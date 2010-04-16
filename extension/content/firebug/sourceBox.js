@@ -78,7 +78,8 @@ Firebug.SourceBoxDecorator.prototype =
  */
 Firebug.SourceBoxPanel = function() {};
 
-Firebug.SourceBoxPanel = extend( extend(Firebug.MeasureBox, Firebug.ActivablePanel),
+var SourceBoxPanelBase = extend(Firebug.MeasureBox, Firebug.ActivablePanel);
+Firebug.SourceBoxPanel = extend(SourceBoxPanelBase,
 /** @lends Firebug.SourceBoxPanel */
 {
     initialize: function(context, doc)
@@ -87,7 +88,7 @@ Firebug.SourceBoxPanel = extend( extend(Firebug.MeasureBox, Firebug.ActivablePan
         this.sourceBoxes = {};
         this.decorator = this.getDecorator();
 
-        Firebug.Panel.initialize.apply(this, arguments);
+        Firebug.ActivablePanel.initialize.apply(this, arguments);
     },
 
     initializeNode: function(panelNode)
@@ -95,6 +96,8 @@ Firebug.SourceBoxPanel = extend( extend(Firebug.MeasureBox, Firebug.ActivablePan
         this.resizeEventTarget = Firebug.chrome.$('fbContentBox');
         this.resizeEventTarget.addEventListener("resize", this.onResize, true);
         this.attachToCache();
+
+        Firebug.ActivablePanel.initializeNode.apply(this, arguments);
     },
 
     reattach: function(doc)
@@ -109,7 +112,8 @@ Firebug.SourceBoxPanel = extend( extend(Firebug.MeasureBox, Firebug.ActivablePan
 
     destroyNode: function()
     {
-        Firebug.Panel.destroyNode.apply(this, arguments);
+        Firebug.ActivablePanel.destroyNode.apply(this, arguments);
+
         this.resizeEventTarget.removeEventListener("resize", this.onResize, true);
         this.detachFromCache();
     },
@@ -168,7 +172,7 @@ Firebug.SourceBoxPanel = extend( extend(Firebug.MeasureBox, Firebug.ActivablePan
     getDecorator: function()
     {
         return new Firebug.SourceBoxDecorator();
-     },
+    },
 
      /* Panel extension point
       * @return string eg "js" or "css"

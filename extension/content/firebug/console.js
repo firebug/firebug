@@ -594,6 +594,7 @@ Firebug.ConsolePanel.prototype = extend(Firebug.ActivablePanel,
     searchable: true,
     breakable: true,
     editable: false,
+    enableA11y: true,
 
     initialize: function()
     {
@@ -615,7 +616,8 @@ Firebug.ConsolePanel.prototype = extend(Firebug.ActivablePanel,
 
     initializeNode : function()
     {
-        dispatch([Firebug.A11yModel], 'onInitializeNode', [this]);
+        Firebug.ActivablePanel.initializeNode.apply(this, arguments);
+
         if (FBTrace.DBG_CONSOLE)
         {
             this.onScroller = bind(this.onScroll, this);
@@ -629,7 +631,8 @@ Firebug.ConsolePanel.prototype = extend(Firebug.ActivablePanel,
 
     destroyNode : function()
     {
-        dispatch([Firebug.A11yModel], 'onDestroyNode', [this]);
+        Firebug.ActivablePanel.destroyNode.apply(this, arguments);
+
         if (this.onScroller)
             this.panelNode.removeEventListener("scroll", this.onScroller, true);
 

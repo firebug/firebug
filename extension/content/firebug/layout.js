@@ -141,6 +141,7 @@ LayoutPanel.prototype = extend(Firebug.Panel,
     name: "layout",
     parentPanel: "html",
     order: 2,
+    enableA11y: true,
 
     initialize: function()
     {
@@ -154,14 +155,16 @@ LayoutPanel.prototype = extend(Firebug.Panel,
     {
         this.panelNode.addEventListener("mouseover", this.onMouseOver, false);
         this.panelNode.addEventListener("mouseout", this.onMouseOut, false);
-        dispatch([Firebug.A11yModel], 'onInitializeNode', [this]);
+
+        Firebug.Panel.initializeNode.apply(this, arguments);
     },
 
     destroyNode: function()
     {
         this.panelNode.removeEventListener("mouseover", this.onMouseOver, false);
         this.panelNode.removeEventListener("mouseout", this.onMouseOut, false);
-        dispatch([Firebug.A11yModel], 'onDestroyNode', [this]);
+
+        Firebug.Panel.destroyNode.apply(this, arguments);
     },
 
     supportsObject: function(object, type)

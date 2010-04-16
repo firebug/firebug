@@ -1936,8 +1936,10 @@ Firebug.Listener.prototype =
             return;
         }
 
+        // Delay the creation until the objects are created so 'this' causes new array
+        // for this object (e.g. module, panel, etc.)
         if (!this.fbListeners)
-            this.fbListeners = []; // delay the creation until the objects are created so 'this' causes new array for each module
+            this.fbListeners = [];
 
         this.fbListeners.push(listener);
     },
@@ -2091,6 +2093,8 @@ Firebug.Panel = extend(new Firebug.Listener(),
     breakable: false,
     order: 2147483647,
     statusSeparator: "<",
+    enableA11y: false,
+    deriveA11yFrom: null,      // Name of the panel that uses the same a11y logic.
 
     initialize: function(context, doc)
     {

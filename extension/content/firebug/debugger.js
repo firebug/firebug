@@ -2114,15 +2114,12 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
 
 // ************************************************************************************************
 
-
 Firebug.ScriptPanel = function() {};
-
 
 /*
  * object used to markup Javascript source lines.
  * In the namespace Firebug.ScriptPanel.
  */
-
 Firebug.ScriptPanel.decorator = extend(new Firebug.SourceBoxDecorator,
 {
     decorate: function(sourceBox, sourceFile)
@@ -2184,6 +2181,8 @@ Firebug.ScriptPanel.decorator = extend(new Firebug.SourceBoxDecorator,
         }});
     },
 });
+
+// ************************************************************************************************
 
 Firebug.ScriptPanel.prototype = extend(Firebug.SourceBoxPanel,
 {
@@ -2511,6 +2510,7 @@ Firebug.ScriptPanel.prototype = extend(Firebug.SourceBoxPanel,
     name: "script",
     searchable: true,
     breakable: true,
+    enableA11y: true,
 
     initialize: function(context, doc)
     {
@@ -2586,8 +2586,8 @@ Firebug.ScriptPanel.prototype = extend(Firebug.SourceBoxPanel,
         this.panelNode.addEventListener("mouseover", this.onMouseOver, false);
         this.panelNode.addEventListener("mouseout", this.onMouseOut, false);
         this.panelNode.addEventListener("scroll", this.onScroll, true);
+
         Firebug.SourceBoxPanel.initializeNode.apply(this, arguments);
-        dispatch([Firebug.A11yModel], "onInitializeNode", [this]);
     },
 
     destroyNode: function()
@@ -2600,8 +2600,8 @@ Firebug.ScriptPanel.prototype = extend(Firebug.SourceBoxPanel,
         this.panelNode.removeEventListener("mouseover", this.onMouseOver, false);
         this.panelNode.removeEventListener("mouseout", this.onMouseOut, false);
         this.panelNode.removeEventListener("scroll", this.onScroll, true);
+
         Firebug.SourceBoxPanel.destroyNode.apply(this, arguments);
-        dispatch([Firebug.A11yModel], "onDestroyNode", [this]);
     },
 
     clear: function()
@@ -2846,7 +2846,7 @@ Firebug.ScriptPanel.prototype = extend(Firebug.SourceBoxPanel,
             return;
 
         this.showSourceFile(updatedSourceFile);
-        dispatch([Firebug.A11yModel], "onUpdateScriptLocation", [this, updatedSourceFile]);
+        dispatch(this.fbListeners, "onUpdateScriptLocation", [this, updatedSourceFile]);
     },
 
     updateSelection: function(object)
@@ -3322,6 +3322,8 @@ CallstackPanel.prototype = extend(Firebug.Panel,
     name: "callstack",
     parentPanel: "script",
     order: 1,
+    enableA11y: true,
+    deriveA11yFrom: "console",
 
     initialize: function(context, doc)
     {
@@ -3345,19 +3347,9 @@ CallstackPanel.prototype = extend(Firebug.Panel,
         Firebug.Panel.destroy.apply(this, arguments);
     },
 
-    initializeNode : function(oldPanelNode)
-    {
-        dispatch([Firebug.A11yModel], 'onInitializeNode', [this, 'console']);
-    },
-
-    destroyNode : function()
-    {
-        dispatch([Firebug.A11yModel], 'onDestroyNode', [this, 'console']);
-    },
-
     show: function(state)
     {
-          this.refresh();
+        this.refresh();
     },
 
     supportsObject: function(object, type)
@@ -3494,7 +3486,6 @@ function getFrameWindow(frame)
         return getRootWindow(win);
     }
 }
-
 
 function ArrayEnumerator(array)
 {

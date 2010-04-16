@@ -222,6 +222,8 @@ Firebug.Breakpoint.BreakpointsPanel.prototype = extend(Firebug.Panel,
     name: "breakpoints",
     parentPanel: "script",
     order: 2,
+    enableA11y: true,
+    deriveA11yFrom: "console",
 
     initialize: function()
     {
@@ -231,16 +233,6 @@ Firebug.Breakpoint.BreakpointsPanel.prototype = extend(Firebug.Panel,
     destroy: function(state)
     {
         Firebug.Panel.destroy.apply(this, arguments);
-    },
-
-    initializeNode : function(oldPanelNode)
-    {
-        dispatch([Firebug.A11yModel], 'onInitializeNode', [this, 'console']);
-    },
-
-    destroyNode : function()
-    {
-        dispatch([Firebug.A11yModel], 'onDestroyNode', [this, 'console']);
     },
 
     show: function(state)

@@ -1,8 +1,15 @@
 /* See license.txt for terms of usage */
+
 FBL.ns(function() { with (FBL) {
+
+// ************************************************************************************************
+// Constants
+
 var singleSpaceTag = DIV({'class' : 'a11y1emSize'}, "x");
-//************************************************************************************************
-//Module Management
+
+// ************************************************************************************************
+// Module Management
+
 Firebug.A11yModel = extend(Firebug.Module,
 {
     dispatchName: "a11y",
@@ -147,20 +154,33 @@ Firebug.A11yModel = extend(Firebug.Module,
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+
+    onCreatePanel: function(context, panel, panelType)
+    {
+        if (!panel.enableA11y)
+            return;
+
+        if (panel.addListener)
+            panel.addListener(this);
+    },
+
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
     // Context & Panel Management
 
-    onInitializeNode : function(panel, actAsPanel)
+    onInitializeNode : function(panel)
     {
         var panelA11y = this.getPanelA11y(panel, true);
         if (!panelA11y)
             return;
+
         panelA11y.tabStop = null;
         panelA11y.manageFocus = false;
         panelA11y.lastIsDefault = false;
-        actAsPanel = actAsPanel ? actAsPanel : panel.name;
-        panelA11y.type = actAsPanel;
+        panelA11y.type = panel.deriveA11yFrom ? panel.deriveA11yFrom : panel.name;
+
         //panel.context.chrome.$("fbContentBox").addEventListener("focus", this.reportFocus, true);
         this.makeFocusable(panel.panelNode, false);
+
         switch (panelA11y.type)
         {
             case 'console':
@@ -225,14 +245,16 @@ Firebug.A11yModel = extend(Firebug.Module,
         }
     },
 
-    onDestroyNode : function(panel, actAsPanel)
+    onDestroyNode : function(panel)
     {
         var panelA11y = this.getPanelA11y(panel);
         if (!panelA11y)
             return;
+
         panelA11y = null;
-        actAsPanel = actAsPanel ? actAsPanel : panel.name;
-        //remove all event handlers we added in onInitializeNode
+
+        // Remove all event handlers we added in onInitializeNode.
+        var actAsPanel = panel.deriveA11yFrom ? panel.deriveA11yFrom : panel.name;
         switch (actAsPanel)
         {
             case 'console':
@@ -2705,4 +2727,6 @@ Firebug.A11yModel = extend(Firebug.Module,
 // Registration
 
 Firebug.registerModule(Firebug.A11yModel);
+
+// ************************************************************************************************
 }});

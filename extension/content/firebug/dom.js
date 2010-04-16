@@ -922,6 +922,16 @@ Firebug.DOMBasePanel.prototype = extend(Firebug.ActivablePanel,
         Firebug.Panel.initialize.apply(this, arguments);
     },
 
+    initializeNode: function(node)
+    {
+        Firebug.Panel.initializeNode.apply(this, arguments);
+    },
+
+    destroyNode: function()
+    {
+        Firebug.Panel.destroyNode.apply(this, arguments);
+    },
+
     destroy: function(state)
     {
         var view = this.viewPath[this.pathIndex];
@@ -1323,6 +1333,8 @@ DOMMainPanel.prototype = extend(Firebug.DOMBasePanel.prototype,
     name: "dom",
     searchable: true,
     statusSeparator: ">",
+    enableA11y: true,
+    deriveA11yFrom: "console",
 
     initialize: function()
     {
@@ -1334,13 +1346,15 @@ DOMMainPanel.prototype = extend(Firebug.DOMBasePanel.prototype,
     initializeNode: function(oldPanelNode)
     {
         this.panelNode.addEventListener("click", this.onClick, false);
-        dispatch([Firebug.A11yModel], 'onInitializeNode', [this, 'console']);
+
+        Firebug.DOMBasePanel.prototype.initializeNode.apply(this, arguments);
     },
 
     destroyNode: function()
     {
         this.panelNode.removeEventListener("click", this.onClick, false);
-        dispatch([Firebug.A11yModel], 'onDestroyNode', [this, 'console']);
+
+        Firebug.DOMBasePanel.prototype.destroyNode.apply(this, arguments);
     },
 
     search: function(text, reverse)
@@ -1388,22 +1402,11 @@ function DOMSidePanel() {}
 
 DOMSidePanel.prototype = extend(Firebug.DOMBasePanel.prototype,
 {
-    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
-    // extends Panel
-
     name: "domSide",
     parentPanel: "html",
     order: 3,
-
-    initializeNode: function(oldPanelNode)
-    {
-        dispatch([Firebug.A11yModel], 'onInitializeNode', [this, 'console']);
-    },
-
-    destroyNode: function()
-    {
-        dispatch([Firebug.A11yModel], 'onDestroyNode', [this, 'console']);
-    },
+    enableA11y: true,
+    deriveA11yFrom: "console",
 });
 
 // ************************************************************************************************
@@ -1536,6 +1539,8 @@ WatchPanel.prototype = extend(Firebug.DOMBasePanel.prototype,
     name: "watches",
     order: 0,
     parentPanel: "script",
+    enableA11y: true,
+    deriveA11yFrom: "console",
 
     initialize: function()
     {
@@ -1550,7 +1555,7 @@ WatchPanel.prototype = extend(Firebug.DOMBasePanel.prototype,
     {
         state.watches = this.watches;
 
-        Firebug.Panel.destroy.apply(this, arguments);
+        Firebug.DOMBasePanel.prototype.destroy.apply(this, arguments);
     },
 
     show: function(state)
@@ -1564,7 +1569,8 @@ WatchPanel.prototype = extend(Firebug.DOMBasePanel.prototype,
         this.panelNode.addEventListener("mousedown", this.onMouseDown, false);
         this.panelNode.addEventListener("mouseover", this.onMouseOver, false);
         this.panelNode.addEventListener("mouseout", this.onMouseOut, false);
-        dispatch([Firebug.A11yModel], "onInitializeNode", [this, 'console']);
+
+        Firebug.DOMBasePanel.prototype.initializeNode.apply(this, arguments);
     },
 
     destroyNode: function()
@@ -1572,13 +1578,13 @@ WatchPanel.prototype = extend(Firebug.DOMBasePanel.prototype,
         this.panelNode.removeEventListener("mousedown", this.onMouseDown, false);
         this.panelNode.removeEventListener("mouseover", this.onMouseOver, false);
         this.panelNode.removeEventListener("mouseout", this.onMouseOut, false);
-        dispatch([Firebug.A11yModel], "onDestroyNode", [this, 'console']);
+
+        Firebug.DOMBasePanel.prototype.destroyNode.apply(this, arguments);
     },
 
     refresh: function()
     {
         this.rebuild(true);
-
     },
 
     updateSelection: function(object)

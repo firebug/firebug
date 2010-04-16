@@ -851,6 +851,7 @@ Firebug.HTMLPanel.prototype = extend(Firebug.Panel,
     breakable: true,
     dependents: ["css", "computed", "layout", "dom", "domSide", "watch"],
     inspectorHistory: new Array(5),
+    enableA11y: true,
 
     initialize: function()
     {
@@ -878,7 +879,8 @@ Firebug.HTMLPanel.prototype = extend(Firebug.Panel,
 
         this.panelNode.addEventListener("click", this.onClick, false);
         this.panelNode.addEventListener("mousedown", this.onMouseDown, false);
-        dispatch([Firebug.A11yModel], "onInitializeNode", [this]);
+
+        Firebug.Panel.initializeNode.apply(this, arguments);
     },
 
     destroyNode: function()
@@ -892,7 +894,8 @@ Firebug.HTMLPanel.prototype = extend(Firebug.Panel,
             this.ioBox.destroy();
             delete this.ioBox;
         }
-        dispatch([Firebug.A11yModel], "onDestroyNode", [this]);
+
+        Firebug.Panel.destroyNode.apply(this, arguments);
     },
 
     show: function(state)

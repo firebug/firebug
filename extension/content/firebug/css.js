@@ -367,11 +367,11 @@ Firebug.CSSStyleSheetPanel.prototype = extend(Firebug.SourceBoxPanel,
     template: domplate(
     {
         tag:
-            DIV({class: "cssSheet insertInto a11yCSSView"},
+            DIV({"class": "cssSheet insertInto a11yCSSView"},
                 FOR("rule", "$rules",
                     CSSRuleTag
                 ),
-                DIV({class: "cssSheet editable insertBefore"}, "")
+                DIV({"class": "cssSheet editable insertBefore"}, "")
                 )
     }),
 
@@ -748,6 +748,8 @@ Firebug.CSSStyleSheetPanel.prototype = extend(Firebug.SourceBoxPanel,
     parentPanel: null,
     searchable: true,
     dependents: ["css", "stylesheet", "dom", "domSide", "layout"],
+    enableA11y: true,
+    deriveA11yFrom: "css",
 
     initialize: function()
     {
@@ -771,16 +773,16 @@ Firebug.CSSStyleSheetPanel.prototype = extend(Firebug.SourceBoxPanel,
     {
         this.panelNode.addEventListener("mousedown", this.onMouseDown, false);
         this.panelNode.addEventListener("click", this.onClick, false);
+
         Firebug.SourceBoxPanel.initializeNode.apply(this, arguments);
-        dispatch([Firebug.A11yModel], 'onInitializeNode', [this, 'css']);
     },
 
     destroyNode: function()
     {
         this.panelNode.removeEventListener("mousedown", this.onMouseDown, false);
         this.panelNode.removeEventListener("click", this.onClick, false);
+
         Firebug.SourceBoxPanel.destroyNode.apply(this, arguments);
-        dispatch([Firebug.A11yModel], 'onDestroyNode', [this, 'css']);
     },
 
     show: function(state)

@@ -389,6 +389,7 @@ NetPanel.prototype = extend(Firebug.ActivablePanel,
     searchable: true,
     editable: true,
     breakable: true,
+    enableA11y: true,
 
     initialize: function(context, doc)
     {
@@ -416,14 +417,14 @@ NetPanel.prototype = extend(Firebug.ActivablePanel,
     {
         this.panelNode.addEventListener("contextmenu", this.onContextMenu, false);
 
-        dispatch([Firebug.A11yModel], "onInitializeNode", [this]);
+        Firebug.ActivablePanel.initializeNode.apply(this, arguments);
     },
 
     destroyNode : function()
     {
         this.panelNode.removeEventListener("contextmenu", this.onContextMenu, false);
 
-        dispatch([Firebug.A11yModel], "onDestroyNode", [this]);
+        Firebug.ActivablePanel.destroyNode.apply(this, arguments);
     },
 
     loadPersistedContent: function(state)
