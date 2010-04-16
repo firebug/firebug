@@ -527,7 +527,7 @@ Firebug.SourceBoxPanel = extend(SourceBoxPanelBase,
             }
         }
 
-        dispatch([Firebug.A11yModel], "onBeforeViewportChange", [this]);  // XXXjjb TODO where should this be?
+        dispatch(this.fbListeners, "onBeforeViewportChange", [this]);  // XXXjjb TODO where should this be?
         this.buildViewAround(sourceBox, viewRange);
 
         if (Firebug.uiListeners.length > 0)

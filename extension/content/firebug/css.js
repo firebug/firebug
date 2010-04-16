@@ -665,7 +665,7 @@ Firebug.CSSStyleSheetPanel.prototype = extend(Firebug.SourceBoxPanel,
             }
         }
         if (this.name == "stylesheet")
-            dispatch([Firebug.A11yModel], 'onInlineEditorClose', [this, row.firstChild, true]);
+            dispatch(this.fbListeners, 'onInlineEditorClose', [this, row.firstChild, true]);
         row.parentNode.removeChild(row);
 
         this.markChange(this.name == "stylesheet");
@@ -845,7 +845,7 @@ Firebug.CSSStyleSheetPanel.prototype = extend(Firebug.SourceBoxPanel,
 
         this.showToolbarButtons("fbCSSButtons", !isSystemStyleSheet(this.location));
 
-        dispatch([Firebug.A11yModel], 'onCSSRulesAdded', [this, this.panelNode]);
+        dispatch(this.fbListeners, 'onCSSRulesAdded', [this, this.panelNode]);
 
         // If the full editing mode (not the inline) is on while the location changes,
         // open the editor again for another file.
@@ -1203,12 +1203,12 @@ Firebug.CSSStyleSheetPanel.prototype = extend(Firebug.SourceBoxPanel,
         {
             this.document.defaultView.getSelection().selectAllChildren(row);
             scrollIntoCenterView(row, this.panelNode);
-            dispatch([Firebug.A11yModel], 'onCSSSearchMatchFound', [this, text, row]);
+            dispatch(this.fbListeners, 'onCSSSearchMatchFound', [this, text, row]);
             return true;
         }
         else
         {
-            dispatch([Firebug.A11yModel], 'onCSSSearchMatchFound', [this, text, null]);
+            dispatch(this.fbListeners, 'onCSSSearchMatchFound', [this, text, null]);
             return false;
         }
     },
@@ -1282,7 +1282,7 @@ CSSElementPanel.prototype = extend(Firebug.CSSStyleSheetPanel.prototype,
 
     updateCascadeView: function(element)
     {
-        dispatch([Firebug.A11yModel], 'onBeforeCSSRulesAdded', [this]);
+        dispatch(this.fbListeners, 'onBeforeCSSRulesAdded', [this]);
         var rules = [], sections = [], usedProps = {};
         this.getInheritedRules(element, sections, usedProps);
         this.getElementRules(element, rules, usedProps);
@@ -1292,7 +1292,7 @@ CSSElementPanel.prototype = extend(Firebug.CSSStyleSheetPanel.prototype,
             var inheritLabel = $STR("InheritedFrom");
             var result = this.template.cascadedTag.replace({rules: rules, inherited: sections,
                 inheritLabel: inheritLabel}, this.panelNode);
-            dispatch([Firebug.A11yModel], 'onCSSRulesAdded', [this, result]);
+            dispatch(this.fbListeners, 'onCSSRulesAdded', [this, result]);
         }
         else
         {
@@ -1656,7 +1656,7 @@ CSSComputedElementPanel.prototype = extend(CSSElementPanel.prototype,
         }
 
         var result = this.template.computedTag.replace({groups: groups}, this.panelNode);
-        dispatch([Firebug.A11yModel], 'onCSSRulesAdded', [this, result]);
+        dispatch(this.fbListeners, 'onCSSRulesAdded', [this, result]);
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *

@@ -298,7 +298,7 @@ Firebug.Breakpoint.BreakpointsPanel.prototype = extend(Firebug.Panel,
             FBTrace.sysout("debugger.breakpoints.refresh "+breakpoints.length+
                 errorBreakpoints.length+monitors.length, [breakpoints, errorBreakpoints, monitors]);
 
-        dispatch([Firebug.A11yModel], 'onBreakRowsRefreshed', [this, this.panelNode]);
+        dispatch(this.fbListeners, 'onBreakRowsRefreshed', [this, this.panelNode]);
     },
 
     extractBreakpoints: function(context, breakpoints, errorBreakpoints, monitors)

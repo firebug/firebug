@@ -2241,7 +2241,7 @@ Firebug.ScriptPanel.prototype = extend(Firebug.SourceBoxPanel,
             if (sourceLink.line)
             {
                 this.scrollToLine(sourceLink.href, sourceLink.line, this.jumpHighlightFactory(sourceLink.line, this.context));
-                dispatch([Firebug.A11yModel], "onShowSourceLink", [this, sourceLink.line]);
+                dispatch(this.fbListeners, "onShowSourceLink", [this, sourceLink.line]);
             }
             if (sourceLink == this.selection)  // then clear it so the next link will scroll and highlight.
                 delete this.selection;
@@ -2762,13 +2762,13 @@ Firebug.ScriptPanel.prototype = extend(Firebug.SourceBoxPanel,
         {
             // this lineNo is an zero-based index into sourceBox.lines. Add one for user line numbers
             this.scrollToLine(sourceBox.repObject.href, lineNo, this.jumpHighlightFactory(lineNo+1, this.context));
-            dispatch([Firebug.A11yModel], 'onScriptSearchMatchFound', [this, text, sourceBox.repObject, lineNo]);
+            dispatch(this.fbListeners, 'onScriptSearchMatchFound', [this, text, sourceBox.repObject, lineNo]);
 
             return true;
         }
         else
         {
-            dispatch([Firebug.A11yModel], 'onScriptSearchMatchFound', [this, text, null, null]);
+            dispatch(this.fbListeners, 'onScriptSearchMatchFound', [this, text, null, null]);
             return false;
         }
     },
@@ -3415,7 +3415,7 @@ CallstackPanel.prototype = extend(Firebug.Panel,
                     this.panelNode.appendChild(div);
                 }
             }
-            dispatch([Firebug.A11yModel], 'onstackCreated', [this]);
+            dispatch(this.fbListeners, 'onStackCreated', [this]);
         }
     },
 

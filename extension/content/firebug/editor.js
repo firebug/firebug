@@ -116,7 +116,7 @@ Firebug.Editor = extend(Firebug.Module,
         {
             if (cancel)
             {
-                dispatch([Firebug.A11yModel], 'onInlineEditorClose', [currentPanel, currentTarget, removeGroup && !originalValue]);
+                dispatch(currentPanel.fbListeners, 'onInlineEditorClose', [currentPanel, currentTarget, removeGroup && !originalValue]);
                 if (value != originalValue)
                     this.saveEditAndNotifyListeners(currentTarget, originalValue, previousValue);
 
@@ -212,7 +212,7 @@ Firebug.Editor = extend(Firebug.Module,
     {
         if (!element)
         {
-            dispatch([Firebug.A11yModel], 'onInlineEditorClose', [currentPanel, currentTarget, true]);
+            dispatch(currentPanel.fbListeners, 'onInlineEditorClose', [currentPanel, currentTarget, true]);
             this.stopEditing();
         }
         else if (hasClass(element, "insertBefore"))
@@ -549,7 +549,7 @@ Firebug.InlineEditor.prototype = domplate(Firebug.BaseEditor,
 
     show: function(target, panel, value, targetSize)
     {
-        dispatch([Firebug.A11yModel], "onInlineEditorShow", [panel, this]);
+        dispatch(panel.fbListeners, "onInlineEditorShow", [panel, this]);
         this.target = target;
         this.panel = panel;
 

@@ -310,7 +310,7 @@ const DirTablePlate = domplate(Firebug.Rep,
                         {
                             var result = rowTag.insertRows({members: slice}, lastRow);
                             lastRow = result[1];
-                            dispatch([Firebug.A11yModel], 'onMemberRowSliceAdded', [null, result, rowCount, setSize]);
+                            dispatch(this.fbListeners, 'onMemberRowSliceAdded', [null, result, rowCount, setSize]);
                             rowCount += insertSliceSize;
                         }
                         if (isLast)
@@ -372,7 +372,7 @@ Firebug.DOMBasePanel.prototype = extend(Firebug.ActivablePanel,
 
     rebuild: function(update, scrollTop)
     {
-        dispatch([Firebug.A11yModel], 'onBeforeDomUpdateSelection', [this]);
+        dispatch(this.fbListeners, 'onBeforeDomUpdateSelection', [this]);
         var members = this.getMembers(this.selection, 0, this.context);
         this.expandMembers(members, this.toggles, 0, 0, this.context);
 
@@ -565,7 +565,7 @@ Firebug.DOMBasePanel.prototype = extend(Firebug.ActivablePanel,
         var result = rowTag.insertRows({members: slice}, tbody.lastChild);
         var rowCount = 1;
         var panel = this;
-        dispatch([Firebug.A11yModel], 'onMemberRowSliceAdded', [panel, result, rowCount, setSize]);
+        dispatch(this.fbListeners, 'onMemberRowSliceAdded', [panel, result, rowCount, setSize]);
         var timeouts = [];
 
         var delay = 0;
@@ -575,7 +575,7 @@ Firebug.DOMBasePanel.prototype = extend(Firebug.ActivablePanel,
             {
                 result = rowTag.insertRows({members: slice}, tbody.lastChild);
                 rowCount += insertSliceSize;
-                dispatch([Firebug.A11yModel], 'onMemberRowSliceAdded', [panel, result, rowCount, setSize]);
+                dispatch(this.fbListeners, 'onMemberRowSliceAdded', [panel, result, rowCount, setSize]);
 
                 if ((panelNode.scrollHeight+panelNode.offsetHeight) >= priorScrollTop)
                     panelNode.scrollTop = priorScrollTop;
@@ -1385,12 +1385,12 @@ DOMMainPanel.prototype = extend(Firebug.DOMBasePanel.prototype,
             scrollIntoCenterView(row, this.panelNode);
 
             this.highlightRow(row);
-            dispatch([Firebug.A11yModel], 'onDomSearchMatchFound', [this, text, row]);
+            dispatch(this.fbListeners, 'onDomSearchMatchFound', [this, text, row]);
             return true;
         }
         else
         {
-            dispatch([Firebug.A11yModel], 'onDomSearchMatchFound', [this, text, null]);
+            dispatch(this.fbListeners, 'onDomSearchMatchFound', [this, text, null]);
             return false;
         }
     }
@@ -1589,7 +1589,7 @@ WatchPanel.prototype = extend(Firebug.DOMBasePanel.prototype,
 
     updateSelection: function(object)
     {
-        dispatch([Firebug.A11yModel], 'onBeforeDomUpdateSelection', [this]);
+        dispatch(this.fbListeners, 'onBeforeDomUpdateSelection', [this]);
         var frame = this.context.currentFrame;
 
         var newFrame = frame && frame.isValid && frame.script != this.lastScript;
@@ -1730,7 +1730,7 @@ DOMEditor.prototype = domplate(Firebug.InlineEditor.prototype,
             return;
 
         var row = getAncestorByClass(target, "memberRow");
-        dispatch([Firebug.A11yModel], 'onWatchEndEditing', [this.panel]);
+        dispatch(this.panel.fbListeners, 'onWatchEndEditing', [this.panel]);
         if (!row)
             this.panel.addWatch(value);
         else if (hasClass(row, "watchRow"))

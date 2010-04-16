@@ -961,12 +961,12 @@ NetPanel.prototype = extend(Firebug.ActivablePanel,
             sel.addRange(this.currentSearch.range);
 
             scrollIntoCenterView(row, this.panelNode);
-            dispatch([Firebug.A11yModel], 'onNetMatchFound', [this, text, row]);
+            dispatch(this.fbListeners, 'onNetMatchFound', [this, text, row]);
             return true;
         }
         else
         {
-            dispatch([Firebug.A11yModel], 'onNetMatchFound', [this, text, null]);
+            dispatch(this.fbListeners, 'onNetMatchFound', [this, text, null]);
             return false;
         }
     },

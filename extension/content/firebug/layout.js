@@ -232,7 +232,7 @@ LayoutPanel.prototype = extend(Firebug.Panel,
         var node = this.template.tag.replace(args, this.panelNode);
         this.adjustCharWidth(this.getMaxCharWidth(args, node), this.panelNode);
 
-        dispatch([Firebug.A11yModel], 'onLayoutBoxCreated', [this, node, args]);
+        dispatch(this.fbListeners, 'onLayoutBoxCreated', [this, node, args]);
     },
 
     /*

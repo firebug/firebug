@@ -138,11 +138,13 @@ InsideOutBox.prototype =
 
     selectObjectBox: function(objectBox, forceOpen)
     {
+        var panel = Firebug.getElementPanel(objectBox);
+
         var isSelected = this.selectedObjectBox && objectBox == this.selectedObjectBox;
         if (!isSelected)
         {
             removeClass(this.selectedObjectBox, "selected");
-            dispatch([Firebug.A11yModel], 'onObjectBoxUnselected', [this.selectedObjectBox]);
+            dispatch(panel.fbListeners, 'onObjectBoxUnselected', [this.selectedObjectBox]);
             this.selectedObjectBox = objectBox;
 
             if (objectBox)
@@ -154,7 +156,7 @@ InsideOutBox.prototype =
                     this.toggleObjectBox(objectBox, true);
             }
         }
-        dispatch([Firebug.A11yModel], 'onObjectBoxSelected', [objectBox]);
+        dispatch(panel.fbListeners, 'onObjectBoxSelected', [objectBox]);
     },
 
     openObjectBox: function(objectBox)

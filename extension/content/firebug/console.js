@@ -68,7 +68,7 @@ Firebug.ConsoleBase =
                     panel.limit.limitInfo.totalCount++;
                     template.updateCounter(panel.limit);
                 }
-                dispatch([Firebug.A11yModel], "onLogRowCreated", [panel , row]);
+                dispatch(this.fbListeners, "onLogRowCreated", [panel , row]);
                 return row;
             }
         }
@@ -556,7 +556,7 @@ Firebug.ConsolePanel.prototype = extend(Firebug.ActivablePanel,
         else
             this.appendFormatted(objects, innerRow, rep);
         row.appendChild(innerRow);
-        dispatch([Firebug.A11yModel], 'onLogRowCreated', [this, innerRow]);
+        dispatch(this.fbListeners, 'onLogRowCreated', [this, innerRow]);
         var groupBody = this.createRow("logGroupBody");
         row.appendChild(groupBody);
         groupBody.setAttribute('role', 'group');
@@ -822,7 +822,7 @@ Firebug.ConsolePanel.prototype = extend(Firebug.ActivablePanel,
         var logRow = search.find(text);
         if (!logRow)
         {
-            dispatch([Firebug.A11yModel], 'onConsoleSearchMatchFound', [this, text, []]);
+            dispatch(this.fbListeners, 'onConsoleSearchMatchFound', [this, text, []]);
             return false;
         }
         for (; logRow; logRow = search.findNext())
@@ -830,7 +830,7 @@ Firebug.ConsolePanel.prototype = extend(Firebug.ActivablePanel,
             setClass(logRow, "matched");
             this.matchSet.push(logRow);
         }
-        dispatch([Firebug.A11yModel], 'onConsoleSearchMatchFound', [this, text, this.matchSet]);
+        dispatch(this.fbListeners, 'onConsoleSearchMatchFound', [this, text, this.matchSet]);
         return true;
     },
 
