@@ -879,6 +879,8 @@ top.FirebugChrome =
         }
 
         $("fbLargeCommandLine").style.fontSize = (zoom * 100)+"%";
+
+        Firebug.dispatchToPanels("onTextSizeChange", [zoom]);
     },
 
     obeyOmitObjectPathStack: function(value)

@@ -128,6 +128,11 @@ Firebug.SourceBoxPanel = extend(SourceBoxPanelBase,
         this.context.sourceCache.removeListener(this);
     },
 
+    onTextSizeChange: function(zoom)
+    {
+        this.sourceBoxes = {};  // clear so we start fresh with new text sizes
+    },
+
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
     //  TabCache listner implementation
 

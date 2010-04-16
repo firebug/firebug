@@ -1405,6 +1405,25 @@ top.Firebug =
         dispatch(modules, "reattachContext", [browser, context]);
     },
 
+    eachPanel: function(callback)
+    {
+        TabWatcher.iterateContexts(function iteratePanels(context)
+        {
+            var rc = context.eachPanelInContext(callback);
+            if (rc)
+                return rc;
+        });
+    },
+
+    dispatchToPanels: function(fName, args)
+    {
+        Firebug.eachPanel( function dispatchToPanel(panel)
+        {
+            if (panel[fName])
+                return panel[fName].apply(panel,args);
+        });
+    },
+
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
     // URL mapping
 
@@ -2217,6 +2236,15 @@ Firebug.Panel = extend(new Firebug.Listener(),
 
     updateOption: function(name, value)
     {
+    },
+
+    /*
+     * Called after chrome.applyTextSize
+     * @param zoom: ratio of current size to normal size, eg 1.5
+     */
+    onTextSizeChange: function(zoom)
+    {
+
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *

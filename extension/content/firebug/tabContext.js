@@ -93,7 +93,7 @@ Firebug.TabContext.prototype =
     removeSourceFile: function(sourceFile)
     {
         if (FBTrace.DBG_SOURCEFILES)
-	        FBTrace.sysout("tabContext.removeSourceFile "+sourceFile.href+" in context "+sourceFile.context.getName());
+            FBTrace.sysout("tabContext.removeSourceFile "+sourceFile.href+" in context "+sourceFile.context.getName());
 
         delete this.sourceFileMap[sourceFile.href];
         delete sourceFile.context;
@@ -261,6 +261,20 @@ Firebug.TabContext.prototype =
         else if (!noCreate)
         {
             return this.createPanel(panelType);
+        }
+    },
+
+    eachPanelInContext: function(callback)
+    {
+        for (var panelName in this.panelMap)
+        {
+            if (this.panelMap.hasOwnProperty(panelName))
+            {
+                var panel = this.panelMap[panelName];
+                var rc = callback(panel);
+                if (rc)
+                    return rc;
+            }
         }
     },
 
