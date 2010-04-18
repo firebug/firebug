@@ -23,6 +23,8 @@ const ConsoleService = Cc["@mozilla.org/consoleservice;1"];
 const Timer = Cc["@mozilla.org/timer;1"];
 const ObserverServiceFactory = Cc["@mozilla.org/observer-service;1"];
 
+Components.utils.import("resource://firebug/storageService.js");
+
 const jsdIDebuggerService = Ci.jsdIDebuggerService;
 const jsdIScript = Ci.jsdIScript;
 const jsdIStackFrame = Ci.jsdIStackFrame;
@@ -130,7 +132,6 @@ var hookFrameCount = 0;
 
 var haltDebugger = null;
 
-var breakpoints = {};
 var breakpointCount = 0;
 var disabledCount = 0;
 var monitorCount = 0;
@@ -166,7 +167,9 @@ function FirebugService()
 
     this.wrappedJSObject = this;
     this.timeStamp = new Date();  /* explore */
-    this.breakpoints = breakpoints; // so chromebug can see it /* explore */
+
+    fbs.restoreBreakpoints();
+
     this.onDebugRequests = 0;  // the number of times we called onError but did not call onDebug
     fbs._lastErrorDebuggr = null;
 
@@ -197,6 +200,9 @@ function FirebugService()
 
     this.onXScriptCreatedByTag = {}; // fbs functions by script tag
     this.nestedScriptStack = []; // scripts contained in leveledScript that have not been drained
+
+    if (FBTrace.DBG_FBS_ERRORS)
+        FBTrace.sysout("FirebugService Initialized");
 }
 
 FirebugService.prototype =
@@ -401,6 +407,13 @@ FirebugService.prototype =
         dispatch(debuggers, "onLock", [false]);
     },
 
+    getDebuggerByName: function(name)
+    {
+        for(var i = 0; i < debuggers.length; i++)
+            if (debuggers[i].debuggerName === name)
+                return debuggers[i];
+    },
+
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
     forceGarbageCollection: function()
     {
@@ -581,15 +594,13 @@ FirebugService.prototype =
             if (!url)
                 continue;
 
-            var urlBreakpoints = breakpoints[url];
-            if (!urlBreakpoints)
-                continue;
+            var urlBreakpoints = fbs.getBreakpoints(url);
 
-            var removals = urlBreakpoints.length;
-            for (var j = 0; j < removals; ++j)
+            while(urlBreakpoints && urlBreakpoints.length)
             {
                 var bp = urlBreakpoints[0];  // this one will be spliced out each time
                 this.clearBreakpoint(url, bp.lineNo);
+                var urlBreakpoints = fbs.getBreakpoints(url);
             }
          }
     },
@@ -598,7 +609,7 @@ FirebugService.prototype =
     {
         if (url)
         {
-            var urlBreakpoints = breakpoints[url];
+            var urlBreakpoints = fbs.getBreakpoints(url);
             if (urlBreakpoints)
             {
                 for (var i = 0; i < urlBreakpoints.length; ++i)
@@ -610,14 +621,16 @@ FirebugService.prototype =
                         {
                             for (var j = 0; j < bp.scriptsWithBreakpoint.length; j++)
                             {
-                                var rc = cb.call.apply(bp.debugger, [url, bp.lineNo, bp, bp.scriptsWithBreakpoint[j]]);
+                                var theDebugger = fbs.getDebuggerByName(bp.debuggerName);
+                                var rc = cb.call.apply(theDebugger, [url, bp.lineNo, bp, bp.scriptsWithBreakpoint[j]]);
                                 if (rc)
                                     return [bp];
                             }
                         }
                         else
                         {
-                            var rc = cb.call.apply(bp.debugger, [url, bp.lineNo, bp]);
+                            var theDebugger = fbs.getDebuggerByName(bp.debuggerName);
+                            var rc = cb.call.apply(theDebugger, [url, bp.lineNo, bp]);
                             if (rc)
                                 return [bp];
                         }
@@ -628,8 +641,9 @@ FirebugService.prototype =
         else
         {
             var bps = [];
-            for (var url in breakpoints)
-                bps.push(this.enumerateBreakpoints(url, cb));
+            var urls = fbs.getBreakpointURLs();
+            for (var i = 0; i < urls.length; i++)
+                bps.push(this.enumerateBreakpoints(urls[i], cb));
             return bps;
         }
     },
@@ -763,7 +777,7 @@ FirebugService.prototype =
     {
         if (url)
         {
-            var urlBreakpoints = breakpoints[url];
+            var urlBreakpoints = fbs.getBreakpoints(url);
             if (urlBreakpoints)
             {
                 for (var i = 0; i < urlBreakpoints.length; ++i)
@@ -1161,6 +1175,8 @@ FirebugService.prototype =
         var bp = this.findBreakpointByScript(frame.script, frame.pc);
         if (bp)
         {
+            var theDebugger = fbs.getDebuggerByName(bp.debuggerName);
+
             // See issue 1179, should not break if we resumed from a single step and have not advanced.
             if (disabledCount || monitorCount || conditionCount || runningUntil)
             {
@@ -1173,16 +1189,16 @@ FirebugService.prototype =
                 if (bp.type & BP_MONITOR && !(bp.disabled & BP_MONITOR))
                 {
                     if (bp.type & BP_TRACE && !(bp.disabled & BP_TRACE) )
-                        this.hookCalls(bp.debugger.onFunctionCall, true);
+                        this.hookCalls(theDebugger.onFunctionCall, true);
                     else
-                        bp.debugger.onMonitorScript(frame);
+                        theDebugger.onMonitorScript(frame);
                 }
 
                 if (bp.type & BP_UNTIL)
                 {
                     this.stopStepping();
-                    if (bp.debugger)
-                        return this.breakIntoDebugger(bp.debugger, frame, type);
+                    if (theDebugger)
+                        return this.breakIntoDebugger(theDebugger, frame, type);
                 }
                 else if (!(bp.type & BP_NORMAL) || bp.disabled & BP_NORMAL)
                 {
@@ -1197,7 +1213,7 @@ FirebugService.prototype =
                 // type was normal, but passed test
             }
             else  // not special, just break for sure
-                return this.breakIntoDebugger(bp.debugger, frame, type);
+                return this.breakIntoDebugger(theDebugger, frame, type);
         }
         else
         {
@@ -2134,7 +2150,7 @@ FirebugService.prototype =
             bp.type |= type;
 
             if (debuggr)
-                bp.debugger = debuggr;
+                bp.debuggerName = debuggr.debuggerName;
             else
             {
                 if (FBTrace.DBG_FBS_BP)
@@ -2143,21 +2159,20 @@ FirebugService.prototype =
         }
         else
         {
-            bp = this.recordBreakpoint(type, url, lineNo, debuggr, props);
-            fbs.setJSDBreakpoint(sourceFile, bp);
+            bp = this.recordBreakpoint(type, url, lineNo, debuggr, props, sourceFile);
         }
         if (FBTrace.DBG_FBS_BP) FBTrace.sysout("addBreakpoint for "+url, [bp, sourceFile]);
         return bp;
     },
 
-    recordBreakpoint: function(type, url, lineNo, debuggr, props)
+    recordBreakpoint: function(type, url, lineNo, debuggr, props, sourceFile)
     {
-        var urlBreakpoints = breakpoints[url];
+        var urlBreakpoints = fbs.getBreakpoints(url);
         if (!urlBreakpoints)
-            breakpoints[url] = urlBreakpoints = [];
+            urlBreakpoints = [];
 
         var bp = {type: type, href: url, lineNo: lineNo, disabled: 0,
-            debugger: debuggr,
+            debuggerName: debuggr.debuggerName,
             condition: "", onTrue: true, hitCount: -1, hit: 0};
         if (props)
         {
@@ -2173,6 +2188,8 @@ FirebugService.prototype =
             }
         }
         urlBreakpoints.push(bp);
+        fbs.setJSDBreakpoint(sourceFile, bp);
+        fbs.saveBreakpoints(url, urlBreakpoints);
         ++breakpointCount;
         return bp;
     },
@@ -2181,7 +2198,7 @@ FirebugService.prototype =
     {
         if (FBTrace.DBG_FBS_BP) FBTrace.sysout("removeBreakpoint for url= "+url);
 
-        var urlBreakpoints = breakpoints[url];
+        var urlBreakpoints = fbs.getBreakpoints(url);
         if (!urlBreakpoints)
             return false;
 
@@ -2229,10 +2246,7 @@ FirebugService.prototype =
                         --conditionCount;
                     }
 
-
-                    if (!urlBreakpoints.length)
-                        delete breakpoints[url];
-
+                    fbs.saveBreakpoints(url, urlBreakpoints);
                 }
                 return bp;
             }
@@ -2243,7 +2257,7 @@ FirebugService.prototype =
 
     findBreakpoint: function(url, lineNo)
     {
-        var urlBreakpoints = breakpoints[url];
+        var urlBreakpoints = fbs.getBreakpoints(url);
         if (urlBreakpoints)
         {
             for (var i = 0; i < urlBreakpoints.length; ++i)
@@ -2261,9 +2275,11 @@ FirebugService.prototype =
     // When we are called, scripts have been compiled so all relevant breakpoints are not "future"
     findBreakpointByScript: function(script, pc)
     {
-        for (var url in breakpoints)
+        var urlsWithBreakpoints = fbs.getBreakpointURLs();
+        for (var j = 0; j < urlsWithBreakpoints.length; j++)
         {
-            var urlBreakpoints = breakpoints[url];
+            var url = urlsWithBreakpoints[j];
+            var urlBreakpoints = fbs.getBreakpoints(url);
             if (urlBreakpoints)
             {
                 for (var i = 0; i < urlBreakpoints.length; ++i)
@@ -2293,7 +2309,7 @@ FirebugService.prototype =
     {
         // If the new script is replacing an old script with a breakpoint still
         var url = sourceFile.href;
-        var urlBreakpoints = breakpoints[url];
+        var urlBreakpoints = fbs.getBreakpoints(url);
         if (FBTrace.DBG_FBS_BP)
         {
             try
@@ -2327,18 +2343,7 @@ FirebugService.prototype =
         else
         {
             if (FBTrace.DBG_FBS_BP)
-            {
-                var tp = 0;
-                for (var p in breakpoints)
-                {
-                    if (breakpoints.hasOwnProperty(p))
-                    {
-                        FBTrace.sysout(url+" =("+(p==url)+")="+p);
-                        tp++;
-                    }
-                }
-                FBTrace.sysout("resetBreakpoints total bp="+tp, breakpoints);
-            }
+                FBTrace.sysout("resetBreakpoints no breakpoints for "+url);
         }
     },
 
@@ -2422,6 +2427,64 @@ FirebugService.prototype =
                 if (FBTrace.DBG_FBS_BP) FBTrace.sysout("setJSDBreakpoint NOT isExecutable tag: "+script.tag+" jsdLine@url="+jsdLine +"@"+sourceFile.href+" pcmap:"+pcmap, script);
             }
          }
+    },
+
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+    saveBreakpoints: function(url, urlBreakpoints)
+    {
+        if (!urlBreakpoints.length)
+        {
+            fbs.breakpointStore.removeItem(url);
+            delete fbs.breakpoints[url];
+            return;
+        }
+
+        fbs.breakpoints[url] = urlBreakpoints;
+
+        var cleanBPs = [];
+        for(var i = 0; i < urlBreakpoints.length; i++)
+        {
+            var bp = urlBreakpoints[i];
+            var cleanBP = {}
+            for (var p in bp)
+                cleanBP[p] = bp[p];
+            delete cleanBP.scriptsWithBreakpoint; // not JSON-able
+            cleanBPs.push(cleanBP);
+        }
+        fbs.breakpointStore.setItem(url, cleanBPs);
+    },
+
+    getBreakpoints: function(url)
+    {
+        return fbs.breakpoints[url];
+    },
+
+    getBreakpointURLs: function()
+    {
+         var urls = this.breakpointStore.getKeys();
+         return urls;
+    },
+
+    restoreBreakpoints: function()
+    {
+        try
+        {
+            this.breakpoints = {};
+            if (FBTrace.DBG_FBS_ERRORS)
+                FBTrace.sysout("restoreBreakpoints using StorageService ");
+
+            this.breakpointStore = StorageService.getStorage("breakpoints.json");
+            var urls = this.breakpointStore.getKeys();
+            for (var i = 0; i < urls.length; i++)
+            {
+                var url = urls[i];
+                this.breakpoints[url] = this.breakpointStore.getItem(url);
+            }
+        }
+        catch(exc)
+        {
+            Component.utils.reportError("firebug-service restoreBreakpoints FAILS "+exc);
+        }
     },
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 

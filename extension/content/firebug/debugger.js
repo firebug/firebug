@@ -427,7 +427,7 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
         {
             fbs.enumerateBreakpoints(null, {call: function(url, lineNo, bp) // null means all urls
             {
-                if (bp.debugger !== Firebug.Debugger) // skip breakpoints of other debuggers.
+                if (bp.debuggerName !== Firebug.Debugger.debuggerName) // skip breakpoints of other debuggers.
                     return;
 
                 if (Firebug.filterSystemURLs) // then there are not system urls, clear all
@@ -1272,9 +1272,9 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
 
     onToggleBreakpoint: function(url, lineNo, isSet, props)
     {
-        if (props.debugger != this) // then not for us
+        if (props.debuggerName != this.debuggerName) // then not for us
         {
-            if (FBTrace.DBG_BP) FBTrace.sysout("debugger("+this.debuggerName+").onToggleBreakpoint ignoring toggle for "+(props.debugger?props.debugger.debuggerName:props.debugger)+" target "+lineNo+"@"+url+"\n");
+            if (FBTrace.DBG_BP) FBTrace.sysout("debugger("+this.debuggerName+").onToggleBreakpoint ignoring toggle for "+props.debuggerName+" target "+lineNo+"@"+url+"\n");
             return;
         }
 
@@ -1745,8 +1745,8 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
         Firebug.clientID = this.registerClient(Firebug);
         this.nsICryptoHash = Components.interfaces["nsICryptoHash"];
 
-        this.debuggerName =  window.location.href+"--"+FBL.getUniqueId(); /*@explore*/
-        this.toString = function() { return this.debuggerName; } /*@explore*/
+        this.debuggerName =  window.location.href;
+        this.toString = function() { return this.debuggerName; }
         if (FBTrace.DBG_INITIALIZE)
             FBTrace.sysout("debugger.initialize "+ this.debuggerName);
 

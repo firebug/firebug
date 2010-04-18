@@ -1,6 +1,9 @@
 content firebug content/firebug/
 content firebug content/firebug/ contentaccessible=yes
 
+// Maps resource://firebug/modules/* to files in modules/*
+resource firebug modules/
+
 skin    firebug classic/1.0 skin/classic/
 skin    firebug-os  classic/1.0 skin/classic/win/
 

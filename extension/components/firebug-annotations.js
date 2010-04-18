@@ -34,7 +34,7 @@ function AnnotationService()
     this.file.append("firebug");
     this.file.append("annotations.json");
 
-    // Load annotaions.
+    // Load annotations.
     this.initialize();
 }
 
