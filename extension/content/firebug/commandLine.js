@@ -118,6 +118,13 @@ Firebug.CommandLine = extend(Firebug.Module,
         expr = "with(_FirebugCommandLine){" + expr + "\n};";
         element.setAttribute("expr", expr);
 
+        if (!context.activeConsoleHandlers)
+        {
+            if (FBTrace.DBG_ERRORS)
+                FBTrace.sysout("commandLine evaluateByEventPassing no consoleHandler ", context.activeConsoleHandlers);
+            return;
+        }
+
         var consoleHandler = context.activeConsoleHandlers[win.wrappedJSObject];
 
         if (!consoleHandler)
