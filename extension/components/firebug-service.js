@@ -495,6 +495,7 @@ FirebugService.prototype =
         if (bp)
         {
             dispatch(debuggers, "onToggleBreakpoint", [sourceFile.href, lineNo, true, bp]);
+            fbs.saveBreakpoints(sourceFile.href);  // after every call to onToggleBreakpoint
             return true;
         }
         return false;
@@ -504,7 +505,10 @@ FirebugService.prototype =
     {
         var bp = this.removeBreakpoint(BP_NORMAL, url, lineNo);
         if (bp)
+        {
             dispatch(debuggers, "onToggleBreakpoint", [url, lineNo, false, bp]);
+            fbs.saveBreakpoints(url);
+        }
         else
         {
             if (FBTrace.DBG_FBS_BP)
@@ -519,6 +523,7 @@ FirebugService.prototype =
         {
             bp.disabled &= ~BP_NORMAL;
             dispatch(debuggers, "onToggleBreakpoint", [url, lineNo, true, bp]);
+            fbs.saveBreakpoints(url);
             --disabledCount;
         }
         else {
@@ -535,6 +540,7 @@ FirebugService.prototype =
             bp.disabled |= BP_NORMAL;
             ++disabledCount;
             dispatch(debuggers, "onToggleBreakpoint", [url, lineNo, true, bp]);
+            fbs.saveBreakpoints(url);
         }
         else
         {
@@ -578,6 +584,7 @@ FirebugService.prototype =
         bp.condition = condition;
 
         dispatch(debuggers, "onToggleBreakpoint", [sourceFile.href, lineNo, true, bp]);
+        fbs.saveBreakpoints(sourceFile.href);
     },
 
     getBreakpointCondition: function(url, lineNo)
@@ -2189,7 +2196,7 @@ FirebugService.prototype =
         }
         urlBreakpoints.push(bp);
         fbs.setJSDBreakpoint(sourceFile, bp);
-        fbs.saveBreakpoints(url, urlBreakpoints);
+        fbs.breakpoints[url] = urlBreakpoints;
         ++breakpointCount;
         return bp;
     },
@@ -2246,7 +2253,7 @@ FirebugService.prototype =
                         --conditionCount;
                     }
 
-                    fbs.saveBreakpoints(url, urlBreakpoints);
+                    fbs.breakpoints[url] = urlBreakpoints;
                 }
                 return bp;
             }
@@ -2332,7 +2339,7 @@ FirebugService.prototype =
             {
                 var bp = urlBreakpoints[i];
                 fbs.setJSDBreakpoint(sourceFile, bp);
-                if (lastLineNumber && !bp.jsdLine && !(bp.disabled & BP_NORMAL) && (bp.lineNo < lastLineNumber))
+                if (bp.disabled & BP_NORMAL)
                 {
                      if (FBTrace.DBG_FBS_BP)
                         FBTrace.sysout("resetBreakpoints:  mark breakpoint disabled: "+bp.lineNo+"@"+sourceFile);
@@ -2430,16 +2437,16 @@ FirebugService.prototype =
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
-    saveBreakpoints: function(url, urlBreakpoints)
+    saveBreakpoints: function(url)
     {
+        var urlBreakpoints = fbs.breakpoints[url];
+
         if (!urlBreakpoints.length)
         {
             fbs.breakpointStore.removeItem(url);
             delete fbs.breakpoints[url];
             return;
         }
-
-        fbs.breakpoints[url] = urlBreakpoints;
 
         var cleanBPs = [];
         for(var i = 0; i < urlBreakpoints.length; i++)
