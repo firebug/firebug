@@ -353,7 +353,7 @@ this.Obj = domplate(Firebug.Rep,
 
     shortPropIterator: function (object)
     {
-        return this.propIterator(object,1);
+        return this.propIterator(object, Firebug.ObjectShortIteratorMax);
     },
 
     propIterator: function (object, max)
