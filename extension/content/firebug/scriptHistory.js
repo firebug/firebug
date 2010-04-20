@@ -13,26 +13,11 @@ const MAX_HISTORY_MENU_ITEMS = 15;
 // ************************************************************************************************
 
 /**
- * @class Support for back and forward pattern for navigatin among script files that
- * have been displayed in the Script panel.
+ * @class Support for back and forward pattern for navigatin within Firebug UI (panels).
  */
-Firebug.Debugger.ScriptHistory = extend(Firebug.Module, 
+Firebug.NavigationHistory = extend(Firebug.Module,
 {
     currIndex: 0,
-
-    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
-    // Extending Module
-
-    onCreatePanel: function(context, panel, panelType)
-    {
-        if (!(panel instanceof Firebug.ScriptPanel))
-            return;
-
-        panel.addListener(this);
-
-        if (FBTrace.DBG_SCRIPTHISTORY)
-            FBTrace.sysout("scripthistory.onCreatePanel; Register as Script panel listener");
-    },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
     // History popup menu
@@ -56,39 +41,44 @@ Firebug.Debugger.ScriptHistory = extend(Firebug.Module,
         if (end == count)
             start = Math.max(count - maxItems, 0);
 
-        var tooltipBack = $STR("firebug.history.Go back to this script");
-        var tooltipCurrent = $STR("firebug.history.Stay on this page");
-        var tooltipForward = $STR("firebug.history.Go forward to this script");
+        var tooltipBack = $STR("firebug.history.Go back to this panel");
+        var tooltipCurrent = $STR("firebug.history.Stay on this panel");
+        var tooltipForward = $STR("firebug.history.Go forward to this panel");
 
         for (var i=end-1; i>=start; i--)
         {
-            var sourceFile = list[i];
+            var historyItem = list[i];
+            var panelType = Firebug.getPanelType(historyItem.panel.name);
+            var label = Firebug.getPanelTitle(panelType);
+            if (historyItem.location)
+                label += " - " + historyItem.location.href;
+
             var menuInfo = {
-                label: sourceFile.href,
+                label: label,
                 nol10n: true,
                 className: "menuitem-iconic fbURLMenuItem",
             };
 
             if (i < this.currIndex)
             {
-                menuInfo.className += " scriptHistoryMenuItemBack";
+                menuInfo.className += " navigationHistoryMenuItemBack";
                 menuInfo.tooltiptext = tooltipBack;
             }
             else if (i == this.currIndex)
             {
                 menuInfo.type = "radio";
                 menuInfo.checked = "true";
-                menuInfo.className = "scriptHistoryMenuItemCurrent";
+                menuInfo.className = "navigationHistoryMenuItemCurrent";
                 menuInfo.tooltiptext = tooltipCurrent;
             }
             else
             {
-                menuInfo.className += " scriptHistoryMenuItemForward";
+                menuInfo.className += " navigationHistoryMenuItemForward";
                 menuInfo.tooltiptext = tooltipForward;
             }
 
             var menuItem = FBL.createMenuItem(popup, menuInfo);
-            menuItem.repObject = sourceFile;
+            menuItem.repObject = location;
             menuItem.setAttribute("index", i);
         }
 
@@ -122,12 +112,12 @@ Firebug.Debugger.ScriptHistory = extend(Firebug.Module,
         if (index < 0 || index >= list.length)
             return;
 
-        var sourceFile = list[index];
+        var historyItem = list[index];
 
         try
         {
             this.navInProgress = true;
-            FirebugChrome.select(new SourceLink(sourceFile.href, undefined, "js"), "script");
+            Firebug.chrome.navigate(historyItem.location, historyItem.panel.name);
             this.currIndex = index;
         }
         catch (e)
@@ -146,8 +136,8 @@ Firebug.Debugger.ScriptHistory = extend(Firebug.Module,
     {
         var list = this.getHistory(context);
 
-        var backButton = $("fbScriptBackButton");
-        var forwardButton = $("fbScriptForwardButton");
+        var backButton = $("fbNavigateBackButton");
+        var forwardButton = $("fbNavigateForwardButton");
 
         backButton.setAttribute("disabled", "true");
         forwardButton.setAttribute("disabled", "true");
@@ -164,42 +154,48 @@ Firebug.Debugger.ScriptHistory = extend(Firebug.Module,
 
     getHistory: function(context)
     {
-        if (!context.scriptPanelHistory)
-            context.scriptPanelHistory = [];
+        if (!context.navigationHistory)
+            context.navigationHistory = [];
 
-        return context.scriptPanelHistory;
+        return context.navigationHistory;
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
-    // Firebug.ScriptPanel listener
+    // UI Listener
 
-    onUpdateScriptLocation: function(panel, sourceFile)
+    onPanelNavigate: function(location, panel)
     {
+        if (FBTrace.DBG_HISTORY)
+            FBTrace.sysout("history.onPanelNavigate; " +
+                "Panel: " + (panel ? panel.name : "Unknown Panel") +
+                "Location: " + (location ? location.href : "No Location"),
+                {panel: panel.constructor.prototype.title, location: location});
+
+        // The panel must be always there
+        if (!panel)
+            return;
+
+        // The user is navigating using the history UI, this action doesn't affect
+        // the history list.
         if (this.navInProgress)
             return;
-
-        if (!(sourceFile instanceof Firebug.SourceFile))
-        {
-            if (FBTrace.DBG_SCRIPTHISTORY)
-                FBTrace.sysout("scripthistory.onUpdateScriptLocation; ERROR not instane of SourceFile",
-                    sourceFile);
-            return;
-        }
 
         var list = this.getHistory(panel.context);
 
         // Remove forward history.
         list.splice(this.currIndex+1, list.length-(this.currIndex+1));
 
-        // If the last file in the history is the same bail out.
-        if (list.length && list[list.length-1].href == sourceFile.href)
+        // If the last item in the history is the same bail out.
+        var lastHistoryItem = list.length ? list[list.length-1] : null;
+        if (lastHistoryItem && lastHistoryItem.panel == panel &&
+            lastHistoryItem.location == location)
             return;
 
-        if (FBTrace.DBG_SCRIPTHISTORY)
-            FBTrace.sysout("scripthistory.onUpdateScriptLocation; Append to history: " +
-                sourceFile.href, sourceFile);
+        if (lastHistoryItem && lastHistoryItem.location && location &&
+            lastHistoryItem.location.href == location.href)
+            return;
 
-        list.push(sourceFile);
+        list.push({panel: panel, location: location});
         this.currIndex = list.length-1;
 
         // Update back and forward buttons in the UI.
@@ -210,7 +206,8 @@ Firebug.Debugger.ScriptHistory = extend(Firebug.Module,
 // ************************************************************************************************
 // Registration
 
-Firebug.registerModule(Firebug.Debugger.ScriptHistory);
+Firebug.registerModule(Firebug.NavigationHistory);
+Firebug.registerUIListener(Firebug.NavigationHistory);
 
 // ************************************************************************************************
 }});

@@ -292,33 +292,33 @@ textbox[type="fbSearchBox"] > panel {
 /************************************************************************************************/
 /* Script history buttons */
 
-#fbScriptBackButton {
+#fbNavigateBackButton {
     list-style-image: url(chrome://firebug/skin/script-back.png);
 }
 
-#fbScriptForwardButton {
+#fbNavigateForwardButton {
     list-style-image: url(chrome://firebug/skin/script-forward.png);
 }
 
-#fbScriptBackButton[disabled="true"] {
+#fbNavigateBackButton[disabled="true"] {
     list-style-image: url(chrome://firebug/skin/script-back-disabled.png);
 }
 
-#fbScriptForwardButton[disabled="true"] {
+#fbNavigateForwardButton[disabled="true"] {
     list-style-image: url(chrome://firebug/skin/script-forward-disabled.png);
 }
 
-.scriptHistoryMenuItemBack,
-menupopup[chromedir="rtl"] > .scriptHistoryMenuItemForward {
+.navigationHistoryMenuItemBack,
+menupopup[chromedir="rtl"] > .navigationHistoryMenuItemForward {
   list-style-image: url("chrome://browser/skin/menu-back.png") !important;
 }
 
-.scriptHistoryMenuItemForward,
-menupopup[chromedir="rtl"] > .scriptHistoryMenuItemBack {
+.navigationHistoryMenuItemForward,
+menupopup[chromedir="rtl"] > .navigationHistoryMenuItemBack {
   list-style-image: url("chrome://firebug/skin/script-forward.png") !important;
 }
 
-.scriptHistoryMenuItemCurrent {
+.navigationHistoryMenuItemCurrent {
   font-weight: bold;
 }
 

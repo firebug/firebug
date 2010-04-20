@@ -114,9 +114,9 @@
             onmouseup="Firebug.Inspector.quickInfoBoxDragEnd(event);">
             <vbox></vbox>
         </popup>
-        <popup id="fbScriptHistoryMenu"
-            oncommand="Firebug.Debugger.ScriptHistory.onHistoryCommand(event, FirebugContext)"
-            onpopupshowing="return Firebug.Debugger.ScriptHistory.onPopupShowing(this, FirebugContext)" />
+        <popup id="fbNavigationHistoryMenu"
+            oncommand="Firebug.NavigationHistory.onHistoryCommand(event, FirebugContext)"
+            onpopupshowing="return Firebug.NavigationHistory.onPopupShowing(this, FirebugContext)" />
     </popupset>
 
     <!-- Main UI -->
@@ -138,6 +138,17 @@
                             <toolbarbutton id="fbInspectButton" tooltiptext="&firebug.InspectTooltip;"
                                     command="cmd_toggleInspecting" collapsed="false">
                             </toolbarbutton>
+
+                            <toolbarseparator/>
+
+                            <toolbaritem contextmenu="fbNavigationHistoryMenu">
+                                <toolbarbutton id="fbNavigateBackButton" disabled="true"
+                                    tooltiptext="firebug.history.Go back"
+                                    oncommand="return Firebug.NavigationHistory.goBack(FirebugContext)"/>
+                                <toolbarbutton id="fbNavigateForwardButton" disabled="true"
+                                    tooltiptext="firebug.history.Go forward"
+                                    oncommand="return Firebug.NavigationHistory.goForward(FirebugContext)"/>
+                            </toolbaritem>
 
                         </hbox>
 
@@ -225,15 +236,6 @@
 
                                     <hbox id="fbScriptButtons" collapsed="true">
                                         <toolbarseparator class="fbPanelSpecificButtonsSeparator"/>
-                                        <toolbaritem contextmenu="fbScriptHistoryMenu">
-                                            <toolbarbutton id="fbScriptBackButton" disabled="true"
-                                                tooltiptext="firebug.history.Go back one script"
-                                                oncommand="return Firebug.Debugger.ScriptHistory.goBack(FirebugContext)"/>
-                                            <toolbarbutton id="fbScriptForwardButton" disabled="true"
-                                                tooltiptext="firebug.history.Go forward one script"
-                                                oncommand="return Firebug.Debugger.ScriptHistory.goForward(FirebugContext)"/>
-                                        </toolbaritem>
-                                        <toolbarseparator/>
                                         <tooltip id="fbScriptFilterMenuTooltip" role="presentation"
                                             onpopupshowing="return Firebug.Debugger.onScriptFilterMenuTooltipShowing(this, FirebugContext)"/>
                                         <toolbarbutton id="fbScriptFilterMenu" type="menu" tooltip="fbScriptFilterTooltip" role="button" aria-haspopup="true">

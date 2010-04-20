@@ -165,7 +165,7 @@ pref("extensions.firebug.DBG_ANNOTATIONS", false);  // Page annotations service 
 pref("extensions.firebug.DBG_XMLVIEWER", false);    // xml explorer                              /*@explore*/
 pref("extensions.firebug.DBG_ACTIVITYOBSERVER", false);    // Net panel's activity observer      /*@explore*/
 pref("extensions.firebug.DBG_TOOLTIP", false);      // tooltip debugging      /*@explore*/
-pref("extensions.firebug.DBG_SCRIPTHISTORY", false);      // history of displayed files in the Script panel      /*@explore*/
+pref("extensions.firebug.DBG_HISTORY", false);      // panel navigation history                  /*@explore*/
 
 // Keyboard
 pref("extensions.firebug.key.shortcut.reenterCommand", "control shift e");

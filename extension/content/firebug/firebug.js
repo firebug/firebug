@@ -270,7 +270,7 @@ top.Firebug =
             "fbBreakOnNextButton", "fbConsolePersist",
             "fbMinimizeButton", "FirebugMenu_Sites", "fbResumeBoxButton",
             "menu_AllOn", "menu_clearActivationList", "showQuickInfoBox", "panelBarTabList",
-            "fbScriptBackButton", "fbScriptForwardButton"];
+            "fbNavigateBackButton", "fbNavigateForwardButton"];
 
         for (var i=0; i<elements.length; i++)
         {
