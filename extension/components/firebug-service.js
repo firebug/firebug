@@ -23,8 +23,6 @@ const ConsoleService = Cc["@mozilla.org/consoleservice;1"];
 const Timer = Cc["@mozilla.org/timer;1"];
 const ObserverServiceFactory = Cc["@mozilla.org/observer-service;1"];
 
-Components.utils.import("resource://firebug/storageService.js");
-
 const jsdIDebuggerService = Ci.jsdIDebuggerService;
 const jsdIScript = Ci.jsdIScript;
 const jsdIStackFrame = Ci.jsdIStackFrame;
@@ -2477,20 +2475,32 @@ FirebugService.prototype =
         try
         {
             this.breakpoints = {};
-            if (FBTrace.DBG_FBS_ERRORS)
-                FBTrace.sysout("restoreBreakpoints using StorageService ");
 
-            this.breakpointStore = StorageService.getStorage("breakpoints.json");
-            var urls = this.breakpointStore.getKeys();
-            for (var i = 0; i < urls.length; i++)
+            Components.utils.import("resource://firebug/storageService.js");
+
+            if (typeof(StorageService) != "undefined")
             {
-                var url = urls[i];
-                this.breakpoints[url] = this.breakpointStore.getItem(url);
+                this.breakpointStore = StorageService.getStorage("breakpoints.json");
+                var urls = this.breakpointStore.getKeys();
+                for (var i = 0; i < urls.length; i++)
+                {
+                    var url = urls[i];
+                    this.breakpoints[url] = this.breakpointStore.getItem(url);
+                }
+            }
+            else
+            {
+                this.breakpointStore =
+                {
+                        setItem: function(){},
+                        removeItem: function(){},
+                        getKeys: function(){return [];},
+                };
             }
         }
         catch(exc)
         {
-            Component.utils.reportError("firebug-service restoreBreakpoints FAILS "+exc);
+            ERROR("firebug-service restoreBreakpoints FAILS "+exc);
         }
     },
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
