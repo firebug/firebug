@@ -293,29 +293,29 @@ textbox[type="fbSearchBox"] > panel {
 /* Script history buttons */
 
 #fbNavigateBackButton {
-    list-style-image: url(chrome://firebug/skin/script-back.png);
+    list-style-image: url(chrome://firebug/skin/nav-back.png);
 }
 
 #fbNavigateForwardButton {
-    list-style-image: url(chrome://firebug/skin/script-forward.png);
+    list-style-image: url(chrome://firebug/skin/nav-forward.png);
 }
 
 #fbNavigateBackButton[disabled="true"] {
-    list-style-image: url(chrome://firebug/skin/script-back-disabled.png);
+    list-style-image: url(chrome://firebug/skin/nav-back-disabled.png);
 }
 
 #fbNavigateForwardButton[disabled="true"] {
-    list-style-image: url(chrome://firebug/skin/script-forward-disabled.png);
+    list-style-image: url(chrome://firebug/skin/nav-forward-disabled.png);
 }
 
 .navigationHistoryMenuItemBack,
 menupopup[chromedir="rtl"] > .navigationHistoryMenuItemForward {
-  list-style-image: url("chrome://browser/skin/menu-back.png") !important;
+  list-style-image: url("chrome://firebug/skin/nav-back.png") !important;
 }
 
 .navigationHistoryMenuItemForward,
 menupopup[chromedir="rtl"] > .navigationHistoryMenuItemBack {
-  list-style-image: url("chrome://firebug/skin/script-forward.png") !important;
+  list-style-image: url("chrome://firebug/skin/nav-forward.png") !important;
 }
 
 .navigationHistoryMenuItemCurrent {

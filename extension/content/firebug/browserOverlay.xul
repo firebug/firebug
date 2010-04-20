@@ -47,7 +47,7 @@
     <script type="application/x-javascript" src="chrome://firebug/content/layout.js"/>
     <script type="application/x-javascript" src="chrome://firebug/content/debuggerHalter.js"/>
     <script type="application/x-javascript" src="chrome://firebug/content/debugger.js"/>
-    <script type="application/x-javascript" src="chrome://firebug/content/scriptHistory.js"/>
+    <script type="application/x-javascript" src="chrome://firebug/content/navigationHistory.js"/>
     <script type="application/x-javascript" src="chrome://firebug/content/dom.js"/>
     <script type="application/x-javascript" src="chrome://firebug/content/net.js"/>
     <script type="application/x-javascript" src="chrome://firebug/content/profiler.js"/>
