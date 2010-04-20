@@ -185,6 +185,8 @@ pref("extensions.firebug.key.shortcut.rightFirebugTab", "accel shift VK_PAGE_DOW
 pref("extensions.firebug.key.shortcut.previousFirebugTab", "control `");
 pref("extensions.firebug.key.shortcut.clearConsole", "accel shift r");
 pref("extensions.firebug.key.shortcut.openTraceConsole", "shift r");                             /*@explore*/
+pref("extensions.firebug.key.shortcut.navBack", "accel shift VK_LEFT");                          /*@explore*/
+pref("extensions.firebug.key.shortcut.navForward", "accel shift VK_RIGHT");                      /*@explore*/
 
 // Accessibility
 pref("extensions.firebug.a11y.enable", false);

@@ -77,6 +77,8 @@
 
         <command id="cmd_togglePersistNet" oncommand="Firebug.NetMonitor.togglePersist(FirebugContext)"/>
         <command id="cmd_toggleOrient" oncommand="FirebugChrome.toggleOrient()" />
+        <command id="cmd_navBack" oncommand="Firebug.NavigationHistory.goBack(FirebugContext)" />
+        <command id="cmd_navForward" oncommand="Firebug.NavigationHistory.goForward(FirebugContext)" />
     </commandset>
 
     <keyset id="mainKeyset">
@@ -99,6 +101,8 @@
         <key id="key_detachFirebug" keycode="VK_F12" modifiers="accel" command="cmd_detachFirebug"/>
         <key id="key_closeFirebug" keycode="VK_F12" modifiers="shift" command="cmd_closeFirebug"/>
         <key id="key_clearConsole" key="r" modifiers="accel,shift" command="cmd_clearConsole" class="fbOnlyKey"/>
+        <key id="key_navBack" keycode="VK_LEFT" modifiers="accel,shift" command="cmd_navBack"/>
+        <key id="key_navForward" keycode="VK_RIGHT" modifiers="accel,shift" command="cmd_navForward"/>
     </keyset>
 
     <popupset id="mainPopupSet">
@@ -141,15 +145,15 @@
 
                             <toolbarseparator/>
 
+                            <!-- History of Navigation -->
                             <toolbaritem contextmenu="fbNavigationHistoryMenu">
                                 <toolbarbutton id="fbNavigateBackButton" disabled="true"
                                     tooltiptext="firebug.history.Go back"
-                                    oncommand="return Firebug.NavigationHistory.goBack(FirebugContext)"/>
+                                    command="cmd_navBack"/>
                                 <toolbarbutton id="fbNavigateForwardButton" disabled="true"
                                     tooltiptext="firebug.history.Go forward"
-                                    oncommand="return Firebug.NavigationHistory.goForward(FirebugContext)"/>
+                                    command="cmd_naForward"/>
                             </toolbaritem>
-
                         </hbox>
 
                         <!-- Panel selector (list of all panels) -->
