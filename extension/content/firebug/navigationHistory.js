@@ -50,7 +50,7 @@ Firebug.NavigationHistory = extend(Firebug.Module,
             var historyItem = list[i];
             var panelType = Firebug.getPanelType(historyItem.panel.name);
             var label = Firebug.getPanelTitle(panelType);
-            if (historyItem.location)
+            if (historyItem.location && historyItem.location.href)
                 label += " - " + historyItem.location.href;
 
             var menuInfo = {
