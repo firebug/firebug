@@ -509,6 +509,12 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
             var script = findScriptForFunctionInContext(FirebugContext, fn);
             if (script)
                 this.monitorScript(fn, script, mode);
+            else
+                Firebug.Console.logFormatted(["Firebug unable to locate jsdIScript for function", fn], FirebugContext, "info");
+        }
+        else
+        {
+            Firebug.Console.logFormatted(["Firebug.Debugger.monitorFunction requires a function", fn], FirebugContext, "info");
         }
     },
 
@@ -528,7 +534,7 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
         if (scriptInfo)
         {
             if (mode == "debug")
-                this.setBreakpoint(scriptInfo.sourceFile, scriptInfo.lineNo, null, this);
+                this.setBreakpoint(scriptInfo.sourceFile, scriptInfo.lineNo);
             else if (mode == "monitor")
                 fbs.monitor(scriptInfo.sourceFile, scriptInfo.lineNo, Firebug.Debugger);
         }
@@ -1745,7 +1751,7 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
         Firebug.clientID = this.registerClient(Firebug);
         this.nsICryptoHash = Components.interfaces["nsICryptoHash"];
 
-        this.debuggerName =  window.location.href;
+        this.debuggerName =  window.location.href +"-@-"+FBL.getUniqueId();
         this.toString = function() { return this.debuggerName; }
         if (FBTrace.DBG_INITIALIZE)
             FBTrace.sysout("debugger.initialize "+ this.debuggerName);
@@ -2021,8 +2027,8 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
 
         if (FBTrace.DBG_ACTIVATION)
             FBTrace.sysout("debugger.onResumeFirebug unpaused: "+unpaused+" isAlwaysEnabled " +Firebug.Debugger.isAlwaysEnabled());
-        if (FBTrace.DBG_ERRORS && !this.registered)
-            FBTrace.sysout("debugger.onResumeFirebug but debugger not registered! *** ");
+        if (FBTrace.DBG_ERRORS && !this.registered && Firebug.Debugger.isAlwaysEnabled())
+            FBTrace.sysout("debugger.onResumeFirebug but debugger "+Firebug.Debugger.debuggerName+" not registered! *** ");
     },
 
     ableWatchSidePanel: function(context)

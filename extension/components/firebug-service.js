@@ -1433,7 +1433,7 @@ FirebugService.prototype =
                      getNext: function() { return innerScripts[this.index++]; },
                 };
                 var sourceFile = debuggr.onXULScriptCreated(frame, outerScript, innerScriptEnumerator);
-                fbs.resetBreakpoints(sourceFile);
+                fbs.resetBreakpoints(sourceFile, debuggr);
             }
             else
             {
@@ -1482,7 +1482,7 @@ FirebugService.prototype =
                 if (debuggr)
                 {
                     var sourceFile = debuggr.onEventScriptCreated(frame, frame.script, fbs.getNestedScriptEnumerator());
-                    fbs.resetBreakpoints(sourceFile);
+                    fbs.resetBreakpoints(sourceFile, debuggr);
                 }
                 else
                 {
@@ -1523,7 +1523,7 @@ FirebugService.prototype =
                 if (debuggr)
                 {
                     var sourceFile = debuggr.onEvalScriptCreated(frame, outerScript, fbs.getNestedScriptEnumerator());
-                    fbs.resetBreakpoints(sourceFile);
+                    fbs.resetBreakpoints(sourceFile, debuggr);
                 }
                 else
                 {
@@ -1569,7 +1569,7 @@ FirebugService.prototype =
             {
                 var sourceFile = debuggr.onTopLevelScriptCreated(frame, frame.script, fbs.getNestedScriptEnumerator());
                 if (FBTrace.DBG_FBS_SRCUNITS) FBTrace.sysout("fbs.onTopLevelScriptCreated got sourceFile:"+sourceFile+" using "+fbs.nestedScriptStack.length+" nestedScripts\n");
-                fbs.resetBreakpoints(sourceFile, frame.script.baseLineNumber+frame.script.lineExtent);
+                fbs.resetBreakpoints(sourceFile, debuggr);
             }
             else
             {
@@ -2310,7 +2310,7 @@ FirebugService.prototype =
         return null;
     },
 
-    resetBreakpoints: function(sourceFile, lastLineNumber) // the sourcefile has just been created after compile
+    resetBreakpoints: function(sourceFile, debuggr) // the sourcefile has just been created after compile
     {
         // If the new script is replacing an old script with a breakpoint still
         var url = sourceFile.href;
@@ -2337,6 +2337,7 @@ FirebugService.prototype =
             {
                 var bp = urlBreakpoints[i];
                 fbs.setJSDBreakpoint(sourceFile, bp);
+                bp.debuggerName = debuggr.debuggerName; // this debugger claims the bp
                 if (bp.disabled & BP_NORMAL)
                 {
                      if (FBTrace.DBG_FBS_BP)
