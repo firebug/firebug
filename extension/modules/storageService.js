@@ -138,7 +138,8 @@ var ObjectPersister =
         var file = dirService.get("ProfD", Ci.nsIFile);
         file.append("firebug");
         file.append(leafName);
-        FBTrace.sysout("ObjectPersister getFileByName("+leafName+")="+file.path);
+        if (FBTrace.DBG_STORAGE)
+            FBTrace.sysout("ObjectPersister getFileByName("+leafName+")="+file.path);
 
         return file;
     },
@@ -148,8 +149,8 @@ var ObjectPersister =
         FBTrace = Cc["@joehewitt.com/firebug-trace-service;1"]
             .getService(Ci.nsISupports).wrappedJSObject.getTracer("extensions.firebug");
 
-        FBTrace.DBG_STORAGE = true;
-        FBTrace.sysout("ObjectPersister read");
+        if (FBTrace.DBG_STORAGE)
+            FBTrace.sysout("ObjectPersister read");
 
         var file = ObjectPersister.getFileByName(leafName);
 
