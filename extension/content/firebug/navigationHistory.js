@@ -13,11 +13,30 @@ const MAX_HISTORY_MENU_ITEMS = 15;
 // ************************************************************************************************
 
 /**
- * @class Support for back and forward pattern for navigatin within Firebug UI (panels).
+ * @class Support for back and forward pattern for navigating within Firebug UI (panels).
  */
 Firebug.NavigationHistory = extend(Firebug.Module,
 {
     currIndex: 0,
+
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+    // Extending Module
+
+    initContext: function(context, persistedState)
+    {
+        Firebug.Module.initContext.apply(this, arguments);
+
+        if (persistedState && persistedState.navigationHistory)
+            context.navigationHistory = persistedState.navigationHistory;
+    },
+
+    destroyContext: function(context, persistedState)
+    {
+        Firebug.ActivableModule.destroyContext.apply(this, arguments);
+
+        if (persistedState)
+            persistedState.navigationHistory = context.navigationHistory;
+    },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
     // History popup menu
@@ -48,7 +67,7 @@ Firebug.NavigationHistory = extend(Firebug.Module,
         for (var i=end-1; i>=start; i--)
         {
             var historyItem = list[i];
-            var panelType = Firebug.getPanelType(historyItem.panel.name);
+            var panelType = Firebug.getPanelType(historyItem.panelName);
             var label = Firebug.getPanelTitle(panelType);
             if (historyItem.location && historyItem.location.href)
                 label += " - " + historyItem.location.href;
@@ -117,7 +136,7 @@ Firebug.NavigationHistory = extend(Firebug.Module,
         try
         {
             this.navInProgress = true;
-            Firebug.chrome.navigate(historyItem.location, historyItem.panel.name);
+            Firebug.chrome.navigate(historyItem.location, historyItem.panelName);
             this.currIndex = index;
         }
         catch (e)
@@ -168,8 +187,7 @@ Firebug.NavigationHistory = extend(Firebug.Module,
         if (FBTrace.DBG_HISTORY)
             FBTrace.sysout("history.onPanelNavigate; " +
                 "Panel: " + (panel ? panel.name : "Unknown Panel") +
-                "Location: " + (location ? location.href : "No Location"),
-                {panel: panel.constructor.prototype.title, location: location});
+                "Location: " + (location ? location.href : "No Location"));
 
         // The panel must be always there
         if (!panel)
@@ -187,7 +205,7 @@ Firebug.NavigationHistory = extend(Firebug.Module,
 
         // If the last item in the history is the same bail out.
         var lastHistoryItem = list.length ? list[list.length-1] : null;
-        if (lastHistoryItem && lastHistoryItem.panel == panel &&
+        if (lastHistoryItem && lastHistoryItem.panelName == panel.name &&
             lastHistoryItem.location == location)
             return;
 
@@ -195,7 +213,7 @@ Firebug.NavigationHistory = extend(Firebug.Module,
             lastHistoryItem.location.href == location.href)
             return;
 
-        list.push({panel: panel, location: location});
+        list.push({panelName: panel.name, location: location});
         this.currIndex = list.length-1;
 
         // Update back and forward buttons in the UI.
