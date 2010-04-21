@@ -2630,8 +2630,13 @@ this.findScriptForFunctionInContext = function(context, fn)
     if (!fn || typeof(fn) !== 'function')
         return found;
 
-    found = this.jsd.wrapValue(fn).script;
+    var wrapped = this.jsd.wrapValue(fn);
+    found = wrapped.script;
+    if (!found)
+        found = wrapped.jsParent.script;
 
+    if (!found && FBTrace.DBG_ERRORS)
+        FBTrace.sysout("findScriptForFunctionInContext ",{fn: fn, wrapValue: this.jsd.wrapValue(fn), found: found});
     if (FBTrace.DBG_FUNCTION_NAMES)
         FBTrace.sysout("findScriptForFunctionInContext found "+(found?found.tag:"none")+"\n");
 
