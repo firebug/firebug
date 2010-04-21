@@ -2467,30 +2467,26 @@ FirebugService.prototype =
 
     getBreakpointURLs: function()
     {
-         var urls = this.breakpointStore.getKeys();
+         var urls = this.getBreakpointStore().getKeys();
          return urls;
     },
 
-    restoreBreakpoints: function()
+    getBreakpointStore: function()
     {
+        if (this.breakpointStore)
+            return this.breakpointStore;
+
         try
         {
-            this.breakpoints = {};
-
             Components.utils.import("resource://firebug/storageService.js");
 
             if (typeof(StorageService) != "undefined")
             {
                 this.breakpointStore = StorageService.getStorage("breakpoints.json");
-                var urls = this.breakpointStore.getKeys();
-                for (var i = 0; i < urls.length; i++)
-                {
-                    var url = urls[i];
-                    this.breakpoints[url] = this.breakpointStore.getItem(url);
-                }
             }
             else
             {
+                ERROR("firebug-service breakpoint StorageService FAILS");
                 this.breakpointStore =
                 {
                         setItem: function(){},
@@ -2498,10 +2494,24 @@ FirebugService.prototype =
                         getKeys: function(){return [];},
                 };
             }
+            return this.breakpointStore;
         }
         catch(exc)
         {
             ERROR("firebug-service restoreBreakpoints FAILS "+exc);
+        }
+
+    },
+
+    restoreBreakpoints: function()
+    {
+        this.breakpoints = {};
+        var breakpointStore = fbs.getBreakpointStore();
+        var urls = breakpointStore.getKeys();
+        for (var i = 0; i < urls.length; i++)
+        {
+            var url = urls[i];
+            this.breakpoints[url] = breakpointStore.getItem(url);
         }
     },
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
@@ -2791,11 +2801,18 @@ var FirebugFactory =
 {
     createInstance: function (outer, iid)
     {
-        if (outer != null)
-            throw NS_ERROR_NO_AGGREGATION;
+        try
+        {
+            if (outer != null)
+                throw NS_ERROR_NO_AGGREGATION;
 
-        FirebugFactory.initializeService();
-        return (new FirebugService()).QueryInterface(iid);
+            FirebugFactory.initializeService();
+            return (new FirebugService()).QueryInterface(iid);
+        }
+        catch (exc)
+        {
+            ERROR("firebug-service initialization FAILS "+exc);
+        }
     },
     initializeService: function()
     {
