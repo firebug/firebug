@@ -432,7 +432,7 @@ NetPanel.prototype = extend(Firebug.ActivablePanel,
         this.initLayout();
 
         var tbody = this.table.querySelector(".netTableBody");
-        var lastRow = tbody.lastChild.previousSibling;
+        var lastRow = this.summaryRow.previousSibling;
 
         // Move all net-rows from the persistedState to this panel.
         var prevTableBody = state.panelNode.getElementsByClassName("netTableBody").item(0);
@@ -469,7 +469,7 @@ NetPanel.prototype = extend(Firebug.ActivablePanel,
             var pageRow = NetPage.pageTag.insertRows({page: state}, lastRow)[0];
             pageRow.files = files;
 
-            lastRow = tbody.lastChild.previousSibling;
+            lastRow = this.summaryRow.previousSibling;
         }
 
         if (this.table.getElementsByClassName("netPageRow").item(0))
@@ -1032,7 +1032,9 @@ NetPanel.prototype = extend(Firebug.ActivablePanel,
             this.table = NetRequestTable.tableTag.append({}, this.panelNode);
             var tbody = this.table.querySelector(".netTableBody");
             this.limitRow = NetLimit.createRow(tbody, limitInfo);
-            this.summaryRow =  NetRequestEntry.summaryTag.insertRows({}, this.table.lastChild.lastChild)[0];
+            this.summaryRow = NetRequestEntry.summaryTag.insertRows({}, this.table.lastChild.lastChild)[0];
+
+            NetRequestEntry.footerTag.insertRows({}, this.summaryRow);
 
             // Update visibility of columns according to the preferences
             var hiddenCols = Firebug.getPref(Firebug.prefDomain, "net.hiddenColumns");
@@ -1066,7 +1068,7 @@ NetPanel.prototype = extend(Firebug.ActivablePanel,
         if (newFileData.length)
         {
             var tbody = this.table.querySelector(".netTableBody");
-            var lastRow = tbody.lastChild.previousSibling;
+            var lastRow = this.summaryRow.previousSibling;
             this.insertRows(newFileData, lastRow);
         }
     },
@@ -1502,8 +1504,7 @@ NetPanel.prototype = extend(Firebug.ActivablePanel,
         this.initLayout();
 
         // Get the last request row before summary row.
-        var tbody = this.table.querySelector(".netTableBody");
-        var lastRow = tbody.lastChild.previousSibling;
+        var lastRow = this.summaryRow.previousSibling;
 
         // Insert an activation message (if the last row isn't the message already);
         if (hasClass(lastRow, "netActivationRow"))
@@ -1588,16 +1589,7 @@ Firebug.NetMonitor.NetRequestTable = domplate(Firebug.Rep, new Firebug.Listener(
     inspectable: false,
 
     tableTag:
-
         TABLE({"class": "netTable", cellpadding: 0, cellspacing: 0, hiddenCols: "", "role": "treegrid"},
-            COLGROUP(
-                COL({style: "width: 1%"}),
-                COL({style: "width: 18%"}),
-                COL({style: "width: 12%"}),
-                COL({style: "width: 12%"}),
-                COL({style: "width: 4%"}),
-                COL({style: "width: 53%"})
-            ),
             THEAD(
                 TR({"class": "netHeaderRow netRow focusRow outerFocusRow", onclick: "$onClickHeader", "role": "row"},
                     TD({id: "netBreakpointBar", width: "1%", "class": "netHeaderCell",
@@ -1923,13 +1915,6 @@ Firebug.NetMonitor.NetRequestEntry = domplate(Firebug.Rep, new Firebug.Listener(
             )
         ),
 
-    headTag:
-        TR({"class": "netHeadRow"},
-            TD({"class": "netHeadCol", colspan: 6},
-                DIV({"class": "netHeadLabel"}, "$doc.rootFile.href")
-            )
-        ),
-
     netInfoTag:
         TR({"class": "netInfoRow outerFocusRow", "role" : "row"},
             TD({"class": "sourceLine netRowHeader"}),
@@ -1967,6 +1952,11 @@ Firebug.NetMonitor.NetRequestEntry = domplate(Firebug.Rep, new Firebug.Listener(
                     )
                 )
             )
+        ),
+
+    footerTag:
+        TR({"class": "netFooterRow", "style" : "height: 100%"},
+            TD({"class": "", colspan: 6})
         ),
 
     onClickRowHeader: function(event)
