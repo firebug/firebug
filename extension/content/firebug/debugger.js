@@ -343,13 +343,7 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
         var executionContext = context.debugFrame.executionContext;
         try {
             executionContext.scriptsEnabled = false;
-
-            if (context.window instanceof Ci.nsIInterfaceRequestor)
-            {
-                context.eventSuppressor = context.window.getInterface(Ci.nsIDOMWindowUtils);
-                if (context.eventSuppressor)
-                    context.eventSuppressor.suppressEventHandling(true);
-            }
+            this.suppressEventHandling(context);
             context.isFrozen = true;
 
             if (FBTrace.DBG_UI_LOOP)
@@ -358,6 +352,16 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
         } catch (exc) {
             // This attribute is only valid for contexts which implement nsIScriptContext.
             if (FBTrace.DBG_UI_LOOP) FBTrace.sysout("debugger.stop, freeze exception in "+context.getName(), exc);
+        }
+    },
+    
+    suppressEventHandling: function(context)
+    {
+        if (context.window instanceof Ci.nsIInterfaceRequestor)
+        {
+            context.eventSuppressor = context.window.getInterface(Ci.nsIDOMWindowUtils);
+            if (context.eventSuppressor)
+                context.eventSuppressor.suppressEventHandling(true);
         }
     },
 
@@ -372,12 +376,7 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
             var executionContext = context.debugFrame.executionContext;
             if (executionContext.isValid)
             {
-                if (context.eventSuppressor)
-                {
-                    context.eventSuppressor.suppressEventHandling(false);
-                    delete context.eventSuppressor;
-                }
-
+                this.unsuppressEventHandling(context);
                 executionContext.scriptsEnabled = true;
             }
             else
@@ -390,7 +389,15 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
         } catch (exc) {
             if (FBTrace.DBG_UI_LOOP) FBTrace.sysout("debugger.stop, scriptsEnabled = true exception:", exc);
         }
-
+    },
+    
+    unsuppressEventHandling: function(context)
+    {
+        if (context.eventSuppressor)
+        {
+            context.eventSuppressor.suppressEventHandling(false);
+            delete context.eventSuppressor;
+        }
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
