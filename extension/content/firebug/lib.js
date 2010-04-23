@@ -2148,6 +2148,8 @@ this.unescapeForTextNode = function(str)
     return str;
 }
 
+this.unescapeForURL = createSimpleEscape('text', 'reverse');
+
 this.escapeNewLines = function(value)
 {
     return value.replace(/\r/gm, "\\r").replace(/\n/gm, "\\n");
@@ -3716,6 +3718,9 @@ this.parseURLEncodedText = function(text, noLimit)
     // Unescape '+' characters that are used to encode a space.
     // See section 2.2.in RFC 3986: http://www.ietf.org/rfc/rfc3986.txt
     text = text.replace(/\+/g, " ");
+
+    // Unescape '&amp;' character
+    text = this.unescapeForURL(text);
 
     function decodeText(text)
     {
