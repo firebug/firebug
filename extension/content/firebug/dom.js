@@ -226,7 +226,7 @@ const DirTablePlate = domplate(Firebug.Rep,
 
         var context = domPanel.context;
         var target = row.lastChild.firstChild;
-        var isString = hasClass(target,"objectBox-string");
+        var isString = hasClass(target, "objectBox-string");
 
         if (hasClass(row, "opened"))
         {
@@ -234,7 +234,7 @@ const DirTablePlate = domplate(Firebug.Rep,
 
             if (isString)
             {
-                var rowValue = domPanel.getRowPropertyValue(row);
+                var rowValue = row.domObject.value
                 row.lastChild.firstChild.textContent = '"' + cropMultipleLines(rowValue) + '"';
             }
             else
@@ -273,7 +273,7 @@ const DirTablePlate = domplate(Firebug.Rep,
             setClass(row, "opened");
             if (isString)
             {
-                var rowValue = domPanel.getRowPropertyValue(row);
+                var rowValue = row.domObject.value
                 row.lastChild.firstChild.textContent = '"' + rowValue + '"';
             }
             else
@@ -1850,6 +1850,7 @@ function getRowOwnerObject(row)
 function getParentRow(row)
 {
     var level = parseInt(row.getAttribute("level"))-1;
+    // If it's top level object the level is now set to -1, is that a problem?
     for (row = row.previousSibling; row; row = row.previousSibling)
     {
         if (parseInt(row.getAttribute("level")) == level)
