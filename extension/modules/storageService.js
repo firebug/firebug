@@ -182,6 +182,7 @@ var ObjectPersister =
             // Load  json.
             var data = {};
             cstream.readString(-1, data);
+            inputStream.close();
             if (!data.value.length)
                 return;
 
