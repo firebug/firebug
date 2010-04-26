@@ -2331,7 +2331,7 @@ FirebugService.prototype =
 
         if (urlBreakpoints)
         {
-            if (FBTrace.DBG_FBS_BP) FBTrace.sysout("resetBreakpoints total bp="+urlBreakpoints.length+" for url="+url+" lastLineNumber="+lastLineNumber);
+            if (FBTrace.DBG_FBS_BP) FBTrace.sysout("resetBreakpoints total bp="+urlBreakpoints.length+" for url="+url);
 
             for (var i = 0; i < urlBreakpoints.length; ++i)
             {
