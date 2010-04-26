@@ -2455,6 +2455,7 @@ FirebugService.prototype =
             for (var p in bp)
                 cleanBP[p] = bp[p];
             delete cleanBP.scriptsWithBreakpoint; // not JSON-able
+            delete cleanBP.pc; // co-indexed with scriptsWithBreakpoint
             cleanBPs.push(cleanBP);
         }
         fbs.breakpointStore.setItem(url, cleanBPs);
@@ -2507,11 +2508,17 @@ FirebugService.prototype =
     {
         this.breakpoints = {};
         var breakpointStore = fbs.getBreakpointStore();
-        var urls = breakpointStore.getKeys();
+        var urls =  fbs.getBreakpointURLs();
         for (var i = 0; i < urls.length; i++)
         {
             var url = urls[i];
             this.breakpoints[url] = breakpointStore.getItem(url);
+        }
+        if (FBTrace.DBG_FBS_BPS)
+        {
+        FBTrace.sysout("restoreBreakpoints "+urls.length+" restored ", this.breakpoints);
+        for (var p in this.breakpoints)
+            FBTrace.sysout("restoreBreakpoints restored "+p);
         }
     },
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
