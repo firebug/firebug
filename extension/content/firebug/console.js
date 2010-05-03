@@ -618,11 +618,8 @@ Firebug.ConsolePanel.prototype = extend(Firebug.ActivablePanel,
     {
         Firebug.ActivablePanel.initializeNode.apply(this, arguments);
 
-        if (FBTrace.DBG_CONSOLE)
-        {
-            this.onScroller = bind(this.onScroll, this);
-            this.panelNode.addEventListener("scroll", this.onScroller, true);
-        }
+        this.onScroller = bind(this.onScroll, this);
+        this.panelNode.addEventListener("scroll", this.onScroller, true);
 
         this.onResizer = bind(this.onResize, this);
         this.resizeEventTarget = Firebug.chrome.$('fbContentBox');
