@@ -1188,18 +1188,26 @@
     </handlers>
 </binding>
 
+<!-- Searchbox is located in the main Firebug toolbar and can be used to search
+    for a keyword within the current panel. -->
 <binding id="searchBox">
     <content sizetopopup="none">
         <xul:textbox anonid="searchBox"
-                rows="1" label="search.Firebug_Search" class="fbsearch-textbox" onkeyup="onSearchBoxKeyUp(event);" aria-describedby="fbSearchBoxDescription" />
-                <xul:description anonid="fbSearchBoxDescription"  collapsed="true" tooltiptext="Press up or down arrow key for search options" />
-        <xul:panel id="fbSearchOptionsPanel" norestorefocus="true" noautofocus="true" ignorekeys="true" onkeydown="onPopupKeyDown(event)" role="presentation">
+            rows="1" label="search.Firebug_Search" class="fbsearch-textbox"
+            onkeyup="onSearchBoxKeyUp(event);" aria-describedby="fbSearchBoxDescription" />
+        <xul:description anonid="fbSearchBoxDescription"  collapsed="true"
+            tooltiptext="Press up or down arrow key for search options" />
+        <xul:panel id="fbSearchOptionsPanel" norestorefocus="true" noautofocus="true"
+            ignorekeys="true" onkeydown="onPopupKeyDown(event)" role="presentation"
+            noautohide="true">
             <xul:vbox class="searchOptionsMenu innerToolbar" role="menu" aria-label="search options">
-              <xul:box anonid="startPanelFocus" class="panelFocusBound" onfocus="startFocusHandler()"  />
+              <xul:box anonid="startPanelFocus" class="panelFocusBound" onfocus="startFocusHandler()" />
               <xul:vbox anonid="searchOptionsList" role="presentation" />
               <xul:hbox pack="center" align="center" role="presentation">
-                  <xul:button anonid="searchPrev" class="fbsearch-options-buttons a11yFocus" label="search.Previous" oncommand="searchPrev()" role="menuitem" />
-                  <xul:button anonid="searchNext" class="fbsearch-options-buttons a11yFocus" label="search.Next" oncommand="searchNext()" role="menuitem" />
+                  <xul:button anonid="searchPrev" class="fbsearch-options-buttons a11yFocus"
+                    label="search.Previous" oncommand="searchPrev()" role="menuitem" />
+                  <xul:button anonid="searchNext" class="fbsearch-options-buttons a11yFocus"
+                    label="search.Next" oncommand="searchNext()" role="menuitem" />
               </xul:hbox>
               <xul:box anonid="endPanelFocus" class="panelFocusBound" onfocus="endFocusHandler()" />
             </xul:vbox>
@@ -1306,11 +1314,9 @@
             ]]></body>
         </method>
 
-        <!--
-        Focus management handlers. These must be defined as methods and registered
-        using addEventListener or attribute registration as XBL handlers do not
-        appear to allow access to anonymous event targets when capturing.
-         -->
+        <!-- Focus management handlers. These must be defined as methods and registered
+            using addEventListener or attribute registration as XBL handlers do not
+            appear to allow access to anonymous event targets when capturing. -->
         <method name="focusHandler">
             <parameter name="event" />
             <body><![CDATA[
@@ -1417,7 +1423,7 @@
         </method>
     </implementation>
     <handlers>
-            <handler event="keypress"><![CDATA[
+        <handler event="keypress"><![CDATA[
             if (event.keyCode ==  KeyEvent.DOM_VK_RETURN)
             {
                 if (FBL.isShift(event))
