@@ -3,10 +3,8 @@
 var Firebug = null;
 var FirebugContext = null;
 
-if(!fbXPCOMUtils)
-    throw "Failed to load FBL";
 
-(function() { with (fbXPCOMUtils) {
+(function() {
 
 // ************************************************************************************************
 // Constants
@@ -79,28 +77,30 @@ top.FirebugChrome =
         if (window.arguments)
             var detachArgs = window.arguments[0];
 
-        if (!detachArgs)
-            detachArgs = {};
-
         if (FBTrace.DBG_INITIALIZE) FBTrace.sysout("chrome.initialize w/detachArgs=", detachArgs);
 
-        if (detachArgs.FBL)
+        if (detachArgs && detachArgs.Firebug)
+        {
+            // we've been opened in a new window by an already initialized Firebug
             top.FBL = detachArgs.FBL;
-        else
-        {
-            if (FBTrace.sysout && (!FBL || !FBL.initialize) )
-                FBTrace.sysout("Firebug is broken, FBL incomplete, if the last function is QI, check lib.js:", FBL);
-
-            FBL.initialize();
-        }
-
-        if (detachArgs.Firebug)
-        {
             Firebug = detachArgs.Firebug;
             FirebugContext = detachArgs.FirebugContext;
         }
         else
-            Firebug.initialize();
+        {
+            // Firebug has not been initialized yet
+
+
+            if (!Firebug.isInitialized)
+            {
+                Firebug.initialize();
+            }
+        }
+
+        // FBL should be available
+        if (FBTrace.sysout && (!FBL || !FBL.initialize) )
+            FBTrace.sysout("Firebug is broken, FBL incomplete, if the last function is QI, check lib.js:", FBL);
+
 
         Firebug.internationalizeUI(window.document);
 
@@ -1507,7 +1507,7 @@ function bindFixed()
     return function() { return fn.apply(object, args); }
 }
 
-}})();
+})();
 
 // ************************************************************************************************
 

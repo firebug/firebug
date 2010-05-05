@@ -1,6 +1,6 @@
 /* See license.txt for terms of usage */
 
-FBL.ns(function() { with (FBL) {
+(function() { with (FBL) {
 
 // ************************************************************************************************
 // Constants
@@ -171,59 +171,35 @@ top.Firebug =
     originalChrome: FirebugChrome,
     chrome: FirebugChrome,
 
+    isInitialized: false,
+
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
     // Initialization
 
     initialize: function()
     {
-        var version = this.getVersion();
-        if (version)
-        {
-            this.version = version;
-            $('fbStatusBar').setAttribute("tooltiptext", "Firebug " + version);
+        if (FBTrace.sysout && (!FBL || !FBL.initialize) )
+            FBTrace.sysout("Firebug is broken, FBL incomplete, if the last function is QI, check lib.js:", FBL);
+        else if (FBTrace.DBG_INITIALIZE)
+            FBTrace.sysout("firebug.initialize FBL: " + FBL);
 
-            var about = $('Firebug_About');
-            if (about)
-            {
-                var aboutLabel = about.getAttribute("label");
-                $('Firebug_About').setAttribute("label",  aboutLabel + " " + version);
-            }
+        FBL.initialize();
+
+        if (tabBrowser)
+        {
+            if (FBTrace.DBG_INITIALIZE)
+                FBTrace.sysout("firebug.initialize has a tabBrowser");
+            this.tabBrowser = tabBrowser;
         }
 
-        for (var i = 0; i < prefNames.length; ++i)
-            this[prefNames[i]] = this.getPref(this.prefDomain, prefNames[i]);
-        for (var i = 0; i < servicePrefNames.length; ++i)
-            this[servicePrefNames[i]] = this.getPref(this.servicePrefDomain, servicePrefNames[i]);
+        this.initializePrefs();
 
-        this.loadExternalEditors();
-
-        prefs.addObserver(this.prefDomain, this, false);
-        prefs.addObserver(this.servicePrefDomain, this, false);
-
-        var basePrefNames = prefNames.length;
-
-        dispatch(modules, "initialize", [this.prefDomain, prefNames]);
-        dispatch(menuItemControllers, "initialize", []);
-
-        for (var i = basePrefNames; i < prefNames.length; ++i)
-            this[prefNames[i]] = this.getPref(this.prefDomain, prefNames[i]);
-
-        if (FBTrace.DBG_OPTIONS)
-        {
-             for (var i = 0; i < prefNames.length; ++i)
-                FBTrace.sysout("firebug.initialize option "+this.prefDomain+"."+prefNames[i]+"="+
-                    this[prefNames[i]]+"\n");
-
-             for (var i = 0; i < servicePrefNames.length; ++i)
-                FBTrace.sysout("firebug.initialize option (service) "+this.servicePrefDomain+"."+
-                    servicePrefNames[i]+"="+this[servicePrefNames[i]]+"\n");
-        }
         if (FBTrace.DBG_INITIALIZE)
             FBTrace.sysout("firebug.initialize client: "+this.clientID+" with prefDomain "+this.prefDomain);
 
-        // In the case that the user opens firebug in a new window but then closes Firefox window, we don't get the
-        // quitApplicationGranted event (platform is still running) and we call shutdown (Firebug isDetached).
-        window.addEventListener('unload', shutdownFirebug, false);
+        this.isInitialized = true;
+
+        dispatch(modules, "initialize", [this.prefDomain, prefNames]);
     },
 
     getVersion: function()
@@ -309,6 +285,26 @@ top.Firebug =
         if (FBTrace.DBG_INITIALIZE)
             FBTrace.sysout("firebug.initializeUI detachArgs:", detachArgs);
 
+        var version = this.getVersion();
+        if (version)
+        {
+            this.version = version;
+            $('fbStatusBar').setAttribute("tooltiptext", "Firebug " + version);
+
+            var about = $('Firebug_About');
+            if (about)
+            {
+                var aboutLabel = about.getAttribute("label");
+                $('Firebug_About').setAttribute("label",  aboutLabel + " " + version);
+            }
+        }
+
+        dispatch(menuItemControllers, "initialize", []);
+
+        // In the case that the user opens firebug in a new window but then closes Firefox window, we don't get the
+        // quitApplicationGranted event (platform is still running) and we call shutdown (Firebug isDetached).
+        window.addEventListener('unload', shutdownFirebug, false);
+
         TabWatcher.initialize(this);
         TabWatcher.addListener(this);
 
@@ -319,16 +315,7 @@ top.Firebug =
 
     shutdown: function()  // called in browser when Firefox closes and in externalMode when fbs gets quitApplicationGranted.
     {
-        window.removeEventListener('unload', shutdownFirebug, false);
-
-        TabWatcher.destroy();
-
-        // Remove the listener after the TabWatcher.destroy() method is called so,
-        // destroyContext event is properly dispatched to the Firebug object and
-        // consequently to all registered modules.
-        TabWatcher.removeListener(this);
-
-        dispatch(modules, "disable", [FirebugChrome]);
+        this.shutdownUI();
 
         prefService.savePrefFile(null);
         prefs.removeObserver(this.prefDomain, this, false);
@@ -341,6 +328,20 @@ top.Firebug =
 
         if (FBTrace.DBG_INITIALIZE)
             FBTrace.sysout("firebug.shutdown exited client "+this.clientID);
+    },
+
+    shutdownUI: function()
+    {
+        window.removeEventListener('unload', shutdownFirebug, false);
+
+        TabWatcher.destroy();
+
+        // Remove the listener after the TabWatcher.destroy() method is called so,
+        // destroyContext event is properly dispatched to the Firebug object and
+        // consequently to all registered modules.
+        TabWatcher.removeListener(this);
+
+        dispatch(modules, "disable", [FirebugChrome]);
     },
 
     // ----------------------------------------------------------------------------------------------------------------
@@ -679,6 +680,37 @@ top.Firebug =
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
     // Options
+
+    initializePrefs: function()
+    {
+        for (var i = 0; i < prefNames.length; ++i)
+            this[prefNames[i]] = this.getPref(this.prefDomain, prefNames[i]);
+        for (var i = 0; i < servicePrefNames.length; ++i)
+            this[servicePrefNames[i]] = this.getPref(this.servicePrefDomain, servicePrefNames[i]);
+
+        //xxxMCollins I don't understand why this has to be called in the middle of loading prefs...
+        this.loadExternalEditors();
+
+        prefs.addObserver(this.prefDomain, this, false);
+        prefs.addObserver(this.servicePrefDomain, this, false);
+
+        var basePrefNames = prefNames.length;
+
+
+        for (var i = basePrefNames; i < prefNames.length; ++i)
+            this[prefNames[i]] = this.getPref(this.prefDomain, prefNames[i]);
+
+        if (FBTrace.DBG_OPTIONS)
+        {
+             for (var i = 0; i < prefNames.length; ++i)
+                FBTrace.sysout("firebug.initialize option "+this.prefDomain+"."+prefNames[i]+"="+
+                    this[prefNames[i]]+"\n");
+
+             for (var i = 0; i < servicePrefNames.length; ++i)
+                FBTrace.sysout("firebug.initialize option (service) "+this.servicePrefDomain+"."+
+                    servicePrefNames[i]+"="+this[servicePrefNames[i]]+"\n");
+        }
+    },
 
     togglePref: function(name)
     {
@@ -1904,7 +1936,7 @@ top.Firebug =
     {
         aWindow = getRootWindow(aWindow);
 
-        if (!aWindow || !this.tabBrowser.getBrowserIndexForDocument)
+        if (!aWindow || !this.tabBrowser || !this.tabBrowser.getBrowserIndexForDocument)
             return null;
 
         try {
@@ -3336,4 +3368,4 @@ function shutdownFirebug() {
     Firebug.shutdown();
 }
 
-}});
+}})();
