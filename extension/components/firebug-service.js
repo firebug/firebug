@@ -2331,7 +2331,8 @@ FirebugService.prototype =
 
         if (urlBreakpoints)
         {
-            if (FBTrace.DBG_FBS_BP) FBTrace.sysout("resetBreakpoints total bp="+urlBreakpoints.length+" for url="+url);
+            if (FBTrace.DBG_FBS_BP)
+            	FBTrace.sysout("resetBreakpoints total bp="+urlBreakpoints.length+" for url="+url);
 
             for (var i = 0; i < urlBreakpoints.length; ++i)
             {
@@ -2384,6 +2385,9 @@ FirebugService.prototype =
                     FBTrace.sysout("setJSDBreakpoint:  tag "+script.tag+", "+i+"/"+scripts.length+" is invalid\n");
                 continue;
             }
+
+            if (bp.scriptsWithBreakpoint.indexOf(script) == -1)
+            	continue;
 
             var pcmap = sourceFile.pcmap_type;
             if (!pcmap)
