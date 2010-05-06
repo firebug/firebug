@@ -1052,7 +1052,8 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
 
                 var doBreak = true;
                 fbs.enumerateBreakpoints(sourceFile.href, {call: function(url, line, props, script) {
-                    FBTrace.sysout("debugger.breakon Errors bp "+url+"@"+line);
+                    if (FBTrace.DBG_FBS_BP)
+                        FBTrace.sysout("debugger.breakon Errors bp "+url+"@"+line+" script "+(script?script.tag:"none"));
                     if(line === lineNo)
                         doBreak = false;
                 }});
