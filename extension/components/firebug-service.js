@@ -2332,7 +2332,7 @@ FirebugService.prototype =
         if (urlBreakpoints)
         {
             if (FBTrace.DBG_FBS_BP)
-            	FBTrace.sysout("resetBreakpoints total bp="+urlBreakpoints.length+" for url="+url);
+                FBTrace.sysout("resetBreakpoints total bp="+urlBreakpoints.length+" for url="+url);
 
             for (var i = 0; i < urlBreakpoints.length; ++i)
             {
@@ -2386,8 +2386,10 @@ FirebugService.prototype =
                 continue;
             }
 
-            if (bp.scriptsWithBreakpoint.indexOf(script) == -1)
-            	continue;
+            for (var j = 0; j < bp.scriptsWithBreakpoint.length; j++)
+            {
+                if (bp.scriptsWithBreakpoint[j].tag === script.tag) continue;
+            }
 
             var pcmap = sourceFile.pcmap_type;
             if (!pcmap)
