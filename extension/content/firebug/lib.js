@@ -4019,10 +4019,10 @@ this.getRequestWebProgress = function(request)
 
     try
     {
-        if (request && request.loadGroup && request.loadGroup.groupObserver)
+        if (request && request.loadGroup && request.loadGroup.notificationCallbacks)
         {
             FBL.suspendShowStackTrace();
-            return request.loadGroup.groupObserver.QueryInterface(Ci.nsILoadContext);
+            return request.loadGroup.notificationCallbacks.getInterface(Ci.nsILoadContext);
         }
     }
     catch (exc)
