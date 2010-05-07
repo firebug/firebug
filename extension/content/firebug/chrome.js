@@ -77,7 +77,8 @@ top.FirebugChrome =
         if (window.arguments)
             var detachArgs = window.arguments[0];
 
-        if (FBTrace.DBG_INITIALIZE) FBTrace.sysout("chrome.initialize w/detachArgs=", detachArgs);
+        if (FBTrace.DBG_INITIALIZE)
+            FBTrace.sysout("chrome.initialize w/detachArgs=", detachArgs);
 
         if (detachArgs && detachArgs.Firebug)
         {
@@ -89,18 +90,13 @@ top.FirebugChrome =
         else
         {
             // Firebug has not been initialized yet
-
-
             if (!Firebug.isInitialized)
-            {
                 Firebug.initialize();
-            }
         }
 
         // FBL should be available
         if (FBTrace.sysout && (!FBL || !FBL.initialize) )
             FBTrace.sysout("Firebug is broken, FBL incomplete, if the last function is QI, check lib.js:", FBL);
-
 
         Firebug.internationalizeUI(window.document);
 
@@ -122,25 +118,8 @@ top.FirebugChrome =
 
         window.addEventListener("blur", onBlur, true);
 
-        // Initialize Firebug Tools & Firebug Icon menus.
-        var firebugMenuPopup = $("fbFirebugMenuPopup");
-        this.initializeMenu($("menu_firebug"), firebugMenuPopup);
-        this.initializeMenu($("fbFirebugMenu"), firebugMenuPopup);
-
         if (FBTrace.DBG_INITIALIZE)
             FBTrace.sysout("chrome.initialized ", window);
-    },
-
-    initializeMenu: function(parentMenu, popupMenu)
-    {
-        if (!parentMenu)
-            return;
-
-        if (parentMenu.getAttribute("initialized"))
-            return;
-
-        parentMenu.appendChild(popupMenu.cloneNode(true));
-        parentMenu.setAttribute("initialized", "true");
     },
 
     /**

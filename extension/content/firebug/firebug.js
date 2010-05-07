@@ -295,11 +295,16 @@ top.Firebug =
             if (about)
             {
                 var aboutLabel = about.getAttribute("label");
-                $('Firebug_About').setAttribute("label",  aboutLabel + " " + version);
+                about.setAttribute("label", aboutLabel + " " + version);
             }
         }
 
         dispatch(menuItemControllers, "initialize", []);
+
+        // Initialize Firebug Tools & Firebug Icon menus.
+        var firebugMenuPopup = $("fbFirebugMenuPopup");
+        this.initializeMenu($("menu_firebug"), firebugMenuPopup);
+        this.initializeMenu($("fbFirebugMenu"), firebugMenuPopup);
 
         // In the case that the user opens firebug in a new window but then closes Firefox window, we don't get the
         // quitApplicationGranted event (platform is still running) and we call shutdown (Firebug isDetached).
@@ -312,6 +317,17 @@ top.Firebug =
         dispatch(modules, "initializeUI", [detachArgs]);
     },
 
+    initializeMenu: function(parentMenu, popupMenu)
+    {
+        if (!parentMenu)
+            return;
+
+        if (parentMenu.getAttribute("initialized"))
+            return;
+
+        parentMenu.appendChild(popupMenu.cloneNode(true));
+        parentMenu.setAttribute("initialized", "true");
+    },
 
     shutdown: function()  // called in browser when Firefox closes and in externalMode when fbs gets quitApplicationGranted.
     {
