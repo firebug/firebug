@@ -4006,7 +4006,7 @@ this.getRequestWebProgress = function(request)
         if (request && request.notificationCallbacks)
         {
             FBL.suspendShowStackTrace();
-            return request.notificationCallbacks.getInterface(Ci.nsIWebProgress);
+            return request.notificationCallbacks.getInterface(Ci.nsILoadContext);
         }
     }
     catch (exc)
@@ -4022,7 +4022,7 @@ this.getRequestWebProgress = function(request)
         if (request && request.loadGroup && request.loadGroup.groupObserver)
         {
             FBL.suspendShowStackTrace();
-            return request.loadGroup.groupObserver.QueryInterface(Ci.nsIWebProgress);
+            return request.loadGroup.groupObserver.QueryInterface(Ci.nsILoadContext);
         }
     }
     catch (exc)
