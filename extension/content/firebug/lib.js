@@ -3715,6 +3715,10 @@ this.parseURLEncodedText = function(text, noLimit)
 
     var params = [];
 
+    // In case the text is empty just return the empty parameters
+    if(text == '')
+      return params;
+
     // Unescape '+' characters that are used to encode a space.
     // See section 2.2.in RFC 3986: http://www.ietf.org/rfc/rfc3986.txt
     text = text.replace(/\+/g, " ");
