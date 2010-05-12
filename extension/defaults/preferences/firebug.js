@@ -7,6 +7,7 @@ pref("extensions.firebug.showInfoTips", true);
 pref("extensions.firebug.largeCommandLine", false);
 pref("extensions.firebug.textWrapWidth", 100);
 pref("extensions.firebug.openInWindow", false);
+pref("extensions.firebug.detachedFirebugOnTop", false);
 pref("extensions.firebug.previousPlacement", 0);
 pref("extensions.firebug.showErrorCount", true);
 pref("extensions.firebug.viewPanelOrient", "vertical");
