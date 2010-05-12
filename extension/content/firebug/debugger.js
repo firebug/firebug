@@ -354,7 +354,7 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
             if (FBTrace.DBG_UI_LOOP) FBTrace.sysout("debugger.stop, freeze exception in "+context.getName(), exc);
         }
     },
-    
+
     suppressEventHandling: function(context)
     {
         if (context.window instanceof Ci.nsIInterfaceRequestor)
@@ -390,7 +390,7 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
             if (FBTrace.DBG_UI_LOOP) FBTrace.sysout("debugger.stop, scriptsEnabled = true exception:", exc);
         }
     },
-    
+
     unsuppressEventHandling: function(context)
     {
         if (context.eventSuppressor)
@@ -1051,9 +1051,9 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
                 var lineNo = analyzer.getSourceLineFromFrame(context, frame);
 
                 var doBreak = true;
-                fbs.enumerateBreakpoints(sourceFile.href, {call: function(url, line, props, script) {
+                fbs.enumerateBreakpoints(sourceFile.href, {call: function(url, line, props, scripts) {
                     if (FBTrace.DBG_FBS_BP)
-                        FBTrace.sysout("debugger.breakon Errors bp "+url+"@"+line+" script "+(script?script.tag:"none"));
+                        FBTrace.sysout("debugger.breakon Errors bp "+url+"@"+line+" scripts "+(scripts?scripts.length:"none"));
                     if(line === lineNo)
                         doBreak = false;
                 }});
@@ -1071,9 +1071,9 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
                         skipAction: function addSkipperAndGo()
                         {
                             // a breakpoint that never hits, but prevents BON for errors
-                            fbs.setBreakpointCondition(sourceFile, lineNo, "false", Firebug.Debugger);
+                            var bp = fbs.setBreakpointCondition(sourceFile, lineNo, "false", Firebug.Debugger);
                             if (FBTrace.DBG_BP)
-                                FBTrace.sysout("debugger.breakon Errors set "+sourceFile.href+"@"+lineNo+" tag: "+frame.script.tag);
+                                FBTrace.sysout("debugger.breakon Errors set "+sourceFile.href+"@"+lineNo+" tag: "+frame.script.tag, bp);
 
                             Firebug.Debugger.resume(context);
                         },
@@ -1318,6 +1318,7 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
                 {
                     if (FBTrace.DBG_BP)
                         FBTrace.sysout("debugger("+this.debuggerName+").onToggleBreakpoint context "+i+" script panel no sourcebox for url: "+url, panel.sourceBoxes);
+                    return;
                 }
 
                 var row = sourceBox.getLineNode(lineNo);
@@ -2179,7 +2180,7 @@ Firebug.ScriptPanel.decorator = extend(new Firebug.SourceBoxDecorator,
 
     setLineBreakpoints: function(sourceFile, sourceBox)
     {
-        fbs.enumerateBreakpoints(sourceFile.href, {call: function(url, line, props, script)
+        fbs.enumerateBreakpoints(sourceFile.href, {call: function(url, line, props, scripts)
         {
             var scriptRow = sourceBox.getLineNode(line);
             if (scriptRow)

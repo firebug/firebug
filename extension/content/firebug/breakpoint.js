@@ -255,7 +255,7 @@ Firebug.Breakpoint.BreakpointsPanel.prototype = extend(Firebug.Panel,
         var monitors = extracted.monitors;
 
         if (FBTrace.DBG_BP)
-            FBTrace.sysout("debugger.breakpoints.refresh extracted " +
+            FBTrace.sysout("breakpoints.breakpoints.refresh extracted " +
                 breakpoints.length+errorBreakpoints.length+monitors.length,
                 [breakpoints, errorBreakpoints, monitors]);
 
@@ -272,7 +272,7 @@ Firebug.Breakpoint.BreakpointsPanel.prototype = extend(Firebug.Panel,
         monitors.sort(sortBreakpoints);
 
         if (FBTrace.DBG_BP)
-            FBTrace.sysout("debugger.breakpoints.refresh sorted "+breakpoints.length+
+            FBTrace.sysout("breakpoints.breakpoints.refresh sorted "+breakpoints.length+
                 errorBreakpoints.length+monitors.length, [breakpoints, errorBreakpoints, monitors]);
 
         var groups = [];
@@ -295,7 +295,7 @@ Firebug.Breakpoint.BreakpointsPanel.prototype = extend(Firebug.Panel,
             FirebugReps.Warning.tag.replace({object: "NoBreakpointsWarning"}, this.panelNode);
 
         if (FBTrace.DBG_BP)
-            FBTrace.sysout("debugger.breakpoints.refresh "+breakpoints.length+
+            FBTrace.sysout("breakpoints.breakpoints.refresh "+breakpoints.length+
                 errorBreakpoints.length+monitors.length, [breakpoints, errorBreakpoints, monitors]);
 
         dispatch(this.fbListeners, 'onBreakRowsRefreshed', [this, this.panelNode]);
@@ -313,16 +313,17 @@ Firebug.Breakpoint.BreakpointsPanel.prototype = extend(Firebug.Panel,
 
         for (var url in context.sourceFileMap)
         {
-            fbs.enumerateBreakpoints(url, {call: function(url, line, props, script)
+            fbs.enumerateBreakpoints(url, {call: function(url, line, props, scripts)
             {
-                if (FBTrace.DBG_BP) FBTrace.sysout("debugger.extractBreakpoints type: "+props.type, props);
+                if (FBTrace.DBG_BP) FBTrace.sysout("breakpoints.extractBreakpoints type: "+props.type+" in url "+url+"@"+line+" contxt "+context.getName(), props);
                 if (renamer.checkForRename(url, line, props)) // some url in this sourceFileMap has changed, we'll be back.
                     return;
 
-                if (script)  // then this is a current (not future) breakpoint
+                if (scripts)  // then this is a current (not future) breakpoint
                 {
+                	var script = scripts[0];
                     var analyzer = Firebug.SourceFile.getScriptAnalyzer(context, script);
-                    if (FBTrace.DBG_BP) FBTrace.sysout("debugger.refresh enumerateBreakpoints for script="+script.tag+(analyzer?" has analyzer":" no analyzer")+"\n");
+                    if (FBTrace.DBG_BP) FBTrace.sysout("breakpoints.refresh enumerateBreakpoints for script="+script.tag+(analyzer?" has analyzer":" no analyzer")+" in context "+context.getName());
                     if (analyzer)
                         var name = analyzer.getFunctionDescription(script, context).name;
                     else
@@ -331,7 +332,7 @@ Firebug.Breakpoint.BreakpointsPanel.prototype = extend(Firebug.Panel,
                 }
                 else
                 {
-                    if (FBTrace.DBG_BP) FBTrace.sysout("debugger.refresh enumerateBreakpoints future for url@line="+url+"@"+line+"\n");
+                    if (FBTrace.DBG_BP) FBTrace.sysout("breakpoints.refresh enumerateBreakpoints future for url@line="+url+"@"+line+"\n");
                     var isFuture = true;
                 }
 
@@ -368,7 +369,7 @@ Firebug.Breakpoint.BreakpointsPanel.prototype = extend(Firebug.Panel,
 
         // even if we did not rename, some bp may be dynamic
         if (FBTrace.DBG_SOURCEFILES)
-            FBTrace.sysout("debugger.extractBreakpoints context.dynamicURLhasBP: "+context.dynamicURLhasBP, result);
+            FBTrace.sysout("breakpoints.extractBreakpoints context.dynamicURLhasBP: "+context.dynamicURLhasBP, result);
 
         return result;
     },
@@ -429,9 +430,15 @@ Firebug.Breakpoint.BreakpointsPanel.prototype = extend(Firebug.Panel,
     {
         this.noRefresh = true;
 
-        var buttons = this.panelNode.getElementsByClassName("closeButton");
-        for (var i=0; i<buttons.length; i++)
-            this.click(buttons[i]);
+        try
+        {
+        	Firebug.Debugger.clearAllBreakpoints(context);
+        }
+        catch(exc)
+        {
+        	FBTrace.sysout("breakpoint.clearAllBreakpoints FAILS "+exc, exc);
+        }
+
 
         this.noRefresh = false;
         this.refresh();
@@ -546,12 +553,12 @@ SourceFileRenamer.prototype.checkForRename = function(url, line, props)
         }
         this.context.dynamicURLhasBP = true;  // whether not we needed to rename, the dynamic sourceFile has a bp.
         if (FBTrace.DBG_SOURCEFILES)
-            FBTrace.sysout("debugger.checkForRename found bp in "+sourceFile+" renamed files:", this.renamedSourceFiles);
+            FBTrace.sysout("breakpoints.checkForRename found bp in "+sourceFile+" renamed files:", this.renamedSourceFiles);
     }
     else
     {
         if (FBTrace.DBG_SOURCEFILES)
-            FBTrace.sysout("debugger.checkForRename found static bp in "+sourceFile+" bp:", props);
+            FBTrace.sysout("breakpoints.checkForRename found static bp in "+sourceFile+" bp:", props);
     }
 
     return (this.renamedSourceFiles.length > 0);
@@ -590,7 +597,7 @@ SourceFileRenamer.prototype.renameSourceFiles = function(context)
         delete context.sourceFileMap[oldURL];  // SourceFile delete
 
         if (FBTrace.DBG_SOURCEFILES)
-            FBTrace.sysout("debugger.renameSourceFiles type: "+bp.type, bp);
+            FBTrace.sysout("breakpoints.renameSourceFiles type: "+bp.type, bp);
 
         Firebug.Debugger.watchSourceFile(context, sourceFile);
         var newBP = fbs.addBreakpoint(sameType, sourceFile, sameLineNo, bp, sameDebuggr);

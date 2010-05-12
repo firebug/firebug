@@ -3000,7 +3000,7 @@ this.safeGetWindowLocation = function(window)
         if (window)
         {
             if (window.closed)
-                return "about:closed";
+                return "(window.closed)";
             if ("location" in window)
                 return window.location+"";
             else
