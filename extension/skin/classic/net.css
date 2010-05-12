@@ -1,9 +1,5 @@
 /* See license.txt for terms of usage */
 
-.panelNode-net {
-    overflow-x: hidden;
-}
-
 .netTable {
     width: 100%;
 }
@@ -640,6 +636,7 @@
 .netInfoPostPartsTable,
 .netInfoPostJSONTable,
 .netInfoPostXMLTable,
+.netInfoPostSVGTable,
 .netInfoPostSourceTable {
     margin-bottom: 10px;
     width: 100%;
