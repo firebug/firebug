@@ -1,9 +1,5 @@
 /* See license.txt for terms of usage */
 
-.panelNode-dom {
-    overflow-x: hidden !important;
-}
-
 .domTable {
     width: 100%;
 }
