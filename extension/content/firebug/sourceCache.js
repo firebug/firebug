@@ -98,9 +98,24 @@ Firebug.SourceCache.prototype = extend(new Firebug.Listener(),
             if (Firebug.filterSystemURLs)
                 return ["Filtered chrome url "+url];  // ignore chrome
 
+            // If the chrome.manifest has  xpcnativewrappers=no, platform munges the url
+            var reWrapperMunge = /(\S*)\s*->\s*(\S*)/;
+            var m = reWrapperMunge.exec(url);
+            if (m)
+            {
+            	url = m[2];
+            	if (FBTrace.DBG_CACHE)
+                    FBTrace.sysout("sourceCache found munged xpcnativewrapper url and set it to "+url+" m "+m+" m[0]:"+m[0]+" [1]"+m[1], m);
+            }
+
             var chromeURI = makeURI(url);
             if (!chromeURI)
+            {
+                if (FBTrace.DBG_CACHE)
+                    FBTrace.sysout("sourceCache.load failed to convert chrome to local: "+url);
             	return ["sourceCache failed to make URI from "+url];
+            }
+
             var localURI = chromeReg.convertChromeURL(chromeURI);
             if (FBTrace.DBG_CACHE)
                 FBTrace.sysout("sourceCache.load converting chrome to local: "+url, " -> "+localURI.spec);
