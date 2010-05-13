@@ -379,13 +379,6 @@ Firebug.ConsolePanel.prototype = extend(Firebug.ActivablePanel,
         }
         else
         {
-            // Don't update the this.wasScrolledToBottom flag now. At the beginning (when the
-            // first log is created) the isScrolledToBottom always returns true.
-            // But make sure the panel scrolls if it should.
-            var wasScrolledToBottom = false;
-            if (this.panelNode.offsetHeight)
-                wasScrolledToBottom = isScrolledToBottom(this.panelNode);
-
             var row = this.createRow("logRow", className);
             appender.apply(this, [objects, row, rep]);
 
@@ -396,7 +389,10 @@ Firebug.ConsolePanel.prototype = extend(Firebug.ActivablePanel,
 
             this.filterLogRow(row, this.wasScrolledToBottom);
 
-            if (wasScrolledToBottom)
+            if (FBTrace.DBG_CONSOLE)
+                FBTrace.sysout("console.append; wasScrolledToBottom " + this.wasScrolledToBottom);
+
+            if (this.wasScrolledToBottom)
                 scrollToBottom(this.panelNode);
 
             return row;
@@ -644,35 +640,50 @@ Firebug.ConsolePanel.prototype = extend(Firebug.ActivablePanel,
     show: function(state)
     {
         if (FBTrace.DBG_CONSOLE)
-            FBTrace.sysout("Console.panel show; " + this.context.getName(), state);
+            FBTrace.sysout("Console.panel show; wasScrolledToBottom: " +
+                (state ? state.wasScrolledToBottom : "no prev state") +
+                " " + this.context.getName(), state);
 
         var enabled = Firebug.Console.isAlwaysEnabled();
         if (enabled)
         {
-             Firebug.Console.disabledPanelPage.hide(this);
-             this.showCommandLine(true);
-             this.showToolbarButtons("fbConsoleButtons", true);
-             Firebug.chrome.setGlobalAttribute("cmd_togglePersistConsole", "checked", this.persistContent);
+            Firebug.Console.disabledPanelPage.hide(this);
+            this.showCommandLine(true);
+            this.showToolbarButtons("fbConsoleButtons", true);
+            Firebug.chrome.setGlobalAttribute("cmd_togglePersistConsole", "checked",
+                this.persistContent);
 
-             if (state && state.wasScrolledToBottom)
-             {
-                 this.wasScrolledToBottom = state.wasScrolledToBottom;
-                 delete state.wasScrolledToBottom;
-             }
+            var wasScrolledToBottom;
+            if (state)
+                wasScrolledToBottom = state.wasScrolledToBottom;
 
-             if (this.wasScrolledToBottom)
-                 scrollToBottom(this.panelNode);
+            if (typeof(wasScrolledToBottom) == "boolean")
+            {
+                this.wasScrolledToBottom = wasScrolledToBottom;
+                delete state.wasScrolledToBottom;
+            }
+            else
+            {
+                // If the previous state doesn't says where to scroll,
+                // scroll to the bottom by default.
+                this.wasScrolledToBottom = true;
+            }
 
-             if (FBTrace.DBG_CONSOLE)
-                 FBTrace.sysout("console.show ------------------ wasScrolledToBottom: " +
-                    this.wasScrolledToBottom + ", " + this.context.getName());
+            if (this.wasScrolledToBottom)
+                scrollToBottom(this.panelNode);
 
-             if (state && state.profileRow) // then we reloaded while profiling
-             {
-                 FBTrace.sysout("console.initialize state.profileRow:", state.profileRow);
-                 this.context.profileRow = state.profileRow;
-                 this.panelNode.appendChild(state.profileRow);
-                 delete state.profileRow;
+            if (FBTrace.DBG_CONSOLE)
+                FBTrace.sysout("console.show; wasScrolledToBottom: " +
+                   this.wasScrolledToBottom + ", " + this.context.getName());
+
+            if (state && state.profileRow) // then we reloaded while profiling
+            {
+                if (FBTrace.DBG_CONSOLE)
+                    FBTrace.sysout("console.show; state.profileRow:", state.profileRow);
+
+                this.context.profileRow = state.profileRow;
+                this.panelNode.appendChild(state.profileRow);
+                delete state.profileRow;
              }
         }
         else
@@ -685,20 +696,25 @@ Firebug.ConsolePanel.prototype = extend(Firebug.ActivablePanel,
     hide: function(state)
     {
         if (FBTrace.DBG_CONSOLE)
-            FBTrace.sysout("Console.panel hide; " + this.context.getName(), state);
+            FBTrace.sysout("console.hide; wasScrolledToBottom: " +
+                this.wasScrolledToBottom + " " + this.context.getName());
+
+        if (state)
+            state.wasScrolledToBottom = this.wasScrolledToBottom;
 
         this.showToolbarButtons("fbConsoleButtons", false);
         this.showCommandLine(false);
 
         if (FBTrace.DBG_CONSOLE)
-            FBTrace.sysout("console.hide ------------------ wasScrolledToBottom: " +
+            FBTrace.sysout("console.hide; wasScrolledToBottom: " +
                 this.wasScrolledToBottom + ", " + this.context.getName());
     },
 
     destroy: function(state)
     {
-        if (this.panelNode.offsetHeight)
-            this.wasScrolledToBottom = isScrolledToBottom(this.panelNode);
+        if (FBTrace.DBG_CONSOLE)
+            FBTrace.sysout("console.destroy; wasScrolledToBottom: " +
+                this.wasScrolledToBottom + " " + this.context.getName());
 
         if (state)
             state.wasScrolledToBottom = this.wasScrolledToBottom;
@@ -936,7 +952,7 @@ Firebug.ConsolePanel.prototype = extend(Firebug.ActivablePanel,
         this.wasScrolledToBottom = FBL.isScrolledToBottom(this.panelNode);
 
         if (FBTrace.DBG_CONSOLE)
-            FBTrace.sysout("console.onScroll ------------------ wasScrolledToBottom: " +
+            FBTrace.sysout("console.onScroll; wasScrolledToBottom: " +
                 this.wasScrolledToBottom + ", wasScrolledToBottom: " +
                 this.context.getName(), event);
     },
@@ -944,7 +960,7 @@ Firebug.ConsolePanel.prototype = extend(Firebug.ActivablePanel,
     onResize: function(event)
     {
         if (FBTrace.DBG_CONSOLE)
-            FBTrace.sysout("console.onResize ------------------ wasScrolledToBottom: " +
+            FBTrace.sysout("console.onResize; wasScrolledToBottom: " +
                 this.wasScrolledToBottom + ", offsetHeight: " + this.panelNode.offsetHeight +
                 ", scrollTop: " + this.panelNode.scrollTop + ", scrollHeight: " +
                 this.panelNode.scrollHeight + ", " + this.context.getName(), event);
