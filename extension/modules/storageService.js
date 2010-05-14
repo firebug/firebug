@@ -262,3 +262,154 @@ var ObjectPersister =
     },
 
 };
+//THE FOLLOWING THREE FUNCTIONS ARE MODIFIED FUNCTIONS FROM http://www.json.org/json2.js
+var myJSON = {
+stringify : function(value, replacer, space)
+{
+    var i;
+    var gap = '';
+    var indent = '';
+
+    if (typeof space === 'number') {
+        for (i = 0; i < space; i += 1) {
+            indent += ' ';
+        }
+    } else if (typeof space === 'string') {
+        indent = space;
+    }
+
+    if (replacer && typeof replacer !== 'function' &&
+            (typeof replacer !== 'object' ||
+             typeof replacer.length !== 'number')) {
+        throw new Error('JSON.stringify');
+    }
+
+    var seen = new Array(25);
+
+    return this.str('', {'': value}, replacer, gap, indent, seen);
+},
+
+quote : function (string) {
+    var escapable = /[\\\"\x00-\x1f\x7f-\x9f\u00ad\u0600-\u0604\u070f\u17b4\u17b5\u200c-\u200f\u2028-\u202f\u2060-\u206f\ufeff\ufff0-\uffff]/g,
+        meta = {    // table of character substitutions
+        '\b': '\\b',
+        '\t': '\\t',
+        '\n': '\\n',
+        '\f': '\\f',
+        '\r': '\\r',
+        '"' : '\\"',
+        '\\': '\\\\'
+        };
+
+    escapable.lastIndex = 0;
+    return escapable.test(string) ?
+        '"' + string.replace(escapable, function (a) {
+            var c = meta[a];
+            return typeof c === 'string' ? c :
+                '\\u' + ('0000' + a.charCodeAt(0).toString(16)).slice(-4);
+        }) + '"' :
+        '"' + string + '"';
+},
+
+depth: 0,      // call depth
+str : function (key, holder, rep, gap, indent, seen) {
+    this.depth++;
+    FBTrace.sysout("str depth "+this.depth+' key '+key, holder);
+    if (key === "scriptsWithBreakpoint")
+    	return "FAILED";
+    if (this.depth > 2000)
+    	debugger;
+    var rc = this.strTrue(key, holder, rep, gap, indent, seen);
+    this.depth--;
+    return rc;
+},
+
+strTrue : function (key, holder, rep, gap, indent, seen) {
+    var i,          // The loop counter.
+        k,          // The member key.
+        v,          // The member value.
+        length,
+        mind = gap,
+        partial,
+        thomas,
+        value = holder[key];
+
+    if (value && typeof value === 'object' &&
+            typeof value.toJSON === 'function') {
+        value = value.toJSON(key);
+    }
+
+    if (typeof rep === 'function') {
+        value = rep.call(holder, key, value);
+    }
+
+    switch (typeof value) {
+    case 'string':
+        return this.quote(value);
+
+    case 'number':
+        return isFinite(value) ? String(value) : 'null';
+
+    case 'boolean':
+    case 'null':
+        return String(value);
+
+    case 'object':
+
+        if (!value) {
+            return 'null';
+        }
+
+        if (seen.indexOf(value)!= -1)
+            return '*** Cycle detected, ending here ***';
+
+        seen.push(value);
+
+        gap += indent;
+        partial = [];
+
+        if (Object.prototype.toString.apply(value) === '[object Array]') {
+            length = value.length;
+            for (i = 0; i < length; i += 1) {
+                partial[i] = this.str(i, value, rep, gap, indent, seen.slice(0)) || 'null';
+            }
+
+            v = partial.length === 0 ? '[]' :
+                gap ? '[\n' + gap +
+                        partial.join(',\n' + gap) + '\n' +
+                            mind + ']' :
+                      '[' + partial.join(',') + ']';
+            gap = mind;
+            return v;
+        }
+
+        if (rep && typeof rep === 'object') {
+            length = rep.length;
+            for (i = 0; i < length; i += 1) {
+                k = rep[i];
+                if (typeof k === 'string') {
+                    v = this.str(k, value, rep, gap, indent, seen.slice(0));
+                    if (v) {
+                        partial.push(this.quote(k) + (gap ? ': ' : ':') + v);
+                    }
+                }
+            }
+        } else {
+
+            for (k in value) {
+                if (Object.hasOwnProperty.call(value, k)) {
+                    v = this.str(k, value, rep, gap, indent, seen.slice(0));
+                    if (v) {
+                        partial.push(this.quote(k) + (gap ? ': ' : ':') + v);
+                    }
+                }
+            }
+        }
+        v = partial.length === 0 ? '{}' :
+            gap ? '{\n' + gap + partial.join(',\n' + gap) + '\n' +
+                    mind + '}' : '{' + partial.join(',') + '}';
+        gap = mind;
+        return v;
+    }
+}
+}
