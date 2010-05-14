@@ -1241,20 +1241,45 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
 
         if (FBTrace.DBG_TOPLEVEL) FBTrace.sysout("debugger.onTopLevelScriptCreated frame.script.tag="+frame.script.tag+" has url="+url);
 
-        var sourceFile = context.sourceFileMap[url];
-        if (sourceFile && (sourceFile instanceof Firebug.TopLevelSourceFile) )      // TODO test multiple script tags in one html file
-        {
-            if (FBTrace.DBG_SOURCEFILES) FBTrace.sysout("debugger.onTopLevelScriptCreated reuse sourcefile="+sourceFile.toString()+" -> "+context.getName()+" ("+context.uid+")"+"\n");
-            if (!sourceFile.outerScript || !sourceFile.outerScript.isValid)
-                sourceFile.outerScript = outerScript;
-            Firebug.SourceFile.addScriptsToSourceFile(sourceFile, outerScript, innerScripts);
-        }
-        else
-        {
-            sourceFile = new Firebug.TopLevelSourceFile(url, script, script.lineExtent, innerScripts);
+    	var isInline = false;
+    	/* The primary purpose here was to deal with http://code.google.com/p/fbug/issues/detail?id=2912
+    	 * This approach could be applied to inline scripts, so I'll leave the code here until we decide.
+    	iterateWindows(context.window, function isInlineScriptTag(win)
+    	{
+    		var location = safeGetWindowLocation(win);
+    		if (location === url)
+    		{
+    			isInline = true;
+    			return isInline;
+    		}
+    	});
+	*/
+    	if (FBTrace.DBG_TOPLEVEL) FBTrace.sysout("debugger.onTopLevelScriptCreated has inLine:"+isInline+" url="+url);
+
+    	if (isInline) // never true see above
+    	{
+    		var href = url +"/"+context.dynamicURLIndex++;
+    		sourceFile = new Firebug.ScriptTagAppendSourceFile(href, script, script.lineExtent, innerScripts);
             this.watchSourceFile(context, sourceFile);
-            if (FBTrace.DBG_SOURCEFILES) FBTrace.sysout("debugger.onTopLevelScriptCreated create sourcefile="+sourceFile.toString()+" -> "+context.getName()+" ("+context.uid+")"+"\n");
-        }
+    		context.pendingScriptTagSourceFile = sourceFile;
+    	}
+    	else
+    	{
+            var sourceFile = context.sourceFileMap[url];
+            if (sourceFile && (sourceFile instanceof Firebug.TopLevelSourceFile) )  // Multiple script tags in HTML or duplicate .js file names.
+            {
+                    if (FBTrace.DBG_SOURCEFILES) FBTrace.sysout("debugger.onTopLevelScriptCreated reuse sourcefile="+sourceFile.toString()+" -> "+context.getName()+" ("+context.uid+")"+"\n");
+                    if (!sourceFile.outerScript || !sourceFile.outerScript.isValid)
+                        sourceFile.outerScript = outerScript;
+                    Firebug.SourceFile.addScriptsToSourceFile(sourceFile, outerScript, innerScripts);
+            }
+            else
+            {
+                sourceFile = new Firebug.TopLevelSourceFile(url, script, script.lineExtent, innerScripts);
+                this.watchSourceFile(context, sourceFile);
+                if (FBTrace.DBG_SOURCEFILES) FBTrace.sysout("debugger.onTopLevelScriptCreated create sourcefile="+sourceFile.toString()+" -> "+context.getName()+" ("+context.uid+")"+"\n");
+            }
+    	}
 
         dispatch(this.fbListeners,"onTopLevelScriptCreated",[context, frame, sourceFile.href]);
         return sourceFile;
@@ -1781,6 +1806,7 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
         }
 
         this.onFunctionCall = bind(this.onFunctionCall, this);
+
         Firebug.ActivableModule.initialize.apply(this, arguments);
     },
 
@@ -1851,8 +1877,51 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
             }
         }
 
+        // context.watchScriptAdditions = bind(this.watchScriptAdditions, this, context);
+
+        // context.window.document.addEventListener("DOMNodeInserted", context.watchScriptAdditions, false);
+
         if (FBTrace.DBG_SOURCEFILES)
             FBTrace.sysout("debugger("+this.debuggerName+").loadedContext enabled on load: "+context.onLoadWindowContent+" context.sourceFileMap", context.sourceFileMap);
+    },
+
+    /*
+     * A DOM Mutation Event handler for script tag additions
+     * FAILS see http://code.google.com/p/fbug/issues/detail?id=2912
+     */
+    watchScriptAdditions: function(event, context)
+    {
+    	if (event.type !== "DOMNodeInserted")
+    		return;
+    	if (event.target.tagName.toLowerCase() !== "script")
+    		return;
+    	FBTrace.sysout("debugger.watchScriptAdditions ", event.target.innerHTML);
+    	var location = safeGetWindowLocation(context.window);
+
+    	FBL.jsd.enumerateScripts({enumerateScript: function(script)
+    	{
+    		if (normalizeURL(script.fileName) === location)
+    		{
+    			var sourceFile = Firebug.SourceFile.getSourceFileByScript(context, script);
+    			FBTrace.sysout('debugger.watchScriptAdditions '+script.tag+" in "+(sourceFile?sourceFile.href:"NONE")+" "+script.functionSource, script.functionSource);
+    			// The dynamically added script tags via element.appendChild do not show up.
+    		}
+    	}});
+
+    	if (context.pendingScriptTagSourceFile)
+    	{
+    		var sourceFile = context.pendingScriptTagSourceFile;
+    		sourceFile.scriptTag = event.target;
+    		sourceFile.source = splitLines(event.target.innerHTML);
+
+    		var panel = context.getPanel("script", true);
+    		if (panel)
+    			panel.removeSourceBoxBySourceFile(sourceFile);
+
+    		FBTrace.sysout("debugger.watchScriptAdditions connected tag to sourcefile", sourceFile);
+
+    		delete context.pendingScriptTagSourceFile;
+    	}
     },
 
     unwatchWindow: function(context, win)  // clean up the source file map in case the frame is being reloaded.
@@ -1879,6 +1948,8 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
     destroyContext: function(context, persistedState)
     {
         Firebug.ActivableModule.destroyContext.apply(this, arguments);
+
+        context.window.document.removeEventListener("DOMNodeInserted", context.watchScriptAdditions, false);
 
         if (context.stopped)
         {
