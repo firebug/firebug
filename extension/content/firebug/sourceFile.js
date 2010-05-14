@@ -684,6 +684,22 @@ Firebug.XULSourceFile.prototype = descend(
         Firebug.SourceFile.CommonBase);
 
 //---------
+Firebug.ScriptTagAppendSourceFile = function(url, outerScript, sourceLength, innerScriptEnumerator) // element.appendChild(scriptTag)
+{
+    this.href = url;
+    this.outerScript = outerScript;  // Beware may not be valid after we return!!
+    this.sourceLength = sourceLength;
+    this.pcmap_type = PCMAP_SOURCETEXT;
+
+    Firebug.SourceFile.addScriptsToSourceFile(this, outerScript, innerScriptEnumerator);
+}
+
+Firebug.ScriptTagAppendSourceFile.prototype = descend(
+        new Firebug.SourceFile("scriptTagAppend"),
+        Firebug.SourceFile.CommonBase);
+
+//-------------------
+
 Firebug.ScriptTagSourceFile = function(context, url, scriptTagNumber) // we don't have the outer script and we delay source load
 {
     this.context = context;
