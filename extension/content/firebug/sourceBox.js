@@ -146,17 +146,9 @@ Firebug.SourceBoxPanel = extend(SourceBoxPanelBase,
         if (context === this.context)
         {
             var url = request.URI.spec;
-            var sourceBox = this.getSourceBoxByURL(url);
-            if (sourceBox)  // else no worries we did not build one
-            {
-                delete this.sourceBoxes[url];
-
-                if (this.selectedSourceBox === sourceBox) // else we will create a new one on show
-                {
-                    var sourceFile = getSourceFileByHref(url, context);
-                    this.showSourceFile(sourceFile);
-                }
-            }
+            var sourceFile = getSourceFileByHref(url, context);
+            if (sourceFile)
+            	this.removeSourceBoxBySourceFile(sourceFile);
         }
     },
 
@@ -251,6 +243,23 @@ Firebug.SourceBoxPanel = extend(SourceBoxPanelBase,
         return url ? this.sourceBoxes[url] : null;
     },
 
+    removeSourceBoxBySourceFile: function(sourceFile)
+    {
+    	var sourceBox = this.getSourceBoxBySourceFile(sourceFile);
+    	if (sourceBox)  // else we did not create one for this sourceFile
+    	{
+    		delete this.sourceBoxes[sourceFile.href];
+    		this.panelNode.removeChild(sourceBox);
+
+    		if (this.selectedSourceBox === sourceBox) // need to update the view
+    		{
+    			delete this.selectedSourceBox;
+    			delete this.location;
+    			this.showSourceFile(sourceFile);
+    		}
+    	}
+    },
+
     renameSourceBox: function(oldURL, newURL)
     {
         var sourceBox = this.sourceBoxes[oldURL];
@@ -267,7 +276,17 @@ Firebug.SourceBoxPanel = extend(SourceBoxPanelBase,
         if (FBTrace.DBG_SOURCEFILES)
             FBTrace.sysout("firebug.showSourceFile: "+sourceFile, sourceBox);
         if (!sourceBox)
-            sourceBox = this.createSourceBox(sourceFile);
+        {
+        	// Has the script tag mutation event arrived?
+        	if (sourceFile.compilation_unit_type === "scriptTagAppend" && !sourceFile.source)
+        	{
+        		// prevent recursion, just give message if it does not arrive
+        		sourceFile.source = ["script tag mutation event has not arrived"];
+        		return;
+        	}
+        	sourceBox = this.createSourceBox(sourceFile);
+        }
+
 
         this.showSourceBox(sourceBox);
     },
