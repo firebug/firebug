@@ -2464,7 +2464,7 @@ FirebugService.prototype =
     	{
             var urlBreakpoints = fbs.getBreakpoints(url);
 
-            if (!urlBreakpoints.length)
+            if (!urlBreakpoints || !urlBreakpoints.length)
             {
                 fbs.breakpointStore.removeItem(url);
                 fbs.deleteBreakpoints(url);
