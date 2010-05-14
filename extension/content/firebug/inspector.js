@@ -823,6 +823,8 @@ Firebug.Inspector.FrameHighlighter.prototype =
         if (this.doNotHighlight(element))
             return;
 
+        var cs, csTransform, csTransformOrig, splitOrigin, lineRect;
+
         var offset = getLTRBWH(element);
         var x = offset.left, y = offset.top;
         var w = offset.width, h = offset.height;
@@ -830,10 +832,13 @@ Firebug.Inspector.FrameHighlighter.prototype =
                 FBTrace.sysout("FrameHighlighter HTML tag:"+element.tagName+" x:"+x+" y:"+y+" w:"+w+" h:"+h);
 
         var wacked = isNaN(x) || isNaN(y) || isNaN(w) || isNaN(h);
-        if (FBTrace.DBG_INSPECT && wacked)
-            FBTrace.sysout("FrameHighlighter.highlight has bad boxObject for "+ element.tagName);
-        if (wacked)
+        if(wacked)
+        {
+            if (FBTrace.DBG_INSPECT)
+                FBTrace.sysout("FrameHighlighter.highlight has bad boxObject for "+ element.tagName);
+
             return;
+        }
 
         if(element.tagName !== "AREA")
         {
@@ -841,17 +846,18 @@ Firebug.Inspector.FrameHighlighter.prototype =
 
             var nodes = this.getNodes(context, element);
 
-            move(nodes.top, x, y-edgeSize);
-            resize(nodes.top, w, edgeSize);
+            move(nodes.top, x - edgeSize, y - edgeSize);
+            resize(nodes.top, w + edgeSize * 2, edgeSize);
 
             move(nodes.right, x+w, y-edgeSize);
             resize(nodes.right, edgeSize, h+edgeSize*2);
 
-            move(nodes.bottom, x, y+h);
-            resize(nodes.bottom, w, edgeSize);
+            move(nodes.bottom, x - edgeSize, y + h);
+            resize(nodes.bottom, w + edgeSize * 2, edgeSize);
 
             move(nodes.left, x-edgeSize, y-edgeSize);
             resize(nodes.left, edgeSize, h+edgeSize*2);
+
             if (FBTrace.DBG_INSPECT)
                 FBTrace.sysout("FrameHighlighter "+element.tagName);
             var body = getNonFrameBody(element);
@@ -863,7 +869,9 @@ Firebug.Inspector.FrameHighlighter.prototype =
             {
                 if (FBTrace.DBG_INSPECT)
                     FBTrace.sysout("FrameHighlighter needsAppend: "+ nodes.top.ownerDocument.documentURI+" !?= "+body.ownerDocument.documentURI, nodes);
+
                 attachStyles(context, body);
+
                 for (var edge in nodes)
                 {
                     try
@@ -876,8 +884,45 @@ Firebug.Inspector.FrameHighlighter.prototype =
                             FBTrace.sysout("inspector.FrameHighlighter.highlight body.appendChild FAILS for body "+body+" "+exc, exc);
                     }
                 }
+
                 if (element.ownerDocument.contentType.indexOf("xul") === -1)  // otherwise the proxies take up screen space in browser.xul
                     createProxiesForDisabledElements(body);
+            }
+
+            if(element.style.MozTransform)
+            {
+                cs = body.ownerDocument.defaultView.getComputedStyle(element, null);
+                csTransform = element.style.MozTransform;
+                csTransformOrig = cs.MozTransformOrigin;
+                splitOrigin = csTransformOrig.split(" ");
+
+                splitOrigin[0] = parseInt(splitOrigin[0], 10);
+                splitOrigin[1] = parseInt(splitOrigin[1], 10);
+
+                nodes.top.style.MozTransform = csTransform;
+                nodes.top.style.MozTransformOrigin = splitOrigin[0] + edgeSize + "px " + (splitOrigin[1] + edgeSize) + 'px';
+
+                nodes.right.style.MozTransform = csTransform;
+                lineRect = getLTRBWH(nodes.right);
+                nodes.right.style.MozTransformOrigin = (x - lineRect.left + splitOrigin[0]) + "px " + (splitOrigin[1] + edgeSize) + "px";
+
+                lineRect = getLTRBWH(nodes.bottom);
+                nodes.bottom.style.MozTransform = csTransform;
+                nodes.bottom.style.MozTransformOrigin = splitOrigin[0] + edgeSize + "px " + (y - lineRect.top + splitOrigin[1]) + "px";
+
+                nodes.left.style.MozTransform = csTransform;
+                nodes.left.style.MozTransformOrigin = splitOrigin[0] + edgeSize + "px " + (splitOrigin[1] + edgeSize) + 'px';
+            }
+            else
+            {
+                nodes.top.style.MozTransform = "rotate(0deg)";
+                nodes.top.style.MozTransformOrigin = "50% 50%";
+                nodes.left.style.MozTransform = "rotate(0deg)";
+                nodes.left.style.MozTransformOrigin = "50% 50%";
+                nodes.bottom.style.MozTransform = "rotate(0deg)";
+                nodes.bottom.style.MozTransformOrigin = "50% 50%";
+                nodes.right.style.MozTransform = "rotate(0deg)";
+                nodes.right.style.MozTransformOrigin = "50% 50%";
             }
         }
         else

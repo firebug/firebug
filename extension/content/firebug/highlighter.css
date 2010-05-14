@@ -8,6 +8,8 @@
     margin: 0;
     padding: 0;
     outline: 0;
+    -moz-transform: rotate(0deg);
+    -moz-transform-origin: 50% 50%;
 }
 
 .firebugCanvas:before, .firebugCanvas:after {
@@ -39,6 +41,8 @@
     margin: 0;
     padding: 0;
     outline: 0;
+    -moz-transform: rotate(0deg);
+    -moz-transform-origin: 50% 50%;
 }
 
 .firebugRuler {
@@ -47,6 +51,8 @@
     padding: 0;
     outline: 0;
     border: 0 none;
+    -moz-transform: rotate(0deg);
+    -moz-transform-origin: 50% 50%;
 }
 
 .firebugRuler:before, .firebugRuler:after {
@@ -89,6 +95,8 @@
     padding: 0;
     border: 0 none;
     outline: 0;
+    -moz-transform: rotate(0deg);
+    -moz-transform-origin: 50% 50%;
 }
 
 .firebugLayoutBox:before, .firebugLayoutBox:after {
@@ -125,6 +133,8 @@
     padding: 0;
     outline: 0;
     border: 0 none;
+    -moz-transform: rotate(0deg);
+    -moz-transform-origin: 50% 50%;
 }
 
 .firebugLayoutLine:before, .firebugLayoutLine:after {
