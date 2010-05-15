@@ -883,33 +883,62 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
             if (!context)
                 return RETURN_CONTINUE;
 
-            if (type == TYPE_DEBUGGER_KEYWORD && frame.functionName === 'firebugDebuggerTracer')
+            if (type == TYPE_DEBUGGER_KEYWORD)
             {
-                var trace = FBL.getCorrectedStackTrace(frame, context);
-                if (FBTrace.DBG_ERRORLOG)
-                    FBTrace.sysout("debugger.firebugDebuggerTracer corrected trace.frames "+trace.frames.length, trace.frames);
-                if (trace)
+                if (frame.functionName === 'firebugDebuggerTracer')
                 {
-                    trace.frames = trace.frames.slice(1); // drop the firebugDebuggerTracer and reorder
+                    var trace = FBL.getCorrectedStackTrace(frame, context);
                     if (FBTrace.DBG_ERRORLOG)
-                        FBTrace.sysout("debugger.firebugDebuggerTracer dropped tracer trace.frames "+trace.frames.length, trace.frames);
-
-                    if (context.window.wrappedJSObject._firebugStackTrace == "requested")
+                        FBTrace.sysout("debugger.firebugDebuggerTracer corrected trace.frames "+trace.frames.length, trace.frames);
+                    if (trace)
                     {
-                        trace.frames = trace.frames.slice(1);  // drop console.error() see consoleInjected.js
+                        trace.frames = trace.frames.slice(1); // drop the firebugDebuggerTracer and reorder
                         if (FBTrace.DBG_ERRORLOG)
-                            FBTrace.sysout("debugger.firebugDebuggerTracer requested trace.frames "+trace.frames.length, trace.frames);
-                        context.stackTrace = trace;
+                            FBTrace.sysout("debugger.firebugDebuggerTracer dropped tracer trace.frames "+trace.frames.length, trace.frames);
+
+                        if (context.window.wrappedJSObject._firebugStackTrace == "requested")
+                        {
+                            trace.frames = trace.frames.slice(1);  // drop console.error() see consoleInjected.js
+                            if (FBTrace.DBG_ERRORLOG)
+                                FBTrace.sysout("debugger.firebugDebuggerTracer requested trace.frames "+trace.frames.length, trace.frames);
+                            context.stackTrace = trace;
+                        }
+                        else
+                            Firebug.Console.log(trace, context, "stackTrace");
                     }
-                    else
-                        Firebug.Console.log(trace, context, "stackTrace");
+
+                    if(FBTrace.DBG_BP)
+                        FBTrace.sysout("debugger.onBreak "+(trace?"debugger trace":" debugger no trace!"));
+
+                    return RETURN_CONTINUE;
                 }
+                else // for debugger keyword offer the skip/continue dialog (optionally?)
+                {
+                    var sourceFile = Firebug.SourceFile.getSourceFileByScript(context, frame.script);
+                    var analyzer = sourceFile.getScriptAnalyzer(frame.script);
+                    var lineNo = analyzer.getSourceLineFromFrame(context, frame);
 
-                if(FBTrace.DBG_BP)
-                    FBTrace.sysout("debugger.onBreak "+(trace?"debugger trace":" debugger no trace!"));
+                    context.breakingCause = {
+                            title: $STR("debugger keyword"),
+                            message: $STR("Skip converts keyword to disabled breakpoint"),
+                            skipAction: function addSkipperAndGo()
+                            {
+                                // a breakpoint that never hits, but prevents debugger keyword (see fbs.onDebugger as well)
+                                var bp = fbs.setBreakpoint(sourceFile, lineNo, null, Firebug.Debugger);
+                                fbs.disableBreakpoint(sourceFile.href, lineNo);
+                                if (FBTrace.DBG_BP)
+                                    FBTrace.sysout("debugger.onBreak converted to disabled bp "+sourceFile.href+"@"+lineNo+" tag: "+frame.script.tag, bp);
 
-                return RETURN_CONTINUE;
+                                Firebug.Debugger.resume(context);
+                            },
+                            okAction: function justGo()
+                            {
+                                Firebug.Debugger.resume(context);
+                            },
+                    };
+                }
             }
+
 
             return this.stop(context, frame, type);
         }
@@ -1071,7 +1100,8 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
                         skipAction: function addSkipperAndGo()
                         {
                             // a breakpoint that never hits, but prevents BON for errors
-                            var bp = fbs.setBreakpointCondition(sourceFile, lineNo, "false", Firebug.Debugger);
+                            var bp = fbs.setBreakpoint(sourceFile, lineNo, null, Firebug.Debugger);
+                            fbs.disableBreakpoint(sourceFile.href, lineNo);
                             if (FBTrace.DBG_BP)
                                 FBTrace.sysout("debugger.breakon Errors set "+sourceFile.href+"@"+lineNo+" tag: "+frame.script.tag, bp);
 
@@ -1241,30 +1271,30 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
 
         if (FBTrace.DBG_TOPLEVEL) FBTrace.sysout("debugger.onTopLevelScriptCreated frame.script.tag="+frame.script.tag+" has url="+url);
 
-    	var isInline = false;
-    	/* The primary purpose here was to deal with http://code.google.com/p/fbug/issues/detail?id=2912
-    	 * This approach could be applied to inline scripts, so I'll leave the code here until we decide.
-    	iterateWindows(context.window, function isInlineScriptTag(win)
-    	{
-    		var location = safeGetWindowLocation(win);
-    		if (location === url)
-    		{
-    			isInline = true;
-    			return isInline;
-    		}
-    	});
-	*/
-    	if (FBTrace.DBG_TOPLEVEL) FBTrace.sysout("debugger.onTopLevelScriptCreated has inLine:"+isInline+" url="+url);
+        var isInline = false;
+        /* The primary purpose here was to deal with http://code.google.com/p/fbug/issues/detail?id=2912
+         * This approach could be applied to inline scripts, so I'll leave the code here until we decide.
+        iterateWindows(context.window, function isInlineScriptTag(win)
+        {
+            var location = safeGetWindowLocation(win);
+            if (location === url)
+            {
+                isInline = true;
+                return isInline;
+            }
+        });
+    */
+        if (FBTrace.DBG_TOPLEVEL) FBTrace.sysout("debugger.onTopLevelScriptCreated has inLine:"+isInline+" url="+url);
 
-    	if (isInline) // never true see above
-    	{
-    		var href = url +"/"+context.dynamicURLIndex++;
-    		sourceFile = new Firebug.ScriptTagAppendSourceFile(href, script, script.lineExtent, innerScripts);
+        if (isInline) // never true see above
+        {
+            var href = url +"/"+context.dynamicURLIndex++;
+            sourceFile = new Firebug.ScriptTagAppendSourceFile(href, script, script.lineExtent, innerScripts);
             this.watchSourceFile(context, sourceFile);
-    		context.pendingScriptTagSourceFile = sourceFile;
-    	}
-    	else
-    	{
+            context.pendingScriptTagSourceFile = sourceFile;
+        }
+        else
+        {
             var sourceFile = context.sourceFileMap[url];
             if (sourceFile && (sourceFile instanceof Firebug.TopLevelSourceFile) )  // Multiple script tags in HTML or duplicate .js file names.
             {
@@ -1279,7 +1309,7 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
                 this.watchSourceFile(context, sourceFile);
                 if (FBTrace.DBG_SOURCEFILES) FBTrace.sysout("debugger.onTopLevelScriptCreated create sourcefile="+sourceFile.toString()+" -> "+context.getName()+" ("+context.uid+")"+"\n");
             }
-    	}
+        }
 
         dispatch(this.fbListeners,"onTopLevelScriptCreated",[context, frame, sourceFile.href]);
         return sourceFile;
@@ -1891,37 +1921,37 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
      */
     watchScriptAdditions: function(event, context)
     {
-    	if (event.type !== "DOMNodeInserted")
-    		return;
-    	if (event.target.tagName.toLowerCase() !== "script")
-    		return;
-    	FBTrace.sysout("debugger.watchScriptAdditions ", event.target.innerHTML);
-    	var location = safeGetWindowLocation(context.window);
+        if (event.type !== "DOMNodeInserted")
+            return;
+        if (event.target.tagName.toLowerCase() !== "script")
+            return;
+        FBTrace.sysout("debugger.watchScriptAdditions ", event.target.innerHTML);
+        var location = safeGetWindowLocation(context.window);
 
-    	FBL.jsd.enumerateScripts({enumerateScript: function(script)
-    	{
-    		if (normalizeURL(script.fileName) === location)
-    		{
-    			var sourceFile = Firebug.SourceFile.getSourceFileByScript(context, script);
-    			FBTrace.sysout('debugger.watchScriptAdditions '+script.tag+" in "+(sourceFile?sourceFile.href:"NONE")+" "+script.functionSource, script.functionSource);
-    			// The dynamically added script tags via element.appendChild do not show up.
-    		}
-    	}});
+        FBL.jsd.enumerateScripts({enumerateScript: function(script)
+        {
+            if (normalizeURL(script.fileName) === location)
+            {
+                var sourceFile = Firebug.SourceFile.getSourceFileByScript(context, script);
+                FBTrace.sysout('debugger.watchScriptAdditions '+script.tag+" in "+(sourceFile?sourceFile.href:"NONE")+" "+script.functionSource, script.functionSource);
+                // The dynamically added script tags via element.appendChild do not show up.
+            }
+        }});
 
-    	if (context.pendingScriptTagSourceFile)
-    	{
-    		var sourceFile = context.pendingScriptTagSourceFile;
-    		sourceFile.scriptTag = event.target;
-    		sourceFile.source = splitLines(event.target.innerHTML);
+        if (context.pendingScriptTagSourceFile)
+        {
+            var sourceFile = context.pendingScriptTagSourceFile;
+            sourceFile.scriptTag = event.target;
+            sourceFile.source = splitLines(event.target.innerHTML);
 
-    		var panel = context.getPanel("script", true);
-    		if (panel)
-    			panel.removeSourceBoxBySourceFile(sourceFile);
+            var panel = context.getPanel("script", true);
+            if (panel)
+                panel.removeSourceBoxBySourceFile(sourceFile);
 
-    		FBTrace.sysout("debugger.watchScriptAdditions connected tag to sourcefile", sourceFile);
+            FBTrace.sysout("debugger.watchScriptAdditions connected tag to sourcefile", sourceFile);
 
-    		delete context.pendingScriptTagSourceFile;
-    	}
+            delete context.pendingScriptTagSourceFile;
+        }
     },
 
     unwatchWindow: function(context, win)  // clean up the source file map in case the frame is being reloaded.
