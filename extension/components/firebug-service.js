@@ -1093,10 +1093,10 @@ FirebugService.prototype =
         if (FBTrace.DBG_FBS_BP)
             FBTrace.sysout("fbs.onDebugger with haltDebugger="+haltDebugger+" in "+frame.script.fileName, frame.script);
         try {
-            if ( fbs.isTopLevelScript(frame, type, rv) && FBTrace.DBG_FBS_SRCUNITS )
+            if ( FBTrace.DBG_FBS_SRCUNITS && fbs.isTopLevelScript(frame, type, rv)  )
                 FBTrace.sysout("fbs.onDebugger found topLevelScript "+ frame.script.tag);
 
-            if ( fbs.isNestedScript(frame, type, rv) && FBTrace.DBG_FBS_SRCUNITS )
+            if (  FBTrace.DBG_FBS_SRCUNITS && fbs.isNestedScript(frame, type, rv) )
                 FBTrace.sysout("fbs.onDebugger found nestedScript "+ frame.script.tag);
 
             if (haltDebugger)
@@ -1106,7 +1106,13 @@ FirebugService.prototype =
                 return debuggr.onHalt(frame);
             }
             else
-                return this.onBreak(frame, type, rv);
+            {
+                var bp = this.findBreakpointByScript(frame.script, frame.pc);
+                if (bp) // then breakpoints override debugger statements (to allow conditional debugger statements);
+                    return this.onBreakpoint(frame, type, rv);
+                else
+                    return this.onBreak(frame, type, rv);
+            }
          }
          catch(exc)
          {
@@ -2202,7 +2208,7 @@ FirebugService.prototype =
         var urlBreakpoints = fbs.getBreakpoints(url);
 
         if (FBTrace.DBG_FBS_BP)
-        	FBTrace.sysout("removeBreakpoint for "+url+", need to check bps="+(urlBreakpoints?urlBreakpoints.length:"none"));
+            FBTrace.sysout("removeBreakpoint for "+url+", need to check bps="+(urlBreakpoints?urlBreakpoints.length:"none"));
 
         if (!urlBreakpoints)
             return false;
@@ -2397,13 +2403,13 @@ FirebugService.prototype =
             for (let j = 0; j < bp.scriptsWithBreakpoint.length; j++)
             {
                 if (bp.scriptsWithBreakpoint[j].tag === script.tag)
-               	{
-                	haveScript = true;
-                	break;
-               	}
+                   {
+                    haveScript = true;
+                    break;
+                   }
             }
             if (haveScript)
-            	continue;
+                continue;
 
             var pcmap = sourceFile.pcmap_type;
             if (!pcmap)
@@ -2459,9 +2465,9 @@ FirebugService.prototype =
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
     saveBreakpoints: function(url)
     {
-    	// Do not call fbs.setBreakpoints() it calls us.
-    	try
-    	{
+        // Do not call fbs.setBreakpoints() it calls us.
+        try
+        {
             var urlBreakpoints = fbs.getBreakpoints(url);
 
             if (!urlBreakpoints || !urlBreakpoints.length)
@@ -2483,17 +2489,17 @@ FirebugService.prototype =
                 cleanBPs.push(cleanBP);
             }
             fbs.breakpointStore.setItem(url, cleanBPs);
-    	}
-    	catch (exc)
-    	{
-    		FBTrace.sysout("firebug-service.saveBreakpoints FAILS "+exc, exc);
-    	}
+        }
+        catch (exc)
+        {
+            FBTrace.sysout("firebug-service.saveBreakpoints FAILS "+exc, exc);
+        }
     },
 
     setBreakpoints: function(url, urlBreakpoints)
     {
-    	fbs.breakpoints[url] = urlBreakpoints;
-    	fbs.saveBreakpoints(url);
+        fbs.breakpoints[url] = urlBreakpoints;
+        fbs.saveBreakpoints(url);
     },
 
     getBreakpoints: function(url)
@@ -2503,7 +2509,7 @@ FirebugService.prototype =
 
     deleteBreakpoints: function(url)
     {
-    	delete fbs.breakpoints[url];
+        delete fbs.breakpoints[url];
     },
 
     getBreakpointURLs: function()
@@ -2556,21 +2562,21 @@ FirebugService.prototype =
             this.breakpoints[url] = bps;
             for (var j = 0; j < bps.length; j++)
             {
-            	var bp = bps[j];
-            	if (bp.condition)
-                	++conditionCount;
+                var bp = bps[j];
+                if (bp.condition)
+                    ++conditionCount;
                 if (bp.disabled)
-                	++disabledCount;
+                    ++disabledCount;
                 if (bp.type & BP_MONITOR)
-                	++monitorCount;
+                    ++monitorCount;
             }
         }
         if (FBTrace.DBG_FBS_BP)
         {
-        	FBTrace.sysout("restoreBreakpoints "+urls.length+", disabledCount:"+disabledCount
+            FBTrace.sysout("restoreBreakpoints "+urls.length+", disabledCount:"+disabledCount
                     +" monitorCount:"+monitorCount+" conditionCount:"+conditionCount+", restored ", this.breakpoints);
-        	for (var p in this.breakpoints)
-        		FBTrace.sysout("restoreBreakpoints restored "+p+" condition "+this.breakpoints[p].condition);
+            for (var p in this.breakpoints)
+                FBTrace.sysout("restoreBreakpoints restored "+p+" condition "+this.breakpoints[p].condition);
         }
     },
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
