@@ -2183,6 +2183,20 @@ this.cropString = function(text, limit, alterText)
         return text;
 };
 
+this.lineBreak = function() {
+    if (navigator.appVersion.indexOf("Win") != -1)
+    {
+      return '\r\n';
+    }
+
+    if (navigator.appVersion.indexOf("Mac") != -1)
+    {
+      return '\r';
+    }
+
+    return '\n';
+};
+
 this.cropMultipleLines = function(text, limit)
 {
     return this.escapeNewLines(this.cropString(text, limit));

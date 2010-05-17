@@ -1662,7 +1662,7 @@ this.ErrorMessage = domplate(Firebug.Rep,
             error.href,
             "Line " +  error.lineNo
         ];
-        copyToClipboard(message.join("\n"));
+        copyToClipboard(message.join(lineBreak()));
     },
 
     breakOnThisError: function(error, context)
