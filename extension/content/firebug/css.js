@@ -1753,8 +1753,14 @@ CSSEditor.prototype = domplate(Firebug.InlineEditor.prototype,
 
     advanceToNext: function(target, charCode)
     {
-        if (charCode == 58 /*":"*/ && hasClass(target, "cssPropName"))
-            return true;
+      if (charCode == 58 /*":"*/ && hasClass(target, "cssPropName"))
+      {
+        return true;
+      }
+      else if (charCode == 59 /*";"*/ && hasClass(target, "cssPropValue"))
+      {
+        return true;
+      }
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
