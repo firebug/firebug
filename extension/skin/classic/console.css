@@ -120,13 +120,15 @@
 .objectLink-textNode,
 .objectLink-function,
 .objectBox-stackTrace,
-.objectLink-profile {
+.objectLink-profile,
+.objectBox-table {
     font-family: Monaco, monospace;
 }
 
 .objectBox-string,
 .objectBox-text,
-.objectLink-textNode {
+.objectLink-textNode,
+.objectBox-table {
     white-space: pre-wrap;
 }
 
@@ -339,6 +341,13 @@
 .useA11y .profileTable *:focus {
     outline-offset: -2px;
 }
+
+/*****************************************************************************************/
+
+.profileTbody .profileRow:nth-child(odd) {
+    background-color: #EFEFEF;
+}
+
 /*****************************************************************************************/
 
 .logRow-stackTrace {

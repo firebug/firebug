@@ -1951,6 +1951,66 @@ this.XPathResult = domplate(this.Arr,
 
 // ************************************************************************************************
 
+this.Table = domplate(Firebug.Rep,
+{
+    className: "table",
+
+    tag:
+        OBJECTBOX({"role": "status"},
+            SPAN("$objects")
+        ),
+
+    tableTag:
+        DIV({"class": "profileSizer", "tabindex": "-1" },
+            TABLE({"class": "profileTable", cellspacing: 0, cellpadding: 0, width: "100%",
+                "role": "grid"},
+                TBODY({"class": "profileTbody", "role": "presentation"},
+                    TR({"class": "headerRow focusRow profileRow subFocusRow", "role": "row"},
+                        FOR("column", "$object|getHeaderColumns",
+                            TH({"class": "headerCell alphaValue a11yFocus", "role": "columnheader"},
+                                DIV({"class": "headerCellBox"},
+                                    $STR("$column")
+                                )
+                            )
+                        )
+                    ),
+                    FOR("row", "$object|getRows",
+                        TR({"class": "focusRow profileRow subFocusRow", "role": "row"},
+                            FOR("column", "$row|getColumns",
+                                TD({"class": "a11yFocus profileCell", "role": "gridcell"},
+                                    TAG("$column|getValueTag", {object: "$column"})
+                                )
+                            )
+                        )
+                    )
+                )
+            )
+        ),
+
+    getValueTag: function(object)
+    {
+        var rep = Firebug.getRep(object);
+        return rep.shortTag || rep.tag;
+    },
+
+    getHeaderColumns: function(table)
+    {
+        return cloneArray(table[0]);
+    },
+
+    getRows: function(table)
+    {
+        return cloneArray(table).slice(1);
+    },
+
+    getColumns: function(row)
+    {
+        return cloneArray(row);
+    }
+});
+
+// ************************************************************************************************
+
 Firebug.registerRep(
     this.nsIDOMHistory, // make this early to avoid exceptions
     this.Undefined,

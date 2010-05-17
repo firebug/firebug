@@ -19,6 +19,7 @@ function _FirebugConsole()
     this.profileEnd = function profileEnd() { window._firebug.notifyFirebug(arguments, 'profileEnd', 'firebugAppendConsole'); }
     this.count = function count() { window._firebug.notifyFirebug(arguments, 'count', 'firebugAppendConsole'); }
     this.clear = function clear() { window._firebug.notifyFirebug(arguments, 'clear', 'firebugAppendConsole'); }
+    this.table = function clear() { window._firebug.notifyFirebug(arguments, 'table', 'firebugAppendConsole'); }
 
     this.error = function error()
     {

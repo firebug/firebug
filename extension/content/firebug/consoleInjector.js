@@ -380,6 +380,25 @@ function FirebugConsoleHandler(context, win)
         return diff;
     };
 
+    this.table = function(msg, array2d)
+    {
+        var row = Firebug.Console.openGroup(msg, context, "table",
+            FirebugReps.Table, true, null, true);
+        removeClass(row, "opened");
+
+        // Limit string values.
+        // xxxHonza: is there better way how to do this?
+        var prevValue = Firebug.stringCropLength;
+        Firebug.stringCropLength = 15;
+
+        // Take snapshot of all the values.
+        FirebugReps.Table.tableTag.replace({object: array2d}, row.lastChild);
+
+        Firebug.stringCropLength = prevValue;
+
+        Firebug.Console.closeGroup(context, true);
+    };
+
     // These functions are over-ridden by commandLine
     this.evaluated = function(result, context)
     {
@@ -388,6 +407,7 @@ function FirebugConsoleHandler(context, win)
 
         Firebug.Console.log(result, context);
     };
+
     this.evaluateError = function(result, context)
     {
         Firebug.Console.log(result, context, "errorMessage");
