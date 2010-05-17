@@ -889,10 +889,11 @@ Firebug.Inspector.FrameHighlighter.prototype =
                     createProxiesForDisabledElements(body);
             }
 
-            if(element.style.MozTransform !== undefined)
+            cs = body.ownerDocument.defaultView.getComputedStyle(element, null);
+            csTransform = cs.MozTransform;
+            
+            if(csTransform)
             {
-                cs = body.ownerDocument.defaultView.getComputedStyle(element, null);
-                csTransform = cs.MozTransform;
                 csTransformOrig = cs.MozTransformOrigin;
                 splitOrigin = csTransformOrig.split(" ");
 
