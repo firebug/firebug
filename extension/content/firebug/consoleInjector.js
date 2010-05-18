@@ -385,18 +385,45 @@ function FirebugConsoleHandler(context, win)
         var row = Firebug.Console.openGroup(msg, context, "table",
             FirebugReps.Table, true, null, true);
         removeClass(row, "opened");
+        Firebug.Console.closeGroup(context, true);
+
+        var groupLabel = row.getElementsByClassName("logGroupLabel").item(0);
+        groupLabel.addEventListener("mousedown", function(event)
+        {
+            if (isLeftClick(event))
+            {
+                var groupRow = event.currentTarget.parentNode;
+                if (hasClass(groupRow, "opened"))
+                {
+                    var tBody = row.getElementsByClassName("profileTbody").item(0);
+
+                    // xxxHonza: customization through preferences.
+                    if (tBody.clientHeight > 200)
+                        tBody.style.height = "200px";
+                }
+            }
+        }, false);
 
         // Limit string values.
         // xxxHonza: is there better way how to do this?
         var prevValue = Firebug.stringCropLength;
         Firebug.stringCropLength = 15;
 
-        // Take snapshot of all the values.
-        FirebugReps.Table.tableTag.replace({object: array2d}, row.lastChild);
-
-        Firebug.stringCropLength = prevValue;
-
-        Firebug.Console.closeGroup(context, true);
+        try
+        {
+            // Take snapshot of all the values.
+            if (array2d.length)
+                var sizer = FirebugReps.Table.tableTag.replace({object: array2d}, row.lastChild);
+        }
+        catch (err)
+        {
+            if (FBTrace.DBG_CONSOLE)
+                FBTrace.sysout("consoleInjector.table; EXCEPTION " + err, err);
+        }
+        finally
+        {
+            Firebug.stringCropLength = prevValue;
+        }
     };
 
     // These functions are over-ridden by commandLine

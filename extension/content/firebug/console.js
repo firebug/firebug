@@ -547,17 +547,23 @@ Firebug.ConsolePanel.prototype = extend(Firebug.ActivablePanel,
 
         var innerRow = this.createRow("logRow");
         setClass(innerRow, "logGroupLabel");
+
+        // Custom rep is used in place of group label.
         if (rep)
             rep.tag.replace({"objects": objects}, innerRow);
         else
             this.appendFormatted(objects, innerRow, rep);
+
         row.appendChild(innerRow);
         dispatch(this.fbListeners, 'onLogRowCreated', [this, innerRow]);
+
+        // Create group body, which is displayed when the group is expanded.
         var groupBody = this.createRow("logGroupBody");
         row.appendChild(groupBody);
         groupBody.setAttribute('role', 'group');
         this.groups.push(groupBody);
 
+        // Expand/collapse logic.
         innerRow.addEventListener("mousedown", function(event)
         {
             if (isLeftClick(event))

@@ -271,19 +271,24 @@
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 .profileSizer {
-    width:100%;
-    overflow-x:auto;
-    overflow-y: scroll;
+    width: 100%;
+}
+
+.profileSizer:focus {
+    outline: none;
 }
 
 .profileTable {
     border-bottom: 1px solid #D7D7D7;
-    padding: 0 0 4px 0;
 }
 
-.profileTable tr[odd="1"] {
-    background-color: #F5F5F5;
-    vertical-align:middle;
+.profileTable TBODY {
+    overflow-x: hidden;
+    overflow-y: scroll;
+}
+
+.profileTable tr:nth-child(even) {
+    background-color: #EFEFEF;
 }
 
 .profileTable a {
@@ -340,12 +345,6 @@
 
 .useA11y .profileTable *:focus {
     outline-offset: -2px;
-}
-
-/*****************************************************************************************/
-
-.profileTbody .profileRow:nth-child(odd) {
-    background-color: #EFEFEF;
 }
 
 /*****************************************************************************************/

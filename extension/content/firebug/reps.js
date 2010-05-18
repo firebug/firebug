@@ -1974,7 +1974,7 @@ this.Table = domplate(Firebug.Rep,
         DIV({"class": "profileSizer", "tabindex": "-1" },
             TABLE({"class": "profileTable", cellspacing: 0, cellpadding: 0, width: "100%",
                 "role": "grid"},
-                TBODY({"class": "profileTbody", "role": "presentation"},
+                THEAD({"class": "profileThead", "role": "presentation"},
                     TR({"class": "headerRow focusRow profileRow subFocusRow", "role": "row"},
                         FOR("column", "$object|getHeaderColumns",
                             TH({"class": "headerCell alphaValue a11yFocus", "role": "columnheader"},
@@ -1983,7 +1983,9 @@ this.Table = domplate(Firebug.Rep,
                                 )
                             )
                         )
-                    ),
+                    )
+                ),
+                TBODY({"class": "profileTbody", "role": "presentation"},
                     FOR("row", "$object|getRows",
                         TR({"class": "focusRow profileRow subFocusRow", "role": "row"},
                             FOR("column", "$row|getColumns",
@@ -2005,16 +2007,25 @@ this.Table = domplate(Firebug.Rep,
 
     getHeaderColumns: function(table)
     {
+        if (!table.length)
+            return [];
+
         return cloneArray(table[0]);
     },
 
     getRows: function(table)
     {
+        if (!table.length)
+            return [];
+
         return cloneArray(table).slice(1);
     },
 
     getColumns: function(row)
     {
+        if (!row.length)
+            return [];
+
         return cloneArray(row);
     }
 });
