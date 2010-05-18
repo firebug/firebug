@@ -387,6 +387,8 @@ function FirebugConsoleHandler(context, win)
         removeClass(row, "opened");
         Firebug.Console.closeGroup(context, true);
 
+        // Register mousedown listener to catch expand and set max-height of
+        // the table. In case of big tables vertical scrollbars appears.
         var groupLabel = row.getElementsByClassName("logGroupLabel").item(0);
         groupLabel.addEventListener("mousedown", function(event)
         {
@@ -396,10 +398,9 @@ function FirebugConsoleHandler(context, win)
                 if (hasClass(groupRow, "opened"))
                 {
                     var tBody = row.getElementsByClassName("profileTbody").item(0);
-
-                    // xxxHonza: customization through preferences.
-                    if (tBody.clientHeight > 200)
-                        tBody.style.height = "200px";
+                    var maxHeight = Firebug.tabularLogMaxHeight;
+                    if (maxHeight > 0 && tBody.clientHeight > maxHeight)
+                        tBody.style.height = maxHeight + "px";
                 }
             }
         }, false);

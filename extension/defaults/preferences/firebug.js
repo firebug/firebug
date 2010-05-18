@@ -46,6 +46,7 @@ pref("extensions.firebug.service.showStackTrace", false);
 pref("extensions.firebug.console.logLimit", 500);
 pref("extensions.firebug.console.enableSites", false);
 pref("extensions.firebug.persistBreakOnError", false);
+pref("extensions.firebug.tabularLogMaxHeight", 200);      // Max height [px] for tabular output in console (provided e.g. by console.table() method). Set to zero in case of no limit.
 
 // HTML
 pref("extensions.firebug.showCommentNodes", false);
