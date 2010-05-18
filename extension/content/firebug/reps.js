@@ -1975,7 +1975,8 @@ this.Table = domplate(Firebug.Rep,
             TABLE({"class": "profileTable", cellspacing: 0, cellpadding: 0, width: "100%",
                 "role": "grid"},
                 THEAD({"class": "profileThead", "role": "presentation"},
-                    TR({"class": "headerRow focusRow profileRow subFocusRow", "role": "row"},
+                    TR({"class": "headerRow focusRow profileRow subFocusRow", "role": "row",
+                        onclick: "$onClickHeader"},
                         FOR("column", "$object|getHeaderColumns",
                             TH({"class": "headerCell alphaValue a11yFocus", "role": "columnheader"},
                                 DIV({"class": "headerCellBox"},
@@ -2027,6 +2028,72 @@ this.Table = domplate(Firebug.Rep,
             return [];
 
         return cloneArray(row);
+    },
+
+    // Sorting
+    onClickHeader: function(event)
+    {
+        var table = getAncestorByClass(event.target, "profileTable");
+        var header = getAncestorByClass(event.target, "headerCell");
+        if (!header)
+            return;
+
+        // xxxHonza: how to safely provide the type of sort from within the web-page
+        var numerical = false;//!hasClass(header, "alphaValue");
+
+        var colIndex = 0;
+        for (header = header.previousSibling; header; header = header.previousSibling)
+            ++colIndex;
+
+        this.sort(table, colIndex, numerical);
+    },
+
+    sort: function(table, colIndex, numerical)
+    {
+        var tbody = getChildByClass(table, "profileTbody");
+        var thead = getChildByClass(table, "profileThead");
+
+        var values = [];
+        for (var row = tbody.childNodes[0]; row; row = row.nextSibling)
+        {
+            var cell = row.childNodes[colIndex];
+            var value = numerical ? parseFloat(cell.textContent) : cell.textContent;
+            values.push({row: row, value: value});
+        }
+
+        values.sort(function(a, b) { return a.value < b.value ? -1 : 1; });
+
+        var headerRow = thead.firstChild;
+        var headerSorted = getChildByClass(headerRow, "headerSorted");
+        removeClass(headerSorted, "headerSorted");
+        if (headerSorted)
+            headerSorted.removeAttribute('aria-sort');
+
+        var header = headerRow.childNodes[colIndex];
+        setClass(header, "headerSorted");
+
+        if (!header.sorted || header.sorted == 1)
+        {
+            removeClass(header, "sortedDescending");
+            setClass(header, "sortedAscending");
+            header.setAttribute("aria-sort", "ascending");
+
+            header.sorted = -1;
+
+            for (var i = 0; i < values.length; ++i)
+                tbody.appendChild(values[i].row);
+        }
+        else
+        {
+            removeClass(header, "sortedAscending");
+            setClass(header, "sortedDescending");
+            header.setAttribute("aria-sort", "descending")
+
+            header.sorted = 1;
+
+            for (var i = values.length-1; i >= 0; --i)
+                tbody.appendChild(values[i].row);
+        }
     }
 });
 

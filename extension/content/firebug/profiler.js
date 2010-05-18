@@ -261,9 +261,10 @@ Firebug.Profiler.ProfileTable = domplate(
     sort: function(table, colIndex, numerical)
     {
         var tbody = getChildByClass(table, "profileTbody");
+        var thead = getChildByClass(table, "profileThead");
 
         var values = [];
-        for (var row = tbody.childNodes[1]; row; row = row.nextSibling)
+        for (var row = tbody.childNodes[0]; row; row = row.nextSibling)
         {
             var cell = row.childNodes[colIndex];
             var value = numerical ? parseFloat(cell.textContent) : cell.textContent;
@@ -272,7 +273,7 @@ Firebug.Profiler.ProfileTable = domplate(
 
         values.sort(function(a, b) { return a.value < b.value ? -1 : 1; });
 
-        var headerRow = tbody.firstChild;
+        var headerRow = thead.firstChild;
         var headerSorted = getChildByClass(headerRow, "headerSorted");
         removeClass(headerSorted, "headerSorted");
         if (headerSorted)

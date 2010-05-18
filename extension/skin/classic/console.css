@@ -309,9 +309,10 @@
 }
 
 .headerCellBox {
-    padding: 2px 4px;
+    padding: 2px 13px 2px 4px;
     border-left: 1px solid #D9D9D9;
     border-right: 1px solid #9C9C9C;
+    white-space: nowrap;
 }
 
 .headerCell:hover:active {
