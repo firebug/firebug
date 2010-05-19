@@ -119,7 +119,7 @@ Firebug.TabCacheModel = extend(Firebug.Module,
 // XXXjjb this same code is in net.js, better to have it only once
             var win = getWindowForRequest(subject);
             if (win)
-                var tabId = Firebug.getTabIdForWindow(win);
+                var tabId = Firebug.getTabIdForWindow(win); // TODO remove, the tabId is not used after all
             if (!tabId)
                 return;
 

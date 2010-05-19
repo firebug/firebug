@@ -45,7 +45,7 @@ const NS_OS_TEMP_DIR = "TmpD"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 
-const firebugURLs =
+const firebugURLs =  // TODO chrome.js
 {
     main: "http://www.getfirebug.com",
     docs: "http://www.getfirebug.com/docs.html",
@@ -183,9 +183,9 @@ top.Firebug =
         else if (FBTrace.DBG_INITIALIZE)
             FBTrace.sysout("firebug.initialize FBL: " + FBL);
 
-        FBL.initialize();
+        FBL.initialize();  // TODO FirebugLoader
 
-        if (tabBrowser)
+        if (tabBrowser) // TODO TabWatcher
         {
             if (FBTrace.DBG_INITIALIZE)
                 FBTrace.sysout("firebug.initialize has a tabBrowser");
@@ -231,7 +231,10 @@ top.Firebug =
         return version+""+release;
     },
 
-    internationalizeUI: function(doc)  // Substitute strings in the UI with fall back to en-US
+    /*
+     *  Substitute strings in the UI, with fall back to en-US
+     */
+    internationalizeUI: function(doc) // TODO chrome.js
     {
         if (!doc)
             return;
@@ -285,7 +288,7 @@ top.Firebug =
         if (FBTrace.DBG_INITIALIZE)
             FBTrace.sysout("firebug.initializeUI detachArgs:", detachArgs);
 
-        var version = this.getVersion();
+        var version = this.getVersion(); // TODO chrome.js
         if (version)
         {
             this.version = version;
@@ -299,7 +302,7 @@ top.Firebug =
             }
         }
 
-        dispatch(menuItemControllers, "initialize", []);
+        dispatch(menuItemControllers, "initialize", []);  // TODO chrome.js
 
         // In the case that the user opens firebug in a new window but then closes Firefox window, we don't get the
         // quitApplicationGranted event (platform is still running) and we call shutdown (Firebug isDetached).
@@ -312,8 +315,10 @@ top.Firebug =
         dispatch(modules, "initializeUI", [detachArgs]);
     },
 
-
-    shutdown: function()  // called in browser when Firefox closes and in externalMode when fbs gets quitApplicationGranted.
+    /*
+     * called in browser when Firefox closes and in externalMode when fbs gets quitApplicationGranted.
+     */
+    shutdown: function()
     {
         this.shutdownUI();
 
@@ -330,7 +335,7 @@ top.Firebug =
             FBTrace.sysout("firebug.shutdown exited client "+this.clientID);
     },
 
-    shutdownUI: function()
+    shutdownUI: function()  // TODO chrome.js
     {
         window.removeEventListener('unload', shutdownFirebug, false);
 
@@ -345,8 +350,9 @@ top.Firebug =
     },
 
     // ----------------------------------------------------------------------------------------------------------------
+    // TODO this entire section to XULWindow
 
-    getSuspended: function()
+    getSuspended: function()  // TODO XULWindow
     {
         var suspendMarker = $("fbStatusIcon");
         if (suspendMarker.hasAttribute("suspended"))
@@ -354,7 +360,7 @@ top.Firebug =
         return null;
     },
 
-    setSuspended: function(value)
+    setSuspended: function(value)  // TODO XULWindow
     {
         var suspendMarker = $("fbStatusIcon");
         if (FBTrace.DBG_ACTIVATION)
@@ -369,7 +375,7 @@ top.Firebug =
         Firebug.resetTooltip();
     },
 
-    toggleSuspend: function()
+    toggleSuspend: function()  // TODO XULWindow
     {
         // getSuspended returns non-null value if Firebug is suspended.
         if (this.getSuspended())
@@ -680,6 +686,7 @@ top.Firebug =
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
     // Options
+    // TODO create options.js as module, support per context options eg break on error
 
     initializePrefs: function()
     {
@@ -689,7 +696,7 @@ top.Firebug =
             this[servicePrefNames[i]] = this.getPref(this.servicePrefDomain, servicePrefNames[i]);
 
         //xxxMCollins I don't understand why this has to be called in the middle of loading prefs...
-        this.loadExternalEditors();
+        this.loadExternalEditors();  // TODO to editors.js as module initialize
 
         prefs.addObserver(this.prefDomain, this, false);
         prefs.addObserver(this.servicePrefDomain, this, false);
@@ -1049,6 +1056,7 @@ top.Firebug =
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
     // Browser Bottom Bar
+    // TODO XULWindow
 
     showBar: function(show)
     {
@@ -1308,6 +1316,7 @@ top.Firebug =
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+    // TODO to options.js
 
     resetAllOptions: function(confirm)  // to default state
     {
@@ -1582,6 +1591,7 @@ top.Firebug =
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
     // nsIPrefObserver
+    // TODO options.js
 
     observe: function(subject, topic, data)
     {
@@ -1937,7 +1947,7 @@ top.Firebug =
     },
     //*********************************************************************************************
 
-    getTabForWindow: function(aWindow)
+    getTabForWindow: function(aWindow)  // TODO move to FBL, only used by getTabIdForWindow
     {
         aWindow = getRootWindow(aWindow);
 
@@ -1960,7 +1970,7 @@ top.Firebug =
         return null;
     },
 
-    getTabIdForWindow: function(win)
+    getTabIdForWindow: function(win)  // TODO move to FBL, rename to getIdForWindow, at 1.7 reimplement with bug 534149
     {
         var tab = this.getTabForWindow(win);
         return tab ? tab.linkedPanel : null;
