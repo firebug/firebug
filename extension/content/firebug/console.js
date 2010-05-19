@@ -550,7 +550,7 @@ Firebug.ConsolePanel.prototype = extend(Firebug.ActivablePanel,
 
         // Custom rep is used in place of group label.
         if (rep)
-            rep.tag.replace({"objects": objects}, innerRow);
+            rep.tag.replace({"object": objects}, innerRow);
         else
             this.appendFormatted(objects, innerRow, rep);
 

@@ -1967,7 +1967,7 @@ this.Table = domplate(Firebug.Rep,
 
     tag:
         OBJECTBOX({"role": "status"},
-            SPAN("$objects")
+            SPAN("$object|getTitle")
         ),
 
     tableTag:
@@ -2000,6 +2000,14 @@ this.Table = domplate(Firebug.Rep,
             )
         ),
 
+    getTitle: function(objects)
+    {
+        if (objects)
+            return objects.toString();
+
+        return "";
+    },
+
     getValueTag: function(object)
     {
         var rep = Firebug.getRep(object);
@@ -2008,26 +2016,47 @@ this.Table = domplate(Firebug.Rep,
 
     getHeaderColumns: function(table)
     {
-        if (!table.length)
-            return [];
+        if (table.length > 0)
+            return this.getProps(table[0]);
 
-        return cloneArray(table[0]);
+        for (var p in table)
+        {
+            var obj = table[p];
+            if (typeof(obj) != "object")
+                return [obj];
+
+            return cloneArray(obj);
+        }
     },
 
     getRows: function(table)
     {
-        if (!table.length)
+        var props = this.getProps(table);
+        if (!props.length)
             return [];
 
-        return cloneArray(table).slice(1);
+        // Except of the header.
+        return props.slice(1);
     },
 
     getColumns: function(row)
     {
-        if (!row.length)
-            return [];
+        if (typeof(row) != "object")
+            return [row];
 
-        return cloneArray(row);
+        return this.getProps(row);
+    },
+
+    getProps: function(obj)
+    {
+        if (obj.length)
+            return cloneArray(obj);
+
+        var arr = [];
+        for (var p in obj)
+            arr.push(obj[p]);
+
+        return arr;
     },
 
     // Sorting

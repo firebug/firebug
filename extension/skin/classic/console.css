@@ -280,6 +280,12 @@
 
 .profileTable {
     border-bottom: 1px solid #D7D7D7;
+    border-left: 1px solid #D7D7D7;
+}
+
+/* If the table is displayed within a group the left border is provided by that group. */
+.logGroup .profileTable {
+    border-left: none;
 }
 
 .profileTable TBODY {
