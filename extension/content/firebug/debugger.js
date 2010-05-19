@@ -242,7 +242,7 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
         {
             // Just ignore exceptions that happened while in the nested loop
             if (FBTrace.DBG_ERRORS)
-                FBTrace.sysout("debugger exception in nested event loop: ", exc);
+                FBTrace.sysout("debugger exception in nested event loop: "+exc, exc);
             else     // else /*@explore*/
                 ERROR("debugger exception in nested event loop: "+exc+"\n");
         }
