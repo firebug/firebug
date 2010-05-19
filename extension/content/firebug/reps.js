@@ -2016,17 +2016,22 @@ this.Table = domplate(Firebug.Rep,
 
     getHeaderColumns: function(table)
     {
+        var cols = [];
         if (table.length > 0)
-            return this.getProps(table[0]);
+            cols = this.getProps(table[0]);
 
         for (var p in table)
         {
             var obj = table[p];
             if (typeof(obj) != "object")
-                return [obj];
-
-            return cloneArray(obj);
+                cols =[obj];
+            else
+                cols = cloneArray(obj);
+            break;
         }
+
+        this.numberOfColumns = cols.length;
+        return cols;
     },
 
     getRows: function(table)
@@ -2041,10 +2046,26 @@ this.Table = domplate(Firebug.Rep,
 
     getColumns: function(row)
     {
+        var cols;
         if (typeof(row) != "object")
-            return [row];
+            cols = [row];
+        else
+            cols = this.getProps(row);
 
-        return this.getProps(row);
+        // Make sure the number of columns is the same as specified by the header.
+        if (cols.length > this.numberOfColumns)
+        {
+            cols = cols.slice(cols.length - this.numberOfColumns);
+        }
+        else if (cols.length < this.numberOfColumns)
+        {
+            // Supply missing values as undefined.
+            var count = this.numberOfColumns - cols.length;
+            for (var i=0; i<count; i++)
+                cols.push(undefined);
+        }
+
+        return cols;
     },
 
     getProps: function(obj)
