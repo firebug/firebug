@@ -761,11 +761,11 @@ Firebug.Breakpoint.BreakNotification.prototype = domplate(Firebug.InlineEditor.p
                             ),
                             BUTTON({"class": "notationButton", onclick: "$onSkipAction",
                                 $collapsed: "$cause|hideSkipAction"},
-                                $STR("Skip")
+                                $STR("script.balloon.Disable")
                             ),
                             BUTTON({"class": "notationButton", onclick: "$onOkAction",
                                 $collapsed: "$cause|hideOkAction"},
-                                $STR("Continue")
+                                $STR("script.balloon.Continue")
                             )
                         ),
                         DIV({"class": "notationCaption"},
