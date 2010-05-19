@@ -375,7 +375,7 @@ top.FirebugChrome =
 
     isFocused: function()
     {
-        var winMediator = CCSV("@mozilla.org/appshell/window-mediator;1", "nsIWindowMediator");
+        var winMediator = Cc["@mozilla.org/appshell/window-mediator;1"].getService(Ci["nsIWindowMediator"]);
 
         return winMediator.getMostRecentWindow(null) == window;
     },
