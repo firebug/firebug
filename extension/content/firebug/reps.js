@@ -1978,9 +1978,10 @@ this.Table = domplate(Firebug.Rep,
                     TR({"class": "headerRow focusRow profileRow subFocusRow", "role": "row",
                         onclick: "$onClickHeader"},
                         FOR("column", "$object|getHeaderColumns",
-                            TH({"class": "headerCell alphaValue a11yFocus", "role": "columnheader"},
+                            TH({"class": "headerCell a11yFocus", "role": "columnheader",
+                                $alphaValue: "$column.alphaValue"},
                                 DIV({"class": "headerCellBox"},
-                                    $STR("$column")
+                                    "$column.name"
                                 )
                             )
                         )
@@ -2016,22 +2017,42 @@ this.Table = domplate(Firebug.Rep,
 
     getHeaderColumns: function(table)
     {
-        var cols = [];
+        var cols;
+        var types;
+
+        // First row of the table should specify headers.
         if (table.length > 0)
             cols = this.getProps(table[0]);
 
+        // Let's use data types in the first row for default sorting
+        // (alphabetical or numerical)
+        if (table.length > 1)
+            types = this.getProps(table[1]);
+
+        // Support for objects with array-like structure.
         for (var p in table)
         {
             var obj = table[p];
-            if (typeof(obj) != "object")
-                cols =[obj];
+            if (!cols)
+                cols = this.getProps(obj);
+            else if (!types)
+                types = this.getProps(obj);
             else
-                cols = cloneArray(obj);
-            break;
+                break;
         }
 
-        this.numberOfColumns = cols.length;
-        return cols;
+        // Put tugether column name and column type.
+        var header = [];
+        for (var i=0; i<cols.length; i++)
+        {
+            header.push({
+                name: cols[i],
+                alphaValue: (i < types.length) ? (typeof(types[i]) != "number") : true
+            });
+        }
+
+        this.numberOfColumns = header.length;
+        return header;
     },
 
     getRows: function(table)
@@ -2046,11 +2067,7 @@ this.Table = domplate(Firebug.Rep,
 
     getColumns: function(row)
     {
-        var cols;
-        if (typeof(row) != "object")
-            cols = [row];
-        else
-            cols = this.getProps(row);
+        var cols = this.getProps(row);
 
         // Make sure the number of columns is the same as specified by the header.
         if (cols.length > this.numberOfColumns)
@@ -2070,13 +2087,15 @@ this.Table = domplate(Firebug.Rep,
 
     getProps: function(obj)
     {
+        if (typeof(obj) != "object")
+            return [obj];
+
         if (obj.length)
             return cloneArray(obj);
 
         var arr = [];
         for (var p in obj)
             arr.push(obj[p]);
-
         return arr;
     },
 
@@ -2088,8 +2107,7 @@ this.Table = domplate(Firebug.Rep,
         if (!header)
             return;
 
-        // xxxHonza: how to safely provide the type of sort from within the web-page
-        var numerical = false;//!hasClass(header, "alphaValue");
+        var numerical = !hasClass(header, "alphaValue");
 
         var colIndex = 0;
         for (header = header.previousSibling; header; header = header.previousSibling)
