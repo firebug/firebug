@@ -751,19 +751,19 @@ Firebug.Breakpoint.BreakNotification.prototype = domplate(Firebug.InlineEditor.p
                     DIV({"class": "conditionEditorInner"},
                         DIV({"class": "notationCaption"},
                             SPAN({"class": "notationTitle"}, "$cause.title"),
-                            BUTTON({"class": "notationButton", onclick: "$onCloseAction",
+                            BUTTON({"class": "notationButton closeButton", onclick: "$onCloseAction",
                                 $collapsed: "$cause|hideCloseAction"},
                                 $STR("X")
                             ),
-                            BUTTON({"class": "notationButton", onclick: "$onCopyAction",
+                            BUTTON({"class": "notationButton copyButton", onclick: "$onCopyAction",
                                 $collapsed: "$cause|hideCopyAction"},
                                 $STR("Copy")
                             ),
-                            BUTTON({"class": "notationButton", onclick: "$onSkipAction",
+                            BUTTON({"class": "notationButton disableButton", onclick: "$onSkipAction",
                                 $collapsed: "$cause|hideSkipAction"},
                                 $STR("script.balloon.Disable")
                             ),
-                            BUTTON({"class": "notationButton", onclick: "$onOkAction",
+                            BUTTON({"class": "notationButton ContinueButton", onclick: "$onOkAction",
                                 $collapsed: "$cause|hideOkAction"},
                                 $STR("script.balloon.Continue")
                             )

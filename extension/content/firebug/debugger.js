@@ -920,7 +920,7 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
 
                     context.breakingCause = {
                             title: $STR("debugger keyword"),
-                            message: $STR("Skip converts keyword to disabled breakpoint"),
+                            message: $STR("Disable converts keyword to disabled breakpoint"), //xxxHonza localization
                             skipAction: function addSkipperAndGo()
                             {
                                 // a breakpoint that never hits, but prevents debugger keyword (see fbs.onDebugger as well)
