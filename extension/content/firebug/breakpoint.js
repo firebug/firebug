@@ -432,15 +432,25 @@ Firebug.Breakpoint.BreakpointsPanel.prototype = extend(Firebug.Panel,
 
         try
         {
-        	Firebug.Debugger.clearAllBreakpoints(context);
+            // Remove regular JSD breakpoints
+            Firebug.Debugger.clearAllBreakpoints(context);
         }
         catch(exc)
         {
-        	FBTrace.sysout("breakpoint.clearAllBreakpoints FAILS "+exc, exc);
+            FBTrace.sysout("breakpoint.clearAllBreakpoints FAILS "+exc, exc);
         }
 
-
         this.noRefresh = false;
+        this.refresh();
+
+        // Remove the rest of all the other kinds of breakpoints (after refresh).
+        // These can come from various modules and perhaps extensions so, use
+        // the appropriate remove buttons.
+        var buttons = this.panelNode.getElementsByClassName("closeButton");
+        while (buttons.length)
+            this.click(buttons[0]);
+
+        // Breakpoint group titles must also go away.
         this.refresh();
     },
 
