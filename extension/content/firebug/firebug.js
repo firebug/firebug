@@ -249,7 +249,7 @@ top.Firebug =
             "fbBreakOnNextButton", "fbConsolePersist",
             "fbMinimizeButton", "FirebugMenu_Sites", "fbResumeBoxButton",
             "menu_AllOn", "menu_clearActivationList", "showQuickInfoBox", "panelBarTabList",
-            "fbNavigateBackButton", "fbNavigateForwardButton", "menu_alwaysOnTopIfDetached"];
+            "fbNavigateBackButton", "fbNavigateForwardButton"];
 
         for (var i=0; i<elements.length; i++)
         {
@@ -1271,12 +1271,7 @@ top.Firebug =
             browser: context.browser,
             FirebugContext: window.FirebugContext
         };
-
-        var features = "";
-        if (this.getPref(this.prefDomain, "detachedFirebugOnTop"))
-            features = "alwaysRaised";
-
-        var win = openWindow("Firebug", "chrome://firebug/content/firebug.xul", features, args);
+        var win = openWindow("Firebug", "chrome://firebug/content/firebug.xul", "", args);
 
         return win;
     },

@@ -430,8 +430,7 @@
                     <menuitem type="checkbox" label="&firebug.ShadeBoxModel;"
                               oncommand="FirebugChrome.onToggleOption(this)"
                               option="shadeBoxModel"/>
-                    <menuitem type="checkbox" id="showQuickInfoBox"
-                              label="firebug_options_showQuickInfoBox"
+                    <menuitem type="checkbox" id="showQuickInfoBox" label="firebug_options_showQuickInfoBox"
                               oncommand="FirebugChrome.onToggleOption(this)"
                               option="showQuickInfoBox"/>
                     <menuitem type="checkbox" id="menu_enableA11y"
@@ -446,10 +445,6 @@
                               label="&firebug.Vertical;"
                               command="cmd_toggleOrient"
                               option="viewPanelOrient" />
-                    <menuitem type="checkbox" id="menu_alwaysOnTopIfDetached"
-                              label="firebug.menu.Detached Firebug on Top"
-                              oncommand="FirebugChrome.onToggleOption(this)"
-                              option="detachedFirebugOnTop" />
                     <menuseparator id="menu_optionsSeparator"/>
                     <menuitem id="menu_resetAllOptions"
                               label="firebug.menu.Reset All Firebug Options"
