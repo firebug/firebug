@@ -152,7 +152,7 @@
                                     command="cmd_navBack"/>
                                 <toolbarbutton id="fbNavigateForwardButton" disabled="true"
                                     tooltiptext="firebug.history.Go forward"
-                                    command="cmd_naForward"/>
+                                    command="cmd_navForward"/>
                             </toolbaritem>
                         </hbox>
 
