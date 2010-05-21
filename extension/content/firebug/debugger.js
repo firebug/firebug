@@ -2893,9 +2893,9 @@ Firebug.ScriptPanel.prototype = extend(Firebug.SourceBoxPanel,
     getSearchOptionsMenuItems: function()
     {
         return [
-            Firebug.Search.searchOptionMenu("search.Case_Sensitive", "searchCaseSensitive"),
-            Firebug.Search.searchOptionMenu("search.Multiple_Files", "searchGlobal"),
-            Firebug.Search.searchOptionMenu("search.Use_Regular_Expression", "searchUseRegularExpression")
+            Firebug.Search.searchOptionMenu("search.Case Sensitive", "searchCaseSensitive"),
+            Firebug.Search.searchOptionMenu("search.Multiple Files", "searchGlobal"),
+            Firebug.Search.searchOptionMenu("search.Use Regular Expression", "searchUseRegularExpression")
         ];
     },
 
