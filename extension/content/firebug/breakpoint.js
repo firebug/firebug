@@ -595,7 +595,6 @@ SourceFileRenamer.prototype.renameSourceFiles = function(context)
         var oldURL = sourceFile.href;
         var sameType = bp.type;
         var sameLineNo = bp.lineNo;
-        var sameDebuggr = bp.debugger;
 
         var segs = oldURL.split('/');  // last is sequence #, next-last is "seq", next-next-last is kind
         var kind = segs.splice(segs.length - 3, 3)[0];
@@ -610,7 +609,7 @@ SourceFileRenamer.prototype.renameSourceFiles = function(context)
             FBTrace.sysout("breakpoints.renameSourceFiles type: "+bp.type, bp);
 
         Firebug.Debugger.watchSourceFile(context, sourceFile);
-        var newBP = fbs.addBreakpoint(sameType, sourceFile, sameLineNo, bp, sameDebuggr);
+        var newBP = fbs.addBreakpoint(sameType, sourceFile, sameLineNo, bp, Firebug.Debugger);
 
         var panel = context.getPanel("script", true);
         if (panel)
