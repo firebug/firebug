@@ -1552,7 +1552,7 @@ this.ErrorMessage = domplate(Firebug.Rep,
             TAG("$object|getObjectsTag", {object: "$object.objects"}),
             DIV({"class": "errorSourceBox errorSource-$object|getSourceType focusRow subLogRow", role : "listitem"},
                 IMG({"class": "errorBreak a11yFocus", src:"blank.gif", role : 'checkbox', 'aria-checked':"$object|hasErrorBreak", title: $STR("console.BreakOnThisError")}),
-                A({"class": "errorSource a11yFocus"}, "$object|getLine"),
+                A({"class": "errorSource a11yFocus", title: "$object|getSourceTitle"}, "$object|getSource"),
                 TAG(this.SourceLink.tag, {object: "$object|getSourceLink"})
             )
         ),
@@ -1596,7 +1596,7 @@ this.ErrorMessage = domplate(Firebug.Rep,
         return ""; // filled in later
     },
 
-    getLine: function(error)
+    getSource: function(error)
     {
         if (error.source)
             return cropMultipleLines(error.source, 80);
@@ -1608,6 +1608,14 @@ this.ErrorMessage = domplate(Firebug.Rep,
         return "";
     },
 
+    getSourceTitle: function(error)
+    {
+      var source = error.getSourceLine();
+      if (source)
+        return trim(source);
+      return "";
+    },
+    
     getSourceLink: function(error)
     {
         var ext = error.category == "css" ? "css" : "js";
