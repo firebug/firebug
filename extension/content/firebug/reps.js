@@ -2049,7 +2049,7 @@ this.Table = domplate(Firebug.Rep,
                 break;
         }
 
-        // Put tugether column name and column type.
+        // Put together a column name and type.
         var header = [];
         for (var i=0; i<cols.length; i++)
         {
