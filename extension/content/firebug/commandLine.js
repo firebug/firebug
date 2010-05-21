@@ -395,18 +395,25 @@ Firebug.CommandLine = extend(Firebug.Module,
         else
             Firebug.toggleBar(true);
 
+        var commandLine = getCommandLine(context);
+
         if (!context.panelName)
+        {
             Firebug.chrome.selectPanel("console");
+        }
         else if (context.panelName != "console")
         {
             Firebug.chrome.switchToPanel(context, "console");
-
-            var commandLine = getCommandLine(context);
             setTimeout(function() { commandLine.select(); });
         }
-        else // then we are already on the console, toggle back
+        else
         {
-            Firebug.chrome.unswitchToPanel(context, "console", true);
+            // We are already on the console, if the command line has also
+            // the focus, toggle back.
+            if (commandLine.getAttribute("focused") == "true")
+                Firebug.chrome.unswitchToPanel(context, "console", true);
+            else
+                setTimeout(function() { commandLine.select(); });
         }
     },
 
