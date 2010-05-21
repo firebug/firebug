@@ -2858,10 +2858,8 @@ Firebug.NetMonitor.NetInfoHeaders = domplate(Firebug.Rep, new Firebug.Listener()
 
         clearNode(tbody);
 
-        if (!headers.length)
-            return;
-
-        NetInfoBody.headerDataTag.insertRows({headers: headers}, tbody);
+        if (headers && headers.length)
+            NetInfoBody.headerDataTag.insertRows({headers: headers}, tbody);
 
         var titleRow = getChildByClass(headersTable, "netInfo" + rowName + "Title");
         removeClass(titleRow, "collapsed");
