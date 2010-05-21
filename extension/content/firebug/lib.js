@@ -452,7 +452,7 @@ function $STR(name, bundle)
     var index = name.lastIndexOf(".");
     if (index > 0 && name.charAt(index-1) != "\\")
         name = name.substr(index + 1);
-    name = name.replace("_", " ");
+    name = name.replace("_", " ", "g");
 
     return name;
 }
