@@ -1237,7 +1237,7 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
 
         var lines = splitLines(source);
 
-        var urlDescribed = this.getDynamicURL(context, normalizeURL(frame.script.fileName), source, "event");
+        var urlDescribed = this.getDynamicURL(context, normalizeURL(frame.script.fileName), lines, "event");
         var url = urlDescribed.href;
 
         context.sourceCache.invalidate(url);
