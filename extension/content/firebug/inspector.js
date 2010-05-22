@@ -299,7 +299,11 @@ Firebug.Inspector = extend(Firebug.Module,
     onInspectingMouseDown: function(event)
     {
         if (FBTrace.DBG_INSPECT)
-           FBTrace.sysout("onInspectingMouseDown event", event);
+           FBTrace.sysout("onInspectingMouseDown event", {originalTarget: event.originalTarget,tmpRealOriginalTarget:event.tmpRealOriginalTarget,event:event});
+
+        if (event.orginalTarget.tagName !== 'xul:thumb') // then allow thru to scroll bar
+        	return
+
         this.stopInspecting(false, true);
         cancelEvent(event);
     },
@@ -891,7 +895,7 @@ Firebug.Inspector.FrameHighlighter.prototype =
 
             cs = body.ownerDocument.defaultView.getComputedStyle(element, null);
             csTransform = cs.MozTransform;
-            
+
             if(csTransform)
             {
                 csTransformOrig = cs.MozTransformOrigin;
