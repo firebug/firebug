@@ -29,12 +29,12 @@ Firebug.Search = extend(Firebug.Module,
 
     searchNext: function(context)
     {
-        this.update(context, true, false);
+        return this.update(context, true, false);
     },
 
     searchPrev: function(context)
     {
-        this.update(context, true, true);
+        return this.update(context, true, true);
     },
 
     displayOnly: function(text, context)
@@ -99,6 +99,8 @@ Firebug.Search = extend(Firebug.Module,
             }
 
             panel.searchText = value;
+
+            return found;
         }
         else
         {
@@ -121,6 +123,8 @@ Firebug.Search = extend(Firebug.Module,
                 }
 
                 panel.searchText = value;
+
+                searchBox.status = (found ? "found" : "notfound");
             }, searchDelay);
         }
     },
@@ -186,6 +190,7 @@ Firebug.Search = extend(Firebug.Module,
         {
             searchBox.collapsed = !panel.searchable;
             searchBox.updateOptions(panel.getSearchOptionsMenuItems());
+            searchBox.status = "notfound";
         }
         else
             searchBox.collapsed = false;

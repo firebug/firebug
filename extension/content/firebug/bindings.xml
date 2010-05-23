@@ -1238,6 +1238,15 @@
                 searchBox.value = val;
             ]]></xbl:setter>
         </property>
+        <property name="status">
+            <xbl:getter><![CDATA[
+                return searchBox.getAttribute("status");
+            ]]></xbl:getter>
+            <xbl:setter><![CDATA[
+                var searchBox = document.getAnonymousElementByAttribute(this, "anonid", "searchBox");
+                searchBox.setAttribute("status", searchBox.value == "" || val);
+            ]]></xbl:setter>
+        </property>
         <property name="optionsShown">
             <xbl:getter><![CDATA[
                 var optionsPopup = document.getElementById("fbSearchOptionsPanel");
@@ -1292,12 +1301,12 @@
         </method>
         <method name="searchNext">
             <body><![CDATA[
-                Firebug.Search.searchNext(FirebugContext);
+                this.status = (Firebug.Search.searchNext(FirebugContext) ? "found" : "notfound");
             ]]></body>
         </method>
         <method name="searchPrev">
             <body><![CDATA[
-                Firebug.Search.searchPrev(FirebugContext);
+                this.status = (Firebug.Search.searchPrev(FirebugContext) ? "found" : "notfound");
             ]]></body>
         </method>
 
