@@ -380,6 +380,23 @@ top.FirebugChrome =
         return winMediator.getMostRecentWindow(null) == window;
     },
 
+    focusWatch: function(context)
+    {
+        if (Firebug.isDetached())
+            Firebug.chrome.focus();
+        else
+            Firebug.toggleBar(true);
+
+        Firebug.chrome.selectPanel("script");
+
+        var watchPanel = context.getPanel("watches", true);
+        if (watchPanel)
+        {
+            Firebug.CommandLine.isReadyElsePreparing(context);
+            watchPanel.editNewWatch();
+        }
+    },
+
     isOpen: function()
     {
         return !($("fbContentBox").collapsed);

@@ -51,7 +51,7 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
     // Debugging
 
-    evaluate: function(js, context, scope)
+    evaluate: function(js, context, scope)  // TODO remote: move to backend, proxy to front
     {
         var frame = context.currentFrame;
         if (!frame)
@@ -73,7 +73,12 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
             throw value;
     },
 
-    getCurrentFrameKeys: function(context)
+    /*
+     * Used by autocomplete in commandLine
+     * @return array of global property names
+     */
+
+    getCurrentFrameKeys: function(context)  // TODO remote
     {
         var globals = keys(context.getGlobalScope().wrappedJSObject);  // return is safe
 
@@ -83,7 +88,10 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
         return globals;
     },
 
-    getFrameKeys: function(frame, names)
+    /*
+     * private to Debugger
+     */
+    getFrameKeys: function(frame, names)  // TODO backend
     {
         var listValue = {value: null}, lengthValue = {value: 0};
         frame.scope.getProperties(listValue, lengthValue);
@@ -97,25 +105,15 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
         return names;
     },
 
-    focusWatch: function(context)
+    /* @Deprecated  see chrome.js */
+    focusWatch: function(context)  // TODO moved
     {
-        if (Firebug.isDetached())
-            Firebug.chrome.focus();
-        else
-            Firebug.toggleBar(true);
-
-        Firebug.chrome.selectPanel("script");
-
-        var watchPanel = context.getPanel("watches", true);
-        if (watchPanel)
-        {
-            Firebug.CommandLine.isReadyElsePreparing(context);
-            watchPanel.editNewWatch();
-        }
+    	return Firebug.chrome.focusWatch(context);
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
-
+    // Private to Debugger
+    
     beginInternalOperation: function() // stop debugger operations like breakOnErrors
     {
         var state = {breakOnErrors: Firebug.breakOnErrors};
