@@ -113,7 +113,7 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
     // Private to Debugger
-    
+
     beginInternalOperation: function() // stop debugger operations like breakOnErrors
     {
         var state = {breakOnErrors: Firebug.breakOnErrors};
@@ -129,11 +129,13 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 
-    halt: function(fn)
+    halt: function(fnOfFrame)
     {
-        this.haltCallback = fn; // called in this.onHalt as fn(frame);
-        fbs.halt(this);
+    	FBTrace.sysout('debugger.halt '+fnOfFrame);
 
+        fbs.halt(this, fnOfFrame);
+
+        /*
         debuggerHalter(); // a function with a URL that passes jsdIFilter and says "debugger;"
 
         if (this.haltCallback) // so we have a second try
@@ -142,7 +144,7 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
             if (Firebug.CommandLine.isReadyElsePreparing(FirebugContext))
                 Firebug.CommandLine.evaluate("debugger;", FirebugContext);
         }
-
+*/
         if(FBTrace.DBG_BP)
             FBTrace.sysout("debugger.halt, completed debugger stmt");
     },
@@ -157,7 +159,7 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
 
     breakNow: function(context)
     {
-        Firebug.Debugger.halt(function(frame)
+        Firebug.Debugger.halt(function haltAnalysis(frame)
         {
             if (FBTrace.DBG_UI_LOOP)
                 FBTrace.sysout("debugger.breakNow: frame "+frame.script.fileName+" context "+context.getName(), frame);
@@ -178,7 +180,7 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
             if (frame)
             {
                 Firebug.Debugger.breakContext = context;
-                Firebug.Debugger.onBreak(frame, 3);
+                Firebug.Debugger.onBreak(frame, "halt"); // I just made up a type that won't match TYPE_DEBUGGER_KEYWORD
             }
             else
             {
@@ -884,59 +886,10 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
             if (type == TYPE_DEBUGGER_KEYWORD)
             {
                 if (frame.functionName === 'firebugDebuggerTracer')
-                {
-                    var trace = FBL.getCorrectedStackTrace(frame, context);
-                    if (FBTrace.DBG_ERRORLOG)
-                        FBTrace.sysout("debugger.firebugDebuggerTracer corrected trace.frames "+trace.frames.length, trace.frames);
-                    if (trace)
-                    {
-                        trace.frames = trace.frames.slice(1); // drop the firebugDebuggerTracer and reorder
-                        if (FBTrace.DBG_ERRORLOG)
-                            FBTrace.sysout("debugger.firebugDebuggerTracer dropped tracer trace.frames "+trace.frames.length, trace.frames);
-
-                        if (context.window.wrappedJSObject._firebugStackTrace == "requested")
-                        {
-                            trace.frames = trace.frames.slice(1);  // drop console.error() see consoleInjected.js
-                            if (FBTrace.DBG_ERRORLOG)
-                                FBTrace.sysout("debugger.firebugDebuggerTracer requested trace.frames "+trace.frames.length, trace.frames);
-                            context.stackTrace = trace;
-                        }
-                        else
-                            Firebug.Console.log(trace, context, "stackTrace");
-                    }
-
-                    if(FBTrace.DBG_BP)
-                        FBTrace.sysout("debugger.onBreak "+(trace?"debugger trace":" debugger no trace!"));
-
-                    return RETURN_CONTINUE;
-                }
-                else // for debugger keyword offer the skip/continue dialog (optionally?)
-                {
-                    var sourceFile = Firebug.SourceFile.getSourceFileByScript(context, frame.script);
-                    var analyzer = sourceFile.getScriptAnalyzer(frame.script);
-                    var lineNo = analyzer.getSourceLineFromFrame(context, frame);
-
-                    context.breakingCause = {
-                            title: $STR("debugger keyword"),
-                            message: $STR("Disable converts keyword to disabled breakpoint"), //xxxHonza localization
-                            skipAction: function addSkipperAndGo()
-                            {
-                                // a breakpoint that never hits, but prevents debugger keyword (see fbs.onDebugger as well)
-                                var bp = fbs.setBreakpoint(sourceFile, lineNo, null, Firebug.Debugger);
-                                fbs.disableBreakpoint(sourceFile.href, lineNo);
-                                if (FBTrace.DBG_BP)
-                                    FBTrace.sysout("debugger.onBreak converted to disabled bp "+sourceFile.href+"@"+lineNo+" tag: "+frame.script.tag, bp);
-
-                                Firebug.Debugger.resume(context);
-                            },
-                            okAction: function justGo()
-                            {
-                                Firebug.Debugger.resume(context);
-                            },
-                    };
-                }
+                	return this.debuggerTracer(context, frame);
+                else
+                	this.setDebuggerKeywordCause(context, frame);
             }
-
 
             return this.stop(context, frame, type);
         }
@@ -948,15 +901,60 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
         }
     },
 
-    onHalt: function(frame)
+    debuggerTracer: function(context, frame)
     {
-        var callback = this.haltCallback;
-        delete this.haltCallback;
+        var trace = FBL.getCorrectedStackTrace(frame, context);
+        if (FBTrace.DBG_ERRORLOG)
+            FBTrace.sysout("debugger.firebugDebuggerTracer corrected trace.frames "+trace.frames.length, trace.frames);
+        if (trace)
+        {
+            trace.frames = trace.frames.slice(1); // drop the firebugDebuggerTracer and reorder
+            if (FBTrace.DBG_ERRORLOG)
+                FBTrace.sysout("debugger.firebugDebuggerTracer dropped tracer trace.frames "+trace.frames.length, trace.frames);
 
-        if (callback)
-            callback(frame);
+            if (context.window.wrappedJSObject._firebugStackTrace == "requested")
+            {
+                trace.frames = trace.frames.slice(1);  // drop console.error() see consoleInjected.js
+                if (FBTrace.DBG_ERRORLOG)
+                    FBTrace.sysout("debugger.firebugDebuggerTracer requested trace.frames "+trace.frames.length, trace.frames);
+                context.stackTrace = trace;
+            }
+            else
+                Firebug.Console.log(trace, context, "stackTrace");
+        }
+
+        if(FBTrace.DBG_BP)
+            FBTrace.sysout("debugger.onBreak "+(trace?"debugger trace":" debugger no trace!"));
 
         return RETURN_CONTINUE;
+    },
+    /*
+     * for |debugger;| keyword offer the skip/continue dialog (optionally?)
+     */
+    setDebuggerKeywordCause: function(context, frame)
+    {
+        var sourceFile = Firebug.SourceFile.getSourceFileByScript(context, frame.script);
+        var analyzer = sourceFile.getScriptAnalyzer(frame.script);
+        var lineNo = analyzer.getSourceLineFromFrame(context, frame);
+
+        context.breakingCause = {
+                title: $STR("debugger keyword"),
+                message: $STR("Disable converts keyword to disabled breakpoint"), //xxxHonza localization
+                skipAction: function addSkipperAndGo()
+                {
+                    // a breakpoint that never hits, but prevents debugger keyword (see fbs.onDebugger as well)
+                    var bp = fbs.setBreakpoint(sourceFile, lineNo, null, Firebug.Debugger);
+                    fbs.disableBreakpoint(sourceFile.href, lineNo);
+                    if (FBTrace.DBG_BP)
+                        FBTrace.sysout("debugger.onBreak converted to disabled bp "+sourceFile.href+"@"+lineNo+" tag: "+frame.script.tag, bp);
+
+                    Firebug.Debugger.resume(context);
+                },
+                okAction: function justGo()
+                {
+                    Firebug.Debugger.resume(context);
+                },
+        };
     },
 
     onThrow: function(frame, rv)

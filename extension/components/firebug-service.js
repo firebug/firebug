@@ -122,13 +122,14 @@ var netDebuggers = [];
 var scriptListeners = [];
 
 var stepMode = 0;
-var stepFrame;
 var stepFrameLineId;
 var stepStayOnDebuggr; // if set, the debuggr we want to stay within
 var stepFrameCount;
+var stepRecursion = 0; // how many times the caller is the same during TYPE_FUNCTION_CALL
 var hookFrameCount = 0;
 
-var haltDebugger = null;
+var haltDebugger = null;  // For reason unknown, fbs.haltDebugger will not work.
+var haltCallBack = null;
 
 var breakpointCount = 0;
 var disabledCount = 0;  // These are an optimization I guess, marking whether we are using this feature anywhere.
@@ -447,21 +448,33 @@ FirebugService.prototype =
         }
     },
 
-    halt: function(debuggr)
+    /*
+     * We are running JS code for Firebug, but we want to break into the debugger.
+     * @param debuggr Debugger object asking for break
+     * @param fnOfFrame, function(frame) to run on break
+     */
+
+    halt: function(debuggr, fnOfFrame)
     {
+    	// store for onDebugger
         haltDebugger = debuggr;
+        haltCallBack = fnOfFrame;
+        FBTrace.sysout('fbs.halt '+haltCallBack);
+        // call onDebugger via hook
+        eval('debugger;');
     },
 
     step: function(mode, startFrame, stayOnDebuggr)
     {
         stepMode = mode;
-        stepFrame = startFrame;
-        stepFrameCount = countFrames(startFrame);
-        stepFrameLineId = stepFrameCount + startFrame.script.fileName + startFrame.line;
+
+        stepRecursion = 0;
+        stepFrameTag = startFrame.script.tag;
+        stepFrameLineId = stepRecursion + startFrame.script.fileName + startFrame.line;
         stepStayOnDebuggr = stayOnDebuggr;
 
         if (FBTrace.DBG_FBS_STEP)
-            FBTrace.sysout("step stepMode = "+getStepName(stepMode) +" stepFrameLineId="+stepFrameLineId+" stepFrameCount="+stepFrameCount+" stepStayOnDebuggr:"+(stepStayOnDebuggr?stepStayOnDebuggr:"null"));
+            FBTrace.sysout("step stepMode = "+getStepName(stepMode) +" stepFrameLineId="+stepFrameLineId+" stepRecursion="+stepRecursion+" stepFrameTag "+stepFrameTag+" stepStayOnDebuggr:"+(stepStayOnDebuggr?stepStayOnDebuggr:"null"));
     },
 
     suspend: function(stayOnDebuggr, context)
@@ -471,7 +484,7 @@ FirebugService.prototype =
         stepStayOnDebuggr = stayOnDebuggr;
 
         if (FBTrace.DBG_FBS_STEP)
-            FBTrace.sysout("step stepMode = "+getStepName(stepMode) +" stepFrameLineId="+stepFrameLineId+" stepFrameCount="+stepFrameCount+" stepStayOnDebuggr:"+(stepStayOnDebuggr?stepStayOnDebuggr:"null"));
+            FBTrace.sysout("step stepMode = "+getStepName(stepMode) +" stepFrameLineId="+stepFrameLineId+" stepRecursion="+stepRecursion+" stepStayOnDebuggr:"+(stepStayOnDebuggr?stepStayOnDebuggr:"null"));
 
         dispatch(debuggers, "onBreakingNext", [stayOnDebuggr, context]);
 
@@ -481,8 +494,9 @@ FirebugService.prototype =
     runUntil: function(sourceFile, lineNo, startFrame, debuggr)
     {
         runningUntil = this.addBreakpoint(BP_UNTIL, sourceFile, lineNo, null, debuggr);
-        stepFrameCount = countFrames(startFrame);
-        stepFrameLineId = stepFrameCount + startFrame.script.fileName + startFrame.line;
+        stepRecursion = 0;
+        stepFrameTag = startFrame.script.tag;
+        stepFrameLineId = stepRecursion + startFrame.script.fileName + startFrame.line;
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
@@ -1101,9 +1115,12 @@ FirebugService.prototype =
 
             if (haltDebugger)
             {
+            	FBTrace.sysout('fbs.onDebugger '+haltCallBack);
+
                 var debuggr = haltDebugger;
                 haltDebugger = null;
-                return debuggr.onHalt(frame);
+                haltCallBack.apply(debuggr,[frame]);
+                return RETURN_CONTINUE;
             }
             else
             {
@@ -2601,7 +2618,6 @@ FirebugService.prototype =
 
         // Execution resumes now. Check if the user requested stepping and if so
         // install the necessary hooks
-        hookFrameCount = countFrames(frame);
         this.startStepping();
         if (FBTrace.DBG_FBS_STEP || FBTrace.DBG_FBS_BP) FBTrace.sysout("fbs.breakIntoDebugger called "+debuggr.debuggerName+" returning "+returned);
         return returned;
@@ -2617,10 +2633,10 @@ FirebugService.prototype =
         if (!stepMode && !runningUntil)
             return;
 
-         if (FBTrace.DBG_FBS_STEP)
-         {
-             FBTrace.sysout("startStepping stepMode = "+getStepName(stepMode) +" hookFrameCount="+hookFrameCount+" stepFrameCount="+stepFrameCount+"\n");
-         }
+        if (FBTrace.DBG_FBS_STEP)
+        {
+            FBTrace.sysout("startStepping stepMode = "+getStepName(stepMode) +" hookFrameCount="+hookFrameCount+" stepRecursion="+stepRecursion);
+        }
 
         this.hookFunctions();
 
@@ -2633,11 +2649,11 @@ FirebugService.prototype =
         if (FBTrace.DBG_FBS_STEP)
         {
             FBTrace.sysout("stopStepping stepMode = "+getStepName(stepMode)
-                 +" hookFrameCount="+hookFrameCount+" stepFrameCount="+stepFrameCount+"\n");
+                 +" hookFrameCount="+hookFrameCount+" stepRecursion="+stepRecursion);
         }
         stepMode = 0;
-        stepFrame = null;
-        stepFrameCount = 0;
+        stepRecursion = 0;
+        stepFrameTag = 0;
         stepFrameLineId = null;
 
         if (runningUntil)
@@ -2667,14 +2683,16 @@ FirebugService.prototype =
             switch (type)
             {
                 case TYPE_TOPLEVEL_START: // fall through
-                case TYPE_FUNCTION_CALL:
+                case TYPE_FUNCTION_CALL:  // the frame will be running the called script
                 {
-                    ++hookFrameCount;
+                    if (stepMode == STEP_OVER || stepMode == STEP_OUT)
+                    {
+                    	if (frame.callingFrame && frame.callingFrame.script.tag === stepFrameTag) // then we are called by the stepping script
+                    		stepRecursion++;
 
-                    if (stepMode == STEP_OVER)
-                        jsd.interruptHook = null;
-
-                    if (stepMode == STEP_INTO)  // normally step into will break in the interrupt handler, but not in event handlers.
+                        jsd.interruptHook = null; // don't watch execution steps, wait for return
+                    }
+                    else if (stepMode == STEP_INTO)  // normally step into will break in the interrupt handler, but not in event handlers.
                     {
                         fbs.stopStepping();
                         stepMode = STEP_SUSPEND; // break on next
@@ -2684,12 +2702,12 @@ FirebugService.prototype =
                     break;
                 }
                 case TYPE_TOPLEVEL_END: // fall through
-                case TYPE_FUNCTION_RETURN:
+                case TYPE_FUNCTION_RETURN:  // the frame will be running the called script
                 {
-                    --hookFrameCount;
-
-                    if (hookFrameCount == 0) {  // stack empty
-                        if ( (stepMode == STEP_INTO) || (stepMode == STEP_OVER) ) {
+                    if (!frame.callingFrame)   // stack empty
+                    {
+                        if ( (stepMode == STEP_INTO) || (stepMode == STEP_OVER) )
+                        {
                             fbs.stopStepping();
                             stepMode = STEP_SUSPEND; // break on next
                             fbs.hookInterrupts();
@@ -2699,15 +2717,24 @@ FirebugService.prototype =
                             fbs.stopStepping();
                         }
                     }
-                    else if (stepMode == STEP_OVER)
+                    else if (stepMode == STEP_OVER || stepMode == STEP_OUT)
                     {
-                        if (hookFrameCount <= stepFrameCount)
-                            fbs.hookInterrupts();
-                    }
-                    else if (stepMode == STEP_OUT)
-                    {
-                        if (hookFrameCount < stepFrameCount)
-                            fbs.hookInterrupts();
+                    	if (!stepRecursion) // then we never hit FUNCTION_CALL or we rolled back after we hit it
+                    	{
+                    		if (frame.script.tag === stepFrameTag)// We are in the stepping frame,
+                    			fbs.hookInterrupts();  // so halt on the next PC
+                    	}
+                    	else if (frame.callingFrame.script.tag === stepFrameTag) //then we could be in the step call
+                    	{
+                    		stepRecursion--;
+
+                        	if (!stepRecursion) // then we've rolled back to the step-call
+                        	{
+                        		if (stepMode == STEP_OVER) // then halt in the next pc of the caller
+                        			fbs.hookInterrupts();
+                        	}
+                    	}
+                    	// else we are not interested in this FUNCTION_RETURN
                     }
 
                     break;
@@ -2723,12 +2750,14 @@ FirebugService.prototype =
                     case TYPE_TOPLEVEL_START: { typeName = "TYPE_TOPLEVEL_START"; break; }
                     case TYPE_TOPLEVEL_END:   { typeName = "TYPE_TOPLEVEL_START"; break; }
                 }
-                FBTrace.sysout("functionHook "+typeName+" stepMode = "+getStepName(stepMode)
-                    +" hookFrameCount="+hookFrameCount+" stepFrameCount="+stepFrameCount+" "+frame.script.fileName);
+                var actualFrames = countFrames(frame);
+                FBTrace.sysout("functionHook "+typeName+" stepMode = "+getStepName(stepMode)+" for script "+stepFrameTag+
+                    " (actual: "+actualFrames+") stepRecursion="+
+                    stepRecursion+" running "+frame.script.tag+" of "+frame.script.fileName+" at "+frame.line+"."+frame.pc);
             }
         }
 
-        if (FBTrace.DBG_FBS_STEP) FBTrace.sysout("set functionHook\n");
+        if (FBTrace.DBG_FBS_STEP) FBTrace.sysout("set functionHook");
         jsd.functionHook = { onCall: functionHook };
     },
 
@@ -2743,11 +2772,12 @@ FirebugService.prototype =
                 return RETURN_CONTINUE;
             }
              */
+
             // Sometimes the same line will have multiple interrupts, so check
             // a unique id for the line and don't break until it changes
-            var frameLineId = hookFrameCount + frame.script.fileName + frame.line;
+            var frameLineId = stepRecursion + frame.script.fileName + frame.line;
             if (FBTrace.DBG_FBS_STEP && (stepMode != STEP_SUSPEND) )
-                FBTrace.sysout("interruptHook pc:"+frame.pc+" frameLineId: "+frameLineId+" vs "+stepFrameLineId);
+                FBTrace.sysout("interruptHook pc:"+frame.pc+" frameLineId: "+frameLineId+" vs "+stepFrameLineId+" running "+frame.script.tag+" of "+frame.script.fileName+" at "+frame.line+"."+frame.pc);
             if (frameLineId != stepFrameLineId)
                 return fbs.onBreak(frame, type, rv);
             else
