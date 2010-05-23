@@ -301,7 +301,7 @@ Firebug.Inspector = extend(Firebug.Module,
         if (FBTrace.DBG_INSPECT)
            FBTrace.sysout("onInspectingMouseDown event", {originalTarget: event.originalTarget,tmpRealOriginalTarget:event.tmpRealOriginalTarget,event:event});
 
-        if (event.orginalTarget.tagName !== 'xul:thumb') // then allow thru to scroll bar
+        if (event.orginalTarget && event.orginalTarget.tagName !== 'xul:thumb') // then allow thru to scroll bar
         	return
 
         this.stopInspecting(false, true);
