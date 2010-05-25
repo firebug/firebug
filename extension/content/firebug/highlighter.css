@@ -8,6 +8,10 @@
     margin: 0;
     padding: 0;
     outline: 0;
+    min-width: 0;
+    max-width: none;
+    min-height: 0;
+    max-height: none;
     -moz-transform: rotate(0deg);
     -moz-transform-origin: 50% 50%;
 }
@@ -24,6 +28,10 @@
     padding: 0;
     outline: 0;
     border: 0 none;
+    min-width: 0;
+    max-width: none;
+    min-height: 0;
+    max-height: none;
 }
 
 .firebugHighlight:before, .firebugHighlight:after {
@@ -41,6 +49,10 @@
     margin: 0;
     padding: 0;
     outline: 0;
+    min-width: 0;
+    max-width: none;
+    min-height: 0;
+    max-height: none;
     -moz-transform: rotate(0deg);
     -moz-transform-origin: 50% 50%;
 }
@@ -51,6 +63,10 @@
     padding: 0;
     outline: 0;
     border: 0 none;
+    min-width: 0;
+    max-width: none;
+    min-height: 0;
+    max-height: none;
     -moz-transform: rotate(0deg);
     -moz-transform-origin: 50% 50%;
 }
@@ -95,6 +111,10 @@
     padding: 0;
     border: 0 none;
     outline: 0;
+    min-width: 0;
+    max-width: none;
+    min-height: 0;
+    max-height: none;
     -moz-transform: rotate(0deg);
     -moz-transform-origin: 50% 50%;
 }
@@ -133,6 +153,10 @@
     padding: 0;
     outline: 0;
     border: 0 none;
+    min-width: 0;
+    max-width: none;
+    min-height: 0;
+    max-height: none;
     -moz-transform: rotate(0deg);
     -moz-transform-origin: 50% 50%;
 }
