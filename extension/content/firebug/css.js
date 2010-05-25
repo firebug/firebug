@@ -1236,7 +1236,7 @@ Firebug.CSSStyleSheetPanel.prototype = extend(Firebug.SourceBoxPanel,
                 props.push(prop.name + ": " + prop.value + prop.important + ";");
         }
 
-        copyToClipboard(props.join("\r\n"));
+        copyToClipboard(props.join(lineBreak()));
     }
 });
 
