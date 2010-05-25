@@ -24,6 +24,7 @@
     z-index: 2147483646;
     position: fixed;
     background-color: #3875d7;
+    opacity: 1;
     margin: 0;
     padding: 0;
     outline: 0;
@@ -63,6 +64,7 @@
     padding: 0;
     outline: 0;
     border: 0 none;
+    opacity: 1;
     min-width: 0;
     max-width: none;
     min-height: 0;
@@ -110,6 +112,7 @@
     margin: 0;
     padding: 0;
     border: 0 none;
+    opacity: 1;
     outline: 0;
     min-width: 0;
     max-width: none;
