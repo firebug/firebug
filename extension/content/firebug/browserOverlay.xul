@@ -56,6 +56,7 @@
     <script type="application/x-javascript" src="chrome://firebug/content/consoleInjector.js"/>
     <script type="application/x-javascript" src="chrome://firebug/content/jsonViewer.js"/>
     <script type="application/x-javascript" src="chrome://firebug/content/xmlViewer.js"/>
+    <script type="application/x-javascript" src="chrome://firebug/content/svgViewer.js"/>
     <script type="application/x-javascript" src="chrome://firebug/content/shortcuts.js"/>
     <script type="application/x-javascript" src="chrome://firebug/content/a11y.js"/>
     <script type="application/x-javascript" src="chrome://firebug/content/editorToContextMenu.js"/>

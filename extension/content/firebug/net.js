@@ -2614,6 +2614,23 @@ Firebug.NetMonitor.NetInfoPostData = domplate(Firebug.Rep, new Firebug.Listener(
             )
         ),
 
+    // image/svg+xml
+    svgTable:
+        TABLE({"class": "netInfoPostSVGTable", cellpadding: 0, cellspacing: 0, "role": "presentation"},
+            TBODY({"role": "list", "aria-label": $STR("svgviewer.tab.SVG")},
+                TR({"class": "netInfoPostSVGTitle", "role": "presentation"},
+                    TD({"role": "presentation" },
+                        DIV({"class": "netInfoPostParams"},
+                            $STR("svgviewer.tab.SVG")
+                        )
+                    )
+                ),
+                TR(
+                    TD({"class": "netInfoPostSVGBody"})
+                )
+            )
+        ),
+          
     sourceTable:
         TABLE({"class": "netInfoPostSourceTable", cellpadding: 0, cellspacing: 0, "role": "presentation"},
             TBODY({"role": "list", "aria-label": $STR("net.label.Source")},
@@ -2668,7 +2685,10 @@ Firebug.NetMonitor.NetInfoPostData = domplate(Firebug.Rep, new Firebug.Listener(
             this.insertJSON(parentNode, file, context);
 
         if (Firebug.XMLViewerModel.isXML(contentType))
-            this.insertXML(parentNode, file, context);
+          this.insertXML(parentNode, file, context);
+
+        if (Firebug.SVGViewerModel.isSVG(contentType))
+          this.insertSVG(parentNode, file, context);
 
         var postText = Utils.getPostText(file, context);
         postText = Utils.formatPostText(postText);
@@ -2723,6 +2743,16 @@ Firebug.NetMonitor.NetInfoPostData = domplate(Firebug.Rep, new Firebug.Listener(
         var jsonBody = jsonTable.getElementsByClassName("netInfoPostXMLBody").item(0);
 
         Firebug.XMLViewerModel.insertXML(jsonBody, text);
+    },
+
+    insertSVG: function(parentNode, file, context)
+    {
+        var text = Utils.getPostText(file, context);
+
+        var jsonTable = this.svgTable.append(null, parentNode);
+        var jsonBody = jsonTable.getElementsByClassName("netInfoPostSVGBody").item(0);
+
+        Firebug.SVGViewerModel.insertSVG(jsonBody, text);
     },
 
     insertSource: function(parentNode, text)
@@ -2859,7 +2889,7 @@ Firebug.NetMonitor.NetInfoHeaders = domplate(Firebug.Rep, new Firebug.Listener()
         clearNode(tbody);
 
         if (headers && headers.length)
-            NetInfoBody.headerDataTag.insertRows({headers: headers}, tbody);
+        NetInfoBody.headerDataTag.insertRows({headers: headers}, tbody);
 
         var titleRow = getChildByClass(headersTable, "netInfo" + rowName + "Title");
         removeClass(titleRow, "collapsed");
