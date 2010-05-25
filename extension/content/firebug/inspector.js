@@ -302,7 +302,7 @@ Firebug.Inspector = extend(Firebug.Module,
             FBTrace.sysout("onInspectingMouseDown event", {originalTarget: event.originalTarget,tmpRealOriginalTarget:event.tmpRealOriginalTarget,event:event});
 
         if (event.originalTarget && event.originalTarget.tagName === 'xul:thumb') // Allow to scroll the document while inspecting
-            return
+            return;
 
         this.stopInspecting(false, true);
         cancelEvent(event);

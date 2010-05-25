@@ -925,7 +925,7 @@ Firebug.A11yModel = extend(Firebug.Module,
                 return;
             var focusRow = node.getElementsByClassName('focusRow').item(0);
             if (!focusRow)
-                return
+                return;
             this.focusPanelRow(Firebug.getElementPanel(focusRow), focusRow);
             node = getAncestorByClass(event.target, 'memberLabel')
             if (!(node && hasClass(node, 'hasChildren')))
@@ -1808,7 +1808,7 @@ Firebug.A11yModel = extend(Firebug.Module,
                     box.a11yCaretOffset = 0;
                     this.insertCaretIntoLine(panel, box);
                     cancelEvent(event);
-                    return
+                    return;
                 }
                 box.a11yCaretLine = goUp ? lineNo - box.viewableLines : lineNo + box.viewableLines;
                 linesToScroll = goUp ? -box.viewableLines : box.viewableLines;
@@ -2263,7 +2263,7 @@ Firebug.A11yModel = extend(Firebug.Module,
                 return;
             var focusRow = node.getElementsByClassName('focusRow').item(0);
             if (!focusRow)
-                return
+                return;
             this.modifyPanelRow(Firebug.getElementPanel(focusRow), focusRow, false);
             this.focus(focusRow);
         }
