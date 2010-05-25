@@ -265,8 +265,8 @@ Firebug.Console = extend(ActivableConsole,
         if (panelName != this.panelName)  // we don't care about other panels
             return;
 
-        if (FBTrace.DBG_CONSOLE)
-            FBTrace.sysout("console.onPanelEnable**************");
+        if (FBTrace.DBG_CONSOLE || FBTrace.DBG_ACTIVATION)
+            FBTrace.sysout("console.onPanelEnable;");
 
         this.watchForErrors();
         Firebug.Debugger.addDependentModule(this); // we inject the console during JS compiles so we need jsd
@@ -277,8 +277,8 @@ Firebug.Console = extend(ActivableConsole,
         if (panelName != this.panelName)  // we don't care about other panels
             return;
 
-        if (FBTrace.DBG_CONSOLE)
-            FBTrace.sysout("console.onPanelDisable**************");
+        if (FBTrace.DBG_CONSOLE || FBTrace.DBG_ACTIVATION)
+            FBTrace.sysout("console.onPanelDisable;");
 
         Firebug.Debugger.removeDependentModule(this); // we inject the console during JS compiles so we need jsd
         this.unwatchForErrors();
@@ -292,6 +292,7 @@ Firebug.Console = extend(ActivableConsole,
     {
         if (FBTrace.DBG_CONSOLE)
             FBTrace.sysout("console.onSuspendFirebug\n");
+
         if (Firebug.Console.isAlwaysEnabled())
             this.unwatchForErrors();
     },
@@ -653,7 +654,7 @@ Firebug.ConsolePanel.prototype = extend(Firebug.ActivablePanel,
         var enabled = Firebug.Console.isAlwaysEnabled();
         if (enabled)
         {
-            Firebug.Console.disabledPanelPage.hide(this);
+            Firebug.DisabledPanelPage.hide(this);
             this.showCommandLine(true);
             this.showToolbarButtons("fbConsoleButtons", true);
             Firebug.chrome.setGlobalAttribute("cmd_togglePersistConsole", "checked",
@@ -695,7 +696,7 @@ Firebug.ConsolePanel.prototype = extend(Firebug.ActivablePanel,
         else
         {
             this.hide(state);
-            Firebug.Console.disabledPanelPage.show(this);
+            Firebug.DisabledPanelPage.show(this);
         }
     },
 

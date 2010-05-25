@@ -1483,8 +1483,6 @@ function onMainTabBoxMouseDown(event)
     if (Firebug.isInBrowser())
     {
         var contentSplitter = Firebug.chrome.$("fbContentSplitter");
-        if (FBTrace.DBG_ERRORS)
-            FBTrace.sysout("onMainTabBoxMouseDown ", event);
         // TODO: grab the splitter here.
     }
 }

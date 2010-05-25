@@ -634,13 +634,6 @@
             return this.tabMenu;
         ]]>
         </constructor>
-        <method name="setModule">
-            <parameter name="module"/>
-            <body><![CDATA[
-            // Make sure the property exists.
-            this.tabMenu.module = module ? module : null;
-            ]]></body>
-        </method>
         <property name="selected">
             <getter><![CDATA[
                 return this.getAttribute("selected");
@@ -674,7 +667,6 @@
         ]]>
         </constructor>
         <field name="value"/>
-        <field name="module"/>
         <property name="selectedPanel">
             <getter><![CDATA[
                 var parentNode = this.parentNode;
@@ -689,14 +681,12 @@
         </property>
         <method name="onEnable">
             <body><![CDATA[
-            if (this.module)
-                this.module.setDefaultState(true);
+            Firebug.PanelActivation.enablePanel(this.selectedPanel);
             ]]></body>
         </method>
         <method name="onDisable">
             <body><![CDATA[
-            if (this.module)
-                this.module.setDefaultState(false);
+            Firebug.PanelActivation.disablePanel(this.selectedPanel);
             ]]></body>
         </method>
         <method name="optionMenu">
@@ -711,12 +701,14 @@
         <method name="updateVisibility">
             <body><![CDATA[
             // Hide the mini-menu (displaying panel's option) if following is true:
-            // 1) The panel isn't activable (this.module == null) and so there are
-            //    no enable/disable options.
+            // 1) The panel isn't activable and so there are no enable/disable options.
             // 2) The panel doesn't provide any additional options.
             var panel = this.selectedPanel;
+            if (!panel)
+                return;
+
             var panelItems = panel ? panel.getOptionsMenuItems(FirebugContext) : null;
-            if (!this.module && !(panelItems && panelItems.length))
+            if (!panel.activable && !(panelItems && panelItems.length))
                 this.setAttribute("collapsed", "true");
             else
                 this.removeAttribute("collapsed");
@@ -733,10 +725,10 @@
 
             var items = [];
 
-            // Create menu items for activation. The module is set only for activable modules.
-            if (this.module)
+            // Create menu items for activation (only for activable panels).
+            if (this.selectedPanel.activable)
             {
-                var enabled = this.module.isAlwaysEnabled();
+                var enabled = this.selectedPanel.isEnabled();
                 items.push(this.optionMenu("panel.Enabled", enabled, this.onEnable));
                 items.push(this.optionMenu("panel.Disabled", !enabled, this.onDisable));
             }
@@ -747,7 +739,7 @@
                 return false;
 
             // If the module is disabled, gray out all the options.
-            if (!enabled && this.module)
+            if (this.selectedPanel.activable && !enabled)
             {
                 for (var i = 0; i < panelItems.length; i++)
                     panelItems[i].disabled = true;

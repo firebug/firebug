@@ -405,11 +405,6 @@ top.Firebug =
         }
     },
 
-    disablePanels: function(context)
-    {
-        Firebug.ModuleManager.disableModules();
-    },
-
     suspend: function()  // dispatch suspendFirebug to all windows
     {
         this.broadcast('suspendFirebug', []);
@@ -1605,16 +1600,6 @@ top.Firebug =
             if (FBTrace.DBG_OPTIONS) FBTrace.sysout("firebug.observe name = value: "+name+"= "+value+"\n");
             this.updatePref(name, value);
         }
-
-        if (topic == "nsPref:changed")
-        {
-            if (data.indexOf(".enableSites") != -1)
-            {
-                if (FBTrace.DBG_PANELS)
-                    FBTrace.sysout("Firebug.observe subject: "+subject+" topic "+topic+" data: "+data+"\n");
-                dispatch(modules, "onEnablePrefChange", [data]);
-            }
-        }
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
@@ -1771,7 +1756,6 @@ top.Firebug =
         if (context.browser.sidePanelNames)
             context.sidePanelNames = context.browser.sidePanelNames;
 
-
         if (FBTrace.DBG_ERRORS && !context.sidePanelNames)
             FBTrace.sysout("firebug.initContext sidePanelNames:",context.sidePanelNames);
 
@@ -1792,7 +1776,9 @@ top.Firebug =
             if(!this.hadFirstContext)  // then we need to enable the panels iff the prefs say so
             {
                 this.hadFirstContext = true;
-                Firebug.ModuleManager.obeyPrefs(context);
+
+                // xxxHonza: should be removed, see below.
+                this.obeyPrefs(context);
             }
             if (Firebug.getSuspended())
                 Firebug.resume();  // This will cause onResumeFirebug for every context including this one.
@@ -1803,6 +1789,22 @@ top.Firebug =
         }
 
         Firebug.resetTooltip();
+    },
+
+    // xxxHonza: this should be removed
+    // XXXjjb: what is actually the purpose of this?
+    obeyPrefs: function(context)
+    {
+        for (var i=0; i<activableModules.length; i++)
+        {
+            var module = activableModules[i];
+            if (module.isAlwaysEnabled())
+                Firebug.PanelActivation.onChangeActivation(module.panelName, true);
+            else
+                Firebug.PanelActivation.onChangeActivation(module.panelName, false);
+
+            //xxxHonza module.updateTab();
+        }
     },
 
     /*
@@ -2612,7 +2614,32 @@ Firebug.Panel = extend(new Firebug.Listener(),
 
 Firebug.ActivablePanel = extend(Firebug.Panel,
 {
-    enablePanel: function(module)
+    activable: true,
+
+    initialize: function(context, doc)
+    {
+        Firebug.Panel.initialize.apply(this, arguments);
+
+        // Notify all modules about state of this created panel. Related modules
+        // have the chance to activate itself at this moment.
+        //var enabled = this.isEnabled();
+        //Firebug.PanelActivation.changeActivation(context, this.name, enabled);
+    },
+
+    destroy: function(state)
+    {
+        Firebug.Panel.destroy.apply(this, arguments);
+    },
+
+    isEnabled: function()
+    {
+        if (!this.name)
+            return false;
+
+        return Firebug.getPref(Firebug.prefDomain + "." + this.name, "enableSites");
+    },
+
+    enablePanel: function()
     {
         var persistedPanelState = getPersistedState(this.context, this.name);
         persistedPanelState.enabled = true;
@@ -2622,40 +2649,44 @@ Firebug.ActivablePanel = extend(Firebug.Panel,
             tab.setAttribute('aria-label', tab.textContent);
 
         // The panel was just enabled so, hide the disable message. Notice that
-        // displaying this page replaces content of the panel.
-        module.disabledPanelPage.hide(this);
+        // this 'disabled' page replaces content of the panel.
+        Firebug.DisabledPanelPage.hide(this);
 
-        // xxxHonza: now I think this is the correct place to call Panel.show
-        // If the enabled panel is currently visible, show the content.
-        // It's necessary to update the toolbar.
         if (this.context.panelName == this.name)
         {
-            if(FBTrace.DBG_PANELS)
+            if (FBTrace.DBG_PANELS)
                 FBTrace.sysout("Firebug.enablePanel state", persistedPanelState);
+
+            // Show panel's content and also update panel's toolbar.
             this.show(persistedPanelState);
         }
 
         Firebug.resetTooltip();
     },
 
-    disablePanel: function(module)
+    disablePanel: function()
     {
         var persistedPanelState = getPersistedState(this.context, this.name);
         persistedPanelState.enabled = false;
 
         var tab = this.getTab();
         if (tab)
-            tab.setAttribute('aria-label', tab.getAttribute('label') + " ("+ $STR('aria.labels.inactive panel') +")");
+        {
+            tab.setAttribute('aria-label', tab.getAttribute('label') +
+                " ("+ $STR('aria.labels.inactive panel') +")");
+        }
 
         // The panel was disabled so, show the disabled page. This page also replaces the
         // old content so, the panel is fresh empty after it's enabled again.
-        module.disabledPanelPage.show(this);
+        Firebug.DisabledPanelPage.show(this);
 
         // Make sure toolbar buttons are not visible for disabled panels.
         if (this.context.panelName == this.name)
         {
-            if(FBTrace.DBG_PANELS)
+            if (FBTrace.DBG_PANELS)
                 FBTrace.sysout("Firebug.disablePanel state", persistedPanelState);
+
+            // Hide panel's content and also update panel's toolbar.
             this.hide(persistedPanelState);
         }
 
@@ -2830,13 +2861,9 @@ Firebug.Rep = domplate(
  */
 Firebug.ActivableModule = extend(Firebug.Module,
 {
-    panelName: null,
-    panelBar1: $("fbPanelBar1"),
-
     initialize: function()
     {
         this.dependents = [];
-        this.disabledPanelPage = new Firebug.DisabledPanelPage(this);
 
         Firebug.Module.initialize.apply(this, arguments);
     },
@@ -2845,7 +2872,7 @@ Firebug.ActivableModule = extend(Firebug.Module,
     {
         Firebug.registerUIListener(this);  // we listen for showUI/hideUI for panel activation
 
-        this.updateTab(null);
+        //xxxHonza this.updateTab(null);
     },
 
     shutdown: function()
@@ -2857,12 +2884,12 @@ Firebug.ActivableModule = extend(Firebug.Module,
 
     reattachContext: function(browser, context)
     {
-        this.updateTab();
+        // xxxHonza: this.updateTab();
     },
 
     showContext: function(browser, context)
     {
-        this.updateTab();
+        // xxxHonza: this.updateTab();
     },
 
     destroyContext: function(context)
@@ -2874,32 +2901,6 @@ Firebug.ActivableModule = extend(Firebug.Module,
     isEnabled: function()
     {
         return this.isAlwaysEnabled();
-    },
-
-    panelEnable: function(context) // panel Disabled -> Enabled for every context with a panel
-    {
-        if (FBTrace.DBG_PANELS  || FBTrace.DBG_ACTIVATION)
-            FBTrace.sysout("firebug.ActivableModule.panelEnable "+this.getPrefDomain()+
-                " isEnabled:"+this.isAlwaysEnabled()+", "+context.getName()+"\n");
-
-        var panel = context.getPanel(this.panelName, false);
-        if (panel)
-            panel.enablePanel(this);
-
-        this.onEnabled(context);
-    },
-
-    panelDisable: function(context)  // panel Enabled -> Disabled for every context with a panel
-    {
-        if (FBTrace.DBG_PANELS || FBTrace.DBG_ACTIVATION)
-            FBTrace.sysout("firebug.ActivableModule.panelDisable "+this.getPrefDomain()+
-                " isEnabled:"+this.isAlwaysEnabled()+", "+context.getName()+"\n");
-
-        var panel = context.getPanel(this.panelName, true);
-        if (panel)
-            panel.disablePanel(this);
-
-        this.onDisabled(context);
     },
 
     onEnabled: function(context)
@@ -2936,17 +2937,17 @@ Firebug.ActivableModule = extend(Firebug.Module,
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
     // uiListener
 
-    showUI: function(browser, context)  // Firebug is opened, in browser or ed
+    showUI: function(browser, context)  // Firebug is opened, in browser or detached
     {
         if (FBTrace.DBG_PANELS || FBTrace.DBG_ACTIVATION)
-            FBTrace.sysout("Firebug.showUI; " + this.panelName + ", " +
+            FBTrace.sysout("Firebug.ActivableModule.showUI; " + this.panelName + ", " +
                 (context ? context.getName() : "No Context"));
     },
 
     hideUI: function(browser, context)  // Firebug closes, either in browser or detached.
     {
         if (FBTrace.DBG_PANELS || FBTrace.DBG_ACTIVATION)
-            FBTrace.sysout("Firebug.hideUI; " + this.panelName + ", " +
+            FBTrace.sysout("Firebug.ActivableModule.hideUI; " + this.panelName + ", " +
                 (context ? context.getName() : "No Context"));
     },
 
@@ -2962,12 +2963,12 @@ Firebug.ActivableModule = extend(Firebug.Module,
         // Module deactivation code.
     },
 
-    onSuspendFirebug: function( )
+    onSuspendFirebug: function()
     {
         // When the number of activeContexts decreases to zero. Modules should remove listeners, disable function that takes resources
     },
 
-    onResumeFirebug: function( )
+    onResumeFirebug: function()
     {
         // When the number of activeContexts increases from zero. Modules should undo the work done in onSuspendFirebug
     },
@@ -3014,210 +3015,9 @@ Firebug.ActivableModule = extend(Firebug.Module,
     {
         return this.isAlwaysEnabled();
     },
-
-    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
-
-    onEnablePrefChange: function(pref)
-    {
-        var panelPref = this.getPrefDomain()+".enableSites";
-
-        if (FBTrace.DBG_PANELS || FBTrace.DBG_ACTIVATION)
-            FBTrace.sysout("firebug.onEnablePrefChange for:"+panelPref +" pref:"+ pref+" in module.panelName:"+this.panelName+"\n");
-
-        if (pref == panelPref)
-        {
-            Firebug.ModuleManager.changeActivation(this);
-        }
-    },
-
-    updateTab: function()
-    {
-        if (!this.panelName && (FBTrace.DBG_PANELS || FBTrace.DBG_ERRORS))
-            FBTrace.sysout("firebug.ActivableModule.updateTab; Missing panelName in activable module", this);
-
-        // Set activable module to mini tab menu so, the menu can get the actual state.
-        var panelBar = Firebug.chrome.$("fbPanelBar1");
-        var tab = panelBar.getTab(this.panelName);
-        if (tab)
-        {
-            tab.setModule(this);
-            var enabled = this.isAlwaysEnabled();
-            if (enabled)
-                tab.setAttribute("aria-disabled", "false");
-            else
-                tab.setAttribute("aria-disabled", "true");
-            if (FBTrace.DBG_PANELS || FBTrace.DBG_ACTIVATION)
-                FBTrace.sysout("firebug.updateTab for "+this.panelName+" set aria-disabled with enabled:"+enabled);
-        }
-        else
-        {
-            if (FBTrace.DBG_PANELS || FBTrace.DBG_ACTIVATION)
-                FBTrace.sysout("firebug.updateTab for "+this.panelName+" ** no tab **");
-        }
-
-    }
 });
 
 // ************************************************************************************************
-
-Firebug.DisabledPanelPage = function(module)
-{
-    this.module = module;
-}
-
-Firebug.DisabledPanelPage.prototype = domplate(Firebug.Rep,
-{
-    tag:
-        DIV({"class": "disabledPanelBox"},
-            H1({"class": "disabledPanelHead"},
-                SPAN("$pageTitle")
-            ),
-            P({"class": "disabledPanelDescription", style: "margin-top: 15px;"},
-                $STR("moduleManager.desc3"),
-                SPAN("&nbsp;"),
-                SPAN({"class": "descImage descImage-$panelName"})
-            )
-            /* need something here that pushes down any thing appended to the panel */
-         ),
-
-    getModuleName: function(module)
-    {
-        var panelType = Firebug.getPanelType(module.panelName);
-        return Firebug.getPanelTitle(panelType);
-    },
-
-    onEnable: function(event)
-    {
-        if (FBTrace.DBG_PANELS)
-            FBTrace.sysout("firebug.DisabledPanelPage.onEnable; " +
-                FirebugContext ? FirebugContext.getName() : "NO CONTEXT");
-
-        Firebug.ModuleManager.enableModules(FirebugContext);
-    },
-
-    show: function(panel)
-    {
-        // Always render the page so, the previous content is properly replaced.
-        //if (!panel.disabledBox)
-            this.render(panel);
-
-        panel.disabledBox.setAttribute("collapsed", false);
-        panel.panelNode.scrollTop = 0;
-
-        if (FBTrace.DBG_PANELS)
-            FBTrace.sysout("firebug.DisabledPanelPage.show:"+panel.disabledBox.getAttribute('collapsed')+" box", panel.disabledBox);
-    },
-
-    hide: function(panel)
-    {
-        if (!panel.disabledBox)
-            return;
-
-        if (FBTrace.DBG_PANELS)
-            FBTrace.sysout("firebug.DisabledPanelPage.hide; box", panel.disabledBox);
-
-        panel.disabledBox.setAttribute("collapsed", true);
-    },
-
-    render: function(panel)
-    {
-        // Prepare arguments for the template.
-        var args = {
-            pageTitle: $STRF("moduleManager.title", [this.getModuleName(this.module)]),
-            panelName: this.module.panelName
-        };
-
-        // Render panel HTML
-        panel.disabledBox = this.tag.replace(args, panel.panelNode, this);
-        panel.panelNode.scrollTop = 0;
-    }
-});
-
-// ************************************************************************************************
-
-Firebug.ModuleManager =
-{
-    disableModules: function(context)
-    {
-        if (!context)
-            context = FirebugContext;
-
-        for (var i=0; i<activableModules.length; i++)
-        {
-            var module = activableModules[i];
-            this.disableModule(module);
-        }
-    },
-
-    enableModules: function(context)
-    {
-        for (var i=0; i<activableModules.length; i++)
-        {
-            var module = activableModules[i];
-            this.enableModule(module);
-        }
-    },
-
-    disableModule: function(module)
-    {
-        if (module.isAlwaysEnabled())  // if we are enabled,
-            module.setDefaultState(false);  // change the pref, triggering disable
-        else
-            this.changeActivation(module); // pref is ok, just disable
-    },
-
-    enableModule: function(module)
-    {
-        if (!module.isAlwaysEnabled())
-            module.setDefaultState(true);
-        else
-            this.changeActivation(module);
-    },
-
-    changeActivation: function(module)
-    {
-        if (module.isAlwaysEnabled())
-            dispatch(modules, "onPanelEnable", [module.panelName]);
-        else
-            dispatch(modules, "onPanelDisable", [module.panelName]);
-
-        module.updateTab();
-        Firebug.resetTooltip();
-
-        TabWatcher.iterateContexts(
-            function changeActivation(context)
-            {
-                try
-                {
-                    if (module.isAlwaysEnabled())
-                        module.panelEnable(context);
-                    else
-                        module.panelDisable(context);
-                }
-                catch (exc)
-                {
-                    if (FBTrace.DBG_ERRORS)
-                        FBTrace.sysout("ModuleManager.changeActivation FAILS for "+context.getName()+" because: "+ exc, exc);
-                }
-            }
-        );
-
-    },
-
-    obeyPrefs: function(context)
-    {
-        for (var i=0; i<activableModules.length; i++)
-        {
-            var module = activableModules[i];
-            if (module.isAlwaysEnabled())
-                this.enableModule(module);
-            else
-                this.disableModule(module);
-
-            module.updateTab();
-        }
-    },
-}
 
 Firebug.Migrator =
 {

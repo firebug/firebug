@@ -2066,7 +2066,8 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
         if (FirebugContext && !fbs.isJSDActive())
             fbs.unPause();
 
-        if (FBTrace.DBG_PANELS || FBTrace.DBG_ACTIVATION) FBTrace.sysout("debugger.onPanelEnable with panelName: "+panelName);
+        if (FBTrace.DBG_PANELS || FBTrace.DBG_ACTIVATION)
+            FBTrace.sysout("debugger.onPanelEnable with panelName: "+panelName);
     },
 
     onPanelDisable: function(panelName)
@@ -2088,10 +2089,13 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
                 }
             }
         }
+
         // else no dependents enabled:
         this.unregisterDebugger();
 
-        if (FBTrace.DBG_PANELS || FBTrace.DBG_ACTIVATION) FBTrace.sysout("debugger.onPanelDisable with panelName: "+panelName);
+        if (FBTrace.DBG_PANELS || FBTrace.DBG_ACTIVATION)
+            FBTrace.sysout("debugger.onPanelDisable with panelName: "+panelName);
+
         this.clearAllBreakpoints();
     },
 
@@ -2740,7 +2744,7 @@ Firebug.ScriptPanel.prototype = extend(Firebug.SourceBoxPanel,
 
         if (enabled)
         {
-            Firebug.Debugger.disabledPanelPage.hide(this);
+            Firebug.DisabledPanelPage.hide(this);
 
             if (this.context.loaded)
             {
@@ -2766,7 +2770,7 @@ Firebug.ScriptPanel.prototype = extend(Firebug.SourceBoxPanel,
         }
         else
         {
-            Firebug.Debugger.disabledPanelPage.show(this);
+            Firebug.DisabledPanelPage.show(this);
         }
     },
 

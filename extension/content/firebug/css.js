@@ -364,6 +364,12 @@ Firebug.CSSStyleSheetPanel = function() {}
 
 Firebug.CSSStyleSheetPanel.prototype = extend(Firebug.SourceBoxPanel,
 {
+    // xxxHonza, XXXjjb
+    // This panel is derived from Firebug.ActivablePanel (predecessor of Firebug.SourceBoxPanel)
+    // but it's apparently not supporting enable/disable. This is a workaround but better 
+    // would be to derive only from Firebug.Panel.
+    activable: false,
+
     template: domplate(
     {
         tag:

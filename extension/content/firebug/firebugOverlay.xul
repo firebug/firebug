@@ -28,7 +28,6 @@
         <command id="cmd_clearNet" oncommand="Firebug.NetMonitor.clear(FirebugContext)"/>
         <command id="cmd_toggleSuspendFirebug" oncommand="Firebug.toggleSuspend()"/>
         <command id="cmd_closeFirebug" oncommand="Firebug.closeFirebug(true)"/>
-        <command id="cmd_disablePanels" oncommand="Firebug.disablePanels(FirebugContext)"/>
 
         <command id="cmd_toggleInspecting" oncommand="if (!FirebugContext) Firebug.toggleBar(true); Firebug.Inspector.toggleInspecting(FirebugContext)"
                  checked="false"/>
@@ -67,8 +66,8 @@
         <command id="cmd_detachFirebug" oncommand="Firebug.toggleDetachBar(false, true)"/>
         <command id="cmd_minimizeFirebug" oncommand="Firebug.minimizeBar()"/>
         <command id="cmd_toggleDetachFirebug" oncommand="Firebug.toggleDetachBar()"/>
-        <command id="cmd_enablePanels" oncommand="Firebug.ModuleManager.enableModules()"/>
-        <command id="cmd_disablePanels" oncommand="Firebug.ModuleManager.disableModules()"/>
+        <command id="cmd_enablePanels" oncommand="Firebug.PanelActivation.enableAllPanels()"/>
+        <command id="cmd_disablePanels" oncommand="Firebug.PanelActivation.disableAllPanels()"/>
         <command id="cmd_allOn" oncommand="Firebug.Activation.toggleAll('on')"/>
         <command id="cmd_clearActivationList" oncommand="Firebug.Activation.clearAnnotations()"/>
         <command id="cmd_customizeFBKeys" oncommand="Firebug.ShortcutsModel.customizeShortcuts()"/>

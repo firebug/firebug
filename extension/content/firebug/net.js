@@ -326,20 +326,26 @@ Firebug.NetMonitor = extend(Firebug.ActivableModule,
         }
     },
 
-    onEnabled: function(context)
+    onEnabled: function(context, enabledPanelName)
     {
-        if (FBTrace.DBG_NET)
-            FBTrace.sysout("net.onEnabled; "+context.getName());
+        if (panelName != enabledPanelName)
+            return;
+
+        if (FBTrace.DBG_NET || FBTrace.DBG_ACTIVATION)
+            FBTrace.sysout("net.onEnabled; " + context.getName());
 
         NetHttpActivityObserver.registerObserver();
 
         monitorContext(context);
     },
 
-    onDisabled: function(context)
+    onDisabled: function(context, disabledPanelName)
     {
-        if (FBTrace.DBG_NET)
-            FBTrace.sysout("net.onDisabled; "+context.getName());
+        if (panelName != disabledPanelName)
+            return;
+
+        if (FBTrace.DBG_NET || FBTrace.DBG_ACTIVATION)
+            FBTrace.sysout("net.onDisabled; " + context.getName());
 
         NetHttpActivityObserver.unregisterObserver();
 
@@ -504,12 +510,12 @@ NetPanel.prototype = extend(Firebug.ActivablePanel,
 
         if (enabled)
         {
-            Firebug.NetMonitor.disabledPanelPage.hide(this);
+            Firebug.DisabledPanelPage.hide(this);
             Firebug.chrome.setGlobalAttribute("cmd_togglePersistNet", "checked", this.persistContent);
         }
         else
         {
-            Firebug.NetMonitor.disabledPanelPage.show(this);
+            Firebug.DisabledPanelPage.show(this);
             this.table = null;
         }
 
