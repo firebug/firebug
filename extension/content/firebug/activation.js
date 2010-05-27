@@ -438,7 +438,7 @@ Firebug.PanelActivation = extend(Firebug.Module,
             var panelName = parts[2];
             var enable = Firebug.getPref(Firebug.prefDomain, panelName + ".enableSites");
 
-            this.onChangeActivation(panelName, enable);
+            this.onChangeActivation(null, panelName, enable);
         }
         catch (e)
         {
@@ -447,46 +447,50 @@ Firebug.PanelActivation = extend(Firebug.Module,
         }
     },
 
-    onChangeActivation: function(panelName, enable)
+    initActivation: function(context, panelName, enable)
     {
-        if (FBTrace.DBG_ACTIVATION)
-            FBTrace.sysout("PanelActivation.changeActivation; The '" + panelName +
-                "' panel is now " + (enable ? "enabled" : "disabled"));
+        this.onChangeActivation(context, panelName, enable);
+    },
 
+    onChangeActivation: function(context, panelName, enable)
+    {
         if (enable)
             dispatch(Firebug.modules, "onPanelEnable", [panelName]);
         else
             dispatch(Firebug.modules, "onPanelDisable", [panelName]);
 
-        // Update UI
-        this.updateTab(panelName, enable);
-        Firebug.resetTooltip();
-
-        // Iterate all contexts and change panel activation for all
-        // panels with this name.
-        var self = this;
-        TabWatcher.iterateContexts(function(context) {
-            self.changeActivation(context, panelName, enable);
-        });
+        // If the context is provided then use it, otherwise iterate all
+        // available contexts
+        if (context)
+        {
+            this.changeActivation(context, panelName, enable);
+        }
+        else
+        {
+            var self = this;
+            TabWatcher.iterateContexts(function(context) {
+                self.changeActivation(context, panelName, enable);
+            });
+        }
     },
 
     changeActivation: function(context, panelName, enable)
     {
         try
         {
-            var panel = context.getPanel(panelName, false);
-            if (!panel)
-                return;
-
-            // Enable or disable panel within the specified context.
-            if (enable)
-                panel.enablePanel();
-            else
-                panel.disablePanel();
-
-            // Another notification for all modules, now with the context.
+            // Second notification sent to all modules, now with the context.
             var fName = enable ? "onEnabled" : "onDisabled";
             dispatch(Firebug.modules, fName, [context, panelName]);
+
+            // Enable or disable panel within the specified context.
+            var panel = context.getPanel(panelName, true);
+            if (panel)
+            {
+                if (enable)
+                    panel.enablePanel();
+                else
+                    panel.disablePanel();
+            }
         }
         catch (exc)
         {
@@ -494,28 +498,7 @@ Firebug.PanelActivation = extend(Firebug.Module,
                 FBTrace.sysout("PanelActivation.onChangeActivation FAILS for " +
                     context.getName() + " because: " + exc, exc);
         }
-    },
-
-    updateTab: function(panelName, enable)
-    {
-        // Set activable module to mini tab menu so, the menu can get the actual state.
-        var panelBar = Firebug.chrome.$("fbPanelBar1");
-        var tab = panelBar.getTab(panelName);
-        if (!tab)
-        {
-            if (FBTrace.DBG_ERRORS || FBTrace.DBG_ACTIVATION)
-                FBTrace.sysout("PanelActivation.updateTab; No tab: " + panelName);
-            return;
-        }
-
-        //xxxHonza: the tab needs to know wheter to show enablement actions or not.
-        //tab.setModule(this);
-
-        if (enable)
-            tab.setAttribute("aria-disabled", "false");
-        else
-            tab.setAttribute("aria-disabled", "true");
-    },
+    }
 });
 
 // ************************************************************************************************

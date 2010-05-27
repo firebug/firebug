@@ -1822,7 +1822,6 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
         $("cmd_decompileEvals").setAttribute("checked", Firebug.decompileEvals);
 
         this.wrappedJSObject = this;  // how we communicate with fbs
-        this.panelName = "script";
 
         // This is a service operation, a way of encapsulating fbs which is in turn implementing this
         // simple service. We could implment a whole component for this service, but it hardly makes sense.
@@ -1852,13 +1851,19 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
 
     enable: function()
     {
-        if (this.isAlwaysEnabled())
-            this.registerDebugger(); // allow callbacks for jsd
+        if (FBTrace.DBG_ACTIVATION)
+            FBTrace.sysout("debugger.Firebug.Debugger.enable; " + this.enabled);
+
+        //if (this.isAlwaysEnabled())
+        //    this.registerDebugger(); // allow callbacks for jsd
     },
 
     disable: function()
     {
-        this.unregisterDebugger();
+        if (FBTrace.DBG_ACTIVATION)
+            FBTrace.sysout("debugger.Firebug.Debugger.disable; " + this.enabled);
+
+        //this.unregisterDebugger();
     },
 
     initializeUI: function()
@@ -2020,6 +2025,7 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
 
         if (this.registered)
             return;
+
         this.registered = true;
 
         var check = fbs.registerDebugger(this);  //  this will eventually set 'jsd' on the statusIcon
@@ -2036,7 +2042,8 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
         if (!this.registered)
             return;
 
-        if (Firebug.Profiler.isProfiling()) // stay registered if we are profiling across a reload.
+        // stay registered if we are profiling across a reload.
+        if (Firebug.Profiler.isProfiling())
             return;
 
         var check = fbs.unregisterDebugger(this);
@@ -2049,7 +2056,8 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
 
     onSourceFileCreated: function(context, sourceFile)
     {
-        // This event can come at any time, eg by frame reloads or ajax, so we need to update the display.
+        // This event can come at any time, eg by frame reloads or ajax,
+        // so we need to update the display.
         context.invalidatePanels("script", "breakpoints");
     },
 
@@ -2058,21 +2066,22 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
 
     onPanelEnable: function(panelName)
     {
-        if (panelName != this.panelName)
+        if (panelName != "script")
             return;
 
+        this.setDefaultState(true);
         this.registerDebugger();
 
         if (FirebugContext && !fbs.isJSDActive())
             fbs.unPause();
 
         if (FBTrace.DBG_PANELS || FBTrace.DBG_ACTIVATION)
-            FBTrace.sysout("debugger.onPanelEnable with panelName: "+panelName);
+            FBTrace.sysout("debugger.onPanelEnable;");
     },
 
     onPanelDisable: function(panelName)
     {
-        if (panelName != this.panelName)
+        if (panelName != "script")
             return;
 
         if (this.dependents.length > 0)
@@ -2081,16 +2090,24 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
             {
                 if (this.dependents[i].isAlwaysEnabled())
                 {
-                    var name = this.dependents[0].dispatchName; // TODO getName() for modules required.
+                    // TODO getName() for modules required.
+                    var name = this.dependents[0].dispatchName;
+
+                    // Log message into the console to inform the user
                     if (FirebugContext)
-                        Firebug.Console.log("Cannot disable the script panel, "+name+" panel requires it", FirebugContext);
-                    if (FBTrace.DBG_PANELS) FBTrace.sysout("debugger.onPanelDisable rejected: "+ name+" dependent, with panelName: "+panelName);
+                        Firebug.Console.log("Cannot disable the script panel, " + name +
+                            " panel requires it", FirebugContext);
+
+                    if (FBTrace.DBG_PANELS)
+                        FBTrace.sysout("debugger.onPanelDisable rejected: " + name +
+                            " dependent, with panelName: " + panelName);
                     return;
                 }
             }
         }
 
         // else no dependents enabled:
+        this.setDefaultState(false);
         this.unregisterDebugger();
 
         if (FBTrace.DBG_PANELS || FBTrace.DBG_ACTIVATION)
@@ -2120,7 +2137,8 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
         var paused = fbs.pause();  // can be called multiple times.
 
         if (FBTrace.DBG_ACTIVATION)
-            FBTrace.sysout("debugger.onSuspendFirebug paused: "+paused+" isAlwaysEnabled " +Firebug.Debugger.isAlwaysEnabled()+"\n");
+            FBTrace.sysout("debugger.onSuspendFirebug paused: "+paused+" isAlwaysEnabled " +
+                Firebug.Debugger.isAlwaysEnabled()+"\n");
 
         if (!paused)  // then we failed to suspend, undo
             return true;
@@ -2136,9 +2154,12 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
         var unpaused = fbs.unPause();
 
         if (FBTrace.DBG_ACTIVATION)
-            FBTrace.sysout("debugger.onResumeFirebug unpaused: "+unpaused+" isAlwaysEnabled " +Firebug.Debugger.isAlwaysEnabled());
+            FBTrace.sysout("debugger.onResumeFirebug unpaused: "+unpaused+" isAlwaysEnabled " +
+                Firebug.Debugger.isAlwaysEnabled());
+
         if (FBTrace.DBG_ERRORS && !this.registered && Firebug.Debugger.isAlwaysEnabled())
-            FBTrace.sysout("debugger.onResumeFirebug but debugger "+Firebug.Debugger.debuggerName+" not registered! *** ");
+            FBTrace.sysout("debugger.onResumeFirebug but debugger " +
+                Firebug.Debugger.debuggerName+" not registered! *** ");
     },
 
     ableWatchSidePanel: function(context)
@@ -2774,20 +2795,26 @@ Firebug.ScriptPanel.prototype = extend(Firebug.SourceBoxPanel,
         }
     },
 
-    enablePanel: function(module)
+    enablePanel: function()
     {
-        Firebug.ActivablePanel.enablePanel.apply(this, arguments);
+        if (FBTrace.DBG_PANELS || FBTrace.DBG_ACTIVATION)
+            FBTrace.sysout("debugger.ScriptPanel.enablePanel;");
 
         this.panelSplitter.collapsed = false;
         this.sidePanelDeck.collapsed = false;
+
+        Firebug.ActivablePanel.enablePanel.apply(this, arguments);
     },
 
-    disablePanel: function(module)
+    disablePanel: function()
     {
-        Firebug.ActivablePanel.disablePanel.apply(this, arguments);
+        if (FBTrace.DBG_PANELS || FBTrace.DBG_ACTIVATION)
+            FBTrace.sysout("debugger.ScriptPanel.disablePanel;");
 
         this.panelSplitter.collapsed = true;
         this.sidePanelDeck.collapsed = true;
+
+        Firebug.ActivablePanel.disablePanel.apply(this, arguments);
     },
 
     hide: function(state)

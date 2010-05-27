@@ -100,7 +100,9 @@ Firebug.TabContext.prototype =
 
         // ?? Firebug.onSourceFileDestroyed(this, sourceFile);
     },
-    // ***************************************************************************
+
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+
     get chrome()  // backward compat
     {
         return Firebug.chrome;
@@ -282,6 +284,7 @@ Firebug.TabContext.prototype =
     {
         // Instantiate a panel object. This is why panels are defined by prototype inheritance
         var panel = new panelType();
+        this.panelMap[panel.name] = panel;
 
         if (FBTrace.DBG_PANELS)
             FBTrace.sysout("tabContext.createPanel; Panel created:", panel);
@@ -292,7 +295,7 @@ Firebug.TabContext.prototype =
         var doc = this.chrome.getPanelDocument(panelType);
         panel.initialize(this, doc);
 
-        return this.panelMap[panel.name] = panel;
+        return panel;
     },
 
     setPanel: function(panelName, panel)  // allows a panel from one context to be used in other contexts.

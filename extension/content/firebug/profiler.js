@@ -21,7 +21,7 @@ Firebug.Profiler = extend(Firebug.Module,
         if (FBTrace.DBG_DISPATCH)
             FBTrace.sysout("Profiler.onPanelEnable panelName: "+panelName+"\n");
 
-        if (panelName == "net" || panelName == "script")
+        if (panelName == "console" || panelName == "script")
             this.setEnabled();
     },
 
@@ -30,7 +30,7 @@ Firebug.Profiler = extend(Firebug.Module,
         if (FBTrace.DBG_DISPATCH)
             FBTrace.sysout("Profiler.onPanelDisable panelName: "+panelName+"\n");
 
-       if (panelName == "net" || panelName == "script")
+        if (panelName == "console" || panelName == "script")
             this.setEnabled();
     },
 

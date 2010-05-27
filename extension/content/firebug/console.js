@@ -192,11 +192,8 @@ Firebug.Console = extend(ActivableConsole,
 
     initialize: function()
     {
-        this.panelName = "console";
-
         Firebug.ActivableModule.initialize.apply(this, arguments);
         Firebug.Debugger.addListener(this);
-
     },
 
     enable: function()
@@ -228,17 +225,17 @@ Firebug.Console = extend(ActivableConsole,
 
     clearReloadWarning: function(context) // remove the warning about reloading.
     {
-         if (context.consoleReloadWarning)
-         {
-             var panel = context.getPanel(this.panelName);
-             panel.clearReloadWarning();
-             delete context.consoleReloadWarning;
-         }
+        if (context.consoleReloadWarning)
+        {
+            var panel = context.getPanel("console");
+            panel.clearReloadWarning();
+            delete context.consoleReloadWarning;
+        }
     },
 
     togglePersist: function(context)
     {
-        var panel = context.getPanel(this.panelName);
+        var panel = context.getPanel("console");
         panel.persistContent = panel.persistContent ? false : true;
         Firebug.chrome.setGlobalAttribute("cmd_togglePersistConsole", "checked", panel.persistContent);
     },
@@ -262,26 +259,32 @@ Firebug.Console = extend(ActivableConsole,
 
     onPanelEnable: function(panelName)
     {
-        if (panelName != this.panelName)  // we don't care about other panels
+        if (panelName != "console")  // we don't care about other panels
             return;
 
         if (FBTrace.DBG_CONSOLE || FBTrace.DBG_ACTIVATION)
             FBTrace.sysout("console.onPanelEnable;");
 
+        this.setDefaultState(true);
         this.watchForErrors();
-        Firebug.Debugger.addDependentModule(this); // we inject the console during JS compiles so we need jsd
+
+        // we inject the console during JS compiles so we need jsd
+        Firebug.Debugger.addDependentModule(this);
     },
 
     onPanelDisable: function(panelName)
     {
-        if (panelName != this.panelName)  // we don't care about other panels
+        if (panelName != "console")  // we don't care about other panels
             return;
 
         if (FBTrace.DBG_CONSOLE || FBTrace.DBG_ACTIVATION)
             FBTrace.sysout("console.onPanelDisable;");
 
-        Firebug.Debugger.removeDependentModule(this); // we inject the console during JS compiles so we need jsd
+        this.setDefaultState(false);
         this.unwatchForErrors();
+
+        // we inject the console during JS compiles so we need jsd
+        Firebug.Debugger.removeDependentModule(this);
 
         // Make sure possible errors coming from the page and displayed in the Firefox
         // status bar are removed.
@@ -754,12 +757,12 @@ Firebug.ConsolePanel.prototype = extend(Firebug.ActivablePanel,
             $STR("console.Break On All Errors"));
     },
 
-    enablePanel: function(module)
+    enablePanel: function()
     {
-        if (FBTrace.DBG_CONSOLE)
-            FBTrace.sysout("console.ConsolePanel.enablePanel; " + this.context.getName());
-
         Firebug.ActivablePanel.enablePanel.apply(this, arguments);
+
+        if (FBTrace.DBG_CONSOLE || FBTrace.DBG_ACTIVATION)
+            FBTrace.sysout("console.ConsolePanel.enablePanel; " + this.context.getName());
 
         this.showCommandLine(true);
 
@@ -767,12 +770,12 @@ Firebug.ConsolePanel.prototype = extend(Firebug.ActivablePanel,
             scrollToBottom(this.panelNode);
     },
 
-    disablePanel: function(module)
+    disablePanel: function()
     {
-        if (FBTrace.DBG_CONSOLE)
-            FBTrace.sysout("console.ConsolePanel.disablePanel; " + this.context.getName());
-
         Firebug.ActivablePanel.disablePanel.apply(this, arguments);
+
+        if (FBTrace.DBG_CONSOLE || FBTrace.DBG_ACTIVATION)
+            FBTrace.sysout("console.ConsolePanel.disablePanel; " + this.context.getName());
 
         this.showCommandLine(false);
     },

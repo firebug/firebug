@@ -138,6 +138,7 @@ const binaryCategoryMap =
 Firebug.NetMonitor = extend(Firebug.ActivableModule,
 {
     dispatchName: "netMonitor",
+
     clear: function(context)
     {
         // The user pressed a Clear button so, remove content of the panel...
@@ -187,8 +188,6 @@ Firebug.NetMonitor = extend(Firebug.ActivableModule,
 
     initialize: function()
     {
-        this.panelName = panelName;
-
         Firebug.ActivableModule.initialize.apply(this, arguments);
 
         if (Firebug.TraceModule)
@@ -334,6 +333,7 @@ Firebug.NetMonitor = extend(Firebug.ActivableModule,
         if (FBTrace.DBG_NET || FBTrace.DBG_ACTIVATION)
             FBTrace.sysout("net.onEnabled; " + context.getName());
 
+        this.setDefaultState(true);
         NetHttpActivityObserver.registerObserver();
 
         monitorContext(context);
@@ -347,6 +347,7 @@ Firebug.NetMonitor = extend(Firebug.ActivableModule,
         if (FBTrace.DBG_NET || FBTrace.DBG_ACTIVATION)
             FBTrace.sysout("net.onDisabled; " + context.getName());
 
+        this.setDefaultState(false);
         NetHttpActivityObserver.unregisterObserver();
 
         unmonitorContext(context);
@@ -399,14 +400,10 @@ NetPanel.prototype = extend(Firebug.ActivablePanel,
 
     initialize: function(context, doc)
     {
-        this.queue = [];
-
         if (FBTrace.DBG_NET)
             FBTrace.sysout("net.NetPanel.initialize; " + context.getName());
 
-        // we listen for showUI/hideUI for panel activation
-        Firebug.registerUIListener(this);
-
+        this.queue = [];
         this.onContextMenu = bind(this.onContextMenu, this);
 
         Firebug.ActivablePanel.initialize.apply(this, arguments);
@@ -489,15 +486,6 @@ NetPanel.prototype = extend(Firebug.ActivablePanel,
         Firebug.ActivablePanel.savePersistedContent.apply(this, arguments);
 
         state.pageTitle = getPageTitle(this.context);
-    },
-
-    // UI Listener
-    showUI: function(browser, context)
-    {
-    },
-
-    hideUI: function(browser, context)
-    {
     },
 
     show: function(state)
@@ -839,11 +827,26 @@ NetPanel.prototype = extend(Firebug.ActivablePanel,
         return this.conditionEditor;
     },
 
-    // Support for activation.
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+    // Activable Panel
+
+    enablePanel: function()
+    {
+        if (FBTrace.DBG_NET || FBTrace.DBG_ACTIVATION)
+            FBTrace.sysout("net.NetPanel.enablePanel; " + this.context.getName());
+
+        Firebug.ActivablePanel.enablePanel.apply(this, arguments);
+    },
+
     disablePanel: function(module)
     {
-        Firebug.ActivablePanel.disablePanel.apply(this, arguments);
+        if (FBTrace.DBG_NET || FBTrace.DBG_ACTIVATION)
+            FBTrace.sysout("net.NetPanel.disablePanel; " + this.context.getName());
+
+        // The content will be replaced by a message saying "disabled now".
         this.table = null;
+
+        Firebug.ActivablePanel.disablePanel.apply(this, arguments);
     },
 
     breakOnNext: function(breaking)
