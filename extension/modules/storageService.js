@@ -8,7 +8,7 @@ const Ci = Components.interfaces;
 const Cr = Components.results;
 
 // https://developer.mozilla.org/en/Using_JavaScript_code_modules
-var EXPORTED_SYMBOLS = ["Storage", "StorageService"];
+var EXPORTED_SYMBOLS = ["Storage", "StorageService", "TextService"];
 
 /*
  * http://dev.w3.org/html5/webstorage/#storage-0
@@ -120,6 +120,13 @@ var StorageService =
     },
 };
 
+var TextService =
+{
+	    writeText: function(leafName, string)
+	    {
+			return ObjectPersister.writeText(leafName, string);
+	    },
+};
 //***************** IMPLEMENTATION ********************************************************
 
 const dirService = Cc["@mozilla.org/file/directory_service;1"].getService(Ci.nsIProperties);
@@ -234,6 +241,21 @@ var ObjectPersister =
 
     writeNow: function(leafName, obj)
     {
+    	try
+    	{
+            // Convert data to JSON.
+            var jsonString = JSON.stringify(obj);
+        	ObjectPersister.writeText(leafName, jsonString);
+    	}
+    	catch(exc)
+    	{
+            if (FBTrace.DBG_ERRORS || FBTrace.DBG_STORAGE)
+                FBTrace.sysout("ObjectPersister.writeNow; EXCEPTION for "+leafName+": "+exc, {exception: exc, obj: obj});
+    	}
+    },
+
+    writeText: function(leafName, string)
+    {
         try
         {
             var file = ObjectPersister.getFileByName(leafName);
@@ -243,21 +265,18 @@ var ObjectPersister =
                 .createInstance(Ci.nsIFileOutputStream);
             outputStream.init(file, 0x02 | 0x08 | 0x20, 0666, 0); // write, create, truncate
 
-            // Convert data to JSON.
-            var jsonString = JSON.stringify(obj);
-
             // Store JSON
-            outputStream.write(jsonString, jsonString.length);
+            outputStream.write(string, string.length);
             outputStream.close();
 
             if (FBTrace.DBG_STORAGE)
-                FBTrace.sysout("ObjectPersister.writeNow to " +
-                    file.path, jsonString);
+                FBTrace.sysout("ObjectPersister.writeNow to " + file.path, string);
+            return file.path;
         }
         catch (err)
         {
             if (FBTrace.DBG_ERRORS || FBTrace.DBG_STORAGE)
-                FBTrace.sysout("ObjectPersister.flush; EXCEPTION for "+leafName+": "+err, {exception: err, object: obj, jsonString: jsonString});
+                FBTrace.sysout("ObjectPersister.writeText; EXCEPTION for "+leafName+": "+err, {exception: err, string: string});
         }
     },
 
