@@ -1087,7 +1087,6 @@ Firebug.CommandLine.injector = {
                 Firebug.CommandLine.injector.injectCommandLineScript(doc);
 
             Firebug.CommandLine.injector.addCommandLineListener(context, win, element);
-            element.setAttribute("firebugCommandLineListener", "true");
         }
         else if (Firebug.CommandLine.isSandbox(context))
         {
@@ -1138,9 +1137,10 @@ Firebug.CommandLine.injector = {
         context.activeCommandLineHandlers[win] = boundHandler;
 
         element.addEventListener("firebugExecuteCommand", boundHandler, true);
+        element.setAttribute("firebugCommandLineListener", "true");
 
         if (FBTrace.DBG_CONSOLE)
-            FBTrace.sysout("addCommandLineListener to element in window with console "+win.location, win.console);
+            FBTrace.sysout("addCommandLineListener to "+ element.tagName +" in window"+win.location+" with console ", win.console);
     },
 
     detachCommandLine: function(context, win)
