@@ -420,7 +420,7 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
 
     clearErrorBreakpoint: function(sourceFile, line)
     {
-        fbs.clearErrorBreakpoint(sourceFile, line, Firebug.Debugger);
+        fbs.clearErrorBreakpoint(sourceFile.href, line, Firebug.Debugger);
     },
 
     clearAllBreakpoints: function(context)
