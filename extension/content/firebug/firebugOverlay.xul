@@ -489,8 +489,8 @@
         </menupopup>
         <panel id="fbMigrator" noautohide='true'>
         <!-- The width and height need to be set or the arrow will not show -->
-        <iframe id="fbMigrationFrame" width='200' height='100' src="chrome://firebug/skin/migrationArrow.svg"></iframe>
-        <button id="fbMigrationOk" label="Ok"/>
+        <!-- maybe later <iframe id="fbMigrationFrame" width='200' height='100' src="chrome://firebug/skin/migrationArrow.svg"></iframe>
+        <button id="fbMigrationOk" label="Ok"/> -->
         </panel>
     </vbox>
 
