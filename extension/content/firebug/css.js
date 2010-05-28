@@ -230,7 +230,7 @@ Firebug.CSSModule = extend(Firebug.Module,
         if (FBTrace.DBG_CSS)
             FBTrace.sysout("css.saveEdit styleSheet.href:"+styleSheet.href+" got innerHTML:"+value+"\n");
 
-        dispatch(this.fbListener, "onCSSFreeEdit", [styleSheet, value]);
+        dispatch(this.fbListeners, "onCSSFreeEdit", [styleSheet, value]);
     },
 
     insertRule: function(styleSheet, cssText, ruleIndex)
