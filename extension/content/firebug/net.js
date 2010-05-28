@@ -1925,7 +1925,7 @@ Firebug.NetMonitor.NetRequestEntry = domplate(Firebug.Rep, new Firebug.Listener(
         ),
 
     netInfoTag:
-        TR({"class": "netInfoRow outerFocusRow", "role" : "row"},
+        TR({"class": "netInfoRow $file|getCategory outerFocusRow", "role" : "row"},
             TD({"class": "sourceLine netRowHeader"}),
             TD({"class": "netInfoCol", colspan: 5, "role" : "gridcell"})
         ),
@@ -2013,7 +2013,7 @@ Firebug.NetMonitor.NetRequestEntry = domplate(Firebug.Rep, new Firebug.Listener(
         toggleClass(row, "opened");
         if (hasClass(row, "opened"))
         {
-            var netInfoRow = this.netInfoTag.insertRows({}, row)[0];
+            var netInfoRow = this.netInfoTag.insertRows({file: file}, row)[0];
             var netInfoCol = netInfoRow.getElementsByClassName("netInfoCol").item(0);
             var netInfoBox = NetInfoBody.tag.replace({file: file}, netInfoCol);
 
