@@ -2692,16 +2692,17 @@ this.getFunctionName = function(script, context, frame, noArgs)
 
     if (!name || (name == "anonymous"))
     {
+    	name = null;
         var analyzer = Firebug.SourceFile.getScriptAnalyzer(context, script);
         if (analyzer && frame)
         {
             if (FBTrace.DBG_STACK) FBTrace.sysout("getFunctionName analyzer.sourceFile:", analyzer.sourceFile);
             var functionSpec = analyzer.getFunctionDescription(script, context, frame);
-            name = functionSpec.name + (noArgs ? "" : "("+functionSpec.args.join(',')+")");
+            if (functionSpec.name)
+            	name = functionSpec.name + (noArgs ? "" : "("+functionSpec.args.join(',')+")");
         }
-        else
+        if (!name) 
         {
-            // XXXjjb I think we can do better, with the analyzer we can fix the line numbers
             if (FBTrace.DBG_STACK) FBTrace.sysout("getFunctionName no analyzer, "+script.baseLineNumber+"@"+script.fileName+"\n");
             name =  this.guessFunctionName(FBL.normalizeURL(script.fileName), script.baseLineNumber, context);
         }

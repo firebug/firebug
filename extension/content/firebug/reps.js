@@ -1403,7 +1403,7 @@ this.StackFrame = domplate(Firebug.Rep,  // XXXjjb Since the repObject is fn the
     {
         if (frame.fn && frame.fn != "anonymous")
             return frame.fn;
-        return getFunctionName(frame.script, frame.context, null, true);
+        return getFunctionName(frame.script, frame.context, frame, true);
     },
 
     getSourceLinkTitle: function(frame)
@@ -1511,7 +1511,7 @@ this.jsdStackFrame = domplate(Firebug.Rep,
     getTitle: function(frame, context)
     {
         if (!frame.isValid) return "(invalid frame)"; // XXXjjb avoid frame.script == null
-        return getFunctionName(frame.script, context);
+        return getFunctionName(frame.script, context, frame, true);
     },
 
     getTooltip: function(frame, context)
