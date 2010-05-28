@@ -1485,7 +1485,8 @@ CSSElementPanel.prototype = extend(Firebug.CSSStyleSheetPanel.prototype,
 
         if (sothinkInstalled)
         {
-            FirebugReps.Warning.tag.replace({object: "SothinkWarning"}, this.panelNode);
+            var div = FirebugReps.Warning.tag.replace({object: "SothinkWarning"}, this.panelNode);
+            div.innerHTML = $STR("SothinkWarning");
             return;
         }
 
