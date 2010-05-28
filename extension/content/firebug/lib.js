@@ -2246,25 +2246,29 @@ this.wrapText = function(text, noEscapeHTML)
     var html = [];
     var wrapWidth = Firebug.textWrapWidth;
 
-    // Split long text into lines and put every line into an <code> element (only in case
+    // Split long text into lines and put every line into a <code> element (only in case
     // if noEscapeHTML is false). This is useful for automatic scrolling when searching
     // within response body (in order to scroll we need an element).
-    // Don't use <pre> elements since these adds addiontanl new line ending when copying
+    // Don't use <pre> elements since this adds additional new line endings when copying
     // selected source code using Firefox->Edit->Copy (Ctrl+C) (issue 2093).
     var lines = this.splitLines(text);
     for (var i = 0; i < lines.length; ++i)
     {
         var line = lines[i];
-        while (line.length > wrapWidth)
-        {
-            var m = reNonAlphaNumeric.exec(line.substr(wrapWidth, 100));
-            var wrapIndex = wrapWidth + (m ? m.index : 0);
-            var subLine = line.substr(0, wrapIndex);
-            line = line.substr(wrapIndex);
 
-            if (!noEscapeHTML) html.push("<code class=\"wrappedText focusRow\" role=\"listitem\">");
-            html.push(noEscapeHTML ? subLine : escapeForTextNode(subLine));
-            if (!noEscapeHTML) html.push("</code>");
+        if (wrapWidth > 0)
+        {
+            while (line.length > wrapWidth)
+            {
+                var m = reNonAlphaNumeric.exec(line.substr(wrapWidth, 100));
+                var wrapIndex = wrapWidth + (m ? m.index : 0);
+                var subLine = line.substr(0, wrapIndex);
+                line = line.substr(wrapIndex);
+    
+                if (!noEscapeHTML) html.push("<code class=\"wrappedText focusRow\" role=\"listitem\">");
+                html.push(noEscapeHTML ? subLine : escapeForTextNode(subLine));
+                if (!noEscapeHTML) html.push("</code>");
+            }
         }
 
         if (!noEscapeHTML) html.push("<code class=\"wrappedText focusRow\" role=\"listitem\">");
