@@ -680,9 +680,8 @@ FirebugService.prototype =
         }
     },
 
-    clearErrorBreakpoint: function(sourceFile, lineNo, debuggr)
+    clearErrorBreakpoint: function(url, lineNo, debuggr)
     {
-        var url = sourceFile.href;
         var index = this.findErrorBreakpoint(url, lineNo);
         if (index != -1)
         {
