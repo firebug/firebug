@@ -30,9 +30,16 @@ Firebug.NavigationHistory = extend(Firebug.Module,
             context.navigationHistory = persistedState.navigationHistory;
     },
 
+    reattachContext: function(browser, context)
+    {
+        Firebug.Module.reattachContext.apply(this, arguments);
+
+        this.updateButtons(context);
+    },
+
     destroyContext: function(context, persistedState)
     {
-        Firebug.ActivableModule.destroyContext.apply(this, arguments);
+        Firebug.Module.destroyContext.apply(this, arguments);
 
         if (persistedState)
             persistedState.navigationHistory = context.navigationHistory;
@@ -155,8 +162,8 @@ Firebug.NavigationHistory = extend(Firebug.Module,
     {
         var list = this.getHistory(context);
 
-        var backButton = $("fbNavigateBackButton");
-        var forwardButton = $("fbNavigateForwardButton");
+        var backButton = Firebug.chrome.$("fbNavigateBackButton");
+        var forwardButton = Firebug.chrome.$("fbNavigateForwardButton");
 
         backButton.setAttribute("disabled", "true");
         forwardButton.setAttribute("disabled", "true");
