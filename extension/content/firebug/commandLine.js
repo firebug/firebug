@@ -1152,9 +1152,12 @@ Firebug.CommandLine.injector = {
         if (element.getAttribute("firebugCommandLineListener") === "true")
         {
             Firebug.CommandLine.evaluate("window._FirebugCommandLine.detachCommandLine()", context);
-            var boundHandler = context.activeCommandLineHandlers[win];
-            if (boundHandler)
-                element.removeEventListener("firebugExecuteCommand", boundHandler, true);
+            if (context.activeCommandLineHandlers)
+            {
+                var boundHandler = context.activeCommandLineHandlers[win];
+                if (boundHandler)
+                    element.removeEventListener("firebugExecuteCommand", boundHandler, true);
+            }
 
             element.removeAttribute("firebugCommandLineListener");
             if (FBTrace.DBG_CONSOLE)
