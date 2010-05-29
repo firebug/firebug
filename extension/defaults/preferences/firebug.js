@@ -168,6 +168,7 @@ pref("extensions.firebug.DBG_SVGVIEWER", false);    // svg explorer             
 pref("extensions.firebug.DBG_ACTIVITYOBSERVER", false);    // Net panel's activity observer      /*@explore*/
 pref("extensions.firebug.DBG_TOOLTIP", false);      // tooltip debugging      /*@explore*/
 pref("extensions.firebug.DBG_HISTORY", false);      // panel navigation history                  /*@explore*/
+pref("extensions.firebug.DBG_STORAGE", false);      // storageService                  /*@explore*/
 
 // Keyboard
 pref("extensions.firebug.key.shortcut.reenterCommand", "control shift e");

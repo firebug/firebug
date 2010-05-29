@@ -120,13 +120,6 @@ var StorageService =
     },
 };
 
-var TextService =
-{
-	    writeText: function(leafName, string)
-	    {
-			return ObjectPersister.writeText(leafName, string);
-	    },
-};
 //***************** IMPLEMENTATION ********************************************************
 
 const dirService = Cc["@mozilla.org/file/directory_service;1"].getService(Ci.nsIProperties);
@@ -139,14 +132,29 @@ var FBTrace = null;
  */
 var ObjectPersister =
 {
-    getFileByName: function(leafName)
+	getProfileDirectory: function()
+	{
+		var file = dirService.get("ProfD", Ci.nsIFile);
+		return file;
+	},
+	
+	getFileInDirectory: function(file, path)  // forward slash separated
+	{
+		var segs = path.split('/');
+		for (var i = 0; i < segs.length; i++)
+		{
+			file.append(segs[i]);
+		}
+		return file;
+	},
+	
+    getFileInProfileDirectory: function(path)
     {
         // Get persistence file stored within the profile directory.
-        var file = dirService.get("ProfD", Ci.nsIFile);
-        file.append("firebug");
-        file.append(leafName);
+		var file = ObjectPersister.getProfileDirectory();
+        file = ObjectPersister.getFileInDirectory(file, path);
         if (FBTrace.DBG_STORAGE)
-            FBTrace.sysout("ObjectPersister getFileByName("+leafName+")="+file.path);
+            FBTrace.sysout("ObjectPersister getFileInProfileDirectory("+path+")="+file.path);
 
         return file;
     },
@@ -157,9 +165,17 @@ var ObjectPersister =
             .getService(Ci.nsISupports).wrappedJSObject.getTracer("extensions.firebug");
 
         if (FBTrace.DBG_STORAGE)
-            FBTrace.sysout("ObjectPersister read");
+            FBTrace.sysout("ObjectPersister read from leafName "+leafName);
 
-        var file = ObjectPersister.getFileByName(leafName);
+        var file = ObjectPersister.getFileInProfileDirectory("firebug/"+leafName);
+        
+        if (!file.exists())
+        {
+            file.create(Ci.nsIFile.NORMAL_FILE_TYPE, 0666);
+            if (FBTrace.DBG_STORAGE)
+                FBTrace.sysout("ObjectPersister.readTextFromFile file created " + file.path);
+            return;
+        }
 
         var obj = this.readObjectFromFile(file);
         return obj;
@@ -167,16 +183,25 @@ var ObjectPersister =
 
     readObjectFromFile: function(file)
     {
+    	var text = ObjectPersister.readTextFromFile(file);
+    	if (!text)
+    		return null;
+    	
+        var nativeJSON = Cc["@mozilla.org/dom/json;1"].createInstance(Ci.nsIJSON);
+        var obj = nativeJSON.decode(text);
+        if (!obj)
+            return;
+
+        if (FBTrace.DBG_STORAGE)
+            FBTrace.sysout("PersistedObject loaded from " + file.path+" got text "+text, obj);
+
+        return obj;
+    },
+    
+    readTextFromFile: function(file)
+    {
         try
         {
-            if (!file.exists())
-            {
-                file.create(Ci.nsIFile.NORMAL_FILE_TYPE, 0666);
-                if (FBTrace.DBG_STORAGE)
-                    FBTrace.sysout("ObjectPersister.readObjectFromFile file created " + file.path);
-                return;
-            }
-
             var inputStream = Cc["@mozilla.org/network/file-input-stream;1"]
                 .createInstance(Ci.nsIFileInputStream);
             var cstream = Cc["@mozilla.org/intl/converter-input-stream;1"]
@@ -191,17 +216,9 @@ var ObjectPersister =
             cstream.readString(-1, data);
             inputStream.close();
             if (!data.value.length)
-                return;
+                return null;
 
-            var nativeJSON = Cc["@mozilla.org/dom/json;1"].createInstance(Ci.nsIJSON);
-            var obj = nativeJSON.decode(data.value);
-            if (!obj)
-                return;
-
-            if (FBTrace.DBG_STORAGE)
-                FBTrace.sysout("PersistedObject loaded from " + file.path, obj);
-
-            return obj;
+            return data.value;
         }
         catch (err)
         {
@@ -245,7 +262,8 @@ var ObjectPersister =
     	{
             // Convert data to JSON.
             var jsonString = JSON.stringify(obj);
-        	ObjectPersister.writeText(leafName, jsonString);
+            var file = ObjectPersister.getFileInProfileDirectory("firebug/"+leafName);
+        	ObjectPersister.writeTextToFile(file, jsonString);
     	}
     	catch(exc)
     	{
@@ -254,12 +272,10 @@ var ObjectPersister =
     	}
     },
 
-    writeText: function(leafName, string)
+    writeTextToFile: function(file, string)
     {
         try
         {
-            var file = ObjectPersister.getFileByName(leafName);
-
             // Initialize output stream.
             var outputStream = Cc["@mozilla.org/network/file-output-stream;1"]
                 .createInstance(Ci.nsIFileOutputStream);
@@ -276,8 +292,16 @@ var ObjectPersister =
         catch (err)
         {
             if (FBTrace.DBG_ERRORS || FBTrace.DBG_STORAGE)
-                FBTrace.sysout("ObjectPersister.writeText; EXCEPTION for "+leafName+": "+err, {exception: err, string: string});
+                FBTrace.sysout("ObjectPersister.writeTextToFile; EXCEPTION for "+file.path+": "+err, {exception: err, string: string});
         }
     },
 
+};
+
+var TextService =
+{
+		readText: ObjectPersister.readTextFromFile,
+	    writeText: ObjectPersister.writeTextToFile,
+	    getProfileDirectory: ObjectPersister.getProfileDirectory,
+	    getFileInDirectory: ObjectPersister.getFileInDirectory,
 };
