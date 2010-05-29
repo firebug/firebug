@@ -49,6 +49,10 @@ var TraceConsole =
 
         // Initialize root node of the trace-console window.
         var consoleFrame = document.getElementById("consoleFrame");
+        consoleFrame.droppedLinkHandler = function()
+        {
+            return false;
+        };
         this.consoleNode = consoleFrame.contentDocument.getElementById("panelNode-traceConsole");
         Firebug.TraceModule.CommonBaseUI.initializeContent(this.consoleNode, this, this.prefDomain,
             FBL.bind(this.initializeContent, this));

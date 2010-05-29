@@ -116,9 +116,17 @@ top.FirebugChrome =
 
         var browser1 = panelBar1.browser;
         browser1.addEventListener("load", browser1Loaded, true);
+        browser1.droppedLinkHandler = function()
+        {
+            return false;
+        };
 
         var browser2 = panelBar2.browser;
         browser2.addEventListener("load", browser2Loaded, true);
+        browser2.droppedLinkHandler = function()
+        {
+            return false;
+        };
 
         window.addEventListener("blur", onBlur, true);
 
