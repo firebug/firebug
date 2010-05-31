@@ -2264,7 +2264,7 @@ this.wrapText = function(text, noEscapeHTML)
                 var wrapIndex = wrapWidth + (m ? m.index : 0);
                 var subLine = line.substr(0, wrapIndex);
                 line = line.substr(wrapIndex);
-    
+
                 if (!noEscapeHTML) html.push("<code class=\"wrappedText focusRow\" role=\"listitem\">");
                 html.push(noEscapeHTML ? subLine : escapeForTextNode(subLine));
                 if (!noEscapeHTML) html.push("</code>");
@@ -2705,7 +2705,7 @@ this.getFunctionName = function(script, context, frame, noArgs)
             if (functionSpec.name)
             	name = functionSpec.name + (noArgs ? "" : "("+functionSpec.args.join(',')+")");
         }
-        if (!name) 
+        if (!name)
         {
             if (FBTrace.DBG_STACK) FBTrace.sysout("getFunctionName no analyzer, "+script.baseLineNumber+"@"+script.fileName+"\n");
             name =  this.guessFunctionName(FBL.normalizeURL(script.fileName), script.baseLineNumber, context);
@@ -3651,15 +3651,37 @@ this.absoluteURL = function(url, baseURL)
 
 this.absoluteURLWithDots = function(url, baseURL)
 {
-    if (url[0] == "?")
-        return baseURL + url;
+	// Should implement http://www.apps.ietf.org/rfc/rfc3986.html#sec-5
+	// or use the newURI approach described in issue 3110.
+	// See tests/content/lib/absoluteURLs.js
+
+    if (url.length === 0)
+    	return baseURL;
+
+	var R_query_index = url.indexOf('?');
+    var R_head = url;
+    if (R_query_index !== -1)
+    	R_head = url.substr(0, R_query_index);
+
+    if (url.indexOf(':') !== -1)
+    	return url;
 
     var reURL = /(([^:]+:)\/{1,2}[^\/]*)(.*?)$/;
-    var m = reURL.exec(url);
-    if (m)
+    var m_url = reURL.exec(R_head);
+    if (m_url)
         return url;
 
-    var m = reURL.exec(baseURL);
+    var B_query_index = baseURL.indexOf('?');
+    var B_head = baseURL;
+    if (B_query_index !== -1)
+    	B_head = baseURL.substr(0, B_query_index);
+
+    if (url[0] === "?")   // cases where R.path is empty.
+        return B_head + url;
+    if  (url[0] === "#")
+    	return baseURL.split('#')[0]+url;
+
+    var m = reURL.exec(B_head);
     if (!m)
         return "";
 
