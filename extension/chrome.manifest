@@ -9,7 +9,7 @@ skin    firebug-os  classic/1.0 skin/classic/win/
 
 locale  firebug bg-BG       locale/bg-BG/
 locale  firebug ca-AD       locale/ca-AD/
-locale  firebug cs-CZ       locale/cs-CZ/
+locale  firebug cs          locale/cs/
 locale  firebug da-DK       locale/da-DK/
 locale  firebug de          locale/de/
 locale  firebug el-GR       locale/el-GR/

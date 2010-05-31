@@ -5,7 +5,7 @@ skin    firebug-os  classic/1.0 jar:chrome/firebug.jar!/skin/classic/win/
 
 locale  firebug bg-BG       jar:chrome/firebug.jar!/locale/bg-BG/
 locale  firebug ca-AD       jar:chrome/firebug.jar!/locale/ca-AD/
-locale  firebug cs-CZ       jar:chrome/firebug.jar!/locale/cs-CZ/
+locale  firebug cs          jar:chrome/firebug.jar!/locale/cs/
 locale  firebug da-DK       jar:chrome/firebug.jar!/locale/da-DK/
 locale  firebug de          jar:chrome/firebug.jar!/locale/de/
 locale  firebug el-GR       jar:chrome/firebug.jar!/locale/el-GR/
