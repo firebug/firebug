@@ -34,7 +34,6 @@ const contentBox = $("fbContentBox");
 const contentSplitter = $("fbContentSplitter");
 const toggleCommand = $("cmd_toggleFirebug");
 const detachCommand = $("cmd_toggleDetachFirebug");
-const tabBrowser = $("content");
 const versionURL = "chrome://firebug/content/branch.properties";
 const statusBarContextMenu = $("fbStatusContextMenu");
 
@@ -167,7 +166,7 @@ top.Firebug =
 
     stringCropLength: 50,
 
-    tabBrowser: tabBrowser,
+    tabBrowser: null,
     originalChrome: FirebugChrome,
     chrome: FirebugChrome,
 
@@ -185,6 +184,7 @@ top.Firebug =
 
         FBL.initialize();  // TODO FirebugLoader
 
+        const tabBrowser = $("content");
         if (tabBrowser) // TODO TabWatcher
         {
             if (FBTrace.DBG_INITIALIZE)
@@ -901,8 +901,8 @@ top.Firebug =
             }
             if (!location)
             {
-                if (tabBrowser.currentURI)
-                    location = tabBrowser.currentURI.asciiSpec;
+                if (this.tabBrowser.currentURI)
+                    location = this.tabBrowser.currentURI.asciiSpec;
             }
             if (!location)
                 return;
