@@ -11,13 +11,13 @@ locale  firebug bg-BG       locale/bg-BG/
 locale  firebug ca-AD       locale/ca-AD/
 locale  firebug cs-CZ       locale/cs-CZ/
 locale  firebug da-DK       locale/da-DK/
-locale  firebug de-DE       locale/de-DE/
+locale  firebug de          locale/de/
 locale  firebug el-GR       locale/el-GR/
 locale  firebug en-US       locale/en-US/
 locale  firebug es-AR       locale/es-AR/
 locale  firebug es-ES       locale/es-ES/
-locale  firebug fa-IR       locale/fa-IR/
-locale  firebug fr-FR       locale/fr-FR/
+locale  firebug fa          locale/fa/
+locale  firebug fr          locale/fr/
 locale  firebug hr-HR       locale/hr-HR/
 locale  firebug hu-HU       locale/hu-HU/
 locale  firebug hy-AM       locale/hy-AM/
@@ -25,8 +25,8 @@ locale  firebug is-IS       locale/is-IS/
 locale  firebug it-IT       locale/it-IT/
 locale  firebug ja-JP       locale/ja-JP/
 locale  firebug ko-KR       locale/ko-KR/
-locale  firebug nl-NL       locale/nl-NL/
-locale  firebug pl-PL       locale/pl-PL/
+locale  firebug nl          locale/nl/
+locale  firebug pl          locale/pl/
 locale  firebug pt-BR       locale/pt-BR/
 locale  firebug pt-PT       locale/pt-PT/
 locale  firebug ro-RO       locale/ro-RO/
@@ -36,7 +36,7 @@ locale  firebug sl-SI       locale/sl-SI/
 locale  firebug sv-SE       locale/sv-SE/
 locale  firebug tr-TR       locale/tr-TR/
 locale  firebug uk-UA       locale/uk-UA/
-locale  firebug vi-VN       locale/vi-VN/
+locale  firebug vi          locale/vi/
 locale  firebug zh-CN       locale/zh-CN/
 locale  firebug zh-TW       locale/zh-TW/
 
