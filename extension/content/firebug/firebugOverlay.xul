@@ -78,6 +78,7 @@
         <command id="cmd_toggleOrient" oncommand="FirebugChrome.toggleOrient()" />
         <command id="cmd_navBack" oncommand="Firebug.NavigationHistory.goBack(FirebugContext)" />
         <command id="cmd_navForward" oncommand="Firebug.NavigationHistory.goForward(FirebugContext)" />
+        <command id="cmd_toggleFreezeWindow" oncommand="Firebug.Debugger.toggleFreezeWindow(FirebugContext)" />
     </commandset>
 
     <keyset id="mainKeyset">
@@ -102,6 +103,7 @@
         <key id="key_clearConsole" key="r" modifiers="accel,shift" command="cmd_clearConsole" class="fbOnlyKey"/>
         <key id="key_navBack" keycode="VK_LEFT" modifiers="accel,shift" command="cmd_navBack"/>
         <key id="key_navForward" keycode="VK_RIGHT" modifiers="accel,shift" command="cmd_navForward"/>
+        <key id="key_toggleFreezeWindow" key="f" modifiers="control,shift" command="cmd_toggleFreezeWindow"/>
     </keyset>
 
     <popupset id="mainPopupSet">

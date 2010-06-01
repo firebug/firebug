@@ -201,20 +201,6 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
         if (FBTrace.DBG_UI_LOOP)
             FBTrace.sysout("debugger.stop "+context.getName()+" frame",frame);
 
-        var executionContext;
-        try
-        {
-            executionContext = frame.executionContext;
-        }
-        catch (exc)
-        {
-            if (FBTrace.DBG_UI_LOOP)
-                FBTrace.sysout("debugger.stop no executionContext, exit");
-
-            // Can't proceed with an execution context - it happens sometimes.
-            return RETURN_CONTINUE;
-        }
-
         context.debugFrame = frame;
         context.stopped = true;
 
@@ -347,11 +333,11 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
             context.isFrozen = true;
 
             if (FBTrace.DBG_UI_LOOP)
-                FBTrace.sysout("debugger.stop try to disable scripts "+(context.eventSuppressor?"and events":"but not events")+" in "+context.getName()+" executionContext.tag "+executionContext.tag+".scriptsEnabled: "+executionContext.scriptsEnabled);
+                FBTrace.sysout("debugger.freeze try to disable scripts "+(context.eventSuppressor?"and events":"but not events")+" in "+context.getName()+" executionContext.tag "+executionContext.tag+".scriptsEnabled: "+executionContext.scriptsEnabled);
 
         } catch (exc) {
             // This attribute is only valid for contexts which implement nsIScriptContext.
-            if (FBTrace.DBG_UI_LOOP) FBTrace.sysout("debugger.stop, freeze exception in "+context.getName(), exc);
+            if (FBTrace.DBG_UI_LOOP) FBTrace.sysout("debugger.freeze, freeze exception in "+context.getName(), exc);
         }
     },
 
@@ -382,10 +368,10 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
             else
             {
                 if (FBTrace.DBG_UI_LOOP)
-                    FBTrace.sysout("debugger.stop "+executionContext.tag+" executionContext is not valid");
+                    FBTrace.sysout("debugger.thaw "+executionContext.tag+" executionContext is not valid");
             }
             if (FBTrace.DBG_UI_LOOP)
-                FBTrace.sysout("debugger.stop try to enable scripts "+(context.eventSuppressor?"with events suppressed":"events enabled")+" in "+context.getName()+" executionContext.tag "+executionContext.tag+".scriptsEnabled: "+executionContext.scriptsEnabled);
+                FBTrace.sysout("debugger.thaw try to enable scripts "+(context.eventSuppressor?"with events suppressed":"events enabled")+" in "+context.getName()+" executionContext.tag "+executionContext.tag+".scriptsEnabled: "+executionContext.scriptsEnabled);
         } catch (exc) {
             if (FBTrace.DBG_UI_LOOP) FBTrace.sysout("debugger.stop, scriptsEnabled = true exception:", exc);
         }
@@ -400,6 +386,46 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
         }
     },
 
+    toggleFreezeWindow: function(context)
+    {
+    	if (!context.stopped) // then we need to break into debugger to get the executionContext
+    	{
+    		Firebug.Debugger.halt(function grabContext(frame)
+    		{
+    			context.debugFrame = frame;
+    			Firebug.Debugger.doToggleFreezeWindow(context);
+    			delete context.debugFrame;
+    		});
+
+    		Firebug.Debugger.toggleReportTopLevel(context);
+    		Firebug.Debugger.suspend(context);
+    	}
+    	else
+    	{
+    		Firebug.Debugger.doToggleFreezeWindow(context);
+    	}
+    },
+
+    doToggleFreezeWindow: function(context)
+    {
+    	if (context.isFrozen)
+    		Firebug.Debugger.unsuppressEventHandling(context);
+    	else
+    		Firebug.Debugger.suppressEventHandling(context);
+    },
+
+    toggleReportTopLevel: function(context)
+    {
+    	if (context.reportTopLevel)
+    		fbs.setTopLevelHook(null);
+    	else
+    	{
+    		fbs.setTopLevelHook(function reportTopLevel(frame)
+    		{
+    			Firebug.Console.logFormatted(["Javascript entered", frame.script.fileName, frame.line], context, "info");
+    		});
+    	}
+    },
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
     // Breakpoints
 

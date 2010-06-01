@@ -1361,8 +1361,18 @@ FirebugService.prototype =
 
     onTopLevel: function(frame, type)
     {
-        if (FBTrace.DBG_TOPLEVEL && type === TYPE_TOPLEVEL_START)
-            FBTrace.sysout("fbs.onTopLevel "+frame.script.tag+" "+frame.script.fileName);
+    	if (type === TYPE_TOPLEVEL_START || type === TYPE_TOPLEVEL_END)
+    	{
+            if (FBTrace.DBG_TOPLEVEL)
+                FBTrace.sysout("fbs.onTopLevel with delegate "+fbs.onTopLevelDelegate+" "+frame.script.tag+" "+frame.script.fileName);
+            if (fbs.onTopLevelDelegate)
+            	fbs.onTopLevelDelegate(frame)
+    	}
+    },
+
+    setTopLevelHook: function(fnOfFrame)
+    {
+    	fbs.onTopLevelDelegate = fnOfFrame;
     },
 
     isTopLevelScript: function(frame, type, val)
