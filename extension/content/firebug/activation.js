@@ -420,7 +420,11 @@ Firebug.PanelActivation = extend(Firebug.Module,
         // Proper activation preference must be available.
         var type = prefs.getPrefType(prefDomain + ".enableSites")
         if (type != Ci.nsIPrefBranch.PREF_BOOL)
+        {
+        	if (FBTrace.DBG_ERRORS)
+        		FBTrace.sysout("activation.setDefaultState FAILS not a PREF_BOOL: "+type)
             return;
+        }
 
         Firebug.setPref(prefDomain, "enableSites", enable);
     },
