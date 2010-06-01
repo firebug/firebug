@@ -22,7 +22,7 @@
 <!ENTITY firebug.About "О расширении...">
 <!ENTITY firebug.AlwaysOpenInWindow "Всегда открывать в новом окне">
 <!ENTITY firebug.ShowFirebug "Открыть Firebug">
-<!ENTITY firebug.DetachFirebug "Открыть Firebug в новом окне">
+<!ENTITY firebug.DetachFirebug "Открыть в отдельном окне">
 <!ENTITY firebug.OpenWith "Открыть в редакторе">
 <!ENTITY firebug.CloseFirebug "Закрыть Firebug">
 <!ENTITY firebug.Permissions "Сайты...">
