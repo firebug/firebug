@@ -1,7 +1,7 @@
-<!ENTITY editors.Description "Stilltir Firebug ritlar:">
+<!ENTITY editors.Description "Skilgreindir Firebug ritlar:">
 <!ENTITY editors.NameColumn "Ritill">
 <!ENTITY editors.ExecutableColumn "Keyrsluskrá">
-<!ENTITY editors.ParamsColumn "Keyrslu viðföng">
+<!ENTITY editors.ParamsColumn "Keyrsluviðföng">
 <!ENTITY add.label "Bæta við">
 <!ENTITY remove.label "Fjarlægja">
 <!ENTITY change.label "Breyta">

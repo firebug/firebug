@@ -1,7 +1,6 @@
 <!ENTITY firebug.Firebug "Firebug">
 <!ENTITY firebug.Close "Loka">
-<!ENTITY firebug.View "Skoða
-">
+<!ENTITY firebug.View "Skoða">
 <!ENTITY firebug.Help "Hjálp">
 <!ENTITY firebug.Vertical "Lóðréttar rúður">
 <!ENTITY firebug.Run "Keyra">
@@ -11,7 +10,7 @@
 <!ENTITY firebug.TextSize "Stærð texta">
 <!ENTITY firebug.IncreaseTextSize "Stækka stærð texta">
 <!ENTITY firebug.DecreaseTextSize "Minnka stærð texta">
-<!ENTITY firebug.NormalTextSize "Venjuleg texta stærð">
+<!ENTITY firebug.NormalTextSize "Venjuleg textastærð">
 <!ENTITY firebug.ShowTooltips "Sýna forskoðun á vísbendingum">
 <!ENTITY firebug.ShadeBoxModel "Skyggt box módel">
 <!ENTITY firebug.Website "Vefsvæði Firebug...">
@@ -33,7 +32,7 @@
 <!ENTITY firebug.Continue "Halda áfram (F8)">
 <!ENTITY firebug.StepOver "Hoppa yfir (F10)">
 <!ENTITY firebug.StepInto "Fara inn í (F11)">
-<!ENTITY firebug.StepOut "Hoppa út">
+<!ENTITY firebug.StepOut "Hoppa út (shift F11)">
 <!ENTITY firebug.BreakOnErrors "Stöðva á villum">
 <!ENTITY firebug.Inspect "Skoða">
 <!ENTITY firebug.InspectElement "Skoða einindi">
@@ -46,6 +45,6 @@
 <!ENTITY firebug.Clear "Hreinsa">
 <!ENTITY firebug.ClearConsole "Hreinsa glugga">
 <!ENTITY firebug.ClearTooltip "Hreinsa gluggann">
-<!ENTITY firebug.All "Allir">
+<!ENTITY firebug.All "Allt">
 <!ENTITY firebug.Images "Myndir">
-<!ENTITY firebug.Flash "Flass">
+<!ENTITY firebug.Flash "Flash">
