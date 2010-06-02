@@ -83,7 +83,7 @@ var CSSStyleRuleTag = domplate(CSSDomplateBase,
     )
 });
 
-const reSplitCSS =  /(url\("?[^"\)]+?"?\))|(rgb\(.*?\))|(#[\dA-Fa-f]+)|(-?\d+(\.\d+)?(%|[a-z]{1,2})?)|([^,\s]+)|"(.*?)"/;
+const reSplitCSS =  /(url\("?[^"\)]+?"?\))|(rgb\(.*?\))|(#[\dA-Fa-f]+)|(-?\d+(\.\d+)?(%|[a-z]{1,2})?)|([^,\s!]+)|"(.*?)"|(!(.*)?)/;
 
 const reURL = /url\("?([^"\)]+)?"?\)/;
 
@@ -1782,7 +1782,11 @@ CSSEditor.prototype = domplate(Firebug.InlineEditor.prototype,
 
     getAutoCompleteList: function(preExpr, expr, postExpr)
     {
-        if (hasClass(this.target, "cssPropName"))
+        if(expr.indexOf("!") == 0)
+        {
+            return ["!important"];
+        }
+        else if (hasClass(this.target, "cssPropName"))
         {
             return getCSSPropertyNames();
         }
@@ -2037,7 +2041,7 @@ function parseCSSValue(value, offset)
 {
     var start = 0;
     var m;
-    while (1)
+    while (true)
     {
         m = reSplitCSS.exec(value);
         if (m && m.index+m[0].length < offset)
