@@ -272,11 +272,6 @@ panelTab[selected="true"] {
     color: black !important;
 }
 
-.toolbar-text-button, .panelStatusLabel {
-    text-shadow: none !important;
-    color: black !important;
-}
-
 /************************************************************************************************/
 
 panelTab[breakOnNextArmed="true"] > .panelTab-text {
