@@ -155,7 +155,7 @@ code {
     border: none !important;
     font: inherit;
     text-decoration: inherit;
-    background-color: #FFFFFF;
+    background-color: window;
 }
 
 .fixedWidthEditor {
