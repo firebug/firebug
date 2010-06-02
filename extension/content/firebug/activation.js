@@ -553,11 +553,15 @@ Firebug.DisabledPanelPage = domplate(Firebug.Rep,
         panel.disabledBox.setAttribute("collapsed", true);
     },
 
+    formatPanelName: function(name) {
+      return name.charAt(0).toUpperCase() + name.slice(1);
+    },
+
     render: function(panel)
     {
         // Prepare arguments for the template.
         var args = {
-            pageTitle: $STRF("moduleManager.title", [panel.name]),
+            pageTitle: $STRF("moduleManager.title", [this.formatPanelName(panel.name)]),
             panelName: panel.name
         };
 
