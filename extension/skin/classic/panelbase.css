@@ -280,8 +280,11 @@ h1.groupHeader {
 /************************************************************************************************/
 
 .disabledPanelBox {
-    width: 100%;
-    position: relative;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    position: absolute;
     padding: 10px 10px 0px 90px;
     background: -moz-field url(chrome://firebug/skin/firebug32.png) no-repeat 30px 30px;
     color: -moz-fieldText;
