@@ -25,7 +25,7 @@
 <!ENTITY firebug.DetachFirebug "Отваряне на Firebug в нов прозорец">
 <!ENTITY firebug.OpenWith "Отваряне с редактор">
 <!ENTITY firebug.CloseFirebug "Затваряне на Firebug">
-<!ENTITY firebug.Permissions "Сайтове...">
+<!ENTITY firebug.Permissions "Сайтове…">
 <!ENTITY firebug.ConfigureEditors "Настройване на редакторите">
 <!ENTITY firebug.CommandLine "Команден ред">
 <!ENTITY firebug.Search "Търсене">
