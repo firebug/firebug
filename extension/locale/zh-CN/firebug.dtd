@@ -32,7 +32,7 @@
 <!ENTITY firebug.Continue "断续 (F8)">
 <!ENTITY firebug.StepOver "单步跳过 (F10)">
 <!ENTITY firebug.StepInto "单步进入 (F11)">
-<!ENTITY firebug.StepOut "单步退出">
+<!ENTITY firebug.StepOut "单步退出 (Shift+F11)">
 <!ENTITY firebug.BreakOnErrors "在错误处中断">
 <!ENTITY firebug.Inspect "查看">
 <!ENTITY firebug.InspectElement "查看元素">
