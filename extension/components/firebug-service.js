@@ -408,6 +408,9 @@ FirebugService.prototype =
 
     getDebuggerByName: function(name)
     {
+    	if (!name)
+    		return;
+    	
         for(var i = 0; i < debuggers.length; i++)
             if (debuggers[i].debuggerName === name)
                 return debuggers[i];
@@ -520,11 +523,6 @@ FirebugService.prototype =
         {
             dispatch(debuggers, "onToggleBreakpoint", [url, lineNo, false, bp]);
             fbs.saveBreakpoints(url);
-        }
-        else
-        {
-            if (FBTrace.DBG_FBS_BP)
-                FBTrace.sysout("fbs.clearBreakpoint no find for "+lineNo+"@"+url);
         }
     },
 
@@ -639,15 +637,13 @@ FirebugService.prototype =
                     {
                         if (bp.scriptsWithBreakpoint && bp.scriptsWithBreakpoint.length > 0)
                         {
-                            var theDebugger = fbs.getDebuggerByName(bp.debuggerName);
-                            var rc = cb.call.apply(theDebugger, [url, bp.lineNo, bp, bp.scriptsWithBreakpoint]);
+                            var rc = cb.call.apply(bp, [url, bp.lineNo, bp, bp.scriptsWithBreakpoint]);
                             if (rc)
                                 return [bp];
                         }
                         else
                         {
-                            var theDebugger = fbs.getDebuggerByName(bp.debuggerName);
-                            var rc = cb.call.apply(theDebugger, [url, bp.lineNo, bp]);
+                            var rc = cb.call.apply(bp, [url, bp.lineNo, bp]);
                             if (rc)
                                 return [bp];
                         }
@@ -1201,6 +1197,8 @@ FirebugService.prototype =
         if (bp)
         {
             var theDebugger = fbs.getDebuggerByName(bp.debuggerName);
+            if (!theDebugger)
+            	theDebugger = this.findDebugger(frame);  // sets debuggr.breakContext
 
             // See issue 1179, should not break if we resumed from a single step and have not advanced.
             if (disabledCount || monitorCount || conditionCount || runningUntil)
@@ -2286,7 +2284,8 @@ FirebugService.prototype =
                 return bp;
             }
         }
-
+        if (FBTrace.DBG_FBS_BP)
+            FBTrace.sysout("fbs.removeBreakpoint no find for "+lineNo+"@"+url+" in "+urlBreakpoints.length, urlBreakpoints);
         return false;
     },
 
@@ -2311,29 +2310,26 @@ FirebugService.prototype =
     findBreakpointByScript: function(script, pc)
     {
         var urlsWithBreakpoints = fbs.getBreakpointURLs();
-        for (let j = 0; j < urlsWithBreakpoints.length; j++)
+        for (let iURL = 0; iURL < urlsWithBreakpoints.length; iURL++)
         {
-            var url = urlsWithBreakpoints[j];
+            var url = urlsWithBreakpoints[iURL];
             var urlBreakpoints = fbs.getBreakpoints(url);
             if (urlBreakpoints)
             {
-                for (var i = 0; i < urlBreakpoints.length; ++i)
+                for (var iBreakpoint = 0; iBreakpoint < urlBreakpoints.length; ++iBreakpoint)
                 {
-                    var bp = urlBreakpoints[i];
+                    var bp = urlBreakpoints[iBreakpoint];
                     if (bp.scriptsWithBreakpoint)
                     {
-                        for (let j = 0; j < bp.scriptsWithBreakpoint.length; j++)
+                        for (let iScript = 0; iScript < bp.scriptsWithBreakpoint.length; iScript++)
                         {
                             if (FBTrace.DBG_FBS_BP)
                             {
-                                var vs = (bp.scriptsWithBreakpoint[j] ? bp.scriptsWithBreakpoint[j].tag+"@"+bp.pc[j]:"future")+" on "+url;
-                                FBTrace.sysout("findBreakpointByScript["+i+","+j+"]"+" looking for "+script.tag+"@"+pc+" vs "+vs);
+                                var vs = (bp.scriptsWithBreakpoint[iScript] ? bp.scriptsWithBreakpoint[iScript].tag+"@"+bp.pc[iScript]:"future")+" on "+url;
+                                FBTrace.sysout("findBreakpointByScript["+iURL+","+iBreakpoint+","+iScript+"]"+" looking for "+script.tag+"@"+pc+" vs "+vs);
                             }
-                            if ( bp.scriptsWithBreakpoint[j] && (bp.scriptsWithBreakpoint[j].tag == script.tag) && (bp.pc[j] == pc) )
+                            if ( bp.scriptsWithBreakpoint[iScript] && (bp.scriptsWithBreakpoint[iScript].tag == script.tag) && (bp.pc[iScript] == pc) )
                                 return bp;
-
-                            if (FBTrace.DBG_FBS_BP)
-                                FBTrace.sysout("findBreakpointByScript"+bp.scriptsWithBreakpoint);
                         }
                     }
                 }
@@ -2512,6 +2508,7 @@ FirebugService.prototype =
                     cleanBP[p] = bp[p];
                 delete cleanBP.scriptsWithBreakpoint; // not JSON-able
                 delete cleanBP.pc; // co-indexed with scriptsWithBreakpoint
+                delete cleanBP.debuggerName;
                 cleanBPs.push(cleanBP);
             }
             fbs.breakpointStore.setItem(url, cleanBPs);
@@ -2751,14 +2748,7 @@ FirebugService.prototype =
             }
             if (FBTrace.DBG_FBS_STEP)
             {
-                var typeName = type;
-                switch(type)
-                {
-                    case TYPE_FUNCTION_RETURN: { typeName = "TYPE_FUNCTION_RETURN"; break; }
-                    case TYPE_FUNCTION_CALL:   { typeName = "TYPE_FUNCTION_CALL"; break; }
-                    case TYPE_TOPLEVEL_START: { typeName = "TYPE_TOPLEVEL_START"; break; }
-                    case TYPE_TOPLEVEL_END:   { typeName = "TYPE_TOPLEVEL_START"; break; }
-                }
+                var typeName = getCallFromType(type);
                 var actualFrames = countFrames(frame);
                 FBTrace.sysout("functionHook "+typeName+" stepMode = "+getStepName(stepMode)+" for script "+stepFrameTag+
                     " (actual: "+actualFrames+") stepRecursion="+
@@ -3262,6 +3252,20 @@ function getExecutionStopNameFromType(type)
         default: return "unknown("+type+")";
     }
 }
+
+function getCallFromType(type)
+{
+    var typeName = type;
+    switch(type)
+    {
+        case TYPE_FUNCTION_RETURN: { typeName = "TYPE_FUNCTION_RETURN"; break; }
+        case TYPE_FUNCTION_CALL:   { typeName = "TYPE_FUNCTION_CALL"; break; }
+        case TYPE_TOPLEVEL_START: { typeName = "TYPE_TOPLEVEL_START"; break; }
+        case TYPE_TOPLEVEL_END:   { typeName = "TYPE_TOPLEVEL_START"; break; }
+    }
+    return typeName;
+}
+
 // For special chromebug tracing
 function getTmpFile()
 {

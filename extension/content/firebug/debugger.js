@@ -108,7 +108,7 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
     /* @Deprecated  see chrome.js */
     focusWatch: function(context)  // TODO moved
     {
-    	return Firebug.chrome.focusWatch(context);
+        return Firebug.chrome.focusWatch(context);
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
@@ -131,7 +131,7 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
 
     halt: function(fnOfFrame)
     {
-    	FBTrace.sysout('debugger.halt '+fnOfFrame);
+        FBTrace.sysout('debugger.halt '+fnOfFrame);
 
         fbs.halt(this, fnOfFrame);
 
@@ -388,44 +388,70 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
 
     toggleFreezeWindow: function(context)
     {
-    	if (!context.stopped) // then we need to break into debugger to get the executionContext
-    	{
-    		Firebug.Debugger.halt(function grabContext(frame)
-    		{
-    			context.debugFrame = frame;
-    			Firebug.Debugger.doToggleFreezeWindow(context);
-    			delete context.debugFrame;
-    		});
+        if (!context.stopped) // then we need to break into debugger to get the executionContext
+        {
+            Firebug.Debugger.halt(function grabContext(frame)
+            {
+                context.debugFrame = frame;
+                Firebug.Debugger.doToggleFreezeWindow(context);
+                delete context.debugFrame;
+            });
 
-    		Firebug.Debugger.toggleReportTopLevel(context);
-    		Firebug.Debugger.suspend(context);
-    	}
-    	else
-    	{
-    		Firebug.Debugger.doToggleFreezeWindow(context);
-    	}
+            Firebug.Debugger.toggleReportTopLevel(context);
+            Firebug.Debugger.suspend(context);
+        }
+        else
+        {
+            Firebug.Debugger.doToggleFreezeWindow(context);
+        }
     },
 
     doToggleFreezeWindow: function(context)
     {
-    	if (context.isFrozen)
-    		Firebug.Debugger.unsuppressEventHandling(context);
-    	else
-    		Firebug.Debugger.suppressEventHandling(context);
+        if (context.isFrozen)
+            Firebug.Debugger.unsuppressEventHandling(context);
+        else
+            Firebug.Debugger.suppressEventHandling(context);
     },
 
     toggleReportTopLevel: function(context)
     {
-    	if (context.reportTopLevel)
-    		fbs.setTopLevelHook(null);
-    	else
-    	{
-    		fbs.setTopLevelHook(function reportTopLevel(frame)
-    		{
-    			Firebug.Console.logFormatted(["Javascript entered", frame.script.fileName, frame.line], context, "info");
-    		});
-    	}
+        if (context.reportTopLevel)
+            fbs.setTopLevelHook(null);
+        else
+        {
+            fbs.setTopLevelHook(Firebug.Debugger, function reportTopLevel(frame)
+            {
+                Firebug.Console.logFormatted(["Javascript entered", frame.script.fileName, frame.line], context, "info");
+            });
+        }
     },
+    setBreakOnNextCause: function(context, frame)  // TODO this should be in the panel (front end)
+    {
+        var sourceFile = Firebug.SourceFile.getSourceFileByScript(context, frame.script);
+        var analyzer = sourceFile.getScriptAnalyzer(frame.script);
+        var lineNo = analyzer.getSourceLineFromFrame(context, frame);
+
+        context.breakingCause = {
+                title: $STR("Break On Next"),
+                message: $STR("Disable converts pause to disabled breakpoint"), //xxxHonza localization
+                skipAction: function addSkipperAndGo()
+                {
+                    // a breakpoint that never hits, but prevents debugger keyword (see fbs.onDebugger as well)
+                    var bp = fbs.setBreakpoint(sourceFile, lineNo, null, Firebug.Debugger);
+                    fbs.disableBreakpoint(sourceFile.href, lineNo);
+                    if (FBTrace.DBG_BP)
+                        FBTrace.sysout("debugger.setBreakOnNextCause converted to disabled bp "+sourceFile.href+"@"+lineNo+" tag: "+frame.script.tag, bp);
+
+                    Firebug.Debugger.resume(context);
+                },
+                okAction: function justGo()
+                {
+                    Firebug.Debugger.resume(context);
+                },
+        };
+    },
+ 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
     // Breakpoints
 
@@ -912,9 +938,9 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
             if (type == TYPE_DEBUGGER_KEYWORD)
             {
                 if (frame.functionName === 'firebugDebuggerTracer')
-                	return this.debuggerTracer(context, frame);
+                    return this.debuggerTracer(context, frame);
                 else
-                	this.setDebuggerKeywordCause(context, frame);
+                    this.setDebuggerKeywordCause(context, frame);
             }
 
             return this.stop(context, frame, type);

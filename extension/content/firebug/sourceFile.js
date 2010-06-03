@@ -525,7 +525,7 @@ Firebug.EventSourceFile = function(url, script, title, source, innerScriptEnumer
      this.outerScript = script;
      this.containingURL = script.fileName;
      this.title = title;
-     this.sourceLines = source; // points to the sourceCache lines
+     this.source = source; // points to the sourceCache lines
      this.sourceLength = source.length;
      this.pcmap_type = PCMAP_PRETTYPRINT;
 
@@ -536,7 +536,7 @@ Firebug.EventSourceFile.prototype =	descend(new Firebug.SourceFile("event"),  //
 {
     getLine: function(context, lineNo)
     {
-        return this.sourceLines[lineNo - 1];
+        return this.source[lineNo - 1];
     },
 
     getBaseLineOffset: function()
@@ -547,7 +547,7 @@ Firebug.EventSourceFile.prototype =	descend(new Firebug.SourceFile("event"),  //
     getObjectDescription: function()
     {
         if (!this.summary)
-             this.summary = Firebug.SourceFile.summarizeSourceLineArray(this.sourceLines, 120);
+             this.summary = Firebug.SourceFile.summarizeSourceLineArray(this.source, 120);
 
         var containingFileDescription = FBL.splitURLBase(this.containingURL);
 

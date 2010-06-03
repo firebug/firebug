@@ -599,6 +599,11 @@ SourceFileRenamer.prototype.renameSourceFiles = function(context)
         var segs = oldURL.split('/');  // last is sequence #, next-last is "seq", next-next-last is kind
         var kind = segs.splice(segs.length - 3, 3)[0];
         var callerURL = segs.join('/');
+        if (!sourceFile.source)
+        {
+        	FBTrace.sysout("breakpoint.renameSourceFiles no source for "+oldURL+" callerURL "+callerURL, sourceFile)
+            continue;
+        }	
         var newURL = Firebug.Debugger.getURLFromMD5(callerURL, sourceFile.source, kind);
         sourceFile.href = newURL.href;
 
