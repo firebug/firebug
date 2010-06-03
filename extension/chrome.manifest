@@ -7,7 +7,7 @@ resource firebug modules/
 skin    firebug classic/1.0 skin/classic/
 skin    firebug-os  classic/1.0 skin/classic/win/
 
-locale  firebug bg-BG       locale/bg-BG/
+locale  firebug bg          locale/bg/
 locale  firebug ca-AD       locale/ca-AD/
 locale  firebug cs          locale/cs/
 locale  firebug da-DK       locale/da-DK/
