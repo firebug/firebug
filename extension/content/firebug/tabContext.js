@@ -124,12 +124,14 @@ Firebug.TabContext.prototype =
 
     destroy: function(state)
     {
+        // All existing timeouts need to be cleared
         if (this.timeouts)
         {
             for (var timeout in this.timeouts)
                 clearTimeout(timeout);
         }
 
+        // Also all waiting intervals must be cleared.
         if (this.intervals)
         {
             for (var timeout in this.intervals)
@@ -148,33 +150,11 @@ Firebug.TabContext.prototype =
                 state.panelState[panelName] = this.persistedState.panelState[panelName];
         }
 
+        // Destroy all panels in this context.
         for (var panelName in this.panelMap)
         {
-            var panel = this.panelMap[panelName];
-
-            // Create an object to persist state, re-using old one if it was never restored
-            var panelState = panelName in state.panelState ? state.panelState[panelName] : {};
-            state.panelState[panelName] = panelState;
-
-            try
-            {
-                // Destroy the panel and allow it to persist extra info to the state object
-                var dontRemove = panel.destroy(panelState);
-                if (dontRemove)
-                    continue;
-            }
-            catch(exc)
-            {
-                if (FBTrace.DBG_ERRORS)
-                    FBTrace.sysout("tabContext.destroy FAILS "+exc, exc);
-                // the destroy failed, don't keep the bad state
-                delete state.panelState[panelName];
-            }
-
-            // Remove the panel node from the DOM
-            var panelNode = panel.panelNode;  // delete panel content
-            if (panelNode && panelNode.parentNode)
-                panelNode.parentNode.removeChild(panelNode);
+            var panelType = Firebug.getPanelType(panelName);
+            this.destroyPanel(panelType, state);
         }
 
         if (FBTrace.DBG_INITIALIZE)
@@ -231,13 +211,23 @@ Firebug.TabContext.prototype =
 
     getPanel: function(panelName, noCreate)
     {
+        // Get "global" panelType, registered using Firebug.registerPanel
         var panelType = Firebug.getPanelType(panelName);
+
+        // The panelType cane be "local", available only within the context.
         if (!panelType && this.panelTypeMap)
-            panelType = this.panelTypeMap[panelName];  // context local panelType
-        //if (FBTrace.DBG_PANELS)                                                                                       /*@expore*/
-        //    FBTrace.sysout("tabContext.getPanel name="+panelName+" noCreate="+noCreate+" panelType="+(panelType?panelType.prototype.name:"null")+"\n");  /*@expore*/
-        if (panelType)
+            panelType = this.panelTypeMap[panelName];
+
+        if (!panelType)
+            return null;
+
+        var enabled = panelType.prototype.isEnabled ? panelType.prototype.isEnabled() : true;
+
+        // Create instance of the panelType only if it's enabled.
+        if (enabled)
             return this.getPanelByType(panelType, noCreate);
+
+        return null;
     },
 
     getPanelByType: function(panelType, noCreate)
@@ -287,7 +277,7 @@ Firebug.TabContext.prototype =
         this.panelMap[panel.name] = panel;
 
         if (FBTrace.DBG_PANELS)
-            FBTrace.sysout("tabContext.createPanel; Panel created:", panel);
+            FBTrace.sysout("tabContext.createPanel; Panel created: " + panel.name, panel);
 
         dispatch(Firebug.modules, "onCreatePanel", [this, panel, panelType]);
 
@@ -296,6 +286,41 @@ Firebug.TabContext.prototype =
         panel.initialize(this, doc);
 
         return panel;
+    },
+
+    destroyPanel: function(panelType, state)
+    {
+        var panelName = panelType.prototype.name;
+        var panel = this.panelMap[panelName];
+        if (!panel)
+            return;
+
+        // Create an object to persist state, re-using old one if it was never restored
+        var panelState = panelName in state.panelState ? state.panelState[panelName] : {};
+        state.panelState[panelName] = panelState;
+
+        try
+        {
+            // Destroy the panel and allow it to persist extra info to the state object
+            var dontRemove = panel.destroy(panelState);
+            delete this.panelMap[panelName];
+
+            if (dontRemove)
+                return;
+        }
+        catch (exc)
+        {
+            if (FBTrace.DBG_ERRORS)
+                FBTrace.sysout("tabContext.destroy FAILS "+exc, exc);
+
+            // the destroy failed, don't keep the bad state
+            delete state.panelState[panelName];
+        }
+
+        // Remove the panel node from the DOM and so delet its content.
+        var panelNode = panel.panelNode;
+        if (panelNode && panelNode.parentNode)
+            panelNode.parentNode.removeChild(panelNode);
     },
 
     setPanel: function(panelName, panel)  // allows a panel from one context to be used in other contexts.

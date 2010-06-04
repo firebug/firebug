@@ -188,24 +188,12 @@ Firebug.Console = extend(ActivableConsole,
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
-    // extends ActivableModule
+    // extends Module
 
     initialize: function()
     {
         Firebug.ActivableModule.initialize.apply(this, arguments);
         Firebug.Debugger.addListener(this);
-    },
-
-    enable: function()
-    {
-        if (Firebug.Console.isAlwaysEnabled())
-            this.watchForErrors();
-    },
-
-    disable: function()
-    {
-        if (Firebug.Console.isAlwaysEnabled())
-            this.unwatchForErrors();
     },
 
     initContext: function(context, persistedState)
@@ -219,7 +207,7 @@ Firebug.Console = extend(ActivableConsole,
         for (var url in context.sourceFileMap)
             return;  // if there are any sourceFiles, then do nothing
 
-        // else we saw no JS, so the reload warning it not needed.
+        // else we saw no JS, so the reload warning is not needed.
         this.clearReloadWarning(context);
     },
 
@@ -228,8 +216,11 @@ Firebug.Console = extend(ActivableConsole,
         if (context.consoleReloadWarning)
         {
             var panel = context.getPanel("console");
-            panel.clearReloadWarning();
-            delete context.consoleReloadWarning;
+            if (panel)
+            {
+                panel.clearReloadWarning();
+                delete context.consoleReloadWarning;
+            }
         }
     },
 
@@ -256,39 +247,26 @@ Firebug.Console = extend(ActivableConsole,
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+    // extend ActivableModule
 
-    onPanelEnable: function(panelName)
+    onObserverChange: function(observer)
     {
-        if (panelName != "console")  // we don't care about other panels
-            return;
+        if (this.hasObservers())
+        {
+            this.watchForErrors();
 
-        if (FBTrace.DBG_CONSOLE || FBTrace.DBG_ACTIVATION)
-            FBTrace.sysout("console.onPanelEnable;");
+            // we inject the console during JS compiles so we need jsd
+            Firebug.Debugger.addDependentModule(this);
+        }
+        else
+        {
+            this.unwatchForErrors();
+            Firebug.Debugger.removeDependentModule(this);
 
-        this.setDefaultState(true);
-        this.watchForErrors();
-
-        // we inject the console during JS compiles so we need jsd
-        Firebug.Debugger.addDependentModule(this);
-    },
-
-    onPanelDisable: function(panelName)
-    {
-        if (panelName != "console")  // we don't care about other panels
-            return;
-
-        if (FBTrace.DBG_CONSOLE || FBTrace.DBG_ACTIVATION)
-            FBTrace.sysout("console.onPanelDisable;");
-
-        this.setDefaultState(false);
-        this.unwatchForErrors();
-
-        // we inject the console during JS compiles so we need jsd
-        Firebug.Debugger.removeDependentModule(this);
-
-        // Make sure possible errors coming from the page and displayed in the Firefox
-        // status bar are removed.
-        this.clear();
+            // Make sure possible errors coming from the page and displayed in the Firefox
+            // status bar are removed.
+            this.clear();
+        }
     },
 
     onSuspendFirebug: function()
@@ -304,6 +282,7 @@ Firebug.Console = extend(ActivableConsole,
     {
         if (FBTrace.DBG_CONSOLE)
             FBTrace.sysout("console.onResumeFirebug\n");
+
         if (Firebug.Console.isAlwaysEnabled())
             this.watchForErrors();
     },
@@ -343,12 +322,15 @@ Firebug.Console = extend(ActivableConsole,
         if (!context)
             context = FirebugContext;
 
-        if (FBTrace.DBG_WINDOWS && !context) FBTrace.sysout("Console.logRow: no context \n");
+        if (FBTrace.DBG_WINDOWS && !context)
+            FBTrace.sysout("Console.logRow: no context \n");
 
         if (this.isAlwaysEnabled())
             return Firebug.ConsoleBase.logRow.apply(this, arguments);
     },
 });
+
+// ************************************************************************************************
 
 Firebug.ConsoleListener =
 {
@@ -363,7 +345,7 @@ Firebug.ConsoleListener =
 
 // ************************************************************************************************
 
-Firebug.ConsolePanel = function () {} // XXjjb attach Firebug so this panel can be extended.
+Firebug.ConsolePanel = function () {};
 
 Firebug.ConsolePanel.prototype = extend(Firebug.ActivablePanel,
 {
@@ -654,52 +636,42 @@ Firebug.ConsolePanel.prototype = extend(Firebug.ActivablePanel,
                 (state ? state.wasScrolledToBottom : "no prev state") +
                 " " + this.context.getName(), state);
 
-        var enabled = Firebug.Console.isAlwaysEnabled();
-        if (enabled)
+        this.showCommandLine(true);
+        this.showToolbarButtons("fbConsoleButtons", true);
+        Firebug.chrome.setGlobalAttribute("cmd_togglePersistConsole", "checked",
+            this.persistContent);
+
+        var wasScrolledToBottom;
+        if (state)
+            wasScrolledToBottom = state.wasScrolledToBottom;
+
+        if (typeof(wasScrolledToBottom) == "boolean")
         {
-            Firebug.DisabledPanelPage.hide(this);
-            this.showCommandLine(true);
-            this.showToolbarButtons("fbConsoleButtons", true);
-            Firebug.chrome.setGlobalAttribute("cmd_togglePersistConsole", "checked",
-                this.persistContent);
-
-            var wasScrolledToBottom;
-            if (state)
-                wasScrolledToBottom = state.wasScrolledToBottom;
-
-            if (typeof(wasScrolledToBottom) == "boolean")
-            {
-                this.wasScrolledToBottom = wasScrolledToBottom;
-                delete state.wasScrolledToBottom;
-            }
-            else
-            {
-                // If the previous state doesn't says where to scroll,
-                // scroll to the bottom by default.
-                this.wasScrolledToBottom = true;
-            }
-
-            if (this.wasScrolledToBottom)
-                scrollToBottom(this.panelNode);
-
-            if (FBTrace.DBG_CONSOLE)
-                FBTrace.sysout("console.show; wasScrolledToBottom: " +
-                   this.wasScrolledToBottom + ", " + this.context.getName());
-
-            if (state && state.profileRow) // then we reloaded while profiling
-            {
-                if (FBTrace.DBG_CONSOLE)
-                    FBTrace.sysout("console.show; state.profileRow:", state.profileRow);
-
-                this.context.profileRow = state.profileRow;
-                this.panelNode.appendChild(state.profileRow);
-                delete state.profileRow;
-             }
+            this.wasScrolledToBottom = wasScrolledToBottom;
+            delete state.wasScrolledToBottom;
         }
         else
         {
-            this.hide(state);
-            Firebug.DisabledPanelPage.show(this);
+            // If the previous state doesn't says where to scroll,
+            // scroll to the bottom by default.
+            this.wasScrolledToBottom = true;
+        }
+
+        if (this.wasScrolledToBottom)
+            scrollToBottom(this.panelNode);
+
+        if (FBTrace.DBG_CONSOLE)
+            FBTrace.sysout("console.show; wasScrolledToBottom: " +
+               this.wasScrolledToBottom + ", " + this.context.getName());
+
+        if (state && state.profileRow) // then we reloaded while profiling
+        {
+            if (FBTrace.DBG_CONSOLE)
+                FBTrace.sysout("console.show; state.profileRow:", state.profileRow);
+
+            this.context.profileRow = state.profileRow;
+            this.panelNode.appendChild(state.profileRow);
+            delete state.profileRow;
         }
     },
 
@@ -757,27 +729,22 @@ Firebug.ConsolePanel.prototype = extend(Firebug.ActivablePanel,
             $STR("console.Break On All Errors"));
     },
 
-    enablePanel: function()
+    /**
+     * Support for panel activation.
+     */
+    onActivationChanged: function(enable)
     {
-        Firebug.ActivablePanel.enablePanel.apply(this, arguments);
-
         if (FBTrace.DBG_CONSOLE || FBTrace.DBG_ACTIVATION)
-            FBTrace.sysout("console.ConsolePanel.enablePanel; " + this.context.getName());
+            FBTrace.sysout("console.ConsolePanel.onActivationChanged; " + enable);
 
-        this.showCommandLine(true);
-
-        if (this.wasScrolledToBottom)
-            scrollToBottom(this.panelNode);
-    },
-
-    disablePanel: function()
-    {
-        Firebug.ActivablePanel.disablePanel.apply(this, arguments);
-
-        if (FBTrace.DBG_CONSOLE || FBTrace.DBG_ACTIVATION)
-            FBTrace.sysout("console.ConsolePanel.disablePanel; " + this.context.getName());
-
-        this.showCommandLine(false);
+        if (enable)
+        {
+            Firebug.Console.addObserver(this);
+        }
+        else
+        {
+            Firebug.Console.removeObserver(this);
+        }
     },
 
     getOptionsMenuItems: function()

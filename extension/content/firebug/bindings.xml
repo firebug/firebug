@@ -22,8 +22,7 @@
     <!-- The XUL structure for the panel bar is specified in the XUL source
          inside each "panelBar" element.  This allows us to have panel bars
          with substantially different layous, including the ability to embed
-         one panel bar within another - albeit at some cost in maintainability.
-    -->
+         one panel bar within another - albeit at some cost in maintainability. -->
     <content>
         <children/>
     </content>
@@ -73,7 +72,10 @@
             tab.setAttribute("label", title);
             tab.setAttribute("tooltiptext", title);
 
-            return this.tabMap[panelType.prototype.name] = tab;
+            this.tabMap[panelType.prototype.name] = tab;
+            this.updateTab(panelType);
+
+            return tab;
             ]]></body>
         </method>
 
@@ -82,6 +84,28 @@
             <body><![CDATA[
             var tab = this.createTab(panelType);
             this.panelTabs.appendChild(tab);
+            ]]></body>
+        </method>
+
+        <method name="getTab">
+            <parameter name="panelName"/>
+            <body><![CDATA[
+                return this.tabMap[panelName];
+            ]]></body>
+        </method>
+
+        <method name="updateTab">
+            <parameter name="panelType"/>
+            <body><![CDATA[
+            var tab = this.getTab(panelType.prototype.name);
+            if (panelType.prototype.activable)
+            {
+                var enabled = panelType.prototype.isEnabled();
+                tab.setAttribute("aria-disabled", enabled ? "false" : "true");
+            }
+
+            // xxxHonza: Does this belong here?
+            Firebug.resetTooltip();
             ]]></body>
         </method>
 
@@ -141,11 +165,7 @@
             <parameter name="tab"/>
             <body><![CDATA[
                 var panelName = tab ? tab.panelType.prototype.name : null;
-                if (panelName && !tab.panelType.prototype.parentPanel)
-                    Firebug.setPref(Firebug.prefDomain, "defaultPanelName", panelName);
-
                 this.selectPanel(panelName);
-
                 var scrollBox = this.getElementsByClassName("tabbrowser-arrowscrollbox").item(0);
                 scrollBox.ensureVisibleTab(tab);
             ]]></body>
@@ -160,6 +180,9 @@
                 var panelType = tab ? tab.panelType : null;
                 var panel = FirebugContext ? FirebugContext.getPanel(panelName) : null;
 
+                if (panelName && !tab.panelType.prototype.parentPanel)
+                    Firebug.setPref(Firebug.prefDomain, "defaultPanelName", panelName);
+
                 // Make sure the panel is visible.
                 this.togglePanel(panelName, true);
 
@@ -168,10 +191,8 @@
 
                 this.hideSelectedPanel();
 
-                if (!panel)
-                    this.tabBox.setAttribute("collapsed", "true");
-                else
-                    this.tabBox.removeAttribute("collapsed");
+                //xxxHonza: can be removed, but Chromebug needs it for now.
+                this.tabBox.removeAttribute("collapsed");
 
                 if (this.selectedTab)
                     this.selectedTab.selected = false;
@@ -195,44 +216,45 @@
                 if (!panel || panel.panelBrowser != this.browser)
                     this.browser.currentPanel = null;
 
-                var ev = document.createEvent("Events");
-                ev.initEvent("selectingPanel", true, false);
-                this.dispatchEvent(ev);
+                this.dispatch("selectingPanel");
 
-                if (panel)
+                var sel = this.browser.contentWindow.getSelection();
+                if (sel)
+                    sel.removeAllRanges();
+
+                this.showSelectedPanel(panelName);  // sets active attribute true
+
+                if (panel && !noRefresh && panel.needsRefresh)
                 {
-                    var sel = this.browser.contentWindow.getSelection();
-                    if (sel)
-                        sel.removeAllRanges();
-
-                    this.showSelectedPanel();  // sets active attribute true
-
-                    if (!noRefresh && panel.needsRefresh)
-                    {
-                        delete panel.needsRefresh;
-                        panel.refresh();
-                    }
-
-                    if (panel.browser)
-                    {
-                        if (panel.browser.parentNode != this.deck)
-                            this.deck.appendChild(panel.browser);
-
-                        this.deck.selectedPanel = panel.browser;
-                    }
-                    else
-                        this.deck.selectedPanel = this.browser;
+                    delete panel.needsRefresh;
+                    panel.refresh();
                 }
 
-                var ev = document.createEvent("Events");
-                ev.initEvent("selectPanel", true, false);
-                this.dispatchEvent(ev);
+                if (panel && panel.browser)
+                {
+                    if (panel.browser.parentNode != this.deck)
+                        this.deck.appendChild(panel.browser);
+                }
+
+                this.deck.selectedPanel = this.browser;
+
+                this.dispatch("selectPanel");
 
                 return panel;
             ]]></body>
         </method>
 
+        <method name="dispatch">
+            <parameter name="eventName"/>
+            <body><![CDATA[
+                var ev = document.createEvent("Events");
+                ev.initEvent(eventName, true, false);
+                this.dispatchEvent(ev);
+            ]]></body>
+        </method>
+
         <method name="showSelectedPanel">
+            <parameter name="panelName"/>
             <body><![CDATA[
                 var panel = this.selectedPanel;
                 if (panel)
@@ -242,9 +264,34 @@
 
                     var state = Firebug.getPanelState(panel);
                     panel.show(state);
-
-                    this.updateToolbarVisibility();
                 }
+                else
+                {
+                    // Render default content (note that the template is available as soon as
+                    // FB namespaces are evaluated)
+                    if (Firebug.DisabledPanelBox)
+                        Firebug.DisabledPanelBox.show(this.browser, panelName);
+                }
+
+                this.updateToolbarVisibility();
+            ]]></body>
+        </method>
+
+        <method name="hideSelectedPanel">
+            <body><![CDATA[
+                var oldPanel = this.selectedPanel;
+                if (oldPanel)
+                {
+                    var state = FBL.getPersistedState(FirebugContext, oldPanel.name);
+                    oldPanel.hide(state);
+
+                    oldPanel.visible = false;  // xxxjjb Why three ways to un-show the panel?
+                    oldPanel.panelNode.removeAttribute("active");
+                }
+
+                // Also hide disabled panel content if any.
+                if (Firebug.DisabledPanelBox)
+                    Firebug.DisabledPanelBox.hide(this.browser);
             ]]></body>
         </method>
 
@@ -274,27 +321,6 @@
 
                 var toolbar = FBL.$("fbToolbox");
                 FBL.collapse(toolbar, noButtons);
-            ]]></body>
-        </method>
-
-        <method name="hideSelectedPanel">
-            <body><![CDATA[
-                var oldPanel = this.selectedPanel;
-                if (oldPanel)
-                {
-                    var state = FBL.getPersistedState(FirebugContext, oldPanel.name);
-                    oldPanel.hide(state);
-
-                    oldPanel.visible = false;  // xxxjjb Why three ways to un-show the panel?
-                    oldPanel.panelNode.removeAttribute("active");
-                }
-            ]]></body>
-        </method>
-
-        <method name="getTab">
-            <parameter name="panelName"/>
-            <body><![CDATA[
-                return this.tabMap[panelName];
             ]]></body>
         </method>
 
@@ -386,7 +412,7 @@
             var tab = event.target;
             for (; tab && !tab.panelType; tab = tab.parentNode);
 
-            if (tab)
+            if (tab && tab.getAttribute("selected") != "true")
             {
                 // Select after a timeout to increase teh snappy
                 setTimeout(FBL.bindFixed(function()
@@ -664,29 +690,22 @@
         <![CDATA[
             this.setAttribute('role', 'menu');
             this.popup = document.getAnonymousElementByAttribute(this, "anonid", "popup");
+            this.panelBar = FBL.getAncestorByClass(this, "panelBar");
         ]]>
         </constructor>
         <field name="value"/>
-        <property name="selectedPanel">
-            <getter><![CDATA[
-                var parentNode = this.parentNode;
-                while (parentNode)
-                {
-                    if (parentNode.hasOwnProperty("selectedPanel"))
-                        return parentNode.selectedPanel;
-                    parentNode = parentNode.parentNode;
-                }
-                return null;
-            ]]></getter>
-        </property>
         <method name="onEnable">
             <body><![CDATA[
-            Firebug.PanelActivation.enablePanel(this.selectedPanel);
+            var panelType = this.panelBar.selectedTab.panelType;
+            panelType.prototype.setEnabled(true);
+            this.panelBar.updateTab(panelType);
             ]]></body>
         </method>
         <method name="onDisable">
             <body><![CDATA[
-            Firebug.PanelActivation.disablePanel(this.selectedPanel);
+            var panelType = this.panelBar.selectedTab.panelType;
+            panelType.prototype.setEnabled(false);
+            this.panelBar.updateTab(panelType);
             ]]></body>
         </method>
         <method name="optionMenu">
@@ -703,7 +722,7 @@
             // Hide the mini-menu (displaying panel's option) if following is true:
             // 1) The panel isn't activable and so there are no enable/disable options.
             // 2) The panel doesn't provide any additional options.
-            var panel = this.selectedPanel;
+            var panel = this.panelBar.selectedPanel;
             if (!panel)
                 return;
 
@@ -720,37 +739,37 @@
             this.popup.showPopup(this, -1, -1, "popup", "bottomleft", "topleft");
         ]]></handler>
         <handler event="popupshowing"><![CDATA[
-            if (!this.selectedPanel)
+            var tab = this.panelBar.selectedTab;
+            if (!tab)
                 return false;
 
             var items = [];
+            var panelType = tab.panelType;
 
             // Create menu items for activation (only for activable panels).
-            if (this.selectedPanel.activable)
+            if (tab.panelType.prototype.activable)
             {
-                var enabled = this.selectedPanel.isEnabled();
+                var enabled = tab.panelType.prototype.isEnabled();
                 items.push(this.optionMenu("panel.Enabled", enabled, this.onEnable));
                 items.push(this.optionMenu("panel.Disabled", !enabled, this.onDisable));
             }
 
-            // Get panel's option items.
-            var panelItems = this.selectedPanel.getOptionsMenuItems(FirebugContext);
-            if (!panelItems)
-                return false;
-
-            // If the module is disabled, gray out all the options.
-            if (this.selectedPanel.activable && !enabled)
+            var panelItems = [];
+            var panel = this.panelBar.selectedPanel;
+            if (panel)
             {
-                for (var i = 0; i < panelItems.length; i++)
-                    panelItems[i].disabled = true;
+                // Get panel's option items.
+                var panelItems = panel.getOptionsMenuItems(FirebugContext);
+                if (panelItems.length > 0)
+                    items.push("-");
             }
-
-            if (panelItems.length > 0)
-                items.push("-");
 
             var menu = FBL.extendArray(items, panelItems);
             for (var i = 0; i < menu.length; ++i)
                 FBL.createMenuItem(this.popup, menu[i]);
+
+            if (!this.popup.childNodes.length)
+                return false;
 
             return true;
         ]]></handler>

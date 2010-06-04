@@ -128,7 +128,7 @@
     <vbox id="fbContentBox">
         <box id="fbPanelBox" flex="1">
             <panelBar id="fbPanelBar1" class="panelBar" flex="3" persist="width,height">
-                <hbox id="fbPanelBar1-tabBox" class="panelTabBox" collapsed="true">
+                <hbox id="fbPanelBar1-tabBox" class="panelTabBox">
                     <hbox id="fbPanelBar1-innerToolbar" class="innerToolbar" role="toolbar" aria-label="Firebug Tools">
                         <hbox id="fbPanelBar1-buttons">
 

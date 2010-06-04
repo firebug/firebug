@@ -1595,6 +1595,7 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
         }
         return null;
     },
+
     // end of guilt trip
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 
@@ -1746,7 +1747,8 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
         return url;
     },
 
-    // ********************************************************************************
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+
     getEvalExpression: function(frame, context)
     {
         var expr = this.getEvalExpressionFromEval(frame, context);  // eval in eval
@@ -2116,26 +2118,27 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
     // extends ActivableModule
 
-    onPanelEnable: function(panelName)
+    onObserverChange: function(observer)
     {
-        if (panelName != "script")
-            return;
+        if (this.hasObservers())
+            this.activateDebugger()
+        else
+            this.deactivateDebugger();
+    },
 
-        this.setDefaultState(true);
+    activateDebugger: function()
+    {
         this.registerDebugger();
 
         if (FirebugContext && !fbs.isJSDActive())
             fbs.unPause();
 
         if (FBTrace.DBG_PANELS || FBTrace.DBG_ACTIVATION)
-            FBTrace.sysout("debugger.onPanelEnable;");
+            FBTrace.sysout("debugger.activate;");
     },
 
-    onPanelDisable: function(panelName)
+    deactivateDebugger: function()
     {
-        if (panelName != "script")
-            return;
-
         if (this.dependents.length > 0)
         {
             for(var i = 0; i < this.dependents.length; i++)
@@ -2159,11 +2162,10 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
         }
 
         // else no dependents enabled:
-        this.setDefaultState(false);
         this.unregisterDebugger();
 
         if (FBTrace.DBG_PANELS || FBTrace.DBG_ACTIVATION)
-            FBTrace.sysout("debugger.onPanelDisable with panelName: "+panelName);
+            FBTrace.sysout("debugger.deactivate");
 
         this.clearAllBreakpoints();
     },
@@ -2174,11 +2176,14 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
         {
             if (!this.isAlwaysEnabled()) // then we need to enable
             {
-                this.setDefaultState(true);
+                this.activateDebugger();
                 if (FirebugContext)
                     Firebug.Console.log("enabling javascript debugger to support "+dependentAddedOrRemoved.dispatchName, FirebugContext);
             }
         }
+
+        // xxxHonza, XXXjjb: what about else? In case there are no dependants we could perhaps
+        // disable again...
     },
 
     onSuspendFirebug: function()
@@ -2407,7 +2412,8 @@ Firebug.ScriptPanel.prototype = extend(Firebug.SourceBoxPanel,
         Firebug.SourceBoxPanel.initialize.apply(this, arguments);
     },
 
-    // *************************************************************************************
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+
     showFunction: function(fn)
     {
         var sourceLink = findSourceForFunction(fn, this.context);
@@ -2817,7 +2823,7 @@ Firebug.ScriptPanel.prototype = extend(Firebug.SourceBoxPanel,
 
         if (enabled)
         {
-            Firebug.DisabledPanelPage.hide(this);
+            //Firebug.DisabledPanelPage.hide(this);
 
             if (this.context.loaded)
             {
@@ -2843,30 +2849,8 @@ Firebug.ScriptPanel.prototype = extend(Firebug.SourceBoxPanel,
         }
         else
         {
-            Firebug.DisabledPanelPage.show(this);
+            //Firebug.DisabledPanelPage.show(this);
         }
-    },
-
-    enablePanel: function()
-    {
-        if (FBTrace.DBG_PANELS || FBTrace.DBG_ACTIVATION)
-            FBTrace.sysout("debugger.ScriptPanel.enablePanel;");
-
-        this.panelSplitter.collapsed = false;
-        this.sidePanelDeck.collapsed = false;
-
-        Firebug.ActivablePanel.enablePanel.apply(this, arguments);
-    },
-
-    disablePanel: function()
-    {
-        if (FBTrace.DBG_PANELS || FBTrace.DBG_ACTIVATION)
-            FBTrace.sysout("debugger.ScriptPanel.disablePanel;");
-
-        this.panelSplitter.collapsed = true;
-        this.sidePanelDeck.collapsed = true;
-
-        Firebug.ActivablePanel.disablePanel.apply(this, arguments);
     },
 
     hide: function(state)
@@ -3128,20 +3112,20 @@ Firebug.ScriptPanel.prototype = extend(Firebug.SourceBoxPanel,
 
         function addFile(url, scriptTagNumber, dependentURL)
         {
-                if (oldMap && url in oldMap)
-                {
-                    var sourceFile = oldMap[url];
-                    sourceFile.dependentURL = dependentURL;
-                    context.addSourceFile(sourceFile);
-                    return false;
-                }
-                else
-                {
-                    var sourceFile = new Firebug.ScriptTagSourceFile(context, url, scriptTagNumber);
-                    sourceFile.dependentURL = dependentURL;
-                    context.addSourceFile(sourceFile);
-                    return true;
-                }
+            if (oldMap && url in oldMap)
+            {
+                var sourceFile = oldMap[url];
+                sourceFile.dependentURL = dependentURL;
+                context.addSourceFile(sourceFile);
+                return false;
+            }
+            else
+            {
+                var sourceFile = new Firebug.ScriptTagSourceFile(context, url, scriptTagNumber);
+                sourceFile.dependentURL = dependentURL;
+                context.addSourceFile(sourceFile);
+                return true;
+            }
         }
 
         iterateWindows(context.window, function updateEachWin(win)
@@ -3193,7 +3177,6 @@ Firebug.ScriptPanel.prototype = extend(Firebug.SourceBoxPanel,
             FBTrace.sysout("updateScriptFiles sourcefiles:", sourceFilesAsArray(context.sourceFileMap));
         }
     },
-
 
     getDefaultLocation: function(context)
     {
@@ -3427,6 +3410,33 @@ Firebug.ScriptPanel.prototype = extend(Firebug.SourceBoxPanel,
     {
         var stepMode = fbs.getStepMode();
         return stepMode && (stepMode == "STEP_SUSPEND");
+    },
+
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+    // extends ActivablePanel
+
+    /**
+     * Support for panel activation.
+     */
+    onActivationChanged: function(enable)
+    {
+        if (FBTrace.DBG_CONSOLE || FBTrace.DBG_ACTIVATION)
+            FBTrace.sysout("console.ScriptPanel.onActivationChanged; " + enable);
+
+        if (enable)
+        {
+            //this.panelSplitter.collapsed = false;
+            //this.sidePanelDeck.collapsed = false;
+
+            Firebug.Debugger.addObserver(this);
+        }
+        else
+        {
+            //this.panelSplitter.collapsed = true;
+            //this.sidePanelDeck.collapsed = true;
+
+            Firebug.Debugger.removeObserver(this);
+        }
     },
 });
 

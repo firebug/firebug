@@ -105,6 +105,7 @@ Firebug.Activation = extend(Firebug.Module,
                     // 1) www.google.com -> google.com
                     // 2) www.stuff.co.nz -> stuff.co.nz
                     // 3) getfirebug.com -> getfirebug.com
+                    // 4) xxxHonza: what about: mail.cn.mozilla.com -> mozilla.com ?
                     var levels = host.split('.');
                     if (levels.length > 2)
                         levels = levels.slice(1);
@@ -377,17 +378,49 @@ Firebug.PanelActivation = extend(Firebug.Module,
         prefs.removeObserver(Firebug.prefDomain, this, false);
     },
 
-    // Enable & disable methods (used e.g. by Options Mini Menu and Firebug status bar menu).
-    enablePanel: function(panel)
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+
+    activatePanelTypes: function(panelTypes)
     {
-        if (panel && panel.activable)
-            this.setDefaultState(panel.name, true);
+        for (var p in panelTypes)
+        {
+            var panelType = panelTypes[p];
+            if (!this.isPanelActivable(panelType))
+                continue;
+
+            if (this.isPanelEnabled(panelType))
+                panelType.prototype.onActivationChanged(true);
+        }
     },
 
-    disablePanel: function(panel)
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+
+    isPanelActivable: function(panelType)
     {
-        if (panel && panel.activable)
-            this.setDefaultState(panel.name, false);
+        return panelType.prototype.activable ? true : false;
+    },
+
+    isPanelEnabled: function(panelType)
+    {
+        if (!this.isPanelActivable(panelType))
+            return true;
+
+        // Panel "class" object is used to decide whether a panel is disabled
+        // or not (i.e.: isEnabled is a static method of Firebug.Panel)
+        return panelType ? panelType.prototype.isEnabled() : false;
+    },
+
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+    // Enable & disable methods.
+
+    enablePanel: function(panelType)
+    {
+        this.setPanelState(panelType, true);
+    },
+
+    disablePanel: function(panelType)
+    {
+        this.setPanelState(panelType, false);
     },
 
     enableAllPanels: function()
@@ -395,8 +428,7 @@ Firebug.PanelActivation = extend(Firebug.Module,
         for (var i = 0; i < Firebug.panelTypes.length; ++i)
         {
             var panelType = Firebug.panelTypes[i];
-            if (panelType.prototype.activable)
-                this.setDefaultState(panelType.prototype.name, true);
+            this.setPanelState(panelType, true);
         }
     },
 
@@ -405,29 +437,27 @@ Firebug.PanelActivation = extend(Firebug.Module,
         for (var i = 0; i < Firebug.panelTypes.length; ++i)
         {
             var panelType = Firebug.panelTypes[i];
-            if (panelType.prototype.activable)
-                this.setDefaultState(panelType.prototype.name, false);
+            this.setPanelState(panelType, false);
         }
     },
 
-    setDefaultState: function(panelName, enable)
+    setPanelState: function(panelType, enable)
     {
-        if (!panelName)
-            return;
+        if (panelType && panelType.prototype.setEnabled)
+            panelType.prototype.setEnabled(enable);
 
-        var prefDomain = Firebug.prefDomain + "." + panelName;
-
-        // Proper activation preference must be available.
-        var type = prefs.getPrefType(prefDomain + ".enableSites")
-        if (type != Ci.nsIPrefBranch.PREF_BOOL)
-        {
-        	if (FBTrace.DBG_ERRORS)
-        		FBTrace.sysout("activation.setDefaultState FAILS not a PREF_BOOL: "+type)
-            return;
-        }
-
-        Firebug.setPref(prefDomain, "enableSites", enable);
+        this.updateTab(panelType);
     },
+
+    updateTab: function(panelType)
+    {
+        var panelName = panelType.prototype.name;
+        var panelBar = Firebug.chrome.$("fbPanelBar1");
+        var tab = panelBar.updateTab(panelType);
+    },
+
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+    // Observer activation changes (preference)
 
     /**
      * Observer for activation preferences changes.
@@ -449,7 +479,9 @@ Firebug.PanelActivation = extend(Firebug.Module,
             var panelName = parts[2];
             var enable = Firebug.getPref(Firebug.prefDomain, panelName + ".enableSites");
 
-            this.onChangeActivation(null, panelName, enable);
+            var panelType = Firebug.getPanelType(panelName, enable);
+            if (panelType)
+                this.onActivationChanged(panelType, enable);
         }
         catch (e)
         {
@@ -458,63 +490,30 @@ Firebug.PanelActivation = extend(Firebug.Module,
         }
     },
 
-    initActivation: function(context, panelName, enable)
+    onActivationChanged: function(panelType, enable)
     {
-        this.onChangeActivation(context, panelName, enable);
-    },
-
-    onChangeActivation: function(context, panelName, enable)
-    {
-        if (enable)
-            dispatch(Firebug.modules, "onPanelEnable", [panelName]);
-        else
-            dispatch(Firebug.modules, "onPanelDisable", [panelName]);
-
-        // If the context is provided then use it, otherwise iterate all
-        // available contexts
-        if (context)
+        if (!enable)
         {
-            this.changeActivation(context, panelName, enable);
-        }
-        else
-        {
+            // Iterate all contexts and destroy all instances of the specified panel.
             var self = this;
             TabWatcher.iterateContexts(function(context) {
-                self.changeActivation(context, panelName, enable);
+                context.destroyPanel(panelType, context.persistedState);
             });
         }
+
+        panelType.prototype.onActivationChanged(enable);
+
+        Firebug.chrome.syncPanel();
     },
-
-    changeActivation: function(context, panelName, enable)
-    {
-        try
-        {
-            // Second notification sent to all modules, now with the context.
-            var fName = enable ? "onEnabled" : "onDisabled";
-            dispatch(Firebug.modules, fName, [context, panelName]);
-
-            // Enable or disable panel within the specified context.
-            var panel = context.getPanel(panelName, true);
-            if (panel)
-            {
-                if (enable)
-                    panel.enablePanel();
-                else
-                    panel.disablePanel();
-            }
-        }
-        catch (exc)
-        {
-            if (FBTrace.DBG_ERRORS)
-                FBTrace.sysout("PanelActivation.onChangeActivation FAILS for " +
-                    context.getName() + " because: " + exc, exc);
-        }
-    }
 });
 
 // ************************************************************************************************
 
-Firebug.DisabledPanelPage = domplate(Firebug.Rep,
+/**
+ * @domplate This template renders default content for disabled panels.
+ */
+Firebug.DisabledPanelBox = domplate(Firebug.Rep,
+/** @lends Firebug.DisabledPanelBox */
 {
     tag:
         DIV({"class": "disabledPanelBox"},
@@ -527,48 +526,42 @@ Firebug.DisabledPanelPage = domplate(Firebug.Rep,
                 SPAN({"class": "descImage descImage-$panelName"})
             )
             /* need something here that pushes down any thing appended to the panel */
-         ),
+        ),
 
-    show: function(panel)
+    /**
+     * Show default content saying that this panel type (specified by name) is disabled.
+     * The parent node is specified in panel.html file.
+     */
+    show: function(browser, panelName)
     {
-        // Always render the page so, the previous content is properly replaced.
-        //if (!panel.disabledBox)
-            this.render(panel);
-
-        panel.disabledBox.setAttribute("collapsed", false);
-        panel.panelNode.scrollTop = 0;
-
-        if (FBTrace.DBG_PANELS)
-            FBTrace.sysout("firebug.DisabledPanelPage.show:"+panel.disabledBox.getAttribute('collapsed')+" box", panel.disabledBox);
-    },
-
-    hide: function(panel)
-    {
-        if (!panel.disabledBox)
+        if (!panelName)
             return;
 
-        if (FBTrace.DBG_PANELS)
-            FBTrace.sysout("firebug.DisabledPanelPage.hide; box", panel.disabledBox);
-
-        panel.disabledBox.setAttribute("collapsed", true);
-    },
-
-    formatPanelName: function(name) {
-      return name.charAt(0).toUpperCase() + name.slice(1);
-    },
-
-    render: function(panel)
-    {
-        // Prepare arguments for the template.
         var args = {
-            pageTitle: $STRF("moduleManager.title", [this.formatPanelName(panel.name)]),
-            panelName: panel.name
+            pageTitle: $STRF("moduleManager.title", [panelName]),
+            panelName: panelName
         };
 
-        // Render panel HTML
-        panel.disabledBox = this.tag.replace(args, panel.panelNode, this);
-        panel.panelNode.scrollTop = 0;
-    }
+        var parentNode = this.getParentNode(browser);
+        this.tag.replace(args, parentNode, this);
+        parentNode.removeAttribute("collapsed");
+    },
+
+    /**
+     * Hide currently displayed default content.
+     */
+    hide: function(browser)
+    {
+        var parentNode = this.getParentNode(browser);
+        clearNode(parentNode);
+        parentNode.setAttribute("collapsed", true);
+    },
+
+    getParentNode: function(browser)
+    {
+        var doc = browser.contentDocument;
+        return doc.documentElement.querySelector(".disabledPanelNode");
+    },
 });
 
 // ************************************************************************************************

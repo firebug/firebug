@@ -278,6 +278,7 @@ h1.groupHeader {
 }
 
 /************************************************************************************************/
+/* Default content for disabled panels */
 
 .disabledPanelBox {
     top: 0;
@@ -322,12 +323,20 @@ h1.groupHeader {
     background-repeat: no-repeat;
 }
 
+.disabledPanelHead:first-letter {
+    text-transform: capitalize;
+}
+
 .disabledPanelBox .descImage-console {
     background-image: url(chrome://firebug/skin/activation-menu-console.png);
 }
 
 .disabledPanelBox .descImage-script {
     background-image: url(chrome://firebug/skin/activation-menu-script.png);
+}
+
+.disabledPanelBox .descImage-net {
+    background-image: url(chrome://firebug/skin/activation-menu-net.png);
 }
 
 .disabledPanelBox .descImage-net {

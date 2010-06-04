@@ -77,7 +77,8 @@ top.FirebugChrome =
         if (window.arguments)
             var detachArgs = window.arguments[0];
 
-        if (FBTrace.DBG_INITIALIZE) FBTrace.sysout("chrome.initialize w/detachArgs=", detachArgs);
+        if (FBTrace.DBG_INITIALIZE)
+            FBTrace.sysout("chrome.initialize w/detachArgs=", detachArgs);
 
         if (detachArgs && detachArgs.Firebug)
         {
@@ -89,18 +90,13 @@ top.FirebugChrome =
         else
         {
             // Firebug has not been initialized yet
-
-
             if (!Firebug.isInitialized)
-            {
                 Firebug.initialize();
-            }
         }
 
         // FBL should be available
         if (FBTrace.sysout && (!FBL || !FBL.initialize) )
             FBTrace.sysout("Firebug is broken, FBL incomplete, if the last function is QI, check lib.js:", FBL);
-
 
         Firebug.internationalizeUI(window.document);
 
@@ -159,7 +155,8 @@ top.FirebugChrome =
         // we listen for panel update
         Firebug.registerUIListener(this);
 
-        try {
+        try
+        {
             if (window.arguments)
                 var detachArgs = window.arguments[0];
 
@@ -196,8 +193,9 @@ top.FirebugChrome =
                 this.attachBrowser(FirebugContext);
             else
                 Firebug.initializeUI(detachArgs);
-
-        } catch (exc) {
+        }
+        catch (exc)
+        {
             FBTrace.sysout("chrome.initializeUI fails "+exc, exc);
         }
     },
@@ -252,8 +250,9 @@ top.FirebugChrome =
     attachBrowser: function(context)  // XXXjjb context == (FirebugContext || null)  and inDetachedScope == true
     {
         if (FBTrace.DBG_ACTIVATION)
-            FBTrace.sysout("chrome.attachBrowser with inDetachedScope="+inDetachedScope+" context="+context
-                               +" context==FirebugContext: "+(context==FirebugContext)+" in window: "+window.location);
+            FBTrace.sysout("chrome.attachBrowser with inDetachedScope="+inDetachedScope +
+                " context="+context+" context==FirebugContext: "+(context==FirebugContext)+
+                " in window: "+window.location);
 
         if (inDetachedScope)  // then we are initializing in external window
         {
@@ -262,9 +261,9 @@ top.FirebugChrome =
             Firebug.selectContext(context);
 
             if (FBTrace.DBG_ACTIVATION)
-                FBTrace.sysout("attachBrowser inDetachedScope in Firebug.chrome.window: "+Firebug.chrome.window.location);
+                FBTrace.sysout("attachBrowser inDetachedScope in Firebug.chrome.window: "+
+                    Firebug.chrome.window.location);
         }
-
     },
 
     undetach: function()
@@ -340,6 +339,7 @@ top.FirebugChrome =
         var file = Components.classes["@mozilla.org/file/directory_service;1"]
            .getService(Components.interfaces.nsIProperties)
            .get("TmpD", Components.interfaces.nsIFile);
+
         file.append("firebug");   // extensions sub-directory
         file.append("panelSave.html");
         file.createUnique(Components.interfaces.nsIFile.NORMAL_FILE_TYPE, 0666);
@@ -383,7 +383,8 @@ top.FirebugChrome =
 
     isFocused: function()
     {
-        var winMediator = Cc["@mozilla.org/appshell/window-mediator;1"].getService(Ci["nsIWindowMediator"]);
+        var winMediator = Cc["@mozilla.org/appshell/window-mediator;1"].
+            getService(Ci["nsIWindowMediator"]);
 
         return winMediator.getMostRecentWindow(null) == window;
     },
@@ -437,6 +438,7 @@ top.FirebugChrome =
             return;
         var i, currentIndex = newIndex = -1, currentPanel = this.getSelectedPanel(), newPanel;
         var panelTypes = Firebug.getMainPanelTypes(FirebugContext);
+
         /*get current panel's index (is there a simpler way for this?*/
         for (i = 0; i < panelTypes.length; i++)
         {
@@ -446,6 +448,7 @@ top.FirebugChrome =
                 break;
             }
         }
+
         if (currentIndex != -1)
         {
             newIndex = goRight ? (currentIndex == panelTypes.length - 1 ? 0 : ++currentIndex) : (currentIndex == 0 ? panelTypes.length - 1 : --currentIndex);
@@ -624,16 +627,17 @@ top.FirebugChrome =
 
     syncPanel: function()
     {
-        if (FBTrace.DBG_PANELS) FBTrace.sysout("chrome.syncPanel FirebugContext="+
-            (FirebugContext ? FirebugContext.getName() : "undefined")+"\n");
+        var context = FirebugContext;
+
+        if (FBTrace.DBG_PANELS)
+            FBTrace.sysout("chrome.syncPanel FirebugContext=" +
+                (context ? context.getName() : "undefined"));
 
         panelStatus.clear();
 
-        if (FirebugContext)
+        if (context)
         {
-            var panelName = FirebugContext.panelName
-                ? FirebugContext.panelName
-                : Firebug.defaultPanelName;
+            var panelName = context.panelName? context.panelName : Firebug.defaultPanelName;
 
             // Make HTML panel the default panel, which is displayed
             // to the user the very first time.
@@ -1371,19 +1375,17 @@ function onSelectingPanel(event)
     }
 
     if (panel)
-    {
         panel.navigate(panel.location);
-        Firebug.chrome.syncLocationList();
-        Firebug.chrome.syncSidePanels();
-        Firebug.chrome.syncStatusPath();
 
-        Firebug.showPanel(panel.context.browser, panel);
-    }
-    else
-    {
-        var browser = FirebugChrome.getCurrentBrowser();
-        Firebug.showPanel(browser, null);
-    }
+    // Synchronize UI around panels.
+    // xxxHonza: The command line should be synced here as well.
+    Firebug.chrome.syncLocationList();
+    Firebug.chrome.syncSidePanels();
+    Firebug.chrome.syncStatusPath();
+
+    // Calling Firebug.showPanel causes dispatching "showPanel" to all modules.
+    var browser = panel ? panel.context.browser : FirebugChrome.getCurrentBrowser();
+    Firebug.showPanel(browser, panel);
 }
 
 function onSelectedSidePanel(event)
@@ -1397,13 +1399,10 @@ function onSelectedSidePanel(event)
             var sidePanelName = sidePanel ? sidePanel.name : null;
             FirebugContext.sidePanelNames[panelName] = sidePanelName;
         }
-        else
-        {
-            if (FBTrace.DBG_ERRORS)
-                FBTrace.sysout("onSelectedSidePanel FirebugContext has no panelName: ",FirebugContext);
-        }
     }
-    if (FBTrace.DBG_PANELS) FBTrace.sysout("chrome.onSelectedSidePanel name="+(sidePanel?sidePanel.name:"undefined")+"\n");
+
+    if (FBTrace.DBG_PANELS)
+        FBTrace.sysout("chrome.onSelectedSidePanel name="+(sidePanel?sidePanel.name:"undefined")+"\n");
 
     var panel = panelBar1.selectedPanel;
     if (panel && sidePanel)

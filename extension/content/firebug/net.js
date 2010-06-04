@@ -325,32 +325,21 @@ Firebug.NetMonitor = extend(Firebug.ActivableModule,
         }
     },
 
-    onEnabled: function(context, enabledPanelName)
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+    // extends Module
+
+    onObserverChange: function(observer)
     {
-        if (panelName != enabledPanelName)
-            return;
-
-        if (FBTrace.DBG_NET || FBTrace.DBG_ACTIVATION)
-            FBTrace.sysout("net.onEnabled; " + context.getName());
-
-        this.setDefaultState(true);
-        NetHttpActivityObserver.registerObserver();
-
-        monitorContext(context);
-    },
-
-    onDisabled: function(context, disabledPanelName)
-    {
-        if (panelName != disabledPanelName)
-            return;
-
-        if (FBTrace.DBG_NET || FBTrace.DBG_ACTIVATION)
-            FBTrace.sysout("net.onDisabled; " + context.getName());
-
-        this.setDefaultState(false);
-        NetHttpActivityObserver.unregisterObserver();
-
-        unmonitorContext(context);
+        if (this.hasObservers())
+        {
+            NetHttpActivityObserver.registerObserver();
+            TabWatcher.iterateContexts(monitorContext);
+        }
+        else
+        {
+            NetHttpActivityObserver.unregisterObserver();
+            TabWatcher.iterateContexts(unmonitorContext);
+        }
     },
 
     onResumeFirebug: function()
@@ -411,8 +400,6 @@ NetPanel.prototype = extend(Firebug.ActivablePanel,
 
     destroy: function(state)
     {
-        Firebug.unregisterUIListener(this);
-
         Firebug.ActivablePanel.destroy.apply(this, arguments);
     },
 
@@ -497,15 +484,9 @@ NetPanel.prototype = extend(Firebug.ActivablePanel,
         this.showToolbarButtons("fbNetButtons", enabled);
 
         if (enabled)
-        {
-            Firebug.DisabledPanelPage.hide(this);
             Firebug.chrome.setGlobalAttribute("cmd_togglePersistNet", "checked", this.persistContent);
-        }
         else
-        {
-            Firebug.DisabledPanelPage.show(this);
             this.table = null;
-        }
 
         if (!enabled)
             return;
@@ -830,23 +811,18 @@ NetPanel.prototype = extend(Firebug.ActivablePanel,
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
     // Activable Panel
 
-    enablePanel: function()
+    /**
+     * Support for panel activation.
+     */
+    onActivationChanged: function(enable)
     {
-        if (FBTrace.DBG_NET || FBTrace.DBG_ACTIVATION)
-            FBTrace.sysout("net.NetPanel.enablePanel; " + this.context.getName());
+        if (FBTrace.DBG_CONSOLE || FBTrace.DBG_ACTIVATION)
+            FBTrace.sysout("console.ConsolePanel.onActivationChanged; " + enable);
 
-        Firebug.ActivablePanel.enablePanel.apply(this, arguments);
-    },
-
-    disablePanel: function(module)
-    {
-        if (FBTrace.DBG_NET || FBTrace.DBG_ACTIVATION)
-            FBTrace.sysout("net.NetPanel.disablePanel; " + this.context.getName());
-
-        // The content will be replaced by a message saying "disabled now".
-        this.table = null;
-
-        Firebug.ActivablePanel.disablePanel.apply(this, arguments);
+        if (enable)
+            Firebug.NetMonitor.addObserver(this);
+        else
+            Firebug.NetMonitor.removeObserver(this);
     },
 
     breakOnNext: function(breaking)
