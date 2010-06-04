@@ -200,10 +200,6 @@ top.Firebug =
         this.isInitialized = true;
 
         dispatch(modules, "initialize", [this.prefDomain, prefNames]);
-
-        // Initial activation of registered panel types. All panel -> module dependencies
-        // should be defined now (in onActivationChange).
-        Firebug.PanelActivation.activatePanelTypes(panelTypes);
     },
 
     getVersion: function()
@@ -300,6 +296,10 @@ top.Firebug =
             }
         }
 
+        // Initial activation of registered panel types. All panel -> module dependencies
+        // should be defined now (in onActivationChange).
+        Firebug.PanelActivation.activatePanelTypes(panelTypes);
+        
         dispatch(menuItemControllers, "initialize", []);  // TODO chrome.js
 
         // In the case that the user opens firebug in a new window but then closes Firefox window, we don't get the
