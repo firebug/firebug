@@ -64,6 +64,7 @@ top.FirebugChrome =
         catch (exc)
         {
             // Disaster!
+        	window.dump("getStackDump:"+FBL.getStackDump()+"\n");
             Components.utils.reportError("Firebug initialization FAILS "+exc);
             if (FBTrace.sysout)
                 FBTrace.sysout("chrome.panelBarReady FAILS: "+exc, exc);
@@ -74,6 +75,16 @@ top.FirebugChrome =
 
     initialize: function()
     {
+        panelBox = $("fbPanelBox");
+        panelSplitter = $("fbPanelSplitter");
+        sidePanelDeck = $("fbSidePanelDeck");
+        panelBar1 = $("fbPanelBar1");
+        panelBar2 = $("fbPanelBar2");
+        locationList = $("fbLocationList");
+        locationSeparator = $("fbLocationSeparator");
+        panelStatus = $("fbPanelStatus");
+        panelStatusSeparator = $("fbStatusSeparator");
+
         if (window.arguments)
             var detachArgs = window.arguments[0];
 
@@ -99,16 +110,6 @@ top.FirebugChrome =
             FBTrace.sysout("Firebug is broken, FBL incomplete, if the last function is QI, check lib.js:", FBL);
 
         Firebug.internationalizeUI(window.document);
-
-        panelBox = $("fbPanelBox");
-        panelSplitter = $("fbPanelSplitter");
-        sidePanelDeck = $("fbSidePanelDeck");
-        panelBar1 = $("fbPanelBar1");
-        panelBar2 = $("fbPanelBar2");
-        locationList = $("fbLocationList");
-        locationSeparator = $("fbLocationSeparator");
-        panelStatus = $("fbPanelStatus");
-        panelStatusSeparator = $("fbStatusSeparator");
 
         var browser1 = panelBar1.browser;
         browser1.addEventListener("load", browser1Loaded, true);

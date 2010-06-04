@@ -201,7 +201,7 @@ top.Firebug =
 
         dispatch(modules, "initialize", [this.prefDomain, prefNames]);
 
-        // Initial activation of registered panel types. All panel -> moduls dependencies
+        // Initial activation of registered panel types. All panel -> module dependencies
         // should be defined now (in onActivationChange).
         Firebug.PanelActivation.activatePanelTypes(panelTypes);
     },
