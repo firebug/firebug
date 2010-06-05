@@ -391,7 +391,7 @@ Firebug.SourceBoxPanel = extend(SourceBoxPanelBase,
 
         if (FBTrace.DBG_SOURCEFILES)
         {
-            FBTrace.sysout("setSourceBoxLineSizes size", size);
+            FBTrace.sysout("setSourceBoxLineSizes size for lineNoCharsSpacer "+lineNoCharsSpacer, size);
             FBTrace.sysout("firebug.setSourceBoxLineSizes, sourceBox.scrollTop "+sourceBox.scrollTop+ " sourceBox.lineHeight: "+sourceBox.lineHeight+" sourceBox.lineNoWidth:"+sourceBox.lineNoWidth+"\n");
         }
     },

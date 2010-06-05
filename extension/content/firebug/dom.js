@@ -1220,7 +1220,7 @@ Firebug.DOMBasePanel.prototype = extend(Firebug.Panel,
 
             items.push(
                 "-",
-                {label: "Copy Name",
+                {label: "Copy Name",  // xxxJJB internationalize 
                     command: bindFixed(this.copyName, this, row) },
                 {label: "Copy Path",
                     command: bindFixed(this.copyPath, this, row) }
