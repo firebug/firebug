@@ -72,14 +72,14 @@
 
 .logRow-info,
 .logRow-info .objectLink-sourceLink {
-    background-color: #FFFFFF;
+    background-color: #EBF5FF;
 }
 
 .logRow-warn,
 .logRow-warningMessage,
 .logRow-warn .objectLink-sourceLink,
 .logRow-warningMessage .objectLink-sourceLink {
-    background-color: cyan;
+    background-color: #FFFFC8;
 }
 
 .logRow-error,
@@ -87,7 +87,7 @@
 .logRow-errorMessage,
 .logRow-error .objectLink-sourceLink,
 .logRow-errorMessage .objectLink-sourceLink {
-    background-color: LightYellow;
+    background-color: #FFEBEB;
 }
 
 .logRow-error,
