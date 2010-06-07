@@ -380,113 +380,12 @@ function FirebugConsoleHandler(context, win)
         return diff;
     };
 
-    this.table = function()
+    this.table = function(data, columns)
     {
-        var objects = cloneArray(arguments);
-
-        // No arguments passed into console.table method, bail out for now,
-        // but some error message could be displayed in the future.
-        if (!objects.length)
-            return;
-
-        // The first paramter is ususlly a string message. Could this string
-        // also specify a patter for the header sorting?
-        // (alphabetical vs. numerical).
-        var format;
-        if (typeof(objects[0]) == "string")
-        {
-            format = objects[0];
-            objects = objects.slice(1);
-        }
-
-        // In case of an availeble format string (usually a message) create
-        // an expandable group (collapsed by default) that contains all provided
-        // tables, otherwise create just a simple log so, the table is immediately
-        // visible.
-        var row;
-        var parentNode;
-        if (format)
-        {
-            row = Firebug.Console.openGroup(format, context, "table",
-                FirebugReps.Table, true, null, true);
-
-            // Collapsed by default
-            removeClass(row, "opened");
-
-            // TBODY is going to be the parent for tables.
-            parentNode = row.lastChild;
-        }
-        else
-        {
-            parentNode = row = Firebug.Console.log(null, context, "table",
-                FirebugReps.Table, true);
-        }
-
-        // Helper listener that sets max height of the displayed table
-        // sroll-bar appears if necessary.
-        // Use: extensions.firebug.tabularLogMaxHeight to customize.
-        function onGroupExpanded(event)
-        {
-            if (isLeftClick(event))
-            {
-                var groupRow = event.currentTarget.parentNode;
-                if (hasClass(groupRow, "opened"))
-                {
-                    var bodies = row.getElementsByClassName("profileTbody");
-                    if (!bodies.length)
-                        return;
-
-                    for (var body in bodies)
-                    {
-                        var tBody = bodies[body];
-                        var maxHeight = Firebug.tabularLogMaxHeight;
-                        if (maxHeight > 0 && tBody.clientHeight > maxHeight)
-                            tBody.style.height = maxHeight + "px";
-                    }
-                }
-            }
-        }
-
-        for (var i=0; i<objects.length; i++)
-        {
-            var obj = objects[i];
-
-            // All arguments should be objects.
-            if (typeof(obj) != "object")
-                continue;
-
-            // Register mousedown listener to catch expand.
-            var groupLabel = row.getElementsByClassName("logGroupLabel").item(0);
-            if (groupLabel)
-                groupLabel.addEventListener("mousedown", onGroupExpanded, false);
-
-            // Limit string values. The default value for cropping is still to big
-            // to be displayed within a table cell.
-            // xxxHonza: is there better way how to do this?
-            var prevValue = Firebug.stringCropLength;
-            Firebug.stringCropLength = 15;
-
-            try
-            {
-                // Take snapshot of all the values.
-                if (obj.length || hasProperties(obj))
-                    FirebugReps.Table.tableTag.append({object: obj}, parentNode);
-            }
-            catch (err)
-            {
-                if (FBTrace.DBG_CONSOLE)
-                    FBTrace.sysout("consoleInjector.table; EXCEPTION " + err, err);
-            }
-            finally
-            {
-                Firebug.stringCropLength = prevValue;
-            }
-        }
-
-        // Stop logging in the our group.
-        if (format)
-            Firebug.Console.closeGroup(context, true);
+        FirebugReps.Table.log(data, columns, context);
     };
+
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 
     // These functions are over-ridden by commandLine
     this.evaluated = function(result, context)

@@ -270,6 +270,10 @@
 
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
+.logRow-table {
+    padding: 0;
+}
+
 .profileSizer {
     width: 100%;
 }
@@ -279,13 +283,11 @@
 }
 
 .profileTable {
-    border-bottom: 1px solid #D7D7D7;
-    border-left: 1px solid #D7D7D7;
 }
 
-/* If the table is displayed within a group the left border is provided by that group. */
+/* If the table is displayed within a group the border is provided by that group. */
 .logGroup .profileTable {
-    border-left: none;
+    border: none;
 }
 
 .profileTable TBODY {
