@@ -366,7 +366,7 @@ Firebug.CSSStyleSheetPanel.prototype = extend(Firebug.SourceBoxPanel,
 {
     // xxxHonza, XXXjjb
     // This panel is derived from Firebug.ActivablePanel (predecessor of Firebug.SourceBoxPanel)
-    // but it's apparently not supporting enable/disable. This is a workaround but better 
+    // but it's apparently not supporting enable/disable. This is a workaround but better
     // would be to derive only from Firebug.Panel.
     activable: false,
 
@@ -1310,7 +1310,7 @@ CSSElementPanel.prototype = extend(Firebug.CSSStyleSheetPanel.prototype,
     getStylesheetURL: function(rule)
     {
         // if the parentStyleSheet.href is null, CSS std says its inline style
-        if (rule && rule.parentStyleSheet.href)
+        if (rule && rule.parentStyleSheet && rule.parentStyleSheet.href)
             return rule.parentStyleSheet.href;
         else
             return this.selection.ownerDocument.location.href;
