@@ -738,13 +738,9 @@ Firebug.ConsolePanel.prototype = extend(Firebug.ActivablePanel,
             FBTrace.sysout("console.ConsolePanel.onActivationChanged; " + enable);
 
         if (enable)
-        {
             Firebug.Console.addObserver(this);
-        }
         else
-        {
             Firebug.Console.removeObserver(this);
-        }
     },
 
     getOptionsMenuItems: function()

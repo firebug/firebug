@@ -20,7 +20,7 @@ const privateBrowsingEnabled = ("@mozilla.org/privatebrowsing;1" in Cc) &&
 // ************************************************************************************************
 
 /**
- * @class Implements Firebug activation logic.
+ * @module Implements Firebug activation logic.
  *
  * 1) Part of the logic is based on annotation service (see components/firebug-annotations.js)
  *    in order to remember whether Firebug is activated for given site or not.
@@ -366,7 +366,14 @@ Firebug.Activation.TabWatcherListener =
 
 // ************************************************************************************************
 
+/**
+ * @module Implements Panel activation logic. A Firebug panel can support activation in order
+ * to avoid performance penalties in cases when panel's featuures are not necesary at the moment.
+ * Such panel must be derived from {@link Firebug.ActivablePanel} and appropriate activable
+ * module from {@link Firebug.ActivableModule}
+ */
 Firebug.PanelActivation = extend(Firebug.Module,
+/** @lends Firebug.PanelActivation */
 {
     initialize: function()
     {

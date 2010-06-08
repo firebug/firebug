@@ -3419,19 +3419,9 @@ Firebug.ScriptPanel.prototype = extend(Firebug.SourceBoxPanel,
             FBTrace.sysout("console.ScriptPanel.onActivationChanged; " + enable);
 
         if (enable)
-        {
-            //this.panelSplitter.collapsed = false;
-            //this.sidePanelDeck.collapsed = false;
-
             Firebug.Debugger.addObserver(this);
-        }
         else
-        {
-            //this.panelSplitter.collapsed = true;
-            //this.sidePanelDeck.collapsed = true;
-
             Firebug.Debugger.removeObserver(this);
-        }
     },
 });
 
