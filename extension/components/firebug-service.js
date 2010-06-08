@@ -633,7 +633,7 @@ FirebugService.prototype =
                 for (var i = 0; i < urlBreakpoints.length; ++i)
                 {
                     var bp = urlBreakpoints[i];
-                    if (bp.type & BP_NORMAL)
+                    if (bp.type & BP_NORMAL && !(bp.type & BP_ERROR) )
                     {
                         if (bp.scriptsWithBreakpoint && bp.scriptsWithBreakpoint.length > 0)
                         {
@@ -670,9 +670,21 @@ FirebugService.prototype =
         var index = this.findErrorBreakpoint(url, lineNo);
         if (index == -1)
         {
-            this.setBreakpoint(sourceFile, lineNo, null, debuggr);
-            errorBreakpoints.push({href: url, lineNo: lineNo, type: BP_ERROR });
-            dispatch(debuggers, "onToggleErrorBreakpoint", [url, lineNo, true, debuggr]);
+        	try
+        	{
+                var bp = this.addBreakpoint(BP_NORMAL | BP_ERROR, sourceFile, lineNo, null, debuggr);
+                if (bp)
+                {
+                    errorBreakpoints.push({href: url, lineNo: lineNo, type: BP_ERROR });
+                    dispatch(debuggers, "onToggleErrorBreakpoint", [url, lineNo, true, debuggr]);
+                    fbs.saveBreakpoints(sourceFile.href);  // after every call to onToggleBreakpoint
+                }
+
+        	}
+        	catch(exc)
+        	{
+        		FBTrace.sysout("fbs.setErrorBreakpoint FAILS "+exc, exc);
+        	}
         }
     },
 
@@ -681,10 +693,11 @@ FirebugService.prototype =
         var index = this.findErrorBreakpoint(url, lineNo);
         if (index != -1)
         {
-            this.clearBreakpoint(url, lineNo);
-            errorBreakpoints.splice(index, 1);
+        	var bp = this.removeBreakpoint(BP_NORMAL | BP_ERROR, url, lineNo);
 
+            errorBreakpoints.splice(index, 1);
             dispatch(debuggers, "onToggleErrorBreakpoint", [url, lineNo, false, debuggr]);
+            fbs.saveBreakpoints(sourceFile.href);  // after every call to onToggleBreakpoint
         }
     },
 
@@ -2592,6 +2605,8 @@ FirebugService.prototype =
                     ++disabledCount;
                 if (bp.type & BP_MONITOR)
                     ++monitorCount;
+                if (bp.type & BP_ERROR)
+                	errorBreakpoints.push({href: url, lineNo: bp.lineNo, type: BP_ERROR });
             }
         }
         if (FBTrace.DBG_FBS_BP)
@@ -2906,6 +2921,8 @@ var FirebugFactory =
         catch (exc)
         {
             ERROR("firebug-service initialization FAILS "+exc);
+            for (var p in exc)
+            	ERROR("firebug-service initialization "+p+"="+exc[p]);
         }
     },
     initializeService: function()
