@@ -90,6 +90,12 @@ window._getFirebugConsoleElement = function _getFirebugConsoleElement()
 {
     var element = document.body ? document.body : document.getElementsByTagName("body")[0];
     if (!element)
-        element = document.documentElement;  // For non-HTML docs
+    {
+    	var maybeHTML = document.documentElement ? document.documentElement.tagName : "null";
+    	if (!maybeHTML || maybeHTML.toLowerCase() !== "html")
+    		element = document.documentElement;  // For non-HTML docs
+    	// else no body has been added yet
+    }
+
     return element;
 };
