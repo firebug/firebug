@@ -701,13 +701,6 @@ NetPanel.prototype = extend(Firebug.ActivablePanel,
 
     copyResponse: function(file)
     {
-        var allowDoublePost = Firebug.getPref(Firebug.prefDomain, "allowDoublePost");
-        if (!allowDoublePost && !file.cacheEntry)
-        {
-            if (!confirm("The response can be re-requested from the server, OK?"))
-                return;
-        }
-
         // Copy response to the clipboard
         copyToClipboard(Utils.getResponseText(file, this.context));
     },
