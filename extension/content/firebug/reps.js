@@ -1092,7 +1092,7 @@ this.Window = domplate(Firebug.Rep,
         catch (exc)
         {
             if (FBTrace.DBG_ERRORS)
-                FBTrace.sysout("reps.Window window closed?");
+                FBTrace.sysout("reps.Window window closed? "+exc, exc);
         }
     },
 
@@ -1615,7 +1615,7 @@ this.ErrorMessage = domplate(Firebug.Rep,
         return trim(source);
       return "";
     },
-    
+
     getSourceLink: function(error)
     {
         var ext = error.category == "css" ? "css" : "js";
