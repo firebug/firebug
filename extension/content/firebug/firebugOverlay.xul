@@ -486,7 +486,7 @@
 
             <menuseparator id="menu_aboutSeparator"/>
 
-            <menuitem id="Firebug_About" label="&firebug.About;"
+            <menuitem id="Firebug_About" class="firebugAbout" label="&firebug.About;"
                       oncommand="FirebugChrome.openAboutDialog()"/>
         </menupopup>
         <panel id="fbMigrator" noautohide='true'>

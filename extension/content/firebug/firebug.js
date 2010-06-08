@@ -286,18 +286,20 @@ top.Firebug =
             this.version = version;
             $('fbStatusBar').setAttribute("tooltiptext", "Firebug " + version);
 
-            var about = $('Firebug_About');
-            if (about)
+            // At this moment there is more 'Firebug About' items (in the icon and tools menu).
+            var nodes = document.querySelectorAll(".firebugAbout");
+            for (var i=0; i<nodes.length; i++)
             {
-                var aboutLabel = about.getAttribute("label");
-                $('Firebug_About').setAttribute("label",  aboutLabel + " " + version);
+                var node = nodes[i];
+                var aboutLabel = node.getAttribute("label");
+                node.setAttribute("label", aboutLabel + " " + version);
             }
         }
 
         // Initial activation of registered panel types. All panel -> module dependencies
         // should be defined now (in onActivationChange).
         Firebug.PanelActivation.activatePanelTypes(panelTypes);
-        
+
         dispatch(menuItemControllers, "initialize", []);  // TODO chrome.js
 
         // In the case that the user opens firebug in a new window but then closes Firefox window, we don't get the
