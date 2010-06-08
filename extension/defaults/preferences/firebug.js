@@ -86,7 +86,6 @@ pref("extensions.firebug.showRulers", true);
 
 // Net
 pref("extensions.firebug.netFilterCategory", "all");
-pref("extensions.firebug.collectHttpHeaders", true);
 pref("extensions.firebug.net.logLimit", 500);
 pref("extensions.firebug.net.enableSites", false);
 pref("extensions.firebug.netDisplayedResponseLimit", 102400); // Maximum size limit for displayed responses [net, console panels].

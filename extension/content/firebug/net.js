@@ -4590,9 +4590,6 @@ Firebug.NetMonitor.Utils =
         }
         catch (e) { }
 
-        if (!Firebug.collectHttpHeaders)
-            return;
-
         try
         {
             if (!file.requestHeaders)
