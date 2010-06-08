@@ -1176,11 +1176,6 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
 
         if (Firebug.breakOnErrors)
         {
-            //xxxHonza: for now, the BON options are disabled to keep things simple.
-            // Deactivate "Break On All Errors" only if the other options says so.
-            //if (!Firebug.persistBreakOnError)
-            //    Firebug.setPref(Firebug.servicePrefDomain, "breakOnErrors", false);
-
             // Switch of Break on Next tab lightning.
             var panel = context.getPanel("console", true);
             //Firebug.Breakpoint.updatePanelTab(panel, false);
