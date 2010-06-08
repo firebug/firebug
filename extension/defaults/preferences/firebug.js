@@ -103,7 +103,6 @@ pref("extensions.firebug.cache.responseLimit", 5242880); // maximum size limit f
 pref("extensions.firebug.externalEditors", "");
 
 // Trace                                                        /*@explore*/
-pref("extensions.firebug.enableTraceConsole", true);            /*@explore*/
 pref("extensions.firebug.alwaysOpenTraceConsole", false);       /*@explore*/
 pref("extensions.firebug.trace.maxMessageLength", 400);         /*@explore*/
 pref("extensions.firebug.trace.enableScope", false);            /*@explore*/
