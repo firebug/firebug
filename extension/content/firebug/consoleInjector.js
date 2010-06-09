@@ -169,7 +169,7 @@ var total_handlers = 0;
 function createConsoleHandler(context, win)
 {
 	var handler = {};
-	handler.console = createConsole(context, win),
+	handler.console = Firebug.Console.createConsole(context, win),
 
     handler.attachTo = function(element)
     {
@@ -216,7 +216,7 @@ function createConsoleHandler(context, win)
     return handler;
 }
 
-function createConsole(context, win)
+Firebug.Console.createConsole = function createConsole(context, win)
 {
 	var console = {};
     console.log = function()
