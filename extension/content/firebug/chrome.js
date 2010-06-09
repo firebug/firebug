@@ -1211,7 +1211,7 @@ top.FirebugChrome =
 
     openAboutDialog: function()
     {
-        var extensionManager = CCSV("@mozilla.org/extensions/manager;1", "nsIExtensionManager");
+        var extensionManager = FBL.CCSV("@mozilla.org/extensions/manager;1", "nsIExtensionManager");
         openDialog("chrome://mozapps/content/extensions/about.xul", "",
             "chrome,centerscreen,modal", "urn:mozilla:item:firebug@software.joehewitt.com", extensionManager.datasource);
     },
