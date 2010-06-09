@@ -628,8 +628,10 @@
             <parameter name="event"/>
             <parameter name="iconNode"/>
             <body><![CDATA[
-            FBTrace.sysout('Here is the iconNode', iconNode);
-            iconNode.style.backgroundColor = "red";
+            // xxxHonza: the goal here is to visually indicate that clicking on
+            // checkmarks in the panel list popup selects the panel.
+            // FBTrace.sysout('Here is the iconNode', iconNode);
+            // iconNode.style.backgroundColor = "red";
             // So, iconNode here is XUL - change the current
             // background-image style (?) of <xul:image> to something that
             // pops out a little
