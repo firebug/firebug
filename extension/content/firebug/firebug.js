@@ -296,10 +296,6 @@ top.Firebug =
             }
         }
 
-        // Initial activation of registered panel types. All panel -> module dependencies
-        // should be defined now (in onActivationChange).
-        Firebug.PanelActivation.activatePanelTypes(panelTypes);
-
         dispatch(menuItemControllers, "initialize", []);  // TODO chrome.js
 
         // In the case that the user opens firebug in a new window but then closes Firefox window, we don't get the
@@ -309,7 +305,11 @@ top.Firebug =
         TabWatcher.initialize(this);
         TabWatcher.addListener(this);
 
-        // Initialize all modules.
+        // Initial activation of registered panel types. All panel -> module dependencies
+        // should be defined now (in onActivationChange).  Must be called after TabWatcher is ready.
+        Firebug.PanelActivation.activatePanelTypes(panelTypes);
+
+        // Tell the modules the UI is up.
         dispatch(modules, "initializeUI", [detachArgs]);
     },
 
@@ -2607,7 +2607,7 @@ Firebug.Panel = extend(new Firebug.Listener(),
  * @panel This object represents a panel with two states: enabled/disabled. Such support
  * is important for panel that represents performance penalties and it's useful for the
  * user to have the option to disable them.
- * 
+ *
  * All methods in this object are used on the prototype object (they reprent class methods)
  * and so, |this| points to the panel's prototype and *not* to the panel instance.
  */
