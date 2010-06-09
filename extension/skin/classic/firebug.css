@@ -176,15 +176,11 @@ toolbar[iconsize="small"] #firebug-button > .toolbarbutton-icon {
     -moz-border-right-colors: #96969D;
     -moz-border-bottom-colors: #96969D;
     -moz-border-left-colors: #96969D;
-    padding: 2px 0 2px 3px;
-    background: -moz-field;
+    padding: 2px 0 2px 20px;
+    background: -moz-field url(chrome://firebug/skin/search.png) no-repeat 4px 1px;
     font: icon;
     font-size: 11px;
     direction: ltr;
-}
-
-.fbsearch-textbox > .autocomplete-textbox-container > .autocomplete-icon {
-    list-style-image: url(chrome://firebug/skin/search.png);
 }
 
 #fbSearchOptionsPanel {
