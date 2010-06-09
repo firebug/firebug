@@ -137,7 +137,7 @@ top.Firebug.Console.injector =
         else
             return false;
 
-        var handler = new FirebugConsoleHandler(context, win);
+        var handler = createConsoleHandler(context, win);
         handler.attachTo(element);
 
         context.activeConsoleHandlers[win] = handler;
@@ -166,11 +166,12 @@ top.Firebug.Console.injector =
 }
 
 var total_handlers = 0;
-function FirebugConsoleHandler(context, win)
+function createConsoleHandler(context, win)
 {
-    this.window = win;
+	var handler = {};
+	handler.console = createConsole(context, win),
 
-    this.attachTo = function(element)
+    handler.attachTo = function(element)
     {
         this.element = element;
         // When raised on our injected element, callback to Firebug and append to console
@@ -181,7 +182,7 @@ function FirebugConsoleHandler(context, win)
             FBTrace.sysout("consoleInjector FirebugConsoleHandler addEventListener "+this.handler_name);
     };
 
-    this.detach = function()
+    handler.detach = function()
     {
         this.element.removeEventListener('firebugAppendConsole', this.boundHandler, true);
 
@@ -189,12 +190,12 @@ function FirebugConsoleHandler(context, win)
             FBTrace.sysout("consoleInjector FirebugConsoleHandler removeEventListener "+this.handler_name);
     };
 
-    this.handler_name = ++total_handlers;
-    this.handleEvent = function(event)
+    handler.handler_name = ++total_handlers;
+    handler.handleEvent = function(event)
     {
         if (FBTrace.DBG_CONSOLE)
             FBTrace.sysout("FirebugConsoleHandler("+this.handler_name+") "+event.target.getAttribute("methodName")+", event", event);
-        if (!Firebug.CommandLine.CommandHandler.handle(event, this, win))
+        if (!Firebug.CommandLine.CommandHandler.handle(event, this.console, win))
         {
             if (FBTrace.DBG_CONSOLE)
                 FBTrace.sysout("FirebugConsoleHandler", this);
@@ -204,35 +205,41 @@ function FirebugConsoleHandler(context, win)
         }
     };
 
-    this.firebug = Firebug.version;
+    handler.firebug = Firebug.version;
 
-    this.init = function()
+    handler.init = function()
     {
         var consoleElement = win.document.getElementById('_firebugConsole');
         consoleElement.setAttribute("FirebugVersion", Firebug.version);
     };
 
-    this.log = function()
+    return handler;
+}
+
+function createConsole(context, win)
+{
+	var console = {};
+    console.log = function()
     {
         logFormatted(arguments, "log");
     };
 
-    this.debug = function()
+    console.debug = function()
     {
         logFormatted(arguments, "debug", true);
     };
 
-    this.info = function()
+    console.info = function()
     {
         logFormatted(arguments, "info", true);
     };
 
-    this.warn = function()
+    console.warn = function()
     {
         logFormatted(arguments, "warn", true);
     };
 
-    this.error = function()
+    console.error = function()
     {
         if (arguments.length == 1)
         {
@@ -245,12 +252,12 @@ function FirebugConsoleHandler(context, win)
         }
     };
 
-    this.exception = function()
+    console.exception = function()
     {
         logAssert("error", arguments);
     };
 
-    this.assert = function(x)
+    console.assert = function(x)
     {
         if (!x)
         {
@@ -261,12 +268,12 @@ function FirebugConsoleHandler(context, win)
         }
     };
 
-    this.dir = function(o)
+    console.dir = function(o)
     {
         Firebug.Console.log(o, context, "dir", Firebug.DOMPanel.DirTable);
     };
 
-    this.dirxml = function(o)
+    console.dirxml = function(o)
     {
         if (o instanceof Window)
             o = o.document.documentElement;
@@ -276,18 +283,18 @@ function FirebugConsoleHandler(context, win)
         Firebug.Console.log(o, context, "dirxml", Firebug.HTMLPanel.SoloElement);
     };
 
-    this.group = function()
+    console.group = function()
     {
         var sourceLink = getStackLink();
         Firebug.Console.openGroup(arguments, null, "group", null, false, sourceLink);
     };
 
-    this.groupEnd = function()
+    console.groupEnd = function()
     {
         Firebug.Console.closeGroup(context);
     };
 
-    this.groupCollapsed = function()
+    console.groupCollapsed = function()
     {
         var sourceLink = getStackLink();
         // noThrottle true is probably ok, openGroups will likely be short strings.
@@ -295,17 +302,17 @@ function FirebugConsoleHandler(context, win)
         removeClass(row, "opened");
     };
 
-    this.profile = function(title)
+    console.profile = function(title)
     {
         Firebug.Profiler.startProfiling(context, title);
     };
 
-    this.profileEnd = function()
+    console.profileEnd = function()
     {
         Firebug.Profiler.stopProfiling(context);
     };
 
-    this.count = function(key)
+    console.count = function(key)
     {
         var frameId = FBL.getStackFrameId();
         if (frameId)
@@ -335,12 +342,12 @@ function FirebugConsoleHandler(context, win)
         }
     };
 
-    this.clear = function()
+    console.clear = function()
     {
         Firebug.Console.clear(context);
     };
 
-    this.time = function(name, reset)
+    console.time = function(name, reset)
     {
         if (!name)
             return;
@@ -358,7 +365,7 @@ function FirebugConsoleHandler(context, win)
         this.timeCounters[key] = time;
     };
 
-    this.timeEnd = function(name)
+    console.timeEnd = function(name)
     {
         var time = new Date().getTime();
 
@@ -380,7 +387,7 @@ function FirebugConsoleHandler(context, win)
         return diff;
     };
 
-    this.table = function(data, columns)
+    console.table = function(data, columns)
     {
         FirebugReps.Table.log(data, columns, context);
     };
@@ -388,7 +395,7 @@ function FirebugConsoleHandler(context, win)
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 
     // These functions are over-ridden by commandLine
-    this.evaluated = function(result, context)
+    console.evaluated = function(result, context)
     {
         if (FBTrace.DBG_CONSOLE)
             FBTrace.sysout("consoleInjector.FirebugConsoleHandler evalutated default called", result);
@@ -396,7 +403,7 @@ function FirebugConsoleHandler(context, win)
         Firebug.Console.log(result, context);
     };
 
-    this.evaluateError = function(result, context)
+    console.evaluateError = function(result, context)
     {
         Firebug.Console.log(result, context, "errorMessage");
     };
@@ -517,6 +524,8 @@ function FirebugConsoleHandler(context, win)
         else
             return "Firebug failed to get stack trace with any frames";
     }
+
+    return console;
 }
 
 }});
