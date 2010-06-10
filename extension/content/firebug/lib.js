@@ -4035,18 +4035,22 @@ this.getInputStreamFromString = function(dataString)
 
 this.getWindowForRequest = function(request)
 {
-    var webProgress = this.getRequestWebProgress(request);
-    try {
-        if (webProgress)
-            return webProgress.DOMWindow;
+    var loadContext = this.getRequestLoadContext(request);
+    try
+    {
+        if (loadContext)
+            return loadContext.associatedWindow;
     }
-    catch (ex) {
+    catch (ex)
+    {
     }
 
     return null;
 };
 
-this.getRequestWebProgress = function(request)
+this.getRequestWebProgress = deprecated("Use getRequestLoadContext function", this.getRequestLoadContext);
+
+this.getRequestLoadContext = function(request)
 {
     try
     {
@@ -4083,9 +4087,10 @@ this.getRequestWebProgress = function(request)
     return null;
 };
 
+// ************************************************************************************************
+// Stack Trace
 
 var saveShowStackTrace = {};
-
 
 /*
  * use in the try{} around a call to getInterface to prevent fbs from generating stack traces
