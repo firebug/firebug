@@ -4048,8 +4048,6 @@ this.getWindowForRequest = function(request)
     return null;
 };
 
-this.getRequestWebProgress = deprecated("Use getRequestLoadContext function", this.getRequestLoadContext);
-
 this.getRequestLoadContext = function(request)
 {
     try
@@ -4086,6 +4084,9 @@ this.getRequestLoadContext = function(request)
 
     return null;
 };
+
+this.getRequestWebProgress = deprecated("Use getRequestLoadContext function", this.getRequestLoadContext);
+
 
 // ************************************************************************************************
 // Stack Trace
@@ -6841,7 +6842,7 @@ function deprecated(msg, fnc)
     {
         if (!this.nagged)
         {
-            var explain = "Deprecated function ("+fnc.name+") "+msg;
+            var explain = "Deprecated function, "+msg;
             if (FBTrace)
                 FBTrace.sysout(explain, getStackDump());
 
