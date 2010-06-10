@@ -19,8 +19,8 @@ const Cc = Components.classes;
 const Ci = Components.interfaces;
 
 this.fbs = fbs; // left over from component.
-
-this.httpObserver = this.CCSV("@joehewitt.com/firebug-http-observer;1", "nsIObserverService");
+Components.utils.import("resource://firebug/firebug-http-observer.js");
+this.httpObserver = httpRequestObserver;
 this.jsd = this.CCSV("@mozilla.org/js/jsd/debugger-service;1", "jsdIDebuggerService");
 
 const finder = this.finder = this.CCIN("@mozilla.org/embedcomp/rangefind;1", "nsIFind");

@@ -3,13 +3,11 @@
 // ************************************************************************************************
 // Constants
 
-const CLASS_ID = Components.ID("{2D92593E-14D0-48ce-B260-A9881BBF9C8B}");
-const CLASS_NAME = "Firebug HTTP Observer Service";
-const CONTRACT_ID = "@joehewitt.com/firebug-http-observer;1";
-
 const Cc = Components.classes;
 const Ci = Components.interfaces;
 const Cr = Components.results;
+
+var EXPORTED_SYMBOLS = ["httpRequestObserver"];
 
 var observerService = Cc["@mozilla.org/observer-service;1"].getService(Ci.nsIObserverService);
 var categoryManager = Cc["@mozilla.org/categorymanager;1"].getService(Ci.nsICategoryManager);
@@ -28,42 +26,42 @@ var FBTrace = null;
  * See also: <a href="http://developer.mozilla.org/en/Setting_HTTP_request_headers">
  * Setting_HTTP_request_headers</a>
  */
-function HttpRequestObserver()
-{
-    this.observers = [];
-    this.isObserving = false;
 
-    // Get firebug-trace service for logging (the service should be already
-    // registered at this moment).
-    FBTrace = Cc["@joehewitt.com/firebug-trace-service;1"]
-       .getService(Ci.nsISupports).wrappedJSObject.getTracer("extensions.firebug");
-
-    // Get firebug-service to listen for suspendFirebug and resumeFirebug events.
-    // TODO is this really the way we want to do suspendFirebug?
-    Components.utils.import("resource://firebug/firebug-service.js");
-
-    this.initialize(fbs);
-}
 
 /* nsIFireBugClient */
 var FirebugClient =
 {
     disableXULWindow: function()
     {
-        if (gHttpObserverSingleton)
-            gHttpObserverSingleton.unregisterObservers();
+        httpRequestObserver.unregisterObservers();
     },
 
     enableXULWindow: function()
     {
-        if (gHttpObserverSingleton)
-            gHttpObserverSingleton.registerObservers();
+        httpRequestObserver.registerObservers();
     }
 }
 
-HttpRequestObserver.prototype =
+httpRequestObserver =
 /** lends HttpRequestObserver */
 {
+	preInitialize: function()
+	{
+    	this.observers = [];
+    	this.isObserving = false;
+
+        // Get firebug-trace service for logging (the service should be already
+        // registered at this moment).
+        FBTrace = Cc["@joehewitt.com/firebug-trace-service;1"]
+           .getService(Ci.nsISupports).wrappedJSObject.getTracer("extensions.firebug");
+
+        // Get firebug-service to listen for suspendFirebug and resumeFirebug events.
+        // TODO is this really the way we want to do suspendFirebug?
+        Components.utils.import("resource://firebug/firebug-service.js");
+
+        this.initialize(fbs);
+	},
+
     initialize: function(fbs)
     {
 		this.firebugService = fbs;
@@ -190,17 +188,6 @@ HttpRequestObserver.prototype =
         return null;
     },
 
-    /* nsISupports */
-    QueryInterface: function(iid)
-    {
-        if (iid.equals(Ci.nsISupports) ||
-            iid.equals(Ci.nsIObserverService) ||
-            iid.equals(Ci.nsIObserver)) {
-            return this;
-        }
-
-        throw Cr.NS_ERROR_NO_INTERFACE;
-    }
 }
 
 function safeGetName(request)
@@ -215,78 +202,5 @@ function safeGetName(request)
     }
 }
 
-// ************************************************************************************************
-// Service factory
 
-var gHttpObserverSingleton = null;
-var HttpRequestObserverFactory =
-{
-    createInstance: function (outer, iid)
-    {
-        if (outer != null)
-            throw Cr.NS_ERROR_NO_AGGREGATION;
-
-        if (iid.equals(Ci.nsISupports) ||
-            iid.equals(Ci.nsIObserverService) ||
-            iid.equals(Ci.nsIObserver))
-        {
-            if (!gHttpObserverSingleton)
-                gHttpObserverSingleton = new HttpRequestObserver();
-            return gHttpObserverSingleton.QueryInterface(iid);
-        }
-
-        throw Cr.NS_ERROR_NO_INTERFACE;
-    },
-
-    QueryInterface: function(iid)
-    {
-        if (iid.equals(Ci.nsISupports) ||
-            iid.equals(Ci.nsISupportsWeakReference) ||
-            iid.equals(Ci.nsIFactory))
-            return this;
-
-        throw Cr.NS_ERROR_NO_INTERFACE;
-    }
-};
-
-// ************************************************************************************************
-// Module implementation
-
-var HttpRequestObserverModule =
-{
-    registerSelf: function (compMgr, fileSpec, location, type)
-    {
-        compMgr = compMgr.QueryInterface(Ci.nsIComponentRegistrar);
-        compMgr.registerFactoryLocation(CLASS_ID, CLASS_NAME,
-            CONTRACT_ID, fileSpec, location, type);
-    },
-
-    unregisterSelf: function(compMgr, fileSpec, location)
-    {
-        compMgr = compMgr.QueryInterface(Ci.nsIComponentRegistrar);
-        compMgr.unregisterFactoryLocation(CLASS_ID, location);
-    },
-
-    getClassObject: function (compMgr, cid, iid)
-    {
-        if (!iid.equals(Ci.nsIFactory))
-            throw Cr.NS_ERROR_NOT_IMPLEMENTED;
-
-        if (cid.equals(CLASS_ID))
-            return HttpRequestObserverFactory;
-
-        throw Cr.NS_ERROR_NO_INTERFACE;
-    },
-
-    canUnload: function(compMgr)
-    {
-        return true;
-    }
-};
-
-// ************************************************************************************************
-
-function NSGetModule(compMgr, fileSpec)
-{
-    return HttpRequestObserverModule;
-}
+httpRequestObserver.preInitialize();
