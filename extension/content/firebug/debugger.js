@@ -171,7 +171,7 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
                     continue;
                 else if (fileName.indexOf(Firebug.Debugger.breakNowURLPrefix) == 0)
                     continue;
-                else if (fileName.indexOf("/components/firebug-") != -1)
+                else if (fileName.indexOf("/modules/firebug-") != -1)
                     continue;
                 else
                     break;
@@ -451,7 +451,7 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
                 },
         };
     },
- 
+
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
     // Breakpoints
 

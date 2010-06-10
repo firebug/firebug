@@ -85,10 +85,10 @@ const LEVEL_EVENT = 3;
 
 const COMPONENTS_FILTERS = [
     new RegExp("^(file:/.*/)extensions/%7B[\\da-fA-F]{8}-[\\da-fA-F]{4}-[\\da-fA-F]{4}-[\\da-fA-F]{4}-[\\da-fA-F]{12}%7D/components/.*\\.js$"),
-    new RegExp("^(file:/.*/)extensions/firebug@software\\.joehewitt\\.com/components/.*\\.js$"),
+    new RegExp("^(file:/.*/)extensions/firebug@software\\.joehewitt\\.com/modules/.*\\.js$"),
     new RegExp("^(file:/.*/extensions/)\\w+@mozilla\\.org/components/.*\\.js$"),
     new RegExp("^(file:/.*/components/)ns[A-Z].*\\.js$"),
-    new RegExp("^(file:/.*/components/)firebug-[^\\.]*\\.js$"),
+    new RegExp("^(file:/.*/modules/)firebug-[^\\.]*\\.js$"),
     new RegExp("^(file:/.*/Contents/MacOS/extensions/.*/components/).*\\.js$"),
     new RegExp("^(file:/.*/modules/).*\\.jsm$"),
     ];
@@ -1876,7 +1876,7 @@ var fbs =
         {
             this.filterModules = this.createFilter("*/firefox/modules/*");
             this.filterComponents = this.createFilter("*/firefox/components/*");
-            this.filterFirebugComponents = this.createFilter("*/components/firebug-*");
+            this.filterFirebugComponents = this.createFilter("*/modules/firebug-*");
             this.filterStringBundle = this.createFilter("XStringBundle");
             this.filterChrome = this.createFilter("chrome://*");
             this.filterPrettyPrint = this.createFilter("x-jsd:ppbuffer*");

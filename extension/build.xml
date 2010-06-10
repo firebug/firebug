@@ -8,7 +8,7 @@ Added support for js-doc-tolkit, odvarko@gmail.com -->
     <condition property="isWindows">
         <os family="windows" />
     </condition>
-    
+
     <condition property="isUnix">
         <os family="unix" />
     </condition>
@@ -176,7 +176,7 @@ Added support for js-doc-tolkit, odvarko@gmail.com -->
     <target name="firebug-service" depends="version"
         description="Check compreg.dat when service changes">
         <uptodate property="deleteCompreg.notRequired"
-                  srcfile="./components/firebug-service.js"
+                  srcfile="./modules/firebug-service.js"
                   targetfile="${install.dir}/compreg.dat" />
     </target>
 

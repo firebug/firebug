@@ -2532,7 +2532,7 @@ this.getStackSourceLink = function()
         {
             for (; frame; frame = frame.caller)
             {
-                var firebugComponent = "/components/firebug-";
+                var firebugComponent = "/modules/firebug-";
                 if (frame.filename && frame.filename.indexOf("chrome://firebug/") != 0 &&
                     frame.filename.indexOf(firebugComponent) == -1)
                     break;
