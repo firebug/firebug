@@ -521,18 +521,31 @@ Firebug.Console.createConsole = function createConsole(context, win)
             var oldest = frames.length - 1;  // 6 - 1 = 5
             for (var i = 0; i < frames.length; i++)
             {
-                if (frames[oldest - i].href.indexOf("chrome:") == 0) break;
-                var fn = frames[oldest - i].fn + "";
-                if (fn && (fn.indexOf("_firebugEvalEvent") != -1) ) break;  // command line
-            }
-            if (FBTrace.DBG_CONSOLE)
-                FBTrace.sysout("consoleInjector getJSDUserStack: "+frames.length+" oldest: "+oldest+" i: "+i+" i - oldest + 2: "+(i - oldest + 2), trace);
-            trace.frames = trace.frames.slice(2 - i);  // take the oldest frames, leave 2 behind they are injection code
+                if (frames[oldest - i].href.indexOf("chrome:") == 0)
+                    break;
 
+                // firebug-service scope reached, in some cases the url starts with file://
+                if (frames[oldest - i].href.indexOf("firebug-service.js") != -1)
+                    break;
+
+                // command line
+                var fn = frames[oldest - i].fn + "";
+                if (fn && (fn.indexOf("_firebugEvalEvent") != -1))
+                    break;
+            }
+
+            if (FBTrace.DBG_CONSOLE)
+                FBTrace.sysout("consoleInjector getJSDUserStack: "+frames.length+" oldest: "+
+                    oldest+" i: "+i+" i - oldest + 2: "+(i - oldest + 2), trace);
+
+            // take the oldest frames, leave 2 behind they are injection code
+            trace.frames = trace.frames.slice(2 - i);
             return trace;
         }
         else
+        {
             return "Firebug failed to get stack trace with any frames";
+        }
     }
 
     return console;
