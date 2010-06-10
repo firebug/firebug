@@ -525,7 +525,7 @@ Firebug.Console.createConsole = function createConsole(context, win)
                     break;
 
                 // firebug-service scope reached, in some cases the url starts with file://
-                if (frames[oldest - i].href.indexOf("firebug-service.js") != -1)
+                if (frames[oldest - i].href.indexOf("modules/firebug-service.js") != -1)
                     break;
 
                 // command line
