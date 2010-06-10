@@ -12,7 +12,7 @@
 <!ENTITY firebug.DecreaseTextSize "Diminuisci">
 <!ENTITY firebug.NormalTextSize "Normale">
 <!ENTITY firebug.ShowTooltips "Mostra tooltip di anteprima">
-<!ENTITY firebug.ShadeBoxModel "Sfuma il box model">
+<!ENTITY firebug.ShadeBoxModel "Sfuma box model">
 <!ENTITY firebug.Website "Sito web">
 <!ENTITY firebug.Documentation "Documentazione">
 <!ENTITY firebug.KeyShortcuts "Scorciatoie da tastiera">
@@ -20,9 +20,9 @@
 <!ENTITY firebug.Issues "Segnalazione problemi">
 <!ENTITY firebug.Donate "Donazioni">
 <!ENTITY firebug.About "Informazioni su Firebug">
-<!ENTITY firebug.AlwaysOpenInWindow "Apri sempre in nuova finestra">
+<!ENTITY firebug.AlwaysOpenInWindow "Apri sempre in finestra separata">
 <!ENTITY firebug.ShowFirebug "Apri Firebug">
-<!ENTITY firebug.DetachFirebug "Apri Firebug in nuova finestra">
+<!ENTITY firebug.DetachFirebug "Apri Firebug in finestra separata">
 <!ENTITY firebug.OpenWith "Apri con">
 <!ENTITY firebug.CloseFirebug "Disattiva Firebug per questo sito web">
 <!ENTITY firebug.Permissions "Siti con permesso…">
@@ -32,9 +32,9 @@
 <!ENTITY firebug.Continue "Continua (F5)">
 <!ENTITY firebug.StepOver "Salta (F10)">
 <!ENTITY firebug.StepInto "Entra (F11)">
-<!ENTITY firebug.StepOut "Esci">
+<!ENTITY firebug.StepOut "Esci (Maiusc+F11)">
 <!ENTITY firebug.BreakOnErrors "Interrompi in caso di errori">
-<!ENTITY firebug.Inspect "Analizza">
+<!ENTITY firebug.Inspect "Analizza con Firebug">
 <!ENTITY firebug.InspectElement "Analizza elemento">
 <!ENTITY firebug.InspectTooltip "Seleziona un elemento nella pagina da analizzare">
 <!ENTITY firebug.Edit "Modifica">
