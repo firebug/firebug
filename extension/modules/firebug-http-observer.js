@@ -26,47 +26,31 @@ var FBTrace = null;
  * See also: <a href="http://developer.mozilla.org/en/Setting_HTTP_request_headers">
  * Setting_HTTP_request_headers</a>
  */
-
-
-/* nsIFireBugClient */
-var FirebugClient =
-{
-    disableXULWindow: function()
-    {
-        httpRequestObserver.unregisterObservers();
-    },
-
-    enableXULWindow: function()
-    {
-        httpRequestObserver.registerObservers();
-    }
-}
-
-httpRequestObserver =
+var httpRequestObserver =
 /** lends HttpRequestObserver */
 {
-	preInitialize: function()
-	{
-    	this.observers = [];
-    	this.isObserving = false;
+    preInitialize: function()
+    {
+        this.observers = [];
+        this.isObserving = false;
 
         // Get firebug-trace service for logging (the service should be already
         // registered at this moment).
-    	Components.utils.import("resource://firebug/firebug-trace-service.js");
-    	FBTrace = traceConsoleService.getTracer("extensions.firebug");
+        Components.utils.import("resource://firebug/firebug-trace-service.js");
+        FBTrace = traceConsoleService.getTracer("extensions.firebug");
 
         // Get firebug-service to listen for suspendFirebug and resumeFirebug events.
         // TODO is this really the way we want to do suspendFirebug?
         Components.utils.import("resource://firebug/firebug-service.js");
 
         this.initialize(fbs);
-	},
+    },
 
     initialize: function(fbs)
     {
-		this.firebugService = fbs;
+        this.firebugService = fbs;
 
-		this.firebugService.registerClient(FirebugClient);
+        this.firebugService.registerClient(FirebugClient);
 
         observerService.addObserver(this, "quit-application", false);
 
@@ -121,18 +105,20 @@ httpRequestObserver =
     /* nsIObserve */
     observe: function(subject, topic, data)
     {
-        if (topic == "quit-application") {
+        if (topic == "quit-application")
+        {
             this.shutdown();
             return;
         }
 
         try
         {
+            if (!(subject instanceof Ci.nsIHttpChannel))
+                return;
+
             if (FBTrace.DBG_HTTPOBSERVER)
-            {
                 FBTrace.sysout("httpObserver.observe " + (topic ? topic.toUpperCase() : topic) +
-                    ", " + ((subject instanceof Ci.nsIRequest) ? safeGetName(subject) : ""));
-            }
+                    ", " + safeGetName(subject));
 
             // Notify all registered observers.
             if (topic == "http-on-modify-request" ||
@@ -163,8 +149,10 @@ httpRequestObserver =
         if (topic != "firebug-http-event")
             throw Cr.NS_ERROR_INVALID_ARG;
 
-        for (var i=0; i<this.observers.length; i++) {
-            if (this.observers[i] == observer) {
+        for (var i=0; i<this.observers.length; i++)
+        {
+            if (this.observers[i] == observer)
+            {
                 this.observers.splice(i, 1);
                 return;
             }
@@ -181,14 +169,11 @@ httpRequestObserver =
 
         for (var i=0; i<this.observers.length; i++)
             this.observers[i].observe(subject, topic, data);
-    },
-
-    enumerateObservers: function(topic)
-    {
-        return null;
-    },
-
+    }
 }
+
+// ************************************************************************************************
+// Request helpers
 
 function safeGetName(request)
 {
@@ -198,9 +183,28 @@ function safeGetName(request)
     }
     catch (exc)
     {
-        return null;
+    }
+
+    return null;
+}
+
+// ************************************************************************************************
+
+/* nsIFireBugClient */
+var FirebugClient =
+{
+    disableXULWindow: function()
+    {
+        httpRequestObserver.unregisterObservers();
+    },
+
+    enableXULWindow: function()
+    {
+        httpRequestObserver.registerObservers();
     }
 }
 
+// ************************************************************************************************
+// Initialization
 
 httpRequestObserver.preInitialize();
