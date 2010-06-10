@@ -152,12 +152,6 @@ var waitingForTimer = false;
 
 var FBTrace = null;
 
-if (!consoleService)
-	var consoleService = Cc["@mozilla.org/consoleservice;1"].getService(Ci.nsIConsoleService);
-
-consoleService.logStringMessage("fbs module exported "+EXPORTED_SYMBOLS[0]);
-
-
 // ************************************************************************************************
 
 
@@ -898,6 +892,8 @@ var fbs =
 
             if ( FBTrace.DBG_FBS_ERRORS )
                 FBTrace.sysout("enableDebugger gets jsd service, isOn:"+jsd.isOn+" initAtStartup:"+jsd.initAtStartup+" now have "+debuggers.length+" debuggers"+" in "+clients.length+" clients");
+
+            jsd.initAtStartup = false;
         }
 
         if (!jsd.isOn)
@@ -2910,47 +2906,6 @@ function getStepName(mode)
     if (mode==STEP_SUSPEND) return "STEP_SUSPEND";
     else return "(not a step mode)";
 }
-
-// ************************************************************************************************
-
-var FirebugFactory =
-{
-    createInstance: function (outer, iid)
-    {
-        try
-        {
-            if (outer != null)
-                throw NS_ERROR_NO_AGGREGATION;
-
-            FirebugFactory.initializeService();
-            return (new FirebugService()).QueryInterface(iid);
-        }
-        catch (exc)
-        {
-            ERROR("firebug-service initialization FAILS "+exc);
-            for (var p in exc)
-            	ERROR("firebug-service initialization "+p+"="+exc[p]);
-        }
-    },
-    initializeService: function()
-    {
-        if (!prefs)
-           prefs = PrefService.getService(nsIPrefBranch2);
-
-        var filterSystemURLs =  prefs.getBoolPref("extensions.firebug.service.filterSystemURLs");
-        if (filterSystemURLs)  // do not turn jsd on unless we want to see chrome
-            return;
-
-        try
-        {
-            var jsd = DebuggerService.getService(jsdIDebuggerService);
-            jsd.initAtStartup = false;
-        }
-        catch (exc)
-        {
-        }
-    }
-};
 
 // ************************************************************************************************
 // Local Helpers
