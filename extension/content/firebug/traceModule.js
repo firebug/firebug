@@ -1230,7 +1230,9 @@ Firebug.TraceModule.TraceMessage = function(type, text, obj, scope, time)
             // Skip frames related to the tracing code.
             var fileName = unescape(frame.filename ? frame.filename : "");
             var traceServiceFile = "firebug-trace-service.js";
-            if (i < 6 || fileName.indexOf(traceServiceFile) != -1)
+
+            // window.dump("traceModule frame "+i+": "+fileName+"\n");
+            if (i < 5 || fileName.indexOf(traceServiceFile) != -1)
                 continue;
 
             var sourceLine = frame.sourceLine ? frame.sourceLine : "";
