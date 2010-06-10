@@ -3,13 +3,11 @@
 // ************************************************************************************************
 // Constants
 
-const CLASS_ID = Components.ID("{5AAEB534-FA57-488d-9A73-20C258FC7BDB}");
-const CLASS_NAME = "Firebug Channel Listener";
-const CONTRACT_ID = "@joehewitt.com/firebug-channel-listener;1";
-
 const Cc = Components.classes;
 const Ci = Components.interfaces;
 const Cr = Components.results;
+
+var EXPORTED_SYMBOLS = ["ChannelListener"];
 
 var FBTrace = {DBG_FAKE: "fake"};
 
@@ -21,10 +19,9 @@ var FBTrace = {DBG_FAKE: "fake"};
  * channels (nsIHttpChannel). A new instance of this object is created and registered an HTTP
  * channel. See Firebug.TabCacheModel.onExamineResponse method.
  */
+
 function ChannelListener()
 {
-    this.wrappedJSObject = this;
-
     this.window = null;
     this.request = null;
 
@@ -51,7 +48,8 @@ function ChannelListener()
 
 ChannelListener.prototype =
 {
-    setAsyncListener: function(request, stream, listener)
+
+	setAsyncListener: function(request, stream, listener)
     {
         try
         {
@@ -130,7 +128,7 @@ ChannelListener.prototype =
             // Store received data into the cache as they come. If the method returns
             // false, the rest of the response is ignored (not cached). This is used
             // to limit size of a cached response.
-            if (!context.sourceCache.storePartialResponse(request, data, this.window)) 
+            if (!context.sourceCache.storePartialResponse(request, data, this.window))
             {
                 this.ignore = true;
                 if (FBTrace.DBG_CACHE)
@@ -368,79 +366,3 @@ function CCIN(cName, ifaceName)
     return Cc[cName].createInstance(Ci[ifaceName]);
 }
 
-// ************************************************************************************************
-// Service factory
-
-var ListenerFactory =
-{
-    createInstance: function (outer, iid)
-    {
-        if (outer != null)
-            throw Cr.NS_ERROR_NO_AGGREGATION;
-
-        if (iid.equals(Ci.nsISupports) ||
-            iid.equals(Ci.nsIStreamListener))
-        {
-            var listener = new ChannelListener();
-
-            if (FBTrace.DBG_CACHE)
-                FBTrace.sysout("tabCache.ListenerFactory.createInstance; ");
-
-            return listener.QueryInterface(iid);
-        }
-
-        throw Cr.NS_ERROR_NO_INTERFACE;
-    },
-
-    QueryInterface: function(iid)
-    {
-        if (iid.equals(Ci.nsISupports) ||
-            iid.equals(Ci.nsISupportsWeakReference) ||
-            iid.equals(Ci.nsIFactory))
-            return this;
-
-        throw Cr.NS_ERROR_NO_INTERFACE;
-    }
-};
-
-// ************************************************************************************************
-// Module implementation
-
-var ListenerModule =
-{
-    registerSelf: function(compMgr, fileSpec, location, type)
-    {
-        compMgr = compMgr.QueryInterface(Ci.nsIComponentRegistrar);
-        compMgr.registerFactoryLocation(CLASS_ID, CLASS_NAME,
-            CONTRACT_ID, fileSpec, location, type);
-    },
-
-    unregisterSelf: function(compMgr, fileSpec, location)
-    {
-        compMgr = compMgr.QueryInterface(Ci.nsIComponentRegistrar);
-        compMgr.unregisterFactoryLocation(CLASS_ID, location);
-    },
-
-    getClassObject: function(compMgr, cid, iid)
-    {
-        if (!iid.equals(Ci.nsIFactory))
-            throw Cr.NS_ERROR_NOT_IMPLEMENTED;
-
-        if (cid.equals(CLASS_ID))
-            return ListenerFactory;
-
-        throw Cr.NS_ERROR_NO_INTERFACE;
-    },
-
-    canUnload: function(compMgr)
-    {
-        return true;
-    }
-};
-
-// ************************************************************************************************
-
-function NSGetModule(compMgr, fileSpec)
-{
-    return ListenerModule;
-}

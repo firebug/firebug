@@ -165,10 +165,12 @@ Firebug.TabCacheModel = extend(Firebug.Module,
             request.QueryInterface(Ci.nsITraceableChannel);
 
             // Create Firebug's stream listener that is tracing HTTP responses.
-            var newListener = CCIN("@joehewitt.com/firebug-channel-listener;1", "nsIStreamListener");
-            newListener.wrappedJSObject.window = win;
+            Components.utils.import("resource://firebug/firebug-channel-listener.js");
+            var newListener = new ChannelListener();  // TODO pass args rather than set properties
+            FBTrace.sysout("tabCache newListener "+newListener, newListener);
+            newListener.window = win;
 
-            // Set proxy listener for back notifiction from XPCOM to chrome (using real interface
+            // Set proxy listener for back notification from XPCOM to chrome (using real interface
             // so nsIRequest object is properly passed from XPCOM scope).
             newListener.QueryInterface(Ci.nsITraceableChannel);
             newListener.setNewListener(new ChannelListenerProxy(win));
@@ -195,10 +197,10 @@ Firebug.TabCacheModel = extend(Firebug.Module,
 
                 // Remember the input stream, so it isn't released by GC.
                 // See issue 2788 for more details.
-                newListener.wrappedJSObject.inputStream = sink.inputStream;
+                newListener.inputStream = sink.inputStream;
 
                 var originalListener = request.setNewListener(tee);
-                newListener.wrappedJSObject.sink = sink;
+                newListener.sink = sink;
 
                 if (tee.initWithObserver)
                     tee.initWithObserver(originalListener, sink.outputStream, newListener);
@@ -207,13 +209,13 @@ Firebug.TabCacheModel = extend(Firebug.Module,
             }
             else
             {
-                newListener.wrappedJSObject.listener = request.setNewListener(newListener);
+                newListener.listener = request.setNewListener(newListener);
             }
 
             // xxxHonza: this is a workaround for #489317. Just passing
             // shouldCacheRequest method to the component so, onStartRequest
             // can decide whether to cache or not.
-            newListener.wrappedJSObject.shouldCacheRequest = function(request)
+            newListener.shouldCacheRequest = function(request)
             {
                 try {
                     return Firebug.TabCacheModel.shouldCacheRequest(request)
@@ -227,7 +229,7 @@ Firebug.TabCacheModel = extend(Firebug.Module,
             // is undefined. But in such a case no cache is needed anyway.
             // Another thing is that the context isn't available now, but will be
             // as soon as this method is used from the stream listener.
-            newListener.wrappedJSObject.getContext = function(win)
+            newListener.getContext = function(win)
             {
                 try {
                     return TabWatcher.getContextByWindow(win);
