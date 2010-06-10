@@ -35,8 +35,8 @@ Firebug.TraceOptionsController = function(prefDomain, onPrefChangeHandler)
 {
     this.prefDomain = prefDomain;
 
-    this.traceService = Cc["@joehewitt.com/firebug-trace-service;1"]
-        .getService(Ci.nsISupports).wrappedJSObject;
+    Components.utils.import("resource://firebug/firebug-trace-service.js");
+    this.traceService = traceConsoleService;
 
     this.addObserver = function()
     {

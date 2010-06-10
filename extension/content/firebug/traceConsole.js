@@ -6,7 +6,8 @@
 const Cc = Components.classes;
 const Ci = Components.interfaces;
 
-const traceService = Cc["@joehewitt.com/firebug-trace-service;1"].getService(Ci.nsIObserverService);
+Components.utils.import("resource://firebug/firebug-trace-service.js");
+var traceService = traceConsoleService;
 
 const PrefService = Cc["@mozilla.org/preferences-service;1"];
 const prefs = PrefService.getService(Ci.nsIPrefBranch2);
@@ -229,7 +230,7 @@ var TraceConsole =
 
                 var appInfo = Cc["@mozilla.org/xre/app-info;1"].getService(Ci.nsIXULAppInfo);
                 var currLocale = Firebug.getPref("general.useragent", "locale");
-                var systemInfo = Cc["@mozilla.org/system-info;1"].getService(Ci.nsIPropertyBag); 
+                var systemInfo = Cc["@mozilla.org/system-info;1"].getService(Ci.nsIPropertyBag);
 
                 var log = { version: "1.0" };
 

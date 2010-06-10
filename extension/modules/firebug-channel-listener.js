@@ -41,8 +41,8 @@ function ChannelListener()
 
     if (FBTrace.DBG_FAKE)  // cause the detrace to remove this statement and check for cached tracer
     {
-        FBTrace = Cc["@joehewitt.com/firebug-trace-service;1"].getService(Ci.nsISupports)
-            .wrappedJSObject.getTracer("extensions.firebug");
+    	Components.utils.import("resource://firebug/firebug-trace-service.js");
+    	FBTrace = traceConsoleService.getTracer("extensions.firebug");
     }
 }
 

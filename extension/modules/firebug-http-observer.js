@@ -52,8 +52,8 @@ httpRequestObserver =
 
         // Get firebug-trace service for logging (the service should be already
         // registered at this moment).
-        FBTrace = Cc["@joehewitt.com/firebug-trace-service;1"]
-           .getService(Ci.nsISupports).wrappedJSObject.getTracer("extensions.firebug");
+    	Components.utils.import("resource://firebug/firebug-trace-service.js");
+    	FBTrace = traceConsoleService.getTracer("extensions.firebug");
 
         // Get firebug-service to listen for suspendFirebug and resumeFirebug events.
         // TODO is this really the way we want to do suspendFirebug?

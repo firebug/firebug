@@ -3,15 +3,14 @@
 // ************************************************************************************************
 // Constants
 
-const CLASS_ID = Components.ID("{D2AC51BC-1622-4d4d-85CB-F8E8B5805CB9}");
-const CLASS_NAME = "Firebug Trace Console Service";
-const CONTRACT_ID = "@joehewitt.com/firebug-trace-service;1";
 const EXTENSIONS = "extensions";
 const DBG_ = "DBG_";
 
 const Cc = Components.classes;
 const Ci = Components.interfaces;
 const Cr = Components.results;
+
+var EXPORTED_SYMBOLS = ["traceConsoleService"];
 
 const PrefService = Cc["@mozilla.org/preferences-service;1"];
 const prefs = PrefService.getService(Ci.nsIPrefBranch2);
@@ -26,7 +25,7 @@ const appShellService = Components.classes["@mozilla.org/appshell/appShellServic
 
 var toOSConsole = false;
 
-TraceConsoleService =
+var traceConsoleService =
 {
     initialize: function() {
         this.observers = [];
@@ -68,7 +67,7 @@ TraceConsoleService =
         if (this.getPref("extensions.firebug-tracing-service.DBG_toOSConsole"))
         {
              toOSConsole = true;  // also need browser.dom.window.dump.enabled true
-             TraceConsoleService.osOut("TraceConsoleService.getTracer, prefDomain: "+prefDomain+"\n");
+             traceConsoleService.osOut("traceConsoleService.getTracer, prefDomain: "+prefDomain+"\n");
         }
 
         if (!this.optionMaps[prefDomain])
@@ -93,7 +92,7 @@ TraceConsoleService =
                 var optionName = p.substr(1); // drop leading .
                 optionMap[optionName] = this.getPref(prefDomain+p);
                 if (toOSConsole)
-                    this.osOut("TraceConsoleService.createManagedOptionMap "+optionName+"="+optionMap[optionName]+"\n");
+                    this.osOut("traceConsoleService.createManagedOptionMap "+optionName+"="+optionMap[optionName]+"\n");
             }
         }
 
@@ -105,15 +104,15 @@ TraceConsoleService =
     {
         if (data.substr(0,EXTENSIONS.length) == EXTENSIONS)
         {
-            for (var prefDomain in gTraceService.optionMaps)
+            for (var prefDomain in traceConsoleService.optionMaps)
             {
                 if (data.substr(0, prefDomain.length) == prefDomain)
                 {
                     var optionName = data.substr(prefDomain.length+1); // skip dot
                     if (optionName.substr(0, DBG_.length) == DBG_)
-                        gTraceService.optionMaps[prefDomain][optionName] = this.getPref(data);
+                        traceConsoleService.optionMaps[prefDomain][optionName] = this.getPref(data);
                     if (toOSConsole)
-                        TraceConsoleService.osOut("TraceConsoleService.observe, prefDomain: "+prefDomain+" optionName "+optionName+"\n");
+                        traceConsoleService.osOut("traceConsoleService.observe, prefDomain: "+prefDomain+" optionName "+optionName+"\n");
                 }
             }
         }
@@ -148,10 +147,10 @@ TraceConsoleService =
             time: (new Date()).getTime()
         };
         if (toOSConsole)
-            TraceConsoleService.osOut(messageType+": "+message+"\n");
+            traceConsoleService.osOut(messageType+": "+message+"\n");
         // Pass JS object properly through XPConnect.
         var wrappedSubject = {wrappedJSObject: messageInfo};
-        gTraceService.notifyObservers(wrappedSubject, "firebug-trace-on-message", message);
+        traceConsoleService.notifyObservers(wrappedSubject, "firebug-trace-on-message", message);
     },
 
     /* nsIObserverService */
@@ -232,7 +231,7 @@ function lastResort(listeners, subject, someData)
     else
         var objPart = subject;
 
-    TraceConsoleService.osOut("FTS"+listeners.length+": "+someData+" "+objPart+"\n");
+    traceConsoleService.osOut("FTS"+listeners.length+": "+someData+" "+objPart+"\n");
 }
 // ************************************************************************************************
 // Public TraceService API
@@ -245,7 +244,7 @@ var TraceAPI = {
         this.noTrace = true;
         try
         {
-            gTraceService.dispatch(messageType, message, obj);
+            traceConsoleService.dispatch(messageType, message, obj);
         }
         catch(exc)
         {
@@ -287,12 +286,12 @@ TraceBase.prototype.sysout = function(message, obj) {
 
         try
         {
-            gTraceService.dispatch(this.prefDomain, message, obj, this.scopeOfFBTrace);
+            traceConsoleService.dispatch(this.prefDomain, message, obj, this.scopeOfFBTrace);
         }
         catch(exc)
         {
             if (toOSConsole)
-                TraceConsoleService.osOut("gTraceService.dispatch FAILS "+exc);
+                traceConsoleService.osOut("traceConsoleService.dispatch FAILS "+exc+"\n");
         }
         finally
         {
@@ -300,81 +299,4 @@ TraceBase.prototype.sysout = function(message, obj) {
         }
 }
 
-
-
-
-// ************************************************************************************************
-// Service factory
-
-var gTraceService = null;
-var TraceConsoleServiceFactory =
-{
-    createInstance: function (outer, iid)
-    {
-        if (outer != null)
-            throw Cr.NS_ERROR_NO_AGGREGATION;
-
-        if (iid.equals(Ci.nsISupports) ||
-            iid.equals(Ci.nsIObserverService))
-        {
-            if (!gTraceService)
-                gTraceService = TraceConsoleService.initialize();
-
-            return gTraceService.QueryInterface(iid);
-        }
-
-        throw Cr.NS_ERROR_NO_INTERFACE;
-    },
-
-    QueryInterface: function(iid)
-    {
-        if (iid.equals(Ci.nsISupports) ||
-            iid.equals(Ci.nsISupportsWeakReference) ||
-            iid.equals(Ci.nsIFactory))
-            return this;
-
-        throw Cr.NS_ERROR_NO_INTERFACE;
-    }
-};
-
-// ************************************************************************************************
-// Module implementation
-
-var TraceConsoleServiceModule =
-{
-    registerSelf: function (compMgr, fileSpec, location, type)
-    {
-        compMgr = compMgr.QueryInterface(Ci.nsIComponentRegistrar);
-        compMgr.registerFactoryLocation(CLASS_ID, CLASS_NAME,
-            CONTRACT_ID, fileSpec, location, type);
-    },
-
-    unregisterSelf: function(compMgr, fileSpec, location)
-    {
-        compMgr = compMgr.QueryInterface(Ci.nsIComponentRegistrar);
-        compMgr.unregisterFactoryLocation(CLASS_ID, location);
-    },
-
-    getClassObject: function (compMgr, cid, iid)
-    {
-        if (!iid.equals(Ci.nsIFactory))
-            throw Cr.NS_ERROR_NOT_IMPLEMENTED;
-
-        if (cid.equals(CLASS_ID))
-            return TraceConsoleServiceFactory;
-
-        throw Cr.NS_ERROR_NO_INTERFACE;
-    },
-
-    canUnload: function(compMgr)
-    {
-        return true;
-    }
-};
-
-// ************************************************************************************************
-
-function NSGetModule(compMgr, fileSpec)
-{
-    return TraceConsoleServiceModule;
-}
+traceConsoleService.initialize();

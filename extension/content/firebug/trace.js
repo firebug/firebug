@@ -2,8 +2,9 @@
 
 // Our global trace object.
 
-var FBTrace = Components.classes["@joehewitt.com/firebug-trace-service;1"]
-                 .getService(Components.interfaces.nsISupports).wrappedJSObject.getTracer("extensions.firebug");
+Components.utils.import("resource://firebug/firebug-trace-service.js");
+var FBTrace = traceConsoleService.getTracer("extensions.firebug");
+
 FBTrace.setScope(window);
 function clearFBTraceScope()
 {

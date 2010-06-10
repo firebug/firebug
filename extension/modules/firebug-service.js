@@ -165,9 +165,8 @@ var fbs =
 {
 	initialize: function()
 	{
-
-	    FBTrace = Cc["@joehewitt.com/firebug-trace-service;1"]
-		                 .getService(Ci.nsISupports).wrappedJSObject.getTracer("extensions.firebug");
+		Components.utils.import("resource://firebug/firebug-trace-service.js");
+		FBTrace = traceConsoleService.getTracer("extensions.firebug");
 
 	    if (FBTrace.DBG_FBS_ERRORS)
 	        FBTrace.sysout("FirebugService Starting");

@@ -137,7 +137,7 @@ var ObjectPersister =
 		var file = dirService.get("ProfD", Ci.nsIFile);
 		return file;
 	},
-	
+
 	getFileInDirectory: function(file, path)  // forward slash separated
 	{
 		var segs = path.split('/');
@@ -147,7 +147,7 @@ var ObjectPersister =
 		}
 		return file;
 	},
-	
+
     getFileInProfileDirectory: function(path)
     {
         // Get persistence file stored within the profile directory.
@@ -161,14 +161,14 @@ var ObjectPersister =
 
     readObject: function(leafName)
     {
-        FBTrace = Cc["@joehewitt.com/firebug-trace-service;1"]
-            .getService(Ci.nsISupports).wrappedJSObject.getTracer("extensions.firebug");
+    	Components.utils.import("resource://firebug/firebug-trace-service.js");
+    	FBTrace = traceConsoleService.getTracer("extensions.firebug");
 
         if (FBTrace.DBG_STORAGE)
             FBTrace.sysout("ObjectPersister read from leafName "+leafName);
 
         var file = ObjectPersister.getFileInProfileDirectory("firebug/"+leafName);
-        
+
         if (!file.exists())
         {
             file.create(Ci.nsIFile.NORMAL_FILE_TYPE, 0666);
@@ -186,7 +186,7 @@ var ObjectPersister =
     	var text = ObjectPersister.readTextFromFile(file);
     	if (!text)
     		return null;
-    	
+
         var nativeJSON = Cc["@mozilla.org/dom/json;1"].createInstance(Ci.nsIJSON);
         var obj = nativeJSON.decode(text);
         if (!obj)
@@ -197,7 +197,7 @@ var ObjectPersister =
 
         return obj;
     },
-    
+
     readTextFromFile: function(file)
     {
         try

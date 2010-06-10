@@ -67,7 +67,8 @@ var annotationService =
 
     initialize: function()
     {
-        FBTrace = Cc["@joehewitt.com/firebug-trace-service;1"].getService(Ci.nsISupports).wrappedJSObject.getTracer("extensions.firebug");
+    	Components.utils.import("resource://firebug/firebug-trace-service.js");
+    	FBTrace = traceConsoleService.getTracer("extensions.firebug");
 
         // Get annotation file stored within the profile directory.
         this.file = dirService.get("ProfD", Ci.nsIFile);
