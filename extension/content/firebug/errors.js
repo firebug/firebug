@@ -34,7 +34,7 @@ const pointlessErrors =
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 
-const fbs = Cc["@joehewitt.com/firebug;1"].getService().wrappedJSObject;
+Components.utils.import("resource://firebug/firebug-service.js");
 const consoleService = CCSV("@mozilla.org/consoleservice;1", "nsIConsoleService");
 
 // ************************************************************************************************

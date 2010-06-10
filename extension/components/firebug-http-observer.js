@@ -18,7 +18,6 @@ var categoryManager = Cc["@mozilla.org/categorymanager;1"].getService(Ci.nsICate
 // HTTP Request Observer implementation
 
 var FBTrace = null;
-var fbs = null;
 
 /**
  * @service This service is intended as the only HTTP observer registered by Firebug.
@@ -40,9 +39,10 @@ function HttpRequestObserver()
        .getService(Ci.nsISupports).wrappedJSObject.getTracer("extensions.firebug");
 
     // Get firebug-service to listen for suspendFirebug and resumeFirebug events.
-    fbs = Cc["@joehewitt.com/firebug;1"].getService(Ci.nsISupports).wrappedJSObject;
+    // TODO is this really the way we want to do suspendFirebug?
+    Components.utils.import("resource://firebug/firebug-service.js");
 
-    this.initialize();
+    this.initialize(fbs);
 }
 
 /* nsIFireBugClient */
@@ -64,9 +64,11 @@ var FirebugClient =
 HttpRequestObserver.prototype =
 /** lends HttpRequestObserver */
 {
-    initialize: function()
+    initialize: function(fbs)
     {
-        fbs.registerClient(FirebugClient);
+		this.firebugService = fbs;
+
+		this.firebugService.registerClient(FirebugClient);
 
         observerService.addObserver(this, "quit-application", false);
 
@@ -78,7 +80,7 @@ HttpRequestObserver.prototype =
 
     shutdown: function()
     {
-        fbs.unregisterClient(FirebugClient);
+        this.firebugService.unregisterClient(FirebugClient);
 
         observerService.removeObserver(this, "quit-application");
 

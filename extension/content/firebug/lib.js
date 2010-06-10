@@ -10,6 +10,7 @@ try { /*@explore*/
 // Modules
 
 Components.utils.import("resource://gre/modules/PluralForm.jsm");
+Components.utils.import("resource://firebug/firebug-service.js");
 
 // ************************************************************************************************
 // Constants
@@ -17,7 +18,8 @@ Components.utils.import("resource://gre/modules/PluralForm.jsm");
 const Cc = Components.classes;
 const Ci = Components.interfaces;
 
-this.fbs = Cc["@joehewitt.com/firebug;1"].getService().wrappedJSObject;
+this.fbs = fbs; // left over from component.
+
 this.httpObserver = this.CCSV("@joehewitt.com/firebug-http-observer;1", "nsIObserverService");
 this.jsd = this.CCSV("@mozilla.org/js/jsd/debugger-service;1", "jsdIDebuggerService");
 

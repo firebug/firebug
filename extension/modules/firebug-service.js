@@ -9,9 +9,6 @@
 // ************************************************************************************************
 // Constants
 
-const CLASS_ID = Components.ID("{a380e9c0-cb39-11da-a94d-0800200c9a66}");
-const CLASS_NAME = "Firebug Service";
-const CONTRACT_ID = "@joehewitt.com/firebug;1";
 const Cc = Components.classes;
 const Ci = Components.interfaces;
 
@@ -103,6 +100,10 @@ const reTooMuchRecursion = /too\smuch\srecursion/;
 // ************************************************************************************************
 // Globals
 
+
+//https://developer.mozilla.org/en/Using_JavaScript_code_modules
+var EXPORTED_SYMBOLS = ["fbs"];
+
 var jsd, fbs, prefs;
 var consoleService;
 var observerService;
@@ -151,61 +152,68 @@ var waitingForTimer = false;
 
 var FBTrace = null;
 
+if (!consoleService)
+	var consoleService = Cc["@mozilla.org/consoleservice;1"].getService(Ci.nsIConsoleService);
+
+consoleService.logStringMessage("fbs module exported "+EXPORTED_SYMBOLS[0]);
+
+
 // ************************************************************************************************
 
-function FirebugService()
+
+var fbs =
 {
+	initialize: function()
+	{
 
-    FBTrace = Cc["@joehewitt.com/firebug-trace-service;1"]
-                 .getService(Ci.nsISupports).wrappedJSObject.getTracer("extensions.firebug");
+	    FBTrace = Cc["@joehewitt.com/firebug-trace-service;1"]
+		                 .getService(Ci.nsISupports).wrappedJSObject.getTracer("extensions.firebug");
 
-    if (FBTrace.DBG_FBS_ERRORS)
-        FBTrace.sysout("FirebugService Starting");
+	    if (FBTrace.DBG_FBS_ERRORS)
+	        FBTrace.sysout("FirebugService Starting");
 
-    fbs = this;
+	    fbs = this;
 
-    this.wrappedJSObject = this;
-    this.timeStamp = new Date();  /* explore */
+	    this.wrappedJSObject = this;
+	    this.timeStamp = new Date();  /* explore */
 
-    fbs.restoreBreakpoints();
+	    fbs.restoreBreakpoints();
 
-    this.onDebugRequests = 0;  // the number of times we called onError but did not call onDebug
-    fbs._lastErrorDebuggr = null;
+	    this.onDebugRequests = 0;  // the number of times we called onError but did not call onDebug
+	    fbs._lastErrorDebuggr = null;
 
 
-    if(FBTrace.DBG_FBS_ERRORS)
-        this.osOut("FirebugService Starting, FBTrace should be up\n");
+	    if(FBTrace.DBG_FBS_ERRORS)
+	        this.osOut("FirebugService Starting, FBTrace should be up\n");
 
-    this.profiling = false;
-    this.pauseDepth = 0;
+	    this.profiling = false;
+	    this.pauseDepth = 0;
 
-    prefs = PrefService.getService(nsIPrefBranch2);
-    fbs.prefDomain = "extensions.firebug.service."
-    prefs.addObserver(fbs.prefDomain, fbs, false);
+	    prefs = PrefService.getService(nsIPrefBranch2);
+	    fbs.prefDomain = "extensions.firebug.service."
+	    prefs.addObserver(fbs.prefDomain, fbs, false);
 
-    observerService = ObserverServiceFactory.getService(Ci.nsIObserverService);
-    observerService.addObserver(QuitApplicationGrantedObserver, "quit-application-granted", false);
-    observerService.addObserver(QuitApplicationRequestedObserver, "quit-application-requested", false);
-    observerService.addObserver(QuitApplicationObserver, "quit-application", false);
+	    observerService = ObserverServiceFactory.getService(Ci.nsIObserverService);
+	    observerService.addObserver(QuitApplicationGrantedObserver, "quit-application-granted", false);
+	    observerService.addObserver(QuitApplicationRequestedObserver, "quit-application-requested", false);
+	    observerService.addObserver(QuitApplicationObserver, "quit-application", false);
 
-    this.scriptsFilter = "all";
-    // XXXjj For some reason the command line will not function if we allow chromebug to see it.?
-    this.alwayFilterURLsStarting = ["chrome://chromebug", "x-jsd:ppbuffer", "chrome://firebug/content/commandLine.js"];  // TODO allow override
-    this.onEvalScriptCreated.kind = "eval";
-    this.onTopLevelScriptCreated.kind = "top-level";
-    this.onEventScriptCreated.kind = "event";
-    this.onXULScriptCreated.kind = "xul";
-    this.pendingXULScripts = [];
+	    this.scriptsFilter = "all";
+	    // XXXjj For some reason the command line will not function if we allow chromebug to see it.?
+	    this.alwayFilterURLsStarting = ["chrome://chromebug", "x-jsd:ppbuffer", "chrome://firebug/content/commandLine.js"];  // TODO allow override
+	    this.onEvalScriptCreated.kind = "eval";
+	    this.onTopLevelScriptCreated.kind = "top-level";
+	    this.onEventScriptCreated.kind = "event";
+	    this.onXULScriptCreated.kind = "xul";
+	    this.pendingXULScripts = [];
 
-    this.onXScriptCreatedByTag = {}; // fbs functions by script tag
-    this.nestedScriptStack = []; // scripts contained in leveledScript that have not been drained
+	    this.onXScriptCreatedByTag = {}; // fbs functions by script tag
+	    this.nestedScriptStack = []; // scripts contained in leveledScript that have not been drained
 
-    if (FBTrace.DBG_FBS_ERRORS)
-        FBTrace.sysout("FirebugService Initialized");
-}
+	    if (FBTrace.DBG_FBS_ERRORS)
+	        FBTrace.sysout("FirebugService Initialized");
+	},
 
-FirebugService.prototype =
-{
     osOut: function(str)
     {
         if (!this.outChannel)
@@ -410,7 +418,7 @@ FirebugService.prototype =
     {
     	if (!name)
     		return;
-    	
+
         for(var i = 0; i < debuggers.length; i++)
             if (debuggers[i].debuggerName === name)
                 return debuggers[i];
@@ -2946,46 +2954,6 @@ var FirebugFactory =
 };
 
 // ************************************************************************************************
-
-var FirebugModule =
-{
-    registerSelf: function (compMgr, fileSpec, location, type)
-    {
-        compMgr = compMgr.QueryInterface(nsIComponentRegistrar);
-        compMgr.registerFactoryLocation(CLASS_ID, CLASS_NAME, CONTRACT_ID, fileSpec, location, type);
-    },
-
-    unregisterSelf: function(compMgr, fileSpec, location)
-    {
-        compMgr = compMgr.QueryInterface(nsIComponentRegistrar);
-        compMgr.unregisterFactoryLocation(CLASS_ID, location);
-    },
-
-    getClassObject: function (compMgr, cid, iid)
-    {
-        if (!iid.equals(nsIFactory))
-            throw NS_ERROR_NOT_IMPLEMENTED;
-
-        if (cid.equals(CLASS_ID))
-            return FirebugFactory;
-
-        throw NS_ERROR_NO_INTERFACE;
-    },
-
-    canUnload: function(compMgr)
-    {
-        return true;
-    }
-};
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
-
-function NSGetModule(compMgr, fileSpec)
-{
-    return FirebugModule;
-}
-
-// ************************************************************************************************
 // Local Helpers
 
 // called by enumerateScripts, onThrow, onDebug, onScriptCreated/Destroyed.
@@ -3383,3 +3351,7 @@ function tmpout(text)
     fbs.foStream.write(text, text.length);
 
 }
+
+fbs.initialize();
+
+//consoleService.logStringMessage("fbs module exported "+fbs);

@@ -10,7 +10,7 @@ const Ci = Components.interfaces;
 const jsdIStackFrame = Ci.jsdIStackFrame;
 const jsdIScript = Ci.jsdIScript;
 
-const fbs = Cc["@joehewitt.com/firebug;1"].getService().wrappedJSObject;
+Components.utils.import("resource://firebug/firebug-service.js");
 
 // ************************************************************************************************
 // Common Tags
