@@ -98,7 +98,8 @@
             <parameter name="panelType"/>
             <body><![CDATA[
             var tab = this.getTab(panelType.prototype.name);
-            if (panelType.prototype.activable)
+
+            if (tab && panelType.prototype.activable)
             {
                 var enabled = panelType.prototype.isEnabled();
                 tab.setAttribute("aria-disabled", enabled ? "false" : "true");
@@ -636,7 +637,7 @@
             // background-image style (?) of <xul:image> to something that
             // pops out a little
             ]]></body>
-        </method> 
+        </method>
     </implementation>
 </binding>
 
