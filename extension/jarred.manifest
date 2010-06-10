@@ -1,9 +1,14 @@
 content firebug jar:chrome/firebug.jar!/content/firebug/ contentaccessible=yes
 content firebug jar:chrome/firebug.jar!/content/firebug/
+
+resource firebug modules/
+
 skin    firebug classic/1.0 jar:chrome/firebug.jar!/skin/classic/
 skin    firebug-os  classic/1.0 jar:chrome/firebug.jar!/skin/classic/win/
 
-locale  firebug bg-BG       jar:chrome/firebug.jar!/locale/bg-BG/
+locale  firebug ar          jar:chrome/firebug.jar!/locale/ar/
+locale  firebug ar-SA       jar:chrome/firebug.jar!/locale/ar-SA/
+locale  firebug bg          jar:chrome/firebug.jar!/locale/bg/
 locale  firebug ca-AD       jar:chrome/firebug.jar!/locale/ca-AD/
 locale  firebug cs          jar:chrome/firebug.jar!/locale/cs/
 locale  firebug da-DK       jar:chrome/firebug.jar!/locale/da-DK/
@@ -11,25 +16,38 @@ locale  firebug de          jar:chrome/firebug.jar!/locale/de/
 locale  firebug el-GR       jar:chrome/firebug.jar!/locale/el-GR/
 locale  firebug en-US       jar:chrome/firebug.jar!/locale/en-US/
 locale  firebug es-AR       jar:chrome/firebug.jar!/locale/es-AR/
+locale  firebug es-CL       jar:chrome/firebug.jar!/locale/es-CL/
 locale  firebug es-ES       jar:chrome/firebug.jar!/locale/es-ES/
+locale  firebug eu-ES       jar:chrome/firebug.jar!/locale/eu-ES/
 locale  firebug fa          jar:chrome/firebug.jar!/locale/fa/
+locale  firebug fi-FI       jar:chrome/firebug.jar!/locale/fi-FI/
 locale  firebug fr          jar:chrome/firebug.jar!/locale/fr/
+locale  firebug fy-NL       jar:chrome/firebug.jar!/locale/fy-NL/
+locale  firebug gl-ES       jar:chrome/firebug.jar!/locale/gl-ES/
+locale  firebug he-IL       jar:chrome/firebug.jar!/locale/he-IL/
 locale  firebug hr-HR       jar:chrome/firebug.jar!/locale/hr-HR/
 locale  firebug hu-HU       jar:chrome/firebug.jar!/locale/hu-HU/
 locale  firebug hy-AM       jar:chrome/firebug.jar!/locale/hy-AM/
+locale  firebug id-ID       jar:chrome/firebug.jar!/locale/id-ID/
 locale  firebug is-IS       jar:chrome/firebug.jar!/locale/is-IS/
 locale  firebug it-IT       jar:chrome/firebug.jar!/locale/it-IT/
 locale  firebug ja-JP       jar:chrome/firebug.jar!/locale/ja-JP/
+locale  firebug kk-KZ       jar:chrome/firebug.jar!/locale/kk-KZ/
 locale  firebug ko-KR       jar:chrome/firebug.jar!/locale/ko-KR/
+locale  firebug mk-MK       jar:chrome/firebug.jar!/locale/mk-MK/
+locale  firebug mn-MN       jar:chrome/firebug.jar!/locale/mn-MN/
 locale  firebug nl          jar:chrome/firebug.jar!/locale/nl/
 locale  firebug pl          jar:chrome/firebug.jar!/locale/pl/
 locale  firebug pt-BR       jar:chrome/firebug.jar!/locale/pt-BR/
 locale  firebug pt-PT       jar:chrome/firebug.jar!/locale/pt-PT/
 locale  firebug ro-RO       jar:chrome/firebug.jar!/locale/ro-RO/
 locale  firebug ru-RU       jar:chrome/firebug.jar!/locale/ru-RU/
+locale  firebug si-LI       jar:chrome/firebug.jar!/locale/si-LI/
 locale  firebug sk-SK       jar:chrome/firebug.jar!/locale/sk-SK/
 locale  firebug sl-SI       jar:chrome/firebug.jar!/locale/sl-SI/
+locale  firebug sr          jar:chrome/firebug.jar!/locale/sr/
 locale  firebug sv-SE       jar:chrome/firebug.jar!/locale/sv-SE/
+locale  firebug te-IN       jar:chrome/firebug.jar!/locale/te-IN/
 locale  firebug tr-TR       jar:chrome/firebug.jar!/locale/tr-TR/
 locale  firebug uk-UA       jar:chrome/firebug.jar!/locale/uk-UA/
 locale  firebug vi          jar:chrome/firebug.jar!/locale/vi/
