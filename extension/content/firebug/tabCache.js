@@ -167,7 +167,6 @@ Firebug.TabCacheModel = extend(Firebug.Module,
             // Create Firebug's stream listener that is tracing HTTP responses.
             Components.utils.import("resource://firebug/firebug-channel-listener.js");
             var newListener = new ChannelListener();  // TODO pass args rather than set properties
-            FBTrace.sysout("tabCache newListener "+newListener, newListener);
             newListener.window = win;
 
             // Set proxy listener for back notification from XPCOM to chrome (using real interface

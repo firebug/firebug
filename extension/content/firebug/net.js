@@ -3830,34 +3830,39 @@ NetProgress.prototype =
         if (!name || reIgnore.exec(name))
             return null;
 
-        var index = this.requests.indexOf(request);
-        if (index == -1 && noCreate)
-            return null;
-
-        if (index == -1)
+        for (var i=0; i<this.files.length; i++)
         {
-            if (!win || getRootWindow(win) != this.context.window)
-                return;
-
-            var fileDoc = this.getRequestDocument(win);
-            var isDocument = request.loadFlags & LOAD_DOCUMENT_URI && fileDoc.parent;
-            var doc = isDocument ? fileDoc.parent : fileDoc;
-
-            var file = doc.createFile(request);
-            if (isDocument)
-            {
-                fileDoc.documentFile = file;
-                file.ownDocument = fileDoc;
-            }
-
-            file.request = request;
-            this.requests.push(request);
-            this.files.push(file);
-            return file;
+            var file = this.files[i];
+            if (file.request == request)
+                return file;
         }
 
-        // There is already a file for the reqeust so use it.
-        return this.files[index];
+        if (noCreate)
+            return null;
+
+        if (!win || getRootWindow(win) != this.context.window)
+            return;
+
+        var fileDoc = this.getRequestDocument(win);
+        var isDocument = request.loadFlags & LOAD_DOCUMENT_URI && fileDoc.parent;
+        var doc = isDocument ? fileDoc.parent : fileDoc;
+
+        var file = doc.createFile(request);
+        if (isDocument)
+        {
+            fileDoc.documentFile = file;
+            file.ownDocument = fileDoc;
+        }
+
+        file.request = request;
+        this.requests.push(request);
+        this.files.push(file);
+
+        if (FBTrace.DBG_NET)
+            FBTrace.sysout("net.createFile; " + safeGetRequestName(request) +
+                "(" + this.files.length + ")");
+
+        return file;
     },
 
     getRequestDocument: function(win)
