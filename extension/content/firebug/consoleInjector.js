@@ -213,6 +213,16 @@ function createConsoleHandler(context, win)
         consoleElement.setAttribute("FirebugVersion", Firebug.version);
     };
 
+    handler.setEvaluatedCallback = function( fnOfResult )
+    {
+    	this.console.evaluated = fnOfResult;
+    };
+
+    handler.setEvaluateErrorCallback = function( fnOfResultAndContext )
+    {
+    	this.console.evaluateError = fnOfResultAndContext;
+    };
+
     return handler;
 }
 

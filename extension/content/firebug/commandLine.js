@@ -135,22 +135,22 @@ Firebug.CommandLine = extend(Firebug.Module,
 
         if (successConsoleFunction)
         {
-            consoleHandler.evaluated = function useConsoleFunction(result)
+            consoleHandler.setEvaluatedCallback( function useConsoleFunction(result)
             {
-                successConsoleFunction(result, context);  // result will be pass thru this function
-            }
+            			successConsoleFunction(result, context);  // result will be pass thru this function
+            });
         }
 
         if (exceptionFunction)
         {
-            consoleHandler.evaluateError = function useExceptionFunction(result)
+            consoleHandler.setEvaluateErrorCallback(function useExceptionFunction(result)
             {
                 exceptionFunction(result, context);
-            }
+            });
         }
         else
         {
-            consoleHandler.evaluateError = function useErrorFunction(result)
+            consoleHandler.setEvaluateErrorCallBack(function useErrorFunction(result)
             {
                 if (result)
                 {
@@ -160,7 +160,7 @@ Firebug.CommandLine = extend(Firebug.Module,
                 }
 
                 Firebug.Console.logFormatted([result], context, "error", true);
-            }
+            });
         }
 
         if (FBTrace.DBG_CONSOLE)
@@ -227,10 +227,10 @@ Firebug.CommandLine = extend(Firebug.Module,
 
         if (successConsoleFunction)
         {
-            consoleHandler.evaluated = function useConsoleFunction(result)
+        	consoleHandler.setEvaluatedCallback( function useConsoleFunction(result)
             {
-                successConsoleFunction(result, context);  // result will be pass thru this function
-            }
+            			successConsoleFunction(result, context);  // result will be pass thru this function
+            });
         }
 
         if (exceptionFunction)
