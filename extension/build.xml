@@ -72,7 +72,6 @@ Added support for js-doc-tolkit, odvarko@gmail.com -->
     <!-- relative to branches/firebug1.1 should be branches/eval -->
 
     <property name="excludes" value="**/.*, **/*.jar, **/*.db" />
-    <property name="components_dir" location="${src_dir}/components" />
     <available file="${src_dir}/aptanadebugger" property="aptanadebugger"/>
 
     <!-- Targets -->
@@ -224,7 +223,7 @@ Added support for js-doc-tolkit, odvarko@gmail.com -->
             <zipfileset dir="${build_dir}" includes="*.jar" prefix="chrome" />
             <zipfileset dir="${src_dir}" includes="icons/**" prefix="chrome" excludes="${excludes}" />
             <zipfileset dir="${src_dir}/platform" includes="**" prefix="platform" excludes="${excludes}, **/skin/**" />
-            <zipfileset dir="${src_dir}/components" includes="*.js" prefix="components" />
+            <zipfileset dir="${src_dir}/modules" includes="*.js" prefix="modules" />
             <zipfileset dir="${src_dir}/defaults" includes="**" prefix="defaults" excludes="${excludes}" />
             <zipfileset dir="${src_dir}" includes="install.rdf" />
             <zipfileset dir="${src_dir}" includes="jarred.manifest" fullpath="chrome.manifest"/>
