@@ -59,9 +59,9 @@ Firebug.Activation = extend(Firebug.Module,
     {
         if(!this.annotationSvc)
         {
-            // Create annotation service.
-            this.annotationSvc = Cc["@joehewitt.com/firebug-annotation-service;1"]
-                .getService(Ci.nsISupports).wrappedJSObject;
+        	// Import annotation service.
+        	Components.utils.import("resource://firebug/firebug-annotations.js");
+        	this.annotationSvc = annotationService;
         }
         return this.annotationSvc;
     },
