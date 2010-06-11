@@ -98,19 +98,19 @@ var _FirebugCommandLine =
     try
     {
         // DBG window.dump("_FirebugCommandLine init console is "+window.console+" in "+window.location+"\n");
-    	var element = window.console.getFirebugElement();
-    	if (element)
-    	{
-    		_FirebugCommandLine.initFirebugCommandLine();
-    	}
-    	else
-    	{
-    		window.addEventListener("DOMContentLoaded", function initAndRemove(event)
-    		{
-    			_FirebugCommandLine.initFirebugCommandLine();
-    			window.removeEventListener("DOMContentLoaded", initAndRemove, true);
-    		}, true);
-    	}
+        var element = window.console.getFirebugElement();
+        if (element)
+        {
+            _FirebugCommandLine.initFirebugCommandLine();
+        }
+        else
+        {
+            window.addEventListener("DOMContentLoaded", function initAndRemove(event)
+            {
+                _FirebugCommandLine.initFirebugCommandLine();
+                window.removeEventListener("DOMContentLoaded", initAndRemove, true);
+            }, true);
+        }
     }
     catch(exc)
     {

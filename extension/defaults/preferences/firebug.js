@@ -129,8 +129,9 @@ pref("extensions.firebug.DBG_EVAL", false);         // debugger.js and firebug-s
 pref("extensions.firebug.DBG_PANELS", false);       // panel selection                           /*@explore*/
 pref("extensions.firebug.DBG_CACHE", false);        // sourceCache                               /*@explore*/
 pref("extensions.firebug.DBG_CONSOLE", false);      // console                                   /*@explore*/
+pref("extensions.firebug.DBG_COMMANDLINE", false);  // command line                              /*@explore*/
 pref("extensions.firebug.DBG_CSS", false);          //                                           /*@explore*/
-pref("extensions.firebug.DBG_CSS_PARSER", false);          //                                           /*@explore*/
+pref("extensions.firebug.DBG_CSS_PARSER", false);          //                                    /*@explore*/
 pref("extensions.firebug.DBG_DBG2FIREBUG", false);  //                                           /*@explore*/
 pref("extensions.firebug.DBG_DOM", false);          //                                           /*@explore*/
 pref("extensions.firebug.DBG_DOMPLATE", false);     // domplate engine                           /*@explore*/
