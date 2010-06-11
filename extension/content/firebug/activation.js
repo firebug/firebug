@@ -57,11 +57,11 @@ Firebug.Activation = extend(Firebug.Module,
 
     getAnnotationService: function()
     {
-        if(!this.annotationSvc)
+        if (!this.annotationSvc)
         {
-        	// Import annotation service.
-        	Components.utils.import("resource://firebug/firebug-annotations.js");
-        	this.annotationSvc = annotationService;
+            // Import annotation service.
+            Components.utils.import("resource://firebug/firebug-annotations.js");
+            this.annotationSvc = annotationService;
         }
         return this.annotationSvc;
     },
@@ -77,6 +77,9 @@ Firebug.Activation = extend(Firebug.Module,
 
     convertToURIKey: function(url, sameOrigin)  // process the URL to canonicalize it. Need not be reversible.
     {
+        // Remove fragment, it shouldn't have any impact on the activation.
+        url = url.replace(/#.*/, "");
+
         var uri = makeURI(normalizeURL(url));
 
         if (Firebug.filterSystemURLs && isSystemURL(url))
@@ -94,7 +97,11 @@ Firebug.Activation = extend(Firebug.Module,
                 if (!shortURI)
                     return uri;
 
-                if (shortURI.scheme === "about")  // annoying "about" URIs throw if you access .host
+                // annoying "about" URIs throw if you access .host
+                if (shortURI.scheme === "about")
+                    return shortURI;
+
+                if (shortURI.scheme === "file")
                     return shortURI;
 
                 var host = shortURI.host;
