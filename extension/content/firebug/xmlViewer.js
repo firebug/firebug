@@ -13,7 +13,7 @@ var xmlContentTypes =
     "application/xhtml+xml",
     "application/rss+xml",
     "application/atom+xml",,
-	"application/vnd.mozilla.maybe.feed",
+    "application/vnd.mozilla.maybe.feed",
     "application/rdf+xml",
     "application/vnd.mozilla.xul+xml"
 ];

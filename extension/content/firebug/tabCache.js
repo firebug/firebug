@@ -47,7 +47,7 @@ var contentTypes =
     "application/atom+xml": 1,
     "application/rss+xml": 1,
     "application/vnd.mozilla.maybe.feed": 1,
-	"application/vnd.mozilla.xul+xml": 1,
+    "application/vnd.mozilla.xul+xml": 1,
     "application/javascript": 1,
     "application/x-javascript": 1,
     "application/x-httpd-php": 1,
