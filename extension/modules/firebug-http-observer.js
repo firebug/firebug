@@ -54,8 +54,6 @@ var httpRequestObserver =
 
         observerService.addObserver(this, "quit-application", false);
 
-        this.registerObservers();
-
         if (FBTrace.DBG_HTTPOBSERVER)
             FBTrace.sysout("httpObserver.initialize OK");
     },
