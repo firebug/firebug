@@ -11,8 +11,11 @@ var xmlContentTypes =
     "text/xml",
     "application/xml",
     "application/xhtml+xml",
+    "application/rss+xml",
+    "application/atom+xml",,
+	"application/vnd.mozilla.maybe.feed",
     "application/rdf+xml",
-    "application/vnd.mozilla.xul+xml",
+    "application/vnd.mozilla.xul+xml"
 ];
 
 // ************************************************************************************************
@@ -85,7 +88,7 @@ Firebug.XMLViewerModel = extend(Firebug.Module,
 
         tabBody.updated = true;
 
-        this.insertXML(tabBody, file.responseText);
+        this.insertXML(tabBody, Firebug.NetMonitor.Utils.getResponseText(file, context));
     },
 
     insertXML: function(parentNode, text)

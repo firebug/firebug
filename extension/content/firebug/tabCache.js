@@ -44,7 +44,10 @@ var contentTypes =
     "view-fragment": 1,
     "application/xml": 1,
     "application/xhtml+xml": 1,
-    "application/vnd.mozilla.xul+xml": 1,
+    "application/atom+xml": 1,
+    "application/rss+xml": 1,
+    "application/vnd.mozilla.maybe.feed": 1,
+	"application/vnd.mozilla.xul+xml": 1,
     "application/javascript": 1,
     "application/x-javascript": 1,
     "application/x-httpd-php": 1,
@@ -367,7 +370,7 @@ Firebug.TabCache.prototype = extend(Firebug.SourceCache.prototype,
 
         // Join the last line with the new first one so, the source code
         // lines are properly formatted...
-        if (currLines.length)
+        if (currLines.length && lines.length)
         {
             // ... but only if the last line isn't already completed.
             var lastLine = currLines[currLines.length-1];
