@@ -663,7 +663,9 @@ this.Element = domplate(Firebug.Rep,
             "&lt;",
             SPAN({"class": "nodeTag"}, "$object.localName|toLowerCase"),
             FOR("attr", "$object|attrIterator",
-                "&nbsp;$attr.localName=&quot;", SPAN({"class": "nodeValue"}, "$attr.nodeValue"), "&quot;"
+                "&nbsp;$attr.localName=&quot;",
+                SPAN({"class": "nodeValue"}, "$attr|getAttrValue"),
+                "&quot;"
             ),
             "&gt;"
          ),
@@ -677,6 +679,12 @@ this.Element = domplate(Firebug.Rep,
                 SPAN({"class": "selectorValue"}, "$object|getValue")
             )
          ),
+
+    getAttrValue: function(attr)
+    {
+        var limit = Firebug.displayedAttributeValueLimit;
+        return (limit > 0) ? cropString(attr.nodeValue, limit) : attr.nodeValue;
+    },
 
     getVisible: function(elt)
     {
@@ -716,74 +724,77 @@ this.Element = domplate(Firebug.Rep,
             value = getFileName(elt.getAttribute("src"));
 
         return value ? " " + cropMultipleLines(value, 20) : "";
-     },
+    },
 
-     attrIterator: function(elt)
-     {
-         var attrs = [];
-         var idAttr, classAttr;
-         if (elt.attributes)
-         {
-             for (var i = 0; i < elt.attributes.length; ++i)
-             {
-                 var attr = elt.attributes[i];
-                 if (attr.localName.indexOf("-moz-math") != -1)
-                     continue;
-                 if (attr.localName.indexOf("firebug-") != -1)
-                     continue;
-                 else if (attr.localName == "id")
-                     idAttr = attr;
-                 else if (attr.localName == "class")
-                     classAttr = attr;
-                 else
-                     attrs.push(attr);
-             }
-         }
-         if (classAttr)
+    attrIterator: function(elt)
+    {
+        var attrs = [];
+        var idAttr, classAttr;
+        if (elt.attributes)
+        {
+            for (var i = 0; i < elt.attributes.length; ++i)
+            {
+                var attr = elt.attributes[i];
+                if (attr.localName.indexOf("-moz-math") != -1)
+                    continue;
+                if (attr.localName.indexOf("firebug-") != -1)
+                    continue;
+                else if (attr.localName == "id")
+                    idAttr = attr;
+                else if (attr.localName == "class")
+                    classAttr = attr;
+                else
+                    attrs.push(attr);
+            }
+        }
+
+        // Make sure 'id' and 'class' attributes are displayed first.
+        if (classAttr)
             attrs.splice(0, 0, classAttr);
         if (idAttr)
-           attrs.splice(0, 0, idAttr);
-         return attrs;
-     },
+            attrs.splice(0, 0, idAttr);
 
-     shortAttrIterator: function(elt)
-     {
-         var attrs = [];
-         if (elt.attributes)
-         {
-             for (var i = 0; i < elt.attributes.length; ++i)
-             {
-                 var attr = elt.attributes[i];
-                 if (attr.localName == "id" || attr.localName == "class")
-                     attrs.push(attr);
-             }
-         }
+        return attrs;
+    },
 
-         return attrs;
-     },
+    shortAttrIterator: function(elt)
+    {
+        // Short version returns only 'id' and 'class' attributes.
+        var attrs = [];
+        if (elt.attributes)
+        {
+            for (var i = 0; i < elt.attributes.length; ++i)
+            {
+                var attr = elt.attributes[i];
+                if (attr.localName == "id" || attr.localName == "class")
+                    attrs.push(attr);
+            }
+        }
+        return attrs;
+    },
 
-     getHidden: function(elt)
-     {
-         return isVisible(elt) ? "" : "nodeHidden";
-     },
+    getHidden: function(elt)
+    {
+        return isVisible(elt) ? "" : "nodeHidden";
+    },
 
-     getXPath: function(elt)
-     {
-         return getElementTreeXPath(elt);
-     },
+    getXPath: function(elt)
+    {
+        return getElementTreeXPath(elt);
+    },
 
-     getNodeTextGroups: function(element)
-     {
-         var text =  element.textContent;
-         if (!Firebug.showFullTextNodes)
-         {
-             text=cropString(text,50);
-         }
+    getNodeTextGroups: function(element)
+    {
+        var text =  element.textContent;
+        if (!Firebug.showFullTextNodes)
+        {
+            text=cropString(text,50);
+        }
 
-         var escapeGroups=[];
+        var escapeGroups=[];
 
-         if (Firebug.showTextNodesWithWhitespace)
-             escapeGroups.push({
+        if (Firebug.showTextNodesWithWhitespace)
+            escapeGroups.push({
                 'group': 'whitespace',
                 'class': 'nodeWhiteSpace',
                 'extra': {
@@ -791,19 +802,20 @@ this.Element = domplate(Firebug.Rep,
                     '\n': '_Para',
                     ' ' : '_Space'
                 }
-             });
-         if (Firebug.showTextNodesWithEntities)
-             escapeGroups.push({
-                 'group':'text',
-                 'class':'nodeTextEntity',
-                 'extra':{}
-             });
+            });
 
-         if (escapeGroups.length)
-             return escapeGroupsForEntities(text, escapeGroups);
-         else
-             return [{str:text,'class':'',extra:''}];
-     },
+        if (Firebug.showTextNodesWithEntities)
+            escapeGroups.push({
+                'group':'text',
+                'class':'nodeTextEntity',
+                'extra':{}
+            });
+
+        if (escapeGroups.length)
+            return escapeGroupsForEntities(text, escapeGroups);
+        else
+            return [{str:text,'class':'',extra:''}];
+    },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 
@@ -913,9 +925,11 @@ this.TextNode = domplate(Firebug.Rep,
         OBJECTLINK(
             "&lt;",
             SPAN({"class": "nodeTag"}, "TextNode"),
-            "&nbsp;textContent=&quot;", SPAN({"class": "nodeValue"}, "$object.textContent|cropMultipleLines"), "&quot;",
+            "&nbsp;textContent=&quot;",
+            SPAN({"class": "nodeValue"}, "$object.textContent|cropMultipleLines"),
+            "&quot;",
             "&gt;"
-            ),
+        ),
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 

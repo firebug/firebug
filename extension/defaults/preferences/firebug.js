@@ -51,6 +51,7 @@ pref("extensions.firebug.expandMutations", false);
 pref("extensions.firebug.scrollToMutations", false);
 pref("extensions.firebug.shadeBoxModel", true);
 pref("extensions.firebug.showQuickInfoBox", false);
+pref("extensions.firebug.displayedAttributeValueLimit", 1024); // Maximum characteres used to displaye value of an (HTML) attribute. There is no limit if set to 0.
 
 // CSS
 pref("extensions.firebug.showUserAgentCSS", false);
