@@ -168,8 +168,8 @@ top.Firebug.Console.injector =
 var total_handlers = 0;
 function createConsoleHandler(context, win)
 {
-	var handler = {};
-	handler.console = Firebug.Console.createConsole(context, win),
+    var handler = {};
+    handler.console = Firebug.Console.createConsole(context, win),
 
     handler.attachTo = function(element)
     {
@@ -215,12 +215,12 @@ function createConsoleHandler(context, win)
 
     handler.setEvaluatedCallback = function( fnOfResult )
     {
-    	this.console.evaluated = fnOfResult;
+        this.console.evaluated = fnOfResult;
     };
 
     handler.setEvaluateErrorCallback = function( fnOfResultAndContext )
     {
-    	this.console.evaluateError = fnOfResultAndContext;
+        this.console.evaluateError = fnOfResultAndContext;
     };
 
     return handler;
@@ -228,7 +228,7 @@ function createConsoleHandler(context, win)
 
 Firebug.Console.createConsole = function createConsole(context, win)
 {
-	var console = {};
+    var console = {};
     console.log = function()
     {
         logFormatted(arguments, "log");
@@ -534,12 +534,13 @@ Firebug.Console.createConsole = function createConsole(context, win)
                     break;
             }
 
-            if (FBTrace.DBG_CONSOLE)
-                FBTrace.sysout("consoleInjector getJSDUserStack: "+frames.length+" oldest: "+
-                    oldest+" i: "+i+" i - oldest + 2: "+(i - oldest + 2), trace);
-
             // take the oldest frames, leave 2 behind they are injection code
             trace.frames = trace.frames.slice(2 - i);
+            
+            if (FBTrace.DBG_CONSOLE)
+                FBTrace.sysout("consoleInjector getJSDUserStack: "+frames.length+" oldest: "+
+                    oldest+" i: "+i+" i - oldest + 2: "+(i - oldest + 2), trace.toString().split('\n'));
+            
             return trace;
         }
         else

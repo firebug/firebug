@@ -2411,7 +2411,7 @@ this.getCurrentStackTrace = function(context)
     {
         if (FBTrace.DBG_STACK) FBTrace.sysout("lib.getCurrentStackTrace frame:", frame);
         trace = FBL.getCorrectedStackTrace(frame, context);
-        if (FBTrace.DBG_STACK) FBTrace.sysout("lib.getCurrentStackTrace trace:", trace);
+        if (FBTrace.DBG_STACK) FBTrace.sysout("lib.getCurrentStackTrace trace:", trace.toString().split('\n'));
     });
 
     return trace;
@@ -2698,14 +2698,14 @@ this.getFunctionName = function(script, context, frame, noArgs)
 
     if (!name || (name == "anonymous"))
     {
-    	name = null;
+        name = null;
         var analyzer = Firebug.SourceFile.getScriptAnalyzer(context, script);
         if (analyzer && frame)
         {
             if (FBTrace.DBG_STACK) FBTrace.sysout("getFunctionName analyzer.sourceFile:", analyzer.sourceFile);
             var functionSpec = analyzer.getFunctionDescription(script, context, frame);
             if (functionSpec.name)
-            	name = functionSpec.name + (noArgs ? "" : "("+functionSpec.args.join(',')+")");
+                name = functionSpec.name + (noArgs ? "" : "("+functionSpec.args.join(',')+")");
         }
         if (!name)
         {
@@ -3536,6 +3536,8 @@ this.isSystemURL = function(url)
         return true;
     else if (url.indexOf("firebug-service.js") != -1)
         return true;
+    else if (url.indexOf("/modules/debuggerHalter.js") != -1)
+    	return true;
     else
         return false;
 };
@@ -3653,20 +3655,20 @@ this.absoluteURL = function(url, baseURL)
 
 this.absoluteURLWithDots = function(url, baseURL)
 {
-	// Should implement http://www.apps.ietf.org/rfc/rfc3986.html#sec-5
-	// or use the newURI approach described in issue 3110.
-	// See tests/content/lib/absoluteURLs.js
+    // Should implement http://www.apps.ietf.org/rfc/rfc3986.html#sec-5
+    // or use the newURI approach described in issue 3110.
+    // See tests/content/lib/absoluteURLs.js
 
     if (url.length === 0)
-    	return baseURL;
+        return baseURL;
 
-	var R_query_index = url.indexOf('?');
+    var R_query_index = url.indexOf('?');
     var R_head = url;
     if (R_query_index !== -1)
-    	R_head = url.substr(0, R_query_index);
+        R_head = url.substr(0, R_query_index);
 
     if (url.indexOf(':') !== -1)
-    	return url;
+        return url;
 
     var reURL = /(([^:]+:)\/{1,2}[^\/]*)(.*?)$/;
     var m_url = reURL.exec(R_head);
@@ -3676,12 +3678,12 @@ this.absoluteURLWithDots = function(url, baseURL)
     var B_query_index = baseURL.indexOf('?');
     var B_head = baseURL;
     if (B_query_index !== -1)
-    	B_head = baseURL.substr(0, B_query_index);
+        B_head = baseURL.substr(0, B_query_index);
 
     if (url[0] === "?")   // cases where R.path is empty.
         return B_head + url;
     if  (url[0] === "#")
-    	return baseURL.split('#')[0]+url;
+        return baseURL.split('#')[0]+url;
 
     var m = reURL.exec(B_head);
     if (!m)

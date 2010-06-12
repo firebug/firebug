@@ -157,55 +157,59 @@ var FBTrace = null;
 
 var fbs =
 {
-	initialize: function()
-	{
-		Components.utils.import("resource://firebug/firebug-trace-service.js");
-		FBTrace = traceConsoleService.getTracer("extensions.firebug");
+    initialize: function()
+    {
+        Components.utils.import("resource://firebug/firebug-trace-service.js");
+        
+        FBTrace = traceConsoleService.getTracer("extensions.firebug");
 
-	    if (FBTrace.DBG_FBS_ERRORS)
-	        FBTrace.sysout("FirebugService Starting");
+        if (FBTrace.DBG_FBS_ERRORS)
+            FBTrace.sysout("FirebugService Starting");
 
-	    fbs = this;
+        fbs = this;
 
-	    this.wrappedJSObject = this;
-	    this.timeStamp = new Date();  /* explore */
+        this.wrappedJSObject = this;
+        this.timeStamp = new Date();  /* explore */
+        
+        Components.utils.import("resource://firebug/debuggerHalter.js");
+        fbs.debuggerHalter = debuggerHalter; // ref to a function in a file that passes the jsdIFilter
+        
+        fbs.restoreBreakpoints();
 
-	    fbs.restoreBreakpoints();
-
-	    this.onDebugRequests = 0;  // the number of times we called onError but did not call onDebug
-	    fbs._lastErrorDebuggr = null;
+        this.onDebugRequests = 0;  // the number of times we called onError but did not call onDebug
+        fbs._lastErrorDebuggr = null;
 
 
-	    if(FBTrace.DBG_FBS_ERRORS)
-	        this.osOut("FirebugService Starting, FBTrace should be up\n");
+        if(FBTrace.DBG_FBS_ERRORS)
+            this.osOut("FirebugService Starting, FBTrace should be up\n");
 
-	    this.profiling = false;
-	    this.pauseDepth = 0;
+        this.profiling = false;
+        this.pauseDepth = 0;
 
-	    prefs = PrefService.getService(nsIPrefBranch2);
-	    fbs.prefDomain = "extensions.firebug.service."
-	    prefs.addObserver(fbs.prefDomain, fbs, false);
+        prefs = PrefService.getService(nsIPrefBranch2);
+        fbs.prefDomain = "extensions.firebug.service."
+        prefs.addObserver(fbs.prefDomain, fbs, false);
 
-	    observerService = ObserverServiceFactory.getService(Ci.nsIObserverService);
-	    observerService.addObserver(QuitApplicationGrantedObserver, "quit-application-granted", false);
-	    observerService.addObserver(QuitApplicationRequestedObserver, "quit-application-requested", false);
-	    observerService.addObserver(QuitApplicationObserver, "quit-application", false);
+        observerService = ObserverServiceFactory.getService(Ci.nsIObserverService);
+        observerService.addObserver(QuitApplicationGrantedObserver, "quit-application-granted", false);
+        observerService.addObserver(QuitApplicationRequestedObserver, "quit-application-requested", false);
+        observerService.addObserver(QuitApplicationObserver, "quit-application", false);
 
-	    this.scriptsFilter = "all";
-	    // XXXjj For some reason the command line will not function if we allow chromebug to see it.?
-	    this.alwayFilterURLsStarting = ["chrome://chromebug", "x-jsd:ppbuffer", "chrome://firebug/content/commandLine.js"];  // TODO allow override
-	    this.onEvalScriptCreated.kind = "eval";
-	    this.onTopLevelScriptCreated.kind = "top-level";
-	    this.onEventScriptCreated.kind = "event";
-	    this.onXULScriptCreated.kind = "xul";
-	    this.pendingXULScripts = [];
+        this.scriptsFilter = "all";
+        // XXXjj For some reason the command line will not function if we allow chromebug to see it.?
+        this.alwayFilterURLsStarting = ["chrome://chromebug", "x-jsd:ppbuffer", "chrome://firebug/content/commandLine.js"];  // TODO allow override
+        this.onEvalScriptCreated.kind = "eval";
+        this.onTopLevelScriptCreated.kind = "top-level";
+        this.onEventScriptCreated.kind = "event";
+        this.onXULScriptCreated.kind = "xul";
+        this.pendingXULScripts = [];
 
-	    this.onXScriptCreatedByTag = {}; // fbs functions by script tag
-	    this.nestedScriptStack = []; // scripts contained in leveledScript that have not been drained
+        this.onXScriptCreatedByTag = {}; // fbs functions by script tag
+        this.nestedScriptStack = []; // scripts contained in leveledScript that have not been drained
 
-	    if (FBTrace.DBG_FBS_ERRORS)
-	        FBTrace.sysout("FirebugService Initialized");
-	},
+        if (FBTrace.DBG_FBS_ERRORS)
+            FBTrace.sysout("FirebugService Initialized");
+    },
 
     osOut: function(str)
     {
@@ -409,8 +413,8 @@ var fbs =
 
     getDebuggerByName: function(name)
     {
-    	if (!name)
-    		return;
+        if (!name)
+            return;
 
         for(var i = 0; i < debuggers.length; i++)
             if (debuggers[i].debuggerName === name)
@@ -453,19 +457,19 @@ var fbs =
     },
 
     /*
-     * We are running JS code for Firebug, but we want to break into the debugger.
+     * We are running JS code for Firebug, but we want to break into the debugger with a stack frame.
      * @param debuggr Debugger object asking for break
      * @param fnOfFrame, function(frame) to run on break
      */
 
     halt: function(debuggr, fnOfFrame)
     {
-    	// store for onDebugger
+        // store for onDebugger
         haltDebugger = debuggr;
         haltCallBack = fnOfFrame;
-        FBTrace.sysout('fbs.halt '+haltCallBack);
+        FBTrace.sysout('fbs.halt jsd.isOn:'+jsd.isOn+' jsd.pauseDepth:'+jsd.pauseDepth+" fbs.isChromeBlocked "+fbs.isChromeBlocked+"  jsd.debuggerHook: "+ jsd.debuggerHook, jsd.debuggerHook);
         // call onDebugger via hook
-        eval('debugger;');
+        fbs.debuggerHalter();
     },
 
     step: function(mode, startFrame, stayOnDebuggr)
@@ -671,8 +675,8 @@ var fbs =
         var index = this.findErrorBreakpoint(url, lineNo);
         if (index == -1)
         {
-        	try
-        	{
+            try
+            {
                 var bp = this.addBreakpoint(BP_NORMAL | BP_ERROR, sourceFile, lineNo, null, debuggr);
                 if (bp)
                 {
@@ -681,11 +685,11 @@ var fbs =
                     fbs.saveBreakpoints(sourceFile.href);  // after every call to onToggleBreakpoint
                 }
 
-        	}
-        	catch(exc)
-        	{
-        		FBTrace.sysout("fbs.setErrorBreakpoint FAILS "+exc, exc);
-        	}
+            }
+            catch(exc)
+            {
+                FBTrace.sysout("fbs.setErrorBreakpoint FAILS "+exc, exc);
+            }
         }
     },
 
@@ -694,7 +698,7 @@ var fbs =
         var index = this.findErrorBreakpoint(url, lineNo);
         if (index != -1)
         {
-        	var bp = this.removeBreakpoint(BP_NORMAL | BP_ERROR, url, lineNo);
+            var bp = this.removeBreakpoint(BP_NORMAL | BP_ERROR, url, lineNo);
 
             errorBreakpoints.splice(index, 1);
             dispatch(debuggers, "onToggleErrorBreakpoint", [url, lineNo, false, debuggr]);
@@ -1126,7 +1130,7 @@ var fbs =
 
             if (haltDebugger)
             {
-            	FBTrace.sysout('fbs.onDebugger '+haltCallBack);
+                FBTrace.sysout('fbs.onDebugger '+haltCallBack);
 
                 var debuggr = haltDebugger;
                 haltDebugger = null;
@@ -1214,7 +1218,7 @@ var fbs =
         {
             var theDebugger = fbs.getDebuggerByName(bp.debuggerName);
             if (!theDebugger)
-            	theDebugger = this.findDebugger(frame);  // sets debuggr.breakContext
+                theDebugger = this.findDebugger(frame);  // sets debuggr.breakContext
 
             // See issue 1179, should not break if we resumed from a single step and have not advanced.
             if (disabledCount || monitorCount || conditionCount || runningUntil)
@@ -1375,18 +1379,18 @@ var fbs =
 
     onTopLevel: function(frame, type)
     {
-    	if (type === TYPE_TOPLEVEL_START || type === TYPE_TOPLEVEL_END)
-    	{
+        if (type === TYPE_TOPLEVEL_START || type === TYPE_TOPLEVEL_END)
+        {
             if (FBTrace.DBG_TOPLEVEL)
                 FBTrace.sysout("fbs.onTopLevel with delegate "+fbs.onTopLevelDelegate+" "+frame.script.tag+" "+frame.script.fileName);
             if (fbs.onTopLevelDelegate)
-            	fbs.onTopLevelDelegate(frame)
-    	}
+                fbs.onTopLevelDelegate(frame)
+        }
     },
 
     setTopLevelHook: function(fnOfFrame)
     {
-    	fbs.onTopLevelDelegate = fnOfFrame;
+        fbs.onTopLevelDelegate = fnOfFrame;
     },
 
     isTopLevelScript: function(frame, type, val)
@@ -1881,7 +1885,7 @@ var fbs =
             this.filterChrome = this.createFilter("chrome://*");
             this.filterPrettyPrint = this.createFilter("x-jsd:ppbuffer*");
             this.filterWrapper = this.createFilter("XPCSafeJSObjectWrapper.cpp");
-            this.noFilterHalter = this.createFilter("chrome://firebug/content/debuggerHalter.js", true);
+            this.noFilterHalter = this.createFilter("resource://firebug/debuggerHalter.js", true);
 
             // jsdIFilter does not allow full regexp matching.
             // So to filter components, we filter their directory names, which we obtain by looking for
@@ -2609,7 +2613,7 @@ var fbs =
                 if (bp.type & BP_MONITOR)
                     ++monitorCount;
                 if (bp.type & BP_ERROR)
-                	errorBreakpoints.push({href: url, lineNo: bp.lineNo, type: BP_ERROR });
+                    errorBreakpoints.push({href: url, lineNo: bp.lineNo, type: BP_ERROR });
             }
         }
         if (FBTrace.DBG_FBS_BP)
@@ -2711,8 +2715,8 @@ var fbs =
                 {
                     if (stepMode == STEP_OVER || stepMode == STEP_OUT)
                     {
-                    	if (frame.callingFrame && frame.callingFrame.script.tag === stepFrameTag) // then we are called by the stepping script
-                    		stepRecursion++;
+                        if (frame.callingFrame && frame.callingFrame.script.tag === stepFrameTag) // then we are called by the stepping script
+                            stepRecursion++;
 
                         jsd.interruptHook = null; // don't watch execution steps, wait for return
                     }
@@ -2743,22 +2747,22 @@ var fbs =
                     }
                     else if (stepMode == STEP_OVER || stepMode == STEP_OUT)
                     {
-                    	if (!stepRecursion) // then we never hit FUNCTION_CALL or we rolled back after we hit it
-                    	{
-                    		if (frame.script.tag === stepFrameTag)// We are in the stepping frame,
-                    			fbs.hookInterrupts();  // so halt on the next PC
-                    	}
-                    	else if (frame.callingFrame.script.tag === stepFrameTag) //then we could be in the step call
-                    	{
-                    		stepRecursion--;
+                        if (!stepRecursion) // then we never hit FUNCTION_CALL or we rolled back after we hit it
+                        {
+                            if (frame.script.tag === stepFrameTag)// We are in the stepping frame,
+                                fbs.hookInterrupts();  // so halt on the next PC
+                        }
+                        else if (frame.callingFrame.script.tag === stepFrameTag) //then we could be in the step call
+                        {
+                            stepRecursion--;
 
-                        	if (!stepRecursion) // then we've rolled back to the step-call
-                        	{
-                        		if (stepMode == STEP_OVER) // then halt in the next pc of the caller
-                        			fbs.hookInterrupts();
-                        	}
-                    	}
-                    	// else we are not interested in this FUNCTION_RETURN
+                            if (!stepRecursion) // then we've rolled back to the step-call
+                            {
+                                if (stepMode == STEP_OVER) // then halt in the next pc of the caller
+                                    fbs.hookInterrupts();
+                            }
+                        }
+                        // else we are not interested in this FUNCTION_RETURN
                     }
 
                     break;

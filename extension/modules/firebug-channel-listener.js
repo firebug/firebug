@@ -41,15 +41,15 @@ function ChannelListener()
 
     if (FBTrace.DBG_FAKE)  // cause the detrace to remove this statement and check for cached tracer
     {
-    	Components.utils.import("resource://firebug/firebug-trace-service.js");
-    	FBTrace = traceConsoleService.getTracer("extensions.firebug");
+        Components.utils.import("resource://firebug/firebug-trace-service.js");
+        FBTrace = traceConsoleService.getTracer("extensions.firebug");
     }
 }
 
 ChannelListener.prototype =
 {
 
-	setAsyncListener: function(request, stream, listener)
+    setAsyncListener: function(request, stream, listener)
     {
         try
         {

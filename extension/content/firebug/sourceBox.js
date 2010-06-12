@@ -148,7 +148,7 @@ Firebug.SourceBoxPanel = extend(SourceBoxPanelBase,
             var url = request.URI.spec;
             var sourceFile = getSourceFileByHref(url, context);
             if (sourceFile)
-            	this.removeSourceBoxBySourceFile(sourceFile);
+                this.removeSourceBoxBySourceFile(sourceFile);
         }
     },
 
@@ -245,19 +245,19 @@ Firebug.SourceBoxPanel = extend(SourceBoxPanelBase,
 
     removeSourceBoxBySourceFile: function(sourceFile)
     {
-    	var sourceBox = this.getSourceBoxBySourceFile(sourceFile);
-    	if (sourceBox)  // else we did not create one for this sourceFile
-    	{
-    		delete this.sourceBoxes[sourceFile.href];
-    		this.panelNode.removeChild(sourceBox);
+        var sourceBox = this.getSourceBoxBySourceFile(sourceFile);
+        if (sourceBox)  // else we did not create one for this sourceFile
+        {
+            delete this.sourceBoxes[sourceFile.href];
+            this.panelNode.removeChild(sourceBox);
 
-    		if (this.selectedSourceBox === sourceBox) // need to update the view
-    		{
-    			delete this.selectedSourceBox;
-    			delete this.location;
-    			this.showSourceFile(sourceFile);
-    		}
-    	}
+            if (this.selectedSourceBox === sourceBox) // need to update the view
+            {
+                delete this.selectedSourceBox;
+                delete this.location;
+                this.showSourceFile(sourceFile);
+            }
+        }
     },
 
     renameSourceBox: function(oldURL, newURL)
@@ -277,14 +277,14 @@ Firebug.SourceBoxPanel = extend(SourceBoxPanelBase,
             FBTrace.sysout("firebug.showSourceFile: "+sourceFile, sourceBox);
         if (!sourceBox)
         {
-        	// Has the script tag mutation event arrived?
-        	if (sourceFile.compilation_unit_type === "scriptTagAppend" && !sourceFile.source)
-        	{
-        		// prevent recursion, just give message if it does not arrive
-        		sourceFile.source = ["script tag mutation event has not arrived"];
-        		return;
-        	}
-        	sourceBox = this.createSourceBox(sourceFile);
+            // Has the script tag mutation event arrived?
+            if (sourceFile.compilation_unit_type === "scriptTagAppend" && !sourceFile.source)
+            {
+                // prevent recursion, just give message if it does not arrive
+                sourceFile.source = ["script tag mutation event has not arrived"];
+                return;
+            }
+            sourceBox = this.createSourceBox(sourceFile);
         }
 
 

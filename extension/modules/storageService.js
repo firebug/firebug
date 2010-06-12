@@ -132,26 +132,26 @@ var FBTrace = null;
  */
 var ObjectPersister =
 {
-	getProfileDirectory: function()
-	{
-		var file = dirService.get("ProfD", Ci.nsIFile);
-		return file;
-	},
+    getProfileDirectory: function()
+    {
+        var file = dirService.get("ProfD", Ci.nsIFile);
+        return file;
+    },
 
-	getFileInDirectory: function(file, path)  // forward slash separated
-	{
-		var segs = path.split('/');
-		for (var i = 0; i < segs.length; i++)
-		{
-			file.append(segs[i]);
-		}
-		return file;
-	},
+    getFileInDirectory: function(file, path)  // forward slash separated
+    {
+        var segs = path.split('/');
+        for (var i = 0; i < segs.length; i++)
+        {
+            file.append(segs[i]);
+        }
+        return file;
+    },
 
     getFileInProfileDirectory: function(path)
     {
         // Get persistence file stored within the profile directory.
-		var file = ObjectPersister.getProfileDirectory();
+        var file = ObjectPersister.getProfileDirectory();
         file = ObjectPersister.getFileInDirectory(file, path);
         if (FBTrace.DBG_STORAGE)
             FBTrace.sysout("ObjectPersister getFileInProfileDirectory("+path+")="+file.path);
@@ -161,8 +161,8 @@ var ObjectPersister =
 
     readObject: function(leafName)
     {
-    	Components.utils.import("resource://firebug/firebug-trace-service.js");
-    	FBTrace = traceConsoleService.getTracer("extensions.firebug");
+        Components.utils.import("resource://firebug/firebug-trace-service.js");
+        FBTrace = traceConsoleService.getTracer("extensions.firebug");
 
         if (FBTrace.DBG_STORAGE)
             FBTrace.sysout("ObjectPersister read from leafName "+leafName);
@@ -183,9 +183,9 @@ var ObjectPersister =
 
     readObjectFromFile: function(file)
     {
-    	var text = ObjectPersister.readTextFromFile(file);
-    	if (!text)
-    		return null;
+        var text = ObjectPersister.readTextFromFile(file);
+        if (!text)
+            return null;
 
         var nativeJSON = Cc["@mozilla.org/dom/json;1"].createInstance(Ci.nsIJSON);
         var obj = nativeJSON.decode(text);
@@ -258,18 +258,18 @@ var ObjectPersister =
 
     writeNow: function(leafName, obj)
     {
-    	try
-    	{
+        try
+        {
             // Convert data to JSON.
             var jsonString = JSON.stringify(obj);
             var file = ObjectPersister.getFileInProfileDirectory("firebug/"+leafName);
-        	ObjectPersister.writeTextToFile(file, jsonString);
-    	}
-    	catch(exc)
-    	{
+            ObjectPersister.writeTextToFile(file, jsonString);
+        }
+        catch(exc)
+        {
             if (FBTrace.DBG_ERRORS || FBTrace.DBG_STORAGE)
                 FBTrace.sysout("ObjectPersister.writeNow; EXCEPTION for "+leafName+": "+exc, {exception: exc, obj: obj});
-    	}
+        }
     },
 
     writeTextToFile: function(file, string)
@@ -300,8 +300,8 @@ var ObjectPersister =
 
 var TextService =
 {
-		readText: ObjectPersister.readTextFromFile,
-	    writeText: ObjectPersister.writeTextToFile,
-	    getProfileDirectory: ObjectPersister.getProfileDirectory,
-	    getFileInDirectory: ObjectPersister.getFileInDirectory,
+        readText: ObjectPersister.readTextFromFile,
+        writeText: ObjectPersister.writeTextToFile,
+        getProfileDirectory: ObjectPersister.getProfileDirectory,
+        getFileInDirectory: ObjectPersister.getFileInDirectory,
 };

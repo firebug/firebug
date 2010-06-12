@@ -532,7 +532,7 @@ Firebug.EventSourceFile = function(url, script, title, source, innerScriptEnumer
      Firebug.SourceFile.addScriptsToSourceFile(this, script, innerScriptEnumerator);
 };
 
-Firebug.EventSourceFile.prototype =	descend(new Firebug.SourceFile("event"),  // prototypical inheritance
+Firebug.EventSourceFile.prototype =    descend(new Firebug.SourceFile("event"),  // prototypical inheritance
 {
     getLine: function(context, lineNo)
     {

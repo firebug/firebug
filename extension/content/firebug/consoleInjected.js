@@ -47,9 +47,9 @@ function _FirebugConsole()
         // DBG element.setAttribute("uid", this.uid);
 
         // DBG if (length > 0)
-        // DBG 	element.setAttribute("checkUserObjects", this.userObjects[0].toString());
+        // DBG     element.setAttribute("checkUserObjects", this.userObjects[0].toString());
         // DBG else
-        // DBG 	element.setAttribute("checkUserObjects", "no userObjects");
+        // DBG     element.setAttribute("checkUserObjects", "no userObjects");
 
         // DBG dump("FirebugConsole("+this.uid+") dispatching event "+methodName+" via "+eventID+" with "+length+ " user objects, [0]:"+this.userObjects[0]+"\n");
         //debugger;
@@ -91,10 +91,10 @@ window._getFirebugConsoleElement = function _getFirebugConsoleElement()
     var element = document.body ? document.body : document.getElementsByTagName("body")[0];
     if (!element)
     {
-    	var maybeHTML = document.documentElement ? document.documentElement.tagName : "null";
-    	if (!maybeHTML || maybeHTML.toLowerCase() !== "html")
-    		element = document.documentElement;  // For non-HTML docs
-    	// else no body has been added yet
+        var maybeHTML = document.documentElement ? document.documentElement.tagName : "null";
+        if (!maybeHTML || maybeHTML.toLowerCase() !== "html")
+            element = document.documentElement;  // For non-HTML docs
+        // else no body has been added yet
     }
 
     return element;

@@ -48,7 +48,7 @@ var _FirebugCommandLine =
         // DBG window.dump("attachCommandLine "+window.location+"\n");
         if (!window.console)
         {
-            // DBG 	debugger;
+            // DBG     debugger;
             window.loadFirebugConsole();
         }
         var element = window.console.getFirebugElement();

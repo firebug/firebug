@@ -64,7 +64,7 @@ top.FirebugChrome =
         catch (exc)
         {
             // Disaster!
-        	window.dump("getStackDump:"+FBL.getStackDump()+"\n");
+            window.dump("getStackDump:"+FBL.getStackDump()+"\n");
             Components.utils.reportError("Firebug initialization FAILS "+exc);
             if (FBTrace.sysout)
                 FBTrace.sysout("chrome.panelBarReady FAILS: "+exc, exc);

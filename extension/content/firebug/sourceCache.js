@@ -103,8 +103,8 @@ Firebug.SourceCache.prototype = extend(new Firebug.Listener(),
             var m = reWrapperMunge.exec(url);
             if (m)
             {
-            	url = m[2];
-            	if (FBTrace.DBG_CACHE)
+                url = m[2];
+                if (FBTrace.DBG_CACHE)
                     FBTrace.sysout("sourceCache found munged xpcnativewrapper url and set it to "+url+" m "+m+" m[0]:"+m[0]+" [1]"+m[1], m);
             }
 
@@ -113,7 +113,7 @@ Firebug.SourceCache.prototype = extend(new Firebug.Listener(),
             {
                 if (FBTrace.DBG_CACHE)
                     FBTrace.sysout("sourceCache.load failed to convert chrome to local: "+url);
-            	return ["sourceCache failed to make URI from "+url];
+                return ["sourceCache failed to make URI from "+url];
             }
 
             var localURI = chromeReg.convertChromeURL(chromeURI);

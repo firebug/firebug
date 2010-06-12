@@ -248,8 +248,8 @@ Firebug.NetMonitor = extend(Firebug.ActivableModule,
                 window.removeEventListener("load", onWindowLoadHandler, true);
 
                 context.setTimeout(function() {
-                	if (window && !window.closed)
-                		window.removeEventListener("MozAfterPaint", onWindowPaintHandler, false);
+                    if (window && !window.closed)
+                        window.removeEventListener("MozAfterPaint", onWindowPaintHandler, false);
                 }, 2000); //xxxHonza: this should be customizable using preferences.
             }
             window.addEventListener("load", onWindowLoadHandler, true);

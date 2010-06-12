@@ -477,22 +477,22 @@ this.Arr = domplate(Firebug.Rep,
         var items = [];
         for (var i = 0; i < array.length && i <= max; ++i)
         {
-        	try
-        	{
-        		var delim = (i == array.length-1 ? "" : ", ");
-        		var value = array[i];
+            try
+            {
+                var delim = (i == array.length-1 ? "" : ", ");
+                var value = array[i];
                 var rep = Firebug.getRep(value);
                 var tag = rep.shortTag || rep.tag;
 
                 items.push({object: value, tag: tag, delim: delim});
-        	}
-        	catch(exc)
-        	{
-        		var rep = Firebug.getRep(exc);
+            }
+            catch(exc)
+            {
+                var rep = Firebug.getRep(exc);
                 var tag = rep.shortTag || rep.tag;
 
-        		items.push({object: exc, tag: tag, delim: delim});
-        	}
+                items.push({object: exc, tag: tag, delim: delim});
+            }
         }
 
         if (array.length > max + 1)

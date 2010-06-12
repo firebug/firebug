@@ -228,7 +228,7 @@ function recognizeShortcut(event)
         key = mustBeKeyChars[keyConstant];
     }
     else
-	{
+    {
         //2. detect basic alphanumeric keys
         var keyNameGuess = keyConstant.replace("VK_", "");
         if (keyNameGuess.length == 1)

@@ -321,7 +321,7 @@ Firebug.Breakpoint.BreakpointsPanel.prototype = extend(Firebug.Panel,
 
                 if (scripts)  // then this is a current (not future) breakpoint
                 {
-                	var script = scripts[0];
+                    var script = scripts[0];
                     var analyzer = Firebug.SourceFile.getScriptAnalyzer(context, script);
                     if (FBTrace.DBG_BP) FBTrace.sysout("breakpoints.refresh enumerateBreakpoints for script="+script.tag+(analyzer?" has analyzer":" no analyzer")+" in context "+context.getName());
                     if (analyzer)
@@ -601,9 +601,9 @@ SourceFileRenamer.prototype.renameSourceFiles = function(context)
         var callerURL = segs.join('/');
         if (!sourceFile.source)
         {
-        	FBTrace.sysout("breakpoint.renameSourceFiles no source for "+oldURL+" callerURL "+callerURL, sourceFile)
+            FBTrace.sysout("breakpoint.renameSourceFiles no source for "+oldURL+" callerURL "+callerURL, sourceFile)
             continue;
-        }	
+        }    
         var newURL = Firebug.Debugger.getURLFromMD5(callerURL, sourceFile.source, kind);
         sourceFile.href = newURL.href;
 

@@ -988,9 +988,9 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
         var sourceFile = Firebug.SourceFile.getSourceFileByScript(context, frame.script);
         if (!sourceFile)
         {
-        	if (FBTrace.DBG_ERRORS)
-        		FBTrace.sysout("debugger.setDebuggerKeywordCause FAILS, no sourceFile for "+frame.script.tag+"@"+frame.script.fileName+" in "+context.getName());
-        	return;
+            if (FBTrace.DBG_ERRORS)
+                FBTrace.sysout("debugger.setDebuggerKeywordCause FAILS, no sourceFile for "+frame.script.tag+"@"+frame.script.fileName+" in "+context.getName());
+            return;
         }
 
         var analyzer = sourceFile.getScriptAnalyzer(frame.script);
