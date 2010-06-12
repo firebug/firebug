@@ -20,6 +20,6 @@ include $(topsrcdir)/config/rules.mk
 
 ifneq (en-US,$(AB_CD))
 libs realchrome::
-	@echo "Comparing $(AB_CD) to en-US"
-	@$(PERL) $(topsrcdir)/toolkit/locales/compare-locales.pl $(srcdir)/en-US $(srcdir)/$(AB_CD)
+    @echo "Comparing $(AB_CD) to en-US"
+    @$(PERL) $(topsrcdir)/toolkit/locales/compare-locales.pl $(srcdir)/en-US $(srcdir)/$(AB_CD)
 endif

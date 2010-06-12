@@ -3537,7 +3537,7 @@ this.isSystemURL = function(url)
     else if (url.indexOf("firebug-service.js") != -1)
         return true;
     else if (url.indexOf("/modules/debuggerHalter.js") != -1)
-    	return true;
+        return true;
     else
         return false;
 };
