@@ -435,14 +435,7 @@ Firebug.Console.createConsole = function createConsole(context, win)
         else
             var msg = args[0];
 
-        if (Firebug.errorStackTrace)
-        {
-            var trace = Firebug.errorStackTrace;
-            delete Firebug.errorStackTrace;
-            if (FBTrace.DBG_CONSOLE)
-                FBTrace.sysout("logAssert trace from errorStackTrace", trace);
-        }
-        else if (msg.stack)
+        if (msg.stack)
         {
             var trace = parseToStackTrace(msg.stack);
             if (FBTrace.DBG_CONSOLE)
@@ -536,11 +529,11 @@ Firebug.Console.createConsole = function createConsole(context, win)
 
             // take the oldest frames, leave 2 behind they are injection code
             trace.frames = trace.frames.slice(2 - i);
-            
+
             if (FBTrace.DBG_CONSOLE)
                 FBTrace.sysout("consoleInjector getJSDUserStack: "+frames.length+" oldest: "+
                     oldest+" i: "+i+" i - oldest + 2: "+(i - oldest + 2), trace.toString().split('\n'));
-            
+
             return trace;
         }
         else
