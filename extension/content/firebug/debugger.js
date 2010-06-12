@@ -131,22 +131,10 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
 
     halt: function(fnOfFrame)
     {
-        FBTrace.sysout('debugger.halt '+fnOfFrame);
+    	if(FBTrace.DBG_BP)
+    		FBTrace.sysout('debugger.halt '+fnOfFrame);
 
         fbs.halt(this, fnOfFrame);
-
-        /*
-        debuggerHalter(); // a function with a URL that passes jsdIFilter and says "debugger;"
-
-        if (this.haltCallback) // so we have a second try
-        {
-            FBTrace.sysout("debugger did not halt jsd: ", jsd);
-            if (Firebug.CommandLine.isReadyElsePreparing(FirebugContext))
-                Firebug.CommandLine.evaluate("debugger;", FirebugContext);
-        }
-*/
-        if(FBTrace.DBG_BP)
-            FBTrace.sysout("debugger.halt, completed debugger stmt");
     },
 
     breakAsIfDebugger: function(frame)
@@ -1935,6 +1923,8 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
             context.dynamicURLhasBP = persistedState.dynamicURLhasBP;
 
         context.dynamicURLIndex = 1; // any dynamic urls need to be unique to the context.
+
+        context.debuggerActiveDuringLoad = Firebug.Debugger.isAlwaysEnabled();
 
         Firebug.ActivableModule.initContext.apply(this, arguments);
     },
