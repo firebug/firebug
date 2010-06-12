@@ -34,7 +34,6 @@ var traceConsoleService =
         // Listen for preferences changes. Trace Options can be changed at run time.
         prefs.addObserver("extensions", this, false);
 
-        this.wrappedJSObject = this;
         return this;
     },
 

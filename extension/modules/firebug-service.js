@@ -160,7 +160,7 @@ var fbs =
     initialize: function()
     {
         Components.utils.import("resource://firebug/firebug-trace-service.js");
-        
+
         FBTrace = traceConsoleService.getTracer("extensions.firebug");
 
         if (FBTrace.DBG_FBS_ERRORS)
@@ -170,10 +170,10 @@ var fbs =
 
         this.wrappedJSObject = this;
         this.timeStamp = new Date();  /* explore */
-        
+
         Components.utils.import("resource://firebug/debuggerHalter.js");
         fbs.debuggerHalter = debuggerHalter; // ref to a function in a file that passes the jsdIFilter
-        
+
         fbs.restoreBreakpoints();
 
         this.onDebugRequests = 0;  // the number of times we called onError but did not call onDebug
@@ -1121,7 +1121,8 @@ var fbs =
     {
         if (FBTrace.DBG_FBS_BP)
             FBTrace.sysout("fbs.onDebugger with haltDebugger="+haltDebugger+" in "+frame.script.fileName, frame.script);
-        try {
+        try
+        {
             if ( FBTrace.DBG_FBS_SRCUNITS && fbs.isTopLevelScript(frame, type, rv)  )
                 FBTrace.sysout("fbs.onDebugger found topLevelScript "+ frame.script.tag);
 
@@ -1130,11 +1131,13 @@ var fbs =
 
             if (haltDebugger)
             {
-                FBTrace.sysout('fbs.onDebugger '+haltCallBack);
+            	var peelOurselvesOff = frame.callingFrame;  // remove debuggerHalter()
+            	peelOurselvesOff = peelOurselvesOff.callingFrame; // remove fbs.halt()
+                FBTrace.sysout('fbs.onDebugger adjusted newest frame: '+peelOurselvesOff.line+'@'+peelOurselvesOff.script.fileName);
 
                 var debuggr = haltDebugger;
                 haltDebugger = null;
-                haltCallBack.apply(debuggr,[frame]);
+                haltCallBack.apply(debuggr,[peelOurselvesOff]);
                 return RETURN_CONTINUE;
             }
             else
@@ -1923,6 +1926,7 @@ var fbs =
             FBTrace.sysout("createChromeBlockingFilters considered "+COMPONENTS_FILTERS.length+
                     " regexps and created "+this.componentFilters.length+
                     " filters with unfound: "+componentsUnfound.length, componentsUnfound);
+            fbs.traceFilters("createChromeBlockingFilters");
         }
     },
 
@@ -2628,7 +2632,9 @@ var fbs =
 
     breakIntoDebugger: function(debuggr, frame, type)
     {
-        // Before we break, clear information about previous stepping session
+    	if (FBTrace.DBG_FBS_STEP || FBTrace.DBG_FBS_BP) FBTrace.sysout("fbs.breakIntoDebugger called "+debuggr.debuggerName+" fbs.isChromeBlocked:"+fbs.isChromeBlocked);
+
+    	// Before we break, clear information about previous stepping session
         this.stopStepping();
 
         // Break into the debugger - execution will stop here until the user resumes
