@@ -1011,7 +1011,10 @@
         <method name="filterList">
             <parameter name="substring"/>
             <body><![CDATA[
-                var firstMatch = null;
+            	if (this.firstMatch)
+            		this.firstMatch.setAttribute("_moz-menuactive", "false");
+
+                this.firstMatch = null;
                 var groupMatchCount = 0;
                 for (var child = this.popup.lastChild; child; child = child.previousSibling)
                 {
@@ -1021,7 +1024,7 @@
                         child._searchMatch = label.indexOf(substring) != -1;
                         if (child._searchMatch)
                         {
-                            firstMatch = child;
+                            this.firstMatch = child;
                             ++groupMatchCount;
                         }
                     }
@@ -1032,16 +1035,19 @@
                     }
                 }
 
-                if (firstMatch)
+                if (this.firstMatch)
                 {
-                    for (var child = this.popup.firstChild; child; child = child.nextSibling)
+                	// skip the filterMessageHeader
+                    for (var child = this.popup.firstChild.nextSibling; child; child = child.nextSibling)
                     {
                         child.hidden = !child._searchMatch;
                         child.removeAttribute("_moz-menuactive");
                     }
 
-                    firstMatch.setAttribute("_moz-menuactive", "true");
+                    this.firstMatch.setAttribute("_moz-menuactive", "true");
                 }
+
+                return this.firstMatch;
             ]]></body>
         </method>
 
@@ -1051,24 +1057,38 @@
                 if (event.keyCode == 13) // Return
                 {
                     this.enterActiveItem();
-                    this.searchString = '';
+                    this.filterString = '';
                 }
                 else if (event.keyCode == 8) // Backspace
                 {
-                    this.searchString = this.searchString.substr(0, this.searchString.length-1);
-                    this.filterList(this.searchString);
+                    this.filterString = this.filterString.substr(0, this.filterString.length-1);
+                    this.filterList(this.filterString);
                 }
                 else if (event.charCode)
                 {
-                    this.searchString += String.fromCharCode(event.charCode).toLowerCase();
-                    this.filterList(this.searchString);
+                    this.filterString += String.fromCharCode(event.charCode).toLowerCase();
+                    this.filterList(this.filterString);
                 }
                 else
                     return;
 
-                Firebug.Search.displayOnly(this.searchString, FirebugContext);
+                this.setFilterStringMessage(this.filterString, this.firstMatch);
                 FBL.cancelEvent(event);
             ]]></body>
+        </method>
+
+        <method name="setFilterStringMessage">
+        	<parameter name="filterString"/>
+        	<parameter name="matched"/>
+        	<body><![CDATA[
+        		var message = this.filterStringHeader.getAttribute('value');
+        		var parts = message.split(':');
+        		message = parts[0]+ ": "+filterString;
+        		if (!matched)
+        			message += " <-- no match";
+        		this.filterStringHeader.setAttribute('value', message);
+        	]]>
+        	</body>
         </method>
     </implementation>
 
@@ -1084,6 +1104,9 @@
                 this.setAttribute("location", null);
                 return false;
             }
+
+            this.filterStringHeader = FBL.createMenuHeader(this.popup, {label: "Type any key to filter list", nol10n: true}); // XXXjjb need l10n
+            FBL.setClass(this.filterStringHeader, "fbURLMenuItem");
 
             var groupNames = [];
             var groups = {};
@@ -1138,7 +1161,6 @@
                     FBL.setClass(menuItem, "fbURLMenuItem");
                 }
             }
-
         ]]></handler>
 
         <handler event="popupshown"><![CDATA[
@@ -1150,16 +1172,16 @@
             // XXXjoe There is a bug in the <xul:autoscrollbox> code which,
             // for reasons I don't grasp yet, never hides the scroll buttons
             // after the first them they are shown - so we must do it ourselves
-            var scrollbox = document.getAnonymousElementByAttribute(
+          /*  var scrollbox = document.getAnonymousElementByAttribute(
                 this.popup, "class", "popup-internal-box");
             if (scrollbox["_scrollButtonUp"])
                 scrollbox["_scrollButtonUp"].collapsed = true;
             if (scrollbox["_scrollButtonDown"])
                 scrollbox["_scrollButtonDown"].collapsed = true;
-
+*/
             this._closed = false;
 
-            this.searchString = "";
+            this.filterString = "";
             this.onkeypress = FBL.bind(this.onKeyPress, this);
             window.addEventListener("keypress", this.onkeypress, true);
         ]]></handler>
@@ -1167,7 +1189,7 @@
         <handler event="popuphidden"><![CDATA[
             window.removeEventListener("keypress", this.onkeypress, true);
             delete this.onkeypress;
-            delete this.searchString;
+            delete this.filterString;
 
             FBL.eraseNode(this.popup);
             this._closed = true;

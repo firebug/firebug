@@ -89,7 +89,7 @@ panelBarTabList > .tabs-alltabs-button {
 
 #fbPanelBar1-buttons {
     margin: 0 4px 0 4px;
-} 
+}
 
 /************************************************************************************************/
 
@@ -220,6 +220,17 @@ panelTab[selected="true"]:hover > panelTabMenu .menuTarget {
     padding-right: 5px;
 }
 
+.autorepeatbutton-up,
+.scrollbutton-up {
+	background-color: #FF9933;  /* Firebug orange */
+	padding: 5px;
+	}
+
+.autorepeatbutton-down,
+.scrollbutton-down {
+	background-color: #FF9933;  /* Firebug orange */
+	padding: 5px;
+	}
 /************************************************************************************************/
 /* Quick Info Box */
 
