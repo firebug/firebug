@@ -1590,7 +1590,7 @@ WatchPanel.prototype = extend(Firebug.DOMBasePanel.prototype,
     updateSelection: function(object)
     {
         dispatch(this.fbListeners, 'onBeforeDomUpdateSelection', [this]);
-        var frame = this.context.currentFrame;
+        var frame = this.context.stoppedFrame;
 
         var newFrame = frame && frame.isValid && frame.script != this.lastScript;
         if (newFrame)

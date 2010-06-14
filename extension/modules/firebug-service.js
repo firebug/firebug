@@ -467,7 +467,9 @@ var fbs =
         // store for onDebugger
         haltDebugger = debuggr;
         haltCallBack = fnOfFrame;
-        FBTrace.sysout('fbs.halt jsd.isOn:'+jsd.isOn+' jsd.pauseDepth:'+jsd.pauseDepth+" fbs.isChromeBlocked "+fbs.isChromeBlocked+"  jsd.debuggerHook: "+ jsd.debuggerHook, jsd.debuggerHook);
+        
+        if (FBTrace.DBG_FBS_BP)
+        	FBTrace.sysout('fbs.halt jsd.isOn:'+jsd.isOn+' jsd.pauseDepth:'+jsd.pauseDepth+" fbs.isChromeBlocked "+fbs.isChromeBlocked+"  jsd.debuggerHook: "+ jsd.debuggerHook, jsd.debuggerHook);
         // call onDebugger via hook
         fbs.debuggerHalter();
     },
@@ -1135,8 +1137,10 @@ var fbs =
             if (haltDebugger)
             {
             	var peelOurselvesOff = frame.callingFrame;  // remove debuggerHalter()
-            	peelOurselvesOff = peelOurselvesOff.callingFrame; // remove fbs.halt()
-                FBTrace.sysout('fbs.onDebugger adjusted newest frame: '+peelOurselvesOff.line+'@'+peelOurselvesOff.script.fileName);
+            	if (peelOurselvesOff.script.fileName.indexOf("chrome://firebug") == 0)  // total guesswork, sometimes the stack is goofy
+            		peelOurselvesOff = peelOurselvesOff.callingFrame; // remove fbs.halt()
+            	if (FBTrace.DBG_FBS_BP)
+            		FBTrace.sysout('fbs.onDebugger adjusted newest frame: '+peelOurselvesOff.line+'@'+peelOurselvesOff.script.fileName);
 
                 var debuggr = haltDebugger;
                 haltDebugger = null;
@@ -3071,6 +3075,22 @@ function countFrames(frame)
     }
 
     return frameCount;
+}
+
+function framesToString(frame)
+{
+	var str = "";
+	while (frame)
+	{
+		str += frameToString(frame)+"\n";
+		frame = frame.callingFrame;
+	}
+	return str;
+}
+
+function frameToString(frame)
+{
+	return frame.script.tag+" in "+frame.script.fileName+"@"+frame.line+"(pc="+frame.pc+")";
 }
 
 function testBreakpoint(frame, bp)

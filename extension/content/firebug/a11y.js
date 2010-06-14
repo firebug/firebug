@@ -1733,7 +1733,7 @@ Firebug.A11yModel = extend(Firebug.Module,
         var panelA11y = this.getPanelA11y(panel);
         if (!panelA11y)
             return;
-        var frame = context.currentFrame;
+        var frame = context.stoppedFrame;
         var fileName =  frame.script.fileName.split("/");  // XXXjjb I think this should be contxt.executingSourceFile.href
         fileName = fileName.pop();
         // XXXjjb the frame.functionName is often anonymous, since the compiler is lame.

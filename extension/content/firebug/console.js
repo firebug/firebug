@@ -242,6 +242,7 @@ Firebug.Console = extend(ActivableConsole,
     {
          iterateWindows(context.window, function detachOneConsole(win)
          {
+        	 Firebug.CommandLine.injector.detachCommandLine(context, win);  // remove this first since it needs the console
              Firebug.Console.injector.detachConsole(context, win);
          });
     },

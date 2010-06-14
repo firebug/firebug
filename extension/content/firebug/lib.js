@@ -4756,7 +4756,8 @@ this.parseToStackTrace = function(stack)
     for (var i = 0; i < lines.length; i++)
     {
         var frame = this.parseToStackFrame(lines[i]);
-        FBTrace.sysout("parseToStackTrace i "+i+" line:"+lines[i]+ "->frame: "+frame, frame);
+        if (FBTrace.DBG_STACK)
+        	FBTrace.sysout("parseToStackTrace i "+i+" line:"+lines[i]+ "->frame: "+frame, frame);
         if (frame)
             trace.frames.push(frame);
     }

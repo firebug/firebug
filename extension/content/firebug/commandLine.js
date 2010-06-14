@@ -165,6 +165,9 @@ Firebug.CommandLine = extend(Firebug.Module,
         }
         else
         {
+        	if (!consoleHandler.setEvaluateErrorCallBack)
+        		FBTrace.sysout("setEvaluateErrorCallBack ", consoleHandler);
+        	
             consoleHandler.setEvaluateErrorCallBack(function useErrorFunction(result)
             {
                 if (result)
@@ -603,10 +606,7 @@ Firebug.CommandLine = extend(Firebug.Module,
 
     destroyContext: function(context, persistedState)
     {
-         iterateWindows(context.window, function detachOneCommandLine(win)
-         {
-             Firebug.CommandLine.injector.detachCommandLine(context, win);
-         });
+         // our work is done in the Console
     },
 
     showPanel: function(browser, panel)

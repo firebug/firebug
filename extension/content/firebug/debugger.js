@@ -53,7 +53,7 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
 
     evaluate: function(js, context, scope)  // TODO remote: move to backend, proxy to front
     {
-        var frame = context.currentFrame;
+        var frame = context.stoppedFrame;
         if (!frame)
             return;
 
@@ -82,8 +82,8 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
     {
         var globals = keys(context.getGlobalScope().wrappedJSObject);  // return is safe
 
-        if (context.currentFrame)
-            return this.getFrameKeys(context.currentFrame, globals);
+        if (context.stoppedFrame)
+            return this.getFrameKeys(context.stoppedFrame, globals);
 
         return globals;
     },
@@ -189,15 +189,14 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
         if (FBTrace.DBG_UI_LOOP)
             FBTrace.sysout("debugger.stop "+context.getName()+" frame",frame);
 
-        context.debugFrame = frame;
+        context.stoppedFrame = frame;
         context.stopped = true;
 
         var hookReturn = dispatch2(this.fbListeners,"onStop",[context,frame, type,rv]);
         if ( hookReturn && hookReturn >= 0 )
         {
             delete context.stopped;
-            delete context.debugFrame;
-            delete context;
+            delete context.stoppedFrame;
             if (FBTrace.DBG_UI_LOOP)
                 FBTrace.sysout("debugger.stop extension vetoed stop with hookReturn "+hookReturn);
 
@@ -261,28 +260,28 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
 
     stepOver: function(context)
     {
-        if (!context.debugFrame || !context.debugFrame.isValid)
+        if (!context.stoppedFrame || !context.stoppedFrame.isValid)
             return;
 
-        fbs.step(STEP_OVER, context.debugFrame, this);
+        fbs.step(STEP_OVER, context.stoppedFrame, this);
         this.resume(context);
     },
 
     stepInto: function(context)
     {
-        if (!context.debugFrame || !context.debugFrame.isValid)
+        if (!context.stoppedFrame || !context.stoppedFrame.isValid)
             return;
 
-        fbs.step(STEP_INTO, context.debugFrame, this);
+        fbs.step(STEP_INTO, context.stoppedFrame, this);
         this.resume(context);
     },
 
     stepOut: function(context)
     {
-        if (!context.debugFrame || !context.debugFrame.isValid)
+        if (!context.stoppedFrame || !context.stoppedFrame.isValid)
             return;
 
-        fbs.step(STEP_OUT, context.debugFrame);
+        fbs.step(STEP_OUT, context.stoppedFrame);
         this.resume(context);
     },
 
@@ -303,10 +302,10 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
         if (FBTrace.DBG_UI_LOOP)
             FBTrace.sysout("runUntil "+lineNo+" @"+sourceFile);
 
-        if (!context.debugFrame || !context.debugFrame.isValid)
+        if (!context.stoppedFrame || !context.stoppedFrame.isValid)
             return;
 
-        fbs.runUntil(sourceFile, lineNo, context.debugFrame, this);
+        fbs.runUntil(sourceFile, lineNo, context.stoppedFrame, this);
         this.resume(context);
     },
 
@@ -314,7 +313,7 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
 
     freeze: function(context)
     {
-        var executionContext = context.debugFrame.executionContext;
+        var executionContext = context.stoppedFrame.executionContext;
         try {
             executionContext.scriptsEnabled = false;
             this.suppressEventHandling(context);
@@ -347,7 +346,7 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
             else
                 return; // bail, we did not freeze this context
 
-            var executionContext = context.debugFrame.executionContext;
+            var executionContext = context.stoppedFrame.executionContext;
             if (executionContext.isValid)
             {
                 this.unsuppressEventHandling(context);
@@ -380,9 +379,9 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
         {
             Firebug.Debugger.halt(function grabContext(frame)
             {
-                context.debugFrame = frame;
+                context.stoppedFrame = frame;
                 Firebug.Debugger.doToggleFreezeWindow(context);
-                delete context.debugFrame;
+                delete context.stoppedFrame;
             });
 
             Firebug.Debugger.toggleReportTopLevel(context);
@@ -651,14 +650,12 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
 
             fbs.lockDebugger();
 
-            context.currentFrame = context.debugFrame;
-
-            context.executingSourceFile = Firebug.SourceFile.getSourceFileByScript(context, context.currentFrame.script);
+            context.executingSourceFile = Firebug.SourceFile.getSourceFileByScript(context, context.stoppedFrame.script);
 
             if (!context.executingSourceFile)  // bail out, we don't want the user stuck in debug with out source.
             {
                 if (FBTrace.DBG_UI_LOOP)
-                    FBTrace.sysout("startDebugging resuming, no sourceFile for "+context.debugFrame.script.fileName, context.debugFrame.script.functionSource);
+                    FBTrace.sysout("startDebugging resuming, no sourceFile for "+context.stoppedFrame.script.fileName, context.stoppedFrame.script.functionSource);
                 this.resume(context);
                 return;
             }
@@ -684,7 +681,7 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
             var panel = context.getPanel("script", true);
             Firebug.Breakpoint.updatePanelTab(panel, false);
 
-            Firebug.chrome.select(context.currentFrame, "script", null, true);
+            Firebug.chrome.select(context.stoppedFrame, "script", null, true);
             Firebug.chrome.focus();
         }
         catch(exc)
@@ -716,8 +713,7 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
             if (context && context.window && !context.aborted)
             {
                 delete context.stopped;
-                delete context.debugFrame;
-                delete context.currentFrame;
+                delete context.stoppedFrame;
 
                 var chrome = Firebug.chrome;
 
@@ -2445,11 +2441,10 @@ Firebug.ScriptPanel.prototype = extend(Firebug.SourceBoxPanel,
             return;
         }
 
-        this.context.currentFrame = frame;
-        var sourceFile = Firebug.SourceFile.getSourceFileByScript(this.context, this.context.currentFrame.script);
+        var sourceFile = Firebug.SourceFile.getSourceFileByScript(this.context, frame.script);
         if (!sourceFile)
         {
-            if (FBTrace.DBG_STACK) FBTrace.sysout("showStackFrame no sourceFile in context "+this.context.getName()+"for currentFrame.script: "+frame.script.fileName);
+            if (FBTrace.DBG_STACK) FBTrace.sysout("showStackFrame no sourceFile in context "+this.context.getName()+"for frame.script: "+frame.script.fileName);
             this.showNoStackFrame()
             return;
         }
@@ -3253,7 +3248,7 @@ Firebug.ScriptPanel.prototype = extend(Firebug.SourceBoxPanel,
 
     showInfoTip: function(infoTip, target, x, y, rangeParent, rangeOffset)
     {
-        var frame = this.context.currentFrame;
+        var frame = this.context.stoppedFrame;
         if (!frame)
             return;
 
@@ -3278,7 +3273,7 @@ Firebug.ScriptPanel.prototype = extend(Firebug.SourceBoxPanel,
 
     getObjectPath: function(frame)
     {
-        frame = this.context.debugFrame;
+        frame = this.context.stoppedFrame;
 
         if (FBTrace.DBG_STACK)
             FBTrace.sysout("debugger.getObjectPath "+((frame && frame.isValid)?"frame is good":(frame?"frame invalid":"no frame"))+" selection: "+this.selection, this.selection);
