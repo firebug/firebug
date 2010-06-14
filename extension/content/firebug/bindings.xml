@@ -1090,6 +1090,21 @@
         	]]>
         	</body>
         </method>
+
+        <method name="onClick">
+            <parameter name="event"/>
+            <body><![CDATA[
+            //https://developer.mozilla.org/en/XUL/arrowscrollbox
+            	var scrollbutton = event.originalTarget;
+            	 var anonid = scrollbutton.getAttribute("anonid");
+            	 if (anonid == 'scrollbutton-up')
+            	    scrollbutton.parentNode.scrollByIndex(-15);
+            	 if (anonid == 'scrollbutton-down')
+            	    scrollbutton.parentNode.scrollByIndex(+15);
+            ]]>
+            </body>
+        </method>
+
     </implementation>
 
     <handlers>
@@ -1184,6 +1199,8 @@
             this.filterString = "";
             this.onkeypress = FBL.bind(this.onKeyPress, this);
             window.addEventListener("keypress", this.onkeypress, true);
+            this.onclick = FBL.bind(this.onClick, this);
+            this.popup.addEventListener("click", this.onclick, true);
         ]]></handler>
 
         <handler event="popuphidden"><![CDATA[

@@ -222,15 +222,33 @@ panelTab[selected="true"]:hover > panelTabMenu .menuTarget {
 
 .autorepeatbutton-up,
 .scrollbutton-up {
-	background-color: #FF9933;  /* Firebug orange */
-	padding: 5px;
+	/* background-color: #FF9933;  Firebug orange */
+	padding: 3px;
 	}
 
 .autorepeatbutton-down,
 .scrollbutton-down {
-	background-color: #FF9933;  /* Firebug orange */
-	padding: 5px;
+	/* background-color: #FF9933;  Firebug orange */
+	padding: 3px;
 	}
+
+.autorepeatbutton-up[disabled="true"],
+	.scrollbutton-up[disabled="true"] {
+	list-style-image: url("chrome://firebug/skin/nav-up-disabled.png");
+}
+.autorepeatbutton-down[disabled="true"],
+	.scrollbutton-down[disabled="true"] {
+	list-style-image: url("chrome://firebug/skin/nav-down-disabled.png");
+}
+.autorepeatbutton-up,
+	.scrollbutton-up {
+	list-style-image: url("chrome://firebug/skin/nav-up.png");
+}
+.autorepeatbutton-down,
+	.scrollbutton-down {
+	list-style-image: url("chrome://firebug/skin/nav-down.png");
+}
+
 /************************************************************************************************/
 /* Quick Info Box */
 
