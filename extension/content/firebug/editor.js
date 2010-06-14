@@ -743,16 +743,14 @@ Firebug.InlineEditor.prototype = domplate(Firebug.BaseEditor,
             Firebug.Editor.tabNextEditor();
             cancelEvent(event);
         }
+        else if (this.numeric && event.charCode && (event.charCode < 48 || event.charCode > 57) && event.charCode != 45 && event.charCode != 46)
+        {
+            FBL.cancelEvent(event);
+        }
         else
         {
-            if (this.numeric && event.charCode && (event.charCode < 48 || event.charCode > 57)
-                && event.charCode != 45 && event.charCode != 46)
-                FBL.cancelEvent(event);
-            else
-            {
-                // If the user backspaces, don't autocomplete after the upcoming input event
-                this.ignoreNextInput = event.keyCode == 8;
-            }
+            // If the user backspaces, don't autocomplete after the upcoming input event
+            this.ignoreNextInput = event.keyCode == 8;
         }
     },
 
