@@ -916,6 +916,9 @@ var fbs =
 
         dispatch(clients, "onJSDActivate", [active, "fbs enableDebugger"]);
         this.hookScripts();
+
+        if (FBTrace.DBG_ACTIVATION)
+        	FBTrace.sysout("enableDebugger with active "+active);
     },
 
     obeyPrefs: function()

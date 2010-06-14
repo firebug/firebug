@@ -2936,7 +2936,7 @@ this.sourceFilesAsArray = function(sourceFileMap)
     var sourceFiles = [];
     for (var url in sourceFileMap)
         sourceFiles.push(sourceFileMap[url]);
-    if (FBTrace.DBG_SOURCEFILES) FBTrace.sysout("sourceFilesAsArray sourcefiles="+sourceFiles.length+"\n");
+    if (FBTrace.DBG_SOURCEFILES) FBTrace.sysout("sourceFilesAsArray sourcefiles="+sourceFiles.length, sourceFiles);
     return sourceFiles;
 };
 

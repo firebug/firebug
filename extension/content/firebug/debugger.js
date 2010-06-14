@@ -1915,6 +1915,7 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
         Firebug.ActivableModule.initializeUI.apply(this, arguments);
         this.filterButton = $("fbScriptFilterMenu");
         this.filterMenuUpdate();
+        Firebug.setIsJSDActive(fbs.isJSDActive()); // jsd may be active before this XUL window was opened
     },
 
     initContext: function(context, persistedState)
@@ -2159,7 +2160,7 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
         if (FBTrace.DBG_PANELS || FBTrace.DBG_ACTIVATION)
             FBTrace.sysout("debugger.deactivate");
 
-        this.clearAllBreakpoints();
+        // this.clearAllBreakpoints();  //XXXjjb I don't think we want to clear breakpoints here, just turn off jsd if no registered debuggers
     },
 
     onDependentModuleChange: function(dependentAddedOrRemoved)
@@ -3074,6 +3075,16 @@ Firebug.ScriptPanel.prototype = extend(Firebug.SourceBoxPanel,
 
         var allSources = sourceFilesAsArray(context.sourceFileMap);
 
+        if (!allSources.length)
+        {
+        	var noJSURL = "firebug:// Warning. No Javascript on this page";
+            var dummySourceFile = new Firebug.NoScriptSourceFile(context, noJSURL);
+            context.sourceCache.store(noJSURL, 'If <script> tags have a \"type\" attribute it should equal \"text/javascript\"" or \"application/javascript\"');
+            context.addSourceFile(dummySourceFile);
+            allSources = sourceFilesAsArray(context.sourceFileMap);
+            return allSources;
+        }
+
         if (Firebug.showAllSourceFiles)
         {
             if (FBTrace.DBG_SOURCEFILES) FBTrace.sysout("debugger getLocationList "+context.getName()+" allSources", allSources);
@@ -3091,7 +3102,15 @@ Firebug.ScriptPanel.prototype = extend(Firebug.SourceBoxPanel,
                 list.push(allSources[i]);
         }
 
-        if (FBTrace.DBG_SOURCEFILES) FBTrace.sysout("debugger.getLocationList enabledOnLoad:"+context.onLoadWindowContent+" all:"+allSources.length+" filtered:"+list.length, list);
+        if (!list.length && allSources.length)
+        {
+        	var allFilteredURL = "firebug:// Warning. All scripts were filtered";
+            var dummySourceFile = new Firebug.NoScriptSourceFile(context, allFilteredURL);
+            context.sourceCache.store(allFilteredURL, 'see Show Chrome Sources Option');
+            context.addSourceFile(dummySourceFile);
+        }
+        if (FBTrace.DBG_SOURCEFILES)
+        	FBTrace.sysout("debugger.getLocationList enabledOnLoad:"+context.onLoadWindowContent+" all:"+allSources.length+" filtered:"+list.length, list);
         return list;
     },
 
