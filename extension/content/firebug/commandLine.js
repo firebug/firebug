@@ -104,13 +104,13 @@ Firebug.CommandLine = extend(Firebug.Module,
         var element = Firebug.Console.getFirebugConsoleElement(context, win);
         if (element)
         {
-            var attached = element.getAttribute("firebugCommandLineAttached");
+            var attached = element.getAttribute("firebug-CommandLineAttached");
             if (!attached)
             {
                 FBTrace.sysout("Firebug console element does not have command line attached " +
                     "its too early for command line", element);
 
-                Firebug.Console.logFormatted(["Firebug cannot find firebugCommandLineAttached " +
+                Firebug.Console.logFormatted(["Firebug cannot find firebug-CommandLineAttached " +
                     "attribute on firebug console element, its too early for command line",
                     element, win], context, "error", true);
                 return;
@@ -125,11 +125,11 @@ Firebug.CommandLine = extend(Firebug.Module,
 
         var event = document.createEvent("Events");
         event.initEvent("firebugCommandLine", true, false);
-        element.setAttribute("methodName", "evaluate");
+        element.setAttribute("firebug-methodName", "evaluate");
 
         expr = expr.toString();
         expr = "with(_FirebugCommandLine){" + expr + "\n};";
-        element.setAttribute("expr", expr);
+        element.setAttribute("firebug-expr", expr);
 
         if (!context.activeConsoleHandlers)
         {
@@ -780,7 +780,7 @@ Firebug.CommandLine.CommandHandler = extend(Object,
     handle: function(event, api, win)
     {
         var element = event.target;
-        var methodName = element.getAttribute("methodName");
+        var methodName = element.getAttribute("firebug-methodName");
 
         var hosed_userObjects = (win.wrappedJSObject?win.wrappedJSObject:win)._firebug.userObjects;
 
@@ -799,13 +799,13 @@ Firebug.CommandLine.CommandHandler = extend(Object,
         if (!subHandler)
             return false;
 
-        element.removeAttribute("retValueType");
+        element.removeAttribute("firebug-retValueType");
         var result = subHandler.apply(api, userObjects);
         if (typeof result != "undefined")
         {
             if (result instanceof Array)
             {
-                element.setAttribute("retValueType", "array");
+                element.setAttribute("firebug-retValueType", "array");
                 for (var item in result)
                     hosed_userObjects.push(result[item]);
             }
@@ -1108,7 +1108,7 @@ Firebug.CommandLine.injector = {
         {
             // If the command line is already attached then end.
             var element = Firebug.Console.getFirebugConsoleElement(context, win);
-            if (element.getAttribute("firebugCommandLineListener") === "true")
+            if (element.getAttribute("firebug-CommandLineListener") === "true")
                 return;
 
             var doc = win.document;
@@ -1169,7 +1169,7 @@ Firebug.CommandLine.injector = {
         context.activeCommandLineHandlers[win] = boundHandler;
 
         element.addEventListener("firebugExecuteCommand", boundHandler, true);
-        element.setAttribute("firebugCommandLineListener", "true");
+        element.setAttribute("firebug-CommandLineListener", "true");
 
         if (FBTrace.DBG_COMMANDLINE)
             FBTrace.sysout("commandLine.addCommandLineListener to "+ element.tagName +" in window"+win.location+" with console ", win.console);
@@ -1181,7 +1181,7 @@ Firebug.CommandLine.injector = {
             win = win.wrappedJSObject;
 
         var element = Firebug.Console.getFirebugConsoleElement(context, win);
-        if (element.getAttribute("firebugCommandLineListener") === "true")
+        if (element.getAttribute("firebug-CommandLineListener") === "true")
         {
             Firebug.CommandLine.evaluate("window._FirebugCommandLine.detachCommandLine()", context);
             if (context.activeCommandLineHandlers)
@@ -1191,7 +1191,7 @@ Firebug.CommandLine.injector = {
                     element.removeEventListener("firebugExecuteCommand", boundHandler, true);
             }
 
-            element.removeAttribute("firebugCommandLineListener");
+            element.removeAttribute("firebug-CommandLineListener");
             if (FBTrace.DBG_COMMANDLINE)
                 FBTrace.sysout("commandLine.detachCommandLineListener "+boundHandler+" from element in window with console "+win.location);
         }
@@ -1226,12 +1226,12 @@ function CommandLineHandler(context, win)
 
         if (!Firebug.CommandLine.CommandHandler.handle(event, this.api, win))
         {
-            var methodName = event.target.getAttribute("methodName");
+            var methodName = event.target.getAttribute("firebug-methodName");
             Firebug.Console.log($STRF("commandline.MethodNotSupported", [methodName]));
         }
 
         if (FBTrace.DBG_COMMANDLINE)
-            FBTrace.sysout("commandLine.handleEvent() "+event.target.getAttribute("methodName")+
+            FBTrace.sysout("commandLine.handleEvent() "+event.target.getAttribute("firebug-methodName")+
                 " context.baseWindow: "+(context.baseWindow?context.baseWindow.location:"no basewindow"),
                 context.baseWindow);
     };

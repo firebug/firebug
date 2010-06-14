@@ -42,7 +42,7 @@ function _FirebugConsole()
             window._firebug.userObjects.push(objs[i]);
 
         var length = window._firebug.userObjects.length;
-        element.setAttribute("methodName", methodName);
+        element.setAttribute("firebug-methodName", methodName);
 
         // DBG element.setAttribute("uid", this.uid);
 
@@ -59,7 +59,7 @@ function _FirebugConsole()
         // DBG dump("FirebugConsole dispatched event "+methodName+" via "+eventID+" with "+length+ " user objects, [0]:"+this.userObjects[0]+"\n");
 
         var result;
-        if (element.getAttribute("retValueType") == "array")
+        if (element.getAttribute("firebug-retValueType") == "array")
             result = [];
 
         if (!result && this.userObjects.length == length+1)
@@ -82,7 +82,7 @@ function _FirebugConsole()
     // Console API
 
     this.__defineGetter__("firebug", function firebug() {
-        return this.getFirebugElement().getAttribute("FirebugVersion");
+        return this.getFirebugElement().getAttribute("firebug-Version");
     });
 }
 

@@ -139,7 +139,7 @@ Firebug.Console = extend(ActivableConsole,
         return element;
 
         // The rest of this code may be needed for the case where we have no JS but want to use the command line?
-        if (!element.getAttribute("FirebugVersion"))
+        if (!element.getAttribute("firebug-Version"))
         {
             if (FBTrace.DBG_CONSOLE)
                 FBTrace.sysout("getFirebugConsoleElement forcing element");

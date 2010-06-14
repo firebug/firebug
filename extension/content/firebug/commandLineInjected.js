@@ -58,13 +58,13 @@ var _FirebugCommandLine =
         {
             // DBG window.dump("attachCommandLine firebugCommandLine "+window.location+"\n");
             var element = event.target;
-            var expr = element.getAttribute("expr"); // see commandLine.js
+            var expr = element.getAttribute("firebug-expr"); // see commandLine.js
             self.evaluate(expr);
             // DBG window.dump("attachCommandLine did evaluate on "+expr+"\n");
         }
 
         element.addEventListener("firebugCommandLine",this._firebugEvalEvent, true);
-        element.setAttribute("firebugCommandLineAttached", "true");
+        element.setAttribute("firebug-CommandLineAttached", "true");
         // DBG window.dump("Added listener for firebugCommandLine event "+window.location+"\n");
     },
 

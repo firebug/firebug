@@ -133,7 +133,7 @@ top.Firebug.Console.injector =
         // We need the element to attach our event listener.
         var element = Firebug.Console.getFirebugConsoleElement(context, win);
         if (element)
-            element.setAttribute("FirebugVersion", Firebug.version); // Initialize Firebug version.
+            element.setAttribute("firebug-Version", Firebug.version); // Initialize Firebug version.
         else
             return false;
 
@@ -194,13 +194,13 @@ function createConsoleHandler(context, win)
     handler.handleEvent = function(event)
     {
         if (FBTrace.DBG_CONSOLE)
-            FBTrace.sysout("FirebugConsoleHandler("+this.handler_name+") "+event.target.getAttribute("methodName")+", event", event);
+            FBTrace.sysout("FirebugConsoleHandler("+this.handler_name+") "+event.target.getAttribute("firebug-methodName")+", event", event);
         if (!Firebug.CommandLine.CommandHandler.handle(event, this.console, win))
         {
             if (FBTrace.DBG_CONSOLE)
                 FBTrace.sysout("FirebugConsoleHandler", this);
 
-            var methodName = event.target.getAttribute("methodName");
+            var methodName = event.target.getAttribute("firebug-methodName");
             Firebug.Console.log($STRF("console.MethodNotSupported", [methodName]));
         }
     };
@@ -210,7 +210,7 @@ function createConsoleHandler(context, win)
     handler.init = function()
     {
         var consoleElement = win.document.getElementById('_firebugConsole');
-        consoleElement.setAttribute("FirebugVersion", Firebug.version);
+        consoleElement.setAttribute("firebug-Version", Firebug.version);
     };
 
     handler.setEvaluatedCallback = function( fnOfResult )
