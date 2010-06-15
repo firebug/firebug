@@ -183,7 +183,13 @@ FirebugReps.Table = domplate(Firebug.Rep,
         try
         {
             this.columns = columns;
-            Firebug.Console.log({data: data, columns: columns}, context, "table", this, true);
+            var row = Firebug.Console.log({data: data, columns: columns}, context, "table", this, true);
+
+            // Set vertical height for scroll bar.
+            var tBody = row.querySelector(".profileTbody");
+            var maxHeight = Firebug.tabularLogMaxHeight;
+            if (maxHeight > 0 && tBody.clientHeight > maxHeight)
+                tBody.style.height = maxHeight + "px";
         }
         catch (err)
         {
