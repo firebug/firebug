@@ -28,7 +28,7 @@ function _FirebugConsole()
         window._firebug.notifyFirebug(arguments, 'error', 'firebugAppendConsole');
         delete window.top._firebugStackTrace;
     }
-    /* DBG */ this.uid = Math.random();
+    // DBG this.uid = Math.random();
 
     this.notifyFirebug = function notifyFirebug(objs, methodName, eventID)
     {
@@ -42,19 +42,19 @@ function _FirebugConsole()
         var length = window._firebug.userObjects.length;
         window.document.setUserData("firebug-methodName", methodName, null);
 
-        /* DBG */ document.setUserData("uid", this.uid, null);
+        // DBG document.setUserData("uid", this.uid, null);
 
-        /* DBG */ if (length > 0)
-        /* DBG */     document.setUserData("checkUserObjects", this.userObjects[0].toString(), null);
-        /* DBG */ else
-        /* DBG */     document.setUserData("checkUserObjects", "no userObjects", null);
+        // DBG if (length > 0)
+        // DBG     document.setUserData("checkUserObjects", this.userObjects[0].toString(), null);
+        // DBG else
+        // DBG     document.setUserData("checkUserObjects", "no userObjects", null);
 
-        /* DBG */ dump("FirebugConsole("+this.uid+") dispatching event "+methodName+" via "+eventID+" with "+length+ " user objects, [0]:"+this.userObjects[0]+"\n");
+        // DBG dump("FirebugConsole("+this.uid+") dispatching event "+methodName+" via "+eventID+" with "+length+ " user objects, [0]:"+this.userObjects[0]+"\n");
         //debugger;
 
         document.dispatchEvent(event);
 
-        /* DBG */ dump("FirebugConsole dispatched event "+methodName+" via "+eventID+" with "+length+ " user objects, [0]:"+this.userObjects[0]+"\n");
+        // DBG dump("FirebugConsole dispatched event "+methodName+" via "+eventID+" with "+length+ " user objects, [0]:"+this.userObjects[0]+"\n");
 
         var result;
         if (document.getUserData("firebug-retValueType") == "array")
