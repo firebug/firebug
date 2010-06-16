@@ -392,7 +392,6 @@ var SpyHttpActivityObserver = extend(Firebug.NetMonitor.NetHttpActivityObserver,
         if (!win)
         {
             var index = this.activeRequests.indexOf(request);
-            var index = activeRequests.indexOf(httpChannel);
             if (index == -1)
                 return;
 
