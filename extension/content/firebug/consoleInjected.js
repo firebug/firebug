@@ -28,12 +28,10 @@ function _FirebugConsole()
         window._firebug.notifyFirebug(arguments, 'error', 'firebugAppendConsole');
         delete window.top._firebugStackTrace;
     }
-    // DBG this.uid = Math.random();
+    /* DBG */ this.uid = Math.random();
 
     this.notifyFirebug = function notifyFirebug(objs, methodName, eventID)
     {
-        var element = this.getFirebugElement();
-
         var event = document.createEvent("Events");
         event.initEvent(eventID, true, false);
 
@@ -42,24 +40,24 @@ function _FirebugConsole()
             window._firebug.userObjects.push(objs[i]);
 
         var length = window._firebug.userObjects.length;
-        element.setAttribute("firebug-methodName", methodName);
+        window.document.setUserData("firebug-methodName", methodName, null);
 
-        // DBG element.setAttribute("uid", this.uid);
+        /* DBG */ document.setUserData("uid", this.uid, null);
 
-        // DBG if (length > 0)
-        // DBG     element.setAttribute("checkUserObjects", this.userObjects[0].toString());
-        // DBG else
-        // DBG     element.setAttribute("checkUserObjects", "no userObjects");
+        /* DBG */ if (length > 0)
+        /* DBG */     document.setUserData("checkUserObjects", this.userObjects[0].toString(), null);
+        /* DBG */ else
+        /* DBG */     document.setUserData("checkUserObjects", "no userObjects", null);
 
-        // DBG dump("FirebugConsole("+this.uid+") dispatching event "+methodName+" via "+eventID+" with "+length+ " user objects, [0]:"+this.userObjects[0]+"\n");
+        /* DBG */ dump("FirebugConsole("+this.uid+") dispatching event "+methodName+" via "+eventID+" with "+length+ " user objects, [0]:"+this.userObjects[0]+"\n");
         //debugger;
 
-        element.dispatchEvent(event);
+        document.dispatchEvent(event);
 
-        // DBG dump("FirebugConsole dispatched event "+methodName+" via "+eventID+" with "+length+ " user objects, [0]:"+this.userObjects[0]+"\n");
+        /* DBG */ dump("FirebugConsole dispatched event "+methodName+" via "+eventID+" with "+length+ " user objects, [0]:"+this.userObjects[0]+"\n");
 
         var result;
-        if (element.getAttribute("firebug-retValueType") == "array")
+        if (document.getUserData("firebug-retValueType") == "array")
             result = [];
 
         if (!result && this.userObjects.length == length+1)
@@ -71,31 +69,12 @@ function _FirebugConsole()
         return result;
     };
 
-    this.getFirebugElement = function getFirebugElement()
-    {
-        if (!this.element)
-            this.element = window._getFirebugConsoleElement();
-        return this.element;
-    },
-
     // ***********************************************************************
     // Console API
 
     this.__defineGetter__("firebug", function firebug() {
-        return this.getFirebugElement().getAttribute("firebug-Version");
+        return document.getUserData("firebug-Version");
     });
 }
 
-window._getFirebugConsoleElement = function _getFirebugConsoleElement()
-{
-    var element = document.body ? document.body : document.getElementsByTagName("body")[0];
-    if (!element)
-    {
-        var maybeHTML = document.documentElement ? document.documentElement.tagName : "null";
-        if (!maybeHTML || maybeHTML.toLowerCase() !== "html")
-            element = document.documentElement;  // For non-HTML docs
-        // else no body has been added yet
-    }
 
-    return element;
-};

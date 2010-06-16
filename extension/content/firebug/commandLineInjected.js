@@ -51,32 +51,29 @@ var _FirebugCommandLine =
             // DBG     debugger;
             window.loadFirebugConsole();
         }
-        var element = window.console.getFirebugElement();
         var self = this;
 
         this._firebugEvalEvent = function _firebugEvalEvent(event)
         {
             // DBG window.dump("attachCommandLine firebugCommandLine "+window.location+"\n");
-            var element = event.target;
-            var expr = element.getAttribute("firebug-expr"); // see commandLine.js
+            var expr = document.getUserData("firebug-expr"); // see commandLine.js
             self.evaluate(expr);
             // DBG window.dump("attachCommandLine did evaluate on "+expr+"\n");
         }
 
-        element.addEventListener("firebugCommandLine",this._firebugEvalEvent, true);
-        element.setAttribute("firebug-CommandLineAttached", "true");
+        document.addEventListener("firebugCommandLine",this._firebugEvalEvent, true);
+        document.setUserData("firebug-CommandLineAttached", "true", null);
         // DBG window.dump("Added listener for firebugCommandLine event "+window.location+"\n");
     },
 
     detachCommandLine: function()
     {
-         var element = window.console.getFirebugElement();
-         element.removeEventListener("firebugCommandLine", this._firebugEvalEvent, true);
+         document.removeEventListener("firebugCommandLine", this._firebugEvalEvent, true);
          delete window._FirebugCommandLine; // suicide!
          // DBG window.dump("detachCommmandLine<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<\n")
     },
 
-    evaluate: function(expr)
+    evaluate: function _firebugInjectedEvaluate(expr)
     {
         try
         {
@@ -98,19 +95,7 @@ var _FirebugCommandLine =
     try
     {
         // DBG window.dump("_FirebugCommandLine init console is "+window.console+" in "+window.location+"\n");
-        var element = window.console.getFirebugElement();
-        if (element)
-        {
-            _FirebugCommandLine.initFirebugCommandLine();
-        }
-        else
-        {
-            window.addEventListener("DOMContentLoaded", function initAndRemove(event)
-            {
-                _FirebugCommandLine.initFirebugCommandLine();
-                window.removeEventListener("DOMContentLoaded", initAndRemove, true);
-            }, true);
-        }
+        _FirebugCommandLine.initFirebugCommandLine();
     }
     catch(exc)
     {

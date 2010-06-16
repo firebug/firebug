@@ -844,17 +844,15 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
         if (!context)
             return false;
 
-        // Since this is method called a lot make a hacky fast check on _getFirebugConsoleElement
-
-        var win = frameWin.wrappedJSObject ? frameWin.wrappedJSObject : frameWin;
-        if (!win._getFirebugConsoleElement && !context.stopped)
+        if (!context.consoleToken)
         {
+        	var win = frameWin.wrappedJSObject ? frameWin.wrappedJSObject : frameWin;
             this.injectConsole(context, win);
         }
         else
         {
             if (FBTrace.DBG_CONSOLE)
-                FBTrace.sysout("debugger.supportsGlobal frameWin._getFirebugConsoleElement exists", win);
+                FBTrace.sysout("debugger.supportsGlobal consoleToken exists", win);
         }
 
         this.breakContext = context;
@@ -880,19 +878,19 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
             catch(exc)
             {
                 if (FBTrace.DBG_ERRORS)
-                    FBTrace.sysout("debugger.supportsGlobal !frameWin._getFirebugConsoleElement consoleReady FAILS: "+exc, exc);
+                    FBTrace.sysout("debugger.supportsGlobal injectConsole FAILS: "+exc, exc);
             }
             finally
             {
                 fbs.filterConsoleInjections = false;
             }
             if (FBTrace.DBG_CONSOLE)
-                FBTrace.sysout("debugger.supportsGlobal !frameWin._getFirebugConsoleElement consoleReady:"+consoleReady, frameWin);
+                FBTrace.sysout("debugger.supportsGlobal injectConsole consoleReady:"+consoleReady, frameWin);
         }
         else
         {
             if (FBTrace.DBG_CONSOLE)
-                FBTrace.sysout("debugger.supportsGlobal !frameWin._getFirebugConsoleElement console NOT enabled ", frameWin);
+                FBTrace.sysout("debugger.supportsGlobal injectConsole console NOT enabled ", frameWin);
         }
     },
 

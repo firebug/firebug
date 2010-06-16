@@ -130,40 +130,6 @@ Firebug.Console = extend(ActivableConsole,
     {
     },
 
-    getFirebugConsoleElement: function(context, win)
-    {
-        var element = (win.document.body ? win.document.body : win.document.getElementsByTagName("body")[0]);
-        if (!element)
-            element = win.document.documentElement; // For non-HTML docs
-
-        return element;
-
-        // The rest of this code may be needed for the case where we have no JS but want to use the command line?
-        if (!element.getAttribute("firebug-Version"))
-        {
-            if (FBTrace.DBG_CONSOLE)
-                FBTrace.sysout("getFirebugConsoleElement forcing element");
-            var elementForcer = "(function(){var r=null; try { r = window._getFirebugConsoleElement();}catch(exc){r=exc;} return r;})();";  // we could just add the elements here
-
-            if (context.stopped)
-                Firebug.Console.injector.evaluateConsoleScript(context);  // todo evaluate consoleForcer on stack
-            else
-                var r = Firebug.CommandLine.evaluateInWebPage(elementForcer, context, win);
-
-            if (FBTrace.DBG_CONSOLE)
-                FBTrace.sysout("getFirebugConsoleElement forcing element result "+r, r);
-
-            var element = win.document.getElementById("_firebugConsole");
-            if (!element) // elementForce fails
-            {
-                if (FBTrace.DBG_ERRORS) FBTrace.sysout("console.getFirebugConsoleElement: no _firebugConsole in win:", win);
-                Firebug.Console.logFormatted(["Firebug cannot find _firebugConsole element", r, win], context, "error", true);
-            }
-        }
-
-        return element;
-    },
-
     isReadyElsePreparing: function(context, win) // this is the only code that should call injector.attachIfNeeded
     {
         if (FBTrace.DBG_CONSOLE)
