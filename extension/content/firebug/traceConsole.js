@@ -85,7 +85,8 @@ var TraceConsole =
     internationalizeUI: function()
     {
         var buttons = ["clearConsole", "findConsole", "separateConsole",
-            "restartFirefox", "closeFirefox", "saveToFile", "loadFromFile"];
+            "restartFirefox", "closeFirefox", "saveToFile", "loadFromFile",
+            "traceToolsMenu", "clearCache", "forceGC"];
 
         for (var i=0; i<buttons.length; i++)
         {
@@ -360,6 +361,34 @@ var TraceConsole =
     {
         goQuitApplication();
     },
+
+    onClearCache: function()
+    {
+        try
+        {
+            var cache = Cc["@mozilla.org/network/cache-service;1"].getService(Ci.nsICacheService);
+            cache.evictEntries(Ci.nsICache.STORE_ON_DISK);
+            cache.evictEntries(Ci.nsICache.STORE_IN_MEMORY);
+        }
+        catch(exc)
+        {
+            if (FBTrace.DBG_ERRORS)
+                FBTrace.sysout("traceConsole.onClearCache EXCEPTION " + exc, exc);
+        }
+    },
+
+    onForceGC: function()
+    {
+        try
+        {
+            FBL.jsd.GC();
+        }
+        catch(exc)
+        {
+            if (FBTrace.DBG_ERRORS)
+                FBTrace.sysout("traceConsole.onForceGC EXCEPTION " + exc, exc);
+        }
+    }
 };
 
 // ************************************************************************************************

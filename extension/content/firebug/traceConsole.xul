@@ -44,6 +44,8 @@
     <command id="cmd_exitFirefox" oncommand="TraceConsole.onExitFirefox();"/>
     <command id="cmd_restartFirefox" oncommand="TraceConsole.onRestartFirefox();"/>
     <command id="cmd_copy" oncommand="goDoCommand('cmd_copy')" disabled="true"/>
+    <command id="cmd_clearCache" oncommand="TraceConsole.onClearCache()"/>
+    <command id="cmd_forceGC" oncommand="TraceConsole.onForceGC()"/>
   </commandset>
 
   <keyset id="mainKeyset">
@@ -69,14 +71,31 @@
         label="tracing.cmd.Bookmark" class="toolbar-image-button"
         tooltiptext="tracing.cmd.tip.Bookmark"
         command="cmd_separateConsole"/>
-      <toolbarbutton id="saveToFile"
-        label="tracing.cmd.Save" class="toolbar-image-button"
-        tooltiptext="tracing.cmd.tip.Save"
-        command="cmd_saveToFile"/>
-      <toolbarbutton id="loadFromFile"
-        label="tracing.cmd.Load" class="toolbar-image-button"
-        tooltiptext="tracing.cmd.tip.Load"
-        command="cmd_loadFromFile"/>
+      <toolbarbutton id="traceToolsMenu"
+        class="toolbar-text-button fbmenubutton"
+        label="tracing.cmd.Tools"
+        tooltiptext="tracing.cmd.tip.Tools"
+        type="menu">
+            <menupopup>
+                <menuitem id="saveToFile"
+                    label="tracing.cmd.Save" class="toolbar-image-button"
+                    tooltiptext="tracing.cmd.tip.Save"
+                    command="cmd_saveToFile"/>
+                <menuitem id="loadFromFile"
+                    label="tracing.cmd.Load" class="toolbar-image-button"
+                    tooltiptext="tracing.cmd.tip.Load"
+                    command="cmd_loadFromFile"/>
+                <menuseparator />
+                <menuitem id="clearCache"
+                    label="tracing.cmd.Clear Browser Cache" class="toolbar-image-button"
+                    tooltiptext="tracing.cmd.tip.Clear Browser Cache"
+                    command="cmd_clearCache"/>
+                <menuitem id="forceGC"
+                    label="tracing.cmd.Force Garbage Collector" class="toolbar-image-button"
+                    tooltiptext="tracing.cmd.tip.Force Garbage Collector"
+                    command="cmd_forceGC"/>
+            </menupopup>
+      </toolbarbutton>
       <toolbarseparator flex="1"/>
       <toolbarbutton id="restartFirefox"
         label="tracing.cmd.Restart" class="toolbar-image-button"

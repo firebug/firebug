@@ -5,7 +5,7 @@
  */
 FBL.ns(function() { with (FBL) {
 
-// ***********************************************************************************
+// ************************************************************************************************
 // Shorcuts and Services
 
 const Cc = Components.classes;
@@ -25,7 +25,7 @@ var EOF = "<br/>";
 // Register locale file with strings for the Tracing Console window.
 Firebug.registerStringBundle("chrome://firebug/locale/firebug-tracing.properties");
 
-//************************************************************************************************
+// ************************************************************************************************
 //  The controller for the prefDomain Model.
 //  getOptionsMenuItems to create View, onPrefChangeHandler for View update
 //  base for trace viewers like tracePanel and traceConsole
@@ -75,7 +75,8 @@ Firebug.TraceOptionsController = function(prefDomain, onPrefChangeHandler)
         }
     };
 
-//*************** UI ***************************************************************
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+    // UI
 
     this.getOptionsMenuItems = function()  // Firebug menu items from option map
     {
@@ -103,7 +104,8 @@ Firebug.TraceOptionsController = function(prefDomain, onPrefChangeHandler)
             catch (err)
             {
                 if (FBTrace.DBG_ERRORS)
-                    FBTrace.sysout("traceModule.getOptionsMenuItems could not create item for "+p+" in prefDomain "+this.prefDomain);
+                    FBTrace.sysout("traceModule.getOptionsMenuItems could not create item for "+p+
+                        " in prefDomain "+this.prefDomain);
                 // if the option doesn't exist in this prefDomain, just continue...
             }
         }
@@ -160,7 +162,7 @@ Firebug.TraceOptionsController = function(prefDomain, onPrefChangeHandler)
 
 };
 
-// ***********************************************************************************
+// ************************************************************************************************
 // Trace Module
 
 Firebug.TraceModule = extend(Firebug.Module,
@@ -180,7 +182,8 @@ Firebug.TraceModule = extend(Firebug.Module,
             this.openConsole();
 
         if (FBTrace.DBG_OPTIONS)
-            FBTrace.sysout("traceModule.initialize: " + prefDomain+" alwayOpen:"+Firebug.getPref(this.prefDomain, "alwaysOpenTraceConsole"));
+            FBTrace.sysout("traceModule.initialize: " + prefDomain+" alwayOpen:"+
+                Firebug.getPref(this.prefDomain, "alwaysOpenTraceConsole"));
     },
 
     internationalizeUI: function(doc)
@@ -356,8 +359,8 @@ Firebug.TraceModule.CommonBaseUI = {
 };
 
 
-//************************************************************************************************
-//Trace Console Rep
+// ************************************************************************************************
+// Trace Console Rep
 
 Firebug.TraceModule.PanelTemplate = domplate({
 
@@ -1811,5 +1814,4 @@ Firebug.registerModule(Firebug.TraceModule);
 Firebug.registerRep(Firebug.TraceModule.MessageTemplate);
 
 // ************************************************************************************************
-
 }});
