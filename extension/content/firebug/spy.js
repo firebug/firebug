@@ -387,10 +387,15 @@ var SpyHttpActivityObserver = extend(Firebug.NetMonitor.NetHttpActivityObserver,
             activitySubtype != Ci.nsISocketTransport.STATUS_RECEIVING_FROM))
             return;
 
+        // xxxHonza: this code is duplicated in net.js, it should be refactored.
         var win = getWindowForRequest(request);
         if (!win)
         {
             var index = this.activeRequests.indexOf(request);
+            var index = activeRequests.indexOf(httpChannel);
+            if (index == -1)
+                return;
+
             if (!(win = this.activeRequests[index+1]))
                 return;
         }

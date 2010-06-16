@@ -4966,6 +4966,9 @@ Firebug.NetMonitor.NetHttpActivityObserver =
         if (!win)
         {
             var index = activeRequests.indexOf(httpChannel);
+            if (index == -1)
+                return;
+
             if (!(win = activeRequests[index+1]))
                 return;
         }
