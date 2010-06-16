@@ -1219,7 +1219,7 @@ Firebug.DOMBasePanel.prototype = extend(Firebug.Panel,
 
             items.push(
                 "-",
-                {label: "Copy Name",  // xxxJJB internationalize 
+                {label: "Copy Name",  // xxxJJB internationalize
                     command: bindFixed(this.copyName, this, row) },
                 {label: "Copy Path",
                     command: bindFixed(this.copyPath, this, row) }
@@ -1921,7 +1921,7 @@ Firebug.DOMModule.BreakpointRep = domplate(Firebug.Rep,
 
     getObjectTag: function(object)
     {
-        var rep = Firebug.getRep(object);
+        var rep = Firebug.getRep(object, FirebugContext);  // I am uncertain about the FirebugContext but I think we are only here in panel code.
         return rep.shortTag ? rep.shortTag : rep.tag;
     },
 

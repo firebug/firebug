@@ -3,6 +3,7 @@
 var Firebug = null;
 var FirebugContext = null;
 
+/* The 'context' in this file is always 'FirebugContext' */
 
 (function() {
 
@@ -756,7 +757,7 @@ top.FirebugChrome =
                     {
                         var object = path[i];
 
-                        var rep = Firebug.getRep(object);
+                        var rep = Firebug.getRep(object, FirebugContext);
                         var objectTitle = rep.getTitle(object, FirebugContext);
 
                         var title = FBL.cropMultipleLines(objectTitle, statusCropSize);
@@ -1037,9 +1038,9 @@ top.FirebugChrome =
 
         this.contextMenuObject = null;
 
-        var rep = Firebug.getRep(object);
+        var rep = Firebug.getRep(object, FirebugContext);
         var realObject = rep ? rep.getRealObject(object, FirebugContext) : null;
-        var realRep = realObject ? Firebug.getRep(realObject) : null;
+        var realRep = realObject ? Firebug.getRep(realObject, FirebugContext) : null;
 
         if (FBTrace.DBG_OPTIONS)
             FBTrace.sysout("chrome.onContextShowing object:"+object+" rep: "+rep+" realObject: "+realObject+" realRep:"+realRep+"\n");
@@ -1136,7 +1137,7 @@ top.FirebugChrome =
             var panelType = Firebug.panelTypes[i];
             if (!panelType.prototype.parentPanel
                 && panelType.prototype.name != FirebugContext.panelName
-                && panelSupportsObject(panelType, object, typeof object))
+                && panelSupportsObject(panelType, object, FirebugContext))
             {
                 var panelName = panelType.prototype.name;
 
@@ -1181,7 +1182,7 @@ top.FirebugChrome =
         else if (panel)
             object = panel.getTooltipObject(target);
 
-        var rep = object ? Firebug.getRep(object) : null;
+        var rep = object ? Firebug.getRep(object, FirebugContext) : null;
         object = rep ? rep.getRealObject(object, FirebugContext) : null;
         rep = object ? Firebug.getRep(object) : null;
 
@@ -1243,13 +1244,13 @@ top.FirebugChrome =
 // ************************************************************************************************
 // Local Helpers
 
-function panelSupportsObject(panelType, object, type)
+function panelSupportsObject(panelType, object, context)
 {
     if (panelType)
     {
         try {
             // This tends to throw exceptions often because some objects are weird
-            return panelType.prototype.supportsObject(object, type)
+            return panelType.prototype.supportsObject(object, typeof object, context)
         } catch (exc) {}
     }
 
@@ -1265,7 +1266,7 @@ function getBestPanelName(object, context, panelName)
     if (panelName)
     {
         panelType = Firebug.getPanelType(panelName);
-        if (panelSupportsObject(panelType, object, typeof object))
+        if (panelSupportsObject(panelType, object, context))
             return panelType.prototype.name;
     }
 
@@ -1280,7 +1281,7 @@ function getBestPanelName(object, context, panelName)
         var panelType = Firebug.panelTypes[i];
         if (!panelType.prototype.parentPanel)
         {
-            var level = panelSupportsObject(panelType, object, typeof object);
+            var level = panelSupportsObject(panelType, object, context);
             if (!bestLevel || (level && (level > bestLevel) ))
             {
                 bestLevel = level;
@@ -1435,9 +1436,9 @@ function onPanelClick(event)
     if (repNode)
     {
         var object = repNode.repObject;
-        var rep = Firebug.getRep(object);
+        var rep = Firebug.getRep(object, FirebugContext);
         var realObject = rep ? rep.getRealObject(object, FirebugContext) : null;
-        var realRep = realObject ? Firebug.getRep(realObject) : rep;
+        var realRep = realObject ? Firebug.getRep(realObject, FirebugContext) : rep;
         if (!realObject)
             realObject = object;
 
@@ -1497,7 +1498,7 @@ function onMainTabBoxMouseDown(event)
 
 function getRealObject(object)
 {
-    var rep = Firebug.getRep(object);
+    var rep = Firebug.getRep(object, FirebugContext);
     var realObject = rep ? rep.getRealObject(object, FirebugContext) : null;
     return realObject ? realObject : object;
 }

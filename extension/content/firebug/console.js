@@ -404,7 +404,7 @@ Firebug.ConsolePanel.prototype = extend(Firebug.ActivablePanel,
     appendObject: function(object, row, rep)
     {
         if (!rep)
-            rep = Firebug.getRep(object);
+            rep = Firebug.getRep(object, this.context);
 
         // Don't forget to pass the template itself as the 'self' parameter so, it's used
         // by domplate as the 'subject' for the generation. Note that the primary purpose

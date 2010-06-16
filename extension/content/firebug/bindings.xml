@@ -869,7 +869,7 @@
             var object = Firebug.getRepObject(event.target);
             if (object)
             {
-                var rep = Firebug.getRep(object);
+                var rep = Firebug.getRep(object, FirebugContext);
                 object = rep.getRealObject(object, FirebugContext);
                 if (object)
                 {
@@ -883,7 +883,7 @@
             var object = Firebug.getRepObject(event.target);
             if (object)
             {
-                var rep = Firebug.getRep(object);
+                var rep = Firebug.getRep(object, FirebugContext);
                 object = rep.getRealObject(object, FirebugContext);
                 if (object)
                     Firebug.Inspector.highlightObject(object, FirebugContext);

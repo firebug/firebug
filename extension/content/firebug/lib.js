@@ -4294,7 +4294,7 @@ this.persistObjects = function(panel, panelState)
 
 this.persistObject = function(object, context)
 {
-    var rep = Firebug.getRep(object);
+    var rep = Firebug.getRep(object, context);
     return rep ? rep.persistObject(object, context) : null;
 };
 

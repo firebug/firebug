@@ -137,7 +137,7 @@ Firebug.Breakpoint.BreakpointListRep = domplate(Firebug.Rep,
 
     getBreakpointRep: function(bp)
     {
-        var rep = Firebug.getRep(bp);
+        var rep = Firebug.getRep(bp, FirebugContext);
         return rep.tag;
     },
 
@@ -603,7 +603,7 @@ SourceFileRenamer.prototype.renameSourceFiles = function(context)
         {
             FBTrace.sysout("breakpoint.renameSourceFiles no source for "+oldURL+" callerURL "+callerURL, sourceFile)
             continue;
-        }    
+        }
         var newURL = Firebug.Debugger.getURLFromMD5(callerURL, sourceFile.source, kind);
         sourceFile.href = newURL.href;
 

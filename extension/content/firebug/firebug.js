@@ -1483,7 +1483,7 @@ top.Firebug =
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
     // Reps
 
-    getRep: function(object)
+    getRep: function(object, context)
     {
         var type = typeof(object);
         if (type == 'object' && object instanceof String)
@@ -1494,7 +1494,7 @@ top.Firebug =
             var rep = reps[i];
             try
             {
-                if (rep.supportsObject(object, type))
+                if (rep.supportsObject(object, type, (context?context:FirebugContext) ))
                 {
                     if (FBTrace.DBG_DOM)
                         FBTrace.sysout("getRep type: "+type+" object: "+object, rep);

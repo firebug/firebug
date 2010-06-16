@@ -2593,7 +2593,7 @@ Firebug.ScriptPanel.prototype = extend(Firebug.SourceBoxPanel,
         Firebug.CommandLine.evaluate(expr, this.context, null, this.context.getGlobalScope(),
             function success(result, context)
             {
-                var rep = Firebug.getRep(result);
+                var rep = Firebug.getRep(result, context);
                 var tag = rep.shortTag ? rep.shortTag : rep.tag;
 
                 if (FBTrace.DBG_STACK)
