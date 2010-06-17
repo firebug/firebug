@@ -2483,6 +2483,10 @@ Firebug.ScriptPanel.prototype = extend(Firebug.SourceBoxPanel,
         var panelStatus = Firebug.chrome.getPanelStatusElements();
         panelStatus.clear(); // clear stack on status bar
         this.updateInfoTip();
+
+        var watchPanel = this.context.getPanel("watches", true);
+        if (watchPanel)
+        	watchPanel.showEmptyMembers();
     },
 
     highlightExecutionLine: function(sourceBox)
