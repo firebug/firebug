@@ -116,9 +116,13 @@
 .scopesRow {
     padding: 2px 18px;
     background-color: LightYellow;
-    border-bottom: 5px solid #BEBEBE;
     color: #666666;
 }
+
+.scopesRow td {
+	border-top: 1px solid #BEBEBE;
+}
+
 .scopesLabel {
     background-color:  LightYellow;
 }

@@ -1628,9 +1628,12 @@ WatchPanel.prototype = extend(Firebug.DOMBasePanel.prototype,
             addMember(object, "user", members, "this", thisVar, 0);
 
             var scopeChain = this.generateScopeChain(frame.scope);
-            addMember(object, "scopes", members, "scopeChain", scopeChain, 0);
 
+            // locals
             members.push.apply(members, this.getMembers(scopeChain[0], 0, this.context));
+
+            for (var i = 1; i < scopeChain.length; i++)
+            	addMember(object, "scopes", members, scopeChain[i].toString(), scopeChain[i], 0);
         }
 
         this.expandMembers(members, this.toggles, 0, 0, this.context);
@@ -1663,6 +1666,7 @@ WatchPanel.prototype = extend(Firebug.DOMBasePanel.prototype,
 
                     scopeVars[name] = unwrapIValue(prop.value);
                 }
+                scopeVars.toString = function() {return "Closure Scope";}
             } else {
                 scopeVars = unwrapIValue(scope);
             }
