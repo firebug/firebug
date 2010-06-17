@@ -432,14 +432,14 @@ Firebug.DOMBasePanel.prototype = extend(Firebug.Panel,
                 {
                     if (isClassFunction(val))
                         addMember(object, "userClass", userClasses, name, val, level, 0, context);
-                    else if (name in domMembers)
+                    else if (isDOMMember(object, name))
                         addMember(object, "domFunction", domFuncs, name, val, level, domMembers[name], context);
                     else
                         addMember(object, "userFunction", userFuncs, name, val, level, 0, context);
                 }
                 else
                 {
-                    if (name in domMembers)
+                    if (isDOMMember(object, name))
                         addMember(object, "dom", domProps, name, val, level, domMembers[name], context);
                     else if (name in domConstantMap)
                         addMember(object, "dom", domConstants, name, val, level, 0, context);

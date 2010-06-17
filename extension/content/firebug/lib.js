@@ -4859,8 +4859,8 @@ this.getDOMMembers = function(object)
         { return domMemberCache.Node; }
     else if (object instanceof Event || object instanceof EventCopy)
         { return domMemberCache.Event; }
-    else
-        return {};
+
+    return null;
 };
 
 this.isDOMMember = function(object, propName)
