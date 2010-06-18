@@ -109,7 +109,7 @@ panelStatus {
     visibility: collapse;
 }
 
-#fbStatusBar[errors] #fbStatusText {
+#fbStatusBar[errors] #fbStatusText[shown] {
     visibility: visible;
 }
 

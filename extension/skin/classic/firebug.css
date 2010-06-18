@@ -107,6 +107,7 @@ toolbar[iconsize="small"] #firebug-button > .toolbarbutton-icon {
 /********************************************************************************************/
 
 #fbStatusBar {
+    min-width: 26px;
     cursor: pointer;
 }
 

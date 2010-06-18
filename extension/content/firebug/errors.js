@@ -68,6 +68,7 @@ var Errors = Firebug.Errors = extend(Firebug.Module,
         {
             statusText.setAttribute("value", error.message);
             statusBar.setAttribute("errors", "true");
+            statusText.setAttribute("shown", "true")
             if (FBTrace.DBG_ERRORLOG) FBTrace.sysout("errors.showMessageOnStatusBar error.message:"+error.message+"\n");
         }
     },
@@ -82,7 +83,12 @@ var Errors = Firebug.Errors = extend(Firebug.Module,
             if (Firebug.showErrorCount)
             {
                 var errorLabel = $STRP("plural.Error_Count", [errorCount]);
+                statusText.setAttribute("shown", "true")
                 statusText.setAttribute("value", errorLabel);
+            }
+            else
+            {
+              statusText.removeAttribute("shown");
             }
 
             statusBar.setAttribute("errors", "true");
