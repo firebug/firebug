@@ -220,32 +220,32 @@ panelTab[selected="true"]:hover > panelTabMenu .menuTarget {
     padding-right: 5px;
 }
 
-.autorepeatbutton-up,
-.scrollbutton-up {
+#fbContentBox .autorepeatbutton-up,
+#fbLocationList .scrollbutton-up {
 	/* background-color: #FF9933;  Firebug orange */
 	padding: 3px;
 	}
 
-.autorepeatbutton-down,
-.scrollbutton-down {
+#fbLocationList .autorepeatbutton-down,
+#fbLocationList .scrollbutton-down {
 	/* background-color: #FF9933;  Firebug orange */
 	padding: 3px;
 	}
 
-.autorepeatbutton-up[disabled="true"],
-	.scrollbutton-up[disabled="true"] {
+#fbLocationList .autorepeatbutton-up[disabled="true"],
+	#fbLocationList .scrollbutton-up[disabled="true"] {
 	list-style-image: url("chrome://firebug/skin/nav-up-disabled.png");
 }
-.autorepeatbutton-down[disabled="true"],
-	.scrollbutton-down[disabled="true"] {
+#fbLocationList .autorepeatbutton-down[disabled="true"],
+	#fbLocationList .scrollbutton-down[disabled="true"] {
 	list-style-image: url("chrome://firebug/skin/nav-down-disabled.png");
 }
-.autorepeatbutton-up,
-	.scrollbutton-up {
+#fbLocationList .autorepeatbutton-up,
+	#fbLocationList .scrollbutton-up {
 	list-style-image: url("chrome://firebug/skin/nav-up.png");
 }
-.autorepeatbutton-down,
-	.scrollbutton-down {
+#fbLocationList .autorepeatbutton-down,
+	#fbLocationList .scrollbutton-down {
 	list-style-image: url("chrome://firebug/skin/nav-down.png");
 }
 
