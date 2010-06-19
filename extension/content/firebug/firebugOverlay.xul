@@ -12,7 +12,8 @@
 <!-- Support for tracing. Only available in X version -->
 <?xul-overlay href="chrome://firebug/content/traceOverlay.xul"?> <!-- /*@explore*/ -->
 
-<overlay xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul">
+<overlay xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul"
+         xmlns:html="http://www.w3.org/1999/xhtml">
 
     <stringbundleset id="stringbundleset">
         <stringbundle id="strings_firebug" src="chrome://firebug/locale/firebug.properties"/>
@@ -380,7 +381,7 @@
         </box>
 
         <hbox id="fbCommandBox">
-            <label id="fbCommandArow" value=">>>"/>
+            <label id="fbCommandArrow" value=">>>"/>
             <textbox id="fbCommandLine" flex="1" label="console command line" aria-autocomplete="inline" />
             <toolbarbutton id="fbCommandToggleSmall" class="toolbarbutton-iconic"
                            oncommand="Firebug.setPref(Firebug.prefDomain, 'largeCommandLine', true)"/>

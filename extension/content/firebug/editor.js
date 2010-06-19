@@ -1084,33 +1084,38 @@ Firebug.AutoCompleter = function(getExprOffset, getRange, evaluator, selectMode,
             textBox.setSelectionRange(offsetEnd, offsetEnd);
 
         this.showCompletions(candidates, offset-exprOffset);
-        
+
         return true;
     };
-    
+
     this.showCompletions = function(candidates, start)
     {
     	var popup = $("fbCommandLineCompletionList");
     	FBL.eraseNode(popup);
-    	
+
     	var vbox = popup.ownerDocument.createElement("vbox");
         popup.appendChild(vbox);
-        
-    	var prefix = candidates[0].substr(0, start-1);
+
+    	var prefix = candidates[0].substr(0, start);
     	for (var i = 0; i < candidates.length; i++)
     	{
     		var hbox = popup.ownerDocument.createElement("hbox");
-    		var label = popup.ownerDocument.createElement('label');
-    		label.setAttribute("class", "monospace ");
-            label.setAttribute("value", candidates[i]);
-            hbox.appendChild(label);
+    		var pre = popup.ownerDocument.createElementNS("http://www.w3.org/1999/xhtml","span");
+    		pre.innerHTML = "<b>"+prefix+"</b>";
+    		var post = popup.ownerDocument.createElementNS("http://www.w3.org/1999/xhtml","span");
+    		post.innerHTML = candidates[i].substr(start);
+    		hbox.appendChild(pre);
+    		hbox.appendChild(post);
     		vbox.appendChild(hbox);
     	}
-    	
-   	 	this.storedX = -20;
-   	 	this.storedY = -10;
 
-   	 	popup.openPopup($("fbCommandLine"), "before_start", this.storedX, this.storedY, false, false);
+    	var arrowBox = $("fbCommandArrow").getBoundingClientRect();
+   	 	//this.storedX = arrowBox.right;
+   	 	//this.storedY = -10;
+
+   	 	var cmdLine = $("fbCommandLine");
+   	 	var anchor = cmdLine.ownerDocument.getAnonymousElementByAttribute(cmdLine, "anonid", "input");
+   	 	popup.openPopup(anchor, "before_start", 0,0, false, false);
     };
 };
 
