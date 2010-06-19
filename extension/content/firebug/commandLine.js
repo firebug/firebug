@@ -155,10 +155,7 @@ Firebug.CommandLine = extend(Firebug.Module,
         }
         else
         {
-        	if (!consoleHandler.setEvaluateErrorCallBack)
-        		FBTrace.sysout("setEvaluateErrorCallBack ", consoleHandler);
-        	
-            consoleHandler.setEvaluateErrorCallBack(function useErrorFunction(result)
+            consoleHandler.setEvaluateErrorCallback(function useErrorFunction(result)
             {
                 if (result)
                 {
