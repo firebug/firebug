@@ -1083,7 +1083,34 @@ Firebug.AutoCompleter = function(getExprOffset, getRange, evaluator, selectMode,
         else
             textBox.setSelectionRange(offsetEnd, offsetEnd);
 
+        this.showCompletions(candidates, offset-exprOffset);
+        
         return true;
+    };
+    
+    this.showCompletions = function(candidates, start)
+    {
+    	var popup = $("fbCommandLineCompletionList");
+    	FBL.eraseNode(popup);
+    	
+    	var vbox = popup.ownerDocument.createElement("vbox");
+        popup.appendChild(vbox);
+        
+    	var prefix = candidates[0].substr(0, start-1);
+    	for (var i = 0; i < candidates.length; i++)
+    	{
+    		var hbox = popup.ownerDocument.createElement("hbox");
+    		var label = popup.ownerDocument.createElement('label');
+    		label.setAttribute("class", "monospace ");
+            label.setAttribute("value", candidates[i]);
+            hbox.appendChild(label);
+    		vbox.appendChild(hbox);
+    	}
+    	
+   	 	this.storedX = -20;
+   	 	this.storedY = -10;
+
+   	 	popup.openPopup($("fbCommandLine"), "before_start", this.storedX, this.storedY, false, false);
     };
 };
 
