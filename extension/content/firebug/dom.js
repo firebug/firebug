@@ -1586,10 +1586,9 @@ WatchPanel.prototype = extend(Firebug.DOMBasePanel.prototype,
         this.rebuild(true);
     },
 
-    updateSelection: function(object)
+    updateSelection: function(frame)
     {
         dispatch(this.fbListeners, 'onBeforeDomUpdateSelection', [this]);
-        var frame = this.context.stoppedFrame;
 
         var newFrame = frame && frame.isValid && frame.script != this.lastScript;
         if (newFrame)
@@ -1618,22 +1617,22 @@ WatchPanel.prototype = extend(Firebug.DOMBasePanel.prototype,
                     }
                 );
 
-                addMember(object, "watch", members, expr, value, 0);
+                addMember(frame.scope, "watch", members, expr, value, 0);
             }
         }
 
         if (frame && frame.isValid)
         {
             var thisVar = unwrapIValue(frame.thisValue);
-            addMember(object, "user", members, "this", thisVar, 0);
+            addMember(frame.scope, "user", members, "this", thisVar, 0);
 
             var scopeChain = this.generateScopeChain(frame.scope);
 
-            // locals
+            // locals, pre-expanded
             members.push.apply(members, this.getMembers(scopeChain[0], 0, this.context));
 
             for (var i = 1; i < scopeChain.length; i++)
-            	addMember(object, "scopes", members, scopeChain[i].toString(), scopeChain[i], 0);
+            	addMember(scopeChain[i], "scopes", members, scopeChain[i].toString(), scopeChain[i], 0);
         }
 
         this.expandMembers(members, this.toggles, 0, 0, this.context);

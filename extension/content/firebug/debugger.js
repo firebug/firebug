@@ -3291,7 +3291,7 @@ Firebug.ScriptPanel.prototype = extend(Firebug.SourceBoxPanel,
         frame = this.context.stoppedFrame;
 
         if (FBTrace.DBG_STACK)
-            FBTrace.sysout("debugger.getObjectPath "+((frame && frame.isValid)?"frame is good":(frame?"frame invalid":"no frame"))+" selection: "+this.selection, this.selection);
+            FBTrace.sysout("debugger.getObjectPath "+((frame && frame.isValid)?("frame is good:"+frame.script.fileName+"@"+frame.line):(frame?"frame invalid":"no frame")), this.selection);
 
         var frames = [];
         for (; frame; frame = getCallingFrame(frame))
@@ -3549,7 +3549,7 @@ CallstackPanel.prototype = extend(Firebug.Panel,
             FBTrace.sysout("CallstackPanel.initialize:"+this.uid+"\n");
         }
 
-        var panelStatus = Firebug.chrome.getPanelStatusElements();
+        var panelStatus = Firebug.chrome.getPanelStatusElements(); // XXXjjb seems like this should be in firebug.js
         this.onPanelStatusSelectItem = bind(this.onSelectItem, this);
         panelStatus.addEventListener('selectItem', this.onPanelStatusSelectItem, false);
 
