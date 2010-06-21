@@ -83,7 +83,7 @@ var CSSStyleRuleTag = domplate(CSSDomplateBase,
     )
 });
 
-const reSplitCSS =  /(url\("?[^"\)]+?"?\))|(rgb\(.*?\))|(#[\dA-Fa-f]+)|(-?\d+(\.\d+)?(%|[a-z]{1,2})?)|([^,\s!]+)|"(.*?)"|(!(.*)?)/;
+const reSplitCSS =  /(url\("?[^"\)]+?"?\))|(rgb\(.*?\))|(#[\dA-Fa-f]+)|(-?\d+(\.\d+)?(%|[a-z]{1,2})?)|([^,\s\/!]+)|"(.*?)"|(!(.*)?)/;
 
 const reURL = /url\("?([^"\)]+)?"?\)/;
 
