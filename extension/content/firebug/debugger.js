@@ -143,7 +143,11 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
         fbs.breakIntoDebugger(debuggr, frame, 3);
     },
 
-    breakNowURLPrefix: "chrome://firebug/",
+    // This URL prefix is used to skip frames from chrome URLs. Note that sometimes chrome URLs
+    // are used even in web pages, but only in rare cases so don't worry about it.
+    // Don't be specific like: chrome://firebug/ since frames coming from extensions e.g.
+    // chrome://firecookie/ wouldn't be skipped then.
+    breakNowURLPrefix: "chrome://",
 
     breakNow: function(context)
     {
