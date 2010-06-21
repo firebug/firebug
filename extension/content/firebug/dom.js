@@ -397,8 +397,17 @@ Firebug.DOMBasePanel.prototype = extend(Firebug.Panel,
             if (isArguments(object))
                 object = cloneArray(object);
 
-            var domMembers = getDOMMembers(object);
             var insecureObject = unwrapObject(object);
+
+            var properties = [];
+            if (insecureObject.hasOwnProperty('prototype'))
+            	properties.push('prototype');
+
+            if (insecureObject.hasOwnProperty('constructor'))
+            	properties.push('constructor');
+
+            if (insecureObject.hasOwnProperty('__proto__'))
+            	properties.push('__proto__');
 
             for (var name in insecureObject)  // enumeration is safe
             {
@@ -410,7 +419,13 @@ Firebug.DOMBasePanel.prototype = extend(Firebug.Panel,
                         FBTrace.sysout("dom.getMembers: ignoreVars: " + name + ", " + level, object);
                     continue;
                 }
+                properties.push(name);
+            }
 
+            var domMembers = getDOMMembers(object);
+            for (let i = 0; i < properties.length; i++)
+            {
+            	var name = properties[i];
                 var val;
                 try
                 {
@@ -1778,6 +1793,10 @@ function addMember(object, type, props, name, value, level, order, context)
     // and so, hasProperties always returns false.
     if (!hasChildren && value) // arguments will never be falsy if the arguments exist
         hasChildren = isArguments(value);
+
+    // Special case for functions with a protoype that has values
+    if (valueType === "function" && value.prototype)
+    	hasChildren = hasProperties(value.prototype);
 
     var member = {
         object: object,
