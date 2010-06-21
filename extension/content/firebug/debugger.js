@@ -3548,19 +3548,11 @@ CallstackPanel.prototype = extend(Firebug.Panel,
             this.uid = FBL.getUniqueId();
             FBTrace.sysout("CallstackPanel.initialize:"+this.uid+"\n");
         }
-
-        var panelStatus = Firebug.chrome.getPanelStatusElements(); // XXXjjb seems like this should be in firebug.js
-        this.onPanelStatusSelectItem = bind(this.onSelectItem, this);
-        panelStatus.addEventListener('selectItem', this.onPanelStatusSelectItem, false);
-
         Firebug.Panel.initialize.apply(this, arguments);
     },
 
     destroy: function(state)
     {
-        var panelStatus = Firebug.chrome.getPanelStatusElements();
-        panelStatus.removeEventListener('selectItem', this.onPanelStatusSelectItem, false);
-
         Firebug.Panel.destroy.apply(this, arguments);
     },
 
@@ -3640,24 +3632,6 @@ CallstackPanel.prototype = extend(Firebug.Panel,
             }
         }
         dispatch(this.fbListeners, 'onStackCreated', [this]);
-    },
-
-    onSelectItem: function(event)
-    {
-        if (FBTrace.DBG_STACK)
-            FBTrace.sysout("CallStack onSelectItem event.target "+event.target, event);
-
-        for (var child = this.panelNode.firstChild; child; child = child.nextSibling)
-        {
-            if (child.frameButton.getAttribute("selected") == "true")
-            {
-                this.selectItem(child);
-                return;
-            }
-        }
-
-        if (FBTrace.DBG_STACK)
-            FBTrace.sysout("CallStack onSelectItem NO HIT in panelNode ", this.panelNode);
     },
 
     selectItem: function(item)
