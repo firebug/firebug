@@ -416,7 +416,12 @@ top.Firebug =
 
     suspendFirebug: function() // dispatch onSuspendFirebug to all modules
     {
-        this.setSuspended("suspending");
+
+    	var cancelSuspend = dispatch2(activableModules, 'onSuspendingFirebug', []);
+    	if (cancelSuspend)
+    		return;
+
+    	this.setSuspended("suspending");
 
         var cancelSuspend = dispatch2(activableModules, 'onSuspendFirebug', [FirebugContext]);  // TODO no context arg
 
@@ -2762,6 +2767,11 @@ Firebug.ActivableModule = extend(Firebug.Module,
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
     // Firebug Activation
+
+    onSuspendingFirebug: function()
+    {
+    	// Called before any suspend actions. Firest caller to return true aborts suspend.
+    },
 
     onSuspendFirebug: function()
     {

@@ -714,13 +714,13 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
             {
                 delete context.stopped;
                 delete context.stoppedFrame;
+                context.executingSourceFile = null;
+                delete context.breakLineNumber;
 
                 var chrome = Firebug.chrome;
 
                 this.syncCommands(context);
                 this.syncListeners(context);
-
-                chrome.syncSidePanels();
 
                 var panel = context.getPanel("script", true);
                 if (panel && panel == Firebug.chrome.getSelectedPanel())
@@ -729,8 +729,7 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
                 if (panel)
                     panel.highlight(false);
 
-                context.executingSourceFile = null;
-                delete context.breakLineNumber;
+                chrome.syncSidePanels();  // after main panel is all updated.
             }
         }
         catch (exc)
@@ -2173,6 +2172,16 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
         // disable again...
     },
 
+    onSuspendingFirebug: function()
+    {
+    	var anyStopped = TabWatcher.iterateContexts(function isAnyStopped(context)
+    	{
+    		return context.stopped;
+    	});
+
+    	return anyStopped;
+    },
+
     onSuspendFirebug: function()
     {
         if (!Firebug.Debugger.isAlwaysEnabled())
@@ -3587,40 +3596,46 @@ CallstackPanel.prototype = extend(Firebug.Panel,
     showStackFrame: function(frame)
     {
         clearNode(this.panelNode);
+
+        if (!frame)
+        	return;
+
         var mainPanel = this.context.getPanel("script", true);
-
-        if (mainPanel && frame)
+        if (!mainPanel)
         {
-            FBL.setClass(this.panelNode, "objectBox-stackTrace");
-            // The panelStatus has the stack, lets reuse it to give the same UX as that control.
-            // TODO use domplate? Use the panel status directly?
-            var panelStatus = Firebug.chrome.getPanelStatusElements();
-            var frameButtons = panelStatus.getElementsByTagName("toolbarbutton");
-            var doc = this.panelNode.ownerDocument;
-            for (var i = 0; i < frameButtons.length; i++)
-            {
-                if (FBL.hasClass(frameButtons[i], "panelStatusLabel"))
-                {
-                    var div = doc.createElement("div");
-                    var frameButton = frameButtons[i];
-                    div.innerHTML = frameButton.getAttribute('label');
-                    if (frameButton.repObject instanceof jsdIStackFrame)  // causes a downcast
-                        div.repObject = frameButton.repObject;
-                    div.frameButton = frameButton;
-                    FBL.setClass(div, "objectLink");
-                    FBL.setClass(div, "objectLink-stackFrame");
-                    FBL.setClass(div, "panelStatusLabel");
-                    FBL.setClass(div, "focusRow");
-                    div.setAttribute('role', "listitem");
-
-                    if (frameButton.getAttribute("selected") == "true")
-                        this.selectItem(div);
-
-                    this.panelNode.appendChild(div);
-                }
-            }
-            dispatch(this.fbListeners, 'onStackCreated', [this]);
+        	FBTrace.sysout("showStackFrame no mainPanel script for context "+this.context.getName());
+        	return;
         }
+
+        FBL.setClass(this.panelNode, "objectBox-stackTrace");
+        // The panelStatus has the stack, lets reuse it to give the same UX as that control.
+        // TODO use domplate? Use the panel status directly?
+        var panelStatus = Firebug.chrome.getPanelStatusElements();
+        var frameButtons = panelStatus.getElementsByTagName("toolbarbutton");
+        var doc = this.panelNode.ownerDocument;
+        for (var i = 0; i < frameButtons.length; i++)
+        {
+            if (FBL.hasClass(frameButtons[i], "panelStatusLabel"))
+            {
+                var div = doc.createElement("div");
+                var frameButton = frameButtons[i];
+                div.innerHTML = frameButton.getAttribute('label');
+                if (frameButton.repObject instanceof jsdIStackFrame)  // causes a downcast
+                    div.repObject = frameButton.repObject;
+                div.frameButton = frameButton;
+                FBL.setClass(div, "objectLink");
+                FBL.setClass(div, "objectLink-stackFrame");
+                FBL.setClass(div, "panelStatusLabel");
+                FBL.setClass(div, "focusRow");
+                div.setAttribute('role', "listitem");
+
+                if (frameButton.getAttribute("selected") == "true")
+                    this.selectItem(div);
+
+                this.panelNode.appendChild(div);
+            }
+        }
+        dispatch(this.fbListeners, 'onStackCreated', [this]);
     },
 
     onSelectItem: function(event)
