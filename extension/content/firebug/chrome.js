@@ -1382,8 +1382,8 @@ function onSelectingPanel(event)
     // Synchronize UI around panels.
     // xxxHonza: The command line should be synced here as well.
     Firebug.chrome.syncLocationList();
-    Firebug.chrome.syncSidePanels();
     Firebug.chrome.syncStatusPath();
+    Firebug.chrome.syncSidePanels();  //xxxjjb unfortunately the callstack side panel depends on the status path (sync after.)
 
     // Calling Firebug.showPanel causes dispatching "showPanel" to all modules.
     var browser = panel ? panel.context.browser : FirebugChrome.getCurrentBrowser();
