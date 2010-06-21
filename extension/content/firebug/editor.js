@@ -343,7 +343,11 @@ Firebug.Editor = extend(Firebug.Module,
             {
                 this.listeners.push(
                     chrome.keyCodeListen("TAB", null, bind(editor.completeValue, editor, 1)),
-                    chrome.keyCodeListen("TAB", isShift, bind(editor.completeValue, editor, -1))
+                    chrome.keyCodeListen("TAB", isShift, bind(editor.completeValue, editor, -1)),
+                    chrome.keyCodeListen("UP", null, bindFixed(editor.completeValue, editor, -1, true)),
+                    chrome.keyCodeListen("DOWN", null, bindFixed(editor.completeValue, editor, 1, true)),
+                    chrome.keyCodeListen("PAGE_UP", null, bindFixed(editor.completeValue, editor, -pageAmount, true)),
+                    chrome.keyCodeListen("PAGE_DOWN", null, bindFixed(editor.completeValue, editor, pageAmount, true))
                 );
             }
         }
@@ -357,6 +361,7 @@ Firebug.Editor = extend(Firebug.Module,
         var win = currentTarget.ownerDocument.defaultView;
         win.removeEventListener("resize", this.onResize, true);
         win.removeEventListener("blur", this.onBlur, true);
+        win.removeEventListener('input', this.onInput, true);
 
         var chrome = Firebug.chrome;
         if (chrome)
@@ -688,9 +693,9 @@ Firebug.InlineEditor.prototype = domplate(Firebug.BaseEditor,
         return this.autoCompleter;
     },
 
-    completeValue: function(amt)
+    completeValue: function(amt, offerOnly)
     {
-        if (this.getAutoCompleter().complete(currentPanel.context, this.input, true, amt < 0))
+        if (this.getAutoCompleter().complete(currentPanel.context, this.input, true, amt < 0, offerOnly))
             Firebug.Editor.update(true);
         else
             this.incrementValue(amt);
@@ -913,7 +918,7 @@ Firebug.AutoCompleter = function(getExprOffset, getRange, evaluator, selectMode,
         exprOffset = 0;
     };
 
-    this.complete = function(context, textBox, cycle, reverse)
+    this.complete = function(context, textBox, cycle, reverse, offerOnly)
     {
         var value = textBox.value;
         var offset = textBox.selectionStart;
@@ -1076,19 +1081,29 @@ Firebug.AutoCompleter = function(getExprOffset, getRange, evaluator, selectMode,
         var preCompletion = expr.substr(0, offset-exprOffset);
         var postCompletion = completion.substr(offset-exprOffset);
 
-        textBox.value = preParsed + preExpr + preCompletion + postCompletion + postExpr;
-        var offsetEnd = preParsed.length + preExpr.length + completion.length;
-        if (selectMode)
-            textBox.setSelectionRange(offset, offsetEnd);
-        else
-            textBox.setSelectionRange(offsetEnd, offsetEnd);
+        if (!offerOnly)
+        {
+            textBox.value = preParsed + preExpr + preCompletion + postCompletion + postExpr;
+            var offsetEnd = preParsed.length + preExpr.length + completion.length;
+            if (selectMode)
+                textBox.setSelectionRange(offset, offsetEnd);
+            else
+                textBox.setSelectionRange(offsetEnd, offsetEnd);
 
-        this.showCompletions(candidates, offset-exprOffset);
+            // The value has been completed, so we don't need to offer more completions
+            var popup = $("fbCommandLineCompletionList");
+            popup.hidePopup();
+        }
+        else
+        {
+        	this.showCompletions(candidates, offset-exprOffset, textBox);
+        }
+
 
         return true;
     };
 
-    this.showCompletions = function(candidates, start)
+    this.showCompletions = function(candidates, start, textBox)
     {
     	var popup = $("fbCommandLineCompletionList");
     	FBL.eraseNode(popup);
@@ -1097,10 +1112,12 @@ Firebug.AutoCompleter = function(getExprOffset, getRange, evaluator, selectMode,
         popup.appendChild(vbox);
 
     	var prefix = candidates[0].substr(0, start);
+    	var pre = null;
+
     	for (var i = 0; i < candidates.length; i++)
     	{
     		var hbox = popup.ownerDocument.createElement("hbox");
-    		var pre = popup.ownerDocument.createElementNS("http://www.w3.org/1999/xhtml","span");
+    		pre = popup.ownerDocument.createElementNS("http://www.w3.org/1999/xhtml","span");
     		pre.innerHTML = "<b>"+prefix+"</b>";
     		var post = popup.ownerDocument.createElementNS("http://www.w3.org/1999/xhtml","span");
     		post.innerHTML = candidates[i].substr(start);
@@ -1109,13 +1126,16 @@ Firebug.AutoCompleter = function(getExprOffset, getRange, evaluator, selectMode,
     		vbox.appendChild(hbox);
     	}
 
-    	var arrowBox = $("fbCommandArrow").getBoundingClientRect();
-   	 	//this.storedX = arrowBox.right;
-   	 	//this.storedY = -10;
-
    	 	var cmdLine = $("fbCommandLine");
    	 	var anchor = cmdLine.ownerDocument.getAnonymousElementByAttribute(cmdLine, "anonid", "input");
-   	 	popup.openPopup(anchor, "before_start", 0,0, false, false);
+   	 	popup.openPopup(anchor, "before_start", 0, 0, false, false);
+
+   	 	return;
+   	 	// reposition after rendering
+   	 	var arrowBox = $("fbCommandArrow").getBoundingClientRect();
+	 	var xOffset = arrowBox.width + pre.clientWidth;
+	    var beforeStartRect = popup.getBoundingClientRect();
+   	 	popup.moveTo(beforeStartRect.left+xOffset, beforeStartRect.top);
     };
 };
 

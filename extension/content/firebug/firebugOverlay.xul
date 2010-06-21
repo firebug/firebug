@@ -123,7 +123,9 @@
         <popup id="fbNavigationHistoryMenu"
             oncommand="Firebug.NavigationHistory.onHistoryCommand(event, FirebugContext)"
             onpopupshowing="return Firebug.NavigationHistory.onPopupShowing(this, FirebugContext)" />
-        <popup id="fbCommandLineCompletionList" />
+        <panel id="fbCommandLineCompletionList" noautohide="true" noautofocus="true">
+            <vbox></vbox>
+        </panel>
     </popupset>
 
     <!-- Main UI -->

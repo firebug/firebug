@@ -569,6 +569,7 @@ Firebug.CommandLine = extend(Firebug.Module,
 
     initializeUI: function()
     {
+    	this.onCommandLineInput = bind(this.onCommandLineInput, this);
         this.attachListeners();
     },
 
@@ -581,8 +582,16 @@ Firebug.CommandLine = extend(Firebug.Module,
     {
         Firebug.chrome.$("fbLargeCommandLine").addEventListener('focus', this.onCommandLineFocus, true);
         Firebug.chrome.$("fbCommandLine").addEventListener('focus', this.onCommandLineFocus, true);
+        Firebug.chrome.$("fbCommandLine").addEventListener('input', this.onCommandLineInput, true);
 
         Firebug.Console.addListener(this);  // to get onConsoleInjection
+    },
+
+    shutdown: function()
+    {
+        Firebug.chrome.$("fbLargeCommandLine").removeEventListener('focus', this.onCommandLineFocus, true);
+        Firebug.chrome.$("fbCommandLine").removeEventListener('focus', this.onCommandLineFocus, true);
+        Firebug.chrome.$("fbCommandLine").removeEventListener('input', this.onCommandLineInput, true);
     },
 
     showContext: function(browser, context)
@@ -655,6 +664,12 @@ Firebug.CommandLine = extend(Firebug.Module,
             return true;
         else
             return false;
+    },
+
+    onCommandLineInput: function(event)
+    {
+    	var commandLine = getCommandLine(FirebugContext);
+        this.autoCompleter.complete(FirebugContext, commandLine, true, false, true);
     },
 
     onCommandLineFocus: function(event)
