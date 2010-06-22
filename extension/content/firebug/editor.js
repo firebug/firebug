@@ -949,7 +949,10 @@ Firebug.AutoCompleter = function(getExprOffset, getRange, evaluator, selectMode,
             if (!cycle)
             {
                 if (!expr)
-                    return;
+                {
+                	this.hide();
+                	return false;
+                }
                 else if (lastExpr && lastExpr.indexOf(expr) != 0)
                 {
                     candidates = null;
@@ -958,7 +961,8 @@ Firebug.AutoCompleter = function(getExprOffset, getRange, evaluator, selectMode,
                 {
                     candidates = null;
                     lastExpr = expr;
-                    return;
+                    this.hide();
+                    return false;
                 }
             }
 
@@ -983,13 +987,17 @@ Firebug.AutoCompleter = function(getExprOffset, getRange, evaluator, selectMode,
                 else
                 {
                     // We can't complete unless we are at the ridge edge
-                    return;
+                	this.hide();
+                    return false;
                 }
             }
 
             var values = evaluator(preExpr, expr, postExpr, context);
             if (!values)
-                return;
+            {
+            	this.hide();
+            	return false;
+            }
 
             if (expr)
             {
@@ -1071,7 +1079,7 @@ Firebug.AutoCompleter = function(getExprOffset, getRange, evaluator, selectMode,
         }
 
         if (!candidates.length)
-            return;
+            return this.hide();
 
         if (lastIndex >= candidates.length)
             lastIndex = 0;
@@ -1093,13 +1101,14 @@ Firebug.AutoCompleter = function(getExprOffset, getRange, evaluator, selectMode,
 
             // The value has been completed, so we don't need to offer more completions
             this.hide();
+            return true;
         }
         else
         {
         	this.show(candidates, offset-exprOffset, textBox);
+        	return false;
         }
 
-        return true;
     };
 
     this.show = function(candidates, start, textBox)
@@ -1129,16 +1138,12 @@ Firebug.AutoCompleter = function(getExprOffset, getRange, evaluator, selectMode,
    	 	completionPopup.openPopup(anchor, "before_start", 0, 0, false, false);
 
    	 	return;
-   	 	// reposition after rendering
-   	 	var arrowBox = $("fbCommandArrow").getBoundingClientRect();
-	 	var xOffset = arrowBox.width + pre.clientWidth;
-	    var beforeStartRect = popup.getBoundingClientRect();
-   	 	popup.moveTo(beforeStartRect.left+xOffset, beforeStartRect.top);
     };
 
     this.hide = function()
     {
     	completionPopup.hidePopup();
+    	return false;
     };
 
     this.handledKeyPress = function(event, FirebugContext, commandLine)
