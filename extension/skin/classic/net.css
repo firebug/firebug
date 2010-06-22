@@ -390,6 +390,14 @@
 }
 
 /************************************************************************************************/
+/* If coming from BF cache (no network activity) */
+
+.netRow.fromBFCache,
+.netRow.fromBFCache .netTimeLabel {
+    color: gray;
+}
+
+/************************************************************************************************/
 /* Time Info tip */
 
 .timeInfoTip {

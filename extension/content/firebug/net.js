@@ -1853,6 +1853,7 @@ Firebug.NetMonitor.NetRequestEntry = domplate(Firebug.Rep, new Firebug.Listener(
                 $history: "$file.file.history",
                 $loaded: "$file.file.loaded",
                 $responseError: "$file.file|isError",
+                $fromBFCache: "$file.file.fromBFCache",
                 $fromCache: "$file.file.fromCache",
                 $inFrame: "$file.file|getInFrame"},
                 TD({"class": "netCol"},
@@ -3344,12 +3345,27 @@ NetProgress.prototype =
         var file = this.getRequestFile(request, win);
         if (file)
         {
-            // XXXjjb Honza I have to set these to get the conditional to work
+            // Parse URL params so, they are available for conditional breakpoints.
             file.urlParams = parseURLParams(file.href);
             this.breakOnXHR(file);
         }
     },
 
+    requestedHeaderFile: function(request, time, win, xhr, extraStringData)
+    {
+        var file = this.getRequestFile(request);
+        if (file)
+        {
+            file.requestHeadersText = extraStringData;
+
+            this.requestedFile(request, time, win, xhr);
+
+            dispatch(Firebug.NetMonitor.fbListeners, "onRequest", [this.context, file]);
+        }
+    },
+
+    // Can be called from onModifyRequest (to cach start even in case of BF cache) and also
+    // from requestHeaderFile (activity observer)
     requestedFile: function requestedFile(request, time, win, xhr)
     {
         var file = this.getRequestFile(request, win);
@@ -3372,14 +3388,12 @@ NetProgress.prototype =
             file.isXHR = xhr;
             file.isBackground = request.loadFlags & LOAD_BACKGROUND;
             file.method = request.requestMethod;
-            //file.urlParams = parseURLParams(file.href);
 
             if (!Ci.nsIHttpActivityDistributor)
                 Utils.getPostText(file, this.context);
 
-            this.extendPhase(file);
-
-            dispatch(Firebug.NetMonitor.fbListeners, "onRequest", [this.context, file]);
+            if (!file.phase)
+                this.extendPhase(file);
 
             return file;
         }
@@ -3434,18 +3448,11 @@ NetProgress.prototype =
         Firebug.Breakpoint.breakNow(this.context.getPanel(panelName, true));
     },
 
-    requestHeadersFile: function(request, time, requestHeadersText)
+    respondedHeaderFile: function(request, time, extraStringData)
     {
         var file = this.getRequestFile(request);
         if (file)
-            file.requestHeadersText = requestHeadersText;
-    },
-
-    responseHeadersFile: function(request, time, responseHeadersText)
-    {
-        var file = this.getRequestFile(request);
-        if (file)
-            file.responseHeadersText = responseHeadersText;
+            file.responseHeadersText = extraStringData;
     },
 
     bodySentFile: function bodySentFile(request, time)
@@ -3457,7 +3464,7 @@ NetProgress.prototype =
         }
     },
 
-    completedFile: function completedFile(request, time)
+    responseStartedFile: function responseStartedFile(request, time)
     {
         var file = this.getRequestFile(request);
         if (file)
@@ -3533,15 +3540,43 @@ NetProgress.prototype =
         }
     },
 
-    respondedCacheFile: function respondedCacheFile(request, time)
+    respondedCacheFile: function respondedCacheFile(request, time, info)
     {
+        dispatch(Firebug.NetMonitor.fbListeners, "onExamineCachedResponse", [this.context, request]);
+
         var file = this.getRequestFile(request, null, true);
         if (file)
         {
             if (FBTrace.DBG_NET_EVENTS)
-                FBTrace.sysout("net.events.respondedCacheFile; " + safeGetName(request));
+                FBTrace.sysout("net.events.respondedCacheFile +" + (now() - file.startTime) + " " +
+                     getPrintableTime() + ", " + request.URI.path, file);
 
-            this.panel.removeLogEntry(file, true);
+            file.respondedTime = time;
+            file.endTime = time;
+            file.fromBFCache = true;
+            file.aborted = false;
+
+            if (request.contentLength >= 0)
+                file.size = request.contentLength;
+
+            Utils.getHttpHeaders(request, file);
+
+            if (info)
+            {
+                if (info.responseStatus == 304)
+                    file.fromCache = true;
+
+                file.responseStatus = info.responseStatus;
+                file.responseStatusText = info.responseStatusText;
+                file.postText = info.postText;
+            }
+
+            getCacheEntry(file, this);
+
+            this.endLoad(file);
+
+            dispatch(Firebug.NetMonitor.fbListeners, "onCachedResponse", [this.context, file]);
+            return file;
         }
         else
         {
@@ -3648,13 +3683,13 @@ NetProgress.prototype =
         return file;
     },
 
-    completeFile: function completeFile(request, time, responseSize)
+    responseCompletedFile: function responseCompletedFile(request, time, responseSize)
     {
         var file = this.getRequestFile(request, null, true);
         if (file)
         {
             if (FBTrace.DBG_NET_EVENTS)
-                FBTrace.sysout("net.events.completeFile +" + time + " " +
+                FBTrace.sysout("net.events.responseCompletedFile +" + time + " " +
                     getPrintableTime() + ", " + request.URI.path, file);
 
             if (responseSize > 0)
@@ -4019,19 +4054,19 @@ NetProgress.prototype =
 };
 
 var startFile = NetProgress.prototype.startFile;
-var requestHeadersFile = NetProgress.prototype.requestHeadersFile;
-var responseHeadersFile = NetProgress.prototype.responseHeadersFile;
+var requestedHeaderFile = NetProgress.prototype.requestedHeaderFile;
+var respondedHeaderFile = NetProgress.prototype.respondedHeaderFile;
 var requestedFile = NetProgress.prototype.requestedFile;
 var respondedFile = NetProgress.prototype.respondedFile;
 var bodySentFile = NetProgress.prototype.bodySentFile;
-var completedFile = NetProgress.prototype.completedFile;
+var responseStartedFile = NetProgress.prototype.responseStartedFile;
 var respondedCacheFile = NetProgress.prototype.respondedCacheFile;
 var connectingFile = NetProgress.prototype.connectingFile;
 var connectedFile = NetProgress.prototype.connectedFile;
 var waitingForFile = NetProgress.prototype.waitingForFile;
 var sendingFile = NetProgress.prototype.sendingFile;
 var receivingFile = NetProgress.prototype.receivingFile;
-var completeFile = NetProgress.prototype.completeFile;
+var responseCompletedFile = NetProgress.prototype.responseCompletedFile;
 var closedFile = NetProgress.prototype.closedFile;
 var resolvingFile = NetProgress.prototype.resolvingFile;
 var progressFile = NetProgress.prototype.progressFile;
@@ -4828,12 +4863,11 @@ Firebug.NetMonitor.NetHttpObserver =
         {
             networkContext.post(startFile, [request, win]);
 
-            // If activity-distributor is available (Fx 3.6) it's used instead.
-            if (!Ci.nsIHttpActivityDistributor)
-            {
-                var xhr = Utils.isXHR(request);
-                networkContext.post(requestedFile, [request, now(), win, xhr]);
-            }
+            // We need to track the request now since activity observer is not used in case
+            // the response comes from BF cache. If it's regular HTTP requests the timing
+            // is properly overriden by activity observer (ACTIVITY_SUBTYPE_REQUEST_HEADER).
+            var xhr = Utils.isXHR(request);
+            networkContext.post(requestedFile, [request, now(), win, xhr]);
         }
     },
 
@@ -4864,8 +4898,22 @@ Firebug.NetMonitor.NetHttpObserver =
         if (!networkContext)
             networkContext = context ? context.netProgress : null;
 
-        if (networkContext)
-            networkContext.post(respondedCacheFile, [request, now()]);
+        if (!networkContext)
+        {
+            if (FBTrace.DBG_NET)
+                FBTrace.sysout("net.onExamineCachedResponse; No CONTEXT for:" + safeGetName(request));
+            return;
+        }
+
+        var info = new Object();
+        info.responseStatus = request.responseStatus;
+        info.responseStatusText = request.responseStatusText;
+
+        // Initialize info.postText property.
+        info.request = request;
+        Utils.getPostText(info, context);
+
+        networkContext.post(respondedCacheFile, [request, now(), info]);
     },
 
     /* nsISupports */
@@ -5008,7 +5056,8 @@ Firebug.NetMonitor.NetHttpActivityObserver =
                 activeRequests.push(httpChannel);
                 activeRequests.push(win);
 
-                networkContext.post(requestHeadersFile, [httpChannel, time, extraStringData]);
+                var isXHR = Utils.isXHR(httpChannel);
+                networkContext.post(requestedHeaderFile, [httpChannel, time, win, isXHR, extraStringData]);
             }
             else if (activitySubtype == nsIHttpActivityObserver.ACTIVITY_SUBTYPE_TRANSACTION_CLOSE)
             {
@@ -5018,21 +5067,13 @@ Firebug.NetMonitor.NetHttpActivityObserver =
                 networkContext.post(closedFile, [httpChannel, time]);
             }
             else if (activitySubtype == nsIHttpActivityObserver.ACTIVITY_SUBTYPE_RESPONSE_HEADER)
-            {
-                networkContext.post(responseHeadersFile, [httpChannel, time, extraStringData]);
-            }
-        }
-
-        if (activityType == nsIHttpActivityObserver.ACTIVITY_TYPE_HTTP_TRANSACTION)
-        {
-            if (activitySubtype == nsIHttpActivityObserver.ACTIVITY_SUBTYPE_REQUEST_HEADER)
-                networkContext.post(requestedFile, [httpChannel, time, win, Utils.isXHR(httpChannel)]);
-            if (activitySubtype == nsIHttpActivityObserver.ACTIVITY_SUBTYPE_REQUEST_BODY_SENT)
+                networkContext.post(respondedHeaderFile, [httpChannel, time, extraStringData]);
+            else if (activitySubtype == nsIHttpActivityObserver.ACTIVITY_SUBTYPE_REQUEST_BODY_SENT)
                 networkContext.post(bodySentFile, [httpChannel, time]);
             else if (activitySubtype == nsIHttpActivityObserver.ACTIVITY_SUBTYPE_RESPONSE_START)
-                networkContext.post(completedFile, [httpChannel, time]);
+                networkContext.post(responseStartedFile, [httpChannel, time]);
             else if (activitySubtype == nsIHttpActivityObserver.ACTIVITY_SUBTYPE_RESPONSE_COMPLETE)
-                networkContext.post(completeFile, [httpChannel, time, extraSizeData]);
+                networkContext.post(responseCompletedFile, [httpChannel, time, extraSizeData]);
         }
         else if (activityType == nsIHttpActivityObserver.ACTIVITY_TYPE_SOCKET_TRANSPORT)
         {
