@@ -570,6 +570,7 @@ Firebug.CommandLine = extend(Firebug.Module,
     initializeUI: function()
     {
     	this.onCommandLineInput = bind(this.onCommandLineInput, this);
+    	this.onCommandLineBlur = bind(this.onCommandLineBlur, this);
         this.attachListeners();
     },
 
@@ -582,7 +583,8 @@ Firebug.CommandLine = extend(Firebug.Module,
     {
         Firebug.chrome.$("fbLargeCommandLine").addEventListener('focus', this.onCommandLineFocus, true);
         Firebug.chrome.$("fbCommandLine").addEventListener('focus', this.onCommandLineFocus, true);
-        Firebug.chrome.$("fbCommandLine").addEventListener('input', this.onCommandLineInput, true);
+        Firebug.chrome.$("fbCommandLine").addEventListener('keypress', this.onCommandLineInput, true);
+        Firebug.chrome.$("fbCommandLine").addEventListener('blur', this.onCommandLineBlur, true);
 
         Firebug.Console.addListener(this);  // to get onConsoleInjection
     },
@@ -592,6 +594,7 @@ Firebug.CommandLine = extend(Firebug.Module,
         Firebug.chrome.$("fbLargeCommandLine").removeEventListener('focus', this.onCommandLineFocus, true);
         Firebug.chrome.$("fbCommandLine").removeEventListener('focus', this.onCommandLineFocus, true);
         Firebug.chrome.$("fbCommandLine").removeEventListener('input', this.onCommandLineInput, true);
+        Firebug.chrome.$("fbCommandLine").removeEventListener('blur', this.onCommandLineBlur, true);
     },
 
     showContext: function(browser, context)
@@ -669,7 +672,13 @@ Firebug.CommandLine = extend(Firebug.Module,
     onCommandLineInput: function(event)
     {
     	var commandLine = getCommandLine(FirebugContext);
-        this.autoCompleter.complete(FirebugContext, commandLine, true, false, true);
+    	if (!this.autoCompleter.handledKeyPress(event, FirebugContext, commandLine))
+    		this.autoCompleter.complete(FirebugContext, commandLine, true, false, true);
+    },
+
+    onCommandLineBlur: function(event)
+    {
+    	this.autoCompleter.hide();
     },
 
     onCommandLineFocus: function(event)

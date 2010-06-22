@@ -890,6 +890,7 @@ Firebug.AutoCompleter = function(getExprOffset, getRange, evaluator, selectMode,
     var preParsed = null;
     var preExpr = null;
     var postExpr = null;
+    var completionPopup = $("fbCommandLineCompletionList");
 
     this.revert = function(textBox)
     {
@@ -1091,44 +1092,41 @@ Firebug.AutoCompleter = function(getExprOffset, getRange, evaluator, selectMode,
                 textBox.setSelectionRange(offsetEnd, offsetEnd);
 
             // The value has been completed, so we don't need to offer more completions
-            var popup = $("fbCommandLineCompletionList");
-            popup.hidePopup();
+            this.hide();
         }
         else
         {
-        	this.showCompletions(candidates, offset-exprOffset, textBox);
+        	this.show(candidates, offset-exprOffset, textBox);
         }
-
 
         return true;
     };
 
-    this.showCompletions = function(candidates, start, textBox)
+    this.show = function(candidates, start, textBox)
     {
-    	var popup = $("fbCommandLineCompletionList");
-    	FBL.eraseNode(popup);
+    	FBL.eraseNode(completionPopup);
 
-    	var vbox = popup.ownerDocument.createElement("vbox");
-        popup.appendChild(vbox);
+    	var vbox = completionPopup.ownerDocument.createElement("vbox");
+        completionPopup.appendChild(vbox);
 
     	var prefix = candidates[0].substr(0, start);
     	var pre = null;
 
     	for (var i = 0; i < candidates.length; i++)
     	{
-    		var hbox = popup.ownerDocument.createElement("hbox");
-    		pre = popup.ownerDocument.createElementNS("http://www.w3.org/1999/xhtml","span");
+    		var hbox = completionPopup.ownerDocument.createElement("hbox");
+    		pre = completionPopup.ownerDocument.createElementNS("http://www.w3.org/1999/xhtml","span");
     		pre.innerHTML = "<b>"+prefix+"</b>";
-    		var post = popup.ownerDocument.createElementNS("http://www.w3.org/1999/xhtml","span");
+    		var post = completionPopup.ownerDocument.createElementNS("http://www.w3.org/1999/xhtml","span");
     		post.innerHTML = candidates[i].substr(start);
     		hbox.appendChild(pre);
     		hbox.appendChild(post);
     		vbox.appendChild(hbox);
     	}
 
-   	 	var cmdLine = $("fbCommandLine");
-   	 	var anchor = cmdLine.ownerDocument.getAnonymousElementByAttribute(cmdLine, "anonid", "input");
-   	 	popup.openPopup(anchor, "before_start", 0, 0, false, false);
+   	 	var cmdLine = $("fbCommandLine");  // should use something relative to textbox
+   	 	var anchor = textBox;  // cmdLine.ownerDocument.getAnonymousElementByAttribute(cmdLine, "anonid", "input");
+   	 	completionPopup.openPopup(anchor, "before_start", 0, 0, false, false);
 
    	 	return;
    	 	// reposition after rendering
@@ -1136,6 +1134,41 @@ Firebug.AutoCompleter = function(getExprOffset, getRange, evaluator, selectMode,
 	 	var xOffset = arrowBox.width + pre.clientWidth;
 	    var beforeStartRect = popup.getBoundingClientRect();
    	 	popup.moveTo(beforeStartRect.left+xOffset, beforeStartRect.top);
+    };
+
+    this.hide = function()
+    {
+    	completionPopup.hidePopup();
+    };
+
+    this.handledKeyPress = function(event, FirebugContext, commandLine)
+    {
+    	if (event.altKey || event.ctrlKey || event.metaKey || event.shiftKey)
+    		return false;
+    	switch(event.keyCode)
+    	{
+
+        	case 13:    // Return/Enter
+            break;
+
+        	case 27: // Escape
+        		this.hide();
+        		return true;
+
+        	case 38: // Up arrow
+            break;
+
+        	case 40: // Down arrow
+            break;
+
+        	case 37: // left arrow
+        	case 39:  // right arrow
+            break;
+
+        	default:
+        		return false;
+    	}
+
     };
 };
 
