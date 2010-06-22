@@ -578,7 +578,9 @@ NetPanel.prototype = extend(Firebug.ActivablePanel,
     {
         return [
             this.disableCacheOption(),
-            optionMenu("net.option.Show Paint Events", "netShowPaintEvents")
+            "-",
+            optionMenu("net.option.Show Paint Events", "netShowPaintEvents"),
+            optionMenu("net.option.Show BF Cache Responses", "netShowBFCacheResponses")
         ];
     },
 
@@ -3392,8 +3394,7 @@ NetProgress.prototype =
             if (!Ci.nsIHttpActivityDistributor)
                 Utils.getPostText(file, this.context);
 
-            if (!file.phase)
-                this.extendPhase(file);
+            this.extendPhase(file);
 
             return file;
         }
@@ -3554,6 +3555,7 @@ NetProgress.prototype =
             file.respondedTime = time;
             file.endTime = time;
             file.fromBFCache = true;
+            file.fromCache = true;
             file.aborted = false;
 
             if (request.contentLength >= 0)
@@ -3563,9 +3565,6 @@ NetProgress.prototype =
 
             if (info)
             {
-                if (info.responseStatus == 304)
-                    file.fromCache = true;
-
                 file.responseStatus = info.responseStatus;
                 file.responseStatusText = info.responseStatusText;
                 file.postText = info.postText;
@@ -3949,6 +3948,17 @@ NetProgress.prototype =
 
     extendPhase: function(file)
     {
+        // Phase start can be measured since HTTP-ON-MODIFIED-REQUEST as
+        // ACTIVITY_SUBTYPE_REQUEST_HEADER won't fire if the response comes from the BF cache.
+        // If it's standard HTTP request we need to start again since REQUEST_HEADER as this
+        // event has the proper time.
+        if (file.phase)
+        {
+            if (file.phase.files[0] == file)
+                file.phase.startTime = file.startTime;
+            return;
+        }
+
         if (this.currentPhase)
         {
             // If the new request has been started within a "phaseInterval" after the
@@ -4231,33 +4241,36 @@ NetPhase.prototype =
     removeFile: function removeFile(file)
     {
         remove(this.files, file);
+
+        // The file don't have a parent phase now.
         file.phase = null;
 
         // If the last file has been removed, update the last file member.
         if (file == this.lastFinishedFile)
         {
-          if (this.files.length == 0)
-          {
-            this.lastFinishedFile = null;
-          }
-          else
-          {
-            for (var i=0; i<this.files.length; i++) {
-              if (this.lastFinishedFile.endTime < this.files[i].endTime)
-                this.lastFinishedFile = this.files[i];
+            if (this.files.length == 0)
+            {
+                this.lastFinishedFile = null;
             }
-          }
+            else
+            {
+                for (var i=0; i<this.files.length; i++)
+                {
+                    if (this.lastFinishedFile.endTime < this.files[i].endTime)
+                        this.lastFinishedFile = this.files[i];
+                }
+            }
         }
     },
 
     get lastStartTime()
     {
-      return this.files[this.files.length - 1].startTime;
+        return this.files[this.files.length - 1].startTime;
     },
 
     get endTime()
     {
-      return this.lastFinishedFile ? this.lastFinishedFile.endTime : null;
+        return this.lastFinishedFile ? this.lastFinishedFile.endTime : null;
     }
 };
 
@@ -4866,8 +4879,11 @@ Firebug.NetMonitor.NetHttpObserver =
             // We need to track the request now since activity observer is not used in case
             // the response comes from BF cache. If it's regular HTTP requests the timing
             // is properly overriden by activity observer (ACTIVITY_SUBTYPE_REQUEST_HEADER).
-            var xhr = Utils.isXHR(request);
-            networkContext.post(requestedFile, [request, now(), win, xhr]);
+            if (Firebug.netShowBFCacheResponses || !Ci.nsIHttpActivityDistributor)
+            {
+                var xhr = Utils.isXHR(request);
+                networkContext.post(requestedFile, [request, now(), win, xhr]);
+            }
         }
     },
 

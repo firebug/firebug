@@ -95,6 +95,7 @@ pref("extensions.firebug.netPhaseInterval", 1000);    // Specifies an interval (
 pref("extensions.firebug.sizePrecision", 1);       // Number of displayed decimal places for size info in the UI. Allowed values: [-1 (all in bytes), 0 (no decimal places), 1 (one decimal place), 2 (two decimal places)]
 pref("extensions.firebug.netParamNameLimit", 25);       // Maximum size [characters] of displayed parameter names in the Net panel (post tab). No limit if zero or less.
 pref("extensions.firebug.netShowPaintEvents", false);
+pref("extensions.firebug.netShowBFCacheResponses", true);   // Show responses coming from the BF (back-forward) cache. These doesn't represent any network activity.
 
 // Cache
 pref("extensions.firebug.cache.mimeTypes", ""); // list of additional cached mime-types separated by space.
