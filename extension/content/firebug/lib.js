@@ -1213,7 +1213,7 @@ this.cssToXPath = function(rule)
             else if (m[1] == '#')
                 parts.push("[@id='" + m[2] + "']");
             else if (m[1] == '.')
-                parts.push("[contains(@class, '" + m[2] + "')]");
+                parts.push("[contains(concat(' ',normalize-space(@class),' '), ' " + m[2] + " ')]");
 
             rule = rule.substr(m[0].length);
         }
