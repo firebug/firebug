@@ -1089,7 +1089,7 @@ Firebug.AutoCompleter = function(getExprOffset, getRange, evaluator, selectMode,
         var completion = candidates[lastIndex];
         var preCompletion = expr.substr(0, offset-exprOffset);
         var postCompletion = completion.substr(offset-exprOffset);
-       
+
         textBox.value = preParsed + preExpr + preCompletion + postCompletion + postExpr;
         var offsetStart = offset;
         var offsetEnd = preParsed.length + preExpr.length + completion.length;
@@ -1122,7 +1122,7 @@ Firebug.AutoCompleter = function(getExprOffset, getRange, evaluator, selectMode,
 
     	for (var i = 0; i < candidates.length; i++)
     	{
-    		var hbox = completionPopup.ownerDocument.createElement("hbox");
+    		var hbox = completionPopup.ownerDocument.createElementNS("http://www.w3.org/1999/xhtml","div");
     		pre = completionPopup.ownerDocument.createElementNS("http://www.w3.org/1999/xhtml","span");
     		pre.innerHTML = "<b>"+prefix+"</b>";
     		var post = completionPopup.ownerDocument.createElementNS("http://www.w3.org/1999/xhtml","span");
@@ -1149,7 +1149,7 @@ Firebug.AutoCompleter = function(getExprOffset, getRange, evaluator, selectMode,
     {
     	if (event.altKey || event.ctrlKey || event.metaKey || event.shiftKey)
     		return false;
-    	
+
         if (event.keyCode == 27) // ESC
         {
         	this.hide();
@@ -1170,7 +1170,7 @@ Firebug.AutoCompleter = function(getExprOffset, getRange, evaluator, selectMode,
         {
         	this.complete(context, textBox, this.input, true, false, true);
         }
-        
+
 
     };
 };
