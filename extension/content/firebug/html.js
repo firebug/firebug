@@ -1664,7 +1664,7 @@ AttributeEditor.prototype = domplate(Firebug.InlineEditor.prototype,
 
     advanceToNext: function(target, charCode)
     {
-        if (charCode == 61 && hasClass(target, "nodeName"))
+        if (charCode == 61 && hasClass(target, "nodeName")) /* '=' */
             return true;
     },
 
