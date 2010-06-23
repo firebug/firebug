@@ -562,7 +562,7 @@ Firebug.CommandLine = extend(Firebug.Module,
         Firebug.Module.initialize.apply(this, arguments);
 
         this.autoCompleter = new Firebug.AutoCompleter(getExpressionOffset, getDot,
-            autoCompleteEval, false, true);
+            autoCompleteEval, true, true);
 
         if (Firebug.largeCommandLine)
             this.setMultiLine(true, Firebug.chrome);
@@ -633,6 +633,7 @@ Firebug.CommandLine = extend(Firebug.Module,
         var value = panel ? panel.context.commandLineText : null;
         var commandLine = getCommandLine(browser);
         commandLine.value = value ? value : "";
+        this.autoCompleter.hide();
     },
 
     updateOption: function(name, value)

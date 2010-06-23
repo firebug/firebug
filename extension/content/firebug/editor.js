@@ -1089,26 +1089,25 @@ Firebug.AutoCompleter = function(getExprOffset, getRange, evaluator, selectMode,
         var completion = candidates[lastIndex];
         var preCompletion = expr.substr(0, offset-exprOffset);
         var postCompletion = completion.substr(offset-exprOffset);
-
-        if (!offerOnly)
-        {
-            textBox.value = preParsed + preExpr + preCompletion + postCompletion + postExpr;
-            var offsetEnd = preParsed.length + preExpr.length + completion.length;
-            if (selectMode)
-                textBox.setSelectionRange(offset, offsetEnd);
-            else
-                textBox.setSelectionRange(offsetEnd, offsetEnd);
-
-            // The value has been completed, so we don't need to offer more completions
-            this.hide();
-            return true;
-        }
+       
+        textBox.value = preParsed + preExpr + preCompletion + postCompletion + postExpr;
+        var offsetStart = offset;
+        var offsetEnd = preParsed.length + preExpr.length + completion.length;
+        if (selectMode)
+            textBox.setSelectionRange(offsetStart, offsetEnd);
         else
+            textBox.setSelectionRange(offsetEnd, offsetEnd);
+
+        if (offerOnly)
         {
         	this.show(candidates, offset-exprOffset, textBox);
         	return false;
         }
-
+        else
+        {
+            this.hide();
+        }
+        return true;
     };
 
     this.show = function(candidates, start, textBox)
@@ -1146,33 +1145,32 @@ Firebug.AutoCompleter = function(getExprOffset, getRange, evaluator, selectMode,
     	return false;
     };
 
-    this.handledKeyPress = function(event, FirebugContext, commandLine)
+    this.handledKeyPress = function(event, context, textBox)
     {
     	if (event.altKey || event.ctrlKey || event.metaKey || event.shiftKey)
     		return false;
-    	switch(event.keyCode)
-    	{
-
-        	case 13:    // Return/Enter
-            break;
-
-        	case 27: // Escape
-        		this.hide();
-        		return true;
-
-        	case 38: // Up arrow
-            break;
-
-        	case 40: // Down arrow
-            break;
-
-        	case 37: // left arrow
-        	case 39:  // right arrow
-            break;
-
-        	default:
-        		return false;
-    	}
+    	
+        if (event.keyCode == 27) // ESC
+        {
+        	this.hide();
+        }
+        else if (event.keyCode === 9) // TAB
+        {
+        	textBox.setSelectionRange(textBox.selectionEnd, textBox.selectionEnd);  // accept completion by deselect
+        }
+        else if (event.keyCode === 8) // backspace
+        {
+        	textBox.selectionStart = textBox.selectionStart - 1;
+        }
+        else if (event.keyCode === 38) // up arrow
+        {
+        	this.complete(context, textBox, this.input, true, true, true);
+        }
+        else if (event.keyCode === 39) // down arrow
+        {
+        	this.complete(context, textBox, this.input, true, false, true);
+        }
+        
 
     };
 };
