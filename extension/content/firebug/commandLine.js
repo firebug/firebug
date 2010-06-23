@@ -439,6 +439,7 @@ Firebug.CommandLine = extend(Firebug.Module,
         var commandLine = getCommandLine(context);
         commandLine.value = context.commandLineText = "";
         this.autoCompleter.reset();
+        this.autoCompleter.hide();
     },
 
     cancel: function(context)
