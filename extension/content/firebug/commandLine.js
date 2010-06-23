@@ -616,24 +616,11 @@ Firebug.CommandLine = extend(Firebug.Module,
     showPanel: function(browser, panel)
     {
         var chrome = Firebug.chrome;
-
-        var isConsole = panel && panel.name == "console";
-        if (Firebug.largeCommandLine)
-        {
-            if (isConsole)
-            {
-                collapse(chrome.$("fbPanelSplitter"), false);
-                collapse(chrome.$("fbSidePanelDeck"), false);
-                chrome.$("fbSidePanelDeck").selectedPanel = chrome.$("fbLargeCommandBox");
-                collapse(chrome.$("fbCommandBox"), true);
-            }
-        }
-        else
-            collapse(chrome.$("fbCommandBox"), !isConsole);
-
         var value = panel ? panel.context.commandLineText : null;
+
         var commandLine = getCommandLine(browser);
         commandLine.value = value ? value : "";
+
         this.autoCompleter.hide();
     },
 

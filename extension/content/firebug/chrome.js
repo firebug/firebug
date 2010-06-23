@@ -31,7 +31,7 @@ const negativeZoomFactors = [1, 0.95, 0.8, 0.7, 0.5, 0.2, 0.1];
 // Globals
 
 var panelBox, panelSplitter, sidePanelDeck, panelBar1, panelBar2, locationList, locationSeparator,
-    panelStatus, panelStatusSeparator;
+    panelStatus, panelStatusSeparator, consolePreview, consolePreviewBrowser;
 
 var waitingPanelBarCount = 2;
 
@@ -85,6 +85,9 @@ top.FirebugChrome =
         locationSeparator = $("fbLocationSeparator");
         panelStatus = $("fbPanelStatus");
         panelStatusSeparator = $("fbStatusSeparator");
+
+        consolePreview = $("fbConsolePreview");
+        consolePreviewBrowser = $("fbConsolePreviewBrowser");
 
         if (window.arguments)
             var detachArgs = window.arguments[0];
@@ -311,6 +314,17 @@ top.FirebugChrome =
 
     getPanelDocument: function(panelType)
     {
+        // Console panel can be displayed for all the other panels
+        // (except of the console panel itself)
+        // XXXjjb, xxxHonza: this should be somehow betterm, more generic and extensible...
+        var consolePanelType = Firebug.getPanelType("console");
+        if (consolePanelType == panelType)
+        {
+            if (!FBL.isCollapsed(consolePreview))
+                return consolePreviewBrowser.contentDocument;
+        }
+
+        // Standard panel and side panel documents.
         if (!panelType.prototype.parentPanel)
             return panelBar1.browser.contentDocument;
         else
@@ -1362,8 +1376,10 @@ function onSelectingPanel(event)
 {
     var panel = panelBar1.selectedPanel;
     var panelName = panel ? panel.name : null;
+
     if (FBTrace.DBG_PANELS)
-        FBTrace.sysout("chrome.onSelectingPanel="+panelName+" FirebugContext="+(FirebugContext?FirebugContext.getName():"undefined")+"\n");
+        FBTrace.sysout("chrome.onSelectingPanel="+panelName+" FirebugContext=" +
+            (FirebugContext?FirebugContext.getName():"undefined"));
 
     if (FirebugContext)
     {

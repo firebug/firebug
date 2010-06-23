@@ -575,6 +575,11 @@ this.collapse = function(elt, collapsed)
     elt.setAttribute("collapsed", collapsed ? "true" : "false");
 };
 
+this.isCollapsed = function(elt)
+{
+    return (elt.getAttribute("collapsed") == "true") ? true : false;
+};
+
 this.obscure = function(elt, obscured)
 {
     if (obscured)

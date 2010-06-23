@@ -80,6 +80,9 @@
         <command id="cmd_navBack" oncommand="Firebug.NavigationHistory.goBack(FirebugContext)" />
         <command id="cmd_navForward" oncommand="Firebug.NavigationHistory.goForward(FirebugContext)" />
         <command id="cmd_toggleFreezeWindow" oncommand="Firebug.Debugger.toggleFreezeWindow(FirebugContext)" />
+
+        <command id="cmd_toggleConsolePreview" oncommand="Firebug.Console.Preview.toggle(FirebugContext)"
+            checked="false"/>
     </commandset>
 
     <keyset id="mainKeyset">
@@ -148,7 +151,7 @@
                                     command="cmd_toggleInspecting" collapsed="false">
                             </toolbarbutton>
 
-                            <toolbarseparator/>
+                            <toolbarseparator id="fbInspectSeparator"/>
 
                             <!-- History of Navigation -->
                             <toolbaritem contextmenu="fbNavigationHistoryMenu">
@@ -159,6 +162,13 @@
                                     tooltiptext="firebug.history.Go forward"
                                     command="cmd_navForward"/>
                             </toolbaritem>
+
+                            <toolbarseparator id="fbNavigationSeparator"/>
+
+                            <toolbarbutton id="fbConsolePreviewButton"
+                                tooltiptext="panel.tooltip.Show Console"
+                                command="cmd_toggleConsolePreview">
+                            </toolbarbutton>
                         </hbox>
 
                         <!-- Panel selector (list of all panels) -->
@@ -382,11 +392,24 @@
             </popup>
         </box>
 
+        <!-- Console preview (available on other panels) -->
+        <splitter id="fbConsolePreviewSplitter" collapsed="true"/>
+        <vbox id="fbConsolePreview" collapsed="true">
+            <deck id="fbConsolePreview-deck" flex="1">
+                <browser id="fbConsolePreviewBrowser"
+                     tooltip="fbTooltip" contextmenu="fbContextMenu"
+                     disablehistory="true"
+                     src="chrome://firebug/content/panel.html"/>
+            </deck>
+        </vbox>
+
+        <!-- Command Line (small) -->
         <hbox id="fbCommandBox">
             <label id="fbCommandArrow" value=">>>"/>
-            <textbox id="fbCommandLine" flex="1" label="console command line" aria-autocomplete="inline" />
+            <textbox id="fbCommandLine" flex="1" label="console command line"
+                aria-autocomplete="inline" />
             <toolbarbutton id="fbCommandToggleSmall" class="toolbarbutton-iconic"
-                           oncommand="Firebug.setPref(Firebug.prefDomain, 'largeCommandLine', true)"/>
+                oncommand="Firebug.setPref(Firebug.prefDomain, 'largeCommandLine', true)"/>
         </hbox>
 
         <!-- Firebug Tools & Icon menu -->
@@ -409,7 +432,7 @@
                 </menupopup>
             </menu>
 
-            <menuseparator  id="menu_openActionsSeparator"/>
+            <menuseparator id="menu_openActionsSeparator"/>
 
             <!-- Text Size -->
             <menu label="&firebug.TextSize;" id="FirebugMenu_TextSize">

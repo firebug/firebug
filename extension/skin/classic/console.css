@@ -4,6 +4,10 @@
     overflow-x: hidden;
 }
 
+.consolePreview .panelNode-console {
+    display: block;
+}
+
 .objectLink:hover {
     cursor: pointer;
     text-decoration: underline;

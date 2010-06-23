@@ -326,6 +326,16 @@ menupopup[chromedir="rtl"] > .navigationHistoryMenuItemBack {
 
 /************************************************************************************************/
 
+#fbConsolePreviewButton {
+    list-style-image: url(chrome://firebug/skin/console.png);
+}
+
+#fbConsolePreviewButton[disabled="true"] {
+    list-style-image: url(chrome://firebug/skin/consoleDisabled.png);
+}
+
+/************************************************************************************************/
+
 #fbBreakOnErrors {
     list-style-image: url(chrome://firebug/skin/breakErrors.png);
 }

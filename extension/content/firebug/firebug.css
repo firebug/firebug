@@ -12,8 +12,6 @@ window[chromehidden~="toolbar"] #fbToolbar {
     height: 270px;
 }
 
-
-
 #fbCommandLine {
     -moz-binding: url("chrome://firebug/content/bindings.xml#commandLine");
 }
@@ -284,7 +282,6 @@ panelTab[selected="true"]:hover > panelTabMenu .menuTarget {
     -moz-margin-start:0;
     cursor: move;
 }
-
 
 /***********************************************************************************************/
 /* Don't let Personas to destroy Firebug's CSS */
