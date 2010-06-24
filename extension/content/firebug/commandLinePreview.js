@@ -11,7 +11,7 @@ FBL.ns(function() { with (FBL) {
 /**
  * @module Console & command line availability in other panels.
  */
-Firebug.Console.Preview = extend(Firebug.Module,
+Firebug.CommandLine.Preview = extend(Firebug.Module,
 {
     initializeUI: function()
     {
@@ -19,14 +19,14 @@ Firebug.Console.Preview = extend(Firebug.Module,
 
         // Set additional style so we can make the panelNode-console node
         // always visible regardles on the currently selected panel.
-        var doc = Firebug.chrome.$("fbConsolePreviewBrowser").contentDocument;
+        var doc = Firebug.chrome.$("fbCommandPreviewBrowser").contentDocument;
         var body = getBody(doc);
-        setClass(body, "consolePreview");
+        setClass(body, "commandPreview");
     },
 
     internationalizeUI: function(doc)
     {
-        var elements = ["fbConsolePreviewButton"];
+        var elements = ["fbCommandPreviewButton"];
 
         for (var i=0; i<elements.length; i++)
         {
@@ -41,8 +41,8 @@ Firebug.Console.Preview = extend(Firebug.Module,
 
     showPanel: function(browser, panel)
     {
-        if (FBTrace.DBG_CONSOLE)
-            FBTrace.sysout("Console.Preview.showPanel; " + panel.name);
+        if (FBTrace.DBG_COMMANDLINE)
+            FBTrace.sysout("commandLine.Preview.showPanel; " + panel.name);
 
         var chrome = Firebug.chrome;
         var visible = this.isVisible();
@@ -62,8 +62,8 @@ Firebug.Console.Preview = extend(Firebug.Module,
         // in another panels).
         if (isConsole)
         {
-            collapse(chrome.$("fbConsolePreview"), true);
-            collapse(chrome.$("fbConsolePreviewSplitter"), true);
+            collapse(chrome.$("fbCommandPreview"), true);
+            collapse(chrome.$("fbCommandPreviewSplitter"), true);
             collapse(chrome.$("fbCommandBox"), largeCmd);
         }
         else
@@ -77,7 +77,7 @@ Firebug.Console.Preview = extend(Firebug.Module,
         var disabled = consolePanelType.prototype.isEnabled() ? "false" : "true";
         if (isConsole)
             disabled = "true";
-        chrome.$("fbConsolePreviewButton").setAttribute("disabled", disabled);
+        chrome.$("fbCommandPreviewButton").setAttribute("disabled", disabled);
 
         // Make sure the console panel is attached to the proper document
         // (the one used by all panels, or the one used by console preview and available
@@ -101,19 +101,19 @@ Firebug.Console.Preview = extend(Firebug.Module,
     setVisible: function(visible)
     {
         var chrome = Firebug.chrome;
-        collapse(chrome.$("fbConsolePreview"), !visible);
-        collapse(chrome.$("fbConsolePreviewSplitter"), !visible);
+        collapse(chrome.$("fbCommandPreview"), !visible);
+        collapse(chrome.$("fbCommandPreviewSplitter"), !visible);
         collapse(chrome.$("fbCommandBox"), !visible);
 
         // The command line can't be multiline in other panels.
         collapse(chrome.$("fbCommandToggleSmall"), visible);
 
-        Firebug.chrome.setGlobalAttribute("cmd_toggleConsolePreview", "checked", visible);
+        Firebug.chrome.setGlobalAttribute("cmd_toggleCommandPreview", "checked", visible);
     },
 
     isVisible: function()
     {
-        var checked = Firebug.chrome.getGlobalAttribute("cmd_toggleConsolePreview", "checked");
+        var checked = Firebug.chrome.getGlobalAttribute("cmd_toggleCommandPreview", "checked");
         return (checked == "true") ? true : false;
     },
 
@@ -133,7 +133,7 @@ Firebug.Console.Preview = extend(Firebug.Module,
 // ************************************************************************************************
 // Registration
 
-Firebug.registerModule(Firebug.Console.Preview);
+Firebug.registerModule(Firebug.CommandLine.Preview);
 
 // ************************************************************************************************
 }});

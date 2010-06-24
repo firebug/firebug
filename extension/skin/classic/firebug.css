@@ -326,12 +326,12 @@ menupopup[chromedir="rtl"] > .navigationHistoryMenuItemBack {
 
 /************************************************************************************************/
 
-#fbConsolePreviewButton {
-    list-style-image: url(chrome://firebug/skin/console.png);
+#fbCommandPreviewButton {
+    list-style-image: url(chrome://firebug/skin/commandLine.png);
 }
 
-#fbConsolePreviewButton[disabled="true"] {
-    list-style-image: url(chrome://firebug/skin/consoleDisabled.png);
+#fbCommandPreviewButton[disabled="true"] {
+    list-style-image: url(chrome://firebug/skin/commandLineDisabled.png);
 }
 
 /************************************************************************************************/

@@ -81,7 +81,7 @@
         <command id="cmd_navForward" oncommand="Firebug.NavigationHistory.goForward(FirebugContext)" />
         <command id="cmd_toggleFreezeWindow" oncommand="Firebug.Debugger.toggleFreezeWindow(FirebugContext)" />
 
-        <command id="cmd_toggleConsolePreview" oncommand="Firebug.Console.Preview.toggle(FirebugContext)"
+        <command id="cmd_toggleCommandPreview" oncommand="Firebug.CommandLine.Preview.toggle(FirebugContext)"
             checked="false"/>
     </commandset>
 
@@ -165,9 +165,9 @@
 
                             <toolbarseparator id="fbNavigationSeparator"/>
 
-                            <toolbarbutton id="fbConsolePreviewButton"
-                                tooltiptext="panel.tooltip.Show Console"
-                                command="cmd_toggleConsolePreview">
+                            <toolbarbutton id="fbCommandPreviewButton"
+                                tooltiptext="panel.tooltip.Show Command Line"
+                                command="cmd_toggleCommandPreview">
                             </toolbarbutton>
                         </hbox>
 
@@ -367,6 +367,7 @@
                             </deck>
                         </panelBar>
 
+                        <!-- Command line multiline (large) -->
                         <vbox id="fbLargeCommandBox">
                             <textbox id="fbLargeCommandLine" multiline="true" flex="1" newlines="pasteintact"
                                      label="LargeCommandLine" />
@@ -392,11 +393,11 @@
             </popup>
         </box>
 
-        <!-- Console preview (available on other panels) -->
-        <splitter id="fbConsolePreviewSplitter" collapsed="true"/>
-        <vbox id="fbConsolePreview" collapsed="true">
-            <deck id="fbConsolePreview-deck" flex="1">
-                <browser id="fbConsolePreviewBrowser"
+        <!-- CommandLine preview (available on other panels) -->
+        <splitter id="fbCommandPreviewSplitter" collapsed="true" collapse="after" />
+        <vbox id="fbCommandPreview" collapsed="true" height="35">
+            <deck id="fbCommandPreview-deck" flex="1">
+                <browser id="fbCommandPreviewBrowser"
                      tooltip="fbTooltip" contextmenu="fbContextMenu"
                      disablehistory="true"
                      src="chrome://firebug/content/panel.html"/>

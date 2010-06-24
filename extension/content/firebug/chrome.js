@@ -31,7 +31,7 @@ const negativeZoomFactors = [1, 0.95, 0.8, 0.7, 0.5, 0.2, 0.1];
 // Globals
 
 var panelBox, panelSplitter, sidePanelDeck, panelBar1, panelBar2, locationList, locationSeparator,
-    panelStatus, panelStatusSeparator, consolePreview, consolePreviewBrowser;
+    panelStatus, panelStatusSeparator, cmdPreview, cmdPreviewBrowser;
 
 var waitingPanelBarCount = 2;
 
@@ -86,8 +86,8 @@ top.FirebugChrome =
         panelStatus = $("fbPanelStatus");
         panelStatusSeparator = $("fbStatusSeparator");
 
-        consolePreview = $("fbConsolePreview");
-        consolePreviewBrowser = $("fbConsolePreviewBrowser");
+        cmdPreview = $("fbCommandPreview");
+        cmdPreviewBrowser = $("fbCommandPreviewBrowser");
 
         if (window.arguments)
             var detachArgs = window.arguments[0];
@@ -320,8 +320,8 @@ top.FirebugChrome =
         var consolePanelType = Firebug.getPanelType("console");
         if (consolePanelType == panelType)
         {
-            if (!FBL.isCollapsed(consolePreview))
-                return consolePreviewBrowser.contentDocument;
+            if (!FBL.isCollapsed(cmdPreview))
+                return cmdPreviewBrowser.contentDocument;
         }
 
         // Standard panel and side panel documents.

@@ -4,10 +4,6 @@
     overflow-x: hidden;
 }
 
-.consolePreview .panelNode-console {
-    display: block;
-}
-
 .objectLink:hover {
     cursor: pointer;
     text-decoration: underline;
@@ -630,4 +626,11 @@
     font-family: Lucida Grande, Tahoma, sans-serif;
     font-weight: bold;
     color:  #888888;
+}
+
+/************************************************************************************************/
+
+/* The panel content is always visible within the command preview on other panels */
+.commandPreview .panelNode-console {
+    display: block;
 }
