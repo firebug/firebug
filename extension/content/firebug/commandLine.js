@@ -437,16 +437,25 @@ Firebug.CommandLine = extend(Firebug.Module,
     clear: function(context)
     {
         var commandLine = getCommandLine(context);
+
+        // Return false if the command line is already empty.
+        if (!commandLine.value)
+            return false;
+
         commandLine.value = context.commandLineText = "";
         this.autoCompleter.reset();
         this.autoCompleter.hide();
+
+        return true;
     },
 
     cancel: function(context)
     {
         var commandLine = getCommandLine(context);
-        if (!this.autoCompleter.revert(commandLine))
-            this.clear(context);
+        if (this.autoCompleter.revert(commandLine))
+            return;
+
+        return this.clear(context);
     },
 
     update: function(context)
@@ -571,9 +580,9 @@ Firebug.CommandLine = extend(Firebug.Module,
 
     initializeUI: function()
     {
-    	this.onCommandLineInput = bind(this.onCommandLineInput, this);
-    	this.onCommandLineBlur = bind(this.onCommandLineBlur, this);
-    	this.onCommandLineKeyPress = bind(this.onCommandLineKeyPress, this);
+        this.onCommandLineInput = bind(this.onCommandLineInput, this);
+        this.onCommandLineBlur = bind(this.onCommandLineBlur, this);
+        this.onCommandLineKeyPress = bind(this.onCommandLineKeyPress, this);
         this.attachListeners();
     },
 
@@ -664,20 +673,20 @@ Firebug.CommandLine = extend(Firebug.Module,
 
     onCommandLineKeyPress: function(event)
     {
-    	var commandLine = getCommandLine(FirebugContext);
-    	this.autoCompleter.handledKeyPress(event, FirebugContext, commandLine)
+        var commandLine = getCommandLine(FirebugContext);
+        this.autoCompleter.handledKeyPress(event, FirebugContext, commandLine)
     },
 
     onCommandLineInput: function(event)
     {
-    	var commandLine = getCommandLine(FirebugContext);
-    	this.autoCompleter.complete(FirebugContext, commandLine, true, false, true);
-    	FirebugContext.commandLineText = commandLine.value;
+        var commandLine = getCommandLine(FirebugContext);
+        this.autoCompleter.complete(FirebugContext, commandLine, true, false, true);
+        FirebugContext.commandLineText = commandLine.value;
     },
 
     onCommandLineBlur: function(event)
     {
-    	this.autoCompleter.hide();
+        this.autoCompleter.hide();
     },
 
     onCommandLineFocus: function(event)

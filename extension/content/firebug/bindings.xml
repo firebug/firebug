@@ -1557,7 +1557,9 @@
         ]]></handler>
 
         <handler event="keypress" keycode="VK_ESCAPE" preventdefault="true"><![CDATA[
-            Firebug.CommandLine.cancel(FirebugContext);
+            // Cancel the event only if it executed the required action (cleared the command line).
+            if (Firebug.CommandLine.cancel(FirebugContext))
+                FBL.cancelEvent(event);
         ]]></handler>
     </handlers>
 </binding>

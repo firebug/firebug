@@ -950,8 +950,8 @@ Firebug.AutoCompleter = function(getExprOffset, getRange, evaluator, selectMode,
             {
                 if (!expr)
                 {
-                	this.hide();
-                	return false;
+                    this.hide();
+                    return false;
                 }
                 else if (lastExpr && lastExpr.indexOf(expr) != 0)
                 {
@@ -987,7 +987,7 @@ Firebug.AutoCompleter = function(getExprOffset, getRange, evaluator, selectMode,
                 else
                 {
                     // We can't complete unless we are at the ridge edge
-                	this.hide();
+                    this.hide();
                     return false;
                 }
             }
@@ -995,8 +995,8 @@ Firebug.AutoCompleter = function(getExprOffset, getRange, evaluator, selectMode,
             var values = evaluator(preExpr, expr, postExpr, context);
             if (!values)
             {
-            	this.hide();
-            	return false;
+                this.hide();
+                return false;
             }
 
             if (expr)
@@ -1100,8 +1100,8 @@ Firebug.AutoCompleter = function(getExprOffset, getRange, evaluator, selectMode,
 
         if (offerOnly)
         {
-        	this.show(candidates, offset-exprOffset, textBox);
-        	return false;
+            this.show(candidates, offset-exprOffset, textBox);
+            return false;
         }
         else
         {
@@ -1112,66 +1112,69 @@ Firebug.AutoCompleter = function(getExprOffset, getRange, evaluator, selectMode,
 
     this.show = function(candidates, start, textBox)
     {
-    	FBL.eraseNode(completionPopup);
+        FBL.eraseNode(completionPopup);
 
-    	var vbox = completionPopup.ownerDocument.createElement("vbox");
+        var vbox = completionPopup.ownerDocument.createElement("vbox");
         completionPopup.appendChild(vbox);
 
-    	var prefix = candidates[0].substr(0, start);
-    	var pre = null;
+        var prefix = candidates[0].substr(0, start);
+        var pre = null;
 
-    	for (var i = 0; i < candidates.length; i++)
-    	{
-    		var hbox = completionPopup.ownerDocument.createElementNS("http://www.w3.org/1999/xhtml","div");
-    		pre = completionPopup.ownerDocument.createElementNS("http://www.w3.org/1999/xhtml","span");
-    		pre.innerHTML = "<b>"+prefix+"</b>";
-    		var post = completionPopup.ownerDocument.createElementNS("http://www.w3.org/1999/xhtml","span");
-    		post.innerHTML = candidates[i].substr(start);
-    		hbox.appendChild(pre);
-    		hbox.appendChild(post);
-    		vbox.appendChild(hbox);
-    	}
+        for (var i = 0; i < candidates.length; i++)
+        {
+            var hbox = completionPopup.ownerDocument.createElementNS("http://www.w3.org/1999/xhtml","div");
+            pre = completionPopup.ownerDocument.createElementNS("http://www.w3.org/1999/xhtml","span");
+            pre.innerHTML = "<b>"+prefix+"</b>";
+            var post = completionPopup.ownerDocument.createElementNS("http://www.w3.org/1999/xhtml","span");
+            post.innerHTML = candidates[i].substr(start);
+            hbox.appendChild(pre);
+            hbox.appendChild(post);
+            vbox.appendChild(hbox);
+        }
 
-   	 	var cmdLine = $("fbCommandLine");  // should use something relative to textbox
-   	 	var anchor = textBox;  // cmdLine.ownerDocument.getAnonymousElementByAttribute(cmdLine, "anonid", "input");
-   	 	completionPopup.openPopup(anchor, "before_start", 0, 0, false, false);
+        var cmdLine = $("fbCommandLine");  // should use something relative to textbox
+        var anchor = textBox;  // cmdLine.ownerDocument.getAnonymousElementByAttribute(cmdLine, "anonid", "input");
+        completionPopup.openPopup(anchor, "before_start", 0, 0, false, false);
 
-   	 	return;
+        return;
     };
 
     this.hide = function()
     {
-    	completionPopup.hidePopup();
-    	return false;
+        if (completionPopup.state == "closed")
+            return false;
+
+        completionPopup.hidePopup();
+        return true;
     };
 
     this.handledKeyPress = function(event, context, textBox)
     {
-    	if (event.altKey || event.ctrlKey || event.metaKey || event.shiftKey)
-    		return false;
+        if (event.altKey || event.ctrlKey || event.metaKey || event.shiftKey)
+            return false;
 
         if (event.keyCode == 27) // ESC
         {
-        	this.hide();
+            // Stop event bubbling if it was used to close the popup.
+            if (this.hide())
+                cancelEvent(event);
         }
         else if (event.keyCode === 9) // TAB
         {
-        	textBox.setSelectionRange(textBox.selectionEnd, textBox.selectionEnd);  // accept completion by deselect
+            textBox.setSelectionRange(textBox.selectionEnd, textBox.selectionEnd);  // accept completion by deselect
         }
         else if (event.keyCode === 8) // backspace
         {
-        	textBox.selectionStart = textBox.selectionStart - 1;
+            textBox.selectionStart = textBox.selectionStart - 1;
         }
         else if (event.keyCode === 38) // up arrow
         {
-        	this.complete(context, textBox, this.input, true, true, true);
+            this.complete(context, textBox, this.input, true, true, true);
         }
         else if (event.keyCode === 39) // down arrow
         {
-        	this.complete(context, textBox, this.input, true, false, true);
+            this.complete(context, textBox, this.input, true, false, true);
         }
-
-
     };
 };
 

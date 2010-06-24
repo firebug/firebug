@@ -9,7 +9,7 @@ FBL.ns(function() { with (FBL) {
 // Implementation
 
 /**
- * @module Console & command line availability in other panels.
+ * @module Command Line availability in other panels.
  */
 Firebug.CommandLine.Preview = extend(Firebug.Module,
 {
@@ -22,6 +22,12 @@ Firebug.CommandLine.Preview = extend(Firebug.Module,
         var doc = Firebug.chrome.$("fbCommandPreviewBrowser").contentDocument;
         var body = getBody(doc);
         setClass(body, "commandPreview");
+
+        this.onCommandLineKeyPress = bind(this.onCommandLineKeyPress, this);
+        this.onKeyPress = bind(this.onKeyPress, this);
+
+        // Register event listeners.
+        Firebug.chrome.$("fbContentBox").addEventListener("keypress", this.onKeyPress, false);
     },
 
     internationalizeUI: function(doc)
@@ -37,6 +43,11 @@ Firebug.CommandLine.Preview = extend(Firebug.Module,
             if (element.hasAttribute("tooltiptext"))
                 FBL.internationalize(element, "tooltiptext");
         }
+    },
+
+    shutdown: function()
+    {
+        Firebug.chrome.$("fbContentBox").removeEventListener("keypress", this.onKeyPress, false);
     },
 
     showPanel: function(browser, panel)
@@ -92,6 +103,9 @@ Firebug.CommandLine.Preview = extend(Firebug.Module,
         if (panel && panel.name == "console")
             return;
 
+        if (FBTrace.DBG_COMMANDLINE)
+            FBTrace.sysout("commandLine.Preview.toggle;");
+
         var visible = this.isVisible();
         this.setVisible(!visible);
 
@@ -127,6 +141,27 @@ Firebug.CommandLine.Preview = extend(Firebug.Module,
         var panel = context.getPanel("console");
         if (panel)
             panel.reattach(doc);
+    },
+
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+    // Event Listeners
+
+    onKeyPress: function(event)
+    {
+        if (event.altKey || event.ctrlKey || event.metaKey || event.shiftKey)
+            return false;
+
+        // ESC
+        var target = event.target;
+        if (target && event.keyCode == 27)
+        {
+            // Don't hide command line if there is a text inside.
+            var cmdLine = Firebug.chrome.$("fbCommandLine");
+            if (cmdLine.value)
+                return;
+
+            this.toggle(FirebugContext);
+        }
     }
 });
 

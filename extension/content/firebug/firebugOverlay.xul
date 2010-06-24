@@ -395,7 +395,7 @@
 
         <!-- CommandLine preview (available on other panels) -->
         <splitter id="fbCommandPreviewSplitter" collapsed="true" collapse="after" />
-        <vbox id="fbCommandPreview" collapsed="true" height="35">
+        <vbox id="fbCommandPreview" collapsed="true" height="35" persist="width,height">
             <deck id="fbCommandPreview-deck" flex="1">
                 <browser id="fbCommandPreviewBrowser"
                      tooltip="fbTooltip" contextmenu="fbContextMenu"
@@ -407,7 +407,7 @@
         <!-- Command Line (small) -->
         <hbox id="fbCommandBox">
             <label id="fbCommandArrow" value=">>>"/>
-            <textbox id="fbCommandLine" flex="1" label="console command line"
+            <textbox id="fbCommandLine" class="commandLine" flex="1" label="console command line"
                 aria-autocomplete="inline" />
             <toolbarbutton id="fbCommandToggleSmall" class="toolbarbutton-iconic"
                 oncommand="Firebug.setPref(Firebug.prefDomain, 'largeCommandLine', true)"/>
