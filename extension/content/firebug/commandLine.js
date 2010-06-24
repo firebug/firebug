@@ -680,6 +680,15 @@ Firebug.CommandLine = extend(Firebug.Module,
     onCommandLineInput: function(event)
     {
         var commandLine = getCommandLine(FirebugContext);
+
+        if (!commandLine.value) // don't complete on empty command line
+        {
+        	this.autoCompleter.reset();
+            this.autoCompleter.hide();
+        	return;
+        }
+
+
         this.autoCompleter.complete(FirebugContext, commandLine, true, false, true);
         FirebugContext.commandLineText = commandLine.value;
     },
