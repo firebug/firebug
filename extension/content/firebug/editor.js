@@ -878,7 +878,7 @@ Firebug.InlineEditor.prototype = domplate(Firebug.BaseEditor,
 // ************************************************************************************************
 // Autocompletion
 
-Firebug.AutoCompleter = function(getExprOffset, getRange, evaluator, selectMode, caseSensitive)
+Firebug.AutoCompleter = function(getExprOffset, getRange, evaluator, selectMode, caseSensitive, noCompleteOnBlank)
 {
     var candidates = null;
     var originalValue = null;
@@ -891,6 +891,7 @@ Firebug.AutoCompleter = function(getExprOffset, getRange, evaluator, selectMode,
     var preExpr = null;
     var postExpr = null;
     var completionPopup = $("fbCommandLineCompletionList");
+    var commandCompletionLineLimit = 40;
 
     this.revert = function(textBox)
     {
@@ -923,6 +924,14 @@ Firebug.AutoCompleter = function(getExprOffset, getRange, evaluator, selectMode,
     {
         var value = textBox.value;
         var offset = textBox.selectionStart;
+        var line = this.pickCandidates(value, offset, context, cycle, reverse);
+
+        if (typeof(line) === "object")
+        	this.showCandidates(textBox, line, offerOnly);
+    };
+
+    this.pickCandidates = function(value, offset, context, cycle, reverse)
+    {
         if (!selectMode && originalOffset != -1)
             offset = originalOffset;
 
@@ -939,7 +948,13 @@ Firebug.AutoCompleter = function(getExprOffset, getRange, evaluator, selectMode,
             // Find the part of the string that is being completed
             var range = getRange ? getRange(parsed, offset-parseStart, context) : null;
             if (!range)
-                range = {start: 0, end: parsed.length-1 };
+            {
+            	if (noCompleteOnBlank)
+            		return false;
+            	else
+            		range = {start: 0, end: parsed.length-1 };
+            }
+
 
             var expr = parsed.substr(range.start, range.end-range.start+1);
             preExpr = parsed.substr(0, range.start);
@@ -1090,17 +1105,27 @@ Firebug.AutoCompleter = function(getExprOffset, getRange, evaluator, selectMode,
         var preCompletion = expr.substr(0, offset-exprOffset);
         var postCompletion = completion.substr(offset-exprOffset);
 
-        textBox.value = preParsed + preExpr + preCompletion + postCompletion + postExpr;
-        var offsetStart = offset;
+        var line = preParsed + preExpr + preCompletion + postCompletion + postExpr;
         var offsetEnd = preParsed.length + preExpr.length + completion.length;
+
+        var result = {value: line, userTyped: offset-exprOffset, completionStart: offset, completionEnd: offsetEnd};
+        return result;
+    };
+
+    this.showCandidates = function(textBox, line, offerOnly)
+    {
+        textBox.value = line.value;
+        var offsetStart = line.completionStart;
+        var offsetEnd = line.completionEnd;
+
         if (selectMode)
             textBox.setSelectionRange(offsetStart, offsetEnd);
         else
             textBox.setSelectionRange(offsetEnd, offsetEnd);
 
-        if (offerOnly)
+        if (offerOnly && candidates.length && candidates.length < commandCompletionLineLimit)
         {
-            this.show(candidates, offset-exprOffset, textBox);
+            this.popupCandidates(candidates, line.userTyped, textBox);
             return false;
         }
         else
@@ -1110,14 +1135,14 @@ Firebug.AutoCompleter = function(getExprOffset, getRange, evaluator, selectMode,
         return true;
     };
 
-    this.show = function(candidates, start, textBox)
+    this.popupCandidates = function(candidates, userTyped, textBox)
     {
         FBL.eraseNode(completionPopup);
 
         var vbox = completionPopup.ownerDocument.createElement("vbox");
         completionPopup.appendChild(vbox);
 
-        var prefix = candidates[0].substr(0, start);
+        var prefix = candidates[0].substr(0, userTyped);
         var pre = null;
 
         for (var i = 0; i < candidates.length; i++)
@@ -1126,7 +1151,7 @@ Firebug.AutoCompleter = function(getExprOffset, getRange, evaluator, selectMode,
             pre = completionPopup.ownerDocument.createElementNS("http://www.w3.org/1999/xhtml","span");
             pre.innerHTML = "<b>"+prefix+"</b>";
             var post = completionPopup.ownerDocument.createElementNS("http://www.w3.org/1999/xhtml","span");
-            post.innerHTML = candidates[i].substr(start);
+            post.innerHTML = candidates[i].substr(userTyped);
             hbox.appendChild(pre);
             hbox.appendChild(post);
             vbox.appendChild(hbox);

@@ -1835,7 +1835,8 @@ function addMember(object, type, props, name, value, level, order, context)
     // If the property is implemented using a getter function (and there is no setter
     // implemented) use a "get" prefix that is displayed in the UI.
     var o = unwrapObject(object);
-    member.prefix = (o.__lookupGetter__(name) && !o.__lookupSetter__(name)) ? "get " : "";
+    if (o)
+    	member.prefix = (o.__lookupGetter__(name) && !o.__lookupSetter__(name)) ? "get " : "";
 
     props.push(member);
     return member;
