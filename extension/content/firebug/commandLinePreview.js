@@ -17,17 +17,12 @@ Firebug.CommandLine.Preview = extend(Firebug.Module,
     {
         Firebug.Module.initializeUI.apply(this, arguments);
 
-        // Set additional style so we can make the panelNode-console node
-        // always visible regardles on the currently selected panel.
-        var doc = Firebug.chrome.$("fbCommandPreviewBrowser").contentDocument;
-        var body = getBody(doc);
-        setClass(body, "commandPreview");
+        this.setPreviewBrowserStyle(Firebug.chrome);
 
         this.onCommandLineKeyPress = bind(this.onCommandLineKeyPress, this);
         this.onKeyPress = bind(this.onKeyPress, this);
 
-        // Register event listeners.
-        Firebug.chrome.$("fbContentBox").addEventListener("keypress", this.onKeyPress, false);
+        this.attachListeners();
     },
 
     internationalizeUI: function(doc)
@@ -48,6 +43,12 @@ Firebug.CommandLine.Preview = extend(Firebug.Module,
     shutdown: function()
     {
         Firebug.chrome.$("fbContentBox").removeEventListener("keypress", this.onKeyPress, false);
+    },
+
+    reattachContext: function(browser, context)
+    {
+        this.setPreviewBrowserStyle(Firebug.chrome);
+        this.attachListeners();
     },
 
     showPanel: function(browser, panel)
@@ -97,6 +98,23 @@ Firebug.CommandLine.Preview = extend(Firebug.Module,
             this.reattach(panel.context);
     },
 
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+
+    setPreviewBrowserStyle: function(chrome)
+    {
+        // Set additional style so we can make the panelNode-console node
+        // always visible regardles on the currently selected panel.
+        var doc = chrome.$("fbCommandPreviewBrowser").contentDocument;
+        var body = getBody(doc);
+        setClass(body, "commandPreview");
+    },
+
+    attachListeners: function()
+    {
+        // Register event listeners.
+        Firebug.chrome.$("fbContentBox").addEventListener("keypress", this.onKeyPress, false);
+    },
+
     toggle: function(context)
     {
         var panel = Firebug.chrome.getSelectedPanel();
@@ -122,7 +140,7 @@ Firebug.CommandLine.Preview = extend(Firebug.Module,
         // The command line can't be multiline in other panels.
         collapse(chrome.$("fbCommandToggleSmall"), visible);
 
-        Firebug.chrome.setGlobalAttribute("cmd_toggleCommandPreview", "checked", visible);
+        chrome.setGlobalAttribute("cmd_toggleCommandPreview", "checked", visible);
 
         // Focus the command line.
         if (visible)
