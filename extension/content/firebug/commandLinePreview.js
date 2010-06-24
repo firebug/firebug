@@ -123,6 +123,10 @@ Firebug.CommandLine.Preview = extend(Firebug.Module,
         collapse(chrome.$("fbCommandToggleSmall"), visible);
 
         Firebug.chrome.setGlobalAttribute("cmd_toggleCommandPreview", "checked", visible);
+
+        // Focus the command line.
+        if (visible)
+            chrome.$("fbCommandLine").focus();
     },
 
     isVisible: function()
@@ -154,14 +158,7 @@ Firebug.CommandLine.Preview = extend(Firebug.Module,
         // ESC
         var target = event.target;
         if (target && event.keyCode == 27)
-        {
-            // Don't hide command line if there is a text inside.
-            var cmdLine = Firebug.chrome.$("fbCommandLine");
-            if (cmdLine.value)
-                return;
-
             this.toggle(FirebugContext);
-        }
     }
 });
 

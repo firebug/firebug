@@ -112,7 +112,6 @@ Firebug.ConsoleBase =
         if (context)
             return context.getPanel("console", noCreate);
     },
-
 };
 
 // ************************************************************************************************
