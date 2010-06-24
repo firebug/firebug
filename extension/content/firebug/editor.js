@@ -1141,6 +1141,7 @@ Firebug.AutoCompleter = function(getExprOffset, getRange, evaluator, selectMode,
 
         var vbox = completionPopup.ownerDocument.createElement("vbox");
         completionPopup.appendChild(vbox);
+        vbox.classList.add("fbCommandLineCompletions");
 
         var prefix = candidates[0].substr(0, userTyped);
         var pre = null;
@@ -1149,14 +1150,17 @@ Firebug.AutoCompleter = function(getExprOffset, getRange, evaluator, selectMode,
         {
             var hbox = completionPopup.ownerDocument.createElementNS("http://www.w3.org/1999/xhtml","div");
             pre = completionPopup.ownerDocument.createElementNS("http://www.w3.org/1999/xhtml","span");
-            pre.innerHTML = "<b>"+prefix+"</b>";
+            pre.innerHTML = "<b>"+prefix+"</b>";  // to do CSS
             var post = completionPopup.ownerDocument.createElementNS("http://www.w3.org/1999/xhtml","span");
             post.innerHTML = candidates[i].substr(userTyped);
             hbox.appendChild(pre);
             hbox.appendChild(post);
             vbox.appendChild(hbox);
+            pre.classList.add("userTypedText");
+            post.classList.add("completionText");
         }
 
+        completionPopup.currentTextBox = textBox;
         var cmdLine = $("fbCommandLine");  // should use something relative to textbox
         var anchor = textBox;  // cmdLine.ownerDocument.getAnonymousElementByAttribute(cmdLine, "anonid", "input");
         completionPopup.openPopup(anchor, "before_start", 0, 0, false, false);
@@ -1166,6 +1170,8 @@ Firebug.AutoCompleter = function(getExprOffset, getRange, evaluator, selectMode,
 
     this.hide = function()
     {
+    	delete completionPopup.currentTextBox;
+
         if (completionPopup.state == "closed")
             return false;
 
@@ -1201,6 +1207,41 @@ Firebug.AutoCompleter = function(getExprOffset, getRange, evaluator, selectMode,
             this.complete(context, textBox, this.input, true, false, true);
         }
     };
+
+    this.setCompletionOnEvent = function(event)
+    {
+    	if (completionPopup.currentTextBox)
+    	{
+    		var selected = event.target;
+    		while (selected && (selected.localName !== "div") )
+    			selected = selected.parentNode;
+
+    		if (selected)
+    		{
+    			var completion = selected.getElementsByClassName('completionText')[0].textContent;
+    			var textBox = completionPopup.currentTextBox;
+    			var start = textBox.selectionStart;
+    			var end = start + completion.length;
+    			textBox.value = textBox.value.substr(0, textBox.selectionStart) + completion;
+        		textBox.setSelectionRange(start, end);
+    		}
+    	}
+    };
+
+    this.acceptCompletion = function(event)
+    {
+    	if (completionPopup.currentTextBox)
+    	{
+    		var textBox = completionPopup.currentTextBox;
+    		textBox.setSelectionRange(textBox.selectionEnd, textBox.selectionEnd);  // accept completion by deselect
+    		this.hide();
+    	}
+    };
+
+    this.acceptCompletion = bind(this.acceptCompletion, this);
+
+    completionPopup.addEventListener("mouseover", this.setCompletionOnEvent, true);
+    completionPopup.addEventListener("click", this.acceptCompletion, true);
 };
 
 // ************************************************************************************************

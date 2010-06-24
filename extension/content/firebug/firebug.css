@@ -20,6 +20,10 @@ window[chromehidden~="toolbar"] #fbToolbar {
     -moz-binding: url("chrome://firebug/content/bindings.xml#largeCommandLine");
 }
 
+.fbCommandLineCompletions {
+	cursor: default;
+}
+
 textbox[type="fbSearchBox"] {
     -moz-binding: url("chrome://firebug/content/bindings.xml#searchBox");
 }
