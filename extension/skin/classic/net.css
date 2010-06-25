@@ -13,6 +13,7 @@
 .hideCategory-image .category-image,
 .hideCategory-xhr .category-xhr,
 .hideCategory-flash .category-flash,
+.hideCategory-media .category-media,
 .hideCategory-txt .category-txt,
 .hideCategory-bin .category-bin {
     display: none;

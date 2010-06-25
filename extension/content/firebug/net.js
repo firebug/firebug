@@ -80,6 +80,7 @@ const fileCategories =
     "xhr": 1,
     "image": 1,
     "flash": 1,
+    "media": 1,
     "txt": 1,
     "bin": 1
 };
@@ -96,7 +97,8 @@ const textFileCategories =
 const binaryFileCategories =
 {
     "bin": 1,
-    "flash": 1
+    "flash": 1,
+    "media": 1
 };
 
 const mimeCategoryMap =
@@ -120,7 +122,21 @@ const mimeCategoryMap =
     "image/png": "image",
     "image/bmp": "image",
     "application/x-shockwave-flash": "flash",
-    "video/x-flv": "flash"
+    "video/x-flv": "flash",
+    "audio/mpeg3": "media",
+    "audio/x-mpeg-3": "media",
+    "video/mpeg": "media",
+    "video/x-mpeg": "media",
+    "audio/ogg": "media",
+    "application/ogg": "media",
+    "application/x-ogg": "media",
+    "application/x-midi": "media",
+    "audio/midi": "media",
+    "audio/x-mid": "media",
+    "audio/x-midi": "media",
+    "music/crescendo": "media",
+    "audio/wav": "media",
+    "audio/x-wav": "media"
 };
 
 const binaryCategoryMap =
