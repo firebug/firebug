@@ -342,7 +342,7 @@ Firebug.ConsolePanel.prototype = extend(Firebug.ActivablePanel,
             this.filterLogRow(row, this.wasScrolledToBottom);
 
             if (FBTrace.DBG_CONSOLE)
-                FBTrace.sysout("console.append; wasScrolledToBottom " + this.wasScrolledToBottom);
+                FBTrace.sysout("console.append; wasScrolledToBottom " + this.wasScrolledToBottom+" "+row.textContent);
 
             if (this.wasScrolledToBottom)
                 scrollToBottom(this.panelNode);
@@ -359,6 +359,9 @@ Firebug.ConsolePanel.prototype = extend(Firebug.ActivablePanel,
                 FBTrace.sysout("ConsolePanel.clear");
             clearNode(this.panelNode);
             this.insertLogLimit(this.context);
+            
+            scrollToBottom(this.panelNode);
+            this.wasScrolledToBottom = true;
         }
     },
 
