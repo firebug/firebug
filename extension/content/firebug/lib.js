@@ -6857,7 +6857,6 @@ function deprecated(msg, fnc)
             var caller = Components.stack.caller;  // drop frame with deprecated()
             ERROR(explain+" "+ caller.toString());
 
-            debugger;
             this.nagged = true;
         }
         return fnc.apply(this, arguments);
