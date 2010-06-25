@@ -924,11 +924,14 @@ Firebug.AutoCompleter = function(getExprOffset, getRange, evaluator, selectMode,
     this.complete = function(context, textBox, cycle, reverse, offerOnly)
     {
         var value = textBox.value;
+        if (!value && noCompleteOnBlank)
+            return false;
+        
         var offset = textBox.selectionStart;
         var line = this.pickCandidates(value, offset, context, cycle, reverse);
 
         if (typeof(line) === "object")
-        	this.showCandidates(textBox, line, offerOnly);
+            this.showCandidates(textBox, line, offerOnly);
     };
 
     this.pickCandidates = function(value, offset, context, cycle, reverse)
@@ -949,13 +952,7 @@ Firebug.AutoCompleter = function(getExprOffset, getRange, evaluator, selectMode,
             // Find the part of the string that is being completed
             var range = getRange ? getRange(parsed, offset-parseStart, context) : null;
             if (!range)
-            {
-            	if (noCompleteOnBlank)
-            		return false;
-            	else
-            		range = {start: 0, end: parsed.length-1 };
-            }
-
+                    range = {start: 0, end: parsed.length-1 };
 
             var expr = parsed.substr(range.start, range.end-range.start+1);
             preExpr = parsed.substr(0, range.start);
@@ -1171,7 +1168,7 @@ Firebug.AutoCompleter = function(getExprOffset, getRange, evaluator, selectMode,
 
     this.hide = function()
     {
-    	delete completionPopup.currentTextBox;
+        delete completionPopup.currentTextBox;
 
         if (completionPopup.state == "closed")
             return false;
@@ -1182,13 +1179,13 @@ Firebug.AutoCompleter = function(getExprOffset, getRange, evaluator, selectMode,
 
     this.clear = function()
     {
-    	var textBox = completionPopup.currentTextBox;
-    	if (textBox)
-    	{
-    		textBox.value = textBox.value.substr(0, textBox.selectionStart)+textBox.value.substr(textBox.selectionEnd);
-    		this.hide();
-    	}
-    	this.reset();
+        var textBox = completionPopup.currentTextBox;
+        if (textBox)
+        {
+            textBox.value = textBox.value.substr(0, textBox.selectionStart)+textBox.value.substr(textBox.selectionEnd);
+            this.hide();
+        }
+        this.reset();
     };
 
     this.handledKeyPress = function(event, context, textBox)
@@ -1204,12 +1201,12 @@ Firebug.AutoCompleter = function(getExprOffset, getRange, evaluator, selectMode,
         }
         else if (event.keyCode === 9) // TAB
         {
-        	if (isShift(event))
-        		this.complete(context, textBox, true, true, true);
-        	else
-        		this.complete(context, textBox, true, false, true);
+            if (isShift(event))
+                this.complete(context, textBox, true, true, true);
+            else
+                this.complete(context, textBox, true, false, true);
 
-        	cancelEvent(event);
+            cancelEvent(event);
         }
         else if (event.keyCode === 8) // backspace
         {
@@ -1217,45 +1214,45 @@ Firebug.AutoCompleter = function(getExprOffset, getRange, evaluator, selectMode,
         }
         else if (event.charCode) // then a character was typed...
         {
-        	var char = String.fromCharCode(event.charCode);
-        	if (!reJavascriptChar.test(char)) // ...but that character was not part of an identifier
-        	{
-        		textBox.setSelectionRange(textBox.selectionEnd, textBox.selectionEnd);  // accept completion by deselect
-        		this.hide(); // close the popup
-        		this.reset(); // start the completions fresh
-        	}
+            var char = String.fromCharCode(event.charCode);
+            if (!reJavascriptChar.test(char)) // ...but that character was not part of an identifier
+            {
+                textBox.setSelectionRange(textBox.selectionEnd, textBox.selectionEnd);  // accept completion by deselect
+                this.hide(); // close the popup
+                this.reset(); // start the completions fresh
+            }
         }
 
     };
 
     this.setCompletionOnEvent = function(event)
     {
-    	if (completionPopup.currentTextBox)
-    	{
-    		var selected = event.target;
-    		while (selected && (selected.localName !== "div") )
-    			selected = selected.parentNode;
+        if (completionPopup.currentTextBox)
+        {
+            var selected = event.target;
+            while (selected && (selected.localName !== "div") )
+                selected = selected.parentNode;
 
-    		if (selected)
-    		{
-    			var completion = selected.getElementsByClassName('completionText')[0].textContent;
-    			var textBox = completionPopup.currentTextBox;
-    			var start = textBox.selectionStart;
-    			var end = start + completion.length;
-    			textBox.value = textBox.value.substr(0, textBox.selectionStart) + completion;
-        		textBox.setSelectionRange(start, end);
-    		}
-    	}
+            if (selected)
+            {
+                var completion = selected.getElementsByClassName('completionText')[0].textContent;
+                var textBox = completionPopup.currentTextBox;
+                var start = textBox.selectionStart;
+                var end = start + completion.length;
+                textBox.value = textBox.value.substr(0, textBox.selectionStart) + completion;
+                textBox.setSelectionRange(start, end);
+            }
+        }
     };
 
     this.acceptCompletion = function(event)
     {
-    	if (completionPopup.currentTextBox)
-    	{
-    		var textBox = completionPopup.currentTextBox;
-    		textBox.setSelectionRange(textBox.selectionEnd, textBox.selectionEnd);  // accept completion by deselect
-    		this.hide();
-    	}
+        if (completionPopup.currentTextBox)
+        {
+            var textBox = completionPopup.currentTextBox;
+            textBox.setSelectionRange(textBox.selectionEnd, textBox.selectionEnd);  // accept completion by deselect
+            this.hide();
+        }
     };
 
     this.acceptCompletion = bind(this.acceptCompletion, this);

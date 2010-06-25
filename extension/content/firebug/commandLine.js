@@ -618,7 +618,8 @@ Firebug.CommandLine = extend(Firebug.Module,
 
     destroyContext: function(context, persistedState)
     {
-         // our work is done in the Console
+        this.autoCompleter.clear();
+         // more of our work is done in the Console
     },
 
     showPanel: function(browser, panel)
@@ -682,9 +683,9 @@ Firebug.CommandLine = extend(Firebug.Module,
 
         if (!commandLine.value) // don't complete on empty command line
         {
-        	this.autoCompleter.reset();
+            this.autoCompleter.reset();
             this.autoCompleter.hide();
-        	return;
+            return;
         }
 
         this.autoCompleter.complete(FirebugContext, commandLine, true, false, true);
@@ -702,7 +703,7 @@ Firebug.CommandLine = extend(Firebug.Module,
 
         if (!Firebug.migrations.commandLineTab)
         {
-        	var textBox = Firebug.chrome.$('fbCommandLine');
+            var textBox = Firebug.chrome.$('fbCommandLine');
             textBox.value = "In Firebug 1.6, TAB cycles completions";
             textBox.select();
             Firebug.migrations.commandLineTab = true;
