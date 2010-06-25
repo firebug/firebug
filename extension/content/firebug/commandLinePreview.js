@@ -134,22 +134,29 @@ Firebug.CommandLine.Preview = extend(Firebug.Module,
     setVisible: function(visible)
     {
         var chrome = Firebug.chrome;
+        var preview = chrome.$("fbCommandPreview");
+        var splitter = chrome.$("fbCommandPreviewSplitter")
+        var cmdbox = chrome.$("fbCommandBox");
+        var toggle = chrome.$("fbCommandToggleSmall");
+        var cmdline = chrome.$("fbCommandLine");
 
-        if (visible == !isCollapsed(chrome.$("fbCommandPreview")))
+        // If all the visual parts are already visible then bail out.
+        if (visible && !isCollapsed(preview) && !isCollapsed(splitter) &&
+            !isCollapsed(cmdbox) && !isCollapsed(toggle))
             return;
 
-        collapse(chrome.$("fbCommandPreview"), !visible);
-        collapse(chrome.$("fbCommandPreviewSplitter"), !visible);
-        collapse(chrome.$("fbCommandBox"), !visible);
+        collapse(preview, !visible);
+        collapse(splitter, !visible);
+        collapse(cmdbox, !visible);
 
         // The command line can't be multiline in other panels.
-        collapse(chrome.$("fbCommandToggleSmall"), visible);
+        collapse(toggle, visible);
 
         chrome.setGlobalAttribute("cmd_toggleCommandPreview", "checked", visible);
 
         // Focus the command line if it has been just displayed.
         if (visible)
-            chrome.$("fbCommandLine").focus();
+            cmdline.focus();
     },
 
     isVisible: function()
