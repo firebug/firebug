@@ -89,6 +89,7 @@ Firebug.CommandLine.Preview = extend(Firebug.Module,
         var disabled = consolePanelType.prototype.isEnabled() ? "false" : "true";
         if (isConsole)
             disabled = "true";
+
         chrome.$("fbCommandPreviewButton").setAttribute("disabled", disabled);
 
         // Make sure the console panel is attached to the proper document
@@ -132,6 +133,9 @@ Firebug.CommandLine.Preview = extend(Firebug.Module,
 
     setVisible: function(visible)
     {
+        if (visible == this.isVisible())
+            return;
+
         var chrome = Firebug.chrome;
         collapse(chrome.$("fbCommandPreview"), !visible);
         collapse(chrome.$("fbCommandPreviewSplitter"), !visible);
@@ -142,7 +146,7 @@ Firebug.CommandLine.Preview = extend(Firebug.Module,
 
         chrome.setGlobalAttribute("cmd_toggleCommandPreview", "checked", visible);
 
-        // Focus the command line.
+        // Focus the command line if it has been just displayed.
         if (visible)
             chrome.$("fbCommandLine").focus();
     },
