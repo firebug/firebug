@@ -261,6 +261,30 @@ Firebug.Profiler.ProfileTable = domplate(
 
     sort: function(table, colIndex, numerical)
     {
+        sortAscending = function()
+        {
+            removeClass(header, "sortedDescending");
+            setClass(header, "sortedAscending");
+            header.setAttribute("aria-sort", "ascending");
+            
+            header.sorted = -1;
+            
+            for (var i = 0; i < values.length; ++i)
+                tbody.appendChild(values[i].row);
+        },
+
+        sortDescending = function()
+        {
+          removeClass(header, "sortedAscending");
+          setClass(header, "sortedDescending");
+          header.setAttribute("aria-sort", "descending")
+
+          header.sorted = 1;
+
+          for (var i = values.length-1; i >= 0; --i)
+              tbody.appendChild(values[i].row);
+        }
+        
         var tbody = getChildByClass(table, "profileTbody");
         var thead = getChildByClass(table, "profileThead");
 
@@ -283,27 +307,27 @@ Firebug.Profiler.ProfileTable = domplate(
         var header = headerRow.childNodes[colIndex];
         setClass(header, "headerSorted");
 
-        if (!header.sorted || header.sorted == 1)
+        if (numerical)
         {
-            removeClass(header, "sortedDescending");
-            setClass(header, "sortedAscending");
-            header.setAttribute("aria-sort", "ascending");
-
-            header.sorted = -1;
-
-            for (var i = 0; i < values.length; ++i)
-                tbody.appendChild(values[i].row);
+            if (!header.sorted || header.sorted == -1)
+            {
+                sortDescending();
+            }
+            else
+            {
+                sortAscending();
+            }
         }
         else
         {
-            removeClass(header, "sortedAscending");
-            setClass(header, "sortedDescending");
-            header.setAttribute("aria-sort", "descending")
-
-            header.sorted = 1;
-
-            for (var i = values.length-1; i >= 0; --i)
-                tbody.appendChild(values[i].row);
+            if (!header.sorted || header.sorted == -1)
+            {
+                sortAscending();
+            }
+            else
+            {
+                sortDescending();
+            }
         }
     }
 });
