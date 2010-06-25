@@ -133,10 +133,11 @@ Firebug.CommandLine.Preview = extend(Firebug.Module,
 
     setVisible: function(visible)
     {
-        if (visible == this.isVisible())
+        var chrome = Firebug.chrome;
+
+        if (visible == !isCollapsed(chrome.$("fbCommandPreview")))
             return;
 
-        var chrome = Firebug.chrome;
         collapse(chrome.$("fbCommandPreview"), !visible);
         collapse(chrome.$("fbCommandPreviewSplitter"), !visible);
         collapse(chrome.$("fbCommandBox"), !visible);
