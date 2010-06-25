@@ -104,7 +104,7 @@ Firebug.CommandLine.Preview = extend(Firebug.Module,
     setPreviewBrowserStyle: function(chrome)
     {
         // Set additional style so we can make the panelNode-console node
-        // always visible regardles on the currently selected panel.
+        // always visible regardless of the currently selected panel.
         var doc = chrome.$("fbCommandPreviewBrowser").contentDocument;
         var body = getBody(doc);
         setClass(body, "commandPreview");
@@ -156,7 +156,14 @@ Firebug.CommandLine.Preview = extend(Firebug.Module,
 
         // Focus the command line if it has been just displayed.
         if (visible)
+        {
+        	setTimeout(function scrollAfterDisplay()
+        	{
+        		var console = FirebugContext.getPanel("console", true);  // the command line result won't be visible unless we have scrollToBottom
+                scrollToBottom(console.panelNode);
+        	});
             cmdline.focus();
+        }
     },
 
     isVisible: function()

@@ -169,6 +169,7 @@ top.Firebug =
     chrome: FirebugChrome,
 
     isInitialized: false,
+    migrations: {},
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
     // Initialization

@@ -700,6 +700,14 @@ Firebug.CommandLine = extend(Firebug.Module,
     {
         Firebug.CommandLine.attachConsoleOnFocus();
 
+        if (!Firebug.migrations.commandLineTab)
+        {
+        	var textBox = Firebug.chrome.$('fbCommandLine');
+            textBox.value = "In Firebug 1.6, TAB cycles completions";
+            textBox.select();
+            Firebug.migrations.commandLineTab = true;
+        }
+
         if (!Firebug.CommandLine.isAttached(FirebugContext))
         {
             return Firebug.CommandLine.isReadyElsePreparing(FirebugContext);
