@@ -181,6 +181,12 @@ top.FirebugChrome =
             doc2.addEventListener("mousedown", onPanelMouseDown, false);
             panelBar2.addEventListener("selectPanel", onSelectedSidePanel, false);
 
+            var doc3 = cmdPreviewBrowser.contentDocument;
+            doc3.addEventListener("mouseover", onPanelMouseOver, false);
+            doc3.addEventListener("mouseout", onPanelMouseOut, false);
+            doc3.addEventListener("mousedown", onPanelMouseDown, false);
+            doc3.addEventListener("click", onPanelClick, false);
+
             var mainTabBox = panelBar1.ownerDocument.getElementById("fbPanelBar1-tabBox");
             mainTabBox.addEventListener("mousedown", onMainTabBoxMouseDown, false);
 
@@ -221,6 +227,12 @@ top.FirebugChrome =
         doc2.removeEventListener("mouseout", onPanelMouseOut, false);
         doc2.removeEventListener("mousedown", onPanelMouseDown, false);
         doc2.removeEventListener("click", onPanelClick, false);
+
+        var doc3 = cmdPreviewBrowser.contentDocument;
+        doc3.removeEventListener("mouseover", onPanelMouseOver, false);
+        doc3.removeEventListener("mouseout", onPanelMouseOut, false);
+        doc3.removeEventListener("mousedown", onPanelMouseDown, false);
+        doc3.removeEventListener("click", onPanelClick, false);
 
         var mainTabBox = panelBar1.ownerDocument.getElementById("fbPanelBar1-tabBox");
         mainTabBox.removeEventListener("mousedown", onMainTabBoxMouseDown, false);
