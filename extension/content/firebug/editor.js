@@ -892,6 +892,7 @@ Firebug.AutoCompleter = function(getExprOffset, getRange, evaluator, selectMode,
     var postExpr = null;
     var completionPopup = $("fbCommandLineCompletionList");
     var commandCompletionLineLimit = 40;
+    var reJavascriptChar = /[a-zA-Z0-9$_]/;
 
     this.revert = function(textBox)
     {
@@ -1179,9 +1180,20 @@ Firebug.AutoCompleter = function(getExprOffset, getRange, evaluator, selectMode,
         return true;
     };
 
+    this.clear = function()
+    {
+    	var textBox = completionPopup.currentTextBox;
+    	if (textBox)
+    	{
+    		textBox.value = textBox.value.substr(0, textBox.selectionStart)+textBox.value.substr(textBox.selectionEnd);
+    		this.hide();
+    	}
+    	this.reset();
+    };
+
     this.handledKeyPress = function(event, context, textBox)
     {
-        if (event.altKey || event.ctrlKey || event.metaKey || event.shiftKey)
+        if (event.altKey || event.ctrlKey || event.metaKey)
             return false;
 
         if (event.keyCode == 27) // ESC
@@ -1192,20 +1204,28 @@ Firebug.AutoCompleter = function(getExprOffset, getRange, evaluator, selectMode,
         }
         else if (event.keyCode === 9) // TAB
         {
-            textBox.setSelectionRange(textBox.selectionEnd, textBox.selectionEnd);  // accept completion by deselect
+        	if (isShift(event))
+        		this.complete(context, textBox, true, true, true);
+        	else
+        		this.complete(context, textBox, true, false, true);
+
+        	cancelEvent(event);
         }
         else if (event.keyCode === 8) // backspace
         {
             textBox.selectionStart = textBox.selectionStart - 1;
         }
-        else if (event.keyCode === 38) // up arrow
+        else if (event.charCode) // then a character was typed...
         {
-            this.complete(context, textBox, this.input, true, true, true);
+        	var char = String.fromCharCode(event.charCode);
+        	if (!reJavascriptChar.test(char)) // ...but that character was not part of an identifier
+        	{
+        		textBox.setSelectionRange(textBox.selectionEnd, textBox.selectionEnd);  // accept completion by deselect
+        		this.hide(); // close the popup
+        		this.reset(); // start the completions fresh
+        	}
         }
-        else if (event.keyCode === 39) // down arrow
-        {
-            this.complete(context, textBox, this.input, true, false, true);
-        }
+
     };
 
     this.setCompletionOnEvent = function(event)

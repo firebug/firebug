@@ -462,7 +462,6 @@ Firebug.CommandLine = extend(Firebug.Module,
     {
         var commandLine = getCommandLine(context);
         context.commandLineText = commandLine.value;
-        this.autoCompleter.reset();
     },
 
     complete: function(context, reverse)
@@ -694,7 +693,7 @@ Firebug.CommandLine = extend(Firebug.Module,
 
     onCommandLineBlur: function(event)
     {
-        this.autoCompleter.hide();
+        this.autoCompleter.clear();
     },
 
     onCommandLineFocus: function(event)

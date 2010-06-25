@@ -1527,15 +1527,6 @@
                 Firebug.CommandLine.checkOverflow(FirebugContext);
         ]]></handler>
 
-        <handler event="keypress" keycode="VK_TAB"><![CDATA[
-            if (this.value == "")
-            {
-                return;
-            }
-            Firebug.CommandLine.complete(FirebugContext, FBL.isShift(event));
-            event.preventDefault();
-        ]]></handler>
-
         <handler event="keypress" keycode="VK_RETURN" modifiers="" preventdefault="true"><![CDATA[
             Firebug.CommandLine.enter(FirebugContext);
         ]]></handler>
