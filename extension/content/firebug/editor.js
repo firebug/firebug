@@ -926,7 +926,7 @@ Firebug.AutoCompleter = function(getExprOffset, getRange, evaluator, selectMode,
         var value = textBox.value;
         if (!value && noCompleteOnBlank)
             return false;
-        
+
         var offset = textBox.selectionStart;
         var line = this.pickCandidates(value, offset, context, cycle, reverse);
 
@@ -1182,10 +1182,15 @@ Firebug.AutoCompleter = function(getExprOffset, getRange, evaluator, selectMode,
         var textBox = completionPopup.currentTextBox;
         if (textBox)
         {
-            textBox.value = textBox.value.substr(0, textBox.selectionStart)+textBox.value.substr(textBox.selectionEnd);
+            textBox.value = this.getVerifiedText(textBox);
             this.hide();
         }
         this.reset();
+    };
+
+    this.getVerifiedText = function(textBox)
+    {
+    	return textBox.value.substr(0, textBox.selectionStart)+textBox.value.substr(textBox.selectionEnd);
     };
 
     this.handledKeyPress = function(event, context, textBox)
@@ -1212,6 +1217,7 @@ Firebug.AutoCompleter = function(getExprOffset, getRange, evaluator, selectMode,
         {
             textBox.selectionStart = textBox.selectionStart - 1;
         }
+        /*
         else if (event.charCode) // then a character was typed...
         {
             var char = String.fromCharCode(event.charCode);
@@ -1222,7 +1228,7 @@ Firebug.AutoCompleter = function(getExprOffset, getRange, evaluator, selectMode,
                 this.reset(); // start the completions fresh
             }
         }
-
+*/
     };
 
     this.setCompletionOnEvent = function(event)

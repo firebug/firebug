@@ -311,7 +311,7 @@ Firebug.CommandLine = extend(Firebug.Module,
     enter: function(context, command)
     {
         var commandLine = getCommandLine(context);
-        var expr = command ? command : commandLine.value;
+        var expr = command ? command : this.autoCompleter.getVerifiedText(commandLine);
         if (expr == "")
             return;
 
@@ -356,7 +356,7 @@ Firebug.CommandLine = extend(Firebug.Module,
     enterMenu: function(context)
     {
         var commandLine = getCommandLine(context);
-        var expr = commandLine.value;
+        var expr = this.autoCompleter.getVerifiedText(commandLine);
         if (expr == "")
             return;
 
@@ -377,7 +377,7 @@ Firebug.CommandLine = extend(Firebug.Module,
     enterInspect: function(context)
     {
         var commandLine = getCommandLine(context);
-        var expr = commandLine.value;
+        var expr = this.autoCompleter.getVerifiedText(commandLine);
         if (expr == "")
             return;
 
@@ -401,7 +401,7 @@ Firebug.CommandLine = extend(Firebug.Module,
     copyBookmarklet: function(context)
     {
         var commandLine = getCommandLine(context);
-        var expr = "javascript: " + stripNewLines(commandLine.value);
+        var expr = "javascript: " + stripNewLines(this.autoCompleter.getVerifiedText(commandLine));
         copyToClipboard(expr);
     },
 
@@ -461,14 +461,14 @@ Firebug.CommandLine = extend(Firebug.Module,
     update: function(context)
     {
         var commandLine = getCommandLine(context);
-        context.commandLineText = commandLine.value;
+        context.commandLineText = this.autoCompleter.getVerifiedText(commandLine);
     },
 
     complete: function(context, reverse)
     {
         var commandLine = getCommandLine(context);
         this.autoCompleter.complete(context, commandLine, true, reverse);
-        context.commandLineText = commandLine.value;
+        context.commandLineText = this.autoCompleter.getVerifiedText(commandLine);
         this.autoCompleter.reset();
     },
 
@@ -540,7 +540,7 @@ Firebug.CommandLine = extend(Firebug.Module,
     {
         var commandLine = getCommandLine(context);
 
-        commandHistory[commandPointer] = commandLine.value;
+        commandHistory[commandPointer] = this.autoCompleter.getVerifiedText(commandLine);
 
         if (dir < 0)
         {
@@ -681,7 +681,7 @@ Firebug.CommandLine = extend(Firebug.Module,
     {
         var commandLine = getCommandLine(FirebugContext);
 
-        if (!commandLine.value) // don't complete on empty command line
+        if (!this.autoCompleter.getVerifiedText(commandLine)) // don't complete on empty command line
         {
             this.autoCompleter.reset();
             this.autoCompleter.hide();
@@ -689,7 +689,7 @@ Firebug.CommandLine = extend(Firebug.Module,
         }
 
         this.autoCompleter.complete(FirebugContext, commandLine, true, false, true);
-        FirebugContext.commandLineText = commandLine.value;
+        FirebugContext.commandLineText = this.autoCompleter.getVerifiedText(commandLine);
     },
 
     onCommandLineBlur: function(event)
