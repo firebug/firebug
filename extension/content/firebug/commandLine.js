@@ -704,7 +704,7 @@ Firebug.CommandLine = extend(Firebug.Module,
         if (!Firebug.migrations.commandLineTab)
         {
             var textBox = Firebug.chrome.$('fbCommandLine');
-            textBox.value = "In Firebug 1.6, TAB cycles completions";
+            textBox.value = "In Firebug 1.6, TAB cycles completions, right arrow accepts";
             textBox.select();
             Firebug.migrations.commandLineTab = true;
         }
