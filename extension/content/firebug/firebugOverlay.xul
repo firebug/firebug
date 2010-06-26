@@ -302,7 +302,7 @@
                                             <toolbarbutton id="fbNetFilter-flash" label="&firebug.Flash;" type="radio"
                                                 class="toolbar-text-button" group="firebugNetFilter"
                                                 oncommand="Firebug.NetMonitor.onToggleFilter(FirebugContext, 'flash')"/>
-                                            <toolbarbutton id="fbNetFilter-media" label="&firebug.Media;" type="radio"
+                                            <toolbarbutton id="fbNetFilter-media" label="net.filter.Media" type="radio"
                                                 class="toolbar-text-button" group="firebugNetFilter"
                                                 oncommand="Firebug.NetMonitor.onToggleFilter(FirebugContext, 'media')"/>
                                         </hbox>
