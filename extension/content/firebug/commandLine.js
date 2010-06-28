@@ -346,6 +346,8 @@ Firebug.CommandLine = extend(Firebug.Module,
 
             if (noscript && noScriptURI)
                 noscript.setJSEnabled(noScriptURI, false);
+
+            this.autoCompleter.reset();
         }
         else
         {
