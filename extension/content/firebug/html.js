@@ -1320,7 +1320,7 @@ var TextTag = Firebug.HTMLPanel.TextTag =
 Firebug.HTMLPanel.CompleteElement = domplate(FirebugReps.Element,
 {
     tag:
-        DIV({"class": "nodeBox open $object|getHidden repIgnore", _repObject: "$object", role : 'presentation'},
+        DIV({"class": "nodeBox open $object|getHidden", _repObject: "$object", role : 'presentation'},
             DIV({"class": "nodeLabel", role: "presentation"},
                 SPAN({"class": "nodeLabelBox repTarget repTarget", role : 'treeitem', 'aria-expanded' : 'false'},
                     "&lt;",
@@ -1390,7 +1390,7 @@ Firebug.HTMLPanel.SoloElement = domplate(Firebug.HTMLPanel.CompleteElement,
 Firebug.HTMLPanel.Element = domplate(FirebugReps.Element,
 {
     tag:
-    DIV({"class": "nodeBox containerNodeBox $object|getHidden repIgnore", _repObject: "$object", role :"presentation"},
+    DIV({"class": "nodeBox containerNodeBox $object|getHidden", _repObject: "$object", role :"presentation"},
         DIV({"class": "nodeLabel", role: "presentation"},
             IMG({"class": "twisty", role: "presentation"}),
             SPAN({"class": "nodeLabelBox repTarget", role : 'treeitem', 'aria-expanded' : 'false'},
@@ -1414,7 +1414,7 @@ Firebug.HTMLPanel.Element = domplate(FirebugReps.Element,
 Firebug.HTMLPanel.HTMLHtmlElement = domplate(FirebugReps.Element,
 {
     tag:
-        DIV({"class": "nodeBox htmlNodeBox containerNodeBox $object|getHidden repIgnore", _repObject: "$object", role :"presentation"},
+        DIV({"class": "nodeBox htmlNodeBox containerNodeBox $object|getHidden", _repObject: "$object", role :"presentation"},
             DIV({"class": "docType $object"},
                 "$object|getDocType"
             ),
@@ -1446,7 +1446,7 @@ Firebug.HTMLPanel.HTMLHtmlElement = domplate(FirebugReps.Element,
 Firebug.HTMLPanel.TextElement = domplate(FirebugReps.Element,
 {
     tag:
-        DIV({"class": "nodeBox textNodeBox $object|getHidden repIgnore", _repObject: "$object", role : 'presentation'},
+        DIV({"class": "nodeBox textNodeBox $object|getHidden", _repObject: "$object", role : 'presentation'},
             DIV({"class": "nodeLabel", role: "presentation"},
                 SPAN({"class": "nodeLabelBox repTarget", role : 'treeitem'},
                     "&lt;",
@@ -1465,7 +1465,7 @@ Firebug.HTMLPanel.TextElement = domplate(FirebugReps.Element,
 Firebug.HTMLPanel.EmptyElement = domplate(FirebugReps.Element,
 {
     tag:
-        DIV({"class": "nodeBox emptyNodeBox $object|getHidden repIgnore", _repObject: "$object", role : 'presentation'},
+        DIV({"class": "nodeBox emptyNodeBox $object|getHidden", _repObject: "$object", role : 'presentation'},
             DIV({"class": "nodeLabel", role: "presentation"},
                 SPAN({"class": "nodeLabelBox repTarget", role : 'treeitem'},
                     "&lt;",
@@ -1480,7 +1480,7 @@ Firebug.HTMLPanel.EmptyElement = domplate(FirebugReps.Element,
 Firebug.HTMLPanel.XEmptyElement = domplate(FirebugReps.Element,
 {
     tag:
-        DIV({"class": "nodeBox emptyNodeBox $object|getHidden repIgnore", _repObject: "$object", role : 'presentation'},
+        DIV({"class": "nodeBox emptyNodeBox $object|getHidden", _repObject: "$object", role : 'presentation'},
             DIV({"class": "nodeLabel", role: "presentation"},
                 SPAN({"class": "nodeLabelBox repTarget", role : 'treeitem'},
                     "&lt;",
