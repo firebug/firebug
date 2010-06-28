@@ -685,7 +685,8 @@
 
 <binding id="panelTabMenu" display="xul:button" extends="chrome://global/content/bindings/toolbarbutton.xml#toolbarbutton">
     <content>
-        <xul:menupopup anonid="popup" />
+        <!-- Specify an empty tooltiptext to avoid displaying tooltip from the tab -->
+        <xul:menupopup anonid="popup" tooltiptext=""/>
         <xul:image anonid="menuTarget" class="menuTarget"/>
     </content>
     <implementation>

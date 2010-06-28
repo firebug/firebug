@@ -157,11 +157,12 @@ Firebug.CommandLine.Preview = extend(Firebug.Module,
         // Focus the command line if it has been just displayed.
         if (visible)
         {
-        	setTimeout(function scrollAfterDisplay()
-        	{
-        		var console = FirebugContext.getPanel("console", true);  // the command line result won't be visible unless we have scrollToBottom
+            setTimeout(function scrollAfterDisplay()
+            {
+                // the command line result won't be visible unless we have scrollToBottom
+                var console = FirebugContext.getPanel("console", true);
                 scrollToBottom(console.panelNode);
-        	});
+            });
             cmdline.focus();
         }
     },
