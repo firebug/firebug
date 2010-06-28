@@ -97,6 +97,10 @@ Firebug.CommandLine.Preview = extend(Firebug.Module,
         // for all the panels).
         if (panel)
             this.reattach(panel.context);
+
+        // If the the console panel is opened on another panel, simulate show event for it.
+        if (!isConsole && visible)
+            this.showPreviewPanel(panel.context);
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
@@ -129,6 +133,22 @@ Firebug.CommandLine.Preview = extend(Firebug.Module,
         this.setVisible(!visible);
 
         this.reattach(context);
+
+        this.showPreviewPanel(context);
+    },
+
+    showPreviewPanel: function(context)
+    {
+        // If the the console panel is opened on another panel, simulate show event for it.
+        if (this.isVisible())
+        {
+            var panel = context.getPanel("console", true);
+            if (panel)
+            {
+                var state = Firebug.getPanelState(panel);
+                panel.show(state);
+            }
+        }
     },
 
     setVisible: function(visible)
@@ -156,15 +176,7 @@ Firebug.CommandLine.Preview = extend(Firebug.Module,
 
         // Focus the command line if it has been just displayed.
         if (visible)
-        {
-            setTimeout(function scrollAfterDisplay()
-            {
-                // the command line result won't be visible unless we have scrollToBottom
-                var console = FirebugContext.getPanel("console", true);
-                scrollToBottom(console.panelNode);
-            });
             cmdline.focus();
-        }
     },
 
     isVisible: function()
@@ -178,9 +190,8 @@ Firebug.CommandLine.Preview = extend(Firebug.Module,
         var consolePanelType = Firebug.getPanelType("console");
         var doc = Firebug.chrome.getPanelDocument(consolePanelType);
 
-        //xxxHonza, XXXjjb: this creates the panel.
         // Console doesn't have to be available (e.g. disabled)
-        var panel = context.getPanel("console");
+        var panel = context.getPanel("console", true);
         if (panel)
             panel.reattach(doc);
     },

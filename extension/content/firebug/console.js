@@ -359,7 +359,7 @@ Firebug.ConsolePanel.prototype = extend(Firebug.ActivablePanel,
                 FBTrace.sysout("ConsolePanel.clear");
             clearNode(this.panelNode);
             this.insertLogLimit(this.context);
-            
+
             scrollToBottom(this.panelNode);
             this.wasScrolledToBottom = true;
         }
