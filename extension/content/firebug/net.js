@@ -4900,9 +4900,9 @@ Firebug.NetMonitor.NetHttpObserver =
         {
             networkContext.post(startFile, [request, win]);
 
-            // We need to track the request now since activity observer is not used in case
-            // the response comes from BF cache. If it's regular HTTP requests the timing
-            // is properly overriden by activity observer (ACTIVITY_SUBTYPE_REQUEST_HEADER).
+            // We need to track the request now since the activity observer is not used in case
+            // the response comes from BF cache. If it's a regular HTTP request the timing
+            // is properly overridden by the activity observer (ACTIVITY_SUBTYPE_REQUEST_HEADER).
             if (Firebug.netShowBFCacheResponses || !Ci.nsIHttpActivityDistributor)
             {
                 var xhr = Utils.isXHR(request);
