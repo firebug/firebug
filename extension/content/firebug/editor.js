@@ -1215,20 +1215,10 @@ Firebug.AutoCompleter = function(getExprOffset, getRange, evaluator, selectMode,
         }
         else if (event.keyCode === 8) // backspace
         {
-            textBox.selectionStart = textBox.selectionStart - 1;
+            if (textBox.selectionStart && textBox.seletionStart !== textBox.selectionEnd)
+            	textBox.selectionStart = textBox.selectionStart - 1;
         }
-        /*
-        else if (event.charCode) // then a character was typed...
-        {
-            var char = String.fromCharCode(event.charCode);
-            if (!reJavascriptChar.test(char)) // ...but that character was not part of an identifier
-            {
-                textBox.setSelectionRange(textBox.selectionEnd, textBox.selectionEnd);  // accept completion by deselect
-                this.hide(); // close the popup
-                this.reset(); // start the completions fresh
-            }
-        }
-*/
+
     };
 
     this.setCompletionOnEvent = function(event)
