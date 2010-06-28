@@ -1365,7 +1365,7 @@ CSSElementPanel.prototype = extend(Firebug.CSSStyleSheetPanel.prototype,
                 var ruleId = rule.selectorText+"/"+line;
                 var sourceLink = new SourceLink(href, line, "css", rule, instance);
 
-                this.markOverridenProps(props, usedProps, inheritMode);
+                this.markOverriddenProps(props, usedProps, inheritMode);
 
                 rules.splice(0, 0, {rule: rule, id: ruleId,
                         selector: rule.selectorText, sourceLink: sourceLink,
@@ -1381,7 +1381,7 @@ CSSElementPanel.prototype = extend(Firebug.CSSStyleSheetPanel.prototype,
             FBTrace.sysout("getElementRules "+rules.length+" rules for "+getElementXPath(element), rules);
     },
 
-    markOverridenProps: function(props, usedProps, inheritMode)
+    markOverriddenProps: function(props, usedProps, inheritMode)
     {
         for (var i = 0; i < props.length; ++i)
         {
@@ -1412,7 +1412,7 @@ CSSElementPanel.prototype = extend(Firebug.CSSStyleSheetPanel.prototype,
         this.addOldProperties(this.context, getElementXPath(element), inheritMode, props);
 
         sortProperties(props);
-        this.markOverridenProps(props, usedProps, inheritMode);
+        this.markOverriddenProps(props, usedProps, inheritMode);
 
         if (props.length)
             rules.splice(0, 0,
