@@ -1392,9 +1392,9 @@ CSSElementPanel.prototype = extend(Firebug.CSSStyleSheetPanel.prototype,
                 for (var j = 0; j < deadProps.length; ++j)
                 {
                     var deadProp = deadProps[j];
-                    if (!deadProp.disabled && !deadProp.wasInherited && deadProp.important && !prop.important)
+                    if (!deadProp.disabled && !deadProp.wasInherited && deadProp.important && !prop.important && prop.value.indexOf("%") == -1)
                         prop.overridden = true;  // new occurrence overridden
-                    else if (!prop.disabled)
+                    else if (!prop.disabled && prop.value.indexOf("%") == -1)
                         deadProp.overridden = true;  // previous occurrences overridden
                 }
             }
