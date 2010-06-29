@@ -2321,6 +2321,7 @@ this.createMenuItem = function(popup, item, before)
         popup.insertBefore(menuitem, before);
     else
         popup.appendChild(menuitem);
+
     return menuitem;
 };
 
@@ -2358,14 +2359,16 @@ this.setItemIntoElement = function(element, item)
         element.setAttribute("option", item.option);
 
     if (item.tooltiptext)
-        element.setAttribute("tooltiptext", item.tooltiptext);
+    {
+        var tooltiptext = item.nol10n ? item.tooltiptext : this.$STR(item.tooltiptext);
+        element.setAttribute("tooltiptext", tooltiptext);
+    }
 
     if (item.className)
         FBL.setClass(element, item.className);
 
     return element;
 }
-
 
 this.createMenuHeader = function(popup, item)
 {
@@ -2393,16 +2396,39 @@ this.createMenuSeparator = function(popup, before)
     return menuitem;
 };
 
-this.optionMenu = function(label, option)
+/**
+ * Create an option menu item definition. This method is usually used in methods like:
+ * {@link Firebug.Panel.getOptionsMenuItems} or {@link Firebug.Panel.getContextMenuItems}.
+ * 
+ * @param {String} label Name of the string from *.properties file.
+ * @param {String} option Name of the associated option.
+ * @param {String, Optional} tooltiptext Optional name of the string from *.properties file
+ *      that should be used as a tooltip for the menu.
+ */
+this.optionMenu = function(label, option, tooltiptext)
 {
-    return {label: label, type: "checkbox", checked: Firebug[option], option: option,
-        command: this.bindFixed(Firebug.setPref, Firebug, Firebug.prefDomain, option, !Firebug[option]) };
+    return {
+        label: label,
+        type: "checkbox",
+        checked: Firebug[option],
+        option: option,
+        tooltiptext: tooltiptext,
+        command: this.bindFixed(Firebug.setPref, Firebug, Firebug.prefDomain,
+            option, !Firebug[option])
+    };
 };
 
-this.serviceOptionMenu = function(label, option)
+this.serviceOptionMenu = function(label, option, tooltiptext)
 {
-    return {label: label, type: "checkbox", checked: Firebug[option], option: option,
-        command: this.bindFixed(Firebug.setPref, Firebug, Firebug.servicePrefDomain, option, !Firebug[option]) };
+    return {
+        label: label,
+        type: "checkbox",
+        checked: Firebug[option],
+        option: option,
+        tooltiptext: tooltiptext,
+        command: this.bindFixed(Firebug.setPref, Firebug, Firebug.servicePrefDomain,
+            option, !Firebug[option])
+    };
 };
 
 // ************************************************************************************************

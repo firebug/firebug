@@ -604,7 +604,8 @@ NetPanel.prototype = extend(Firebug.ActivablePanel,
             this.disableCacheOption(),
             "-",
             optionMenu("net.option.Show Paint Events", "netShowPaintEvents"),
-            optionMenu("net.option.Show BF Cache Responses", "netShowBFCacheResponses")
+            optionMenu("net.option.Show BF Cache Responses", "netShowBFCacheResponses",
+                "net.option.tip.Show_BF_Cache_Responses")
         ];
     },
 
