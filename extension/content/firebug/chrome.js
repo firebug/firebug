@@ -14,6 +14,8 @@ const Cc = Components.classes;
 const Ci = Components.interfaces;
 const nsIWebNavigation = Ci.nsIWebNavigation;
 
+const observerService = Cc["@mozilla.org/observer-service;1"].getService(Ci.nsIObserverService);
+
 const LOAD_FLAGS_BYPASS_PROXY = nsIWebNavigation.LOAD_FLAGS_BYPASS_PROXY;
 const LOAD_FLAGS_BYPASS_CACHE = nsIWebNavigation.LOAD_FLAGS_BYPASS_CACHE;
 const LOAD_FLAGS_NONE = nsIWebNavigation.LOAD_FLAGS_NONE;
@@ -212,6 +214,8 @@ top.FirebugChrome =
                 this.appendStylesheet(doc2, Firebug.stylesheets[uri]);
                 this.appendStylesheet(doc3, Firebug.stylesheets[uri]);
             }
+
+            FirstRunPage.initializeUI();
         }
         catch (exc)
         {
@@ -1287,6 +1291,40 @@ top.FirebugChrome =
 };
 
 // ************************************************************************************************
+// Welcome Page (first run)
+
+var FirstRunPage =
+{
+    initializeUI: function()
+    {
+        // If the version in preferences is smaller than the current version
+        // display the welcome page.
+        if (FBL.checkFirebugVersion(Firebug.currentVersion) > 0)
+        {
+            FBTrace.sysout("FirstRunPage.initializeUI; current: " + Firebug.getVersion() +
+                "preferences: " + Firebug.currentVersion);
+
+            // Wait for session restore and display the welcome page.
+            observerService.addObserver(this, "sessionstore-windows-restored" , false);
+        }
+    },
+
+    observe: function(subjet, topic, data)
+    {
+        if (topic != "sessionstore-windows-restored")
+            return;
+
+        // Don't forget to update the preference so, the page is not
+        // displayed again.
+        var version = Firebug.getVersion();
+        Firebug.setPref(Firebug.prefDomain, "currentVersion", version);
+
+        // xxxHonza: put the URL in firebugURLs as soon as it's in chrome.js
+        FBL.openNewTab("http://getfirebug.com/whatisfirebug", "Firebug=" + version);
+    }
+}
+
+// ************************************************************************************************
 // Local Helpers
 
 function panelSupportsObject(panelType, object, context)
@@ -1549,7 +1587,6 @@ function getRealObject(object)
     var realObject = rep ? rep.getRealObject(object, FirebugContext) : null;
     return realObject ? realObject : object;
 }
-
 
 // ************************************************************************************************
 // Utils (duplicated from lib.js)

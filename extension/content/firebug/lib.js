@@ -28,6 +28,7 @@ const wm = this.CCSV("@mozilla.org/appshell/window-mediator;1", "nsIWindowMediat
 const ioService = this.CCSV("@mozilla.org/network/io-service;1", "nsIIOService");
 const consoleService = Components.classes["@mozilla.org/consoleservice;1"].
     getService(Components.interfaces["nsIConsoleService"]);
+const versionChecker = Cc["@mozilla.org/xpcom/version-comparator;1"].getService(Ci.nsIVersionComparator);
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 
@@ -7094,6 +7095,9 @@ this.ReversibleRegExp = function(regex, flags)
     };
 };
 
+// ************************************************************************************************
+// Wrappers
+
 function unwrapObject(object)
 {
     // TODO: We might be able to make this check more authoritative with QueryInterface.
@@ -7121,6 +7125,39 @@ this.unwrapIValue = function(object)
     }
 }
 
+// ************************************************************************************************
+// Firebug Version Comparator
+
+/**
+ * Compare expected Firebug version with the current Firebug installed.
+ * @param {Object} expectedVersion Expected version of Firebug.
+ * @returns
+ * -1 the current version is smaller 
+ *  0 the current version is the same
+ *  1 the current version is bigger
+ *
+ * @example:
+ * if (compareFirebugVersion("1.6") >= 0)
+ * {
+ *     // The current version is Firebug 1.6+
+ * }
+ */
+this.checkFirebugVersion = function(expectedVersion)
+{
+    if (!expectedVersion)
+        return 1;
+
+    var version = Firebug.getVersion();
+
+    // Adapt to Firefox version scheme.
+    expectedVersion = expectedVersion.replace('X', '', "g");
+    version = version.replace('X', '', "g");
+
+    // Use Firefox comparator service.
+    return versionChecker.compare(version, expectedVersion);
+}
+
+// ************************************************************************************************
 }).apply(FBL);
 } catch(e) /*@explore*/
 { /*@explore*/
