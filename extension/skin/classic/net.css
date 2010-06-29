@@ -173,6 +173,15 @@
     width: 100%;
 }
 
+.netDebugCol {
+    opacity: 1.0!important;
+    border-right: 1px solid #CCCCCC;
+}
+
+.netDebugCol .sourceLine {
+    border-right: none;
+}
+
 .netStatusCol {
     padding-left: 10px;
     color: rgb(128, 128, 128);
@@ -394,7 +403,7 @@
 /************************************************************************************************/
 /* If coming from BF cache (no network activity) */
 
-.netRow.fromBFCache {
+.netRow.fromBFCache .netCol {
     opacity: 0.5;
 }
 

@@ -1883,7 +1883,7 @@ Firebug.NetMonitor.NetRequestEntry = domplate(Firebug.Rep, new Firebug.Listener(
                 $fromBFCache: "$file.file.fromBFCache",
                 $fromCache: "$file.file.fromCache",
                 $inFrame: "$file.file|getInFrame"},
-                TD({"class": "netCol"},
+                TD({"class": "netDebugCol netCol"},
                    DIV({"class": "sourceLine netRowHeader",
                    onclick: "$onClickRowHeader"},
                         "&nbsp;"
