@@ -22,6 +22,24 @@ window[chromehidden~="toolbar"] #fbToolbar {
 
 .fbCommandLineCompletions {
 	cursor: default;
+	font-family: Monaco, monospace;
+}
+
+.fbPopupTitle {
+	font-family: Lucida Grande, Tahoma, sans-serif;
+	padding: 2px 18px;
+    background-color: LightYellow;
+    border-bottom: 1px solid #BEBEBE;
+    color: #666666;
+}
+
+.completionText {
+	color: #666666;
+}
+.completionText[selected=true] {
+	background-color:highlight;
+	border-color:highlight;
+	color:highlighttext !important;
 }
 
 textbox[type="fbSearchBox"] {

@@ -1123,7 +1123,7 @@ Firebug.AutoCompleter = function(getExprOffset, getRange, evaluator, selectMode,
 
         if (offerOnly && candidates.length && candidates.length < commandCompletionLineLimit)
         {
-            this.popupCandidates(candidates, line.userTyped, textBox);
+            this.popupCandidates(candidates, line, textBox);
             return false;
         }
         else
@@ -1133,7 +1133,7 @@ Firebug.AutoCompleter = function(getExprOffset, getRange, evaluator, selectMode,
         return true;
     };
 
-    this.popupCandidates = function(candidates, userTyped, textBox)
+    this.popupCandidates = function(candidates, line, textBox)
     {
         FBL.eraseNode(completionPopup);
 
@@ -1141,16 +1141,26 @@ Firebug.AutoCompleter = function(getExprOffset, getRange, evaluator, selectMode,
         completionPopup.appendChild(vbox);
         vbox.classList.add("fbCommandLineCompletions");
 
-        var prefix = candidates[0].substr(0, userTyped);
+        var title = completionPopup.ownerDocument.createElementNS("http://www.w3.org/1999/xhtml","div");
+        title.innerHTML = "TAB cycles, -> accepts";
+        title.classList.add('fbPopupTitle');
+        vbox.appendChild(title);
+
+        var prefix = this.getVerifiedText(textBox);
         var pre = null;
+        var selected = this.getCompletionText(textBox);
 
         for (var i = 0; i < candidates.length; i++)
         {
             var hbox = completionPopup.ownerDocument.createElementNS("http://www.w3.org/1999/xhtml","div");
             pre = completionPopup.ownerDocument.createElementNS("http://www.w3.org/1999/xhtml","span");
-            pre.innerHTML = "<b>"+prefix+"</b>";  // to do CSS
+            pre.innerHTML = prefix;
             var post = completionPopup.ownerDocument.createElementNS("http://www.w3.org/1999/xhtml","span");
-            post.innerHTML = candidates[i].substr(userTyped);
+            var completion = candidates[i].substr(line.userTyped);
+            post.innerHTML = completion;
+            if (completion == selected)
+            	post.setAttribute('selected', 'true');
+
             hbox.appendChild(pre);
             hbox.appendChild(post);
             vbox.appendChild(hbox);
@@ -1191,6 +1201,11 @@ Firebug.AutoCompleter = function(getExprOffset, getRange, evaluator, selectMode,
     this.getVerifiedText = function(textBox)
     {
     	return textBox.value.substr(0, textBox.selectionStart)+textBox.value.substr(textBox.selectionEnd);
+    };
+
+    this.getCompletionText = function(textBox)
+    {
+    	return textBox.value.substr(textBox.selectionStart, textBox.selectionEnd);
     };
 
     this.handledKeyPress = function(event, context, textBox)
