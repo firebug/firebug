@@ -13,7 +13,7 @@
       <Description>
         <em:id>toolkit@mozilla.org</em:id>
         <em:minVersion>1.9.2</em:minVersion>
-        <em:maxVersion>1.9.3.*</em:maxVersion>
+        <em:maxVersion>2.0.0.*</em:maxVersion>
       </Description>
     </em:targetApplication>
 
@@ -22,7 +22,7 @@
       <Description>
         <em:id>{ec8030f7-c20a-464f-9b0e-13a3a9e97384}</em:id>
         <em:minVersion>3.6</em:minVersion>
-        <em:maxVersion>3.7.*</em:maxVersion>
+        <em:maxVersion>4.0.*</em:maxVersion>
       </Description>
     </em:targetApplication>
 
@@ -38,7 +38,7 @@
     <em:contributor>Mike Collins (IBM Almaden)</em:contributor>
     <em:contributor>Kevin Decker</em:contributor>
     <em:contributor>Mike Ratcliffe (Comartis AG)</em:contributor>
-    <em:contributor>Hernan Rodríguez Colmeiro</em:contributor>
+    <em:contributor>Hernan RodrÃ­guez Colmeiro</em:contributor>
     <em:contributor>Austin Andrews</em:contributor>
     <em:contributor>Christoph Dorn</em:contributor>
     <em:contributor>Steven Roussey (AppCenter Inc, Network54)</em:contributor>
@@ -48,32 +48,32 @@
     <em:updateURL>http://getfirebug.com/releases/firebug/1.6X/update.rdf</em:updateURL>
     <em:updateKey>MIGfMA0GCSqGSIb3DQEBAQUAA4GNADCBiQKBgQDdk7eOPk0RIRtces8JJWYW6yPfBwsxnE3+5em4LocKjUvL3DkfTIc6owjOjpaGmi+Erv6kjPAI7kWCmPM/j+yTSAqbLJG2TOsff+fBW3HYPvrzXAy3Gnga8JaJ5CWF8BSXRm95VAZ4rsMZfHX0kEWHQcrDjseuz8m/0fZXBfpJUQIDAQAB</em:updateKey>
 
-    <em:translator>Leszek(teo)Życzkowski (pl-PL)</em:translator>
+    <em:translator>Leszek(teo)Å»yczkowski (pl-PL)</em:translator>
     <em:translator>markh (nl-NL)</em:translator>
     <em:translator>peter3 (sv-SE)</em:translator>
     <em:translator>AlleyKat (da-DK)</em:translator>
     <em:translator>Hector Zhao, lovelywcm (zh-CN)</em:translator>
-    <em:translator>Lukáš Kucharczyk, Michal Kec (cs-CZ)</em:translator>
+    <em:translator>LukÃ¡Å¡ Kucharczyk, Michal Kec (cs-CZ)</em:translator>
     <em:translator>Team erweiterungen.de, ReinekeFux, Benedikt Langens, Sebastian Zartner (de-DE)</em:translator>
     <em:translator>l0stintranslation, gonzalopirobutirro (it-IT)</em:translator>
     <em:translator>alexxed (ro-RO)</em:translator>
     <em:translator>Nicolas Martin, Franck Marcia (fr-FR)</em:translator>
     <em:translator>gLes (hu-HU)</em:translator>
-    <em:translator>Xavi Ivars - Softcatalà (ca)</em:translator>
+    <em:translator>Xavi Ivars - SoftcatalÃ  (ca)</em:translator>
     <em:translator>gezmen (tr-TR)</em:translator>
     <em:translator>eternoendless (es-AR)</em:translator>
     <em:translator>Dark Preacher (ru-RU)</em:translator>
     <em:translator>Tiago Oliveira, Diego de Carvalho Zimmermann, Alexandre Rapaki (pt-BR)</em:translator>
-    <em:translator>Juan Botías, Álvaro G. Vicario (es-ES)</em:translator>
+    <em:translator>Juan BotÃ­as, Ã�lvaro G. Vicario (es-ES)</em:translator>
     <em:translator>Andriy Zhouck (uk-UA)</em:translator>
     <em:translator>Hisateru Tanaka (ja-JP)</em:translator>
     <em:translator>Mohsen Shadroo (fa-IR)</em:translator>
     <em:translator>Eduard Babayan (hy-AM)</em:translator>
-    <em:translator>Helder Magalhães (pt-PT)</em:translator>
-    <em:translator>Tomaž Mačus (sl-SI)</em:translator>
+    <em:translator>Helder MagalhÃ£es (pt-PT)</em:translator>
+    <em:translator>TomaÅ¾ MaÄ�us (sl-SI)</em:translator>
     <em:translator>Stoyan Stefanov (bg-BG)</em:translator>
-    <em:translator>Kristján Bjarni Guðmundsson (is-IS)</em:translator>
-    <em:translator>NGUYỄN Mạnh Hùng (vi-VN)</em:translator>
+    <em:translator>KristjÃ¡n Bjarni GuÃ°mundsson (is-IS)</em:translator>
+    <em:translator>NGUYá»„N Máº¡nh HÃ¹ng (vi-VN)</em:translator>
     <em:translator>Bwah (hr-HR)</em:translator>
     <em:translator>Sonickydon (el-GR)</em:translator>
 
