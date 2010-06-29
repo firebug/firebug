@@ -171,6 +171,9 @@ top.Firebug =
     isInitialized: false,
     migrations: {},
 
+    // Custom stylesheets registered by extensions.
+    stylesheets: [],
+
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
     // Initialization
 
@@ -418,11 +421,11 @@ top.Firebug =
     suspendFirebug: function() // dispatch onSuspendFirebug to all modules
     {
 
-    	var cancelSuspend = dispatch2(activableModules, 'onSuspendingFirebug', []);
-    	if (cancelSuspend)
-    		return;
+        var cancelSuspend = dispatch2(activableModules, 'onSuspendingFirebug', []);
+        if (cancelSuspend)
+            return;
 
-    	this.setSuspended("suspending");
+        this.setSuspended("suspending");
 
         var cancelSuspend = dispatch2(activableModules, 'onSuspendFirebug', [FirebugContext]);  // TODO no context arg
 
@@ -664,6 +667,16 @@ top.Firebug =
     {
         categoryManager.addCategoryEntry("strings_firebug", bundleURI, "", true, true);
         this.stringBundle = null;
+    },
+
+    /**
+     * Allows registering of custom stylesheet coming from extension. The stylesheet is then
+     * used automatially thorough Firebug UI.
+     * @param {Object} styleURI URI of the stylesheet.
+     */
+    registerStylesheet: function(styleURI)
+    {
+        this.stylesheets.push(styleURI);
     },
 
     registerMenuItem: function(menuItemController)

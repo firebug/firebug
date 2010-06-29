@@ -204,11 +204,30 @@ top.FirebugChrome =
                 this.attachBrowser(FirebugContext);
             else
                 Firebug.initializeUI(detachArgs);
+
+            // Append all registered styleesheets into Firebug UI.
+            for (var uri in Firebug.stylesheets)
+            {
+                this.appendStylesheet(doc1, Firebug.stylesheets[uri]);
+                this.appendStylesheet(doc2, Firebug.stylesheets[uri]);
+                this.appendStylesheet(doc3, Firebug.stylesheets[uri]);
+            }
         }
         catch (exc)
         {
             FBTrace.sysout("chrome.initializeUI fails "+exc, exc);
         }
+    },
+
+    appendStylesheet: function(doc, uri)
+    {
+        // Make sure the stylesheet is not appended twice.
+        if ($(uri, doc))
+            return;
+
+        var styleSheet = FBL.createStyleSheet(doc, uri);
+        styleSheet.setAttribute("id", uri);
+        FBL.addStyleSheet(doc, styleSheet);
     },
 
     shutdown: function()
@@ -1587,6 +1606,4 @@ function dddx()
 {
     Firebug.Console.logFormatted(arguments);
 }
-
-
 
