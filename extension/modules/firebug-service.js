@@ -469,7 +469,7 @@ var fbs =
         haltCallBack = fnOfFrame;
         
         if (FBTrace.DBG_FBS_BP)
-        	FBTrace.sysout('fbs.halt jsd.isOn:'+jsd.isOn+' jsd.pauseDepth:'+jsd.pauseDepth+" fbs.isChromeBlocked "+fbs.isChromeBlocked+"  jsd.debuggerHook: "+ jsd.debuggerHook, jsd.debuggerHook);
+            FBTrace.sysout('fbs.halt jsd.isOn:'+jsd.isOn+' jsd.pauseDepth:'+jsd.pauseDepth+" fbs.isChromeBlocked "+fbs.isChromeBlocked+"  jsd.debuggerHook: "+ jsd.debuggerHook, jsd.debuggerHook);
         // call onDebugger via hook
         fbs.debuggerHalter();
     },
@@ -920,7 +920,7 @@ var fbs =
         this.hookScripts();
 
         if (FBTrace.DBG_ACTIVATION)
-        	FBTrace.sysout("enableDebugger with active "+active);
+            FBTrace.sysout("enableDebugger with active "+active);
     },
 
     obeyPrefs: function()
@@ -1136,11 +1136,11 @@ var fbs =
 
             if (haltDebugger)
             {
-            	var peelOurselvesOff = frame.callingFrame;  // remove debuggerHalter()
-            	if (peelOurselvesOff.script.fileName.indexOf("chrome://firebug") == 0)  // total guesswork, sometimes the stack is goofy
-            		peelOurselvesOff = peelOurselvesOff.callingFrame; // remove fbs.halt()
-            	if (FBTrace.DBG_FBS_BP)
-            		FBTrace.sysout('fbs.onDebugger adjusted newest frame: '+peelOurselvesOff.line+'@'+peelOurselvesOff.script.fileName);
+                var peelOurselvesOff = frame.callingFrame;  // remove debuggerHalter()
+                if (peelOurselvesOff.script.fileName.indexOf("chrome://firebug") == 0)  // total guesswork, sometimes the stack is goofy
+                    peelOurselvesOff = peelOurselvesOff.callingFrame; // remove fbs.halt()
+                if (FBTrace.DBG_FBS_BP)
+                    FBTrace.sysout('fbs.onDebugger adjusted newest frame: '+peelOurselvesOff.line+'@'+peelOurselvesOff.script.fileName);
 
                 var debuggr = haltDebugger;
                 haltDebugger = null;
@@ -2639,9 +2639,9 @@ var fbs =
 
     breakIntoDebugger: function(debuggr, frame, type)
     {
-    	if (FBTrace.DBG_FBS_STEP || FBTrace.DBG_FBS_BP) FBTrace.sysout("fbs.breakIntoDebugger called "+debuggr.debuggerName+" fbs.isChromeBlocked:"+fbs.isChromeBlocked);
+        if (FBTrace.DBG_FBS_STEP || FBTrace.DBG_FBS_BP) FBTrace.sysout("fbs.breakIntoDebugger called "+debuggr.debuggerName+" fbs.isChromeBlocked:"+fbs.isChromeBlocked);
 
-    	// Before we break, clear information about previous stepping session
+        // Before we break, clear information about previous stepping session
         this.stopStepping();
 
         // Break into the debugger - execution will stop here until the user resumes
@@ -3079,18 +3079,18 @@ function countFrames(frame)
 
 function framesToString(frame)
 {
-	var str = "";
-	while (frame)
-	{
-		str += frameToString(frame)+"\n";
-		frame = frame.callingFrame;
-	}
-	return str;
+    var str = "";
+    while (frame)
+    {
+        str += frameToString(frame)+"\n";
+        frame = frame.callingFrame;
+    }
+    return str;
 }
 
 function frameToString(frame)
 {
-	return frame.script.tag+" in "+frame.script.fileName+"@"+frame.line+"(pc="+frame.pc+")";
+    return frame.script.tag+" in "+frame.script.fileName+"@"+frame.line+"(pc="+frame.pc+")";
 }
 
 function testBreakpoint(frame, bp)

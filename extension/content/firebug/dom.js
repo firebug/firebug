@@ -401,13 +401,13 @@ Firebug.DOMBasePanel.prototype = extend(Firebug.Panel,
 
             var properties = [];
             if (insecureObject.hasOwnProperty('prototype'))
-            	properties.push('prototype');
+                properties.push('prototype');
 
             if (insecureObject.hasOwnProperty('constructor'))
-            	properties.push('constructor');
+                properties.push('constructor');
 
             if (insecureObject.hasOwnProperty('__proto__'))
-            	properties.push('__proto__');
+                properties.push('__proto__');
 
             for (var name in insecureObject)  // enumeration is safe
             {
@@ -425,7 +425,7 @@ Firebug.DOMBasePanel.prototype = extend(Firebug.Panel,
             var domMembers = getDOMMembers(object);
             for (let i = 0; i < properties.length; i++)
             {
-            	var name = properties[i];
+                var name = properties[i];
                 var val;
                 try
                 {
@@ -1647,7 +1647,7 @@ WatchPanel.prototype = extend(Firebug.DOMBasePanel.prototype,
             members.push.apply(members, this.getMembers(scopeChain[0], 0, this.context));
 
             for (var i = 1; i < scopeChain.length; i++)
-            	addMember(scopeChain[i], "scopes", members, scopeChain[i].toString(), scopeChain[i], 0);
+                addMember(scopeChain[i], "scopes", members, scopeChain[i].toString(), scopeChain[i], 0);
         }
 
         this.expandMembers(members, this.toggles, 0, 0, this.context);
@@ -1796,7 +1796,7 @@ function addMember(object, type, props, name, value, level, order, context)
 
     // Special case for functions with a protoype that has values
     if (valueType === "function" && value.prototype)
-    	hasChildren = hasProperties(value.prototype);
+        hasChildren = hasProperties(value.prototype);
 
     var member = {
         object: object,
@@ -1836,7 +1836,7 @@ function addMember(object, type, props, name, value, level, order, context)
     // implemented) use a "get" prefix that is displayed in the UI.
     var o = unwrapObject(object);
     if (o)
-    	member.prefix = (o.__lookupGetter__(name) && !o.__lookupSetter__(name)) ? "get " : "";
+        member.prefix = (o.__lookupGetter__(name) && !o.__lookupSetter__(name)) ? "get " : "";
 
     props.push(member);
     return member;

@@ -2784,7 +2784,7 @@ Firebug.ActivableModule = extend(Firebug.Module,
 
     onSuspendingFirebug: function()
     {
-    	// Called before any suspend actions. Firest caller to return true aborts suspend.
+        // Called before any suspend actions. Firest caller to return true aborts suspend.
     },
 
     onSuspendFirebug: function()

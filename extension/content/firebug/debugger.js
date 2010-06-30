@@ -131,8 +131,8 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
 
     halt: function(fnOfFrame)
     {
-    	if(FBTrace.DBG_BP)
-    		FBTrace.sysout('debugger.halt '+fnOfFrame);
+        if(FBTrace.DBG_BP)
+            FBTrace.sysout('debugger.halt '+fnOfFrame);
 
         fbs.halt(this, fnOfFrame);
     },
@@ -849,7 +849,7 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
 
         if (!context.consoleToken)
         {
-        	var win = frameWin.wrappedJSObject ? frameWin.wrappedJSObject : frameWin;
+            var win = frameWin.wrappedJSObject ? frameWin.wrappedJSObject : frameWin;
             this.injectConsole(context, win);
         }
         else
@@ -2178,12 +2178,12 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
 
     onSuspendingFirebug: function()
     {
-    	var anyStopped = TabWatcher.iterateContexts(function isAnyStopped(context)
-    	{
-    		return context.stopped;
-    	});
+        var anyStopped = TabWatcher.iterateContexts(function isAnyStopped(context)
+        {
+            return context.stopped;
+        });
 
-    	return anyStopped;
+        return anyStopped;
     },
 
     onSuspendFirebug: function()
@@ -2499,7 +2499,7 @@ Firebug.ScriptPanel.prototype = extend(Firebug.SourceBoxPanel,
 
         var watchPanel = this.context.getPanel("watches", true);
         if (watchPanel)
-        	watchPanel.showEmptyMembers();
+            watchPanel.showEmptyMembers();
     },
 
     highlightExecutionLine: function(sourceBox)
@@ -3087,7 +3087,7 @@ Firebug.ScriptPanel.prototype = extend(Firebug.SourceBoxPanel,
 
         if (!allSources.length)
         {
-        	var noJSURL = "firebug:// Warning. No Javascript on this page";
+            var noJSURL = "firebug:// Warning. No Javascript on this page";
             var dummySourceFile = new Firebug.NoScriptSourceFile(context, noJSURL);
             context.sourceCache.store(noJSURL, 'If <script> tags have a \"type\" attribute it should equal \"text/javascript\"" or \"application/javascript\"');
             context.addSourceFile(dummySourceFile);
@@ -3114,13 +3114,13 @@ Firebug.ScriptPanel.prototype = extend(Firebug.SourceBoxPanel,
 
         if (!list.length && allSources.length)
         {
-        	var allFilteredURL = "firebug:// Warning. All scripts were filtered";
+            var allFilteredURL = "firebug:// Warning. All scripts were filtered";
             var dummySourceFile = new Firebug.NoScriptSourceFile(context, allFilteredURL);
             context.sourceCache.store(allFilteredURL, 'see Show Chrome Sources Option');
             context.addSourceFile(dummySourceFile);
         }
         if (FBTrace.DBG_SOURCEFILES)
-        	FBTrace.sysout("debugger.getLocationList enabledOnLoad:"+context.onLoadWindowContent+" all:"+allSources.length+" filtered:"+list.length, list);
+            FBTrace.sysout("debugger.getLocationList enabledOnLoad:"+context.onLoadWindowContent+" all:"+allSources.length+" filtered:"+list.length, list);
         return list;
     },
 
@@ -3594,13 +3594,13 @@ CallstackPanel.prototype = extend(Firebug.Panel,
         clearNode(this.panelNode);
 
         if (!frame)
-        	return;
+            return;
 
         var mainPanel = this.context.getPanel("script", true);
         if (!mainPanel)
         {
-        	FBTrace.sysout("showStackFrame no mainPanel script for context "+this.context.getName());
-        	return;
+            FBTrace.sysout("showStackFrame no mainPanel script for context "+this.context.getName());
+            return;
         }
 
         FBL.setClass(this.panelNode, "objectBox-stackTrace");

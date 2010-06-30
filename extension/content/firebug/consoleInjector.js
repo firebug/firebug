@@ -13,22 +13,22 @@ top.Firebug.Console.injector =
 {
     isAttached: function(context, win)
     {
-		if (FBTrace.DBG_CONSOLE)
-			FBTrace.sysout("Console.isAttached :"+context.consoleToken+" vs  "+win.document.getUserData("firebug-Token")+ " in "+safeGetWindowLocation(win.wrappedJSObject));
+        if (FBTrace.DBG_CONSOLE)
+            FBTrace.sysout("Console.isAttached :"+context.consoleToken+" vs  "+win.document.getUserData("firebug-Token")+ " in "+safeGetWindowLocation(win.wrappedJSObject));
 
-		if (!context.consoleToken)
-			return false;
-		
-		var attachedToken = win.document.getUserData("firebug-Token");
-		if (!attachedToken)
-			return false;
-		
-		if (context.consoleToken !== attachedToken)
-		{
-			Firebug.Console.logFormatted(["Firebug Console token changed!"], FirebugContext, "info");  // XXXTODO NLS
-			return false;
-		}
-		return true;
+        if (!context.consoleToken)
+            return false;
+        
+        var attachedToken = win.document.getUserData("firebug-Token");
+        if (!attachedToken)
+            return false;
+        
+        if (context.consoleToken !== attachedToken)
+        {
+            Firebug.Console.logFormatted(["Firebug Console token changed!"], FirebugContext, "info");  // XXXTODO NLS
+            return false;
+        }
+        return true;
     },
 
     attachIfNeeded: function(context, win)

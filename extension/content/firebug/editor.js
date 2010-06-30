@@ -928,7 +928,7 @@ Firebug.AutoCompleter = function(getExprOffset, getRange, evaluator, selectMode,
             return false;
         
         if (!this.getCompletionText(textBox))
-        	this.reset();
+            this.reset();
 
         var offset = textBox.selectionStart;
         var line = this.pickCandidates(value, offset, context, cycle, reverse, showGlobal);
@@ -1166,22 +1166,22 @@ Firebug.AutoCompleter = function(getExprOffset, getRange, evaluator, selectMode,
         
         if(candidates.length > commandCompletionLineLimit)  
         {
-    		var showBottom = commandCompletionLineLimit;
+            var showBottom = commandCompletionLineLimit;
 
-        	if (line.index > (commandCompletionLineLimit - 3) ) // then implement manual scrolling
-        	{
-        		if (line.index > (candidates.length - commandCompletionLineLimit) ) // then just show the bottom
-        		{
-        			var showTop = candidates.length - commandCompletionLineLimit;
-        			var showBottom = candidates.length;
-        		}
-        		else
-        		{
-        			var showTop = line.index - (commandCompletionLineLimit - 3); 
-        			var showBottom = line.index + 3;
-        		}
-        	}
-        	// else we are in the top part of the list
+            if (line.index > (commandCompletionLineLimit - 3) ) // then implement manual scrolling
+            {
+                if (line.index > (candidates.length - commandCompletionLineLimit) ) // then just show the bottom
+                {
+                    var showTop = candidates.length - commandCompletionLineLimit;
+                    var showBottom = candidates.length;
+                }
+                else
+                {
+                    var showTop = line.index - (commandCompletionLineLimit - 3); 
+                    var showBottom = line.index + 3;
+                }
+            }
+            // else we are in the top part of the list
         }
 
         for (var i = showTop; i < showBottom; i++)
@@ -1193,7 +1193,7 @@ Firebug.AutoCompleter = function(getExprOffset, getRange, evaluator, selectMode,
             var completion = candidates[i].substr(line.userTyped);
             post.innerHTML = completion;
             if (i === line.index)
-            	post.setAttribute('selected', 'true');
+                post.setAttribute('selected', 'true');
 
             hbox.appendChild(pre);
             hbox.appendChild(post);
@@ -1234,21 +1234,21 @@ Firebug.AutoCompleter = function(getExprOffset, getRange, evaluator, selectMode,
 
     this.getVerifiedText = function(textBox)
     {
-    	return textBox.value.substr(0, textBox.selectionStart)+textBox.value.substr(textBox.selectionEnd);
+        return textBox.value.substr(0, textBox.selectionStart)+textBox.value.substr(textBox.selectionEnd);
     };
 
     this.getCompletionText = function(textBox)
     {
-    	return textBox.value.substr(textBox.selectionStart, textBox.selectionEnd);
+        return textBox.value.substr(textBox.selectionStart, textBox.selectionEnd);
     };
 
     this.handledKeyUp = function(event, context, textBox)
     {
-    	if (!this.getCompletionText(textBox)) // then the completion was accepted
-    	{
-    		this.hide();
-    		this.reset();
-    	}
+        if (!this.getCompletionText(textBox)) // then the completion was accepted
+        {
+            this.hide();
+            this.reset();
+        }
     };
     
     this.handledKeyDown = function(event, context, textBox)
@@ -1258,7 +1258,7 @@ Firebug.AutoCompleter = function(getExprOffset, getRange, evaluator, selectMode,
         
         if (event.ctrlKey && event.keyCode === 17) // Control space forces completion incl globals
         {
-        	this.complete(context, textBox, true, false, true, true);
+            this.complete(context, textBox, true, false, true, true);
         }
 
         if (event.keyCode == 27) // ESC, close the completer
@@ -1278,27 +1278,27 @@ Firebug.AutoCompleter = function(getExprOffset, getRange, evaluator, selectMode,
         }
         else if (event.keyCode === 40) // DOWN arrow, cycle down
         {
-        	if (textBox.selectionStart && textBox.seletionStart !== textBox.selectionEnd)
-        	{
-        		this.complete(context, textBox, true, false, true);
+            if (textBox.selectionStart && textBox.seletionStart !== textBox.selectionEnd)
+            {
+                this.complete(context, textBox, true, false, true);
                 cancelEvent(event);
                 return true;
-        	}
-        	// else the arrow will fall through to command history
+            }
+            // else the arrow will fall through to command history
         }
         else if (event.keyCode === 38) // UP arrow
         {
-        	if (textBox.selectionStart && textBox.seletionStart !== textBox.selectionEnd)
-        	{
-        		this.complete(context, textBox, true, true, true);
-        		cancelEvent(event);
-        		return true;
-        	}
+            if (textBox.selectionStart && textBox.seletionStart !== textBox.selectionEnd)
+            {
+                this.complete(context, textBox, true, true, true);
+                cancelEvent(event);
+                return true;
+            }
         }
         else if (event.keyCode === 8) // backspace
         {
             if (textBox.selectionStart && textBox.seletionStart !== textBox.selectionEnd)
-            	textBox.selectionStart = textBox.selectionStart - 1;
+                textBox.selectionStart = textBox.selectionStart - 1;
         }
 
     };

@@ -1012,8 +1012,8 @@
         <method name="filterList">
             <parameter name="substring"/>
             <body><![CDATA[
-            	if (this.firstMatch)
-            		this.firstMatch.setAttribute("_moz-menuactive", "false");
+                if (this.firstMatch)
+                    this.firstMatch.setAttribute("_moz-menuactive", "false");
 
                 this.firstMatch = null;
                 var groupMatchCount = 0;
@@ -1038,7 +1038,7 @@
 
                 if (this.firstMatch)
                 {
-                	// skip the filterMessageHeader
+                    // skip the filterMessageHeader
                     for (var child = this.popup.firstChild.nextSibling; child; child = child.nextSibling)
                     {
                         child.hidden = !child._searchMatch;
@@ -1079,29 +1079,29 @@
         </method>
 
         <method name="setFilterStringMessage">
-        	<parameter name="filterString"/>
-        	<parameter name="matched"/>
-        	<body><![CDATA[
-        		var message = this.filterStringHeader.getAttribute('value');
-        		var parts = message.split(':');
-        		message = parts[0]+ ": "+filterString;
-        		if (!matched)
-        			message += " <-- no match";
-        		this.filterStringHeader.setAttribute('value', message);
-        	]]>
-        	</body>
+            <parameter name="filterString"/>
+            <parameter name="matched"/>
+            <body><![CDATA[
+                var message = this.filterStringHeader.getAttribute('value');
+                var parts = message.split(':');
+                message = parts[0]+ ": "+filterString;
+                if (!matched)
+                    message += " <-- no match";
+                this.filterStringHeader.setAttribute('value', message);
+            ]]>
+            </body>
         </method>
 
         <method name="onClick">
             <parameter name="event"/>
             <body><![CDATA[
             //https://developer.mozilla.org/en/XUL/arrowscrollbox
-            	var scrollbutton = event.originalTarget;
-            	 var anonid = scrollbutton.getAttribute("anonid");
-            	 if (anonid == 'scrollbutton-up')
-            	    scrollbutton.parentNode.scrollByIndex(-15);
-            	 if (anonid == 'scrollbutton-down')
-            	    scrollbutton.parentNode.scrollByIndex(+15);
+                var scrollbutton = event.originalTarget;
+                 var anonid = scrollbutton.getAttribute("anonid");
+                 if (anonid == 'scrollbutton-up')
+                    scrollbutton.parentNode.scrollByIndex(-15);
+                 if (anonid == 'scrollbutton-down')
+                    scrollbutton.parentNode.scrollByIndex(+15);
             ]]>
             </body>
         </method>
