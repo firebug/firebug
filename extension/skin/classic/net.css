@@ -131,6 +131,15 @@
     display: table-cell;
 }
 
+.netDebugCol {
+    border-right: 1px solid #CCCCCC;
+    background-color: #EEEEEE;
+}
+
+.netDebugCol .sourceLine {
+    border-right: none;
+}
+
 /************************************************************************************************/
 /* Column visibility */
 
@@ -171,16 +180,6 @@
 
 .netLabel {
     width: 100%;
-}
-
-.netDebugCol {
-    opacity: 1.0!important;
-    border-right: 1px solid #CCCCCC;
-    background-color: #EEEEEE;
-}
-
-.netDebugCol .sourceLine {
-    border-right: none;
 }
 
 .netStatusCol {
@@ -404,7 +403,21 @@
 /************************************************************************************************/
 /* If coming from BF cache (no network activity) */
 
-.netRow.fromBFCache .netCol {
+.netRow.fromBFCache .netLabel {
+    opacity: 0.5;
+}
+
+.netRow.fromBFCache .netHrefLabel {
+    opacity: 1.0;
+    color: gray;
+}
+
+.netRow.fromBFCache .netBlockingBar,
+.netRow.fromBFCache .netResolvingBar,
+.netRow.fromBFCache .netConnectingBar,
+.netRow.fromBFCache .netSendingBar,
+.netRow.fromBFCache .netWaitingBar,
+.netRow.fromBFCache .netReceivingBar {
     opacity: 0.5;
 }
 
