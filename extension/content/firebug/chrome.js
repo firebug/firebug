@@ -1318,9 +1318,10 @@ var FirstRunPage =
         // displayed again.
         var version = Firebug.getVersion();
         Firebug.setPref(Firebug.prefDomain, "currentVersion", version);
+        version = version.replace('X', '', "g");
 
         // xxxHonza: put the URL in firebugURLs as soon as it's in chrome.js
-        FBL.openNewTab("http://getfirebug.com/whatisfirebug", "Firebug=" + version);
+        FBL.openNewTab("http://getfirebug.com/firstrun#Firebug " + version);
     }
 }
 
