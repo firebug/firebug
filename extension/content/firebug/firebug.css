@@ -20,9 +20,15 @@ window[chromehidden~="toolbar"] #fbToolbar {
     -moz-binding: url("chrome://firebug/content/bindings.xml#largeCommandLine");
 }
 
+.fbCommandLineCompletionPanel {
+	/* height: 270px; */
+}
+
 .fbCommandLineCompletions {
 	cursor: default;
 	font-family: Monaco, monospace;
+	/* overflow: auto; XXXjjb I can't get the CSS to work
+	max-height: 270px; */
 }
 
 .fbPopupTitle {

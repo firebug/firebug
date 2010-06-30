@@ -921,20 +921,25 @@ Firebug.AutoCompleter = function(getExprOffset, getRange, evaluator, selectMode,
         exprOffset = 0;
     };
 
-    this.complete = function(context, textBox, cycle, reverse, offerOnly)
+    this.complete = function(context, textBox, cycle, reverse, offerOnly, showGlobal)
     {
         var value = textBox.value;
         if (!value && noCompleteOnBlank)
             return false;
+        
+        if (!this.getCompletionText(textBox))
+        	this.reset();
 
         var offset = textBox.selectionStart;
-        var line = this.pickCandidates(value, offset, context, cycle, reverse);
+        var line = this.pickCandidates(value, offset, context, cycle, reverse, showGlobal);
 
         if (typeof(line) === "object")
             this.showCandidates(textBox, line, offerOnly);
+        
+        return line;
     };
 
-    this.pickCandidates = function(value, offset, context, cycle, reverse)
+    this.pickCandidates = function(value, offset, context, cycle, reverse, showGlobal)
     {
         if (!selectMode && originalOffset != -1)
             offset = originalOffset;
@@ -1005,6 +1010,13 @@ Firebug.AutoCompleter = function(getExprOffset, getRange, evaluator, selectMode,
                 }
             }
 
+            if (!showGlobal && !preExpr && !expr && !postExpr)
+            {
+                // Don't complete globals unless we are forced to do so.
+                this.hide();
+                return false;
+            }
+            
             var values = evaluator(preExpr, expr, postExpr, context);
             if (!values)
             {
@@ -1106,7 +1118,7 @@ Firebug.AutoCompleter = function(getExprOffset, getRange, evaluator, selectMode,
         var line = preParsed + preExpr + preCompletion + postCompletion + postExpr;
         var offsetEnd = preParsed.length + preExpr.length + completion.length;
 
-        var result = {value: line, userTyped: offset-exprOffset, completionStart: offset, completionEnd: offsetEnd};
+        var result = {value: line, index: lastIndex, userTyped: offset-exprOffset, completionStart: offset, completionEnd: offsetEnd};
         return result;
     };
 
@@ -1121,7 +1133,7 @@ Firebug.AutoCompleter = function(getExprOffset, getRange, evaluator, selectMode,
         else
             textBox.setSelectionRange(offsetEnd, offsetEnd);
 
-        if (offerOnly && candidates.length && candidates.length < commandCompletionLineLimit)
+        if (offerOnly && candidates.length && candidates.length > 1)
         {
             this.popupCandidates(candidates, line, textBox);
             return false;
@@ -1142,15 +1154,37 @@ Firebug.AutoCompleter = function(getExprOffset, getRange, evaluator, selectMode,
         vbox.classList.add("fbCommandLineCompletions");
 
         var title = completionPopup.ownerDocument.createElementNS("http://www.w3.org/1999/xhtml","div");
-        title.innerHTML = "TAB cycles, -> accepts";
+        title.innerHTML = "Use TAB and arrow keys";
         title.classList.add('fbPopupTitle');
         vbox.appendChild(title);
 
         var prefix = this.getVerifiedText(textBox);
         var pre = null;
-        var selected = this.getCompletionText(textBox);
+        
+        var showTop = 0;
+        var showBottom = candidates.length;
+        
+        if(candidates.length > commandCompletionLineLimit)  
+        {
+    		var showBottom = commandCompletionLineLimit;
 
-        for (var i = 0; i < candidates.length; i++)
+        	if (line.index > (commandCompletionLineLimit - 3) ) // then implement manual scrolling
+        	{
+        		if (line.index > (candidates.length - commandCompletionLineLimit) ) // then just show the bottom
+        		{
+        			var showTop = candidates.length - commandCompletionLineLimit;
+        			var showBottom = candidates.length;
+        		}
+        		else
+        		{
+        			var showTop = line.index - (commandCompletionLineLimit - 3); 
+        			var showBottom = line.index + 3;
+        		}
+        	}
+        	// else we are in the top part of the list
+        }
+
+        for (var i = showTop; i < showBottom; i++)
         {
             var hbox = completionPopup.ownerDocument.createElementNS("http://www.w3.org/1999/xhtml","div");
             pre = completionPopup.ownerDocument.createElementNS("http://www.w3.org/1999/xhtml","span");
@@ -1158,7 +1192,7 @@ Firebug.AutoCompleter = function(getExprOffset, getRange, evaluator, selectMode,
             var post = completionPopup.ownerDocument.createElementNS("http://www.w3.org/1999/xhtml","span");
             var completion = candidates[i].substr(line.userTyped);
             post.innerHTML = completion;
-            if (completion == selected)
+            if (i === line.index)
             	post.setAttribute('selected', 'true');
 
             hbox.appendChild(pre);
@@ -1175,7 +1209,7 @@ Firebug.AutoCompleter = function(getExprOffset, getRange, evaluator, selectMode,
 
         return;
     };
-
+    
     this.hide = function()
     {
         delete completionPopup.currentTextBox;
@@ -1208,18 +1242,32 @@ Firebug.AutoCompleter = function(getExprOffset, getRange, evaluator, selectMode,
     	return textBox.value.substr(textBox.selectionStart, textBox.selectionEnd);
     };
 
-    this.handledKeyPress = function(event, context, textBox)
+    this.handledKeyUp = function(event, context, textBox)
     {
-        if (event.altKey || event.ctrlKey || event.metaKey)
+    	if (!this.getCompletionText(textBox)) // then the completion was accepted
+    	{
+    		this.hide();
+    		this.reset();
+    	}
+    };
+    
+    this.handledKeyDown = function(event, context, textBox)
+    {
+        if (event.altKey || event.metaKey)
             return false;
+        
+        if (event.ctrlKey && event.keyCode === 17) // Control space forces completion incl globals
+        {
+        	this.complete(context, textBox, true, false, true, true);
+        }
 
-        if (event.keyCode == 27) // ESC
+        if (event.keyCode == 27) // ESC, close the completer
         {
             // Stop event bubbling if it was used to close the popup.
             if (this.hide())
                 cancelEvent(event);
         }
-        else if (event.keyCode === 9) // TAB
+        else if (event.keyCode === 9) // TAB, cycle
         {
             if (isShift(event))
                 this.complete(context, textBox, true, true, true);
@@ -1227,6 +1275,25 @@ Firebug.AutoCompleter = function(getExprOffset, getRange, evaluator, selectMode,
                 this.complete(context, textBox, true, false, true);
 
             cancelEvent(event);
+        }
+        else if (event.keyCode === 40) // DOWN arrow, cycle down
+        {
+        	if (textBox.selectionStart && textBox.seletionStart !== textBox.selectionEnd)
+        	{
+        		this.complete(context, textBox, true, false, true);
+                cancelEvent(event);
+                return true;
+        	}
+        	// else the arrow will fall through to command history
+        }
+        else if (event.keyCode === 38) // UP arrow
+        {
+        	if (textBox.selectionStart && textBox.seletionStart !== textBox.selectionEnd)
+        	{
+        		this.complete(context, textBox, true, true, true);
+        		cancelEvent(event);
+        		return true;
+        	}
         }
         else if (event.keyCode === 8) // backspace
         {

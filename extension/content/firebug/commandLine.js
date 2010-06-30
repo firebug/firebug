@@ -542,6 +542,10 @@ Firebug.CommandLine = extend(Firebug.Module,
     {
         var commandLine = getCommandLine(context);
 
+        var completion = this.autoCompleter.getCompletionText(commandLine);
+        if (completion) // let the arrow keys go to the autocompleter
+        	return;
+        
         commandHistory[commandPointer] = this.autoCompleter.getVerifiedText(commandLine);
 
         if (dir < 0)
@@ -573,7 +577,7 @@ Firebug.CommandLine = extend(Firebug.Module,
         Firebug.Module.initialize.apply(this, arguments);
 
         this.autoCompleter = new Firebug.AutoCompleter(getExpressionOffset, getDot,
-            autoCompleteEval, true, true, true);
+            bind(autoCompleteEval, this), true, true, true);
 
         if (Firebug.largeCommandLine)
             this.setMultiLine(true, Firebug.chrome);
@@ -583,7 +587,8 @@ Firebug.CommandLine = extend(Firebug.Module,
     {
         this.onCommandLineInput = bind(this.onCommandLineInput, this);
         this.onCommandLineBlur = bind(this.onCommandLineBlur, this);
-        this.onCommandLineKeyPress = bind(this.onCommandLineKeyPress, this);
+        this.onCommandLineKeyUp = bind(this.onCommandLineKeyUp, this);
+        this.onCommandLineKeyDown = bind(this.onCommandLineKeyDown, this);
         this.attachListeners();
     },
 
@@ -597,7 +602,8 @@ Firebug.CommandLine = extend(Firebug.Module,
         Firebug.chrome.$("fbLargeCommandLine").addEventListener('focus', this.onCommandLineFocus, true);
         Firebug.chrome.$("fbCommandLine").addEventListener('focus', this.onCommandLineFocus, true);
         Firebug.chrome.$("fbCommandLine").addEventListener('input', this.onCommandLineInput, true);
-        Firebug.chrome.$("fbCommandLine").addEventListener('keypress', this.onCommandLineKeyPress, true);
+        Firebug.chrome.$("fbCommandLine").addEventListener('keyup', this.onCommandLineKeyUp, true);
+        Firebug.chrome.$("fbCommandLine").addEventListener('keydown', this.onCommandLineKeyDown, true);
         Firebug.chrome.$("fbCommandLine").addEventListener('blur', this.onCommandLineBlur, true);
 
         Firebug.Console.addListener(this);  // to get onConsoleInjection
@@ -609,6 +615,7 @@ Firebug.CommandLine = extend(Firebug.Module,
         Firebug.chrome.$("fbCommandLine").removeEventListener('focus', this.onCommandLineFocus, true);
         Firebug.chrome.$("fbCommandLine").removeEventListener('input', this.onCommandLineInput, true);
         Firebug.chrome.$("fbCommandLine").removeEventListener('keypress', this.onCommandLineKeyPress, true);
+        Firebug.chrome.$("fbCommandLine").removeEventListener('keydown', this.onCommandLineKeyDown, true);
         Firebug.chrome.$("fbCommandLine").removeEventListener('blur', this.onCommandLineBlur, true);
     },
 
@@ -673,12 +680,18 @@ Firebug.CommandLine = extend(Firebug.Module,
             return false;
     },
 
-    onCommandLineKeyPress: function(event)
+    onCommandLineKeyUp: function(event)
     {
         var commandLine = getCommandLine(FirebugContext);
-        this.autoCompleter.handledKeyPress(event, FirebugContext, commandLine)
+        this.autoCompleter.handledKeyUp(event, FirebugContext, commandLine)
     },
 
+    onCommandLineKeyDown: function(event)
+    {
+        var commandLine = getCommandLine(FirebugContext);
+        this.autoCompleter.handledKeyDown(event, FirebugContext, commandLine)
+    },
+    
     onCommandLineInput: function(event)
     {
         var commandLine = getCommandLine(FirebugContext);
