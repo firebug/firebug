@@ -176,6 +176,7 @@
 .netDebugCol {
     opacity: 1.0!important;
     border-right: 1px solid #CCCCCC;
+    background-color: #EEEEEE;
 }
 
 .netDebugCol .sourceLine {
