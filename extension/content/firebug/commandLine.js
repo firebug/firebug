@@ -585,6 +585,7 @@ Firebug.CommandLine = extend(Firebug.Module,
 
     initializeUI: function()
     {
+    	this.onCommandLineFocus = bind(this.onCommandLineFocus, true);
         this.onCommandLineInput = bind(this.onCommandLineInput, this);
         this.onCommandLineBlur = bind(this.onCommandLineBlur, this);
         this.onCommandLineKeyUp = bind(this.onCommandLineKeyUp, this);
@@ -709,12 +710,18 @@ Firebug.CommandLine = extend(Firebug.Module,
 
     onCommandLineBlur: function(event)
     {
+    	if (this.autoCompleter.linuxFocusHack)
+    		return;
+    	
         this.autoCompleter.clear();
     },
 
     onCommandLineFocus: function(event)
     {
-        Firebug.CommandLine.attachConsoleOnFocus();
+    	if (this.autoCompleter && this.autoCompleter.linuxFocusHack)
+    		return;
+
+    	Firebug.CommandLine.attachConsoleOnFocus();
 
         if (!Firebug.migrations.commandLineTab)
         {

@@ -931,6 +931,9 @@ Firebug.AutoCompleter = function(getExprOffset, getRange, evaluator, selectMode,
             this.reset();
 
         var offset = textBox.selectionStart;
+        if (!offset)
+        	offset = value.length;
+        
         var line = this.pickCandidates(value, offset, context, cycle, reverse, showGlobal);
 
         if (typeof(line) === "object")
@@ -1204,7 +1207,8 @@ Firebug.AutoCompleter = function(getExprOffset, getRange, evaluator, selectMode,
 
         completionPopup.currentTextBox = textBox;
         var cmdLine = $("fbCommandLine");  // should use something relative to textbox
-        var anchor = textBox;  // cmdLine.ownerDocument.getAnonymousElementByAttribute(cmdLine, "anonid", "input");
+        var anchor = textBox; 
+        this.linuxFocusHack = textBox;
         completionPopup.openPopup(anchor, "before_start", 0, 0, false, false);
 
         return;
@@ -1335,8 +1339,18 @@ Firebug.AutoCompleter = function(getExprOffset, getRange, evaluator, selectMode,
 
     this.acceptCompletion = bind(this.acceptCompletion, this);
 
+    this.focusHack = function(event)
+    {
+    	if (this.linuxFocusHack)
+    		this.linuxFocusHack.focus();
+    	delete this.linuxFocusHack;
+    };
+    
+    this.onPopupShown = bind(this.onPopupShown, this);
+    
     completionPopup.addEventListener("mouseover", this.setCompletionOnEvent, true);
     completionPopup.addEventListener("click", this.acceptCompletion, true);
+    completionPopup.addEventListener("focus", this.focusHack, true);
 };
 
 // ************************************************************************************************
