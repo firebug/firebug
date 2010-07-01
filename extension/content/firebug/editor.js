@@ -926,7 +926,7 @@ Firebug.AutoCompleter = function(getExprOffset, getRange, evaluator, selectMode,
         var value = textBox.value;
         if (!value && noCompleteOnBlank)
             return false;
-        
+
         if (!this.getCompletionText(textBox))
             this.reset();
 
@@ -938,7 +938,7 @@ Firebug.AutoCompleter = function(getExprOffset, getRange, evaluator, selectMode,
 
         if (typeof(line) === "object")
             this.showCandidates(textBox, line, offerOnly);
-        
+
         return line;
     };
 
@@ -1019,7 +1019,7 @@ Firebug.AutoCompleter = function(getExprOffset, getRange, evaluator, selectMode,
                 this.hide();
                 return false;
             }
-            
+
             var values = evaluator(preExpr, expr, postExpr, context);
             if (!values)
             {
@@ -1163,11 +1163,11 @@ Firebug.AutoCompleter = function(getExprOffset, getRange, evaluator, selectMode,
 
         var prefix = this.getVerifiedText(textBox);
         var pre = null;
-        
+
         var showTop = 0;
         var showBottom = candidates.length;
-        
-        if(candidates.length > commandCompletionLineLimit)  
+
+        if(candidates.length > commandCompletionLineLimit)
         {
             var showBottom = commandCompletionLineLimit;
 
@@ -1180,7 +1180,7 @@ Firebug.AutoCompleter = function(getExprOffset, getRange, evaluator, selectMode,
                 }
                 else
                 {
-                    var showTop = line.index - (commandCompletionLineLimit - 3); 
+                    var showTop = line.index - (commandCompletionLineLimit - 3);
                     var showBottom = line.index + 3;
                 }
             }
@@ -1213,7 +1213,7 @@ Firebug.AutoCompleter = function(getExprOffset, getRange, evaluator, selectMode,
 
         return;
     };
-    
+
     this.hide = function()
     {
         delete completionPopup.currentTextBox;
@@ -1254,22 +1254,20 @@ Firebug.AutoCompleter = function(getExprOffset, getRange, evaluator, selectMode,
             this.reset();
         }
     };
-    
+
     this.handledKeyDown = function(event, context, textBox)
     {
         if (event.altKey || event.metaKey)
             return false;
-        
+
         if (event.ctrlKey && event.keyCode === 17) // Control space forces completion incl globals
         {
             this.complete(context, textBox, true, false, true, true);
         }
-
-        if (event.keyCode == 27) // ESC, close the completer
+        else if (event.keyCode === 8) // backspace
         {
-            // Stop event bubbling if it was used to close the popup.
-            if (this.hide())
-                cancelEvent(event);
+            if (textBox.selectionStart && textBox.seletionStart !== textBox.selectionEnd)
+                textBox.selectionStart = textBox.selectionStart - 1;
         }
         else if (event.keyCode === 9) // TAB, cycle
         {
@@ -1280,15 +1278,15 @@ Firebug.AutoCompleter = function(getExprOffset, getRange, evaluator, selectMode,
 
             cancelEvent(event);
         }
-        else if (event.keyCode === 40) // DOWN arrow, cycle down
+        else if (event.keyCode === 13 || event.keyCode === 14 || event.keyCode === 190) // RETURN ENTER, PERIOD
         {
-            if (textBox.selectionStart && textBox.seletionStart !== textBox.selectionEnd)
-            {
-                this.complete(context, textBox, true, false, true);
+        	this.acceptCompletionInTextBox(textBox);
+        }
+        else if (event.keyCode == 27) // ESC, close the completer
+        {
+            // Stop event bubbling if it was used to close the popup.
+            if (this.hide())
                 cancelEvent(event);
-                return true;
-            }
-            // else the arrow will fall through to command history
         }
         else if (event.keyCode === 38) // UP arrow
         {
@@ -1299,10 +1297,15 @@ Firebug.AutoCompleter = function(getExprOffset, getRange, evaluator, selectMode,
                 return true;
             }
         }
-        else if (event.keyCode === 8) // backspace
+        else if (event.keyCode === 40) // DOWN arrow, cycle down
         {
             if (textBox.selectionStart && textBox.seletionStart !== textBox.selectionEnd)
-                textBox.selectionStart = textBox.selectionStart - 1;
+            {
+                this.complete(context, textBox, true, false, true);
+                cancelEvent(event);
+                return true;
+            }
+            // else the arrow will fall through to command history
         }
 
     };
@@ -1327,14 +1330,16 @@ Firebug.AutoCompleter = function(getExprOffset, getRange, evaluator, selectMode,
         }
     };
 
+    this.acceptCompletionInTextBox = function(textBox)
+    {
+        textBox.setSelectionRange(textBox.selectionEnd, textBox.selectionEnd);  // accept completion by deselect
+        this.hide();
+    };
+
     this.acceptCompletion = function(event)
     {
         if (completionPopup.currentTextBox)
-        {
-            var textBox = completionPopup.currentTextBox;
-            textBox.setSelectionRange(textBox.selectionEnd, textBox.selectionEnd);  // accept completion by deselect
-            this.hide();
-        }
+        	this.acceptCompletionInTextBox(completionPopup.currentTextBox);
     };
 
     this.acceptCompletion = bind(this.acceptCompletion, this);
