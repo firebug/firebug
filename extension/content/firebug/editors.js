@@ -61,10 +61,35 @@ var gEditorManager =
 
         this._load();
         this._tree.view = this._treeView;
+
+        this.internationalizeUI(document);
     },
 
     uninit: function()
     {
+    },
+
+    internationalizeUI: function(doc)
+    {
+        var elements = ["firebug-external-editors", "actionsIntro", "editorName",
+            "editorExecutable", "editorParams", "addEditor", "removeEditor", "changeEditor",
+            "closeDialogButton"];
+
+        for (var i=0; i<elements.length; i++)
+        {
+            var element = doc.getElementById(elements[i]);
+            if (!element)
+                continue;
+
+            if (element.hasAttribute("title"))
+                this._FBL.internationalize(element, "title");
+
+            if (element.hasAttribute("label"))
+                this._FBL.internationalize(element, "label");
+
+            if (element.hasAttribute("value"))
+                this._FBL.internationalize(element, "value");
+        }
     },
 
     onSelectionChanged: function()

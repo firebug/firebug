@@ -244,14 +244,36 @@ top.Firebug =
         if (FBTrace.DBG_INITIALIZE)
             FBTrace.sysout("Firebug.internationalizeUI");
 
-        var elements = ["menu_clearConsole", "menu_resetAllOptions",
+        var elements = [
+            /* firebugOverlay.xul */
+            "menu_clearConsole", "menu_resetAllOptions",
             "menu_enablePanels", "menu_disablePanels",
             "fbCommandLine", "fbFirebugMenu", "fbLargeCommandLine", "menu_customizeShortcuts",
             "menu_enableA11y", "menu_activateSameOrigin", "menu_onByDefault", "fbContinueButton",
-            "fbBreakOnNextButton", "fbConsolePersist",
+            "fbBreakOnNextButton",
             "fbMinimizeButton", "FirebugMenu_Sites", "fbResumeBoxButton",
             "menu_AllOn", "menu_clearActivationList", "showQuickInfoBox", "panelBarTabList",
-            "fbNavigateBackButton", "fbNavigateForwardButton"];
+            "fbNavigateBackButton", "fbNavigateForwardButton",
+
+            "fbInspectButton", "fbCloseButton", "fbConsoleClear", "fbConsolePersist",
+            "fbToggleProfiling", "fbToggleHTMLEditing", "fbToggleCSSEditing",
+            "menu_toggleFirebug", "menu_detachFirebug", "FirebugMenu_OpenWith",
+            "menu_configureEditors", "FirebugMenu_TextSize", "menu_increaseTextSize",
+            "menu_decreaseTextSize", "menu_normalTextSize", "FirebugMenu_Options",
+            "menu_alwaysOpenInWindow", "menu_showTooltips", "menu_shadeBoxModel",
+            "menu_toggleOrient",
+
+            "menu_firebugWebsite", "menu_firebugDoc", "menu_firebugKeyboard",
+            "menu_firebugForums", "menu_firebugIssues", "menu_firebugDonate",
+
+            "menu_inspectElement", "menu_profileScript", "menu_focusCommandLine",
+            "menu_focusFirebugSearch", "Firebug_About",
+
+            /* browserOverlay.xul */
+            "menu_openFirebugEditors", "menu_firebugInspect", "menu_viewToggleFirebug",
+            "menu_viewToggleFirebug", "menu_firebug", "inspector-button", "firebug-button",
+            "menu_detachFirebug", "menu_ClearConsole"
+        ];
 
         for (var i=0; i<elements.length; i++)
         {
@@ -269,6 +291,15 @@ top.Firebug =
             if (element.hasAttribute("tooltiptext"))
                 FBL.internationalize(element, "tooltiptext");
         }
+
+        // Translated strings for this label don't include "..." at the end.
+        var node = doc.getElementById("menu_openFirebugEditors");
+        var label = node.getAttribute("label") + "...";
+        node.setAttribute("label", label);
+
+        var node = doc.getElementById("menu_configureEditors");
+        var label = node.getAttribute("label") + "...";
+        node.setAttribute("label", label);
 
         // Allow other modules to internationalize UI labels (called also for
         // detached Firebug window).

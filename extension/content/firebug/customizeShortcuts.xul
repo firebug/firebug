@@ -3,11 +3,6 @@
 <?xml-stylesheet href="chrome://global/skin/global.css"?>
 <?xml-stylesheet href="chrome://firebug/skin/customizeShortcuts.css" ?>
 
-<!DOCTYPE window [
-<!ENTITY % firebugDTD SYSTEM "chrome://firebug/locale/firebug.dtd">
-%firebugDTD;
-]>
-
 <dialog xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul"
         class="windowDialog"
         id="firebug-customize-keyboard"

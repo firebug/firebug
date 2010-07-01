@@ -2,13 +2,6 @@
 
 <?xul-overlay href="chrome://firebug/content/firebugOverlay.xul"?>
 
-<!DOCTYPE window [
-<!ENTITY % firebugDTD SYSTEM "chrome://firebug/locale/firebug.dtd">
-%firebugDTD;
-<!ENTITY % browserDTD SYSTEM "chrome://browser/locale/browser.dtd" >
-%browserDTD;
-]>
-
 <overlay xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul">
 
     <script type="application/x-javascript" src="chrome://firebug/content/trace.js"/>
@@ -16,7 +9,6 @@
     <script type="application/x-javascript" src="chrome://firebug/content/xpcom.js"/>
     <script type="application/x-javascript" src="chrome://firebug/content/chrome.js"/>
     <script type="application/x-javascript" src="chrome://firebug/content/lib.js"/>
-
 
     <script type="application/x-javascript" src="chrome://firebug/content/domplate.js"/>
     <script type="application/x-javascript" src="chrome://firebug/content/insideOutBox.js"/>
@@ -70,15 +62,17 @@
     <popup id="contentAreaContextMenu">
 
         <!-- TODO Firebug.Editors. -->
-        <menu label="&firebug.OpenWith;" id="menu_firebugOpenWithEditor"
-              insertbefore="context-viewsource">
-            <menupopup id="menu_firebugOpenWith" onpopupshowing="return FirebugChrome.onEditorsShowing(this);">
-                <menuitem label="&firebug.ConfigureEditors;..." command="cmd_openFirebugEditors"/>
+        <menu label="firebug.OpenWith" id="menu_firebugOpenWithEditor"
+            insertbefore="context-viewsource">
+            <menupopup id="menu_firebugOpenWith"
+                onpopupshowing="return FirebugChrome.onEditorsShowing(this);">
+                <menuitem id="menu_openFirebugEditors" label="firebug.ConfigureEditors"
+                    command="cmd_openFirebugEditors"/>
             </menupopup>
         </menu>
 
         <menuseparator/>
-        <menuitem id="menu_firebugInspect" label="&firebug.InspectElement;"
+        <menuitem id="menu_firebugInspect" label="firebug.InspectElement"
                   class="menuitem-iconic" image="chrome://firebug/skin/Templarian_inspector.png"
                   command="cmd_inspect" />
     </popup>
@@ -86,21 +80,21 @@
     <!-- Firefox View menu -->
     <menupopup id="menu_viewPopup">
         <menuitem id="menu_viewToggleFirebug" insertbefore="toggle_taskbar"
-                  label="&firebug.Firebug;" type="checkbox"
+                  label="firebug.Firebug" type="checkbox"
                   key="key_toggleFirebug" command="cmd_toggleFirebug"/>
     </menupopup>
 
     <!-- SeaMonkey View menu -->
     <menupopup id="menu_View_Popup">
         <menuitem id="menu_viewToggleFirebug" insertafter="menuitem_fullScreen"
-                  label="&firebug.Firebug;" type="checkbox"
+                  label="firebug.Firebug" type="checkbox"
                   key="key_toggleFirebug" command="cmd_toggleFirebug"/>
     </menupopup>
 
     <!-- Firefox Tools menu -->
     <menupopup id="menu_ToolsPopup">
         <menu id="menu_firebug" class="menuitem-iconic" image="chrome://firebug/skin/firebug16.png"
-              label="&firebug.Firebug;" insertbefore="javascriptConsole">
+              label="firebug.Firebug" insertbefore="javascriptConsole">
               <!-- Content comes from fbFirebugMenuPopup -->
         </menu>
     </menupopup>
@@ -108,19 +102,19 @@
     <!-- SeaMonkey Tools menu -->
     <menupopup id="toolsPopup">
         <menu id="menu_firebug" class="menuitem-iconic" image="chrome://firebug/skin/firebug16.png"
-              label="&firebug.Firebug;">
+              label="firebug.Firebug">
               <!-- Content comes from fbFirebugMenuPopup -->
         </menu>
     </menupopup>
 
     <!-- Buttons for Firefox Customize Toolbar dialog -->
     <toolbarpalette id="BrowserToolbarPalette">
-        <toolbarbutton id="inspector-button" label="&firebug.Inspect;"
+        <toolbarbutton id="inspector-button" label="firebug.Inspect"
                        class="toolbarbutton-1 chromeclass-toolbar-additional"
-                       observes="cmd_toggleInspecting" tooltiptext="&firebug.InspectElement;"/>
-        <toolbarbutton id="firebug-button" label="&firebug.Firebug;"
+                       observes="cmd_toggleInspecting" tooltiptext="firebug.InspectElement"/>
+        <toolbarbutton id="firebug-button" label="firebug.Firebug"
                        class="toolbarbutton-1 chromeclass-toolbar-additional"
-                       observes="cmd_toggleDetachFirebug" tooltiptext="&firebug.DetachFirebug;"/>
+                       observes="cmd_toggleDetachFirebug" tooltiptext="firebug.DetachFirebug"/>
     </toolbarpalette>
 
     <!-- Firebug panel -->
@@ -143,17 +137,22 @@
 
         <!-- Context menu -->
         <menupopup id="fbStatusContextMenu" onpopupshowing="FirebugChrome.onOptionsShowing(this)">
-            <menuitem id="menu_detachFirebug" label="&firebug.DetachFirebug;" command="cmd_toggleDetachFirebug"
-                      type="checkbox" key="key_detachFirebug"/>
+            <menuitem id="menu_detachFirebug" label="firebug.DetachFirebug"
+                    command="cmd_toggleDetachFirebug"
+                    type="checkbox" key="key_detachFirebug"/>
             <menuseparator/>
-            <menuitem label="&firebug.ClearConsole;" command="cmd_clearConsole" key="key_clearConsole"/>
+            <menuitem id="menu_ClearConsole" label="firebug.ClearConsole"
+                    command="cmd_clearConsole" key="key_clearConsole"/>
             <menuseparator/>
-            <menuitem id="menu_enablePanels" label="firebug.menu.Enable All Panels" command="cmd_enablePanels"/>
-            <menuitem id="menu_disablePanels" label="firebug.menu.Disable All Panels" command="cmd_disablePanels"/>
+            <menuitem id="menu_enablePanels" label="firebug.menu.Enable All Panels"
+                    command="cmd_enablePanels"/>
+            <menuitem id="menu_disablePanels" label="firebug.menu.Disable All Panels"
+                    command="cmd_disablePanels"/>
             <menuseparator/>
-            <menuitem id="menu_AllOn" type="checkbox" label="On for all web pages" command="cmd_allOn"/>
+            <menuitem id="menu_AllOn" type="checkbox" label="On for all web pages"
+                    command="cmd_allOn"/>
             <menuitem id="menu_clearActivationList" label="firebug.menu.Clear Activation List"
-                      command="cmd_clearActivationList"/>
+                    command="cmd_clearActivationList"/>
         </menupopup>
     </statusbar>
 </overlay>

@@ -4,8 +4,6 @@
 <?xml-stylesheet href="chrome://mozapps/content/preferences/preferences.css" type="text/css"?>
 <?xml-stylesheet href="chrome://browser/skin/preferences/preferences.css" type="text/css"?>
 
-<!DOCTYPE window SYSTEM "chrome://firebug/locale/editors.dtd">
-
 <dialog xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul"
         buttons="accept,cancel"
         id="firebug-external-editors-change"
@@ -16,118 +14,23 @@
         persist="screenX screenY">
 
   <script type="application/x-javascript" src="chrome://firebug/content/xpcom.js"/>
-  <script><![CDATA[
-
-      var item;
-      var FBL;
-      var internalFilefieldTextbox;
-      var browseButton;
-
-      function onLoad()
-      {
-         var args = window.arguments[0];
-         item = args.item;
-         FBL = args.FBL;
-
-         browseButton = document.getElementById("browse-button");
-
-         document.getElementById("name").value = item.label;
-         if ( item.executable )
-         {
-            try {
-                var file = fbXPCOMUtils.CCIN("@mozilla.org/file/local;1", "nsILocalFile");
-                file.initWithPath(item.executable);
-                document.getElementById("executable").file = file;
-            }
-            catch(exc) {}
-         }
-         if ( item.cmdline )
-            document.getElementById("cmdline").value = item.cmdline;
-         onChange();
-         
-         // Localization
-         var element = document.getElementById("firebug-external-editors-change");
-         var xulString = element.getAttribute("title");
-         document.title = FBL.$STR(xulString);
-         
-         if (document.getAnonymousElementByAttribute && !document.getElementById("executable").file) {
-           setTimeout(function() {
-             internalFilefieldTextbox = document.getAnonymousElementByAttribute(document.getElementById("executable"), "class", "fileFieldLabel");
-             if (internalFilefieldTextbox) {
-               internalFilefieldTextbox.readOnly = false;
-               internalFilefieldTextbox.addEventListener("input", function(e) {
-                 browseButton.disabled = true;
-                 onChange();
-               }, false);
-             }
-           }, 100);
-         }
-      }
-
-      function onAccept()
-      {
-          item.label = document.getElementById("name").value;
-          if (!browseButton.disabled) {
-            var file = document.getElementById("executable").file;
-            item.executable = "";
-            if (file)
-                item.executable = file.path;
-          } else {
-            item.executable = internalFilefieldTextbox.value.replace(/^\s+|\s+$/g, '');
-          }
-          item.cmdline = document.getElementById("cmdline").value;
-          window.arguments[1].saveChanges = true;
-      }
-
-      function onChange()
-      {
-          document.documentElement.getButton("accept").disabled = !(
-              document.getElementById("name").value && (
-                (browseButton.disabled && internalFilefieldTextbox && internalFilefieldTextbox.value && internalFilefieldTextbox.value.replace(/^\s+|\s+$/g, '')) ||
-                (!browseButton.disabled && document.getElementById("executable").file)
-              )
-          );
-      }
-
-      function onBrowse()
-      {
-        const Ci = Components.interfaces;
-        const nsIFilePicker = Ci.nsIFilePicker;
-        var picker = fbXPCOMUtils.CCIN("@mozilla.org/filepicker;1", "nsIFilePicker");
-        picker.init(window, "", nsIFilePicker.modeOpen);
-        picker.appendFilters(nsIFilePicker.filterApps);
-        if ( picker.show() == nsIFilePicker.returnOK && picker.file )
-        {
-          var execField = document.getElementById("executable");
-          execField.file = picker.file;
-          
-          if (internalFilefieldTextbox) {
-            internalFilefieldTextbox.readOnly = true;
-          }
-          
-          onChange();
-          return true;
-        }
-        return false;
-      }
-
-  ]]></script>
+  <script type="application/x-javascript" src="chrome://firebug/content/changeeditor.js"/>
 
   <vbox flex="1">
-      <hbox>
-         <label control="name" align="baseline">&changeEditor.Name;</label>
+      <hbox align="center">
+         <label id="fbNameLabel" control="name" align="baseline" value="changeEditor.Name"/>
          <textbox id="name" flex="1" oninput="onChange()"/>
       </hbox>
       <separator class="groove"/>
-      <hbox>
-         <label control="executable" align="baseline">&changeEditor.Executable;</label>
+      <hbox align="center">
+         <label id="fbExecutableLabel" control="executable" align="baseline"
+            value="changeEditor.Executable"/>
          <filefield id="executable" flex="1"/>
-         <button id="browse-button" oncommand="onBrowse();" label="&browse.label;"/>
-
+         <button id="browse-button" oncommand="onBrowse();" label="browse.label"/>
       </hbox>
       <separator class="thin"/>
       <hbox align="center">
-          <label control="cmdline">&changeEditor.CmdLine;</label>
+          <label id="fbCmdLineLabel" control="cmdline" value="changeEditor.CmdLine"/>
           <textbox id="cmdline" flex="1" oninput="onChange()"/>
       </hbox>
   </vbox>

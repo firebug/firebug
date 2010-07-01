@@ -221,11 +221,15 @@ Firebug.NetMonitor = extend(Firebug.ActivableModule,
 
     internationalizeUI: function(doc)
     {
-        var elements = ["fbNetPersist", "fbNetFilter-media"];
+        var elements = ["fbNetPersist", "fbNetFilter-media", "fbNetClear", "fbNetFilter-all",
+            "fbNetFilter-image", "fbNetFilter-flash"];
 
         for (var i=0; i<elements.length; i++)
         {
             var element = doc.getElementById(elements[i]);
+            if (!element)
+                continue;
+
             if (element.hasAttribute("label"))
                 FBL.internationalize(element, "label");
 

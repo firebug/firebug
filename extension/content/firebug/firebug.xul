@@ -8,8 +8,6 @@
 <?xml-stylesheet href="chrome://browser/skin/browser.css"?>
 
 <!DOCTYPE window [
-<!ENTITY % firebugDTD SYSTEM "chrome://firebug/locale/firebug.dtd">
-%firebugDTD;
 <!ENTITY % browserDTD SYSTEM "chrome://browser/locale/browser.dtd" >
 %browserDTD;
 ]>
@@ -42,13 +40,13 @@
         <command id="cmd_cut" oncommand="goDoCommand('cmd_cut')" disabled="true"/>
         <command id="cmd_copy" oncommand="goDoCommand('cmd_copy')" disabled="true"/>
         <command id="cmd_paste" oncommand="goDoCommand('cmd_paste')" disabled="true"/>
-        <command id="cmd_delete" oncommand="goDoCommand('cmd_delete')" valueDefault="&deleteCmd.label;"
-                 disabled="true"/>
+        <command id="cmd_delete" oncommand="goDoCommand('cmd_delete')" disabled="true"
+            valueDefault="&deleteCmd.label;"/>
         <command id="cmd_selectAll" oncommand="goDoCommand('cmd_selectAll')" disabled="true"/>
         <command id="cmd_closeWindow" oncommand="window.close()"/>
         <command id="cmd_reload" oncommand="FirebugChrome.reload()"/>
         <command id="cmd_reloadSkipCache" oncommand="FirebugChrome.reload(true)"/>
-        <command id="cmd_toggleOrient" oncommand="FirebugChrome.toggleOrient()" />
+        <command id="cmd_toggleOrient" oncommand="FirebugChrome.toggleOrient()"/>
     </commandset>
 
     <keyset id="mainKeyset">
