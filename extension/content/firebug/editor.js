@@ -932,8 +932,8 @@ Firebug.AutoCompleter = function(getExprOffset, getRange, evaluator, selectMode,
 
         var offset = textBox.selectionStart;
         if (!offset)
-        	offset = value.length;
-        
+            offset = value.length;
+
         var line = this.pickCandidates(value, offset, context, cycle, reverse, showGlobal);
 
         if (typeof(line) === "object")
@@ -1207,7 +1207,7 @@ Firebug.AutoCompleter = function(getExprOffset, getRange, evaluator, selectMode,
 
         completionPopup.currentTextBox = textBox;
         var cmdLine = $("fbCommandLine");  // should use something relative to textbox
-        var anchor = textBox; 
+        var anchor = textBox;
         this.linuxFocusHack = textBox;
         completionPopup.openPopup(anchor, "before_start", 0, 0, false, false);
 
@@ -1278,9 +1278,9 @@ Firebug.AutoCompleter = function(getExprOffset, getRange, evaluator, selectMode,
 
             cancelEvent(event);
         }
-        else if (event.keyCode === 13 || event.keyCode === 14 || event.keyCode === 190) // RETURN ENTER, PERIOD
+        else if (event.keyCode === 13 || event.keyCode === 14)  // RETURN , ENTER
         {
-        	this.acceptCompletionInTextBox(textBox);
+            this.acceptCompletionInTextBox(textBox);
         }
         else if (event.keyCode == 27) // ESC, close the completer
         {
@@ -1307,7 +1307,21 @@ Firebug.AutoCompleter = function(getExprOffset, getRange, evaluator, selectMode,
             }
             // else the arrow will fall through to command history
         }
+    },
 
+    this.handledKeyPress = function(event, context, textBox)
+    {
+        var char = String.fromCharCode(event.charCode);
+        switch (char)
+        {
+            case '.':
+            case '(':
+            case ')':
+                this.acceptCompletionInTextBox(textBox);
+                break;
+            default:
+                break;
+        }
     };
 
     this.setCompletionOnEvent = function(event)
@@ -1339,20 +1353,20 @@ Firebug.AutoCompleter = function(getExprOffset, getRange, evaluator, selectMode,
     this.acceptCompletion = function(event)
     {
         if (completionPopup.currentTextBox)
-        	this.acceptCompletionInTextBox(completionPopup.currentTextBox);
+            this.acceptCompletionInTextBox(completionPopup.currentTextBox);
     };
 
     this.acceptCompletion = bind(this.acceptCompletion, this);
 
     this.focusHack = function(event)
     {
-    	if (this.linuxFocusHack)
-    		this.linuxFocusHack.focus();
-    	delete this.linuxFocusHack;
+        if (this.linuxFocusHack)
+            this.linuxFocusHack.focus();
+        delete this.linuxFocusHack;
     };
-    
+
     this.onPopupShown = bind(this.onPopupShown, this);
-    
+
     completionPopup.addEventListener("mouseover", this.setCompletionOnEvent, true);
     completionPopup.addEventListener("click", this.acceptCompletion, true);
     completionPopup.addEventListener("focus", this.focusHack, true);
