@@ -294,12 +294,18 @@ top.Firebug =
 
         // Translated strings for this label don't include "..." at the end.
         var node = doc.getElementById("menu_openFirebugEditors");
-        var label = node.getAttribute("label") + "...";
-        node.setAttribute("label", label);
+        if (node)
+        {
+            var label = node.getAttribute("label") + "...";
+            node.setAttribute("label", label);
+        }
 
-        var node = doc.getElementById("menu_configureEditors");
-        var label = node.getAttribute("label") + "...";
-        node.setAttribute("label", label);
+        node = doc.getElementById("menu_configureEditors");
+        if (node)
+        {
+            var label = node.getAttribute("label") + "...";
+            node.setAttribute("label", label);
+        }
 
         // Allow other modules to internationalize UI labels (called also for
         // detached Firebug window).
