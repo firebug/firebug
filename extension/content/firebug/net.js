@@ -223,19 +223,9 @@ Firebug.NetMonitor = extend(Firebug.ActivableModule,
     {
         var elements = ["fbNetPersist", "fbNetFilter-media", "fbNetClear", "fbNetFilter-all",
             "fbNetFilter-image", "fbNetFilter-flash"];
+        var attributes = ["label", "tooltiptext"];
 
-        for (var i=0; i<elements.length; i++)
-        {
-            var element = doc.getElementById(elements[i]);
-            if (!element)
-                continue;
-
-            if (element.hasAttribute("label"))
-                FBL.internationalize(element, "label");
-
-            if (element.hasAttribute("tooltiptext"))
-                FBL.internationalize(element, "tooltiptext");
-        }
+        FBL.internationalizeElements(doc, elements, attributes);
     },
 
     shutdown: function()

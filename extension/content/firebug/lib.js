@@ -558,6 +558,22 @@ this.internationalize = function(element, attr, args)
     }
 }
 
+this.internationalizeElements = function(doc, elements, attributes)
+{
+    for (var i=0; i<elements.length; i++)
+    {
+        var element = doc.getElementById(elements[i]);
+        if (!element)
+            continue;
+
+        for (var j=0; j<attributes.length; j++)
+        {
+            if (element.hasAttribute(attributes[j]))
+                FBL.internationalize(element, attributes[j]);
+        }
+    }
+}
+
 // ************************************************************************************************
 // Visibility
 
