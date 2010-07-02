@@ -759,7 +759,7 @@
             {
                 // Get panel's option items.
                 var panelItems = panel.getOptionsMenuItems(FirebugContext);
-                if (panelItems.length > 0)
+                if (panelItems && panelItems.length > 0)
                     items.push("-");
             }
 
