@@ -610,6 +610,11 @@ Firebug.ConsolePanel.prototype = extend(Firebug.ActivablePanel,
         Firebug.chrome.setGlobalAttribute("cmd_togglePersistConsole", "checked",
             this.persistContent);
 
+        this.showPanel(state);
+    },
+
+    showPanel: function(state)
+    {
         var wasScrolledToBottom;
         if (state)
             wasScrolledToBottom = state.wasScrolledToBottom;

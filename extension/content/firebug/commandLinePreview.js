@@ -146,7 +146,7 @@ Firebug.CommandLine.Preview = extend(Firebug.Module,
             if (panel)
             {
                 var state = Firebug.getPanelState(panel);
-                panel.show(state);
+                panel.showPanel(state);
             }
         }
     },
