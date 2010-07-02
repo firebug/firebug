@@ -1116,7 +1116,7 @@
                 return false;
             }
 
-            this.filterStringHeader = FBL.createMenuHeader(this.popup, {label: "Type any key to filter list", nol10n: true}); // XXXjjb need l10n
+            this.filterStringHeader = FBL.createMenuHeader(this.popup, {label: "script.Type any key to filter list"}); 
             FBL.setClass(this.filterStringHeader, "fbURLMenuItem");
 
             var groupNames = [];
@@ -1180,16 +1180,6 @@
             if (!this._closed)
                 return;
 
-            // XXXjoe There is a bug in the <xul:autoscrollbox> code which,
-            // for reasons I don't grasp yet, never hides the scroll buttons
-            // after the first them they are shown - so we must do it ourselves
-          /*  var scrollbox = document.getAnonymousElementByAttribute(
-                this.popup, "class", "popup-internal-box");
-            if (scrollbox["_scrollButtonUp"])
-                scrollbox["_scrollButtonUp"].collapsed = true;
-            if (scrollbox["_scrollButtonDown"])
-                scrollbox["_scrollButtonDown"].collapsed = true;
-*/
             this._closed = false;
 
             this.filterString = "";
