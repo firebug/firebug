@@ -2,7 +2,7 @@
 
 <?xml-stylesheet href="chrome://global/skin/global.css"?>
 <?xml-stylesheet href="chrome://global/skin/findBar.css" type="text/css"?>
-<?xml-stylesheet href="skin/traceConsole.css"?>
+<!-- <?xml-stylesheet href="chrome://firebug/skin/traceConsole.css"?> -->
 
 <!DOCTYPE window [
 <!ENTITY % browserDTD SYSTEM "chrome://browser/locale/browser.dtd" >
@@ -114,7 +114,7 @@
   </popupset>
 
   <vbox flex="1">
-    <browser id="consoleFrame" type="content-primary"
+    <browser id="consoleFrame"
              src="traceConsole.html" flex="1"
              disablehistory="true" contextmenu="fbContextMenu"
              tooltip="fbTooltip"/>
