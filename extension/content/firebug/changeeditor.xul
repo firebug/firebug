@@ -18,7 +18,7 @@
 
   <vbox flex="1">
       <hbox align="center">
-         <label id="fbNameLabel" control="name" align="baseline" value="changeEditor.Name"/>
+         <label id="fbNameLabel" control="name" value="changeEditor.Name"/>
          <textbox id="name" flex="1" oninput="onChange()"/>
       </hbox>
       <separator class="groove"/>
@@ -34,5 +34,4 @@
           <textbox id="cmdline" flex="1" oninput="onChange()"/>
       </hbox>
   </vbox>
-
 </dialog>
