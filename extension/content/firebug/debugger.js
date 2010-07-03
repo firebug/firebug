@@ -812,7 +812,7 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
 
     showPanel: function(browser, panel)
     {
-        if (panel && panel.name == "script")
+        if (panel && panel.name == "script") // this test on name is a sign that this code belongs in panel.show()
         {
             this.syncCommands(panel.context);
             this.ableWatchSidePanel(panel.context);
