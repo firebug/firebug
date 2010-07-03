@@ -54,7 +54,7 @@ Firebug.CommandLine.Preview = extend(Firebug.Module,
     showPanel: function(browser, panel)
     {
         if (FBTrace.DBG_COMMANDLINE)
-            FBTrace.sysout("commandLine.Preview.showPanel; " + panel.name);
+            FBTrace.sysout("commandLine.Preview.showPanel; " + (panel?panel.name:"null panel"));
 
         var chrome = Firebug.chrome;
         var visible = this.isVisible();
@@ -99,7 +99,7 @@ Firebug.CommandLine.Preview = extend(Firebug.Module,
             this.reattach(panel.context);
 
         // If the the console panel is opened on another panel, simulate show event for it.
-        if (!isConsole && visible)
+        if (panel && !isConsole && visible)
             this.showPreviewPanel(panel.context);
     },
 

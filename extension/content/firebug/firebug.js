@@ -1491,6 +1491,7 @@ top.Firebug =
 
     showPanel: function(browser, panel)
     {
+    	// The panel may be null
         dispatch(modules, "showPanel", [browser, panel]);
     },
 
@@ -2137,6 +2138,8 @@ Firebug.Module = extend(new Firebug.Listener(),
 
     /*
      * After "onSelectingPanel", a panel has been selected but is not yet visible
+     * @param browser a tab's browser element
+     * @param panel selectet panel OR null
      */
     showPanel: function(browser, panel)
     {

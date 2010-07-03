@@ -125,7 +125,6 @@
             oncommand="Firebug.NavigationHistory.onHistoryCommand(event, FirebugContext)"
             onpopupshowing="return Firebug.NavigationHistory.onPopupShowing(this, FirebugContext)" />
         <panel id="fbCommandLineCompletionList" class="fbCommandLineCompletionPanel" noautohide="true" noautofocus="true">
-            
         </panel>
     </popupset>
 
