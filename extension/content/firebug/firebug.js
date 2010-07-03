@@ -710,7 +710,7 @@ top.Firebug =
 
     registerStringBundle: function(bundleURI)
     {
-        categoryManager.addCategoryEntry("strings_firebug", bundleURI, "", true, true);
+        categoryManager.addCategoryEntry("strings_firebug", bundleURI, "", false, true);
         this.stringBundle = null;
     },
 
