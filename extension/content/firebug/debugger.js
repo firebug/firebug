@@ -53,7 +53,7 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
 
     evaluate: function(js, context, scope)  // TODO remote: move to backend, proxy to front
     {
-        var frame = context.stoppedFrame;
+        var frame = context.currentFrame;
         if (!frame)
             return;
 
@@ -82,8 +82,8 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
     {
         var globals = keys(context.getGlobalScope().wrappedJSObject);  // return is safe
 
-        if (context.stoppedFrame)
-            return this.getFrameKeys(context.stoppedFrame, globals);
+        if (context.currentFrame)
+            return this.getFrameKeys(context.currentFrame, globals);
 
         return globals;
     },
@@ -193,7 +193,8 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
         if (FBTrace.DBG_UI_LOOP)
             FBTrace.sysout("debugger.stop "+context.getName()+" frame",frame);
 
-        context.stoppedFrame = frame;
+        context.stoppedFrame = frame;  // the frame we stopped in, don't change this elsewhere.
+        context.currentFrame = frame;  // the frame we show to user, depends on selection
         context.stopped = true;
 
         var hookReturn = dispatch2(this.fbListeners,"onStop",[context,frame, type,rv]);
@@ -201,6 +202,7 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
         {
             delete context.stopped;
             delete context.stoppedFrame;
+            delete context.currentFrame;
             if (FBTrace.DBG_UI_LOOP)
                 FBTrace.sysout("debugger.stop extension vetoed stop with hookReturn "+hookReturn);
 
@@ -2476,6 +2478,8 @@ Firebug.ScriptPanel.prototype = extend(Firebug.SourceBoxPanel,
             return;
         }
 
+        this.context.currentFrame = frame;  // this is the frame to use for evals
+
         this.context.executingSourceFile = sourceFile;
         this.executionFile = sourceFile;
         if (this.executionFile)
@@ -3279,7 +3283,7 @@ Firebug.ScriptPanel.prototype = extend(Firebug.SourceBoxPanel,
 
     showInfoTip: function(infoTip, target, x, y, rangeParent, rangeOffset)
     {
-        var frame = this.context.stoppedFrame;
+        var frame = this.context.currentFrame;
         if (!frame)
             return;
 
@@ -3304,7 +3308,7 @@ Firebug.ScriptPanel.prototype = extend(Firebug.SourceBoxPanel,
 
     getObjectPath: function(frame)
     {
-        frame = this.context.stoppedFrame;
+        frame = this.context.currentFrame;
 
         if (FBTrace.DBG_STACK)
             FBTrace.sysout("debugger.getObjectPath "+((frame && frame.isValid)?("frame is good:"+frame.script.fileName+"@"+frame.line):(frame?"frame invalid":"no frame")), this.selection);
