@@ -140,9 +140,17 @@ var clearContextTimeout = 0;
 var temporaryFiles = [];
 var temporaryDirectory = null;
 
-// Register default Firebug string bundle (yet before domplate templates).
-categoryManager.addCategoryEntry("strings_firebug",
-    "chrome://firebug/locale/firebug.properties", "", true, true);
+try
+{
+    // Register default Firebug string bundle (yet before domplate templates).
+    // Notice that this category entry must not be persistent in Fx 4.0
+    categoryManager.addCategoryEntry("strings_firebug",
+        "chrome://firebug/locale/firebug.properties", "", false, true);
+}
+catch (exc)
+{
+    dump("Register default string bundle FAILS: "+exc+"\n");
+}
 
 // ************************************************************************************************
 
@@ -3152,10 +3160,12 @@ Firebug.Migrator =
 }
 
 // ************************************************************************************************
+
 /*
  * If we are detached and the main Firefox window closes, also close the matching Firebug window.
  */
-function shutdownFirebug() {
+function shutdownFirebug()
+{
     try
     {
         if (Firebug.isDetached())
@@ -3169,4 +3179,5 @@ function shutdownFirebug() {
     Firebug.shutdown();
 }
 
+// ************************************************************************************************
 }})();
