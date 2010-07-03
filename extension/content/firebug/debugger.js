@@ -3109,7 +3109,7 @@ Firebug.ScriptPanel.prototype = extend(Firebug.SourceBoxPanel,
         {
             var noJSURL = "firebug:// Warning. No Javascript on this page";
             var dummySourceFile = new Firebug.NoScriptSourceFile(context, noJSURL);
-            context.sourceCache.store(noJSURL, 'If <script> tags have a \"type\" attribute it should equal \"text/javascript\"" or \"application/javascript\"');
+            context.sourceCache.store(noJSURL, 'If <script> tags have a \"type\" attribute it should equal \"text/javascript\" or \"application/javascript\"');
             context.addSourceFile(dummySourceFile);
             allSources = sourceFilesAsArray(context.sourceFileMap);
             return allSources;
