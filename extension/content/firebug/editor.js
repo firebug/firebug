@@ -886,7 +886,7 @@ Firebug.AutoCompleter = function(getExprOffset, getRange, evaluator, selectMode,
     var lastExpr = null;
     var lastOffset = -1;
     var exprOffset = 0;
-    var lastIndex = 0;
+    var lastIndex = -2;  // adding 1 will still be less then zero
     var preParsed = null;
     var preExpr = null;
     var postExpr = null;
@@ -919,6 +919,7 @@ Firebug.AutoCompleter = function(getExprOffset, getRange, evaluator, selectMode,
         lastExpr = null;
         lastOffset = 0;
         exprOffset = 0;
+        lastIndex = -2;
     };
 
     this.complete = function(context, textBox, cycle, reverse, offerOnly, showGlobal)
@@ -1052,8 +1053,6 @@ Firebug.AutoCompleter = function(getExprOffset, getRange, evaluator, selectMode,
                             candidates.push(name);
                     }
                 }
-
-                lastIndex = reverse ? candidates.length-1 : 0;
             }
             else if (searchExpr)
             {
@@ -1096,7 +1095,7 @@ Firebug.AutoCompleter = function(getExprOffset, getRange, evaluator, selectMode,
                     if (values[i].substr)
                         candidates.push(values[i]);
                 }
-                lastIndex = -1;
+                lastIndex = -2;
             }
         }
 
@@ -1109,10 +1108,10 @@ Firebug.AutoCompleter = function(getExprOffset, getRange, evaluator, selectMode,
         if (!candidates.length)
             return this.hide();
 
-        if (lastIndex >= candidates.length)
-            lastIndex = 0;
-        else if (lastIndex < 0)
-            lastIndex = candidates.length-1;
+        if (candidates.length === 1)
+        	lastIndex = 0;
+        else if (lastIndex >= candidates.length || lastIndex < 0)
+            lastIndex = this.pickDefaultCandidate();
 
         var completion = candidates[lastIndex];
         var preCompletion = expr.substr(0, offset-exprOffset);
@@ -1125,6 +1124,18 @@ Firebug.AutoCompleter = function(getExprOffset, getRange, evaluator, selectMode,
         return result;
     };
 
+    this.pickDefaultCandidate = function()
+    {
+    	// The shortest candidate is default value
+    	var pick = 0;
+    	for (var i = 1; i < candidates.length; i++)
+    	{
+    		if (candidates[i].length < candidates[pick].length)
+    			pick = i;
+    	}
+    	return pick;
+    };
+    
     this.showCandidates = function(textBox, line, offerOnly)
     {
         textBox.value = line.value;
