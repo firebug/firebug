@@ -2735,7 +2735,7 @@ Firebug.NetMonitor.NetInfoPostData = domplate(Firebug.Rep, new Firebug.Listener(
         var jsonBody = jsonTable.getElementsByClassName("netInfoPostJSONBody").item(0);
 
         if (!this.toggles)
-            this.toggles = {};
+            this.toggles = new ToggleBranch();
 
         Firebug.DOMPanel.DirTable.tag.replace(
             {object: data, toggles: this.toggles}, jsonBody);

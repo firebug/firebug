@@ -507,7 +507,7 @@ this.Arr = domplate(Firebug.Rep,
         return items;
     },
 
-    toggles: {},
+    toggles: new ToggleBranch(),
 
     getItemIndex: function(child)
     {
@@ -1940,7 +1940,7 @@ this.Storage = domplate(Firebug.Rep,
 this.XPathResult = domplate(this.Arr,
 {
     className: "array xPathResult",
-    toggles: {},
+    toggles: new ToggleBranch(),
 
     tag:
         SPAN(this.Arr.tag),

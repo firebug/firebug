@@ -246,9 +246,9 @@ const DirTablePlate = domplate(Firebug.Rep,
                     for (var i = 0; i < path.length; ++i)
                     {
                         if (i == path.length-1)
-                            delete toggles[path[i]];
+                            toggles.remove(path[i]);
                         else
-                            toggles = toggles[path[i]];
+                            toggles = toggles.get(path[i]);
                     }
                 }
 
@@ -286,11 +286,13 @@ const DirTablePlate = domplate(Firebug.Rep,
                     for (var i = 0; i < path.length; ++i)
                     {
                         var name = path[i];
-                        if (toggles.hasOwnProperty(name))
-                            toggles = toggles[name];
+                        if (toggles.get(name))
+                            toggles = toggles.get(name);
                         else
-                            toggles = toggles[name] = {};
+                            toggles = toggles.set(name, new ToggleBranch());
                     }
+                    if (FBTrace.DBG_DOMPLATE)
+                        FBTrace.sysout("toggleRow mark path "+toggles);
                 }
 
                 var members = domPanel.getMembers(target.repObject, level+1, context);
@@ -521,7 +523,7 @@ Firebug.DOMBasePanel.prototype = extend(Firebug.Panel,
             if (member.level > level)
                 break;
 
-            if ( toggles.hasOwnProperty(member.name) )
+            if ( toggles.get(member.name) )
             {
                 member.open = "opened";  // member.level <= level && member.name in toggles.
                 if (member.type == 'string')
@@ -533,14 +535,14 @@ Firebug.DOMBasePanel.prototype = extend(Firebug.Panel,
                 members.splice.apply(members, args);
                 if (FBTrace.DBG_DOM)
                 {
-                    FBTrace.sysout("expandMembers member.name", member.name);
-                    FBTrace.sysout("expandMembers toggles", toggles);
-                    FBTrace.sysout("expandMembers toggles[member.name]", toggles[member.name]);
-                    FBTrace.sysout("dom.expandedMembers level: "+level+" member", member);
+                    FBTrace.sysout("expandMembers member.name "+member.name+" member "+member);
+                    FBTrace.sysout("expandMembers toggles "+toggles, toggles);
+                    FBTrace.sysout("expandMembers toggles.get(member.name) "+toggles.get(member.name), toggles.get(member.name));
+                    FBTrace.sysout("dom.expandedMembers level: "+level+" member.level "+member.level, member);
                 }
 
                 expanded += newMembers.length;
-                i += newMembers.length + this.expandMembers(members, toggles[member.name], i+1, level+1, context);
+                i += newMembers.length + this.expandMembers(members, toggles.get(member.name), i+1, level+1, context);
             }
         }
 
@@ -931,7 +933,7 @@ Firebug.DOMBasePanel.prototype = extend(Firebug.Panel,
         this.propertyPath = [];
         this.viewPath = [];
         this.pathIndex = -1;
-        this.toggles = {};
+        this.toggles = new ToggleBranch();
 
         Firebug.Panel.initialize.apply(this, arguments);
     },
@@ -1095,7 +1097,7 @@ Firebug.DOMBasePanel.prototype = extend(Firebug.Panel,
         var pathIndex = this.findPathIndex(object);
         if (newPath || pathIndex == -1)
         {
-            this.toggles = {};
+            this.toggles = new ToggleBranch();
 
             if (newPath)
             {
@@ -1142,7 +1144,7 @@ Firebug.DOMBasePanel.prototype = extend(Firebug.Panel,
             }
             else
             {
-                this.toggles = {};
+                this.toggles = new ToggleBranch();
 
                 var win = unwrapObject(this.context.getGlobalScope());
                 if (object == win)
@@ -1158,7 +1160,7 @@ Firebug.DOMBasePanel.prototype = extend(Firebug.Panel,
                     this.objectPath = [win, object];
                     this.propertyPath = [null, null];
                     this.viewPath = [
-                        {toggles: {}, scrollTop: 0},
+                        {toggles: new ToggleBranch(), scrollTop: 0},
                         {toggles: this.toggles, scrollTop: 0}
                     ];
                 }
@@ -1172,7 +1174,7 @@ Firebug.DOMBasePanel.prototype = extend(Firebug.Panel,
             this.pathIndex = pathIndex;
 
             var view = this.viewPath[pathIndex];
-            this.toggles = view ? view.toggles : {};
+            this.toggles = view ? view.toggles : new ToggleBranch();
 
             // Persist the current scroll location
             if (previousView && this.panelNode.scrollTop)
@@ -1438,7 +1440,7 @@ WatchPanel.prototype = extend(Firebug.DOMBasePanel.prototype,
 
     showEmptyMembers: function()
     {
-        this.tag.replace({domPanel: this, toggles: {}}, this.panelNode);
+        this.tag.replace({domPanel: this, toggles: new ToggleBranch()}, this.panelNode);
     },
 
     addWatch: function(expression)
@@ -1608,7 +1610,7 @@ WatchPanel.prototype = extend(Firebug.DOMBasePanel.prototype,
         var newFrame = frame && frame.isValid && frame.script != this.lastScript;
         if (newFrame)
         {
-            this.toggles = {};
+            this.toggles = new ToggleBranch();
             this.lastScript = frame.script;
         }
 

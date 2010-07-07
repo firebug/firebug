@@ -30,7 +30,7 @@ Firebug.JSONViewerModel = extend(Firebug.Module,
         Firebug.NetMonitor.NetInfoBody.addListener(this);
 
         // Used by Firebug.DOMPanel.DirTable domplate.
-        this.toggles = {};
+        this.toggles = new ToggleBranch();
     },
 
     shutdown: function()
