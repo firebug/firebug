@@ -436,9 +436,9 @@ Firebug.Inspector = extend(Firebug.Module,
         this.inspectNode(null);
     },
 
-    quickInfoBoxDragStart: function(event)
+    quickInfoBoxDragStart: function()
     {
-        quickInfoBox.dragStart(event);
+        quickInfoBox.dragStart();
     },
 
     quickInfoBoxDrag: function(event)
@@ -446,9 +446,9 @@ Firebug.Inspector = extend(Firebug.Module,
         quickInfoBox.drag(event);
     },
 
-    quickInfoBoxDragEnd: function(event)
+    quickInfoBoxDragEnd: function()
     {
-        quickInfoBox.dragEnd(event);
+        quickInfoBox.dragEnd();
     }
 });
 
@@ -508,7 +508,7 @@ function getImageMapHighlighter(context)
                 canvas = doc.createElementNS("http://www.w3.org/1999/xhtml", "canvas");
                 unwrapObject(canvas).firebugIgnore = true;
                 if (FBTrace.DBG_INSPECT)
-                    unwrapObject(div).firebugIgnore = false;
+                    unwrapObject(canvas).firebugIgnore = false;
                 canvas.id = "firebugCanvas";
                 canvas.className = "firebugCanvas";
                 canvas.width = context.window.innerWidth;
@@ -528,14 +528,14 @@ function getImageMapHighlighter(context)
             show: function(state)
             {
                 if(!canvas)
-                    init();
+                    init(null);
 
                 canvas.style.display = state?'block':'none';
             },
 
             getImages: function(mapName, multi)
             {
-                var i, eltsLen,
+                var i, eltsLen, rect,
                     elts = [],
                     images = [],
                     elts2 = doc.getElementsByTagName("img"),
@@ -574,7 +574,7 @@ function getImageMapHighlighter(context)
 
             highlight: function(eltArea, multi)
             {
-                var i, j, v, vLen, images, imagesLen, rect, shape, clearForFirst;
+                var i, j, v, vLen, images, imagesLen, rect, shape;
 
                 if (eltArea && eltArea.coords)
                 {
@@ -712,18 +712,18 @@ quickInfoBox =
 
     hide: function()
     {
+        var qiBox = $('fbQuickInfoPanel');
         this.prevX = null;
         this.prevY = null;
-        qiBox = $('fbQuickInfoPanel');
         qiBox.hidePopup();
     },
 
-    dragStart: function(event)
+    dragStart: function()
     {
         this.dragging = true;
     },
 
-    dragEnd: function(event)
+    dragEnd: function()
     {
         this.dragging = false;
         this.prevX = null;
@@ -807,13 +807,13 @@ quickInfoBox =
 
         return needsTitle;
     }
-}
+};
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 
 Firebug.Inspector.FrameHighlighter = function()
 {
-}
+};
 
 Firebug.Inspector.FrameHighlighter.prototype =
 {
@@ -958,7 +958,7 @@ Firebug.Inspector.FrameHighlighter.prototype =
         {
             var doc = context.window.document;
 
-            function createEdge(name)
+            function createEdge()
             {
                 var div = doc.createElementNS("http://www.w3.org/1999/xhtml", "div");
                 unwrapObject(div).firebugIgnore = true;
@@ -970,10 +970,10 @@ Firebug.Inspector.FrameHighlighter.prototype =
 
             context.frameHighlighter =
             {
-                top: createEdge("Top"),
-                right: createEdge("Right"),
-                bottom: createEdge("Bottom"),
-                left: createEdge("Left")
+                top: createEdge(),
+                right: createEdge(),
+                bottom: createEdge(),
+                left: createEdge()
             };
         }
 
@@ -1006,7 +1006,7 @@ PopupHighlighter.prototype =
     unhighlight: function(context)
     {
     },
-}
+};
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 
 function BoxModelHighlighter()
@@ -1017,8 +1017,9 @@ BoxModelHighlighter.prototype =
 {
     highlight: function(context, element, boxFrame)
     {
-        var nodes = this.getNodes(context);
-        var highlightFrame = boxFrame ? nodes[boxFrame] : null;
+        var line,
+            nodes = this.getNodes(context),
+            highlightFrame = boxFrame ? nodes[boxFrame] : null;
 
         if (context.highlightFrame)
             removeClass(context.highlightFrame, "firebugHighlightBox");
@@ -1143,7 +1144,7 @@ BoxModelHighlighter.prototype =
                     if (nodes.parent)
                         body.appendChild(nodes.parent);
 
-                    for (var line in nodes.lines)
+                    for (line in nodes.lines)
                         body.appendChild(nodes.lines[line]);
                 }
             }
@@ -1152,7 +1153,7 @@ BoxModelHighlighter.prototype =
                 if (nodes.parent)
                     body.removeChild(nodes.parent);
 
-                for (var line in nodes.lines)
+                for (line in nodes.lines)
                     body.removeChild(nodes.lines[line]);
             }
         }
@@ -1340,9 +1341,8 @@ function isVisibleElement(elt)
             "meta": true,
             "script": true,
             "style": true,
-            "title": true,
-            "isindex": true
-        }
+            "title": true
+        };
 
     return !invisibleElements[elt.nodeName.toLowerCase()];
 }

@@ -116,9 +116,9 @@
         <tooltip id="fbTooltip" class="fbURLMenuItem"
             onpopupshowing="return FirebugChrome.onTooltipShowing(event);"/>
         <popup id="fbQuickInfoPanel" width="210" noautohide="true"
-            onmousedown="Firebug.Inspector.quickInfoBoxDragStart(event);"
+            onmousedown="Firebug.Inspector.quickInfoBoxDragStart();"
             onmousemove="Firebug.Inspector.quickInfoBoxDrag(event);"
-            onmouseup="Firebug.Inspector.quickInfoBoxDragEnd(event);">
+            onmouseup="Firebug.Inspector.quickInfoBoxDragEnd();">
             <vbox></vbox>
         </popup>
         <popup id="fbNavigationHistoryMenu"
