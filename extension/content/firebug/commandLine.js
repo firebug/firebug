@@ -972,7 +972,7 @@ function autoCompleteEval(preExpr, expr, postExpr, context)
             );
             
             if (lastDot !== -1) // if we had no dot, add a keyword that matches exactly
-            	addMatchingKeyword(preExpr, self.complete);
+                addMatchingKeyword(preExpr, self.complete);
             
             return self.complete;
         }
@@ -1003,8 +1003,8 @@ function autoCompleteEval(preExpr, expr, postExpr, context)
 
 function addMatchingKeyword(expr, completions)
 {
-	if (isJavaScriptKeyword(expr))
-		completions.push(expr);
+    if (isJavaScriptKeyword(expr))
+        completions.push(expr);
 }
 
 function injectScript(script, win)
