@@ -1238,6 +1238,7 @@ Firebug.CSSStyleSheetPanel.prototype = extend(Firebug.SourceBoxPanel,
         }
         else
         {
+            this.document.defaultView.getSelection().removeAllRanges();
             dispatch(this.fbListeners, 'onCSSSearchMatchFound', [this, text, null]);
             return false;
         }
