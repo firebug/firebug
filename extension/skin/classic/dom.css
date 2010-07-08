@@ -17,13 +17,9 @@
 
 .memberLabel {
     cursor: default;
-    -moz-user-select:  none;
     overflow: hidden;
-    /*position: absolute;*/
     padding-left: 18px;
-    /*max-width: 30%;*/
     white-space: nowrap;
-    background-color: #FFFFFF;
 }
 
 .memberLabelPrefix {

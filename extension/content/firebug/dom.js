@@ -1379,6 +1379,7 @@ DOMMainPanel.prototype = extend(Firebug.DOMBasePanel.prototype,
         {
             delete this.currentSearch;
             this.highlightRow(null);
+            this.document.defaultView.getSelection().removeAllRanges();
             return false;
         }
 
@@ -1406,6 +1407,7 @@ DOMMainPanel.prototype = extend(Firebug.DOMBasePanel.prototype,
         }
         else
         {
+            this.document.defaultView.getSelection().removeAllRanges();
             dispatch(this.fbListeners, 'onDomSearchMatchFound', [this, text, null]);
             return false;
         }
