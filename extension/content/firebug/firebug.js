@@ -1499,7 +1499,7 @@ top.Firebug =
 
     showPanel: function(browser, panel)
     {
-    	// The panel may be null
+        // The panel may be null
         dispatch(modules, "showPanel", [browser, panel]);
     },
 

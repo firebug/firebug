@@ -21,31 +21,31 @@ window[chromehidden~="toolbar"] #fbToolbar {
 }
 
 .fbCommandLineCompletionPanel {
-	/* height: 270px; */
+    /* height: 270px; */
 }
 
 .fbCommandLineCompletions {
-	cursor: default;
-	font-family: Monaco, monospace;
-	/* overflow: auto; XXXjjb I can't get the CSS to work
-	max-height: 270px; */
+    cursor: default;
+    font-family: Monaco, monospace;
+    /* overflow: auto; XXXjjb I can't get the CSS to work
+    max-height: 270px; */
 }
 
 .fbPopupTitle {
-	font-family: Lucida Grande, Tahoma, sans-serif;
-	padding: 2px 18px;
+    font-family: Lucida Grande, Tahoma, sans-serif;
+    padding: 2px 18px;
     background-color: LightYellow;
     border-bottom: 1px solid #BEBEBE;
     color: #666666;
 }
 
 .completionText {
-	color: #666666;
+    color: #666666;
 }
 .completionText[selected=true] {
-	background-color:highlight;
-	border-color:highlight;
-	color:highlighttext !important;
+    background-color:highlight;
+    border-color:highlight;
+    color:highlighttext !important;
 }
 
 textbox[type="fbSearchBox"] {
@@ -248,31 +248,31 @@ panelTab[selected="true"]:hover > panelTabMenu .menuTarget {
 
 #fbContentBox .autorepeatbutton-up,
 #fbLocationList .scrollbutton-up {
-	/* background-color: #FF9933;  Firebug orange */
-	padding: 3px;
-	}
+    /* background-color: #FF9933;  Firebug orange */
+    padding: 3px;
+    }
 
 #fbLocationList .autorepeatbutton-down,
 #fbLocationList .scrollbutton-down {
-	/* background-color: #FF9933;  Firebug orange */
-	padding: 3px;
-	}
+    /* background-color: #FF9933;  Firebug orange */
+    padding: 3px;
+    }
 
 #fbLocationList .autorepeatbutton-up[disabled="true"],
-	#fbLocationList .scrollbutton-up[disabled="true"] {
-	list-style-image: url("chrome://firebug/skin/nav-up-disabled.png");
+    #fbLocationList .scrollbutton-up[disabled="true"] {
+    list-style-image: url("chrome://firebug/skin/nav-up-disabled.png");
 }
 #fbLocationList .autorepeatbutton-down[disabled="true"],
-	#fbLocationList .scrollbutton-down[disabled="true"] {
-	list-style-image: url("chrome://firebug/skin/nav-down-disabled.png");
+    #fbLocationList .scrollbutton-down[disabled="true"] {
+    list-style-image: url("chrome://firebug/skin/nav-down-disabled.png");
 }
 #fbLocationList .autorepeatbutton-up,
-	#fbLocationList .scrollbutton-up {
-	list-style-image: url("chrome://firebug/skin/nav-up.png");
+    #fbLocationList .scrollbutton-up {
+    list-style-image: url("chrome://firebug/skin/nav-up.png");
 }
 #fbLocationList .autorepeatbutton-down,
-	#fbLocationList .scrollbutton-down {
-	list-style-image: url("chrome://firebug/skin/nav-down.png");
+    #fbLocationList .scrollbutton-down {
+    list-style-image: url("chrome://firebug/skin/nav-down.png");
 }
 
 /************************************************************************************************/

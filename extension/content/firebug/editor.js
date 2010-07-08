@@ -1109,7 +1109,7 @@ Firebug.AutoCompleter = function(getExprOffset, getRange, evaluator, selectMode,
             return this.hide();
 
         if (candidates.length === 1)
-        	lastIndex = 0;
+            lastIndex = 0;
         else if (lastIndex >= candidates.length || lastIndex < 0)
             lastIndex = this.pickDefaultCandidate();
 
@@ -1126,14 +1126,14 @@ Firebug.AutoCompleter = function(getExprOffset, getRange, evaluator, selectMode,
 
     this.pickDefaultCandidate = function()
     {
-    	// The shortest candidate is default value
-    	var pick = 0;
-    	for (var i = 1; i < candidates.length; i++)
-    	{
-    		if (candidates[i].length < candidates[pick].length)
-    			pick = i;
-    	}
-    	return pick;
+        // The shortest candidate is default value
+        var pick = 0;
+        for (var i = 1; i < candidates.length; i++)
+        {
+            if (candidates[i].length < candidates[pick].length)
+                pick = i;
+        }
+        return pick;
     };
     
     this.showCandidates = function(textBox, line, offerOnly)
