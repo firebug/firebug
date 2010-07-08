@@ -960,7 +960,10 @@ function autoCompleteEval(preExpr, expr, postExpr, context)
                     if (FBTrace.DBG_COMMANDLINE)
                         FBTrace.sysout("commandLine.autoCompleteEval \'"+preExpr+"\' found result", result);
 
-                    self.complete = keys(result).sort();
+                    if (typeof result === 'string' || FirebugReps.Arr.isArray(result))
+                        self.complete = nonNumericKeys(result).sort();
+                    else
+                        self.complete = keys(result).sort();
                 },
                 function failed(result, context)
                 {
@@ -970,10 +973,10 @@ function autoCompleteEval(preExpr, expr, postExpr, context)
                     self.complete = [];
                 }
             );
-            
+
             if (lastDot !== -1) // if we had no dot, add a keyword that matches exactly
                 addMatchingKeyword(preExpr, self.complete);
-            
+
             return self.complete;
         }
         else
@@ -987,9 +990,9 @@ function autoCompleteEval(preExpr, expr, postExpr, context)
                 var completions =  keys(context.window.wrappedJSObject);  // return is safe
             else  // hopefull sandbox in Chromebug
                 var completions = keys(context.global);
-            
+
             addMatchingKeyword(expr, completions);
-            
+
             return completions.sort();
         }
     }

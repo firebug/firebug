@@ -147,6 +147,25 @@ this.keys = function(map)  // At least sometimes the keys will be on user-level 
     return keys;  // return is safe
 };
 
+this.nonNumerickeys = function(map)  // At least sometimes the keys will be on user-level window objects
+{
+    var keys = [];
+    try
+    {
+        for (var name in map)  // enumeration is safe
+        {
+            if (! (name instanceof number) )
+                keys.push(name);   // name is string, safe
+        }
+    }
+    catch (exc)
+    {
+        // Sometimes we get exceptions trying to iterate properties
+    }
+
+    return keys;  // return is safe
+};
+
 this.values = function(map)
 {
     var values = [];
@@ -2896,7 +2915,7 @@ this.getFunctionArgValues = function(frame)
         var values = this.getPropertiesFromObjectScope(frame);
 
     if (FBTrace.DBG_STACK)
-    	FBTrace.sysout("lib.getFunctionArgValues "+frame+" scope: "+frame.scope.jsClassName, {values: values});
+        FBTrace.sysout("lib.getFunctionArgValues "+frame+" scope: "+frame.scope.jsClassName, {values: values});
 
     return values;
 }

@@ -78,8 +78,7 @@ var _FirebugCommandLine =
         try
         {
             var result = window.eval(expr);
-            if (typeof result != "undefined")
-                window.console.notifyFirebug([result], "evaluated", "firebugAppendConsole");
+            window.console.notifyFirebug([result], "evaluated", "firebugAppendConsole");
         }
         catch(exc)
         {
