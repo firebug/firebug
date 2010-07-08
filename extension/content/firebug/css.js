@@ -1135,6 +1135,17 @@ Firebug.CSSStyleSheetPanel.prototype = extend(Firebug.SourceBoxPanel,
         return baseDescription;
     },
 
+    highlightRow: function(row)
+    {
+        if (this.highlightedRow)
+            cancelClassTimed(this.highlightedRow, "jumpHighlight", this.context);
+
+        this.highlightedRow = row;
+
+        if (row)
+            setClassTimed(row, "jumpHighlight", this.context);
+    },
+
     search: function(text, reverse)
     {
         var curDoc = this.searchCurrentDoc(!Firebug.searchGlobal, text, reverse);
@@ -1171,6 +1182,8 @@ Firebug.CSSStyleSheetPanel.prototype = extend(Firebug.SourceBoxPanel,
         if (!text)
         {
             delete this.currentSearch;
+            this.highlightRow(null);
+            this.document.defaultView.getSelection().removeAllRanges();
             return false;
         }
 
@@ -1191,7 +1204,10 @@ Firebug.CSSStyleSheetPanel.prototype = extend(Firebug.SourceBoxPanel,
                     var sel = this.document.defaultView.getSelection();
                     sel.removeAllRanges();
                     sel.addRange(this.currentSearch.range);
+
                     scrollSelectionIntoView(this);
+                    this.highlightRow(row);
+
                     return true;
                 }
                 else
@@ -1207,8 +1223,16 @@ Firebug.CSSStyleSheetPanel.prototype = extend(Firebug.SourceBoxPanel,
 
         if (row)
         {
-            this.document.defaultView.getSelection().selectAllChildren(row);
+            var sel = this.document.defaultView.getSelection();
+            sel.removeAllRanges();
+            sel.addRange(this.currentSearch.range);
+
+            // Should be replaced by scrollToLine() of sourceBox,
+            // though first jumpHighlightFactory() has to be adjusted to
+            // remove the current highlighting when called again
             scrollIntoCenterView(row, this.panelNode);
+            this.highlightRow(row.parentNode);
+
             dispatch(this.fbListeners, 'onCSSSearchMatchFound', [this, text, row]);
             return true;
         }
