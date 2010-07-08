@@ -173,7 +173,7 @@ Firebug.Profiler = extend(Firebug.Module,
                 context.throttle(insert, tag, [{object: calls[i]}, tHeader]);
             }
 
-            context.throttle(groupRow.scrollIntoView, groupRow);
+            context.throttle(groupRow.scrollIntoView, groupRow, []);
         }
         else
         {
@@ -266,9 +266,9 @@ Firebug.Profiler.ProfileTable = domplate(
             removeClass(header, "sortedDescending");
             setClass(header, "sortedAscending");
             header.setAttribute("aria-sort", "ascending");
-            
+
             header.sorted = -1;
-            
+
             for (var i = 0; i < values.length; ++i)
                 tbody.appendChild(values[i].row);
         },
@@ -284,7 +284,7 @@ Firebug.Profiler.ProfileTable = domplate(
           for (var i = values.length-1; i >= 0; --i)
               tbody.appendChild(values[i].row);
         }
-        
+
         var tbody = getChildByClass(table, "profileTbody");
         var thead = getChildByClass(table, "profileThead");
 
