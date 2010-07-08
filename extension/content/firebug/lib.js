@@ -629,7 +629,7 @@ this.ToggleBranch = function()
     this.meta = {};
 }
 
-const metaNames = 
+this.metaNames = 
 [
  'prototype', 
  'constructor', 
@@ -656,7 +656,7 @@ this.ToggleBranch.prototype =
     // Another implementation could simply prefix all keys with "#".
     getMeta: function(name)
     {
-        if (metaNames.indexOf(name) !== -1)
+        if (FBL.metaNames.indexOf(name) !== -1)
             return "meta_"+name;
     },
 
@@ -3219,7 +3219,7 @@ this.getExpressionAt = function(text, charOffset)
     return {expr: null, offset: -1};
 };
 
-var jsKeywords =
+this.jsKeywords =
 {
     "var": 1,
     "const": 1,
@@ -3258,7 +3258,7 @@ var jsKeywords =
 
 this.isJavaScriptKeyword = function(name)
 {
-    return name in jsKeywords;
+    return name in FBL.jsKeywords;
 };
 
 // ************************************************************************************************

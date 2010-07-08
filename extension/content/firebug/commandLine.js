@@ -970,6 +970,10 @@ function autoCompleteEval(preExpr, expr, postExpr, context)
                     self.complete = [];
                 }
             );
+            
+            if (lastDot !== -1) // if we had no dot, add a keyword that matches exactly
+            	addMatchingKeyword(preExpr, self.complete);
+            
             return self.complete;
         }
         else
@@ -980,9 +984,13 @@ function autoCompleteEval(preExpr, expr, postExpr, context)
             // Cross window type pseudo-comparison
             var innerWindow = context.window.wrappedJSObject;
             if (innerWindow && innerWindow.Window && innerWindow.constructor.toString() === innerWindow.Window.toString())
-                return keys(context.window.wrappedJSObject).sort();  // return is safe
+                var completions =  keys(context.window.wrappedJSObject);  // return is safe
             else  // hopefull sandbox in Chromebug
-                return keys(context.global).sort();
+                var completions = keys(context.global);
+            
+            addMatchingKeyword(expr, completions);
+            
+            return completions.sort();
         }
     }
     catch (exc)
@@ -991,6 +999,12 @@ function autoCompleteEval(preExpr, expr, postExpr, context)
             FBTrace.sysout("commandLine.autoCompleteEval FAILED", exc);
         return [];
     }
+}
+
+function addMatchingKeyword(expr, completions)
+{
+	if (isJavaScriptKeyword(expr))
+		completions.push(expr);
 }
 
 function injectScript(script, win)
