@@ -73,6 +73,21 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
             throw value;
     },
 
+    evaluateInCallingFrame: function(js, fileName, lineNo)
+    {
+        return this.halt(function evalInFrame(frame)
+        {
+            window.dump("evaluateInCallingFrame "+frame.script.fileName+" stack: "+getJSDStackDump(frame)+"\n");
+            var result = {};
+            var ok = frame.eval(js, fileName, lineNo, result);
+            var value = unwrapIValue(result.value);
+            if (ok)
+                return value;
+            else
+                throw value;
+        });
+    },
+
     /*
      * Used by autocomplete in commandLine
      * @return array of global property names
@@ -134,7 +149,7 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
         if(FBTrace.DBG_BP)
             FBTrace.sysout('debugger.halt '+fnOfFrame);
 
-        fbs.halt(this, fnOfFrame);
+        return fbs.halt(this, fnOfFrame);
     },
 
     breakAsIfDebugger: function(frame)
@@ -1160,7 +1175,7 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
         catch (exc)
         {
             if (FBTrace.DBG_ERRORS)
-                FBTrace.sysout("debugger.onError getCorrectedStackTrace FAILED:", exc);
+                FBTrace.sysout("debugger.onError getCorrectedStackTrace FAILED: "+exc, exc);
         }
 
         var hookReturn = dispatch2(this.fbListeners,"onError",[context, frame, error]);
@@ -2461,6 +2476,17 @@ Firebug.ScriptPanel.prototype = extend(Firebug.SourceBoxPanel,
         }
     },
 
+    showStackFrameXB: function(frameXB)
+    {
+        if (this.context.stopped)
+        {
+            this.setCurrentStackFrame(frameXB);
+            this.showExecutingSourceFile(frameXB.sourceFile, frameXB);
+        }
+        else
+            this.showNoStackFrame();
+    },
+
     showStackFrame: function(frame)
     {
         if (!frame || (frame && !frame.isValid))
@@ -2478,8 +2504,13 @@ Firebug.ScriptPanel.prototype = extend(Firebug.SourceBoxPanel,
             return;
         }
 
-        this.context.currentFrame = frame;  // this is the frame to use for evals
+        this.setCurrentStackFrame(frame);
 
+        this.showExecutingSourceFile(sourceFile, frame);
+    },
+
+    showExecutingSourceFile: function(sourceFile, frame)
+    {
         this.context.executingSourceFile = sourceFile;
         this.executionFile = sourceFile;
         if (this.executionFile)
@@ -2520,6 +2551,19 @@ Firebug.ScriptPanel.prototype = extend(Firebug.SourceBoxPanel,
         var watchPanel = this.context.getPanel("watches", true);
         if (watchPanel)
             watchPanel.showEmptyMembers();
+    },
+
+    /*
+     * set the UI's current selected frame from any type of frame. This is the frame to use for evals
+     * @param frame: native or XB frame
+     */
+
+    setCurrentStackFrame: function(frame)
+    {
+        if (frame instanceof Ci.jsdIStackFrame)
+            this.context.currentFrame = frame;  // TODO XB reverse this so the XB frame is current
+        else if (frame instanceof StackFrame)
+            this.context.currentFrame = frame.getNativeFrame();
     },
 
     highlightExecutionLine: function(sourceBox)
@@ -2990,7 +3034,8 @@ Firebug.ScriptPanel.prototype = extend(Firebug.SourceBoxPanel,
         if( object instanceof jsdIStackFrame
             || object instanceof Firebug.SourceFile
             || (object instanceof SourceLink && object.type == "js")
-            || typeof(object) == "function" )
+            || typeof(object) == "function"
+            || object instanceof StackFrame)
             return 1;
         else return 0;
     },
@@ -3065,6 +3110,8 @@ Firebug.ScriptPanel.prototype = extend(Firebug.SourceBoxPanel,
                 FBTrace.sysout("debugger updateSelection this.showSourceLink(object)", object);
             else if (typeof(object) == "function")
                 FBTrace.sysout("debugger updateSelection this.showFunction(object)", object);
+            else if (object instanceof StackFrame)
+                FBTrace.sysout("debugger updateSelection this.showStackFrameXB(object)", object);
             else
                 FBTrace.sysout("debugger updateSelection this.showStackFrame(null)", object);
         }
@@ -3077,6 +3124,8 @@ Firebug.ScriptPanel.prototype = extend(Firebug.SourceBoxPanel,
             this.showSourceLink(object);
         else if (typeof(object) == "function")
             this.showFunction(object);
+        else if (object instanceof StackFrame)
+            this.showStackFrameXB(object);
         else
             this.showStackFrame(null);
     },
@@ -3583,12 +3632,12 @@ CallstackPanel.prototype = extend(Firebug.Panel,
 
     supportsObject: function(object, type)
     {
-        return object instanceof jsdIStackFrame;
+        return object instanceof jsdIStackFrame || object instanceof StackFrame;
     },
 
     updateSelection: function(object)
     {
-        if (object instanceof jsdIStackFrame)
+        if (object instanceof jsdIStackFrame || object instanceof StackFrame)
             this.showStackFrame(object);
     },
 
@@ -3609,12 +3658,13 @@ CallstackPanel.prototype = extend(Firebug.Panel,
         }
     },
 
-    showStackFrame: function(frame)
+    showStackFrame: function(frame) // we don't use the frame argument
     {
         clearNode(this.panelNode);
 
         if (!frame)
             return;
+
 
         var mainPanel = this.context.getPanel("script", true);
         if (!mainPanel)
@@ -3624,33 +3674,23 @@ CallstackPanel.prototype = extend(Firebug.Panel,
         }
 
         FBL.setClass(this.panelNode, "objectBox-stackTrace");
-        // The panelStatus has the stack, lets reuse it to give the same UX as that control.
-        // TODO use domplate? Use the panel status directly?
-        var panelStatus = Firebug.chrome.getPanelStatusElements();
-        var frameButtons = panelStatus.getElementsByTagName("toolbarbutton");
-        var doc = this.panelNode.ownerDocument;
-        for (var i = 0; i < frameButtons.length; i++)
+
+        var trace = getCorrectedStackTrace(this.context.stoppedFrame, this.context);
+
+        var rep = Firebug.getRep(trace, this.context);
+
+        if(FBTrace.DBG_STACK)
+	        FBTrace.sysout("callstack showStackFrame with "+trace.frames.length+" frames using "+rep+" into "+this.panelNode, {trace: trace, rep:rep, node:this.panelNode});
+
+        rep.tag.replace({object:trace}, this.panelNode);
+
+        var frameElts = this.panelNode.getElementsByClassName("objectBox-stackFrame");
+        for(var i = 0; i < frameElts.length; i++)
         {
-            if (FBL.hasClass(frameButtons[i], "panelStatusLabel"))
-            {
-                var div = doc.createElement("div");
-                var frameButton = frameButtons[i];
-                div.innerHTML = frameButton.getAttribute('label');
-                if (frameButton.repObject instanceof jsdIStackFrame)  // causes a downcast
-                    div.repObject = frameButton.repObject;
-                div.frameButton = frameButton;
-                FBL.setClass(div, "objectLink");
-                FBL.setClass(div, "objectLink-stackFrame");
-                FBL.setClass(div, "panelStatusLabel");
-                FBL.setClass(div, "focusRow");
-                div.setAttribute('role', "listitem");
-
-                if (frameButton.getAttribute("selected") == "true")
-                    this.selectItem(div);
-
-                this.panelNode.appendChild(div);
-            }
+            if (trace.frames[i].isCurrent)
+                frameElts[i].setAttribute("selected", "true");
         }
+
         dispatch(this.fbListeners, 'onStackCreated', [this]);
     },
 
@@ -3663,6 +3703,8 @@ CallstackPanel.prototype = extend(Firebug.Panel,
 
         if (item)
             item.setAttribute("selected", "true");
+
+        this.showParent();
     },
 
     getOptionsMenuItems: function()
@@ -3671,7 +3713,19 @@ CallstackPanel.prototype = extend(Firebug.Panel,
             optionMenu("OmitObjectPathStack", "omitObjectPathStack"),  // an option handled by chrome.js
             ];
         return items;
-    }
+    },
+
+    showParent: function()
+    {
+        if (FBTrace.DBG_STACK)
+	        FBTrace.sysout('showParent '+this.selectedItem, this.selectedItem);
+
+        // lookup the name of the function using frame.eval() -> function object
+        //  var wrapped = this.jsd.wrapValue(fn);
+        //    parent = wrapped.jsParent;
+        // check parent[name] === fn
+        // if true allow edit to reset that value.
+    },
 });
 
 // ************************************************************************************************

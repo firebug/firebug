@@ -467,11 +467,12 @@ var fbs =
         // store for onDebugger
         haltDebugger = debuggr;
         haltCallBack = fnOfFrame;
-        
+
         if (FBTrace.DBG_FBS_BP)
             FBTrace.sysout('fbs.halt jsd.isOn:'+jsd.isOn+' jsd.pauseDepth:'+jsd.pauseDepth+" fbs.isChromeBlocked "+fbs.isChromeBlocked+"  jsd.debuggerHook: "+ jsd.debuggerHook, jsd.debuggerHook);
         // call onDebugger via hook
         fbs.debuggerHalter();
+        return fbs.haltReturnValue;
     },
 
     step: function(mode, startFrame, stayOnDebuggr)
@@ -1137,14 +1138,26 @@ var fbs =
             if (haltDebugger)
             {
                 var peelOurselvesOff = frame.callingFrame;  // remove debuggerHalter()
-                if (peelOurselvesOff.script.fileName.indexOf("chrome://firebug") == 0)  // total guesswork, sometimes the stack is goofy
-                    peelOurselvesOff = peelOurselvesOff.callingFrame; // remove fbs.halt()
-                if (FBTrace.DBG_FBS_BP)
-                    FBTrace.sysout('fbs.onDebugger adjusted newest frame: '+peelOurselvesOff.line+'@'+peelOurselvesOff.script.fileName);
+                peelOurselvesOff = peelOurselvesOff.callingFrame; // remove fbs.halt()
 
-                var debuggr = haltDebugger;
+                while( peelOurselvesOff && ( peelOurselvesOff.script.fileName.indexOf("content/debugger.js") > 0 ) )
+                    peelOurselvesOff = peelOurselvesOff.callingFrame;
+
+                if (peelOurselvesOff)
+                {
+                    if (FBTrace.DBG_FBS_BP)
+                        FBTrace.sysout('fbs.onDebugger adjusted newest frame: '+peelOurselvesOff.line+'@'+peelOurselvesOff.script.fileName);
+
+                    var debuggr = haltDebugger;
+                    fbs.haltReturnValue = haltCallBack.apply(debuggr,[peelOurselvesOff]);
+                }
+                else
+                {
+                    FBTrace.sysout("fbs.halt FAILS "+framesToString(frame));
+                    fbs.haltReturnValue = "firebug-service.halt FAILS, no stack frames left ";
+                }
+
                 haltDebugger = null;
-                haltCallBack.apply(debuggr,[peelOurselvesOff]);
                 return RETURN_CONTINUE;
             }
             else

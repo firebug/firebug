@@ -20,6 +20,7 @@ function DomplateLoop()
 (function() {
 
 var womb = null;
+var uid = 0;
 
 top.domplate = function()
 {
@@ -221,6 +222,9 @@ DomplateTag.prototype =
             }
         }
 
+        if (FBTrace.DBG_DOMPLATE)
+            fnBlock.push("//@ sourceURL=chrome://firebug/compileMarkup_"+(this.tagName?this.tagName:'')+"_"+(uid++)+".js\n");
+
         var js = fnBlock.join("");
         this.renderMarkup = eval(js);
     },
@@ -252,6 +256,9 @@ DomplateTag.prototype =
 
     generateMarkup: function(topBlock, topOuts, blocks, info)
     {
+        if (FBTrace.DBG_DOMPLATE)
+            var beginBlock = topBlock.length;
+
         topBlock.push(',"<', this.tagName, '"');
 
         for (var name in this.attrs)
@@ -295,8 +302,10 @@ DomplateTag.prototype =
 
         this.generateChildMarkup(topBlock, topOuts, blocks, info);
         topBlock.push(',"</', this.tagName, '>"');
+
         if (FBTrace.DBG_DOMPLATE)
-            FBTrace.sysout("domplate.generateMarkup: "+this.tagName, topBlock.join(""));
+            FBTrace.sysout("DomplateTag.generateMarkup "+this.tagName+": "+topBlock.slice( - topBlock.length + beginBlock).join("").replace("\n"," "), {listeners: this.listeners, props: this.props, attrs: this.attrs});
+
     },
 
     generateChildMarkup: function(topBlock, topOuts, blocks, info)
@@ -429,10 +438,17 @@ DomplateTag.prototype =
                     parent = parent.parentNode;
                 else
                     parent = parent.childNodes[index];
+
+                if (FBTrace.DBG_DOMPLATE && !parent)
+                    FBTrace.sysout("domplate.__path__ will return null for root "+root+" and offset "+offset+" arguments["+i+"]="+arguments[i]+' index: '+index, {root: root});
             }
 
             return parent;
         }
+
+        if (FBTrace.DBG_DOMPLATE)
+            fnBlock.push("//@ sourceURL=chrome://firebug/compileDOM_"+(this.tagName?this.tagName:'')+"_"+(uid++)+".js\n");
+
         var js = fnBlock.join("");
         // Exceptions on this line are often in the eval
         this.renderDOM = eval(js);
@@ -470,9 +486,18 @@ DomplateTag.prototype =
     generateNodePath: function(path, blocks)
     {
         blocks.push("var node = __path__(root, o");
+
         for (var i = 0; i < path.length; ++i)
-            blocks.push(",", path[i]);
+            blocks.push(",", path[i]);  // this will be a sum of integers as a string which will be summed then passed to __path__
+
         blocks.push(");\n");
+
+        if(FBTrace.DBG_DOMPLATE)
+        {
+            var nBlocks = 2*path.length + 2;
+            var genTrace = "FBTrace.sysout(\'"+blocks.slice(-nBlocks).join("").replace("\n","")+"\'+'->'+FBL.getElementHTML(node), node);\n";
+            blocks.push(genTrace);
+        }
     },
 
     generateChildDOM: function(path, blocks, args)
@@ -533,6 +558,9 @@ DomplateEmbed.prototype = copyObject(DomplateTag.prototype,
     {
         this.addCode(topBlock, topOuts, blocks);
 
+        if (FBTrace.DBG_DOMPLATE)
+            var beginBlock = blocks.length;
+
         blocks.push('__link__(');
         addParts(this.value, '', blocks, info);
         blocks.push(', __code__, __out__, {\n');
@@ -550,11 +578,18 @@ DomplateEmbed.prototype = copyObject(DomplateTag.prototype,
         }
 
         blocks.push('});\n');
+
+        if (FBTrace.DBG_DOMPLATE)
+            FBTrace.sysout("DomplateEmbed.generateMarkup "+blocks.slice( - blocks.length + beginBlock).join("").replace("\n"," "), {value: this.value, attrs: this.attrs});
+
         //this.generateChildMarkup(topBlock, topOuts, blocks, info);
     },
 
-    generateDOM: function(path, blocks, args)
+    generateDOM: function(path, blocks, args)  // XXXjjb args not used?
     {
+        if (FBTrace.DBG_DOMPLATE)
+            var beginBlock = blocks.length;
+
         var embedName = 'e'+path.embedIndex++;
 
         this.generateNodePath(path, blocks);
@@ -563,6 +598,11 @@ DomplateEmbed.prototype = copyObject(DomplateTag.prototype,
         var argsName = 'd' + path.renderIndex++;
         blocks.push(embedName + ' = __link__(node, ', valueName, ', ', argsName, ');\n');
 
+        if (FBTrace.DBG_DOMPLATE)
+        {
+            FBTrace.sysout("DomplateEmbed.generateDOM "+blocks.slice( - blocks.length + beginBlock).join("").replace("\n"," "), {path: path});
+            blocks.push("FBTrace.sysout('__link__ called with node:'+FBL.getElementHTML(node), node);\n");
+        }
         return embedName;
     }
 });
@@ -888,7 +928,7 @@ var Renderer =
         catch (e)
         {
             if (FBTrace.DBG_DOMPLATE || FBTrace.DBG_ERRORS)
-                FBTrace.sysout("domplate.renderHTML; EXCEPTION " + e, e);
+                FBTrace.sysout("domplate.renderHTML; EXCEPTION " + e, {exc: e, render: this.tag.renderMarkup});
         }
     },
 
@@ -1032,7 +1072,15 @@ var Renderer =
         var domArgs = [root, this.tag.context, 0];
         domArgs.push.apply(domArgs, this.tag.domArgs);
         domArgs.push.apply(domArgs, outputs);
-        this.tag.renderDOM.apply(self ? self : this.tag.subject, domArgs);
+        try
+        {
+            this.tag.renderDOM.apply(self ? self : this.tag.subject, domArgs);
+        }
+        catch(exc)
+        {
+            if (FBTrace.DBG_ERRORS)
+                FBTrace.sysout("domplate renderDom FAILS "+exc, {exc: exc, renderDOM: this.tag.renderDOM.toSource(), domplate: this, domArgs: domArgs, self: self})
+        }
 
         return root;
     },

@@ -42,7 +42,7 @@ window[chromehidden~="toolbar"] #fbToolbar {
 .completionText {
     color: #666666;
 }
-.completionText[selected=true] {
+.completionText[selected="true"] {
     background-color:highlight;
     border-color:highlight;
     color:highlighttext !important;

@@ -1403,6 +1403,8 @@ this.StackFrame = domplate(Firebug.Rep,  // XXXjjb Since the repObject is fn the
             A({"class": "objectLink a11yFocus", _repObject: "$object"}, "$object|getCallName"),
             SPAN("("),
             FOR("arg", "$object|argIterator",
+                SPAN({"class": "argName"}, "$arg.name"),
+                SPAN("="),
                 TAG("$arg.tag", {object: "$arg.value"}),
                 SPAN({"class": "arrayComma"}, "$arg.delim")
             ),
@@ -1417,7 +1419,7 @@ this.StackFrame = domplate(Firebug.Rep,  // XXXjjb Since the repObject is fn the
     {
         if (frame.fn && frame.fn != "anonymous")
             return frame.fn;
-        return getFunctionName(frame.script, frame.context, frame, true);
+        return getFunctionName(frame.script, frame.context, frame.nativeFrame, true);
     },
 
     getSourceLinkTitle: function(frame)
@@ -1440,7 +1442,7 @@ this.StackFrame = domplate(Firebug.Rep,  // XXXjjb Since the repObject is fn the
             if (!arg)
                 break;
 
-            if (arg.value) // then we got these from jsd
+            if (arg.hasOwnProperty('value')) // then we got these from jsd
             {
                 var rep = Firebug.getRep(arg.value);
                 var tag = rep.shortTag ? rep.shortTag : rep.tag;
@@ -1448,6 +1450,10 @@ this.StackFrame = domplate(Firebug.Rep,  // XXXjjb Since the repObject is fn the
                 var delim = (i == frame.args.length-1 ? "" : ", ");
 
                 items.push({name: arg.name, value: arg.value, tag: tag, delim: delim});
+            }
+            else if (arg.hasOwnProperty('name'))
+            {
+                items.push({name: arg.name, delim: delim});
             }
             else  // eg from Error object
             {
@@ -1457,6 +1463,9 @@ this.StackFrame = domplate(Firebug.Rep,  // XXXjjb Since the repObject is fn the
 
                 items.push({value: arg, tag: tag, delim: delim});
             }
+
+            if (FBTrace.DBG_DOMPLATE)
+                FBTrace.sysout("reps.stackframe args["+i+"]: "+arg.name+" = "+arg.value, {arg: arg, item: items[items.length - 1]});
         }
 
         return items;
@@ -1473,7 +1482,10 @@ this.StackFrame = domplate(Firebug.Rep,  // XXXjjb Since the repObject is fn the
 
     inspectObject: function(stackFrame, context)
     {
-        Firebug.chrome.select(this.getSourceLink(stackFrame));
+        if (context.stopped)
+            Firebug.chrome.select(stackFrame);
+        else
+            Firebug.chrome.select(this.getSourceLink(stackFrame));
     },
 
     getTooltip: function(stackFrame, context)
@@ -1515,7 +1527,7 @@ this.jsdStackFrame = domplate(Firebug.Rep,
 {
     inspectable: false,
 
-    className: "jsdIStactFrame",
+    className: "jsdIStackFrame",
 
     supportsObject: function(object, type)
     {

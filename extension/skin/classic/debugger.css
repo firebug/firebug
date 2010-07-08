@@ -337,6 +337,11 @@
     padding: 0 4px;
 }
 
+.objectBox-stackFrame[selected="true"] {
+    outline: 1px solid #D9D9B6;
+    background-color: lightgoldenrodyellow;
+}
+
 .objectLink-stackFrame:hover {
     color: blue;
 }

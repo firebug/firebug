@@ -623,27 +623,27 @@ this.eraseNode = function(node)
         node.removeChild(node.lastChild);
 };
 
-this.ToggleBranch = function() 
+this.ToggleBranch = function()
 {
     this.normal = {};
     this.meta = {};
 }
 
-this.metaNames = 
+this.metaNames =
 [
- 'prototype', 
- 'constructor', 
- '__proto__', 
+ 'prototype',
+ 'constructor',
+ '__proto__',
  'toString',
  'toSource',
- 'hasOwnProperty', 
- 'getPrototypeOf', 
- '__defineGetter__', 
- '__defineSetter__', 
- '__lookupGetter__', 
+ 'hasOwnProperty',
+ 'getPrototypeOf',
+ '__defineGetter__',
+ '__defineSetter__',
+ '__lookupGetter__',
  '__lookupSetter__',
  '__noSuchMethod__',
- 'propertyIsEnumerable', 
+ 'propertyIsEnumerable',
  'isPrototypeOf',
  'watch',
  'unwatch',
@@ -651,7 +651,7 @@ this.metaNames =
  'toLocaleString'
 ];
 
-this.ToggleBranch.prototype = 
+this.ToggleBranch.prototype =
 {
     // Another implementation could simply prefix all keys with "#".
     getMeta: function(name)
@@ -663,7 +663,7 @@ this.ToggleBranch.prototype =
     get: function(name)  // return the toggle branch at name
     {
         var metaName = this.getMeta(name);
-        if (metaName) 
+        if (metaName)
             var value = this.meta[metaName];
         else if (this.normal.hasOwnProperty(name))
             var value = this.normal[name];
@@ -672,31 +672,31 @@ this.ToggleBranch.prototype =
 
         if (FBTrace.DBG_DOMPLATE)
             if (value && !(value instanceof ToggleBranch)) FBTrace.sysout("ERROR ToggleBranch.get("+name+") not set to a ToggleBranch!");
-        
+
         return value;
     },
-    
+
     set: function(name, value)  // value will be another toggle branch
     {
         if (FBTrace.DBG_DOMPLATE)
             if (value && !(value instanceof ToggleBranch)) FBTrace.sysout("ERROR ToggleBranch.set("+name+","+value+") not set to a ToggleBranch!");
-        
+
         var metaName = this.getMeta(name);
         if (metaName)
             return this.meta[metaName] = value;
         else
             return this.normal[name] = value;
     },
-    
+
     remove: function(name)  // remove the toggle branch at name
     {
         var metaName = this.getMeta(name);
         if (metaName)
             delete this.meta[metaName];
         else
-            delete this.normal[name]; 
+            delete this.normal[name];
     },
-    
+
     toString: function()
     {
         return "[ToggleBranch]";
@@ -2498,7 +2498,7 @@ this.createMenuSeparator = function(popup, before)
 /**
  * Create an option menu item definition. This method is usually used in methods like:
  * {@link Firebug.Panel.getOptionsMenuItems} or {@link Firebug.Panel.getContextMenuItems}.
- * 
+ *
  * @param {String} label Name of the string from *.properties file.
  * @param {String} option Name of the associated option.
  * @param {String, Optional} tooltiptext Optional name of the string from *.properties file
@@ -2573,6 +2573,9 @@ this.getCorrectedStackTrace = function(frame, context)
         if (!(Firebug.filterSystemURLs && this.isSystemURL(FBL.normalizeURL(frame.script.fileName))))
         {
             var stackFrame = this.getStackFrame(frame, context);
+            if (context.currentFrame && context.currentFrame === frame)
+                stackFrame.isCurrent = true;
+
             if (stackFrame)
                 trace.frames.push(stackFrame);
         }
@@ -2616,7 +2619,7 @@ this.getStackFrame = function(frame, context)
                 fncSpec.name = frame.script.functionName;
 
             if (FBTrace.DBG_STACK) FBTrace.sysout("lib.getStackFrame "+fncSpec.name, {sourceFile: sourceFile, script: frame.script, fncSpec: fncSpec});
-            return new this.StackFrame(context, fncSpec.name, frame.script, url, lineNo, fncSpec.args, frame.pc);
+            return new this.StackFrame(context, fncSpec.name, frame, url, lineNo, fncSpec.args, frame.pc, sourceFile);
         }
         else
         {
@@ -2630,7 +2633,7 @@ this.getStackFrame = function(frame, context)
     }
     catch (exc)
     {
-        if (FBTrace.DBG_STACK) FBTrace.sysout("getCorrectedStackTrace fails:", exc);
+        if (FBTrace.DBG_STACK) FBTrace.sysout("getCorrectedStackTrace fails: "+exc, exc);
         return null;
     }
 };
@@ -2885,33 +2888,25 @@ this.guessFunctionNameFromLines = function(url, lineNo, sourceCache)
     return "(?)";
 };
 
-this.getFunctionArgNames = function(frame)
-{
-    var script = frame.script;
-    if (script.getParameterNames)  // FF 3.6 or later
-    {
-        return script.getParameterNames();
-    }
-    else // FF 3.5 or eariler
-    {
-        return []; // TODO
-        var m = reFunctionArgNames.exec(this.safeToString(fn));
-        if (m)
-        {
-            var argNames = m[2].split(", ");
-            if (argNames.length && argNames[0])
-                return argNames;
-        }
-        return [];
-    }
-};
-
 this.getFunctionArgValues = function(frame)
 {
-    var values = [];
+    if (frame.scope.jsClassName == "Call")
+        var values = this.getPropertiesFromCallScope(frame);
+    else
+        var values = this.getPropertiesFromObjectScope(frame);
 
-    var argNames = this.getFunctionArgNames(frame);
+    if (FBTrace.DBG_STACK)
+    	FBTrace.sysout("lib.getFunctionArgValues "+frame+" scope: "+frame.scope.jsClassName, {values: values});
+
+    return values;
+}
+
+this.getPropertiesFromObjectScope = function(frame)
+{
+    var argNames = frame.script.getParameterNames();
     var scope = FBL.unwrapIValue(frame.scope);
+
+    var values = [];
 
     for (var i = 0; i < argNames.length; ++i)
     {
@@ -2926,6 +2921,22 @@ this.getFunctionArgValues = function(frame)
         {
             values.push({name: argName});
         }
+    }
+
+    return values;
+};
+
+this.getPropertiesFromCallScope = function(frame)
+{
+    var argNames = frame.script.getParameterNames();
+    var scope = frame.scope;
+    var values = [];
+    for (var i = 0; i < argNames.length; ++i)
+    {
+        var argName = argNames[i];
+        var pvalue = scope.getProperty(argName); // jsdIValue in jsdIDebuggerService
+        var value = pvalue ? FBL.unwrapIValue(pvalue.value) : undefined;
+        values.push({name: argName, value: value});
     }
 
     return values;
@@ -4836,16 +4847,19 @@ this.traceToString = function(trace)                /*@explore*/
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 
-this.StackFrame = function(context, fn, script, href, lineNo, args, pc)
+this.StackFrame = function(context, fn, nativeFrame, href, lineNo, args, pc, sourceFile)
 {
     this.context = context;
     this.fn = fn;
-    this.script = script;
     this.href = href;
     this.line = lineNo;
     this.args = args;
-    this.flags = (script?script.flags:null);
     this.pc = pc;
+    this.sourceFile = sourceFile;
+    // Mozilla
+    this.nativeFrame = nativeFrame;
+    this.script = nativeFrame ? nativeFrame.script : null;  // TODO-XB
+    this.flags = (this.script?this.script.flags:null);
 };
 
 this.StackFrame.prototype =
@@ -4859,6 +4873,13 @@ this.StackFrame.prototype =
         else
             return this.href;
     },
+
+    getNativeFrame:function()  // Mozilla
+    {
+        if (this.nativeFrame && this.nativeFrame.isValid)
+            return this.nativeFrame;
+    },
+
     destroy: function()
     {
         if (FBTrace.DBG_STACK)
@@ -7230,7 +7251,7 @@ this.unwrapIValue = function(object)
  * Compare expected Firebug version with the current Firebug installed.
  * @param {Object} expectedVersion Expected version of Firebug.
  * @returns
- * -1 the current version is smaller 
+ * -1 the current version is smaller
  *  0 the current version is the same
  *  1 the current version is bigger
  *

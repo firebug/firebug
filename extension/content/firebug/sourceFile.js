@@ -317,7 +317,7 @@ Firebug.SourceFile.prototype =
      // these objects map JSD's values to correct values
      getScriptAnalyzer: function(script)
      {
-         if (this.outerScript && (script.tag == this.outerScript.tag) )
+         if (script && this.outerScript && (script.tag == this.outerScript.tag) )
              return this.getOuterScriptAnalyzer();
          return new Firebug.SourceFile.NestedScriptAnalyzer(this);
      },
