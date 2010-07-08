@@ -720,9 +720,12 @@ top.FirebugChrome =
 
         if (FirebugContext && FirebugContext.sidePanelNames)
         {
-            var sidePanelName = FirebugContext.sidePanelNames[FirebugContext.panelName];
-            sidePanelName = getBestSidePanelName(sidePanelName, panelTypes);
-            panelBar2.selectPanel(sidePanelName, true);
+            if ( !panelBar2.selectedPanel || (panelBar2.selectedPanel.parentPanel !== panelBar1.selectedPanel.name) )
+            {
+                var sidePanelName = FirebugContext.sidePanelNames[FirebugContext.panelName];
+                sidePanelName = getBestSidePanelName(sidePanelName, panelTypes);
+                panelBar2.selectPanel(sidePanelName, true);
+            }
         }
         else
             panelBar2.selectPanel(null);
