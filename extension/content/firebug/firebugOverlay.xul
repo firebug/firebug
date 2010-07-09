@@ -236,6 +236,22 @@
                                             type="checkbox" tooltiptext="firebug.console.Do Not Clear On Reload" command="cmd_togglePersistConsole"/>
                                         <toolbarbutton id="fbToggleProfiling" label="firebug.Profile" class="toolbar-text-button"
                                             type="checkbox" command="cmd_toggleProfiling"/>
+                                        <toolbarseparator class="fbPanelSpecificButtonsSeparator"/>
+                                        <toolbarbutton id="fbConsoleFilter-all" label="firebug.All" type="radio"
+                                            class="toolbar-text-button" tooltiptext="firebug.console.Show All Log Entries"
+                                            group="firebugConsoleFilter" oncommand="Firebug.Console.onToggleFilter(FirebugContext, '')"/>
+                                        <toolbarbutton id="fbConsoleFilter-errorMessage" label="firebug.console.Errors" type="radio"
+                                            class="toolbar-text-button" tooltiptext="firebug.console.Filter by Errors"
+                                            group="firebugConsoleFilter" oncommand="Firebug.Console.onToggleFilter(FirebugContext, 'errorMessage')"/>
+                                        <toolbarbutton id="fbConsoleFilter-warn" label="firebug.console.Warnings" type="radio"
+                                            class="toolbar-text-button" tooltiptext="firebug.console.Filter by Warnings"
+                                            group="firebugConsoleFilter" oncommand="Firebug.Console.onToggleFilter(FirebugContext, 'warn')"/>
+                                        <toolbarbutton id="fbConsoleFilter-info" label="firebug.console.Info" type="radio"
+                                            class="toolbar-text-button" tooltiptext="firebug.console.Filter by Info"
+                                            group="firebugConsoleFilter" oncommand="Firebug.Console.onToggleFilter(FirebugContext, 'info')"/>
+                                        <toolbarbutton id="fbConsoleFilter-debug" label="firebug.console.Debug Info" type="radio"
+                                            group="firebugConsoleFilter" class="toolbar-text-button" tooltiptext="firebug.console.Filter by Debug Info"
+                                            oncommand="Firebug.Console.onToggleFilter(FirebugContext, 'debug')"/>
                                     </hbox>
 
                                     <hbox id="fbHTMLButtons" collapsed="true">

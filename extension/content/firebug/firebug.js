@@ -70,6 +70,7 @@ const prefNames =  // XXXjjb TODO distribute to modules
     "showJSErrors", "showJSWarnings", "showCSSErrors", "showXMLErrors",
     "showChromeErrors", "showChromeMessages", "showExternalErrors",
     "showXMLHttpRequests", "showNetworkErrors", "tabularLogMaxHeight",
+    "consoleFilterTypes",
 
     // HTML
     "showFullTextNodes", "showCommentNodes",
@@ -264,6 +265,8 @@ top.Firebug =
             "fbNavigateBackButton", "fbNavigateForwardButton",
 
             "fbInspectButton", "fbCloseButton", "fbConsoleClear", "fbConsolePersist",
+            "fbConsoleFilter-all", "fbConsoleFilter-errorMessage", "fbConsoleFilter-warn",
+            "fbConsoleFilter-info", "fbConsoleFilter-debug", 
             "fbToggleProfiling", "fbToggleHTMLEditing", "fbToggleCSSEditing",
             "menu_toggleFirebug", "menu_detachFirebug", "FirebugMenu_OpenWith",
             "menu_configureEditors", "FirebugMenu_TextSize", "menu_increaseTextSize",

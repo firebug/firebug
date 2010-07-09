@@ -159,6 +159,7 @@ Firebug.Console = extend(ActivableConsole,
     {
         Firebug.ActivableModule.initialize.apply(this, arguments);
         Firebug.Debugger.addListener(this);
+        this.syncFilterButtons(Firebug.chrome);
     },
 
     initContext: function(context, persistedState)
@@ -253,6 +254,52 @@ Firebug.Console = extend(ActivableConsole,
             this.watchForErrors();
     },
 
+    onToggleFilter: function(context, filterType)
+    {
+        if (!context)
+            context = FirebugContext;
+
+/* Preparation for multiple filters 
+        if (filterType == "")
+            Firebug.consoleFilterTypes = "";
+        else
+        {
+            var index = Firebug.consoleFilterTypes.indexOf(filterType);
+            if (index >= 0)
+                Firebug.consoleFilterTypes = Firebug.consoleFilterTypes.substr(0, index-1) +
+                    Firebug.consoleFilterTypes.substr(index+filterType.length);
+            else
+                Firebug.consoleFilterTypes += " " + filterType;
+        }
+*/
+        Firebug.consoleFilterTypes = filterType;
+
+        Firebug.setPref(Firebug.prefDomain, "consoleFilterTypes", Firebug.consoleFilterTypes);
+
+        var panel = this.getPanel(context, true);
+        if (panel)
+            panel.setFilter(Firebug.consoleFilterTypes);
+    },
+
+    syncFilterButtons: function(chrome)
+    {
+        if (Firebug.consoleFilterTypes == "")
+        {
+            var button = chrome.$("fbConsoleFilter-all");
+            button.checked = true;
+        }
+        else
+        {
+            var filterTypes = Firebug.consoleFilterTypes.split(" ");
+
+            for (var type in filterTypes)
+            {
+                var button = chrome.$("fbConsoleFilter-" + filterTypes[type]);
+                button.checked = true;
+            }
+        }
+    },
+
     watchForErrors: function()
     {
         Firebug.Errors.checkEnabled();
@@ -332,6 +379,13 @@ Firebug.ConsolePanel.prototype = extend(Firebug.ActivablePanel,
         else
         {
             var row = this.createRow("logRow", className);
+
+            // xxxsz: Hack to cover messages of both types of warnings ("warn" and "warningMessage")
+            // warnings should be unified in the future
+            if (Firebug.consoleFilterTypes.indexOf(className) != -1 ||
+                (className == "warningMessage" && Firebug.consoleFilterTypes.indexOf("warn") != -1))
+                setClass(row, "matched");
+
             appender.apply(this, [objects, row, rep]);
 
             if (sourceLink)
@@ -607,6 +661,9 @@ Firebug.ConsolePanel.prototype = extend(Firebug.ActivablePanel,
 
         this.showCommandLine(true);
         this.showToolbarButtons("fbConsoleButtons", true);
+
+        this.setFilter(Firebug.consoleFilterTypes);
+
         Firebug.chrome.setGlobalAttribute("cmd_togglePersistConsole", "checked",
             this.persistContent);
 
@@ -664,6 +721,19 @@ Firebug.ConsolePanel.prototype = extend(Firebug.ActivablePanel,
         if (FBTrace.DBG_CONSOLE)
             FBTrace.sysout("console.hide; wasScrolledToBottom: " +
                 this.wasScrolledToBottom + ", " + this.context.getName());
+    },
+
+    updateOption: function(name, value)
+    {
+        if (name == "consoleFilterTypes")
+        {
+            Firebug.Console.syncFilterButtons(Firebug.chrome);
+            for (var i = 0; i < TabWatcher.contexts.length; ++i)
+            {
+                var context = TabWatcher.contexts[i];
+                Firebug.Console.onToggleFilter(context, value);
+            }
+        }
     },
 
     destroy: function(state)
@@ -756,6 +826,40 @@ Firebug.ConsolePanel.prototype = extend(Firebug.ActivablePanel,
     getBreakOnMenuItems: function()
     {
        return [];
+    },
+
+    setFilter: function(filterTypes) {
+        // Make previously visible nodes invisible again
+        if (this.filterSet)
+        {
+            for (var i in this.filterSet)
+                removeClass(this.filterSet[i], "matched");
+        }
+  
+        this.filterSet = [];
+
+        if (filterTypes == "")
+            removeClass(this.panelNode, "searching");
+        else
+            setClass(this.panelNode, "searching");
+
+        var filterTypesArray = filterTypes.split(" ");
+
+        // xxxsz: Hack to cover messages of both types of warnings ("warn" and "warningMessage")
+        // warnings should be unified in the future
+        if (filterTypes.indexOf("warn") != -1)
+            filterTypesArray.push("warningMessage");
+        
+        for (var child in this.panelNode.children)
+        {
+            var logRow = this.panelNode.children[child];
+            for (var type in filterTypesArray)
+            {
+                if (hasClass(logRow, "logRow-" + filterTypesArray[type]))
+                    setClass(logRow, "matched");
+                this.filterSet.push(logRow);
+            }
+        }
     },
 
     search: function(text)
