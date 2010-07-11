@@ -75,7 +75,7 @@ Firebug.Search = extend(Firebug.Module,
         // This sucks, but the find service won't match nodes that are invisible, so we
         // have to make sure to make them all visible unless the user is appending to the
         // last string, in which case it's ok to just search the set of visible nodes
-        if (!panel.searchText || value.indexOf(panel.searchText) != 0)
+        if (!panel.searchText || value == panel.searchText || value.indexOf(panel.searchText) != 0)
             removeClass(panelNode, "searching");
 
         // Cancel the previous search to keep typing smooth

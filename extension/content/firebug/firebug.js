@@ -265,7 +265,7 @@ top.Firebug =
             "fbNavigateBackButton", "fbNavigateForwardButton",
 
             "fbInspectButton", "fbCloseButton", "fbConsoleClear", "fbConsolePersist",
-            "fbConsoleFilter-all", "fbConsoleFilter-errorMessage", "fbConsoleFilter-warn",
+            "fbConsoleFilter-all", "fbConsoleFilter-error", "fbConsoleFilter-warning",
             "fbConsoleFilter-info", "fbConsoleFilter-debug", 
             "fbToggleProfiling", "fbToggleHTMLEditing", "fbToggleCSSEditing",
             "menu_toggleFirebug", "menu_detachFirebug", "FirebugMenu_OpenWith",

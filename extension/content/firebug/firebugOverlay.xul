@@ -239,13 +239,13 @@
                                         <toolbarseparator class="fbPanelSpecificButtonsSeparator"/>
                                         <toolbarbutton id="fbConsoleFilter-all" label="firebug.All" type="radio"
                                             class="toolbar-text-button" tooltiptext="firebug.console.Show All Log Entries"
-                                            group="firebugConsoleFilter" oncommand="Firebug.Console.onToggleFilter(FirebugContext, '')"/>
-                                        <toolbarbutton id="fbConsoleFilter-errorMessage" label="firebug.console.Errors" type="radio"
+                                            group="firebugConsoleFilter" oncommand="Firebug.Console.onToggleFilter(FirebugContext, 'all')"/>
+                                        <toolbarbutton id="fbConsoleFilter-error" label="firebug.console.Errors" type="radio"
                                             class="toolbar-text-button" tooltiptext="firebug.console.Filter by Errors"
-                                            group="firebugConsoleFilter" oncommand="Firebug.Console.onToggleFilter(FirebugContext, 'errorMessage')"/>
-                                        <toolbarbutton id="fbConsoleFilter-warn" label="firebug.console.Warnings" type="radio"
+                                            group="firebugConsoleFilter" oncommand="Firebug.Console.onToggleFilter(FirebugContext, 'error')"/>
+                                        <toolbarbutton id="fbConsoleFilter-warning" label="firebug.console.Warnings" type="radio"
                                             class="toolbar-text-button" tooltiptext="firebug.console.Filter by Warnings"
-                                            group="firebugConsoleFilter" oncommand="Firebug.Console.onToggleFilter(FirebugContext, 'warn')"/>
+                                            group="firebugConsoleFilter" oncommand="Firebug.Console.onToggleFilter(FirebugContext, 'warning')"/>
                                         <toolbarbutton id="fbConsoleFilter-info" label="firebug.console.Info" type="radio"
                                             class="toolbar-text-button" tooltiptext="firebug.console.Filter by Info"
                                             group="firebugConsoleFilter" oncommand="Firebug.Console.onToggleFilter(FirebugContext, 'info')"/>

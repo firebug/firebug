@@ -11,6 +11,25 @@ const nsIPrefBranch2 = Ci.nsIPrefBranch2;
 const PrefService = Cc["@mozilla.org/preferences-service;1"];
 const prefs = PrefService.getService(nsIPrefBranch2);
 
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+
+const logTypes =
+{
+    "error": 1,
+    "warning": 1,
+    "info": 1,
+    "debug": 1,
+    "profile": 1,
+    "table": 1,
+    "group": 1,
+    "command": 1,
+    "stackTrace": 1,
+    "log": 1,
+    "dir": 1,
+    "assert": 1,
+    "spy": 1
+};
+
 // ************************************************************************************************
 
 var maxQueueRequests = 500;
@@ -278,7 +297,11 @@ Firebug.Console = extend(ActivableConsole,
 
         var panel = this.getPanel(context, true);
         if (panel)
+        {
             panel.setFilter(Firebug.consoleFilterTypes);
+            Firebug.Search.update(context);
+        }
+
     },
 
     syncFilterButtons: function(chrome)
@@ -292,7 +315,7 @@ Firebug.Console = extend(ActivableConsole,
         {
             var filterTypes = Firebug.consoleFilterTypes.split(" ");
 
-            for (var type in filterTypes)
+            for (var type = 0; type < filterTypes.length; type++)
             {
                 var button = chrome.$("fbConsoleFilter-" + filterTypes[type]);
                 button.checked = true;
@@ -379,12 +402,6 @@ Firebug.ConsolePanel.prototype = extend(Firebug.ActivablePanel,
         else
         {
             var row = this.createRow("logRow", className);
-
-            // xxxsz: Hack to cover messages of both types of warnings ("warn" and "warningMessage")
-            // warnings should be unified in the future
-            if (Firebug.consoleFilterTypes.indexOf(className) != -1 ||
-                (className == "warningMessage" && Firebug.consoleFilterTypes.indexOf("warn") != -1))
-                setClass(row, "matched");
 
             appender.apply(this, [objects, row, rep]);
 
@@ -828,51 +845,34 @@ Firebug.ConsolePanel.prototype = extend(Firebug.ActivablePanel,
        return [];
     },
 
-    setFilter: function(filterTypes) {
-        // Make previously visible nodes invisible again
-        if (this.filterSet)
+    setFilter: function(filterTypes)
+    {
+        var panelNode = this.panelNode;
+        for (var type in logTypes)
         {
-            for (var i in this.filterSet)
-                removeClass(this.filterSet[i], "matched");
-        }
-  
-        this.filterSet = [];
-
-        if (filterTypes == "")
-            removeClass(this.panelNode, "searching");
-        else
-            setClass(this.panelNode, "searching");
-
-        var filterTypesArray = filterTypes.split(" ");
-
-        // xxxsz: Hack to cover messages of both types of warnings ("warn" and "warningMessage")
-        // warnings should be unified in the future
-        if (filterTypes.indexOf("warn") != -1)
-            filterTypesArray.push("warningMessage");
-        
-        for (var child in this.panelNode.children)
-        {
-            var logRow = this.panelNode.children[child];
-            for (var type in filterTypesArray)
+            // Different types of errors and warnings are combined for filtering
+            if (filterTypes == "all" || filterTypes.indexOf(type) != -1 ||
+                (filterTypes.indexOf("error") != -1 && (type == "error" || type == "errorMessage")) ||
+                (filterTypes.indexOf("warning") != -1 && (type == "warn" || type == "warningMessage")))
             {
-                if (hasClass(logRow, "logRow-" + filterTypesArray[type]))
-                    setClass(logRow, "matched");
-                this.filterSet.push(logRow);
+                removeClass(panelNode, "hideType-"+type);
             }
+            else
+                setClass(panelNode, "hideType-"+type);
         }
     },
 
     search: function(text)
     {
-        if (!text)
-            return;
-
         // Make previously visible nodes invisible again
         if (this.matchSet)
         {
             for (var i in this.matchSet)
                 removeClass(this.matchSet[i], "matched");
         }
+
+        if (!text)
+            return;
 
         this.matchSet = [];
 

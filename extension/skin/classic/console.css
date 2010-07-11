@@ -429,6 +429,24 @@
     display: none;
 }
 
+.panelNode.hideType-error .logRow-error,
+.panelNode.hideType-error .logRow-errorMessage,
+.panelNode.hideType-warning .logRow-warn,
+.panelNode.hideType-warning .logRow-warningMessage,
+.panelNode.hideType-info .logRow-info,
+.panelNode.hideType-debug .logRow-debug,
+.panelNode.hideType-profile .logRow-profile,
+.panelNode.hideType-table .logRow-table,
+.panelNode.hideType-group .logRow-group,
+.panelNode.hideType-command .logRow-command,
+.panelNode.hideType-stackTrace .logRow-stackTrace,
+.panelNode.hideType-log .logRow-log,
+.panelNode.hideType-dir .logRow-dir,
+.panelNode.hideType-assert .logRow-assert,
+.panelNode.hideType-spy .logRow-spy {
+    display: none !important;
+}
+
 .logRow.matched {
     display: block !important;
 }
