@@ -715,6 +715,9 @@ top.FirebugChrome =
 
     syncSidePanels: function()
     {
+        if (!panelBar1.selectedPanel)
+            return;
+
         var panelTypes = Firebug.getSidePanelTypes(FirebugContext, panelBar1.selectedPanel);
         panelBar2.updatePanels(panelTypes);
 
