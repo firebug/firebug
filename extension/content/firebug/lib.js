@@ -2910,9 +2910,9 @@ this.guessFunctionNameFromLines = function(url, lineNo, sourceCache)
 this.getFunctionArgValues = function(frame)
 {
     if (frame.scope.jsClassName == "Call")
-        var values = this.getPropertiesFromCallScope(frame);
+        var values = this.getArgumentsFromCallScope(frame);
     else
-        var values = this.getPropertiesFromObjectScope(frame);
+        var values = this.getArgumentsFromObjectScope(frame);
 
     if (FBTrace.DBG_STACK)
         FBTrace.sysout("lib.getFunctionArgValues "+frame+" scope: "+frame.scope.jsClassName, {values: values});
@@ -2920,7 +2920,7 @@ this.getFunctionArgValues = function(frame)
     return values;
 }
 
-this.getPropertiesFromObjectScope = function(frame)
+this.getArgumentsFromObjectScope = function(frame)
 {
     var argNames = frame.script.getParameterNames();
     var scope = FBL.unwrapIValue(frame.scope);
@@ -2932,9 +2932,10 @@ this.getPropertiesFromObjectScope = function(frame)
         var argName = argNames[i];
         if (scope)
         {
-            var pvalue = scope.argName;
-            var value = pvalue ? FBL.unwrapIValue(pvalue.value) : undefined;
-            values.push({name: argName, value: value});
+            var pvalue = scope[argName];
+            //?? XXXjjb why are we unwrapping here, scope is a normal object
+            //var value = pvalue ? FBL.unwrapIValue(pvalue.value) : undefined;
+            values.push({name: argName, value: pvalue});
         }
         else
         {
@@ -2945,7 +2946,7 @@ this.getPropertiesFromObjectScope = function(frame)
     return values;
 };
 
-this.getPropertiesFromCallScope = function(frame)
+this.getArgumentsFromCallScope = function(frame)
 {
     var argNames = frame.script.getParameterNames();
     var scope = frame.scope;
@@ -2960,6 +2961,23 @@ this.getPropertiesFromCallScope = function(frame)
 
     return values;
 };
+
+this.unwrapIValueObject = function(scope)
+{
+    scopeVars = {};
+    var listValue = {value: null}, lengthValue = {value: 0};
+    scope.getProperties(listValue, lengthValue);
+
+    for (var i = 0; i < lengthValue.value; ++i)
+    {
+        var prop = listValue.value[i];
+        var name = FBL.unwrapIValue(prop.name);
+        if (!FBL.shouldIgnore(name))
+            scopeVars[name] = FBL.unwrapIValue(prop.value);
+    }
+    return scopeVars;
+};
+
 
 // ************************************************************************************************
 // Source Files
@@ -6987,6 +7005,33 @@ const invisibleTags = this.invisibleTags =
     "FRAME": 1,
     "TABBROWSER": 1,
     */
+};
+
+this.ignoreVars =
+{
+    "__firebug__": 1,
+    "eval": 1,
+
+    // We are forced to ignore Java-related variables, because
+    // trying to access them causes browser freeze
+    "java": 1,
+    "sun": 1,
+    "Packages": 1,
+    "JavaArray": 1,
+    "JavaMember": 1,
+    "JavaObject": 1,
+    "JavaClass": 1,
+    "JavaPackage": 1,
+    // internal firebug things XXXjjb todo we should privatize these
+    "_firebug": 1,
+    "_FirebugConsole": 1,
+    "_FirebugCommandLine": 1,
+    "loadFirebugConsole": 1,
+};
+
+this.shouldIgnore = function(name)
+{
+    return (this.ignoreVars[name] === 1);
 };
 
 // ************************************************************************************************

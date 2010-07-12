@@ -3639,6 +3639,8 @@ CallstackPanel.prototype = extend(Firebug.Panel,
     {
         if (object instanceof jsdIStackFrame || object instanceof StackFrame)
             this.showStackFrame(object);
+
+        this.showReferents(object);
     },
 
     refresh: function()
@@ -3680,7 +3682,7 @@ CallstackPanel.prototype = extend(Firebug.Panel,
         var rep = Firebug.getRep(trace, this.context);
 
         if(FBTrace.DBG_STACK)
-	        FBTrace.sysout("callstack showStackFrame with "+trace.frames.length+" frames using "+rep+" into "+this.panelNode, {trace: trace, rep:rep, node:this.panelNode});
+            FBTrace.sysout("callstack showStackFrame with "+trace.frames.length+" frames using "+rep+" into "+this.panelNode, {trace: trace, rep:rep, node:this.panelNode});
 
         rep.tag.replace({object:trace}, this.panelNode);
 
@@ -3696,6 +3698,7 @@ CallstackPanel.prototype = extend(Firebug.Panel,
 
     selectItem: function(item)
     {
+        // XXXjjb I don't think this is called
         if (this.selectedItem)
             this.selectedItem.removeAttribute("selected");
 
@@ -3703,8 +3706,6 @@ CallstackPanel.prototype = extend(Firebug.Panel,
 
         if (item)
             item.setAttribute("selected", "true");
-
-        this.showParent();
     },
 
     getOptionsMenuItems: function()
@@ -3715,19 +3716,177 @@ CallstackPanel.prototype = extend(Firebug.Panel,
         return items;
     },
 
-    showParent: function()
+    showReferents: function()
     {
+        // Find obj.fn for the currently executing function
+        // The general case is (expr_for_this).(expr_for_fn)().
+        // expr navigates us using names from the scope chain
+        delete this.parent;
+
+        var frame = this.context.currentFrame;
+
+        var fnName = getFunctionName(frame.script, this.context, frame, true);
+
         if (FBTrace.DBG_STACK)
-	        FBTrace.sysout('showParent '+this.selectedItem, this.selectedItem);
+            FBTrace.sysout('showReferents '+frame, frame);
 
         // lookup the name of the function using frame.eval() -> function object
-        //  var wrapped = this.jsd.wrapValue(fn);
-        //    parent = wrapped.jsParent;
-        // check parent[name] === fn
-        // if true allow edit to reset that value.
+        // use 'this' as a lookup scope since function calls can be obj.fn or just fn
+        var js = "with (this) {"+fnName +";}";
+
+        var result = {};
+        var ok = frame.eval(js, "", 1, result);
+        if (ok)
+        {
+            if (result.value instanceof Ci.jsdIValue)
+            {
+                if (FBTrace.DBG_STACK)
+                    FBTrace.sysout("Firebug.Debugger.showReferents evaled "+js+" and got "+result.value, result);
+                try
+                {
+                    var fn = result.value.getWrappedValue();
+                    var thisObject = unwrapIValueObject(frame.thisValue);
+                    var referents = findObjectPropertyPath("this", thisObject, fn, []);
+
+                    if (FBTrace.DBG_STACK)
+                        FBTrace.sysout("Firebug.Debugger.showReferents found from thisObject "+referents.length, {thisObject: thisObject, fn: fn, referents: referents});
+
+                    var containingScope = unwrapIValueObject(result.value.jsParent);
+
+                    if (FBTrace.DBG_STACK)
+                        FBTrace.sysout("Firebug.Debugger.showReferents containingScope from "+result.value.jsParent.jsClassName, containingScope);
+
+                    var scopeReferents = findObjectPropertyPath(result.value.jsParent.jsClassName, containingScope, fn, []);
+                    // Do we need to look in the entire scope chain? I think yes
+
+                    if (FBTrace.DBG_STACK)
+                        FBTrace.sysout("Firebug.Debugger.showReferents found scope referents "+scopeReferents.length, {containingScope: containingScope, fn: fn, referents: scopeReferents});
+
+                    referents = referents.concat(scopeReferents);
+                    FBTrace.sysout("Firebug.Debugger.showReferents found total referents "+referents.length, {fn: fn, referents: referents});
+                    for (var i = 0; i < referents.length; i++)
+                    {
+                        if (FBTrace.DBG_STACK)
+                            FBTrace.sysout("Firebug.Debugger.showReferents found referent "+referents[i].getObjectPathExpression(), {fn: fn, referent: referents[i], path:referents[i].getObjectPathObjects() });
+                    }
+                }
+                catch(exc)
+                {
+                    if (FBTrace.DBG_STACK || FBTrace.DBG_ERRORS)
+                        FBTrace.sysout("Firebug.Debugger.showReferents FAILED: "+exc, exc);
+                }
+            }
+            else
+            {
+                if (FBTrace.DBG_STACK || FBTrace.DBG_ERRORS)
+                    FBTrace.sysout("Firebug.Debugger.showReferents evaled "+js+" but result.value not instanceof Ci.jsdIValue "+result.value, result);
+            }
+            // if true allow edit to reset that value.
+        }
+        else
+            if (FBTrace.DBG_STACK || FBTrace.DBG_ERRORS)
+                FBTrace.sysout("Firebug.Debugger.showReferents eval failed with "+ok+" result "+result.value, result);
     },
 });
 
+function Referent(containerName, container, propertyName, obj)
+{
+    this._firebug = true;
+    // Reverse order, deep is first
+    this.values = [container];
+    this.names = [propertyName, containerName];
+    this.object = obj;
+
+}
+Referent.prototype =
+{
+    getContainer: function()
+    {
+        return this.container;
+    },
+    /*
+     * A string of identifiers separated by dots such that container[string] gives obj
+     */
+    getObjectPathExpression: function()
+    {
+        this.objectPathExpr = FBL.cloneArray(this.names).reverse().join('.');
+        return this.objectPathExpr;
+    },
+
+    getObjectPathObjects: function()
+    {
+        this.objChain = FBL.cloneArray(this.values);
+        this.objChain.push(this.object);
+        this.objChain.reverse();
+        return this.objChain;
+    },
+
+    //--------------------------------------------------------
+    prependPath: function(p, segmentObject)
+    {
+        this.names.push(p);
+        this.values.push(segmentObject);
+    },
+
+};
+
+
+// Recursively look for obj in container using array of visited objects
+function findObjectPropertyPath(containerName, container, obj, visited)
+{
+    if (!container || !obj || !visited)
+        return false;
+
+    var referents = [];
+    visited.push(container);
+    for (var p in container)
+    {
+        if (container.hasOwnProperty(p))
+        {
+            var candidate = null;
+            try
+            {
+                candidate = container[p];
+            }
+            catch(exc)
+            {
+                // eg sessionStorage
+            }
+
+            if (candidate === obj) // then we found a property pointing to our obj
+            {
+                referents.push(new Referent(containerName, container, p, obj));
+            }
+            else // recurse
+            {
+                var candidateType = typeof (candidate);
+                if (candidateType === 'object' || candidateType === 'function')
+                {
+                    if (visited.indexOf(candidate) === -1)
+                    {
+                        var refsInChildren = findObjectPropertyPath(p, candidate, obj, visited);
+                        if (refsInChildren.length)
+                        {
+                            // As we unwind the recursion we tack on layers of the path.
+                            for (var i = 0; i < refsInChildren.length; i++)
+                            {
+                                var refInChildren = refsInChildren[i];
+                                refInChildren.prependPath(containerName, container);
+                                referents.push(refInChildren);
+                                FBTrace.sysout(" Did prependPath with p "+p+" gave "+referents[referents.length - 1].getObjectPathExpression(), referents[referents.length - 1]);
+
+                            }
+                        }
+                    }
+                    //else we already looked at that object.
+                } // else the object has no properties
+            }
+        }
+    }
+    FBTrace.sysout(" Returning "+referents.length+ " referents", referents);
+
+    return referents;
+}
 // ************************************************************************************************
 
 function getCallingFrame(frame)

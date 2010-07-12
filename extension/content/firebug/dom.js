@@ -16,28 +16,6 @@ const insertInterval = 40;
 
 const rxIdentifier = /^[$_A-Za-z][$_A-Za-z0-9]*$/
 
-const ignoreVars =
-{
-    "__firebug__": 1,
-    "eval": 1,
-
-    // We are forced to ignore Java-related variables, because
-    // trying to access them causes browser freeze
-    "java": 1,
-    "sun": 1,
-    "Packages": 1,
-    "JavaArray": 1,
-    "JavaMember": 1,
-    "JavaObject": 1,
-    "JavaClass": 1,
-    "JavaPackage": 1,
-    // internal firebug things XXXjjb todo we should privatize these
-    "_firebug": 1,
-    "_FirebugConsole": 1,
-    "_FirebugCommandLine": 1,
-    "loadFirebugConsole": 1,
-};
-
 // ************************************************************************************************
 
 Firebug.DOMModule = extend(Firebug.Module,
@@ -414,8 +392,7 @@ Firebug.DOMBasePanel.prototype = extend(Firebug.Panel,
             for (var name in insecureObject)  // enumeration is safe
             {
                 // Ignore only global variables (properties of the |window| object).
-                // javascript.options.strict says ignoreVars is undefined.
-                if (ignoreVars[name] == 1 && (object instanceof Window))
+                if (shouldIgnore(name) && (object instanceof Window))
                 {
                     if (FBTrace.DBG_DOM)
                         FBTrace.sysout("dom.getMembers: ignoreVars: " + name + ", " + level, object);
@@ -1637,6 +1614,7 @@ WatchPanel.prototype = extend(Firebug.DOMBasePanel.prototype,
                 );
 
                 addMember(frame.scope, "watch", members, expr, value, 0);
+                FBTrace.sysout("watch.updateSelection "+expr+" = "+value, {expr: expr, value: value, members: members})
             }
         }
 
@@ -1667,23 +1645,7 @@ WatchPanel.prototype = extend(Firebug.DOMBasePanel.prototype,
             // scopes, so we want to special case this to get all variables
             // in all cases.
             if (scope.jsClassName == "Call") {
-                scopeVars = {};
-                var listValue = {value: null}, lengthValue = {value: 0};
-                scope.getProperties(listValue, lengthValue);
-
-                for (var i = 0; i < lengthValue.value; ++i)
-                {
-                    var prop = listValue.value[i];
-                    var name = unwrapIValue(prop.name);
-                    if (ignoreVars[name] == 1)
-                    {
-                        if (FBTrace.DBG_DOM)
-                            FBTrace.sysout("dom.generateScopeChain: ignoreVars: " + name);
-                        continue;
-                    }
-
-                    scopeVars[name] = unwrapIValue(prop.value);
-                }
+                var scopeVars = unwrapIValueObject(scope)
                 scopeVars.toString = function() {return "Closure Scope";}
             } else {
                 scopeVars = unwrapIValue(scope);
