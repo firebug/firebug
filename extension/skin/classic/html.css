@@ -113,7 +113,6 @@
 
 .nodeBox.selected > .nodeLabel > .nodeLabelBox,
 .nodeBox.selected > .nodeLabel {
-    border-color: Highlight;
     background-color: Highlight;
     color: HighlightText !important;
 }
@@ -129,7 +128,7 @@
 
 .nodeBox.highlighted > .nodeLabel {
     border-color: Highlight !important;
-    background-color: cyan !important;
+    background-color: #c4f4ff !important;
     color: #000000 !important;
 }
 
