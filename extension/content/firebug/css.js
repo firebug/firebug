@@ -1063,7 +1063,7 @@ Firebug.CSSStyleSheetPanel.prototype = extend(Firebug.SourceBoxPanel,
                 else if (cssValue.type == "url")
                 {
                     var propNameNode = target.parentNode.getElementsByClassName("cssPropName").item(0);
-                    if (propNameNode && isImageRule(propNameNode.textContent))
+                    if (propNameNode && isImageRule(getElementSimpleType(Firebug.getRepObject(target)),propNameNode.textContent))
                     {
                         var rule = Firebug.getRepObject(target);
                         var baseURL = this.getStylesheetURL(rule);
@@ -1813,13 +1813,13 @@ CSSEditor.prototype = domplate(Firebug.InlineEditor.prototype,
         }
         else if (hasClass(this.target, "cssPropName"))
         {
-            return getCSSPropertyNames();
+            return getCSSPropertyNames(getElementSimpleType(Firebug.getRepObject(this.target)));
         }
         else
         {
             var row = getAncestorByClass(this.target, "cssProp");
             var propName = getChildByClass(row, "cssPropName").textContent;
-            return getCSSKeywordsByProperty(propName);
+            return getCSSKeywordsByProperty(getElementSimpleType(Firebug.getRepObject(this.target)),propName);
         }
     }
 });

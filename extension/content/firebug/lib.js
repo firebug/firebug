@@ -1623,22 +1623,22 @@ this.scrollIntoCenterView = function(element, scrollBox, notX, notY)
 // ************************************************************************************************
 // CSS
 
-var cssKeywordMap = null;
-var cssPropNames = null;
+var cssKeywordMap = {};
+var cssPropNames = {};
 var cssColorNames = null;
 var imageRules = null;
 
-this.getCSSKeywordsByProperty = function(propName)
+this.getCSSKeywordsByProperty = function(nodeType,propName)
 {
-    if (!cssKeywordMap)
+    if (!cssKeywordMap[nodeType])
     {
-        cssKeywordMap = {};
+        cssKeywordMap[nodeType] = {};
 
-        for (var name in this.cssInfo)
+        for (var name in this.cssInfo[nodeType])
         {
             var list = [];
 
-            var types = this.cssInfo[name];
+            var types = this.cssInfo[nodeType][name];
             for (var i = 0; i < types.length; ++i)
             {
                 var keywords = this.cssKeywords[types[i]];
@@ -1646,24 +1646,24 @@ this.getCSSKeywordsByProperty = function(propName)
                     list.push.apply(list, keywords);
             }
 
-            cssKeywordMap[name] = list;
+            cssKeywordMap[nodeType][name] = list;
         }
     }
 
-    return propName in cssKeywordMap ? cssKeywordMap[propName] : [];
+    return propName in cssKeywordMap[nodeType] ? cssKeywordMap[nodeType][propName] : [];
 };
 
-this.getCSSPropertyNames = function()
+this.getCSSPropertyNames = function(nodeType)
 {
-    if (!cssPropNames)
+    if (!cssPropNames[nodeType])
     {
-        cssPropNames = [];
+        cssPropNames[nodeType] = [];
 
-        for (var name in this.cssInfo)
-            cssPropNames.push(name);
+        for (var name in this.cssInfo[nodeType]) 
+            cssPropNames[nodeType].push(name);
     }
 
-    return cssPropNames;
+    return cssPropNames[nodeType];
 };
 
 this.isColorKeyword = function(keyword)
@@ -1687,13 +1687,13 @@ this.isColorKeyword = function(keyword)
     return cssColorNames.indexOf(keyword.toLowerCase()) != -1;
 };
 
-this.isImageRule = function(rule)
+this.isImageRule = function(nodeType,rule)
 {
     if (!imageRules)
     {
         imageRules = [];
 
-        for (var i in this.cssInfo)
+        for (var i in this.cssInfo[nodeType])
         {
             var r = i.toLowerCase();
             var suffix = "image";
@@ -1847,6 +1847,16 @@ var getElementType = this.getElementType = function(node)
         return 'xhtml';
     else if (isElementHTML(node))
         return 'html';
+}
+
+var getElementSimpleType = this.getElementSimpleType = function(node)
+{
+    if (isElementSVG(node))
+        return 'svg';
+    else if (isElementMathML(node))
+        return 'mathml';
+    else 
+    	return 'html';
 }
 
 var isElementHTML = this.isElementHTML = function(node)
@@ -5977,8 +5987,8 @@ this.domConstantMap =
     "SVG_ZOOMANDPAN_MAGNIFY": 1,
     "SVG_ZOOMANDPAN_UNKNOWN": 1
 };
-
-this.cssInfo =
+this.cssInfo = {};
+this.cssInfo.html =
 {
     "background": ["bgRepeat", "bgAttachment", "bgPosition", "color", "systemColor", "none"],
     "background-attachment": ["bgAttachment"],
@@ -6140,67 +6150,67 @@ this.cssInfo =
     "-moz-transform-origin": ["bgPosition"]
 };
 
-var svgCSSInfo = {
- 'alignment-baseline': ["auto","baseline","before-edge","text-before-edge","middle","central","after-edge","text-after-edge","ideographic","alphabetic","hanging","mathematical","inherit",],
- 'baseline-shift': ["baseline","sub","super","inherit",],
- 'clip': ["auto","inherit",],
- 'clip-path': ["none","inherit",],
- 'clip-rule': ["nonzero","evenodd","inherit",],
- 'color': ["inherit",],
- 'color-interpolation': ["auto","sRGB","linearRGB","inherit",],
- 'color-interpolation-filters': ["auto","sRGB","linearRGB","inherit",],
- 'color-profile': ["auto","sRGB","inherit",],
- 'color-rendering': ["auto","optimizeSpeed","optimizeQuality","inherit",],
- 'cursor': ["crosshair","default","pointer","move","e-resize","ne-resize","nw-resize","n-resize","se-resize","sw-resize","s-resize","w-resize","text","wait","help ] ]","inherit",],
- 'direction': ["ltr","rtl","inherit",],
- 'display': ["inline","block","list-item","run-in","compact","marker","table","inline-table","table-row-group","table-header-group","table-footer-group","table-row","table-column-group","table-column","table-cell","table-caption","none","inherit",],
- 'dominant-baseline': ["auto","use-script","no-change","reset-size","ideographic","alphabetic","hanging","mathematical","central","middle","text-after-edge","text-before-edge","inherit",],
- 'enable-background': ["accumulate","inherit",],
- 'fill': [],
- 'fill-opacity': ["inherit",],
- 'fill-rule': ["nonzero","evenodd","inherit",],
- 'filter': ["none","inherit",],
- 'flood-color': ["currentColor","inherit",],
- 'flood-opacity': ["inherit",],
- 'font': ["[ [ 'font-style'","","'font-variant'","","'font-weight' ]? 'font-size' [ / 'line-height' ]? 'font-family' ]","caption","icon","menu","message-box","small-caption","status-bar","inherit",],
- 'font-family': ["inherit",],
- 'font-size': ["inherit",],
- 'font-size-adjust': ["none","inherit",],
- 'font-stretch': ["normal","wider","narrower","ultra-condensed","extra-condensed","condensed","semi-condensed","semi-expanded","expanded","extra-expanded","ultra-expanded","inherit",],
- 'font-style': ["normal","italic","oblique","inherit",],
- 'font-variant': ["normal","small-caps","inherit",],
- 'font-weight': ["normal","bold","bolder","lighter","100","200","300","400","500","600","700","800","900","inherit",],
- 'glyph-orientation-horizontal': ["inherit",],
- 'glyph-orientation-vertical': ["auto","inherit",],
- 'image-rendering': ["auto","optimizeSpeed","optimizeQuality","inherit",],
- 'kerning': ["auto","inherit",],
- 'letter-spacing': ["normal","inherit",],
- 'lighting-color': ["currentColor","inherit",],
- 'marker': ["see individual properties",],
- 'marker-end': ["none","inherit",],
- 'mask': ["none","inherit",],
- 'opacity': ["inherit",],
- 'overflow': ["visible","hidden","scroll","auto","inherit",],
- 'pointer-events': ["visiblePainted","visibleFill","visibleStroke","visible","painted","fill","stroke","all","none","inherit",],
- 'shape-rendering': ["auto","optimizeSpeed","crispEdges","geometricPrecision","inherit",],
- 'stop-color': ["currentColor","inherit",],
- 'stop-opacity': ["inherit",],
- 'stroke': [],
- 'stroke-dasharray': ["none","inherit",],
- 'stroke-dashoffset': ["inherit",],
- 'stroke-linecap': ["butt","round","square","inherit",],
- 'stroke-linejoin': ["miter","round","bevel","inherit",],
- 'stroke-miterlimit': ["inherit",],
- 'stroke-opacity': ["inherit",],
- 'stroke-width': ["inherit",],
- 'text-anchor': ["start","middle","end","inherit",],
- 'text-decoration': ["none","[ underline","","overline","","line-through","","blink ]","inherit",],
- 'text-rendering': ["auto","optimizeSpeed","optimizeLegibility","geometricPrecision","inherit",],
- 'unicode-bidi': ["normal","embed","bidi-override","inherit",],
- 'visibility': ["visible","hidden","collapse","inherit",],
- 'word-spacing': ["normal","inherit",],
- 'writing-mode': ["lr-tb","rl-tb","tb-rl","lr","rl","tb","inherit",],
- };
+this.cssInfo.svg = {
+    "alignment-baseline": ["svgAlignmentBaseline"],
+    "baseline-shift": ["baselineShift"],
+    "clip": ["auto"],
+    "clip-path": ["none"],
+    "clip-rule": ["clipRule"],
+    "color": ["color"],
+    "color-interpolation": ["colorInterpolation"],
+    "color-interpolation-filters": ["colorInterpolation"],
+    "color-profile": ["colorProfile"],
+    "color-rendering": ["colorRendering"],
+    "cursor": ["cursor"],
+    "direction": ["direction"],
+    "display": ["display"],
+    "dominant-baseline": ["dominantBaseline"],
+    "enable-background": ["accumulate"],
+    "fill": ["clipRule"],
+    "fill-opacity": [],
+    "fill-rule": ["clipRule"],
+    "filter": ["none"],
+    "flood-color": ["currentColor"],
+    "flood-opacity": [],
+    "font": ["fontStyle","fontVariant","fontWeight"],
+    "font-family": ["fontFamily"],
+    "font-size": ["fontSize"],
+    "font-size-adjust": [],
+    "font-stretch": ["fontStretch"],
+    "font-style": ["fontStyle"],
+    "font-variant": ["fontVariant"],
+    "font-weight": ["fontWeight"],
+    "glyph-orientation-horizontal": [],
+    "glyph-orientation-vertical": ["auto"],
+    "image-rendering": ["imageRendering"],
+    "kerning": ["auto"],
+    "letter-spacing": ["normal"],
+    "lighting-color": ["currentColor"],
+    "marker": ["none"],
+    "marker-end": ["none"],
+    "mask": ["none"],
+    "opacity": [],
+    "overflow": ["auto","svgOverflow"],
+    "pointer-events": ["pointerEvents","none"],
+    "shape-rendering": ["auto","shapeRendering"],
+    "stop-color": ["currentColor"],
+    "stop-opacity": [],
+    "stroke": [],
+    "stroke-dasharray": ["none"],
+    "stroke-dashoffset": [],
+    "stroke-linecap": ["strokeLinecap"],
+    "stroke-linejoin": ["strokeLinejoin"],
+    "stroke-miterlimit": [],
+    "stroke-opacity": [],
+    "stroke-width": [],
+    "text-anchor": ["mozBoxPack"],
+    "text-decoration": ["none","textDecoration"],
+    "text-rendering": ["none","textRendering"],
+    "unicode-bidi": ["unicodeBidi"],
+    "visibility": ["visibility"],
+    "word-spacing": ["normal"],
+    "writing-mode": ["writingMode"]
+};
 
 
 this.inheritedStyleNames =
@@ -6938,6 +6948,150 @@ this.cssKeywords =
         "normal",
         "break-word",
         "inherit"
+    ],
+    
+    // start SVG specific
+    
+    "alignmentBaseline": 
+    [
+        "auto",
+        "baseline",
+        "before-edge",
+        "text-before-edge",
+        "middle",
+        "central",
+        "after-edge",
+        "text-after-edge",
+        "ideographic",
+        "alphabetic",
+        "hanging",
+        "mathematical"
+    ],
+    
+    "baselineShift":
+    [
+        "baseline",
+        "sub",
+        "super"
+    ],
+    
+    "colorInterpolation":
+    [
+        "auto",
+        "sRGB",
+        "linearRGB"
+    ],
+    
+    "clipRule":
+    [
+        "nonzero",
+        "evenodd"
+    ],
+    
+    "colorProfile":
+    [
+        "auto",
+        "sRGB"
+    ],
+    
+    "colorRendering":
+    [ 
+        "auto",
+        "optimizeSpeed",
+        "optimizeQuality"
+    ],
+    
+    "dominantBaseline":
+    [
+        "auto",
+        "use-script",
+        "no-change",
+        "reset-size",
+        "ideographic",
+        "alphabetic",
+        "hanging",
+        "mathematical",
+        "central",
+        "middle",
+        "text-after-edge",
+        "text-before-edge"
+    ],
+    
+    "accumulate":
+    [
+        "accumulate"
+    ],
+    
+    "fontStretch":
+    [
+        "normal",
+        "wider",
+        "narrower",
+        "ultra-condensed",
+        "extra-condensed",
+        "condensed",
+        "semi-condensed",
+        "semi-expanded",
+        "expanded",
+        "extra-expanded",
+        "ultra-expanded"
+    ],
+    
+    "imageRendering":
+    [
+        "auto",
+        "optimizeSpeed",
+        "optimizeQuality"
+    ],
+    
+    "svgOverflow":
+    [
+        "visible",
+        "hidden",
+        "scroll"
+    ],
+    
+    "pointerEvents":
+    [
+        "visiblePainted",
+        "visibleFill",
+        "visibleStroke",
+        "visible",
+        "painted",
+        "fill",
+        "stroke",
+        "all"
+    ],
+    
+    "shapeRendering":
+    [
+        "optimizeSpeed",
+        "crispEdges",
+        "geometricPrecision"
+    ],
+    
+    "strokeLinecap":
+    [
+        "butt",
+        "round",
+        "square"
+    ],
+    
+    "strokeLinejoin":
+    [
+        "miter",
+        "round",
+        "bevel"
+    ],
+
+    "writingMode":
+    [
+        "lr-tb",
+        "rl-tb",
+        "tb-rl",
+        "lr",
+        "rl",
+        "tb"
     ]
 };
 
