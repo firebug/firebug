@@ -5471,6 +5471,9 @@ Firebug.NetMonitor.BreakpointRep = domplate(Firebug.Rep,
         if (!panel)
             return;
 
+        // xxxsz: Needs a better way to update display of breakpoint than invalidate the whole panel's display
+        panel.context.invalidatePanels("breakpoints"); 
+
         panel.enumerateRequests(function(file)
         {
             if (file.getFileURL() == bp.href)

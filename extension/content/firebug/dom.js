@@ -1961,6 +1961,9 @@ Firebug.DOMModule.BreakpointRep = domplate(Firebug.Rep,
         var domPanel = context.getPanel("dom", true);
         if (domPanel)
         {
+            // xxxsz: Needs a better way to update display of breakpoint than invalidate the whole panel's display
+            domPanel.context.invalidatePanels("breakpoints"); 
+
             var row = findRow(domPanel.panelNode, bp.object);
             if (row)
                 row.setAttribute("disabledBreakpoint", bp.checked ? "false" : "true");

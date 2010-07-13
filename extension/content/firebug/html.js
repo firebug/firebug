@@ -2121,11 +2121,19 @@ Firebug.HTMLModule.BreakpointRep = domplate(Firebug.Rep,
     onEnable: function(event)
     {
         var checkBox = event.target;
-        if (hasClass(checkBox, "breakpointCheckbox"))
-        {
-            var bp = getAncestorByClass(checkBox, "breakpointRow").repObject;
-            bp.checked = checkBox.checked;
-        }
+        if (!hasClass(checkBox, "breakpointCheckbox"))
+            return;
+
+        var bpPanel = Firebug.getElementPanel(event.target);
+        var context = bpPanel.context;
+
+        var panel = context.getPanel("html", true);
+        if (panel)
+            // xxxsz: Needs a better way to update display of breakpoint than invalidate the whole panel's display
+            panel.context.invalidatePanels("breakpoints"); 
+
+        var bp = getAncestorByClass(checkBox, "breakpointRow").repObject;
+        bp.checked = checkBox.checked;
     },
 
     supportsObject: function(object, type)
