@@ -279,8 +279,16 @@
     font-weight: bold;
 }
 
-.breakpointRow[aria-checked="false"] .breakpointName {
-    color: #888888;
+.breakpointRow[aria-checked="false"] > .breakpointBlockHead > *,
+.breakpointRow[aria-checked="false"] > .breakpointCode {
+    opacity: 0.5;
+}
+
+.breakpointRow[aria-checked="false"] .breakpointCheckbox,
+.breakpointRow[aria-checked="false"] .objectLink-sourceLink,
+.breakpointRow[aria-checked="false"] .closeButton,
+.breakpointRow[aria-checked="false"] .breakpointMutationType {
+    opacity: 1.0 !important;
 }
 
 .breakpointCode {
@@ -291,10 +299,6 @@
     border-bottom: 1px solid #D7D7D7;
     font-family: Monaco, monospace;
     color: DarkGreen;
-}
-
-.breakpointRow[aria-checked="false"] .breakpointCode {
-    color: #99c199;
 }
 
 .breakpointCondition {
