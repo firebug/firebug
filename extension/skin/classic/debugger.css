@@ -245,6 +245,10 @@
 
 /************************************************************************************************/
 
+.breakpointsGroupListBox {
+  overflow: hidden;
+}
+
 .breakpointBlockHead {
     position: relative;
     padding-top: 4px;
