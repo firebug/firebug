@@ -705,7 +705,7 @@ var fbs =
 
             errorBreakpoints.splice(index, 1);
             dispatch(debuggers, "onToggleErrorBreakpoint", [url, lineNo, false, debuggr]);
-            fbs.saveBreakpoints(sourceFile.href);  // after every call to onToggleBreakpoint
+            fbs.saveBreakpoints(url);  // after every call to onToggleBreakpoint
         }
     },
 
