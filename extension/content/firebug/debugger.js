@@ -735,6 +735,7 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
             {
                 delete context.stopped;
                 delete context.stoppedFrame;
+                delete context.currentFrame;
                 context.executingSourceFile = null;
                 delete context.breakLineNumber;
 
@@ -882,11 +883,9 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
 
     injectConsole: function(context, frameWin)
     {
-        if (context.notificationSourceFile)
-        {
-            delete context.sourceFileMap[context.notificationSourceFile.href];
-            delete context.notificationSourceFile;
-        }
+        if (context.jsDebugInactiveDuringLoad)
+            delete context.jsDebugInactiveDuringLoad;
+
         if (Firebug.Console.isAlwaysEnabled())
         {
             // This is how the console is injected ahead of JS running on the page
@@ -2871,6 +2870,16 @@ Firebug.ScriptPanel.prototype = extend(Firebug.SourceBoxPanel,
         clearNode(this.panelNode);
     },
 
+    warningTag:
+        DIV({"class": "disabledPanelBox"},
+            H1({"class": "disabledPanelHead"},
+                SPAN("$pageTitle")
+            ),
+            P({"class": "disabledPanelDescription", style: "margin-top: 15px;"},
+                SPAN("$suggestion")
+            )
+        ),
+
     show: function(state)
     {
         var enabled = Firebug.Debugger.isAlwaysEnabled();
@@ -2890,9 +2899,17 @@ Firebug.ScriptPanel.prototype = extend(Firebug.SourceBoxPanel,
 
         if (enabled)
         {
-            //Firebug.DisabledPanelPage.hide(this);
-
-            if (this.context.loaded)
+            if (this.context.jsDebugInactiveDuringLoad)
+            {
+                // Fill the panel node with a warning, the take it out if the user selects a sourceFile
+                var args = {
+                        pageTitle: $STR("Script Panel was inactive during page load"),
+                        suggestion: $STR("Reload to see all sources")
+                }
+                this.activeWarningTag = this.warningTag.replace(args, this.panelNode, this);
+                this.location = null;
+            }
+            else if (this.context.loaded)
             {
                 if (!this.restored)  // this work should be done in loadedContext but on the panel
                 {
@@ -3093,6 +3110,17 @@ Firebug.ScriptPanel.prototype = extend(Firebug.SourceBoxPanel,
         if (!updatedSourceFile)
             return;
 
+        if (this.activeWarningTag)
+        {
+            clearNode(this.panelNode);
+            delete this.activeWarningTag;
+
+            // The user was seeing the warning, but selected a file to show in the script panel.
+            // The removal of the warning leaves the panel without a clientHeight, so
+            //  the old sourcebox will be out of sync. Just remove it and start over.
+            this.removeAllSourceBoxes();
+        }
+
         this.showSourceFile(updatedSourceFile);
         dispatch(this.fbListeners, "onUpdateScriptLocation", [this, updatedSourceFile]);
     },
@@ -3256,11 +3284,7 @@ Firebug.ScriptPanel.prototype = extend(Firebug.SourceBoxPanel,
             }
         });
 
-        var notificationURL = "firebug:// Warning. Script Panel was inactive during page load/Reload to see all sources";
-        var dummySourceFile = new Firebug.NoScriptSourceFile(context, notificationURL);
-        context.sourceCache.store(notificationURL, 'reload to see all source files');
-        context.addSourceFile(dummySourceFile);
-        context.notificationSourceFile = dummySourceFile;
+        context.jsDebugInactiveDuringLoad = true;
 
         if (FBTrace.DBG_SOURCEFILES)
         {

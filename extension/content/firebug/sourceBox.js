@@ -130,7 +130,12 @@ Firebug.SourceBoxPanel = extend(SourceBoxPanelBase,
 
     onTextSizeChange: function(zoom)
     {
-        this.sourceBoxes = {};  // clear so we start fresh with new text sizes
+        this.removeAllSourceBoxes();  // clear so we start fresh with new text sizes
+    },
+    
+    removeAllSourceBoxes: function()
+    {
+    	  this.sourceBoxes = {};   
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
@@ -540,7 +545,7 @@ Firebug.SourceBoxPanel = extend(SourceBoxPanelBase,
         {
             this.clearSourceBox(sourceBox);
         }
-        else if (sourceBox.scrollTop === sourceBox.lastScrollTop && sourceBox.clientHeight === sourceBox.lastClientHeight)
+        else if (sourceBox.scrollTop === sourceBox.lastScrollTop && sourceBox.clientHeight && sourceBox.clientHeight === sourceBox.lastClientHeight)
         {
             if (sourceBox.firstRenderedLine <= viewRange.firstLine && sourceBox.lastRenderedLine >= viewRange.lastLine)
             {
