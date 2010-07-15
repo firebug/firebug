@@ -109,19 +109,19 @@
     </keyset>
 
     <popupset id="mainPopupSet">
-        <popup id="fbContextMenu" onpopupshowing="return FirebugChrome.onContextShowing(event);">
+        <menupopup id="fbContextMenu" onpopupshowing="return FirebugChrome.onContextShowing(event);">
             <menuitem label="&copyCmd.label;" accesskey="&copyCmd.accesskey;" command="cmd_copy"/>
-        </popup>
-        <popup id="fbInlineEditorPopup" />
+        </menupopup>
+        <menupopup id="fbInlineEditorPopup" />
         <tooltip id="fbTooltip" class="fbURLMenuItem"
             onpopupshowing="return FirebugChrome.onTooltipShowing(event);"/>
-        <popup id="fbQuickInfoPanel" width="210" noautohide="true"
+        <menupopup id="fbQuickInfoPanel" width="210" noautohide="true"
             onmousedown="Firebug.Inspector.quickInfoBoxDragStart();"
             onmousemove="Firebug.Inspector.quickInfoBoxDrag(event);"
             onmouseup="Firebug.Inspector.quickInfoBoxDragEnd();">
             <vbox></vbox>
-        </popup>
-        <popup id="fbNavigationHistoryMenu"
+        </menupopup>
+        <menupopup id="fbNavigationHistoryMenu"
             oncommand="Firebug.NavigationHistory.onHistoryCommand(event, FirebugContext)"
             onpopupshowing="return Firebug.NavigationHistory.onPopupShowing(this, FirebugContext)" />
         <panel id="fbCommandLineCompletionList" class="fbCommandLineCompletionPanel" noautohide="true" noautofocus="true">
@@ -413,9 +413,9 @@
                 </box>
             </panelBar>
 
-            <popup id="inspectorPopup" style="background: transparent; border: 2px solid red">
+            <menupopup id="inspectorPopup" style="background: transparent; border: 2px solid red">
                 <label value="inspect"/>
-            </popup>
+            </menupopup>
         </box>
 
         <!-- CommandLine preview (available on other panels) -->
