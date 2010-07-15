@@ -385,7 +385,7 @@ Firebug.SourceFile.NestedScriptAnalyzer.prototype =
     // Interpret frame to give fn(args)
     getFunctionDescription: function(script, context, frame)
     {
-        if (frame)
+        if (frame && frame.isValid)
         {
             var name = frame.name;
             var args = FBL.getFunctionArgValues(frame);
@@ -578,7 +578,7 @@ Firebug.EventSourceFile.OuterScriptAnalyzer.prototype =
     // Interpret frame to give fn(args)
     getFunctionDescription: function(script, context, frame)
     {
-        if (frame)
+        if (frame & frame.isValid)
         {
             var args = FBL.getFunctionArgValues(frame);
             var name = getFunctionName(script, context, frame, true);

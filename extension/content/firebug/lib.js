@@ -1659,7 +1659,7 @@ this.getCSSPropertyNames = function(nodeType)
     {
         cssPropNames[nodeType] = [];
 
-        for (var name in this.cssInfo[nodeType]) 
+        for (var name in this.cssInfo[nodeType])
             cssPropNames[nodeType].push(name);
     }
 
@@ -1855,8 +1855,8 @@ var getElementSimpleType = this.getElementSimpleType = function(node)
         return 'svg';
     else if (isElementMathML(node))
         return 'mathml';
-    else 
-    	return 'html';
+    else
+        return 'html';
 }
 
 var isElementHTML = this.isElementHTML = function(node)
@@ -2595,6 +2595,10 @@ this.getStackTrace = deprecated("name change for self-documentation", this.getCo
 
 this.getCorrectedStackTrace = function(frame, context)
 {
+    try
+    {
+
+
     var trace = new this.StackTrace();
 
     for (; frame && frame.isValid; frame = frame.callingFrame)
@@ -2623,6 +2627,11 @@ this.getCorrectedStackTrace = function(frame, context)
         trace.frames[50] = new this.StackFrame(context, excuse, null, excuse, 0, []);
     }
 
+    }
+    catch (exc)
+    {
+        FBTrace.sysout("getCorrectedStackTrace FAILS "+exc, exc);
+    }
     return trace;
 };
 
@@ -2919,7 +2928,7 @@ this.guessFunctionNameFromLines = function(url, lineNo, sourceCache)
 
 this.getFunctionArgValues = function(frame)
 {
-    if (frame.scope.jsClassName == "Call")
+    if (frame.isValid && frame.scope.jsClassName == "Call")
         var values = this.getArgumentsFromCallScope(frame);
     else
         var values = this.getArgumentsFromObjectScope(frame);
@@ -6949,10 +6958,10 @@ this.cssKeywords =
         "break-word",
         "inherit"
     ],
-    
+
     // start SVG specific
-    
-    "alignmentBaseline": 
+
+    "alignmentBaseline":
     [
         "auto",
         "baseline",
@@ -6967,40 +6976,40 @@ this.cssKeywords =
         "hanging",
         "mathematical"
     ],
-    
+
     "baselineShift":
     [
         "baseline",
         "sub",
         "super"
     ],
-    
+
     "colorInterpolation":
     [
         "auto",
         "sRGB",
         "linearRGB"
     ],
-    
+
     "clipRule":
     [
         "nonzero",
         "evenodd"
     ],
-    
+
     "colorProfile":
     [
         "auto",
         "sRGB"
     ],
-    
+
     "colorRendering":
-    [ 
+    [
         "auto",
         "optimizeSpeed",
         "optimizeQuality"
     ],
-    
+
     "dominantBaseline":
     [
         "auto",
@@ -7016,12 +7025,12 @@ this.cssKeywords =
         "text-after-edge",
         "text-before-edge"
     ],
-    
+
     "accumulate":
     [
         "accumulate"
     ],
-    
+
     "fontStretch":
     [
         "normal",
@@ -7036,21 +7045,21 @@ this.cssKeywords =
         "extra-expanded",
         "ultra-expanded"
     ],
-    
+
     "imageRendering":
     [
         "auto",
         "optimizeSpeed",
         "optimizeQuality"
     ],
-    
+
     "svgOverflow":
     [
         "visible",
         "hidden",
         "scroll"
     ],
-    
+
     "pointerEvents":
     [
         "visiblePainted",
@@ -7062,21 +7071,21 @@ this.cssKeywords =
         "stroke",
         "all"
     ],
-    
+
     "shapeRendering":
     [
         "optimizeSpeed",
         "crispEdges",
         "geometricPrecision"
     ],
-    
+
     "strokeLinecap":
     [
         "butt",
         "round",
         "square"
     ],
-    
+
     "strokeLinejoin":
     [
         "miter",
