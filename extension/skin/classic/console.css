@@ -235,6 +235,10 @@
     opacity: 0.1;
 }
 
+.errorUnbreakable {
+    display: none;
+}
+
 .hasBreakSwitch .errorBreak {
     display: inline;
 }

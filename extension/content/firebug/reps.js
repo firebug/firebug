@@ -1575,7 +1575,7 @@ this.ErrorMessage = domplate(Firebug.Rep,
             DIV({"class": "errorTrace", role : 'presentation'}),
             TAG("$object|getObjectsTag", {object: "$object.objects"}),
             DIV({"class": "errorSourceBox errorSource-$object|getSourceType focusRow subLogRow", role : "listitem"},
-                IMG({"class": "errorBreak a11yFocus", src:"blank.gif", role : 'checkbox', 'aria-checked':"$object|hasErrorBreak", title: $STR("console.Break On This Error")}),
+                IMG({"class": "$object|isBreakableError a11yFocus", src:"blank.gif", role : 'checkbox', 'aria-checked':"$object|hasErrorBreak", title: $STR("console.Break On This Error")}),
                 A({"class": "errorSource a11yFocus", title: "$object|getSourceTitle"}, "$object|getSource"),
                 TAG(this.SourceLink.tag, {object: "$object|getSourceLink"})
             )
@@ -1601,6 +1601,11 @@ this.ErrorMessage = domplate(Firebug.Rep,
     hasBreakSwitch: function(error)
     {
         return error.href && error.lineNo > 0;
+    },
+
+    isBreakableError: function(error)
+    {
+        return (error.category === "js") ? 'errorBreak' : 'errorUnbreakable';
     },
 
     hasErrorBreak: function(error)
