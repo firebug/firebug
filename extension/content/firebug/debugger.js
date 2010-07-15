@@ -3664,7 +3664,7 @@ CallstackPanel.prototype = extend(Firebug.Panel,
         if (object instanceof jsdIStackFrame || object instanceof StackFrame)
             this.showStackFrame(object);
 
-        this.showReferents(object);
+        //this.showReferents(object);
     },
 
     refresh: function()
