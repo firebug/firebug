@@ -61,28 +61,6 @@ Firebug.CommandLine.Preview = extend(Firebug.Module,
         var isConsole = (panel && panel.name == "console");
         var largeCmd = Firebug.largeCommandLine;
 
-        if (largeCmd && isConsole)
-        {
-            collapse(chrome.$("fbPanelSplitter"), false);
-            collapse(chrome.$("fbSidePanelDeck"), false);
-            collapse(chrome.$("fbCommandBox"), true);
-            chrome.$("fbSidePanelDeck").selectedPanel = chrome.$("fbLargeCommandBox");
-        }
-
-        // Update visibility of the console-preview (hidden if the Console panel is selected,
-        // but the console button in toolbar still indicates that the preview should be opened
-        // in another panels).
-        if (isConsole)
-        {
-            collapse(chrome.$("fbCommandPreview"), true);
-            collapse(chrome.$("fbCommandPreviewSplitter"), true);
-            collapse(chrome.$("fbCommandBox"), largeCmd);
-        }
-        else
-        {
-            this.setVisible(visible);
-        }
-
         // Disable the console preview button (Firebug toolbar) if the Console panel
         // is disabled or selected.
         var consolePanelType = Firebug.getPanelType("console");
@@ -91,6 +69,28 @@ Firebug.CommandLine.Preview = extend(Firebug.Module,
             disabled = "true";
 
         chrome.$("fbCommandPreviewButton").setAttribute("disabled", disabled);
+
+        if ((largeCmd && isConsole) || !panel)
+        {
+            collapse(chrome.$("fbPanelSplitter"), panel ? false : true);
+            collapse(chrome.$("fbSidePanelDeck"), panel ? false : true);
+            collapse(chrome.$("fbCommandBox"), true);
+            chrome.$("fbSidePanelDeck").selectedPanel = chrome.$("fbLargeCommandBox");
+        }
+
+        // Update visibility of the console-preview (hidden if the Console panel is selected,
+        // but the console button in toolbar still indicates that the preview should be opened
+        // in another panels).
+        if (isConsole || !panel || disabled == "true")
+        {
+            collapse(chrome.$("fbCommandPreview"), true);
+            collapse(chrome.$("fbCommandPreviewSplitter"), true);
+            collapse(chrome.$("fbCommandBox"), largeCmd || disabled == "true");
+        }
+        else
+        {
+            this.setVisible(visible);
+        }
 
         // Make sure the console panel is attached to the proper document
         // (the one used by all panels, or the one used by console preview and available
