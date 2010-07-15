@@ -36,12 +36,12 @@ var httpRequestObserver =
 
         // Get firebug-trace service for logging (the service should be already
         // registered at this moment).
-        Components.utils.import("resource://firebug/firebug-trace-service.js");
+        Components.utils["import"]("resource://firebug/firebug-trace-service.js");
         FBTrace = traceConsoleService.getTracer("extensions.firebug");
 
         // Get firebug-service to listen for suspendFirebug and resumeFirebug events.
         // TODO is this really the way we want to do suspendFirebug?
-        Components.utils.import("resource://firebug/firebug-service.js");
+        Components.utils["import"]("resource://firebug/firebug-service.js");
 
         this.initialize(fbs);
     },
@@ -184,6 +184,25 @@ function safeGetName(request)
     }
 
     return null;
+}
+
+// ************************************************************************************************
+
+// Debugging helper.
+function dumpStack(message)
+{
+    dump(message + "\n");
+
+    for (var frame = Components.stack, i = 0; frame; frame = frame.caller, i++)
+    {
+        if (i < 1)
+            continue;
+
+        var fileName = unescape(frame.filename ? frame.filename : "");
+        var lineNumber = frame.lineNumber ? frame.lineNumber : "";
+
+        dump(fileName + ":" + lineNumber + "\n");
+    }
 }
 
 // ************************************************************************************************
