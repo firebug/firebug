@@ -3742,7 +3742,7 @@ CallstackPanel.prototype = extend(Firebug.Panel,
 
     showReferents: function()
     {
-        // Find obj.fn for the currently executing function
+        // Find obj.functionName for the currently executing function
         // The general case is (expr_for_this).(expr_for_fn)().
         // expr navigates us using names from the scope chain
         delete this.parent;

@@ -18,11 +18,11 @@ top.Firebug.Console.injector =
 
         if (!context.consoleToken)
             return false;
-        
+
         var attachedToken = win.document.getUserData("firebug-Token");
         if (!attachedToken)
             return false;
-        
+
         if (context.consoleToken !== attachedToken)
         {
             Firebug.Console.logFormatted(["Firebug Console token changed!"], FirebugContext, "info");  // XXXTODO NLS
@@ -133,7 +133,7 @@ top.Firebug.Console.injector =
             return;
 
         win.document.setUserData("firebug-Version", Firebug.version, null); // Initialize Firebug version.
-        
+
         context.consoleToken = Math.random();
         win.document.setUserData("firebug-Token", context.consoleToken, null); // Initialize Firebug token
 
@@ -204,12 +204,12 @@ function createConsoleHandler(context, win)
     };
 
     // When raised on our injected element, callback to Firebug and append to console
-    
+
     win.document.addEventListener('firebugAppendConsole', bind(handler.handleEvent, handler), true); // capturing
 
     if (FBTrace.DBG_CONSOLE)
         FBTrace.sysout("consoleInjector FirebugConsoleHandler addEventListener "+handler.handler_name);
-    
+
     return handler;
 }
 
@@ -509,7 +509,7 @@ Firebug.Console.createConsole = function createConsole(context, win)
                     break;
 
                 // command line
-                var fn = frames[oldest - i].fn + "";
+                var fn = frames[oldest - i].getFunctionName() + "";
                 if (fn && (fn.indexOf("_firebugEvalEvent") != -1))
                     break;
             }

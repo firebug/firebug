@@ -2593,47 +2593,53 @@ this.getCurrentJSDStackDump = function()
 
 this.getStackTrace = deprecated("name change for self-documentation", this.getCorrectedStackTrace);
 
+/*
+ * Converts a Mozilla stack frame to a frameXB
+ */
 this.getCorrectedStackTrace = function(frame, context)
 {
     try
     {
+        var trace = new this.StackTrace();
 
-
-    var trace = new this.StackTrace();
-
-    for (; frame && frame.isValid; frame = frame.callingFrame)
-    {
-        if (!(Firebug.filterSystemURLs && this.isSystemURL(FBL.normalizeURL(frame.script.fileName))))
+        for (; frame && frame.isValid; frame = frame.callingFrame)
         {
-            var stackFrame = this.getStackFrame(frame, context);
-            if (context.currentFrame && context.currentFrame === frame)
-                stackFrame.isCurrent = true;
+            if (!(Firebug.filterSystemURLs && this.isSystemURL(FBL.normalizeURL(frame.script.fileName))))
+            {
+                var stackFrame = this.getStackFrame(frame, context);
+                if (context.currentFrame && context.currentFrame === frame)
+                    stackFrame.isCurrent = true;
 
-            if (stackFrame)
-                trace.frames.push(stackFrame);
+                if (stackFrame)
+                    trace.frames.push(stackFrame);
+            }
+            else
+            {
+                if (FBTrace.DBG_STACK)
+                    FBTrace.sysout("lib.getCorrectedStackTrace isSystemURL frame.script.fileName "+frame.script.fileName+"\n");
+            }
         }
-        else
+
+        if (trace.frames.length > 100)  // TODO in the loop above
         {
-            if (FBTrace.DBG_STACK)
-                FBTrace.sysout("lib.getCorrectedStackTrace isSystemURL frame.script.fileName "+frame.script.fileName+"\n");
+            var originalLength = trace.frames.length;
+            trace.frames.splice(50, originalLength - 100);
+            var excuse = "(eliding "+(originalLength - 100)+" frames)";
+            trace.frames[50] = new this.StackFrame(context, excuse, null, excuse, 0, []);
         }
-    }
-
-    if (trace.frames.length > 100)
-    {
-        var originalLength = trace.frames.length;
-        trace.frames.splice(50, originalLength - 100);
-        var excuse = "(eliding "+(originalLength - 100)+" frames)";
-        trace.frames[50] = new this.StackFrame(context, excuse, null, excuse, 0, []);
-    }
 
     }
     catch (exc)
     {
-        FBTrace.sysout("getCorrectedStackTrace FAILS "+exc, exc);
+        if (FBTrace.DBG_ERRORS)
+            FBTrace.sysout("getCorrectedStackTrace FAILS "+exc, exc);
     }
     return trace;
 };
+
+/*
+ * Converts from Mozilla stack frame to frameXB
+ */
 
 this.getStackFrame = function(frame, context)
 {
@@ -2653,10 +2659,14 @@ this.getStackFrame = function(frame, context)
 
             var lineNo = analyzer.getSourceLineFromFrame(context, frame);
             var fncSpec = analyzer.getFunctionDescription(frame.script, context, frame);
-            if (!fncSpec.name)
-                fncSpec.name = frame.script.functionName;
+            if (!fncSpec.name || fncSpec.name === "anonymous")
+            {
+                fncSpec.name =  this.guessFunctionName(url, frame.script.baseLineNumber, context);
+                if (!fncSpec.name)
+                    fncSpec.name = "?";
+            }
 
-            if (FBTrace.DBG_STACK) FBTrace.sysout("lib.getStackFrame "+fncSpec.name, {sourceFile: sourceFile, script: frame.script, fncSpec: fncSpec});
+            if (FBTrace.DBG_STACK) FBTrace.sysout("lib.getStackFrame "+fncSpec.name, {sourceFile: sourceFile, script: frame.script, fncSpec: fncSpec, analyzer: analyzer});
             return new this.StackFrame(context, fncSpec.name, frame, url, lineNo, fncSpec.args, frame.pc, sourceFile);
         }
         else
@@ -2878,7 +2888,7 @@ this.getFunctionName = function(script, context, frame, noArgs)
             if (functionSpec.name)
                 name = functionSpec.name + (noArgs ? "" : "("+functionSpec.args.join(',')+")");
         }
-        if (!name)
+        if (!name || name == "anonymous")
         {
             if (FBTrace.DBG_STACK) FBTrace.sysout("getFunctionName no analyzer, "+script.baseLineNumber+"@"+script.fileName+"\n");
             name =  this.guessFunctionName(FBL.normalizeURL(script.fileName), script.baseLineNumber, context);
@@ -2926,6 +2936,7 @@ this.guessFunctionNameFromLines = function(url, lineNo, sourceCache)
     return "(?)";
 };
 
+// Mozilla
 this.getFunctionArgValues = function(frame)
 {
     if (frame.isValid && frame.scope.jsClassName == "Call")
@@ -2939,6 +2950,7 @@ this.getFunctionArgValues = function(frame)
     return values;
 }
 
+// Mozilla
 this.getArgumentsFromObjectScope = function(frame)
 {
     var argNames = frame.script.getParameterNames();
@@ -4901,12 +4913,14 @@ this.traceToString = function(trace)                /*@explore*/
     str += "\n<bottom>";                            /*@explore*/
     return str;                                     /*@explore*/
 }
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 
-this.StackFrame = function(context, fn, nativeFrame, href, lineNo, args, pc, sourceFile)
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+// frameXB, cross-browser frame
+
+this.StackFrame = function(context, functionName, nativeFrame, href, lineNo, args, pc, sourceFile)
 {
     this.context = context;
-    this.fn = fn;
+    this.fn = functionName;
     this.href = href;
     this.line = lineNo;
     this.args = args;
@@ -4920,6 +4934,11 @@ this.StackFrame = function(context, fn, nativeFrame, href, lineNo, args, pc, sou
 
 this.StackFrame.prototype =
 {
+    getFunctionName: function()
+    {
+        return this.fn;
+    },
+
     toString: function()
     {
         // XXXjjb analyze args and fn?
@@ -4941,8 +4960,9 @@ this.StackFrame.prototype =
         if (FBTrace.DBG_STACK)
             FBTrace.sysout("StackFrame destroyed:"+this.uid+"\n");
         this.script = null;
-        this.fn = null;
+        this.nativeFrame = null;
     },
+
     signature: function()
     {
         return this.script.tag +"." + this.pc;
