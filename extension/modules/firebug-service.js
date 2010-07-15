@@ -900,7 +900,15 @@ var fbs =
             if ( FBTrace.DBG_FBS_ERRORS )
                 FBTrace.sysout("enableDebugger gets jsd service, isOn:"+jsd.isOn+" initAtStartup:"+jsd.initAtStartup+" now have "+debuggers.length+" debuggers"+" in "+clients.length+" clients");
 
-            jsd.initAtStartup = false;
+            try
+            {
+                // XXXjjb: this throws an exeception in Fx40
+                jsd.initAtStartup = false;
+            }
+            catch (e)
+            {
+                FBTrace.sysout("enableDebugger " + e, e);
+            }
         }
 
         if (!jsd.isOn)
