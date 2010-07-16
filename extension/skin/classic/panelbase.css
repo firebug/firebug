@@ -13,7 +13,7 @@ body {
 
 h1 {
     font-size: 17px;
-    border-bottom: 1px solid threedlightshadow;
+    border-bottom: 1px solid #CCCCCC;
 }
 
 a {
@@ -33,7 +33,7 @@ code {
 /************************************************************************************************/
 
 .jumpHighlight {
-    background-color: #c4f4ff !important;
+    background-color: #C4F4FF !important;
 }
 
 /************************************************************************************************/
