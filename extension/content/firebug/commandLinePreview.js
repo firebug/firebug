@@ -65,7 +65,7 @@ Firebug.CommandLine.Preview = extend(Firebug.Module,
         // is disabled or selected.
         var consolePanelType = Firebug.getPanelType("console");
         var disabled = consolePanelType.prototype.isEnabled() ? "false" : "true";
-        if (isConsole)
+        if (isConsole || !panel)
             disabled = "true";
 
         chrome.$("fbCommandPreviewButton").setAttribute("disabled", disabled);
