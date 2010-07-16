@@ -865,6 +865,8 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
         if (!context)
             return false;
 
+        context.jsDebuggerActive = true;
+
         if (!context.consoleToken)
         {
             var win = frameWin.wrappedJSObject ? frameWin.wrappedJSObject : frameWin;
@@ -883,9 +885,6 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
 
     injectConsole: function(context, frameWin)
     {
-        if (context.jsDebugInactiveDuringLoad)
-            delete context.jsDebugInactiveDuringLoad;
-
         if (Firebug.Console.isAlwaysEnabled())
         {
             // This is how the console is injected ahead of JS running on the page
@@ -904,7 +903,7 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
                 fbs.filterConsoleInjections = false;
             }
             if (FBTrace.DBG_CONSOLE)
-                FBTrace.sysout("debugger.supportsGlobal injectConsole consoleReady:"+consoleReady, frameWin);
+                FBTrace.sysout("debugger.supportsGlobal injectConsole consoleReady:"+consoleReady+" jsDebuggerActive: "+context.jsDebuggerActive, frameWin);
         }
         else
         {
@@ -1954,7 +1953,7 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
 
         context.dynamicURLIndex = 1; // any dynamic urls need to be unique to the context.
 
-        context.debuggerActiveDuringLoad = Firebug.Debugger.isAlwaysEnabled();
+        context.jsDebuggerActive = false;
 
         Firebug.ActivableModule.initContext.apply(this, arguments);
     },
@@ -2899,7 +2898,7 @@ Firebug.ScriptPanel.prototype = extend(Firebug.SourceBoxPanel,
 
         if (enabled)
         {
-            if (this.context.jsDebugInactiveDuringLoad)
+            if (!this.context.jsDebuggerActive)
             {
                 // Fill the panel node with a warning, the take it out if the user selects a sourceFile
                 var args = {
@@ -3283,8 +3282,6 @@ Firebug.ScriptPanel.prototype = extend(Firebug.SourceBoxPanel,
                     FBTrace.sysout("updateScriptFiles "+(scriptSrc?"inclusion":"inline")+" script #"+i+"/"+scripts.length+(added?" adding ":" readded ")+url+" to context="+context.getName()+"\n");
             }
         });
-
-        context.jsDebugInactiveDuringLoad = true;
 
         if (FBTrace.DBG_SOURCEFILES)
         {
