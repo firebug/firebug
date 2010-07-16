@@ -392,6 +392,16 @@ Firebug.PanelActivation = extend(Firebug.Module,
         prefs.removeObserver(Firebug.prefDomain, this, false);
     },
 
+    showPanel: function(browser, panel)
+    {
+        if (FBTrace.DBG_ACTIVATION)
+            FBTrace.sysout("PanelActivation.showPanel; " + (panel ? panel.name : "null panel"));
+
+        // Panel toolbar is not displayed for disabled panels.
+        var chrome = Firebug.chrome;
+        collapse(chrome.$("fbToolbar"), !panel);
+    },
+
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 
     activatePanelTypes: function(panelTypes)
