@@ -1613,7 +1613,11 @@ WatchPanel.prototype = extend(Firebug.DOMBasePanel.prototype,
                     }
                 );
 
-                addMember(frame.scope, "watch", members, expr, value, 0);
+                var scope = this.context.getGlobalScope();
+                if (frame && frame.isValid)
+                    scope = frame.scope;
+
+                addMember(scope, "watch", members, expr, value, 0);
                 FBTrace.sysout("watch.updateSelection "+expr+" = "+value, {expr: expr, value: value, members: members})
             }
         }
@@ -1962,7 +1966,7 @@ Firebug.DOMModule.BreakpointRep = domplate(Firebug.Rep,
         if (domPanel)
         {
             // xxxsz: Needs a better way to update display of breakpoint than invalidate the whole panel's display
-            domPanel.context.invalidatePanels("breakpoints"); 
+            domPanel.context.invalidatePanels("breakpoints");
 
             var row = findRow(domPanel.panelNode, bp.object);
             if (row)
