@@ -2639,6 +2639,13 @@ Firebug.ScriptPanel.prototype = extend(Firebug.SourceBoxPanel,
         var sourceLine = getChildByClass(sourceRow, "sourceLine");
         var condition = fbs.getBreakpointCondition(this.location.href, lineNo);
 
+        if (condition)
+        {
+            var watchPanel = this.context.getPanel("watches", true);
+            watchPanel.removeWatch(condition);
+            watchPanel.rebuild();
+        }
+
         Firebug.Editor.startEditing(sourceLine, condition);
     },
 
