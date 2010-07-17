@@ -1439,7 +1439,16 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
                     if (props.condition)  // issue 1371
                     {
                         var watchPanel = this.ableWatchSidePanel(context);
-                        watchPanel.addWatch(props.condition);
+
+                        if (watchPanel)
+                        {
+                            watchPanel.addWatch(props.condition);
+                        }
+                        else
+                        {
+                            if (FBTrace.DBG_ERRORS)
+                                FBTrace.sysout("onToggleBreakpoint no watch panel in context "+context.getName());
+                        }
                     }
                     row.setAttribute("disabledBreakpoint", new Boolean(props.disabled).toString());
                 }
