@@ -1322,7 +1322,7 @@ Firebug.HTMLPanel.CompleteElement = domplate(FirebugReps.Element,
     tag:
         DIV({"class": "nodeBox open $object|getHidden", _repObject: "$object", role : 'presentation'},
             DIV({"class": "nodeLabel", role: "presentation"},
-                SPAN({"class": "nodeLabelBox repTarget repTarget", role : 'treeitem', 'aria-expanded' : 'false'},
+                SPAN({"class": "nodeLabelBox repTarget", role : 'treeitem', 'aria-expanded' : 'false'},
                     "&lt;",
                     SPAN({"class": "nodeTag"}, "$object.nodeName|toLowerCase"),
                     FOR("attr", "$object|attrIterator", AttrTag),
