@@ -743,6 +743,22 @@ top.Firebug =
         return this.stringBundle;
     },
 
+    getDefaultStringBundle: function()
+    {
+        if (!this.defaultStringBundle)
+        {
+            var ioService = Cc["@mozilla.org/network/io-service;1"].getService(Ci.nsIIOService);
+            var chromeRegistry = Cc["@mozilla.org/chrome/chrome-registry;1"].getService(Ci.nsIChromeRegistry);
+            var bundle = document.getElementById("strings_firebug");
+            var uri = ioService.newURI(bundle.src, "UTF-8", null);
+            var fileURI = chromeRegistry.convertChromeURL(uri).spec;
+            var parts = fileURI.split("/");
+            parts[parts.length - 2] = "en-US";
+            this.defaultStringBundle = stringBundleService.createBundle(parts.join("/"));
+        }
+        return this.defaultStringBundle;
+    },
+
     getPluralRule: function()
     {
         try {

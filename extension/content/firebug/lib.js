@@ -448,16 +448,18 @@ this.isAncestorIgnored = function(node)
  */
 function $STR(name, bundle)
 {
+    var strKey = name.replace(' ', '_', "g");
+
     try
     {
         if (typeof bundle == "string")
             bundle = document.getElementById(bundle);
 
         if (bundle)
-            return bundle.getString(name.replace(' ', '_', "g"));
+            return bundle.getString(strKey);
 
         if (Firebug)
-            return Firebug.getStringBundle().GetStringFromName(name.replace(' ', '_', "g"));
+            return Firebug.getStringBundle().GetStringFromName(strKey);
     }
     catch (err)
     {
@@ -468,19 +470,30 @@ function $STR(name, bundle)
         }
     }
 
-    // XXXjjb apparently we get to this code if we get an exception above...is that best we can do?
+    try
+    {
+        // The en-US string should be always available.
+        var bundle = Firebug.getDefaultStringBundle();
+        return bundle.GetStringFromName(strKey);
+    }
+    catch (err)
+    {
+        FBTrace.sysout("lib.getString: " + name + "\n");
+        FBTrace.sysout("lib.getString FAILS ", err);
+    }
 
-    // Use only the label after last dot.
+    // Don't panic now and use only the label after last dot.
     var index = name.lastIndexOf(".");
     if (index > 0 && name.charAt(index-1) != "\\")
         name = name.substr(index + 1);
     name = name.replace("_", " ", "g");
-
     return name;
 }
 
 function $STRF(name, args, bundle)
 {
+    var strKey = name.replace(' ', '_', "g");
+
     try
     {
         // xxxHonza: Workaround for #485511
@@ -491,9 +504,9 @@ function $STRF(name, args, bundle)
             bundle = document.getElementById(bundle);
 
         if (bundle)
-            return bundle.getFormattedString(name.replace(' ', '_', "g"), args);
+            return bundle.getFormattedString(strKey, args);
         else
-            return Firebug.getStringBundle().formatStringFromName(name.replace(' ', '_', "g"), args, args.length);
+            return Firebug.getStringBundle().formatStringFromName(strKey, args, args.length);
     }
     catch (err)
     {
@@ -504,7 +517,19 @@ function $STRF(name, args, bundle)
         }
     }
 
-    // Use only the label after last dot.
+    try
+    {
+        // The en-US string should be always available.
+        var bundle = Firebug.getDefaultStringBundle();
+        return bundle.formatStringFromName(strKey, args, args.length);
+    }
+    catch (err)
+    {
+        FBTrace.sysout("lib.getString: " + name + "\n");
+        FBTrace.sysout("lib.getString FAILS ", err);
+    }
+
+    // Don't panic now and use only the label after last dot.
     var index = name.lastIndexOf(".");
     if (index > 0)
         name = name.substr(index + 1);
