@@ -950,6 +950,8 @@ Firebug.CSSStyleSheetPanel.prototype = extend(Firebug.SourceBoxPanel,
         if (hasClass(target, "cssSelector"))
         {
             items.push(
+                {label: "Copy Rule Declaration", id: "fbCopyRuleDeclaration",
+                    command: bindFixed(this.copyRuleDeclaration, this, target) },
                 {label: "Copy Style Declaration", id: "fbCopyStyleDeclaration",
                     command: bindFixed(this.copyStyleDeclaration, this, target) }
             );
@@ -1253,21 +1255,36 @@ Firebug.CSSStyleSheetPanel.prototype = extend(Firebug.SourceBoxPanel,
         ];
     },
 
-    copyStyleDeclaration: function(cssSelector)
+    getStyleDeclaration: function(rule)
+    {
+        var props = [];
+
+        for (var p in rule.props)
+        {
+          var prop = rule.props[p];
+          if (!(prop.disabled || prop.overridden))
+            props.push(prop.name + ": " + prop.value + prop.important + ";");
+        }
+
+        return props;
+    },
+
+    copyRuleDeclaration: function(cssSelector)
     {
         var cssRule = getAncestorByClass(cssSelector, "cssRule");
         var listBox = cssRule.getElementsByClassName("cssPropertyListBox")[0];
-        var rule = listBox.rule;
+        var props = this.getStyleDeclaration(listBox.rule);
 
-        var props = [];
-        for (var p in rule.props)
-        {
-            var prop = rule.props[p];
-            if (!(prop.disabled || prop.overridden))
-                props.push(prop.name + ": " + prop.value + prop.important + ";");
-        }
+        copyToClipboard(cssSelector.textContent + " {" + lineBreak() + "  " + props.join(lineBreak() + "  ") + lineBreak() + "}");
+    },
 
-        copyToClipboard(props.join(lineBreak()));
+    copyStyleDeclaration: function(cssSelector)
+    {
+      var cssRule = getAncestorByClass(cssSelector, "cssRule");
+      var listBox = cssRule.getElementsByClassName("cssPropertyListBox")[0];
+      var props = this.getStyleDeclaration(listBox.rule);
+      
+      copyToClipboard(props.join(lineBreak()));
     }
 });
 
