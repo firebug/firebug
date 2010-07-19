@@ -57,8 +57,7 @@
   position: relative;
 }
 
-.cssInheritHeader, .cssComputedHeader {
-  position: relative;
+.cssComputedHeader {
   cursor: pointer;
 }
 
