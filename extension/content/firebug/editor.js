@@ -893,6 +893,12 @@ Firebug.AutoCompleter = function(getExprOffset, getRange, evaluator, selectMode,
     var completionPopup = $("fbCommandLineCompletionList");
     var commandCompletionLineLimit = 40;
     var reJavascriptChar = /[a-zA-Z0-9$_]/;
+    // current completion state values
+    var completionEnd = 0;
+    var value = "";
+    var preCompletion = "";
+    var completionStart = -1;
+    var completionEnd = -1;
 
     this.revert = function(textBox)
     {
@@ -935,14 +941,17 @@ Firebug.AutoCompleter = function(getExprOffset, getRange, evaluator, selectMode,
         if (!offset)
             offset = value.length;
 
-        var line = this.pickCandidates(value, offset, context, cycle, reverse, showGlobal);
+        var found =  this.pickCandidates(value, offset, context, cycle, reverse, showGlobal);
 
-        if (typeof(line) === "object")
-            this.showCandidates(textBox, line, offerOnly);
+        if (found)
+            this.showCandidates(textBox, offerOnly);
 
-        return line;
+        return found;
     };
 
+    /*
+     * returns true if candidate list was created
+     */
     this.pickCandidates = function(value, offset, context, cycle, reverse, showGlobal)
     {
         if (!selectMode && originalOffset != -1)
@@ -1080,7 +1089,10 @@ Firebug.AutoCompleter = function(getExprOffset, getRange, evaluator, selectMode,
 
                 // Nothing found, so there's nothing to complete to
                 if (searchIndex == -1)
-                    return this.reset();
+                {
+                    this.reset();
+                    return false;
+                }
 
                 expr = searchExpr;
                 candidates = cloneArray(values);
@@ -1106,23 +1118,58 @@ Firebug.AutoCompleter = function(getExprOffset, getRange, evaluator, selectMode,
         }
 
         if (!candidates.length)
-            return this.hide();
+        {
+            this.hide();
+            return false;
+        }
 
-        if (candidates.length === 1)
-            lastIndex = 0;
-        else if (lastIndex >= candidates.length || lastIndex < 0)
-            lastIndex = this.pickDefaultCandidate();
+        this.adjustLastIndex();
 
         var completion = candidates[lastIndex];
-        var preCompletion = expr.substr(0, offset-exprOffset);
+        preCompletion = expr.substr(0, offset-exprOffset);
         var postCompletion = completion.substr(offset-exprOffset);
 
         var line = preParsed + preExpr + preCompletion + postCompletion + postExpr;
         var offsetEnd = preParsed.length + preExpr.length + completion.length;
 
-        var result = {value: line, index: lastIndex, userTyped: offset-exprOffset, completionStart: offset, completionEnd: offsetEnd};
-        return result;
+        // store current state of completion
+        currentLine = line;
+        completionStart = offset;
+        completionEnd = offsetEnd;
+
+        return true;
     };
+
+    this.adjustLastIndex = function()
+    {
+        if (candidates.length === 1)
+            lastIndex = 0;
+        else if (lastIndex >= candidates.length)  // use default on first completion, else cycle
+            lastIndex = (lastIndex > -1) ? 0 : this.pickDefaultCandidate();
+        else if (lastIndex < 0)
+            lastIndex = (lastIndex > -1) ? (candidates.length - 1) : this.pickDefaultCandidate();
+    };
+
+    this.cycle = function(reverse)
+    {
+        if (lastIndex < 0)
+            return false;
+
+        lastIndex += reverse ? -1 : 1;
+        this.adjustLastIndex();
+
+        var completion = candidates[lastIndex];
+        var postCompletion = completion.substr(preCompletion.length);
+        var line = currentLine.substr(0, completionStart);
+        line += postCompletion;
+        var end = line.length;
+        line += currentLine.substr(completionEnd);
+
+        // preCompletion and completionStart do not change
+        currentLine = line;
+        completionEnd = end;
+        return true;
+    },
 
     this.pickDefaultCandidate = function()
     {
@@ -1135,21 +1182,19 @@ Firebug.AutoCompleter = function(getExprOffset, getRange, evaluator, selectMode,
         }
         return pick;
     };
-    
-    this.showCandidates = function(textBox, line, offerOnly)
+
+    this.showCandidates = function(textBox, offerOnly)
     {
-        textBox.value = line.value;
-        var offsetStart = line.completionStart;
-        var offsetEnd = line.completionEnd;
+        textBox.value = currentLine;
 
         if (selectMode)
-            textBox.setSelectionRange(offsetStart, offsetEnd);
+            textBox.setSelectionRange(completionStart, completionEnd);
         else
-            textBox.setSelectionRange(offsetEnd, offsetEnd);
+            textBox.setSelectionRange(completionEnd, completionEnd);
 
         if (offerOnly && candidates.length && candidates.length > 1)
         {
-            this.popupCandidates(candidates, line, textBox);
+            this.popupCandidates(candidates, textBox);
             return false;
         }
         else
@@ -1159,7 +1204,7 @@ Firebug.AutoCompleter = function(getExprOffset, getRange, evaluator, selectMode,
         return true;
     };
 
-    this.popupCandidates = function(candidates, line, textBox)
+    this.popupCandidates = function(candidates, textBox)
     {
         FBL.eraseNode(completionPopup);
 
@@ -1182,17 +1227,17 @@ Firebug.AutoCompleter = function(getExprOffset, getRange, evaluator, selectMode,
         {
             var showBottom = commandCompletionLineLimit;
 
-            if (line.index > (commandCompletionLineLimit - 3) ) // then implement manual scrolling
+            if (lastIndex > (commandCompletionLineLimit - 3) ) // then implement manual scrolling
             {
-                if (line.index > (candidates.length - commandCompletionLineLimit) ) // then just show the bottom
+                if (lastIndex > (candidates.length - commandCompletionLineLimit) ) // then just show the bottom
                 {
                     var showTop = candidates.length - commandCompletionLineLimit;
                     var showBottom = candidates.length;
                 }
                 else
                 {
-                    var showTop = line.index - (commandCompletionLineLimit - 3);
-                    var showBottom = line.index + 3;
+                    var showTop = lastIndex - (commandCompletionLineLimit - 3);
+                    var showBottom = lastIndex + 3;
                 }
             }
             // else we are in the top part of the list
@@ -1204,9 +1249,9 @@ Firebug.AutoCompleter = function(getExprOffset, getRange, evaluator, selectMode,
             pre = completionPopup.ownerDocument.createElementNS("http://www.w3.org/1999/xhtml","span");
             pre.innerHTML = prefix;
             var post = completionPopup.ownerDocument.createElementNS("http://www.w3.org/1999/xhtml","span");
-            var completion = candidates[i].substr(line.userTyped);
+            var completion = candidates[i].substr(preCompletion.length);
             post.innerHTML = completion;
-            if (i === line.index)
+            if (i === lastIndex)
                 post.setAttribute('selected', 'true');
 
             hbox.appendChild(pre);
@@ -1303,7 +1348,8 @@ Firebug.AutoCompleter = function(getExprOffset, getRange, evaluator, selectMode,
         {
             if (textBox.selectionStart && textBox.seletionStart !== textBox.selectionEnd)
             {
-                this.complete(context, textBox, true, true, true);
+                if (this.cycle(true))
+                    this.showCandidates(textBox, true);
                 cancelEvent(event);
                 return true;
             }
@@ -1312,7 +1358,9 @@ Firebug.AutoCompleter = function(getExprOffset, getRange, evaluator, selectMode,
         {
             if (textBox.selectionStart && textBox.seletionStart !== textBox.selectionEnd)
             {
-                this.complete(context, textBox, true, false, true);
+                if (this.cycle(false))
+                    this.showCandidates(textBox, true);
+
                 cancelEvent(event);
                 return true;
             }
@@ -1345,7 +1393,11 @@ Firebug.AutoCompleter = function(getExprOffset, getRange, evaluator, selectMode,
 
             if (selected)
             {
-                var completion = selected.getElementsByClassName('completionText')[0].textContent;
+                var completionText = selected.getElementsByClassName('completionText')[0];
+                if (!completionText)
+                    return;
+
+                var completion = completionText.textContent;
                 var textBox = completionPopup.currentTextBox;
                 var start = textBox.selectionStart;
                 var end = start + completion.length;
