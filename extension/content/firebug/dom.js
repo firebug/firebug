@@ -1427,6 +1427,12 @@ WatchPanel.prototype = extend(Firebug.DOMBasePanel.prototype,
         if (!this.watches)
             this.watches = [];
 
+        for (var i = 0; i < this.watches.length; i++)
+        {
+            if (expression == this.watches[i])
+                return;
+        }
+
         this.watches.splice(0, 0, expression);
         this.rebuild(true);
     },
