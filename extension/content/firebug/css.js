@@ -1476,6 +1476,7 @@ CSSElementPanel.prototype = extend(Firebug.CSSStyleSheetPanel.prototype,
             doc.addEventListener("mousedown", this.onActiveChange, false);
         }
     },
+
     unwatchWindow: function(win)
     {
         var doc = win.document;
@@ -1645,15 +1646,18 @@ CSSComputedElementPanel.prototype = extend(CSSElementPanel.prototype,
         computedTag:
             DIV({"class": "a11yCSSView", role : "list", "aria-label" : $STR('aria.labels.computed styles')},
                 FOR("group", "$groups",
-                    H1({class: "cssInheritHeader groupHeader focusRow", role : "listitem"},
-                        SPAN({class: "cssInheritLabel"}, "$group.title")
-                    ),
-                    TABLE({width: "100%", role : 'group'},
-                        TBODY({role : 'presentation'},
-                            FOR("prop", "$group.props",
-                                TR({class : 'focusRow computedStyleRow', role : 'listitem'},
-                                    TD({class: "stylePropName", role : 'presentation'}, "$prop.name"),
-                                    TD({class: "stylePropValue", role : 'presentation'}, "$prop.value")
+                    DIV({"class": "computedStylesGroup opened", role : "list"},
+                        H1({class: "cssComputedHeader groupHeader focusRow", role : "listitem"},
+                            IMG({class: "twisty", role: "presentation"}),
+                            SPAN({class: "cssComputedLabel"}, "$group.title")
+                        ),
+                        TABLE({width: "100%", role : 'group'},
+                            TBODY({role : 'presentation'},
+                                FOR("prop", "$group.props",
+                                    TR({class : 'focusRow computedStyleRow', role : 'listitem'},
+                                        TD({class: "stylePropName", role : 'presentation'}, "$prop.name"),
+                                        TD({class: "stylePropValue", role : 'presentation'}, "$prop.value")
+                                    )
                                 )
                             )
                         )
@@ -1698,6 +1702,12 @@ CSSComputedElementPanel.prototype = extend(CSSElementPanel.prototype,
     parentPanel: "html",
     order: 1,
 
+    initialize: function() {
+      Firebug.CSSStyleSheetPanel.prototype.initialize.apply(this, arguments);
+
+      this.onMouseDown = bind(this.onMouseDown, this);
+    },
+
     updateView: function(element)
     {
         this.updateComputedView(element);
@@ -1708,6 +1718,21 @@ CSSComputedElementPanel.prototype = extend(CSSElementPanel.prototype,
         return [
             {label: "Refresh", command: bind(this.refresh, this) }
         ];
+    },
+
+    onMouseDown: function(event) {
+        if (!isLeftClick(event))
+          return;
+
+        if (hasClass(event.target, "cssComputedHeader"))
+            this.toggleNode(event);
+    },
+
+    toggleNode: function(event)
+    {
+        var group = getAncestorByClass(event.target, "computedStylesGroup");
+
+        toggleClass(group, "opened");
     }
 });
 

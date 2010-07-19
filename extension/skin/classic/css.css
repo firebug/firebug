@@ -45,12 +45,46 @@
     text-decoration: line-through;
 }
 
+.computedStylesGroup table {
+  display: none;
+} 
+
+.computedStylesGroup.opened table {
+  display: block;
+} 
+
+.cssInheritHeader, .cssComputedHeader {
+  position: relative;
+}
+
+.cssInheritHeader, .cssComputedHeader {
+  position: relative;
+  cursor: pointer;
+}
+
+.computedStylesGroup > .cssComputedHeader {
+  margin: 0;
+}
+
+.computedStylesGroup.opened > .cssComputedHeader {
+  margin: 0 0 4px;
+}
+
+.cssComputedHeader > .twisty {
+  background-position: 4px 3px !important;
+}
+
 .cssInheritedRule {
 }
 
-.cssInheritLabel {
+.cssInheritLabel,
+.cssComputedLabel {
     margin-right: 0.25em;
     font-weight: bold;
+}
+
+.cssComputedLabel {
+    margin-left: 14px;
 }
 
 .cssRule .objectLink-sourceLink {
