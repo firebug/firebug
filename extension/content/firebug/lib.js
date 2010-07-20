@@ -466,10 +466,7 @@ function $STR(name, bundle)
         catch (err)
         {
             if (FBTrace.DBG_LOCALE)
-            {
-                FBTrace.sysout("lib.getString: " + name + "\n");
-                FBTrace.sysout("lib.getString FAILS ", err);
-            }
+                FBTrace.sysout("lib.getString FAILS '" + name + "'", err);
         }
     }
 
@@ -481,8 +478,8 @@ function $STR(name, bundle)
     }
     catch (err)
     {
-        FBTrace.sysout("lib.getString: " + name + "\n");
-        FBTrace.sysout("lib.getString FAILS ", err);
+        if (FBTrace.DBG_LOCALE)
+            FBTrace.sysout("lib.getString (default) FAILS '" + name + "'", err);
     }
 
     // Don't panic now and use only the label after last dot.
@@ -517,10 +514,7 @@ function $STRF(name, args, bundle)
         catch (err)
         {
             if (FBTrace.DBG_LOCALE)
-            {
-                FBTrace.sysout("lib.getString: " + name + "\n");
-                FBTrace.sysout("lib.getString FAILS ", err);
-            }
+                FBTrace.sysout("lib.getString FAILS '" + name + "'", err);
         }
     }
 
@@ -532,8 +526,8 @@ function $STRF(name, args, bundle)
     }
     catch (err)
     {
-        FBTrace.sysout("lib.getString: " + name + "\n");
-        FBTrace.sysout("lib.getString FAILS ", err);
+        if (FBTrace.DBG_LOCALE)
+            FBTrace.sysout("lib.getString (default) FAILS '" + name + "'", err);
     }
 
     // Don't panic now and use only the label after last dot.
