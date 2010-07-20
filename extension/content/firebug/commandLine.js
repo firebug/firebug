@@ -307,11 +307,18 @@ Firebug.CommandLine = extend(Firebug.Module,
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+    acceptCompletionOrReturnIt: function(context)
+    {
+        var commandLine = getCommandLine(context);
+        if (this.autoCompleter.acceptCompletionInTextBox(commandLine))
+            return ""; // next time we will return text
+        else
+            return this.autoCompleter.getVerifiedText(commandLine);
+    },
 
     enter: function(context, command)
     {
-        var commandLine = getCommandLine(context);
-        var expr = command ? command : this.autoCompleter.getVerifiedText(commandLine);
+        var expr = command ? command : this.acceptCompletionOrReturnIt(context);
         if (expr == "")
             return;
 
@@ -357,8 +364,7 @@ Firebug.CommandLine = extend(Firebug.Module,
 
     enterMenu: function(context)
     {
-        var commandLine = getCommandLine(context);
-        var expr = this.autoCompleter.getVerifiedText(commandLine);
+        var expr = this.acceptCompletionOrReturnIt(context);
         if (expr == "")
             return;
 
@@ -371,6 +377,7 @@ Firebug.CommandLine = extend(Firebug.Module,
                 Firebug.chrome.contextMenuObject = result;
 
                 var popup = Firebug.chrome.$("fbContextMenu");
+                var commandLine = getCommandLine(context);
                 popup.showPopup(commandLine, -1, -1, "popup", "bottomleft", "topleft");
             }
         });
@@ -378,8 +385,7 @@ Firebug.CommandLine = extend(Firebug.Module,
 
     enterInspect: function(context)
     {
-        var commandLine = getCommandLine(context);
-        var expr = this.autoCompleter.getVerifiedText(commandLine);
+        var expr = this.acceptCompletionOrReturnIt(context);
         if (expr == "")
             return;
 

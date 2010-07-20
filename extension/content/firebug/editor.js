@@ -899,6 +899,7 @@ Firebug.AutoCompleter = function(getExprOffset, getRange, evaluator, selectMode,
     var preCompletion = "";
     var completionStart = -1;
     var completionEnd = -1;
+    var accepted = false;
 
     this.revert = function(textBox)
     {
@@ -926,6 +927,7 @@ Firebug.AutoCompleter = function(getExprOffset, getRange, evaluator, selectMode,
         lastOffset = 0;
         exprOffset = 0;
         lastIndex = -2;
+        accepted = false;
     };
 
     this.complete = function(context, textBox, cycle, reverse, offerOnly, showGlobal)
@@ -1112,10 +1114,7 @@ Firebug.AutoCompleter = function(getExprOffset, getRange, evaluator, selectMode,
         }
 
         if (cycle)
-        {
             expr = lastExpr;
-            lastIndex += reverse ? -1 : 1;
-        }
 
         if (!candidates.length)
         {
@@ -1145,9 +1144,9 @@ Firebug.AutoCompleter = function(getExprOffset, getRange, evaluator, selectMode,
         if (candidates.length === 1)
             lastIndex = 0;
         else if (lastIndex >= candidates.length)  // use default on first completion, else cycle
-            lastIndex = (lastIndex >= -1) ? 0 : this.pickDefaultCandidate();
+            lastIndex = (lastIndex === -2) ? this.pickDefaultCandidate() : 0;
         else if (lastIndex < 0)
-            lastIndex = (lastIndex >= -1) ? (candidates.length - 1) : this.pickDefaultCandidate();
+            lastIndex = (lastIndex === -2) ? this.pickDefaultCandidate() : (candidates.length - 1);
     };
 
     this.cycle = function(reverse)
@@ -1304,7 +1303,7 @@ Firebug.AutoCompleter = function(getExprOffset, getRange, evaluator, selectMode,
 
     this.handledKeyUp = function(event, context, textBox)
     {
-        if (!this.getCompletionText(textBox)) // then the completion was accepted
+        if (accepted)
         {
             this.hide();
             this.reset();
@@ -1334,10 +1333,10 @@ Firebug.AutoCompleter = function(getExprOffset, getRange, evaluator, selectMode,
 
             cancelEvent(event);
         }
-        else if (event.keyCode === 13 || event.keyCode === 14)  // RETURN , ENTER
+       /* else if (event.keyCode === 13 || event.keyCode === 14)  // RETURN , ENTER
         {
             this.acceptCompletionInTextBox(textBox);
-        }
+        }*/
         else if (event.keyCode == 27) // ESC, close the completer
         {
             // Stop event bubbling if it was used to close the popup.
@@ -1409,8 +1408,10 @@ Firebug.AutoCompleter = function(getExprOffset, getRange, evaluator, selectMode,
 
     this.acceptCompletionInTextBox = function(textBox)
     {
+        accepted = textBox.selectionStart != textBox.selectionEnd;
         textBox.setSelectionRange(textBox.selectionEnd, textBox.selectionEnd);  // accept completion by deselect
         this.hide();
+        return accepted;
     };
 
     this.acceptCompletion = function(event)
