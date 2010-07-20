@@ -450,23 +450,26 @@ function $STR(name, bundle)
 {
     var strKey = name.replace(' ', '_', "g");
 
-    try
+    var useDefaultLocale = Firebug.getPref(Firebug.prefDomain, "useDefaultLocale");
+    if (!useDefaultLocale)
     {
-        if (typeof bundle == "string")
-            bundle = document.getElementById(bundle);
-
-        if (bundle)
-            return bundle.getString(strKey);
-
-        if (Firebug)
-            return Firebug.getStringBundle().GetStringFromName(strKey);
-    }
-    catch (err)
-    {
-        if (FBTrace.DBG_LOCALE)
+        try
         {
-            FBTrace.sysout("lib.getString: " + name + "\n");
-            FBTrace.sysout("lib.getString FAILS ", err);
+            if (typeof bundle == "string")
+                bundle = document.getElementById(bundle);
+
+            if (bundle)
+                return bundle.getString(strKey);
+            else
+                return Firebug.getStringBundle().GetStringFromName(strKey);
+        }
+        catch (err)
+        {
+            if (FBTrace.DBG_LOCALE)
+            {
+                FBTrace.sysout("lib.getString: " + name + "\n");
+                FBTrace.sysout("lib.getString FAILS ", err);
+            }
         }
     }
 
@@ -494,26 +497,30 @@ function $STRF(name, args, bundle)
 {
     var strKey = name.replace(' ', '_', "g");
 
-    try
+    var useDefaultLocale = Firebug.getPref(Firebug.prefDomain, "useDefaultLocale");
+    if (!useDefaultLocale)
     {
-        // xxxHonza: Workaround for #485511
-        if (!bundle)
-            bundle = "strings_firebug";
-
-        if (typeof bundle == "string")
-            bundle = document.getElementById(bundle);
-
-        if (bundle)
-            return bundle.getFormattedString(strKey, args);
-        else
-            return Firebug.getStringBundle().formatStringFromName(strKey, args, args.length);
-    }
-    catch (err)
-    {
-        if (FBTrace.DBG_LOCALE)
+        try
         {
-            FBTrace.sysout("lib.getString: " + name + "\n");
-            FBTrace.sysout("lib.getString FAILS ", err);
+            // xxxHonza: Workaround for #485511
+            if (!bundle)
+                bundle = "strings_firebug";
+
+            if (typeof bundle == "string")
+                bundle = document.getElementById(bundle);
+
+            if (bundle)
+                return bundle.getFormattedString(strKey, args);
+            else
+                return Firebug.getStringBundle().formatStringFromName(strKey, args, args.length);
+        }
+        catch (err)
+        {
+            if (FBTrace.DBG_LOCALE)
+            {
+                FBTrace.sysout("lib.getString: " + name + "\n");
+                FBTrace.sysout("lib.getString FAILS ", err);
+            }
         }
     }
 
