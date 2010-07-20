@@ -561,8 +561,10 @@ Firebug.DisabledPanelBox = domplate(Firebug.Rep,
         if (!panelName)
             return;
 
+        var panel = Firebug.getPanelType(panelName);
+        var panelTitle = Firebug.getPanelTitle(panel);
         var args = {
-            pageTitle: $STRF("moduleManager.title", [panelName]),
+            pageTitle: $STRF("moduleManager.title", [panelTitle]),
             panelName: panelName
         };
 
