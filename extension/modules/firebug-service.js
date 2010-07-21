@@ -1140,7 +1140,8 @@ var fbs =
             if (haltDebugger)
             {
                 var peelOurselvesOff = frame.callingFrame;  // remove debuggerHalter()
-                peelOurselvesOff = peelOurselvesOff.callingFrame; // remove fbs.halt()
+                if (!fbs.isChromeBlocked) // then we will have another frame from this file
+                	peelOurselvesOff = peelOurselvesOff.callingFrame; // remove fbs.halt()
 
                 while( peelOurselvesOff && ( peelOurselvesOff.script.fileName.indexOf("content/debugger.js") > 0 ) )
                     peelOurselvesOff = peelOurselvesOff.callingFrame;
@@ -1148,7 +1149,7 @@ var fbs =
                 if (peelOurselvesOff)
                 {
                     if (FBTrace.DBG_FBS_BP)
-                        FBTrace.sysout('fbs.onDebugger adjusted newest frame: '+peelOurselvesOff.line+'@'+peelOurselvesOff.script.fileName);
+                        FBTrace.sysout('fbs.onDebugger adjusted newest frame: '+peelOurselvesOff.line+'@'+peelOurselvesOff.script.fileName+" frames: ", framesToString(frame));
 
                     var debuggr = haltDebugger;
                     fbs.haltReturnValue = haltCallBack.apply(debuggr,[peelOurselvesOff]);
