@@ -284,7 +284,7 @@ top.Firebug =
             /* browserOverlay.xul */
             "menu_openFirebugEditors", "menu_firebugInspect", "menu_viewToggleFirebug",
             "menu_viewToggleFirebug", "menu_firebug", "inspector-button", "firebug-button",
-            "menu_detachFirebug", "menu_ClearConsole"
+            "menu_detachFirebug", "menu_ClearConsole", "menu_firebugOpenWithEditor"
         ];
 
         for (var i=0; i<elements.length; i++)
