@@ -1889,7 +1889,7 @@ Firebug.HTMLModule.MutationBreakpoints =
     {
         var changeLabel = Firebug.HTMLModule.BreakpointRep.getChangeLabel({type: type});
         context.breakingCause = {
-            title: $STR("net.Break On Mutate"),
+            title: $STR("html.Break On Mutate"),
             message: changeLabel,
             type: event.type,
             target: event.target,
