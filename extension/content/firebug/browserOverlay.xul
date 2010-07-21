@@ -137,7 +137,7 @@
 
         <!-- Context menu -->
         <menupopup id="fbStatusContextMenu" onpopupshowing="FirebugChrome.onOptionsShowing(this)">
-            <menuitem id="menu_detachFirebug" label="firebug.DetachFirebug"
+            <menuitem id="menu_detachFirebugContext" label="firebug.DetachFirebug"
                     command="cmd_toggleDetachFirebug"
                     type="checkbox" key="key_detachFirebug"/>
             <menuseparator/>

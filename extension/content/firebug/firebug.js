@@ -269,7 +269,7 @@ top.Firebug =
             "fbConsoleFilter-all", "fbConsoleFilter-error", "fbConsoleFilter-warning",
             "fbConsoleFilter-info", "fbConsoleFilter-debug", 
             "fbToggleProfiling", "fbToggleHTMLEditing", "fbToggleCSSEditing",
-            "menu_toggleFirebug", "menu_detachFirebug", "FirebugMenu_OpenWith",
+            "menu_toggleFirebug", "menu_detachFirebugContext", "FirebugMenu_OpenWith",
             "menu_configureEditors", "FirebugMenu_TextSize", "menu_increaseTextSize",
             "menu_decreaseTextSize", "menu_normalTextSize", "FirebugMenu_Options",
             "menu_alwaysOpenInWindow", "menu_showTooltips", "menu_shadeBoxModel",
