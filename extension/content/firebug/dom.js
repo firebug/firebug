@@ -289,7 +289,7 @@ const DirTablePlate = domplate(Firebug.Rep,
                         {
                             var result = rowTag.insertRows({members: slice}, lastRow);
                             lastRow = result[1];
-                            dispatch(this.fbListeners, 'onMemberRowSliceAdded', [null, result, rowCount, setSize]);
+                            dispatch(Firebug.DOMModule.fbListeners, 'onMemberRowSliceAdded', [null, result, rowCount, setSize]);
                             rowCount += insertSliceSize;
                         }
                         if (isLast)
@@ -568,7 +568,7 @@ Firebug.DOMBasePanel.prototype = extend(Firebug.Panel,
             {
                 result = rowTag.insertRows({members: slice}, tbody.lastChild);
                 rowCount += insertSliceSize;
-                dispatch(this.fbListeners, 'onMemberRowSliceAdded', [panel, result, rowCount, setSize]);
+                dispatch(Firebug.DOMModule.fbListeners, 'onMemberRowSliceAdded', [panel, result, rowCount, setSize]);
 
                 if ((panelNode.scrollHeight+panelNode.offsetHeight) >= priorScrollTop)
                     panelNode.scrollTop = priorScrollTop;
