@@ -12,6 +12,10 @@ Added support for js-doc-tolkit, odvarko@gmail.com -->
     <condition property="isUnix">
         <os family="unix" />
     </condition>
+	
+	<condition property="isMac">
+	        <os family="mac" />
+	</condition>
 
     <property environment="env"/>
 
@@ -36,7 +40,7 @@ Added support for js-doc-tolkit, odvarko@gmail.com -->
         <property name="install.dir" value="${env.APPDATA}\Mozilla\Firefox\Profiles\${profilefolder}"/>
     </target>
 
-    <target name="properties-default-unix" if="isUnix">
+    <target name="properties-default-unix" if="isUnix" unless="isMac">
         <input
             message="Please enter Profile folder name:"
             addproperty="profilefolder"
