@@ -687,7 +687,7 @@
     <implementation>
         <constructor>
         <![CDATA[
-            this.setAttribute('role', 'menu');
+            this.setAttribute('role', 'presentation');
             this.popup = document.getAnonymousElementByAttribute(this, "anonid", "popup");
             this.panelBar = FBL.getAncestorByClass(this, "panelBar");
         ]]>
@@ -741,7 +741,7 @@
             var tab = this.panelBar.selectedTab;
             if (!tab)
                 return false;
-
+            this.setAttribute('role', 'menu');
             var items = [];
             var panelType = tab.panelType;
 
@@ -773,6 +773,7 @@
             return true;
         ]]></handler>
         <handler event="popuphidden"><![CDATA[
+            this.setAttribute('role', 'presentation');
             FBL.eraseNode(this.popup);
         ]]></handler>
     </handlers>
