@@ -41,6 +41,7 @@ Firebug.A11yModel = extend(Firebug.Module,
         this.onNetBlur = bind(this.onNetBlur, this);
         Firebug.chrome.window.a11yEnabled = false; // mark ourselves disabled so we don't performDisable() if we are not enabled.
         Firebug.Debugger.addListener(this);
+        Firebug.Console.addListener(this);
     },
 
     initializeUI : function()
@@ -198,7 +199,8 @@ Firebug.A11yModel = extend(Firebug.Module,
                 }
                 else
                     panel.panelNode.setAttribute('role', 'presentation');
-                //panel.panelNode.setAttribute('aria-live', 'polite');
+                panel.panelNode.setAttribute('aria-live', 'polite');
+                panel.panelNode.setAttribute('aria-relevant', 'additions');
                 panel.panelNode.addEventListener("keypress", this.onNavigablePanelKeyPress, false);
                 panel.panelNode.addEventListener("focus", this.onPanelFocus, true);
                 panel.panelNode.addEventListener("mousedown", this.onConsoleMouseDown, false);
