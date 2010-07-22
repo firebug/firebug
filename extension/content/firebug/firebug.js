@@ -2040,6 +2040,18 @@ top.Firebug =
         var tab = this.getTabForWindow(win);
         return tab ? tab.linkedPanel : null;
     },
+
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+    // FBTest
+
+    // Expose our test list to the FBTest console for automated testing.
+    onGetTestList: function(testLists)
+    {
+        testLists.push({
+            extension: "Firebug",
+            testListURL: "http://getfirebug.com/tests/content/testlists/firebug1.6.html"
+        });
+    }
 };
 
 // ************************************************************************************************
