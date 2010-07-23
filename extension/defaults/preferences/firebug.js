@@ -16,7 +16,7 @@ pref("extensions.firebug.panelTabMinWidth", 50);            // Minimum width of 
 pref("extensions.firebug.sourceLinkLabelWidth", 17);        // Maximum amount of characters for source link labels (displayed e.g. in CSS or Console panels)
 pref("extensions.firebug.currentVersion", "");              // If Firebug version is bigger than the one in this string, a first-run welcome page is displayed.
 pref("extensions.firebug.useDefaultLocale", false);         // Set to true if Firebug should use default (en-US) locale instead of the current Firefox locale.
-
+pref("extensions.firebug.knownIssues40Displayed", false);   // Set to true if known issues log has been already displayed in the Console panel to the user.
 pref("extensions.firebug.activateSameOrigin", true);
 
 // Search
