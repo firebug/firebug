@@ -1741,7 +1741,8 @@ CSSComputedElementPanel.prototype = extend(CSSElementPanel.prototype,
         if (!isLeftClick(event))
           return;
 
-        if (hasClass(event.target, "cssComputedHeader"))
+        var cssComputedHeader = getAncestorByClass(event.target, "cssComputedHeader");
+        if (cssComputedHeader)
             this.toggleNode(event);
     },
 
