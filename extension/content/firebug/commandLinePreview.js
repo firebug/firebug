@@ -13,6 +13,8 @@ FBL.ns(function() { with (FBL) {
  */
 Firebug.CommandLine.Preview = extend(Firebug.Module,
 {
+    lastFocused : null,
+    
     initializeUI: function()
     {
         Firebug.Module.initializeUI.apply(this, arguments);
@@ -176,7 +178,13 @@ Firebug.CommandLine.Preview = extend(Firebug.Module,
 
         // Focus the command line if it has been just displayed.
         if (visible)
+        {
+            this.lastFocused = document.commandDispatcher.focusedElement;
             cmdline.focus();
+        }
+        else if (this.lastFocused && isVisible(this.lastFocused) && typeof this.lastFocused.focus == "function")
+            this.lastFocused.focus();
+            this.lastFocused = null;
     },
 
     isVisible: function()
