@@ -1238,7 +1238,7 @@
         <xul:description anonid="fbSearchBoxDescription"  collapsed="true"
             tooltiptext="Press up or down arrow key for search options" />
         <xul:panel id="fbSearchOptionsPanel" norestorefocus="true" noautofocus="true"
-            ignorekeys="true" onkeydown="onPopupKeyDown(event)" role="presentation"
+            ignorekeys="true" role="presentation"
             noautohide="true">
             <xul:vbox class="searchOptionsMenu innerToolbar" role="menu" aria-label="search options">
               <xul:box anonid="startPanelFocus" class="panelFocusBound" onfocus="startFocusHandler()" />
@@ -1453,27 +1453,25 @@
                     this.hideOptions();
             ]]></body>
         </method>
-        <method name="onPopupKeyDown">
-            <parameter name="event" />
-            <body><![CDATA[
-                if (!Firebug.A11yModel || !Firebug.A11yModel.isEnabled())
-                    return;
-                if (event.keyCode ==  KeyEvent.DOM_VK_ESCAPE)
-                {
-                    var optionsPopup = document.getElementById("fbSearchOptionsPanel");
-                    var items = optionsPopup.getElementsByClassName("a11yFocus");
-                    var searchBox = document.getAnonymousElementByAttribute(this, "anonid", "searchBox");
-                    if (!optionsPopup || !items || !searchBox)
-                        return;
-                    searchBox.focus();
-                    optionsPopup.hidePopup();
-                }
-            ]]></body>
-        </method>
     </implementation>
     <handlers>
         <handler event="keypress"><![CDATA[
-            if (event.keyCode ==  KeyEvent.DOM_VK_RETURN)
+            if (event.keyCode ==  KeyEvent.DOM_VK_ESCAPE) 
+            {
+                var optionsPopup = document.getElementById("fbSearchOptionsPanel");
+                var searchBox = document.getAnonymousElementByAttribute(this, "anonid", "searchBox");
+                if (!optionsPopup || !searchBox)
+                    return;
+                searchBox.focus();
+                if (optionsPopup.state == "open") 
+                {
+                    event.stopPropagation(); // prevent cmd preview toggle
+                    optionsPopup.hidePopup();
+                }
+                else
+                    return;
+            }
+            else if (event.keyCode ==  KeyEvent.DOM_VK_RETURN)
             {
                 if (FBL.isShift(event))
                     this.searchPrev();

@@ -214,7 +214,8 @@ Firebug.CommandLine.Preview = extend(Firebug.Module,
 
         // ESC
         var target = event.target;
-        if (target && event.keyCode == 27)
+        // prevent conflict with inline editors being closed
+        if (target && event.keyCode == 27 && !hasClass(event.target, "textEditorInner"))
             this.toggle(FirebugContext);
     }
 });
