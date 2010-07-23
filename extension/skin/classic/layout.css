@@ -16,7 +16,7 @@
 
 .layoutBox {
     position: absolute;
-    border: 1px solid #4D8CA5;
+    border: 1px solid #888888;
     top: 20px;
     right: 20px;
     bottom: 20px;
@@ -40,15 +40,15 @@
 }
 
 .borderLayoutBox {
-    background: #6CB5DF;
+    background-color: #BBBBBB;
 }
 
 .paddingLayoutBox {
-    background: #00F3F3;
+    background-color: #DDDDDD;
 }
 
 .contentLayoutBox {
-    background: #00F3F3;
+    background: #DDDDDD;
 }
 
 .layoutBox.editing,
