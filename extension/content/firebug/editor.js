@@ -87,6 +87,13 @@ Firebug.Editor = extend(Firebug.Module,
             FBTrace.sysout("Editor start panel "+currentPanel.name);
         this.attachListeners(currentEditor, panel.context);
     },
+    
+    saveAndClose: function() {
+        if (!currentTarget)
+            return;
+        dispatch(currentPanel.fbListeners, 'onInlineEditorClose', [currentPanel, currentTarget, !originalValue]);
+        this.stopEditing();
+    },
 
     stopEditing: function(cancel)
     {
@@ -321,7 +328,7 @@ Firebug.Editor = extend(Firebug.Module,
         if (currentEditor.tabNavigation)
         {
             this.listeners.push(
-                chrome.keyCodeListen("RETURN", null, bind(this.tabNextEditor, this)),
+                chrome.keyCodeListen("RETURN", null, bind(this.saveAndClose, this)),
                 chrome.keyCodeListen("RETURN", isControl, bind(this.insertRow, this, null, "after")),
                 chrome.keyCodeListen("TAB", null, bind(this.tabNextEditor, this)),
                 chrome.keyCodeListen("TAB", isShift, bind(this.tabPreviousEditor, this))
