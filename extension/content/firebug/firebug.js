@@ -275,7 +275,7 @@ top.Firebug =
             "menu_alwaysOpenInWindow", "menu_showTooltips", "menu_shadeBoxModel",
             "menu_toggleOrient",
 
-            "menu_firebugWebsite", "menu_firebugDoc", "menu_firebugKeyboard",
+            "menu_firebugUrlWebsite", "menu_firebugDoc", "menu_firebugKeyboard",
             "menu_firebugForums", "menu_firebugIssues", "menu_firebugDonate",
 
             "menu_inspectElement", "menu_profileScript", "menu_focusCommandLine",
