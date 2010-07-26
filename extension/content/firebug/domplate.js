@@ -1023,7 +1023,6 @@ var Renderer =
             FBTrace.sysout("domplate.insertNode html: "+html+"\n");
 
         var range = doc.createRange();
-        range.selectNode(doc.body);
         var frag = range.createContextualFragment(html);
 
         var root = frag.firstChild;
