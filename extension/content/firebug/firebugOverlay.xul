@@ -449,7 +449,9 @@
             <menuitem id="menu_detachFirebug" label="firebug.DetachFirebug"
                       command="cmd_toggleDetachFirebug" type="checkbox"
                       key="key_detachFirebug"/>
-
+            <menuitem id="menu_closeFirebug" label="firebug.CloseFirebug"
+                      command="cmd_closeFirebug"
+                      key="key_closeFirebug"/>
             <!-- Editors -->
             <menu id="FirebugMenu_OpenWith" label="firebug.OpenWith">
                 <menupopup id="fbFirebugMenu_OpenWith"

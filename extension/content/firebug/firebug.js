@@ -254,7 +254,7 @@ top.Firebug =
         if (FBTrace.DBG_INITIALIZE)
             FBTrace.sysout("Firebug.internationalizeUI");
 
-        var elements = [
+        var elements = [ // TODO mark these elements with "class='fbInternational'" then document.getElementsByClassName
             /* firebugOverlay.xul */
             "menu_clearConsole", "menu_resetAllOptions",
             "menu_enablePanels", "menu_disablePanels",
@@ -267,7 +267,7 @@ top.Firebug =
 
             "fbInspectButton", "fbCloseButton", "fbConsoleClear", "fbConsolePersist",
             "fbConsoleFilter-all", "fbConsoleFilter-error", "fbConsoleFilter-warning",
-            "fbConsoleFilter-info", "fbConsoleFilter-debug", 
+            "fbConsoleFilter-info", "fbConsoleFilter-debug",
             "fbToggleProfiling", "fbToggleHTMLEditing", "fbToggleCSSEditing",
             "menu_toggleFirebug", "menu_detachFirebugContext", "FirebugMenu_OpenWith",
             "menu_configureEditors", "FirebugMenu_TextSize", "menu_increaseTextSize",
@@ -284,7 +284,7 @@ top.Firebug =
             /* browserOverlay.xul */
             "menu_openFirebugEditors", "menu_firebugInspect", "menu_viewToggleFirebug",
             "menu_viewToggleFirebug", "menu_firebug", "inspector-button", "firebug-button",
-            "menu_detachFirebug", "menu_ClearConsole", "menu_firebugOpenWithEditor"
+            "menu_detachFirebug", "menu_closeFirebug", "menu_ClearConsole", "menu_firebugOpenWithEditor"
         ];
 
         for (var i=0; i<elements.length; i++)
