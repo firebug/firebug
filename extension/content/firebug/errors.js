@@ -289,6 +289,9 @@ var Errors = Firebug.Errors = extend(Firebug.Module,
                 if (!context.window || !context.getWindowLocation())
                     return false;
 
+                if (FBTrace.DBG_ERRORLOG)
+                    FBTrace.sysout("findContextByURL for "+(context.loaded?'loaded':'not loaded')+" window location: "+context.getWindowLocation().toString());
+
                 if (context.getWindowLocation().toString() == url)
                 {
                     if (FBTrace.DBG_ERRORLOG && FBTrace.DBG_CSS)
@@ -318,6 +321,15 @@ var Errors = Firebug.Errors = extend(Firebug.Module,
                 }
                 else  // then new stylesheets are still coming in.
                 {
+                    // TODO move updateScriptFiles to lib
+                    Firebug.ScriptPanel.prototype.updateScriptFiles(context);  // build a new list of script tag sourceFiles
+                    if (context.sourceFileMap && context.sourceFileMap[url])
+                    {
+                        if (FBTrace.DBG_EERRORLOG)
+                            FBTrace.sysout("findContextByURL found match in updated sourceFileMap");
+                        return errorContext = context;
+                    }
+
                     if (FBL.getStyleSheetByHref(url, context))
                     {
                         if (FBTrace.DBG_ERRORLOG && FBTrace.DBG_CSS)
