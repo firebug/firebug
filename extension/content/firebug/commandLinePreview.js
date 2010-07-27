@@ -182,9 +182,11 @@ Firebug.CommandLine.Preview = extend(Firebug.Module,
             this.lastFocused = document.commandDispatcher.focusedElement;
             cmdline.focus();
         }
-        else if (this.lastFocused && isVisible(this.lastFocused) && typeof this.lastFocused.focus == "function")
+        else if (this.lastFocused && isVisible(this.lastFocused) && typeof this.lastFocused.focus == "function") 
+        {
             this.lastFocused.focus();
             this.lastFocused = null;
+        }
     },
 
     isVisible: function()
