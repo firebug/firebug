@@ -209,7 +209,7 @@ Firebug.A11yModel = extend(Firebug.Module,
                 break;
             case 'html':
                 panel.panelNode.setAttribute('role', 'tree');
-                panel.panelNode.setAttribute('aria-label', $STR('a11y.labels.document structue'));
+                panel.panelNode.setAttribute('aria-label', $STR('a11y.labels.document structure'));
                 panel.panelNode.addEventListener("keypress", this.onHTMLKeyPress, false);
                 panel.panelNode.addEventListener("focus", this.onHTMLFocus, true);
                 panel.panelNode.addEventListener("blur", this.onHTMLBlur, true);
