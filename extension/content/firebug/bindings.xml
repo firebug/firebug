@@ -1235,12 +1235,11 @@
         <xul:textbox anonid="searchBox"
             rows="1" label="search.Firebug_Search" class="fbsearch-textbox"
             onkeyup="onSearchBoxKeyUp(event);" aria-describedby="fbSearchBoxDescription" />
-        <xul:description anonid="fbSearchBoxDescription"  collapsed="true"
-            tooltiptext="Press up or down arrow key for search options" />
+        <xul:description anonid="fbSearchBoxDescription"  collapsed="true"/>
         <xul:panel id="fbSearchOptionsPanel" norestorefocus="true" noautofocus="true"
             ignorekeys="true" role="presentation"
             noautohide="true">
-            <xul:vbox class="searchOptionsMenu innerToolbar" role="menu" aria-label="search options">
+            <xul:vbox class="searchOptionsMenu innerToolbar" role="menu" anonid="fbSearchOptionsMenu">
               <xul:box anonid="startPanelFocus" class="panelFocusBound" onfocus="startFocusHandler()" />
               <xul:vbox anonid="searchOptionsList" role="presentation" />
               <xul:hbox pack="center" align="center" role="presentation">
@@ -1260,7 +1259,13 @@
             var searchBox = document.getAnonymousElementByAttribute(this, "anonid", "searchBox"),
                 searchPrev = document.getAnonymousElementByAttribute(this, "anonid", "searchPrev"),
                 searchNext = document.getAnonymousElementByAttribute(this, "anonid", "searchNext"),
+                searchMenu = document.getAnonymousElementByAttribute(this, "anonid", "fbSearchOptionsMenu"),
+                searchDescription = document.getAnonymousElementByAttribute(this, "anonid", "fbSearchBoxDescription"),
                 optionsPopup = document.getElementById("fbSearchOptionsPanel");
+                if (searchMenu)
+                    searchMenu.setAttribute("aria-label", FBL.$STR("a11y.labels.search options"))
+                if (searchDescription)
+                    searchDescription.setAttribute("tooltiptext", FBL.$STR("a11y.labels.Press up or down arrow key for search options"))
             FBL.internationalize(searchBox, "label");
             FBL.internationalize(searchPrev, "label");
             FBL.internationalize(searchNext, "label");

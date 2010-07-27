@@ -133,7 +133,7 @@
         <box id="fbPanelBox" flex="1">
             <panelBar id="fbPanelBar1" class="panelBar" flex="3" persist="width,height">
                 <hbox id="fbPanelBar1-tabBox" class="panelTabBox">
-                    <hbox id="fbPanelBar1-innerToolbar" class="innerToolbar" role="toolbar" aria-label="Firebug Tools">
+                    <hbox id="fbPanelBar1-innerToolbar" class="innerToolbar" role="toolbar" aria-label="a11y.labels.firebug_tools">
                         <hbox id="fbPanelBar1-buttons">
 
                             <!-- Firebug Icon Menu -->
@@ -151,7 +151,7 @@
                             <toolbarseparator id="fbInspectSeparator"/>
 
                             <!-- History of Navigation -->
-                            <toolbaritem contextmenu="fbNavigationHistoryMenu">
+                            <toolbaritem contextmenu="fbNavigationHistoryMenu" class="noTabStop">
                                 <toolbarbutton id="fbNavigateBackButton" disabled="true"
                                     tooltiptext="firebug.history.Go back"
                                     command="cmd_navBack"/>
@@ -228,7 +228,7 @@
                                         </stack>
                                     </toolbarbutton>
 
-                                    <hbox id="fbConsoleButtons" collapsed="true">
+                                    <hbox id="fbConsoleButtons" collapsed="true" class="noTabStop">
                                         <toolbarseparator class="fbPanelSpecificButtonsSeparator"/>
                                         <toolbarbutton id="fbConsoleClear" label="firebug.Clear" class="toolbar-text-button"
                                             tooltiptext="firebug.ClearTooltip" command="cmd_clearConsole"/>
@@ -254,19 +254,19 @@
                                             oncommand="Firebug.Console.onToggleFilter(FirebugContext, 'debug')"/>
                                     </hbox>
 
-                                    <hbox id="fbHTMLButtons" collapsed="true">
+                                    <hbox id="fbHTMLButtons" collapsed="true" class="noTabStop" >
                                         <toolbarseparator class="fbPanelSpecificButtonsSeparator"/>
                                         <toolbarbutton id="fbToggleHTMLEditing" label="firebug.Edit" class="toolbar-text-button"
                                             tooltiptext="firebug.EditHTMLTooltip" command="cmd_toggleHTMLEditing"/>
                                     </hbox>
 
-                                    <hbox id="fbCSSButtons" collapsed="true">
+                                    <hbox id="fbCSSButtons" collapsed="true" class="noTabStop">
                                         <toolbarseparator class="fbPanelSpecificButtonsSeparator"/>
                                         <toolbarbutton id="fbToggleCSSEditing" label="firebug.Edit" class="toolbar-text-button"
                                             tooltiptext="firebug.EditCSSTooltip" command="cmd_toggleCSSEditing"/>
                                     </hbox>
 
-                                    <hbox id="fbScriptButtons" collapsed="true">
+                                    <hbox id="fbScriptButtons" collapsed="true" class="noTabStop">
                                         <toolbarseparator class="fbPanelSpecificButtonsSeparator"/>
                                         <tooltip id="fbScriptFilterMenuTooltip" role="presentation"
                                             onpopupshowing="return Firebug.Debugger.onScriptFilterMenuTooltipShowing(this, FirebugContext)"/>
@@ -283,7 +283,7 @@
                                         </toolbarbutton>
                                     </hbox>
 
-                                    <hbox id="fbNetButtons" collapsed="true">
+                                    <hbox id="fbNetButtons" collapsed="true" class="noTabStop">
                                         <toolbarseparator class="fbPanelSpecificButtonsSeparator"/>
                                         <toolbarbutton id="fbNetClear" label="firebug.Clear" class="toolbar-text-button"
                                             tooltiptext="firebug.ClearTooltip" command="cmd_clearNet"/>
@@ -336,7 +336,7 @@
                                     <toolbarseparator id="fbLocationSeparator" collapsed="true"/>
                                     <toolbarbutton id="fbLocationList" locationProvider="FirebugChrome.getLocationProvider();"
                                           collapsed="true" tooltip="fbTooltip" contextmenu="fbContextMenu"
-                                          class="noTabStop" role="button" aria-haspopup="true" aria-label="file selector"/>
+                                          class="noTabStop" role="button" aria-haspopup="true" aria-label="a11y.labels.file selector"/>
 
                                     <toolbarseparator id="fbStatusSeparator" collapsed="true"/>
                                     <panelStatus id="fbPanelStatus" flex="1"
@@ -376,7 +376,7 @@
                                     class="tabbrowser-arrowscrollbox">
                                     <!-- Tab Side Bar -->
                                     <hbox id="fbPanelBar2-panelTabs" class="panelTabs" role="tablist"
-                                          aria-label="firebug side panels" />
+                                          aria-label="a11y.labels.firebug_side_panels" />
                                 </panelBarArrowscrollbox>
                             </hbox>
                             <deck id="fbPanelBar2-deck" flex="1">

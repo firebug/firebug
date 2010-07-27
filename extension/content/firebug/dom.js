@@ -122,7 +122,7 @@ const DirTablePlate = domplate(Firebug.Rep,
     tableTag:
         TABLE({"class": "domTable", cellpadding: 0, cellspacing: 0,
             _toggles: "$toggles", _domPanel: "$domPanel", onclick: "$onClick",
-            role: 'tree', 'aria-label': 'DOM properties'},
+            role: 'tree', 'aria-label': $STR('a11y.labels.dom_properties')},
             TBODY({role : 'presentation'},
                 SizerRow
             )

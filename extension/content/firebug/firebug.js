@@ -280,6 +280,8 @@ top.Firebug =
 
             "menu_inspectElement", "menu_profileScript", "menu_focusCommandLine",
             "menu_focusFirebugSearch", "Firebug_About",
+            
+            "fbPanelBar2-panelTabs", "fbWindowButtons", "fbPanelBar1-innerToolbar", "fbLocationList",
 
             /* browserOverlay.xul */
             "menu_openFirebugEditors", "menu_firebugInspect", "menu_viewToggleFirebug",
@@ -302,6 +304,8 @@ top.Firebug =
 
             if (element.hasAttribute("tooltiptext"))
                 FBL.internationalize(element, "tooltiptext");
+            if (element.hasAttribute("aria-label"))
+                FBL.internationalize(element, "aria-label");
         }
 
         // Translated strings for this label don't include "..." at the end.

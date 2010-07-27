@@ -35,7 +35,6 @@ Firebug.A11yModel = extend(Firebug.Module,
         this.onScriptKeyPress = bind(this.onScriptKeyPress, this);
         this.onScriptKeyUp = bind(this.onScriptKeyUp, this);
         this.onScriptMouseUp = bind(this.onScriptMouseUp, this);
-        //XXXjjb this one got lost? this.onNetKeyPress = bind(this.onNetKeyPress, this);
         this.onNetMouseDown = bind(this.onNetMouseDown, this);
         this.onNetFocus = bind(this.onNetFocus, this);
         this.onNetBlur = bind(this.onNetBlur, this);
@@ -2243,7 +2242,7 @@ Firebug.A11yModel = extend(Firebug.Module,
             Array.forEach(focusObjects, function(e,i,a) {
                 this.makeFocusable(e);
                 if (hasClass(e, 'netTimeCol') && getAncestorByClass(e, 'fromCache'))
-                    e.setAttribute('aria-label', e.textContent + " (" + $STR("a11y.labels.cached") +")"); // TODO : localize
+                    e.setAttribute('aria-label', e.textContent + " (" + $STR("a11y.labels.cached") +")");
             }, this);
         }
         else return;
