@@ -176,10 +176,10 @@ Firebug.Console = extend(ActivableConsole,
 
     initialize: function()
     {
-        Firebug.ActivableModule.initialize.apply(this, arguments);
+    	Firebug.consoleFilterTypes = "";
+    	Firebug.ActivableModule.initialize.apply(this, arguments);
         Firebug.Debugger.addListener(this);
         this.syncFilterButtons(Firebug.chrome);
-        Firebug.consoleFilterTypes = "";
     },
 
     initContext: function(context, persistedState)
