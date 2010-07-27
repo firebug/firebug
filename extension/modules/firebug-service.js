@@ -1046,8 +1046,8 @@ var fbs =
     broadcast: function(message, args)  // re-transmit the message (string) with args [objs] to XUL windows.
     {
         dispatch(clients, message, args);
-        if (FBTrace.DBG_FBS_ERRORS)
-            FBTrace.sysout("fbs.broadcast "+message+" to "+clients.length+" windows\n");
+        if (FBTrace.DBG_FBS_ERRORS || FBTrace.DBG_ACTIVATION)
+            FBTrace.sysout("fbs.broadcast "+message+" to "+clients.length+" clients", clients);
     },
 
 
@@ -1141,7 +1141,7 @@ var fbs =
             {
                 var peelOurselvesOff = frame.callingFrame;  // remove debuggerHalter()
                 if (!fbs.isChromeBlocked) // then we will have another frame from this file
-                	peelOurselvesOff = peelOurselvesOff.callingFrame; // remove fbs.halt()
+                    peelOurselvesOff = peelOurselvesOff.callingFrame; // remove fbs.halt()
 
                 while( peelOurselvesOff && ( peelOurselvesOff.script.fileName.indexOf("content/debugger.js") > 0 ) )
                     peelOurselvesOff = peelOurselvesOff.callingFrame;

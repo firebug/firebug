@@ -72,7 +72,7 @@ var httpRequestObserver =
     {
         if (FBTrace.DBG_HTTPOBSERVER)
             FBTrace.sysout("httpObserver.registerObservers; wasObserving: " +
-                this.isObserving);
+                this.isObserving+" with observers "+this.observers.length, this.observers);
 
         if (this.isObserving)
             return;
@@ -88,7 +88,7 @@ var httpRequestObserver =
     {
         if (FBTrace.DBG_HTTPOBSERVER)
             FBTrace.sysout("httpObserver.unregisterObservers; wasObserving: " +
-                this.isObserving);
+                this.isObserving+" with observers "+this.observers.length, this.observers);
 
         if (!this.isObserving)
             return;
@@ -210,6 +210,8 @@ function dumpStack(message)
 /* nsIFireBugClient */
 var FirebugClient =
 {
+    dispatchName: "httpRequestObserver",
+
     disableXULWindow: function()
     {
         httpRequestObserver.unregisterObservers();
