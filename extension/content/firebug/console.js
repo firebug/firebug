@@ -63,7 +63,7 @@ Firebug.ConsoleBase =
     logRow: function(appender, objects, context, className, rep, sourceLink, noThrottle, noRow)
     {
         if (!context)
-            context = FirebugContext;
+            context = Firebug.currentContext;
 
         if (FBTrace.DBG_ERRORS && !context)
             FBTrace.sysout("Console.logRow has no context, skipping objects", objects);
@@ -106,7 +106,7 @@ Firebug.ConsoleBase =
     appendFormatted: function(args, row, context)
     {
         if (!context)
-            context = FirebugContext;
+            context = Firebug.currentContext;
 
         var panel = this.getPanel(context);
         panel.appendFormatted(args, row);
@@ -115,7 +115,7 @@ Firebug.ConsoleBase =
     clear: function(context)
     {
         if (!context)
-            context = FirebugContext;
+            context = Firebug.currentContext;
 
         if (context)
             Firebug.Errors.clear(context);
@@ -176,8 +176,8 @@ Firebug.Console = extend(ActivableConsole,
 
     initialize: function()
     {
-    	Firebug.consoleFilterTypes = "";
-    	Firebug.ActivableModule.initialize.apply(this, arguments);
+        Firebug.consoleFilterTypes = "";
+        Firebug.ActivableModule.initialize.apply(this, arguments);
         Firebug.Debugger.addListener(this);
         this.syncFilterButtons(Firebug.chrome);
     },
@@ -277,9 +277,9 @@ Firebug.Console = extend(ActivableConsole,
     onToggleFilter: function(context, filterType)
     {
         if (!context)
-            context = FirebugContext;
+            context = Firebug.currentContext;
 
-/* Preparation for multiple filters 
+/* Preparation for multiple filters
         if (filterType == "")
             Firebug.consoleFilterTypes = "";
         else
@@ -357,7 +357,7 @@ Firebug.Console = extend(ActivableConsole,
     logRow: function(appender, objects, context, className, rep, sourceLink, noThrottle, noRow)
     {
         if (!context)
-            context = FirebugContext;
+            context = Firebug.currentContext;
 
         if (FBTrace.DBG_WINDOWS && !context)
             FBTrace.sysout("Console.logRow: no context \n");
@@ -827,7 +827,7 @@ Firebug.ConsolePanel.prototype = extend(Firebug.ActivablePanel,
     getShowStackTraceMenuItem: function()
     {
         var menuItem = serviceOptionMenu("ShowStackTrace", "showStackTrace");
-        if (FirebugContext && !Firebug.Debugger.isAlwaysEnabled())
+        if (Firebug.currentContext && !Firebug.Debugger.isAlwaysEnabled())
             menuItem.disabled = true;
         return menuItem;
     },

@@ -103,6 +103,7 @@ top.FirebugChrome =
             top.FBL = detachArgs.FBL;
             Firebug = detachArgs.Firebug;
             FirebugContext = detachArgs.FirebugContext;
+            Firebug.currentContext = FirebugContext;
         }
         else
         {
@@ -662,6 +663,7 @@ top.FirebugChrome =
          // This sets the global value of FirebugContext in the window that this chrome is compiled into.
          // Note that for firebug.xul, the Firebug object is shared across windows, but not FirebugChrome and FirebugContext
          FirebugContext = context;
+         Firebug.currentContext = context;
 
          if (FBTrace.DBG_WINDOWS || FBTrace.DBG_DISPATCH)
              FBTrace.sysout("setFirebugContext "+(FirebugContext?FirebugContext.getName():" **> NULL <** ") + " in "+window.location+" has wrapped: "+(FirebugContext?FirebugContext.wrappedJSObject:"no"));
