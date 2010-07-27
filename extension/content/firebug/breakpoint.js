@@ -47,12 +47,12 @@ Firebug.Breakpoint = extend(Firebug.Module,
             breakButton.setAttribute("panelName", panel.name);
 
         breakButton.removeAttribute("type");
-
+        collapse(breakButton, panel.breakable ? false : true);
+        
         // Disable break-on-next if it isn't supported by the current panel.
         if (!panel.breakable || !panel.context.jsDebuggerActive )
         {
             Firebug.chrome.setGlobalAttribute("cmd_breakOnNext", "breakable", "disabled");
-            Firebug.chrome.setGlobalAttribute("cmd_breakOnNext", "tooltiptext", "");
             return;
         }
 
