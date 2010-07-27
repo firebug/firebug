@@ -1328,6 +1328,7 @@ DOMMainPanel.prototype = extend(Firebug.DOMBasePanel.prototype,
     statusSeparator: ">",
     enableA11y: true,
     deriveA11yFrom: "console",
+    searchType : "dom",
 
     initialize: function()
     {

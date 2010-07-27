@@ -1066,7 +1066,7 @@ Firebug.A11yModel = extend(Firebug.Module,
         }
     },
 
-    onObjectBoxSelected: function(objectBox)
+    onObjectBoxSelected: function(objectBox, forceFocus)
     {
         var panel = Firebug.getElementPanel(objectBox);
         var panelA11y = this.getPanelA11y(panel);
@@ -1075,7 +1075,7 @@ Firebug.A11yModel = extend(Firebug.Module,
         var label = objectBox.firstChild.getElementsByClassName('nodeLabelBox').item(0);
         if (label) {
             this.makeFocusable(label, true);
-            if (this.panelHasFocus(panel))
+            if (this.panelHasFocus(panel) || forceFocus)
                 this.focus(label);
         }
     },
@@ -1134,7 +1134,8 @@ Firebug.A11yModel = extend(Firebug.Module,
         var popup = Firebug.chrome.$('fbSearchOptionsPopup');
         if (popup)
             popup.hidePopup();
-        switch(panelA11y.type)
+        var type = panel.searchType ? panel.searchType : panelA11y.type;
+        switch(type)
         {
             case 'html':
                 var match = panel.lastSearch.lastMatch;
@@ -1144,9 +1145,12 @@ Firebug.A11yModel = extend(Firebug.Module,
                 if (!nodeBox)
                     return;
                 nodeBox = getAncestorByClass(nodeBox, 'nodeBox');
+                //select call will not trigger focus because focus is outside the HTML panel (i.e. the search field),
                 panel.select(nodeBox.repObject, true);
+                // Manually force selected node to be focused  
+                this.onObjectBoxSelected(nodeBox, true);
                 break;
-            case 'stylesheet':
+            case 'css':
                 if (panel.currentSearch && panel.currentSearch.currentNode)
                 {
                     var focusRow = getAncestorByClass(panel.currentSearch.currentNode, 'focusRow');
