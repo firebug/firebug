@@ -147,9 +147,11 @@ var Errors = Firebug.Errors = extend(Firebug.Module,
                     FBTrace.sysout("errors.observe nsIScriptError: "+object.errorMessage, object);
 
                 var context = this.getErrorContext(object);  // after instanceof
-                context = this.logScriptError(context, object, isWarning);
+
                 if (!context)
                     return;
+
+                context = this.logScriptError(context, object, isWarning);
             }
             else
             {
@@ -161,6 +163,8 @@ var Errors = Firebug.Errors = extend(Firebug.Module,
                             FBTrace.sysout("errors.observe nsIConsoleMessage: "+object.message, object);
 
                         var context = this.getErrorContext(object);  // after instanceof
+                        if (!context)
+                            context = FirebugContext;
                         var msgId = lessTalkMoreAction(context, object, isWarning);
                         if (!msgId)
                             return;
@@ -173,7 +177,11 @@ var Errors = Firebug.Errors = extend(Firebug.Module,
                             FBTrace.sysout("errors.observe object.message:", object);
 
                         var context = this.getErrorContext(object);
-                        if (context)  // maybe just FirebugContext
+
+                        if (!context)
+                            context = FirebugContext;
+
+                        if (context)
                             Firebug.Console.log(object.message, context, "consoleMessage", FirebugReps.Text);
                         else
                             FBTrace.sysout("errors.observe, no context for message", object);
@@ -250,18 +258,10 @@ var Errors = Firebug.Errors = extend(Firebug.Module,
 
         var className = isWarning ? "warningMessage" : "errorMessage";
 
-        if (context)
-        {
-            if (FBTrace.DBG_ERRORLOG) FBTrace.sysout("errors.observe delayed log to "+context.getName()+"\n");
-             // then report later to avoid loading sourceS
-            context.throttle(this.delayedLogging, this, [msgId, context, error, context, className, false, true], true);
-        }
-        else
-        {
-            if (FBTrace.DBG_ERRORLOG) FBTrace.sysout("errors.observe direct log to FirebugContext"+FirebugContext+"\n");
-            Firebug.Console.log(error, FirebugContext,  className);
-        }
-        return context;
+        if (FBTrace.DBG_ERRORLOG) FBTrace.sysout("errors.observe delayed log to "+context.getName()+"\n");
+        // report later to avoid loading sourceS
+        context.throttle(this.delayedLogging, this, [msgId, context, error, context, className, false, true], true);
+
     },
 
     delayedLogging: function()
@@ -290,7 +290,7 @@ var Errors = Firebug.Errors = extend(Firebug.Module,
                     return false;
 
                 if (FBTrace.DBG_ERRORLOG)
-                    FBTrace.sysout("findContextByURL for "+(context.loaded?'loaded':'not loaded')+" window location: "+context.getWindowLocation().toString());
+                    FBTrace.sysout("findContextByURL seeking "+url+" in "+(context.loaded?'loaded':'not loaded')+" window location: "+context.getWindowLocation().toString());
 
                 if (context.getWindowLocation().toString() == url)
                 {
@@ -351,11 +351,7 @@ var Errors = Firebug.Errors = extend(Firebug.Module,
         {
             if (FBTrace.DBG_ERRORLOG)
                 FBTrace.sysout("errors.getErrorContext no context from error filename:"+url, object);
-            errorContext = FirebugContext;  // this is problem if the user isn't viewing the page with errors
         }
-
-        if (FBTrace.DBG_ERRORLOG && !FirebugContext)
-            FBTrace.sysout("errors.observe, no FirebugContext in "+window.location+"\n");
 
         return errorContext; // we looked everywhere...
     },
