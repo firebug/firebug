@@ -729,6 +729,11 @@ top.FirebugChrome =
                 sidePanelName = getBestSidePanelName(sidePanelName, panelTypes);
                 panelBar2.selectPanel(sidePanelName, true);
             }
+            else
+            {
+                // if the context changes we need to refresh the panel
+                panelBar2.selectPanel(panelBar2.selectedPanel.name, true);
+            }
         }
         else
             panelBar2.selectPanel(null);
