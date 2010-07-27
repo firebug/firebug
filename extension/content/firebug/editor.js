@@ -1333,6 +1333,9 @@ Firebug.AutoCompleter = function(getExprOffset, getRange, evaluator, selectMode,
         }
         else if (event.keyCode === 9) // TAB, cycle
         {
+            if (completionPopup.state == "closed")
+                return; // When the list is collapsed, allow (shift) tabbing out of the field
+                
             if (isShift(event))
                 this.complete(context, textBox, true, true, true);
             else
