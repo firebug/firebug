@@ -1219,7 +1219,7 @@ Firebug.AutoCompleter = function(getExprOffset, getRange, evaluator, selectMode,
         vbox.classList.add("fbCommandLineCompletions");
 
         var title = completionPopup.ownerDocument.createElementNS("http://www.w3.org/1999/xhtml","div");
-        title.innerHTML = $STR("console.Use TAB and arrow keys");
+        title.innerHTML = $STR("console.Use Arrow keys or Enter");
         title.classList.add('fbPopupTitle');
         vbox.appendChild(title);
 
