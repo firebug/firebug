@@ -121,20 +121,11 @@ Firebug.CommandLine = extend(Firebug.Module,
         expr = "with(_FirebugCommandLine){" + expr + "\n};";
         win.document.setUserData("firebug-expr", expr, null);
 
-        if (!context.activeConsoleHandlers)
-        {
-            if (FBTrace.DBG_ERRORS || FBTrace.DBG_COMMANDLINE)
-                FBTrace.sysout("commandLine.evaluateByEventPassing no consoleHandler ",
-                    context.activeConsoleHandlers);
-            return;
-        }
-
-        var consoleHandler = context.activeConsoleHandlers[win.wrappedJSObject];
+        var consoleHandler = Firebug.Console.injector.getConsoleHandler(context, win);
 
         if (!consoleHandler)
         {
-            FBTrace.sysout("commandLine evaluateByEventPassing no consoleHandler ",
-                context.activeConsoleHandlers);
+            FBTrace.sysout("commandLine evaluateByEventPassing no consoleHandler "+safeGetWindowLocation(win));
             return;
         }
 
@@ -223,12 +214,11 @@ Firebug.CommandLine = extend(Firebug.Module,
         expr = expr.toString();
         expr = "with(_FirebugCommandLine){" + expr + "\n};";
 
-        var consoleHandler = context.activeConsoleHandlers[win.wrappedJSObject];
+        var consoleHandler = Firebug.Console.injector.getConsoleHandler(context, win);
 
         if (!consoleHandler)
         {
-            FBTrace.sysout("commandLine evaluateByPostMessage no consoleHandler ",
-                context.activeConsoleHandlers);
+            FBTrace.sysout("commandLine evaluateByPostMessage no consoleHandler "+safeGetWindowLocation(win));
             return;
         }
 
@@ -1105,12 +1095,9 @@ function FirebugCommandLineAPI(context, baseWindow)
         // The window object parameter uses XPCSafeJSObjectWrapper, but we need XPCNativeWrapper
         // (and its wrappedJSObject member). So, look within all registered consoleHandlers for
         // the same window (from tabWatcher) that uses uses XPCNativeWrapper (operator "==" works).
-        for (var p in context.activeConsoleHandlers) {
-            if (context.activeConsoleHandlers.hasOwnProperty(p) && p == object) {
-                baseWindow = context.baseWindow = p;
-                break;
-            }
-        }
+        var entry = Firebug.Console.injector.getConsoleHandlerEntry(context, object);
+        if (entry)
+            baseWindow = entry.win;
 
         Firebug.Console.log(["Current window:", context.baseWindow], context, "info");
     };

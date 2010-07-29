@@ -867,7 +867,7 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
 
         context.jsDebuggerActive = true;
 
-        if (!context.consoleToken)
+        if (!Firebug.Console.injector.isAttached(context, frameWin))
         {
             var win = frameWin.wrappedJSObject ? frameWin.wrappedJSObject : frameWin;
             this.injectConsole(context, win);
@@ -875,7 +875,7 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
         else
         {
             if (FBTrace.DBG_CONSOLE)
-                FBTrace.sysout("debugger.supportsGlobal consoleToken exists", win);
+                FBTrace.sysout("debugger.supportsGlobal console isAttached to "+safeGetWindowLocation(frameWin)+" in  "+context.getName());
         }
 
         this.breakContext = context;

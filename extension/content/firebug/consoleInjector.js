@@ -13,17 +13,24 @@ top.Firebug.Console.injector =
 {
     isAttached: function(context, win)
     {
-        if (FBTrace.DBG_CONSOLE)
-            FBTrace.sysout("Console.isAttached :"+context.consoleToken+" vs  "+win.document.getUserData("firebug-Token")+ " in "+safeGetWindowLocation(win.wrappedJSObject));
-
-        if (!context.consoleToken)
-            return false;
-
         var attachedToken = win.document.getUserData("firebug-Token");
+
+        if (FBTrace.DBG_CONSOLE)
+            FBTrace.sysout("Console.isAttached document token:"+attachedToken+ " in "+safeGetWindowLocation(win));
+
         if (!attachedToken)
             return false;
 
-        if (context.consoleToken !== attachedToken)
+        var handler = this.getConsoleHandler(context, win);
+
+        if( !handler )
+        {
+            if (FBTrace.DBG_CONSOLE)
+                FBTrace.sysout("Console.isAttached no handler where we have a token!", context.activeConsoleHandlers);
+            return false;
+        }
+
+        if (handler.token !== attachedToken)
         {
             Firebug.Console.logFormatted(["Firebug Console token changed!"], FirebugContext, "info");  // XXXTODO NLS
             return false;
@@ -120,30 +127,65 @@ top.Firebug.Console.injector =
 
     addConsoleListener: function(context, win)
     {
-        if (!context.activeConsoleHandlers)  // then we have not been this way before
-            context.activeConsoleHandlers = {};
-
         if (!win)
             win = context.window;
 
         if (win.wrappedJSObject)
             win = win.wrappedJSObject;
 
-        if (context.activeConsoleHandlers[win])
-            return;
-
         win.document.setUserData("firebug-Version", Firebug.version, null); // Initialize Firebug version.
 
-        context.consoleToken = Math.random();
-        win.document.setUserData("firebug-Token", context.consoleToken, null); // Initialize Firebug token
 
         var handler = createConsoleHandler(context, win);
+        win.document.setUserData("firebug-Token", handler.token, null); // Initialize Firebug token
 
-        context.activeConsoleHandlers[win] = handler;
+        this.setConsoleHandler(context, win, handler);
+
+        return true;
+    },
+
+    getConsoleHandlerEntry: function(context, win)
+    {
+        var wrapperNonsense = (win.wrappedJSObject ? win.wrappedJSObject : win);
+        if (context.activeConsoleHandlers)
+        {
+            for(var i = 0; i < context.activeConsoleHandlers.length; i++)
+            {
+                if (context.activeConsoleHandlers[i].win === wrapperNonsense)
+                    return context.activeConsoleHandlers[i];
+            }
+        }
+    },
+
+    getConsoleHandler: function(context, win)
+    {
+        var entry = this.getConsoleHandlerEntry(context, win);
+        if (entry)
+            return entry.handler;
+    },
+
+    removeConsoleHandler: function(context, win)
+    {
+        var entry = this.getConsoleHandlerEntry(context, win);
+        if (entry)
+        {
+            entry.handler.detach();
+            remove(context.activeConsoleHandlers, entry);
+        }
+    },
+
+    setConsoleHandler: function(context, win, handler)
+    {
+        if (!context.activeConsoleHandlers)
+            context.activeConsoleHandlers = [];
+
+        var wrapperNonsense = (win.wrappedJSObject ? win.wrappedJSObject : win);
+
+        context.activeConsoleHandlers.push({win: wrapperNonsense, handler: handler });
 
         if (FBTrace.DBG_CONSOLE)
-            FBTrace.sysout("consoleInjector addConsoleListener attached handler("+handler.handler_name+") to _firebugConsole in : "+win.location+"\n");
-        return true;
+            FBTrace.sysout("consoleInjector addConsoleListener set token "+handler.token+" and  attached handler("+handler.handler_name+") to _firebugConsole in : "+safeGetWindowLocation(wrapperNonsense));
+
     },
 
     detachConsole: function(context, win)
@@ -154,13 +196,7 @@ top.Firebug.Console.injector =
         if (win.wrappedJSObject)
             win = win.wrappedJSObject;
 
-        if (context.activeConsoleHandlers)
-        {
-            if (context.activeConsoleHandlers[win])
-                context.activeConsoleHandlers[win].detach();
-            delete context.activeConsoleHandlers[win];
-        }
-
+        this.removeConsoleHandler(context, win);
     },
 }
 
@@ -179,6 +215,8 @@ function createConsoleHandler(context, win)
     };
 
     handler.handler_name = ++total_handlers;
+    handler.token = Math.random();
+
     handler.handleEvent = function(event)
     {
         if (FBTrace.DBG_CONSOLE)
