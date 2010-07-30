@@ -757,7 +757,7 @@ var fbs =
 
     untraceAll: function(debuggr)
     {
-        jsd.functionHook = null; // undo hookCalls()
+        this.unhookFunctions(); // undo hookCalls()
     },
 
     traceCalls: function(sourceFile, lineNo, debuggr)
@@ -1297,6 +1297,99 @@ var fbs =
             return RETURN_CONTINUE;
         else
             return this.onBreak(frame, type, val);
+    },
+
+    onFunction: function(frame, type)
+    {
+        switch (type)
+        {
+            case TYPE_TOPLEVEL_START: // fall through
+            case TYPE_FUNCTION_CALL:  // the frame will be running the called script
+            {
+                if (stepMode == STEP_OVER || stepMode == STEP_OUT)
+                {
+                    if (frame.callingFrame && frame.callingFrame.script.tag === stepFrameTag) // then we are called by the stepping script
+                        stepRecursion++;
+
+                        this.unhookInterrupts(); // don't watch execution steps, wait for return
+                }
+                else if (stepMode == STEP_INTO)  // normally step into will break in the interrupt handler, but not in event handlers.
+                {
+                    fbs.stopStepping();
+                    stepMode = STEP_SUSPEND; // break on next
+                    fbs.hookInterrupts();
+                }
+
+                break;
+            }
+            case TYPE_TOPLEVEL_END: // fall through
+            case TYPE_FUNCTION_RETURN:  // the frame will be running the called script
+            {
+                if (!frame.callingFrame)   // stack empty
+                {
+                    if ( (stepMode == STEP_INTO) || (stepMode == STEP_OVER) )
+                    {
+                        fbs.stopStepping();
+                        stepMode = STEP_SUSPEND; // break on next
+                        fbs.hookInterrupts();
+                    }
+                    else
+                    {
+                        fbs.stopStepping();
+                    }
+                }
+                else if (stepMode == STEP_OVER || stepMode == STEP_OUT)
+                {
+                    if (!stepRecursion) // then we never hit FUNCTION_CALL or we rolled back after we hit it
+                    {
+                        if (frame.script.tag === stepFrameTag)// We are in the stepping frame,
+                            fbs.hookInterrupts();  // so halt on the next PC
+                    }
+                    else if (frame.callingFrame.script.tag === stepFrameTag) //then we could be in the step call
+                    {
+                        stepRecursion--;
+
+                        if (!stepRecursion) // then we've rolled back to the step-call
+                        {
+                            if (stepMode == STEP_OVER) // then halt in the next pc of the caller
+                                fbs.hookInterrupts();
+                        }
+                    }
+                    // else we are not interested in this FUNCTION_RETURN
+                }
+
+                break;
+            }
+        }
+        if (FBTrace.DBG_FBS_STEP)
+        {
+            var typeName = getCallFromType(type);
+            var actualFrames = countFrames(frame);
+            FBTrace.sysout("functionHook "+typeName+" stepMode = "+getStepName(stepMode)+" for script "+stepFrameTag+
+                " (actual: "+actualFrames+") stepRecursion="+
+                stepRecursion+" running "+frame.script.tag+" of "+frame.script.fileName+" at "+frame.line+"."+frame.pc);
+        }
+    },
+
+    onInterrupt: function(frame, type, rv)
+    {
+        /*if ( isFilteredURL(frame.script.fileName) )  // it does not seem feasible to use jsdIFilter-ing TODO try again
+        {
+            if (FBTrace.DBG_FBS_STEP)
+                FBTrace.sysout("fbs.hookInterrupts filtered "+frame.script.fileName);
+            return RETURN_CONTINUE;
+        }
+         */
+
+        // Sometimes the same line will have multiple interrupts, so check
+        // a unique id for the line and don't break until it changes
+        var frameLineId = stepRecursion + frame.script.fileName + frame.line;
+        if (FBTrace.DBG_FBS_STEP && (stepMode != STEP_SUSPEND) )
+            FBTrace.sysout("interruptHook pc:"+frame.pc+" frameLineId: "+frameLineId+" vs "+stepFrameLineId+" running "+frame.script.tag+" of "+frame.script.fileName+" at "+frame.line+"."+frame.pc);
+        if (frameLineId != stepFrameLineId)
+            return fbs.onBreak(frame, type, rv);
+        else
+            return RETURN_CONTINUE;
     },
 
     onThrow: function(frame, type, rv)
@@ -2719,8 +2812,8 @@ var fbs =
             runningUntil = null;
         }
 
-        jsd.interruptHook = null;
-        jsd.functionHook = null;
+        this.unhookInterrupts();
+        this.unhookFunctions();
     },
 
     /*
@@ -2732,110 +2825,26 @@ var fbs =
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+    hookInterrupts: function()
+    {
+        if (FBTrace.DBG_FBS_STEP) FBTrace.sysout("set InterruptHook with stepFrameLineId: "+stepFrameLineId);
+        jsd.interruptHook = { onExecute: hook(this.onInterrupt, RETURN_CONTINUE)};
+    },
+
+    unhookInterrupts: function()
+    {
+        jsd.interruptHook = null;
+    },
 
     hookFunctions: function()
     {
-        function functionHook(frame, type)
-        {
-            switch (type)
-            {
-                case TYPE_TOPLEVEL_START: // fall through
-                case TYPE_FUNCTION_CALL:  // the frame will be running the called script
-                {
-                    if (stepMode == STEP_OVER || stepMode == STEP_OUT)
-                    {
-                        if (frame.callingFrame && frame.callingFrame.script.tag === stepFrameTag) // then we are called by the stepping script
-                            stepRecursion++;
-
-                        jsd.interruptHook = null; // don't watch execution steps, wait for return
-                    }
-                    else if (stepMode == STEP_INTO)  // normally step into will break in the interrupt handler, but not in event handlers.
-                    {
-                        fbs.stopStepping();
-                        stepMode = STEP_SUSPEND; // break on next
-                        fbs.hookInterrupts();
-                    }
-
-                    break;
-                }
-                case TYPE_TOPLEVEL_END: // fall through
-                case TYPE_FUNCTION_RETURN:  // the frame will be running the called script
-                {
-                    if (!frame.callingFrame)   // stack empty
-                    {
-                        if ( (stepMode == STEP_INTO) || (stepMode == STEP_OVER) )
-                        {
-                            fbs.stopStepping();
-                            stepMode = STEP_SUSPEND; // break on next
-                            fbs.hookInterrupts();
-                        }
-                        else
-                        {
-                            fbs.stopStepping();
-                        }
-                    }
-                    else if (stepMode == STEP_OVER || stepMode == STEP_OUT)
-                    {
-                        if (!stepRecursion) // then we never hit FUNCTION_CALL or we rolled back after we hit it
-                        {
-                            if (frame.script.tag === stepFrameTag)// We are in the stepping frame,
-                                fbs.hookInterrupts();  // so halt on the next PC
-                        }
-                        else if (frame.callingFrame.script.tag === stepFrameTag) //then we could be in the step call
-                        {
-                            stepRecursion--;
-
-                            if (!stepRecursion) // then we've rolled back to the step-call
-                            {
-                                if (stepMode == STEP_OVER) // then halt in the next pc of the caller
-                                    fbs.hookInterrupts();
-                            }
-                        }
-                        // else we are not interested in this FUNCTION_RETURN
-                    }
-
-                    break;
-                }
-            }
-            if (FBTrace.DBG_FBS_STEP)
-            {
-                var typeName = getCallFromType(type);
-                var actualFrames = countFrames(frame);
-                FBTrace.sysout("functionHook "+typeName+" stepMode = "+getStepName(stepMode)+" for script "+stepFrameTag+
-                    " (actual: "+actualFrames+") stepRecursion="+
-                    stepRecursion+" running "+frame.script.tag+" of "+frame.script.fileName+" at "+frame.line+"."+frame.pc);
-            }
-        }
-
         if (FBTrace.DBG_FBS_STEP) FBTrace.sysout("set functionHook");
-        jsd.functionHook = { onCall: functionHook };
+        jsd.functionHook = { onCall: hook(this.onFunction, true) };
     },
 
-    hookInterrupts: function()
+    unhookFunctions: function()
     {
-        function interruptHook(frame, type, rv)
-        {
-            /*if ( isFilteredURL(frame.script.fileName) )  // it does not seem feasible to use jsdIFilter-ing TODO try again
-            {
-                if (FBTrace.DBG_FBS_STEP)
-                    FBTrace.sysout("fbs.hookInterrupts filtered "+frame.script.fileName);
-                return RETURN_CONTINUE;
-            }
-             */
-
-            // Sometimes the same line will have multiple interrupts, so check
-            // a unique id for the line and don't break until it changes
-            var frameLineId = stepRecursion + frame.script.fileName + frame.line;
-            if (FBTrace.DBG_FBS_STEP && (stepMode != STEP_SUSPEND) )
-                FBTrace.sysout("interruptHook pc:"+frame.pc+" frameLineId: "+frameLineId+" vs "+stepFrameLineId+" running "+frame.script.tag+" of "+frame.script.fileName+" at "+frame.line+"."+frame.pc);
-            if (frameLineId != stepFrameLineId)
-                return fbs.onBreak(frame, type, rv);
-            else
-                return RETURN_CONTINUE;
-        }
-
-        if (FBTrace.DBG_FBS_STEP) FBTrace.sysout("set InterruptHook with stepFrameLineId: "+stepFrameLineId);
-        jsd.interruptHook = { onExecute: interruptHook };
+        jsd.functionHook = null;
     },
 
     hookScripts: function()
@@ -2893,7 +2902,7 @@ var fbs =
                         FBTrace.sysout("functionHook TYPE_FUNCTION_RETURN "+frame.script.fileName+"\n");
 
                     if (unhookAtBottom && hookFrameCount == 0) {  // stack empty
-                       jsd.functionHook = null;
+                       this.unhookFunctions();
                     }
 
                     contextCached = callBack(contextCached, frame, hookFrameCount, false);
