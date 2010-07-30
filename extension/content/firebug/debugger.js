@@ -2169,7 +2169,7 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
 
     deactivateDebugger: function()
     {
-        if (this.dependents.length > 0)
+        if (this.dependents && this.dependents.length > 0)
         {
             for(var i = 0; i < this.dependents.length; i++)
             {

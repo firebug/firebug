@@ -254,7 +254,9 @@ Firebug.SourceBoxPanel = extend(SourceBoxPanelBase,
         if (sourceBox)  // else we did not create one for this sourceFile
         {
             delete this.sourceBoxes[sourceFile.href];
-            this.panelNode.removeChild(sourceBox);
+            
+            if (sourceBox.parentNode === this.panelNode)
+            	this.panelNode.removeChild(sourceBox);
 
             if (this.selectedSourceBox === sourceBox) // need to update the view
             {
