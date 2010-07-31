@@ -1767,6 +1767,13 @@ CSSEditor.prototype = domplate(Firebug.InlineEditor.prototype,
     insertNewRow: function(target, insertWhere)
     {
         var rule = Firebug.getRepObject(target);
+        if(!rule)
+        {
+        	if(FBTrace.DBG_CSS || FBTrace.DBG_ERRORS)
+        		FBTrace.sysout("CSSEditor insertNewRow no repObject (rule) for target "+target, target);
+        	return; // prevent infinite recursion thru insertBefore, setEditTarget
+        }
+        
         var emptyProp = {name: "", value: "", important: ""};
 
         if (insertWhere == "before")
