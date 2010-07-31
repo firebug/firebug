@@ -323,7 +323,12 @@ DomplateTag.prototype =
     addCode: function(topBlock, topOuts, blocks)
     {
         if (topBlock.length)
+        {
             blocks.push('__code__.push(""', topBlock.join(""), ');\n');
+            if (FBTrace.DBG_DOMPLATE)
+                blocks.push('FBTrace.sysout("addCode "+__code__.join(""));\n');
+        }
+
         if (topOuts.length)
             blocks.push('__out__.push(', topOuts.join(","), ');\n');
         topBlock.splice(0, topBlock.length);
@@ -424,6 +429,8 @@ DomplateTag.prototype =
             return nodeCount;
         }
 
+        // start at a given node |parent|, then index recursively into its children using arguments 2, 3, ...;
+        // The primary purpose of the 'path' is to name variables in the generated code
         function __path__(parent, offset)
         {
             var root = parent;
@@ -434,7 +441,7 @@ DomplateTag.prototype =
                 if (i == 3)
                     index += offset;
 
-                if (index == -1)
+                if (index == -1)  // then walk up the tree
                     parent = parent.parentNode;
                 else
                     parent = parent.childNodes[index];
@@ -488,14 +495,14 @@ DomplateTag.prototype =
         blocks.push("var node = __path__(root, o");
 
         for (var i = 0; i < path.length; ++i)
-            blocks.push(",", path[i]);  // this will be a sum of integers as a string which will be summed then passed to __path__
+            blocks.push(",", path[i]);  // this will be a sum of integers as a string which will be summed in the eval, then passed to __path__
 
         blocks.push(");\n");
 
         if(FBTrace.DBG_DOMPLATE)
         {
             var nBlocks = 2*path.length + 2;
-            var genTrace = "FBTrace.sysout(\'"+blocks.slice(-nBlocks).join("").replace("\n","")+"\'+'->'+FBL.getElementHTML(node), node);\n";
+            var genTrace = "FBTrace.sysout(\'"+blocks.slice(-nBlocks).join("").replace("\n","")+"\'+'->'+(node?FBL.getElementHTML(node):'null'), node);\n";
             blocks.push(genTrace);
         }
     },
@@ -963,8 +970,8 @@ var Renderer =
         // To save the next poor soul:
         // In order to properly apply properties and event handlers on elements
         // constructed by a FOR tag, the tag needs to be able to iterate up and
-        // down the tree, meaning if FOR is the root element as is the case with
-        // many insertRows calls, it will need to iterator over portions of the
+        // down the tree. If FOR is the root element, as is the case with
+        // many 'insertRows' calls, it will need to iterator over portions of the
         // new parent.
         //
         // To achieve this end, __path__ defines the -1 operator which allows
@@ -972,7 +979,8 @@ var Renderer =
         // below we are able to iterate over the elements.
         //
         // This fails when applied to a non-loop element as non-loop elements
-        // Do not generate to proper path to bounce up and down the tree.
+        // do not generate to proper path to bounce up and down the tree.
+        //
         var offset = 0;
         if (this.tag.isLoop)
         {
@@ -994,7 +1002,7 @@ var Renderer =
     {
         return this.insertNode(
                 args, before.ownerDocument,
-                function(frag) {
+                function beforeInserter(frag) {
                     before.parentNode.insertBefore(frag, before);
                 },
                 self);
@@ -1023,6 +1031,11 @@ var Renderer =
             FBTrace.sysout("domplate.insertNode html: "+html+"\n");
 
         var range = doc.createRange();
+        // if doc starts with a Text node, domplate fails because the fragment starts with a text node.
+        // That must be a gecko bug, but let's just workaround it since we want to switch to innerHTML anyway
+        var aDiv = doc.getElementsByTagName("div").item(0);
+        range.setStartBefore(aDiv);
+        // TODO replace with standard innerHTML
         var frag = range.createContextualFragment(html);
 
         var root = frag.firstChild;
