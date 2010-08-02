@@ -680,7 +680,7 @@ top.FirebugChrome =
 
     syncPanel: function()
     {
-        var context = FirebugContext;
+        var context = Firebug.currentContext;
 
         if (FBTrace.DBG_PANELS)
             FBTrace.sysout("chrome.syncPanel FirebugContext=" +
