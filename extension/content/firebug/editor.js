@@ -87,7 +87,7 @@ Firebug.Editor = extend(Firebug.Module,
             FBTrace.sysout("Editor start panel "+currentPanel.name);
         this.attachListeners(currentEditor, panel.context);
     },
-    
+
     saveAndClose: function() {
         if (!currentTarget)
             return;
@@ -885,7 +885,7 @@ Firebug.InlineEditor.prototype = domplate(Firebug.BaseEditor,
 // ************************************************************************************************
 // Autocompletion
 
-Firebug.AutoCompleter = function(getExprOffset, getRange, evaluator, selectMode, caseSensitive, noCompleteOnBlank)
+Firebug.AutoCompleter = function(getExprOffset, getRange, evaluator, selectMode, caseSensitive, noCompleteOnBlank, noShowGlobal)
 {
     var candidates = null;
     var originalValue = null;
@@ -937,7 +937,7 @@ Firebug.AutoCompleter = function(getExprOffset, getRange, evaluator, selectMode,
         accepted = false;
     };
 
-    this.complete = function(context, textBox, cycle, reverse, offerOnly, showGlobal)
+    this.complete = function(context, textBox, cycle, reverse, offerOnly)
     {
         var value = textBox.value;
         if (!value && noCompleteOnBlank)
@@ -947,10 +947,10 @@ Firebug.AutoCompleter = function(getExprOffset, getRange, evaluator, selectMode,
             this.reset();
 
         var offset = textBox.selectionStart;
-        if (!offset)
-            offset = value.length;
+        //if (!offset)
+        //    offset = value.length;
 
-        var found =  this.pickCandidates(value, offset, context, cycle, reverse, showGlobal);
+        var found =  this.pickCandidates(value, offset, context, cycle, reverse);
 
         if (found)
             this.showCandidates(textBox, offerOnly);
@@ -961,7 +961,7 @@ Firebug.AutoCompleter = function(getExprOffset, getRange, evaluator, selectMode,
     /*
      * returns true if candidate list was created
      */
-    this.pickCandidates = function(value, offset, context, cycle, reverse, showGlobal)
+    this.pickCandidates = function(value, offset, context, cycle, reverse)
     {
         if (!selectMode && originalOffset != -1)
             offset = originalOffset;
@@ -985,6 +985,7 @@ Firebug.AutoCompleter = function(getExprOffset, getRange, evaluator, selectMode,
             preExpr = parsed.substr(0, range.start);
             postExpr = parsed.substr(range.end+1);
             exprOffset = parseStart + range.start;
+            FBTrace.sysout("editor.complete cycle "+cycle+" expr: "+expr, {expr: expr, range:range, parseStart: parseStart, offset: offset, values:values});
 
             if (!cycle)
             {
@@ -1032,7 +1033,7 @@ Firebug.AutoCompleter = function(getExprOffset, getRange, evaluator, selectMode,
                 }
             }
 
-            if (!showGlobal && !preExpr && !expr && !postExpr)
+            if (noShowGlobal && !preExpr && !expr && !postExpr)
             {
                 // Don't complete globals unless we are forced to do so.
                 this.hide();
@@ -1129,7 +1130,7 @@ Firebug.AutoCompleter = function(getExprOffset, getRange, evaluator, selectMode,
             return false;
         }
 
-        this.adjustLastIndex();
+        this.adjustLastIndex(cycle, reverse);
 
         var completion = candidates[lastIndex];
         preCompletion = expr.substr(0, offset-exprOffset);
@@ -1146,7 +1147,7 @@ Firebug.AutoCompleter = function(getExprOffset, getRange, evaluator, selectMode,
         return true;
     };
 
-    this.adjustLastIndex = function()
+    this.adjustLastIndex = function(cycle, reverse)
     {
         if (candidates.length === 1)
             lastIndex = 0;
@@ -1154,6 +1155,8 @@ Firebug.AutoCompleter = function(getExprOffset, getRange, evaluator, selectMode,
             lastIndex = (lastIndex === -2) ? this.pickDefaultCandidate() : 0;
         else if (lastIndex < 0)
             lastIndex = (lastIndex === -2) ? this.pickDefaultCandidate() : (candidates.length - 1);
+        else if (cycle)
+            lastIndex += reverse ? -1 : 1;
     };
 
     this.cycle = function(reverse)
@@ -1335,7 +1338,7 @@ Firebug.AutoCompleter = function(getExprOffset, getRange, evaluator, selectMode,
         {
             if (completionPopup.state == "closed")
                 return; // When the list is collapsed, allow (shift) tabbing out of the field
-                
+
             if (isShift(event))
                 this.complete(context, textBox, true, true, true);
             else

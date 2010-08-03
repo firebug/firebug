@@ -1767,6 +1767,7 @@ CSSEditor.prototype = domplate(Firebug.InlineEditor.prototype,
     insertNewRow: function(target, insertWhere)
     {
         var rule = Firebug.getRepObject(target);
+
         var emptyProp = {name: "", value: "", important: ""};
 
         if (insertWhere == "before")

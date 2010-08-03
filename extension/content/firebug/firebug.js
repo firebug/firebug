@@ -1294,7 +1294,7 @@ top.Firebug =
             }
         }
         else
-            this.detachBar(FirebugContext);
+            this.detachBar(Firebug.currentContext);
     },
 
     closeDetachedWindow: function(userCommands)

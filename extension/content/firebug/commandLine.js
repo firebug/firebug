@@ -573,7 +573,7 @@ Firebug.CommandLine = extend(Firebug.Module,
         Firebug.Module.initialize.apply(this, arguments);
 
         this.autoCompleter = new Firebug.AutoCompleter(getExpressionOffset, getDot,
-            bind(autoCompleteEval, this), true, true, true);
+            bind(autoCompleteEval, this), true, true, true, true);
 
         if (Firebug.largeCommandLine)
             this.setMultiLine(true, Firebug.chrome);
