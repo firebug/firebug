@@ -280,7 +280,7 @@ top.Firebug =
 
             "menu_inspectElement", "menu_profileScript", "menu_focusCommandLine",
             "menu_focusFirebugSearch", "Firebug_About",
-            
+
             "fbPanelBar2-panelTabs", "fbWindowButtons", "fbPanelBar1-innerToolbar", "fbLocationList",
 
             /* browserOverlay.xul */
@@ -1624,6 +1624,9 @@ top.Firebug =
         }
     },
 
+    /*
+     * The child node that has a repObject
+     */
     getRepNode: function(node)
     {
         for (var child = node; child; child = child.parentNode)

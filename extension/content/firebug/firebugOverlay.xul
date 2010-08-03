@@ -43,6 +43,7 @@
 
         <command id="cmd_breakOnNext" oncommand="FirebugChrome.breakOnNext(FirebugContext, event);"/>
 
+        <command id="cmd_rerun" oncommand="Firebug.Debugger.rerun(FirebugContext)" disabled="true"/>
         <command id="cmd_resumeExecution" oncommand="Firebug.Debugger.resume(FirebugContext)" disabled="true"/>
         <command id="cmd_stepOver" oncommand="Firebug.Debugger.stepOver(FirebugContext)" disabled="true"/>
         <command id="cmd_stepInto" oncommand="Firebug.Debugger.stepInto(FirebugContext)" disabled="true"/>
@@ -343,6 +344,8 @@
                                         tooltip="fbTooltip" contextmenu="fbContextMenu" class="noTabStop" />
 
                                     <hbox id="fbDebuggerButtons" minwidth="126" collapsed="true" class="noTabStop">
+                                        <toolbarbutton id="fbRerunButton" command="cmd_rerun"
+                                            tooltiptext="firebug.Rerun" class="toolbar-image-button" />
                                         <toolbarbutton id="fbContinueButton" command="cmd_resumeExecution"
                                             tooltiptext="firebug.Continue" class="toolbar-image-button" />
                                         <toolbarbutton id="fbStepIntoButton" command="cmd_stepInto"

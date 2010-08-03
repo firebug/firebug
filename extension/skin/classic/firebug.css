@@ -243,6 +243,14 @@ textbox[type="fbSearchBox"] > panel {
     margin-right: 2px;
 }
 
+#fbRerunButton {
+    list-style-image: url(chrome://firebug/skin/rerun.png);
+}
+
+#fbRerunButton[disabled="true"]{
+    list-style-image: url(chrome://firebug/skin/rerun-disabled.png);
+}
+
 #fbContinueButton {
     list-style-image: url(chrome://firebug/skin/continue.png);
 }

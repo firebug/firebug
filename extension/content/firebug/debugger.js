@@ -22,6 +22,7 @@ const RETURN_THROW_WITH_VAL = jsdIExecutionHook.RETURN_THROW_WITH_VAL;
 const RETURN_CONTINUE = jsdIExecutionHook.RETURN_CONTINUE;
 const RETURN_CONTINUE_THROW = jsdIExecutionHook.RETURN_CONTINUE_THROW;
 const RETURN_ABORT = jsdIExecutionHook.RETURN_ABORT;
+const RETURN_HOOK_ERROR = jsdIExecutionHook.RETURN_HOOK_ERROR;
 
 const TYPE_THROW = jsdIExecutionHook.TYPE_THROW;
 const TYPE_DEBUGGER_KEYWORD = jsdIExecutionHook.TYPE_DEBUGGER_KEYWORD;
@@ -254,8 +255,93 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
             delete context.aborted;
             return RETURN_ABORT;
         }
+        else if (context.rerun)
+        {
+            setTimeout(function reExecute()
+            {
+                var rerun = context.rerun;
+                delete context.rerun;
+
+                if (FBTrace.DBG_UI_LOOP)
+                    FBTrace.sysout("Firebug.debugger.reExecute ", {rerun: rerun});
+                // fire the prestored script
+
+                function successConsoleFunction(result, context)
+                {
+                    if (FBTrace.DBG_UI_LOOP)
+                        FBTrace.sysout("Firebug.debugger.reExecute success", result);
+                }
+                function exceptionFunction(result, context)
+                {
+                    if (FBTrace.DBG_ERRORS)
+                        FBTrace.sysout("Firebug.debugger.reExecute FAILED "+result, result);
+                }
+                Firebug.CommandLine.evaluate("window._firebug.rerunFunction()", context, null, context.window, successConsoleFunction, exceptionFunction);
+
+            });
+
+            if (FBTrace.DBG_UI_LOOP)
+                FBTrace.sysout("Firebug.debugger.reExecute return "+RETURN_HOOK_ERROR);
+
+            return RETURN_HOOK_ERROR;
+        }
         else
             return RETURN_CONTINUE;
+    },
+
+    rerun: function(context)
+    {
+        if(!context.stopped)
+        {
+            FBTrace.sysout("debugger.rerun FAILS: not stopped");
+            return;
+        }
+
+        if (FBTrace.DBG_UI_LOOP)
+                FBTrace.sysout("debugger.rerun for "+context.getName());
+        try
+        {
+            // walk back to the oldest frame
+            var frame = context.stoppedFrame;
+            while (frame.callingFrame)
+                frame = frame.callingFrame;
+
+            // In this oldest frame we have element.onclick(event)
+            // We want to cause the page to run this again after we abort this call stack.
+            //
+            function getStoreRerunInfoScript(fnName)
+            {
+                var str = "window._firebug.rerunThis = this;\n";
+                str += "window._firebug.rerunArgs = [];\n"
+                str += "for (var i = 0; i < arguments.length; i++) window._firebug.rerunArgs.push(arguments[i]);\n"
+                str += "window._firebug.rerunFunctionName = "+fnName+";\n"
+                str +="window._firebug.rerunFunction = function _firebugRerun() { "+fnName+".apply(window._firebug.rerunThis, window._firebug.rerunArgs); }"
+                return str;
+            }
+
+            context.rerun = {};
+            context.rerun.fn = frame.script.functionObject; // I know this is not correct but I don't know what is
+            var fnName = getFunctionName(frame.script, context, frame, true);
+            var referents = getReferents(frame, fnName);
+            context.rerun.fnName = referents.pop();  // hmm some could go away before we execute?
+
+            context.rerun.script = getStoreRerunInfoScript(fnName);
+
+            // now run the script that stores the rerun info in the page
+            var result = {};
+            var ok = frame.eval(context.rerun.script, context.window.location + "/RerunScript", 1, result);
+            if (FBTrace.DBG_UI_LOOP)
+                FBTrace.sysout("debugger.rerun "+ok+" and result: "+result+" for "+context.getName(), context.rerun);
+        }
+        catch(exc)
+        {
+            if (FBTrace.DBG_ERRORS)
+                FBTrace.sysout("debugger.rerun FAILS for "+context.getName()+" because "+exc, {exc:exc, rerun: context.rerun});
+        }
+
+
+        // now continue but abort the current call stack.
+        this.resume(context);  // the context.rerun will signal abort stack
     },
 
     resume: function(context)
@@ -753,6 +839,11 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
 
                 chrome.syncSidePanels();  // after main panel is all updated.
             }
+            else
+            {
+                if (FBTrace.DBG_UI_LOOP)
+                    FBTrace.sysout("debugger.stopDebugging else "+context.getName()+" "+context.window.location);
+            }
         }
         catch (exc)
         {
@@ -776,6 +867,7 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
         if (context.stopped)
         {
             chrome.setGlobalAttribute("fbDebuggerButtons", "stopped", "true");
+            chrome.setGlobalAttribute("cmd_rerun", "disabled", "false");
             chrome.setGlobalAttribute("cmd_resumeExecution", "disabled", "false");
             chrome.setGlobalAttribute("cmd_stepOver", "disabled", "false");
             chrome.setGlobalAttribute("cmd_stepInto", "disabled", "false");
@@ -784,6 +876,7 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
         else
         {
             chrome.setGlobalAttribute("fbDebuggerButtons", "stopped", "false");
+            chrome.setGlobalAttribute("cmd_rerun", "disabled", "true");
             chrome.setGlobalAttribute("cmd_stepOver", "disabled", "true");
             chrome.setGlobalAttribute("cmd_stepInto", "disabled", "true");
             chrome.setGlobalAttribute("cmd_stepOut", "disabled", "true");
@@ -1902,7 +1995,7 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
 
     internationalizeUI: function(doc)
     {
-        var elements = ["fbContinueButton", "fbStepIntoButton", "fbStepOverButton",
+        var elements = ["fbRerunButton", "fbContinueButton", "fbStepIntoButton", "fbStepOverButton",
             "fbStepOutButton"];
 
         for (var i=0; i<elements.length; i++)
@@ -3761,69 +3854,12 @@ CallstackPanel.prototype = extend(Firebug.Panel,
         delete this.parent;
 
         var frame = this.context.currentFrame;
-
         var fnName = getFunctionName(frame.script, this.context, frame, true);
 
-        if (FBTrace.DBG_STACK)
-            FBTrace.sysout('showReferents '+frame, frame);
+        var referents = this.getReferents(frame, fnName);
 
-        // lookup the name of the function using frame.eval() -> function object
-        // use 'this' as a lookup scope since function calls can be obj.fn or just fn
-        var js = "with (this) {"+fnName +";}";
-
-        var result = {};
-        var ok = frame.eval(js, "", 1, result);
-        if (ok)
-        {
-            if (result.value instanceof Ci.jsdIValue)
-            {
-                if (FBTrace.DBG_STACK)
-                    FBTrace.sysout("Firebug.Debugger.showReferents evaled "+js+" and got "+result.value, result);
-                try
-                {
-                    var fn = result.value.getWrappedValue();
-                    var thisObject = unwrapIValueObject(frame.thisValue);
-                    var referents = findObjectPropertyPath("this", thisObject, fn, []);
-
-                    if (FBTrace.DBG_STACK)
-                        FBTrace.sysout("Firebug.Debugger.showReferents found from thisObject "+referents.length, {thisObject: thisObject, fn: fn, referents: referents});
-
-                    var containingScope = unwrapIValueObject(result.value.jsParent);
-
-                    if (FBTrace.DBG_STACK)
-                        FBTrace.sysout("Firebug.Debugger.showReferents containingScope from "+result.value.jsParent.jsClassName, containingScope);
-
-                    var scopeReferents = findObjectPropertyPath(result.value.jsParent.jsClassName, containingScope, fn, []);
-                    // Do we need to look in the entire scope chain? I think yes
-
-                    if (FBTrace.DBG_STACK)
-                        FBTrace.sysout("Firebug.Debugger.showReferents found scope referents "+scopeReferents.length, {containingScope: containingScope, fn: fn, referents: scopeReferents});
-
-                    referents = referents.concat(scopeReferents);
-                    FBTrace.sysout("Firebug.Debugger.showReferents found total referents "+referents.length, {fn: fn, referents: referents});
-                    for (var i = 0; i < referents.length; i++)
-                    {
-                        if (FBTrace.DBG_STACK)
-                            FBTrace.sysout("Firebug.Debugger.showReferents found referent "+referents[i].getObjectPathExpression(), {fn: fn, referent: referents[i], path:referents[i].getObjectPathObjects() });
-                    }
-                }
-                catch(exc)
-                {
-                    if (FBTrace.DBG_STACK || FBTrace.DBG_ERRORS)
-                        FBTrace.sysout("Firebug.Debugger.showReferents FAILED: "+exc, exc);
-                }
-            }
-            else
-            {
-                if (FBTrace.DBG_STACK || FBTrace.DBG_ERRORS)
-                    FBTrace.sysout("Firebug.Debugger.showReferents evaled "+js+" but result.value not instanceof Ci.jsdIValue "+result.value, result);
-            }
-            // if true allow edit to reset that value.
-        }
-        else
-            if (FBTrace.DBG_STACK || FBTrace.DBG_ERRORS)
-                FBTrace.sysout("Firebug.Debugger.showReferents eval failed with "+ok+" result "+result.value, result);
     },
+
 });
 
 function Referent(containerName, container, propertyName, obj)
@@ -3866,6 +3902,71 @@ Referent.prototype =
     },
 
 };
+
+function getReferents(frame, fnName)
+{
+    if (FBTrace.DBG_STACK)
+        FBTrace.sysout('showReferents '+frame, frame);
+
+    // lookup the name of the function using frame.eval() -> function object
+    // use 'this' as a lookup scope since function calls can be obj.fn or just fn
+    var js = "with (this) {"+fnName +";}";
+
+    var result = {};
+    var ok = frame.eval(js, "", 1, result);
+    if (ok)
+    {
+        if (result.value instanceof Ci.jsdIValue)
+        {
+            if (FBTrace.DBG_STACK)
+                FBTrace.sysout("Firebug.Debugger.showReferents evaled "+js+" and got "+result.value, result);
+            try
+            {
+                var fn = result.value.getWrappedValue();
+                var thisObject = unwrapIValueObject(frame.thisValue);
+                var referents = findObjectPropertyPath("this", thisObject, fn, []);
+
+                if (FBTrace.DBG_STACK)
+                    FBTrace.sysout("Firebug.Debugger.showReferents found from thisObject "+referents.length, {thisObject: thisObject, fn: fn, referents: referents});
+
+                var containingScope = unwrapIValueObject(result.value.jsParent);
+
+                if (FBTrace.DBG_STACK)
+                    FBTrace.sysout("Firebug.Debugger.showReferents containingScope from "+result.value.jsParent.jsClassName, containingScope);
+
+                var scopeReferents = findObjectPropertyPath(result.value.jsParent.jsClassName, containingScope, fn, []);
+                // Do we need to look in the entire scope chain? I think yes
+
+                if (FBTrace.DBG_STACK)
+                    FBTrace.sysout("Firebug.Debugger.showReferents found scope referents "+scopeReferents.length, {containingScope: containingScope, fn: fn, referents: scopeReferents});
+
+                referents = referents.concat(scopeReferents);
+                FBTrace.sysout("Firebug.Debugger.showReferents found total referents "+referents.length, {fn: fn, referents: referents});
+                for (var i = 0; i < referents.length; i++)
+                {
+                    if (FBTrace.DBG_STACK)
+                        FBTrace.sysout("Firebug.Debugger.showReferents found referent "+referents[i].getObjectPathExpression(), {fn: fn, referent: referents[i], path:referents[i].getObjectPathObjects() });
+                }
+            }
+            catch(exc)
+            {
+                if (FBTrace.DBG_STACK || FBTrace.DBG_ERRORS)
+                    FBTrace.sysout("Firebug.Debugger.showReferents FAILED: "+exc, exc);
+            }
+        }
+        else
+        {
+            if (FBTrace.DBG_STACK || FBTrace.DBG_ERRORS)
+                FBTrace.sysout("Firebug.Debugger.showReferents evaled "+js+" but result.value not instanceof Ci.jsdIValue "+result.value, result);
+        }
+        return referents;
+    }
+    else
+    {
+        if (FBTrace.DBG_STACK || FBTrace.DBG_ERRORS)
+            FBTrace.sysout("Firebug.Debugger.showReferents eval failed with "+ok+" result "+result.value, result);
+    }
+}
 
 
 // Recursively look for obj in container using array of visited objects
