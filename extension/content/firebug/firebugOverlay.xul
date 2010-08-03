@@ -335,11 +335,11 @@
 
                                     <toolbarseparator id="fbLocationSeparator" collapsed="true"/>
                                     <toolbarbutton id="fbLocationList" locationProvider="FirebugChrome.getLocationProvider();"
-                                          collapsed="true" tooltip="fbTooltip" contextmenu="fbContextMenu"
+                                          collapsed="true" tooltip="fbTooltip" contextmenu="fbContextMenu"  flex="1"
                                           class="noTabStop" role="button" aria-haspopup="true" aria-label="a11y.labels.file selector"/>
 
                                     <toolbarseparator id="fbStatusSeparator" collapsed="true"/>
-                                    <panelStatus id="fbPanelStatus" flex="1"
+                                    <panelStatus id="fbPanelStatus" flex="100"
                                         tooltip="fbTooltip" contextmenu="fbContextMenu" class="noTabStop" />
 
                                     <hbox id="fbDebuggerButtons" minwidth="126" collapsed="true" class="noTabStop">
