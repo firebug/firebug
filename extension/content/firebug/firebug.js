@@ -626,9 +626,30 @@ top.Firebug =
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
     // Registration
 
+    registerPreferences: function(registrants)
+    {
+    	FBTrace.sysout("registerPreferences "+registrants.length, registrants);
+    	for (var i = 0; i < registrants.length; i++)
+    	{
+    		var registrant = registrants[i];
+    		if (registrant.getDefaultPreferences)
+    		{
+    			var defaultPreferences = registrant.getDefaultPreferences();
+    			FBTrace.sysout("registerPreferences defaultPreferences "+defaultPreferences.length,defaultPreferences)
+    			for (var j = 0; j < defaultPreferences.length; j++)
+    			{
+    				var value = this.getPref(this.prefDomain, defaultPreferences[j].name);
+    				if (!value)
+    					this.setPref(this.prefDomain, defaultPreferences[j].name, defaultPreferences[j].value, typeof(defaultPreferences[j].value));
+    			}
+    		}
+    	}
+    },
+    
     registerModule: function()
     {
         modules.push.apply(modules, arguments);
+        this.registerPreferences(cloneArray(arguments));
 
         if (FBTrace.DBG_INITIALIZE)
         {
@@ -658,6 +679,8 @@ top.Firebug =
 
         for (var j = 0; j < arguments.length; j++)
             Firebug.uiListeners.push(arguments[j]);
+        
+        this.registerPreferences(cloneArray(arguments));
     },
 
     unregisterExtension: function()  // TODO remove
@@ -688,6 +711,8 @@ top.Firebug =
 
         for (var i = 0; i < arguments.length; ++i)
             panelTypeMap[arguments[i].prototype.name] = arguments[i];
+        
+        this.registerPreferences(cloneArray(arguments));
 
         if (FBTrace.DBG_INITIALIZE)
             for (var i = 0; i < arguments.length; ++i)
@@ -2749,7 +2774,7 @@ Firebug.ActivablePanel = extend(Firebug.Panel,
         if (type != Ci.nsIPrefBranch.PREF_BOOL)
         {
             if (FBTrace.DBG_ERRORS || FBTrace.DBG_ACTIVATION)
-                FBTrace.sysout("firebug.ActivablePanel.setEnabled FAILS not a PREF_BOOL: " + type);
+                FBTrace.sysout("firebug.ActivablePanel.setEnabled FAILS "+prefDomain+".enableSites"+" not a PREF_BOOL: " + type);
             return;
         }
 
