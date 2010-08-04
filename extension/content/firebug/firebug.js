@@ -628,24 +628,24 @@ top.Firebug =
 
     registerPreferences: function(registrants)
     {
-    	FBTrace.sysout("registerPreferences "+registrants.length, registrants);
-    	for (var i = 0; i < registrants.length; i++)
-    	{
-    		var registrant = registrants[i];
-    		if (registrant.getDefaultPreferences)
-    		{
-    			var defaultPreferences = registrant.getDefaultPreferences();
-    			FBTrace.sysout("registerPreferences defaultPreferences "+defaultPreferences.length,defaultPreferences)
-    			for (var j = 0; j < defaultPreferences.length; j++)
-    			{
-    				var value = this.getPref(this.prefDomain, defaultPreferences[j].name);
-    				if (!value)
-    					this.setPref(this.prefDomain, defaultPreferences[j].name, defaultPreferences[j].value, typeof(defaultPreferences[j].value));
-    			}
-    		}
-    	}
+        FBTrace.sysout("registerPreferences "+registrants.length, registrants);
+        for (var i = 0; i < registrants.length; i++)
+        {
+            var registrant = registrants[i];
+            if (registrant.getDefaultPreferences)
+            {
+                var defaultPreferences = registrant.getDefaultPreferences();
+                FBTrace.sysout("registerPreferences defaultPreferences "+defaultPreferences.length,defaultPreferences)
+                for (var j = 0; j < defaultPreferences.length; j++)
+                {
+                    var value = this.getPref(this.prefDomain, defaultPreferences[j].name);
+                    if (!value)
+                        this.setPref(this.prefDomain, defaultPreferences[j].name, defaultPreferences[j].value, typeof(defaultPreferences[j].value));
+                }
+            }
+        }
     },
-    
+
     registerModule: function()
     {
         modules.push.apply(modules, arguments);
@@ -679,7 +679,7 @@ top.Firebug =
 
         for (var j = 0; j < arguments.length; j++)
             Firebug.uiListeners.push(arguments[j]);
-        
+
         this.registerPreferences(cloneArray(arguments));
     },
 
@@ -711,7 +711,7 @@ top.Firebug =
 
         for (var i = 0; i < arguments.length; ++i)
             panelTypeMap[arguments[i].prototype.name] = arguments[i];
-        
+
         this.registerPreferences(cloneArray(arguments));
 
         if (FBTrace.DBG_INITIALIZE)
@@ -885,6 +885,11 @@ top.Firebug =
         {
             FBTrace.sysout("firebug.setPref FAILS: Invalid preference "+prefName+" check that it is listed in defaults/prefs.js");
         }
+
+        setTimeout(function delaySavePrefs()
+        {
+            prefs.savePrefFile(null);
+        });
 
         if (FBTrace.DBG_OPTIONS)
             FBTrace.sysout("firebug.setPref type="+type+" name="+prefName+" value="+value+"\n");
