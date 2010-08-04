@@ -626,30 +626,29 @@ top.Firebug =
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
     // Registration
 
-    registerPreferences: function(registrants)
+    /*
+     * Set a default value for a preference into the firebug preferences list. 
+     * @param name preference name, possibly dot segmented, will be stored under extensions.firebug.<name>
+     * @param value default value of preference
+     * @return true if default set, else false
+     */
+    registerPreference: function(name, value)
     {
-        FBTrace.sysout("registerPreferences "+registrants.length, registrants);
-        for (var i = 0; i < registrants.length; i++)
+    	 if (FBTrace.DBG_INITIALIZE)
+    		 FBTrace.sysout("registerPreference "+name+" -> "+value);
+
+        var currentValue = this.getPref(this.prefDomain, name);
+        if (!currentValue)
         {
-            var registrant = registrants[i];
-            if (registrant.getDefaultPreferences)
-            {
-                var defaultPreferences = registrant.getDefaultPreferences();
-                FBTrace.sysout("registerPreferences defaultPreferences "+defaultPreferences.length,defaultPreferences)
-                for (var j = 0; j < defaultPreferences.length; j++)
-                {
-                    var value = this.getPref(this.prefDomain, defaultPreferences[j].name);
-                    if (!value)
-                        this.setPref(this.prefDomain, defaultPreferences[j].name, defaultPreferences[j].value, typeof(defaultPreferences[j].value));
-                }
-            }
+        	this.setPref(this.prefDomain, name, value, typeof(value));
+        	return true;
         }
+        return false;
     },
 
     registerModule: function()
     {
         modules.push.apply(modules, arguments);
-        this.registerPreferences(cloneArray(arguments));
 
         if (FBTrace.DBG_INITIALIZE)
         {
@@ -679,8 +678,6 @@ top.Firebug =
 
         for (var j = 0; j < arguments.length; j++)
             Firebug.uiListeners.push(arguments[j]);
-
-        this.registerPreferences(cloneArray(arguments));
     },
 
     unregisterExtension: function()  // TODO remove
@@ -711,8 +708,6 @@ top.Firebug =
 
         for (var i = 0; i < arguments.length; ++i)
             panelTypeMap[arguments[i].prototype.name] = arguments[i];
-
-        this.registerPreferences(cloneArray(arguments));
 
         if (FBTrace.DBG_INITIALIZE)
             for (var i = 0; i < arguments.length; ++i)
