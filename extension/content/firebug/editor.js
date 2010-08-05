@@ -1156,7 +1156,13 @@ Firebug.AutoCompleter = function(getExprOffset, getRange, evaluator, selectMode,
         else if (lastIndex < 0)
             lastIndex = (lastIndex === -2) ? this.pickDefaultCandidate() : (candidates.length - 1);
         else if (cycle)
+        {
             lastIndex += reverse ? -1 : 1;
+            if (lastIndex >= candidates.length)
+                lastIndex = 0;
+            else if (lastIndex < 0)
+                lastIndex = candidates.length - 1;
+        }
     };
 
     this.cycle = function(reverse)
