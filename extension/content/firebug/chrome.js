@@ -1516,17 +1516,23 @@ function onSelectedSidePanel(event)
 function onPanelMouseOver(event)
 {
     var object = Firebug.getRepObject(event.target);
-    if (object)
-    {
-        var realObject = getRealObject(object);
-        if (realObject)
-            Firebug.Inspector.highlightObject(realObject, FirebugContext);
-    }
+    if(!object)
+        return;
+
+    var rep = Firebug.getRep(object, FirebugContext);
+    if(rep)
+        rep.highlightObject(object, FirebugContext);
 }
 
 function onPanelMouseOut(event)
 {
-    Firebug.Inspector.highlightObject(null);
+    var object = Firebug.getRepObject(event.target);
+    if(!object)
+        return;
+
+    var rep = Firebug.getRep(object, FirebugContext);
+    if(rep)
+        rep.unhighlightObject(object, FirebugContext);
 }
 
 function onPanelClick(event)

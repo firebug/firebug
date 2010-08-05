@@ -2998,6 +2998,17 @@ Firebug.Rep = domplate(
         return false;
     },
 
+    highlightObject: function(object, context)
+    {
+        var realObject = this.getRealObject(object, context);
+        if (realObject)
+            Firebug.Inspector.highlightObject(realObject, context);
+    },
+
+    unhighlightObject: function(object, context) {
+    	Firebug.Inspector.highlightObject(null);
+    },
+    
     inspectObject: function(object, context)
     {
         Firebug.chrome.select(object);
