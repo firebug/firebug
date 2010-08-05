@@ -3071,10 +3071,21 @@ Firebug.ScriptPanel.prototype = extend(Firebug.SourceBoxPanel,
 
             if (this.location && !this.context.jsDebuggerActive) // then we have a file, but debugger did not see it
             {
-                // Fill the panel node with a warning, then take it out if the user selects a sourceFile
-                var args = {
-                        pageTitle: $STR("Script Panel was inactive during page load"),
-                        suggestion: $STR("Reload to see all sources")
+                // Fill the panel node with a warning
+                var jsEnabled = Firebug.getPref("javascript", "enabled");
+                if (jsEnabled)
+                {
+                    var args = {
+                            pageTitle: $STR("Script Panel was inactive during page load"),
+                            suggestion: $STR("Reload to see all sources")
+                    }
+                }
+                else
+                {
+                    var args = {
+                            pageTitle: $STR("Javascript is not enabled"),
+                            suggestion: $STR("See Firefox > Tools > Options > Content > Enable Javascript")
+                    }
                 }
                 this.activeWarningTag = this.warningTag.replace(args, this.panelNode, this);
                 this.location = null;
@@ -3097,7 +3108,15 @@ Firebug.ScriptPanel.prototype = extend(Firebug.SourceBoxPanel,
                 if (!this.location)
                 {
                     // Fill the panel node with a warning
-                    if (this.context.allScriptsWereFiltered)
+                    var jsEnabled = Firebug.getPref("javascript", "enabled");
+                    if (!jsEnabled)
+                    {
+                        var args = {
+                                pageTitle: $STR("Javascript is not enabled"),
+                                suggestion: $STR("See Firefox > Tools > Options > Content > Enable Javascript")
+                        }
+                    }
+                    else if (this.context.allScriptsWereFiltered)
                     {
                         var args = {
                                 pageTitle: $STR("Warning. All scripts were filtered"),
