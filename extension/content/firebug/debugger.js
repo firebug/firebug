@@ -296,13 +296,13 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
             FBTrace.sysout("debugger.rerun FAILS: not stopped");
             return;
         }
-        
+
         context.rerun = this.getRerun(context);
 
         // now continue but abort the current call stack.
         this.resume(context);  // the context.rerun will signal abort stack
     },
-    
+
     getRerun: function(context)
     {
         if (FBTrace.DBG_UI_LOOP)
@@ -313,19 +313,19 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
             var frame = context.stoppedFrame;
             while (frame.callingFrame && frame.callingFrame.script.functionName)
             {
-            	frame = frame.callingFrame;
-            	
-            	if (frame.script.functionName == "_firebugRerun") // re-reRun
-            	{
-            		if (FBTrace.DBG_UI_LOOP)
-            			FBTrace.sysout("getRerun re-rerun ", context.savedRerun);
-            		return context.savedRerun;
-            	}
+                frame = frame.callingFrame;
+
+                if (frame.script.functionName == "_firebugRerun") // re-reRun
+                {
+                    if (FBTrace.DBG_UI_LOOP)
+                        FBTrace.sysout("getRerun re-rerun ", context.savedRerun);
+                    return context.savedRerun;
+                }
             }
-                
-            
-            
-            
+
+
+
+
             // In this oldest frame we have element.onclick(event) or window.foo()
             // We want to cause the page to run this again after we abort this call stack.
             //
@@ -356,7 +356,7 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
             if (FBTrace.DBG_ERRORS)
                 FBTrace.sysout("debugger.rerun FAILS for "+context.getName()+" because "+exc, {exc:exc, rerun: rerun});
         }
-        
+
         return rerun;
     },
 
@@ -442,12 +442,41 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
             this.suppressEventHandling(context);
             context.isFrozen = true;
 
-            if (FBTrace.DBG_UI_LOOP)
-                FBTrace.sysout("debugger.freeze try to disable scripts "+(context.eventSuppressor?"and events":"but not events")+" in "+context.getName()+" executionContext.tag "+executionContext.tag+".scriptsEnabled: "+executionContext.scriptsEnabled);
+            // https://developer.mozilla.org/en/XUL_Tutorial/Focus_and_Selection#Getting_the_currently_focused_element
+            if (context.window.document.commandDispatcher)
+            {
+                context.saveFocus = context.window.document.commandDispatcher.focusedElement;
+                if (context.saveFocus)
+                {
+                    this.discardBlurEvents = function(event)
+                    {
+                        if (FBTrace.DBG_UI_LOOP)
+                            FBTrace.sysout("debugger.freeze discard blur event "+context.discardOneMore+" while focus is "+context.window.document.commandDispatcher.focusedElement, event);
+                        event.preventDefault();
+                        event.stopPropagation();
+                        if (context.discardOneMore)
+                        {
+                            context.window.removeEventListener('blur', this.discardBlurEvents, true);
+                            delete context.discardOneMore;
+                            delete context.saveFocus;
+                        }
+                    },
 
-        } catch (exc) {
+                    context.window.addEventListener('blur', this.discardBlurEvents, true);
+                }
+
+            }
+
+            if (FBTrace.DBG_UI_LOOP)
+            {
+                FBTrace.sysout("debugger.freeze context.saveFocus "+context.saveFocus, context.saveFocus);
+                FBTrace.sysout("debugger.freeze try to disable scripts "+(context.eventSuppressor?"and events":"but not events")+" in "+context.getName()+" executionContext.tag "+executionContext.tag+".scriptsEnabled: "+executionContext.scriptsEnabled);
+            }
+        }
+        catch (exc)
+        {
             // This attribute is only valid for contexts which implement nsIScriptContext.
-            if (FBTrace.DBG_UI_LOOP) FBTrace.sysout("debugger.freeze, freeze exception in "+context.getName(), exc);
+            if (FBTrace.DBG_UI_LOOP) FBTrace.sysout("debugger.freeze, freeze exception "+exc+" in "+context.getName(), exc);
         }
     },
 
@@ -473,6 +502,21 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
             if (executionContext.isValid)
             {
                 this.unsuppressEventHandling(context);
+
+                // Before we release JS, put the focus back
+                if (context.saveFocus)
+                {
+                    context.window.focus();
+                    context.saveFocus.focus();
+                    context.discardOneMore = true;
+                }
+
+                if (FBTrace.DBG_UI_LOOP)
+                {
+                    var nowFocused = context.window.document.commandDispatcher ? context.window.document.commandDispatcher.focusedElement : null;
+                    FBTrace.sysout("debugger.thaw context.saveFocus "+context.saveFocus+" vs "+nowFocused, context.saveFocus);
+                }
+
                 executionContext.scriptsEnabled = true;
             }
             else
