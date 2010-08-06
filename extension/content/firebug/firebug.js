@@ -878,11 +878,13 @@ top.Firebug =
             prefs.setBoolPref(prefName, value);
         else if (type == nsIPrefBranch.PREF_INVALID)
         {
-            FBTrace.sysout("firebug.setPref FAILS: Invalid preference "+prefName+" check that it is listed in defaults/prefs.js");
+            FBTrace.sysout("firebug.setPref FAILS: Invalid preference "+prefName+" with type "+prefType+", check that it is listed in defaults/prefs.js");
         }
 
         setTimeout(function delaySavePrefs()
         {
+        	if (FBTrace.DBG_OPTIONS)
+                FBTrace.sysout("firebug.delaySavePrefs type="+type+" name="+prefName+" value="+value+"\n");
             prefs.savePrefFile(null);
         });
 
