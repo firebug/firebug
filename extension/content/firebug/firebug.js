@@ -627,21 +627,21 @@ top.Firebug =
     // Registration
 
     /*
-     * Set a default value for a preference into the firebug preferences list. 
+     * Set a default value for a preference into the firebug preferences list.
      * @param name preference name, possibly dot segmented, will be stored under extensions.firebug.<name>
      * @param value default value of preference
      * @return true if default set, else false
      */
     registerPreference: function(name, value)
     {
-    	 if (FBTrace.DBG_INITIALIZE)
-    		 FBTrace.sysout("registerPreference "+name+" -> "+value);
+         if (FBTrace.DBG_INITIALIZE)
+             FBTrace.sysout("registerPreference "+name+" -> "+value);
 
         var currentValue = this.getPref(this.prefDomain, name);
         if (!currentValue)
         {
-        	this.setPref(this.prefDomain, name, value, typeof(value));
-        	return true;
+            this.setPref(this.prefDomain, name, value, typeof(value));
+            return true;
         }
         return false;
     },
@@ -883,7 +883,7 @@ top.Firebug =
 
         setTimeout(function delaySavePrefs()
         {
-        	if (FBTrace.DBG_OPTIONS)
+            if (FBTrace.DBG_OPTIONS)
                 FBTrace.sysout("firebug.delaySavePrefs type="+type+" name="+prefName+" value="+value+"\n");
             prefs.savePrefFile(null);
         });
@@ -2447,7 +2447,7 @@ Firebug.Panel = extend(new Firebug.Listener(),
         if (FBTrace.DBG_PANELS)
             FBTrace.sysout("navigate "+this.name+" to "+object+" when this.location="+this.location+"\n");
         if (!object)
-            object = this.getDefaultLocation(this.context);
+            object = this.getDefaultLocation();
         if (!object)
             object = null;  // not undefined.
 
@@ -2518,7 +2518,7 @@ Firebug.Panel = extend(new Firebug.Listener(),
     select: function(object, forceUpdate)
     {
         if (!object)
-            object = this.getDefaultSelection(this.context);
+            object = this.getDefaultSelection();
 
         if(FBTrace.DBG_PANELS)
             FBTrace.sysout("firebug.select "+this.name+" forceUpdate: "+forceUpdate+" "+object+((object==this.selection)?"==":"!=")+this.selection);
@@ -2620,7 +2620,7 @@ Firebug.Panel = extend(new Firebug.Listener(),
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 
-    getDefaultSelection: function(context)
+    getDefaultSelection: function()
     {
         return null;
     },
@@ -2657,7 +2657,7 @@ Firebug.Panel = extend(new Firebug.Listener(),
         return null;
     },
 
-    getDefaultLocation: function(context)
+    getDefaultLocation: function()
     {
         return null;
     },
@@ -3008,9 +3008,9 @@ Firebug.Rep = domplate(
     },
 
     unhighlightObject: function(object, context) {
-    	Firebug.Inspector.highlightObject(null);
+        Firebug.Inspector.highlightObject(null);
     },
-    
+
     inspectObject: function(object, context)
     {
         Firebug.chrome.select(object);

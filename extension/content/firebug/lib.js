@@ -4580,7 +4580,7 @@ this.restoreSelection = function(panel, panelState)
     {
         function overrideDefaultWithPersistedSelection()
         {
-            if (panel.selection == panel.getDefaultSelection(panel.context) && panelState.persistedSelection)
+            if (panel.selection == panel.getDefaultSelection() && panelState.persistedSelection)
             {
                 var selection = panelState.persistedSelection(panel.context);
                 if (selection)

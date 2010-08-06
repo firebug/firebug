@@ -3067,7 +3067,7 @@ Firebug.ScriptPanel.prototype = extend(Firebug.SourceBoxPanel,
 
         if (enabled)
         {
-            this.location = this.getDefaultLocation(this.context);
+            this.location = this.getDefaultLocation();
 
             if (this.location && !this.context.jsDebuggerActive) // then we have a file, but debugger did not see it
             {
@@ -3315,7 +3315,7 @@ Firebug.ScriptPanel.prototype = extend(Firebug.SourceBoxPanel,
         // Since our last use of the sourceFile we may have compiled or recompiled the source
         var updatedSourceFile = this.context.sourceFileMap[sourceFile.href];
         if (!updatedSourceFile)
-            updatedSourceFile = this.getDefaultLocation(this.context);
+            updatedSourceFile = this.getDefaultLocation();
         if (!updatedSourceFile)
             return;
 
@@ -3490,15 +3490,15 @@ Firebug.ScriptPanel.prototype = extend(Firebug.SourceBoxPanel,
         }
     },
 
-    getDefaultLocation: function(context)
+    getDefaultLocation: function()
     {
         var sourceFiles = this.getLocationList();
         if (!sourceFiles.length)
             return null;
 
-        if (context)
+        if (this.context)
         {
-            var url = context.getWindowLocation();
+            var url = this.context.getWindowLocation();
             for (var i = 0; i < sourceFiles.length; i++)
             {
                 if (url == sourceFiles[i].href)
@@ -3510,9 +3510,9 @@ Firebug.ScriptPanel.prototype = extend(Firebug.SourceBoxPanel,
             return sourceFiles[0];
     },
 
-    getDefaultSelection: function(context)
+    getDefaultSelection: function()
     {
-        return this.getDefaultLocation(context);
+        return this.getDefaultLocation();
     },
 
     getTooltipObject: function(target)
