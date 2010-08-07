@@ -578,6 +578,14 @@ top.FirebugChrome =
         return panelBar2.selectPanel(panelName);
     },
 
+    selectSupportingPanel: function(object, context, forceUpdate)
+    {
+    	var bestPanelName = getBestPanelSupportingObject(object, context);
+    	var panel = this.selectPanel(bestPanelName, false, true);
+        if (panel)
+            panel.select(object, forceUpdate);
+    },
+    
     clearPanels: function()
     {
         panelBar1.hideSelectedPanel();
@@ -1369,7 +1377,11 @@ function getBestPanelName(object, context, panelName)
 
     // The suggested name didn't pan out, so search for the panel type with the
     // most specific level of support
+    return getBestPanelSupportingObject(object, context);
+}
 
+function getBestPanelSupportingObject(object, context)
+{
     var bestLevel = 0;
     var bestPanel = null;
 
