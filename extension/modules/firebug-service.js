@@ -1020,7 +1020,9 @@ var fbs =
             fbs.pauseDepth--;
             fbs.hookScripts();
 
-            var depth = jsd.unPause();
+            if(jsd.pauseDepth)
+            	var depth = jsd.unPause();
+            
             var active = fbs.isJSDActive();
 
 
