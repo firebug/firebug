@@ -65,7 +65,7 @@ Firebug.CommandLine = extend(Firebug.Module,
 
             if (this.isSandbox(context))
                 result = this.evaluateInSandbox(expr, context, thisValue, targetWindow, successConsoleFunction, exceptionFunction);
-            else if (context.stopped)
+            else if (context.stopped && context.currentFrame.isValid)
                 result = this.evaluateInDebugFrame(expr, context, thisValue, targetWindow,  successConsoleFunction, exceptionFunction);
             else
                 result = this.evaluateByEventPassing(expr, context, thisValue, targetWindow, successConsoleFunction, exceptionFunction);
@@ -1274,7 +1274,14 @@ Firebug.CommandLine.injector = {
 
         if (win.document.getUserData("firebug-CommandLineListener") === "true")
         {
-            Firebug.CommandLine.evaluate("window._FirebugCommandLine.detachCommandLine()", context);
+        	if (FBTrace.DBG_ERRORS)
+        	{
+        		function failureCallback(result, context)
+        		{
+        			FBTrace.sysout("Firebug.CommandLine.evaluate FAILS  "+result, result);
+        		}
+        	}
+            Firebug.CommandLine.evaluate("window._FirebugCommandLine.detachCommandLine()", context, null, win, null, failureCallback );
             if (context.activeCommandLineHandlers)
             {
                 var boundHandler = context.activeCommandLineHandlers[win];
