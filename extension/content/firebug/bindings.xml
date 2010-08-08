@@ -174,7 +174,7 @@
             <body><![CDATA[
                 var tab = panelName ? this.tabMap[panelName] : null;
                 var panelType = tab ? tab.panelType : null;
-                var panel = FirebugContext ? FirebugContext.getPanel(panelName) : null;
+                var panel = Firebug.currentContext ? Firebug.currentContext.getPanel(panelName) : null;
 
                 if (panelName && !tab.panelType.prototype.parentPanel)
                     Firebug.setPref(Firebug.prefDomain, "defaultPanelName", panelName);
@@ -184,7 +184,7 @@
 
                 if (panel && (panel == this.selectedPanel) && !forceUpdate)
                     return panel;
-
+FBTrace.sysout('selectPanel '+panelName+" panel: "+panel);
                 this.hideSelectedPanel();
 
                 //xxxHonza: can be removed, but Chromebug needs it for now.
@@ -278,7 +278,7 @@
                 var oldPanel = this.selectedPanel;
                 if (oldPanel)
                 {
-                    var state = FBL.getPersistedState(FirebugContext, oldPanel.name);
+                    var state = FBL.getPersistedState(Firebug.currentContext, oldPanel.name);
                     oldPanel.hide(state);
 
                     oldPanel.visible = false;  // xxxjjb Why three ways to un-show the panel?
@@ -725,7 +725,7 @@
             if (!panel)
                 return;
 
-            var panelItems = panel ? panel.getOptionsMenuItems(FirebugContext) : null;
+            var panelItems = panel ? panel.getOptionsMenuItems(Firebug.currentContext) : null;
             if (!panel.activable && !(panelItems && panelItems.length))
                 this.setAttribute("collapsed", "true");
             else
@@ -758,7 +758,7 @@
             if (panel)
             {
                 // Get panel's option items.
-                var panelItems = panel.getOptionsMenuItems(FirebugContext);
+                var panelItems = panel.getOptionsMenuItems(Firebug.currentContext);
                 if (panelItems && panelItems.length > 0)
                     items.push("-");
             }
@@ -825,7 +825,7 @@
                 {
                     if (item.rep)
                     {
-                        var itemObject = item.rep.getRealObject(item.repObject, FirebugContext);
+                        var itemObject = item.rep.getRealObject(item.repObject, Firebug.currentContext);
                         if (itemObject == object)
                             return item;
                     }
@@ -866,8 +866,8 @@
             var object = Firebug.getRepObject(event.target);
             if (object)
             {
-                var rep = Firebug.getRep(object, FirebugContext);
-                object = rep.getRealObject(object, FirebugContext);
+                var rep = Firebug.getRep(object, Firebug.currentContext);
+                object = rep.getRealObject(object, Firebug.currentContext);
                 if (object)
                 {
                     this.selectObject(object);
@@ -880,10 +880,10 @@
             var object = Firebug.getRepObject(event.target);
             if (object)
             {
-                var rep = Firebug.getRep(object, FirebugContext);
-                object = rep.getRealObject(object, FirebugContext);
+                var rep = Firebug.getRep(object, Firebug.currentContext);
+                object = rep.getRealObject(object, Firebug.currentContext);
                 if (object)
-                    Firebug.Inspector.highlightObject(object, FirebugContext);
+                    Firebug.Inspector.highlightObject(object, Firebug.currentContext);
             }
         ]]></handler>
 
@@ -1117,7 +1117,7 @@
                 return false;
             }
 
-            this.filterStringHeader = FBL.createMenuHeader(this.popup, {label: "script.Type any key to filter list"}); 
+            this.filterStringHeader = FBL.createMenuHeader(this.popup, {label: "script.Type any key to filter list"});
             FBL.setClass(this.filterStringHeader, "fbURLMenuItem");
 
             var groupNames = [];
@@ -1346,12 +1346,12 @@
         </method>
         <method name="searchNext">
             <body><![CDATA[
-                this.status = (Firebug.Search.searchNext(FirebugContext) ? "found" : "notfound");
+                this.status = (Firebug.Search.searchNext(Firebug.currentContext) ? "found" : "notfound");
             ]]></body>
         </method>
         <method name="searchPrev">
             <body><![CDATA[
-                this.status = (Firebug.Search.searchPrev(FirebugContext) ? "found" : "notfound");
+                this.status = (Firebug.Search.searchPrev(Firebug.currentContext) ? "found" : "notfound");
             ]]></body>
         </method>
 
@@ -1461,14 +1461,14 @@
     </implementation>
     <handlers>
         <handler event="keypress"><![CDATA[
-            if (event.keyCode ==  KeyEvent.DOM_VK_ESCAPE) 
+            if (event.keyCode ==  KeyEvent.DOM_VK_ESCAPE)
             {
                 var optionsPopup = document.getElementById("fbSearchOptionsPanel");
                 var searchBox = document.getAnonymousElementByAttribute(this, "anonid", "searchBox");
                 if (!optionsPopup || !searchBox)
                     return;
                 searchBox.focus();
-                if (optionsPopup.state == "open") 
+                if (optionsPopup.state == "open")
                 {
                     event.stopPropagation(); // prevent cmd preview toggle
                     optionsPopup.hidePopup();
@@ -1492,7 +1492,7 @@
         ]]></handler>
 
         <handler event="input"><![CDATA[
-            Firebug.Search.update(FirebugContext);
+            Firebug.Search.update(Firebug.currentContext);
         ]]></handler>
 
         <handler event="popupshowing"><![CDATA[
@@ -1509,37 +1509,37 @@
 <binding id="commandLine" extends="chrome://global/content/bindings/textbox.xml#textarea">
     <handlers>
         <handler event="input"><![CDATA[
-            Firebug.CommandLine.update(FirebugContext);
+            Firebug.CommandLine.update(Firebug.currentContext);
         ]]></handler>
 
         <handler event="overflow"><![CDATA[
             if (window.Firebug)
-                Firebug.CommandLine.checkOverflow(FirebugContext);
+                Firebug.CommandLine.checkOverflow(Firebug.currentContext);
         ]]></handler>
 
         <handler event="keypress" keycode="VK_RETURN" modifiers="" preventdefault="true"><![CDATA[
-            Firebug.CommandLine.enter(FirebugContext);
+            Firebug.CommandLine.enter(Firebug.currentContext);
         ]]></handler>
 
         <handler event="keypress" keycode="VK_RETURN" modifiers="meta" preventdefault="true"><![CDATA[
-            Firebug.CommandLine.enterMenu(FirebugContext);
+            Firebug.CommandLine.enterMenu(Firebug.currentContext);
         ]]></handler>
 
         <handler event="keypress" keycode="VK_RETURN" modifiers="shift" preventdefault="true"><![CDATA[
-            Firebug.CommandLine.enterInspect(FirebugContext);
+            Firebug.CommandLine.enterInspect(Firebug.currentContext);
         ]]></handler>
 
         <handler event="keypress" keycode="VK_UP" preventdefault="true"><![CDATA[
-            Firebug.CommandLine.cycleCommandHistory(FirebugContext, -1);
+            Firebug.CommandLine.cycleCommandHistory(Firebug.currentContext, -1);
         ]]></handler>
 
         <handler event="keypress" keycode="VK_DOWN" preventdefault="true"><![CDATA[
-            Firebug.CommandLine.cycleCommandHistory(FirebugContext, 1);
+            Firebug.CommandLine.cycleCommandHistory(Firebug.currentContext, 1);
         ]]></handler>
 
         <handler event="keypress" keycode="VK_ESCAPE" preventdefault="true"><![CDATA[
             // Cancel the event only if it executed the required action (cleared the command line).
-            if (Firebug.CommandLine.cancel(FirebugContext))
+            if (Firebug.CommandLine.cancel(Firebug.currentContext))
                 FBL.cancelEvent(event);
         ]]></handler>
     </handlers>
@@ -1548,7 +1548,7 @@
 <binding id="largeCommandLine" extends="chrome://global/content/bindings/textbox.xml#textarea">
     <handlers>
         <handler event="input"><![CDATA[
-            Firebug.CommandLine.update(FirebugContext);
+            Firebug.CommandLine.update(Firebug.currentContext);
         ]]></handler>
 
         <handler event="keypress" keycode="VK_TAB"><![CDATA[
@@ -1558,15 +1558,15 @@
         ]]></handler>
 
         <handler event="keypress" keycode="VK_RETURN" modifiers="meta" preventdefault="true"><![CDATA[
-            Firebug.CommandLine.enter(FirebugContext);
+            Firebug.CommandLine.enter(Firebug.currentContext);
         ]]></handler>
 
         <handler event="keypress" keycode="VK_RETURN" modifiers="control" preventdefault="true"><![CDATA[
-            Firebug.CommandLine.enter(FirebugContext);
+            Firebug.CommandLine.enter(Firebug.currentContext);
         ]]></handler>
 
         <handler event="keypress" keycode="VK_ESCAPE" preventdefault="true"><![CDATA[
-            Firebug.CommandLine.cancel(FirebugContext);
+            Firebug.CommandLine.cancel(Firebug.currentContext);
         ]]></handler>
     </handlers>
 </binding>

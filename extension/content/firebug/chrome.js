@@ -204,7 +204,7 @@ top.FirebugChrome =
             this.updatePanelBar1(Firebug.panelTypes);
 
             if (inDetachedScope)
-                this.attachBrowser(FirebugContext);
+                this.attachBrowser(Firebug.currentContext);
             else
                 Firebug.initializeUI(detachArgs);
 
@@ -288,11 +288,11 @@ top.FirebugChrome =
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 
-    attachBrowser: function(context)  // XXXjjb context == (FirebugContext || null)  and inDetachedScope == true
+    attachBrowser: function(context)  // XXXjjb context == (Firebug.currentContext || null)  and inDetachedScope == true
     {
         if (FBTrace.DBG_ACTIVATION)
             FBTrace.sysout("chrome.attachBrowser with inDetachedScope="+inDetachedScope +
-                " context="+context+" context==FirebugContext: "+(context==FirebugContext)+
+                " context="+context+" context==Firebug.currentContext: "+(context==Firebug.currentContext)+
                 " in window: "+window.location);
 
         if (inDetachedScope)  // then we are initializing in external window
@@ -480,8 +480,8 @@ top.FirebugChrome =
 
     gotoPreviousTab: function()
     {
-        if (FirebugContext.previousPanelName)
-            this.selectPanel(FirebugContext.previousPanelName);
+        if (Firebug.currentContext.previousPanelName)
+            this.selectPanel(Firebug.currentContext.previousPanelName);
     },
 
     gotoSiblingTab : function(goRight)
@@ -489,7 +489,7 @@ top.FirebugChrome =
         if ($('fbContentBox').collapsed)
             return;
         var i, currentIndex = newIndex = -1, currentPanel = this.getSelectedPanel(), newPanel;
-        var panelTypes = Firebug.getMainPanelTypes(FirebugContext);
+        var panelTypes = Firebug.getMainPanelTypes(Firebug.currentContext);
 
         /*get current panel's index (is there a simpler way for this?*/
         for (i = 0; i < panelTypes.length; i++)
@@ -514,7 +514,7 @@ top.FirebugChrome =
 
     getNextObject: function(reverse)
     {
-        var panel = FirebugContext.getPanel(FirebugContext.panelName);
+        var panel = Firebug.currentContext.getPanel(Firebug.currentContext.panelName);
         if (panel)
         {
             var item = panelStatus.getItemByObject(panel.selection);
@@ -559,7 +559,7 @@ top.FirebugChrome =
     {
         if (FBTrace.DBG_PANELS)
             FBTrace.sysout("chrome.select object:"+object+" panelName:"+panelName+" sidePanelName:"+sidePanelName+" forceUpdate:"+forceUpdate+"\n");
-        var bestPanelName = getBestPanelName(object, FirebugContext, panelName);
+        var bestPanelName = getBestPanelName(object, Firebug.currentContext, panelName);
         var panel = this.selectPanel(bestPanelName, sidePanelName, true);
         if (panel)
             panel.select(object, forceUpdate);
@@ -568,7 +568,7 @@ top.FirebugChrome =
     selectPanel: function(panelName, sidePanelName, noRefresh)
     {
         if (panelName && sidePanelName)
-            FirebugContext.sidePanelNames[panelName] = sidePanelName;
+            Firebug.currentContext.sidePanelNames[panelName] = sidePanelName;
 
         return panelBar1.selectPanel(panelName, false, noRefresh);  // cause panel visibility changes and events
     },
@@ -580,12 +580,12 @@ top.FirebugChrome =
 
     selectSupportingPanel: function(object, context, forceUpdate)
     {
-    	var bestPanelName = getBestPanelSupportingObject(object, context);
-    	var panel = this.selectPanel(bestPanelName, false, true);
+        var bestPanelName = getBestPanelSupportingObject(object, context);
+        var panel = this.selectPanel(bestPanelName, false, true);
         if (panel)
             panel.select(object, forceUpdate);
     },
-    
+
     clearPanels: function()
     {
         panelBar1.hideSelectedPanel();
@@ -674,7 +674,7 @@ top.FirebugChrome =
          Firebug.currentContext = context;
 
          if (FBTrace.DBG_WINDOWS || FBTrace.DBG_DISPATCH)
-             FBTrace.sysout("setFirebugContext "+(FirebugContext?FirebugContext.getName():" **> NULL <** ") + " in "+window.location+" has wrapped: "+(FirebugContext?FirebugContext.wrappedJSObject:"no"));
+             FBTrace.sysout("setFirebugContext "+(Firebug.currentContext?Firebug.currentContext.getName():" **> NULL <** ") + " in "+window.location+" has wrapped: "+(Firebug.currentContext?Firebug.currentContext.wrappedJSObject:"no"));
     },
 
     hidePanel: function()
@@ -691,7 +691,7 @@ top.FirebugChrome =
         var context = Firebug.currentContext;
 
         if (FBTrace.DBG_PANELS)
-            FBTrace.sysout("chrome.syncPanel FirebugContext=" +
+            FBTrace.sysout("chrome.syncPanel Firebug.currentContext=" +
                 (context ? context.getName() : "undefined"));
 
         panelStatus.clear();
@@ -719,7 +719,7 @@ top.FirebugChrome =
 
     syncMainPanels: function()
     {
-        var panelTypes = Firebug.getMainPanelTypes(FirebugContext);
+        var panelTypes = Firebug.getMainPanelTypes(Firebug.currentContext);
         panelBar1.updatePanels(panelTypes);
     },
 
@@ -728,14 +728,14 @@ top.FirebugChrome =
         if (!panelBar1.selectedPanel)
             return;
 
-        var panelTypes = Firebug.getSidePanelTypes(FirebugContext, panelBar1.selectedPanel);
+        var panelTypes = Firebug.getSidePanelTypes(Firebug.currentContext, panelBar1.selectedPanel);
         panelBar2.updatePanels(panelTypes);
 
-        if (FirebugContext && FirebugContext.sidePanelNames)
+        if (Firebug.currentContext && Firebug.currentContext.sidePanelNames)
         {
             if ( !panelBar2.selectedPanel || (panelBar2.selectedPanel.parentPanel !== panelBar1.selectedPanel.name) )
             {
-                var sidePanelName = FirebugContext.sidePanelNames[FirebugContext.panelName];
+                var sidePanelName = Firebug.currentContext.sidePanelNames[Firebug.currentContext.panelName];
                 sidePanelName = getBestSidePanelName(sidePanelName, panelTypes);
                 panelBar2.selectPanel(sidePanelName, true);
             }
@@ -755,9 +755,9 @@ top.FirebugChrome =
 
     syncTitle: function()
     {
-        if (FirebugContext)
+        if (Firebug.currentContext)
         {
-            var title = FirebugContext.getTitle();
+            var title = Firebug.currentContext.getTitle();
             window.document.title = FBL.$STRF("WindowTitle", [title]);
         }
         else
@@ -827,8 +827,8 @@ top.FirebugChrome =
                     {
                         var object = path[i];
 
-                        var rep = Firebug.getRep(object, FirebugContext);
-                        var objectTitle = rep.getTitle(object, FirebugContext);
+                        var rep = Firebug.getRep(object, Firebug.currentContext);
+                        var objectTitle = rep.getTitle(object, Firebug.currentContext);
 
                         var title = FBL.cropMultipleLines(objectTitle, statusCropSize);
                         panelStatus.addItem(title, object, rep, panel.statusSeparator);
@@ -854,7 +854,7 @@ top.FirebugChrome =
     addTab: function(context, url, title, parentPanel)
     {
         context.addPanelType(url, title, parentPanel);
-        if (context == FirebugContext)
+        if (context == Firebug.currentContext)
         {
             if (parentPanel)
             {
@@ -1108,9 +1108,9 @@ top.FirebugChrome =
 
         this.contextMenuObject = null;
 
-        var rep = Firebug.getRep(object, FirebugContext);
-        var realObject = rep ? rep.getRealObject(object, FirebugContext) : null;
-        var realRep = realObject ? Firebug.getRep(realObject, FirebugContext) : null;
+        var rep = Firebug.getRep(object, Firebug.currentContext);
+        var realObject = rep ? rep.getRealObject(object, Firebug.currentContext) : null;
+        var realRep = realObject ? Firebug.getRep(realObject, Firebug.currentContext) : null;
 
         if (FBTrace.DBG_OPTIONS)
             FBTrace.sysout("chrome.onContextShowing object:"+object+" rep: "+rep+" realObject: "+realObject+" realRep:"+realRep+"\n");
@@ -1118,7 +1118,7 @@ top.FirebugChrome =
         if (realObject && realRep)
         {
             // 1. Add the custom menu items from the realRep
-            var menu = realRep.getContextMenuItems(realObject, target, FirebugContext);
+            var menu = realRep.getContextMenuItems(realObject, target, Firebug.currentContext);
             if (menu)
             {
                 for (var i = 0; i < menu.length; ++i)
@@ -1129,7 +1129,7 @@ top.FirebugChrome =
         if (object && rep && rep != realRep)
         {
             // 1. Add the custom menu items from the original rep
-            var items = rep.getContextMenuItems(object, target, FirebugContext);
+            var items = rep.getContextMenuItems(object, target, Firebug.currentContext);
             if (items)
             {
                 for (var i = 0; i < items.length; ++i)
@@ -1174,7 +1174,7 @@ top.FirebugChrome =
         {
             var lastChild = popup.lastChild;
             FBL.eraseNode(popup);
-            var disabled = (!FirebugContext);
+            var disabled = (!Firebug.currentContext);
             for( var i = 0; i < editors.length; ++i )
             {
                 if (editors[i] == "-")
@@ -1199,15 +1199,15 @@ top.FirebugChrome =
 
         // Domplate (+ support for context menus) can be used even in separate
         // windows when FirebugContext doesn't have to be defined.
-        if (!FirebugContext)
+        if (!Firebug.currentContext)
             return items;
 
         for (var i = 0; i < Firebug.panelTypes.length; ++i)
         {
             var panelType = Firebug.panelTypes[i];
             if (!panelType.prototype.parentPanel
-                && panelType.prototype.name != FirebugContext.panelName
-                && panelSupportsObject(panelType, object, FirebugContext))
+                && panelType.prototype.name != Firebug.currentContext.panelName
+                && panelSupportsObject(panelType, object, Firebug.currentContext))
             {
                 var panelName = panelType.prototype.name;
 
@@ -1252,13 +1252,13 @@ top.FirebugChrome =
         else if (panel)
             object = panel.getTooltipObject(target);
 
-        var rep = object ? Firebug.getRep(object, FirebugContext) : null;
-        object = rep ? rep.getRealObject(object, FirebugContext) : null;
+        var rep = object ? Firebug.getRep(object, Firebug.currentContext) : null;
+        object = rep ? rep.getRealObject(object, Firebug.currentContext) : null;
         rep = object ? Firebug.getRep(object) : null;
 
         if (object && rep)
         {
-            var label = rep.getTooltip(object, FirebugContext);
+            var label = rep.getTooltip(object, Firebug.currentContext);
             if (label)
             {
                 tooltip.setAttribute("label", label);
@@ -1458,7 +1458,7 @@ function onBlur(event)
 {
     // XXXjjb this seems like a waste: called continuously to clear possible highlight I guess.
     // XXXhh Is this really necessary? I disabled it for now as this was preventing me to show highlights on focus
-    //Firebug.Inspector.highlightObject(null, FirebugContext);
+    //Firebug.Inspector.highlightObject(null, Firebug.currentContext);
 }
 
 function onSelectLocation(event)
@@ -1473,17 +1473,17 @@ function onSelectingPanel(event)
     var panelName = panel ? panel.name : null;
 
     if (FBTrace.DBG_PANELS)
-        FBTrace.sysout("chrome.onSelectingPanel="+panelName+" FirebugContext=" +
-            (FirebugContext?FirebugContext.getName():"undefined"));
+        FBTrace.sysout("chrome.onSelectingPanel="+panelName+" Firebug.currentContext=" +
+            (Firebug.currentContext?Firebug.currentContext.getName():"undefined"));
 
-    if (FirebugContext)
+    if (Firebug.currentContext)
     {
-        FirebugContext.previousPanelName = FirebugContext.panelName;
-        FirebugContext.panelName = panelName;
+        Firebug.currentContext.previousPanelName = Firebug.currentContext.panelName;
+        Firebug.currentContext.panelName = panelName;
 
-        FirebugContext.sidePanelName =
-            FirebugContext.sidePanelNames && panelName in FirebugContext.sidePanelNames
-            ? FirebugContext.sidePanelNames[panelName]
+        Firebug.currentContext.sidePanelName =
+            Firebug.currentContext.sidePanelNames && panelName in Firebug.currentContext.sidePanelNames
+            ? Firebug.currentContext.sidePanelNames[panelName]
             : null;
     }
 
@@ -1504,13 +1504,13 @@ function onSelectingPanel(event)
 function onSelectedSidePanel(event)
 {
     var sidePanel = panelBar2.selectedPanel;
-    if (FirebugContext)
+    if (Firebug.currentContext)
     {
-        var panelName = FirebugContext.panelName;
+        var panelName = Firebug.currentContext.panelName;
         if (panelName)
         {
             var sidePanelName = sidePanel ? sidePanel.name : null;
-            FirebugContext.sidePanelNames[panelName] = sidePanelName;
+            Firebug.currentContext.sidePanelNames[panelName] = sidePanelName;
         }
     }
 
@@ -1531,9 +1531,9 @@ function onPanelMouseOver(event)
     if(!object)
         return;
 
-    var rep = Firebug.getRep(object, FirebugContext);
+    var rep = Firebug.getRep(object, Firebug.currentContext);
     if(rep)
-        rep.highlightObject(object, FirebugContext);
+        rep.highlightObject(object, Firebug.currentContext);
 }
 
 function onPanelMouseOut(event)
@@ -1542,9 +1542,9 @@ function onPanelMouseOut(event)
     if(!object)
         return;
 
-    var rep = Firebug.getRep(object, FirebugContext);
+    var rep = Firebug.getRep(object, Firebug.currentContext);
     if(rep)
-        rep.unhighlightObject(object, FirebugContext);
+        rep.unhighlightObject(object, Firebug.currentContext);
 }
 
 function onPanelClick(event)
@@ -1553,9 +1553,9 @@ function onPanelClick(event)
     if (repNode)
     {
         var object = repNode.repObject;
-        var rep = Firebug.getRep(object, FirebugContext);
-        var realObject = rep ? rep.getRealObject(object, FirebugContext) : null;
-        var realRep = realObject ? Firebug.getRep(realObject, FirebugContext) : rep;
+        var rep = Firebug.getRep(object, Firebug.currentContext);
+        var realObject = rep ? rep.getRealObject(object, Firebug.currentContext) : null;
+        var realRep = realObject ? Firebug.getRep(realObject, Firebug.currentContext) : rep;
         if (!realObject)
             realObject = object;
 
@@ -1565,16 +1565,16 @@ function onPanelClick(event)
             {
                 if (realRep)
                 {
-                    realRep.inspectObject(realObject, FirebugContext);
+                    realRep.inspectObject(realObject, Firebug.currentContext);
                     FBL.cancelEvent(event);
                 }
             }
         }
         else if (FBL.isControlClick(event) || FBL.isMiddleClick(event))
         {
-            if (!realRep || !realRep.browseObject(realObject, FirebugContext))
+            if (!realRep || !realRep.browseObject(realObject, Firebug.currentContext))
             {
-                if (rep && !(rep != realRep && rep.browseObject(object, FirebugContext)))
+                if (rep && !(rep != realRep && rep.browseObject(object, Firebug.currentContext)))
                 {
                     var panel = Firebug.getElementPanel(event.target);
                     if (!panel || !panel.browseObject(realObject))
@@ -1615,8 +1615,8 @@ function onMainTabBoxMouseDown(event)
 
 function getRealObject(object)
 {
-    var rep = Firebug.getRep(object, FirebugContext);
-    var realObject = rep ? rep.getRealObject(object, FirebugContext) : null;
+    var rep = Firebug.getRep(object, Firebug.currentContext);
+    var realObject = rep ? rep.getRealObject(object, Firebug.currentContext) : null;
     return realObject ? realObject : object;
 }
 
