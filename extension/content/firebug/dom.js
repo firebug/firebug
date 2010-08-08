@@ -1595,6 +1595,9 @@ WatchPanel.prototype = extend(Firebug.DOMBasePanel.prototype,
     {
         dispatch(this.fbListeners, 'onBeforeDomUpdateSelection', [this]);
 
+        if (frame instanceof StackFrame)  // TODO convert this code to work off StackFrame rather than native frames
+            frame = frame.getNativeFrame();
+
         var newFrame = frame && frame.isValid && frame.script != this.lastScript;
         if (newFrame)
         {
@@ -1775,7 +1778,7 @@ function addMember(object, type, props, name, value, level, order, context)
 
     // Special case for functions with a protoype that has values
     if (valueType === "function" && value.prototype)
-        hasChildren = hasProperties(value.prototype);
+        hasChildren = hasChildren || hasProperties(value.prototype);
 
     var member = {
         object: object,
