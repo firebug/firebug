@@ -255,12 +255,12 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
             delete context.aborted;
             return RETURN_ABORT;
         }
-        else if (context.rerun)
+        else if (Firebug.rerun)
         {
             setTimeout(function reExecute()
             {
-                var rerun = context.savedRerun = context.rerun;
-                delete context.rerun;
+                var rerun = context.savedRerun = Firebug.rerun;
+                delete Firebug.rerun;
 
                 if (FBTrace.DBG_UI_LOOP)
                     FBTrace.sysout("Firebug.debugger.reExecute ", {rerun: rerun});
@@ -270,11 +270,13 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
                 {
                     if (FBTrace.DBG_UI_LOOP)
                         FBTrace.sysout("Firebug.debugger.reExecute success", result);
+                    dispatch(Firebug.Debugger.fbListeners, "onRerunComplete", [true, result]);
                 }
                 function exceptionFunction(result, context)
                 {
                     if (FBTrace.DBG_ERRORS)
                         FBTrace.sysout("Firebug.debugger.reExecute FAILED "+result, result);
+                    dispatch(Firebug.Debugger.fbListeners, "onRerunComplete", [failed, result]);
                 }
                 Firebug.CommandLine.evaluate("window._firebug.rerunFunction()", context, null, context.window, successConsoleFunction, exceptionFunction);
 
@@ -297,10 +299,16 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
             return;
         }
 
-        context.rerun = this.getRerun(context);
+        if (Firebug.rerun)
+        {
+            FBTrace.sysout("debugger.rerun FAILS: Firebug.rerun in progress");
+            return;
+        }
+
+        Firebug.rerun = this.getRerun(context);
 
         // now continue but abort the current call stack.
-        this.resume(context);  // the context.rerun will signal abort stack
+        this.resume(context);  // the Firebug.rerun will signal abort stack
     },
 
     getRerun: function(context)
@@ -322,9 +330,6 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
                     return context.savedRerun;
                 }
             }
-
-
-
 
             // In this oldest frame we have element.onclick(event) or window.foo()
             // We want to cause the page to run this again after we abort this call stack.

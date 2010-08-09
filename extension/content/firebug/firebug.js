@@ -468,6 +468,9 @@ top.Firebug =
 
     suspend: function()  // dispatch suspendFirebug to all windows
     {
+        if(Firebug.rerun)
+            return;
+
         this.broadcast('suspendFirebug', []);
     },
 

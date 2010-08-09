@@ -452,7 +452,7 @@ var fbs =
         catch (exc)
         {
             if (FBTrace.DBG_FBS_ERRORS)
-                FBTrace.sysout("fbs: jsd.exitNestedEventLoop FAILS "+exc);
+                FBTrace.sysout("fbs: jsd.exitNestedEventLoop FAILS "+exc, exc);
         }
     },
 
