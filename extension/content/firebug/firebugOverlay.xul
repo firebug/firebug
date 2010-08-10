@@ -20,35 +20,35 @@
     <commandset id="mainCommandSet">
         <!-- TODO Firebug.Editors. -->
         <command id="cmd_openFirebugEditors" oncommand="Firebug.openEditors()"/>
-        <command id="cmd_openInEditor" oncommand="Firebug.openInEditor(FirebugContext, event.sourceEvent.target.value)"/>
+        <command id="cmd_openInEditor" oncommand="Firebug.openInEditor(Firebug.currentContext, event.sourceEvent.target.value)"/>
         <!-- end TODO Firebug.Editors. -->
-        <command id="cmd_clearConsole" oncommand="Firebug.Console.clear(FirebugContext)"/>
-        <command id="cmd_togglePersistConsole" oncommand="Firebug.Console.togglePersist(FirebugContext)"/>
-        <command id="cmd_clearNet" oncommand="Firebug.NetMonitor.clear(FirebugContext)"/>
+        <command id="cmd_clearConsole" oncommand="Firebug.Console.clear(Firebug.currentContext)"/>
+        <command id="cmd_togglePersistConsole" oncommand="Firebug.Console.togglePersist(Firebug.currentContext)"/>
+        <command id="cmd_clearNet" oncommand="Firebug.NetMonitor.clear(Firebug.currentContext)"/>
         <command id="cmd_toggleSuspendFirebug" oncommand="Firebug.toggleSuspend()"/>
         <command id="cmd_closeFirebug" oncommand="Firebug.closeFirebug(true)"/>
 
-        <command id="cmd_toggleInspecting" oncommand="if (!FirebugContext) Firebug.toggleBar(true); Firebug.Inspector.toggleInspecting(FirebugContext)"
+        <command id="cmd_toggleInspecting" oncommand="if (!Firebug.currentContext) Firebug.toggleBar(true); Firebug.Inspector.toggleInspecting(Firebug.currentContext)"
                  checked="false"/>
         <command id="cmd_toggleQuickInfoBox" oncommand="Firebug.Inspector.toggleQuickInfoBox()"
                  checked="false"/>
-        <command id="cmd_toggleProfiling" oncommand="Firebug.Profiler.toggleProfiling(FirebugContext)"/>
-        <command id="cmd_toggleHTMLEditing" oncommand="FirebugContext.getPanel('html').toggleEditing()"/>
-        <command id="cmd_toggleCSSEditing" oncommand="FirebugContext.getPanel('stylesheet').toggleEditing()"/>
+        <command id="cmd_toggleProfiling" oncommand="Firebug.Profiler.toggleProfiling(Firebug.currentContext)"/>
+        <command id="cmd_toggleHTMLEditing" oncommand="Firebug.currentContext.getPanel('html').toggleEditing()"/>
+        <command id="cmd_toggleCSSEditing" oncommand="Firebug.currentContext.getPanel('stylesheet').toggleEditing()"/>
 
-        <command id="cmd_focusCommandLine" oncommand="if (FirebugContext) Firebug.CommandLine.focus(FirebugContext)"/>
-        <command id="cmd_focusFirebugSearch" oncommand="if (FirebugContext) Firebug.Search.focus(FirebugContext);"/>
-        <command id="cmd_focusWatchEditor" oncommand="if (FirebugContext) Firebug.Debugger.focusWatch(FirebugContext);"/>
-        <command id="cmd_focusLocation" oncommand="if (FirebugContext) FirebugChrome.focusLocationList(FirebugContext);"/>
+        <command id="cmd_focusCommandLine" oncommand="if (Firebug.currentContext) Firebug.CommandLine.focus(Firebug.currentContext)"/>
+        <command id="cmd_focusFirebugSearch" oncommand="if (Firebug.currentContext) Firebug.Search.focus(Firebug.currentContext);"/>
+        <command id="cmd_focusWatchEditor" oncommand="if (Firebug.currentContext) Firebug.Debugger.focusWatch(Firebug.currentContext);"/>
+        <command id="cmd_focusLocation" oncommand="if (Firebug.currentContext) FirebugChrome.focusLocationList(Firebug.currentContext);"/>
 
-        <command id="cmd_breakOnNext" oncommand="FirebugChrome.breakOnNext(FirebugContext, event);"/>
+        <command id="cmd_breakOnNext" oncommand="FirebugChrome.breakOnNext(Firebug.currentContext, event);"/>
 
-        <command id="cmd_rerun" oncommand="Firebug.Debugger.rerun(FirebugContext)" disabled="true"/>
-        <command id="cmd_resumeExecution" oncommand="Firebug.Debugger.resume(FirebugContext)" disabled="true"/>
-        <command id="cmd_stepOver" oncommand="Firebug.Debugger.stepOver(FirebugContext)" disabled="true"/>
-        <command id="cmd_stepInto" oncommand="Firebug.Debugger.stepInto(FirebugContext)" disabled="true"/>
-        <command id="cmd_stepOut" oncommand="Firebug.Debugger.stepOut(FirebugContext)" disabled="true"/>
-        <command id="cmd_reenterCommand" oncommand="Firebug.CommandLine.reenter(FirebugContext)"/>
+        <command id="cmd_rerun" oncommand="Firebug.Debugger.rerun(Firebug.currentContext)" disabled="true"/>
+        <command id="cmd_resumeExecution" oncommand="Firebug.Debugger.resume(Firebug.currentContext)" disabled="true"/>
+        <command id="cmd_stepOver" oncommand="Firebug.Debugger.stepOver(Firebug.currentContext)" disabled="true"/>
+        <command id="cmd_stepInto" oncommand="Firebug.Debugger.stepInto(Firebug.currentContext)" disabled="true"/>
+        <command id="cmd_stepOut" oncommand="Firebug.Debugger.stepOut(Firebug.currentContext)" disabled="true"/>
+        <command id="cmd_reenterCommand" oncommand="Firebug.CommandLine.reenter(Firebug.currentContext)"/>
 
         <command id="cmd_previousFirebugTab" oncommand="FirebugChrome.gotoPreviousTab()"/>
         <command id="cmd_leftFirebugTab" oncommand="FirebugChrome.gotoSiblingTab(false)"/>
@@ -56,7 +56,7 @@
         <command id="cmd_nextObject" oncommand="FirebugChrome.gotoNextObject()"/>
         <command id="cmd_previousObject" oncommand="FirebugChrome.gotoNextObject(true)"/>
 
-        <command id="cmd_clearAllBreakpoints" oncommand="Firebug.Debugger.clearAllBreakpoints(FirebugContext)"/>
+        <command id="cmd_clearAllBreakpoints" oncommand="Firebug.Debugger.clearAllBreakpoints(Firebug.currentContext)"/>
         <command id="cmd_breakOnErrors" oncommand="Firebug.togglePref('breakOnErrors')"/>
         <command id="cmd_decompileEvals" oncommand="Firebug.togglePref('decompileEvals')"/>
 
@@ -74,13 +74,13 @@
         <command id="cmd_resetAllOptions" oncommand="Firebug.resetAllOptions(true);"/>
         <command id="cmd_inspect" oncommand="Firebug.Inspector.inspectFromContextMenu(document.popupNode);"/>
 
-        <command id="cmd_togglePersistNet" oncommand="Firebug.NetMonitor.togglePersist(FirebugContext)"/>
+        <command id="cmd_togglePersistNet" oncommand="Firebug.NetMonitor.togglePersist(Firebug.currentContext)"/>
         <command id="cmd_toggleOrient" oncommand="FirebugChrome.toggleOrient()" />
-        <command id="cmd_navBack" oncommand="Firebug.NavigationHistory.goBack(FirebugContext)" />
-        <command id="cmd_navForward" oncommand="Firebug.NavigationHistory.goForward(FirebugContext)" />
-        <command id="cmd_toggleFreezeWindow" oncommand="Firebug.Debugger.toggleFreezeWindow(FirebugContext)" />
+        <command id="cmd_navBack" oncommand="Firebug.NavigationHistory.goBack(Firebug.currentContext)" />
+        <command id="cmd_navForward" oncommand="Firebug.NavigationHistory.goForward(Firebug.currentContext)" />
+        <command id="cmd_toggleFreezeWindow" oncommand="Firebug.Debugger.toggleFreezeWindow(Firebug.currentContext)" />
 
-        <command id="cmd_toggleCommandPreview" oncommand="Firebug.CommandLine.Preview.toggle(FirebugContext)"
+        <command id="cmd_toggleCommandPreview" oncommand="Firebug.CommandLine.Preview.toggle(Firebug.currentContext)"
             checked="false"/>
     </commandset>
 
@@ -123,8 +123,8 @@
             <vbox></vbox>
         </menupopup>
         <menupopup id="fbNavigationHistoryMenu"
-            oncommand="Firebug.NavigationHistory.onHistoryCommand(event, FirebugContext)"
-            onpopupshowing="return Firebug.NavigationHistory.onPopupShowing(this, FirebugContext)" />
+            oncommand="Firebug.NavigationHistory.onHistoryCommand(event, Firebug.currentContext)"
+            onpopupshowing="return Firebug.NavigationHistory.onPopupShowing(this, Firebug.currentContext)" />
         <panel id="fbCommandLineCompletionList" class="fbCommandLineCompletionPanel" noautohide="true" noautofocus="true">
         </panel>
     </popupset>
@@ -240,19 +240,19 @@
                                         <toolbarseparator class="fbPanelSpecificButtonsSeparator"/>
                                         <toolbarbutton id="fbConsoleFilter-all" label="firebug.All" type="radio"
                                             class="toolbar-text-button" tooltiptext="firebug.console.Show All Log Entries"
-                                            group="firebugConsoleFilter" oncommand="Firebug.Console.onToggleFilter(FirebugContext, 'all')"/>
+                                            group="firebugConsoleFilter" oncommand="Firebug.Console.onToggleFilter(Firebug.currentContext, 'all')"/>
                                         <toolbarbutton id="fbConsoleFilter-error" label="firebug.console.Errors" type="radio"
                                             class="toolbar-text-button" tooltiptext="firebug.console.Filter by Errors"
-                                            group="firebugConsoleFilter" oncommand="Firebug.Console.onToggleFilter(FirebugContext, 'error')"/>
+                                            group="firebugConsoleFilter" oncommand="Firebug.Console.onToggleFilter(Firebug.currentContext, 'error')"/>
                                         <toolbarbutton id="fbConsoleFilter-warning" label="firebug.console.Warnings" type="radio"
                                             class="toolbar-text-button" tooltiptext="firebug.console.Filter by Warnings"
-                                            group="firebugConsoleFilter" oncommand="Firebug.Console.onToggleFilter(FirebugContext, 'warning')"/>
+                                            group="firebugConsoleFilter" oncommand="Firebug.Console.onToggleFilter(Firebug.currentContext, 'warning')"/>
                                         <toolbarbutton id="fbConsoleFilter-info" label="firebug.console.Info" type="radio"
                                             class="toolbar-text-button" tooltiptext="firebug.console.Filter by Info"
-                                            group="firebugConsoleFilter" oncommand="Firebug.Console.onToggleFilter(FirebugContext, 'info')"/>
+                                            group="firebugConsoleFilter" oncommand="Firebug.Console.onToggleFilter(Firebug.currentContext, 'info')"/>
                                         <toolbarbutton id="fbConsoleFilter-debug" label="firebug.console.Debug Info" type="radio"
                                             group="firebugConsoleFilter" class="toolbar-text-button" tooltiptext="firebug.console.Filter by Debug Info"
-                                            oncommand="Firebug.Console.onToggleFilter(FirebugContext, 'debug')"/>
+                                            oncommand="Firebug.Console.onToggleFilter(Firebug.currentContext, 'debug')"/>
                                     </hbox>
 
                                     <hbox id="fbHTMLButtons" collapsed="true" class="noTabStop" >
@@ -270,12 +270,12 @@
                                     <hbox id="fbScriptButtons" collapsed="true" class="noTabStop">
                                         <toolbarseparator class="fbPanelSpecificButtonsSeparator"/>
                                         <tooltip id="fbScriptFilterMenuTooltip" role="presentation"
-                                            onpopupshowing="return Firebug.Debugger.onScriptFilterMenuTooltipShowing(this, FirebugContext)"/>
+                                            onpopupshowing="return Firebug.Debugger.onScriptFilterMenuTooltipShowing(this, Firebug.currentContext)"/>
                                         <toolbarbutton id="fbScriptFilterMenu" type="menu" tooltip="fbScriptFilterTooltip" role="button" aria-haspopup="true">
                                             <menupopup
-                                                oncommand="return Firebug.Debugger.onScriptFilterMenuCommand(event, FirebugContext)"
-                                                onpopupshowing="return Firebug.Debugger.onScriptFilterMenuPopupShowing(this, FirebugContext)"
-                                                onpopuphiding="return Firebug.Debugger.onScriptFilterMenuPopupHiding(this, FirebugContext)">
+                                                oncommand="return Firebug.Debugger.onScriptFilterMenuCommand(event, Firebug.currentContext)"
+                                                onpopupshowing="return Firebug.Debugger.onScriptFilterMenuPopupShowing(this, Firebug.currentContext)"
+                                                onpopuphiding="return Firebug.Debugger.onScriptFilterMenuPopupHiding(this, Firebug.currentContext)">
                                                 <menuitem type="radio" name="fbScriptFilterMenu" value="static"/>
                                                 <menuitem type="radio" name="fbScriptFilterMenu" value="evals"/>
                                                 <menuitem type="radio" name="fbScriptFilterMenu" value="events"/>
@@ -297,33 +297,33 @@
                                             <toolbarbutton id="fbNetFilter-all" label="firebug.All" type="radio"
                                                 class="toolbar-text-button"
                                                 group="firebugNetFilter" checked="true"
-                                                oncommand="Firebug.NetMonitor.onToggleFilter(FirebugContext, 'all')"/>
+                                                oncommand="Firebug.NetMonitor.onToggleFilter(Firebug.currentContext, 'all')"/>
                                             <toolbarbutton id="fbNetFilter-html" label="HTML" type="radio"
                                                 class="toolbar-text-button"
                                                 group="firebugNetFilter"
-                                                oncommand="Firebug.NetMonitor.onToggleFilter(FirebugContext, 'html')"/>
+                                                oncommand="Firebug.NetMonitor.onToggleFilter(Firebug.currentContext, 'html')"/>
                                             <toolbarbutton id="fbNetFilter-css" label="CSS" type="radio"
                                                 class="toolbar-text-button"
                                                 group="firebugNetFilter"
-                                                oncommand="Firebug.NetMonitor.onToggleFilter(FirebugContext, 'css')"/>
+                                                oncommand="Firebug.NetMonitor.onToggleFilter(Firebug.currentContext, 'css')"/>
                                             <toolbarbutton id="fbNetFilter-js" label="JS" type="radio"
                                                 class="toolbar-text-button"
                                                 group="firebugNetFilter"
-                                                oncommand="Firebug.NetMonitor.onToggleFilter(FirebugContext, 'js')"/>
+                                                oncommand="Firebug.NetMonitor.onToggleFilter(Firebug.currentContext, 'js')"/>
                                             <toolbarbutton id="fbNetFilter-xhr" label="XHR" type="radio"
                                                 tooltiptext="XMLHttpRequest"
                                                 class="toolbar-text-button" group="firebugNetFilter"
-                                                oncommand="Firebug.NetMonitor.onToggleFilter(FirebugContext, 'xhr')"/>
+                                                oncommand="Firebug.NetMonitor.onToggleFilter(Firebug.currentContext, 'xhr')"/>
                                             <toolbarbutton id="fbNetFilter-image" label="firebug.Images" type="radio"
                                                 class="toolbar-text-button"
                                                 group="firebugNetFilter"
-                                                oncommand="Firebug.NetMonitor.onToggleFilter(FirebugContext, 'image')"/>
+                                                oncommand="Firebug.NetMonitor.onToggleFilter(Firebug.currentContext, 'image')"/>
                                             <toolbarbutton id="fbNetFilter-flash" label="firebug.Flash" type="radio"
                                                 class="toolbar-text-button" group="firebugNetFilter"
-                                                oncommand="Firebug.NetMonitor.onToggleFilter(FirebugContext, 'flash')"/>
+                                                oncommand="Firebug.NetMonitor.onToggleFilter(Firebug.currentContext, 'flash')"/>
                                             <toolbarbutton id="fbNetFilter-media" label="net.filter.Media" type="radio"
                                                 class="toolbar-text-button" group="firebugNetFilter"
-                                                oncommand="Firebug.NetMonitor.onToggleFilter(FirebugContext, 'media')"/>
+                                                oncommand="Firebug.NetMonitor.onToggleFilter(Firebug.currentContext, 'media')"/>
                                         </hbox>
                                     </hbox>
 
@@ -399,14 +399,14 @@
                             <hbox id="fbCommandToolbar">
                                 <toolbarbutton id="fbCmdLineRunButton" label="firebug.Run"
                                     class="toolbar-text-button"
-                                    oncommand="Firebug.CommandLine.enter(FirebugContext)"/>
+                                    oncommand="Firebug.CommandLine.enter(Firebug.currentContext)"/>
                                 <toolbarbutton id="fbCmdLineClearButton" label="firebug.Clear"
                                     class="toolbar-text-button"
-                                    oncommand="Firebug.CommandLine.clear(FirebugContext)"/>
+                                    oncommand="Firebug.CommandLine.clear(Firebug.currentContext)"/>
                                 <toolbarbutton id="fbCmdLineCopyButton" label="firebug.Copy"
                                     class="toolbar-text-button"
                                     tooltiptext="firebug.CopyBookmarklet"
-                                    oncommand="Firebug.CommandLine.copyBookmarklet(FirebugContext)"/>
+                                    oncommand="Firebug.CommandLine.copyBookmarklet(Firebug.currentContext)"/>
                                 <toolbarspacer flex="1"/>
                                 <toolbarbutton id="fbCommandToggleLarge" class="toolbarbutton-iconic"
                                     oncommand="Firebug.setPref(Firebug.prefDomain, 'largeCommandLine', false)"/>
