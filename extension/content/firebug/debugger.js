@@ -298,7 +298,7 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
             FBTrace.sysout("debugger.rerun FAILS: not stopped");
             return;
         }
-
+        
         if (Firebug.rerun)
         {
             FBTrace.sysout("debugger.rerun FAILS: Firebug.rerun in progress");
@@ -310,7 +310,7 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
         // now continue but abort the current call stack.
         this.resume(context);  // the Firebug.rerun will signal abort stack
     },
-
+    
     getRerun: function(context)
     {
         if (FBTrace.DBG_UI_LOOP)
@@ -321,14 +321,14 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
             var frame = context.stoppedFrame;
             while (frame.callingFrame && frame.callingFrame.script.functionName)
             {
-                frame = frame.callingFrame;
-
-                if (frame.script.functionName == "_firebugRerun") // re-reRun
-                {
-                    if (FBTrace.DBG_UI_LOOP)
-                        FBTrace.sysout("getRerun re-rerun ", context.savedRerun);
-                    return context.savedRerun;
-                }
+            	frame = frame.callingFrame;
+            	
+            	if (frame.script.functionName == "_firebugRerun") // re-reRun
+            	{
+            		if (FBTrace.DBG_UI_LOOP)
+            			FBTrace.sysout("getRerun re-rerun ", context.savedRerun);
+            		return context.savedRerun;
+            	}
             }
 
             // In this oldest frame we have element.onclick(event) or window.foo()
@@ -349,19 +349,22 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
 
             var fnName = getFunctionName(frame.script, context, frame, true);
             rerun.script = getStoreRerunInfoScript(fnName);
+            var jsdFunctionName = frame.script.functionName;
 
             // now run the script that stores the rerun info in the page
             var result = {};
             var ok = frame.eval(rerun.script, context.window.location + "/RerunScript", 1, result);
+            
+            // If the eval goes off somewhere wacky, the frame may be invalid by this point.
             if (FBTrace.DBG_UI_LOOP)
-                FBTrace.sysout("debugger.rerun "+ok+" and result: "+result+" for "+context.getName(), {result: result, rerun: rerun, functionName: frame.script.functionName});
+                FBTrace.sysout("debugger.rerun "+ok+" and result: "+result+" for "+context.getName(), {result: result, rerun: rerun, functionName: jsdFunctionName});
         }
         catch(exc)
         {
             if (FBTrace.DBG_ERRORS)
                 FBTrace.sysout("debugger.rerun FAILS for "+context.getName()+" because "+exc, {exc:exc, rerun: rerun});
         }
-
+        
         return rerun;
     },
 
@@ -503,7 +506,7 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
             else
                 return; // bail, we did not freeze this context
 
-            var executionContext = context.stoppedFrame.executionContext;
+            	var executionContext = context.stoppedFrame.executionContext;
             if (executionContext.isValid)
             {
                 this.unsuppressEventHandling(context);
@@ -520,7 +523,7 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
                 {
                     var nowFocused = context.window.document.commandDispatcher ? context.window.document.commandDispatcher.focusedElement : null;
                     FBTrace.sysout("debugger.thaw context.saveFocus "+context.saveFocus+" vs "+nowFocused, context.saveFocus);
-                }
+            }
 
                 executionContext.scriptsEnabled = true;
             }
@@ -2690,7 +2693,7 @@ Firebug.ScriptPanel.prototype = extend(Firebug.SourceBoxPanel,
             if (this.context.breakingCause)
                 this.context.breakingCause.lineNo = this.executionLineNo;
 
-            this.scrollToLine(url, this.executionLineNo, bind(this.highlightExecutionLine, this) );
+            this.scrollToLine(url, this.executionLineNo, bind(this.highlightExecutionLine, this, this.executionLineNo, "exe_line") );
             this.context.throttle(this.updateInfoTip, this);
             return;
         }
@@ -2707,7 +2710,7 @@ Firebug.ScriptPanel.prototype = extend(Firebug.SourceBoxPanel,
         this.executionLineNo = -1;
 
         if (this.selectedSourceBox)
-            this.highlightExecutionLine(this.selectedSourceBox);  // clear highlight
+            this.highlightExecutionLine(this.selectedSourceBox, this.executionLineNo, "exe_line");  // clear highlight
 
         var panelStatus = Firebug.chrome.getPanelStatusElements();
         panelStatus.clear(); // clear stack on status bar
@@ -2729,42 +2732,6 @@ Firebug.ScriptPanel.prototype = extend(Firebug.SourceBoxPanel,
             this.context.currentFrame = frame;  // TODO XB reverse this so the XB frame is current
         else if (frame instanceof StackFrame)
             this.context.currentFrame = frame.getNativeFrame();
-    },
-
-    highlightExecutionLine: function(sourceBox)
-    {
-        if (this.executionLine)  // could point to any node in any sourcebox
-            this.executionLine.removeAttribute("exe_line");
-
-        var lineNode = sourceBox.getLineNode(this.executionLineNo);
-
-        this.executionLine = lineNode;  // if null, clears
-
-        if (sourceBox.breakCauseBox)
-        {
-            sourceBox.breakCauseBox.hide();
-            delete sourceBox.breakCauseBox;
-        }
-
-        if (lineNode)
-        {
-            lineNode.setAttribute("exe_line", "true");
-            if (this.context.breakingCause && !this.context.breakingCause.shown)
-            {
-                this.context.breakingCause.shown = true;
-                var cause = this.context.breakingCause;
-                if (cause)
-                {
-                    var sourceLine = getChildByClass(lineNode, "sourceLine");
-                    sourceBox.breakCauseBox = new Firebug.Breakpoint.BreakNotification(this.document, cause);
-                    sourceBox.breakCauseBox.show(sourceLine, this, "not an editor, yet?");
-                }
-            }
-        }
-
-        if (FBTrace.DBG_BP || FBTrace.DBG_STACK)
-            FBTrace.sysout("debugger.highlightExecutionLine lineNo: "+this.executionLineNo+" lineNode="+lineNode+"\n");
-        return true; // sticky
     },
 
     toggleBreakpoint: function(lineNo)
@@ -3080,10 +3047,10 @@ Firebug.ScriptPanel.prototype = extend(Firebug.SourceBoxPanel,
                 var jsEnabled = Firebug.getPref("javascript", "enabled");
                 if (jsEnabled)
                 {
-                    var args = {
-                            pageTitle: $STR("Script Panel was inactive during page load"),
-                            suggestion: $STR("Reload to see all sources")
-                    }
+                var args = {
+                        pageTitle: $STR("Script Panel was inactive during page load"),
+                        suggestion: $STR("Reload to see all sources")
+                }
                 }
                 else
                 {
@@ -3138,7 +3105,7 @@ Firebug.ScriptPanel.prototype = extend(Firebug.SourceBoxPanel,
                     this.activeWarningTag = this.warningTag.replace(args, this.panelNode, this);
                 }
             }
-            else  // show default
+            else // show default
                 this.navigate(this.location);
 
             var breakpointPanel = this.context.getPanel("breakpoints", true);

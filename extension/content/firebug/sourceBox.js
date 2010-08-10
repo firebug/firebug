@@ -181,7 +181,7 @@ Firebug.SourceBoxPanel = extend(SourceBoxPanelBase,
       */
     getSourceType: function()
     {
-        throw "Need to override in extender";
+        throw "SourceBox.getSourceType: Need to override in extender ";
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
@@ -296,6 +296,22 @@ Firebug.SourceBoxPanel = extend(SourceBoxPanelBase,
 
 
         this.showSourceBox(sourceBox);
+    },
+    
+    showSourceLink: function(sourceLink)
+    {
+        var sourceFile = getSourceFileByHref(sourceLink.href, this.context);
+        if (sourceFile)
+        {
+            this.navigate(sourceFile);
+            if (sourceLink.line)
+            {
+                this.scrollToLine(sourceLink.href, sourceLink.line, this.jumpHighlightFactory(sourceLink.line, this.context));
+                dispatch(this.fbListeners, "onShowSourceLink", [this, sourceLink.line]);
+            }
+            if (sourceLink == this.selection)  // then clear it so the next link will scroll and highlight.
+                delete this.selection;
+        }
     },
 
     showSourceBox: function(sourceBox)
@@ -514,6 +530,42 @@ Firebug.SourceBoxPanel = extend(SourceBoxPanelBase,
         }
     },
 
+    highlightExecutionLine: function(sourceBox, lineNumber, highlightingAttribute)
+    {
+        if (this.executionLine)  // could point to any node in any sourcebox, private to this function
+            this.executionLine.removeAttribute(highlightingAttribute);
+
+        var lineNode = sourceBox.getLineNode(lineNumber);
+
+        this.executionLine = lineNode;  // if null, clears
+
+        if (sourceBox.breakCauseBox)
+        {
+            sourceBox.breakCauseBox.hide();
+            delete sourceBox.breakCauseBox;
+        }
+
+        if (lineNode)
+        {
+            lineNode.setAttribute(highlightingAttribute, "true");
+            if (this.context.breakingCause && !this.context.breakingCause.shown)
+            {
+                this.context.breakingCause.shown = true;
+                var cause = this.context.breakingCause;
+                if (cause)
+                {
+                    var sourceLine = getChildByClass(lineNode, "sourceLine");
+                    sourceBox.breakCauseBox = new Firebug.Breakpoint.BreakNotification(this.document, cause);
+                    sourceBox.breakCauseBox.show(sourceLine, this, "not an editor, yet?");
+                }
+            }
+        }
+
+        if (FBTrace.DBG_BP || FBTrace.DBG_STACK || FBTrace.DBG_SOURCEFILES)
+            FBTrace.sysout("sourceBox.highlightExecutionLine lineNo: "+lineNumber+" lineNode="+lineNode+"\n");
+        return true; // sticky
+    },
+    
     /*
      * resize and scroll event handler
      */
