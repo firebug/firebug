@@ -298,7 +298,7 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
             FBTrace.sysout("debugger.rerun FAILS: not stopped");
             return;
         }
-        
+
         if (Firebug.rerun)
         {
             FBTrace.sysout("debugger.rerun FAILS: Firebug.rerun in progress");
@@ -310,7 +310,7 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
         // now continue but abort the current call stack.
         this.resume(context);  // the Firebug.rerun will signal abort stack
     },
-    
+
     getRerun: function(context)
     {
         if (FBTrace.DBG_UI_LOOP)
@@ -321,14 +321,14 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
             var frame = context.stoppedFrame;
             while (frame.callingFrame && frame.callingFrame.script.functionName)
             {
-            	frame = frame.callingFrame;
-            	
-            	if (frame.script.functionName == "_firebugRerun") // re-reRun
-            	{
-            		if (FBTrace.DBG_UI_LOOP)
-            			FBTrace.sysout("getRerun re-rerun ", context.savedRerun);
-            		return context.savedRerun;
-            	}
+                frame = frame.callingFrame;
+
+                if (frame.script.functionName == "_firebugRerun") // re-reRun
+                {
+                    if (FBTrace.DBG_UI_LOOP)
+                        FBTrace.sysout("getRerun re-rerun ", context.savedRerun);
+                    return context.savedRerun;
+                }
             }
 
             // In this oldest frame we have element.onclick(event) or window.foo()
@@ -354,7 +354,7 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
             // now run the script that stores the rerun info in the page
             var result = {};
             var ok = frame.eval(rerun.script, context.window.location + "/RerunScript", 1, result);
-            
+
             // If the eval goes off somewhere wacky, the frame may be invalid by this point.
             if (FBTrace.DBG_UI_LOOP)
                 FBTrace.sysout("debugger.rerun "+ok+" and result: "+result+" for "+context.getName(), {result: result, rerun: rerun, functionName: jsdFunctionName});
@@ -364,7 +364,7 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
             if (FBTrace.DBG_ERRORS)
                 FBTrace.sysout("debugger.rerun FAILS for "+context.getName()+" because "+exc, {exc:exc, rerun: rerun});
         }
-        
+
         return rerun;
     },
 
@@ -506,7 +506,7 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
             else
                 return; // bail, we did not freeze this context
 
-            	var executionContext = context.stoppedFrame.executionContext;
+                var executionContext = context.stoppedFrame.executionContext;
             if (executionContext.isValid)
             {
                 this.unsuppressEventHandling(context);
