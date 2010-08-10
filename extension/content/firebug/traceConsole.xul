@@ -114,7 +114,7 @@
   </popupset>
 
   <vbox flex="1">
-    <browser id="consoleFrame"
+    <browser id="consoleFrame" type="content-primary"
              src="traceConsole.html" flex="1"
              disablehistory="true" contextmenu="fbContextMenu"
              tooltip="fbTooltip"/>
