@@ -3010,16 +3010,6 @@ Firebug.ScriptPanel.prototype = extend(Firebug.SourceBoxPanel,
         clearNode(this.panelNode);
     },
 
-    warningTag:
-        DIV({"class": "disabledPanelBox"},
-            H1({"class": "disabledPanelHead"},
-                SPAN("$pageTitle")
-            ),
-            P({"class": "disabledPanelDescription", style: "margin-top: 15px;"},
-                SPAN("$suggestion")
-            )
-        ),
-
     show: function(state)
     {
         var enabled = Firebug.Debugger.isAlwaysEnabled();
@@ -3046,20 +3036,10 @@ Firebug.ScriptPanel.prototype = extend(Firebug.SourceBoxPanel,
                 // Fill the panel node with a warning
                 var jsEnabled = Firebug.getPref("javascript", "enabled");
                 if (jsEnabled)
-                {
-                var args = {
-                        pageTitle: $STR("Script Panel was inactive during page load"),
-                        suggestion: $STR("Reload to see all sources")
-                }
-                }
+                    this.activeWarningTag = WarningRep.showInactive(this.panelNode);
                 else
-                {
-                    var args = {
-                            pageTitle: $STR("Javascript is not enabled"),
-                            suggestion: $STR("See Firefox > Tools > Options > Content > Enable Javascript")
-                    }
-                }
-                this.activeWarningTag = this.warningTag.replace(args, this.panelNode, this);
+                    this.activeWarningTag = WarningRep.showNotEnabled(this.panelNode);
+
                 this.location = null;
             }
             else if (this.context.loaded)
@@ -3082,39 +3062,21 @@ Firebug.ScriptPanel.prototype = extend(Firebug.SourceBoxPanel,
                     // Fill the panel node with a warning
                     var jsEnabled = Firebug.getPref("javascript", "enabled");
                     if (!jsEnabled)
-                    {
-                        var args = {
-                                pageTitle: $STR("Javascript is not enabled"),
-                                suggestion: $STR("See Firefox > Tools > Options > Content > Enable Javascript")
-                        }
-                    }
+                        this.activeWarningTag = WarningRep.showNotEnabled(this.panelNode);
                     else if (this.context.allScriptsWereFiltered)
-                    {
-                        var args = {
-                                pageTitle: $STR("Warning. All scripts were filtered"),
-                                suggestion: $STR("See Script Filter setting on tool bar or \'Show Chrome Sources Option\"")
-                        };
-                    }
+                        this.activeWarningTag = WarningRep.showFiltered(this.panelNode);
                     else  // they were not filtered, we just had none
-                    {
-                        var args = {
-                                pageTitle: $STR("No Javascript on this page"),
-                                suggestion: $STR("If <script> tags have a \"type\" attribute it should equal \"text/javascript\" or \"application/javascript\"'")
-                        }
-                    }
-                    this.activeWarningTag = this.warningTag.replace(args, this.panelNode, this);
+                        this.activeWarningTag = WarningRep.showNoScript(this.panelNode);
                 }
             }
             else // show default
+            {
                 this.navigate(this.location);
+            }
 
             var breakpointPanel = this.context.getPanel("breakpoints", true);
             if (breakpointPanel)
                 breakpointPanel.refresh();
-        }
-        else
-        {
-            //Firebug.DisabledPanelPage.show(this);
         }
     },
 
@@ -3716,6 +3678,83 @@ Firebug.ScriptPanel.prototype = extend(Firebug.SourceBoxPanel,
             Firebug.Debugger.removeObserver(this);
     },
 });
+
+// ************************************************************************************************
+
+/**
+ * @domplate Displays various warning messages within the Script panel.
+ * xxxHonza: localization
+ */
+Firebug.ScriptPanel.WarningRep = domplate(Firebug.Rep,
+{
+    tag:
+        DIV({"class": "disabledPanelBox"},
+            H1({"class": "disabledPanelHead"},
+                SPAN("$pageTitle")
+            ),
+            P({"class": "disabledPanelDescription", style: "margin-top: 15px;"},
+                SPAN("$suggestion")
+            )
+        ),
+
+    enableScriptTag:
+        DIV({"class": "objectLink", onclick: "$onEnableScript", style: "color: blue"},
+            SPAN("Enable JavaScript and Refresh")
+        ),
+
+    onEnableScript: function(event)
+    {
+        Firebug.setPref("javascript", "enabled", true);
+
+        var panel = Firebug.getElementPanel(event.target);
+        panel.context.window.location.reload();
+    },
+
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+
+    showInactive: function(parentNode)
+    {
+        var args = {
+            pageTitle: $STR("Script Panel was inactive during page load"),
+            suggestion: $STR("Reload to see all sources")
+        };
+        return this.tag.replace(args, parentNode, this);
+    },
+
+    showNotEnabled: function(parentNode)
+    {
+        var args = {
+            pageTitle: $STR("Javascript is not enabled"),
+            suggestion: $STR("See Firefox > Tools > Options > Content > Enable Javascript")
+        }
+
+        var box = this.tag.replace(args, parentNode, this);
+        this.enableScriptTag.append({}, box, this);
+
+        return box;
+    },
+
+    showFiltered: function(parentNode)
+    {
+        var args = {
+            pageTitle: $STR("Warning. All scripts were filtered"),
+            suggestion: $STR("See Script Filter setting on tool bar or \'Show Chrome Sources Option\"")
+        };
+        return this.tag.replace(args, parentNode, this);
+    },
+
+    showNoScript: function(parentNode)
+    {
+        var args = {
+            pageTitle: $STR("No Javascript on this page"),
+            suggestion: $STR("If <script> tags have a \"type\" attribute it should equal " +
+                "\"text/javascript\" or \"application/javascript\"'")
+        }
+        return this.tag.replace(args, parentNode, this);
+    }
+});
+
+var WarningRep = Firebug.ScriptPanel.WarningRep;
 
 // ************************************************************************************************
 
