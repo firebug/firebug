@@ -2736,26 +2736,28 @@ Firebug.ScriptPanel.prototype = extend(Firebug.SourceBoxPanel,
 
     toggleBreakpoint: function(lineNo)
     {
+        var sourceFile = this.getSourceFileBySourceBox(this.selectedSourceBox);
         var lineNode = this.selectedSourceBox.getLineNode(lineNo);
-        if (!this.location && FBTrace.DBG_ERRORS)
-            FBTrace.sysout("toggleBreakpoint no this.location! ", this);
-        if (this.location.href != this.selectedSourceBox.repObject.href && FBTrace.DBG_ERRORS)
-            FBTrace.sysout("toggleBreakpoint this.location != selectedSourceBox ", this);
 
-        if (FBTrace.DBG_BP) FBTrace.sysout("debugger.toggleBreakpoint lineNo="+lineNo+" this.location.href:"+this.location.href+" lineNode.breakpoint:"+(lineNode?lineNode.getAttribute("breakpoint"):"(no lineNode)")+"\n", this.selectedSourceBox);
+        if (!sourceFile && FBTrace.DBG_ERRORS)
+            FBTrace.sysout("toggleBreakpoint no sourceFile! ", this);
+        if (FBTrace.DBG_BP)
+            FBTrace.sysout("debugger.toggleBreakpoint lineNo="+lineNo+" sourceFile.href:"+sourceFile.href+" lineNode.breakpoint:"+(lineNode?lineNode.getAttribute("breakpoint"):"(no lineNode)")+"\n", this.selectedSourceBox);
+
         if (lineNode.getAttribute("breakpoint") == "true")
-            fbs.clearBreakpoint(this.location.href, lineNo);
+            fbs.clearBreakpoint(sourceFile.href, lineNo);
         else
-            fbs.setBreakpoint(this.location, lineNo, null, Firebug.Debugger);
+            fbs.setBreakpoint(sourceFile, lineNo, null, Firebug.Debugger);
     },
 
     toggleDisableBreakpoint: function(lineNo)
     {
+        var sourceFile = this.getSourceFileBySourceBox(this.selectedSourceBox);
         var lineNode = this.selectedSourceBox.getLineNode(lineNo);
         if (lineNode.getAttribute("disabledBreakpoint") == "true")
-            fbs.enableBreakpoint(this.location.href, lineNo);
+            fbs.enableBreakpoint(sourceFile.href, lineNo);
         else
-            fbs.disableBreakpoint(this.location.href, lineNo);
+            fbs.disableBreakpoint(sourceFile.href, lineNo);
     },
 
     editBreakpointCondition: function(lineNo)

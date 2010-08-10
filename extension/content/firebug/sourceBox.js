@@ -132,10 +132,10 @@ Firebug.SourceBoxPanel = extend(SourceBoxPanelBase,
     {
         this.removeAllSourceBoxes();  // clear so we start fresh with new text sizes
     },
-    
+
     removeAllSourceBoxes: function()
     {
-          this.sourceBoxes = {};   
+          this.sourceBoxes = {};
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
@@ -254,9 +254,9 @@ Firebug.SourceBoxPanel = extend(SourceBoxPanelBase,
         if (sourceBox)  // else we did not create one for this sourceFile
         {
             delete this.sourceBoxes[sourceFile.href];
-            
+
             if (sourceBox.parentNode === this.panelNode)
-            	this.panelNode.removeChild(sourceBox);
+                this.panelNode.removeChild(sourceBox);
 
             if (this.selectedSourceBox === sourceBox) // need to update the view
             {
@@ -297,7 +297,7 @@ Firebug.SourceBoxPanel = extend(SourceBoxPanelBase,
 
         this.showSourceBox(sourceBox);
     },
-    
+
     showSourceLink: function(sourceLink)
     {
         var sourceFile = getSourceFileByHref(sourceLink.href, this.context);
@@ -352,6 +352,11 @@ Firebug.SourceBoxPanel = extend(SourceBoxPanelBase,
         this.setSourceBoxLineSizes(sourceBox);
 
         return sourceBox;
+    },
+
+    getSourceFileBySourceBox: function(sourceBox)
+    {
+        return sourceBox.repObject;
     },
 
     initializeSourceBox: function(sourceFile)
@@ -565,7 +570,7 @@ Firebug.SourceBoxPanel = extend(SourceBoxPanelBase,
             FBTrace.sysout("sourceBox.highlightExecutionLine lineNo: "+lineNumber+" lineNode="+lineNode+"\n");
         return true; // sticky
     },
-    
+
     /*
      * resize and scroll event handler
      */
