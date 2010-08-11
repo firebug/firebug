@@ -4954,7 +4954,7 @@ this.StackFrame = function(sourceFile, lineNo, functionName, args, nativeFrame, 
     this.args = args;
 
     // Derived from sourceFile
-    this.href = href;
+    this.href = sourceFile.href;
 
     // Mozilla
     this.nativeFrame = nativeFrame;
@@ -4969,6 +4969,11 @@ this.StackFrame.prototype =
         return this.fn;
     },
 
+    toSourceLink: function()
+    {
+    	return new FBL.SourceLink(this.sourceFile.href, this.line, "js");
+    },
+    
     toString: function()
     {
             return this.fn+", "+this.sourceFile.href+"@"+this.line;

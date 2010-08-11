@@ -298,6 +298,9 @@ Firebug.SourceBoxPanel = extend(SourceBoxPanelBase,
         this.showSourceBox(sourceBox);
     },
 
+    /*
+     * Assumes that locations are sourceFiles, TODO lower class
+     */
     showSourceLink: function(sourceLink)
     {
         var sourceFile = getSourceFileByHref(sourceLink.href, this.context);
