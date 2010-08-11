@@ -184,7 +184,10 @@
 
                 if (panel && (panel == this.selectedPanel) && !forceUpdate)
                     return panel;
-FBTrace.sysout('selectPanel '+panelName+" panel: "+panel);
+
+                if (FBTrace.DBG_PANELS)
+                    FBTrace.sysout('selectPanel '+panelName+" panel: "+panel);
+
                 this.hideSelectedPanel();
 
                 //xxxHonza: can be removed, but Chromebug needs it for now.

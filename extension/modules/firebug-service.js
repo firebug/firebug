@@ -623,7 +623,9 @@ var fbs =
 
             var urlBreakpoints = fbs.getBreakpoints(url);
 
-            FBTrace.sysout("clearAllBreakpoints "+url+" urlBreakpoints: "+(urlBreakpoints?urlBreakpoints.length:"null"));
+            if (FBTrace.DBG_FBS_BP)
+                FBTrace.sysout("clearAllBreakpoints "+url+" urlBreakpoints: "+
+                    (urlBreakpoints?urlBreakpoints.length:"null"));
 
             if (!urlBreakpoints)
                 return false;
