@@ -126,6 +126,7 @@ var activeContexts = [];
 var activableModules = [];
 var extensions = [];
 var panelTypes = [];
+var earlyRegPanelTypes = []; // See Firebug.registerPanelType for more info
 var reps = [];
 var defaultRep = null;
 var defaultFuncRep = null;
@@ -194,7 +195,14 @@ top.Firebug =
         else if (FBTrace.DBG_INITIALIZE)
             FBTrace.sysout("firebug.initialize FBL: " + FBL);
 
+        // Till now all registered panels (too soon) have been inserted into earlyRegPanelTypes.
+        var tempPanelTypes = earlyRegPanelTypes;
+        earlyRegPanelTypes = null;
+
         FBL.initialize();  // TODO FirebugLoader
+
+        // Append early registered panels at the end.
+        panelTypes.push.apply(panelTypes, tempPanelTypes);
 
         const tabBrowser = $("content");
         if (tabBrowser) // TODO TabWatcher
@@ -710,7 +718,14 @@ top.Firebug =
 
     registerPanel: function()
     {
-        panelTypes.push.apply(panelTypes, arguments);
+        // In order to keep built in panels (like Console, Script...) be the first one
+        // and insert all panels coming from extension at the end, catch any early registered
+        // panel (i.e. before FBL.initialize is called, such as YSlow) in a temp array
+        // that is appended at the end as soon as FBL.initialize is called.
+        if (earlyRegPanelTypes)
+            earlyRegPanelTypes.push.apply(earlyRegPanelTypes, arguments);
+        else
+            panelTypes.push.apply(panelTypes, arguments);
 
         for (var i = 0; i < arguments.length; ++i)
             panelTypeMap[arguments[i].prototype.name] = arguments[i];
