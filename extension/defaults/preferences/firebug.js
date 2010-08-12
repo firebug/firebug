@@ -4,7 +4,6 @@ pref("extensions.firebug.defaultPanelName", "html");
 pref("extensions.firebug.throttleMessages", true);
 pref("extensions.firebug.textSize", 0);
 pref("extensions.firebug.showInfoTips", true);
-pref("extensions.firebug.largeCommandLine", false);
 pref("extensions.firebug.textWrapWidth", 100);
 pref("extensions.firebug.openInWindow", false);
 pref("extensions.firebug.previousPlacement", 0);
@@ -18,6 +17,10 @@ pref("extensions.firebug.currentVersion", "");              // If Firebug versio
 pref("extensions.firebug.useDefaultLocale", false);         // Set to true if Firebug should use default (en-US) locale instead of the current Firefox locale.
 pref("extensions.firebug.knownIssues40Displayed", false);   // Set to true if known issues log has been already displayed in the Console panel to the user.
 pref("extensions.firebug.activateSameOrigin", true);
+
+// Command line
+pref("extensions.firebug.largeCommandLine", false);
+pref("extensions.firebug.commandLineShowCompleterPopup", true);
 
 // Search
 pref("extensions.firebug.searchCaseSensitive", false);

@@ -572,11 +572,17 @@ Firebug.CommandLine = extend(Firebug.Module,
     {
         Firebug.Module.initialize.apply(this, arguments);
 
-        this.autoCompleter = new Firebug.AutoCompleter(getExpressionOffset, getDot,
-            bind(autoCompleteEval, this), true, true, true, true);
+        this.setAutoCompleter();
 
         if (Firebug.largeCommandLine)
             this.setMultiLine(true, Firebug.chrome);
+    },
+
+    setAutoCompleter: function()
+    {
+        var showCompletionPopup = Firebug.getPref(Firebug.prefDomain, "commandLineShowCompleterPopup");
+        this.autoCompleter = new Firebug.AutoCompleter(getExpressionOffset, getDot,
+                bind(autoCompleteEval, this), true, true, true, true, showCompletionPopup);
     },
 
     initializeUI: function()
@@ -664,6 +670,8 @@ Firebug.CommandLine = extend(Firebug.Module,
     {
         if (name == "largeCommandLine")
             this.setMultiLine(value, Firebug.chrome);
+        else if (name == "commandLineShowCompleterPopup")
+            this.setAutoCompleter();
     },
 
     // called by users of command line, currently:
@@ -1274,13 +1282,13 @@ Firebug.CommandLine.injector = {
 
         if (win.document.getUserData("firebug-CommandLineListener") === "true")
         {
-        	if (FBTrace.DBG_ERRORS)
-        	{
-        		function failureCallback(result, context)
-        		{
-        			FBTrace.sysout("Firebug.CommandLine.evaluate FAILS  "+result, result);
-        		}
-        	}
+            if (FBTrace.DBG_ERRORS)
+            {
+                function failureCallback(result, context)
+                {
+                    FBTrace.sysout("Firebug.CommandLine.evaluate FAILS  "+result, result);
+                }
+            }
             Firebug.CommandLine.evaluate("window._FirebugCommandLine.detachCommandLine()", context, null, win, null, failureCallback );
             if (context.activeCommandLineHandlers)
             {

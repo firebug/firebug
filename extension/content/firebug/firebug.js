@@ -73,6 +73,9 @@ const prefNames =  // XXXjjb TODO distribute to modules
     "showXMLHttpRequests", "showNetworkErrors", "tabularLogMaxHeight",
     "consoleFilterTypes",
 
+    // CommandLine
+    "commandLineShowCompleterPopup",
+
     // HTML
     "showFullTextNodes", "showCommentNodes",
     "showTextNodesWithWhitespace", "showTextNodesWithEntities",
@@ -651,8 +654,8 @@ top.Firebug =
         var currentValue = this.getPref(this.prefDomain, name);
         if (!currentValue)
         {
-        	var defaultBranch = PrefService.getDefaultBranch(this.prefDomain);
-        	
+            var defaultBranch = PrefService.getDefaultBranch(this.prefDomain);
+
             var type = this.getPreferenceTypeByExample( typeof(value) );
             if (this.setPreference(name, value, type, defaultBranch))
                 return true;
@@ -878,7 +881,7 @@ top.Firebug =
         var type = this.getPreferenceTypeByExample( (prefType?prefType:typeof(value)) );
 
         if (!this.setPreference(prefName, value, type, prefs))
-        	return;
+            return;
 
         setTimeout(function delaySavePrefs()
         {
@@ -890,15 +893,15 @@ top.Firebug =
         if (FBTrace.DBG_OPTIONS)
             FBTrace.sysout("firebug.setPref type="+type+" name="+prefName+" value="+value+"\n");
     },
-    
+
     setPreference: function(prefName, value, type, prefBranch)
     {
         if (type == nsIPrefBranch.PREF_STRING)
-        	prefBranch.setCharPref(prefName, value);
+            prefBranch.setCharPref(prefName, value);
         else if (type == nsIPrefBranch.PREF_INT)
-        	prefBranch.setIntPref(prefName, value);
+            prefBranch.setIntPref(prefName, value);
         else if (type == nsIPrefBranch.PREF_BOOL)
-        	prefBranch.setBoolPref(prefName, value);
+            prefBranch.setBoolPref(prefName, value);
         else if (type == nsIPrefBranch.PREF_INVALID)
         {
             FBTrace.sysout("firebug.setPref FAILS: Invalid preference "+prefName+" with type "+type+", check that it is listed in defaults/prefs.js");
@@ -906,7 +909,7 @@ top.Firebug =
         }
         return true;
     },
-    
+
     getPreferenceTypeByExample: function(prefType)
     {
         if (prefType)
