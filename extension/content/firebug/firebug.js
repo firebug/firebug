@@ -643,8 +643,11 @@ top.Firebug =
         var currentValue = this.getPref(this.prefDomain, name);
         if (!currentValue)
         {
-            this.setPref(this.prefDomain, name, value, typeof(value));
-            return true;
+        	var defaultBranch = PrefService.getDefaultBranch(this.prefDomain);
+        	
+            var type = this.getPreferenceTypeByExample( typeof(value) );
+            if (this.setPreference(name, value, type, defaultBranch))
+                return true;
         }
         return false;
     },
@@ -857,6 +860,40 @@ top.Firebug =
     {
         var prefName = prefDomain + "." + name;
 
+        var type = this.getPreferenceTypeByExample( (prefType?prefType:typeof(value)) );
+
+        if (!this.setPreference(prefName, value, type, prefs))
+        	return;
+
+        setTimeout(function delaySavePrefs()
+        {
+            if (FBTrace.DBG_OPTIONS)
+                FBTrace.sysout("firebug.delaySavePrefs type="+type+" name="+prefName+" value="+value+"\n");
+            prefs.savePrefFile(null);
+        });
+
+        if (FBTrace.DBG_OPTIONS)
+            FBTrace.sysout("firebug.setPref type="+type+" name="+prefName+" value="+value+"\n");
+    },
+    
+    setPreference: function(prefName, value, type, prefBranch)
+    {
+        if (type == nsIPrefBranch.PREF_STRING)
+        	prefBranch.setCharPref(prefName, value);
+        else if (type == nsIPrefBranch.PREF_INT)
+        	prefBranch.setIntPref(prefName, value);
+        else if (type == nsIPrefBranch.PREF_BOOL)
+        	prefBranch.setBoolPref(prefName, value);
+        else if (type == nsIPrefBranch.PREF_INVALID)
+        {
+            FBTrace.sysout("firebug.setPref FAILS: Invalid preference "+prefName+" with type "+type+", check that it is listed in defaults/prefs.js");
+            return false;
+        }
+        return true;
+    },
+    
+    getPreferenceTypeByExample: function(prefType)
+    {
         if (prefType)
         {
             if (prefType === typeof("s"))
@@ -872,27 +909,7 @@ top.Firebug =
         {
             var type = prefs.getPrefType(prefName);
         }
-
-        if (type == nsIPrefBranch.PREF_STRING)
-            prefs.setCharPref(prefName, value);
-        else if (type == nsIPrefBranch.PREF_INT)
-            prefs.setIntPref(prefName, value);
-        else if (type == nsIPrefBranch.PREF_BOOL)
-            prefs.setBoolPref(prefName, value);
-        else if (type == nsIPrefBranch.PREF_INVALID)
-        {
-            FBTrace.sysout("firebug.setPref FAILS: Invalid preference "+prefName+" with type "+prefType+", check that it is listed in defaults/prefs.js");
-        }
-
-        setTimeout(function delaySavePrefs()
-        {
-            if (FBTrace.DBG_OPTIONS)
-                FBTrace.sysout("firebug.delaySavePrefs type="+type+" name="+prefName+" value="+value+"\n");
-            prefs.savePrefFile(null);
-        });
-
-        if (FBTrace.DBG_OPTIONS)
-            FBTrace.sysout("firebug.setPref type="+type+" name="+prefName+" value="+value+"\n");
+        return type;
     },
 
     clearPref: function(prefDomain, name)
