@@ -32,8 +32,10 @@ top.Firebug.Console.injector =
 
         if (handler.token !== attachedToken)
         {
-            Firebug.Console.logFormatted(["Firebug Console token changed!"], FirebugContext, "info");  // XXXTODO NLS
-            return false;
+            var msg = "Firebug Console token changed! "+handler.token+" !== "+attachedToken;
+            Firebug.Console.logFormatted([msg], FirebugContext, "info");  // XXXTODO NLS
+            var exc = new Error(msg);
+            throw exc;
         }
         return true;
     },
