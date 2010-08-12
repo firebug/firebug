@@ -1282,9 +1282,28 @@ top.FirebugChrome =
 
     openAboutDialog: function()
     {
-        var extensionManager = FBL.CCSV("@mozilla.org/extensions/manager;1", "nsIExtensionManager");
-        openDialog("chrome://mozapps/content/extensions/about.xul", "",
-            "chrome,centerscreen,modal", "urn:mozilla:item:firebug@software.joehewitt.com", extensionManager.datasource);
+        Components.utils.import("resource://gre/modules/AddonManager.jsm");
+
+        if (FBTrace.DBG_WINDOWS)
+            FBTrace.sysout("Firebug.openAboutDialog", AddonManager);
+
+        // Firefox 4.0 implements new AddonManager.
+        if (AddonManager)
+        {
+            AddonManager.getAddonByID("firebug@software.joehewitt.com", function(addon) {
+                openDialog("chrome://mozapps/content/extensions/about.xul", "",
+                "chrome,centerscreen,modal", addon);
+            });
+        }
+        else
+        {
+            var extensionManager = FBL.CCSV("@mozilla.org/extensions/manager;1",
+                "nsIExtensionManager");
+
+            openDialog("chrome://mozapps/content/extensions/about.xul", "",
+                "chrome,centerscreen,modal", "urn:mozilla:item:firebug@software.joehewitt.com",
+                extensionManager.datasource);
+        }
     },
 
     breakOnNext: function(context, event)
