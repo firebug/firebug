@@ -23,12 +23,23 @@ var FirebugAboutOverlay =
 {
     onLoad: function()
     {
-        var extensionID = window.arguments[0];
-        if (FBTrace.DBG_WINDOWS)
-            FBTrace.sysout("FirebugAboutOverlay.onLoad " + extensionID);
+        try
+        {
+            var extension = window.arguments[0];
+            if (extension == "urn:mozilla:item:firebug@software.joehewitt.com" ||
+                extension.id && extension.id == "firebug@software.joehewitt.com")
+            {
+                sss.loadAndRegisterSheet(uri, sss.USER_SHEET);
+            }
 
-        if (extensionID == "urn:mozilla:item:firebug@software.joehewitt.com")
-            sss.loadAndRegisterSheet(uri, sss.USER_SHEET);
+            if (FBTrace.DBG_WINDOWS)
+                FBTrace.sysout("FirebugAboutOverlay.onLoad; ", extension);
+        }
+        catch (e)
+        {
+            if (FBTrace.DBG_ERRORS)
+                FBTrace.sysout("FirebugAboutOverlay.onLoad; EXCEPTION " + e, e);
+        }
     },
 
     onUnload: function()

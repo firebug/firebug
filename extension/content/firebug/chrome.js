@@ -1285,7 +1285,7 @@ top.FirebugChrome =
         Components.utils.import("resource://gre/modules/AddonManager.jsm");
 
         if (FBTrace.DBG_WINDOWS)
-            FBTrace.sysout("Firebug.openAboutDialog", AddonManager);
+            FBTrace.sysout("Firebug.openAboutDialog");
 
         // Firefox 4.0 implements new AddonManager.
         if (AddonManager)
