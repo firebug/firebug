@@ -466,6 +466,9 @@ DomplateTag.prototype =
         {
             if (FBTrace.DBG_DOMPLATE)
                 FBTrace.sysout("renderDOM FAILS "+exc, {exc:exc, js: js});
+            var chained =  new Error("Domplate.renderDom FAILS");
+            chained.cause = {exc:exc, js: js};
+            throw chained;
         }
 
     },
@@ -1100,7 +1103,10 @@ var Renderer =
         catch(exc)
         {
             if (FBTrace.DBG_ERRORS)
-                FBTrace.sysout("domplate renderDom FAILS "+exc, {exc: exc, renderDOM: this.tag.renderDOM.toSource(), domplate: this, domArgs: domArgs, self: self})
+                FBTrace.sysout("domplate renderDom FAILS "+exc, {exc: exc, renderDOM: this.tag.renderDOM.toSource(), domplate: this, domArgs: domArgs, self: self});
+            var chained =  new Error("Domplate.renderDom FAILS: "+exc);
+            chained.cause = {exc: exc, renderDOM: this.tag.renderDOM.toSource(), domplate: this, domArgs: domArgs, self: self};
+            throw chained;
         }
 
         return root;
