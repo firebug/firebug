@@ -654,7 +654,7 @@ top.Firebug =
         var currentValue = this.getPref(this.prefDomain, name);
         if (!currentValue)
         {
-            var defaultBranch = PrefService.getDefaultBranch(this.prefDomain);
+            var defaultBranch = prefService.getDefaultBranch(this.prefDomain);
 
             var type = this.getPreferenceTypeByExample( typeof(value) );
             if (this.setPreference(name, value, type, defaultBranch))
