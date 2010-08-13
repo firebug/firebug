@@ -90,8 +90,6 @@ ChannelListener.prototype =
     {
         if (FBTrace.DBG_CACHE && this.ignore)
             FBTrace.sysout("tabCache.ChannelListener.onCollectData; IGNORE stopping further onCollectData");
-        if (this.ignore)
-            return;
 
         try
         {
@@ -100,9 +98,17 @@ ChannelListener.prototype =
                 var bis = CCIN("@mozilla.org/binaryinputstream;1", "nsIBinaryInputStream");
                 bis.setInputStream(inputStream);
                 var data = bis.readBytes(count);
+
+                // Data from the pipe has been consumed (to avoid mem leaks) so, we can end now.
+                if (this.ignore)
+                    return;
             }
             else
             {
+                // In this case, we don't need to read the data.
+                if (this.ignore)
+                    return;
+
                 var binaryInputStream = CCIN("@mozilla.org/binaryinputstream;1", "nsIBinaryInputStream");
                 var storageStream = CCIN("@mozilla.org/storagestream;1", "nsIStorageStream");
                 var binaryOutputStream = CCIN("@mozilla.org/binaryoutputstream;1", "nsIBinaryOutputStream");
@@ -221,7 +227,10 @@ ChannelListener.prototype =
                     FBTrace.sysout("tabCache.ChannelListener.onStartRequest NO SINK stopping setAsyncListener");
                 if (FBTrace.DBG_CACHE && this.ignore && this.sink)
                     FBTrace.sysout("tabCache.ChannelListener.onStartRequest IGNORE(shouldCacheRequest) stopping setAsyncListener");
-                if (!this.ignore && this.sink)
+
+                // Even if the response is marked as ignored we need to read the sink
+                // to avoid mem leaks.
+                if (this.sink)
                     this.setAsyncListener(request, this.sink.inputStream, this);
             }
         }
@@ -305,10 +314,10 @@ ChannelListener.prototype =
                 }
 
                 // Listen for further incoming data.
-                 if (FBTrace.DBG_CACHE && this.ignore)
-                     FBTrace.sysout("tabCache.ChannelListener.onInputStreamReady IGNORE stopping setAsyncListener");
-                 if (!this.ignore)
-                    this.setAsyncListener(this.request, stream, this);
+                if (FBTrace.DBG_CACHE && this.ignore)
+                    FBTrace.sysout("tabCache.ChannelListener.onInputStreamReady IGNORE stopping setAsyncListener");
+
+                this.setAsyncListener(this.request, stream, this);
             }
             else
             {
