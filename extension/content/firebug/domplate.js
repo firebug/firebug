@@ -458,7 +458,16 @@ DomplateTag.prototype =
 
         var js = fnBlock.join("");
         // Exceptions on this line are often in the eval
-        this.renderDOM = eval(js);
+        try
+        {
+            this.renderDOM = eval(js);
+        }
+        catch(exc)
+        {
+            if (FBTrace.DBG_DOMPLATE)
+                FBTrace.sysout("renderDOM FAILS "+exc, {exc:exc, js: js});
+        }
+
     },
 
     generateDOM: function(path, blocks, args)
@@ -935,7 +944,7 @@ var Renderer =
         catch (e)
         {
             if (FBTrace.DBG_DOMPLATE || FBTrace.DBG_ERRORS)
-                FBTrace.sysout("domplate.renderHTML; EXCEPTION " + e, {exc: e, render: this.tag.renderMarkup});
+                FBTrace.sysout("domplate.renderHTML; EXCEPTION " + e, {exc: e, render: this.tag.renderMarkup.toSource()});
         }
     },
 
