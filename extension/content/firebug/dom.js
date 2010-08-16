@@ -422,25 +422,25 @@ Firebug.DOMBasePanel.prototype = extend(Firebug.Panel,
                 var ordinal = parseInt(name);
                 if (ordinal || ordinal == 0)
                 {
-                    addMember(object, "ordinal", ordinals, name, val, level, 0, context);
+                    this.addMember(object, "ordinal", ordinals, name, val, level, 0, context);
                 }
                 else if (typeof(val) == "function")
                 {
                     if (isClassFunction(val))
-                        addMember(object, "userClass", userClasses, name, val, level, 0, context);
+                        this.addMember(object, "userClass", userClasses, name, val, level, 0, context);
                     else if (isDOMMember(object, name))
-                        addMember(object, "domFunction", domFuncs, name, val, level, domMembers[name], context);
+                        this.addMember(object, "domFunction", domFuncs, name, val, level, domMembers[name], context);
                     else
-                        addMember(object, "userFunction", userFuncs, name, val, level, 0, context);
+                        this.addMember(object, "userFunction", userFuncs, name, val, level, 0, context);
                 }
                 else
                 {
                     if (isDOMMember(object, name))
-                        addMember(object, "dom", domProps, name, val, level, domMembers[name], context);
+                        this.addMember(object, "dom", domProps, name, val, level, domMembers[name], context);
                     else if (name in domConstantMap)
-                        addMember(object, "dom", domConstants, name, val, level, 0, context);
+                        this.addMember(object, "dom", domConstants, name, val, level, 0, context);
                     else
-                        addMember(object, "user", userProps, name, val, level, 0, context);
+                        this.addMember(object, "user", userProps, name, val, level, 0, context);
                 }
             }
         }
@@ -493,6 +493,70 @@ Firebug.DOMBasePanel.prototype = extend(Firebug.Panel,
         return members;
     },
 
+    addMember: function(object, type, props, name, value, level, order, context)
+    {
+        var rep = Firebug.getRep(value);    // do this first in case a call to instanceof reveals contents
+        var tag = rep.shortTag ? rep.shortTag : rep.tag;
+
+        var valueType = typeof(value);
+        var hasChildren = hasProperties(value) && !(value instanceof ErrorCopy) &&
+            (valueType == "function" || (valueType == "object" && value != null)
+            || (valueType == "string" && value.length > Firebug.stringCropLength));
+
+        // Special case for "arguments", which is not enumerable by for...in statement
+        // and so, hasProperties always returns false.
+        if (!hasChildren && value) // arguments will never be falsy if the arguments exist
+            hasChildren = isArguments(value);
+
+        // Special case for functions with a protoype that has values
+        if (valueType === "function" && value.prototype)
+            hasChildren = hasChildren || hasProperties(value.prototype);
+
+        var member = {
+            object: object,
+            name: name,
+            value: value,
+            type: type,
+            rowClass: "memberRow-"+type,
+            open: "",
+            order: order,
+            level: level,
+            indent: level*16,
+            hasChildren: hasChildren,
+            tag: tag
+        };
+
+        // The context doesn't have to be specified (e.g. in case of Watch panel that is based
+        // on the same template as the DOM panel, but doesn't show any breakpoints).
+        if (context)
+        {
+            // xxxHonza: Support for object change not implemented yet.
+            member.breakable = !hasChildren;
+
+            // xxxHonza: Disable breaking on direct window properties, see #520572
+            if (object instanceof Ci.nsIDOMWindow)
+                member.breakable = false;
+
+            var breakpoints = context.dom.breakpoints;
+            var bp = breakpoints.findBreakpoint(object, name);
+            if (bp)
+            {
+                member.breakpoint = true;
+                member.disabledBreakpoint = !bp.checked;
+            }
+        }
+
+        // If the property is implemented using a getter function (and there is no setter
+        // implemented) use a "get" prefix that is displayed in the UI.
+        var o = unwrapObject(object);
+        if (o)
+            member.prefix = (o.__lookupGetter__(name) && !o.__lookupSetter__(name)) ? "get " : "";
+
+        props.push(member);
+        return member;
+    },
+
+    
     expandMembers: function (members, toggles, offset, level, context)  // recursion starts with offset=0, level=0
     {
         var expanded = 0;
@@ -1629,7 +1693,7 @@ WatchPanel.prototype = extend(Firebug.DOMBasePanel.prototype,
                 if (frame && frame.isValid)
                     scope = frame.scope;
 
-                addMember(scope, "watch", members, expr, value, 0);
+                this.addMember(scope, "watch", members, expr, value, 0);
                 FBTrace.sysout("watch.updateSelection "+expr+" = "+value, {expr: expr, value: value, members: members})
             }
         }
@@ -1637,7 +1701,7 @@ WatchPanel.prototype = extend(Firebug.DOMBasePanel.prototype,
         if (frame && frame.isValid)
         {
             var thisVar = unwrapIValue(frame.thisValue);
-            addMember(frame.scope, "user", members, "this", thisVar, 0);
+            this.addMember(frame.scope, "user", members, "this", thisVar, 0);
 
             var scopeChain = this.generateScopeChain(frame.scope);
 
@@ -1645,7 +1709,7 @@ WatchPanel.prototype = extend(Firebug.DOMBasePanel.prototype,
             members.push.apply(members, this.getMembers(scopeChain[0], 0, this.context));
 
             for (var i = 1; i < scopeChain.length; i++)
-                addMember(scopeChain[i], "scopes", members, scopeChain[i].toString(), scopeChain[i], 0);
+                this.addMember(scopeChain[i], "scopes", members, scopeChain[i].toString(), scopeChain[i], 0);
         }
 
         this.expandMembers(members, this.toggles, 0, 0, this.context);
@@ -1761,68 +1825,6 @@ function isArguments(obj)
     return false;
 }
 
-function addMember(object, type, props, name, value, level, order, context)
-{
-    var rep = Firebug.getRep(value);    // do this first in case a call to instanceof reveals contents
-    var tag = rep.shortTag ? rep.shortTag : rep.tag;
-
-    var valueType = typeof(value);
-    var hasChildren = hasProperties(value) && !(value instanceof ErrorCopy) &&
-        (valueType == "function" || (valueType == "object" && value != null)
-        || (valueType == "string" && value.length > Firebug.stringCropLength));
-
-    // Special case for "arguments", which is not enumerable by for...in statement
-    // and so, hasProperties always returns false.
-    if (!hasChildren && value) // arguments will never be falsy if the arguments exist
-        hasChildren = isArguments(value);
-
-    // Special case for functions with a protoype that has values
-    if (valueType === "function" && value.prototype)
-        hasChildren = hasChildren || hasProperties(value.prototype);
-
-    var member = {
-        object: object,
-        name: name,
-        value: value,
-        type: type,
-        rowClass: "memberRow-"+type,
-        open: "",
-        order: order,
-        level: level,
-        indent: level*16,
-        hasChildren: hasChildren,
-        tag: tag
-    };
-
-    // The context doesn't have to be specified (e.g. in case of Watch panel that is based
-    // on the same template as the DOM panel, but doesn't show any breakpoints).
-    if (context)
-    {
-        // xxxHonza: Support for object change not implemented yet.
-        member.breakable = !hasChildren;
-
-        // xxxHonza: Disable breaking on direct window properties, see #520572
-        if (object instanceof Ci.nsIDOMWindow)
-            member.breakable = false;
-
-        var breakpoints = context.dom.breakpoints;
-        var bp = breakpoints.findBreakpoint(object, name);
-        if (bp)
-        {
-            member.breakpoint = true;
-            member.disabledBreakpoint = !bp.checked;
-        }
-    }
-
-    // If the property is implemented using a getter function (and there is no setter
-    // implemented) use a "get" prefix that is displayed in the UI.
-    var o = unwrapObject(object);
-    if (o)
-        member.prefix = (o.__lookupGetter__(name) && !o.__lookupSetter__(name)) ? "get " : "";
-
-    props.push(member);
-    return member;
-}
 
 function getWatchRowIndex(row)
 {
