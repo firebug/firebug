@@ -3864,7 +3864,7 @@ Firebug.CallstackPanel.prototype = extend(Firebug.Panel,
 
     show: function(state)
     {
-        this.refresh();
+        this.rebuild();
     },
 
     supportsObject: function(object, type)
@@ -3911,7 +3911,7 @@ Firebug.CallstackPanel.prototype = extend(Firebug.Panel,
             this.showStackFrame(object);
     },
 
-    refresh: function()
+    rebuild: function()
     {
         var trace = getCorrectedStackTrace(this.context.stoppedFrame, this.context);
         this.navigate(trace);
