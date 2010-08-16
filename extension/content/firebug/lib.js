@@ -4902,9 +4902,9 @@ this.SourceText.getLineAsHTML = function(lineNo)
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 
-this.StackTrace = function()
+this.StackTrace = function(adoptFrames)
 {
-    this.frames = [];
+    this.frames = adoptFrames || [];
 };
 
 this.StackTrace.prototype =
