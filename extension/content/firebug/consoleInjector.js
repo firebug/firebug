@@ -33,9 +33,9 @@ top.Firebug.Console.injector =
         if (handler.token !== attachedToken)
         {
             var msg = "Firebug Console token changed! "+handler.token+" !== "+attachedToken;
-            Firebug.Console.logFormatted([msg], FirebugContext, "info");  // XXXTODO NLS
-            var exc = new Error(msg);
-            throw exc;
+            Firebug.Console.logFormatted([msg], context, "info");  // XXXTODO NLS
+            if (FBTrace.DBG_CONSOLE)
+                FBTrace.sysout(msg +" context: "+context.getName());
         }
         return true;
     },
@@ -136,7 +136,6 @@ top.Firebug.Console.injector =
             win = win.wrappedJSObject;
 
         win.document.setUserData("firebug-Version", Firebug.version, null); // Initialize Firebug version.
-
 
         var handler = createConsoleHandler(context, win);
         win.document.setUserData("firebug-Token", handler.token, null); // Initialize Firebug token
