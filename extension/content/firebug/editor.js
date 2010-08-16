@@ -88,9 +88,11 @@ Firebug.Editor = extend(Firebug.Module,
         this.attachListeners(currentEditor, panel.context);
     },
 
-    saveAndClose: function() {
+    saveAndClose: function()
+    {
         if (!currentTarget)
             return;
+
         dispatch(currentPanel.fbListeners, 'onInlineEditorClose', [currentPanel, currentTarget, !originalValue]);
         this.stopEditing();
     },
@@ -116,6 +118,10 @@ Firebug.Editor = extend(Firebug.Module,
         var value = currentEditor.getValue();
         if (value == defaultValue)
             value = "";
+
+        // Reset the editor's value so it isn't accidentaly reused the next time
+        // the editor instance is reused (see also 3280, 3332).
+        currentEditor.setValue("");
 
         var removeGroup = currentEditor.endEditing(currentTarget, value, cancel);
 
