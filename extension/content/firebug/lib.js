@@ -2627,17 +2627,21 @@ this.getCorrectedStackTrace = function(frame, context)
     try
     {
         var trace = new this.StackTrace();
-
+        var nextOlderFrame = null;
         for (; frame && frame.isValid; frame = frame.callingFrame)
         {
             if (!(Firebug.filterSystemURLs && this.isSystemURL(FBL.normalizeURL(frame.script.fileName))))
             {
                 var stackFrame = this.getStackFrame(frame, context);
-                if (context.currentFrame && context.currentFrame === frame)
-                    stackFrame.isCurrent = true;
-
                 if (stackFrame)
+                {
+                    if (context.currentFrame && context.currentFrame === frame)
+                        trace.currentFrameIndex = trace.length;
+
+                    stackFrame.setCallingFrame(nextOlderFrame, trace.frames.length);
+                    nextOlderFrame = stackFrame;
                     trace.frames.push(stackFrame);
+                }
             }
             else
             {
@@ -4971,12 +4975,28 @@ this.StackFrame.prototype =
 
     toSourceLink: function()
     {
-    	return new FBL.SourceLink(this.sourceFile.href, this.line, "js");
+        return new FBL.SourceLink(this.sourceFile.href, this.line, "js");
     },
-    
+
     toString: function()
     {
             return this.fn+", "+this.sourceFile.href+"@"+this.line;
+    },
+
+    setCallingFrame: function(caller, frameIndex)
+    {
+        this.callingFrame = caller;
+        this.frameIndex = frameIndex;
+    },
+
+    getCallingFrame: function()
+    {
+        return this.callingFrame;
+    },
+
+    getFrameIndex: function()
+    {
+        return this.frameIndex;
     },
 
     getNativeFrame: function()  // Mozilla, used for backwards compat, TODO remove

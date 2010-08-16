@@ -52,6 +52,11 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
     // Debugging
 
+    hasValidStack: function(context)
+    {
+        return context.stopped && context.currentFrame.isValid;
+    },
+
     evaluate: function(js, context, scope)  // TODO remote: move to backend, proxy to front
     {
         var frame = context.currentFrame;
@@ -3834,9 +3839,9 @@ Firebug.DebuggerListener =
 
 // ************************************************************************************************
 
-function CallstackPanel() { }
+Firebug.CallstackPanel = function() { }
 
-CallstackPanel.prototype = extend(Firebug.Panel,
+Firebug.CallstackPanel.prototype = extend(Firebug.Panel,
 {
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
     // extends Panel
@@ -3849,10 +3854,6 @@ CallstackPanel.prototype = extend(Firebug.Panel,
 
     initialize: function(context, doc)
     {
-        if (FBTrace.DBG_STACK) {
-            this.uid = FBL.getUniqueId();
-            FBTrace.sysout("CallstackPanel.initialize:"+this.uid+"\n");
-        }
         Firebug.Panel.initialize.apply(this, arguments);
     },
 
@@ -3868,52 +3869,70 @@ CallstackPanel.prototype = extend(Firebug.Panel,
 
     supportsObject: function(object, type)
     {
-        return object instanceof jsdIStackFrame || object instanceof StackFrame;
+        return (object instanceof StackTrace) || (object instanceof jsdIStackFrame) || (object instanceof StackFrame);
     },
 
+    // this.selection is a StackFrame in our this.location
     updateSelection: function(object)
     {
-        if (object instanceof jsdIStackFrame || object instanceof StackFrame)
-            this.showStackFrame(object);
+        // The selection object should be StackFrame
+        if (object instanceof StackFrame)
+        {
+            var trace = this.location;
+            trace.currentFrameIndex = object.frameIndex;
+            if (trace.currentFrameIndex != undefined)
+                this.selectFrame(trace.currentFrameIndex);
 
-        //this.showReferents(object);
+            FBTrace.sysout("Callstack updateSelection index:"+trace.currentFrameIndex+" StackFrame "+object, object);
+        }
+        else if(object instanceof jsdIStackFrame)
+        {
+            var trace = this.location;
+            if (trace)
+            {
+                trace.frames.forEach(function selectMatching(frame)
+                {
+                    if (frame.nativeFrame === object)
+                        this.select(frame);
+                }, this);
+            }
+        }
+    },
+
+    // this.location is a StackTrace
+    updateLocation: function(object)
+    {
+        // All paths lead to showStackTrace
+        if (object instanceof StackTrace)
+            this.showStackTrace(object);
+        else if (object instanceof jsdIStackFrame)
+            this.navigate(getCorrectedStackTrace(object, this.context));
+        else if (object instanceof StackFrame)
+            this.showStackFrame(object);
     },
 
     refresh: function()
     {
-        var mainPanel = this.context.getPanel("script", true);
-        if (mainPanel)
-        {
-            if (mainPanel.selection instanceof jsdIStackFrame)
-                this.showStackFrame(mainPanel.selection);
-            if (FBTrace.DBG_STACK)
-                FBTrace.sysout("debugger.callstackPanel.refresh for jsdIStackFrame:"+(mainPanel.selection instanceof jsdIStackFrame)+" mainPanel.selection "+mainPanel.selection );
-        }
-        else
-        {
-            if (FBTrace.DBG_ERRORS)
-                FBTrace.sysout("debugger.refresh: no main panel 'script' in context "+this.context.getName());
-        }
+        var trace = getCorrectedStackTrace(this.context.stoppedFrame, this.context);
+        this.navigate(trace);
     },
 
-    showStackFrame: function(frame) // we don't use the frame argument
+    showStackFrame: function(frame)
+    {
+        var trace = new StackTrace();
+        while(frame)
+        {
+            trace.frames.push(frame);
+            frame = frame.getCallingFrame();
+        }
+        this.navigate(trace);
+    },
+
+    showStackTrace: function(trace)
     {
         clearNode(this.panelNode);
 
-        if (!frame)
-            return;
-
-
-        var mainPanel = this.context.getPanel("script", true);
-        if (!mainPanel)
-        {
-            FBTrace.sysout("showStackFrame no mainPanel script for context "+this.context.getName());
-            return;
-        }
-
         FBL.setClass(this.panelNode, "objectBox-stackTrace");
-
-        var trace = getCorrectedStackTrace(this.context.stoppedFrame, this.context);
 
         var rep = Firebug.getRep(trace, this.context);
 
@@ -3922,19 +3941,20 @@ CallstackPanel.prototype = extend(Firebug.Panel,
 
         rep.tag.replace({object:trace}, this.panelNode);
 
-        var frameElts = this.panelNode.getElementsByClassName("objectBox-stackFrame");
-        for(var i = 0; i < frameElts.length; i++)
-        {
-            if (trace.frames[i].isCurrent)
-                frameElts[i].setAttribute("selected", "true");
-        }
+        if (trace.currentFrameIndex)
+            this.select(trace[trace.currentFrameIndex]);
 
         dispatch(this.fbListeners, 'onStackCreated', [this]);
     },
 
+    selectFrame: function(frameIndex)
+    {
+        var frameElts = this.panelNode.getElementsByClassName("objectBox-stackFrame");
+        this.selectItem(frameElts[frameIndex]);
+    },
+
     selectItem: function(item)
     {
-        // XXXjjb I don't think this is called
         if (this.selectedItem)
             this.selectedItem.removeAttribute("selected");
 
@@ -4178,7 +4198,7 @@ function ArrayEnumerator(array)
 // ************************************************************************************************
 
 Firebug.registerActivableModule(Firebug.Debugger);
-Firebug.registerPanel(CallstackPanel);
+Firebug.registerPanel(Firebug.CallstackPanel);
 Firebug.registerPanel(Firebug.ScriptPanel);
 
 // ************************************************************************************************

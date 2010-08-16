@@ -65,7 +65,7 @@ Firebug.CommandLine = extend(Firebug.Module,
 
             if (this.isSandbox(context))
                 result = this.evaluateInSandbox(expr, context, thisValue, targetWindow, successConsoleFunction, exceptionFunction);
-            else if (context.stopped && context.currentFrame.isValid)
+            else if (Firebug.Debugger.hasValidStack(context))
                 result = this.evaluateInDebugFrame(expr, context, thisValue, targetWindow,  successConsoleFunction, exceptionFunction);
             else
                 result = this.evaluateByEventPassing(expr, context, thisValue, targetWindow, successConsoleFunction, exceptionFunction);

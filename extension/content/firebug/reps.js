@@ -1400,6 +1400,7 @@ this.StackFrame = domplate(Firebug.Rep,  // XXXjjb Since the repObject is fn the
 {
     tag:
         OBJECTBLOCK(
+            SPAN({"class":"stackframeMarker"}, ""),
             A({"class": "objectLink a11yFocus", _repObject: "$object"}, "$object|getCallName"),
             SPAN("("),
             FOR("arg", "$object|argIterator",
