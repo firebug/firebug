@@ -24,23 +24,31 @@ Firebug.KnownIssues = extend(Firebug.Module,
 
     showPanel: function(browser, panel)
     {
+        if (!panel)
+            return;
+
         // Only display if the console panel is actually visible.
         if (panel && panel.name != "console")
             return;
 
         // Don't display if it was already displayed before.
-        if (Firebug.knownIssues40Displayed)
+        if (panel.panelNode.querySelector(".objectLink.knownIssues"))
             return;
 
         // Display the message only for Firefox 40
         if (versionChecker.compare(appInfo.version, "4.0*") < 0)
             return;
 
-        // Don't display the message again.
-        Firebug.setPref(Firebug.prefDomain, "knownIssues40Displayed", true);
-
-        // Log the message into the console.
-        Firebug.Console.log([], panel.context, "info", Firebug.KnownIssuesRep);
+        try
+        {
+            // Log the message into the console.
+            Firebug.Console.log([], panel.context, "info", Firebug.KnownIssuesRep);
+        }
+        catch (e)
+        {
+            if (FBTrace.DBG_ERRORS)
+                FBTrace.sysout("Firebug.KnownIssues.showPanel; EXCEPTION", e);
+        }
     }
 });
 
@@ -54,7 +62,7 @@ Firebug.KnownIssuesRep = domplate(Firebug.Rep,
         FirebugReps.OBJECTBOX({onclick: ""},
             SPAN($STR("message.knownIssues40")),
             SPAN("&nbsp;"),
-            SPAN({"class": "objectLink", style: "color:blue", onclick: "$onclick"},
+            SPAN({"class": "objectLink knownIssues", style: "color:blue", onclick: "$onclick"},
                 "http://getfirebug.com/knownissues"
             )
         ),
