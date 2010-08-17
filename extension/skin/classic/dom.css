@@ -15,6 +15,10 @@
     overflow: hidden;
 }
 
+.memberValueCell.readOnly {
+    opacity: 0.5;
+}
+
 .memberLabel {
     cursor: default;
     overflow: hidden;
@@ -24,6 +28,8 @@
 
 .memberLabelPrefix {
     color: gray;
+    margin-right: 3px;
+    font-weight: normal;
 }
 
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */

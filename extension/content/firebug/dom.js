@@ -88,13 +88,14 @@ const DirTablePlate = domplate(Firebug.Rep,
                )
             ),
             TD({"class": "memberLabelCell", style: "padding-left: $member.indent\\px",
-                role: 'presentation'},
+                role: "presentation"},
                 DIV({"class": "memberLabel $member.type\\Label"},
                     SPAN({"class": "memberLabelPrefix"}, "$member.prefix"),
                     SPAN("$member.name")
                 )
             ),
-            TD({"class": "memberValueCell", role : 'presentation'},
+            TD({"class": "memberValueCell", $readOnly: "$member.readOnly",
+                role: "presentation"},
                 TAG("$member.tag", {object: "$member.value"})
             )
         ),
@@ -176,7 +177,6 @@ const DirTablePlate = domplate(Firebug.Rep,
                         panel.setPropertyValue(row, !rowValue);
                     else
                         panel.editProperty(row);
-
                     cancelEvent(event);
                 }
             }
@@ -404,7 +404,7 @@ Firebug.DOMBasePanel.prototype = extend(Firebug.Panel,
             }
 
             var domMembers = getDOMMembers(object);
-            for (let i = 0; i < properties.length; i++)
+            for (var i = 0; i < properties.length; i++)
             {
                 var name = properties[i];
                 var val;
@@ -523,7 +523,8 @@ Firebug.DOMBasePanel.prototype = extend(Firebug.Panel,
             level: level,
             indent: level*16,
             hasChildren: hasChildren,
-            tag: tag
+            tag: tag,
+            prefix: ""
         };
 
         // The context doesn't have to be specified (e.g. in case of Watch panel that is based
@@ -546,11 +547,29 @@ Firebug.DOMBasePanel.prototype = extend(Firebug.Panel,
             }
         }
 
-        // If the property is implemented using a getter function (and there is no setter
-        // implemented) use a "get" prefix that is displayed in the UI.
+        // Set prefix for user defined properties. This prefix help the user to distinguish
+        // among simple properties and those defined using getter and/or (only a) setter.
         var o = unwrapObject(object);
-        if (o)
-            member.prefix = (o.__lookupGetter__(name) && !o.__lookupSetter__(name)) ? "get " : "";
+        if (o && !isDOMMember(object, name))
+        {
+            var getter = o.__lookupGetter__(name);
+            var setter = o.__lookupSetter__(name);
+
+            // both, getter and setter
+            if (getter && setter)
+                member.type = "userFunction";
+
+            // only getter
+            if (getter && !setter)
+            {
+                member.readOnly = true;
+                member.prefix = "get";
+            }
+
+            // only setter
+            if (!getter && setter)
+                member.prefix = "set";
+        }
 
         props.push(member);
         return member;
@@ -780,10 +799,16 @@ Firebug.DOMBasePanel.prototype = extend(Firebug.Panel,
 
     editProperty: function(row, editValue)
     {
+        var member = row.domObject;
+        if (member.readOnly)
+            return;
+
         if (hasClass(row, "watchNewRow"))
         {
             if (this.context.stopped)
+            {
                 Firebug.Editor.startEditing(row, "");
+            }
             else if (Firebug.Console.isAlwaysEnabled())  // not stopped in debugger, need command line
             {
                 if (Firebug.CommandLine.onCommandLineFocus())
@@ -792,7 +817,9 @@ Firebug.DOMBasePanel.prototype = extend(Firebug.Panel,
                     row.innerHTML = $STR("warning.Command line blocked?");
             }
             else
+            {
                 row.innerHTML = $STR("warning.Console must be enabled");
+            }
         }
         else if (hasClass(row, "watchRow"))
         {
