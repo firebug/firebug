@@ -799,14 +799,24 @@ Firebug.Breakpoint.BreakNotification.prototype = domplate(Firebug.InlineEditor.p
             )
         ),
 
+    getElementTag: function(node)
+    {
+		if (node)
+		{
+			var rep = Firebug.getRep(node);
+			if (rep)
+				return rep.shortTag || rep.tag;
+		}
+    },
+    
     getTargetTag: function(cause)
     {
-        return cause.target ? FirebugReps.Element.shortTag : null;
+        return this.getElementTag(cause.target) || null;
     },
 
     getRelatedTargetTag: function(cause)
     {
-        return cause.relatedTarget ? FirebugReps.Element.shortTag : null;
+        return this.getElementTag(cause.relatedNode) || null;
     },
 
     getDiff: function(cause)
