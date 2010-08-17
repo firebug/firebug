@@ -524,7 +524,8 @@ Firebug.DOMBasePanel.prototype = extend(Firebug.Panel,
             indent: level*16,
             hasChildren: hasChildren,
             tag: tag,
-            prefix: ""
+            prefix: "",
+            readOnly: false
         };
 
         // The context doesn't have to be specified (e.g. in case of Watch panel that is based
@@ -800,7 +801,7 @@ Firebug.DOMBasePanel.prototype = extend(Firebug.Panel,
     editProperty: function(row, editValue)
     {
         var member = row.domObject;
-        if (member.readOnly)
+        if (member && member.readOnly)
             return;
 
         if (hasClass(row, "watchNewRow"))

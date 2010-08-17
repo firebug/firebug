@@ -15,7 +15,7 @@
     overflow: hidden;
 }
 
-.memberValueCell.readOnly {
+.memberValueCell.readOnly > SPAN {
     opacity: 0.5;
 }
 
