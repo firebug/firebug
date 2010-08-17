@@ -576,7 +576,7 @@ Firebug.DOMBasePanel.prototype = extend(Firebug.Panel,
         return member;
     },
 
-    
+
     expandMembers: function (members, toggles, offset, level, context)  // recursion starts with offset=0, level=0
     {
         var expanded = 0;
@@ -1501,9 +1501,9 @@ DOMSidePanel.prototype = extend(Firebug.DOMBasePanel.prototype,
 
 // ************************************************************************************************
 
-function WatchPanel() {}
+Firebug.WatchPanel = function() {}
 
-WatchPanel.prototype = extend(Firebug.DOMBasePanel.prototype,
+Firebug.WatchPanel.prototype = extend(Firebug.DOMBasePanel.prototype,
 {
     tag: DirTablePlate.watchTag,
 
@@ -2186,7 +2186,7 @@ DOMBreakpointGroup.prototype = extend(new Firebug.Breakpoint.BreakpointGroup(),
 Firebug.registerModule(Firebug.DOMModule);
 Firebug.registerPanel(DOMMainPanel);
 Firebug.registerPanel(DOMSidePanel);
-Firebug.registerPanel(WatchPanel);
+Firebug.registerPanel(Firebug.WatchPanel);
 Firebug.registerRep(Firebug.DOMModule.BreakpointRep);
 
 // ************************************************************************************************
