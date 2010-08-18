@@ -543,6 +543,14 @@ top.FirebugChrome =
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
     // Panels
 
+    /*
+     * Set this.location on the current panel or one given by name.
+     * The location object should be known to the caller to be of the correct type for the panel, 
+     * eg SourceFile for Script panel 
+     * @param object the location object, null selects default location
+     * @param panelName the .name field for the desired panel, null means current panel
+     * @param sidePanelName I don't know how this affects the outcome
+     */
     navigate: function(object, panelName, sidePanelName)
     {
         var panel;
@@ -555,6 +563,13 @@ top.FirebugChrome =
             panel.navigate(object);
     },
 
+    /*
+     *  Set this.selection by object type analysis, passing the object to all panels to find the best match
+     *  @param object the new this.selection object
+     *  @param panelName matching panel.name will be used if its supportsObject returns true value
+     *  @param sidePanelName default side panel name, used if its supportObject returns true value 
+     *  @param forceUpdate if true, then (object === this.selection) is ignored and updateSelection is called
+     */
     select: function(object, panelName, sidePanelName, forceUpdate)
     {
         if (FBTrace.DBG_PANELS)
