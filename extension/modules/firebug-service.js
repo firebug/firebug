@@ -187,7 +187,7 @@ var fbs =
         this.pauseDepth = 0;
 
         prefs = PrefService.getService(nsIPrefBranch2);
-        fbs.prefDomain = "extensions.firebug.service."
+        fbs.prefDomain = "extensions.firebug"
         prefs.addObserver(fbs.prefDomain, fbs, false);
 
         observerService = ObserverServiceFactory.getService(Ci.nsIObserverService);
@@ -294,6 +294,7 @@ var fbs =
     // nsIObserver
     observe: function(subject, topic, data)
     {
+        if(topic != "nsPref:changed") return;
         fbs.obeyPrefs();
     },
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
@@ -938,8 +939,20 @@ var fbs =
         this.showStackTrace = prefs.getBoolPref("extensions.firebug.service.showStackTrace");
         this.breakOnErrors = prefs.getBoolPref("extensions.firebug.service.breakOnErrors");
         this.trackThrowCatch = prefs.getBoolPref("extensions.firebug.service.trackThrowCatch");
+
+        var pref = this.scriptFilter;
         this.scriptsFilter = prefs.getCharPref("extensions.firebug.service.scriptsFilter");
+        var mustReset = (pref !== this.scriptsFilter)
+
+        pref = this.filterSystemURLs;
         this.filterSystemURLs = prefs.getBoolPref("extensions.firebug.service.filterSystemURLs");  // may not be exposed to users
+        mustReset = mustReset || (pref !== this.filterSystemURLs);
+
+        if (mustReset && jsd && jsd.scriptHook)
+        {
+            fbs.unhookScripts();
+            fbs.hookScripts();
+        }
 
         FirebugPrefsObserver.syncFilter();
 
