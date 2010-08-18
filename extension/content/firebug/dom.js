@@ -569,7 +569,10 @@ Firebug.DOMBasePanel.prototype = extend(Firebug.Panel,
 
             // only setter
             if (!getter && setter)
+            {
+                member.readOnly = true;
                 member.prefix = "set";
+            }
         }
 
         props.push(member);
