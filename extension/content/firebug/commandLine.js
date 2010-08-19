@@ -405,6 +405,8 @@ Firebug.CommandLine = extend(Firebug.Module,
 
     focus: function(context)
     {
+        var wasMinimized = Firebug.isMinimized();
+
         if (Firebug.isDetached())
             Firebug.chrome.focus();
         else
@@ -424,8 +426,9 @@ Firebug.CommandLine = extend(Firebug.Module,
         else
         {
             // We are already on the console, if the command line has also
-            // the focus, toggle back.
-            if (commandLine.getAttribute("focused") == "true")
+            // the focus, toggle back. But only if the UI has been already
+            // opened.
+            if (commandLine.getAttribute("focused") == "true" && !wasMinimized)
                 Firebug.chrome.unswitchToPanel(context, "console", true);
             else
                 setTimeout(function() { commandLine.select(); });
