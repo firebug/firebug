@@ -139,7 +139,7 @@ Firebug.SourceBoxPanel = extend(SourceBoxPanelBase,
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
-    //  TabCache listner implementation
+    //  TabCache listener implementation
 
     onStartRequest: function(context, request)
     {
@@ -503,7 +503,7 @@ Firebug.SourceBoxPanel = extend(SourceBoxPanelBase,
             {
                 var viewRange = this.getViewRangeFromTargetLine(this.selectedSourceBox, lineNo);
                 this.selectedSourceBox.newScrollTop = this.getScrollTopFromViewRange(this.selectedSourceBox, viewRange);
-                if (FBTrace.DBG_SOURCEFILES) FBTrace.sysout("SourceBoxPanel.scrollTimeout: newScrollTop "+this.selectedSourceBox.newScrollTop+" for "+this.selectedSourceBox.repObject.href);
+                if (FBTrace.DBG_SOURCEFILES) FBTrace.sysout("SourceBoxPanel.scrollTimeout: newScrollTop "+this.selectedSourceBox.newScrollTop+" vs old "+this.selectedSourceBox.scrollTop+" for "+this.selectedSourceBox.repObject.href);
                 this.selectedSourceBox.scrollTop = this.selectedSourceBox.newScrollTop; // *may* cause scrolling
                 if (FBTrace.DBG_SOURCEFILES) FBTrace.sysout("SourceBoxPanel.scrollTimeout: scrollTo "+lineNo+" scrollTop:"+this.selectedSourceBox.scrollTop+ " lineHeight: "+this.selectedSourceBox.lineHeight);
             }
@@ -839,7 +839,7 @@ Firebug.SourceBoxPanel = extend(SourceBoxPanelBase,
                 delete this.noRecurse;
                 var vrStr = viewRange.firstLine+"-"+viewRange.lastLine;
                 var tvrStr = testViewRange.firstLine+"-"+testViewRange.lastLine;
-                FBTrace.sysout("getScrollTopFromCenterLine "+((viewRange==testViewRange)? "checks" : vrStr+"=!viewRange!="+tvrStr));
+                FBTrace.sysout("getScrollTopFromCenterLine "+((vrStr==tvrStr)? "checks" : vrStr+"=!viewRange!="+tvrStr));
             }
         }
 
