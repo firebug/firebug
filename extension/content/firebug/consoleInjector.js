@@ -16,17 +16,26 @@ top.Firebug.Console.injector =
         var attachedToken = win.document.getUserData("firebug-Token");
 
         if (FBTrace.DBG_CONSOLE)
-            FBTrace.sysout("Console.isAttached document token:"+attachedToken+ " in "+safeGetWindowLocation(win));
+            FBTrace.sysout("Console.isAttached document token:"+attachedToken+ " in "+
+                safeGetWindowLocation(win));
+
+        var handler = this.getConsoleHandler(context, win);
+
+        if (!attachedToken && handler)
+        {
+            if (FBTrace.DBG_CONSOLE)
+                FBTrace.sysout("Console.isAttached no token where we have a handler!",
+                    context.activeConsoleHandlers);
+        }
 
         if (!attachedToken)
             return false;
 
-        var handler = this.getConsoleHandler(context, win);
-
-        if( !handler )
+        if (!handler)
         {
             if (FBTrace.DBG_CONSOLE)
-                FBTrace.sysout("Console.isAttached no handler where we have a token!", context.activeConsoleHandlers);
+                FBTrace.sysout("Console.isAttached no handler where we have a token!",
+                    context.activeConsoleHandlers);
             return false;
         }
 
@@ -34,9 +43,11 @@ top.Firebug.Console.injector =
         {
             var msg = "Firebug Console token changed! "+handler.token+" !== "+attachedToken;
             Firebug.Console.logFormatted([msg], context, "info");  // XXXTODO NLS
+
             if (FBTrace.DBG_CONSOLE)
                 FBTrace.sysout(msg +" context: "+context.getName());
         }
+
         return true;
     },
 
@@ -77,7 +88,8 @@ top.Firebug.Console.injector =
             FBTrace.sysout("attachConsoleInjector evaluation completed for "+win.location);
     },
 
-    getConsoleInjectionScript: function() {
+    getConsoleInjectionScript: function()
+    {
         if (!this.consoleInjectionScript)
         {
             var script = "";
@@ -242,8 +254,17 @@ function createConsoleHandler(context, win)
         this.console.evaluateError = fnOfResultAndContext;
     };
 
-    // When raised on our injected element, callback to Firebug and append to console
+    handler.win = win;
+    handler.context = context;
 
+    handler.onUnload = function()
+    {
+        Firebug.Console.injector.detachConsole(this.context, this.win);
+    };
+
+    win.addEventListener("unload", bind(handler.onUnload, handler), true);
+
+    // When raised on our injected element, callback to Firebug and append to console
     win.document.addEventListener('firebugAppendConsole', bind(handler.handleEvent, handler), true); // capturing
 
     if (FBTrace.DBG_CONSOLE)
