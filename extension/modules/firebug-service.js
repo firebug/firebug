@@ -936,17 +936,23 @@ var fbs =
 
     obeyPrefs: function()
     {
-        this.showStackTrace = prefs.getBoolPref("extensions.firebug.service.showStackTrace");
-        this.breakOnErrors = prefs.getBoolPref("extensions.firebug.service.breakOnErrors");
-        this.trackThrowCatch = prefs.getBoolPref("extensions.firebug.service.trackThrowCatch");
+        fbs.showStackTrace = prefs.getBoolPref("extensions.firebug.service.showStackTrace");
+        fbs.breakOnErrors = prefs.getBoolPref("extensions.firebug.service.breakOnErrors");
+        fbs.trackThrowCatch = prefs.getBoolPref("extensions.firebug.service.trackThrowCatch");
 
-        var pref = this.scriptFilter;
-        this.scriptsFilter = prefs.getCharPref("extensions.firebug.service.scriptsFilter");
-        var mustReset = (pref !== this.scriptsFilter)
+        var pref = fbs.scriptsFilter;
+        fbs.scriptsFilter = prefs.getCharPref("extensions.firebug.service.scriptsFilter");
+        var mustReset = (pref !== fbs.scriptsFilter)
 
-        pref = this.filterSystemURLs;
-        this.filterSystemURLs = prefs.getBoolPref("extensions.firebug.service.filterSystemURLs");  // may not be exposed to users
-        mustReset = mustReset || (pref !== this.filterSystemURLs);
+        if (FBTrace.DBG_FBS_ERRORS)
+            FBTrace.sysout("obeyPrefs mustReset = "+mustReset+" pref: "+pref+" fbs.scriptsFilter: "+fbs.scriptsFilter, fbs);
+
+        pref = fbs.filterSystemURLs;
+        fbs.filterSystemURLs = prefs.getBoolPref("extensions.firebug.service.filterSystemURLs");  // may not be exposed to users
+        mustReset = mustReset || (pref !== fbs.filterSystemURLs);
+
+        if (FBTrace.DBG_FBS_ERRORS)
+                FBTrace.sysout("obeyPrefs mustReset = "+mustReset+" pref: "+pref+" fbs.filterSystemURLs: "+fbs.filterSystemURLs);
 
         if (mustReset && jsd && jsd.scriptHook)
         {
@@ -958,7 +964,7 @@ var fbs =
 
         try {
             if (FBTrace.DBG_FBS_ERRORS)
-                FBTrace.sysout("fbs.obeyPrefs showStackTrace:"+this.showStackTrace+" breakOnErrors:"+this.breakOnErrors+" trackThrowCatch:"+this.trackThrowCatch+" scriptFilter:"+this.scriptsFilter+" filterSystemURLs:"+this.filterSystemURLs);
+                FBTrace.sysout("fbs.obeyPrefs showStackTrace:"+fbs.showStackTrace+" breakOnErrors:"+fbs.breakOnErrors+" trackThrowCatch:"+fbs.trackThrowCatch+" scriptFilter:"+fbs.scriptsFilter+" filterSystemURLs:"+fbs.filterSystemURLs);
         }
         catch (exc)
         {
@@ -1162,8 +1168,6 @@ var fbs =
             if (haltDebugger)
             {
                 var peelOurselvesOff = frame.callingFrame;  // remove debuggerHalter()
-                if (!fbs.isChromeBlocked) // then we will have another frame from this file
-                    peelOurselvesOff = peelOurselvesOff.callingFrame; // remove fbs.halt()
 
                 while( peelOurselvesOff && ( peelOurselvesOff.script.fileName.indexOf("content/debugger.js") > 0 ) )
                     peelOurselvesOff = peelOurselvesOff.callingFrame;

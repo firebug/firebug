@@ -175,7 +175,7 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
         Firebug.Debugger.halt(function haltAnalysis(frame)
         {
             if (FBTrace.DBG_UI_LOOP)
-                FBTrace.sysout("debugger.breakNow: frame "+frame.script.fileName+" context "+context.getName(), frame);
+                FBTrace.sysout("debugger.breakNow: frame "+frame.script.fileName+" context "+context.getName(), getJSDStackDump(frame) );
 
             for (; frame && frame.isValid; frame = frame.callingFrame)
             {
