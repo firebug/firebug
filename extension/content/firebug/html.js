@@ -562,7 +562,7 @@ Firebug.HTMLPanel.prototype = extend(Firebug.Panel,
         var parentNode = node ? node.parentNode : null;
 
         if (FBTrace.DBG_HTML)
-            FBTrace.sysout("ChromeBugPanel.getParentObject for "+node.nodeName+" parentNode:"+(parentNode?parentNode.nodeName:"null-or-false")+"\n");
+            FBTrace.sysout("html.getParentObject for "+node.nodeName+" parentNode:"+(parentNode?parentNode.nodeName:"null-or-false")+"\n");
 
         if (parentNode)
         {
@@ -933,6 +933,14 @@ Firebug.HTMLPanel.prototype = extend(Firebug.Panel,
 
     watchWindow: function(win)
     {
+        var self = this;
+        setTimeout(function() {
+            self.watchWindowDelayed(win);
+        }, 100);
+    },
+
+    watchWindowDelayed: function(win)
+    {
         if (this.context.window && this.context.window != win) // then I guess we are an embedded window
         {
             var htmlPanel = this;
@@ -982,11 +990,17 @@ Firebug.HTMLPanel.prototype = extend(Firebug.Panel,
 
     mutateDocumentEmbedded: function(win, remove)
     {
-        // document.documentElement    Returns the Element that is a direct child of document. For HTML documents, this normally the HTML element.
+        //xxxHonza: win.document.documentElement is null if this method is synchronously
+        // called after watchWindow. This is why watchWindowDelayed is introduced.
+        // See issue 3342
+
+        // document.documentElement - Returns the Element that is a direct child of document.
+        // For HTML documents, this normally the HTML element.
+        var self = this;
         var target = win.document.documentElement;
         var parent = win.frameElement;
-        var nextSibling = this.findNextSibling(target || parent);
-        this.mutateNode(target, parent, nextSibling, remove);
+        var nextSibling = self.findNextSibling(target || parent);
+        self.mutateNode(target, parent, nextSibling, remove);
     },
 
     supportsObject: function(object, type)
