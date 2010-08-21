@@ -22,6 +22,20 @@ Firebug.KnownIssues = extend(Firebug.Module,
 {
     dispatchName: "knownIssues",
 
+    initialize: function()
+    {
+        var popupPrefName = "commandLineShowCompleterPopup";
+        if (/Linux/.test(window.navigator.platform))
+            Firebug.registerPreference(popupPrefName, false);
+        else
+            Firebug.registerPreference(popupPrefName, true);
+
+        Firebug.commandLineShowCompleterPopup = Firebug.getPref(Firebug.prefDomain, popupPrefName);
+
+        if (FBTrace.DBG_INITIALIZE)
+            FBTrace.sysout("Set commandLineShowCompleterPopup "+Firebug.commandLineShowCompleterPopup);
+    },
+
     showPanel: function(browser, panel)
     {
         if (!panel)

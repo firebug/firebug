@@ -73,9 +73,6 @@ const prefNames =  // XXXjjb TODO distribute to modules
     "showXMLHttpRequests", "showNetworkErrors", "tabularLogMaxHeight",
     "consoleFilterTypes",
 
-    // CommandLine
-    "commandLineShowCompleterPopup",
-
     // HTML
     "showFullTextNodes", "showCommentNodes",
     "showTextNodesWithWhitespace", "showTextNodesWithEntities",
@@ -2506,7 +2503,7 @@ Firebug.Panel = extend(new Firebug.Listener(),
      * @param object a location, must be one of getLocationList() returns
      *  if  getDefaultLocation() can return null, then updateLocation must handle it here.
      */
-    updateLocation: function(object)  
+    updateLocation: function(object)
     {
     },
 
@@ -2590,7 +2587,7 @@ Firebug.Panel = extend(new Firebug.Listener(),
             Firebug.Search.searchOptionMenu("search.Case Sensitive", "searchCaseSensitive")
         ];
     },
-    
+
     /**
      * Navigates to the next document whose match parameter returns true.
      */

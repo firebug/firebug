@@ -19,7 +19,6 @@ pref("extensions.firebug.activateSameOrigin", true);
 
 // Command line
 pref("extensions.firebug.largeCommandLine", false);
-pref("extensions.firebug.commandLineShowCompleterPopup", true);
 
 // Search
 pref("extensions.firebug.searchCaseSensitive", false);
