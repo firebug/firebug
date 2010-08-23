@@ -475,7 +475,7 @@ Firebug.CommandLine = extend(Firebug.Module,
 
     setMultiLine: function(multiLine, chrome, saveMultiLine)
     {
-        if (FirebugContext && FirebugContext.panelName != "console")
+        if (Firebug.currentContext && Firebug.currentContext.panelName != "console")
             return;
 
         collapse(chrome.$("fbCommandBox"), multiLine);
@@ -711,25 +711,25 @@ Firebug.CommandLine = extend(Firebug.Module,
 
     onCommandLineKeyUp: function(event)
     {
-        var commandLine = getCommandLine(FirebugContext);
-        this.autoCompleter.handledKeyUp(event, FirebugContext, commandLine)
+        var commandLine = getCommandLine(Firebug.currentContext);
+        this.autoCompleter.handledKeyUp(event, Firebug.currentContext, commandLine)
     },
 
     onCommandLineKeyDown: function(event)
     {
-        var commandLine = getCommandLine(FirebugContext);
-        this.autoCompleter.handledKeyDown(event, FirebugContext, commandLine)
+        var commandLine = getCommandLine(Firebug.currentContext);
+        this.autoCompleter.handledKeyDown(event, Firebug.currentContext, commandLine)
     },
 
     onCommandLineKeyPress: function(event)
     {
-        var commandLine = getCommandLine(FirebugContext);
-        this.autoCompleter.handledKeyPress(event, FirebugContext, commandLine)
+        var commandLine = getCommandLine(Firebug.currentContext);
+        this.autoCompleter.handledKeyPress(event, Firebug.currentContext, commandLine)
     },
 
     onCommandLineInput: function(event)
     {
-        var commandLine = getCommandLine(FirebugContext);
+        var commandLine = getCommandLine(Firebug.currentContext);
 
         if (!this.autoCompleter.getVerifiedText(commandLine)) // don't complete on empty command line
         {
@@ -738,8 +738,8 @@ Firebug.CommandLine = extend(Firebug.Module,
             return;
         }
 
-        this.autoCompleter.complete(FirebugContext, commandLine, true, false, true);
-        FirebugContext.commandLineText = this.autoCompleter.getVerifiedText(commandLine);
+        this.autoCompleter.complete(Firebug.currentContext, commandLine, true, false, true);
+        Firebug.currentContext.commandLineText = this.autoCompleter.getVerifiedText(commandLine);
     },
 
     onCommandLineBlur: function(event)
@@ -765,9 +765,9 @@ Firebug.CommandLine = extend(Firebug.Module,
             Firebug.migrations.commandLineTab = true;
         }
 
-        if (!Firebug.CommandLine.isAttached(FirebugContext))
+        if (!Firebug.CommandLine.isAttached(Firebug.currentContext))
         {
-            return Firebug.CommandLine.isReadyElsePreparing(FirebugContext);
+            return Firebug.CommandLine.isReadyElsePreparing(Firebug.currentContext);
         }
         else
         {
@@ -775,7 +775,7 @@ Firebug.CommandLine = extend(Firebug.Module,
             {
                 try
                 {
-                    var cmdLine = FirebugContext.window.wrappedJSObject._FirebugCommandLine
+                    var cmdLine = Firebug.currentContext.window.wrappedJSObject._FirebugCommandLine
                     FBTrace.sysout("commandLine.onCommandLineFocus, attachCommandLine ", cmdLine);
                 }
                 catch (e)
@@ -795,37 +795,37 @@ Firebug.CommandLine = extend(Firebug.Module,
 
     attachConsoleOnFocus: function()
     {
-        if (!FirebugContext)
+        if (!Firebug.currentContext)
         {
             if (FBTrace.DBG_ERRORS || FBTrace.DBG_COMMANDLINE)
-                FBTrace.sysout("commandLine.attachConsoleOnFocus no FirebugContext");
+                FBTrace.sysout("commandLine.attachConsoleOnFocus no Firebug.currentContext");
             return;
         }
 
         if (FBTrace.DBG_COMMANDLINE)
-            FBTrace.sysout("commandLine.attachConsoleOnFocus: FirebugContext is "+FirebugContext.getName() +
+            FBTrace.sysout("commandLine.attachConsoleOnFocus: Firebug.currentContext is "+Firebug.currentContext.getName() +
                 " in window "+window.location);
 
         // User has decided to use the command line, but the web page may not have the console
         // if the page has no javascript
-        if (Firebug.Console.isReadyElsePreparing(FirebugContext))
+        if (Firebug.Console.isReadyElsePreparing(Firebug.currentContext))
         {
             // the page had _firebug so we know that consoleInjected.js compiled and ran.
             if (FBTrace.DBG_COMMANDLINE)
             {
-                if (FirebugContext)
-                    FBTrace.sysout("commandLine.attachConsoleOnFocus: "+FirebugContext.getName());
+                if (Firebug.currentContext)
+                    FBTrace.sysout("commandLine.attachConsoleOnFocus: "+Firebug.currentContext.getName());
                 else
-                    FBTrace.sysout("commandLine.attachConsoleOnFocus: No FirebugContext\n");
+                    FBTrace.sysout("commandLine.attachConsoleOnFocus: No Firebug.currentContext\n");
             }
         }
         else
         {
-            Firebug.Console.injector.forceConsoleCompilationInPage(FirebugContext, FirebugContext.window);
+            Firebug.Console.injector.forceConsoleCompilationInPage(Firebug.currentContext, Firebug.currentContext.window);
 
             if (FBTrace.DBG_COMMANDLINE)
                 FBTrace.sysout("commandLine.attachConsoleOnFocus, attachConsole "+
-                    FirebugContext.window.location);
+                    Firebug.currentContext.window.location);
         }
     },
 
@@ -1157,22 +1157,22 @@ function FirebugCommandLineAPI(context, baseWindow)
 
     this.traceAll = function()
     {
-        Firebug.Debugger.traceAll(FirebugContext);
+        Firebug.Debugger.traceAll(Firebug.currentContext);
     };
 
     this.untraceAll = function()
     {
-        Firebug.Debugger.untraceAll(FirebugContext);
+        Firebug.Debugger.untraceAll(Firebug.currentContext);
     };
 
     this.traceCalls = function(fn)
     {
-        Firebug.Debugger.traceCalls(FirebugContext, fn);
+        Firebug.Debugger.traceCalls(Firebug.currentContext, fn);
     };
 
     this.untraceCalls = function(fn)
     {
-        Firebug.Debugger.untraceCalls(FirebugContext, fn);
+        Firebug.Debugger.untraceCalls(Firebug.currentContext, fn);
     };
 
     this.monitorEvents = function(object, types)

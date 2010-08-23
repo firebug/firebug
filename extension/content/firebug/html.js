@@ -2085,7 +2085,7 @@ Firebug.HTMLModule.BreakpointRep = domplate(Firebug.Rep,
 
     getNodeTag: function(node)
     {
-        var rep = Firebug.getRep(node, FirebugContext);
+        var rep = Firebug.getRep(node, Firebug.currentContext);
         return rep.shortTag ? rep.shortTag : rep.tag;
     },
 

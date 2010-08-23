@@ -491,7 +491,7 @@ top.Firebug =
 
         this.setSuspended("suspending");
 
-        var cancelSuspend = dispatch2(activableModules, 'onSuspendFirebug', [FirebugContext]);  // TODO no context arg
+        var cancelSuspend = dispatch2(activableModules, 'onSuspendFirebug', [Firebug.currentContext]);  // TODO no context arg
 
         if (cancelSuspend)
             Firebug.resume();
@@ -507,7 +507,7 @@ top.Firebug =
     resumeFirebug: function()  // dispatch onResumeFirebug to all modules
     {
         this.setSuspended("resuming");
-        dispatch(activableModules, 'onResumeFirebug', [FirebugContext]);// TODO no context arg
+        dispatch(activableModules, 'onResumeFirebug', [Firebug.currentContext]);// TODO no context arg
         this.setSuspended(null);
     },
 
@@ -1211,7 +1211,7 @@ top.Firebug =
     {
         var browser = Firebug.chrome.getCurrentBrowser();
         if (FBTrace.DBG_WINDOWS || FBTrace.DBG_ACTIVATION)
-            FBTrace.sysout("showBar("+show+") for browser "+browser.currentURI.spec+" FirebugContext "+FirebugContext);
+            FBTrace.sysout("showBar("+show+") for browser "+browser.currentURI.spec+" Firebug.currentContext "+Firebug.currentContext);
 
         var contentBox = Firebug.chrome.$("fbContentBox");
         var contentSplitter = Firebug.chrome.$("fbContentSplitter");
@@ -1234,7 +1234,7 @@ top.Firebug =
         this.showKeys(shouldShow);
 
         //xxxHonza: should be removed.
-        dispatch(Firebug.uiListeners, show ? "showUI" : "hideUI", [browser, FirebugContext]);
+        dispatch(Firebug.uiListeners, show ? "showUI" : "hideUI", [browser, Firebug.currentContext]);
 
         // Sync panel state after the showUI event is dispatched. syncPanel method calls
         // Panel.show method, which expects the active context to be already registered.
@@ -1278,7 +1278,7 @@ top.Firebug =
         if (panelName)
             Firebug.chrome.selectPanel(panelName);
 
-        if (FirebugContext && browser.showFirebug)  // then we are already debugging the selected tab
+        if (Firebug.currentContext && browser.showFirebug)  // then we are already debugging the selected tab
         {
             if (Firebug.isDetached()) // if we are out of the browser focus the window
                 Firebug.chrome.focus();
@@ -1295,7 +1295,7 @@ top.Firebug =
             {
                 var context = TabWatcher.getContextByWindow(browser.contentWindow);
                 if (context) // ASSERT: we should not have showFirebug false on a page with a context
-                    FBTrace.sysout("Firebug.toggleBar: placement "+this.getPlacement()+ " context: "+context.getName()+" FirebugContext: "+(FirebugContext?FirebugContext.getName():"null")+" browser.showFirebug:"+browser.showFirebug);
+                    FBTrace.sysout("Firebug.toggleBar: placement "+this.getPlacement()+ " context: "+context.getName()+" Firebug.currentContext: "+(Firebug.currentContext?Firebug.currentContext.getName():"null")+" browser.showFirebug:"+browser.showFirebug);
             }
 
             var created = TabWatcher.watchBrowser(browser);  // create a context for this page
@@ -1329,7 +1329,7 @@ top.Firebug =
 
     unMinimize: function()
     {
-        this.updateActiveContexts(FirebugContext);
+        this.updateActiveContexts(Firebug.currentContext);
         Firebug.setPlacement("inBrowser");
         Firebug.showBar(true);
     },
@@ -1363,8 +1363,8 @@ top.Firebug =
     {
         Firebug.showBar(false);
 
-        if (FirebugContext)
-            TabWatcher.unwatchBrowser(FirebugContext.browser, userCommands);
+        if (Firebug.currentContext)
+            TabWatcher.unwatchBrowser(Firebug.currentContext.browser, userCommands);
         // else the user closed Firebug external window while not looking at a debugged web page.
 
         Firebug.resetTooltip();
@@ -1408,18 +1408,17 @@ top.Firebug =
 
         this.showBar(false);  // don't show in browser.xul now
 
-        Firebug.chrome.setFirebugContext(context);  // make sure the FirebugContext agrees with context
+        Firebug.chrome.setFirebugContext(context);  // make sure the Firebug.currentContext agrees with context
 
         this.setPlacement("detached");  // we'll reset it in the new window, but we seem to race with code in this window.
 
         if (FBTrace.DBG_ACTIVATION)
-            FBTrace.sysout("Firebug.detachBar opening firebug.xul for context "+FirebugContext.getName() );
+            FBTrace.sysout("Firebug.detachBar opening firebug.xul for context "+Firebug.currentContext.getName() );
 
         var args = {
             FBL: FBL,
             Firebug: this,
             browser: context.browser,
-            FirebugContext: window.FirebugContext
         };
         var win = openWindow("Firebug", "chrome://firebug/content/firebug.xul", "", args);
 
@@ -1645,7 +1644,7 @@ top.Firebug =
             var rep = reps[i];
             try
             {
-                if (rep.supportsObject(object, type, (context?context:FirebugContext) ))
+                if (rep.supportsObject(object, type, (context?context:Firebug.currentContext) ))
                 {
                     if (FBTrace.DBG_DOM)
                         FBTrace.sysout("getRep type: "+type+" object: "+object, rep);
@@ -1789,7 +1788,7 @@ top.Firebug =
 
     onPauseJSDRequested: function(rejection)
     {
-        if (top.FirebugContext)  // then we are active in this browser.xul
+        if (top.Firebug.currentContext)  // then we are active in this browser.xul
             rejection.push(true); // so reject the request
 
         dispatch2(Firebug.Debugger.fbListeners, "onPauseJSDRequested", [rejection]);
@@ -1956,7 +1955,7 @@ top.Firebug =
         }
 
         Firebug.chrome.setFirebugContext(context); // the context becomes the default for its view
-        this.updateActiveContexts(context);  // resume, after setting FirebugContext
+        this.updateActiveContexts(context);  // resume, after setting Firebug.currentContext
 
         dispatch(modules, "showContext", [browser, context]);  // tell modules we may show UI
 
@@ -2051,10 +2050,10 @@ top.Firebug =
 
         dispatch(modules, "destroyContext", [context, persistedState]);
 
-        if (FirebugContext == context)
+        if (Firebug.currentContext == context)
         {
             Firebug.chrome.clearPanels(); // disconnect the to-be-destroyed panels from the panelBar
-            Firebug.chrome.setFirebugContext(null);  // FirebugContext is about to be destroyed
+            Firebug.chrome.setFirebugContext(null);  // Firebug.currentContext is about to be destroyed
         }
 
         var browser = context.browser;
@@ -2966,7 +2965,7 @@ Firebug.ActivableModule = extend(Firebug.Module,
     setDefaultState: function(enable)
     {
         //@deprecated
-        Firebug.Console.log("Deprecated: don't use ActivableModule.setDefaultState!", FirebugContext);
+        Firebug.Console.log("Deprecated: don't use ActivableModule.setDefaultState!", Firebug.currentContext);
     },
 
     isEnabled: function()
@@ -3105,7 +3104,7 @@ Firebug.Rep = domplate(
     * Extensions may monkey patch and chain off this call
     * @param object: the 'realObject', a model value, eg a DOM property
     * @param target: the HTML element clicked on.
-    * @param context: the context, probably FirebugContext
+    * @param context: the context, probably Firebug.currentContext
     * @return an array of menu items.
     */
     getContextMenuItems: function(object, target, context)

@@ -265,7 +265,7 @@ Firebug.Activation = extend(Firebug.Module,
     {
         if (privateBrowsingEnabled)
         {
-            Firebug.Console.logFormatted(["Sites are not remembered in Private Browsing Mode"], FirebugContext, "info");  // XXXTODO NLS
+            Firebug.Console.logFormatted(["Sites are not remembered in Private Browsing Mode"], Firebug.currentContext, "info");  // XXXTODO NLS
             return;
         }
 

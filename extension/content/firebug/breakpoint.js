@@ -137,7 +137,7 @@ Firebug.Breakpoint.BreakpointListRep = domplate(Firebug.Rep,
 
     getBreakpointRep: function(bp)
     {
-        var rep = Firebug.getRep(bp, FirebugContext);
+        var rep = Firebug.getRep(bp, Firebug.currentContext);
         return rep.tag;
     },
 

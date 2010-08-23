@@ -1,9 +1,8 @@
 /* See license.txt for terms of usage */
 
 var Firebug = null;
-var FirebugContext = null;
 
-/* The 'context' in this file is always 'FirebugContext' */
+/* The 'context' in this file is always 'Firebug.currentContext' */
 
 (function() {
 
@@ -102,8 +101,7 @@ top.FirebugChrome =
             // we've been opened in a new window by an already initialized Firebug
             top.FBL = detachArgs.FBL;
             Firebug = detachArgs.Firebug;
-            FirebugContext = detachArgs.FirebugContext;
-            Firebug.currentContext = FirebugContext;
+            Firebug.currentContext = detachArgs.Firebug.currentContext;
         }
         else
         {
@@ -672,8 +670,8 @@ top.FirebugChrome =
 
     setFirebugContext: function(context)
     {
-         // This sets the global value of FirebugContext in the window that this chrome is compiled into.
-         // Note that for firebug.xul, the Firebug object is shared across windows, but not FirebugChrome and FirebugContext
+         // This sets the global value of Firebug.currentContext in the window that this chrome is compiled into.
+         // Note that for firebug.xul, the Firebug object is shared across windows, but not FirebugChrome and Firebug.currentContext
          FirebugContext = context;
          Firebug.currentContext = context;
 
@@ -1202,7 +1200,7 @@ top.FirebugChrome =
         var items = [];
 
         // Domplate (+ support for context menus) can be used even in separate
-        // windows when FirebugContext doesn't have to be defined.
+        // windows when Firebug.currentContext doesn't have to be defined.
         if (!Firebug.currentContext)
             return items;
 

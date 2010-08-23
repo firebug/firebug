@@ -494,7 +494,7 @@ Firebug.A11yModel = extend(Firebug.Module,
 
     ensurePanelTabStops: function()
     {
-        if (!FirebugContext || !FirebugContext.chrome) // XXXjjb: seems like this shoudl be !Firebug.chrome
+        if (!Firebug.currentContext || !Firebug.currentContext.chrome) // XXXjjb: seems like this shoudl be !Firebug.chrome
             return;
         var panel = Firebug.chrome.getSelectedPanel();
         var sidePanel = Firebug.chrome.getSelectedSidePanel();
@@ -2529,7 +2529,7 @@ Firebug.A11yModel = extend(Firebug.Module,
     focus : function(elem, noVisiCheck, needsMoreTime)
     {
         if (isElement(elem) && (noVisiCheck || this.isVisibleByStyle(elem)))
-            FirebugContext.setTimeout(function(){
+            Firebug.currentContext.setTimeout(function(){
                 elem.focus()
                 }, needsMoreTime ? 500 :10);
     },

@@ -58,7 +58,7 @@ var Errors = Firebug.Errors = extend(Firebug.Module,
     {
         context.errorCount = count;
 
-        if (context == FirebugContext)
+        if (context == Firebug.currentContext)
             this.showCount(context.errorCount);
     },
 
@@ -164,7 +164,7 @@ var Errors = Firebug.Errors = extend(Firebug.Module,
 
                         var context = this.getErrorContext(object);  // after instanceof
                         if (!context)
-                            context = FirebugContext;
+                            context = Firebug.currentContext;
                         var msgId = lessTalkMoreAction(context, object, isWarning);
                         if (!msgId)
                             return;
@@ -179,7 +179,7 @@ var Errors = Firebug.Errors = extend(Firebug.Module,
                         var context = this.getErrorContext(object);
 
                         if (!context)
-                            context = FirebugContext;
+                            context = Firebug.currentContext;
 
                         if (context)
                             Firebug.Console.log(object.message, context, "consoleMessage", FirebugReps.Text);
@@ -277,7 +277,7 @@ var Errors = Firebug.Errors = extend(Firebug.Module,
     {
         var url = object.sourceName;
         if(!url)
-            return FirebugContext;  // eg some XPCOM messages
+            return Firebug.currentContext;  // eg some XPCOM messages
 
         var errorContext = null;
         TabWatcher.iterateContexts(

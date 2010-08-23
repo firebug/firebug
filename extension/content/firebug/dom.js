@@ -1959,7 +1959,7 @@ Firebug.DOMModule.BreakpointRep = domplate(Firebug.Rep,
 
     getObjectTag: function(object)
     {
-        var rep = Firebug.getRep(object, FirebugContext);  // I am uncertain about the FirebugContext but I think we are only here in panel code.
+        var rep = Firebug.getRep(object, Firebug.currentContext);  // I am uncertain about the Firebug.currentContext but I think we are only here in panel code.
         return rep.shortTag ? rep.shortTag : rep.tag;
     },
 

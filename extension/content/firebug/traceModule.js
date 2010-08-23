@@ -706,7 +706,7 @@ Firebug.TraceModule.MessageTemplate = domplate(Firebug.Rep,
         // Register onLoad listener and open the source file at the specified line.
         if (cbWindow) {
             cbWindow.addEventListener("load", function() {
-                var context = cbWindow.FirebugContext;
+                var context = cbWindow.Firebug.currentContext;
                 var link = new cbWindow.FBL.SourceLink(fileName, lineNumber, "js");
                 Firebug.chrome.select(link, "script");
             }, true);

@@ -3138,7 +3138,7 @@ Firebug.NetMonitor.SizeInfoTip = domplate(Firebug.Rep,
 
     render: function(file, parentNode)
     {
-        var postText = Utils.getPostText(file, FirebugContext, true);
+        var postText = Utils.getPostText(file, Firebug.currentContext, true);
         postText = postText ? postText : "";
 
         var sizeInfo = [];

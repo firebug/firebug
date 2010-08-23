@@ -231,7 +231,12 @@ top.TabWatcher = extend(new Firebug.Listener(),
 
         // Create if any listener says true to showCreateContext
         if (dispatch2(this.fbListeners, "shouldCreateContext", [browser, url, userCommands]))
-            return true;
+        {
+        	 if (FBTrace.DBG_ACTIVATION)
+                 FBTrace.sysout("-> shouldCreateContext with user: "+userCommands+ " one listener says yes to "+ url, this.fbListeners);
+        	return true;
+        }
+            
 
         if (FBTrace.DBG_ACTIVATION)
             FBTrace.sysout("-> shouldCreateContext with user: "+userCommands+ " no opinion for: "+ url);
@@ -268,7 +273,7 @@ top.TabWatcher = extend(new Firebug.Listener(),
 
         // The proper instance of FirebugChrome object (different for detached Firebug and
         // accessible as Firebug.chrome property) must be used for the context object.
-        // (the global context object FirebugContext is also different for detached firebug).
+        // (the global context object Firebug.currentContext is also different for detached firebug).
         var context = new contextType(win, browser, Firebug.chrome, persistedState);
         contexts.push(context);
 
