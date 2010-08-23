@@ -175,7 +175,7 @@ this.values = function(map)
         {
             try
             {
-                values.push(map[name]);
+                values.push(map[name]);  
             }
             catch (exc)
             {

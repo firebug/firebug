@@ -13,49 +13,16 @@ top.Firebug.Console.injector =
 {
     isAttached: function(context, win)
     {
-        var attachedToken = win.document.getUserData("firebug-Token");
-
-        if (FBTrace.DBG_CONSOLE)
-            FBTrace.sysout("Console.isAttached document token:"+attachedToken+ " in "+
-                safeGetWindowLocation(win));
-
         var handler = this.getConsoleHandler(context, win);
 
-        if (!attachedToken && handler)
-        {
-            if (FBTrace.DBG_CONSOLE)
-                FBTrace.sysout("Console.isAttached no token where we have a handler!",
-                    context.activeConsoleHandlers);
-        }
+        if (FBTrace.DBG_CONSOLE)
+                FBTrace.sysout("Console.isAttached "+handler+" in context "+context.getName()+" and win "+safeGetWindowLocation(win), handler);
 
-        if (!attachedToken)
-            return false;
-
-        if (!handler)
-        {
-            if (FBTrace.DBG_CONSOLE)
-                FBTrace.sysout("Console.isAttached no handler where we have a token!",
-                    context.activeConsoleHandlers);
-            return false;
-        }
-
-        if (handler.token !== attachedToken)
-        {
-            var msg = "Firebug Console token changed! "+handler.token+" !== "+attachedToken;
-            Firebug.Console.logFormatted([msg], context, "info");  // XXXTODO NLS
-
-            if (FBTrace.DBG_CONSOLE)
-                FBTrace.sysout(msg +" context: "+context.getName());
-        }
-
-        return true;
+        return handler;
     },
 
     attachIfNeeded: function(context, win)
     {
-        if (FBTrace.DBG_CONSOLE)
-            FBTrace.sysout("Console.attachIfNeeded has win "+(win? ((win.wrappedJSObject?"YES":"NO")+" wrappedJSObject"):"null") );
-
         if (this.isAttached(context, win))
             return true;
 
@@ -144,9 +111,6 @@ top.Firebug.Console.injector =
         if (!win)
             win = context.window;
 
-        if (win.wrappedJSObject)
-            win = win.wrappedJSObject;
-
         win.document.setUserData("firebug-Version", Firebug.version, null); // Initialize Firebug version.
 
         var handler = createConsoleHandler(context, win);
@@ -157,33 +121,26 @@ top.Firebug.Console.injector =
         return true;
     },
 
-    getConsoleHandlerEntry: function(context, win)
+    getConsoleHandler: function(context, win)
     {
-        var wrapperNonsense = (win.wrappedJSObject ? win.wrappedJSObject : win);
-        if (context.activeConsoleHandlers)
+    	var attachedToken = win.document.getUserData("firebug-Token");
+    	if (context.activeConsoleHandlers)
         {
             for(var i = 0; i < context.activeConsoleHandlers.length; i++)
             {
-                if (context.activeConsoleHandlers[i].win === wrapperNonsense)
+                if (context.activeConsoleHandlers[i].token === attachedToken)
                     return context.activeConsoleHandlers[i];
             }
         }
     },
 
-    getConsoleHandler: function(context, win)
-    {
-        var entry = this.getConsoleHandlerEntry(context, win);
-        if (entry)
-            return entry.handler;
-    },
-
     removeConsoleHandler: function(context, win)
     {
-        var entry = this.getConsoleHandlerEntry(context, win);
-        if (entry)
+        var handler = this.getConsoleHandler(context, win);
+        if (handler)
         {
-            entry.handler.detach();
-            remove(context.activeConsoleHandlers, entry);
+            handler.detach();
+            remove(context.activeConsoleHandlers, handler);
         }
     },
 
@@ -192,12 +149,10 @@ top.Firebug.Console.injector =
         if (!context.activeConsoleHandlers)
             context.activeConsoleHandlers = [];
 
-        var wrapperNonsense = (win.wrappedJSObject ? win.wrappedJSObject : win);
-
-        context.activeConsoleHandlers.push({win: wrapperNonsense, handler: handler });
+        context.activeConsoleHandlers.push(handler);
 
         if (FBTrace.DBG_CONSOLE)
-            FBTrace.sysout("consoleInjector addConsoleListener set token "+handler.token+" and  attached handler("+handler.handler_name+") to _firebugConsole in : "+safeGetWindowLocation(wrapperNonsense));
+            FBTrace.sysout("consoleInjector addConsoleListener set token "+handler.token+" and  attached handler("+handler.handler_name+") to _firebugConsole in : "+safeGetWindowLocation(win));
 
     },
 
@@ -205,9 +160,6 @@ top.Firebug.Console.injector =
     {
         if (!win)
             win = context.window;
-
-        if (win.wrappedJSObject)
-            win = win.wrappedJSObject;
 
         this.removeConsoleHandler(context, win);
     },

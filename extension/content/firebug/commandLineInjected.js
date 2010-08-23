@@ -1,5 +1,8 @@
 /* See license.txt for terms of usage */
 
+
+// This code is evaluated into a web page
+
 var _FirebugCommandLine =
 {
     initFirebugCommandLine: function()
