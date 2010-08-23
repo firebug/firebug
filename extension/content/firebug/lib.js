@@ -379,6 +379,18 @@ this.addStyleSheet = function(doc, style)
         doc.documentElement.appendChild(style);
 };
 
+this.appendStylesheet = function(doc, uri)
+{
+    // Make sure the stylesheet is not appended twice.
+    if (this.$(uri, doc))
+        return;
+
+    var styleSheet = this.createStyleSheet(doc, uri);
+    styleSheet.setAttribute("id", uri);
+    this.addStyleSheet(doc, styleSheet);
+},
+
+
 this.addScript = function(doc, id, src)
 {
     var element = doc.createElementNS("http://www.w3.org/1999/xhtml", "html:script");

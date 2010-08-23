@@ -211,9 +211,9 @@ top.FirebugChrome =
             // Append all registered styleesheets into Firebug UI.
             for (var uri in Firebug.stylesheets)
             {
-                this.appendStylesheet(doc1, Firebug.stylesheets[uri]);
-                this.appendStylesheet(doc2, Firebug.stylesheets[uri]);
-                this.appendStylesheet(doc3, Firebug.stylesheets[uri]);
+                appendStylesheet(doc1, Firebug.stylesheets[uri]);
+                appendStylesheet(doc2, Firebug.stylesheets[uri]);
+                appendStylesheet(doc3, Firebug.stylesheets[uri]);
             }
 
             FirstRunPage.initializeUI();
@@ -222,17 +222,6 @@ top.FirebugChrome =
         {
             FBTrace.sysout("chrome.initializeUI fails "+exc, exc);
         }
-    },
-
-    appendStylesheet: function(doc, uri)
-    {
-        // Make sure the stylesheet is not appended twice.
-        if ($(uri, doc))
-            return;
-
-        var styleSheet = FBL.createStyleSheet(doc, uri);
-        styleSheet.setAttribute("id", uri);
-        FBL.addStyleSheet(doc, styleSheet);
     },
 
     shutdown: function()
@@ -545,8 +534,8 @@ top.FirebugChrome =
 
     /*
      * Set this.location on the current panel or one given by name.
-     * The location object should be known to the caller to be of the correct type for the panel, 
-     * eg SourceFile for Script panel 
+     * The location object should be known to the caller to be of the correct type for the panel,
+     * eg SourceFile for Script panel
      * @param object the location object, null selects default location
      * @param panelName the .name field for the desired panel, null means current panel
      * @param sidePanelName I don't know how this affects the outcome
@@ -567,7 +556,7 @@ top.FirebugChrome =
      *  Set this.selection by object type analysis, passing the object to all panels to find the best match
      *  @param object the new this.selection object
      *  @param panelName matching panel.name will be used if its supportsObject returns true value
-     *  @param sidePanelName default side panel name, used if its supportObject returns true value 
+     *  @param sidePanelName default side panel name, used if its supportObject returns true value
      *  @param forceUpdate if true, then (object === this.selection) is ignored and updateSelection is called
      */
     select: function(object, panelName, sidePanelName, forceUpdate)
