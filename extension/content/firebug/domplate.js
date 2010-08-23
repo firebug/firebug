@@ -202,7 +202,7 @@ DomplateTag.prototype =
             var iterOuts = [];
             outputs.push(iterOuts);
 
-            if (iter instanceof Array)
+            if (iter instanceof Array || iter instanceof NodeList)
                 iter = new ArrayIterator(iter);
 
             try
