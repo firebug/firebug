@@ -1399,7 +1399,6 @@ Firebug.AutoCompleter = function(getExprOffset, getRange, evaluator, selectMode,
         {
             case '.':
             case '(':
-            case ')':
                 this.acceptCompletionInTextBox(textBox);
                 break;
             default:
