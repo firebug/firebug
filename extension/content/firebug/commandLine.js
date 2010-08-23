@@ -967,7 +967,9 @@ function autoCompleteEval(preExpr, expr, postExpr, context)
                     if (FBTrace.DBG_COMMANDLINE)
                         FBTrace.sysout("commandLine.autoCompleteEval \'"+preExpr+"\' found result", result);
 
-                    if (typeof result === 'string' || FirebugReps.Arr.isArray(result))
+                    if (typeof result === 'string')
+                    	self.complete = [];
+                    else if (FirebugReps.Arr.isArray(result))
                         self.complete = nonNumericKeys(result).sort();
                     else
                         self.complete = keys(result).sort();
