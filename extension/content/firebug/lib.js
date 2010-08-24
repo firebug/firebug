@@ -390,7 +390,6 @@ this.appendStylesheet = function(doc, uri)
     this.addStyleSheet(doc, styleSheet);
 },
 
-
 this.addScript = function(doc, id, src)
 {
     var element = doc.createElementNS("http://www.w3.org/1999/xhtml", "html:script");

@@ -209,9 +209,9 @@ top.FirebugChrome =
             // Append all registered styleesheets into Firebug UI.
             for (var uri in Firebug.stylesheets)
             {
-                appendStylesheet(doc1, Firebug.stylesheets[uri]);
-                appendStylesheet(doc2, Firebug.stylesheets[uri]);
-                appendStylesheet(doc3, Firebug.stylesheets[uri]);
+                FBL.appendStylesheet(doc1, Firebug.stylesheets[uri]);
+                FBL.appendStylesheet(doc2, Firebug.stylesheets[uri]);
+                FBL.appendStylesheet(doc3, Firebug.stylesheets[uri]);
             }
 
             FirstRunPage.initializeUI();
