@@ -23,23 +23,23 @@ var FBTrace = null;
 var observerService =
 /** lends observerService */
 {
-	observersByTopic: {},
-	
+    observersByTopic: {},
+    
     /* nsIObserverService */
     addObserver: function(observer, topic, weak)
     {
         if (!this.observersByTopic[topic])
-        	this.observersByTopic[topic] = [];
+            this.observersByTopic[topic] = [];
         
         this.observersByTopic[topic].push(observer);
     },
 
     removeObserver: function(observer, topic)
     {
-    	var observers = this.observersByTopic[topic];
-    	if (!observers)
-    		throw new Error("observer-service.removeObserver FAILED no observers for topic "+topic);
-    	
+        var observers = this.observersByTopic[topic];
+        if (!observers)
+            throw new Error("observer-service.removeObserver FAILED no observers for topic "+topic);
+        
         for (var i=0; i < observers.length; i++)
         {
             if (observers[i] == observer)
@@ -54,23 +54,23 @@ var observerService =
 
     notifyObservers: function(subject, topic, data)
     {
-    	var observers = this.observersByTopic[topic];
-    	if (observers)
-    	{
+        var observers = this.observersByTopic[topic];
+        if (observers)
+        {
             for (var i=0; i < observers.length; i++)
                 observers[i].observe(subject, topic, data);
-    	}
+        }
     },
     
     enumerateObservers: function(topic, fnOfObserver)
     {
-    	var observers = this.observersByTopic[topic];
-    	if (fnOfObserver)
-    	{
-    		for (var i=0; i < observers.length; i++)
+        var observers = this.observersByTopic[topic];
+        if (fnOfObserver)
+        {
+            for (var i=0; i < observers.length; i++)
                 fnOfObserver(observers[i]);
-    	}
-    	return observers;  // may be null or array
+        }
+        return observers;  // may be null or array
     },
 }
 

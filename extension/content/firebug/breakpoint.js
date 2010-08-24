@@ -801,12 +801,12 @@ Firebug.Breakpoint.BreakNotification.prototype = domplate(Firebug.InlineEditor.p
 
     getElementTag: function(node)
     {
-		if (node)
-		{
-			var rep = Firebug.getRep(node);
-			if (rep)
-				return rep.shortTag || rep.tag;
-		}
+        if (node)
+        {
+            var rep = Firebug.getRep(node);
+            if (rep)
+                return rep.shortTag || rep.tag;
+        }
     },
     
     getTargetTag: function(cause)

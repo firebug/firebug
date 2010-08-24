@@ -176,7 +176,7 @@ Firebug.CommandLine = extend(Firebug.Module,
         var win = targetWindow ? targetWindow : (context.baseWindow ? context.baseWindow : context.window);
 
         if (!context.commandLineAPI)
-            context.commandLineAPI = new FirebugCommandLineAPI(context);  
+            context.commandLineAPI = new FirebugCommandLineAPI(context);
 
         var htmlPanel = context.getPanel("html", true);
         var scope = {
@@ -788,7 +788,7 @@ Firebug.CommandLine = extend(Firebug.Module,
 
     isAttached: function(context)
     {
-    	// _FirebugCommandLine is evaluated into the page
+        // _FirebugCommandLine is evaluated into the page
         return ( context && context.window && context.window.wrappedJSObject ) ?
             context.window.wrappedJSObject._FirebugCommandLine : false;
     },
@@ -968,7 +968,7 @@ function autoCompleteEval(preExpr, expr, postExpr, context)
                         FBTrace.sysout("commandLine.autoCompleteEval \'"+preExpr+"\' found result", result);
 
                     if (typeof result === 'string')
-                    	self.complete = [];
+                        self.complete = [];
                     else if (FirebugReps.Arr.isArray(result))
                         self.complete = nonNumericKeys(result).sort();
                     else
@@ -1063,8 +1063,8 @@ function cleanIndentation(text)
 //
 // These functions will be called in the extension like this:
 //   subHandler.apply(api, userObjects);
-// where subHandler is one of the entries below, api is this object and userObjects are entries in 
-// an array we created in the web page. 
+// where subHandler is one of the entries below, api is this object and userObjects are entries in
+// an array we created in the web page.
 
 function FirebugCommandLineAPI(context)
 {
@@ -1115,7 +1115,7 @@ function FirebugCommandLineAPI(context)
         // the same window (from tabWatcher) that uses uses XPCNativeWrapper (operator "==" works).
         var entry = Firebug.Console.injector.getConsoleHandlerEntry(context, object);
         if (entry)
-            context.baseWindow = entry.win;  
+            context.baseWindow = entry.win;
 
         Firebug.Console.log(["Current window:", context.baseWindow], context, "info");
     };
@@ -1130,7 +1130,7 @@ function FirebugCommandLineAPI(context)
         Firebug.chrome.select(obj, panelName);
     };
 
-    this.keys = function(o)  
+    this.keys = function(o)
     {
         return FBL.keys(o);  // the object is from the page, unwrapped
     };
@@ -1269,9 +1269,9 @@ Firebug.CommandLine.injector = {
         var handler = new CommandLineHandler(context, win);
 
         var boundHandler = bind(handler.handleEvent, handler);
-        
+
         this.setCommandLineListener(context, win, boundHandler);
-        
+
         win.document.addEventListener("firebugExecuteCommand", boundHandler, true);
         win.document.setUserData("firebug-CommandLineListener", "true", null);
 
@@ -1281,26 +1281,26 @@ Firebug.CommandLine.injector = {
 
     getCommandLineListener: function(context, win)
     {
-    	if (context.activeCommandLineHandlers)
-    	{
-    		var consoleHandler = Firebug.Console.injector.getConsoleHandler(context, win);
-    		if (consoleHandler)
-    			return context.activeCommandLineHandlers[consoleHandler.token];
-    		 
-    		if (FBTrace.DBG_CONSOLE)
-    			FBTrace.sysout("getCommandLineListener no consoleHandler for "+context.getName()+" win "+safeGetWindowLocation(win));    		
-    	}
+        if (context.activeCommandLineHandlers)
+        {
+            var consoleHandler = Firebug.Console.injector.getConsoleHandler(context, win);
+            if (consoleHandler)
+                return context.activeCommandLineHandlers[consoleHandler.token];
+
+            if (FBTrace.DBG_CONSOLE)
+                FBTrace.sysout("getCommandLineListener no consoleHandler for "+context.getName()+" win "+safeGetWindowLocation(win));
+        }
     },
-    
+
     setCommandLineListener: function(context, win, boundHandler)
     {
         if (!context.activeCommandLineHandlers)
             context.activeCommandLineHandlers = {};
 
-    	var consoleHandler = Firebug.Console.injector.getConsoleHandler(context, win);
-    	context.activeCommandLineHandlers[consoleHandler.token] = boundHandler;
+        var consoleHandler = Firebug.Console.injector.getConsoleHandler(context, win);
+        context.activeCommandLineHandlers[consoleHandler.token] = boundHandler;
     },
-    
+
     detachCommandLine: function(context, win)
     {
         if (win.document.getUserData("firebug-CommandLineListener") === "true")
@@ -1313,11 +1313,11 @@ Firebug.CommandLine.injector = {
                 }
             }
             Firebug.CommandLine.evaluate("window._FirebugCommandLine.detachCommandLine()", context, null, win, null, failureCallback );
-            
-            var boundHandler = this.getCommandLineHandler(context, win);
+
+            var boundHandler = this.getCommandLineListener(context, win);
             if (boundHandler)
                 win.document.removeEventListener("firebugExecuteCommand", boundHandler, true);
-            
+
             win.document.setUserData("firebug-CommandLineListener", null, null);
             if (FBTrace.DBG_COMMANDLINE)
                 FBTrace.sysout("commandLine.detachCommandLineListener "+boundHandler+" in window with console "+win.location);
@@ -1339,7 +1339,7 @@ function CommandLineHandler(context, win)
         // Appends variables into the api.
         var htmlPanel = context.getPanel("html", true);
         var vars = htmlPanel ? htmlPanel.getInspectorVars():null;
-        
+
         for (var prop in vars)
         {
             function createHandler(p) {

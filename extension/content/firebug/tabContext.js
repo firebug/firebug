@@ -284,10 +284,10 @@ Firebug.TabContext.prototype =
         // Initialize panel and associate with a document.
         if (panel.parentPanel) // then this new panel is a side panel
         {
-        	panel.mainPanel = this.panelMap[panel.parentPanel];
-        	panel.mainPanel.addListener(panel); // wire the side panel to get UI events from the main panel
+            panel.mainPanel = this.panelMap[panel.parentPanel];
+            panel.mainPanel.addListener(panel); // wire the side panel to get UI events from the main panel
         }
-        	
+            
         var doc = this.chrome.getPanelDocument(panelType);
         panel.initialize(this, doc);
 

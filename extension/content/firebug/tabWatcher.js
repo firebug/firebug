@@ -232,9 +232,9 @@ top.TabWatcher = extend(new Firebug.Listener(),
         // Create if any listener says true to showCreateContext
         if (dispatch2(this.fbListeners, "shouldCreateContext", [browser, url, userCommands]))
         {
-        	 if (FBTrace.DBG_ACTIVATION)
+             if (FBTrace.DBG_ACTIVATION)
                  FBTrace.sysout("-> shouldCreateContext with user: "+userCommands+ " one listener says yes to "+ url, this.fbListeners);
-        	return true;
+            return true;
         }
             
 

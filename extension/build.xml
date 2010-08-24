@@ -12,10 +12,10 @@ Added support for js-doc-tolkit, odvarko@gmail.com -->
     <condition property="isUnix">
         <os family="unix" />
     </condition>
-	
-	<condition property="isMac">
-	        <os family="mac" />
-	</condition>
+    
+    <condition property="isMac">
+            <os family="mac" />
+    </condition>
 
     <property environment="env"/>
 

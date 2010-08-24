@@ -123,8 +123,8 @@ top.Firebug.Console.injector =
 
     getConsoleHandler: function(context, win)
     {
-    	var attachedToken = win.document.getUserData("firebug-Token");
-    	if (context.activeConsoleHandlers)
+        var attachedToken = win.document.getUserData("firebug-Token");
+        if (context.activeConsoleHandlers)
         {
             for(var i = 0; i < context.activeConsoleHandlers.length; i++)
             {
