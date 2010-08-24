@@ -1076,7 +1076,7 @@ function FirebugCommandLineAPI(context)
 
     this.$$ = function(selector) // uses only DOM calls
     {
-        return FBL.getElementsBySelector(context.baseWindow.document, selector);
+        return context.baseWindow.document.querySelectorAll(selector);
     };
 
     this.$x = function(xpath) // uses only DOM calls
