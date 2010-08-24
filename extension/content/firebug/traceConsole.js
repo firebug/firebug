@@ -12,6 +12,7 @@ var traceService = traceConsoleService;
 const PrefService = Cc["@mozilla.org/preferences-service;1"];
 const prefs = PrefService.getService(Ci.nsIPrefBranch2);
 const prefService = PrefService.getService(Ci.nsIPrefService);
+const directoryService = Cc["@mozilla.org/file/directory_service;1"].getService(Ci.nsIProperties);
 
 var gFindBar;
 
@@ -86,7 +87,7 @@ var TraceConsole =
     {
         var buttons = ["clearConsole", "findConsole", "separateConsole",
             "restartFirefox", "closeFirefox", "saveToFile", "loadFromFile",
-            "traceToolsMenu", "clearCache", "forceGC"];
+            "traceToolsMenu", "clearCache", "forceGC", "openProfileDir"];
 
         for (var i=0; i<buttons.length; i++)
         {
@@ -388,7 +389,16 @@ var TraceConsole =
             if (FBTrace.DBG_ERRORS)
                 FBTrace.sysout("traceConsole.onForceGC EXCEPTION " + exc, exc);
         }
-    }
+    },
+
+    openProfileDir: function(context)
+    {
+        var profileFolder = directoryService.get("ProfD", Ci.nsIFile);
+        var path = profileFolder.QueryInterface(Ci.nsILocalFile).path;
+        var fileLocal = Cc["@mozilla.org/file/local;1"].getService(Ci.nsILocalFile);
+        fileLocal.initWithPath(path);
+        fileLocal.launch();
+    },
 };
 
 // ************************************************************************************************

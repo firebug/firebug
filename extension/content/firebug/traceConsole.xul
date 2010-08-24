@@ -46,6 +46,7 @@
     <command id="cmd_copy" oncommand="goDoCommand('cmd_copy')" disabled="true"/>
     <command id="cmd_clearCache" oncommand="TraceConsole.onClearCache()"/>
     <command id="cmd_forceGC" oncommand="TraceConsole.onForceGC()"/>
+    <command id="cmd_openProfileDir" oncommand="TraceConsole.openProfileDir()"/>
   </commandset>
 
   <keyset id="mainKeyset">
@@ -94,6 +95,10 @@
                     label="tracing.cmd.Force Garbage Collector" class="toolbar-image-button"
                     tooltiptext="tracing.cmd.tip.Force Garbage Collector"
                     command="cmd_forceGC"/>
+                <menuitem id="openProfileDir"
+                    label="tracing.cmd.Open Profile Directory" class="toolbar-image-button"
+                    tooltiptext="tracing.cmd.tip.Open Profile Directory"
+                    command="cmd_openProfileDir"/>
             </menupopup>
       </toolbarbutton>
       <toolbarseparator flex="1"/>
