@@ -27,7 +27,7 @@
     padding: 0px;
     opacity: 0.8;
 
-    /* The default styling does not always keep button size contant or image
+    /* The default styling does not always keep button size content or image
        position constant, e.g. when [checked="true"].  These numbers were
        chosen to keep them constant against the default winstripe styling. */
     padding-top: 4px;
@@ -72,11 +72,6 @@ toolbar[iconsize="small"] #firebug-button > .toolbarbutton-icon {
 }
 
 /********************************************************************************************/
-
-#fbLocationSeparator,
-#fbStatusSeparator {
-    min-height: 11px;
-}
 
 #fbCommandArrow {
     margin: 2px 0 2px 7px;

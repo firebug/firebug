@@ -262,7 +262,6 @@
                                     </hbox>
 
                                     <hbox id="fbCSSButtons" collapsed="true" class="noTabStop">
-                                        <toolbarseparator class="fbPanelSpecificButtonsSeparator"/>
                                         <toolbarbutton id="fbToggleCSSEditing" label="firebug.Edit" class="toolbar-text-button"
                                             tooltiptext="firebug.EditCSSTooltip" command="cmd_toggleCSSEditing"/>
                                     </hbox>
@@ -334,14 +333,26 @@
                                             command="cmd_toggleTraceConsole"/>
                                     </hbox>
 
-                                    <toolbarseparator id="fbLocationSeparator" collapsed="true"/>
-                                    <toolbarbutton id="fbLocationList" locationProvider="FirebugChrome.getLocationProvider();"
-                                          collapsed="true" tooltip="fbTooltip" contextmenu="fbContextMenu"  flex="1"
-                                          class="noTabStop" role="button" aria-haspopup="true" aria-label="a11y.labels.file selector"/>
+                                    <!-- Location buttons, used e.g. by the Script panel
+                                        to show name of the currently displayed file name.
+                                        The button also allows to pick another one. -->
+                                    <hbox id="fbLocationButtons" collapsed="true">
+                                        <toolbarseparator id="fbLocationSeparator"/>
+                                        <toolbarbutton id="fbLocationList"
+                                            locationProvider="FirebugChrome.getLocationProvider();"
+                                            tooltip="fbTooltip" contextmenu="fbContextMenu"
+                                            class="noTabStop" role="button" aria-haspopup="true"
+                                            aria-label="a11y.labels.file selector"/>
+                                    </hbox>
 
-                                    <toolbarseparator id="fbStatusSeparator" collapsed="true"/>
-                                    <panelStatus id="fbPanelStatus" flex="100"
-                                        tooltip="fbTooltip" contextmenu="fbContextMenu" class="noTabStop" />
+                                    <!-- Status buttons, used e.g. by the HTML panel to show
+                                        a parent list of the currently selected element. -->
+                                    <hbox id="fbStatusButtons" flex="100">
+                                        <toolbarseparator id="fbStatusSeparator"/>
+                                        <panelStatus id="fbPanelStatus"
+                                            tooltip="fbTooltip" contextmenu="fbContextMenu"
+                                            class="noTabStop"/>
+                                    </hbox>
 
                                     <hbox id="fbDebuggerButtons" minwidth="126" collapsed="true" class="noTabStop">
                                         <toolbarbutton id="fbRerunButton" command="cmd_rerun"

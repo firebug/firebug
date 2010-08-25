@@ -31,7 +31,7 @@ const negativeZoomFactors = [1, 0.95, 0.8, 0.7, 0.5, 0.2, 0.1];
 // ************************************************************************************************
 // Globals
 
-var panelBox, panelSplitter, sidePanelDeck, panelBar1, panelBar2, locationList, locationSeparator,
+var panelBox, panelSplitter, sidePanelDeck, panelBar1, panelBar2, locationList, locationButtons,
     panelStatus, panelStatusSeparator, cmdPreview, cmdPreviewBrowser;
 
 var waitingPanelBarCount = 2;
@@ -83,7 +83,7 @@ top.FirebugChrome =
         panelBar1 = $("fbPanelBar1");
         panelBar2 = $("fbPanelBar2");
         locationList = $("fbLocationList");
-        locationSeparator = $("fbLocationSeparator");
+        locationButtons = $("fbLocationButtons");
         panelStatus = $("fbPanelStatus");
         panelStatusSeparator = $("fbStatusSeparator");
 
@@ -777,13 +777,11 @@ top.FirebugChrome =
         if (panel && panel.location)
         {
             locationList.location = panel.location;
-            FBL.collapse(locationSeparator, false);
-            FBL.collapse(locationList, false);
+            FBL.collapse(locationButtons, false);
         }
         else
         {
-            FBL.collapse(locationSeparator, true);
-            FBL.collapse(locationList, true);
+            FBL.collapse(locationButtons, true);
         }
     },
 
@@ -809,7 +807,22 @@ top.FirebugChrome =
             }
             else
             {
-                FBL.hide(panelStatusSeparator, false);
+                // Alright, let's update visibility of the separator. The separator
+                // is displayed only if there are some other buttons on the left side.
+                // Before showing the status separator let's see whethere there are any other
+                // button on the left.
+                var hide = true;
+                var sibling = panelStatusSeparator.parentNode.previousSibling;
+                while (sibling)
+                {
+                    if (!FBL.isCollapsed(sibling))
+                    {
+                        hide = false;
+                        break;
+                    }
+                    sibling = sibling.previousSibling;
+                }
+                FBL.hide(panelStatusSeparator, hide);
 
                 if (panel.name != panelStatus.lastPanelName)
                     panelStatus.clear();
@@ -1511,15 +1524,18 @@ function onSelectingPanel(event)
     if (panel)
         panel.navigate(panel.location);
 
-    // Synchronize UI around panels.
-    // xxxHonza: The command line should be synced here as well.
-    Firebug.chrome.syncLocationList();
-    Firebug.chrome.syncStatusPath();
-    Firebug.chrome.syncSidePanels();  //xxxjjb unfortunately the callstack side panel depends on the status path (sync after.)
-
     // Calling Firebug.showPanel causes dispatching "showPanel" to all modules.
     var browser = panel ? panel.context.browser : FirebugChrome.getCurrentBrowser();
     Firebug.showPanel(browser, panel);
+
+    // Synchronize UI around panels. Execute the sync after showPanel so the logic
+    // can decide whether to display separators or not.
+    // xxxHonza: The command line should be synced here as well.
+    Firebug.chrome.syncLocationList();
+    Firebug.chrome.syncStatusPath();
+
+    //xxxjjb unfortunately the callstack side panel depends on the status path (sync after.)
+    Firebug.chrome.syncSidePanels();
 }
 
 function onSelectedSidePanel(event)

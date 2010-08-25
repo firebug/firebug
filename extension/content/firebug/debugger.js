@@ -3024,7 +3024,7 @@ Firebug.ScriptPanel.prototype = extend(Firebug.SourceBoxPanel,
         // These buttons are visible only if debugger is enabled.
         this.showToolbarButtons("fbLocationSeparator", enabled);
         this.showToolbarButtons("fbDebuggerButtons", enabled);
-        this.showToolbarButtons("fbLocationList", enabled);
+        this.showToolbarButtons("fbLocationButtons", enabled);
         this.showToolbarButtons("fbScriptButtons", enabled);
 
         // Additional debugger panels are visible only if debugger
@@ -3094,7 +3094,7 @@ Firebug.ScriptPanel.prototype = extend(Firebug.SourceBoxPanel,
         this.highlight(this.context.stopped);
 
         this.showToolbarButtons("fbScriptButtons", false);
-        this.showToolbarButtons("fbLocationList", false);
+        this.showToolbarButtons("fbLocationButtons", false);
         var panelStatus = Firebug.chrome.getPanelStatusElements();
         FBL.hide(panelStatus, false);
 

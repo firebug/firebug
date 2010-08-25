@@ -792,7 +792,8 @@
             <body><![CDATA[
                 if (this.firstChild)
                 {
-                    var box = document.createElement("hbox");  // extra box needed to fix alignment issue in Vista theme
+                    // extra box needed to fix alignment issue in Vista theme
+                    var box = document.createElement("hbox");
                     box.setAttribute('role', 'separator');
                     box.setAttribute('align', 'center');
                     var sep = document.createElement("label");

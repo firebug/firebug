@@ -39,7 +39,7 @@ Firebug.Breakpoint = extend(Firebug.Module,
 
     showPanel: function(browser, panel)
     {
-        if(!panel)  // there is no selectedPanel?
+        if (!panel)  // there is no selectedPanel?
             return;
 
         var breakButton = Firebug.chrome.$("fbBreakOnNextButton");
@@ -47,8 +47,8 @@ Firebug.Breakpoint = extend(Firebug.Module,
             breakButton.setAttribute("panelName", panel.name);
 
         breakButton.removeAttribute("type");
-        collapse(breakButton, panel.breakable ? false : true);
-        
+        collapse(breakButton, !panel.breakable);
+
         // Disable break-on-next if it isn't supported by the current panel.
         if (!panel.breakable || !panel.context.jsDebuggerActive )
         {
