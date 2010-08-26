@@ -308,16 +308,20 @@ this.convertToUnicode = function(text, charset)
 
     try
     {
-        var conv = this.CCSV("@mozilla.org/intl/scriptableunicodeconverter", "nsIScriptableUnicodeConverter");
+        var conv = this.CCIN("@mozilla.org/intl/scriptableunicodeconverter",
+            "nsIScriptableUnicodeConverter");
         conv.charset = charset ? charset : "UTF-8";
         return conv.ConvertToUnicode(text);
     }
     catch (exc)
     {
         if (FBTrace.DBG_ERRORS)
-            FBTrace.sysout("lib.convertToUnicode: fails: for charset "+charset+" conv.charset:"+conv.charset+" exc: "+exc, exc);
+            FBTrace.sysout("lib.convertToUnicode: fails: for charset "+charset+" conv.charset:"+
+                conv.charset+" exc: "+exc, exc);
+
         // the exception is worthless, make up a new one
-        throw new Error("Firebug failed to convert to unicode using charset: "+conv.charset+" in @mozilla.org/intl/scriptableunicodeconverter");
+        throw new Error("Firebug failed to convert to unicode using charset: "+conv.charset+
+            " in @mozilla.org/intl/scriptableunicodeconverter");
     }
 };
 
@@ -328,14 +332,16 @@ this.convertFromUnicode = function(text, charset)
 
     try
     {
-        var conv = this.CCSV("@mozilla.org/intl/scriptableunicodeconverter", "nsIScriptableUnicodeConverter");
+        var conv = this.CCIN("@mozilla.org/intl/scriptableunicodeconverter",
+            "nsIScriptableUnicodeConverter");
         conv.charset = charset ? charset : "UTF-8";
         return conv.ConvertFromUnicode(text);
     }
     catch (exc)
     {
         if (FBTrace.DBG_ERRORS)
-            FBTrace.sysout("lib.convertFromUnicode: fails: for charset "+charset+" conv.charset:"+conv.charset+" exc: "+exc, exc);
+            FBTrace.sysout("lib.convertFromUnicode: fails: for charset "+charset+" conv.charset:"+
+                conv.charset+" exc: "+exc, exc);
     }
 };
 
@@ -4186,7 +4192,7 @@ this.parseJSONPString = function(jsonString, originURL)
 
 this.readFromStream = function(stream, charset, noClose)
 {
-    var sis = this.CCSV("@mozilla.org/binaryinputstream;1", "nsIBinaryInputStream");
+    var sis = this.CCIN("@mozilla.org/binaryinputstream;1", "nsIBinaryInputStream");
     sis.setInputStream(stream);
 
     var segments = [];
