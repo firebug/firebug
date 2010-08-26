@@ -1429,7 +1429,7 @@ Firebug.HTMLPanel.HTMLHtmlElement = domplate(FirebugReps.Element,
 {
     tag:
         DIV({"class": "nodeBox htmlNodeBox containerNodeBox $object|getHidden", _repObject: "$object", role :"presentation"},
-            DIV({"class": "docType $object"},
+            DIV({"class": "docType"},
                 "$object|getDocType"
             ),
             DIV({"class": "nodeLabel", role: "presentation"},
@@ -2144,7 +2144,7 @@ Firebug.HTMLModule.BreakpointRep = domplate(Firebug.Rep,
         var panel = context.getPanel("html", true);
         if (panel)
             // xxxsz: Needs a better way to update display of breakpoint than invalidate the whole panel's display
-            panel.context.invalidatePanels("breakpoints"); 
+            panel.context.invalidatePanels("breakpoints");
 
         var bp = getAncestorByClass(checkBox, "breakpointRow").repObject;
         bp.checked = checkBox.checked;
