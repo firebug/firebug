@@ -14,6 +14,7 @@ const Ci = Components.interfaces;
 const nsIWebNavigation = Ci.nsIWebNavigation;
 
 const observerService = Cc["@mozilla.org/observer-service;1"].getService(Ci.nsIObserverService);
+const wm = Cc["@mozilla.org/appshell/window-mediator;1"].getService(Ci.nsIWindowMediator);
 
 const LOAD_FLAGS_BYPASS_PROXY = nsIWebNavigation.LOAD_FLAGS_BYPASS_PROXY;
 const LOAD_FLAGS_BYPASS_CACHE = nsIWebNavigation.LOAD_FLAGS_BYPASS_CACHE;
@@ -422,10 +423,7 @@ top.FirebugChrome =
 
     isFocused: function()
     {
-        var winMediator = Cc["@mozilla.org/appshell/window-mediator;1"].
-            getService(Ci["nsIWindowMediator"]);
-
-        return winMediator.getMostRecentWindow(null) == window;
+        return wm.getMostRecentWindow(null) == window;
     },
 
     focusWatch: function(context)
@@ -1369,14 +1367,24 @@ var FirstRunPage =
         if (topic != "sessionstore-windows-restored")
             return;
 
-        // Don't forget to update the preference so, the page is not
-        // displayed again.
-        var version = Firebug.getVersion();
-        Firebug.setPref(Firebug.prefDomain, "currentVersion", version);
-        version = version.replace('X', '', "g");
+        setTimeout(function()
+        {
+            // Open the page in the top most window so, the user can see it immediately.
+            if (wm.getMostRecentWindow("navigator:browser") != window)
+                return;
 
-        // xxxHonza: put the URL in firebugURLs as soon as it's in chrome.js
-        FBL.openNewTab("http://getfirebug.com/firstrun#Firebug " + version);
+            // Avoid opening of the page in a second browser window.
+            if (FBL.checkFirebugVersion(Firebug.currentVersion) > 0)
+            {
+                // Don't forget to update the preference so, the page is not displayed again
+                var version = Firebug.getVersion();
+                Firebug.setPref(Firebug.prefDomain, "currentVersion", version);
+                version = version.replace('X', '', "g");
+
+                // xxxHonza: put the URL in firebugURLs as soon as it's in chrome.js
+                FBL.openNewTab("http://getfirebug.com/firstrun#Firebug " + version);
+            }
+        }, 500);
     }
 }
 
