@@ -784,7 +784,14 @@ Firebug.HTMLPanel.prototype = extend(Firebug.Panel,
     {
         if (isLeftClick(event) && event.detail == 2)
         {
-            this.toggleNode(event);
+            // The doublick (detail == 2) expands an HTML element, but the user must click
+            // on the element itself not on the twisty, which is a sibling and child of the
+            // parent element (so the result would be expanding of the parent HTML elemnt,
+            // not the one that is actually associated with the twisty).
+            // This is tricky but should make life easiere for users who are used to click
+            // the little twisty. Honza
+            if (!hasClass(event.target, "twisty"))
+                this.toggleNode(event);
         }
         else if (isAltClick(event) && event.detail == 2 && !this.editing)
         {
@@ -796,6 +803,7 @@ Firebug.HTMLPanel.prototype = extend(Firebug.Panel,
     {
         if (!isLeftClick(event))
             return;
+
         if (getAncestorByClass(event.target, "nodeTag"))
         {
             var node = Firebug.getRepObject(event.target);
