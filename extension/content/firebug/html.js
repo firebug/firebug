@@ -1428,13 +1428,14 @@ Firebug.HTMLPanel.Element = domplate(FirebugReps.Element,
 Firebug.HTMLPanel.HTMLHtmlElement = domplate(FirebugReps.Element,
 {
     tag:
-        DIV({"class": "nodeBox htmlNodeBox containerNodeBox $object|getHidden", _repObject: "$object", role :"presentation"},
+        DIV({"class": "nodeBox htmlNodeBox containerNodeBox $object|getHidden",
+            _repObject: "$object", role :"presentation"},
             DIV({"class": "docType"},
                 "$object|getDocType"
             ),
             DIV({"class": "nodeLabel", role: "presentation"},
                 IMG({"class": "twisty", role: "presentation"}),
-                SPAN({"class": "nodeLabelBox repTarget", role : 'treeitem', 'aria-expanded' : 'false'},
+                SPAN({"class": "nodeLabelBox repTarget", role: 'treeitem', 'aria-expanded': 'false'},
                     "&lt;",
                     SPAN({"class": "nodeTag"}, "$object.nodeName|toLowerCase"),
                     FOR("attr", "$object|attrIterator", AttrTag),
@@ -1450,10 +1451,12 @@ Firebug.HTMLPanel.HTMLHtmlElement = domplate(FirebugReps.Element,
                 )
             )
         ),
+
     getDocType: function(obj)
     {
         var doctype = obj.ownerDocument.doctype;
-        return '<!DOCTYPE ' + doctype.name + (doctype.publicId ? ' PUBLIC "' + doctype.publicId + '"': '') + (doctype.systemId ? ' "' + doctype.systemId + '"' : '') + '>';
+        return '<!DOCTYPE ' + doctype.name + (doctype.publicId ? ' PUBLIC "' + doctype.publicId +
+            '"': '') + (doctype.systemId ? ' "' + doctype.systemId + '"' : '') + '>';
     }
 });
 

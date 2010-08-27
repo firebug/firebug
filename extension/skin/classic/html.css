@@ -61,18 +61,16 @@
 }
 
 .docType {
-    position: absolute;
-    top: -16px;
     font-family: Monaco, monospace;
-    padding-left: 8px;
+    padding-left: 5px;
     color: #999;
     white-space: nowrap;
     font-style: italic;
 }
-.htmlNodeBox {
-    top: 16px;
-}
 
+.htmlNodeBox > .nodeLabel > .twisty {
+    top: 13px;
+}
 
 .nodeWhiteSpace {
     border: 1px solid LightGray;
