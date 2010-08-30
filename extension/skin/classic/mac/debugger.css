@@ -69,7 +69,7 @@
 .useA11y .panelStatusLabel:focus {
     outline-offset: -2px !important;
  }
- 
+
 .sourceBox > .sourceRow > .sourceLine {
     cursor: pointer;
 }
@@ -252,6 +252,7 @@
 .breakpointBlockHead > .objectLink-sourceLink {
     top: 2px;
     right: 20px;
+    background-color: #FFFFFF; // issue 3308
 }
 
 .breakpointBlockHead > .closeButton {
