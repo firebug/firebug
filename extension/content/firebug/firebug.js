@@ -893,6 +893,9 @@ top.Firebug =
 
     setPreference: function(prefName, value, type, prefBranch)
     {
+        // Don't forget to use a dot before pref name.
+        prefName = "." + prefName;
+
         if (type == nsIPrefBranch.PREF_STRING)
             prefBranch.setCharPref(prefName, value);
         else if (type == nsIPrefBranch.PREF_INT)
