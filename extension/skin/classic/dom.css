@@ -140,7 +140,7 @@
 
 .editor-watchNewRow,
 .editor-memberRow {
-    font-family: Monaco, monospace !important;
+    font-family: monospace !important;
 }
 
 .editor-memberRow {
@@ -152,7 +152,7 @@
 }
 
 .watchRow > .memberLabelCell {
-    font-family: Monaco, monospace;
+    font-family: monospace;
     padding-top: 1px;
     padding-bottom: 1px;
 }

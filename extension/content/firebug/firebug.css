@@ -26,7 +26,7 @@ window[chromehidden~="toolbar"] #fbToolbar {
 
 .fbCommandLineCompletions {
     cursor: default;
-    font-family: Monaco, monospace;
+    font-family: monospace;
     /* overflow: auto; XXXjjb I can't get the CSS to work
     max-height: 270px; */
 }
@@ -282,7 +282,7 @@ panelTab[selected="true"]:hover > panelTabMenu .menuTarget {
     border:1px solid threedshadow;
     background-color:white;
     opacity:0.9;
-    font-family: Monaco, monospace;
+    font-family: monospace;
     font-size: 11px;
     padding-bottom: 5px;
     cursor: move;

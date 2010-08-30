@@ -245,7 +245,7 @@
     border-right: none;
     padding: 8px;
     background-color: #FFFFFF;
-    font-family: Monaco, monospace;
+    font-family: monospace;
     overflow-x: auto;
 }
 

@@ -217,7 +217,7 @@ code {
     padding: 2px 3px;
     border: 1px solid #CBE087;
     background: LightYellow;
-    font-family: Monaco, monospace;
+    font-family: monospace;
     color: #000000;
     display: none;
     white-space: nowrap;
@@ -273,7 +273,7 @@ h1.groupHeader {
     margin: 0;
     border: none;
     /* padding-left: 8px; XXXjjb issue 1317 Causes the scrollbar on long sources to be hidden under the divider */
-    font-family: Monaco, monospace;
+    font-family: monospace;
     font-size: Inherit;
 }
 

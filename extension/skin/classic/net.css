@@ -234,7 +234,7 @@
     background-image: none !important;
     border: 1px solid #CBE087;
     background-color: LightYellow;
-    font-family: Monaco, monospace;
+    font-family: monospace;
     color: #000000;
     font-size: 10px;
     z-index: 2147483647;
@@ -625,7 +625,7 @@
     border-right: none;
     padding: 8px;
     background-color: #FFFFFF;
-    font-family: Monaco, monospace;
+    font-family: monospace;
     /*overflow-x: auto; HTML is damaged in case of big (2-3MB) responses */
 }
 

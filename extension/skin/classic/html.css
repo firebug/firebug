@@ -7,7 +7,7 @@
 
 .nodeBox {
     position: relative;
-    font-family: Monaco, monospace;
+    font-family: monospace;
     padding-left: 13px;
     -moz-user-select: -moz-none;
 }
@@ -61,7 +61,7 @@
 }
 
 .docType {
-    font-family: Monaco, monospace;
+    font-family: monospace;
     padding-left: 5px;
     color: #999;
     white-space: nowrap;
@@ -213,7 +213,7 @@
 .breakpointCode .nodeLabel {
     padding-left: 0px;
     margin-left: 0px;
-    font-family: Monaco, monospace !important;
+    font-family: monospace !important;
 }
 
 .breakpointCode .nodeTag,

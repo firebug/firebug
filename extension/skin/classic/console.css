@@ -47,7 +47,7 @@
 /*****************************************************************************************/
 
 .logRow-command > .objectBox-text {
-    font-family: Monaco, monospace;
+    font-family: monospace;
     color: #0000FF;
     white-space: pre-wrap;
 }
@@ -122,7 +122,7 @@
 .objectBox-stackTrace,
 .objectLink-profile,
 .objectBox-table {
-    font-family: Monaco, monospace;
+    font-family: monospace;
 }
 
 .objectBox-string,
@@ -216,7 +216,7 @@
 
 .errorSource {
     cursor: pointer;
-    font-family: Monaco, monospace;
+    font-family: monospace;
     color: DarkGreen;
 }
 
@@ -393,7 +393,7 @@
 .selectorTag,
 .selectorId,
 .selectorClass {
-    font-family: Monaco, monospace;
+    font-family: monospace;
     font-weight: normal;
 }
 
@@ -473,7 +473,7 @@
 .arrayLeftBracket,
 .arrayRightBracket,
 .arrayComma {
-    font-family: Monaco, monospace;
+    font-family: monospace;
 }
 
 .objectLeftBrace,
