@@ -464,8 +464,7 @@ Firebug.CSSStyleSheetPanel.prototype = extend(Firebug.SourceBoxPanel,
                 if (rule instanceof CSSStyleRule)
                 {
                     var props = this.getRuleProperties(context, rule);
-                    var line = domUtils.getRuleLine(rule);
-                    var ruleId = rule.selectorText+"/"+line;
+                    var ruleId = getRuleId(rule);
                     rules.push({tag: CSSStyleRuleTag.tag, rule: rule, id: ruleId,
                                 selector: rule.selectorText, props: props,
                                 isSystemSheet: isSystemSheet,
@@ -524,8 +523,7 @@ Firebug.CSSStyleSheetPanel.prototype = extend(Firebug.SourceBoxPanel,
     {
         var props = this.parseCSSProps(rule.style, inheritMode);
 
-        line = domUtils.getRuleLine(rule);
-        var ruleId = rule.selectorText+"/"+line;
+        var ruleId = getRuleId(rule);
         this.addOldProperties(context, ruleId, inheritMode, props);
         sortProperties(props);
 
@@ -1283,7 +1281,7 @@ Firebug.CSSStyleSheetPanel.prototype = extend(Firebug.SourceBoxPanel,
       var cssRule = getAncestorByClass(cssSelector, "cssRule");
       var listBox = cssRule.getElementsByClassName("cssPropertyListBox")[0];
       var props = this.getStyleDeclaration(listBox.rule);
-      
+
       copyToClipboard(props.join(lineBreak()));
     }
 });
@@ -1404,11 +1402,11 @@ CSSElementPanel.prototype = extend(Firebug.CSSStyleSheetPanel.prototype,
                     continue;
 
                 var line = domUtils.getRuleLine(rule);
-                var ruleId = rule.selectorText+"/"+line;
                 var sourceLink = new SourceLink(href, line, "css", rule, instance);
 
                 this.markOverriddenProps(props, usedProps, inheritMode);
 
+                var ruleId = getRuleId(rule);
                 rules.splice(0, 0, {rule: rule, id: ruleId,
                         selector: rule.selectorText, sourceLink: sourceLink,
                         props: props, inherited: inheritMode,
@@ -2199,6 +2197,14 @@ function getSelectionController(panel)
     return browser.docShell.QueryInterface(nsIInterfaceRequestor)
         .getInterface(nsISelectionDisplay)
         .QueryInterface(nsISelectionController);
+}
+
+const reQuotes = /['"]/g;
+function getRuleId(rule)
+{
+    var line = domUtils.getRuleLine(rule);
+    var ruleId = rule.selectorText.replace(reQuotes,"%")+"/"+line; // xxxjjb I hope % is invalid in selectortext
+    return ruleId;
 }
 
 // ************************************************************************************************
