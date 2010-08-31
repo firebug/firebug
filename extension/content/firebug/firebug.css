@@ -65,59 +65,6 @@ panelBar {
 }
 
 /************************************************************************************************/
-/* Scrollable TabBar + TabList */
-
-panelBarArrowscrollbox {
-    -moz-binding: url("chrome://firebug/content/bindings.xml#panelBarArrowscrollbox");
-}
-
-panelBarTabList {
-    -moz-binding: url("chrome://firebug/content/bindings.xml#panelBarTabList");
-}
-
-.panelBarTabListMenuItem {
-    -moz-binding: url("chrome://firebug/content/bindings.xml#panelBarTabListMenuItem");
-}
-
-panelBarArrowscrollbox > .scrollbutton-up,
-panelBarArrowscrollbox > .scrollbutton-down,
-panelBarTabList > .tabs-alltabs-button {
-    margin: 0 !important;
-}
-
-panelBarTabList > .tabs-alltabs-button {
-    border-right: 1px solid ThreeDShadow !important;
-    -moz-border-radius-topright: 2px !important;
-}
-
-#fbPanelBar1-tabBox > panelBarArrowscrollbox > .scrollbutton-up
-{
-    border-left: 1px solid ThreeDShadow !important;
-    -moz-border-radius-topleft: 2px !important;
-}
-
-#fbPanelBar1-tabBox > panelBarArrowscrollbox > .scrollbutton-down
-{
-    border-right: 1px solid ThreeDShadow !important;
-    -moz-border-radius-topright: 2px !important;
-}
-
-#fbPanelBar1-tabBox > panelBarArrowscrollbox {
-    margin-right: 4px;
-}
-
-#fbPanelBar2-tabBox > panelBarArrowscrollbox > .scrollbutton-up,
-#fbPanelBar2-tabBox > panelBarArrowscrollbox > .scrollbutton-down,
-#fbPanelBar2-tabBox > panelBarTabList > .tabs-alltabs-button {
-    border-top: none !important;
-    -moz-border-radius: 0px !important;
-}
-
-#fbPanelBar1-buttons {
-    margin: 0 4px 0 4px;
-}
-
-/************************************************************************************************/
 
 panelStatus {
     -moz-binding: url("chrome://firebug/content/bindings.xml#panelStatus");
@@ -329,3 +276,148 @@ panelTab[aria-disabled='true'] {
     color: graytext !important;
 }
 
+/************************************************************************************************/
+/* Scrollable TabBar + TabList */
+
+panelBarArrowscrollbox {
+    -moz-binding: url("chrome://firebug/content/bindings.xml#panelBarArrowscrollbox");
+}
+
+panelBarTabList {
+    -moz-binding: url("chrome://firebug/content/bindings.xml#panelBarTabList");
+}
+
+.panelBarTabListMenuItem {
+    -moz-binding: url("chrome://firebug/content/bindings.xml#panelBarTabListMenuItem");
+}
+
+/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+panelBarArrowscrollbox > .scrollbutton-up,
+panelBarArrowscrollbox > .scrollbutton-down,
+panelBarTabList > .fb-tabs-alltabs-button {
+    margin: 0 !important;
+}
+
+#fbPanelBar1-tabBox > panelBarArrowscrollbox > .scrollbutton-up
+{
+    border-left: 1px solid ThreeDShadow !important;
+    -moz-border-radius-topleft: 2px !important;
+}
+
+#fbPanelBar1-tabBox > panelBarArrowscrollbox > .scrollbutton-down
+{
+    border-right: 1px solid ThreeDShadow !important;
+    -moz-border-radius-topright: 2px !important;
+}
+
+#fbPanelBar1-tabBox > panelBarArrowscrollbox {
+    margin-right: 4px;
+}
+
+#fbPanelBar2-tabBox > panelBarArrowscrollbox > .scrollbutton-up,
+#fbPanelBar2-tabBox > panelBarArrowscrollbox > .scrollbutton-down,
+#fbPanelBar2-tabBox > panelBarTabList > .fb-tabs-alltabs-button {
+    border-top: none !important;
+    -moz-border-radius: 0px !important;
+}
+
+#fbPanelBar1-buttons {
+    margin: 0 4px 0 4px;
+}
+
+/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+.fb-tabs-alltabs-button {
+    /*list-style-image: url("chrome://firebug/skin/tabbar/alltabs-box-bkgnd-icon.png");*/
+    -moz-border-start: 2px solid;
+    -moz-border-left-colors: rgba(0,0,0,0.25) rgba(255,255,255,0.15);
+    -moz-border-right-colors: rgba(0,0,0,0.25) rgba(255,255,255,0.15);
+    margin: 0;
+    padding-left: 0;
+    padding-right: 0;
+
+    border-right: 1px solid ThreeDShadow !important;
+    -moz-border-radius-topright: 2px !important;
+}
+
+.fb-tabs-alltabs-button > .toolbarbutton-text {
+    display: none;
+}
+
+/* Tab scrollbox arrow and all-tabs buttons */
+panelBarArrowscrollbox > .scrollbutton-up,
+panelBarArrowscrollbox > .scrollbutton-down,
+.fb-tabs-alltabs-button {
+    -moz-appearance: none;
+    width: 18px;
+    margin: 3px 0px 4px;
+    padding: 0px;
+    border: 2px solid;
+    border-right-width: 1px;
+    border-bottom: none;
+    -moz-border-top-colors: ThreeDShadow rgba(255,255,255,.3);
+    -moz-border-right-colors: ThreeDShadow;
+    -moz-border-left-colors: ThreeDShadow rgba(255,255,255,.3);
+    background: url("chrome://firebug/skin/tabbar/tab-bkgnd.png") repeat-x;
+}
+
+panelBarArrowscrollbox > .scrollbutton-up:not([disabled="true"]):hover,
+panelBarArrowscrollbox > .scrollbutton-down:not([disabled="true"]):hover,
+.fb-tabs-alltabs-button:hover {
+    border-top-width: 1px;
+    padding-top: 1px;
+    -moz-border-top-colors: ThreeDShadow;
+    -moz-border-right-colors: ThreeDShadow;
+    -moz-border-left-colors: ThreeDShadow transparent;
+    background-image: url("chrome://firebug/skin/tabbar/tab-hover-bkgnd.png");
+}
+
+panelBarArrowscrollbox > .scrollbutton-up[disabled="true"],
+panelBarArrowscrollbox > .scrollbutton-down[disabled="true"] {
+    opacity: .4;
+}
+
+panelBarArrowscrollbox > .scrollbutton-up {
+    border-left-style: none;
+    /*list-style-image: url("chrome://firebug/skin/tabbar/tab-arrow-start.png");*/
+    -moz-border-radius-topright: 2px;
+}
+
+panelBarArrowscrollbox > .scrollbutton-up[chromedir="rtl"] {
+    border-left-style: solid;
+    border-right-style: none;
+    -moz-border-radius-topleft: 2px;
+    -moz-border-radius-topright: 0px;
+    /*list-style-image: url("chrome://firebug/skin/tabbar/tab-arrow-end.png");*/
+}
+
+panelBarArrowscrollbox > .scrollbutton-down,
+.fb-tabs-alltabs-button {
+    border-right-style: none;
+    -moz-border-radius-topleft: 2px;
+}
+
+panelBarArrowscrollbox > .scrollbutton-down {
+    /*list-style-image: url("chrome://firebug/skin/tabbar/tab-arrow-end.png");*/
+}
+
+panelBarArrowscrollbox > .scrollbutton-down[chromedir="rtl"] {
+    border-left-style: none;
+    border-right-style: solid;
+    -moz-border-radius-topleft: 0px;
+    -moz-border-radius-topright: 2px;
+}
+
+panelBarArrowscrollbox > .scrollbutton-down[chromedir="rtl"] {
+    /*list-style-image: url("chrome://firebug/skin/tabbar/tab-arrow-start.png");*/
+}
+
+.fb-tabs-alltabs-button > .toolbarbutton-text,
+.fb-tabs-alltabs-button > .toolbarbutton-icon {
+    display: none;
+}
+
+.fb-tabs-alltabs-button > .toolbarbutton-menu-dropmarker {
+    margin: 2px 1px 2px 0px;
+}
