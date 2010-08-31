@@ -893,8 +893,11 @@ top.Firebug =
 
     setPreference: function(prefName, value, type, prefBranch)
     {
-        // Don't forget to use a dot before pref name.
-        prefName = "." + prefName;
+        // xxxHonza, XXXjjb: sometimes I am seeing: extensions.firebugcommandLineShowCompleterPopup
+        // preference that should really be: extensions.firebug.commandLineShowCompleterPopup
+        // Is the better fix for this (this is rather a workaround).
+        if (prefName.indexOf("extensions.firebug") != 0)
+            prefName = "." + prefName;
 
         if (type == nsIPrefBranch.PREF_STRING)
             prefBranch.setCharPref(prefName, value);
