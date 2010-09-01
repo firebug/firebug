@@ -36,11 +36,6 @@
     -moz-padding-end: 2px;
 }
 
-#fbInspectButton image {
-    margin-right: 3px;
-    margin-bottom: 1px;
-}
-
 #fbBreakOnNextButton {
     margin-bottom: 1px;
     opacity: 0.8;
@@ -228,7 +223,7 @@ textbox[type="fbSearchBox"] > panel {
 }
 
 #fbBreakOnNextButtonOld {
-     list-style-image: url("chrome://firebug/skin/breakNextDisabled.png");
+    list-style-image: url("chrome://firebug/skin/breakNextDisabled.png");
 }
 
 /************************************************************************************************/

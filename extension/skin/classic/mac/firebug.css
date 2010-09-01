@@ -125,12 +125,11 @@
     background-color: #86888B !important;
 }
 
-
 .toolbarbutton-iconic {
-    margin: 0 4px 0 1px !important;
-    padding: 0 !important;
-    border: none !important;
-    background: transparent !important;
+    margin: 0 1px 0 1px !important;
+    padding: 0 1px 0 1px !important;
+    /*border: none !important;*/
+    /*background: transparent !important;*/
 }
 
 .toolbarbutton-iconic > .toolbarbutton-icon {
@@ -460,4 +459,38 @@ panelTab[selected="true"] > .panelTab-right {
 
 .toolbar-image-button > .toolbarbutton-text {
     display: none;
+}
+
+
+/************************************************************************************************/
+/* Scrollable TabBar + TabList */
+
+#fbPanelBar1-innerToolbar {
+    margin-right: 0;
+}
+
+#fbPanelBar1-tabBox > panelBarArrowscrollbox > .scrollbutton-up {
+    border-right: 2px solid !important;
+    -moz-border-right-colors: rgba(0,0,0,0.25) rgba(255,255,255,0.15) !important;
+    border-left: 2px solid transparent !important;
+}
+
+#fbPanelBar1-tabBox > panelBarArrowscrollbox > .scrollbutton-down {
+    border-left: 2px solid !important;
+    border-right: 2px solid !important;
+    -moz-border-left-colors: rgba(0,0,0,0.25) rgba(255,255,255,0.15) !important;
+    -moz-border-right-colors: rgba(0,0,0,0.25) rgba(255,255,255,0.15) !important;
+}
+
+.fb-tabs-alltabs-button > .toolbarbutton-text {
+    display: none;
+}
+
+.fb-tabs-alltabs-button {
+    margin-right: 0;
+    padding: 0 4px 0 3px !important;
+    border-left: 2px solid !important;
+    border-right: 2px solid !important;
+    -moz-border-left-colors: rgba(0,0,0,0.25) rgba(255,255,255,0.15) !important;
+    -moz-border-right-colors: rgba(0,0,0,0.25) rgba(255,255,255,0.15) !important;
 }
