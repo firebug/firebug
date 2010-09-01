@@ -1,13 +1,7 @@
 /* See license.txt for terms of usage */
 
 #fbFirebugMenu {
-    margin: 0 2px 0 4px;
-    padding: 0;
     list-style-image: url(chrome://firebug/skin/mac/firebugMenu.png);
-}
-
-#fbFirebugMenu > .toolbarbutton-icon {
-    padding: 0;
 }
 
 #fbFirebugMenu:hover {
@@ -90,6 +84,7 @@
     margin-right: -12px;
     -moz-border-image: url(chrome://firebug/skin/mac/search-panel.png) 16 50 24 12 / 16px 50px 24px 12px repeat;
 }
+
 #fbSearchOptionsPanel[position="after_end"] {
     -moz-border-image: url(chrome://firebug/skin/mac/search-panel-down.png) 25 50 18 12 / 25px 50px 18px 12px repeat;
 }
@@ -125,9 +120,27 @@
     background-color: #86888B !important;
 }
 
+/* Don't display label and remove padding for all the following toolbar buttons */
+#fbFirebugMenu,
+#fbInspectButton,
+#fbNavigateBackButton,
+#fbNavigateForwardButton,
+#fbCommandPreviewButton {
+    margin: 0 1px 0 1px;
+    padding: 0 1px 0 1px;
+}
+
+#fbFirebugMenu > .toolbarbutton-text,
+#fbInspectButton > .toolbarbutton-text,
+#fbNavigateBackButton > .toolbarbutton-text,
+#fbNavigateForwardButton > .toolbarbutton-text,
+#fbCommandPreviewButton > .toolbarbutton-text {
+    display: none;
+}
+
 .toolbarbutton-iconic {
     margin: 0 1px 0 1px !important;
-    padding: 0 1px 0 1px !important;
+    padding: 0 !important;
     /*border: none !important;*/
     /*background: transparent !important;*/
 }

@@ -139,16 +139,14 @@
 
                             <!-- Firebug Icon Menu -->
                             <toolbarbutton id="fbFirebugMenu" type="menu" label="firebug options"
-                                    role="button" aria-haspopup="true" owns="fbFirebugMenuPopup"
-                                    class="toolbarbutton-iconic">
+                                    role="button" aria-haspopup="true" owns="fbFirebugMenuPopup">
                                 <image src="chrome://firebug/skin/firebug.png"/>
                                 <!-- Content comes from fbFirebugMenuPopup -->
                             </toolbarbutton>
 
                             <!-- HTML Inspector -->
                             <toolbarbutton id="fbInspectButton" tooltiptext="firebug.InspectTooltip"
-                                    command="cmd_toggleInspecting" collapsed="false"
-                                    class="toolbarbutton-iconic">
+                                    command="cmd_toggleInspecting" collapsed="false">
                             </toolbarbutton>
 
                             <toolbarseparator id="fbInspectSeparator"/>
@@ -157,20 +155,17 @@
                             <toolbaritem contextmenu="fbNavigationHistoryMenu" class="noTabStop">
                                 <toolbarbutton id="fbNavigateBackButton" disabled="true"
                                     tooltiptext="firebug.history.Go back"
-                                    command="cmd_navBack"
-                                    class="toolbarbutton-iconic"/>
+                                    command="cmd_navBack"/>
                                 <toolbarbutton id="fbNavigateForwardButton" disabled="true"
                                     tooltiptext="firebug.history.Go forward"
-                                    command="cmd_navForward"
-                                    class="toolbarbutton-iconic"/>
+                                    command="cmd_navForward"/>
                             </toolbaritem>
 
                             <toolbarseparator id="fbNavigationSeparator"/>
 
                             <toolbarbutton id="fbCommandPreviewButton"
                                 tooltiptext="panel.tooltip.Show Command Line"
-                                command="cmd_toggleCommandPreview"
-                                class="toolbarbutton-iconic">
+                                command="cmd_toggleCommandPreview">
                             </toolbarbutton>
                         </hbox>
 
