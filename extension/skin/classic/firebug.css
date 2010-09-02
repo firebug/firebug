@@ -464,5 +464,9 @@ menupopup[chromedir="rtl"] > .navigationHistoryMenuItemBack {
 }
 
 /************************************************************************************************/
+/* Scrollable TabBar + TabList */
 
-
+/* Collision with CuteButtons - Crystal SVG 0.2.5, see 3374 */
+#fbNetPersist {
+    -moz-image-region: rect(0, 1px, 1px, 0);
+}
