@@ -520,6 +520,10 @@
     text-decoration: underline;
 }
 
+.logRow-errorMessage .errorTitle > .errorMessage {
+    white-space: pre-wrap;
+}
+
 /*****************************************************************************************/
 
 .logRow-log .objectBox-array.hasTwisty {
