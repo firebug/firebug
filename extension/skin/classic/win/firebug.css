@@ -303,6 +303,10 @@ panelTab[selected="true"] > .panelTab-right {
     padding: 0 4px;
 }
 
+.panelStatusLabel > .toolbarbutton-icon {
+    margin: 0 !important;
+}
+
 .panelStatusLabel:hover {
     color: blue;
 }
@@ -315,6 +319,7 @@ panelTab[selected="true"] > .panelTab-right {
     margin: 2px 6px;
     font-weight: bold;
 }
+
 
 /************************************************************************************************/
 /* Scrollable TabBar + TabList */

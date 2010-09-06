@@ -349,9 +349,11 @@
                                         a parent list of the currently selected element. -->
                                     <hbox id="fbStatusButtons" flex="100">
                                         <toolbarseparator id="fbStatusSeparator"/>
-                                        <panelStatus id="fbPanelStatus"
-                                            tooltip="fbTooltip" contextmenu="fbContextMenu"
-                                            class="noTabStop"/>
+                                        <arrowscrollbox flex="1" smoothscroll="true" orient="horizontal">
+                                            <panelStatus id="fbPanelStatus"
+                                                tooltip="fbTooltip" contextmenu="fbContextMenu"
+                                                class="noTabStop"/>
+                                        </arrowscrollbox>
                                     </hbox>
 
                                     <hbox id="fbDebuggerButtons" minwidth="126" collapsed="true" class="noTabStop">
