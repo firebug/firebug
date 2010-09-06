@@ -235,10 +235,17 @@ textbox[type="fbSearchBox"] > panel {
 
 #fbRerunButton {
     list-style-image: url(chrome://firebug/skin/rerun.png);
+    -moz-image-region: rect(0, 16px, 16px, 0);
 }
 
-#fbRerunButton[disabled="true"]{
-    list-style-image: url(chrome://firebug/skin/rerun-disabled.png);
+#fbRerunButton: hover {
+    list-style-image: url(chrome://firebug/skin/rerun.png);
+    -moz-image-region: rect(16px, 16px, 32px, 0);
+}
+
+#fbRerunButton[disabled="true"] {
+    list-style-image: url(chrome://firebug/skin/rerun.png);
+    -moz-image-region: rect(32px, 16px, 48px, 0);
 }
 
 #fbContinueButton {
