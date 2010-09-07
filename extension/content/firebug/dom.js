@@ -1060,7 +1060,8 @@ Firebug.DOMBasePanel.prototype = extend(Firebug.Panel,
             if (state.propertyPath)
                 this.propertyPath = state.propertyPath;
 
-            var selectObject = defaultObject = this.getDefaultSelection();
+            var defaultObject = this.getDefaultSelection();
+            var selectObject = defaultObject;
 
             if (state.firstSelection)
             {
