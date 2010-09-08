@@ -3021,19 +3021,6 @@ Firebug.ScriptPanel.prototype = extend(Firebug.SourceBoxPanel,
     {
         var enabled = Firebug.Debugger.isAlwaysEnabled();
 
-        // These buttons are visible only if debugger is enabled.
-        this.showToolbarButtons("fbLocationSeparator", enabled);
-        this.showToolbarButtons("fbDebuggerButtons", enabled);
-        this.showToolbarButtons("fbLocationButtons", enabled);
-        this.showToolbarButtons("fbScriptButtons", enabled);
-
-        // Additional debugger panels are visible only if debugger
-        // is enabled.
-        this.panelSplitter.collapsed = !enabled;
-        this.sidePanelDeck.collapsed = !enabled;
-
-        this.highlight(this.context.stopped);
-
         if (enabled)
         {
             this.location = this.getDefaultLocation();
@@ -3055,14 +3042,18 @@ Firebug.ScriptPanel.prototype = extend(Firebug.SourceBoxPanel,
                 {
                     delete this.location;  // remove the default location if any
                     restoreLocation(this, state);
+                    this.restored = true;
+                }
+                else // we already restored
+                {
+                    if (!this.selectedSourceBox)  // but somehow we did not make a sourcebox?
+                        this.navigate(this.location);
+                    else  // then we can sync the location to the sourcebox
+                        this.location = this.selectedSourceBox.repObject;
                 }
 
                 if (state && this.location)  // then we are restoring and we have a location, so scroll when we can
                     this.scrollInfo = { location: this.location, previousCenterLine: state.previousCenterLine};
-                if (!this.selectedSourceBox)  // somehow we did not make a sourcebox?
-                    this.navigate(this.location);
-
-                this.restored = true;
 
                 if (!this.location)
                 {
@@ -3081,9 +3072,29 @@ Firebug.ScriptPanel.prototype = extend(Firebug.SourceBoxPanel,
                 this.navigate(this.location);
             }
 
-            var breakpointPanel = this.context.getPanel("breakpoints", true);
-            if (breakpointPanel)
-                breakpointPanel.refresh();
+            var active = !this.activeWarningTag;
+
+            collapse(Firebug.chrome.$("fbToolbar"), !active);
+
+            // These buttons are visible only if debugger is enabled.
+            this.showToolbarButtons("fbLocationSeparator", active);
+            this.showToolbarButtons("fbDebuggerButtons", active);
+            this.showToolbarButtons("fbLocationButtons", active);
+            this.showToolbarButtons("fbScriptButtons", active);
+
+            // Additional debugger panels are visible only if debugger
+            // is active.
+            this.panelSplitter.collapsed = !active;
+            this.sidePanelDeck.collapsed = !active;
+
+            if (active)
+            {
+                this.highlight(this.context.stopped);
+
+                var breakpointPanel = this.context.getPanel("breakpoints", true);
+                if (breakpointPanel)
+                    breakpointPanel.refresh();
+            }
         }
     },
 
