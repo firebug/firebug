@@ -2649,6 +2649,44 @@ Firebug.ScriptPanel.prototype = extend(Firebug.SourceBoxPanel,
         }
     },
 
+    highlightExecutionLine: function()
+    {
+        var highlightingAttribute = "exe_line";
+        if (this.executionLine)  // could point to any node in any sourcebox, private to this function
+            this.executionLine.removeAttribute(highlightingAttribute);
+
+        var sourceBox = this.selectedSourceBox;
+        var lineNode = sourceBox.getLineNode(this.executionLineNo);
+        this.executionLine = lineNode;  // if null, clears
+
+        if (sourceBox.breakCauseBox)
+        {
+            sourceBox.breakCauseBox.hide();
+            delete sourceBox.breakCauseBox;
+        }
+
+        if (this.executionLine)
+        {
+            lineNode.setAttribute(highlightingAttribute, "true");
+            if (this.context.breakingCause && !this.context.breakingCause.shown)
+            {
+                this.context.breakingCause.shown = true;
+                var cause = this.context.breakingCause;
+                if (cause)
+                {
+                    var sourceLine = getChildByClass(lineNode, "sourceLine");
+                    sourceBox.breakCauseBox = new Firebug.Breakpoint.BreakNotification(this.document, cause);
+                    sourceBox.breakCauseBox.show(sourceLine, this, "not an editor, yet?");
+                }
+            }
+        }
+
+        if (FBTrace.DBG_BP || FBTrace.DBG_STACK || FBTrace.DBG_SOURCEFILES)
+            FBTrace.sysout("sourceBox.highlightExecutionLine lineNo: "+this.executionLineNo+" lineNode="+lineNode+"\n");
+
+        return this.executionLine; // sticky if we have a line to highlight
+    },
+
     showStackFrameXB: function(frameXB)
     {
         if (this.context.stopped)
@@ -2698,7 +2736,7 @@ Firebug.ScriptPanel.prototype = extend(Firebug.SourceBoxPanel,
             if (this.context.breakingCause)
                 this.context.breakingCause.lineNo = this.executionLineNo;
 
-            this.scrollToLine(url, this.executionLineNo, bind(this.highlightExecutionLine, this, this.executionLineNo, "exe_line") );
+            this.scrollToLine(url, this.executionLineNo, bind(this.highlightExecutionLine, this) );
             this.context.throttle(this.updateInfoTip, this);
             return;
         }
@@ -2715,7 +2753,7 @@ Firebug.ScriptPanel.prototype = extend(Firebug.SourceBoxPanel,
         this.executionLineNo = -1;
 
         if (this.selectedSourceBox)
-            this.highlightExecutionLine(this.selectedSourceBox, this.executionLineNo, "exe_line");  // clear highlight
+            this.highlightExecutionLine();  // clear highlight
 
         var panelStatus = Firebug.chrome.getPanelStatusElements();
         panelStatus.clear(); // clear stack on status bar

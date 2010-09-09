@@ -496,9 +496,6 @@ Firebug.SourceBoxPanel = extend(SourceBoxPanelBase,
                     FBTrace.sysout("SourceBoxPanel.scrollTimeout, no viewable lines", this.selectedSourceBox);
             }
 
-            if (highlighter)
-                 this.selectedSourceBox.highlighter = highlighter;
-
             if (!skipScrolling)
             {
                 var viewRange = this.getViewRangeFromTargetLine(this.selectedSourceBox, lineNo);
@@ -512,6 +509,8 @@ Firebug.SourceBoxPanel = extend(SourceBoxPanelBase,
                 this.applyDecorator(this.selectedSourceBox); // may need to highlight even if we don't scroll
 
         }, this));
+
+        this.selectedSourceBox.highlighter = highlighter;  // clears if null
     },
 
     /*
@@ -536,42 +535,6 @@ Firebug.SourceBoxPanel = extend(SourceBoxPanelBase,
 
             return false; // not sticky
         }
-    },
-
-    highlightExecutionLine: function(sourceBox, lineNumber, highlightingAttribute)
-    {
-        if (this.executionLine)  // could point to any node in any sourcebox, private to this function
-            this.executionLine.removeAttribute(highlightingAttribute);
-
-        var lineNode = sourceBox.getLineNode(lineNumber);
-
-        this.executionLine = lineNode;  // if null, clears
-
-        if (sourceBox.breakCauseBox)
-        {
-            sourceBox.breakCauseBox.hide();
-            delete sourceBox.breakCauseBox;
-        }
-
-        if (lineNode)
-        {
-            lineNode.setAttribute(highlightingAttribute, "true");
-            if (this.context.breakingCause && !this.context.breakingCause.shown)
-            {
-                this.context.breakingCause.shown = true;
-                var cause = this.context.breakingCause;
-                if (cause)
-                {
-                    var sourceLine = getChildByClass(lineNode, "sourceLine");
-                    sourceBox.breakCauseBox = new Firebug.Breakpoint.BreakNotification(this.document, cause);
-                    sourceBox.breakCauseBox.show(sourceLine, this, "not an editor, yet?");
-                }
-            }
-        }
-
-        if (FBTrace.DBG_BP || FBTrace.DBG_STACK || FBTrace.DBG_SOURCEFILES)
-            FBTrace.sysout("sourceBox.highlightExecutionLine lineNo: "+lineNumber+" lineNode="+lineNode+"\n");
-        return true; // sticky
     },
 
     /*
