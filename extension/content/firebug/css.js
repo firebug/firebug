@@ -40,11 +40,17 @@ var CSSPropTag = domplate(CSSDomplateBase,
     tag:
         DIV({"class": "cssProp focusRow", $disabledStyle: "$prop.disabled",
             $editGroup: "$rule|isEditable",
-            $cssOverridden: "$prop.overridden", role: "option"},
-        SPAN({"class": "cssPropName", $editable: "$rule|isEditable"}, "$prop.name"),
-        SPAN({"class": "cssColon"}, ":"),
-        SPAN({"class": "cssPropValue", $editable: "$rule|isEditable"}, "$prop.value$prop.important"),
-        SPAN({"class": "cssSemi"}, ";")
+            $cssOverridden: "$prop.overridden",
+            role: "option"},
+            SPAN({"class": "cssPropName", $editable: "$rule|isEditable"},
+                "$prop.name"
+            ),
+            SPAN({"class": "cssColon"}, ":&nbsp;"), // Use space here so, copy to clipboard has it (3266).
+            SPAN({"class": "cssPropValue", $editable: "$rule|isEditable"},
+                "$prop.value$prop.important"
+            ),
+            SPAN({"class": "cssSemi"}, ";"
+        )
     )
 });
 
