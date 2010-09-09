@@ -38,13 +38,13 @@ var CSSDomplateBase =
 var CSSPropTag = domplate(CSSDomplateBase,
 {
     tag:
-        DIV({class: "cssProp focusRow", $disabledStyle: "$prop.disabled",
+        DIV({"class": "cssProp focusRow", $disabledStyle: "$prop.disabled",
             $editGroup: "$rule|isEditable",
-            $cssOverridden: "$prop.overridden", role : "option"},
-        SPAN({class: "cssPropName", $editable: "$rule|isEditable"}, "$prop.name"),
-        SPAN({class: "cssColon"}, ":"),
-        SPAN({class: "cssPropValue", $editable: "$rule|isEditable"}, "$prop.value$prop.important"),
-        SPAN({class: "cssSemi"}, ";")
+            $cssOverridden: "$prop.overridden", role: "option"},
+        SPAN({"class": "cssPropName", $editable: "$rule|isEditable"}, "$prop.name"),
+        SPAN({"class": "cssColon"}, ":"),
+        SPAN({"class": "cssPropValue", $editable: "$rule|isEditable"}, "$prop.value$prop.important"),
+        SPAN({"class": "cssSemi"}, ";")
     )
 });
 
@@ -54,9 +54,9 @@ var CSSRuleTag =
 var CSSImportRuleTag = domplate(
 {
     tag:
-        DIV({class: "cssRule insertInto focusRow importRule", _repObject: "$rule.rule"},
+        DIV({"class": "cssRule insertInto focusRow importRule", _repObject: "$rule.rule"},
         "@import &quot;",
-        A({class: "objectLink", _repObject: "$rule.rule.styleSheet"}, "$rule.rule.href"),
+        A({"class": "objectLink", _repObject: "$rule.rule.styleSheet"}, "$rule.rule.href"),
         "&quot;;"
     )
 });
@@ -64,22 +64,22 @@ var CSSImportRuleTag = domplate(
 var CSSStyleRuleTag = domplate(CSSDomplateBase,
 {
     tag:
-        DIV({class: "cssRule insertInto",
+        DIV({"class": "cssRule insertInto",
             $cssEditableRule: "$rule|isEditable",
             $editGroup: "$rule|isSelectorEditable",
             _repObject: "$rule.rule",
-            "ruleId": "$rule.id", role : 'presentation'},
-        DIV({class: "cssHead focusRow", role : 'listitem'},
-            SPAN({class: "cssSelector", $editable: "$rule|isSelectorEditable"}, "$rule.selector"), " {"
+            "ruleId": "$rule.id", role: 'presentation'},
+        DIV({"class": "cssHead focusRow", role: 'listitem'},
+            SPAN({"class": "cssSelector", $editable: "$rule|isSelectorEditable"}, "$rule.selector"), " {"
         ),
-        DIV({role : 'group'},
-            DIV({class : "cssPropertyListBox", _rule: "$rule", role : 'listbox'},
+        DIV({role: 'group'},
+            DIV({"class": "cssPropertyListBox", _rule: "$rule", role: 'listbox'},
                 FOR("prop", "$rule.props",
                     TAG(CSSPropTag.tag, {rule: "$rule", prop: "$prop"})
                 )
             )
         ),
-        DIV({class: "editable insertBefore", role:"presentation"}, "}")
+        DIV({"class": "editable insertBefore", role:"presentation"}, "}")
     )
 });
 
@@ -1295,20 +1295,20 @@ CSSElementPanel.prototype = extend(Firebug.CSSStyleSheetPanel.prototype,
     template: domplate(
     {
         cascadedTag:
-            DIV({"class": "a11yCSSView",  role : 'presentation'},
-                DIV({role : 'list', 'aria-label' : $STR('aria.labels.style rules') },
+            DIV({"class": "a11yCSSView",  role: 'presentation'},
+                DIV({role: 'list', 'aria-label' : $STR('aria.labels.style rules') },
                     FOR("rule", "$rules",
                         TAG("$ruleTag", {rule: "$rule"})
                     )
                 ),
-                DIV({role : "list", 'aria-label' :$STR('aria.labels.inherited style rules')},
+                DIV({role: "list", 'aria-label' :$STR('aria.labels.inherited style rules')},
                     FOR("section", "$inherited",
 
-                        H1({class: "cssInheritHeader groupHeader focusRow", role : 'listitem' },
-                            SPAN({class: "cssInheritLabel"}, "$inheritLabel"),
+                        H1({"class": "cssInheritHeader groupHeader focusRow", role: 'listitem' },
+                            SPAN({"class": "cssInheritLabel"}, "$inheritLabel"),
                             TAG(FirebugReps.Element.shortTag, {object: "$section.element"})
                         ),
-                        DIV({role : 'group'},
+                        DIV({role: 'group'},
                             FOR("rule", "$section.rules",
                                 TAG("$ruleTag", {rule: "$rule"})
                             )
@@ -1318,7 +1318,7 @@ CSSElementPanel.prototype = extend(Firebug.CSSStyleSheetPanel.prototype,
             ),
 
         ruleTag:
-          DIV({class: "cssElementRuleContainer"},
+          DIV({"class": "cssElementRuleContainer"},
               TAG(CSSStyleRuleTag.tag, {rule: "$rule"}),
               TAG(FirebugReps.SourceLink.tag, {object: "$rule.sourceLink"})
           )
@@ -1659,19 +1659,19 @@ CSSComputedElementPanel.prototype = extend(CSSElementPanel.prototype,
     template: domplate(
     {
         computedTag:
-            DIV({"class": "a11yCSSView", role : "list", "aria-label" : $STR('aria.labels.computed styles')},
+            DIV({"class": "a11yCSSView", role: "list", "aria-label" : $STR('aria.labels.computed styles')},
                 FOR("group", "$groups",
-                    DIV({"class": "computedStylesGroup opened", role : "list"},
-                        H1({class: "cssComputedHeader groupHeader focusRow", role : "listitem"},
-                            IMG({class: "twisty", role: "presentation"}),
-                            SPAN({class: "cssComputedLabel"}, "$group.title")
+                    DIV({"class": "computedStylesGroup opened", role: "list"},
+                        H1({"class": "cssComputedHeader groupHeader focusRow", role: "listitem"},
+                            IMG({"class": "twisty", role: "presentation"}),
+                            SPAN({"class": "cssComputedLabel"}, "$group.title")
                         ),
-                        TABLE({width: "100%", role : 'group'},
-                            TBODY({role : 'presentation'},
+                        TABLE({width: "100%", role: 'group'},
+                            TBODY({role: 'presentation'},
                                 FOR("prop", "$group.props",
-                                    TR({class : 'focusRow computedStyleRow', role : 'listitem'},
-                                        TD({class: "stylePropName", role : 'presentation'}, "$prop.name"),
-                                        TD({class: "stylePropValue", role : 'presentation'}, "$prop.value")
+                                    TR({"class": 'focusRow computedStyleRow', role: 'listitem'},
+                                        TD({"class": "stylePropName", role: 'presentation'}, "$prop.name"),
+                                        TD({"class": "stylePropValue", role: 'presentation'}, "$prop.value")
                                     )
                                 )
                             )
@@ -1717,10 +1717,11 @@ CSSComputedElementPanel.prototype = extend(CSSElementPanel.prototype,
     parentPanel: "html",
     order: 1,
 
-    initialize: function() {
-      Firebug.CSSStyleSheetPanel.prototype.initialize.apply(this, arguments);
+    initialize: function()
+    {
+        Firebug.CSSStyleSheetPanel.prototype.initialize.apply(this, arguments);
 
-      this.onMouseDown = bind(this.onMouseDown, this);
+        this.onMouseDown = bind(this.onMouseDown, this);
     },
 
     updateView: function(element)
@@ -1735,9 +1736,10 @@ CSSComputedElementPanel.prototype = extend(CSSElementPanel.prototype,
         ];
     },
 
-    onMouseDown: function(event) {
+    onMouseDown: function(event)
+    {
         if (!isLeftClick(event))
-          return;
+            return;
 
         var cssComputedHeader = getAncestorByClass(event.target, "cssComputedHeader");
         if (cssComputedHeader)
@@ -1827,14 +1829,14 @@ CSSEditor.prototype = domplate(Firebug.InlineEditor.prototype,
 
     advanceToNext: function(target, charCode)
     {
-      if (charCode == 58 /*":"*/ && hasClass(target, "cssPropName"))
-      {
-        return true;
-      }
-      else if (charCode == 59 /*";"*/ && hasClass(target, "cssPropValue"))
-      {
-        return true;
-      }
+        if (charCode == 58 /*":"*/ && hasClass(target, "cssPropName"))
+        {
+            return true;
+        }
+        else if (charCode == 59 /*";"*/ && hasClass(target, "cssPropValue"))
+        {
+            return true;
+        }
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
@@ -1991,7 +1993,7 @@ StyleSheetEditor.prototype = domplate(Firebug.BaseEditor,
     multiLine: true,
 
     tag: DIV(
-        TEXTAREA({class: "styleSheetEditor fullPanelEditor", oninput: "$onInput"})
+        TEXTAREA({"class": "styleSheetEditor fullPanelEditor", oninput: "$onInput"})
     ),
 
     getValue: function()
@@ -2177,7 +2179,8 @@ function getStyleSheetCSS(sheet, context)
         return context.sourceCache.load(sheet.href).join("");
 }
 
-function getStyleSheetOwnerNode(sheet) {
+function getStyleSheetOwnerNode(sheet)
+{
     for (; sheet && !sheet.ownerNode; sheet = sheet.parentStyleSheet);
 
     return sheet.ownerNode;
