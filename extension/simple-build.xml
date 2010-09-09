@@ -1,0 +1,74 @@
+<?xml version="1.0" ?>
+
+<!-- In order to build firebug extension run: $ant build
+    The final xpi file should be located in release directory
+    GETFIREBUG in content/firebug/branch.properties assumes you have fbug and getfirebug.com directories at the same level
+    To check GETFIREBUG value run: ant -v echo
+-->
+<project name="firebug" basedir="." default="build">
+
+    <!-- Properties -->
+    <property file="content/firebug/branch.properties"/>
+
+    <!-- Directories -->
+    <property name="build.dir" value="../../build"/>
+	<property name="release.dir" value="${GETFIREBUG}/${VERSION}"/>
+
+	<available file="${release.dir}" property="release.dir.available"/>
+
+	<!-- echo -->
+	<target name="echo" >
+		<echo message="firebug version: ${VERSION}${RELEASE} in ${release.dir} available: ${release.dir.available}"/>
+	</target>
+
+    <!-- Clean -->
+    <target name="clean">
+        <delete dir="${build.dir}"/>
+    </target>
+
+    <!-- Build -->
+    <target name="build" if="release.dir.available" depends="clean">
+
+        <!-- Copy directory -->
+        <copy todir="${build.dir}">
+            <fileset dir=".">
+               <include name="**/*.js"/>
+               <include name="**/*.xul"/>
+               <include name="**/*.properties"/>
+               <include name="**/*.css"/>
+            </fileset>
+        </copy>
+
+        <!-- Copy extension installation files and licence.txt -->
+        <copy file="chrome.manifest" todir="${build.dir}"/>
+        <copy file="license.txt" todir="${build.dir}"/>
+
+        <!-- Update release version from content/firebug/branch.properties file -->
+    	<copy file="install.rdf.tpl.xml" tofile="install.rdf"/>
+    	<replace file="install.rdf" propertyFile="content/firebug/branch.properties">
+            <replacefilter token="@VERSION@" property="VERSION"/>
+            <replacefilter token="@RELEASE@" property="RELEASE"/>
+        </replace>
+    	<copy file="install.rdf" todir="${build.dir}"/>
+
+        <!-- Create final firebug.xpi file -->
+        <zip destfile="${release.dir}/firebug-${VERSION}${RELEASE}.xpi"
+            basedir="${build.dir}" update="true" />
+
+        <!-- Generate update.rdf file -->
+        <delete file="${release.dir}/update.rdf"/>
+        <copy file="update.rdf.tpl.xml" tofile="update.rdf"/>
+        <replace file="update.rdf" propertyFile="content/firebug/branch.properties">
+            <replacefilter token="@VERSION@" property="VERSION"/>
+            <replacefilter token="@RELEASE@" property="RELEASE"/>
+        	<replacefilter token="@LEAF@" value="firebug-${VERSION}${RELEASE}.xpi"/>
+        </replace>
+        <copy file="update.rdf" todir="${release.dir}"/>
+
+        <delete dir="${build.dir}"/>
+
+        <!-- Final version message -->
+    	<antcall target="echo"></antcall>
+    </target>
+
+</project>
