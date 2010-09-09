@@ -1089,7 +1089,11 @@ Firebug.HTMLPanel.prototype = extend(Firebug.Panel,
         }
         else
         {
-            Firebug.chrome.getSelectedSidePanel().panelNode.scrollTop = 0;
+            // xxxHonza, XXXjjb: the scroll position can't be just reset here,
+            // what if the side panel wants to preserve it?
+            // Is it correct to remove this?
+            //Firebug.chrome.getSelectedSidePanel().panelNode.scrollTop = 0;
+
             this.ioBox.select(object, true, false, this.noScrollIntoView);
             this.inspectorHistory.unshift(object);
             if (this.inspectorHistory.length > 5)
