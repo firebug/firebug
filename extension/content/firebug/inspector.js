@@ -377,28 +377,27 @@ Firebug.Inspector = extend(Firebug.Module,
 
     showPanel: function(browser, panel)
     {
-        var chrome = Firebug.chrome;
-        var disabled = !panel || !panel.context.loaded;
-
-        chrome.setGlobalAttribute("cmd_toggleInspecting", "disabled", disabled);
-        //chrome.setGlobalAttribute("menu_firebugInspect", "disabled", disabled);
+        // The panel can be null (if disabled) so use the global context.
+        var disabled = !Firebug.currentContext.loaded;
+        Firebug.chrome.setGlobalAttribute("cmd_toggleInspecting", "disabled", disabled);
     },
 
     loadedContext: function(context)
     {
         Firebug.chrome.setGlobalAttribute("cmd_toggleInspecting", "disabled", "false");
-        //Firebug.chrome.setGlobalAttribute("menu_firebugInspect", "disabled", "false");
     },
 
     updateOption: function(name, value)
     {
         if (name == "shadeBoxModel")
-            {
+        {
             this.highlightObject(null);
             this.defaultHighlighter = value ? getHighlighter("boxModel") : getHighlighter("frame");
-            }
+        }
         else if(name == "showQuickInfoBox")
+        {
             quickInfoBox.boxEnabled = value;
+        }
     },
 
     getObjectByURL: function(context, url)
