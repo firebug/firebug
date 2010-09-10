@@ -45,8 +45,7 @@
     <em:contributor>Sebastian Zartner</em:contributor>
     <em:iconURL>chrome://firebug/skin/firebug32.png</em:iconURL>
     <em:homepageURL>http://www.getfirebug.com/</em:homepageURL>
-    <em:updateURL>http://getfirebug.com/releases/firebug/@VERSION@/update.rdf</em:updateURL>
-    <em:updateKey>@PUBLICKEY@</em:updateKey>
+    <em:updateURL>https://getfirebug.com/releases/firebug/@VERSION@/update.rdf</em:updateURL>
 
     <em:translator>Leszek(teo)Życzkowski (pl-PL)</em:translator>
     <em:translator>markh (nl-NL)</em:translator>
