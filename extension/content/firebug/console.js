@@ -55,6 +55,11 @@ Firebug.ConsoleBase =
         return this.logRow(appendOpenGroup, objects, context, className, rep, sourceLink, noThrottle);
     },
 
+    openCollapsedGroup: function(objects, context, className, rep, noThrottle, sourceLink, noPush)
+    {
+        return this.logRow(appendCollapsedGroup, objects, context, className, rep, sourceLink, noThrottle);
+    },
+
     closeGroup: function(context, noThrottle)
     {
         return this.logRow(appendCloseGroup, null, context, null, null, null, noThrottle, true);
@@ -562,6 +567,12 @@ Firebug.ConsolePanel.prototype = extend(Firebug.ActivablePanel,
             else
                 this.appendObject(object, row);
         }
+    },
+
+    appendCollapsedGroup: function(objects, row, rep)
+    {
+        this.appendOpenGroup(objects, row, rep);
+        removeClass(row, "opened");
     },
 
     appendOpenGroup: function(objects, row, rep)
@@ -1073,6 +1084,7 @@ function parseFormat(format)
 var appendObject = Firebug.ConsolePanel.prototype.appendObject;
 var appendFormatted = Firebug.ConsolePanel.prototype.appendFormatted;
 var appendOpenGroup = Firebug.ConsolePanel.prototype.appendOpenGroup;
+var appendCollapsedGroup = Firebug.ConsolePanel.prototype.appendCollapsedGroup;
 var appendCloseGroup = Firebug.ConsolePanel.prototype.appendCloseGroup;
 
 // ************************************************************************************************

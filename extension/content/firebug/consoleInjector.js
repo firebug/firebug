@@ -306,9 +306,13 @@ Firebug.Console.createConsole = function createConsole(context, win)
     console.groupCollapsed = function()
     {
         var sourceLink = getStackLink();
-        // noThrottle true is probably ok, openGroups will likely be short strings.
-        var row = Firebug.Console.openGroup(arguments, null, "group", null, true, sourceLink);
-        removeClass(row, "opened");
+
+        // noThrottle true can't be used here (in order to get the result row now)
+        // because there can be some logs delayed in the queue and they would end up
+        // in a different grup.
+        // Use rather a different method that causes auto collapsing of the group
+        // when it's created.
+        Firebug.Console.openCollapsedGroup(arguments, null, "group", null, false, sourceLink);
     };
 
     console.profile = function(title)
