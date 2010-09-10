@@ -2160,6 +2160,7 @@ DOMBreakpointGroup.prototype = extend(new Firebug.Breakpoint.BreakpointGroup(),
                 // xxxJJB: The Components.utils.evalInSandbox fails from some reason.
                 var expr = "context.window.wrappedJSObject." + bp.objectPath;
                 bp.object = eval(expr);
+                bp.context = context;
                 bp.watchProperty();
 
                 if (FBTrace.DBG_DOM)
