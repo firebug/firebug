@@ -2682,9 +2682,9 @@ Firebug.ScriptPanel.prototype = extend(Firebug.SourceBoxPanel,
         }
 
         if (FBTrace.DBG_BP || FBTrace.DBG_STACK || FBTrace.DBG_SOURCEFILES)
-            FBTrace.sysout("sourceBox.highlightExecutionLine lineNo: "+this.executionLineNo+" lineNode="+lineNode+"\n");
+            FBTrace.sysout("sourceBox.highlightExecutionLine lineNo: "+this.executionLineNo+" lineNode="+lineNode+" in "+sourceBox.repObject.href);
 
-        return this.executionLine; // sticky if we have a line to highlight
+        return (this.executionLineNo > 0); // sticky if we have a valid line
     },
 
     showStackFrameXB: function(frameXB)
@@ -3055,28 +3055,41 @@ Firebug.ScriptPanel.prototype = extend(Firebug.SourceBoxPanel,
         clearNode(this.panelNode);
     },
 
+    showWarning: function()
+    {
+        // Fill the panel node with a warning if needed
+        var aLocation = this.getDefaultLocation();
+        var jsEnabled = Firebug.getPref("javascript", "enabled");
+        if (!jsEnabled)
+            this.activeWarningTag = WarningRep.showNotEnabled(this.panelNode);
+        else if (this.context.allScriptsWereFiltered)
+            this.activeWarningTag = WarningRep.showFiltered(this.panelNode);
+        else if (aLocation && !this.context.jsDebuggerActive)
+            this.activeWarningTag = WarningRep.showInactive(this.panelNode);
+        else if (!aLocation) // they were not filtered, we just had none
+            this.activeWarningTag = WarningRep.showNoScript(this.panelNode);
+        else
+            return false;
+
+        return true;
+    },
+
     show: function(state)
     {
         var enabled = Firebug.Debugger.isAlwaysEnabled();
 
-        if (enabled)
+        if (!enabled)
+            return;
+
+        var active = !this.showWarning();
+
+        if (active)
         {
             this.location = this.getDefaultLocation();
 
-            if (this.location && !this.context.jsDebuggerActive) // then we have a file, but debugger did not see it
+            if (this.context.loaded)
             {
-                // Fill the panel node with a warning
-                var jsEnabled = Firebug.getPref("javascript", "enabled");
-                if (jsEnabled)
-                    this.activeWarningTag = WarningRep.showInactive(this.panelNode);
-                else
-                    this.activeWarningTag = WarningRep.showNotEnabled(this.panelNode);
-
-                this.location = null;
-            }
-            else if (this.context.loaded)
-            {
-                if (!this.restored)  // this work should be done in loadedContext but on the panel
+                if (!this.restored)
                 {
                     delete this.location;  // remove the default location if any
                     restoreLocation(this, state);
@@ -3092,48 +3105,31 @@ Firebug.ScriptPanel.prototype = extend(Firebug.SourceBoxPanel,
 
                 if (state && this.location)  // then we are restoring and we have a location, so scroll when we can
                     this.scrollInfo = { location: this.location, previousCenterLine: state.previousCenterLine};
-
-                if (!this.location)
-                {
-                    // Fill the panel node with a warning
-                    var jsEnabled = Firebug.getPref("javascript", "enabled");
-                    if (!jsEnabled)
-                        this.activeWarningTag = WarningRep.showNotEnabled(this.panelNode);
-                    else if (this.context.allScriptsWereFiltered)
-                        this.activeWarningTag = WarningRep.showFiltered(this.panelNode);
-                    else  // they were not filtered, we just had none
-                        this.activeWarningTag = WarningRep.showNoScript(this.panelNode);
-                }
             }
             else // show default
             {
                 this.navigate(this.location);
             }
 
-            var active = !this.activeWarningTag;
+            this.highlight(this.context.stopped);
 
-            collapse(Firebug.chrome.$("fbToolbar"), !active);
-
-            // These buttons are visible only if debugger is enabled.
-            this.showToolbarButtons("fbLocationSeparator", active);
-            this.showToolbarButtons("fbDebuggerButtons", active);
-            this.showToolbarButtons("fbLocationButtons", active);
-            this.showToolbarButtons("fbScriptButtons", active);
-
-            // Additional debugger panels are visible only if debugger
-            // is active.
-            this.panelSplitter.collapsed = !active;
-            this.sidePanelDeck.collapsed = !active;
-
-            if (active)
-            {
-                this.highlight(this.context.stopped);
-
-                var breakpointPanel = this.context.getPanel("breakpoints", true);
-                if (breakpointPanel)
-                    breakpointPanel.refresh();
-            }
+            var breakpointPanel = this.context.getPanel("breakpoints", true);
+            if (breakpointPanel)
+                breakpointPanel.refresh();
         }
+
+        collapse(Firebug.chrome.$("fbToolbar"), !active);
+
+        // These buttons are visible only if debugger is enabled.
+        this.showToolbarButtons("fbLocationSeparator", active);
+        this.showToolbarButtons("fbDebuggerButtons", active);
+        this.showToolbarButtons("fbLocationButtons", active);
+        this.showToolbarButtons("fbScriptButtons", active);
+
+        // Additional debugger panels are visible only if debugger
+        // is active.
+        this.panelSplitter.collapsed = !active;
+        this.sidePanelDeck.collapsed = !active;
     },
 
     hide: function(state)
