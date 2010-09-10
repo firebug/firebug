@@ -217,7 +217,8 @@ function createConsoleHandler(context, win)
     win.addEventListener("unload", bind(handler.onUnload, handler), true);
 
     // When raised on our injected element, callback to Firebug and append to console
-    win.document.addEventListener('firebugAppendConsole', bind(handler.handleEvent, handler), true); // capturing
+    handler.boundHandler = bind(handler.handleEvent, handler);
+    win.document.addEventListener('firebugAppendConsole', handler.boundHandler, true); // capturing
 
     if (FBTrace.DBG_CONSOLE)
         FBTrace.sysout("consoleInjector FirebugConsoleHandler addEventListener "+handler.handler_name);
