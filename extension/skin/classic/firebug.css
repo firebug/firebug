@@ -238,7 +238,7 @@ textbox[type="fbSearchBox"] > panel {
     -moz-image-region: rect(0, 16px, 16px, 0);
 }
 
-#fbRerunButton: hover {
+#fbRerunButton:hover {
     list-style-image: url(chrome://firebug/skin/rerun.png);
     -moz-image-region: rect(16px, 16px, 32px, 0);
 }
