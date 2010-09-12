@@ -261,7 +261,7 @@
 .breakpointBlockHead > .objectLink-sourceLink {
     top: 4px;
     right: 20px;
-    background-color: #FFFFFF; // issue 3308
+    background-color: #FFFFFF; /* issue 3308 */
 }
 
 .breakpointBlockHead > .closeButton {
