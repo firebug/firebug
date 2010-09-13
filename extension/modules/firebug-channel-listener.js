@@ -11,6 +11,8 @@ var EXPORTED_SYMBOLS = ["ChannelListener"];
 
 var FBTrace = {DBG_FAKE: "fake"};
 
+var activeRequests = [];
+
 // ************************************************************************************************
 // ChannelListener implementation
 
@@ -206,7 +208,14 @@ ChannelListener.prototype =
         {
             this.request = request.QueryInterface(Ci.nsIHttpChannel);
 
-            if (FBTrace.DBG_CACHE)
+            // Don't register listener twice (redirects, see also bug529536).
+            var index = activeRequests.indexOf(request);
+            if (index != -1)
+                return;
+
+            activeRequests.push(request);
+
+            //if (FBTrace.DBG_CACHE)
                 FBTrace.sysout("tabCache.ChannelListener.onStartRequest; " +
                     request.contentType + ", " + safeGetName(request));
 
@@ -261,6 +270,12 @@ ChannelListener.prototype =
     {
         try
         {
+            var index = activeRequests.indexOf(request);
+            if (index == -1)
+                return;
+
+            activeRequests.splice(index, 1);
+
             var context = this.getContext(this.window);
             if (context)
                 this.proxyListener.onStopRequest(request, requestContext, statusCode);
