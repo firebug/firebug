@@ -1295,13 +1295,20 @@ top.FirebugChrome =
 
     openAboutDialog: function()
     {
-        Components.utils.import("resource://gre/modules/AddonManager.jsm");
-
         if (FBTrace.DBG_WINDOWS)
             FBTrace.sysout("Firebug.openAboutDialog");
 
-        // Firefox 4.0 implements new AddonManager.
-        if (AddonManager)
+        try
+        {
+            // Firefox 4.0 implements new AddonManager. In case of Firefox 3.6 the module
+            // is not avaialble and there is an exception.
+            Components.utils.import("resource://gre/modules/AddonManager.jsm");
+        }
+        catch (err)
+        {
+        }
+
+        if (typeof(AddonManager) != "undefined")
         {
             AddonManager.getAddonByID("firebug@software.joehewitt.com", function(addon) {
                 openDialog("chrome://mozapps/content/extensions/about.xul", "",
