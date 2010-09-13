@@ -1563,6 +1563,7 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
             return;
         }
 
+        var found = false;
         for (var i = 0; i < TabWatcher.contexts.length; ++i)
         {
             var context = TabWatcher.contexts[i];
@@ -1579,7 +1580,7 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
                 {
                     if (FBTrace.DBG_ERRORS)
                         FBTrace.sysout("onToggleBreakpoint no panel in context "+context.getName());
-                    return;
+                    continue;
                 }
 
                 panel.context.invalidatePanels("breakpoints");
@@ -1589,7 +1590,7 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
                 {
                     if (FBTrace.DBG_BP)
                         FBTrace.sysout("debugger("+this.debuggerName+").onToggleBreakpoint context "+i+" script panel no sourcebox for url: "+url, panel.sourceBoxes);
-                    return;
+                    continue;
                 }
 
                 var row = sourceBox.getLineNode(lineNo);
@@ -1630,10 +1631,11 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
                     row.removeAttribute("disabledBreakpoint");
                 }
                 dispatch(this.fbListeners, "onToggleBreakpoint", [context, url, lineNo, isSet]);
-                return;
+                found = true;
+                continue;
             }
         }
-        if (FBTrace.DBG_BP)
+        if (FBTrace.DBG_BP && !found)
             FBTrace.sysout("debugger("+this.debuggerName+").onToggleBreakpoint no find context");
     },
 
