@@ -215,9 +215,9 @@ ChannelListener.prototype =
 
             activeRequests.push(request);
 
-            //if (FBTrace.DBG_CACHE)
+            if (FBTrace.DBG_CACHE)
                 FBTrace.sysout("tabCache.ChannelListener.onStartRequest; " +
-                    request.contentType + ", " + safeGetName(request));
+                    this.request.contentType + ", " + safeGetName(this.request));
 
             // Pass to the proxy only if the associated context exists (the window is not unloaded)
             var context = this.getContext(this.window);
