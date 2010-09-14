@@ -1552,6 +1552,11 @@ top.Firebug =
             }
         }
 
+        resultTypes.sort(function(a, b)
+        {
+            return a.prototype.order < b.prototype.order ? -1 : 1;
+        });
+
         return resultTypes;
     },
 
@@ -2325,8 +2330,8 @@ Firebug.Panel = extend(new Firebug.Listener(),
     searchable: false,    // supports search
     editable: true,       // clicking on contents in the panel will invoke the inline editor, eg the CSS Style panel or HTML panel.
     breakable: false,     // if true, supports break-on-next (the pause button functionality)
-    order: 2147483647,    // relative position of the panel as a side panel, this is how Style appears on left in HTML main panel
-    statusSeparator: "<", //  the character used to separate items on the panel status (aka breadcrumbs) in the tool bar, eg ">"  in the DOM panel
+    order: 2147483647,    // relative position of the panel (or a side panel)
+    statusSeparator: "<", // the character used to separate items on the panel status (aka breadcrumbs) in the tool bar, eg ">"  in the DOM panel
     enableA11y: false,    // true if the panel wants to participate in A11y accessibility support.
     deriveA11yFrom: null, // Name of the panel that uses the same a11y logic.
 

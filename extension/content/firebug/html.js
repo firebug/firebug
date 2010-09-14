@@ -860,6 +860,7 @@ Firebug.HTMLPanel.prototype = extend(Firebug.Panel,
     dependents: ["css", "computed", "layout", "dom", "domSide", "watch"],
     inspectorHistory: new Array(5),
     enableA11y: true,
+    order: 20,
 
     initialize: function()
     {

@@ -407,6 +407,7 @@ NetPanel.prototype = extend(Firebug.ActivablePanel,
     editable: true,
     breakable: true,
     enableA11y: true,
+    order: 60,
 
     initialize: function(context, doc)
     {

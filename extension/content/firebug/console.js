@@ -402,6 +402,7 @@ Firebug.ConsolePanel.prototype = extend(Firebug.ActivablePanel,
     lastLogTime: 0,
     groups: null,
     limit: null,
+    order: 10,
 
     append: function(appender, objects, className, rep, sourceLink, noRow)
     {

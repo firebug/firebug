@@ -2959,6 +2959,7 @@ Firebug.ScriptPanel.prototype = extend(Firebug.SourceBoxPanel,
     searchable: true,
     breakable: true,
     enableA11y: true,
+    order: 40,
 
     initialize: function(context, doc)
     {
