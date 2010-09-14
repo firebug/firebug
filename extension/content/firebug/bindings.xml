@@ -1248,8 +1248,7 @@
             onkeyup="onSearchBoxKeyUp(event);" aria-describedby="fbSearchBoxDescription" />
         <xul:description anonid="fbSearchBoxDescription"  collapsed="true"/>
         <xul:panel id="fbSearchOptionsPanel" norestorefocus="true" noautofocus="true"
-            ignorekeys="true" role="presentation"
-            noautohide="true">
+            ignorekeys="true" role="presentation">
             <xul:vbox class="searchOptionsMenu innerToolbar" role="menu" anonid="fbSearchOptionsMenu">
               <xul:box anonid="startPanelFocus" class="panelFocusBound" onfocus="startFocusHandler()" />
               <xul:vbox anonid="searchOptionsList" role="presentation" />
