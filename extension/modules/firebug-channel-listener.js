@@ -11,7 +11,8 @@ var EXPORTED_SYMBOLS = ["ChannelListener"];
 
 var FBTrace = {DBG_FAKE: "fake"};
 
-var activeRequests = [];
+const PrefService = Cc["@mozilla.org/preferences-service;1"].getService(Ci.nsIPrefBranch2);
+var redirectionLimit = PrefService.getIntPref("network.http.redirection-limit");
 
 // ************************************************************************************************
 // ChannelListener implementation
@@ -208,16 +209,21 @@ ChannelListener.prototype =
         {
             this.request = request.QueryInterface(Ci.nsIHttpChannel);
 
-            // Don't register listener twice (redirects, see also bug529536).
-            var index = activeRequests.indexOf(request);
-            if (index != -1)
-                return;
-
-            activeRequests.push(request);
-
             if (FBTrace.DBG_CACHE)
                 FBTrace.sysout("tabCache.ChannelListener.onStartRequest; " +
                     this.request.contentType + ", " + safeGetName(this.request));
+
+            // Don't register listener twice (redirects, see also bug529536).
+            // xxxHonza: I don't know any way how to find out that a listener
+            // has been already registered for the channel. So, use the redirection limit
+            // to see that the channel has been redirected and so, listener is there.
+            if (request.redirectionLimit < redirectionLimit)
+            {
+                if (FBTrace.DBG_CACHE)
+                    FBTrace.sysout("tabCache.ChannelListener.onStartRequest; redirected request " +
+                        request.redirectionLimit + " (max=" + redirectionLimit + ")");
+                return;
+            }
 
             // Pass to the proxy only if the associated context exists (the window is not unloaded)
             var context = this.getContext(this.window);
@@ -270,11 +276,9 @@ ChannelListener.prototype =
     {
         try
         {
-            var index = activeRequests.indexOf(request);
-            if (index == -1)
-                return;
-
-            activeRequests.splice(index, 1);
+            if (FBTrace.DBG_CACHE)
+                FBTrace.sysout("tabCache.ChannelListener.onStopRequest; " +
+                    request.contentType + ", " + safeGetName(request));
 
             var context = this.getContext(this.window);
             if (context)
