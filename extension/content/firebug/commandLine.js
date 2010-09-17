@@ -920,12 +920,10 @@ function getExpressionOffset(command, offset)
 
     var bracketCount = 0;
 
-    var start = command.length-1;
-    for (; start >= 0; --start)
+    var start = command.length;
+    while (start --> 0)
     {
         var c = command[start];
-        if ((c == "," || c == ";" || c == " ") && !bracketCount)
-            break;
         if (reOpenBracket.test(c))
         {
             if (bracketCount)
@@ -934,7 +932,17 @@ function getExpressionOffset(command, offset)
                 break;
         }
         else if (reCloseBracket.test(c))
-            ++bracketCount;
+        {
+            if (bracketCount == 0 && command[start + 1] != '.')
+                break;
+            else
+                ++bracketCount;
+        }
+        else if (bracketCount == 0)
+        {
+            if (/[a-zA-Z0-9.]/.test(c));
+            else break;
+        }
     }
 
     return start + 1;
