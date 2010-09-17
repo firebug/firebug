@@ -737,6 +737,20 @@ top.Firebug =
                 FBTrace.sysout("registerPanel "+arguments[i].prototype.name+"\n");
     },
 
+    unregisterPanel: function(panelType)
+    {
+        for (var i = 0; i < panelTypes.length; ++i)
+        {
+            if (panelTypes[i] == panelType)
+            {
+                panelTypes.splice(i, 1);
+                break;
+            }
+        }
+
+        delete panelTypeMap[panelType.prototype.name];
+    },
+
     registerRep: function()
     {
         reps.push.apply(reps, arguments);
