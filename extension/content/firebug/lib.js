@@ -3630,7 +3630,11 @@ const eventTypes =
         "close",
         "command",
         "broadcast",
-        "commandupdate" ]
+        "commandupdate" ],
+    clipboard: [
+        "cut",
+        "copy",
+        "paste" ],
 };
 
 this.getEventFamily = function(eventType)
