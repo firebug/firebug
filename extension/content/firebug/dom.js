@@ -382,14 +382,6 @@ Firebug.DOMBasePanel.prototype = extend(Firebug.Panel,
             var insecureObject = unwrapObject(object);
 
             var properties = [];
-            if (insecureObject.hasOwnProperty('prototype'))
-                properties.push('prototype');
-
-            if (insecureObject.hasOwnProperty('constructor'))
-                properties.push('constructor');
-
-            if (insecureObject.hasOwnProperty('__proto__'))
-                properties.push('__proto__');
 
             for (var name in insecureObject)  // enumeration is safe
             {
@@ -402,6 +394,15 @@ Firebug.DOMBasePanel.prototype = extend(Firebug.Panel,
                 }
                 properties.push(name);
             }
+
+            if (insecureObject.hasOwnProperty('constructor') && properties.indexOf('constructor') == -1)
+                properties.push('constructor');
+
+            if (insecureObject.hasOwnProperty('prototype'))
+                properties.push('prototype');
+
+            if (insecureObject.hasOwnProperty('__proto__'))
+                properties.push('__proto__');
 
             var domMembers = getDOMMembers(object);
             for (var i = 0; i < properties.length; i++)
