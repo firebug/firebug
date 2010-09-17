@@ -344,7 +344,15 @@ this.Obj = domplate(Firebug.Rep,
         ),
 
     titleTag:
-        SPAN({"class": "objectTitle"}, "$object|getTitle"),
+        SPAN({"class": "objectTitle"}, "$object|getTitleTag"),
+        
+    getTitleTag: function(object)
+    {
+	    var title = this.getTitle(object);
+	    if (title == "Object")
+	        title = "{...}";
+	    return title;
+    },
 
     longPropIterator: function (object)
     {
@@ -522,7 +530,7 @@ this.Arr = domplate(Firebug.Rep,
 
     hasSpecialProperties: function(array)
     {
-        // Don't use __count__ property, this is beeing removed from Fx 3.7
+        // Don't use __count__ property, this is being removed from Fx 3.7
         var n = 0;
         for (var p in array)
             n += Object.prototype.hasOwnProperty.call(array, p);
