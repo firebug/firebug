@@ -236,7 +236,7 @@ top.TabWatcher = extend(new Firebug.Listener(),
                  FBTrace.sysout("-> shouldCreateContext with user: "+userCommands+ " one listener says yes to "+ url, this.fbListeners);
             return true;
         }
-            
+
 
         if (FBTrace.DBG_ACTIVATION)
             FBTrace.sysout("-> shouldCreateContext with user: "+userCommands+ " no opinion for: "+ url);
@@ -348,7 +348,7 @@ top.TabWatcher = extend(new Firebug.Listener(),
         // Unfortunately, dummy requests that trigger the call to watchWindow
         // are called several times, so we have to avoid dispatching watchWindow
         // more than once
-        if (context && context.windows.indexOf(win) == -1 && location != aboutBlank)
+        if (context && context.windows.indexOf(win) == -1)
         {
             context.windows.push(win);
 
