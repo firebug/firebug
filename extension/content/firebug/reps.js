@@ -345,13 +345,13 @@ this.Obj = domplate(Firebug.Rep,
 
     titleTag:
         SPAN({"class": "objectTitle"}, "$object|getTitleTag"),
-        
+
     getTitleTag: function(object)
     {
-	    var title = this.getTitle(object);
-	    if (title == "Object")
-	        title = "{...}";
-	    return title;
+        var title = this.getTitle(object);
+        if (title == "Object")
+            title = "{...}";
+        return title;
     },
 
     longPropIterator: function (object)
