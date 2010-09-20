@@ -206,11 +206,14 @@ Browser.prototype._contextCreated = function(context) {
  * listeners.
  * 
  * @function
- * @param context the {@link JavaScriptContext} that has been destroyed
+ * @param id the identifier of the {@link JavaScriptContext} that has been destroyed
  */
-Browser.prototype._contextDestroyed = function(context) {
-	this.contexts[context.getId()] = null;
-	this._dispatch("onContextDestroyed", [context]);
+Browser.prototype._contextDestroyed = function(id) {
+	var destroyed = this.contexts[id];
+	if (destroyed) {
+		this.contexts[id] = null;
+		this._dispatch("onContextDestroyed", [destroyed]);
+	}
 };
 
 /**
