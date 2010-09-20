@@ -211,7 +211,7 @@ Browser.prototype._contextCreated = function(context) {
 Browser.prototype._contextDestroyed = function(id) {
 	var destroyed = this.contexts[id];
 	if (destroyed) {
-		this.contexts[id] = null;
+		delete this.contexts[id];
 		this._dispatch("onContextDestroyed", [destroyed]);
 	}
 };
