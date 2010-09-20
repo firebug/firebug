@@ -26,8 +26,6 @@ this.jsd = this.CCSV("@mozilla.org/js/jsd/debugger-service;1", "jsdIDebuggerServ
 const finder = this.finder = this.CCIN("@mozilla.org/embedcomp/rangefind;1", "nsIFind");
 const wm = this.CCSV("@mozilla.org/appshell/window-mediator;1", "nsIWindowMediator");
 const ioService = this.CCSV("@mozilla.org/network/io-service;1", "nsIIOService");
-const consoleService = Components.classes["@mozilla.org/consoleservice;1"].
-    getService(Components.interfaces["nsIConsoleService"]);
 const versionChecker = Cc["@mozilla.org/xpcom/version-comparator;1"].getService(Ci.nsIVersionComparator);
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
@@ -7316,7 +7314,9 @@ this.ERROR = ERROR;
 
 function ddd(text)
 {
-    consoleService.logStringMessage(text + "");
+    var consoleService = CCSV("@mozilla.org/consoleservice;1", "nsIConsoleService");
+    if (consoleService)
+        consoleService.logStringMessage(text + "");
 }
 this.ddd = ddd;
 

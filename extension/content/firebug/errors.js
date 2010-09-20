@@ -105,13 +105,15 @@ var Errors = Firebug.Errors = extend(Firebug.Module,
 
     startObserving: function()
     {
-        consoleService.registerListener(this);
+        if (consoleService)
+            consoleService.registerListener(this);
         this.isObserving = true;
     },
 
     stopObserving: function()
     {
-        consoleService.unregisterListener(this);
+        if (consoleService)
+            consoleService.unregisterListener(this);
         this.isObserving = false;
     },
 
