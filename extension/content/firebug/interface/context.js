@@ -39,13 +39,15 @@
  * 
  * @constructor
  * @param id unique execution context identifier, a {@link String} that cannot be <code>null</code>
+ * @param url the URL associated with this context
  * @param browser the browser that contains the execution context
  * @type JavaScriptContext
  * @return a new JavaScriptContext
  * @version 1.0
  */
-function JavaScriptContext(id, browser) {
+function JavaScriptContext(id, url, browser) {
 	this.id = id;
+	this.url = url;
 	this.browser = browser;
 	this.scripts = [];
 	this.is_destroyed = false;
@@ -66,6 +68,19 @@ function JavaScriptContext(id, browser) {
  */
 JavaScriptContext.prototype.getId = function() {
 	return this.id;
+};
+
+/**
+ * Returns the URL associated with this execution context.
+ * <p>
+ * This function does not require communication with
+ * the browser.
+ * </p>
+ * @function
+ * @returns URL as a {@link String}
+ */
+JavaScriptContext.prototype.getURL = function() {
+	return this.url;
 };
 
 /**
