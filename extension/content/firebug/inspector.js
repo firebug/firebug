@@ -378,7 +378,8 @@ Firebug.Inspector = extend(Firebug.Module,
     showPanel: function(browser, panel)
     {
         // The panel can be null (if disabled) so use the global context.
-        var disabled = !Firebug.currentContext.loaded;
+        var context = Firebug.currentContext;
+        var disabled = (context && context.loaded) ? false : true;
         Firebug.chrome.setGlobalAttribute("cmd_toggleInspecting", "disabled", disabled);
     },
 
