@@ -43,7 +43,7 @@
  * @version 1.0
  */
 function Browser() {
-	this.contexts = []; // array of contexts indexed by context id (Strings)
+	this.contexts = []; // array of contexts
 	this.handlers = []; // map of event types to array of handler functions
 	this.EVENT_TYPES = ["onBreak", "onConsoleDebug", "onConsoleError", "onConsoleInfo", "onConsoleLog",
 	                    "onConsoleWarn", "onContextCreated", "onContextDestroyed", "onInspectNode",
@@ -169,6 +169,15 @@ Browser.prototype.on = function(eventType, listener) {
 	}
 };
 
+/**
+ * Disconnects this client from the browser it is associated with.
+ * 
+ * @function
+ */
+Browser.prototype.disconnect = function() {
+	
+}
+
 //TODO: support to remove a listener
 
 // ---- PRIVATE ---- 
@@ -182,8 +191,13 @@ Browser.prototype.on = function(eventType, listener) {
  * @param context the {@link JavaScriptContext} that has been added
  */
 Browser.prototype._contextCreated = function(context) {
-	this.contexts[context.getId()] = context;
-	this._dispatch("onContextCreated", [context]);
+	// if already present, don't add it again
+	var id = context.getId();
+	if (this.contexts[id]) {
+		return;
+	}
+	this.contexts[id] = context;
+	this._dispatch("onContextCreated", [context]);	
 };
 
 /**
