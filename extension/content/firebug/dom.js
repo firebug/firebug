@@ -371,7 +371,7 @@ Firebug.DOMBasePanel.prototype = extend(Firebug.Panel,
             level = 0;
 
         var ordinals = [], userProps = [], userClasses = [], userFuncs = [],
-            domProps = [], domFuncs = [], domConstants = [];
+            domProps = [], domFuncs = [], domConstants = [], proto = [];
 
         try
         {
@@ -385,6 +385,10 @@ Firebug.DOMBasePanel.prototype = extend(Firebug.Panel,
 
             for (var name in insecureObject)  // enumeration is safe
             {
+                // Prototype properties are available throuhg expandable prototype object.
+                if (!insecureObject.hasOwnProperty(name))
+                    continue;
+
                 // Ignore only global variables (properties of the |window| object).
                 if (shouldIgnore(name) && (object instanceof Window))
                 {
@@ -438,7 +442,9 @@ Firebug.DOMBasePanel.prototype = extend(Firebug.Panel,
                 {
                     if (isDOMMember(object, name))
                         this.addMember(object, "dom", domProps, name, val, level, domMembers[name], context);
-                    else if (name in domConstantMap)
+                    else if (isPrototype(name))
+                        this.addMember(object, "proto", proto, name, val, level, 0, context);
+                    else if (isDOMConstant(name))
                         this.addMember(object, "dom", domConstants, name, val, level, 0, context);
                     else
                         this.addMember(object, "user", userProps, name, val, level, 0, context);
@@ -455,7 +461,6 @@ Firebug.DOMBasePanel.prototype = extend(Firebug.Panel,
         }
 
         function sortName(a, b) { return a.name > b.name ? 1 : -1; }
-        function sortOrder(a, b) { return a.order > b.order ? 1 : -1; }
 
         var members = [];
 
@@ -490,6 +495,9 @@ Firebug.DOMBasePanel.prototype = extend(Firebug.Panel,
 
         if (Firebug.showDOMConstants)
             members.push.apply(members, domConstants);
+
+        // The prototype is always displayed at the end.
+        members.push.apply(members, proto);
 
         return members;
     },
@@ -1859,6 +1867,10 @@ function isArguments(obj)
     return false;
 }
 
+function isPrototype(name)
+{
+    return (name == "prototype" || name == "__proto__");
+}
 
 function getWatchRowIndex(row)
 {

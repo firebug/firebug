@@ -5893,6 +5893,15 @@ domMemberMap.Event =
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 
+this.isDOMConstant = function(name)
+{
+    // The constant map has also its own prototype, but it isn't considered to be a constant.
+    if (name == "__proto__")
+        return false;
+
+    return (name in this.domConstantMap);
+}
+
 this.domConstantMap =
 {
     "ELEMENT_NODE": 1,
@@ -6087,6 +6096,9 @@ this.domConstantMap =
     "SVG_ZOOMANDPAN_MAGNIFY": 1,
     "SVG_ZOOMANDPAN_UNKNOWN": 1
 };
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+
 this.cssInfo = {};
 this.cssInfo.html =
 {
