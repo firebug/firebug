@@ -63,8 +63,8 @@ function Browser() {
 Browser.prototype.getJavaScriptContexts = function() {
 	// return a copy of contexts so the master copy is not corrupted
 	var knownContexts = [];
-	for ( var i = 0; i < this.contexts.length; i++) {
-		knownContexts.push(this.contexts[i]);
+	for (var id in this.contexts) {
+		knownContexts.push(this.contexts[id]);
 	}
 	return knownContexts;
 };
