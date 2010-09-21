@@ -36,14 +36,14 @@
  * may originate from a JavaScript source file or a script element in an HTML file.
  * 
  * @constructor
- * @param id compilation unit identifier - a {@link String}
+ * @param url compilation unit URL - a {@link String}
  * @param context the {@link JavaScriptContext} this compilation unit is contained in
  * @type CompilationUnit
  * @return a new CompilationUnit
  * @version 1.0
  */
-function CompilationUnit(id, context) {
-	this.id = id;
+function CompilationUnit(url, context) {
+	this.url = url;
 	this.context = context;
 	this.breakpoints = [];
 }
@@ -51,8 +51,7 @@ function CompilationUnit(id, context) {
 // ---- API ----
 
 /**
- * Returns the identifier of this compilation unit. A compilation unit's identifier is
- * unique within its execution context.
+ * Returns the URL of this compilation unit.
  * <p>
  * This function does not require communication with
  * the browser.
@@ -61,8 +60,8 @@ function CompilationUnit(id, context) {
  * @function
  * @returns compilation unit identifier as a {@link String}
  */
-CompilationUnit.prototype.getId = function() {
-	return this.id;
+CompilationUnit.prototype.getURL = function() {
+	return this.url;
 };
 
 /**

@@ -193,3 +193,24 @@ JavaScriptContext.prototype.getStackFrames = function(listener) {
 };
 
 //---- PRIVATE ----
+
+/**
+ * Adds the newly created script to the list of compilation units in this context.
+ * Sends notification that the script has been compiled.
+ * 
+ * @function
+ * @param cu a {@link CompilationUnit}
+ */
+JavaScriptContext.prototype._scriptCompiled = function(cu) {
+	this.scripts.push(cu);
+	this.getBrowser()._dispatch("onScript", [cu]);
+}
+
+/**
+ * Notification this execution context has been destroyed.
+ * 
+ * @function
+ */
+JavaScriptContext.prototype._destroyed = function() {
+	this.is_destroyed = true;
+}

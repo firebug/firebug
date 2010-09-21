@@ -70,6 +70,23 @@ Browser.prototype.getJavaScriptContexts = function() {
 };
 
 /**
+ * Returns the JavaScript execution context with the specified id or <code>null</code>
+ * if none.
+ * 
+ * @function
+ * @param id identifier of an {@link JavaScriptContext}
+ * @returns the {@link JavaScriptContext} execution context with the specified id or <code>null</code>
+ * 
+ */
+Browser.prototype.getJavaScriptContext = function(id) {
+	var context = this.contexts[id];
+	if (context) {
+		return context;
+	}
+	return null;
+}
+
+/**
  * Registers a listener (function) for a specific type of event.
  * <p>
  * The supported event types and associated listener function signatures summarized in the
@@ -211,6 +228,7 @@ Browser.prototype._contextCreated = function(context) {
 Browser.prototype._contextDestroyed = function(id) {
 	var destroyed = this.contexts[id];
 	if (destroyed) {
+		destroyed._destroyed();
 		delete this.contexts[id];
 		this._dispatch("onContextDestroyed", [destroyed]);
 	}
