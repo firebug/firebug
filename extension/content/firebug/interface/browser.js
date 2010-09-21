@@ -44,6 +44,7 @@
  */
 function Browser() {
 	this.contexts = []; // array of contexts
+	this.activeContext = null;
 	this.handlers = []; // map of event types to array of handler functions
 	this.EVENT_TYPES = ["onBreak", "onConsoleDebug", "onConsoleError", "onConsoleInfo", "onConsoleLog",
 	                    "onConsoleWarn", "onContextCreated", "onContextDestroyed", "onInspectNode",
@@ -84,7 +85,18 @@ Browser.prototype.getJavaScriptContext = function(id) {
 		return context;
 	}
 	return null;
-}
+};
+
+/**
+ * Returns the JavaScript execution context that currently has focus in the browser
+ * or <code>null</code> if none.
+ * 
+ * @function
+ * @returns the active {@link JavaScriptContext} or <code>null</code>
+ */
+Browser.prototype.getActiveJavaScriptContext = function() {
+	return this.activeContext;
+};
 
 /**
  * Registers a listener (function) for a specific type of event.
@@ -133,6 +145,12 @@ Browser.prototype.getJavaScriptContext = function(id) {
  *   <td>onContextCreated</td>
  *   <td>function({@link JavaScriptContext})</td>
  *   <td>specified execution context has been created</td>
+ * </tr>
+ * <tr>
+ *   <td>onContextChanged</td>
+ *   <td>function({@link JavaScriptContext}, {@link JavaScriptContext})</td>
+ *   <td>notification the active context has changed from the first to the latter - either argument
+ *      may be <code>null</code></td>
  * </tr>
  * <tr>
  *   <td>onContextDestroyed</td>
@@ -247,6 +265,20 @@ Browser.prototype._dispatch = function(eventType, arguments) {
 		for ( var i = 0; i < functions.length; i++) {
 			functions[i].apply(null, arguments);
 		}
+	}
+};
+
+/**
+ * Sets the currently active JavaScript execution context, possibly <code>null</code>.
+ * 
+ * @function
+ * @param context a {@link JavaScriptContext} or <code>null</code>
+ */
+Browser.prototype._setActiveContext = function(context) {
+	var prev = this.activeContext;
+	this.activeContext = context;
+	if (prev != context) {
+		this._dispatch("onContextChanged", [prev, this.activeContext]);
 	}
 };
 
