@@ -139,22 +139,16 @@ JavaScriptContext.prototype.getBreakpoints = function() {
 };
 
 /**
- * Returns all JavaScript compilation units that have been compiled (loaded) in this
- * execution context.
- * <p>
- * This function does not require communication with
- * the browser.
- * </p>
+ * Requests all compilation units that have been compiled (loaded) in this execution context
+ * asynchronously. Compilation units will be retrieved from the browser (if required) and
+ * reported to the listener function when available. The listener function may be called before or
+ * after this function returns.
+ * 
  * @function
- * @returns an array of {@link CompilationUnit}'s
+ * @param listener a function that accepts an array of {@link CompilationUnit}'s.
  */
-JavaScriptContext.prototype.getCompilationUnits = function() {
-	// return a copy of scripts so the master copy is not corrupted
-	var knownScripts = [];
-	for ( var i = 0; i < this.scripts.length; i++) {
-		knownScripts.push(this.scripts[i]);
-	}
-	return knownScripts;
+JavaScriptContext.prototype.getCompilationUnits = function(listener) {
+	// TODO:
 };
 
 /**
@@ -193,18 +187,6 @@ JavaScriptContext.prototype.getStackFrames = function(listener) {
 };
 
 //---- PRIVATE ----
-
-/**
- * Adds the newly created script to the list of compilation units in this context.
- * Sends notification that the script has been compiled.
- * 
- * @function
- * @param cu a {@link CompilationUnit}
- */
-JavaScriptContext.prototype._scriptCompiled = function(cu) {
-	this.scripts.push(cu);
-	this.getBrowser()._dispatch("onScript", [cu]);
-}
 
 /**
  * Notification this execution context has been destroyed.
