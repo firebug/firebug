@@ -21,7 +21,6 @@ Firebug.CommandLine.Preview = extend(Firebug.Module,
 
         this.setPreviewBrowserStyle(Firebug.chrome);
 
-        this.onCommandLineKeyPress = bind(this.onCommandLineKeyPress, this);
         this.onKeyPress = bind(this.onKeyPress, this);
 
         this.attachListeners();
