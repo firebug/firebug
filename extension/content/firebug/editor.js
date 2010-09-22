@@ -1394,8 +1394,8 @@ Firebug.AutoCompleter = function(getExprOffset, getRange, evaluator, selectMode,
 
     this.handledKeyPress = function(event, context, textBox)
     {
-        var char = String.fromCharCode(event.charCode);
-        switch (char)
+        var ch = String.fromCharCode(event.charCode);
+        switch (ch)
         {
             case '.':
             case '(':
