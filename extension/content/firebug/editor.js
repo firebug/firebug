@@ -1453,8 +1453,6 @@ Firebug.AutoCompleter = function(getExprOffset, getRange, evaluator, selectMode,
         delete this.linuxFocusHack;
     };
 
-    this.onPopupShown = bind(this.onPopupShown, this);
-
     completionPopup.addEventListener("mouseover", this.setCompletionOnEvent, true);
     completionPopup.addEventListener("click", this.acceptCompletion, true);
     completionPopup.addEventListener("focus", this.focusHack, true);
