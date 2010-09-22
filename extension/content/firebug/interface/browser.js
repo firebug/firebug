@@ -32,7 +32,7 @@
  */
 
 /**
- * Describes a debuggable web browser. A browser may be remote and contain one or more
+ * Proxy to a debuggable web browser. A browser may be remote and contain one or more
  * JavaScript execution contexts. Each JavaScript execution context may contain one or
  * more compilation units. A browser provides notification to registered listeners describing
  * events that occur in the browser.
@@ -43,12 +43,13 @@
  * @version 1.0
  */
 function Browser() {
-	this.contexts = []; // array of contexts
+	this.contexts = {}; // map of contexts, indexed by conext ID
 	this.activeContext = null;
-	this.handlers = []; // map of event types to array of handler functions
+	this.handlers = {}; // map of event types to array of handler functions
 	this.EVENT_TYPES = ["onBreak", "onConsoleDebug", "onConsoleError", "onConsoleInfo", "onConsoleLog",
-	                    "onConsoleWarn", "onContextCreated", "onContextDestroyed", "onInspectNode",
-	                    "onResume", "onSuspend", "onToggleBreakpoint"];
+	                    "onConsoleWarn", "onContextCreated", "onContextDestroyed", "onContextChanged", "onInspectNode",
+	                    "onResume", "onSuspend", "onToggleBreakpoint", "onDisconnect"];
+	this.connected = false;
 }
 
 // ---- API ----
@@ -96,6 +97,17 @@ Browser.prototype.getJavaScriptContext = function(id) {
  */
 Browser.prototype.getActiveJavaScriptContext = function() {
 	return this.activeContext;
+};
+
+/**
+ * Returns whether this proxy is currently connected to the underlying browser it
+ * represents.
+ * 
+ *  @function
+ *  @returns whether connected to the underlying browser
+ */
+Browser.prototype.isConnected = function() {
+	return this.connected;
 };
 
 /**
@@ -158,6 +170,11 @@ Browser.prototype.getActiveJavaScriptContext = function() {
  *   <td>specified execution context no longer exists</td>
  * </tr>
  * <tr>
+ *   <td>onDisconnect</td>
+ *   <td>function({@link Browser}</td>
+ *   <td>notification the connection to the remote browser has been closed</td>
+ * </tr>
+ * <tr>
  *   <td>onInspectNode</td>
  *   <td>TODO</td>
  *   <td>TODO</td>
@@ -181,27 +198,26 @@ Browser.prototype.getActiveJavaScriptContext = function() {
  * </p>
  * <p>
  * <ul>
- * <li>TODO: notification the browser has been destroyed?</li>
  * <li>TODO: how can clients remove (deregister) listeners?</li>
  * </ul>
  * </p>
  * @function
  * @param eventType an event type ({@link String}) listed in the above table
  * @param listener a listener (function) that handles the event
+ * @exception Error if an unsupported event type is specified
  */
-Browser.prototype.on = function(eventType, listener) {
-	for ( var i = 0; i < this.EVENT_TYPES.length; i++) {
-		if (eventType == this.EVENT_TYPES[i]) {
-			var list = this.handlers[eventType];
-			if (!list) {
-				list = [];
-				this.handlers[eventType] = list;
-			}
-			// TODO: do we need to validate function argument length?
-			list.push(listener);
-			return;
-		}
+Browser.prototype.addEventListener = function(eventType, listener) {
+	var i = this.EVENT_TYPES.indexof(eventType);
+	if (i < 0) {
+		// unsupported event type
+		throw new Error("eventType '" + eventType + "' is not supported");
 	}
+	var list = this.handlers[eventType];
+	if (!list) {
+		list = [];
+		this.handlers[eventType] = list;
+	}
+	list.push(listener);
 };
 
 /**
@@ -215,7 +231,7 @@ Browser.prototype.disconnect = function() {
 
 //TODO: support to remove a listener
 
-// ---- PRIVATE ---- 
+// ---- PRIVATE ---- Subclasses may call these functions
 
 /**
  * Notification the given context has been added to this browser.
@@ -281,4 +297,20 @@ Browser.prototype._setActiveContext = function(context) {
 		this._dispatch("onContextChanged", [prev, this.activeContext]);
 	}
 };
+
+/**
+ * Sets whether this proxy is connected to its underlying browser.
+ * Sends 'onDisconnect' notification when the browser becomes disconnected.
+ * 
+ * @function
+ * @param connected whether this proxy is connected to its underlying browser
+ */
+Browser.prototype._setConnected = function(connected) {
+	var wasConnected = this.connected;
+	this.connected = connected;
+	if (wasConnected && !connected) {
+		this._dispatch("onDisconnect", [this]);
+	}
+
+}
 
