@@ -32,12 +32,12 @@
  */
 
 /**
- * Describes a compilation unit in a JavaScript execution context. A compilation unit
- * may originate from a JavaScript source file or a script element in an HTML file.
+ * Describes a compilation unit in a browser context. A compilation unit
+ * may originate from a JavaScript source file or a script element in HTML.
  * 
  * @constructor
- * @param url compilation unit URL - a {@link String}
- * @param context the {@link JavaScriptContext} this compilation unit is contained in
+ * @param url compilation unit URL - a {@link String} or <code>null</code> if none
+ * @param context the {@link BrowserContext} this compilation unit is contained in
  * @type CompilationUnit
  * @return a new CompilationUnit
  * @version 1.0
@@ -65,16 +65,16 @@ CompilationUnit.prototype.getURL = function() {
 };
 
 /**
- * Returns the JavaScript execution context this compilation unit was compiled in.
+ * Returns the browser context this compilation unit was compiled in.
  * <p>
  * This function does not require communication with
  * the browser.
  * </p>
  * 
  * @function
- * @returns a {@link JavaScriptContext}
+ * @returns a {@link BrowserContext}
  */
-CompilationUnit.prototype.getJavaScriptContext = function() {
+CompilationUnit.prototype.getBrowserContext = function() {
 	return this.context;
 };
 
@@ -85,7 +85,6 @@ CompilationUnit.prototype.getJavaScriptContext = function() {
  * This function does not require communication with
  * the browser.
  * </p>
- * 
  * @function
  * @returns an array of {@link Breakpoint}'s
  */

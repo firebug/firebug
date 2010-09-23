@@ -55,32 +55,15 @@ function Browser() {
 // ---- API ----
 
 /**
- * Returns all JavaScript execution contexts currently known to this {@link Browser}.
- * <p>
- * This function does not require communication with the remote browser.
- * </p>
- * @function
- * @returns an array of {@link JavaScriptContext}
- */
-Browser.prototype.getJavaScriptContexts = function() {
-	// return a copy of contexts so the master copy is not corrupted
-	var knownContexts = [];
-	for (var id in this.contexts) {
-		knownContexts.push(this.contexts[id]);
-	}
-	return knownContexts;
-};
-
-/**
- * Returns the JavaScript execution context with the specified id or <code>null</code>
+ * Returns the {@link BrowserContext} with the specified id or <code>null</code>
  * if none.
  * 
  * @function
- * @param id identifier of an {@link JavaScriptContext}
- * @returns the {@link JavaScriptContext} execution context with the specified id or <code>null</code>
+ * @param id identifier of an {@link BrowserContext}
+ * @returns the {@link BrowserContext} with the specified id or <code>null</code>
  * 
  */
-Browser.prototype.getJavaScriptContext = function(id) {
+Browser.prototype.getBrowserContext = function(id) {
 	var context = this.contexts[id];
 	if (context) {
 		return context;
@@ -89,13 +72,31 @@ Browser.prototype.getJavaScriptContext = function(id) {
 };
 
 /**
- * Returns the JavaScript execution context that currently has focus in the browser
+ * Returns the root contexts being browsed. A {@link BrowserContext} represents the
+ * content that has been served up and is being rendered for a location (URL) that
+ * has been navigated to. 
+ * <p>
+ * This function does not require communication with the remote browser.
+ * </p>
+ * @function
+ * @returns an array of {@link BrowserContext}'s
+ */
+Browser.prototype.getBrowserContexts = function() {
+	var knownContexts = [];
+	for (var id in this.contexts) {
+		knownContexts.push(this.contexts[id]);
+	}
+	return knownContexts;
+}
+
+/**
+ * Returns the {@link BrowserContext} that currently has focus in the browser
  * or <code>null</code> if none.
  * 
  * @function
- * @returns the active {@link JavaScriptContext} or <code>null</code>
+ * @returns the {@link BrowserContext} that has focus or <code>null</code>
  */
-Browser.prototype.getActiveJavaScriptContext = function() {
+Browser.prototype.getFocusBrowserContext = function() {
 	return this.activeContext;
 };
 
@@ -111,99 +112,34 @@ Browser.prototype.isConnected = function() {
 };
 
 /**
- * Registers a listener (function) for a specific type of event.
+ * Registers a listener (function) for a specific type of event. Listener
+ * call back functions are specified in {@link BrowserEventListener}.
  * <p>
- * The supported event types and associated listener function signatures summarized in the
- * following table.
- * </p>
- * <p>
- * <table border="1">
- * <tr>
- *   <th>Event Type</th>
- *   <th>Listener Function</th>
- *   <th>Description</th>
- * </tr>
- * <tr>
- *   <td>onBreak</td>
- *   <td>function({@link CompilationUnit}, lineNumber)</td>
- *   <td>specified execution context has suspended execution</td>
- * </tr>
- * <tr>
- *   <td>onConsoleDebug</td>
- *   <td>TODO</td>
- *   <td>TODO</td>
- * </tr>
- * <tr>
- *   <td>onConsoleError</td>
- *   <td>TODO</td>
- *   <td>TODO</td>
- * </tr>
- * <tr>
- *   <td>onConsoleInfo</td>
- *   <td>function({@link JavaScriptContext}, messages[])</td>
- *   <td>specified information messages have been written by the specified JavaScript execution context</td>
- * </tr>
- * <tr>
- *   <td>onConsoleLog</td>
- *   <td>function({@link JavaScriptContext}, messages[])</td>
- *   <td>specified log messages have been written by the specified JavaScript execution context</td>
- * </tr>
- * <tr>
- *   <td>onConsoleWarn</td>
- *   <td>function({@link JavaScriptContext}, messages[])</td>
- *   <td>specified warning messages have been written by the specified JavaScript execution context</td>
- * </tr>
- * <tr>
- *   <td>onContextCreated</td>
- *   <td>function({@link JavaScriptContext})</td>
- *   <td>specified execution context has been created</td>
- * </tr>
- * <tr>
- *   <td>onContextChanged</td>
- *   <td>function({@link JavaScriptContext}, {@link JavaScriptContext})</td>
- *   <td>notification the active context has changed from the first to the latter - either argument
- *      may be <code>null</code></td>
- * </tr>
- * <tr>
- *   <td>onContextDestroyed</td>
- *   <td>function({@link JavaScriptContext})</td>
- *   <td>specified execution context no longer exists</td>
- * </tr>
- * <tr>
- *   <td>onDisconnect</td>
- *   <td>function({@link Browser}</td>
- *   <td>notification the connection to the remote browser has been closed</td>
- * </tr>
- * <tr>
- *   <td>onInspectNode</td>
- *   <td>TODO</td>
- *   <td>TODO</td>
- * </tr>
- * <tr>
- *   <td>onResume</td>
- *   <td>function({@link JavaScriptContext})</td>
- *   <td>specified execution context has resumed execution</td>
- * </tr>
- * <tr>
- *   <td>onScript</td>
- *   <td>function({@link CompilationUnit})</td>
- *   <td>specified compilation unit has been compiled (loaded)</td>
- * </tr>
- * <tr>
- *   <td>onToggleBreakpoint</td>
- *   <td>function({@link JavaScriptContext}, {@link Breakpoint})</td>
- *   <td>TODO</td>
- * </tr>
- * </table>
- * </p>
- * <p>
+ * The supported event types are:
+ * <ul>
+ *   <li>onBreak</li>
+ *   <li>onConsoleDebug</li>
+ *   <li>onConsoleError</li>
+ *   <li>onConsoleInfo</li>
+ *   <li>onConsoleLog</li>
+ *   <li>onConsoleWarn</li>
+ *   <li>onContextCreated</li>
+ *   <li>onContextChanged</li>
+ *   <li>onContextDestroyed</li>
+ *   <li>onDisconnect</li>
+ *   <li>onInspectNode</li>
+ *   <li>onResume</li>
+ *   <li>onScript</li>
+ *   <li>onToggleBreakpoint</li>
+ * </ul>
  * <ul>
  * <li>TODO: how can clients remove (deregister) listeners?</li>
  * </ul>
  * </p>
  * @function
- * @param eventType an event type ({@link String}) listed in the above table
- * @param listener a listener (function) that handles the event
+ * @param eventType an event type ({@link String}) listed above
+ * @param listener a listener (function) that handles the event as specified
+ *   by {@link BrowserEventListener}
  * @exception Error if an unsupported event type is specified
  */
 Browser.prototype.addEventListener = function(eventType, listener) {
@@ -237,9 +173,16 @@ Browser.prototype.disconnect = function() {
  * Notification the given context has been added to this browser.
  * Adds the context to the list of active contexts and notifies context
  * listeners.
- * 
+ * <p>
+ * Has no effect if the context has already been created. For example,
+ * it's possible for a race condition to occur when a remote browser
+ * sends notification of a context being created before the initial set
+ * of contexts have been retrieved. In such a case, it would possible for
+ * a client to add the context twice (once for the create event, and again
+ * when retrieving the initial list of contexts).
+ * </p>
  * @function
- * @param context the {@link JavaScriptContext} that has been added
+ * @param context the {@link BrowserContext} that has been added
  */
 Browser.prototype._contextCreated = function(context) {
 	// if already present, don't add it again
@@ -255,9 +198,17 @@ Browser.prototype._contextCreated = function(context) {
  * Notification the given context has been destroyed.
  * Removes the context from the list of active contexts and notifies context
  * listeners.
+ * <p>
+ * Has no effect if the context has already been destroyed or has not yet
+ * been retrieved from the browser. For example, it's possible for a race
+ * condition to occur when a remote browser sends notification of a context
+ * being destroyed before the initial list of contexts is retrieved from the
+ * browser. In this case an implementation could ask to destroy a context that
+ * that has not yet been reported as created.
+ * </p>
  * 
  * @function
- * @param id the identifier of the {@link JavaScriptContext} that has been destroyed
+ * @param id the identifier of the {@link BrowserContext} that has been destroyed
  */
 Browser.prototype._contextDestroyed = function(id) {
 	var destroyed = this.contexts[id];
@@ -285,12 +236,12 @@ Browser.prototype._dispatch = function(eventType, arguments) {
 };
 
 /**
- * Sets the currently active JavaScript execution context, possibly <code>null</code>.
+ * Sets the browser context that has focus, possibly <code>null</code>.
  * 
  * @function
- * @param context a {@link JavaScriptContext} or <code>null</code>
+ * @param context a {@link BrowserContext} or <code>null</code>
  */
-Browser.prototype._setActiveContext = function(context) {
+Browser.prototype._setFocusContext = function(context) {
 	var prev = this.activeContext;
 	this.activeContext = context;
 	if (prev != context) {

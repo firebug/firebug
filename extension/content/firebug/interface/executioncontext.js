@@ -32,25 +32,19 @@
  */
 
 /**
- * Describes a JavaScript execution context in a browser. An execution
+ * Describes the execution of JavaScript within a browser context. An execution
  * context pertains to one or more compilation units (JavaScript scripts)
  * that may contain breakpoints. An execution context can suspend and resume
  * and provides stack frames when suspended.
  * 
  * @constructor
- * @param id unique execution context identifier, a {@link String} that cannot be <code>null</code>
- * @param url the URL associated with this context
- * @param browser the browser that contains the execution context
+ * @param browser the browser context the execution context is contained in
  * @type JavaScriptContext
  * @return a new JavaScriptContext
  * @version 1.0
  */
-function JavaScriptContext(id, url, browser) {
-	this.id = id;
-	this.url = url;
-	this.browser = browser;
-	this.scripts = [];
-	this.is_destroyed = false;
+function JavaScriptContext(browserContext) {
+	this.browserContext= browserContext;
 	this.is_suspended = false;
 	this.frames = [];
 }
@@ -58,42 +52,16 @@ function JavaScriptContext(id, url, browser) {
 //---- API ----
 
 /**
- * Returns the unique identifier of this execution context.
+ * Returns the browser context this execution context is contained in.
  * <p>
  * This function does not require communication with
  * the browser.
  * </p>
  * @function
- * @returns execution context identifier as a {@link String}
+ * @returns a {@link BrowserContext}
  */
-JavaScriptContext.prototype.getId = function() {
-	return this.id;
-};
-
-/**
- * Returns the URL associated with this execution context.
- * <p>
- * This function does not require communication with
- * the browser.
- * </p>
- * @function
- * @returns URL as a {@link String}
- */
-JavaScriptContext.prototype.getURL = function() {
-	return this.url;
-};
-
-/**
- * Returns the browser this execution context is contained in.
- * <p>
- * This function does not require communication with
- * the browser.
- * </p>
- * @function
- * @returns a {@link Browser}
- */
-JavaScriptContext.prototype.getBrowser = function() {
-	return this.browser;
+JavaScriptContext.prototype.getBrowserContext = function() {
+	return this.browserContext;
 };
 
 /**
@@ -110,44 +78,30 @@ JavaScriptContext.prototype.isSuspended = function() {
 };
 
 /**
- * Returns whether this execution context currently exists. Returns <code>false</code>
- * if this execution context has been destroyed.
+ * Returns whether this execution context has terminated. Returns <code>true</code>
+ * if this execution context has terminated, otherwise <code>false</code>.
  * <p>
  * This function does not require communication with
  * the browser.
  * </p>
  * @function
- * @returns a boolean indicating whether this execution context currently exists
+ * @returns a boolean indicating whether this execution context has terminated
  */
-JavaScriptContext.prototype.exists = function() {
+JavaScriptContext.prototype.isTerminated = function() {
 	return !this.is_destroyed;
 };
 
 /**
- * Returns all breakpoints that have been created in this execution context
- * that have not been cleared.
+ * Returns the breakpoint this execution context is currently suspended at
+ * or <code>null</code> if none.
  * <p>
  * This function does not require communication with
  * the browser.
  * </p>
  * @function
- * @returns an array of {@link Breakpoint}'s installed in this {@link JavaScriptContext}
+ * @returns the {@link Breakpoint} this execution context is suspended at or <code>null</code>
  */
-JavaScriptContext.prototype.getBreakpoints = function() {
-	// TODO: return all breakpoints from all scripts in this context
-	// might call out to the browser to ensure consistency
-};
-
-/**
- * Requests all compilation units that have been compiled (loaded) in this execution context
- * asynchronously. Compilation units will be retrieved from the browser (if required) and
- * reported to the listener function when available. The listener function may be called before or
- * after this function returns.
- * 
- * @function
- * @param listener a function that accepts an array of {@link CompilationUnit}'s.
- */
-JavaScriptContext.prototype.getCompilationUnits = function(listener) {
+JavaScriptContext.prototype.getBreakpoint = function() {
 	// TODO:
 };
 
@@ -187,12 +141,3 @@ JavaScriptContext.prototype.getStackFrames = function(listener) {
 };
 
 //---- PRIVATE ----
-
-/**
- * Notification this execution context has been destroyed.
- * 
- * @function
- */
-JavaScriptContext.prototype._destroyed = function() {
-	this.is_destroyed = true;
-}
