@@ -173,7 +173,7 @@ this.values = function(map)
         {
             try
             {
-                values.push(map[name]);  
+                values.push(map[name]);
             }
             catch (exc)
             {
@@ -7322,7 +7322,7 @@ this.ERROR = ERROR;
 
 function ddd(text)
 {
-    var consoleService = CCSV("@mozilla.org/consoleservice;1", "nsIConsoleService");
+    var consoleService = Cc["@mozilla.org/consoleservice;1"].getService(Ci["nsIConsoleService"]);
     if (consoleService)
         consoleService.logStringMessage(text + "");
 }
