@@ -402,7 +402,7 @@ Firebug.DOMBasePanel.prototype = extend(Firebug.Panel,
             if (insecureObject.hasOwnProperty('constructor') && properties.indexOf('constructor') == -1)
                 properties.push('constructor');
 
-            if (insecureObject.hasOwnProperty('prototype'))
+            if (insecureObject.hasOwnProperty('prototype') && properties.indexOf('prototype') == -1)
                 properties.push('prototype');
 
             if (insecureObject.__proto__)  // XXXjjb I think it is always true ?
