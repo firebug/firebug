@@ -405,7 +405,7 @@ Firebug.DOMBasePanel.prototype = extend(Firebug.Panel,
             if (insecureObject.hasOwnProperty('prototype'))
                 properties.push('prototype');
 
-            if (insecureObject.hasOwnProperty('__proto__'))
+            if (insecureObject.__proto__)  // XXXjjb I think it is always true ?
                 properties.push('__proto__');
 
             var domMembers = getDOMMembers(object);
@@ -440,10 +440,10 @@ Firebug.DOMBasePanel.prototype = extend(Firebug.Panel,
                 }
                 else
                 {
-                    if (isDOMMember(object, name))
-                        this.addMember(object, "dom", domProps, name, val, level, domMembers[name], context);
-                    else if (isPrototype(name))
+                    if (isPrototype(name))
                         this.addMember(object, "proto", proto, name, val, level, 0, context);
+                    else if (isDOMMember(object, name))
+                        this.addMember(object, "dom", domProps, name, val, level, domMembers[name], context);
                     else if (isDOMConstant(name))
                         this.addMember(object, "dom", domConstants, name, val, level, 0, context);
                     else
