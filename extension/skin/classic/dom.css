@@ -113,20 +113,6 @@
     font-weight: bold;
 }
 
-.memberRow.protoRow {
-    background-color: rgb(255, 255, 224);
-}
-
-.memberRow.protoRow > TD {
-    border-top: 1px solid rgb(238,238,238);
-}
-
-.protoLabel {
-    color: gray;
-    font-style: italic;
-    font-weight: bold;
-}
-
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 .scopesRow {

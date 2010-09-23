@@ -385,10 +385,6 @@ Firebug.DOMBasePanel.prototype = extend(Firebug.Panel,
 
             for (var name in insecureObject)  // enumeration is safe
             {
-                // Prototype properties are available throuhg expandable prototype object.
-                if (!insecureObject.hasOwnProperty(name))
-                    continue;
-
                 // Ignore only global variables (properties of the |window| object).
                 if (shouldIgnore(name) && (object instanceof Window))
                 {
