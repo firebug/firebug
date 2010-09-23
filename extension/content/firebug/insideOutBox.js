@@ -97,11 +97,11 @@ InsideOutBox.prototype =
         return objectBox;
     },
 
-    expandObject: function(object)
+    expandObject: function(object, expandAll)
     {
         var objectBox = this.createObjectBox(object);
         if (objectBox)
-            this.expandObjectBox(objectBox);
+            this.expandObjectBox(objectBox, expandAll);
     },
 
     contractObject: function(object)
@@ -176,7 +176,7 @@ InsideOutBox.prototype =
         }
     },
 
-    expandObjectBox: function(objectBox)
+    expandObjectBox: function(objectBox, expandAll)
     {
         var nodeChildBox = this.getChildObjectBox(objectBox);
         if (!nodeChildBox)
@@ -187,10 +187,19 @@ InsideOutBox.prototype =
             var firstChild = this.view.getChildObject(objectBox.repObject, 0);
             this.populateChildBox(firstChild, nodeChildBox);
         }
+
         var labelBox = objectBox.getElementsByClassName('nodeLabelBox').item(0);
         if (labelBox)
             labelBox.setAttribute('aria-expanded', 'true');
         setClass(objectBox, "open");
+
+        // Recursively expand all child boxes.
+        if (expandAll)
+        {
+            var childBoxes = nodeChildBox.querySelectorAll(".containerNodeBox");
+            for (var i=0; i<childBoxes.length; i++)
+                this.expandObjectBox(childBoxes[i], expandAll);
+        }
     },
 
     contractObjectBox: function(objectBox)
@@ -209,9 +218,9 @@ InsideOutBox.prototype =
         var labelBox = nodeLabel.getElementsByClassName('nodeLabelBox').item(0);
         if (labelBox)
             labelBox.setAttribute('aria-expanded', isOpen);
+
         if (!forceOpen && isOpen)
             this.contractObjectBox(objectBox);
-
         else if (!isOpen)
             this.expandObjectBox(objectBox);
     },

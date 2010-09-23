@@ -229,6 +229,11 @@ Firebug.HTMLPanel.prototype = extend(Firebug.Panel,
         Firebug.HTMLModule.deleteNode(node, this.context);
     },
 
+    expandAll: function(node)
+    {
+        this.ioBox.expandObject(node, true);
+    },
+
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 
     getElementSourceText: function(node)
@@ -784,7 +789,7 @@ Firebug.HTMLPanel.prototype = extend(Firebug.Panel,
     {
         if (isLeftClick(event) && event.detail == 2)
         {
-            // The doublick (detail == 2) expands an HTML element, but the user must click
+            // The double-click (detail == 2) expands an HTML element, but the user must click
             // on the element itself not on the twisty.
             // The logic should be as follow:
             // - click on the twisty expands/collapses the element
@@ -845,6 +850,8 @@ Firebug.HTMLPanel.prototype = extend(Firebug.Panel,
             this.deleteNode(node, "up");
         else if (event.keyCode == KeyEvent.DOM_VK_DELETE && !(node.localName in innerEditableTags) && !(nonEditableTags.hasOwnProperty(node.localName)))
             this.deleteNode(node, "down");
+        else if (event.charCode == "42")  // Pressing '*' expands the node with all its children.
+            this.ioBox.expandObject(node, true);
         else
             return;
 
@@ -1237,9 +1244,20 @@ Firebug.HTMLPanel.prototype = extend(Firebug.Panel,
                 else if (isElementSVG(node))
                     EditElement = "EditSVGElement";
 
-                items.push("-", { label: EditElement, command: bindFixed(this.editNode, this, node)},
-                            { label: "DeleteElement", command: bindFixed(this.deleteNode, this, node), disabled:(node.localName in innerEditableTags)}
-                           );
+                items.push("-",
+                    {label: EditElement, command: bindFixed(this.editNode, this, node)},
+                    {label: "DeleteElement", command: bindFixed(this.deleteNode, this, node),
+                        disabled:(node.localName in innerEditableTags)}
+                );
+            }
+
+            var objectBox = getAncestorByClass(target, "nodeBox");
+            var nodeChildBox = this.ioBox.getChildObjectBox(objectBox);
+            if (nodeChildBox)
+            {
+                items.push("-",
+                    {label: "html.label.Expand All", acceltext: "*",
+                        command: bindFixed(this.expandAll, this, node)});
             }
         }
         else
