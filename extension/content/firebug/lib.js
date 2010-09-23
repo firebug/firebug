@@ -2541,6 +2541,9 @@ this.setItemIntoElement = function(element, item)
     if (item.className)
         FBL.setClass(element, item.className);
 
+    if (item.acceltext)
+        element.setAttribute("acceltext", item.acceltext);
+
     return element;
 }
 
