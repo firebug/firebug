@@ -1268,10 +1268,10 @@ Firebug.AutoCompleter = function(getExprOffset, getRange, evaluator, selectMode,
         {
             var hbox = completionPopup.ownerDocument.createElementNS("http://www.w3.org/1999/xhtml","div");
             pre = completionPopup.ownerDocument.createElementNS("http://www.w3.org/1999/xhtml","span");
-            pre.innerHTML = prefix;
+            pre.innerHTML = escapeForTextNode(prefix);
             var post = completionPopup.ownerDocument.createElementNS("http://www.w3.org/1999/xhtml","span");
             var completion = candidates[i].substr(preCompletion.length);
-            post.innerHTML = completion;
+            post.innerHTML = escapeForTextNode(completion);
             if (i === lastIndex)
                 post.setAttribute('selected', 'true');
 
