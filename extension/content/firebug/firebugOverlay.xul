@@ -347,7 +347,7 @@
 
                                     <!-- Status buttons, used e.g. by the HTML panel to show
                                         a parent list of the currently selected element. -->
-                                    <hbox id="fbStatusButtons" flex="100">
+                                    <hbox id="fbStatusButtons" flex="100" collapsed="true">
                                         <toolbarseparator id="fbStatusSeparator"/>
                                         <arrowscrollbox flex="1" smoothscroll="true" orient="horizontal">
                                             <panelStatus id="fbPanelStatus"

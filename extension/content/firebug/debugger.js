@@ -3128,6 +3128,7 @@ Firebug.ScriptPanel.prototype = extend(Firebug.SourceBoxPanel,
         this.showToolbarButtons("fbDebuggerButtons", active);
         this.showToolbarButtons("fbLocationButtons", active);
         this.showToolbarButtons("fbScriptButtons", active);
+        this.showToolbarButtons("fbStatusButtons", active);
 
         // Additional debugger panels are visible only if debugger
         // is active.
@@ -3143,6 +3144,8 @@ Firebug.ScriptPanel.prototype = extend(Firebug.SourceBoxPanel,
 
         this.showToolbarButtons("fbScriptButtons", false);
         this.showToolbarButtons("fbLocationButtons", false);
+        this.showToolbarButtons("fbStatusButtons", false);
+
         var panelStatus = Firebug.chrome.getPanelStatusElements();
         FBL.hide(panelStatus, false);
 

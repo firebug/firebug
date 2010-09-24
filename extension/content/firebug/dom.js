@@ -1051,6 +1051,8 @@ Firebug.DOMBasePanel.prototype = extend(Firebug.Panel,
 
     show: function(state)
     {
+        this.showToolbarButtons("fbStatusButtons", true);
+
         if (!this.selection)
         {
             if (!state)
@@ -1134,6 +1136,8 @@ Firebug.DOMBasePanel.prototype = extend(Firebug.Panel,
 
     hide: function()
     {
+        this.showToolbarButtons("fbStatusButtons", false);
+
         var view = this.viewPath[this.pathIndex];
         if (view && this.panelNode.scrollTop)
             view.scrollTop = this.panelNode.scrollTop;

@@ -917,6 +917,7 @@ Firebug.HTMLPanel.prototype = extend(Firebug.Panel,
     show: function(state)
     {
         this.showToolbarButtons("fbHTMLButtons", true);
+        this.showToolbarButtons("fbStatusButtons", true);
 
         this.panelNode.ownerDocument.addEventListener("keypress", this.onKeyPress, true);
 
@@ -943,6 +944,8 @@ Firebug.HTMLPanel.prototype = extend(Firebug.Panel,
     hide: function()
     {
         this.showToolbarButtons("fbHTMLButtons", false);
+        this.showToolbarButtons("fbStatusButtons", false);
+
         delete this.infoTipURL;  // clear the state that is tracking the infotip so it is reset after next show()
         this.panelNode.ownerDocument.removeEventListener("keypress", this.onKeyPress, true);
     },
