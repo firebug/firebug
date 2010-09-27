@@ -24,10 +24,15 @@ var _FirebugCommandLine =
         }
 
         // Define console shortcuts
-        var consoleShortcuts = ["dir", "dirxml"];
+        var consoleShortcuts = ["dir", "dirxml", "table"];
         for (var i=0; i<consoleShortcuts.length; i++)
         {
             var command = consoleShortcuts[i];
+
+            // If the method is already defined, don't override it.
+            if (window[command])
+                continue;
+
             this[command] = new Function("return window.console." + command + ".apply(window.console, arguments)");
         }
 
