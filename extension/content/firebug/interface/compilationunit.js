@@ -112,9 +112,9 @@ CompilationUnit.prototype.getSource = function(listener) {
 };
 
 /**
- * Requests to create a breakpoint in this compilation unit asynchronously. The breakpoint
- * request will be sent to the browser and an <code>onToggleBreakpoint</code> event will
- * be sent by the browser when the breakpoint is installed.
+ * Requests to create a breakpoint in this compilation unit asynchronously. A breakpoint
+ * creation request will be sent to the browser and an <code>onToggleBreakpoint</code>
+ * event will be sent by the browser when the breakpoint is installed.
  * <p>
  * <ul>
  * <li>TODO: onToggleBreakpoint event is not spec'd - is this the intended use?</li>
@@ -132,3 +132,32 @@ CompilationUnit.prototype.setBreakpoint = function(lineNumber) {
 };
 
 // ---- PRIVATE ----
+
+/**
+ * Adds the specified breakpoint to this compilation unit's collection of breakpoints.
+ * Implementation should call this method when a breakpoint is created in a compilation
+ * unit.
+ * 
+ * @param breakpoint the breakpoint that was created
+ * @function
+ */
+CompilationUnit.prototype._addBreakpoint = function(breakpoint) {
+	this.breakpoints.push(breakpoint);
+};
+
+/**
+ * Removes the specified breakpoint from this compilation unit's collection of breakpoints.
+ * Implementation should call this method when a breakpoint is cleared from a compilation
+ * unit.
+ * 
+ * @param breakpoint the breakpoint that was removed
+ * @function
+ */
+CompilationUnit.prototype._removeBreakpoint = function(breakpoint) {
+	for ( var i = 0; i < this.breakpoints.length; i++) {
+		if (this.breakpoints[i] == breakpoint) {
+			this.breakpoints.splice(i, 1);
+			return;
+		}
+	}
+};
