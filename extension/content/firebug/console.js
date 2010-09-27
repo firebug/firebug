@@ -751,7 +751,6 @@ Firebug.ConsolePanel.prototype = extend(Firebug.ActivablePanel,
         if (state)
             state.wasScrolledToBottom = this.wasScrolledToBottom;
 
-        this.showToolbarButtons("fbConsoleButtons", false);
         this.showCommandLine(false);
 
         if (FBTrace.DBG_CONSOLE)

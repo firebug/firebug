@@ -47,7 +47,7 @@ Firebug.Breakpoint = extend(Firebug.Module,
             breakButton.setAttribute("panelName", panel.name);
 
         breakButton.removeAttribute("type");
-        collapse(breakButton, !panel.breakable);
+        collapse($("fbBonButtons"), !panel.breakable);
 
         // Disable break-on-next if it isn't supported by the current panel.
         if (!panel.breakable || !panel.context.jsDebuggerActive )

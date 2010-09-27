@@ -817,8 +817,6 @@ Firebug.CSSStyleSheetPanel.prototype = extend(Firebug.SourceBoxPanel,
 
     hide: function()
     {
-        this.showToolbarButtons("fbCSSButtons", false);
-
         this.lastScrollTop = this.panelNode.scrollTop;
     },
 

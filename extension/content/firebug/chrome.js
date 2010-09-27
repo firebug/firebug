@@ -1539,6 +1539,18 @@ function onSelectingPanel(event)
     if (panel)
         panel.navigate(panel.location);
 
+    // Hide all toolbars now. It's a responsibility of the new selected panel to show
+    // those toolbars that are necessary. This avoids the situation when naughty panel
+    // doesn't clean up its toolbars. This must be done before showPanel where visibility
+    // of the BON buttons is managed.
+    var toolbar = $("fbToolbarInner");
+    var child = toolbar.firstChild;
+    while (child)
+    {
+        FBL.collapse(child, true);
+        child = child.nextSibling;
+    }
+
     // Calling Firebug.showPanel causes dispatching "showPanel" to all modules.
     var browser = panel ? panel.context.browser : FirebugChrome.getCurrentBrowser();
     Firebug.showPanel(browser, panel);

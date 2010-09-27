@@ -214,20 +214,22 @@
                                 <hbox id="fbToolbarInner" class="innerToolbar" insertbefore="fbDetachButton" flex="1" align="center">
 
                                     <!-- Break On Next -->
-                                    <toolbarbutton id="fbBreakOnNextButton" command="cmd_breakOnNext"
-                                        tooltiptext="script.Break On Next" breakable="disabled">
-                                        <stack id="fbBreakOnNextButtonStack">
-                                            <image id="fbBreakOnImageDisabled"></image>
-                                            <image id="fbBreakOnImage" class="fbBreakOnImage"></image>
-                                            <image id="fbBreakOnImageActive" class="fbBreakOnImage"></image>
-                                            <image id="fbBreakOnImageArmed" class="fbBreakOnImage"></image>
-                                            <!-- Badges -->
-                                            <image id="fbBreakOnImageError" class="fbBreakOnImage"></image>
-                                            <image id="fbBreakOnImageMutate" class="fbBreakOnImage"></image>
-                                            <image id="fbBreakOnImageNext" class="fbBreakOnImage"></image>
-                                            <image id="fbBreakOnImageXHR" class="fbBreakOnImage"></image>
-                                        </stack>
-                                    </toolbarbutton>
+                                    <hbox id="fbBonButtons" collapsed="true" class="noTabStop">
+                                        <toolbarbutton id="fbBreakOnNextButton" command="cmd_breakOnNext"
+                                            tooltiptext="script.Break On Next" breakable="disabled">
+                                            <stack id="fbBreakOnNextButtonStack">
+                                                <image id="fbBreakOnImageDisabled"></image>
+                                                <image id="fbBreakOnImage" class="fbBreakOnImage"></image>
+                                                <image id="fbBreakOnImageActive" class="fbBreakOnImage"></image>
+                                                <image id="fbBreakOnImageArmed" class="fbBreakOnImage"></image>
+                                                <!-- Badges -->
+                                                <image id="fbBreakOnImageError" class="fbBreakOnImage"></image>
+                                                <image id="fbBreakOnImageMutate" class="fbBreakOnImage"></image>
+                                                <image id="fbBreakOnImageNext" class="fbBreakOnImage"></image>
+                                                <image id="fbBreakOnImageXHR" class="fbBreakOnImage"></image>
+                                            </stack>
+                                        </toolbarbutton>
+                                    </hbox>
 
                                     <hbox id="fbConsoleButtons" collapsed="true" class="noTabStop">
                                         <toolbarseparator class="fbPanelSpecificButtonsSeparator"/>

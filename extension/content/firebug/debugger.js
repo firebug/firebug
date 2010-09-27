@@ -3138,13 +3138,7 @@ Firebug.ScriptPanel.prototype = extend(Firebug.SourceBoxPanel,
 
     hide: function(state)
     {
-        this.showToolbarButtons("fbDebuggerButtons", false);
-
         this.highlight(this.context.stopped);
-
-        this.showToolbarButtons("fbScriptButtons", false);
-        this.showToolbarButtons("fbLocationButtons", false);
-        this.showToolbarButtons("fbStatusButtons", false);
 
         var panelStatus = Firebug.chrome.getPanelStatusElements();
         FBL.hide(panelStatus, false);
