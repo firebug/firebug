@@ -224,7 +224,7 @@ panelTab[selected="true"]:hover > panelTabMenu .menuTarget {
 
 /* Evaluated scripts can take a lot of horizontal space on the toolbar so, this is the limit */
 #fbLocationList {
-    max-width: 180px;
+    max-width: 250px;
 }
 
 /************************************************************************************************/

@@ -358,7 +358,7 @@
                                         </arrowscrollbox>
                                     </hbox>
 
-                                    <hbox id="fbDebuggerButtons" minwidth="126" collapsed="true" class="noTabStop">
+                                    <hbox id="fbDebuggerButtons" collapsed="true" class="noTabStop">
                                         <toolbarbutton id="fbRerunButton" command="cmd_rerun"
                                             tooltiptext="firebug.Rerun" class="toolbar-image-button" />
                                         <toolbarbutton id="fbContinueButton" command="cmd_resumeExecution"
