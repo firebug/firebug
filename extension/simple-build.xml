@@ -1,74 +1,105 @@
 <?xml version="1.0" ?>
 
-<!-- In order to build firebug extension run: $ant build
-    The final xpi file should be located in release directory
-    GETFIREBUG in content/firebug/branch.properties assumes you have fbug and getfirebug.com directories at the same level
-    To check GETFIREBUG value run: ant -v echo
--->
+<!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+* In order to build Firebug xpi run: $ant -f simple-build.xml
+
+* The final xpi + update.rdf file will be located in 'release' sub directory.
+
+* If GETFIREBUG is properly specified in content/firebug/branch.properties
+  (it assumes you have fbug and getfirebug.com directories at the same level)
+  The xpi + update.rdf will be also deployed for you there and so, you can just commit.
+
+* To check GETFIREBUG value run: ant -f simple-build echo
+- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
 <project name="firebug" basedir="." default="build">
 
     <!-- Properties -->
     <property file="content/firebug/branch.properties"/>
 
     <!-- Directories -->
-    <property name="build.dir" value="../../build"/>
-	<property name="release.dir" value="${GETFIREBUG}/${VERSION}"/>
+    <property name="build.dir" value="./build"/>
+    <property name="release.dir" value="./release"/>
+    <property name="deploy.dir" value="${GETFIREBUG}/${VERSION}"/>
 
-	<available file="${release.dir}" property="release.dir.available"/>
+    <available file="${deploy.dir}" property="deploy.dir.available"/>
 
-	<!-- echo -->
-	<target name="echo" >
-		<echo message="firebug version: ${VERSION}${RELEASE} in ${release.dir} available: ${release.dir.available}"/>
-	</target>
+    <!-- echo -->
+    <target name="echo">
+        <echo message="Build directory: ${build.dir}"/>
+        <echo message="Deploy directory ${deploy.dir} available: ${deploy.dir.available}"/>
+    </target>
 
     <!-- Clean -->
     <target name="clean">
         <delete dir="${build.dir}"/>
+        <delete dir="${release.dir}"/>
     </target>
 
     <!-- Build -->
-    <target name="build" if="release.dir.available" depends="clean">
+    <target name="build" depends="clean">
 
-        <!-- Copy directory -->
+        <mkdir dir="${build.dir}" />
+        <mkdir dir="${release.dir}" />
+
+        <!-- Copy all files -->
         <copy todir="${build.dir}">
             <fileset dir=".">
                <include name="**/*.js"/>
                <include name="**/*.xul"/>
                <include name="**/*.properties"/>
                <include name="**/*.css"/>
+               <include name="**/*.html"/>
+               <include name="**/*.xml"/>
+               <include name="**/*.dtd"/>
+               <include name="**/*.png"/>
+               <include name="**/*.gif"/>
+               <include name="**/*.ico"/>
+               <include name="**/*.manifest"/>
+               <include name="**/*.txt"/>
+               <include name="**/*.html"/>
             </fileset>
         </copy>
 
-        <!-- Copy extension installation files and licence.txt -->
-        <copy file="chrome.manifest" todir="${build.dir}"/>
-        <copy file="license.txt" todir="${build.dir}"/>
-
-        <!-- Update release version from content/firebug/branch.properties file -->
-    	<copy file="install.rdf.tpl.xml" tofile="install.rdf"/>
-    	<replace file="install.rdf" propertyFile="content/firebug/branch.properties">
+        <!-- Copy install.rd with updated release version info -->
+        <copy file="install.rdf.tpl.xml" tofile="${build.dir}/install.rdf"/>
+        <replace file="${build.dir}/install.rdf" propertyFile="content/firebug/branch.properties">
             <replacefilter token="@VERSION@" property="VERSION"/>
             <replacefilter token="@RELEASE@" property="RELEASE"/>
         </replace>
-    	<copy file="install.rdf" todir="${build.dir}"/>
+
+        <!-- Remove unnecessary *.xml files in the root directory (like e.g. this build file),
+            but not from sub directories. -->
+        <delete dir="${build.dir}" includes="*.xml" />
+        <delete file="${build.dir}/update.rdf" />
+        <delete file="${build.dir}/jarred.manifest" />
 
         <!-- Create final firebug.xpi file -->
         <zip destfile="${release.dir}/firebug-${VERSION}${RELEASE}.xpi"
             basedir="${build.dir}" update="true" />
 
-        <!-- Generate update.rdf file -->
-        <delete file="${release.dir}/update.rdf"/>
-        <copy file="update.rdf.tpl.xml" tofile="update.rdf"/>
-        <replace file="update.rdf" propertyFile="content/firebug/branch.properties">
-            <replacefilter token="@VERSION@" property="VERSION"/>
-            <replacefilter token="@RELEASE@" property="RELEASE"/>
-        	<replacefilter token="@LEAF@" value="firebug-${VERSION}${RELEASE}.xpi"/>
-        </replace>
-        <copy file="update.rdf" todir="${release.dir}"/>
-
+        <!-- The xpi is created, let's remove the build dir. -->
         <delete dir="${build.dir}"/>
 
-        <!-- Final version message -->
-    	<antcall target="echo"></antcall>
+        <!-- Copy update.rdf file with updated release version info -->
+        <copy file="update.rdf.tpl.xml" tofile="${release.dir}/update.rdf"/>
+        <replace file="${release.dir}/update.rdf" propertyFile="content/firebug/branch.properties">
+            <replacefilter token="@VERSION@" property="VERSION"/>
+            <replacefilter token="@RELEASE@" property="RELEASE"/>
+            <replacefilter token="@LEAF@" value="firebug-${VERSION}${RELEASE}.xpi"/>
+        </replace>
+
+        <!-- Final message -->
+        <echo message="Firebug version: ${VERSION}${RELEASE} in ${build.dir}"/>
+
+        <!-- Deploy -->
+        <antcall target="deploy" />
+    </target>
+
+    <!-- Deploy to release.dir if provided properly -->
+    <target name="deploy" if="deploy.dir.available">
+        <copy file="${release.dir}/update.rdf" todir="${deploy.dir}"/>
+        <copy file="${release.dir}/firebug-${VERSION}${RELEASE}.xpi" todir="${deploy.dir}"/>
+        <echo message="Firebug deployed: ${VERSION}${RELEASE} to ${deploy.dir}"/>
     </target>
 
 </project>
