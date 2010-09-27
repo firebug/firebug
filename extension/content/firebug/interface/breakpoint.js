@@ -66,37 +66,20 @@
  * </p>
  * 
  * @constructor
- * @param id unique breakpoint identifier, a {@link String} that cannot be <code>null</code>
  * @param compilationUnit the {@link CompilationUnit} unit that contains this breakpoint
  * @param lineNumber the source code line number the breakpoint is set on
  * @type Breakpoint
  * @return a new Breakpoint
  * @version 1.0
  */
-function Breakpoint(id, compilationUnit, lineNumber) {
-	this.id = id;
+function Breakpoint(compilationUnit, lineNumber) {
 	this.compilationUnit = compilationUnit;
+	this.lineNumber = lineNumber;
 	this.installed = false;
 	this.cleared = false;
-	this.exists = true;
 }
 
 // ---- API ----
-
-/**
- * Returns the identifier of this breakpoint. A breakpoint identifier is unique within
- * its compilation unit.
- * <p>
- * This function does not require communication with
- * the browser.
- * </p>
- * 
- * @function
- * @returns breakpoint identifier as as {@link String}
- */
-Breakpoint.prototype.getId = function() {
-	return this.id;
-};
 
 /**
  * Returns the compilation unit this breakpoint was created in.
@@ -155,7 +138,7 @@ Breakpoint.prototype.isInstalled = function() {
  * @returns whether this breakpoint has been cleared
  */
 Breakpoint.prototype.isCleared = function() {
-	return !this.cleared;
+	return this.cleared;
 };
 
 /**
@@ -169,7 +152,37 @@ Breakpoint.prototype.isCleared = function() {
  * 
  */
 Breakpoint.prototype.getLineNumber = function() {
-	
+	return this.lineNumber;
 };
 
 // ---- PRIVATE ---- 
+
+/**
+ * Implementations must call this method when a breakpoint gets installed in the browser.
+ * Notification will be sent to registered listeners that the breakpoint has been installed.
+ * Updates the installed property of this breakpoint. This method should only be called once when
+ * a breakpoint becomes installed.
+ * 
+ * @function
+ */
+Breakpoint.prototype._installed = function() {
+	if (!this.installed) {
+		this.installed = true;
+		this.getCompilationUnit().getBrowserContext().getBrowser()._dispatch("onToggleBreakpoint", [this]);	
+	}
+}
+
+/**
+ * Implementations must call this method when a breakpoint is cleared from the browser.
+ * Notification will be sent to registered listeners that the breakpoint has been cleared.
+ * Updates the installed and cleared properties of this breakpoint. This method should only
+ * be called once when a breakpoint is cleared.
+ * 
+ * @function
+ */
+Breakpoint.prototype._cleared = function() {
+	if (!this.cleared) {
+		this.cleared = true;
+		this.getCompilationUnit().getBrowserContext().getBrowser()._dispatch("onToggleBreakpoint", [this]);
+	}
+}
