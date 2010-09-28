@@ -401,7 +401,7 @@ Firebug.DOMBasePanel.prototype = extend(Firebug.Panel,
             if (insecureObject.hasOwnProperty('prototype') && properties.indexOf('prototype') == -1)
                 properties.push('prototype');
 
-            if (insecureObject.__proto__)  // XXXjjb I think it is always true ?
+            if (insecureObject.__proto__ && hasProperties(insecureObject.__proto__))  // XXXjjb I think it is always true ?
                 properties.push('__proto__');
 
             var domMembers = getDOMMembers(object);
