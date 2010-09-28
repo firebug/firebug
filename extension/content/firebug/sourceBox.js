@@ -862,7 +862,7 @@ Firebug.SourceBoxPanel = extend(SourceBoxPanelBase,
         if (!firstRenderedLineElement)
         {
             // It's not an error if the panel is disabled.
-            if (FBTrace.DBG_ERRORS && this.prototype.isEnabled())
+            if (FBTrace.DBG_ERRORS && this.isEnabled())
                 FBTrace.sysout("setViewportPadding FAILS, no line at "+sourceBox.firstRenderedLine, sourceBox);
             return;
         }
