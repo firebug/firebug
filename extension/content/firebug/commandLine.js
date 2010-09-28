@@ -940,7 +940,7 @@ function getExpressionOffset(command, offset)
         }
         else if (bracketCount == 0)
         {
-            if (/[a-zA-Z0-9_.]/.test(c));
+            if (/[a-zA-Z0-9$_.]/.test(c));
             else break;
         }
     }
