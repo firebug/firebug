@@ -212,13 +212,14 @@ var ObjectPersister =
             cstream.init(inputStream, "UTF-8", 0, 0);
 
             // Load  json.
+            var json = "";
             var data = {};
-            cstream.readString(-1, data);
-            inputStream.close();
-            if (!data.value.length)
-                return null;
+            while (cstream.readString(-1, data) != 0)
+                json += data.value;
 
-            return data.value;
+            inputStream.close();
+
+            return json;
         }
         catch (err)
         {
