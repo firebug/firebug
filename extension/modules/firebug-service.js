@@ -435,7 +435,6 @@ var fbs =
         fbs.nestedEventLoopDepth = jsd.enterNestedEventLoop({
             onNest: function()
             {
-                dispatch(netDebuggers, "resumeActivity");
                 callback.onNest();
             }
         });
@@ -445,7 +444,6 @@ var fbs =
 
     exitNestedEventLoop: function()
     {
-        dispatch(netDebuggers, "suspendActivity");
         try
         {
             return jsd.exitNestedEventLoop();
