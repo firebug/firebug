@@ -423,22 +423,28 @@ var fbs =
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+
     forceGarbageCollection: function()
     {
         jsd.GC(); // Force the engine to perform garbage collection.
     },
+
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 
     enterNestedEventLoop: function(callback)
     {
         dispatch(netDebuggers, "suspendActivity");
+        this.activitySuspended = true;
+
         fbs.nestedEventLoopDepth = jsd.enterNestedEventLoop({
             onNest: function()
             {
                 callback.onNest();
             }
         });
+
         dispatch(netDebuggers, "resumeActivity");
+        this.activitySuspended = false;
         return fbs.nestedEventLoopDepth;
     },
 

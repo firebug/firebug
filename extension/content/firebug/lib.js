@@ -3276,6 +3276,19 @@ this.iterateBrowserTabs = function(browserWindow, callback)
     return false;
 }
 
+/**
+ * Returns <browser> element for specified content window.
+ * @param {Object} win - Content window
+ */
+this.getBrowserForWindow = function(win)
+{
+    var tabBrowser = document.getElementById("content");
+    if (tabBrowser && win.document)
+        return tabBrowser.getBrowserForDocument(win.document);
+};
+
+// ************************************************************************************************
+
 this.safeGetWindowLocation = function(window)
 {
     try
@@ -4376,17 +4389,6 @@ this.suspendShowStackTrace = function()
 this.resumeShowStackTrace = function()
 {
     Firebug.showStackTrace = saveShowStackTrace;
-};
-
-/**
- * Returns <browser> element for specified content window.
- * @param {Object} win - Content window
- */
-this.getBrowserForWindow = function(win)
-{
-    var tabBrowser = document.getElementById("content");
-    if (tabBrowser && win.document)
-        return tabBrowser.getBrowserForDocument(win.document);
 };
 
 // ************************************************************************************************

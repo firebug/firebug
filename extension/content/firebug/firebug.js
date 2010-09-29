@@ -2110,6 +2110,7 @@ top.Firebug =
     },
 
     //*********************************************************************************************
+
     /*
      * This method syncs the UI to a context
      * @param context to become the active and visible context
@@ -2118,6 +2119,7 @@ top.Firebug =
     {
         this.showContext(context.browser, context);
     },
+
     //*********************************************************************************************
 
     getTabForWindow: function(aWindow)  // TODO move to FBL, only used by getTabIdForWindow
@@ -2147,6 +2149,12 @@ top.Firebug =
     {
         var tab = this.getTabForWindow(win);
         return tab ? tab.linkedPanel : null;
+    },
+
+    focusBrowserTab: function(win)    // TODO move to FBL
+    {
+        this.tabBrowser.selectedTab = this.getTabForWindow(win);
+        this.chrome.focus();
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *

@@ -3069,7 +3069,9 @@ Firebug.ScriptPanel.prototype = extend(Firebug.SourceBoxPanel,
         // Fill the panel node with a warning if needed
         var aLocation = this.getDefaultLocation();
         var jsEnabled = Firebug.getPref("javascript", "enabled");
-        if (!jsEnabled)
+        if (FBL.fbs.activitySuspended && !this.context.stopped)
+            this.activeWarningTag = WarningRep.showActivitySuspended(this.panelNode);
+        else if (!jsEnabled)
             this.activeWarningTag = WarningRep.showNotEnabled(this.panelNode);
         else if (this.context.allScriptsWereFiltered)
             this.activeWarningTag = WarningRep.showFiltered(this.panelNode);
@@ -3756,8 +3758,15 @@ Firebug.ScriptPanel.WarningRep = domplate(Firebug.Rep,
 
     enableScriptTag:
         DIV({"class": "objectLink", onclick: "$onEnableScript", style: "color: blue"},
-            SPAN($STR("script.button.enable_javascript"))
+            $STR("script.button.enable_javascript")
         ),
+
+    focusDebuggerTag:
+        DIV({"class": "objectLink", onclick: "$onFocusDebugger", style: "color: blue"},
+            $STR("script.button.script.button.Go to that page")
+        ),
+
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 
     onEnableScript: function(event)
     {
@@ -3765,6 +3774,21 @@ Firebug.ScriptPanel.WarningRep = domplate(Firebug.Rep,
 
         var panel = Firebug.getElementPanel(event.target);
         panel.context.window.location.reload();
+    },
+
+    onFocusDebugger: function(event)
+    {
+        iterateBrowserWindows("navigator:browser", function(win)
+        {
+            return win.TabWatcher.iterateContexts(function(context)
+            {
+                if (context.stopped)
+                {
+                     win.Firebug.focusBrowserTab(context.window);
+                     return true;
+                }
+            });
+        });
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
@@ -3807,6 +3831,19 @@ Firebug.ScriptPanel.WarningRep = domplate(Firebug.Rep,
             suggestion: $STR("script.suggestion.no_javascript")
         }
         return this.tag.replace(args, parentNode, this);
+    },
+
+    showActivitySuspended: function(parentNode)
+    {
+        var args = {
+            pageTitle: $STR("script.warning.debugger_active"),
+            suggestion: $STR("script.suggestion.debugger_active")
+        }
+
+        var box = this.tag.replace(args, parentNode, this);
+        this.focusDebuggerTag.append({}, box, this);
+
+        return box;
     }
 });
 
