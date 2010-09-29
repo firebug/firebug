@@ -345,6 +345,7 @@ Firebug.DOMBasePanel.ToolboxPlate = ToolboxPlate;
 Firebug.DOMBasePanel.prototype = extend(Firebug.Panel,
 {
     tag: DirTablePlate.tableTag,
+    dirTablePlate: DirTablePlate,
 
     getRealObject: function(object)
     {
@@ -644,7 +645,7 @@ Firebug.DOMBasePanel.prototype = extend(Firebug.Panel,
 
         var table = this.tag.replace({domPanel: this, toggles: this.toggles}, dest);
         var tbody = table.lastChild;
-        var rowTag = DirTablePlate.rowTag;
+        var rowTag = this.dirTablePlate.rowTag;
 
         // Insert the first slice immediately
         var setSize = members.length;
@@ -743,7 +744,7 @@ Firebug.DOMBasePanel.prototype = extend(Firebug.Panel,
         if (!object)
             return;
 
-        // Get the value with try-catch statement. This method is used also wihin
+        // Get the value with try-catch statement. This method is used also within
         // getContextMenuItems where the exception would break the context menu.
         // 1) The Firebug.Debugger.evaluate can throw
         // 2) object[propName] can also throws in case of e.g. non existing "abc.abc" prop name.
@@ -1087,7 +1088,7 @@ Firebug.DOMBasePanel.prototype = extend(Firebug.Panel,
             if (this.propertyPath.length > 1)
                 selectObject = this.resetPaths(selectObject);
             else
-                this.propertyPath.push(null);   // Sync with objectPath always containing a defalt object.
+                this.propertyPath.push(null);   // Sync with objectPath always containing a default object.
 
             var selection = state.pathIndex < this.objectPath.length
                 ? this.getPathObject(state.pathIndex)

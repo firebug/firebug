@@ -375,7 +375,7 @@ Firebug.Activation.TabWatcherListener =
 
 /**
  * @module Implements Panel activation logic. A Firebug panel can support activation in order
- * to avoid performance penalties in cases when panel's featuures are not necesary at the moment.
+ * to avoid performance penalties in cases when panel's features are not necessary at the moment.
  * Such panel must be derived from {@link Firebug.ActivablePanel} and appropriate activable
  * module from {@link Firebug.ActivableModule}
  */
