@@ -110,7 +110,7 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
     },
 
     /*
-     * private to Debugger
+     * private to Debugger, returns list of strings
      */
     getFrameKeys: function(frame, names)  // TODO backend
     {
@@ -915,7 +915,7 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
             else
             {
                 if (FBTrace.DBG_UI_LOOP)
-                    FBTrace.sysout("debugger.stopDebugging else "+context.getName()+" "+context.window.location);
+                    FBTrace.sysout("debugger.stopDebugging else "+context.getName()+" "+safeGetWindowLocation(context.window));
             }
         }
         catch (exc)
@@ -1297,6 +1297,12 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
             if (Firebug.breakOnErrors)
             {
                 var sourceFile = Firebug.SourceFile.getSourceFileByScript(context, frame.script);
+                if (!sourceFile)
+                {
+                    if (FBTrace.DBG_ERRORS)
+                        FBTrace.sysout("debugger.breakon Errors no sourceFile for "+frame.script.tag+"@"+frame.script.fileName);
+                    return;
+                }
                 var analyzer = sourceFile.getScriptAnalyzer(frame.script);
                 var lineNo = analyzer.getSourceLineFromFrame(context, frame);
 
