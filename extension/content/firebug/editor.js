@@ -1119,7 +1119,18 @@ Firebug.AutoCompleter = function(getExprOffset, getRange, evaluator, selectMode,
                 candidates = [];
                 for (var i = 0; i < values.length; ++i)
                 {
-                    if (values[i].substr)
+                    var value = values[i];
+
+                    // Use only string props
+                    if (typeof(value) != "string")
+                        continue;
+
+                    // Use only those props that don't contain unsafe charactes and so need
+                    // quotation (e.g. object["my prop"] notice the space character).
+                    // Following expression checks that the name starts with a letter or $_,
+                    // and there are only letters, numbers or $_ character in the string (no spaces).
+                    var re = /^[A-Za-z_$][A-Za-z_$0-9]*/;
+                    if (value.match(re) == value)
                         candidates.push(values[i]);
                 }
                 lastIndex = -2;
