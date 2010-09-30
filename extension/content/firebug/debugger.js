@@ -3070,7 +3070,12 @@ Firebug.ScriptPanel.prototype = extend(Firebug.SourceBoxPanel,
         var aLocation = this.getDefaultLocation();
         var jsEnabled = Firebug.getPref("javascript", "enabled");
         if (FBL.fbs.activitySuspended && !this.context.stopped)
+        {
+            // Make sure that the content of the panel is restored as soon as
+            // the debugger is resumed.
+            this.restored = false;
             this.activeWarningTag = WarningRep.showActivitySuspended(this.panelNode);
+        }
         else if (!jsEnabled)
             this.activeWarningTag = WarningRep.showNotEnabled(this.panelNode);
         else if (this.context.allScriptsWereFiltered)
@@ -3757,13 +3762,13 @@ Firebug.ScriptPanel.WarningRep = domplate(Firebug.Rep,
         ),
 
     enableScriptTag:
-        DIV({"class": "objectLink", onclick: "$onEnableScript", style: "color: blue"},
+        SPAN({"class": "objectLink", onclick: "$onEnableScript", style: "color: blue"},
             $STR("script.button.enable_javascript")
         ),
 
     focusDebuggerTag:
-        DIV({"class": "objectLink", onclick: "$onFocusDebugger", style: "color: blue"},
-            $STR("script.button.script.button.Go to that page")
+        SPAN({"class": "objectLink", onclick: "$onFocusDebugger", style: "color: blue"},
+            $STR("script.button.Go to that page")
         ),
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
