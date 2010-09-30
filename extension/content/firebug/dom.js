@@ -1229,7 +1229,7 @@ Firebug.DOMBasePanel.prototype = extend(Firebug.Panel,
             {
                 this.toggles = new ToggleBranch();
 
-                var win = unwrapObject(this.context.getGlobalScope());
+                var win = this.getDefaultSelection();
                 if (object == win)
                 {
                     this.pathIndex = 0;
