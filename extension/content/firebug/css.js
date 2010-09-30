@@ -1259,13 +1259,15 @@ Firebug.CSSStyleSheetPanel.prototype = extend(Firebug.SourceBoxPanel,
         ];
     },
 
-    getStyleDeclaration: function(rule)
+    getStyleDeclaration: function(cssSelector)
     {
+        var cssRule = getAncestorByClass(cssSelector, "cssRule");
+        var cssRules = cssRule.getElementsByClassName("cssPropertyListBox")[0].rule;
         var props = [];
 
-        for (var p in rule.props)
+        for (var p in cssRules.props)
         {
-          var prop = rule.props[p];
+          var prop = cssRules.props[p];
           if (!(prop.disabled || prop.overridden))
             props.push(prop.name + ": " + prop.value + prop.important + ";");
         }
@@ -1275,20 +1277,14 @@ Firebug.CSSStyleSheetPanel.prototype = extend(Firebug.SourceBoxPanel,
 
     copyRuleDeclaration: function(cssSelector)
     {
-        var cssRule = getAncestorByClass(cssSelector, "cssRule");
-        var listBox = cssRule.getElementsByClassName("cssPropertyListBox")[0];
-        var props = this.getStyleDeclaration(listBox.rule);
-
+        var props = this.getStyleDeclaration(cssSelector);
         copyToClipboard(cssSelector.textContent + " {" + lineBreak() + "  " + props.join(lineBreak() + "  ") + lineBreak() + "}");
     },
 
     copyStyleDeclaration: function(cssSelector)
     {
-      var cssRule = getAncestorByClass(cssSelector, "cssRule");
-      var listBox = cssRule.getElementsByClassName("cssPropertyListBox")[0];
-      var props = this.getStyleDeclaration(listBox.rule);
-
-      copyToClipboard(props.join(lineBreak()));
+        var props = this.getStyleDeclaration(cssSelector);
+        copyToClipboard(props.join(lineBreak()));
     }
 });
 
