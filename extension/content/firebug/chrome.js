@@ -686,7 +686,7 @@ top.FirebugChrome =
             panelBar2.hideSelectedPanel()
     },
 
-    syncPanel: function()
+    syncPanel: function(panelName)
     {
         var context = Firebug.currentContext;
 
@@ -698,7 +698,8 @@ top.FirebugChrome =
 
         if (context)
         {
-            var panelName = context.panelName? context.panelName : Firebug.defaultPanelName;
+            if (!panelName)
+                panelName = context.panelName? context.panelName : Firebug.defaultPanelName;
 
             // Make HTML panel the default panel, which is displayed
             // to the user the very first time.
@@ -725,6 +726,8 @@ top.FirebugChrome =
 
     syncSidePanels: function()
     {
+        if(FBTrace.DBG_PANELS)
+            FBTrace.sysout("syncSidePanels "+panelBar1.selectedPanel);
         if (!panelBar1.selectedPanel)
             return;
 

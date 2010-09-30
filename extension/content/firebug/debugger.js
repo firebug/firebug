@@ -860,7 +860,7 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
             // Update Break on Next lightning.
             var panel = context.getPanel("script", true);
             Firebug.Breakpoint.updatePanelTab(panel, false);
-
+            Firebug.chrome.syncPanel("script");  // issue 3463
             Firebug.chrome.select(context.stoppedFrame, "script", null, true);
             Firebug.chrome.focus();
         }
