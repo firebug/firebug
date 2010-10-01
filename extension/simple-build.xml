@@ -10,6 +10,8 @@
   The xpi + update.rdf will be also deployed for you there and so, you can just commit.
 
 * To check GETFIREBUG value run: ant -f simple-build echo
+
+* To build xpi and generate JS doc (from source comments) run: $ant -f simple-build.xml jsdoc
 - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
 <project name="firebug" basedir="." default="build">
 
@@ -19,14 +21,15 @@
     <!-- Directories -->
     <property name="build.dir" value="./build"/>
     <property name="release.dir" value="./release"/>
-    <property name="deploy.dir" value="${GETFIREBUG}/${VERSION}"/>
+    <property name="deploy-xpi.dir" value="${GETFIREBUG}/releases/firebug/${VERSION}"/>
+    <property name="deploy-jsdoc.dir" value="${GETFIREBUG}/developer/api/firebug${VERSION}"/>
 
-    <available file="${deploy.dir}" property="deploy.dir.available"/>
+    <available file="${GETFIREBUG}" property="deploy.dir.available"/>
 
     <!-- echo -->
     <target name="echo">
         <echo message="Build directory: ${build.dir}"/>
-        <echo message="Deploy directory ${deploy.dir} available: ${deploy.dir.available}"/>
+        <echo message="Deploy directory ${GETFIREBUG} available: ${deploy.dir.available}"/>
     </target>
 
     <!-- Clean -->
@@ -95,11 +98,56 @@
         <antcall target="deploy" />
     </target>
 
-    <!-- Deploy to release.dir if provided properly -->
+    <!-- Deploy if target available -->
     <target name="deploy" if="deploy.dir.available">
-        <copy file="${release.dir}/update.rdf" todir="${deploy.dir}"/>
-        <copy file="${release.dir}/firebug-${VERSION}${RELEASE}.xpi" todir="${deploy.dir}"/>
-        <echo message="Firebug deployed: ${VERSION}${RELEASE} to ${deploy.dir}"/>
+
+        <!-- Deploy xpi & update.rdf files -->
+        <copy file="${release.dir}/update.rdf" todir="${deploy-xpi.dir}"/>
+        <copy file="${release.dir}/firebug-${VERSION}${RELEASE}.xpi" todir="${deploy-xpi.dir}"/>
+        <echo message="XPI deployed to: ${VERSION}${RELEASE} to ${deploy-xpi.dir}"/>
+    </target>
+
+    <!-- Deploy if target available -->
+    <target name="deploy-jsdoc" if="deploy.dir.available">
+
+        <!-- Deploy jsdoc -->
+        <copy todir="${deploy-jsdoc.dir}">
+            <fileset dir="${release.dir}/jsdoc"/>
+        </copy>
+
+        <echo message="JSDoc deployed to: ${VERSION}${RELEASE} to ${deploy-xpi.dir}"/>
+    </target>
+
+    <!-- Support for generating docs from Firebug source code using js-doc-toolkit
+        See the output in $svn/jsdoc/out directory -->
+    <target name="jsdoc" depends="build" description="Generate documentation">
+
+        <property name="jsdoc.dir" value="../../jsdoc/"/>
+        <property name="jsdoc-toolkit.dir" value="${jsdoc.dir}/jsdoc-toolkit-2.3.0/"/>
+        <property name="jsdoc-output.dir" value="${release.dir}/jsdoc/"/>
+
+        <path id="jsdoctoolkit">
+            <!-- Rhino js.jar 1.7.R2 must be used with jsdoctoolkit-ant-task-1.0.1.jar -->
+            <fileset dir="${jsdoc.dir}" includes="*.jar"/>
+        </path>
+
+        <taskdef name="jsdoctoolkit"
+            classpathref="jsdoctoolkit"
+            classname="uk.co.darrenhurley.ant.tasks.JsDocToolkit"/>
+
+        <echo message="Generate doc from Firebug source."/>
+
+        <!-- Clean the output direcotory -->
+        <delete dir="${jsdoc-output.dir}"/>
+
+        <!-- Parse all source files -->
+        <jsdoctoolkit jsdochome="${jsdoc-toolkit.dir}"
+            template="firebug"
+            outputdir="${jsdoc-output.dir}"
+            inputdir="." />
+
+        <!-- Deploy -->
+        <antcall target="deploy-jsdoc" />
     </target>
 
 </project>
