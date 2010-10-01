@@ -268,8 +268,9 @@ top.TabWatcher = extend(new Firebug.Listener(),
         // xxxHonza, xxxJJB: web application detection. Based on domain check.
         var prevDomain = persistedState ? getDomain(persistedState.location) : null;
         var domain = getDomain(location);
-        if (!persistedState || prevDomain != domain)
-            persistedState = null;
+        // Remove this, see 3484
+        //if (!persistedState || prevDomain != domain)
+        //    persistedState = null;
 
         // The proper instance of FirebugChrome object (different for detached Firebug and
         // accessible as Firebug.chrome property) must be used for the context object.
