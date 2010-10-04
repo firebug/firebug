@@ -200,6 +200,10 @@ Firebug.NavigationHistory = extend(Firebug.Module,
         if (!panel)
             return;
 
+        // Ignore side panel navigation.
+        if (panel.parentPanel) 
+            return;
+
         // The user is navigating using the history UI, this action doesn't affect
         // the history list.
         if (this.navInProgress)
