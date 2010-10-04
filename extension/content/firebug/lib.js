@@ -1821,6 +1821,9 @@ this.getBoxFromStyles = function(style, element)
 
 this.getElementCSSSelector = function(element)
 {
+    if (!element || !element.localName)
+        return "null";
+
     var label = element.localName.toLowerCase();
     if (element.id)
         label += "#" + element.id;
