@@ -851,6 +851,8 @@ top.FirebugChrome =
                     }
 
                     panelStatus.selectObject(panel.selection);
+                    if (FBTrace.DBG_PANELS)
+	                    FBTrace.sysout("syncStatusPath "+path.length+" items ", path);
                 }
             }
         }
