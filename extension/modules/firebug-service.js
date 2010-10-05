@@ -752,7 +752,7 @@ var fbs =
         for (var i = 0; i < errorBreakpoints.length; ++i)
         {
             var bp = errorBreakpoints[i];
-            if (bp.lineNo == lineNo && bp.href == url)
+            if (bp.lineNo === lineNo && bp.href == url)
                 return i;
         }
 
@@ -2374,6 +2374,9 @@ var fbs =
         if (!urlBreakpoints)
             urlBreakpoints = [];
 
+        if (typeof(lineNo) !== 'number')
+            throw new Error("firebug-service line numbers must be numbers "+lineNo+"@"+url);
+
         var bp = {type: type, href: url, lineNo: lineNo, disabled: 0,
             debuggerName: debuggr.debuggerName,
             condition: "", onTrue: true, hitCount: -1, hit: 0};
@@ -2412,7 +2415,7 @@ var fbs =
             var bp = urlBreakpoints[i];
             if (FBTrace.DBG_FBS_BP) FBTrace.sysout("removeBreakpoint checking bp.lineNo vs lineNo="+bp.lineNo+" vs "+lineNo);
 
-            if (bp.lineNo == lineNo)
+            if (bp.lineNo === lineNo)
             {
                 bp.type &= ~type;
                 if (!bp.type)
@@ -2467,7 +2470,7 @@ var fbs =
             for (var i = 0; i < urlBreakpoints.length; ++i)
             {
                 var bp = urlBreakpoints[i];
-                if (bp.lineNo == lineNo)
+                if (bp.lineNo === lineNo)
                     return bp;
             }
         }
@@ -2649,7 +2652,7 @@ var fbs =
             }
             else
             {
-                if (FBTrace.DBG_FBS_BP) FBTrace.sysout("setJSDBreakpoint NOT isExecutable tag: "+script.tag+" jsdLine@url="+jsdLine +"@"+sourceFile.href+" pcmap:"+pcmap, script);
+                if (FBTrace.DBG_FBS_BP) FBTrace.sysout("setJSDBreakpoint NOT isExecutable tag: "+script.tag+" jsdLine@url="+jsdLine +"@"+sourceFile.href+" pcmap:"+pcmap+" baselineOffset:"+sourceFile.getBaseLineOffset(), script);
             }
          }
     },
