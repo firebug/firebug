@@ -11,9 +11,11 @@
     padding-left: 13px;
     -moz-user-select: -moz-none;
 }
+
 .nodeBox.search-selection {
     -moz-user-select: text;
 }
+
 .twisty {
     position: absolute;
     left: 0px;
@@ -60,6 +62,14 @@
     color: #333333;
 }
 
+.documentNodeBox {
+    padding-left: 0;
+}
+
+.documentNodeBox > .nodeChildBox {
+    margin-left: 0;
+}
+
 .docType {
     font-family: monospace;
     padding-left: 5px;
@@ -68,17 +78,12 @@
     font-style: italic;
 }
 
-.htmlNodeBox > .nodeLabel > .twisty {
-    top: 13px;
-}
-
 .nodeWhiteSpace {
     border: 1px solid LightGray;
     white-space: pre; /* otherwise the border will be collapsed around zero pixels */
     margin-left: 1px;
     color: gray;
 }
-
 
 .nodeWhiteSpace_Space {
     border: 1px solid #ddd;

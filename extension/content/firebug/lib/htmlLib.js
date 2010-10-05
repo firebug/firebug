@@ -525,7 +525,7 @@ Firebug.HTMLLib =
      */
     isSourceElement: function(element)
     {
-        var tag = element.localName.toLowerCase();
+        var tag = element.localName ? element.localName.toLowerCase() : "";
         return tag == "script" || tag == "link" || tag == "style"
             || (tag == "link" && element.getAttribute("rel") == "stylesheet");
     },
