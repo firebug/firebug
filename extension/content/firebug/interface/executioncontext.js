@@ -88,7 +88,7 @@ JavaScriptContext.prototype.isSuspended = function() {
  * @returns a boolean indicating whether this execution context has terminated
  */
 JavaScriptContext.prototype.isTerminated = function() {
-	return !this.is_destroyed;
+	return !this.getBrowserContext().exists();
 };
 
 /**
@@ -141,3 +141,39 @@ JavaScriptContext.prototype.getStackFrames = function(listener) {
 };
 
 //---- PRIVATE ----
+
+/**
+ * Sets this execution context as currently suspended. Fires notification
+ * of the suspend to registered listeners. Subclasses may call this method
+ * when a suspend occurs.
+ * <p>
+ * Has no effect if this execution context is already suspended.
+ * </p>
+ * 
+ * @function
+ * @param compilationUnit the compilation unit where the suspend occurred
+ * @param lineNumber the line number the suspend occurred at
+ */
+JavaScriptContext.prototype._suspended = function(compilationUnit, lineNumber) {
+	if (!this.is_suspended) {
+		this.is_suspended = true;
+		this.getBrowserContext().getBrowser()._dispatch("onBreak", [compilationUnit, lineNumber]);
+	}
+};
+
+/**
+ * Sets this execution context as currently running. Fires notification
+ * of the resume to registered listeners. Subclasses may call this method
+ * when a resume occurs.
+ * <p>
+ * Has no effect if this execution context is already running.
+ * </p>
+ * 
+ * @function
+ */
+JavaScriptContext.prototype._resumed = function() {
+	if (this.is_suspended) {
+		this.is_suspended = false;
+		this.getBrowserContext().getBrowser()._dispatch("onResume", [this]);
+	}
+}
