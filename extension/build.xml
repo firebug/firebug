@@ -63,7 +63,7 @@
             </fileset>
         </copy>
 
-        <!-- Copy install.rd with updated release version info -->
+        <!-- Copy install.rdf with updated release version info -->
         <copy file="install.rdf.tpl.xml" tofile="${build.dir}/install.rdf"/>
         <replace file="${build.dir}/install.rdf" propertyFile="content/firebug/branch.properties">
             <replacefilter token="@VERSION@" property="VERSION"/>
@@ -73,7 +73,6 @@
         <!-- Remove unnecessary *.xml files in the root directory (like e.g. this build file),
             but not from sub directories. -->
         <delete dir="${build.dir}" includes="*.xml" />
-        <delete file="${build.dir}/update.rdf" />
 
         <!-- Create final firebug.xpi file -->
         <zip destfile="${release.dir}/firebug-${VERSION}${RELEASE}.xpi"
@@ -91,7 +90,7 @@
         </replace>
 
         <!-- Final message -->
-        <echo message="Firebug version: ${VERSION}${RELEASE} in ${build.dir}"/>
+        <echo message="Firebug version: ${VERSION}${RELEASE} in ${release.dir}"/>
 
         <!-- Deploy -->
         <antcall target="deploy" />
@@ -101,8 +100,8 @@
     <target name="deploy" if="deploy.dir.available">
 
         <!-- Deploy xpi & update.rdf files -->
-        <copy file="${release.dir}/update.rdf" todir="${deploy-xpi.dir}"/>
-        <copy file="${release.dir}/firebug-${VERSION}${RELEASE}.xpi" todir="${deploy-xpi.dir}"/>
+        <copy file="${release.dir}/update.rdf" todir="${deploy-xpi.dir}" overwrite="true"/>
+        <copy file="${release.dir}/firebug-${VERSION}${RELEASE}.xpi" todir="${deploy-xpi.dir}" overwrite="true"/>
         <echo message="XPI deployed to: ${VERSION}${RELEASE} to ${deploy-xpi.dir}"/>
     </target>
 
