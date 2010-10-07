@@ -49,6 +49,7 @@ function BrowserContext(id, url, browser) {
 	this.browser = browser;
 	this.is_destroyed = false;
 	this.is_loaded = false;
+	this.compilationUnits = {}; // map of URL to compilation unit
 }
 
 //---- API ----
@@ -135,6 +136,21 @@ BrowserContext.prototype.getCompilationUnits = function(listener) {
 };
 
 /**
+ * Returns the {@link CompilationUnit} associated with the specified URL or <code>null</code>
+ * if none.
+ * <p>
+ * This function does not require communication with
+ * the browser.
+ * </p>
+ * @function
+ * @param url the URL a script is requested for
+ * @returns a {@link CompilationUnit} or <code>null</code>
+ */
+BrowserContext.prototype.getCompilationUnit = function(url) {
+	return this.compilationUnits[url];
+};
+
+/**
  * Returns the JavaScript execution context associated with this browser context
  * or <code>null</code> if none.
  * 
@@ -171,4 +187,32 @@ BrowserContext.prototype._loaded = function() {
 	this.is_loaded = true;
 }
 
+/**
+ * Adds the given compilation unit to the collection of compilation units in this execution context.
+ * Sends 'onScript' notification. Subclasses should call the method when a script has been
+ * created/added in the context. It should only be called once per script. Has no effect if
+ * a script with an identical URL has already been added.
+ * 
+ * @function
+ * @param compilationUnit a {@link CompilationUnit}
+ */
+BrowserContext.prototype._addCompilationUnit = function(compilationUnit) {
+	if (!this.compilationUnits[compilationUnit.getURL()]) {
+		this.compilationUnits[compilationUnit.getURL()] = compilationUnit;
+		this.getBrowser()._dispatch("onScript", [compilationUnit]);
+	}
+};
 
+/**
+ * Returns a copy of the compilation units known to this execution context in an array.
+ * 
+ * @function
+ * @returns array of {@link CompilationUnit}
+ */
+BrowserContext.prototype._getCompilationUnits = function() {
+	var copyScripts = [];
+	for (var url in this.compilationUnits) {
+		copyScripts.push(this.compilationUnits[url]);
+	}
+	return copyScripts;
+};
