@@ -48,6 +48,7 @@ function BrowserContext(id, url, browser) {
 	this.url = url;
 	this.browser = browser;
 	this.is_destroyed = false;
+	this.is_loaded = false;
 }
 
 //---- API ----
@@ -106,6 +107,21 @@ BrowserContext.prototype.exists = function() {
 };
 
 /**
+ * Returns whether this browser context has completed loading. Returns <code>true</code>
+ * if all compilation units referenced by this context have been loaded, otherwise
+ * <code>false</code>.
+ * <p>
+ * This function does not require communication with
+ * the browser.
+ * </p>
+ * @function
+ * @returns a boolean indicating whether this context has completed loading
+ */
+BrowserContext.prototype.isLoaded = function() {
+	return this.is_loaded;
+};
+
+/**
  * Requests all JavaScript compilation units that have been compiled (loaded) in this context
  * asynchronously. Compilation units will be retrieved from the browser (if required) and
  * reported to the listener function when available. The listener function may be called before or
@@ -132,10 +148,27 @@ BrowserContext.prototype.getJavaScriptContext = function() {
 // ----- PRIVATE -----
 
 /**
- * Notification this context has been destroyed.
+ * Notification this context has been destroyed. Clients should not call
+ * this function. This function is called by the {@link Browser} implementation
+ * of _contextDestroyed(..). Clients should call Browser._contextDestroyed(...)
+ * when a context is destroyed.
  * 
  * @function
  */
 BrowserContext.prototype._destroyed = function() {
 	this.is_destroyed = true;
 }
+
+/**
+ * Notification this context has been destroyed. Clients should not call
+ * this function. This function is called by the {@link Browser} implementation
+ * of _contextLoaded(..). Clients should call Browser._contextLoaded(...)
+ * when a context has completed loading.
+ * 
+ * @function
+ */
+BrowserContext.prototype._loaded = function() {
+	this.is_loaded = true;
+}
+
+

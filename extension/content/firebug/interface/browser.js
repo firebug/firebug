@@ -220,6 +220,20 @@ Browser.prototype._contextDestroyed = function(id) {
 };
 
 /**
+ * Notification the given context has been loaded. Notifies context listeners.
+ * 
+ * @function
+ * @param id the identifier of the {@link BrowserContext} that has been loaded
+ */
+Browser.prototype._contextLoaded = function(id) {
+	var loaded = this.contexts[id];
+	if (loaded) {
+		loaded._loaded();
+		this._dispatch("onContextLoaded", [loaded]);
+	}
+};
+
+/**
  * Dispatches an event notification to all registered functions for
  * the specified event type.
  * 

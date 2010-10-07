@@ -88,7 +88,9 @@ function BrowserEventListener() {
 	onConsoleWarn: function(browserContext, messages) {}
 	
 	/**
-	 * Notification the specified browser context has been created.
+	 * Notification the specified browser context has been created. This notification
+	 * is sent when a new context is created and before any scripts are compiled in
+	 * the new context.
 	 * 
 	 * @function
 	 * @param browserContext the {@link BrowserContext} that was created
@@ -111,6 +113,14 @@ function BrowserEventListener() {
 	 * @param browserContext the {@link BrowserContext} that was destroyed
 	 */
 	onContextDestroyed: function(browserContext) {}
+	
+	/**
+	 * Notification the specified browser context has completed loading.
+	 * 
+	 * @function
+	 * @param browserContext the {@link BrowserContext} that has completed loading
+	 */
+	onContextLoaded: function(browserContext) {}
 	
 	/**
 	 * Notification the connection to the remote browser has been closed.
