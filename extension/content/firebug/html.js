@@ -842,12 +842,19 @@ Firebug.HTMLPanel.prototype = extend(Firebug.Panel,
 
     onKeyPress: function(event)
     {
-        if (this.editing || isControl(event) || isShift(event))
+        if (this.editing)
             return;
 
         var node = this.selection;
         if (!node)
             return;
+
+        if (String.fromCharCode(event.charCode) == "*")  // Pressing '*' expands the node with all its children.
+            this.ioBox.expandObject(node, true);
+
+        if (isControl(event) || isShift(event))
+            return;
+
         if (event.keyCode == KeyEvent.DOM_VK_UP)
             this.selectNodeBy("up");
         else if (event.keyCode == KeyEvent.DOM_VK_DOWN)
@@ -860,8 +867,6 @@ Firebug.HTMLPanel.prototype = extend(Firebug.Panel,
             this.deleteNode(node, "up");
         else if (event.keyCode == KeyEvent.DOM_VK_DELETE && !(node.localName in innerEditableTags) && !(nonEditableTags.hasOwnProperty(node.localName)))
             this.deleteNode(node, "down");
-        else if (event.charCode == "42")  // Pressing '*' expands the node with all its children.
-            this.ioBox.expandObject(node, true);
         else
             return;
 
