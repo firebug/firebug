@@ -548,9 +548,20 @@ Firebug.DisabledPanelBox = domplate(Firebug.Rep,
                 $STR("moduleManager.desc3"),
                 SPAN("&nbsp;"),
                 SPAN({"class": "descImage descImage-$panelName"})
+            ),
+            A({"class": "objectLink", onclick: "$onEnable"},
+                $STR("moduleManager.Enable")
             )
             /* need something here that pushes down any thing appended to the panel */
         ),
+
+    onEnable: function(event)
+    {
+        var panelBar = Firebug.chrome.$("fbPanelBar1");
+        var panelType = panelBar.selectedTab.panelType;
+        panelType.prototype.setEnabled(true);
+        panelBar.updateTab(panelType);
+    },
 
     /**
      * Show default content saying that this panel type (specified by name) is disabled.
