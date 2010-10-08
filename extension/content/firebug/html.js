@@ -854,9 +854,9 @@ Firebug.HTMLPanel.prototype = extend(Firebug.Panel,
         // - collapses the node
         var ch = String.fromCharCode(event.charCode);
         if (ch == "*")
-            this.ioBox.expandObject(node, true);
+            this.ioBox.toggleObject(node, true, event);
         else if (ch == "+")
-            this.ioBox.expandObject(node, false);
+            this.ioBox.expandObject(node);
         else if (ch == "-")
             this.ioBox.contractObject(node);
 
