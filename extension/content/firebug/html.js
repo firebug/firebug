@@ -577,7 +577,7 @@ Firebug.HTMLPanel.prototype = extend(Firebug.Panel,
                 {
                     // for chromebug to avoid climbing put to browser.xul
                     if (parentNode.defaultView == this.context.window)
-                        return parentNode;
+                        return null;
 
                     if (FBTrace.DBG_HTML)
                         FBTrace.sysout("getParentObject parentNode.nodeType 9, frameElement:"+parentNode.defaultView.frameElement+"\n");
