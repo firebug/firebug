@@ -89,7 +89,11 @@ FirebugReps.Table = domplate(Firebug.Rep,
 
         var arr = [];
         for (var p in obj)
-            arr.push(obj[p]);
+        {
+            var value = obj[p];
+            if (this.domFilter(value, p))
+                arr.push(value);
+        }
         return arr;
     },
 
@@ -237,6 +241,9 @@ FirebugReps.Table = domplate(Firebug.Rep,
         for (var p in firstRow)
         {
             var value = firstRow[p];
+            if (!this.domFilter(value, p))
+                continue;
+
             header.push({
                 property: p,
                 label: p,
@@ -246,6 +253,36 @@ FirebugReps.Table = domplate(Firebug.Rep,
 
         return header;
     },
+
+    /**
+     * Filtering based on options set in the DOM panel.
+     * @param {Object} value - a property value under inspection.
+     * @param {String} name - name of the property.
+     * @returns true if the value should be displayed, otherwise false.
+     */
+    domFilter: function(object, name)
+    {
+        var domMembers = getDOMMembers(object, name);
+
+        if (typeof(object) == "function")
+        {
+            if (isDOMMember(object, name) && !Firebug.showDOMFuncs)
+                return false;
+            else if (!Firebug.showUserFuncs)
+                return false;
+        }
+        else
+        {
+            if (isDOMMember(object, name) && !Firebug.showDOMProps)
+                return false;
+            else if (isDOMConstant(name) && !Firebug.showDOMConstants)
+                return false;
+            else if (!Firebug.showUserProps)
+                return false;
+        }
+
+        return true;
+    }
 });
 
 // ************************************************************************************************
