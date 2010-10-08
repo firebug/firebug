@@ -168,11 +168,10 @@ this.Func = domplate(Firebug.Rep,
 
     summarizeFunction: function(fn)
     {
-        var fnRegex = /function ([^(]+\([^)]*\)) \{/;
         var fnText = safeToString(fn);
-
-        var m = fnRegex.exec(fnText);
-        return m ? m[1] : (fnText ? fnText : "function()");
+        var namedFn = /^function ([^(]+\([^)]*\)) \{/.exec(fnText);
+        var anonFn  = /^function \(/.test(fnText);
+        return namedFn ? namedFn[1] : (anonFn ? "function()" : fnText);
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
