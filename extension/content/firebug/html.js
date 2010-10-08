@@ -849,8 +849,16 @@ Firebug.HTMLPanel.prototype = extend(Firebug.Panel,
         if (!node)
             return;
 
-        if (String.fromCharCode(event.charCode) == "*")  // Pressing '*' expands the node with all its children.
+        // * expands the node with all its children
+        // + expands the node
+        // - collapses the node
+        var ch = String.fromCharCode(event.charCode);
+        if (ch == "*")
             this.ioBox.expandObject(node, true);
+        else if (ch == "+")
+            this.ioBox.expandObject(node, false);
+        else if (ch == "-")
+            this.ioBox.contractObject(node);
 
         if (isControl(event) || isShift(event))
             return;
