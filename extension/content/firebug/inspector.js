@@ -986,6 +986,8 @@ function PopupHighlighter()
 {
 }
 
+Firebug.Inspector.PopupHighlighter = PopupHighlighter;
+
 PopupHighlighter.prototype =
 {
     highlight: function(context, element)
@@ -1012,6 +1014,8 @@ PopupHighlighter.prototype =
 function BoxModelHighlighter()
 {
 }
+
+Firebug.Inspector.BoxModelHighlighter = BoxModelHighlighter;
 
 BoxModelHighlighter.prototype =
 {
