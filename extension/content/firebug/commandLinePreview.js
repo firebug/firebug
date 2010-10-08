@@ -14,7 +14,7 @@ FBL.ns(function() { with (FBL) {
 Firebug.CommandLine.Preview = extend(Firebug.Module,
 {
     lastFocused : null,
-    
+
     initializeUI: function()
     {
         Firebug.Module.initializeUI.apply(this, arguments);
@@ -79,19 +79,12 @@ Firebug.CommandLine.Preview = extend(Firebug.Module,
             chrome.$("fbSidePanelDeck").selectedPanel = chrome.$("fbLargeCommandBox");
         }
 
-        // Update visibility of the console-preview (hidden if the Console panel is selected,
-        // but the console button in toolbar still indicates that the preview should be opened
-        // in another panels).
-        if (isConsole || !panel || disabled == "true")
-        {
-            collapse(chrome.$("fbCommandPreview"), true);
-            collapse(chrome.$("fbCommandPreviewSplitter"), true);
-            collapse(chrome.$("fbCommandBox"), largeCmd || disabled == "true");
-        }
-        else
-        {
-            this.setVisible(visible);
-        }
+        // The console can't be multiline on other panels so, hide the toggle-to-multiline
+        // button (displayed at the end of the one line command line)
+        collapse(chrome.$("fbCommandToggleSmall"), !isConsole);
+
+        // Update visibility of the console-preview (hidden if the Console panel is selected).
+        this.updateVisibility(visible && !isConsole && panel);
 
         // Make sure the console panel is attached to the proper document
         // (the one used by all panels, or the one used by console preview and available
@@ -130,11 +123,11 @@ Firebug.CommandLine.Preview = extend(Firebug.Module,
         if (FBTrace.DBG_COMMANDLINE)
             FBTrace.sysout("commandLine.Preview.toggle;");
 
-        var visible = this.isVisible();
-        this.setVisible(!visible);
+        var newState = !this.isVisible();
+        Firebug.chrome.setGlobalAttribute("cmd_toggleCommandPreview", "checked", newState);
+        this.updateVisibility(newState);
 
         this.reattach(context);
-
         this.showPreviewPanel(context);
     },
 
@@ -152,14 +145,13 @@ Firebug.CommandLine.Preview = extend(Firebug.Module,
         }
     },
 
-    setVisible: function(visible)
+    updateVisibility: function(visible)
     {
         var chrome = Firebug.chrome;
         var preview = chrome.$("fbCommandPreview");
         var splitter = chrome.$("fbCommandPreviewSplitter")
         var cmdbox = chrome.$("fbCommandBox");
         var toggle = chrome.$("fbCommandToggleSmall");
-        var cmdline = chrome.$("fbCommandLine");
 
         // If all the visual parts are already visible then bail out.
         if (visible && !isCollapsed(preview) && !isCollapsed(splitter) &&
@@ -173,18 +165,28 @@ Firebug.CommandLine.Preview = extend(Firebug.Module,
         // The command line can't be multiline in other panels.
         collapse(toggle, visible);
 
-        chrome.setGlobalAttribute("cmd_toggleCommandPreview", "checked", visible);
+        var commandLineSmall = chrome.$("fbCommandLine");
+        var commandLineLarge = chrome.$("fbLargeCommandLine");
 
         // Focus the command line if it has been just displayed.
         if (visible)
         {
             this.lastFocused = document.commandDispatcher.focusedElement;
-            cmdline.focus();
+            commandLineSmall.focus();
         }
-        else if (this.lastFocused && isVisible(this.lastFocused) && typeof this.lastFocused.focus == "function") 
+        else if (this.lastFocused && isVisible(this.lastFocused) &&
+            typeof this.lastFocused.focus == "function") 
         {
             this.lastFocused.focus();
             this.lastFocused = null;
+        }
+
+        if (Firebug.largeCommandLine)
+        {
+            if (visible)
+                commandLineSmall.value = stripNewLines(commandLineLarge.value);
+            else
+                commandLineLarge.value = cleanIndentation(commandLineSmall.value);
         }
     },
 

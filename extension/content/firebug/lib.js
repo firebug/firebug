@@ -1291,7 +1291,6 @@ this.insertTextIntoElement = function(element, text)
     controller.doCommandWithParams(command, params);
 };
 
-
 // ************************************************************************************************
 // XPath
 
@@ -2467,6 +2466,34 @@ this.insertWrappedText = function(text, textBox, noEscapeHTML)
 {
     var html = this.wrapText(text, noEscapeHTML);
     textBox.innerHTML = "<pre role=\"list\">" + html.join("") + "</pre>";
+}
+
+// ************************************************************************************************
+// Indent
+
+const reIndent = /^(\s+)/;
+
+function getIndent(line)
+{
+    var m = reIndent.exec(line);
+    return m ? m[0].length : 0;
+}
+
+this.cleanIndentation = function(text)
+{
+    var lines = this.splitLines(text);
+
+    var minIndent = -1;
+    for (var i = 0; i < lines.length; ++i)
+    {
+        var line = lines[i];
+        var indent = getIndent(line);
+        if (minIndent == -1 && line && !this.isWhitespace(line))
+            minIndent = indent;
+        if (indent >= minIndent)
+            lines[i] = line.substr(minIndent);
+    }
+    return lines.join("");
 }
 
 // ************************************************************************************************

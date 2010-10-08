@@ -296,6 +296,7 @@ Firebug.CommandLine = extend(Firebug.Module,
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+
     acceptCompletionOrReturnIt: function(context)
     {
         var commandLine = getCommandLine(context);
@@ -314,7 +315,7 @@ Firebug.CommandLine = extend(Firebug.Module,
         var mozJSEnabled = Firebug.getPref("javascript", "enabled");
         if (mozJSEnabled)
         {
-            if (!Firebug.largeCommandLine)
+            if (!Firebug.largeCommandLine || context.panelName != "console")
             {
                 this.clear(context);
                 this.appendToHistory(expr);
@@ -1046,34 +1047,14 @@ function injectScript(script, win)
 
 function getCommandLine(context)
 {
+    // Command line on other panels is never multiline.
+    var visible = Firebug.CommandLine.Preview.isVisible();
+    if (visible && context.panelName != "console")
+        return Firebug.chrome.$("fbCommandLine");
+
     return Firebug.largeCommandLine
         ? Firebug.chrome.$("fbLargeCommandLine")
         : Firebug.chrome.$("fbCommandLine");
-}
-
-const reIndent = /^(\s+)/;
-
-function getIndent(line)
-{
-    var m = reIndent.exec(line);
-    return m ? m[0].length : 0;
-}
-
-function cleanIndentation(text)
-{
-    var lines = splitLines(text);
-
-    var minIndent = -1;
-    for (var i = 0; i < lines.length; ++i)
-    {
-        var line = lines[i];
-        var indent = getIndent(line);
-        if (minIndent == -1 && line && !isWhitespace(line))
-            minIndent = indent;
-        if (indent >= minIndent)
-            lines[i] = line.substr(minIndent);
-    }
-    return lines.join("");
 }
 
 // ************************************************************************************************
