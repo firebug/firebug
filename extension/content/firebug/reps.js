@@ -172,14 +172,15 @@ this.Func = domplate(Firebug.Rep,
         var fnText = safeToString(fn);
 
         var m = fnRegex.exec(fnText);
-        return m ? m[1] : "function()";
+        return m ? m[1] : (fnText ? fnText : "function()");
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 
     copySource: function(fn)
     {
-        copyToClipboard(safeToString(fn));
+        if (fn && typeof (fn['toSource']) == 'function')
+            copyToClipboard(fn.toSource());
     },
 
     monitor: function(fn, script, monitored)
