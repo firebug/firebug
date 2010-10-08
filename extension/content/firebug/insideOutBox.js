@@ -527,7 +527,7 @@ InsideOutBox.prototype =
     isInExistingRoot: function(node)
     {
         if (FBTrace.DBG_HTML)
-            dbg_isInExistingRoot = "";
+            var dbg_isInExistingRoot = "";
 
         var parentNode = node;
         while (parentNode && parentNode != this.rootObject)
@@ -545,7 +545,7 @@ InsideOutBox.prototype =
     getRootNode: function(node)
     {
         if (FBTrace.DBG_HTML)
-            dbg_getRootNode ="";
+            var dbg_getRootNode ="";
 
         while (1)
         {
