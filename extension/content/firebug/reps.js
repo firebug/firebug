@@ -657,22 +657,6 @@ function instanceOf(object, Klass)
     return false;
 }
 
-this.Except = domplate(Firebug.Rep,
-{
-    tag:
-        OBJECTBOX({_repObject: "$object"}, "$object.name in file $object.fileName on line $object.lineNumber"),
-
-    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
-
-    className: "exception",
-
-    supportsObject: function(object, type, context)
-    {
-        var win = context && context.window && context.window.wrappedJSObject;
-        var found = (win && instanceOf(object,win.Error)) || (object instanceof ErrorCopy);
-        return found;
-    }
-});
 
 
 // ************************************************************************************************
@@ -1652,7 +1636,7 @@ this.ErrorMessage = domplate(Firebug.Rep,
     getSource: function(error)
     {
         if (error.source)
-            return cropMultipleLines(error.source, 80);
+            return cropString(error.source, 80);
         if (error.category == "js" && error.href && error.href.indexOf("XPCSafeJSObjectWrapper") != -1)
             return "";
         var source = error.getSourceLine();
@@ -1757,7 +1741,7 @@ this.ErrorMessage = domplate(Firebug.Rep,
     className: "errorMessage",
     inspectable: false,
 
-    supportsObject: function(object, type)
+    supportsObject: function(object, type, context)
     {
         return object instanceof ErrorMessage;
     },
@@ -1788,6 +1772,44 @@ this.ErrorMessage = domplate(Firebug.Rep,
         }
 
         return items;
+    }
+});
+
+this.Except = domplate(Firebug.Rep,
+{
+    tag:
+        TAG(this.ErrorMessage.tag, {object: "$object|getErrorMessage"}),
+
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+
+    className: "exception",
+    
+    getTitle: function(object) {
+        return object.name + (object.message ? ": " + object.message : "");
+    },
+    
+    getErrorMessage: function(object) {
+        var win = Firebug.currentContext.window;
+        var trace = FBL.parseToStackTrace(object.stack);
+        if (trace && trace.frames && trace.frames[trace.frames.length-1].fn == "_firebugEvalEvent")
+            trace.frames.pop();
+        var url = object.fileName ? object.fileName : win.location.href;
+        var lineNo = object.lineNumber ? object.lineNumber : 0;
+        var errorObject = new FBL.ErrorMessage(object, url, lineNo, lineNo, 'js', Firebug.currentContext, trace);
+
+        if (trace && trace.frames && trace.frames[0])
+           errorObject.correctWithStackTrace(trace);
+
+        errorObject.resetSource();
+        
+        return errorObject;
+    },
+
+    supportsObject: function(object, type, context)
+    {
+        var win = context && context.window && context.window.wrappedJSObject;
+        var found = (win && instanceOf(object,win.Error)) || (object instanceof ErrorCopy);
+        return found;
     }
 });
 

@@ -141,7 +141,7 @@ Firebug.CommandLine = extend(Firebug.Module,
         {
             consoleHandler.setEvaluateErrorCallback(function useExceptionFunction(result)
             {
-                exceptionFunction(result, context);
+                exceptionFunction(result, context, "errorMessage");
             });
         }
         else
@@ -234,7 +234,7 @@ Firebug.CommandLine = extend(Firebug.Module,
         {
             consoleHandler.evaluateError = function useExceptionFunction(result)
             {
-                exceptionFunction(result, context);
+                exceptionFunction(result, context, "errorMessage");
             }
         }
         else
