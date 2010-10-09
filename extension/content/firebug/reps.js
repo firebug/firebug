@@ -646,18 +646,31 @@ this.NetFile = domplate(this.Obj,
 
 // ************************************************************************************************
 
+function instanceOf(object, Klass)
+{
+    while (object != null) 
+    {
+        if (object == Klass.prototype)
+           return true;
+        object = object.__proto__;
+    }
+    return false;
+}
+
 this.Except = domplate(Firebug.Rep,
 {
     tag:
-        OBJECTBOX({_repObject: "$object"}, "$object.message"),
+        OBJECTBOX({_repObject: "$object"}, "$object.name in file $object.fileName on line $object.lineNumber"),
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 
     className: "exception",
 
-    supportsObject: function(object, type)
+    supportsObject: function(object, type, context)
     {
-        return object instanceof ErrorCopy;
+        var win = context && context.window && context.window.wrappedJSObject;
+        var found = (win && instanceOf(object,win.Error)) || (object instanceof ErrorCopy);
+        return found;
     }
 });
 
