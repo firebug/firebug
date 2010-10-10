@@ -72,7 +72,9 @@ Firebug.HTMLModule = extend(Firebug.Module,
 
 Firebug.HTMLPanel = function() {};
 
-Firebug.HTMLPanel.prototype = extend(Firebug.Panel,
+var WalkingPanel = extend(Firebug.Panel, HTMLLib.ElementWalkerFunctions);
+
+Firebug.HTMLPanel.prototype = extend(WalkingPanel,
 {
     toggleEditing: function()
     {
@@ -549,7 +551,7 @@ Firebug.HTMLPanel.prototype = extend(Firebug.Panel,
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
-    // SourceBox proxy
+    // InsideOutBoxView implementation
 
     createObjectBox: function(object, isRoot)
     {
@@ -564,10 +566,10 @@ Firebug.HTMLPanel.prototype = extend(Firebug.Panel,
         if (node instanceof SourceText)
             return node.owner;
 
-        var parentNode = node ? node.parentNode : null;
+        var parentNode = this.getParentNode(node);
 
-        if (FBTrace.DBG_HTML)
-            FBTrace.sysout("html.getParentObject for "+node.nodeName+" parentNode:"+(parentNode?parentNode.nodeName:"null-or-false")+"\n");
+        //if (FBTrace.DBG_HTML)
+        //    FBTrace.sysout("html.getParentObject for "+node.nodeName+" parentNode:"+getElementCSSSelector(parentNode));
 
         if (parentNode)
         {
@@ -575,20 +577,18 @@ Firebug.HTMLPanel.prototype = extend(Firebug.Panel,
             {
                 if (parentNode.defaultView)
                 {
-                    // for chromebug to avoid climbing put to browser.xul
-                    if (parentNode.defaultView == this.context.window)
+                    if (parentNode.defaultView == this.context.window) // for chromebug to avoid climbing out to browser.xul
                         return null;
 
                     if (FBTrace.DBG_HTML)
-                        FBTrace.sysout("getParentObject parentNode.nodeType 9, frameElement:"+parentNode.defaultView.frameElement+"\n");
-
+                        FBTrace.sysout("getParentObject parentNode.nodeType 9, frameElement:"+parentNode.defaultView.frameElement+"\n");                  /*@explore*/
                     return parentNode.defaultView.frameElement;
                 }
                 else if (this.embeddedBrowserParents)
                 {
                     var skipParent = this.embeddedBrowserParents[node];  // better be HTML element, could be iframe
                     if (FBTrace.DBG_HTML)
-                        FBTrace.sysout("getParentObject skipParent:"+(skipParent?skipParent.nodeName:"none")+"\n");
+                        FBTrace.sysout("getParentObject skipParent:"+(skipParent?skipParent.nodeName:"none")+"\n");                  /*@explore*/
                     if (skipParent)
                         return skipParent;
                 }
@@ -631,7 +631,7 @@ Firebug.HTMLPanel.prototype = extend(Firebug.Panel,
             return;
         }
         if (FBTrace.DBG_HTML)
-            FBTrace.sysout("getChildObject "+node.tagName+" index "+index+" previousSibling: "+previousSibling, {node: node, previousSibling:previousSibling});
+            FBTrace.sysout("getChildObject "+node.tagName+" index "+index+" previousSibling: "+(previousSibling?getElementCSSSelector(previousSibling):"null"), {node: node, previousSibling:previousSibling});
 
         if (this.isSourceElement(node))
         {
@@ -696,28 +696,6 @@ Firebug.HTMLPanel.prototype = extend(Firebug.Panel,
     isWhitespaceText: function(node)
     {
         return HTMLLib.isWhitespaceText(node);
-    },
-
-    getFirstChild: function(node)
-    {
-        this.treeWalker = node.ownerDocument.createTreeWalker(
-                 node, NodeFilter.SHOW_ALL, null, false);
-        return this.treeWalker.firstChild();
-    },
-
-    getNextSibling: function(node)
-    {
-        if (FBTrace.DBG_HTML || FBTrace.DBG_ERRORS)
-        {
-            if (node != this.treeWalker.currentNode)
-                FBTrace.sysout("getNextSibling FAILS treeWalker "+this.treeWalker.currentNode+" out of sync with node "+node, this.treeWalker);
-        }
-        var next = this.treeWalker.nextSibling();
-
-        if (!next)
-            delete this.treeWalker;
-
-        return next;
     },
 
     findNextSibling: function (node)
@@ -1424,7 +1402,7 @@ Firebug.HTMLPanel.CompleteElement = domplate(FirebugReps.Element,
         else
         {
             var nodes = [];
-            for (var child = node.firstChild; child; child = child.nextSibling)
+            for (var child = this.getFirstChild(node); child; child = this.getNextSibling(child))
             {
                 if (child.nodeType != Node.TEXT_NODE || !HTMLLib.isWhitespaceText(child))
                     nodes.push(child);

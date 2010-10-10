@@ -254,11 +254,11 @@ Firebug.HTMLLib =
                 setClass(trueNodeBox,'search-selection');
 
                 scrollIntoCenterView(row, panelNode);
-                var sel = panelNode.ownerDocument.defaultView.getSelection(); 
+                var sel = panelNode.ownerDocument.defaultView.getSelection();
                 sel.removeAllRanges();
                 sel.addRange(this.textSearch.range);
 
-                removeClass(trueNodeBox,'search-selection'); 
+                removeClass(trueNodeBox,'search-selection');
                 return true;
             }
         };
@@ -604,22 +604,22 @@ Firebug.HTMLLib =
         // https://developer.mozilla.org/en/XBL/XBL_1.0_Reference/DOM_Interfaces
         if (element.ownerDocument instanceof Ci.nsIDOMDocumentXBL)
         {
-            var anonChildren = element.ownerDocument.getAnonymousNodes(element);
-            if (anonChildren)
+            var walker = new Firebug.HTMLLib.ElementWalker();
+            var child = walker.getFirstChild(element);
+
+            while (child)
             {
-                for (var i = 0; i < anonChildren.length; i++)
-                {
-                    if (anonChildren[i].nodeType == Node.ELEMENT_NODE)
-                        return false;
-                }
+                if (child.nodeType === Node.ELEMENT_NODE)
+                    return false;
+                child = walker.getNextSibling(element);
             }
         }
         if (FBTrace.DBG_HTML)
-            FBTrace.sysout("hasNoElementChildren TRUE "+element.tagName, element);
+            FBTrace.sysout("hasNoElementChildren TRUE "+element.tagName+" (element.ownerDocument instanceof Ci.nsIDOMDocumentXBL) "+(element.ownerDocument instanceof Ci.nsIDOMDocumentXBL), element);
         return true;
     },
-    
-    
+
+
     /**
      * Determines if the given node has any children which are comments.
      *
@@ -631,7 +631,7 @@ Firebug.HTMLLib =
         if (element.hasChildNodes())
         {
             var children = element.childNodes;
-            for (var i = 0; i < children.length; i++) 
+            for (var i = 0; i < children.length; i++)
             {
               if (children[i] instanceof Comment)
                  return true;
@@ -745,7 +745,42 @@ Firebug.HTMLLib =
     {
         var nodeLabelBox = nodeBox.firstChild.lastChild;
         return getChildByClass(nodeLabelBox, "nodeText");
-    }
+    },
+
+    ElementWalkerFunctions:  // These functions can be copied to add tree walking feature
+    {
+        getTreeWalker: function(node)
+        {
+            if (!this.treeWalker || this.treeWalker.currentNode !== node)
+                this.treeWalker = node.ownerDocument.createTreeWalker(
+                    node, NodeFilter.SHOW_ALL, null, false);
+            return this.treeWalker;
+        },
+
+        getFirstChild: function(node)
+        {
+            return this.getTreeWalker(node).firstChild();
+        },
+
+        getNextSibling: function(node)
+        {
+            return this.getTreeWalker(node).nextSibling();
+        },
+
+        getParentNode: function(node)
+        {
+            // the Mozilla XBL tree walker fails for parentNode
+            return node.parentNode;
+        },
+    },
+
+    ElementWalker: function()  // tree walking via new ElementWalker
+    {
+
+    },
+
 };
+
+Firebug.HTMLLib.ElementWalker.prototype = Firebug.HTMLLib.ElementWalkerFunctions;
 
 }});
