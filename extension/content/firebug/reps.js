@@ -1866,26 +1866,38 @@ this.Except = domplate(Firebug.Rep,
 
     getTitle: function(object)
     {
-        return object.name + (object.message ? ": " + object.message : "");
+        if (object.name)
+            return object.name + (object.message ? ": " + object.message : "");
+         if (object.message)
+            return object.message;
+        return "Exception";
     },
 
     getErrorMessage: function(object)
     {
-        var win = Firebug.currentContext.window;
-        var trace = FBL.parseToStackTrace(object.stack);
-        if (trace && trace.frames && trace.frames[trace.frames.length-1].fn == "_firebugEvalEvent")
-            trace.frames.pop();
+        var win = Firebug.currentContext.window, 
+            trace, 
+            url, 
+            lineNo, 
+            errorObject,
+            message;
 
-        var url = object.fileName ? object.fileName : win.location.href;
-        var lineNo = object.lineNumber ? object.lineNumber : 0;
-        var errorObject = new FBL.ErrorMessage(object, url, lineNo, lineNo, 'js',
+        if (object.stack)
+        {
+            trace = FBL.parseToStackTrace(object.stack);
+            if (trace && trace.frames && trace.frames[trace.frames.length - 1].fn == "_firebugEvalEvent") 
+                trace.frames.pop();
+        }
+        url = object.fileName ? object.fileName : (win ? win.location.href : "");
+        lineNo = object.lineNumber ? object.lineNumber : 0;
+        message = this.getTitle(object);
+        errorObject = new FBL.ErrorMessage(message, url, lineNo, '', 'js', 
             Firebug.currentContext, trace);
-
-        if (trace && trace.frames && trace.frames[0])
-           errorObject.correctWithStackTrace(trace);
-
+        
+        if (trace && trace.frames && trace.frames[0]) 
+            errorObject.correctWithStackTrace(trace);
         errorObject.resetSource();
-
+        
         return errorObject;
     },
 
