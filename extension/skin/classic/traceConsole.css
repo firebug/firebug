@@ -290,7 +290,7 @@
 }
 
 /* Exception */
-.messageTable .exception {
+.messageTable .objectBox-errorMessage {
     color: Red;
 }
 

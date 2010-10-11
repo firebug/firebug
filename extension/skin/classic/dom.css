@@ -180,3 +180,16 @@
     right: 0;
     padding: 1px 2px;
 }
+
+/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+.domTable .objectBox-errorMessage {
+    padding: 0 0 0 18px;
+    background: url(chrome://firebug/skin/errorIcon-sm.png) no-repeat 0 0;
+    color: red;
+}
+
+.domTable .objectBox-errorMessage .errorTitle {
+    display: inline;
+}
+

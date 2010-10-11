@@ -157,12 +157,6 @@
     color: #FFFFFF;
 }
 
-.objectBox-exception {
-    padding: 0 2px 0 18px;
-    background: url(chrome://firebug/skin/errorIcon-sm.png) no-repeat 0 0;
-    color: red;
-}
-
 .objectLink-sourceLink {
     position: absolute;
     right: 4px;

@@ -1880,17 +1880,24 @@ this.Except = domplate(Firebug.Rep,
             url, 
             lineNo, 
             errorObject,
-            message;
+            message,
+            isCommandLine;
+
+        url = object.fileName ? object.fileName : (win ? win.location.href : "");
+        lineNo = object.lineNumber ? object.lineNumber : 0;
+        message = this.getTitle(object);
 
         if (object.stack)
         {
             trace = FBL.parseToStackTrace(object.stack);
-            if (trace && trace.frames && trace.frames[trace.frames.length - 1].fn == "_firebugEvalEvent") 
+            isCommandLine = trace && trace.frames && trace.frames[trace.frames.length - 1].fn == "_firebugEvalEvent";
+            if (isCommandLine)
                 trace.frames.pop();
+            if(trace.frames.length == 0)
+                trace = undefined;
+            if (isCommandLine && !trace)
+                lineNo = 0;
         }
-        url = object.fileName ? object.fileName : (win ? win.location.href : "");
-        lineNo = object.lineNumber ? object.lineNumber : 0;
-        message = this.getTitle(object);
         errorObject = new FBL.ErrorMessage(message, url, lineNo, '', 'js', 
             Firebug.currentContext, trace);
         
