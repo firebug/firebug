@@ -1404,22 +1404,44 @@ this.SourceFile = domplate(this.SourceLink,
 this.StackFrame = domplate(Firebug.Rep,  // XXXjjb Since the repObject is fn the stack does not have correct line numbers
 {
     tag:
-        OBJECTBLOCK(
-            SPAN({"class":"stackframeMarker"}, ""),
+        OBJECTBLOCK({$hasTwisty: "$object|hasArguments", _repObject: "$object",
+            onclick: "$onToggleArguments"},
+            SPAN({"class":"stackFrameMarker"}, ""),
             A({"class": "objectLink a11yFocus", _repObject: "$object"}, "$object|getCallName"),
             SPAN("("),
-            FOR("arg", "$object|argIterator",
-                SPAN({"class": "argName"}, "$arg.name"),
-                SPAN("="),
-                TAG("$arg.tag", {object: "$arg.value"}),
-                SPAN({"class": "arrayComma"}, "$arg.delim")
+            SPAN({"class": "arguments"},
+                FOR("arg", "$object|argIterator",
+                    SPAN({"class": "argName"}, "$arg.name"),
+                    SPAN("="),
+                    TAG("$arg.tag", {object: "$arg.value"}),
+                    SPAN({"class": "arrayComma"}, "$arg.delim")
+                )
             ),
             SPAN(")"),
             SPAN({"class": "objectLink-sourceLink objectLink a11yFocus",
                 _repObject: "$object|getSourceLink",
                 role: "link"},
-                "$object|getSourceLinkTitle")
+                "$object|getSourceLinkTitle"),
+            DIV({"class": "argList"})
         ),
+
+    argList:
+        DIV({"class": "argListBox", onclick: "$onSelectFrame"},
+            FOR("arg", "$object|argIterator",
+                DIV({"class": "argBox"},
+                    SPAN({"class": "argName"}, "$arg.name"),
+                    SPAN("&nbsp;=&nbsp;"),
+                    TAG("$arg.tag", {object: "$arg.value"})
+                )
+            )
+        ),
+
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+    hasArguments: function(frame)
+    {
+        return frame.args.length;
+    },
 
     getCallName: function(frame)
     {
@@ -1475,7 +1497,68 @@ this.StackFrame = domplate(Firebug.Rep,  // XXXjjb Since the repObject is fn the
         return items;
     },
 
+    getSourceLink: function(stackFrame)
+    {
+        var sourceLink = new SourceLink(stackFrame.href, stackFrame.line, "js");
+        return sourceLink;
+    },
+
+    onToggleArguments: function(event)
+    {
+        this.toggleArguments(event.originalTarget);
+    },
+
+    toggleArguments: function(target)
+    {
+        if (hasClass(target, "objectBox-stackFrame"))
+        {
+            if (hasClass(target, "opened"))
+                this.collapseArguments(target);
+            else
+                this.expandArguments(target);
+        }
+    },
+
+    collapseArguments: function(target)
+    {
+        if (!hasClass(target, "opened"))
+            return;
+
+        toggleClass(target, "opened");
+
+        var argList = target.getElementsByClassName("argList").item(0);
+        clearNode(argList);
+    },
+
+    expandArguments: function(target)
+    {
+        if (hasClass(target, "opened"))
+            return;
+
+        var frame = target.repObject;
+        if (!this.hasArguments(frame))
+            return;
+
+        toggleClass(target, "opened");
+
+        var argList = target.getElementsByClassName("argList").item(0);
+        this.argList.replace({object: frame}, argList);
+    },
+
+    onSelectFrame: function(event)
+    {
+        var target = event.currentTarget;
+        if (hasClass(target, "argListBox"))
+        {
+            var stackFrame = getAncestorByClass(target, "objectBox-stackFrame");
+            var panel = Firebug.getElementPanel(target);
+            this.inspectObject(stackFrame.repObject, panel.context);
+            cancelEvent(event);
+        }
+    },
+
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+    // Rep
 
     className: "stackFrame",
 
@@ -1495,13 +1578,7 @@ this.StackFrame = domplate(Firebug.Rep,  // XXXjjb Since the repObject is fn the
     getTooltip: function(stackFrame, context)
     {
         return $STRF("Line", [stackFrame.href, stackFrame.line]);
-    },
-
-    getSourceLink: function(stackFrame)
-    {
-        var sourceLink = new SourceLink(stackFrame.href, stackFrame.line, "js");
-        return sourceLink;
-    },
+    }
 });
 
 // ************************************************************************************************
@@ -1527,6 +1604,7 @@ this.StackTrace = domplate(Firebug.Rep,
 
 // ************************************************************************************************
 // Mozilla
+
 this.jsdStackFrame = domplate(Firebug.Rep,
 {
     inspectable: false,

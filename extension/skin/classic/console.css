@@ -367,7 +367,7 @@
     background: #F8F8F8;
 }
 
-.objectBox-stackFrame, .errorSourceBox {
+.errorSourceBox {
     position: relative;
     padding-top: 2px;
 }

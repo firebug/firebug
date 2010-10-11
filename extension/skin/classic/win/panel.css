@@ -10,6 +10,7 @@
 .logGroup > .logRow,
 .memberRow.hasChildren > .memberLabelCell > .memberLabel,
 .hasHeaders .netHrefLabel,
+.objectBox-stackFrame.hasTwisty,
 .netPageRow > .netCol > .netPageTitle,
 .cssComputedHeader > .twisty {
     background-image: url(chrome://firebug/skin/win/twistyClosed.png);
@@ -27,6 +28,7 @@
 .nodeBox.open > .nodeLabel > .twisty,
 .netRow.opened > .netCol > .netHrefLabel,
 .netPageRow.opened > .netCol > .netPageTitle,
+.objectBox-stackFrame.hasTwisty.opened,
 .computedStylesGroup.opened > .cssComputedHeader > .twisty {
       background-image: url(chrome://firebug/skin/win/twistyOpen.png);
 }
