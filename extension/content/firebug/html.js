@@ -652,13 +652,18 @@ Firebug.HTMLPanel.prototype = extend(WalkingPanel,
             {
                 if (!this.embeddedBrowserParents)
                     this.embeddedBrowserParents = {};
-                var skipChild = node.contentDocument; // unwrap
+
+                // First child of a document is doc-type.
+                var skipChild = node.contentDocument.firstChild; // unwrap
                 this.embeddedBrowserParents[skipChild] = node;
 
                 return skipChild;  // (the node's).(type 9 document).(HTMLElement)
             }
-            else
-                return null;
+            else if (previousSibling)
+            {
+                // Next child of a document (after doc-type) is <html>.
+                return previousSibling.nextSibling;
+            }
         }
         else if (node.getSVGDocument && node.getSVGDocument())  // then the node is a frame
         {
@@ -1461,16 +1466,16 @@ Firebug.HTMLPanel.HTMLDocument = domplate(FirebugReps.Element,
 {
     tag:
         DIV({"class": "nodeBox documentNodeBox containerNodeBox",
-            _repObject: "$object", role :"presentation"},
-            DIV({"class": "nodeChildBox", role :"group"})
+            _repObject: "$object", role: "presentation"},
+            DIV({"class": "nodeChildBox", role: "group"})
         )
 });
 
 Firebug.HTMLPanel.HTMLDocType = domplate(FirebugReps.Element,
 {
     tag:
-        DIV({"class": "nodeBox htmlNodeBox containerNodeBox",
-            _repObject: "$object", role :"presentation"},
+        DIV({"class": "nodeBox docTypeNodeBox containerNodeBox",
+            _repObject: "$object", role: "presentation"},
             DIV({"class": "docType"},
                 "$object|getDocType"
             )
