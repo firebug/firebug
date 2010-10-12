@@ -1894,8 +1894,8 @@ this.Except = domplate(Firebug.Rep,
                 trace.frames.pop();
                 while (trace.frames.length && /^_[fF]irebug/.test(trace.frames[trace.frames.length - 1].fn))
                 {
-                	isCommandLine = true;
-                	trace.frames.pop();
+                    isCommandLine = true;
+                    trace.frames.pop();
                 }
                 if(trace.frames.length == 0)
                     trace = undefined;
