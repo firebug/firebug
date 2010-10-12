@@ -568,6 +568,10 @@ Firebug.HTMLPanel.prototype = extend(WalkingPanel,
 
         var parentNode = this.getParentNode(node);
 
+        // for chromebug to avoid climbing out to browser.xul
+        if (node.nodeName == "#document")
+            return null;
+
         //if (FBTrace.DBG_HTML)
         //    FBTrace.sysout("html.getParentObject for "+node.nodeName+" parentNode:"+getElementCSSSelector(parentNode));
 
@@ -577,8 +581,8 @@ Firebug.HTMLPanel.prototype = extend(WalkingPanel,
             {
                 if (parentNode.defaultView)
                 {
-                    if (parentNode.defaultView == this.context.window) // for chromebug to avoid climbing out to browser.xul
-                        return null;
+                    if (parentNode.defaultView == this.context.window)
+                        return parentNode;
 
                     if (FBTrace.DBG_HTML)
                         FBTrace.sysout("getParentObject parentNode.nodeType 9, frameElement:"+parentNode.defaultView.frameElement+"\n");                  /*@explore*/
