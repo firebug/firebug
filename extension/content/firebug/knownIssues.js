@@ -32,6 +32,11 @@ Firebug.KnownIssues = extend(Firebug.Module,
 
         Firebug.commandLineShowCompleterPopup = Firebug.getPref(Firebug.prefDomain, popupPrefName);
 
+        // In Firefox 4.0b7+ the addon-toolbar is not showing up. We'll workaround that for now.
+        var addonBar = document.getElementById('addon-bar');
+        if (addonBar)
+            collapse(addonBar, false);
+
         if (FBTrace.DBG_INITIALIZE)
             FBTrace.sysout("Set commandLineShowCompleterPopup "+Firebug.commandLineShowCompleterPopup);
     },
