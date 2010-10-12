@@ -1735,7 +1735,10 @@ Firebug.WatchPanel.prototype = extend(Firebug.DOMBasePanel.prototype,
                     scope = frame.scope;
 
                 this.addMember(scope, "watch", members, expr, value, 0);
-                FBTrace.sysout("watch.updateSelection "+expr+" = "+value, {expr: expr, value: value, members: members})
+
+                if (FBTrace.DBG_DOM)
+                    FBTrace.sysout("watch.updateSelection "+expr+" = "+value,
+                        {expr: expr, value: value, members: members})
             }
         }
 
