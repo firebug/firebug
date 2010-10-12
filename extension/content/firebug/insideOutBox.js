@@ -359,23 +359,24 @@ InsideOutBox.prototype =
             if (!parentObjectBox)
                 return null;
 
-            var parentChildBox = this.getChildObjectBox(parentObjectBox);  // childObjectBoxOfParentObjectBox?
+            // Returns an inner box (nodeChildBox) that contains list of child boxes (nodeBox).
+            var childrenBox = this.getChildObjectBox(parentObjectBox);
 
             if (FBTrace.DBG_HTML)
                 FBTrace.sysout("insideOutBox.createObjectBoxes getChildObjectBox("+
-                    formatObjectBox(parentObjectBox)+")= parentChildBox: "+formatObjectBox(parentChildBox));
+                    formatObjectBox(parentObjectBox)+")= childrenBox: "+formatObjectBox(childrenBox));
 
-            if (!parentChildBox)
+            if (!childrenBox)
                 return null;
 
-            var childObjectBox = this.findChildObjectBox(parentChildBox, object);
+            var childObjectBox = this.findChildObjectBox(childrenBox, object);
 
             if (FBTrace.DBG_HTML)
                 FBTrace.sysout("insideOutBox.createObjectBoxes findChildObjectBox("+
-                    formatNode(parentChildBox)+","+formatNode(object)+"): childObjectBox: "+
+                    formatNode(childrenBox)+","+formatNode(object)+"): childObjectBox: "+
                         formatObjectBox(childObjectBox), childObjectBox);
 
-            return childObjectBox ? childObjectBox : this.populateChildBox(object, parentChildBox);
+            return childObjectBox ? childObjectBox : this.populateChildBox(object, childrenBox);
         }
     },
 
@@ -393,11 +394,11 @@ InsideOutBox.prototype =
             if (!parentObjectBox)
                 return null;
 
-            var parentChildBox = this.getChildObjectBox(parentObjectBox);
-            if (!parentChildBox)
+            var childrenBox = this.getChildObjectBox(parentObjectBox);
+            if (!childrenBox)
                 return null;
 
-            return this.findChildObjectBox(parentChildBox, object);
+            return this.findChildObjectBox(childrenBox, object);
         }
     },
 
