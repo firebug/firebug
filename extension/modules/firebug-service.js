@@ -785,7 +785,7 @@ var fbs =
         if (bp)
         {
             bp.type &= ~BP_TRACE;
-            this.unmonitor(sourceFile, lineNo);
+            this.unmonitor(sourceFile.href, lineNo);
         }
     },
 
@@ -803,12 +803,12 @@ var fbs =
         return bp;
     },
 
-    unmonitor: function(sourceFile, lineNo)
+    unmonitor: function(href, lineNo)
     {
-        if (lineNo != -1 && this.removeBreakpoint(BP_MONITOR, sourceFile.href, lineNo))
+        if (lineNo != -1 && this.removeBreakpoint(BP_MONITOR, href, lineNo))
         {
             --monitorCount;
-            dispatch(debuggers, "onToggleMonitor", [sourceFile.href, lineNo, false]);
+            dispatch(debuggers, "onToggleMonitor", [ href, lineNo, false]);
         }
     },
 

@@ -774,7 +774,7 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
             if (mode == "debug")
                 this.clearBreakpoint(scriptInfo.sourceFile, scriptInfo.lineNo);
             else if (mode == "monitor")
-                fbs.unmonitor(scriptInfo.sourceFile, scriptInfo.lineNo);
+                fbs.unmonitor(scriptInfo.sourceFile.href, scriptInfo.lineNo);
         }
     },
 
