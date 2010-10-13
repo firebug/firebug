@@ -1289,7 +1289,7 @@ top.FirebugChrome =
         else
             FBL.removeClass(tooltip, 'noteInToolTip');
 
-        if (target.hasAttribute("title"))
+        if (target && target.hasAttribute("title"))
         {
             tooltip.setAttribute("label", target.getAttribute("title"));
             return true;
