@@ -1411,7 +1411,9 @@ Firebug.HTMLPanel.CompleteElement = domplate(FirebugReps.Element,
         else
         {
             var nodes = [];
-            for (var child = this.getFirstChild(node); child; child = this.getNextSibling(child))
+            var walker = new Firebug.HTMLLib.ElementWalker();
+
+            for (var child = walker.getFirstChild(node); child; child = walker.getNextSibling(child))
             {
                 if (child.nodeType != Node.TEXT_NODE || !HTMLLib.isWhitespaceText(child))
                     nodes.push(child);
