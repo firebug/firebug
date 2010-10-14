@@ -32,41 +32,64 @@
  */
 
 /**
- * Describes a variable visible in a stack frame of an execution context, or a property
- * of an object. A variable has a name and a value.
+ * Describes an instance of an array object in a JavaScript program.
  * 
  * @constructor
- * @param name variable name as a {@link String}
- * @type Variable
- * @return a new Variable
+ * @param id unique object identifier (number)
+ * @param length of the array
+ * @type ArrayReference
+ * @augments ObjectReference
+ * @return a new {@link ArrayReference}
  * @version 1.0
  */
-function Variable(name) {
-	this.name = name;
+function ArrayReference(id, length) {
+	ObjectReference.call(this, "array", id);
+	this.length = length;
 }
 
 /**
- * Returns the name of this variable as a {@link String}.
+ * Subclass of {@link ObjectReference}
+ */
+ArrayReference.prototype = subclass(ObjectReference.prototype);
+
+/**
+ * Returns the length of this array.
  * <p>
  * This function does not require communication with
  * the browser.
  * </p>
  * @function
- * @returns the name of this variable as a {@link String}
+ * @returns the length of this array.
  */
-Variable.prototype.getName = function() {
-	return this.name;
+ArrayReference.prototype.getLength = function() {
+	return this.length;
 };
 
 /**
- * Requests the value of this variable asynchronously. The value will be retrieved
- * and reported back to the listener function when available. The listener may be
- * called before of after this function returns.
+ * Requests the value at the specified index of this array asynchronously. The value
+ * will be retrieved and reported back to the listener when available. The listener
+ * may be called before after this function returns.
  * 
  * @function
+ * @param index the index of the value to return
  * @param listener a listener (function) that accepts an {@link ObjectReference} or
- *  <code>null</code> (indicates the value of this variable is <code>null</code>) 
+ *  <code>null</code> (indicates the value at the specified index is <code>null</code>).
  */
-Variable.prototype.getValue = function(listener) {
+ArrayReference.prototype.getValue = function(index, listener) {
+	// TODO:
+};
+
+/**
+ * Requests a range of values at the specified index of this array asynchronously. The values
+ * will be retrieved and reported back to the listener when available. The listener
+ * may be called before after this function returns.
+ * 
+ * @function
+ * @param index the offset to start retrieving values at
+ * @param length the number of values to retrieve
+ * @param listener a listener (function) that accepts an array of {@link ObjectReference} or
+ *  <code>null</code> (indicates the value at the specified index is <code>null</code>).
+ */
+ArrayReference.prototype.getValues = function(index, length, listener) {
 	// TODO:
 };

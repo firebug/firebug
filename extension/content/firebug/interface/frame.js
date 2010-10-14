@@ -136,5 +136,16 @@ StackFrame.prototype.getLocals = function() {
 	// TODO: locals appear to have a name and value, but the structure of the value is not yet clear to me
 };
 
+/**
+ * Returns the object associated with the 'this' keyword in this stack frame.
+ * 
+ * @function
+ * @returns the {@link ObjectReference} associated with the 'this' keyword in
+ *   this stack frame 
+ */
+StackFrame.prototype.getThis = function() {
+	
+};
+
 
 // ---- PRIVATE ---- 

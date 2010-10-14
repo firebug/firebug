@@ -32,60 +32,35 @@
  */
 
 /**
- * Describes a value referenced by a variable.
- * A value represents data in a program - for example a number, string or object.
+ * Describes an instance of a primitive object in a JavaScript program -
+ * a number, boolean, or string.
  * 
  * @constructor
- * @param type type of value
- * @param data underlying data value, based on the type of value
- * @type Value
- * @return a new Value
+ * @param type - one of "boolean", "number", or "string"
+ * @param id unique object identifier
+ * @param value the value - a boolean, number or {@link String} 
+ * @type Primitive
+ * @augments ObjectReference
+ * @return a new {@link Primitive}
  * @version 1.0
  */
-function Value(type, data) {
-	this.type = type;
-	this.data = data;
+function Primitive(type, id, value) {
+	ObjectReference.call(this, type, id);
+	this.value = value;
 }
 
 /**
- * Returns the type of data this value contains as a {@link String}.
- * One of the following is returned:
- * <ul>
- * <li><code>object</code></li>
- * <li><code>function</code></li>
- * <li><code>boolean</code></li>
- * <li><code>number</code></li>
- * <li><code>string</code></li>
- * <li><code>undefined</code></li>
- * </ul>
- * <p>
- * <ul>
- * <li>TODO: is an array also a special data type?</li>
- * <li>TODO: do we need to distinguish between null and undefined?</li>
- * </ul>
- * </p>
- * @function
- * @returns the type of data this value contains
+ * Subclass of {@link ObjectReference}
  */
-Value.prototype.getType = function() {
-	return this.type;
-};
+Primitive.prototype = subclass(ObjectReference.prototype);
 
 /**
- * Returns the underlying data associated with this value.
+ * Returns the underlying value of this object.
  * <table border="1">
  * 	<tr>
  * 		<th>Value Type</th>
  * 		<th>Return Type</th>
  *  </tr>
- *  <tr>
- *		<td>object</td>
- *		<td>an array of {@link Variable}'s representing the properties of the object</td>
- *	</tr>
- *	<tr>
- *		<td>function</td>
- *		<td>TODO</td>
- *	</tr>
  *	<tr>
  *		<td>boolean</td>
  *		<td>a boolean value</td>
@@ -98,15 +73,14 @@ Value.prototype.getType = function() {
  *		<td>string</td>
  *		<td>returns a {@link String}</td>
  *	</tr>
- *	<tr>
- *		<td>undefined</td>
- *		<td>returns null</td>
- *	</tr>
  * </table>
- * 
+ * <p>
+ * This function does not require communication with
+ * the browser.
+ * </p>
  * @function
- * @returns the underlying data value or <code>null</code> if undefined
+ * @returns the underlying value - a boolean, number, or {@link String}
  */
-Value.prototype.getData = function() {
-	return this.data;
+Primitive.prototype.getValue = function() {
+	return this.value;
 };

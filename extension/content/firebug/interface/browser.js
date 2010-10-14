@@ -52,6 +52,17 @@ function Browser() {
 	this.connected = false;
 }
 
+/** 
+ * Function to extend/subclass an object.
+ * 
+ * @function
+ */
+function subclass(obj) {
+	function f(){};
+	f.prototype = obj;
+	return new f();
+}
+
 // ---- API ----
 
 /**
