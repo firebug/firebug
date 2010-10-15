@@ -47,7 +47,7 @@ Firebug.Breakpoint = extend(Firebug.Module,
             breakButton.setAttribute("panelName", panel.name);
 
         breakButton.removeAttribute("type");
-        collapse($("fbBonButtons"), !panel.breakable);
+        collapse(Firebug.chrome.$("fbBonButtons"), !panel.breakable);
 
         // Disable break-on-next if it isn't supported by the current panel.
         if (!panel.breakable || !panel.context.jsDebuggerActive )
@@ -808,7 +808,7 @@ Firebug.Breakpoint.BreakNotification.prototype = domplate(Firebug.InlineEditor.p
                 return rep.shortTag || rep.tag;
         }
     },
-    
+
     getTargetTag: function(cause)
     {
         return this.getElementTag(cause.target) || null;
