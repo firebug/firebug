@@ -992,6 +992,12 @@ Firebug.AutoCompleter = function(getExprOffset, getRange, evaluator, selectMode,
             postExpr = parsed.substr(range.end+1);
             exprOffset = parseStart + range.start;
 
+            if (FBTrace.DBG_EDITOR)
+            {
+                var sep = (parsed.indexOf('|') > -1) ? '^' : '|';
+                FBTrace.sysout(preExpr+sep+expr+sep+postExpr+" offset: "+offset+" parseStart:"+parseStart);
+            }
+
             if (!cycle)
             {
                 if (!expr)
@@ -1237,7 +1243,7 @@ Firebug.AutoCompleter = function(getExprOffset, getRange, evaluator, selectMode,
 
     this.popupCandidates = function(candidates, textBox)
     {
-        // This method should not operation on the textBox or candidates list
+        // This method should not operate on the textBox or candidates list
         FBL.eraseNode(completionPopup);
 
         var vbox = completionPopup.ownerDocument.createElement("vbox");
@@ -1405,6 +1411,9 @@ Firebug.AutoCompleter = function(getExprOffset, getRange, evaluator, selectMode,
 
     this.handledKeyPress = function(event, context, textBox)
     {
+        if (!Firebug.Editor.completeBySyntax)  // there is no such option now, and no UI. So this removes a feature for 1.6
+            return;
+
         var ch = String.fromCharCode(event.charCode);
         switch (ch)
         {
