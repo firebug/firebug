@@ -1387,7 +1387,7 @@ Firebug.AutoCompleter = function(getExprOffset, getRange, evaluator, selectMode,
         }
         else if (event.keyCode === 38) // UP arrow
         {
-            if (textBox.selectionStart && textBox.selectionStart !== textBox.selectionEnd)
+            if (textBox.selectionEnd && textBox.selectionStart !== textBox.selectionEnd)
             {
                 if (this.cycle(true))
                     this.showCandidates(textBox, true);
@@ -1397,7 +1397,7 @@ Firebug.AutoCompleter = function(getExprOffset, getRange, evaluator, selectMode,
         }
         else if (event.keyCode === 40) // DOWN arrow, cycle down
         {
-            if (textBox.selectionStart && textBox.selectionStart !== textBox.selectionEnd)
+            if (textBox.selectionEnd && textBox.selectionStart !== textBox.selectionEnd)
             {
                 if (this.cycle(false))
                     this.showCandidates(textBox, true);
