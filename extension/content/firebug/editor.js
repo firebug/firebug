@@ -1360,7 +1360,7 @@ Firebug.AutoCompleter = function(getExprOffset, getRange, evaluator, selectMode,
         }
         else if (event.keyCode === 8) // backspace
         {
-            if (textBox.selectionStart && textBox.seletionStart !== textBox.selectionEnd)
+            if (textBox.selectionStart && textBox.selectionStart !== textBox.selectionEnd)
                 textBox.selectionStart = textBox.selectionStart - 1;
         }
         else if (event.keyCode === 9) // TAB, cycle
@@ -1387,7 +1387,7 @@ Firebug.AutoCompleter = function(getExprOffset, getRange, evaluator, selectMode,
         }
         else if (event.keyCode === 38) // UP arrow
         {
-            if (textBox.selectionStart && textBox.seletionStart !== textBox.selectionEnd)
+            if (textBox.selectionStart && textBox.selectionStart !== textBox.selectionEnd)
             {
                 if (this.cycle(true))
                     this.showCandidates(textBox, true);
@@ -1397,7 +1397,7 @@ Firebug.AutoCompleter = function(getExprOffset, getRange, evaluator, selectMode,
         }
         else if (event.keyCode === 40) // DOWN arrow, cycle down
         {
-            if (textBox.selectionStart && textBox.seletionStart !== textBox.selectionEnd)
+            if (textBox.selectionStart && textBox.selectionStart !== textBox.selectionEnd)
             {
                 if (this.cycle(false))
                     this.showCandidates(textBox, true);
