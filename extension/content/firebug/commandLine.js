@@ -1096,7 +1096,7 @@ function FirebugCommandLineAPI(context)
         if (!node)
             return node;
 
-        return node;
+        return FBL.unwrapObject(node);
     };
 
     this.cd = function(object)
@@ -1345,7 +1345,7 @@ function CommandLineHandler(context, win)
                 return function() {
                     if (FBTrace.DBG_COMMANDLINE)
                         FBTrace.sysout("commandLine.getInspectorHistory: " + p, vars);
-                    return vars[p];
+                    return FBL.unwrapObject(vars[p]);
                 }
             }
             this.api[prop] = createHandler(prop);  // XXXjjb should these be removed?
