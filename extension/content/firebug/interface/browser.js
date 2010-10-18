@@ -154,7 +154,7 @@ Browser.prototype.isConnected = function() {
  * @exception Error if an unsupported event type is specified
  */
 Browser.prototype.addEventListener = function(eventType, listener) {
-	var i = this.EVENT_TYPES.indexof(eventType);
+	var i = this.EVENT_TYPES.indexOf(eventType);
 	if (i < 0) {
 		// unsupported event type
 		throw new Error("eventType '" + eventType + "' is not supported");
