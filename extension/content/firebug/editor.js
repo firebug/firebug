@@ -334,7 +334,8 @@ Firebug.Editor = extend(Firebug.Module,
         if (currentEditor.tabNavigation)
         {
             this.listeners.push(
-                chrome.keyCodeListen("RETURN", null, bind(this.saveAndClose, this)),
+                chrome.keyCodeListen("RETURN", null, bind(this.tabNextEditor, this)),
+                chrome.keyCodeListen("RETURN", isShift, bind(this.saveAndClose, this)),
                 chrome.keyCodeListen("RETURN", isControl, bind(this.insertRow, this, null, "after")),
                 chrome.keyCodeListen("TAB", null, bind(this.tabNextEditor, this)),
                 chrome.keyCodeListen("TAB", isShift, bind(this.tabPreviousEditor, this))
