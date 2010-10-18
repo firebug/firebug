@@ -47,8 +47,9 @@ function Browser() {
 	this.activeContext = null;
 	this.handlers = {}; // map of event types to array of handler functions
 	this.EVENT_TYPES = ["onBreak", "onConsoleDebug", "onConsoleError", "onConsoleInfo", "onConsoleLog",
-	                    "onConsoleWarn", "onContextCreated", "onContextDestroyed", "onContextChanged", "onInspectNode",
-	                    "onResume", "onSuspend", "onToggleBreakpoint", "onDisconnect"];
+	                    "onConsoleWarn", "onContextCreated", "onContextDestroyed", "onContextChanged",
+	                    "onContextLoaded", "onInspectNode", "onResume", "onScript", "onSuspend", "onToggleBreakpoint",
+	                    "onDisconnect"];
 	this.connected = false;
 }
 
