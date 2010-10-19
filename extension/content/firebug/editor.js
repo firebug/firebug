@@ -1366,14 +1366,10 @@ Firebug.AutoCompleter = function(getExprOffset, getRange, evaluator, selectMode,
         }
         else if (event.keyCode === 9) // TAB, cycle
         {
-            if (completionPopup.state == "closed")
-                return; // When the list is collapsed, allow (shift) tabbing out of the field
+            if (!textBox.selectionEnd || textBox.selectionStart === textBox.selectionEnd)
+                return; // When there is no completion, allow tabbing out of the field
 
-            if (isShift(event))
-                this.complete(context, textBox, true, true, true);
-            else
-                this.complete(context, textBox, true, false, true);
-
+            this.acceptCompletionInTextBox(textBox);
             cancelEvent(event);
         }
        /* else if (event.keyCode === 13 || event.keyCode === 14)  // RETURN , ENTER
