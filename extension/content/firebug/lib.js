@@ -4168,7 +4168,7 @@ this.parseJSONString = function(jsonString, originURL)
         FBTrace.sysout("jsonviewer.parseJSON; " + jsonString);
 
     // See if this is a Prototype style *-secure request.
-    var regex = new RegExp(/^\/\*-secure-([\s\S]*)\*\/\s*$/);
+    var regex = new RegExp(/\s*\/\*-secure-([\s\S]*)\*\/\s*$/);
     var matches = regex.exec(jsonString);
 
     if (matches)
