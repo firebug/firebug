@@ -1431,11 +1431,20 @@ Firebug.TraceModule.TraceMessage.prototype =
             return this.ifaces;
 
         this.ifaces = [];
-        for (var iface in Ci) {
-            if (this.obj instanceof Ci[iface]) {
-                var ifaceProps = this.ifaces[iface] = [];
-                for (p in Ci[iface])
-                    ifaceProps[p] = this.obj[p];
+        for (var iface in Ci)
+        {
+            try
+            {
+                if (this.obj instanceof Ci[iface])
+                {
+                    var ifaceProps = this.ifaces[iface] = [];
+                    for (p in Ci[iface])
+                        ifaceProps[p] = this.obj[p];
+                }
+            }
+            catch (err)
+            {
+                onPanic("TraceMessage.getInterfaces: " + iface, err);
             }
         }
         return this.ifaces;
