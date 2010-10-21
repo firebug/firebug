@@ -98,6 +98,9 @@ const prefNames =  // XXXjjb TODO distribute to modules
     "netDisplayedPostBodyLimit", "netPhaseInterval", "sizePrecision",
     "netParamNameLimit", "netShowPaintEvents", "netShowBFCacheResponses",
 
+    // JSON Preview
+    "sortJsonPreview",
+
     // Stack
     "omitObjectPathStack",
 

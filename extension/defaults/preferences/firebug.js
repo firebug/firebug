@@ -101,6 +101,9 @@ pref("extensions.firebug.netParamNameLimit", 25);       // Maximum size [charact
 pref("extensions.firebug.netShowPaintEvents", false);
 pref("extensions.firebug.netShowBFCacheResponses", true);   // Show responses coming from the BF (back-forward) cache. These doesn't represent any network activity.
 
+// JSON Preview
+pref("extensions.firebug.sortJsonPreview", false);   // If true JSON preview in the Net panel is sorted by keys.
+
 // Cache
 pref("extensions.firebug.cache.mimeTypes", ""); // list of additional cached mime-types separated by space.
 pref("extensions.firebug.cache.responseLimit", 5242880); // maximum size limit for cached response.

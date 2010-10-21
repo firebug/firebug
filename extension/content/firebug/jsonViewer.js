@@ -25,12 +25,10 @@ var contentTypes =
 Firebug.JSONViewerModel = extend(Firebug.Module,
 {
     dispatchName: "jsonViewer",
+
     initialize: function()
     {
         Firebug.NetMonitor.NetInfoBody.addListener(this);
-
-        // Used by Firebug.DOMPanel.DirTable domplate.
-        this.toggles = new ToggleBranch();
     },
 
     shutdown: function()
@@ -94,11 +92,9 @@ Firebug.JSONViewerModel = extend(Firebug.Module,
             return;
 
         tabBody.updated = true;
+        tabBody.context = context;
 
-        if (file.jsonObject) {
-            Firebug.DOMPanel.DirTable.tag.replace(
-                 {object: file.jsonObject, toggles: this.toggles}, tabBody);
-        }
+        this.Preview.render(tabBody, file, context);
     },
 
     parseJSON: function(file)
@@ -106,6 +102,110 @@ Firebug.JSONViewerModel = extend(Firebug.Module,
         var jsonString = new String(file.responseText);
         return parseJSONString(jsonString, "http://" + file.request.originalURI.host);
     },
+});
+
+// ************************************************************************************************
+
+Firebug.JSONViewerModel.Preview = domplate(
+{
+    bodyTag:
+        DIV({"class": "jsonPreview", _repObject: "$file"},
+            DIV({"class": "title"},
+                DIV({"class": "sortLink", onclick: "$onSort", $sorted: "$sorted"},
+                    SPAN({"class": "doSort"}, $STR("jsonviewer.sort")),
+                    SPAN({"class": "doNotSort"}, $STR("jsonviewer.do not sort"))
+                )
+            ),
+            DIV({"class": "jsonPreviewBody"})
+        ),
+
+    onSort: function(event)
+    {
+        var target = event.target;
+        var sortLink = FBL.getAncestorByClass(target, "sortLink");
+        if (!sortLink)
+            return;
+
+        FBL.cancelEvent(event);
+
+        FBL.toggleClass(sortLink, "sorted");
+        Firebug.setPref(Firebug.prefDomain, "sortJsonPreview", !Firebug.sortJsonPreview);
+
+        var preview = FBL.getAncestorByClass(sortLink, "jsonPreview");
+        var body = FBL.getAncestorByClass(sortLink, "netInfoJSONText");
+        this.render(body, preview.repObject, body.context);
+    },
+
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+    render: function(body, file, context)
+    {
+        if (!file.jsonObject)
+            return;
+
+        if (!body.jsonTree)
+            body.jsonTree = new JSONTreePlate();
+
+        var input = {file: file, sorted: Firebug.sortJsonPreview};
+        parentNode = this.bodyTag.replace(input, body, this);
+        parentNode = parentNode.getElementsByClassName("jsonPreviewBody").item(0);
+
+        body.jsonTree.render(file.jsonObject, parentNode, context);
+    }
+});
+
+// ************************************************************************************************
+
+function JSONTreePlate()
+{
+    // Used by Firebug.DOMPanel.DirTable domplate.
+    this.toggles = new ToggleBranch();
+}
+
+// xxxHonza: this Event if this object is *not* a panel in Firebug terminology,
+// there is no other way how to subclass the DOM Tree. Better solution would be
+// to have a middle object between DirTablePlate and DOMBasePanel.
+JSONTreePlate.prototype = extend(Firebug.DOMBasePanel.prototype,
+{
+    dispatchName: "JSONTreePlate",
+
+    render: function(jsonObject, parentNode, context)
+    {
+        try
+        {
+            this.panelNode = parentNode;
+            this.context = context;
+
+            var members = this.getMembers(jsonObject, 0);
+            this.expandMembers(members, this.toggles, 0, 0, context);
+            this.showMembers(members, false, false);
+        }
+        catch (err)
+        {
+            if (FBTrace.DBG_JSONVIEWER)
+                FBTrace.sysout("jsonviewer.render; EXCEPTION", err);
+        }
+    },
+
+    getMembers: function(object, level, context)
+    {
+        if (!level)
+            level = 0;
+
+        var members = [];
+
+        for (var name in object)
+        {
+            var val = object[name];
+            this.addMember(object, "user", members, name, val, level, 0);
+        }
+
+        function sortName(a, b) { return a.name > b.name ? 1 : -1; }
+        if (Firebug.sortJsonPreview)
+            members.sort(sortName);
+
+        return members;
+    }
 });
 
 // ************************************************************************************************
