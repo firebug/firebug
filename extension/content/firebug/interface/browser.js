@@ -59,9 +59,9 @@ function Browser() {
  * @function
  */
 function subclass(obj) {
-	function f(){};
-	f.prototype = obj;
-	return new f();
+	function F(){}
+	F.prototype = obj;
+	return new F();
 }
 
 // ---- API ----
@@ -99,7 +99,7 @@ Browser.prototype.getBrowserContexts = function() {
 		knownContexts.push(this.contexts[id]);
 	}
 	return knownContexts;
-}
+};
 
 /**
  * Returns the {@link BrowserContext} that currently has focus in the browser
@@ -175,7 +175,7 @@ Browser.prototype.addEventListener = function(eventType, listener) {
  */
 Browser.prototype.disconnect = function() {
 	
-}
+};
 
 //TODO: support to remove a listener
 
@@ -252,11 +252,11 @@ Browser.prototype._contextLoaded = function(id) {
  * @param eventType event type
  * @param arguments arguments to be applied to handler functions
  */
-Browser.prototype._dispatch = function(eventType, arguments) {
-	functions = this.handlers[eventType];
+Browser.prototype._dispatch = function(eventType, args) {
+	var functions = this.handlers[eventType];
 	if (functions) {
 		for ( var i = 0; i < functions.length; i++) {
-			functions[i].apply(null, arguments);
+			functions[i].apply(null, args);
 		}
 	}
 };
@@ -270,7 +270,7 @@ Browser.prototype._dispatch = function(eventType, arguments) {
 Browser.prototype._setFocusContext = function(context) {
 	var prev = this.activeContext;
 	this.activeContext = context;
-	if (prev != context) {
+	if (prev !== context) {
 		this._dispatch("onContextChanged", [prev, this.activeContext]);
 	}
 };
@@ -289,5 +289,5 @@ Browser.prototype._setConnected = function(connected) {
 		this._dispatch("onDisconnect", [this]);
 	}
 
-}
+};
 
