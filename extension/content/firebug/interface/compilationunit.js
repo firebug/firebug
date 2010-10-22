@@ -155,7 +155,7 @@ CompilationUnit.prototype._addBreakpoint = function(breakpoint) {
  */
 CompilationUnit.prototype._removeBreakpoint = function(breakpoint) {
 	for ( var i = 0; i < this.breakpoints.length; i++) {
-		if (this.breakpoints[i] == breakpoint) {
+		if (this.breakpoints[i] === breakpoint) {
 			this.breakpoints.splice(i, 1);
 			return;
 		}
