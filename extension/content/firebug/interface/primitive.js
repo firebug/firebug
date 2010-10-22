@@ -57,9 +57,9 @@ Primitive.prototype = subclass(ObjectReference.prototype);
 /**
  * Returns the underlying value of this object.
  * <table border="1">
- * 	<tr>
- * 		<th>Value Type</th>
- * 		<th>Return Type</th>
+ *  <tr>
+ *		<th>Value Type</th>
+ *		<th>Return Type</th>
  *  </tr>
  *	<tr>
  *		<td>boolean</td>
