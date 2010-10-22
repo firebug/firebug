@@ -176,4 +176,4 @@ JavaScriptContext.prototype._resumed = function() {
 		this.is_suspended = false;
 		this.getBrowserContext().getBrowser()._dispatch("onResume", [this]);
 	}
-}
+};

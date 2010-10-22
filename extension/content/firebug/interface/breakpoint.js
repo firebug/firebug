@@ -170,7 +170,7 @@ Breakpoint.prototype._installed = function() {
 		this.installed = true;
 		this.getCompilationUnit().getBrowserContext().getBrowser()._dispatch("onToggleBreakpoint", [this]);	
 	}
-}
+};
 
 /**
  * Implementations must call this method when a breakpoint is cleared from the browser.
@@ -185,4 +185,4 @@ Breakpoint.prototype._cleared = function() {
 		this.cleared = true;
 		this.getCompilationUnit().getBrowserContext().getBrowser()._dispatch("onToggleBreakpoint", [this]);
 	}
-}
+};

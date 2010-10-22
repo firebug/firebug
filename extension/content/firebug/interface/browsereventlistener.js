@@ -160,4 +160,4 @@ Browser.EventListener = {
      */
     onToggleBreakpoint: function(breakpoint) {}
 
-}
+};

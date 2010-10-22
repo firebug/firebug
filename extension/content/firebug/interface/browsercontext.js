@@ -159,7 +159,7 @@ BrowserContext.prototype.getCompilationUnit = function(url) {
  */
 BrowserContext.prototype.getJavaScriptContext = function() {
 	// TODO:
-}
+};
 
 // ----- PRIVATE -----
 
@@ -173,7 +173,7 @@ BrowserContext.prototype.getJavaScriptContext = function() {
  */
 BrowserContext.prototype._destroyed = function() {
 	this.is_destroyed = true;
-}
+};
 
 /**
  * Notification this context has been destroyed. Clients should not call
@@ -185,7 +185,7 @@ BrowserContext.prototype._destroyed = function() {
  */
 BrowserContext.prototype._loaded = function() {
 	this.is_loaded = true;
-}
+};
 
 /**
  * Adds the given compilation unit to the collection of compilation units in this execution context.
