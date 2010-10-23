@@ -464,15 +464,11 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
                     context.discardBlurEvents = function(event)
                     {
                         if (FBTrace.DBG_UI_LOOP)
-                            FBTrace.sysout("debugger.freeze discard blur event "+context.discardOneMore+" while focus is "+context.window.document.commandDispatcher.focusedElement, event);
+                            FBTrace.sysout("debugger.freeze discard blur event "+context.saveFocus+" while focus is "+context.window.document.commandDispatcher.focusedElement, event);
                         event.preventDefault();
                         event.stopPropagation();
-                        if (context.discardOneMore)
-                        {
+                        if (!context.saveFocus)
                             context.window.removeEventListener('blur', context.discardBlurEvents, true);
-                            delete context.discardOneMore;
-                            delete context.saveFocus;
-                        }
                     },
 
                     context.window.addEventListener('blur', context.discardBlurEvents, true);
@@ -521,7 +517,7 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
                 {
                     context.window.focus();
                     context.saveFocus.focus();
-                    context.discardOneMore = true;
+                    delete context.saveFocus;
                 }
 
                 if (FBTrace.DBG_UI_LOOP)
