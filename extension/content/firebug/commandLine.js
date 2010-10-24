@@ -522,6 +522,11 @@ Firebug.CommandLine = extend(Firebug.Module,
         }
     },
 
+    onCommandLineOverflow: function(event)
+    {
+        this.checkOverflow(Firebug.currentContext);
+    },
+
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 
     appendToHistory: function(command, unique)
@@ -596,6 +601,7 @@ Firebug.CommandLine = extend(Firebug.Module,
         this.onCommandLineKeyUp = bind(this.onCommandLineKeyUp, this);
         this.onCommandLineKeyDown = bind(this.onCommandLineKeyDown, this);
         this.onCommandLineKeyPress = bind(this.onCommandLineKeyPress, this);
+        this.onCommandLineOverflow = bind(this.onCommandLineOverflow, this);
         this.attachListeners();
     },
 
@@ -627,6 +633,8 @@ Firebug.CommandLine = extend(Firebug.Module,
         Firebug.chrome.$("fbLargeCommandLine").addEventListener('focus', this.onCommandLineFocus, true);
         Firebug.chrome.$("fbCommandLine").addEventListener('focus', this.onCommandLineFocus, true);
         Firebug.chrome.$("fbCommandLine").addEventListener('input', this.onCommandLineInput, true);
+        Firebug.chrome.$("fbCommandLine").addEventListener('overflow', this.onCommandLineOverflow, true);
+
         Firebug.chrome.$("fbCommandLine").addEventListener('keyup', this.onCommandLineKeyUp, true);
         Firebug.chrome.$("fbCommandLine").addEventListener('keydown', this.onCommandLineKeyDown, true);
         Firebug.chrome.$("fbCommandLine").addEventListener('keypress', this.onCommandLineKeyPress, true);
@@ -640,9 +648,9 @@ Firebug.CommandLine = extend(Firebug.Module,
         Firebug.chrome.$("fbLargeCommandLine").removeEventListener('focus', this.onCommandLineFocus, true);
         Firebug.chrome.$("fbCommandLine").removeEventListener('focus', this.onCommandLineFocus, true);
         Firebug.chrome.$("fbCommandLine").removeEventListener('input', this.onCommandLineInput, true);
+        Firebug.chrome.$("fbCommandLine").removeEventListener('overflow', this.onCommandLineOverflow, true);
         Firebug.chrome.$("fbCommandLine").removeEventListener('keypress', this.onCommandLineKeyPress, true);
         Firebug.chrome.$("fbCommandLine").removeEventListener('keydown', this.onCommandLineKeyDown, true);
-        Firebug.chrome.$("fbCommandLine").removeEventListener('keypress', this.onCommandLineKeyPress, true);
         Firebug.chrome.$("fbCommandLine").removeEventListener('blur', this.onCommandLineBlur, true);
     },
 
@@ -724,7 +732,47 @@ Firebug.CommandLine = extend(Firebug.Module,
     onCommandLineKeyPress: function(event)
     {
         var commandLine = getCommandLine(Firebug.currentContext);
-        this.autoCompleter.handledKeyPress(event, Firebug.currentContext, commandLine)
+        if (!this.autoCompleter.handledKeyPress(event, Firebug.currentContext, commandLine))
+            this.handledKeyPress(event);  // independent of completer
+    },
+
+    handledKeyPress: function(event)
+    {
+        if (event.keyCode === 13 || event.keyCode === 14)  // RETURN , ENTER
+        {
+            if (!event.metaKey && !event.shiftKey)
+            {
+                event.preventDefault();
+                Firebug.CommandLine.enter(Firebug.currentContext);
+                return true;
+            }
+            else if (event.metaKey && !event.shiftKey)
+            {
+                event.preventDefault();
+                Firebug.CommandLine.enterMenu(Firebug.currentContext);
+                return true;
+            }
+            else if(event.shiftKey && !event.metaKey)
+            {
+                event.preventDefault();
+                Firebug.CommandLine.enterInspect(Firebug.currentContext);
+                return true;
+            }
+        } else if (event.keyCode === 38) {  // UP arrow
+            event.preventDefault();
+            Firebug.CommandLine.cycleCommandHistory(Firebug.currentContext, -1);
+            return true;
+        } else if (event.keyCode === 40) {  // DOWN arrow
+            event.preventDefault();
+            Firebug.CommandLine.cycleCommandHistory(Firebug.currentContext, 1);
+            return true;
+        } else if (event.keyCode === 27) {  // ESC
+            event.preventDefault();
+            if (Firebug.CommandLine.cancel(Firebug.currentContext))
+                FBL.cancelEvent(event);
+            return true;
+        }
+        return false;
     },
 
     onCommandLineInput: function(event)

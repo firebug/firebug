@@ -1516,44 +1516,7 @@
     </handlers>
 </binding>
 
-<binding id="commandLine" extends="chrome://global/content/bindings/textbox.xml#textarea">
-    <handlers>
-        <handler event="input"><![CDATA[
-            Firebug.CommandLine.update(Firebug.currentContext);
-        ]]></handler>
 
-        <handler event="overflow"><![CDATA[
-            if (window.Firebug)
-                Firebug.CommandLine.checkOverflow(Firebug.currentContext);
-        ]]></handler>
-
-        <handler event="keypress" keycode="VK_RETURN" modifiers="" preventdefault="true"><![CDATA[
-            Firebug.CommandLine.enter(Firebug.currentContext);
-        ]]></handler>
-
-        <handler event="keypress" keycode="VK_RETURN" modifiers="meta" preventdefault="true"><![CDATA[
-            Firebug.CommandLine.enterMenu(Firebug.currentContext);
-        ]]></handler>
-
-        <handler event="keypress" keycode="VK_RETURN" modifiers="shift" preventdefault="true"><![CDATA[
-            Firebug.CommandLine.enterInspect(Firebug.currentContext);
-        ]]></handler>
-
-        <handler event="keypress" keycode="VK_UP" preventdefault="true"><![CDATA[
-            Firebug.CommandLine.cycleCommandHistory(Firebug.currentContext, -1);
-        ]]></handler>
-
-        <handler event="keypress" keycode="VK_DOWN" preventdefault="true"><![CDATA[
-            Firebug.CommandLine.cycleCommandHistory(Firebug.currentContext, 1);
-        ]]></handler>
-
-        <handler event="keypress" keycode="VK_ESCAPE" preventdefault="true"><![CDATA[
-            // Cancel the event only if it executed the required action (cleared the command line).
-            if (Firebug.CommandLine.cancel(Firebug.currentContext))
-                FBL.cancelEvent(event);
-        ]]></handler>
-    </handlers>
-</binding>
 
 <binding id="largeCommandLine" extends="chrome://global/content/bindings/textbox.xml#textarea">
     <handlers>

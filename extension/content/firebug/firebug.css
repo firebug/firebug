@@ -12,10 +12,6 @@ window[chromehidden~="toolbar"] #fbToolbar {
     height: 270px;
 }
 
-#fbCommandLine {
-    -moz-binding: url("chrome://firebug/content/bindings.xml#commandLine");
-}
-
 #fbLargeCommandLine {
     -moz-binding: url("chrome://firebug/content/bindings.xml#largeCommandLine");
 }
@@ -27,8 +23,7 @@ window[chromehidden~="toolbar"] #fbToolbar {
 .fbCommandLineCompletions {
     cursor: default;
     font-family: monospace;
-    /* overflow: auto; XXXjjb I can't get the CSS to work
-    max-height: 270px; */
+    white-space: pre;
 }
 
 .fbPopupTitle {
