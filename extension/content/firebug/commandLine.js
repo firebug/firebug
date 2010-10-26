@@ -161,8 +161,15 @@ Firebug.CommandLine = extend(Firebug.Module,
 
         if (FBTrace.DBG_COMMANDLINE)
             FBTrace.sysout("commandLine.evaluateByEventPassing \'"+expr+"\' using consoleHandler:", consoleHandler);
-
-        win.document.dispatchEvent(event);
+        try
+        {
+            win.document.dispatchEvent(event);
+        }
+        catch(exc)
+        {
+            if (FBTrace.DBG_COMMANDLINE || FBTrace.DBG_ERRORS)
+                FBTrace.sysout("commandLine.evaluateByEventPassing dispatchEvent FAILS "+exc, {exc:exc, event:event});
+        }
 
         if (FBTrace.DBG_COMMANDLINE)
             FBTrace.sysout("commandLine.evaluateByEventPassing return after firebugCommandLine event:", event);
@@ -300,10 +307,12 @@ Firebug.CommandLine = extend(Firebug.Module,
     acceptCompletionOrReturnIt: function(context)
     {
         var commandLine = getCommandLine(context);
-        if (this.autoCompleter.acceptCompletionInTextBox(commandLine))
-            return ""; // next time we will return text
-        else
+        var completionBox = getCompletionBox();
+        if (commandLine.value.length === completionBox.value.length) // we have nothing to complete
             return this.autoCompleter.getVerifiedText(commandLine);
+
+        this.autoCompleter.acceptCompletionInTextBox(commandLine, completionBox);
+        return ""; // next time we will return text
     },
 
     enter: function(context, command)
@@ -438,6 +447,9 @@ Firebug.CommandLine = extend(Firebug.Module,
     clear: function(context)
     {
         var commandLine = getCommandLine(context);
+        var completionBox = getCompletionBox();
+
+        completionBox.value = "";
 
         // Return false if the command line is already empty.
         if (!commandLine.value)
@@ -468,7 +480,8 @@ Firebug.CommandLine = extend(Firebug.Module,
     complete: function(context, reverse)
     {
         var commandLine = getCommandLine(context);
-        this.autoCompleter.complete(context, commandLine, true, reverse);
+        var completionBox = getCompletionBox();
+        this.autoCompleter.complete(context, commandLine, completionBox, true, reverse);
         context.commandLineText = this.autoCompleter.getVerifiedText(commandLine);
         this.autoCompleter.reset();
     },
@@ -570,7 +583,13 @@ Firebug.CommandLine = extend(Firebug.Module,
         this.autoCompleter.reset();
 
         commandLine.value = context.commandLineText = command;
-        commandLine.inputField.setSelectionRange(command.length, command.length);
+        this.setCursor(commandLine, command.length);
+    },
+
+    setCursor: function(commandLine, position)
+    {
+        //commandLine.inputField.setSelectionRange(command.length, command.length);  // textbox version, https://developer.mozilla.org/en/XUL/Property/inputField
+        commandLine.setSelectionRange(position, position);
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
@@ -720,19 +739,25 @@ Firebug.CommandLine = extend(Firebug.Module,
     onCommandLineKeyUp: function(event)
     {
         var commandLine = getCommandLine(Firebug.currentContext);
-        this.autoCompleter.handledKeyUp(event, Firebug.currentContext, commandLine)
+        var completionBox = getCompletionBox();
+
+        this.autoCompleter.handledKeyUp(event, Firebug.currentContext, commandLine, completionBox)
     },
 
     onCommandLineKeyDown: function(event)
     {
         var commandLine = getCommandLine(Firebug.currentContext);
-        this.autoCompleter.handledKeyDown(event, Firebug.currentContext, commandLine)
+        var completionBox = getCompletionBox();
+
+        this.autoCompleter.handledKeyDown(event, Firebug.currentContext, commandLine, completionBox)
     },
 
     onCommandLineKeyPress: function(event)
     {
         var commandLine = getCommandLine(Firebug.currentContext);
-        if (!this.autoCompleter.handledKeyPress(event, Firebug.currentContext, commandLine))
+        var completionBox = getCompletionBox();
+
+        if (!this.autoCompleter.handledKeyPress(event, Firebug.currentContext, commandLine, completionBox))
             this.handledKeyPress(event);  // independent of completer
     },
 
@@ -778,6 +803,7 @@ Firebug.CommandLine = extend(Firebug.Module,
     onCommandLineInput: function(event)
     {
         var commandLine = getCommandLine(Firebug.currentContext);
+        var completionBox = getCompletionBox();
 
         if (!this.autoCompleter.getVerifiedText(commandLine)) // don't complete on empty command line
         {
@@ -786,7 +812,7 @@ Firebug.CommandLine = extend(Firebug.Module,
             return;
         }
 
-        this.autoCompleter.complete(Firebug.currentContext, commandLine, true, false, true);
+        this.autoCompleter.complete(Firebug.currentContext, commandLine, completionBox, true, false, true);
         Firebug.currentContext.commandLineText = this.autoCompleter.getVerifiedText(commandLine);
     },
 
@@ -1104,6 +1130,12 @@ function getCommandLine(context)
         ? Firebug.chrome.$("fbLargeCommandLine")
         : Firebug.chrome.$("fbCommandLine");
 }
+
+function getCompletionBox()
+{
+    return Firebug.chrome.$("fbCommandLineCompletion");
+}
+
 
 // ************************************************************************************************
 // Command line APIs definition

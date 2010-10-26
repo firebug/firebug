@@ -944,7 +944,7 @@ Firebug.AutoCompleter = function(getExprOffset, getRange, evaluator, selectMode,
         accepted = false;
     };
 
-    this.complete = function(context, textBox, cycle, reverse)
+    this.complete = function(context, textBox, completionBox, cycle, reverse)
     {
         var value = textBox.value;
         if (!value && noCompleteOnBlank)
@@ -960,7 +960,7 @@ Firebug.AutoCompleter = function(getExprOffset, getRange, evaluator, selectMode,
         var found =  this.pickCandidates(value, offset, context, cycle, reverse);
 
         if (found)
-            this.showCandidates(textBox);
+            this.showCandidates(textBox, completionBox);
 
         return found;
     };
@@ -1221,14 +1221,9 @@ Firebug.AutoCompleter = function(getExprOffset, getRange, evaluator, selectMode,
         return pick;
     };
 
-    this.showCandidates = function(textBox)
+    this.showCandidates = function(textBox, completionBox)
     {
-        textBox.value = currentLine;
-
-        if (selectMode)
-            textBox.setSelectionRange(completionStart, completionEnd);
-        else
-            textBox.setSelectionRange(completionEnd, completionEnd);
+        completionBox.value = currentLine;
 
         if (showCompletionPopup && candidates.length && candidates.length > 1)
         {
@@ -1350,7 +1345,7 @@ Firebug.AutoCompleter = function(getExprOffset, getRange, evaluator, selectMode,
         }
     };
 
-    this.handledKeyDown = function(event, context, textBox)
+    this.handledKeyDown = function(event, context, textBox, completionBox)
     {
         if (event.altKey || event.metaKey)
             return false;
@@ -1361,16 +1356,26 @@ Firebug.AutoCompleter = function(getExprOffset, getRange, evaluator, selectMode,
         }
         else if (event.keyCode === 8) // backspace
         {
-            if (textBox.selectionStart && textBox.selectionStart !== textBox.selectionEnd)
-                textBox.selectionStart = textBox.selectionStart - 1;
+            // I think we need to reconsider the completion here.
+            //if (textBox.selectionStart && (textBox.selectionStart !== textBox.selectionEnd) )
+            //    textBox.selectionStart = textBox.selectionStart - 1;
         }
         else if (event.keyCode === 9) // TAB, cycle
         {
-            if (!textBox.selectionEnd || textBox.selectionStart === textBox.selectionEnd)
-                return; // When there is no completion, allow tabbing out of the field
-
-            this.acceptCompletionInTextBox(textBox);
-            cancelEvent(event);
+            if (textBox.selectionStart !== textBox.selectionEnd) // then the user has selected text
+            {
+                textBox.selectRange(textBox.selectionEnd, textBox.selectionStart); // deselect
+                cancelEvent(event);
+            }
+            else if (completionBox.value.length == textBox.value.length)  // then no completion text,
+            {
+                return; //  pass TAB along
+            }
+            else  // complete
+            {
+                this.acceptCompletionInTextBox(textBox, completionBox);
+                cancelEvent(event);
+            }
         }
        /* else if (event.keyCode === 13 || event.keyCode === 14)  // RETURN , ENTER
         {
@@ -1387,7 +1392,7 @@ Firebug.AutoCompleter = function(getExprOffset, getRange, evaluator, selectMode,
             if (textBox.selectionEnd && textBox.selectionStart !== textBox.selectionEnd)
             {
                 if (this.cycle(true))
-                    this.showCandidates(textBox, true);
+                    this.showCandidates(textBox, completionBox);
                 cancelEvent(event);
                 return true;
             }
@@ -1397,7 +1402,7 @@ Firebug.AutoCompleter = function(getExprOffset, getRange, evaluator, selectMode,
             if (textBox.selectionEnd && textBox.selectionStart !== textBox.selectionEnd)
             {
                 if (this.cycle(false))
-                    this.showCandidates(textBox, true);
+                    this.showCandidates(textBox, completionBox);
 
                 cancelEvent(event);
                 return true;
@@ -1408,20 +1413,8 @@ Firebug.AutoCompleter = function(getExprOffset, getRange, evaluator, selectMode,
 
     this.handledKeyPress = function(event, context, textBox)
     {
-        if (!Firebug.Editor.completeBySyntax)  // there is no such option now, and no UI. So this removes a feature for 1.6
-            return;
-
-        var ch = String.fromCharCode(event.charCode);
-        switch (ch)
-        {
-            case '.':
-            case '(':
-                this.acceptCompletionInTextBox(textBox);
-                return true;
-                break;
-            default:
-                break;
-        }
+        if (event.keyCode === 8)  // Backspace
+            cancelEvent(event);   // heuristic, FBTest sends us both keydown and keypress
     };
 
     this.setCompletionOnEvent = function(event)
@@ -1444,22 +1437,24 @@ Firebug.AutoCompleter = function(getExprOffset, getRange, evaluator, selectMode,
                 var end = start + completion.length;
                 textBox.value = textBox.value.substr(0, textBox.selectionStart) + completion;
                 textBox.setSelectionRange(start, end);
+                if (FBTrace.DBG_EDITOR)
+                    FBTrace.sysout("textBox.setSelectionRange "+start+" - "+end);
             }
         }
     };
 
-    this.acceptCompletionInTextBox = function(textBox)
+    this.acceptCompletionInTextBox = function(textBox, completionBox)
     {
-        accepted = textBox.selectionStart != textBox.selectionEnd;
-        textBox.setSelectionRange(textBox.selectionEnd, textBox.selectionEnd);  // accept completion by deselect
+        textBox.value = completionBox.value;
+        textBox.setSelectionRange(textBox.value.length, textBox.value.length); // ensure the cursor at EOL
         this.hide();
-        return accepted;
+        return true;
     };
 
     this.acceptCompletion = function(event)
     {
         if (completionPopup.currentTextBox)
-            this.acceptCompletionInTextBox(completionPopup.currentTextBox);
+            this.acceptCompletionInTextBox(completionPopup.currentTextBox, getCompletionBox());
     };
 
     this.acceptCompletion = bind(this.acceptCompletion, this);
@@ -1478,6 +1473,11 @@ Firebug.AutoCompleter = function(getExprOffset, getRange, evaluator, selectMode,
 
 // ************************************************************************************************
 // Local Helpers
+
+function getCompletionBox()  // FIXME XXXjjb I think this should be bound into the completer, dupes commandLine.js code
+{
+    return Firebug.chrome.$("fbCommandLineCompletion");
+}
 
 function getDefaultEditor(panel)
 {

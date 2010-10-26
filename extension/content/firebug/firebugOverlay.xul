@@ -450,8 +450,18 @@
         <!-- Command Line (small) -->
         <hbox id="fbCommandBox">
             <label id="fbCommandArrow" value=">>>"/>
-            <textbox id="fbCommandLine" class="commandLine" flex="1" label="console command line"
-                aria-autocomplete="inline" />
+            <hbox flex="1">
+            <html:div style="position: relative;">
+               <html:div style="position: relative; background: none repeat scroll 0% 0% transparent;"> <!-- transparent background, silver text over user inputs -->
+                 <html:input id="fbCommandLineCompletion" class="fbCommandLine" style="position: absolute; z-index:1; color:silver" type="text" maxlength="2048" autocomplete="off" /> <!-- completion text -->
+                 <html:div id="misspell" class="lst"></html:div> <!-- holds the misspelling and a red squiggly line -->
+               </html:div>
+               <html:div class="lst" style="position: absolute; top: -900px; left: -9000px; max-width: 3000px; overflow: hidden; width: auto;">do</html:div> <!-- off screen -->
+               <html:div style="position: relative">
+                   <html:input id="fbCommandLine" class="fbCommandLine" style="position: relative; z-index:3" type="text" maxlength="2048" autocomplete="off" aria-autocomplete="inline" />
+               </html:div>
+            </html:div>
+            </hbox>
             <toolbarbutton id="fbCommandToggleSmall" class="toolbarbutton-iconic"
                 oncommand="Firebug.setPref(Firebug.prefDomain, 'largeCommandLine', true)"/>
         </hbox>
