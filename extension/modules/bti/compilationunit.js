@@ -31,6 +31,14 @@
  * OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+// ************************************************************************************************
+// Module
+
+var EXPORTED_SYMBOLS = ["CompilationUnit"];
+
+// ************************************************************************************************
+// Compilation Unit
+
 /**
  * Describes a compilation unit in a browser context. A compilation unit
  * may originate from a JavaScript source file or a script element in HTML.
@@ -42,13 +50,15 @@
  * @return a new CompilationUnit
  * @version 1.0
  */
-function CompilationUnit(url, context) {
-	this.url = url;
-	this.context = context;
-	this.breakpoints = [];
+function CompilationUnit(url, context)
+{
+    this.url = url;
+    this.context = context;
+    this.breakpoints = [];
 }
 
-// ---- API ----
+// ************************************************************************************************
+// API
 
 /**
  * Returns the URL of this compilation unit.
@@ -60,8 +70,9 @@ function CompilationUnit(url, context) {
  * @function
  * @returns compilation unit identifier as a {@link String}
  */
-CompilationUnit.prototype.getURL = function() {
-	return this.url;
+CompilationUnit.prototype.getURL = function()
+{
+    return this.url;
 };
 
 /**
@@ -74,8 +85,9 @@ CompilationUnit.prototype.getURL = function() {
  * @function
  * @returns a {@link BrowserContext}
  */
-CompilationUnit.prototype.getBrowserContext = function() {
-	return this.context;
+CompilationUnit.prototype.getBrowserContext = function()
+{
+    return this.context;
 };
 
 /**
@@ -88,13 +100,13 @@ CompilationUnit.prototype.getBrowserContext = function() {
  * @function
  * @returns an array of {@link Breakpoint}'s
  */
-CompilationUnit.prototype.getBreakpoints = function() {
-	// return a copy of scripts so the master copy is not corrupted
-	var bps = [];
-	for ( var i = 0; i < this.breakpoints.length; i++) {
-		bps.push(this.breakpoints[i]);
-	}
-	return bps;
+CompilationUnit.prototype.getBreakpoints = function()
+{
+    // return a copy of scripts so the master copy is not corrupted
+    var bps = [];
+    for ( var i = 0; i < this.breakpoints.length; i++)
+        bps.push(this.breakpoints[i]);
+    return bps;
 };
 
 /**
@@ -107,8 +119,9 @@ CompilationUnit.prototype.getBreakpoints = function() {
  * @function
  * @param listener a listener (function) that accepts a {@link String} of source code
  */
-CompilationUnit.prototype.getSource = function(listener) {
-	//TODO:
+CompilationUnit.prototype.getSource = function(listener)
+{
+    //TODO:
 };
 
 /**
@@ -127,11 +140,13 @@ CompilationUnit.prototype.getSource = function(listener) {
  * @function
  * @param lineNumber the source line number in this compilation unit to set the breakpoint on
  */
-CompilationUnit.prototype.setBreakpoint = function(lineNumber) {
-	// TODO:
+CompilationUnit.prototype.setBreakpoint = function(lineNumber)
+{
+    // TODO:
 };
 
-// ---- PRIVATE ----
+// ************************************************************************************************
+// Private
 
 /**
  * Adds the specified breakpoint to this compilation unit's collection of breakpoints.
@@ -141,8 +156,9 @@ CompilationUnit.prototype.setBreakpoint = function(lineNumber) {
  * @param breakpoint the breakpoint that was created
  * @function
  */
-CompilationUnit.prototype._addBreakpoint = function(breakpoint) {
-	this.breakpoints.push(breakpoint);
+CompilationUnit.prototype._addBreakpoint = function(breakpoint)
+{
+    this.breakpoints.push(breakpoint);
 };
 
 /**
@@ -153,11 +169,14 @@ CompilationUnit.prototype._addBreakpoint = function(breakpoint) {
  * @param breakpoint the breakpoint that was removed
  * @function
  */
-CompilationUnit.prototype._removeBreakpoint = function(breakpoint) {
-	for ( var i = 0; i < this.breakpoints.length; i++) {
-		if (this.breakpoints[i] === breakpoint) {
-			this.breakpoints.splice(i, 1);
-			return;
-		}
-	}
+CompilationUnit.prototype._removeBreakpoint = function(breakpoint)
+{
+    for ( var i = 0; i < this.breakpoints.length; i++)
+    {
+        if (this.breakpoints[i] === breakpoint)
+        {
+            this.breakpoints.splice(i, 1);
+            return;
+        }
+    }
 };

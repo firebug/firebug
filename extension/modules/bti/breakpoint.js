@@ -31,6 +31,14 @@
  * OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+// ************************************************************************************************
+// Module
+
+var EXPORTED_SYMBOLS = ["Breakpoint"];
+
+// ************************************************************************************************
+// Breakpoint
+
 /**
  * Describes a breakpoint in a compilation unit. A breakpoint is specific to a compilation unit and
  * execution context.
@@ -72,14 +80,16 @@
  * @return a new Breakpoint
  * @version 1.0
  */
-function Breakpoint(compilationUnit, lineNumber) {
-	this.compilationUnit = compilationUnit;
-	this.lineNumber = lineNumber;
-	this.installed = false;
-	this.cleared = false;
+function Breakpoint(compilationUnit, lineNumber)
+{
+    this.compilationUnit = compilationUnit;
+    this.lineNumber = lineNumber;
+    this.installed = false;
+    this.cleared = false;
 }
 
-// ---- API ----
+// ************************************************************************************************
+// API
 
 /**
  * Returns the compilation unit this breakpoint was created in.
@@ -91,8 +101,9 @@ function Breakpoint(compilationUnit, lineNumber) {
  * @function
  * @returns a {@link CompilationUnit}
  */
-Breakpoint.prototype.getCompilationUnit = function() {
-	return this.compilationUnit;
+Breakpoint.prototype.getCompilationUnit = function()
+{
+    return this.compilationUnit;
 };
 
 /**
@@ -108,8 +119,9 @@ Breakpoint.prototype.getCompilationUnit = function() {
  * </p>
  * @function
  */
-Breakpoint.prototype.clear = function() {
-	// TODO:
+Breakpoint.prototype.clear = function()
+{
+    // TODO:
 };
 
 /**
@@ -122,8 +134,9 @@ Breakpoint.prototype.clear = function() {
  * @returns <code>true</code> if the breakpoint is installed
  *  and <code>false</code> if it has been cleared
  */
-Breakpoint.prototype.isInstalled = function() {
-	return this.installed;
+Breakpoint.prototype.isInstalled = function()
+{
+    return this.installed;
 };
 
 /**
@@ -137,8 +150,9 @@ Breakpoint.prototype.isInstalled = function() {
  * @function
  * @returns whether this breakpoint has been cleared
  */
-Breakpoint.prototype.isCleared = function() {
-	return this.cleared;
+Breakpoint.prototype.isCleared = function()
+{
+    return this.cleared;
 };
 
 /**
@@ -151,11 +165,13 @@ Breakpoint.prototype.isCleared = function() {
  * @returns line number
  * 
  */
-Breakpoint.prototype.getLineNumber = function() {
-	return this.lineNumber;
+Breakpoint.prototype.getLineNumber = function()
+{
+    return this.lineNumber;
 };
 
-// ---- PRIVATE ---- 
+// ************************************************************************************************
+// Private 
 
 /**
  * Implementations must call this method when a breakpoint gets installed in the browser.
@@ -165,11 +181,13 @@ Breakpoint.prototype.getLineNumber = function() {
  * 
  * @function
  */
-Breakpoint.prototype._installed = function() {
-	if (!this.installed) {
-		this.installed = true;
-		this.getCompilationUnit().getBrowserContext().getBrowser()._dispatch("onToggleBreakpoint", [this]);	
-	}
+Breakpoint.prototype._installed = function()
+{
+    if (!this.installed)
+    {
+        this.installed = true;
+        this.getCompilationUnit().getBrowserContext().getBrowser()._dispatch("onToggleBreakpoint", [this]);	
+    }
 };
 
 /**
@@ -180,9 +198,11 @@ Breakpoint.prototype._installed = function() {
  * 
  * @function
  */
-Breakpoint.prototype._cleared = function() {
-	if (!this.cleared) {
-		this.cleared = true;
-		this.getCompilationUnit().getBrowserContext().getBrowser()._dispatch("onToggleBreakpoint", [this]);
-	}
+Breakpoint.prototype._cleared = function()
+{
+    if (!this.cleared)
+    {
+        this.cleared = true;
+        this.getCompilationUnit().getBrowserContext().getBrowser()._dispatch("onToggleBreakpoint", [this]);
+    }
 };

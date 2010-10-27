@@ -9,25 +9,6 @@
     <script type="application/x-javascript" src="chrome://firebug/content/xpcom.js"/>
     <script type="application/x-javascript" src="chrome://firebug/content/chrome.js"/>
     <script type="application/x-javascript" src="chrome://firebug/content/lib.js"/>
-    
-    <!-- defines function used in the interface, load first -->
-    <script type="application/x-javascript" src="chrome://firebug/content/interface/browser.js"/>
-    <script type="application/x-javascript" src="chrome://firebug/content/interface/breakpoint.js"/>
-
-    <script type="application/x-javascript" src="chrome://firebug/content/interface/browsercontext.js"/>
-    <script type="application/x-javascript" src="chrome://firebug/content/interface/browsereventlistener.js"/>
-    <script type="application/x-javascript" src="chrome://firebug/content/interface/compilationunit.js"/>
-    <script type="application/x-javascript" src="chrome://firebug/content/interface/executioncontext.js"/>
-    <script type="application/x-javascript" src="chrome://firebug/content/interface/frame.js"/>
-
-    <script type="application/x-javascript" src="chrome://firebug/content/interface/objectreference.js"/>
-    <!-- requires objectreference -->
-    <script type="application/x-javascript" src="chrome://firebug/content/interface/functionreference.js"/>
-    <script type="application/x-javascript" src="chrome://firebug/content/interface/arrayreference.js"/>
-
-    <script type="application/x-javascript" src="chrome://firebug/content/interface/primitive.js"/>
-    <script type="application/x-javascript" src="chrome://firebug/content/interface/property.js"/>
-    <script type="application/x-javascript" src="chrome://firebug/content/interface/variable.js"/>
 
     <script type="application/x-javascript" src="chrome://firebug/content/domplate.js"/>
     <script type="application/x-javascript" src="chrome://firebug/content/insideOutBox.js"/>

@@ -31,6 +31,14 @@
  * OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+// ************************************************************************************************
+// Module
+
+var EXPORTED_SYMBOLS = ["JavaScriptContext"];
+
+// ************************************************************************************************
+// JavaScriptContext
+
 /**
  * Describes the execution of JavaScript within a browser context. An execution
  * context pertains to one or more compilation units (JavaScript scripts)
@@ -43,13 +51,15 @@
  * @return a new JavaScriptContext
  * @version 1.0
  */
-function JavaScriptContext(browserContext) {
-	this.browserContext= browserContext;
-	this.is_suspended = false;
-	this.frames = [];
+function JavaScriptContext(browserContext)
+{
+    this.browserContext= browserContext;
+    this.is_suspended = false;
+    this.frames = [];
 }
 
-//---- API ----
+// ************************************************************************************************
+// API
 
 /**
  * Returns the browser context this execution context is contained in.
@@ -60,8 +70,9 @@ function JavaScriptContext(browserContext) {
  * @function
  * @returns a {@link BrowserContext}
  */
-JavaScriptContext.prototype.getBrowserContext = function() {
-	return this.browserContext;
+JavaScriptContext.prototype.getBrowserContext = function()
+{
+    return this.browserContext;
 };
 
 /**
@@ -73,8 +84,9 @@ JavaScriptContext.prototype.getBrowserContext = function() {
  * @function
  * @returns a boolean indicating whether this execution context is currently suspended
  */
-JavaScriptContext.prototype.isSuspended = function() {
-	return this.is_suspended;
+JavaScriptContext.prototype.isSuspended = function()
+{
+    return this.is_suspended;
 };
 
 /**
@@ -87,8 +99,9 @@ JavaScriptContext.prototype.isSuspended = function() {
  * @function
  * @returns a boolean indicating whether this execution context has terminated
  */
-JavaScriptContext.prototype.isTerminated = function() {
-	return !this.getBrowserContext().exists();
+JavaScriptContext.prototype.isTerminated = function()
+{
+    return !this.getBrowserContext().exists();
 };
 
 /**
@@ -101,8 +114,9 @@ JavaScriptContext.prototype.isTerminated = function() {
  * @function
  * @returns the {@link Breakpoint} this execution context is suspended at or <code>null</code>
  */
-JavaScriptContext.prototype.getBreakpoint = function() {
-	// TODO:
+JavaScriptContext.prototype.getBreakpoint = function()
+{
+    // TODO:
 };
 
 /**
@@ -112,8 +126,9 @@ JavaScriptContext.prototype.getBreakpoint = function() {
  * 
  * @function
  */
-JavaScriptContext.prototype.suspend = function() {
-	//TODO:
+JavaScriptContext.prototype.suspend = function()
+{
+    //TODO:
 };
 
 /**
@@ -123,8 +138,9 @@ JavaScriptContext.prototype.suspend = function() {
  * 
  * @function
  */
-JavaScriptContext.prototype.resume = function() {
-	//TODO:
+JavaScriptContext.prototype.resume = function()
+{
+    //TODO:
 };
 
 /**
@@ -136,11 +152,13 @@ JavaScriptContext.prototype.resume = function() {
  * @function
  * @param listener a function that accepts an array of {@link StackFrame}'s.
  */
-JavaScriptContext.prototype.getStackFrames = function(listener) {
-	// TODO:
+JavaScriptContext.prototype.getStackFrames = function(listener)
+{
+    // TODO:
 };
 
-//---- PRIVATE ----
+// ************************************************************************************************
+// Private
 
 /**
  * Sets this execution context as currently suspended. Fires notification
@@ -154,11 +172,13 @@ JavaScriptContext.prototype.getStackFrames = function(listener) {
  * @param compilationUnit the compilation unit where the suspend occurred
  * @param lineNumber the line number the suspend occurred at
  */
-JavaScriptContext.prototype._suspended = function(compilationUnit, lineNumber) {
-	if (!this.is_suspended) {
-		this.is_suspended = true;
-		this.getBrowserContext().getBrowser()._dispatch("onBreak", [compilationUnit, lineNumber]);
-	}
+JavaScriptContext.prototype._suspended = function(compilationUnit, lineNumber)
+{
+    if (!this.is_suspended)
+    {
+        this.is_suspended = true;
+        this.getBrowserContext().getBrowser()._dispatch("onBreak", [compilationUnit, lineNumber]);
+    }
 };
 
 /**
@@ -171,9 +191,11 @@ JavaScriptContext.prototype._suspended = function(compilationUnit, lineNumber) {
  * 
  * @function
  */
-JavaScriptContext.prototype._resumed = function() {
-	if (this.is_suspended) {
-		this.is_suspended = false;
-		this.getBrowserContext().getBrowser()._dispatch("onResume", [this]);
-	}
+JavaScriptContext.prototype._resumed = function()
+{
+    if (this.is_suspended)
+    {
+        this.is_suspended = false;
+        this.getBrowserContext().getBrowser()._dispatch("onResume", [this]);
+    }
 };

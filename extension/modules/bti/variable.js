@@ -31,65 +31,53 @@
  * OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+// ************************************************************************************************
+// Module
+
+var EXPORTED_SYMBOLS = ["Variable"];
+
+// ************************************************************************************************
+// Variable
+
 /**
- * Describes an instance of an array object in a JavaScript program.
+ * Describes a variable visible in a stack frame of an execution context, or a property
+ * of an object. A variable has a name and a value.
  * 
  * @constructor
- * @param id unique object identifier (number)
- * @param length of the array
- * @type ArrayReference
- * @augments ObjectReference
- * @return a new {@link ArrayReference}
+ * @param name variable name as a {@link String}
+ * @type Variable
+ * @return a new Variable
  * @version 1.0
  */
-function ArrayReference(id, length) {
-	ObjectReference.call(this, "array", id);
-	this.length = length;
+function Variable(name)
+{
+    this.name = name;
 }
 
 /**
- * Subclass of {@link ObjectReference}
- */
-ArrayReference.prototype = subclass(ObjectReference.prototype);
-
-/**
- * Returns the length of this array.
+ * Returns the name of this variable as a {@link String}.
  * <p>
  * This function does not require communication with
  * the browser.
  * </p>
  * @function
- * @returns the length of this array.
+ * @returns the name of this variable as a {@link String}
  */
-ArrayReference.prototype.getLength = function() {
-	return this.length;
+Variable.prototype.getName = function()
+{
+    return this.name;
 };
 
 /**
- * Requests the value at the specified index of this array asynchronously. The value
- * will be retrieved and reported back to the listener when available. The listener
- * may be called before after this function returns.
+ * Requests the value of this variable asynchronously. The value will be retrieved
+ * and reported back to the listener function when available. The listener may be
+ * called before of after this function returns.
  * 
  * @function
- * @param index the index of the value to return
  * @param listener a listener (function) that accepts an {@link ObjectReference} or
- *  <code>null</code> (indicates the value at the specified index is <code>null</code>).
+ *  <code>null</code> (indicates the value of this variable is <code>null</code>) 
  */
-ArrayReference.prototype.getValue = function(index, listener) {
-	// TODO:
-};
-
-/**
- * Requests a range of values at the specified index of this array asynchronously. The values
- * will be retrieved and reported back to the listener when available. The listener
- * may be called before after this function returns.
- * 
- * @function
- * @param index the offset to start retrieving values at
- * @param length the number of values to retrieve
- * @param listener a listener (function) that accepts an array of {@link ObjectReference} or
- *  <code>null</code> (indicates the value at the specified index is <code>null</code>).
- */
-ArrayReference.prototype.getValues = function(index, length, listener) {
-	// TODO:
+Variable.prototype.getValue = function(listener)
+{
+    // TODO:
 };

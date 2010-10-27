@@ -31,6 +31,14 @@
  * OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+// ************************************************************************************************
+// Module
+
+var EXPORTED_SYMBOLS = ["ObjectReference"];
+
+// ************************************************************************************************
+// ObjectReference
+
 /**
  * Describes an instance of an object in a JavaScript program - for example a number,
  * string or object.
@@ -42,9 +50,10 @@
  * @return a new {@link ObjectReference}
  * @version 1.0
  */
-function ObjectReference(type, id) {
-	this.type = type;
-	this.id = id;
+function ObjectReference(type, id)
+{
+    this.type = type;
+    this.id = id;
 }
 
 /**
@@ -56,8 +65,9 @@ function ObjectReference(type, id) {
  * @function
  * @returns unique object identifier (number)
  */
-ObjectReference.prototype.getId = function() {
-	return this.id;
+ObjectReference.prototype.getId = function()
+{
+    return this.id;
 };
 
 /**
@@ -78,8 +88,9 @@ ObjectReference.prototype.getId = function() {
  * @function
  * @returns the type of data this object contains
  */
-ObjectReference.prototype.getType = function() {
-	return this.type;
+ObjectReference.prototype.getType = function()
+{
+    return this.type;
 };
 
 /**
@@ -90,8 +101,8 @@ ObjectReference.prototype.getType = function() {
  * @function
  * @param listener a listener (function) that accepts an array of {@link Property}'s
  */
-ObjectReference.prototype.getProperties = function(listener) {
-	
+ObjectReference.prototype.getProperties = function(listener)
+{
 };
 
 /**
@@ -104,6 +115,6 @@ ObjectReference.prototype.getProperties = function(listener) {
  * @param listener a listener (function) that accepts a {@link Property}
  *  or <code>null</code> if the property is undefined
  */
-ObjectReference.prototype.getProperty = function(name, listener) {
-	
+ObjectReference.prototype.getProperty = function(name, listener)
+{
 };

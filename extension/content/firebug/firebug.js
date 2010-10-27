@@ -216,6 +216,7 @@ top.Firebug =
         }
 
         this.initializePrefs();
+        this.initializeBTI();
 
         if (FBTrace.DBG_INITIALIZE)
             FBTrace.sysout("firebug.initialize client: "+this.clientID+" with prefDomain "+this.prefDomain);
@@ -223,6 +224,20 @@ top.Firebug =
         this.isInitialized = true;
 
         dispatch(modules, "initialize", [this.prefDomain, prefNames]);
+    },
+
+    initializeBTI: function()
+    {
+        try
+        {
+            // Load Browser Tools Interface definition
+            Components.utils.import("resource://firebug/bti/bti.js", this);
+        }
+        catch (err)
+        {
+            if (FBTrace.DBG_INITIALIZE)
+                FBTrace.sysout("firebug.initializeBTI EXCEPTION:" + err, err);
+        }
     },
 
     getVersion: function()

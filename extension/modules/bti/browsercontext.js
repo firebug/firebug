@@ -31,6 +31,16 @@
  * OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+// ************************************************************************************************
+// Module
+
+Components.utils.import("resource://firebug/bti/lib.js");
+
+var EXPORTED_SYMBOLS = ["BrowserContext"];
+
+// ************************************************************************************************
+// Browser
+
 /**
  * Describes a root context in a browser - the content that has been served up
  * and is being rendered for a location (URL) that has been navigated to. 
@@ -43,16 +53,18 @@
  * @return a new {@link BrowserContext}
  * @version 1.0
  */
-function BrowserContext(id, url, browser) {
-	this.id = id;
-	this.url = url;
-	this.browser = browser;
-	this.is_destroyed = false;
-	this.is_loaded = false;
-	this.compilationUnits = {}; // map of URL to compilation unit
+function BrowserContext(id, url, browser)
+{
+    this.id = id;
+    this.url = url;
+    this.browser = browser;
+    this.is_destroyed = false;
+    this.is_loaded = false;
+    this.compilationUnits = {}; // map of URL to compilation unit
 }
 
-//---- API ----
+// ************************************************************************************************
+// API
 
 /**
  * Returns the unique identifier of this context.
@@ -63,8 +75,9 @@ function BrowserContext(id, url, browser) {
  * @function
  * @returns context identifier as a {@link String}
  */
-BrowserContext.prototype.getId = function() {
-	return this.id;
+BrowserContext.prototype.getId = function()
+{
+    return this.id;
 };
 
 /**
@@ -76,8 +89,9 @@ BrowserContext.prototype.getId = function() {
  * @function
  * @returns URL as a {@link String}
  */
-BrowserContext.prototype.getURL = function() {
-	return this.url;
+BrowserContext.prototype.getURL = function()
+{
+    return this.url;
 };
 
 /**
@@ -89,8 +103,9 @@ BrowserContext.prototype.getURL = function() {
  * @function
  * @returns a {@link Browser}
  */
-BrowserContext.prototype.getBrowser = function() {
-	return this.browser;
+BrowserContext.prototype.getBrowser = function()
+{
+    return this.browser;
 };
 
 /**
@@ -103,8 +118,9 @@ BrowserContext.prototype.getBrowser = function() {
  * @function
  * @returns a boolean indicating whether this context currently exists
  */
-BrowserContext.prototype.exists = function() {
-	return !this.is_destroyed;
+BrowserContext.prototype.exists = function()
+{
+    return !this.is_destroyed;
 };
 
 /**
@@ -118,8 +134,9 @@ BrowserContext.prototype.exists = function() {
  * @function
  * @returns a boolean indicating whether this context has completed loading
  */
-BrowserContext.prototype.isLoaded = function() {
-	return this.is_loaded;
+BrowserContext.prototype.isLoaded = function()
+{
+    return this.is_loaded;
 };
 
 /**
@@ -131,8 +148,9 @@ BrowserContext.prototype.isLoaded = function() {
  * @function
  * @param listener a function that accepts an array of {@link CompilationUnit}'s.
  */
-BrowserContext.prototype.getCompilationUnits = function(listener) {
-	// TODO:
+BrowserContext.prototype.getCompilationUnits = function(listener)
+{
+    // TODO:
 };
 
 /**
@@ -146,8 +164,9 @@ BrowserContext.prototype.getCompilationUnits = function(listener) {
  * @param url the URL a script is requested for
  * @returns a {@link CompilationUnit} or <code>null</code>
  */
-BrowserContext.prototype.getCompilationUnit = function(url) {
-	return this.compilationUnits[url];
+BrowserContext.prototype.getCompilationUnit = function(url)
+{
+    return this.compilationUnits[url];
 };
 
 /**
@@ -157,11 +176,13 @@ BrowserContext.prototype.getCompilationUnit = function(url) {
  * @function
  * @returns a {@link JavaScriptContext} or <code>null</code>
  */
-BrowserContext.prototype.getJavaScriptContext = function() {
-	// TODO:
+BrowserContext.prototype.getJavaScriptContext = function()
+{
+    // TODO:
 };
 
-// ----- PRIVATE -----
+// ************************************************************************************************
+// Private
 
 /**
  * Notification this context has been destroyed. Clients should not call
@@ -171,8 +192,9 @@ BrowserContext.prototype.getJavaScriptContext = function() {
  * 
  * @function
  */
-BrowserContext.prototype._destroyed = function() {
-	this.is_destroyed = true;
+BrowserContext.prototype._destroyed = function()
+{
+    this.is_destroyed = true;
 };
 
 /**
@@ -183,8 +205,9 @@ BrowserContext.prototype._destroyed = function() {
  * 
  * @function
  */
-BrowserContext.prototype._loaded = function() {
-	this.is_loaded = true;
+BrowserContext.prototype._loaded = function()
+{
+    this.is_loaded = true;
 };
 
 /**
@@ -196,11 +219,13 @@ BrowserContext.prototype._loaded = function() {
  * @function
  * @param compilationUnit a {@link CompilationUnit}
  */
-BrowserContext.prototype._addCompilationUnit = function(compilationUnit) {
-	if (!this.compilationUnits[compilationUnit.getURL()]) {
-		this.compilationUnits[compilationUnit.getURL()] = compilationUnit;
-		this.getBrowser()._dispatch("onScript", [compilationUnit]);
-	}
+BrowserContext.prototype._addCompilationUnit = function(compilationUnit)
+{
+    if (!this.compilationUnits[compilationUnit.getURL()])
+    {
+        this.compilationUnits[compilationUnit.getURL()] = compilationUnit;
+        this.getBrowser()._dispatch("onScript", [compilationUnit]);
+    }
 };
 
 /**
@@ -209,10 +234,10 @@ BrowserContext.prototype._addCompilationUnit = function(compilationUnit) {
  * @function
  * @returns array of {@link CompilationUnit}
  */
-BrowserContext.prototype._getCompilationUnits = function() {
-	var copyScripts = [];
-	for (var url in this.compilationUnits) {
-		copyScripts.push(this.compilationUnits[url]);
-	}
-	return copyScripts;
+BrowserContext.prototype._getCompilationUnits = function()
+{
+    var copyScripts = [];
+    for (var url in this.compilationUnits)
+        copyScripts.push(this.compilationUnits[url]);
+    return copyScripts;
 };

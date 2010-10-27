@@ -31,6 +31,17 @@
  * OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+// ************************************************************************************************
+// Module
+
+Components.utils.import("resource://firebug/bti/objectreference.js");
+Components.utils.import("resource://firebug/bti/lib.js");
+
+var EXPORTED_SYMBOLS = ["Primitive"];
+
+// ************************************************************************************************
+// ObjectReference
+
 /**
  * Describes an instance of a primitive object in a JavaScript program -
  * a number, boolean, or string.
@@ -44,9 +55,10 @@
  * @return a new {@link Primitive}
  * @version 1.0
  */
-function Primitive(type, id, value) {
-	ObjectReference.call(this, type, id);
-	this.value = value;
+function Primitive(type, id, value)
+{
+    ObjectReference.call(this, type, id);
+    this.value = value;
 }
 
 /**
@@ -81,6 +93,7 @@ Primitive.prototype = subclass(ObjectReference.prototype);
  * @function
  * @returns the underlying value - a boolean, number, or {@link String}
  */
-Primitive.prototype.getValue = function() {
-	return this.value;
+Primitive.prototype.getValue = function()
+{
+    return this.value;
 };

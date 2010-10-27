@@ -31,6 +31,14 @@
  * OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+// ************************************************************************************************
+// Module
+
+var EXPORTED_SYMBOLS = ["StackFrame"];
+
+// ************************************************************************************************
+// StackFrame
+
 /**
  * Describes a stack frame in a JavaScript execution context.
  * 
@@ -44,15 +52,17 @@
  * @return a new StackFrame
  * @version 1.0
  */
-function StackFrame(index, context, compilationUnit, functionName, lineNumber) {
-	this.index = index;
-	this.context = context;
-	this.compilationUnit = compilationUnit;
-	this.functionName = functionName;
-	this.lineNumber = lineNumber;
+function StackFrame(index, context, compilationUnit, functionName, lineNumber)
+{
+    this.index = index;
+    this.context = context;
+    this.compilationUnit = compilationUnit;
+    this.functionName = functionName;
+    this.lineNumber = lineNumber;
 }
 
-// ---- API ----
+// ************************************************************************************************
+// API
 
 /**
  * Returns the index of this frame in the current stack of frames.
@@ -63,8 +73,9 @@ function StackFrame(index, context, compilationUnit, functionName, lineNumber) {
  * @function
  * @returns stack frame identifier as a {@link String}
  */
-StackFrame.prototype.getIndex = function() {
-	return this.index;
+StackFrame.prototype.getIndex = function()
+{
+    return this.index;
 };
 
 /**
@@ -76,8 +87,9 @@ StackFrame.prototype.getIndex = function() {
  * @function
  * @returns a {@link JavaScriptContext}
  */
-StackFrame.prototype.getContext = function() {
-	return this.context;
+StackFrame.prototype.getContext = function()
+{
+    return this.context;
 };
 
 /**
@@ -89,8 +101,9 @@ StackFrame.prototype.getContext = function() {
  * @function
  * @returns a {@link CompilationUnit}
  */
-StackFrame.prototype.getCompilationUnit = function() {
-	return this.compilationUnit;
+StackFrame.prototype.getCompilationUnit = function()
+{
+    return this.compilationUnit;
 };
 
 /**
@@ -102,8 +115,9 @@ StackFrame.prototype.getCompilationUnit = function() {
  * @function
  * @returns function name as a {@link String}
  */
-StackFrame.prototype.getFunctionName = function() {
-	return this.functionName;
+StackFrame.prototype.getFunctionName = function()
+{
+    return this.functionName;
 };
 
 /**
@@ -119,8 +133,9 @@ StackFrame.prototype.getFunctionName = function() {
  * @function
  * @returns line number
  */
-StackFrame.prototype.getLineNumber = function() {
-	return this.lineNumber;
+StackFrame.prototype.getLineNumber = function()
+{
+    return this.lineNumber;
 };
 
 /**
@@ -132,8 +147,9 @@ StackFrame.prototype.getLineNumber = function() {
  * @function
  * @returns the local variables currently visible in this stack frame as an array of {@link Variable}'s
  */
-StackFrame.prototype.getLocals = function() {
-	// TODO: locals appear to have a name and value, but the structure of the value is not yet clear to me
+StackFrame.prototype.getLocals = function()
+{
+    // TODO: locals appear to have a name and value, but the structure of the value is not yet clear to me
 };
 
 /**
@@ -143,9 +159,10 @@ StackFrame.prototype.getLocals = function() {
  * @returns the {@link ObjectReference} associated with the 'this' keyword in
  *   this stack frame 
  */
-StackFrame.prototype.getThis = function() {
-	
+StackFrame.prototype.getThis = function()
+{
 };
 
-
-// ---- PRIVATE ---- 
+// ************************************************************************************************
+// Private
+ 
