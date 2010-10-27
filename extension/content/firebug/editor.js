@@ -1414,7 +1414,10 @@ Firebug.AutoCompleter = function(getExprOffset, getRange, evaluator, selectMode,
     this.handledKeyPress = function(event, context, textBox)
     {
         if (event.keyCode === 8)  // Backspace
-            cancelEvent(event);   // heuristic, FBTest sends us both keydown and keypress
+        {
+            //cancelEvent(event);   // heuristic, FBTest sends us both keydown and keypress
+            return true;
+        }
     };
 
     this.setCompletionOnEvent = function(event)
