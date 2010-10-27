@@ -559,10 +559,6 @@ Firebug.CommandLine = extend(Firebug.Module,
     {
         var commandLine = getCommandLine(context);
 
-        var completion = this.autoCompleter.getCompletionText(commandLine);
-        if (completion) // let the arrow keys go to the autocompleter
-            return;
-
         commandHistory[commandPointer] = this.autoCompleter.getVerifiedText(commandLine);
 
         if (dir < 0)

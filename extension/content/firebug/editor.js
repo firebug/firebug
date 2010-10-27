@@ -709,7 +709,7 @@ Firebug.InlineEditor.prototype = domplate(Firebug.BaseEditor,
 
     completeValue: function(amt)
     {
-        if (this.getAutoCompleter().complete(currentPanel.context, this.input, true, amt < 0))
+        if (this.getAutoCompleter().complete(currentPanel.context, this.input, null, true, amt < 0))
             Firebug.Editor.update(true);
         else
             this.incrementValue(amt);
@@ -786,7 +786,7 @@ Firebug.InlineEditor.prototype = domplate(Firebug.BaseEditor,
             this.getAutoCompleter().reset();
         }
         else if (this.completeAsYouType)
-            this.getAutoCompleter().complete(currentPanel.context, this.input, false);
+            this.getAutoCompleter().complete(currentPanel.context, this.input, null, false);
         else
             this.getAutoCompleter().reset();
 
@@ -944,25 +944,22 @@ Firebug.AutoCompleter = function(getExprOffset, getRange, evaluator, selectMode,
         accepted = false;
     };
 
-    this.complete = function(context, textBox, completionBox, cycle, reverse)
+    this.complete = function(context, textBox, completionBox, cycle, reverse, showGlobals)
     {
-        var value = textBox.value;
-        if (!value && noCompleteOnBlank)
+        if (!this.getCompletionText(completionBox)) // then we don't have a previous value
+            this.reset();                           // so start over
+
+        this.clearCandidates(textBox, completionBox);
+
+        if (!this.getVerifiedText(completionBox) && !showGlobals) // then no completion is desired
             return false;
 
-        if (!this.getCompletionText(textBox))
-            this.reset();
-
         var offset = textBox.selectionStart;
-        //if (!offset)
-        //    offset = value.length;
 
-        var found =  this.pickCandidates(value, offset, context, cycle, reverse);
+        var found =  this.pickCandidates(textBox.value, offset, context, cycle, reverse, showGlobals);
 
-        if (found)
-            this.showCandidates(textBox, completionBox);
-        else
-            completionBox.value = "";
+        if (completionBox && found)
+                this.showCandidates(textBox, completionBox);
 
         return found;
     };
@@ -970,7 +967,7 @@ Firebug.AutoCompleter = function(getExprOffset, getRange, evaluator, selectMode,
     /*
      * returns true if candidate list was created
      */
-    this.pickCandidates = function(value, offset, context, cycle, reverse)
+    this.pickCandidates = function(value, offset, context, cycle, reverse, showGlobals)
     {
         if (!selectMode && originalOffset != -1)
             offset = originalOffset;
@@ -1047,7 +1044,7 @@ Firebug.AutoCompleter = function(getExprOffset, getRange, evaluator, selectMode,
                 }
             }
 
-            if (noShowGlobal && !preExpr && !expr && !postExpr)
+            if (!showGlobals && !preExpr && !expr && !postExpr)
             {
                 // Don't complete globals unless we are forced to do so.
                 this.hide();
@@ -1239,6 +1236,11 @@ Firebug.AutoCompleter = function(getExprOffset, getRange, evaluator, selectMode,
         return true;
     };
 
+    this.clearCandidates = function(textBox, completionBox)
+    {
+        completionBox.value = "";
+    },
+
     this.popupCandidates = function(candidates, textBox)
     {
         // This method should not operate on the textBox or candidates list
@@ -1330,16 +1332,21 @@ Firebug.AutoCompleter = function(getExprOffset, getRange, evaluator, selectMode,
 
     this.getVerifiedText = function(textBox)
     {
-        return textBox.value.substr(0, textBox.selectionStart)+textBox.value.substr(textBox.selectionEnd);
+        return textBox.value;
     };
 
-    this.getCompletionText = function(textBox)
+    this.getCompletionText = function(box)
     {
-        return textBox.value.substr(textBox.selectionStart, textBox.selectionEnd);
+        return box.value;
     };
 
-    this.handledKeyUp = function(event, context, textBox)
+    this.handledKeyUp = function(event, context, textBox, completionBox)
     {
+        if (event.keyCode === 8) // backspace
+        {
+            this.complete(context, textBox, completionBox, true, false); // force completion
+            return;
+        }
         if (accepted)
         {
             this.hide();
@@ -1352,15 +1359,9 @@ Firebug.AutoCompleter = function(getExprOffset, getRange, evaluator, selectMode,
         if (event.altKey || event.metaKey)
             return false;
 
-        if (event.ctrlKey && event.keyCode === 17) // Control space forces completion incl globals
+        if (event.ctrlKey && event.keyCode === 17) // Control space
         {
-            this.complete(context, textBox, true, false, true, true);
-        }
-        else if (event.keyCode === 8) // backspace
-        {
-            // I think we need to reconsider the completion here.
-            //if (textBox.selectionStart && (textBox.selectionStart !== textBox.selectionEnd) )
-            //    textBox.selectionStart = textBox.selectionStart - 1;
+            this.complete(context, textBox, completionBox, true, false, true); // force completion incl globals
         }
         else if (event.keyCode === 9) // TAB, cycle
         {
