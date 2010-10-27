@@ -961,6 +961,8 @@ Firebug.AutoCompleter = function(getExprOffset, getRange, evaluator, selectMode,
 
         if (found)
             this.showCandidates(textBox, completionBox);
+        else
+            completionBox.value = "";
 
         return found;
     };

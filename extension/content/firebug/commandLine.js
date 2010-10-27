@@ -308,7 +308,7 @@ Firebug.CommandLine = extend(Firebug.Module,
     {
         var commandLine = getCommandLine(context);
         var completionBox = getCompletionBox();
-        if (commandLine.value.length === completionBox.value.length) // we have nothing to complete
+        if (completionBox.value.length === 0 || commandLine.value.length === completionBox.value.length) // we have nothing to complete
             return this.autoCompleter.getVerifiedText(commandLine);
 
         this.autoCompleter.acceptCompletionInTextBox(commandLine, completionBox);
