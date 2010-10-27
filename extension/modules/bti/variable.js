@@ -81,3 +81,8 @@ Variable.prototype.getValue = function(listener)
 {
     // TODO:
 };
+
+// ************************************************************************************************
+// CommonJS
+
+exports = Variable;

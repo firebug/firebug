@@ -34,7 +34,15 @@
 // ************************************************************************************************
 // Module
 
-Components.utils.import("resource://firebug/bti/lib.js");
+var rootPath = "";
+if (typeof(require) == "undefined") {
+    var chrome = typeof(Components) != "undefined";
+    require = chrome ? Components.utils["import"] : function(){};
+    rootPath = chrome ? "resource://firebug/bti/" : "";
+}
+
+require(rootPath + "lib.js");
+require(rootPath + "objectreference.js");
 
 var EXPORTED_SYMBOLS = ["Browser"];
 
@@ -436,3 +444,9 @@ Browser.EventListener = {
      */
     onToggleBreakpoint: function(breakpoint) {}
 };
+
+// ************************************************************************************************
+// CommonJS
+
+exports = Browser;
+

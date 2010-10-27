@@ -180,3 +180,8 @@ CompilationUnit.prototype._removeBreakpoint = function(breakpoint)
         }
     }
 };
+
+// ************************************************************************************************
+// CommonJS
+
+exports = CompilationUnit;

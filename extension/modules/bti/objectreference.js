@@ -118,3 +118,8 @@ ObjectReference.prototype.getProperties = function(listener)
 ObjectReference.prototype.getProperty = function(name, listener)
 {
 };
+
+// ************************************************************************************************
+// CommonJS
+
+exports = ObjectReference;

@@ -80,3 +80,8 @@ Property.prototype.getValue = function(listener)
 {
     // TODO:
 };
+
+// ************************************************************************************************
+// CommonJS
+
+exports = Property;

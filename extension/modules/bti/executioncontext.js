@@ -199,3 +199,8 @@ JavaScriptContext.prototype._resumed = function()
         this.getBrowserContext().getBrowser()._dispatch("onResume", [this]);
     }
 };
+
+// ************************************************************************************************
+// CommonJS
+
+exports = JavaScriptContext;

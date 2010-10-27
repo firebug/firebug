@@ -34,8 +34,15 @@
 // ************************************************************************************************
 // Module
 
-Components.utils.import("resource://firebug/bti/objectreference.js");
-Components.utils.import("resource://firebug/bti/lib.js");
+var rootPath = "";
+if (typeof(require) == "undefined") {
+    var chrome = typeof(Components) != "undefined";
+    require = chrome ? Components.utils["import"] : function(){};
+    rootPath = chrome ? "resource://firebug/bti/" : "";
+}
+
+require(rootPath + "lib.js");
+require(rootPath + "objectreference.js");
 
 var EXPORTED_SYMBOLS = ["Primitive"];
 
@@ -97,3 +104,8 @@ Primitive.prototype.getValue = function()
 {
     return this.value;
 };
+
+// ************************************************************************************************
+// CommonJS
+
+exports = Primitive;

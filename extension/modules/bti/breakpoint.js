@@ -206,3 +206,8 @@ Breakpoint.prototype._cleared = function()
         this.getCompilationUnit().getBrowserContext().getBrowser()._dispatch("onToggleBreakpoint", [this]);
     }
 };
+
+// ************************************************************************************************
+// CommonJS
+
+exports = Breakpoint;

@@ -34,7 +34,14 @@
 // ************************************************************************************************
 // Module
 
-Components.utils.import("resource://firebug/bti/lib.js");
+var rootPath = "";
+if (typeof(require) == "undefined") {
+    var chrome = typeof(Components) != "undefined";
+    require = chrome ? Components.utils["import"] : function(){};
+    rootPath = chrome ? "resource://firebug/bti/" : "";
+}
+
+require(rootPath + "lib.js");
 
 var EXPORTED_SYMBOLS = ["BrowserContext"];
 
@@ -241,3 +248,8 @@ BrowserContext.prototype._getCompilationUnits = function()
         copyScripts.push(this.compilationUnits[url]);
     return copyScripts;
 };
+
+// ************************************************************************************************
+// CommonJS
+
+exports = BrowserContext;
