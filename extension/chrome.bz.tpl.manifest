@@ -1,0 +1,59 @@
+content firebug content/firebug/
+content firebug content/firebug/ contentaccessible=yes
+
+# Maps resource://firebug/* to files in modules/*
+resource firebug modules/
+
+skin    firebug classic/1.0 skin/classic/
+skin    firebug-os  classic/1.0 skin/classic/win/
+
+locale  firebug ar-SA       locale/ar-SA/
+locale  firebug bg          locale/bg/
+locale  firebug ca-AD       locale/ca-AD/
+locale  firebug cs          locale/cs/
+locale  firebug da-DK       locale/da-DK/
+locale  firebug de          locale/de/
+locale  firebug el-GR       locale/el-GR/
+locale  firebug en-US       locale/en-US/
+locale  firebug es          locale/es/
+locale  firebug es-AR       locale/es-AR/
+locale  firebug es-CL       locale/es-CL/
+locale  firebug fa          locale/fa/
+locale  firebug fi-FI       locale/fi-FI/
+locale  firebug fr          locale/fr/
+locale  firebug fy-NL       locale/fy-NL/
+locale  firebug gl-ES       locale/gl-ES/
+locale  firebug he-IL       locale/he-IL/
+locale  firebug hr-HR       locale/hr-HR/
+locale  firebug hu-HU       locale/hu-HU/
+locale  firebug hy-AM       locale/hy-AM/
+locale  firebug id-ID       locale/id-ID/
+locale  firebug is-IS       locale/is-IS/
+locale  firebug it-IT       locale/it-IT/
+locale  firebug ja-JP       locale/ja-JP/
+locale  firebug kk-KZ       locale/kk-KZ/
+locale  firebug ko-KR       locale/ko-KR/
+locale  firebug mk-MK       locale/mk-MK/
+locale  firebug mn-MN       locale/mn-MN/
+locale  firebug nl          locale/nl/
+locale  firebug pl          locale/pl/
+locale  firebug pt-BR       locale/pt-BR/
+locale  firebug pt-PT       locale/pt-PT/
+locale  firebug ro-RO       locale/ro-RO/
+locale  firebug ru-RU       locale/ru-RU/
+locale  firebug sk-SK       locale/sk-SK/
+locale  firebug sl-SI       locale/sl-SI/
+locale  firebug sr          locale/sr/
+locale  firebug sv-SE       locale/sv-SE/
+locale  firebug te-IN       locale/te-IN/
+locale  firebug tr-TR       locale/tr-TR/
+locale  firebug uk-UA       locale/uk-UA/
+locale  firebug vi          locale/vi/
+locale  firebug zh-CN       locale/zh-CN/
+locale  firebug zh-TW       locale/zh-TW/
+
+overlay chrome://browser/content/browser.xul         chrome://firebug/content/browserOverlay.xul
+overlay chrome://global/content/customizeToolbar.xul         chrome://firebug/content/customizeToolbarOverlay.xul
+overlay chrome://mozapps/content/extensions/about.xul         chrome://firebug/content/aboutOverlay.xul
+
+overlay chrome://navigator/content/navigator.xul        chrome://firebug/content/browserOverlay.xul
