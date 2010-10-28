@@ -648,7 +648,7 @@ this.NetFile = domplate(this.Obj,
 
 function instanceOf(object, Klass)
 {
-    while (object != null) 
+    while (object != null)
     {
         if (object == Klass.prototype)
            return true;
@@ -894,7 +894,7 @@ this.Element = domplate(Firebug.Rep,
 
     getTooltip: function(elt)
     {
-        return this.getXPath(elt);
+        return this.getXPath(elt) + " (" + elt.namespaceURI+")";
     },
 
     getContextMenuItems: function(elt, target, context)
@@ -1875,10 +1875,10 @@ this.Except = domplate(Firebug.Rep,
 
     getErrorMessage: function(object)
     {
-        var win = Firebug.currentContext.window, 
-            trace, 
-            url, 
-            lineNo, 
+        var win = Firebug.currentContext.window,
+            trace,
+            url,
+            lineNo,
             errorObject,
             message,
             isCommandLine = false;
@@ -1903,13 +1903,13 @@ this.Except = domplate(Firebug.Rep,
             if (!trace)
                 lineNo = 0;
         }
-        errorObject = new FBL.ErrorMessage(message, url, lineNo, '', 'js', 
+        errorObject = new FBL.ErrorMessage(message, url, lineNo, '', 'js',
             Firebug.currentContext, trace);
-        
-        if (trace && trace.frames && trace.frames[0]) 
+
+        if (trace && trace.frames && trace.frames[0])
             errorObject.correctWithStackTrace(trace);
         errorObject.resetSource();
-        
+
         return errorObject;
     },
 

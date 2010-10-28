@@ -1198,7 +1198,7 @@ Firebug.HTMLPanel.prototype = extend(WalkingPanel,
 
     getTooltipObject: function(target)
     {
-        return null;
+        return Firebug.getRepObject(target);
     },
 
     getOptionsMenuItems: function()
