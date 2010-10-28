@@ -951,7 +951,7 @@ Firebug.AutoCompleter = function(getExprOffset, getRange, evaluator, selectMode,
 
         this.clearCandidates(textBox, completionBox);
 
-        if (!this.getVerifiedText(completionBox) && !showGlobals) // then no completion is desired
+        if (!this.getVerifiedText(textBox) && !showGlobals) // then no completion is desired
             return false;
 
         var offset = textBox.selectionStart;
@@ -1362,6 +1362,7 @@ Firebug.AutoCompleter = function(getExprOffset, getRange, evaluator, selectMode,
         if (event.ctrlKey && event.keyCode === 17) // Control space
         {
             this.complete(context, textBox, completionBox, true, false, true); // force completion incl globals
+            return true;
         }
         else if (event.keyCode === 9) // TAB, cycle
         {
@@ -1369,15 +1370,17 @@ Firebug.AutoCompleter = function(getExprOffset, getRange, evaluator, selectMode,
             {
                 textBox.selectRange(textBox.selectionEnd, textBox.selectionStart); // deselect
                 cancelEvent(event);
+                return true;
             }
             else if (completionBox.value.length == textBox.value.length)  // then no completion text,
             {
-                return; //  pass TAB along
+                return false; //  pass TAB along
             }
             else  // complete
             {
                 this.acceptCompletionInTextBox(textBox, completionBox);
                 cancelEvent(event);
+                return true;
             }
         }
        /* else if (event.keyCode === 13 || event.keyCode === 14)  // RETURN , ENTER
@@ -1388,40 +1391,23 @@ Firebug.AutoCompleter = function(getExprOffset, getRange, evaluator, selectMode,
         {
             // Stop event bubbling if it was used to close the popup.
             if (this.hide())
-                cancelEvent(event);
-        }
-        else if (event.keyCode === 38) // UP arrow
-        {
-            if (textBox.selectionEnd && textBox.selectionStart !== textBox.selectionEnd)
             {
-                if (this.cycle(true))
-                    this.showCandidates(textBox, completionBox);
                 cancelEvent(event);
                 return true;
             }
         }
-        else if (event.keyCode === 40) // DOWN arrow, cycle down
+        else if (event.keyCode === 38 || event.keyCode === 40) // UP of DOWN arrow
         {
-            if (textBox.selectionEnd && textBox.selectionStart !== textBox.selectionEnd)
+            if (this.getCompletionText(completionBox))
             {
-                if (this.cycle(false))
+                if (this.cycle(event.keyCode === 38))
                     this.showCandidates(textBox, completionBox);
-
                 cancelEvent(event);
                 return true;
             }
             // else the arrow will fall through to command history
         }
     },
-
-    this.handledKeyPress = function(event, context, textBox)
-    {
-        if (event.keyCode === 8)  // Backspace
-        {
-            //cancelEvent(event);   // heuristic, FBTest sends us both keydown and keypress
-            return true;
-        }
-    };
 
     this.setCompletionOnEvent = function(event)
     {
