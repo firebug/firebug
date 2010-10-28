@@ -1,3 +1,9 @@
+/* See license.txt for terms of usage */
+
+@import "chrome://firebug-os/skin/traceConsole.css";
+
+/************************************************************************************************/
+
 #panelNode-traceConsole,
 #traceLogContent {
     overflow: hidden;

@@ -25,6 +25,13 @@
     background: #F6F6F6 url(chrome://firebug/skin/mac/toolbar.gif) repeat-x;
 }
 
+#fbCommandArrow,
+#fbCommandLine,
+#fbLargeCommandLine,
+.fbCommandLineCompletions {
+    font-family: Monaco, monospace;
+}
+
 #fbLargeCommandLine {
     -moz-appearance: none;
     border: none;
@@ -211,6 +218,13 @@
 
 #fbCommandToggleLarge:hover:active {
     list-style-image: url(chrome://firebug/skin/mac/minActive.png) !important;
+}
+
+/********************************************************************************************/
+/* Quick Info Box */
+
+#fbQuickInfoPanel {
+    font-family: Monaco, monospace;
 }
 
 /********************************************************************************************/
@@ -506,4 +520,10 @@ panelTab[selected="true"] > .panelTab-right {
     border-right: 2px solid !important;
     -moz-border-left-colors: rgba(0,0,0,0.25) rgba(255,255,255,0.15) !important;
     -moz-border-right-colors: rgba(0,0,0,0.25) rgba(255,255,255,0.15) !important;
+}
+
+/************************************************************************************************/
+
+#fbMigrationOk {
+    font-family: Monaco, monospace;
 }

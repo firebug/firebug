@@ -48,7 +48,49 @@ body {
 }
 
 /************************************************************************************************/
+/* Panel base */
+
+.infoTip,
+.fullPanelEditor {
+    font-family: Monaco, monospace;
+}
+
+/************************************************************************************************/
+/* Console panel */
+
+.logRow-command > .objectBox-text,
+.objectBox-string,
+.objectBox-text,
+.objectBox-number,
+.objectLink-element,
+.objectLink-textNode,
+.objectLink-function,
+.objectBox-stackTrace,
+.objectLink-profile,
+.objectBox-table,
+.errorSource,
+.selectorTag,
+.selectorId,
+.selectorClass,
+.objectLeftBrace,
+.objectRightBrace,
+.objectEqual,
+.objectComma,
+.arrayLeftBracket,
+.arrayRightBracket,
+.arrayComma {
+      font-family: Monaco, monospace;
+}
+
+/************************************************************************************************/
 /* HTML panel */
+
+.nodeBox,
+.docType,
+.breakpointCode .nodeBox.containerNodeBox,
+.breakpointCode .nodeLabel {
+    font-family: Monaco, monospace;
+}
 
 .nodeBox.selected > .nodeLabel > .nodeLabelBox,
 .nodeBox.selected > .nodeLabel {
@@ -79,7 +121,23 @@ body {
 }
 
 /************************************************************************************************/
+/* CSS panel */
+
+.cssRule {
+    font-family: Monaco, monospace;
+}
+
+/************************************************************************************************/
 /* DOM panel */
+
+.editor-watchNewRow,
+.editor-memberRow {
+    font-family: Monaco, monospace !important;
+}
+
+.watchRow > .memberLabelCell {
+    font-family: Monaco, monospace;
+}
 
 .closeButton {
     width: 16px;
@@ -93,4 +151,12 @@ body {
 
 .closeButton:hover:active {
     background-image: url(chrome://firebug/skin/mac/closeActive.png);
+}
+
+/************************************************************************************************/
+/* Net panel */
+
+.useA11y .a11yShowFullLabel,
+.netInfoText {
+    font-family: Monaco, monospace;
 }
