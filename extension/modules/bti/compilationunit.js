@@ -139,6 +139,7 @@ CompilationUnit.prototype.getSource = function(listener)
  * </p>
  * @function
  * @param lineNumber the source line number in this compilation unit to set the breakpoint on
+ * @return the {@link Breakpoint} that was created
  */
 CompilationUnit.prototype.setBreakpoint = function(lineNumber)
 {
