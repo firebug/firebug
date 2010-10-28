@@ -68,7 +68,7 @@ function Browser()
     this.EVENT_TYPES = ["onBreak", "onConsoleDebug", "onConsoleError", "onConsoleInfo",
         "onConsoleLog", "onConsoleWarn", "onContextCreated", "onContextDestroyed",
         "onContextChanged", "onContextLoaded", "onInspectNode", "onResume", "onScript",
-        "onSuspend", "onToggleBreakpoint", "onDisconnect"];
+        "onSuspend", "onToggleBreakpoint", "onBreakpointError", "onDisconnect"];
     this.connected = false;
 }
 
@@ -438,11 +438,22 @@ Browser.EventListener = {
 
     /**
      * Notification the specified breakpoint has been installed or cleared.
+     * State can be retrieved from the breakpoint to determine whether the 
+     * breakpoint is installed or cleared.
      *
      * @function
      * @param breakpoint the {@link Breakpoint} that has been toggled
      */
-    onToggleBreakpoint: function(breakpoint) {}
+    onToggleBreakpoint: function(breakpoint) {},
+    
+    /**
+     * Notification the specified breakpoint has failed to install or clear.
+     * State can be retrieved from the breakpoint to determine what failed.
+     *
+     * @function
+     * @param breakpoint the {@link Breakpoint} that failed to install or clear
+     */
+    onBreakpointError: function(breakpoint) {}
 };
 
 // ************************************************************************************************

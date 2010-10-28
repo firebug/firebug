@@ -44,33 +44,14 @@ var EXPORTED_SYMBOLS = ["Breakpoint"];
  * execution context.
  * <p>
  * A breakpoint proceeds through states in its lifecycle.
- * <table border="1">
- *   <tr>
- *     <th>State</th>
- *     <th>isInstalled()</th>
- *     <th>isCleared()</th>
- *   </tr>
- *   <tr>
- *     <td>Created, but not yet installed</td>
- *     <td>false</td>
- *     <td>false</td>
- *   </tr>
- *   <tr>
- *     <td>Created and installed</td>
- *     <td>true</td>
- *     <td>false</td>
- *   </tr>
- *   <tr>
- *     <td>Cleared, but not yet uninstalled</td>
- *     <td>true</td>
- *     <td>true</td>
- *   </tr>
- *   <tr>
- *     <td>Cleared and uninstalled</td>
- *     <td>false</td>
- *     <td>true</td>
- *   </tr>
- * </table>
+ * <ul>
+ * <li>{@link Breakpoint.PENDING_INSTALL} - created and pending installation in the runtime</li>
+ * <li>{@link Breakpoint.FAILED_INSTALL} - failed to install in the runtime</li>
+ * <li>{@link Breakpoint.INSTALLED} - installed in the runtime</li>
+ * <li>{@link Breakpoint.PENDING_CLEAR} - pending removal from the runtime</li>
+ * <li>{@link Breakpoint.FAILED_CLEAR} - failed to clear from the runtime</li>
+ * <li>{@link Breakpoint.CLEARED} - cleared from the runtime</li>
+ * </ul>
  * </p>
  * 
  * @constructor
@@ -84,12 +65,42 @@ function Breakpoint(compilationUnit, lineNumber)
 {
     this.compilationUnit = compilationUnit;
     this.lineNumber = lineNumber;
-    this.installed = false;
-    this.cleared = false;
+    this.state = this.PENDING_INSTALL;
 }
 
 // ************************************************************************************************
 // API
+
+/**
+ * Breakpoint state indicating a breakpoint has been created and is pending installation.
+ * @constant 
+ */
+Breakpoint.prototype.PENDING_INSTALL = 1;
+/**
+ * Breakpoint state indicating a breakpoint failed to install.
+ * @constant 
+ */
+Breakpoint.prototype.FAILED_INSTALL = 2;
+/**
+ * Breakpoint state indicating a breakpoint has been installed.
+ * @constant 
+ */
+Breakpoint.prototype.INSTALLED = 3;
+/**
+ * Breakpoint state indicating a breakpoint pending a clear. 
+ * @constant 
+ */
+Breakpoint.prototype.PENDING_CLEAR = 4;
+/**
+ * Breakpoint state indicating a clear request failed.
+ * @constant 
+ */
+Breakpoint.prototype.FAILED_CLEAR = 5;
+/**
+ * Breakpoint state indicating a breakpoint has been cleared.
+ * @constant 
+ */
+Breakpoint.prototype.CLEARED = 6;
 
 /**
  * Returns the compilation unit this breakpoint was created in.
@@ -125,35 +136,18 @@ Breakpoint.prototype.clear = function()
 };
 
 /**
- * Returns whether this breakpoint is installed in its {@link CompilationUnit}.
+ * Returns the current state of this breakpoint - one of the state constants defined
+ * by this object.
  * <p>
  * This function does not require communication with
  * the browser.
  * </p>
  * @function
- * @returns <code>true</code> if the breakpoint is installed
- *  and <code>false</code> if it has been cleared
+ * @return breakpoint state
  */
-Breakpoint.prototype.isInstalled = function()
-{
-    return this.installed;
-};
-
-/**
- * Returns whether this breakpoint has been cleared. A breakpoint is considered cleared
- * as soon as its clear function has been called regardless of the browser's knowledge of
- * the clear.
- * <p>
- * This function does not require communication with
- * the browser.
- * </p>
- * @function
- * @returns whether this breakpoint has been cleared
- */
-Breakpoint.prototype.isCleared = function()
-{
-    return this.cleared;
-};
+Breakpoint.prototype.getState = function() {
+	return this.state;
+}
 
 /**
  * Returns the source code line number this breakpoint was created on.
@@ -183,9 +177,9 @@ Breakpoint.prototype.getLineNumber = function()
  */
 Breakpoint.prototype._installed = function()
 {
-    if (!this.installed)
+    if (this.state === this.PENDING_INSTALL)
     {
-        this.installed = true;
+    	this.state = this.INSTALLED;
         this.getCompilationUnit().getBrowserContext().getBrowser()._dispatch("onToggleBreakpoint", [this]);	
     }
 };
@@ -193,17 +187,50 @@ Breakpoint.prototype._installed = function()
 /**
  * Implementations must call this method when a breakpoint is cleared from the browser.
  * Notification will be sent to registered listeners that the breakpoint has been cleared.
- * Updates the installed and cleared properties of this breakpoint. This method should only
- * be called once when a breakpoint is cleared.
+ * This method should only be called once when a breakpoint is cleared.
  * 
  * @function
  */
 Breakpoint.prototype._cleared = function()
 {
-    if (!this.cleared)
+    if (this.state != this.CLEARED)
     {
-        this.cleared = true;
+        this.state = this.CLEARED;
         this.getCompilationUnit().getBrowserContext().getBrowser()._dispatch("onToggleBreakpoint", [this]);
+    }
+};
+
+/**
+ * Implementations must call this method when a breakpoint fails to install in the browser.
+ * Notification will be sent to registered listeners that breakpoint installation has failed.
+ * Updates breakpoint state. This method should only be called once when a breakpoint fails to
+ * install.
+ * 
+ * @function
+ */
+Breakpoint.prototype._failedInstall = function()
+{
+    if (this.state === this.PENDING_INSTALL)
+    {
+        this.state = this.FAILED_INSTALL;
+        this.getCompilationUnit().getBrowserContext().getBrowser()._dispatch("onBreakpointError", [this]);
+    }
+};
+
+/**
+ * Implementations must call this method when a breakpoint fails to clear from the browser.
+ * Notification will be sent to registered listeners that breakpoint clear has failed.
+ * Updates breakpoint state. This method should only be called once when a breakpoint fails to
+ * clear.
+ * 
+ * @function
+ */
+Breakpoint.prototype._failedClear = function()
+{
+    if (this.state === this.PENDING_CLEAR)
+    {
+        this.state = this.FAILED_CLEAR;
+        this.getCompilationUnit().getBrowserContext().getBrowser()._dispatch("onBreakpointError", [this]);
     }
 };
 
