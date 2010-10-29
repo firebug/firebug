@@ -333,11 +333,11 @@ menupopup[chromedir="rtl"] > .navigationHistoryMenuItemBack {
 
 /************************************************************************************************/
 
-#fbCommandPreviewButton {
+#fbCommandPopupButton {
     list-style-image: url(chrome://firebug/skin/commandLine.png);
 }
 
-#fbCommandPreviewButton[disabled="true"] {
+#fbCommandPopupButton[disabled="true"] {
     list-style-image: url(chrome://firebug/skin/commandLineDisabled.png);
 }
 

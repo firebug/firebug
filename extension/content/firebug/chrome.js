@@ -33,7 +33,7 @@ const negativeZoomFactors = [1, 0.95, 0.8, 0.7, 0.5, 0.2, 0.1];
 // Globals
 
 var panelBox, panelSplitter, sidePanelDeck, panelBar1, panelBar2, locationList, locationButtons,
-    panelStatus, panelStatusSeparator, cmdPreview, cmdPreviewBrowser;
+    panelStatus, panelStatusSeparator, cmdPopup, cmdPopupBrowser;
 
 var waitingPanelBarCount = 2;
 
@@ -88,8 +88,8 @@ top.FirebugChrome =
         panelStatus = $("fbPanelStatus");
         panelStatusSeparator = $("fbStatusSeparator");
 
-        cmdPreview = $("fbCommandPreview");
-        cmdPreviewBrowser = $("fbCommandPreviewBrowser");
+        cmdPopup = $("fbCommandPopup");
+        cmdPopupBrowser = $("fbCommandPopupBrowser");
 
         if (window.arguments)
             var detachArgs = window.arguments[0];
@@ -183,7 +183,7 @@ top.FirebugChrome =
             doc2.addEventListener("mousedown", onPanelMouseDown, false);
             panelBar2.addEventListener("selectPanel", onSelectedSidePanel, false);
 
-            var doc3 = cmdPreviewBrowser.contentDocument;
+            var doc3 = cmdPopupBrowser.contentDocument;
             doc3.addEventListener("mouseover", onPanelMouseOver, false);
             doc3.addEventListener("mouseout", onPanelMouseOut, false);
             doc3.addEventListener("mousedown", onPanelMouseDown, false);
@@ -240,7 +240,7 @@ top.FirebugChrome =
         doc2.removeEventListener("mousedown", onPanelMouseDown, false);
         doc2.removeEventListener("click", onPanelClick, false);
 
-        var doc3 = cmdPreviewBrowser.contentDocument;
+        var doc3 = cmdPopupBrowser.contentDocument;
         doc3.removeEventListener("mouseover", onPanelMouseOver, false);
         doc3.removeEventListener("mouseout", onPanelMouseOut, false);
         doc3.removeEventListener("mousedown", onPanelMouseDown, false);
@@ -340,12 +340,12 @@ top.FirebugChrome =
     {
         // Console panel can be displayed for all the other panels
         // (except of the console panel itself)
-        // XXXjjb, xxxHonza: this should be somehow betterm, more generic and extensible...
+        // XXXjjb, xxxHonza: this should be somehow better, more generic and extensible...
         var consolePanelType = Firebug.getPanelType("console");
         if (consolePanelType == panelType)
         {
-            if (!FBL.isCollapsed(cmdPreview))
-                return cmdPreviewBrowser.contentDocument;
+            if (!FBL.isCollapsed(cmdPopup))
+                return cmdPopupBrowser.contentDocument;
         }
 
         // Standard panel and side panel documents.

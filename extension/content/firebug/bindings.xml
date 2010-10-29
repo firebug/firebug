@@ -1480,7 +1480,7 @@
                 searchBox.focus();
                 if (optionsPopup.state == "open")
                 {
-                    event.stopPropagation(); // prevent cmd preview toggle
+                    event.stopPropagation(); // prevent cmd popup toggle
                     optionsPopup.hidePopup();
                 }
                 else

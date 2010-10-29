@@ -132,7 +132,7 @@
 #fbInspectButton,
 #fbNavigateBackButton,
 #fbNavigateForwardButton,
-#fbCommandPreviewButton {
+#fbCommandPopupButton {
     margin: 0 1px 0 1px;
     padding: 0 1px 0 1px;
 }
@@ -141,7 +141,7 @@
 #fbInspectButton > .toolbarbutton-text,
 #fbNavigateBackButton > .toolbarbutton-text,
 #fbNavigateForwardButton > .toolbarbutton-text,
-#fbCommandPreviewButton > .toolbarbutton-text {
+#fbCommandPopupButton > .toolbarbutton-text {
     display: none;
 }
 

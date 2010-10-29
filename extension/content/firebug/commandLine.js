@@ -1106,7 +1106,7 @@ function injectScript(script, win)
 function getCommandLine(context)
 {
     // Command line on other panels is never multiline.
-    var visible = Firebug.CommandLine.Preview.isVisible();
+    var visible = Firebug.CommandLine.Popup.isVisible();
     if (visible && context.panelName != "console")
         return Firebug.chrome.$("fbCommandLine");
 

@@ -650,7 +650,7 @@
 
 /************************************************************************************************/
 
-/* The panel content is always visible within the command preview on other panels */
-.commandPreview .panelNode-console {
+/* The panel content is always visible within the command popup on other panels */
+.commandPopup .panelNode-console {
     display: block;
 }

@@ -11,7 +11,7 @@ FBL.ns(function() { with (FBL) {
 /**
  * @module Command Line availability in other panels.
  */
-Firebug.CommandLine.Preview = extend(Firebug.Module,
+Firebug.CommandLine.Popup = extend(Firebug.Module,
 {
     lastFocused : null,
 
@@ -19,7 +19,7 @@ Firebug.CommandLine.Preview = extend(Firebug.Module,
     {
         Firebug.Module.initializeUI.apply(this, arguments);
 
-        this.setPreviewBrowserStyle(Firebug.chrome);
+        this.setPopupBrowserStyle(Firebug.chrome);
 
         this.onKeyPress = bind(this.onKeyPress, this);
 
@@ -28,7 +28,7 @@ Firebug.CommandLine.Preview = extend(Firebug.Module,
 
     internationalizeUI: function(doc)
     {
-        var elements = ["fbCommandPreviewButton"];
+        var elements = ["fbCommandPopupButton"];
 
         for (var i=0; i<elements.length; i++)
         {
@@ -48,28 +48,28 @@ Firebug.CommandLine.Preview = extend(Firebug.Module,
 
     reattachContext: function(browser, context)
     {
-        this.setPreviewBrowserStyle(Firebug.chrome);
+        this.setPopupBrowserStyle(Firebug.chrome);
         this.attachListeners();
     },
 
     showPanel: function(browser, panel)
     {
         if (FBTrace.DBG_COMMANDLINE)
-            FBTrace.sysout("commandLine.Preview.showPanel; " + (panel?panel.name:"null panel"));
+            FBTrace.sysout("commandLine.Popup.showPanel; " + (panel?panel.name:"null panel"));
 
         var chrome = Firebug.chrome;
         var visible = this.isVisible();
         var isConsole = (panel && panel.name == "console");
         var largeCmd = Firebug.largeCommandLine;
 
-        // Disable the console preview button (Firebug toolbar) if the Console panel
+        // Disable the console popup button (Firebug toolbar) if the Console panel
         // is disabled or selected.
         var consolePanelType = Firebug.getPanelType("console");
         var disabled = consolePanelType.prototype.isEnabled() ? "false" : "true";
         if (isConsole || !panel)
             disabled = "true";
 
-        chrome.$("fbCommandPreviewButton").setAttribute("disabled", disabled);
+        chrome.$("fbCommandPopupButton").setAttribute("disabled", disabled);
 
         if ((largeCmd && isConsole) || !panel)
         {
@@ -83,29 +83,29 @@ Firebug.CommandLine.Preview = extend(Firebug.Module,
         // button (displayed at the end of the one line command line)
         collapse(chrome.$("fbCommandToggleSmall"), !isConsole);
 
-        // Update visibility of the console-preview (hidden if the Console panel is selected).
+        // Update visibility of the console-popup (hidden if the Console panel is selected).
         this.updateVisibility(visible && !isConsole && panel);
 
         // Make sure the console panel is attached to the proper document
-        // (the one used by all panels, or the one used by console preview and available
+        // (the one used by all panels, or the one used by console popup and available
         // for all the panels).
         if (panel)
             this.reattach(panel.context);
 
         // If the the console panel is opened on another panel, simulate show event for it.
         if (panel && !isConsole && visible)
-            this.showPreviewPanel(panel.context);
+            this.showPopupPanel(panel.context);
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 
-    setPreviewBrowserStyle: function(chrome)
+    setPopupBrowserStyle: function(chrome)
     {
         // Set additional style so we can make the panelNode-console node
         // always visible regardless of the currently selected panel.
-        var doc = chrome.$("fbCommandPreviewBrowser").contentDocument;
+        var doc = chrome.$("fbCommandPopupBrowser").contentDocument;
         var body = getBody(doc);
-        setClass(body, "commandPreview");
+        setClass(body, "commandPopup");
     },
 
     attachListeners: function()
@@ -121,17 +121,17 @@ Firebug.CommandLine.Preview = extend(Firebug.Module,
             return;
 
         if (FBTrace.DBG_COMMANDLINE)
-            FBTrace.sysout("commandLine.Preview.toggle;");
+            FBTrace.sysout("commandLine.Popup.toggle;");
 
         var newState = !this.isVisible();
-        Firebug.chrome.setGlobalAttribute("cmd_toggleCommandPreview", "checked", newState);
+        Firebug.chrome.setGlobalAttribute("cmd_toggleCommandPopup", "checked", newState);
         this.updateVisibility(newState);
 
         this.reattach(context);
-        this.showPreviewPanel(context);
+        this.showPopupPanel(context);
     },
 
-    showPreviewPanel: function(context)
+    showPopupPanel: function(context)
     {
         // If the the console panel is opened on another panel, simulate show event for it.
         if (this.isVisible())
@@ -148,17 +148,17 @@ Firebug.CommandLine.Preview = extend(Firebug.Module,
     updateVisibility: function(visible)
     {
         var chrome = Firebug.chrome;
-        var preview = chrome.$("fbCommandPreview");
-        var splitter = chrome.$("fbCommandPreviewSplitter")
+        var popup = chrome.$("fbCommandPopup");
+        var splitter = chrome.$("fbCommandPopupSplitter")
         var cmdbox = chrome.$("fbCommandBox");
         var toggle = chrome.$("fbCommandToggleSmall");
 
         // If all the visual parts are already visible then bail out.
-        if (visible && !isCollapsed(preview) && !isCollapsed(splitter) &&
+        if (visible && !isCollapsed(popup) && !isCollapsed(splitter) &&
             !isCollapsed(cmdbox) && !isCollapsed(toggle))
             return;
 
-        collapse(preview, !visible);
+        collapse(popup, !visible);
         collapse(splitter, !visible);
         collapse(cmdbox, !visible);
 
@@ -192,7 +192,7 @@ Firebug.CommandLine.Preview = extend(Firebug.Module,
 
     isVisible: function()
     {
-        var checked = Firebug.chrome.getGlobalAttribute("cmd_toggleCommandPreview", "checked");
+        var checked = Firebug.chrome.getGlobalAttribute("cmd_toggleCommandPopup", "checked");
         return (checked == "true") ? true : false;
     },
 
@@ -226,7 +226,7 @@ Firebug.CommandLine.Preview = extend(Firebug.Module,
 // ************************************************************************************************
 // Registration
 
-Firebug.registerModule(Firebug.CommandLine.Preview);
+Firebug.registerModule(Firebug.CommandLine.Popup);
 
 // ************************************************************************************************
 }});

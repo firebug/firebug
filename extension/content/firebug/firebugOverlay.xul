@@ -80,7 +80,7 @@
         <command id="cmd_navForward" oncommand="Firebug.NavigationHistory.goForward(Firebug.currentContext)" />
         <command id="cmd_toggleFreezeWindow" oncommand="Firebug.Debugger.toggleFreezeWindow(Firebug.currentContext)" />
 
-        <command id="cmd_toggleCommandPreview" oncommand="Firebug.CommandLine.Preview.toggle(Firebug.currentContext)"
+        <command id="cmd_toggleCommandPopup" oncommand="Firebug.CommandLine.Popup.toggle(Firebug.currentContext)"
             checked="false"/>
     </commandset>
 
@@ -163,9 +163,9 @@
 
                             <toolbarseparator id="fbNavigationSeparator"/>
 
-                            <toolbarbutton id="fbCommandPreviewButton"
+                            <toolbarbutton id="fbCommandPopupButton"
                                 tooltiptext="panel.tooltip.Show Command Line"
-                                command="cmd_toggleCommandPreview">
+                                command="cmd_toggleCommandPopup">
                             </toolbarbutton>
                         </hbox>
 
@@ -436,11 +436,11 @@
             </menupopup>
         </box>
 
-        <!-- CommandLine preview (available on other panels) -->
-        <splitter id="fbCommandPreviewSplitter" collapsed="true" collapse="after" />
-        <vbox id="fbCommandPreview" collapsed="true" height="35" persist="width,height">
-            <deck id="fbCommandPreview-deck" flex="1">
-                <browser id="fbCommandPreviewBrowser"
+        <!-- CommandLine popup (available on other panels) -->
+        <splitter id="fbCommandPopupSplitter" collapsed="true" collapse="after" />
+        <vbox id="fbCommandPopup" collapsed="true" height="35" persist="width,height">
+            <deck id="fbCommandPopup-deck" flex="1">
+                <browser id="fbCommandPopupBrowser"
                      tooltip="fbTooltip" contextmenu="fbContextMenu"
                      disablehistory="true"
                      src="chrome://firebug/content/panel.html"/>
