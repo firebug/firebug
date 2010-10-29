@@ -457,7 +457,7 @@ Firebug.CommandLine = extend(Firebug.Module,
 
         commandLine.value = context.commandLineText = "";
         this.autoCompleter.reset();
-        this.autoCompleter.hide();
+        this.autoCompleter.hide(getCompletionBox());
 
         return true;
     },
@@ -673,7 +673,7 @@ Firebug.CommandLine = extend(Firebug.Module,
 
     destroyContext: function(context, persistedState)
     {
-        this.autoCompleter.clear();
+        this.autoCompleter.clear(getCompletionBox());
          // more of our work is done in the Console
     },
 
@@ -685,7 +685,7 @@ Firebug.CommandLine = extend(Firebug.Module,
         var commandLine = getCommandLine(browser);
         commandLine.value = value ? value : "";
 
-        this.autoCompleter.hide();
+        this.autoCompleter.hide(getCompletionBox());
     },
 
     updateOption: function(name, value)
@@ -792,7 +792,7 @@ Firebug.CommandLine = extend(Firebug.Module,
         if (!this.autoCompleter.getVerifiedText(commandLine)) // don't complete on empty command line
         {
             this.autoCompleter.reset();
-            this.autoCompleter.hide();
+            this.autoCompleter.hide(getCompletionBox());
             return;
         }
 
@@ -805,7 +805,7 @@ Firebug.CommandLine = extend(Firebug.Module,
         if (this.autoCompleter.linuxFocusHack)
             return;
 
-        this.autoCompleter.clear();
+        this.autoCompleter.clear(getCompletionBox());
     },
 
     onCommandLineFocus: function(event)

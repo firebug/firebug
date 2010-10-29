@@ -1231,7 +1231,7 @@ Firebug.AutoCompleter = function(getExprOffset, getRange, evaluator, selectMode,
         }
         else
         {
-            this.hide();
+            this.hide(candidates.length ? null : completionBox);
         }
         return true;
     };
@@ -1308,8 +1308,11 @@ Firebug.AutoCompleter = function(getExprOffset, getRange, evaluator, selectMode,
         return;
     };
 
-    this.hide = function()
+    this.hide = function(box)
     {
+        if (box)
+            box.value = ""; // erase the text in the second track
+
         delete completionPopup.currentTextBox;
 
         if (completionPopup.state == "closed")
@@ -1319,14 +1322,14 @@ Firebug.AutoCompleter = function(getExprOffset, getRange, evaluator, selectMode,
         return true;
     };
 
-    this.clear = function()
+    this.clear = function(box)
     {
         var textBox = completionPopup.currentTextBox;
         if (textBox)
-        {
-            textBox.value = this.getVerifiedText(textBox);
-            this.hide();
-        }
+            this.hide(box);
+
+        box.value = ""; // erase the text in the second track
+
         this.reset();
     };
 
@@ -1390,7 +1393,7 @@ Firebug.AutoCompleter = function(getExprOffset, getRange, evaluator, selectMode,
         else if (event.keyCode == 27) // ESC, close the completer
         {
             // Stop event bubbling if it was used to close the popup.
-            if (this.hide())
+            if (this.hide(completionBox))
             {
                 cancelEvent(event);
                 return true;
@@ -1439,7 +1442,7 @@ Firebug.AutoCompleter = function(getExprOffset, getRange, evaluator, selectMode,
     {
         textBox.value = completionBox.value;
         textBox.setSelectionRange(textBox.value.length, textBox.value.length); // ensure the cursor at EOL
-        this.hide();
+        this.hide(completionBox);
         return true;
     };
 
