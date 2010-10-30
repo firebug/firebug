@@ -1362,7 +1362,7 @@ Firebug.AutoCompleter = function(getExprOffset, getRange, evaluator, selectMode,
         if (event.altKey || event.metaKey)
             return false;
 
-        if (event.ctrlKey && event.keyCode === 17) // Control space
+        if (event.ctrlKey && event.keyCode === 32) // Control space
         {
             this.complete(context, textBox, completionBox, true, false, true); // force completion incl globals
             return true;
