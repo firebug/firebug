@@ -348,6 +348,10 @@ InsideOutBox.prototype =
         {
             var parentNode = this.view.getParentObject(object);
 
+            if (FBTrace.DBG_HTML)
+                FBTrace.sysout("insideOutBox.createObjectBoxes createObjectBoxes recursing with parentNode "+
+                    formatNode(parentNode)+" from object "+formatNode(object));
+
             // recurse towards parent, eventually returning rootObjectBox
             var parentObjectBox = this.createObjectBoxes(parentNode, rootObject);
 
@@ -551,15 +555,15 @@ InsideOutBox.prototype =
 
         while (1)
         {
-            if (FBTrace.DBG_HTML)
-                dbg_getRootNode += node.localName+" < ";
-
             var parentNode = this.view.getParentObject(node);
 
             if (!parentNode)
                 break;
-            else
-                node = parentNode;
+
+            if (FBTrace.DBG_HTML)
+                dbg_getRootNode += node.localName+" < ";
+
+            node = parentNode;
         }
         if (FBTrace.DBG_HTML)
             FBTrace.sysout("insideOutBox.getRootNode "+dbg_getRootNode);
@@ -608,7 +612,15 @@ function formatNode(object)
 {
     if (object)
     {
-        return getElementCSSSelector(object);
+        if (!object.localName)
+        {
+            var str = object.toString();
+            if (str)
+                return str;
+            else
+                return "(an object with no localName or toString result)";
+        }
+        else  return getElementCSSSelector(object);
     }
     else
         return "(null object)";

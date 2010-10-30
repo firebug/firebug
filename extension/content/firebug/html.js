@@ -689,6 +689,9 @@ Firebug.HTMLPanel.prototype = extend(WalkingPanel,
         else
             var child = this.getFirstChild(node); // child is set to at the beginning of an iteration.
 
+        if (FBTrace.DBG_HTML)
+            FBTrace.sysout("getChildObject firstChild "+child+ " with Firebug.showTextNodesWithWhitespace "+Firebug.showTextNodesWithWhitespace);
+
         if (Firebug.showTextNodesWithWhitespace)  // then the index is true to the node list
             return child;
         else
