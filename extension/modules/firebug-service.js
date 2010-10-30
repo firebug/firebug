@@ -919,7 +919,21 @@ var fbs =
 
         if (!jsd.isOn)
         {
-            jsd.on(); // this should be the only call to jsd.on().
+            if (jsd.asyncOn) // then FF 4.0+
+            {
+                jsd.asyncOn(
+                {
+                    onDebuggerActivated: function onDebuggerActivated()
+                    {
+                        FBTrace.sysout("jsd.onDebuggerActivated ==========================");
+                    }
+                });
+            }
+            else // FF 3.6-
+            {
+                FBTrace.sysout("jsd.on()  ==========================");
+                jsd.on(); // this should be the only call to jsd.on().
+            }
             jsd.flags |= DISABLE_OBJECT_TRACE;
 
             if (jsd.pauseDepth && FBTrace.DBG_FBS_ERRORS)
