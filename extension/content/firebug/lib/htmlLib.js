@@ -754,17 +754,18 @@ Firebug.HTMLLib =
             if (!this.treeWalker || this.treeWalker.currentNode !== node)
                 this.treeWalker = node.ownerDocument.createTreeWalker(
                     node, NodeFilter.SHOW_ALL, null, false);
+
             return this.treeWalker;
         },
 
         getFirstChild: function(node)
         {
-            return this.getTreeWalker(node).firstChild();
+            return Firebug.HTMLLib.ElementWalkerFunctions.getTreeWalker(node).firstChild();
         },
 
         getNextSibling: function(node)
         {
-            return this.getTreeWalker(node).nextSibling();
+            return Firebug.HTMLLib.ElementWalkerFunctions. (node).nextSibling();
         },
 
         getParentNode: function(node)
