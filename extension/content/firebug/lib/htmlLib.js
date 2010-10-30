@@ -765,7 +765,7 @@ Firebug.HTMLLib =
 
         getNextSibling: function(node)
         {
-            return Firebug.HTMLLib.ElementWalkerFunctions. (node).nextSibling();
+            return Firebug.HTMLLib.ElementWalkerFunctions.getTreeWalker(node).nextSibling();
         },
 
         getParentNode: function(node)
