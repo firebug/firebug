@@ -1055,13 +1055,7 @@ Firebug.AutoCompleter = function(getExprOffset, getRange, evaluator, selectMode,
             var m = reJavaScriptGroup.exec(value);
             if (m) // then we have group operator
             {
-                var group = m[1];
-                if (group === ')')
-                    candidates = [')'];
-                else if (group === '{')
-                    candidates = ['}'];
-                else
-                    candidates = [group];
+                return false; // give up, we need at least to balance
             }
             else
             {
