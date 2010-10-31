@@ -1355,7 +1355,8 @@ Firebug.AutoCompleter = function(getExprOffset, getRange, evaluator, selectMode,
         if (textBox)
             this.hide(box);
 
-        box.value = ""; // erase the text in the second track
+        if (box)
+            box.value = ""; // erase the text in the second track
 
         this.reset();
     };
