@@ -152,6 +152,14 @@ InsideOutBox.prototype =
     {
         var panel = Firebug.getElementPanel(objectBox);
 
+        if (!panel)
+        {
+            if (FBTrace.DBG_ERRORS || FBTrace.DBG_HTML)
+                FBTrace.sysout("selectObjectBox no panel for "+objectBox, objectBox);
+            return;
+        }
+
+
         var isSelected = this.selectedObjectBox && objectBox == this.selectedObjectBox;
         if (!isSelected)
         {
@@ -480,8 +488,19 @@ InsideOutBox.prototype =
                 var newBox = view.createObjectBox(targetSibling);
                 if (newBox)
                 {
+                    if (!nodeChildBox) FBTrace.sysout("insideOutBox FAILS no nodeChildBox "+repObject, repObject)
                     if (lastSiblingBox)
-                        nodeChildBox.insertBefore(newBox, lastSiblingBox);
+                    {
+                        try
+                        {
+                            nodeChildBox.insertBefore(newBox, lastSiblingBox);
+                        }
+                        catch(exc)
+                        {
+                            FBTrace.sysout("insideOutBox FAILS insertBefore ",{repObject:repObject, nodeChildBox: nodeChildBox, newBox: newBox, lastSiblingBox: lastSiblingBox});
+
+                        }
+                    }
                     else
                         nodeChildBox.appendChild(newBox);
                 }
@@ -520,11 +539,13 @@ InsideOutBox.prototype =
     {
         for (var childBox = parentNodeBox.firstChild; childBox; childBox = childBox.nextSibling)
         {
+            if (FBTrace.DBG_HTML)
+                FBTrace.sysout("insideOutBox.findChildObjectBox repObject: " +formatNode(repObject)+" in "+formatNode(childBox)+" = "+formatNode(childBox.repObject), {childBoxRepObject: childBox.repObject,repObject:repObject} );
             if (childBox.repObject == repObject)
                 return childBox;
         }
         if (FBTrace.DBG_HTML)
-            FBTrace.sysout("insideOutBox.findChildObjectBox no match for repObject: " +(repObject && (repObject.localName || repObject))+" in "+parentNodeBox.localName);
+            FBTrace.sysout("insideOutBox.findChildObjectBox no match for repObject: " +formatNode(repObject)+" in "+formatNode(parentNodeBox));
     },
 
     /**
