@@ -907,6 +907,7 @@ Firebug.AutoCompleter = function(getExprOffset, getRange, evaluator, selectMode,
     var completionPopup = $("fbCommandLineCompletionList");
     var commandCompletionLineLimit = 40;
     var reJavascriptChar = /[a-zA-Z0-9$_]/;
+    var reJavaScriptGroup = /([\{\"\/\(\'])/;
     // current completion state values
     var completionEnd = 0;
     var value = "";
@@ -1051,95 +1052,40 @@ Firebug.AutoCompleter = function(getExprOffset, getRange, evaluator, selectMode,
                 return false;
             }
 
-            var values = evaluator(preExpr, expr, postExpr, context);
-            if (!values)
+            var m = reJavaScriptGroup.exec(value);
+            if (m) // then we have group operator
             {
-                this.hide();
-                return false;
-            }
-
-            if (expr)
-            {
-                // Filter the list of values to those which begin with expr. We
-                // will then go on to complete the first value in the resulting list
-                candidates = [];
-
-                if (caseSensitive)
-                {
-                    for (var i = 0; i < values.length; ++i)
-                    {
-                        var name = values[i];
-                        if (name.indexOf && name.indexOf(expr) == 0)
-                            candidates.push(name);
-                    }
-                }
+                var group = m[1];
+                if (group === ')')
+                    candidates = [')'];
+                else if (group === '{')
+                    candidates = ['}'];
                 else
-                {
-                    var lowerExpr = caseSensitive ? expr : expr.toLowerCase();
-                    for (var i = 0; i < values.length; ++i)
-                    {
-                        var name = values[i];
-                        if (name.indexOf && name.toLowerCase().indexOf(lowerExpr) == 0)
-                            candidates.push(name);
-                    }
-                }
-            }
-            else if (searchExpr)
-            {
-                var searchIndex = -1;
-
-                // Find the first instance of searchExpr in the values list. We
-                // will then complete the string that is found
-                if (caseSensitive)
-                {
-                    searchIndex = values.indexOf(expr);
-                }
-                else
-                {
-                    var lowerExpr = searchExpr.toLowerCase();
-                    for (var i = 0; i < values.length; ++i)
-                    {
-                        var name = values[i];
-                        if (name && name.toLowerCase().indexOf(lowerExpr) == 0)
-                        {
-                            searchIndex = i;
-                            break;
-                        }
-                    }
-                }
-
-                // Nothing found, so there's nothing to complete to
-                if (searchIndex == -1)
-                {
-                    this.reset();
-                    return false;
-                }
-
-                expr = searchExpr;
-                candidates = cloneArray(values);
-                lastIndex = searchIndex;
+                    candidates = [group];
             }
             else
             {
-                expr = "";
-                candidates = [];
-                for (var i = 0; i < values.length; ++i)
+                var values = evaluator(preExpr, expr, postExpr, context);
+                if (!values)
                 {
-                    var value = values[i];
-
-                    // Use only string props
-                    if (typeof(value) != "string")
-                        continue;
-
-                    // Use only those props that don't contain unsafe charactes and so need
-                    // quotation (e.g. object["my prop"] notice the space character).
-                    // Following expression checks that the name starts with a letter or $_,
-                    // and there are only letters, numbers or $_ character in the string (no spaces).
-                    var re = /^[A-Za-z_$][A-Za-z_$0-9]*/;
-                    if (value.match(re) == value)
-                        candidates.push(values[i]);
+                    this.hide();
+                    return false;
                 }
-                lastIndex = -2;
+
+                if (expr)
+                {
+                    this.setCandidatesByExpr(expr, values);
+                }
+                else if (searchExpr)
+                {
+                    if (!this.setCandidatesBySearchExpr(searchExpr, expr, values))
+                        return false;
+                    expr = searchExpr;
+                }
+                else
+                {
+                    this.setCandidatesByValues(values);
+                }
             }
         }
 
@@ -1168,6 +1114,93 @@ Firebug.AutoCompleter = function(getExprOffset, getRange, evaluator, selectMode,
 
         return true;
     };
+
+    this.setCandidatesByExpr = function(expr, values)
+    {
+        // Filter the list of values to those which begin with expr. We
+        // will then go on to complete the first value in the resulting list
+        candidates = [];
+
+        if (caseSensitive)
+        {
+            for (var i = 0; i < values.length; ++i)
+            {
+                var name = values[i];
+                if (name.indexOf && name.indexOf(expr) == 0)
+                    candidates.push(name);
+            }
+        }
+        else
+        {
+            var lowerExpr = caseSensitive ? expr : expr.toLowerCase();
+            for (var i = 0; i < values.length; ++i)
+            {
+                var name = values[i];
+                if (name.indexOf && name.toLowerCase().indexOf(lowerExpr) == 0)
+                    candidates.push(name);
+            }
+        }
+    };
+
+    this.setCandidatesBySearchExpr = function(searchExpr, expr, values)
+    {
+        var searchIndex = -1;
+
+        // Find the first instance of searchExpr in the values list. We
+        // will then complete the string that is found
+        if (caseSensitive)
+        {
+            searchIndex = values.indexOf(expr);
+        }
+        else
+        {
+            var lowerExpr = searchExpr.toLowerCase();
+            for (var i = 0; i < values.length; ++i)
+            {
+                var name = values[i];
+                if (name && name.toLowerCase().indexOf(lowerExpr) == 0)
+                {
+                    searchIndex = i;
+                    break;
+                }
+            }
+        }
+
+        // Nothing found, so there's nothing to complete to
+        if (searchIndex == -1)
+        {
+            this.reset();
+            return false;
+        }
+
+        candidates = cloneArray(values);
+        lastIndex = searchIndex;
+        return true;
+    };
+
+    this.setCandidatesByValues = function(values)
+    {
+        expr = "";
+        candidates = [];
+        for (var i = 0; i < values.length; ++i)
+        {
+            var value = values[i];
+
+            // Use only string props
+            if (typeof(value) != "string")
+                continue;
+
+            // Use only those props that don't contain unsafe charactes and so need
+            // quotation (e.g. object["my prop"] notice the space character).
+            // Following expression checks that the name starts with a letter or $_,
+            // and there are only letters, numbers or $_ character in the string (no spaces).
+            var re = /^[A-Za-z_$][A-Za-z_$0-9]*/;
+            if (value.match(re) == value)
+                candidates.push(values[i]);
+        }
+        lastIndex = -2;
+    }
+
 
     this.adjustLastIndex = function(cycle, reverse)
     {
@@ -1359,6 +1392,8 @@ Firebug.AutoCompleter = function(getExprOffset, getRange, evaluator, selectMode,
 
     this.handledKeyDown = function(event, context, textBox, completionBox)
     {
+        var clearedTabWarning = this.clearTabWarning(completionBox);
+
         if (event.altKey || event.metaKey)
             return false;
 
@@ -1367,7 +1402,7 @@ Firebug.AutoCompleter = function(getExprOffset, getRange, evaluator, selectMode,
             this.complete(context, textBox, completionBox, true, false, true); // force completion incl globals
             return true;
         }
-        else if (event.keyCode === 9) // TAB, cycle
+        else if (event.keyCode === 9) // TAB
         {
             if (textBox.selectionStart !== textBox.selectionEnd) // then the user has selected text
             {
@@ -1375,9 +1410,13 @@ Firebug.AutoCompleter = function(getExprOffset, getRange, evaluator, selectMode,
                 cancelEvent(event);
                 return true;
             }
-            else if (completionBox.value.length == textBox.value.length)  // then no completion text,
+            else if (!completionBox.value.length)  // then no completion text,
             {
-                return false; //  pass TAB along
+                if (clearedTabWarning) // then you were warned,
+                    return false; //  pass TAB along
+
+                this.setTabWarning(textBox, completionBox);
+                return true;
             }
             else  // complete
             {
@@ -1386,16 +1425,11 @@ Firebug.AutoCompleter = function(getExprOffset, getRange, evaluator, selectMode,
                 return true;
             }
         }
-       /* else if (event.keyCode === 13 || event.keyCode === 14)  // RETURN , ENTER
-        {
-            this.acceptCompletionInTextBox(textBox);
-        }*/
         else if (event.keyCode == 27) // ESC, close the completer
         {
-            // Stop event bubbling if it was used to close the popup.
-            if (this.hide(completionBox))
+            if (this.hide(completionBox))  // then we closed the popup
             {
-                cancelEvent(event);
+                cancelEvent(event); // Stop event bubbling if it was used to close the popup.
                 return true;
             }
         }
@@ -1410,7 +1444,24 @@ Firebug.AutoCompleter = function(getExprOffset, getRange, evaluator, selectMode,
             }
             // else the arrow will fall through to command history
         }
-    },
+    };
+
+    this.clearTabWarning = function(completionBox)
+    {
+        if (completionBox.tabWarning)
+        {
+            completionBox.value = "";
+            delete completionBox.tabWarning;
+            return true;
+        }
+        return false;
+    };
+
+    this.setTabWarning = function(textBox, completionBox)
+    {
+        completionBox.value = textBox.value + "    " + "(no completions)";  // TODO need NLS <<<<<<<<<<<<<<<<
+        completionBox.tabWarning = true;
+    };
 
     this.setCompletionOnEvent = function(event)
     {
