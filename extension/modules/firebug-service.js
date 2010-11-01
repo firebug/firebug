@@ -925,6 +925,7 @@ var fbs =
                 {
                     onDebuggerActivated: function onDebuggerActivated()
                     {
+                        jsd.flags |= DISABLE_OBJECT_TRACE;
                         FBTrace.sysout("jsd.onDebuggerActivated ==========================");
                     }
                 });
@@ -933,8 +934,8 @@ var fbs =
             {
                 FBTrace.sysout("jsd.on()  ==========================");
                 jsd.on(); // this should be the only call to jsd.on().
+                jsd.flags |= DISABLE_OBJECT_TRACE;
             }
-            jsd.flags |= DISABLE_OBJECT_TRACE;
 
             if (jsd.pauseDepth && FBTrace.DBG_FBS_ERRORS)
                 FBTrace.sysout("fbs.enableDebugger found non-zero jsd.pauseDepth !! "+jsd.pauseDepth)
