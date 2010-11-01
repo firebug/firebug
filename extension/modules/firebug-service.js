@@ -917,30 +917,46 @@ var fbs =
                 jsd.initAtStartup = false;
         }
 
-        if (!jsd.isOn)
+        if (jsd.asyncOn) // then FF 4.0+
         {
-            if (jsd.asyncOn) // then FF 4.0+
+            if (!jsd.isOn)
             {
                 jsd.asyncOn(
-                {
-                    onDebuggerActivated: function onDebuggerActivated()
-                    {
-                        jsd.flags |= DISABLE_OBJECT_TRACE;
-                        FBTrace.sysout("jsd.onDebuggerActivated ==========================");
-                    }
-                });
+                        {
+                            onDebuggerActivated: function doDebuggerActivated()
+                            {
+                                fbs.onDebuggerActivated();
+                                fbs.onJSDebuggingActive();
+                            }
+                        });
             }
-            else // FF 3.6-
+            else
             {
-                FBTrace.sysout("jsd.on()  ==========================");
-                jsd.on(); // this should be the only call to jsd.on().
-                jsd.flags |= DISABLE_OBJECT_TRACE;
+                fbs.onJSDebuggingActive();
             }
-
-            if (jsd.pauseDepth && FBTrace.DBG_FBS_ERRORS)
-                FBTrace.sysout("fbs.enableDebugger found non-zero jsd.pauseDepth !! "+jsd.pauseDepth)
         }
+        else // FF 3.6-
+        {
+            if (!jsd.isOn)
+            {
+                FBTrace.sysout("Firefox 3.6 or earlier  ==========================");
+                jsd.on(); // this should be the only call to jsd.on().
+                fbs.onDebuggerActivated();
+            }
+            fbs.onJSDebuggingActive();
+        }
+    },
 
+    onDebuggerActivated: function()
+    {
+        jsd.flags |= DISABLE_OBJECT_TRACE;
+        FBTrace.sysout("jsd.onDebuggerActivated ==========================");
+        if (jsd.pauseDepth && FBTrace.DBG_FBS_ERRORS)
+            FBTrace.sysout("fbs.enableDebugger found non-zero jsd.pauseDepth !! "+jsd.pauseDepth);
+    },
+
+    onJSDebuggingActive: function()
+    {
         if (!this.filterChrome)
             this.createChromeBlockingFilters();
 
