@@ -838,7 +838,7 @@ Firebug.InlineEditor.prototype = domplate(Firebug.BaseEditor,
             }
 
             var approxTextWidth = this.textSize.width;
-            var maxWidth = (currentPanel.panelNode.scrollWidth - this.targetOffset.x)
+            var maxWidth = (currentPanel.panelNode.clientWidth - this.targetOffset.x)
                 - this.outerMargin;
 
             var wrapped = initial
@@ -947,6 +947,7 @@ Firebug.AutoCompleter = function(getExprOffset, getRange, evaluator, selectMode,
 
     this.complete = function(context, textBox, completionBox, cycle, reverse, showGlobals)
     {
+
         if (!this.getCompletionText(completionBox)) // then we don't have a previous value
             this.reset();                           // so start over
 
@@ -1198,13 +1199,15 @@ Firebug.AutoCompleter = function(getExprOffset, getRange, evaluator, selectMode,
 
     this.adjustLastIndex = function(cycle, reverse)
     {
-        if (candidates.length === 1)
+        if (!cycle) // we have a valid lastIndex but we are not cycling, so reset it
+            lastIndex = this.pickDefaultCandidate();
+        else if (candidates.length === 1)
             lastIndex = 0;
         else if (lastIndex >= candidates.length)  // use default on first completion, else cycle
             lastIndex = (lastIndex === -2) ? this.pickDefaultCandidate() : 0;
         else if (lastIndex < 0)
             lastIndex = (lastIndex === -2) ? this.pickDefaultCandidate() : (candidates.length - 1);
-        else if (cycle)
+        else // we have cycle == true
         {
             lastIndex += reverse ? -1 : 1;
             if (lastIndex >= candidates.length)
