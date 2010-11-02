@@ -765,7 +765,8 @@ Firebug.HTMLLib =
 
         getNextSibling: function(node)
         {
-            return Firebug.HTMLLib.ElementWalkerFunctions.getTreeWalker(node).nextSibling();
+            // the Mozilla XBL tree walker fails for nextSibling
+            return node.nextSibling;
         },
 
         getParentNode: function(node)
