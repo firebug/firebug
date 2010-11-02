@@ -595,12 +595,17 @@ Firebug.DOMBasePanel.prototype = extend(Firebug.Panel,
             if (member.level > level)
                 break;
 
-            if ( toggles.get(member.name) )
+            if (toggles.get(member.name))
             {
-                member.open = "opened";  // member.level <= level && member.name in toggles.
-                if (member.type == 'string')
+                // member.level <= level && member.name in toggles.
+                member.open = "opened";
+
+                // Don't expand if the member doesn't have children any more.
+                if (!member.hasChildren)
                     continue;
-                var newMembers = this.getMembers(member.value, level+1, context);  // sets newMembers.level to level+1
+
+                // sets newMembers.level to level+1
+                var newMembers = this.getMembers(member.value, level+1, context);
 
                 var args = [i+1, 0];
                 args.push.apply(args, newMembers);
@@ -609,12 +614,16 @@ Firebug.DOMBasePanel.prototype = extend(Firebug.Panel,
                 {
                     FBTrace.sysout("expandMembers member.name "+member.name+" member "+member);
                     FBTrace.sysout("expandMembers toggles "+toggles, toggles);
-                    FBTrace.sysout("expandMembers toggles.get(member.name) "+toggles.get(member.name), toggles.get(member.name));
-                    FBTrace.sysout("dom.expandedMembers level: "+level+" member.level "+member.level, member);
+                    FBTrace.sysout("expandMembers toggles.get(member.name) " +
+                        toggles.get(member.name), toggles.get(member.name));
+                    FBTrace.sysout("dom.expandedMembers level: "+level+" member.level " +
+                        member.level, member);
                 }
 
                 expanded += newMembers.length;
-                i += newMembers.length + this.expandMembers(members, toggles.get(member.name), i+1, level+1, context);
+
+                i += newMembers.length + this.expandMembers(members, toggles.get(member.name),
+                    i+1, level+1, context);
             }
         }
 
