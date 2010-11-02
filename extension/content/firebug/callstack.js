@@ -39,7 +39,10 @@ Firebug.CallstackPanel.prototype = extend(Firebug.Panel,
     show: function(state)
     {
         this.rebuild();  // hack: should not have to call
-        FBTrace.sysout("callstack.show state: "+state, state);
+
+        if (FBTrace.DBG_STACK)
+            FBTrace.sysout("callstack.show state: "+state, state);
+
         if (state)
         {
             if (state.callstackToggles)
@@ -77,7 +80,8 @@ Firebug.CallstackPanel.prototype = extend(Firebug.Panel,
             if (item.getAttribute("selected") == "true")
                 state.selectedCallStackFrameIndex = i;
         }
-        FBTrace.sysout("callstack.hide state: "+state, state);
+        if (FBTrace.DBG_STACK)
+            FBTrace.sysout("callstack.hide state: "+state, state);
     },
 
     supportsObject: function(object, type)
