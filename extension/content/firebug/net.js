@@ -3153,7 +3153,7 @@ Firebug.NetMonitor.SizeInfoTip = domplate(Firebug.Rep,
                 size: responseHeaders.length + file.size});
             sizeInfo.push({label: $STR("net.sizeinfo.Total Sent") + "*",
                 size: file.requestHeadersText.length + postText.length});
-            sizeInfo.push({label: "*Including Headers", size: -2});
+            sizeInfo.push({label: "*" + $STR("net.sizeinfo.Including Headers"), size: -2});
         }
 
         this.tag.replace({sizeInfo: sizeInfo}, parentNode);
