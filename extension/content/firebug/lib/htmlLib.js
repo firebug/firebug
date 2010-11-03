@@ -611,7 +611,7 @@ Firebug.HTMLLib =
             {
                 if (child.nodeType === Node.ELEMENT_NODE)
                     return false;
-                child = walker.getNextSibling(element);
+                child = walker.getNextSibling(child);
             }
         }
         if (FBTrace.DBG_HTML)
