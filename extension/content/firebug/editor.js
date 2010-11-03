@@ -1222,8 +1222,7 @@ Firebug.AutoCompleter = function(getExprOffset, getRange, evaluator, selectMode,
         if (lastIndex < 0)
             return false;
 
-        lastIndex += reverse ? -1 : 1;
-        this.adjustLastIndex();
+        this.adjustLastIndex(true, reverse);
 
         var completion = candidates[lastIndex];
         var postCompletion = completion.substr(preCompletion.length);
@@ -1402,13 +1401,7 @@ Firebug.AutoCompleter = function(getExprOffset, getRange, evaluator, selectMode,
         }
         else if (event.keyCode === 9) // TAB
         {
-            if (textBox.selectionStart !== textBox.selectionEnd) // then the user has selected text
-            {
-                textBox.selectRange(textBox.selectionEnd, textBox.selectionStart); // deselect
-                cancelEvent(event);
-                return true;
-            }
-            else if (!completionBox.value.length)  // then no completion text,
+            if (!completionBox.value.length)  // then no completion text,
             {
                 if (clearedTabWarning) // then you were warned,
                     return false; //  pass TAB along
