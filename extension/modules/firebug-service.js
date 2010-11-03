@@ -921,10 +921,11 @@ var fbs =
         {
             if (!jsd.isOn)
             {
-                jsd.asyncOn(
+                jsd.asyncOn(  // turn on jsd for the next event
                         {
                             onDebuggerActivated: function doDebuggerActivated()
                             {
+                                // now we are in the next event and jsd is on.
                                 fbs.onDebuggerActivated();
                                 fbs.onJSDebuggingActive();
                             }
@@ -939,7 +940,9 @@ var fbs =
         {
             if (!jsd.isOn)
             {
-                FBTrace.sysout("Firefox 3.6 or earlier  ==========================");
+                if (FBTrace.DBG_FBS_ERRORS)
+                    FBTrace.sysout("Firefox 3.6 or earlier  ==========================");
+
                 jsd.on(); // this should be the only call to jsd.on().
                 fbs.onDebuggerActivated();
             }
@@ -950,7 +953,8 @@ var fbs =
     onDebuggerActivated: function()
     {
         jsd.flags |= DISABLE_OBJECT_TRACE;
-        FBTrace.sysout("jsd.onDebuggerActivated ==========================");
+        if (FBTrace.DBG_FBS_ERRORS)
+            FBTrace.sysout("jsd.onDebuggerActivated ==========================");
         if (jsd.pauseDepth && FBTrace.DBG_FBS_ERRORS)
             FBTrace.sysout("fbs.enableDebugger found non-zero jsd.pauseDepth !! "+jsd.pauseDepth);
     },
