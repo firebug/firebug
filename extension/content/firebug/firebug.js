@@ -2183,7 +2183,7 @@ top.Firebug =
     {
         testLists.push({
             extension: "Firebug",
-            testListURL: "http://getfirebug.com/tests/content/testlists/firebug1.6.html"
+            testListURL: "http://getfirebug.com/tests/content/testlists/firebug1.7.html"
         });
     }
 };
