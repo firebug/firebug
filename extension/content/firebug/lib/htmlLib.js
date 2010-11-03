@@ -604,6 +604,9 @@ Firebug.HTMLLib =
         // https://developer.mozilla.org/en/XBL/XBL_1.0_Reference/DOM_Interfaces
         if (element.ownerDocument instanceof Ci.nsIDOMDocumentXBL)
         {
+            if (FBTrace.DBG_HTML)
+                FBTrace.sysout("hasNoElementChildren "+FBL.getElementCSSSelector(element)+" (element.ownerDocument instanceof Ci.nsIDOMDocumentXBL) "+(element.ownerDocument instanceof Ci.nsIDOMDocumentXBL), element);
+
             var walker = new Firebug.HTMLLib.ElementWalker();
             var child = walker.getFirstChild(element);
 
@@ -747,7 +750,7 @@ Firebug.HTMLLib =
         return getChildByClass(nodeLabelBox, "nodeText");
     },
 
-    ElementWalkerFunctions:  // These functions can be copied to add tree walking feature
+    ElementWalkerFunctions:  // These functions can be copied to add tree walking feature, they allow Chromebug to reuse the HTML panel
     {
         getTreeWalker: function(node)
         {
@@ -760,7 +763,7 @@ Firebug.HTMLLib =
 
         getFirstChild: function(node)
         {
-            return Firebug.HTMLLib.ElementWalkerFunctions.getTreeWalker(node).firstChild();
+            return node.firstChild;
         },
 
         getNextSibling: function(node)
