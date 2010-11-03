@@ -76,14 +76,17 @@ toolbar[iconsize="small"] #firebug-button > .toolbarbutton-icon {
 
 .fbCommandLine {
     -moz-appearance: none;
-    margin: 0;
+    margin: 2px 0;
     padding: 0 4px;
-    height: 20px;
+    height: 15px;
     border: none;
     font-family: monospace;
+    font-size: 12px;
     direction: ltr;
-    width: 800px;
+    width: 100%;
     background: none repeat scroll 0% 0% transparent;
+    position: relative;
+    z-index: 3;
 }
 
 #fbLargeCommandLine {
@@ -94,6 +97,31 @@ toolbar[iconsize="small"] #firebug-button > .toolbarbutton-icon {
 
 #fbCommandLine > .textbox-input-box > .textbox-textarea {
     overflow: hidden;
+}
+
+.fbCommandHtmlBox {
+    position: relative;
+    margin-right: 7px;
+}
+
+.fbCommandHtmlBox .background {
+    position: relative;
+    background: none repeat scroll 0% 0% transparent;
+}
+
+#fbCommandLineCompletion {
+    position: absolute;
+    z-index: 1;
+    color: silver;
+}
+
+.fbCommandHtmlBox .offScreen {
+    position: absolute;
+    top: -900px;
+    left: -9000px;
+    max-width: 3000px;
+    overflow: hidden;
+    width: auto;
 }
 
 /********************************************************************************************/
