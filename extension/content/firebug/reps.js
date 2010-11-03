@@ -2178,7 +2178,8 @@ Firebug.registerRep(
     this.Except,
     this.XML,
     this.Arr,
-    this.XPathResult
+    this.XPathResult,
+    this.Storage
 );
 
 Firebug.setDefaultReps(this.Func, this.Obj);
