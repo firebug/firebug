@@ -947,16 +947,12 @@ Firebug.AutoCompleter = function(getExprOffset, getRange, evaluator, selectMode,
 
     this.complete = function(context, textBox, completionBox, cycle, reverse, showGlobals)
     {
-
-        if (!this.getCompletionText(completionBox)) // then we don't have a previous value
-            this.reset();                           // so start over
-
         this.clearCandidates(textBox, completionBox);
 
         if (!this.getVerifiedText(textBox) && !showGlobals) // then no completion is desired
             return false;
 
-        var offset = textBox.selectionStart;
+        var offset = textBox.selectionStart; // defines the cursor position
 
         var found =  this.pickCandidates(textBox.value, offset, context, cycle, reverse, showGlobals);
 
@@ -1069,7 +1065,7 @@ Firebug.AutoCompleter = function(getExprOffset, getRange, evaluator, selectMode,
 
                 if (expr)
                 {
-                    this.setCandidatesByExpr(expr, values);
+                    this.setCandidatesByExpr(expr, values, reverse);
                 }
                 else if (searchExpr)
                 {
@@ -1102,6 +1098,12 @@ Firebug.AutoCompleter = function(getExprOffset, getRange, evaluator, selectMode,
         var line = preParsed + preExpr + preCompletion + postCompletion + postExpr;
         var offsetEnd = preParsed.length + preExpr.length + completion.length;
 
+        /* XXXjjb I think this is needed for inline completion???
+        if (selectMode)
+            textBox.setSelectionRange(offset, offsetEnd);
+        else
+            textBox.setSelectionRange(offsetEnd, offsetEnd);
+*/
         // store current state of completion
         currentLine = line;
         completionStart = offset;
@@ -1110,7 +1112,7 @@ Firebug.AutoCompleter = function(getExprOffset, getRange, evaluator, selectMode,
         return true;
     };
 
-    this.setCandidatesByExpr = function(expr, values)
+    this.setCandidatesByExpr = function(expr, values, reverse)
     {
         // Filter the list of values to those which begin with expr. We
         // will then go on to complete the first value in the resulting list
@@ -1135,6 +1137,8 @@ Firebug.AutoCompleter = function(getExprOffset, getRange, evaluator, selectMode,
                     candidates.push(name);
             }
         }
+
+        lastIndex = -2;
     };
 
     this.setCandidatesBySearchExpr = function(searchExpr, expr, values)
