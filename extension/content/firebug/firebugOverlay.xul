@@ -465,8 +465,8 @@
                     <!-- off screen -->
                     <html:div class="lst offScreen">do</html:div>
                     <html:div style="position: relative">
-                        <html:input id="fbCommandLine" class="fbCommandLine" type="text"
-                            maxlength="2048" autocomplete="off" aria-autocomplete="inline" />
+                        <textbox id="fbCommandLine" class="fbCommandLine" flex="1"
+                            aria-autocomplete="inline" multiline="false" newlines="pasteintact"/>
                     </html:div>
                 </html:div>
             </hbox>
