@@ -1411,6 +1411,7 @@ Firebug.AutoCompleter = function(getExprOffset, getRange, evaluator, selectMode,
                     return false; //  pass TAB along
 
                 this.setTabWarning(textBox, completionBox);
+                cancelEvent(event);
                 return true;
             }
             else  // complete
