@@ -761,6 +761,10 @@ Firebug.SourceBoxPanel = extend(SourceBoxPanelBase,
         viewRange.firstLine = Math.floor(scrollTop / averageLineHeight + 1);
 
         var panelHeight = this.panelNode.clientHeight;
+
+        if (panelHeight === 0)  // then we probably have not inserted the elements yet and the clientHeight is bogus
+            panelHeight = this.panelNode.ownerDocument.documentElement.clientHeight;
+
         var viewableLines = Math.ceil((panelHeight / averageLineHeight) + 1);
         viewRange.lastLine = viewRange.firstLine + viewableLines;
         if (viewRange.lastLine > sourceBox.maximumLineNumber)
