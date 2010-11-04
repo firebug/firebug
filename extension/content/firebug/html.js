@@ -555,7 +555,8 @@ Firebug.HTMLPanel.prototype = extend(WalkingPanel,
 
     createObjectBox: function(object, isRoot)
     {
-        if (FBTrace.DBG_HTML) FBTrace.sysout("html.createObjectBox("+(object.tagName?object.tagName:object)+", isRoot:"+(isRoot?"true":"false")+")\n");
+        if (FBTrace.DBG_HTML)
+            FBTrace.sysout("html.createObjectBox("+FBL.getElementCSSSelector(object)+", isRoot:"+(isRoot?"true":"false")+")\n");
         var tag = getNodeTag(object);
         if (tag)
             return tag.replace({object: object}, this.document);
@@ -627,6 +628,11 @@ Firebug.HTMLPanel.prototype = extend(WalkingPanel,
         }
     },
 
+    /*
+     * @param: node a DOM node from the Web page
+     * @param: index counter for important children, may skip whitespace
+     * @param: previousSibling a node from the web page
+     */
     getChildObject: function(node, index, previousSibling)
     {
         if (!node)
@@ -646,9 +652,10 @@ Firebug.HTMLPanel.prototype = extend(WalkingPanel,
         }
         else if (node instanceof Document)
         {
-            if (previousSibling)
-                return previousSibling.nextSibling;
-            return node.firstChild;
+            if (previousSibling !== null)
+                return this.getNextSibling(previousSibling);
+            else
+                return this.getFirstChild(node);
         }
         else if (node.contentDocument)  // then the node is a frame
         {
@@ -658,7 +665,7 @@ Firebug.HTMLPanel.prototype = extend(WalkingPanel,
                     this.embeddedBrowserParents = {};
 
                 // First child of a document is doc-type.
-                var skipChild = node.contentDocument.firstChild; // unwrap
+                var skipChild = this.getFirstChild(node.contentDocument); // unwrap
                 this.embeddedBrowserParents[skipChild] = node;
 
                 return skipChild;  // (the node's).(type 9 document).(HTMLElement)
@@ -666,7 +673,7 @@ Firebug.HTMLPanel.prototype = extend(WalkingPanel,
             else if (previousSibling)
             {
                 // Next child of a document (after doc-type) is <html>.
-                return previousSibling.nextSibling;
+                return this.getNextSibling(previousSibling);
             }
         }
         else if (node.getSVGDocument && node.getSVGDocument())  // then the node is a frame
