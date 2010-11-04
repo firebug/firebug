@@ -355,7 +355,55 @@ var Errors = Firebug.Errors = extend(Firebug.Module,
                 FBTrace.sysout("errors.getErrorContext no context from error filename:"+url, object);
         }
 
+        // Use nsIScriptError2 (if available) to compare the parent window guessed by Firebug
+        // with the window produced by the new nsIScriptError2.outerWindowID
+        if (FBTrace.DBG_ERRORS)
+        {
+            var win1 = this.getErrorWindow(object);
+            var win2 = errorContext ? errorContext.window : null;
+
+            win1 = getRootWindow(win1);
+            win2 = getRootWindow(win2);
+            if (win1 && win1 != win2)
+                FBTrace.sysout("errors.getErrorContext; ERROR wrong parent window?");
+        }
+
         return errorContext; // we looked everywhere...
+    },
+
+    /**
+     * Returns a parent window (outer window) for given error object (an object
+     * that is passed int a consoleListener).
+     * This method should be the primary way how to find the parent window for any
+     * error object.
+     * 
+     * @param {Object} object Error object (implementing nsIScriptError2 since Fx40)
+     */
+    getErrorWindow: function(object)
+    {
+        try
+        {
+            // Bug 605492 introduces new API: nsIScriptError2.outerWindowID so use it
+            // if it's available.
+            if (!Ci["nsIScriptError2"])
+                return null;
+
+            if (!(object instanceof Ci.nsIScriptError2))
+                return null;
+
+            var domWindowUtils = window.QueryInterface(Ci.nsIInterfaceRequestor)
+                .getInterface(Ci.nsIDOMWindowUtils);
+
+            if (!object.outerWindowID)
+                return null;
+
+            return domWindowUtils.getOuterWindowWithId(object.outerWindowID);
+        }
+        catch (err)
+        {
+            if (FBTrace.DBG_ERRORS)
+                FBTrace.sysout("errors.getErrorWindowl; EXCEPTION" + err, err);
+        }
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
