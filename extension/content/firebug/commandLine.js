@@ -796,7 +796,7 @@ Firebug.CommandLine = extend(Firebug.Module,
             return;
         }
 
-        this.autoCompleter.complete(Firebug.currentContext, commandLine, completionBox, false, false);
+        this.autoCompleter.complete(Firebug.currentContext, commandLine, completionBox, true, false);
         Firebug.currentContext.commandLineText = this.autoCompleter.getVerifiedText(commandLine);
     },
 
