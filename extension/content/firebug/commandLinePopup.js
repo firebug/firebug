@@ -84,7 +84,7 @@ Firebug.CommandLine.Popup = extend(Firebug.Module,
         collapse(chrome.$("fbCommandToggleSmall"), !isConsole);
 
         // Update visibility of the console-popup (hidden if the Console panel is selected).
-        this.updateVisibility(visible && !isConsole && panel);
+        this.updateVisibility(visible && !isConsole && panel && disabled != "true");
 
         // Make sure the console panel is attached to the proper document
         // (the one used by all panels, or the one used by console popup and available
