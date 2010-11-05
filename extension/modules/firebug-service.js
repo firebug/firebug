@@ -1155,7 +1155,7 @@ var fbs =
                     // This frame is not for the debugger we want
                     if (stepMode == STEP_OVER || stepMode == STEP_OUT)  // then we are in the debuggr we want and returned in to one we don't
                     {
-                        this.stopStepping(); // run, you are free.
+                        this.stopStepping(frame); // run, you are free.
                     }
 
                     return RETURN_CONTINUE;  // This means that we will continue to take interrupts until  when?
@@ -1330,7 +1330,7 @@ var fbs =
 
                 if (bp.type & BP_UNTIL)
                 {
-                    this.stopStepping();
+                    this.stopStepping(frame);
                     if (theDebugger)
                         return this.breakIntoDebugger(theDebugger, frame, type);
                 }
@@ -1376,13 +1376,13 @@ var fbs =
                     if (frame.callingFrame && frame.callingFrame.script.tag === stepFrameTag) // then we are called by the stepping script
                         stepRecursion++;
 
-                        this.unhookInterrupts(); // don't watch execution steps, wait for return
+                        this.unhookInterrupts(frame); // don't watch execution steps, wait for return
                 }
                 else if (stepMode == STEP_INTO)  // normally step into will break in the interrupt handler, but not in event handlers.
                 {
-                    fbs.stopStepping();
+                    fbs.stopStepping(frame);
                     stepMode = STEP_SUSPEND; // break on next
-                    fbs.hookInterrupts();
+                    fbs.hookInterrupts(frame);  // FF4JM setBreakpoint(0), the test (stepMode === STEP_INTO) when we hit
                 }
 
                 break;
@@ -1394,13 +1394,13 @@ var fbs =
                 {
                     if ( (stepMode == STEP_INTO) || (stepMode == STEP_OVER) )
                     {
-                        fbs.stopStepping();
+                        fbs.stopStepping(frame);
                         stepMode = STEP_SUSPEND; // break on next
-                        fbs.hookInterrupts();
+                        fbs.hookInterrupts(frame); // FF4JM, I think we should bail, the stack is empty even if the user said INTO
                     }
                     else
                     {
-                        fbs.stopStepping();
+                        fbs.stopStepping(frame);
                     }
                 }
                 else if (stepMode == STEP_OVER || stepMode == STEP_OUT)
@@ -1408,7 +1408,7 @@ var fbs =
                     if (!stepRecursion) // then we never hit FUNCTION_CALL or we rolled back after we hit it
                     {
                         if (frame.script.tag === stepFrameTag)// We are in the stepping frame,
-                            fbs.hookInterrupts();  // so halt on the next PC
+                            fbs.hookInterrupts(frame);  // so halt on the next PC // FF4JM setBreakOnAllPC
                     }
                     else if (frame.callingFrame.script.tag === stepFrameTag) //then we could be in the step call
                     {
@@ -1417,7 +1417,7 @@ var fbs =
                         if (!stepRecursion) // then we've rolled back to the step-call
                         {
                             if (stepMode == STEP_OVER) // then halt in the next pc of the caller
-                                fbs.hookInterrupts();
+                                fbs.hookInterrupts(frame); // FF4JM setBreakOnAllPC
                         }
                     }
                     // else we are not interested in this FUNCTION_RETURN
@@ -2819,7 +2819,7 @@ var fbs =
         if (FBTrace.DBG_FBS_STEP || FBTrace.DBG_FBS_BP) FBTrace.sysout("fbs.breakIntoDebugger called "+debuggr.debuggerName+" fbs.isChromeBlocked:"+fbs.isChromeBlocked);
 
         // Before we break, clear information about previous stepping session
-        this.stopStepping();
+        this.stopStepping(frame);
 
         // Break into the debugger - execution will stop here until the user resumes
         var returned;
@@ -2836,7 +2836,7 @@ var fbs =
 
         // Execution resumes now. Check if the user requested stepping and if so
         // install the necessary hooks
-        this.startStepping();
+        this.startStepping(frame);
         if (FBTrace.DBG_FBS_STEP || FBTrace.DBG_FBS_BP) FBTrace.sysout("fbs.breakIntoDebugger called "+debuggr.debuggerName+" returning "+returned);
         return returned;
     },
@@ -2846,7 +2846,7 @@ var fbs =
         return this.breakOnErrors || this.findErrorBreakpoint(this.normalizeURL(reportNextError.fileName), reportNextError.lineNo) != -1;
     },
 
-    startStepping: function()
+    startStepping: function(frame)
     {
         if (!stepMode && !runningUntil)
             return;
@@ -2859,10 +2859,10 @@ var fbs =
         this.hookFunctions();
 
         if (stepMode == STEP_OVER || stepMode == STEP_INTO)
-            this.hookInterrupts();
+            this.hookInterrupts(frame);  // FF4JM setBreakOnAllPC
     },
 
-    stopStepping: function()
+    stopStepping: function(frame)
     {
         if (FBTrace.DBG_FBS_STEP)
         {
@@ -2880,7 +2880,7 @@ var fbs =
             runningUntil = null;
         }
 
-        this.unhookInterrupts();
+        this.unhookInterrupts(frame);  // FF4JM clearBreakOnAllPC
         this.unhookFunctions();
     },
 
@@ -2893,13 +2893,13 @@ var fbs =
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
-    hookInterrupts: function()
+    hookInterrupts: function(frame)
     {
         if (FBTrace.DBG_FBS_STEP) FBTrace.sysout("set InterruptHook with stepFrameLineId: "+stepFrameLineId);
         jsd.interruptHook = { onExecute: hook(this.onInterrupt, RETURN_CONTINUE)};
     },
 
-    unhookInterrupts: function()
+    unhookInterrupts: function(frame)
     {
         jsd.interruptHook = null;
     },
