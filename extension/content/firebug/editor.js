@@ -1259,7 +1259,7 @@ Firebug.AutoCompleter = function(getExprOffset, getRange, evaluator, selectMode,
 
         if (showCompletionPopup && candidates.length && candidates.length > 1)
         {
-            this.popupCandidates(candidates, textBox);
+            this.popupCandidates(candidates, textBox, completionBox);
             return false;
         }
         else
@@ -1275,7 +1275,7 @@ Firebug.AutoCompleter = function(getExprOffset, getRange, evaluator, selectMode,
             completionBox.value = "";
     },
 
-    this.popupCandidates = function(candidates, textBox)
+    this.popupCandidates = function(candidates, textBox, completionBox)
     {
         // This method should not operate on the textBox or candidates list
         FBL.eraseNode(completionPopup);
@@ -1333,7 +1333,7 @@ Firebug.AutoCompleter = function(getExprOffset, getRange, evaluator, selectMode,
             post.classList.add("completionText");
         }
 
-        completionPopup.currentTextBox = textBox;
+        completionPopup.currentCompletionBox = completionBox;
         var cmdLine = $("fbCommandLine");  // should use something relative to textbox
         var anchor = textBox;
         this.linuxFocusHack = textBox;
@@ -1347,7 +1347,7 @@ Firebug.AutoCompleter = function(getExprOffset, getRange, evaluator, selectMode,
         if (box)
             box.value = ""; // erase the text in the second track
 
-        delete completionPopup.currentTextBox;
+        delete completionPopup.currentCompletionBox;
 
         if (completionPopup.state == "closed")
             return false;
@@ -1358,7 +1358,7 @@ Firebug.AutoCompleter = function(getExprOffset, getRange, evaluator, selectMode,
 
     this.clear = function(box)
     {
-        var textBox = completionPopup.currentTextBox;
+        var textBox = completionPopup.currentCompletionBox;
         if (textBox)
             this.hide(box);
 
@@ -1453,7 +1453,7 @@ Firebug.AutoCompleter = function(getExprOffset, getRange, evaluator, selectMode,
 
     this.setCompletionOnEvent = function(event)
     {
-        if (completionPopup.currentTextBox)
+        if (completionPopup.currentCompletionBox)
         {
             var selected = event.target;
             while (selected && (selected.localName !== "div") )
@@ -1465,14 +1465,11 @@ Firebug.AutoCompleter = function(getExprOffset, getRange, evaluator, selectMode,
                 if (!completionText)
                     return;
 
-                var completion = completionText.textContent;
-                var textBox = completionPopup.currentTextBox;
-                var start = textBox.selectionStart;
-                var end = start + completion.length;
-                textBox.value = textBox.value.substr(0, textBox.selectionStart) + completion;
-                textBox.setSelectionRange(start, end);
+                var completion = selected.textContent;
+                var textBox = completionPopup.currentCompletionBox;
+                textBox.value = completion;
                 if (FBTrace.DBG_EDITOR)
-                    FBTrace.sysout("textBox.setSelectionRange "+start+" - "+end);
+                    FBTrace.sysout("textBox.setCompletionOnEvent "+completion);
             }
         }
     };
@@ -1487,8 +1484,8 @@ Firebug.AutoCompleter = function(getExprOffset, getRange, evaluator, selectMode,
 
     this.acceptCompletion = function(event)
     {
-        if (completionPopup.currentTextBox)
-            this.acceptCompletionInTextBox(completionPopup.currentTextBox, getCompletionBox());
+        if (completionPopup.currentCompletionBox)
+            this.acceptCompletionInTextBox(getTextBox(), getCompletionBox());
     };
 
     this.acceptCompletion = bind(this.acceptCompletion, this);
@@ -1512,6 +1509,11 @@ function getCompletionBox()  // FIXME XXXjjb I think this should be bound into t
 {
     return Firebug.chrome.$("fbCommandLineCompletion");
 }
+function getTextBox()  // FIXME XXXjjb I think this should be bound into the completer, dupes commandLine.js code
+{
+    return Firebug.chrome.$("fbCommandLine");
+}
+
 
 function getDefaultEditor(panel)
 {
