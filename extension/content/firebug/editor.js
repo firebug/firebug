@@ -1271,7 +1271,8 @@ Firebug.AutoCompleter = function(getExprOffset, getRange, evaluator, selectMode,
 
     this.clearCandidates = function(textBox, completionBox)
     {
-        completionBox.value = "";
+        if (completionBox)
+            completionBox.value = "";
     },
 
     this.popupCandidates = function(candidates, textBox)
