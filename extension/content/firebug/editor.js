@@ -1380,16 +1380,7 @@ Firebug.AutoCompleter = function(getExprOffset, getRange, evaluator, selectMode,
 
     this.handledKeyUp = function(event, context, textBox, completionBox)
     {
-        if (event.keyCode === 8) // backspace
-        {
-            this.complete(context, textBox, completionBox, true, false); // force completion
-            return;
-        }
-        if (accepted)
-        {
-            this.hide();
-            this.reset();
-        }
+        return;  // Some of the keyDown maybe should be in keyUp
     };
 
     this.handledKeyDown = function(event, context, textBox, completionBox)
@@ -1401,7 +1392,7 @@ Firebug.AutoCompleter = function(getExprOffset, getRange, evaluator, selectMode,
 
         if (event.ctrlKey && event.keyCode === 32) // Control space
         {
-            this.complete(context, textBox, completionBox, true, false, true); // force completion incl globals
+            this.complete(context, textBox, completionBox, false, false, true); // force completion incl globals
             return true;
         }
         else if (event.keyCode === 9) // TAB
