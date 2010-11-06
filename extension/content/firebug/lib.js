@@ -297,6 +297,15 @@ this.hasProperties = function(ob)
     return false;
 };
 
+this.getPrototype = function(ob)
+{
+    try
+    {
+        return ob.prototype;
+    } catch (exc) {}
+    return null;
+};
+
 // ************************************************************************************************
 
 this.convertToUnicode = function(text, charset)

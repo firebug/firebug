@@ -162,9 +162,9 @@ function JSONTreePlate()
     this.toggles = new ToggleBranch();
 }
 
-// xxxHonza: this Event if this object is *not* a panel in Firebug terminology,
-// there is no other way how to subclass the DOM Tree. Better solution would be
-// to have a middle object between DirTablePlate and DOMBasePanel.
+// xxxHonza: this object is *not* a panel (using Firebug terminology), but
+// there is no other way how to subclass the DOM Tree than to derive from the DOMBasePanel.
+// Better solution would be to have a middle object between DirTablePlate and DOMBasePanel.
 JSONTreePlate.prototype = extend(Firebug.DOMBasePanel.prototype,
 {
     dispatchName: "JSONTreePlate",

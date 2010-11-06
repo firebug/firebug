@@ -369,6 +369,7 @@
 /************************************************************************************************/
 
 .objectLink-regexp,
+.objectLink-Storage,
 .objectLink-object {
     font-family: Lucida Grande, sans-serif;
     font-weight: bold;
@@ -380,6 +381,10 @@
     font-weight: normal;
     font-style: italic;
     color: #555555;
+}
+
+.storageTitle {
+    font-weight: normal;
 }
 
 /************************************************************************************************/

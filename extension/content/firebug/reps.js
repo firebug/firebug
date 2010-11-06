@@ -2075,18 +2075,34 @@ this.ApplicationCache = domplate(Firebug.Rep,
     }
 });
 
-//************************************************************************************************
+// ************************************************************************************************
 
 this.Storage = domplate(Firebug.Rep,
 {
     tag:
-        OBJECTBOX({onclick: "$show"},
-            OBJECTLINK("$object|summarize")
+        OBJECTLINK(
+            FOR("prop", "$object|longPropIterator",
+                "$prop.name",
+                SPAN({"class": "objectEqual", role: "presentation"}, "$prop.equal"),
+                TAG("$prop.tag", {object: "$prop.object"}),
+                SPAN({"class": "objectComma", role: "presentation"}, "$prop.delim")
+            )
+        ),
+
+    shortTag:
+        OBJECTLINK(
+            SPAN({"class": "storageTitle"}, "$object|summarize "),
+            FOR("prop", "$object|shortPropIterator",
+                "$prop.name",
+                SPAN({"class": "objectEqual", role: "presentation"}, "$prop.equal"),
+                TAG("$prop.tag", {object: "$prop.object"}),
+                SPAN({"class": "objectComma", role: "presentation"}, "$prop.delim")
+            )
         ),
 
     summarize: function(storage)
     {
-        return storage.length +" items in Storage";
+        return storage.length + " items in Storage "; //xxxHonza localization
     },
 
     show: function(storage)
@@ -2101,7 +2117,25 @@ this.Storage = domplate(Firebug.Rep,
     supportsObject: function(object, type)
     {
         return (object instanceof Storage);
-    }
+    },
+
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+    // Iterator
+
+    longPropIterator: function(object)
+    {
+        return this.propIterator(object, 100);
+    },
+
+    shortPropIterator: function(object)
+    {
+        return this.propIterator(object, Firebug.ObjectShortIteratorMax);
+    },
+
+    propIterator: function(object, max)
+    {
+        return FirebugReps.Obj.propIterator(object, max);
+    },
 });
 
 // ************************************************************************************************

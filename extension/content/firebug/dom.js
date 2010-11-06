@@ -514,9 +514,10 @@ Firebug.DOMBasePanel.prototype = extend(Firebug.Panel,
         if (!hasChildren && value) // arguments will never be falsy if the arguments exist
             hasChildren = isArguments(value);
 
+        var proto = getPrototype(value);
         // Special case for functions with a protoype that has values
-        if (valueType === "function" && value.prototype)
-            hasChildren = hasChildren || hasProperties(value.prototype);
+        if (valueType === "function" && proto)
+            hasChildren = hasChildren || hasProperties(proto);
 
         var member = {
             object: object,
