@@ -1414,7 +1414,7 @@ Firebug.AutoCompleter = function(getExprOffset, getRange, evaluator, selectMode,
                 return true;
             }
         }
-        else if (event.keyCode == 27) // ESC, close the completer
+        else if (event.keyCode === 27) // ESC, close the completer
         {
             if (this.hide(completionBox))  // then we closed the popup
             {
