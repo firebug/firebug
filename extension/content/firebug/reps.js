@@ -2105,11 +2105,6 @@ this.Storage = domplate(Firebug.Rep,
         return storage.length + " items in Storage "; //xxxHonza localization
     },
 
-    show: function(storage)
-    {
-        openNewTab("http://dev.w3.org/html5/webstorage/#storage-0");
-    },
-
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 
     className: "Storage",
@@ -2135,6 +2130,84 @@ this.Storage = domplate(Firebug.Rep,
     propIterator: function(object, max)
     {
         return FirebugReps.Obj.propIterator(object, max);
+    },
+});
+
+// ************************************************************************************************
+
+this.StorageList = domplate(Firebug.Rep,
+{
+    tag:
+        OBJECTLINK(
+            FOR("prop", "$object|longPropIterator",
+                "$prop.name",
+                SPAN({"class": "objectEqual", role: "presentation"}, "$prop.equal"),
+                TAG("$prop.tag", {object: "$prop.object"}),
+                SPAN({"class": "objectComma", role: "presentation"}, "$prop.delim")
+            )
+        ),
+
+    shortTag:
+        OBJECTLINK({onclick: "$onClick"},
+            SPAN({"class": "storageTitle"}, "$object|summarize "),
+            FOR("prop", "$object|shortPropIterator",
+                "$prop.name",
+                SPAN({"class": "objectEqual", role: "presentation"}, "$prop.equal"),
+                TAG("$prop.tag", {object: "$prop.object"}),
+                SPAN({"class": "objectComma", role: "presentation"}, "$prop.delim")
+            )
+        ),
+
+    onClick: function(event)
+    {
+        var globalStorage = event.currentTarget.repObject;
+        var context = Firebug.currentContext;
+        var domain = getPrettyDomain(context.window.location.href);
+
+        Firebug.chrome.select(globalStorage.namedItem(domain));
+        cancelEvent(event);
+    },
+
+    summarize: function(globalStorage)
+    {
+        var context = Firebug.currentContext;
+        var domain = getPrettyDomain(context.window.location.href);
+        return globalStorage.namedItem(domain).length + " items in Global Storage "; //xxxHonza localization
+    },
+
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+
+    className: "StorageList",
+
+    supportsObject: function(object, type)
+    {
+        return (object instanceof StorageList);
+    },
+
+    getRealObject: function(object, context)
+    {
+        var domain = getPrettyDomain(context.window.location.href);
+        return globalStorage.namedItem(domain);
+    },
+
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+    // Iterator
+
+    longPropIterator: function(object)
+    {
+        return this.propIterator(object, 100);
+    },
+
+    shortPropIterator: function(object)
+    {
+        return this.propIterator(object, Firebug.ObjectShortIteratorMax);
+    },
+
+    propIterator: function(object, max)
+    {
+        var context = Firebug.currentContext;
+        var domain = getPrettyDomain(context.window.location.href);
+        return FirebugReps.Obj.propIterator(object.namedItem(domain), max);
     },
 });
 
@@ -2213,7 +2286,8 @@ Firebug.registerRep(
     this.XML,
     this.Arr,
     this.XPathResult,
-    this.Storage
+    this.Storage,
+    this.StorageList
 );
 
 Firebug.setDefaultReps(this.Func, this.Obj);
