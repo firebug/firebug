@@ -7602,6 +7602,11 @@ function unwrapObject(object)
     if (typeof(object) === 'undefined' || object == null)
         return object;
 
+    // There is an expception when accessing StorageList.wrappedJSObject (which is
+    // instance of StorageObsolete)
+    if (object instanceof StorageList)
+        return object;
+
     if (object.wrappedJSObject)
         return object.wrappedJSObject;
 
