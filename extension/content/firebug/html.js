@@ -664,10 +664,10 @@ Firebug.HTMLPanel.prototype = extend(WalkingPanel,
                 if (!this.embeddedBrowserParents)
                     this.embeddedBrowserParents = {};
 
-                // First child of a document is doc-type.
-                var skipChild = this.getFirstChild(node.contentDocument); // unwrap
-                this.embeddedBrowserParents[skipChild] = node;
-
+                var skipChild = node.contentDocument.documentElement;  // punch thru and adopt the root element as our child
+                this.embeddedBrowserParents[skipChild] = node;         // store our adopted childe in a side table
+                if (FBTrace.DBG_HTML)
+                	FBTrace.sysout("Found skipChild "+FBL.getElementCSSSelector(skipChild)+" for  "+FBL.getElementCSSSelector(node)+ " with node.contentDocument "+node.contentDocument);
                 return skipChild;  // (the node's).(type 9 document).(HTMLElement)
             }
             else if (previousSibling)
@@ -697,7 +697,7 @@ Firebug.HTMLPanel.prototype = extend(WalkingPanel,
             var child = this.getFirstChild(node); // child is set to at the beginning of an iteration.
 
         if (FBTrace.DBG_HTML)
-            FBTrace.sysout("getChildObject firstChild "+child+ " with Firebug.showTextNodesWithWhitespace "+Firebug.showTextNodesWithWhitespace);
+            FBTrace.sysout("getChildObject firstChild "+FBL.getElementCSSSelector(child)+ " with Firebug.showTextNodesWithWhitespace "+Firebug.showTextNodesWithWhitespace);
 
         if (Firebug.showTextNodesWithWhitespace)  // then the index is true to the node list
             return child;
