@@ -1447,6 +1447,7 @@ Firebug.AutoCompleter = function(getExprOffset, getRange, evaluator, selectMode,
 
     this.setTabWarning = function(textBox, completionBox)
     {
+        // xxxHonza: localization
         completionBox.value = textBox.value + "    " + "(no completions)";  // TODO need NLS <<<<<<<<<<<<<<<<
         completionBox.tabWarning = true;
     };
