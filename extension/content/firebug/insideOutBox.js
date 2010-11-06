@@ -85,7 +85,7 @@ InsideOutBox.prototype =
     select: function(object, makeBoxVisible, forceOpen, noScrollIntoView)
     {
         if (FBTrace.DBG_HTML)
-            FBTrace.sysout("insideOutBox.select object:", object);
+            FBTrace.sysout("insideOutBox.select object:"+object, object);
         var objectBox = this.createObjectBox(object);
         this.selectObjectBox(objectBox, forceOpen);
         if (makeBoxVisible)
@@ -299,8 +299,16 @@ InsideOutBox.prototype =
         if (FBTrace.DBG_HTML)
             FBTrace.sysout("----insideOutBox.createObjectBox: createObjectBoxes(object="+formatNode(object)+", rootObject="+formatNode(this.rootObject)+") ="+formatNode(objectBox), objectBox);
 
-        if (!objectBox)
-            return null;
+        if (!objectBox)  // we found an object outside of the navigatible tree
+        {
+            // Look up for an enclosing parent. NB this will mask failures in createObjectBoxes
+            var parentNode = this.view.getParentObject(object);
+
+            if (FBTrace.DBG_ERRORS || FBTrace.DBG_HTML)
+                FBTrace.sysout("insideOutBox.select no objectBox for object:"+FBL.getElementCSSSelector(object) + " trying "+FBL.getElementCSSSelector(parentNode));
+
+            return this.createObjectBox(parentNode);
+        }
         else if (object == this.rootObject)
             return objectBox;
         else
