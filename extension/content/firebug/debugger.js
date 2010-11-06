@@ -446,7 +446,6 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
-
     freeze: function(context)
     {
         var executionContext = context.stoppedFrame.executionContext;
@@ -459,21 +458,24 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
             if (context.window.document.commandDispatcher)
             {
                 context.saveFocus = context.window.document.commandDispatcher.focusedElement;
-                if (context.saveFocus)
+                if (context.saveFocus && !context.discardBlurEvents)
                 {
-                    context.discardBlurEvents = function(event)
+                    context.discardBlurEvents = function blurDiscarder(event)
                     {
+                        if (!context.saveFocus)
+                        {
+                            context.window.removeEventListener('blur', context.discardBlurEvents, true);
+                            delete context.discardBlurEvents;
+                        }
+
                         if (FBTrace.DBG_UI_LOOP)
                             FBTrace.sysout("debugger.freeze discard blur event "+context.saveFocus+" while focus is "+context.window.document.commandDispatcher.focusedElement, event);
                         event.preventDefault();
                         event.stopPropagation();
-                        if (!context.saveFocus)
-                            context.window.removeEventListener('blur', context.discardBlurEvents, true);
                     },
 
                     context.window.addEventListener('blur', context.discardBlurEvents, true);
                 }
-
             }
 
             if (FBTrace.DBG_UI_LOOP)
