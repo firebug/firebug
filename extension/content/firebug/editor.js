@@ -1395,7 +1395,7 @@ Firebug.AutoCompleter = function(getExprOffset, getRange, evaluator, selectMode,
             this.complete(context, textBox, completionBox, false, false, true); // force completion incl globals
             return true;
         }
-        else if (event.keyCode === 9 || event.keyCode === 39) // TAB or right arrow
+        else if (event.keyCode === 9 || (event.keyCode === 39 && completionBox.value.length)) // TAB or right arrow
         {
             if (!completionBox.value.length)  // then no completion text,
             {
