@@ -105,13 +105,16 @@ var annotationService =
             cstream.init(inputStream, "UTF-8", 0, 0);
 
             // Load annotations.
+            var json = "";
             var data = {};
-            cstream.readString(-1, data);
-            if (!data.value.length)
+            while (cstream.readString(-1, data) != 0)
+                json += data.value;
+
+            if (!json.length)
                 return;
 
             var nativeJSON = Cc["@mozilla.org/dom/json;1"].createInstance(Ci.nsIJSON);
-            var arr = nativeJSON.decode(data.value);
+            var arr = nativeJSON.decode(json);
             if (!arr)
                 return;
 
