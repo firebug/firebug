@@ -387,7 +387,13 @@ InsideOutBox.prototype =
                     formatObjectBox(parentObjectBox)+")= childrenBox: "+formatObjectBox(childrenBox));
 
             if (!childrenBox)
+            {
+                if (FBTrace.DBG_ERRORS)
+                    FBTrace.sysout("insideOutBox.createObjectBoxes FAILS for "+formatNode(object)+" getChildObjectBox("+
+                        formatObjectBox(parentObjectBox)+")= childrenBox: "+formatObjectBox(childrenBox));
+                // This is where we could try to create a box for objects we cannot get to by navigation via walker or DOM nodes (native anonymous)
                 return null;
+            }
 
             var childObjectBox = this.findChildObjectBox(childrenBox, object);
 
@@ -659,6 +665,8 @@ function formatObjectBox(object)
 {
     if (object)
     {
+        if (object.localName)
+            return getElementCSSSelector(object);
         return object.textContent;
     }
     else
