@@ -136,7 +136,17 @@ const DirTablePlate = domplate(Firebug.Rep,
 
     memberIterator: function(object, level)
     {
-        return Firebug.DOMBasePanel.prototype.getMembers(object, level, this.context);
+        var members = Firebug.DOMBasePanel.prototype.getMembers(object, level, this.context);
+        if (members.length)
+            return members;
+
+        return [{
+            name: "There are no child objects", //xxxHonza localization
+            type: "string",
+            rowClass: "memberRow-string",
+            tag: Firebug.Rep.tag,
+            prefix: ""
+        }];
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
