@@ -1999,7 +1999,7 @@ this.SourceText = domplate(Firebug.Rep,
 this.nsIDOMHistory = domplate(Firebug.Rep,
 {
     tag:
-        OBJECTBOX({onclick: "$showHistory"},
+        OBJECTBOX({onclick: "$showHistory", _repObject: "$object"},
             OBJECTLINK("$object|summarizeHistory")
         ),
 
@@ -2018,10 +2018,11 @@ this.nsIDOMHistory = domplate(Firebug.Rep,
         }
     },
 
-    showHistory: function(history)
+    showHistory: function(event)
     {
         try
         {
+            var history = event.currentTarget.repObject;
             var items = history.length;  // if this throws, then unsupported
             Firebug.chrome.select(history);
         }
