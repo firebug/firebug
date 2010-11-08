@@ -533,7 +533,10 @@ this.Arr = domplate(Firebug.Rep,
         // Don't use __count__ property, this is being removed from Fx 3.7
         var n = 0;
         for (var p in array)
-            n += Object.prototype.hasOwnProperty.call(array, p);
+        {
+            if (array.hasOwnProperty(p))
+                n++;
+        }
 
         return (array.length != n) && hasProperties(array);
     },
