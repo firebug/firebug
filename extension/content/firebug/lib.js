@@ -7623,8 +7623,10 @@ this.unwrapIValue = function(object)
         // this should be the only call to getWrappedValue in firebug
         if (typeof(XPCSafeJSObjectWrapper) != "undefined")
             return XPCSafeJSObjectWrapper(unwrapped);
-        else
+        else if (typeof(unwrapped) == "object")
             return XPCNativeWrapper.unwrap(unwrapped);
+        else
+            return unwrapped;
     }
     catch (exc)
     {
