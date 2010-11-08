@@ -2051,7 +2051,7 @@ this.ApplicationCache = domplate(Firebug.Rep,
     {
         try
         {
-            return applicationCache.length + " items in offline cache";
+            return applicationCache.mozItems.length + " items in offline cache";
         }
         catch(exc)
         {
