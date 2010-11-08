@@ -7619,7 +7619,12 @@ this.unwrapIValue = function(object)
     var unwrapped = object.getWrappedValue();
     try
     {
-        return XPCSafeJSObjectWrapper(unwrapped);  // this should be the only call to getWrappedValue in firebug
+        // XPCSafeJSObjectWrapper is not defined in Firefox 4.0
+        // this should be the only call to getWrappedValue in firebug
+        if (typeof(XPCSafeJSObjectWrapper) != "undefined")
+            return XPCSafeJSObjectWrapper(unwrapped);
+        else
+            return XPCNativeWrapper.unwrap(unwrapped);
     }
     catch (exc)
     {
