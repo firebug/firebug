@@ -3968,9 +3968,9 @@ this.getPrettyDomain = function(url)
 
 this.absoluteURL = function(url, baseURL)
 {
-    // Replace "/./" with "/" using regular expressions (don't use strings since "/./"
+    // Replace "/./" with "/" using regular expressions (don't use string since /./
     // can be treated as regular expressoin too, see 3551).
-    return this.absoluteURLWithDots(url, baseURL).replace(/\/\.\//, /\//, "g");
+    return this.absoluteURLWithDots(url, baseURL).replace(/\/\.\//, "/", "g");
 };
 
 this.absoluteURLWithDots = function(url, baseURL)
