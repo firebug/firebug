@@ -429,12 +429,18 @@ NetPanel.prototype = extend(Firebug.ActivablePanel,
     {
         this.panelNode.addEventListener("contextmenu", this.onContextMenu, false);
 
+        this.onResizer = bind(this.onResize, this);
+        this.resizeEventTarget = Firebug.chrome.$('fbContentBox');
+        this.resizeEventTarget.addEventListener("resize", this.onResizer, true);
+
         Firebug.ActivablePanel.initializeNode.apply(this, arguments);
     },
 
     destroyNode : function()
     {
         this.panelNode.removeEventListener("contextmenu", this.onContextMenu, false);
+
+        this.resizeEventTarget.removeEventListener("resize", this.onResizer, true);
 
         Firebug.ActivablePanel.destroyNode.apply(this, arguments);
     },
@@ -1000,6 +1006,8 @@ NetPanel.prototype = extend(Firebug.ActivablePanel,
 
         if (this.wasScrolledToBottom)
             scrollToBottom(this.panelNode);
+
+        this.updateHRefLabelWidth();
 
         if (FBTrace.DBG_NET)
             FBTrace.sysout("net.updateLayout; Layout done, time elapsed: " +
@@ -1578,6 +1586,33 @@ NetPanel.prototype = extend(Firebug.ActivablePanel,
         if (FBTrace.DBG_NET)
             FBTrace.sysout("net.panel.clear; " + this.context.getName());
     },
+
+    onResize: function()
+    {
+        this.updateHRefLabelWidth();
+    },
+
+    updateHRefLabelWidth: function()
+    {
+        // Update max-width of the netHrefLabel according to the wiidth of the parent column.
+        // I don't know if there is a way to do this in CSS.
+        var domUtils = CCSV("@mozilla.org/inspector/dom-utils;1", "inIDOMUtils");
+        var netHrefCol = this.table.querySelector(".netHrefCol");
+        var hrefLabel = this.table.querySelector(".netHrefLabel");
+
+        var rules = domUtils.getCSSStyleRules(hrefLabel);
+        for (var i = 0; i < rules.Count(); ++i)
+        {
+            var rule = QI(rules.GetElementAt(i), Ci.nsIDOMCSSStyleRule);
+            if (rule.selectorText == ".netHrefLabel")
+            {
+                var style = rule.style;
+                var paddingLeft = parseInt(style.getPropertyValue("padding-left"));
+                style.setProperty("max-width", (netHrefCol.clientWidth - paddingLeft) + "px", "");
+                break;
+            }
+        }
+    },
 });
 
 // ************************************************************************************************
@@ -1816,7 +1851,8 @@ Firebug.NetMonitor.NetRequestTable = domplate(Firebug.Rep, new Firebug.Listener(
 
     onShowColumn: function(context, colId)
     {
-        var table = context.getPanel(panelName, true).table;
+        var panel = context.getPanel(panelName, true);
+        var table = panel.table;
         var hiddenCols = table.getAttribute("hiddenCols");
 
         // If the column is already presented in the list of hidden columns,
@@ -1834,6 +1870,8 @@ Firebug.NetMonitor.NetRequestTable = domplate(Firebug.Rep, new Firebug.Listener(
 
         // Store current state into the preferences.
         Firebug.setPref(Firebug.prefDomain, "net.hiddenColumns", table.getAttribute("hiddenCols"));
+
+        panel.updateHRefLabelWidth();
     },
 
     onResetColumns: function(context)
