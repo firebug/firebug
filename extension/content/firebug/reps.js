@@ -2047,9 +2047,7 @@ this.nsIDOMHistory = domplate(Firebug.Rep,
 this.ApplicationCache = domplate(Firebug.Rep,
 {
     tag:
-        OBJECTBOX({onclick: "$showApplicationCache"},
-            OBJECTLINK("$object|summarizeCache")
-        ),
+        OBJECTLINK("$object|summarizeCache"),
 
     summarizeCache: function(applicationCache)
     {
@@ -2061,11 +2059,6 @@ this.ApplicationCache = domplate(Firebug.Rep,
         {
             return "https://bugzilla.mozilla.org/show_bug.cgi?id=422264";
         }
-    },
-
-    showApplicationCache: function(event)
-    {
-        openNewTab("https://bugzilla.mozilla.org/show_bug.cgi?id=422264");
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
