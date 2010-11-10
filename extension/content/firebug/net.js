@@ -1597,11 +1597,15 @@ NetPanel.prototype = extend(Firebug.ActivablePanel,
         if (!this.table)
             return;
 
-        // Update max-width of the netHrefLabel according to the wiidth of the parent column.
+        // Update max-width of the netHrefLabel according to the width of the parent column.
         // I don't know if there is a way to do this in CSS.
         var domUtils = CCSV("@mozilla.org/inspector/dom-utils;1", "inIDOMUtils");
-        var netHrefCol = this.table.querySelector(".netHrefCol");
+        var netHrefCol = this.table.querySelector("#netHrefCol");
         var hrefLabel = this.table.querySelector(".netHrefLabel");
+
+        var maxWidth = netHrefCol.clientWidth;
+        if (maxWidth == 0)
+            maxWidth = "15%";
 
         var rules = domUtils.getCSSStyleRules(hrefLabel);
         for (var i = 0; i < rules.Count(); ++i)
@@ -1611,7 +1615,7 @@ NetPanel.prototype = extend(Firebug.ActivablePanel,
             {
                 var style = rule.style;
                 var paddingLeft = parseInt(style.getPropertyValue("padding-left"));
-                style.setProperty("max-width", (netHrefCol.clientWidth - paddingLeft) + "px", "");
+                style.setProperty("max-width", (maxWidth - paddingLeft) + "px", "");
                 break;
             }
         }
