@@ -1811,7 +1811,7 @@ Firebug.WatchPanel.prototype = extend(Firebug.DOMBasePanel.prototype,
             else
             {
                 if (FBTrace.DBG_ERRORS)
-                    FBTrace.sysout("dom .generateScopeChain: bad scopeVars");
+                    FBTrace.sysout("dom .generateScopeChain: bad scopeVars for scope.jsClassName:"+scope.jsClassName, scope );
             }
             scope = scope.jsParent;
         }
