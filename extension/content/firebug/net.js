@@ -1594,6 +1594,9 @@ NetPanel.prototype = extend(Firebug.ActivablePanel,
 
     updateHRefLabelWidth: function()
     {
+        if (!this.table)
+            return;
+
         // Update max-width of the netHrefLabel according to the wiidth of the parent column.
         // I don't know if there is a way to do this in CSS.
         var domUtils = CCSV("@mozilla.org/inspector/dom-utils;1", "inIDOMUtils");
@@ -2673,7 +2676,7 @@ Firebug.NetMonitor.NetInfoPostData = domplate(Firebug.Rep, new Firebug.Listener(
                 )
             )
         ),
-          
+
     sourceTable:
         TABLE({"class": "netInfoPostSourceTable", cellpadding: 0, cellspacing: 0, "role": "presentation"},
             TBODY({"role": "list", "aria-label": $STR("net.label.Source")},
@@ -5509,7 +5512,7 @@ Firebug.NetMonitor.BreakpointRep = domplate(Firebug.Rep,
             return;
 
         // xxxsz: Needs a better way to update display of breakpoint than invalidate the whole panel's display
-        panel.context.invalidatePanels("breakpoints"); 
+        panel.context.invalidatePanels("breakpoints");
 
         panel.enumerateRequests(function(file)
         {
