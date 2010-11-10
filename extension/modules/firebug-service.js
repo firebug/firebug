@@ -1302,7 +1302,12 @@ var fbs =
     onBreakpoint: function(frame, type, val)
     {
         if ( fbs.isTopLevelScript(frame, type, val) )
+        {
+        	if (FBTrace.DBG_FBS_BP)
+        		FBTrace.sysout("onBreakpoint isTopLevel returning "+RETURN_CONTINUE);
+        	
             return RETURN_CONTINUE;
+        }
 
         var bp = this.findBreakpointByScript(frame.script, frame.pc);
         if (bp)
@@ -1580,21 +1585,21 @@ var fbs =
     isTopLevelScript: function(frame, type, val)
     {
         var scriptTag = frame.script.tag;
-        if (FBTrace.DBG_FBS_SRCUNITS) FBTrace.sysout("onBreakpoint frame.script.tag="+frame.script.tag );
+        if (FBTrace.DBG_FBS_SRCUNITS) FBTrace.sysout("isTopLevelScript frame.script.tag="+frame.script.tag );
 
         if (scriptTag in this.onXScriptCreatedByTag)
         {
             if (FBTrace.DBG_FBS_TRACKFILES)
                 trackFiles.def(frame);
             var onXScriptCreated = this.onXScriptCreatedByTag[scriptTag];
-            if (FBTrace.DBG_FBS_BP) FBTrace.sysout("onBreakpoint("+getExecutionStopNameFromType(type)+") with frame.script.tag="
+            if (FBTrace.DBG_FBS_BP) FBTrace.sysout("isTopLevelScript("+getExecutionStopNameFromType(type)+") with frame.script.tag="
                                       +frame.script.tag+" onXScriptCreated:"+onXScriptCreated.kind+"\n");
             delete this.onXScriptCreatedByTag[scriptTag];
             frame.script.clearBreakpoint(0);
             try {
                 var sourceFile = onXScriptCreated(frame, type, val);
             } catch (e) {
-                FBTrace.sysout("onBreakpoint called onXScriptCreated and it didn't end well:",e);
+                FBTrace.sysout("isTopLevelScript called onXScriptCreated and it didn't end well:",e);
             }
 
             if (FBTrace.DBG_FBS_SRCUNITS)
@@ -1608,7 +1613,7 @@ var fbs =
             else  // sourceFile.breakOnZero matches the script we have halted.
             {
                if (FBTrace.DBG_FBS_BP)
-                   FBTrace.sysout("fbs.onBreakpoint breakOnZero, continuing for user breakpoint\n");
+                   FBTrace.sysout("fbs.isTopLevelScript breakOnZero, continuing for user breakpoint\n");
             }
         }
         return false;
