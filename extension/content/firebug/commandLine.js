@@ -944,16 +944,6 @@ Firebug.CommandLine.CommandHandler = extend(Object,
                 debugger;
         }
 
-        // Don't displaye undefined in cases where command line APIs don't
-        // return any value (like e.g. dir, table, etc.)
-        if (methodName == "evaluated")
-        {
-            if (userObjects && userObjects.length == 1 &&
-                typeof(userObjects[0]) == "undefined") {
-                return true;
-            }
-        }
-
         var subHandler = api[methodName];
         if (!subHandler)
             return false;
