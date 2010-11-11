@@ -1603,6 +1603,9 @@ NetPanel.prototype = extend(Firebug.ActivablePanel,
         var netHrefCol = this.table.querySelector("#netHrefCol");
         var hrefLabel = this.table.querySelector(".netHrefLabel");
 
+        if (!hrefLabel)
+            return;
+
         var maxWidth = netHrefCol.clientWidth;
         if (maxWidth == 0)
             maxWidth = "15%";
