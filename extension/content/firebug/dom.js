@@ -1790,29 +1790,38 @@ Firebug.WatchPanel.prototype = extend(Firebug.DOMBasePanel.prototype,
             // in all cases.
             if (scope.jsClassName == "Call") {
                 var scopeVars = unwrapIValueObject(scope)
-                scopeVars.toString = function() {return "Closure Scope";}
-            } else {
-                scopeVars = unwrapIValue(scope);
+                scopeVars.toString = function() {return $STR("Closure Scope");}
             }
-
-            if (scopeVars && scopeVars.hasOwnProperty)
+            else if (scope.jsClassName == "Block")
             {
-                if (!scopeVars.hasOwnProperty("toString")) {
-                    (function() {
-                        var className = scope.jsClassName;
-                        scopeVars.toString = function() {
-                            return $STR(className + " Scope");
-                        };
-                    })();
-                }
-
-                ret.push(scopeVars);
+                var scopeVars = unwrapIValueObject(scope)
+                scopeVars.toString = function() {return $STR("Block Scope");}
             }
             else
             {
-                if (FBTrace.DBG_ERRORS)
-                    FBTrace.sysout("dom .generateScopeChain: bad scopeVars for scope.jsClassName:"+scope.jsClassName, scope );
+                scopeVars = unwrapIValue(scope);
+
+                if (scopeVars && scopeVars.hasOwnProperty)
+                {
+                    if (!scopeVars.hasOwnProperty("toString")) {
+                        (function() {
+                            var className = scope.jsClassName;
+                            scopeVars.toString = function() {
+                                return $STR(className + " Scope");
+                            };
+                        })();
+                    }
+                }
+                else
+                {
+                    if (FBTrace.DBG_ERRORS)
+                        FBTrace.sysout("dom .generateScopeChain: bad scopeVars for scope.jsClassName:"+scope.jsClassName, scope );
+                }
             }
+
+            if (scopeVars)
+                ret.push(scopeVars);
+
             scope = scope.jsParent;
         }
 
