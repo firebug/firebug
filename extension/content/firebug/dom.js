@@ -524,10 +524,13 @@ Firebug.DOMBasePanel.prototype = extend(Firebug.Panel,
         if (!hasChildren && value) // arguments will never be falsy if the arguments exist
             hasChildren = isArguments(value);
 
-        var proto = getPrototype(value);
-        // Special case for functions with a protoype that has values
-        if (valueType === "function" && proto)
-            hasChildren = hasChildren || hasProperties(proto);
+        if (value)
+        {
+            var proto = getPrototype(value);
+            // Special case for functions with a protoype that has values
+            if (valueType === "function" && proto)
+                hasChildren = hasChildren || hasProperties(proto);
+        }
 
         var member = {
             object: object,
@@ -679,7 +682,7 @@ Firebug.DOMBasePanel.prototype = extend(Firebug.Panel,
         var delay = 0;
         while (members.length)
         {
-            timeouts.push(this.context.setTimeout(function(slice)
+            timeouts.push(this.context.setTimeout(function addMemberRowSlice(slice)
             {
                 result = rowTag.insertRows({members: slice}, tbody.lastChild);
                 rowCount += insertSliceSize;
