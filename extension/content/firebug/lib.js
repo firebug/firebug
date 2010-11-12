@@ -18,6 +18,9 @@ Components.utils.import("resource://firebug/firebug-service.js");
 const Cc = Components.classes;
 const Ci = Components.interfaces;
 
+Components.utils.import("resource://firebug/securable-module.js");
+this.Loader = Loader;
+
 this.fbs = fbs; // left over from component.
 Components.utils.import("resource://firebug/firebug-http-observer.js");
 this.httpObserver = httpRequestObserver;
@@ -7635,6 +7638,26 @@ this.unwrapIValue = function(object)
         if (FBTrace.DBG_ERRORS)
             FBTrace.sysout("unwrapIValue FAILS for "+object+" cause: "+exc,{exc: exc, object: object, unwrapped: unwrapped});
     }
+}
+
+// ************************************************************************************************
+// URLs
+
+/**
+ * Converts resource: to file: URL.
+ * @param {String} resourceURL
+ */
+this.resourceToFile = function(resourceURL)
+{
+    var resHandler = ioService.getProtocolHandler("resource")
+        .QueryInterface(Ci.nsIResProtocolHandler);
+
+    var justURL = resourceURL.split("resource://")[1];
+    var splitted = justURL.split("/");
+    var sub = splitted.shift();
+
+    var path = resHandler.getSubstitution(sub).spec;
+    return path + splitted.join("/");
 }
 
 // ************************************************************************************************
