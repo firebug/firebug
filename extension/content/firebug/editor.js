@@ -954,7 +954,7 @@ Firebug.AutoCompleter = function(getExprOffset, getRange, evaluator, selectMode,
 
         var offset = textBox.selectionStart; // defines the cursor position
 
-        var found =  this.pickCandidates(textBox.value, offset, context, cycle, reverse, showGlobals);
+        var found =  this.pickCandidates(textBox, offset, context, cycle, reverse, showGlobals);
 
         if (completionBox && found)
                 this.showCandidates(textBox, completionBox);
@@ -965,8 +965,9 @@ Firebug.AutoCompleter = function(getExprOffset, getRange, evaluator, selectMode,
     /*
      * returns true if candidate list was created
      */
-    this.pickCandidates = function(value, offset, context, cycle, reverse, showGlobals)
+    this.pickCandidates = function(textBox, offset, context, cycle, reverse, showGlobals)
     {
+        var value = textBox.value;
         if (!selectMode && originalOffset != -1)
             offset = originalOffset;
 
@@ -1098,12 +1099,17 @@ Firebug.AutoCompleter = function(getExprOffset, getRange, evaluator, selectMode,
         var line = preParsed + preExpr + preCompletion + postCompletion + postExpr;
         var offsetEnd = preParsed.length + preExpr.length + completion.length;
 
-        /* XXXjjb I think this is needed for inline completion???
-        if (selectMode)
+
+        if (selectMode) // inline completion  uses this
+        {
+            textBox.value = line;
             textBox.setSelectionRange(offset, offsetEnd);
+        }
         else
+        {
             textBox.setSelectionRange(offsetEnd, offsetEnd);
-*/
+        }
+
         // store current state of completion
         currentLine = line;
         completionStart = offset;
