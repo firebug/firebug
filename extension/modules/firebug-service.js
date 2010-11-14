@@ -1303,9 +1303,9 @@ var fbs =
     {
         if ( fbs.isTopLevelScript(frame, type, val) )
         {
-        	if (FBTrace.DBG_FBS_BP)
-        		FBTrace.sysout("onBreakpoint isTopLevel returning "+RETURN_CONTINUE);
-        	
+            if (FBTrace.DBG_FBS_BP)
+                FBTrace.sysout("onBreakpoint isTopLevel returning "+RETURN_CONTINUE);
+
             return RETURN_CONTINUE;
         }
 
@@ -1518,7 +1518,6 @@ var fbs =
         }
         if (!fbs._lastErrorWindow)
             this._lastErrorWindow =  this.getOutermostScope(frame);
-
 
         if (fbs.trackThrowCatch)
         {
@@ -2196,9 +2195,9 @@ var fbs =
                 //var workerScope = new XPCNativeWrapper(scope.getWrappedValue());
 
                 //if (FBTrace.DBG_FBS_FINDDEBUGGER)
-                //        FBTrace.sysout("fbs.getFrameScopeRoot found WorkerGlobalScope: "+scope.jsClassName, workerScope);
+                //        FBTrace.sysout("fbs.getOutermostScope found WorkerGlobalScope: "+scope.jsClassName, workerScope);
                 // https://bugzilla.mozilla.org/show_bug.cgi?id=507930 if (FBTrace.DBG_FBS_FINDDEBUGGER)
-                //        FBTrace.sysout("fbs.getFrameScopeRoot found WorkerGlobalScope.location: "+workerScope.location, workerScope.location);
+                //        FBTrace.sysout("fbs.getOutermostScope found WorkerGlobalScope.location: "+workerScope.location, workerScope.location);
                 return null; // https://bugzilla.mozilla.org/show_bug.cgi?id=507783
             }
     */
@@ -2218,7 +2217,7 @@ var fbs =
             }
 
             if (FBTrace.DBG_FBS_FINDDEBUGGER)
-                FBTrace.sysout("fbs.getFrameScopeRoot found scope chain bottom, not Window: "+scope.jsClassName, scope);
+                FBTrace.sysout("fbs.getOutermostScope found scope chain bottom, not Window: "+scope.jsClassName, scope);
 
             return wrapIfNative(scope.getWrappedValue());  // not a window or a sandbox
         }
@@ -3122,30 +3121,6 @@ function wrapIfNative(obj)
     {
         if (FBTrace.DBG_FBS_ERRORS)
             FBTrace.sysout("fbs.wrapIfNative FAILED: "+exc, obj);
-    }
-}
-
-function getFrameWindow(frame)
-{
-    if (debuggers.length < 1)  // too early, frame.eval will crash FF2
-            return;
-    try
-    {
-        if (FBTrace.DBG_FBS_SRCUNITS)
-            FBTrace.sysout("fbs: resort to getFrameWindow");
-        var result = {};
-        frame.eval("window", "", 1, result);
-        var win = unwrapIValue(result.value);
-        if (win instanceof Ci.nsIDOMWindow)
-            return getRootWindow(win);
-        else
-            return getFrameScopeRoot(frame);
-    }
-    catch (exc)
-    {
-        if (FBTrace.DBG_FBS_SRCUNITS)
-            ERROR("firebug-service getFrameWindow fails: "+exc);  // FBTrace.DBG_WINDOWS
-        return null;
     }
 }
 
