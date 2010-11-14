@@ -667,7 +667,7 @@ Firebug.HTMLPanel.prototype = extend(WalkingPanel,
                 var skipChild = node.contentDocument.documentElement;  // punch thru and adopt the root element as our child
                 this.embeddedBrowserParents[skipChild] = node;         // store our adopted childe in a side table
                 if (FBTrace.DBG_HTML)
-                	FBTrace.sysout("Found skipChild "+FBL.getElementCSSSelector(skipChild)+" for  "+FBL.getElementCSSSelector(node)+ " with node.contentDocument "+node.contentDocument);
+                    FBTrace.sysout("Found skipChild "+FBL.getElementCSSSelector(skipChild)+" for  "+FBL.getElementCSSSelector(node)+ " with node.contentDocument "+node.contentDocument);
                 return skipChild;  // (the node's).(type 9 document).(HTMLElement)
             }
             else if (previousSibling)
@@ -1117,12 +1117,19 @@ Firebug.HTMLPanel.prototype = extend(WalkingPanel,
         }
         else
         {
-            // xxxHonza, XXXjjb: the scroll position can't be just reset here,
-            // what if the side panel wants to preserve it?
-            // Is it correct to remove this?
-            //Firebug.chrome.getSelectedSidePanel().panelNode.scrollTop = 0;
+            var found = this.ioBox.select(object, true, false, this.noScrollIntoView);
+            if (!found)
+            {
+                // Look up for an enclosing parent. NB this will mask failures in createObjectBoxes
+                var parentNode = this.getParentObject(object);
 
-            this.ioBox.select(object, true, false, this.noScrollIntoView);
+                if (FBTrace.DBG_ERRORS || FBTrace.DBG_HTML)
+                    FBTrace.sysout("html.updateSelect no objectBox for object:"+FBL.getElementCSSSelector(object) + " trying "+FBL.getElementCSSSelector(parentNode));
+
+                this.updateSelection(parentNode);
+                return;
+            }
+
             this.inspectorHistory.unshift(object);
             if (this.inspectorHistory.length > 5)
                 this.inspectorHistory.pop();
