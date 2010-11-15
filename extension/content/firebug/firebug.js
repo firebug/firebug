@@ -663,11 +663,12 @@ top.Firebug =
      */
     registerPreference: function(name, value)
     {
-         if (FBTrace.DBG_INITIALIZE)
-             FBTrace.sysout("registerPreference "+name+" -> "+value);
-
         var currentValue = this.getPref(this.prefDomain, name);
-        if (!currentValue)
+
+        if (FBTrace.DBG_INITIALIZE)
+            FBTrace.sysout("registerPreference "+name+" -> "+value+" type "+typeof(value)+" with currentValue "+currentValue);
+
+        if (currentValue === undefined)
         {
             // https://developer.mozilla.org/en/Code_snippets/Preferences
             //This is the reason why you should usually pass strings ending with a dot to getBranch(), like prefs.getBranch("accessibility.").
@@ -932,7 +933,7 @@ top.Firebug =
         // Is the better fix for this (this is rather a workaround).
         //if (prefName.indexOf("extensions.firebug") != 0)
         //    prefName = "." + prefName;
-        if (prefName.indexOf("bug.") == -1)
+        if ((prefBranch.root+prefName).indexOf("bug.") == -1)
             FBTrace.sysout("WARNING setPreference called without bug.", {prefName: prefName, value: value});
         // The above lines and comments should be removed once the prefs seem correct
 
