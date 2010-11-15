@@ -942,11 +942,23 @@ NetPanel.prototype = extend(Firebug.ActivablePanel,
         ];
     },
 
+    highlightRow: function(row)
+    {
+        if (this.highlightedRow)
+            cancelClassTimed(this.highlightedRow, "jumpHighlight", this.context);
+
+        this.highlightedRow = row;
+
+        if (row)
+            setClassTimed(row, "jumpHighlight", this.context);
+    },
+
     search: function(text, reverse)
     {
         if (!text)
         {
             delete this.currentSearch;
+            this.highlightRow(null);
             return false;
         }
 
@@ -968,6 +980,10 @@ NetPanel.prototype = extend(Firebug.ActivablePanel,
             sel.addRange(this.currentSearch.range);
 
             scrollIntoCenterView(row, this.panelNode);
+            if(this.currentSearch.shouldSearchResponses() && getAncestorByClass(row, "netInfoResponseText"))
+                this.highlightRow(row)
+            else
+                this.highlightRow(getAncestorByClass(row, "netRow"));
             dispatch(this.fbListeners, 'onNetMatchFound', [this, text, row]);
             return true;
         }
@@ -5419,7 +5435,7 @@ var NetPanelSearch = function(panel, rowFinder)
                 return sib;
         }
 
-        return wrapAround ? this.getFirstRow() : null;;
+        return wrapAround ? this.getFirstRow() : null;
     }
 
     this.shouldSearchResponses = function()
