@@ -813,7 +813,8 @@ Firebug.CommandLine = extend(Firebug.Module,
         if (this.autoCompleter && this.autoCompleter.linuxFocusHack)
             return;
 
-        Firebug.CommandLine.attachConsoleOnFocus();
+        if (!Firebug.CommandLine.attachConsoleOnFocus())  // then there is no currentContext.
+            return;
 
         if (!Firebug.migrations.commandLineTab)
         {
@@ -858,7 +859,7 @@ Firebug.CommandLine = extend(Firebug.Module,
         {
             if (FBTrace.DBG_ERRORS || FBTrace.DBG_COMMANDLINE)
                 FBTrace.sysout("commandLine.attachConsoleOnFocus no Firebug.currentContext");
-            return;
+            return false;
         }
 
         if (FBTrace.DBG_COMMANDLINE)
@@ -886,6 +887,7 @@ Firebug.CommandLine = extend(Firebug.Module,
                 FBTrace.sysout("commandLine.attachConsoleOnFocus, attachConsole "+
                     Firebug.currentContext.window.location);
         }
+        return true;
     },
 
     onPanelEnable: function(panelName)
