@@ -522,9 +522,16 @@ Firebug.SourceBoxPanel = extend(SourceBoxPanelBase,
         return function jumpHighlightIfInView(sourceBox)
         {
             var  lineNode = sourceBox.getLineNode(lineNo);
+
+            if (context.highlightedRow)
+              cancelClassTimed(context.highlightedRow, "jumpHighlight", context);
+
             if (lineNode)
             {
                 setClassTimed(lineNode, "jumpHighlight", context);
+
+                context.highlightedRow = lineNode;
+
                 if (FBTrace.DBG_SOURCEFILES)
                     FBTrace.sysout("jumpHighlightFactory on line "+lineNo+" lineNode:"+lineNode.innerHTML+"\n");
             }
