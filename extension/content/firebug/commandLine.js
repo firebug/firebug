@@ -605,7 +605,7 @@ Firebug.CommandLine = extend(Firebug.Module,
     {
         var showCompletionPopup = Firebug.getPref(Firebug.prefDomain, "commandLineShowCompleterPopup");
         this.autoCompleter = new Firebug.AutoCompleter(getExpressionOffset, getDot,
-                bind(autoCompleteEval, this), true, true, true, true, showCompletionPopup);
+                bind(autoCompleteEval, this), false, true, true, true, showCompletionPopup);
     },
 
     initializeUI: function()

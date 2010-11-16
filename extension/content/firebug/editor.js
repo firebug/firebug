@@ -968,8 +968,6 @@ Firebug.AutoCompleter = function(getExprOffset, getRange, evaluator, selectMode,
     this.pickCandidates = function(textBox, offset, context, cycle, reverse, showGlobals)
     {
         var value = textBox.value;
-        if (!selectMode && originalOffset != -1)
-            offset = originalOffset;
 
         if (!candidates || !cycle || offset != lastOffset)
         {
