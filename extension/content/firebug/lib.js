@@ -18,9 +18,6 @@ Components.utils.import("resource://firebug/firebug-service.js");
 const Cc = Components.classes;
 const Ci = Components.interfaces;
 
-Components.utils.import("resource://firebug/securable-module.js");
-this.Loader = Loader;
-
 this.fbs = fbs; // left over from component.
 Components.utils.import("resource://firebug/firebug-http-observer.js");
 this.httpObserver = httpRequestObserver;
