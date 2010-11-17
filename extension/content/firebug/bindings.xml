@@ -738,6 +738,8 @@
     </implementation>
     <handlers>
         <handler event="mousedown" button="0"><![CDATA[
+            var popupBoxObject = this.popup.popupBoxObject;
+            popupBoxObject.setConsumeRollupEvent(popupBoxObject.ROLLUP_NO_CONSUME);
             this.popup.showPopup(this, -1, -1, "popup", "bottomleft", "topleft");
         ]]></handler>
         <handler event="popupshowing"><![CDATA[

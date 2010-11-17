@@ -2564,6 +2564,11 @@ this.setItemIntoElement = function(element, item)
     if (item.type)
         element.setAttribute("type", item.type);
 
+    // Avoid closing the popup menu if a preference has been changed.
+    // This allows to quickly change more options.
+    if (item.type == "checkbox")
+        element.setAttribute("closemenu", "none");
+
     if (item.checked)
         element.setAttribute("checked", "true");
 
@@ -2643,8 +2648,10 @@ this.optionMenu = function(label, option, tooltiptext)
         checked: Firebug[option],
         option: option,
         tooltiptext: tooltiptext,
-        command: this.bindFixed(Firebug.setPref, Firebug, Firebug.prefDomain,
-            option, !Firebug[option])
+        command: function() {
+            return Firebug.setPref.apply(Firebug, [Firebug.prefDomain,
+                option, !Firebug[option]]);
+        }
     };
 };
 
