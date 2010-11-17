@@ -13,7 +13,7 @@
     margin: 0;
     padding: 1em 0 0 6px;
     font-family: monospace;
-    color: #000000;
+    color: -moz-fieldtext;
 }
 
 .cssRule:first-child {

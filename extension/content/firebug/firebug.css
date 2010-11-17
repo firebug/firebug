@@ -263,7 +263,7 @@ panelTab[selected="true"]:hover > panelTabMenu .menuTarget {
 
 #fbContentBox *:-moz-lwtheme {
     text-shadow: none !important;
-    color: black;
+    color: -moz-dialogtext;
 }
 
 /************************************************************************************************/

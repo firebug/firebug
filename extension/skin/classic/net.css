@@ -50,6 +50,7 @@
     padding: 0 !important;
     font-weight: bold;
     background: #BBBBBB url(chrome://firebug/skin/tableHeader.gif) repeat-x;
+    color: #000000;
     white-space: nowrap;
 }
 
@@ -163,7 +164,7 @@
 }
 
 .netRow.loaded {
-    background: #FFFFFF;
+    background: -moz-field;
 }
 
 .netRow.loaded:hover {
@@ -372,7 +373,7 @@
     top: 1px;
     left: 100%;
     padding-left: 6px;
-    color: #444444;
+    color: #808080;
     min-width: 16px;
 }
 
@@ -565,7 +566,7 @@
 
 .netInfoCol {
     border-top: 1px solid #EEEEEE;
-    background: url(chrome://firebug/skin/group.gif) repeat-x #FFFFFF;
+    background: url(chrome://firebug/skin/group.gif) repeat-x -moz-field;
 }
 
 .netInfoBody {
@@ -585,7 +586,7 @@
     border: 1px solid transparent;
     border-bottom: none;
     font-weight: bold;
-    color: #565656;
+    color: -moz-dialogtext;
 }
 
 .netInfoTab:hover {
@@ -596,7 +597,7 @@
     cursor: default !important;
     border-color: #D7D7D7;
     -moz-border-radius: 4px 4px 0 0;
-    background-color: #FFFFFF;
+    background-color: window;
 }
 
 .logRow-netInfo.error .netInfoTitle {
@@ -624,7 +625,7 @@
     border: 1px solid #D7D7D7;
     border-right: none;
     padding: 8px;
-    background-color: #FFFFFF;
+    background-color: -moz-field;
     font-family: monospace;
     /*overflow-x: auto; HTML is damaged in case of big (2-3MB) responses */
 }
