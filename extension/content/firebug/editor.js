@@ -709,7 +709,7 @@ Firebug.InlineEditor.prototype = domplate(Firebug.BaseEditor,
 
     completeValue: function(amt)
     {
-        if (this.getAutoCompleter().complete(currentPanel.context, this.input, null, true, amt < 0))
+        if (this.getAutoCompleter().complete(currentPanel.context, this.input, null, true, amt < 0, true))
             Firebug.Editor.update(true);
         else
             this.incrementValue(amt);
