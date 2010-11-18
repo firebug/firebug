@@ -940,11 +940,7 @@ Firebug.CommandLine.CommandHandler = extend(Object,
         var userObjects = hosed_userObjects ? cloneArray(hosed_userObjects) : [];
 
         if (FBTrace.DBG_COMMANDLINE)
-        {
             FBTrace.sysout("commandLine.CommandHandler: method "+methodName+" userObjects:",  userObjects);
-            if (!userObjects)
-                debugger;
-        }
 
         var subHandler = api[methodName];
         if (!subHandler)
