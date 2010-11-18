@@ -1553,21 +1553,35 @@ CSSElementPanel.prototype = extend(Firebug.CSSStyleSheetPanel.prototype,
             {label: "Expand Shorthand Properties", type: "checkbox", checked: Firebug.expandShorthandProps,
                     command: bindFixed(Firebug.togglePref, Firebug, "expandShorthandProps") }
         ];
+
         if (domUtils && this.selection)
         {
             var state = safeGetContentState(this.selection);
+            var self = this
 
             ret.push("-");
+
             ret.push({label: ":active", type: "checkbox", checked: state & STATE_ACTIVE,
-              command: bindFixed(this.updateContentState, this, STATE_ACTIVE, state & STATE_ACTIVE)});
+                command: function() {
+                    self.updateContentState(STATE_ACTIVE, !this.getAttribute("checked"));
+                }
+            });
+
             ret.push({label: ":hover", type: "checkbox", checked: state & STATE_HOVER,
-              command: bindFixed(this.updateContentState, this, STATE_HOVER, state & STATE_HOVER)});
+                command: function() {
+                    self.updateContentState(STATE_HOVER, !this.getAttribute("checked"));
+                }
+            });
         }
+
         return ret;
     },
 
     updateContentState: function(state, remove)
     {
+        if (FBTrace.DBG_CSS)
+            FBTrace.sysout("css.updateContentState; state: " + state + ", remove: " + remove);
+
         domUtils.setContentState(remove ? this.selection.ownerDocument.documentElement : this.selection, state);
         this.refresh();
     },

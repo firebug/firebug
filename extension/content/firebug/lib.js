@@ -2646,8 +2646,7 @@ this.optionMenu = function(label, option, tooltiptext)
         option: option,
         tooltiptext: tooltiptext,
         command: function() {
-            return Firebug.setPref.apply(Firebug, [Firebug.prefDomain,
-                option, !Firebug[option]]);
+            return Firebug.setPref(Firebug.prefDomain, option, !Firebug[option]);
         }
     };
 };
@@ -2660,8 +2659,9 @@ this.serviceOptionMenu = function(label, option, tooltiptext)
         checked: Firebug[option],
         option: option,
         tooltiptext: tooltiptext,
-        command: this.bindFixed(Firebug.setPref, Firebug, Firebug.servicePrefDomain,
-            option, !Firebug[option])
+        command: function() {
+            return Firebug.setPref(Firebug.servicePrefDomain, option, !Firebug[option]);
+        }
     };
 };
 

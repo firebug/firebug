@@ -612,8 +612,11 @@ NetPanel.prototype = extend(Firebug.ActivablePanel,
     {
         var BrowserCache = Firebug.NetMonitor.BrowserCache;
         var disabled = !BrowserCache.isEnabled();
-        return {label: "net.option.Disable Browser Cache", type: "checkbox", checked: disabled,
-            command: bindFixed(BrowserCache.enable, BrowserCache, disabled) };
+        return { label: "net.option.Disable Browser Cache", type: "checkbox", checked: disabled,
+            command: function() {
+                BrowserCache.enable(!this.getAttribute("checked"));
+            }
+        };
     },
 
     getContextMenuItems: function(nada, target)
@@ -5696,6 +5699,9 @@ Firebug.NetMonitor.BrowserCache =
 
     enable: function(state)
     {
+        if (FBTrace.DBG_NET)
+            FBTrace.sysout("net.BrowserCache.enable; " + state);
+
         Firebug.setPref(this.cacheDomain, "disk.enable", state);
         Firebug.setPref(this.cacheDomain, "memory.enable", state);
     }
