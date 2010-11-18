@@ -137,11 +137,12 @@ ChannelListener.prototype =
             // Store received data into the cache as they come. If the method returns
             // false, the rest of the response is ignored (not cached). This is used
             // to limit size of a cached response.
-            if (!context.sourceCache.storePartialResponse(request, data, this.window))
+            if (!context.sourceCache.storePartialResponse(request, data, this.window, offset))
             {
                 this.ignore = true;
                 if (FBTrace.DBG_CACHE)
-                    FBTrace.sysout("tabCache.ChannelListener.onCollectData IGNORE SET because of storePartialResponse");
+                    FBTrace.sysout("tabCache.ChannelListener.onCollectData IGNORE SET " +
+                        "because of storePartialResponse");
             }
 
             // Let other listeners use the stream.
@@ -319,8 +320,9 @@ ChannelListener.prototype =
             {
                 try
                 {
+                    var offset = stream.tell();
                     var available = stream.available();
-                    this.onDataAvailable(this.request, null, stream, 0, available);
+                    this.onDataAvailable(this.request, null, stream, offset, available);
                 }
                 catch (err)
                 {

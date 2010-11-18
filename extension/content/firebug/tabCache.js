@@ -302,11 +302,24 @@ Firebug.TabCache.prototype = extend(Firebug.SourceCache.prototype,
 {
     responses: [],       // responses in progress.
 
-    storePartialResponse: function(request, responseText, win)
+    storePartialResponse: function(request, responseText, win, offset)
     {
+        if (!offset)
+            offset = 0;
+
         if (FBTrace.DBG_CACHE)
             FBTrace.sysout("tabCache.storePartialResponse " + safeGetName(request),
                 request.contentCharset);
+
+        var url = safeGetName(request);
+        var response = this.getResponse(request);
+
+        // Skip any response data that we have received before (f ex when 
+        // response packets are repeated due to quirks in how authentication
+        // requests are projected to the channel listener)
+        var newRawSize = offset + responseText.length;
+        var addRawBytes = newRawSize - response.rawSize;
+        responseText = responseText.substr(responseText.length - addRawBytes);
 
         try
         {
@@ -322,9 +335,6 @@ Firebug.TabCache.prototype = extend(Firebug.SourceCache.prototype,
             // return false;
         }
 
-        var url = safeGetName(request);
-        var response = this.getResponse(request);
-
         // Size of each response is limited.
         var limitNotReached = true;
         if (response.size + responseText.length >= responseSizeLimit)
@@ -335,6 +345,7 @@ Firebug.TabCache.prototype = extend(Firebug.SourceCache.prototype,
         }
 
         response.size += responseText.length;
+        response.rawSize = newRawSize;
 
         // Store partial content into the cache.
         this.store(url, responseText);
@@ -352,7 +363,8 @@ Firebug.TabCache.prototype = extend(Firebug.SourceCache.prototype,
             this.invalidate(url);
             this.responses[url] = response = {
                 request: request,
-                size: 0
+                size: 0,
+                rawSize: 0
             };
         }
 
