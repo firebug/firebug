@@ -29,7 +29,7 @@
 
 .traceInfoCol {
     border-top: 1px solid #EEEEEE;
-    background: url(chrome://firebug/skin/group.gif) repeat-x #FFFFFF;
+    background: url(chrome://firebug/skin/group.png) repeat-x #FFFFFF;
     vertical-align: top;
 }
 
@@ -210,7 +210,7 @@
 
 .messageInfoCol {
     border-top: 1px solid #EEEEEE;
-    background: url(chrome://firebug/skin/group.gif) repeat-x #FFFFFF;
+    background: url(chrome://firebug/skin/group.png) repeat-x #FFFFFF;
 }
 
 .messageInfoBody {

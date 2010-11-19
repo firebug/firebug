@@ -255,7 +255,7 @@ h1.groupHeader {
     margin: 0 0 4px 0;
     border-top: 1px solid #CCCCCC;
     border-bottom: 1px solid #CCCCCC;
-    background: url(chrome://firebug/skin/group.gif) repeat-x #FFFFFF;
+    background: url(chrome://firebug/skin/group.png) repeat-x #FFFFFF;
     font-size: inherit;
 }
 

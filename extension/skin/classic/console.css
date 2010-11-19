@@ -18,7 +18,7 @@
 }
 
 .logGroup {
-    background: url(chrome://firebug/skin/group.gif) repeat-x #FFFFFF;
+    background: url(chrome://firebug/skin/group.png) repeat-x #FFFFFF;
     padding: 0;
     border: none;
 }
@@ -538,7 +538,7 @@
 
 .logRow-spy,
 .logRow-spy .objectLink-sourceLink {
-    background: url(chrome://firebug/skin/group.gif) repeat-x #FFFFFF;
+    background: url(chrome://firebug/skin/group.png) repeat-x #FFFFFF;
     padding-right: 4px;
     right: 0;
 }
