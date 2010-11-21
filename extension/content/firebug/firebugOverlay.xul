@@ -80,6 +80,10 @@
         <command id="cmd_navForward" oncommand="Firebug.NavigationHistory.goForward(Firebug.currentContext)" />
         <command id="cmd_toggleFreezeWindow" oncommand="Firebug.Debugger.toggleFreezeWindow(Firebug.currentContext)" />
 
+        <command id="cmd_increaseTextSize" oncommand="Firebug.increaseTextSize(1);"/>
+        <command id="cmd_decreaseTextSize" oncommand="Firebug.increaseTextSize(-1);"/>
+        <command id="cmd_normalTextSize" oncommand="Firebug.setTextSize(0);"/>
+
         <command id="cmd_toggleCommandPopup" oncommand="Firebug.CommandLine.Popup.toggle(Firebug.currentContext)"
             checked="false"/>
     </commandset>
@@ -107,6 +111,9 @@
         <key id="key_navBack" keycode="VK_LEFT" modifiers="accel,shift" command="cmd_navBack"/>
         <key id="key_navForward" keycode="VK_RIGHT" modifiers="accel,shift" command="cmd_navForward"/>
         <key id="key_toggleFreezeWindow" key="f" modifiers="control,shift" command="cmd_toggleFreezeWindow"/>
+        <key id="key_increaseTextSize" key="+" modifiers="accel shift" command="cmd_increaseTextSize"/>
+        <key id="key_decreaseTextSize" key="-" modifiers="accel shift" command="cmd_decreaseTextSize"/>
+        <key id="key_normalTextSize" keycode="VK_INSERT" modifiers="accel shift" command="cmd_normalTextSize"/>
     </keyset>
 
     <popupset id="mainPopupSet">
@@ -504,15 +511,15 @@
             <!-- Text Size -->
             <menu id="FirebugMenu_TextSize" label="firebug.TextSize">
                 <menupopup>
-                    <menuitem id="menu_increaseTextSize"
-                        label="firebug.IncreaseTextSize"
-                        oncommand="Firebug.increaseTextSize(1)"/>
-                    <menuitem id="menu_decreaseTextSize"
-                        label="firebug.DecreaseTextSize"
-                        oncommand="Firebug.increaseTextSize(-1)"/>
-                    <menuitem id="menu_normalTextSize"
-                        label="firebug.NormalTextSize"
-                        oncommand="Firebug.setTextSize(0)"/>
+                    <menuitem id="menu_increaseTextSize" label="firebug.IncreaseTextSize"
+                        command="cmd_increaseTextSize"
+                        key="key_increaseTextSize"/>
+                    <menuitem id="menu_decreaseTextSize" label="firebug.DecreaseTextSize"
+                        command="cmd_decreaseTextSize"
+                        key="key_decreaseTextSize"/>
+                    <menuitem id="menu_normalTextSize" label="firebug.NormalTextSize"
+                        command="cmd_normalTextSize"
+                        key="key_normalTextSize"/>
                 </menupopup>
             </menu>
 

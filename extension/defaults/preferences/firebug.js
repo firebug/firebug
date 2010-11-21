@@ -192,6 +192,9 @@ pref("extensions.firebug.key.shortcut.clearConsole", "accel shift r");
 pref("extensions.firebug.key.shortcut.openTraceConsole", "shift r");                             /*@explore*/
 pref("extensions.firebug.key.shortcut.navBack", "accel shift VK_LEFT");                          /*@explore*/
 pref("extensions.firebug.key.shortcut.navForward", "accel shift VK_RIGHT");                      /*@explore*/
+pref("extensions.firebug.key.shortcut.increaseTextSize", "accel shift +");
+pref("extensions.firebug.key.shortcut.decreaseTextSize", "accel shift -");
+pref("extensions.firebug.key.shortcut.normalTextSize", "accel shift VK_INSERT");
 
 // Accessibility
 pref("extensions.firebug.a11y.enable", false);
