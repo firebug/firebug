@@ -123,7 +123,7 @@ function saveChanges()
 
 function saveShortcut(shortcutId, index, array)
 {
-    if (updatedShortcuts[shortcutId])
+    if (shortcutId in updatedShortcuts)
         branch.setCharPref(shortcutId, updatedShortcuts[shortcutId]);
 }
 
@@ -191,9 +191,9 @@ function recognizeShortcut(event)
     var shortcut = "";
     if ( [9, 16, 17, 18].indexOf(event.keyCode) != -1 ||
         ((!event.shiftKey && !event.altKey && !event.ctrlKey) &&
-        [ 8, 13, 27].indexOf(event.keyCode) != -1))
+        [13, 27].indexOf(event.keyCode) != -1))
     {
-        //Always let tab pass. Let enter, escape & backspace pass if no modifiers are used
+        //Always let tab pass. Let enter & escape pass, if no modifiers are used
         return;
     }
 
@@ -202,6 +202,14 @@ function recognizeShortcut(event)
     event.stopPropagation();
 
     var target = event.target;
+
+    if (event.keyCode == 8 && !event.shiftKey && !event.altKey && !event.ctrlKey) { // Backspace pressed
+        updatedShortcuts[target.id.replace('_shortcut', "")] = "";
+        event.target.value = "";
+
+        return false;
+    }
+
     var modifiers = [];
     if (event.altKey)
         modifiers.push("alt");
