@@ -3139,6 +3139,9 @@ this.getAllStyleSheets = function(context)
         if (!Firebug.showUserAgentCSS && FBL.isSystemURL(sheetLocation))
             return;
 
+        if (sheet.ownerNode && unwrapObject(sheet.ownerNode).firebugIgnore)
+            return;
+
         styleSheets.push(sheet);
         try
         {
