@@ -10,14 +10,13 @@
 
 .cssRule {
     position: relative;
-    margin: 0;
-    padding: 1em 0 0 6px;
+    margin: 1em 0 0 6px;
     font-family: monospace;
     color: -moz-fieldtext;
 }
 
 .cssRule:first-child {
-    padding-top: 6px;
+    margin-top: 6px;
 }
 
 .cssElementRuleContainer {
@@ -30,6 +29,7 @@
 
 .cssProp {
     /*padding-left: 2em;*/
+    line-height: 1.4em;
 }
 
 .cssPropName {
@@ -90,11 +90,15 @@
 }
 
 .cssProp.editGroup:hover {
-    background: url(chrome://firebug/skin/disable.png) no-repeat 2px 1px;
+    background: transparent url(chrome://firebug/skin/disable.png) no-repeat 2px 1px;
+}
+
+.cssProp.editGroup span:first-child:hover {
+    cursor: pointer;
 }
 
 .cssProp.disabledStyle {
-    background: url(chrome://firebug/skin/disableHover.png) no-repeat 2px 1px;
+    background: transparent url(chrome://firebug/skin/disableHover.png) no-repeat 2px 1px;
     opacity: 1;
     color: #CCCCCC;
 }
