@@ -615,6 +615,7 @@ Firebug.CommandLine = extend(Firebug.Module,
         this.onCommandLineBlur = bind(this.onCommandLineBlur, this);
         this.onCommandLineKeyUp = bind(this.onCommandLineKeyUp, this);
         this.onCommandLineKeyDown = bind(this.onCommandLineKeyDown, this);
+        this.onCommandLineKeyPress = bind(this.onCommandLineKeyPress, this);
         this.onCommandLineOverflow = bind(this.onCommandLineOverflow, this);
         this.attachListeners();
     },
@@ -650,6 +651,7 @@ Firebug.CommandLine = extend(Firebug.Module,
         Firebug.chrome.$("fbCommandLine").addEventListener('overflow', this.onCommandLineOverflow, true);
         Firebug.chrome.$("fbCommandLine").addEventListener('keyup', this.onCommandLineKeyUp, true);
         Firebug.chrome.$("fbCommandLine").addEventListener('keydown', this.onCommandLineKeyDown, true);
+        Firebug.chrome.$("fbCommandLine").addEventListener('keypress', this.onCommandLineKeyPress, true);
         Firebug.chrome.$("fbCommandLine").addEventListener('blur', this.onCommandLineBlur, true);
 
         Firebug.Console.addListener(this);  // to get onConsoleInjection
@@ -662,6 +664,7 @@ Firebug.CommandLine = extend(Firebug.Module,
         Firebug.chrome.$("fbCommandLine").removeEventListener('input', this.onCommandLineInput, true);
         Firebug.chrome.$("fbCommandLine").removeEventListener('overflow', this.onCommandLineOverflow, true);
         Firebug.chrome.$("fbCommandLine").removeEventListener('keydown', this.onCommandLineKeyDown, true);
+        Firebug.chrome.$("fbCommandLine").removeEventListener('keypress', this.onCommandLineKeyPress, true);
         Firebug.chrome.$("fbCommandLine").removeEventListener('blur', this.onCommandLineBlur, true);
     },
 
@@ -737,6 +740,11 @@ Firebug.CommandLine = extend(Firebug.Module,
     },
 
     onCommandLineKeyDown: function(event)
+    {
+        // The code moved into key-press handler due to bug 613752
+    },
+
+    onCommandLineKeyPress: function(event)
     {
         var commandLine = getCommandLine(Firebug.currentContext);
         var completionBox = getCompletionBox();
