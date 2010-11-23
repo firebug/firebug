@@ -1040,19 +1040,13 @@ Firebug.CSSStyleSheetPanel.prototype = extend(Firebug.SourceBoxPanel,
         }
     },
 
-    showInfoTip: function(infoTip, target, x, y)
+    showInfoTip: function(infoTip, target, x, y, rangeParent, rangeOffset)
     {
         var propValue = getAncestorByClass(target, "cssPropValue");
         if (propValue)
         {
-            var offset = getClientOffset(propValue);
-            var offsetX = x-offset.x;
-
             var text = propValue.textContent;
-            var charWidth = propValue.offsetWidth/text.length;
-            var charOffset = Math.floor(offsetX/charWidth);
-
-            var cssValue = parseCSSValue(text, charOffset);
+            var cssValue = parseCSSValue(text, rangeOffset);
             if (cssValue)
             {
                 if (cssValue.value == this.infoTipValue)
