@@ -467,7 +467,8 @@ Firebug.CSSStyleSheetPanel.prototype = extend(Firebug.SourceBoxPanel,
                     var props = this.getRuleProperties(context, rule);
                     var ruleId = getRuleId(rule);
                     rules.push({tag: CSSStyleRuleTag.tag, rule: rule, id: ruleId,
-                                selector: rule.selectorText, props: props,
+                                selector: rule.selectorText.replace(/ :/g, " *:"), // Show universal selectors with pseudo-class (http://code.google.com/p/fbug/issues/detail?id=3683)
+                                props: props,
                                 isSystemSheet: isSystemSheet,
                                 isSelectorEditable: true});
                 }
@@ -1410,7 +1411,8 @@ CSSElementPanel.prototype = extend(Firebug.CSSStyleSheetPanel.prototype,
 
                 var ruleId = getRuleId(rule);
                 rules.splice(0, 0, {rule: rule, id: ruleId,
-                        selector: rule.selectorText, sourceLink: sourceLink,
+                        selector: rule.selectorText.replace(/ :/g, " *:"), // Show universal selectors with pseudo-class (http://code.google.com/p/fbug/issues/detail?id=3683)
+                        sourceLink: sourceLink,
                         props: props, inherited: inheritMode,
                         isSystemSheet: isSystemSheet});
             }
