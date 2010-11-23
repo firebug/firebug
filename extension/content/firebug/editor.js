@@ -138,7 +138,7 @@ Firebug.Editor = extend(Firebug.Module,
             }
             else if (!value)
             {
-                this.saveEditAndNotifyListeners(currentTarget, null, previousValue);
+                this.saveEditAndNotifyListeners(currentTarget, "", previousValue);
 
                 if (removeGroup && currentGroup)
                     currentGroup.parentNode.removeChild(currentGroup);

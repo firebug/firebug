@@ -636,6 +636,12 @@ Firebug.CSSStyleSheetPanel.prototype = extend(Firebug.SourceBoxPanel,
         if (!location)
         {
             location = getChildByClass(this.panelNode, "cssSheet");
+
+            // Stylesheet has no rules
+            if (!location)
+                this.template.tag.replace({rules: []}, this.panelNode);
+
+            location = getChildByClass(this.panelNode, "cssSheet");
             Firebug.Editor.insertRowForObject(location);
         }
         else
@@ -1895,17 +1901,17 @@ CSSRuleEditor.prototype = domplate(Firebug.InlineEditor.prototype,
 {
     insertNewRow: function(target, insertWhere)
     {
-         var emptyRule = {
-                 selector: "",
-                 id: "",
-                 props: [],
-                 isSelectorEditable: true
-         };
+        var emptyRule = {
+             selector: "",
+             id: "",
+             props: [],
+             isSelectorEditable: true
+        };
 
-         if (insertWhere == "before")
-             return CSSStyleRuleTag.tag.insertBefore({rule: emptyRule}, target);
-         else
-             return CSSStyleRuleTag.tag.insertAfter({rule: emptyRule}, target);
+        if (insertWhere == "before")
+            return CSSStyleRuleTag.tag.insertBefore({rule: emptyRule}, target);
+        else
+            return CSSStyleRuleTag.tag.insertAfter({rule: emptyRule}, target);
     },
 
     saveEdit: function(target, value, previousValue)
