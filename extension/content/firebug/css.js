@@ -1339,7 +1339,9 @@ CSSElementPanel.prototype = extend(Firebug.CSSStyleSheetPanel.prototype,
         }
         else
         {
-            var result = FirebugReps.Warning.tag.replace({object: "EmptyElementCSS"}, this.panelNode);
+            var warning = FirebugReps.Warning.tag.replace({object: ""}, this.panelNode);
+            var result = FirebugReps.Description.render($STR("css.EmptyElementCSS"),
+                warning, bind(this.editElementStyle, this));
             dispatch([Firebug.A11yModel], 'onCSSRulesAdded', [this, result]);
         }
     },

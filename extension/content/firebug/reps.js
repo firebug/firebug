@@ -2256,6 +2256,46 @@ this.XPathResult = domplate(this.Arr,
 
 // ************************************************************************************************
 
+this.Description = domplate(Firebug.Rep,
+{
+    className: "Description",
+
+    tag:
+        DIV({onclick: "$onClickLink"}),
+
+    render: function(text, parentNode, listener)
+    {
+        function clickListener(event)
+        {
+            // Only clicks on links are passed to the original listener.
+            var localName = event.target.localName;
+            if (localName && localName.toLowerCase() == "a")
+                listener(event);
+        };
+
+        var rootNode = this.tag.replace({onClickLink: clickListener}, parentNode, this);
+
+        var parser = CCIN("@mozilla.org/xmlextras/domparser;1", "nsIDOMParser");
+        var doc = parser.parseFromString("<div>" + text + "</div>", "text/xml");
+        var root = doc.documentElement;
+
+        // Error handling
+        var nsURI = "http://www.mozilla.org/newlayout/xml/parsererror.xml";
+        if (root.namespaceURI == nsURI && root.nodeName == "parsererror")
+        {
+            FBTrace.sysout("reps.Description; parse ERROR " + root.firstChild.nodeValue, root);
+
+            return FirebugReps.Warning.tag.replace({object: "css.EmptyElementCSS"},
+                parentNode, FirebugReps.Warning);
+        }
+
+        rootNode.appendChild(root);
+        return rootNode;
+    }
+});
+
+// ************************************************************************************************
+
 Firebug.registerRep(
     this.nsIDOMHistory, // make this early to avoid exceptions
     this.Undefined,

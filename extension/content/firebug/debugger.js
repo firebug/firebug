@@ -3775,8 +3775,16 @@ Firebug.ScriptPanel.WarningRep = domplate(Firebug.Rep,
     {
         Firebug.setPref("javascript", "enabled", true);
 
-        var panel = Firebug.getElementPanel(event.target);
-        panel.context.window.location.reload();
+        this.reloadPageFromMemory(event.target);
+    },
+
+    reloadPageFromMemory: function(event)
+    {
+        var context= Firebug.getElementPanel(event.target).context;
+        if (context.browser)
+            context.browser.reloadWithFlags(Ci.nsIWebNavigation.LOAD_FLAGS_CHARSET_CHANGE)
+        else
+            context.window.location.reload();
     },
 
     onFocusDebugger: function(event)
@@ -3800,9 +3808,15 @@ Firebug.ScriptPanel.WarningRep = domplate(Firebug.Rep,
     {
         var args = {
             pageTitle: $STR("script.warning.inactive_during_page_load"),
-            suggestion: $STR("script.suggestion.inactive_during_page_load")
+            suggestion: $STR("script.suggestion.inactive_during_page_load2")
         };
-        return this.tag.replace(args, parentNode, this);
+
+        var box = this.tag.replace(args, parentNode, this);
+        var description = box.querySelector(".disabledPanelDescription");
+        FirebugReps.Description.render(args.suggestion, description,
+            bind(this.reloadPageFromMemory, this));
+
+        return box;
     },
 
     showNotEnabled: function(parentNode)
