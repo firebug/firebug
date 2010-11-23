@@ -261,7 +261,7 @@ panelTab[selected="true"]:hover > panelTabMenu .menuTarget {
 /***********************************************************************************************/
 /* Don't let Personas to destroy Firebug's CSS */
 
-#fbContentBox *:-moz-lwtheme {
+#fbContentBox:-moz-lwtheme {
     text-shadow: none !important;
     color: -moz-dialogtext;
 }

@@ -85,8 +85,7 @@ toolbar[iconsize="small"] #firebug-button > .toolbarbutton-icon {
     font-size: 12px;
     direction: ltr;
     width: 100%;
-    background: none repeat scroll 0% 0% -moz-field;
-    color: -moz-fieldtext !important;
+    background: none repeat scroll 0% 0% transparent;
     position: relative;
     z-index: 3;
 }
@@ -201,7 +200,7 @@ toolbar[iconsize="small"] #firebug-button > .toolbarbutton-icon {
     -moz-border-left-colors: #96969D;
     padding: 2px 0 2px 21px;
     background: -moz-field url(chrome://firebug/skin/search.png) no-repeat 4px 1px;
-    font: icon;
+    font: message-box;
     font-size: 11px;
     direction: ltr;
 }
@@ -229,7 +228,8 @@ textbox[type="fbSearchBox"] > panel {
 
 #fbCommandBox {
     border-top: 1px solid #CCCCCC;
-    background-color: -moz-dialog;
+    background-color: -moz-field;
+    color: -moz-fieldtext;
 }
 
 /********************************************************************************************/
