@@ -865,12 +865,7 @@ Firebug.CSSStyleSheetPanel.prototype = extend(Firebug.SourceBoxPanel,
         if (styleSheet && styleSheet.editStyleSheet)
             styleSheet = styleSheet.editStyleSheet.sheet;
 
-try {
-	        var rules = this.getStyleSheetRules(this.context, styleSheet);
-
-} catch (e) {
-    FBTrace.sysout("css.updateLocation; EXCEPTION " + e, e);
-}
+        var rules = this.getStyleSheetRules(this.context, styleSheet);
 
         if (rules && rules.length)
         {
