@@ -455,6 +455,9 @@ Firebug.CSSStyleSheetPanel.prototype = extend(Firebug.SourceBoxPanel,
 
     getStyleSheetRules: function(context, styleSheet)
     {
+        if (!styleSheet)
+            return [];
+
         if (styleSheet.ownerNode && unwrapObject(styleSheet.ownerNode).firebugIgnore)
             return [];
 
@@ -849,29 +852,26 @@ Firebug.CSSStyleSheetPanel.prototype = extend(Firebug.SourceBoxPanel,
         if (FBTrace.DBG_CSS)
             FBTrace.sysout("css.updateLocation; " + (styleSheet ? styleSheet.href : "no stylesheet"));
 
-        if (!styleSheet)
-            return;
-
-        if (styleSheet.editStyleSheet)
+        if (styleSheet && styleSheet.editStyleSheet)
             styleSheet = styleSheet.editStyleSheet.sheet;
 
         var rules = this.getStyleSheetRules(this.context, styleSheet);
-
-        var result;
-        if (rules.length)
+        if (rules && rules.length)
         {
-            result = this.template.tag.replace({rules: rules}, this.panelNode);
+            this.template.tag.replace({rules: rules}, this.panelNode);
         }
         else
         {
+            // If there are no stylesheetes on the page (and so no rules) display
+            // a description that also contains a link "create a rule".
             var warning = FirebugReps.Warning.tag.replace({object: ""}, this.panelNode);
-            result = FirebugReps.Description.render($STR("css.EmptyStyleSheet"),
+            FirebugReps.Description.render($STR("css.EmptyStyleSheet"),
                 warning, bind(this.insertRule, this));
         }
 
         this.showToolbarButtons("fbCSSButtons", !isSystemStyleSheet(this.location));
 
-        dispatch(this.fbListeners, 'onCSSRulesAdded', [this, this.panelNode]);
+        dispatch(this.fbListeners, "onCSSRulesAdded", [this, this.panelNode]);
 
         // If the full editing mode (not the inline) is on while the location changes,
         // open the editor again for another file.
