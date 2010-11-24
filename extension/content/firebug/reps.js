@@ -7,8 +7,6 @@ var FirebugReps = FBL.ns(function() { with (FBL) {
 
 const Cc = Components.classes;
 const Ci = Components.interfaces;
-const jsdIStackFrame = Ci.jsdIStackFrame;
-const jsdIScript = Ci.jsdIScript;
 
 Components.utils.import("resource://firebug/firebug-service.js");
 
@@ -246,76 +244,6 @@ this.Func = domplate(Firebug.Rep,
 });
 
 // ************************************************************************************************
-
-this.jsdScript = domplate(Firebug.Rep,
-{
-    copySource: function(script)
-    {
-        var fn = unwrapIValue(script.functionObject); // XXXjjb all of the script.functionObjects should be removed see bug 521010
-        return FirebugReps.Func.copySource(fn);
-    },
-
-    monitor: function(fn, script, monitored)
-    {
-        fn = unwrapIValue(script.functionObject);
-        return FirebugReps.Func.monitor(fn, script, monitored);
-    },
-
-    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
-
-    className: "jsdScript",
-    inspectable: false,
-
-    supportsObject: function(object, type)
-    {
-        if ( object instanceof jsdIScript )
-            FBTrace.sysout("jsdIScript objects no longer supported in Firebug front end");
-        return false;
-    },
-
-    inspectObject: function(script, context)
-    {
-        var sourceLink = getSourceLinkForScript(script, context);
-        if (sourceLink)
-            Firebug.chrome.select(sourceLink);
-    },
-
-    getRealObject: function(script, context)
-    {
-        return script;
-    },
-
-    getTooltip: function(script)
-    {
-        return $STRF("jsdIScript", [script.tag]);
-    },
-
-    getTitle: function(script, context)
-    {
-        var fn = unwrapIValue(script.functionObject);
-        return FirebugReps.Func.getTitle(fn, context);
-    },
-
-    getContextMenuItems: function(script, target, context)
-    {
-        var fn = unwrapIValue(script.functionObject);
-
-        var scriptInfo = Firebug.SourceFile.getSourceFileAndLineByScript(context, script);
-           var monitored = scriptInfo ? fbs.isMonitored(scriptInfo.sourceFile.href, scriptInfo.lineNo) : false;
-
-        var name = getFunctionName(script, context);
-
-        return [
-            {label: "CopySource", command: bindFixed(this.copySource, this, script) },
-            "-",
-            {label: $STRF("ShowCallsInConsole", [name]), nol10n: true,
-             type: "checkbox", checked: monitored,
-             command: bindFixed(this.monitor, this, fn, monitored) }
-        ];
-    }
-});
-
-//************************************************************************************************
 
 this.Obj = domplate(Firebug.Rep,
 {
@@ -1607,44 +1535,6 @@ this.StackTrace = domplate(Firebug.Rep,
     }
 });
 
-// ************************************************************************************************
-// Mozilla
-
-this.jsdStackFrame = domplate(Firebug.Rep,
-{
-    inspectable: false,
-
-    className: "jsdIStackFrame",
-
-    supportsObject: function(object, type)
-    {
-        return (object instanceof jsdIStackFrame);
-    },
-
-    getTitle: function(frame, context)
-    {
-        if (!frame.isValid) return "(invalid frame)"; // XXXjjb avoid frame.script == null
-        return getFunctionName(frame.script, context, frame, true);
-    },
-
-    getTooltip: function(frame, context)
-    {
-        if (!frame.isValid) return "(invalid frame; did Firebug suspend?)";  // XXXjjb avoid frame.script == null
-        var sourceInfo = Firebug.SourceFile.getSourceFileAndLineByScript(context, frame.script, frame);
-        if (sourceInfo)
-            return $STRF("Line", [sourceInfo.sourceFile.href, sourceInfo.lineNo]);
-        else
-            return $STRF("Line", [frame.script.fileName, frame.line]);
-    },
-
-    getContextMenuItems: function(frame, target, context)
-    {
-        var fn = unwrapIValue(frame.script.functionObject);
-        return FirebugReps.Func.getContextMenuItems(fn, target, context, frame.script);
-    }
-});
-
-// ************************************************************************************************
 
 this.ErrorMessage = domplate(Firebug.Rep,
 {
@@ -2317,8 +2207,6 @@ Firebug.registerRep(
     this.SourceFile,
     this.StackTrace,
     this.StackFrame,
-    this.jsdStackFrame,
-    this.jsdScript,
     this.NetFile,
     this.Property,
     this.Except,
