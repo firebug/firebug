@@ -1807,6 +1807,12 @@ CSSEditor.prototype = domplate(Firebug.InlineEditor.prototype,
     insertNewRow: function(target, insertWhere)
     {
         var rule = Firebug.getRepObject(target);
+        if (!rule)
+        {
+            if (FBTrace.DBG_CSS)
+                FBTrace.sysout("CSSEditor.insertNewRow; ERROR There is no CSS rule", target);
+            return;
+        }
 
         var emptyProp = {name: "", value: "", important: ""};
 
@@ -1941,10 +1947,21 @@ CSSRuleEditor.prototype = domplate(Firebug.InlineEditor.prototype,
 
         target.innerHTML = escapeForCss(value);
 
-        if (value === previousValue)     return;
+        if (value === previousValue)
+            return;
 
         var row = getAncestorByClass(target, "cssRule");
         var styleSheet = this.panel.location;
+
+        // If there is no stylesheet on the page we need to create one to make a place
+        // where to put the custom user provided rule.
+        if (!styleSheet)
+        {
+            if (FBTrace.DBG_CSS)
+                FBTrace.sysout("CSSRuleEditor.saveEdit: ERROR There is no stylesheet!");
+            return;
+        }
+
         styleSheet = styleSheet.editStyleSheet ? styleSheet.editStyleSheet.sheet : styleSheet;
 
         var cssRules = styleSheet.cssRules;
@@ -2000,7 +2017,9 @@ CSSRuleEditor.prototype = domplate(Firebug.InlineEditor.prototype,
                 row.repObject = undefined;
                 return;
             }
-        } else {
+        }
+        else
+        {
             rule = undefined;
         }
 
