@@ -3119,7 +3119,6 @@ this.unwrapIValueObject = function(scope)
     return scopeVars;
 };
 
-
 // ************************************************************************************************
 // Source Files
 
@@ -3127,6 +3126,30 @@ this.getSourceFileByHref = function(url, context)
 {
     return context.sourceFileMap[url];
 };
+
+this.sourceURLsAsArray = function(context)
+{
+    var urls = [];
+    var sourceFileMap = context.sourceFileMap;
+    for (var url in sourceFileMap)
+        urls.push(url);
+
+    if (FBTrace.DBG_SOURCEFILES) FBTrace.sysout("sourceURLsAsArray urls="+urls.length+" in context "+context.getName()+"\n");
+
+    return urls;
+};
+
+this.sourceFilesAsArray = function(sourceFileMap)
+{
+    var sourceFiles = [];
+    for (var url in sourceFileMap)
+        sourceFiles.push(sourceFileMap[url]);
+    if (FBTrace.DBG_SOURCEFILES) FBTrace.sysout("sourceFilesAsArray sourcefiles="+sourceFiles.length, sourceFiles);
+    return sourceFiles;
+};
+
+// ************************************************************************************************
+// CSS
 
 this.getAllStyleSheets = function(context)
 {
@@ -3241,27 +3264,18 @@ this.createStyleSheetMap = function(context)
     return context.styleSheetMap;
 };
 
-this.sourceURLsAsArray = function(context)
+this.safeGetCSSRules = function(styleSheet)
 {
-    var urls = [];
-    var sourceFileMap = context.sourceFileMap;
-    for (var url in sourceFileMap)
-        urls.push(url);
+    try
+    {
+        return styleSheet.cssRules;
+    }
+    catch (e)
+    {
+    }
 
-    if (FBTrace.DBG_SOURCEFILES) FBTrace.sysout("sourceURLsAsArray urls="+urls.length+" in context "+context.getName()+"\n");
-
-    return urls;
-};
-
-this.sourceFilesAsArray = function(sourceFileMap)
-{
-    var sourceFiles = [];
-    for (var url in sourceFileMap)
-        sourceFiles.push(sourceFileMap[url]);
-    if (FBTrace.DBG_SOURCEFILES) FBTrace.sysout("sourceFilesAsArray sourcefiles="+sourceFiles.length, sourceFiles);
-    return sourceFiles;
-};
-
+    return null;
+}
 
 // ************************************************************************************************
 // Firefox browsing

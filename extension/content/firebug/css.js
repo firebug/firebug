@@ -462,23 +462,36 @@ Firebug.CSSStyleSheetPanel.prototype = extend(Firebug.SourceBoxPanel,
 
         function appendRules(cssRules)
         {
-            for (var i = 0; i < cssRules.length; ++i)
+            if (!cssRules)
+                return;
+
+            for (var i=0; i<cssRules.length; ++i)
             {
                 var rule = cssRules[i];
                 if (rule instanceof CSSStyleRule)
                 {
                     var props = this.getRuleProperties(context, rule);
                     var ruleId = getRuleId(rule);
-                    rules.push({tag: CSSStyleRuleTag.tag, rule: rule, id: ruleId,
-                                selector: rule.selectorText.replace(/ :/g, " *:"), // Show universal selectors with pseudo-class (http://code.google.com/p/fbug/issues/detail?id=3683)
-                                props: props,
-                                isSystemSheet: isSystemSheet,
-                                isSelectorEditable: true});
+                    rules.push({
+                        tag: CSSStyleRuleTag.tag,
+                        rule: rule,
+                        id: ruleId,
+                        // Show universal selectors with pseudo-class
+                        // (http://code.google.com/p/fbug/issues/detail?id=3683)
+                        selector: rule.selectorText.replace(/ :/g, " *:"),
+                        props: props,
+                        isSystemSheet: isSystemSheet,
+                        isSelectorEditable: true
+                    });
                 }
                 else if (rule instanceof CSSImportRule)
+                {
                     rules.push({tag: CSSImportRuleTag.tag, rule: rule});
+                }
                 else if (rule instanceof CSSMediaRule)
-                    appendRules.apply(this, [rule.cssRules]);
+                {
+                    appendRules.apply(this, [safeGetCSSRules(styleSheet)]);
+                }
                 else
                 {
                     if (FBTrace.DBG_ERRORS || FBTrace.DBG_CSS)
@@ -488,7 +501,7 @@ Firebug.CSSStyleSheetPanel.prototype = extend(Firebug.SourceBoxPanel,
         }
 
         var rules = [];
-        appendRules.apply(this, [styleSheet.cssRules]);
+        appendRules.apply(this, [safeGetCSSRules(styleSheet)]);
         return rules;
     },
 
@@ -852,7 +865,13 @@ Firebug.CSSStyleSheetPanel.prototype = extend(Firebug.SourceBoxPanel,
         if (styleSheet && styleSheet.editStyleSheet)
             styleSheet = styleSheet.editStyleSheet.sheet;
 
-        var rules = this.getStyleSheetRules(this.context, styleSheet);
+try {
+	        var rules = this.getStyleSheetRules(this.context, styleSheet);
+
+} catch (e) {
+    FBTrace.sysout("css.updateLocation; EXCEPTION " + e, e);
+}
+
         if (rules && rules.length)
         {
             this.template.tag.replace({rules: rules}, this.panelNode);
