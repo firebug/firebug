@@ -2682,21 +2682,6 @@ this.getCurrentStackTrace = function(context)
     return trace;
 };
 
-this.getCurrentJSDStackDump = function()
-{
-    var trace = null;
-
-    Firebug.Debugger.halt(function(frame)
-    {
-        if (FBTrace.DBG_STACK) FBTrace.sysout("lib.getCurrentJSDStackDump frame:", frame);
-        trace = FBL.getJSDStackDump(frame);
-        if (FBTrace.DBG_STACK) FBTrace.sysout("lib.getCurrentJSDStackDump trace:", trace);
-    });
-
-    return trace;
-};
-
-
 this.getStackTrace = deprecated("name change for self-documentation", this.getCorrectedStackTrace);
 
 /*
