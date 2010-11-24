@@ -2269,7 +2269,7 @@ this.Description = domplate(Firebug.Rep,
         {
             // Only clicks on links are passed to the original listener.
             var localName = event.target.localName;
-            if (localName && localName.toLowerCase() == "a")
+            if (listener && localName && localName.toLowerCase() == "a")
                 listener(event);
         };
 

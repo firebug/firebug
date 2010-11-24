@@ -859,9 +859,15 @@ Firebug.CSSStyleSheetPanel.prototype = extend(Firebug.SourceBoxPanel,
 
         var result;
         if (rules.length)
+        {
             result = this.template.tag.replace({rules: rules}, this.panelNode);
+        }
         else
-            result = FirebugReps.Warning.tag.replace({object: "EmptyStyleSheet"}, this.panelNode);
+        {
+            var warning = FirebugReps.Warning.tag.replace({object: ""}, this.panelNode);
+            result = FirebugReps.Description.render($STR("css.EmptyStyleSheet"),
+                warning, bind(this.insertRule, this));
+        }
 
         this.showToolbarButtons("fbCSSButtons", !isSystemStyleSheet(this.location));
 
