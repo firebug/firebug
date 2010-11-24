@@ -182,12 +182,12 @@ this.Func = domplate(Firebug.Rep,
             copyToClipboard(fn.toSource());
     },
 
-    monitor: function(fn, script, monitored)
+    monitor: function(fn, monitored)
     {
         if (monitored)
-            Firebug.Debugger.unmonitorScript(fn, script, "monitor");
+            Firebug.Debugger.unmonitorFunction(fn,  "monitor");
         else
-            Firebug.Debugger.monitorScript(fn, script, "monitor");
+            Firebug.Debugger.monitorFunction(fn, "monitor");
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
@@ -240,7 +240,7 @@ this.Func = domplate(Firebug.Rep,
             "-",
             {label: $STRF("ShowCallsInConsole", [name]), nol10n: true,
              type: "checkbox", checked: monitored,
-             command: bindFixed(this.monitor, this, fn, script, monitored) }
+             command: bindFixed(this.monitor, this, fn, monitored) }
         ];
     }
 });
@@ -268,7 +268,9 @@ this.jsdScript = domplate(Firebug.Rep,
 
     supportsObject: function(object, type)
     {
-        return object instanceof jsdIScript;
+        if ( object instanceof jsdIScript )
+            FBTrace.sysout("jsdIScript objects no longer supported in Firebug front end");
+        return false;
     },
 
     inspectObject: function(script, context)
@@ -308,7 +310,7 @@ this.jsdScript = domplate(Firebug.Rep,
             "-",
             {label: $STRF("ShowCallsInConsole", [name]), nol10n: true,
              type: "checkbox", checked: monitored,
-             command: bindFixed(this.monitor, this, fn, script, monitored) }
+             command: bindFixed(this.monitor, this, fn, monitored) }
         ];
     }
 });
