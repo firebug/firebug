@@ -455,10 +455,7 @@ Firebug.CSSStyleSheetPanel.prototype = extend(Firebug.SourceBoxPanel,
 
     getStyleSheetRules: function(context, styleSheet)
     {
-        if (!styleSheet)
-            return [];
-
-        if (styleSheet.ownerNode && unwrapObject(styleSheet.ownerNode).firebugIgnore)
+        if (!styleSheet || (styleSheet.ownerNode && unwrapObject(styleSheet.ownerNode).firebugIgnore))
             return [];
 
         var isSystemSheet = isSystemStyleSheet(styleSheet);
