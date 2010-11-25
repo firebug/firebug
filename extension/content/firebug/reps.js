@@ -2181,6 +2181,9 @@ this.Description = domplate(Firebug.Rep,
                 parentNode, FirebugReps.Warning);
         }
 
+        // Nodes from external documents need to be imported.
+        root = rootNode.ownerDocument.importNode(root, true);
+
         rootNode.appendChild(root);
         return rootNode;
     }
