@@ -378,7 +378,11 @@ this.createStyleSheet = function(doc, url)
     var style = doc.createElementNS("http://www.w3.org/1999/xhtml", "style");
     style.setAttribute("charset","utf-8");
     style.setAttribute("type", "text/css");
-    style.innerHTML = this.getResource(url);
+
+    var cssText = this.getResource(url);
+    if (cssText)
+        style.innerHTML = cssText;
+
     FBL.unwrapObject(style).firebugIgnore = true;
     return style;
 }
@@ -401,6 +405,8 @@ this.appendStylesheet = function(doc, uri)
     var styleSheet = this.createStyleSheet(doc, uri);
     styleSheet.setAttribute("id", uri);
     this.addStyleSheet(doc, styleSheet);
+
+    return styleSheet;
 },
 
 this.addScript = function(doc, id, src)

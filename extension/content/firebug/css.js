@@ -307,14 +307,12 @@ Firebug.CSSModule = extend(Firebug.Module,
         //
         // WARN: This behavior was determined anecdotally.
         // See http://code.google.com/p/fbug/issues/detail?id=2440
-        if (!isXMLPrettyPrint(doc)) {
-          var style = doc.createElementNS("http://www.w3.org/1999/xhtml", "style");
-          style.setAttribute("charset","utf-8");
-          unwrapObject(style).firebugIgnore = true;
-          style.setAttribute("type", "text/css");
-          style.innerHTML = "#fbIgnoreStyleDO_NOT_USE {}";
-          addStyleSheet(doc, style);
-          style.parentNode.removeChild(style);
+        if (!isXMLPrettyPrint(doc))
+        {
+            var style = createStyleSheet(doc);
+            style.innerHTML = "#fbIgnoreStyleDO_NOT_USE {}";
+            addStyleSheet(doc, style);
+            style.parentNode.removeChild(style);
         }
 
         // https://bugzilla.mozilla.org/show_bug.cgi?id=500365
@@ -455,7 +453,11 @@ Firebug.CSSStyleSheetPanel.prototype = extend(Firebug.SourceBoxPanel,
 
     getStyleSheetRules: function(context, styleSheet)
     {
-        if (!styleSheet || (styleSheet.ownerNode && unwrapObject(styleSheet.ownerNode).firebugIgnore))
+        // Skip all stylesheets marked as 'firebugIgnore', but don't skip the
+        // default stylesheet that is used in case there is no other stylesheet
+        // on the page.
+        var unwrapped = styleSheet ? unwrapObject(styleSheet.ownerNode) : null;
+        if (!styleSheet || unwrapped && unwrapped.firebugIgnore && !unwrapped.defaultStylesheet)
             return [];
 
         var isSystemSheet = isSystemStyleSheet(styleSheet);
@@ -866,15 +868,14 @@ Firebug.CSSStyleSheetPanel.prototype = extend(Firebug.SourceBoxPanel,
             styleSheet = styleSheet.editStyleSheet.sheet;
 
         var rules = this.getStyleSheetRules(this.context, styleSheet);
-
         if (rules && rules.length)
         {
             this.template.tag.replace({rules: rules}, this.panelNode);
         }
         else
         {
-            // If there are no stylesheetes on the page (and so no rules) display
-            // a description that also contains a link "create a rule".
+            // If there are no rules on the page display a description that also
+            // contains a link "create a rule".
             var warning = FirebugReps.Warning.tag.replace({object: ""}, this.panelNode);
             FirebugReps.Description.render($STR("css.EmptyStyleSheet"),
                 warning, bind(this.insertRule, this));
@@ -1928,10 +1929,10 @@ CSSRuleEditor.prototype = domplate(Firebug.InlineEditor.prototype,
     insertNewRow: function(target, insertWhere)
     {
         var emptyRule = {
-             selector: "",
-             id: "",
-             props: [],
-             isSelectorEditable: true
+            selector: "mySelector", // xxxHonza localization
+            id: "",
+            props: [],
+            isSelectorEditable: true
         };
 
         if (insertWhere == "before")
@@ -1953,13 +1954,19 @@ CSSRuleEditor.prototype = domplate(Firebug.InlineEditor.prototype,
         var row = getAncestorByClass(target, "cssRule");
         var styleSheet = this.panel.location;
 
-        // If there is no stylesheet on the page we need to create one to make a place
-        // where to put the custom user provided rule.
         if (!styleSheet)
         {
-            if (FBTrace.DBG_CSS)
-                FBTrace.sysout("CSSRuleEditor.saveEdit: ERROR There is no stylesheet!");
-            return;
+            // If there is no stylesheet on the page we need to create a temporary one,
+            // in order to make a place where to put (custom) user provided rules.
+            // If this code would be in this.getDefaultLocation the default stylesheet
+            // would be created automatically for all pages with not styles, which
+            // could be damaging for special pages (see eg issue 2440)
+            // At this moment the user edits the styles so some CSS changes on the page
+            // are expected.
+            var doc = this.panel.context.window.document;
+            var style = appendStylesheet(doc, "chrome://firebug/default-stylesheet.css");
+            FBL.unwrapObject(style).defaultStylesheet = true;
+            this.panel.location = styleSheet = style.sheet;
         }
 
         styleSheet = styleSheet.editStyleSheet ? styleSheet.editStyleSheet.sheet : styleSheet;
