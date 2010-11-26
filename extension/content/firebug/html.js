@@ -821,6 +821,7 @@ Firebug.HTMLPanel.prototype = extend(WalkingPanel,
             var node = Firebug.getRepObject(event.target);
             this.noScrollIntoView = true;
             this.select(node);
+            $('fbToggleHTMLEditing').disabled = nonEditableTags.hasOwnProperty(node.localName);
             delete this.noScrollIntoView;
             if (hasClass(event.target, "twisty"))
                 this.toggleNode(event);
