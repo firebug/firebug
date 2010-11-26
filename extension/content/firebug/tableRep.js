@@ -179,9 +179,12 @@ FirebugReps.Table = domplate(Firebug.Rep,
         for (var i=0; cols && i<cols.length; i++)
         {
             var col = cols[i];
+            var prop = (typeof(col.property) != "undefined") ? col.property : col;
+            var label = (typeof(col.label) != "undefined") ? col.label : prop;
+
             columns.push({
-                property: (typeof(col.property) != "undefined") ? col.property : col,
-                label: (typeof(col.property) != "undefined") ? col.label : col.toString(),
+                property: prop,
+                label: label,
                 alphaValue: true
             });
         }
@@ -190,11 +193,10 @@ FirebugReps.Table = domplate(Firebug.Rep,
         if (!columns.length)
             columns = this.getHeaderColumns(data);
 
-        // Limit string values. The default value for cropping is still to big
-        // to be displayed within a table cell.
-        // xxxHonza: is there better way how to do this?
+        // Don't limit strings in the table. It should be mostly ok. In case of 
+        // complaints we need an option.
         var prevValue = Firebug.stringCropLength;
-        Firebug.stringCropLength = 15;
+        Firebug.stringCropLength = -1;
 
         try
         {

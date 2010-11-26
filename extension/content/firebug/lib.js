@@ -2377,22 +2377,30 @@ this.escapeJS = function(value)
 this.cropString = function(text, limit, alterText)
 {
     if (!alterText)
-        alterText = "..."; //…
+        alterText = "...";
 
+    // Make sure it's a string.
     text = text + "";
 
+    // Use default limit if necessary.
     if (!limit)
         limit = Firebug.stringCropLength;
+
+    // Crop the string only if a limit is actualy specified.
+    if (limit <= 0)
+        return text;
+
     var halfLimit = (limit / 2);
     halfLimit -= 2; // adjustment for alterText's increase in size
 
     if (text.length > limit)
         return text.substr(0, halfLimit) + alterText + text.substr(text.length-halfLimit);
-    else
-        return text;
+
+    return text;
 };
 
-this.lineBreak = function() {
+this.lineBreak = function()
+{
     if (navigator.appVersion.indexOf("Win") != -1)
     {
       return '\r\n';

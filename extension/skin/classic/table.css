@@ -45,6 +45,12 @@
     padding: 1px 4px 0 4px;
 }
 
+/* The last column needs more horizontal space since part of it is overlapped by
+   the vertical scroll bar */
+.dataTable td:last-child {
+    padding-right: 20px;
+}
+
 .useA11y .dataTable *:focus {
     outline-offset: -2px;
 }
