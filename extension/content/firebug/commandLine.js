@@ -605,7 +605,7 @@ Firebug.CommandLine = extend(Firebug.Module,
     {
         var showCompletionPopup = Firebug.getPref(Firebug.prefDomain, "commandLineShowCompleterPopup");
         this.autoCompleter = new Firebug.AutoCompleter(getExpressionOffset, getDot,
-                bind(autoCompleteEval, this), false, true, true, true, showCompletionPopup);
+                bind(autoCompleteEval, this), false, true, true, true, showCompletionPopup, isValidProperty);
     },
 
     initializeUI: function()
@@ -1085,6 +1085,24 @@ function autoCompleteEval(preExpr, expr, postExpr, context)
             FBTrace.sysout("commandLine.autoCompleteEval FAILED", exc);
         return [];
     }
+}
+
+var reValidJSToken = /^[A-Za-z_$][A-Za-z_$0-9]*/;
+function isValidProperty(value)
+{
+    // Use only string props
+    if (typeof(value) != "string")
+        return false;
+
+    // Use only those props that don't contain unsafe charactes and so need
+    // quotation (e.g. object["my prop"] notice the space character).
+    // Following expression checks that the name starts with a letter or $_,
+    // and there are only letters, numbers or $_ character in the string (no spaces).
+
+    if (value.match(reValidJSToken) == value)
+        return true;
+    else
+        return false;
 }
 
 function addMatchingKeyword(expr, completions)

@@ -1912,6 +1912,13 @@ CSSEditor.prototype = domplate(Firebug.InlineEditor.prototype,
             var propName = getChildByClass(row, "cssPropName").textContent;
             return getCSSKeywordsByProperty(getElementSimpleType(Firebug.getRepObject(this.target)),propName);
         }
+    },
+
+    reValidCSSToken: /^[A-Za-z_$\-][A-Za-z_$\-0-9]*/,
+
+    isValidAutoCompleteProperty: function(value)
+    {
+        return this.reValidCSSToken.test(value);
     }
 });
 
