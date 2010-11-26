@@ -12,11 +12,11 @@ FirebugReps.Table = domplate(Firebug.Rep,
     className: "table",
 
     tag:
-        DIV({"class": "profileSizer", "tabindex": "-1" },
-            TABLE({"class": "profileTable", cellspacing: 0, cellpadding: 0, width: "100%",
+        DIV({"class": "dataTableSizer", "tabindex": "-1" },
+            TABLE({"class": "dataTable", cellspacing: 0, cellpadding: 0, width: "100%",
                 "role": "grid"},
-                THEAD({"class": "profileThead", "role": "presentation"},
-                    TR({"class": "headerRow focusRow profileRow subFocusRow", "role": "row",
+                THEAD({"class": "dataTableThead", "role": "presentation"},
+                    TR({"class": "headerRow focusRow dataTableRow subFocusRow", "role": "row",
                         onclick: "$onClickHeader"},
                         FOR("column", "$object.columns",
                             TH({"class": "headerCell a11yFocus", "role": "columnheader",
@@ -28,11 +28,11 @@ FirebugReps.Table = domplate(Firebug.Rep,
                         )
                     )
                 ),
-                TBODY({"class": "profileTbody", "role": "presentation"},
+                TBODY({"class": "dataTableTbody", "role": "presentation"},
                     FOR("row", "$object.data|getRows",
-                        TR({"class": "focusRow profileRow subFocusRow", "role": "row"},
+                        TR({"class": "focusRow dataTableRow subFocusRow", "role": "row"},
                             FOR("column", "$row|getColumns",
-                                TD({"class": "a11yFocus profileCell", "role": "gridcell"},
+                                TD({"class": "a11yFocus dataTableCell", "role": "gridcell"},
                                     TAG("$column|getValueTag", {object: "$column"})
                                 )
                             )
@@ -102,7 +102,7 @@ FirebugReps.Table = domplate(Firebug.Rep,
 
     onClickHeader: function(event)
     {
-        var table = getAncestorByClass(event.target, "profileTable");
+        var table = getAncestorByClass(event.target, "dataTable");
         var header = getAncestorByClass(event.target, "headerCell");
         if (!header)
             return;
@@ -118,8 +118,8 @@ FirebugReps.Table = domplate(Firebug.Rep,
 
     sort: function(table, colIndex, numerical)
     {
-        var tbody = getChildByClass(table, "profileTbody");
-        var thead = getChildByClass(table, "profileThead");
+        var tbody = getChildByClass(table, "dataTableTbody");
+        var thead = getChildByClass(table, "dataTableThead");
 
         var values = [];
         for (var row = tbody.childNodes[0]; row; row = row.nextSibling)
@@ -202,7 +202,7 @@ FirebugReps.Table = domplate(Firebug.Rep,
             var row = Firebug.Console.log({data: data, columns: columns}, context, "table", this, true);
 
             // Set vertical height for scroll bar.
-            var tBody = row.querySelector(".profileTbody");
+            var tBody = row.querySelector(".dataTableTbody");
             var maxHeight = Firebug.tabularLogMaxHeight;
             if (maxHeight > 0 && tBody.clientHeight > maxHeight)
                 tBody.style.height = maxHeight + "px";
