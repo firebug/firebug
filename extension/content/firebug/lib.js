@@ -379,7 +379,7 @@ this.createStyleSheet = function(doc, url)
     style.setAttribute("charset","utf-8");
     style.setAttribute("type", "text/css");
 
-    var cssText = this.getResource(url);
+    var cssText = url ? this.getResource(url) : null;
     if (cssText)
         style.innerHTML = cssText;
 
