@@ -1349,7 +1349,7 @@ CSSElementPanel.prototype = extend(Firebug.CSSStyleSheetPanel.prototype,
     }),
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
-
+    // All calls to this method must call cleanupSheets first
     updateCascadeView: function(element)
     {
         dispatch(this.fbListeners, 'onBeforeCSSRulesAdded', [this]);
@@ -1383,7 +1383,7 @@ CSSElementPanel.prototype = extend(Firebug.CSSStyleSheetPanel.prototype,
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
-
+    // All calls to this method must call cleanupSheets first
     getInheritedRules: function(element, sections, usedProps)
     {
         var parent = element.parentNode;
@@ -1399,6 +1399,7 @@ CSSElementPanel.prototype = extend(Firebug.CSSStyleSheetPanel.prototype,
         }
     },
 
+    // All calls to this method must call cleanupSheets first
     getElementRules: function(element, rules, usedProps, inheritMode)
     {
         var inspectedRules, displayedRules = {};
@@ -1538,6 +1539,7 @@ CSSElementPanel.prototype = extend(Firebug.CSSStyleSheetPanel.prototype,
 
     updateView: function(element)
     {
+        Firebug.CSSModule.cleanupSheets(element.ownerDocument, Firebug.currentContext);
         this.updateCascadeView(element);
         if (domUtils)
         {
