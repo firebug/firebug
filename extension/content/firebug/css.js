@@ -492,7 +492,7 @@ Firebug.CSSStyleSheetPanel.prototype = extend(Firebug.SourceBoxPanel,
                 }
                 else if (rule instanceof CSSMediaRule)
                 {
-                    appendRules.apply(this, [safeGetCSSRules(styleSheet)]);
+                    appendRules.apply(this, [safeGetCSSRules(rule)]);
                 }
                 else
                 {
