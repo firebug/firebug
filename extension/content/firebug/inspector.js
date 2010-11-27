@@ -435,20 +435,11 @@ Firebug.Inspector = extend(Firebug.Module,
         this.inspectNode(null);
     },
 
-    quickInfoBoxDragStart: function()
+    quickInfoBoxHandler: function(e)
     {
-        quickInfoBox.dragStart();
-    },
-
-    quickInfoBoxDrag: function(event)
-    {
-        quickInfoBox.drag(event);
-    },
-
-    quickInfoBoxDragEnd: function()
-    {
-        quickInfoBox.dragEnd();
+        quickInfoBox.handleEvent(e);
     }
+
 });
 
 // ************************************************************************************************
@@ -658,6 +649,8 @@ quickInfoBox =
     {
         if (!this.boxEnabled || !element)
             return;
+        
+        this.needsToHide = false
 
         var vbox, lab,
             needsTitle = false,
@@ -703,59 +696,75 @@ quickInfoBox =
     },
 
     hide: function()
-    {
+    {    // if mouse is over panel defer hiding to mouseout to not cause flickering
+        if (this.mouseover || this.dragging)
+        {
+            this.needsToHide = true;
+            return;
+        }
+            
         var qiBox = $('fbQuickInfoPanel');
         this.prevX = null;
         this.prevY = null;
+        this.needsToHide = false;
         qiBox.hidePopup();
     },
-
-    dragStart: function()
+   
+    handleEvent: function(event)
     {
-        this.dragging = true;
-    },
-
-    dragEnd: function()
-    {
-        this.dragging = false;
-        this.prevX = null;
-        this.prevY = null;
-    },
-
-    drag: function(event)
-    {
-        if(this.dragging)
+        switch (event.type) 
         {
-            var diffX, diffY, newX, newY,
-                qiBox = $('fbQuickInfoPanel'),
-                boxX = qiBox.boxObject.screenX,
-                boxY = qiBox.boxObject.screenY,
-                x = event.screenX,
-                y = event.screenY;
+            case "mousemove":
+                if(!this.dragging)
+                    return;
+            
+                var diffX, diffY,                
+                    boxX = this.qiBox.screenX,
+                    boxY = this.qiBox.screenY,
+                    x = event.screenX,
+                    y = event.screenY;
+               
+                diffX = x - this.prevX;
+                diffY = y - this.prevY;
 
-            this.prevX = this.prevX || x;
-            this.prevY = this.prevY || y;
-            diffX = x - this.prevX;
-            diffY = y - this.prevY;
-            newX = boxX + diffX;
-            newY = boxY + diffY;
-
-            if(newX < 0)
-                newX = 0;
-
-            if(newY < 0)
-                newY = 0;
-
-            if(newY + qiBox.boxObject.height > window.screen.height - 5)
-                newY = window.screen.height - qiBox.boxObject.height - 5;
-
-            qiBox.hidePopup();
-            qiBox.openPopupAtScreen(newX, newY, false);
-
-            this.prevX = x;
-            this.prevY = y;
-            this.storedX = boxX;
-            this.storedY = boxY;
+                this.qiBox.moveTo(boxX + diffX, boxY + diffY);
+                
+                this.prevX = x;
+                this.prevY = y;
+                this.storedX = boxX;
+                this.storedY = boxY;
+                break;
+            case "mousedown":
+                this.qiPanel = $('fbQuickInfoPanel');
+                this.qiBox = this.qiPanel.boxObject;
+                this.qiPanel.addEventListener('mousemove', this, true);
+                this.qiPanel.addEventListener('mouseup', this, true);
+                this.dragging = true;
+                this.prevX = event.screenX;
+                this.prevY = event.screenY;
+                break;
+            case "mouseup":
+                this.qiPanel.removeEventListener('mousemove', this, true);
+                this.qiPanel.removeEventListener('mouseup', this, true);
+                this.qiPanel = this.qiBox = null
+                this.prevX = this.prevY = null;
+                this.dragging = false;
+                break;
+			// this is a hack to find when mouse enters and leaves panel
+			// it requires that #fbQuickInfoPanel have border
+            case "mouseover":
+                if(this.dragging)
+                    return;
+                this.mouseover = true;
+                break;
+            case "mouseout":
+                if(this.dragging)
+                    return;
+                this.mouseover = false;
+                // if hiding was defered because mouse was over panel hide it
+                if (this.needsToHide && event.target.nodeName == 'panel')
+                    this.hide();
+                break;
         }
     },
 

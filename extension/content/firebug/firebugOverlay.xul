@@ -123,12 +123,12 @@
         <menupopup id="fbInlineEditorPopup" />
         <tooltip id="fbTooltip" class="fbURLMenuItem"
             onpopupshowing="return FirebugChrome.onTooltipShowing(event);"/>
-        <menupopup id="fbQuickInfoPanel" width="210" noautohide="true"
-            onmousedown="Firebug.Inspector.quickInfoBoxDragStart();"
-            onmousemove="Firebug.Inspector.quickInfoBoxDrag(event);"
-            onmouseup="Firebug.Inspector.quickInfoBoxDragEnd();">
+        <panel id="fbQuickInfoPanel" width="210" noautohide="true" noautofocus="true" 
+            onmousedown="Firebug.Inspector.quickInfoBoxHandler(event);"
+            onmouseover="Firebug.Inspector.quickInfoBoxHandler(event);"
+            onmouseout="Firebug.Inspector.quickInfoBoxHandler(event);">
             <vbox></vbox>
-        </menupopup>
+        </panel>
         <menupopup id="fbNavigationHistoryMenu"
             oncommand="Firebug.NavigationHistory.onHistoryCommand(event, Firebug.currentContext)"
             onpopupshowing="return Firebug.NavigationHistory.onPopupShowing(this, Firebug.currentContext)" />
