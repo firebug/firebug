@@ -128,6 +128,7 @@ pref("extensions.firebug.DBG_FBS_TRACKFILES", false); // dump all js files to di
 pref("extensions.firebug.DBG_FBS_FUNCTION", false); // firebug new Function              /*@explore*/
 pref("extensions.firebug.DBG_ACTIVATION", false);   // firebug.js and tabWatcher.js      /*@explore*/
 pref("extensions.firebug.DBG_BP", false);           // debugger.js and firebug-services.js; lots of output   /*@explore*/
+pref("extensions.firebug.DBG_COMPILATION_UNITS", false);           // debugger.js and firebug-services.js; lots of output   /*@explore*/
 pref("extensions.firebug.DBG_TOPLEVEL", false);     // top level jsd scripts                     /*@explore*/
 pref("extensions.firebug.DBG_STACK", false);        // call stack, mostly debugger.js            /*@explore*/
 pref("extensions.firebug.DBG_UI_LOOP", false);      // debugger.js                               /*@explore*/

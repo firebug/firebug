@@ -2785,8 +2785,10 @@ Firebug.ScriptPanel.prototype = extend(Firebug.SourceBoxPanel,
 
     toggleBreakpoint: function(lineNo)
     {
-        var sourceFile = this.getSourceFileBySourceBox(this.selectedSourceBox);
+        var href = this.getSourceBoxURL(this.selectedSourceBox);
         var lineNode = this.selectedSourceBox.getLineNode(lineNo);
+
+        var sourceFile = this.context.sourceFileMap[href];
 
         if (!sourceFile && FBTrace.DBG_ERRORS)
             FBTrace.sysout("toggleBreakpoint no sourceFile! ", this);
@@ -2801,12 +2803,12 @@ Firebug.ScriptPanel.prototype = extend(Firebug.SourceBoxPanel,
 
     toggleDisableBreakpoint: function(lineNo)
     {
-        var sourceFile = this.getSourceFileBySourceBox(this.selectedSourceBox);
+        var href = this.getSourceBoxURL(this.selectedSourceBox);
         var lineNode = this.selectedSourceBox.getLineNode(lineNo);
         if (lineNode.getAttribute("disabledBreakpoint") == "true")
-            fbs.enableBreakpoint(sourceFile.href, lineNo);
+            fbs.enableBreakpoint(href, lineNo);
         else
-            fbs.disableBreakpoint(sourceFile.href, lineNo);
+            fbs.disableBreakpoint(href, lineNo);
     },
 
     editBreakpointCondition: function(lineNo)
@@ -3327,7 +3329,7 @@ Firebug.ScriptPanel.prototype = extend(Firebug.SourceBoxPanel,
             this.removeAllSourceBoxes();
         }
 
-        this.showSourceFile(updatedSourceFile);
+        this.showSource(updatedSourceFile.href);
         dispatch(this.fbListeners, "onUpdateScriptLocation", [this, updatedSourceFile]);
     },
 

@@ -25,7 +25,7 @@ Firebug.SourceBoxDecorator.prototype =
      * The sourceBox will contain lines from firstRenderedLine to lastRenderedLine
      * The user will be able to see sourceBox.firstViewableLine to sourceBox.lastViewableLine
      */
-    decorate: function(sourceBox, sourceFile)
+    decorate: function(sourceBox, compilationUnit)
     {
         return;
     },
@@ -151,9 +151,9 @@ Firebug.SourceBoxPanel = extend(SourceBoxPanelBase,
         if (context === this.context)
         {
             var url = request.URI.spec;
-            var sourceFile = getSourceFileByHref(url, context);
-            if (sourceFile)
-                this.removeSourceBoxBySourceFile(sourceFile);
+            var compilationUnit = context.getCompilationUnit(url);
+            if (compilationUnit)
+                this.removeSourceBoxByCompilationUnit(compilationUnit);
         }
     },
 
@@ -231,12 +231,12 @@ Firebug.SourceBoxPanel = extend(SourceBoxPanelBase,
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 
-    getSourceBoxBySourceFile: function(sourceFile)
+    getSourceBoxByCompilationUnit: function(compilationUnit)
     {
-        if (sourceFile.href)
+        if (compilationUnit.href)
         {
-            var sourceBox = this.getSourceBoxByURL(sourceFile.href);
-            if (sourceBox && sourceBox.repObject == sourceFile)
+            var sourceBox = this.getSourceBoxByURL(compilationUnit.href);
+            if (sourceBox && sourceBox.repObject == compilationUnit)
                 return sourceBox;
             else
                 return null;  // cause a new one to be created
@@ -248,12 +248,12 @@ Firebug.SourceBoxPanel = extend(SourceBoxPanelBase,
         return url ? this.sourceBoxes[url] : null;
     },
 
-    removeSourceBoxBySourceFile: function(sourceFile)
+    removeSourceBoxByCompilationUnit: function(compilationUnit)
     {
-        var sourceBox = this.getSourceBoxBySourceFile(sourceFile);
-        if (sourceBox)  // else we did not create one for this sourceFile
+        var sourceBox = this.getSourceBoxByCompilationUnit(compilationUnit);
+        if (sourceBox)  // else we did not create one for this compilationUnit
         {
-            delete this.sourceBoxes[sourceFile.href];
+            delete this.sourceBoxes[compilationUnit.href];
 
             if (sourceBox.parentNode === this.panelNode)
                 this.panelNode.removeChild(sourceBox);
@@ -262,7 +262,7 @@ Firebug.SourceBoxPanel = extend(SourceBoxPanelBase,
             {
                 delete this.selectedSourceBox;
                 delete this.location;
-                this.showSourceFile(sourceFile);
+                this.showSource(compilationUnit.href);
             }
         }
     },
@@ -277,36 +277,41 @@ Firebug.SourceBoxPanel = extend(SourceBoxPanelBase,
         }
     },
 
-    showSourceFile: function(sourceFile)
+    showSource: function(url)
     {
-        var sourceBox = this.getSourceBoxBySourceFile(sourceFile);
-        if (FBTrace.DBG_SOURCEFILES)
-            FBTrace.sysout("firebug.showSourceFile: "+sourceFile, sourceBox);
+        var compilationUnit = this.context.getCompilationUnit(url);
+
+        if (FBTrace.DBG_COMPILATION_UNITS)
+            FBTrace.sysout("firebug.showSource: "+url, compilationUnit);
+
+        if (!compilationUnit)
+            return;
+
+        var sourceBox = this.getSourceBoxByCompilationUnit(compilationUnit);
         if (!sourceBox)
         {
             // Has the script tag mutation event arrived?
-            if (sourceFile.compilation_unit_type === "scriptTagAppend" && !sourceFile.source)
+            if (compilationUnit.compilation_unit_type === "scriptTagAppend" && !compilationUnit.source)
             {
                 // prevent recursion, just give message if it does not arrive
-                sourceFile.source = ["script tag mutation event has not arrived"];
+                compilationUnit.source = ["script tag mutation event has not arrived"];
                 return;
             }
-            sourceBox = this.createSourceBox(sourceFile);
+            sourceBox = this.createSourceBox(compilationUnit);
         }
-
 
         this.showSourceBox(sourceBox);
     },
 
     /*
-     * Assumes that locations are sourceFiles, TODO lower class
+     * Assumes that locations are compilationUnits, TODO lower class
      */
     showSourceLink: function(sourceLink)
     {
-        var sourceFile = getSourceFileByHref(sourceLink.href, this.context);
-        if (sourceFile)
+        var compilationUnit = this.context.getCompilationUnit(sourceLink.href);
+        if (compilationUnit)
         {
-            this.navigate(sourceFile);
+            this.navigate(compilationUnit);
             if (sourceLink.line)
             {
                 this.scrollToLine(sourceLink.href, sourceLink.line, this.jumpHighlightFactory(sourceLink.line, this.context));
@@ -335,21 +340,21 @@ Firebug.SourceBoxPanel = extend(SourceBoxPanelBase,
 
     /* Private, do not call outside of this object
     * A sourceBox is a div with additional operations and state.
-    * @param sourceFile there is at most one sourceBox for each sourceFile
+    * @param compilationUnit there is at most one sourceBox for each compilationUnit
     */
-    createSourceBox: function(sourceFile)  // decorator(sourceFile, sourceBox)
+    createSourceBox: function(compilationUnit)  // decorator(compilationUnit, sourceBox)
     {
-        var sourceBox = this.initializeSourceBox(sourceFile);
+        var sourceBox = this.initializeSourceBox(compilationUnit);
 
         sourceBox.decorator = this.decorator;
 
         // Framework connection
         sourceBox.decorator.onSourceBoxCreation(sourceBox);
 
-        this.sourceBoxes[sourceFile.href] = sourceBox;
+        this.sourceBoxes[compilationUnit.href] = sourceBox;
 
-        if (FBTrace.DBG_SOURCEFILES)
-            FBTrace.sysout("firebug.createSourceBox with "+sourceBox.maximumLineNumber+" lines for "+sourceFile+(sourceFile.href?" sourceBoxes":" anon "), sourceBox);
+        if (FBTrace.DBG_COMPILATION_UNITS)
+            FBTrace.sysout("firebug.createSourceBox with "+sourceBox.maximumLineNumber+" lines for "+compilationUnit+(compilationUnit.href?" sourceBoxes":" anon "), sourceBox);
 
         this.panelNode.appendChild(sourceBox);
         this.setSourceBoxLineSizes(sourceBox);
@@ -357,25 +362,25 @@ Firebug.SourceBoxPanel = extend(SourceBoxPanelBase,
         return sourceBox;
     },
 
-    getSourceFileBySourceBox: function(sourceBox)
+    getSourceBoxURL: function(sourceBox)
     {
-        return sourceBox.repObject;
+        return sourceBox.repObject.href;
     },
 
-    initializeSourceBox: function(sourceFile)
+    initializeSourceBox: function(compilationUnit)
     {
         var sourceBox = this.document.createElement("div");
         setClass(sourceBox, "sourceBox");
         collapse(sourceBox, true);
 
-        var lines = sourceFile.loadScriptLines(this.context);
+        var lines = compilationUnit.loadScriptLines(this.context);
         if (!lines)
         {
-            lines = ["Failed to load source for sourceFile "+sourceFile];
+            lines = ["Failed to load source for compilationUnit "+compilationUnit];
         }
 
         sourceBox.lines = lines;
-        sourceBox.repObject = sourceFile;
+        sourceBox.repObject = compilationUnit;
 
         sourceBox.maximumLineNumber = lines.length;
         sourceBox.maxLineNoChars = (sourceBox.maximumLineNumber + "").length;
@@ -420,7 +425,7 @@ Firebug.SourceBoxPanel = extend(SourceBoxPanelBase,
         view.previousSibling.firstChild.firstChild.style.width = sourceBox.lineNoWidth + "px";
         view.nextSibling.firstChild.firstChild.style.width = sourceBox.lineNoWidth +"px";
 
-        if (FBTrace.DBG_SOURCEFILES)
+        if (FBTrace.DBG_COMPILATION_UNITS)
         {
             FBTrace.sysout("setSourceBoxLineSizes size for lineNoCharsSpacer "+lineNoCharsSpacer, size);
             FBTrace.sysout("firebug.setSourceBoxLineSizes, sourceBox.scrollTop "+sourceBox.scrollTop+ " sourceBox.lineHeight: "+sourceBox.lineHeight+" sourceBox.lineNoWidth:"+sourceBox.lineNoWidth+"\n");
@@ -440,13 +445,13 @@ Firebug.SourceBoxPanel = extend(SourceBoxPanelBase,
     },
 
     /* Select sourcebox with href, scroll lineNo into center, highlight lineNo with highlighter given
-     * @param href a URL, null means the selected sourcefile
+     * @param href a URL, null means the selected compilationUnit
      * @param lineNo integer 1-maximumLineNumber
      * @param highlighter callback, a function(sourceBox). sourceBox.centralLine will be lineNo
      */
     scrollToLine: function(href, lineNo, highlighter)
     {
-        if (FBTrace.DBG_SOURCEFILES)
+        if (FBTrace.DBG_COMPILATION_UNITS)
             FBTrace.sysout("SourceBoxPanel.scrollToLine: "+lineNo+"@"+href+" with highlighter "+highlighter, highlighter);
 
         if (this.context.scrollTimeout)
@@ -459,14 +464,14 @@ Firebug.SourceBoxPanel = extend(SourceBoxPanelBase,
         {
             if (!this.selectedSourceBox || this.selectedSourceBox.repObject.href != href)
             {
-                var sourceFile = this.context.sourceFileMap[href];
-                if (!sourceFile)
+                var compilationUnit = this.context.getCompilationUnit(href);
+                if (!compilationUnit)
                 {
-                    if(FBTrace.DBG_SOURCEFILES)
-                        FBTrace.sysout("scrollToLine FAILS, no sourceFile for href "+href, this.context.sourceFileMap);
+                    if(FBTrace.DBG_COMPILATION_UNITS)
+                        FBTrace.sysout("scrollToLine FAILS, no compilationUnit for href "+href, this.context.compilationUnits);
                     return;
                 }
-                this.navigate(sourceFile);
+                this.navigate(compilationUnit);
             }
         }
 
@@ -474,7 +479,7 @@ Firebug.SourceBoxPanel = extend(SourceBoxPanelBase,
         {
             if (!this.selectedSourceBox)
             {
-                if (FBTrace.DBG_SOURCEFILES)
+                if (FBTrace.DBG_COMPILATION_UNITS)
                     FBTrace.sysout("SourceBoxPanel.scrollTimeout no selectedSourceBox");
                 return;
             }
@@ -489,11 +494,11 @@ Firebug.SourceBoxPanel = extend(SourceBoxPanelBase,
                 var linesFromTop = lineNo - this.selectedSourceBox.firstViewableLine;
                 var linesFromBot = this.selectedSourceBox.lastViewableLine - lineNo;
                 skipScrolling = (linesFromTop > 3 && linesFromBot > 3);
-                if (FBTrace.DBG_SOURCEFILES) FBTrace.sysout("SourceBoxPanel.scrollTimeout: skipScrolling: "+skipScrolling+" fromTop:"+linesFromTop+" fromBot:"+linesFromBot);
+                if (FBTrace.DBG_COMPILATION_UNITS) FBTrace.sysout("SourceBoxPanel.scrollTimeout: skipScrolling: "+skipScrolling+" fromTop:"+linesFromTop+" fromBot:"+linesFromBot);
             }
             else  // the selectedSourceBox has not been built
             {
-                if (FBTrace.DBG_SOURCEFILES)
+                if (FBTrace.DBG_COMPILATION_UNITS)
                     FBTrace.sysout("SourceBoxPanel.scrollTimeout, no viewable lines", this.selectedSourceBox);
             }
 
@@ -501,9 +506,9 @@ Firebug.SourceBoxPanel = extend(SourceBoxPanelBase,
             {
                 var viewRange = this.getViewRangeFromTargetLine(this.selectedSourceBox, lineNo);
                 this.selectedSourceBox.newScrollTop = this.getScrollTopFromViewRange(this.selectedSourceBox, viewRange);
-                if (FBTrace.DBG_SOURCEFILES) FBTrace.sysout("SourceBoxPanel.scrollTimeout: newScrollTop "+this.selectedSourceBox.newScrollTop+" vs old "+this.selectedSourceBox.scrollTop+" for "+this.selectedSourceBox.repObject.href);
+                if (FBTrace.DBG_COMPILATION_UNITS) FBTrace.sysout("SourceBoxPanel.scrollTimeout: newScrollTop "+this.selectedSourceBox.newScrollTop+" vs old "+this.selectedSourceBox.scrollTop+" for "+this.selectedSourceBox.repObject.href);
                 this.selectedSourceBox.scrollTop = this.selectedSourceBox.newScrollTop; // *may* cause scrolling
-                if (FBTrace.DBG_SOURCEFILES) FBTrace.sysout("SourceBoxPanel.scrollTimeout: scrollTo "+lineNo+" scrollTop:"+this.selectedSourceBox.scrollTop+ " lineHeight: "+this.selectedSourceBox.lineHeight);
+                if (FBTrace.DBG_COMPILATION_UNITS) FBTrace.sysout("SourceBoxPanel.scrollTimeout: scrollTo "+lineNo+" scrollTop:"+this.selectedSourceBox.scrollTop+ " lineHeight: "+this.selectedSourceBox.lineHeight);
             }
 
             if (this.selectedSourceBox.highlighter)
@@ -532,12 +537,12 @@ Firebug.SourceBoxPanel = extend(SourceBoxPanelBase,
 
                 context.highlightedRow = lineNode;
 
-                if (FBTrace.DBG_SOURCEFILES)
+                if (FBTrace.DBG_COMPILATION_UNITS)
                     FBTrace.sysout("jumpHighlightFactory on line "+lineNo+" lineNode:"+lineNode.innerHTML+"\n");
             }
             else
             {
-                if (FBTrace.DBG_SOURCEFILES)
+                if (FBTrace.DBG_COMPILATION_UNITS)
                     FBTrace.sysout("jumpHighlightFactory no node at line "+lineNo, sourceBox);
             }
 
@@ -554,7 +559,7 @@ Firebug.SourceBoxPanel = extend(SourceBoxPanelBase,
         // But our SourceBoxPanel has viewport that will change size.
         if (this.selectedSourceBox && this.visible)
         {
-            if (FBTrace.DBG_SOURCEFILES)
+            if (FBTrace.DBG_COMPILATION_UNITS)
                 FBTrace.sysout("resizer event: "+event.type, event);
 
             this.reView(this.selectedSourceBox);
@@ -582,7 +587,7 @@ Firebug.SourceBoxPanel = extend(SourceBoxPanelBase,
         {
             if (sourceBox.firstRenderedLine <= viewRange.firstLine && sourceBox.lastRenderedLine >= viewRange.lastLine)
             {
-                if (FBTrace.DBG_SOURCEFILES)
+                if (FBTrace.DBG_COMPILATION_UNITS)
                     FBTrace.sysout("reView skipping sourceBox "+sourceBox.scrollTop+"=scrollTop="+sourceBox.lastScrollTop+", "+ sourceBox.clientHeight+"=clientHeight="+sourceBox.lastClientHeight, sourceBox);
                 // skip work if nothing changes.
                 return;
@@ -642,7 +647,7 @@ Firebug.SourceBoxPanel = extend(SourceBoxPanelBase,
         sourceBox.lastViewableLine = viewRange.lastLine;
         sourceBox.numberOfRenderedLines = sourceBox.lastRenderedLine - sourceBox.firstRenderedLine + 1;
 
-        if (FBTrace.DBG_SOURCEFILES)
+        if (FBTrace.DBG_COMPILATION_UNITS)
             FBTrace.sysout("buildViewAround viewRange: "+viewRange.firstLine+"-"+viewRange.lastLine+" rendered: "+sourceBox.firstRenderedLine+"-"+sourceBox.lastRenderedLine, sourceBox);
     },
 
@@ -779,7 +784,7 @@ Firebug.SourceBoxPanel = extend(SourceBoxPanelBase,
 
         viewRange.centralLine = Math.floor((viewRange.lastLine - viewRange.firstLine)/2);
 
-        if (FBTrace.DBG_SOURCEFILES)
+        if (FBTrace.DBG_COMPILATION_UNITS)
         {
             FBTrace.sysout("getViewRangeFromScrollTop scrollTop:"+scrollTop+" viewRange: "+viewRange.firstLine+"-"+viewRange.lastLine);
             if (!this.noRecurse)
@@ -804,7 +809,7 @@ Firebug.SourceBoxPanel = extend(SourceBoxPanelBase,
         var averageLineHeight = this.getAverageLineHeight(sourceBox);
         var scrollTop = Math.floor(averageLineHeight * (viewRange.firstLine - 1));
 
-        if (FBTrace.DBG_SOURCEFILES)
+        if (FBTrace.DBG_COMPILATION_UNITS)
         {
             FBTrace.sysout("getScrollTopFromViewRange viewRange:"+viewRange.firstLine+"-"+viewRange.lastLine+" averageLineHeight: "+averageLineHeight+" scrollTop "+scrollTop);
             if (!this.noRecurse)
@@ -861,7 +866,7 @@ Firebug.SourceBoxPanel = extend(SourceBoxPanelBase,
         else
             var totalPadding = virtualSourceBoxHeight - sourceBox.viewport.clientHeight;
 
-        if (FBTrace.DBG_SOURCEFILES)
+        if (FBTrace.DBG_COMPILATION_UNITS)
             FBTrace.sysout("getTotalPadding clientHeight:"+sourceBox.viewport.clientHeight+"  max: "+max+" gives total padding "+totalPadding);
 
         return totalPadding;
@@ -887,7 +892,7 @@ Firebug.SourceBoxPanel = extend(SourceBoxPanelBase,
         var linesOfPadding = Math.floor( (topPadding + averageLineHeight)/ averageLineHeight);
         var topPadding = (linesOfPadding - 1)* averageLineHeight;
 
-        if (FBTrace.DBG_SOURCEFILES)
+        if (FBTrace.DBG_COMPILATION_UNITS)
             FBTrace.sysout("setViewportPadding sourceBox.scrollTop - (firstViewRangeOffset - firstRenderedLineOffset): "+sourceBox.scrollTop+"-"+"("+firstViewRangeOffset+"-"+firstRenderedLineOffset+")="+topPadding);
         // we want the bottomPadding to take up the rest
         var totalPadding = this.getTotalPadding(sourceBox);
@@ -899,7 +904,7 @@ Firebug.SourceBoxPanel = extend(SourceBoxPanelBase,
         if (bottomPadding < 0)
             bottomPadding = 0;
 
-        if(FBTrace.DBG_SOURCEFILES)
+        if(FBTrace.DBG_COMPILATION_UNITS)
         {
             FBTrace.sysout("setViewportPadding viewport.offsetHeight: "+sourceBox.viewport.offsetHeight+" viewport.clientHeight "+sourceBox.viewport.clientHeight);
             FBTrace.sysout("setViewportPadding sourceBox.offsetHeight: "+sourceBox.offsetHeight+" sourceBox.clientHeight "+sourceBox.clientHeight);
@@ -956,7 +961,7 @@ Firebug.SourceBoxPanel = extend(SourceBoxPanelBase,
             if (Firebug.uiListeners.length > 0)
                 dispatch(Firebug.uiListeners, "onApplyDecorator", [sourceBox]);
 
-            if (FBTrace.DBG_SOURCEFILES)
+            if (FBTrace.DBG_COMPILATION_UNITS)
                 FBTrace.sysout("sourceBoxDecoratorTimeout "+sourceBox.repObject, sourceBox);
         }
         catch (exc)
@@ -973,7 +978,7 @@ Firebug.SourceBoxPanel = extend(SourceBoxPanelBase,
             if (sourceBox.highlighter)
             {
                 var sticky = sourceBox.highlighter(sourceBox);
-                if (FBTrace.DBG_SOURCEFILES)
+                if (FBTrace.DBG_COMPILATION_UNITS)
                     FBTrace.sysout("asyncHighlighting highlighter sticky:"+sticky,
                         sourceBox.highlighter);
 

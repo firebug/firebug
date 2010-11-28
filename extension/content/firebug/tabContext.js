@@ -27,7 +27,8 @@ Firebug.TabContext = function(win, browser, chrome, persistedState)
     this.windows = [];
     this.panelMap = {};
     this.sidePanelNames = {};
-    this.sourceFileMap = {};
+
+    this.compilationUnits = {};
 
     // New nsITraceableChannel interface (introduced in FF3.0.4) makes possible
     // to re-implement source-cache so, it solves the double-load problem.
@@ -39,10 +40,19 @@ Firebug.TabContext = function(win, browser, chrome, persistedState)
         this.sourceCache = new Firebug.SourceCache(this);
 
     this.global = win;  // used by chromebug
+
+    // -- Back end support --
+    this.sourceFileMap = {};  // backend
 };
 
 Firebug.TabContext.prototype =
 {
+    //************************ Browser Tools Interface BrowserContext *******************************
+    getCompilationUnit: function(url)
+    {
+        return this.compilationUnits[url];
+    },
+    //***********************************************************************************************
     getWindowLocation: function()
     {
         return safeGetWindowLocation(this.window);
@@ -86,6 +96,8 @@ Firebug.TabContext.prototype =
     {
         this.sourceFileMap[sourceFile.href] = sourceFile;
         sourceFile.context = this;
+
+        this.compilationUnits[sourceFile.href] = sourceFile;
 
         Firebug.onSourceFileCreated(this, sourceFile);
     },
@@ -287,7 +299,7 @@ Firebug.TabContext.prototype =
             panel.mainPanel = this.panelMap[panel.parentPanel];
             panel.mainPanel.addListener(panel); // wire the side panel to get UI events from the main panel
         }
-            
+
         var doc = this.chrome.getPanelDocument(panelType);
         panel.initialize(this, doc);
 
