@@ -323,12 +323,10 @@ var Errors = Firebug.Errors = extend(Firebug.Module,
                 }
                 else  // then new stylesheets are still coming in.
                 {
-                    // TODO move updateScriptFiles to lib
-                    Firebug.ScriptPanel.prototype.updateScriptFiles(context);  // build a new list of script tag sourceFiles
-                    if (context.sourceFileMap && context.sourceFileMap[url])
+                    if (context.getCompilationUnit(url))
                     {
                         if (FBTrace.DBG_EERRORLOG)
-                            FBTrace.sysout("findContextByURL found match in updated sourceFileMap");
+                            FBTrace.sysout("findContextByURL found match in compilationUnits");
                         return errorContext = context;
                     }
 
@@ -376,7 +374,7 @@ var Errors = Firebug.Errors = extend(Firebug.Module,
      * that is passed int a consoleListener).
      * This method should be the primary way how to find the parent window for any
      * error object.
-     * 
+     *
      * @param {Object} object Error object (implementing nsIScriptError2 since Fx40)
      */
     getErrorWindow: function(object)

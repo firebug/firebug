@@ -433,15 +433,15 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
         fbs.stopStepping();  // TODO per context
     },
 
-    runUntil: function(context, sourceFile, lineNo)
+    runUntil: function(context, compilationUnit, lineNo)
     {
         if (FBTrace.DBG_UI_LOOP)
-            FBTrace.sysout("runUntil "+lineNo+" @"+sourceFile);
+            FBTrace.sysout("runUntil "+lineNo+" @"+compilationUnit);
 
         if (!context.stoppedFrame || !context.stoppedFrame.isValid)
             return;
 
-        fbs.runUntil(sourceFile, lineNo, context.stoppedFrame, this);
+        fbs.runUntil(compilationUnit, lineNo, context.stoppedFrame, this);
         this.resume(context);
     },
 
@@ -603,7 +603,7 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
                 skipAction: function addSkipperAndGo()
                 {
                     // a breakpoint that never hits, but prevents debugger keyword (see fbs.onDebugger as well)
-                    var bp = fbs.setBreakpoint(sourceFile, lineNo, null, Firebug.Debugger);
+                    var bp = Firebug.Debugger.setBreakpoint(sourceFile, lineNo);
                     fbs.disableBreakpoint(sourceFile.href, lineNo);
                     if (FBTrace.DBG_BP)
                         FBTrace.sysout("debugger.setBreakOnNextCause converted to disabled bp "+sourceFile.href+"@"+lineNo+" tag: "+frame.script.tag, bp);
@@ -622,6 +622,8 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
 
     setBreakpoint: function(sourceFile, lineNo)
     {
+        if (sourceFile instanceof CompilationUnit)
+            sourceFile = sourceFile.sourceFile;  // see HACK in tabContext
         fbs.setBreakpoint(sourceFile, lineNo, null, Firebug.Debugger);
     },
 
@@ -644,8 +646,8 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
     {
         if (context)
         {
-            var sourceFiles = sourceFilesAsArray(context.sourceFileMap);
-            fbs.clearAllBreakpoints(sourceFiles, Firebug.Debugger);
+            var units = context.getAllCompilationUnits();
+            fbs.clearAllBreakpoints(units, Firebug.Debugger);
         }
         else
         {
@@ -654,13 +656,10 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
                 if (bp.debuggerName !== Firebug.Debugger.debuggerName) // skip breakpoints of other debuggers.
                     return;
 
-                if (Firebug.filterSystemURLs) // then there are not system urls, clear all
-                    fbs.clearBreakpoint(url, lineNo);
-                else
-                {
-                    if (!isSystemURL(url))  // if there are system urls, leave them
-                        fbs.clearBreakpoint(url, lineNo);
-                }
+                if (context && !context.getCompilationUnit(url)) // then we want to clear only one context,
+                    return;                                      // so skip URLs in other contexts
+
+                fbs.clearBreakpoint(url, lineNo);
             }});
         }
     },
@@ -758,7 +757,7 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
         if (scriptInfo)
         {
             if (mode == "debug")
-                this.setBreakpoint(scriptInfo.sourceFile, scriptInfo.lineNo);
+                Firebug.Debugger.setBreakpoint(scriptInfo.sourceFile, scriptInfo.lineNo);
             else if (mode == "monitor")
                 fbs.monitor(scriptInfo.sourceFile, scriptInfo.lineNo, Firebug.Debugger);
         }
@@ -1166,7 +1165,7 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
                 skipAction: function addSkipperAndGo()
                 {
                     // a breakpoint that never hits, but prevents debugger keyword (see fbs.onDebugger as well)
-                    var bp = fbs.setBreakpoint(sourceFile, lineNo, null, Firebug.Debugger);
+                    var bp = Firebug.Debugger.setBreakpoint(sourceFile, lineNo);
                     fbs.disableBreakpoint(sourceFile.href, lineNo);
                     if (FBTrace.DBG_BP)
                         FBTrace.sysout("debugger.onBreak converted to disabled bp "+sourceFile.href+"@"+lineNo+" tag: "+frame.script.tag, bp);
@@ -1325,7 +1324,7 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
                         skipAction: function addSkipperAndGo()
                         {
                             // a breakpoint that never hits, but prevents BON for errors
-                            var bp = fbs.setBreakpoint(sourceFile, lineNo, null, Firebug.Debugger);
+                            var bp = Firebug.Debugger.setBreakpoint(sourceFile, lineNo);
                             fbs.disableBreakpoint(sourceFile.href, lineNo);
                             if (FBTrace.DBG_BP)
                                 FBTrace.sysout("debugger.breakon Errors set "+sourceFile.href+"@"+lineNo+" tag: "+frame.script.tag, bp);
@@ -2146,6 +2145,66 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
         Firebug.ActivableModule.reattachContext.apply(this, arguments);
     },
 
+    showContext: function(browser, context)
+    {
+        if (context && !context.onLoadWindowContent) // then context was not active during load
+            this.updateScriptFiles(context);
+    },
+
+    updateScriptFiles: function(context)  // scan windows for 'script' tags (only if debugger is not enabled)
+    {
+        function addFile(url, scriptTagNumber, dependentURL)
+        {
+            var sourceFile = new Firebug.ScriptTagSourceFile(context, url, scriptTagNumber);
+            sourceFile.dependentURL = dependentURL;
+            context.addSourceFile(sourceFile);
+            return true;
+        }
+
+        iterateWindows(context.window, function updateEachWin(win)
+        {
+            if (FBTrace.DBG_SOURCEFILES)
+                FBTrace.sysout("updateScriptFiles iterateWindows: "+win.location.href, " documentElement: "+win.document.documentElement);
+            if (!win.document.documentElement)
+                return;
+
+            var url = normalizeURL(win.location.href);
+
+            if (url)
+            {
+                if (!context.sourceFileMap.hasOwnProperty(url))
+                {
+                    var URLOnly = new Firebug.NoScriptSourceFile(context, url);
+                    context.addSourceFile(URLOnly);
+                    if (FBTrace.DBG_SOURCEFILES) FBTrace.sysout("updateScriptFiles created NoScriptSourceFile for URL:"+url, URLOnly);
+                }
+            }
+
+            var baseUrl = win.location.href;
+            var bases = win.document.documentElement.getElementsByTagName("base");
+            if (bases && bases[0])
+            {
+                baseUrl = bases[0].href;
+            }
+
+            var scripts = win.document.documentElement.getElementsByTagName("script");
+            for (var i = 0; i < scripts.length; ++i)
+            {
+                var scriptSrc = scripts[i].getAttribute('src'); // for XUL use attribute
+                var url = scriptSrc ? absoluteURL(scriptSrc, baseUrl) : win.location.href;
+                url = normalizeURL(url ? url : win.location.href);
+                var added = addFile(url, i, (scriptSrc?win.location.href:null));
+                if (FBTrace.DBG_SOURCEFILES)
+                    FBTrace.sysout("updateScriptFiles "+(scriptSrc?"inclusion":"inline")+" script #"+i+"/"+scripts.length+(added?" adding ":" readded ")+url+" to context="+context.getName()+"\n");
+            }
+        });
+
+        if (FBTrace.DBG_SOURCEFILES)
+        {
+            FBTrace.sysout("updateScriptFiles sourcefiles:", sourceFilesAsArray(context.sourceFileMap));
+        }
+    },
+
     loadedContext: function(context)
     {
         var watchPanel = this.ableWatchSidePanel(context);
@@ -2528,7 +2587,7 @@ Firebug.ScriptPanel = function() {};
  */
 Firebug.ScriptPanel.decorator = extend(new Firebug.SourceBoxDecorator,
 {
-    decorate: function(sourceBox, sourceFile)
+    decorate: function(sourceBox, unused)
     {
         this.markExecutableLines(sourceBox);
         this.setLineBreakpoints(sourceBox.repObject, sourceBox)
@@ -2536,9 +2595,9 @@ Firebug.ScriptPanel.decorator = extend(new Firebug.SourceBoxDecorator,
 
     markExecutableLines: function(sourceBox)
     {
-        var sourceFile = sourceBox.repObject;
+        var compilationUnit = sourceBox.repObject;
         if (FBTrace.DBG_BP || FBTrace.DBG_LINETABLE)
-            FBTrace.sysout("debugger.markExecutableLines START: "+sourceFile.toString(), sourceFile.getLineRanges());
+            FBTrace.sysout("debugger.markExecutableLines START: "+compilationUnit.toString());
 
         var lineNo = sourceBox.firstViewableLine;
         while( lineNode = sourceBox.getLineNode(lineNo) )
@@ -2549,9 +2608,9 @@ Firebug.ScriptPanel.decorator = extend(new Firebug.SourceBoxDecorator,
                 continue;
             }
 
-            var script = sourceFile.isExecutableLine(lineNo, true);
+            var script = compilationUnit.isExecutableLine(lineNo);
 
-            if (FBTrace.DBG_LINETABLE) FBTrace.sysout("debugger.markExecutableLines ["+lineNo+"]="+(script?script.tag:"X")+"\n");
+            if (FBTrace.DBG_LINETABLE) FBTrace.sysout("debugger.markExecutableLines ["+lineNo+"]="+script);
             if (script)
                 lineNode.setAttribute("executable", "true");
             else
@@ -2566,12 +2625,12 @@ Firebug.ScriptPanel.decorator = extend(new Firebug.SourceBoxDecorator,
         }
 
         if (FBTrace.DBG_BP || FBTrace.DBG_LINETABLE)
-            FBTrace.sysout("debugger.markExecutableLines DONE: "+sourceFile.toString()+"\n");
+            FBTrace.sysout("debugger.markExecutableLines DONE: "+compilationUnit.toString()+"\n");
     },
 
-    setLineBreakpoints: function(sourceFile, sourceBox)
+    setLineBreakpoints: function(compilationUnit, sourceBox)
     {
-        fbs.enumerateBreakpoints(sourceFile.href, {call: function(url, line, props, scripts)
+        fbs.enumerateBreakpoints(compilationUnit.getURL(), {call: function(url, line, props, scripts)
         {
             var scriptRow = sourceBox.getLineNode(line);
             if (scriptRow)
@@ -2583,7 +2642,7 @@ Firebug.ScriptPanel.decorator = extend(new Firebug.SourceBoxDecorator,
                     scriptRow.setAttribute("condition", "true");
             }
             if (FBTrace.DBG_LINETABLE)
-                FBTrace.sysout("debugger.setLineBreakpoints found "+scriptRow+" for "+line+"@"+sourceFile.href+"\n");
+                FBTrace.sysout("debugger.setLineBreakpoints found "+scriptRow+" for "+line+"@"+compilationUnit.getURL()+"\n");
         }});
     },
 });
@@ -2641,10 +2700,10 @@ Firebug.ScriptPanel.prototype = extend(Firebug.SourceBoxPanel,
 
     showSourceLink: function(sourceLink)
     {
-        var sourceFile = getSourceFileByHref(sourceLink.href, this.context);
-        if (sourceFile)
+        var compilationUnit = this.context.getCompilationUnit(sourceLink.href);
+        if (compilationUnit)
         {
-            this.navigate(sourceFile);
+            this.navigate(compilationUnit);
             if (sourceLink.line)
             {
                 this.scrollToLine(sourceLink.href, sourceLink.line, this.jumpHighlightFactory(sourceLink.line, this.context));
@@ -2798,7 +2857,7 @@ Firebug.ScriptPanel.prototype = extend(Firebug.SourceBoxPanel,
         if (lineNode.getAttribute("breakpoint") == "true")
             fbs.clearBreakpoint(sourceFile.href, lineNo);
         else
-            fbs.setBreakpoint(sourceFile, lineNo, null, Firebug.Debugger);
+            Firebug.Debugger.setBreakpoint(sourceFile, lineNo);
     },
 
     toggleDisableBreakpoint: function(lineNo)
@@ -2900,7 +2959,7 @@ Firebug.ScriptPanel.prototype = extend(Firebug.SourceBoxPanel,
             return;
 
         var sourceRow = sourceLine.parentNode;
-        var sourceFile = sourceRow.parentNode.repObject;
+        var compilationUnit = sourceRow.parentNode.repObject;
         var lineNo = parseInt(sourceLine.textContent);
 
         if (isLeftClick(event))
@@ -2983,7 +3042,7 @@ Firebug.ScriptPanel.prototype = extend(Firebug.SourceBoxPanel,
 
     destroy: function(state)
     {
-        delete this.selection; // We want the location (sourcefile) to persist, not the selection (eg stackFrame).
+        delete this.selection; // We want the location (compilationUnit) to persist, not the selection (eg stackFrame).
         persistObjects(this, state);
 
         state.location = this.location;
@@ -3197,8 +3256,8 @@ Firebug.ScriptPanel.prototype = extend(Firebug.SourceBoxPanel,
 
         var self = this;
 
-        function scanDoc(sourceFile) {
-            var lines = sourceFile.loadScriptLines(self.context);
+        function scanDoc(compilationUnit) {
+            var lines = compilationUnit.loadScriptLines(self.context);
             if (!lines)
                 return;
             // we don't care about reverse here as we are just looking for existence,
@@ -3257,25 +3316,12 @@ Firebug.ScriptPanel.prototype = extend(Firebug.SourceBoxPanel,
     supportsObject: function(object, type)
     {
         if( object instanceof jsdIStackFrame
-            || object instanceof Firebug.SourceFile
+            || object instanceof CompilationUnit
             || (object instanceof SourceLink && object.type == "js")
             || typeof(object) == "function"
             || object instanceof StackFrame)
             return 1;
         else return 0;
-    },
-
-    hasObject: function(object)
-    {
-        FBTrace.sysout("debugger.hasObject in "+this.context.getName()+" SourceLink: "+(object instanceof SourceLink), object);
-        if (object instanceof Firebug.SourceFile)
-            return (object.href in this.context.sourceFileMap);
-        else if (object instanceof SourceLink)
-            return (object.href in this.context.sourceFileMap);
-        else if (object instanceof jsdIStackFrame)
-            return (normalizeURL(object.script.fileName) in this.context.sourceFileMap);
-        else if (object instanceof "function")
-            return false; //TODO
     },
 
     refresh: function()  // delete any sourceBox-es that are not in sync with sourceFiles
@@ -3285,8 +3331,8 @@ Firebug.ScriptPanel.prototype = extend(Firebug.SourceBoxPanel,
             if (this.sourceBoxes.hasOwnProperty(url))
             {
                 var sourceBox = this.sourceBoxes[url];
-                var sourceFile = this.context.sourceFileMap[url];
-                if (!sourceFile || sourceFile != sourceBox.repObject) // then out of sync
+                var compilationUnit = this.context.getCompilationUnit(url);
+                if (!compilationUnit || compilationUnit != sourceBox.repObject) // then out of sync
                 {
                    var victim = this.sourceBoxes[url];
                    delete this.sourceBoxes[url];
@@ -3306,16 +3352,16 @@ Firebug.ScriptPanel.prototype = extend(Firebug.SourceBoxPanel,
             this.navigate();
     },
 
-    updateLocation: function(sourceFile)
+    updateLocation: function(compilationUnit)
     {
-        if (!sourceFile)
+        if (!compilationUnit)
             return;  // XXXjjb do we need to show a blank?
 
-        // Since our last use of the sourceFile we may have compiled or recompiled the source
-        var updatedSourceFile = this.context.sourceFileMap[sourceFile.href];
-        if (!updatedSourceFile)
-            updatedSourceFile = this.getDefaultLocation();
-        if (!updatedSourceFile)
+        // Since our last use of the compilationUnit we may have compiled or recompiled the source
+        var updatedCompilationUnit = this.context.getCompilationUnit(compilationUnit.getURL());
+        if (!updatedCompilationUnit)
+            updatedCompilationUnit = this.getDefaultLocation();
+        if (!updatedCompilationUnit)
             return;
 
         if (this.activeWarningTag)
@@ -3329,8 +3375,8 @@ Firebug.ScriptPanel.prototype = extend(Firebug.SourceBoxPanel,
             this.removeAllSourceBoxes();
         }
 
-        this.showSource(updatedSourceFile.href);
-        dispatch(this.fbListeners, "onUpdateScriptLocation", [this, updatedSourceFile]);
+        this.showSource(updatedCompilationUnit.getURL());
+        dispatch(this.fbListeners, "onUpdateScriptLocation", [this, updatedCompilationUnit]);
     },
 
     updateSelection: function(object)
@@ -3340,7 +3386,7 @@ Firebug.ScriptPanel.prototype = extend(Firebug.SourceBoxPanel,
             FBTrace.sysout("debugger updateSelection object:"+object+" of type "+typeof(object)+"\n");
             if (object instanceof jsdIStackFrame)
                 FBTrace.sysout("debugger updateSelection this.showStackFrame(object)", object);
-            else if (object instanceof Firebug.SourceFile)
+            else if (object instanceof CompilationUnit)
                 FBTrace.sysout("debugger updateSelection this.navigate(object)", object);
             else if (object instanceof SourceLink)
                 FBTrace.sysout("debugger updateSelection this.showSourceLink(object)", object);
@@ -3354,7 +3400,7 @@ Firebug.ScriptPanel.prototype = extend(Firebug.SourceBoxPanel,
 
         if (object instanceof jsdIStackFrame)
             this.showStackFrame(object);
-        else if (object instanceof Firebug.SourceFile)
+        else if (object instanceof CompilationUnit)
             this.navigate(object);
         else if (object instanceof SourceLink)
             this.showSourceLink(object);
@@ -3366,16 +3412,16 @@ Firebug.ScriptPanel.prototype = extend(Firebug.SourceBoxPanel,
             this.showStackFrame(null);
     },
 
-    showThisSourceFile: function(sourceFile)
+    showThisCompilationUnit: function(compilationUnit)
     {
         //-----------------------------------123456789
-        if (sourceFile.href.substr(0, 9) == "chrome://")
+        if (compilationUnit.getURL().substr(0, 9) == "chrome://")
             return false;
 
-           if (sourceFile.isEval() && !this.showEvals)
+           if (compilationUnit.getKind() === CompilationUnit.EVAL && !this.showEvals)
                return false;
 
-        if (sourceFile.isEvent() && !this.showEvents)
+        if (compilationUnit.getKind() === CompilationUnit.BROWSER_GENERATED && !this.showEvents)
             return false;
 
         return true;
@@ -3385,10 +3431,7 @@ Firebug.ScriptPanel.prototype = extend(Firebug.SourceBoxPanel,
     {
         var context = this.context;
 
-        if (!context.onLoadWindowContent) // then context was not active during load
-            this.updateScriptFiles(context);
-
-        var allSources = sourceFilesAsArray(context.sourceFileMap);
+        var allSources = context.getAllCompilationUnits();
 
         if (!allSources.length)
             return [];
@@ -3406,7 +3449,7 @@ Firebug.ScriptPanel.prototype = extend(Firebug.SourceBoxPanel,
         var list = [];
         for (var i = 0; i < allSources.length; i++)
         {
-            if (this.showThisSourceFile(allSources[i]))
+            if (this.showThisCompilationUnit(allSources[i]))
                 list.push(allSources[i]);
         }
 
@@ -3420,93 +3463,24 @@ Firebug.ScriptPanel.prototype = extend(Firebug.SourceBoxPanel,
         return list;
     },
 
-    updateScriptFiles: function(context, eraseSourceFileMap)  // scan windows for 'script' tags (only if debugger is not enabled)
-    {
-        var oldMap = eraseSourceFileMap ? null : context.sourceFileMap;
-
-        if (FBTrace.DBG_SOURCEFILES)
-            FBTrace.sysout("updateScriptFiles oldMap "+oldMap);
-
-        function addFile(url, scriptTagNumber, dependentURL)
-        {
-            if (oldMap && url in oldMap)
-            {
-                var sourceFile = oldMap[url];
-                sourceFile.dependentURL = dependentURL;
-                context.addSourceFile(sourceFile);
-                return false;
-            }
-            else
-            {
-                var sourceFile = new Firebug.ScriptTagSourceFile(context, url, scriptTagNumber);
-                sourceFile.dependentURL = dependentURL;
-                context.addSourceFile(sourceFile);
-                return true;
-            }
-        }
-
-        iterateWindows(context.window, function updateEachWin(win)
-        {
-            if (FBTrace.DBG_SOURCEFILES)
-                FBTrace.sysout("updateScriptFiles iterateWindows: "+win.location.href, " documentElement: "+win.document.documentElement);
-            if (!win.document.documentElement)
-                return;
-
-            var url = normalizeURL(win.location.href);
-
-            if (url)
-            {
-                if (!context.sourceFileMap.hasOwnProperty(url))
-                {
-                    var URLOnly = new Firebug.NoScriptSourceFile(context, url);
-                    context.addSourceFile(URLOnly);
-                    if (FBTrace.DBG_SOURCEFILES) FBTrace.sysout("updateScriptFiles created NoScriptSourceFile for URL:"+url, URLOnly);
-                }
-            }
-
-            var baseUrl = win.location.href;
-            var bases = win.document.documentElement.getElementsByTagName("base");
-            if (bases && bases[0])
-            {
-                baseUrl = bases[0].href;
-            }
-
-            var scripts = win.document.documentElement.getElementsByTagName("script");
-            for (var i = 0; i < scripts.length; ++i)
-            {
-                var scriptSrc = scripts[i].getAttribute('src'); // for XUL use attribute
-                var url = scriptSrc ? absoluteURL(scriptSrc, baseUrl) : win.location.href;
-                url = normalizeURL(url ? url : win.location.href);
-                var added = addFile(url, i, (scriptSrc?win.location.href:null));
-                if (FBTrace.DBG_SOURCEFILES)
-                    FBTrace.sysout("updateScriptFiles "+(scriptSrc?"inclusion":"inline")+" script #"+i+"/"+scripts.length+(added?" adding ":" readded ")+url+" to context="+context.getName()+"\n");
-            }
-        });
-
-        if (FBTrace.DBG_SOURCEFILES)
-        {
-            FBTrace.sysout("updateScriptFiles sourcefiles:", sourceFilesAsArray(context.sourceFileMap));
-        }
-    },
-
     getDefaultLocation: function()
     {
-        var sourceFiles = this.getLocationList();
-        if (!sourceFiles.length)
+        var compilationUnits = this.getLocationList();
+        if (!compilationUnits.length)
             return null;
 
         if (this.context)
         {
             var url = this.context.getWindowLocation();
-            for (var i = 0; i < sourceFiles.length; i++)
+            for (var i = 0; i < compilationUnits.length; i++)
             {
-                if (url == sourceFiles[i].href)
-                    return sourceFiles[i];
+                if (url == compilationUnits[i].href)
+                    return compilationUnits[i];
             }
-            return sourceFiles[0];
+            return compilationUnits[0];
         }
         else
-            return sourceFiles[0];
+            return compilationUnits[0];
     },
 
     getDefaultSelection: function()
@@ -3593,15 +3567,26 @@ Firebug.ScriptPanel.prototype = extend(Firebug.SourceBoxPanel,
         return frames;
     },
 
-    getObjectLocation: function(sourceFile)
+    getObjectLocation: function(compilationUnit)
     {
-        return sourceFile.href;
+        return compilationUnit.getURL();
     },
 
     // return.path: group/category label, return.name: item label
-    getObjectDescription: function(sourceFile)
+    getObjectDescription: function(compilationUnit)
     {
-        return sourceFile.getObjectDescription();
+        if (compilationUnit instanceof Firebug.SourceFile)
+            debugger;
+        var kind = compilationUnit.getKind();
+        if (kind == CompilationUnit.BROWSER_GENERATED)
+        {
+            var url = compilationUnit.getURL()
+            var i = url.indexOf("/event/seq");
+            var container = url.substr(0,i);
+            var split = FBL.splitURLBase(container);  // path & name
+            return {path: split.path, name: split.name+url.substr(i) };
+        }
+        return FBL.splitURLBase(compilationUnit.getURL());
     },
 
     getOptionsMenuItems: function()
@@ -3675,7 +3660,7 @@ Firebug.ScriptPanel.prototype = extend(Firebug.SourceBoxPanel,
             var sourceRow = getAncestorByClass(target, "sourceRow");
             if (sourceRow)
             {
-                var sourceFile = getAncestorByClass(sourceRow, "sourceBox").repObject;
+                var compilationUnit = getAncestorByClass(sourceRow, "sourceBox").repObject;
                 var lineNo = parseInt(sourceRow.firstChild.textContent);
 
                 var debuggr = Firebug.Debugger;
@@ -3691,7 +3676,7 @@ Firebug.ScriptPanel.prototype = extend(Firebug.SourceBoxPanel,
                         command: bindFixed(debuggr.stepOut, debuggr, this.context) },
                     {label: "RunUntil",
                         command: bindFixed(debuggr.runUntil, debuggr, this.context,
-                        sourceFile, lineNo) }
+                        compilationUnit, lineNo) }
                 );
             }
         }

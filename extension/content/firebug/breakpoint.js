@@ -245,9 +245,6 @@ Firebug.Breakpoint.BreakpointsPanel.prototype = extend(Firebug.Panel,
         if (this.noRefresh)
             return;
 
-        if (!Firebug.Debugger.isAlwaysEnabled(this.context))
-            this.updateScriptFiles(this.context);
-
         var extracted = this.extractBreakpoints(this.context, breakpoints, errorBreakpoints, monitors);
 
         var breakpoints = extracted.breakpoints;
@@ -379,8 +376,6 @@ Firebug.Breakpoint.BreakpointsPanel.prototype = extend(Firebug.Panel,
         var items = [];
 
         var context = this.context;
-        if (!Firebug.Debugger.isAlwaysEnabled(context))
-            this.updateScriptFiles(context);
 
         var bpCount = 0, disabledCount = 0;
         var checkBoxes = this.panelNode.getElementsByClassName("breakpointCheckbox");

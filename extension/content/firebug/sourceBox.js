@@ -2,6 +2,7 @@
 
 FBL.ns(function() { with (FBL) {
 
+Components.utils.import("resource://firebug/bti/compilationunit.js");
 // ************************************************************************************************
 
 /**
@@ -233,9 +234,9 @@ Firebug.SourceBoxPanel = extend(SourceBoxPanelBase,
 
     getSourceBoxByCompilationUnit: function(compilationUnit)
     {
-        if (compilationUnit.href)
+        if (compilationUnit.getURL())
         {
-            var sourceBox = this.getSourceBoxByURL(compilationUnit.href);
+            var sourceBox = this.getSourceBoxByURL(compilationUnit.getURL());
             if (sourceBox && sourceBox.repObject == compilationUnit)
                 return sourceBox;
             else
@@ -253,7 +254,7 @@ Firebug.SourceBoxPanel = extend(SourceBoxPanelBase,
         var sourceBox = this.getSourceBoxByCompilationUnit(compilationUnit);
         if (sourceBox)  // else we did not create one for this compilationUnit
         {
-            delete this.sourceBoxes[compilationUnit.href];
+            delete this.sourceBoxes[compilationUnit.getURL()];
 
             if (sourceBox.parentNode === this.panelNode)
                 this.panelNode.removeChild(sourceBox);
@@ -262,7 +263,7 @@ Firebug.SourceBoxPanel = extend(SourceBoxPanelBase,
             {
                 delete this.selectedSourceBox;
                 delete this.location;
-                this.showSource(compilationUnit.href);
+                this.showSource(compilationUnit.getURL());
             }
         }
     },
@@ -289,16 +290,7 @@ Firebug.SourceBoxPanel = extend(SourceBoxPanelBase,
 
         var sourceBox = this.getSourceBoxByCompilationUnit(compilationUnit);
         if (!sourceBox)
-        {
-            // Has the script tag mutation event arrived?
-            if (compilationUnit.compilation_unit_type === "scriptTagAppend" && !compilationUnit.source)
-            {
-                // prevent recursion, just give message if it does not arrive
-                compilationUnit.source = ["script tag mutation event has not arrived"];
-                return;
-            }
             sourceBox = this.createSourceBox(compilationUnit);
-        }
 
         this.showSourceBox(sourceBox);
     },
@@ -351,10 +343,10 @@ Firebug.SourceBoxPanel = extend(SourceBoxPanelBase,
         // Framework connection
         sourceBox.decorator.onSourceBoxCreation(sourceBox);
 
-        this.sourceBoxes[compilationUnit.href] = sourceBox;
+        this.sourceBoxes[compilationUnit.getURL()] = sourceBox;
 
         if (FBTrace.DBG_COMPILATION_UNITS)
-            FBTrace.sysout("firebug.createSourceBox with "+sourceBox.maximumLineNumber+" lines for "+compilationUnit+(compilationUnit.href?" sourceBoxes":" anon "), sourceBox);
+            FBTrace.sysout("firebug.createSourceBox with "+sourceBox.maximumLineNumber+" lines for "+compilationUnit+(compilationUnit.getURL()?" sourceBoxes":" anon "), sourceBox);
 
         this.panelNode.appendChild(sourceBox);
         this.setSourceBoxLineSizes(sourceBox);
@@ -364,7 +356,7 @@ Firebug.SourceBoxPanel = extend(SourceBoxPanelBase,
 
     getSourceBoxURL: function(sourceBox)
     {
-        return sourceBox.repObject.href;
+        return sourceBox.repObject.getURL();
     },
 
     initializeSourceBox: function(compilationUnit)
@@ -372,18 +364,8 @@ Firebug.SourceBoxPanel = extend(SourceBoxPanelBase,
         var sourceBox = this.document.createElement("div");
         setClass(sourceBox, "sourceBox");
         collapse(sourceBox, true);
-
-        var lines = compilationUnit.loadScriptLines(this.context);
-        if (!lines)
-        {
-            lines = ["Failed to load source for compilationUnit "+compilationUnit];
-        }
-
-        sourceBox.lines = lines;
         sourceBox.repObject = compilationUnit;
-
-        sourceBox.maximumLineNumber = lines.length;
-        sourceBox.maxLineNoChars = (sourceBox.maximumLineNumber + "").length;
+        compilationUnit.sourceBox = sourceBox;
 
         sourceBox.getLineNode =  function(lineNo)
         {
@@ -404,6 +386,26 @@ Firebug.SourceBoxPanel = extend(SourceBoxPanelBase,
 
         sourceBox.viewport = getChildByClass(sourceBox, 'sourceViewport');
         return sourceBox;
+    },
+
+    onSourceLinesAvailable: function(compilationUnit, firstLineAvailable, lastLineAvailable, lines)
+    {
+        var sourceBox = compilationUnit.sourceBox;
+        var requestedLines = compilationUnit.pendingViewRange;
+        delete compilationUnit.pendingViewRange;
+
+        if (firstLineAvailable > requestedLines.firstLine)
+            requestedLines.firstLine = firstLineAvailable;
+
+        if (lastLineAvailable < requestedLines.lastLine)
+            requestedLines.lastLine = lastLineAvailable;
+
+        sourceBox.lines = lines;  // an array indexed from firstLineAvailable to lastLineAvailable
+
+        sourceBox.maximumLineNumber = compilationUnit.getNumberOfLines();
+        sourceBox.maxLineNoChars = (sourceBox.maximumLineNumber + "").length;
+
+        this.reViewOnSourceLinesAvailable(sourceBox, requestedLines);
     },
 
     setSourceBoxLineSizes: function(sourceBox)
@@ -594,6 +596,13 @@ Firebug.SourceBoxPanel = extend(SourceBoxPanelBase,
             }
         }
 
+        var compilationUnit = sourceBox.repObject;
+        compilationUnit.pendingViewRange = viewRange;
+        compilationUnit.getSourceLines(viewRange.firstLine, viewRange.lastLine, bind(this.onSourceLinesAvailable, this));
+    },
+
+    reViewOnSourceLinesAvailable: function(sourceBox, viewRange)
+    {
         dispatch(this.fbListeners, "onBeforeViewportChange", [this]);  // XXXjjb TODO where should this be?
         this.buildViewAround(sourceBox, viewRange);
 

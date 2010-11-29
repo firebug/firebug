@@ -2,6 +2,7 @@
 
 FBL.ns(function() { with (FBL) {
 
+    Components.utils.import("resource://firebug/bti/compilationunit.js");
 // ************************************************************************************************
 // Constants
 
@@ -52,6 +53,11 @@ Firebug.TabContext.prototype =
     {
         return this.compilationUnits[url];
     },
+
+    getAllCompilationUnits: function()
+    {
+        return FBL.mapAsArray(this.compilationUnits);
+    },
     //***********************************************************************************************
     getWindowLocation: function()
     {
@@ -97,7 +103,13 @@ Firebug.TabContext.prototype =
         this.sourceFileMap[sourceFile.href] = sourceFile;
         sourceFile.context = this;
 
-        this.compilationUnits[sourceFile.href] = sourceFile;
+        var compilationUnit = new CompilationUnit(sourceFile.href, this);
+        this.compilationUnits[sourceFile.href] = compilationUnit;
+        compilationUnit.sourceFile = sourceFile; // HACK
+        if (sourceFile.compilation_unit_type == "event")
+            compilationUnit.kind = CompilationUnit.BROWSER_GENERATED;
+        if (sourceFile.compilation_unit_type == "eval")
+            compilationUnit.kind = CompilationUnit.EVAL;
 
         Firebug.onSourceFileCreated(this, sourceFile);
     },
