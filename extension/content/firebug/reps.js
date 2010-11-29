@@ -1173,7 +1173,7 @@ this.SourceLink = domplate(Firebug.Rep,
         catch(exc)
         {
             if (FBTrace.DBG_ERRORS)
-                FBTrace.sysout("reps.getSourceLinkTitle decodeURIComponent fails for \'"+fileName+"\': "+exc, exc);
+                FBTrace.sysout("reps.getSourceLinkTitle decodeURIComponent fails for \'"+sourceLink.href+"\': "+exc, exc);
             fileName = sourceLink.href;
         }
 

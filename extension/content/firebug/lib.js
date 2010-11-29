@@ -2870,7 +2870,77 @@ this.StackFrame.prototype =
      signature: function()
      {
          return this.script.tag +"." + this.pc;
-     }
+     },
+
+     getThisValue: function()
+     {
+         if (this.nativeFrame && !this.thisVar)
+              this.thisVar = FBL.unwrapIValue(this.nativeFrame.thisValue);
+         return this.thisVar;
+     },
+
+     getScopes: function()
+     {
+         if (this.nativeFrame && !this.scope)
+              this.scope = this.generateScopeChain(this.nativeFrame.scope);
+         return this.scope;
+     },
+
+
+     // Private
+
+     generateScopeChain: function (scope)
+     {
+         var ret = [];
+         while (scope) {
+             var scopeVars;
+             // getWrappedValue will not contain any variables for closure
+             // scopes, so we want to special case this to get all variables
+             // in all cases.
+             if (scope.jsClassName == "Call") {
+                 var scopeVars = FBL.unwrapIValueObject(scope)
+                 scopeVars.toString = function() {return $STR("Closure Scope");}
+             }
+             else if (scope.jsClassName == "Block")
+             {
+                 var scopeVars = FBL.unwrapIValueObject(scope)
+                 scopeVars.toString = function() {return $STR("Block Scope");}
+             }
+             else
+             {
+                 scopeVars = FBL.unwrapIValue(scope);
+
+                 if (scopeVars && scopeVars.hasOwnProperty)
+                 {
+                     if (!scopeVars.hasOwnProperty("toString")) {
+                         (function() {
+                             var className = scope.jsClassName;
+                             scopeVars.toString = function() {
+                                 return $STR(className + " Scope");
+                             };
+                         })();
+                     }
+                 }
+                 else
+                 {
+                     if (FBTrace.DBG_ERRORS)
+                         FBTrace.sysout("dom .generateScopeChain: bad scopeVars for scope.jsClassName:"+scope.jsClassName, scope );
+                 }
+             }
+
+             if (scopeVars)
+                 ret.push(scopeVars);
+
+             scope = scope.jsParent;
+         }
+
+         ret.toString = function() {
+             return $STR("Scope Chain");
+         };
+
+         return ret;
+     },
+
 };
 
 //-----------------------111111----222222-----33---444  1 All 'Not a (' followed by (; 2 All 'Not a )' followed by a ); 3 text between @ and : digits

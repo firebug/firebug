@@ -1721,14 +1721,38 @@ Firebug.WatchPanel.prototype = extend(Firebug.DOMBasePanel.prototype,
 
     updateSelection: function(frame)
     {
+        try // this method is called while the debugger has halted JS, so failures don't show up in FBS_ERRORS
+        {
+            this.doUpdateSelection(frame);
+        }
+        catch(exc)
+        {
+            if (FBTrace.DBG_ERRORS || FBTrace.DBG_STACK)
+                FBTrace.sysout("updateSelection FAILS "+exc, exc);
+        }
+    },
+
+    doUpdateSelection: function(frame)
+    {
+        if (FBTrace.DBG_STACK)
+            FBTrace.sysout("dom watch panel updateSelection frame "+frame, frame);
+
         dispatch(this.fbListeners, 'onBeforeDomUpdateSelection', [this]);
 
-        var newFrame = frame.signature() != this.frameSignature;
+        var newFrame = frame && ('signature' in frame) && (frame.signature() != this.frameSignature);
         if (newFrame)
         {
             this.toggles = new ToggleBranch();
             this.frameSignature = frame.signature();
         }
+
+        if (frame instanceof StackFrame)
+            var scopes = frame.getScopes();
+        else
+            var scopes = [this.context.getGlobalScope()];
+
+        if (FBTrace.DBG_STACK)
+            FBTrace.sysout("dom watch panel updateSelection scopes "+scopes.length, scopes);
 
         var members = [];
 
@@ -1750,11 +1774,7 @@ Firebug.WatchPanel.prototype = extend(Firebug.DOMBasePanel.prototype,
                     }
                 );
 
-                var scope = this.context.getGlobalScope();
-                if (frame && frame.isValid)
-                    scope = frame.scope;
-
-                this.addMember(scope, "watch", members, expr, value, 0);
+                this.addMember(scopes[0], "watch", members, expr, value, 0);
 
                 if (FBTrace.DBG_DOM)
                     FBTrace.sysout("watch.updateSelection "+expr+" = "+value,
@@ -1762,74 +1782,25 @@ Firebug.WatchPanel.prototype = extend(Firebug.DOMBasePanel.prototype,
             }
         }
 
-        if (frame && frame.isValid)
+        if (frame && frame instanceof StackFrame)
         {
-            var thisVar = unwrapIValue(frame.thisValue);
-            this.addMember(frame.scope, "user", members, "this", thisVar, 0);
+            var thisVar = frame.getThisValue();
+            if (thisVar)
+                this.addMember(scopes[0], "user", members, "this", thisVar, 0);
 
-            var scopeChain = this.generateScopeChain(frame.scope);
 
             // locals, pre-expanded
-            members.push.apply(members, this.getMembers(scopeChain[0], 0, this.context));
+            members.push.apply(members, this.getMembers(scopes[0], 0, this.context));
 
-            for (var i = 1; i < scopeChain.length; i++)
-                this.addMember(scopeChain[i], "scopes", members, scopeChain[i].toString(), scopeChain[i], 0);
+            for (var i = 1; i < scopes.length; i++)
+                this.addMember(scopes[i], "scopes", members, scopes[i].toString(), scopes[i], 0);
         }
 
         this.expandMembers(members, this.toggles, 0, 0, this.context);
         this.showMembers(members, !newFrame);
-    },
 
-    generateScopeChain: function (scope)
-    {
-        var ret = [];
-        while (scope) {
-            var scopeVars;
-            // getWrappedValue will not contain any variables for closure
-            // scopes, so we want to special case this to get all variables
-            // in all cases.
-            if (scope.jsClassName == "Call") {
-                var scopeVars = unwrapIValueObject(scope)
-                scopeVars.toString = function() {return $STR("Closure Scope");}
-            }
-            else if (scope.jsClassName == "Block")
-            {
-                var scopeVars = unwrapIValueObject(scope)
-                scopeVars.toString = function() {return $STR("Block Scope");}
-            }
-            else
-            {
-                scopeVars = unwrapIValue(scope);
-
-                if (scopeVars && scopeVars.hasOwnProperty)
-                {
-                    if (!scopeVars.hasOwnProperty("toString")) {
-                        (function() {
-                            var className = scope.jsClassName;
-                            scopeVars.toString = function() {
-                                return $STR(className + " Scope");
-                            };
-                        })();
-                    }
-                }
-                else
-                {
-                    if (FBTrace.DBG_ERRORS)
-                        FBTrace.sysout("dom .generateScopeChain: bad scopeVars for scope.jsClassName:"+scope.jsClassName, scope );
-                }
-            }
-
-            if (scopeVars)
-                ret.push(scopeVars);
-
-            scope = scope.jsParent;
-        }
-
-        ret.toString = function() {
-            return $STR("Scope Chain");
-        };
-
-        return ret;
+        if (FBTrace.DBG_STACK)
+            FBTrace.sysout("dom watch panel updateSelection members "+members.length, members);
     },
 
 });
