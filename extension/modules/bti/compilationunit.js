@@ -56,7 +56,7 @@ CompilationUnit.prototype.getKind = function getKind()
 
 CompilationUnit.prototype.isExecutableLine = function isExecutableLine(lineNo)
 {
-    return true; // HACK
+    return this.sourceFile.isExecutableLine(lineNo);
 }
 
 /**
