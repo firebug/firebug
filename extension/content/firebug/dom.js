@@ -1723,14 +1723,11 @@ Firebug.WatchPanel.prototype = extend(Firebug.DOMBasePanel.prototype,
     {
         dispatch(this.fbListeners, 'onBeforeDomUpdateSelection', [this]);
 
-        if (frame instanceof StackFrame)  // TODO convert this code to work off StackFrame rather than native frames
-            frame = frame.getNativeFrame();
-
-        var newFrame = frame && frame.isValid && frame.script != this.lastScript;
+        var newFrame = frame.signature() != this.frameSignature;
         if (newFrame)
         {
             this.toggles = new ToggleBranch();
-            this.lastScript = frame.script;
+            this.frameSignature = frame.signature();
         }
 
         var members = [];

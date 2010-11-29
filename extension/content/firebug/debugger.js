@@ -2716,24 +2716,6 @@ function findObjectPropertyPath(containerName, container, obj, visited)
 }
 // ************************************************************************************************
 
-function getCallingFrame(frame)
-{
-    try
-    {
-        do
-        {
-            frame = frame.callingFrame;
-            if (!(Firebug.filterSystemURLs && isSystemURL(normalizeURL(frame.script.fileName))))
-                return frame;
-        }
-        while (frame);
-    }
-    catch (exc)
-    {
-    }
-    return null;
-}
-
 function getFrameWindow(frame)
 {
     var result = {};

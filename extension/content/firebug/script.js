@@ -958,13 +958,11 @@ FBL.ns(function() { with (FBL) {
 
         getObjectPath: function(frame)
         {
-            frame = this.context.currentFrame;
-
             if (FBTrace.DBG_STACK)
-                FBTrace.sysout("debugger.getObjectPath "+((frame && frame.isValid)?("frame is good:"+frame.script.fileName+"@"+frame.line):(frame?"frame invalid":"no frame")), this.selection);
+                FBTrace.sysout("debugger.getObjectPath "+frame);
 
             var frames = [];
-            for (; frame; frame = getCallingFrame(frame))
+            for (; frame; frame = frame.getCallingFrame())
                 frames.push(frame);
 
             return frames;

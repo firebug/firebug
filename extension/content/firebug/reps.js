@@ -1371,6 +1371,11 @@ this.StackFrame = domplate(Firebug.Rep,  // XXXjjb Since the repObject is fn the
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
+    getTitle: function(frame)
+    {
+        return frame.getFunctionName();
+    },
+
     hasArguments: function(frame)
     {
         return frame.args.length;

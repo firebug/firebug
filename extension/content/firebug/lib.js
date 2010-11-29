@@ -2734,7 +2734,7 @@ this.getCorrectedStackTrace = function(frame, context)
             var originalLength = trace.frames.length;
             trace.frames.splice(50, originalLength - 100);
             var excuse = "(eliding "+(originalLength - 100)+" frames)";
-            trace.frames[50] = new this.StackFrame({href: excuse}, 0, excuse, []);
+            trace.frames[50] = new this.StackFrame({href: excuse}, 0, excuse, [], undefined, undefined, context);
         }
 
     }
@@ -2756,7 +2756,7 @@ this.getStackFrame = function(frame, context)
     {
         var excuse = (frame.isNative) ?  "(native)" : "(debugger)";
         if (FBTrace.DBG_STACK) FBTrace.sysout("lib.getStackFrame "+excuse+" frame\n");
-        return new this.StackFrame({href: excuse}, 0, excuse, []);
+        return new this.StackFrame({href: excuse}, 0, excuse, [], undefined, undefined, context);
     }
     try
     {
@@ -2776,7 +2776,7 @@ this.getStackFrame = function(frame, context)
             }
 
             if (FBTrace.DBG_STACK) FBTrace.sysout("lib.getStackFrame "+fncSpec.name, {sourceFile: sourceFile, script: frame.script, fncSpec: fncSpec, analyzer: analyzer});
-            return new this.StackFrame(sourceFile, lineNo, fncSpec.name, fncSpec.args, frame);
+            return new this.StackFrame(sourceFile, lineNo, fncSpec.name, fncSpec.args, frame, undefined, context);
         }
         else
         {
@@ -2785,7 +2785,7 @@ this.getStackFrame = function(frame, context)
 
             var script = frame.script;
 
-            return new this.StackFrame({href: FBL.normalizeURL(script.fileName)}, frame.line, script.functionName, [], frame);
+            return new this.StackFrame({href: FBL.normalizeURL(script.fileName)}, frame.line, script.functionName, [], frame, undefined, context);
         }
     }
     catch (exc)
@@ -2794,6 +2794,109 @@ this.getStackFrame = function(frame, context)
         return null;
     }
 };
+
+//* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+//frameXB, cross-browser frame
+
+this.StackFrame = function(sourceFile, lineNo, functionName, args, nativeFrame, pc, context)
+{
+ // Essential fields
+ this.sourceFile = sourceFile;
+ this.line = lineNo;
+ this.fn = functionName;  // cache?
+ this.context = context;
+
+ // optional
+ this.args = args;
+
+ // Derived from sourceFile
+ this.href = sourceFile.href;
+
+ // Mozilla
+ this.nativeFrame = nativeFrame;
+ this.pc = pc;
+ this.script = nativeFrame ? nativeFrame.script : null;  // TODO-XB
+};
+
+this.StackFrame.prototype =
+{
+     getFunctionName: function()
+     {
+         return this.fn;
+     },
+
+     toSourceLink: function()
+     {
+         return new FBL.SourceLink(this.sourceFile.href, this.line, "js");
+     },
+
+     toString: function()
+     {
+             return this.fn+", "+this.sourceFile.href+"@"+this.line;
+     },
+
+     setCallingFrame: function(caller, frameIndex)
+     {
+         this.callingFrame = caller;
+         this.frameIndex = frameIndex;
+     },
+
+     getCallingFrame: function()
+     {
+         FBTrace.sysout("getCallingFrame "+this, this);
+         if (!this.callingFrame && this.nativeFrame)
+         {
+             var nativeCallingFrame = this.nativeFrame.callingFrame;
+             if (nativeCallingFrame)
+                 this.callingFrame = FBL.getStackFrame(nativeCallingFrame, this.context);
+         }
+         return this.callingFrame;
+     },
+
+     getFrameIndex: function()
+     {
+         return this.frameIndex;
+     },
+
+     destroy: function()
+     {
+         if (FBTrace.DBG_STACK)
+             FBTrace.sysout("StackFrame destroyed:"+this.uid+"\n");
+         this.script = null;
+         this.nativeFrame = null;
+         this.context = null;
+     },
+
+     signature: function()
+     {
+         return this.script.tag +"." + this.pc;
+     }
+};
+
+//-----------------------111111----222222-----33---444  1 All 'Not a (' followed by (; 2 All 'Not a )' followed by a ); 3 text between @ and : digits
+var reErrorStackLine = /([^\(]*)\(([^\)]*)\)@(.*):(\d*)/;
+
+this.parseToStackFrame = function(line) // function name (arg, arg, arg)@fileName:lineNo
+{
+     var m = reErrorStackLine.exec(line);
+     if (m)
+         return new this.StackFrame({href:m[3]}, m[4], m[1], m[2].split(','), undefined, undefined, context);
+}
+
+this.parseToStackTrace = function(stack)
+{
+    var lines = stack.split('\n');
+     var trace = new this.StackTrace();
+     for (var i = 0; i < lines.length; i++)
+     {
+         var frame = this.parseToStackFrame(lines[i]);
+         if (FBTrace.DBG_STACK)
+             FBTrace.sysout("parseToStackTrace i "+i+" line:"+lines[i]+ "->frame: "+frame, frame);
+         if (frame)
+             trace.frames.push(frame);
+     }
+     return trace;
+}
 
 function getStackDump()
 {
@@ -5060,102 +5163,6 @@ this.traceToString = function(trace)                /*@explore*/
     return str;                                     /*@explore*/
 }
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
-// frameXB, cross-browser frame
-
-this.StackFrame = function(sourceFile, lineNo, functionName, args, nativeFrame, pc)
-{
-    // Essential fields
-    this.sourceFile = sourceFile;
-    this.line = lineNo;
-    this.fn = functionName;  // cache?
-
-    // optional
-    this.args = args;
-
-    // Derived from sourceFile
-    this.href = sourceFile.href;
-
-    // Mozilla
-    this.nativeFrame = nativeFrame;
-    this.pc = pc;
-    this.script = nativeFrame ? nativeFrame.script : null;  // TODO-XB
-};
-
-this.StackFrame.prototype =
-{
-    getFunctionName: function()
-    {
-        return this.fn;
-    },
-
-    toSourceLink: function()
-    {
-        return new FBL.SourceLink(this.sourceFile.href, this.line, "js");
-    },
-
-    toString: function()
-    {
-            return this.fn+", "+this.sourceFile.href+"@"+this.line;
-    },
-
-    setCallingFrame: function(caller, frameIndex)
-    {
-        this.callingFrame = caller;
-        this.frameIndex = frameIndex;
-    },
-
-    getCallingFrame: function()
-    {
-        return this.callingFrame;
-    },
-
-    getFrameIndex: function()
-    {
-        return this.frameIndex;
-    },
-
-    getNativeFrame: function()  // Mozilla, used for backwards compat, TODO remove
-    {
-        if (this.nativeFrame && this.nativeFrame.isValid)
-            return this.nativeFrame;
-    },
-
-    destroy: function()
-    {
-        if (FBTrace.DBG_STACK)
-            FBTrace.sysout("StackFrame destroyed:"+this.uid+"\n");
-        this.script = null;
-        this.nativeFrame = null;
-    },
-
-    signature: function()
-    {
-        return this.script.tag +"." + this.pc;
-    }
-};
-//-----------------------111111----222222-----33---444  1 All 'Not a (' followed by (; 2 All 'Not a )' followed by a ); 3 text between @ and : digits
-var reErrorStackLine = /([^\(]*)\(([^\)]*)\)@(.*):(\d*)/;
-this.parseToStackFrame = function(line) // function name (arg, arg, arg)@fileName:lineNo
-{
-    var m = reErrorStackLine.exec(line);
-    if (m)
-        return new this.StackFrame({href:m[3]}, m[4], m[1], m[2].split(','));
-}
-this.parseToStackTrace = function(stack)
-{
-    var lines = stack.split('\n');
-    var trace = new this.StackTrace();
-    for (var i = 0; i < lines.length; i++)
-    {
-        var frame = this.parseToStackFrame(lines[i]);
-        if (FBTrace.DBG_STACK)
-            FBTrace.sysout("parseToStackTrace i "+i+" line:"+lines[i]+ "->frame: "+frame, frame);
-        if (frame)
-            trace.frames.push(frame);
-    }
-    return trace;
-}
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 
