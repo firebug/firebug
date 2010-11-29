@@ -5,13 +5,17 @@
 
 var EXPORTED_SYMBOLS = ["CompilationUnit"];
 
+// XXXjjb Modules HACK
+Components.utils.import("resource://firebug/firebug-trace-service.js");
+FBTrace = traceConsoleService.getTracer("extensions.firebug");
+
 // ************************************************************************************************
 // Compilation Unit
 
 /**
  * Describes a compilation unit in a browser context. A compilation unit
  * may originate from a JavaScript source file or a script element in HTML.
- * 
+ *
  * @constructor
  * @param url compilation unit URL - a {@link String} or <code>null</code> if none
  * @param context the {@link BrowserContext} this compilation unit is contained in
@@ -24,10 +28,36 @@ function CompilationUnit(url, context)
     this.url = url;
     this.context = context;
     this.breakpoints = [];
+    this.numberOfLines = 0;
+    this.kind = CompilationUnit.SCRIPT_TAG;
 }
+
+/*
+ * Kinds of Compilation Units
+ */
+CompilationUnit.SCRIPT_TAG = "script_tag";
+CompilationUnit.EVAL = "eval";
+CompilationUnit.BROWSER_GENERATED = "event";
 
 // ************************************************************************************************
 // API
+
+/**
+ * Returns the Kind of Compilation Unit
+ * <p>
+ * This function does not require communication with
+ * the browser.
+ * </p>
+ */
+CompilationUnit.prototype.getKind = function getKind()
+{
+    return this.kind;
+}
+
+CompilationUnit.prototype.isExecutableLine = function isExecutableLine(lineNo)
+{
+    return true; // HACK
+}
 
 /**
  * Returns the URL of this compilation unit.
@@ -35,7 +65,7 @@ function CompilationUnit(url, context)
  * This function does not require communication with
  * the browser.
  * </p>
- * 
+ *
  * @function
  * @returns compilation unit identifier as a {@link String}
  */
@@ -50,7 +80,7 @@ CompilationUnit.prototype.getURL = function()
  * This function does not require communication with
  * the browser.
  * </p>
- * 
+ *
  * @function
  * @returns a {@link BrowserContext}
  */
@@ -88,9 +118,19 @@ CompilationUnit.prototype.getBreakpoints = function()
  * @function
  * @param listener a listener (function) that accepts a {@link String} of source code
  */
-CompilationUnit.prototype.getSource = function(listener)
+CompilationUnit.prototype.getSourceLines = function(firstLine, lastLine, listener)
 {
-    //TODO:
+    this.lines = this.sourceFile.loadScriptLines(this.context);
+    this.numberOfLines = this.lines.length;
+    listener(this, 1, this.lines.length, this.lines);
+};
+
+/**
+ * Request the current estimated number of source lines in the entire compilationUnit
+ */
+CompilationUnit.prototype.getNumberOfLines = function()
+{
+    return this.numberOfLines;
 };
 
 /**
@@ -122,7 +162,7 @@ CompilationUnit.prototype.setBreakpoint = function(lineNumber)
  * Adds the specified breakpoint to this compilation unit's collection of breakpoints.
  * Implementation should call this method when a breakpoint is created in a compilation
  * unit.
- * 
+ *
  * @param breakpoint the breakpoint that was created
  * @function
  */
@@ -135,7 +175,7 @@ CompilationUnit.prototype._addBreakpoint = function(breakpoint)
  * Removes the specified breakpoint from this compilation unit's collection of breakpoints.
  * Implementation should call this method when a breakpoint is cleared from a compilation
  * unit.
- * 
+ *
  * @param breakpoint the breakpoint that was removed
  * @function
  */
