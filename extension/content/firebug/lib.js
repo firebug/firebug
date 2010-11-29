@@ -3138,6 +3138,8 @@ this.sourceURLsAsArray = function(context)
     return urls;
 };
 
+
+// deprecated, use mapAsArray
 this.sourceFilesAsArray = function(sourceFileMap)
 {
     var sourceFiles = [];
@@ -3146,6 +3148,16 @@ this.sourceFilesAsArray = function(sourceFileMap)
     if (FBTrace.DBG_SOURCEFILES) FBTrace.sysout("sourceFilesAsArray sourcefiles="+sourceFiles.length, sourceFiles);
     return sourceFiles;
 };
+
+this.mapAsArray = function(map)
+{
+    var entries = [];
+    for (var url in map)
+        entries.push(map[url]);
+
+    return entries;
+};
+
 
 // ************************************************************************************************
 // CSS
