@@ -2844,7 +2844,7 @@ this.StackFrame.prototype =
      getCallingFrame: function()
      {
          FBTrace.sysout("getCallingFrame "+this, this);
-         if (!this.callingFrame && this.nativeFrame)
+         if (!this.callingFrame && this.nativeFrame && this.nativeFrame.isValid)
          {
              var nativeCallingFrame = this.nativeFrame.callingFrame;
              if (nativeCallingFrame)
