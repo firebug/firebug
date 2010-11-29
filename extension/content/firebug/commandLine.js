@@ -1154,7 +1154,8 @@ function FirebugCommandLineAPI(context)
 
     this.$$ = function(selector) // uses only DOM calls
     {
-        return context.baseWindow.document.querySelectorAll(selector);
+        var result = context.baseWindow.document.querySelectorAll(selector);
+        return cloneArray(result);
     };
 
     this.$x = function(xpath) // uses only DOM calls
