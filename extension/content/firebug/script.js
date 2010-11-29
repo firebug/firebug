@@ -7,6 +7,7 @@ FBL.ns(function() { with (FBL) {
 
     Firebug.ScriptPanel = function() {};
 
+    Firebug.ScriptPanel.reLineNumber = /^[^\\]?#(\d*)$/;
     /*
      * object used to markup Javascript source lines.
      * In the namespace Firebug.ScriptPanel.
@@ -636,7 +637,7 @@ FBL.ns(function() { with (FBL) {
             }
 
             // Check if the search is for a line number
-            var m = reLineNumber.exec(text);
+            var m = Firebug.ScriptPanel.reLineNumber.exec(text);
             if (m)
             {
                 if (!m[1])

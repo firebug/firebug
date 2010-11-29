@@ -35,8 +35,6 @@ const STEP_OUT = 3;
 
 const tooltipTimeout = 300;
 
-const reLineNumber = /^[^\\]?#(\d*)$/;
-
 const reEval =  /\s*eval\s*\(([^)]*)\)/m;        // eval ( $1 )
 const reHTM = /\.[hH][tT][mM]/;
 const reFunction = /\s*Function\s*\(([^)]*)\)/m;
