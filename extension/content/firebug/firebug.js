@@ -1399,15 +1399,14 @@ top.Firebug =
     {
         if (!forceOpen && Firebug.isDetached())  // detached -> minimized
         {
-            Firebug.chrome.close();
-            detachCommand.setAttribute("checked", false);
-            if (reopenInBrowser)
+            setTimeout(function delayMinimize()
             {
-                setTimeout(function delayMinimize()
-                {
-                    Firebug.unMinimize()
-                });
-            }
+                if (reopenInBrowser)
+                    Firebug.unMinimize();
+                else
+                    Firebug.minimizeBar();
+            });
+            Firebug.chrome.close();
         }
         else
             this.detachBar(Firebug.currentContext);
