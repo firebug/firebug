@@ -1852,8 +1852,22 @@ this.getElementCSSSelector = function(element)
     var label = element.localName.toLowerCase();
     if (element.id)
         label += "#" + element.id;
+
     if (element.hasAttribute("class"))
-        label += "." + element.getAttribute("class").split(" ")[0];
+    {
+        var classes = element.getAttribute("class");
+        var names = classes.split(" ");
+
+        // Find the first class used for this element (skip spaces)
+        for (var p in names)
+        {
+            if (names[p])
+            {
+                label += "." + names[p];
+                break;
+            }
+        }
+    }
 
     return label;
 };
