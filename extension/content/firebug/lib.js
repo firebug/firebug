@@ -1853,21 +1853,8 @@ this.getElementCSSSelector = function(element)
     if (element.id)
         label += "#" + element.id;
 
-    if (element.hasAttribute("class"))
-    {
-        var classes = element.getAttribute("class");
-        var names = classes.split(" ");
-
-        // Find the first class used for this element (skip spaces)
-        for (var p in names)
-        {
-            if (names[p])
-            {
-                label += "." + names[p];
-                break;
-            }
-        }
-    }
+    if (element.classList.length > 0)
+        label += "." + element.classList.item(0);
 
     return label;
 };
