@@ -1566,6 +1566,12 @@ top.Firebug =
             : FBL.$STR("Panel-"+panelType.prototype.name);
     },
 
+    getPanelTooltip: function(panelType)
+    {
+        return panelType.prototype.tooltip ? panelType.prototype.tooltip
+            : this.getPanelTitle(panelType);
+    },
+
     getMainPanelTypes: function(context)
     {
         var resultTypes = [];
