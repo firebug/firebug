@@ -1298,14 +1298,17 @@ top.Firebug =
 
     showKeys: function(shouldShow)
     {
+        // Get all key bindings marked as fbOnlyKey
         if (!this.fbOnlyKeys)
         {
             var keyset = document.getElementById("mainKeyset");
-            this.fbOnlyKeys = keyset.getElementsByClassName("fbOnlyKey").item(0);
+            this.fbOnlyKeys = keyset.querySelectorAll(".fbOnlyKey");
         }
+
+        // Iterate over all key bindings and disable them if Firebug UI is not opened.
         var keys = this.fbOnlyKeys;
         for (var i = 0; i < keys.length; i++)
-            keys[i].setAttribute("disabled", !!shouldShow);
+            keys[i].setAttribute("disabled", shouldShow ? "false" : "true");
     },
 
     closeFirebug: function(userCommand)  // this is really deactivate

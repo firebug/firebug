@@ -91,7 +91,7 @@
     <keyset id="mainKeyset">
         <key id="key_reenterCommand" key="e" modifiers="control,shift" command="cmd_reenterCommand" class="fbOnlyKey"/>
         <key id="key_toggleInspecting" key="c" modifiers="accel,shift" command="cmd_toggleInspecting" />
-        <key id="key_toggleQuickInfoBox" key="i" modifiers="accel,shift" command="cmd_toggleQuickInfoBox" />
+        <key id="key_toggleQuickInfoBox" key="i" modifiers="accel,shift" command="cmd_toggleQuickInfoBox" class="fbOnlyKey"/>
         <key id="key_toggleProfiling" key="p" modifiers="accel,shift" command="cmd_toggleProfiling" class="fbOnlyKey"/>
         <key id="key_focusCommandLine" key="l" modifiers="accel,shift" command="cmd_focusCommandLine" class="fbOnlyKey"/>
         <key id="key_focusFirebugSearch" key="k" modifiers="accel,shift" command="cmd_focusFirebugSearch" class="fbOnlyKey"/>
@@ -101,19 +101,19 @@
         <key id="key_nextObject" key="." modifiers="control" command="cmd_nextObject" class="fbOnlyKey"/>
         <key id="key_previousObject" key="," modifiers="control" command="cmd_previousObject" class="fbOnlyKey"/>
         <key id="key_previousFirebugTab" key="`" modifiers="control" command="cmd_previousFirebugTab" class="fbOnlyKey"/>
-        <key id="key_leftFirebugTab" keycode="VK_PAGE_UP" modifiers="accel shift" command="cmd_leftFirebugTab"/>
-        <key id="key_rightFirebugTab" keycode="VK_PAGE_DOWN" modifiers="accel shift" command="cmd_rightFirebugTab"/>
-        <key id="key_customizeFBKeys" keycode="VK_B" modifiers="accel shift alt" command="cmd_customizeFBKeys"/>
+        <key id="key_leftFirebugTab" keycode="VK_PAGE_UP" modifiers="accel shift" command="cmd_leftFirebugTab" class="fbOnlyKey"/>
+        <key id="key_rightFirebugTab" keycode="VK_PAGE_DOWN" modifiers="accel shift" command="cmd_rightFirebugTab" class="fbOnlyKey"/>
+        <key id="key_customizeFBKeys" keycode="VK_B" modifiers="accel shift alt" command="cmd_customizeFBKeys" class="fbOnlyKey"/>
         <key id="key_toggleFirebug" keycode="VK_F12" command="cmd_toggleFirebug"/>
         <key id="key_detachFirebug" keycode="VK_F12" modifiers="accel" command="cmd_detachFirebug"/>
         <key id="key_closeFirebug" keycode="VK_F12" modifiers="shift" command="cmd_closeFirebug"/>
         <key id="key_clearConsole" key="r" modifiers="accel,shift" command="cmd_clearConsole" class="fbOnlyKey"/>
-        <key id="key_navBack" keycode="VK_LEFT" modifiers="accel,shift" command="cmd_navBack"/>
-        <key id="key_navForward" keycode="VK_RIGHT" modifiers="accel,shift" command="cmd_navForward"/>
-        <key id="key_toggleFreezeWindow" key="f" modifiers="control,shift" command="cmd_toggleFreezeWindow"/>
-        <key id="key_increaseTextSize" key="+" modifiers="accel shift" command="cmd_increaseTextSize"/>
-        <key id="key_decreaseTextSize" key="-" modifiers="accel shift" command="cmd_decreaseTextSize"/>
-        <key id="key_normalTextSize" keycode="VK_INSERT" modifiers="accel shift" command="cmd_normalTextSize"/>
+        <key id="key_navBack" keycode="VK_LEFT" modifiers="accel,shift" command="cmd_navBack" class="fbOnlyKey"/>
+        <key id="key_navForward" keycode="VK_RIGHT" modifiers="accel,shift" command="cmd_navForward" class="fbOnlyKey"/>
+        <key id="key_toggleFreezeWindow" key="f" modifiers="control,shift" command="cmd_toggleFreezeWindow" class="fbOnlyKey"/>
+        <key id="key_increaseTextSize" key="+" modifiers="accel shift" command="cmd_increaseTextSize" class="fbOnlyKey"/>
+        <key id="key_decreaseTextSize" key="-" modifiers="accel shift" command="cmd_decreaseTextSize" class="fbOnlyKey"/>
+        <key id="key_normalTextSize" keycode="VK_INSERT" modifiers="accel shift" command="cmd_normalTextSize" class="fbOnlyKey"/>
     </keyset>
 
     <popupset id="mainPopupSet">
