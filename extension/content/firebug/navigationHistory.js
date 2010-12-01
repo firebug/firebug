@@ -17,8 +17,6 @@ const MAX_HISTORY_MENU_ITEMS = 15;
  */
 Firebug.NavigationHistory = extend(Firebug.Module,
 {
-    currIndex: 0,
-
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
     // Extending Module
 
@@ -26,8 +24,15 @@ Firebug.NavigationHistory = extend(Firebug.Module,
     {
         Firebug.Module.initContext.apply(this, arguments);
 
+        // Initialize context members.
+        context.navigationHistory = [];
+        context.navigationHistoryIndex = 0;
+
         if (persistedState && persistedState.navigationHistory)
+        {
             context.navigationHistory = persistedState.navigationHistory;
+            context.navigationHistoryIndex = persistedState.navigationHistoryIndex;
+        }
     },
 
     reattachContext: function(browser, context)
@@ -42,7 +47,10 @@ Firebug.NavigationHistory = extend(Firebug.Module,
         Firebug.Module.destroyContext.apply(this, arguments);
 
         if (persistedState)
+        {
             persistedState.navigationHistory = context.navigationHistory;
+            persistedState.navigationHistoryIndex = context.navigationHistoryIndex;
+        }
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
@@ -50,6 +58,11 @@ Firebug.NavigationHistory = extend(Firebug.Module,
 
     onPopupShowing: function(popup, context)
     {
+        var currIndex = this.getCurrentIndex(context);
+
+        if (FBTrace.DBG_HISTORY)
+            FBTrace.sysout("history.onPopupShowing; " + currIndex + ", " + context.getName(), context);
+
         FBL.eraseNode(popup);
 
         var list = this.getHistory(context);
@@ -61,8 +74,8 @@ Firebug.NavigationHistory = extend(Firebug.Module,
 
         var maxItems = MAX_HISTORY_MENU_ITEMS;
         var half = Math.floor(maxItems / 2);
-        var start = Math.max(this.currIndex - half, 0);
-        var end = Math.min(start == 0 ? maxItems : this.currIndex + half + 1, count);
+        var start = Math.max(currIndex - half, 0);
+        var end = Math.min(start == 0 ? maxItems : currIndex + half + 1, count);
 
         if (end == count)
             start = Math.max(count - maxItems, 0);
@@ -85,12 +98,12 @@ Firebug.NavigationHistory = extend(Firebug.Module,
                 className: "menuitem-iconic fbURLMenuItem",
             };
 
-            if (i < this.currIndex)
+            if (i < currIndex)
             {
                 menuInfo.className += " navigationHistoryMenuItemBack";
                 menuInfo.tooltiptext = tooltipBack;
             }
-            else if (i == this.currIndex)
+            else if (i == currIndex)
             {
                 menuInfo.type = "radio";
                 menuInfo.checked = "true";
@@ -124,12 +137,22 @@ Firebug.NavigationHistory = extend(Firebug.Module,
 
     goBack: function(context)
     {
-        this.gotoHistoryIndex(context, --this.currIndex);
+        var currIndex = this.getCurrentIndex(context);
+
+        if (FBTrace.DBG_HISTORY)
+            FBTrace.sysout("history.goBack; " + currIndex + ", " + context.getName(), context);
+
+        this.gotoHistoryIndex(context, currIndex - 1);
     },
 
     goForward: function(context)
     {
-        this.gotoHistoryIndex(context, ++this.currIndex);
+        var currIndex = this.getCurrentIndex(context);
+
+        if (FBTrace.DBG_HISTORY)
+            FBTrace.sysout("history.goForward; " + currIndex + ", " + context.getName(), context);
+
+        this.gotoHistoryIndex(context, currIndex + 1);
     },
 
     gotoHistoryIndex: function(context, index)
@@ -144,7 +167,7 @@ Firebug.NavigationHistory = extend(Firebug.Module,
         {
             this.navInProgress = true;
             Firebug.chrome.navigate(historyItem.location, historyItem.panelName);
-            this.currIndex = index;
+            context.navigationHistoryIndex = index;
         }
         catch (e)
         {
@@ -171,10 +194,12 @@ Firebug.NavigationHistory = extend(Firebug.Module,
         if (list.length <= 1)
             return;
 
-        if (this.currIndex > 0)
+        var currIndex = this.getCurrentIndex(context);
+
+        if (currIndex > 0)
             backButton.removeAttribute("disabled");
 
-        if (this.currIndex < list.length-1)
+        if (currIndex < list.length-1)
             forwardButton.removeAttribute("disabled");
     },
 
@@ -186,15 +211,27 @@ Firebug.NavigationHistory = extend(Firebug.Module,
         return context.navigationHistory;
     },
 
+    getCurrentIndex: function(context)
+    {
+        if (typeof(context.navigationHistoryIndex) == "undefined")
+            context.navigationHistoryIndex = 0;
+
+        return context.navigationHistoryIndex;
+    },
+
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
     // UI Listener
 
     onPanelNavigate: function(location, panel)
     {
+        var context = panel.context;
+        var currIndex = this.getCurrentIndex(context);
+
         if (FBTrace.DBG_HISTORY)
-            FBTrace.sysout("history.onPanelNavigate; " +
-                "Panel: " + (panel ? panel.name : "Unknown Panel") +
-                "Location: " + (location ? location.href : "No Location"));
+            FBTrace.sysout("history.onPanelNavigate; " + currIndex + ", " +
+                "Panel: " + (panel ? panel.name : "Unknown Panel") + ", " +
+                "Location: " + (location ? location.href : "No Location") + ", " +
+                context.getName());
 
         // The panel must be always there
         if (!panel)
@@ -209,10 +246,7 @@ Firebug.NavigationHistory = extend(Firebug.Module,
         if (this.navInProgress)
             return;
 
-        var list = this.getHistory(panel.context);
-
-        // Remove forward history.
-        list.splice(this.currIndex+1, list.length-(this.currIndex+1));
+        var list = this.getHistory(context);
 
         // If the last item in the history is the same bail out.
         var lastHistoryItem = list.length ? list[list.length-1] : null;
@@ -224,11 +258,25 @@ Firebug.NavigationHistory = extend(Firebug.Module,
             lastHistoryItem.location.href == location.href)
             return;
 
+        // If the panel is the same, bail out.
+        var currHistoryItem = list.length ? list[currIndex] : null;
+        if (currHistoryItem && currHistoryItem.panelName == panel.name &&
+            currHistoryItem.location == location)
+            return;
+
+        // Remove forward history.
+        list.splice(currIndex+1, list.length-(currIndex+1));
+
+        // New back history record.
         list.push({panelName: panel.name, location: location});
-        this.currIndex = list.length-1;
+        context.navigationHistoryIndex = list.length-1;
+
+        if (FBTrace.DBG_HISTORY)
+            FBTrace.sysout("history.onPanelNavigate; New history record created " + currIndex +
+                ", " + panel.name + ", " + (location ? location.href : "No Location"), list);
 
         // Update back and forward buttons in the UI.
-        this.updateButtons(panel.context);
+        this.updateButtons(context);
     }
 });
 
