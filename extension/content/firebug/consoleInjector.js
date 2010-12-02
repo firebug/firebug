@@ -89,6 +89,9 @@ top.Firebug.Console.injector =
             return;
         }
 
+        if (isXMLPrettyPrint(context, win))
+            return;
+
         var consoleForcer = "window.loadFirebugConsole();";
 
         if (context.stopped)

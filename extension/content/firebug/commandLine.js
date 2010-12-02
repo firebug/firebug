@@ -709,8 +709,13 @@ Firebug.CommandLine = extend(Firebug.Module,
         if (this.isSandbox(context))
             return;
 
+        if (isXMLPrettyPrint(context, win))
+            return false;
+
         if (win)
+        {
             Firebug.CommandLine.injector.attachCommandLine(context, win);
+        }
         else
         {
             Firebug.CommandLine.injector.attachCommandLine(context, context.window);

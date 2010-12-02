@@ -22,6 +22,7 @@ this.fbs = fbs; // left over from component.
 Components.utils.import("resource://firebug/firebug-http-observer.js");
 this.httpObserver = httpRequestObserver;
 this.jsd = this.CCSV("@mozilla.org/js/jsd/debugger-service;1", "jsdIDebuggerService");
+this.domUtils = this.CCSV("@mozilla.org/inspector/dom-utils;1", "inIDOMUtils");
 
 const finder = this.finder = this.CCIN("@mozilla.org/embedcomp/rangefind;1", "nsIFind");
 const wm = this.CCSV("@mozilla.org/appshell/window-mediator;1", "nsIWindowMediator");
@@ -1909,7 +1910,6 @@ this.getInstanceForStyleSheet = function(styleSheet, ownerDocument)
 // ************************************************************************************************
 // HTML and XML Serialization
 
-
 var getElementType = this.getElementType = function(node)
 {
     if (isElementXUL(node))
@@ -2092,6 +2092,40 @@ this.getElementXML = function(element)
     var xml = [];
     toXML(element);
     return xml.join("");
+};
+
+// ************************************************************************************************
+// Whitespace and Entity conversions
+
+/**
+ * Returns true if given document is based on a XML and so displaying pretty printed XML elements.
+ */
+this.isXMLPrettyPrint = function(context, win)
+{
+    if (context.isXMLPrettyPrint)
+        return true;
+
+    try
+    {
+        var doc = win ? win.document : context.window.document;
+        var bindings = this.domUtils.getBindingURLs(doc.documentElement);
+        for (var i = 0; i < bindings.length; i++)
+        {
+            var bindingURI = bindings.queryElementAt(i, Ci.nsIURI);
+            if (FBTrace.DBG_CSS)
+                FBTrace.sysout("bindingURL: " + i + " " + bindingURI.resolve(""));
+
+            if (bindingURI.resolve("") === "chrome://global/content/xml/XMLPrettyPrint.xml")
+            {
+                return context.isXMLPrettyPrint = true;
+            }
+        }
+    }
+    catch (e)
+    {
+        if (FBTrace.DBG_ERRORS)
+            FBTrace.sysout("css.isXMLPrettyPrint; EXCEPTION "+e, e);
+    }
 };
 
 // ************************************************************************************************

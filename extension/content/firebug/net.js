@@ -1618,7 +1618,6 @@ NetPanel.prototype = extend(Firebug.ActivablePanel,
 
         // Update max-width of the netHrefLabel according to the width of the parent column.
         // I don't know if there is a way to do this in CSS.
-        var domUtils = CCSV("@mozilla.org/inspector/dom-utils;1", "inIDOMUtils");
         var netHrefCol = this.table.querySelector("#netHrefCol");
         var hrefLabel = this.table.querySelector(".netHrefLabel");
 

@@ -20,8 +20,6 @@ const STATE_HOVER   = 0x04;
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 
-const domUtils = CCSV("@mozilla.org/inspector/dom-utils;1", "inIDOMUtils");
-
 var CSSDomplateBase =
 {
     isEditable: function(rule)
@@ -307,7 +305,7 @@ Firebug.CSSModule = extend(Firebug.Module,
         //
         // WARN: This behavior was determined anecdotally.
         // See http://code.google.com/p/fbug/issues/detail?id=2440
-        if (!isXMLPrettyPrint(doc))
+        if (!isXMLPrettyPrint(context))
         {
             var style = createStyleSheet(doc);
             style.innerHTML = "#fbIgnoreStyleDO_NOT_USE {}";
@@ -1670,26 +1668,6 @@ function safeGetContentState(selection)
     {
         if (FBTrace.DBG_ERRORS)
             FBTrace.sysout("css.safeGetContentState; EXCEPTION "+e, e);
-    }
-}
-
-function isXMLPrettyPrint(doc)
-{
-    try
-    {
-        var bindings = domUtils.getBindingURLs(doc.documentElement);
-        for (var i = 0; i < bindings.length; i++)
-        {
-            var bindingURI = bindings.queryElementAt(i, nsIURI);
-            if (FBTrace.DBG_CSS) { FBTrace.sysout("bindingURL: " + i + " " + bindingURI.resolve("")); }
-            if (bindingURI.resolve("") === "chrome://global/content/xml/XMLPrettyPrint.xml")
-                return true;
-        }
-    }
-    catch (e)
-    {
-        if (FBTrace.DBG_ERRORS)
-          FBTrace.sysout("css.isXMLPrettyPrint; EXCEPTION "+e, e);
     }
 }
 

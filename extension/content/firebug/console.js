@@ -160,8 +160,13 @@ Firebug.Console = extend(ActivableConsole,
                 (win?"an argument: ":"null, context.window: ") +
                 (win?win.location:context.window.location), (win?win:context.window));
 
+        if (isXMLPrettyPrint(context, win))
+            return false;
+
         if (win)
+        {
             return this.injector.attachIfNeeded(context, win);
+        }
         else
         {
             var attached = true;
