@@ -138,6 +138,9 @@ top.FirebugChrome =
         this.initializeMenu($("menu_firebug"), firebugMenuPopup);
         this.initializeMenu($("fbFirebugMenu"), firebugMenuPopup);
 
+        // Register handlers for (de)activation of key bindings.
+        KeyBindingsManager.initialize();
+
         if (FBTrace.DBG_INITIALIZE)
             FBTrace.sysout("chrome.initialized ", window);
     },
@@ -259,6 +262,8 @@ top.FirebugChrome =
             this.undetach();
         else
             Firebug.shutdown();
+
+        KeyBindingsManager.shutdown();
     },
 
     updateOption: function(name, value)
@@ -1399,6 +1404,68 @@ var FirstRunPage =
         }, 500);
     }
 }
+
+// ************************************************************************************************
+// Key Bindings Manager
+
+/**
+ * This object is responsible for activation and deactivation of key bindings registered by
+ * Firebug overlay. These are only available if Firebug UI is focused - to avoid collisions
+ * with key bindings on the current page (or Firefox key bingins that should apply when the
+ * current page is focused).
+ */
+var KeyBindingsManager =
+{
+    initialize: function()
+    {
+        this.onFocus = FBL.bind(this.onFocus, this);
+        this.onBlur = FBL.bind(this.onBlur, this);
+
+        var contentBox = $("fbContentBox");
+        contentBox.addEventListener("focus", this.onFocus, true);
+        contentBox.addEventListener("blur", this.onBlur, true);
+    },
+
+    shutdown: function()
+    {
+        var contentBox = $("fbContentBox");
+        contentBox.removeEventListener("focus", this.onFocus, true);
+        contentBox.removeEventListener("blur", this.onBlur, true);
+    },
+
+    onFocus: function()
+    {
+        if (this.isEnabled)
+            return;
+
+        this.isEnabled = true;
+        this.enableKeys(true);
+    },
+
+    onBlur: function()
+    {
+        if (!this.isEnabled)
+            return;
+
+        this.isEnabled = false;
+        this.enableKeys(false);
+    },
+
+    enableKeys: function(enable)
+    {
+        // Get all key bindings marked as fbOnlyKey
+        if (!this.fbOnlyKeys)
+        {
+            var keyset = document.getElementById("mainKeyset");
+            this.fbOnlyKeys = keyset.querySelectorAll(".fbOnlyKey");
+        }
+
+        // Iterate over all key bindings and disable them if Firebug UI is not opened.
+        var keys = this.fbOnlyKeys;
+        for (var i = 0; i < keys.length; i++)
+            keys[i].setAttribute("disabled", enable ? "false" : "true");
+    }
+};
 
 // ************************************************************************************************
 // Local Helpers
