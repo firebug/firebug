@@ -2146,7 +2146,7 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
 
     showContext: function(browser, context)
     {
-        if (context && !context.onLoadWindowContent) // then context was not active during load
+        if (context && context.loaded && !context.onLoadWindowContent) // then context was not active during load
             this.updateScriptFiles(context);
     },
 
