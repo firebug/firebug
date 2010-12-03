@@ -1854,7 +1854,7 @@ this.getElementCSSSelector = function(element)
     if (element.id)
         label += "#" + element.id;
 
-    if (element.classList.length > 0)
+    if (element.classList && element.classList.length > 0)
         label += "." + element.classList.item(0);
 
     return label;
