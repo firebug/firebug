@@ -1579,9 +1579,7 @@ this.ErrorMessage = domplate(Firebug.Rep,
 
     hasStackTrace: function(error)
     {
-        var url = error.href.toString();
-        var fromCommandLine = (url.indexOf("XPCSafeJSObjectWrapper") != -1);
-        return !fromCommandLine && error.trace;
+        return error && error.trace;
     },
 
     hasBreakSwitch: function(error)
@@ -1775,13 +1773,13 @@ this.Except = domplate(Firebug.Rep,
 
     getErrorMessage: function(object)
     {
-        var win = Firebug.currentContext.window,
+        var context = Firebug.currentContext,
+            win = context.window,
             trace,
             url,
             lineNo,
             errorObject,
-            message,
-            isCommandLine = false;
+            message;
 
         url = object.fileName ? object.fileName : (win ? win.location.href : "");
         lineNo = object.lineNumber ? object.lineNumber : 0;
@@ -1789,22 +1787,13 @@ this.Except = domplate(Firebug.Rep,
 
         if (object.stack)
         {
-            trace = FBL.parseToStackTrace(object.stack);
-            if (trace){
-                trace.frames.pop();
-                while (trace.frames.length && /^_[fF]irebug/.test(trace.frames[trace.frames.length - 1].fn))
-                {
-                    isCommandLine = true;
-                    trace.frames.pop();
-                }
-                if(trace.frames.length == 0)
-                    trace = undefined;
-            }
+            trace = FBL.parseToStackTrace(object.stack, context);
+            trace = cleanStackTraceOfFirebug(trace);
             if (!trace)
                 lineNo = 0;
         }
         errorObject = new FBL.ErrorMessage(message, url, lineNo, '', 'js',
-            Firebug.currentContext, trace);
+            context, trace);
 
         if (trace && trace.frames && trace.frames[0])
             errorObject.correctWithStackTrace(trace);

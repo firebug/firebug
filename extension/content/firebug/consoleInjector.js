@@ -444,7 +444,7 @@ Firebug.Console.createConsole = function createConsole(context, win)
 
         if (msg.stack)
         {
-            var trace = parseToStackTrace(msg.stack);
+            var trace = parseToStackTrace(msg.stack, context);
             if (FBTrace.DBG_CONSOLE)
                 FBTrace.sysout("logAssert trace from msg.stack", trace);
         }
@@ -461,8 +461,10 @@ Firebug.Console.createConsole = function createConsole(context, win)
                 FBTrace.sysout("logAssert trace from getJSDUserStack", trace);
         }
 
+        trace = cleanStackTraceOfFirebug(trace);
+        
         var url = msg.fileName ? msg.fileName : win.location.href;
-        var lineNo = msg.lineNumber ? msg.lineNumber : 0;
+        var lineNo = (trace && msg.lineNumber) ? msg.lineNumber : 0; // we may have only the line popped above
         var errorObject = new FBL.ErrorMessage(msg, url, lineNo, "", category, context, trace);
 
         if (trace && trace.frames && trace.frames[0])

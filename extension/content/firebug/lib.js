@@ -1936,12 +1936,12 @@ var getElementSimpleType = this.getElementSimpleType = function(node)
 
 var isElementHTML = this.isElementHTML = function(node)
 {
-    return node.nodeName == node.nodeName.toUpperCase();
+    return node.nodeName == node.nodeName.toUpperCase() && node.namespaceURI == 'http://www.w3.org/1999/xhtml';
 }
 
 var isElementXHTML = this.isElementXHTML = function(node)
 {
-    return node.nodeName == node.nodeName.toLowerCase();
+    return node.nodeName == node.nodeName.toLowerCase() && node.namespaceURI == 'http://www.w3.org/1999/xhtml';
 }
 
 var isElementMathML = this.isElementMathML = function(node)
@@ -2878,7 +2878,8 @@ this.StackFrame.prototype =
 
      getCallingFrame: function()
      {
-         FBTrace.sysout("getCallingFrame "+this, this);
+         if (FBTrace.DBG_STACK)
+             FBTrace.sysout("getCallingFrame "+this, this);
          if (!this.callingFrame && this.nativeFrame && this.nativeFrame.isValid)
          {
              var nativeCallingFrame = this.nativeFrame.callingFrame;
@@ -2982,26 +2983,44 @@ this.StackFrame.prototype =
 //-----------------------111111----222222-----33---444  1 All 'Not a (' followed by (; 2 All 'Not a )' followed by a ); 3 text between @ and : digits
 var reErrorStackLine = /([^\(]*)\(([^\)]*)\)@(.*):(\d*)/;
 
-this.parseToStackFrame = function(line) // function name (arg, arg, arg)@fileName:lineNo
+this.parseToStackFrame = function(line, context) // function name (arg, arg, arg)@fileName:lineNo
 {
      var m = reErrorStackLine.exec(line);
      if (m)
          return new this.StackFrame({href:m[3]}, m[4], m[1], m[2].split(','), undefined, undefined, context);
 }
 
-this.parseToStackTrace = function(stack)
+this.parseToStackTrace = function(stack, context)
 {
-    var lines = stack.split('\n');
+     var lines = stack.split('\n');
      var trace = new this.StackTrace();
      for (var i = 0; i < lines.length; i++)
      {
-         var frame = this.parseToStackFrame(lines[i]);
+         var frame = this.parseToStackFrame(lines[i],context);
          if (FBTrace.DBG_STACK)
              FBTrace.sysout("parseToStackTrace i "+i+" line:"+lines[i]+ "->frame: "+frame, frame);
          if (frame)
              trace.frames.push(frame);
      }
      return trace;
+}
+
+this.cleanStackTraceOfFirebug = function(trace)
+{
+    if (trace && trace.frames){
+        while (trace.frames.length && 
+            (
+             /^_[fF]irebug/.test(trace.frames[trace.frames.length - 1].fn) || 
+             /^\s*with\s*\(\s*_[fF]irebug/.test(trace.frames[trace.frames.length - 1].sourceFile.source)
+            )
+        )
+        {
+            trace.frames.pop();
+        }
+        if(trace.frames.length == 0)
+            trace = undefined;
+    }
+    return trace;
 }
 
 function getStackDump()
@@ -3778,7 +3797,8 @@ this.dispatch = function(listeners, name, args)
             var listener = listeners[i];
             if (!listener)
             {
-                FBTrace.sysout("FBL.dispatch ERROR "+i+" "+name+" to null listener.");
+                if (FBTrace.DBG_DISPATCH || FBTrace.DBG_ERRORS)
+                    FBTrace.sysout("FBL.dispatch ERROR "+i+" "+name+" to null listener.");
                 continue;
             }
             if ( listener[name] )
