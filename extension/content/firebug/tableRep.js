@@ -277,7 +277,7 @@ FirebugReps.Table = domplate(Firebug.Rep,
         {
             if (isDOMMember(object, name) && !Firebug.showDOMProps)
                 return false;
-            else if (isDOMConstant(name) && !Firebug.showDOMConstants)
+            else if (isDOMConstant(object, name) && !Firebug.showDOMConstants)
                 return false;
             else if (!Firebug.showUserProps)
                 return false;

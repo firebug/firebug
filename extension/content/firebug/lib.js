@@ -6121,10 +6121,18 @@ domMemberMap.Event =
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 
-this.isDOMConstant = function(name)
+this.isDOMConstant = function(object, name)
 {
     // The constant map has also its own prototype, but it isn't considered to be a constant.
     if (name == "__proto__")
+        return false;
+    
+    if (!(
+        object instanceof Window || 
+        object instanceof Node || 
+        object instanceof Location || 
+        object instanceof Event
+    ))
         return false;
 
     return (name in this.domConstantMap);

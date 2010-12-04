@@ -451,7 +451,7 @@ Firebug.DOMBasePanel.prototype = extend(Firebug.Panel,
                         this.addMember(object, "proto", proto, name, val, level, 0, context);
                     else if (isDOMMember(object, name))
                         this.addMember(object, "dom", domProps, name, val, level, domMembers[name], context);
-                    else if (isDOMConstant(name))
+                    else if (isDOMConstant(object, name))
                         this.addMember(object, "dom", domConstants, name, val, level, 0, context);
                     else
                         this.addMember(object, "user", userProps, name, val, level, 0, context);
