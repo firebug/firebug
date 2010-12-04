@@ -309,7 +309,14 @@ Firebug.TabContext.prototype =
         if (panel.parentPanel) // then this new panel is a side panel
         {
             panel.mainPanel = this.panelMap[panel.parentPanel];
-            panel.mainPanel.addListener(panel); // wire the side panel to get UI events from the main panel
+            if (panel.mainPanel) // then our panel map is consistent
+                panel.mainPanel.addListener(panel); // wire the side panel to get UI events from the main panel
+            else                 // then our panel map is broken, maybe by an extension failure.
+            {
+                if (FBTrace.DBG_ERRORS)
+                    FBTrace.sysout("tabContext.createPanel panel.mainPanel missing "+panel.name+" from "+panel.parentPanel.name);
+            }
+
         }
 
         var doc = this.chrome.getPanelDocument(panelType);
