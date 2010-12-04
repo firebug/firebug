@@ -129,8 +129,7 @@ var stepFrameCount;
 var stepRecursion = 0; // how many times the caller is the same during TYPE_FUNCTION_CALL
 var hookFrameCount = 0;
 
-var haltDebugger = null;  // For reason unknown, fbs.haltDebugger will not work.
-var haltCallBack = null;
+var haltObject = null;  // For reason unknown, fbs.haltDebugger will not work.
 
 var breakpointCount = 0;
 var disabledCount = 0;  // These are an optimization I guess, marking whether we are using this feature anywhere.
@@ -479,12 +478,19 @@ var fbs =
 
     halt: function(debuggr, fnOfFrame)
     {
-        // store for onDebugger
-        haltDebugger = debuggr;
-        haltCallBack = fnOfFrame;
+        if (!debuggr || !fnOfFrame)
+        {
+            if (FBTrace.DBG_FBS_ERRORS)
+                FBTrace.sysout("fbs.halt call FAILS bad arguments", arguments);
+            return null;
+        }
 
         if (FBTrace.DBG_FBS_BP)
             FBTrace.sysout('fbs.halt jsd.isOn:'+jsd.isOn+' jsd.pauseDepth:'+jsd.pauseDepth+" fbs.isChromeBlocked "+fbs.isChromeBlocked+"  jsd.debuggerHook: "+ jsd.debuggerHook, jsd.debuggerHook);
+
+        // store for onDebugger
+        haltObject = {haltDebugger: debuggr, haltCallBack: fnOfFrame};
+
         // call onDebugger via hook
         fbs.debuggerHalter();
         return fbs.haltReturnValue;
@@ -1123,7 +1129,7 @@ var fbs =
     broadcast: function(message, args)  // re-transmit the message (string) with args [objs] to XUL windows.
     {
         dispatch(clients, message, args);
-        if (FBTrace.DBG_FBS_ERRORS || FBTrace.DBG_ACTIVATION)
+        if (FBTrace.DBG_ACTIVATION)
             FBTrace.sysout("fbs.broadcast "+message+" to "+clients.length+" clients", clients);
     },
 
@@ -1205,7 +1211,7 @@ var fbs =
     onDebugger: function(frame, type, rv)
     {
         if (FBTrace.DBG_FBS_BP)
-            FBTrace.sysout("fbs.onDebugger with haltDebugger="+haltDebugger+" in "+frame.script.fileName, frame.script);
+            FBTrace.sysout("fbs.onDebugger with haltDebugger="+(haltObject?haltObject.haltDebugger:"null")+" in "+frame.script.fileName, frame.script);
         try
         {
             if ( FBTrace.DBG_FBS_SRCUNITS && fbs.isTopLevelScript(frame, type, rv)  )
@@ -1214,9 +1220,11 @@ var fbs =
             if (  FBTrace.DBG_FBS_SRCUNITS && fbs.isNestedScript(frame, type, rv) )
                 FBTrace.sysout("fbs.onDebugger found nestedScript "+ frame.script.tag);
 
-            if (haltDebugger)
+            if (haltObject)
             {
-                var peelOurselvesOff = frame.callingFrame;  // remove debuggerHalter()
+                var peelOurselvesOff = frame;
+                if (peelOurselvesOff.script.fileName.indexOf("modules/debuggerHalter.js") > 0)
+                    peelOurselvesOff = frame.callingFrame;  // remove debuggerHalter()
 
                 while( peelOurselvesOff && ( peelOurselvesOff.script.fileName.indexOf("content/debugger.js") > 0 ) )
                     peelOurselvesOff = peelOurselvesOff.callingFrame;
@@ -1224,10 +1232,11 @@ var fbs =
                 if (peelOurselvesOff)
                 {
                     if (FBTrace.DBG_FBS_BP)
-                        FBTrace.sysout('fbs.onDebugger adjusted newest frame: '+peelOurselvesOff.line+'@'+peelOurselvesOff.script.fileName+" frames: ", framesToString(frame));
+                        FBTrace.sysout("fbs.onDebugger, "+(haltObject.haltCallBack?"with":"without")+" callback, adjusted newest frame: "+peelOurselvesOff.line+'@'+peelOurselvesOff.script.fileName+" frames: ", framesToString(frame));
 
-                    var debuggr = haltDebugger;
-                    fbs.haltReturnValue = haltCallBack.apply(debuggr,[peelOurselvesOff]);
+                    var debuggr = haltObject.haltDebugger;
+                    var callback = haltObject.haltCallBack;
+                    fbs.haltReturnValue = callback.apply(debuggr,[peelOurselvesOff]);
                 }
                 else
                 {
@@ -1235,7 +1244,6 @@ var fbs =
                     fbs.haltReturnValue = "firebug-service.halt FAILS, no stack frames left ";
                 }
 
-                haltDebugger = null;
                 return RETURN_CONTINUE;
             }
             else
@@ -1246,15 +1254,19 @@ var fbs =
                 else
                     return this.onBreak(frame, type, rv);
             }
-         }
-         catch(exc)
-         {
+        }
+        catch(exc)
+        {
             if (FBTrace.DBG_FBS_ERRORS)
                 FBTrace.sysout("onDebugger failed: "+exc,exc);
 
             ERROR("onDebugger failed: "+exc);
             return RETURN_CONTINUE;
-         }
+        }
+        finally
+        {
+            haltObject = null;
+        }
     },
 
     // when the onError handler returns false
@@ -1903,6 +1915,9 @@ var fbs =
             if (FBTrace.DBG_FBS_CREATION || FBTrace.DBG_FBS_SRCUNITS)
                 FBTrace.sysout("onScriptCreated: "+script.tag+"@("+script.baseLineNumber+"-"
                     +(script.baseLineNumber+script.lineExtent)+")"+script.fileName);
+
+            if (script.lineExtent > 80000 && FBTrace.DBG_FBS_SRCUNITS)
+                FBTrace.sysout("****************>> BOGUS line extent ("+script.lineExtent+") for "+script.fileName);
 
             if (FBTrace.DBG_FBS_CREATION)
             {
