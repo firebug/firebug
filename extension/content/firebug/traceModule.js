@@ -1226,17 +1226,22 @@ Firebug.TraceModule.TraceMessage = function(type, text, obj, scope, time)
     }
     else
     {
+        var traceServiceFile = "firebug-trace-service.js";
+        var firebugServiceFile = "firebug-service.js";
+
         // Initialize stack trace info. This must be done now, when the stack
         // is available.
         for (var frame = Components.stack, i=0; frame; frame = frame.caller, i++)
         {
             // Skip frames related to the tracing code.
             var fileName = unescape(frame.filename ? frame.filename : "");
-            var traceServiceFile = "firebug-trace-service.js";
 
             // window.dump("traceModule frame "+i+": "+fileName+"\n");
             if (i < 5 || fileName.indexOf(traceServiceFile) != -1)
                 continue;
+
+            if (fileName.indexOf(firebugServiceFile) != -1)
+                this.fbsIsOnStack = true;
 
             var sourceLine = frame.sourceLine ? frame.sourceLine : "";
             var lineNumber = frame.lineNumber ? frame.lineNumber : "";
@@ -1272,7 +1277,9 @@ Firebug.TraceModule.TraceMessage = function(type, text, obj, scope, time)
     this.getProperties();
 
     // Get current scope
-    this.getScope();
+
+    if (!this.fbsIsOnStack)
+        this.getScope();
 }
 
 // ************************************************************************************************
