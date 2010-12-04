@@ -6123,6 +6123,11 @@ domMemberMap.Event =
 
 this.isDOMConstant = function(object, name)
 {
+    if (name == undefined)
+    {
+        return isDOMConstantDep({},object);
+    }
+    
     // The constant map has also its own prototype, but it isn't considered to be a constant.
     if (name == "__proto__")
         return false;
@@ -6137,6 +6142,7 @@ this.isDOMConstant = function(object, name)
 
     return (name in this.domConstantMap);
 }
+var isDOMConstantDep = deprecated("isDOMConstant(name) signature changed (object,name)",this.isDOMConstant);
 
 this.domConstantMap =
 {
