@@ -248,7 +248,8 @@ Firebug.TabCacheModel = extend(Firebug.Module,
 
     shouldCacheRequest: function(request)
     {
-        request.QueryInterface(Ci.nsIHttpChannel);
+        if ( !(request instanceof Ci.nsIHttpChannel) )
+            return;
 
         // Allow to customize caching rules.
         if (dispatch2(this.fbListeners, "shouldCacheRequest", [request]))
@@ -314,7 +315,7 @@ Firebug.TabCache.prototype = extend(Firebug.SourceCache.prototype,
         var url = safeGetName(request);
         var response = this.getResponse(request);
 
-        // Skip any response data that we have received before (f ex when 
+        // Skip any response data that we have received before (f ex when
         // response packets are repeated due to quirks in how authentication
         // requests are projected to the channel listener)
         var newRawSize = offset + responseText.length;
