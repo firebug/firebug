@@ -128,6 +128,12 @@ Firebug.SourceCache.prototype = extend(new Firebug.Listener(),
             return this.loadFromLocal(url);
         }
 
+        if ( url.indexOf('resource://') === 0)
+        {
+            var fileURL = FBL.resourceToFile(url);
+            return this.loadFromLocal(url);
+        }
+
         // Unfortunately, the URL isn't available so, let's try to use FF cache.
         // Notice that additional network request to the server can be made in
         // this method (double-load).
