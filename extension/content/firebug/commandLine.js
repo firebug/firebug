@@ -1151,21 +1151,19 @@ function getCompletionBox()
 
 function FirebugCommandLineAPI(context)
 {
-    this.$ = function(id)  // uses only DOM calls
+    this.$ = function(id)  // returns unwrapped elements from the page
     {
-        var doc = context.baseWindow.document;
-        return context.baseWindow.document.getElementById(id);
+        return FBL.unwrapObject(context.baseWindow.document).getElementById(id);
     };
 
-    this.$$ = function(selector) // uses only DOM calls
+    this.$$ = function(selector) // returns unwrapped elements from the page
     {
-        var result = context.baseWindow.document.querySelectorAll(selector);
-        return cloneArray(result);
+        return FBL.unwrapObject(context.baseWindow.document).querySelectorAll(selector);
     };
 
-    this.$x = function(xpath) // uses only DOM calls
+    this.$x = function(xpath) // returns unwrapped elements from the page
     {
-        return FBL.getElementsByXPath(context.baseWindow.document, xpath);
+        return FBL.getElementsByXPath(FBL.unwrapObject(context.baseWindow.document), xpath);
     };
 
     this.$n = function(index) // values from the extension space
