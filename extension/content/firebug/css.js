@@ -1916,7 +1916,7 @@ CSSRuleEditor.prototype = domplate(Firebug.InlineEditor.prototype,
     insertNewRow: function(target, insertWhere)
     {
         var emptyRule = {
-            selector: "mySelector", // xxxHonza localization
+            selector: "",
             id: "",
             props: [],
             isSelectorEditable: true
