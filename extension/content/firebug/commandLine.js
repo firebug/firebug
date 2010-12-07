@@ -1158,7 +1158,8 @@ function FirebugCommandLineAPI(context)
 
     this.$$ = function(selector) // returns unwrapped elements from the page
     {
-        return FBL.unwrapObject(context.baseWindow.document).querySelectorAll(selector);
+        var result = FBL.unwrapObject(context.baseWindow.document).querySelectorAll(selector);
+        return cloneArray(result);
     };
 
     this.$x = function(xpath) // returns unwrapped elements from the page
