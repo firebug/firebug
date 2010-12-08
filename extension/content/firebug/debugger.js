@@ -453,7 +453,7 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
             context.isFrozen = true;
 
             // https://developer.mozilla.org/en/XUL_Tutorial/Focus_and_Selection#Getting_the_currently_focused_element
-            if (context.window.document.commandDispatcher)
+            if (context.window && context.window.document.commandDispatcher)
             {
                 context.saveFocus = context.window.document.commandDispatcher.focusedElement;
                 if (context.saveFocus && !context.discardBlurEvents)
@@ -518,13 +518,13 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
                     context.window.focus();
                     context.saveFocus.focus();
                     delete context.saveFocus;
-                }
 
-                if (FBTrace.DBG_UI_LOOP)
-                {
-                    var nowFocused = context.window.document.commandDispatcher ? context.window.document.commandDispatcher.focusedElement : null;
-                    FBTrace.sysout("debugger.thaw context.saveFocus "+context.saveFocus+" vs "+nowFocused, context.saveFocus);
-            }
+                    if (FBTrace.DBG_UI_LOOP)
+                    {
+                        var nowFocused = context.window.document.commandDispatcher ? context.window.document.commandDispatcher.focusedElement : null;
+                        FBTrace.sysout("debugger.thaw context.saveFocus "+context.saveFocus+" vs "+nowFocused, context.saveFocus);
+                    }
+                }
 
                 executionContext.scriptsEnabled = true;
             }
@@ -838,12 +838,12 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
             var currentBreakable = Firebug.chrome.getGlobalAttribute("cmd_breakOnNext", "breakable");
 
             if (FBTrace.DBG_BP)
-                FBTrace.sysout("debugger.startDebugging; currentBreakable "+currentBreakable+" in " + context.getName());
+                FBTrace.sysout("debugger.startDebugging; currentBreakable "+currentBreakable+" in " + context.getName()+" currentContext "+Firebug.currentContext.getName());
 
             if (currentBreakable == "false") // then we are armed but we broke
                 Firebug.chrome.setGlobalAttribute("cmd_breakOnNext", "breakable", "true");
 
-            if (context != Firebug.currentContext || Firebug.isDetached())
+            if (context != Firebug.currentContext)
                 Firebug.selectContext(context);  // Make Firebug.currentContext = context and sync the UI
 
             if (Firebug.isMinimized()) // then open the UI to show we are stopped
@@ -886,7 +886,7 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
 
             // If the user reloads the page while the debugger is stopped, then
             // the current context will be destroyed just before
-            if (context && context.window && !context.aborted)
+            if (context && !context.aborted)
             {
                 delete context.stopped;
                 delete context.stoppedFrame;
