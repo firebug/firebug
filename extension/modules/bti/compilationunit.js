@@ -116,13 +116,13 @@ CompilationUnit.prototype.getBreakpoints = function()
  * TODO: what if the compilation unit no longer exists in the browser
  * </p>
  * @function
- * @param listener a listener (function) that accepts a {@link String} of source code
+ * @param listener a listener (function) that accepts (firstLineNumber, lastLineNubmer, array of source code lines)
  */
 CompilationUnit.prototype.getSourceLines = function(firstLine, lastLine, listener)
 {
     this.lines = this.sourceFile.loadScriptLines(this.context);
-    this.numberOfLines = this.lines.length;
-    listener(this, 1, this.lines.length, this.lines);
+    this.numberOfLines = (this.lines ? this.lines.length : 0);
+    listener(this, 1, this.numberOfLines, this.lines);
 };
 
 /**
