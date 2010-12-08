@@ -1196,7 +1196,7 @@ function FirebugCommandLineAPI(context)
         // The window object parameter uses XPCSafeJSObjectWrapper, but we need XPCNativeWrapper
         // (and its wrappedJSObject member). So, look within all registered consoleHandlers for
         // the same window (from tabWatcher) that uses uses XPCNativeWrapper (operator "==" works).
-        var entry = Firebug.Console.injector.getConsoleHandlerEntry(context, object);
+        var entry = Firebug.Console.injector.getConsoleHandler(context, object);
         if (entry)
             context.baseWindow = entry.win;
 
