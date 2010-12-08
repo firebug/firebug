@@ -2811,7 +2811,7 @@ this.getStackFrame = function(frame, context)
             }
 
             if (FBTrace.DBG_STACK) FBTrace.sysout("lib.getStackFrame "+fncSpec.name, {sourceFile: sourceFile, script: frame.script, fncSpec: fncSpec, analyzer: analyzer});
-            return new this.StackFrame(sourceFile, lineNo, fncSpec.name, fncSpec.args, frame, undefined, context);
+            return new this.StackFrame(sourceFile, lineNo, fncSpec.name, fncSpec.args, frame, undefined, sourceFile.context);
         }
         else
         {
@@ -3008,9 +3008,9 @@ this.parseToStackTrace = function(stack, context)
 this.cleanStackTraceOfFirebug = function(trace)
 {
     if (trace && trace.frames){
-        while (trace.frames.length && 
+        while (trace.frames.length &&
             (
-             /^_[fF]irebug/.test(trace.frames[trace.frames.length - 1].fn) || 
+             /^_[fF]irebug/.test(trace.frames[trace.frames.length - 1].fn) ||
              /^\s*with\s*\(\s*_[fF]irebug/.test(trace.frames[trace.frames.length - 1].sourceFile.source)
             )
         )
@@ -4441,7 +4441,7 @@ this.getResource = function(aURL)
     catch (e)
     {
         if (FBTrace.DBG_ERRORS)
-            FBTrace.sysout("lib.getResource FAILS for "+aURL, e);
+            FBTrace.sysout("lib.getResource FAILS for \'"+aURL+"\'", e);
     }
 };
 
@@ -6127,15 +6127,15 @@ this.isDOMConstant = function(object, name)
     {
         return isDOMConstantDep({},object);
     }
-    
+
     // The constant map has also its own prototype, but it isn't considered to be a constant.
     if (name == "__proto__")
         return false;
-    
+
     if (!(
-        object instanceof Window || 
-        object instanceof Node || 
-        object instanceof Location || 
+        object instanceof Window ||
+        object instanceof Node ||
+        object instanceof Location ||
         object instanceof Event
     ))
         return false;

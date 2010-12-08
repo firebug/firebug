@@ -791,17 +791,17 @@ FBL.ns(function() { with (FBL) {
         {
             if (FBTrace.DBG_PANELS)
             {
-                FBTrace.sysout("debugger updateSelection object:"+object+" of type "+typeof(object)+"\n");
+                FBTrace.sysout("script updateSelection object:"+object+" of type "+typeof(object), object);
                 if (object instanceof CompilationUnit)
-                    FBTrace.sysout("debugger updateSelection this.navigate(object)", object);
+                    FBTrace.sysout("script updateSelection this.navigate(object)", object);
                 else if (object instanceof SourceLink)
-                    FBTrace.sysout("debugger updateSelection this.showSourceLink(object)", object);
+                    FBTrace.sysout("script updateSelection this.showSourceLink(object)", object);
                 else if (typeof(object) == "function")
-                    FBTrace.sysout("debugger updateSelection this.showFunction(object)", object);
+                    FBTrace.sysout("script updateSelection this.showFunction(object)", object);
                 else if (object instanceof StackFrame)
-                    FBTrace.sysout("debugger updateSelection this.showStackFrameXB(object)", object);
+                    FBTrace.sysout("script updateSelection this.showStackFrameXB(object)", object);
                 else
-                    FBTrace.sysout("debugger updateSelection this.showStackFrame(null)", object);
+                    FBTrace.sysout("script updateSelection this.showStackFrame(null)", object);
             }
 
             if (object instanceof CompilationUnit)
@@ -960,7 +960,7 @@ FBL.ns(function() { with (FBL) {
         getObjectPath: function(frame)
         {
             if (FBTrace.DBG_STACK)
-                FBTrace.sysout("debugger.getObjectPath "+frame);
+                FBTrace.sysout("debugger.getObjectPath "+frame, frame);
 
             var frames = [];
             for (; frame; frame = frame.getCallingFrame())

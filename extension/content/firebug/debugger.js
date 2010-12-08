@@ -1579,11 +1579,7 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
 
                 var panel = context.getPanel("script", true);
                 if (!panel)
-                {
-                    if (FBTrace.DBG_ERRORS)
-                        FBTrace.sysout("onToggleBreakpoint no panel in context "+context.getName());
                     continue;
-                }
 
                 panel.context.invalidatePanels("breakpoints");
 
