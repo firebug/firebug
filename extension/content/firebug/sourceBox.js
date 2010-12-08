@@ -137,6 +137,8 @@ Firebug.SourceBoxPanel = extend(SourceBoxPanelBase,
     removeAllSourceBoxes: function()
     {
           this.sourceBoxes = {};
+          delete this.selectedSourceBox;
+          delete this.location;
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
