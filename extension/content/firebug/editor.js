@@ -496,24 +496,12 @@ Firebug.InlineEditor = function(doc)
 Firebug.InlineEditor.prototype = domplate(Firebug.BaseEditor,
 {
     enterOnBlur: true,
-    outerMargin: 8,
-    shadowExpand: 7,
 
     tag:
         DIV({"class": "inlineEditor"},
-            DIV({"class": "textEditorTop1"},
-                DIV({"class": "textEditorTop2"})
-            ),
-            DIV({"class": "textEditorInner1"},
-                DIV({"class": "textEditorInner2"},
-                    INPUT({"class": "textEditorInner", type: "text",
-                        oninput: "$onInput", onkeypress: "$onKeyPress", onoverflow: "$onOverflow",
-                        oncontextmenu: "$onContextMenu"}
-                    )
-                )
-            ),
-            DIV({"class": "textEditorBottom1"},
-                DIV({"class": "textEditorBottom2"})
+            INPUT({"class": "textEditorInner", type: "text",
+                oninput: "$onInput", onkeypress: "$onKeyPress", onoverflow: "$onOverflow",
+                oncontextmenu: "$onContextMenu"}
             )
         ),
 
@@ -545,7 +533,7 @@ Firebug.InlineEditor.prototype = domplate(Firebug.BaseEditor,
     initializeInline: function(doc)
     {
         this.box = this.tag.replace({}, doc, this);
-        this.input = this.box.childNodes[1].firstChild.firstChild;  // XXXjjb childNode[1] required
+        this.input = this.box.firstChild;
         this.expander = this.expanderTag.replace({}, doc, this);
         this.initialize();
     },
@@ -592,16 +580,6 @@ Firebug.InlineEditor.prototype = domplate(Firebug.BaseEditor,
         {
             this.startMeasuring(target);
             this.textSize = this.measureInputText(value);
-
-            // Correct the height of the box to make the funky CSS drop-shadow line up
-            var parent = this.input.parentNode;
-            if (hasClass(parent, "textEditorInner2"))
-            {
-                var yDiff = this.textSize.height - this.shadowExpand;
-                parent.style.height = yDiff + "px";
-                parent.parentNode.style.height = yDiff + "px";
-            }
-
             this.updateLayout(true);
         }
 
@@ -826,8 +804,8 @@ Firebug.InlineEditor.prototype = domplate(Firebug.BaseEditor,
     {
         if (this.fixedWidth)
         {
-            this.box.style.left = (this.targetOffset.x) + "px";
-            this.box.style.top = (this.targetOffset.y) + "px";
+            this.box.style.left = this.targetOffset.x + "px";
+            this.box.style.top = this.targetOffset.y + "px";
 
             var w = this.target.offsetWidth;
             var h = this.target.offsetHeight;
@@ -843,8 +821,7 @@ Firebug.InlineEditor.prototype = domplate(Firebug.BaseEditor,
             }
 
             var approxTextWidth = this.textSize.width;
-            var maxWidth = (currentPanel.panelNode.clientWidth - this.targetOffset.x)
-                - this.outerMargin;
+            var maxWidth = (currentPanel.panelNode.clientWidth - this.targetOffset.x);
 
             var wrapped = initial
                 ? this.noWrap && this.targetSize.height > this.textSize.height+3
