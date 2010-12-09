@@ -153,7 +153,6 @@ var FBTrace = null;
 
 // ************************************************************************************************
 
-
 var fbs =
 {
     initialize: function()
@@ -2547,7 +2546,7 @@ var fbs =
     findBreakpointByScript: function(script, pc)
     {
         var urlsWithBreakpoints = fbs.getBreakpointURLs();
-        for (let iURL = 0; iURL < urlsWithBreakpoints.length; iURL++)
+        for (var iURL = 0; iURL < urlsWithBreakpoints.length; iURL++)
         {
             var url = urlsWithBreakpoints[iURL];
             var urlBreakpoints = fbs.getBreakpoints(url);
@@ -2558,7 +2557,7 @@ var fbs =
                     var bp = urlBreakpoints[iBreakpoint];
                     if (bp.scriptsWithBreakpoint)
                     {
-                        for (let iScript = 0; iScript < bp.scriptsWithBreakpoint.length; iScript++)
+                        for (var iScript = 0; iScript < bp.scriptsWithBreakpoint.length; iScript++)
                         {
                             if (FBTrace.DBG_FBS_BP)
                             {
@@ -2659,7 +2658,7 @@ var fbs =
             }
 
             var haveScript = false;
-            for (let j = 0; j < bp.scriptsWithBreakpoint.length; j++)
+            for (var j = 0; j < bp.scriptsWithBreakpoint.length; j++)
             {
                 if (bp.scriptsWithBreakpoint[j].tag === script.tag)
                    {
@@ -2921,17 +2920,29 @@ var fbs =
         return getStepName(stepMode);
     },
 
-    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+    // Hook Interupts
+
     hookInterrupts: function(frame)
     {
-        if (FBTrace.DBG_FBS_STEP) FBTrace.sysout("set InterruptHook with stepFrameLineId: "+stepFrameLineId);
+        if (FBTrace.DBG_FBS_STEP)
+            FBTrace.sysout("set InterruptHook with stepFrameLineId: " + stepFrameLineId + " " +
+                (frame ? frame.script.enableSingleStepInterrupts : "<noframe>"));
+
         jsd.interruptHook = { onExecute: hook(this.onInterrupt, RETURN_CONTINUE)};
+
+        ScriptInterrupter.enable(frame.script);
     },
 
     unhookInterrupts: function(frame)
     {
         jsd.interruptHook = null;
+
+        ScriptInterrupter.disableAll();
     },
+
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+    // Hook Functions
 
     hookFunctions: function()
     {
@@ -2943,6 +2954,9 @@ var fbs =
     {
         jsd.functionHook = null;
     },
+
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+    // Hook Scripts
 
     hookScripts: function()
     {
@@ -3034,8 +3048,82 @@ var fbs =
             trackFiles.merge(moreFiles);
         trackFiles.dump();
     },
-
 };
+
+// ************************************************************************************************
+// Script Interrupt Manager
+
+var ScriptInterrupter =
+{
+    entries: {},
+
+    enable: function(script)
+    {
+        if (!script.enableSingleStepInterrupts)
+            return;
+
+        if (this.entries[script.tag])
+            return;
+
+        try
+        {
+            script.enableSingleStepInterrupts(true);
+        }
+        catch (e)
+        {
+            FBTrace.sysout("fbs.ScriptInterrupter.enable; EXCEPTION");
+        }
+
+        this.entries[script.tag] = {
+            script: script
+        }
+    },
+
+    disable: function(script)
+    {
+        if (!script.enableSingleStepInterrupts)
+            return;
+
+        var entry = this.entries[script.tag];
+        if (!entry)
+            return;
+
+        try
+        {
+            script.enableSingleStepInterrupts(false);
+        }
+        catch (e)
+        {
+            FBTrace.sysout("fbs.ScriptInterrupter.disable; EXCEPTION");
+        }
+
+        delete this.entries[script.tag];
+    },
+
+    disableAll: function()
+    {
+        for (var tag in this.entries)
+        {
+            var entry = this.entries[tag];
+            if (!entry.script.enableSingleStepInterrupts)
+                return;
+
+            try
+            {
+                entry.script.enableSingleStepInterrupts(false);
+            }
+            catch (e)
+            {
+                FBTrace.sysout("fbs.ScriptInterrupter.disable; EXCEPTION");
+            }
+       }
+
+       this.entries = {};
+    }
+}
+
+// ************************************************************************************************
+// Local Helpers
 
 function getStepName(mode)
 {
@@ -3045,9 +3133,6 @@ function getStepName(mode)
     if (mode==STEP_SUSPEND) return "STEP_SUSPEND";
     else return "(not a step mode)";
 }
-
-// ************************************************************************************************
-// Local Helpers
 
 // called by enumerateScripts, onThrow, onDebug, onScriptCreated/Destroyed.
 function isFilteredURL(rawJSD_script_filename)
