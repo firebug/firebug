@@ -2102,8 +2102,8 @@ this.getElementXML = function(element)
  */
 this.isXMLPrettyPrint = function(context, win)
 {
-    if (context.isXMLPrettyPrint)
-        return true;
+    if (context.isXMLPrettyPrintDetected)
+        return context.isXMLPrettyPrint;
 
     try
     {
@@ -2115,10 +2115,9 @@ this.isXMLPrettyPrint = function(context, win)
             if (FBTrace.DBG_CSS)
                 FBTrace.sysout("bindingURL: " + i + " " + bindingURI.resolve(""));
 
-            if (bindingURI.resolve("") === "chrome://global/content/xml/XMLPrettyPrint.xml")
-            {
-                return context.isXMLPrettyPrint = true;
-            }
+            context.isXMLPrettyPrintDetected = true;
+            return context.isXMLPrettyPrint = (bindingURI.resolve("") ===
+                "chrome://global/content/xml/XMLPrettyPrint.xml");
         }
     }
     catch (e)

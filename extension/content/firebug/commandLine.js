@@ -107,9 +107,30 @@ Firebug.CommandLine = extend(Firebug.Module,
             FBTrace.sysout("commandLine: document does not have command line attached " +
                 "its too early for command line "+safeGetWindowLocation(win), document);
 
-            Firebug.Console.logFormatted(["Firebug cannot find firebug-CommandLineAttached " +
-                "document.getUserData , its too early for command line",
-                 win], context, "error", true);
+            if (isXMLPrettyPrint(context, win))
+            {
+                var msg = $STR("commandline.disabledForXMLDocs");
+                var row = Firebug.Console.logFormatted([msg], context, "warn", true);
+                var objectBox = row.querySelector(".objectBox");
+
+                // Log a message with a clickable link that can be used to enable
+                // the command line - but the page will switch into HTML. The listener
+                // passed into the function is called when the user clicks the link.
+                FirebugReps.Description.render(msg, objectBox, bind(function()
+                {
+                    // Reset the flag that protect script injection into the page.
+                    context.isXMLPrettyPrint = false;
+
+                    // Now inject the command line.
+                    Firebug.CommandLine.initializeCommandLineIfNeeded(context, win);
+                }, this));
+            }
+            else
+            {
+                Firebug.Console.logFormatted(["Firebug cannot find firebug-CommandLineAttached " +
+                    "document.getUserData , its too early for command line",
+                     win], context, "error", true);
+            }
             return;
         }
 
