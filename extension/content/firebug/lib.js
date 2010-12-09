@@ -2768,7 +2768,7 @@ this.getCorrectedStackTrace = function(frame, context)
             var originalLength = trace.frames.length;
             trace.frames.splice(50, originalLength - 100);
             var excuse = "(eliding "+(originalLength - 100)+" frames)";
-            trace.frames[50] = new this.StackFrame({href: excuse}, 0, excuse, [], undefined, undefined, context);
+            trace.frames[50] = new this.StackFrame({href: excuse}, 0, excuse, [], null, null, context);
         }
 
     }
@@ -2790,7 +2790,7 @@ this.getStackFrame = function(frame, context)
     {
         var excuse = (frame.isNative) ?  "(native)" : "(debugger)";
         if (FBTrace.DBG_STACK) FBTrace.sysout("lib.getStackFrame "+excuse+" frame\n");
-        return new this.StackFrame({href: excuse}, 0, excuse, [], undefined, undefined, context);
+        return new this.StackFrame({href: excuse}, 0, excuse, [], null, null, context);
     }
     try
     {
@@ -2810,7 +2810,7 @@ this.getStackFrame = function(frame, context)
             }
 
             if (FBTrace.DBG_STACK) FBTrace.sysout("lib.getStackFrame "+fncSpec.name, {sourceFile: sourceFile, script: frame.script, fncSpec: fncSpec, analyzer: analyzer});
-            return new this.StackFrame(sourceFile, lineNo, fncSpec.name, fncSpec.args, frame, undefined, sourceFile.context);
+            return new this.StackFrame(sourceFile, lineNo, fncSpec.name, fncSpec.args, frame, null, sourceFile.context);
         }
         else
         {
@@ -2819,7 +2819,7 @@ this.getStackFrame = function(frame, context)
 
             var script = frame.script;
 
-            return new this.StackFrame({href: FBL.normalizeURL(script.fileName)}, frame.line, script.functionName, [], frame, undefined, context);
+            return new this.StackFrame({href: FBL.normalizeURL(script.fileName)}, frame.line, script.functionName, [], frame, null, context);
         }
     }
     catch (exc)
@@ -2986,7 +2986,7 @@ this.parseToStackFrame = function(line, context) // function name (arg, arg, arg
 {
      var m = reErrorStackLine.exec(line);
      if (m)
-         return new this.StackFrame({href:m[3]}, m[4], m[1], m[2].split(','), undefined, undefined, context);
+         return new this.StackFrame({href:m[3]}, m[4], m[1], m[2].split(','), null, null, context);
 }
 
 this.parseToStackTrace = function(stack, context)

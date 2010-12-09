@@ -1189,6 +1189,10 @@ FBL.ns(function() { with (FBL) {
                     }
                 });
             });
+            // No context is stopped
+            var depth = fbs.exitNestedEventLoop();
+            if (FBTrace.DBG_UI_LOOP)
+                FBTrace.sysout("Firebug.Debugger.onFocusDebugger FAILS, aborting nested event loop at depth "+depth);
         },
 
         // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *

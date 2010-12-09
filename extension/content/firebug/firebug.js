@@ -2546,7 +2546,7 @@ Firebug.Panel = extend(new Firebug.Listener(),
         if ( !this.location || (object != this.location) )  // if this.location undefined, may set to null
         {
             if (FBTrace.DBG_PANELS)
-                FBTrace.sysout("navigate "+this.name+" to location "+object+"\n");
+                FBTrace.sysout("navigate "+this.name+" to location "+object, object);
 
             this.location = object;
             this.updateLocation(object);
