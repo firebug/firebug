@@ -311,7 +311,7 @@
     border-bottom: 1px solid #9C9C9C;
     padding: 0 !important;
     font-weight: bold;
-    background: #BBBBBB url(chrome://firebug/skin/tableHeader.gif) repeat-x;
+    background: #C8C8C8 -moz-linear-gradient(top, rgba(255, 255, 255, 0.3), rgba(0, 0, 0, 0.2));
 }
 
 .headerCellBox {
@@ -322,11 +322,11 @@
 }
 
 .headerCell:hover:active {
-    background: #959595 url(chrome://firebug/skin/tableHeaderActive.gif) repeat-x;
+    background: #B4B4B4 -moz-linear-gradient(top, rgba(255, 255, 255, 0.3), rgba(0, 0, 0, 0.2));
 }
 
 .headerSorted {
-    background: #7D93B2 url(chrome://firebug/skin/tableHeaderSorted.gif) repeat-x;
+    background: #8CA0BE -moz-linear-gradient(top, rgba(255, 255, 255, 0.3), rgba(0, 0, 0, 0.2));
 }
 
 .headerSorted > .headerCellBox {
@@ -339,7 +339,7 @@
 }
 
 .headerSorted:hover:active {
-    background: #536B90 url(chrome://firebug/skin/tableHeaderSortedActive.gif) repeat-x;
+    background: #6E87AA -moz-linear-gradient(top, rgba(255, 255, 255, 0.3), rgba(0, 0, 0, 0.2));
 }
 
 .linkCell {
