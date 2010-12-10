@@ -2931,7 +2931,8 @@ var fbs =
 
         jsd.interruptHook = { onExecute: hook(this.onInterrupt, RETURN_CONTINUE)};
 
-        ScriptInterrupter.enable(frame.script);
+        if (frame)  // then we may be were called in FF3.6 for break on next script panel
+            ScriptInterrupter.enable(frame.script);
     },
 
     unhookInterrupts: function(frame)
