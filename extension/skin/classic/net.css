@@ -289,59 +289,48 @@
     border-right: 50px solid transparent;
 }
 
-.netResolvingBar {
+.netResolvingBar,
+.netConnectingBar,
+.netBlockingBar,
+.netSendingBar,
+.netWaitingBar,
+.netReceivingBar {
     position: absolute;
     left: 0;
-    top: 0;
-    bottom: 0;
-    background: #FFFFFF url(chrome://firebug/skin/netBarResolving.gif) repeat-x;
-    z-index:60;
+    top: 1px;
+    bottom: 1px;
+    background-image: -moz-linear-gradient(top, rgba(255, 255, 255, 0.3), rgba(0, 0, 0, 0.2));
+}
+
+.netResolvingBar {
+    background-color: #91D2DC;
+    z-index: 60;
 }
 
 .netConnectingBar {
-    position: absolute;
-    left: 0;
-    top: 0;
-    bottom: 0;
-    background: #FFFFFF url(chrome://firebug/skin/netBarConnecting.gif) repeat-x;
-    z-index:50;
+    background-color: #B9E164;
+    z-index: 50;
 }
 
 .netBlockingBar {
-    position: absolute;
-    left: 0;
-    top: 0;
-    bottom: 0;
-    background: #FFFFFF url(chrome://firebug/skin/netBarWaiting.gif) repeat-x;
-    z-index:40;
+    background-color: #EBE1D2;
+    z-index: 40;
 }
 
 .netSendingBar {
-    position: absolute;
-    left: 0;
-    top: 0;
-    bottom: 0;
-    background: #FFFFFF url(chrome://firebug/skin/netBarSending.gif) repeat-x;
-    z-index:30;
+    background-color: #E1826E;
+    z-index: 30;
 }
 
 .netWaitingBar {
-    position: absolute;
-    left: 0;
-    top: 0;
-    bottom: 0;
-    background: #FFFFFF url(chrome://firebug/skin/netBarResponded.gif) repeat-x;
-    z-index:20;
+    background-color: #B4A5D2;
+    z-index: 20;
     min-width: 1px;
 }
 
 .netReceivingBar {
-    position: absolute;
-    left: 0;
-    top: 0;
-    bottom: 0;
-    background: #38D63B url(chrome://firebug/skin/netBarLoading.gif) repeat-x;
-    z-index:10;
+    background-color: #78E17D;
+    z-index: 10;
 }
 
 .netWindowLoadBar,
@@ -386,14 +375,14 @@
  */
 .loaded .netReceivingBar,
 .loaded.netReceivingBar {
-    background: #B6B6B6 url(chrome://firebug/skin/netBarLoaded.gif) repeat-x;
-    border-color: #B6B6B6;
+    background: #D7D7D7 -moz-linear-gradient(top, rgba(255, 255, 255, 0.3), rgba(0, 0, 0, 0.2));
+    border-color: #D7D7D7;
 }
 
 .fromCache .netReceivingBar,
 .fromCache.netReceivingBar {
-    background: #D6D6D6 url(chrome://firebug/skin/netBarCached.gif) repeat-x;
-    border-color: #D6D6D6;
+    background: #FAFAFA -moz-linear-gradient(top, rgba(255, 255, 255, 0.3), rgba(0, 0, 0, 0.2));
+    border-color: #FAFAFA;
 }
 
 .netSummaryRow .netTimeLabel,
