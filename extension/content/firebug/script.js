@@ -210,7 +210,7 @@ FBL.ns(function() { with (FBL) {
                 this.selectedSourceBox.highlightedLineNumber = -1;
                 this.highlightLine(); // clear highlight
                 if (FBTrace.DBG_STACK)
-	                FBTrace.sysout("showNoStackFrame clear "+this.selectedSourceBox.repObject.url);
+                    FBTrace.sysout("showNoStackFrame clear "+this.selectedSourceBox.repObject.url);
             }
 
             var panelStatus = Firebug.chrome.getPanelStatusElements();
@@ -934,6 +934,7 @@ FBL.ns(function() { with (FBL) {
                 FBTrace.sysout("debugger.getObjectPath "+frame, frame);
 
             var frames = [];
+            frame = frame.getStackNewestFrame();
             for (; frame; frame = frame.getCallingFrame())
                 frames.push(frame);
 

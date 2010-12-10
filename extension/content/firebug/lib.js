@@ -2740,14 +2740,18 @@ this.getCorrectedStackTrace = function(frame, context)
     try
     {
         var trace = new this.StackTrace();
+        var newestFrame = null;
         var nextOlderFrame = null;
         for (; frame && frame.isValid; frame = frame.callingFrame)
         {
             if (!(Firebug.filterSystemURLs && this.isSystemURL(FBL.normalizeURL(frame.script.fileName))))
             {
-                var stackFrame = this.getStackFrame(frame, context);
+                var stackFrame = this.getStackFrame(frame, context, newestFrame);
                 if (stackFrame)
                 {
+                    if (!newestFrame)
+                        newestFrame = stackFrame;
+
                     if (context.currentFrame && context.currentFrame === frame)
                         trace.currentFrameIndex = trace.length;
 
@@ -2784,13 +2788,13 @@ this.getCorrectedStackTrace = function(frame, context)
  * Converts from Mozilla stack frame to frameXB
  */
 
-this.getStackFrame = function(frame, context)
+this.getStackFrame = function(frame, context, newestFrameXB)
 {
     if (frame.isNative || frame.isDebugger)
     {
         var excuse = (frame.isNative) ?  "(native)" : "(debugger)";
         if (FBTrace.DBG_STACK) FBTrace.sysout("lib.getStackFrame "+excuse+" frame\n");
-        return new this.StackFrame({href: excuse}, 0, excuse, [], null, null, context);
+        return new this.StackFrame({href: excuse}, 0, excuse, [], null, null, context, newestFrameXB);
     }
     try
     {
@@ -2810,7 +2814,7 @@ this.getStackFrame = function(frame, context)
             }
 
             if (FBTrace.DBG_STACK) FBTrace.sysout("lib.getStackFrame "+fncSpec.name, {sourceFile: sourceFile, script: frame.script, fncSpec: fncSpec, analyzer: analyzer});
-            return new this.StackFrame(sourceFile, lineNo, fncSpec.name, fncSpec.args, frame, null, sourceFile.context);
+            return new this.StackFrame(sourceFile, lineNo, fncSpec.name, fncSpec.args, frame, null, sourceFile.context, newestFrameXB);
         }
         else
         {
@@ -2819,7 +2823,7 @@ this.getStackFrame = function(frame, context)
 
             var script = frame.script;
 
-            return new this.StackFrame({href: FBL.normalizeURL(script.fileName)}, frame.line, script.functionName, [], frame, null, context);
+            return new this.StackFrame({href: FBL.normalizeURL(script.fileName)}, frame.line, script.functionName, [], frame, null, context, newestFrameXB);
         }
     }
     catch (exc)
@@ -2832,13 +2836,14 @@ this.getStackFrame = function(frame, context)
 //* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 //frameXB, cross-browser frame
 
-this.StackFrame = function(sourceFile, lineNo, functionName, args, nativeFrame, pc, context)
+this.StackFrame = function(sourceFile, lineNo, functionName, args, nativeFrame, pc, context, newestFrame)
 {
  // Essential fields
  this.sourceFile = sourceFile;
  this.line = lineNo;
  this.fn = functionName;  // cache?
  this.context = context;
+ this.newestFrame = newestFrame; // the newest frame in the stack containing 'this' frame
 
  // optional
  this.args = args;
@@ -2862,6 +2867,11 @@ this.StackFrame.prototype =
     getCompilationUnit: function()
     {
         return this.context.getCompilationUnit(this.href);
+    },
+
+    getStackNewestFrame: function()
+    {
+        return (this.newestFrame ? this.newestFrame : this);
     },
 
     getFunctionName: function()
