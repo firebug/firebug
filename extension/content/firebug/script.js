@@ -141,15 +141,15 @@ FBL.ns(function() { with (FBL) {
             }
         },
 
-        highlightExecutionLine: function()
+        highlightLine: function()
         {
             var highlightingAttribute = "exe_line";
-            if (this.executionLine)  // could point to any node in any sourcebox, private to this function
-                this.executionLine.removeAttribute(highlightingAttribute);
+            if (this.selectedLine)  // could point to any node in any sourcebox, private to this function
+                this.selectedLine.removeAttribute(highlightingAttribute);
 
             var sourceBox = this.selectedSourceBox;
-            var lineNode = sourceBox.getLineNode(this.executionLineNo);
-            this.executionLine = lineNode;  // if null, clears
+            var lineNode = sourceBox.getLineNode(sourceBox.highlightedLineNumber);
+            this.selectedLine = lineNode;  // if null, clears
 
             if (sourceBox.breakCauseBox)
             {
@@ -157,7 +157,7 @@ FBL.ns(function() { with (FBL) {
                 delete sourceBox.breakCauseBox;
             }
 
-            if (this.executionLine)
+            if (this.selectedLine)
             {
                 lineNode.setAttribute(highlightingAttribute, "true");
                 if (this.context.breakingCause && !this.context.breakingCause.shown)
@@ -174,73 +174,44 @@ FBL.ns(function() { with (FBL) {
             }
 
             if (FBTrace.DBG_BP || FBTrace.DBG_STACK || FBTrace.DBG_SOURCEFILES)
-                FBTrace.sysout("sourceBox.highlightExecutionLine lineNo: "+this.executionLineNo+" lineNode="+lineNode+" in "+sourceBox.repObject.href);
+                FBTrace.sysout("sourceBox.highlightLine lineNo: "+sourceBox.highlightedLineNumber+" lineNode="+lineNode+" in "+sourceBox.repObject.href);
 
-            return (this.executionLineNo > 0); // sticky if we have a valid line
+            return (sourceBox.highlightedLineNumber > 0); // sticky if we have a valid line
         },
 
         showStackFrameXB: function(frameXB)
         {
             if (this.context.stopped)
-                this.showExecutingSourceFile(frameXB.sourceFile, frameXB);
+                this.showStackFrameTrue(frameXB);
             else
                 this.showNoStackFrame();
         },
 
-        showStackFrame: function(frame)
+        showStackFrameTrue: function(frame)
         {
-            if (!frame || (frame && !frame.isValid))
-            {
-                if (FBTrace.DBG_STACK) FBTrace.sysout("showStackFrame no valid frame\n");
-                this.showNoStackFrame();
-                return;
-            }
+             var url = frame.getURL();
+             var lineNo = frame.getLineNumber();
 
-            var sourceFile = Firebug.SourceFile.getSourceFileByScript(this.context, frame.script);
-            if (!sourceFile)
-            {
-                if (FBTrace.DBG_STACK) FBTrace.sysout("showStackFrame no sourceFile in context "+this.context.getName()+"for frame.script: "+frame.script.fileName);
-                this.showNoStackFrame()
-                return;
-            }
+             if (FBTrace.DBG_STACK)
+                 FBTrace.sysout("showStackFrame: "+url+"@"+lineNo+"\n");
 
-            this.showExecutingSourceFile(sourceFile, frame);
-        },
+             if (this.context.breakingCause)
+                 this.context.breakingCause.lineNo = lineNo;
 
-        showExecutingSourceFile: function(sourceFile, frame)
-        {
-            this.context.executingSourceFile = sourceFile;
-            this.executionFile = sourceFile;
-            if (this.executionFile)
-            {
-                var url = this.executionFile.href;
-                var analyzer = this.executionFile.getScriptAnalyzer(frame.script);
-                this.executionLineNo = analyzer.getSourceLineFromFrame(this.context, frame);  // TODo implement for each type
-
-                if (FBTrace.DBG_STACK)
-                    FBTrace.sysout("showStackFrame executionFile:"+this.executionFile+"@"+this.executionLineNo+"\n");
-
-                if (this.context.breakingCause)
-                    this.context.breakingCause.lineNo = this.executionLineNo;
-
-                this.scrollToLine(url, this.executionLineNo, bind(this.highlightExecutionLine, this) );
-                this.context.throttle(this.updateInfoTip, this);
-                return;
-            }
-            else
-            {
-                if (FBTrace.DBG_STACK) FBTrace.sysout("showStackFrame no getSourceFileByScript for tag="+frame.script.tag+"\n");
-                this.showNoStackFrame();
-            }
+             this.scrollToLine(url, lineNo, bind(this.highlightLine, this) );
+             this.context.throttle(this.updateInfoTip, this);
+             return;
         },
 
         showNoStackFrame: function()
         {
-            this.executionFile = null;
-            this.executionLineNo = -1;
-
             if (this.selectedSourceBox)
-                this.highlightExecutionLine();  // clear highlight
+            {
+                this.selectedSourceBox.highlightedLineNumber = -1;
+                this.highlightLine(); // clear highlight
+                if (FBTrace.DBG_STACK)
+	                FBTrace.sysout("showNoStackFrame clear "+this.selectedSourceBox.repObject.url);
+            }
 
             var panelStatus = Firebug.chrome.getPanelStatusElements();
             panelStatus.clear(); // clear stack on status bar

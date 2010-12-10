@@ -479,6 +479,11 @@ Firebug.SourceBoxPanel = extend(SourceBoxPanelBase,
             }
         }
 
+        this.selectedSourceBox.targetedLineNumber = lineNo;
+        this.selectedSourceBox.highlightedLineNumber = lineNo;  // the targetedLineNumber may not be the highlightedLineNumber
+        if (FBTrace.DBG_COMPILATION_UNITS)
+        	FBTrace.sysout("this.selectedSourceBox.highlightedLineNumber "+this.selectedSourceBox.repObject.url+"@"+this.selectedSourceBox.highlightedLineNumber);
+
         this.context.scrollTimeout = this.context.setTimeout(bindFixed(function()
         {
             if (!this.selectedSourceBox)
@@ -487,8 +492,6 @@ Firebug.SourceBoxPanel = extend(SourceBoxPanelBase,
                     FBTrace.sysout("SourceBoxPanel.scrollTimeout no selectedSourceBox");
                 return;
             }
-
-            this.selectedSourceBox.targetedLine = lineNo;
 
             // At this time we know which sourcebox is selected but the viewport is not selected.
             // We need to scroll, let the scroll handler set the viewport, then highlight any lines visible.
@@ -516,7 +519,10 @@ Firebug.SourceBoxPanel = extend(SourceBoxPanelBase,
             }
 
             if (this.selectedSourceBox.highlighter)
+            {
+                if (FBTrace.DBG_COMPILATION_UNITS) FBTrace.sysout("SourceBoxPanel.scrollTimeout, highlightedLineNumber: "+this.selectedSourceBox.highlightedLineNumber);
                 this.applyDecorator(this.selectedSourceBox); // may need to highlight even if we don't scroll
+            }
 
         }, this));
 
@@ -572,13 +578,12 @@ Firebug.SourceBoxPanel = extend(SourceBoxPanelBase,
 
     reView: function(sourceBox, clearCache)  // called for all scroll events, including any time sourcebox.scrollTop is set
     {
-        if (sourceBox.targetedLine)
+        if (sourceBox.targetedLineNumber) // then we requested a certain line
         {
-            sourceBox.targetLineNumber = sourceBox.targetedLine;
-            var viewRange = this.getViewRangeFromTargetLine(sourceBox, sourceBox.targetedLine);
-            delete sourceBox.targetedLine;
+            var viewRange = this.getViewRangeFromTargetLine(sourceBox, sourceBox.targetedLineNumber);
+            delete sourceBox.targetedLineNumber;
         }
-        else
+        else  // no special line
         {
             var viewRange = this.getViewRangeFromScrollTop(sourceBox, sourceBox.scrollTop);
         }
@@ -961,6 +966,9 @@ Firebug.SourceBoxPanel = extend(SourceBoxPanelBase,
         // within the Script panel, the user expects immediate response.
         this.context.sourceBoxHighlighterTimeout = this.context.setTimeout(
             bindFixed(this.asyncHighlighting, this, sourceBox));
+            
+        if (FBTrace.DBG_COMPILATION_UNITS)
+	        FBTrace.sysout("applyDecorator "+sourceBox.repObject.url+"@"+sourceBox.highlightedLineNumber, sourceBox);
     },
 
     asyncDecorating: function(sourceBox)

@@ -2854,72 +2854,87 @@ this.StackFrame = function(sourceFile, lineNo, functionName, args, nativeFrame, 
 
 this.StackFrame.prototype =
 {
-     getFunctionName: function()
-     {
-         return this.fn;
-     },
+    getURL: function()
+    {
+        return this.href;
+    },
 
-     toSourceLink: function()
-     {
-         return new FBL.SourceLink(this.sourceFile.href, this.line, "js");
-     },
+    getCompilationUnit: function()
+    {
+        return this.context.getCompilationUnit(this.href);
+    },
 
-     toString: function()
-     {
-             return this.fn+", "+this.sourceFile.href+"@"+this.line;
-     },
+    getFunctionName: function()
+    {
+        return this.fn;
+    },
 
-     setCallingFrame: function(caller, frameIndex)
-     {
-         this.callingFrame = caller;
-         this.frameIndex = frameIndex;
-     },
+    toSourceLink: function()
+    {
+        return new FBL.SourceLink(this.sourceFile.href, this.line, "js");
+    },
 
-     getCallingFrame: function()
-     {
-         if (FBTrace.DBG_STACK)
-             FBTrace.sysout("getCallingFrame "+this, this);
-         if (!this.callingFrame && this.nativeFrame && this.nativeFrame.isValid)
-         {
-             var nativeCallingFrame = this.nativeFrame.callingFrame;
-             if (nativeCallingFrame)
-                 this.callingFrame = FBL.getStackFrame(nativeCallingFrame, this.context);
-         }
-         return this.callingFrame;
-     },
+    toString: function()
+    {
+            return this.fn+", "+this.sourceFile.href+"@"+this.line;
+    },
 
-     getFrameIndex: function()
-     {
-         return this.frameIndex;
-     },
+    setCallingFrame: function(caller, frameIndex)
+    {
+        this.callingFrame = caller;
+        this.frameIndex = frameIndex;
+    },
 
-     destroy: function()
-     {
-         if (FBTrace.DBG_STACK)
-             FBTrace.sysout("StackFrame destroyed:"+this.uid+"\n");
-         this.script = null;
-         this.nativeFrame = null;
-         this.context = null;
-     },
+    getCallingFrame: function()
+    {
+        if (FBTrace.DBG_STACK)
+            FBTrace.sysout("getCallingFrame "+this, this);
+        if (!this.callingFrame && this.nativeFrame && this.nativeFrame.isValid)
+        {
+            var nativeCallingFrame = this.nativeFrame.callingFrame;
+            if (nativeCallingFrame)
+                this.callingFrame = FBL.getStackFrame(nativeCallingFrame, this.context);
+        }
+        return this.callingFrame;
+    },
 
-     signature: function()
-     {
-         return this.script.tag +"." + this.pc;
-     },
+    getFrameIndex: function()
+    {
+        return this.frameIndex;
+    },
 
-     getThisValue: function()
-     {
-         if (this.nativeFrame && !this.thisVar)
-              this.thisVar = FBL.unwrapIValue(this.nativeFrame.thisValue);
-         return this.thisVar;
-     },
+    getLineNumber: function()
+    {
+        return this.line;
+    },
 
-     getScopes: function()
-     {
-         if (this.nativeFrame && !this.scope)
-              this.scope = this.generateScopeChain(this.nativeFrame.scope);
-         return this.scope;
-     },
+    destroy: function()
+    {
+        if (FBTrace.DBG_STACK)
+            FBTrace.sysout("StackFrame destroyed:"+this.uid+"\n");
+        this.script = null;
+        this.nativeFrame = null;
+        this.context = null;
+    },
+
+    signature: function()
+    {
+        return this.script.tag +"." + this.pc;
+    },
+
+    getThisValue: function()
+    {
+        if (this.nativeFrame && !this.thisVar)
+             this.thisVar = FBL.unwrapIValue(this.nativeFrame.thisValue);
+        return this.thisVar;
+    },
+
+    getScopes: function()
+    {
+        if (this.nativeFrame && !this.scope)
+             this.scope = this.generateScopeChain(this.nativeFrame.scope);
+        return this.scope;
+    },
 
 
      // Private
