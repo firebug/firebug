@@ -49,7 +49,7 @@
     border-bottom: 1px solid #9C9C9C;
     padding: 0 !important;
     font-weight: bold;
-    background: #C4C4C4 -moz-linear-gradient(top, rgba(255, 255, 255, 0.2), rgba(0, 0, 0, 0.2));
+    background: #C4C4C4 -moz-linear-gradient(top, rgba(255, 255, 255, 0.3), rgba(0, 0, 0, 0.2));
     color: #000000;
     white-space: nowrap;
 }
@@ -65,11 +65,11 @@
 }
 
 .netHeaderCell:hover:active {
-    background: #B4B4B4 -moz-linear-gradient(top, rgba(255, 255, 255, 0.3), rgba(0, 0, 0, 0.2));
+    background-color: #B4B4B4;
 }
 
 .netHeaderSorted {
-    background: #8CA0BE -moz-linear-gradient(top, rgba(255, 255, 255, 0.3), rgba(0, 0, 0, 0.2));
+    background-color: #8CA0BE;
 }
 
 .netHeaderSorted > .netHeaderCellBox {
@@ -82,7 +82,7 @@
 }
 
 .netHeaderSorted:hover:active {
-    background: #6E87AA -moz-linear-gradient(top, rgba(255, 255, 255, 0.3), rgba(0, 0, 0, 0.2));
+    background-color: #6E87AA;
 }
 
 /************************************************************************************************/
