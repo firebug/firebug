@@ -37,6 +37,10 @@
     background-position: 4px 4px;
 }
 
+.hasHeaders .netHrefLabel {
+    background-position: 2px 50%;
+}
+
 /************************************************************************************************/
 /* DOM panel */
 
