@@ -2843,7 +2843,7 @@ this.StackFrame = function(sourceFile, lineNo, functionName, args, nativeFrame, 
  this.line = lineNo;
  this.fn = functionName;  // cache?
  this.context = context;
- this.newestFrame = newestFrame; // the newest frame in the stack containing 'this' frame
+ this.newestFrame = (newestFrame ? newestFrame : this); // the newest frame in the stack containing 'this' frame
 
  // optional
  this.args = args;
@@ -2871,7 +2871,7 @@ this.StackFrame.prototype =
 
     getStackNewestFrame: function()
     {
-        return (this.newestFrame ? this.newestFrame : this);
+        return this.newestFrame;
     },
 
     getFunctionName: function()
@@ -2903,7 +2903,7 @@ this.StackFrame.prototype =
         {
             var nativeCallingFrame = this.nativeFrame.callingFrame;
             if (nativeCallingFrame)
-                this.callingFrame = FBL.getStackFrame(nativeCallingFrame, this.context);
+                this.callingFrame = FBL.getStackFrame(nativeCallingFrame, this.context, this.newestFrame);
         }
         return this.callingFrame;
     },

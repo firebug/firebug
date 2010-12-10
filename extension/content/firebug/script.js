@@ -949,8 +949,6 @@ FBL.ns(function() { with (FBL) {
         // return.path: group/category label, return.name: item label
         getObjectDescription: function(compilationUnit)
         {
-            if (compilationUnit instanceof Firebug.SourceFile)
-                debugger;
             var kind = compilationUnit.getKind();
             if (kind == CompilationUnit.BROWSER_GENERATED)
             {
