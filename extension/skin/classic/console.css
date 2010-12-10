@@ -390,6 +390,17 @@
 
 /************************************************************************************************/
 
+.objectLink-NamedNodeMap .nodeName,
+.objectLink-NamedNodeMap .objectEqual,
+.objectLink-NamedNodeMap .arrayLeftBracket,
+.objectLink-NamedNodeMap .arrayRightBracket,
+.objectLink-Attr .attrEqual,
+.objectLink-Attr .attrTitle {
+    color: rgb(0, 0, 136)
+}
+
+/************************************************************************************************/
+
 .selectorTag,
 .selectorId,
 .selectorClass {

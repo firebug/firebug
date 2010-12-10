@@ -2185,6 +2185,137 @@ this.Description = domplate(Firebug.Rep,
 
 // ************************************************************************************************
 
+this.Attr = domplate(Firebug.Rep,
+{
+    tag:
+        OBJECTLINK(
+            SPAN(
+                SPAN({"class": "attrTitle"}, "$object|getTitle"),
+                SPAN({"class": "attrEqual"}, "="),
+                TAG("$object|getValueTag", {object: "$object.nodeValue"})
+            )
+        ),
+
+    getTitle: function(attr)
+    {
+        return attr.nodeName;
+    },
+
+    getValueTag: function(object)
+    {
+        return Firebug.getRep(object.nodeValue).tag;
+    },
+
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+
+    className: "Attr",
+
+    supportsObject: function(object, type)
+    {
+        return (object instanceof Attr);
+    },
+});
+
+// ************************************************************************************************
+
+this.NamedNodeMap = domplate(Firebug.Rep,
+{
+    tag:
+        OBJECTLINK(
+            SPAN({"class": "arrayLeftBracket", role: "presentation"}, "["),
+            FOR("prop", "$object|longPropIterator",
+                SPAN({"class": "nodeName"}, "$prop.name"),
+                SPAN({"class": "objectEqual", role: "presentation"}, "$prop.equal"),
+                TAG("$prop.tag", {object: "$prop.object"}),
+                SPAN({"class": "objectComma", role: "presentation"}, "$prop.delim")
+            ),
+            SPAN({"class": "arrayRightBracket", role: "presentation"}, "]")
+        ),
+
+    shortTag:
+        OBJECTLINK({onclick: "$onClick"},
+            SPAN({"class": "arrayLeftBracket", role: "presentation"}, "["),
+            FOR("prop", "$object|shortPropIterator",
+                SPAN({"class": "nodeName"}, "$prop.name"),
+                SPAN({"class": "objectEqual", role: "presentation"}, "$prop.equal"),
+                TAG("$prop.tag", {object: "$prop.object"}),
+                SPAN({"class": "objectComma", role: "presentation"}, "$prop.delim")
+            ),
+            SPAN({"class": "arrayRightBracket", role: "presentation"}, "]")
+        ),
+
+    onClick: function(event)
+    {
+        var globalStorage = event.currentTarget.repObject;
+        var context = Firebug.currentContext;
+        var domain = getPrettyDomain(context.window.location.href);
+
+        Firebug.chrome.select(globalStorage.namedItem(domain));
+        cancelEvent(event);
+    },
+
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+
+    className: "NamedNodeMap",
+
+    supportsObject: function(object, type)
+    {
+        return (object instanceof NamedNodeMap);
+    },
+
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+    // Iterator
+
+    longPropIterator: function(object)
+    {
+        return this.propIterator(object, 100);
+    },
+
+    shortPropIterator: function(object)
+    {
+        return this.propIterator(object, Firebug.ObjectShortIteratorMax);
+    },
+
+    propIterator: function (object, max)
+    {
+        max = max || 3;
+        if (!object)
+            return [];
+
+        var props = [];
+        for (var i=0; i<object.length && i<max; i++)
+        {
+            var item = object.item(i);
+            var name = item.nodeName;
+            var value = item.nodeValue;
+
+            var rep = Firebug.getRep(value);
+            tag = rep.tag;
+
+            props.push({tag: tag, name: name, object: value, equal: "=", delim: ", "});
+        }
+
+        if (object.length > max)
+        {
+            props[Math.max(1,max-1)] = {
+                object: (object.length-max) + " more...", //xxxHonza localization
+                tag: FirebugReps.Caption.tag,
+                name: "",
+                equal:"",
+                delim:""
+            };
+        }
+        else if (props.length > 0)
+        {
+            props[props.length-1].delim = '';
+        }
+
+        return props;
+    },
+});
+
+// ************************************************************************************************
+
 Firebug.registerRep(
     this.nsIDOMHistory, // make this early to avoid exceptions
     this.Undefined,
@@ -2211,7 +2342,9 @@ Firebug.registerRep(
     this.Arr,
     this.XPathResult,
     this.Storage,
-    this.StorageList
+    this.StorageList,
+    this.Attr,
+    this.NamedNodeMap
 );
 
 Firebug.setDefaultReps(this.Func, this.Obj);
