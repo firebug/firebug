@@ -513,13 +513,40 @@ var fbs =
         stepMode = STEP_SUSPEND;
         stepFrameLineId = null;
         stepStayOnDebuggr = stayOnDebuggr;
+        stepFrameTag = 0;
 
         if (FBTrace.DBG_FBS_STEP)
-            FBTrace.sysout("step stepMode = "+getStepName(stepMode) +" stepFrameLineId="+stepFrameLineId+" stepRecursion="+stepRecursion+" stepStayOnDebuggr:"+(stepStayOnDebuggr?stepStayOnDebuggr:"null"));
+            FBTrace.sysout("step stepMode = "+getStepName(stepMode) +" stepFrameLineId="+stepFrameLineId+" stepRecursion="+stepRecursion+" stepStayOnDebuggr:"+(stepStayOnDebuggr?stepStayOnDebuggr:"null")+" topLevel: "+jsd.topLevelHook);
 
         dispatch(debuggers, "onBreakingNext", [stayOnDebuggr, context]);
 
-        this.hookInterrupts();
+        var breakOnNextHook = fbs.getBreakOnNextFunction(context);
+
+        jsd.topLevelHook = { onCall: breakOnNextHook };
+        jsd.functionHook = { onCall: breakOnNextHook };
+    },
+
+    getBreakOnNextFunction: function (context)
+    {
+        return function breakOnNextFunction(frame, type)
+        {
+            if (!frame.callingFrame)
+            {
+                var lucky = context.getSourceFileByTag(frame.script.tag);
+                if (!lucky)
+                {
+                    var val = {};
+                    if ( fbs.isTopLevelScript(frame, type, val) )
+                        lucky = context.getSourceFileByTag(frame.script.tag);
+                }
+                if (lucky)
+                {
+                    FBTrace.sysout("breakOnNextFunction hits at "+getCallFromType(type)+" at "+frame.script.fileName+" tag:"+(lucky?"LUCKY WINNER":frame.script.tag), framesToString(frame));
+                    var rv = {};
+                    return fbs.onBreak(frame, type, rv);
+                }
+            }
+        }
     },
 
     runUntil: function(sourceFile, lineNo, startFrame, debuggr)
@@ -1159,10 +1186,10 @@ var fbs =
         try
         {
             // avoid step_out from web page to chrome
-            if (type==jsdIExecutionHook.TYPE_INTERRUPTED && stepStayOnDebuggr)
+            if (stepStayOnDebuggr) // do we need this ? type==jsdIExecutionHook.TYPE_INTERRUPTED &&
             {
                 var debuggr = this.reFindDebugger(frame, stepStayOnDebuggr);
-                if (FBTrace.DBG_FBS_STEP && (stepMode != STEP_SUSPEND) )
+                if (FBTrace.DBG_FBS_STEP)
                     FBTrace.sysout("fbs.onBreak type="+getExecutionStopNameFromType(type)+" hookFrameCount:"+hookFrameCount+" stepStayOnDebuggr "+stepStayOnDebuggr+" debuggr:"+(debuggr?debuggr:"null")+" last_debuggr="+(fbs.last_debuggr?fbs.last_debuggr.debuggerName:"null"));
 
                 if (!debuggr)
@@ -1588,18 +1615,16 @@ var fbs =
 
     onTopLevel: function(frame, type)
     {
-        if (type === TYPE_TOPLEVEL_START || type === TYPE_TOPLEVEL_END)
-        {
             if (FBTrace.DBG_TOPLEVEL)
-                FBTrace.sysout("fbs.onTopLevel with delegate "+fbs.onTopLevelDelegate+" "+frame.script.tag+" "+frame.script.fileName);
+                FBTrace.sysout("fbs.onTopLevel "+getCallFromType(type)+" with delegate "+fbs.onTopLevelDelegate+" "+frame.script.tag+" "+frame.script.fileName);
             if (fbs.onTopLevelDelegate)
-                fbs.onTopLevelDelegate(frame)
-        }
+                fbs.onTopLevelDelegate(frame, type)
     },
 
-    setTopLevelHook: function(fnOfFrame)
+    setTopLevelHook: function(fnOfFrameAndType)
     {
-        fbs.onTopLevelDelegate = fnOfFrame;
+        fbs.onTopLevelDelegate = fnOfFrameAndType;
+        jsd.topLevelHook = { onCall: hook(fnOfFrameAndType, true)};
     },
 
     isTopLevelScript: function(frame, type, val)
@@ -2974,7 +2999,6 @@ var fbs =
         jsd.breakpointHook = { onExecute: hook(this.onBreakpoint, RETURN_CONTINUE) };
         jsd.throwHook = { onExecute: hook(this.onThrow, RETURN_CONTINUE_THROW) };
         jsd.errorHook = { onError: hook(this.onError, true) };
-        jsd.topLevelHook = { onCall: hook(this.onTopLevel, true)};
     },
 
     unhookScripts: function()
@@ -3213,7 +3237,8 @@ function hook(fn, rv)
             var msg =  "Error in hook: "+ exc +" fn=\n"+fn+"\n stack=\n";
             for (var frame = Components.stack; frame; frame = frame.caller)
                 msg += frame.filename + "@" + frame.line + ";\n";
-               ERROR(msg);
+
+            ERROR(msg);
             return rv;
         }
     }

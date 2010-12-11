@@ -585,10 +585,11 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
         {
             fbs.setTopLevelHook(Firebug.Debugger, function reportTopLevel(frame)
             {
-                Firebug.Console.logFormatted(["Javascript entered", frame.script.fileName, frame.line], context, "info");
+                Firebug.Console.logFormatted(["JavaScript entered", frame.script.fileName, frame.line], context, "info");
             });
         }
     },
+
     setBreakOnNextCause: function(context, frame)  // TODO this should be in the panel (front end)
     {
         var sourceFile = Firebug.SourceFile.getSourceFileByScript(context, frame.script);

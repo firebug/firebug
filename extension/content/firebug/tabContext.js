@@ -30,6 +30,7 @@ Firebug.TabContext = function(win, browser, chrome, persistedState)
     this.sidePanelNames = {};
 
     this.compilationUnits = {};
+    this.sourceFileByTag = {}; // mozilla only
 
     // New nsITraceableChannel interface (introduced in FF3.0.4) makes possible
     // to re-implement source-cache so, it solves the double-load problem.
@@ -103,9 +104,13 @@ Firebug.TabContext.prototype =
         this.sourceFileMap[sourceFile.href] = sourceFile;
         sourceFile.context = this;
 
+        this.addTags(sourceFile);
+
         var compilationUnit = new CompilationUnit(sourceFile.href, this);
         this.compilationUnits[sourceFile.href] = compilationUnit;
+
         compilationUnit.sourceFile = sourceFile; // HACK
+
         if (sourceFile.compilation_unit_type == "event")
             compilationUnit.kind = CompilationUnit.BROWSER_GENERATED;
         if (sourceFile.compilation_unit_type == "eval")
@@ -123,6 +128,18 @@ Firebug.TabContext.prototype =
         delete sourceFile.context;
 
         // ?? Firebug.onSourceFileDestroyed(this, sourceFile);
+    },
+
+    addTags: function(sourceFile)
+    {
+        this.sourceFileByTag[sourceFile.outerScript.tag] = sourceFile;
+        for (var innerTag in sourceFile.innerScripts)
+            this.sourceFileByTag[innerTag] = sourceFile;
+    },
+
+    getSourceFileByTag: function(tag)
+    {
+        return this.sourceFileByTag[tag];
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
