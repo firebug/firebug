@@ -3140,7 +3140,7 @@ Firebug.Rep = domplate(
         if (object.constructor && typeof(object.constructor) == 'function')
         {
             var ctorName = object.constructor.name;
-            if (ctorName)
+            if (ctorName && ctorName != "Object")
                 return ctorName;
         }
 
