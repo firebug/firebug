@@ -428,7 +428,7 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
 
     unSuspend: function(context)
     {
-        fbs.stopStepping();  // TODO per context
+        fbs.stopStepping(null, context);  // TODO per context
     },
 
     runUntil: function(context, compilationUnit, lineNo)
@@ -439,6 +439,7 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
         if (!context.stoppedFrame || !context.stoppedFrame.isValid)
             return;
 
+        var sourceFile = compilationUnit.sourceFile;
         fbs.runUntil(compilationUnit, lineNo, context.stoppedFrame, this);
         this.resume(context);
     },
