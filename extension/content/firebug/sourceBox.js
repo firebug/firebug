@@ -396,11 +396,18 @@ Firebug.SourceBoxPanel = extend(SourceBoxPanelBase,
         var requestedLines = compilationUnit.pendingViewRange;
         delete compilationUnit.pendingViewRange;
 
-        if (firstLineAvailable > requestedLines.firstLine)
-            requestedLines.firstLine = firstLineAvailable;
+        if (requestedLines) // then are viewing a range
+        {
+            if (firstLineAvailable > requestedLines.firstLine)
+                requestedLines.firstLine = firstLineAvailable;
 
-        if (lastLineAvailable < requestedLines.lastLine)
-            requestedLines.lastLine = lastLineAvailable;
+            if (lastLineAvailable < requestedLines.lastLine)
+                requestedLines.lastLine = lastLineAvailable;
+        }
+        else // then no range was given, render all.
+        {
+            requestedLines = {firstLine: firstLineAvailable, lastLine: lastLineAvailable};
+        }
 
         sourceBox.lines = lines;  // an array indexed from firstLineAvailable to lastLineAvailable
 
@@ -482,7 +489,7 @@ Firebug.SourceBoxPanel = extend(SourceBoxPanelBase,
         this.selectedSourceBox.targetedLineNumber = lineNo;
         this.selectedSourceBox.highlightedLineNumber = lineNo;  // the targetedLineNumber may not be the highlightedLineNumber
         if (FBTrace.DBG_COMPILATION_UNITS)
-        	FBTrace.sysout("this.selectedSourceBox.highlightedLineNumber "+this.selectedSourceBox.repObject.url+"@"+this.selectedSourceBox.highlightedLineNumber);
+            FBTrace.sysout("this.selectedSourceBox.highlightedLineNumber "+this.selectedSourceBox.repObject.url+"@"+this.selectedSourceBox.highlightedLineNumber);
 
         this.context.scrollTimeout = this.context.setTimeout(bindFixed(function()
         {
@@ -966,9 +973,9 @@ Firebug.SourceBoxPanel = extend(SourceBoxPanelBase,
         // within the Script panel, the user expects immediate response.
         this.context.sourceBoxHighlighterTimeout = this.context.setTimeout(
             bindFixed(this.asyncHighlighting, this, sourceBox));
-            
+
         if (FBTrace.DBG_COMPILATION_UNITS)
-	        FBTrace.sysout("applyDecorator "+sourceBox.repObject.url+"@"+sourceBox.highlightedLineNumber, sourceBox);
+            FBTrace.sysout("applyDecorator "+sourceBox.repObject.url+"@"+sourceBox.highlightedLineNumber, sourceBox);
     },
 
     asyncDecorating: function(sourceBox)
