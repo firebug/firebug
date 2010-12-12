@@ -534,6 +534,7 @@ Firebug.Breakpoint.BreakpointGroup.prototype =
 };
 
 // ************************************************************************************************
+// TODO move to mozilla back end
 
 function SourceFileRenamer(context)
 {
@@ -725,9 +726,10 @@ Firebug.Breakpoint.ConditionEditor.prototype = domplate(Firebug.InlineEditor.pro
     {
         if (!cancel)
         {
-            var sourceFile = this.panel.location;
+            var compilationUnit = this.panel.location;
             var lineNo = parseInt(this.target.textContent);
-
+            // TODO rest is mozilla backend
+            var sourceFile = compilationUnit.sourceFile;
             fbs.setBreakpointCondition(sourceFile, lineNo, value, Firebug.Debugger);
         }
     },
