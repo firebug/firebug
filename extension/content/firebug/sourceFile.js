@@ -342,8 +342,10 @@ Firebug.SourceFile.prototype =
      {
          if (this.source)
              return this.source;
-         else
+         else if (context.sourceCache)
              return context.sourceCache.load(this.href);
+         else if (FBTrace.DBG_ERRORS)
+             FBTrace.sysout("sourceFile.loadScriptLines FAILS no sourceCache "+context.getName(), context);
      },
 
      getOuterScriptAnalyzer: function()
