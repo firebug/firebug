@@ -173,7 +173,7 @@ FBL.ns(function() { with (FBL) {
                 }
             }
 
-            if (FBTrace.DBG_BP || FBTrace.DBG_STACK || FBTrace.DBG_SOURCEFILES)
+            if (FBTrace.DBG_BP || FBTrace.DBG_STACK || FBTrace.DBG_COMPILATION_UNITS)
                 FBTrace.sysout("sourceBox.highlightLine lineNo: "+sourceBox.highlightedLineNumber+" lineNode="+lineNode+" in "+sourceBox.repObject.href);
 
             return (sourceBox.highlightedLineNumber > 0); // sticky if we have a valid line
@@ -227,17 +227,17 @@ FBL.ns(function() { with (FBL) {
             var href = this.getSourceBoxURL(this.selectedSourceBox);
             var lineNode = this.selectedSourceBox.getLineNode(lineNo);
 
-            var sourceFile = this.context.sourceFileMap[href];
+            var compilationUnit = this.context.getCompilationUnit(href);
 
-            if (!sourceFile && FBTrace.DBG_ERRORS)
-                FBTrace.sysout("toggleBreakpoint no sourceFile! ", this);
+            if (!compilationUnit && FBTrace.DBG_ERRORS)
+                FBTrace.sysout("toggleBreakpoint no compilationUnit! ", this);
             if (FBTrace.DBG_BP)
-                FBTrace.sysout("debugger.toggleBreakpoint lineNo="+lineNo+" sourceFile.href:"+sourceFile.href+" lineNode.breakpoint:"+(lineNode?lineNode.getAttribute("breakpoint"):"(no lineNode)")+"\n", this.selectedSourceBox);
+                FBTrace.sysout("debugger.toggleBreakpoint lineNo="+lineNo+" compilationUnit.href:"+compilationUnit.href+" lineNode.breakpoint:"+(lineNode?lineNode.getAttribute("breakpoint"):"(no lineNode)")+"\n", this.selectedSourceBox);
 
             if (lineNode.getAttribute("breakpoint") == "true")
-                fbs.clearBreakpoint(sourceFile.href, lineNo);
+                fbs.clearBreakpoint(href, lineNo);
             else
-                Firebug.Debugger.setBreakpoint(sourceFile, lineNo);
+                Firebug.Debugger.setBreakpoint(compilationUnit, lineNo);
         },
 
         toggleDisableBreakpoint: function(lineNo)
@@ -348,7 +348,7 @@ FBL.ns(function() { with (FBL) {
                 this.toggleDisableBreakpoint(lineNo);
             else if (isControlClick(event) || isMiddleClick(event))
             {
-                Firebug.Debugger.runUntil(this.context, sourceFile, lineNo, Firebug.Debugger);
+                Firebug.Debugger.runUntil(this.context, compilationUnit, lineNo, Firebug.Debugger);
                 cancelEvent(event);
             }
         },
@@ -703,7 +703,7 @@ FBL.ns(function() { with (FBL) {
             else return 0;
         },
 
-        refresh: function()  // delete any sourceBox-es that are not in sync with sourceFiles
+        refresh: function()  // delete any sourceBox-es that are not in sync with compilationUnits
         {
             for(var url in this.sourceBoxes)
             {
@@ -720,7 +720,7 @@ FBL.ns(function() { with (FBL) {
                             collapse(this.selectedSourceBox, true);
                             delete this.selectedSourceBox;
                        }
-                       if (FBTrace.DBG_SOURCEFILES)
+                       if (FBTrace.DBG_COMPILATION_UNITS)
                            FBTrace.sysout("debugger.refresh deleted sourceBox for "+url);
                     }
                 }
@@ -813,7 +813,7 @@ FBL.ns(function() { with (FBL) {
 
             if (Firebug.showAllSourceFiles)
             {
-                if (FBTrace.DBG_SOURCEFILES) FBTrace.sysout("debugger getLocationList "+context.getName()+" allSources", allSources);
+                if (FBTrace.DBG_COMPILATION_UNITS) FBTrace.sysout("debugger getLocationList "+context.getName()+" allSources", allSources);
                 return allSources;
             }
 
@@ -833,7 +833,7 @@ FBL.ns(function() { with (FBL) {
             else
                 delete this.context.allScriptsWereFiltered;
 
-            if (FBTrace.DBG_SOURCEFILES)
+            if (FBTrace.DBG_COMPILATION_UNITS)
                 FBTrace.sysout("debugger.getLocationList enabledOnLoad:"+context.onLoadWindowContent+" all:"+allSources.length+" filtered:"+list.length, list);
             return list;
         },
