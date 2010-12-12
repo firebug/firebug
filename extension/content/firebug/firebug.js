@@ -3137,6 +3137,13 @@ Firebug.Rep = domplate(
 
     getTitle: function(object)
     {
+        if (object.__proto__ && object.__proto__.constructor)
+        {
+            var ctorName = object.__proto__.constructor.name;
+            if (ctorName)
+                return ctorName;
+        }
+        
         var label = safeToString(object); // eg [object XPCWrappedNative [object foo]]
 
         const re =/\[object ([^\]]*)/;
