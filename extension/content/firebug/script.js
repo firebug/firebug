@@ -868,20 +868,7 @@ FBL.ns(function() { with (FBL) {
             // Target should be A element with class = sourceLine
             if ( hasClass(target, 'sourceLine') )
             {
-                var lineNo = parseInt(target.innerHTML);
-
-                if ( isNaN(lineNo) )
-                    return;
-                var scripts = this.location.scriptsIfLineCouldBeExecutable(lineNo);
-                if (scripts)
-                {
-                    var str = "scripts ";
-                    for(var i = 0; i < scripts.length; i++)
-                        str += scripts[i].tag +" ";
-                    return str;
-                }
-                else
-                    return new String("no executable script at "+lineNo);
+               return null; // TODO
             }
             return null;
         },
