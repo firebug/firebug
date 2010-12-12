@@ -7910,7 +7910,10 @@ this.checkFirebugVersion = function(expectedVersion)
 }).apply(FBL);
 } catch(e) /*@explore*/
 { /*@explore*/
-    dump("FBL Fails "+e+"\n"); /*@explore*/
+    dump("FBL Fails "+e+"\n");
+    for (var p in e)
+        dump("FBL exception["+p+"]="+e[p]+"\n");
+
     dump("If the service @joehewitt.com/firebug;1 fails, try deleting compreg.dat, xpti.dat\n"); /*@explore*/
     dump("Another cause can be mangled install.rdf.\n"); /*@explore*/
 } /*@explore*/
