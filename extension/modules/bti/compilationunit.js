@@ -116,7 +116,9 @@ CompilationUnit.prototype.getBreakpoints = function()
  * TODO: what if the compilation unit no longer exists in the browser
  * </p>
  * @function
- * @param listener a listener (function) that accepts (firstLineNumber, lastLineNubmer, array of source code lines)
+ * @param firstLineNumber requested line number starting point; < 1 means from lowest line number
+ * @param lastLineNumber request last line number; < 1 means up to maximum line
+ * @param listener a listener (function) that accepts (compilationUnit, firstLineNumber, lastLineNumber, array of source code lines)
  */
 CompilationUnit.prototype.getSourceLines = function(firstLine, lastLine, listener)
 {

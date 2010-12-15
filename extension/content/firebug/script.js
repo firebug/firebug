@@ -636,8 +636,16 @@ FBL.ns(function() { with (FBL) {
 
             var self = this;
 
-            function scanDoc(compilationUnit) {
-                var lines = compilationUnit.loadScriptLines(self.context);
+            function scanDoc(compilationUnit)
+            {
+                var lines = null;
+
+                // TODO the source lines arrive async in general
+                compilationUnit.getSourceLines(-1, -1, function loadSource(unit, firstLineNumber, lastLineNumber, linesRead)
+                {
+                    lines = linesRead;
+                });
+
                 if (!lines)
                     return;
                 // we don't care about reverse here as we are just looking for existence,
@@ -783,8 +791,6 @@ FBL.ns(function() { with (FBL) {
                 this.showFunction(object);
             else if (object instanceof StackFrame)
                 this.showStackFrameXB(object);
-            else
-                this.showStackFrame(null);
         },
 
         showThisCompilationUnit: function(compilationUnit)

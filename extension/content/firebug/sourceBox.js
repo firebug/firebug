@@ -245,6 +245,12 @@ Firebug.SourceBoxPanel = extend(SourceBoxPanelBase,
                 return null;  // cause a new one to be created
         }
     },
+    
+    getCompilationUnit: function()
+    {
+    	if (this.selectedSourceBox)
+    		return this.seletedSourceBox.repObject;
+    },
 
     getSourceBoxByURL: function(url)
     {
