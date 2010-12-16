@@ -926,6 +926,9 @@ FBL.ns(function() { with (FBL) {
             if (FBTrace.DBG_STACK)
                 FBTrace.sysout("debugger.getObjectPath "+frame, frame);
 
+            if (!frame || !frame.getStackNewestFrame) // then its probably not a frame after all
+                return;
+
             var frames = [];
             frame = frame.getStackNewestFrame();
             for (; frame; frame = frame.getCallingFrame())
