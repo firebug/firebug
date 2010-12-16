@@ -2018,7 +2018,7 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
             if (evaled)
             {
                 var src = unwrapIValue(result_src.value);
-                return src;
+                return src+"";
             }
             else
             {
