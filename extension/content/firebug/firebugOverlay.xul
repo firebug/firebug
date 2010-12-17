@@ -10,6 +10,7 @@
 <!-- Support for tracing. Only available in X version -->
 <?xul-overlay href="chrome://firebug/content/traceOverlay.xul"?> <!-- /*@explore*/ -->
 
+
 <overlay xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul"
          xmlns:html="http://www.w3.org/1999/xhtml">
 
@@ -18,10 +19,6 @@
     </stringbundleset>
 
     <commandset id="mainCommandSet">
-        <!-- TODO Firebug.Editors. -->
-        <command id="cmd_openFirebugEditors" oncommand="Firebug.openEditors()"/>
-        <command id="cmd_openInEditor" oncommand="Firebug.openInEditor(Firebug.currentContext, event.sourceEvent.target.value)"/>
-        <!-- end TODO Firebug.Editors. -->
         <command id="cmd_clearConsole" oncommand="Firebug.Console.clear(Firebug.currentContext)"/>
         <command id="cmd_togglePersistConsole" oncommand="Firebug.Console.togglePersist(Firebug.currentContext)"/>
         <command id="cmd_clearNet" oncommand="Firebug.NetMonitor.clear(Firebug.currentContext)"/>
@@ -497,10 +494,10 @@
             <menuitem id="menu_closeFirebug" label="firebug.CloseFirebug"
                       command="cmd_closeFirebug"
                       key="key_closeFirebug"/>
-            <!-- Editors -->
+            <!-- Editors TODO XXXjjb I tried to move this to external/editorsOverlay.xul but failed. -->
             <menu id="FirebugMenu_OpenWith" label="firebug.OpenWith">
                 <menupopup id="fbFirebugMenu_OpenWith"
-                    onpopupshowing="return FirebugChrome.onEditorsShowing(this);">
+                    onpopupshowing="return Firebug.ExternalEditors.onEditorsShowing(this);">
                         <menuitem id="menu_configureEditors" label="firebug.ConfigureEditors"
                             command="cmd_openFirebugEditors"/>
                 </menupopup>

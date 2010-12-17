@@ -1,7 +1,7 @@
 /* See license.txt for terms of usage */
 
 // Runs during overlay processing
-function OpenEditorShowHide(event) 
+function OpenEditorShowHide(event)
 {
     var item = document.getElementById("menu_firebugOpenWithEditor");
 
@@ -9,7 +9,7 @@ function OpenEditorShowHide(event)
     item.hidden = (popupNode instanceof HTMLInputElement
         || popupNode instanceof HTMLIFrameElement
         || popupNode instanceof HTMLTextAreaElement
-        || Firebug.registeredEditors.length == 0);
+        || Firebug.ExternalEditors.registeredEditors.length == 0);
 }
 
 function addOpenEditorShowHide(event)

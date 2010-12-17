@@ -857,7 +857,7 @@ top.FirebugChrome =
 
                     panelStatus.selectObject(panel.selection);
                     if (FBTrace.DBG_PANELS)
-	                    FBTrace.sysout("syncStatusPath "+path.length+" items ", path);
+                        FBTrace.sysout("syncStatusPath "+path.length+" items ", path);
                 }
             }
         }
@@ -1188,32 +1188,6 @@ top.FirebugChrome =
 
         if (!popup.firstChild)
             return false;
-    },
-
-    onEditorsShowing: function(popup)  // TODO move to Firebug.Editors module in editors.js
-    {
-        var editors = Firebug.registeredEditors;
-        if ( editors.length > 0 )
-        {
-            var lastChild = popup.lastChild;
-            FBL.eraseNode(popup);
-            var disabled = (!Firebug.currentContext);
-            for( var i = 0; i < editors.length; ++i )
-            {
-                if (editors[i] == "-")
-                {
-                    FBL.createMenuItem(popup, "-");
-                    continue;
-                }
-                var item = {label: editors[i].label, image: editors[i].image,
-                                nol10n: true, disabled: disabled };
-                var menuitem = FBL.createMenuItem(popup, item);
-                menuitem.setAttribute("command", "cmd_openInEditor");
-                menuitem.value = editors[i].id;
-            }
-            FBL.createMenuItem(popup, "-");
-            popup.appendChild(lastChild);
-        }
     },
 
     getInspectMenuItems: function(object)

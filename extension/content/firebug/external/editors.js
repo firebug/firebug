@@ -107,7 +107,7 @@ var gEditorManager =
             item: item,
             FBL: this._FBL
         };
-        openDialog("chrome://firebug/content/changeeditor.xul",  "_blank", "modal,centerscreen", args, result);
+        openDialog("chrome://firebug/content/external/changeeditor.xul",  "_blank", "modal,centerscreen", args, result);
         if (result.saveChanges)
         {
             item.id = item.label.replace(/\W/g, "_");
@@ -167,7 +167,7 @@ var gEditorManager =
             FBL: this._FBL
         };
         var result = {};
-        openDialog("chrome://firebug/content/changeeditor.xul",  "_blank", "modal,centerscreen", args, result);
+        openDialog("chrome://firebug/content/external/changeeditor.xul",  "_blank", "modal,centerscreen", args, result);
         if (result.saveChanges)
         {
             this._saveItem(item);

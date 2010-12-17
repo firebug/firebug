@@ -133,8 +133,6 @@ var earlyRegPanelTypes = []; // See Firebug.registerPanelType for more info
 var reps = [];
 var defaultRep = null;
 var defaultFuncRep = null;
-var editors = [];
-var externalEditors = [];
 var menuItemControllers = [];
 
 var panelTypeMap = {};
@@ -858,9 +856,6 @@ top.Firebug =
         for (var i = 0; i < servicePrefNames.length; ++i)
             this[servicePrefNames[i]] = this.getPref(this.servicePrefDomain, servicePrefNames[i]);
 
-        //xxxMCollins I don't understand why this has to be called in the middle of loading prefs...
-        this.loadExternalEditors();  // TODO to editors.js as module initialize
-
         prefs.addObserver(this.prefDomain, this, false);
         prefs.addObserver(this.servicePrefDomain, this, false);
 
@@ -1010,8 +1005,6 @@ top.Firebug =
             if (Firebug.chrome != Firebug.originalChrome)
                 Firebug.originalChrome.updateOption(name, value);
 
-            if (name.substr(0, 15) == "externalEditors")
-                this.loadExternalEditors();
         }
         catch (err)
         {
@@ -1028,146 +1021,7 @@ top.Firebug =
     },
 
     // ********************************************************************************************
-    // External editors
-    // TODO move to editors.js as Firebug.Editors module
 
-    loadExternalEditors: function()
-    {
-        const prefName = "externalEditors";
-        const editorPrefNames = ["label", "executable", "cmdline", "image"];
-
-        externalEditors = [];
-        var list = this.getPref(this.prefDomain, prefName).split(",");
-        for (var i = 0; i < list.length; ++i)
-        {
-            var editorId = list[i];
-            if ( !editorId || editorId == "")
-                continue;
-            var item = { id: editorId };
-            for( var j = 0; j < editorPrefNames.length; ++j )
-            {
-                try {
-                    item[editorPrefNames[j]] = this.getPref(this.prefDomain, prefName+"."+editorId+"."+editorPrefNames[j]);
-                }
-                catch(exc)
-                {
-                }
-            }
-            if ( item.label && item.executable )
-            {
-                if (!item.image)
-                    item.image = getIconURLForFile(item.executable);
-                externalEditors.push(item);
-            }
-        }
-        return externalEditors;
-    },
-
-    get registeredEditors()
-    {
-        var newArray = [];
-        if ( editors.length > 0 )
-        {
-            newArray.push.apply(newArray, editors);
-            if ( externalEditors.length > 0 )
-                newArray.push("-");
-        }
-        if ( externalEditors.length > 0 )
-            newArray.push.apply(newArray, externalEditors);
-
-        return newArray;
-    },
-
-    openEditors: function()
-    {
-        var args = {
-            FBL: FBL,
-            prefName: this.prefDomain + ".externalEditors"
-        };
-        openWindow("Firebug:ExternalEditors", "chrome://firebug/content/editors.xul", "", args);
-    },
-
-    openInEditor: function(context, editorId)
-    {
-        try
-        {
-            if (!editorId)
-                return;
-
-            var location;
-            if (context)
-            {
-                var panel = Firebug.chrome.getSelectedPanel();
-                if (panel)
-                {
-                    location = panel.location;
-                    if (!location && panel.name == "html")
-                        location = context.window.document.location;
-                    if (location && (location instanceof Firebug.SourceFile || location instanceof CSSStyleSheet ))
-                        location = location.href;
-                }
-            }
-            if (!location)
-            {
-                if (this.tabBrowser.currentURI)
-                    location = this.tabBrowser.currentURI.asciiSpec;
-            }
-            if (!location)
-                return;
-            location = location.href || location.toString();
-            if (Firebug.filterSystemURLs && isSystemURL(location))
-                return;
-
-            var list = extendArray(editors, externalEditors);
-            var editor = null;
-            for( var i = 0; i < list.length; ++i )
-            {
-                if (editorId == list[i].id)
-                {
-                    editor = list[i];
-                    break;
-                }
-            }
-            if (editor)
-            {
-                if (editor.handler)
-                {
-                    editor.handler(location);
-                    return;
-                }
-                var args = [];
-                var localFile = null;
-                var targetAdded = false;
-                if (editor.cmdline)
-                {
-                    args = editor.cmdline.split(" ");
-                    for( var i = 0; i < args.length; ++i )
-                    {
-                        if ( args[i] == "%url" )
-                        {
-                            args[i] = location;
-                            targetAdded = true;
-                        }
-                        else if ( args[i] == "%file" )
-                        {
-                            if (!localFile)
-                                localFile = this.getLocalSourceFile(context, location);
-                            args[i] = localFile;
-                            targetAdded = true;
-                        }
-                    }
-                }
-                if (!targetAdded)
-                {
-                    localFile = this.getLocalSourceFile(context, location);
-                    if (!localFile)
-                        return;
-                    args.push(localFile);
-                }
-                FBL.launchProgram(editor.executable, args);
-            }
-        } catch(exc) { ERROR(exc); }
-    },
 
     getLocalSourceFile: function(context, href)
     {

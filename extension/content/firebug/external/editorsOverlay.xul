@@ -1,0 +1,27 @@
+<?xml version="1.0"?>
+
+<overlay xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul">
+
+<script type="application/x-javascript" src="chrome://firebug/content/external/externalEditors.js"/>
+<script type="application/x-javascript" src="chrome://firebug/content/external/editorToContextMenu.js"/>
+
+    <!-- Firefox page context menu -->
+    <menupopup id="contentAreaContextMenu">
+
+        <menu label="firebug.OpenWith" id="menu_firebugOpenWithEditor"
+            insertbefore="context-viewsource">
+            <menupopup id="menu_firebugOpenWith"
+                onpopupshowing="return Firebug.ExternalEditors.onEditorsShowing(this);">
+                <menuitem id="menu_openFirebugEditors" label="firebug.ConfigureEditors"
+                    command="cmd_openFirebugEditors"/>
+            </menupopup>
+        </menu>
+
+    </menupopup>
+
+    <commandset id="mainCommandSet">
+        <command id="cmd_openFirebugEditors" oncommand="Firebug.ExternalEditors.openEditors()"/>
+        <command id="cmd_openInEditor" oncommand="Firebug.openInEditor(Firebug.currentContext, event.sourceEvent.target.value)"/>
+    </commandset>
+
+</overlay>

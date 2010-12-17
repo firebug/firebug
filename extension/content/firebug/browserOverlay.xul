@@ -1,6 +1,9 @@
 <?xml version="1.0"?>
 
+
 <?xul-overlay href="chrome://firebug/content/firebugOverlay.xul"?>
+
+
 
 <overlay xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul">
 
@@ -55,7 +58,6 @@
     <script type="application/x-javascript" src="chrome://firebug/content/svgViewer.js"/>
     <script type="application/x-javascript" src="chrome://firebug/content/shortcuts.js"/>
     <script type="application/x-javascript" src="chrome://firebug/content/a11y.js"/>
-    <script type="application/x-javascript" src="chrome://firebug/content/editorToContextMenu.js"/>
     <script type="application/x-javascript" src="chrome://firebug/content/knownIssues.js"/>
 
     <!-- Support for tracing. Only available in X version -->
@@ -63,16 +65,6 @@
 
     <!-- Firefox page context menu -->
     <menupopup id="contentAreaContextMenu">
-
-        <!-- TODO Firebug.Editors. -->
-        <menu label="firebug.OpenWith" id="menu_firebugOpenWithEditor"
-            insertbefore="context-viewsource">
-            <menupopup id="menu_firebugOpenWith"
-                onpopupshowing="return FirebugChrome.onEditorsShowing(this);">
-                <menuitem id="menu_openFirebugEditors" label="firebug.ConfigureEditors"
-                    command="cmd_openFirebugEditors"/>
-            </menupopup>
-        </menu>
 
         <menuseparator/>
         <menuitem id="menu_firebugInspect" label="firebug.InspectElement"
