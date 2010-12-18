@@ -141,8 +141,7 @@ var optionUpdateMap = {};
 var deadWindows = [];
 var deadWindowTimeout = 0;
 var clearContextTimeout = 0;
-var temporaryFiles = [];
-var temporaryDirectory = null;
+
 
 try
 {
@@ -1020,96 +1019,8 @@ top.Firebug =
             FBTrace.sysout("firebug.updatePref EXIT: "+name+"="+value+"\n");
     },
 
-    // ********************************************************************************************
 
 
-    getLocalSourceFile: function(context, href)
-    {
-        if ( isLocalURL(href) )
-            return getLocalPath(href);
-
-        var data;
-        if (context)
-        {
-            data = context.sourceCache.loadText(href);
-        }
-        else
-        {
-            // xxxHonza: if the fake context is used the source code is always get using
-            // (a) the browser cache or (b) request to the server.
-            var selectedBrowser = Firebug.chrome.getCurrentBrowser();
-            var ctx = {
-                browser: selectedBrowser,
-                window: selectedBrowser.contentWindow
-            };
-            data = new Firebug.SourceCache(ctx).loadText(href);
-        }
-
-        if (!data)
-            return;
-
-        if (!temporaryDirectory)
-        {
-            var tmpDir = DirService.getFile(NS_OS_TEMP_DIR, {});
-            tmpDir.append("fbtmp");
-            tmpDir.createUnique(nsIFile.DIRECTORY_TYPE, 0775);
-            temporaryDirectory = tmpDir;
-        }
-
-        var lpath = href.replace(/^[^:]+:\/*/g, "").replace(/\?.*$/g, "").replace(/[^0-9a-zA-Z\/.]/g, "_");
-        /* dummy comment to workaround eclipse bug */
-        if ( !/\.[\w]{1,5}$/.test(lpath) )
-        {
-            if ( lpath.charAt(lpath.length-1) == '/' )
-                lpath += "index";
-            lpath += ".html";
-        }
-
-        if ( getPlatformName() == "WINNT" )
-            lpath = lpath.replace(/\//g, "\\");
-
-        var file = QI(temporaryDirectory.clone(), nsILocalFile);
-        file.appendRelativePath(lpath);
-        if (!file.exists())
-            file.create(nsIFile.NORMAL_FILE_TYPE, 0664);
-        temporaryFiles.push(file.path);
-
-        var converter = CCIN("@mozilla.org/intl/scriptableunicodeconverter", "nsIScriptableUnicodeConverter");
-        converter.charset = 'UTF-8'; // TODO detect charset from current tab
-        data = converter.ConvertFromUnicode(data);
-
-        var stream = CCIN("@mozilla.org/network/safe-file-output-stream;1", "nsIFileOutputStream");
-        stream.init(file, 0x04 | 0x08 | 0x20, 0664, 0); // write, create, truncate
-        stream.write(data, data.length);
-        if (stream instanceof nsISafeOutputStream)
-            stream.finish();
-        else
-            stream.close();
-
-        return file.path;
-    },
-
-    deleteTemporaryFiles: function()  // TODO call on "shutdown" event to modules
-    {
-        try {
-            var file = CCIN("@mozilla.org/file/local;1", "nsILocalFile");
-            for( var i = 0; i < temporaryFiles.length; ++i)
-            {
-                file.initWithPath(temporaryFiles[i]);
-                if (file.exists())
-                    file.remove(false);
-            }
-        }
-        catch(exc)
-        {
-        }
-        try {
-            if (temporaryDirectory && temporaryDirectory.exists())
-                temporaryDirectory.remove(true);
-        } catch(exc)
-        {
-        }
-    },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
     // Browser Bottom Bar
