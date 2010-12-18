@@ -9,7 +9,7 @@ function OpenEditorShowHide(event)
     item.hidden = (popupNode instanceof HTMLInputElement
         || popupNode instanceof HTMLIFrameElement
         || popupNode instanceof HTMLTextAreaElement
-        || Firebug.ExternalEditors.registeredEditors.length == 0);
+        || Firebug.ExternalEditors.getRegisteredEditors.length == 0);
 }
 
 function addOpenEditorShowHide(event)

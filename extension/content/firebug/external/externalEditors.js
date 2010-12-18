@@ -28,12 +28,12 @@ FBL.ns(function() { with (FBL)
 
         shutdown: function()
         {
-        	 this.deleteTemporaryFiles();
+             this.deleteTemporaryFiles();
         },
 
         // ----------------------------------------------------------------------------------
-        
-        get registeredEditors()
+
+        getRegisteredEditors()
         {
             var newArray = [];
             if ( editors.length > 0 )
@@ -84,7 +84,7 @@ FBL.ns(function() { with (FBL)
         //
         onEditorsShowing: function(popup)
         {
-            var editors = Firebug.ExternalEditors.registeredEditors;
+            var editors = Firebug.ExternalEditors.getRegisteredEditors();
             if ( editors.length > 0 )
             {
                 var lastChild = popup.lastChild;
