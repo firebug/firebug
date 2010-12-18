@@ -26,7 +26,13 @@ FBL.ns(function() { with (FBL)
                 this.loadExternalEditors();
         },
 
+        shutdown: function()
+        {
+        	 this.deleteTemporaryFiles();
+        },
 
+        // ----------------------------------------------------------------------------------
+        
         get registeredEditors()
         {
             var newArray = [];

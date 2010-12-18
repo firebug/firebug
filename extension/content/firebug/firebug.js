@@ -407,7 +407,6 @@ top.Firebug =
         dispatch(modules, "shutdown");
 
         this.closeDeadWindows();
-        this.deleteTemporaryFiles();
 
         if (FBTrace.DBG_INITIALIZE)
             FBTrace.sysout("firebug.shutdown exited client "+this.clientID);
