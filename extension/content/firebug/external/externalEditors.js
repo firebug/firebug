@@ -33,6 +33,11 @@ FBL.ns(function() { with (FBL)
 
         // ----------------------------------------------------------------------------------
 
+        registerEditor: function()
+        {
+            editors.push.apply(editors, arguments);
+        },
+
         getRegisteredEditors()
         {
             var newArray = [];

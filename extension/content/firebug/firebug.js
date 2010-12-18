@@ -783,11 +783,6 @@ top.Firebug =
         defaultFuncRep = funcRep;
     },
 
-    registerEditor: function()
-    {
-        editors.push.apply(editors, arguments);
-    },
-
     registerStringBundle: function(bundleURI)
     {
         categoryManager.addCategoryEntry("strings_firebug", bundleURI, "", false, true);
