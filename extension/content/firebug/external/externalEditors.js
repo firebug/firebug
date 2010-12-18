@@ -11,13 +11,20 @@ FBL.ns(function() { with (FBL)
     var temporaryFiles = [];
     var temporaryDirectory = null;
 
+    var syncFilesToEditor = false;  // TODO pref
+
     Firebug.ExternalEditors = extend(Firebug.Module,
     {
+        // *************** implement Module *****************************************************
+
         initializeUI: function()
         {
             Firebug.Module.initializeUI.apply(this, arguments);
 
             this.loadExternalEditors();
+
+            // we listen for panel update
+            Firebug.registerUIListener(this);
         },
 
         updateOption: function(name, value)
@@ -32,13 +39,34 @@ FBL.ns(function() { with (FBL)
         },
 
         // ----------------------------------------------------------------------------------
+        // UIListener
+        onPanelNavigate: function(location, panel)
+        {
+            if (!syncFilesToEditor)
+                return;
+
+            if (location instanceof CompilationUnit)
+                openNewTab('http://localhost:8080/coding.html#file=' + location.url);
+        },
+
+        onObjectSelected: function(link, panel)
+        {
+            if (!syncFilesToEditor)
+                return;
+
+            if (link instanceof SourceLink)
+            {
+                openNewTab('http://localhost:8080/coding.html#file=' + sourceLink.href + "&line=" + sourceLink.line);
+            }
+        },
+        // ----------------------------------------------------------------------------------
 
         registerEditor: function()
         {
             editors.push.apply(editors, arguments);
         },
 
-        getRegisteredEditors()
+        getRegisteredEditors: function()
         {
             var newArray = [];
             if ( editors.length > 0 )
@@ -59,7 +87,7 @@ FBL.ns(function() { with (FBL)
             const editorPrefNames = ["label", "executable", "cmdline", "image"];
 
             externalEditors = [];
-            var list = this.getPref(this.prefDomain, prefName).split(",");
+            var list = Firebug.getPref(Firebug.prefDomain, prefName).split(",");
             for (var i = 0; i < list.length; ++i)
             {
                 var editorId = list[i];
@@ -69,7 +97,7 @@ FBL.ns(function() { with (FBL)
                 for( var j = 0; j < editorPrefNames.length; ++j )
                 {
                     try {
-                        item[editorPrefNames[j]] = this.getPref(this.prefDomain, prefName+"."+editorId+"."+editorPrefNames[j]);
+                        item[editorPrefNames[j]] = Firebug.getPref(this.prefDomain, prefName+"."+editorId+"."+editorPrefNames[j]);
                     }
                     catch(exc)
                     {
@@ -295,5 +323,7 @@ FBL.ns(function() { with (FBL)
         },
 
     });
+
+    Firebug.registerModule(Firebug.ExternalEditors);
 
 }});
