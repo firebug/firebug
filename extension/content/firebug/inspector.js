@@ -29,11 +29,12 @@ Firebug.Inspector = extend(Firebug.Module,
     {
         if(context && context.window && context.window.document)
         {
-            context.window.document.addEventListener("mousemove", function(event)
+            context.inspectorMouseMove = function inspectorMouseMove(event)
             {
                 mx = event.clientX;
                 my = event.clientY;
-            }, true);
+            }
+            context.window.document.addEventListener("mousemove", context.inspectorMouseMove, true);
         }
 
         if (!element || !isElement(element) || !isVisible(unwrapObject(element)))
@@ -76,7 +77,11 @@ Firebug.Inspector = extend(Firebug.Module,
             {
                 delete oldContext.highlightTimeout;
                 if (oldContext.window && oldContext.window.document)
+                {
                     highlighter.unhighlight(oldContext);
+                    if (oldContext.inspectorMouseMove)
+                        oldContext.window.document.removeEventListener("mousemove", oldContext.inspectorMouseMove, true);
+                }
             }, inspectDelay);
         }
     },
@@ -649,7 +654,7 @@ quickInfoBox =
     {
         if (!this.boxEnabled || !element)
             return;
-        
+
         this.needsToHide = false
 
         var vbox, lab,
@@ -702,33 +707,33 @@ quickInfoBox =
             this.needsToHide = true;
             return;
         }
-            
+
         var qiBox = $('fbQuickInfoPanel');
         this.prevX = null;
         this.prevY = null;
         this.needsToHide = false;
         qiBox.hidePopup();
     },
-   
+
     handleEvent: function(event)
     {
-        switch (event.type) 
+        switch (event.type)
         {
             case "mousemove":
                 if(!this.dragging)
                     return;
-            
-                var diffX, diffY,                
+
+                var diffX, diffY,
                     boxX = this.qiBox.screenX,
                     boxY = this.qiBox.screenY,
                     x = event.screenX,
                     y = event.screenY;
-               
+
                 diffX = x - this.prevX;
                 diffY = y - this.prevY;
 
                 this.qiBox.moveTo(boxX + diffX, boxY + diffY);
-                
+
                 this.prevX = x;
                 this.prevY = y;
                 this.storedX = boxX;
@@ -750,8 +755,8 @@ quickInfoBox =
                 this.prevX = this.prevY = null;
                 this.dragging = false;
                 break;
-			// this is a hack to find when mouse enters and leaves panel
-			// it requires that #fbQuickInfoPanel have border
+            // this is a hack to find when mouse enters and leaves panel
+            // it requires that #fbQuickInfoPanel have border
             case "mouseover":
                 if(this.dragging)
                     return;
