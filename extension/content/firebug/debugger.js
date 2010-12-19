@@ -234,7 +234,7 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
             // We will pause here until resume is called
             var depth = fbs.enterNestedEventLoop({onNest: bindFixed(this.startDebugging, this, context)});
             // For some reason we don't always end up here
-            if (FBTrace.DBG_UI_LOOP) FBTrace.sysout("debugger.stop, depth:"+depth+" context:"+context.getName());
+            if (FBTrace.DBG_UI_LOOP) FBTrace.sysout("debugger.stop, nesting depth:"+depth+" jsd.pauseDepth: "+jsd.pauseDepth+" context:"+context.getName());
         }
         catch (exc)
         {
@@ -397,7 +397,7 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
         if (!context.stoppedFrame || !context.stoppedFrame.isValid)
             return;
 
-        fbs.step(STEP_OVER, context.stoppedFrame, this);
+        fbs.step(STEP_OVER, context, this);
         this.resume(context);
     },
 
@@ -406,7 +406,7 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
         if (!context.stoppedFrame || !context.stoppedFrame.isValid)
             return;
 
-        fbs.step(STEP_INTO, context.stoppedFrame, this);
+        fbs.step(STEP_INTO, context, this);
         this.resume(context);
     },
 
@@ -415,7 +415,7 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
         if (!context.stoppedFrame || !context.stoppedFrame.isValid)
             return;
 
-        fbs.step(STEP_OUT, context.stoppedFrame);
+        fbs.step(STEP_OUT, context, this);
         this.resume(context);
     },
 
@@ -429,6 +429,7 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
     unSuspend: function(context)
     {
         fbs.stopStepping(null, context);  // TODO per context
+        fbs.cancelBreakOnNextCall(this, context)
     },
 
     runUntil: function(context, compilationUnit, lineNo)

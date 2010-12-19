@@ -122,11 +122,6 @@ var debuggers = [];
 var netDebuggers = [];
 var scriptListeners = [];
 
-var stepMode = 0;
-var stepFrameLineId;
-var stepStayOnDebuggr; // if set, the debuggr we want to stay within
-var stepFrameCount;
-var stepRecursion = 0; // how many times the caller is the same during TYPE_FUNCTION_CALL
 var hookFrameCount = 0;
 
 var haltObject = null;  // For reason unknown, fbs.haltDebugger will not work.
@@ -152,32 +147,465 @@ var waitingForTimer = false;
 var FBTrace = null;
 
 // ************************************************************************************************
-function Hooks()
+function frameId(frame, depth)
 {
-    this.list = [];
+    return frame.script.tag+"@"+frame.line+"^"+depth;
 }
 
-Hooks.prototype =
+function extend(l,r)
 {
-    hook: function(aHook)
+    var newOb = {};
+    for (var n in l)
+        newOb[n] = l[n];
+    for (var n in r)
+        newOb[n] = r[n];
+    return newOb;
+}
+
+// ************************************************************************************************
+// jsdICallHook or jsdIExecutionHook.
+
+var jsdHandlers =
+{
+    hooks: [],
+
+    // Stage for activation when 'hook' is called
+    add: function(aHook)
     {
-        this.list.push(aHook);
+        if (!aHook)
+            ERROR("firebug-service.jsdHandlers.add: null hook");
+
+        this.hooks.push(aHook);
     },
 
-    unhook: function(aHook)
+    remove: function(aHook)
     {
-        var i = this.list.indexOf(aHook);
-        if (i <= 0)
-            this.list.splice(i, 1);
+        var i = this.hooks.indexOf(aHook);
+        if (i != -1)
+            this.hooks.splice(i, 1);
         else
-            ERROR("firebug-service.Hooks.unhook FAILS, no such hook "+aHook.name, {aHook: aHook, Hooks: this});
+            ERROR("firebug-service.Hooks.unhook ERROR, no such hook "+aHook.name, {aHook: aHook, Hooks: this});
     },
 
-    dispatch: function()
+    // activate hooks
+    hook: function(frame)
     {
-        for (var i = 0; i < this.list.length; i++)
-            this.list[i].apply(fbs, arguments);
+        if (FBTrace.DBG_FBS_STEP)
+            FBTrace.sysout("start hooks "+this.hooks.length+" hooks active "+frameToString(frame), this);
+
+        for (var i = 0; i < this.hooks.length; i++)
+        {
+            var aHook = this.hooks[i];
+
+            aHook.hook(frame);
+
+            if ("onFunctionCall" in aHook || "onFunctionReturn" in aHook)
+                fbs.hookFunctions();
+            if ("onInterrupt" in aHook)
+                fbs.hookInterrupts();
+        }
+    },
+
+    unhook: function(frame)
+    {
+        if (FBTrace.DBG_FBS_STEP)
+            FBTrace.sysout("stop hooks "+this.hooks.length+" hooks active", this);
+
+        this.checkForUnhookFunctions(frame);
+        this.checkForUnhookInterrupts(frame);
+    },
+
+    checkForUnhookFunctions: function(frame)
+    {
+        for (var i = 0; i < this.hooks.length; i++)
+        {
+            var aHook = this.hooks[i];
+
+            aHook.unhook(frame);
+
+            if ("onFunctionCall" in aHook || "onFunctionReturn" in aHook)
+                return;
+        }
+
+        fbs.unhookFunctions();
+    },
+
+    checkForUnhookInterrupts: function(frame)
+    {
+        for (var i = 0; i < this.hooks.length; i++)
+        {
+            var aHook = this.hooks[i];
+
+            if ("onInterrupt" in aHook)
+                return;
+        }
+
+        fbs.unhookInterrupts();   // none found
+    },
+
+    dispatch: function(methodName, frame, type, rv)
+    {
+        for (var i = 0; i < this.hooks.length; i++)
+        {
+            var aHook = this.hooks[i];
+
+            if (methodName in aHook)
+            {
+                if (FBTrace.DBG_FBS_ERRORS)
+                    FBTrace.sysout("firebug-service.jsdHandler.dispatch "+methodName+" to "+aHook+" "+getCallFromType(type)+" frame: "+frameToString(frame), this);
+
+                var rc = aHook[methodName].apply(aHook, [frame, type, rv]);
+
+                if (typeof(rc) != 'undefined' || rc !== RETURN_CONTINUE)
+                    return rc;
+            }
+        }
+
+        return RETURN_CONTINUE;
     }
+};
+
+// ************************************* BREAK ON NEXT ***********************************************
+
+function BreakOnNextCall(debuggr, context)
+{
+    this.debuggr = debuggr;
+    this.context = context;
+}
+
+BreakOnNextCall.prototype =
+{
+    mode: "bon",
+
+    hook: function(frame)
+    {
+    },
+
+    unhook: function(frame)
+    {
+    },
+
+    hit: function(frame, type)  // the frame will be running the calling script
+    {
+        fbs.cancelBreakOnNextCall(this.debuggr, this.context);
+
+        var rv = {};
+        return fbs.routeBreakToDebuggr(frame, type, rv, this.debuggr);
+    },
+
+    onFunctionCall: function(frame, type)
+    {
+        var lucky = this.context.getSourceFileByTag(frame.script.tag);
+        if (!lucky) // then function running the frame is not in this context
+        {
+            if (!frame.callingFrame) // then we could be running an outer function from a new compilation unit
+            {
+                var val = {};
+                if ( fbs.isTopLevelScript(frame, type, val) )  // then the function could have just been added to the context
+                    lucky = this.context.getSourceFileByTag(frame.script.tag);
+            }
+        }
+
+        if (lucky) // then we hit in a function in our context
+        {
+            if (FBTrace.DBG_FBS_STEP)
+                FBTrace.sysout("breakOnNextTopFunction hits at "+getCallFromType(type)+" at "+frame.script.fileName+" tag:"+(lucky?"LUCKY WINNER":frame.script.tag), framesToString(frame));
+            return this.hit(frame,type);
+        }
+        // else maybe we hit on a event unrelated to our context
+    },
+};
+
+// Stack segments
+// When frame.callingFrame is null then we are starting a new stack segment
+//    FrameId                        track call stack
+//   segment0.fnc1  !callingFrame  !this.callingFrameId
+//   segment0.fnc2                  this.callingFrameId == segment0.fnc1
+//   ...
+//   segment1.fnc44  !callingFrame  this.callingFrameId == fnc2.segment0
+//   segment1.fnc45
+//
+
+
+// ******************** STEPPING **********************************************************
+// run until the current function returns, then stop in the caller.
+function OutStepper(debuggr, context)
+{
+    this.debuggr = debuggr;
+    this.context = context;
+    if (!this.debuggr)
+        ERROR("firebug-service.OutStepper no debuggr");
+}
+
+OutStepper.prototype =
+{
+    mode: "out",
+
+    getCallingFrameId: function(frame)
+    {
+        if (frame.callingFrame)
+            return frameId(frame.callingFrame, this.depth);
+
+        var debuggr =  fbs.reFindDebugger(frame, this.debuggr);
+        if (debuggr && debuggr.breakContext)
+            return debuggr.breakContext.getName(); //  TODO segments
+    },
+
+    hook: function(frame)
+    {
+        this.depth = 0;
+
+        if (frame)
+        {
+            this.callingFrameId = this.getCallingFrameId(frame);
+            if (!this.callingFrameId)
+                ERROR("OutStepper.hook cannot find callingFrame ", this);
+            this.startFrameTag = frame.script.tag;
+        }
+        else
+        {
+            ERROR("OutStepper.hook no frame ");
+        }
+
+        if (FBTrace.DBG_FBS_STEP)
+            FBTrace.sysout(this.mode+" hook with frame "+frameToString(frame)+" with callingFrameId "+this.callingFrameId, this);
+
+        return true;
+    },
+
+    onFunctionCall: function stepFunctionCall(frame, type) // the frame will be running the called script
+    {
+        var callingFrameId = this.getCallingFrameId(frame);
+
+        if (this.callingFrameId === callingFrameId) // then it is our caller
+        {
+            this.depth++;
+            this.callingFrameId = callingFrameId;  // push new id for stepFunctionReturn
+            if (FBTrace.DBG_FBS_STEP)
+                FBTrace.sysout(this.mode+" stepFunctionCall new depth "+this.depth+" new callingFrameId "+this.callingFrameId);
+        }
+        // else someone else, ignore it
+    },
+
+    onFunctionReturn: function stepFunctionReturn(frame, type) // the frame will be running the called script
+    {
+        var callingFrameId = this.getCallingFrameId(frame);
+
+        if (this.callingFrameId === callingFrameId) // then it is our caller
+        {
+            if (this.depth) // but we are not back to our caller
+            {
+                this.depth--;
+                this.callingFrameId = callingFrameId; // recursion
+                return;
+            }
+            else // then we are back to the frame we started on
+            {
+                if (frame.callingFrame)
+                    return this.hit(frame.callingFrame, type);
+                
+                if (FBTrace.DBG_FBS_STEP)
+                	FBTrace.sysout("OutStepper.onFunctionReturn no calling frame "+frameToString(frame), this);
+                
+                jsdHandlers.unhook(frame);  // we are done here
+                jsdHandlers.remove(this);
+                return;
+            }
+        }
+        if (!this.callingFrameId && callingFrameId) // then we are returning with out ever calling stepFunctionCall, but on a frame we care about.
+        {
+            if (frame.script.tag === this.startFrameTag) // then are returning from the frame we care about
+            {
+                if (frame.callingFrame)
+                    return this.hit(frame.callingFrame, type);
+                else
+                    ERROR("Should be top level just exit", this);
+            }
+            ERROR("Returning from a frame we care about but not one we know "+frameToString(frame), this);
+
+        } // else it's is not a frame we care about
+        if (FBTrace.DBG_FBS_STEP)
+        	FBTrace.sysout(this.mode+".onFunctionReturn callingFrameId "+callingFrameId+" called frame "+frameToString(frame), this)
+    },
+
+    unhook: function(frame)
+    {
+    },
+
+    hit: function(frame, type, rv)
+    {
+        if (FBTrace.DBG_FBS_STEP)
+            FBTrace.sysout(this.mode+" hit "+getCallFromType(type)+" at "+frameToString(frame), this);
+
+        var debuggr = fbs.reFindDebugger(frame, this.debuggr);
+        if (debuggr)
+        {
+            jsdHandlers.unhook(frame);
+            jsdHandlers.remove(this);
+
+            var rv = {};
+
+            return fbs.breakIntoDebugger(debuggr, frame, type);
+        }
+        return ERROR("Hit but debuggr did not match "+this.debuggr.debuggerName+" in frame "+frameToString(frame), this);
+    },
+
+    toString: function()
+    {
+        return this.mode + " for "+this.context.getName();
+    },
+};
+
+// like OutStepper, but run a single line in this function.
+function LineStepper(debuggr, context)
+{
+    this.context = context;
+    this.debuggr = debuggr;
+}
+
+LineStepper.prototype = extend(OutStepper.prototype,
+{
+    mode: "over",
+
+    hook: function hookLineStepper(frame)
+    {
+        OutStepper.prototype.hook.apply(this, arguments); // hook functions
+        this.lineFrameId = frameId(frame, this.depth);
+
+        if (FBTrace.DBG_FBS_STEP)
+            FBTrace.sysout(this.mode+".hook "+frameToString(frame)+" with lineFrameId "+this.lineFrameId, this);
+    },
+
+    unhook: function unhookLineStepper(frame)
+    {
+        if (FBTrace.DBG_FBS_STEP)
+        	FBTrace.sysout("LineStepper unhook ", this);
+    },
+
+    //  jsdIExecutionHook, onExecute
+    onInterrupt: function stepLine(frame, type, rv)
+    {
+        // Sometimes the same line will have multiple interrupts, so check
+        // a unique id for the line and don't break until it changes
+        var frameLineId = frameId(frame, this.depth);
+        if (FBTrace.DBG_FBS_STEP)
+            FBTrace.sysout(this.mode+" interruptHook pc:"+frame.pc+" frameLineId: "+frameLineId+" vs "+this.lineFrameId+" running "+frame.script.tag+" of "+frame.script.fileName+" at "+frame.line+"."+frame.pc, this);
+        if (frameLineId != this.lineFrameId)
+            return this.hit(frame, type, rv);
+        else
+            return RETURN_CONTINUE;
+    },
+
+    toString: function()
+    {
+        return this.mode + " for "+this.context.getName();
+    },
+
+});
+
+// Like OutStepper but if the line calls a function, stop on its first line.
+function IntoStepper(debuggr, context)
+{
+    this.context = context;
+    this.debuggr = debuggr;
+}
+
+IntoStepper.prototype = extend(LineStepper.prototype,
+{
+    mode: "into",
+
+    hook: function(frame)
+    {
+        LineStepper.prototype.hook.apply(this, arguments); // hook functions and interrupts
+        this.stepFrameTag = frame.script.tag;
+    },
+
+    onFunctionCall: function intoFunctionCall(frame, type) // the frame will be running the called script
+    {
+        var callingFrame = frame.callingFrame;
+        if (callingFrame)
+        {
+            if (this.stepFrameTag === callingFrame.script.tag) // then we stepped into from our caller
+                return this.hit(frame, type);
+            // else someone else, ignore it
+            if (FBTrace.DBG_FBS_STEP)
+            	FBTrace.sysout(this.mode+".intoFunctionCall no match "+this.stepFrameTag+" vs "+callingFrame.script.tag, this);
+        }
+        // else this would be a top level call, do we want to check for another event from this context?
+    },
+});
+
+
+function LogFunctionStepper()
+{
+    this.initialize();
+}
+
+LogFunctionStepper.prototype =
+{
+    hook: function()
+    {
+        fbs.inDebuggerSetupStack = true;
+    },
+
+    stop: function()
+    {
+        delete fbs.stackDescription;
+    },
+
+    onFunctionCall: function logFunctionCall(frame, type) // the frame will be running the called script
+    {
+        if (fbs.inDebuggerSetupStack) // then we are still in the debugger set up code
+            return;
+
+        if (!fbs.stackDescription)
+            fbs.stackDescription = { oldestTag: frame.script.tag, depth: 1, entries: [] };
+        else
+            fbs.stackDescription.depth++;
+
+        this.logFunction(frame, type);
+    },
+
+    onFunctionReturn: function logFunctionReturn(frame, type) // the frame will be running the called script
+    {
+        if (fbs.inDebuggerSetupStack) // then we are still in the debugger set up code
+        {
+            if (!frame.callingFrame) // then done with setup
+                delete fbs.inDebuggerSetupStack;
+
+            return;
+        }
+
+        if (!fbs.stackDescription)
+            fbs.stackDescription = { oldestTag: "Return first!", depth: 0, entries: [] };
+        fbs.stackDescription.depth--;
+
+        this.logFunction(frame, type);
+
+        if (!frame.callingFrame)
+        {
+            var diff = (fbs.stackDescription.oldestTag !== frame.script.tag);
+            if (FBTrace.DBG_FBS_STEP)
+            	FBTrace.sysout("Stack ends at depth "+fbs.stackDescription.depth+(diff?" NO Match on tag ":" tags match"), fbs.stackDescription.entries);
+            fbs.stackDescription.entries = [];
+        }
+
+        if (!fbs.stackDescription.depth)
+            delete fbs.stackDescription;
+    },
+
+    logFunction: function(frame, type)
+    {
+            var typeName = getCallFromType(type);
+            var actualFrames = countFrames(frame);
+            fbs.stackDescription.entries.push(""+fbs.stackDescription.depth+
+                ": "+typeName +
+                " (frameCount: "+actualFrames+") " +
+                " oldestTag "+fbs.stackDescription.oldestTag+
+                " running "+frame.script.tag+" of "+frame.script.fileName+" at "+frame.line+"."+frame.pc);
+    },
+
+
 };
 
 var fbs =
@@ -277,7 +705,7 @@ var fbs =
         }
         catch (exc)
         {
-            // Seems to be the normal path...FBTrace.sysout("FirebugService, attempt to exitNestedEventLoop fails "+exc);
+            // Seems to be the normal path...FBTrace.sysout("FirebugService, attempt to exitNestedEventLoop ERROR "+exc);
         }
 
 
@@ -287,7 +715,7 @@ var fbs =
         }
         catch (exc)
         {
-            FBTrace.sysout("fbs prefs.removeObserver fails "+exc, exc);
+            FBTrace.sysout("fbs prefs.removeObserver ERROR "+exc, exc);
         }
 
         try
@@ -298,7 +726,7 @@ var fbs =
         }
         catch (exc)
         {
-            FBTrace.sysout("fbs quit-application-observers removeObserver fails "+exc, exc);
+            FBTrace.sysout("fbs quit-application-observers removeObserver ERROR "+exc, exc);
         }
 
         jsd = null;
@@ -472,7 +900,7 @@ var fbs =
         }
         catch(exc)
         {
-            FBTrace.sysout("fbs.enterNestedEventLoop FAILS "+exc, exc);
+            FBTrace.sysout("fbs.enterNestedEventLoop ERROR "+exc, exc);
         }
         finally
         {
@@ -492,7 +920,7 @@ var fbs =
         catch (exc)
         {
             if (FBTrace.DBG_FBS_ERRORS)
-                FBTrace.sysout("fbs: jsd.exitNestedEventLoop FAILS "+exc, exc);
+                FBTrace.sysout("fbs: jsd.exitNestedEventLoop ERROR "+exc, exc);
         }
     },
 
@@ -507,7 +935,7 @@ var fbs =
         if (!debuggr || !fnOfFrame)
         {
             if (FBTrace.DBG_FBS_ERRORS)
-                FBTrace.sysout("fbs.halt call FAILS bad arguments", arguments);
+                FBTrace.sysout("fbs.halt call ERROR bad arguments", arguments);
             return null;
         }
 
@@ -522,187 +950,40 @@ var fbs =
         return fbs.haltReturnValue;
     },
 
-    // ******************** STEPPING **********************************************************
-    step: function(mode, startFrame, stayOnDebuggr)
-    {
-        stepMode = mode;
-
-        stepRecursion = 0;
-        stepFrameTag = startFrame.script.tag;
-        stepFrameLineId = stepRecursion + startFrame.script.fileName + startFrame.line;
-        stepStayOnDebuggr = stayOnDebuggr;
-
-        if (FBTrace.DBG_FBS_STEP)
-            FBTrace.sysout("step stepMode = "+getStepName(stepMode) +" stepFrameLineId="+stepFrameLineId+" stepRecursion="+stepRecursion+" stepFrameTag "+stepFrameTag+" stepStayOnDebuggr:"+(stepStayOnDebuggr?stepStayOnDebuggr:"null"));
-        // next we call resume in Firebug.Debugger
-    },
-
-    stepFunctionCall: function stepFunctionCall(frame) // the frame will be running the called script
-    {
-        if (stepMode == STEP_OVER || stepMode == STEP_OUT)
-        {
-            if (frame.callingFrame && frame.callingFrame.script.tag === stepFrameTag) // then we are called by the stepping script
-                stepRecursion++;
-
-            this.unhookInterrupts(frame); // don't watch execution steps, wait for return
-        }
-        else if (stepMode == STEP_INTO)  // normally step into will break in the interrupt handler, but not in event handlers.
-        {
-            fbs.stopStepping(frame);
-            stepMode = STEP_SUSPEND; // break on next
-            fbs.hookInterrupts(frame);  // FF4JM setBreakpoint(0), the test (stepMode === STEP_INTO) when we hit
-        }
-    },
-
-    stepFunctionReturn: function stepFunctionReturn(frame) // the frame will be running the called script
-    {
-        if (!frame.callingFrame)   // stack empty
-        {
-            if ( (stepMode == STEP_INTO) || (stepMode == STEP_OVER) )
-            {
-                fbs.stopStepping(frame);
-                stepMode = STEP_SUSPEND; // break on next
-                fbs.hookInterrupts(frame); // FF4JM, I think we should bail, the stack is empty even if the user said INTO
-            }
-            else
-            {
-                fbs.stopStepping(frame);
-            }
-        }
-        else if (stepMode == STEP_OVER || stepMode == STEP_OUT)
-        {
-            if (!stepRecursion) // then we never hit FUNCTION_CALL or we rolled back after we hit it
-            {
-                if (frame.script.tag === stepFrameTag)// We are in the stepping frame,
-                    fbs.hookInterrupts(frame);  // so halt on the next PC // FF4JM setBreakOnAllPC
-            }
-            else if (frame.callingFrame.script.tag === stepFrameTag) //then we could be in the step call
-            {
-                stepRecursion--;
-
-                if (!stepRecursion) // then we've rolled back to the step-call
-                {
-                    if (stepMode == STEP_OVER) // then halt in the next pc of the caller
-                        fbs.hookInterrupts(frame); // FF4JM setBreakOnAllPC
-                }
-            }
-            // else we are not interested in this FUNCTION_RETURN
-        }
-    },
-
-    logFunctionCall: function logFunctionCall(frame, type) // the frame will be running the called script
-    {
-        if (fbs.inDebuggerSetupStack) // then we are still in the debugger set up code
-            return;
-
-        if (!fbs.stackDescription)
-        {
-            fbs.stackDescription = { oldestTag: frame.script.tag, depth: 1, entries: [] };
-        }
-        else
-        {
-            fbs.stackDescription.depth++;
-        }
-        this.logFunction(frame, type);
-    },
-
-    logFunctionReturn: function logFunctionReturn(frame, type) // the frame will be running the called script
-    {
-        if (fbs.inDebuggerSetupStack) // then we are still in the debugger set up code
-        {
-            if (!frame.callingFrame) // then done with setup
-                delete fbs.inDebuggerSetupStack;
-
-            return;
-        }
-
-        if (!fbs.stackDescription)
-            fbs.stackDescription = { oldestTag: "Return first!", depth: 0, entries: [] };
-        fbs.stackDescription.depth--;
-
-        this.logFunction(frame, type);
-
-        if (!frame.callingFrame)
-        {
-            var diff = (fbs.stackDescription.oldestTag !== frame.script.tag);
-            FBTrace.sysout("Stack ends at depth "+fbs.stackDescription.depth+(diff?" NO Match on tag ":" tags match"), fbs.stackDescription.entries);
-            fbs.stackDescription.entries = [];
-        }
-
-        if (!fbs.stackDescription.depth)
-            delete fbs.stackDescription;
-    },
-
-    logFunction: function(frame, type)
-    {
-            var typeName = getCallFromType(type);
-            var actualFrames = countFrames(frame);
-            fbs.stackDescription.entries.push(""+fbs.stackDescription.depth+
-                ": "+typeName +
-                " (frameCount: "+actualFrames+") " +
-                " oldestTag "+fbs.stackDescription.oldestTag+
-                " running "+frame.script.tag+" of "+frame.script.fileName+" at "+frame.line+"."+frame.pc);
-    },
 
     // ******************** Break on next *******************************************************
     // deprecated API
-    suspend: function(stayOnDebuggr, context)
+    suspend: function(debuggr, context)
     {
-        fbs.breakOnNext(stayOnDebuggr, context);
+        fbs.breakOnNextCall(debuggr, context);
     },
 
-    breakOnNext: function(stayOnDebuggr, context)
+    breakOnNextCall: function(debuggr, context)
     {
-        stepMode = STEP_SUSPEND;
-        stepFrameLineId = null;
-        stepStayOnDebuggr = stayOnDebuggr;
-        stepFrameTag = 0;
-
-        if (FBTrace.DBG_FBS_STEP)
-            FBTrace.sysout("step stepMode = "+getStepName(stepMode) +" stepFrameLineId="+stepFrameLineId+" stepRecursion="+stepRecursion+" stepStayOnDebuggr:"+(stepStayOnDebuggr?stepStayOnDebuggr:"null")+" topLevel: "+jsd.topLevelHook);
-
-        dispatch(debuggers, "onBreakingNext", [stayOnDebuggr, context]);
+        dispatch(debuggers, "onBreakingNext", [debuggr, context]);
 
         if (context.breakOnNextHook)
-            fbs.onFunctionCallHooks.unhook(context.breakOnNextHook);
+        {
+            ERROR("firebug-service.breakOnNextCall already active ", context);
+        }
 
-        context.breakOnNextHook = fbs.getBreakOnNextFunction(context);
+        context.breakOnNextHook = new BreakOnNextCall(debuggr, context);
 
-        fbs.onFunctionCallHooks.hook(context.breakOnNextHook);
-
-        fbs.hookFunctions();
+        jsdHandlers.add(context.breakOnNextHook);
+        jsdHandlers.hook(); // no frame arg
     },
 
-    getBreakOnNextFunction: function (context)
+    cancelBreakOnNextCall: function(debuggr, context)
     {
-        return function breakOnNextFunction(frame, type)
-        {
-            if (!frame.callingFrame)
-            {
-                var lucky = context.getSourceFileByTag(frame.script.tag);
-                if (!lucky)
-                {
-                    var val = {};
-                    if ( fbs.isTopLevelScript(frame, type, val) )
-                        lucky = context.getSourceFileByTag(frame.script.tag);
-                }
-                if (lucky)
-                {
-                    if (FBTrace.DBG_FBS_STEP)
-                        FBTrace.sysout("breakOnNextFunction hits at "+getCallFromType(type)+" at "+frame.script.fileName+" tag:"+(lucky?"LUCKY WINNER":frame.script.tag), framesToString(frame));
-                    var rv = {};
-                    return fbs.onBreak(frame, type, rv);
-                }
-            }
-        }
+        jsdHandlers.unhook(/* no frame argument */);
+        jsdHandlers.remove(context.breakOnNextHook);
+        delete context.breakOnNextHook;
     },
 
     runUntil: function(sourceFile, lineNo, startFrame, debuggr)
     {
+        // TODO per context
         runningUntil = this.addBreakpoint(BP_UNTIL, sourceFile, lineNo, null, debuggr);
-        stepRecursion = 0;
-        stepFrameTag = startFrame.script.tag;
-        stepFrameLineId = stepRecursion + startFrame.script.fileName + startFrame.line;
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
@@ -893,7 +1174,7 @@ var fbs =
             }
             catch(exc)
             {
-                FBTrace.sysout("fbs.setErrorBreakpoint FAILS "+exc, exc);
+                FBTrace.sysout("fbs.setErrorBreakpoint ERROR "+exc, exc);
             }
         }
     },
@@ -1191,16 +1472,15 @@ var fbs =
 
         if (FBTrace.DBG_FBS_FUNCTION)
         {
-            fbs.onFunctionCallHooks.hook(fbs.logFunctionCall);
-            fbs.onFunctionReturnHooks.hook(fbs.logFunctionReturn);
-            fbs.inDebuggerSetupStack = true;
-            fbs.loggingFunctionCalls = true;
-        } else if (fbs.loggingFunctionCalls)
+            fbs.loggingFunctionCalls = new LogFunctionStepper();
+            jsdHandlers.add(fbs.loggingFunctionCalls);
+            jsdHandlers.hook() // no frame argument
+        }
+        else if (fbs.loggingFunctionCalls)
         {
-            fbs.onFunctionCallHooks.unhook(fbs.logFunctionCall);
-            fbs.onFunctionReturnHooks.unhook(fbs.logFunctionReturn);
-            delete fbs.stackDescription;
-            delete fbs.logFunctionCalls;
+            jsdHandlers.unhook("no frame argument");
+            fbs.jsdHandler.remove(fbs.loggingFunctionCalls);
+            delete fbs.loggingFunctionCalls;
         }
 
         FirebugPrefsObserver.syncFilter();
@@ -1341,60 +1621,6 @@ var fbs =
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
     // jsd Hooks
 
-    // When (debugger keyword and not halt)||(bp and BP_UNTIL) || (onBreakPoint && no conditions)
-    // || interuptHook.  rv is ignored
-    onBreak: function(frame, type, rv)
-    {
-        try
-        {
-            // avoid step_out from web page to chrome
-            if (stepStayOnDebuggr) // do we need this ? type==jsdIExecutionHook.TYPE_INTERRUPTED &&
-            {
-                var debuggr = this.reFindDebugger(frame, stepStayOnDebuggr);
-                if (FBTrace.DBG_FBS_STEP)
-                    FBTrace.sysout("fbs.onBreak type="+getExecutionStopNameFromType(type)+" hookFrameCount:"+hookFrameCount+" stepStayOnDebuggr "+stepStayOnDebuggr+" debuggr:"+(debuggr?debuggr:"null")+" last_debuggr="+(fbs.last_debuggr?fbs.last_debuggr.debuggerName:"null"));
-
-                if (!debuggr)
-                {
-                    // This frame is not for the debugger we want
-                    if (stepMode == STEP_OVER || stepMode == STEP_OUT)  // then we are in the debuggr we want and returned in to one we don't
-                    {
-                        this.stopStepping(frame); // run, you are free.
-                    }
-
-                    return RETURN_CONTINUE;  // This means that we will continue to take interrupts until  when?
-                }
-                else
-                {
-                    if (stepMode == STEP_SUSPEND) // then we have interrupted the outerFunction
-                    {
-                        var scriptTag = frame.script.tag;
-                        if (scriptTag in this.onXScriptCreatedByTag) // yes, we have to create the sourceFile
-                            this.onBreakpoint(frame, type, rv);  // TODO refactor so we don't get mixed up
-                    }
-                }
-            }
-            else
-            {
-                var debuggr = this.findDebugger(frame);
-
-                if (FBTrace.DBG_FBS_STEP)
-                    FBTrace.sysout("fbs.onBreak type="+getExecutionStopNameFromType(type)+" debuggr:"+(debuggr?debuggr:"null")+" last_debuggr="+(fbs.last_debuggr?fbs.last_debuggr.debuggerName:"null"));
-            }
-
-            if (debuggr)
-                return this.breakIntoDebugger(debuggr, frame, type);
-
-        }
-        catch(exc)
-        {
-            if (FBTrace.DBG_FBS_ERRORS)
-                FBTrace.sysout("onBreak failed: "+exc,exc);
-            ERROR("onBreak failed: "+exc, exc);
-        }
-        return RETURN_CONTINUE;
-    },
-
     // When engine encounters debugger keyword (only)
     onDebugger: function(frame, type, rv)
     {
@@ -1428,8 +1654,8 @@ var fbs =
                 }
                 else
                 {
-                    FBTrace.sysout("fbs.halt FAILS "+framesToString(frame));
-                    fbs.haltReturnValue = "firebug-service.halt FAILS, no stack frames left ";
+                    FBTrace.sysout("fbs.halt ERROR "+framesToString(frame));
+                    fbs.haltReturnValue = "firebug-service.halt ERROR, no stack frames left ";
                 }
 
                 return RETURN_CONTINUE;
@@ -1440,7 +1666,7 @@ var fbs =
                 if (bp) // then breakpoints override debugger statements (to allow conditional debugger statements);
                     return this.onBreakpoint(frame, type, rv);
                 else
-                    return this.onBreak(frame, type, rv);
+                    return fbs.routeBreakToDebuggr(frame, type, rv);
             }
         }
         catch(exc)
@@ -1538,14 +1764,24 @@ var fbs =
                 if (bp.type & BP_MONITOR && !(bp.disabled & BP_MONITOR))
                 {
                     if (bp.type & BP_TRACE && !(bp.disabled & BP_TRACE) )
-                        this.hookCalls(theDebugger.onFunctionCall, true);
-                    else
+                        this.hookCalls(theDebugger.onFunctionCall, true);  // TODO
+                     else
                         theDebugger.onMonitorScript(frame);
                 }
 
-                if (bp.type & BP_UNTIL)
+                if (bp.type & BP_UNTIL)  // then we hit the runningUntil breakpoint
                 {
-                    this.stopStepping(frame);
+                    if (runningUntil)
+                    {
+                        this.removeBreakpoint(BP_UNTIL, runningUntil.href, runningUntil.lineNo);
+                        runningUntil = null;
+                    }
+                    else
+                    {
+                        if (FBTrace.DBG_FBS_ERRORS)
+                            FBTrace.sysout("BP_UNTIL but not runningUntil!", bp);
+                    }
+
                     if (theDebugger)
                         return this.breakIntoDebugger(theDebugger, frame, type);
                 }
@@ -1576,60 +1812,10 @@ var fbs =
         if (runningUntil)
             return RETURN_CONTINUE;
         else
-            return this.onBreak(frame, type, val);
+            return fbs.routeBreakToDebuggr(frame, type, val);
     },
 
-    onFunctionCallHooks: new Hooks(),
-    onFunctionReturnHooks: new Hooks(),
-
-    onFunction: function(frame, type) // called in try/catch block with this === fbs
-    {
-        switch (type)
-        {
-            case TYPE_TOPLEVEL_START: // fall through
-            case TYPE_FUNCTION_CALL:  // the frame will be running the called script
-            {
-                this.onFunctionCallHooks.dispatch(frame, type);
-                break;
-            }
-            case TYPE_TOPLEVEL_END: // fall through
-            case TYPE_FUNCTION_RETURN:  // the frame will be running the called script
-            {
-                this.onFunctionReturnHooks.dispatch(frame, type);
-                break;
-            }
-        }
-        if (FBTrace.DBG_FBS_STEP)
-        {
-            var typeName = getCallFromType(type);
-            var actualFrames = countFrames(frame);
-            FBTrace.sysout("functionHook "+typeName+" stepMode = "+getStepName(stepMode)+" for script "+stepFrameTag+
-                " (actual: "+actualFrames+") stepRecursion="+
-                stepRecursion+" running "+frame.script.tag+" of "+frame.script.fileName+" at "+frame.line+"."+frame.pc);
-        }
-    },
-
-
-    onInterrupt: function(frame, type, rv)
-    {
-        /*if ( isFilteredURL(frame.script.fileName) )  // it does not seem feasible to use jsdIFilter-ing TODO try again
-        {
-            if (FBTrace.DBG_FBS_STEP)
-                FBTrace.sysout("fbs.hookInterrupts filtered "+frame.script.fileName);
-            return RETURN_CONTINUE;
-        }
-         */
-
-        // Sometimes the same line will have multiple interrupts, so check
-        // a unique id for the line and don't break until it changes
-        var frameLineId = stepRecursion + frame.script.fileName + frame.line;
-        if (FBTrace.DBG_FBS_STEP && (stepMode != STEP_SUSPEND) )
-            FBTrace.sysout("interruptHook pc:"+frame.pc+" frameLineId: "+frameLineId+" vs "+stepFrameLineId+" running "+frame.script.tag+" of "+frame.script.fileName+" at "+frame.line+"."+frame.pc);
-        if (frameLineId != stepFrameLineId)
-            return fbs.onBreak(frame, type, rv);
-        else
-            return RETURN_CONTINUE;
-    },
+    // **************************************************************************************
 
     onThrow: function(frame, type, rv)
     {
@@ -1847,7 +2033,7 @@ var fbs =
         catch(exc)
         {
             if (FBTrace.DBG_FBS_ERRORS)
-                FBTrace.sysout("onXULScriptCreated fails "+exc, exc);
+                FBTrace.sysout("onXULScriptCreated ERROR "+exc, exc);
         }
     },
 
@@ -1984,7 +2170,7 @@ var fbs =
         catch (exc)
         {
             FBTrace.sysout("onTopLevelScriptCreated FAILED: "+exc, exc);
-            ERROR("onTopLevelScriptCreated Fails: "+exc);
+            ERROR("onTopLevelScriptCreated ERROR: "+exc);
         }
 
         fbs.clearNestedScripts();
@@ -2050,7 +2236,7 @@ var fbs =
                     if (FBTrace.DBG_FBS_CREATION || FBTrace.DBG_FBS_SRCUNITS)
                         FBTrace.sysout("onScriptCreated "+script.tag+": filename filtered:\'"+fileName+"\'"+(fbs.filterConsoleInjections?" console injection":""));
                 } catch (exc) {
-                    FBTrace.sysout("onScriptCreated "+script.tag+" filtered msg FAILS \'"+script.fileName+"\'"); /*? Bug 426692 */
+                    FBTrace.sysout("onScriptCreated "+script.tag+" filtered msg ERROR \'"+script.fileName+"\'"); /*? Bug 426692 */
                 }
                 if (FBTrace.DBG_FBS_TRACKFILES)
                     trackFiles.drop(fileName);
@@ -2069,7 +2255,7 @@ var fbs =
                 try {
                     FBTrace.sysout("onScriptCreated: \'"+script.functionName+"\'", script.functionSource);
                 } catch (exc) {
-                    FBTrace.sysout("onScriptCreated "+script.tag+" FAILS \'"+script.fileName+"\'"); /*? Bug 426692 */
+                    FBTrace.sysout("onScriptCreated "+script.tag+" ERROR \'"+script.fileName+"\'"); /*? Bug 426692 */
                 }
             }
 
@@ -2273,7 +2459,7 @@ var fbs =
                 }
             });
         } catch (exc) {
-            FBTrace.sysout("createChromeblockingFilters fails >>>>>>>>>>>>>>>>> "+exc, exc);
+            FBTrace.sysout("createChromeblockingFilters ERROR >>>>>>>>>>>>>>>>> "+exc, exc);
         }
 
         if (FBTrace.DBG_FBS_BP)
@@ -2481,7 +2667,7 @@ var fbs =
             }
             catch (exc)
             {
-                FBTrace.sysout("firebug-service askDebuggersForSupport FAILS: "+exc,exc);
+                FBTrace.sysout("firebug-service askDebuggersForSupport ERROR: "+exc,exc);
             }
         }
         return null;
@@ -2897,7 +3083,7 @@ var fbs =
         }
         catch (exc)
         {
-            FBTrace.sysout("firebug-service.saveBreakpoints FAILS "+exc, exc);
+            FBTrace.sysout("firebug-service.saveBreakpoints ERROR "+exc, exc);
         }
     },
 
@@ -2938,7 +3124,7 @@ var fbs =
             }
             else
             {
-                ERROR("firebug-service breakpoint StorageService FAILS");
+                ERROR("firebug-service breakpoint StorageService ERROR");
                 this.breakpointStore =
                 {
                         setItem: function(){},
@@ -2950,7 +3136,7 @@ var fbs =
         }
         catch(exc)
         {
-            ERROR("firebug-service restoreBreakpoints FAILS "+exc);
+            ERROR("firebug-service restoreBreakpoints ERROR "+exc);
         }
 
     },
@@ -2987,6 +3173,44 @@ var fbs =
         }
     },
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+    // When (debugger keyword and not halt)||(bp and BP_UNTIL) || (onBreakPoint && no conditions)
+    // || interuptHook (single stepping).
+    // rv is ignored
+    routeBreakToDebuggr: function(frame, type, rv, stepStayOnDebuggr)
+    {
+        try
+        {
+            // avoid step_out from web page to chrome
+            if (stepStayOnDebuggr)
+            {
+                var debuggr = this.reFindDebugger(frame, stepStayOnDebuggr);
+                if (FBTrace.DBG_FBS_STEP)
+                    FBTrace.sysout("fbs.routeBreakToDebuggr type="+getExecutionStopNameFromType(type)+" stepStayOnDebuggr "+stepStayOnDebuggr+" debuggr:"+(debuggr?debuggr:"null")+" last_debuggr="+(fbs.last_debuggr?fbs.last_debuggr.debuggerName:"null"));
+
+                if (!debuggr) // then the frame is not for our debugger
+                    return RETURN_CONTINUE;  // This means that we will continue to take interrupts until  when?
+            }
+            else
+            {
+                var debuggr = this.findDebugger(frame);
+
+                if (FBTrace.DBG_FBS_STEP)
+                    FBTrace.sysout("fbs.routeBreakToDebuggr type="+getExecutionStopNameFromType(type)+" debuggr:"+(debuggr?debuggr:"null")+" last_debuggr="+(fbs.last_debuggr?fbs.last_debuggr.debuggerName:"null"));
+            }
+
+            if (debuggr)
+                return this.breakIntoDebugger(debuggr, frame, type);
+
+        }
+        catch(exc)
+        {
+            if (FBTrace.DBG_FBS_ERRORS)
+                FBTrace.sysout("routeBreakToDebuggr failed: "+exc,exc);
+            ERROR("routeBreakToDebuggr failed: "+exc, exc);
+        }
+        return RETURN_CONTINUE;
+    },
+
 
     breakIntoDebugger: function(debuggr, frame, type)
     {
@@ -3004,14 +3228,15 @@ var fbs =
         }
         catch (exc)
         {
-            ERROR(exc);
+            ERROR("breakIntoDebugger ERROR "+exc, exc);
             returned = RETURN_CONTINUE;
         }
 
         // Execution resumes now. Check if the user requested stepping and if so
         // install the necessary hooks
         this.startStepping(frame);
-        if (FBTrace.DBG_FBS_STEP || FBTrace.DBG_FBS_BP) FBTrace.sysout("fbs.breakIntoDebugger called "+debuggr.debuggerName+" returning "+returned);
+        if (FBTrace.DBG_FBS_STEP || FBTrace.DBG_FBS_BP)
+            FBTrace.sysout("fbs.breakIntoDebugger returning "+returned+" from "+debuggr.debuggerName+" with jsd.pauseDepth "+jsd.pauseDepth+" and functionHook "+jsd.functionHook);
         return returned;
     },
 
@@ -3020,68 +3245,31 @@ var fbs =
         return this.breakOnErrors || this.findErrorBreakpoint(this.normalizeURL(reportNextError.fileName), reportNextError.lineNo) != -1;
     },
 
-    startStepping: function(frame)
+    step: function(mode, context, debuggr) // debuggr calls us to stage stepping
     {
-        if (!stepMode && !runningUntil)
-            return;
+        if (mode === STEP_INTO)
+            var stepper = new IntoStepper(debuggr, context);
+        else if (mode === STEP_OVER)
+            var stepper = new LineStepper(debuggr, context);
+        else if (mode === STEP_OUT)
+            var stepper = new OutStepper(debuggr, context);
 
-        if (FBTrace.DBG_FBS_STEP)
-        {
-            FBTrace.sysout("startStepping stepMode = "+getStepName(stepMode) +" hookFrameCount="+hookFrameCount+" stepRecursion="+stepRecursion);
-        }
+        if (stepper)
+            jsdHandlers.add(stepper);
+        else
+            ERROR("fbs.step ERROR unknown mode "+mode);
+        // the actual stepping starts after we resume
+    },
 
-        fbs.onFunctionCallHooks.hook(fbs.stepFunctionCall);
-        fbs.onFunctionReturnHooks.hook(fbs.stepFunctionReturn);
 
-        if (stepMode == STEP_OVER || stepMode == STEP_INTO)
-            this.hookInterrupts(frame);  // FF4JM setBreakOnAllPC
-
-        fbs.hookFunctions();
+    startStepping: function(frame) // if needed
+    {
+        jsdHandlers.hook(frame);
     },
 
     stopStepping: function(frame, context)
     {
-        if (FBTrace.DBG_FBS_STEP)
-        {
-            FBTrace.sysout("stopStepping stepMode = "+getStepName(stepMode)
-                 +" hookFrameCount="+hookFrameCount+" stepRecursion="+stepRecursion+" "+(frame?frameToString(frame):"no frame arg"));
-        }
-        stepMode = 0;
-        stepRecursion = 0;
-        stepFrameTag = 0;
-        stepFrameLineId = null;
-
-        if (runningUntil)
-        {
-            this.removeBreakpoint(BP_UNTIL, runningUntil.href, runningUntil.lineNo);
-            runningUntil = null;
-        }
-
-        if (context && context.breakOnNextHook)
-            fbs.onFunctionCallHooks.unhook(context.breakOnNextHook);
-
-        this.unhookInterrupts(frame);
-
-        if (jsd.functionHook)
-        {
-            fbs.onFunctionCallHooks.unhook(fbs.stepFunctionCall);
-            fbs.onFunctionReturnHooks.unhook(fbs.stepFunctionReturn);
-
-            this.unhookFunctions();
-        }
-        else
-        {
-            if (FBTrace.DBG_FBS_ERRORS)
-                FBTrace.sysout("fbs.stopStepping called when jsd.functionHook is not set");
-        }
-    },
-
-    /*
-     * Returns a string describing the step mode or null for not stepping.
-     */
-    getStepMode: function()
-    {
-        return getStepName(stepMode);
+        jsdHandlers.unhook(frame);
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -3090,13 +3278,17 @@ var fbs =
     hookInterrupts: function(frame)
     {
         if (FBTrace.DBG_FBS_STEP)
-            FBTrace.sysout("set InterruptHook with stepFrameLineId: " + stepFrameLineId + " " +
-                (frame ? frame.script.enableSingleStepInterrupts : "<noframe>"));
+            FBTrace.sysout("set InterruptHook " + (frame ? frame.script.enableSingleStepInterrupts : "<noframe>"));
 
-        jsd.interruptHook = { onExecute: hook(this.onInterrupt, RETURN_CONTINUE)};
+        jsd.interruptHook = { onExecute: hook(this.onInterrupt, RETURN_CONTINUE)};  // TODO move the try code in hook() to dispatch
 
         if (frame)  // then we may be were called in FF3.6 for break on next script panel
             ScriptInterrupter.enable(frame.script);
+    },
+
+    onInterrupt: function(frame, type, rv)
+    {
+        return jsdHandlers.dispatch("onInterrupt", frame, type);
     },
 
     unhookInterrupts: function(frame)
@@ -3113,6 +3305,25 @@ var fbs =
     {
         if (FBTrace.DBG_FBS_STEP) FBTrace.sysout("set functionHook");
         jsd.functionHook = { onCall: hook(this.onFunction, true) };
+    },
+
+    onFunction: function(frame, type) // called in try/catch block with this === fbs
+    {
+        switch (type)
+        {
+            case TYPE_TOPLEVEL_START: // fall through
+            case TYPE_FUNCTION_CALL:  // the frame will be running the called script
+            {
+                jsdHandlers.dispatch("onFunctionCall", frame, type);
+                break;
+            }
+            case TYPE_TOPLEVEL_END: // fall through
+            case TYPE_FUNCTION_RETURN:  // the frame will be running the called script
+            {
+                jsdHandlers.dispatch("onFunctionReturn", frame, type);
+                break;
+            }
+        }
     },
 
     unhookFunctions: function()
@@ -3148,6 +3359,7 @@ var fbs =
         if (FBTrace.DBG_FBS_STEP || FBTrace.DBG_FBS_TRACKFILES) FBTrace.sysout("unset scriptHook\n");
     },
 
+    // TODO rewrite as a Stepper
     hookCalls: function(callBack, unhookAtBottom)
     {
         var contextCached = null;
@@ -3373,8 +3585,8 @@ function hook(fn, rv)
         }
         catch (exc)
         {
-            var msg =  "Error in hook: "+ exc +" fn=\n"+fn+"\n stack=\n";
-            ERROR(msg);
+            var msg =  "Error in hook: "+ exc;
+            ERROR(msg, exc);
             return rv;
         }
     }
@@ -3435,6 +3647,15 @@ function framesToString(frame)
 
 function frameToString(frame)
 {
+    if (!frame)
+        return "< no frame >";
+
+    if (!frame.script)
+    {
+        ERROR("frameToString bad frame "+typeof(frame), frame);
+        return "<bad frame>";
+    }
+
     return frame.script.tag+" in "+frame.script.fileName+"@"+frame.line+"(pc="+frame.pc+")";
 }
 
@@ -3539,7 +3760,7 @@ function unwrapIValue(object)
     catch (exc)
     {
         if (FBTrace.DBG_ERRORS)
-            FBTrace.sysout("fbs.unwrapIValue FAILS for "+object,{exc: exc, object: object, unwrapped: unwrapped});
+            FBTrace.sysout("fbs.unwrapIValue ERROR for "+object,{exc: exc, object: object, unwrapped: unwrapped});
     }
 }
 
@@ -3549,18 +3770,28 @@ var consoleService = null;
 
 function ERROR(text, exc)
 {
-
     if (!consoleService)
         consoleService = ConsoleService.getService(nsIConsoleService);
 
-    consoleService.logStringMessage(text + "");
+    try
+    {
+        fbs.unhookInterrupts(); // Stop and clear everything
+        fbs.unhookFunctions();
+        fbs.unhookScripts();
+        jsdHandlers.list = [];
+        consoleService.logStringMessage("ERROR: "+text);
 
-    var frame = Components.stack;
-    frame = frame.caller; // drop this frame we are in now.
-    for ( ; frame; frame = frame.caller)
-        consoleService.logStringMessage(frame.filename + "@" + frame.lineNumber + ";");
+        var frame = Components.stack;
+        frame = frame.caller; // drop this frame we are in now.
+        for ( ; frame; frame = frame.caller)
+            consoleService.logStringMessage(frame.filename + "@" + frame.lineNumber + ";");
 
-    FBTrace.sysout(text, exc);
+        FBTrace.sysout(text, exc);
+    }
+    catch(exc)
+    {
+        consoleService.logStringMessage("ERROR in ERROR: "+exc);
+    }
 }
 
 function getExecutionStopNameFromType(type)
