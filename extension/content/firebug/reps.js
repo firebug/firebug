@@ -1698,18 +1698,18 @@ this.ErrorMessage = domplate(Firebug.Rep,
 
     breakOnThisError: function(error, context)
     {
-
-        var sourceFile = context.sourceFileMap[normalizeURL(error.href)];
-        if (!sourceFile)
+        var compilationUnit = context.getCompilationUnit(normalizeURL(error.href));
+        if (!compilationUnit)
         {
-            Firebug.Console.logFormatted(["reps.breakOnThisError has not source file for error.href: "+error.href, error], context, 'error', true);
+            if (FBTrace.DBG_ERRORS)
+                FBTrace.sysout("reps.breakOnThisError has no source file for error.href: "+error.href+"  error:"+error, context);
             return;
         }
 
         if (this.hasErrorBreak(error))
-            Firebug.Debugger.clearErrorBreakpoint(sourceFile, error.lineNo);
+            Firebug.Debugger.clearErrorBreakpoint(compilationUnit, error.lineNo);
         else
-            Firebug.Debugger.setErrorBreakpoint(sourceFile, error.lineNo);
+            Firebug.Debugger.setErrorBreakpoint(compilationUnit, error.lineNo);
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *

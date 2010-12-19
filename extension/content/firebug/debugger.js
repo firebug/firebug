@@ -633,14 +633,14 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
         fbs.clearBreakpoint(sourceFile.href, lineNo);
     },
 
-    setErrorBreakpoint: function(sourceFile, line)
+    setErrorBreakpoint: function(compilationUnit, line)
     {
-        fbs.setErrorBreakpoint(sourceFile, line, Firebug.Debugger);
+        fbs.setErrorBreakpoint(compilationUnit.sourceFile, line, Firebug.Debugger);
     },
 
-    clearErrorBreakpoint: function(sourceFile, line)
+    clearErrorBreakpoint: function(compilationUnit, line)
     {
-        fbs.clearErrorBreakpoint(sourceFile.href, line, Firebug.Debugger);
+        fbs.clearErrorBreakpoint(compilationUnit.getURL(), line, Firebug.Debugger);
     },
 
     clearAllBreakpoints: function(context)
