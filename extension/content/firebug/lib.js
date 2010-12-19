@@ -4231,6 +4231,32 @@ this.getLocalPath = function(url)
     }
 };
 
+
+this.getLocalOrSystemPath = function(url)
+{
+    if (!this.isLocalURL(url) && !this.isSystemURL(url))
+        return;
+
+    var uri = ioService.newURI(url, null, null), file;
+    if (uri.schemeIs("resource"))
+    {
+        var ph = ioService.getProtocolHandler("resource").QueryInterface(Ci.nsIResProtocolHandler);
+        var abspath = ph.getSubstitution(uri.host);
+        uri = ioService.newURI(uri.path.substr(1), null, abspath);
+    }
+    while (uri.schemeIs("chrome"))
+    {
+        var chromeRegistry = Cc["@mozilla.org/chrome/chrome-registry;1"].getService(Ci.nsIChromeRegistry);
+        uri = chromeRegistry.convertChromeURL(uri);
+    }
+    if (uri.schemeIs("file"))
+    {
+        file = uri.QueryInterface(Ci.nsIFileURL).file;
+    }
+
+    return file && !file.isDirectory() && file.path;
+}
+
 this.getURLFromLocalFile = function(file)
 {
     var fileHandler = ioService.getProtocolHandler("file").QueryInterface(Ci.nsIFileProtocolHandler);
@@ -5784,7 +5810,7 @@ domMemberMap.Element = extendArray(domMemberMap.Node,
     "getFeature",
     "getUserData",
     "setUserData",
-    
+
     "childElementCount",
     "children",
     "classList",
@@ -5796,7 +5822,7 @@ domMemberMap.Element = extendArray(domMemberMap.Node,
     "lastElementChild",
     "nextElementSibling",
     "previousElementSibling",
-    
+
     "getBoundingClientRect",
     "getClientRects",
     "getElementsByClassName",
@@ -5804,7 +5830,7 @@ domMemberMap.Element = extendArray(domMemberMap.Node,
     "querySelector",
     "querySelectorAll",
     "scrollIntoView"
-    
+
 ]);
 
 domMemberMap.SVGElement = extendArray(domMemberMap.Element,

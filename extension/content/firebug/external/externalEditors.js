@@ -5,9 +5,15 @@ FBL.ns(function() { with (FBL)
     const Cc = Components.classes;
     const Ci = Components.interfaces;
 
-    var externalEditors = [];
-    var editors = [];
+    const DirService =  CCSV("@mozilla.org/file/directory_service;1", "nsIDirectoryServiceProvider");
+    const NS_OS_TEMP_DIR = "TmpD"
+    const nsIFile = Ci.nsIFile;
+    const nsILocalFile = Ci.nsILocalFile;
+    const nsISafeOutputStream = Ci.nsISafeOutputStream;
+    const nsIURI = Ci.nsIURI;
 
+    var editors = [];
+    var externalEditors = [];
     var temporaryFiles = [];
     var temporaryDirectory = null;
 
@@ -97,7 +103,7 @@ FBL.ns(function() { with (FBL)
                 for( var j = 0; j < editorPrefNames.length; ++j )
                 {
                     try {
-                        item[editorPrefNames[j]] = Firebug.getPref(this.prefDomain, prefName+"."+editorId+"."+editorPrefNames[j]);
+                        item[editorPrefNames[j]] = Firebug.getPref(Firebug.prefDomain, prefName+"."+editorId+"."+editorPrefNames[j]);
                     }
                     catch(exc)
                     {
@@ -113,11 +119,21 @@ FBL.ns(function() { with (FBL)
             return externalEditors;
         },
 
+        getDefaultEditor: function()
+        {
+            return externalEditors[0] || editors[0];
+        },
+
+        count: function()
+        {
+            return externalEditors.length + editors.length;
+        },
+
         // ********* overlay menu support
         //
         onEditorsShowing: function(popup)
         {
-            var editors = Firebug.ExternalEditors.getRegisteredEditors();
+            var editors = this.getRegisteredEditors();
             if ( editors.length > 0 )
             {
                 var lastChild = popup.lastChild;
@@ -141,103 +157,148 @@ FBL.ns(function() { with (FBL)
             }
         },
 
-        openEditors: function()
+        openEditorList: function()
         {
             var args = {
                 FBL: FBL,
-                prefName: this.prefDomain + ".externalEditors"
+                prefName: Firebug.prefDomain + ".externalEditors"
             };
             openWindow("Firebug:ExternalEditors", "chrome://firebug/content/external/editors.xul", "", args);
         },
 
-        openInEditor: function(context, editorId)
+        appendContextMenuItem: function(items, url, line)
+        {
+            var editor = this.getDefaultEditor();
+            items.push(
+                {label: editor.label,
+                 image: editor.image,
+                 command: function(){
+                        Firebug.ExternalEditors.open(url, line)
+                    }
+                }
+            );
+        },
+
+        openContext: function(context, editorId)
+        {
+            var location;
+            if (context)
+            {
+                var panel = Firebug.chrome.getSelectedPanel();
+                if (panel)
+                {
+                    location = panel.location;
+                    if (!location && panel.name == "html")
+                        location = context.window.document.location;
+                    if (location && (location instanceof Firebug.SourceFile || location instanceof CSSStyleSheet ))
+                        location = location.href;
+                }
+            }
+            if (!location)
+            {
+                if (Firebug.tabBrowser.currentURI)
+                    location = Firebug.tabBrowser.currentURI.asciiSpec;
+            }
+            if (!location)
+                return;
+            location = location.href || location.url || location.toString();
+            if (Firebug.filterSystemURLs && isSystemURL(location))
+                return;
+
+            this.open(location, null, editorId, context)
+        },
+
+        open: function(href, line, editorId, context)
         {
             try
             {
-                if (!editorId)
+                if (!href)
                     return;
-
-                var location;
-                if (context)
-                {
-                    var panel = Firebug.chrome.getSelectedPanel();
-                    if (panel)
-                    {
-                        location = panel.location;
-                        if (!location && panel.name == "html")
-                            location = context.window.document.location;
-                        if (location && (location instanceof Firebug.SourceFile || location instanceof CSSStyleSheet ))
-                            location = location.href;
-                    }
-                }
-                if (!location)
-                {
-                    if (this.tabBrowser.currentURI)
-                        location = this.tabBrowser.currentURI.asciiSpec;
-                }
-                if (!location)
-                    return;
-                location = location.href || location.toString();
-                if (Firebug.filterSystemURLs && isSystemURL(location))
-                    return;
-
-                var list = extendArray(editors, externalEditors);
                 var editor = null;
-                for( var i = 0; i < list.length; ++i )
+                if (editorId)
                 {
-                    if (editorId == list[i].id)
+                    var list = extendArray(externalEditors, editors);
+                    for( var i = 0; i < list.length; ++i )
                     {
-                        editor = list[i];
-                        break;
-                    }
-                }
-                if (editor)
-                {
-                    if (editor.handler)
-                    {
-                        editor.handler(location);
-                        return;
-                    }
-                    var args = [];
-                    var localFile = null;
-                    var targetAdded = false;
-                    if (editor.cmdline)
-                    {
-                        args = editor.cmdline.split(" ");
-                        for( var i = 0; i < args.length; ++i )
+                        if (editorId == list[i].id)
                         {
-                            if ( args[i] == "%url" )
-                            {
-                                args[i] = location;
-                                targetAdded = true;
-                            }
-                            else if ( args[i] == "%file" )
-                            {
-                                if (!localFile)
-                                    localFile = this.getLocalSourceFile(context, location);
-                                args[i] = localFile;
-                                targetAdded = true;
-                            }
+                            editor = list[i];
+                            break;
                         }
                     }
-                    if (!targetAdded)
-                    {
-                        localFile = this.getLocalSourceFile(context, location);
-                        if (!localFile)
-                            return;
-                        args.push(localFile);
-                    }
-                    FBL.launchProgram(editor.executable, args);
                 }
+                else
+                    editor = this.getDefaultEditor();
+
+                if (!editor)
+                     return;
+
+                if (editor.handler)
+                {
+                    editor.handler(href,line);
+                    return;
+                }
+                var args = [];
+                var localFile = null;
+                var targetAdded = false;
+                var cmdline = editor.cmdline
+                if (cmdline)
+                {
+                    cmdline = cmdline.replace(' ', '\x00', 'g')
+
+                    if(cmdline.indexOf("%line")>-1)
+                    {
+                        line = parseInt(line);
+                        if(typeof line == 'number' && !isNaN(line))
+                            cmdline = cmdline.replace('%line', line);
+                        else //don't send argument with bogus line number
+                        {
+                            var i = cmdline.indexOf("%line");
+                            var i2 = cmdline.indexOf("\x00", i);
+                            if(i2 == -1)
+                                i2 = cmdline.length;
+                            var i1 = cmdline.lastIndexOf("\x00", i);
+                            if(i1 == -1)
+                                i1 = 0;
+                            cmdline = cmdline.substring(0, i1) + cmdline.substr(i2);
+                        }
+                    }
+                    if(cmdline.indexOf("%url")>-1)
+                    {
+                        cmdline = cmdline.replace('%url', href, 'g');
+                        targetAdded = true;
+                    }
+                    else if ( cmdline.indexOf("%file")>-1 )
+                    {
+                        localFile = this.getLocalSourceFile(context, href);
+                        if (localFile)
+                        {
+                            cmdline = cmdline.replace('%file', localFile, 'g');
+                            targetAdded = true;
+                        }
+                    }
+
+                    cmdline.split(/\x00+/).forEach(function(x){ if(x) args.push(x) })
+                }
+                if (!targetAdded)
+                {
+                    localFile = this.getLocalSourceFile(context, href);
+                    if (!localFile)
+                        return;
+                    args.push(localFile);
+                }
+
+                FBL.launchProgram(editor.executable, args);
             } catch(exc) { ERROR(exc); }
-        },
+        },        
 
         // ********************************************************************************************
 
         getLocalSourceFile: function(context, href)
         {
-            if ( isLocalURL(href) )
-                return getLocalPath(href);
+            var filePath = getLocalOrSystemPath(href)
+            if ( filePath )
+                return filePath;
 
             var data;
             if (context)

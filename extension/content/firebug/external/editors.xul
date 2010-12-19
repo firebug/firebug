@@ -51,6 +51,9 @@
       <button id="changeEditor"
               label="change.label"
               oncommand="gEditorManager.changeEditorHandler();"/>
+      <button id="moveUpEditor"
+              label="moveUp.label"
+              oncommand="gEditorManager.moveUpEditorHandler();"/>
       <spacer flex="1"/>
       <button id="closeDialogButton"
               oncommand="close();" icon="close"

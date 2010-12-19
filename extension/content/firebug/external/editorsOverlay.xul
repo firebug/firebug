@@ -20,8 +20,16 @@
     </menupopup>
 
     <commandset id="mainCommandSet">
-        <command id="cmd_openFirebugEditors" oncommand="Firebug.ExternalEditors.openEditors()"/>
-        <command id="cmd_openInEditor" oncommand="Firebug.openInEditor(Firebug.currentContext, event.sourceEvent.target.value)"/>
+        <command id="cmd_openFirebugEditors" oncommand="Firebug.ExternalEditors.openEditorList()"/>
+        <command id="cmd_openInEditor" oncommand="Firebug.ExternalEditors.openContext(Firebug.currentContext, event.sourceEvent.target.value)"/>
     </commandset>
-
+    <menupopup id="fbFirebugMenuPopup">
+        <menu id="FirebugMenu_OpenWith" label="firebug.OpenWith" insertbefore="menu_openActionsSeparator">
+            <menupopup id="fbFirebugMenu_OpenWith"
+                onpopupshowing="return Firebug.ExternalEditors.onEditorsShowing(this);">
+                    <menuitem id="menu_configureEditors" label="firebug.ConfigureEditors"
+                        command="cmd_openFirebugEditors"/>
+            </menupopup>
+        </menu>
+    </menupopup>
 </overlay>

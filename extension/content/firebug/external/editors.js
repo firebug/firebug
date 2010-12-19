@@ -15,6 +15,7 @@ var gEditorManager =
     _data : [],
     _removeButton : null,
     _changeButton : null,
+    _moveUpButton : null,
 
     init: function()
     {
@@ -24,6 +25,7 @@ var gEditorManager =
 
         (this._removeButton = document.getElementById("removeEditor")).disabled = true;
         (this._changeButton = document.getElementById("changeEditor")).disabled = true;
+        (this._moveUpButton = document.getElementById("moveUpEditor")).disabled = true;
 
         this._tree = document.getElementById("editorsList");
 
@@ -72,7 +74,7 @@ var gEditorManager =
     internationalizeUI: function(doc)
     {
         var elements = ["firebug-external-editors", "actionsIntro", "editorName",
-            "editorExecutable", "editorParams", "addEditor", "removeEditor", "changeEditor",
+            "editorExecutable", "editorParams", "addEditor", "removeEditor", "changeEditor", "moveUpEditor",
             "closeDialogButton"];
 
         for (var i=0; i<elements.length; i++)
@@ -97,6 +99,7 @@ var gEditorManager =
         var selection = this._tree.view.selection;
         this._removeButton.disabled = (selection.count != 1);
         this._changeButton.disabled = (selection.count != 1);
+        this._moveUpButton.disabled = (selection.count != 1) || (selection.currentIndex == 0);
     },
 
     addEditorHandler: function()
@@ -175,6 +178,26 @@ var gEditorManager =
         this._loadItem(item);
         this._tree.view = this._treeView;
     },
+
+    moveUpEditorHandler: function()
+    {
+        var selection = this._tree.view.selection;
+        if (selection.count < 1)
+            return;
+        var item = this._data[selection.currentIndex];
+        this._data.splice(selection.currentIndex, 1);
+        this._data.unshift(item);
+        this._tree.view = this._treeView;
+        try {
+            var editors = this._data.map(function(x) x.id);
+            prefs.setCharPref(this._prefName, editors.join(","));
+        }
+        catch(exc)
+        {
+            this._FBL.ERROR(exc);
+        }
+    },
+
 
     _loadItem: function(item)
     {

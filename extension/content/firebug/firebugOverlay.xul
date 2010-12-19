@@ -494,14 +494,7 @@
             <menuitem id="menu_closeFirebug" label="firebug.CloseFirebug"
                       command="cmd_closeFirebug"
                       key="key_closeFirebug"/>
-            <!-- Editors TODO XXXjjb I tried to move this to external/editorsOverlay.xul but failed. -->
-            <menu id="FirebugMenu_OpenWith" label="firebug.OpenWith">
-                <menupopup id="fbFirebugMenu_OpenWith"
-                    onpopupshowing="return Firebug.ExternalEditors.onEditorsShowing(this);">
-                        <menuitem id="menu_configureEditors" label="firebug.ConfigureEditors"
-                            command="cmd_openFirebugEditors"/>
-                </menupopup>
-            </menu>
+            
 
             <menuseparator id="menu_openActionsSeparator"/>
 

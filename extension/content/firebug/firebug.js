@@ -11,13 +11,9 @@ const Ci = Components.interfaces;
 const nsIPrefBranch = Ci.nsIPrefBranch;
 const nsIPrefBranch2 = Ci.nsIPrefBranch2;
 const nsISupports = Ci.nsISupports;
-const nsIFile = Ci.nsIFile;
-const nsILocalFile = Ci.nsILocalFile;
-const nsISafeOutputStream = Ci.nsISafeOutputStream;
-const nsIURI = Ci.nsIURI;
+
 
 const PrefService = Cc["@mozilla.org/preferences-service;1"];
-const DirService =  CCSV("@mozilla.org/file/directory_service;1", "nsIDirectoryServiceProvider");
 
 const nsIPrefService = Ci.nsIPrefService;
 const prefService = PrefService.getService(nsIPrefService);
@@ -40,7 +36,6 @@ const statusBarContextMenu = $("fbStatusContextMenu");
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 
 const prefs = PrefService.getService(nsIPrefBranch2);
-const NS_OS_TEMP_DIR = "TmpD"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 

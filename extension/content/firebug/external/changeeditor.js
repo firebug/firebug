@@ -102,7 +102,7 @@ function onAccept()
         var file = fbXPCOMUtils.CCIN("@mozilla.org/file/local;1", "nsILocalFile");
         file.initWithPath(item.executable);
         if (!file.isExecutable())
-           throw "NotAnExecutable"; 
+           throw "NotAnExecutable";
 
         window.arguments[1].saveChanges = true;
         return true;
@@ -168,5 +168,40 @@ function onBrowse()
     return false;
 }
 
+function insertText(text, whole)
+{
+    var textbox = document.getElementById("cmdline")
+    if(whole)
+        textbox.select();
 
+    textbox.editor.QueryInterface(Components.interfaces.nsIPlaintextEditor).insertText(text);
+    textbox.focus()
+}
 // ************************************************************************************************
+
+// would be good to have autosuggest for popular editors
+var defaultCommandLines={
+    "sublimetext": "%file:%line",
+    "notepad++":   "-n%line %file",
+    "emeditor":    "/l %line %file"
+}
+
+function suggestionPopupShowing(popup){
+    FBL.eraseNode(popup);
+
+    for (var i in defaultCommandLines)
+    {
+        var box = document.createElement('hbox');
+        var label = document.createElement('label');
+        label.setAttribute('value', i + ': ');
+        box.appendChild(label);
+
+        label = document.createElement('label');
+        label.setAttribute('value', defaultCommandLines[i]);
+        label.className = 'text-link'
+        box.appendChild(label);
+
+        popup.appendChild(box)
+    }
+
+}
