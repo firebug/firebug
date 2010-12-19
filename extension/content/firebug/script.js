@@ -957,6 +957,17 @@ FBL.ns(function() { with (FBL) {
             return FBL.splitURLBase(compilationUnit.getURL());
         },
 
+        getSourceLink: function(target, object)
+        {
+            var sourceRow = getAncestorByClass(target, "sourceRow");
+            if (!sourceRow)
+                return;
+
+            var sourceLine = getChildByClass(sourceRow, "sourceLine");
+            var lineNo = parseInt(sourceLine.textContent);
+            return new FBL.SourceLink(this.location.url, lineNo, 'js');
+        },
+
         getOptionsMenuItems: function()
         {
             var context = this.context;

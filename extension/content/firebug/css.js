@@ -1161,6 +1161,19 @@ Firebug.CSSStyleSheetPanel.prototype = extend(Firebug.SourceBoxPanel,
         return baseDescription;
     },
 
+    getSourceLink: function(target, rule)
+    {
+        var href = rule.parentStyleSheet.href;  // Null means inline
+        if (!href)
+            href = element.ownerDocument.location.href; // http://code.google.com/p/fbug/issues/detail?id=452
+
+        var line = domUtils.getRuleLine(rule);
+        var instance = getInstanceForStyleSheet(rule.parentStyleSheet);
+        var sourceLink = new SourceLink(href, line, "css", rule, instance);
+
+        return sourceLink;
+    },
+
     highlightRow: function(row)
     {
         if (this.highlightedRow)
@@ -1412,22 +1425,15 @@ CSSElementPanel.prototype = extend(Firebug.CSSStyleSheetPanel.prototype,
             {
                 var rule = QI(inspectedRules.GetElementAt(i), nsIDOMCSSStyleRule);
 
-                var href = rule.parentStyleSheet.href;  // Null means inline
-
-                var instance = getInstanceForStyleSheet(rule.parentStyleSheet, element.ownerDocument);
-
                 var isSystemSheet = isSystemStyleSheet(rule.parentStyleSheet);
                 if (!Firebug.showUserAgentCSS && isSystemSheet) // This removes user agent rules
                     continue;
-                if (!href)
-                    href = element.ownerDocument.location.href; // http://code.google.com/p/fbug/issues/detail?id=452
 
                 var props = this.getRuleProperties(this.context, rule, inheritMode);
                 if (inheritMode && !props.length)
                     continue;
 
-                var line = domUtils.getRuleLine(rule);
-                var sourceLink = new SourceLink(href, line, "css", rule, instance);
+                var sourceLink = this.getSourceLink(element, rule);
 
                 this.markOverriddenProps(props, usedProps, inheritMode);
 

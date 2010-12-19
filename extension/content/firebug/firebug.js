@@ -2561,6 +2561,15 @@ Firebug.Panel = extend(new Firebug.Listener(),
         return tab;
     },
 
+    /*
+     * If the panel supports source viewing, then return a SourceLink, else null
+     * @param target an element from the panel under the mouse
+     * @param object the realObject under the mouse
+     */
+    getSourceLink: function(target, object)
+    {
+    },
+
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
     // Support for Break On Next
 

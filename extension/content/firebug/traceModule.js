@@ -729,9 +729,18 @@ Firebug.TraceModule.MessageTemplate = domplate(Firebug.Rep,
     {
         return message;
     },
+    
+    getSourceLink: function(target, object)
+    {
+	    if (hasClass(target, "stackFrameLink"))
+        {
+        	var sourceLink = new FBL.SourceLink(target.innerHTML, target.getAttribute("lineNumber"));
+			return sourceLink;
+        }
+    },
 
     // Context menu
-    getContextMenuItems: function(message, target, context)
+    getContextMenuItems: function(message, target, context, repObject)
     {
         var items = [];
 
@@ -776,6 +785,12 @@ Firebug.TraceModule.MessageTemplate = domplate(Firebug.Rep,
             });
         }
 
+        if (hasClass(target, "stackFrameLink")&& Firebug.ExternalEditors.count())
+        {
+        	var sourceLink = new FBL.SourceLink(target.innerHTML, target.getAttribute("lineNumber"));
+            Firebug.ExternalEditors.appendContextMenuItem(items, target.innerHTML, target.getAttribute("lineNumber"));
+        }
+        
         if (items.length > 0)
             items.push("-");
 

@@ -166,6 +166,24 @@ FBL.ns(function() { with (FBL)
             openWindow("Firebug:ExternalEditors", "chrome://firebug/content/external/editors.xul", "", args);
         },
 
+        onContextMenu: function(items, object, target, context, panel)
+        {
+            if (Firebug.ExternalEditors.count())
+            {
+                if (panel)
+                {
+                    var sourceLink = panel.getSourceLink(target, object);
+                    if (sourceLink)
+                        Firebug.ExternalEditors.appendContextMenuItem(items, sourceLink.href, sourceLink.line);
+                }
+                else if (object instanceof FBL.SourceLink)
+                {
+                    var sourceLink = object;
+                    Firebug.ExternalEditors.appendContextMenuItem(items, sourceLink.href, sourceLink.line);
+                }
+            }
+        },
+
         appendContextMenuItem: function(items, url, line)
         {
             var editor = this.getDefaultEditor();
@@ -290,7 +308,7 @@ FBL.ns(function() { with (FBL)
 
                 FBL.launchProgram(editor.executable, args);
             } catch(exc) { ERROR(exc); }
-        },        
+        },
 
         // ********************************************************************************************
 
