@@ -403,10 +403,10 @@ OutStepper.prototype =
             {
                 if (frame.callingFrame)
                     return this.hit(frame.callingFrame, type);
-                
+
                 if (FBTrace.DBG_FBS_STEP)
-                	FBTrace.sysout("OutStepper.onFunctionReturn no calling frame "+frameToString(frame), this);
-                
+                    FBTrace.sysout("OutStepper.onFunctionReturn no calling frame "+frameToString(frame), this);
+
                 jsdHandlers.unhook(frame);  // we are done here
                 jsdHandlers.remove(this);
                 return;
@@ -425,7 +425,7 @@ OutStepper.prototype =
 
         } // else it's is not a frame we care about
         if (FBTrace.DBG_FBS_STEP)
-        	FBTrace.sysout(this.mode+".onFunctionReturn callingFrameId "+callingFrameId+" called frame "+frameToString(frame), this)
+            FBTrace.sysout(this.mode+".onFunctionReturn callingFrameId "+callingFrameId+" called frame "+frameToString(frame), this)
     },
 
     unhook: function(frame)
@@ -452,6 +452,7 @@ OutStepper.prototype =
 
     toString: function()
     {
+        if (!this.context.getName) FBTrace.sysout("this.context.getName ", this.context);
         return this.mode + " for "+this.context.getName();
     },
 };
@@ -471,6 +472,7 @@ LineStepper.prototype = extend(OutStepper.prototype,
     {
         OutStepper.prototype.hook.apply(this, arguments); // hook functions
         this.lineFrameId = frameId(frame, this.depth);
+        this.stepFrameTag = frame.script.tag;
 
         if (FBTrace.DBG_FBS_STEP)
             FBTrace.sysout(this.mode+".hook "+frameToString(frame)+" with lineFrameId "+this.lineFrameId, this);
@@ -479,12 +481,17 @@ LineStepper.prototype = extend(OutStepper.prototype,
     unhook: function unhookLineStepper(frame)
     {
         if (FBTrace.DBG_FBS_STEP)
-        	FBTrace.sysout("LineStepper unhook ", this);
+            FBTrace.sysout("LineStepper unhook ", this);
     },
 
     //  jsdIExecutionHook, onExecute
     onInterrupt: function stepLine(frame, type, rv)
     {
+        if (this.stepFrameTag !== frame.script.tag) // then we stepped into another function
+        {
+            // We'd have much bettter performance if we set a new OutStepper here then remove interrupt hook until it hits.
+            return RETURN_CONTINUE;
+        }
         // Sometimes the same line will have multiple interrupts, so check
         // a unique id for the line and don't break until it changes
         var frameLineId = frameId(frame, this.depth);
@@ -498,6 +505,8 @@ LineStepper.prototype = extend(OutStepper.prototype,
 
     toString: function()
     {
+        if (!this.context.getName) FBTrace.sysout("this.context.getName ", this.context);
+
         return this.mode + " for "+this.context.getName();
     },
 
@@ -517,7 +526,6 @@ IntoStepper.prototype = extend(LineStepper.prototype,
     hook: function(frame)
     {
         LineStepper.prototype.hook.apply(this, arguments); // hook functions and interrupts
-        this.stepFrameTag = frame.script.tag;
     },
 
     onFunctionCall: function intoFunctionCall(frame, type) // the frame will be running the called script
@@ -529,7 +537,7 @@ IntoStepper.prototype = extend(LineStepper.prototype,
                 return this.hit(frame, type);
             // else someone else, ignore it
             if (FBTrace.DBG_FBS_STEP)
-            	FBTrace.sysout(this.mode+".intoFunctionCall no match "+this.stepFrameTag+" vs "+callingFrame.script.tag, this);
+                FBTrace.sysout(this.mode+".intoFunctionCall no match "+this.stepFrameTag+" vs "+callingFrame.script.tag, this);
         }
         // else this would be a top level call, do we want to check for another event from this context?
     },
@@ -586,7 +594,7 @@ LogFunctionStepper.prototype =
         {
             var diff = (fbs.stackDescription.oldestTag !== frame.script.tag);
             if (FBTrace.DBG_FBS_STEP)
-            	FBTrace.sysout("Stack ends at depth "+fbs.stackDescription.depth+(diff?" NO Match on tag ":" tags match"), fbs.stackDescription.entries);
+                FBTrace.sysout("Stack ends at depth "+fbs.stackDescription.depth+(diff?" NO Match on tag ":" tags match"), fbs.stackDescription.entries);
             fbs.stackDescription.entries = [];
         }
 
