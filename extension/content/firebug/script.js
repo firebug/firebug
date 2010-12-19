@@ -1075,8 +1075,7 @@ FBL.ns(function() { with (FBL) {
 
         shouldBreakOnNext: function()
         {
-            var stepMode = fbs.getStepMode();
-            return stepMode && (stepMode == "STEP_SUSPEND");
+            return !!this.context.breakOnNextHook;  // TODO BTI
         },
 
         // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
