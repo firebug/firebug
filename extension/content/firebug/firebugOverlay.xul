@@ -494,7 +494,6 @@
             <menuitem id="menu_closeFirebug" label="firebug.CloseFirebug"
                       command="cmd_closeFirebug"
                       key="key_closeFirebug"/>
-            
 
             <menuseparator id="menu_openActionsSeparator"/>
 

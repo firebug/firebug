@@ -1188,7 +1188,14 @@ top.FirebugChrome =
 
         // 3. Add menu items from uiListeners
         var items = [];
-        FBL.dispatch(Firebug.uiListeners, "onContextMenu", [items, object, target, Firebug.currentContext, panel]);
+        FBL.dispatch(Firebug.uiListeners, "onContextMenu", [items, object, target,
+            Firebug.currentContext, panel]);
+
+        if (items)
+        {
+            for (var i = 0; i < items.length; ++i)
+                FBL.createMenuItem(popup, items[i]);
+        }
 
         if (!popup.firstChild)
             return false;
