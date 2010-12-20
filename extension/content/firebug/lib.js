@@ -384,7 +384,7 @@ this.createStyleSheet = function(doc, url)
     if (cssText)
     {
         var index = url.lastIndexOf("/");
-        var absURL = url.substr(0, index+1)
+        var absURL = url.substr(0, index+1);
 
         // Replace all relative URLs with absolute (using the passed url).
         // Note that stylesheets can come from various extensions and the source can
