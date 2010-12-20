@@ -1,9 +1,6 @@
 /* See license.txt for terms of usage */
 
 // ************************************************************************************************
-// Constants
-
-// ************************************************************************************************
 // Globals
 
 var item;
@@ -180,13 +177,15 @@ function insertText(text, whole)
 // ************************************************************************************************
 
 // would be good to have autosuggest for popular editors
-var defaultCommandLines={
+var defaultCommandLines =
+{
     "sublimetext": "%file:%line",
     "notepad++":   "-n%line %file",
     "emeditor":    "/l %line %file"
 }
 
-function suggestionPopupShowing(popup){
+function suggestionPopupShowing(popup)
+{
     FBL.eraseNode(popup);
 
     for (var i in defaultCommandLines)
@@ -203,5 +202,6 @@ function suggestionPopupShowing(popup){
 
         popup.appendChild(box)
     }
-
 }
+
+// ************************************************************************************************

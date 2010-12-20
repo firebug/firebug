@@ -7,7 +7,6 @@
 
     <!-- Firefox page context menu -->
     <menupopup id="contentAreaContextMenu">
-
         <menu label="firebug.OpenWith" id="menu_firebugOpenWithEditor"
             insertbefore="context-viewsource">
             <menupopup id="menu_firebugOpenWith"
@@ -16,13 +15,15 @@
                     command="cmd_openFirebugEditors"/>
             </menupopup>
         </menu>
-
     </menupopup>
 
+    <!-- Basic editing related commands -->
     <commandset id="mainCommandSet">
         <command id="cmd_openFirebugEditors" oncommand="Firebug.ExternalEditors.openEditorList()"/>
         <command id="cmd_openInEditor" oncommand="Firebug.ExternalEditors.openContext(Firebug.currentContext, event.sourceEvent.target.value)"/>
     </commandset>
+
+    <!-- Firebug icon menu overlay -->
     <menupopup id="fbFirebugMenuPopup">
         <menu id="FirebugMenu_OpenWith" label="firebug.OpenWith" insertbefore="menu_openActionsSeparator">
             <menupopup id="fbFirebugMenu_OpenWith"
@@ -32,4 +33,5 @@
             </menupopup>
         </menu>
     </menupopup>
+
 </overlay>

@@ -13,37 +13,38 @@
         ondialogaccept="return onAccept();"
         persist="screenX screenY">
 
-  <script type="application/x-javascript" src="chrome://firebug/content/xpcom.js"/>
-  <script type="application/x-javascript" src="chrome://firebug/content/external/changeeditor.js"/>
+    <script type="application/x-javascript" src="chrome://firebug/content/xpcom.js"/>
+    <script type="application/x-javascript" src="chrome://firebug/content/external/changeeditor.js"/>
 
-  <vbox flex="1">
-      <hbox align="center">
-         <label id="fbNameLabel" control="name" value="changeEditor.Name"/>
-         <textbox id="name" flex="1" oninput="onChange()"/>
-      </hbox>
-      <separator class="groove"/>
-      <hbox align="center">
-         <label id="fbExecutableLabel" control="executable" align="baseline"
-            value="changeEditor.Executable"/>
-         <filefield id="executable" flex="1"/>
-         <button id="browse-button" oncommand="onBrowse();" label="browse.label"/>
-      </hbox>
-      <separator class="thin"/>
-      <hbox align="center">
-          <label id="fbCmdLineLabel" control="cmdline" value="changeEditor.CmdLine"/>
-          <textbox id="cmdline" flex="1" oninput="onChange()"/>
-          <toolbarbutton type='menu' label=''>
-            <panel onpopupshowing='suggestionPopupShowing(this)'
-                onclick='if(event.target.className=="text-link")insertText(event.target.value,true)'
-                position="after_end"/>
-          </toolbarbutton>
-      </hbox>
-      <vbox align="left" onclick='if(event.target.className=="text-link")insertText(event.target.textContent)'>
-          <description>arguments supplied by firebug are:</description>
-          <description><label class='text-link'>%url </label> url of the file (if %url is not present %file will be added by default)</description>
-          <description><label class='text-link'>%file </label>path to the local file (or to the temporary copy)</description>
-          <description><label class='text-link'>%line </label>line number (if avaliable)</description>
-      </vbox>
-	  <separator class="groove"/>
-  </vbox>
+    <vbox flex="1">
+        <hbox align="center">
+            <label id="fbNameLabel" control="name" value="changeEditor.Name"/>
+            <textbox id="name" flex="1" oninput="onChange()"/>
+        </hbox>
+        <separator class="groove"/>
+        <hbox align="center">
+            <label id="fbExecutableLabel" control="executable" align="baseline"
+                value="changeEditor.Executable"/>
+            <filefield id="executable" flex="1"/>
+            <button id="browse-button" oncommand="onBrowse();" label="browse.label"/>
+        </hbox>
+        <separator class="thin"/>
+        <hbox align="center">
+            <label id="fbCmdLineLabel" control="cmdline" value="changeEditor.CmdLine"/>
+            <textbox id="cmdline" flex="1" oninput="onChange()"/>
+            <toolbarbutton type='menu' label=''>
+                <panel onpopupshowing='suggestionPopupShowing(this)'
+                    onclick='if(event.target.className=="text-link")insertText(event.target.value,true)'
+                    position="after_end"/>
+            </toolbarbutton>
+        </hbox>
+        <vbox align="left" onclick='if(event.target.className=="text-link")insertText(event.target.textContent)'>
+            <description>arguments supplied by firebug are:</description>
+            <description><label class='text-link'>%url </label> url of the file (if %url is not present %file will be added by default)</description>
+            <description><label class='text-link'>%file </label>path to the local file (or to the temporary copy)</description>
+            <description><label class='text-link'>%line </label>line number (if avaliable)</description>
+        </vbox>
+        <separator class="groove"/>
+    </vbox>
+
 </dialog>

@@ -1,5 +1,7 @@
 /* See license.txt for terms of usage */
 
+// ********************************************************************************************* //
+
 // Runs during overlay processing
 function OpenEditorShowHide(event)
 {
@@ -35,5 +37,7 @@ function addContextToForms(contextMenu)
             this.shouldDisplay = true;
     };
 }
+
+// ********************************************************************************************* //
 
 window.addEventListener("load", addOpenEditorShowHide, false);
