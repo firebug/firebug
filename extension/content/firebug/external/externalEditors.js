@@ -20,8 +20,6 @@ var externalEditors = [];
 var temporaryFiles = [];
 var temporaryDirectory = null;
 
-var syncFilesToEditor = false;  // TODO pref
-
 // ********************************************************************************************* //
 // Module Implementation
 
@@ -32,9 +30,6 @@ Firebug.ExternalEditors = extend(Firebug.Module,
         Firebug.Module.initializeUI.apply(this, arguments);
 
         this.loadExternalEditors();
-
-        // we listen for panel update
-        Firebug.registerUIListener(this);
     },
 
     updateOption: function(name, value)
@@ -46,30 +41,6 @@ Firebug.ExternalEditors = extend(Firebug.Module,
     shutdown: function()
     {
          this.deleteTemporaryFiles();
-    },
-
-    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-    // UIListener
-
-    onPanelNavigate: function(location, panel)
-    {
-        if (!syncFilesToEditor)
-            return;
-
-        if (location instanceof CompilationUnit)
-            openNewTab('http://localhost:8080/coding.html#file=' + location.url);
-    },
-
-    onObjectSelected: function(link, panel)
-    {
-        if (!syncFilesToEditor)
-            return;
-
-        if (link instanceof SourceLink)
-        {
-            openNewTab('http://localhost:8080/coding.html#file=' + sourceLink.href + "&line=" +
-                sourceLink.line);
-        }
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
