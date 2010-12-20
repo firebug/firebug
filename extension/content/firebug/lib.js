@@ -382,7 +382,18 @@ this.createStyleSheet = function(doc, url)
 
     var cssText = url ? this.getResource(url) : null;
     if (cssText)
+    {
+        var index = url.lastIndexOf("/");
+        var absURL = url.substr(0, index+1)
+
+        // Replace all relative URLs with absolute (using the passed url).
+        // Note that stylesheets can come from various extensions and the source can
+        // be even used in a browser env where relative URLs make more sense.
+        var expr = /url\(([\'"]?)(?![\'"]?(?:[a-z]+:|\/))/gi;
+        cssText = cssText.replace(expr, "url($1" + absURL);
+
         style.innerHTML = cssText;
+    }
 
     FBL.unwrapObject(style).firebugIgnore = true;
     return style;
@@ -400,8 +411,9 @@ this.addStyleSheet = function(doc, style)
 this.appendStylesheet = function(doc, uri)
 {
     // Make sure the stylesheet is not appended twice.
-    if (this.$(uri, doc))
-        return;
+    var styleSheet = this.$(uri, doc);
+    if (styleSheet)
+        return styleSheet;
 
     var styleSheet = this.createStyleSheet(doc, uri);
     styleSheet.setAttribute("id", uri);
