@@ -3570,7 +3570,7 @@ this.openNewTab = function(url, postText)
         postData.setData(stringStream);
     }
 
-    gBrowser.selectedTab = gBrowser.addTab(url, null, null, postData);
+    return gBrowser.selectedTab = gBrowser.addTab(url, null, null, postData);
 };
 
 this.openWindow = function(windowType, url, features, params)
