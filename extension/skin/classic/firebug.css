@@ -1,6 +1,8 @@
 /* See license.txt for terms of usage */
 
+/*************************************************************************************************/
 /* overrides to revert personas. see http://code.google.com/p/fbug/issues/detail?id=2704 */
+
 #fbContentBox:-moz-lwtheme {
   background-color: -moz-dialog;
   color: -moz-dialogtext;
@@ -13,15 +15,10 @@
 #fbContentBox:-moz-lwtheme toolbar {
   -moz-appearance: toolbar;
 }
+
 /* end overrides */
 
-#inspector-button {
-  list-style-image: url(chrome://firebug/skin/inspect.png);
-}
-
-#inspector-button[disabled="true"] {
-  list-style-image: url(chrome://firebug/skin/inspectDisabled.png);
-}
+/*************************************************************************************************/
 
 #fbInspectButton {
     margin-bottom: 1px;
@@ -51,6 +48,17 @@
     -moz-padding-end: 2px;
 }
 
+/*************************************************************************************************/
+/* Customizable Dialog Toolbar Buttons */
+
+#inspector-button {
+  list-style-image: url(chrome://firebug/skin/inspect.png);
+}
+
+#inspector-button[disabled="true"] {
+  list-style-image: url(chrome://firebug/skin/inspectDisabled.png);
+}
+
 toolbar[iconsize="small"] #inspector-button > .toolbarbutton-icon {
     list-style-image: url(chrome://firebug/skin/inspectSmall.png);
     width: 16px;
@@ -58,7 +66,7 @@ toolbar[iconsize="small"] #inspector-button > .toolbarbutton-icon {
 }
 
 #firebug-button {
-  list-style-image: url(chrome://firebug/skin/firebug24.png);
+    list-style-image: url(chrome://firebug/skin/firebug24.png);
 }
 
 toolbar[iconsize="small"] #firebug-button > .toolbarbutton-icon {
@@ -67,7 +75,7 @@ toolbar[iconsize="small"] #firebug-button > .toolbarbutton-icon {
     height: 16px;
 }
 
-/********************************************************************************************/
+/*************************************************************************************************/
 
 #fbCommandArrow {
     margin: 2px 0 2px 7px;
@@ -125,7 +133,7 @@ toolbar[iconsize="small"] #firebug-button > .toolbarbutton-icon {
     width: auto;
 }
 
-/********************************************************************************************/
+/*************************************************************************************************/
 
 #fbStatusBar {
     min-width: 26px;
@@ -381,7 +389,7 @@ menupopup[chromedir="rtl"] > .navigationHistoryMenuItemBack {
     list-style-image: url(chrome://firebug/skin/breakErrorsOn.png);
 }
 
-/********************************************************************************/
+/*************************************************************************************************/
 
 /* default is disabled */
 .fbBreakOnImage {
@@ -502,7 +510,7 @@ menupopup[chromedir="rtl"] > .navigationHistoryMenuItemBack {
     font-weight: bold;
 }
 
-/************************************************************************************************/
+/*************************************************************************************************/
 /* Scrollable TabBar + TabList */
 
 /* Collision with CuteButtons - Crystal SVG 0.2.5, see 3374 */

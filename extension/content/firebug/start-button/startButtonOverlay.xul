@@ -1,0 +1,75 @@
+<?xml version="1.0"?>
+
+<overlay xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul">
+    <script type="application/x-javascript" src="chrome://firebug/content/start-button/startButtonOverlay.js"/>
+
+    <popupset id="mainPopupSet">
+
+        <!-- Popup menu shared by the Status bar icon and Firebug button (the toolbar button
+             available in Customizable Toolbar dialog, see below) -->
+        <menupopup id="fbStatusContextMenu"
+            onpopupshowing="FirebugChrome.onOptionsShowing(this)">
+            <menuitem
+                id="menu_detachFirebugContext"
+                label="firebug.DetachFirebug"
+                command="cmd_toggleDetachFirebug"
+                type="checkbox" key="key_detachFirebug"/>
+            <menuseparator/>
+            <menuitem
+                id="menu_ClearConsole"
+                label="firebug.ClearConsole"
+                command="cmd_clearConsole"
+                key="key_clearConsole"/>
+            <menuseparator/>
+            <menuitem
+                id="menu_enablePanels"
+                label="firebug.menu.Enable All Panels"
+                command="cmd_enablePanels"/>
+            <menuitem
+                id="menu_disablePanels"
+                label="firebug.menu.Disable All Panels"
+                command="cmd_disablePanels"/>
+            <menuseparator/>
+            <menuitem
+                id="menu_AllOn"
+                type="checkbox"
+                label="On for all web pages"
+                command="cmd_allOn"/>
+            <menuitem
+                id="menu_clearActivationList"
+                label="firebug.menu.Clear Activation List"
+                command="cmd_clearActivationList"/>
+        </menupopup>
+    </popupset>
+
+    <!-- Buttons for Firefox Customize Toolbar dialog -->
+    <toolbarpalette id="BrowserToolbarPalette">
+
+        <!-- DOM Inspector -->
+        <toolbarbutton id="inspector-button" label="firebug.Inspect"
+            class="toolbarbutton-1 chromeclass-toolbar-additional"
+            observes="cmd_toggleInspecting" tooltiptext="firebug.InspectElement"/>
+
+        <!-- Firebug button -->
+        <toolbarbutton id="firebug-button" label="firebug.Firebug"
+            class="toolbarbutton-1 chromeclass-toolbar-additional"
+            observes="cmd_toggleFirebug" tooltiptext="firebug.ShowFirebug"
+            type="menu-button" contextmenu="fbStatusContextMenu">
+            <!-- menu fbStatusContextMenu is cloned here -->
+        </toolbarbutton>
+    </toolbarpalette>
+
+    <!-- Extend Firefox status bar -->
+    <statusbar id="status-bar">
+        <statusbarpanel id="fbStatusBar" context="fbStatusContextMenu" role="button"
+            aria-labelledby="fbStatusPrefix fbStatusText" aria-describedby="fbStatusIcon"
+            onmouseup="Firebug.onClickStatusIcon(Firebug.currentContext, event);"
+            tooltiptext="Firebug">
+            <image id="fbStatusIcon" />
+            <label id="fbStatusPrefix" collapsed="true" />
+            <label id="fbStatusText"
+                onmouseup="Firebug.onClickStatusText(Firebug.currentContext, event);" />
+        </statusbarpanel>
+    </statusbar>
+
+</overlay>
