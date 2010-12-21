@@ -6,7 +6,7 @@ FBL.ns(function() { with (FBL) {
 // Constants
 
 var popup = $("fbStatusContextMenu");
-var firebugButton = $("firebug-button");
+
 
 // ********************************************************************************************* //
 // Module Implementation
@@ -17,6 +17,7 @@ Firebug.StartButton = extend(Firebug.Module,
     {
         Firebug.Module.initializeUI.apply(this, arguments);
 
+        var firebugButton = $("firebug-button");
         firebugButton.appendChild(popup.cloneNode(true));
     },
 
