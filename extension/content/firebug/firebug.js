@@ -1935,7 +1935,25 @@ top.Firebug =
 };
 
 // ************************************************************************************************
+// API for Greasemonkey, Jetpack and other Firefox extensions
+/*
+ * @param global wrapped up global: outer window or sandbox
+ */
+Firebug.getConsoleByGlobal = function getConsoleByGlobal(global)
+{
+    var context = TabWatcher.getContextByGlobal(global);
+    if (context)
+    {
+        var handler = Firebug.Console.injector.getConsoleHandler(context, global);
+        FBTrace.sysout("Firebug.getConsoleByGlobal "+handler.console+" for "+context.getName(), handler);
+        return handler.console;
+    }
 
+    if (FBTrace.DBG_ERRORS)
+        FBTrace.sysout("Firebug.getConsoleByGlobal FAILS for "+global, global);
+}
+
+//************************************************************************************************
 /**
  * Support for listeners registration. This object also extended by Firebug.Module so,
  * all modules supports listening automatically. Notice that array of listeners

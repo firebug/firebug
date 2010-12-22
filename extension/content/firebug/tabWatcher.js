@@ -528,7 +528,7 @@ top.TabWatcher = extend(new Firebug.Listener(),
         var rootWindow = getRootWindow(winIn);
 
         //if (FBTrace.DBG_INITIALIZE)
-        //    FBTrace.sysout("winIn: "+safeGetWindowLocation(winIn).substr(0,50)+" rootWindow: "+safeGetWindowLocation(rootWindow));
+            FBTrace.sysout("winIn: "+safeGetWindowLocation(winIn).substr(0,50)+" rootWindow: "+safeGetWindowLocation(rootWindow));
 
         if (rootWindow)
         {
@@ -556,6 +556,11 @@ top.TabWatcher = extend(new Firebug.Listener(),
             }
         }
         return null;
+    },
+
+    getContextByGlobal: function(global)
+    {
+        return this.getContextByWindow(global) || this.getContextBySandbox(global);
     },
 
     getBrowserByWindow: function(win)
