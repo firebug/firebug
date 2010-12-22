@@ -64,7 +64,7 @@ top.Firebug.Console.injector =
             script += " return (window._firebug ? window._firebug : window.loadFirebugConsole()); })\n\n";
 
             script += "window.loadFirebugConsole = function loadFirebugConsole() {\n";
-            script += "window._firebug =  new _FirebugConsole();";
+            script += "window._firebug =  _createFirebugConsole();";
 
             if (FBTrace.DBG_CONSOLE)
                 script += " window.dump('loadFirebugConsole '+window.location+'\\n');\n";
@@ -462,7 +462,7 @@ Firebug.Console.createConsole = function createConsole(context, win)
         }
 
         trace = cleanStackTraceOfFirebug(trace);
-        
+
         var url = msg.fileName ? msg.fileName : win.location.href;
         var lineNo = (trace && msg.lineNumber) ? msg.lineNumber : 0; // we may have only the line popped above
         var errorObject = new FBL.ErrorMessage(msg, url, lineNo, "", category, context, trace);
