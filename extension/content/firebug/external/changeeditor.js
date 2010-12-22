@@ -35,6 +35,8 @@ function onLoad()
 
     // Localization
     internationalizeUI(document);
+    
+    window.sizeToContent();
 
     if (document.getAnonymousElementByAttribute && !document.getElementById("executable").file)
     {
@@ -194,6 +196,10 @@ function suggestionPopupShowing(popup)
         var label = document.createElement('label');
         label.setAttribute('value', i + ': ');
         box.appendChild(label);
+
+        var spacer = document.createElement('spacer');
+        spacer.setAttribute('flex', 1);
+        box.appendChild(spacer);
 
         label = document.createElement('label');
         label.setAttribute('value', defaultCommandLines[i]);

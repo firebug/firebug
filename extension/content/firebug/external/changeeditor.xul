@@ -7,7 +7,6 @@
 <dialog xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul"
         buttons="accept,cancel"
         id="firebug-external-editors-change"
-        width="450" height="350"
         title="editors.Editor_Configuration"
         onload="onLoad();"
         ondialogaccept="return onAccept();"

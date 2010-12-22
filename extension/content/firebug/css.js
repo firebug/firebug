@@ -1164,10 +1164,12 @@ Firebug.CSSStyleSheetPanel.prototype = extend(Firebug.SourceBoxPanel,
     getSourceLink: function(target, rule)
     {
         var href = rule.parentStyleSheet.href;  // Null means inline
-        if (!href)
-            href = element.ownerDocument.location.href; // http://code.google.com/p/fbug/issues/detail?id=452
+        if (!href) {
+            var element = rule.parentStyleSheet.ownerNode;
+            var href = element.ownerDocument.location.href;  // http://code.google.com/p/fbug/issues/detail?id=452
+        }
 
-        var line = domUtils.getRuleLine(rule);
+        var line = getRuleLine(rule);
         var instance = getInstanceForStyleSheet(rule.parentStyleSheet);
         var sourceLink = new SourceLink(href, line, "css", rule, instance);
 
@@ -1433,7 +1435,7 @@ CSSElementPanel.prototype = extend(Firebug.CSSStyleSheetPanel.prototype,
                 if (inheritMode && !props.length)
                     continue;
 
-                var sourceLink = this.getSourceLink(element, rule);
+                var sourceLink = this.getSourceLink(null, rule);
 
                 this.markOverriddenProps(props, usedProps, inheritMode);
 
@@ -2213,6 +2215,19 @@ function sortProperties(props)
     });
 }
 
+function getRuleLine(rule)
+{
+    // TODO return closest guess if rule isn't CSSStyleRule
+    // and keep track of edited rule lines
+    try
+    {
+        return domUtils.getRuleLine(rule); 
+    }
+    catch(e)
+    {}
+    return 0;
+}
+
 function getTopmostRuleLine(panelNode)
 {
     for (var child = panelNode.firstChild; child; child = child.nextSibling)
@@ -2222,7 +2237,7 @@ function getTopmostRuleLine(panelNode)
             var rule = child.repObject;
             if (rule)
                 return {
-                    line: domUtils.getRuleLine(rule),
+                    line: getRuleLine(rule),
                     offset: panelNode.scrollTop-child.offsetTop
                 };
         }

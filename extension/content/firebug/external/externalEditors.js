@@ -28,7 +28,7 @@ Firebug.ExternalEditors = extend(Firebug.Module,
     initializeUI: function()
     {
         Firebug.Module.initializeUI.apply(this, arguments);
-
+        Firebug.registerUIListener(this)
         this.loadExternalEditors();
     },
 
@@ -153,21 +153,21 @@ Firebug.ExternalEditors = extend(Firebug.Module,
 
     onContextMenu: function(items, object, target, context, panel)
     {
-        if (Firebug.ExternalEditors.count())
+        if (!this.count())
+            return
+
+        if (object instanceof FBL.SourceLink)
         {
-            if (panel)
-            {
-                var sourceLink = panel.getSourceLink(target, object);
-                if (sourceLink)
-                    Firebug.ExternalEditors.appendContextMenuItem(items, sourceLink.href,
-                        sourceLink.line);
-            }
-            else if (object instanceof FBL.SourceLink)
-            {
-                var sourceLink = object;
-                Firebug.ExternalEditors.appendContextMenuItem(items, sourceLink.href,
+            var sourceLink = object;
+            this.appendContextMenuItem(items, sourceLink.href,
+                sourceLink.line);
+        }
+        else if (panel)
+        {
+            var sourceLink = panel.getSourceLink(target, object);
+            if (sourceLink)
+                this.appendContextMenuItem(items, sourceLink.href,
                     sourceLink.line);
-            }
         }
     },
 
@@ -261,7 +261,7 @@ Firebug.ExternalEditors = extend(Firebug.Module,
                 {
                     line = parseInt(line);
                     if(typeof line == 'number' && !isNaN(line))
-                        cmdline = cmdline.replace('%line', line);
+                        cmdline = cmdline.replace('%line', line, 'g');
                     else //don't send argument with bogus line number
                     {
                         var i = cmdline.indexOf("%line");
