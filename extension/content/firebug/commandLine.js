@@ -662,6 +662,10 @@ Firebug.CommandLine = extend(Firebug.Module,
     reattachContext: function(browser, context)
     {
         this.attachListeners();
+
+        // Recreate auto-completer so, the correct popup panel (fbCommandLineCompletionList)
+        // is used (the one in detached window or the one in the browser.xul)
+        this.setAutoCompleter();
     },
 
     attachListeners: function()
