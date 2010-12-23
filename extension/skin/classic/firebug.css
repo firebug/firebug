@@ -273,67 +273,37 @@ textbox[type="fbSearchBox"] > panel {
     margin-right: 2px;
 }
 
-#fbRerunButton {
-    list-style-image: url(chrome://firebug/skin/rerun.png);
+#fbDebuggerButtons toolbarbutton {
     -moz-image-region: rect(0, 16px, 16px, 0);
 }
 
-#fbRerunButton:hover {
-    list-style-image: url(chrome://firebug/skin/rerun.png);
+#fbDebuggerButtons toolbarbutton:hover,
+#fbDebuggerButtons toolbarbutton:active {
     -moz-image-region: rect(16px, 16px, 32px, 0);
 }
 
-#fbRerunButton[disabled="true"] {
-    list-style-image: url(chrome://firebug/skin/rerun.png);
+#fbDebuggerButtons toolbarbutton[disabled="true"] {
     -moz-image-region: rect(32px, 16px, 48px, 0);
+}
+
+#fbRerunButton {
+    list-style-image: url(chrome://firebug/skin/rerun.png);
 }
 
 #fbContinueButton {
     list-style-image: url(chrome://firebug/skin/continue.png);
 }
 
-#fbContinueButton:hover:active {
-    list-style-image: url(chrome://firebug/skin/continueActive.png);
-}
-
-#fbContinueButton[disabled="true"] {
-    list-style-image: url(chrome://firebug/skin/continueDisabled.png) !important;
-}
-
 #fbStepOverButton {
     list-style-image: url(chrome://firebug/skin/stepOver.png);
-}
-
-#fbStepOverButton:hover:active {
-    list-style-image: url(chrome://firebug/skin/stepOverActive.png);
-}
-
-#fbStepOverButton[disabled="true"] {
-    list-style-image: url(chrome://firebug/skin/stepOverDisabled.png) !important;
 }
 
 #fbStepIntoButton {
     list-style-image: url(chrome://firebug/skin/stepInto.png);
 }
 
-#fbStepIntoButton:hover:active {
-    list-style-image: url(chrome://firebug/skin/stepIntoActive.png);
-}
-
-#fbStepIntoButton[disabled="true"] {
-    list-style-image: url(chrome://firebug/skin/stepIntoDisabled.png) !important;
-}
-
 #fbStepOutButton {
     list-style-image: url(chrome://firebug/skin/stepOut.png);
-}
-
-#fbStepOutButton:hover:active {
-    list-style-image: url(chrome://firebug/skin/stepOutActive.png);
-}
-
-#fbStepOutButton[disabled="true"] {
-    list-style-image: url(chrome://firebug/skin/stepOutDisabled.png) !important;
 }
 
 /************************************************************************************************/
