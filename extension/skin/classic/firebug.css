@@ -260,6 +260,12 @@ textbox[type="fbSearchBox"] > panel {
 
 #fbInspectButton {
     list-style-image: url("chrome://firebug/skin/Templarian_inspector.png");
+    -moz-image-region: rect(0, 16px, 16px, 0);
+}
+
+#fbInspectButton:hover,
+#fbInspectButton:active {
+    -moz-image-region: rect(16px, 16px, 32px, 0);
 }
 
 #fbBreakOnNextButtonOld {
@@ -309,6 +315,23 @@ textbox[type="fbSearchBox"] > panel {
 /************************************************************************************************/
 /* Script history buttons */
 
+#fbNavigateBackButton,
+#fbNavigateForwardButton {
+    -moz-image-region: rect(0, 16px, 16px, 0);
+}
+
+#fbNavigateBackButton:hover,
+#fbNavigateBackButton:active,
+#fbNavigateForwardButton:hover,
+#fbNavigateForwardButton:active {
+    -moz-image-region: rect(16px, 16px, 32px, 0);
+}
+
+#fbNavigateBackButton[disabled="true"],
+#fbNavigateForwardButton[disabled="true"] {
+    -moz-image-region: rect(32px, 16px, 48px, 0);
+}
+
 #fbNavigateBackButton {
     list-style-image: url(chrome://firebug/skin/nav-back.png);
 }
@@ -317,26 +340,18 @@ textbox[type="fbSearchBox"] > panel {
     list-style-image: url(chrome://firebug/skin/nav-forward.png);
 }
 
-#fbNavigateBackButton[disabled="true"] {
-    list-style-image: url(chrome://firebug/skin/nav-back-disabled.png);
-}
-
-#fbNavigateForwardButton[disabled="true"] {
-    list-style-image: url(chrome://firebug/skin/nav-forward-disabled.png);
-}
-
 .navigationHistoryMenuItemBack,
 menupopup[chromedir="rtl"] > .navigationHistoryMenuItemForward {
-  list-style-image: url("chrome://firebug/skin/nav-back.png") !important;
+    list-style-image: url("chrome://firebug/skin/nav-back.png") !important;
 }
 
 .navigationHistoryMenuItemForward,
 menupopup[chromedir="rtl"] > .navigationHistoryMenuItemBack {
-  list-style-image: url("chrome://firebug/skin/nav-forward.png") !important;
+    list-style-image: url("chrome://firebug/skin/nav-forward.png") !important;
 }
 
 .navigationHistoryMenuItemCurrent {
-  font-weight: bold;
+    font-weight: bold;
 }
 
 /************************************************************************************************/
