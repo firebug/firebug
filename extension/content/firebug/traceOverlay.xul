@@ -11,7 +11,7 @@
 
     <!-- Overlay for Firebug menu -->
     <menupopup id="fbFirebugMenuPopup">
-        <menuitem id="menu_openTraceConsole" label="Open Firebug Tracing"
+        <menuitem id="menu_openTraceConsole" label="Open_Firebug_Tracing"
             command="cmd_openTraceConsole" insertbefore="menu_aboutSeparator"
             key="key_openTraceConsole"/>
 
@@ -19,7 +19,7 @@
             <menupopup id="FirebugMenu_OptionsPopup">
                 <menuitem id="FirebugMenu_Options_alwaysOpenTraceConsole"
                     insertbefore="menu_optionsSeparator"
-                    type="checkbox" label="Always Open Firebug Tracing"
+                    type="checkbox" label="Always_Open_Firebug_Tracing"
                     oncommand="FirebugChrome.onToggleOption(this)"
                     option="alwaysOpenTraceConsole"/>
             </menupopup>

@@ -273,58 +273,15 @@ top.Firebug =
         if (FBTrace.DBG_INITIALIZE)
             FBTrace.sysout("Firebug.internationalizeUI");
 
-        var elements = [ // TODO mark these elements with "class='fbInternational'" then document.getElementsByClassName
-            /* firebugOverlay.xul */
-            "menu_clearConsole", "menu_resetAllOptions",
-            "menu_enablePanels", "menu_disablePanels",
-            "fbCommandLine", "fbFirebugMenu", "fbLargeCommandLine", "menu_customizeShortcuts",
-            "menu_enableA11y", "menu_activateSameOrigin", "menu_onByDefault", "fbContinueButton",
-            "fbBreakOnNextButton",
-            "fbMinimizeButton", "FirebugMenu_Sites", "fbResumeBoxButton",
-            "menu_AllOn", "menu_clearActivationList", "showQuickInfoBox", "panelBarTabList",
-            "fbNavigateBackButton", "fbNavigateForwardButton",
-
-            "fbInspectButton", "fbCloseButton", "fbConsoleClear", "fbConsolePersist",
-            "fbConsoleFilter-all", "fbConsoleFilter-error", "fbConsoleFilter-warning",
-            "fbConsoleFilter-info", "fbConsoleFilter-debug",
-            "fbToggleProfiling", "fbToggleHTMLEditing", "fbToggleCSSEditing",
-            "menu_toggleFirebug", "menu_detachFirebugContext", "FirebugMenu_OpenWith",
-            "menu_configureEditors", "FirebugMenu_TextSize", "menu_increaseTextSize",
-            "menu_decreaseTextSize", "menu_normalTextSize", "FirebugMenu_Options",
-            "menu_alwaysOpenInWindow", "menu_showTooltips", "menu_shadeBoxModel",
-            "menu_toggleOrient",
-
-            "menu_firebugUrlWebsite", "menu_firebugFAQ", "menu_firebugDoc", "menu_firebugKeyboard",
-            "menu_firebugForums", "menu_firebugIssues", "menu_firebugDonate",
-
-            "menu_inspectElement", "menu_profileScript", "menu_focusCommandLine",
-            "menu_focusFirebugSearch", "Firebug_About",
-
-            "fbPanelBar2-panelTabs", "fbWindowButtons", "fbPanelBar1-innerToolbar", "fbLocationList",
-
-            /* browserOverlay.xul */
-            "menu_openFirebugEditors", "menu_firebugInspect", "menu_viewToggleFirebug",
-            "menu_viewToggleFirebug", "menu_firebug", "inspector-button", "firebug-button",
-            "menu_detachFirebug", "menu_closeFirebug", "menu_ClearConsole", "menu_firebugOpenWithEditor"
-        ];
-
+        var elements = doc.getElementsByClassName("fbInternational");
+        var attributes = ["label", "tooltiptext", "aria-label"];
         for (var i=0; i<elements.length; i++)
         {
-            var element = doc.getElementById(elements[i]);
-            if (!element)
+            for(var j=0; j<attributes.length; j++)
             {
-                if (FBTrace.DBG_LOCALE)
-                    FBTrace.sysout("firebug.internationalizeUI; Element Not Found: " + elements[i]);
-                continue;
+                if (elements[i].hasAttribute(attributes[j]))
+                    FBL.internationalize(elements[i], attributes[j]);
             }
-
-            if (element.hasAttribute("label"))
-                FBL.internationalize(element, "label");
-
-            if (element.hasAttribute("tooltiptext"))
-                FBL.internationalize(element, "tooltiptext");
-            if (element.hasAttribute("aria-label"))
-                FBL.internationalize(element, "aria-label");
         }
 
         // Translated strings for this label don't include "..." at the end.
