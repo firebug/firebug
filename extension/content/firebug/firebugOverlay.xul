@@ -82,6 +82,8 @@
 
         <command id="cmd_toggleCommandPopup" oncommand="Firebug.CommandLine.Popup.toggle(Firebug.currentContext)"
             checked="false"/>
+
+        <command id="cmd_openHelp" oncommand="Firebug.visitWebsite('FAQ');"/>
     </commandset>
 
     <keyset id="mainKeyset">
@@ -110,6 +112,7 @@
         <key id="key_increaseTextSize" key="+" modifiers="accel shift" command="cmd_increaseTextSize" class="fbOnlyKey"/>
         <key id="key_decreaseTextSize" key="-" modifiers="accel shift" command="cmd_decreaseTextSize" class="fbOnlyKey"/>
         <key id="key_normalTextSize" keycode="VK_INSERT" modifiers="accel shift" command="cmd_normalTextSize" class="fbOnlyKey"/>
+        <key id="key_help" keycode="VK_F1" command="cmd_openHelp" class="fbOnlyKey"/>
     </keyset>
 
     <popupset id="mainPopupSet">
