@@ -430,7 +430,7 @@
                                     tooltiptext="firebug.CopyBookmarklet"
                                     oncommand="Firebug.CommandLine.copyBookmarklet(Firebug.currentContext)"/>
                                 <toolbarspacer flex="1"/>
-                                <toolbarbutton id="fbCommandToggleLarge" class="toolbarbutton-iconic"
+                                <toolbarbutton id="fbCommandToggleLarge" tooltiptext="firebug.CommandLine" class="toolbarbutton-iconic fbInternational"
                                     oncommand="Firebug.setPref(Firebug.prefDomain, 'largeCommandLine', false)"/>
                             </hbox>
                         </vbox>
@@ -479,7 +479,7 @@
             </hbox>
 
             <!-- Toggle into multi-line command line -->
-            <toolbarbutton id="fbCommandToggleSmall" class="toolbarbutton-iconic"
+            <toolbarbutton id="fbCommandToggleSmall" tooltiptext="Command_Editor" class="toolbarbutton-iconic fbInternational"
                 oncommand="Firebug.setPref(Firebug.prefDomain, 'largeCommandLine', true)"/>
         </hbox>
 
