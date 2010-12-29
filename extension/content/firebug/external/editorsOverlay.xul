@@ -8,11 +8,11 @@
     <!-- Firefox page context menu -->
     <menupopup id="contentAreaContextMenu">
         <menu label="firebug.OpenWith" id="menu_firebugOpenWithEditor"
-            insertbefore="context-viewsource">
+            insertbefore="context-viewsource" class="fbInternational">
             <menupopup id="menu_firebugOpenWith"
                 onpopupshowing="return Firebug.ExternalEditors.onEditorsShowing(this);">
                 <menuitem id="menu_openFirebugEditors" label="firebug.ConfigureEditors"
-                    command="cmd_openFirebugEditors"/>
+                    command="cmd_openFirebugEditors" class="fbInternational"/>
             </menupopup>
         </menu>
     </menupopup>
@@ -25,11 +25,11 @@
 
     <!-- Firebug icon menu overlay -->
     <menupopup id="fbFirebugMenuPopup">
-        <menu id="FirebugMenu_OpenWith" label="firebug.OpenWith" insertbefore="menu_openActionsSeparator">
+        <menu id="FirebugMenu_OpenWith" label="firebug.OpenWith" insertbefore="menu_openActionsSeparator" class="fbInternational">
             <menupopup id="fbFirebugMenu_OpenWith"
                 onpopupshowing="return Firebug.ExternalEditors.onEditorsShowing(this);">
                     <menuitem id="menu_configureEditors" label="firebug.ConfigureEditors"
-                        command="cmd_openFirebugEditors"/>
+                        command="cmd_openFirebugEditors" class="fbInternational"/>
             </menupopup>
         </menu>
     </menupopup>

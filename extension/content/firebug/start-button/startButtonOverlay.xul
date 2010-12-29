@@ -13,32 +13,38 @@
                 id="menu_detachFirebugContext"
                 label="firebug.DetachFirebug"
                 command="cmd_toggleDetachFirebug"
-                type="checkbox" key="key_detachFirebug"/>
+                type="checkbox" key="key_detachFirebug"
+                class="fbInternational"/>
             <menuseparator/>
             <menuitem
                 id="menu_ClearConsole"
                 label="firebug.ClearConsole"
                 command="cmd_clearConsole"
-                key="key_clearConsole"/>
+                key="key_clearConsole"
+                class="fbInternational"/>
             <menuseparator/>
             <menuitem
                 id="menu_enablePanels"
                 label="firebug.menu.Enable All Panels"
-                command="cmd_enablePanels"/>
+                command="cmd_enablePanels"
+                class="fbInternational"/>
             <menuitem
                 id="menu_disablePanels"
                 label="firebug.menu.Disable All Panels"
-                command="cmd_disablePanels"/>
+                command="cmd_disablePanels"
+                class="fbInternational"/>
             <menuseparator/>
             <menuitem
                 id="menu_AllOn"
                 type="checkbox"
-                label="On for all web pages"
-                command="cmd_allOn"/>
+                label="On_for_all_web_pages"
+                command="cmd_allOn"
+                class="fbInternational"/>
             <menuitem
                 id="menu_clearActivationList"
                 label="firebug.menu.Clear Activation List"
-                command="cmd_clearActivationList"/>
+                command="cmd_clearActivationList"
+                class="fbInternational"/>
         </menupopup>
     </popupset>
 
@@ -47,12 +53,12 @@
 
         <!-- DOM Inspector -->
         <toolbarbutton id="inspector-button" label="firebug.Inspect"
-            class="toolbarbutton-1 chromeclass-toolbar-additional"
+            class="toolbarbutton-1 chromeclass-toolbar-additional fbInternational"
             observes="cmd_toggleInspecting" tooltiptext="firebug.InspectElement"/>
 
         <!-- Firebug button -->
         <toolbarbutton id="firebug-button" label="firebug.Firebug"
-            class="toolbarbutton-1 chromeclass-toolbar-additional"
+            class="toolbarbutton-1 chromeclass-toolbar-additional fbInternational"
             observes="cmd_toggleFirebug" tooltiptext="firebug.ShowFirebug"
             type="menu-button" contextmenu="fbStatusContextMenu">
             <!-- menu fbStatusContextMenu is cloned here -->
