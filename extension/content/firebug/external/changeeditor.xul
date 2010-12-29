@@ -38,10 +38,11 @@
             </toolbarbutton>
         </hbox>
         <vbox align="left" onclick='if(event.target.className=="text-link")insertText(event.target.textContent)'>
-            <description>arguments supplied by firebug are:</description>
-            <description><label class='text-link'>%url </label> url of the file (if %url is not present %file will be added by default)</description>
+            <!-- ToDo: Internationalize argument descriptions -->
+            <description>Arguments supplied by Firebug:</description>
+            <description><label class='text-link'>%url </label> URL of the file (if %url is not present, %file will be added by default)</description>
             <description><label class='text-link'>%file </label>path to the local file (or to the temporary copy)</description>
-            <description><label class='text-link'>%line </label>line number (if avaliable)</description>
+            <description><label class='text-link'>%line </label>line number (if available)</description>
         </vbox>
         <separator class="groove"/>
     </vbox>
