@@ -83,7 +83,7 @@
         <hbox>
             <spacer flex="1"/>
             <button id="fbResumeBoxButton"
-                label="label.Activate Firebug for the selected Firefox tab"
+                label="label.Activate Firebug for the current website"
                 command="cmd_toggleSuspendFirebug" class="fbInternational"/>
             <spacer flex="1"/>
         </hbox>

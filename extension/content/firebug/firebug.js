@@ -1766,7 +1766,7 @@ top.Firebug =
         {
             collapse(contentBox, true);
             collapse(resumeBox, false);
-            Firebug.chrome.window.document.title = $STR("Firebug - inactive for selected Firefox tab");
+            Firebug.chrome.window.document.title = $STR("Firebug - inactive for current website");
         }
     },
 
