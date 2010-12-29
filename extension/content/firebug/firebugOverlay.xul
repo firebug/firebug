@@ -561,6 +561,8 @@
                 <menupopup id="FirebugMenu_SitesPopup">
                     <menuitem id="menu_firebugUrlWebsite" label="firebug.Website"
                         oncommand="Firebug.visitWebsite('main')"/>
+                    <menuitem id="menu_firebugFAQ" label="firebug.FAQ"
+                        command="cmd_openHelp" key="key_help"/>
                     <menuitem id="menu_firebugDoc" label="firebug.Documentation"
                         oncommand="Firebug.visitWebsite('docs')"/>
                     <menuitem id="menu_firebugKeyboard" label="firebug.KeyShortcuts"
