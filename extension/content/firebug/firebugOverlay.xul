@@ -532,7 +532,7 @@
                               oncommand="FirebugChrome.onToggleOption(this)"
                               option="shadeBoxModel" class="fbInternational"/>
                     <menuitem id="showQuickInfoBox"
-                              type="checkbox" label="firebug_options_showQuickInfoBox"
+                              type="checkbox" label="firebug.Show_Quick_Info_Box"
                               oncommand="FirebugChrome.onToggleOption(this)"
                               option="showQuickInfoBox" class="fbInternational"/>
                     <menuitem id="menu_enableA11y"
