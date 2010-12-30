@@ -24,7 +24,7 @@ var CSSDomplateBase =
 {
     isEditable: function(rule)
     {
-        return !rule.isSystemSheet;
+        return !rule.isSystemSheet && !rule.isNotEditable;
     },
 
     isSelectorEditable: function(rule)
@@ -66,11 +66,30 @@ var CSSImportRuleTag = domplate(
     )
 });
 
+var CSSFontFaceRuleTag = domplate(CSSDomplateBase, {
+  tag: DIV({class: "cssRule cssFontFaceRule",
+          $cssEditableRule: "$rule|isEditable",
+          $insertInto: "$rule|isEditable",
+          _repObject: "$rule.rule",
+          role : 'presentation'},
+      DIV({class: "cssHead focusRow", role : 'listitem'}, "@font-face {"),
+      DIV({role : 'group'},
+          DIV({class : "cssPropertyListBox", role : 'listbox'},
+              FOR("prop", "$rule.props",
+                  TAG(CSSPropTag.tag, {rule: "$rule", prop: "$prop"})
+              )
+          )
+      ),
+      DIV({$editable: "$rule|isEditable", $insertBefore:"$rule|isEditable", role:"presentation"}, "}")
+  )
+});
+
 var CSSStyleRuleTag = domplate(CSSDomplateBase,
 {
     tag:
-        DIV({"class": "cssRule insertInto",
+        DIV({"class": "cssRule",
             $cssEditableRule: "$rule|isEditable",
+            $insertInto: "$rule|isEditable",
             $editGroup: "$rule|isSelectorEditable",
             _repObject: "$rule.rule",
             "ruleId": "$rule.id", role: 'presentation'},
@@ -84,7 +103,7 @@ var CSSStyleRuleTag = domplate(CSSDomplateBase,
                 )
             )
         ),
-        DIV({"class": "editable insertBefore", role:"presentation"}, "}")
+        DIV({$editable: "$rule|isEditable", $insertBefore: "$rule|isEditable", role:"presentation"}, "}")
     )
 });
 
@@ -491,6 +510,16 @@ Firebug.CSSStyleSheetPanel.prototype = extend(Firebug.SourceBoxPanel,
                 else if (rule instanceof CSSMediaRule)
                 {
                     appendRules.apply(this, [safeGetCSSRules(rule)]);
+                }
+                else if (rule instanceof CSSFontFaceRule)
+                {
+                    var props = this.parseCSSProps(rule.style);
+                    sortProperties(props);
+                    rules.push({
+                        tag: CSSFontFaceRuleTag.tag, rule: rule,
+                        props: props, isSystemSheet: isSystemSheet,
+                        isNotEditable: true
+                    });
                 }
                 else
                 {
