@@ -1896,21 +1896,29 @@ top.Firebug =
 // API for Greasemonkey, Jetpack and other Firefox extensions
 /*
  * @param global wrapped up global: outer window or sandbox
+ * @return a |console| object for the window
  */
 Firebug.getConsoleByGlobal = function getConsoleByGlobal(global)
 {
-    var context = TabWatcher.getContextByGlobal(global);
-    if (context)
+    try
     {
-        var handler = Firebug.Console.injector.getConsoleHandler(context, global);
-        FBTrace.sysout("Firebug.getConsoleByGlobal "+handler.console+" for "+context.getName(), handler);
-        return handler.console;
+        var context = TabWatcher.getContextByGlobal(global);
+        if (context)
+        {
+            var handler = Firebug.Console.injector.getConsoleHandler(context, global);
+            FBTrace.sysout("Firebug.getConsoleByGlobal "+handler.console+" for "+context.getName(), handler);
+            return handler.console;
+        }
+
+        if (FBTrace.DBG_ERRORS)
+            FBTrace.sysout("Firebug.getConsoleByGlobal FAILS, no context for global "+global, global);
     }
-
-    if (FBTrace.DBG_ERRORS)
-        FBTrace.sysout("Firebug.getConsoleByGlobal FAILS for "+global, global);
+    catch(exc)
+    {
+        if(FBTrace.DBG_ERRORS)
+            FBTrace.sysout("Firebug.getConsoleByGlobal FAILS "+exc, exc);
+    }
 }
-
 //************************************************************************************************
 /**
  * Support for listeners registration. This object also extended by Firebug.Module so,
