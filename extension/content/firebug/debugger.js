@@ -279,7 +279,7 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
                 {
                     if (FBTrace.DBG_ERRORS)
                         FBTrace.sysout("Firebug.debugger.reExecute FAILED "+result, result);
-                    dispatch(Firebug.Debugger.fbListeners, "onRerunComplete", [failed, result]);
+                    dispatch(Firebug.Debugger.fbListeners, "onRerunComplete", [false, result]);
                 }
                 Firebug.CommandLine.evaluate("window._firebug.rerunFunction()", context, null, context.window, successConsoleFunction, exceptionFunction);
 
