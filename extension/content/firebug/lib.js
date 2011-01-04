@@ -6247,12 +6247,11 @@ this.isDOMConstant = function(object, name)
     if (name == "__proto__")
         return false;
 
-    if (!(
-        object instanceof Window ||
+    if (!(object instanceof Window ||
         object instanceof Node ||
         object instanceof Location ||
-        object instanceof Event
-    ))
+        object instanceof Event ||
+        object instanceof EventCopy))
         return false;
 
     return domConstantMap.hasOwnProperty(name);
