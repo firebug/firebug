@@ -627,7 +627,7 @@ function onHTTPSpyReadyStateChange(spy, event)
     }
 
     // If the request is loading update the end time.
-    if (spy.xhrRequest.readyState == 3)
+    if (spy.logRow && spy.xhrRequest.readyState == 3 && spy.sendTime && spy.endTime)
     {
         spy.responseTime = spy.endTime - spy.sendTime;
         updateTime(spy);
