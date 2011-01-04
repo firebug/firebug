@@ -293,7 +293,13 @@ this.hasProperties = function(ob)
     try
     {
         for (var name in ob)
+        {
+            // Try to access the property before declaring existing properties.
+            // It's because some properties can't be read see:
+            // issue 3843, https://bugzilla.mozilla.org/show_bug.cgi?id=455013
+            var value = ob[name];
             return true;
+        }
     } catch (exc) {}
     return false;
 };
@@ -672,7 +678,22 @@ this.isVisible = function(elt)
         //FBTrace.sysout("isVisible elt.offsetWidth: "+elt.offsetWidth+" offsetHeight:"+ elt.offsetHeight+" localName:"+ elt.localName+" nameSpace:"+elt.nameSpaceURI+"\n");
         return (!elt.hidden && !elt.collapsed);
     }
-    return elt.offsetWidth > 0 || elt.offsetHeight > 0 || elt.localName in invisibleTags || isElementSVG(elt) || isElementMathML(elt);
+
+    try
+    {
+        return elt.offsetWidth > 0 ||
+            elt.offsetHeight > 0 ||
+            elt.localName in invisibleTags ||
+            isElementSVG(elt) ||
+            isElementMathML(elt);
+    }
+    catch (err)
+    {
+        if (FBTrace.DBG_ERRORS)
+            FBTrace.sysout("lib.isVisible; EXCEPTION " + err, err);
+    }
+
+    return false;
 };
 
 this.collapse = function(elt, collapsed)

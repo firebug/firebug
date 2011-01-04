@@ -599,7 +599,7 @@ this.Element = domplate(Firebug.Rep,
     tag:
         OBJECTLINK(
             "&lt;",
-            SPAN({"class": "nodeTag"}, "$object.localName|toLowerCase"),
+            SPAN({"class": "nodeTag"}, "$object|getLocalName"),
             FOR("attr", "$object|attrIterator",
                 "&nbsp;$attr.localName=&quot;",
                 SPAN({"class": "nodeValue"}, "$attr|getAttrValue"),
@@ -618,6 +618,18 @@ this.Element = domplate(Firebug.Rep,
             )
          ),
 
+    getLocalName: function(object)
+    {
+        try
+        {
+            return object.localName.toLowerCase();
+        }
+        catch (err)
+        {
+            return "";
+        }
+    },
+
     getAttrValue: function(attr)
     {
         var limit = Firebug.displayedAttributeValueLimit;
@@ -631,19 +643,33 @@ this.Element = domplate(Firebug.Rep,
 
     getSelectorTag: function(elt)
     {
-        return elt.localName.toLowerCase();
+        return this.getLocalName(elt);
     },
 
     getSelectorId: function(elt)
     {
-        return elt.id ? ("#" + elt.id) : "";
+        try
+        {
+            return elt.id ? ("#" + elt.id) : "";
+        }
+        catch (e)
+        {
+            return "";
+        }
     },
 
     getSelectorClass: function(elt)
     {
-        return elt.getAttribute("class")
-            ? ("." + elt.getAttribute("class").split(" ")[0])
-            : "";
+        try
+        {
+            return elt.getAttribute("class")
+                ? ("." + elt.getAttribute("class").split(" ")[0])
+                : "";
+        }
+        catch (err)
+        {
+        }
+        return "";
     },
 
     getValue: function(elt)
