@@ -24,10 +24,10 @@ function _createFirebugConsole()
 
     console.error = function error()
     {
-        console.top._firebugStackTrace = "requested"; // flag to cause trace to store trace in context.stackTrace
+        window.top._firebugStackTrace = "requested"; // flag to cause trace to store trace in context.stackTrace
         console.trace(); // set the context.stackTrace
         console.notifyFirebug(arguments, 'error', 'firebugAppendConsole');
-        delete console.top._firebugStackTrace;
+        delete window.top._firebugStackTrace;
     }
     // DBG console.uid = Math.random();
 
