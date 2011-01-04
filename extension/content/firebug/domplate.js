@@ -205,11 +205,12 @@ DomplateTag.prototype =
             if (iter instanceof Array || iter instanceof NodeList)
                 iter = new ArrayIterator(iter);
 
+            var value;
             try
             {
                 while (1)
                 {
-                    var value = iter.next();
+                    value = iter.next();
                     var itemOuts = [0,0];
                     iterOuts.push(itemOuts);
                     fn.apply(this, [value, itemOuts]);
@@ -217,6 +218,9 @@ DomplateTag.prototype =
             }
             catch (exc)
             {
+                if (exc != StopIteration && FBTrace.DBG_ERRORS)
+                    FBTrace.sysout("domplate; __loop__ EXCEPTION " + value.name + ", " + exc, exc);
+
                 if (exc != StopIteration)
                     throw exc;
             }

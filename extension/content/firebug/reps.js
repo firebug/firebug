@@ -2079,9 +2079,18 @@ this.StorageList = domplate(Firebug.Rep,
 
     summarize: function(globalStorage)
     {
-        var context = Firebug.currentContext;
-        var domain = getPrettyDomain(context.window.location.href);
-        return globalStorage.namedItem(domain).length + " items in Global Storage "; //xxxHonza localization
+        try
+        {
+            var context = Firebug.currentContext;
+            var domain = getPrettyDomain(context.window.location.href);
+            return globalStorage.namedItem(domain).length + " items in Global Storage "; //xxxHonza localization
+        }
+        catch (e)
+        {
+            if (FBTrace.DBG_ERRORS)
+                FBTrace.sysout("reps.StorageList.summarize; EXCEPTION " + e, e);
+        }
+        return "";
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
@@ -2095,8 +2104,16 @@ this.StorageList = domplate(Firebug.Rep,
 
     getRealObject: function(object, context)
     {
-        var domain = getPrettyDomain(context.window.location.href);
-        return globalStorage.namedItem(domain);
+        try
+        {
+            var domain = getPrettyDomain(context.window.location.href);
+            return globalStorage.namedItem(domain);
+        }
+        catch (e)
+        {
+            if (FBTrace.DBG_ERRORS)
+                FBTrace.sysout("reps.StorageList.getRealObject; EXCEPTION " + e, e);
+        }
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
@@ -2114,9 +2131,18 @@ this.StorageList = domplate(Firebug.Rep,
 
     propIterator: function(object, max)
     {
-        var context = Firebug.currentContext;
-        var domain = getPrettyDomain(context.window.location.href);
-        return FirebugReps.Obj.propIterator(object.namedItem(domain), max);
+        try
+        {
+            var context = Firebug.currentContext;
+            var domain = getPrettyDomain(context.window.location.href);
+            return FirebugReps.Obj.propIterator(object.namedItem(domain), max);
+        }
+        catch (e)
+        {
+            if (FBTrace.DBG_ERRORS)
+                FBTrace.sysout("reps.StorageList.propIterator; EXCEPTION " + e, e);
+        }
+        return [];
     },
 });
 
