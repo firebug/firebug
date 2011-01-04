@@ -88,18 +88,27 @@
 
     <!-- Firefox Tools menu -->
     <menupopup id="menu_ToolsPopup">
-        <menu id="menu_firebug" class="menuitem-iconic fbInternational"
-              image="chrome://firebug/skin/firebug16.png"
+        <menu id="menu_firebug" class="menu-iconic fbInternational"
               label="firebug.Firebug" insertbefore="javascriptConsole">
               <!-- Content comes from fbFirebugMenuPopup -->
         </menu>
     </menupopup>
 
+    <!-- Firefox 4 Web Developer menu -->
+    <menupopup id="appmenu_webDeveloper_popup">
+        <splitmenu id="appmenu_firebug" class="fbInternational" iconic="true"
+            label="firebug.Firebug" insertbefore="appmenu_webConsole"
+            command="cmd_toggleFirebug" key="key_toggleFirebug">
+                <!-- Content comes from fbFirebugMenuPopup -->
+        </splitmenu>
+        <menuseparator insertbefore="appmenu_webConsole" />
+    </menupopup>
+
     <!-- SeaMonkey Tools menu -->
     <menupopup id="toolsPopup">
         <menu id="menu_firebug" class="menuitem-iconic fbInternational"
-              image="chrome://firebug/skin/firebug16.png"
-              label="firebug.Firebug">
+              label="firebug.Firebug"
+              insertbefore="appmenu_webConsole">
               <!-- Content comes from fbFirebugMenuPopup -->
         </menu>
     </menupopup>

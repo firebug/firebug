@@ -19,6 +19,13 @@
 /* end overrides */
 
 /*************************************************************************************************/
+/* Firebug Menu */
+
+#menu_firebug, #appmenu_firebug {
+    list-style-image: url(chrome://firebug/skin/firebug16.png);
+}
+
+/*************************************************************************************************/
 
 #fbInspectButton {
     margin-bottom: 1px;

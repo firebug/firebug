@@ -133,9 +133,10 @@ top.FirebugChrome =
 
         window.addEventListener("blur", onBlur, true);
 
-        // Initialize Firebug Tools & Firebug Icon menus.
+        // Initialize Firebug Tools, Web Developer and Firebug Icon menus.
         var firebugMenuPopup = $("fbFirebugMenuPopup");
         this.initializeMenu($("menu_firebug"), firebugMenuPopup);
+        this.initializeMenu($("appmenu_firebug"), firebugMenuPopup);
         this.initializeMenu($("fbFirebugMenu"), firebugMenuPopup);
 
         // Register handlers for (de)activation of key bindings.
