@@ -173,8 +173,9 @@
     border-bottom: none;
 }
 
+/* Set proper height of window buttons (close, min, detach) */
 #fbWindowButtons.innerToolbar {
-    padding: 6px 0 5px 0;   /* Set proper height of window buttons (close, min, detach) */
+    padding: 5px 0 6px 0;
 }
 
 /************************************************************************************************/
