@@ -586,14 +586,14 @@ Firebug.HTMLPanel.prototype = extend(WalkingPanel,
                         return parentNode;
 
                     if (FBTrace.DBG_HTML)
-                        FBTrace.sysout("getParentObject parentNode.nodeType 9, frameElement:"+parentNode.defaultView.frameElement+"\n");                  /*@explore*/
+                        FBTrace.sysout("getParentObject parentNode.nodeType 9, frameElement:"+parentNode.defaultView.frameElement+"\n");
                     return parentNode.defaultView.frameElement;
                 }
                 else if (this.embeddedBrowserParents)
                 {
                     var skipParent = this.embeddedBrowserParents[node];  // better be HTML element, could be iframe
                     if (FBTrace.DBG_HTML)
-                        FBTrace.sysout("getParentObject skipParent:"+(skipParent?skipParent.nodeName:"none")+"\n");                  /*@explore*/
+                        FBTrace.sysout("getParentObject skipParent:"+(skipParent?skipParent.nodeName:"none")+"\n");
                     if (skipParent)
                         return skipParent;
                 }

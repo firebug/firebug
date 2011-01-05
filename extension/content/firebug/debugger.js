@@ -45,7 +45,7 @@ const reTooMuchRecursion = /too\smuch\srecursion/;
 Firebug.Debugger = extend(Firebug.ActivableModule,
 {
     dispatchName: "debugger",
-    fbs: fbs, // access to firebug-service in chromebug under browser.xul.DOM.Firebug.Debugger.fbs /*@explore*/
+    fbs: fbs, // access to firebug-service in chromebug under browser.xul.DOM.Firebug.Debugger.fbs
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
     // Debugging
@@ -241,7 +241,7 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
             // Just ignore exceptions that happened while in the nested loop
             if (FBTrace.DBG_ERRORS)
                 FBTrace.sysout("debugger exception in nested event loop: "+exc, exc);
-            else     // else /*@explore*/
+            else
                 ERROR("debugger exception in nested event loop: "+exc+"\n");
         }
         finally

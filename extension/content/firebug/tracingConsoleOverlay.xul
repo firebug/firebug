@@ -1,0 +1,9 @@
+<?xml version="1.0"?>
+<!-- See license.txt for terms of usage -->
+
+<?xul-overlay href="chrome://firebug/content/traceOverlay.xul"?>
+
+<overlay xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul"> 
+    <!-- Support for tracing, which is available in Firebug 'X' version only -->
+    <script type="application/x-javascript" src="chrome://firebug/content/traceModule.js"/>
+</overlay>

@@ -7,9 +7,6 @@
 %chromebugDTD;
 ]>
 
-<!-- Support for tracing. Only available in X version -->
-<?xul-overlay href="chrome://firebug/content/traceOverlay.xul"?> <!-- /*@explore*/ -->
-
 <overlay xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul"
          xmlns:html="http://www.w3.org/1999/xhtml">
 

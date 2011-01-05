@@ -22,7 +22,7 @@ FBL.ns(function() { with (FBL)
 
 Firebug.SourceFile = function (compilation_unit_type)
 {
-    this.compilation_unit_type = compilation_unit_type; /*@explore*/
+    this.compilation_unit_type = compilation_unit_type;
 }
 
 Firebug.SourceFile.prototype =
