@@ -1,17 +1,23 @@
 <?xml version="1.0" ?>
 
 <!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-* In order to build Firebug xpi run: $ant
+* 1) In order to build Firebug (including tracing) xpi run: $ant
+  The final xpi + update.rdf file will be located in 'release' sub directory.
 
-* The final xpi + update.rdf file will be located in 'release' sub directory.
-
-* If GETFIREBUG is properly specified in content/firebug/branch.properties
+  If GETFIREBUG is properly specified in content/firebug/branch.properties
   (it assumes you have fbug and getfirebug.com directories at the same level)
   The xpi + update.rdf will be also deployed for you there and so, you can just commit.
 
-* To check GETFIREBUG value run: ant echo
+  The release directory should contain two files:
+  - firebug<version>.xpi (including updateURL) for getfirebug.com
+  - firebug<version>-amo.xpi (disabled update) for AMO
 
-* To build xpi and generate JS doc (from source comments) run: $ant jsdoc
+* 2) In order to build Firebug final release (no tracing) run: $ant release
+  Again xpi files will be located in the 'release' directory.
+
+* 3) To check GETFIREBUG value run: ant echo
+
+* 4)To build xpi and generate JS doc (from source comments) run: $ant jsdoc
 - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
 <project name="firebug" basedir="." default="build">
 
@@ -38,20 +44,48 @@
         <delete dir="${release.dir}"/>
     </target>
 
-    <!-- Build -->
+    <!-- Build Debug (X) -->
     <target name="build" depends="clean">
         <antcall target="prepare-build" />
-        <antcall target="createFirebugXPI" />
+
+        <!-- Create XPI for getfirebug.com -->
+        <antcall target="createFirebugXPI">
+            <param name="file-name" value="firebug-${VERSION}${RELEASE}.xpi"/>
+        </antcall>
+
+        <antcall target="disableUpdate" />
+
+        <!-- Create XPI for AMO -->
+        <antcall target="createFirebugXPI">
+            <param name="file-name" value="firebug-${VERSION}${RELEASE}-amo.xpi"/>
+        </antcall>
+
+        <delete dir="${build.dir}"/>
         <antcall target="deploy" />
-        <echo message="Firebug (X) version: ${VERSION}${RELEASE} in ${release.dir}"/>
+
+        <echo message="Firebug version: ${VERSION}${RELEASE} in ${release.dir}"/>
     </target>
 
     <!-- Build Release -->
     <target name="release" depends="clean">
         <antcall target="prepare-build" />
         <antcall target="disableTracingConsole" />
-        <antcall target="createFirebugXPI" />
+
+        <!-- Create XPI for getfirebug.com -->
+        <antcall target="createFirebugXPI">
+            <param name="file-name" value="firebug-${VERSION}${RELEASE}.xpi"/>
+        </antcall>
+
+        <antcall target="disableUpdate" />
+
+        <!-- Create XPI for AMO -->
+        <antcall target="createFirebugXPI">
+            <param name="file-name" value="firebug-${VERSION}${RELEASE}-amo.xpi"/>
+        </antcall>
+
+        <delete dir="${build.dir}"/>
         <antcall target="deploy" />
+
         <echo message="Firebug Release version: ${VERSION}${RELEASE} in ${release.dir}"/>
     </target>
 
@@ -61,7 +95,6 @@
         <antcall target="disableTracingConsole" />
         <antcall target="disableUpdate" />
         <antcall target="createFirebugXPI" />
-        <antcall target="deploy" />
         <echo message="Firebug Release version: ${VERSION}${RELEASE} in ${release.dir}"/>
     </target>
 
@@ -106,11 +139,8 @@
     <target name="createFirebugXPI">
 
         <!-- Compress files (ZIP) -->
-        <zip destfile="${release.dir}/firebug-${VERSION}${RELEASE}.xpi"
+        <zip destfile="${release.dir}/${file-name}"
             basedir="${build.dir}" update="true" />
-
-        <!-- The xpi is created, let's remove the build dir. -->
-        <delete dir="${build.dir}"/>
 
         <!-- Copy update.rdf file with updated release version info -->
         <copy file="update.rdf.tpl.xml" tofile="${release.dir}/update.rdf"/>
@@ -121,10 +151,8 @@
         </replace>
     </target>
 
-    <!-- Deploy if target available -->
+    <!-- Deploy xpi & update.rdf files - if target available -->
     <target name="deploy" if="deploy.dir.available">
-
-        <!-- Deploy xpi & update.rdf files -->
         <copy file="${release.dir}/update.rdf" todir="${deploy-xpi.dir}" overwrite="true"/>
         <copy file="${release.dir}/firebug-${VERSION}${RELEASE}.xpi" todir="${deploy-xpi.dir}" overwrite="true"/>
         <echo message="XPI deployed to: ${VERSION}${RELEASE} to ${deploy-xpi.dir}"/>
@@ -183,9 +211,12 @@
         <echo message="${build.dir}/chrome.manifest - Tracing Console Disabled" />
     </target>
 
-    <!-- Disable Firebug Tracing Console -->
+    <!-- Remove update URL, this is necessary for AMO -->
     <target name="disableUpdate">
-        <!-- TODO -->
+        <replaceregexp file="${build.dir}/install.rdf"
+            match="https://getfirebug.com/releases/firebug/1.6/update.rdf"
+            replace=""
+            byline="true" />
     </target>
 
 </project>
