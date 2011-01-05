@@ -40,6 +40,33 @@
 
     <!-- Build -->
     <target name="build" depends="clean">
+        <antcall target="prepare-build" />
+        <antcall target="createFirebugXPI" />
+        <antcall target="deploy" />
+        <echo message="Firebug (X) version: ${VERSION}${RELEASE} in ${release.dir}"/>
+    </target>
+
+    <!-- Build Release -->
+    <target name="release" depends="clean">
+        <antcall target="prepare-build" />
+        <antcall target="disableTracingConsole" />
+        <antcall target="createFirebugXPI" />
+        <antcall target="deploy" />
+        <echo message="Firebug Release version: ${VERSION}${RELEASE} in ${release.dir}"/>
+    </target>
+
+    <!-- Build AMO Release -->
+    <target name="release-amo" depends="clean">
+        <antcall target="prepare-build" />
+        <antcall target="disableTracingConsole" />
+        <antcall target="disableUpdate" />
+        <antcall target="createFirebugXPI" />
+        <antcall target="deploy" />
+        <echo message="Firebug Release version: ${VERSION}${RELEASE} in ${release.dir}"/>
+    </target>
+
+    <!-- Prepare build files -->
+    <target name="prepare-build">
 
         <mkdir dir="${build.dir}" />
         <mkdir dir="${release.dir}" />
@@ -73,8 +100,12 @@
         <!-- Remove unnecessary *.xml files in the root directory (like e.g. this build file),
             but not from sub directories. -->
         <delete dir="${build.dir}" includes="*.xml" />
+    </target>
 
-        <!-- Create final firebug.xpi file -->
+    <!-- Create final firebug.xpi file -->
+    <target name="createFirebugXPI">
+
+        <!-- Compress files (ZIP) -->
         <zip destfile="${release.dir}/firebug-${VERSION}${RELEASE}.xpi"
             basedir="${build.dir}" update="true" />
 
@@ -88,12 +119,6 @@
             <replacefilter token="@RELEASE@" property="RELEASE"/>
             <replacefilter token="@LEAF@" value="firebug-${VERSION}${RELEASE}.xpi"/>
         </replace>
-
-        <!-- Final message -->
-        <echo message="Firebug version: ${VERSION}${RELEASE} in ${release.dir}"/>
-
-        <!-- Deploy -->
-        <antcall target="deploy" />
     </target>
 
     <!-- Deploy if target available -->
@@ -146,6 +171,21 @@
 
         <!-- Deploy -->
         <antcall target="deploy-jsdoc" />
+    </target>
+
+    <!-- Remove (ie comment out) Firebug tracing console overlay from the chrome.manifest file.
+         The console is not available in the final releases. -->
+    <target name="disableTracingConsole">
+        <replaceregexp file="${build.dir}/chrome.manifest"
+            match="(.*)tracingConsoleOverlay\.xul"
+            replace="# \1tracingConsoleOverlay\.xul"
+            byline="true" />
+        <echo message="${build.dir}/chrome.manifest - Tracing Console Disabled" />
+    </target>
+
+    <!-- Disable Firebug Tracing Console -->
+    <target name="disableUpdate">
+        <!-- TODO -->
     </target>
 
 </project>
