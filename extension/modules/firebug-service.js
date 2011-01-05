@@ -310,7 +310,7 @@ BreakOnNextCall.prototype =
         {
             if (FBTrace.DBG_FBS_STEP)
                 FBTrace.sysout("breakOnNextTopFunction hits at "+getCallFromType(type)+" at "+frame.script.fileName+" tag:"+(lucky?"LUCKY WINNER":frame.script.tag), framesToString(frame));
-            return this.hit(frame,type);
+            return this.hit(frame, type);
         }
         // else maybe we hit on a event unrelated to our context
     },
@@ -3322,13 +3322,13 @@ var fbs =
             case TYPE_TOPLEVEL_START: // fall through
             case TYPE_FUNCTION_CALL:  // the frame will be running the called script
             {
-                jsdHandlers.dispatch("onFunctionCall", frame, type);
+                jsdHandlers.dispatch("onFunctionCall", frame, shiftCallType(type));
                 break;
             }
             case TYPE_TOPLEVEL_END: // fall through
             case TYPE_FUNCTION_RETURN:  // the frame will be running the called script
             {
-                jsdHandlers.dispatch("onFunctionReturn", frame, type);
+                jsdHandlers.dispatch("onFunctionReturn", frame, shiftCallType(type));
                 break;
             }
         }
@@ -3826,6 +3826,11 @@ function getCallFromType(type)
         case TYPE_TOPLEVEL_END:   { typeName = "TOPLEVEL_START"; break; }
     }
     return typeName;
+}
+
+function shiftCallType(type)
+{
+    return type + 10;
 }
 
 // For special chromebug tracing
