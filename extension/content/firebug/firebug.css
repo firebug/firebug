@@ -10,6 +10,7 @@ window[chromehidden~="toolbar"] #fbToolbar {
 #fbContentBox {
     -moz-binding: url("chrome://firebug/content/bindings.xml#initializer");
     height: 270px;
+    background-color: -moz-dialog;
 }
 
 #fbLargeCommandLine {
