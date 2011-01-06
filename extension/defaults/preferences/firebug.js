@@ -8,7 +8,7 @@ pref("extensions.firebug.textWrapWidth", 100);
 pref("extensions.firebug.openInWindow", false);
 pref("extensions.firebug.previousPlacement", 0);
 pref("extensions.firebug.showErrorCount", true);
-pref("extensions.firebug.viewPanelOrient", "vertical");
+pref("extensions.firebug.viewPanelOrient", false);          // true == vertical, false == horizontal
 pref("extensions.firebug.allPagesActivation", "none");
 pref("extensions.firebug.hiddenPanels", "");                // List of hidden panels separated by a space
 pref("extensions.firebug.panelTabMinWidth", 50);            // Minimum width of a panel tab [px] applied when there is no enough horizontal size for the tab bar.

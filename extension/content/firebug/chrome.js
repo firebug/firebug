@@ -867,10 +867,11 @@ top.FirebugChrome =
     toggleOrient: function()
     {
         var panelPane = $("fbPanelPane");
-        panelSplitter.orient = panelPane.orient
-            = panelPane.orient == "vertical" ? "horizontal" : "vertical";
-        var option = $('menu_toggleOrient').getAttribute("option");
-        Firebug.setPref(Firebug.prefDomain, option, panelPane.orient != "vertical");
+        var newValue = panelPane.orient == "vertical" ? "horizontal" : "vertical";
+        panelSplitter.orient = panelPane.orient = newValue;
+
+        var option = $("menu_toggleOrient").getAttribute("option");
+        Firebug.setPref(Firebug.prefDomain, option, newValue == "vertical");
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
