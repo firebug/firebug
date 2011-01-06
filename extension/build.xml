@@ -214,7 +214,7 @@
     <!-- Remove update URL, this is necessary for AMO -->
     <target name="disableUpdate">
         <replaceregexp file="${build.dir}/install.rdf"
-            match="https://getfirebug.com/releases/firebug/1.6/update.rdf"
+            match="(.*)https://getfirebug.com/releases/firebug/${VERSION}/update.rdf(.*)"
             replace=""
             byline="true" />
     </target>
