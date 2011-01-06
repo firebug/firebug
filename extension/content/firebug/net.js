@@ -1628,6 +1628,8 @@ NetPanel.prototype = extend(Firebug.ActivablePanel,
         if (maxWidth == 0)
             maxWidth = "15%";
 
+        // This call must precede all getCSSStyleRules calls
+        Firebug.CSSModule.cleanupSheets(hrefLabel.ownerDocument, Firebug.currentContext);
         var rules = domUtils.getCSSStyleRules(hrefLabel);
         for (var i = 0; i < rules.Count(); ++i)
         {
