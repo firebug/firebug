@@ -363,7 +363,7 @@ var Errors = Firebug.Errors = extend(Firebug.Module,
             win1 = getRootWindow(win1);
             win2 = getRootWindow(win2);
             if (win1 && win1 != win2)
-                FBTrace.sysout("errors.getErrorContext; ERROR wrong parent window?");
+                FBTrace.sysout("errors.getErrorContext; ERROR wrong parent window?", object);
         }
 
         return errorContext; // we looked everywhere...
