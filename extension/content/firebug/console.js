@@ -206,7 +206,7 @@ Firebug.Console = extend(ActivableConsole,
         // Inject console handler if not injected yet. It's injected only in the case that
         // the page has JS (and thus may call console) and Firebug has been activated after
         // the first JS call (and thus we have not already injected).
-        if (!this.injector.isAttached(context, context.window) && !context.jsDebuggerActive)
+        if (!this.injector.isAttached(context, context.window) && !context.jsDebuggerCalledUs)
             this.isReadyElsePreparing(context);
 
         // else we saw no JS, so the reload warning is not needed.

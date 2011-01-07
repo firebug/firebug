@@ -1030,7 +1030,7 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
         if (!context)
             return false;
 
-        context.jsDebuggerActive = true;
+        context.jsDebuggerCalledUs = true;  // otherwise we cannot be called.
 
         if (!Firebug.Console.injector.isAttached(context, frameWin))
         {
@@ -1068,7 +1068,7 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
                 fbs.filterConsoleInjections = false;
             }
             if (FBTrace.DBG_CONSOLE)
-                FBTrace.sysout("debugger.supportsGlobal injectConsole consoleReady:"+consoleReady+" jsDebuggerActive: "+context.jsDebuggerActive, frameWin);
+                FBTrace.sysout("debugger.supportsGlobal injectConsole consoleReady:"+consoleReady+" jsDebuggerCalledUs: "+context.jsDebuggerCalledUs, frameWin);
         }
         else
         {
@@ -2131,7 +2131,7 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
 
         context.dynamicURLIndex = 1; // any dynamic urls need to be unique to the context.
 
-        context.jsDebuggerActive = false;
+        context.jsDebuggerCalledUs = false;
 
         Firebug.ActivableModule.initContext.apply(this, arguments);
     },

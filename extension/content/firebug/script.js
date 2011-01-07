@@ -115,6 +115,26 @@ Firebug.ScriptPanel.prototype = extend(Firebug.SourceBoxPanel,
         Firebug.SourceBoxPanel.initialize.apply(this, arguments);
     },
 
+    initializeUI: function()
+    {
+        Firebug.Module.initializeUI.apply(this, arguments);
+        Firebug.Debugger.addListener(this);
+    },
+
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+    // Firebug.Debugger Listener
+    onJSDActivate: function(active, why)
+    {
+        if (Firebug.chrome.getSelectedPanel() === this) // then the change in jsd causes a refresh
+            Firebug.chrome.syncPanel(this.name);
+    },
+
+    onJSDDeactivate: function(active, why) // stop or pause
+    {
+        if (Firebug.chrome.getSelectedPanel() === this)
+            Firebug.chrome.syncPanel(this.name);
+    },
+
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 
     showFunction: function(fn)
@@ -524,8 +544,10 @@ Firebug.ScriptPanel.prototype = extend(Firebug.SourceBoxPanel,
             this.activeWarningTag = WarningRep.showNotEnabled(this.panelNode);
         else if (this.context.allScriptsWereFiltered)
             this.activeWarningTag = WarningRep.showFiltered(this.panelNode);
-        else if (aLocation && !this.context.jsDebuggerActive)
+        else if (aLocation && !this.context.jsDebuggerCalledUs)
             this.activeWarningTag = WarningRep.showInactive(this.panelNode);
+        else if (!Firebug.Debugger.jsDebuggerOn)  // set asynchronously by jsd in FF 4.0
+            this.activeWarningTag = WarningRep.showDebuggerInactive(this.panelNode);
         else if (!aLocation) // they were not filtered, we just had none
             this.activeWarningTag = WarningRep.showNoScript(this.panelNode);
         else
@@ -1076,6 +1098,13 @@ Firebug.ScriptPanel.prototype = extend(Firebug.SourceBoxPanel,
         return this.conditionEditor;
     },
 
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+
+    supportsBreakOnNext: function()
+    {
+        return this.breakable && Firebug.Debugger.jsDebuggerOn;
+    },
+
     breakOnNext: function(enabled)
     {
         if (enabled)
@@ -1202,6 +1231,18 @@ Firebug.ScriptPanel.WarningRep = domplate(Firebug.Rep,
 
         var box = this.tag.replace(args, parentNode, this);
         this.enableScriptTag.append({}, box, this);
+
+        return box;
+    },
+
+    showDebuggerInactive: function(parentNode)
+    {
+        var args = {
+            pageTitle: $STR("script.warning.debugger_not_activated"),
+            suggestion: $STR("script.suggestion.debugger_not_activated")
+        }
+
+        var box = this.tag.replace(args, parentNode, this);
 
         return box;
     },

@@ -1578,10 +1578,14 @@ top.Firebug =
 
     setIsJSDActive: function(active)  // should only be call on the jsd activation events, so it correctly reflects jsd state
     {
+        // Front side UI mark
         if (active)
             $('fbStatusIcon').setAttribute("script", "on");
         else
             $('fbStatusIcon').setAttribute("script", "off");
+
+        // Front side state
+        Firebug.Debugger.jsDebuggerOn = active;
 
         if (FBTrace.DBG_ACTIVATION)
             FBTrace.sysout("debugger.setIsJSDActive "+active+"\n");
@@ -2556,6 +2560,13 @@ Firebug.Panel = extend(new Firebug.Listener(),
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
     // Support for Break On Next
+    /*
+     * Called by the framework to see if the panel currently supports BON
+     */
+    supportsBreakOnNext: function()
+    {
+        return this.breakable;  // most panels just use this flag
+    },
 
     /**
      * Called by the framework when the user clicks on the Break On Next button.
