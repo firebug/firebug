@@ -202,7 +202,7 @@ var jsdHandlers =
             if ("onFunctionCall" in aHook || "onFunctionReturn" in aHook)
                 fbs.hookFunctions();
             if ("onInterrupt" in aHook)
-                fbs.hookInterrupts();
+                fbs.hookInterrupts(frame);
         }
     },
 
@@ -3285,13 +3285,13 @@ var fbs =
 
     hookInterrupts: function(frame)
     {
-        if (FBTrace.DBG_FBS_STEP)
-            FBTrace.sysout("set InterruptHook " + (frame ? frame.script.enableSingleStepInterrupts : "<noframe>"));
-
         jsd.interruptHook = { onExecute: hook(this.onInterrupt, RETURN_CONTINUE)};  // TODO move the try code in hook() to dispatch
 
-        if (frame)  // then we may be were called in FF3.6 for break on next script panel
+        if (frame)
             ScriptInterrupter.enable(frame.script);
+
+        if (FBTrace.DBG_FBS_STEP)
+            FBTrace.sysout("set InterruptHook frame.script.tag: "+(frame?frame.script.tag:"<no frame>"), ScriptInterrupter);
     },
 
     onInterrupt: function(frame, type, rv)
