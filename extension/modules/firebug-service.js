@@ -149,7 +149,10 @@ var FBTrace = null;
 // ************************************************************************************************
 function frameId(frame, depth)
 {
-    return frame.script.tag+"@"+frame.line+"^"+depth;
+	if (frame)
+		return frame.script.tag+"@"+frame.line+"^"+depth;
+	else
+		return "noIdForNoframe";
 }
 
 function extend(l,r)
@@ -251,7 +254,7 @@ var jsdHandlers =
 
             if (methodName in aHook)
             {
-                if (FBTrace.DBG_FBS_ERRORS)
+                if (FBTrace.DBG_FBS_STEP || FBTrace.DBG_DISPATCH)
                     FBTrace.sysout("firebug-service.jsdHandler.dispatch "+methodName+" to "+aHook+" "+getCallFromType(type)+" frame: "+frameToString(frame), this);
 
                 var rc = aHook[methodName].apply(aHook, [frame, type, rv]);
