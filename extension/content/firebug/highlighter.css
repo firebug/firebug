@@ -1,9 +1,10 @@
 /* See license.txt for terms of usage */
-.firebugCanvas {
-    position: fixed;
+/** reset styling **/
+.firebugResetStyles {
+    z-index: 2147483646;
     top: 0;
     left: 0;
-    display: none;
+    display: block;
     border: 0 none;
     margin: 0;
     padding: 0;
@@ -17,76 +18,44 @@
     -moz-border-radius: 0 !important;
     -moz-box-shadow: none !important;
     background-image: none !important;
+    pointer-events: none !important;
 }
 
-.firebugCanvas:before, .firebugCanvas:after {
-    content: "";
+.firebugResetStyles:before, .firebugResetStyles:after {
+    content: "" !important;
+}
+/**actual styling to be modified by firebug theme**/
+.firebugCanvas {
+    display: none;
+    position: fixed;
+    pointer-events: auto !important;
 }
 
 .firebugHighlight {
-    z-index: 2147483646;
-    position: fixed;
-    background-color: #3875d7;
     opacity: 1;
-    margin: 0;
-    padding: 0;
-    outline: 0;
-    border: 0 none;
-    min-width: 0;
-    max-width: none;
-    min-height: 0;
-    max-height: none;
-    -moz-border-radius: 0 !important;
-    -moz-box-shadow: none !important;
-    background-image: none !important;
+    position: fixed;
+    background-color: transparent;
+    border: 2px solid #3875d7;
 }
 
-.firebugHighlight:before, .firebugHighlight:after {
-    content: "";
+.firebugFrameHighlight {
+    opacity: 1;
+    position: fixed;
+    background-color: #3875d7;
 }
 
 .firebugLayoutBoxParent {
-    z-index: 2147483646;
     position: fixed;
     background-color: transparent;
     border-top: 0 none;
     border-right: 1px dashed #E00 !important;
     border-bottom: 1px dashed #E00 !important;
     border-left: 0 none;
-    margin: 0;
-    padding: 0;
-    outline: 0;
-    min-width: 0;
-    max-width: none;
-    min-height: 0;
-    max-height: none;
-    -moz-transform: rotate(0deg);
-    -moz-transform-origin: 50% 50%;
-    -moz-border-radius: 0 !important;
-    -moz-box-shadow: none !important;
-    background-image: none !important;
 }
 
 .firebugRuler {
-    position: absolute;
-    margin: 0;
-    padding: 0;
-    outline: 0;
-    border: 0 none;
     opacity: 1;
-    min-width: 0;
-    max-width: none;
-    min-height: 0;
-    max-height: none;
-    -moz-transform: rotate(0deg);
-    -moz-transform-origin: 50% 50%;
-    -moz-border-radius: 0 !important;
-    -moz-box-shadow: none !important;
-    background-image: none !important;
-}
-
-.firebugRuler:before, .firebugRuler:after {
-    content: "";
+    position: fixed;
 }
 
 .firebugRulerH {
@@ -98,9 +67,6 @@
     border-top: 1px solid #BBBBBB;
     border-right: 1px dashed #BBBBBB;
     border-bottom: 1px solid #000000;
-    -moz-border-radius: 0 !important;
-    -moz-box-shadow: none !important;
-    background-image: none !important;
 }
 
 .firebugRulerV {
@@ -112,9 +78,6 @@
     border-left: 1px solid #BBBBBB;
     border-right: 1px solid #000000;
     border-bottom: 1px dashed #BBBBBB;
-    -moz-border-radius: 0 !important;
-    -moz-box-shadow: none !important;
-    background-image: none !important;
 }
 
 .overflowRulerX > .firebugRulerV {
@@ -127,29 +90,11 @@
 
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 .firebugLayoutBox {
-    margin: 0;
-    padding: 0;
-    border: 0 none;
     opacity: 1;
-    outline: 0;
     width: auto;
-    min-width: 0;
-    max-width: none;
-    min-height: 0;
-    max-height: none;
-    -moz-transform: rotate(0deg);
-    -moz-transform-origin: 50% 50%;
-    -moz-border-radius: 0 !important;
-    -moz-box-shadow: none !important;
-    background-image: none !important;
-}
-
-.firebugLayoutBox:before, .firebugLayoutBox:after {
-    content: "";
 }
 
 .firebugLayoutBoxOffset {
-    z-index: 2147483646;
     position: fixed;
     opacity: 0.8;
 }
@@ -171,26 +116,8 @@
 }
 
 .firebugLayoutLine {
-    z-index: 2147483646;
-    background-color: #000000;
     opacity: 0.4;
-    margin: 0;
-    padding: 0;
-    outline: 0;
-    border: 0 none;
-    min-width: 0;
-    max-width: none;
-    min-height: 0;
-    max-height: none;
-    -moz-transform: rotate(0deg);
-    -moz-transform-origin: 50% 50%;
-    -moz-border-radius: 0 !important;
-    -moz-box-shadow: none !important;
-    background-image: none !important;
-}
-
-.firebugLayoutLine:before, .firebugLayoutLine:after {
-    content: "";
+    background-color: #000000;
 }
 
 .firebugLayoutLineLeft, .firebugLayoutLineRight {
@@ -226,9 +153,5 @@
 .fbProxyElement {
     position: absolute;
     background-color: transparent;
-    z-index: 2147483646;
-    margin: 0;
-    padding: 0;
-    outline: 0;
-    border: 0 none;
+    pointer-events: auto !important;
 }

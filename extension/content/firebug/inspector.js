@@ -5,7 +5,7 @@ FBL.ns(function() { with (FBL) {
 // ************************************************************************************************
 // Constants
 
-const inspectDelay = 100;
+const inspectDelay = 200;
 const edgeSize = 2;
 const defaultPrimaryPanel = "html";
 const defaultSecondaryPanel = "dom";
@@ -33,7 +33,7 @@ Firebug.Inspector = extend(Firebug.Module,
             {
                 mx = event.clientX;
                 my = event.clientY;
-            }
+            };
             context.window.document.addEventListener("mousemove", context.inspectorMouseMove, true);
         }
 
@@ -494,11 +494,9 @@ function getImageMapHighlighter(context)
             if(!canvas)
             {
                 canvas = doc.createElementNS("http://www.w3.org/1999/xhtml", "canvas");
-                unwrapObject(canvas).firebugIgnore = true;
-                if (FBTrace.DBG_INSPECT)
-                    unwrapObject(canvas).firebugIgnore = false;
+                hideElementFromInspection(canvas);
                 canvas.id = "firebugCanvas";
-                canvas.className = "firebugCanvas";
+                canvas.className = "firebugResetStyles firebugCanvas";
                 canvas.width = context.window.innerWidth;
                 canvas.height = context.window.innerHeight;
                 canvas.addEventListener("mousemove", function(event){context.imageMapHighlighter.mouseMoved(event)}, true);
@@ -655,7 +653,7 @@ quickInfoBox =
         if (!this.boxEnabled || !element)
             return;
 
-        this.needsToHide = false
+        this.needsToHide = false;
 
         var vbox, lab,
             needsTitle = false,
@@ -751,7 +749,7 @@ quickInfoBox =
             case "mouseup":
                 this.qiPanel.removeEventListener('mousemove', this, true);
                 this.qiPanel.removeEventListener('mouseup', this, true);
-                this.qiPanel = this.qiBox = null
+                this.qiPanel = this.qiBox = null;
                 this.prevX = this.prevY = null;
                 this.dragging = false;
                 break;
@@ -838,8 +836,9 @@ Firebug.Inspector.FrameHighlighter.prototype =
         var offset = getLTRBWH(element);
         var x = offset.left, y = offset.top;
         var w = offset.width, h = offset.height;
+
         if (FBTrace.DBG_INSPECT)
-                FBTrace.sysout("FrameHighlighter HTML tag:"+element.tagName+" x:"+x+" y:"+y+" w:"+w+" h:"+h);
+            FBTrace.sysout("FrameHighlighter HTML tag:" + element.tagName + " x:" + x + " y:" + y + " w:" + w + " h:" + h);
 
         var wacked = isNaN(x) || isNaN(y) || isNaN(w) || isNaN(h);
         if(wacked)
@@ -854,19 +853,10 @@ Firebug.Inspector.FrameHighlighter.prototype =
         {
             quickInfoBox.show(element);
 
-            var nodes = this.getNodes(context, element);
+            var highlighter = this.getHighlighter(context, element);
 
-            move(nodes.top, x - edgeSize, y - edgeSize);
-            resize(nodes.top, w + edgeSize * 2, edgeSize);
-
-            move(nodes.right, x+w, y-edgeSize);
-            resize(nodes.right, edgeSize, h+edgeSize*2);
-
-            move(nodes.bottom, x - edgeSize, y + h);
-            resize(nodes.bottom, w + edgeSize * 2, edgeSize);
-
-            move(nodes.left, x-edgeSize, y-edgeSize);
-            resize(nodes.left, edgeSize, h+edgeSize*2);
+            move(highlighter, x - edgeSize, y - edgeSize);
+            resize(highlighter, w, h);
 
             if (FBTrace.DBG_INSPECT)
                 FBTrace.sysout("FrameHighlighter "+element.tagName);
@@ -874,25 +864,22 @@ Firebug.Inspector.FrameHighlighter.prototype =
             if (!body)
                 return this.unhighlight(context);
 
-            var needsAppend = !nodes.top.parentNode || nodes.top.ownerDocument != body.ownerDocument;
+            var needsAppend = !highlighter.parentNode || highlighter.ownerDocument != body.ownerDocument;
             if (needsAppend)
             {
                 if (FBTrace.DBG_INSPECT)
-                    FBTrace.sysout("FrameHighlighter needsAppend: "+ nodes.top.ownerDocument.documentURI+" !?= "+body.ownerDocument.documentURI, nodes);
+                    FBTrace.sysout("FrameHighlighter needsAppend: " + highlighter.ownerDocument.documentURI + " !?= " + body.ownerDocument.documentURI, highlighter);
 
                 attachStyles(context, body);
 
-                for (var edge in nodes)
+                try
                 {
-                    try
-                    {
-                        body.appendChild(nodes[edge]);
-                    }
-                    catch(exc)
-                    {
-                        if (FBTrace.DBG_INSPECT)
-                            FBTrace.sysout("inspector.FrameHighlighter.highlight body.appendChild FAILS for body "+body+" "+exc, exc);
-                    }
+                    body.appendChild(highlighter);
+                }
+                catch(exc)
+                {
+                    if (FBTrace.DBG_INSPECT)
+                        FBTrace.sysout("inspector.FrameHighlighter.highlight body.appendChild FAILS for body " + body + " "+exc, exc);
                 }
 
                 if (element.ownerDocument.contentType.indexOf("xul") === -1)  // otherwise the proxies take up screen space in browser.xul
@@ -905,35 +892,14 @@ Firebug.Inspector.FrameHighlighter.prototype =
             if(csTransform)
             {
                 csTransformOrig = cs.MozTransformOrigin;
-                splitOrigin = csTransformOrig.split(" ");
 
-                splitOrigin[0] = parseInt(splitOrigin[0], 10);
-                splitOrigin[1] = parseInt(splitOrigin[1], 10);
-
-                nodes.top.style.MozTransform = csTransform;
-                nodes.top.style.MozTransformOrigin = splitOrigin[0] + edgeSize + "px " + (splitOrigin[1] + edgeSize) + 'px';
-
-                nodes.right.style.MozTransform = csTransform;
-                lineRect = getLTRBWH(nodes.right);
-                nodes.right.style.MozTransformOrigin = (x - lineRect.left + splitOrigin[0]) + "px " + (splitOrigin[1] + edgeSize) + "px";
-
-                lineRect = getLTRBWH(nodes.bottom);
-                nodes.bottom.style.MozTransform = csTransform;
-                nodes.bottom.style.MozTransformOrigin = splitOrigin[0] + edgeSize + "px " + (y - lineRect.top + splitOrigin[1]) + "px";
-
-                nodes.left.style.MozTransform = csTransform;
-                nodes.left.style.MozTransformOrigin = splitOrigin[0] + edgeSize + "px " + (splitOrigin[1] + edgeSize) + 'px';
+                highlighter.style.MozTransform = csTransform;
+                highlighter.style.MozTransformOrigin = csTransformOrig
             }
             else
             {
-                nodes.top.style.MozTransform = "rotate(0deg)";
-                nodes.top.style.MozTransformOrigin = "50% 50%";
-                nodes.left.style.MozTransform = "rotate(0deg)";
-                nodes.left.style.MozTransformOrigin = "50% 50%";
-                nodes.bottom.style.MozTransform = "rotate(0deg)";
-                nodes.bottom.style.MozTransformOrigin = "50% 50%";
-                nodes.right.style.MozTransform = "rotate(0deg)";
-                nodes.right.style.MozTransformOrigin = "50% 50%";
+                highlighter.style.MozTransform = "";
+                highlighter.style.MozTransformOrigin = "";
             }
         }
         else
@@ -947,40 +913,27 @@ Firebug.Inspector.FrameHighlighter.prototype =
     {
         if (FBTrace.DBG_INSPECT)
             FBTrace.sysout("FrameHighlighter unhightlight", context.window.location);
-        var nodes = this.getNodes(context);
-        var body = nodes.top.parentNode;
+        
+        var highlighter = this.getHighlighter(context);
+        var body = highlighter.parentNode;
         if (body)
         {
-            for (var edge in nodes)
-                body.removeChild(nodes[edge]);
-
+            body.removeChild(highlighter);
             quickInfoBox.hide();
         }
     },
 
-    getNodes: function(context)
+    getHighlighter: function(context)
     {
         if (!context.frameHighlighter)
         {
-            var doc = context.window.document;
+            var doc = context.window.document,
+                div = doc.createElementNS("http://www.w3.org/1999/xhtml", "div");
 
-            function createEdge()
-            {
-                var div = doc.createElementNS("http://www.w3.org/1999/xhtml", "div");
-                unwrapObject(div).firebugIgnore = true;
-                if (FBTrace.DBG_INSPECT)
-                    unwrapObject(div).firebugIgnore = false;
-                div.className = "firebugHighlight";
-                return div;
-            }
+            hideElementFromInspection(div);
+            div.className = "firebugResetStyles firebugHighlight";
 
-            context.frameHighlighter =
-            {
-                top: createEdge(),
-                right: createEdge(),
-                bottom: createEdge(),
-                left: createEdge()
-            };
+            context.frameHighlighter = div;
         }
 
         return context.frameHighlighter;
@@ -1179,30 +1132,24 @@ BoxModelHighlighter.prototype =
             function createRuler(name)
             {
                 var div = doc.createElementNS("http://www.w3.org/1999/xhtml", "div");
-                unwrapObject(div).firebugIgnore = true;
-                if (FBTrace.DBG_INSPECT)
-                    unwrapObject(div).firebugIgnore = false;
-                div.className = "firebugRuler firebugRuler"+name;
+                hideElementFromInspection(div);
+                div.className = "firebugResetStyles firebugRuler firebugRuler"+name;
                 return div;
             }
 
             function createBox(name)
             {
                 var div = doc.createElementNS("http://www.w3.org/1999/xhtml", "div");
-                unwrapObject(div).firebugIgnore = true;
-                if (FBTrace.DBG_INSPECT)
-                    unwrapObject(div).firebugIgnore = false;
-                div.className = "firebugLayoutBox firebugLayoutBox"+name;
+                hideElementFromInspection(div);
+                div.className = "firebugResetStyles firebugLayoutBox firebugLayoutBox"+name;
                 return div;
             }
 
             function createLine(name)
             {
                 var div = doc.createElementNS("http://www.w3.org/1999/xhtml", "div");
-                unwrapObject(div).firebugIgnore = true;
-                if (FBTrace.DBG_INSPECT)
-                    unwrapObject(div).firebugIgnore = false;
-                div.className = "firebugLayoutLine firebugLayoutLine"+name;
+                hideElementFromInspection(div);
+                div.className = "firebugResetStyles firebugLayoutLine firebugLayoutLine"+name;
                 return div;
             }
 
@@ -1293,9 +1240,7 @@ function createProxiesForDisabledElements(body)
             div.style.top = rect.top + body.scrollTop + "px";
             div.style.width = rect.width + "px";
             div.style.height = rect.height + "px";
-            unwrapObject(div).firebugIgnore = true;
-            if (FBTrace.DBG_INSPECT)
-                unwrapObject(div).firebugIgnore = false;
+            hideElementFromInspection(div);
             div.fbProxyFor = nodes[i];
             nodes[i].fbHasProxyElement = true;
 
@@ -1328,6 +1273,12 @@ function isVisibleElement(elt)
 
     return !invisibleElements[elt.nodeName.toLowerCase()];
 }
+
+function hideElementFromInspection(elt) {
+    unwrapObject(elt).firebugIgnore = !FBTrace.DBG_INSPECT;
+}
+
+
 // ************************************************************************************************
 
 Firebug.registerModule(Firebug.Inspector);
