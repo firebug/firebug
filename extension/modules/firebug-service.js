@@ -785,11 +785,13 @@ var fbs =
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
     // nsIObserver
+
     observe: function(subject, topic, data)
     {
         if(topic != "nsPref:changed") return;
         fbs.obeyPrefs();
     },
+
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 
     get lastErrorWindow()
@@ -990,9 +992,12 @@ var fbs =
         return fbs.haltReturnValue;
     },
 
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+    // Break on Next
 
-    // ******************** Break on next *******************************************************
     // deprecated API
+    // xxxjjb: BON should be entirely implemented by breakOnNextCall object, right?
+
     suspend: function(debuggr, context)
     {
         fbs.breakOnNextCall(debuggr, context);
@@ -1082,7 +1087,6 @@ var fbs =
             if (FBTrace.DBG_FBS_BP)
                 FBTrace.sysout("fbs.disableBreakpoint no find for "+lineNo+"@"+url);
         }
-
     },
 
     isBreakpointDisabled: function(url, lineNo)
@@ -1192,9 +1196,9 @@ var fbs =
         }
     },
 
-    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
     // error breakpoints are a way of selecting breakpoint from the Console
-    //
+
     setErrorBreakpoint: function(sourceFile, lineNo, debuggr)
     {
         var url = sourceFile.href;
@@ -1400,7 +1404,7 @@ var fbs =
             return -1;
     },
 
-    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
     enableDebugger: function()
     {
@@ -1421,7 +1425,9 @@ var fbs =
             jsd = DebuggerService.getService(jsdIDebuggerService);
 
             if ( FBTrace.DBG_FBS_ERRORS )
-                FBTrace.sysout("enableDebugger gets jsd service, isOn:"+jsd.isOn+" initAtStartup:"+jsd.initAtStartup+" now have "+debuggers.length+" debuggers"+" in "+clients.length+" clients");
+                FBTrace.sysout("enableDebugger gets jsd service, isOn:"+jsd.isOn+" initAtStartup:"+
+                    jsd.initAtStartup+" now have "+debuggers.length+" debuggers"+" in "+
+                    clients.length+" clients");
 
             // This property has been removed from Fx40
             if (jsd.initAtStartup)
@@ -1433,14 +1439,14 @@ var fbs =
             if (!jsd.isOn)
             {
                 jsd.asyncOn(  // turn on jsd for the next event
-                        {
-                            onDebuggerActivated: function doDebuggerActivated()
-                            {
-                                // now we are in the next event and jsd is on.
-                                fbs.onDebuggerActivated();
-                                fbs.onJSDebuggingActive();
-                            }
-                        });
+                {
+                    onDebuggerActivated: function doDebuggerActivated()
+                    {
+                        // now we are in the next event and jsd is on.
+                        fbs.onDebuggerActivated();
+                        fbs.onJSDebuggingActive();
+                    }
+                });
             }
             else
             {
@@ -1464,8 +1470,10 @@ var fbs =
     onDebuggerActivated: function()
     {
         jsd.flags |= DISABLE_OBJECT_TRACE;
+
         if (FBTrace.DBG_FBS_ERRORS)
             FBTrace.sysout("jsd.onDebuggerActivated ==========================");
+
         if (jsd.pauseDepth && FBTrace.DBG_FBS_ERRORS)
             FBTrace.sysout("fbs.enableDebugger found non-zero jsd.pauseDepth !! "+jsd.pauseDepth);
     },
@@ -1495,14 +1503,16 @@ var fbs =
         var mustReset = (pref !== fbs.scriptsFilter)
 
         if (FBTrace.DBG_FBS_ERRORS)
-            FBTrace.sysout("obeyPrefs mustReset = "+mustReset+" pref: "+pref+" fbs.scriptsFilter: "+fbs.scriptsFilter, fbs);
+            FBTrace.sysout("obeyPrefs mustReset = "+mustReset+" pref: "+pref+" fbs.scriptsFilter: "
+                +fbs.scriptsFilter, fbs);
 
         pref = fbs.filterSystemURLs;
         fbs.filterSystemURLs = prefs.getBoolPref("extensions.firebug.service.filterSystemURLs");  // may not be exposed to users
         mustReset = mustReset || (pref !== fbs.filterSystemURLs);
 
         if (FBTrace.DBG_FBS_ERRORS)
-                FBTrace.sysout("obeyPrefs mustReset = "+mustReset+" pref: "+pref+" fbs.filterSystemURLs: "+fbs.filterSystemURLs);
+            FBTrace.sysout("obeyPrefs mustReset = "+mustReset+" pref: "+pref+
+                " fbs.filterSystemURLs: "+fbs.filterSystemURLs);
 
         if (mustReset && jsd && jsd.scriptHook)
         {
@@ -1525,9 +1535,12 @@ var fbs =
 
         FirebugPrefsObserver.syncFilter();
 
-        try {
+        try
+        {
             if (FBTrace.DBG_FBS_ERRORS)
-                FBTrace.sysout("fbs.obeyPrefs showStackTrace:"+fbs.showStackTrace+" breakOnErrors:"+fbs.breakOnErrors+" trackThrowCatch:"+fbs.trackThrowCatch+" scriptFilter:"+fbs.scriptsFilter+" filterSystemURLs:"+fbs.filterSystemURLs);
+                FBTrace.sysout("fbs.obeyPrefs showStackTrace:"+fbs.showStackTrace+
+                    " breakOnErrors:"+fbs.breakOnErrors+" trackThrowCatch:"+fbs.trackThrowCatch+
+                    " scriptFilter:"+fbs.scriptsFilter+" filterSystemURLs:"+fbs.filterSystemURLs);
         }
         catch (exc)
         {
@@ -1604,7 +1617,8 @@ var fbs =
         if (fbs.pauseDepth > 0 || force)
         {
             if (FBTrace.DBG_ACTIVATION && (!jsd.isOn || jsd.pauseDepth == 0) )
-                FBTrace.sysout("fbs.unpause while jsd.isOn is "+jsd.isOn+" and hooked scripts pauseDepth:"+jsd.pauseDepth);
+                FBTrace.sysout("fbs.unpause while jsd.isOn is "+jsd.isOn+
+                    " and hooked scripts pauseDepth:"+jsd.pauseDepth);
 
             fbs.pauseDepth--;
             fbs.hookScripts();
@@ -1616,7 +1630,8 @@ var fbs =
 
 
             if (FBTrace.DBG_ACTIVATION)
-                FBTrace.sysout("fbs.unPause hooked scripts and unPaused, active:"+active+" depth "+depth+" jsd.isOn: "+jsd.isOn+" fbs.pauseDepth "+fbs.pauseDepth);
+                FBTrace.sysout("fbs.unPause hooked scripts and unPaused, active:"+active+" depth "+
+                    depth+" jsd.isOn: "+jsd.isOn+" fbs.pauseDepth "+fbs.pauseDepth);
 
             dispatch(clients, "onJSDActivate", [active, "unpause depth"+jsd.pauseDepth]);
 
@@ -1624,7 +1639,8 @@ var fbs =
         else  // we were not paused.
         {
             if (FBTrace.DBG_ACTIVATION)
-                FBTrace.sysout("fbs.unPause no action: (jsd.pauseDepth || !jsd.isOn) = ("+ jsd.pauseDepth+" || "+ !jsd.isOn+")"+" fbs.pauseDepth "+fbs.pauseDepth);
+                FBTrace.sysout("fbs.unPause no action: (jsd.pauseDepth || !jsd.isOn) = ("+
+                    jsd.pauseDepth+" || "+ !jsd.isOn+")"+" fbs.pauseDepth "+fbs.pauseDepth);
         }
         return fbs.pauseDepth;
     },
@@ -1641,7 +1657,6 @@ var fbs =
             FBTrace.sysout("fbs.broadcast "+message+" to "+clients.length+" clients", clients);
     },
 
-
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 
     normalizeURL: function(url)
@@ -1657,7 +1672,6 @@ var fbs =
         return url ? url.replace(/file:\/\/\//, "file:/") : "";
     },
 
-
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
     // jsd Hooks
 
@@ -1665,7 +1679,9 @@ var fbs =
     onDebugger: function(frame, type, rv)
     {
         if (FBTrace.DBG_FBS_BP)
-            FBTrace.sysout("fbs.onDebugger with haltDebugger="+(haltObject?haltObject.haltDebugger:"null")+" in "+frame.script.fileName, frame.script);
+            FBTrace.sysout("fbs.onDebugger with haltDebugger="+
+                (haltObject?haltObject.haltDebugger:"null")+" in "+frame.script.fileName, frame.script);
+
         try
         {
             if ( FBTrace.DBG_FBS_SRCUNITS && fbs.isTopLevelScript(frame, type, rv)  )
@@ -1858,7 +1874,7 @@ var fbs =
             return fbs.routeBreakToDebuggr(frame, type, val);
     },
 
-    // **************************************************************************************
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
     onThrow: function(frame, type, rv)
     {
@@ -1965,10 +1981,10 @@ var fbs =
 
     onTopLevel: function(frame, type)
     {
-            if (FBTrace.DBG_TOPLEVEL)
-                FBTrace.sysout("fbs.onTopLevel "+getCallFromType(type)+" with delegate "+fbs.onTopLevelDelegate+" "+frame.script.tag+" "+frame.script.fileName);
-            if (fbs.onTopLevelDelegate)
-                fbs.onTopLevelDelegate(frame, type)
+        if (FBTrace.DBG_TOPLEVEL)
+            FBTrace.sysout("fbs.onTopLevel "+getCallFromType(type)+" with delegate "+fbs.onTopLevelDelegate+" "+frame.script.tag+" "+frame.script.fileName);
+        if (fbs.onTopLevelDelegate)
+            fbs.onTopLevelDelegate(frame, type)
     },
 
     setTopLevelHook: function(fnOfFrameAndType)
@@ -2222,7 +2238,8 @@ var fbs =
         return sourceFile;
     },
 
-    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
     getNestedScriptEnumerator: function()
     {
         var enumer =
@@ -2403,17 +2420,17 @@ var fbs =
         }
     },
 
-    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
     createFilter: function(pattern, pass)
     {
         var filter = {
-                globalObject: null,
-                flags: pass ? (jsdIFilter.FLAG_ENABLED | jsdIFilter.FLAG_PASS) : jsdIFilter.FLAG_ENABLED,
-                urlPattern: pattern,
-                startLine: 0,
-                endLine: 0
-            };
+            globalObject: null,
+            flags: pass ? (jsdIFilter.FLAG_ENABLED | jsdIFilter.FLAG_PASS) : jsdIFilter.FLAG_ENABLED,
+            urlPattern: pattern,
+            startLine: 0,
+            endLine: 0
+        };
         return filter;
     },
 
@@ -2518,9 +2535,9 @@ var fbs =
     {
         FBTrace.sysout("fbs.traceFilters from "+from);
         jsd.enumerateFilters({ enumerateFilter: function(filter)
-            {
-                FBTrace.sysout("jsdIFilter "+filter.urlPattern, filter);
-            }});
+        {
+            FBTrace.sysout("jsdIFilter "+filter.urlPattern, filter);
+        }});
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
@@ -2530,44 +2547,45 @@ var fbs =
         var enumeratedContexts = [];
         jsd.enumerateContexts( {enumerateContext: function(jscontext)
         {
-                try
+            try
+            {
+                if (!jscontext.isValid)
+                    return;
+
+                var wrappedGlobal = jscontext.globalObject;
+                if (!wrappedGlobal)
+                    return;
+
+                var unwrappedGlobal = wrappedGlobal.getWrappedValue();
+                if (!unwrappedGlobal)
+                    return;
+
+                if (unwrappedGlobal instanceof Ci.nsISupports)
+                    var global = new XPCNativeWrapper(unwrappedGlobal);
+                else
+                    var global = unwrappedGlobal;
+
+                if (FBTrace.DBG_FBS_JSCONTEXTS)
+                    FBTrace.sysout("getJSContexts jsIContext tag:"+jscontext.tag+
+                        (jscontext.isValid?" - isValid\n":" - NOT valid\n"));
+
+                if (global)
                 {
-                    if (!jscontext.isValid)
-                        return;
-
-                    var wrappedGlobal = jscontext.globalObject;
-                    if (!wrappedGlobal)
-                        return;
-
-                    var unwrappedGlobal = wrappedGlobal.getWrappedValue();
-                    if (!unwrappedGlobal)
-                        return;
-
-                    if (unwrappedGlobal instanceof Ci.nsISupports)
-                        var global = new XPCNativeWrapper(unwrappedGlobal);
-                    else
-                        var global = unwrappedGlobal;
-
+                    callback(global, jscontext.tag);
+                }
+                else
+                {
                     if (FBTrace.DBG_FBS_JSCONTEXTS)
-                        FBTrace.sysout("getJSContexts jsIContext tag:"+jscontext.tag+(jscontext.isValid?" - isValid\n":" - NOT valid\n"));
-
-                    if (global)
-                    {
-                        callback(global, jscontext.tag);
-                    }
-                    else
-                    {
-                        if (FBTrace.DBG_FBS_JSCONTEXTS)
-                            FBTrace.sysout("getJSContexts no global object tag:"+jscontext.tag);
-                        return; // skip this
-                    }
-
-                    enumeratedContexts.push(jscontext);
+                        FBTrace.sysout("getJSContexts no global object tag:"+jscontext.tag);
+                    return; // skip this
                 }
-                catch(e)
-                {
-                    FBTrace.sysout("jscontext dump FAILED "+e, e);
-                }
+
+                enumeratedContexts.push(jscontext);
+            }
+            catch(e)
+            {
+                FBTrace.sysout("jscontext dump FAILED "+e, e);
+            }
 
         }});
         return enumeratedContexts;
@@ -2584,7 +2602,8 @@ var fbs =
                 scope = scope.jsParent;
 
             // These are just determined by trial and error.
-            if (scope.jsClassName == "Window" || scope.jsClassName == "ChromeWindow" || scope.jsClassName == "ModalContentWindow")
+            if (scope.jsClassName == "Window" || scope.jsClassName == "ChromeWindow" ||
+                scope.jsClassName == "ModalContentWindow")
             {
                 lastWindowScope = wrapIfNative(scope.getWrappedValue());
                 return  lastWindowScope;
@@ -2766,7 +2785,9 @@ var fbs =
         return mark;
     },
 
-    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+    // Breakpoints 
+
     // jsd breakpoints are on a PC in a jsdIScript
     // Users breakpoint on a line of source
     // Because test.js can be included multiple times, the URL+line number from the UI is not unique.
@@ -2779,7 +2800,6 @@ var fbs =
     //    Save the sourceFile.href+line and set the jsd breakpoint when we compile
     //    Venkman called these "future" breakpoints
     //    We cannot prevent future breakpoints on lines that have no script.  Break onCreate with error?
-
     addBreakpoint: function(type, sourceFile, lineNo, props, debuggr)
     {
         var url = sourceFile.href;
@@ -2803,7 +2823,10 @@ var fbs =
         {
             bp = this.recordBreakpoint(type, url, lineNo, debuggr, props, sourceFile);
         }
-        if (FBTrace.DBG_FBS_BP) FBTrace.sysout("addBreakpoint for "+url, [bp, sourceFile]);
+
+        if (FBTrace.DBG_FBS_BP)
+            FBTrace.sysout("addBreakpoint for "+url, [bp, sourceFile]);
+
         return bp;
     },
 
@@ -2844,7 +2867,8 @@ var fbs =
         var urlBreakpoints = fbs.getBreakpoints(url);
 
         if (FBTrace.DBG_FBS_BP)
-            FBTrace.sysout("removeBreakpoint for "+url+", need to check bps="+(urlBreakpoints?urlBreakpoints.length:"none"));
+            FBTrace.sysout("removeBreakpoint for "+url+", need to check bps="+
+                (urlBreakpoints?urlBreakpoints.length:"none"));
 
         if (!urlBreakpoints)
             return false;
@@ -2852,7 +2876,8 @@ var fbs =
         for (var i = 0; i < urlBreakpoints.length; ++i)
         {
             var bp = urlBreakpoints[i];
-            if (FBTrace.DBG_FBS_BP) FBTrace.sysout("removeBreakpoint checking bp.lineNo vs lineNo="+bp.lineNo+" vs "+lineNo);
+            if (FBTrace.DBG_FBS_BP)
+                FBTrace.sysout("removeBreakpoint checking bp.lineNo vs lineNo="+bp.lineNo+" vs "+lineNo);
 
             if (bp.lineNo === lineNo)
             {
@@ -2869,7 +2894,8 @@ var fbs =
                                 try
                                 {
                                     script.clearBreakpoint(bp.pc[j]);
-                                    if (FBTrace.DBG_FBS_BP) FBTrace.sysout("removeBreakpoint in tag="+script.tag+" at "+lineNo+"@"+url);
+                                    if (FBTrace.DBG_FBS_BP)
+                                        FBTrace.sysout("removeBreakpoint in tag="+script.tag+" at "+lineNo+"@"+url);
                                 }
                                 catch (exc)
                                 {
@@ -3891,8 +3917,8 @@ function shiftCallType(type)
     return type + 10;
 }
 
-// ************************************************************************************************
-// Chromebug Tracing 
+// ********************************************************************************************* //
+// Chromebug Tracing
 
 // xxxJJB, shouldn't the followin code be part of Chromebug (could be done as part of splitting
 // this file into more modules?)
@@ -4003,9 +4029,9 @@ function tmpout(text)
 
 }
 
-// ************************************************************************************************
+// ********************************************************************************************* //
 // Initialization
 
 fbs.initialize();
 
-// ************************************************************************************************
+// ********************************************************************************************* //
