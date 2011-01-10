@@ -149,10 +149,10 @@ var FBTrace = null;
 // ************************************************************************************************
 function frameId(frame, depth)
 {
-	if (frame)
-		return frame.script.tag+"@"+frame.line+"^"+depth;
-	else
-		return "noIdForNoframe";
+    if (frame)
+        return frame.script.tag+"@"+frame.line+"^"+depth;
+    else
+        return "noIdForNoframe";
 }
 
 function extend(l,r)
@@ -1648,8 +1648,11 @@ var fbs =
             if (haltObject)
             {
                 var peelOurselvesOff = frame;
-                if (peelOurselvesOff.script.fileName.indexOf("modules/debuggerHalter.js") > 0)
+                if (peelOurselvesOff.script.fileName.indexOf("debuggerHalter.js") > 0)
                     peelOurselvesOff = frame.callingFrame;  // remove debuggerHalter()
+
+                while( peelOurselvesOff && ( peelOurselvesOff.script.fileName.indexOf("firebug-service.js") > 0 ) )
+                    peelOurselvesOff = peelOurselvesOff.callingFrame;
 
                 while( peelOurselvesOff && ( peelOurselvesOff.script.fileName.indexOf("content/debugger.js") > 0 ) )
                     peelOurselvesOff = peelOurselvesOff.callingFrame;
