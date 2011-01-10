@@ -573,7 +573,7 @@ IntoStepper.prototype = extend(LineStepper.prototype,
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 /**
- * TODO: doc, xxxJJB: is this for FBTrace purposes only?
+ * Tracer for learning about function stepping, not part of firebug
  */
 function LogFunctionStepper()
 {
@@ -997,6 +997,7 @@ var fbs =
 
     // deprecated API
     // xxxjjb: BON should be entirely implemented by breakOnNextCall object, right?
+    // xxxhonza: Debugger.suspend should be removed and replaced by breakOnNextCall
 
     suspend: function(debuggr, context)
     {
@@ -2786,7 +2787,7 @@ var fbs =
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-    // Breakpoints 
+    // Breakpoints
 
     // jsd breakpoints are on a PC in a jsdIScript
     // Users breakpoint on a line of source
@@ -3431,6 +3432,7 @@ var fbs =
 
     // TODO rewrite as a Stepper
     // xxxJJB: perhaps xxxHonza could implement the stepper, but what the code is responsible for?
+    // xxxhonza: traceAll and trace a function. I don't think these work anyway, a good start is to remove the old code.
     hookCalls: function(callBack, unhookAtBottom)
     {
         var contextCached = null;
@@ -3856,7 +3858,7 @@ var QuitApplicationObserver =
 // ********************************************************************************************* //
 // Console Service
 
-// xxxJJB: Support for console logging could be moved into separate module, correct? 
+// xxxJJB: Support for console logging could be moved into separate module, correct?
 
 var consoleService = null;
 
@@ -3922,6 +3924,7 @@ function shiftCallType(type)
 
 // xxxJJB, shouldn't the followin code be part of Chromebug (could be done as part of splitting
 // this file into more modules?)
+// xxxhonza, yes
 
 function getTmpFile()
 {
