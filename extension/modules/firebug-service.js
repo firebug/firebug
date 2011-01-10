@@ -91,7 +91,7 @@ const COMPONENTS_FILTERS = [
     new RegExp("^(file:/.*/modules/)firebug-[^\\.]*\\.js$"),
     new RegExp("^(file:/.*/Contents/MacOS/extensions/.*/components/).*\\.js$"),
     new RegExp("^(file:/.*/modules/).*\\.jsm$"),
-    ];
+];
 
 const reDBG = /DBG_(.*)/;
 const reXUL = /\.xul$|\.xml$/;
@@ -99,7 +99,6 @@ const reTooMuchRecursion = /too\smuch\srecursion/;
 
 // ************************************************************************************************
 // Globals
-
 
 //https://developer.mozilla.org/en/Using_JavaScript_code_modules
 var EXPORTED_SYMBOLS = ["fbs"];
@@ -114,8 +113,7 @@ var urlFilters = [
     'chrome://',
     'XStringBundle',
     'x-jsd:ppbuffer?type=function', // internal script for pretty printing
-    ];
-
+];
 
 var clients = [];
 var debuggers = [];
@@ -147,6 +145,7 @@ var waitingForTimer = false;
 var FBTrace = null;
 
 // ************************************************************************************************
+
 function frameId(frame, depth)
 {
     if (frame)
@@ -155,6 +154,7 @@ function frameId(frame, depth)
         return "noIdForNoframe";
 }
 
+// xxxHonza: duplicated in lib.js, there should be a shared module with this API.
 function extend(l,r)
 {
     var newOb = {};
@@ -268,7 +268,8 @@ var jsdHandlers =
     }
 };
 
-// ************************************* BREAK ON NEXT ***********************************************
+// ********************************************************************************************* //
+// Break on Next
 
 function BreakOnNextCall(debuggr, context)
 {
@@ -312,7 +313,10 @@ BreakOnNextCall.prototype =
         if (lucky) // then we hit in a function in our context
         {
             if (FBTrace.DBG_FBS_STEP)
-                FBTrace.sysout("breakOnNextTopFunction hits at "+getCallFromType(type)+" at "+frame.script.fileName+" tag:"+(lucky?"LUCKY WINNER":frame.script.tag), framesToString(frame));
+                FBTrace.sysout("breakOnNextTopFunction hits at "+getCallFromType(type)+" at "+
+                    frame.script.fileName+" tag:"+(lucky?"LUCKY WINNER":frame.script.tag),
+                    framesToString(frame));
+
             return this.hit(frame, type);
         }
         // else maybe we hit on a event unrelated to our context
@@ -329,13 +333,15 @@ BreakOnNextCall.prototype =
 //   segment1.fnc45
 //
 
+// ********************************************************************************************* //
+// Steppers Implementation
 
-// ******************** STEPPING **********************************************************
 // run until the current function returns, then stop in the caller.
 function OutStepper(debuggr, context)
 {
     this.debuggr = debuggr;
     this.context = context;
+
     if (!this.debuggr)
         ERROR("firebug-service.OutStepper no debuggr");
 }
@@ -349,7 +355,7 @@ OutStepper.prototype =
         if (frame.callingFrame)
             return frameId(frame.callingFrame, this.depth);
 
-        var debuggr =  fbs.reFindDebugger(frame, this.debuggr);
+        var debuggr = fbs.reFindDebugger(frame, this.debuggr);
         if (debuggr && debuggr.breakContext)
             return debuggr.breakContext.getName(); //  TODO segments
     },
@@ -376,7 +382,8 @@ OutStepper.prototype =
         return true;
     },
 
-    onFunctionCall: function stepFunctionCall(frame, type) // the frame will be running the called script
+    // the frame will be running the called script
+    onFunctionCall: function stepFunctionCall(frame, type)
     {
         var callingFrameId = this.getCallingFrameId(frame);
 
@@ -385,12 +392,14 @@ OutStepper.prototype =
             this.depth++;
             this.callingFrameId = callingFrameId;  // push new id for stepFunctionReturn
             if (FBTrace.DBG_FBS_STEP)
-                FBTrace.sysout(this.mode+" stepFunctionCall new depth "+this.depth+" new callingFrameId "+this.callingFrameId);
+                FBTrace.sysout(this.mode+" stepFunctionCall new depth "+this.depth+
+                    " new callingFrameId "+this.callingFrameId);
         }
         // else someone else, ignore it
     },
 
-    onFunctionReturn: function stepFunctionReturn(frame, type) // the frame will be running the called script
+    // the frame will be running the called script
+    onFunctionReturn: function stepFunctionReturn(frame, type)
     {
         var callingFrameId = this.getCallingFrameId(frame);
 
@@ -415,6 +424,7 @@ OutStepper.prototype =
                 return;
             }
         }
+
         if (!this.callingFrameId && callingFrameId) // then we are returning with out ever calling stepFunctionCall, but on a frame we care about.
         {
             if (frame.script.tag === this.startFrameTag) // then are returning from the frame we care about
@@ -425,10 +435,12 @@ OutStepper.prototype =
                     ERROR("Should be top level just exit", this);
             }
             ERROR("Returning from a frame we care about but not one we know "+frameToString(frame), this);
+        }
 
-        } // else it's is not a frame we care about
+        // else it's is not a frame we care about
         if (FBTrace.DBG_FBS_STEP)
-            FBTrace.sysout(this.mode+".onFunctionReturn callingFrameId "+callingFrameId+" called frame "+frameToString(frame), this)
+            FBTrace.sysout(this.mode+".onFunctionReturn callingFrameId "+callingFrameId+
+                " called frame "+frameToString(frame), this)
     },
 
     unhook: function(frame)
@@ -460,6 +472,8 @@ OutStepper.prototype =
     },
 };
 
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
 // like OutStepper, but run a single line in this function.
 function LineStepper(debuggr, context)
 {
@@ -478,7 +492,8 @@ LineStepper.prototype = extend(OutStepper.prototype,
         this.stepFrameTag = frame.script.tag;
 
         if (FBTrace.DBG_FBS_STEP)
-            FBTrace.sysout(this.mode+".hook "+frameToString(frame)+" with lineFrameId "+this.lineFrameId, this);
+            FBTrace.sysout(this.mode+".hook "+frameToString(frame)+" with lineFrameId "+
+                this.lineFrameId, this);
     },
 
     unhook: function unhookLineStepper(frame)
@@ -487,7 +502,7 @@ LineStepper.prototype = extend(OutStepper.prototype,
             FBTrace.sysout("LineStepper unhook ", this);
     },
 
-    //  jsdIExecutionHook, onExecute
+    // jsdIExecutionHook, onExecute
     onInterrupt: function stepLine(frame, type, rv)
     {
         if (this.stepFrameTag !== frame.script.tag) // then we stepped into another function
@@ -495,11 +510,16 @@ LineStepper.prototype = extend(OutStepper.prototype,
             // We'd have much bettter performance if we set a new OutStepper here then remove interrupt hook until it hits.
             return RETURN_CONTINUE;
         }
+
         // Sometimes the same line will have multiple interrupts, so check
         // a unique id for the line and don't break until it changes
         var frameLineId = frameId(frame, this.depth);
+
         if (FBTrace.DBG_FBS_STEP)
-            FBTrace.sysout(this.mode+" interruptHook pc:"+frame.pc+" frameLineId: "+frameLineId+" vs "+this.lineFrameId+" running "+frame.script.tag+" of "+frame.script.fileName+" at "+frame.line+"."+frame.pc, this);
+            FBTrace.sysout(this.mode+" interruptHook pc:"+frame.pc+" frameLineId: "+frameLineId+
+                " vs "+this.lineFrameId+" running "+frame.script.tag+" of "+frame.script.fileName+
+                " at "+frame.line+"."+frame.pc, this);
+
         if (frameLineId != this.lineFrameId)
             return this.hit(frame, type, rv);
         else
@@ -514,6 +534,8 @@ LineStepper.prototype = extend(OutStepper.prototype,
     },
 
 });
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 // Like OutStepper but if the line calls a function, stop on its first line.
 function IntoStepper(debuggr, context)
@@ -540,13 +562,19 @@ IntoStepper.prototype = extend(LineStepper.prototype,
                 return this.hit(frame, type);
             // else someone else, ignore it
             if (FBTrace.DBG_FBS_STEP)
-                FBTrace.sysout(this.mode+".intoFunctionCall no match "+this.stepFrameTag+" vs "+callingFrame.script.tag, this);
+                FBTrace.sysout(this.mode+".intoFunctionCall no match "+this.stepFrameTag+" vs "+
+                    callingFrame.script.tag, this);
         }
+
         // else this would be a top level call, do we want to check for another event from this context?
     },
 });
 
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
+/**
+ * TODO: doc, xxxJJB: is this for FBTrace purposes only?
+ */
 function LogFunctionStepper()
 {
     this.initialize();
@@ -607,17 +635,18 @@ LogFunctionStepper.prototype =
 
     logFunction: function(frame, type)
     {
-            var typeName = getCallFromType(type);
-            var actualFrames = countFrames(frame);
-            fbs.stackDescription.entries.push(""+fbs.stackDescription.depth+
-                ": "+typeName +
-                " (frameCount: "+actualFrames+") " +
-                " oldestTag "+fbs.stackDescription.oldestTag+
-                " running "+frame.script.tag+" of "+frame.script.fileName+" at "+frame.line+"."+frame.pc);
+        var typeName = getCallFromType(type);
+        var actualFrames = countFrames(frame);
+        fbs.stackDescription.entries.push(""+fbs.stackDescription.depth+
+            ": "+typeName +
+            " (frameCount: "+actualFrames+") " +
+            " oldestTag "+fbs.stackDescription.oldestTag+
+            " running "+frame.script.tag+" of "+frame.script.fileName+" at "+frame.line+"."+frame.pc);
     },
-
-
 };
+
+// ********************************************************************************************* //
+// Firebug Service
 
 var fbs =
 {
@@ -2493,6 +2522,7 @@ var fbs =
                 FBTrace.sysout("jsdIFilter "+filter.urlPattern, filter);
             }});
     },
+
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 
     eachJSContext: function(callback)
@@ -3374,6 +3404,7 @@ var fbs =
     },
 
     // TODO rewrite as a Stepper
+    // xxxJJB: perhaps xxxHonza could implement the stepper, but what the code is responsible for?
     hookCalls: function(callBack, unhookAtBottom)
     {
         var contextCached = null;
@@ -3449,6 +3480,8 @@ var ScriptInterrupter =
 
     enable: function(script)
     {
+        FBTrace.sysout("fbs.ScriptInterrupter.enable;");
+
         if (!script.enableSingleStepInterrupts)
             return;
 
@@ -3467,10 +3500,15 @@ var ScriptInterrupter =
         this.entries[script.tag] = {
             script: script
         }
+
+        FBTrace.sysout("fbs.ScriptInterrupter.enable; " + script.fileName + " (" +
+            script.baseLineNumber + ")", script);
     },
 
     disable: function(script)
     {
+        FBTrace.sysout("fbs.ScriptInterrupter.disable;");
+
         if (!script.enableSingleStepInterrupts)
             return;
 
@@ -3488,6 +3526,9 @@ var ScriptInterrupter =
         }
 
         delete this.entries[script.tag];
+
+        FBTrace.sysout("fbs.ScriptInterrupter.disable; " + script.fileName + " (" +
+            script.baseLineNumber + ")", script);
     },
 
     disableAll: function()
@@ -3574,7 +3615,7 @@ function deepSystemURLStem(rawJSD_script_filename)
     return false;
 }
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 function dispatch(listeners, name, args)
 {
@@ -3718,7 +3759,24 @@ function remove(list, item)
         list.splice(index, 1);
 }
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+function unwrapIValue(object)
+{
+    var unwrapped = object.getWrappedValue();
+    try
+    {
+        if (unwrapped)
+            return XPCSafeJSObjectWrapper(unwrapped);
+    }
+    catch (exc)
+    {
+        if (FBTrace.DBG_ERRORS)
+            FBTrace.sysout("fbs.unwrapIValue ERROR for "+object,
+                {exc: exc, object: object, unwrapped: unwrapped});
+    }
+}
+
+// ********************************************************************************************* //
+// Preferences
 
 var FirebugPrefsObserver =
 {
@@ -3732,14 +3790,19 @@ var FirebugPrefsObserver =
     }
 };
 
+// ********************************************************************************************* //
+// Application Observers
+
 var QuitApplicationGrantedObserver =
 {
     observe: function(subject, topic, data)
     {
         if (FBTrace.DBG_FBS_ERRORS)
-            FBTrace.sysout("xxxxxxxxxxxx FirebugService QuitApplicationGrantedObserver "+topic+"  start xyyxxxxxxxxxxxxxx\n");
+            FBTrace.sysout("xxxxxxxxxxxx FirebugService QuitApplicationGrantedObserver "+topic+
+                "  start xyyxxxxxxxxxxxxxx\n");
     }
 };
+
 var QuitApplicationRequestedObserver =
 {
     observe: function(subject, topic, data)
@@ -3748,6 +3811,7 @@ var QuitApplicationRequestedObserver =
             FBTrace.sysout("FirebugService QuitApplicationRequestedObserver "+topic);
     }
 };
+
 var QuitApplicationObserver =
 {
     observe: function(subject, topic, data)
@@ -3758,27 +3822,15 @@ var QuitApplicationObserver =
         fbs.shutdown();
         fbs = null;
         if (FBTrace.DBG_FBS_ERRORS)
-            FBTrace.sysout("xxxxxxxxxxxx FirebugService QuitApplicationObserver "+topic+" end xxxxxxxxxxxxxxxxx\n");
+            FBTrace.sysout("xxxxxxxxxxxx FirebugService QuitApplicationObserver "+topic+
+                " end xxxxxxxxxxxxxxxxx\n");
     }
 };
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
-function unwrapIValue(object)
-{
-    var unwrapped = object.getWrappedValue();
-    try
-    {
-        if (unwrapped)
-            return XPCSafeJSObjectWrapper(unwrapped);
-    }
-    catch (exc)
-    {
-        if (FBTrace.DBG_ERRORS)
-            FBTrace.sysout("fbs.unwrapIValue ERROR for "+object,{exc: exc, object: object, unwrapped: unwrapped});
-    }
-}
+// ********************************************************************************************* //
+// Console Service
 
-//* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+// xxxJJB: Support for console logging could be moved into separate module, correct? 
 
 var consoleService = null;
 
@@ -3839,7 +3891,12 @@ function shiftCallType(type)
     return type + 10;
 }
 
-// For special chromebug tracing
+// ************************************************************************************************
+// Chromebug Tracing 
+
+// xxxJJB, shouldn't the followin code be part of Chromebug (could be done as part of splitting
+// this file into more modules?)
+
 function getTmpFile()
 {
     var file = Components.classes["@mozilla.org/file/directory_service;1"].
@@ -3854,8 +3911,8 @@ function getTmpFile()
 function getTmpStream(file)
 {
     // file is nsIFile, data is a string
-    var foStream = Components.classes["@mozilla.org/network/file-output-stream;1"].
-                             createInstance(Components.interfaces.nsIFileOutputStream);
+    var foStream = Cc["@mozilla.org/network/file-output-stream;1"].
+        createInstance(Ci.nsIFileOutputStream);
 
     // use 0x02 | 0x10 to open file for appending.
     foStream.init(file, 0x02 | 0x08 | 0x20, 0666, 0);
@@ -3866,18 +3923,22 @@ function getTmpStream(file)
     return foStream;
 }
 
-var trackFiles  = {
+var trackFiles =
+{
     allFiles: {},
+
     add: function(fileName)
     {
         var name = new String(fileName);
         this.allFiles[name] = [];
     },
+
     drop: function(fileName)
     {
         var name = new String(fileName);
         this.allFiles[name].push("dropped");
     },
+
     def: function(frame)
     {
         var frameGlobal = fbs.getOutermostScope(frame);
@@ -3899,6 +3960,7 @@ var trackFiles  = {
             this.allFiles[name]=["not added"];
         this.allFiles[name].push(scopeName);
     },
+
     merge: function(moreFiles)
     {
         for (var p in moreFiles)
@@ -3909,6 +3971,7 @@ var trackFiles  = {
                 this.allFiles[p] = moreFiles[p];
         }
     },
+
     dump: function()
     {
         var n = 0;
@@ -3940,6 +4003,9 @@ function tmpout(text)
 
 }
 
+// ************************************************************************************************
+// Initialization
+
 fbs.initialize();
 
-//consoleService.logStringMessage("fbs module exported "+fbs);
+// ************************************************************************************************
