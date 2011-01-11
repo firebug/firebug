@@ -126,6 +126,13 @@ top.Firebug.Console.injector =
 
     getConsoleHandler: function(context, win)
     {
+        if (!win.document)
+        {
+            if (FBTrace.DBG_ERRORS)
+                FBTrace.sysout("console.getConsoleHandler; NO DOCUMENT", {win:win, context:context});
+            return null;
+        }
+
         var attachedToken = win.document.getUserData("firebug-Token");
         if (context.activeConsoleHandlers)
         {
