@@ -62,12 +62,8 @@
   list-style-image: url(chrome://firebug/skin/inspect.png);
 }
 
-#inspector-button[disabled="true"] {
-  list-style-image: url(chrome://firebug/skin/inspectDisabled.png);
-}
-
 toolbar[iconsize="small"] #inspector-button > .toolbarbutton-icon {
-    list-style-image: url(chrome://firebug/skin/inspectSmall.png);
+    list-style-image: url(chrome://firebug/skin/inspect.png);
     width: 16px;
     height: 16px;
 }
