@@ -729,13 +729,13 @@ Firebug.TraceModule.MessageTemplate = domplate(Firebug.Rep,
     {
         return message;
     },
-    
+
     getSourceLink: function(target, object)
     {
-	    if (hasClass(target, "stackFrameLink"))
+        if (hasClass(target, "stackFrameLink"))
         {
-        	var sourceLink = new FBL.SourceLink(target.innerHTML, target.getAttribute("lineNumber"));
-			return sourceLink;
+            var sourceLink = new FBL.SourceLink(target.innerHTML, target.getAttribute("lineNumber"));
+            return sourceLink;
         }
     },
 
@@ -787,10 +787,10 @@ Firebug.TraceModule.MessageTemplate = domplate(Firebug.Rep,
 
         if (hasClass(target, "stackFrameLink")&& Firebug.ExternalEditors.count())
         {
-        	var sourceLink = new FBL.SourceLink(target.innerHTML, target.getAttribute("lineNumber"));
+            var sourceLink = new FBL.SourceLink(target.innerHTML, target.getAttribute("lineNumber"));
             Firebug.ExternalEditors.appendContextMenuItem(items, target.innerHTML, target.getAttribute("lineNumber"));
         }
-        
+
         if (items.length > 0)
             items.push("-");
 
@@ -1457,7 +1457,7 @@ Firebug.TraceModule.TraceMessage.prototype =
         {
             try
             {
-                if (this.obj instanceof Ci[iface])
+                if (("prototype" in Ci[iface]) && this.obj instanceof Ci[iface])
                 {
                     var ifaceProps = this.ifaces[iface] = [];
                     for (p in Ci[iface])
@@ -1466,7 +1466,7 @@ Firebug.TraceModule.TraceMessage.prototype =
             }
             catch (err)
             {
-                onPanic("TraceMessage.getInterfaces: " + iface, err);
+                onPanic("TraceMessage.getInterfaces: " + iface+" typeof(Ci[iface].prototype)="+typeof(Ci[iface].prototype), err);
             }
         }
         return this.ifaces;
