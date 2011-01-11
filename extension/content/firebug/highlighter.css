@@ -32,16 +32,10 @@
 }
 
 .firebugHighlight {
-    opacity: 1;
-    position: fixed;
-    background-color: transparent;
-    border: 2px solid #3875d7;
-}
-
-.firebugFrameHighlight {
-    opacity: 1;
-    position: fixed;
-    background-color: #3875d7;
+    opacity: 1 !important;
+    position: fixed !important;
+    background-color: transparent !important;
+    -moz-box-shadow: 0 0 2px 2px highlight !important;
 }
 
 .firebugLayoutBoxParent {

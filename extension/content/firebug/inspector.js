@@ -6,7 +6,6 @@ FBL.ns(function() { with (FBL) {
 // Constants
 
 const inspectDelay = 200;
-const edgeSize = 2;
 const defaultPrimaryPanel = "html";
 const defaultSecondaryPanel = "dom";
 const highlightCSS = "chrome://firebug/content/highlighter.css";
@@ -855,7 +854,7 @@ Firebug.Inspector.FrameHighlighter.prototype =
 
             var highlighter = this.getHighlighter(context, element);
 
-            move(highlighter, x - edgeSize, y - edgeSize);
+            move(highlighter, x, y);
             resize(highlighter, w, h);
 
             if (FBTrace.DBG_INSPECT)
