@@ -467,10 +467,32 @@ function getHighlighter(type)
     }
 }
 
-function pad(element, t, r, b, l)
-{
-    element.style.padding = Math.abs(t) + "px " + Math.abs(r) + "px "
-        + Math.abs(b) + "px " + Math.abs(l) + "px";
+function pad(element, t, r, b, l) {
+    var css = 'padding:' + Math.abs(t) + "px " + Math.abs(r) + "px "
+         + Math.abs(b) + "px " + Math.abs(l) + "px !important;";
+    
+    if(element)
+        element.style.cssText = css;
+    else
+        return css;
+}
+
+function moveImp(element, x, y) {
+    var css = 'left:' + x + 'px !important;top:' + y + 'px !important;';
+    
+    if(element)
+        element.style.cssText = css;
+    else
+        return css;
+}
+
+function resizeImp(element, w, h) {
+    var css = 'width:' + w + 'px !important;height:' + h + 'px !important;';
+
+    if(element)
+        element.style.cssText = css;
+    else
+        return css;
 }
 
 // ************************************************************************************************
@@ -515,7 +537,7 @@ function getImageMapHighlighter(context)
                 if(!canvas)
                     init(null);
 
-                canvas.style.display = state?'block':'none';
+                canvas.style.cssText = 'display:' + (state?'block':'none') + ' !important';
             },
 
             getImages: function(mapName, multi)
@@ -611,8 +633,6 @@ function getImageMapHighlighter(context)
 
                     this.show(true);
                 }
-                else
-                    return;
             },
 
             mouseMoved: function(event)
@@ -850,18 +870,26 @@ Firebug.Inspector.FrameHighlighter.prototype =
 
         if(element.tagName !== "AREA")
         {
-            quickInfoBox.show(element);
-
-            var highlighter = this.getHighlighter(context, element);
-
-            move(highlighter, x, y);
-            resize(highlighter, w, h);
-
             if (FBTrace.DBG_INSPECT)
                 FBTrace.sysout("FrameHighlighter "+element.tagName);
             var body = getNonFrameBody(element);
             if (!body)
                 return this.unhighlight(context);
+
+
+            quickInfoBox.show(element);
+            var highlighter = this.getHighlighter(context, element);
+
+            cs = body.ownerDocument.defaultView.getComputedStyle(element, null);
+            csTransform = cs.MozTransform;
+
+            var css = moveImp(null, x, y) + resizeImp(null, w, h);
+            if(csTransform)
+                css +=
+                    '-moz-transform:' + csTransform + ' !important;',
+                    '-moz-transform-origin' + cs.MozTransformOrigin    + ' !important;';
+
+            highlighter.style.cssText = css;
 
             var needsAppend = !highlighter.parentNode || highlighter.ownerDocument != body.ownerDocument;
             if (needsAppend)
@@ -884,22 +912,6 @@ Firebug.Inspector.FrameHighlighter.prototype =
                 if (element.ownerDocument.contentType.indexOf("xul") === -1)  // otherwise the proxies take up screen space in browser.xul
                     createProxiesForDisabledElements(body);
             }
-
-            cs = body.ownerDocument.defaultView.getComputedStyle(element, null);
-            csTransform = cs.MozTransform;
-
-            if(csTransform)
-            {
-                csTransformOrig = cs.MozTransformOrigin;
-
-                highlighter.style.MozTransform = csTransform;
-                highlighter.style.MozTransformOrigin = csTransformOrig
-            }
-            else
-            {
-                highlighter.style.MozTransform = "";
-                highlighter.style.MozTransformOrigin = "";
-            }
         }
         else
         {
@@ -911,8 +923,8 @@ Firebug.Inspector.FrameHighlighter.prototype =
     unhighlight: function(context)
     {
         if (FBTrace.DBG_INSPECT)
-            FBTrace.sysout("FrameHighlighter unhightlight", context.window.location);
-        
+            FBTrace.sysout("FrameHighlighter unhighlight", context.window.location);
+
         var highlighter = this.getHighlighter(context);
         var body = highlighter.parentNode;
         if (body)
@@ -930,7 +942,7 @@ Firebug.Inspector.FrameHighlighter.prototype =
                 div = doc.createElementNS("http://www.w3.org/1999/xhtml", "div");
 
             hideElementFromInspection(div);
-            div.className = "firebugResetStyles firebugHighlight";
+            div.className = "firebugResetStyles firebugFrameHighlighter";
 
             context.frameHighlighter = div;
         }
@@ -994,14 +1006,14 @@ BoxModelHighlighter.prototype =
             var h = offset.height - (styles.paddingTop + styles.paddingBottom
                     + styles.borderTop + styles.borderBottom);
 
-            move(nodes.offset, x, y);
+            moveImp(nodes.offset, x, y);
             pad(nodes.margin, styles.marginTop, styles.marginRight, styles.marginBottom,
                     styles.marginLeft);
             pad(nodes.border, styles.borderTop, styles.borderRight, styles.borderBottom,
                     styles.borderLeft);
             pad(nodes.padding, styles.paddingTop, styles.paddingRight, styles.paddingBottom,
                     styles.paddingLeft);
-            resize(nodes.content, w, h);
+            resizeImp(nodes.content, w, h);
 
             // element.tagName !== "BODY" for issue 2447. hopefully temporary, robc
             var showLines = Firebug.showRulers && boxFrame && element.tagName !== "BODY";
@@ -1052,10 +1064,10 @@ BoxModelHighlighter.prototype =
                         + Math.abs(styles.marginTop) + Math.abs(styles.marginBottom);
                 }
 
-                move(nodes.lines.top, 0, top);
-                move(nodes.lines.right, left+width, 0);
-                move(nodes.lines.bottom, 0, top+height);
-                move(nodes.lines.left, left, 0)
+                moveImp(nodes.lines.top, 0, top);
+                moveImp(nodes.lines.right, left+width, 0);
+                moveImp(nodes.lines.bottom, 0, top+height);
+                moveImp(nodes.lines.left, left, 0)
             }
 
             var body = getNonFrameBody(element);
@@ -1128,45 +1140,33 @@ BoxModelHighlighter.prototype =
             if (FBTrace.DBG_INSPECT && doc)
                 FBTrace.sysout("inspect.getNodes doc: "+doc.location);
 
-            function createRuler(name)
-            {
-                var div = doc.createElementNS("http://www.w3.org/1999/xhtml", "div");
-                hideElementFromInspection(div);
-                div.className = "firebugResetStyles firebugRuler firebugRuler"+name;
-                return div;
-            }
+            var Ruler = "firebugResetStyles firebugRuler firebugRuler";
+            var Box = "firebugResetStyles firebugLayoutBox firebugLayoutBox";
+            var Line = "firebugResetStyles firebugLayoutLine firebugLayoutLine";
 
-            function createBox(name)
+            function create(className, name)
             {
                 var div = doc.createElementNS("http://www.w3.org/1999/xhtml", "div");
                 hideElementFromInspection(div);
-                div.className = "firebugResetStyles firebugLayoutBox firebugLayoutBox"+name;
-                return div;
-            }
-
-            function createLine(name)
-            {
-                var div = doc.createElementNS("http://www.w3.org/1999/xhtml", "div");
-                hideElementFromInspection(div);
-                div.className = "firebugResetStyles firebugLayoutLine firebugLayoutLine"+name;
+                div.className = className +name;
                 return div;
             }
 
             var nodes = context.boxModelHighlighter =
             {
-                parent: createBox("Parent"),
-                rulerH: createRuler("H"),
-                rulerV: createRuler("V"),
-                offset: createBox("Offset"),
-                margin: createBox("Margin"),
-                border: createBox("Border"),
-                padding: createBox("Padding"),
-                content: createBox("Content"),
+                parent: create(Box, "Parent"),
+                rulerH: create(Ruler, "H"),
+                rulerV: create(Ruler, "V"),
+                offset: create(Box, "Offset"),
+                margin: create(Box, "Margin"),
+                border: create(Box, "Border"),
+                padding: create(Box, "Padding"),
+                content: create(Box, "Content"),
                 lines: {
-                    top: createLine("Top"),
-                    right: createLine("Right"),
-                    bottom: createLine("Bottom"),
-                    left: createLine("Left")
+                    top: create(Line, "Top"),
+                    right: create(Line, "Right"),
+                    bottom: create(Line, "Bottom"),
+                    left: create(Line, "Left")
                 }
             };
 
@@ -1190,8 +1190,8 @@ BoxModelHighlighter.prototype =
         var parentW = offsetParent.offsetWidth-1;
         var parentH = offsetParent.offsetHeight-1;
 
-        move(nodes.parent, parentX, parentY);
-        resize(nodes.parent, parentW, parentH);
+        nodes.parent.style.cssText = moveImp(null, parentX, parentY) +
+            resizeImp(null, parentW, parentH);
 
         if (parentX < 14)
             setClass(nodes.parent, "overflowRulerX");
@@ -1235,10 +1235,8 @@ function createProxiesForDisabledElements(body)
 
             div = doc.createElementNS("http://www.w3.org/1999/xhtml", "div");
             div.className = "fbProxyElement";
-            div.style.left = rect.left + "px";
-            div.style.top = rect.top + body.scrollTop + "px";
-            div.style.width = rect.width + "px";
-            div.style.height = rect.height + "px";
+            div.style.cssText = moveImp(null, rect.left, rect.top + body.scrollTop) +
+                resizeImp(null, rect.width, rect.height);
             hideElementFromInspection(div);
             div.fbProxyFor = nodes[i];
             nodes[i].fbHasProxyElement = true;
