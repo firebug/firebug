@@ -38,45 +38,45 @@
     <em:contributor>Mike Collins (IBM Almaden)</em:contributor>
     <em:contributor>Kevin Decker</em:contributor>
     <em:contributor>Mike Ratcliffe (Comartis AG)</em:contributor>
-    <em:contributor>Hernan Rodríguez Colmeiro</em:contributor>
+    <em:contributor>Hernan Rodriguez Colmeiro</em:contributor>
     <em:contributor>Austin Andrews</em:contributor>
     <em:contributor>Christoph Dorn</em:contributor>
     <em:contributor>Steven Roussey (AppCenter Inc, Network54)</em:contributor>
     <em:contributor>Sebastian Zartner</em:contributor>
+
     <em:iconURL>chrome://firebug/skin/firebug32.png</em:iconURL>
     <em:homepageURL>http://www.getfirebug.com/</em:homepageURL>
     <em:updateURL>https://getfirebug.com/releases/firebug/1.7X/update.rdf</em:updateURL>
 
-    <em:translator>Leszek(teo)Życzkowski (pl-PL)</em:translator>
+    <em:translator>Leszek(teo)Zyczkowski (pl-PL)</em:translator>
     <em:translator>markh (nl-NL)</em:translator>
     <em:translator>peter3 (sv-SE)</em:translator>
     <em:translator>AlleyKat (da-DK)</em:translator>
     <em:translator>Hector Zhao, lovelywcm (zh-CN)</em:translator>
-    <em:translator>Lukáš Kucharczyk, Michal Kec (cs-CZ)</em:translator>
+    <em:translator>Lukas Kucharczyk, Michal Kec (cs-CZ)</em:translator>
     <em:translator>Team erweiterungen.de, ReinekeFux, Benedikt Langens, Sebastian Zartner (de-DE)</em:translator>
     <em:translator>l0stintranslation, gonzalopirobutirro (it-IT)</em:translator>
     <em:translator>alexxed (ro-RO)</em:translator>
     <em:translator>Nicolas Martin, Franck Marcia (fr-FR)</em:translator>
     <em:translator>gLes (hu-HU)</em:translator>
-    <em:translator>Xavi Ivars - Softcatalà (ca)</em:translator>
+    <em:translator>Xavi Ivars - Softcatala (ca)</em:translator>
     <em:translator>gezmen (tr-TR)</em:translator>
     <em:translator>eternoendless (es-AR)</em:translator>
     <em:translator>Dark Preacher (ru-RU)</em:translator>
     <em:translator>Tiago Oliveira, Diego de Carvalho Zimmermann, Alexandre Rapaki (pt-BR)</em:translator>
-    <em:translator>Juan Botías, Álvaro G. Vicario (es-ES)</em:translator>
+    <em:translator>Juan Botias, Alvaro G. Vicario (es-ES)</em:translator>
     <em:translator>Andriy Zhouck (uk-UA)</em:translator>
     <em:translator>Hisateru Tanaka (ja-JP)</em:translator>
     <em:translator>Mohsen Shadroo (fa-IR)</em:translator>
     <em:translator>Eduard Babayan (hy-AM)</em:translator>
-    <em:translator>Helder Magalhães (pt-PT)</em:translator>
-    <em:translator>Tomaž Mačus (sl-SI)</em:translator>
+    <em:translator>Helder Magalhaes (pt-PT)</em:translator>
+    <em:translator>Tomaz Macus (sl-SI)</em:translator>
     <em:translator>Stoyan Stefanov, Alexander Shopov (bg)</em:translator>
-    <em:translator>Kristján Bjarni Guðmundsson (is-IS)</em:translator>
-    <em:translator>NGUYỄN Mạnh Hùng (vi-VN)</em:translator>
+    <em:translator>Kristjan Bjarni Guomundsson (is-IS)</em:translator>
+    <em:translator>NGUYEN Manh Hung (vi-VN)</em:translator>
     <em:translator>Bwah (hr-HR)</em:translator>
-    <em:translator>Sonickydon (el-GR)</em:translator>
-    <em:translator>David Gonzáles (es)</em:translator>
     <em:translator>Sonickydon (el)</em:translator>
-    <em:translator>ДакСРБИЈА (sr)</em:translator>
+    <em:translator>David Gonzales (es)</em:translator>
+    <em:translator>DakSrbija (sr)</em:translator>
   </Description>
 </RDF>
