@@ -3508,8 +3508,6 @@ var ScriptInterrupter =
 
     enable: function(script)
     {
-        FBTrace.sysout("fbs.ScriptInterrupter.enable;");
-
         if (!script.enableSingleStepInterrupts)
             return;
 
@@ -3522,21 +3520,17 @@ var ScriptInterrupter =
         }
         catch (e)
         {
-            FBTrace.sysout("fbs.ScriptInterrupter.enable; EXCEPTION");
+            if (FBTrace.DBG_ERRORS)
+                FBTrace.sysout("fbs.ScriptInterrupter.enable; EXCEPTION");
         }
 
         this.entries[script.tag] = {
             script: script
         }
-
-        FBTrace.sysout("fbs.ScriptInterrupter.enable; " + script.fileName + " (" +
-            script.baseLineNumber + ")", script);
     },
 
     disable: function(script)
     {
-        FBTrace.sysout("fbs.ScriptInterrupter.disable;");
-
         if (!script.enableSingleStepInterrupts)
             return;
 
@@ -3550,13 +3544,11 @@ var ScriptInterrupter =
         }
         catch (e)
         {
-            FBTrace.sysout("fbs.ScriptInterrupter.disable; EXCEPTION");
+            if (FBTrace.DBG_ERRORS)
+                FBTrace.sysout("fbs.ScriptInterrupter.disable; EXCEPTION");
         }
 
         delete this.entries[script.tag];
-
-        FBTrace.sysout("fbs.ScriptInterrupter.disable; " + script.fileName + " (" +
-            script.baseLineNumber + ")", script);
     },
 
     disableAll: function()
@@ -3573,7 +3565,8 @@ var ScriptInterrupter =
             }
             catch (e)
             {
-                FBTrace.sysout("fbs.ScriptInterrupter.disable; EXCEPTION");
+                if (FBTrace.DBG_ERRORS)
+                    FBTrace.sysout("fbs.ScriptInterrupter.disable; EXCEPTION");
             }
        }
 
