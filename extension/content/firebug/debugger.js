@@ -1295,6 +1295,13 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
 
             if (Firebug.breakOnErrors)
             {
+                var eventOrigin = FBL.unwrapIValue(frame.executionContext.globalObject);
+                if (!eventOrigin)
+                    return 0;
+                var eventOriginIndex = context.windows.indexOf(eventOrigin);
+                if (eventOriginIndex < 0) // then the event that lead the error is not cause by code in this context
+                    return 0;
+
                 var sourceFile = Firebug.SourceFile.getSourceFileByScript(context, frame.script);
                 if (!sourceFile)
                 {
