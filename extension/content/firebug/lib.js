@@ -2142,6 +2142,13 @@ this.isXMLPrettyPrint = function(context, win)
     try
     {
         var doc = win ? win.document : context.window.document;
+        if (!doc)
+        {
+            if (FBTrace.DBG_ERRORS)
+                FBTrace.sysout("lib.isXMLPrettyPrint; NO DOCUMENT", {win:win, context:context});
+            return false;
+        }
+
         var bindings = this.domUtils.getBindingURLs(doc.documentElement);
         for (var i = 0; i < bindings.length; i++)
         {
