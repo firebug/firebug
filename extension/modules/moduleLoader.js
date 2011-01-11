@@ -336,7 +336,7 @@ ModuleLoader.prototype = {
 
 // *** load require.js and override its methods as needed. ****
 
-ModuleLoader.requireJSFileName = "resource://hellomodule/require.js";
+ModuleLoader.requireJSFileName = "resource://firebug/require.js";
 
 coreRequire = ModuleLoader.bootStrap(ModuleLoader.requireJSFileName).require;
 
