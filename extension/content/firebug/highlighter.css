@@ -30,7 +30,6 @@
 /**actual styling to be modified by firebug theme**/
 .firebugCanvas {
     display: none !important;
-    pointer-events: auto !important;
 }
 
 .firebugFrameHighlighter {
