@@ -36,7 +36,7 @@ Firebug.Editor = extend(Firebug.Module,
     dispatchName: "editor",
     tabCharacter: "    ",
 
-    startEditing: function(target, value, editor)
+    startEditing: function(target, value, editor, selectionData)
     {
         this.stopEditing();
 
@@ -80,7 +80,7 @@ Firebug.Editor = extend(Firebug.Module,
         if (currentGroup)
             setClass(currentGroup, "editing");
 
-        currentEditor.show(target, currentPanel, value, targetSize);
+        currentEditor.show(target, currentPanel, value, targetSize, selectionData);
         dispatch(this.fbListeners, "onBeginEditing", [currentPanel, currentEditor, target, value]);
         currentEditor.beginEditing(target, value);
         if (FBTrace.DBG_EDITOR)
@@ -554,7 +554,7 @@ Firebug.InlineEditor.prototype = domplate(Firebug.BaseEditor,
         return this.input.value = stripNewLines(value);
     },
 
-    show: function(target, panel, value, targetSize)
+    show: function(target, panel, value, targetSize, selectionData)
     {
         dispatch(panel.fbListeners, "onInlineEditorShow", [panel, this]);
         this.target = target;
@@ -587,6 +587,8 @@ Firebug.InlineEditor.prototype = domplate(Firebug.BaseEditor,
 
         panel.panelNode.appendChild(this.box);
         this.input.select();
+        if (selectionData) //transfer slection to input element
+            this.input.setSelectionRange(selectionData.start, selectionData.end);
 
         // Insert the "expander" to cover the target element with white space
         if (!this.fixedWidth)

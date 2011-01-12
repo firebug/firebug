@@ -177,6 +177,7 @@ top.FirebugChrome =
             doc1.addEventListener("mouseover", onPanelMouseOver, false);
             doc1.addEventListener("mouseout", onPanelMouseOut, false);
             doc1.addEventListener("mousedown", onPanelMouseDown, false);
+            doc1.addEventListener("mouseup", onPanelMouseUp, false);
             doc1.addEventListener("click", onPanelClick, false);
             panelBar1.addEventListener("selectingPanel", onSelectingPanel, false);
 
@@ -185,6 +186,7 @@ top.FirebugChrome =
             doc2.addEventListener("mouseout", onPanelMouseOut, false);
             doc2.addEventListener("click", onPanelClick, false);
             doc2.addEventListener("mousedown", onPanelMouseDown, false);
+            doc2.addEventListener("mouseup", onPanelMouseUp, false);
             panelBar2.addEventListener("selectPanel", onSelectedSidePanel, false);
 
             var doc3 = cmdPopupBrowser.contentDocument;
@@ -236,12 +238,14 @@ top.FirebugChrome =
         doc1.removeEventListener("mouseover", onPanelMouseOver, false);
         doc1.removeEventListener("mouseout", onPanelMouseOut, false);
         doc1.removeEventListener("mousedown", onPanelMouseDown, false);
+        doc1.removeEventListener("mouseup", onPanelMouseUp, false);
         doc1.removeEventListener("click", onPanelClick, false);
 
         var doc2 = panelBar2.browser.contentDocument;
         doc2.removeEventListener("mouseover", onPanelMouseOver, false);
         doc2.removeEventListener("mouseout", onPanelMouseOut, false);
         doc2.removeEventListener("mousedown", onPanelMouseDown, false);
+        doc2.removeEventListener("mouseup", onPanelMouseUp, false);
         doc2.removeEventListener("click", onPanelClick, false);
 
         var doc3 = cmdPopupBrowser.contentDocument;
@@ -1720,17 +1724,44 @@ function onPanelMouseDown(event)
 {
     if (FBL.isLeftClick(event))
     {
-        var editable = FBL.getAncestorByClass(event.target, "editable");
-        if (editable)
-        {
-            Firebug.Editor.startEditing(editable);
-            FBL.cancelEvent(event);
-        }
+        this.lastMouseDownPosition = {x: event.screenX, y: event.screenY};
     }
     else if (FBL.isMiddleClick(event) && Firebug.getRepNode(event.target))
     {
         // Prevent auto-scroll when middle-clicking a rep object
         FBL.cancelEvent(event);
+    }
+}
+function onPanelMouseUp(event)
+{
+    if (FBL.isLeftClick(event))
+    {
+        var selection = event.target.ownerDocument.defaultView.getSelection();
+        var target = selection.focusNode || event.target;
+        if(selection.focusNode === selection.anchorNode){
+            var editable = FBL.getAncestorByClass(target, "editable");
+            if (editable)
+            {
+                var selectionData;
+                var selFO = selection.focusOffset,selAO = selection.anchorOffset;
+                if (selFO == selAO) // selection is collapsed
+                {
+                    var distance = Math.abs(event.screenX - this.lastMouseDownPosition.x) +
+                                      Math.abs(event.screenY - this.lastMouseDownPosition.y);
+					 // if mouse has moved far enough set selection at that point
+                    if (distance > 3)
+                        selectionData = {start: selFO, end: selFO};
+					 // otherwise leave selectionData undefined to select all text
+                }
+                else if (selFO < selAO)
+                    selectionData = {start: selFO, end: selAO};
+                else
+                    selectionData = {start: selAO, end: selFO};
+
+                Firebug.Editor.startEditing(editable, null, null, selectionData);
+                FBL.cancelEvent(event);
+            }
+        }
     }
 }
 

@@ -137,6 +137,13 @@ code {
 }
 
 /************************************************************************************************/
+.inlineEditor {
+    pointer-events: none;
+}
+
+.textEditorInner {
+    pointer-events: auto;
+}
 
 .inlineEditor,
 .fixedWidthEditor {

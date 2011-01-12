@@ -9,7 +9,6 @@
     position: relative;
     font-family: monospace;
     padding-left: 13px;
-    -moz-user-select: -moz-none;
 }
 
 .nodeBox.search-selection {

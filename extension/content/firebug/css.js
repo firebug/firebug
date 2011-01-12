@@ -768,32 +768,34 @@ Firebug.CSSStyleSheetPanel.prototype = extend(Firebug.SourceBoxPanel,
 
     onMouseDown: function(event)
     {
-        // XXjoe Hack to only allow clicking on the checkbox
-        if (!isLeftClick(event) || event.clientX > 20)
-            return;
 
-        if (hasClass(event.target, "textEditor"))
-            return;
-
-        var row = getAncestorByClass(event.target, "cssProp");
-        if (row && hasClass(row, "editGroup"))
-        {
-            this.disablePropertyRow(row);
-            cancelEvent(event);
-        }
     },
 
     onClick: function(event)
     {
-        if (!isLeftClick(event) || event.clientX <= 20 || event.detail != 2)
+        if (!isLeftClick(event))
             return;
-
-        var row = getAncestorByClass(event.target, "cssRule");
-        if (row && !getAncestorByClass(event.target, "cssPropName")
-            && !getAncestorByClass(event.target, "cssPropValue"))
+        // XXjoe Hack to only allow clicking on the checkbox
+        if ( (event.clientX <= 20) && (event.detail == 1) )
         {
-            this.insertPropertyRow(row);
-            cancelEvent(event);
+            if (hasClass(event.target, "textEditor"))
+                return;
+            var row = getAncestorByClass(event.target, "cssProp");
+            if (row && hasClass(row, "editGroup"))
+            {
+                this.disablePropertyRow(row);
+                cancelEvent(event);
+            }
+        }
+		else if( (event.clientX >= 20) && (event.detail == 2) )
+        {
+            var row = getAncestorByClass(event.target, "cssRule");
+            if (row && !getAncestorByClass(event.target, "cssPropName")
+                && !getAncestorByClass(event.target, "cssPropValue"))
+            {
+                this.insertPropertyRow(row);
+                cancelEvent(event);
+            }
         }
     },
 
