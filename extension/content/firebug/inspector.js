@@ -850,8 +850,7 @@ Firebug.Inspector.FrameHighlighter.prototype =
         if (this.doNotHighlight(element))
             return;
 
-        var cs, csTransform, csTransformOrig, splitOrigin, lineRect;
-
+        var cs;
         var offset = getLTRBWH(element);
         var x = offset.left, y = offset.top;
         var w = offset.width, h = offset.height;
@@ -880,14 +879,23 @@ Firebug.Inspector.FrameHighlighter.prototype =
             quickInfoBox.show(element);
             var highlighter = this.getHighlighter(context, element);
 
-            cs = body.ownerDocument.defaultView.getComputedStyle(element, null);
-            csTransform = cs.MozTransform;
-
             var css = moveImp(null, x, y) + resizeImp(null, w, h);
-            if(csTransform)
-                css +=
-                    '-moz-transform:' + csTransform + ' !important;',
-                    '-moz-transform-origin' + cs.MozTransformOrigin    + ' !important;';
+
+            cs = body.ownerDocument.defaultView.getComputedStyle(element, null);
+
+            if(cs.MozTransform && cs.MozTransform != 'none')
+                css += '-moz-transform:' + cs.MozTransform + '!important;' +
+                       '-moz-transform-origin:' + cs.MozTransformOrigin + '!important;';
+            if(cs.borderRadius)
+              css += 'border-radius:' + cs.borderRadius + '!important;';
+            if(cs.borderTopLeftRadius)
+              css += 'border-top-left-radius:' + cs.borderTopLeftRadius + '!important;';
+            if(cs.borderTopRightRadius)
+              css += 'border-top-right-radius:' + cs.borderTopRightRadius + '!important;';
+            if(cs.borderBottomLeftRadius)
+                css += 'border-bottom-left-radius:' + cs.borderBottomLeftRadius + '!important;';
+            if(cs.borderBottomRightRadius)
+                css += 'border-bottom-right-radius:' + cs.borderBottomRightRadius + '!important;';
 
             highlighter.style.cssText = css;
 
