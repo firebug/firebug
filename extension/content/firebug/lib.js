@@ -2757,19 +2757,7 @@ this.serviceOptionMenu = function(label, option, tooltiptext)
 // ************************************************************************************************
 // Stack Traces
 
-this.getCurrentStackTrace = function(context)
-{
-    var trace = null;
 
-    Firebug.Debugger.halt(function(frame)
-    {
-        if (FBTrace.DBG_STACK) FBTrace.sysout("lib.getCurrentStackTrace frame:", frame);
-        trace = FBL.getCorrectedStackTrace(frame, context);
-        if (FBTrace.DBG_STACK) FBTrace.sysout("lib.getCurrentStackTrace trace:", trace.toString().split('\n'));
-    });
-
-    return trace;
-};
 
 this.getStackTrace = deprecated("name change for self-documentation", this.getCorrectedStackTrace);
 

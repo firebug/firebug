@@ -524,7 +524,7 @@ Firebug.Console.createConsole = function createConsole(context, win)
 
     function getJSDUserStack()
     {
-        var trace = FBL.getCurrentStackTrace(context);
+        var trace = Firebug.Debugger.getCurrentStackTrace(context);
 
         var frames = trace ? trace.frames : null;
         if (frames && (frames.length > 0) )

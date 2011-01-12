@@ -155,6 +155,20 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
 
         return fbs.halt(this, fnOfFrame);
     },
+    
+    getCurrentStackTrace: function(context)
+    {
+        var trace = null;
+
+        Firebug.Debugger.halt(function(frame)
+        {
+            if (FBTrace.DBG_STACK) FBTrace.sysout("lib.getCurrentStackTrace frame:", frame);
+            trace = FBL.getCorrectedStackTrace(frame, context);
+            if (FBTrace.DBG_STACK) FBTrace.sysout("lib.getCurrentStackTrace trace:", trace.toString().split('\n'));
+        });
+
+        return trace;
+    },
 
     breakAsIfDebugger: function(frame)
     {
