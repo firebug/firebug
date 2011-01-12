@@ -101,6 +101,11 @@ Firebug.SourceBoxPanel = extend(SourceBoxPanelBase,
         Firebug.ActivablePanel.initializeNode.apply(this, arguments);
     },
 
+    detach: function(oldChrome, newChrome)
+    {
+        this.removeAllSourceBoxes();  // clear so we start fresh with the new window
+    },
+
     reattach: function(doc)
     {
         var oldEventTarget = this.resizeEventTarget;
@@ -136,9 +141,15 @@ Firebug.SourceBoxPanel = extend(SourceBoxPanelBase,
 
     removeAllSourceBoxes: function()
     {
-          this.sourceBoxes = {};
-          delete this.selectedSourceBox;
-          delete this.location;
+        for (var url in this.sourceBoxes)
+        {
+            var sourceBox = this.sourceBoxes[url];
+            this.panelNode.removeChild(sourceBox);
+        }
+
+        this.sourceBoxes = {};
+        delete this.selectedSourceBox;
+        delete this.location;
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
@@ -245,11 +256,11 @@ Firebug.SourceBoxPanel = extend(SourceBoxPanelBase,
                 return null;  // cause a new one to be created
         }
     },
-    
+
     getCompilationUnit: function()
     {
-    	if (this.selectedSourceBox)
-    		return this.seletedSourceBox.repObject;
+        if (this.selectedSourceBox)
+            return this.seletedSourceBox.repObject;
     },
 
     getSourceBoxByURL: function(url)

@@ -1124,6 +1124,7 @@ top.Firebug =
     setChrome: function(newChrome, newPlacement)
     {
         var oldChrome = Firebug.chrome;
+        Firebug.dispatchToPanels("detach", [oldChrome, newChrome]);
         Firebug.chrome = newChrome;
         Firebug.setPlacement(newPlacement);
 
@@ -2186,7 +2187,7 @@ Firebug.Panel = extend(new Firebug.Listener(),
         scrollToBottom(this.panelNode);
     },
 
-    // called when a panel in one XUL window is about to appear in another one.
+    // called when a panel in one XUL window is about to disappear to later reappear another XUL window.
     detach: function(oldChrome, newChrome)
     {
     },
