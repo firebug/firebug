@@ -437,8 +437,8 @@ Firebug.Console.createConsole = function createConsole(context, win)
     function logFormatted(args, className, linkToSource, noThrottle)
     {
         var sourceLink = linkToSource ? getStackLink() : null;
-        Firebug.Console.logFormatted(args, context, className, noThrottle, sourceLink);
-        return "_firebugIgnore";
+        var rc = Firebug.Console.logFormatted(args, context, className, noThrottle, sourceLink);
+        return rc ? rc : "_firebugIgnore";
     }
 
     function logAssert(category, args)
