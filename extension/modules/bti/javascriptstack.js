@@ -3,46 +3,36 @@
 // ************************************************************************************************
 // Module
 
-var EXPORTED_SYMBOLS = ["JavaScriptContext"];
+var EXPORTED_SYMBOLS = ["JavaScriptStack"];
 
 // ************************************************************************************************
-// JavaScriptContext
+// JavaScriptStack
 
 /**
- * Describes the execution of JavaScript within a browser context. An execution
- * context pertains to one or more compilation units (JavaScript scripts)
- * that may contain breakpoints. An execution context can suspend and resume
- * and provides stack frames when suspended.
- * 
+ * Describes the execution of JavaScript within a browser context. A Stack
+ * can be suspended, then provide stack frames, and then be resumed.
+ *
  * @constructor
- * @param browser the browser context the execution context is contained in
- * @type JavaScriptContext
- * @return a new JavaScriptContext
+ * @type JavaScriptStack
+ * @return a new JavaScriptStack
  * @version 1.0
  */
-function JavaScriptContext(browserContext)
+function JavaScriptStack()
 {
-    this.browserContext= browserContext;
     this.is_suspended = false;
     this.frames = [];
 }
 
-// ************************************************************************************************
-// API
 
-/**
- * Returns the browser context this execution context is contained in.
- * <p>
- * This function does not require communication with
- * the browser.
- * </p>
- * @function
- * @returns a {@link BrowserContext}
- */
-JavaScriptContext.prototype.getBrowserContext = function()
-{
-    return this.browserContext;
-};
+// ************************************************************************************************
+//
+
+
+
+
+// ************************************************************************************************
+// Operations on JavaScriptStack objects
+
 
 /**
  * Returns whether this execution context is currently suspended.
@@ -53,24 +43,9 @@ JavaScriptContext.prototype.getBrowserContext = function()
  * @function
  * @returns a boolean indicating whether this execution context is currently suspended
  */
-JavaScriptContext.prototype.isSuspended = function()
+JavaScriptStack.prototype.isSuspended = function()
 {
     return this.is_suspended;
-};
-
-/**
- * Returns whether this execution context has terminated. Returns <code>true</code>
- * if this execution context has terminated, otherwise <code>false</code>.
- * <p>
- * This function does not require communication with
- * the browser.
- * </p>
- * @function
- * @returns a boolean indicating whether this execution context has terminated
- */
-JavaScriptContext.prototype.isTerminated = function()
-{
-    return !this.getBrowserContext().exists();
 };
 
 /**
@@ -83,7 +58,7 @@ JavaScriptContext.prototype.isTerminated = function()
  * @function
  * @returns the {@link Breakpoint} this execution context is suspended at or <code>null</code>
  */
-JavaScriptContext.prototype.getBreakpoint = function()
+JavaScriptStack.prototype.getBreakpoint = function()
 {
     // TODO:
 };
@@ -92,10 +67,10 @@ JavaScriptContext.prototype.getBreakpoint = function()
  * Requests to suspend this execution context asynchronously iff this context is in a running
  * state. The request will be sent to the browser and an <code>onBreak</code> event will be
  * sent asynchronously by the {@link Browser} when the underlying execution context suspends.
- * 
+ *
  * @function
  */
-JavaScriptContext.prototype.suspend = function()
+JavaScriptStack.prototype.suspend = function()
 {
     //TODO:
 };
@@ -104,10 +79,10 @@ JavaScriptContext.prototype.suspend = function()
  * Requests to resume this execution context asynchronously iff this context is in a suspended
  * state. The request will be sent to the browser and an <code>onResume</code> event will be
  * sent asynchronously by the {@link Browser} when the underlying execution context resumes.
- * 
+ *
  * @function
  */
-JavaScriptContext.prototype.resume = function()
+JavaScriptStack.prototype.resume = function()
 {
     //TODO:
 };
@@ -117,11 +92,11 @@ JavaScriptContext.prototype.resume = function()
  * when an execution context is suspended. Stack frames will be retrieved from the browser (if required) and
  * reported to the listener function when available. The listener function may be called before or
  * after this function returns. If this execution context is not suspended an empty array is reported.
- * 
+ *
  * @function
  * @param listener a function that accepts an array of {@link StackFrame}'s.
  */
-JavaScriptContext.prototype.getStackFrames = function(listener)
+JavaScriptStack.prototype.getStackFrames = function(listener)
 {
     // TODO:
 };
@@ -136,12 +111,12 @@ JavaScriptContext.prototype.getStackFrames = function(listener)
  * <p>
  * Has no effect if this execution context is already suspended.
  * </p>
- * 
+ *
  * @function
  * @param compilationUnit the compilation unit where the suspend occurred
  * @param lineNumber the line number the suspend occurred at
  */
-JavaScriptContext.prototype._suspended = function(compilationUnit, lineNumber)
+JavaScriptStack.prototype._suspended = function(compilationUnit, lineNumber)
 {
     if (!this.is_suspended)
     {
@@ -157,10 +132,10 @@ JavaScriptContext.prototype._suspended = function(compilationUnit, lineNumber)
  * <p>
  * Has no effect if this execution context is already running.
  * </p>
- * 
+ *
  * @function
  */
-JavaScriptContext.prototype._resumed = function()
+JavaScriptStack.prototype._resumed = function()
 {
     if (this.is_suspended)
     {
@@ -172,4 +147,4 @@ JavaScriptContext.prototype._resumed = function()
 // ************************************************************************************************
 // CommonJS
 
-exports = JavaScriptContext;
+exports = JavaScriptStack;

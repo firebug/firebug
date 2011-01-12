@@ -108,6 +108,7 @@ Firebug.Breakpoint = extend(Firebug.Module,
             tab.setAttribute("breakOnNextArmed", armed ? "true" : "false");
     },
 
+    // supports non-JS break on next
     breakNow: function(panel)
     {
         this.updatePanelTab(panel, false);

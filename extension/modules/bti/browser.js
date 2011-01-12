@@ -23,7 +23,7 @@ var EXPORTED_SYMBOLS = ["Browser"];
  * JavaScript execution contexts. Each JavaScript execution context may contain one or
  * more compilation units. A browser provides notification to registered listeners describing
  * events that occur in the browser.
- * 
+ *
  * @constructor
  * @type Browser
  * @return a new Browser
@@ -31,7 +31,7 @@ var EXPORTED_SYMBOLS = ["Browser"];
  */
 function Browser()
 {
-    this.contexts = {}; // map of contexts, indexed by conext ID
+    this.contexts = {}; // map of contexts, indexed by context ID
     this.activeContext = null;
     this.handlers = {}; // map of event types to array of handler functions
     this.EVENT_TYPES = ["onBreak", "onConsoleDebug", "onConsoleError", "onConsoleInfo",
@@ -47,11 +47,11 @@ function Browser()
 /**
  * Returns the {@link BrowserContext} with the specified id or <code>null</code>
  * if none.
- * 
+ *
  * @function
  * @param id identifier of an {@link BrowserContext}
  * @returns the {@link BrowserContext} with the specified id or <code>null</code>
- * 
+ *
  */
 Browser.prototype.getBrowserContext = function(id)
 {
@@ -64,7 +64,7 @@ Browser.prototype.getBrowserContext = function(id)
 /**
  * Returns the root contexts being browsed. A {@link BrowserContext} represents the
  * content that has been served up and is being rendered for a location (URL) that
- * has been navigated to. 
+ * has been navigated to.
  * <p>
  * This function does not require communication with the remote browser.
  * </p>
@@ -82,7 +82,7 @@ Browser.prototype.getBrowserContexts = function()
 /**
  * Returns the {@link BrowserContext} that currently has focus in the browser
  * or <code>null</code> if none.
- * 
+ *
  * @function
  * @returns the {@link BrowserContext} that has focus or <code>null</code>
  */
@@ -94,7 +94,7 @@ Browser.prototype.getFocusBrowserContext = function()
 /**
  * Returns whether this proxy is currently connected to the underlying browser it
  * represents.
- * 
+ *
  *  @function
  *  @returns whether connected to the underlying browser
  */
@@ -153,7 +153,7 @@ Browser.prototype.addEventListener = function(eventType, listener)
 
 /**
  * Disconnects this client from the browser it is associated with.
- * 
+ *
  * @function
  */
 Browser.prototype.disconnect = function()
@@ -203,7 +203,7 @@ Browser.prototype._contextCreated = function(context)
  * browser. In this case an implementation could ask to destroy a context that
  * that has not yet been reported as created.
  * </p>
- * 
+ *
  * @function
  * @param id the identifier of the {@link BrowserContext} that has been destroyed
  */
@@ -220,7 +220,7 @@ Browser.prototype._contextDestroyed = function(id)
 
 /**
  * Notification the given context has been loaded. Notifies context listeners.
- * 
+ *
  * @function
  * @param id the identifier of the {@link BrowserContext} that has been loaded
  */
@@ -237,7 +237,7 @@ Browser.prototype._contextLoaded = function(id)
 /**
  * Dispatches an event notification to all registered functions for
  * the specified event type.
- * 
+ *
  * @param eventType event type
  * @param arguments arguments to be applied to handler functions
  */
@@ -253,7 +253,7 @@ Browser.prototype._dispatch = function(eventType, args)
 
 /**
  * Sets the browser context that has focus, possibly <code>null</code>.
- * 
+ *
  * @function
  * @param context a {@link BrowserContext} or <code>null</code>
  */
@@ -268,7 +268,7 @@ Browser.prototype._setFocusContext = function(context)
 /**
  * Sets whether this proxy is connected to its underlying browser.
  * Sends 'onDisconnect' notification when the browser becomes disconnected.
- * 
+ *
  * @function
  * @param connected whether this proxy is connected to its underlying browser
  */
@@ -392,9 +392,9 @@ Browser.EventListener = {
      * Notification the specified execution context has resumed execution.
      *
      * @function
-     * @param javaScriptContext the {@link JavaScriptContext} that has resumed
+     * @param stack the {@link JavaScriptStack} that has resumed
      */
-    onResume: function(javaScriptContext) {},
+    onResume: function(stack) {},
 
     /**
      * Notification the specified compilation unit has been compiled (loaded)
@@ -407,14 +407,14 @@ Browser.EventListener = {
 
     /**
      * Notification the specified breakpoint has been installed or cleared.
-     * State can be retrieved from the breakpoint to determine whether the 
+     * State can be retrieved from the breakpoint to determine whether the
      * breakpoint is installed or cleared.
      *
      * @function
      * @param breakpoint the {@link Breakpoint} that has been toggled
      */
     onToggleBreakpoint: function(breakpoint) {},
-    
+
     /**
      * Notification the specified breakpoint has failed to install or clear.
      * State can be retrieved from the breakpoint to determine what failed.

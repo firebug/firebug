@@ -10,21 +10,21 @@ var EXPORTED_SYMBOLS = ["StackFrame"];
 
 /**
  * Describes a stack frame in a JavaScript execution context.
- * 
+ *
  * @constructor
  * @param index frame index (0 indicates the top frame)
- * @param context the {@link JavaScriptContext} the frame is contained in
+ * @param stack the {@link JavaScriptStack} the frame is contained in
  * @param compilationUnit the {@link CompilationUnit} this frame is associated with
  * @param functionName the name of the function the frame is associated with - a {@link String}
- * @param lineNumber the source code line number the frame is associated with 
+ * @param lineNumber the source code line number the frame is associated with
  * @type StackFrame
  * @return a new StackFrame
  * @version 1.0
  */
-function StackFrame(index, context, compilationUnit, functionName, lineNumber)
+function StackFrame(index, stack, compilationUnit, functionName, lineNumber)
 {
     this.index = index;
-    this.context = context;
+    this.stack = stack;
     this.compilationUnit = compilationUnit;
     this.functionName = functionName;
     this.lineNumber = lineNumber;
@@ -32,6 +32,7 @@ function StackFrame(index, context, compilationUnit, functionName, lineNumber)
 
 // ************************************************************************************************
 // API
+
 
 /**
  * Returns the index of this frame in the current stack of frames.
@@ -48,17 +49,17 @@ StackFrame.prototype.getIndex = function()
 };
 
 /**
- * Returns the JavaScript execution context this frame is contained in.
+ * Returns the JavaScript stack this frame is contained in.
  * <p>
  * This function does not require communication with
  * the browser.
  * </p>
  * @function
- * @returns a {@link JavaScriptContext}
+ * @returns a {@link JavaScriptStack}
  */
-StackFrame.prototype.getContext = function()
+StackFrame.prototype.getStack = function()
 {
-    return this.context;
+    return this.stack;
 };
 
 /**
@@ -123,10 +124,10 @@ StackFrame.prototype.getLocals = function()
 
 /**
  * Returns the object associated with the 'this' keyword in this stack frame.
- * 
+ *
  * @function
  * @returns the {@link ObjectReference} associated with the 'this' keyword in
- *   this stack frame 
+ *   this stack frame
  */
 StackFrame.prototype.getThis = function()
 {

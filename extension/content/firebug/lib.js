@@ -5510,7 +5510,7 @@ domMemberMap.Window =
     "mozAnimationStartTime", //FF4.0
     "mozPaintCount", //FF4.0
     "mozRequestAnimationFrame", //FF4.0
-    
+
     "status",
     "defaultStatus",
 
@@ -6526,7 +6526,7 @@ this.cssInfo.html =
     "border-top-right-radius": [], //FF4.0
     "border-bottom-right-radius": [], //FF4.0
     "border-bottom-left-radius": [], //FF4.0
-    
+
     "box-shadow": [], //FF4.0
 
     "bottom": ["auto"],
@@ -6665,7 +6665,7 @@ this.cssInfo.html =
     "-moz-transition-duration": [], //FF4.0 TODO
     "-moz-transition-timing-function": [], //FF4.0 TODO
     "-moz-transition-delay": [] //FF4.0 TODO
-    
+
 };
 
 this.cssInfo.svg = {
@@ -7636,7 +7636,7 @@ this.cssKeywords =
         "rl",
         "tb"
     ],
-    
+
     "resize":
     [
         "none",

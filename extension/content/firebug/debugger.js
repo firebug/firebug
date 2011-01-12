@@ -50,11 +50,13 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
     // Debugging
 
+    // moz
     hasValidStack: function(context)
     {
         return context.stopped && context.currentFrame.isValid;
     },
 
+    // on bti, method of stack
     evaluate: function(js, context, scope)  // TODO remote: move to backend, proxy to front
     {
         var frame = context.currentFrame;
@@ -77,6 +79,7 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
             throw value;
     },
 
+    // on bti (not called in firebug source)
     evaluateInCallingFrame: function(js, fileName, lineNo)
     {
         return this.halt(function evalInFrame(frame)
@@ -97,6 +100,7 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
      * @return array of global property names
      */
 
+    // on bti
     getCurrentFrameKeys: function(context)  // TODO remote
     {
         var globals = keys(context.getGlobalScope().wrappedJSObject);  // return is safe
@@ -110,7 +114,8 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
     /*
      * private to Debugger, returns list of strings
      */
-    getFrameKeys: function(frame, names)  // TODO backend
+    // moz
+    getFrameKeys: function(frame, names)
     {
         var listValue = {value: null}, lengthValue = {value: 0};
         frame.scope.getProperties(listValue, lengthValue);
@@ -133,6 +138,7 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
     // Private to Debugger
 
+    // moz
     beginInternalOperation: function() // stop debugger operations like breakOnErrors
     {
         var state = {breakOnErrors: Firebug.breakOnErrors};
@@ -140,6 +146,7 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
         return state;
     },
 
+    // moz
     endInternalOperation: function(state)  // pass back the object given by beginInternalOperation
     {
         Firebug.breakOnErrors = state.breakOnErrors;
@@ -148,6 +155,7 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 
+    // moz
     halt: function(fnOfFrame)
     {
         if(FBTrace.DBG_BP)
@@ -155,7 +163,9 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
 
         return fbs.halt(this, fnOfFrame);
     },
-    
+
+
+    // on bti
     getCurrentStackTrace: function(context)
     {
         var trace = null;
@@ -170,6 +180,7 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
         return trace;
     },
 
+    // Used by FBTest
     breakAsIfDebugger: function(frame)
     {
         var debuggr = fbs.findDebugger(frame); // should return 'this' but also sets this.breakContext
@@ -182,6 +193,7 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
     // chrome://firecookie/ wouldn't be skipped then.
     breakNowURLPrefix: "chrome://",
 
+    // on bti
     breakNow: function(context)
     {
         Firebug.Debugger.halt(function haltAnalysis(frame)
@@ -215,6 +227,7 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
         });
     },
 
+    // moz, called by back end
     stop: function(context, frame, type, rv)
     {
         if (context.stopped)
@@ -308,6 +321,7 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
             return RETURN_CONTINUE;
     },
 
+    // on bti
     rerun: function(context)
     {
         if(!context.stopped)
@@ -328,6 +342,7 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
         this.resume(context);  // the Firebug.rerun will signal abort stack
     },
 
+    // moz
     getRerun: function(context)
     {
         if (FBTrace.DBG_UI_LOOP)
@@ -385,6 +400,7 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
         return rerun;
     },
 
+    // bti
     resume: function(context)
     {
         if (FBTrace.DBG_UI_LOOP)
@@ -395,6 +411,7 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
         if (FBTrace.DBG_UI_LOOP) FBTrace.sysout("debugger.resume, depth:"+depth+"\n");
     },
 
+    // bti
     abort: function(context)
     {
         if (context.stopped)
@@ -406,6 +423,7 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
         }
     },
 
+    // bti
     stepOver: function(context)
     {
         if (!context.stoppedFrame || !context.stoppedFrame.isValid)
@@ -460,6 +478,7 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+    //moz
     freeze: function(context)
     {
         var executionContext = context.stoppedFrame.executionContext;
@@ -565,6 +584,7 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
         }
     },
 
+    // on bti
     toggleFreezeWindow: function(context)
     {
         if (!context.stopped) // then we need to break into debugger to get the executionContext
@@ -585,6 +605,7 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
         }
     },
 
+    // moz
     doToggleFreezeWindow: function(context)
     {
         if (context.isFrozen)

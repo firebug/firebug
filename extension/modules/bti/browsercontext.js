@@ -150,9 +150,9 @@ BrowserContext.prototype.getCompilationUnit = function(url)
  * or <code>null</code> if none.
  * 
  * @function
- * @returns a {@link JavaScriptContext} or <code>null</code>
+ * @returns a {@link JavaScriptStack} or <code>null</code>
  */
-BrowserContext.prototype.getJavaScriptContext = function()
+BrowserContext.prototype.getJavaScriptStack = function()
 {
     // TODO:
 };
