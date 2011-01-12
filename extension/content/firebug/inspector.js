@@ -470,7 +470,7 @@ function getHighlighter(type)
 function pad(element, t, r, b, l) {
     var css = 'padding:' + Math.abs(t) + "px " + Math.abs(r) + "px "
          + Math.abs(b) + "px " + Math.abs(l) + "px !important;";
-    
+
     if(element)
         element.style.cssText = css;
     else
@@ -479,7 +479,7 @@ function pad(element, t, r, b, l) {
 
 function moveImp(element, x, y) {
     var css = 'left:' + x + 'px !important;top:' + y + 'px !important;';
-    
+
     if(element)
         element.style.cssText = css;
     else
@@ -520,8 +520,6 @@ function getImageMapHighlighter(context)
                 canvas.className = "firebugResetStyles firebugCanvas";
                 canvas.width = context.window.innerWidth;
                 canvas.height = context.window.innerHeight;
-                canvas.addEventListener("mousemove", function(event){context.imageMapHighlighter.mouseMoved(event)}, true);
-                canvas.addEventListener("mouseout", function(){getImageMapHighlighter(context).destroy();}, true);
                 context.window.addEventListener("scroll", function(){context.imageMapHighlighter.show(false);}, true);
 
                 doc.body.appendChild(canvas);
@@ -636,19 +634,9 @@ function getImageMapHighlighter(context)
                 }
             },
 
-            mouseMoved: function(event)
-            {
-                var idata = ctx.getImageData(event.layerX, event.layerY, 1, 1);
-
-                mx = event.clientX;
-                my = event.clientY;
-
-                if (!idata || (idata.data[0] === 0 && idata.data[1] === 0 && idata.data[2] === 0 && idata.data[3] === 0))
-                    this.show(false);
-            },
-
             destroy: function()
             {
+                this.show(false);
                 canvas = null;
                 ctx = null;
             }
@@ -876,6 +864,7 @@ Firebug.Inspector.FrameHighlighter.prototype =
             if (!body)
                 return this.unhighlight(context);
 
+            this.ihl && this.ihl.show(false);
 
             quickInfoBox.show(element);
             var highlighter = this.getHighlighter(context, element);
@@ -924,8 +913,8 @@ Firebug.Inspector.FrameHighlighter.prototype =
         }
         else
         {
-            var ihl = getImageMapHighlighter(context);
-            ihl.highlight(element, false);
+            this.ihl = getImageMapHighlighter(context);
+            this.ihl.highlight(element, false);
         }
     },
 
@@ -941,6 +930,9 @@ Firebug.Inspector.FrameHighlighter.prototype =
             body.removeChild(highlighter);
             quickInfoBox.hide();
         }
+
+        this.ihl && this.ihl.destroy();
+        this.ihl = null;
     },
 
     getHighlighter: function(context)
@@ -981,6 +973,8 @@ BoxModelHighlighter.prototype =
 
         if(element.tagName !== "AREA")
         {
+            this.ihl && this.ihl.show(false);
+
             quickInfoBox.show(element);
             context.highlightFrame = highlightFrame;
 
@@ -1114,8 +1108,8 @@ BoxModelHighlighter.prototype =
         }
         else
         {
-            var ihl = getImageMapHighlighter(context);
-            ihl.highlight(element, true);
+            this.ihl = getImageMapHighlighter(context);
+            this.ihl.highlight(element, true);
         }
     },
 
@@ -1136,6 +1130,9 @@ BoxModelHighlighter.prototype =
                     body.removeChild(nodes.lines[line]);
             }
         }
+
+        this.ihl && this.ihl.destroy();
+        this.ihl = null;
 
         quickInfoBox.hide();
     },
