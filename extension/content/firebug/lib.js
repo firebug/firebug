@@ -2999,12 +2999,12 @@ this.StackFrame.prototype =
              // scopes, so we want to special case this to get all variables
              // in all cases.
              if (scope.jsClassName == "Call") {
-                 var scopeVars = FBL.unwrapIValueObject(scope)
+                 scopeVars = FBL.unwrapIValueObject(scope)
                  scopeVars.toString = function() {return $STR("Closure Scope");}
              }
              else if (scope.jsClassName == "Block")
              {
-                 var scopeVars = FBL.unwrapIValueObject(scope)
+                 scopeVars = FBL.unwrapIValueObject(scope)
                  scopeVars.toString = function() {return $STR("Block Scope");}
              }
              else
@@ -3046,13 +3046,23 @@ this.StackFrame.prototype =
 };
 
 //-----------------------111111----222222-----33---444  1 All 'Not a (' followed by (; 2 All 'Not a )' followed by a ); 3 text between @ and : digits
-var reErrorStackLine = /([^\(]*)\(([^\)]*)\)@(.*):(\d*)/;
+var reErrorStackLine = /^(.*)@(.*):(\d*)$/;
+var reErrorStackLine2 = /^([^\(]*)\((.*)\)$/;
 
 this.parseToStackFrame = function(line, context) // function name (arg, arg, arg)@fileName:lineNo
 {
      var m = reErrorStackLine.exec(line);
      if (m)
-         return new this.StackFrame({href:m[3]}, m[4], m[1], m[2].split(','), null, null, context);
+     {
+         var m2 = reErrorStackLine2.exec(m[1]);
+         if (m2)
+         {
+             var params = m2[2].split(',');
+             FBTrace.sysout("parseToStackFrame",{line:line,paramStr:m2[2],params:params});
+             //var params = JSON.parse("["+m2[2]+"]");
+             return new this.StackFrame({href:m[2]}, m[3], m2[1], params, null, null, context);
+         }
+     }
 }
 
 this.parseToStackTrace = function(stack, context)
@@ -3397,7 +3407,7 @@ this.getArgumentsFromCallScope = function(frame)
 
 this.unwrapIValueObject = function(scope)
 {
-    scopeVars = {};
+    var scopeVars = {};
     var listValue = {value: null}, lengthValue = {value: 0};
     scope.getProperties(listValue, lengthValue);
 
@@ -5508,6 +5518,10 @@ domMemberMap.Window =
     "scrollMaxX",
     "scrollMaxY",
 
+    "mozAnimationStartTime", //FF4.0
+    "mozPaintCount", //FF4.0
+    "mozRequestAnimationFrame", //FF4.0
+    
     "status",
     "defaultStatus",
 
