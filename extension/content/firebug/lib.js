@@ -5518,6 +5518,7 @@ domMemberMap.Window =
     "scrollMaxX",
     "scrollMaxY",
 
+    "URL", //FF4.0
     "mozAnimationStartTime", //FF4.0
     "mozPaintCount", //FF4.0
     "mozRequestAnimationFrame", //FF4.0
@@ -6506,6 +6507,9 @@ this.cssInfo.html =
     "background-image": ["none"],
     "background-position": ["bgPosition"],
     "background-repeat": ["bgRepeat"],
+    "background-size": ["bgSize"],
+    "background-clip": ["boxModels"], //FF4.0
+    "background-origin": ["boxModels"], //FF4.0
 
     "border": ["borderStyle", "thickness", "color", "systemColor", "none"],
     "border-top": ["borderStyle", "borderCollapse", "color", "systemColor", "none"],
@@ -6529,6 +6533,13 @@ this.cssInfo.html =
     "border-right-width": ["thickness"],
     "border-bottom-width": ["thickness"],
     "border-left-width": ["thickness"],
+    "border-radius": [], //FF4.0
+    "border-top-left-radius": [], //FF4.0
+    "border-top-right-radius": [], //FF4.0
+    "border-bottom-right-radius": [], //FF4.0
+    "border-bottom-left-radius": [], //FF4.0
+    
+    "box-shadow": [], //FF4.0
 
     "bottom": ["auto"],
     "caption-side": ["captionSide"],
@@ -6595,6 +6606,7 @@ this.cssInfo.html =
 
     "position": ["position"],
     "quotes": ["none"],
+    "resize": ["resize"],//FF4.0
     "right": ["auto"],
     "table-layout": ["tableLayout", "auto"],
     "text-align": ["textAlign"],
@@ -6644,9 +6656,9 @@ this.cssInfo.html =
     "-moz-user-input": ["userInput"],
     "-moz-user-modify": [],
     "-moz-user-select": ["userSelect", "none"],
-    "-moz-background-clip": [],
+    //"-moz-background-clip": [], //Removed/renamed in FF4.0
     "-moz-background-inline-policy": [],
-    "-moz-background-origin": [],
+    //"-moz-background-origin": [], //Removed/renamed in FF4.0
     "-moz-binding": [],
     "-moz-column-count": [],
     "-moz-column-gap": [],
@@ -6657,7 +6669,15 @@ this.cssInfo.html =
     "-moz-column-width": [],
     "-moz-image-region": [],
     "-moz-transform": ["mozTransformFunction", "none"],
-    "-moz-transform-origin": ["bgPosition"]
+    "-moz-transform-origin": ["bgPosition"],
+    "-moz-font-feature-settings": ["normal"], //FF4.0
+    "-moz-tab-size": [], //FF4.0,
+    "-moz-transition": [], //FF4.0 TODO
+    "-moz-transition-property": [], //FF4.0 TODO
+    "-moz-transition-duration": [], //FF4.0 TODO
+    "-moz-transition-timing-function": [], //FF4.0 TODO
+    "-moz-transition-delay": [] //FF4.0 TODO
+    
 };
 
 this.cssInfo.svg = {
@@ -6760,7 +6780,7 @@ this.inheritedStyleNames =
 
 this.cssKeywords =
 {
-    "appearance":
+    "mozAppearance":
     [
         "button",
         "button-small",
@@ -6802,7 +6822,13 @@ this.cssKeywords =
         "treetwisty",
         "treetwistyopen",
         "treeview",
-        "window"
+        "window",
+        "-moz-mac-unified-toolbar", //FF3.5
+        "-moz-win-borderless-glass", //FF4.0
+        "-moz-win-browsertabbar-toolbox", //FF3.0
+        "-moz-win-communications-toolbox", //FF3.0
+        "-moz-win-glass", //FF3.5
+        "-moz-win-media-toolbox" //FF
     ],
 
     "systemColor":
@@ -7002,6 +7028,11 @@ this.cssKeywords =
         "none"
     ],
 
+    "normal":
+    [
+        "normal"
+    ],
+
     "captionSide":
     [
         "top",
@@ -7062,6 +7093,13 @@ this.cssKeywords =
         "-moz-spinning"
     ],
 
+    "boxModels": //FF4.0
+    [
+        "padding-box",
+        "border-box",
+        "content-box"
+    ],
+
     "direction":
     [
         "ltr",
@@ -7089,6 +7127,13 @@ this.cssKeywords =
         "repeat-x",
         "repeat-y",
         "no-repeat"
+    ],
+
+    "bgSize": // FF4.0
+    [
+        "auto",
+        "cover",
+        "contain"
     ],
 
     "borderStyle":
@@ -7602,6 +7647,15 @@ this.cssKeywords =
         "lr",
         "rl",
         "tb"
+    ],
+    
+    "resize":
+    [
+        "none",
+        "both",
+        "horizontal",
+        "vertical",
+        "inherit"
     ]
 };
 
