@@ -241,40 +241,40 @@ Firebug.Console.createConsole = function createConsole(context, win)
     var console = {};
     console.log = function()
     {
-        logFormatted(arguments, "log");
+        return logFormatted(arguments, "log");
     };
 
     console.debug = function()
     {
-        logFormatted(arguments, "debug", true);
+        return logFormatted(arguments, "debug", true);
     };
 
     console.info = function()
     {
-        logFormatted(arguments, "info", true);
+        return logFormatted(arguments, "info", true);
     };
 
     console.warn = function()
     {
-        logFormatted(arguments, "warn", true);
+        return logFormatted(arguments, "warn", true);
     };
 
     console.error = function()
     {
         if (arguments.length == 1)
         {
-            logAssert("error", arguments);  // add more info based on stack trace
+            return logAssert("error", arguments);  // add more info based on stack trace
         }
         else
         {
             Firebug.Errors.increaseCount(context);
-            logFormatted(arguments, "error", true);  // user already added info
+            return logFormatted(arguments, "error", true);  // user already added info
         }
     };
 
     console.exception = function()
     {
-        logAssert("error", arguments);
+        return logAssert("error", arguments);
     };
 
     console.assert = function(x)
@@ -284,7 +284,7 @@ Firebug.Console.createConsole = function createConsole(context, win)
             var rest = [];
             for (var i = 1; i < arguments.length; i++)
                 rest.push(arguments[i]);
-            logAssert("assert", rest);
+            return logAssert("assert", rest);
         }
     };
 
@@ -437,7 +437,8 @@ Firebug.Console.createConsole = function createConsole(context, win)
     function logFormatted(args, className, linkToSource, noThrottle)
     {
         var sourceLink = linkToSource ? getStackLink() : null;
-        return Firebug.Console.logFormatted(args, context, className, noThrottle, sourceLink);
+        Firebug.Console.logFormatted(args, context, className, noThrottle, sourceLink);
+        return "_firebugIgnore";
     }
 
     function logAssert(category, args)
@@ -488,6 +489,7 @@ Firebug.Console.createConsole = function createConsole(context, win)
 
         var row = Firebug.Console.log(errorObject, context, "errorMessage", null, true); // noThrottle
         row.scrollIntoView();
+        return "_firebugIgnore";
     }
 
     function getComponentsStackDump()
