@@ -63,7 +63,6 @@
     <menupopup id="contentAreaContextMenu">
         <menuseparator/>
         <menuitem id="menu_firebugInspect" label="firebug.InspectElement"
-                  image="chrome://firebug/skin/Templarian_inspector.png"
                   command="cmd_inspect" class="menuitem-iconic fbInternational" />
     </menupopup>
 

@@ -201,21 +201,39 @@ panelTab[selected="true"]:hover > panelTabMenu .menuTarget {
     padding: 3px;
     }
 
-#fbLocationList .autorepeatbutton-up[disabled="true"],
-    #fbLocationList .scrollbutton-up[disabled="true"] {
-    list-style-image: url("chrome://firebug/skin/nav-up-disabled.png");
-}
-#fbLocationList .autorepeatbutton-down[disabled="true"],
-    #fbLocationList .scrollbutton-down[disabled="true"] {
-    list-style-image: url("chrome://firebug/skin/nav-down-disabled.png");
-}
 #fbLocationList .autorepeatbutton-up,
-    #fbLocationList .scrollbutton-up {
-    list-style-image: url("chrome://firebug/skin/nav-up.png");
+#fbLocationList .scrollbutton-up {
+    list-style-image: url(chrome://firebug/skin/nav-up.png);
 }
+
 #fbLocationList .autorepeatbutton-down,
-    #fbLocationList .scrollbutton-down {
-    list-style-image: url("chrome://firebug/skin/nav-down.png");
+#fbLocationList .scrollbutton-down {
+    list-style-image: url(chrome://firebug/skin/nav-down.png);
+}
+
+#fbLocationList .autorepeatbutton-up,
+#fbLocationList .scrollbutton-up,
+#fbLocationList .autorepeatbutton-down,
+#fbLocationList .scrollbutton-down {
+    -moz-image-region: rect(0, 16px, 16px, 0);
+}
+
+#fbLocationList .autorepeatbutton-up:hover,
+#fbLocationList .autorepeatbutton-up:active,
+#fbLocationList .scrollbutton-up:hover,
+#fbLocationList .scrollbutton-up:active,
+#fbLocationList .autorepeatbutton-down:hover,
+#fbLocationList .autorepeatbutton-down:active,
+#fbLocationList .scrollbutton-down:hover,
+#fbLocationList .scrollbutton-down:active {
+    -moz-image-region: rect(16px, 16px, 32px, 0);
+}
+
+#fbLocationList .autorepeatbutton-up[disabled="true"],
+#fbLocationList .scrollbutton-up[disabled="true"],
+#fbLocationList .autorepeatbutton-down[disabled="true"],
+#fbLocationList .scrollbutton-down[disabled="true"] {
+    -moz-image-region: rect(32px, 16px, 48px, 0);
 }
 
 /* Evaluated scripts can take a lot of horizontal space on the toolbar so, this is the limit */
