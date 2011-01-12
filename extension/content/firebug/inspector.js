@@ -595,7 +595,7 @@ function getImageMapHighlighter(context)
                         ctx = canvas.getContext("2d");
 
                     ctx.fillStyle = "rgba(135, 206, 235, 0.7)";
-                    ctx.strokeStyle = "rgb(29, 55, 95)";
+                    ctx.strokeStyle = "rgb(44, 167, 220)";
                     ctx.lineWidth = 2;
 
                     if(images.length === 0)
@@ -624,6 +624,7 @@ function getImageMapHighlighter(context)
                             ctx.moveTo(rect.left + parseInt(v[0], 10), rect.top + parseInt(v[1], 10));
                             for(i=2; i < vLen; i += 2)
                                 ctx.lineTo(rect.left + parseInt(v[i], 10), rect.top + parseInt(v[i + 1], 10));
+                            ctx.lineTo(rect.left + parseInt(v[0], 10), rect.top + parseInt(v[1], 10));
                         }
 
                         ctx.fill();
