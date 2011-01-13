@@ -102,7 +102,7 @@ Firebug.Inspector = extend(Firebug.Module,
 
         Firebug.chrome.setGlobalAttribute("cmd_toggleInspecting", "checked", "true");
         this.attachInspectListeners(context);
-        
+
         var inspectingPanelName = this._resolveInspectingPanelName(context);
         this.inspectingPanel = Firebug.chrome.switchToPanel(context, inspectingPanelName);
 
@@ -157,7 +157,7 @@ Firebug.Inspector = extend(Firebug.Module,
 
                 Firebug.chrome.select(node);
             }, inspectDelay);
-            dispatch(this.fbListeners, "onInspectNode", [context, node]);
+            dispatch(this.fbListeners, "onInspectNode", [context, node] );
         }
     },
 
@@ -186,7 +186,7 @@ Firebug.Inspector = extend(Firebug.Module,
         this.inspecting = false;
 
         var panel = Firebug.chrome.unswitchToPanel(context, this.inspectingPanel.name, cancelled);
-        
+
         panel.stopInspecting(panel.selection, cancelled);
 
         dispatch(this.fbListeners, "onStopInspecting", [context] );
@@ -951,6 +951,7 @@ Firebug.Inspector.FrameHighlighter.prototype =
         if (body)
         {
             body.removeChild(highlighter);
+            removeProxiesForDisabledElements(body);
             quickInfoBox.hide();
         }
 
@@ -1256,9 +1257,9 @@ function createProxiesForDisabledElements(body)
         doc = body.ownerDocument,
         nodes = doc.getElementsByTagName("*");
 
-    for(i = 0; i < nodes.length; i++)
+    for (i = 0; i < nodes.length; i++)
     {
-        if(nodes[i].hasAttribute("disabled") && !nodes[i].fbHasProxyElement)
+        if (nodes[i].hasAttribute("disabled") && !nodes[i].fbHasProxyElement)
         {
             rect = nodes[i].getBoundingClientRect();
 
@@ -1272,6 +1273,18 @@ function createProxiesForDisabledElements(body)
 
             body.appendChild(div);
         }
+    }
+}
+
+function removeProxiesForDisabledElements(body)
+{
+    var doc = body.ownerDocument,
+        proxyElements = doc.getElementsByClassName("fbProxyElement");
+    
+    for (var i = 0; i < proxyElements.length; i++)
+    {
+        proxyElements[i].fbProxyFor.fbHasProxyElement = false;
+        proxyElements[i].parentNode.removeChild(proxyElements[i]);
     }
 }
 
