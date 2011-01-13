@@ -273,6 +273,7 @@ Firebug.Inspector = extend(Firebug.Module,
                 FBTrace.sysout("inspector.attacheInspectListeners to "+subWin.location+" subWindow of "+win.location);
             subWin.document.addEventListener("mouseover", this.onInspectingMouseOver, true);
             subWin.document.addEventListener("mousedown", this.onInspectingMouseDown, true);
+            subWin.document.addEventListener("mouseup", this.onInspectingMouseUp, true);
             subWin.document.addEventListener("click", this.onInspectingClick, true);
         }, this));
     },
@@ -299,6 +300,7 @@ Firebug.Inspector = extend(Firebug.Module,
         {
             subWin.document.removeEventListener("mouseover", this.onInspectingMouseOver, true);
             subWin.document.removeEventListener("mousedown", this.onInspectingMouseDown, true);
+            subWin.document.removeEventListener("mouseup", this.onInspectingMouseUp, true);
         }, this));
     },
 
@@ -330,7 +332,19 @@ Firebug.Inspector = extend(Firebug.Module,
         if (event.originalTarget && event.originalTarget.tagName === 'xul:thumb') // Allow to scroll the document while inspecting
             return;
 
+        cancelEvent(event);
+    },
+
+    onInspectingMouseUp: function(event)
+    {
+        if (FBTrace.DBG_INSPECT)
+            FBTrace.sysout("onInspectingMouseUp event", {originalTarget: event.originalTarget,tmpRealOriginalTarget:event.tmpRealOriginalTarget,event:event});
+
+        if (event.originalTarget && event.originalTarget.tagName === 'xul:thumb') // Allow to release scrollbar while inspecting
+            return;
+
         this.stopInspecting(false, true);
+
         cancelEvent(event);
     },
 
@@ -356,6 +370,7 @@ Firebug.Inspector = extend(Firebug.Module,
 
         this.onInspectingMouseOver = bind(this.onInspectingMouseOver, this);
         this.onInspectingMouseDown = bind(this.onInspectingMouseDown, this);
+        this.onInspectingMouseUp = bind(this.onInspectingMouseUp, this);
         this.onInspectingClick = bind(this.onInspectingClick, this);
 
         this.updateOption("shadeBoxModel", Firebug.shadeBoxModel);
