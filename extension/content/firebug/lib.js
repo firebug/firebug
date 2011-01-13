@@ -5510,6 +5510,7 @@ domMemberMap.Window =
     "mozAnimationStartTime", //FF4.0
     "mozPaintCount", //FF4.0
     "mozRequestAnimationFrame", //FF4.0
+    "mozIndexedDB", //FF4.0
 
     "status",
     "defaultStatus",
