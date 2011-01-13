@@ -1286,10 +1286,8 @@ function createProxiesForDisabledElements(body)
             div = doc.createElementNS("http://www.w3.org/1999/xhtml", "div");
             hideElementFromInspection(div);
             div.className = "fbProxyElement";
-            div.style.left = rect.left + "px";
-            div.style.top = rect.top + body.scrollTop + "px";
-            div.style.width = rect.width + "px";
-            div.style.height = rect.height + "px";
+            div.style.cssText = moveImp(null, rect.left, rect.top + body.scrollTop) +
+                resizeImp(null, rect.width, rect.height);
             div.fbProxyFor = node;
             node.fbHasProxyElement = true;
 
