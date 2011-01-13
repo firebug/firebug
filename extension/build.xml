@@ -133,6 +133,9 @@
         <!-- Remove unnecessary *.xml files in the root directory (like e.g. this build file),
             but not from sub directories. -->
         <delete dir="${build.dir}" includes="*.xml" />
+
+        <!-- Remove template for manifest file that is used for Babelzilla builds -->
+        <delete file="${build.dir}/chrome.bz.tpl.manifest"/>
     </target>
 
     <!-- Create final firebug.xpi file -->
