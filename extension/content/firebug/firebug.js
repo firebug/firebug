@@ -2113,7 +2113,9 @@ Firebug.Panel = extend(new Firebug.Listener(),
     statusSeparator: "<", // the character used to separate items on the panel status (aka breadcrumbs) in the tool bar, eg ">"  in the DOM panel
     enableA11y: false,    // true if the panel wants to participate in A11y accessibility support.
     deriveA11yFrom: null, // Name of the panel that uses the same a11y logic.
-
+    inspectable: false,	  // true to support inspecting elements inside this panel
+                          // panel may also want to declare -> inspectOnlySupportedObjects
+    
     initialize: function(context, doc)
     {
         if (!context.browser)

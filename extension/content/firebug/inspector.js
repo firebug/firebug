@@ -6,8 +6,6 @@ FBL.ns(function() { with (FBL) {
 // Constants
 
 const inspectDelay = 200;
-const defaultPrimaryPanel = "html";
-const defaultSecondaryPanel = "dom";
 const highlightCSS = "chrome://firebug/content/highlighter.css";
 
 // ************************************************************************************************
@@ -23,6 +21,7 @@ Firebug.Inspector = extend(Firebug.Module,
 {
     dispatchName: "inspector",
     inspecting: false,
+    inspectingPanel: null,
 
     highlightObject: function(element, context, highlightType, boxFrame)
     {
@@ -103,16 +102,18 @@ Firebug.Inspector = extend(Firebug.Module,
 
         Firebug.chrome.setGlobalAttribute("cmd_toggleInspecting", "checked", "true");
         this.attachInspectListeners(context);
+        
+        var inspectingPanelName = this._resolveInspectingPanelName(context);
+        this.inspectingPanel = Firebug.chrome.switchToPanel(context, inspectingPanelName);
 
-        var htmlPanel = Firebug.chrome.switchToPanel(context, "html");
 
         if (Firebug.isDetached())
             context.window.focus();
         else if (Firebug.isMinimized())
             Firebug.showBar(true);
 
-        htmlPanel.panelNode.focus();
-        htmlPanel.startInspecting();
+        this.inspectingPanel.panelNode.focus();
+        this.inspectingPanel.startInspecting();
 
         if (context.stopped)
             Firebug.Debugger.thaw(context);
@@ -146,11 +147,17 @@ Firebug.Inspector = extend(Firebug.Module,
 
         if (node)
         {
+            var panel = this.inspectingPanel;
             this.inspectTimeout = context.setTimeout(function()
             {
+                //some panels may want to only allow inspection of panel-supported objects
+                if(panel.inspectOnlySupportedObjects && !panel.supportsObject(node, typeof node)) {
+                    return;
+                }
+
                 Firebug.chrome.select(node);
             }, inspectDelay);
-            dispatch(this.fbListeners, "onInspectNode", [context, node] );
+            dispatch(this.fbListeners, "onInspectNode", [context, node]);
         }
     },
 
@@ -178,30 +185,46 @@ Firebug.Inspector = extend(Firebug.Module,
 
         this.inspecting = false;
 
-        var htmlPanel = Firebug.chrome.unswitchToPanel(context, "html", cancelled);
-
-        htmlPanel.stopInspecting(htmlPanel.selection, cancelled);
+        var panel = Firebug.chrome.unswitchToPanel(context, this.inspectingPanel.name, cancelled);
+        
+        panel.stopInspecting(panel.selection, cancelled);
 
         dispatch(this.fbListeners, "onStopInspecting", [context] );
 
         this.inspectNode(null);
     },
 
+    _resolveInspectingPanelName: function(context) {
+    	var name,
+            requestingPanel = context && context.getPanel(context.panelName);
+
+    	if(requestingPanel && requestingPanel.inspectable) {
+    		name = requestingPanel.name;
+    	} else {
+    		name = "html";
+    	}
+
+    	return name;
+    },
+
+
     inspectFromContextMenu: function(elt)
     {
-        var context, htmlPanel;
+        var panel, inspectingPanelName,
+            context = this.inspectingContext || TabWatcher.getContextByWindow(elt.ownerDocument.defaultView);
 
-        Firebug.toggleBar(true);
-        Firebug.chrome.select(elt, "html");
-        context = this.inspectingContext || TabWatcher.getContextByWindow(elt.ownerDocument.defaultView);
-        htmlPanel = Firebug.chrome.selectPanel("html");
-        htmlPanel.panelNode.focus();
+        inspectingPanelName = this._resolveInspectingPanelName(context);
+
+        Firebug.toggleBar(true, inspectingPanelName);
+        Firebug.chrome.select(elt, inspectingPanelName);
+        panel = Firebug.chrome.selectPanel(inspectingPanelName);
+        panel.panelNode.focus();
     },
 
     inspectNodeBy: function(dir)
     {
-        var target;
-        var node = this.inspectingNode;
+        var target,
+            node = this.inspectingNode;
 
         if (dir == "up")
             target = Firebug.chrome.getNextObject();
