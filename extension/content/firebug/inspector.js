@@ -915,16 +915,26 @@ Firebug.Inspector.FrameHighlighter.prototype =
                 css += '-moz-transform:' + cs.MozTransform + '!important;' +
                        '-moz-transform-origin:' + cs.MozTransformOrigin + '!important;';
             if(cs.borderRadius)
-              css += 'border-radius:' + cs.borderRadius + '!important;';
+                css += 'border-radius:' + cs.borderRadius + ' !important;';
             if(cs.borderTopLeftRadius)
-              css += 'border-top-left-radius:' + cs.borderTopLeftRadius + '!important;';
+                css += 'border-top-left-radius:' + cs.borderTopLeftRadius + ' !important;';
             if(cs.borderTopRightRadius)
-              css += 'border-top-right-radius:' + cs.borderTopRightRadius + '!important;';
-            if(cs.borderBottomLeftRadius)
-                css += 'border-bottom-left-radius:' + cs.borderBottomLeftRadius + '!important;';
+                css += 'border-top-right-radius:' + cs.borderTopRightRadius + ' !important;';
             if(cs.borderBottomRightRadius)
-                css += 'border-bottom-right-radius:' + cs.borderBottomRightRadius + '!important;';
-
+                css += 'border-bottom-right-radius:' + cs.borderBottomRightRadius + ' !important;';
+            if(cs.borderBottomLeftRadius)
+                css += 'border-bottom-left-radius:' + cs.borderBottomLeftRadius + ' !important;';
+            if(cs.MozBorderRadius)
+                css += '-moz-border-radius:' + cs.MozBorderRadius + ' !important;';
+            if(cs.MozBorderRadiusTopleft)
+                css += '-moz-border-radius-topleft:' + cs.MozBorderRadiusTopleft + ' !important;';
+            if(cs.MozBorderRadiusTopright)
+                css += '-moz-border-radius-topright:' + cs.MozBorderRadiusTopright + ' !important;';
+            if(cs.MozBorderRadiusBottomright)
+                css += '-moz-border-radius-bottomright:' + cs.MozBorderRadiusBottomright + ' !important;';
+            if(cs.MozBorderRadiusBottomleft)
+                css += '-moz-border-radius-bottomleft:' + cs.MozBorderRadiusBottomleft + ' !important;';
+            
             highlighter.style.cssText = css;
 
             var needsAppend = !highlighter.parentNode || highlighter.ownerDocument != body.ownerDocument;
