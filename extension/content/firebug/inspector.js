@@ -1253,23 +1253,30 @@ function attachStyles(context, body)
 
 function createProxiesForDisabledElements(body)
 {
-    var i, rect, div,
+    var i, rect, div, node,
         doc = body.ownerDocument,
-        nodes = doc.getElementsByTagName("*");
+        xpe = new XPathEvaluator(),
+        nsResolver = xpe.createNSResolver(doc.documentElement);
 
-    for (i = 0; i < nodes.length; i++)
+    var result = xpe.evaluate('//*[@disabled]', doc.documentElement,
+                      nsResolver, XPathResult.ORDERED_NODE_SNAPSHOT_TYPE, null);
+    var l = result.snapshotLength;
+    
+    for(i = 0; i < l; i++)
     {
-        if (nodes[i].hasAttribute("disabled") && !nodes[i].fbHasProxyElement)
+        node = result.snapshotItem(i);
+        if(!node.fbHasProxyElement)
         {
-            rect = nodes[i].getBoundingClientRect();
-
+            rect = node.getBoundingClientRect();
             div = doc.createElementNS("http://www.w3.org/1999/xhtml", "div");
-            div.className = "fbProxyElement";
-            div.style.cssText = moveImp(null, rect.left, rect.top + body.scrollTop) +
-                resizeImp(null, rect.width, rect.height);
             hideElementFromInspection(div);
-            div.fbProxyFor = nodes[i];
-            nodes[i].fbHasProxyElement = true;
+            div.className = "fbProxyElement";
+            div.style.left = rect.left + "px";
+            div.style.top = rect.top + body.scrollTop + "px";
+            div.style.width = rect.width + "px";
+            div.style.height = rect.height + "px";
+            div.fbProxyFor = node;
+            node.fbHasProxyElement = true;
 
             body.appendChild(div);
         }
