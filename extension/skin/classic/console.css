@@ -151,10 +151,8 @@
 
 .objectBox-null,
 .objectBox-undefined {
-    padding: 0 2px;
-    outline: 1px solid #666666;
-    background-color: #888888;
-    color: #FFFFFF;
+    font-style: italic;
+    color: #999999;
 }
 
 .objectLink-sourceLink {
