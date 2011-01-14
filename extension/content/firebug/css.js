@@ -2067,6 +2067,14 @@ CSSRuleEditor.prototype = domplate(Firebug.InlineEditor.prototype,
         }
 
         this.panel.markChange(this.panel.name == "stylesheet");
+    },
+
+    advanceToNext: function(target, charCode)
+    {
+        if (charCode == 123 /* "{" */)
+        {
+            return true;
+        }
     }
 });
 
