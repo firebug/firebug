@@ -451,6 +451,9 @@ Firebug.ConsolePanel.prototype = extend(Firebug.ActivablePanel,
 
             scrollToBottom(this.panelNode);
             this.wasScrolledToBottom = true;
+
+            // Don't forget to clear opened groups, if any.
+            this.groups = null;
         }
     },
 
