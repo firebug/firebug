@@ -5888,7 +5888,12 @@ domMemberMap.Element = extendArray(domMemberMap.Node,
     "mozMatchesSelector",
     "querySelector",
     "querySelectorAll",
-    "scrollIntoView"
+    "scrollIntoView",
+    
+    "onLoad",//FF4.0
+    "hidden",//FF4.0
+    "setCapture",//FF4.0
+    "releaseCapture"//FF4.0
 ]);
 
 domMemberMap.SVGElement = extendArray(domMemberMap.Element,
