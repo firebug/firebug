@@ -291,6 +291,7 @@ Firebug.Console.createConsole = function createConsole(context, win)
     console.dir = function(o)
     {
         Firebug.Console.log(o, context, "dir", Firebug.DOMPanel.DirTable);
+        return "_firebugIgnore";
     };
 
     console.dirxml = function(o)
@@ -301,17 +302,20 @@ Firebug.Console.createConsole = function createConsole(context, win)
             o = o.documentElement;
 
         Firebug.Console.log(o, context, "dirxml", Firebug.HTMLPanel.SoloElement);
+        return "_firebugIgnore";
     };
 
     console.group = function()
     {
         var sourceLink = getStackLink();
         Firebug.Console.openGroup(arguments, null, "group", null, false, sourceLink);
+        return "_firebugIgnore";
     };
 
     console.groupEnd = function()
     {
         Firebug.Console.closeGroup(context);
+        return "_firebugIgnore";
     };
 
     console.groupCollapsed = function()
@@ -324,16 +328,19 @@ Firebug.Console.createConsole = function createConsole(context, win)
         // Use rather a different method that causes auto collapsing of the group
         // when it's created.
         Firebug.Console.openCollapsedGroup(arguments, null, "group", null, false, sourceLink);
+        return "_firebugIgnore";
     };
 
     console.profile = function(title)
     {
         Firebug.Profiler.startProfiling(context, title);
+        return "_firebugIgnore";
     };
 
     console.profileEnd = function()
     {
         Firebug.Profiler.stopProfiling(context);
+        return "_firebugIgnore";
     };
 
     console.count = function(key)
@@ -364,11 +371,13 @@ Firebug.Console.createConsole = function createConsole(context, win)
 
             frameCounter.logRow.firstChild.firstChild.nodeValue = label;
         }
+        return "_firebugIgnore";
     };
 
     console.clear = function()
     {
         Firebug.Console.clear(context);
+        return "_firebugIgnore";
     };
 
     console.time = function(name, reset)
@@ -387,6 +396,7 @@ Firebug.Console.createConsole = function createConsole(context, win)
             return;
 
         this.timeCounters[key] = time;
+        return "_firebugIgnore";
     };
 
     console.timeEnd = function(name)
@@ -414,6 +424,7 @@ Firebug.Console.createConsole = function createConsole(context, win)
     console.table = function(data, columns)
     {
         FirebugReps.Table.log(data, columns, context);
+        return "_firebugIgnore";
     };
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
