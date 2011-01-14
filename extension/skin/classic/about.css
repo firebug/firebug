@@ -3,12 +3,12 @@
 /************************************************************************************************/
 /* Firebug About Dialog Overlay */
 
+#developersBox,
 #translatorsBox,
 #contributorsBox {
-    height: 150px !important;
-    overflow: auto;
     border: 2px rgb(192, 192, 192) solid;
     padding: 5px;
+    margin: 0 5px 5px 0;
 }
 
 #extensionTranslators,
