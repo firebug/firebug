@@ -2114,7 +2114,8 @@ Firebug.Panel = extend(new Firebug.Listener(),
     enableA11y: false,    // true if the panel wants to participate in A11y accessibility support.
     deriveA11yFrom: null, // Name of the panel that uses the same a11y logic.
     inspectable: false,	  // true to support inspecting elements inside this panel
-                          // panel may also want to declare -> inspectOnlySupportedObjects
+    inspectOnlySupportedObjects: true, //when true the inspector won't display objects not supported by the current panel
+    								   //when false, the inspector will select the best suitable panel to display objects being inspected. 
     
     initialize: function(context, doc)
     {
