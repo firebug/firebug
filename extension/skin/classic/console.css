@@ -152,7 +152,7 @@
 .objectBox-null,
 .objectBox-undefined {
     font-style: italic;
-    color: #999999;
+    color: #787878;
 }
 
 .objectLink-sourceLink {
