@@ -128,7 +128,7 @@ Firebug.Inspector = extend(Firebug.Module,
             node = node.parentNode;
 
         if(node && unwrapObject(node).firebugIgnore && !node.fbProxyFor)
-                return;
+            return;
 
         var context = this.inspectingContext;
 
@@ -271,6 +271,8 @@ Firebug.Inspector = extend(Firebug.Module,
         {
             if (FBTrace.DBG_INSPECT)
                 FBTrace.sysout("inspector.attacheInspectListeners to "+subWin.location+" subWindow of "+win.location);
+
+            subWin.document.addEventListener("scroll", this.onInspectingScroll, true);
             subWin.document.addEventListener("mouseover", this.onInspectingMouseOver, true);
             subWin.document.addEventListener("mousedown", this.onInspectingMouseDown, true);
             subWin.document.addEventListener("mouseup", this.onInspectingMouseUp, true);
@@ -298,6 +300,7 @@ Firebug.Inspector = extend(Firebug.Module,
 
         iterateWindows(win, bind(function(subWin)
         {
+            subWin.document.removeEventListener("acroll", this.onInspectingScroll, true);
             subWin.document.removeEventListener("mouseover", this.onInspectingMouseOver, true);
             subWin.document.removeEventListener("mousedown", this.onInspectingMouseDown, true);
             subWin.document.removeEventListener("mouseup", this.onInspectingMouseUp, true);
@@ -314,7 +317,15 @@ Firebug.Inspector = extend(Firebug.Module,
         }, this));
     },
 
-    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+
+    onInspectingScroll: function(event)
+    {
+        if (FBTrace.DBG_INSPECT)
+           FBTrace.sysout("onInspectingScroll event", event);
+
+        this.inspectNode(null);
+    },
 
     onInspectingMouseOver: function(event)
     {
@@ -368,6 +379,7 @@ Firebug.Inspector = extend(Firebug.Module,
     {
         Firebug.Module.initialize.apply(this, arguments);
 
+        this.onInspectingScroll = bind(this.onInspectingScroll, this);
         this.onInspectingMouseOver = bind(this.onInspectingMouseOver, this);
         this.onInspectingMouseDown = bind(this.onInspectingMouseDown, this);
         this.onInspectingMouseUp = bind(this.onInspectingMouseUp, this);
@@ -1191,7 +1203,8 @@ BoxModelHighlighter.prototype =
         if (!context.boxModelHighlighter)
         {
             var doc = context.window.document;
-            if (FBTrace.DBG_ERRORS && !doc) FBTrace.sysout("inspector getNodes no document for window:"+window.location);
+            if (FBTrace.DBG_ERRORS && !doc)
+                FBTrace.sysout("inspector getNodes no document for window:"+window.location);
             if (FBTrace.DBG_INSPECT && doc)
                 FBTrace.sysout("inspect.getNodes doc: "+doc.location);
 
@@ -1321,7 +1334,7 @@ function removeProxiesForDisabledElements(body)
 function rgbToHex(value)
 {
     return value.replace(/\brgb\((\d{1,3}),\s*(\d{1,3}),\s*(\d{1,3})\)/gi, function(_, r, g, b) {
-    return '#' + ((1 << 24) + (r << 16) + (g << 8) + (b << 0)).toString(16).substr(-6).toUpperCase();
+        return '#' + ((1 << 24) + (r << 16) + (g << 8) + (b << 0)).toString(16).substr(-6).toUpperCase();
     });
 }
 
