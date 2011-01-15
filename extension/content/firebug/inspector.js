@@ -300,7 +300,7 @@ Firebug.Inspector = extend(Firebug.Module,
 
         iterateWindows(win, bind(function(subWin)
         {
-            subWin.document.removeEventListener("acroll", this.onInspectingScroll, true);
+            subWin.document.removeEventListener("scroll", this.onInspectingScroll, true);
             subWin.document.removeEventListener("mouseover", this.onInspectingMouseOver, true);
             subWin.document.removeEventListener("mousedown", this.onInspectingMouseDown, true);
             subWin.document.removeEventListener("mouseup", this.onInspectingMouseUp, true);
