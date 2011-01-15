@@ -180,7 +180,7 @@
                     <panelBarArrowscrollbox id="fbPanelBar1-Arrowscrollbox" orient="horizontal"
                         flex="100" chromedir="ltr"
                         clicktoscroll="true"
-                        class="tabbrowser-arrowscrollbox">
+                        class="panelbar-arrowscrollbox">
 
                         <!-- Tab Bar -->
                         <hbox id="fbPanelBar1-panelTabs" class="panelTabs" role="tablist"
@@ -395,7 +395,7 @@
                                 <panelBarArrowscrollbox id="fbPanelBar2-Arrowscrollbox" orient="horizontal" flex="1"
                                     style="min-width: 1px;" chromedir="ltr"
                                     clicktoscroll="true"
-                                    class="tabbrowser-arrowscrollbox">
+                                    class="panelbar-arrowscrollbox">
                                     <!-- Tab Side Bar -->
                                     <hbox id="fbPanelBar2-panelTabs" class="panelTabs fbInternational" role="tablist"
                                           aria-label="a11y.labels.firebug_side_panels" />

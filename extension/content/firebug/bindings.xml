@@ -163,7 +163,7 @@
             <body><![CDATA[
                 var panelName = tab ? tab.panelType.prototype.name : null;
                 this.selectPanel(panelName);
-                var scrollBox = this.getElementsByClassName("tabbrowser-arrowscrollbox").item(0);
+                var scrollBox = this.getElementsByClassName("panelbar-arrowscrollbox").item(0);
                 scrollBox.ensureVisibleTab(tab);
             ]]></body>
         </method>
