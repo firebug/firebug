@@ -233,7 +233,11 @@ Firebug.HTMLPanel.prototype = extend(WalkingPanel,
 
     expandAll: function(node)
     {
-        this.ioBox.expandObject(node, true);
+        var box = this.ioBox.createObjectBox(node);
+        if (!hasClass(box, "open"))
+            this.ioBox.expandObject(node, true);
+        else
+            this.ioBox.contractObject(node, true);
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
@@ -1291,7 +1295,7 @@ Firebug.HTMLPanel.prototype = extend(WalkingPanel,
             if (nodeChildBox)
             {
                 items.push("-",
-                    {label: "html.label.Expand All", acceltext: "*",
+                    {label: "html.label.Expand/Contract All", acceltext: "*",
                         command: bindFixed(this.expandAll, this, node)});
             }
         }
