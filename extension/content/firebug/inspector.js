@@ -89,13 +89,7 @@ Firebug.Inspector = extend(Firebug.Module,
         if (this.inspecting)
             this.stopInspecting(true);
         else
-        {
-            var htmlpanel = context.getPanel("html", true);
-            if(htmlpanel && htmlpanel.editing)
-                Firebug.Editor.stopEditing();
-
             this.startInspecting(context);
-        }
     },
 
     startInspecting: function(context)

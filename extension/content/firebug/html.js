@@ -89,6 +89,25 @@ Firebug.HTMLPanel.prototype = extend(WalkingPanel,
         delete this.lastSearch;
     },
 
+    select: function(object, forceUpdate)
+    {
+        if (!object)
+            object = this.getDefaultSelection();
+
+        if(FBTrace.DBG_PANELS)
+            FBTrace.sysout("firebug.select "+this.name+" forceUpdate: "+forceUpdate+" "+object+((object==this.selection)?"==":"!=")+this.selection);
+
+        if (forceUpdate || object != this.selection)
+        {
+            this.selection = object;
+            this.updateSelection(object);
+            dispatch(Firebug.uiListeners, "onObjectSelected", [object, this]);
+
+            if(this.editing)
+                this.editNode(object);
+        }
+    },
+
     selectNext: function()
     {
         var objectBox = this.ioBox.createObjectBox(this.selection);
