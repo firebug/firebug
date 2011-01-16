@@ -12,8 +12,7 @@ const highlightCSS = "chrome://firebug/content/highlighter.css";
 // Globals
 
 var boxModelHighlighter = null,
-    frameHighlighter = null,
-    mx, my;
+    frameHighlighter = null;
 
 // ************************************************************************************************
 
@@ -25,16 +24,6 @@ Firebug.Inspector = extend(Firebug.Module,
 
     highlightObject: function(element, context, highlightType, boxFrame)
     {
-        if(context && context.window && context.window.document)
-        {
-            context.inspectorMouseMove = function inspectorMouseMove(event)
-            {
-                mx = event.clientX;
-                my = event.clientY;
-            };
-            context.window.document.addEventListener("mousemove", context.inspectorMouseMove, true);
-        }
-
         if (!element || !isElement(element) || !isVisible(unwrapObject(element)))
         {
             if(element && element.nodeType == 3)
@@ -553,7 +542,7 @@ function getImageMapHighlighter(context)
     if(!context)
         return;
 
-    var canvas, ctx,
+    var canvas, ctx, mx, my,
         doc = context.window.document,
         init = function(elt)
         {
@@ -570,7 +559,13 @@ function getImageMapHighlighter(context)
                 canvas.className = "firebugResetStyles firebugCanvas";
                 canvas.width = context.window.innerWidth;
                 canvas.height = context.window.innerHeight;
-                context.window.addEventListener("scroll", function(){context.imageMapHighlighter.show(false);}, true);
+                context.window.addEventListener("scroll", function(){
+                    context.imageMapHighlighter.show(false);
+                }, true);
+                doc.addEventListener("mousemove", function(event){
+                    mx = event.clientX;
+                    my = event.clientY;
+                }, true);
 
                 doc.body.appendChild(canvas);
             }
@@ -590,40 +585,40 @@ function getImageMapHighlighter(context)
 
             getImages: function(mapName, multi)
             {
-                var i, eltsLen, rect,
-                    elts = [],
+                var i, rect, nsResolver, xpe, elt, elts,
                     images = [],
-                    elts2 = doc.getElementsByTagName("img"),
-                    elts3 = doc.getElementsByTagName("input"),
-                    elts2Len = elts2.length,
-                    elts3Len = elts3.length;
+                    eltsLen = 0;
 
-                for(i = 0; i < elts2Len; i++)
-                    elts.push(elts2[i]);
+                if(!mapName)
+                    return;
 
-                for(i = 0; i < elts3Len; i++)
-                    elts.push(elts3[i]);
+                xpe = new XPathEvaluator();
+                nsResolver = xpe.createNSResolver(doc.documentElement);
 
-                if(elts)
+                elts = xpe.evaluate("//map[@name='" + mapName + "']", doc,
+                    nsResolver, XPathResult.ORDERED_NODE_SNAPSHOT_TYPE, null);
+
+                if(elts.snapshotLength === 0)
+                    return;
+
+                elts = xpe.evaluate("(//img | //input)[@usemap='#" + mapName + "']", doc.documentElement,
+                    nsResolver, XPathResult.ORDERED_NODE_SNAPSHOT_TYPE, null);
+                eltsLen = elts.snapshotLength;
+
+                for(i = 0; i < eltsLen; i++)
                 {
-                    eltsLen = elts.length;
+                    elt = elts.snapshotItem(i);
+                    rect = getLTRBWH(elt);
 
-                    for(i = 0; i < eltsLen; i++)
+                    if(multi)
+                        images.push(elt);
+                    else if(rect.left <= mx && rect.right >= mx && rect.top <= my && rect.bottom >= my)
                     {
-                        if(elts[i].getAttribute('usemap') == mapName)
-                        {
-                            rect = getLTRBWH(elts[i]);
-
-                            if(multi)
-                                images.push(elts[i]);
-                            else if(rect.left <= mx && rect.right >= mx && rect.top <= my && rect.bottom >= my)
-                            {
-                                images[0] = elts[i];
-                                break;
-                            }
-                        }
+                        images[0] = elt;
+                        break;
                     }
                 }
+
                 return images;
             },
 
@@ -633,7 +628,7 @@ function getImageMapHighlighter(context)
 
                 if (eltArea && eltArea.coords)
                 {
-                    images = this.getImages("#"+eltArea.parentNode.name, multi);
+                    images = this.getImages(eltArea.parentNode.name, multi);
 
                     init(eltArea);
 
@@ -1321,10 +1316,11 @@ function createProxiesForDisabledElements(body)
 
 function removeProxiesForDisabledElements(body)
 {
-    var doc = body.ownerDocument,
-        proxyElements = doc.getElementsByClassName("fbProxyElement");
+    var i, doc = body.ownerDocument,
+        proxyElements = doc.getElementsByClassName("fbProxyElement"),
+        proxyElementsLen = proxyElements.length;
     
-    for (var i = 0; i < proxyElements.length; i++)
+    for (i = 0; i < proxyElementsLen; i++)
     {
         proxyElements[i].fbProxyFor.fbHasProxyElement = false;
         proxyElements[i].parentNode.removeChild(proxyElements[i]);
