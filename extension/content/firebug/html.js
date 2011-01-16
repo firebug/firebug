@@ -103,7 +103,7 @@ Firebug.HTMLPanel.prototype = extend(WalkingPanel,
             this.updateSelection(object);
             dispatch(Firebug.uiListeners, "onObjectSelected", [object, this]);
 
-            if(this.editing)
+            if(this.editing && $("fbToggleHTMLEditing").getAttribute("checked") === "true")
                 this.editNode(object);
         }
     },
