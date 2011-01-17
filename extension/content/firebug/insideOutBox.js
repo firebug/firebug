@@ -116,11 +116,11 @@ InsideOutBox.prototype =
             this.expandObjectBox(objectBox, expandAll);
     },
 
-    contractObject: function(object)
+    contractObject: function(object, contractAll)
     {
         var objectBox = this.createObjectBox(object);
         if (objectBox)
-            this.contractObjectBox(objectBox);
+            this.contractObjectBox(objectBox, contractAll);
     },
 
     highlightObjectBox: function(objectBox)
@@ -213,7 +213,7 @@ InsideOutBox.prototype =
             labelBox.setAttribute('aria-expanded', 'true');
         setClass(objectBox, "open");
 
-        // Recursively expand all child boxes.
+        // Recursively expand all child boxes
         if (expandAll)
         {
             for (var child = nodeChildBox.firstChild; child; child = child.nextSibling)
@@ -248,13 +248,17 @@ InsideOutBox.prototype =
         if (labelBox)
             labelBox.setAttribute('aria-expanded', 'false');
 
-        // Recursively (one level) contract all child boxes.
+        // Recursively contract all child boxes
+        var nodeChildBox = this.getChildObjectBox(objectBox);
+        if (!nodeChildBox)
+            return;
+
         if (contractAll)
         {
             for (var child = nodeChildBox.firstChild; child; child = child.nextSibling)
             {
-                if (hasClass(child, "containerNodeBox"))
-                    this.contractObjectBox(childBoxes[i], contractAll);
+                if (hasClass(child, "containerNodeBox") && hasClass(child, "open"))
+                    this.contractObjectBox(child, contractAll);
             }
         }
     },

@@ -250,13 +250,9 @@ Firebug.HTMLPanel.prototype = extend(WalkingPanel,
         Firebug.HTMLModule.deleteNode(node, this.context);
     },
 
-    expandAll: function(node)
+    toggleAll: function(node)
     {
-        var box = this.ioBox.createObjectBox(node);
-        if (!hasClass(box, "open"))
-            this.ioBox.expandObject(node, true);
-        else
-            this.ioBox.contractObject(node, true);
+        this.ioBox.toggleObject(node, true);
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
@@ -1315,7 +1311,7 @@ Firebug.HTMLPanel.prototype = extend(WalkingPanel,
             {
                 items.push("-",
                     {label: "html.label.Expand/Contract All", acceltext: "*",
-                        command: bindFixed(this.expandAll, this, node)});
+                        command: bindFixed(this.toggleAll, this, node)});
             }
         }
         else
