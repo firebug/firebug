@@ -6495,10 +6495,10 @@ var domConstantMap = this.domConstantMap =
 this.cssInfo = {};
 this.cssInfo.html =
 {
-    "background": ["bgRepeat", "bgAttachment", "bgPosition", "color", "systemColor", "none"],
+    "background": ["bgRepeat", "bgAttachment", "bgPosition", "color", "systemColor", "mozBackgroundImage", "none"],
     "background-attachment": ["bgAttachment"],
     "background-color": ["color", "systemColor"],
-    "background-image": ["none"],
+    "background-image": ["none", "mozBackgroundImage"],
     "background-position": ["bgPosition"],
     "background-repeat": ["bgRepeat"],
     "background-size": ["bgSize"],
@@ -7452,6 +7452,14 @@ this.cssKeywords =
         "stretch",
         "round",
         "repeat"
+    ],
+
+    "mozBackgroundImage":
+    [
+        "-moz-linear-gradient", // FF4.0
+        "-moz-radial-gradient", // FF4.0
+        "-moz-element", // FF4.0
+        "-moz-image-rect" // FF4.0
     ],
 
     "mozTransformFunction":
