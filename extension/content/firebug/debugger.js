@@ -1337,16 +1337,31 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
                 if (!eventOrigin)
                     return 0;
 
+                // Check if the eventOrigin (window) comes from this context.
+                var eventOriginIndex = -1;
+                for (var i=0; i<context.windows.length; i++)
+                {
+                    if (context.windows[i] == eventOrigin) {
+                        eventOriginIndex = i;
+                        break;
+                    }
+                }
+
                 // Bail out if the event that lead the error is not cause by code in this context.
-                var eventOriginIndex = context.windows.indexOf(eventOrigin);
                 if (eventOriginIndex < 0)
+                {
+                    if (FBTrace.DBG_ERRORS)
+                        FBTrace.sysout("debugger.onError; error is not from this context: (" +
+                            eventOriginIndex + ") " + frame.script.tag+"@"+frame.script.fileName);
                     return 0;
+                }
 
                 var sourceFile = Firebug.SourceFile.getSourceFileByScript(context, frame.script);
                 if (!sourceFile)
                 {
                     if (FBTrace.DBG_ERRORS)
-                        FBTrace.sysout("debugger.breakon Errors no sourceFile for "+frame.script.tag+"@"+frame.script.fileName);
+                        FBTrace.sysout("debugger.breakon Errors no sourceFile for "+
+                            frame.script.tag+"@"+frame.script.fileName);
                     return;
                 }
 
@@ -1354,10 +1369,13 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
                 var lineNo = analyzer.getSourceLineFromFrame(context, frame);
 
                 var doBreak = true;
-                fbs.enumerateBreakpoints(sourceFile.href, {call: function(url, line, props, scripts) {
+                fbs.enumerateBreakpoints(sourceFile.href, {call: function(url, line, props, scripts)
+                {
                     if (FBTrace.DBG_FBS_BP)
-                        FBTrace.sysout("debugger.breakon Errors bp "+url+"@"+line+" scripts "+(scripts?scripts.length:"none"));
-                    if(line === lineNo)
+                        FBTrace.sysout("debugger.breakon Errors bp "+url+"@"+line+" scripts "+
+                            (scripts?scripts.length:"none"));
+
+                    if (line === lineNo)
                         doBreak = false;
                 }});
 
