@@ -1439,11 +1439,23 @@ var fbs =
         {
             if (!jsd.isOn)
             {
+                if (FBTrace.DBG_ACTIVATION)
+                {
+                    var startAsyncOn = new Date().getTime();
+                    FBTrace.sysout("firebug-service.activation begin jsd.asyncOn "+startAsyncOn);
+                }
+
                 jsd.asyncOn(  // turn on jsd for the next event
                 {
                     onDebuggerActivated: function doDebuggerActivated()
                     {
                         // now we are in the next event and jsd is on.
+                        if (FBTrace.DBG_ACTIVATION)
+                        {
+                            var nowAsyncOn = new Date().getTime();
+                            FBTrace.sysout("firebug-service.activation now we are in the next event and JSD is ON "+nowAsyncOn+" delta: "+(nowAsyncOn - startAsyncOn)+"ms" );
+                        }
+
                         fbs.onDebuggerActivated();
                         fbs.onJSDebuggingActive();
                     }
@@ -1472,7 +1484,7 @@ var fbs =
     {
         jsd.flags |= DISABLE_OBJECT_TRACE;
 
-        if (FBTrace.DBG_FBS_ERRORS)
+        if (FBTrace.DBG_ACTIVATION)
             FBTrace.sysout("jsd.onDebuggerActivated ==========================");
 
         if (jsd.pauseDepth && FBTrace.DBG_FBS_ERRORS)
@@ -1503,7 +1515,7 @@ var fbs =
         fbs.scriptsFilter = prefs.getCharPref("extensions.firebug.service.scriptsFilter");
         var mustReset = (pref !== fbs.scriptsFilter)
 
-        if (FBTrace.DBG_FBS_ERRORS)
+        if (FBTrace.DBG_OPTIONS)
             FBTrace.sysout("obeyPrefs mustReset = "+mustReset+" pref: "+pref+" fbs.scriptsFilter: "
                 +fbs.scriptsFilter, fbs);
 
@@ -1511,7 +1523,7 @@ var fbs =
         fbs.filterSystemURLs = prefs.getBoolPref("extensions.firebug.service.filterSystemURLs");  // may not be exposed to users
         mustReset = mustReset || (pref !== fbs.filterSystemURLs);
 
-        if (FBTrace.DBG_FBS_ERRORS)
+        if (FBTrace.DBG_OPTIONS)
             FBTrace.sysout("obeyPrefs mustReset = "+mustReset+" pref: "+pref+
                 " fbs.filterSystemURLs: "+fbs.filterSystemURLs);
 
@@ -1538,7 +1550,7 @@ var fbs =
 
         try
         {
-            if (FBTrace.DBG_FBS_ERRORS)
+            if (FBTrace.DBG_OPTIONS)
                 FBTrace.sysout("fbs.obeyPrefs showStackTrace:"+fbs.showStackTrace+
                     " breakOnErrors:"+fbs.breakOnErrors+" trackThrowCatch:"+fbs.trackThrowCatch+
                     " scriptFilter:"+fbs.scriptsFilter+" filterSystemURLs:"+fbs.filterSystemURLs);
