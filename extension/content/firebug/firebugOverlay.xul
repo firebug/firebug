@@ -417,14 +417,16 @@
                                 label="LargeCommandLine" />
                             <hbox id="fbCommandToolbar">
                                 <toolbarbutton id="fbCmdLineRunButton" label="firebug.Run"
-                                    class="toolbar-text-button"
+                                    class="toolbar-text-button fbInternational"
+                                    tooltiptext="firebug.Run_the_entered_command"
                                     oncommand="Firebug.CommandLine.enter(Firebug.currentContext)"/>
                                 <toolbarbutton id="fbCmdLineClearButton" label="firebug.Clear"
-                                    class="toolbar-text-button"
+                                    class="toolbar-text-button fbInternational"
+                                    tooltiptext="firebug.Clear_the_Command_Editor"
                                     oncommand="Firebug.CommandLine.clear(Firebug.currentContext)"/>
                                 <toolbarbutton id="fbCmdLineCopyButton" label="firebug.Copy"
-                                    class="toolbar-text-button"
-                                    tooltiptext="firebug.CopyBookmarklet"
+                                    class="toolbar-text-button fbInternational"
+                                    tooltiptext="firebug.Copy_the_script_as_a_bookmarklet"
                                     oncommand="Firebug.CommandLine.copyBookmarklet(Firebug.currentContext)"/>
                                 <toolbarspacer flex="1"/>
                                 <toolbarbutton id="fbCommandToggleLarge" tooltiptext="firebug.CommandLine" class="toolbarbutton-iconic fbInternational"

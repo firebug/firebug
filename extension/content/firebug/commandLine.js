@@ -643,24 +643,6 @@ Firebug.CommandLine = extend(Firebug.Module,
         this.attachListeners();
     },
 
-    internationalizeUI: function(doc)
-    {
-        var elements = ["fbCmdLineRunButton", "fbCmdLineClearButton", "fbCmdLineCopyButton"];
-
-        for (var i=0; i<elements.length; i++)
-        {
-            var element = doc.getElementById(elements[i]);
-            if (!element)
-                continue;
-
-            if (element.hasAttribute("label"))
-                FBL.internationalize(element, "label");
-
-            if (element.hasAttribute("tooltiptext"))
-                FBL.internationalize(element, "tooltiptext");
-        }
-    },
-
     reattachContext: function(browser, context)
     {
         this.attachListeners();
