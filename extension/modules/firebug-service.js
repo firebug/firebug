@@ -1749,8 +1749,10 @@ var fbs =
         if (FBTrace.DBG_FBS_ERRORS)
         {
             fbs.onDebugRequests--;
-            FBTrace.sysout("fbs.onDebug ("+fbs.onDebugRequests+") fileName="+frame.script.fileName+ " reportNextError="+reportNextError+" breakOnNext:"+this.breakOnErrors);
+            FBTrace.sysout("fbs.onDebug ("+fbs.onDebugRequests+") fileName="+frame.script.fileName+
+                " reportNextError="+reportNextError+" breakOnNext:"+this.breakOnErrors);
         }
+
         if ( isFilteredURL(frame.script.fileName) )
         {
             reportNextError = false;
@@ -1960,8 +1962,10 @@ var fbs =
                 messageKind = "Uncaught-Exception";
             if (flags & jsdIErrorHook.REPORT_STRICT)
                 messageKind += "-Strict";
-            FBTrace.sysout("fbs.onError ("+fbs.onDebugRequests+") with this.showStackTrace="+this.showStackTrace+" and this.breakOnErrors="
-                   +this.breakOnErrors+" kind="+messageKind+" msg="+message+"@"+fileName+":"+lineNo+"."+pos+"\n");
+
+            FBTrace.sysout("fbs.onError ("+fbs.onDebugRequests+") with this.showStackTrace="+
+                this.showStackTrace+" and this.breakOnErrors="+this.breakOnErrors+" kind="+
+                messageKind+" msg="+message+"@"+fileName+":"+lineNo+"."+pos+"\n");
         }
 
         // global to pass info to onDebug. Some duplicate values to support different apis
@@ -3407,11 +3411,14 @@ var fbs =
 
     hookScripts: function()
     {
-        if (FBTrace.DBG_FBS_STEP || FBTrace.DBG_FBS_TRACKFILES) FBTrace.sysout("set scriptHook\n");
+        if (FBTrace.DBG_FBS_STEP || FBTrace.DBG_FBS_TRACKFILES)
+            FBTrace.sysout("set scriptHook\n");
+
         jsd.scriptHook = {
             onScriptCreated: hook(this.onScriptCreated),
             onScriptDestroyed: hook(this.onScriptDestroyed)
         };
+
         if (fbs.filterSystemURLs)
             fbs.setChromeBlockingFilters();
 
@@ -3427,7 +3434,8 @@ var fbs =
         jsd.scriptHook = null;
         fbs.removeChromeBlockingFilters();
 
-        if (FBTrace.DBG_FBS_STEP || FBTrace.DBG_FBS_TRACKFILES) FBTrace.sysout("unset scriptHook\n");
+        if (FBTrace.DBG_FBS_STEP || FBTrace.DBG_FBS_TRACKFILES)
+            FBTrace.sysout("unset scriptHook\n");
     },
 
     // TODO rewrite as a Stepper
