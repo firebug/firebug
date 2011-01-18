@@ -254,17 +254,17 @@ Firebug.Console = extend(ActivableConsole,
 
     onObserverChange: function(observer)
     {
-        if (this.hasObservers())
+        if (this.isAlwaysEnabled())
         {
             this.watchForErrors();
 
             // we inject the console during JS compiles so we need jsd
-            Firebug.Debugger.addDependentModule(this);
+            Firebug.Debugger.addObserver(this);
         }
         else
         {
             this.unwatchForErrors();
-            Firebug.Debugger.removeDependentModule(this);
+            Firebug.Debugger.removeObserver(this);
 
             // Make sure possible errors coming from the page and displayed in the Firefox
             // status bar are removed.

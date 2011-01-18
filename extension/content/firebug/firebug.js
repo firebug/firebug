@@ -1585,11 +1585,13 @@ top.Firebug =
         else
             $('fbStatusIcon').setAttribute("script", "off");
 
+        Firebug.resetTooltip();
+
         // Front side state
         Firebug.Debugger.jsDebuggerOn = active;
 
         if (FBTrace.DBG_ACTIVATION)
-            FBTrace.sysout("debugger.setIsJSDActive "+active+"\n");
+            FBTrace.sysout("debugger.setIsJSDActive "+active+" icon attribute: "+$('fbStatusIcon').getAttribute("script"));
 
     },
 
@@ -2115,7 +2117,7 @@ Firebug.Panel = extend(new Firebug.Listener(),
     deriveA11yFrom: null, // Name of the panel that uses the same a11y logic.
     inspectable: false,   // true to support inspecting elements inside this panel
     inspectOnlySupportedObjects: true, //when true the inspector won't display objects not supported by the current panel
-                                       //when false, the inspector will select the best suitable panel to display objects being inspected. 
+                                       //when false, the inspector will select the best suitable panel to display objects being inspected.
 
     initialize: function(context, doc)
     {
@@ -2714,8 +2716,12 @@ Firebug.ActivableModule = extend(Firebug.Module,
         if (!this.observers)
             this.observers = [];
 
-        this.observers.push(observer);
-        this.onObserverChange(observer);  // not dispatched.
+        if (this.observers.indexOf(observer) === -1)
+        {
+            this.observers.push(observer);
+            this.onObserverChange(observer);  // targeted, not dispatched.
+        }
+        // else no-op
     },
 
     removeObserver: function(observer)
@@ -2723,8 +2729,12 @@ Firebug.ActivableModule = extend(Firebug.Module,
         if (!this.observers)
             return;
 
-        remove(this.observers, observer);
-        this.onObserverChange(observer);  // not dispatched
+        if (this.observers.indexOf(observer) !== -1)
+        {
+            remove(this.observers, observer);
+            this.onObserverChange(observer);  // targeted, not dispatched
+        }
+        // else no-op
     },
 
     /**
@@ -2739,38 +2749,11 @@ Firebug.ActivableModule = extend(Firebug.Module,
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
-    // Cross module dependencies.
-
-    addDependentModule: function(dependent)
-    {
-        if (!this.dependents)
-            this.dependents = [];
-
-        this.dependents.push(dependent);
-        this.onDependentModuleChange(dependent);  // not dispatched.
-    },
-
-    removeDependentModule: function(dependent)
-    {
-        if (!this.dependents)
-            return;
-
-        remove(this.dependents, dependent);
-        this.onDependentModuleChange(dependent);  // not dispatched
-    },
-
-    onDependentModuleChange: function(dependent)
-    {
-        if (FBTrace.DBG_WINDOWS)
-            FBTrace.sysout("onDependentModuleChange no-op for "+dependent.dispatchName);
-    },
-
-    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
     // Firebug Activation
 
     onSuspendingFirebug: function()
     {
-        // Called before any suspend actions. Firest caller to return true aborts suspend.
+        // Called before any suspend actions. First caller to return true aborts suspend.
     },
 
     onSuspendFirebug: function()

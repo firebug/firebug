@@ -2169,17 +2169,12 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
     {
         if (FBTrace.DBG_ACTIVATION)
             FBTrace.sysout("debugger.Firebug.Debugger.enable; " + this.enabled);
-
-        //if (this.isAlwaysEnabled())
-        //    this.registerDebugger(); // allow callbacks for jsd
     },
 
     disable: function()
     {
         if (FBTrace.DBG_ACTIVATION)
             FBTrace.sysout("debugger.Firebug.Debugger.disable; " + this.enabled);
-
-        //this.unregisterDebugger();
     },
 
     initializeUI: function()
@@ -2445,70 +2440,41 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
 
     onObserverChange: function(observer)
     {
+        if (FBTrace.DBG_ACTIVATION) {
+            var names = [];
+            this.observers.forEach(function(ob){names.push(ob.name);});
+            FBTrace.sysout("debugger.onObserverChange "+this.hasObservers()+" "+this.observers.length+": "+names.join(','), this.observers);
+        }
+
         if (this.hasObservers())
-            this.activateDebugger()
+        {
+            this.activateDebugger();
+            if (Firebug.currentContext)
+            {
+                var name = observer.name || observer.dispatchName;
+                Firebug.Console.log("enabling javascript debugger "+(name?"to support "+name:""));
+            }
+        }
         else
+        {
             this.deactivateDebugger();
+        }
     },
 
     activateDebugger: function()
     {
         this.registerDebugger();
 
-        if (Firebug.currentContext && !fbs.isJSDActive())
-            fbs.unPause();
-
         if (FBTrace.DBG_PANELS || FBTrace.DBG_ACTIVATION)
-            FBTrace.sysout("debugger.activate;");
+            FBTrace.sysout("debugger.activateDebugger requested;");
     },
 
     deactivateDebugger: function()
     {
-        if (this.dependents && this.dependents.length > 0)
-        {
-            for(var i = 0; i < this.dependents.length; i++)
-            {
-                if (this.dependents[i].isAlwaysEnabled())
-                {
-                    // TODO getName() for modules required.
-                    var name = this.dependents[0].dispatchName;
-
-                    // Log message into the console to inform the user
-                    if (Firebug.currentContext)
-                        Firebug.Console.log("Cannot disable the script panel, " + name +
-                            " panel requires it", Firebug.currentContext);
-
-                    if (FBTrace.DBG_PANELS)
-                        FBTrace.sysout("debugger.onPanelDisable rejected: " + name +
-                            " dependent, with panelName: " + panelName);
-                    return;
-                }
-            }
-        }
-
-        // else no dependents enabled:
         this.unregisterDebugger();
 
         if (FBTrace.DBG_PANELS || FBTrace.DBG_ACTIVATION)
             FBTrace.sysout("debugger.deactivate");
-
-        // this.clearAllBreakpoints();  //XXXjjb I don't think we want to clear breakpoints here, just turn off jsd if no registered debuggers
-    },
-
-    onDependentModuleChange: function(dependentAddedOrRemoved)
-    {
-        if (this.dependents.length > 0) // then we have dependents now
-        {
-            if (!this.isAlwaysEnabled()) // then we need to enable
-            {
-                this.activateDebugger();
-                if (Firebug.currentContext)
-                    Firebug.Console.log("enabling javascript debugger to support "+dependentAddedOrRemoved.dispatchName, Firebug.currentContext);
-            }
-        }
-
-        // xxxHonza, XXXjjb: what about else? In case there are no dependants we could perhaps
-        // disable again...
     },
 
     onSuspendingFirebug: function()
