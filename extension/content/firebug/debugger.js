@@ -1317,14 +1317,17 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
 
         try
         {
-            if (FBTrace.DBG_ERRORS) FBTrace.sysout("debugger.onError: "+error.errorMessage+" in "+(context?context.getName():"no context"), error);
+            if (FBTrace.DBG_ERRORS)
+                FBTrace.sysout("debugger.onError: "+error.errorMessage+" in "+
+                    (context?context.getName():"no context"), error);
 
             if (reTooMuchRecursion.test(error.errorMessage))
                 frame = fbs.discardRecursionFrames(frame);
 
             Firebug.errorStackTrace = getCorrectedStackTrace(frame, context);
             if (FBTrace.DBG_ERRORS)
-                FBTrace.sysout("debugger.onError errorStackTrace ", Firebug.errorStackTrace);
+                FBTrace.sysout("debugger.onError; break=" + Firebug.breakOnErrors +
+                    ", errorStackTrace:", Firebug.errorStackTrace);
 
             delete context.breakingCause;
 
@@ -1333,8 +1336,10 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
                 var eventOrigin = FBL.unwrapIValue(frame.executionContext.globalObject);
                 if (!eventOrigin)
                     return 0;
+
+                // Bail out if the event that lead the error is not cause by code in this context.
                 var eventOriginIndex = context.windows.indexOf(eventOrigin);
-                if (eventOriginIndex < 0) // then the event that lead the error is not cause by code in this context
+                if (eventOriginIndex < 0)
                     return 0;
 
                 var sourceFile = Firebug.SourceFile.getSourceFileByScript(context, frame.script);
@@ -1344,6 +1349,7 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
                         FBTrace.sysout("debugger.breakon Errors no sourceFile for "+frame.script.tag+"@"+frame.script.fileName);
                     return;
                 }
+
                 var analyzer = sourceFile.getScriptAnalyzer(frame.script);
                 var lineNo = analyzer.getSourceLineFromFrame(context, frame);
 
