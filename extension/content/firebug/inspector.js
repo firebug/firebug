@@ -130,24 +130,30 @@ Firebug.Inspector = extend(Firebug.Module,
         if(node && node.fbProxyFor)
             node = node.fbProxyFor;
 
-        this.highlightObject(node, context, "frame");
-
-        this.inspectingNode = node;
-
         if (node)
         {
+            //some panels may want to only allow inspection of panel-supported objects
             var panel = this.inspectingPanel;
-            this.inspectTimeout = context.setTimeout(function()
+            while (node)
             {
-                //some panels may want to only allow inspection of panel-supported objects
-                if(panel.inspectOnlySupportedObjects && !panel.supportsObject(node, typeof node)) {
+                if(!panel.inspectOnlySupportedObjects || (panel.inspectOnlySupportedObjects && panel.supportsObject(node, typeof node)))
+                {
+                    this.highlightObject(node, context, "frame");
+                    this.inspectingNode = node;
+        
+                    this.inspectTimeout = context.setTimeout(function()
+                    {
+                        Firebug.chrome.select(node);
+                    }, inspectDelay);
+                    dispatch(this.fbListeners, "onInspectNode", [context, node] );
                     return;
                 }
-
-                Firebug.chrome.select(node);
-            }, inspectDelay);
-            dispatch(this.fbListeners, "onInspectNode", [context, node] );
+                node = node.parentNode;
+            }
         }
+        // node will be undefined
+        this.highlightObject(node, context, "frame");
+        this.inspectingNode = node;
     },
 
     stopInspecting: function(cancelled, waitForClick)
