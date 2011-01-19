@@ -928,14 +928,16 @@ var fbs =
 
     enterNestedEventLoop: function(callback)
     {
-        dispatch(netDebuggers, "suspendActivity");
-        this.activitySuspended = true;
-
         try
         {
-            fbs.nestedEventLoopDepth = jsd.enterNestedEventLoop({
+            dispatch(netDebuggers, "suspendActivity");
+            this.activitySuspended = true;
+
+            fbs.nestedEventLoopDepth = jsd.enterNestedEventLoop(
+            {
                 onNest: function()
                 {
+                    dispatch(netDebuggers, "resumeActivity");
                     callback.onNest();
                 }
             });
@@ -957,6 +959,7 @@ var fbs =
     {
         try
         {
+            dispatch(netDebuggers, "suspendActivity");
             return jsd.exitNestedEventLoop();
         }
         catch (exc)
