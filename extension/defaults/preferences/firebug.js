@@ -16,6 +16,7 @@ pref("extensions.firebug.sourceLinkLabelWidth", 17);        // Maximum amount of
 pref("extensions.firebug.currentVersion", "");              // If Firebug version is bigger than the one in this string, a first-run welcome page is displayed.
 pref("extensions.firebug.useDefaultLocale", false);         // Set to true if Firebug should use default (en-US) locale instead of the current Firefox locale.
 pref("extensions.firebug.activateSameOrigin", true);
+pref("extensions.firebug.toolbarCustomizationDone", false);  // Set to true if the start-button has been initially appended into Firefox toolbar.
 
 // Command line
 pref("extensions.firebug.largeCommandLine", false);
