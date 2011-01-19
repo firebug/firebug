@@ -1533,9 +1533,11 @@ top.Firebug =
             throw new Error("enableXULWindow window is closed!!");
 
         if (FBTrace.DBG_ACTIVATION)
-            FBTrace.sysout("enable XUL Window +++++++++++++++++++++++++++++++++++++++", Firebug.detachArgs);
+            FBTrace.sysout("enable XUL Window +++++++++++++++++++++++++++++++++++++++",
+                Firebug.detachArgs);
 
-        dispatch(modules, "enable", [FirebugChrome]);  // allows errors to flow thru fbs and callbacks to supportWindow to begin
+        // allows errors to flow thru fbs and callbacks to supportWindow to begin
+        dispatch(modules, "enable", [FirebugChrome]);
     },
 
     disableXULWindow: function()
@@ -1545,9 +1547,7 @@ top.Firebug =
             FBTrace.sysout("disable XUL Window --------------------------------------");
     },
 
-    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
-    // These are XUL window level call backs and should be moved into Firebug where is says nsIFirebugClient
-    // xxxHonza: so I did
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
     onPauseJSDRequested: function(rejection)
     {
