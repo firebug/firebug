@@ -152,24 +152,6 @@ toolbar[iconsize="small"] #firebug-button > .toolbarbutton-icon {
     cursor: pointer;
 }
 
-#fbStatusIcon {
-    list-style-image: url(chrome://firebug/skin/firebug-gray-16.png);
-}
-#fbStatusIcon[script="on"] {
-    list-style-image: url(chrome://firebug/skin/firebug16.png);
-}
-#fbStatusIcon[net="on"] {
-    list-style-image: url(chrome://firebug/skin/firebug16.png);
-}
-#fbStatusIcon[console="on"] {
-    list-style-image: url(chrome://firebug/skin/firebug16.png);
-}
-
-#fbStatusIcon[suspended="suspended"] {
-    list-style-image: url(chrome://firebug/skin/firebug-gray-16.png);
-}
-
-
 #fbStatusText {
     cursor: pointer;
     color: red;
@@ -178,6 +160,46 @@ toolbar[iconsize="small"] #firebug-button > .toolbarbutton-icon {
 
 #fbStatusBar[errors] #fbStatusIcon {
     list-style-image: url(chrome://firebug/skin/errorIcon-sm.png);
+}
+
+/*************************************************************************************************/
+/* Firebug Status Icon */
+
+#fbStatusIcon {
+    list-style-image: url(chrome://firebug/skin/firebug-gray-16.png);
+}
+
+#fbStatusIcon[script="on"],
+#fbStatusIcon[net="on"],
+#fbStatusIcon[console="on"] {
+    list-style-image: url(chrome://firebug/skin/firebug16.png);
+}
+
+#fbStatusIcon[suspended="suspended"] {
+    list-style-image: url(chrome://firebug/skin/firebug-gray-16.png);
+}
+
+/*************************************************************************************************/
+/* Firebug Status Icon */
+
+#firebug-button[script="on"],
+#firebug-button[net="on"],
+#firebug-button[console="on"] {
+    list-style-image: url(chrome://firebug/skin/firebug24.png);
+}
+
+#firebug-button[suspended="suspended"] {
+    list-style-image: url(chrome://firebug/skin/firebug-gray-24.png);
+}
+
+toolbar[iconsize="small"] #firebug-button[script="on"],
+toolbar[iconsize="small"] #firebug-button[net="on"],
+toolbar[iconsize="small"] #firebug-button[console="on"] {
+    list-style-image: url(chrome://firebug/skin/firebug16.png);
+}
+
+toolbar[iconsize="small"] #firebug-button[suspended="suspended"] {
+    list-style-image: url(chrome://firebug/skin/firebug-gray-16.png);
 }
 
 /********************************************************************************************/

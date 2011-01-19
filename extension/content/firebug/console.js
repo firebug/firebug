@@ -343,13 +343,13 @@ Firebug.Console = extend(ActivableConsole,
     watchForErrors: function()
     {
         Firebug.Errors.checkEnabled();
-        $('fbStatusIcon').setAttribute("console", "on");
+        $('firebugStatus').setAttribute("console", "on");
     },
 
     unwatchForErrors: function()
     {
         Firebug.Errors.checkEnabled();
-        $('fbStatusIcon').removeAttribute("console");
+        $('firebugStatus').removeAttribute("console");
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *

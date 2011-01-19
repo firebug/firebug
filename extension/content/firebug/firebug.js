@@ -384,7 +384,7 @@ top.Firebug =
 
     getSuspended: function()  // TODO XULWindow
     {
-        var suspendMarker = $("fbStatusIcon");
+        var suspendMarker = $("firebugStatus");
         if (suspendMarker.hasAttribute("suspended"))
             return suspendMarker.getAttribute("suspended");
         return null;
@@ -392,7 +392,7 @@ top.Firebug =
 
     setSuspended: function(value)  // TODO XULWindow
     {
-        var suspendMarker = $("fbStatusIcon");
+        var suspendMarker = $("firebugStatus");
         if (FBTrace.DBG_ACTIVATION)
             FBTrace.sysout("Firebug.setSuspended to "+value+". Browser: " +
                 Firebug.chrome.window.document.title);
@@ -484,18 +484,18 @@ top.Firebug =
         var strOff = $STR("enablement.off");
 
         var status = "";
-        var fbStatusIcon = $('fbStatusIcon');
-        if (fbStatusIcon.getAttribute("console") == "on")
+        var firebugStatus = $('firebugStatus');
+        if (firebugStatus.getAttribute("console") == "on")
             status +="Console: "+strOn+",";
         else
             status +="Console: "+strOff+",";
 
-        if (fbStatusIcon.getAttribute("net") == "on")
+        if (firebugStatus.getAttribute("net") == "on")
             status +=" Net: "+strOn+",";
         else
             status +=" Net: "+strOff+",";
 
-        if (fbStatusIcon.getAttribute("script") == "on")
+        if (firebugStatus.getAttribute("script") == "on")
             status +=" Script: "+strOn;
         else
             status +=" Script: "+strOff+"";
@@ -526,7 +526,7 @@ top.Firebug =
 
         tooltip += "\n" + $STR(Firebug.getPlacement());
 
-        $('fbStatusBar').setAttribute("tooltiptext", tooltip);
+        $('firebugStatus').setAttribute("tooltiptext", tooltip);
     },
 
     getURLsForAllActiveContexts: function()
@@ -1581,9 +1581,9 @@ top.Firebug =
     {
         // Front side UI mark
         if (active)
-            $('fbStatusIcon').setAttribute("script", "on");
+            $('firebugStatus').setAttribute("script", "on");
         else
-            $('fbStatusIcon').setAttribute("script", "off");
+            $('firebugStatus').setAttribute("script", "off");
 
         Firebug.resetTooltip();
 
@@ -1591,7 +1591,7 @@ top.Firebug =
         Firebug.Debugger.jsDebuggerOn = active;
 
         if (FBTrace.DBG_ACTIVATION)
-            FBTrace.sysout("debugger.setIsJSDActive "+active+" icon attribute: "+$('fbStatusIcon').getAttribute("script"));
+            FBTrace.sysout("debugger.setIsJSDActive "+active+" icon attribute: "+$('firebugStatus').getAttribute("script"));
 
     },
 

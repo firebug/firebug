@@ -4435,7 +4435,7 @@ function monitorContext(context)
         panel.insertActivationMessage();
 
     // Update status bar icon.
-    $('fbStatusIcon').setAttribute("net", "on");
+    $('firebugStatus').setAttribute("net", "on");
 }
 
 function unmonitorContext(context)
@@ -4466,7 +4466,7 @@ function unmonitorContext(context)
     context.netProgress.activate(null);
 
     // Update status bar icon.
-    $('fbStatusIcon').removeAttribute("net");
+    $('firebugStatus').removeAttribute("net");
 
     // And finaly destroy the net panel sub context.
     delete context.netProgress;

@@ -59,11 +59,19 @@
         <!-- Firebug button -->
         <toolbarbutton id="firebug-button" label="firebug.Firebug"
             class="toolbarbutton-1 chromeclass-toolbar-additional fbInternational"
-            observes="cmd_toggleFirebug" tooltiptext="firebug.ShowFirebug"
-            type="menu-button" contextmenu="fbStatusContextMenu">
+            command="cmd_toggleFirebug" tooltiptext="firebug.ShowFirebug"
+            type="menu-button" contextmenu="fbStatusContextMenu"
+            observes="firebugStatus">
             <!-- menu fbStatusContextMenu is cloned here -->
         </toolbarbutton>
     </toolbarpalette>
+
+    <!-- The broadcaster holds the current Firebug activation state. The state
+         (i.e. attributes of the broadcaster are shared among all observers,
+         which is: fbStatusIcon and firebug-button. -->
+    <broadcasterset id="mainBroadcasterSet">
+        <broadcaster id="firebugStatus" />
+    </broadcasterset>
 
     <!-- Extend Firefox status bar -->
     <statusbar id="status-bar">
@@ -71,7 +79,7 @@
             aria-labelledby="fbStatusPrefix fbStatusText" aria-describedby="fbStatusIcon"
             onmouseup="Firebug.onClickStatusIcon(Firebug.currentContext, event);"
             tooltiptext="Firebug">
-            <image id="fbStatusIcon" />
+            <image id="fbStatusIcon" observes="firebugStatus"/>
             <label id="fbStatusPrefix" collapsed="true" />
             <label id="fbStatusText"
                 onmouseup="Firebug.onClickStatusText(Firebug.currentContext, event);" />
