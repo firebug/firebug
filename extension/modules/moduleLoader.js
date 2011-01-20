@@ -48,6 +48,7 @@ function ModuleLoader(global, requirejsConfig, securityOrigin) {
     this.loadDepsThenCallback  = function() { // during the ctor call, bind a ref to the loader
         return self.prefixWithConfig.apply(self, arguments);  // use the bound ref to call apply with proper |this|
     }
+    this.define = this.loadDepsThenCallback;
 
     ModuleLoader.currentModuleLoader = this;
 
