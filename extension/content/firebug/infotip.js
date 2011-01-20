@@ -1,6 +1,6 @@
 /* See license.txt for terms of usage */
 
-FBL.ns(function() { with (FBL) {
+define("infotip.js", [], function(require, exports, module) { with (FBL) {
 
 // ************************************************************************************************
 // Constants
@@ -252,5 +252,5 @@ Firebug.InfoTip = extend(Firebug.Module,
 Firebug.registerModule(Firebug.InfoTip);
 
 // ************************************************************************************************
-
+return Firebug.InfoTip;
 }});

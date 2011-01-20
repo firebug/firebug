@@ -1,6 +1,6 @@
 /* See license.txt for terms of usage */
 
-FBL.ns(function() { with (FBL) {
+define("a11y.js", [], function(require, exports, module) { with (FBL) {
 
 // ************************************************************************************************
 // Constants
@@ -1147,7 +1147,7 @@ Firebug.A11yModel = extend(Firebug.Module,
                 nodeBox = getAncestorByClass(nodeBox, 'nodeBox');
                 //select call will not trigger focus because focus is outside the HTML panel (i.e. the search field),
                 panel.select(nodeBox.repObject, true);
-                // Manually force selected node to be focused  
+                // Manually force selected node to be focused
                 this.onObjectBoxSelected(nodeBox, true);
                 break;
             case 'css':
@@ -2735,4 +2735,5 @@ Firebug.A11yModel = extend(Firebug.Module,
 Firebug.registerModule(Firebug.A11yModel);
 
 // ************************************************************************************************
+return Firebug.A11yModel;
 }});

@@ -1,6 +1,6 @@
 /* See license.txt for terms of usage */
 
-FBL.ns(function() { with (FBL) {
+define("sourceBox.js", [], function(require, exports, module) { with (FBL) {
 
 Components.utils.import("resource://firebug/bti/compilationunit.js");
 // ************************************************************************************************
@@ -1038,4 +1038,5 @@ Firebug.SourceBoxPanel = extend(SourceBoxPanelBase,
 });
 
 // ************************************************************************************************
+return Firebug.SourceBoxPanel;
 }});

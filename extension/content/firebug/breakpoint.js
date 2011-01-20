@@ -1,6 +1,6 @@
 /* See license.txt for terms of usage */
 
-FBL.ns(function() { with (FBL) {
+define("breakpoint.js", ["reps.js", "editor.js"], function(FirebugReps, _Editors) { with (FBL) {
 
 // ************************************************************************************************
 // Constants
@@ -972,4 +972,6 @@ Firebug.registerRep(Firebug.Breakpoint.BreakpointRep);
 Firebug.registerModule(Firebug.Breakpoint);
 
 // ************************************************************************************************
+
+return Firebug.Breakpoint;
 }});

@@ -1,6 +1,6 @@
 /* See license.txt for terms of usage */
 
-FBL.ns(function() { with (FBL) {
+define("navigationHistory.js", [], function(require, exports, module) { with (FBL) {
 
 // ************************************************************************************************
 // Constants
@@ -238,7 +238,7 @@ Firebug.NavigationHistory = extend(Firebug.Module,
             return;
 
         // Ignore side panel navigation.
-        if (panel.parentPanel) 
+        if (panel.parentPanel)
             return;
 
         // The user is navigating using the history UI, this action doesn't affect
@@ -287,4 +287,5 @@ Firebug.registerModule(Firebug.NavigationHistory);
 Firebug.registerUIListener(Firebug.NavigationHistory);
 
 // ************************************************************************************************
+return Firebug.NavigationHistory;
 }});

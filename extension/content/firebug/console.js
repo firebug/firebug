@@ -1,6 +1,6 @@
 /* See license.txt for terms of usage */
 
-FBL.ns(function() { with (FBL) {
+define("console.js", [], function(require, exports, module) { with (FBL) {
 
 // ************************************************************************************************
 // Constants
@@ -771,9 +771,9 @@ Firebug.ConsolePanel.prototype = extend(Firebug.ActivablePanel,
         if (name == "consoleFilterTypes")
         {
             Firebug.Console.syncFilterButtons(Firebug.chrome);
-            for (var i = 0; i < TabWatcher.contexts.length; ++i)
+            for (var i = 0; i < Firebug.TabWatcher.contexts.length; ++i)
             {
-                var context = TabWatcher.contexts[i];
+                var context = Firebug.TabWatcher.contexts[i];
                 Firebug.Console.onToggleFilter(context, value);
             }
         }
@@ -1107,4 +1107,5 @@ Firebug.registerActivableModule(Firebug.Console);
 Firebug.registerPanel(Firebug.ConsolePanel);
 
 // ************************************************************************************************
+return Firebug.Console;
 }});

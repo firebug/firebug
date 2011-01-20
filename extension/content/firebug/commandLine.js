@@ -1,6 +1,6 @@
 /* See license.txt for terms of usage */
 
-FBL.ns(function() { with (FBL) {
+define("commandLine.js", [], function(require, exports, module) { with (FBL) {
 
 // ************************************************************************************************
 // Constants
@@ -1471,4 +1471,5 @@ function getNoScript()
 Firebug.registerModule(Firebug.CommandLine);
 
 // ************************************************************************************************
+return Firebug.CommandLine;
 }});

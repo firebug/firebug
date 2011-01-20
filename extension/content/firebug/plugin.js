@@ -1,6 +1,6 @@
 /* See license.txt for terms of usage */
 
-FBL.ns(function() { with (FBL) {
+define("plugin.js", [], function(require, exports, module) { with (FBL) {
 
 // ************************************************************************************************
 
@@ -130,5 +130,5 @@ function innerCall(innerPanel, name, args)
 }
 
 // ************************************************************************************************
-
+return Firebug.PluginPanel;
 }});

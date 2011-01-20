@@ -1,6 +1,6 @@
 /* See license.txt for terms of usage */
 
-FBL.ns(function() { with (FBL) {
+define(function(require, exports, module) { with (FBL) {
 
 const Ci = Components.interfaces;
 const SHOW_ALL = Ci.nsIDOMNodeFilter.SHOW_ALL;

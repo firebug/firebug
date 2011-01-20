@@ -1,6 +1,6 @@
 /* See license.txt for terms of usage */
 
-FBL.ns(function() { with (FBL) {
+define("editor.js", [], function(require, exports, module) { with (FBL) {
 
 // ************************************************************************************************
 // Constants
@@ -1567,5 +1567,5 @@ function insertTab()
 Firebug.registerModule(Firebug.Editor);
 
 // ************************************************************************************************
-
+return Firebug.Editor;
 }});

@@ -1,6 +1,6 @@
 /* See license.txt for terms of usage */
 
-FBL.ns(function() { with (FBL) {
+define("html.js", ["lib/htmlLib.js", "reps.js", "editor.js"],function(HTMLLib, FirebugReps, Editors) { with (FBL) {
 
 // ************************************************************************************************
 // Constants
@@ -8,11 +8,9 @@ FBL.ns(function() { with (FBL) {
 const Cc = Components.classes;
 const Ci = Components.interfaces;
 
-const MODIFICATION = MutationEvent.MODIFICATION;
-const ADDITION = MutationEvent.ADDITION;
-const REMOVAL = MutationEvent.REMOVAL;
-
-const HTMLLib = Firebug.HTMLLib;
+const MODIFICATION = window.MutationEvent.MODIFICATION;
+const ADDITION = window.MutationEvent.ADDITION;
+const REMOVAL = window.MutationEvent.REMOVAL;
 
 const BP_BREAKONATTRCHANGE = 1;
 const BP_BREAKONCHILDCHANGE = 2;
@@ -931,7 +929,7 @@ Firebug.HTMLPanel.prototype = extend(WalkingPanel,
     initializeNode: function(oldPanelNode)
     {
         if (!this.ioBox)
-            this.ioBox = new InsideOutBox(this, this.panelNode);
+            this.ioBox = new Firebug.InsideOutBox(this, this.panelNode);
 
         this.panelNode.addEventListener("click", this.onClick, false);
         this.panelNode.addEventListener("mousedown", this.onMouseDown, false);
@@ -1084,7 +1082,7 @@ Firebug.HTMLPanel.prototype = extend(WalkingPanel,
             if (this.ioBox)
                 this.ioBox.destroy();
 
-            this.ioBox = new InsideOutBox(this, this.panelNode);
+            this.ioBox = new Firebug.InsideOutBox(this, this.panelNode);
             this.ioBox.select(this.selection, true, true);
         }
     },
@@ -2328,8 +2326,6 @@ MutationBreakpointGroup.prototype = extend(new Firebug.Breakpoint.BreakpointGrou
 });
 
 
-
-
 // ************************************************************************************************
 // Registration
 
@@ -2338,4 +2334,5 @@ Firebug.registerModule(Firebug.HTMLModule);
 Firebug.registerRep(Firebug.HTMLModule.BreakpointRep);
 
 // ************************************************************************************************
+return Firebug.HTMLModule;
 }});

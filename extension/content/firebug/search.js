@@ -1,6 +1,6 @@
 /* See license.txt for terms of usage */
 
-FBL.ns(function() { with (FBL) {
+define("search.js", [], function(require, exports, module) { with (FBL) {
 
 // ************************************************************************************************
 // Constants
@@ -202,4 +202,5 @@ Firebug.Search = extend(Firebug.Module,
 Firebug.registerModule(Firebug.Search);
 
 // ************************************************************************************************
+return Firebug.Search;
 }});

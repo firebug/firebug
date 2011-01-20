@@ -1,7 +1,6 @@
 /* See license.txt for terms of usage */
 
-
-FBL.ns(function() { with (FBL) {
+define("profiler.js", ["reps.js"], function(FirebugReps) { with (FBL) {
 
 var toggleProfiling = $("fbToggleProfiling");
 
@@ -444,4 +443,5 @@ Firebug.registerRep(Firebug.Profiler.ProfileCall);
 
 // ************************************************************************************************
 
+return Firebug.Profiler;
 }});

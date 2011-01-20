@@ -68,7 +68,8 @@ top.FirebugChrome =
         {
             // Disaster!
             window.dump("getStackDump:"+FBL.getStackDump()+"\n");
-            Components.utils.reportError("Firebug initialization FAILS "+exc);
+            var msg = exc.toString() +" "+(exc.fileName || exc.sourceName) + "@" + exc.lineNumber;
+            Components.utils.reportError(msg);
             if (FBTrace.sysout)
                 FBTrace.sysout("chrome.panelBarReady FAILS: "+exc, exc);
             return false;
@@ -106,9 +107,10 @@ top.FirebugChrome =
         }
         else
         {
-            // Firebug has not been initialized yet
             if (!Firebug.isInitialized)
+            {
                 Firebug.initialize();
+            }
         }
 
         // FBL should be available
@@ -1748,10 +1750,10 @@ function onPanelMouseUp(event)
                 {
                     var distance = Math.abs(event.screenX - this.lastMouseDownPosition.x) +
                                       Math.abs(event.screenY - this.lastMouseDownPosition.y);
-					 // if mouse has moved far enough set selection at that point
+                     // if mouse has moved far enough set selection at that point
                     if (distance > 3)
                         selectionData = {start: selFO, end: selFO};
-					 // otherwise leave selectionData undefined to select all text
+                     // otherwise leave selectionData undefined to select all text
                 }
                 else if (selFO < selAO)
                     selectionData = {start: selFO, end: selAO};

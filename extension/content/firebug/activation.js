@@ -1,6 +1,6 @@
 /* See license.txt for terms of usage */
 
-FBL.ns(function() { with (FBL) {
+define("activation.js", [], function(require, exports, module) { with (FBL) {
 
 // ************************************************************************************************
 // Constants
@@ -44,7 +44,7 @@ Firebug.Activation = extend(Firebug.Module,
     {
         Firebug.Module.initializeUI.apply(this, arguments);
 
-        TabWatcher.addListener(this.TabWatcherListener);
+        Firebug.TabWatcher.addListener(this.TabWatcherListener);
 
         // The "off" option is removed so make sure to convert previsous prev value
         // into "none" if necessary.
@@ -70,7 +70,7 @@ Firebug.Activation = extend(Firebug.Module,
     {
         Firebug.Module.shutdown.apply(this, arguments);
 
-        TabWatcher.removeListener(this.TabWatcherListener);
+        Firebug.TabWatcher.removeListener(this.TabWatcherListener);
 
         this.getAnnotationService().flush();
     },
@@ -164,7 +164,7 @@ Firebug.Activation = extend(Firebug.Module,
             if (hasAnnotation)
                 return this.checkAnnotation(browser, uri);
 
-            if (browser.FirebugLink) // then TabWatcher found a connection
+            if (browser.FirebugLink) // then Firebug.TabWatcher found a connection
             {
                 var dst = browser.FirebugLink.dst;
                 var dstURI = this.convertToURIKey(dst.spec, Firebug.activateSameOrigin);
@@ -202,7 +202,7 @@ Firebug.Activation = extend(Firebug.Module,
             }
             else if (browser.contentWindow.opener)
             {
-                var openerContext = TabWatcher.getContextByWindow(browser.contentWindow.opener);
+                var openerContext = Firebug.TabWatcher.getContextByWindow(browser.contentWindow.opener);
 
                 if (FBTrace.DBG_ACTIVATION)
                     FBTrace.sysout("shouldCreateContext opener found, has "+
@@ -520,7 +520,7 @@ Firebug.PanelActivation = extend(Firebug.Module,
         {
             // Iterate all contexts and destroy all instances of the specified panel.
             var self = this;
-            TabWatcher.iterateContexts(function(context) {
+            Firebug.TabWatcher.iterateContexts(function(context) {
                 context.destroyPanel(panelType, context.persistedState);
             });
         }
@@ -607,4 +607,5 @@ Firebug.registerModule(Firebug.Activation);
 Firebug.registerModule(Firebug.PanelActivation);
 
 // ************************************************************************************************
+return Firebug.Activation;
 }});

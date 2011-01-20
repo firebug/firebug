@@ -1,6 +1,6 @@
 /* See license.txt for terms of usage */
 
-FBL.ns(function() { with (FBL)
+define("sourceFile.js", [], function(require, exports, module) { with (FBL)
 {
     const Cc = Components.classes;
     const Ci = Components.interfaces;
@@ -792,4 +792,6 @@ Firebug.SourceFile.guessEnclosingFunctionName = function(url, line, context)
     return FBL.guessFunctionName(url, line-1, context);
 };
 
+
+return Firebug.SourceFile;
 }});

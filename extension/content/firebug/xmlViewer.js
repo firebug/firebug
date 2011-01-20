@@ -1,6 +1,6 @@
 /* See license.txt for terms of usage */
 
-FBL.ns(function() { with (FBL) {
+define("xmlViewer.js", [], function(require, exports, module) { with (FBL) {
 
 // ************************************************************************************************
 // Constants
@@ -177,5 +177,5 @@ Firebug.XMLViewerModel.ParseError = domplate(Firebug.Rep,
 // Registration
 
 Firebug.registerModule(Firebug.XMLViewerModel);
-
+return Firebug.XMLViewerModel;
 }});

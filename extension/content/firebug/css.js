@@ -1,6 +1,5 @@
 /* See license.txt for terms of usage */
-
-FBL.ns(function() { with (FBL) {
+define("css.js", ["reps.js"], function(FirebugReps) { with (FBL) {
 
 // ************************************************************************************************
 // Constants
@@ -787,7 +786,7 @@ Firebug.CSSStyleSheetPanel.prototype = extend(Firebug.SourceBoxPanel,
                 cancelEvent(event);
             }
         }
-		else if( (event.clientX >= 20) && (event.detail == 2) )
+        else if( (event.clientX >= 20) && (event.detail == 2) )
         {
             var row = getAncestorByClass(event.target, "cssRule");
             if (row && !getAncestorByClass(event.target, "cssPropName")
@@ -2331,4 +2330,5 @@ Firebug.registerPanel(CSSComputedElementPanel);
 
 // ************************************************************************************************
 
+return Firebug.CSSModule;
 }});

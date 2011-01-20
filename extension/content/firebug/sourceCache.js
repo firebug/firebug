@@ -1,6 +1,6 @@
 /* See license.txt for terms of usage */
 
-FBL.ns(function() { with (FBL) {
+define("sourceCache.js", [], function(require, exports, module) { with (FBL) {
 
 // ************************************************************************************************
 // Constants
@@ -362,4 +362,5 @@ function getCacheKey(context)
 }
 
 // ************************************************************************************************
+return Firebug.SourceCache;
 }});

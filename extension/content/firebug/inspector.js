@@ -1,6 +1,6 @@
 /* See license.txt for terms of usage */
 
-FBL.ns(function() { with (FBL) {
+define("inspector.js", [], function(require, exports, module) { with (FBL) {
 
 // ************************************************************************************************
 // Constants
@@ -1368,5 +1368,5 @@ function hideElementFromInspection(elt) {
 Firebug.registerModule(Firebug.Inspector);
 
 // ************************************************************************************************
-
+return Firebug.Inspector;
 }});

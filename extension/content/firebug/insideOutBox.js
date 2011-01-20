@@ -1,13 +1,13 @@
 /* See license.txt for terms of usage */
 
-FBL.ns(function() { with (FBL) {
+define("insideOutBox.js", [], function(require, exports, module) { with (FBL) {
 
 /**
  * View interface used to populate an InsideOutBox object.
  *
  * All views must implement this interface (directly or via duck typing).
  */
-top.InsideOutBoxView = {
+InsideOutBoxView = {
     /**
      * Retrieves the parent object for a given child object.
      */
@@ -35,7 +35,7 @@ top.InsideOutBoxView = {
  * Construction uses an "inside-out" algorithm, meaning that the view's job is first
  * to tell us the ancestry of each object, and secondarily its descendants.
  */
-top.InsideOutBox = function(view, box)
+Firebug.InsideOutBox = function(view, box)
 {
     this.view = view;
     this.box = box;
@@ -50,7 +50,7 @@ top.InsideOutBox = function(view, box)
     box.addEventListener("mousedown", this.onMouseDown, false);
 };
 
-InsideOutBox.prototype =
+Firebug.InsideOutBox.prototype =
 {
     destroy: function()
     {
@@ -678,4 +678,5 @@ function getObjectPath(element, aView)
     return path;
 }
 
+return Firebug.InsideOutBox;
 }});

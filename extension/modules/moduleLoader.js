@@ -19,6 +19,8 @@ var Ci = Components.interfaces;
 var Cc = Components.classes;
 var Cu = Components.utils;
 
+var consoleService = Cc["@mozilla.org/consoleservice;1"].getService(Ci.nsIConsoleService);
+
 
 /*
  * @param global: the global object to use for the execution context associated with the module loader.
@@ -31,7 +33,7 @@ var Cu = Components.utils;
  */
 
 function ModuleLoader(global, requirejsConfig, securityOrigin) {
-    this.config = ModuleLoader.copyProperties(requirejsConfig);
+    this.config = ModuleLoader.copyProperties({}, requirejsConfig);
     this.global = global;
     this.securityOrigin;
 
@@ -54,6 +56,39 @@ function ModuleLoader(global, requirejsConfig, securityOrigin) {
     }
     ModuleLoader.loaders.push(this);
 }
+
+ModuleLoader.debug = false;
+
+/*
+ModuleLoader.checkDefineArguments = function(id, dependencies, definerFunction) {
+    var problem = "";
+    if (!id || typeof(id) !== 'string')
+        problem += "First argument must be an id, a string, was "+id;
+    if (!dependencies || !(length in dependencies) )
+        problem += "Second argument must be an array of dependencies";
+    if (!definerFunction || typeof(definerFunction != "function") )
+        problem += "Third argument must function defining the module";
+    if (problem)
+        throw new Error("ERROR in define() call: "+problem);
+}
+ModuleLoader.define = function(id, dependencies, definerFunction) {
+    ModuleLoader.checkDefineArguments.apply(ModuleLoader, arguments);
+
+    if (!ModuleLoader.modules) {
+        ModuleLoader.modules = {}; // indexed by id
+    }
+    if (id in ModuleLoader.modules) {
+        throw new Error("ERROR in define() call: "+id+" already defined");
+    }
+    ModuleLoader.modules[id] = {dependencies: dependencies, definerFunction: definerFunction};
+}
+
+ModuleLoader.require = function(leafs, finalizer) {
+    // Load the leafs
+    // check deps
+    // run finalizer
+}
+*/
 /*
  * @return the current module loader for the current execution context.
  * (XXXjjb: dubious value)
@@ -72,23 +107,19 @@ ModuleLoader.get = function(name) {
     }
 }
 /*
- * @return shallow copy of lhs overridden by rhs
- * @param lhs left hand side object, properties copied in to return
+ * @return reference to lhs, overridden by properties of rhs
+ * @param lhs left hand side object, properties may be overwritten by rhs
  * @param rhs (optional) right hand side object, properties copied over lhs
  */
 ModuleLoader.copyProperties = function(lhs, rhs) {
-    var obj = {};
-    if (rhs) {
-        for (var p in rhs) {
-            obj[p] = rhs[p];
+    for (var p in rhs) {
+        try {
+            lhs[p] = rhs[p];
+        } catch (exc) {
+            // On the Mozila platform we get "Operation is not supported"
         }
     }
-    if (lhs) {
-        for (var p in lhs) {
-            obj[p] = lhs[p];
-        }
-    }
-    return obj;
+    return lhs;
 }
 
 ModuleLoader.systemPrincipal = Cc["@mozilla.org/systemprincipal;1"].createInstance(Ci.nsIPrincipal);
@@ -96,7 +127,13 @@ ModuleLoader.mozIOService = Cc['@mozilla.org/network/io-service;1'].getService(C
 
 ModuleLoader.bootStrap = function(requirejsPath) {
     var primordialLoader = new ModuleLoader(null, {context: "_Primordial"});
-    ModuleLoader.bootstrapUnit = primordialLoader.loadModule(requirejsPath);
+    try {
+        if (ModuleLoader.debug) consoleService.logStringMessage("ModuleLoader bootstrap from "+requirejsPath);
+        ModuleLoader.bootstrapUnit = primordialLoader.loadModule(requirejsPath);
+    } catch (exc) {
+        consoleService.logStringMessage("ModuleLoader bootstrap ERROR "+exc);
+    }
+
     // require.js does not export so we need to fix that
     ModuleLoader.bootstrapUnit.exports = {
         require: ModuleLoader.bootstrapUnit.sandbox.require,
@@ -149,7 +186,8 @@ ModuleLoader.prototype = {
             this.totalEvals += 1;
             return evalResult;
         } catch (exc) {
-            return coreRequire.onError(new Error("ModuleLoader.evalScript ERROR "+exc), {exc: exc, unit: unit});
+            var msg = exc.toString() +" "+(exc.fileName || exc.sourceName) + "@" + exc.lineNumber;
+            return ModuleLoader.onError(msg, {exception: exc, compilationUnit: unit, moduleLoader: this});
         }
     },
 
@@ -164,8 +202,9 @@ ModuleLoader.prototype = {
             }
 
         } catch (exc) {
-            return coreRequire.onError(new Error("ModuleLoader could not convert "+mrl+" to absolute URL using baseURI "+this.baseURI), {exception: exc, moduleLoader: this});
+            return ModuleLoader.onError(new Error("ModuleLoader could not convert "+mrl+" to absolute URL using baseURI "+this.baseURI), {exception: exc, moduleLoader: this});
         }
+        consoleService.logStringMessage("ModuleLoader loadModule reading "+url);
 
         var unit = {
             source: this.mozReadTextFromFile(url),
@@ -178,7 +217,7 @@ ModuleLoader.prototype = {
 
         // Any properties of this.global that are functions compiled in chrome scope become exposed to evaled code.
         if (this.global) {
-            thatGlobal = ModuleLoader.copyProperties(thatGlobal, this.global);
+            ModuleLoader.copyProperties(thatGlobal, this.global);
         }
 
         this.loadModuleLoading(thatGlobal);  // only for system sandboxes.
@@ -196,14 +235,16 @@ ModuleLoader.prototype = {
             }
         }
         this.attachModule(url, unit);  // even if we don't have any valid exports, so we can try to finish dependencies
+
+        if (ModuleLoader.debug) ModuleLoader.onDebug("ModuleLoader loaded "+url, {compilationUnit: unit, moduleLoader: this});
         return unit;
     },
 
     loadModuleLoading: function(thatGlobal) {
-        if (this.principal.equals(ModuleLoader.systemPrincipal)) {
+       // if (this.principal == "system") { // voodoo learned from securable-modules.js, .equals() does not work
             thatGlobal.require = coreRequire;  // reuse the require compile objects
             thatGlobal.define = define;
-        }
+       // }
     },
 
     // **** clients will get require from their ModuleLoader instance
@@ -221,9 +262,20 @@ ModuleLoader.prototype = {
                 var args = arguments;
             }
             args[0] = this.remapConfig(ModuleLoader.copyProperties(args[0], this.config));
+
+            if (args[0].onError) {
+                this.saveOnError = coreRequire.onError;
+                coreRequire.onError = args[0].onError;
+            }
+
             coreRequire.apply(null, args);
+
+            if (this.saveOnError) {
+                coreRequire.onError = this.saveOnError;
+                delete this.saveOnError;
+            }
         } else {
-            coreRequire.onError("ModuleLoader.loadDepsThenCallback(deps, callback), deps string or array of strings, callback called after strings resolved and loaded", this);
+            if (ModuleLoader.debug) ModuleLoader.onDebug("ModuleLoader.loadDepsThenCallback(deps, callback), deps string or array of strings, callback called after strings resolved and loaded", this);
         }
     },
 
@@ -237,7 +289,7 @@ ModuleLoader.prototype = {
             try {
                 this.baseURI = ModuleLoader.mozIOService.newURI(cfg.baseUrl, null, null);
             } catch (exc) {
-                coreRequire.onError("ModuleLoader ERROR failed to create baseURI from "+cfg.baseUrl, this);
+                ModuleLoader.onError("ModuleLoader ERROR failed to create baseURI from "+cfg.baseUrl, this);
             }
         }
         else if (this.baseURI) {
@@ -284,6 +336,10 @@ ModuleLoader.prototype = {
         return this.name;
     },
 
+    toString: function() {
+        return "Moduleloader "+this.getModuleLoaderName()+": "+this.totalEntries+" entries";
+    },
+
     safeGetWindowLocation: function(window)	{
         try {
             if (window) {
@@ -328,11 +384,53 @@ ModuleLoader.prototype = {
 
             return data;
         } catch (err) {
-            return coreRequire.onError(new Error("mozReadTextFromFile; EXCEPTION "+err), {err:err, pathToFile: pathToFile, moduleLoader: this});
+            if (err.name === "NS_ERROR_FILE_NOT_FOUND") {
+                // TODO: The call stack needs to point to the caller here
+                var callsite = "";
+                var caller = err.location ? err.location.caller : null;
+                while (caller) {
+                    if (caller.filename === "resource://firebug/moduleLoader.js" && caller.lineNumber === 49) {
+                        if (caller.caller) {
+                            callsite = caller.caller.filename +"@"+caller.caller.lineNumber;
+                        }
+                        break;
+                    }
+                    caller = caller.caller;
+                }
+                return ModuleLoader.onError(new Error("ModuleLoader file not found "+pathToFile+" "+callsite), {err:err, pathToFile: pathToFile, moduleLoader: this});
+            }
+            return ModuleLoader.onError(new Error("mozReadTextFromFile; EXCEPTION "+err), {err:err, pathToFile: pathToFile, moduleLoader: this});
         }
     },
 
 }
+
+
+ModuleLoader.onError = function (err, object) {
+    consoleService.logStringMessage("ModuleLoader pre-bootstrap ERROR "+err);
+    if (object) {
+        consoleService.logStringMessage("ModuleLoader pre-bootstrap object "+object);
+        for (var p in object) {
+            consoleService.logStringMessage("ModuleLoader pre-bootstrap object["+p+"]="+object[p]);
+        }
+    }
+}
+
+ModuleLoader.onDebug = function (err, object) {
+    consoleService.logStringMessage("ModuleLoader pre-bootstrap message "+err);
+    if (object) {
+        consoleService.logStringMessage("ModuleLoader pre-bootstrap object "+object);
+        for (var p in object) {
+            try {
+                consoleService.logStringMessage("ModuleLoader pre-bootstrap object["+p+"]="+object[p]);
+            } catch (exc) {
+                // bah bogus errors
+            }
+        }
+    }
+}
+
+
 
 // *** load require.js and override its methods as needed. ****
 
@@ -343,7 +441,23 @@ coreRequire = ModuleLoader.bootStrap(ModuleLoader.requireJSFileName).require;
 if (coreRequire) {
     define = coreRequire.def; // see require.js
 } else {
-    throw new Error("ModuleLoader ERROR failed to read and load "+ModuleLoader.requireJSFileName);
+    ModuleLoader.onError("ModuleLoader ERROR bootStrap has no require property from "+ModuleLoader.requireJSFileName);
+}
+
+function loadCompilationUnit(moduleLoader, context, url, moduleName) {
+    try {
+        var unit = moduleLoader.loadModule(url);
+        context.completeLoad(moduleName);             // round up all the dependencies
+        return unit;
+    } catch (exc) {
+        var errorURL = exc.filename || exc.sourceName || exc.fileName;
+        var errorLineNumber = exc.lineNumber;
+        ModuleLoader.onDebug("loadCompilationUnit got exception "+exc+" on "+errorURL+"@"+errorLineNumber+", trying "+moduleLoader.config.edit);
+        if (moduleLoader.config.edit) {
+            return moduleLoader.config.edit(exc, errorURL, errorLineNumber);
+        }
+        throw exc;
+    }
 }
 
 // Override to connect require.js to our loader
@@ -357,28 +471,40 @@ coreRequire.load = function (context, moduleName, url) {
     var moduleLoader = ModuleLoader.get(context.contextName); // set in config for each subsystem
 
     if (moduleLoader) {
-        var unit = moduleLoader.loadModule(url);
-        context.completeLoad(moduleName);             // round up all the dependencies
+        var unit = null;
+        while (!unit) {
+            ModuleLoader.onDebug("ModuleLoader coreRequire.load loadCompilationUnit "+url);
+            unit = loadCompilationUnit(moduleLoader, context, url, moduleName);
+        }
         unit.exports = context.defined[moduleName];   // remember what we exported.
+        if (ModuleLoader.debug) ModuleLoader.onDebug(context.contextName+" loaded "+url);
     } else {
-        return coreRequire.onError( new Error("require.attach called with unknown moduleLoaderName "+context.contextName+" for url "+url), ModuleLoader );
+        return ModuleLoader.onError( new Error("require.attach called with unknown moduleLoaderName "+context.contextName+" for url "+url), ModuleLoader );
     }
 };
 
-try
-{
-    Components.utils.import("resource://firebug/firebug-trace-service.js");
-    var FBTrace = traceConsoleService.getTracer("extensions.chromebug");
-    coreRequire.chainOnError = coreRequire.onError;
-    coreRequire.onError = function (err, object) {
-        FBTrace.sysout(err+"",{errorObject: err, moreInfo: object});
-        coreRequire.chainOnError(err);
+coreRequire.analyzeFailure = function(context, managers, specified, loaded) {
+    for (var i = 0; i < managers.length; i++) {
+        var manager = managers[i];
+        context.config.onDebug("require.js ERROR failed to complete "+manager.fullName+" isDone:"+manager.isDone+" #defined: "+manager.depCount+" #required: "+manager.depMax);
+        var theNulls = [];
+        var theUndefineds = [];
+        var theUnstrucks = manager.strikeList;
+        var depsTotal = 0;
+        for( var depName in manager.deps) {
+            if (typeof (manager.deps[depName]) === "undefined") theUndefineds.push(depName);
+            if (manager.deps[depName] === null) theNulls.push(depName);
+            var strikeIndex = manager.strikeList.indexOf(depName);
+            manager.strikeList.splice(strikeIndex, 1);
+        }
+        context.config.onDebug("require.js: "+theNulls.length+" null dependencies "+theNulls.join(',')+" << check module ids.", theNulls);
+        context.config.onDebug("require.js: "+theUndefineds.length+" undefined dependencies: "+theUndefineds.join(',')+" << check module return values.", theUndefineds);
+        context.config.onDebug("require.js: "+theUnstrucks.length+" unstruck dependencies "+theUnstrucks.join(',')+" << check duplicate requires", theUnstrucks);
+
+        for (var j = 0; j < manager.depArray.length; j++) {
+            var id = manager.depArray[j];
+            var module = manager.deps[id];
+            context.config.onDebug("require.js: "+j+" specified: "+specified[id]+" loaded: "+loaded[id]+" "+id+" "+module);
+        }
     }
 }
-catch(exc)
-{
-    var consoleService = Cc["@mozilla.org/consoleservice;1"].getService(Ci.nsIConsoleService);
-    consoleService.logStringMessage("Install Firebug tracing extension for more informative errors");
-}
-
-

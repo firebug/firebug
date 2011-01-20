@@ -1,6 +1,6 @@
 /* See license.txt for terms of usage */
 
-FBL.ns(function() { with (FBL) {
+define("script.js", [], function(require, exports, module) { with (FBL) {
 
 // ************************************************************************************************
 // Constants
@@ -1190,7 +1190,7 @@ Firebug.ScriptPanel.WarningRep = domplate(Firebug.Rep,
     {
         iterateBrowserWindows("navigator:browser", function(win)
         {
-            return win.TabWatcher.iterateContexts(function(context)
+            return win.Firebug.TabWatcher.iterateContexts(function(context)
             {
                 if (context.stopped)
                 {
@@ -1287,4 +1287,5 @@ var WarningRep = Firebug.ScriptPanel.WarningRep;
 Firebug.registerPanel(Firebug.ScriptPanel);
 
 // ************************************************************************************************
+return Firebug.ScriptPanel;
 }});

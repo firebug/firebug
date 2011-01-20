@@ -141,6 +141,19 @@ var clearContextTimeout = 0;
 
 try
 {
+    // Get ModuleLoader implementation (it's Mozilla JS code module)
+    Components.utils["import"]("resource://firebug/moduleLoader.js");
+}
+catch (exc)
+{
+    var msg = exc.toString() +" "+(exc.fileName || exc.sourceName) + "@" + exc.lineNumber;
+
+    dump("Import moduleLoader.js FAILS: "+msg+"\n");
+    FBTrace.sysout("Import moduleLoader.js ERROR "+msg, exc);
+}
+
+try
+{
     // Register default Firebug string bundle (yet before domplate templates).
     // Notice that this category entry must not be persistent in Fx 4.0
     categoryManager.addCategoryEntry("strings_firebug",
@@ -195,13 +208,96 @@ top.Firebug =
         var tempPanelTypes = earlyRegPanelTypes;
         earlyRegPanelTypes = null;
 
-        FBL.initialize();  // TODO FirebugLoader
+        if (ModuleLoader)
+        {
+            var firebugScope = // pump the objects from this scope down into module loader
+            {
+                __proto__: window,
+                Firebug: Firebug,
+                fbXPCOMUtils: fbXPCOMUtils,
+                FBL: FBL,
+                FBTrace: FBTrace,
+            };
+            var uid = Math.random();  // to give each XUL window its own loader (for now)
+            var config = {
+                context:"Firebug "+uid, // TODO XUL window id on FF4.0+
+                baseUrl: "chrome://firebug/content/",
+                onDebug: function() {FBTrace.sysout.apply(FBTrace,arguments); },
+                onError: function() {FBTrace.sysout.apply(FBTrace,arguments); },
+                waitSeconds: 0,
+                /* edit: function(errorMsg, errorURL, errorLineNumber)
+                {
+                    window.alert(errorMsg+" "+errorURL+"@"+errorLineNumber);
+                },
+                edit: function(context, url, module)
+                {
+                    FBTrace.sysout("opening window modal on "+url);
+                    var a = {url: url};
+                    return window.showModalDialog("chrome://firebug/content/external/editors.xul",{}, "resizable:yes;scroll:yes;dialogheight:480;dialogwidth:600;center:yes");
+                }
+                */
+            };
+            var asyncLoad = (new ModuleLoader(firebugScope, config)).loadDepsThenCallback;
 
+            var defaultPanels = // this will pull in all the rest of the code by dependencies
+                [
+                      "tabWatcher.js",
+                     "insideOutBox.js", // dep
+                     "sourceFile.js", // dep
+                     "sourceBox.js",
+                     "activation.js",
+                     "sourceCache.js",
+                     "tabContext.js",
+                     "tabCache.js",
+                     "tableRep.js",
+                     "infotip.js",
+                     "commandLine.js",
+                     "commandLinePopup.js",
+                     "search.js",
+                     "inspector.js",
+                     "plugin.js",
+                     "breakpoint.js",
+                     "console.js",
+                     "html.js",
+                     "css.js",
+                     "layout.js",
+                     "debugger.js",
+                     "script.js",
+                     "callstack.js",
+                     "navigationHistory.js",
+                     "dom.js",
+                     "net.js",
+                     "profiler.js",
+                     "errors.js",
+                     "spy.js",
+                     "consoleInjector.js",
+                     "jsonViewer.js",
+                     "xmlViewer.js",
+                     "svgViewer.js",
+                     "shortcuts.js",
+                     "a11y.js",
+                     "knownIssues.js",
+                ];
+
+            asyncLoad(defaultPanels, function delay(){
+                Firebug.completeInitialize(tempPanelTypes);
+            });
+        }
+        else
+        {
+            FBL.initialize();
+            this.completeInitialize(tempPanelTypes);
+        }
+    },
+
+    completeInitialize: function(tempPanelTypes)
+    {
+    	FBL.initialize();  // non require.js modules
         // Append early registered panels at the end.
         panelTypes.push.apply(panelTypes, tempPanelTypes);
 
         const tabBrowser = $("content");
-        if (tabBrowser) // TODO TabWatcher
+        if (tabBrowser) // TODO Firebug.TabWatcher
         {
             if (FBTrace.DBG_INITIALIZE)
                 FBTrace.sysout("firebug.initialize has a tabBrowser");
@@ -335,11 +431,11 @@ top.Firebug =
         // quitApplicationGranted event (platform is still running) and we call shutdown (Firebug isDetached).
         window.addEventListener('unload', shutdownFirebug, false);
 
-        TabWatcher.initialize(this);
-        TabWatcher.addListener(this);
+        Firebug.TabWatcher.initialize(this);
+        Firebug.TabWatcher.addListener(this);
 
         // Initial activation of registered panel types. All panel -> module dependencies
-        // should be defined now (in onActivationChange).  Must be called after TabWatcher is ready.
+        // should be defined now (in onActivationChange).  Must be called after Firebug.TabWatcher is ready.
         Firebug.PanelActivation.activatePanelTypes(panelTypes);
 
         // Tell the modules the UI is up.
@@ -369,12 +465,12 @@ top.Firebug =
     {
         window.removeEventListener('unload', shutdownFirebug, false);
 
-        TabWatcher.destroy();
+        Firebug.TabWatcher.destroy();
 
-        // Remove the listener after the TabWatcher.destroy() method is called so,
+        // Remove the listener after the Firebug.TabWatcher.destroy() method is called so,
         // destroyContext event is properly dispatched to the Firebug object and
         // consequently to all registered modules.
-        TabWatcher.removeListener(this);
+        Firebug.TabWatcher.removeListener(this);
 
         dispatch(modules, "disable", [FirebugChrome]);
     },
@@ -515,7 +611,7 @@ top.Firebug =
         if (Firebug.getSuspended())
             tooltip += "\n" + Firebug.getSuspended();
         else
-            tooltip += "\n" + $STRP("plural.Total_Firebugs", [TabWatcher.contexts.length]);
+            tooltip += "\n" + $STRP("plural.Total_Firebugs", [Firebug.TabWatcher.contexts.length]);
 
         if (Firebug.allPagesActivation == "on")
         {
@@ -532,7 +628,7 @@ top.Firebug =
     getURLsForAllActiveContexts: function()
     {
         var contextURLSet = [];  // create a list of all unique activeContexts
-        TabWatcher.iterateContexts( function createActiveContextList(context)
+        Firebug.TabWatcher.iterateContexts( function createActiveContextList(context)
         {
             if (FBTrace.DBG_WINDOWS)
                 FBTrace.sysout("context "+context.getName());
@@ -658,7 +754,7 @@ top.Firebug =
         extensions.push.apply(extensions, arguments);
 
         for (var i = 0; i < arguments.length; ++i)
-            TabWatcher.addListener(arguments[i]);
+            Firebug.TabWatcher.addListener(arguments[i]);
 
         for (var j = 0; j < arguments.length; j++)
             Firebug.uiListeners.push(arguments[j]);
@@ -668,7 +764,7 @@ top.Firebug =
     {
         for (var i = 0; i < arguments.length; ++i)
         {
-            TabWatcher.removeListener(arguments[i]);
+            Firebug.TabWatcher.removeListener(arguments[i]);
             remove(Firebug.uiListeners, arguments[i]);
             remove(extensions, arguments[i])
         }
@@ -1010,7 +1106,7 @@ top.Firebug =
     {
         var browser = FirebugChrome.getCurrentBrowser();
 
-        TabWatcher.unwatchBrowser(browser, userCommand);
+        Firebug.TabWatcher.unwatchBrowser(browser, userCommand);
         Firebug.resetTooltip();
     },
 
@@ -1045,12 +1141,12 @@ top.Firebug =
         {
             if (FBTrace.DBG_ERRORS)
             {
-                var context = TabWatcher.getContextByWindow(browser.contentWindow);
+                var context = Firebug.TabWatcher.getContextByWindow(browser.contentWindow);
                 if (context) // ASSERT: we should not have showFirebug false on a page with a context
                     FBTrace.sysout("Firebug.toggleBar: placement "+this.getPlacement()+ " context: "+context.getName()+" Firebug.currentContext: "+(Firebug.currentContext?Firebug.currentContext.getName():"null")+" browser.showFirebug:"+browser.showFirebug);
             }
 
-            var created = TabWatcher.watchBrowser(browser);  // create a context for this page
+            var created = Firebug.TabWatcher.watchBrowser(browser);  // create a context for this page
             if (!created)
             {
                 if (FBTrace.DBG_ERRORS)
@@ -1115,7 +1211,7 @@ top.Firebug =
         Firebug.showBar(false);
 
         if (Firebug.currentContext)
-            TabWatcher.unwatchBrowser(Firebug.currentContext.browser, userCommands);
+            Firebug.TabWatcher.unwatchBrowser(Firebug.currentContext.browser, userCommands);
         // else the user closed Firebug external window while not looking at a debugged web page.
 
         Firebug.resetTooltip();
@@ -1129,7 +1225,7 @@ top.Firebug =
         Firebug.setPlacement(newPlacement);
 
         // reattach all contexts to the new chrome
-        TabWatcher.iterateContexts(function reattach(context)
+        Firebug.TabWatcher.iterateContexts(function reattach(context)
         {
             context.reattach(oldChrome, newChrome);
 
@@ -1142,14 +1238,14 @@ top.Firebug =
         if (!context)
         {
             var browser = Firebug.chrome.getCurrentBrowser();
-            var created = TabWatcher.watchBrowser(browser);  // create a context for this page
+            var created = Firebug.TabWatcher.watchBrowser(browser);  // create a context for this page
             if (!created)
             {
                 if (FBTrace.DBG_ERRORS)
                     FBTrace.sysout("Firebug.detachBar, no context in "+window.location);
                 return null;
             }
-            context = TabWatcher.getContextByWindow(browser.contentWindow);
+            context = Firebug.TabWatcher.getContextByWindow(browser.contentWindow);
         }
 
         if (Firebug.isDetached())  // can be set true attachBrowser
@@ -1239,7 +1335,7 @@ top.Firebug =
             }
         }
 
-        TabWatcher.iterateContexts( function clearBPs(context)
+        Firebug.TabWatcher.iterateContexts( function clearBPs(context)
         {
             Firebug.Debugger.clearAllBreakpoints(context);
         });
@@ -1363,7 +1459,7 @@ top.Firebug =
 
     eachPanel: function(callback)
     {
-        TabWatcher.iterateContexts(function iteratePanels(context)
+        Firebug.TabWatcher.iterateContexts(function iteratePanels(context)
         {
             var rc = context.eachPanelInContext(callback);
             if (rc)
@@ -1656,7 +1752,7 @@ top.Firebug =
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
-    // TabWatcher Listener
+    // Firebug.TabWatcher Listener
 
     getContextType: function()
     {
@@ -1713,9 +1809,9 @@ top.Firebug =
     },
 
     /*
-     * To be called from TabWatcher only, see selectContext
+     * To be called from Firebug.TabWatcher only, see selectContext
      */
-    showContext: function(browser, context)  // TabWatcher showContext. null context means we don't debug that browser
+    showContext: function(browser, context)  // Firebug.TabWatcher showContext. null context means we don't debug that browser
     {
         if (clearContextTimeout)
         {
@@ -1830,7 +1926,7 @@ top.Firebug =
         browser.panelName = context.panelName;
         browser.sidePanelNames = context.sidePanelNames;
 
-        // next the context is deleted and removed from the TabWatcher, we clean up in unWatchBrowser
+        // next the context is deleted and removed from the Firebug.TabWatcher, we clean up in unWatchBrowser
     },
 
     onSourceFileCreated: function(context, sourceFile)
@@ -1909,7 +2005,7 @@ Firebug.getConsoleByGlobal = function getConsoleByGlobal(global)
 {
     try
     {
-        var context = TabWatcher.getContextByGlobal(global);
+        var context = Firebug.TabWatcher.getContextByGlobal(global);
         if (context)
         {
             var handler = Firebug.Console.injector.getConsoleHandler(context, global);

@@ -372,7 +372,7 @@ ChannelListener.prototype =
     getContext: function(win)
     {
         // This must be overridden in tabCache. This scope doesn't have an
-        // access to TabWatcher and its getContextByWindow method.
+        // access to Firebug.TabWatcher and its getContextByWindow method.
         return null;
     }
 }

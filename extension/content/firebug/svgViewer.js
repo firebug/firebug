@@ -1,6 +1,6 @@
 /* See license.txt for terms of usage */
 
-FBL.ns(function() { with (FBL) {
+define("svgViewer.js", [], function(require, exports, module) { with (FBL) {
 
 // ************************************************************************************************
 // Constants
@@ -171,4 +171,5 @@ Firebug.SVGViewerModel.ParseError = domplate(Firebug.Rep,
 
 Firebug.registerModule(Firebug.SVGViewerModel);
 
+return Firebug.SVGViewerModel;
 }});

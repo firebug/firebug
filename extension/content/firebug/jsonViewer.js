@@ -1,6 +1,6 @@
 /* See license.txt for terms of usage */
 
-FBL.ns(function() { with (FBL) {
+define("jsonViewer.js", [], function(require, exports, module) { with (FBL) {
 
 // ************************************************************************************************
 
@@ -214,4 +214,5 @@ JSONTreePlate.prototype = extend(Firebug.DOMBasePanel.prototype,
 Firebug.registerModule(Firebug.JSONViewerModel);
 
 // ************************************************************************************************
+return Firebug.JSONViewerModel;
 }});

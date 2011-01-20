@@ -1,7 +1,7 @@
 /* See license.txt for terms of usage */
 
 //
-FBL.ns(function() { with (FBL) {
+define("consoleInjector.js", [], function(require, exports, module) { with (FBL) {
 
 // ************************************************************************************************
 // Constants
@@ -9,7 +9,7 @@ FBL.ns(function() { with (FBL) {
 const Cc = Components.classes;
 const Ci = Components.interfaces;
 
-top.Firebug.Console.injector =
+Firebug.Console.injector =
 {
     isAttached: function(context, win)
     {
@@ -574,4 +574,5 @@ Firebug.Console.createConsole = function createConsole(context, win)
     return console;
 }
 
+return Firebug.Console.injector;
 }});

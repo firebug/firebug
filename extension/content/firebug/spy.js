@@ -1,6 +1,6 @@
 /* See license.txt for terms of usage */
 
-FBL.ns(function() { with (FBL) {
+define("spy.js", ["reps.js"], function(FirebugReps) { with (FBL) {
 
 // ************************************************************************************************
 // Constants
@@ -98,9 +98,9 @@ Firebug.Spy = extend(Firebug.Module,
         if (name == "showXMLHttpRequests")
         {
             var tach = value ? this.attachObserver : this.detachObserver;
-            for (var i = 0; i < TabWatcher.contexts.length; ++i)
+            for (var i = 0; i < Firebug.TabWatcher.contexts.length; ++i)
             {
-                var context = TabWatcher.contexts[i];
+                var context = Firebug.TabWatcher.contexts[i];
                 iterateWindows(context.window, function(win)
                 {
                     tach.apply(this, [context, win]);
@@ -1064,4 +1064,5 @@ Firebug.registerModule(Firebug.Spy);
 Firebug.registerRep(Firebug.Spy.XHR);
 
 // ************************************************************************************************
+return Firebug.Spy;
 }});

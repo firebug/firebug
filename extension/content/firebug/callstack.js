@@ -1,6 +1,6 @@
 /* See license.txt for terms of usage */
 
-FBL.ns(function() { with (FBL) {
+define("callstack.js", [], function(require, exports, module) { with (FBL) {
 
 // ************************************************************************************************
 // Constants
@@ -353,4 +353,5 @@ function getReferents(frame, fnName)
 Firebug.registerPanel(Firebug.CallstackPanel);
 
 // ************************************************************************************************
+return Firebug.CallstackPanel;
 }});

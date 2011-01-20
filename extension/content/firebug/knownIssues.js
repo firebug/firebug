@@ -1,6 +1,6 @@
 /* See license.txt for terms of usage */
 
-FBL.ns(function() { with (FBL) {
+define("knownIssues.js", ["reps.js"], function(FirebugReps) { with (FBL) {
 
 // ************************************************************************************************
 // Constants
@@ -97,4 +97,5 @@ Firebug.KnownIssuesRep = domplate(Firebug.Rep,
 Firebug.registerModule(Firebug.KnownIssues);
 
 // ************************************************************************************************
+return Firebug.KnownIssues;
 }});

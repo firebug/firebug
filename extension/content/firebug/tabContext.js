@@ -1,6 +1,6 @@
 /* See license.txt for terms of usage */
 
-FBL.ns(function() { with (FBL) {
+define("tabContext.js", [], function(require, exports, module) { with (FBL) {
 
     Components.utils.import("resource://firebug/bti/compilationunit.js");
 // ************************************************************************************************
@@ -441,7 +441,7 @@ Firebug.TabContext.prototype =
     {
         if (setTimeout == this.setTimeout)
             throw new Error("setTimeout recursion");
-        var timeout = setTimeout.apply(top, arguments);
+        var timeout = window.setTimeout.apply(top, arguments);
 
         if (!this.timeouts)
             this.timeouts = {};
@@ -583,5 +583,5 @@ function createPanelName(url)
 }
 
 // ************************************************************************************************
-
+return Firebug.TabContext;
 }});
