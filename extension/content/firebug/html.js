@@ -370,6 +370,8 @@ Firebug.HTMLPanel.prototype = extend(WalkingPanel,
             // generated after the attribute was removed from the node
             this.highlightMutation(objectNodeBox, objectNodeBox, "mutated");
         }
+
+        Firebug.Inspector.repaint();
     },
 
     mutateText: function(target, parent, textValue)
@@ -1294,7 +1296,7 @@ Firebug.HTMLPanel.prototype = extend(WalkingPanel,
                 var EditElement = "EditHTMLElement";
 
                 if (isElementMathML(node))
-                    EditElement = "EditMathMLElement"
+                    EditElement = "EditMathMLElement";
                 else if (isElementSVG(node))
                     EditElement = "EditSVGElement";
 
@@ -2178,7 +2180,7 @@ Firebug.HTMLModule.Breakpoint = function(node, type)
     this.xpath = getElementXPath(node);
     this.checked = true;
     this.type = type;
-}
+};
 
 Firebug.HTMLModule.BreakpointRep = domplate(Firebug.Rep,
 {
