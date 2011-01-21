@@ -186,34 +186,7 @@ Firebug.ExternalEditors = extend(Firebug.Module,
 
     openContext: function(context, editorId)
     {
-        var location;
-        if (context)
-        {
-            var panel = Firebug.chrome.getSelectedPanel();
-            if (panel)
-            {
-                location = panel.location;
-                if (!location && panel.name == "html")
-                    location = context.window.document.location;
-
-                if (location && (location instanceof Firebug.SourceFile ||
-                    location instanceof CSSStyleSheet))
-                {
-                    location = location.href;
-                }
-            }
-        }
-        if (!location)
-        {
-            if (Firebug.tabBrowser.currentURI)
-                location = Firebug.tabBrowser.currentURI.asciiSpec;
-        }
-        if (!location)
-            return;
-        location = location.href || location.url || location.toString();
-        if (Firebug.filterSystemURLs && isSystemURL(location))
-            return;
-
+        var location = Firebug.chrome.getSelectedPanelLocation();
         this.open(location, null, editorId, context)
     },
 

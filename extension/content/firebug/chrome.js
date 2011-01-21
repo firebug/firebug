@@ -661,6 +661,42 @@ top.FirebugChrome =
         return switchToPanel;
     },
 
+    getSelectedPanelLocation: function()
+    {
+        var location;
+        if (Firebug.currentContext)
+        {
+            var panel = Firebug.chrome.getSelectedPanel();
+            if (panel)
+            {
+                location = panel.location;
+                if (!location && panel.name == "html")
+                    location = Firebug.currentContext.window.document.location;
+
+                if (location && (location instanceof Firebug.SourceFile ||
+                    location instanceof CSSStyleSheet))
+                {
+                    location = location.href;
+                }
+            }
+        }
+
+        if (!location)
+        {
+            if (Firebug.tabBrowser.currentURI)
+                location = Firebug.tabBrowser.currentURI.asciiSpec;
+        }
+
+        if (!location)
+            return;
+
+        location = location.href || location.url || location.toString();
+        if (Firebug.filterSystemURLs && isSystemURL(location))
+            return;
+
+        return location;
+    },
+
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
     // Location interface provider for binding.xml panelFileList
 
@@ -1748,10 +1784,10 @@ function onPanelMouseUp(event)
                 {
                     var distance = Math.abs(event.screenX - this.lastMouseDownPosition.x) +
                                       Math.abs(event.screenY - this.lastMouseDownPosition.y);
-					 // if mouse has moved far enough set selection at that point
+                     // if mouse has moved far enough set selection at that point
                     if (distance > 3)
                         selectionData = {start: selFO, end: selFO};
-					 // otherwise leave selectionData undefined to select all text
+                     // otherwise leave selectionData undefined to select all text
                 }
                 else if (selFO < selAO)
                     selectionData = {start: selFO, end: selAO};
