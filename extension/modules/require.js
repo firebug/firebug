@@ -126,7 +126,8 @@ var require, define;
                 waitSeconds: 7,
                 baseUrl: s.baseUrl || "./",
                 paths: {},
-                packages: {}
+                packages: {},
+                debug: null,
             },
             defQueue = [],
             specified = {
@@ -390,6 +391,10 @@ var require, define;
                     }
                 }
 
+                if (context.config.onDebug) {
+                    context.config.onDebug("require.js: defining "+fullName+" with "+args.length+" dependents", {defineFunction: manager.callback, args: args});
+                }
+
                 ret = req.execCb(fullName, manager.callback, args);
 
                 if (fullName) {
@@ -456,6 +461,7 @@ var require, define;
                     fullName: fullName,
                     deps: {},
                     depArray: depArray,
+                    strikeList: [], // length depMax, value depName,
                     callback: callback,
                     onDep: function (depName, value) {
                         if (!(depName in manager.deps)) {
@@ -481,9 +487,10 @@ var require, define;
                 //as part of a layer, where onScriptLoad is not fired
                 //for those cases. Do this after the inline define and
                 //dependency tracing is done.
-                //Also check if auto-registry of jQuery needs to be skipped.
                 specified[fullName] = true;
                 loaded[fullName] = true;
+
+                //Also check if auto-registry of jQuery needs to be skipped.
                 context.jQueryDef = (fullName === "jquery");
             }
 
@@ -523,6 +530,7 @@ var require, define;
                     } else {
                         //A dynamic dependency.
                         manager.depMax += 1;
+                        manager.strikeList.push(depName);
 
                         queueDependency(depArg);
 
@@ -690,6 +698,16 @@ var require, define;
                 //Cycle through the waitAry, and call items in sequence.
                 for (i = 0; (manager = waitAry[i]); i++) {
                     forceExec(manager, {});
+                }
+
+                if (!context.checkLoadedDepth) {
+                    context.checkLoadedDepth = 0;
+                }
+                if (context.checkLoadedDepth++ > 15) {
+                    if (req.analyzeFailure && context.config.onDebug) {
+                        context.config.analyzeFailure(context, waitAry, specified, loaded);
+                    }
+                    return;
                 }
 
                 checkLoaded();
@@ -912,7 +930,7 @@ var require, define;
                     config.priorityWait = cfg.priority;
                 }
 
-                //If a deps array or a config callback is specified, then call
+                //If a deps array or a config callback is given, then call
                 //require with those args. This is useful when require is defined as a
                 //config object before require.js is loaded.
                 if (cfg.deps || cfg.callback) {
@@ -1162,7 +1180,7 @@ var require, define;
      *
      * If the first argument is an array, then it will be treated as an array
      * of dependency string names to fetch. An optional function callback can
-     * be specified to execute when all of those dependencies are available.
+     * be given, to execute when all of those dependencies are available.
      *
      * Make a local req variable to help Caja compliance (it assumes things
      * on a require that are not standardized), and to give a short
@@ -1260,6 +1278,7 @@ var require, define;
 
         if (!urlFetched[url]) {
             context.scriptCount += 1;
+            context.config.onDebug("context.scriptCount incremented "+url, {context: context});
             req.attach(url, contextName, moduleName);
             urlFetched[url] = true;
 
