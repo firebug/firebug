@@ -70,9 +70,32 @@ panelStatus {
     -moz-binding: url("chrome://firebug/content/bindings.xml#panelStatus");
 }
 
+/************************************************************************************************/
+/* Location List */
+
 #fbLocationList {
     -moz-binding: url("chrome://firebug/content/bindings.xml#panelFileList");
 }
+
+.fbLocationListFilter {
+    -moz-binding: url("chrome://firebug/content/bindings.xml#panelFileListFilter");
+    background: white;
+    border: 1px solid rgb(150, 150, 157);
+    padding: 3px;
+    margin-left: 32px;
+    color: gray;
+    font-weight: normal;
+}
+
+.fbLocationListFilter[match="false"] {
+    background-color: rgb(255, 102, 102);
+}
+
+.fbLocationListFilter[keyword="true"] {
+    color: black;
+}
+
+/************************************************************************************************/
 
 #fbStatusText {
     visibility: collapse;

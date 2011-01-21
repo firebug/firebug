@@ -316,11 +316,13 @@ panelTab[selected="true"] > .panelTab-right {
     font-weight: bold;
 }
 
+/************************************************************************************************/
+/* Location list */
+
 .menuHeader {
     margin: 2px 6px;
     font-weight: bold;
 }
-
 
 /************************************************************************************************/
 /* Scrollable TabBar + TabList */

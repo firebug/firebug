@@ -900,8 +900,11 @@
     </handlers>
 </binding>
 
-<binding id="panelFileList">
 
+<!-- This binding represents a location list used in some panels. The list is based
+     on a popup menu and displayes availalble files on the curernt page. For instance,
+     in the Script panel, the location list displays list of all scripts. -->
+<binding id="panelFileList">
     <content popup="_child">
         <xul:label class="toolbarbutton-text title" crop="right" flex="1"
             xbl:inherits="value=title"/>
@@ -1012,6 +1015,184 @@
             ]]></body>
         </method>
 
+        <method name="onKeyPress">
+            <parameter name="event"/>
+            <body><![CDATA[
+                if (event.keyCode == 13) // Return
+                {
+                    this.enterActiveItem();
+                    FBL.cancelEvent(event);
+                }
+
+                this.filter.onKeyPress(event);
+            ]]></body>
+        </method>
+
+        <method name="onClick">
+            <parameter name="event"/>
+            <body><![CDATA[
+                //https://developer.mozilla.org/en/XUL/arrowscrollbox
+                var scrollbutton = event.originalTarget;
+                var anonid = scrollbutton.getAttribute("anonid");
+                if (anonid == 'scrollbutton-up')
+                    scrollbutton.parentNode.scrollByIndex(-15);
+                if (anonid == 'scrollbutton-down')
+                    scrollbutton.parentNode.scrollByIndex(+15);
+            ]]>
+            </body>
+        </method>
+
+    </implementation>
+
+    <handlers>
+        <handler event="popupshowing"><![CDATA[
+            if (this.popup.firstChild)
+                return false;
+
+            var locator = this.getLocator();
+            var objects = locator.getLocationList();
+            if (!objects)
+            {
+                this.setAttribute("label", "");
+                this.setAttribute("location", null);
+                return false;
+            }
+
+            if (locator.getLocationContent)
+            {
+                locator.getLocationContent(objects, this.popup);
+                return;
+            }
+
+            this.filter = FBL.createMenuHeader(this.popup,
+                {label: "script.Type any key to filter list"});
+            FBL.setClass(this.filter, "fbURLMenuItem");
+            FBL.setClass(this.filter, "fbLocationListFilter");
+
+            var groupNames = [];
+            var groups = {};
+
+            var currentDescription = null;
+            if (this.repObject)
+                currentDescription = locator.getObjectDescription(this.repObject);
+
+            for (var i = 0; i < objects.length; ++i)
+            {
+                var object = objects[i];
+                var description = locator.getObjectDescription(object);
+                if (!description)
+                    FBTrace.sysout("binding.xml popupshowing Fails" , object);
+
+                var entry = {object: object, fileName: description.name};
+
+                if (currentDescription && currentDescription.name == description.name &&
+                    currentDescription.path == description.path)
+                {
+                    entry.selected = true;
+                }
+
+                if (groups.hasOwnProperty(description.path))
+                {
+                    groups[description.path].push(entry);
+                }
+                else
+                {
+                    groups[description.path] = [entry];
+                    groupNames.push(description.path);
+                }
+            }
+
+            groupNames.sort();
+
+            for (var i = 0; i < groupNames.length; ++i)
+            {
+                var path = groupNames[i];
+                var urls = groups[path];
+                urls.sort(function(a, b) { return a.fileName < b.fileName ? -1 : 1; });
+
+                var menuHeader = FBL.createMenuHeader(this.popup, {label: path, nol10n: true});
+                FBL.setClass(menuHeader, "fbURLMenuItem");
+
+                for (var j = 0; j < urls.length; ++j)
+                {
+                    var menuInfo = {label: urls[j].fileName, nol10n: true};
+
+                    if (urls[j].selected)
+                    {
+                        menuInfo.type = "checkbox";
+                        menuInfo.checked = true;
+                    }
+
+                    var menuItem = FBL.createMenuItem(this.popup, menuInfo);
+                    menuItem.repObject = urls[j].object;
+                    FBL.setClass(menuItem, "fbURLMenuItem");
+                }
+            }
+        ]]></handler>
+
+        <handler event="popupshown"><![CDATA[
+            // Weird, but this gets fired when the user clicks on a menuitem,
+            // which hiding the buttons again and resulting in jitters - let's avoid that.
+            if (!this._closed)
+                return;
+
+            this._closed = false;
+
+            this.filter.filterString = "";
+
+            this.onkeypress = FBL.bind(this.onKeyPress, this);
+            window.addEventListener("keypress", this.onkeypress, true);
+
+            this.onclick = FBL.bind(this.onClick, this);
+            this.popup.addEventListener("click", this.onclick, true);
+        ]]></handler>
+
+        <handler event="popuphidden"><![CDATA[
+            window.removeEventListener("keypress", this.onkeypress, true);
+            delete this.onkeypress;
+
+            delete this.filter.filterString;
+
+            FBL.eraseNode(this.popup);
+            this._closed = true;
+        ]]></handler>
+
+        <handler event="command"><![CDATA[
+            var object = event.originalTarget.repObject;
+
+            // Select after a timeout to increase teh snappy
+            setTimeout(FBL.bindFixed(function()
+            {
+                this.selectObject(object);
+            }, this));
+        ]]></handler>
+
+        <handler event="mouseover"><![CDATA[
+            var object = Firebug.getRepObject(event.target);
+            if (object)
+            {
+                var locator = this.getLocator();
+                if (locator.getObjectLocation)
+                    event.target.setAttribute('tooltiptext', locator.getObjectLocation(object));
+                else
+                {
+                    if (FBTrace.DBG_LOCATIONS)
+                        FBTrace.sysout("!locator.getObjectLocation for "+ this.getAttribute('label'), locator);
+                }
+            }
+            return;
+        ]]></handler>
+    </handlers>
+</binding>
+
+<!-- Panel file list filter is used in the file list (location list) to filter its content. -->
+<binding id="panelFileListFilter">
+    <implementation>
+        <constructor><![CDATA[
+            this.popup = document.getAnonymousElementByAttribute(this.parentNode.parentNode,
+                "anonid", "popup");
+        ]]></constructor>
+
         <method name="filterList">
             <parameter name="substring"/>
             <body><![CDATA[
@@ -1060,8 +1241,7 @@
             <body><![CDATA[
                 if (event.keyCode == 13) // Return
                 {
-                    this.enterActiveItem();
-                    this.filterString = '';
+                    this.filterString = "";
                 }
                 else if (event.keyCode == 8) // Backspace
                 {
@@ -1074,7 +1254,9 @@
                     this.filterList(this.filterString);
                 }
                 else
+                {
                     return;
+                }
 
                 this.setFilterStringMessage(this.filterString, this.firstMatch);
                 FBL.cancelEvent(event);
@@ -1085,161 +1267,22 @@
             <parameter name="filterString"/>
             <parameter name="matched"/>
             <body><![CDATA[
-                var message = this.filterStringHeader.getAttribute('value');
-                var parts = message.split(':');
-                message = parts[0]+ ": "+filterString;
-                if (!matched)
-                    message += " <-- no match";
-                this.filterStringHeader.setAttribute('value', message);
+                // The placeholder is displayed in gray while the filter is in black.
+                this.setAttribute("keyword", filterString ? true : false);
+
+                // If there is no match the background is red.
+                this.setAttribute("match", matched ? true : false);
+
+                // Set the text into the box. If the user entirely removed the text use
+                // the placeholder again.
+                filterString = filterString ? filterString : 
+                    FBL.$STR("script.Type any key to filter list");
+
+                this.setAttribute("value", filterString);
             ]]>
             </body>
         </method>
-
-        <method name="onClick">
-            <parameter name="event"/>
-            <body><![CDATA[
-            //https://developer.mozilla.org/en/XUL/arrowscrollbox
-                var scrollbutton = event.originalTarget;
-                 var anonid = scrollbutton.getAttribute("anonid");
-                 if (anonid == 'scrollbutton-up')
-                    scrollbutton.parentNode.scrollByIndex(-15);
-                 if (anonid == 'scrollbutton-down')
-                    scrollbutton.parentNode.scrollByIndex(+15);
-            ]]>
-            </body>
-        </method>
-
     </implementation>
-
-    <handlers>
-        <handler event="popupshowing"><![CDATA[
-            if (this.popup.firstChild)
-                return false;
-            var locator = this.getLocator();
-            var objects = locator.getLocationList();
-            if (!objects)
-            {
-                this.setAttribute("label", "");
-                this.setAttribute("location", null);
-                return false;
-            }
-
-            if (locator.getLocationContent)
-            {
-                locator.getLocationContent(objects, this.popup);
-                return;
-            }
-
-            this.filterStringHeader = FBL.createMenuHeader(this.popup, {label: "script.Type any key to filter list"});
-            FBL.setClass(this.filterStringHeader, "fbURLMenuItem");
-
-            var groupNames = [];
-            var groups = {};
-
-            var currentDescription = null;
-            if (this.repObject)
-                currentDescription = locator.getObjectDescription(this.repObject);
-
-            for (var i = 0; i < objects.length; ++i)
-            {
-                var object = objects[i];
-                var description = locator.getObjectDescription(object);
-                if (!description)
-                    FBTrace.sysout("binding.xml popupshowing Fails" , object);
-
-                var entry = {object: object, fileName: description.name};
-
-                if (currentDescription && currentDescription.name == description.name && currentDescription.path == description.path)
-                    entry.selected = true;
-
-                if (groups.hasOwnProperty(description.path))
-                    groups[description.path].push(entry);
-                else
-                {
-                    groups[description.path] = [entry];
-                    groupNames.push(description.path);
-                }
-            }
-
-            groupNames.sort();
-
-            for (var i = 0; i < groupNames.length; ++i)
-            {
-                var path = groupNames[i];
-                var urls = groups[path];
-                urls.sort(function(a, b) { return a.fileName < b.fileName ? -1 : 1; });
-
-                var menuHeader = FBL.createMenuHeader(this.popup, {label: path, nol10n: true});
-                FBL.setClass(menuHeader, "fbURLMenuItem");
-
-                for (var j = 0; j < urls.length; ++j)
-                {
-                    var menuInfo = {label: urls[j].fileName, nol10n: true};
-
-                    if (urls[j].selected)
-                    {
-                        menuInfo.type = "checkbox";
-                        menuInfo.checked = true;
-                    }
-
-                    var menuItem = FBL.createMenuItem(this.popup, menuInfo);
-                    menuItem.repObject = urls[j].object;
-                    FBL.setClass(menuItem, "fbURLMenuItem");
-                }
-            }
-        ]]></handler>
-
-        <handler event="popupshown"><![CDATA[
-            // Weird, but this gets fired when the user clicks on a menuitem,
-            // which hiding the buttons again and resulting in jitters - let's avoid that.
-            if (!this._closed)
-                return;
-
-            this._closed = false;
-
-            this.filterString = "";
-            this.onkeypress = FBL.bind(this.onKeyPress, this);
-            window.addEventListener("keypress", this.onkeypress, true);
-            this.onclick = FBL.bind(this.onClick, this);
-            this.popup.addEventListener("click", this.onclick, true);
-        ]]></handler>
-
-        <handler event="popuphidden"><![CDATA[
-            window.removeEventListener("keypress", this.onkeypress, true);
-            delete this.onkeypress;
-            delete this.filterString;
-
-            FBL.eraseNode(this.popup);
-            this._closed = true;
-        ]]></handler>
-
-        <handler event="command"><![CDATA[
-            var object = event.originalTarget.repObject;
-
-            // Select after a timeout to increase teh snappy
-            setTimeout(FBL.bindFixed(function()
-            {
-                this.selectObject(object);
-            }, this));
-        ]]></handler>
-
-        <handler event="mouseover"><![CDATA[
-            var object = Firebug.getRepObject(event.target);
-            if (object)
-            {
-                var locator = this.getLocator();
-                if (locator.getObjectLocation)
-                    event.target.setAttribute('tooltiptext', locator.getObjectLocation(object));
-                else
-                {
-                    if (FBTrace.DBG_LOCATIONS)
-                        FBTrace.sysout("!locator.getObjectLocation for "+ this.getAttribute('label'), locator);
-                }
-            }
-
-            return;
-        ]]></handler>
-    </handlers>
 </binding>
 
 <!-- Searchbox is located in the main Firebug toolbar and can be used to search
