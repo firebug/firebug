@@ -241,6 +241,18 @@ Firebug.Inspector = extend(Firebug.Module,
             beep();
     },
 
+    repaint: function() {
+        var rp = this.repaint,
+            highlighter = rp.highlighter,
+            context = rp.context,
+            element = rp.element,
+            boxFrame = rp.boxFrame,
+            isFrameHighlighter = rp.isFrameHighlighter;
+
+        if((this.inspecting && isFrameHighlighter) || !isFrameHighlighter)
+            highlighter.highlight(context, element, boxFrame);
+    },
+
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 
     attachInspectListeners: function(context)
@@ -295,7 +307,7 @@ Firebug.Inspector = extend(Firebug.Module,
 
         iterateWindows(win, bind(function(subWin)
         {
-            subWin.document.removeEventListener("scroll", this.onInspectingScroll, true);
+            // we don't remove the scroll event listener because we need it outside of inspect mode
             subWin.document.removeEventListener("mouseover", this.onInspectingMouseOver, true);
             subWin.document.removeEventListener("mousedown", this.onInspectingMouseDown, true);
             subWin.document.removeEventListener("mouseup", this.onInspectingMouseUp, true);
@@ -319,7 +331,7 @@ Firebug.Inspector = extend(Firebug.Module,
         if (FBTrace.DBG_INSPECT)
            FBTrace.sysout("onInspectingScroll event", event);
 
-        this.inspectNode(null);
+        this.repaint();
     },
 
     onInspectingMouseOver: function(event)
@@ -887,6 +899,8 @@ Firebug.Inspector.FrameHighlighter.prototype =
 
     highlight: function(context, element)
     {
+        storeHighlighterParams(this, context, element, null, true);
+
         if (this.doNotHighlight(element))
             return;
 
@@ -1029,6 +1043,8 @@ BoxModelHighlighter.prototype =
         var line,
             nodes = this.getNodes(context),
             highlightFrame = boxFrame ? nodes[boxFrame] : null;
+
+        storeHighlighterParams(this, context, element, boxFrame, false);
 
         if (context.highlightFrame)
             removeClass(context.highlightFrame, "firebugHighlightBox");
@@ -1362,6 +1378,15 @@ function hideElementFromInspection(elt) {
     unwrapObject(elt).firebugIgnore = !FBTrace.DBG_INSPECT;
 }
 
+function storeHighlighterParams(highlighter, context, element, boxFrame, isFrameHighlighter) {
+    var fir = Firebug.Inspector.repaint;
+
+    fir.highlighter = highlighter;
+    fir.context = context,
+    fir.element = element,
+    fir.boxFrame = boxFrame;
+    fir.isFrameHighlighter = isFrameHighlighter;
+}
 
 // ************************************************************************************************
 
