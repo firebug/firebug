@@ -4928,7 +4928,8 @@ this.getIconURLForFile = function(path)
     }
     catch(exc)
     {
-        this.ERROR(exc);
+        if (FBTrace.DBG_ERRORS)
+            FBTrace.sysout("getIconURLForFile ERROR "+exc+" for "+path, exc);
     }
     return null;
 }
@@ -5889,7 +5890,7 @@ domMemberMap.Element = extendArray(domMemberMap.Node,
     "querySelector",
     "querySelectorAll",
     "scrollIntoView",
-    
+
     "onLoad",//FF4.0
     "hidden",//FF4.0
     "setCapture",//FF4.0
