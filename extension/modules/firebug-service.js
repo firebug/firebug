@@ -3434,6 +3434,7 @@ var fbs =
             onScriptDestroyed: hook(this.onScriptDestroyed)
         };
 
+        jsd.clearFilters();
         if (fbs.filterSystemURLs)
             fbs.setChromeBlockingFilters();
 
