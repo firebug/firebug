@@ -279,6 +279,7 @@ Firebug.Inspector = extend(Firebug.Module,
             if (FBTrace.DBG_INSPECT)
                 FBTrace.sysout("inspector.attacheInspectListeners to "+subWin.location+" subWindow of "+win.location);
 
+            subWin.document.addEventListener("resize", this.onInspectingResizeWindow, true);
             subWin.document.addEventListener("scroll", this.onInspectingScroll, true);
             subWin.document.addEventListener("mouseover", this.onInspectingMouseOver, true);
             subWin.document.addEventListener("mousedown", this.onInspectingMouseDown, true);
@@ -325,6 +326,14 @@ Firebug.Inspector = extend(Firebug.Module,
     },
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+
+    onInspectingResizeWindow: function(event)
+    {
+        if (FBTrace.DBG_INSPECT)
+           FBTrace.sysout("onInspectingResizeWindow event", event);
+
+        this.repaint();
+    },
 
     onInspectingScroll: function(event)
     {
@@ -386,6 +395,7 @@ Firebug.Inspector = extend(Firebug.Module,
     {
         Firebug.Module.initialize.apply(this, arguments);
 
+        this.onInspectingResizeWindow = bind(this.onInspectingResizeWindow, this);
         this.onInspectingScroll = bind(this.onInspectingScroll, this);
         this.onInspectingMouseOver = bind(this.onInspectingMouseOver, this);
         this.onInspectingMouseDown = bind(this.onInspectingMouseDown, this);
