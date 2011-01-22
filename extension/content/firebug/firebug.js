@@ -237,7 +237,7 @@ top.Firebug =
                 }
                 */
             };
-            var asyncLoad = (new ModuleLoader(firebugScope, config)).loadDepsThenCallback;
+            var loader = new ModuleLoader(firebugScope, config);
 
             var defaultPanels = // this will pull in all the rest of the code by dependencies
                 [
@@ -279,7 +279,7 @@ top.Firebug =
                      "knownIssues.js",
                 ];
 
-            asyncLoad(defaultPanels, function delay(){
+            loader.define(defaultPanels, function delay(){
                 Firebug.completeInitialize(tempPanelTypes);
             });
         }
@@ -292,7 +292,7 @@ top.Firebug =
 
     completeInitialize: function(tempPanelTypes)
     {
-    	FBL.initialize();  // non require.js modules
+        FBL.initialize();  // non require.js modules
         // Append early registered panels at the end.
         panelTypes.push.apply(panelTypes, tempPanelTypes);
 
