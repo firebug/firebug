@@ -227,14 +227,14 @@ Firebug.TabCacheModel = extend(Firebug.Module,
 
             // xxxHonza: this is a workaround for the tracing-listener to get the
             // right context. Notice that if the window (parent browser) is closed
-            // during the response download the TabWatcher (used within this method)
+            // during the response download the Firebug.TabWatcher (used within this method)
             // is undefined. But in such a case no cache is needed anyway.
             // Another thing is that the context isn't available now, but will be
             // as soon as this method is used from the stream listener.
             newListener.getContext = function(win)
             {
                 try {
-                    return TabWatcher.getContextByWindow(win);
+                    return Firebug.TabWatcher.getContextByWindow(win);
                 } catch (err){}
                 return null;
             }
@@ -573,7 +573,7 @@ ChannelListenerProxy.prototype =
     getContext: function()
     {
         try {
-            return TabWatcher.getContextByWindow(this.window);
+            return Firebug.TabWatcher.getContextByWindow(this.window);
         } catch (e) {}
         return null;
     }
@@ -599,5 +599,5 @@ function safeGetName(request)
 Firebug.registerModule(Firebug.TabCacheModel);
 
 // ************************************************************************************************
-
+return Firebug.TabCacheModel;
 }});

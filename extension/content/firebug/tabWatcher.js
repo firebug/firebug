@@ -40,7 +40,7 @@ var contexts = [];
 
 // ************************************************************************************************
 
-top.TabWatcher = extend(new Firebug.Listener(),
+Firebug.TabWatcher = extend(new Firebug.Listener(),
 {
     // Store contexts where they can be accessed externally
     contexts: contexts,
@@ -169,7 +169,7 @@ top.TabWatcher = extend(new Firebug.Listener(),
         if (context && !context.loaded && !context.showContextTimeout)
         {
             // still loading, we want to showContext one time but not too agressively
-            context.showContextTimeout = setTimeout(bindFixed( function delayShowContext()
+            context.showContextTimeout = window.setTimeout(bindFixed( function delayShowContext()
             {
                 if (FBTrace.DBG_WINDOWS)
                     FBTrace.sysout("-> watchTopWindow delayShowContext id:"+context.showContextTimeout, context);
@@ -495,7 +495,7 @@ top.TabWatcher = extend(new Firebug.Listener(),
 
         iterateWindows(context.window, function(win)
         {
-            dispatch(TabWatcher.fbListeners, "unwatchWindow", [context, win]);
+            dispatch(Firebug.TabWatcher.fbListeners, "unwatchWindow", [context, win]);
         });
 
         dispatch(this.fbListeners, "destroyContext", [context, persistedState, context.browser]);
@@ -662,7 +662,7 @@ var TabProgressListener = extend(BaseProgressListener,
         if (progress.DOMWindow.parent == progress.DOMWindow)
         {
             var srcWindow = getWindowForRequest(request);
-            var browser = srcWindow ? TabWatcher.getBrowserByWindow(srcWindow) : null;
+            var browser = srcWindow ? Firebug.TabWatcher.getBrowserByWindow(srcWindow) : null;
             var requestFromFirebuggedWindow = browser && browser.showFirebug;
 
             if (FBTrace.DBG_WINDOWS || FBTrace.DBG_ACTIVATION)
@@ -680,9 +680,9 @@ var TabProgressListener = extend(BaseProgressListener,
                 evictTopWindow(progress.DOMWindow, uri);
 
             if (uri)
-                TabWatcher.watchTopWindow(progress.DOMWindow, uri);
+                Firebug.TabWatcher.watchTopWindow(progress.DOMWindow, uri);
             else // the location change to a non-uri means we need to hide
-                TabWatcher.watchContext(progress.DOMWindow, null, true);
+                Firebug.TabWatcher.watchContext(progress.DOMWindow, null, true);
         }
     },
 
@@ -730,11 +730,11 @@ var FrameProgressListener = extend(BaseProgressListener,
 
                 if (win.parent == win && (win.location.href == "about:blank"))
                 {
-                    TabWatcher.watchTopWindow(win, win.location.href);
+                    Firebug.TabWatcher.watchTopWindow(win, win.location.href);
                     return;
                 }
                 else
-                    TabWatcher.watchWindow(win);
+                    Firebug.TabWatcher.watchWindow(win);
             }
         }
 
@@ -742,7 +742,7 @@ var FrameProgressListener = extend(BaseProgressListener,
         // is our best shot here at hooking them.
         if (flag & STATE_IS_DOCUMENT && flag & STATE_TRANSFERRING)
         {
-            TabWatcher.watchWindow(progress.DOMWindow);
+            Firebug.TabWatcher.watchWindow(progress.DOMWindow);
             return;
         }
 
@@ -818,7 +818,7 @@ var TabWatcherHttpObserver = extend(Object,
         {
             if ( (FBTrace.DBG_ACTIVATION || FBTrace.DBG_WINDOWS) && win == win.parent)
             {
-                FBTrace.sysout("-> tabWatcher TabWatcherHttpObserver *** START *** " +
+                FBTrace.sysout("-> tabWatcher Firebug.TabWatcherHttpObserver *** START *** " +
                     "document request for: " + request.URI.spec + " window for request is "+safeGetWindowLocation(win)+"\n");
             }
 
@@ -826,7 +826,7 @@ var TabWatcherHttpObserver = extend(Object,
             {
                 // Make sure the frame listener is registered for top level window so,
                 // we can get all onStateChange events and init context for all opened tabs.
-                var browser = TabWatcher.getBrowserByWindow(win);
+                var browser = Firebug.TabWatcher.getBrowserByWindow(win);
 
                 if (!browser)
                     return;
@@ -894,7 +894,7 @@ function onPageHideTopWindow(event)
 
         if (FBTrace.DBG_WINDOWS)
             FBTrace.sysout("-> tabWatcher onPageHideTopWindow for: "+safeGetWindowLocation(win)+"\n");
-        TabWatcher.unwatchTopWindow(win);
+        Firebug.TabWatcher.unwatchTopWindow(win);
     }
     else
     {
@@ -909,7 +909,7 @@ function evictTopWindow(win, uri)
 {
     if (FBTrace.DBG_WINDOWS)
         FBTrace.sysout("-> tabWatcher evictTopWindow win "+safeGetWindowLocation(win)+" uri "+uri.spec);
-    TabWatcher.unwatchTopWindow(win);
+    Firebug.TabWatcher.unwatchTopWindow(win);
 }
 
 function onUnloadTopWindow(event)
@@ -918,7 +918,7 @@ function onUnloadTopWindow(event)
     win.removeEventListener("unload", onUnloadTopWindow, true);
     if (FBTrace.DBG_WINDOWS)
         FBTrace.sysout("-> tabWatcher onUnloadTopWindow for: "+safeGetWindowLocation(win)+" typeof :"+typeof(win)+"\n");
-    TabWatcher.unwatchTopWindow(win);
+    Firebug.TabWatcher.unwatchTopWindow(win);
 }
 
 function onLoadWindowContent(event)
@@ -950,7 +950,7 @@ function onLoadWindowContent(event)
     }
 
     // Signal that we got the onLoadWindowContent event. This prevents the FrameProgressListener from sending it.
-    var context = TabWatcher.getContextByWindow(win);
+    var context = Firebug.TabWatcher.getContextByWindow(win);
     if (context)
         context.onLoadWindowContent = true;
 
@@ -958,7 +958,7 @@ function onLoadWindowContent(event)
     {
         if (FBTrace.DBG_WINDOWS)
             FBTrace.sysout("-> tabWatcher.onLoadWindowContent:"+safeGetWindowLocation(win), win);
-        TabWatcher.watchLoadedTopWindow(win);
+        Firebug.TabWatcher.watchLoadedTopWindow(win);
     }
     catch(exc)
     {
@@ -975,7 +975,7 @@ function onUnloadWindow(event)
     var eventType = "unload";
     if (FBTrace.DBG_WINDOWS)
         FBTrace.sysout("-> tabWatcher.onUnloadWindow for: "+safeGetWindowLocation(win) +" removeEventListener: "+ eventType+"\n");
-    TabWatcher.unwatchWindow(win);
+    Firebug.TabWatcher.unwatchWindow(win);
 }
 
 function safeGetName(request)
@@ -1019,5 +1019,5 @@ var TraceListener =
 };
 
 // ************************************************************************************************
-
+return Firebug.TabWatcher;
 }});

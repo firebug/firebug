@@ -972,4 +972,6 @@ Firebug.registerRep(Firebug.Breakpoint.BreakpointRep);
 Firebug.registerModule(Firebug.Breakpoint);
 
 // ************************************************************************************************
+
+return Firebug.Breakpoint;
 }});

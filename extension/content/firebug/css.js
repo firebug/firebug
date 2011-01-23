@@ -787,7 +787,7 @@ Firebug.CSSStyleSheetPanel.prototype = extend(Firebug.SourceBoxPanel,
                 cancelEvent(event);
             }
         }
-		else if( (event.clientX >= 20) && (event.detail == 2) )
+        else if( (event.clientX >= 20) && (event.detail == 2) )
         {
             var row = getAncestorByClass(event.target, "cssRule");
             if (row && !getAncestorByClass(event.target, "cssPropName")
@@ -2331,4 +2331,5 @@ Firebug.registerPanel(CSSComputedElementPanel);
 
 // ************************************************************************************************
 
+return Firebug.CSSModule;
 }});

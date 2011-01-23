@@ -130,5 +130,5 @@ function innerCall(innerPanel, name, args)
 }
 
 // ************************************************************************************************
-
+return Firebug.PluginPanel;
 }});

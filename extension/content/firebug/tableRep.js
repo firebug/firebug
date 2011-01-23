@@ -6,7 +6,6 @@ FBL.ns(function() { with (FBL) {
 // Constants
 
 // ************************************************************************************************
-
 FirebugReps.Table = domplate(Firebug.Rep,
 {
     className: "table",
@@ -193,7 +192,7 @@ FirebugReps.Table = domplate(Firebug.Rep,
         if (!columns.length)
             columns = this.getHeaderColumns(data);
 
-        // Don't limit strings in the table. It should be mostly ok. In case of 
+        // Don't limit strings in the table. It should be mostly ok. In case of
         // complaints we need an option.
         var prevValue = Firebug.stringCropLength;
         Firebug.stringCropLength = -1;
@@ -287,5 +286,6 @@ FirebugReps.Table = domplate(Firebug.Rep,
     }
 });
 
+return FirebugReps.Table;
 // ************************************************************************************************
 }});

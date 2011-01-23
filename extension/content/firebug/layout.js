@@ -199,7 +199,7 @@ LayoutPanel.prototype = extend(Firebug.Panel,
         var position = style.getPropertyCSSValue("position").cssText;
         args.position = position;
         args.outerLabel = '';
-        
+
         if (isElementSVG(element) || isElementMathML(element) || isElementXUL(element))
         {
             var rect = element.getBoundingClientRect();
@@ -209,26 +209,26 @@ LayoutPanel.prototype = extend(Firebug.Panel,
             args.width = Math.round(rect.width);
             args.height = Math.round(rect.height);
         }
-        
+
         // these Modes are classes on the domplate
         args.outerLeftMode = args.outerRightMode = args.outerTopMode
         = args.outerBottomMode = "blankEdge";
-        
+
         if (position == "absolute" || position == "fixed" || position == "relative")
         {
             function getStyle(style, name) { var v = style.getPropertyCSSValue(name); return (v && v.cssText) ? parseInt(v.cssText) : ' '; }
 
             args.outerLabel = $STR("LayoutPosition");
-            
+
             args.outerLeft = getStyle(style,'left');
             args.outerTop = getStyle(style,'top');
             args.outerRight = getStyle(style,'right');
             args.outerBottom = getStyle(style,'bottom');
-            
+
             args.outerLeftMode = args.outerRightMode = args.outerTopMode
                 = args.outerBottomMode = "absoluteEdge";
         }
-        
+
         var node = this.template.tag.replace(args, this.panelNode);
         this.adjustCharWidth(this.getMaxCharWidth(args, node), this.panelNode);
 
@@ -414,5 +414,5 @@ function getVerticalText(n)
 Firebug.registerPanel(LayoutPanel);
 
 // ************************************************************************************************
-
+return LayoutPanel;  // move into Firebug.Layout ?
 }});

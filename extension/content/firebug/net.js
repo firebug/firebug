@@ -354,12 +354,12 @@ Firebug.NetMonitor = extend(Firebug.ActivableModule,
         if (this.hasObservers())
         {
             NetHttpActivityObserver.registerObserver();
-            TabWatcher.iterateContexts(monitorContext);
+            Firebug.TabWatcher.iterateContexts(monitorContext);
         }
         else
         {
             NetHttpActivityObserver.unregisterObserver();
-            TabWatcher.iterateContexts(unmonitorContext);
+            Firebug.TabWatcher.iterateContexts(unmonitorContext);
         }
     },
 
@@ -370,7 +370,7 @@ Firebug.NetMonitor = extend(Firebug.ActivableModule,
 
         // Resume only if enabled.
         if (Firebug.NetMonitor.isAlwaysEnabled())
-            TabWatcher.iterateContexts(monitorContext);
+            Firebug.TabWatcher.iterateContexts(monitorContext);
     },
 
     onSuspendFirebug: function()
@@ -380,7 +380,7 @@ Firebug.NetMonitor = extend(Firebug.ActivableModule,
 
         // Suspend only if enabled.
         if (Firebug.NetMonitor.isAlwaysEnabled())
-            TabWatcher.iterateContexts(unmonitorContext);
+            Firebug.TabWatcher.iterateContexts(unmonitorContext);
     },
 
     togglePersist: function(context)
@@ -550,9 +550,9 @@ NetPanel.prototype = extend(Firebug.ActivablePanel,
         if (name == "netFilterCategory")
         {
             Firebug.NetMonitor.syncFilterButtons(Firebug.chrome);
-            for (var i = 0; i < TabWatcher.contexts.length; ++i)
+            for (var i = 0; i < Firebug.TabWatcher.contexts.length; ++i)
             {
-                var context = TabWatcher.contexts[i];
+                var context = Firebug.TabWatcher.contexts[i];
                 Firebug.NetMonitor.onToggleFilter(context, value);
             }
         }
@@ -1625,8 +1625,6 @@ NetPanel.prototype = extend(Firebug.ActivablePanel,
             return;
 
         var maxWidth = netHrefCol.clientWidth;
-        if (maxWidth == 0)
-            maxWidth = "15%";
 
         // This call must precede all getCSSStyleRules calls
         Firebug.CSSModule.cleanupSheets(hrefLabel.ownerDocument, Firebug.currentContext);
@@ -1638,7 +1636,10 @@ NetPanel.prototype = extend(Firebug.ActivablePanel,
             {
                 var style = rule.style;
                 var paddingLeft = parseInt(style.getPropertyValue("padding-left"));
-                style.setProperty("max-width", (maxWidth - paddingLeft) + "px", "");
+                if (maxWidth == 0)
+                    style.setProperty("max-width", "15%", "");
+                else
+                    style.setProperty("max-width", (maxWidth - paddingLeft) + "px", "");
                 break;
             }
         }
@@ -4896,7 +4897,7 @@ Firebug.NetMonitor.NetHttpObserver =
                 return;
 
             var win = getWindowForRequest(subject);
-            var context = TabWatcher.getContextByWindow(win);
+            var context = Firebug.TabWatcher.getContextByWindow(win);
 
             // The context doesn't have to exist yet. In such cases a temp Net context is
             // created within onModifyRequest.
@@ -4938,7 +4939,7 @@ Firebug.NetMonitor.NetHttpObserver =
             win == win.parent && !isRedirect)
         {
             var browser = getBrowserForWindow(win);
-            if (!TabWatcher.shouldCreateContext(browser, name, null))
+            if (!Firebug.TabWatcher.shouldCreateContext(browser, name, null))
             {
                 if (FBTrace.DBG_NET)
                     FBTrace.sysout("net.onModifyRequest; Activation logic says don't create temp context.");
@@ -5123,7 +5124,7 @@ Firebug.NetMonitor.NetHttpActivityObserver =
                 return;
         }
 
-        var context = TabWatcher.getContextByWindow(win);
+        var context = Firebug.TabWatcher.getContextByWindow(win);
         var tabId = Firebug.getTabIdForWindow(win);
         if (!(tabId && win))
             return;
@@ -5716,4 +5717,5 @@ Firebug.registerPanel(NetPanel);
 Firebug.registerRep(Firebug.NetMonitor.BreakpointRep);
 
 // ************************************************************************************************
+return Firebug.NetMonitor;
 }});

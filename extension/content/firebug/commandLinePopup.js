@@ -175,7 +175,7 @@ Firebug.CommandLine.Popup = extend(Firebug.Module,
             commandLineSmall.focus();
         }
         else if (this.lastFocused && isVisible(this.lastFocused) &&
-            typeof this.lastFocused.focus == "function") 
+            typeof this.lastFocused.focus == "function")
         {
             this.lastFocused.focus();
             this.lastFocused = null;
@@ -229,4 +229,5 @@ Firebug.CommandLine.Popup = extend(Firebug.Module,
 Firebug.registerModule(Firebug.CommandLine.Popup);
 
 // ************************************************************************************************
+return Firebug.CommandLine.Popup;
 }});

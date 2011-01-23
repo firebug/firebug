@@ -1053,7 +1053,7 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
         if (!this.isAlwaysEnabled())
             return false;
 
-        var context = ( (win && TabWatcher) ? TabWatcher.getContextByWindow(win) : null);
+        var context = ( (win && Firebug.TabWatcher) ? Firebug.TabWatcher.getContextByWindow(win) : null);
 
         this.breakContext = context;
         return !!context;
@@ -1061,7 +1061,7 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
 
     supportsGlobal: function(frameWin) // This is call from fbs for almost all fbs operations
     {
-        var context = ( (frameWin && TabWatcher) ? TabWatcher.getContextByWindow(frameWin) : null);
+        var context = ( (frameWin && Firebug.TabWatcher) ? Firebug.TabWatcher.getContextByWindow(frameWin) : null);
         if (!context)
             return false;
 
@@ -1607,7 +1607,7 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
         if (FBTrace.DBG_BP)
             FBTrace.sysout("debugger.getContextByFrame");
         var win = fbs.getOutermostScope(frame);
-        return win ? TabWatcher.getContextByWindow(win) : null;
+        return win ? Firebug.TabWatcher.getContextByWindow(win) : null;
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
@@ -1635,9 +1635,9 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
         }
 
         var found = false;
-        for (var i = 0; i < TabWatcher.contexts.length; ++i)
+        for (var i = 0; i < Firebug.TabWatcher.contexts.length; ++i)
         {
-            var context = TabWatcher.contexts[i];
+            var context = Firebug.TabWatcher.contexts[i];
             var sourceFile = context.sourceFileMap[url];
             if (sourceFile) {
                 if (FBTrace.DBG_BP)
@@ -1708,9 +1708,9 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
 
     onToggleErrorBreakpoint: function(url, lineNo, isSet)
     {
-        for (var i = 0; i < TabWatcher.contexts.length; ++i)
+        for (var i = 0; i < Firebug.TabWatcher.contexts.length; ++i)
         {
-            var context = TabWatcher.contexts[i];
+            var context = Firebug.TabWatcher.contexts[i];
             var panel = context.getPanel("console", true);
             if (panel)
             {
@@ -1735,9 +1735,9 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
 
     onToggleMonitor: function(url, lineNo, isSet)
     {
-        for (var i = 0; i < TabWatcher.contexts.length; ++i)
+        for (var i = 0; i < Firebug.TabWatcher.contexts.length; ++i)
         {
-            var panel = TabWatcher.contexts[i].getPanel("console", true);
+            var panel = Firebug.TabWatcher.contexts[i].getPanel("console", true);
             if (panel)
                 panel.context.invalidatePanels("breakpoints");
         }
@@ -2479,7 +2479,7 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
 
     onSuspendingFirebug: function()
     {
-        var anyStopped = TabWatcher.iterateContexts(function isAnyStopped(context)
+        var anyStopped = Firebug.TabWatcher.iterateContexts(function isAnyStopped(context)
         {
             return context.stopped;
         });
@@ -2774,4 +2774,5 @@ function ArrayEnumerator(array)
 Firebug.registerActivableModule(Firebug.Debugger);
 
 // ************************************************************************************************
+return Firebug.Debugger;
 }});

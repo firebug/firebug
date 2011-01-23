@@ -202,4 +202,5 @@ Firebug.Search = extend(Firebug.Module,
 Firebug.registerModule(Firebug.Search);
 
 // ************************************************************************************************
+return Firebug.Search;
 }});

@@ -444,4 +444,5 @@ Firebug.registerRep(Firebug.Profiler.ProfileCall);
 
 // ************************************************************************************************
 
+return Firebug.Profiler;
 }});

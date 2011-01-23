@@ -1567,5 +1567,5 @@ function insertTab()
 Firebug.registerModule(Firebug.Editor);
 
 // ************************************************************************************************
-
+return Firebug.Editor;
 }});

@@ -8,11 +8,9 @@ FBL.ns(function() { with (FBL) {
 const Cc = Components.classes;
 const Ci = Components.interfaces;
 
-const MODIFICATION = MutationEvent.MODIFICATION;
-const ADDITION = MutationEvent.ADDITION;
-const REMOVAL = MutationEvent.REMOVAL;
-
-const HTMLLib = Firebug.HTMLLib;
+const MODIFICATION = window.MutationEvent.MODIFICATION;
+const ADDITION = window.MutationEvent.ADDITION;
+const REMOVAL = window.MutationEvent.REMOVAL;
 
 const BP_BREAKONATTRCHANGE = 1;
 const BP_BREAKONCHILDCHANGE = 2;
@@ -72,7 +70,7 @@ Firebug.HTMLModule = extend(Firebug.Module,
 
 Firebug.HTMLPanel = function() {};
 
-var WalkingPanel = extend(Firebug.Panel, HTMLLib.ElementWalkerFunctions);
+var WalkingPanel = extend(Firebug.Panel, Firebug.HTMLLib.ElementWalkerFunctions);
 
 Firebug.HTMLPanel.prototype = extend(WalkingPanel,
 {
@@ -178,7 +176,7 @@ Firebug.HTMLPanel.prototype = extend(WalkingPanel,
         var objectNodeBox = this.ioBox.findObjectBox(elt);
         if (objectNodeBox)
         {
-            var attrBox = HTMLLib.findNodeAttrBox(objectNodeBox, attrName);
+            var attrBox = Firebug.HTMLLib.findNodeAttrBox(objectNodeBox, attrName);
             if (attrBox)
             {
                 var attrValueBox = attrBox.childNodes[3];
@@ -268,12 +266,12 @@ Firebug.HTMLPanel.prototype = extend(WalkingPanel,
 
         var lines;
 
-        var url = HTMLLib.getSourceHref(node);
+        var url = Firebug.HTMLLib.getSourceHref(node);
         if (url)
             lines = this.context.sourceCache.load(url);
         else
         {
-            var text = HTMLLib.getSourceText(node);
+            var text = Firebug.HTMLLib.getSourceText(node);
             lines = splitLines(text);
         }
 
@@ -328,7 +326,7 @@ Firebug.HTMLPanel.prototype = extend(WalkingPanel,
 
         if (attrChange == MODIFICATION || attrChange == ADDITION)
         {
-            var nodeAttr = HTMLLib.findNodeAttrBox(objectNodeBox, attrName);
+            var nodeAttr = Firebug.HTMLLib.findNodeAttrBox(objectNodeBox, attrName);
             if (FBTrace.DBG_HTML)
                 FBTrace.sysout("mutateAttr "+attrChange+" "+attrName+"="+attrValue+" node: "+nodeAttr, nodeAttr);
             if (nodeAttr && nodeAttr.childNodes.length > 3)
@@ -360,7 +358,7 @@ Firebug.HTMLPanel.prototype = extend(WalkingPanel,
         }
         else if (attrChange == REMOVAL)
         {
-            var nodeAttr = HTMLLib.findNodeAttrBox(objectNodeBox, attrName);
+            var nodeAttr = Firebug.HTMLLib.findNodeAttrBox(objectNodeBox, attrName);
             if (nodeAttr)
             {
                 nodeAttr.parentNode.removeChild(nodeAttr);
@@ -404,7 +402,7 @@ Firebug.HTMLPanel.prototype = extend(WalkingPanel,
             if (FBTrace.DBG_HTML)
                 FBTrace.sysout("html.mutateText target: " + target + " parent: " + parent);
 
-            var nodeText = HTMLLib.getTextElementTextBox(parentNodeBox);
+            var nodeText = Firebug.HTMLLib.getTextElementTextBox(parentNodeBox);
             if (!nodeText.firstChild)
             {
                 if (FBTrace.DBG_HTML)   FBTrace.sysout("html.mutateText failed to update text, TextElement firstChild does not exist");
@@ -735,17 +733,17 @@ Firebug.HTMLPanel.prototype = extend(WalkingPanel,
 
     isWhitespaceText: function(node)
     {
-        return HTMLLib.isWhitespaceText(node);
+        return Firebug.HTMLLib.isWhitespaceText(node);
     },
 
     findNextSibling: function (node)
     {
-        return HTMLLib.findNextSibling(node);
+        return Firebug.HTMLLib.findNextSibling(node);
     },
 
     isSourceElement: function(element)
     {
-        return HTMLLib.isSourceElement(element);
+        return Firebug.HTMLLib.isSourceElement(element);
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
@@ -933,7 +931,7 @@ Firebug.HTMLPanel.prototype = extend(WalkingPanel,
     initializeNode: function(oldPanelNode)
     {
         if (!this.ioBox)
-            this.ioBox = new InsideOutBox(this, this.panelNode);
+            this.ioBox = new Firebug.InsideOutBox(this, this.panelNode);
 
         this.panelNode.addEventListener("click", this.onClick, false);
         this.panelNode.addEventListener("mousedown", this.onMouseDown, false);
@@ -1086,7 +1084,7 @@ Firebug.HTMLPanel.prototype = extend(WalkingPanel,
             if (this.ioBox)
                 this.ioBox.destroy();
 
-            this.ioBox = new InsideOutBox(this, this.panelNode);
+            this.ioBox = new Firebug.InsideOutBox(this, this.panelNode);
             this.ioBox.select(this.selection, true, true);
         }
     },
@@ -1188,7 +1186,7 @@ Firebug.HTMLPanel.prototype = extend(WalkingPanel,
         else
         {
             var doc = this.context.window.document;
-            search = this.lastSearch = new HTMLLib.NodeSearch(text, doc, this.panelNode, this.ioBox);
+            search = this.lastSearch = new Firebug.HTMLLib.NodeSearch(text, doc, this.panelNode, this.ioBox);
         }
 
         var loopAround = search.find(reverse, Firebug.Search.isCaseSensitive(text));
@@ -1461,7 +1459,7 @@ Firebug.HTMLPanel.CompleteElement = domplate(FirebugReps.Element,
 
             for (var child = walker.getFirstChild(node); child; child = walker.getNextSibling(child))
             {
-                if (child.nodeType != Node.TEXT_NODE || !HTMLLib.isWhitespaceText(child))
+                if (child.nodeType != Node.TEXT_NODE || !Firebug.HTMLLib.isWhitespaceText(child))
                     nodes.push(child);
             }
             return nodes;
@@ -1937,13 +1935,13 @@ function getNodeTag(node, expandAll)
             return getEmptyElementTag(node);
         else if (unwrapObject(node).firebugIgnore)
             return null;
-        else if (HTMLLib.isContainerElement(node))
+        else if (Firebug.HTMLLib.isContainerElement(node))
             return expandAll ? Firebug.HTMLPanel.CompleteElement.tag : Firebug.HTMLPanel.Element.tag;
-        else if (HTMLLib.isEmptyElement(node))
+        else if (Firebug.HTMLLib.isEmptyElement(node))
             return getEmptyElementTag(node);
-        else if (Firebug.showCommentNodes && HTMLLib.hasCommentChildren(node))
+        else if (Firebug.showCommentNodes && Firebug.HTMLLib.hasCommentChildren(node))
             return expandAll ? Firebug.HTMLPanel.CompleteElement.tag : Firebug.HTMLPanel.Element.tag;
-        else if (HTMLLib.hasNoElementChildren(node))
+        else if (Firebug.HTMLLib.hasNoElementChildren(node))
             return Firebug.HTMLPanel.TextElement.tag;
         else
             return expandAll ? Firebug.HTMLPanel.CompleteElement.tag : Firebug.HTMLPanel.Element.tag;
@@ -2330,8 +2328,6 @@ MutationBreakpointGroup.prototype = extend(new Firebug.Breakpoint.BreakpointGrou
 });
 
 
-
-
 // ************************************************************************************************
 // Registration
 
@@ -2340,4 +2336,5 @@ Firebug.registerModule(Firebug.HTMLModule);
 Firebug.registerRep(Firebug.HTMLModule.BreakpointRep);
 
 // ************************************************************************************************
+return Firebug.HTMLModule;
 }});

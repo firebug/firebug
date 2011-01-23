@@ -1587,4 +1587,5 @@ function getNoScript()
 Firebug.registerModule(Firebug.CommandLine);
 
 // ************************************************************************************************
+return Firebug.CommandLine;
 }});

@@ -2212,5 +2212,6 @@ Firebug.registerRep(Firebug.DOMModule.BreakpointRep);
 
 // ************************************************************************************************
 
+return Firebug.DOMModule;
 }});
 

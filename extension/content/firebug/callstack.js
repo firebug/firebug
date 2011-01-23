@@ -353,4 +353,5 @@ function getReferents(frame, fnName)
 Firebug.registerPanel(Firebug.CallstackPanel);
 
 // ************************************************************************************************
+return Firebug.CallstackPanel;
 }});

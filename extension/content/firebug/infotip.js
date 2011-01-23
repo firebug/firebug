@@ -252,5 +252,5 @@ Firebug.InfoTip = extend(Firebug.Module,
 Firebug.registerModule(Firebug.InfoTip);
 
 // ************************************************************************************************
-
+return Firebug.InfoTip;
 }});

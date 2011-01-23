@@ -97,4 +97,5 @@ Firebug.KnownIssuesRep = domplate(Firebug.Rep,
 Firebug.registerModule(Firebug.KnownIssues);
 
 // ************************************************************************************************
+return Firebug.KnownIssues;
 }});

@@ -282,7 +282,7 @@ var Errors = Firebug.Errors = extend(Firebug.Module,
             return Firebug.currentContext;  // eg some XPCOM messages
 
         var errorContext = null;
-        TabWatcher.iterateContexts(
+        Firebug.TabWatcher.iterateContexts(
             function findContextByURL(context)
             {
                 if (FBTrace.DBG_ERRORLOG && FBTrace.DBG_CSS)
@@ -363,7 +363,12 @@ var Errors = Firebug.Errors = extend(Firebug.Module,
             win1 = getRootWindow(win1);
             win2 = getRootWindow(win2);
             if (win1 && win1 != win2)
-                FBTrace.sysout("errors.getErrorContext; ERROR wrong parent window?", object);
+            {
+                var win1Name = safeGetWindowLocation(win1);
+                var win2Name = safeGetWindowLocation(win2);
+                var moreInfo =  {object: object, fromError2: win1, fromFirebug: win2};
+                FBTrace.sysout("errors.getErrorContext; ERROR wrong parent window? "+win1Name+" !== "+win2Name, moreInfo);
+        }
         }
 
         return errorContext; // we looked everywhere...
@@ -684,7 +689,7 @@ function getExceptionContext(context)
     var errorWin = fbs.lastErrorWindow;  // not available unless Script panel is enabled.
     if (errorWin)
     {
-        var errorContext = TabWatcher.getContextByWindow(errorWin);
+        var errorContext = Firebug.TabWatcher.getContextByWindow(errorWin);
         if (FBTrace.DBG_ERRORLOG)
             FBTrace.sysout("errors.observe exception context:"+(errorContext?errorContext.getName():"none")+" errorWin: "+errorWin+"\n");
         if (errorContext)
@@ -720,4 +725,5 @@ Firebug.registerModule(Errors);
 
 // ************************************************************************************************
 
+return Firebug.Errors;
 }});

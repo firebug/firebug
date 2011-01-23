@@ -75,7 +75,7 @@ Firebug.ShortcutsModel = extend(Firebug.Module,
 
         // Open customize shortcuts dialog. Pass FBL into the XUL window so,
         // common APIs can be used (e.g. localization).
-        window.openDialog("chrome://firebug/content/customizeShortcuts.xul", "", 
+        window.openDialog("chrome://firebug/content/customizeShortcuts.xul", "",
             "chrome,centerscreen,dialog,modal,resizable=yes", args);
     }
 });
@@ -86,4 +86,5 @@ Firebug.ShortcutsModel = extend(Firebug.Module,
 Firebug.registerModule(Firebug.ShortcutsModel);
 
 // ************************************************************************************************
+return Firebug.ShortcutsModel;
 }});

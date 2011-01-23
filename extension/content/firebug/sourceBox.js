@@ -1038,4 +1038,5 @@ Firebug.SourceBoxPanel = extend(SourceBoxPanelBase,
 });
 
 // ************************************************************************************************
+return Firebug.SourceBoxPanel;
 }});

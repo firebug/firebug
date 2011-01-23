@@ -792,4 +792,6 @@ Firebug.SourceFile.guessEnclosingFunctionName = function(url, line, context)
     return FBL.guessFunctionName(url, line-1, context);
 };
 
+
+return Firebug.SourceFile;
 }});

@@ -177,5 +177,5 @@ Firebug.XMLViewerModel.ParseError = domplate(Firebug.Rep,
 // Registration
 
 Firebug.registerModule(Firebug.XMLViewerModel);
-
+return Firebug.XMLViewerModel;
 }});

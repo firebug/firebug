@@ -171,4 +171,5 @@ Firebug.SVGViewerModel.ParseError = domplate(Firebug.Rep,
 
 Firebug.registerModule(Firebug.SVGViewerModel);
 
+return Firebug.SVGViewerModel;
 }});

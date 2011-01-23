@@ -140,7 +140,7 @@ Firebug.Inspector = extend(Firebug.Module,
                 {
                     this.highlightObject(node, context, "frame");
                     this.inspectingNode = node;
-        
+
                     this.inspectTimeout = context.setTimeout(function()
                     {
                         Firebug.chrome.select(node);
@@ -190,16 +190,16 @@ Firebug.Inspector = extend(Firebug.Module,
     },
 
     _resolveInspectingPanelName: function(context) {
-    	var name,
+        var name,
             requestingPanel = context && context.getPanel(context.panelName);
 
-    	if(requestingPanel && requestingPanel.inspectable) {
-    		name = requestingPanel.name;
-    	} else {
-    		name = "html";
-    	}
+        if(requestingPanel && requestingPanel.inspectable) {
+            name = requestingPanel.name;
+        } else {
+            name = "html";
+        }
 
-    	return name;
+        return name;
     },
 
 
@@ -971,7 +971,7 @@ Firebug.Inspector.FrameHighlighter.prototype =
                 css += '-moz-border-radius-bottomright:' + cs.MozBorderRadiusBottomright + ' !important;';
             if(cs.MozBorderRadiusBottomleft)
                 css += '-moz-border-radius-bottomleft:' + cs.MozBorderRadiusBottomleft + ' !important;';
-            
+
             highlighter.style.cssText = css;
 
             var needsAppend = !highlighter.parentNode || highlighter.ownerDocument != body.ownerDocument;
@@ -1326,7 +1326,7 @@ function createProxiesForDisabledElements(body)
     var result = xpe.evaluate('//*[@disabled]', doc.documentElement,
                       nsResolver, XPathResult.ORDERED_NODE_SNAPSHOT_TYPE, null);
     var l = result.snapshotLength;
-    
+
     for(i = 0; i < l; i++)
     {
         node = result.snapshotItem(i);
@@ -1351,7 +1351,7 @@ function removeProxiesForDisabledElements(body)
     var i, doc = body.ownerDocument,
         proxyElements = doc.getElementsByClassName("fbProxyElement"),
         proxyElementsLen = proxyElements.length;
-    
+
     for (i = 0; i < proxyElementsLen; i++)
     {
         proxyElements[i].fbProxyFor.fbHasProxyElement = false;
@@ -1403,5 +1403,5 @@ function storeHighlighterParams(highlighter, context, element, boxFrame, isFrame
 Firebug.registerModule(Firebug.Inspector);
 
 // ************************************************************************************************
-
+return Firebug.Inspector;
 }});
