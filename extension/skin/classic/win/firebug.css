@@ -120,6 +120,23 @@
     list-style-image: url(chrome://firebug/skin/win/detachActive.png);
 }
 
+#fbCommandLineHistoryButton {
+    list-style-image: url(chrome://firebug/skin/win/commandHistory.png);
+    -moz-image-region: rect(0, 16px, 16px, 0);
+}
+
+#fbCommandLineHistoryButton:hover {
+    -moz-image-region: rect(16px, 16px, 32px, 0);
+}
+
+#fbCommandLineHistoryButton:active {
+    -moz-image-region: rect(32px, 16px, 48px, 0);
+}
+
+#fbCommandLineHistoryButton[disabled] {
+    -moz-image-region: rect(48px, 16px, 64px, 0);
+}
+
 #fbCommandToggleSmall {
     list-style-image: url(chrome://firebug/skin/win/up.png);
 }
@@ -145,6 +162,18 @@
 }
 
 /************************************************************************************************/
+
+#fbCommandHistory {
+    min-width: 200px;
+    cursor: default;
+    font-family: monospace;
+    white-space: pre;
+}
+
+.commandHistoryItem.selected {
+    background-color: highlight;
+    color: highlighttext;
+}
 
 #fbLargeCommandLine {
     -moz-appearance: none;
@@ -323,6 +352,7 @@ panelTab[selected="true"] > .panelTab-right {
     margin: 2px 6px;
     font-weight: bold;
 }
+
 
 /************************************************************************************************/
 /* Scrollable TabBar + TabList */

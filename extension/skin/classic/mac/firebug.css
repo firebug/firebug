@@ -196,6 +196,23 @@
     list-style-image: url(chrome://firebug/skin/mac/detachActive.png) !important;
 }
 
+#fbCommandLineHistoryButton {
+    list-style-image: url(chrome://firebug/skin/mac/commandHistory.png);
+    -moz-image-region: rect(0, 13px, 13px, 0);
+}
+
+#fbCommandLineHistoryButton:hover {
+    -moz-image-region: rect(13px, 13px, 26px, 0);
+}
+
+#fbCommandLineHistoryButton:active {
+    -moz-image-region: rect(26px, 13px, 39px, 0);
+}
+
+#fbCommandLineHistoryButton[disabled] {
+    -moz-image-region: rect(39px, 13px, 52px, 0);
+}
+
 #fbCommandToggleSmall {
     list-style-image: url(chrome://firebug/skin/mac/detach.png) !important;
 }

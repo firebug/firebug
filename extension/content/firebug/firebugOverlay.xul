@@ -130,6 +130,8 @@
             onpopupshowing="return Firebug.NavigationHistory.onPopupShowing(this, Firebug.currentContext)" />
         <panel id="fbCommandLineCompletionList" class="fbCommandLineCompletionPanel" noautofocus="true">
         </panel>
+        <panel id="fbCommandHistory" noautofocus="true">
+        </panel>
     </popupset>
 
     <!-- Main UI -->
@@ -428,6 +430,10 @@
                                     class="toolbar-text-button fbInternational"
                                     tooltiptext="firebug.Copy_the_script_as_a_bookmarklet"
                                     oncommand="Firebug.CommandLine.copyBookmarklet(Firebug.currentContext)"/>
+                                <toolbarbutton id="fbCommandEditorHistoryButton" label="firebug.History"
+                                    class="toolbarbutton fbInternational"
+                                    tooltiptext="firebug.Insert_a_previously_entered_command"
+                                    oncommand="Firebug.CommandLine.commandHistory.show(this)" disabled="true"/>
                                 <toolbarspacer flex="1"/>
                                 <toolbarbutton id="fbCommandToggleLarge" tooltiptext="firebug.CommandLine" class="toolbarbutton-iconic fbInternational"
                                     oncommand="Firebug.setPref(Firebug.prefDomain, 'largeCommandLine', false)"/>
@@ -455,6 +461,8 @@
 
         <!-- Command Line (small) -->
         <hbox id="fbCommandBox">
+            <toolbarbutton id="fbCommandLineHistoryButton" tooltiptext="Command_History" class="toolbarbutton-iconic fbInternational"
+                oncommand="Firebug.CommandLine.commandHistory.show(this);" disabled="true"/>
             <label id="fbCommandArrow" value=">>>"/>
             <hbox flex="1">
                 <html:div class="fbCommandHtmlBox" flex="100%">
