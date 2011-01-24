@@ -1423,7 +1423,7 @@ Firebug.HTMLPanel.CompleteElement = domplate(FirebugReps.Element,
             DIV({"class": "nodeLabel", role: "presentation"},
                 SPAN({"class": "nodeLabelBox repTarget", role : 'treeitem', 'aria-expanded' : 'false'},
                     "&lt;",
-                    SPAN({"class": "nodeTag"}, "$object.nodeName|toLowerCase"),
+                    SPAN({"class": "nodeTag"}, "$object|getNodeName"),
                     FOR("attr", "$object|attrIterator", AttrTag),
                     SPAN({"class": "nodeBracket"}, "&gt;")
                 )
@@ -1435,7 +1435,7 @@ Firebug.HTMLPanel.CompleteElement = domplate(FirebugReps.Element,
             ),
             DIV({"class": "nodeCloseLabel", role:"presentation"},
                 "&lt;/",
-                SPAN({"class": "nodeTag"}, "$object.nodeName|toLowerCase"),
+                SPAN({"class": "nodeTag"}, "$object|getNodeName"),
                 "&gt;"
              )
         ),
@@ -1496,7 +1496,7 @@ Firebug.HTMLPanel.Element = domplate(FirebugReps.Element,
             IMG({"class": "twisty", role: "presentation"}),
             SPAN({"class": "nodeLabelBox repTarget", role : 'treeitem', 'aria-expanded' : 'false'},
                 "&lt;",
-                SPAN({"class": "nodeTag"}, "$object.nodeName|toLowerCase"),
+                SPAN({"class": "nodeTag"}, "$object|getNodeName"),
                 FOR("attr", "$object|attrIterator", AttrTag),
                 SPAN({"class": "nodeBracket editable insertBefore"}, "&gt;")
             )
@@ -1505,7 +1505,7 @@ Firebug.HTMLPanel.Element = domplate(FirebugReps.Element,
         DIV({"class": "nodeCloseLabel", role : "presentation"},
             SPAN({"class": "nodeCloseLabelBox repTarget"},
                 "&lt;/",
-                SPAN({"class": "nodeTag"}, "$object.nodeName|toLowerCase"),
+                SPAN({"class": "nodeTag"}, "$object|getNodeName"),
                 "&gt;"
             )
         )
@@ -1547,7 +1547,7 @@ Firebug.HTMLPanel.HTMLHtmlElement = domplate(FirebugReps.Element,
                 IMG({"class": "twisty", role: "presentation"}),
                 SPAN({"class": "nodeLabelBox repTarget", role: 'treeitem', 'aria-expanded': 'false'},
                     "&lt;",
-                    SPAN({"class": "nodeTag"}, "$object.nodeName|toLowerCase"),
+                    SPAN({"class": "nodeTag"}, "$object|getNodeName"),
                     FOR("attr", "$object|attrIterator", AttrTag),
                     SPAN({"class": "nodeBracket editable insertBefore"}, "&gt;")
                 )
@@ -1556,7 +1556,7 @@ Firebug.HTMLPanel.HTMLHtmlElement = domplate(FirebugReps.Element,
             DIV({"class": "nodeCloseLabel", role : "presentation"},
                 SPAN({"class": "nodeCloseLabelBox repTarget"},
                     "&lt;/",
-                    SPAN({"class": "nodeTag"}, "$object.nodeName|toLowerCase"),
+                    SPAN({"class": "nodeTag"}, "$object|getNodeName"),
                     "&gt;"
                 )
             )
@@ -1570,12 +1570,12 @@ Firebug.HTMLPanel.TextElement = domplate(FirebugReps.Element,
             DIV({"class": "nodeLabel", role: "presentation"},
                 SPAN({"class": "nodeLabelBox repTarget", role : 'treeitem'},
                     "&lt;",
-                    SPAN({"class": "nodeTag"}, "$object.nodeName|toLowerCase"),
+                    SPAN({"class": "nodeTag"}, "$object|getNodeName"),
                     FOR("attr", "$object|attrIterator", AttrTag),
                     SPAN({"class": "nodeBracket editable insertBefore"}, "&gt;"),
                     TextTag,
                     "&lt;/",
-                    SPAN({"class": "nodeTag"}, "$object.nodeName|toLowerCase"),
+                    SPAN({"class": "nodeTag"}, "$object|getNodeName"),
                     "&gt;"
                 )
             )
@@ -1589,7 +1589,7 @@ Firebug.HTMLPanel.EmptyElement = domplate(FirebugReps.Element,
             DIV({"class": "nodeLabel", role: "presentation"},
                 SPAN({"class": "nodeLabelBox repTarget", role : 'treeitem'},
                     "&lt;",
-                    SPAN({"class": "nodeTag"}, "$object.nodeName|toLowerCase"),
+                    SPAN({"class": "nodeTag"}, "$object|getNodeName"),
                     FOR("attr", "$object|attrIterator", AttrTag),
                     SPAN({"class": "nodeBracket editable insertBefore"}, "&gt;")
                 )
@@ -1604,7 +1604,7 @@ Firebug.HTMLPanel.XEmptyElement = domplate(FirebugReps.Element,
             DIV({"class": "nodeLabel", role: "presentation"},
                 SPAN({"class": "nodeLabelBox repTarget", role : 'treeitem'},
                     "&lt;",
-                    SPAN({"class": "nodeTag"}, "$object.nodeName|toLowerCase"),
+                    SPAN({"class": "nodeTag"}, "$object|getNodeName"),
                     FOR("attr", "$object|attrIterator", AttrTag),
                     SPAN({"class": "nodeBracket editable insertBefore"}, "/&gt;")
                 )

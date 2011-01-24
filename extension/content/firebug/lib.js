@@ -1877,7 +1877,7 @@ this.getElementCSSSelector = function(element)
     if (!element || !element.localName)
         return "null";
 
-    var label = element.localName.toLowerCase();
+    var label = getLocalName(element);
     if (element.id)
         label += "#" + element.id;
 
@@ -1968,7 +1968,7 @@ var isElementHTML = this.isElementHTML = function(node)
 
 var isElementXHTML = this.isElementXHTML = function(node)
 {
-    return node.nodeName == node.nodeName.toLowerCase() && node.namespaceURI == 'http://www.w3.org/1999/xhtml';
+    return node.nodeName != node.nodeName.toUpperCase() && node.namespaceURI == 'http://www.w3.org/1999/xhtml';
 }
 
 var isElementMathML = this.isElementMathML = function(node)
@@ -1984,6 +1984,18 @@ var isElementSVG = this.isElementSVG = function(node)
 var isElementXUL = this.isElementXUL = function(node)
 {
     return node instanceof XULElement;
+}
+
+var getNodeName = this.getNodeName = function(node)
+{
+    var name = node.nodeName;
+    return isElementHTML(node) ? name.toLowerCase() : name;
+}
+
+var getLocalName = this.getLocalName = function(node)
+{
+    var name = node.localName;
+    return isElementHTML(node) ? name.toLowerCase() : name;
 }
 
 this.isSelfClosing = function(element)
@@ -2003,8 +2015,9 @@ this.getElementHTML = function(element)
         {
             if (unwrapObject(elt).firebugIgnore)
                 return;
-
-            html.push('<', elt.nodeName.toLowerCase());
+            
+            var nodeName = getNodeName(elt);
+            html.push('<', nodeName);
 
             for (var i = 0; i < elt.attributes.length; ++i)
             {
@@ -2039,7 +2052,7 @@ this.getElementHTML = function(element)
                         toHTML(child);
                 }
 
-                html.push('</', elt.nodeName.toLowerCase(), '>');
+                html.push('</', nodeName, '>');
             }
             else if (isElementSVG(elt) || isElementMathML(elt))
             {
@@ -2051,7 +2064,7 @@ this.getElementHTML = function(element)
             }
             else
             {
-                html.push('></', elt.nodeName.toLowerCase(), '>');
+                html.push('></', nodeName, '>');
             }
         }
         else if (elt.nodeType == Node.TEXT_NODE)
@@ -2076,7 +2089,8 @@ this.getElementXML = function(element)
             if (unwrapObject(elt).firebugIgnore)
                 return;
 
-            xml.push('<', elt.nodeName.toLowerCase());
+            var nodeName = getNodeName(elt);
+            xml.push('<', nodeName);
 
             for (var i = 0; i < elt.attributes.length; ++i)
             {
@@ -2103,7 +2117,7 @@ this.getElementXML = function(element)
                 for (var child = elt.firstChild; child; child = child.nextSibling)
                     toXML(child);
 
-                xml.push('</', elt.nodeName.toLowerCase(), '>');
+                xml.push('</', nodeName, '>');
             }
             else
                 xml.push('/>');

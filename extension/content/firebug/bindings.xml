@@ -1201,6 +1201,7 @@
 
                 this.firstMatch = null;
                 var groupMatchCount = 0;
+                substring = substring.toLowerCase();
                 for (var child = this.popup.lastChild; child; child = child.previousSibling)
                 {
                     if (child.localName == "menuitem")

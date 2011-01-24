@@ -622,7 +622,19 @@ FirebugReps.Element = domplate(Firebug.Rep,
     {
         try
         {
-            return object.localName.toLowerCase();
+            return getLocalName(object);
+        }
+        catch (err)
+        {
+            return "";
+        }
+    },
+
+    getNodeName: function(object)
+    {
+        try
+        {
+            return getNodeName(object);
         }
         catch (err)
         {
