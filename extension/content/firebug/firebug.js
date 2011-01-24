@@ -515,7 +515,7 @@ top.Firebug =
         if (Firebug.getSuspended())
             tooltip += "\n" + Firebug.getSuspended();
         else
-            tooltip += "\n" + $STRP("plural.Total_Firebugs", [Firebug.TabWatcher.contexts.length]);
+            tooltip += "\n" + $STRP("plural.Total_Firebugs2", [Firebug.TabWatcher.contexts.length]);
 
         if (Firebug.allPagesActivation == "on")
         {

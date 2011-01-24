@@ -607,15 +607,8 @@ function $STRP(name, args, index, bundle)
     if (!index)
         index = 0;
 
-    var margs = [];
-    var numForms = getNumForms();
-
-    // Repeat the args for numForms time(s)
-    for (var i = 0; i < numForms; i++)
-        margs = margs.concat(args);
-
     // Get proper plural form from the string (depends on the current Firefox locale).
-    var translatedString = $STRF(name, margs, bundle);
+    var translatedString = $STRF(name, args, bundle);
     if (translatedString.search(";") > 0)
         return getPluralForm(args[index], translatedString);
 

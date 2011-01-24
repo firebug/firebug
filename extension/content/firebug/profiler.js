@@ -158,7 +158,7 @@ Firebug.Profiler = extend(Firebug.Module,
             if (!groupRow.customMessage)
                 captionBox.textContent = $STR("Profile");
             var timeBox = groupRow.getElementsByClassName("profileTime").item(0);
-            timeBox.textContent = $STRP("plural.Profile_Time", [totalTime, totalCalls], 1);
+            timeBox.textContent = $STRP("plural.Profile_Time2", [totalTime, totalCalls], 1);
 
             var groupBody = groupRow.lastChild;
             var sizer = Firebug.Profiler.ProfileTable.tag.replace({}, groupBody);

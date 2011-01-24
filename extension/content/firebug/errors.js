@@ -82,9 +82,8 @@ var Errors = Firebug.Errors = extend(Firebug.Module,
         {
             if (Firebug.showErrorCount)
             {
-                var errorLabel = $STRP("plural.Error_Count", [errorCount]);
                 statusText.setAttribute("shown", "true")
-                statusText.setAttribute("value", errorLabel);
+                statusText.setAttribute("value", $STRP("plural.Error_Count2", [errorCount]));
             }
             else
             {

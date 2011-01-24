@@ -1359,7 +1359,7 @@ NetPanel.prototype = extend(Firebug.ActivablePanel,
             return;
 
         var countLabel = row.childNodes[1].firstChild;
-        countLabel.firstChild.nodeValue = $STRP("plural.Request_Count", [fileCount]);
+        countLabel.firstChild.nodeValue = $STRP("plural.Request_Count2", [fileCount]);
 
         var sizeLabel = row.childNodes[4].firstChild;
         sizeLabel.setAttribute("totalSize", totalSize);
@@ -3250,7 +3250,7 @@ Firebug.NetMonitor.NetLimit = domplate(Firebug.Rep,
                         TR(
                             TD(
                                 SPAN({"class": "netLimitLabel"},
-                                    $STRP("plural.Limit_Exceeded", [0])
+                                    $STRP("plural.Limit_Exceeded2", [0])
                                 )
                             ),
                             TD({style: "width:100%"}),
@@ -3283,7 +3283,7 @@ Firebug.NetMonitor.NetLimit = domplate(Firebug.Rep,
 
         // Update info within the limit row.
         var limitLabel = row.getElementsByClassName("netLimitLabel").item(0);
-        limitLabel.firstChild.nodeValue = $STRP("plural.Limit_Exceeded", [row.limitInfo.totalCount]);
+        limitLabel.firstChild.nodeValue = $STRP("plural.Limit_Exceeded2", [row.limitInfo.totalCount]);
     },
 
     createTable: function(parent, limitInfo)
