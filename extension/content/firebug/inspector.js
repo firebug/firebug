@@ -206,7 +206,7 @@ Firebug.Inspector = extend(Firebug.Module,
     inspectFromContextMenu: function(elt)
     {
         var panel, inspectingPanelName,
-            context = this.inspectingContext || TabWatcher.getContextByWindow(elt.ownerDocument.defaultView);
+            context = this.inspectingContext || Firebug.TabWatcher.getContextByWindow(elt.ownerDocument.defaultView);
 
         inspectingPanelName = this._resolveInspectingPanelName(context);
 
