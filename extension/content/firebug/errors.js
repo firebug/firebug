@@ -279,6 +279,8 @@ var Errors = Firebug.Errors = extend(Firebug.Module,
         var url = object.sourceName;
         if(!url)
             return Firebug.currentContext;  // eg some XPCOM messages
+        if (url.indexOf("://chromebug/"))
+            return Firebug.currentContext; // no context for self
 
         var errorContext = null;
         Firebug.TabWatcher.iterateContexts(
