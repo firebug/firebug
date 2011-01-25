@@ -282,6 +282,7 @@ Firebug.Inspector = extend(Firebug.Module,
             subWin.document.addEventListener("resize", this.onInspectingResizeWindow, true);
             subWin.document.addEventListener("scroll", this.onInspectingScroll, true);
             subWin.document.addEventListener("mouseover", this.onInspectingMouseOver, true);
+            subWin.document.addEventListener("mouseout", this.onInspectingMouseOut, true);
             subWin.document.addEventListener("mousedown", this.onInspectingMouseDown, true);
             subWin.document.addEventListener("mouseup", this.onInspectingMouseUp, true);
             subWin.document.addEventListener("click", this.onInspectingClick, true);
@@ -310,6 +311,7 @@ Firebug.Inspector = extend(Firebug.Module,
         {
             // we don't remove the scroll event listener because we need it outside of inspect mode
             subWin.document.removeEventListener("mouseover", this.onInspectingMouseOver, true);
+            subWin.document.removeEventListener("mouseout", this.onInspectingMouseOut, true);
             subWin.document.removeEventListener("mousedown", this.onInspectingMouseDown, true);
             subWin.document.removeEventListener("mouseup", this.onInspectingMouseUp, true);
         }, this));
@@ -347,7 +349,16 @@ Firebug.Inspector = extend(Firebug.Module,
     {
         if (FBTrace.DBG_INSPECT)
            FBTrace.sysout("onInspectingMouseOver event", event);
+
         this.inspectNode(event.target);
+        cancelEvent(event);
+    },
+
+    onInspectingMouseOut: function(event)
+    {
+        if (FBTrace.DBG_INSPECT)
+           FBTrace.sysout("onInspectingMouseOut event", event);
+
         cancelEvent(event);
     },
 
@@ -398,6 +409,7 @@ Firebug.Inspector = extend(Firebug.Module,
         this.onInspectingResizeWindow = bind(this.onInspectingResizeWindow, this);
         this.onInspectingScroll = bind(this.onInspectingScroll, this);
         this.onInspectingMouseOver = bind(this.onInspectingMouseOver, this);
+        this.onInspectingMouseOut = bind(this.onInspectingMouseOut, this);
         this.onInspectingMouseDown = bind(this.onInspectingMouseDown, this);
         this.onInspectingMouseUp = bind(this.onInspectingMouseUp, this);
         this.onInspectingClick = bind(this.onInspectingClick, this);
