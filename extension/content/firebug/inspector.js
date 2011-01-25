@@ -247,9 +247,9 @@ Firebug.Inspector = extend(Firebug.Module,
             context = rp.context,
             element = rp.element,
             boxFrame = rp.boxFrame,
-            isFrameHighlighter = rp.isFrameHighlighter;
+            isBoxHighlighter = highlighter.getNodes && highlighter.getNodes(context).offset.parentNode;
 
-        if(highlighter && ((this.inspecting && isFrameHighlighter) || !isFrameHighlighter))
+        if(highlighter && (isBoxHighlighter || (this.inspecting && !isBoxHighlighter)))
             highlighter.highlight(context, element, boxFrame);
     },
 
@@ -909,7 +909,7 @@ Firebug.Inspector.FrameHighlighter.prototype =
 
     highlight: function(context, element)
     {
-        storeHighlighterParams(this, context, element, null, true);
+        storeHighlighterParams(this, context, element, null);
 
         if (this.doNotHighlight(element))
             return;
@@ -1054,7 +1054,7 @@ BoxModelHighlighter.prototype =
             nodes = this.getNodes(context),
             highlightFrame = boxFrame ? nodes[boxFrame] : null;
 
-        storeHighlighterParams(this, context, element, boxFrame, false);
+        storeHighlighterParams(this, context, element, boxFrame);
 
         if (context.highlightFrame)
             removeClass(context.highlightFrame, "firebugHighlightBox");
@@ -1388,14 +1388,13 @@ function hideElementFromInspection(elt) {
     unwrapObject(elt).firebugIgnore = !FBTrace.DBG_INSPECT;
 }
 
-function storeHighlighterParams(highlighter, context, element, boxFrame, isFrameHighlighter) {
+function storeHighlighterParams(highlighter, context, element, boxFrame) {
     var fir = Firebug.Inspector.repaint;
 
     fir.highlighter = highlighter;
     fir.context = context,
     fir.element = element,
     fir.boxFrame = boxFrame;
-    fir.isFrameHighlighter = isFrameHighlighter;
 }
 
 // ************************************************************************************************
