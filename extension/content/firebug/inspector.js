@@ -249,7 +249,7 @@ Firebug.Inspector = extend(Firebug.Module,
             boxFrame = rp.boxFrame,
             isFrameHighlighter = rp.isFrameHighlighter;
 
-        if((this.inspecting && isFrameHighlighter) || !isFrameHighlighter)
+        if(highlighter && ((this.inspecting && isFrameHighlighter) || !isFrameHighlighter))
             highlighter.highlight(context, element, boxFrame);
     },
 
