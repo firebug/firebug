@@ -170,7 +170,7 @@
 
                             <toolbarbutton id="fbCommandPopupButton"
                                 tooltiptext="panel.tooltip.Show Command Line"
-                                command="cmd_toggleCommandPopup">
+                                command="cmd_toggleCommandPopup" class="fbInternational">
                             </toolbarbutton>
                         </hbox>
 
@@ -292,16 +292,16 @@
 
                                     <hbox id="fbNetButtons" collapsed="true" class="noTabStop">
                                         <toolbarseparator class="fbPanelSpecificButtonsSeparator"/>
-                                        <toolbarbutton id="fbNetClear" label="firebug.Clear" class="toolbar-text-button"
+                                        <toolbarbutton id="fbNetClear" label="firebug.Clear" class="toolbar-text-button fbInternational"
                                             tooltiptext="firebug.ClearTooltip" command="cmd_clearNet"/>
                                         <toolbarbutton id="fbNetPersist" label="firebug.console.Persist"
-                                            class="toolbar-text-button"
+                                            class="toolbar-text-button fbInternational"
                                             tooltiptext="firebug.console.Do Not Clear On Reload"
                                             command="cmd_togglePersistNet"/>
                                         <hbox id="fbNetButtonsFilter" class="noTabStop">
                                             <toolbarseparator/>
                                             <toolbarbutton id="fbNetFilter-all" label="firebug.All" type="radio"
-                                                class="toolbar-text-button"
+                                                class="toolbar-text-button fbInternational"
                                                 group="firebugNetFilter" checked="true"
                                                 oncommand="Firebug.NetMonitor.onToggleFilter(Firebug.currentContext, 'all')"/>
                                             <toolbarbutton id="fbNetFilter-html" label="HTML" type="radio"
@@ -321,14 +321,14 @@
                                                 class="toolbar-text-button" group="firebugNetFilter"
                                                 oncommand="Firebug.NetMonitor.onToggleFilter(Firebug.currentContext, 'xhr')"/>
                                             <toolbarbutton id="fbNetFilter-image" label="firebug.Images" type="radio"
-                                                class="toolbar-text-button"
+                                                class="toolbar-text-button fbInternational"
                                                 group="firebugNetFilter"
                                                 oncommand="Firebug.NetMonitor.onToggleFilter(Firebug.currentContext, 'image')"/>
                                             <toolbarbutton id="fbNetFilter-flash" label="firebug.Flash" type="radio"
-                                                class="toolbar-text-button" group="firebugNetFilter"
+                                                class="toolbar-text-button fbInternational" group="firebugNetFilter"
                                                 oncommand="Firebug.NetMonitor.onToggleFilter(Firebug.currentContext, 'flash')"/>
                                             <toolbarbutton id="fbNetFilter-media" label="net.filter.Media" type="radio"
-                                                class="toolbar-text-button" group="firebugNetFilter"
+                                                class="toolbar-text-button fbInternational" group="firebugNetFilter"
                                                 oncommand="Firebug.NetMonitor.onToggleFilter(Firebug.currentContext, 'media')"/>
                                         </hbox>
                                     </hbox>

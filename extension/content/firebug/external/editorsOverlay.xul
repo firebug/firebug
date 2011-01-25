@@ -11,7 +11,7 @@
             insertbefore="context-viewsource" class="fbInternational">
             <menupopup id="menu_firebugOpenWith"
                 onpopupshowing="return Firebug.ExternalEditors.onEditorsShowing(this);">
-                <menuitem id="menu_openFirebugEditors" label="firebug.ConfigureEditors"
+                <menuitem id="menu_openFirebugEditors" label="firebug.Configure_Editors"
                     command="cmd_openFirebugEditors" class="fbInternational"/>
             </menupopup>
         </menu>
@@ -28,7 +28,7 @@
         <menu id="FirebugMenu_OpenWith" label="firebug.OpenWith" insertbefore="menu_openActionsSeparator" class="fbInternational">
             <menupopup id="fbFirebugMenu_OpenWith"
                 onpopupshowing="return Firebug.ExternalEditors.onEditorsShowing(this);">
-                    <menuitem id="menu_configureEditors" label="firebug.ConfigureEditors"
+                    <menuitem id="menu_configureEditors" label="firebug.Configure_Editors"
                         command="cmd_openFirebugEditors" class="fbInternational"/>
             </menupopup>
         </menu>

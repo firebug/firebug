@@ -2135,22 +2135,6 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
         Firebug.ActivableModule.initialize.apply(this, arguments);
     },
 
-    internationalizeUI: function(doc)
-    {
-        var elements = ["fbRerunButton", "fbContinueButton", "fbStepIntoButton", "fbStepOverButton",
-            "fbStepOutButton"];
-
-        for (var i=0; i<elements.length; i++)
-        {
-            var element = doc.getElementById(elements[i]);
-            if (element.hasAttribute("label"))
-                FBL.internationalize(element, "label");
-
-            if (element.hasAttribute("tooltiptext"))
-                FBL.internationalize(element, "tooltiptext");
-        }
-    },
-
     /*
      * per-XUL window registration; this method just allows us to keep fbs in this file.
      * @param clientAPI an object that implements functions called by fbs for clients.

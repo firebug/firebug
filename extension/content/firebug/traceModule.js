@@ -186,17 +186,6 @@ Firebug.TraceModule = extend(Firebug.Module,
                 Firebug.getPref(this.prefDomain, "alwaysOpenTraceConsole"));
     },
 
-    internationalizeUI: function(doc)
-    {
-        var elements = ["FirebugMenu_Options_alwaysOpenTraceConsole", "menu_openTraceConsole"];
-        for (var i=0; i<elements.length; i++)
-        {
-            var element = doc.getElementById(elements[i]);
-            if (element)
-                FBL.internationalize(element, "label");
-        }
-    },
-
     shutdown: function()
     {
     },

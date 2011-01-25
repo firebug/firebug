@@ -70,7 +70,7 @@ var TraceConsole =
         Firebug.TraceModule.onLoadConsole(window, logNode);
 
         // Make sure the UI is localized.
-        this.internationalizeUI();
+        Firebug.internationalizeUI(window.document);
         this.updateTimeInfo();
 
         // If the opener is closed the console must be also closed.
@@ -81,20 +81,6 @@ var TraceConsole =
         // Fetch all cached messages.
         for (var i=0; i<queue.length; i++)
             this.dump(queue[i]);
-    },
-
-    internationalizeUI: function()
-    {
-        var buttons = ["clearConsole", "findConsole", "separateConsole",
-            "restartFirefox", "closeFirefox", "saveToFile", "loadFromFile",
-            "traceToolsMenu", "clearCache", "forceGC", "openProfileDir"];
-
-        for (var i=0; i<buttons.length; i++)
-        {
-            var element = document.getElementById(buttons[i]);
-            FBL.internationalize(element, "label");
-            FBL.internationalize(element, "tooltiptext");
-        }
     },
 
     updateTimeInfo: function()

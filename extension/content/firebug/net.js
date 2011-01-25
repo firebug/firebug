@@ -219,15 +219,6 @@ Firebug.NetMonitor = extend(Firebug.ActivableModule,
         Firebug.Debugger.addListener(this.DebuggerListener);
     },
 
-    internationalizeUI: function(doc)
-    {
-        var elements = ["fbNetPersist", "fbNetFilter-media", "fbNetClear", "fbNetFilter-all",
-            "fbNetFilter-image", "fbNetFilter-flash"];
-        var attributes = ["label", "tooltiptext"];
-
-        FBL.internationalizeElements(doc, elements, attributes);
-    },
-
     shutdown: function()
     {
         prefs.removeObserver(Firebug.prefDomain, this, false);

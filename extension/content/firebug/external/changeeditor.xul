@@ -7,44 +7,52 @@
 <dialog xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul"
         buttons="accept,cancel"
         id="firebug-external-editors-change"
-        title="editors.Editor_Configuration"
+        title="changeEditor.Editor_Configuration"
         onload="onLoad();"
         ondialogaccept="return onAccept();"
-        persist="screenX screenY">
+        persist="screenX screenY"
+        class="fbInternational">
 
     <script type="application/x-javascript" src="chrome://firebug/content/xpcom.js"/>
     <script type="application/x-javascript" src="chrome://firebug/content/external/changeeditor.js"/>
 
     <vbox flex="1">
         <hbox align="center">
-            <label id="fbNameLabel" control="name" value="changeEditor.Name"/>
+            <label id="fbNameLabel" control="name"
+                value="changeEditor.Name" class="fbInternational"/>
             <textbox id="name" flex="1" oninput="onChange()"/>
         </hbox>
         <separator class="groove"/>
         <hbox align="center">
             <label id="fbExecutableLabel" control="executable" align="baseline"
-                value="changeEditor.Executable"/>
+                value="changeEditor.Executable" class="fbInternational"/>
             <filefield id="executable" flex="1"/>
-            <button id="browse-button" oncommand="onBrowse();" label="browse.label"/>
+            <button id="browse-button" oncommand="onBrowse();"
+                label="editors.Browse" class="fbInternational"/>
         </hbox>
         <separator class="thin"/>
         <hbox align="center">
-            <label id="fbCmdLineLabel" control="cmdline" value="changeEditor.CmdLine"/>
+            <label id="fbCmdLineLabel" control="cmdline"
+                value="changeEditor.CmdLine" class="fbInternational"/>
             <textbox id="cmdline" flex="1" oninput="onChange()"/>
-            <toolbarbutton type='menu' label=''>
-                <panel onpopupshowing='suggestionPopupShowing(this)'
-                    onclick='if(event.target.className=="text-link")insertText(event.target.value,true)'
+            <toolbarbutton type="menu" label="">
+                <panel onpopupshowing="suggestionPopupShowing(this)"
+                    onclick="if(event.target.className=='text-link') insertText(event.target.value,true);"
                     position="after_end"/>
             </toolbarbutton>
         </hbox>
-        <vbox align="left" onclick='if(event.target.className=="text-link")insertText(event.target.textContent)'>
-            <!-- ToDo: Internationalize argument descriptions -->
-            <description>Arguments supplied by Firebug:</description>
+        <vbox align="left" onclick="if(event.target.className=='text-link') insertText(event.target.textContent);">
+            <description><label class='text-link'>%url </label> URL of the file (if %url is not present, %file will be added by default)</description>
+            <description class="fbInternational">changeEditor.Supplied_arguments</description>
+            <description class="fbInternational">changeEditor.URL_of_file</description>
+            <description class="fbInternational">changeEditor.Path_to_local_file</description>
+            <description class="fbInternational">changeEditor.Line_number</description>
+<!--
             <description><label class='text-link'>%url </label> URL of the file (if %url is not present, %file will be added by default)</description>
             <description><label class='text-link'>%file </label>path to the local file (or to the temporary copy)</description>
             <description><label class='text-link'>%line </label>line number (if available)</description>
+-->
         </vbox>
         <separator class="groove"/>
     </vbox>
-
 </dialog>

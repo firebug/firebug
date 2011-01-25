@@ -59,23 +59,37 @@ function onLoad()
 
 function internationalizeUI(doc)
 {
-    var elements = ["firebug-external-editors-change", "fbNameLabel", "fbExecutableLabel",
-        "browse-button", "fbCmdLineLabel"];
-
+    var elements = doc.getElementsByClassName("fbInternational");
+    var attributes = ["title", "label", "value"];
     for (var i=0; i<elements.length; i++)
     {
-        var element = doc.getElementById(elements[i]);
-        if (!element)
-            continue;
+        if (elements[i].nodeName == "description")
+        {
+            var localized = FBL.$STR(elements[i].textContent);
+            var parser = fbXPCOMUtils.CCIN("@mozilla.org/xmlextras/domparser;1", "nsIDOMParser");
+            var doc = parser.parseFromString("<vbox>" + localized + "</vbox>", "text/xml");
+            var root = doc.documentElement;
 
-        if (element.hasAttribute("title"))
-            FBL.internationalize(element, "title");
+            while(elements[i].firstChild)
+                elements[i].removeChild(elements[i].firstChild);
 
-        if (element.hasAttribute("label"))
-            FBL.internationalize(element, "label");
-
-        if (element.hasAttribute("value"))
-            FBL.internationalize(element, "value");
+            for(var j=0; j<root.childNodes.length; j++)
+            {
+                // ToDo: Show labels correctly
+                // Namespaces are not inherited from doc, so labels 
+                // are not shown as links
+                node = doc.importNode(root.childNodes[j], true);
+                elements[i].appendChild(node);
+            }
+        }
+        else
+        {
+            for(var j=0; j<attributes.length; j++)
+            {
+                if (elements[i].hasAttribute(attributes[j]))
+                    FBL.internationalize(elements[i], attributes[j]);
+            }
+        }
     }
 }
 

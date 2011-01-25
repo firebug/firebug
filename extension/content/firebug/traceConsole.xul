@@ -61,53 +61,53 @@
   <toolbox id="consoleToolbox">
     <toolbar id="consoleToolbar" align="center">
       <toolbarbutton id="clearConsole"
-        label="tracing.cmd.Clear" class="toolbar-image-button"
+        label="tracing.cmd.Clear" class="toolbar-image-button fbInternational"
         tooltiptext="tracing.cmd.tip.Clear"
         command="cmd_clearConsole"/>
       <toolbarbutton id="findConsole"
-        label="tracing.cmd.Find" class="toolbar-image-button"
+        label="tracing.cmd.Find" class="toolbar-image-button fbInternational"
         tooltiptext="tracing.cmd.tip.Find"
         command="cmd_find"/>
       <toolbarbutton id="separateConsole"
-        label="tracing.cmd.Bookmark" class="toolbar-image-button"
+        label="tracing.cmd.Bookmark" class="toolbar-image-button fbInternational"
         tooltiptext="tracing.cmd.tip.Bookmark"
         command="cmd_separateConsole"/>
       <toolbarbutton id="traceToolsMenu"
-        class="toolbar-text-button fbmenubutton"
+        class="toolbar-text-button fbmenubutton fbInternational"
         label="tracing.cmd.Tools"
         tooltiptext="tracing.cmd.tip.Tools"
         type="menu">
             <menupopup>
                 <menuitem id="saveToFile"
-                    label="tracing.cmd.Save" class="toolbar-image-button"
+                    label="tracing.cmd.Save" class="toolbar-image-button fbInternational"
                     tooltiptext="tracing.cmd.tip.Save"
                     command="cmd_saveToFile"/>
                 <menuitem id="loadFromFile"
-                    label="tracing.cmd.Load" class="toolbar-image-button"
+                    label="tracing.cmd.Load" class="toolbar-image-button fbInternational"
                     tooltiptext="tracing.cmd.tip.Load"
                     command="cmd_loadFromFile"/>
                 <menuseparator />
                 <menuitem id="clearCache"
-                    label="tracing.cmd.Clear Browser Cache" class="toolbar-image-button"
+                    label="tracing.cmd.Clear Browser Cache" class="toolbar-image-button fbInternational"
                     tooltiptext="tracing.cmd.tip.Clear Browser Cache"
                     command="cmd_clearCache"/>
                 <menuitem id="forceGC"
-                    label="tracing.cmd.Force Garbage Collector" class="toolbar-image-button"
+                    label="tracing.cmd.Force Garbage Collector" class="toolbar-image-button fbInternational"
                     tooltiptext="tracing.cmd.tip.Force Garbage Collector"
                     command="cmd_forceGC"/>
                 <menuitem id="openProfileDir"
-                    label="tracing.cmd.Open Profile Directory" class="toolbar-image-button"
+                    label="tracing.cmd.Open Profile Directory" class="toolbar-image-button fbInternational"
                     tooltiptext="tracing.cmd.tip.Open Profile Directory"
                     command="cmd_openProfileDir"/>
             </menupopup>
       </toolbarbutton>
       <toolbarseparator flex="1"/>
       <toolbarbutton id="restartFirefox"
-        label="tracing.cmd.Restart" class="toolbar-image-button"
+        label="tracing.cmd.Restart" class="toolbar-image-button fbInternational"
         tooltiptext="tracing.cmd.tip.Restart"
         command="cmd_restartFirefox"/>
       <toolbarbutton id="closeFirefox"
-        label="tracing.cmd.Exit" class="toolbar-image-button"
+        label="tracing.cmd.Exit" class="toolbar-image-button fbInternational"
         tooltiptext="tracing.cmd.tip.Exit"
         command="cmd_exitFirefox"/>
     </toolbar>
