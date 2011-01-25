@@ -1298,7 +1298,6 @@ Firebug.CommandLine.CommandHistory = function() {
             $("fbCommandLineHistoryButton").removeAttribute("disabled");
             $("fbCommandEditorHistoryButton").removeAttribute("disabled");
             commandsPopup.addEventListener("mouseover", this.onMouseOver, true);
-            commandsPopup.addEventListener("mouseout", this.onMouseOut, true);
             commandsPopup.addEventListener("mouseup", this.onMouseUp, true);
         }
     };
