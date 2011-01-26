@@ -93,13 +93,16 @@
 }
 
 .netRowHeader {
-    cursor: pointer;
     display: none;
     height: 15px;
     margin-right: 0 !important;
 }
 
-/* Display brekpoint disc */
+.category-xhr .netRowHeader {
+    cursor: pointer;
+}
+
+/* Display breakpoint disc */
 .netRow .netRowHeader {
     background-position: 5px 1px;
 }
