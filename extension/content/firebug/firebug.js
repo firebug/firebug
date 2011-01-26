@@ -1183,34 +1183,6 @@ top.Firebug =
         this.showBar(browser && browser.showFirebug);  // implicitly this is operating in the chrome of browser.xul
     },
 
-    onClickStatusIcon: function(context, event)
-    {
-        if (event.button != 0)
-            return;
-        else if (isControl(event))
-            this.toggleDetachBar(true);
-        else if (context && context.errorCount)
-            Firebug.toggleBar(undefined, 'console');
-        else
-            this.toggleBar();
-    },
-
-    onClickStatusText: function(context, event)
-    {
-        if (event.button != 0)
-            return;
-
-        if (!context || !context.errorCount)
-            return;
-
-        var panel = Firebug.chrome.getSelectedPanel();
-        if (panel && panel.name != "console")
-        {
-            Firebug.chrome.selectPanel("console");
-            cancelEvent(event);
-        }
-    },
-
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
     // TODO to options.js
 

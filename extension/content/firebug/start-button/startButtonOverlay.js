@@ -5,7 +5,16 @@ FBL.ns(function() { with (FBL) {
 // ********************************************************************************************* //
 // Constants
 
+const Cc = Components.classes;
+const Ci = Components.interfaces;
+
+var appInfo = Cc["@mozilla.org/xre/app-info;1"].getService(Ci.nsIXULAppInfo);
+var versionChecker = Cc["@mozilla.org/xpcom/version-comparator;1"].getService(Ci.nsIVersionComparator);
+
 var popup = $("fbStatusContextMenu");
+var statusBar = $("fbStatusBar");
+var statusText = $("fbStatusText");
+var firebugButton = $("firebug-button");
 
 // ********************************************************************************************* //
 // Module Implementation
@@ -33,6 +42,10 @@ Firebug.StartButton = extend(Firebug.Module,
 
         // Append the button into Firefox toolbar automatically.
         this.appendToToolbar();
+
+        // If Firefox version is 4+, let's 
+        if (versionChecker.compare(appInfo.version, "4.0*") >= 0)
+            startButton.setAttribute("firefox", "4");
     },
 
     shutdown: function()
@@ -77,6 +90,75 @@ Firebug.StartButton = extend(Firebug.Module,
                 if (FBTrace.DBG_ERRORS)
                     FBTrace.sysout("startButton; appendToToolbar EXCEPTION " + e, e);
             }
+        }
+    },
+
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+    // Support for the status bar (OBSOLETE in Fx4)
+
+    onClickStatusText: function(context, event)
+    {
+        if (event.button != 0)
+            return;
+
+        if (!context || !context.errorCount)
+            return;
+
+        var panel = Firebug.chrome.getSelectedPanel();
+        if (panel && panel.name != "console")
+        {
+            Firebug.chrome.selectPanel("console");
+            cancelEvent(event);
+        }
+    },
+
+    onClickStatusIcon: function(context, event)
+    {
+        if (event.button != 0)
+            return;
+        else if (isControl(event))
+            Firebug.toggleDetachBar(true);
+        else if (context && context.errorCount)
+            Firebug.toggleBar(undefined, "console");
+        else
+            Firebug.toggleBar();
+    },
+
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+    // Error count
+
+    showCount: function(errorCount)
+    {
+        FBTrace.sysout("startButton.showCount; " + errorCount);
+
+        if (!statusBar)
+            return;
+
+        if (errorCount)
+        {
+            if (Firebug.showErrorCount)
+            {
+                statusText.setAttribute("shown", "true")
+                statusText.setAttribute("value", $STRP("plural.Error_Count2", [errorCount]));
+
+                firebugButton.setAttribute("showErrors", "true");
+                firebugButton.setAttribute("errorCount", errorCount);
+            }
+            else
+            {
+                statusText.removeAttribute("shown");
+                firebugButton.removeAtribute("showErrors");
+            }
+
+            statusBar.setAttribute("errors", "true");
+        }
+        else
+        {
+            statusText.setAttribute("value", "");
+            statusBar.removeAttribute("errors");
+
+            firebugButton.removeAttribute("showErrors");
+            firebugButton.removeAttribute("errorCount");
         }
     },
 });
