@@ -351,15 +351,12 @@ Firebug.Inspector = extend(Firebug.Module,
            FBTrace.sysout("onInspectingMouseOver event", event);
 
         this.inspectNode(event.target);
-        cancelEvent(event);
     },
 
     onInspectingMouseOut: function(event)
     {
         if (FBTrace.DBG_INSPECT)
            FBTrace.sysout("onInspectingMouseOut event", event);
-
-        cancelEvent(event);
     },
 
     onInspectingMouseDown: function(event)
