@@ -399,7 +399,7 @@ Firebug.ScriptPanel.prototype = extend(Firebug.SourceBoxPanel,
 
             this.hoveredLine = sourceLine;
 
-            if (sourceLine)
+            if (getAncestorByClass(sourceLine, "sourceViewport"))
                 setClass(sourceLine.parentNode, "hovered");
         }
     },
