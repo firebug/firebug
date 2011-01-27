@@ -129,8 +129,6 @@ Firebug.StartButton = extend(Firebug.Module,
 
     showCount: function(errorCount)
     {
-        FBTrace.sysout("startButton.showCount; " + errorCount);
-
         if (!statusBar)
             return;
 
