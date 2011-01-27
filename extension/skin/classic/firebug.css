@@ -95,27 +95,26 @@ toolbar[iconsize="small"] #firebug-button > .toolbarbutton-icon {
 }
 
 #firebug-button .badge {
-    width: 14px;
-    height: 14px;
-    padding-top: 9px;
-    margin: 0;
-    margin-right: -10px;
-    visibility: hidden;
-}
-
-#firebug-button[showErrors="true"] .badge {
-    visibility: visible; 
-}
-
-#firebug-button .badge > .icon {
-    list-style-image: url(chrome://firebug/skin/errorCounter.png);
+   -moz-box-sizing: border-box;
+    margin: 4px -10px 2px -8px;
 }
 
 #firebug-button .badge > .label {
+    -moz-box-sizing: border-box;
     color: white;
     text-align: center;
     font-size: 9px;
-    padding-right: 1px;
+    padding: 0 3px;
+    border-radius: 3.5px;
+    border-style: solid;
+    border-width: 1px;
+    border-color: rgba(0, 0, 0, 0.22);
+    background-color: rgb(252, 101, 101);
+    visibility: hidden;
+}
+
+#firebug-button[showErrors="true"] .badge .label {
+    visibility: visible;
 }
 
 #firebug-button .fb-toolbarbutton {

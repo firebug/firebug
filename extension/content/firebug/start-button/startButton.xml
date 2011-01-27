@@ -12,8 +12,7 @@
     <content>
         <children includes="observes|template|menupopup|panel|tooltip"/>
         <xul:stack class="badge">
-            <xul:image class="icon"/>
-            <xul:label class="label" xbl:inherits="value=errorCount"/>
+            <xul:label class="label" value="0" xbl:inherits="value=errorCount"/>
         </xul:stack>
         <xul:toolbarbutton class="fb-toolbarbutton box-inherit toolbarbutton-menubutton-button"
             anonid="button" flex="1" allowevents="true"
