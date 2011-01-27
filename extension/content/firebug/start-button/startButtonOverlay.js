@@ -91,6 +91,10 @@ Firebug.StartButton = extend(Firebug.Module,
                     FBTrace.sysout("startButton; appendToToolbar EXCEPTION " + e, e);
             }
         }
+
+        // Don't forget to show the navigation bar - just in case it's hidden.
+        // setToolbarVisibility() comes from browser.js
+        setToolbarVisibility(navBar, true)
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
