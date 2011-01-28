@@ -102,7 +102,6 @@ toolbar[iconsize="small"] #firebug-button > .toolbarbutton-icon {
 #firebug-button .badge > .label {
     -moz-box-sizing: border-box;
     visibility: hidden;
-
     font-size: 10px;
     padding: 0 3px;
     line-height: 13px;
@@ -123,7 +122,7 @@ toolbar[iconsize="small"] #firebug-button > .toolbarbutton-icon {
     box-shadow: 0 1px 0 rgba(180,189,202, 0.7);
 }
 
-#firebug-button[showErrors="true"] .badge .label {
+#firebug-button[showErrors="true"]:not([errorCount="0"]) .badge .label {
     visibility: visible;
 }
 

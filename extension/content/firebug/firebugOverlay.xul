@@ -69,6 +69,7 @@
 
         <command id="cmd_togglePersistNet" oncommand="Firebug.NetMonitor.togglePersist(Firebug.currentContext)"/>
         <command id="cmd_toggleOrient" oncommand="FirebugChrome.toggleOrient()" />
+        <command id="cmd_toggleShowErrorCount" oncommand="FirebugChrome.toggleShowErrorCount();" />
         <command id="cmd_navBack" oncommand="Firebug.NavigationHistory.goBack(Firebug.currentContext)" />
         <command id="cmd_navForward" oncommand="Firebug.NavigationHistory.goForward(Firebug.currentContext)" />
         <command id="cmd_toggleFreezeWindow" oncommand="Firebug.Debugger.toggleFreezeWindow(Firebug.currentContext)" />
@@ -530,6 +531,11 @@
                               type="checkbox" label="firebug.AlwaysOpenInWindow"
                               oncommand="FirebugChrome.onToggleOption(this)"
                               option="openInWindow" class="fbInternational"/>
+                    <menuitem id="menu_toggleShowErrorCount"
+                              type="checkbox" label="firebug.Show_Error_Count"
+                              oncommand="FirebugChrome.onToggleOption(this)"
+                              option="showErrorCount"
+                              class="fbInternational"/>
                     <menuitem id="menu_showTooltips"
                               type="checkbox" label="firebug.ShowTooltips"
                               oncommand="FirebugChrome.onToggleOption(this)"

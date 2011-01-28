@@ -23,6 +23,13 @@
                 command="cmd_clearConsole"
                 key="key_clearConsole"
                 class="fbInternational"/>
+            <menuitem
+                id="menu_showErrorCount"
+                type="checkbox"
+                label="firebug.Show Error Count"
+                oncommand="FirebugChrome.onToggleOption(this)"
+                option="showErrorCount"
+                class="fbInternational"/>
             <menuseparator/>
             <menuitem
                 id="menu_enablePanels"

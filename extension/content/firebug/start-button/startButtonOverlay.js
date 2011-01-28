@@ -149,7 +149,11 @@ Firebug.StartButton = extend(Firebug.Module,
             else
             {
                 statusText.removeAttribute("shown");
-                firebugButton.removeAtribute("showErrors");
+                firebugButton.removeAttribute("showErrors");
+
+                // Use '0' so, the horizontal space for the number is still allocated.
+                // The button will cause re-layout if there is more than 9 errors.
+                firebugButton.setAttribute("errorCount", "0");
             }
 
             statusBar.setAttribute("errors", "true");
@@ -159,10 +163,8 @@ Firebug.StartButton = extend(Firebug.Module,
             statusText.setAttribute("value", "");
             statusBar.removeAttribute("errors");
 
-            firebugButton.removeAttribute("showErrors");
-
             // Use '0' so, the horizontal space for the number is still allocated.
-            // The button will cause relayout if there is more than 9 errors.
+            // The button will cause re-layout if there is more than 9 errors.
             firebugButton.setAttribute("errorCount", "0");
         }
     },

@@ -283,6 +283,8 @@ top.FirebugChrome =
             this.applyTextSize(value);
         if (name =="omitObjectPathStack")
             this.obeyOmitObjectPathStack(value);
+        if (name == "showErrorCount")
+            this.toggleShowErrorCount();
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
@@ -1053,6 +1055,11 @@ top.FirebugChrome =
     obeyOmitObjectPathStack: function(value)
     {
         FBL.hide(panelStatus, (value?true:false));
+    },
+
+    toggleShowErrorCount: function()
+    {
+        Firebug.Errors.showContext(null, Firebug.currentContext);
     },
 
     getPanelStatusElements: function()
