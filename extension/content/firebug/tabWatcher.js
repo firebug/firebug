@@ -343,7 +343,7 @@ Firebug.TabWatcher = extend(new Firebug.Listener(),
 
         // For every window we watch, prepare for unwatch. It's OK if this is called
         // more times (see 2695).
-        if (context && location != aboutBlank)
+        if (context)
             TabWatcherUnloader.registerWindow(win);
 
         // Unfortunately, dummy requests that trigger the call to watchWindow
@@ -599,12 +599,12 @@ var TabWatcherUnloader =
     registerWindow: function(win)
     {
         var root = (win.parent == win);
-        var eventName = root ? "pagehide" : "unload";
+        var eventName = (root && (win.location.href !== "about:blank")) ? "pagehide" : "unload";
         var listener = bind(root ? this.onPageHide : this.onUnload, this);
         win.addEventListener(eventName, listener, false);
 
         if (FBTrace.DBG_WINDOWS)
-            FBTrace.sysout("-> tabWatcher.watchWindow addEventListener for " + eventName);
+            FBTrace.sysout("-> tabWatcher.watchWindow addEventListener for " + eventName+" on "+safeGetWindowLocation(win));
 
         this.listeners.push({
             window: win,
@@ -663,10 +663,10 @@ var TabProgressListener = extend(BaseProgressListener,
         {
             var srcWindow = getWindowForRequest(request);
             var browser = srcWindow ? Firebug.TabWatcher.getBrowserByWindow(srcWindow) : null;
-            var requestFromFirebuggedWindow = browser && browser.showFirebug;
 
             if (FBTrace.DBG_WINDOWS || FBTrace.DBG_ACTIVATION)
             {
+                var requestFromFirebuggedWindow = browser && browser.showFirebug;
                 FBTrace.sysout("-> TabProgressListener.onLocationChange "+
                     progress.DOMWindow.location+" to: "+
                     (uri?uri.spec:"null location")+
@@ -888,7 +888,7 @@ function onPageHideTopWindow(event)
         FBTrace.sysout("-> tabWatcher pagehide event.currentTarget "+safeGetWindowLocation(win), event);
 
     // http://developer.mozilla.org/en/docs/Using_Firefox_1.5_caching#pagehide_event
-    if (event.persisted) // then the page is cached and there cannot be an unload handler
+    if (event.persisted || safeGetWindowLocation(win) === aboutBlank) // then the page is cached and there cannot be an unload handler
     {
         //  see Bug 484710 -  add pageIgnore event for pages that are ejected from the bfcache
 
