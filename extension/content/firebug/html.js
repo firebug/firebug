@@ -866,6 +866,9 @@ Firebug.HTMLPanel.prototype = extend(WalkingPanel,
         if (!node)
             return;
 
+        if (!noKeyModifiers(event))
+          return;
+
         // * expands the node with all its children
         // + expands the node
         // - collapses the node
@@ -876,9 +879,6 @@ Firebug.HTMLPanel.prototype = extend(WalkingPanel,
             this.ioBox.expandObject(node);
         else if (ch == "-")
             this.ioBox.contractObject(node);
-
-        if (isControl(event) || isShift(event))
-            return;
 
         if (event.keyCode == KeyEvent.DOM_VK_UP)
             this.selectNodeBy("up");
