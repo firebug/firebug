@@ -1,0 +1,26 @@
+/* See license.txt for terms of usage */
+
+/************************************************************************************************/
+/* Breakpoint notifications */
+
+.notationCaption {
+    padding-top: 5px;
+}
+
+.notationTitle {
+    font-weight: bold;
+}
+
+.notationTitle.diff {
+    font-weight: normal;
+}
+
+.notationButton {
+    float: right;
+}
+
+.breakNotification .doNotShowBreakNotification {
+    vertical-align: middle;
+}
+
+/************************************************************************************************/

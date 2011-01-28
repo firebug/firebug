@@ -189,7 +189,7 @@ Firebug.ScriptPanel.prototype = extend(Firebug.SourceBoxPanel,
             {
                 this.context.breakingCause.shown = true;
                 var cause = this.context.breakingCause;
-                if (cause)
+                if (cause && Firebug.showBreakNotification)
                 {
                     var sourceLine = getChildByClass(lineNode, "sourceLine");
                     sourceBox.breakCauseBox = new Firebug.Breakpoint.BreakNotification(this.document, cause);
@@ -1007,6 +1007,7 @@ Firebug.ScriptPanel.prototype = extend(Firebug.SourceBoxPanel,
             serviceOptionMenu("TrackThrowCatch", "trackThrowCatch"),
             //"-",
             //1.2 option on toolbar this.optionMenu("DebuggerEnableAlways", enableAlwaysPref)
+            optionMenu("Show Break Notifications", "showBreakNotification")
         ];
     },
 

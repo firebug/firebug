@@ -18,6 +18,7 @@ pref("extensions.firebug.useDefaultLocale", false);         // Set to true if Fi
 pref("extensions.firebug.activateSameOrigin", true);
 pref("extensions.firebug.toolbarCustomizationDone", false);  // Set to true if the start-button has been initially appended into Firefox toolbar.
 pref("extensions.firebug.addonBarOpened", false);            // Set to true if Firefox addon-bar has been initially opened for the user (to see the status bar icon at least the first time).
+pref("extensions.firebug.showBreakNotification", true);      // If true, Firebug shows a notification message when break in debugger happens (break on debugger; keyword, break on an error, etc.)
 
 // Command line
 pref("extensions.firebug.largeCommandLine", false);

@@ -58,6 +58,7 @@ const prefNames =  // XXXjjb TODO distribute to modules
     "activateSameOrigin", "allPagesActivation", "hiddenPanels",
     "panelTabMinWidth", "sourceLinkLabelWidth", "currentVersion",
     "useDefaultLocale", "toolbarCustomizationDone", "addonBarOpened",
+    "showBreakNotification",
 
     // Search
     "searchCaseSensitive", "searchGlobal", "searchUseRegularExpression",
