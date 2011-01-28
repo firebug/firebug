@@ -2015,7 +2015,7 @@ this.getElementHTML = function(element)
         {
             if (unwrapObject(elt).firebugIgnore)
                 return;
-            
+
             var nodeName = getNodeName(elt);
             html.push('<', nodeName);
 
@@ -4277,30 +4277,51 @@ this.getLocalPath = function(url)
     }
 };
 
+/*
+ * Mozilla URI from non-web URL
+ * @param URL
+ * @returns undefined or nsIURI
+ */
 
-this.getLocalOrSystemPath = function(url)
+this.getLocalSystemURI = function(url)
 {
     if (!this.isLocalURL(url) && !this.isSystemURL(url))
         return;
 
-    var uri = ioService.newURI(url, null, null), file;
-    if (uri.schemeIs("resource"))
+    try
     {
-        var ph = ioService.getProtocolHandler("resource").QueryInterface(Ci.nsIResProtocolHandler);
-        var abspath = ph.getSubstitution(uri.host);
-        uri = ioService.newURI(uri.path.substr(1), null, abspath);
+        var uri = ioService.newURI(url, null, null);
+        if (uri.schemeIs("resource"))
+        {
+            var ph = ioService.getProtocolHandler("resource").QueryInterface(Ci.nsIResProtocolHandler);
+            var abspath = ph.getSubstitution(uri.host);
+            uri = ioService.newURI(uri.path.substr(1), null, abspath);
+        }
+        while (uri.schemeIs("chrome"))
+        {
+            var chromeRegistry = Cc["@mozilla.org/chrome/chrome-registry;1"].getService(Ci.nsIChromeRegistry);
+            uri = chromeRegistry.convertChromeURL(uri);
+        }
+        return uri;
     }
-    while (uri.schemeIs("chrome"))
+    catch(exc)
     {
-        var chromeRegistry = Cc["@mozilla.org/chrome/chrome-registry;1"].getService(Ci.nsIChromeRegistry);
-        uri = chromeRegistry.convertChromeURL(uri);
+        if (FBTrace.DBG_ERRORS)
+            FBTrace.sysout("getLocalSystemURI failed for "+url);
     }
-    if (uri.schemeIs("file"))
-    {
-        file = uri.QueryInterface(Ci.nsIFileURL).file;
-    }
+}
 
-    return file && !file.isDirectory() && file.path;
+/*
+ * Mozilla native path for local URL
+ */
+this.getLocalOrSystemPath = function(url)
+{
+    var uri = FBL.getLocalSystemURI(url);
+    if (uri && uri.schemeIs("file"))
+    {
+        var file = uri.QueryInterface(Ci.nsIFileURL).file;
+        return file && !file.isDirectory() && file.path;
+    }
 }
 
 this.getURLFromLocalFile = function(file)
