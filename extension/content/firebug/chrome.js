@@ -1047,7 +1047,7 @@ top.FirebugChrome =
             box.style.fontSize = (zoom * 100)+"%";
         }
 
-        $("fbLargeCommandLine").style.fontSize = (zoom * 100)+"%";
+        Firebug.CommandLine.getCommandLineLarge().style.fontSize = (zoom * 100)+"%";
 
         Firebug.dispatchToPanels("onTextSizeChange", [zoom]);
     },

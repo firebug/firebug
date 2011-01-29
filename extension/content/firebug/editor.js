@@ -1313,7 +1313,7 @@ Firebug.AutoCompleter = function(getExprOffset, getRange, evaluator, selectMode,
         }
 
         completionPopup.currentCompletionBox = completionBox;
-        var cmdLine = $("fbCommandLine");  // should use something relative to textbox
+        var cmdLine = Firebug.CommandLine.getCommandLineSmall();  // should use something relative to textbox
         var anchor = textBox;
         this.linuxFocusHack = textBox;
         completionPopup.openPopup(anchor, "before_start", 0, 0, false, false);
@@ -1466,7 +1466,7 @@ Firebug.AutoCompleter = function(getExprOffset, getRange, evaluator, selectMode,
     this.acceptCompletion = function(event)
     {
         if (completionPopup.currentCompletionBox)
-            this.acceptCompletionInTextBox(getTextBox(), getCompletionBox());
+            this.acceptCompletionInTextBox(Firebug.CommandLine.getCommandLineSmall(), Firebug.CommandLine.getCompletionBox());
     };
 
     this.acceptCompletion = bind(this.acceptCompletion, this);
@@ -1485,16 +1485,6 @@ Firebug.AutoCompleter = function(getExprOffset, getRange, evaluator, selectMode,
 
 // ************************************************************************************************
 // Local Helpers
-
-function getCompletionBox()  // FIXME XXXjjb I think this should be bound into the completer, dupes commandLine.js code
-{
-    return Firebug.chrome.$("fbCommandLineCompletion");
-}
-function getTextBox()  // FIXME XXXjjb I think this should be bound into the completer, dupes commandLine.js code
-{
-    return Firebug.chrome.$("fbCommandLine");
-}
-
 
 function getDefaultEditor(panel)
 {
