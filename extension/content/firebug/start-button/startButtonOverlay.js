@@ -94,7 +94,7 @@ Firebug.StartButton = extend(Firebug.Module,
 
         // Don't forget to show the navigation bar - just in case it's hidden.
         // setToolbarVisibility() comes from browser.js
-        setToolbarVisibility(navBar, true)
+        setToolbarVisibility(navBar, true);
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
