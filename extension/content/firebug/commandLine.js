@@ -527,6 +527,8 @@ Firebug.CommandLine = extend(Firebug.Module,
             return;
         }
 
+        Firebug.currentContext.commandLineText = Firebug.currentContext.commandLineText || "";
+
         if (multiLine)
             commandLineLarge.value = cleanIndentation(Firebug.currentContext.commandLineText);
         else
