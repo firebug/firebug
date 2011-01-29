@@ -716,8 +716,7 @@ var fbs =
         observerService.addObserver(QuitApplicationObserver, "quit-application", false);
 
         this.scriptsFilter = "all";
-        // XXXjj For some reason the command line will not function if we allow chromebug to see it.?
-        this.alwayFilterURLsStarting = ["chrome://chromebug", "x-jsd:ppbuffer", "chrome://firebug/content/commandLine.js"];  // TODO allow override
+        this.alwayFilterURLsStarting = ["chrome://chromebug", "x-jsd:ppbuffer"];  // TODO allow override
         this.onEvalScriptCreated.kind = "eval";
         this.onTopLevelScriptCreated.kind = "top-level";
         this.onEventScriptCreated.kind = "event";
