@@ -527,9 +527,9 @@ Firebug.CommandLine = extend(Firebug.Module,
         }
 
         if (multiLine)
-            commandLineLarge.value = cleanIndentation(commandLineSmall.value);
+            commandLineLarge.value = cleanIndentation(Firebug.currentContext.commandLineText);
         else
-            commandLineSmall.value = stripNewLines(commandLineLarge.value);
+            commandLineSmall.value = stripNewLines(Firebug.currentContext.commandLineText);
     },
 
     toggleMultiLine: function(forceLarge)
