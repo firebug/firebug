@@ -4312,13 +4312,16 @@ this.getLocalSystemURI = function(url)
 /*
  * Mozilla native path for local URL
  */
-this.getLocalOrSystemPath = function(url)
+this.getLocalOrSystemPath = function(url, allowDirectories)
 {
     var uri = FBL.getLocalSystemURI(url);
     if (uri instanceof Ci.nsIFileURL)
     {
         var file = uri.file;
-        return file && file.path;
+        if (allowDirectories)
+            return file && file.path;
+        else
+            return file && !file.isDirectory() && file.path;
     }
 }
 
