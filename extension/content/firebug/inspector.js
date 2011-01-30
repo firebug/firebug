@@ -11,8 +11,8 @@ const highlightCSS = "chrome://firebug/content/highlighter.css";
 // ************************************************************************************************
 // Globals
 
-var boxModelHighlighter = null,
-    frameHighlighter = null;
+var boxModelHighlighter = null;
+var frameHighlighter = null;
 
 // ************************************************************************************************
 
@@ -66,8 +66,10 @@ Firebug.Inspector = extend(Firebug.Module,
                 if (oldContext.window && oldContext.window.document)
                 {
                     highlighter.unhighlight(oldContext);
+
                     if (oldContext.inspectorMouseMove)
-                        oldContext.window.document.removeEventListener("mousemove", oldContext.inspectorMouseMove, true);
+                        oldContext.window.document.removeEventListener("mousemove",
+                            oldContext.inspectorMouseMove, true);
                 }
             }, inspectDelay);
         }
@@ -95,7 +97,6 @@ Firebug.Inspector = extend(Firebug.Module,
         var inspectingPanelName = this._resolveInspectingPanelName(context);
         this.inspectingPanel = Firebug.chrome.switchToPanel(context, inspectingPanelName);
 
-
         if (Firebug.isDetached())
             context.window.focus();
         else if (Firebug.isMinimized())
@@ -116,7 +117,7 @@ Firebug.Inspector = extend(Firebug.Module,
         if (node && node.nodeType != 1)
             node = node.parentNode;
 
-        if(node && unwrapObject(node).firebugIgnore && !node.fbProxyFor)
+        if (node && unwrapObject(node).firebugIgnore && !node.fbProxyFor)
             return;
 
         var context = this.inspectingContext;
@@ -127,7 +128,7 @@ Firebug.Inspector = extend(Firebug.Module,
             delete this.inspectTimeout;
         }
 
-        if(node && node.fbProxyFor)
+        if (node && node.fbProxyFor)
             node = node.fbProxyFor;
 
         if (node)
@@ -136,7 +137,8 @@ Firebug.Inspector = extend(Firebug.Module,
             var panel = this.inspectingPanel;
             while (node)
             {
-                if(!panel.inspectOnlySupportedObjects || (panel.inspectOnlySupportedObjects && panel.supportsObject(node, typeof node)))
+                var only = panel.inspectOnlySupportedObjects;
+                if (!only || (only && panel.supportsObject(node, typeof node)))
                 {
                     this.highlightObject(node, context, "frame");
                     this.inspectingNode = node;
@@ -145,12 +147,14 @@ Firebug.Inspector = extend(Firebug.Module,
                     {
                         Firebug.chrome.select(node);
                     }, inspectDelay);
-                    dispatch(this.fbListeners, "onInspectNode", [context, node] );
+
+                    dispatch(this.fbListeners, "onInspectNode", [context, node]);
                     return;
                 }
                 node = node.parentNode;
             }
         }
+
         // node will be undefined
         this.highlightObject(node, context, "frame");
         this.inspectingNode = node;
@@ -184,29 +188,27 @@ Firebug.Inspector = extend(Firebug.Module,
 
         panel.stopInspecting(panel.selection, cancelled);
 
-        dispatch(this.fbListeners, "onStopInspecting", [context] );
+        dispatch(this.fbListeners, "onStopInspecting", [context]);
 
         this.inspectNode(null);
     },
 
-    _resolveInspectingPanelName: function(context) {
-        var name,
-            requestingPanel = context && context.getPanel(context.panelName);
+    _resolveInspectingPanelName: function(context)
+    {
+        var name, requestingPanel = context && context.getPanel(context.panelName);
 
-        if(requestingPanel && requestingPanel.inspectable) {
+        if (requestingPanel && requestingPanel.inspectable)
             name = requestingPanel.name;
-        } else {
+        else
             name = "html";
-        }
 
         return name;
     },
 
-
     inspectFromContextMenu: function(elt)
     {
-        var panel, inspectingPanelName,
-            context = this.inspectingContext || Firebug.TabWatcher.getContextByWindow(elt.ownerDocument.defaultView);
+        var panel, inspectingPanelName;
+        var context = this.inspectingContext || Firebug.TabWatcher.getContextByWindow(elt.ownerDocument.defaultView);
 
         inspectingPanelName = this._resolveInspectingPanelName(context);
 
@@ -222,7 +224,9 @@ Firebug.Inspector = extend(Firebug.Module,
             node = this.inspectingNode;
 
         if (dir == "up")
+        {
             target = Firebug.chrome.getNextObject();
+        }
         else if (dir == "down")
         {
             target = Firebug.chrome.getNextObject(true);
@@ -241,15 +245,17 @@ Firebug.Inspector = extend(Firebug.Module,
             beep();
     },
 
-    repaint: function() {
-        var rp = this.repaint,
-            highlighter = rp.highlighter,
-            context = rp.context,
-            element = rp.element,
-            boxFrame = rp.boxFrame,
-            isBoxHighlighter = highlighter && highlighter.getNodes && highlighter.getNodes(context).offset.parentNode;
+    repaint: function()
+    {
+        var rp = this.repaint;
+        var highlighter = rp.highlighter;
+        var context = rp.context;
+        var element = rp.element;
+        var boxFrame = rp.boxFrame;
+        var isBoxHighlighter = highlighter && highlighter.getNodes &&
+                highlighter.getNodes(context).offset.parentNode;
 
-        if(highlighter && (isBoxHighlighter || (this.inspecting && !isBoxHighlighter)))
+        if (highlighter && (isBoxHighlighter || (this.inspecting && !isBoxHighlighter)))
             highlighter.highlight(context, element, boxFrame);
     },
 
@@ -277,7 +283,8 @@ Firebug.Inspector = extend(Firebug.Module,
         iterateWindows(win, bind(function(subWin)
         {
             if (FBTrace.DBG_INSPECT)
-                FBTrace.sysout("inspector.attacheInspectListeners to "+subWin.location+" subWindow of "+win.location);
+                FBTrace.sysout("inspector.attacheInspectListeners to "+subWin.location+
+                    " subWindow of "+win.location);
 
             subWin.document.addEventListener("resize", this.onInspectingResizeWindow, true);
             subWin.document.addEventListener("scroll", this.onInspectingScroll, true);
@@ -290,8 +297,8 @@ Firebug.Inspector = extend(Firebug.Module,
 
     detachInspectListeners: function(context)
     {
-        var i, keyListenersLen,
-            win = context.window;
+        var i, keyListenersLen;
+        var win = context.window;
 
         if (!win || !win.document)
             return;
@@ -325,7 +332,7 @@ Firebug.Inspector = extend(Firebug.Module,
         }, this));
     },
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
     onInspectingResizeWindow: function(event)
     {
@@ -354,9 +361,11 @@ Firebug.Inspector = extend(Firebug.Module,
     onInspectingMouseDown: function(event)
     {
         if (FBTrace.DBG_INSPECT)
-            FBTrace.sysout("onInspectingMouseDown event", {originalTarget: event.originalTarget,tmpRealOriginalTarget:event.tmpRealOriginalTarget,event:event});
+            FBTrace.sysout("onInspectingMouseDown event", {originalTarget: event.originalTarget,
+                tmpRealOriginalTarget:event.tmpRealOriginalTarget,event:event});
 
-        if (event.originalTarget && event.originalTarget.tagName === 'xul:thumb') // Allow to scroll the document while inspecting
+        // Allow to scroll the document while inspecting
+        if (event.originalTarget && event.originalTarget.tagName === "xul:thumb")
             return;
 
         cancelEvent(event);
@@ -365,9 +374,11 @@ Firebug.Inspector = extend(Firebug.Module,
     onInspectingMouseUp: function(event)
     {
         if (FBTrace.DBG_INSPECT)
-            FBTrace.sysout("onInspectingMouseUp event", {originalTarget: event.originalTarget,tmpRealOriginalTarget:event.tmpRealOriginalTarget,event:event});
+            FBTrace.sysout("onInspectingMouseUp event", {originalTarget: event.originalTarget,
+                tmpRealOriginalTarget:event.tmpRealOriginalTarget,event:event});
 
-        if (event.originalTarget && event.originalTarget.tagName === 'xul:thumb') // Allow to release scrollbar while inspecting
+        // Allow to release scrollbar while inspecting
+        if (event.originalTarget && event.originalTarget.tagName === "xul:thumb")
             return;
 
         this.stopInspecting(false, true);
@@ -379,12 +390,14 @@ Firebug.Inspector = extend(Firebug.Module,
     {
         if (FBTrace.DBG_INSPECT)
             FBTrace.sysout("onInspectingClick event", event);
+
         var win = event.currentTarget.defaultView;
         if (win)
         {
             win = getRootWindow(win);
             this.detachClickInspectListeners(win);
         }
+
         cancelEvent(event);
     },
 
@@ -567,37 +580,38 @@ function resizeImp(element, w, h) {
 
 function getImageMapHighlighter(context)
 {
-    if(!context)
+    if (!context)
         return;
 
-    var canvas, ctx, mx, my,
-        doc = context.window.document,
-        init = function(elt)
+    var canvas, ctx, mx, my;
+    var doc = context.window.document;
+
+    var init = function(elt)
+    {
+        if (elt)
+            doc = elt.ownerDocument;
+
+        canvas = doc.getElementById('firebugCanvas');
+
+        if(!canvas)
         {
-            if(elt)
-                doc = elt.ownerDocument;
+            canvas = doc.createElementNS("http://www.w3.org/1999/xhtml", "canvas");
+            hideElementFromInspection(canvas);
+            canvas.id = "firebugCanvas";
+            canvas.className = "firebugResetStyles firebugCanvas";
+            canvas.width = context.window.innerWidth;
+            canvas.height = context.window.innerHeight;
+            context.window.addEventListener("scroll", function(){
+                context.imageMapHighlighter.show(false);
+            }, true);
+            doc.addEventListener("mousemove", function(event){
+                mx = event.clientX;
+                my = event.clientY;
+            }, true);
 
-            canvas = doc.getElementById('firebugCanvas');
-
-            if(!canvas)
-            {
-                canvas = doc.createElementNS("http://www.w3.org/1999/xhtml", "canvas");
-                hideElementFromInspection(canvas);
-                canvas.id = "firebugCanvas";
-                canvas.className = "firebugResetStyles firebugCanvas";
-                canvas.width = context.window.innerWidth;
-                canvas.height = context.window.innerHeight;
-                context.window.addEventListener("scroll", function(){
-                    context.imageMapHighlighter.show(false);
-                }, true);
-                doc.addEventListener("mousemove", function(event){
-                    mx = event.clientX;
-                    my = event.clientY;
-                }, true);
-
-                doc.body.appendChild(canvas);
-            }
-        };
+            doc.body.appendChild(canvas);
+        }
+    };
 
     if (!context.imageMapHighlighter)
     {
@@ -629,17 +643,19 @@ function getImageMapHighlighter(context)
                 if(elts.snapshotLength === 0)
                     return;
 
-                elts = xpe.evaluate("(//img | //input)[@usemap='#" + mapName + "']", doc.documentElement,
-                    nsResolver, XPathResult.ORDERED_NODE_SNAPSHOT_TYPE, null);
+                elts = xpe.evaluate("(//img | //input)[@usemap='#" + mapName + "']",
+                    doc.documentElement, nsResolver, XPathResult.ORDERED_NODE_SNAPSHOT_TYPE, null);
                 eltsLen = elts.snapshotLength;
 
-                for(i = 0; i < eltsLen; i++)
+                for (i = 0; i < eltsLen; i++)
                 {
                     elt = elts.snapshotItem(i);
                     rect = getLTRBWH(elt);
 
-                    if(multi)
+                    if (multi)
+                    {
                         images.push(elt);
+                    }
                     else if(rect.left <= mx && rect.right >= mx && rect.top <= my && rect.bottom >= my)
                     {
                         images[0] = elt;
@@ -719,7 +735,8 @@ function getImageMapHighlighter(context)
     return context.imageMapHighlighter;
 }
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
 quickInfoBox =
 {
     boxEnabled: undefined,
@@ -923,7 +940,7 @@ Firebug.Inspector.FrameHighlighter.prototype =
             FBTrace.sysout("FrameHighlighter HTML tag:" + element.tagName + " x:" + x + " y:" + y + " w:" + w + " h:" + h);
 
         var wacked = isNaN(x) || isNaN(y) || isNaN(w) || isNaN(h);
-        if(wacked)
+        if (wacked)
         {
             if (FBTrace.DBG_INSPECT)
                 FBTrace.sysout("FrameHighlighter.highlight has bad boxObject for "+ element.tagName);
@@ -931,7 +948,7 @@ Firebug.Inspector.FrameHighlighter.prototype =
             return;
         }
 
-        if(element.tagName !== "AREA")
+        if (element.tagName !== "AREA")
         {
             if (FBTrace.DBG_INSPECT)
                 FBTrace.sysout("FrameHighlighter "+element.tagName);
@@ -978,7 +995,8 @@ Firebug.Inspector.FrameHighlighter.prototype =
             if (needsAppend)
             {
                 if (FBTrace.DBG_INSPECT)
-                    FBTrace.sysout("FrameHighlighter needsAppend: " + highlighter.ownerDocument.documentURI + " !?= " + body.ownerDocument.documentURI, highlighter);
+                    FBTrace.sysout("FrameHighlighter needsAppend: " + highlighter.ownerDocument.documentURI +
+                        " !?= " + body.ownerDocument.documentURI, highlighter);
 
                 attachStyles(context, body);
 
@@ -989,10 +1007,12 @@ Firebug.Inspector.FrameHighlighter.prototype =
                 catch(exc)
                 {
                     if (FBTrace.DBG_INSPECT)
-                        FBTrace.sysout("inspector.FrameHighlighter.highlight body.appendChild FAILS for body " + body + " "+exc, exc);
+                        FBTrace.sysout("inspector.FrameHighlighter.highlight body.appendChild FAILS for body " +
+                            body + " "+exc, exc);
                 }
 
-                if (element.ownerDocument.contentType.indexOf("xul") === -1)  // otherwise the proxies take up screen space in browser.xul
+                // otherwise the proxies take up screen space in browser.xul
+                if (element.ownerDocument.contentType.indexOf("xul") === -1)
                     createProxiesForDisabledElements(body);
             }
         }
@@ -1361,7 +1381,8 @@ function removeProxiesForDisabledElements(body)
 
 function rgbToHex(value)
 {
-    return value.replace(/\brgb\((\d{1,3}),\s*(\d{1,3}),\s*(\d{1,3})\)/gi, function(_, r, g, b) {
+    return value.replace(/\brgb\((\d{1,3}),\s*(\d{1,3}),\s*(\d{1,3})\)/gi, function(_, r, g, b)
+    {
         return '#' + ((1 << 24) + (r << 16) + (g << 8) + (b << 0)).toString(16).substr(-6).toUpperCase();
     });
 }
@@ -1384,11 +1405,13 @@ function isVisibleElement(elt)
     return !invisibleElements[elt.nodeName.toLowerCase()];
 }
 
-function hideElementFromInspection(elt) {
+function hideElementFromInspection(elt)
+{
     unwrapObject(elt).firebugIgnore = !FBTrace.DBG_INSPECT;
 }
 
-function storeHighlighterParams(highlighter, context, element, boxFrame) {
+function storeHighlighterParams(highlighter, context, element, boxFrame)
+{
     var fir = Firebug.Inspector.repaint;
 
     fir.highlighter = highlighter;
