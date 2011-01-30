@@ -1909,15 +1909,13 @@ this.getDocumentForStyleSheet = function(styleSheet)
  */
 this.getInstanceForStyleSheet = function(styleSheet, ownerDocument)
 {
-    // System URLs are always unique (or at least we are making this assumption)
-    if (FBL.isSystemStyleSheet(styleSheet))
-        return 0;
-
     // ownerDocument is an optional hint for performance
     if (FBTrace.DBG_CSS)
         FBTrace.sysout("getInstanceForStyleSheet href:" + styleSheet.href + " mediaText:" + styleSheet.media.mediaText + " path to ownerNode" + (styleSheet.ownerNode && FBL.getElementXPath(styleSheet.ownerNode)), ownerDocument);
 
     ownerDocument = ownerDocument || FBL.getDocumentForStyleSheet(styleSheet);
+    if(!ownerDocument)
+        return;
 
     var ret = 0,
         styleSheets = ownerDocument.styleSheets,

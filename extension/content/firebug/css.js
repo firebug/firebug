@@ -1205,7 +1205,7 @@ Firebug.CSSStyleSheetPanel.prototype = extend(Firebug.SourceBoxPanel,
             href = element.ownerDocument.location.href;  // http://code.google.com/p/fbug/issues/detail?id=452
 
         var line = getRuleLine(rule);
-        var instance = getInstanceForStyleSheet(rule.parentStyleSheet, target.ownerDocument);
+        var instance = getInstanceForStyleSheet(rule.parentStyleSheet);
         var sourceLink = new SourceLink(href, line, "css", rule, instance);
 
         return sourceLink;
@@ -1473,7 +1473,7 @@ CSSElementPanel.prototype = extend(Firebug.CSSStyleSheetPanel.prototype,
                 if (inheritMode && !props.length)
                     continue;
 
-                var sourceLink = this.getSourceLink(element, rule);
+                var sourceLink = this.getSourceLink(null, rule);
 
                 this.markOverriddenProps(props, usedProps, inheritMode);
 
