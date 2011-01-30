@@ -1151,7 +1151,10 @@ top.FirebugChrome =
         //if (!panelBar1.selectedPanel)
         //    return false;
 
-        var popup = $("fbContextMenu");
+        var popup = event.target;
+        if(popup.id !="fbContextMenu")
+            return;
+
         var target = document.popupNode;
         var panel = target ? Firebug.getElementPanel(target) : null;
 
@@ -1239,7 +1242,7 @@ top.FirebugChrome =
         // 3. Add menu items from uiListeners
         var items = [];
         FBL.dispatch(Firebug.uiListeners, "onContextMenu", [items, object, target,
-            Firebug.currentContext, panel]);
+            Firebug.currentContext, panel, popup]);
 
         if (items)
         {

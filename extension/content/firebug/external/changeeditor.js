@@ -197,7 +197,9 @@ var defaultCommandLines =
 {
     "sublimetext": "%file:%line",
     "notepad++":   "-n%line %file",
-    "emeditor":    "/l %line %file"
+    "emeditor":    "/l %line %file",
+    "browser":     "%url",
+    "explorer":    "/select,%file"
 }
 
 function suggestionPopupShowing(popup)
