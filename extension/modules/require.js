@@ -392,7 +392,7 @@ var require, define;
                 }
 
                 if (context.config.onDebug) {
-                    context.config.onDebug("require.js: defining "+fullName+" with "+args.length+" dependents", {defineFunction: manager.callback, args: args});
+                    context.config.onDebug("require.js: defining "+fullName+" with "+args.length+" dependents", {defineFunction: manager.callback, dependents: args});
                 }
 
                 ret = req.execCb(fullName, manager.callback, args);

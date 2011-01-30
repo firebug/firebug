@@ -203,9 +203,9 @@ ModuleLoader.prototype = {
             }
 
         } catch (exc) {
-            return ModuleLoader.onError(new Error("ModuleLoader could not convert "+mrl+" to absolute URL using baseURI "+this.baseURI), {exception: exc, moduleLoader: this});
+            return ModuleLoader.onError(new Error("ModuleLoader could not convert "+mrl+" to absolute URL using baseURI "+this.baseURI.spec), {exception: exc, moduleLoader: this});
         }
-        consoleService.logStringMessage("ModuleLoader loadModule reading "+url);
+        if (ModuleLoader.debug) ModuleLoader.onDebug("ModuleLoader loadModule reading "+url);
 
         var unit = {
             source: this.mozReadTextFromFile(url),
@@ -265,6 +265,8 @@ ModuleLoader.prototype = {
             args[0] = this.remapConfig(ModuleLoader.copyProperties(args[0], this.config));
 
             if (args[0].onError) {
+                if (ModuleLoader.debug) ModuleLoader.onDebug("ModuleLoader overriding onError ");
+
                 this.saveOnError = coreRequire.onError;
                 coreRequire.onError = args[0].onError;
             }
@@ -290,12 +292,20 @@ ModuleLoader.prototype = {
             try {
                 this.baseURI = ModuleLoader.mozIOService.newURI(cfg.baseUrl, null, null);
             } catch (exc) {
-                ModuleLoader.onError("ModuleLoader ERROR failed to create baseURI from "+cfg.baseUrl, this);
+                throw new Error("ModuleLoader ERROR failed to create baseURI from baseUrl =\'"+cfg.baseUrl+"\'");
             }
         }
         else if (this.baseURI) {
             cfg.baseUrl = this.baseURI.spec;
         }
+
+        if (cfg.debug)
+            ModuleLoader.debug = !!cfg.debug;
+        if (cfg.onDebug)
+            ModuleLoader.onDebug = cfg.onDebug;
+
+        if (cfg.onError)
+            ModuleLoader.onError = cfg.onError;
 
         return cfg;
     },
@@ -408,11 +418,11 @@ ModuleLoader.prototype = {
 
 
 ModuleLoader.onError = function (err, object) {
-    consoleService.logStringMessage("ModuleLoader pre-bootstrap ERROR "+err);
+    Cu.reportError("ModuleLoader pre-bootstrap ERROR "+err);
     if (object) {
-        consoleService.logStringMessage("ModuleLoader pre-bootstrap object "+object);
+        Cu.reportError("ModuleLoader pre-bootstrap object "+object);
         for (var p in object) {
-            consoleService.logStringMessage("ModuleLoader pre-bootstrap object["+p+"]="+object[p]);
+            Cu.reportError("ModuleLoader pre-bootstrap object["+p+"]="+object[p]);
         }
     }
 }
@@ -453,7 +463,7 @@ function loadCompilationUnit(moduleLoader, context, url, moduleName) {
     } catch (exc) {
         var errorURL = exc.filename || exc.sourceName || exc.fileName;
         var errorLineNumber = exc.lineNumber;
-        ModuleLoader.onDebug("loadCompilationUnit got exception "+exc+" on "+errorURL+"@"+errorLineNumber+", trying "+moduleLoader.config.edit);
+        ModuleLoader.onError("loadCompilationUnit got exception "+exc+" on "+errorURL+"@"+errorLineNumber+", trying "+moduleLoader.config.edit);
         if (moduleLoader.config.edit) {
             return moduleLoader.config.edit(exc, errorURL, errorLineNumber);
         }
