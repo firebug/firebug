@@ -4317,10 +4317,10 @@ this.getLocalSystemURI = function(url)
 this.getLocalOrSystemPath = function(url)
 {
     var uri = FBL.getLocalSystemURI(url);
-    if (uri && uri.schemeIs("file"))
+    if (uri instanceof Ci.nsIFileURL)
     {
-        var file = uri.QueryInterface(Ci.nsIFileURL).file;
-        return file && !file.isDirectory() && file.path;
+        var file = uri.file;
+        return file && file.path;
     }
 }
 
