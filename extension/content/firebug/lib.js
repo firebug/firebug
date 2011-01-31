@@ -3051,7 +3051,7 @@ this.parseToStackFrame = function(line, context) // function name (arg, arg, arg
          if (m2)
          {
              var params = m2[2].split(',');
-             FBTrace.sysout("parseToStackFrame",{line:line,paramStr:m2[2],params:params});
+             //FBTrace.sysout("parseToStackFrame",{line:line,paramStr:m2[2],params:params});
              //var params = JSON.parse("["+m2[2]+"]");
              return new this.StackFrame({href:m[2]}, m[3], m2[1], params, null, null, context);
          }
@@ -4283,9 +4283,6 @@ this.getLocalPath = function(url)
 
 this.getLocalSystemURI = function(url)
 {
-    if (!this.isLocalURL(url) && !this.isSystemURL(url))
-        return;
-
     try
     {
         var uri = ioService.newURI(url, null, null);
@@ -4295,7 +4292,7 @@ this.getLocalSystemURI = function(url)
             var abspath = ph.getSubstitution(uri.host);
             uri = ioService.newURI(uri.path.substr(1), null, abspath);
         }
-        while (uri.schemeIs("chrome"))
+        if (uri.schemeIs("chrome"))
         {
             var chromeRegistry = Cc["@mozilla.org/chrome/chrome-registry;1"].getService(Ci.nsIChromeRegistry);
             uri = chromeRegistry.convertChromeURL(uri);
