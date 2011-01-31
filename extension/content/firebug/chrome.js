@@ -694,7 +694,7 @@ top.FirebugChrome =
             return;
 
         location = location.href || location.url || location.toString();
-        if (Firebug.filterSystemURLs && isSystemURL(location))
+        if (Firebug.filterSystemURLs && FBL.isSystemURL(location))
             return;
 
         return location;
