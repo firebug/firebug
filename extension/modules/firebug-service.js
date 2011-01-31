@@ -1865,8 +1865,9 @@ var fbs =
             {
                 if (FBTrace.DBG_FBS_BP)
                 {
-                    FBTrace.sysout("onBreakpoint("+getExecutionStopNameFromType(type)+") disabledCount:"+disabledCount
-                              +" monitorCount:"+monitorCount+" conditionCount:"+conditionCount+" runningUntil:"+runningUntil, bp);
+                    FBTrace.sysout("onBreakpoint("+getExecutionStopNameFromType(type)+
+                        ") disabledCount:"+disabledCount+" monitorCount:"+monitorCount+
+                        " conditionCount:"+conditionCount+" runningUntil:"+runningUntil, bp);
                 }
 
                 if (bp.type & BP_MONITOR && !(bp.disabled & BP_MONITOR))

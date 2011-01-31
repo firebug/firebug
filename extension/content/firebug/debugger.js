@@ -425,7 +425,9 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
 
         // this will cause us to return to just after the enterNestedEventLoop call
         var depth = fbs.exitNestedEventLoop();
-        if (FBTrace.DBG_UI_LOOP) FBTrace.sysout("debugger.resume, depth:"+depth+"\n");
+
+        if (FBTrace.DBG_UI_LOOP)
+            FBTrace.sysout("debugger.resume, depth:"+depth+"\n");
     },
 
     // bti
@@ -490,7 +492,7 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
             return;
 
         var sourceFile = compilationUnit.sourceFile;
-        fbs.runUntil(compilationUnit, lineNo, context.stoppedFrame, this);
+        fbs.runUntil(compilationUnit.sourceFile, lineNo, context.stoppedFrame, this);
         this.resume(context);
     },
 
