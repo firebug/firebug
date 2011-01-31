@@ -143,6 +143,7 @@ try
 {
     // Get ModuleLoader implementation (it's Mozilla JS code module)
     Components.utils["import"]("resource://firebug/moduleLoader.js");
+    Cu.reportError("Loaded ModuleLoader");
 }
 catch (exc)
 {
@@ -212,11 +213,12 @@ top.Firebug =
         {
             var firebugScope = // pump the objects from this scope down into module loader
             {
-                __proto__: window,
+                window : window,
                 Firebug: Firebug,
                 fbXPCOMUtils: fbXPCOMUtils,
                 FBL: FBL,
                 FBTrace: FBTrace,
+                domplate: domplate,
             };
             var uid = Math.random();  // to give each XUL window its own loader (for now)
             var config = {
