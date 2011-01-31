@@ -2076,7 +2076,11 @@ Firebug.NetMonitor.NetRequestEntry = domplate(Firebug.Rep, new Firebug.Listener(
             // Notify listeners so additional tabs can be created.
             dispatch(NetInfoBody.fbListeners, "initTabBody", [netInfoBox, file]);
 
-            NetInfoBody.selectTabByName(netInfoBox, "Headers");
+            // Select "Headers" tab by default, if no other tab is selected already.
+            // (e.g. by a third party Firebug extension in 'initTabBody' event)
+            if (!netInfoBox.selectedTab)
+                NetInfoBody.selectTabByName(netInfoBox, "Headers");
+
             var category = Utils.getFileCategory(row.repObject);
             if (category)
                 setClass(netInfoBox, "category-" + category);
