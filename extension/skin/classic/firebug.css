@@ -102,13 +102,14 @@ toolbar[iconsize="small"] #firebug-button > .toolbarbutton-icon {
 #firebug-button .badge > .label {
     -moz-box-sizing: border-box;
     visibility: hidden;
-    font-size: 10px;
-    padding: 0 3px;
-    line-height: 13px;
-    font-family: Arial;
-    text-shadow: 0 0 1px #EEF1F7;
-    color: #900;
-    border-radius: 3px;
+    font-size:10px;
+    padding:0 3px;
+    line-height:13px;
+    font-family:Arial;
+    text-shadow:0 0 1px #EEF1F7;
+    color:#900;
+    border-radius:3px;
+    background-color:rgba(255, 0, 0, 0.9);
     box-shadow:inset 0px 0px 1px white;
     background-image: -moz-linear-gradient(
         center bottom,
@@ -116,10 +117,12 @@ toolbar[iconsize="small"] #firebug-button > .toolbarbutton-icon {
         #DEE4EB 80%,
         #E7EBF3 81%
     );
-    border-width: 1px;
-    border-style: solid;
+    border-width:1px;
+    border-style:solid;
     border-color: #B3BBC4 #9DA4AD #868D96 #9DA4AD;
-    box-shadow: 0 1px 0 rgba(180,189,202, 0.7);
+    box-shadow:0 0 1px rgba(255, 255, 255, 0.3) inset,
+               0 1px 0 rgba(180, 189, 202, 0.7),
+               0 0 3px rgba(153, 0, 0, 0.9);
 }
 
 #firebug-button[showErrors="true"]:not([errorCount="0"]) .badge .label {
