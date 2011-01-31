@@ -199,7 +199,7 @@ Firebug.NetMonitor = extend(Firebug.ActivableModule,
         NetLimit.updateMaxLimit();
 
         // Synchronize UI buttons with the current filter.
-        this.syncFilterButtons(FirebugChrome);
+        this.syncFilterButtons(Firebug.chrome);
 
         prefs.addObserver(Firebug.prefDomain, NetLimit, false);
     },

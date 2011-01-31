@@ -8,7 +8,7 @@ define("shortcuts.js", [], function(require, exports, module) { with (FBL) {
 
 const Cc = Components.classes;
 const Ci = Components.interfaces;
-const prefs = Cc["@mozilla.org/preferences-service;1"].getService(Ci.nsIPrefBranch2);
+var prefs = Cc["@mozilla.org/preferences-service;1"].getService(Ci.nsIPrefBranch2);
 
 /**
  * ShortcutsModel object implements keyboard shortcuts logic.
