@@ -1,6 +1,6 @@
 /* See license.txt for terms of usage */
 
-define("script.js", [], function(require, exports, module) { with (FBL) {
+define("script.js", ["reps.js"], function(FirebugReps) { with (FBL) {
 
 // ************************************************************************************************
 // Constants
