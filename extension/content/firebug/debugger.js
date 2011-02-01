@@ -1,6 +1,6 @@
 /* See license.txt for terms of usage */
 
-define("debugger.js", [], function(require, exports, module) { with (FBL) {
+FBL.ns(function() { with (FBL) {
 
 // ************************************************************************************************
 // Constants
@@ -266,7 +266,7 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
 
         try
         {
-             this.freeze(context);
+            this.freeze(context);
 
             // We will pause here until resume is called
             var depth = fbs.enterNestedEventLoop({onNest: bindFixed(this.startDebugging, this, context)});
@@ -673,24 +673,24 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
 
         context.breakingCause =
         {
-                title: $STR("Break On Next"),
-                message: $STR("Disable converts pause to disabled breakpoint"), //xxxHonza localization
-                skipAction: function addSkipperAndGo()
-                {
-                    // a breakpoint that never hits, but prevents debugger keyword (see fbs.onDebugger as well)
-                    var bp = Firebug.Debugger.setBreakpoint(sourceFile, lineNo);
-                    fbs.disableBreakpoint(sourceFile.href, lineNo);
+            title: $STR("Break On Next"),
+            message: $STR("Disable converts pause to disabled breakpoint"), //xxxHonza localization
+            skipAction: function addSkipperAndGo()
+            {
+                // a breakpoint that never hits, but prevents debugger keyword (see fbs.onDebugger as well)
+                var bp = Firebug.Debugger.setBreakpoint(sourceFile, lineNo);
+                fbs.disableBreakpoint(sourceFile.href, lineNo);
 
-                    if (FBTrace.DBG_BP)
+                if (FBTrace.DBG_BP)
                     FBTrace.sysout("debugger.setBreakOnNextCause converted to disabled bp " +
                         sourceFile.href+"@"+lineNo+" tag: "+frame.script.tag, bp);
     
-                    Firebug.Debugger.resume(context);
-                },
-                okAction: function justGo()
-                {
-                    Firebug.Debugger.resume(context);
-                },
+                Firebug.Debugger.resume(context);
+            },
+            okAction: function justGo()
+            {
+                Firebug.Debugger.resume(context);
+            },
         };
     },
 
@@ -1260,23 +1260,23 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
 
         context.breakingCause =
         {
-                title: $STR("debugger keyword"),
-                message: $STR("Disable converts keyword to disabled breakpoint"), //xxxHonza localization
-                skipAction: function addSkipperAndGo()
-                {
-                    // a breakpoint that never hits, but prevents debugger keyword (see fbs.onDebugger as well)
-                    var bp = Firebug.Debugger.setBreakpoint(sourceFile, lineNo);
-                    fbs.disableBreakpoint(sourceFile.href, lineNo);
-                    if (FBTrace.DBG_BP)
+            title: $STR("debugger keyword"),
+            message: $STR("Disable converts keyword to disabled breakpoint"), //xxxHonza localization
+            skipAction: function addSkipperAndGo()
+            {
+                // a breakpoint that never hits, but prevents debugger keyword (see fbs.onDebugger as well)
+                var bp = Firebug.Debugger.setBreakpoint(sourceFile, lineNo);
+                fbs.disableBreakpoint(sourceFile.href, lineNo);
+                if (FBTrace.DBG_BP)
                     FBTrace.sysout("debugger.onBreak converted to disabled bp "+sourceFile.href+
                         "@"+lineNo+" tag: "+frame.script.tag, bp);
 
-                    Firebug.Debugger.resume(context);
-                },
-                okAction: function justGo()
-                {
-                    Firebug.Debugger.resume(context);
-                },
+                Firebug.Debugger.resume(context);
+            },
+            okAction: function justGo()
+            {
+                Firebug.Debugger.resume(context);
+            },
         };
     },
 
@@ -1948,19 +1948,19 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
             FBTrace.sysout("debugger.getConstructoreExpression candidate_line:"+candidate_line+"\n");
 
         if (candidate_line && candidate_line != null)
-            {
-                var m = reFunction.exec(candidate_line);
-                if (m)
-                    var arguments =  m[1];     // TODO Lame: need to count parens, with escapes and quotes
-            }
+        {
+            var m = reFunction.exec(candidate_line);
+            if (m)
+                var arguments =  m[1];     // TODO Lame: need to count parens, with escapes and quotes
+        }
 
         if (FBTrace.DBG_EVAL)
             FBTrace.sysout("debugger.getConstructoreExpression arguments:"+arguments+"\n");
 
         if (arguments) // need to break down commas and get last arg.
         {
-                var lastComma = arguments.lastIndexOf(',');
-                return arguments.substring(lastComma+1);  // if -1 then 0
+            var lastComma = arguments.lastIndexOf(',');
+            return arguments.substring(lastComma+1);  // if -1 then 0
         }
 
         return null;

@@ -1,6 +1,6 @@
 /* See license.txt for terms of usage */
 
-define("sourceFile.js", [], function(require, exports, module) { with (FBL)
+FBL.ns(function() { with (FBL)
 {
     const Cc = Components.classes;
     const Ci = Components.interfaces;

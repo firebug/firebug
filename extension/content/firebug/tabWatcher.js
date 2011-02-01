@@ -1,6 +1,6 @@
 /* See license.txt for terms of usage */
 
-define("tabWatcher.js", [], function(require, exports, module) { with (FBL) {
+FBL.ns(function() { with (FBL) {
 
 // ************************************************************************************************
 // Constants
@@ -181,7 +181,6 @@ Firebug.TabWatcher = extend(new Firebug.Listener(),
                         FBTrace.sysout("tabWatcher watchTopWindow no context.window "+(context.browser? context.browser.currentURI.spec : " and no context.browser")+"\n");
                 }
             }, this), 400);
-            window.dump("_______________________ setTimeout call succeede _________________________\n");
         }
         else
         {

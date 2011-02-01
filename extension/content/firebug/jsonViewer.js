@@ -1,6 +1,6 @@
 /* See license.txt for terms of usage */
 
-define("jsonViewer.js", [], function(require, exports, module) { with (FBL) {
+FBL.ns(function() { with (FBL) {
 
 // ************************************************************************************************
 

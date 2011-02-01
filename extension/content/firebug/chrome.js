@@ -107,10 +107,9 @@ top.FirebugChrome =
         }
         else
         {
+            // Firebug has not been initialized yet
             if (!Firebug.isInitialized)
-            {
                 Firebug.initialize();
-            }
         }
 
         // FBL should be available

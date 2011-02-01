@@ -1,14 +1,13 @@
 /* See license.txt for terms of usage */
 
-define("shortcuts.js", [], function(require, exports, module) { with (FBL) {
-
+FBL.ns( function() { with (FBL) {
 
 // ************************************************************************************************
 // Constants
 
 const Cc = Components.classes;
 const Ci = Components.interfaces;
-var prefs = Cc["@mozilla.org/preferences-service;1"].getService(Ci.nsIPrefBranch2);
+const prefs = Cc["@mozilla.org/preferences-service;1"].getService(Ci.nsIPrefBranch2);
 
 /**
  * ShortcutsModel object implements keyboard shortcuts logic.

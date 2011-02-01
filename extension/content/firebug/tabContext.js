@@ -1,6 +1,6 @@
 /* See license.txt for terms of usage */
 
-define("tabContext.js", [], function(require, exports, module) { with (FBL) {
+FBL.ns(function() { with (FBL) {
 
     Components.utils.import("resource://firebug/bti/compilationunit.js");
 // ************************************************************************************************
@@ -439,7 +439,7 @@ Firebug.TabContext.prototype =
 
     setTimeout: function()
     {
-        if (window.setTimeout == this.setTimeout)
+        if (setTimeout == this.setTimeout)
             throw new Error("setTimeout recursion");
         var timeout = window.setTimeout.apply(top, arguments);
 

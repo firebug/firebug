@@ -253,7 +253,6 @@ top.Firebug =
                      "sourceBox.js",
                      "activation.js",
                      "sourceCache.js",
-                     "tabContext.js",
                      "tabCache.js",
                      "tableRep.js",
                      "infotip.js",

@@ -1,7 +1,7 @@
 /* See license.txt for terms of usage */
 
 //
-define("consoleInjector.js", [], function(require, exports, module) { with (FBL) {
+FBL.ns(function() { with (FBL) {
 
 // ************************************************************************************************
 // Constants
