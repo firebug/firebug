@@ -73,24 +73,15 @@ var gEditorManager =
 
     internationalizeUI: function(doc)
     {
-        var elements = ["firebug-external-editors", "actionsIntro", "editorName",
-            "editorExecutable", "editorParams", "addEditor", "removeEditor", "changeEditor", "moveUpEditor",
-            "closeDialogButton"];
-
+        var elements = doc.getElementsByClassName("fbInternational");
+        var attributes = ["title", "label", "value"];
         for (var i=0; i<elements.length; i++)
         {
-            var element = doc.getElementById(elements[i]);
-            if (!element)
-                continue;
-
-            if (element.hasAttribute("title"))
-                this._FBL.internationalize(element, "title");
-
-            if (element.hasAttribute("label"))
-                this._FBL.internationalize(element, "label");
-
-            if (element.hasAttribute("value"))
-                this._FBL.internationalize(element, "value");
+            for(var j=0; j<attributes.length; j++)
+            {
+                if (elements[i].hasAttribute(attributes[j]))
+                    this._FBL.internationalize(elements[i], attributes[j]);
+            }
         }
     },
 

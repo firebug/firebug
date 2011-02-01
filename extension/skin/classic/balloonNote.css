@@ -1,0 +1,132 @@
+/* See license.txt for terms of usage */
+
+/************************************************************************************************/
+
+.balloon {
+    z-index: 2147483647;
+    position: absolute;
+    margin-top: 0;
+    left: 2px;
+    width: 90%;
+}
+
+/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+.balloonContent {
+    font-family: Lucida Grande, sans-serif;
+    font-size: 11px;
+    color: #226679;
+}
+
+.balloonCloseButton {
+    float: right;
+    vertical-align: top;
+    position: relative;
+    top: -13px;
+    right: -8px;
+}
+
+/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+.balloonTop1 {
+    background: url(noteCorners.png) no-repeat 100% 0;
+    margin-left: 37px;
+    height: 35px;
+}
+
+.balloonTop2 {
+    position: relative;
+    left: -37px;
+    width: 37px;
+    height: 35px;
+    background: url(noteCorners.png) no-repeat;
+}
+
+.balloonInner1 {
+    padding-left: 37px;
+    background: url(noteBorders.png) repeat-y;
+}
+
+.balloonInner2 {
+    padding-right: 25px;
+    background: url(noteBorders.png) repeat-y 100% 0;
+}
+
+.balloonInner3 {
+    background: url(noteContent.png) repeat-y;
+}
+
+.balloonInner4 {
+    position: relative;
+    top: -8px;
+}
+
+.balloonBottom1 {
+    background: url(noteCorners.png) no-repeat 100% 100%;
+    margin-left: 37px;
+    height: 33px;
+}
+
+.balloonBottom2 {
+    position: relative;
+    left: -37px;
+    width: 37px;
+    height: 33px;
+    background: url(noteCorners.png) no-repeat 0 100%;
+}
+
+/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+.upsideDown {
+    margin-top: 2px;
+}
+
+.upsideDown .balloonTop1 {
+    background: url(noteCornersUps.png) no-repeat 100% 0;
+    margin-left: 33px;
+    height: 25px;
+}
+
+.upsideDown .balloonTop2 {
+    position: relative;
+    left: -33px;
+    width: 33px;
+    height: 25px;
+    background: url(noteCornersUps.png) no-repeat;
+}
+
+.upsideDown .balloonInner1 {
+    padding-left: 33px;
+    background: url(noteBordersUps.png) repeat-y;
+}
+
+.upsideDown .balloonInner2 {
+    padding-right: 25px;
+    background: url(noteBordersUps.png) repeat-y 100% 0;
+}
+
+.upsideDown .balloonInner3 {
+    background: url(noteContentUps.png) repeat-y;
+}
+
+.upsideDown .balloonInner4 {
+    top: 8px;
+}
+
+.upsideDown .balloonBottom1 {
+    background: url(noteCornersUps.png) no-repeat 100% 100%;
+    margin-left: 33px;
+    height: 43px;
+    z-index: 500;
+}
+
+.upsideDown .balloonBottom2 {
+    position: relative;
+    left: -33px;
+    width: 33px;
+    height: 43px;
+    background: url(noteCornersUps.png) no-repeat 0 100%;
+    z-index: 500;
+}
+
+/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */

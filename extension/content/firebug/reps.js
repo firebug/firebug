@@ -624,7 +624,19 @@ FirebugReps.Element = domplate(Firebug.Rep,
     {
         try
         {
-            return object.localName.toLowerCase();
+            return getLocalName(object);
+        }
+        catch (err)
+        {
+            return "";
+        }
+    },
+
+    getNodeName: function(object)
+    {
+        try
+        {
+            return getNodeName(object);
         }
         catch (err)
         {
@@ -1686,21 +1698,27 @@ FirebugReps.ErrorMessage = domplate(Firebug.Rep,
         {
             var panel = Firebug.getElementPanel(event.target);
             this.breakOnThisError(target.repObject, panel.context);
+            return;
         }
         else if (hasClass(event.target, "errorSource"))
         {
             var panel = Firebug.getElementPanel(event.target);
             this.inspectObject(target.repObject, panel.context);
+            return;
         }
-        else if (hasClass(event.target, "errorTitle"))
+
+        var errorTitle = getAncestorByClass(event.target, "errorTitle");
+        if (errorTitle)
         {
             var traceBox = target.childNodes[1];
             toggleClass(target, "opened");
             event.target.setAttribute('aria-expanded', hasClass(target, "opened"));
+
             if (hasClass(target, "opened"))
             {
                 if (target.stackTrace)
-                    var node = FirebugReps.StackTrace.tag.append({object: target.stackTrace}, traceBox);
+                    FirebugReps.StackTrace.tag.append({object: target.stackTrace}, traceBox);
+
                 if (Firebug.A11yModel.enabled)
                 {
                     var panel = Firebug.getElementPanel(event.target);
@@ -1708,7 +1726,9 @@ FirebugReps.ErrorMessage = domplate(Firebug.Rep,
                 }
             }
             else
+            {
                 clearNode(traceBox);
+            }
         }
     },
 

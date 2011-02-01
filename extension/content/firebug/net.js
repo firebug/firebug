@@ -219,15 +219,6 @@ Firebug.NetMonitor = extend(Firebug.ActivableModule,
         Firebug.Debugger.addListener(this.DebuggerListener);
     },
 
-    internationalizeUI: function(doc)
-    {
-        var elements = ["fbNetPersist", "fbNetFilter-media", "fbNetClear", "fbNetFilter-all",
-            "fbNetFilter-image", "fbNetFilter-flash"];
-        var attributes = ["label", "tooltiptext"];
-
-        FBL.internationalizeElements(doc, elements, attributes);
-    },
-
     shutdown: function()
     {
         prefs.removeObserver(Firebug.prefDomain, this, false);
@@ -1359,7 +1350,7 @@ NetPanel.prototype = extend(Firebug.ActivablePanel,
             return;
 
         var countLabel = row.childNodes[1].firstChild;
-        countLabel.firstChild.nodeValue = $STRP("plural.Request_Count", [fileCount]);
+        countLabel.firstChild.nodeValue = $STRP("plural.Request_Count2", [fileCount]);
 
         var sizeLabel = row.childNodes[4].firstChild;
         sizeLabel.setAttribute("totalSize", totalSize);
@@ -1625,8 +1616,6 @@ NetPanel.prototype = extend(Firebug.ActivablePanel,
             return;
 
         var maxWidth = netHrefCol.clientWidth;
-        if (maxWidth == 0)
-            maxWidth = "15%";
 
         // This call must precede all getCSSStyleRules calls
         Firebug.CSSModule.cleanupSheets(hrefLabel.ownerDocument, Firebug.currentContext);
@@ -1638,8 +1627,10 @@ NetPanel.prototype = extend(Firebug.ActivablePanel,
             {
                 var style = rule.style;
                 var paddingLeft = parseInt(style.getPropertyValue("padding-left"));
-                FBTrace.sysout("net panel max-width set to "+(maxWidth - paddingLeft) + "px", {paddingLeft: paddingLeft, maxWidth: maxWidth});
-                style.setProperty("max-width", (maxWidth - paddingLeft) + "px", "");
+                if (maxWidth == 0)
+                    style.setProperty("max-width", "15%", "");
+                else
+                    style.setProperty("max-width", (maxWidth - paddingLeft) + "px", "");
                 break;
             }
         }
@@ -2085,7 +2076,11 @@ Firebug.NetMonitor.NetRequestEntry = domplate(Firebug.Rep, new Firebug.Listener(
             // Notify listeners so additional tabs can be created.
             dispatch(NetInfoBody.fbListeners, "initTabBody", [netInfoBox, file]);
 
+            // Select "Headers" tab by default, if no other tab is selected already.
+            // (e.g. by a third party Firebug extension in 'initTabBody' event)
+            if (!netInfoBox.selectedTab)
             NetInfoBody.selectTabByName(netInfoBox, "Headers");
+
             var category = Utils.getFileCategory(row.repObject);
             if (category)
                 setClass(netInfoBox, "category-" + category);
@@ -3250,7 +3245,7 @@ Firebug.NetMonitor.NetLimit = domplate(Firebug.Rep,
                         TR(
                             TD(
                                 SPAN({"class": "netLimitLabel"},
-                                    $STRP("plural.Limit_Exceeded", [0])
+                                    $STRP("plural.Limit_Exceeded2", [0])
                                 )
                             ),
                             TD({style: "width:100%"}),
@@ -3283,7 +3278,7 @@ Firebug.NetMonitor.NetLimit = domplate(Firebug.Rep,
 
         // Update info within the limit row.
         var limitLabel = row.getElementsByClassName("netLimitLabel").item(0);
-        limitLabel.firstChild.nodeValue = $STRP("plural.Limit_Exceeded", [row.limitInfo.totalCount]);
+        limitLabel.firstChild.nodeValue = $STRP("plural.Limit_Exceeded2", [row.limitInfo.totalCount]);
     },
 
     createTable: function(parent, limitInfo)

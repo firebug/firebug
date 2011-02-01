@@ -61,6 +61,36 @@ function ModuleLoader(global, requirejsConfig, securityOrigin) {
 ModuleLoader.debug = false;
 
 /*
+ModuleLoader.checkDefineArguments = function(id, dependencies, definerFunction) {
+    var problem = "";
+    if (!id || typeof(id) !== 'string')
+        problem += "First argument must be an id, a string, was "+id;
+    if (!dependencies || !(length in dependencies) )
+        problem += "Second argument must be an array of dependencies";
+    if (!definerFunction || typeof(definerFunction != "function") )
+        problem += "Third argument must function defining the module";
+    if (problem)
+        throw new Error("ERROR in define() call: "+problem);
+}
+ModuleLoader.define = function(id, dependencies, definerFunction) {
+    ModuleLoader.checkDefineArguments.apply(ModuleLoader, arguments);
+
+    if (!ModuleLoader.modules) {
+        ModuleLoader.modules = {}; // indexed by id
+    }
+    if (id in ModuleLoader.modules) {
+        throw new Error("ERROR in define() call: "+id+" already defined");
+    }
+    ModuleLoader.modules[id] = {dependencies: dependencies, definerFunction: definerFunction};
+}
+
+ModuleLoader.require = function(leafs, finalizer) {
+    // Load the leafs
+    // check deps
+    // run finalizer
+}
+*/
+/*
  * @return the current module loader for the current execution context.
  * (XXXjjb: dubious value)
  */

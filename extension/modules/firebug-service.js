@@ -6,13 +6,13 @@
 // Convert from fileName to URL with normalizeURL
 // We probably don't need denormalizeURL since we don't send .fileName back to JSD
 
-// ************************************************************************************************
+// ********************************************************************************************* //
 // Constants
 
 const Cc = Components.classes;
 const Ci = Components.interfaces;
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 const PrefService = Cc["@mozilla.org/preferences-service;1"];
 const DebuggerService = Cc["@mozilla.org/js/jsd/debugger-service;1"];
@@ -36,7 +36,7 @@ const nsIConsoleService = Ci.nsIConsoleService;
 const nsITimer = Ci.nsITimer;
 const nsITimerCallback = Ci.nsITimerCallback;
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 const NS_ERROR_NO_INTERFACE = Components.results.NS_ERROR_NO_INTERFACE;
 const NS_ERROR_NOT_IMPLEMENTED = Components.results.NS_ERROR_NOT_IMPLEMENTED;
@@ -61,7 +61,7 @@ const RETURN_VALUE = jsdIExecutionHook.RETURN_RET_WITH_VAL;
 const RETURN_THROW_WITH_VAL = jsdIExecutionHook.RETURN_THROW_WITH_VAL;
 const RETURN_CONTINUE_THROW = jsdIExecutionHook.RETURN_CONTINUE_THROW;
 
-const NS_OS_TEMP_DIR = "TmpD"
+const NS_OS_TEMP_DIR = "TmpD";
 
 const STEP_OVER = 1;
 const STEP_INTO = 2;
@@ -70,7 +70,7 @@ const STEP_SUSPEND = 4;
 
 const TYPE_ONE_SHOT = nsITimer.TYPE_ONE_SHOT;
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 const BP_NORMAL = 1;
 const BP_MONITOR = 2;
@@ -97,14 +97,13 @@ const reDBG = /DBG_(.*)/;
 const reXUL = /\.xul$|\.xml$/;
 const reTooMuchRecursion = /too\smuch\srecursion/;
 
-// ************************************************************************************************
+// ********************************************************************************************* //
 // Globals
 
 //https://developer.mozilla.org/en/Using_JavaScript_code_modules
 var EXPORTED_SYMBOLS = ["fbs"];
 
-var jsd, fbs, prefs;
-var consoleService;
+var jsd, prefs;
 var observerService;
 
 var contextCount = 0;
@@ -144,7 +143,7 @@ var waitingForTimer = false;
 
 var FBTrace = null;
 
-// ************************************************************************************************
+// ********************************************************************************************* //
 
 function frameId(frame, depth)
 {
@@ -165,7 +164,7 @@ function extend(l,r)
     return newOb;
 }
 
-// ************************************************************************************************
+// ********************************************************************************************* //
 // jsdICallHook or jsdIExecutionHook.
 
 var jsdHandlers =
@@ -334,9 +333,12 @@ BreakOnNextCall.prototype =
 //
 
 // ********************************************************************************************* //
-// Steppers Implementation
+// Stepper: Step Out Implementation
 
-// run until the current function returns, then stop in the caller.
+/**
+ * @class This object implements "step out" debugger feature. In other words run until
+ * the current function returns, then stop in the caller.
+ */
 function OutStepper(debuggr, context)
 {
     this.debuggr = debuggr;
@@ -347,6 +349,7 @@ function OutStepper(debuggr, context)
 }
 
 OutStepper.prototype =
+/** @lends OutStepper */
 {
     mode: "out",
 
@@ -377,7 +380,8 @@ OutStepper.prototype =
         }
 
         if (FBTrace.DBG_FBS_STEP)
-            FBTrace.sysout(this.mode+" hook with frame "+frameToString(frame)+" with callingFrameId "+this.callingFrameId, this);
+            FBTrace.sysout(this.mode+" hook with frame "+frameToString(frame)+
+                " with callingFrameId "+this.callingFrameId, this);
 
         return true;
     },
@@ -391,6 +395,7 @@ OutStepper.prototype =
         {
             this.depth++;
             this.callingFrameId = callingFrameId;  // push new id for stepFunctionReturn
+
             if (FBTrace.DBG_FBS_STEP)
                 FBTrace.sysout(this.mode+" stepFunctionCall new depth "+this.depth+
                     " new callingFrameId "+this.callingFrameId);
@@ -417,7 +422,8 @@ OutStepper.prototype =
                     return this.hit(frame.callingFrame, type);
 
                 if (FBTrace.DBG_FBS_STEP)
-                    FBTrace.sysout("OutStepper.onFunctionReturn no calling frame "+frameToString(frame), this);
+                    FBTrace.sysout("OutStepper.onFunctionReturn no calling frame "+
+                        frameToString(frame), this);
 
                 jsdHandlers.unhook(frame);  // we are done here
                 jsdHandlers.remove(this);
@@ -458,23 +464,31 @@ OutStepper.prototype =
             jsdHandlers.unhook(frame);
             jsdHandlers.remove(this);
 
-            var rv = {};
+            rv = {};
 
             return fbs.breakIntoDebugger(debuggr, frame, type);
         }
-        return ERROR("Hit but debuggr did not match "+this.debuggr.debuggerName+" in frame "+frameToString(frame), this);
+
+        return ERROR("Hit but debuggr did not match "+this.debuggr.debuggerName+" in frame "+
+            frameToString(frame), this);
     },
 
     toString: function()
     {
-        if (!this.context.getName) FBTrace.sysout("this.context.getName ", this.context);
+        if (!this.context.getName)
+            FBTrace.sysout("this.context.getName ", this.context);
+
         return this.mode + " for "+this.context.getName();
     },
 };
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+// ********************************************************************************************* //
+// Stepper: Step Over Implementation
 
-// like OutStepper, but run a single line in this function.
+/**
+ * @class This oject implements "step over". I's like {@link OutStepper}, but run a single
+ * line in this function.
+ */
 function LineStepper(debuggr, context)
 {
     this.context = context;
@@ -482,12 +496,14 @@ function LineStepper(debuggr, context)
 }
 
 LineStepper.prototype = extend(OutStepper.prototype,
+/** @lends LineStepper */
 {
     mode: "over",
 
     hook: function hookLineStepper(frame)
     {
         OutStepper.prototype.hook.apply(this, arguments); // hook functions
+
         this.lineFrameId = frameId(frame, this.depth);
         this.stepFrameTag = frame.script.tag;
 
@@ -507,7 +523,8 @@ LineStepper.prototype = extend(OutStepper.prototype,
     {
         if (this.stepFrameTag !== frame.script.tag) // then we stepped into another function
         {
-            // We'd have much bettter performance if we set a new OutStepper here then remove interrupt hook until it hits.
+            // We'd have much bettter performance if we set a new OutStepper here then remove
+            // interrupt hook until it hits.
             return RETURN_CONTINUE;
         }
 
@@ -532,12 +549,15 @@ LineStepper.prototype = extend(OutStepper.prototype,
 
         return this.mode + " for "+this.context.getName();
     },
-
 });
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+// ********************************************************************************************* //
+// Stepper: Step In Implementation
 
-// Like OutStepper but if the line calls a function, stop on its first line.
+/**
+ * @class This oject implements "step in". I's like {@link OutStepper}, but if the line
+ * calls a function, stop on its first line
+ */
 function IntoStepper(debuggr, context)
 {
     this.context = context;
@@ -545,6 +565,7 @@ function IntoStepper(debuggr, context)
 }
 
 IntoStepper.prototype = extend(LineStepper.prototype,
+/** @lends IntoStepper */
 {
     mode: "into",
 
@@ -560,6 +581,7 @@ IntoStepper.prototype = extend(LineStepper.prototype,
         {
             if (this.stepFrameTag === callingFrame.script.tag) // then we stepped into from our caller
                 return this.hit(frame, type);
+
             // else someone else, ignore it
             if (FBTrace.DBG_FBS_STEP)
                 FBTrace.sysout(this.mode+".intoFunctionCall no match "+this.stepFrameTag+" vs "+
@@ -570,7 +592,8 @@ IntoStepper.prototype = extend(LineStepper.prototype,
     },
 });
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+// ********************************************************************************************* //
+// Function Stepper/Tracer
 
 /**
  * Tracer for learning about function stepping, not part of firebug
@@ -624,8 +647,11 @@ LogFunctionStepper.prototype =
         if (!frame.callingFrame)
         {
             var diff = (fbs.stackDescription.oldestTag !== frame.script.tag);
+
             if (FBTrace.DBG_FBS_STEP)
-                FBTrace.sysout("Stack ends at depth "+fbs.stackDescription.depth+(diff?" NO Match on tag ":" tags match"), fbs.stackDescription.entries);
+                FBTrace.sysout("Stack ends at depth "+fbs.stackDescription.depth+
+                    (diff?" NO Match on tag ":" tags match"), fbs.stackDescription.entries);
+
             fbs.stackDescription.entries = [];
         }
 
@@ -680,7 +706,7 @@ var fbs =
         this.pauseDepth = 0;
 
         prefs = PrefService.getService(nsIPrefBranch2);
-        fbs.prefDomain = "extensions.firebug"
+        fbs.prefDomain = "extensions.firebug";
         prefs.addObserver(fbs.prefDomain, fbs, false);
 
         observerService = ObserverServiceFactory.getService(Ci.nsIObserverService);
@@ -689,8 +715,7 @@ var fbs =
         observerService.addObserver(QuitApplicationObserver, "quit-application", false);
 
         this.scriptsFilter = "all";
-        // XXXjj For some reason the command line will not function if we allow chromebug to see it.?
-        this.alwayFilterURLsStarting = ["chrome://chromebug", "x-jsd:ppbuffer", "chrome://firebug/content/commandLine.js"];  // TODO allow override
+        this.alwayFilterURLsStarting = ["chrome://chromebug", "x-jsd:ppbuffer"];  // TODO allow override
         this.onEvalScriptCreated.kind = "eval";
         this.onTopLevelScriptCreated.kind = "top-level";
         this.onEventScriptCreated.kind = "event";
@@ -828,9 +853,12 @@ var fbs =
             debuggers.push(debuggr);
             if (debuggers.length == 1)
                 this.enableDebugger();
+
             if (FBTrace.DBG_FBS_FINDDEBUGGER  || FBTrace.DBG_ACTIVATION)
-                FBTrace.sysout("fbs.registerDebugger have "+debuggers.length+" after reg debuggr.debuggerName: "+debuggr.debuggerName+" we are "+(enabledDebugger?"enabled":"not enabled")+" " +
-                        "On:"+(jsd?jsd.isOn:"no jsd")+" jsd.pauseDepth:"+(jsd?jsd.pauseDepth:"off")+" fbs.pauseDepth:"+fbs.pauseDepth);
+                FBTrace.sysout("fbs.registerDebugger have "+debuggers.length+
+                    " after reg debuggr.debuggerName: "+debuggr.debuggerName+" we are "+
+                    (enabledDebugger?"enabled":"not enabled")+" " + "On:"+(jsd?jsd.isOn:"no jsd")+
+                    " jsd.pauseDepth:"+(jsd?jsd.pauseDepth:"off")+" fbs.pauseDepth:"+fbs.pauseDepth);
         }
         else
             throw "firebug-service debuggers must have wrappedJSObject";
@@ -840,6 +868,7 @@ var fbs =
                 netDebuggers.push(debuggr);
         } catch(exc) {
         }
+
         try {
             if (debuggr.onScriptCreated)
                 scriptListeners.push(debuggr);
@@ -882,7 +911,9 @@ var fbs =
             this.disableDebugger();
 
         if (FBTrace.DBG_FBS_FINDDEBUGGER || FBTrace.DBG_ACTIVATION)
-            FBTrace.sysout("fbs.unregisterDebugger have "+debuggers.length+" after unreg debuggr.debuggerName: "+debuggr.debuggerName+" we are "+(enabledDebugger?"enabled":"not enabled")+" jsd.isOn:"+(jsd?jsd.isOn:"no jsd"));
+            FBTrace.sysout("fbs.unregisterDebugger have "+debuggers.length+
+                " after unreg debuggr.debuggerName: "+debuggr.debuggerName+" we are "+
+                (enabledDebugger?"enabled":"not enabled")+" jsd.isOn:"+(jsd?jsd.isOn:"no jsd"));
 
         return debuggers.length;
     },
@@ -1516,7 +1547,7 @@ var fbs =
 
         var pref = fbs.scriptsFilter;
         fbs.scriptsFilter = prefs.getCharPref("extensions.firebug.service.scriptsFilter");
-        var mustReset = (pref !== fbs.scriptsFilter)
+        var mustReset = (pref !== fbs.scriptsFilter);
 
         if (FBTrace.DBG_OPTIONS)
             FBTrace.sysout("obeyPrefs mustReset = "+mustReset+" pref: "+pref+" fbs.scriptsFilter: "
@@ -1540,7 +1571,7 @@ var fbs =
         {
             fbs.loggingFunctionCalls = new LogFunctionStepper();
             jsdHandlers.add(fbs.loggingFunctionCalls);
-            jsdHandlers.hook() // no frame argument
+            jsdHandlers.hook(); // no frame argument
         }
         else if (fbs.loggingFunctionCalls)
         {
@@ -1749,7 +1780,7 @@ var fbs =
             if (FBTrace.DBG_FBS_ERRORS)
                 FBTrace.sysout("onDebugger failed: "+exc,exc);
 
-            ERROR("onDebugger failed: "+exc);
+            ERROR("onDebugger failed: "+exc, exc);
             return RETURN_CONTINUE;
         }
         finally
@@ -1834,8 +1865,9 @@ var fbs =
             {
                 if (FBTrace.DBG_FBS_BP)
                 {
-                    FBTrace.sysout("onBreakpoint("+getExecutionStopNameFromType(type)+") disabledCount:"+disabledCount
-                              +" monitorCount:"+monitorCount+" conditionCount:"+conditionCount+" runningUntil:"+runningUntil, bp);
+                    FBTrace.sysout("onBreakpoint("+getExecutionStopNameFromType(type)+
+                        ") disabledCount:"+disabledCount+" monitorCount:"+monitorCount+
+                        " conditionCount:"+conditionCount+" runningUntil:"+runningUntil, bp);
                 }
 
                 if (bp.type & BP_MONITOR && !(bp.disabled & BP_MONITOR))
@@ -2036,7 +2068,8 @@ var fbs =
             if (FBTrace.DBG_FBS_SRCUNITS)
             {
                 var msg = "Top Scripts Uncleared:";
-                for (p in this.onXScriptCreatedByTag) msg += (p+"|");
+                for (var p in this.onXScriptCreatedByTag)
+                    msg += (p + "|");
                 FBTrace.sysout(msg);
             }
             if (!sourceFile || !sourceFile.breakOnZero || sourceFile.breakOnZero != scriptTag)
@@ -3236,6 +3269,7 @@ var fbs =
         this.breakpoints = {};
         var breakpointStore = fbs.getBreakpointStore();
         var urls =  fbs.getBreakpointURLs();
+
         for (var i = 0; i < urls.length; i++)
         {
             var url = urls[i];
@@ -3254,14 +3288,19 @@ var fbs =
                     errorBreakpoints.push({href: url, lineNo: bp.lineNo, type: BP_ERROR });
             }
         }
+
         if (FBTrace.DBG_FBS_BP)
         {
-            FBTrace.sysout("restoreBreakpoints "+urls.length+", disabledCount:"+disabledCount
-                    +" monitorCount:"+monitorCount+" conditionCount:"+conditionCount+", restored ", this.breakpoints);
+            FBTrace.sysout("restoreBreakpoints "+urls.length+", disabledCount:"+disabledCount+
+                " monitorCount:"+monitorCount+" conditionCount:"+conditionCount+", restored ",
+                this.breakpoints);
+
             for (var p in this.breakpoints)
-                FBTrace.sysout("restoreBreakpoints restored "+p+" condition "+this.breakpoints[p].condition);
+                FBTrace.sysout("restoreBreakpoints restored "+p+" condition "+
+                    this.breakpoints[p].condition);
         }
     },
+
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
     // When (debugger keyword and not halt)||(bp and BP_UNTIL) || (onBreakPoint && no conditions)
     // || interuptHook (single stepping).
@@ -3275,7 +3314,9 @@ var fbs =
             {
                 var debuggr = this.reFindDebugger(frame, stepStayOnDebuggr);
                 if (FBTrace.DBG_FBS_STEP)
-                    FBTrace.sysout("fbs.routeBreakToDebuggr type="+getExecutionStopNameFromType(type)+" stepStayOnDebuggr "+stepStayOnDebuggr+" debuggr:"+(debuggr?debuggr:"null")+" last_debuggr="+(fbs.last_debuggr?fbs.last_debuggr.debuggerName:"null"));
+                    FBTrace.sysout("fbs.routeBreakToDebuggr type="+getExecutionStopNameFromType(type)+
+                        " stepStayOnDebuggr "+stepStayOnDebuggr+" debuggr:"+(debuggr?debuggr:"null")+
+                        " last_debuggr="+(fbs.last_debuggr?fbs.last_debuggr.debuggerName:"null"));
 
                 if (!debuggr) // then the frame is not for our debugger
                     return RETURN_CONTINUE;  // This means that we will continue to take interrupts until  when?
@@ -3285,7 +3326,9 @@ var fbs =
                 var debuggr = this.findDebugger(frame);
 
                 if (FBTrace.DBG_FBS_STEP)
-                    FBTrace.sysout("fbs.routeBreakToDebuggr type="+getExecutionStopNameFromType(type)+" debuggr:"+(debuggr?debuggr:"null")+" last_debuggr="+(fbs.last_debuggr?fbs.last_debuggr.debuggerName:"null"));
+                    FBTrace.sysout("fbs.routeBreakToDebuggr type="+getExecutionStopNameFromType(type)+
+                        " debuggr:"+(debuggr?debuggr:"null")+" last_debuggr="+
+                        (fbs.last_debuggr?fbs.last_debuggr.debuggerName:"null"));
             }
 
             if (debuggr)
@@ -3301,10 +3344,11 @@ var fbs =
         return RETURN_CONTINUE;
     },
 
-
     breakIntoDebugger: function(debuggr, frame, type)
     {
-        if (FBTrace.DBG_FBS_STEP || FBTrace.DBG_FBS_BP) FBTrace.sysout("fbs.breakIntoDebugger called "+debuggr.debuggerName+" fbs.isChromeBlocked:"+fbs.isChromeBlocked);
+        if (FBTrace.DBG_FBS_STEP || FBTrace.DBG_FBS_BP)
+            FBTrace.sysout("fbs.breakIntoDebugger called "+debuggr.debuggerName+
+                " fbs.isChromeBlocked:"+fbs.isChromeBlocked);
 
         // Before we break, clear information about previous stepping session
         this.stopStepping(frame);
@@ -3325,14 +3369,19 @@ var fbs =
         // Execution resumes now. Check if the user requested stepping and if so
         // install the necessary hooks
         this.startStepping(frame);
+
         if (FBTrace.DBG_FBS_STEP || FBTrace.DBG_FBS_BP)
-            FBTrace.sysout("fbs.breakIntoDebugger returning "+returned+" from "+debuggr.debuggerName+" with jsd.pauseDepth "+jsd.pauseDepth+" and functionHook "+jsd.functionHook);
+            FBTrace.sysout("fbs.breakIntoDebugger returning "+returned+" from "+
+                debuggr.debuggerName+" with jsd.pauseDepth "+jsd.pauseDepth+" and functionHook "+
+                jsd.functionHook);
+
         return returned;
     },
 
     needToBreakForError: function(reportNextError)
     {
-        return this.breakOnErrors || this.findErrorBreakpoint(this.normalizeURL(reportNextError.fileName), reportNextError.lineNo) != -1;
+        return this.breakOnErrors || this.findErrorBreakpoint(
+            this.normalizeURL(reportNextError.fileName), reportNextError.lineNo) != -1;
     },
 
     step: function(mode, context, debuggr) // debuggr calls us to stage stepping
@@ -3351,7 +3400,6 @@ var fbs =
         // the actual stepping starts after we resume
     },
 
-
     startStepping: function(frame) // if needed
     {
         jsdHandlers.hook(frame);
@@ -3367,13 +3415,15 @@ var fbs =
 
     hookInterrupts: function(frame)
     {
-        jsd.interruptHook = { onExecute: hook(this.onInterrupt, RETURN_CONTINUE)};  // TODO move the try code in hook() to dispatch
+        // TODO move the try code in hook() to dispatch
+        jsd.interruptHook = { onExecute: hook(this.onInterrupt, RETURN_CONTINUE)};
 
         if (frame)
             ScriptInterrupter.enable(frame.script);
 
         if (FBTrace.DBG_FBS_STEP)
-            FBTrace.sysout("set InterruptHook frame.script.tag: "+(frame?frame.script.tag:"<no frame>"), ScriptInterrupter);
+            FBTrace.sysout("set InterruptHook frame.script.tag: "+
+                (frame?frame.script.tag:"<no frame>"), ScriptInterrupter);
     },
 
     onInterrupt: function(frame, type, rv)
@@ -3523,7 +3573,7 @@ var fbs =
     },
 };
 
-// ************************************************************************************************
+// ********************************************************************************************* //
 // Script Interrupt Manager
 
 var ScriptInterrupter =
@@ -3596,7 +3646,7 @@ var ScriptInterrupter =
 
        this.entries = {};
     }
-}
+};
 
 // ************************************************************************************************
 // Local Helpers
@@ -3830,7 +3880,7 @@ var FirebugPrefsObserver =
         var filter = fbs.scriptsFilter;
         fbs.showEvents = (filter == "all" || filter == "events");
         fbs.showEvals = (filter == "all" || filter == "evals");
-        if (FBTrace.DBG_FBS_ERRORS)
+        if (FBTrace.DBG_OPTIONS)
             FBTrace.sysout("fbs.showEvents "+fbs.showEvents+" fbs.showEvals "+fbs.showEvals);
     }
 };
@@ -4038,7 +4088,7 @@ var trackFiles =
 
         }
     },
-}
+};
 
 function tmpout(text)
 {

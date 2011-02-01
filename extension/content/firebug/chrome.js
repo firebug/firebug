@@ -284,6 +284,8 @@ top.FirebugChrome =
             this.applyTextSize(value);
         if (name =="omitObjectPathStack")
             this.obeyOmitObjectPathStack(value);
+        if (name == "showErrorCount")
+            this.toggleShowErrorCount();
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
@@ -663,6 +665,42 @@ top.FirebugChrome =
         return switchToPanel;
     },
 
+    getSelectedPanelLocation: function()
+    {
+        var location;
+        if (Firebug.currentContext)
+        {
+            var panel = Firebug.chrome.getSelectedPanel();
+            if (panel)
+            {
+                location = panel.location;
+                if (!location && panel.name == "html")
+                    location = Firebug.currentContext.window.document.location;
+
+                if (location && (location instanceof Firebug.SourceFile ||
+                    location instanceof CSSStyleSheet))
+                {
+                    location = location.href;
+                }
+            }
+        }
+
+        if (!location)
+        {
+            if (Firebug.tabBrowser.currentURI)
+                location = Firebug.tabBrowser.currentURI.asciiSpec;
+        }
+
+        if (!location)
+            return;
+
+        location = location.href || location.url || location.toString();
+        if (Firebug.filterSystemURLs && FBL.isSystemURL(location))
+            return;
+
+        return location;
+    },
+
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
     // Location interface provider for binding.xml panelFileList
 
@@ -1010,7 +1048,10 @@ top.FirebugChrome =
             box.style.fontSize = (zoom * 100)+"%";
         }
 
-        $("fbLargeCommandLine").style.fontSize = (zoom * 100)+"%";
+        if(Firebug.CommandLine.getCommandLineLarge().setFontSize)
+            Firebug.CommandLine.getCommandLineLarge().setFontSize((zoom * 100) + "%");
+        else
+            Firebug.CommandLine.getCommandLineLarge().style.fontSize = (zoom * 100) + "%";
 
         Firebug.dispatchToPanels("onTextSizeChange", [zoom]);
     },
@@ -1018,6 +1059,11 @@ top.FirebugChrome =
     obeyOmitObjectPathStack: function(value)
     {
         FBL.hide(panelStatus, (value?true:false));
+    },
+
+    toggleShowErrorCount: function()
+    {
+        Firebug.Errors.showContext(null, Firebug.currentContext);
     },
 
     getPanelStatusElements: function()
@@ -1071,6 +1117,20 @@ top.FirebugChrome =
             detachFirebug.setAttribute("label", (Firebug.isDetached() ?
                 FBL.$STR("firebug.AttachFirebug") : FBL.$STR("firebug.DetachFirebug")));
         }
+
+        var toggleFirebug = FBL.getElementsByAttribute(popup, "id", "menu_toggleFirebug")[0];
+        if (toggleFirebug)
+        {
+            var fbContentBox = this.$("fbContentBox");
+            var collapsed = fbContentBox.getAttribute("collapsed");
+            toggleFirebug.setAttribute("label", (collapsed == "true"?
+                FBL.$STR("firebug.ShowFirebug") : FBL.$STR("firebug.Hide Firebug"))); // xxxHonza localization
+
+            // If Firebug is detached, hide the menu (F12 doesn't hide but just focuses the
+            // external window)
+            if (Firebug.isDetached())
+                toggleFirebug.setAttribute("collapsed", (collapsed == "true" ? "false" : "true"));
+        }
     },
 
     onOptionsShowing: function(popup)
@@ -1109,7 +1169,10 @@ top.FirebugChrome =
         //if (!panelBar1.selectedPanel)
         //    return false;
 
-        var popup = $("fbContextMenu");
+        var popup = event.target;
+        if(popup.id !="fbContextMenu")
+            return;
+
         var target = document.popupNode;
         var panel = target ? Firebug.getElementPanel(target) : null;
 
@@ -1197,7 +1260,7 @@ top.FirebugChrome =
         // 3. Add menu items from uiListeners
         var items = [];
         FBL.dispatch(Firebug.uiListeners, "onContextMenu", [items, object, target,
-            Firebug.currentContext, panel]);
+            Firebug.currentContext, panel, popup]);
 
         if (items)
         {

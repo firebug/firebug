@@ -38,12 +38,17 @@ Firebug.Profiler = extend(Firebug.Module,
         // The profiler is available only if the debugger (script panel) and console are enabled.
         var debuggerEnabled = Firebug.Debugger.isAlwaysEnabled();
         var consoleEnabled = Firebug.Console.isAlwaysEnabled();
-        toggleProfiling.disabled = !debuggerEnabled || !consoleEnabled;
+        var disabled = !debuggerEnabled || !consoleEnabled;
+
+        // Attributes must be modified on the <command> element. All toolbar buttons
+        // and menuitems are hooked up to the command.
+        Firebug.chrome.setGlobalAttribute("cmd_toggleProfiling", "disabled",
+            disabled ? "true" : "false");
 
         // Update button's tooltip.
-        var tooltipText = toggleProfiling.disabled ? $STR("ProfileButton.Disabled.Tooltip")
+        var tooltipText = disabled ? $STR("ProfileButton.Disabled.Tooltip")
             : $STR("ProfileButton.Enabled.Tooltip");
-        toggleProfiling.setAttribute("tooltiptext", tooltipText);
+        Firebug.chrome.setGlobalAttribute("cmd_toggleProfiling", "tooltiptext", tooltipText);
     },
 
     toggleProfiling: function(context)
@@ -157,7 +162,7 @@ Firebug.Profiler = extend(Firebug.Module,
             if (!groupRow.customMessage)
                 captionBox.textContent = $STR("Profile");
             var timeBox = groupRow.getElementsByClassName("profileTime").item(0);
-            timeBox.textContent = $STRP("plural.Profile_Time", [totalTime, totalCalls], 1);
+            timeBox.textContent = $STRP("plural.Profile_Time2", [totalTime, totalCalls], 1);
 
             var groupBody = groupRow.lastChild;
             var sizer = Firebug.Profiler.ProfileTable.tag.replace({}, groupBody);

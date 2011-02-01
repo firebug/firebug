@@ -62,42 +62,9 @@ var Errors = Firebug.Errors = extend(Firebug.Module,
             this.showCount(context.errorCount);
     },
 
-    showMessageOnStatusBar: function(error)
-    {
-        if (statusText && statusBar && Firebug.breakOnErrors && error.message &&  !(error.flags & WARNING_FLAG))  // sometimes statusText is undefined..how?
-        {
-            statusText.setAttribute("value", error.message);
-            statusBar.setAttribute("errors", "true");
-            statusText.setAttribute("shown", "true")
-            if (FBTrace.DBG_ERRORLOG) FBTrace.sysout("errors.showMessageOnStatusBar error.message:"+error.message+"\n");
-        }
-    },
-
     showCount: function(errorCount)
     {
-        if (!statusBar)
-            return;
-
-        if (errorCount)
-        {
-            if (Firebug.showErrorCount)
-            {
-                var errorLabel = $STRP("plural.Error_Count", [errorCount]);
-                statusText.setAttribute("shown", "true")
-                statusText.setAttribute("value", errorLabel);
-            }
-            else
-            {
-              statusText.removeAttribute("shown");
-            }
-
-            statusBar.setAttribute("errors", "true");
-        }
-        else
-        {
-            statusText.setAttribute("value", "");
-            statusBar.removeAttribute("errors");
-        }
+        Firebug.StartButton.showCount(errorCount);
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
@@ -280,6 +247,8 @@ var Errors = Firebug.Errors = extend(Firebug.Module,
         var url = object.sourceName;
         if(!url)
             return Firebug.currentContext;  // eg some XPCOM messages
+        if (url.indexOf("://chromebug/"))
+            return Firebug.currentContext; // no context for self
 
         var errorContext = null;
         Firebug.TabWatcher.iterateContexts(
@@ -368,7 +337,7 @@ var Errors = Firebug.Errors = extend(Firebug.Module,
                 var win2Name = safeGetWindowLocation(win2);
                 var moreInfo =  {object: object, fromError2: win1, fromFirebug: win2};
                 FBTrace.sysout("errors.getErrorContext; ERROR wrong parent window? "+win1Name+" !== "+win2Name, moreInfo);
-            }
+        }
         }
 
         return errorContext; // we looked everywhere...

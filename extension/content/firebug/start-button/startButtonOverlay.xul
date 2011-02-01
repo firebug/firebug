@@ -1,7 +1,8 @@
 <?xml version="1.0"?>
 
 <overlay xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul">
-    <script type="application/x-javascript" src="chrome://firebug/content/start-button/startButtonOverlay.js"/>
+    <script type="application/x-javascript"
+        src="chrome://firebug/content/start-button/startButtonOverlay.js"/>
 
     <popupset id="mainPopupSet">
 
@@ -21,6 +22,13 @@
                 label="firebug.ClearConsole"
                 command="cmd_clearConsole"
                 key="key_clearConsole"
+                class="fbInternational"/>
+            <menuitem
+                id="menu_showErrorCount"
+                type="checkbox"
+                label="firebug.Show Error Count"
+                oncommand="FirebugChrome.onToggleOption(this)"
+                option="showErrorCount"
                 class="fbInternational"/>
             <menuseparator/>
             <menuitem
@@ -77,12 +85,12 @@
     <statusbar id="status-bar">
         <statusbarpanel id="fbStatusBar" context="fbStatusContextMenu" role="button"
             aria-labelledby="fbStatusPrefix fbStatusText" aria-describedby="fbStatusIcon"
-            onmouseup="Firebug.onClickStatusIcon(Firebug.currentContext, event);"
+            onmouseup="Firebug.StartButton.onClickStatusIcon(Firebug.currentContext, event);"
             tooltiptext="Firebug">
             <image id="fbStatusIcon" observes="firebugStatus"/>
             <label id="fbStatusPrefix" collapsed="true" />
             <label id="fbStatusText"
-                onmouseup="Firebug.onClickStatusText(Firebug.currentContext, event);" />
+                onmouseup="Firebug.StartButton.onClickStatusText(Firebug.currentContext, event);" />
         </statusbarpanel>
     </statusbar>
 

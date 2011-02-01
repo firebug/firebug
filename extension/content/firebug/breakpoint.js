@@ -113,7 +113,20 @@ Firebug.Breakpoint = extend(Firebug.Module,
     {
         this.updatePanelTab(panel, false);
         Firebug.Debugger.breakNow(panel.context);
-    }
+    },
+
+    updateOption: function(name, value)
+    {
+        if (name == "showBreakNotification")
+        {
+            var panelBar1 = Firebug.chrome.$("fbPanelBar1");
+            var doc = panelBar1.browser.contentDocument;
+            var checkboxes = doc.querySelectorAll(".doNotShowBreakNotification");
+
+            for (var i=0; i<checkboxes.length; i++)
+                checkboxes[i].checked = !value;
+        }
+    },
 });
 
 // ************************************************************************************************
@@ -313,7 +326,10 @@ Firebug.Breakpoint.BreakpointsPanel.prototype = extend(Firebug.Panel,
         {
             fbs.enumerateBreakpoints(url, {call: function(url, line, props, scripts)
             {
-                if (FBTrace.DBG_BP) FBTrace.sysout("breakpoints.extractBreakpoints type: "+props.type+" in url "+url+"@"+line+" contxt "+context.getName(), props);
+                if (FBTrace.DBG_BP)
+                    FBTrace.sysout("breakpoints.extractBreakpoints type: "+props.type+" in url "+
+                        url+"@"+line+" contxt "+context.getName(), props);
+
                 if (renamer.checkForRename(url, line, props)) // some url in this sourceFileMap has changed, we'll be back.
                     return;
 
@@ -321,16 +337,24 @@ Firebug.Breakpoint.BreakpointsPanel.prototype = extend(Firebug.Panel,
                 {
                     var script = scripts[0];
                     var analyzer = Firebug.SourceFile.getScriptAnalyzer(context, script);
-                    if (FBTrace.DBG_BP) FBTrace.sysout("breakpoints.refresh enumerateBreakpoints for script="+script.tag+(analyzer?" has analyzer":" no analyzer")+" in context "+context.getName());
+                    if (FBTrace.DBG_BP)
+                        FBTrace.sysout("breakpoints.refresh enumerateBreakpoints for script="+
+                            script.tag+(analyzer?" has analyzer":" no analyzer")+" in context "+
+                            context.getName());
+
                     if (analyzer)
                         var name = analyzer.getFunctionDescription(script, context).name;
                     else
                         var name = FBL.guessFunctionName(url, 1, context);
+
                     var isFuture = false;
                 }
                 else
                 {
-                    if (FBTrace.DBG_BP) FBTrace.sysout("breakpoints.refresh enumerateBreakpoints future for url@line="+url+"@"+line+"\n");
+                    if (FBTrace.DBG_BP)
+                        FBTrace.sysout("breakpoints.refresh enumerateBreakpoints future for url@line="+
+                            url+"@"+line+"\n");
+
                     var isFuture = true;
                 }
 
@@ -367,7 +391,8 @@ Firebug.Breakpoint.BreakpointsPanel.prototype = extend(Firebug.Panel,
 
         // even if we did not rename, some bp may be dynamic
         if (FBTrace.DBG_SOURCEFILES)
-            FBTrace.sysout("breakpoints.extractBreakpoints context.dynamicURLhasBP: "+context.dynamicURLhasBP, result);
+            FBTrace.sysout("breakpoints.extractBreakpoints context.dynamicURLhasBP: "+
+                context.dynamicURLhasBP, result);
 
         return result;
     },
@@ -558,9 +583,12 @@ SourceFileRenamer.prototype.checkForRename = function(url, line, props)
                 this.bps.push(props);
             }
         }
+
         this.context.dynamicURLhasBP = true;  // whether not we needed to rename, the dynamic sourceFile has a bp.
+
         if (FBTrace.DBG_SOURCEFILES)
-            FBTrace.sysout("breakpoints.checkForRename found bp in "+sourceFile+" renamed files:", this.renamedSourceFiles);
+            FBTrace.sysout("breakpoints.checkForRename found bp in "+sourceFile+" renamed files:",
+                this.renamedSourceFiles);
     }
     else
     {
@@ -577,7 +605,8 @@ SourceFileRenamer.prototype.needToRename = function(context)
         this.renameSourceFiles(context);
 
     if (FBTrace.DBG_SOURCEFILES)
-        FBTrace.sysout("debugger renamed " + this.renamedSourceFiles.length + " sourceFiles", context.sourceFileMap);
+        FBTrace.sysout("debugger renamed " + this.renamedSourceFiles.length + " sourceFiles",
+            context.sourceFileMap);
 
     return this.renamedSourceFiles.length;
 }
@@ -632,7 +661,7 @@ SourceFileRenamer.prototype.renameSourceFiles = function(context)
     return this.renamedSourceFiles.length;
 }
 
-// ************************************************************************************************
+// ********************************************************************************************* //
 
 Firebug.Breakpoint.ConditionEditor = function(doc)
 {
@@ -721,7 +750,7 @@ Firebug.Breakpoint.ConditionEditor.prototype = domplate(Firebug.InlineEditor.pro
     {
     },
 
-    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
     endEditing: function(target, value, cancel)
     {
@@ -737,8 +766,9 @@ Firebug.Breakpoint.ConditionEditor.prototype = domplate(Firebug.InlineEditor.pro
 
 });
 
-// ************************************************************************************************
-/*
+// ********************************************************************************************* //
+
+/**
  * Construct a break notification popup
  * @param doc the document to contain the popup
  * @param cause info object for the popup, with these optional fields:
@@ -749,51 +779,45 @@ Firebug.Breakpoint.ConditionEditor.prototype = domplate(Firebug.InlineEditor.pro
 Firebug.Breakpoint.BreakNotification = function(doc, cause)
 {
     this.initialize(doc, cause);
+    setClass(this.box, "breakNotification");
+    this.box.repObject = this;
 }
 
+// xxxHonza: move as much as possible into Firebug.BalloonNote object
 Firebug.Breakpoint.BreakNotification.prototype = domplate(Firebug.InlineEditor.prototype,
 {
-    tag:
-        DIV({"class": "conditionEditor breakNotification", onclick: "$hide"},
-            DIV({"class": "notationEditorTop1"},
-                DIV({"class": "notationEditorTop2"})
-            ),
-            DIV({"class": "notationEditorInner1"},
-                DIV({"class": "notationEditorInner2"},
-                    DIV({"class": "conditionEditorInner"},
-                        DIV({"class": "notationCaption"},
-                            SPAN({"class": "notationTitle"}, "$cause.title"),
-                            BUTTON({"class": "notationButton closeButton", onclick: "$onCloseAction",
-                                $collapsed: "$cause|hideCloseAction"},
-                                $STR("X")
-                            ),
-                            BUTTON({"class": "notationButton copyButton", onclick: "$onCopyAction",
-                                $collapsed: "$cause|hideCopyAction"},
-                                $STR("Copy")
-                            ),
-                            BUTTON({"class": "notationButton disableButton", onclick: "$onSkipAction",
-                                $collapsed: "$cause|hideSkipAction"},
-                                $STR("script.balloon.Disable")
-                            ),
-                            BUTTON({"class": "notationButton ContinueButton", onclick: "$onOkAction",
-                                $collapsed: "$cause|hideOkAction"},
-                                $STR("script.balloon.Continue")
-                            )
-                        ),
-                        DIV({"class": "notationCaption"},
-                            SPAN({"class": "notationTitle"}, "$cause|getTitle"),
-                            SPAN("&nbsp;"),
-                            SPAN({"class": "notationTitle diff"}, "$cause|getDiff"),
-                            SPAN("&nbsp;"),
-                            TAG("$cause|getTargetTag", {object: "$cause.target"}),
-                            SPAN("&nbsp;"),
-                            TAG("$cause|getRelatedTargetTag", {object: "$cause.relatedNode"})
-                        )
-                    )
+    contentTag:
+        DIV(
+            DIV({"class": "notationCaption"},
+                SPAN({"class": "notationTitle"}, "$cause.title"),
+                BUTTON({"class": "notationButton copyButton", onclick: "$onCopyAction",
+                    $collapsed: "$cause|hideCopyAction"},
+                    $STR("Copy")
+                ),
+                BUTTON({"class": "notationButton disableButton", onclick: "$onSkipAction",
+                    $collapsed: "$cause|hideSkipAction"},
+                    $STR("script.balloon.Disable")
+                ),
+                BUTTON({"class": "notationButton ContinueButton", onclick: "$onOkAction",
+                    $collapsed: "$cause|hideOkAction"},
+                    $STR("script.balloon.Continue")
                 )
             ),
-            DIV({"class": "notationEditorBottom1"},
-                DIV({"class": "notationEditorBottom2"})
+            DIV({"class": "notationCaption"},
+                SPAN({"class": "notationTitle"}, "$cause|getTitle"),
+                SPAN("&nbsp;"),
+                SPAN({"class": "notationTitle diff"}, "$cause|getDiff"),
+                SPAN("&nbsp;"),
+                TAG("$cause|getTargetTag", {object: "$cause.target"}),
+                SPAN("&nbsp;"),
+                TAG("$cause|getRelatedTargetTag", {object: "$cause.relatedNode"})
+            ),
+            DIV({"class": "notationCaption"},
+                INPUT({"class": "doNotShowBreakNotification", type: "checkbox",
+                    change: "$onShowBreakNotificationChanged"},
+                    // xxxHonza localization
+                    "Do not display break notifications (you can enable it again in the panel's tab menu)"
+                )
             )
         ),
 
@@ -842,10 +866,27 @@ Firebug.Breakpoint.BreakNotification.prototype = domplate(Firebug.InlineEditor.p
         return str;
     },
 
+    getContentTag: function(object)
+    {
+        return this.contentTag;
+    },
+
+    onShowBreakNotificationChanged: function(event)
+    {
+        // Do not display again if the user wishes so.
+        Firebug.setPref(Firebug.prefDomain, "showBreakNotification", !event.target.checked);
+    },
+
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
     initialize: function(doc, cause)
     {
         this.cause = cause;
-        this.box = this.tag.replace({cause: cause}, doc, this);
+        this.box = Firebug.BalloonNote.prototype.tag.replace({cause: cause}, doc, this);
+
+        // xxxHonza: it's weird, but I can't associate the event handler using domplate.
+        var checkbox = this.box.querySelector(".doNotShowBreakNotification");
+        checkbox.addEventListener("change", bind(this.onShowBreakNotificationChanged, this), false);
     },
 
     show: function(sourceLine, panel, value)
@@ -877,44 +918,48 @@ Firebug.Breakpoint.BreakNotification.prototype = domplate(Firebug.InlineEditor.p
 
     hide: function(event) // the argument event does not come thru??
     {
-        if (this.panel)
+        // We already called hide
+        if (!this.panel)
+            return;
+
+        // As the box shrinks you don't want text to spill
+        var guts = this.box.getElementsByClassName("balloonContent").item(0);
+        collapse(guts, true);  
+
+        var msg = this.cause.message;
+        if (msg)
         {
-            var guts = this.box.getElementsByClassName("conditionEditorInner").item(0);
-            collapse(guts, true);  // as the box shrinks you don't want text to spill
-
-            var msg = this.cause.message;
-            if (msg)
+            var self = this;
+            var delta = Math.max(20,Math.floor(self.box.clientWidth/20));
+            var interval = setInterval(function slide(event)
             {
-                var self = this;
-                var delta = Math.max(20,Math.floor(self.box.clientWidth/20));
-                var interval = setInterval(function slide(event)
+                if (self.box.clientWidth < delta)
                 {
-                    if (self.box.clientWidth < delta)
-                    {
-                        clearNode(guts);
+                    clearNode(guts);
 
-                        clearInterval(interval);
-                        if (self.box.parentNode)
-                        {
-                            self.box.parentNode.removeChild(self.box);
-                            self.target.setAttribute('title', msg);
-                            setClass(self.target, "noteInToolTip");
-                        }
-                        delete self.target;
-                        delete self.panel;
+                    clearInterval(interval);
+                    if (self.box.parentNode)
+                    {
+                        self.box.parentNode.removeChild(self.box);
+                        self.target.setAttribute('title', msg);
+                        setClass(self.target, "noteInToolTip");
                     }
-                    else
-                        self.box.style.width = (self.box.clientWidth - delta)+"px";
-                }, 15);
-            }
-            else
-            {
-                delete this.target;
-                delete this.panel;
-            }
+                    delete self.target;
+                    delete self.panel;
+                }
+                else
+                    self.box.style.width = (self.box.clientWidth - delta)+"px";
+            }, 15);
         }
-        // else we already called hide
+        else
+        {
+            delete this.target;
+            delete this.panel;
+        }
     },
+
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+    // Notification Actions
 
     hideCopyAction: function(cause)
     {
@@ -934,8 +979,9 @@ Firebug.Breakpoint.BreakNotification.prototype = domplate(Firebug.InlineEditor.p
 
     onSkipAction: function(event)
     {
-         if (this.cause.skipAction)
-             this.cause.skipAction();
+        var balloon = this.getBalloon(event.target);
+        if (balloon.cause.skipAction)
+            balloon.cause.skipAction();
     },
 
     hideOkAction: function(cause)
@@ -945,33 +991,39 @@ Firebug.Breakpoint.BreakNotification.prototype = domplate(Firebug.InlineEditor.p
 
     onOkAction: function(event)
     {
-         if (this.cause.okAction)
-             this.cause.okAction();
-    },
-
-    hideCloseAction: function(cause)
-    {
-        return !cause.closeAction;
+        var balloon = this.getBalloon(event.target);
+        if (balloon.cause.okAction)
+            balloon.cause.okAction();
     },
 
     onCloseAction: function(event)
     {
-        if (this.cause.onCloseAction)
-            this.cause.onCloseAction();
+        var balloon = this.getBalloon(event.target);
+        if (balloon.cause.onCloseAction)
+            balloon.cause.onCloseAction();
         else
-            this.hide(event); // same as click on balloon body
+            balloon.hide(event); // same as click on balloon body
     },
 
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+    getBalloon: function(target)
+    {
+        var parentNode = getAncestorByClass(target, "balloon");
+        return parentNode.repObject;
+    }
 });
 
-// ************************************************************************************************
+// ********************************************************************************************* //
 // Registration
 
 Firebug.registerPanel(Firebug.Breakpoint.BreakpointsPanel);
 Firebug.registerRep(Firebug.Breakpoint.BreakpointRep);
 Firebug.registerModule(Firebug.Breakpoint);
 
-// ************************************************************************************************
+// ********************************************************************************************* //
+
+return Firebug.Breakpoint;
 
 return Firebug.Breakpoint;
 }});

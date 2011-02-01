@@ -492,6 +492,10 @@
             <body><![CDATA[
             if (this.initialized)
                 return;
+
+            if (!this.panelTabs)
+                return;
+
             var tab = this.panelTabs.firstChild;
             while (tab)
             {
@@ -900,19 +904,21 @@
     </handlers>
 </binding>
 
-<binding id="panelFileList">
-
+<!-- This binding represents a location list used in a panel. The list is based
+     on a menu-button (a toolbar button with popup menu) and its purposes it displaying
+     available files on the current page. For instance, in the Script panel, the location
+     list displays list of all scripts. -->
+<binding id="panelFileList" display="xul:menu"
+    extends="chrome://global/content/bindings/toolbarbutton.xml#menu-button">
     <content popup="_child">
         <xul:label class="toolbarbutton-text title" crop="right" flex="1"
             xbl:inherits="value=title"/>
-        <xul:menupopup anonid="popup" position="after_start"/>
-        <children includes="observes|template|menupopup|tooltip"/>
-        <xul:image class="toolbarbutton-icon"
-            xbl:inherits="validate,src=image,toolbarmode,buttonstyle"/>
-        <xul:label class="toolbarbutton-text label" crop="right" flex="1"
-             xbl:inherits="value=label,accesskey,crop,toolbarmode,buttonstyle"/>
-        <xul:dropmarker type="menu" class="toolbarbutton-menu-dropmarker"
-            xbl:inherits="disabled,label"/>
+        <xul:menupopup anonid="popup"/>
+        <xul:toolbarbutton class="fb-toolbarbutton box-inherit toolbarbutton-menubutton-button"
+            anonid="button" flex="1" 
+            xbl:inherits="disabled,crop,image,label,accesskey,command,align,dir,pack,orient" />
+        <xul:dropmarker type="menu-button" class="toolbarbutton-menubutton-dropmarker"
+            xbl:inherits="align,dir,pack,orient,disabled,label"/>
     </content>
 
     <resources>
@@ -981,12 +987,6 @@
             ]]></body>
         </method>
 
-        <method name="showPopup">
-            <body><![CDATA[
-                this.popup.showPopup(this, -1, -1, "popup", "bottomleft", "topleft");
-            ]]></body>
-        </method>
-
         <method name="selectObject">
             <parameter name="object"/>
             <body><![CDATA[
@@ -1012,98 +1012,28 @@
             ]]></body>
         </method>
 
-        <method name="filterList">
-            <parameter name="substring"/>
-            <body><![CDATA[
-                if (this.firstMatch)
-                    this.firstMatch.setAttribute("_moz-menuactive", "false");
-
-                this.firstMatch = null;
-                var groupMatchCount = 0;
-                for (var child = this.popup.lastChild; child; child = child.previousSibling)
-                {
-                    if (child.localName == "menuitem")
-                    {
-                        var label = child.getAttribute("label").toLowerCase();
-                        child._searchMatch = label.indexOf(substring) != -1;
-                        if (child._searchMatch)
-                        {
-                            this.firstMatch = child;
-                            ++groupMatchCount;
-                        }
-                    }
-                    else
-                    {
-                        child._searchMatch = !!groupMatchCount;
-                        groupMatchCount = 0;
-                    }
-                }
-
-                if (this.firstMatch)
-                {
-                    // skip the filterMessageHeader
-                    for (var child = this.popup.firstChild.nextSibling; child; child = child.nextSibling)
-                    {
-                        child.hidden = !child._searchMatch;
-                        child.removeAttribute("_moz-menuactive");
-                    }
-
-                    this.firstMatch.setAttribute("_moz-menuactive", "true");
-                }
-
-                return this.firstMatch;
-            ]]></body>
-        </method>
-
         <method name="onKeyPress">
             <parameter name="event"/>
             <body><![CDATA[
                 if (event.keyCode == 13) // Return
                 {
                     this.enterActiveItem();
-                    this.filterString = '';
+                    FBL.cancelEvent(event);
                 }
-                else if (event.keyCode == 8) // Backspace
-                {
-                    this.filterString = this.filterString.substr(0, this.filterString.length-1);
-                    this.filterList(this.filterString);
-                }
-                else if (event.charCode)
-                {
-                    this.filterString += String.fromCharCode(event.charCode).toLowerCase();
-                    this.filterList(this.filterString);
-                }
-                else
-                    return;
 
-                this.setFilterStringMessage(this.filterString, this.firstMatch);
-                FBL.cancelEvent(event);
+                this.filter.onKeyPress(event);
             ]]></body>
-        </method>
-
-        <method name="setFilterStringMessage">
-            <parameter name="filterString"/>
-            <parameter name="matched"/>
-            <body><![CDATA[
-                var message = this.filterStringHeader.getAttribute('value');
-                var parts = message.split(':');
-                message = parts[0]+ ": "+filterString;
-                if (!matched)
-                    message += " <-- no match";
-                this.filterStringHeader.setAttribute('value', message);
-            ]]>
-            </body>
         </method>
 
         <method name="onClick">
             <parameter name="event"/>
             <body><![CDATA[
-            //https://developer.mozilla.org/en/XUL/arrowscrollbox
+                //https://developer.mozilla.org/en/XUL/arrowscrollbox
                 var scrollbutton = event.originalTarget;
-                 var anonid = scrollbutton.getAttribute("anonid");
-                 if (anonid == 'scrollbutton-up')
+                var anonid = scrollbutton.getAttribute("anonid");
+                if (anonid == 'scrollbutton-up')
                     scrollbutton.parentNode.scrollByIndex(-15);
-                 if (anonid == 'scrollbutton-down')
+                if (anonid == 'scrollbutton-down')
                     scrollbutton.parentNode.scrollByIndex(+15);
             ]]>
             </body>
@@ -1115,6 +1045,7 @@
         <handler event="popupshowing"><![CDATA[
             if (this.popup.firstChild)
                 return false;
+
             var locator = this.getLocator();
             var objects = locator.getLocationList();
             if (!objects)
@@ -1130,8 +1061,10 @@
                 return;
             }
 
-            this.filterStringHeader = FBL.createMenuHeader(this.popup, {label: "script.Type any key to filter list"});
-            FBL.setClass(this.filterStringHeader, "fbURLMenuItem");
+            this.filter = FBL.createMenuHeader(this.popup,
+                {label: "script.Type any key to filter list"});
+            FBL.setClass(this.filter, "fbURLMenuItem");
+            FBL.setClass(this.filter, "fbLocationListFilter");
 
             var groupNames = [];
             var groups = {};
@@ -1149,11 +1082,16 @@
 
                 var entry = {object: object, fileName: description.name};
 
-                if (currentDescription && currentDescription.name == description.name && currentDescription.path == description.path)
+                if (currentDescription && currentDescription.name == description.name &&
+                    currentDescription.path == description.path)
+                {
                     entry.selected = true;
+                }
 
                 if (groups.hasOwnProperty(description.path))
+                {
                     groups[description.path].push(entry);
+                }
                 else
                 {
                     groups[description.path] = [entry];
@@ -1197,9 +1135,11 @@
 
             this._closed = false;
 
-            this.filterString = "";
+            this.filter.filterString = "";
+
             this.onkeypress = FBL.bind(this.onKeyPress, this);
             window.addEventListener("keypress", this.onkeypress, true);
+
             this.onclick = FBL.bind(this.onClick, this);
             this.popup.addEventListener("click", this.onclick, true);
         ]]></handler>
@@ -1207,7 +1147,8 @@
         <handler event="popuphidden"><![CDATA[
             window.removeEventListener("keypress", this.onkeypress, true);
             delete this.onkeypress;
-            delete this.filterString;
+
+            delete this.filter.filterString;
 
             FBL.eraseNode(this.popup);
             this._closed = true;
@@ -1236,10 +1177,113 @@
                         FBTrace.sysout("!locator.getObjectLocation for "+ this.getAttribute('label'), locator);
                 }
             }
-
             return;
         ]]></handler>
     </handlers>
+</binding>
+
+<!-- Panel file list filter is used in the file list (location list) to filter its content. -->
+<binding id="panelFileListFilter">
+    <implementation>
+        <constructor><![CDATA[
+           this.popup = this.parentNode;
+        ]]></constructor>
+
+        <method name="filterList">
+            <parameter name="substring"/>
+            <body><![CDATA[
+                this.firstMatch = null;
+                var groupMatchCount = 0;
+                substring = substring.toLowerCase();
+                for (var child = this.popup.lastChild; child; child = child.previousSibling)
+                {
+                    if (child.localName == "menuitem")
+                    {
+                        var label = child.getAttribute("label").toLowerCase();
+                        child._searchMatch = label.indexOf(substring) != -1;
+                        if (child._searchMatch)
+                        {
+                            this.firstMatch = child;
+                            ++groupMatchCount;
+                        }
+                    }
+                    else
+                    {
+                        child._searchMatch = !!groupMatchCount;
+                        groupMatchCount = 0;
+                    }
+                }
+
+                if (this.firstMatch)
+                {
+                    // skip the filterMessageHeader
+                    for (var child = this.popup.firstChild.nextSibling; child; child = child.nextSibling)
+                        child.hidden = !child._searchMatch;
+
+                    try
+                    {
+                        var toolbarButton = this.popup.parentNode;
+                        var menuBoxObject = toolbarButton.boxObject.QueryInterface(Ci.nsIMenuBoxObject);
+                        menuBoxObject.activeChild = this.firstMatch;
+                    }
+                    catch (err)
+                    {
+                        if (FBTrace.DBG_ERRORS)
+                            FBTrace.sysout("bindings; panelFileListFilter EXCEPTION " + err, err);
+                    }
+                }
+
+                return this.firstMatch;
+            ]]></body>
+        </method>
+
+        <method name="onKeyPress">
+            <parameter name="event"/>
+            <body><![CDATA[
+                if (event.keyCode == 13) // Return
+                {
+                    this.filterString = "";
+                }
+                else if (event.keyCode == 8) // Backspace
+                {
+                    this.filterString = this.filterString.substr(0, this.filterString.length-1);
+                    this.filterList(this.filterString);
+                }
+                else if (event.charCode)
+                {
+                    this.filterString += String.fromCharCode(event.charCode).toLowerCase();
+                    this.filterList(this.filterString);
+                }
+                else
+                {
+                    return;
+                }
+
+                this.setFilterStringMessage(this.filterString, this.firstMatch);
+                FBL.cancelEvent(event);
+            ]]></body>
+        </method>
+
+        <method name="setFilterStringMessage">
+            <parameter name="filterString"/>
+            <parameter name="matched"/>
+            <body><![CDATA[
+                // The placeholder is displayed in gray while the filter is in black.
+                this.setAttribute("keyword", filterString ? true : false);
+
+                // If there is no match the background is red.
+                this.setAttribute("match", matched ? true : false);
+
+                // Set the text into the box. If the user entirely removed the text use
+                // the placeholder again.
+                filterString = filterString ? filterString : 
+                    FBL.$STR("script.Type any key to filter list");
+
+                this.setAttribute("value", filterString);
+            ]]>
+            </body>
+        </method>
+    </implementation>
 </binding>
 
 <!-- Searchbox is located in the main Firebug toolbar and can be used to search
@@ -1545,6 +1589,36 @@
             Firebug.CommandLine.cancel(Firebug.currentContext);
         ]]></handler>
     </handlers>
+</binding>
+
+
+<binding id="splitmenu" extends="chrome://global/content/bindings/menu.xml#menuitem-base">
+    <content align='stretch'>
+        <xul:menuitem anonid="item" flex="1"
+                    class="menuitem-tooltip split-menuitem-item"
+                    xbl:inherits="label,key,image,value" allowevents='true'/>
+        <xul:hbox class="split-menu-right-image" xbl:inherits="_moz-menuactive" >
+            <xul:hbox align="center" class="menu-right" xbl:inherits="_moz-menuactive,disabled">
+                <xul:image/>
+            </xul:hbox>
+        </xul:hbox>
+        <children includes="menupopup"/>
+    </content>
+
+    <implementation implements="nsIDOMXULSelectControlItemElement, nsIDOMXULContainerItemElement, nsIAccessibleProvider">
+        <constructor><![CDATA[
+            if (this.getAttribute("iconic") == "true") {
+                this.item.classList.remove("menuitem-tooltip");
+                this.item.classList.add("menuitem-iconic-tooltip");
+                this.item.classList.add("menuitem-iconic");
+            }
+			// workaround for 3.6 bug
+			this.item.classList.add("split-menuitem-item");
+      ]]></constructor>
+      <field name="item" readonly="true">
+            document.getAnonymousElementByAttribute(this, "anonid", "item");
+      </field>
+    </implementation>
 </binding>
 
 </bindings>

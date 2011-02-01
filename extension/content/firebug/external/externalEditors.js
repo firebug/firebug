@@ -132,7 +132,6 @@ Firebug.ExternalEditors = extend(Firebug.Module,
                 var item = {label: editors[i].label, image: editors[i].image,
                                 nol10n: true, disabled: disabled };
                 var menuitem = FBL.createMenuItem(popup, item);
-                menuitem.setAttribute("command", "cmd_openInEditor");
                 menuitem.value = editors[i].id;
             }
             FBL.createMenuItem(popup, "-");
@@ -151,7 +150,7 @@ Firebug.ExternalEditors = extend(Firebug.Module,
             "", args);
     },
 
-    onContextMenu: function(items, object, target, context, panel)
+    onContextMenu: function(items, object, target, context, panel, popup)
     {
         if (!this.count())
             return
@@ -159,61 +158,46 @@ Firebug.ExternalEditors = extend(Firebug.Module,
         if (object instanceof FBL.SourceLink)
         {
             var sourceLink = object;
-            this.appendContextMenuItem(items, sourceLink.href,
+            this.appendContextMenuItem(popup, sourceLink.href,
                 sourceLink.line);
         }
         else if (panel)
         {
             var sourceLink = panel.getSourceLink(target, object);
             if (sourceLink)
-                this.appendContextMenuItem(items, sourceLink.href,
+                this.appendContextMenuItem(popup, sourceLink.href,
                     sourceLink.line);
         }
     },
 
-    appendContextMenuItem: function(items, url, line)
+    appendContextMenuItem: function(popup, url, line)
     {
         var editor = this.getDefaultEditor();
-        items.push(
-            {label: editor.label,
-             image: editor.image,
-             command: function(){
-                    Firebug.ExternalEditors.open(url, line)
-                }
-            }
-        );
+
+        var item = FBL.$('menu_firebugOpenWithEditor').cloneNode(true);
+        item.setAttribute('image', editor.image);
+        item.setAttribute('label', editor.label);
+        item.value = editor.id;
+        item.removeAttribute('openFromContext');
+
+        popup.appendChild(item);
+
+        this.lastSource={url: url, line: line};
+    },
+
+    onContextMenuCommand: function(event)
+    {
+        if (event.target.hasAttribute('openEditorList'))
+            this.openEditorList();
+        else if(event.currentTarget.hasAttribute('openFromContext'))
+            this.openContext(Firebug.currentContext, event.target.value);
+        else
+            this.open(this.lastSource.url, this.lastSource.line, event.target.value);
     },
 
     openContext: function(context, editorId)
     {
-        var location;
-        if (context)
-        {
-            var panel = Firebug.chrome.getSelectedPanel();
-            if (panel)
-            {
-                location = panel.location;
-                if (!location && panel.name == "html")
-                    location = context.window.document.location;
-
-                if (location && (location instanceof Firebug.SourceFile ||
-                    location instanceof CSSStyleSheet))
-                {
-                    location = location.href;
-                }
-            }
-        }
-        if (!location)
-        {
-            if (Firebug.tabBrowser.currentURI)
-                location = Firebug.tabBrowser.currentURI.asciiSpec;
-        }
-        if (!location)
-            return;
-        location = location.href || location.url || location.toString();
-        if (Firebug.filterSystemURLs && isSystemURL(location))
-            return;
-
+        var location = Firebug.chrome.getSelectedPanelLocation();
         this.open(location, null, editorId, context)
     },
 

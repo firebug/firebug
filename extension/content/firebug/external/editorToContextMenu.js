@@ -8,10 +8,24 @@ function OpenEditorShowHide(event)
     var item = document.getElementById("menu_firebugOpenWithEditor");
 
     var popupNode = document.popupNode;
-    item.hidden = (popupNode instanceof HTMLInputElement
+    var hidden = (popupNode instanceof HTMLInputElement
         || popupNode instanceof HTMLIFrameElement
-        || popupNode instanceof HTMLTextAreaElement
-        || Firebug.ExternalEditors.count() == 0);
+        || popupNode instanceof HTMLTextAreaElement)
+    if(hidden)
+    {
+        item.hidden = true;
+        return;
+    }
+    var editor=Firebug.ExternalEditors.getDefaultEditor();
+    if(!editor)
+    {
+        item.hidden = true;
+        return;
+    }
+    item.hidden = false;
+    item.setAttribute('image', editor.image);
+    item.setAttribute('label', editor.label);
+    item.value = editor.id;
 }
 
 function addOpenEditorShowHide(event)

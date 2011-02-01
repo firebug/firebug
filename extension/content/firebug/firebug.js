@@ -57,7 +57,8 @@ const prefNames =  // XXXjjb TODO distribute to modules
     "largeCommandLine", "textWrapWidth", "openInWindow", "showErrorCount",
     "activateSameOrigin", "allPagesActivation", "hiddenPanels",
     "panelTabMinWidth", "sourceLinkLabelWidth", "currentVersion",
-    "useDefaultLocale",
+    "useDefaultLocale", "toolbarCustomizationDone", "addonBarOpened",
+    "showBreakNotification",
 
     // Search
     "searchCaseSensitive", "searchGlobal", "searchUseRegularExpression",
@@ -616,7 +617,7 @@ top.Firebug =
         if (Firebug.getSuspended())
             tooltip += "\n" + Firebug.getSuspended();
         else
-            tooltip += "\n" + $STRP("plural.Total_Firebugs", [Firebug.TabWatcher.contexts.length]);
+            tooltip += "\n" + $STRP("plural.Total_Firebugs2", [Firebug.TabWatcher.contexts.length]);
 
         if (Firebug.allPagesActivation == "on")
         {
@@ -1067,9 +1068,6 @@ top.Firebug =
             FBTrace.sysout("firebug.updatePref EXIT: "+name+"="+value+"\n");
     },
 
-
-
-
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
     // Browser Bottom Bar
     // TODO XULWindow
@@ -1077,8 +1075,10 @@ top.Firebug =
     showBar: function(show)
     {
         var browser = Firebug.chrome.getCurrentBrowser();
+
         if (FBTrace.DBG_WINDOWS || FBTrace.DBG_ACTIVATION)
-            FBTrace.sysout("showBar("+show+") for browser "+browser.currentURI.spec+" Firebug.currentContext "+Firebug.currentContext);
+            FBTrace.sysout("showBar("+show+") for browser "+browser.currentURI.spec+
+                " Firebug.currentContext "+Firebug.currentContext);
 
         var contentBox = Firebug.chrome.$("fbContentBox");
         var contentSplitter = Firebug.chrome.$("fbContentSplitter");
@@ -1091,12 +1091,6 @@ top.Firebug =
 
         if (contentSplitter)
             contentSplitter.setAttribute("collapsed", !shouldShow);
-
-        if (toggleCommand)
-            toggleCommand.setAttribute("checked", !!shouldShow);
-
-        if (detachCommand)
-            detachCommand.setAttribute("checked", Firebug.isDetached());
 
         //xxxHonza: should be removed.
         dispatch(Firebug.uiListeners, show ? "showUI" : "hideUI", [browser, Firebug.currentContext]);
@@ -1204,7 +1198,7 @@ top.Firebug =
                     Firebug.unMinimize();
                 else
                     Firebug.minimizeBar();
-            });
+            }, 200);
             Firebug.chrome.close();
         }
         else
@@ -1282,34 +1276,6 @@ top.Firebug =
     {
         var browser = FirebugChrome.getCurrentBrowser();
         this.showBar(browser && browser.showFirebug);  // implicitly this is operating in the chrome of browser.xul
-    },
-
-    onClickStatusIcon: function(context, event)
-    {
-        if (event.button != 0)
-            return;
-        else if (isControl(event))
-            this.toggleDetachBar(true);
-        else if (context && context.errorCount)
-            Firebug.toggleBar(undefined, 'console');
-        else
-            this.toggleBar();
-    },
-
-    onClickStatusText: function(context, event)
-    {
-        if (event.button != 0)
-            return;
-
-        if (!context || !context.errorCount)
-            return;
-
-        var panel = Firebug.chrome.getSelectedPanel();
-        if (panel && panel.name != "console")
-        {
-            Firebug.chrome.selectPanel("console");
-            cancelEvent(event);
-        }
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *

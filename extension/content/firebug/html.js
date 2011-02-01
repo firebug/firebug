@@ -70,7 +70,7 @@ Firebug.HTMLModule = extend(Firebug.Module,
 
 Firebug.HTMLPanel = function() {};
 
-var WalkingPanel = extend(Firebug.Panel, HTMLLib.ElementWalkerFunctions);
+var WalkingPanel = extend(Firebug.Panel, Firebug.HTMLLib.ElementWalkerFunctions);
 
 Firebug.HTMLPanel.prototype = extend(WalkingPanel,
 {
@@ -176,7 +176,7 @@ Firebug.HTMLPanel.prototype = extend(WalkingPanel,
         var objectNodeBox = this.ioBox.findObjectBox(elt);
         if (objectNodeBox)
         {
-            var attrBox = HTMLLib.findNodeAttrBox(objectNodeBox, attrName);
+            var attrBox = Firebug.HTMLLib.findNodeAttrBox(objectNodeBox, attrName);
             if (attrBox)
             {
                 var attrValueBox = attrBox.childNodes[3];
@@ -266,12 +266,12 @@ Firebug.HTMLPanel.prototype = extend(WalkingPanel,
 
         var lines;
 
-        var url = HTMLLib.getSourceHref(node);
+        var url = Firebug.HTMLLib.getSourceHref(node);
         if (url)
             lines = this.context.sourceCache.load(url);
         else
         {
-            var text = HTMLLib.getSourceText(node);
+            var text = Firebug.HTMLLib.getSourceText(node);
             lines = splitLines(text);
         }
 
@@ -326,7 +326,7 @@ Firebug.HTMLPanel.prototype = extend(WalkingPanel,
 
         if (attrChange == MODIFICATION || attrChange == ADDITION)
         {
-            var nodeAttr = HTMLLib.findNodeAttrBox(objectNodeBox, attrName);
+            var nodeAttr = Firebug.HTMLLib.findNodeAttrBox(objectNodeBox, attrName);
             if (FBTrace.DBG_HTML)
                 FBTrace.sysout("mutateAttr "+attrChange+" "+attrName+"="+attrValue+" node: "+nodeAttr, nodeAttr);
             if (nodeAttr && nodeAttr.childNodes.length > 3)
@@ -358,7 +358,7 @@ Firebug.HTMLPanel.prototype = extend(WalkingPanel,
         }
         else if (attrChange == REMOVAL)
         {
-            var nodeAttr = HTMLLib.findNodeAttrBox(objectNodeBox, attrName);
+            var nodeAttr = Firebug.HTMLLib.findNodeAttrBox(objectNodeBox, attrName);
             if (nodeAttr)
             {
                 nodeAttr.parentNode.removeChild(nodeAttr);
@@ -368,6 +368,8 @@ Firebug.HTMLPanel.prototype = extend(WalkingPanel,
             // generated after the attribute was removed from the node
             this.highlightMutation(objectNodeBox, objectNodeBox, "mutated");
         }
+
+        Firebug.Inspector.repaint();
     },
 
     mutateText: function(target, parent, textValue)
@@ -400,7 +402,7 @@ Firebug.HTMLPanel.prototype = extend(WalkingPanel,
             if (FBTrace.DBG_HTML)
                 FBTrace.sysout("html.mutateText target: " + target + " parent: " + parent);
 
-            var nodeText = HTMLLib.getTextElementTextBox(parentNodeBox);
+            var nodeText = Firebug.HTMLLib.getTextElementTextBox(parentNodeBox);
             if (!nodeText.firstChild)
             {
                 if (FBTrace.DBG_HTML)   FBTrace.sysout("html.mutateText failed to update text, TextElement firstChild does not exist");
@@ -731,17 +733,17 @@ Firebug.HTMLPanel.prototype = extend(WalkingPanel,
 
     isWhitespaceText: function(node)
     {
-        return HTMLLib.isWhitespaceText(node);
+        return Firebug.HTMLLib.isWhitespaceText(node);
     },
 
     findNextSibling: function (node)
     {
-        return HTMLLib.findNextSibling(node);
+        return Firebug.HTMLLib.findNextSibling(node);
     },
 
     isSourceElement: function(element)
     {
-        return HTMLLib.isSourceElement(element);
+        return Firebug.HTMLLib.isSourceElement(element);
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
@@ -864,6 +866,9 @@ Firebug.HTMLPanel.prototype = extend(WalkingPanel,
         if (!node)
             return;
 
+        if (!noKeyModifiers(event))
+          return;
+
         // * expands the node with all its children
         // + expands the node
         // - collapses the node
@@ -874,9 +879,6 @@ Firebug.HTMLPanel.prototype = extend(WalkingPanel,
             this.ioBox.expandObject(node);
         else if (ch == "-")
             this.ioBox.contractObject(node);
-
-        if (isControl(event) || isShift(event))
-            return;
 
         if (event.keyCode == KeyEvent.DOM_VK_UP)
             this.selectNodeBy("up");
@@ -1184,7 +1186,7 @@ Firebug.HTMLPanel.prototype = extend(WalkingPanel,
         else
         {
             var doc = this.context.window.document;
-            search = this.lastSearch = new HTMLLib.NodeSearch(text, doc, this.panelNode, this.ioBox);
+            search = this.lastSearch = new Firebug.HTMLLib.NodeSearch(text, doc, this.panelNode, this.ioBox);
         }
 
         var loopAround = search.find(reverse, Firebug.Search.isCaseSensitive(text));
@@ -1292,7 +1294,7 @@ Firebug.HTMLPanel.prototype = extend(WalkingPanel,
                 var EditElement = "EditHTMLElement";
 
                 if (isElementMathML(node))
-                    EditElement = "EditMathMLElement"
+                    EditElement = "EditMathMLElement";
                 else if (isElementSVG(node))
                     EditElement = "EditSVGElement";
 
@@ -1421,7 +1423,7 @@ Firebug.HTMLPanel.CompleteElement = domplate(FirebugReps.Element,
             DIV({"class": "nodeLabel", role: "presentation"},
                 SPAN({"class": "nodeLabelBox repTarget", role : 'treeitem', 'aria-expanded' : 'false'},
                     "&lt;",
-                    SPAN({"class": "nodeTag"}, "$object.nodeName|toLowerCase"),
+                    SPAN({"class": "nodeTag"}, "$object|getNodeName"),
                     FOR("attr", "$object|attrIterator", AttrTag),
                     SPAN({"class": "nodeBracket"}, "&gt;")
                 )
@@ -1433,7 +1435,7 @@ Firebug.HTMLPanel.CompleteElement = domplate(FirebugReps.Element,
             ),
             DIV({"class": "nodeCloseLabel", role:"presentation"},
                 "&lt;/",
-                SPAN({"class": "nodeTag"}, "$object.nodeName|toLowerCase"),
+                SPAN({"class": "nodeTag"}, "$object|getNodeName"),
                 "&gt;"
              )
         ),
@@ -1457,7 +1459,7 @@ Firebug.HTMLPanel.CompleteElement = domplate(FirebugReps.Element,
 
             for (var child = walker.getFirstChild(node); child; child = walker.getNextSibling(child))
             {
-                if (child.nodeType != Node.TEXT_NODE || !HTMLLib.isWhitespaceText(child))
+                if (child.nodeType != Node.TEXT_NODE || !Firebug.HTMLLib.isWhitespaceText(child))
                     nodes.push(child);
             }
             return nodes;
@@ -1494,7 +1496,7 @@ Firebug.HTMLPanel.Element = domplate(FirebugReps.Element,
             IMG({"class": "twisty", role: "presentation"}),
             SPAN({"class": "nodeLabelBox repTarget", role : 'treeitem', 'aria-expanded' : 'false'},
                 "&lt;",
-                SPAN({"class": "nodeTag"}, "$object.nodeName|toLowerCase"),
+                SPAN({"class": "nodeTag"}, "$object|getNodeName"),
                 FOR("attr", "$object|attrIterator", AttrTag),
                 SPAN({"class": "nodeBracket editable insertBefore"}, "&gt;")
             )
@@ -1503,7 +1505,7 @@ Firebug.HTMLPanel.Element = domplate(FirebugReps.Element,
         DIV({"class": "nodeCloseLabel", role : "presentation"},
             SPAN({"class": "nodeCloseLabelBox repTarget"},
                 "&lt;/",
-                SPAN({"class": "nodeTag"}, "$object.nodeName|toLowerCase"),
+                SPAN({"class": "nodeTag"}, "$object|getNodeName"),
                 "&gt;"
             )
         )
@@ -1545,7 +1547,7 @@ Firebug.HTMLPanel.HTMLHtmlElement = domplate(FirebugReps.Element,
                 IMG({"class": "twisty", role: "presentation"}),
                 SPAN({"class": "nodeLabelBox repTarget", role: 'treeitem', 'aria-expanded': 'false'},
                     "&lt;",
-                    SPAN({"class": "nodeTag"}, "$object.nodeName|toLowerCase"),
+                    SPAN({"class": "nodeTag"}, "$object|getNodeName"),
                     FOR("attr", "$object|attrIterator", AttrTag),
                     SPAN({"class": "nodeBracket editable insertBefore"}, "&gt;")
                 )
@@ -1554,7 +1556,7 @@ Firebug.HTMLPanel.HTMLHtmlElement = domplate(FirebugReps.Element,
             DIV({"class": "nodeCloseLabel", role : "presentation"},
                 SPAN({"class": "nodeCloseLabelBox repTarget"},
                     "&lt;/",
-                    SPAN({"class": "nodeTag"}, "$object.nodeName|toLowerCase"),
+                    SPAN({"class": "nodeTag"}, "$object|getNodeName"),
                     "&gt;"
                 )
             )
@@ -1568,12 +1570,12 @@ Firebug.HTMLPanel.TextElement = domplate(FirebugReps.Element,
             DIV({"class": "nodeLabel", role: "presentation"},
                 SPAN({"class": "nodeLabelBox repTarget", role : 'treeitem'},
                     "&lt;",
-                    SPAN({"class": "nodeTag"}, "$object.nodeName|toLowerCase"),
+                    SPAN({"class": "nodeTag"}, "$object|getNodeName"),
                     FOR("attr", "$object|attrIterator", AttrTag),
                     SPAN({"class": "nodeBracket editable insertBefore"}, "&gt;"),
                     TextTag,
                     "&lt;/",
-                    SPAN({"class": "nodeTag"}, "$object.nodeName|toLowerCase"),
+                    SPAN({"class": "nodeTag"}, "$object|getNodeName"),
                     "&gt;"
                 )
             )
@@ -1587,7 +1589,7 @@ Firebug.HTMLPanel.EmptyElement = domplate(FirebugReps.Element,
             DIV({"class": "nodeLabel", role: "presentation"},
                 SPAN({"class": "nodeLabelBox repTarget", role : 'treeitem'},
                     "&lt;",
-                    SPAN({"class": "nodeTag"}, "$object.nodeName|toLowerCase"),
+                    SPAN({"class": "nodeTag"}, "$object|getNodeName"),
                     FOR("attr", "$object|attrIterator", AttrTag),
                     SPAN({"class": "nodeBracket editable insertBefore"}, "&gt;")
                 )
@@ -1602,7 +1604,7 @@ Firebug.HTMLPanel.XEmptyElement = domplate(FirebugReps.Element,
             DIV({"class": "nodeLabel", role: "presentation"},
                 SPAN({"class": "nodeLabelBox repTarget", role : 'treeitem'},
                     "&lt;",
-                    SPAN({"class": "nodeTag"}, "$object.nodeName|toLowerCase"),
+                    SPAN({"class": "nodeTag"}, "$object|getNodeName"),
                     FOR("attr", "$object|attrIterator", AttrTag),
                     SPAN({"class": "nodeBracket editable insertBefore"}, "/&gt;")
                 )
@@ -1933,13 +1935,13 @@ function getNodeTag(node, expandAll)
             return getEmptyElementTag(node);
         else if (unwrapObject(node).firebugIgnore)
             return null;
-        else if (HTMLLib.isContainerElement(node))
+        else if (Firebug.HTMLLib.isContainerElement(node))
             return expandAll ? Firebug.HTMLPanel.CompleteElement.tag : Firebug.HTMLPanel.Element.tag;
-        else if (HTMLLib.isEmptyElement(node))
+        else if (Firebug.HTMLLib.isEmptyElement(node))
             return getEmptyElementTag(node);
-        else if (Firebug.showCommentNodes && HTMLLib.hasCommentChildren(node))
+        else if (Firebug.showCommentNodes && Firebug.HTMLLib.hasCommentChildren(node))
             return expandAll ? Firebug.HTMLPanel.CompleteElement.tag : Firebug.HTMLPanel.Element.tag;
-        else if (HTMLLib.hasNoElementChildren(node))
+        else if (Firebug.HTMLLib.hasNoElementChildren(node))
             return Firebug.HTMLPanel.TextElement.tag;
         else
             return expandAll ? Firebug.HTMLPanel.CompleteElement.tag : Firebug.HTMLPanel.Element.tag;
@@ -2176,7 +2178,7 @@ Firebug.HTMLModule.Breakpoint = function(node, type)
     this.xpath = getElementXPath(node);
     this.checked = true;
     this.type = type;
-}
+};
 
 Firebug.HTMLModule.BreakpointRep = domplate(Firebug.Rep,
 {

@@ -8,7 +8,6 @@ define("commandLine.js", [], function(require, exports, module) { with (FBL) {
 const Cc = Components.classes;
 const Ci = Components.interfaces;
 
-const commandHistoryMax = 1000;
 const commandPrefix = ">>>";
 
 const reOpenBracket = /[\[\(\{]/;
@@ -17,10 +16,6 @@ const reCmdSource = /^with\(_FirebugCommandLine\){(.*)};$/;
 
 // ************************************************************************************************
 // Globals
-
-var commandHistory = [""];
-var commandPointer = 0;
-var commandInsertPointer = -1;
 
 // ************************************************************************************************
 
@@ -296,7 +291,8 @@ Firebug.CommandLine = extend(Firebug.Module,
     // isSandbox(context) true, => context.global is a Sandbox
     evaluateInSandbox: function(expr, context, thisValue, targetWindow, successConsoleFunction, exceptionFunction)
     {
-        var scriptToEval = expr;
+        var result,
+            scriptToEval = expr;
 
         try
         {
@@ -329,8 +325,8 @@ Firebug.CommandLine = extend(Firebug.Module,
 
     acceptCompletionOrReturnIt: function(context)
     {
-        var commandLine = getCommandLine(context);
-        var completionBox = getCompletionBox();
+        var commandLine = this.getCommandLine(context);
+        var completionBox = this.getCompletionBox();
         if (completionBox.value.length === 0 || commandLine.value.length === completionBox.value.length) // we have nothing to complete
             return this.autoCompleter.getVerifiedText(commandLine);
 
@@ -350,7 +346,6 @@ Firebug.CommandLine = extend(Firebug.Module,
             if (!Firebug.largeCommandLine || context.panelName != "console")
             {
                 this.clear(context);
-                this.appendToHistory(expr);
                 Firebug.Console.log(commandPrefix + " " + expr, context, "command", FirebugReps.Text);
             }
             else
@@ -358,6 +353,8 @@ Firebug.CommandLine = extend(Firebug.Module,
                 var shortExpr = cropString(stripNewLines(expr), 100);
                 Firebug.Console.log(commandPrefix + " " + shortExpr, context, "command", FirebugReps.Text);
             }
+
+            this.commandHistory.appendToHistory(expr);
 
             var noscript = getNoScript();
             if (noscript)
@@ -390,7 +387,7 @@ Firebug.CommandLine = extend(Firebug.Module,
         if (expr == "")
             return;
 
-        this.appendToHistory(expr, true);
+        this.commandHistory.appendToHistory(expr, true);
 
         this.evaluate(expr, context, null, null, function(result, context)
         {
@@ -399,7 +396,7 @@ Firebug.CommandLine = extend(Firebug.Module,
                 Firebug.chrome.contextMenuObject = result;
 
                 var popup = Firebug.chrome.$("fbContextMenu");
-                var commandLine = getCommandLine(context);
+                var commandLine = this.getCommandLine(context);
                 popup.showPopup(commandLine, -1, -1, "popup", "bottomleft", "topleft");
             }
         });
@@ -412,7 +409,7 @@ Firebug.CommandLine = extend(Firebug.Module,
             return;
 
         this.clear(context);
-        this.appendToHistory(expr);
+        this.commandHistory.appendToHistory(expr);
 
         this.evaluate(expr, context, null, null, function(result, context)
         {
@@ -423,28 +420,26 @@ Firebug.CommandLine = extend(Firebug.Module,
 
     reenter: function(context)
     {
-        var command = commandHistory[commandInsertPointer];
+        var command = this.commandHistory.commands[this.commandHistory.commandInsertPointer];
         if (command)
             this.enter(context, command);
     },
 
     copyBookmarklet: function(context)
     {
-        var commandLine = getCommandLine(context);
+        var commandLine = this.getCommandLine(context);
         var expr = "javascript: " + stripNewLines(this.autoCompleter.getVerifiedText(commandLine));
         copyToClipboard(expr);
     },
 
     focus: function(context)
     {
-        var wasMinimized = Firebug.isMinimized();
-
         if (Firebug.isDetached())
             Firebug.chrome.focus();
         else
             Firebug.toggleBar(true);
 
-        var commandLine = getCommandLine(context);
+        var commandLine = this.getCommandLine(context);
 
         if (!context.panelName)
         {
@@ -452,7 +447,7 @@ Firebug.CommandLine = extend(Firebug.Module,
         }
         else if (context.panelName != "console")
         {
-            Firebug.chrome.switchToPanel(context, "console");
+            this.Popup.toggle(Firebug.currentContext);
             setTimeout(function() { commandLine.select(); });
         }
         else
@@ -460,17 +455,15 @@ Firebug.CommandLine = extend(Firebug.Module,
             // We are already on the console, if the command line has also
             // the focus, toggle back. But only if the UI has been already
             // opened.
-            if (commandLine.getAttribute("focused") == "true" && !wasMinimized)
-                Firebug.chrome.unswitchToPanel(context, "console", true);
-            else
+            if (commandLine.getAttribute("focused") != "true")
                 setTimeout(function() { commandLine.select(); });
         }
     },
 
     clear: function(context)
     {
-        var commandLine = getCommandLine(context);
-        var completionBox = getCompletionBox();
+        var commandLine = this.getCommandLine(context);
+        var completionBox = this.getCompletionBox();
 
         completionBox.value = "";
 
@@ -480,14 +473,14 @@ Firebug.CommandLine = extend(Firebug.Module,
 
         commandLine.value = context.commandLineText = "";
         this.autoCompleter.reset();
-        this.autoCompleter.hide(getCompletionBox());
+        this.autoCompleter.hide(this.getCompletionBox());
 
         return true;
     },
 
     cancel: function(context)
     {
-        var commandLine = getCommandLine(context);
+        var commandLine = this.getCommandLine(context);
         if (this.autoCompleter.revert(commandLine))
             return;
 
@@ -496,14 +489,14 @@ Firebug.CommandLine = extend(Firebug.Module,
 
     update: function(context)
     {
-        var commandLine = getCommandLine(context);
+        var commandLine = this.getCommandLine(context);
         context.commandLineText = this.autoCompleter.getVerifiedText(commandLine);
     },
 
     complete: function(context, reverse)
     {
-        var commandLine = getCommandLine(context);
-        var completionBox = getCompletionBox();
+        var commandLine = this.getCommandLine(context);
+        var completionBox = this.getCompletionBox();
         this.autoCompleter.complete(context, commandLine, completionBox, true, reverse);
         context.commandLineText = this.autoCompleter.getVerifiedText(commandLine);
         this.autoCompleter.reset();
@@ -521,8 +514,8 @@ Firebug.CommandLine = extend(Firebug.Module,
         if (multiLine)
             chrome.$("fbSidePanelDeck").selectedPanel = chrome.$("fbLargeCommandBox");
 
-        var commandLineSmall = chrome.$("fbCommandLine");
-        var commandLineLarge = chrome.$("fbLargeCommandLine");
+        var commandLineSmall = this.getCommandLineSmall();
+        var commandLineLarge = this.getCommandLineLarge();
 
         if (saveMultiLine)  // we are just closing the view
         {
@@ -530,10 +523,12 @@ Firebug.CommandLine = extend(Firebug.Module,
             return;
         }
 
+        Firebug.currentContext.commandLineText = Firebug.currentContext.commandLineText || "";
+
         if (multiLine)
-            commandLineLarge.value = cleanIndentation(commandLineSmall.value);
+            commandLineLarge.value = cleanIndentation(Firebug.currentContext.commandLineText);
         else
-            commandLineSmall.value = stripNewLines(commandLineLarge.value);
+            commandLineSmall.value = stripNewLines(Firebug.currentContext.commandLineText);
     },
 
     toggleMultiLine: function(forceLarge)
@@ -548,7 +543,7 @@ Firebug.CommandLine = extend(Firebug.Module,
         if (!context)
             return;
 
-        var commandLine = getCommandLine(context);
+        var commandLine = this.getCommandLine(context);
         if (commandLine.value.indexOf("\n") >= 0)
         {
             setTimeout(bindFixed(function()
@@ -565,46 +560,6 @@ Firebug.CommandLine = extend(Firebug.Module,
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 
-    appendToHistory: function(command, unique)
-    {
-        if (unique && commandHistory[commandInsertPointer] == command)
-            return;
-
-        ++commandInsertPointer;
-        if (commandInsertPointer >= commandHistoryMax)
-            commandInsertPointer = 0;
-
-        commandPointer = commandInsertPointer+1;
-        commandHistory[commandInsertPointer] = command;
-    },
-
-    cycleCommandHistory: function(context, dir)
-    {
-        var commandLine = getCommandLine(context);
-
-        commandHistory[commandPointer] = this.autoCompleter.getVerifiedText(commandLine);
-
-        if (dir < 0)
-        {
-            --commandPointer;
-            if (commandPointer < 0)
-                commandPointer = 0;
-        }
-        else
-        {
-            ++commandPointer;
-            if (commandPointer > commandInsertPointer+1)
-                commandPointer = commandInsertPointer+1;
-        }
-
-        var command = commandHistory[commandPointer];
-
-        this.autoCompleter.reset();
-
-        commandLine.value = context.commandLineText = command;
-        this.setCursor(commandLine, command.length);
-    },
-
     setCursor: function(commandLine, position)
     {
         //commandLine.inputField.setSelectionRange(command.length, command.length);  // textbox version, https://developer.mozilla.org/en/XUL/Property/inputField
@@ -619,6 +574,7 @@ Firebug.CommandLine = extend(Firebug.Module,
         Firebug.Module.initialize.apply(this, arguments);
 
         this.setAutoCompleter();
+        this.commandHistory = new Firebug.CommandLine.CommandHistory();
 
         if (Firebug.largeCommandLine)
             this.setMultiLine(true, Firebug.chrome);
@@ -654,27 +610,33 @@ Firebug.CommandLine = extend(Firebug.Module,
 
     attachListeners: function()
     {
-        Firebug.chrome.$("fbLargeCommandLine").addEventListener('focus', this.onCommandLineFocus, true);
-        Firebug.chrome.$("fbCommandLine").addEventListener('focus', this.onCommandLineFocus, true);
-        Firebug.chrome.$("fbCommandLine").addEventListener('input', this.onCommandLineInput, true);
-        Firebug.chrome.$("fbCommandLine").addEventListener('overflow', this.onCommandLineOverflow, true);
-        Firebug.chrome.$("fbCommandLine").addEventListener('keyup', this.onCommandLineKeyUp, true);
-        Firebug.chrome.$("fbCommandLine").addEventListener('keydown', this.onCommandLineKeyDown, true);
-        Firebug.chrome.$("fbCommandLine").addEventListener('keypress', this.onCommandLineKeyPress, true);
-        Firebug.chrome.$("fbCommandLine").addEventListener('blur', this.onCommandLineBlur, true);
+        var commandLineSmall = this.getCommandLineSmall(),
+            commandLineLarge = this.getCommandLineLarge();
+
+        commandLineLarge.addEventListener('focus', this.onCommandLineFocus, true);
+        commandLineSmall.addEventListener('focus', this.onCommandLineFocus, true);
+        commandLineSmall.addEventListener('input', this.onCommandLineInput, true);
+        commandLineSmall.addEventListener('overflow', this.onCommandLineOverflow, true);
+        commandLineSmall.addEventListener('keyup', this.onCommandLineKeyUp, true);
+        commandLineSmall.addEventListener('keydown', this.onCommandLineKeyDown, true);
+        commandLineSmall.addEventListener('keypress', this.onCommandLineKeyPress, true);
+        commandLineSmall.addEventListener('blur', this.onCommandLineBlur, true);
 
         Firebug.Console.addListener(this);  // to get onConsoleInjection
     },
 
     shutdown: function()
     {
-        Firebug.chrome.$("fbLargeCommandLine").removeEventListener('focus', this.onCommandLineFocus, true);
-        Firebug.chrome.$("fbCommandLine").removeEventListener('focus', this.onCommandLineFocus, true);
-        Firebug.chrome.$("fbCommandLine").removeEventListener('input', this.onCommandLineInput, true);
-        Firebug.chrome.$("fbCommandLine").removeEventListener('overflow', this.onCommandLineOverflow, true);
-        Firebug.chrome.$("fbCommandLine").removeEventListener('keydown', this.onCommandLineKeyDown, true);
-        Firebug.chrome.$("fbCommandLine").removeEventListener('keypress', this.onCommandLineKeyPress, true);
-        Firebug.chrome.$("fbCommandLine").removeEventListener('blur', this.onCommandLineBlur, true);
+        var commandLineSmall = this.getCommandLineSmall(),
+            commandLineLarge = this.getCommandLineLarge();
+
+        commandLineLarge.removeEventListener('focus', this.onCommandLineFocus, true);
+        commandLineSmall.removeEventListener('focus', this.onCommandLineFocus, true);
+        commandLineSmall.removeEventListener('input', this.onCommandLineInput, true);
+        commandLineSmall.removeEventListener('overflow', this.onCommandLineOverflow, true);
+        commandLineSmall.removeEventListener('keydown', this.onCommandLineKeyDown, true);
+        commandLineSmall.removeEventListener('keypress', this.onCommandLineKeyPress, true);
+        commandLineSmall.removeEventListener('blur', this.onCommandLineBlur, true);
     },
 
     showContext: function(browser, context)
@@ -685,7 +647,7 @@ Firebug.CommandLine = extend(Firebug.Module,
 
     destroyContext: function(context, persistedState)
     {
-        this.autoCompleter.clear(getCompletionBox());
+        this.autoCompleter.clear(this.getCompletionBox());
          // more of our work is done in the Console
     },
 
@@ -694,10 +656,10 @@ Firebug.CommandLine = extend(Firebug.Module,
         var chrome = Firebug.chrome;
         var value = panel ? panel.context.commandLineText : null;
 
-        var commandLine = getCommandLine(browser);
+        var commandLine = this.getCommandLine(browser);
         commandLine.value = value ? value : "";
 
-        this.autoCompleter.hide(getCompletionBox());
+        this.autoCompleter.hide(this.getCompletionBox());
     },
 
     updateOption: function(name, value)
@@ -739,32 +701,38 @@ Firebug.CommandLine = extend(Firebug.Module,
         }
 
         // the attach is asynchronous, we can report when it is complete:
-        if (context.window.wrappedJSObject._FirebugCommandLine)
-            return true;
-        else
-            return false;
+        return context.window.wrappedJSObject._FirebugCommandLine;
     },
 
     onCommandLineKeyUp: function(event)
     {
-        var commandLine = getCommandLine(Firebug.currentContext);
-        var completionBox = getCompletionBox();
+        var commandLine = this.getCommandLine(Firebug.currentContext);
+        var completionBox = this.getCompletionBox();
 
-        this.autoCompleter.handledKeyUp(event, Firebug.currentContext, commandLine, completionBox)
+        //this.autoCompleter.handledKeyUp(event, Firebug.currentContext, commandLine, completionBox)
     },
 
     onCommandLineKeyDown: function(event)
     {
-        // The code moved into key-press handler due to bug 613752
+        if (event.keyCode === KeyEvent.DOM_VK_H && (event.ctrlKey || event.metaKey))
+        {
+            event.preventDefault();
+            this.commandHistory.show($("fbCommandLineHistoryButton"));
+            return true;
+        }
+
+        // Parts of the code moved into key-press handler due to bug 613752
     },
 
     onCommandLineKeyPress: function(event)
     {
-        var commandLine = getCommandLine(Firebug.currentContext);
-        var completionBox = getCompletionBox();
+        var commandLine = this.getCommandLine(Firebug.currentContext);
+        var completionBox = this.getCompletionBox();
 
         if (!this.autoCompleter.handledKeyDown(event, Firebug.currentContext, commandLine, completionBox))
+        {
             this.handledKeyDown(event);  // independent of completer
+        }
     },
 
     handledKeyDown: function(event)
@@ -789,15 +757,21 @@ Firebug.CommandLine = extend(Firebug.Module,
                 Firebug.CommandLine.enterInspect(Firebug.currentContext);
                 return true;
             }
-        } else if (event.keyCode === 38) {  // UP arrow
+        }
+        else if (event.keyCode === 38) // Up arrow
+        {
             event.preventDefault();
-            Firebug.CommandLine.cycleCommandHistory(Firebug.currentContext, -1);
+            this.commandHistory.cycleCommands(Firebug.currentContext, -1);
             return true;
-        } else if (event.keyCode === 40) {  // DOWN arrow
+        }
+        else if (event.keyCode === 40) // Down arrow
+        {
             event.preventDefault();
-            Firebug.CommandLine.cycleCommandHistory(Firebug.currentContext, 1);
+            this.commandHistory.cycleCommands(Firebug.currentContext, 1);
             return true;
-        } else if (event.keyCode === 27) {  // ESC
+        }
+        else if (event.keyCode === 27) // Esc
+        {
             event.preventDefault();
             if (Firebug.CommandLine.cancel(Firebug.currentContext))
                 FBL.cancelEvent(event);
@@ -808,17 +782,18 @@ Firebug.CommandLine = extend(Firebug.Module,
 
     onCommandLineInput: function(event)
     {
-        var commandLine = getCommandLine(Firebug.currentContext);
-        var completionBox = getCompletionBox();
+        var commandLine = this.getCommandLine(Firebug.currentContext);
+        var completionBox = this.getCompletionBox();
 
         if (!this.autoCompleter.getVerifiedText(commandLine)) // don't complete on empty command line
         {
             this.autoCompleter.reset();
-            this.autoCompleter.hide(getCompletionBox());
+            this.autoCompleter.hide(this.getCompletionBox());
             return;
         }
 
-        this.autoCompleter.complete(Firebug.currentContext, commandLine, completionBox, true, false);
+        if (!this.commandHistory.isShown())
+            this.autoCompleter.complete(Firebug.currentContext, commandLine, completionBox, true, false);
         Firebug.currentContext.commandLineText = this.autoCompleter.getVerifiedText(commandLine);
     },
 
@@ -827,7 +802,7 @@ Firebug.CommandLine = extend(Firebug.Module,
         if (this.autoCompleter.linuxFocusHack)
             return;
 
-        this.autoCompleter.clear(getCompletionBox());
+        this.autoCompleter.clear(this.getCompletionBox());
     },
 
     onCommandLineFocus: function(event)
@@ -939,11 +914,38 @@ Firebug.CommandLine = extend(Firebug.Module,
         // for some reason the console has been injected. If the user had focus in the command
         // line they want it added in the page also. If the user has the cursor in the command
         // line and reloads, the focus will already be there. issue 1339
-        var isFocused = ($("fbLargeCommandLine").getAttribute("focused") == "true");
-        isFocused = isFocused || ($("fbCommandLine").getAttribute("focused") == "true");
+        var isFocused = (this.getCommandLineLarge().getAttribute("focused") == "true");
+        isFocused = isFocused || (this.getCommandLineSmall().getAttribute("focused") == "true");
         if (isFocused)
             setTimeout(this.onCommandLineFocus);
     },
+
+    getCommandLine: function(context)
+    {
+        // Command line on other panels is never multiline.
+        var visible = Firebug.CommandLine.Popup.isVisible();
+        if (visible && context.panelName != "console")
+            return this.getCommandLineSmall();
+
+        return Firebug.largeCommandLine
+            ? this.getCommandLineLarge()
+            : this.getCommandLineSmall();
+    },
+
+    getCompletionBox: function()
+    {
+        return Firebug.chrome.$("fbCommandLineCompletion");
+    },
+
+    getCommandLineSmall: function()
+    {
+        return Firebug.chrome.$("fbCommandLine");
+    },
+
+    getCommandLineLarge: function()
+    {
+        return Firebug.chrome.$("fbLargeCommandLine");
+    }
 });
 
 // ************************************************************************************************
@@ -1019,8 +1021,8 @@ function getExpressionOffset(command, offset)
         }
         else if (bracketCount == 0)
         {
-            if (/[a-zA-Z0-9$_.]/.test(c));
-            else break;
+            if (!/[a-zA-Z0-9$_.]/.test(c))
+                break;
         }
     }
 
@@ -1038,6 +1040,8 @@ function getDot(expr, offset)
 
 function autoCompleteEval(preExpr, expr, postExpr, context)
 {
+    var completions;
+
     try
     {
         if (preExpr)
@@ -1048,7 +1052,7 @@ function autoCompleteEval(preExpr, expr, postExpr, context)
                 preExpr = preExpr.substr(0, lastDot);
 
             var self = this;
-            self.complete = []
+            self.complete = [];
             Firebug.CommandLine.evaluate(preExpr, context, context.thisValue, null,
                 function found(result, context)
                 {
@@ -1084,9 +1088,9 @@ function autoCompleteEval(preExpr, expr, postExpr, context)
             // Cross window type pseudo-comparison
             var innerWindow = context.window.wrappedJSObject;
             if (innerWindow && innerWindow.Window && innerWindow.constructor.toString() === innerWindow.Window.toString())
-                var completions =  keys(context.window.wrappedJSObject);  // return is safe
+                completions =  keys(context.window.wrappedJSObject);  // return is safe
             else  // hopefull sandbox in Chromebug
-                var completions = keys(context.global);
+                completions = keys(context.global);
 
             addMatchingKeyword(expr, completions);
 
@@ -1113,10 +1117,7 @@ function isValidProperty(value)
     // Following expression checks that the name starts with a letter or $_,
     // and there are only letters, numbers or $_ character in the string (no spaces).
 
-    if (value.match(reValidJSToken) == value)
-        return true;
-    else
-        return false;
+    return value.match(reValidJSToken) == value;
 }
 
 function addMatchingKeyword(expr, completions)
@@ -1129,26 +1130,6 @@ function injectScript(script, win)
 {
     win.location = "javascript: " + script;
 }
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
-
-function getCommandLine(context)
-{
-    // Command line on other panels is never multiline.
-    var visible = Firebug.CommandLine.Popup.isVisible();
-    if (visible && context.panelName != "console")
-        return Firebug.chrome.$("fbCommandLine");
-
-    return Firebug.largeCommandLine
-        ? Firebug.chrome.$("fbLargeCommandLine")
-        : Firebug.chrome.$("fbCommandLine");
-}
-
-function getCompletionBox()
-{
-    return Firebug.chrome.$("fbCommandLineCompletion");
-}
-
 
 // ************************************************************************************************
 // Command line APIs definition
@@ -1299,6 +1280,149 @@ function FirebugCommandLineAPI(context)
 }
 
 // ************************************************************************************************
+Firebug.CommandLine.CommandHistory = function() {
+    const commandHistoryMax = 1000;
+
+    var commandsPopup = $("fbCommandHistory");
+    var commands = [];
+    var commandPointer = 0;
+    var commandInsertPointer = -1;
+
+    this.appendToHistory = function(command)
+    {
+        if (commands[commandInsertPointer] == command)
+            return;
+
+        commandInsertPointer++;
+
+        if (commandInsertPointer >= commandHistoryMax)
+            commandInsertPointer = 0;
+
+        commandPointer = commandInsertPointer + 1;
+        commands[commandInsertPointer] = command;
+
+        if ($("fbCommandLineHistoryButton").hasAttribute("disabled"))
+        {
+            $("fbCommandLineHistoryButton").removeAttribute("disabled");
+            $("fbCommandEditorHistoryButton").removeAttribute("disabled");
+            commandsPopup.addEventListener("mouseover", this.onMouseOver, true);
+            commandsPopup.addEventListener("mouseup", this.onMouseUp, true);
+        }
+    };
+
+    this.cycleCommands = function(context, dir)
+    {
+        var command,
+            commandLine = Firebug.CommandLine.getCommandLine(context);
+
+        if (dir < 0)
+        {
+            if (commandPointer > 0)
+                commandPointer--;
+        }
+        else if (commandPointer < commands.length)
+            commandPointer++;
+
+        if (commandPointer < commands.length)
+        {
+            command =  commands[commandPointer];
+            if (commandsPopup.state == "open")
+            {
+                var commandElements = commandsPopup.ownerDocument.getElementsByClassName("commandHistoryItem");
+                this.selectCommand(commandElements[commandPointer]);
+            }
+        }
+        else
+        {
+            command =  "";
+            this.removeCommandSelection();
+        }
+
+        commandLine.value = context.commandLineText = command;
+
+        Firebug.CommandLine.setCursor(commandLine, command.length);
+    };
+
+    this.isShown = function() {
+        return commandsPopup.state == "open";
+    };
+
+    this.show = function(element) {
+        FBL.eraseNode(commandsPopup);
+
+        if(commands.length == 0)
+          return;
+
+        var vbox = commandsPopup.ownerDocument.createElement("vbox");
+        commandsPopup.appendChild(vbox);
+
+        for (var i = 0; i < commands.length; i++)
+        {
+            var hbox = commandsPopup.ownerDocument.createElementNS("http://www.w3.org/1999/xhtml", "div");
+
+            hbox.classList.add("commandHistoryItem");
+            var shortExpr = cropString(stripNewLines(commands[i]), 50);
+            hbox.innerHTML = escapeForTextNode(shortExpr);
+            hbox.value = i;
+            vbox.appendChild(hbox);
+
+            if (i === commandPointer)
+              this.selectCommand(hbox);
+        }
+
+        commandsPopup.openPopup(element, "before_start", 0, 0, false, false);
+
+        return true;
+    };
+
+    this.hide = function()
+    {
+        commandsPopup.hidePopup();
+
+        return true;
+    };
+
+    this.removeCommandSelection = function()
+    {
+        var selected = commandsPopup.ownerDocument.getElementsByClassName("selected")[0];
+        removeClass(selected, "selected");
+    };
+
+    this.selectCommand = function(element)
+    {
+        this.removeCommandSelection();
+
+        setClass(element, "selected");
+    };
+
+    this.onKeyUp = function(event)
+    {
+      if (event.keyCode === 38) // Up Key
+          this.cycleCommands(context, -1);
+      else if (event.keyCode === 40) // Down Key
+          this.cycleCommands(context, 1);
+    };
+
+    this.onMouseOver = function(event)
+    {
+        var hovered = event.target;
+
+        if (hovered.localName == "vbox")
+            return;
+
+        Firebug.CommandLine.commandHistory.selectCommand(hovered);
+    };
+
+    this.onMouseUp = function(event)
+    {
+        var commandLine = Firebug.CommandLine.getCommandLine(Firebug.currentContext);
+
+        commandLine.value = commands[event.target.value];
+        commandPointer = event.target.value;
+
+        commandsPopup.hidePopup();
+    };
+};
 
 Firebug.CommandLine.injector = {
 

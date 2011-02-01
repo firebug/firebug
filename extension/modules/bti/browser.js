@@ -45,6 +45,18 @@ function Browser()
 // API
 
 /**
+ * Returns current status of tools 
+ *
+ * @function
+ * @returns  an array of Tools, an object with toolName and enabled boolean
+ *
+ */
+Browser.prototype.getTools = function()
+{
+    return [];
+};
+
+/**
  * Returns the {@link BrowserContext} with the specified id or <code>null</code>
  * if none.
  *

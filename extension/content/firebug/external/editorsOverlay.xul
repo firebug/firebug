@@ -7,29 +7,30 @@
 
     <!-- Firefox page context menu -->
     <menupopup id="contentAreaContextMenu">
-        <menu label="firebug.OpenWith" id="menu_firebugOpenWithEditor"
-            insertbefore="context-viewsource" class="fbInternational">
+        <menu type='splitmenu' label="firebug.OpenWith" id="menu_firebugOpenWithEditor"
+                insertbefore="context-viewsource" iconic='true' class="fbInternational" 
+                command='cmd_openInEditor' openFromContext='true'>
             <menupopup id="menu_firebugOpenWith"
-                onpopupshowing="return Firebug.ExternalEditors.onEditorsShowing(this);">
-                <menuitem id="menu_openFirebugEditors" label="firebug.ConfigureEditors"
-                    command="cmd_openFirebugEditors" class="fbInternational"/>
+                    onpopupshowing="return Firebug.ExternalEditors.onEditorsShowing(this, 1);">
+                <menuitem id="menu_configureEditorsContext" label="firebug.ConfigureEditors"
+                        openEditorList="true" class="fbInternational"/>
             </menupopup>
         </menu>
     </menupopup>
 
     <!-- Basic editing related commands -->
     <commandset id="mainCommandSet">
-        <command id="cmd_openFirebugEditors" oncommand="Firebug.ExternalEditors.openEditorList()"/>
-        <command id="cmd_openInEditor" oncommand="Firebug.ExternalEditors.openContext(Firebug.currentContext, event.sourceEvent.target.value)"/>
+        <command id="cmd_openInEditor" oncommand="Firebug.ExternalEditors.onContextMenuCommand(event)"/>
     </commandset>
 
     <!-- Firebug icon menu overlay -->
     <menupopup id="fbFirebugMenuPopup">
-        <menu id="FirebugMenu_OpenWith" label="firebug.OpenWith" insertbefore="menu_openActionsSeparator" class="fbInternational">
-            <menupopup id="fbFirebugMenu_OpenWith"
-                onpopupshowing="return Firebug.ExternalEditors.onEditorsShowing(this);">
-                    <menuitem id="menu_configureEditors" label="firebug.ConfigureEditors"
-                        command="cmd_openFirebugEditors" class="fbInternational"/>
+        <menu id="FirebugMenu_OpenWith" label="firebug.OpenWith" insertafter="menu_openActionsSeparator"
+                class="fbInternational" openFromContext='true' command='cmd_openInEditor'>
+            <menupopup id="fbFirebugMenu_OpenWith" 
+                    onpopupshowing="return Firebug.ExternalEditors.onEditorsShowing(this);">
+                <menuitem id="menu_configureEditors" label="firebug.ConfigureEditors"
+                        openEditorList="true" class="fbInternational"/>
             </menupopup>
         </menu>
     </menupopup>

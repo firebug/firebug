@@ -26,21 +26,6 @@ Firebug.CommandLine.Popup = extend(Firebug.Module,
         this.attachListeners();
     },
 
-    internationalizeUI: function(doc)
-    {
-        var elements = ["fbCommandPopupButton"];
-
-        for (var i=0; i<elements.length; i++)
-        {
-            var element = doc.getElementById(elements[i]);
-            if (element.hasAttribute("label"))
-                FBL.internationalize(element, "label");
-
-            if (element.hasAttribute("tooltiptext"))
-                FBL.internationalize(element, "tooltiptext");
-        }
-    },
-
     shutdown: function()
     {
         Firebug.chrome.$("fbContentBox").removeEventListener("keypress", this.onKeyPress, false);
@@ -165,8 +150,8 @@ Firebug.CommandLine.Popup = extend(Firebug.Module,
         // The command line can't be multiline in other panels.
         collapse(toggle, visible);
 
-        var commandLineSmall = chrome.$("fbCommandLine");
-        var commandLineLarge = chrome.$("fbLargeCommandLine");
+        var commandLineSmall = Firebug.CommandLine.getCommandLineLarge();
+        var commandLineLarge = Firebug.CommandLine.getCommandLineSmall();
 
         // Focus the command line if it has been just displayed.
         if (visible)

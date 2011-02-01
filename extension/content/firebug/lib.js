@@ -607,15 +607,8 @@ function $STRP(name, args, index, bundle)
     if (!index)
         index = 0;
 
-    var margs = [];
-    var numForms = getNumForms();
-
-    // Repeat the args for numForms time(s)
-    for (var i = 0; i < numForms; i++)
-        margs = margs.concat(args);
-
     // Get proper plural form from the string (depends on the current Firefox locale).
-    var translatedString = $STRF(name, margs, bundle);
+    var translatedString = $STRF(name, args, bundle);
     if (translatedString.search(";") > 0)
         return getPluralForm(args[index], translatedString);
 
@@ -1884,7 +1877,7 @@ this.getElementCSSSelector = function(element)
     if (!element || !element.localName)
         return "null";
 
-    var label = element.localName.toLowerCase();
+    var label = getLocalName(element);
     if (element.id)
         label += "#" + element.id;
 
@@ -1916,15 +1909,13 @@ this.getDocumentForStyleSheet = function(styleSheet)
  */
 this.getInstanceForStyleSheet = function(styleSheet, ownerDocument)
 {
-    // System URLs are always unique (or at least we are making this assumption)
-    if (FBL.isSystemStyleSheet(styleSheet))
-        return 0;
-
     // ownerDocument is an optional hint for performance
     if (FBTrace.DBG_CSS)
         FBTrace.sysout("getInstanceForStyleSheet href:" + styleSheet.href + " mediaText:" + styleSheet.media.mediaText + " path to ownerNode" + (styleSheet.ownerNode && FBL.getElementXPath(styleSheet.ownerNode)), ownerDocument);
 
     ownerDocument = ownerDocument || FBL.getDocumentForStyleSheet(styleSheet);
+    if(!ownerDocument)
+        return;
 
     var ret = 0,
         styleSheets = ownerDocument.styleSheets,
@@ -1975,7 +1966,7 @@ var isElementHTML = this.isElementHTML = function(node)
 
 var isElementXHTML = this.isElementXHTML = function(node)
 {
-    return node.nodeName == node.nodeName.toLowerCase() && node.namespaceURI == 'http://www.w3.org/1999/xhtml';
+    return node.nodeName != node.nodeName.toUpperCase() && node.namespaceURI == 'http://www.w3.org/1999/xhtml';
 }
 
 var isElementMathML = this.isElementMathML = function(node)
@@ -1991,6 +1982,18 @@ var isElementSVG = this.isElementSVG = function(node)
 var isElementXUL = this.isElementXUL = function(node)
 {
     return node instanceof XULElement;
+}
+
+var getNodeName = this.getNodeName = function(node)
+{
+    var name = node.nodeName;
+    return isElementHTML(node) ? name.toLowerCase() : name;
+}
+
+var getLocalName = this.getLocalName = function(node)
+{
+    var name = node.localName;
+    return isElementHTML(node) ? name.toLowerCase() : name;
 }
 
 this.isSelfClosing = function(element)
@@ -2011,7 +2014,8 @@ this.getElementHTML = function(element)
             if (unwrapObject(elt).firebugIgnore)
                 return;
 
-            html.push('<', elt.nodeName.toLowerCase());
+            var nodeName = getNodeName(elt);
+            html.push('<', nodeName);
 
             for (var i = 0; i < elt.attributes.length; ++i)
             {
@@ -2046,7 +2050,7 @@ this.getElementHTML = function(element)
                         toHTML(child);
                 }
 
-                html.push('</', elt.nodeName.toLowerCase(), '>');
+                html.push('</', nodeName, '>');
             }
             else if (isElementSVG(elt) || isElementMathML(elt))
             {
@@ -2058,7 +2062,7 @@ this.getElementHTML = function(element)
             }
             else
             {
-                html.push('></', elt.nodeName.toLowerCase(), '>');
+                html.push('></', nodeName, '>');
             }
         }
         else if (elt.nodeType == Node.TEXT_NODE)
@@ -2083,7 +2087,8 @@ this.getElementXML = function(element)
             if (unwrapObject(elt).firebugIgnore)
                 return;
 
-            xml.push('<', elt.nodeName.toLowerCase());
+            var nodeName = getNodeName(elt);
+            xml.push('<', nodeName);
 
             for (var i = 0; i < elt.attributes.length; ++i)
             {
@@ -2110,7 +2115,7 @@ this.getElementXML = function(element)
                 for (var child = elt.firstChild; child; child = child.nextSibling)
                     toXML(child);
 
-                xml.push('</', elt.nodeName.toLowerCase(), '>');
+                xml.push('</', nodeName, '>');
             }
             else
                 xml.push('/>');
@@ -3046,7 +3051,7 @@ this.parseToStackFrame = function(line, context) // function name (arg, arg, arg
          if (m2)
          {
              var params = m2[2].split(',');
-             FBTrace.sysout("parseToStackFrame",{line:line,paramStr:m2[2],params:params});
+             //FBTrace.sysout("parseToStackFrame",{line:line,paramStr:m2[2],params:params});
              //var params = JSON.parse("["+m2[2]+"]");
              return new this.StackFrame({href:m[2]}, m[3], m2[1], params, null, null, context);
          }
@@ -4270,30 +4275,51 @@ this.getLocalPath = function(url)
     }
 };
 
+/*
+ * Mozilla URI from non-web URL
+ * @param URL
+ * @returns undefined or nsIURI
+ */
 
-this.getLocalOrSystemPath = function(url)
+this.getLocalSystemURI = function(url)
 {
-    if (!this.isLocalURL(url) && !this.isSystemURL(url))
-        return;
+    try
+    {
+        var uri = ioService.newURI(url, null, null);
+        if (uri.schemeIs("resource"))
+        {
+            var ph = ioService.getProtocolHandler("resource").QueryInterface(Ci.nsIResProtocolHandler);
+            var abspath = ph.getSubstitution(uri.host);
+            uri = ioService.newURI(uri.path.substr(1), null, abspath);
+        }
+        if (uri.schemeIs("chrome"))
+        {
+            var chromeRegistry = Cc["@mozilla.org/chrome/chrome-registry;1"].getService(Ci.nsIChromeRegistry);
+            uri = chromeRegistry.convertChromeURL(uri);
+        }
+        return uri;
+    }
+    catch(exc)
+    {
+        if (FBTrace.DBG_ERRORS)
+            FBTrace.sysout("getLocalSystemURI failed for "+url);
+    }
+}
 
-    var uri = ioService.newURI(url, null, null), file;
-    if (uri.schemeIs("resource"))
+/*
+ * Mozilla native path for local URL
+ */
+this.getLocalOrSystemPath = function(url, allowDirectories)
+{
+    var uri = FBL.getLocalSystemURI(url);
+    if (uri instanceof Ci.nsIFileURL)
     {
-        var ph = ioService.getProtocolHandler("resource").QueryInterface(Ci.nsIResProtocolHandler);
-        var abspath = ph.getSubstitution(uri.host);
-        uri = ioService.newURI(uri.path.substr(1), null, abspath);
+        var file = uri.file;
+        if (allowDirectories)
+            return file && file.path;
+        else
+            return file && !file.isDirectory() && file.path;
     }
-    while (uri.schemeIs("chrome"))
-    {
-        var chromeRegistry = Cc["@mozilla.org/chrome/chrome-registry;1"].getService(Ci.nsIChromeRegistry);
-        uri = chromeRegistry.convertChromeURL(uri);
-    }
-    if (uri.schemeIs("file"))
-    {
-        file = uri.QueryInterface(Ci.nsIFileURL).file;
-    }
-
-    return file && !file.isDirectory() && file.path;
 }
 
 this.getURLFromLocalFile = function(file)
@@ -4928,7 +4954,8 @@ this.getIconURLForFile = function(path)
     }
     catch(exc)
     {
-        this.ERROR(exc);
+        if (FBTrace.DBG_ERRORS)
+            FBTrace.sysout("getIconURLForFile ERROR "+exc+" for "+path, exc);
     }
     return null;
 }
@@ -5889,7 +5916,7 @@ domMemberMap.Element = extendArray(domMemberMap.Node,
     "querySelector",
     "querySelectorAll",
     "scrollIntoView",
-    
+
     "onLoad",//FF4.0
     "hidden",//FF4.0
     "setCapture",//FF4.0

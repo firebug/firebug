@@ -1,0 +1,26 @@
+<?xml version="1.0"?>
+
+<bindings xmlns="http://www.mozilla.org/xbl"
+    xmlns:xbl="http://www.mozilla.org/xbl"
+    xmlns:xul="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul">
+
+<!-- Firebug start button is available in a 'Customize Toolbar' dialog with support
+     for error badge that displays number of errors on the current page (if any) -->
+<binding id="start-button" display="xul:menu"
+    extends="chrome://global/content/bindings/toolbarbutton.xml#menu-button">
+
+    <content>
+        <children includes="observes|template|menupopup|panel|tooltip"/>
+        <xul:stack class="badge">
+            <xul:label class="label" value="0" xbl:inherits="value=errorCount"/>
+        </xul:stack>
+        <xul:toolbarbutton class="fb-toolbarbutton box-inherit toolbarbutton-menubutton-button"
+            anonid="button" flex="1" allowevents="true"
+            xbl:inherits="disabled,crop,image,label,accesskey,command,align,dir,pack,orient"/>
+        <xul:dropmarker type="menu-button" class="toolbarbutton-menubutton-dropmarker"
+            xbl:inherits="align,dir,pack,orient,disabled,label"/>
+    </content>
+
+</binding>
+
+</bindings>
