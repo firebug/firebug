@@ -1780,7 +1780,7 @@ var fbs =
             if (FBTrace.DBG_FBS_ERRORS)
                 FBTrace.sysout("onDebugger failed: "+exc,exc);
 
-            ERROR("onDebugger failed: "+exc);
+            ERROR("onDebugger failed: "+exc, exc);
             return RETURN_CONTINUE;
         }
         finally
@@ -3880,7 +3880,7 @@ var FirebugPrefsObserver =
         var filter = fbs.scriptsFilter;
         fbs.showEvents = (filter == "all" || filter == "events");
         fbs.showEvals = (filter == "all" || filter == "evals");
-        if (FBTrace.DBG_FBS_ERRORS)
+        if (FBTrace.DBG_OPTIONS)
             FBTrace.sysout("fbs.showEvents "+fbs.showEvents+" fbs.showEvals "+fbs.showEvals);
     }
 };

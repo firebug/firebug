@@ -7,6 +7,10 @@ FBL.ns(function() { with (FBL) {
 
 Components.utils.import("resource://firebug/bti/compilationunit.js");
 
+if (!Firebug.JavaScriptModule)
+    Firebug.JavaScriptModule = Firebug.Debugger;
+
+
 // ************************************************************************************************
 // Script panel
 
@@ -118,11 +122,11 @@ Firebug.ScriptPanel.prototype = extend(Firebug.SourceBoxPanel,
     initializeUI: function()
     {
         Firebug.Module.initializeUI.apply(this, arguments);
-        Firebug.Debugger.addListener(this);
+        Firebug.JavaScriptModule.addListener(this);
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
-    // Firebug.Debugger Listener
+    // Firebug.JavaScriptModule Listener
     onJSDActivate: function(active, why)
     {
         if (Firebug.chrome.getSelectedPanel() === this) // then the change in jsd causes a refresh
@@ -262,7 +266,7 @@ Firebug.ScriptPanel.prototype = extend(Firebug.SourceBoxPanel,
         if (lineNode.getAttribute("breakpoint") == "true")
             fbs.clearBreakpoint(href, lineNo);
         else
-            Firebug.Debugger.setBreakpoint(compilationUnit, lineNo);
+            Firebug.JavaScriptModule.setBreakpoint(compilationUnit, lineNo);
     },
 
     toggleDisableBreakpoint: function(lineNo)
@@ -373,7 +377,7 @@ Firebug.ScriptPanel.prototype = extend(Firebug.SourceBoxPanel,
             this.toggleDisableBreakpoint(lineNo);
         else if (isControlClick(event) || isMiddleClick(event))
         {
-            Firebug.Debugger.runUntil(this.context, compilationUnit, lineNo, Firebug.Debugger);
+            Firebug.JavaScriptModule.runUntil(this.context, compilationUnit, lineNo, Firebug.JavaScriptModule);
             cancelEvent(event);
         }
     },
@@ -469,11 +473,11 @@ Firebug.ScriptPanel.prototype = extend(Firebug.SourceBoxPanel,
 
         if (this.context.stopped)
         {
-            Firebug.Debugger.detachListeners(this.context, oldChrome);
-            Firebug.Debugger.attachListeners(this.context, newChrome);
+            Firebug.JavaScriptModule.detachListeners(this.context, oldChrome);
+            Firebug.JavaScriptModule.attachListeners(this.context, newChrome);
         }
 
-        Firebug.Debugger.syncCommands(this.context);
+        Firebug.JavaScriptModule.syncCommands(this.context);
 
         Firebug.SourceBoxPanel.detach.apply(this, arguments);
     },
@@ -546,7 +550,7 @@ Firebug.ScriptPanel.prototype = extend(Firebug.SourceBoxPanel,
             this.activeWarningTag = WarningRep.showFiltered(this.panelNode);
         else if (aLocation && !this.context.jsDebuggerCalledUs)
             this.activeWarningTag = WarningRep.showInactive(this.panelNode);
-        else if (!Firebug.Debugger.jsDebuggerOn)  // set asynchronously by jsd in FF 4.0
+        else if (!Firebug.JavaScriptModule.jsDebuggerOn)  // set asynchronously by jsd in FF 4.0
             this.activeWarningTag = WarningRep.showDebuggerInactive(this.panelNode);
         else if (!aLocation) // they were not filtered, we just had none
             this.activeWarningTag = WarningRep.showNoScript(this.panelNode);
@@ -558,7 +562,7 @@ Firebug.ScriptPanel.prototype = extend(Firebug.SourceBoxPanel,
 
     show: function(state)
     {
-        var enabled = Firebug.Debugger.isAlwaysEnabled();
+        var enabled = Firebug.JavaScriptModule.isAlwaysEnabled();
 
         if (!enabled)
             return;
@@ -1070,7 +1074,7 @@ Firebug.ScriptPanel.prototype = extend(Firebug.SourceBoxPanel,
                 var compilationUnit = getAncestorByClass(sourceRow, "sourceBox").repObject;
                 var lineNo = parseInt(sourceRow.firstChild.textContent);
 
-                var debuggr = Firebug.Debugger;
+                var debuggr = Firebug.JavaScriptModule;
                 items.push(
                     "-",
                     {label: "Continue",
@@ -1103,15 +1107,15 @@ Firebug.ScriptPanel.prototype = extend(Firebug.SourceBoxPanel,
 
     supportsBreakOnNext: function()
     {
-        return this.breakable && Firebug.Debugger.jsDebuggerOn;
+        return this.breakable && Firebug.JavaScriptModule.jsDebuggerOn;
     },
 
     breakOnNext: function(enabled)
     {
         if (enabled)
-            Firebug.Debugger.suspend(this.context);
+            Firebug.JavaScriptModule.suspend(this.context);
         else
-            Firebug.Debugger.unSuspend(this.context);
+            Firebug.JavaScriptModule.unSuspend(this.context);
     },
 
     getBreakOnNextTooltip: function(armed)
@@ -1136,9 +1140,9 @@ Firebug.ScriptPanel.prototype = extend(Firebug.SourceBoxPanel,
             FBTrace.sysout("ScriptPanel.onActivationChanged; " + enable);
 
         if (enable)
-            Firebug.Debugger.addObserver(this);
+            Firebug.JavaScriptModule.addObserver(this);
         else
-            Firebug.Debugger.removeObserver(this);
+            Firebug.JavaScriptModule.removeObserver(this);
     },
 });
 
@@ -1175,16 +1179,13 @@ Firebug.ScriptPanel.WarningRep = domplate(Firebug.Rep,
     {
         Firebug.setPref("javascript", "enabled", true);
 
-        this.reloadPageFromMemory(event.target);
+        Firebug.JavaScriptModule.reloadPageFromMemory(event.target);
     },
 
     reloadPageFromMemory: function(event)
     {
         var context= Firebug.getElementPanel(event.target).context;
-        if (context.browser)
-            context.browser.reloadWithFlags(Ci.nsIWebNavigation.LOAD_FLAGS_CHARSET_CHANGE)
-        else
-            context.window.location.reload();
+        Firebug.TabWatcher.reloadPageFromMemeory(context);
     },
 
     onFocusDebugger: function(event)
@@ -1203,7 +1204,7 @@ Firebug.ScriptPanel.WarningRep = domplate(Firebug.Rep,
         // No context is stopped
         var depth = fbs.exitNestedEventLoop();
         if (FBTrace.DBG_UI_LOOP)
-            FBTrace.sysout("Firebug.Debugger.onFocusDebugger FAILS, aborting nested event loop at depth "+depth);
+            FBTrace.sysout("Firebug.JavaScriptModule.onFocusDebugger FAILS, aborting nested event loop at depth "+depth);
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
