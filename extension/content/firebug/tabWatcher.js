@@ -662,6 +662,18 @@ var TabWatcherUnloader =
     },
 
 
+
+    // Called by script panel, not sure where this belongs.
+
+    reloadPageFromMemory: function(context)
+    {
+            if (context.browser)
+            context.browser.reloadWithFlags(Ci.nsIWebNavigation.LOAD_FLAGS_CHARSET_CHANGE)
+        else
+            context.window.location.reload();
+    },
+
+
 };
 
 // ************************************************************************************************
