@@ -649,7 +649,7 @@ var TabWatcherUnloader =
                 this.listeners.length + ") " + win.location, event);
 
         onUnloadWindow(event);
-    }
+    },
 
     // Called by script panel, not sure where this belongs.
 
