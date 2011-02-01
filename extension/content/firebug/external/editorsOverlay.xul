@@ -25,7 +25,7 @@
 
     <!-- Firebug icon menu overlay -->
     <menupopup id="fbFirebugMenuPopup">
-        <menu id="FirebugMenu_OpenWith" label="firebug.OpenWith" insertbefore="menu_openActionsSeparator"
+        <menu id="FirebugMenu_OpenWith" label="firebug.OpenWith" insertafter="menu_openActionsSeparator"
                 class="fbInternational" openFromContext='true' command='cmd_openInEditor'>
             <menupopup id="fbFirebugMenu_OpenWith" 
                     onpopupshowing="return Firebug.ExternalEditors.onEditorsShowing(this);">

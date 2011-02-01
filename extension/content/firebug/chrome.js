@@ -1116,6 +1116,20 @@ top.FirebugChrome =
             detachFirebug.setAttribute("label", (Firebug.isDetached() ?
                 FBL.$STR("firebug.AttachFirebug") : FBL.$STR("firebug.DetachFirebug")));
         }
+
+        var toggleFirebug = FBL.getElementsByAttribute(popup, "id", "menu_toggleFirebug")[0];
+        if (toggleFirebug)
+        {
+            var fbContentBox = this.$("fbContentBox");
+            var collapsed = fbContentBox.getAttribute("collapsed");
+            toggleFirebug.setAttribute("label", (collapsed == "true"?
+                FBL.$STR("firebug.ShowFirebug") : FBL.$STR("firebug.Hide Firebug"))); // xxxHonza localization
+
+            // If Firebug is detached, hide the menu (F12 doesn't hide but just focuses the
+            // external window)
+            if (Firebug.isDetached())
+                toggleFirebug.setAttribute("collapsed", (collapsed == "true" ? "false" : "true"));
+        }
     },
 
     onOptionsShowing: function(popup)

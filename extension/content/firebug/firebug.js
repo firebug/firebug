@@ -967,9 +967,6 @@ top.Firebug =
             FBTrace.sysout("firebug.updatePref EXIT: "+name+"="+value+"\n");
     },
 
-
-
-
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
     // Browser Bottom Bar
     // TODO XULWindow
@@ -977,8 +974,10 @@ top.Firebug =
     showBar: function(show)
     {
         var browser = Firebug.chrome.getCurrentBrowser();
+
         if (FBTrace.DBG_WINDOWS || FBTrace.DBG_ACTIVATION)
-            FBTrace.sysout("showBar("+show+") for browser "+browser.currentURI.spec+" Firebug.currentContext "+Firebug.currentContext);
+            FBTrace.sysout("showBar("+show+") for browser "+browser.currentURI.spec+
+                " Firebug.currentContext "+Firebug.currentContext);
 
         var contentBox = Firebug.chrome.$("fbContentBox");
         var contentSplitter = Firebug.chrome.$("fbContentSplitter");
@@ -991,12 +990,6 @@ top.Firebug =
 
         if (contentSplitter)
             contentSplitter.setAttribute("collapsed", !shouldShow);
-
-        if (toggleCommand)
-            toggleCommand.setAttribute("checked", !!shouldShow);
-
-        if (detachCommand)
-            detachCommand.setAttribute("checked", Firebug.isDetached());
 
         //xxxHonza: should be removed.
         dispatch(Firebug.uiListeners, show ? "showUI" : "hideUI", [browser, Firebug.currentContext]);
@@ -1104,7 +1097,7 @@ top.Firebug =
                     Firebug.unMinimize();
                 else
                     Firebug.minimizeBar();
-            });
+            }, 200);
             Firebug.chrome.close();
         }
         else

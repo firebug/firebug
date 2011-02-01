@@ -492,6 +492,10 @@
             <body><![CDATA[
             if (this.initialized)
                 return;
+
+            if (!this.panelTabs)
+                return;
+
             var tab = this.panelTabs.firstChild;
             while (tab)
             {
