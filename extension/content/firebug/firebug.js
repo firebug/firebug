@@ -143,14 +143,17 @@ try
 {
     // Get ModuleLoader implementation (it's Mozilla JS code module)
     Components.utils["import"]("resource://firebug/moduleLoader.js");
-    Cu.reportError("Loaded ModuleLoader");
+    if (FBTrace.DBG_MODULES)
+        FBTrace.sysout("Loaded ModuleLoader");
 }
 catch (exc)
 {
     var msg = exc.toString() +" "+(exc.fileName || exc.sourceName) + "@" + exc.lineNumber;
-
-    dump("Import moduleLoader.js FAILS: "+msg+"\n");
-    FBTrace.sysout("Import moduleLoader.js ERROR "+msg, exc);
+    if (FBTrace.DBG_MODULES)
+    {
+        dump("Import moduleLoader.js FAILS: "+msg+"\n");
+        FBTrace.sysout("Import moduleLoader.js ERROR "+msg, exc);
+    }
 }
 
 try
