@@ -38,14 +38,18 @@ Firebug.StartButton = extend(Firebug.Module,
         // Associate a popup-menu with the start button (the same as it's
         // used for the obsolete status bar icon.
         var startButton = $("firebug-button");
-        startButton.appendChild(popup.cloneNode(true));
+        if (startButton)
+        {
+            startButton.appendChild(popup.cloneNode(true));
 
-        // Append the button into Firefox toolbar automatically.
-        this.appendToToolbar();
+            // Append the button into Firefox toolbar automatically.
+            this.appendToToolbar();
 
-        // If Firefox version is 4+, let's 
-        if (versionChecker.compare(appInfo.version, "4.0*") >= 0)
-            startButton.setAttribute("firefox", "4");
+            // If Firefox version is 4+, let's
+            if (versionChecker.compare(appInfo.version, "4.0*") >= 0)
+                startButton.setAttribute("firefox", "4");
+
+        }
     },
 
     shutdown: function()
