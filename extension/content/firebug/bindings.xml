@@ -915,7 +915,7 @@
             xbl:inherits="value=title"/>
         <xul:menupopup anonid="popup"/>
         <xul:toolbarbutton class="fb-toolbarbutton box-inherit toolbarbutton-menubutton-button"
-            anonid="button" flex="1" 
+            anonid="button" flex="1"
             xbl:inherits="disabled,crop,image,label,accesskey,command,align,dir,pack,orient" />
         <xul:dropmarker type="menu-button" class="toolbarbutton-menubutton-dropmarker"
             xbl:inherits="align,dir,pack,orient,disabled,label"/>
@@ -1223,8 +1223,8 @@
                     try
                     {
                         var toolbarButton = this.popup.parentNode;
-                        var menuBoxObject = toolbarButton.boxObject.QueryInterface(Ci.nsIMenuBoxObject);
-                        menuBoxObject.activeChild = this.firstMatch;
+                        if(toolbarButton.boxObject instanceof Components.interfaces.nsIMenuBoxObject)
+                            toolbarButton.boxObject.activeChild = this.firstMatch;
                     }
                     catch (err)
                     {
@@ -1276,7 +1276,7 @@
 
                 // Set the text into the box. If the user entirely removed the text use
                 // the placeholder again.
-                filterString = filterString ? filterString : 
+                filterString = filterString ? filterString :
                     FBL.$STR("script.Type any key to filter list");
 
                 this.setAttribute("value", filterString);
@@ -1612,8 +1612,8 @@
                 this.item.classList.add("menuitem-iconic-tooltip");
                 this.item.classList.add("menuitem-iconic");
             }
-			// workaround for 3.6 bug
-			this.item.classList.add("split-menuitem-item");
+            // workaround for 3.6 bug
+            this.item.classList.add("split-menuitem-item");
       ]]></constructor>
       <field name="item" readonly="true">
             document.getAnonymousElementByAttribute(this, "anonid", "item");

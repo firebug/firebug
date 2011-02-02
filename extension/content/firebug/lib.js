@@ -110,6 +110,9 @@ this.bindFixed = function() // fn, thisObject, args => thisObject.fn(args);
 
 this.extend = function(l, r)
 {
+    if (!l || !r)
+        throw new Error("FBL.extend on undefined object");
+
     var newOb = {};
     for (var n in l)
         newOb[n] = l[n];
