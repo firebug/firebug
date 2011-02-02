@@ -78,20 +78,44 @@ toolbar[iconsize="small"] #inspector-button > .toolbarbutton-icon {
     height: 16px;
 }
 
-/* Firebug button */
+/* Firebug Start Button */
 #firebug-button {
+    list-style-image: url(chrome://firebug/skin/firebug24.png);
+}
+
+#firebug-button[script="on"],
+#firebug-button[net="on"],
+#firebug-button[console="on"] {
+    list-style-image: url(chrome://firebug/skin/firebug24.png);
+}
+
+#firebug-button[suspended="suspended"] {
+    list-style-image: url(chrome://firebug/skin/firebug-gray-24.png);
+}
+
+toolbar[iconsize="small"] #firebug-button[script="on"] > .toolbarbutton-icon,
+toolbar[iconsize="small"] #firebug-button[net="on"] > .toolbarbutton-icon,
+toolbar[iconsize="small"] #firebug-button[console="on"] > .toolbarbutton-icon {
     list-style-image: url(chrome://firebug/skin/firebug16.png);
 }
 
-/* In Firefox 4, the button has a special badge that shows number of errors. */
-#firebug-button[firefox="4"] {
-    -moz-binding: url("chrome://firebug/content/start-button/startButton.xml#start-button");
+toolbar[iconsize="small"] #firebug-button[suspended="suspended"] > .toolbarbutton-icon {
+    list-style-image: url(chrome://firebug/skin/firebug-gray-16.png);
 }
 
 toolbar[iconsize="small"] #firebug-button > .toolbarbutton-icon {
     list-style-image: url(chrome://firebug/skin/firebug16.png);
     width: 16px;
     height: 16px;
+}
+
+/* In Firefox 4, the button has a special badge that shows number of errors. Also, the icon
+   size is always 16x16px and so, if the button is appended into bookmarks or addon-bar the
+   height is not affected. This is OK since the plan for Firefox 4 is to use 16x16 sizes
+   only anyway, see: https://bugzilla.mozilla.org/show_bug.cgi?id=616472 */
+#firebug-button[firefox="4"] {
+    -moz-binding: url("chrome://firebug/content/start-button/startButton.xml#start-button");
+    list-style-image: url(chrome://firebug/skin/firebug16.png);
 }
 
 #firebug-button .badge {
@@ -134,6 +158,39 @@ toolbar[iconsize="small"] #firebug-button > .toolbarbutton-icon {
 }
 
 /*************************************************************************************************/
+/* Firebug Status Icon */
+
+#fbStatusBar {
+    min-width: 26px;
+    cursor: pointer;
+}
+
+#fbStatusText {
+    cursor: pointer;
+    color: red;
+    font-weight: bold;
+}
+
+#fbStatusBar[showErrors] #fbStatusIcon {
+    list-style-image: url(chrome://firebug/skin/errorIcon.png);
+}
+
+#fbStatusIcon {
+    list-style-image: url(chrome://firebug/skin/firebug-gray-16.png);
+}
+
+#fbStatusIcon[script="on"],
+#fbStatusIcon[net="on"],
+#fbStatusIcon[console="on"] {
+    list-style-image: url(chrome://firebug/skin/firebug16.png);
+}
+
+#fbStatusIcon[suspended="suspended"] {
+    list-style-image: url(chrome://firebug/skin/firebug-gray-16.png);
+}
+
+/*************************************************************************************************/
+/* Command Line */
 
 #fbCommandArrow {
     margin: 2px 0 2px 7px;
@@ -192,63 +249,7 @@ toolbar[iconsize="small"] #firebug-button > .toolbarbutton-icon {
 }
 
 /*************************************************************************************************/
-
-#fbStatusBar {
-    min-width: 26px;
-    cursor: pointer;
-}
-
-#fbStatusText {
-    cursor: pointer;
-    color: red;
-    font-weight: bold;
-}
-
-#fbStatusBar[showErrors] #fbStatusIcon {
-    list-style-image: url(chrome://firebug/skin/errorIcon.png);
-}
-
-/*************************************************************************************************/
-/* Firebug Status Icon */
-
-#fbStatusIcon {
-    list-style-image: url(chrome://firebug/skin/firebug-gray-16.png);
-}
-
-#fbStatusIcon[script="on"],
-#fbStatusIcon[net="on"],
-#fbStatusIcon[console="on"] {
-    list-style-image: url(chrome://firebug/skin/firebug16.png);
-}
-
-#fbStatusIcon[suspended="suspended"] {
-    list-style-image: url(chrome://firebug/skin/firebug-gray-16.png);
-}
-
-/*************************************************************************************************/
-/* Firebug Start Button */
-
-#firebug-button[script="on"],
-#firebug-button[net="on"],
-#firebug-button[console="on"] {
-    list-style-image: url(chrome://firebug/skin/firebug16.png);
-}
-
-#firebug-button[suspended="suspended"] {
-    list-style-image: url(chrome://firebug/skin/firebug-gray-24.png);
-}
-
-toolbar[iconsize="small"] #firebug-button[script="on"] > .toolbarbutton-icon,
-toolbar[iconsize="small"] #firebug-button[net="on"] > .toolbarbutton-icon,
-toolbar[iconsize="small"] #firebug-button[console="on"] > .toolbarbutton-icon {
-    list-style-image: url(chrome://firebug/skin/firebug16.png);
-}
-
-toolbar[iconsize="small"] #firebug-button[suspended="suspended"] > .toolbarbutton-icon {
-    list-style-image: url(chrome://firebug/skin/firebug-gray-16.png);
-}
-
-/********************************************************************************************/
+/* Toolbar */
 
 #fbToolbar {
     padding-left: 4px;
@@ -257,6 +258,9 @@ toolbar[iconsize="small"] #firebug-button[suspended="suspended"] > .toolbarbutto
 #fbToolbarInner {
     overflow: hidden;
 }
+
+/*************************************************************************************************/
+/* Search Box */
 
 #fbSearchBox {
     margin-left: 0;
@@ -306,7 +310,8 @@ toolbar[iconsize="small"] #firebug-button[suspended="suspended"] > .toolbarbutto
 }
 
 textbox[type="fbSearchBox"] > panel {
-    -moz-border-radius: 1px;    /* This prevents the drop shadow from appearing See nsLayoutUtils::GetFrameTransparency*/
+    /* This prevents the drop shadow from appearing See nsLayoutUtils::GetFrameTransparency*/
+    -moz-border-radius: 1px;
 }
 
 .fbSearchBox-attention textbox {
@@ -320,7 +325,7 @@ textbox[type="fbSearchBox"] > panel {
     color: -moz-fieldtext;
 }
 
-/********************************************************************************************/
+/*************************************************************************************************/
 
 .toolbar-image-button {
 }
@@ -352,7 +357,7 @@ textbox[type="fbSearchBox"] > panel {
     list-style-image: url("chrome://firebug/skin/breakNextDisabled.png");
 }
 
-/************************************************************************************************/
+/*************************************************************************************************/
 /* Debugger buttons */
 
 #fbDebuggerButtons {
@@ -392,7 +397,7 @@ textbox[type="fbSearchBox"] > panel {
     list-style-image: url(chrome://firebug/skin/stepOut.png);
 }
 
-/************************************************************************************************/
+/*************************************************************************************************/
 /* Script history buttons */
 
 #fbNavigateBackButton,
@@ -440,7 +445,7 @@ menupopup[chromedir="rtl"] > .navigationHistoryMenuItemBack {
     font-weight: bold;
 }
 
-/************************************************************************************************/
+/*************************************************************************************************/
 
 #fbCommandPopupButton {
     list-style-image: url(chrome://firebug/skin/commandLine.png);
@@ -450,7 +455,7 @@ menupopup[chromedir="rtl"] > .navigationHistoryMenuItemBack {
     list-style-image: url(chrome://firebug/skin/commandLineDisabled.png);
 }
 
-/************************************************************************************************/
+/*************************************************************************************************/
 
 #fbBreakOnErrors {
     list-style-image: url(chrome://firebug/skin/breakErrors.png);
