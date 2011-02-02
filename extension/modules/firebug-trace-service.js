@@ -138,6 +138,8 @@ var traceConsoleService =
             obj = string;
         }
 
+        message = message +"";    // make sure message is a string
+
         // Create wrapper with message type info.
         var messageInfo = {
             obj: obj,
