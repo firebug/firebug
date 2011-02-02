@@ -1,6 +1,6 @@
 /* See license.txt for terms of usage */
 
-define("debugger.js", ["bti/compilationunit.js"], function(require, exports, module) { with (FBL) {
+define("debugger.js", ["bti/compilationunit.js"], function(CompilationUnit) { with (FBL) {
 
 // ************************************************************************************************
 // Constants
