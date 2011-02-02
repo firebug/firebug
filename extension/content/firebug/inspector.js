@@ -250,12 +250,13 @@ Firebug.Inspector = extend(Firebug.Module,
         var rp = this.repaint;
         var highlighter = rp.highlighter;
         var context = rp.context;
+        var win = context && context.window;
         var element = rp.element;
         var boxFrame = rp.boxFrame;
         var isBoxHighlighter = highlighter && highlighter.getNodes &&
                 highlighter.getNodes(context).offset.parentNode;
 
-        if (highlighter && (isBoxHighlighter || (this.inspecting && !isBoxHighlighter)))
+        if (win && highlighter && (isBoxHighlighter || (this.inspecting && !isBoxHighlighter)))
             highlighter.highlight(context, element, boxFrame);
     },
 

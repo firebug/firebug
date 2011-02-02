@@ -251,6 +251,8 @@ Firebug.CommandLine = extend(Firebug.Module,
         {
             consoleHandler.setEvaluatedCallback( function useConsoleFunction(result)
             {
+                if (result === "_firebugIgnore")
+                    return;
                 successConsoleFunction(result, context);  // result will be pass thru this function
             });
         }
