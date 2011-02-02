@@ -136,32 +136,20 @@ Firebug.StartButton = extend(Firebug.Module,
         if (!statusBar)
             return;
 
-        if (errorCount)
+        if (errorCount && Firebug.showErrorCount)
         {
-            if (Firebug.showErrorCount)
-            {
-                statusText.setAttribute("shown", "true")
-                statusText.setAttribute("value", $STRP("plural.Error_Count2", [errorCount]));
+            statusBar.setAttribute("showErrors", "true")
+            statusText.setAttribute("value", $STRP("plural.Error_Count2", [errorCount]));
 
-                firebugButton.setAttribute("showErrors", "true");
-                firebugButton.setAttribute("errorCount", errorCount);
-            }
-            else
-            {
-                statusText.removeAttribute("shown");
-                firebugButton.removeAttribute("showErrors");
-
-                // Use '0' so, the horizontal space for the number is still allocated.
-                // The button will cause re-layout if there is more than 9 errors.
-                firebugButton.setAttribute("errorCount", "0");
-            }
-
-            statusBar.setAttribute("errors", "true");
+            firebugButton.setAttribute("showErrors", "true");
+            firebugButton.setAttribute("errorCount", errorCount);
         }
         else
         {
+            statusBar.removeAttribute("showErrors");
             statusText.setAttribute("value", "");
-            statusBar.removeAttribute("errors");
+
+            firebugButton.removeAttribute("showErrors");
 
             // Use '0' so, the horizontal space for the number is still allocated.
             // The button will cause re-layout if there is more than 9 errors.

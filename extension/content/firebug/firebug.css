@@ -39,9 +39,9 @@ window[chromehidden~="toolbar"] #fbToolbar {
     color: #666666;
 }
 .completionText[selected="true"] {
-    background-color:highlight;
-    border-color:highlight;
-    color:highlighttext !important;
+    background-color: highlight;
+    border-color: highlight;
+    color: highlighttext !important;
 }
 
 textbox[type="fbSearchBox"] {
@@ -100,7 +100,7 @@ panelStatus {
     visibility: collapse;
 }
 
-#fbStatusBar[errors] #fbStatusText[shown] {
+#fbStatusBar[showErrors] #fbStatusText {
     visibility: visible;
 }
 
@@ -126,7 +126,7 @@ panelTabMenu {
 }
 
 panelTab > panelTabMenu .menuTarget {
-    visibility:collapse;
+    visibility: collapse;
 }
 
 panelTab[selected="true"] > panelTabMenu .menuTarget,
@@ -134,8 +134,8 @@ panelTab:focus > panelTabMenu .menuTarget {
     background: url(chrome://firebug/skin/tabMenuTarget.png) no-repeat center;
     width: 11px;
     height: 10px;
-    vertical-align:middle;
-    visibility:visible;
+    vertical-align: middle;
+    visibility: visible;
 }
 
 panelTab[selected="true"]:hover > panelTabMenu .menuTarget {
@@ -267,9 +267,9 @@ panelTab[selected="true"]:hover > panelTabMenu .menuTarget {
 /* Quick Info Box */
 
 #fbQuickInfoPanel {
-    border:1px solid threedshadow;
-    background-color:white;
-    opacity:0.9;
+    border: 1px solid threedshadow;
+    background-color: white;
+    opacity: 0.9;
     font-family: monospace;
     font-size: 11px;
     padding-bottom: 5px;
@@ -295,7 +295,7 @@ panelTab[selected="true"]:hover > panelTabMenu .menuTarget {
 .fbQuickInfoValue {
     color: DarkBlue;
     margin-bottom: 0;
-    -moz-margin-start:0;
+    -moz-margin-start: 0;
     cursor: move;
 }
 
@@ -347,8 +347,8 @@ menuitem.split-menuitem-item[_moz-menuactive="true"], .split-menu-right-image[_m
 menu[type=splitmenu] {
     -moz-binding: url("chrome://firebug/content/bindings.xml#splitmenu");
     display: -moz-box;
-    -moz-box-orient:horizontal;
-    -moz-appearance:none !important;
+    -moz-box-orient: horizontal;
+    -moz-appearance: none !important;
     color: menutext;
     background-color: transparent !important;
 }
