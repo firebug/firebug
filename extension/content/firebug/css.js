@@ -1,6 +1,5 @@
 /* See license.txt for terms of usage */
-
-FBL.ns(function() { with (FBL) {
+define("css.js", [], function() { with (FBL) {
 
 // ************************************************************************************************
 // Constants

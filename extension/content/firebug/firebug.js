@@ -256,6 +256,8 @@ top.Firebug =
                  "debugger.js",
                  "tabContext.js",
                  "sourceBox.js",
+                 "script.js",
+                 "css.js"
                 ];
 
             loader.define(defaultPanels, function delay(){
