@@ -234,7 +234,7 @@ top.Firebug =
                 context:"Firebug "+uid, // TODO XUL window id on FF4.0+
                 baseUrl: "resource://firebugModules/",
                 onDebug: function() {FBTrace.sysout.apply(FBTrace,arguments); },
-                onError: function() {FBTrace.sysout.apply(FBTrace,arguments); },
+                onError: function() {Cu.reportError(arguments[0]); FBTrace.sysout.apply(FBTrace,arguments); },
                 waitSeconds: 0,
                 debug: true,
                 /* edit: function(errorMsg, errorURL, errorLineNumber)
