@@ -39,7 +39,7 @@ Firebug 1.1 is Firebug 1.05 by Joe Hewitt with additions by John J. Barton and M
 
 == For Extensions ==
     * All modules support Firebug.Listener
-    * add option extensions.firebug-tracing-service.toOSConsole for debugging tracing or early FF
+    * add option extensions.firebug-tracing-service.DBG_toOSConsole for debugging tracing or early FF
     * TabWatch dispatch separate from modules dispatch
     * acceptContext/declineContext replaced by shouldCreateContext/shouldNotCreateContext
     * function() objects default rep is next to last so function types can be trapped by supportsObject()
