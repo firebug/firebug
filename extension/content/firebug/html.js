@@ -1,6 +1,6 @@
 /* See license.txt for terms of usage */
 
-define("html.js", ["lib/htmlLib.js", "reps.js", "editor.js"],function(HTMLLib, FirebugReps, Editors) { with (FBL) {
+FBL.ns(function() { with (FBL) {
 
 // ************************************************************************************************
 // Constants

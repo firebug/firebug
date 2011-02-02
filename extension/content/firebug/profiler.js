@@ -1,6 +1,7 @@
 /* See license.txt for terms of usage */
 
-define("profiler.js", ["reps.js"], function(FirebugReps) { with (FBL) {
+
+FBL.ns(function() { with (FBL) {
 
 var toggleProfiling = $("fbToggleProfiling");
 

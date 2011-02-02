@@ -2079,7 +2079,7 @@ Firebug.NetMonitor.NetRequestEntry = domplate(Firebug.Rep, new Firebug.Listener(
             // Select "Headers" tab by default, if no other tab is selected already.
             // (e.g. by a third party Firebug extension in 'initTabBody' event)
             if (!netInfoBox.selectedTab)
-            NetInfoBody.selectTabByName(netInfoBox, "Headers");
+                NetInfoBody.selectTabByName(netInfoBox, "Headers");
 
             var category = Utils.getFileCategory(row.repObject);
             if (category)

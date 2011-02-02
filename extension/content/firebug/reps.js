@@ -1,8 +1,6 @@
 /* See license.txt for terms of usage */
 
-define("reps.js", [], function(require, exports, module) { with (FBL) {
-
-var FirebugReps = {};
+var FirebugReps = FBL.ns(function() { with (FBL) {
 
 // ************************************************************************************************
 // Constants
