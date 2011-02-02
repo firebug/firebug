@@ -226,11 +226,13 @@ top.Firebug =
                 FirebugReps: FirebugReps,
                 FBTrace: FBTrace,
                 domplate: domplate,
+                setTimeout: function(fn, delay) { return window.setTimeout(fn, delay); }, // bind window via closure
+                clearTimeout: function(fn, delay) { return window.clearTimeout(fn, delay); }, // bind window via closure
             };
             var uid = Math.random();  // to give each XUL window its own loader (for now)
             var config = {
                 context:"Firebug "+uid, // TODO XUL window id on FF4.0+
-                baseUrl: "resource://firebug/",
+                baseUrl: "resource://firebugModules/",
                 onDebug: function() {FBTrace.sysout.apply(FBTrace,arguments); },
                 onError: function() {FBTrace.sysout.apply(FBTrace,arguments); },
                 waitSeconds: 0,
@@ -251,7 +253,9 @@ top.Firebug =
 
             var defaultPanels = // this will pull in all the rest of the code by dependencies
                 [
-                 "debugger.js"
+                 "debugger.js",
+                 "tabContext.js",
+                 "sourceBox.js",
                 ];
 
             loader.define(defaultPanels, function delay(){

@@ -440,6 +440,8 @@ Firebug.TabContext.prototype =
     {
         if (setTimeout == this.setTimeout)
             throw new Error("setTimeout recursion");
+
+        var top = window; // FIXME
         var timeout = window.setTimeout.apply(top, arguments);
 
         if (!this.timeouts)
@@ -460,6 +462,7 @@ Firebug.TabContext.prototype =
 
     setInterval: function()
     {
+        var top = window; // FIXME
         var timeout = setInterval.apply(top, arguments);
 
         if (!this.intervals)
