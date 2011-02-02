@@ -80,7 +80,7 @@ toolbar[iconsize="small"] #inspector-button > .toolbarbutton-icon {
 
 /* Firebug button */
 #firebug-button {
-    list-style-image: url(chrome://firebug/skin/firebug24.png);
+    list-style-image: url(chrome://firebug/skin/firebug16.png);
 }
 
 /* In Firefox 4, the button has a special badge that shows number of errors. */
@@ -231,7 +231,7 @@ toolbar[iconsize="small"] #firebug-button > .toolbarbutton-icon {
 #firebug-button[script="on"],
 #firebug-button[net="on"],
 #firebug-button[console="on"] {
-    list-style-image: url(chrome://firebug/skin/firebug24.png);
+    list-style-image: url(chrome://firebug/skin/firebug16.png);
 }
 
 #firebug-button[suspended="suspended"] {
