@@ -1,8 +1,7 @@
 /* See license.txt for terms of usage */
 
-FBL.ns(function() { with (FBL) {
+define("tabContext.js", ["bti/compilationunit.js"], function(CompilationUnit) { with (FBL) {
 
-    Components.utils.import("resource://firebug/bti/compilationunit.js");
 // ************************************************************************************************
 // Constants
 

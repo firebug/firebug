@@ -142,6 +142,23 @@ var clearContextTimeout = 0;
 
 try
 {
+    // Get ModuleLoader implementation (it's Mozilla JS code module)
+    Components.utils["import"]("resource://firebug/moduleLoader.js");
+    if (FBTrace.DBG_MODULES)
+        FBTrace.sysout("Loaded ModuleLoader");
+}
+catch (exc)
+{
+    var msg = exc.toString() +" "+(exc.fileName || exc.sourceName) + "@" + exc.lineNumber;
+    if (FBTrace.DBG_MODULES)
+    {
+        dump("Import moduleLoader.js FAILS: "+msg+"\n");
+        FBTrace.sysout("Import moduleLoader.js ERROR "+msg, exc);
+    }
+}
+
+try
+{
     // Register default Firebug string bundle (yet before domplate templates).
     // Notice that this category entry must not be persistent in Fx 4.0
     categoryManager.addCategoryEntry("strings_firebug",
@@ -196,8 +213,59 @@ top.Firebug =
         var tempPanelTypes = earlyRegPanelTypes;
         earlyRegPanelTypes = null;
 
-        FBL.initialize();  // TODO FirebugLoader
+        FBL.initialize();  // non require.js modules
 
+        if (ModuleLoader)
+        {
+            var firebugScope = // pump the objects from this scope down into module loader
+            {
+                window : window,
+                Firebug: Firebug,
+                fbXPCOMUtils: fbXPCOMUtils,
+                FBL: FBL,
+                FirebugReps: FirebugReps,
+                FBTrace: FBTrace,
+                domplate: domplate,
+            };
+            var uid = Math.random();  // to give each XUL window its own loader (for now)
+            var config = {
+                context:"Firebug "+uid, // TODO XUL window id on FF4.0+
+                baseUrl: "resource://firebug/",
+                onDebug: function() {FBTrace.sysout.apply(FBTrace,arguments); },
+                onError: function() {FBTrace.sysout.apply(FBTrace,arguments); },
+                waitSeconds: 0,
+                debug: true,
+                /* edit: function(errorMsg, errorURL, errorLineNumber)
+                {
+                    window.alert(errorMsg+" "+errorURL+"@"+errorLineNumber);
+                },
+                edit: function(context, url, module)
+                {
+                    FBTrace.sysout("opening window modal on "+url);
+                    var a = {url: url};
+                    return window.showModalDialog("chrome://firebug/content/external/editors.xul",{}, "resizable:yes;scroll:yes;dialogheight:480;dialogwidth:600;center:yes");
+                }
+                */
+            };
+            var loader = new ModuleLoader(firebugScope, config);
+
+            var defaultPanels = // this will pull in all the rest of the code by dependencies
+                [
+                 "debugger.js"
+                ];
+
+            loader.define(defaultPanels, function delay(){
+                Firebug.completeInitialize(tempPanelTypes);
+            });
+        }
+        else
+        {
+            this.completeInitialize(tempPanelTypes);
+        }
+    },
+
+    completeInitialize: function(tempPanelTypes)
+    {
         // Append early registered panels at the end.
         panelTypes.push.apply(panelTypes, tempPanelTypes);
 
@@ -225,7 +293,7 @@ top.Firebug =
         try
         {
             // Load Browser Tools Interface definition
-            Components.utils.import("resource://firebug/bti/bti.js", this);
+            //Components.utils.import("resource://firebug/bti/bti.js", this);
         }
         catch (err)
         {

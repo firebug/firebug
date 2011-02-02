@@ -1,11 +1,9 @@
 /* See license.txt for terms of usage */
 
-FBL.ns(function() { with (FBL) {
+define("script.js", ["bti/compilationunit.js"], function(CompilationUnit) { with (FBL) {
 
 // ************************************************************************************************
 // Constants
-
-Components.utils.import("resource://firebug/bti/compilationunit.js");
 
 if (!Firebug.JavaScriptModule)
     Firebug.JavaScriptModule = Firebug.Debugger;

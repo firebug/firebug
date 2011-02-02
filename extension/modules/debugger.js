@@ -1,6 +1,6 @@
 /* See license.txt for terms of usage */
 
-FBL.ns(function() { with (FBL) {
+define("debugger.js", ["bti/compilationunit.js"], function(require, exports, module) { with (FBL) {
 
 // ************************************************************************************************
 // Constants
@@ -684,7 +684,7 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
                 if (FBTrace.DBG_BP)
                     FBTrace.sysout("debugger.setBreakOnNextCause converted to disabled bp " +
                         sourceFile.href+"@"+lineNo+" tag: "+frame.script.tag, bp);
-    
+
                 Firebug.Debugger.resume(context);
             },
             okAction: function justGo()

@@ -588,6 +588,16 @@ Firebug.TabWatcher = extend(new Firebug.Listener(),
                 return rc;
         }
     },
+
+    // Called by script panel, not sure where this belongs.
+
+    reloadPageFromMemory: function(context)
+    {
+            if (context.browser)
+            context.browser.reloadWithFlags(Ci.nsIWebNavigation.LOAD_FLAGS_CHARSET_CHANGE)
+        else
+            context.window.location.reload();
+    },
 });
 
 // ************************************************************************************************
@@ -650,30 +660,6 @@ var TabWatcherUnloader =
 
         onUnloadWindow(event);
     },
-
-    // Called by script panel, not sure where this belongs.
-
-    reloadPageFromMemory: function(context)
-    {
-            if (context.browser)
-            context.browser.reloadWithFlags(Ci.nsIWebNavigation.LOAD_FLAGS_CHARSET_CHANGE)
-        else
-            context.window.location.reload();
-    },
-
-
-
-    // Called by script panel, not sure where this belongs.
-
-    reloadPageFromMemory: function(context)
-    {
-            if (context.browser)
-            context.browser.reloadWithFlags(Ci.nsIWebNavigation.LOAD_FLAGS_CHARSET_CHANGE)
-        else
-            context.window.location.reload();
-    },
-
-
 };
 
 // ************************************************************************************************

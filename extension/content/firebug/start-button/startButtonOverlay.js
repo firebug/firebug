@@ -23,7 +23,7 @@ var firebugButton = $("firebug-button");
  * @module StartButton module represents the UI entry point to Firebug. This "start buttton"
  * formerly known as "the status bar icon" is automatically appended into Firefox toolbar
  * (since Firefox 4).
- * 
+ *
  * Start button is associated with a menu (fbStatusContextMenu) that contains basic actions
  * such as panel activation and also indicates whether Firebug is activated/deactivated for
  * the current page (by changing its color).
@@ -38,14 +38,18 @@ Firebug.StartButton = extend(Firebug.Module,
         // Associate a popup-menu with the start button (the same as it's
         // used for the obsolete status bar icon.
         var startButton = $("firebug-button");
-        startButton.appendChild(popup.cloneNode(true));
+        if (startButton)
+        {
+            startButton.appendChild(popup.cloneNode(true));
 
-        // Append the button into Firefox toolbar automatically.
-        this.appendToToolbar();
+            // Append the button into Firefox toolbar automatically.
+            this.appendToToolbar();
 
-        // If Firefox version is 4+, let's 
-        if (versionChecker.compare(appInfo.version, "4.0*") >= 0)
-            startButton.setAttribute("firefox", "4");
+            // If Firefox version is 4+, let's
+            if (versionChecker.compare(appInfo.version, "4.0*") >= 0)
+                startButton.setAttribute("firefox", "4");
+
+        }
     },
 
     shutdown: function()

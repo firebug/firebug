@@ -2491,6 +2491,7 @@ var fbs =
     {
         if (!fbs.isChromeBlocked)
         {
+
             jsd.appendFilter(this.noFilterHalter);  // must be first
             jsd.appendFilter(this.filterChrome);
             jsd.appendFilter(this.filterComponents);
@@ -2514,6 +2515,8 @@ var fbs =
     {
         if (fbs.isChromeBlocked)
         {
+            if (!this.filterChrome)
+                FBTrace.sysout("removeChromeBlockingFilters is confused ", this);
             jsd.removeFilter(this.filterChrome);
             jsd.removeFilter(this.filterComponents);
             jsd.removeFilter(this.filterFirebugComponents);

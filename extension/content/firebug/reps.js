@@ -1,5 +1,6 @@
 /* See license.txt for terms of usage */
 
+// Set this global to an empty object, and populate the object during FBL.initialize
 var FirebugReps = FBL.ns(function() { with (FBL) {
 
 // ************************************************************************************************
