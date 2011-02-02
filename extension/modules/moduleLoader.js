@@ -408,7 +408,7 @@ ModuleLoader.prototype = {
                     }
                     caller = caller.caller;
                 }
-                return ModuleLoader.onError(new Error("ModuleLoader file not found "+pathToFile+" "+callsite), {err:err, pathToFile: pathToFile, moduleLoader: this});
+                return ModuleLoader.onError(new Error("ERROR ModuleLoader file not found "+pathToFile+" from "+callsite), {err:err, pathToFile: pathToFile, moduleLoader: this});
             }
             return ModuleLoader.onError(new Error("mozReadTextFromFile; EXCEPTION "+err), {err:err, pathToFile: pathToFile, moduleLoader: this});
         }
