@@ -1746,7 +1746,7 @@ var fbs =
                 while( peelOurselvesOff && ( peelOurselvesOff.script.fileName.indexOf("firebug-service.js") > 0 ) )
                     peelOurselvesOff = peelOurselvesOff.callingFrame;
 
-                while( peelOurselvesOff && ( peelOurselvesOff.script.fileName.indexOf("content/debugger.js") > 0 ) )
+                while( peelOurselvesOff && ( peelOurselvesOff.script.fileName.indexOf("/debugger.js") > 0 ) )
                     peelOurselvesOff = peelOurselvesOff.callingFrame;
 
                 if (peelOurselvesOff)
