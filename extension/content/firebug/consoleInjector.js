@@ -286,6 +286,7 @@ Firebug.Console.createConsole = function createConsole(context, win)
                 rest.push(arguments[i]);
             return logAssert("assert", rest);
         }
+        return "_firebugIgnore";
     };
 
     console.dir = function(o)
@@ -383,7 +384,7 @@ Firebug.Console.createConsole = function createConsole(context, win)
     console.time = function(name, reset)
     {
         if (!name)
-            return;
+            return "_firebugIgnore";
 
         var time = new Date().getTime();
 
@@ -404,7 +405,7 @@ Firebug.Console.createConsole = function createConsole(context, win)
         var time = new Date().getTime();
 
         if (!this.timeCounters)
-            return;
+            return "_firebugIgnore";
 
         var key = "KEY"+name.toString();
 
@@ -500,6 +501,7 @@ Firebug.Console.createConsole = function createConsole(context, win)
 
         var row = Firebug.Console.log(errorObject, context, "errorMessage", null, true); // noThrottle
         row.scrollIntoView();
+
         return "_firebugIgnore";
     }
 

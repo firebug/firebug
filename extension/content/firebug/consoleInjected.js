@@ -10,7 +10,7 @@ function _createFirebugConsole()
     console.assert = function assert() { return console.notifyFirebug(arguments, 'assert', 'firebugAppendConsole'); }
     console.dir = function dir() { return console.notifyFirebug(arguments, 'dir', 'firebugAppendConsole'); }
     console.dirxml = function dirxml() { return console.notifyFirebug(arguments, 'dirxml', 'firebugAppendConsole'); }
-    console.trace = function firebugDebuggerTracer() { debugger; }
+    console.trace = function firebugDebuggerTracer() { debugger; return "_firebugIgnore"; }
     console.group = function group() { return console.notifyFirebug(arguments, 'group', 'firebugAppendConsole'); }
     console.groupEnd = function groupEnd() { return console.notifyFirebug(arguments, 'groupEnd', 'firebugAppendConsole'); }
     console.groupCollapsed = function groupCollapsed() { return console.notifyFirebug(arguments, 'groupCollapsed', 'firebugAppendConsole'); }
