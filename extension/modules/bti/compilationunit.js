@@ -5,8 +5,6 @@
 
 var EXPORTED_SYMBOLS = ["CompilationUnit"];
 
-define([], function(){
-
 // XXXjjb Modules HACK
 Components.utils.import("resource://firebug/firebug-trace-service.js");
 FBTrace = traceConsoleService.getTracer("extensions.firebug");
@@ -199,6 +197,3 @@ CompilationUnit.prototype._removeBreakpoint = function(breakpoint)
 // CommonJS
 
 exports = CompilationUnit;
-return CompilationUnit;
-
-});
