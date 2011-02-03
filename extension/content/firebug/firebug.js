@@ -233,8 +233,26 @@ top.Firebug =
             var config = {
                 context:"Firebug "+uid, // TODO XUL window id on FF4.0+
                 baseUrl: "resource://firebugModules/",
-                onDebug: function() {FBTrace.sysout.apply(FBTrace,arguments); },
-                onError: function() {Cu.reportError(arguments[0]); FBTrace.sysout.apply(FBTrace,arguments); },
+                onDebug: function() {
+                    if (!this.FBTrace)
+                    {
+                        // traceConsoleService is a global of |window| frome trace.js.
+                        // on the first call we use it to get a ref to the Cu.import module object
+                        this.FBTrace = traceConsoleService.getTracer("extensions.firebug");
+                    }
+                    this.FBTrace.sysout.apply(this.FBTrace,arguments);
+                },
+                onError: function()
+                {
+                    Cu.reportError(arguments[0]);
+                    if (!this.FBTrace)
+                    {
+                        // traceConsoleService is a global of |window| frome trace.js.
+                        // on the first call we use it to get a ref to the Cu.import module object
+                        this.FBTrace = traceConsoleService.getTracer("extensions.firebug");
+                    }
+                    this.FBTrace.sysout.apply(this.FBTrace,arguments);
+                },
                 waitSeconds: 0,
                 debug: true,
                 /* edit: function(errorMsg, errorURL, errorLineNumber)
