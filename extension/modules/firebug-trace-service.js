@@ -110,8 +110,6 @@ var traceConsoleService =
                     var optionName = data.substr(prefDomain.length+1); // skip dot
                     if (optionName.substr(0, DBG_.length) == DBG_)
                         traceConsoleService.optionMaps[prefDomain][optionName] = this.getPref(data);
-                    if (toOSConsole)
-                        traceConsoleService.osOut("traceConsoleService.observe, prefDomain: "+prefDomain+" optionName "+optionName+"\n");
                 }
             }
         }
