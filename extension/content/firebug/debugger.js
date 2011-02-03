@@ -1224,7 +1224,7 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
                 FBTrace.sysout("debugger.firebugDebuggerTracer dropped tracer trace.frames "+
                     trace.frames.length, trace.frames);
 
-            if (context.window.wrappedJSObject._firebugStackTrace == "requested")
+            if (unwrapObject(context.window)._firebugStackTrace == "requested")
             {
                 trace.frames = trace.frames.slice(1);  // drop console.error() see consoleInjected.js
                 if (FBTrace.DBG_ERRORLOG)

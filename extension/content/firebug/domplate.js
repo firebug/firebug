@@ -197,13 +197,26 @@ DomplateTag.prototype =
             return FBL.escapeForSourceLine(value);
         }
 
+        function isArray(it)
+        {
+            return Object.prototype.toString.call(it) === "[object Array]";
+        }
+
         function __loop__(iter, outputs, fn)
         {
             var iterOuts = [];
             outputs.push(iterOuts);
 
-            if (iter instanceof Array || iter instanceof NodeList)
+            if (isArray(iter) || iter instanceof NodeList)
+            {
+                FBTrace.sysout("loop is detecting an array - create iterator", iter);
                 iter = new ArrayIterator(iter);
+            }
+            else 
+            {
+                FBTrace.sysout("array: " + Object.prototype.toString.call(iter));
+                FBTrace.sysout("loop is not detecting an array " + typeof iter + ": " + Array, iter);
+            }
 
             var value;
             try
@@ -219,7 +232,8 @@ DomplateTag.prototype =
             catch (exc)
             {
                 if (exc != StopIteration && FBTrace.DBG_ERRORS)
-                    FBTrace.sysout("domplate; __loop__ EXCEPTION " + value.name + ", " + exc, exc);
+                    FBTrace.sysout("domplate; __loop__ EXCEPTION " +
+                        (value ? value.name : "no value") + ", " + exc, exc);
 
                 // Don't throw the exception, many built in objects in Firefox throws exceptions
                 // these days and it breaks the UI. We can remove as soon as:
