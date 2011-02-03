@@ -1734,7 +1734,7 @@ Firebug.WatchPanel.prototype = extend(Firebug.DOMBasePanel.prototype,
         }
         catch(exc)
         {
-            if (FBTrace.DBG_ERRORS || FBTrace.DBG_STACK)
+            if (FBTrace.DBG_ERRORS && FBTrace.DBG_STACK)
                 FBTrace.sysout("updateSelection FAILS "+exc, exc);
         }
     },

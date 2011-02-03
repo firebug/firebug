@@ -1620,12 +1620,8 @@ NetPanel.prototype = extend(Firebug.ActivablePanel,
 
         var maxWidth = netHrefCol.clientWidth;
 
-        if (!Firebug.currentContext)
-            FBTrace.sysout("commandLine.setMultiline; Firebug.currentContext == NULL");
-            return;
-
-        // This call must precede all getCSSStyleRules calls
-        Firebug.CSSModule.cleanupSheets(hrefLabel.ownerDocument, Firebug.currentContext);
+        // This call must precede all getCSSStyleRules calls  FIXME not needed after 3.6
+        Firebug.CSSModule.cleanupSheets(hrefLabel.ownerDocument, this.context);
         var rules = domUtils.getCSSStyleRules(hrefLabel);
         for (var i = 0; i < rules.Count(); ++i)
         {
@@ -4443,7 +4439,7 @@ function monitorContext(context)
 
 function unmonitorContext(context)
 {
-    if (FBTrace.DBG_NET)
+    if (FBTrace.DBG_NET && context)
         FBTrace.sysout("net.unmonitorContext; (" + context.netProgress + ") " + context.getName());
 
     var netProgress = context ? context.netProgress : null;

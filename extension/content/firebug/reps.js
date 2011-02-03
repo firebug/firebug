@@ -1201,7 +1201,7 @@ FirebugReps.SourceLink = domplate(Firebug.Rep,
 
     getSourceLinkTitle: function(sourceLink)
     {
-        if (!sourceLink)
+        if (!sourceLink || !sourceLink.href || typeof(sourceLink.href) !== 'string')
             return "";
 
         try

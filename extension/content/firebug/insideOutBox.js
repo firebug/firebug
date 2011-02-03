@@ -154,7 +154,7 @@ Firebug.InsideOutBox.prototype =
 
         if (!panel)
         {
-            if (FBTrace.DBG_ERRORS || FBTrace.DBG_HTML)
+            if (FBTrace.DBG_ERRORS && FBTrace.DBG_HTML)
                 FBTrace.sysout("selectObjectBox no panel for "+objectBox, objectBox);
             return;
         }

@@ -524,7 +524,7 @@ Firebug.CSSStyleSheetPanel.prototype = extend(Firebug.SourceBoxPanel,
                 }
                 else
                 {
-                    if (FBTrace.DBG_ERRORS || FBTrace.DBG_CSS)
+                    if (FBTrace.DBG_ERRORS && FBTrace.DBG_CSS)
                         FBTrace.sysout("css getStyleSheetRules failed to classify a rule ", rule);
                 }
             }
@@ -1707,11 +1707,12 @@ function safeGetContentState(selection)
 {
     try
     {
-        return domUtils.getContentState(selection);
+        if (selection && selection.ownerDocument)
+            return domUtils.getContentState(selection);
     }
     catch (e)
     {
-        if (FBTrace.DBG_ERRORS)
+        if (FBTrace.DBG_ERRORS && FBTrace.DBG_CSS)
             FBTrace.sysout("css.safeGetContentState; EXCEPTION "+e, e);
     }
 }

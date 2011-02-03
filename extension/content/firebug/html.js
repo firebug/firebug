@@ -803,7 +803,7 @@ Firebug.HTMLPanel.prototype = extend(WalkingPanel,
             }
             catch (exc)
             {
-                if (FBTrace.DBG_ERRORS || FBTrace.DBG_HTML)
+                if (FBTrace.DBG_ERRORS && FBTrace.DBG_HTML)
                     FBTrace.sysout("html.onMutateNode FAILS:", exc);
             }
         }, this);
@@ -1143,7 +1143,7 @@ Firebug.HTMLPanel.prototype = extend(WalkingPanel,
                 // Look up for an enclosing parent. NB this will mask failures in createObjectBoxes
                 var parentNode = this.getParentObject(object);
 
-                if (FBTrace.DBG_ERRORS || FBTrace.DBG_HTML)
+                if (FBTrace.DBG_ERRORS && FBTrace.DBG_HTML)
                     FBTrace.sysout("html.updateSelect no objectBox for object:"+FBL.getElementCSSSelector(object) + " trying "+FBL.getElementCSSSelector(parentNode));
 
                 this.updateSelection(parentNode);

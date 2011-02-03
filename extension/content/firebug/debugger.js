@@ -1204,7 +1204,7 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
         }
         catch (exc)
         {
-            if (FBTrace.DBG_ERRORS || FBTrace.DBG_BP)
+            if (FBTrace.DBG_ERRORS && FBTrace.DBG_BP)
                 FBTrace.sysout("debugger.onBreak FAILS", exc);
             throw exc;
         }

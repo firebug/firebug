@@ -69,7 +69,7 @@ Firebug.CommandLine = extend(Firebug.Module,
         }
         catch (exc)  // XXX jjb, I don't expect this to be taken, the try here is for the finally
         {
-            if (FBTrace.DBG_ERRORS || FBTrace.DBG_COMMANDLINE)
+            if (FBTrace.DBG_ERRORS && FBTrace.DBG_COMMANDLINE)
                 FBTrace.sysout("commandLine.evaluate with context.stopped:" + context.stopped +
                     " EXCEPTION " + exc, exc);
         }
@@ -87,7 +87,7 @@ Firebug.CommandLine = extend(Firebug.Module,
 
         if (!win)
         {
-            if (FBTrace.DBG_ERRORS || FBTrace.DBG_COMMANDLINE)
+            if (FBTrace.DBG_ERRORS && FBTrace.DBG_COMMANDLINE)
                 FBTrace.sysout("commandLine.evaluateByEventPassing: no targetWindow!\n");
             return;
         }
@@ -228,7 +228,7 @@ Firebug.CommandLine = extend(Firebug.Module,
         var win = targetWindow ? targetWindow : (context.baseWindow ? context.baseWindow : context.window);
         if (!win)
         {
-            if (FBTrace.DBG_ERRORS || FBTrace.DBG_COMMANDLINE)
+            if (FBTrace.DBG_ERRORS && FBTrace.DBG_COMMANDLINE)
                 FBTrace.sysout("commandLine.evaluateByPostMessage: no targetWindow!\n");
             return;
         }
@@ -305,7 +305,7 @@ Firebug.CommandLine = extend(Firebug.Module,
         }
         catch (e)
         {
-            if (FBTrace.DBG_ERRORS || FBTrace.DBG_COMMANDLINE)
+            if (FBTrace.DBG_ERRORS && FBTrace.DBG_COMMANDLINE)
                 FBTrace.sysout("commandLine.evaluateInSandbox FAILED in "+context.getName()+
                     " because "+e, e);
 
@@ -525,18 +525,16 @@ Firebug.CommandLine = extend(Firebug.Module,
             return;
         }
 
-        if (!Firebug.currentContext)
+        if (Firebug.currentContext)
         {
-            FBTrace.sysout("commandLine.setMultiline; Firebug.currentContext == NULL");
-            return;
+            Firebug.currentContext.commandLineText = Firebug.currentContext.commandLineText || "";
+
+            if (multiLine)
+                commandLineLarge.value = cleanIndentation(Firebug.currentContext.commandLineText);
+            else
+                commandLineSmall.value = stripNewLines(Firebug.currentContext.commandLineText);
         }
-
-        Firebug.currentContext.commandLineText = Firebug.currentContext.commandLineText || "";
-
-        if (multiLine)
-            commandLineLarge.value = cleanIndentation(Firebug.currentContext.commandLineText);
-        else
-            commandLineSmall.value = stripNewLines(Firebug.currentContext.commandLineText);
+        // else we may be hiding a panel while turning Firebug off
     },
 
     toggleMultiLine: function(forceLarge)
@@ -862,7 +860,7 @@ Firebug.CommandLine = extend(Firebug.Module,
     {
         if (!Firebug.currentContext)
         {
-            if (FBTrace.DBG_ERRORS || FBTrace.DBG_COMMANDLINE)
+            if (FBTrace.DBG_ERRORS && FBTrace.DBG_COMMANDLINE)
                 FBTrace.sysout("commandLine.attachConsoleOnFocus no Firebug.currentContext");
             return false;
         }
@@ -1107,7 +1105,7 @@ function autoCompleteEval(preExpr, expr, postExpr, context)
     }
     catch (exc)
     {
-        if (FBTrace.DBG_ERRORS || FBTrace.DBG_COMMANDLINE)
+        if (FBTrace.DBG_ERRORS && FBTrace.DBG_COMMANDLINE)
             FBTrace.sysout("commandLine.autoCompleteEval FAILED", exc);
         return [];
     }

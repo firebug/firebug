@@ -486,7 +486,7 @@ Firebug.ConsolePanel.prototype = extend(Firebug.ActivablePanel,
 
     clearReloadWarning: function()
     {
-        if (this.warningRow)
+        if (this.warningRow && this.warningRow.parentNode)
         {
             this.warningRow.parentNode.removeChild(this.warningRow);
             delete this.warningRow;
