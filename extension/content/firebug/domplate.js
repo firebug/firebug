@@ -219,7 +219,8 @@ DomplateTag.prototype =
             catch (exc)
             {
                 if (exc != StopIteration && FBTrace.DBG_ERRORS)
-                    FBTrace.sysout("domplate; __loop__ EXCEPTION " + value.name + ", " + exc, exc);
+                    FBTrace.sysout("domplate; __loop__ EXCEPTION " +
+                        (value ? value.name : "no value") + ", " + exc, exc);
 
                 // Don't throw the exception, many built in objects in Firefox throws exceptions
                 // these days and it breaks the UI. We can remove as soon as:
