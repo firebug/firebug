@@ -1,5 +1,5 @@
 /* See license.txt for terms of usage */
-define("css.js", [], function() { with (FBL) {
+FBL.ns(function() { with (FBL) {
 
 // ************************************************************************************************
 // Constants
@@ -2341,6 +2341,4 @@ Firebug.registerPanel(CSSElementPanel);
 Firebug.registerPanel(CSSComputedElementPanel);
 
 // ************************************************************************************************
-
-return Firebug.CSSModule;
 }});
