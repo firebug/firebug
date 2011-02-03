@@ -64,3 +64,4 @@ pref("extensions.firebug.DBG_ACTIVITYOBSERVER", false);    // Net panel's activi
 pref("extensions.firebug.DBG_TOOLTIP", false);      // tooltip debugging      /*@explore*/
 pref("extensions.firebug.DBG_HISTORY", false);      // panel navigation history                  /*@explore*/
 pref("extensions.firebug.DBG_STORAGE", false);      // storageService                            /*@explore*/
+pref("extensions.firebug.DBG_MODULES", false);      // moduleloading                            /*@explore*/
