@@ -1185,7 +1185,7 @@ Firebug.ScriptPanel.WarningRep = domplate(Firebug.Rep,
     reloadPageFromMemory: function(event)
     {
         var context= Firebug.getElementPanel(event.target).context;
-        Firebug.TabWatcher.reloadPageFromMemeory(context);
+        Firebug.TabWatcher.reloadPageFromMemory(context);
     },
 
     onFocusDebugger: function(event)
