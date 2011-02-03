@@ -525,12 +525,16 @@ Firebug.CommandLine = extend(Firebug.Module,
             return;
         }
 
-        Firebug.currentContext.commandLineText = Firebug.currentContext.commandLineText || "";
+        if (Firebug.currentContext)
+        {
+            Firebug.currentContext.commandLineText = Firebug.currentContext.commandLineText || "";
 
-        if (multiLine)
-            commandLineLarge.value = cleanIndentation(Firebug.currentContext.commandLineText);
-        else
-            commandLineSmall.value = stripNewLines(Firebug.currentContext.commandLineText);
+            if (multiLine)
+                commandLineLarge.value = cleanIndentation(Firebug.currentContext.commandLineText);
+            else
+                commandLineSmall.value = stripNewLines(Firebug.currentContext.commandLineText);
+        }
+        // else we may be hiding a panel while turning Firebug off
     },
 
     toggleMultiLine: function(forceLarge)
