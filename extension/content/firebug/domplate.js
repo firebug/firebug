@@ -208,15 +208,7 @@ DomplateTag.prototype =
             outputs.push(iterOuts);
 
             if (isArray(iter) || iter instanceof NodeList)
-            {
-                FBTrace.sysout("loop is detecting an array - create iterator", iter);
                 iter = new ArrayIterator(iter);
-            }
-            else 
-            {
-                FBTrace.sysout("array: " + Object.prototype.toString.call(iter));
-                FBTrace.sysout("loop is not detecting an array " + typeof iter + ": " + Array, iter);
-            }
 
             var value;
             try
