@@ -37,7 +37,7 @@ Firebug.Profiler = extend(Firebug.Module,
     setEnabled: function()
     {
         // The profiler is available only if the debugger (script panel) and console are enabled.
-        var debuggerEnabled = Firebug.Debugger.isAlwaysEnabled();
+        var debuggerEnabled = Firebug.JavaScriptModule.isAlwaysEnabled();
         var consoleEnabled = Firebug.Console.isAlwaysEnabled();
         var disabled = !debuggerEnabled || !consoleEnabled;
 

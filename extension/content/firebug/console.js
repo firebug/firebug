@@ -188,7 +188,7 @@ Firebug.Console = extend(ActivableConsole,
     {
         Firebug.consoleFilterTypes = "";
         Firebug.ActivableModule.initialize.apply(this, arguments);
-        Firebug.Debugger.addListener(this);
+        Firebug.JavaScriptModule.addListener(this);
         this.syncFilterButtons(Firebug.chrome);
     },
 
@@ -259,12 +259,12 @@ Firebug.Console = extend(ActivableConsole,
             this.watchForErrors();
 
             // we inject the console during JS compiles so we need jsd
-            Firebug.Debugger.addObserver(this);
+            Firebug.JavaScriptModule.addObserver(this);
         }
         else
         {
             this.unwatchForErrors();
-            Firebug.Debugger.removeObserver(this);
+            Firebug.JavaScriptModule.removeObserver(this);
 
             // Make sure possible errors coming from the page and displayed in the Firefox
             // status bar are removed.
@@ -353,7 +353,7 @@ Firebug.Console = extend(ActivableConsole,
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
-    // Firebug.Debugger listener
+    // Firebug.JavaScriptModule listener
 
     onMonitorScript: function(context, frame)
     {
@@ -853,7 +853,7 @@ Firebug.ConsolePanel.prototype = extend(Firebug.ActivablePanel,
     getShowStackTraceMenuItem: function()
     {
         var menuItem = serviceOptionMenu("ShowStackTrace", "showStackTrace");
-        if (Firebug.currentContext && !Firebug.Debugger.isAlwaysEnabled())
+        if (Firebug.currentContext && !Firebug.JavaScriptModule.isAlwaysEnabled())
             menuItem.disabled = true;
         return menuItem;
     },

@@ -184,9 +184,9 @@ FirebugReps.Func = domplate(Firebug.Rep,
     monitor: function(fn, monitored)
     {
         if (monitored)
-            Firebug.Debugger.unmonitorFunction(fn,  "monitor");
+            Firebug.JavaScriptModule.unmonitorFunction(fn,  "monitor");
         else
-            Firebug.Debugger.monitorFunction(fn, "monitor");
+            Firebug.JavaScriptModule.monitorFunction(fn, "monitor");
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
@@ -1754,9 +1754,9 @@ FirebugReps.ErrorMessage = domplate(Firebug.Rep,
         }
 
         if (this.hasErrorBreak(error))
-            Firebug.Debugger.clearErrorBreakpoint(compilationUnit, error.lineNo);
+            Firebug.JavaScriptModule.clearErrorBreakpoint(compilationUnit, error.lineNo);
         else
-            Firebug.Debugger.setErrorBreakpoint(compilationUnit, error.lineNo);
+            Firebug.JavaScriptModule.setErrorBreakpoint(compilationUnit, error.lineNo);
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *

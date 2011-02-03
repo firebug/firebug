@@ -271,12 +271,15 @@ top.Firebug =
 
             var defaultPanels = // this will pull in all the rest of the code by dependencies
                 [
-                 "debugger.js",
                  "tabContext.js",
                  "sourceBox.js",
-                 "script.js"
-                 //"css.js"
+                 "script.js",
                 ];
+
+            // FIXME need dynamic loading here
+                defaultPanels.push("javascriptmodule.js");
+            //
+                defaultPanels.push("debugger.js");
 
             loader.define(defaultPanels, function delay(){
                 Firebug.completeInitialize(tempPanelTypes);
@@ -533,7 +536,7 @@ top.Firebug =
     broadcast: function(message, args)
     {
         // dispatch message to all XUL windows registered to firebug service.
-        // Implemented in Firebug.Debugger.
+        // Implemented in Firebug.JavaScriptModule.
     },
 
     suspend: function()  // dispatch suspendFirebug to all windows
@@ -1301,7 +1304,7 @@ top.Firebug =
 
         Firebug.TabWatcher.iterateContexts( function clearBPs(context)
         {
-            Firebug.Debugger.clearAllBreakpoints(context);
+            Firebug.JavaScriptModule.clearAllBreakpoints(context);
         });
     },
 
@@ -1614,7 +1617,7 @@ top.Firebug =
         if (top.Firebug.currentContext)  // then we are active in this browser.xul
             rejection.push(true); // so reject the request
 
-        dispatch2(Firebug.Debugger.fbListeners, "onPauseJSDRequested", [rejection]);
+        dispatch2(Firebug.JavaScriptModule.fbListeners, "onPauseJSDRequested", [rejection]);
     },
 
     onJSDActivate: function(active, why)  // just before hooks are set
@@ -1624,7 +1627,7 @@ top.Firebug =
         if (FBTrace.DBG_ACTIVATION)
             FBTrace.sysout("debugger.onJSDActivate "+why+" active:"+active+"\n");
 
-        dispatch2(Firebug.Debugger.fbListeners, "onJSDActivate", [active, why]);
+        dispatch2(Firebug.JavaScriptModule.fbListeners, "onJSDActivate", [active, why]);
     },
 
     onJSDDeactivate: function(active, why)
@@ -1634,7 +1637,7 @@ top.Firebug =
         if (FBTrace.DBG_ACTIVATION)
             FBTrace.sysout("debugger.onJSDDeactivate "+why+" active:"+active+"\n");
 
-        dispatch2(Firebug.Debugger.fbListeners, "onJSDDeactivate", [active, why]);
+        dispatch2(Firebug.JavaScriptModule.fbListeners, "onJSDDeactivate", [active, why]);
     },
 
     setIsJSDActive: function(active)  // should only be call on the jsd activation events, so it correctly reflects jsd state
@@ -1648,7 +1651,7 @@ top.Firebug =
         Firebug.resetTooltip();
 
         // Front side state
-        Firebug.Debugger.jsDebuggerOn = active;
+        Firebug.JavaScriptModule.jsDebuggerOn = active;
 
         if (FBTrace.DBG_ACTIVATION)
             FBTrace.sysout("debugger.setIsJSDActive "+active+" icon attribute: "+$('firebugStatus').getAttribute("script"));
@@ -2734,7 +2737,7 @@ Firebug.ActivablePanel = extend(Firebug.Panel,
 /**
  * @module Should be used by modules (Firebug specific task controllers) that supports
  * activation. An example of such 'activable' module can be the debugger module
- * {@link Firebug.Debugger}, which can be disabled in order to avoid performance
+ * {@link Firebug.JavaScriptModule}, which can be disabled in order to avoid performance
  * penalties (in cases where the user doesn't need a debugger for the moment).
  */
 Firebug.ActivableModule = extend(Firebug.Module,

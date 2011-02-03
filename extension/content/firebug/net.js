@@ -216,7 +216,7 @@ Firebug.NetMonitor = extend(Firebug.ActivableModule,
         Firebug.NetMonitor.NetHttpObserver.registerObserver();
         NetHttpActivityObserver.registerObserver();
 
-        Firebug.Debugger.addListener(this.DebuggerListener);
+        Firebug.JavaScriptModule.addListener(this.DebuggerListener);
     },
 
     shutdown: function()
@@ -228,7 +228,7 @@ Firebug.NetMonitor = extend(Firebug.ActivableModule,
         Firebug.NetMonitor.NetHttpObserver.unregisterObserver();
         NetHttpActivityObserver.unregisterObserver();
 
-        Firebug.Debugger.removeListener(this.DebuggerListener);
+        Firebug.JavaScriptModule.removeListener(this.DebuggerListener);
     },
 
     initContext: function(context, persistedState)
@@ -527,7 +527,7 @@ NetPanel.prototype = extend(Firebug.ActivablePanel,
         if (FBTrace.DBG_NET)
             FBTrace.sysout("net.netPanel.hide; " + this.context.getName());
 
-        Firebug.Debugger.syncCommands(this.context);
+        Firebug.JavaScriptModule.syncCommands(this.context);
 
         delete this.infoTipURL;  // clear the state that is tracking the infotip so it is reset after next show()
         this.wasScrolledToBottom = isScrolledToBottom(this.panelNode);

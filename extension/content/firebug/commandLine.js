@@ -1221,42 +1221,42 @@ function FirebugCommandLineAPI(context)
 
     this.debug = function(fn)
     {
-        Firebug.Debugger.monitorFunction(fn, "debug");
+        Firebug.JavaScriptModule.monitorFunction(fn, "debug");
     };
 
     this.undebug = function(fn)
     {
-        Firebug.Debugger.unmonitorFunction(fn, "debug");
+        Firebug.JavaScriptModule.unmonitorFunction(fn, "debug");
     };
 
     this.monitor = function(fn)
     {
-        Firebug.Debugger.monitorFunction(fn, "monitor");
+        Firebug.JavaScriptModule.monitorFunction(fn, "monitor");
     };
 
     this.unmonitor = function(fn)
     {
-        Firebug.Debugger.unmonitorFunction(fn, "monitor");
+        Firebug.JavaScriptModule.unmonitorFunction(fn, "monitor");
     };
 
     this.traceAll = function()
     {
-        Firebug.Debugger.traceAll(Firebug.currentContext);
+        Firebug.JavaScriptModule.traceAll(Firebug.currentContext);
     };
 
     this.untraceAll = function()
     {
-        Firebug.Debugger.untraceAll(Firebug.currentContext);
+        Firebug.JavaScriptModule.untraceAll(Firebug.currentContext);
     };
 
     this.traceCalls = function(fn)
     {
-        Firebug.Debugger.traceCalls(Firebug.currentContext, fn);
+        Firebug.JavaScriptModule.traceCalls(Firebug.currentContext, fn);
     };
 
     this.untraceCalls = function(fn)
     {
-        Firebug.Debugger.untraceCalls(Firebug.currentContext, fn);
+        Firebug.JavaScriptModule.untraceCalls(Firebug.currentContext, fn);
     };
 
     this.monitorEvents = function(object, types)
@@ -1468,7 +1468,7 @@ Firebug.CommandLine.injector = {
     evalCommandLineScript: function(context)
     {
         var scriptSource = getResource("chrome://firebug/content/commandLineInjected.js");
-        Firebug.Debugger.evaluate(scriptSource, context);
+        Firebug.JavaScriptModule.evaluate(scriptSource, context);
         if (FBTrace.DBG_COMMANDLINE)
             FBTrace.sysout("commandLine.evalCommandLineScript ", scriptSource);
     },
