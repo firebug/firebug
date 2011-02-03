@@ -436,13 +436,13 @@ Firebug.TabContext.prototype =
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 
-    setTimeout: function()
+    setTimeout: function(fn, delay)
     {
         if (setTimeout == this.setTimeout)
             throw new Error("setTimeout recursion");
 
-        var top = window; // FIXME
-        var timeout = setTimeout.apply(top, arguments);
+        // we're using a sandboxed setTimeout function
+        var timeout = setTimeout(fn, delay);
 
         if (!this.timeouts)
             this.timeouts = {};
@@ -454,16 +454,17 @@ Firebug.TabContext.prototype =
 
     clearTimeout: function(timeout)
     {
+        // we're using a sandboxed clearTimeout function
         clearTimeout(timeout);
 
         if (this.timeouts)
             delete this.timeouts[timeout];
     },
 
-    setInterval: function()
+    setInterval: function(fn, delay)
     {
-        var top = window; // FIXME
-        var timeout = setInterval.apply(top, arguments);
+        // we're using a sandboxed setInterval function
+        var timeout = setInterval(fn, delay);
 
         if (!this.intervals)
             this.intervals = {};
@@ -475,6 +476,7 @@ Firebug.TabContext.prototype =
 
     clearInterval: function(timeout)
     {
+        // we're using a sandboxed clearInterval function
         clearInterval(timeout);
 
         if (this.intervals)
