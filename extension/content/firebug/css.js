@@ -1594,7 +1594,7 @@ CSSElementPanel.prototype = extend(Firebug.CSSStyleSheetPanel.prototype,
 
     updateSelection: function(element)
     {
-        if ( !(element instanceof Element) ) // html supports SourceLink
+        if ( !(element instanceof window.Element) ) // html supports SourceLink
             return;
 
         if (sothinkInstalled)
