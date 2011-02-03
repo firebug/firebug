@@ -2513,23 +2513,33 @@ var fbs =
 
     removeChromeBlockingFilters: function()
     {
-        if (fbs.isChromeBlocked)
+        try
         {
-            if (!this.filterChrome)
-                FBTrace.sysout("removeChromeBlockingFilters is confused ", this);
-            jsd.removeFilter(this.filterChrome);
-            jsd.removeFilter(this.filterComponents);
-            jsd.removeFilter(this.filterFirebugComponents);
-            jsd.removeFilter(this.filterModules);
-            jsd.removeFilter(this.filterStringBundle);
-            jsd.removeFilter(this.filterPrettyPrint);
-            jsd.removeFilter(this.filterWrapper);
-            jsd.removeFilter(this.noFilterHalter);
-            for (var i = 0; i < this.componentFilters.length; i++)
-                jsd.removeFilter(this.componentFilters[i]);
+            if (fbs.isChromeBlocked)
+            {
+                if (!this.filterChrome)
+                    FBTrace.sysout("removeChromeBlockingFilters is confused ", this);
 
-            fbs.isChromeBlocked = false;
+                jsd.removeFilter(this.filterChrome);
+                jsd.removeFilter(this.filterComponents);
+                jsd.removeFilter(this.filterFirebugComponents);
+                jsd.removeFilter(this.filterModules);
+                jsd.removeFilter(this.filterStringBundle);
+                jsd.removeFilter(this.filterPrettyPrint);
+                jsd.removeFilter(this.filterWrapper);
+                jsd.removeFilter(this.noFilterHalter);
+
+                for (var i = 0; i < this.componentFilters.length; i++)
+                    jsd.removeFilter(this.componentFilters[i]);
+
+                fbs.isChromeBlocked = false;
+            }
         }
+        catch (err)
+        {
+            FBTrace.sysout("fbs.removeChromeBlockingFilters; EXCEPTION " + err, err);
+        }
+
         if (FBTrace.DBG_FBS_BP)
             this.traceFilters("removeChromeBlockingFilters");
     },
