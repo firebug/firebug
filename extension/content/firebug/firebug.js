@@ -213,8 +213,6 @@ top.Firebug =
         var tempPanelTypes = earlyRegPanelTypes;
         earlyRegPanelTypes = null;
 
-        FBL.initialize();  // non require.js modules
-
         if (ModuleLoader)
         {
             var firebugScope = // pump the objects from this scope down into module loader
@@ -256,8 +254,8 @@ top.Firebug =
                  "debugger.js",
                  "tabContext.js",
                  "sourceBox.js",
-                 "script.js",
-                 "css.js"
+                 "script.js"
+                 //"css.js"
                 ];
 
             loader.define(defaultPanels, function delay(){
@@ -272,6 +270,8 @@ top.Firebug =
 
     completeInitialize: function(tempPanelTypes)
     {
+        FBL.initialize();  // non require.js modules
+
         // Append early registered panels at the end.
         panelTypes.push.apply(panelTypes, tempPanelTypes);
 
