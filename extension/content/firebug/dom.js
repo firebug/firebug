@@ -293,18 +293,21 @@ const DirTablePlate = domplate(Firebug.Rep,
                 var rowCount = 1;
                 while (members.length)
                 {
-                    setTimeout(function(slice, isLast)
+                    with({slice: members.splice(0, insertSliceSize), isLast: !members.length})
                     {
-                        if (lastRow.parentNode)
+                        setTimeout(function()
                         {
-                            var result = rowTag.insertRows({members: slice}, lastRow);
-                            lastRow = result[1];
-                            dispatch(Firebug.DOMModule.fbListeners, 'onMemberRowSliceAdded', [null, result, rowCount, setSize]);
-                            rowCount += insertSliceSize;
-                        }
-                        if (isLast)
-                            delete row.insertTimeout;
-                    }, delay, members.splice(0, insertSliceSize), !members.length);
+                            if (lastRow.parentNode)
+                            {
+                                var result = rowTag.insertRows({members: slice}, lastRow);
+                                lastRow = result[1];
+                                dispatch(Firebug.DOMModule.fbListeners, 'onMemberRowSliceAdded', [null, result, rowCount, setSize]);
+                                rowCount += insertSliceSize;
+                            }
+                            if (isLast)
+                                delete row.insertTimeout;
+                        }, delay);
+                    }
 
                     delay += insertInterval;
                 }
@@ -682,15 +685,19 @@ Firebug.DOMBasePanel.prototype = extend(Firebug.Panel,
         var delay = 0;
         while (members.length)
         {
-            timeouts.push(this.context.setTimeout(function addMemberRowSlice(slice)
+            with({slice: members.splice(0, insertSliceSize)})
             {
-                result = rowTag.insertRows({members: slice}, tbody.lastChild);
-                rowCount += insertSliceSize;
-                dispatch(Firebug.DOMModule.fbListeners, 'onMemberRowSliceAdded', [panel, result, rowCount, setSize]);
+                timeouts.push(this.context.setTimeout(function addMemberRowSlice()
+                {
+                    result = rowTag.insertRows({members: slice}, tbody.lastChild);
+                    rowCount += insertSliceSize;
+                    dispatch(Firebug.DOMModule.fbListeners, 'onMemberRowSliceAdded', [panel, result, rowCount, setSize]);
 
-                if ((panelNode.scrollHeight+panelNode.offsetHeight) >= priorScrollTop)
-                    panelNode.scrollTop = priorScrollTop;
-            }, delay, members.splice(0, insertSliceSize)));
+                    if ((panelNode.scrollHeight+panelNode.offsetHeight) >= priorScrollTop)
+                        panelNode.scrollTop = priorScrollTop;
+
+                }, delay));
+            }
 
             delay += insertInterval;
         }
