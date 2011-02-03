@@ -225,7 +225,9 @@ top.Firebug =
                 FBTrace: FBTrace,
                 domplate: domplate,
                 setTimeout: function(fn, delay) { return window.setTimeout(fn, delay); }, // bind window via closure
-                clearTimeout: function(fn, delay) { return window.clearTimeout(fn, delay); }, // bind window via closure
+                clearTimeout: function(timeout) { return window.clearTimeout(timeout); }, // bind window via closure
+                setInterval: function(fn, delay) { return window.setInterval(fn, delay); }, // bind window via closure
+                clearInterval: function(timeout) { return window.clearInterval(timeout); }, // bind window via closure
             };
             var uid = Math.random();  // to give each XUL window its own loader (for now)
             var config = {
