@@ -525,6 +525,12 @@ Firebug.CommandLine = extend(Firebug.Module,
             return;
         }
 
+        if (!Firebug.currentContext)
+        {
+            FBTrace.sysout("commandLine.setMultiline; Firebug.currentContext == NULL");
+            return;
+        }
+
         Firebug.currentContext.commandLineText = Firebug.currentContext.commandLineText || "";
 
         if (multiLine)

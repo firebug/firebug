@@ -1613,9 +1613,16 @@ NetPanel.prototype = extend(Firebug.ActivablePanel,
         var hrefLabel = this.table.querySelector(".netHrefLabel");
 
         if (!hrefLabel)
+        {
+            FBTrace.sysout("net.updateHRefLabelWidth; Firebug.currentContext == NULL");
             return;
+        }
 
         var maxWidth = netHrefCol.clientWidth;
+
+        if (!Firebug.currentContext)
+            FBTrace.sysout("commandLine.setMultiline; Firebug.currentContext == NULL");
+            return;
 
         // This call must precede all getCSSStyleRules calls
         Firebug.CSSModule.cleanupSheets(hrefLabel.ownerDocument, Firebug.currentContext);
