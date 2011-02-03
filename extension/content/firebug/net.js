@@ -1613,6 +1613,9 @@ NetPanel.prototype = extend(Firebug.ActivablePanel,
         var hrefLabel = this.table.querySelector(".netHrefLabel");
 
         if (!hrefLabel)
+            return;
+
+        if (!Firebug.currentContext)
         {
             FBTrace.sysout("net.updateHRefLabelWidth; Firebug.currentContext == NULL");
             return;
