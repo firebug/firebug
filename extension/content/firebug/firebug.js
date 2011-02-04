@@ -234,6 +234,7 @@ top.Firebug =
                 context:"Firebug "+uid, // TODO XUL window id on FF4.0+
                 baseUrl: "resource://firebugModules/",
                 onDebug: function() {
+                    return;
                     if (!this.FBTrace)
                     {
                         // traceConsoleService is a global of |window| frome trace.js.
@@ -244,6 +245,7 @@ top.Firebug =
                 },
                 onError: function()
                 {
+                    return;
                     Cu.reportError(arguments[0]);
                     if (!this.FBTrace)
                     {
@@ -312,6 +314,8 @@ top.Firebug =
         this.isInitialized = true;
 
         dispatch(modules, "initialize", [this.prefDomain, prefNames]);
+        
+        FBTrace.timeEnd("INITIALIZATION_TIME");
     },
 
     initializeBTI: function()
