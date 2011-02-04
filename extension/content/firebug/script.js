@@ -2,14 +2,6 @@
 
 define("script.js", ["bti/compilationunit.js"], function(CompilationUnit) { with (FBL) {
 
-// ************************************************************************************************
-// Constants
-
-if (!Firebug.JavaScriptModule)
-    Firebug.JavaScriptModule = Firebug.Debugger;
-
-
-// ************************************************************************************************
 // Script panel
 
 Firebug.ScriptPanel = function() {};
@@ -120,11 +112,11 @@ Firebug.ScriptPanel.prototype = extend(Firebug.SourceBoxPanel,
     initializeUI: function()
     {
         Firebug.Module.initializeUI.apply(this, arguments);
-        Firebug.JavaScriptModule.addListener(this);
+        Firebug.Debugger.addListener(this);
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
-    // Firebug.JavaScriptModule Listener
+    // Firebug.Debugger Listener
     onJSDActivate: function(active, why)
     {
         if (Firebug.chrome.getSelectedPanel() === this) // then the change in jsd causes a refresh
@@ -264,7 +256,7 @@ Firebug.ScriptPanel.prototype = extend(Firebug.SourceBoxPanel,
         if (lineNode.getAttribute("breakpoint") == "true")
             fbs.clearBreakpoint(href, lineNo);
         else
-            Firebug.JavaScriptModule.setBreakpoint(compilationUnit, lineNo);
+            Firebug.Debugger.setBreakpoint(compilationUnit, lineNo);
     },
 
     toggleDisableBreakpoint: function(lineNo)
@@ -375,7 +367,7 @@ Firebug.ScriptPanel.prototype = extend(Firebug.SourceBoxPanel,
             this.toggleDisableBreakpoint(lineNo);
         else if (isControlClick(event) || isMiddleClick(event))
         {
-            Firebug.JavaScriptModule.runUntil(this.context, compilationUnit, lineNo, Firebug.JavaScriptModule);
+            Firebug.Debugger.runUntil(this.context, compilationUnit, lineNo, Firebug.Debugger);
             cancelEvent(event);
         }
     },
@@ -471,11 +463,11 @@ Firebug.ScriptPanel.prototype = extend(Firebug.SourceBoxPanel,
 
         if (this.context.stopped)
         {
-            Firebug.JavaScriptModule.detachListeners(this.context, oldChrome);
-            Firebug.JavaScriptModule.attachListeners(this.context, newChrome);
+            Firebug.Debugger.detachListeners(this.context, oldChrome);
+            Firebug.Debugger.attachListeners(this.context, newChrome);
         }
 
-        Firebug.JavaScriptModule.syncCommands(this.context);
+        Firebug.Debugger.syncCommands(this.context);
 
         Firebug.SourceBoxPanel.detach.apply(this, arguments);
     },
@@ -548,7 +540,7 @@ Firebug.ScriptPanel.prototype = extend(Firebug.SourceBoxPanel,
             this.activeWarningTag = WarningRep.showFiltered(this.panelNode);
         else if (aLocation && !this.context.jsDebuggerCalledUs)
             this.activeWarningTag = WarningRep.showInactive(this.panelNode);
-        else if (!Firebug.JavaScriptModule.jsDebuggerOn)  // set asynchronously by jsd in FF 4.0
+        else if (!Firebug.Debugger.jsDebuggerOn)  // set asynchronously by jsd in FF 4.0
             this.activeWarningTag = WarningRep.showDebuggerInactive(this.panelNode);
         else if (!aLocation) // they were not filtered, we just had none
             this.activeWarningTag = WarningRep.showNoScript(this.panelNode);
@@ -560,7 +552,7 @@ Firebug.ScriptPanel.prototype = extend(Firebug.SourceBoxPanel,
 
     show: function(state)
     {
-        var enabled = Firebug.JavaScriptModule.isAlwaysEnabled();
+        var enabled = Firebug.Debugger.isAlwaysEnabled();
 
         if (!enabled)
             return;
@@ -1072,7 +1064,7 @@ Firebug.ScriptPanel.prototype = extend(Firebug.SourceBoxPanel,
                 var compilationUnit = getAncestorByClass(sourceRow, "sourceBox").repObject;
                 var lineNo = parseInt(sourceRow.firstChild.textContent);
 
-                var debuggr = Firebug.JavaScriptModule;
+                var debuggr = Firebug.Debugger;
                 items.push(
                     "-",
                     {label: "Continue",
@@ -1105,15 +1097,15 @@ Firebug.ScriptPanel.prototype = extend(Firebug.SourceBoxPanel,
 
     supportsBreakOnNext: function()
     {
-        return this.breakable && Firebug.JavaScriptModule.jsDebuggerOn;
+        return this.breakable && Firebug.Debugger.jsDebuggerOn;
     },
 
     breakOnNext: function(enabled)
     {
         if (enabled)
-            Firebug.JavaScriptModule.suspend(this.context);
+            Firebug.Debugger.suspend(this.context);
         else
-            Firebug.JavaScriptModule.unSuspend(this.context);
+            Firebug.Debugger.unSuspend(this.context);
     },
 
     getBreakOnNextTooltip: function(armed)
@@ -1138,9 +1130,9 @@ Firebug.ScriptPanel.prototype = extend(Firebug.SourceBoxPanel,
             FBTrace.sysout("ScriptPanel.onActivationChanged; " + enable);
 
         if (enable)
-            Firebug.JavaScriptModule.addObserver(this);
+            Firebug.Debugger.addObserver(this);
         else
-            Firebug.JavaScriptModule.removeObserver(this);
+            Firebug.Debugger.removeObserver(this);
     },
 });
 
@@ -1177,7 +1169,7 @@ Firebug.ScriptPanel.WarningRep = domplate(Firebug.Rep,
     {
         Firebug.setPref("javascript", "enabled", true);
 
-        Firebug.JavaScriptModule.reloadPageFromMemory(event.target);
+        Firebug.Debugger.reloadPageFromMemory(event.target);
     },
 
     reloadPageFromMemory: function(event)
@@ -1202,7 +1194,7 @@ Firebug.ScriptPanel.WarningRep = domplate(Firebug.Rep,
         // No context is stopped
         var depth = fbs.exitNestedEventLoop();
         if (FBTrace.DBG_UI_LOOP)
-            FBTrace.sysout("Firebug.JavaScriptModule.onFocusDebugger FAILS, aborting nested event loop at depth "+depth);
+            FBTrace.sysout("Firebug.Debugger.onFocusDebugger FAILS, aborting nested event loop at depth "+depth);
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
