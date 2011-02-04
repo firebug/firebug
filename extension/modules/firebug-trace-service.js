@@ -268,6 +268,46 @@ var TraceAPI = {
         return (node.getAttribute('anonid')=="title-box");
     },
 
+    time: function(name, reset)
+    {
+        if (!name)
+            return;
+
+        var time = new Date().getTime();
+
+        if (!this.timeCounters)
+            this.timeCounters = {};
+
+        var key = "KEY"+name.toString();
+
+        if (!reset && this.timeCounters[key])
+            return;
+
+        this.timeCounters[key] = time;
+    },
+
+    timeEnd: function(name)
+    {
+        var time = new Date().getTime();
+
+        if (!this.timeCounters)
+            return;
+
+        var key = "KEY"+name.toString();
+
+        var timeCounter = this.timeCounters[key];
+        if (timeCounter)
+        {
+            var diff = time - timeCounter;
+            var label = name + ": " + diff + "ms";
+
+            this.sysout(label);
+
+            delete this.timeCounters[key];
+        }
+
+        return diff;
+    }
 };
 
 var TraceBase = function(prefDomain) {
