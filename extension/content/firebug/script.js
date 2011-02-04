@@ -2,7 +2,7 @@
 
 define("script.js", ["ToolsInterface"], function(ToolsInterface) { with (FBL) {
 
-    var CompilationUnit = ToolsInterface.CompilationUnit;
+var CompilationUnit = ToolsInterface.CompilationUnit;
 
 // Script panel
 
@@ -114,20 +114,14 @@ Firebug.ScriptPanel.prototype = extend(Firebug.SourceBoxPanel,
     initializeUI: function()
     {
         Firebug.Module.initializeUI.apply(this, arguments);
-        Firebug.Debugger.addListener(this);
+        ToolsInterface.addEventListener("onJavaScriptDebugging", this);
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
-    // Firebug.Debugger Listener
-    onJSDActivate: function(active, why)
+    // Browser.listener
+    onJavaScriptDebugging: function(active, why)
     {
         if (Firebug.chrome.getSelectedPanel() === this) // then the change in jsd causes a refresh
-            Firebug.chrome.syncPanel(this.name);
-    },
-
-    onJSDDeactivate: function(active, why) // stop or pause
-    {
-        if (Firebug.chrome.getSelectedPanel() === this)
             Firebug.chrome.syncPanel(this.name);
     },
 
