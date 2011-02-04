@@ -13,7 +13,7 @@ function clearFBTraceScope()
 }
 window.addEventListener('unload', clearFBTraceScope, true);
 
-FBTrace.time("INITIALIZATION_TIME");
+FBTrace.time("SCRIPTTAG_TIME");
 
 // ************************************************************************************************
 // Some examples of tracing APIs

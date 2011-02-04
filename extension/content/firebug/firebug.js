@@ -204,6 +204,8 @@ top.Firebug =
 
     initialize: function()
     {
+        FBTrace.timeEnd("SCRIPTTAG_TIME");
+        FBTrace.time("MODULE_TIME");
         if (FBTrace.sysout && (!FBL || !FBL.initialize) )
             FBTrace.sysout("Firebug is broken, FBL incomplete, if the last function is QI, check lib.js:", FBL);
         else if (FBTrace.DBG_INITIALIZE)
@@ -292,6 +294,8 @@ top.Firebug =
 
     completeInitialize: function(tempPanelTypes)
     {
+        FBTrace.timeEnd("MODULE_TIME");
+        FBTrace.time("INITIALIZATION_TIME");
         FBL.initialize();  // non require.js modules
 
         // Append early registered panels at the end.
@@ -314,7 +318,7 @@ top.Firebug =
         this.isInitialized = true;
 
         dispatch(modules, "initialize", [this.prefDomain, prefNames]);
-        
+
         FBTrace.timeEnd("INITIALIZATION_TIME");
     },
 
