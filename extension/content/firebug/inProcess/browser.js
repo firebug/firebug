@@ -24,15 +24,81 @@ function Browser()
     this.contexts = {}; // map of contexts, indexed by context ID
     this.activeContext = null;
     this.handlers = {}; // map of event types to array of handler functions
-    this.EVENT_TYPES = ["onBreak", "onConsoleDebug", "onConsoleError", "onConsoleInfo",
-        "onConsoleLog", "onConsoleWarn", "onContextCreated", "onContextDestroyed",
-        "onContextChanged", "onContextLoaded", "onInspectNode", "onResume", "onScript",
-        "onSuspend", "onToggleBreakpoint", "onBreakpointError", "onDisconnect"];
     this.connected = false;
 }
 
 // ************************************************************************************************
 // API
+
+Browser.debug = {handlers: true};
+Browser.onDebug = function()
+{
+    if (Browser.debug)
+        throw new Error("Browser.debug set but no Brower.onDebug is defined");
+}
+
+Browser.unimplementedHandler = function()
+{
+    if (Browser.debug && Browser.debug.handlers) Browser.onDebug("Browser.listener unimplemented event handler called ", {handler: this, args: arguments});
+}
+
+Browser.listener =
+{
+    onBreak: function() {
+        Browser.unimplementedHandler.apply(this, arguments);
+    },
+    onConsoleDebug: function() {
+        Browser.unimplementedHandler.apply(this, arguments);
+    },
+    onConsoleError: function() {
+        Browser.unimplementedHandler.apply(this, arguments);
+    },
+    onConsoleInfo: function() {
+        Browser.unimplementedHandler.apply(this, arguments);
+    },
+    onConsoleLog: function() {
+        Browser.unimplementedHandler.apply(this, arguments);
+    },
+    onConsoleWarn: function() {
+        Browser.unimplementedHandler.apply(this, arguments);
+    },
+    onContextCreated: function() {
+        Browser.unimplementedHandler.apply(this, arguments);
+    },
+    onContextDestroyed: function() {
+        Browser.unimplementedHandler.apply(this, arguments);
+    },
+    onContextChanged: function() {
+        Browser.unimplementedHandler.apply(this, arguments);
+    },
+    onContextLoaded: function() {
+        Browser.unimplementedHandler.apply(this, arguments);
+    },
+    onInspectNode: function() {
+        Browser.unimplementedHandler.apply(this, arguments);
+    },
+    onResume: function() {
+        Browser.unimplementedHandler.apply(this, arguments);
+    },
+    onScript: function() {
+        Browser.unimplementedHandler.apply(this, arguments);
+    },
+    onSuspend: function() {
+        Browser.unimplementedHandler.apply(this, arguments);
+    },
+    onJavaScriptDebugging: function () {
+        Browser.unimplementedHandler.apply(this, arguments);
+    },
+    onToggleBreakpoint: function() {
+        Browser.unimplementedHandler.apply(this, arguments);
+    },
+    onBreakpointError: function() {
+        Browser.unimplementedHandler.apply(this, arguments);
+    },
+    onDisconnect: function() {
+        Browser.unimplementedHandler.apply(this, arguments);
+    },
+};
 /*
  * Testing and sanity: clearAllBreakpoints
  */
@@ -133,6 +199,7 @@ Browser.prototype.isConnected = function()
  *   <li>onResume</li>
  *   <li>onScript</li>
  *   <li>onToggleBreakpoint</li>
+ *   <li>onJavaScriptDebugging</li>
  * </ul>
  * <ul>
  * <li>TODO: how can clients remove (deregister) listeners?</li>
@@ -146,12 +213,12 @@ Browser.prototype.isConnected = function()
  */
 Browser.prototype.addEventListener = function(eventType, listener)
 {
-    var i = this.EVENT_TYPES.indexOf(eventType);
-    if (i < 0)
+    if ( !Browser.listener.hasOwnProperty(eventType) )
     {
         // unsupported event type
         throw new Error("eventType '" + eventType + "' is not supported");
     }
+
     var list = this.handlers[eventType];
     if (!list)
     {
