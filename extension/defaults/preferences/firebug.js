@@ -1,4 +1,6 @@
 // Global
+pref("extensions.firebug.architecture", "inProcess");
+
 pref("javascript.options.strict.debug", false);
 pref("extensions.firebug.defaultPanelName", "html");
 pref("extensions.firebug.throttleMessages", true);
