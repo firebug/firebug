@@ -218,6 +218,8 @@ top.Firebug =
         this.isInitialized = true;
 
         dispatch(modules, "initialize", [this.prefDomain, prefNames]);
+        
+        FBTrace.timeEnd("INITIALIZATION_TIME");
     },
 
     initializeBTI: function()

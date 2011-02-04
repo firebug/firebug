@@ -12,6 +12,50 @@ function clearFBTraceScope()
     FBTrace.setScope(null);
 }
 window.addEventListener('unload', clearFBTraceScope, true);
+
+FBTrace.time = function(name, reset)
+{
+    if (!name)
+        return "_firebugIgnore";
+
+    var time = new Date().getTime();
+
+    if (!FBTrace.timeCounters)
+        FBTrace.timeCounters = {};
+
+    var key = "KEY"+name.toString();
+
+    if (!reset && FBTrace.timeCounters[key])
+        return;
+
+    this.timeCounters[key] = time;
+    return "_firebugIgnore";
+};
+
+FBTrace.timeEnd = function(name)
+{
+    var time = new Date().getTime();
+
+    if (!FBTrace.timeCounters)
+        return "_firebugIgnore";
+
+    var key = "KEY"+name.toString();
+
+    var timeCounter = FBTrace.timeCounters[key];
+    if (timeCounter)
+    {
+        var diff = time - timeCounter;
+        var label = name + ": " + diff + "ms";
+
+        FBTrace.sysout(label);
+
+        delete this.timeCounters[key];
+    }
+    return diff;
+};
+
+FBTrace.time("INITIALIZATION_TIME");
+
 // ************************************************************************************************
 // Some examples of tracing APIs
 
