@@ -1,6 +1,8 @@
 /* See license.txt for terms of usage */
 
-define("debugger.js", ["bti/compilationunit.js"], function(CompilationUnit) { with (FBL) {
+define("debugger.js", ["ToolsInterface"], function(ToolsInterface) { with (FBL) {
+
+    var CompilationUnit = ToolsInterface.CompilationUnit;
 
 // ************************************************************************************************
 // Constants

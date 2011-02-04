@@ -201,6 +201,8 @@ top.Firebug =
         Firebug.LoadManager = FirebugLoadManager;
         delete FirebugLoadManager; // unpollute global
 
+        Firebug.architecture = 'inProcess';
+
         Firebug.LoadManager.loadCore(function coreInitialize()
         {
                 Firebug.completeInitialize(tempPanelTypes);
@@ -239,7 +241,6 @@ top.Firebug =
         try
         {
             // Load Browser Tools Interface definition
-            //Components.utils.import("resource://firebug/bti/bti.js", this);
         }
         catch (err)
         {

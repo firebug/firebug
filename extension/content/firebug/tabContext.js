@@ -1,6 +1,8 @@
 /* See license.txt for terms of usage */
 
-define("tabContext.js", ["bti/compilationunit.js"], function(CompilationUnit) { with (FBL) {
+define("tabContext.js", ["ToolsInterface"], function(ToolsInterface) { with (FBL) {
+
+    var CompilationUnit = ToolsInterface.CompilationUnit;
 
 // ************************************************************************************************
 // Constants

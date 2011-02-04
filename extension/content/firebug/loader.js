@@ -20,7 +20,7 @@ var FirebugLoadManager = function () {
 
     function preLoadInitialization()
     {
-        // FIXME, create options.js as dependdent of loader. Firebug.architecture = this.getPref(this.prefDomain, "architecture");
+        // FIXME, create options.js as dependent of loader. Firebug.architecture = this.getPref(this.prefDomain, "architecture");
     }
 
     function getModuleLoaderScope()
@@ -97,16 +97,28 @@ var FirebugLoadManager = function () {
     function loadCore(coreInitialize)
     {
         var loader = createLoader();
-        var defaultPanels = // this will pull in all the rest of the code by dependencies
-            [
-             "tabContext.js",
-             "sourceBox.js",
-             "script.js",
-            ];
 
-        defaultPanels.push("debugger.js");
+        var coreModules = [];
 
-        loader.define(defaultPanels, coreInitialize);
+        if (Firebug.architecture === 'inProcess')
+        {
+            coreModules.push("inProcess/tools.js");  // must be first
+            coreModules.push("debugger.js");
+        }
+        else
+        {
+            throw new Error("ERROR Firebug.LoadManager.loadCore unknown architechture requested: "+Firebug.architecture);
+        }
+
+        var defaultModules = [
+         "tabContext.js",
+         "sourceBox.js",
+         "script.js",
+        ];
+
+        var modules = coreModules.concat(defaultModules);
+
+        loader.define(modules, coreInitialize);
     }
 
     return {loadCore: loadCore};
