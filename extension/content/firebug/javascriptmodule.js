@@ -1,6 +1,6 @@
 /* See license.txt for terms of usage */
 
-define("javascriptmodule.js", ["bti/compilationunit.js"], function(CompilationUnit) { with (FBL) {
+define("javascriptmodule.js", ["bti/browser.js", "bti/compilationunit.js"], function(Browser, CompilationUnit) { with (FBL) {
 
 // ************************************************************************************************
 // Constants
@@ -346,25 +346,7 @@ Firebug.JavaScriptModule = extend(Firebug.ActivableModule,
 
     clearAllBreakpoints: function(context)
     {
-        throw new Error("need bti");
-        if (context)
-        {
-            var units = context.getAllCompilationUnits();
-            fbs.clearAllBreakpoints(units, Firebug.JavaScriptModule);
-        }
-        else
-        {
-            fbs.enumerateBreakpoints(null, {call: function(url, lineNo, bp) // null means all urls
-            {
-                if (bp.debuggerName !== Firebug.JavaScriptModule.debuggerName) // skip breakpoints of other debuggers.
-                    return;
-
-                if (context && !context.getCompilationUnit(url)) // then we want to clear only one context,
-                    return;                                      // so skip URLs in other contexts
-
-                fbs.clearBreakpoint(url, lineNo);
-            }});
-        }
+        this.btiBrowser.clearAllBreakpoints();
     },
 
     enableAllBreakpoints: function(context)
@@ -808,29 +790,13 @@ Firebug.JavaScriptModule = extend(Firebug.ActivableModule,
 
     initialize: function()
     {
-        Firebug.clientID = this.registerClient(Firebug);
-        this.nsICryptoHash = Components.interfaces["nsICryptoHash"];
-
-        this.debuggerName =  window.location.href +"-@-"+FBL.getUniqueId();
-        this.toString = function() { return this.debuggerName; }
         if (FBTrace.DBG_INITIALIZE)
-            FBTrace.sysout("JavaScriptModule.initialize "+ this.debuggerName);
+            FBTrace.sysout("JavaScriptModule.initialize ");
 
-        this.hash_service = CCSV("@mozilla.org/security/hash;1", "nsICryptoHash");
+        this.btiBrowser = new Browser();
 
         $("cmd_breakOnErrors").setAttribute("checked", Firebug.breakOnErrors);
         $("cmd_decompileEvals").setAttribute("checked", Firebug.decompileEvals);
-
-        this.wrappedJSObject = this;  // how we communicate with fbs
-
-        // This is a service operation, a way of encapsulating fbs which is in turn implementing this
-        // simple service. We could implment a whole component for this service, but it hardly makes sense.
-        Firebug.broadcast = function encapsulateFBSBroadcast(message, args)
-        {
-            fbs.broadcast(message, args);
-        }
-
-        this.onFunctionCall = bind(this.onFunctionCall, this);
 
         Firebug.ActivableModule.initialize.apply(this, arguments);
     },

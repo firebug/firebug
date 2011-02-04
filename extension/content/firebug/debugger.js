@@ -719,6 +719,7 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
         fbs.clearErrorBreakpoint(compilationUnit.getURL(), line, Firebug.Debugger);
     },
 
+    // Called by bti browser.clearAllBreakpoints
     clearAllBreakpoints: function(context)
     {
         if (context)

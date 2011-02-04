@@ -3,17 +3,7 @@
 // ************************************************************************************************
 // Module
 
-var rootPath = "";
-if (typeof(require) == "undefined") {
-    var chrome = typeof(Components) != "undefined";
-    require = chrome ? Components.utils["import"] : function(){};
-    rootPath = chrome ? "resource://firebug/bti/" : "";
-}
-
-require(rootPath + "lib.js");
-require(rootPath + "objectreference.js");
-
-var EXPORTED_SYMBOLS = ["Browser"];
+define([], function factoryBrowser(require){
 
 // ************************************************************************************************
 // Browser
@@ -43,9 +33,17 @@ function Browser()
 
 // ************************************************************************************************
 // API
+/*
+ * Testing and sanity: clearAllBreakpoints
+ */
+Browser.prototype.clearAllBreakpoints = function()
+{
+    Firebug.Debugger.clearAllBreakpoints();
+}
+
 
 /**
- * Returns current status of tools 
+ * Returns current status of tools
  *
  * @function
  * @returns  an array of Tools, an object with toolName and enabled boolean
@@ -440,5 +438,6 @@ Browser.EventListener = {
 // ************************************************************************************************
 // CommonJS
 
-exports = Browser;
+return exports = Browser;
 
+});
