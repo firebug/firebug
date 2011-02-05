@@ -58,7 +58,7 @@ function ModuleLoader(global, requirejsConfig, securityOrigin) {
     ModuleLoader.loaders.push(this);
 }
 
-ModuleLoader.debug = false;
+ModuleLoader.debug = true;
 
 /*
  * @return the current module loader for the current execution context.
@@ -164,18 +164,18 @@ ModuleLoader.prototype = {
 
     loadModule: function(mrl, callback) {
         try {
-            var mozURI = ModuleLoader.mozIOService.newURI(mrl, null, (this.baseURI ? this.baseURI : null));
+            var url = (this.baseURL || "") + mrl;
+            // we can't use baseURI because resource:// is not a valid URI
+            var mozURI = ModuleLoader.mozIOService.newURI(url, null, null);
             var url = mozURI.spec;
 
-            if (!this.baseURI) {  // then we did not have one configured before, use the first one we see
-                var baseURL = url.split('/').slice(0,-1).join('/');
-                this.baseURI =  ModuleLoader.mozIOService.newURI(mrl, null, null);
+            if (!this.baseURL) {  // then we did not have one configured before, use the first one we see
+                this.baseURL = url.split('/').slice(0,-1).join('/');
             }
-
         } catch (exc) {
-            return ModuleLoader.onError(new Error("ModuleLoader could not convert "+mrl+" to absolute URL using baseURI "+this.baseURI.spec), {exception: exc, moduleLoader: this});
+            return ModuleLoader.onError(new Error("ModuleLoader could not convert "+mrl+" to absolute URL using baseURL "+this.baseURL.spec), {exception: exc, moduleLoader: this});
         }
-        if (ModuleLoader.debug) ModuleLoader.onDebug("ModuleLoader loadModule reading "+url);
+        if (ModuleLoader.debug) ModuleLoader.onDebug("ModuleLoader loadModule reading "+url+" from baseURL: "+this.baseURL+" and mrl: "+mrl+" ");
 
         var unit = {
             source: this.mozReadTextFromFile(url),
@@ -253,21 +253,6 @@ ModuleLoader.prototype = {
     },
 
     remapConfig: function(cfg) {
-        if (!cfg.context) {
-            // The require.js config object uses 'context' property name to mean 'contextName'.
-            cfg.context = this.getModuleLoaderName();
-        } // else caller better know what they are doing...
-
-        if (cfg.baseUrl) {
-            try {
-                this.baseURI = ModuleLoader.mozIOService.newURI(cfg.baseUrl, null, null);
-            } catch (exc) {
-                throw new Error("ModuleLoader ERROR failed to create baseURI from baseUrl =\'"+cfg.baseUrl+"\'");
-            }
-        }
-        else if (this.baseURI) {
-            cfg.baseUrl = this.baseURI.spec;
-        }
 
         if (cfg.debug)
             ModuleLoader.debug = !!cfg.debug;
@@ -276,6 +261,18 @@ ModuleLoader.prototype = {
 
         if (cfg.onError)
             ModuleLoader.onError = cfg.onError;
+
+        if (!cfg.context) {
+            // The require.js config object uses 'context' property name to mean 'contextName'.
+            cfg.context = this.getModuleLoaderName();
+        } // else caller better know what they are doing...
+
+        if (cfg.baseUrl) { // then assume the incoming value
+                this.baseURL = cfg.baseUrl;
+        }
+        else if (this.baseURL) {  // then tell require.js about it
+            cfg.baseUrl = this.baseURL;
+        }
 
         return cfg;
     },
