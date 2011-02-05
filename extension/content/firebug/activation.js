@@ -271,11 +271,17 @@ Firebug.Activation = extend(Firebug.Module,
         if (uri)
             this.getAnnotationService().setPageAnnotation(uri, annotation);
 
+        if (FBTrace.DBG_ACTIVATION || FBTrace.DBG_ANNOTATION)
+            FBTrace.sysout("setPageAnnotation currentURI "+currentURI+" becomes URI key "+(uri?uri.spec:"ERROR"));
+
         if (Firebug.activateSameOrigin)
         {
             uri = this.convertToURIKey(currentURI, false);
             if (uri)
                 this.getAnnotationService().setPageAnnotation(uri, annotation);
+
+            if (FBTrace.DBG_ACTIVATION || FBTrace.DBG_ANNOTATION)
+                FBTrace.sysout("setPageAnnotation with activeSameOrigin currentURI "+currentURI.spec+" becomes URI key "+(uri?uri.spec:"ERROR"));
         }
     },
 
