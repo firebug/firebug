@@ -59,7 +59,7 @@ var FirebugLoadManager = function () {
             },
             onError: function()
             {
-                Cu.reportError(arguments[0]);
+                Components.utils.reportError(arguments[0]);
                 if (!this.FBTrace)
                 {
                     // traceConsoleService is a global of |window| frome trace.js.
