@@ -3930,6 +3930,13 @@ this.dispatch2 = function(listeners, name, args)
         if (FBTrace.DBG_DISPATCH)
             var noMethods = [];
 
+        if (!listeners)
+        {
+            if (FBTrace.DBG_DISPATCH)
+                FBTrace.sysout("dispatch2, no listeners");
+            return;
+        }
+
         for (var i = 0; i < listeners.length; ++i)
         {
             var listener = listeners[i];
