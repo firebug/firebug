@@ -1,7 +1,15 @@
-define("ToolsInterface", ["inProcess/browser.js", "inProcess/compilationunit.js"], function(Browser, CompilationUnit) {
+define("ToolsInterface", ["firebugModules/inProcess/browser.js", "firebugModules/inProcess/compilationunit.js"], function(Browser, CompilationUnit) {
 
-var ToolsInterface = new Browser();
+Browser.onDebug = function()
+{
+    FBTrace.sysout.apply(FBTrace, arguments);
+}
 
+var ToolsInterface = {}
+
+ToolsInterface.browser = new Browser();
+
+ToolsInterface.Browser = Browser;
 ToolsInterface.CompilationUnit = CompilationUnit;
 
 return ToolsInterface;

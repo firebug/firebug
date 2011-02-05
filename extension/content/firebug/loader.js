@@ -47,7 +47,7 @@ var FirebugLoadManager = function () {
         var uid = Math.random();  // to give each XUL window its own loader (for now)
         var config = {
             context:"Firebug "+uid, // TODO XUL window id on FF4.0+
-            baseUrl: "resource://firebugModules/",
+            baseUrl: "resource://",
             onDebug: function() {
                 if (!this.FBTrace)
                 {
@@ -102,8 +102,8 @@ var FirebugLoadManager = function () {
 
         if (Firebug.architecture === 'inProcess')
         {
-            coreModules.push("inProcess/tools.js");  // must be first
-            coreModules.push("debugger.js");
+            coreModules.push("firebugModules/inProcess/tools.js");  // must be first
+            coreModules.push("firebugModules/debugger.js");
         }
         else
         {
@@ -111,9 +111,9 @@ var FirebugLoadManager = function () {
         }
 
         var defaultModules = [
-         "tabContext.js",
-         "sourceBox.js",
-         "script.js",
+         "firebugModules/tabContext.js",
+         "firebugModules/sourceBox.js",
+         "firebugModules/script.js",
         ];
 
         var modules = coreModules.concat(defaultModules);

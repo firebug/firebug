@@ -1,6 +1,6 @@
 /* See license.txt for terms of usage */
 
-define("script.js", ["ToolsInterface"], function(ToolsInterface) { with (FBL) {
+define("firebugModules/script.js", ["ToolsInterface"], function(ToolsInterface) { with (FBL) {
 
 var CompilationUnit = ToolsInterface.CompilationUnit;
 

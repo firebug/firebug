@@ -1,6 +1,6 @@
 /* See license.txt for terms of usage */
 
-define("sourceBox.js", ["ToolsInterface"], function(ToolsInterface) { with (FBL) {
+define("firebugModules/sourceBox.js", ["ToolsInterface"], function(ToolsInterface) { with (FBL) {
 
     var CompilationUnit = ToolsInterface.CompilationUnit;
 
