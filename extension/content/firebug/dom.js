@@ -24,7 +24,7 @@ Firebug.DOMModule = extend(Firebug.Module,
     {
         Firebug.Module.initialize.apply(this, arguments);
         if (Firebug.JavaScriptModule)
-            Firebug.JavaScriptModule.addListener(this.DebuggerListener);
+            Firebug.ToolsInterface.browser.addListener(this.DebuggerListener);
     },
 
     initContext: function(context, persistedState)

@@ -216,7 +216,7 @@ Firebug.NetMonitor = extend(Firebug.ActivableModule,
         Firebug.NetMonitor.NetHttpObserver.registerObserver();
         NetHttpActivityObserver.registerObserver();
 
-        Firebug.JavaScriptModule.addListener(this.DebuggerListener);
+        Firebug.ToolsInterface.browser.addListener(this.DebuggerListener);
     },
 
     shutdown: function()

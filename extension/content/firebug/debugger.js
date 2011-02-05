@@ -2305,7 +2305,7 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
         Firebug.ActivableModule.initializeUI.apply(this, arguments);
         this.filterButton = $("fbScriptFilterMenu");
         this.filterMenuUpdate();
-        Firebug.setIsJSDActive(fbs.isJSDActive()); // jsd may be active before this XUL window was opened
+        Firebug.ToolsInterface.browser.dispatch("onJavaScriptDebugging", {isActive: fbs.isJSDActive()}); // jsd may be active before this XUL window was opened
     },
 
     initContext: function(context, persistedState)

@@ -1535,7 +1535,7 @@ top.Firebug =
         if (top.Firebug.currentContext)  // then we are active in this browser.xul
             rejection.push(true); // so reject the request
 
-        dispatch2(Firebug.JavaScriptModule.fbListeners, "onPauseJSDRequested", [rejection]);
+        dispatch2(Firebug.Debugger.fbListeners, "onPauseJSDRequested", [rejection]);
     },
 
     onJSDActivate: function(active, why)  // just before hooks are set
@@ -1545,7 +1545,7 @@ top.Firebug =
         if (FBTrace.DBG_ACTIVATION)
             FBTrace.sysout("debugger.onJSDActivate "+why+" active:"+active+"\n");
 
-        dispatch2(Firebug.JavaScriptModule.fbListeners, "onJSDActivate", [active, why]);
+        dispatch2(Firebug.Debugger.fbListeners, "onJSDActivate", [active, why]);
     },
 
     onJSDDeactivate: function(active, why)
@@ -1555,7 +1555,7 @@ top.Firebug =
         if (FBTrace.DBG_ACTIVATION)
             FBTrace.sysout("debugger.onJSDDeactivate "+why+" active:"+active+"\n");
 
-        dispatch2(Firebug.JavaScriptModule.fbListeners, "onJSDDeactivate", [active, why]);
+        dispatch2(Firebug.Debugger.fbListeners, "onJSDDeactivate", [active, why]);
     },
 
     setIsJSDActive: function(active)  // should only be call on the jsd activation events, so it correctly reflects jsd state

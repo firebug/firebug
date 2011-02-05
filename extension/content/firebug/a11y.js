@@ -39,7 +39,7 @@ Firebug.A11yModel = extend(Firebug.Module,
         this.onNetFocus = bind(this.onNetFocus, this);
         this.onNetBlur = bind(this.onNetBlur, this);
         Firebug.chrome.window.a11yEnabled = false; // mark ourselves disabled so we don't performDisable() if we are not enabled.
-        Firebug.JavaScriptModule.addListener(this);
+        Firebug.ToolsInterface.browser.addListener(this);
         Firebug.Console.addListener(this);
         Firebug.DOMModule.addListener(this);
     },

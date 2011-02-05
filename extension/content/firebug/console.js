@@ -188,7 +188,7 @@ Firebug.Console = extend(ActivableConsole,
     {
         Firebug.consoleFilterTypes = "";
         Firebug.ActivableModule.initialize.apply(this, arguments);
-        Firebug.JavaScriptModule.addListener(this);
+        Firebug.ToolsInterface.browser.addListener(this);
         this.syncFilterButtons(Firebug.chrome);
     },
 

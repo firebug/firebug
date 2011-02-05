@@ -12,6 +12,9 @@ ToolsInterface.browser = new Browser();
 ToolsInterface.Browser = Browser;
 ToolsInterface.CompilationUnit = CompilationUnit;
 
+// FIXME eventually we want the dependency system to pass around the ToolsInterface
+Firebug.ToolsInterface = ToolsInterface;
+
 return ToolsInterface;
 
 

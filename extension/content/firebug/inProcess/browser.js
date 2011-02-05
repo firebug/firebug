@@ -24,6 +24,8 @@ function Browser()
     this.contexts = {}; // map of contexts, indexed by context ID
     this.activeContext = null;
     this.handlers = {}; // map of event types to array of handler functions
+    this.listeners = [];  // array of Browser.listener objects
+    this.tools = {};  // registry of known tools
     this.connected = false;
 }
 
@@ -119,6 +121,16 @@ Browser.prototype.getTools = function()
 {
     return [];
 };
+
+/*
+ * Return the status of a tool
+ * @param name, eg "console"
+ * @returns an object with properties including toolName and enabled
+ */
+Browser.prototype.getTool = function(name)
+{
+    return this.tools[name];
+}
 
 /**
  * Returns the {@link BrowserContext} with the specified id or <code>null</code>
@@ -227,6 +239,19 @@ Browser.prototype.addEventListener = function(eventType, listener)
     }
     list.push(listener);
 };
+
+Browser.prototype.addListener = function(listener)
+{
+    var i = this.listeners.indexOf(listener);
+    if (i === -1)
+        this.listeners.push(listener);
+    // else no-op
+};
+
+Browser.prototype.dispatch = function(eventName, args)
+{
+    FBL.dispatch2(this.listeners, eventName, args);
+}
 
 /**
  * Disconnects this client from the browser it is associated with.

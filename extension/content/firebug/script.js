@@ -123,6 +123,20 @@ Firebug.ScriptPanel.prototype = extend(Firebug.SourceBoxPanel,
     {
         if (Firebug.chrome.getSelectedPanel() === this) // then the change in jsd causes a refresh
             Firebug.chrome.syncPanel(this.name);
+
+        // Front side UI mark
+        if (active)
+            $('firebugStatus').setAttribute("script", "on");
+        else
+            $('firebugStatus').setAttribute("script", "off");
+
+        Firebug.resetTooltip();
+
+        // Front side state
+        Firebug.jsDebuggerOn = active;
+
+        if (FBTrace.DBG_ACTIVATION)
+            FBTrace.sysout("debugger.setIsJSDActive "+active+" icon attribute: "+$('firebugStatus').getAttribute("script"));
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
@@ -536,7 +550,7 @@ Firebug.ScriptPanel.prototype = extend(Firebug.SourceBoxPanel,
             this.activeWarningTag = WarningRep.showFiltered(this.panelNode);
         else if (aLocation && !this.context.jsDebuggerCalledUs)
             this.activeWarningTag = WarningRep.showInactive(this.panelNode);
-        else if (!Firebug.Debugger.jsDebuggerOn)  // set asynchronously by jsd in FF 4.0
+        else if (!Firebug.jsDebuggerOn)  // set asynchronously by jsd in FF 4.0
             this.activeWarningTag = WarningRep.showDebuggerInactive(this.panelNode);
         else if (!aLocation) // they were not filtered, we just had none
             this.activeWarningTag = WarningRep.showNoScript(this.panelNode);
@@ -1093,7 +1107,7 @@ Firebug.ScriptPanel.prototype = extend(Firebug.SourceBoxPanel,
 
     supportsBreakOnNext: function()
     {
-        return this.breakable && Firebug.Debugger.jsDebuggerOn;
+        return this.breakable && Firebug.jsDebuggerOn;
     },
 
     breakOnNext: function(enabled)

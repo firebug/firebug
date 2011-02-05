@@ -24,7 +24,7 @@ Firebug.HTMLModule = extend(Firebug.Module,
     initialize: function(prefDomain, prefNames)
     {
         Firebug.Module.initialize.apply(this, arguments);
-        Firebug.JavaScriptModule.addListener(this.DebuggerListener);
+        Firebug.ToolsInterface.browser.addListener(this.DebuggerListener);
     },
 
     initContext: function(context, persistedState)
