@@ -2257,8 +2257,7 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
 
         this.hash_service = CCSV("@mozilla.org/security/hash;1", "nsICryptoHash");
 
-        $("cmd_breakOnErrors").setAttribute("checked", Firebug.breakOnErrors);
-        $("cmd_decompileEvals").setAttribute("checked", Firebug.decompileEvals);
+        Firebug.ToolsInterface.browser.registerTool('script', this);
 
         this.wrappedJSObject = this;  // how we communicate with fbs
 
@@ -2273,6 +2272,8 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
 
         Firebug.ActivableModule.initialize.apply(this, arguments);
     },
+
+    toolName: "script",
 
     /*
      * per-XUL window registration; this method just allows us to keep fbs in this file.

@@ -145,6 +145,7 @@ var ActivableConsole = extend(Firebug.ActivableModule, Firebug.ConsoleBase);
 Firebug.Console = extend(ActivableConsole,
 {
     dispatchName: "console",
+    toolName: "console",
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
     // extends Module
@@ -189,6 +190,7 @@ Firebug.Console = extend(ActivableConsole,
         Firebug.consoleFilterTypes = "";
         Firebug.ActivableModule.initialize.apply(this, arguments);
         Firebug.ToolsInterface.browser.addListener(this);
+        Firebug.ToolsInterface.browser.registerTool('console', this);
         this.syncFilterButtons(Firebug.chrome);
     },
 

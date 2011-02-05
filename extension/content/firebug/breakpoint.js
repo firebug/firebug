@@ -223,7 +223,7 @@ Firebug.Breakpoint.BreakpointRep = domplate(Firebug.Rep,
 
     supportsObject: function(object, type)
     {
-        return (object instanceof Firebug.JavaScriptModule.Breakpoint);
+        return (object instanceof Firebug.Debugger.Breakpoint);  // FIXME moz back end
     }
 });
 
@@ -924,7 +924,7 @@ Firebug.Breakpoint.BreakNotification.prototype = domplate(Firebug.InlineEditor.p
 
         // As the box shrinks you don't want text to spill
         var guts = this.box.getElementsByClassName("balloonContent").item(0);
-        collapse(guts, true);  
+        collapse(guts, true);
 
         var msg = this.cause.message;
         if (msg)

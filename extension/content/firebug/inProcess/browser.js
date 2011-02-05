@@ -132,6 +132,11 @@ Browser.prototype.getTool = function(name)
     return this.tools[name];
 }
 
+Browser.prototype.registerTool = function(name, tool)
+{
+    this.tools[name] = tool;
+}
+
 /**
  * Returns the {@link BrowserContext} with the specified id or <code>null</code>
  * if none.
