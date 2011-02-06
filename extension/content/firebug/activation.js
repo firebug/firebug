@@ -263,7 +263,8 @@ Firebug.Activation = extend(Firebug.Module,
     {
         if (privateBrowsingEnabled)
         {
-            Firebug.Console.logFormatted(["Sites are not remembered in Private Browsing Mode"], Firebug.currentContext, "info");  // XXXTODO NLS
+            Firebug.Console.logFormatted(["Sites are not remembered in Private Browsing Mode"],
+                Firebug.currentContext, "info");  // XXXTODO NLS xxxHonza localization
             Firebug.chrome.selectPanel('console');
             return;
         }
@@ -273,7 +274,8 @@ Firebug.Activation = extend(Firebug.Module,
             this.getAnnotationService().setPageAnnotation(uri, annotation);
 
         if (FBTrace.DBG_ACTIVATION || FBTrace.DBG_ANNOTATION)
-            FBTrace.sysout("setPageAnnotation currentURI "+currentURI+" becomes URI key "+(uri?uri.spec:"ERROR"));
+            FBTrace.sysout("setPageAnnotation currentURI "+currentURI+" becomes URI key "+
+                (uri?uri.spec:"ERROR"));
 
         if (Firebug.activateSameOrigin)
         {
@@ -282,7 +284,8 @@ Firebug.Activation = extend(Firebug.Module,
                 this.getAnnotationService().setPageAnnotation(uri, annotation);
 
             if (FBTrace.DBG_ACTIVATION || FBTrace.DBG_ANNOTATION)
-                FBTrace.sysout("setPageAnnotation with activeSameOrigin currentURI "+currentURI.spec+" becomes URI key "+(uri?uri.spec:"ERROR"));
+                FBTrace.sysout("setPageAnnotation with activeSameOrigin currentURI "+
+                    currentURI.spec+" becomes URI key "+(uri?uri.spec:"ERROR"));
         }
     },
 
