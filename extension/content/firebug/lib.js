@@ -986,12 +986,19 @@ this.toggleClass = function(elt, name)
 
 this.setClassTimed = function(elt, name, context, timeout)
 {
+    if (FBTrace.DBG_HTML || FBTrace.DBG_SOURCEFILES)
+    {
+        FBTrace.sysout("FBL.setClassTimed elt.__setClassTimeout: "+elt.__setClassTimeout+
+                " this.isVisible(elt): "+this.isVisible(elt)+
+                " elt.__invisibleAtSetPoint: "+elt.__invisibleAtSetPoint);
+    }
+
     if (!timeout)
         timeout = 1300;
 
-    if (elt.__setClassTimeout)
-        context.clearTimeout(elt.__setClassTimeout);
-    else
+    if (elt.__setClassTimeout)  // then we are already waiting to remove the class mark
+        context.clearTimeout(elt.__setClassTimeout);  // reset the timer
+    else                        // then we are not waiting to remove the mark
         this.setClass(elt, name);
 
     if (!this.isVisible(elt))
@@ -1010,11 +1017,11 @@ this.setClassTimed = function(elt, name, context, timeout)
     {
         delete elt.__setClassTimeout;
 
-        if (elt.__invisibleAtSetPoint)
+        if (elt.__invisibleAtSetPoint)  // then user can't see it, try again later
             FBL.setClassTimed(elt, name, context, timeout);
         else
         {
-            delete elt.__invisibleAtSetPoint;
+            delete elt.__invisibleAtSetPoint;  // may be zero
             FBL.removeClass(elt, name);
         }
     }, timeout);
