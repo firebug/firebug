@@ -994,7 +994,6 @@ Firebug.ScriptPanel.prototype = extend(Firebug.SourceBoxPanel,
         var context = this.context;
 
         return [
-            /*optionMenu("DecompileEvals", "decompileEvals"),*/
             serviceOptionMenu("ShowAllSourceFiles", "showAllSourceFiles"),
             // 1.2: always check last line; optionMenu("UseLastLineForEvalName", "useLastLineForEvalName"),
             // 1.2: always use MD5 optionMenu("UseMD5ForEvalName", "useMD5ForEvalName")

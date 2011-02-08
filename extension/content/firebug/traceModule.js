@@ -1446,7 +1446,8 @@ Firebug.TraceModule.TraceMessage.prototype =
         {
             try
             {
-                if (("prototype" in Ci[iface]) && this.obj instanceof Ci[iface])
+                // http://groups.google.com/group/mozilla.dev.platform/browse_thread/thread/7e660bf20836fa47
+                if (/*("prototype" in Ci[iface]) && */this.obj instanceof Ci[iface])
                 {
                     var ifaceProps = this.ifaces[iface] = [];
                     for (p in Ci[iface])
@@ -1455,7 +1456,8 @@ Firebug.TraceModule.TraceMessage.prototype =
             }
             catch (err)
             {
-                onPanic("TraceMessage.getInterfaces: " + iface+" typeof(Ci[iface].prototype)="+typeof(Ci[iface].prototype), err);
+                onPanic("TraceMessage.getInterfaces: " + iface+" typeof(Ci[iface].prototype)="+
+                    typeof(Ci[iface].prototype), err);
             }
         }
         return this.ifaces;

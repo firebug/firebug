@@ -305,7 +305,7 @@ var TraceAPI = {
 
             delete this.timeCounters[key];
         }
-        
+
         return diff;
     }
 };

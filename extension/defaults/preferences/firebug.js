@@ -72,7 +72,6 @@ pref("extensions.firebug.service.filterSystemURLs", true);
 pref("extensions.firebug.service.showAllSourceFiles", false);
 pref("extensions.firebug.service.trackThrowCatch", false);
 pref("extensions.firebug.script.enableSites", false);
-pref("extensions.firebug.decompileEvals", false);
 pref("extensions.firebug.service.scriptsFilter", "all");
 
 // If the value is greather than zero, the Script panel replaces tabs
