@@ -1541,7 +1541,7 @@ top.Firebug =
         Firebug.resetTooltip();
 
         // Front side state
-        Firebug.JavaScriptModule.jsDebuggerOn = active;
+        Firebug.Debugger.jsDebuggerOn = active;
 
         if (FBTrace.DBG_ACTIVATION)
             FBTrace.sysout("debugger.setIsJSDActive "+active+" icon attribute: "+$('firebugStatus').getAttribute("script"));
@@ -2627,7 +2627,7 @@ Firebug.ActivablePanel = extend(Firebug.Panel,
 /**
  * @module Should be used by modules (Firebug specific task controllers) that supports
  * activation. An example of such 'activable' module can be the debugger module
- * {@link Firebug.JavaScriptModule}, which can be disabled in order to avoid performance
+ * {@link Firebug.Debugger}, which can be disabled in order to avoid performance
  * penalties (in cases where the user doesn't need a debugger for the moment).
  */
 Firebug.ActivableModule = extend(Firebug.Module,

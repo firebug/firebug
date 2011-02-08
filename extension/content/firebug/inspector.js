@@ -106,7 +106,7 @@ Firebug.Inspector = extend(Firebug.Module,
         this.inspectingPanel.startInspecting();
 
         if (context.stopped)
-            Firebug.JavaScriptModule.thaw(context);
+            Firebug.Debugger.thaw(context);
 
         if (context.hoverNode)
             this.inspectNode(context.hoverNode);
@@ -168,7 +168,7 @@ Firebug.Inspector = extend(Firebug.Module,
         var context = this.inspectingContext;
 
         if (context.stopped)
-            Firebug.JavaScriptModule.freeze(context);
+            Firebug.Debugger.freeze(context);
 
         if (this.inspectTimeout)
         {

@@ -31,16 +31,16 @@
 
         <command id="cmd_focusCommandLine" oncommand="if (Firebug.currentContext) Firebug.CommandLine.focus(Firebug.currentContext)"/>
         <command id="cmd_focusFirebugSearch" oncommand="if (Firebug.currentContext) Firebug.Search.focus(Firebug.currentContext);"/>
-        <command id="cmd_focusWatchEditor" oncommand="if (Firebug.currentContext) Firebug.JavaScriptModule.focusWatch(Firebug.currentContext);"/>
+        <command id="cmd_focusWatchEditor" oncommand="if (Firebug.currentContext) Firebug.Debugger.focusWatch(Firebug.currentContext);"/>
         <command id="cmd_focusLocation" oncommand="if (Firebug.currentContext) FirebugChrome.focusLocationList(Firebug.currentContext);"/>
 
         <command id="cmd_breakOnNext" oncommand="FirebugChrome.breakOnNext(Firebug.currentContext, event);"/>
 
-        <command id="cmd_rerun" oncommand="Firebug.JavaScriptModule.rerun(Firebug.currentContext)" disabled="true"/>
-        <command id="cmd_resumeExecution" oncommand="Firebug.JavaScriptModule.resume(Firebug.currentContext)" disabled="true"/>
-        <command id="cmd_stepOver" oncommand="Firebug.JavaScriptModule.stepOver(Firebug.currentContext)" disabled="true"/>
-        <command id="cmd_stepInto" oncommand="Firebug.JavaScriptModule.stepInto(Firebug.currentContext)" disabled="true"/>
-        <command id="cmd_stepOut" oncommand="Firebug.JavaScriptModule.stepOut(Firebug.currentContext)" disabled="true"/>
+        <command id="cmd_rerun" oncommand="Firebug.Debugger.rerun(Firebug.currentContext)" disabled="true"/>
+        <command id="cmd_resumeExecution" oncommand="Firebug.Debugger.resume(Firebug.currentContext)" disabled="true"/>
+        <command id="cmd_stepOver" oncommand="Firebug.Debugger.stepOver(Firebug.currentContext)" disabled="true"/>
+        <command id="cmd_stepInto" oncommand="Firebug.Debugger.stepInto(Firebug.currentContext)" disabled="true"/>
+        <command id="cmd_stepOut" oncommand="Firebug.Debugger.stepOut(Firebug.currentContext)" disabled="true"/>
         <command id="cmd_reenterCommand" oncommand="Firebug.CommandLine.reenter(Firebug.currentContext)"/>
 
         <command id="cmd_previousFirebugTab" oncommand="FirebugChrome.gotoPreviousTab()"/>
@@ -49,7 +49,7 @@
         <command id="cmd_nextObject" oncommand="FirebugChrome.gotoNextObject()"/>
         <command id="cmd_previousObject" oncommand="FirebugChrome.gotoNextObject(true)"/>
 
-        <command id="cmd_clearAllBreakpoints" oncommand="Firebug.JavaScriptModule.clearAllBreakpoints(Firebug.currentContext)"/>
+        <command id="cmd_clearAllBreakpoints" oncommand="Firebug.Debugger.clearAllBreakpoints(Firebug.currentContext)"/>
         <command id="cmd_breakOnErrors" oncommand="Firebug.togglePref('breakOnErrors')"/>
         <command id="cmd_decompileEvals" oncommand="Firebug.togglePref('decompileEvals')"/>
 
@@ -72,7 +72,7 @@
         <command id="cmd_toggleShowErrorCount" oncommand="FirebugChrome.toggleShowErrorCount();" />
         <command id="cmd_navBack" oncommand="Firebug.NavigationHistory.goBack(Firebug.currentContext)" />
         <command id="cmd_navForward" oncommand="Firebug.NavigationHistory.goForward(Firebug.currentContext)" />
-        <command id="cmd_toggleFreezeWindow" oncommand="Firebug.JavaScriptModule.toggleFreezeWindow(Firebug.currentContext)" />
+        <command id="cmd_toggleFreezeWindow" oncommand="Firebug.Debugger.toggleFreezeWindow(Firebug.currentContext)" />
 
         <command id="cmd_increaseTextSize" oncommand="Firebug.increaseTextSize(1);"/>
         <command id="cmd_decreaseTextSize" oncommand="Firebug.increaseTextSize(-1);"/>
@@ -277,12 +277,12 @@
                                     <hbox id="fbScriptButtons" collapsed="true" class="noTabStop">
                                         <toolbarseparator class="fbPanelSpecificButtonsSeparator"/>
                                         <tooltip id="fbScriptFilterMenuTooltip" role="presentation"
-                                            onpopupshowing="return Firebug.JavaScriptModule.onScriptFilterMenuTooltipShowing(this, Firebug.currentContext)"/>
+                                            onpopupshowing="return Firebug.Debugger.onScriptFilterMenuTooltipShowing(this, Firebug.currentContext)"/>
                                         <toolbarbutton id="fbScriptFilterMenu" type="menu" tooltip="fbScriptFilterTooltip" role="button" aria-haspopup="true">
                                             <menupopup
-                                                oncommand="return Firebug.JavaScriptModule.onScriptFilterMenuCommand(event, Firebug.currentContext)"
-                                                onpopupshowing="return Firebug.JavaScriptModule.onScriptFilterMenuPopupShowing(this, Firebug.currentContext)"
-                                                onpopuphiding="return Firebug.JavaScriptModule.onScriptFilterMenuPopupHiding(this, Firebug.currentContext)">
+                                                oncommand="return Firebug.Debugger.onScriptFilterMenuCommand(event, Firebug.currentContext)"
+                                                onpopupshowing="return Firebug.Debugger.onScriptFilterMenuPopupShowing(this, Firebug.currentContext)"
+                                                onpopuphiding="return Firebug.Debugger.onScriptFilterMenuPopupHiding(this, Firebug.currentContext)">
                                                 <menuitem type="radio" name="fbScriptFilterMenu" value="static"/>
                                                 <menuitem type="radio" name="fbScriptFilterMenu" value="evals"/>
                                                 <menuitem type="radio" name="fbScriptFilterMenu" value="events"/>

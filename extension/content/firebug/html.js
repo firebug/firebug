@@ -48,7 +48,7 @@ Firebug.HTMLModule = extend(Firebug.Module,
     shutdown: function()
     {
         Firebug.Module.shutdown.apply(this, arguments);
-        Firebug.JavaScriptModule.removeListener(this.DebuggerListener);
+        Firebug.Debugger.removeListener(this.DebuggerListener);
     },
 
     deleteNode: function(node, context)
@@ -1982,7 +1982,7 @@ function getNodeBoxTag(nodeBox)
 // Mutation Breakpoints
 
 /**
- * @class Represents {@link Firebug.JavaScriptModule} listener. This listener is reponsible for
+ * @class Represents {@link Firebug.Debugger} listener. This listener is reponsible for
  * providing a list of mutation-breakpoints into the Breakpoints side-panel.
  */
 Firebug.HTMLModule.DebuggerListener =

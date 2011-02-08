@@ -112,7 +112,7 @@ Firebug.Breakpoint = extend(Firebug.Module,
     breakNow: function(panel)
     {
         this.updatePanelTab(panel, false);
-        Firebug.JavaScriptModule.breakNow(panel.context);
+        Firebug.Debugger.breakNow(panel.context);  // TODO BTI
     },
 
     updateOption: function(name, value)
@@ -298,7 +298,7 @@ Firebug.Breakpoint.BreakpointsPanel.prototype = extend(Firebug.Panel,
             groups.push({name: "monitors", title: $STR("LoggedFunctions"),
                 breakpoints: monitors});
 
-        dispatch(Firebug.JavaScriptModule.fbListeners, "getBreakpoints", [this.context, groups]);
+        dispatch(Firebug.Debugger.fbListeners, "getBreakpoints", [this.context, groups]);
 
         if (groups.length)
             Firebug.Breakpoint.BreakpointListRep.tag.replace({groups: groups}, this.panelNode);
@@ -320,7 +320,7 @@ Firebug.Breakpoint.BreakpointsPanel.prototype = extend(Firebug.Panel,
 
         var renamer = new SourceFileRenamer(context);
         var self = this;
-        var Breakpoint = Firebug.JavaScriptModule.Breakpoint;
+        var Breakpoint = Firebug.Debugger.Breakpoint;
 
         for (var url in context.sourceFileMap)
         {
@@ -454,7 +454,7 @@ Firebug.Breakpoint.BreakpointsPanel.prototype = extend(Firebug.Panel,
         try
         {
             // Remove regular JSD breakpoints
-            Firebug.JavaScriptModule.clearAllBreakpoints(context);
+            Firebug.Debugger.clearAllBreakpoints(context);
         }
         catch(exc)
         {
@@ -630,7 +630,7 @@ SourceFileRenamer.prototype.renameSourceFiles = function(context)
             FBTrace.sysout("breakpoint.renameSourceFiles no source for "+oldURL+" callerURL "+callerURL, sourceFile)
             continue;
         }
-        var newURL = Firebug.JavaScriptModule.getURLFromMD5(callerURL, sourceFile.source, kind);
+        var newURL = Firebug.Debugger.getURLFromMD5(callerURL, sourceFile.source, kind);
         sourceFile.href = newURL.href;
 
         fbs.removeBreakpoint(bp.type, oldURL, bp.lineNo);
@@ -639,7 +639,7 @@ SourceFileRenamer.prototype.renameSourceFiles = function(context)
         if (FBTrace.DBG_SOURCEFILES)
             FBTrace.sysout("breakpoints.renameSourceFiles type: "+bp.type, bp);
 
-        Firebug.JavaScriptModule.watchSourceFile(context, sourceFile);
+        Firebug.Debugger.watchSourceFile(context, sourceFile);
         var newBP = fbs.addBreakpoint(sameType, sourceFile, sameLineNo, bp, Firebug.Debugger);
 
         var panel = context.getPanel("script", true);

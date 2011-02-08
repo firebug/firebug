@@ -261,12 +261,12 @@ Firebug.Console = extend(ActivableConsole,
             this.watchForErrors();
 
             // we inject the console during JS compiles so we need jsd
-            Firebug.JavaScriptModule.addObserver(this);
+            Firebug.Debugger.addObserver(this);
         }
         else
         {
             this.unwatchForErrors();
-            Firebug.JavaScriptModule.removeObserver(this);
+            Firebug.Debugger.removeObserver(this);
 
             // Make sure possible errors coming from the page and displayed in the Firefox
             // status bar are removed.
@@ -355,7 +355,7 @@ Firebug.Console = extend(ActivableConsole,
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
-    // Firebug.JavaScriptModule listener
+    // Firebug.Debugger listener
 
     onMonitorScript: function(context, frame)
     {
@@ -855,7 +855,7 @@ Firebug.ConsolePanel.prototype = extend(Firebug.ActivablePanel,
     getShowStackTraceMenuItem: function()
     {
         var menuItem = serviceOptionMenu("ShowStackTrace", "showStackTrace");
-        if (Firebug.currentContext && !Firebug.JavaScriptModule.isAlwaysEnabled())
+        if (Firebug.currentContext && !Firebug.Debugger.isAlwaysEnabled())
             menuItem.disabled = true;
         return menuItem;
     },

@@ -23,7 +23,7 @@ Firebug.DOMModule = extend(Firebug.Module,
     initialize: function(prefDomain, prefNames)
     {
         Firebug.Module.initialize.apply(this, arguments);
-        if (Firebug.JavaScriptModule)
+        if (Firebug.Debugger)
             Firebug.ToolsInterface.browser.addListener(this.DebuggerListener);
     },
 
@@ -48,8 +48,8 @@ Firebug.DOMModule = extend(Firebug.Module,
     shutdown: function()
     {
         Firebug.Module.shutdown.apply(this, arguments);
-        if (Firebug.JavaScriptModule)
-            Firebug.JavaScriptModule.removeListener(this.DebuggerListener);
+        if (Firebug.Debugger)
+            Firebug.Debugger.removeListener(this.DebuggerListener);
     },
 });
 
@@ -776,12 +776,12 @@ Firebug.DOMBasePanel.prototype = extend(Firebug.Panel,
 
         // Get the value with try-catch statement. This method is used also within
         // getContextMenuItems where the exception would break the context menu.
-        // 1) The Firebug.JavaScriptModule.evaluate can throw
+        // 1) The Firebug.Debugger.evaluate can throw
         // 2) object[propName] can also throws in case of e.g. non existing "abc.abc" prop name.
         try
         {
             if (object instanceof jsdIStackFrame)
-                return Firebug.JavaScriptModule.evaluate(propName, this.context);
+                return Firebug.Debugger.evaluate(propName, this.context);
             else
                 return object[propName];
         }

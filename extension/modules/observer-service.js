@@ -24,13 +24,13 @@ var observerService =
 /** lends observerService */
 {
     observersByTopic: {},
-    
+
     /* nsIObserverService */
     addObserver: function(observer, topic, weak)
     {
         if (!this.observersByTopic[topic])
             this.observersByTopic[topic] = [];
-        
+
         this.observersByTopic[topic].push(observer);
     },
 
@@ -39,7 +39,7 @@ var observerService =
         var observers = this.observersByTopic[topic];
         if (!observers)
             throw new Error("observer-service.removeObserver FAILED no observers for topic "+topic);
-        
+
         for (var i=0; i < observers.length; i++)
         {
             if (observers[i] == observer)
@@ -61,7 +61,7 @@ var observerService =
                 observers[i].observe(subject, topic, data);
         }
     },
-    
+
     enumerateObservers: function(topic, fnOfObserver)
     {
         var observers = this.observersByTopic[topic];
