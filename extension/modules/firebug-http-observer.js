@@ -50,8 +50,6 @@ var httpRequestObserver =
     {
         this.firebugService = fbs;
 
-        this.firebugService.registerClient(FirebugClient);
-
         observerService.addObserver(this, "quit-application", false);
 
         if (FBTrace.DBG_HTTPOBSERVER)
@@ -60,8 +58,6 @@ var httpRequestObserver =
 
     shutdown: function()
     {
-        this.firebugService.unregisterClient(FirebugClient);
-
         observerService.removeObserver(this, "quit-application");
 
         if (FBTrace.DBG_HTTPOBSERVER)
@@ -202,24 +198,6 @@ function dumpStack(message)
         var lineNumber = frame.lineNumber ? frame.lineNumber : "";
 
         dump(fileName + ":" + lineNumber + "\n");
-    }
-}
-
-// ************************************************************************************************
-
-/* nsIFireBugClient */
-var FirebugClient =
-{
-    dispatchName: "httpRequestObserver",
-
-    disableXULWindow: function()
-    {
-        httpRequestObserver.unregisterObservers();
-    },
-
-    enableXULWindow: function()
-    {
-        httpRequestObserver.registerObservers();
     }
 }
 

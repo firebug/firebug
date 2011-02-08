@@ -37,6 +37,9 @@ const tabBrowser = $("content");
 // Globals
 
 var contexts = [];
+//TODO requirejs
+Components.utils.import("resource://firebug/firebug-http-observer.js");
+var httpObserver = httpRequestObserver;  // XXXjjb Honza should we just use the RHS here?
 
 // ************************************************************************************************
 
@@ -254,9 +257,6 @@ Firebug.TabWatcher = extend(new Firebug.Listener(),
 
     createContext: function(win, browser, contextType)
     {
-        if (contexts.length == 0)
-            Firebug.broadcast('enableXULWindow', []);
-
         // If the page is reloaded, store the persisted state from the previous
         // page on the new context
         var persistedState = browser.persistedState;
@@ -513,9 +513,6 @@ Firebug.TabWatcher = extend(new Firebug.Listener(),
         var currentBrowser = Firebug.chrome.getCurrentBrowser();
         if (!currentBrowser.showFirebug)  // unwatchContext can be called on an unload event after another tab is selected
             dispatch(this.fbListeners, "showContext", [browser, null]); // context is null if we don't want to debug this browser
-
-        if (contexts.length == 0)
-            Firebug.broadcast("disableXULWindow", []);
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *

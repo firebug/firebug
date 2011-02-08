@@ -145,6 +145,9 @@ const binaryCategoryMap =
     "flash" : 1
 };
 
+// TODO requirejs
+Components.utils.import("resource://firebug/firebug-http-observer.js");
+var httpObserver = httpRequestObserver;  // XXXjjb Honza should we just use the RHS here?
 // ************************************************************************************************
 
 /**
@@ -189,7 +192,7 @@ Firebug.NetMonitor = extend(Firebug.ActivableModule,
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
-    // extends Module
+    // extends ActivableModule
 
     initializeUI: function()
     {
@@ -361,7 +364,11 @@ Firebug.NetMonitor = extend(Firebug.ActivableModule,
 
         // Resume only if enabled.
         if (Firebug.NetMonitor.isAlwaysEnabled())
+        {
+            httpRequestObserver.registerObservers();  // XXXjjb Honza was called in firebug-http-observer.js on old enableXULWindow
             Firebug.TabWatcher.iterateContexts(monitorContext);
+        }
+
     },
 
     onSuspendFirebug: function()
@@ -371,7 +378,11 @@ Firebug.NetMonitor = extend(Firebug.ActivableModule,
 
         // Suspend only if enabled.
         if (Firebug.NetMonitor.isAlwaysEnabled())
+        {
+            httpRequestObserver.unregisterObservers();  // XXXjjb Honza was called in firebug-http-observer.js on old disableXULWindow
             Firebug.TabWatcher.iterateContexts(unmonitorContext);
+        }
+
     },
 
     togglePersist: function(context)

@@ -61,6 +61,10 @@ var contentTypes =
     "image/svg+xml" : 1
 };
 
+//TODO requirejs
+Components.utils.import("resource://firebug/firebug-http-observer.js");
+var httpObserver = httpRequestObserver;  // XXXjjb Honza should we just use the RHS here?
+
 // ************************************************************************************************
 // Model implementation
 

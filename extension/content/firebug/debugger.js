@@ -2247,26 +2247,19 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
 
     initialize: function()
     {
-        Firebug.clientID = this.registerClient(Firebug);
+        Firebug.clientID = this.registerClient(Firebug.JSDebugClient);
         this.nsICryptoHash = Components.interfaces["nsICryptoHash"];
 
         this.debuggerName =  window.location.href +"-@-"+FBL.getUniqueId();
         this.toString = function() { return this.debuggerName; }
         if (FBTrace.DBG_INITIALIZE)
-            FBTrace.sysout("debugger.initialize "+ this.debuggerName);
+            FBTrace.sysout("debugger.initialize "+ this.debuggerName+" Firebug.clientID "+Firebug.clientID);
 
         this.hash_service = CCSV("@mozilla.org/security/hash;1", "nsICryptoHash");
 
         Firebug.ToolsInterface.browser.registerTool('script', this);
 
         this.wrappedJSObject = this;  // how we communicate with fbs
-
-        // This is a service operation, a way of encapsulating fbs which is in turn implementing this
-        // simple service. We could implment a whole component for this service, but it hardly makes sense.
-        Firebug.broadcast = function encapsulateFBSBroadcast(message, args)
-        {
-            fbs.broadcast(message, args);
-        }
 
         this.onFunctionCall = bind(this.onFunctionCall, this);
 
@@ -2522,7 +2515,7 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
 
     shutdown: function()
     {
-        this.unregisterClient(Firebug);
+        this.unregisterClient(Firebug.JSDebugClient);
         fbs.unregisterDebugger(this);
     },
 
@@ -2821,7 +2814,23 @@ Firebug.DebuggerListener =
 };
 
 // ************************************************************************************************
+// Signals from fbs, passed along to our listeners
+Firebug.JSDebugClient =
+{
+        onJSDActivate: function(active, fromMsg)
+        {
+            dispatch2(this.fbListeners, "onJSDActivate", arguments);
+        },
+        onJSDDeactivate: function(active, fromMsg)
+        {
+            dispatch2(this.fbListeners, "onJSDDeactivate", arguments);
+        },
+        onPauseJSDRequested: function(rejection)
+        {
+            dispatch2(this.fbListeners, "onPauseJSDRequested", arguments);
+        },
 
+}
 // Recursively look for obj in container using array of visited objects
 function findObjectPropertyPath(containerName, container, obj, visited)
 {

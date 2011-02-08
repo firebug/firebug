@@ -228,7 +228,7 @@ top.Firebug =
         this.initializeBTI();
 
         if (FBTrace.DBG_INITIALIZE)
-            FBTrace.sysout("firebug.initialize client: "+this.clientID+" with prefDomain "+this.prefDomain);
+            FBTrace.sysout("firebug.initialize with prefDomain "+this.prefDomain);
 
         this.isInitialized = true;
 
@@ -378,7 +378,7 @@ top.Firebug =
         this.closeDeadWindows();
 
         if (FBTrace.DBG_INITIALIZE)
-            FBTrace.sysout("firebug.shutdown exited client "+this.clientID);
+            FBTrace.sysout("firebug.shutdown exited ");
     },
 
     shutdownUI: function()  // TODO chrome.js
@@ -451,18 +451,12 @@ top.Firebug =
         }
     },
 
-    broadcast: function(message, args)
-    {
-        // dispatch message to all XUL windows registered to firebug service.
-        // Implemented in Firebug.JavaScriptModule.
-    },
-
     suspend: function()  // dispatch suspendFirebug to all windows
     {
         if(Firebug.rerun)
             return;
 
-        this.broadcast('suspendFirebug', []);
+        Firebug.suspendFirebug();
     },
 
     suspendFirebug: function() // dispatch onSuspendFirebug to all modules
@@ -484,7 +478,7 @@ top.Firebug =
 
     resume: function()
     {
-        this.broadcast('resumeFirebug', []);
+        Firebug.resumeFirebug();
     },
 
     resumeFirebug: function()  // dispatch onResumeFirebug to all modules
@@ -1194,6 +1188,7 @@ top.Firebug =
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
     // TODO to options.js
+    // TODO this needs to be moz_options.js and have BTI call
 
     resetAllOptions: function(confirm)  // to default state
     {
@@ -1222,7 +1217,7 @@ top.Firebug =
 
         Firebug.TabWatcher.iterateContexts( function clearBPs(context)
         {
-            Firebug.JavaScriptModule.clearAllBreakpoints(context);
+            Firebug.Debugger.clearAllBreakpoints(context);
         });
     },
 
@@ -1503,29 +1498,6 @@ top.Firebug =
             if (FBTrace.DBG_OPTIONS) FBTrace.sysout("firebug.observe name = value: "+name+"= "+value+"\n");
             this.updatePref(name, value);
         }
-    },
-
-    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
-    // nsIFireBugClient  These are per Firefox XUL window callbacks
-
-    enableXULWindow: function()  // Called when the first context is created.
-    {
-        if (window.closed)
-            throw new Error("enableXULWindow window is closed!!");
-
-        if (FBTrace.DBG_ACTIVATION)
-            FBTrace.sysout("enable XUL Window +++++++++++++++++++++++++++++++++++++++",
-                Firebug.detachArgs);
-
-        // allows errors to flow thru fbs and callbacks to supportWindow to begin
-        dispatch(modules, "enable", [FirebugChrome]);
-    },
-
-    disableXULWindow: function()
-    {
-        dispatch(modules, "disable", [FirebugChrome]);
-        if (FBTrace.DBG_ACTIVATION)
-            FBTrace.sysout("disable XUL Window --------------------------------------");
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

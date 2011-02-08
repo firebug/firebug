@@ -11,6 +11,11 @@ const Ci = Components.interfaces;
 // List of contexts with XHR spy attached.
 var contexts = [];
 
+//TODO requirejs
+Components.utils.import("resource://firebug/firebug-http-observer.js");
+var httpObserver = httpRequestObserver;  // XXXjjb Honza should we just use the RHS here?
+
+
 // ************************************************************************************************
 // Spy Module
 

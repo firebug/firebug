@@ -20,8 +20,6 @@ const Cc = Components.classes;
 const Ci = Components.interfaces;
 
 this.fbs = fbs; // left over from component.
-Components.utils.import("resource://firebug/firebug-http-observer.js");
-this.httpObserver = httpRequestObserver;
 this.jsd = this.CCSV("@mozilla.org/js/jsd/debugger-service;1", "jsdIDebuggerService");
 this.domUtils = this.CCSV("@mozilla.org/inspector/dom-utils;1", "inIDOMUtils");
 
