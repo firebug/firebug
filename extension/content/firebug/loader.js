@@ -14,7 +14,7 @@ var FirebugLoadManager = function () {
             dump("Import moduleLoader.js FAILS: "+msg+"\n");
             FBTrace.sysout("Import moduleLoader.js ERROR "+msg, exc);
         }
-        Components.util.reportError(msg);
+        Components.utils.reportError(msg);
         throw exc;
     }
 
