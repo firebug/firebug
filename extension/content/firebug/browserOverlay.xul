@@ -1,7 +1,6 @@
 <?xml version="1.0"?>
 
 <?xul-overlay href="chrome://firebug/content/firebugOverlay.xul"?>
-<?xul-overlay href="chrome://firebug/content/external/editorsOverlay.xul"?>
 <?xul-overlay href="chrome://firebug/content/start-button/startButtonOverlay.xul"?>
 
 <overlay xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul">
