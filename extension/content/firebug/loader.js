@@ -100,14 +100,28 @@ var FirebugLoadManager = function () {
 
         var coreModules = [];
 
-        if (Firebug.architecture === 'inProcess')
+        if (FirebugLoadManager.arch === 'inProcess')
         {
             coreModules.push("firebugModules/inProcess/tools.js");  // must be first
             coreModules.push("firebugModules/debugger.js");
         }
+        else if (FirebugLoadManager.arch == "remoteClient")
+        {
+            coreModules.push("crossfireModules/tools.js");
+            coreModules.push("firebugModules/debugger.js");
+
+        }
+        else if (FirebugLoadManager.arch == "remoteServer")
+        {
+
+            coreModules.push("firebugModules/inProcess/tools.js");  // must be first
+            coreModules.push("firebugModules/debugger.js");
+
+            coreModules.push("crossfireModules/crossfire-server.js");
+        }
         else
         {
-            throw new Error("ERROR Firebug.LoadManager.loadCore unknown architechture requested: "+Firebug.architecture);
+            throw new Error("ERROR Firebug.LoadManager.loadCore unknown architechture requested: "+Firebug.arch);
         }
 
         var defaultModules = [

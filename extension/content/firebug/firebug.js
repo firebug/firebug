@@ -201,8 +201,6 @@ top.Firebug =
         Firebug.LoadManager = FirebugLoadManager;
         delete FirebugLoadManager; // unpollute global
 
-        Firebug.architecture = 'inProcess';
-
         Firebug.LoadManager.loadCore(function coreInitialize()
         {
                 Firebug.completeInitialize(tempPanelTypes);
