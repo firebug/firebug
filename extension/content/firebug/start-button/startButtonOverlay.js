@@ -14,7 +14,6 @@ var versionChecker = Cc["@mozilla.org/xpcom/version-comparator;1"].getService(Ci
 var popup = $("fbStatusContextMenu");
 var statusBar = $("fbStatusBar");
 var statusText = $("fbStatusText");
-var firebugButton = $("firebug-button");
 
 // ********************************************************************************************* //
 // Module Implementation
@@ -140,24 +139,31 @@ Firebug.StartButton = extend(Firebug.Module,
         if (!statusBar)
             return;
 
+        var firebugButton = $("firebug-button");
         if (errorCount && Firebug.showErrorCount)
         {
             statusBar.setAttribute("showErrors", "true")
             statusText.setAttribute("value", $STRP("plural.Error_Count2", [errorCount]));
 
-            firebugButton.setAttribute("showErrors", "true");
-            firebugButton.setAttribute("errorCount", errorCount);
+            if (firebugButton)
+            {
+                firebugButton.setAttribute("showErrors", "true");
+                firebugButton.setAttribute("errorCount", errorCount);
+            }
         }
         else
         {
             statusBar.removeAttribute("showErrors");
             statusText.setAttribute("value", "");
 
-            firebugButton.removeAttribute("showErrors");
-
-            // Use '0' so, the horizontal space for the number is still allocated.
-            // The button will cause re-layout if there is more than 9 errors.
-            firebugButton.setAttribute("errorCount", "0");
+            if (firebugButton)
+            {
+                firebugButton.removeAttribute("showErrors");
+                
+                // Use '0' so, the horizontal space for the number is still allocated.
+                // The button will cause re-layout if there is more than 9 errors.
+                firebugButton.setAttribute("errorCount", "0");
+            }
         }
     },
 });
