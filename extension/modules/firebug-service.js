@@ -828,6 +828,9 @@ var fbs =
 
     registerClient: function(client)  // clients are essentially XUL windows
     {
+        if (!client)
+            throw new Error("firebug-service cannot register client: "+client);
+
         clients.push(client);
         return clients.length;
     },
@@ -1697,6 +1700,7 @@ var fbs =
         return (jsd && jsd.isOn && (jsd.pauseDepth == 0) );
     },
 
+    // TODO delete once Chromebug works on BTI
     broadcast: function(message, args)  // re-transmit the message (string) with args [objs] to XUL windows.
     {
         dispatch(clients, message, args);
