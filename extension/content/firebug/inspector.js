@@ -1248,9 +1248,10 @@ BoxModelHighlighter.prototype =
 
     getNodes: function(context)
     {
-        if (!context.boxModelHighlighter)
+        if (!context.boxModelHighlighter && context.window)
         {
             var doc = context.window.document;
+
             if (FBTrace.DBG_ERRORS && !doc)
                 FBTrace.sysout("inspector getNodes no document for window:"+window.location);
             if (FBTrace.DBG_INSPECT && doc)
