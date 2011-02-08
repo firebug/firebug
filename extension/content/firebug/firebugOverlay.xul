@@ -53,7 +53,6 @@
 
         <command id="cmd_clearAllBreakpoints" oncommand="Firebug.Debugger.clearAllBreakpoints(Firebug.currentContext)"/>
         <command id="cmd_breakOnErrors" oncommand="Firebug.togglePref('breakOnErrors')"/>
-        <command id="cmd_decompileEvals" oncommand="Firebug.togglePref('decompileEvals')"/>
 
         <command id="cmd_toggleTraceConsole" oncommand="Firebug.TraceModule.openConsole()"/>
 

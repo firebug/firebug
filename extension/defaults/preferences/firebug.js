@@ -70,7 +70,6 @@ pref("extensions.firebug.service.filterSystemURLs", true);
 pref("extensions.firebug.service.showAllSourceFiles", false);
 pref("extensions.firebug.service.trackThrowCatch", false);
 pref("extensions.firebug.script.enableSites", false);
-pref("extensions.firebug.decompileEvals", false);
 pref("extensions.firebug.service.scriptsFilter", "all");
 
 // If the value is greather than zero, the Script panel replaces tabs
@@ -85,7 +84,6 @@ pref("extensions.firebug.showUserProps", true);
 pref("extensions.firebug.showUserFuncs", true);
 pref("extensions.firebug.showDOMProps", true);
 pref("extensions.firebug.showDOMFuncs", false);
-pref("extensions.firebug.showDOMConstants", false);
 pref("extensions.firebug.ObjectShortIteratorMax", 3);
 
 // Layout
