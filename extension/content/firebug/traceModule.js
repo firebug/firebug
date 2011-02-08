@@ -1446,8 +1446,7 @@ Firebug.TraceModule.TraceMessage.prototype =
         {
             try
             {
-                // xxxHonza: what is the reason to have the ("prototype" in Ci[iface])
-                // condition there? This prevents displaying the Interfaces tab completely.
+                // http://groups.google.com/group/mozilla.dev.platform/browse_thread/thread/7e660bf20836fa47
                 if (/*("prototype" in Ci[iface]) && */this.obj instanceof Ci[iface])
                 {
                     var ifaceProps = this.ifaces[iface] = [];
