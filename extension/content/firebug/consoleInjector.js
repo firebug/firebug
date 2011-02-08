@@ -394,7 +394,7 @@ Firebug.Console.createConsole = function createConsole(context, win)
         var key = "KEY"+name.toString();
 
         if (!reset && this.timeCounters[key])
-            return;
+            return "_firebugIgnore";
 
         this.timeCounters[key] = time;
         return "_firebugIgnore";

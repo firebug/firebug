@@ -542,6 +542,7 @@ Firebug.HTMLPanel.prototype = extend(WalkingPanel,
 
     highlightMutation: function(elt, objectBox, type)
     {
+        FBTrace.sysout("html.highlightMutation Firebug.highlightMutations:"+Firebug.highlightMutations, {elt: elt, objectBox: objectBox, type: type});
         if (!elt)
             return;
 

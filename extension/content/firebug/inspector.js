@@ -253,8 +253,14 @@ Firebug.Inspector = extend(Firebug.Module,
         var win = context && context.window;
         var element = rp.element;
         var boxFrame = rp.boxFrame;
-        var isBoxHighlighter = highlighter && highlighter.getNodes &&
-                highlighter.getNodes(context).offset.parentNode;
+        var isBoxHighlighter = false;
+
+        if (highlighter && highlighter.getNodes)
+        {
+            var nodes = highlighter.getNodes(context);
+            if (nodes)
+                isBoxHighlighter = nodes.offset.parentNode;
+        }
 
         if (win && highlighter && (isBoxHighlighter || (this.inspecting && !isBoxHighlighter)))
             highlighter.highlight(context, element, boxFrame);
@@ -1248,9 +1254,10 @@ BoxModelHighlighter.prototype =
 
     getNodes: function(context)
     {
-        if (!context.boxModelHighlighter)
+        if (!context.boxModelHighlighter && context.window)
         {
             var doc = context.window.document;
+
             if (FBTrace.DBG_ERRORS && !doc)
                 FBTrace.sysout("inspector getNodes no document for window:"+window.location);
             if (FBTrace.DBG_INSPECT && doc)

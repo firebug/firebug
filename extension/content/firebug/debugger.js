@@ -1984,7 +1984,7 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
         var eval_expr = this.getEvalExpression(frame, context);
         if (FBTrace.DBG_EVAL) FBTrace.sysout("getEvalLevelSourceFile eval_expr:"+eval_expr+"\n");
 
-        if (eval_expr && !Firebug.decompileEvals)
+        if (eval_expr)
         {
             var source  = this.getEvalBody(frame, "lib.getEvalLevelSourceFile.getEvalBody", 1, eval_expr);
             var mapType = PCMAP_SOURCETEXT;
@@ -2215,7 +2215,7 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
 
     getEvalBody: function(frame, asName, asLine, evalExpr)
     {
-        if (evalExpr  && !Firebug.decompileEvals)
+        if (evalExpr)
         {
             var result_src = {};
             var evalThis = "new String("+evalExpr+");";
@@ -2502,8 +2502,6 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
     {
         if (name == "breakOnErrors")
             $("cmd_breakOnErrors").setAttribute("checked", value);
-        else if (name == "decompileEvals")
-            $("cmd_decompileEvals").setAttribute("checked", value);
     },
 
     getObjectByURL: function(context, url)
