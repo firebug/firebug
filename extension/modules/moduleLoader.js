@@ -96,6 +96,17 @@ ModuleLoader.copyProperties = function(lhs, rhs) {
 ModuleLoader.systemPrincipal = Cc["@mozilla.org/systemprincipal;1"].createInstance(Ci.nsIPrincipal);
 ModuleLoader.mozIOService = Cc['@mozilla.org/network/io-service;1'].getService(Ci.nsIIOService);
 
+ModuleLoader.isRelativeURL = function(url)
+{
+    var R_query_index = url.indexOf('?');
+    var R_head = url;
+    if (R_query_index !== -1)
+        R_head = url.substr(0, R_query_index);
+
+    return (R_head.indexOf(':') === -1);
+}
+
+
 ModuleLoader.bootStrap = function(requirejsPath) {
     var primordialLoader = new ModuleLoader(null, {context: "_Primordial"});
     try {
@@ -162,20 +173,25 @@ ModuleLoader.prototype = {
         }
     },
 
+
     loadModule: function(mrl, callback) {
         try {
-            var mozURI = ModuleLoader.mozIOService.newURI(mrl, null, (this.baseURI ? this.baseURI : null));
+            var url = mrl;
+
+            if ( ModuleLoader.isRelativeURL(mrl) )
+                url = (this.baseURL || "") + mrl;
+
+            // we can't use baseURI because resource:// is not a valid URI
+            var mozURI = ModuleLoader.mozIOService.newURI(url, null, null);
             var url = mozURI.spec;
 
-            if (!this.baseURI) {  // then we did not have one configured before, use the first one we see
-                var baseURL = url.split('/').slice(0,-1).join('/');
-                this.baseURI =  ModuleLoader.mozIOService.newURI(mrl, null, null);
+            if (!this.baseURL) {  // then we did not have one configured before, use the first one we see
+                this.baseURL = url.split('/').slice(0,-1).join('/');
             }
-
         } catch (exc) {
-            return ModuleLoader.onError(new Error("ModuleLoader could not convert "+mrl+" to absolute URL using baseURI "+this.baseURI.spec), {exception: exc, moduleLoader: this});
+            return ModuleLoader.onError(new Error("ModuleLoader could not convert "+mrl+" to absolute URL using baseURL "+(this.baseURL ? this.baseURL.spec:" undefined")), {exception: exc, moduleLoader: this});
         }
-        if (ModuleLoader.debug) ModuleLoader.onDebug("ModuleLoader loadModule reading "+url);
+        if (ModuleLoader.debug) ModuleLoader.onDebug("ModuleLoader loadModule reading "+url+" from baseURL: "+this.baseURL+" and mrl: "+mrl+" ");
 
         var unit = {
             source: this.mozReadTextFromFile(url),
@@ -253,21 +269,6 @@ ModuleLoader.prototype = {
     },
 
     remapConfig: function(cfg) {
-        if (!cfg.context) {
-            // The require.js config object uses 'context' property name to mean 'contextName'.
-            cfg.context = this.getModuleLoaderName();
-        } // else caller better know what they are doing...
-
-        if (cfg.baseUrl) {
-            try {
-                this.baseURI = ModuleLoader.mozIOService.newURI(cfg.baseUrl, null, null);
-            } catch (exc) {
-                throw new Error("ModuleLoader ERROR failed to create baseURI from baseUrl =\'"+cfg.baseUrl+"\'");
-            }
-        }
-        else if (this.baseURI) {
-            cfg.baseUrl = this.baseURI.spec;
-        }
 
         if (cfg.debug)
             ModuleLoader.debug = !!cfg.debug;
@@ -276,6 +277,19 @@ ModuleLoader.prototype = {
 
         if (cfg.onError)
             ModuleLoader.onError = cfg.onError;
+
+        if (!cfg.context) {
+            // The require.js config object uses 'context' property name to mean 'contextName'.
+            cfg.context = this.getModuleLoaderName();
+        } // else caller better know what they are doing...
+
+        if (cfg.baseUrl) { // then assume the incoming value
+            var endsWithSlash = cfg.baseUrl.charAt(cfg.baseUrl.length - 1);
+            this.baseURL = cfg.baseUrl + (endsWithSlash ? '' : '/');
+        }
+        else if (this.baseURL) {  // then tell require.js about it
+            cfg.baseUrl = this.baseURL;
+        }
 
         return cfg;
     },
@@ -389,12 +403,20 @@ ModuleLoader.prototype = {
 
 ModuleLoader.onError = function (err, object) {
     Cu.reportError("ModuleLoader pre-bootstrap ERROR "+err);
-    if (object) {
-        Cu.reportError("ModuleLoader pre-bootstrap object "+object);
-        for (var p in object) {
-            Cu.reportError("ModuleLoader pre-bootstrap object["+p+"]="+object[p]);
+    try
+    {
+        if (object) {
+            Cu.reportError("ModuleLoader pre-bootstrap object "+object);
+            for (var p in object) {
+                Cu.reportError("ModuleLoader pre-bootstrap object["+p+"]="+object[p]);
+            }
         }
     }
+    finally
+    {
+        throw err;  // if we get an error, die
+    }
+
 }
 
 ModuleLoader.onDebug = function (err, object) {
