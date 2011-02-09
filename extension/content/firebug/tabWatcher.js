@@ -684,8 +684,9 @@ var TabProgressListener = extend(BaseProgressListener,
                     (requestFromFirebuggedWindow?" from firebugged window":" no firebug"));
             }
 
-            if (uri && uri.spec === "about:blank") // the onStateChange will deal with this troublesome case
-                return;
+            // See issue 4040
+            //if (uri && uri.spec === "about:blank") // the onStateChange will deal with this troublesome case
+            //    return;
 
             if (uri && uri.scheme === "wyciwyg")  // document.open() was called, the document was cleared.
                 evictTopWindow(progress.DOMWindow, uri);
