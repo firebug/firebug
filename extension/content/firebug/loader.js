@@ -59,7 +59,7 @@ var FirebugLoadManager = function () {
             },
             onError: function()
             {
-                Components.utils.reportError(arguments[0]);
+                Components.utils.reportError(arguments[0]);  // put something out for sure
                 if (!this.FBTrace)
                 {
                     // traceConsoleService is a global of |window| frome trace.js.
@@ -67,6 +67,7 @@ var FirebugLoadManager = function () {
                     this.FBTrace = traceConsoleService.getTracer("extensions.firebug");
                 }
                 this.FBTrace.sysout.apply(this.FBTrace,arguments);
+                throw arguments[0];
             },
             waitSeconds: 0,
             debug: true,
