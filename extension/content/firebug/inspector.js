@@ -22,8 +22,61 @@ Firebug.Inspector = extend(Firebug.Module,
     inspecting: false,
     inspectingPanel: null,
 
+    /**
+     * @param elementArr Elements to highlight
+     * @param context Context of the elements to be highlighted
+     * @param highlightType (optional) Either "frame" or "boxModel", default is frame.
+     * @param color (optional) any valid html color e.g. red, #f00, #ff0000, etc. Only applies to the frame highlighter.
+     */
+    multiHighlight: function(elementArr, context, highlightType, color)
+    {
+        var i, elementLen, highlighter;
+
+        highlightType = highlightType || "frame";
+        highlighter = getHighlighter(highlightType);
+
+        this.clearAllHighlights(context);
+
+        if (!elementArr || !FirebugReps.Arr.isArray(elementArr))
+        {
+            this.highlightObject(elementArr, context, highlightType, null, color);
+        }
+        else
+        {
+            if (context && context.window && context.window.document)
+            {
+                for (i = 0, elementLen = elementArr.length; i < elementLen; i++)
+                {
+                    if(highlightType ==="frame")
+                        context.frameHighlighter = null;
+                    else
+                        context.boxModelHighlighter = null;
+
+                    highlighter.highlight(context, elementArr[i], null, color);
+                }
+            }
+        }
+    },
+
+    clearAllHighlights: function(context) {
+        if (context && context.window && context.window.document)
+        {
+            var doc = context.window.document;
+            var elts = doc.getElementsByClassName("firebugResetStyles");
+            for (var i = elts.length - 1; i >= 0; i--)
+            {
+                var elt = elts[i];
+                if(elt)
+                    elt.parentNode.removeChild(elt);
+            }
+        }
+    },
+
     highlightObject: function(element, context, highlightType, boxFrame, color)
     {
+        if(!this.inspecting)
+            this.clearAllHighlights(context);
+
         if (!element || !isElement(element) || !isVisible(unwrapObject(element)))
         {
             if(element && element.nodeType == 3)
@@ -102,6 +155,8 @@ Firebug.Inspector = extend(Firebug.Module,
     {
         if (this.inspecting || !context || !context.loaded)
             return;
+
+        this.clearAllHighlights(context);
 
         this.inspecting = true;
         this.inspectingContext = context;
@@ -1013,7 +1068,7 @@ Firebug.Inspector.FrameHighlighter.prototype =
             if(cs.MozBorderRadiusBottomleft)
                 css += '-moz-border-radius-bottomleft:' + cs.MozBorderRadiusBottomleft + ' !important;';
             if(color)
-                css += 'box-shadow: 0 0 2px 2px ' + color + ' !important;-moz-box-shadow: 0 0 2px 2px ' + color + ' !important;'
+                css += 'box-shadow: 0 0 2px 2px ' + color + ' !important;-moz-box-shadow: 0 0 2px 2px ' + color + ' !important;';
 
             highlighter.style.cssText = css;
 
