@@ -69,14 +69,14 @@ Firebug.Inspector = extend(Firebug.Module,
                 if(elt)
                     elt.parentNode.removeChild(elt);
             }
+
+            context.frameHighlighter = null;
+            context.boxModelHighlighter = null;
         }
     },
 
     highlightObject: function(element, context, highlightType, boxFrame, color)
     {
-        if(!this.inspecting)
-            this.clearAllHighlights(context);
-
         if (!element || !isElement(element) || !isVisible(unwrapObject(element)))
         {
             if(element && element.nodeType == 3)
@@ -94,11 +94,8 @@ Firebug.Inspector = extend(Firebug.Module,
         var highlighter = highlightType ? getHighlighter(highlightType) : this.defaultHighlighter;
 
         var oldContext = this.highlightedContext;
-        if (oldContext && highlighter != this.highlighter)
-        {
-            if (oldContext.window)
-                this.highlighter.unhighlight(oldContext);
-        }
+        if (oldContext && oldContext.window)
+            this.clearAllHighlights(oldContext);
 
         this.highlighter = highlighter;
         this.highlightedElement = element;
@@ -1156,6 +1153,7 @@ BoxModelHighlighter.prototype =
             highlightFrame = boxFrame ? nodes[boxFrame] : null;
 
         storeHighlighterParams(this, context, element, boxFrame, "highlight");
+        Firebug.Inspector.highlightedContext = context;
 
         if (context.highlightFrame)
             removeClass(context.highlightFrame, "firebugHighlightBox");
