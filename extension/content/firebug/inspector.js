@@ -22,7 +22,7 @@ Firebug.Inspector = extend(Firebug.Module,
     inspecting: false,
     inspectingPanel: null,
 
-    highlightObject: function(element, context, highlightType, boxFrame)
+    highlightObject: function(element, context, highlightType, boxFrame, color)
     {
         if (!element || !isElement(element) || !isVisible(unwrapObject(element)))
         {
@@ -56,7 +56,7 @@ Firebug.Inspector = extend(Firebug.Module,
             if(!isVisibleElement(element))
                 highlighter.unhighlight(context);
             else if (context && context.window && context.window.document)
-                highlighter.highlight(context, element, boxFrame);
+                highlighter.highlight(context, element, boxFrame, color);
         }
         else if (oldContext)
         {
@@ -83,6 +83,21 @@ Firebug.Inspector = extend(Firebug.Module,
             this.startInspecting(context);
     },
 
+    onPanelChanged: function(event)
+    {
+        if (this.inspecting)
+        {
+            var panelBar1 = $("fbPanelBar1");
+            panel = panelBar1.selectedPanel;
+
+            if (panel && panel.inspectable)
+            {
+                this.inspectNode(null);
+                this.inspectingPanel = panel;
+            }
+        }
+    },
+
     startInspecting: function(context)
     {
         if (this.inspecting || !context || !context.loaded)
@@ -104,6 +119,8 @@ Firebug.Inspector = extend(Firebug.Module,
 
         this.inspectingPanel.panelNode.focus();
         this.inspectingPanel.startInspecting();
+
+        dispatch(this.fbListeners, "onStartInspecting", [context]);
 
         if (context.stopped)
             Firebug.Debugger.thaw(context);
@@ -131,36 +148,29 @@ Firebug.Inspector = extend(Firebug.Module,
         if (node && node.fbProxyFor)
             node = node.fbProxyFor;
 
+        var inspectingPanel = this.inspectingPanel;
+
+        // Some panels may want to only allow inspection of panel-supported objects
+        node = inspectingPanel ? inspectingPanel.getInspectNode(node) : node;
+
+        var highlightColor = inspectingPanel ? inspectingPanel.inspectHighlightColor : "";
+        this.highlightObject(node, context, "frame", undefined, highlightColor);
+
+        this.inspectingNode = node;
+
         if (node)
         {
-            //some panels may want to only allow inspection of panel-supported objects
-            var panel = this.inspectingPanel;
-            while (node)
+            this.inspectTimeout = context.setTimeout(function()
             {
-                var only = panel.inspectOnlySupportedObjects;
-                if (!only || (only && panel.supportsObject(node, typeof node)))
-                {
-                    this.highlightObject(node, context, "frame");
-                    this.inspectingNode = node;
-
-                    this.inspectTimeout = context.setTimeout(function()
-                    {
-                        Firebug.chrome.select(node);
-                    }, inspectDelay);
-
-                    dispatch(this.fbListeners, "onInspectNode", [context, node]);
-                    return;
-                }
-                node = node.parentNode;
-            }
+                var selection = inspectingPanel.inspectNode(node);
+                dispatch(self.fbListeners, "onInspectNode", [context, node]);
+                if (selection)
+                    inspectingPanel.select(node);
+            }, inspectDelay);
         }
-
-        // node will be undefined
-        this.highlightObject(node, context, "frame");
-        this.inspectingNode = node;
     },
 
-    stopInspecting: function(cancelled, waitForClick)
+    stopInspecting: function(canceled, waitForClick)
     {
         if (!this.inspecting)
             return;
@@ -184,11 +194,10 @@ Firebug.Inspector = extend(Firebug.Module,
 
         this.inspecting = false;
 
-        var panel = Firebug.chrome.unswitchToPanel(context, this.inspectingPanel.name, cancelled);
+        Firebug.chrome.unswitchToPanel(context, this.inspectingPanel.name, canceled);
 
-        panel.stopInspecting(panel.selection, cancelled);
-
-        dispatch(this.fbListeners, "onStopInspecting", [context]);
+        this.inspectingPanel.stopInspecting(this.inspectingNode, canceled);
+        dispatch(this.fbListeners, "onStopInspecting", [context, this.inspectingNode, canceled]);
 
         this.inspectNode(null);
     },
@@ -208,12 +217,14 @@ Firebug.Inspector = extend(Firebug.Module,
     inspectFromContextMenu: function(elt)
     {
         var panel, inspectingPanelName;
-        var context = this.inspectingContext || Firebug.TabWatcher.getContextByWindow(elt.ownerDocument.defaultView);
+        var context = this.inspectingContext ||
+            Firebug.TabWatcher.getContextByWindow(elt.ownerDocument.defaultView);
 
-        inspectingPanelName = this._resolveInspectingPanelName(context);
+        inspectingPanelName = "html";
 
         Firebug.toggleBar(true, inspectingPanelName);
         Firebug.chrome.select(elt, inspectingPanelName);
+
         panel = Firebug.chrome.selectPanel(inspectingPanelName);
         panel.panelNode.focus();
     },
@@ -253,6 +264,7 @@ Firebug.Inspector = extend(Firebug.Module,
         var win = context && context.window;
         var element = rp.element;
         var boxFrame = rp.boxFrame;
+        var color = rp.color;
         var isBoxHighlighter = false;
 
         if (highlighter && highlighter.getNodes)
@@ -263,7 +275,7 @@ Firebug.Inspector = extend(Firebug.Module,
         }
 
         if (win && highlighter && (isBoxHighlighter || (this.inspecting && !isBoxHighlighter)))
-            highlighter.highlight(context, element, boxFrame);
+            highlighter.highlight(context, element, boxFrame, color);
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
@@ -421,9 +433,13 @@ Firebug.Inspector = extend(Firebug.Module,
         this.onInspectingMouseDown = bind(this.onInspectingMouseDown, this);
         this.onInspectingMouseUp = bind(this.onInspectingMouseUp, this);
         this.onInspectingClick = bind(this.onInspectingClick, this);
+        this.onPanelChanged = bind(this.onPanelChanged, this);
 
         this.updateOption("shadeBoxModel", Firebug.shadeBoxModel);
         this.updateOption("showQuickInfoBox", Firebug.showQuickInfoBox);
+
+        var panelBar1 = $("fbPanelBar1");
+        panelBar1.addEventListener("selectPanel", this.onPanelChanged, false);
     },
 
     initContext: function(context)
@@ -931,9 +947,10 @@ Firebug.Inspector.FrameHighlighter.prototype =
         return false; // (element instanceof XULElement);
     },
 
-    highlight: function(context, element)
+    highlight: function(context, element, extra, color)
     {
-        storeHighlighterParams(this, context, element, null);
+        color = color || "highlight";
+        storeHighlighterParams(this, context, element, null, color);
 
         if (this.doNotHighlight(element))
             return;
@@ -995,6 +1012,8 @@ Firebug.Inspector.FrameHighlighter.prototype =
                 css += '-moz-border-radius-bottomright:' + cs.MozBorderRadiusBottomright + ' !important;';
             if(cs.MozBorderRadiusBottomleft)
                 css += '-moz-border-radius-bottomleft:' + cs.MozBorderRadiusBottomleft + ' !important;';
+            if(color)
+                css += 'box-shadow: 0 0 2px 2px ' + color + ' !important;-moz-box-shadow: 0 0 2px 2px ' + color + ' !important;'
 
             highlighter.style.cssText = css;
 
@@ -1075,18 +1094,18 @@ Firebug.Inspector.BoxModelHighlighter = BoxModelHighlighter;
 
 BoxModelHighlighter.prototype =
 {
-    highlight: function(context, element, boxFrame)
+    highlight: function(context, element, boxFrame, color)
     {
         var line,
             nodes = this.getNodes(context),
             highlightFrame = boxFrame ? nodes[boxFrame] : null;
 
-        storeHighlighterParams(this, context, element, boxFrame);
+        storeHighlighterParams(this, context, element, boxFrame, "highlight");
 
         if (context.highlightFrame)
             removeClass(context.highlightFrame, "firebugHighlightBox");
 
-        if(element.tagName !== "AREA")
+        if (element.tagName !== "AREA")
         {
             this.ihl && this.ihl.show(false);
 
@@ -1418,14 +1437,15 @@ function hideElementFromInspection(elt)
     unwrapObject(elt).firebugIgnore = !FBTrace.DBG_INSPECT;
 }
 
-function storeHighlighterParams(highlighter, context, element, boxFrame)
+function storeHighlighterParams(highlighter, context, element, boxFrame, color)
 {
     var fir = Firebug.Inspector.repaint;
 
     fir.highlighter = highlighter;
-    fir.context = context,
-    fir.element = element,
+    fir.context = context;
+    fir.element = element;
     fir.boxFrame = boxFrame;
+    fir.color = color;
 }
 
 // ************************************************************************************************

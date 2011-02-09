@@ -644,7 +644,7 @@ top.FirebugChrome =
                 Firebug.showBar(false);
 
             if (this.previousPanelName == switchToPanelName)
-                this.select(this.previousObject);
+                switchToPanel.select(this.previousObject);
             else
                 this.selectPanel(this.previousPanelName, this.previousSidePanelName);
         }

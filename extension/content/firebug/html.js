@@ -74,6 +74,8 @@ var WalkingPanel = extend(Firebug.Panel, Firebug.HTMLLib.ElementWalkerFunctions)
 
 Firebug.HTMLPanel.prototype = extend(WalkingPanel,
 {
+    inspectable: true,
+
     toggleEditing: function()
     {
         if (this.editing)
@@ -1156,7 +1158,7 @@ Firebug.HTMLPanel.prototype = extend(WalkingPanel,
         }
     },
 
-    stopInspecting: function(object, cancelled)
+    stopInspecting: function(object, canceled)
     {
         if (object != this.inspectorHistory)
         {
@@ -1171,7 +1173,7 @@ Firebug.HTMLPanel.prototype = extend(WalkingPanel,
 
         this.ioBox.highlight(null);
 
-        if (!cancelled)
+        if (!canceled)
             this.ioBox.select(object, true);
     },
 
