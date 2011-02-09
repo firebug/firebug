@@ -30,7 +30,7 @@ Firebug.Inspector = extend(Firebug.Module,
      */
     multiHighlight: function(elementArr, context, highlightType, color)
     {
-        var i, elementLen, highlighter;
+        var i, elt, elementLen, highlighter;
 
         highlightType = highlightType || "frame";
         highlighter = getHighlighter(highlightType);
@@ -52,7 +52,10 @@ Firebug.Inspector = extend(Firebug.Module,
                     else
                         context.boxModelHighlighter = null;
 
-                    highlighter.highlight(context, elementArr[i], null, color);
+                    elt = elementArr[i];
+
+                    if(elt.nodeType !== 3)
+                        highlighter.highlight(context, elt, null, color);
                 }
             }
         }
