@@ -54,8 +54,13 @@ Firebug.Inspector = extend(Firebug.Module,
 
                     elt = elementArr[i];
 
-                    if(elt.nodeType !== 3)
+                    if (elt)
+                    {
+                        if(elt.nodeType === 3)
+                            elt = elt.parentNode;
+
                         highlighter.highlight(context, elt, null, color);
+                    }
                 }
             }
         }
