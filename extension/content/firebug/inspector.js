@@ -30,10 +30,11 @@ Firebug.Inspector = extend(Firebug.Module,
      */
     multiHighlight: function(elementArr, context, highlightType, color)
     {
-        var i, elt, elementLen, highlighter;
+        var i, elt, elementLen, highlighter, usingColorArray;
 
         highlightType = highlightType || "frame";
         highlighter = getHighlighter(highlightType);
+        usingColorArray = FirebugReps.Arr.isArray(color);
 
         this.clearAllHighlights(context);
 
@@ -59,7 +60,10 @@ Firebug.Inspector = extend(Firebug.Module,
                         if(elt.nodeType === 3)
                             elt = elt.parentNode;
 
-                        highlighter.highlight(context, elt, null, color);
+                        if (usingColorArray)
+                            highlighter.highlight(context, elt, null, color[i]);
+                        else
+                            highlighter.highlight(context, elt, null, color);
                     }
                 }
             }
@@ -85,6 +89,9 @@ Firebug.Inspector = extend(Firebug.Module,
 
     highlightObject: function(element, context, highlightType, boxFrame, color)
     {
+        if (FirebugReps.Arr.isArray(element))
+            return this.multiHighlight(element, context, highlightType, color);
+
         if (!element || !isElement(element) || !isVisible(unwrapObject(element)))
         {
             if(element && element.nodeType == 3)
