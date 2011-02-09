@@ -135,5 +135,5 @@ var FirebugLoadManager = function () {
         loader.define(modules, coreInitialize);
     }
 
-    return {loadCore: loadCore};
+    return {loadCore: loadCore, arch: "inProcess"};
 }();
