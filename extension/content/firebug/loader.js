@@ -14,13 +14,13 @@ var FirebugLoadManager = function () {
             dump("Import moduleLoader.js FAILS: "+msg+"\n");
             FBTrace.sysout("Import moduleLoader.js ERROR "+msg, exc);
         }
-        Components.util.reportError(msg);
+        Components.utils.reportError(msg);
         throw exc;
     }
 
     function preLoadInitialization()
     {
-        // FIXME, create options.js as dependdent of loader. Firebug.architecture = this.getPref(this.prefDomain, "architecture");
+        // FIXME, create options.js as dependent of loader. Firebug.architecture = this.getPref(this.prefDomain, "architecture");
     }
 
     function getModuleLoaderScope()
@@ -59,7 +59,7 @@ var FirebugLoadManager = function () {
             },
             onError: function()
             {
-                Cu.reportError(arguments[0]);
+                Components.utils.reportError(arguments[0]);
                 if (!this.FBTrace)
                 {
                     // traceConsoleService is a global of |window| frome trace.js.
