@@ -465,6 +465,9 @@ var require, define;
                     callback: callback,
                     onDep: function (depName, value) {
                         if (!(depName in manager.deps)) {
+                            if (context.config.onDebug && !value) {
+                                context.config.onDebug("require.js:  "+depName+" set to null exports object!", {manager: manager});
+                            }
                             manager.deps[depName] = value;
                             manager.depCount += 1;
                             if (manager.depCount === manager.depMax) {
