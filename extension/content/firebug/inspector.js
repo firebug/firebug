@@ -1168,7 +1168,6 @@ BoxModelHighlighter.prototype =
             highlightFrame = boxFrame ? nodes[boxFrame] : null;
 
         storeHighlighterParams(this, context, element, boxFrame, "highlight");
-        Firebug.Inspector.highlightedContext = context;
 
         if (context.highlightFrame)
             removeClass(context.highlightFrame, "firebugHighlightBox");
@@ -1514,6 +1513,8 @@ function storeHighlighterParams(highlighter, context, element, boxFrame, color)
     fir.element = element;
     fir.boxFrame = boxFrame;
     fir.color = color;
+    
+    Firebug.Inspector.highlightedContext = context;
 }
 
 // ************************************************************************************************
