@@ -688,7 +688,7 @@ function getImageMapHighlighter(context)
             canvas = doc.createElementNS("http://www.w3.org/1999/xhtml", "canvas");
             hideElementFromInspection(canvas);
             canvas.id = "firebugCanvas";
-            canvas.className = "firebugResetStyles firebugCanvas";
+            canvas.className = "firebugResetStyles firebugBlockBackgroundColor firebugCanvas";
             canvas.width = context.window.innerWidth;
             canvas.height = context.window.innerHeight;
             context.window.addEventListener("scroll", function(){
@@ -1161,13 +1161,27 @@ Firebug.Inspector.BoxModelHighlighter = BoxModelHighlighter;
 
 BoxModelHighlighter.prototype =
 {
-    highlight: function(context, element, boxFrame, color)
+    highlight: function(context, element, boxFrame, colorObj)
     {
         var line,
             nodes = this.getNodes(context),
             highlightFrame = boxFrame ? nodes[boxFrame] : null;
 
-        storeHighlighterParams(this, context, element, boxFrame, "highlight");
+        // if a single color was passed in lets use it as the content box color
+        if (typeof colorObj === "string")
+        {
+            (function() {
+                var tempObj = {padding: "SlateBlue", border: "#444444", margin: "#EDFF64"};
+                tempObj.content = colorObj;
+                colorObj = tempObj;
+            })();
+        }
+        else
+        {
+            colorObj = colorObj || {content: "SkyBlue", padding: "SlateBlue", border: "#444444", margin: "#EDFF64"};
+        }
+
+        storeHighlighterParams(this, context, element, boxFrame, colorObj);
 
         if (context.highlightFrame)
             removeClass(context.highlightFrame, "firebugHighlightBox");
@@ -1278,6 +1292,26 @@ BoxModelHighlighter.prototype =
             if (!body)
                 return this.unhighlight(context);
 
+            if (colorObj.content)
+                unwrapObject(nodes.content).style.cssText += "background-color: " + colorObj.content + " !important;";
+            else
+                unwrapObject(nodes.content).style.cssText += "background-color: #87CEEB !important;";
+
+            if (colorObj.padding)
+                unwrapObject(nodes.padding).style.cssText += "background-color: " + colorObj.padding + " !important;";
+            else
+                unwrapObject(nodes.padding).style.cssText += "background-color: #6A5ACD !important;";
+
+            if (colorObj.border)
+                unwrapObject(nodes.border).style.cssText += "background-color: " + colorObj.border + " !important;";
+            else
+                unwrapObject(nodes.border).style.cssText += "background-color: #444444 !important;";
+
+            if (colorObj.margin)
+                unwrapObject(nodes.margin).style.cssText += "background-color: " + colorObj.margin + " !important;";
+            else
+                unwrapObject(nodes.margin).style.cssText += "background-color: #EDFF64 !important;";
+
             var needsAppend = !nodes.offset.parentNode
                 || nodes.offset.parentNode.ownerDocument != body.ownerDocument;
 
@@ -1349,15 +1383,21 @@ BoxModelHighlighter.prototype =
             if (FBTrace.DBG_INSPECT && doc)
                 FBTrace.sysout("inspect.getNodes doc: "+doc.location);
 
-            var Ruler = "firebugResetStyles firebugRuler firebugRuler";
-            var Box = "firebugResetStyles firebugLayoutBox firebugLayoutBox";
-            var Line = "firebugResetStyles firebugLayoutLine firebugLayoutLine";
+            var Ruler = "firebugResetStyles firebugBlockBackgroundColor firebugRuler firebugRuler";
+            var Box = "firebugResetStyles firebugBlockBackgroundColor firebugLayoutBox firebugLayoutBox";
+            var CustomizableBox = "firebugResetStyles firebugLayoutBox";
+            var Line = "firebugResetStyles firebugBlockBackgroundColor firebugLayoutLine firebugLayoutLine";
 
             function create(className, name)
             {
                 var div = doc.createElementNS("http://www.w3.org/1999/xhtml", "div");
                 hideElementFromInspection(div);
-                div.className = className +name;
+
+                if (className !== CustomizableBox)
+                    div.className = className + name;
+                else
+                    div.className = className;
+
                 return div;
             }
 
@@ -1367,10 +1407,10 @@ BoxModelHighlighter.prototype =
                 rulerH: create(Ruler, "H"),
                 rulerV: create(Ruler, "V"),
                 offset: create(Box, "Offset"),
-                margin: create(Box, "Margin"),
-                border: create(Box, "Border"),
-                padding: create(Box, "Padding"),
-                content: create(Box, "Content"),
+                margin: create(CustomizableBox, "Margin"),
+                border: create(CustomizableBox, "Border"),
+                padding: create(CustomizableBox, "Padding"),
+                content: create(CustomizableBox, "Content"),
                 lines: {
                     top: create(Line, "Top"),
                     right: create(Line, "Right"),
@@ -1513,7 +1553,7 @@ function storeHighlighterParams(highlighter, context, element, boxFrame, color)
     fir.element = element;
     fir.boxFrame = boxFrame;
     fir.color = color;
-    
+
     Firebug.Inspector.highlightedContext = context;
 }
 

@@ -20,8 +20,11 @@
     -moz-border-radius: 0 !important;
     -moz-box-shadow: none !important;
     background-image: none !important;
-    background-color: transparent !important;
     pointer-events: none !important;
+}
+
+.firebugBlockBackgroundColor {
+    background-color: transparent !important;
 }
 
 .firebugResetStyles:before, .firebugResetStyles:after {
@@ -41,22 +44,6 @@
 .firebugLayoutBoxOffset {
     opacity: 0.8 !important;
     position: fixed !important;
-}
-
-.firebugLayoutBoxMargin {
-    background-color: #EDFF64 !important;
-}
-
-.firebugLayoutBoxBorder {
-    background-color: #444444 !important;
-}
-
-.firebugLayoutBoxPadding {
-    background-color: SlateBlue !important;
-}
-
-.firebugLayoutBoxContent {
-    background-color: SkyBlue !important;
 }
 
 .firebugLayoutLine {
