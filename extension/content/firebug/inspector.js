@@ -73,13 +73,24 @@ Firebug.Inspector = extend(Firebug.Module,
     clearAllHighlights: function(context) {
         if (context && context.window && context.window.document)
         {
-            var doc = context.window.document;
-            var elts = doc.getElementsByClassName("firebugResetStyles");
-            for (var i = elts.length - 1; i >= 0; i--)
+            var i, j, elt, elts, windows;
+            var win = context.window;
+
+            if (win.document.body && win.document.body.localName.toUpperCase() === "FRAMESET")
+                windows = win.frames;
+            else
+                windows = [win];
+
+            for (i = 0; i < windows.length; i++)
             {
-                var elt = elts[i];
-                if(elt)
-                    elt.parentNode.removeChild(elt);
+                elts = windows[i].document.getElementsByClassName("firebugResetStyles");
+
+                for (j = elts.length - 1; j >= 0; j--)
+                {
+                    elt = elts[j];
+                    if(elt)
+                        elt.parentNode.removeChild(elt);
+                }
             }
 
             context.frameHighlighter = null;
@@ -1014,13 +1025,18 @@ Firebug.Inspector.FrameHighlighter.prototype =
         return false; // (element instanceof XULElement);
     },
 
-    highlight: function(context, element, extra, color)
+    highlight: function(context, element, extra, colorObj)
     {
-        color = color || "highlight";
-        storeHighlighterParams(this, context, element, null, color);
-
         if (this.doNotHighlight(element))
             return;
+
+        // if a single color was passed in lets use it as the border color
+        if (typeof colorObj === "string")
+            colorObj = {background: "transparent", border: colorObj};
+        else
+            colorObj = colorObj || {background: "transparent", border: "#004bc7"};
+
+        storeHighlighterParams(this, context, element, null, colorObj);
 
         var cs;
         var offset = getLTRBWH(element);
@@ -1056,31 +1072,39 @@ Firebug.Inspector.FrameHighlighter.prototype =
 
             cs = body.ownerDocument.defaultView.getComputedStyle(element, null);
 
-            if(cs.MozTransform && cs.MozTransform != 'none')
-                css += '-moz-transform:' + cs.MozTransform + '!important;' +
-                       '-moz-transform-origin:' + cs.MozTransformOrigin + '!important;';
+            if(cs.MozTransform && cs.MozTransform != "none")
+                css += "-moz-transform:" + cs.MozTransform + "!important;" +
+                       "-moz-transform-origin:" + cs.MozTransformOrigin + "!important;";
             if(cs.borderRadius)
-                css += 'border-radius:' + cs.borderRadius + ' !important;';
+                css += "border-radius:" + cs.borderRadius + " !important;";
             if(cs.borderTopLeftRadius)
-                css += 'border-top-left-radius:' + cs.borderTopLeftRadius + ' !important;';
+                css += "border-top-left-radius:" + cs.borderTopLeftRadius + " !important;";
             if(cs.borderTopRightRadius)
-                css += 'border-top-right-radius:' + cs.borderTopRightRadius + ' !important;';
+                css += "border-top-right-radius:" + cs.borderTopRightRadius + " !important;";
             if(cs.borderBottomRightRadius)
-                css += 'border-bottom-right-radius:' + cs.borderBottomRightRadius + ' !important;';
+                css += "border-bottom-right-radius:" + cs.borderBottomRightRadius + " !important;";
             if(cs.borderBottomLeftRadius)
-                css += 'border-bottom-left-radius:' + cs.borderBottomLeftRadius + ' !important;';
+                css += "border-bottom-left-radius:" + cs.borderBottomLeftRadius + " !important;";
             if(cs.MozBorderRadius)
-                css += '-moz-border-radius:' + cs.MozBorderRadius + ' !important;';
+                css += "-moz-border-radius:" + cs.MozBorderRadius + " !important;";
             if(cs.MozBorderRadiusTopleft)
-                css += '-moz-border-radius-topleft:' + cs.MozBorderRadiusTopleft + ' !important;';
+                css += "-moz-border-radius-topleft:" + cs.MozBorderRadiusTopleft + " !important;";
             if(cs.MozBorderRadiusTopright)
-                css += '-moz-border-radius-topright:' + cs.MozBorderRadiusTopright + ' !important;';
+                css += "-moz-border-radius-topright:" + cs.MozBorderRadiusTopright + " !important;";
             if(cs.MozBorderRadiusBottomright)
-                css += '-moz-border-radius-bottomright:' + cs.MozBorderRadiusBottomright + ' !important;';
+                css += "-moz-border-radius-bottomright:" + cs.MozBorderRadiusBottomright + " !important;";
             if(cs.MozBorderRadiusBottomleft)
-                css += '-moz-border-radius-bottomleft:' + cs.MozBorderRadiusBottomleft + ' !important;';
-            if(color)
-                css += 'box-shadow: 0 0 2px 2px ' + color + ' !important;-moz-box-shadow: 0 0 2px 2px ' + color + ' !important;';
+                css += "-moz-border-radius-bottomleft:" + cs.MozBorderRadiusBottomleft + " !important;";
+
+            if(colorObj && colorObj.border)
+                css += "box-shadow: 0 0 2px 2px " + colorObj.border + " !important; -moz-box-shadow: 0 0 2px 2px " + colorObj.border + " !important;";
+            else
+                css += "box-shadow: 0 0 2px 2px #3875d7 !important; -moz-box-shadow: 0 0 2px 2px #004bc7 !important;";
+
+            if(colorObj && colorObj.background)
+                css += "background-color: " + colorObj.background + " !important; opacity: 0.6 !important;";
+            else
+                css += "background-color: transparent !important; opacity: 1 !important;";
 
             highlighter.style.cssText = css;
 
@@ -1457,7 +1481,7 @@ BoxModelHighlighter.prototype =
 function getNonFrameBody(elt)
 {
     var body = getBody(elt.ownerDocument);
-    return (body.localName && body.localName.toUpperCase() == "FRAMESET") ? null : body;
+    return (body.localName && body.localName.toUpperCase() === "FRAMESET") ? null : body;
 }
 
 function attachStyles(context, body)
