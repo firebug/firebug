@@ -1035,22 +1035,25 @@ top.FirebugChrome =
         panelBar1.browser.markupDocumentViewer.textZoom = zoom;
         panelBar2.browser.markupDocumentViewer.textZoom = zoom;
 
-
+        var box = $("fbCommandBox");
         var aNode = panelBar1.selectedPanel ? panelBar1.selectedPanel.panelNode : null ;
         if (aNode)
         {
             Firebug.MeasureBox.startMeasuring(aNode);
             var size = Firebug.MeasureBox.measureText();
-            Firebug.MeasureBox.stopMeasuring();
-            var box = $("fbCommandBox");
             box.style.height = size.height;
-            box.style.fontSize = (zoom * 100)+"%";
+            Firebug.MeasureBox.stopMeasuring();
         }
 
+        var zoomString = (zoom * 100) + "%";
+        box.style.fontSize = zoomString;
+        Firebug.CommandLine.getCommandLineSmall().style.fontSize = zoomString;
+        $("fbCommandLineCompletion").style.fontSize = zoomString;
+
         if(Firebug.CommandLine.getCommandLineLarge().setFontSize)
-            Firebug.CommandLine.getCommandLineLarge().setFontSize((zoom * 100) + "%");
+            Firebug.CommandLine.getCommandLineLarge().setFontSize(zoomString);
         else
-            Firebug.CommandLine.getCommandLineLarge().style.fontSize = (zoom * 100) + "%";
+            Firebug.CommandLine.getCommandLineLarge().style.fontSize = zoomString;
 
         Firebug.dispatchToPanels("onTextSizeChange", [zoom]);
     },
