@@ -10,7 +10,6 @@ Components.utils.import("resource://firebug/bti/compilationunit.js");
 if (!Firebug.JavaScriptModule)
     Firebug.JavaScriptModule = Firebug.Debugger;
 
-
 // ************************************************************************************************
 // Script panel
 
@@ -46,7 +45,9 @@ Firebug.ScriptPanel.decorator = extend(new Firebug.SourceBoxDecorator,
 
             var script = compilationUnit.isExecutableLine(lineNo);
 
-            if (FBTrace.DBG_LINETABLE) FBTrace.sysout("script.markExecutableLines ["+lineNo+"]="+script);
+            if (FBTrace.DBG_LINETABLE)
+                FBTrace.sysout("script.markExecutableLines ["+lineNo+"]="+script);
+
             if (script)
                 lineNode.setAttribute("executable", "true");
             else
@@ -77,8 +78,10 @@ Firebug.ScriptPanel.decorator = extend(new Firebug.SourceBoxDecorator,
                 if (props.condition)
                     scriptRow.setAttribute("condition", "true");
             }
+
             if (FBTrace.DBG_LINETABLE)
-                FBTrace.sysout("script.setLineBreakpoints found "+scriptRow+" for "+line+"@"+compilationUnit.getURL()+"\n");
+                FBTrace.sysout("script.setLineBreakpoints found "+scriptRow+" for "+line+"@"+
+                    compilationUnit.getURL()+"\n");
         }});
     },
 });
@@ -127,6 +130,7 @@ Firebug.ScriptPanel.prototype = extend(Firebug.SourceBoxPanel,
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
     // Firebug.JavaScriptModule Listener
+
     onJSDActivate: function(active, why)
     {
         if (Firebug.chrome.getSelectedPanel() === this) // then the change in jsd causes a refresh
@@ -150,7 +154,8 @@ Firebug.ScriptPanel.prototype = extend(Firebug.SourceBoxPanel,
         }
         else
         {
-            if (FBTrace.DBG_ERRORS) FBTrace.sysout("no sourcelink for function"); // want to avoid the script panel if possible
+            if (FBTrace.DBG_ERRORS)
+                FBTrace.sysout("no sourcelink for function"); // want to avoid the script panel if possible
         }
     },
 
@@ -162,10 +167,14 @@ Firebug.ScriptPanel.prototype = extend(Firebug.SourceBoxPanel,
             this.navigate(compilationUnit);
             if (sourceLink.line)
             {
-                this.scrollToLine(sourceLink.href, sourceLink.line, this.jumpHighlightFactory(sourceLink.line, this.context));
+                this.scrollToLine(sourceLink.href, sourceLink.line,
+                    this.jumpHighlightFactory(sourceLink.line, this.context));
+
                 dispatch(this.fbListeners, "onShowSourceLink", [this, sourceLink.line]);
             }
-            if (sourceLink == this.selection)  // then clear it so the next link will scroll and highlight.
+
+            // then clear it so the next link will scroll and highlight.
+            if (sourceLink == this.selection)
                 delete this.selection;
         }
     },
@@ -203,7 +212,8 @@ Firebug.ScriptPanel.prototype = extend(Firebug.SourceBoxPanel,
         }
 
         if (FBTrace.DBG_BP || FBTrace.DBG_STACK || FBTrace.DBG_COMPILATION_UNITS)
-            FBTrace.sysout("sourceBox.highlightLine lineNo: "+sourceBox.highlightedLineNumber+" lineNode="+lineNode+" in "+sourceBox.repObject.href);
+            FBTrace.sysout("sourceBox.highlightLine lineNo: "+sourceBox.highlightedLineNumber+
+                " lineNode="+lineNode+" in "+sourceBox.repObject.href);
 
         return (sourceBox.highlightedLineNumber > 0); // sticky if we have a valid line
     },
@@ -260,8 +270,12 @@ Firebug.ScriptPanel.prototype = extend(Firebug.SourceBoxPanel,
 
         if (!compilationUnit && FBTrace.DBG_ERRORS)
             FBTrace.sysout("toggleBreakpoint no compilationUnit! ", this);
+
         if (FBTrace.DBG_BP)
-            FBTrace.sysout("script.toggleBreakpoint lineNo="+lineNo+" compilationUnit.href:"+compilationUnit.href+" lineNode.breakpoint:"+(lineNode?lineNode.getAttribute("breakpoint"):"(no lineNode)")+"\n", this.selectedSourceBox);
+            FBTrace.sysout("script.toggleBreakpoint lineNo="+lineNo+" compilationUnit.href:"+
+                compilationUnit.href+" lineNode.breakpoint:"+
+                (lineNode?lineNode.getAttribute("breakpoint"):"(no lineNode)")+
+                "\n", this.selectedSourceBox);
 
         if (lineNode.getAttribute("breakpoint") == "true")
             fbs.clearBreakpoint(href, lineNo);
