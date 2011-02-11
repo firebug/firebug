@@ -34,6 +34,11 @@ Firebug.SourceFile.prototype =
         return 0;
     },
 
+    getURL: function()
+    {
+        return this.href;
+    },
+
     toString: function()
     {
         var str = (this.compilation_unit_type?this.compilation_unit_type+" ":"")+this.href+" script.tags( ";
