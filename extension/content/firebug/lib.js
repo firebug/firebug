@@ -3799,19 +3799,20 @@ this.cancelEvent = function(event)
     event.preventDefault();
 };
 
-this.isLeftClick = function(event)
+this.isLeftClick = function(event, allowKeyModifiers)
 {
-    return event.button == 0 && this.noKeyModifiers(event);
+    return event.button == 0 && (allowKeyModifiers || this.noKeyModifiers(event));
 };
 
-this.isMiddleClick = function(event)
+this.isMiddleClick = function(event, allowKeyModifiers)
 {
-    return event.button == 1 && this.noKeyModifiers(event);
+    return event.button == 1 && (allowKeyModifiers || this.noKeyModifiers(event));
 };
 
-this.isRightClick = function(event)
+this.isRightClick = function(event, allowKeyModifiers)
 {
-    return event.button == 2 && this.noKeyModifiers(event);
+    
+    return event.button == 2 && (allowKeyModifiers || this.noKeyModifiers(event));
 };
 
 this.noKeyModifiers = function(event)

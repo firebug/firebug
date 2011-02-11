@@ -181,6 +181,7 @@ top.FirebugChrome =
             doc1.addEventListener("mouseup", onPanelMouseUp, false);
             doc1.addEventListener("click", onPanelClick, false);
             panelBar1.addEventListener("selectingPanel", onSelectingPanel, false);
+            panelBar1.addEventListener("DOMMouseScroll", onMouseScroll, false);
 
             var doc2 = panelBar2.browser.contentDocument;
             doc2.addEventListener("mouseover", onPanelMouseOver, false);
@@ -241,6 +242,7 @@ top.FirebugChrome =
         doc1.removeEventListener("mousedown", onPanelMouseDown, false);
         doc1.removeEventListener("mouseup", onPanelMouseUp, false);
         doc1.removeEventListener("click", onPanelClick, false);
+        panelBar1.removeEventListener("DOMMouseScroll", onMouseScroll, false);
 
         var doc2 = panelBar2.browser.contentDocument;
         doc2.removeEventListener("mouseover", onPanelMouseOver, false);
@@ -1702,6 +1704,14 @@ function onSelectingPanel(event)
     Firebug.chrome.syncSidePanels();
 }
 
+function onMouseScroll(event) {
+    if (FBL.isControlShift(event))
+    {
+        FBL.cancelEvent(event);
+        Firebug.increaseTextSize(-event.detail);
+    }
+}
+
 function onSelectedSidePanel(event)
 {
     var sidePanel = panelBar2.selectedPanel;
@@ -1792,6 +1802,11 @@ function onPanelMouseDown(event)
     if (FBL.isLeftClick(event))
     {
         this.lastMouseDownPosition = {x: event.screenX, y: event.screenY};
+    }
+    else if (FBL.isMiddleClick(event, true) && FBL.isControlShift(event))
+    {
+        FBL.cancelEvent(event);
+        Firebug.setTextSize(0);
     }
     else if (FBL.isMiddleClick(event) && Firebug.getRepNode(event.target))
     {
