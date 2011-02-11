@@ -1352,12 +1352,27 @@ FirebugReps.SourceFile = domplate(FirebugReps.SourceLink,
 
     supportsObject: function(object, type)
     {
-        return object.compilation_unit_type; // kinda hacky, but more reliable than type testing
+        // kinda hacky, but more reliable than type testing
+        if (object.compilation_unit_type)
+            return true;
+
+        // CompilationUnit wraps the source file.
+        var sourceFile = object.sourceFile;
+        if (sourceFile && sourceFile.compilation_unit_type)
+            return true;
+
+        return false;
     },
 
     persistObject: function(sourceFile)
     {
-        return bind(this.persistor, top, sourceFile.href);
+        var href = sourceFile.href
+
+        // CompilationUnit wraps the source file.
+        if (!href && sourceFile.sourceFile)
+            href = sourceFile.sourceFile.href;
+
+        return bind(this.persistor, top, href);
     },
 
     browseObject: function(sourceLink, context)
