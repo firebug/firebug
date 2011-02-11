@@ -666,35 +666,6 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
         }
     },
 
-    setBreakOnNextCause: function(context, frame)  // TODO this should be in the panel (front end)
-    {
-        var sourceFile = Firebug.SourceFile.getSourceFileByScript(context, frame.script);
-        var analyzer = sourceFile.getScriptAnalyzer(frame.script);
-        var lineNo = analyzer.getSourceLineFromFrame(context, frame);
-
-        context.breakingCause =
-        {
-            title: $STR("Break On Next"),
-            message: $STR("Disable converts pause to disabled breakpoint"), //xxxHonza localization
-            skipAction: function addSkipperAndGo()
-            {
-                // a breakpoint that never hits, but prevents debugger keyword (see fbs.onDebugger as well)
-                var bp = Firebug.Debugger.setBreakpoint(sourceFile, lineNo);
-                fbs.disableBreakpoint(sourceFile.href, lineNo);
-
-                if (FBTrace.DBG_BP)
-                    FBTrace.sysout("debugger.setBreakOnNextCause converted to disabled bp " +
-                        sourceFile.href+"@"+lineNo+" tag: "+frame.script.tag, bp);
-
-                Firebug.Debugger.resume(context);
-            },
-            okAction: function justGo()
-            {
-                Firebug.Debugger.resume(context);
-            },
-        };
-    },
-
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
     // Breakpoints
 
