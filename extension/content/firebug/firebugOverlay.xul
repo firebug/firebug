@@ -465,10 +465,11 @@
         <hbox id="fbCommandBox">
             <toolbarbutton id="fbCommandLineHistoryButton" tooltiptext="Command_History" class="toolbarbutton-iconic fbInternational"
                 oncommand="Firebug.CommandLine.commandHistory.show(this);" disabled="true"/>
-            <label id="fbCommandArrow" value=">>>"/>
+            <vbox pack="center">
+                <label id="fbCommandArrow" value="&gt;&gt;&gt;"/>
+            </vbox>
             <hbox flex="1">
-                <html:div class="fbCommandHtmlBox" flex="100%">
-
+                <vbox class="fbCommandHtmlBox" pack="center" flex="100%">
                     <!-- transparent background, silver text over user inputs -->
                     <html:div class="background">
                         <!-- completion text -->
@@ -476,15 +477,10 @@
                             type="text" maxlength="2048" autocomplete="off" />
                         <!-- holds the misspelling and a red squiggly line -->
                         <html:div id="misspell" class="lst"></html:div>
-                    </html:div>
-
-                    <!-- off screen -->
-                    <html:div class="lst offScreen">do</html:div>
-                    <html:div style="position: relative">
                         <textbox id="fbCommandLine" class="fbCommandLine" flex="1"
                             aria-autocomplete="inline" multiline="false" newlines="pasteintact"/>
                     </html:div>
-                </html:div>
+                </vbox>
             </hbox>
 
             <!-- Toggle into multi-line command line -->
