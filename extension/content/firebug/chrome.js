@@ -1128,7 +1128,7 @@ top.FirebugChrome =
             var fbContentBox = this.$("fbContentBox");
             var collapsed = fbContentBox.getAttribute("collapsed");
             toggleFirebug.setAttribute("label", (collapsed == "true"?
-                FBL.$STR("firebug.ShowFirebug") : FBL.$STR("firebug.Hide Firebug"))); // xxxHonza localization
+                FBL.$STR("firebug.ShowFirebug") : FBL.$STR("firebug.HideFirebug")));
 
             // If Firebug is detached, hide the menu (F12 doesn't hide but just focuses the
             // external window)

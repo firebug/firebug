@@ -235,7 +235,7 @@ FirebugReps.Table = domplate(Firebug.Rep,
         }
 
         if (typeof(firstRow) != "object")
-            return [{label: "Object Properties"}]; //xxxHonza: localization
+            return [{label: $STR("firebug.reps.table.ObjectProperties")}];
 
         // Put together a column property, label and type (type for default sorting logic).
         var header = [];

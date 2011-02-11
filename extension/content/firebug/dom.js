@@ -141,7 +141,7 @@ const DirTablePlate = domplate(Firebug.Rep,
             return members;
 
         return [{
-            name: "There are no child objects", //xxxHonza localization
+            name: $STR("firebug.dom.noChildren"),
             type: "string",
             rowClass: "memberRow-string",
             tag: Firebug.Rep.tag,

@@ -660,7 +660,8 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
         {
             fbs.setTopLevelHook(Firebug.Debugger, function reportTopLevel(frame)
             {
-                Firebug.Console.logFormatted(["JavaScript entered", frame.script.fileName, frame.line], context, "info");
+                Firebug.Console.logFormatted(["JavaScript entered", frame.script.fileName,
+                    frame.line], context, "info");
             });
         }
     },
@@ -684,7 +685,7 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
                 if (FBTrace.DBG_BP)
                     FBTrace.sysout("debugger.setBreakOnNextCause converted to disabled bp " +
                         sourceFile.href+"@"+lineNo+" tag: "+frame.script.tag, bp);
-    
+
                 Firebug.Debugger.resume(context);
             },
             okAction: function justGo()
@@ -1241,7 +1242,8 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
 
         return RETURN_CONTINUE;
     },
-    /*
+
+    /**
      * for |debugger;| keyword offer the skip/continue dialog (optionally?)
      */
     setDebuggerKeywordCause: function(context, frame)
@@ -1261,7 +1263,7 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
         context.breakingCause =
         {
             title: $STR("debugger keyword"),
-            message: $STR("Disable converts keyword to disabled breakpoint"), //xxxHonza localization
+            message: $STR("firebug.bon.cause.disableDebuggerKeyword"),
             skipAction: function addSkipperAndGo()
             {
                 // a breakpoint that never hits, but prevents debugger keyword (see fbs.onDebugger as well)

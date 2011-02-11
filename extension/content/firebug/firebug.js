@@ -761,8 +761,8 @@ top.Firebug =
         menuItemControllers.push(menuItemController);
     },
 
-    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
-    // Localization
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+    // Localization API
 
     getStringBundle: function()
     {
@@ -776,7 +776,8 @@ top.Firebug =
         if (!this.defaultStringBundle)
         {
             var ioService = Cc["@mozilla.org/network/io-service;1"].getService(Ci.nsIIOService);
-            var chromeRegistry = Cc["@mozilla.org/chrome/chrome-registry;1"].getService(Ci.nsIChromeRegistry);
+            var chromeRegistry = Cc["@mozilla.org/chrome/chrome-registry;1"].
+                getService(Ci.nsIChromeRegistry);
             var bundle = document.getElementById("strings_firebug");
             var uri = ioService.newURI(bundle.src, "UTF-8", null);
             var fileURI = chromeRegistry.convertChromeURL(uri).spec;
@@ -1042,8 +1043,14 @@ top.Firebug =
             if (FBTrace.DBG_ERRORS)
             {
                 var context = Firebug.TabWatcher.getContextByWindow(browser.contentWindow);
-                if (context) // ASSERT: we should not have showFirebug false on a page with a context
-                    FBTrace.sysout("Firebug.toggleBar: placement "+this.getPlacement()+ " context: "+context.getName()+" Firebug.currentContext: "+(Firebug.currentContext?Firebug.currentContext.getName():"null")+" browser.showFirebug:"+browser.showFirebug);
+                if (context)
+                {
+                    // ASSERT: we should not have showFirebug false on a page with a context
+                    FBTrace.sysout("Firebug.toggleBar: placement "+this.getPlacement()+
+                        " context: "+context.getName()+" Firebug.currentContext: "+
+                        (Firebug.currentContext?Firebug.currentContext.getName():"null")+
+                        " browser.showFirebug:"+browser.showFirebug);
+                }
             }
 
             var created = Firebug.TabWatcher.watchBrowser(browser);  // create a context for this page

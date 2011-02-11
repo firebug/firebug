@@ -338,11 +338,11 @@ FirebugReps.Obj = domplate(Firebug.Rep,
             if (count > max)
             {
                 props[Math.max(1,max-1)] = {
-                    object: "more...", //xxxHonza localization
+                    object: $STR("firebug.reps.more") + "...",
                     tag: FirebugReps.Caption.tag,
                     name: "",
-                    equal:"",
-                    delim:""
+                    equal: "",
+                    delim: ""
                 };
             }
             else if (props.length > 0)
@@ -436,7 +436,7 @@ FirebugReps.Arr = domplate(Firebug.Rep,
         if (array.length > max + 1)
         {
             items[max] = {
-                object: (array.length-max) + " more...", //xxxHonza localization
+                object: (array.length-max) + " " + $STR("firebug.reps.more") + "...",
                 tag: FirebugReps.Caption.tag,
                 delim: ""
             };
@@ -2031,7 +2031,7 @@ FirebugReps.Storage = domplate(Firebug.Rep,
 
     summarize: function(storage)
     {
-        return storage.length + " items in Storage "; //xxxHonza localization
+        return $STRP("firebug.storage.totalItems", [storage.length]);
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
@@ -2098,7 +2098,7 @@ FirebugReps.Storage = domplate(Firebug.Rep,
             if (count > max)
             {
                 props[Math.max(1,max-1)] = {
-                    object: "more...", //xxxHonza localization
+                    object: $STR("firebug.reps.more") + "...",
                     tag: FirebugReps.Caption.tag,
                     name: "",
                     equal:"",
@@ -2158,7 +2158,8 @@ FirebugReps.StorageList = domplate(Firebug.Rep,
         {
             var context = Firebug.currentContext;
             var domain = getPrettyDomain(context.window.location.href);
-            return globalStorage.namedItem(domain).length + " items in Global Storage "; //xxxHonza localization
+            var length = globalStorage.namedItem(domain).length;
+            return $STRP("firebug.storage.totalItems", [length]) + " ";
         }
         catch (e)
         {
@@ -2257,7 +2258,7 @@ FirebugReps.XPathResult = domplate(FirebugReps.Arr,
         if (xpathresult.snapshotLength > max + 1)
         {
             items[max] = {
-                object: (xpathresult.snapshotLength-max) + " more...", //xxxHonza localization
+                object: (xpathresult.snapshotLength-max) + " " + $STR("firebug.reps.more") + "...",
                 tag: FirebugReps.Caption.tag,
                 delim: ""
             };
@@ -2425,7 +2426,7 @@ FirebugReps.NamedNodeMap = domplate(Firebug.Rep,
         if (object.length > max)
         {
             props[Math.max(1,max-1)] = {
-                object: (object.length-max) + " more...", //xxxHonza localization
+                object: (object.length-max) + " " + $STR("firebug.reps.more") + "...",
                 tag: FirebugReps.Caption.tag,
                 name: "",
                 equal:"",
