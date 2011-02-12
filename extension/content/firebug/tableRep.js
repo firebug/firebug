@@ -64,13 +64,18 @@ FirebugReps.Table = domplate(Firebug.Rep,
         for (var i=0; i<this.columns.length; i++)
         {
             var prop = this.columns[i].property;
-            var props = (typeof(prop) == "string") ? prop.split(".") : [prop];
+            
+            if (typeof row[prop] === "undefined")
+            {
+                var props = (typeof(prop) == "string") ? prop.split(".") : [prop];
 
-            var value = row;
-            try {
+                var value = row;
                 for (var p in props)
-                    value = value[props[p]];
-            } catch (e) {
+                    value = (value && value[props[p]]) || undefined;
+            }
+            else
+            {
+                value = row[prop];
             }
 
             cols.push(value);
