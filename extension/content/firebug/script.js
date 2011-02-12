@@ -108,13 +108,8 @@ Firebug.ScriptPanel.prototype = extend(Firebug.SourceBoxPanel,
     initialize: function(context, doc)
     {
         this.location = null;
-        Firebug.SourceBoxPanel.initialize.apply(this, arguments);
-    },
-
-    initializeUI: function()
-    {
-        Firebug.Module.initializeUI.apply(this, arguments);
         ToolsInterface.addEventListener("onJavaScriptDebugging", this);
+        Firebug.SourceBoxPanel.initialize.apply(this, arguments);
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
