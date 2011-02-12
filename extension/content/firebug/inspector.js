@@ -36,7 +36,7 @@ Firebug.Inspector = extend(Firebug.Module,
         highlighter = getHighlighter(highlightType);
         usingColorArray = FirebugReps.Arr.isArray(color);
 
-        this.clearAllHighlights(context);
+        this.clearAllHighlights();
 
         if (!elementArr || !FirebugReps.Arr.isArray(elementArr))
         {
@@ -70,32 +70,8 @@ Firebug.Inspector = extend(Firebug.Module,
         }
     },
 
-    clearAllHighlights: function(context) {
-        if (context && context.window && context.window.document)
-        {
-            var i, j, elt, elts, windows;
-            var win = context.window;
-
-            if (win.document.body && win.document.body.localName.toUpperCase() === "FRAMESET")
-                windows = win.frames;
-            else
-                windows = [win];
-
-            for (i = 0; i < windows.length; i++)
-            {
-                elts = windows[i].document.getElementsByClassName("firebugResetStyles");
-
-                for (j = elts.length - 1; j >= 0; j--)
-                {
-                    elt = elts[j];
-                    if(elt)
-                        elt.parentNode.removeChild(elt);
-                }
-            }
-
-            context.frameHighlighter = null;
-            context.boxModelHighlighter = null;
-        }
+    clearAllHighlights: function() {
+        highlighterCache.clear();
     },
 
     highlightObject: function(element, context, highlightType, boxFrame, color)
@@ -121,7 +97,7 @@ Firebug.Inspector = extend(Firebug.Module,
 
         var oldContext = this.highlightedContext;
         if (oldContext && oldContext.window)
-            this.clearAllHighlights(oldContext);
+            this.clearAllHighlights();
 
         this.highlighter = highlighter;
         this.highlightedElement = element;
@@ -179,7 +155,7 @@ Firebug.Inspector = extend(Firebug.Module,
         if (this.inspecting || !context || !context.loaded)
             return;
 
-        this.clearAllHighlights(context);
+        this.clearAllHighlights();
 
         this.inspecting = true;
         this.inspectingContext = context;
@@ -1168,6 +1144,7 @@ Firebug.Inspector.FrameHighlighter.prototype =
             hideElementFromInspection(div);
             div.className = "firebugResetStyles firebugFrameHighlighter";
 
+            highlighterCache.add(div);
             context.frameHighlighter = div;
         }
 
@@ -1343,6 +1320,7 @@ BoxModelHighlighter.prototype =
             {
                 attachStyles(context, body);
                 body.appendChild(nodes.offset);
+                highlighterCache.add(nodes.offset);
             }
 
             if (showLines)
@@ -1350,10 +1328,16 @@ BoxModelHighlighter.prototype =
                 if (!nodes.lines.top.parentNode)
                 {
                     if (nodes.parent)
+                    {
                         body.appendChild(nodes.parent);
+                        highlighterCache.add(nodes.parent);
+                    }
 
                     for (line in nodes.lines)
+                    {
                         body.appendChild(nodes.lines[line]);
+                        highlighterCache.add(nodes.lines[line]);
+                    }
                 }
             }
             else if (nodes.lines.top.parentNode)
@@ -1477,6 +1461,36 @@ BoxModelHighlighter.prototype =
             removeClass(nodes.parent, "overflowRulerY");
     }
 };
+
+// ************************************************************************************************
+
+var highlighterCache = {
+    highlighters: [],
+
+    add: function(node)
+    {
+        this.highlighters.push(node);
+    },
+
+    clear: function()
+    {
+        var i, highlighter;
+
+        for(i = this.highlighters.length - 1; i >= 0; i--)
+        {
+            highlighter = this.highlighters[i];
+
+            if (highlighter && highlighter.parentNode)
+            {
+                highlighter.parentNode.removeChild(highlighter);
+            }
+        }
+
+        this.highlighters = [];
+    }
+};
+
+// ************************************************************************************************
 
 function getNonFrameBody(elt)
 {
