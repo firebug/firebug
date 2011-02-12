@@ -234,9 +234,11 @@
                 {
                     if (panel.browser.parentNode != this.deck)
                         this.deck.appendChild(panel.browser);
-                }
 
-                this.deck.selectedPanel = this.browser;
+                    this.deck.selectedPanel = panel.browser;
+                }
+                else
+                    this.deck.selectedPanel = this.browser;
 
                 this.dispatch("selectPanel");
 

@@ -1367,7 +1367,6 @@ NetPanel.prototype = extend(Firebug.ActivablePanel,
         if (firstPhase.windowLoadTime)
         {
             var loadTime = firstPhase.windowLoadTime - firstPhase.startTime;
-            // xxxHonza: localization?
             timeText += " (onload: " + NetRequestEntry.formatTime(loadTime) + ")";
         }
 

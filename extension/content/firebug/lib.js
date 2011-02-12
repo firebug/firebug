@@ -3808,19 +3808,20 @@ this.cancelEvent = function(event)
     event.preventDefault();
 };
 
-this.isLeftClick = function(event)
+this.isLeftClick = function(event, allowKeyModifiers)
 {
-    return event.button == 0 && this.noKeyModifiers(event);
+    return event.button == 0 && (allowKeyModifiers || this.noKeyModifiers(event));
 };
 
-this.isMiddleClick = function(event)
+this.isMiddleClick = function(event, allowKeyModifiers)
 {
-    return event.button == 1 && this.noKeyModifiers(event);
+    return event.button == 1 && (allowKeyModifiers || this.noKeyModifiers(event));
 };
 
-this.isRightClick = function(event)
+this.isRightClick = function(event, allowKeyModifiers)
 {
-    return event.button == 2 && this.noKeyModifiers(event);
+    
+    return event.button == 2 && (allowKeyModifiers || this.noKeyModifiers(event));
 };
 
 this.noKeyModifiers = function(event)
@@ -4999,9 +5000,10 @@ this.persistObjects = function(panel, panelState)
 
     if (panel.selection)
         panelState.persistedSelection = this.persistObject(panel.selection, panel.context);
-    if (FBTrace.DBG_INITIALIZE)
-        FBTrace.sysout("lib.persistObjects "+panel.name+" panel.location:"+panel.location+" panel.selection:"+panel.selection+" panelState:", panelState);
 
+    if (FBTrace.DBG_INITIALIZE)
+        FBTrace.sysout("lib.persistObjects "+panel.name+" panel.location:"+panel.location+
+            " panel.selection:"+panel.selection+" panelState:", panelState);
 };
 
 this.persistObject = function(object, context)
@@ -5019,7 +5021,8 @@ this.restoreLocation =  function(panel, panelState)
         var location = panelState.persistedLocation(panel.context);
 
         if (FBTrace.DBG_INITIALIZE)
-            FBTrace.sysout("lib.restoreObjects "+panel.name+" persistedLocation: "+location+" panelState:", panelState);
+            FBTrace.sysout("lib.restoreObjects "+panel.name+" persistedLocation: "+location+
+                " panelState:", panelState);
 
         if (location)
         {
@@ -5032,7 +5035,8 @@ this.restoreLocation =  function(panel, panelState)
         panel.navigate(null);
 
     if (FBTrace.DBG_INITIALIZE)
-        FBTrace.sysout("lib.restoreLocation panel.location: "+panel.location+" restored: "+restored+" panelState:", panelState);
+        FBTrace.sysout("lib.restoreLocation panel.location: "+panel.location+" restored: "+
+            restored+" panelState:", panelState);
 
     return restored;
 };
@@ -5065,15 +5069,19 @@ this.restoreSelection = function(panel, panelState)
             }
 
             if (FBTrace.DBG_INITIALIZE)
-                FBTrace.sysout("lib.overrideDefaultsWithPersistedValues "+panel.name+" panel.location: "+panel.location+" panel.selection: "+panel.selection+" panelState:", panelState);
+                FBTrace.sysout("lib.overrideDefaultsWithPersistedValues "+panel.name+
+                    " panel.location: "+panel.location+" panel.selection: "+panel.selection+
+                    " panelState:", panelState);
         }
 
         // If we couldn't restore the selection, wait a bit and try again
-        panel.context.setTimeout(overrideDefaultWithPersistedSelection, overrideDefaultsWithPersistedValuesTimeout);
+        panel.context.setTimeout(overrideDefaultWithPersistedSelection,
+            overrideDefaultsWithPersistedValuesTimeout);
     }
 
     if (FBTrace.DBG_INITIALIZE)
-        FBTrace.sysout("lib.restore "+panel.name+" needRetry "+needRetry+" panel.selection: "+panel.selection+" panelState:", panelState);
+        FBTrace.sysout("lib.restore "+panel.name+" needRetry "+needRetry+" panel.selection: "+
+            panel.selection+" panelState:", panelState);
 };
 
 this.restoreObjects = function(panel, panelState)
