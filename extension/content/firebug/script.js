@@ -119,13 +119,8 @@ Firebug.ScriptPanel.prototype = extend(Firebug.SourceBoxPanel,
     initialize: function(context, doc)
     {
         this.location = null;
-        Firebug.SourceBoxPanel.initialize.apply(this, arguments);
-    },
-
-    initializeUI: function()
-    {
-        Firebug.Module.initializeUI.apply(this, arguments);
         Firebug.JavaScriptModule.addListener(this);
+        Firebug.SourceBoxPanel.initialize.apply(this, arguments);
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
@@ -476,7 +471,7 @@ Firebug.ScriptPanel.prototype = extend(Firebug.SourceBoxPanel,
             state.previousCenterLine = sourceBox.centerLine;
             delete this.selectedSourceBox;
         }
-
+        Firebug.JavaScriptModule.removeListener(this);
         Firebug.SourceBoxPanel.destroy.apply(this, arguments);
     },
 
