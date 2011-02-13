@@ -15,6 +15,8 @@ const nsILocalFile = Ci.nsILocalFile;
 const nsISafeOutputStream = Ci.nsISafeOutputStream;
 const nsIURI = Ci.nsIURI;
 
+const prefDomain = "extensions.firebug";
+
 var editors = [];
 var externalEditors = [];
 var temporaryFiles = [];
@@ -71,7 +73,7 @@ Firebug.ExternalEditors = extend(Firebug.Module,
         const editorPrefNames = ["label", "executable", "cmdline", "image"];
 
         externalEditors = [];
-        var list = Firebug.getPref(Firebug.prefDomain, prefName).split(",");
+        var list = Firebug.getPref(prefDomain, prefName).split(",");
         for (var i = 0; i < list.length; ++i)
         {
             var editorId = list[i];
@@ -83,7 +85,7 @@ Firebug.ExternalEditors = extend(Firebug.Module,
             {
                 try
                 {
-                    item[editorPrefNames[j]] = Firebug.getPref(Firebug.prefDomain, prefName+"."+
+                    item[editorPrefNames[j]] = Firebug.getPref(prefDomain, prefName+"."+
                         editorId+"."+editorPrefNames[j]);
                 }
                 catch(exc)
@@ -143,7 +145,7 @@ Firebug.ExternalEditors = extend(Firebug.Module,
     {
         var args = {
             FBL: FBL,
-            prefName: Firebug.prefDomain + ".externalEditors"
+            prefName: prefDomain + ".externalEditors"
         };
 
         openWindow("Firebug:ExternalEditors", "chrome://firebug/content/external/editors.xul",
@@ -168,13 +170,30 @@ Firebug.ExternalEditors = extend(Firebug.Module,
                 this.appendContextMenuItem(popup, sourceLink.href,
                     sourceLink.line);
         }
+        else if (hasClass(target, "stackFrameLink"))
+            this.appendContextMenuItem(popup, target.innerHTML, target.getAttribute("lineNumber"));
+    },
+
+    createContextMenuItem: function(doc){
+        var item = doc.createElement('menu');
+        item.setAttribute('type', "splitmenu");
+        item.setAttribute('iconic', "true");
+        item.setAttribute('oncommand', "Firebug.ExternalEditors.onContextMenuCommand(event)");
+        var menupopup = doc.createElement('menupopup');
+        menupopup.setAttribute('onpopupshowing', "return Firebug.ExternalEditors.onEditorsShowing(this)");
+        item.appendChild(menupopup);
+        return item;
     },
 
     appendContextMenuItem: function(popup, url, line)
     {
         var editor = this.getDefaultEditor();
-
-        var item = FBL.$('menu_firebugOpenWithEditor').cloneNode(true);
+        var doc = popup.ownerDocument;
+        var item = FBL.$('menu_firebugOpenWithEditor', doc);
+        if (item)
+            item = item.cloneNode(true);
+        else
+            item = this.createContextMenuItem(doc);
         item.setAttribute('image', editor.image);
         item.setAttribute('label', editor.label);
         item.value = editor.id;

@@ -346,7 +346,6 @@ menuitem.split-menuitem-item[_moz-menuactive="true"], .split-menu-right-image[_m
 
 menu[type=splitmenu] {
     -moz-binding: url("chrome://firebug/content/bindings.xml#splitmenu");
-    display: -moz-box;
     -moz-box-orient: horizontal;
     -moz-appearance: none !important;
     color: menutext;
