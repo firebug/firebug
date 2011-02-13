@@ -326,15 +326,13 @@ Firebug.Inspector = extend(Firebug.Module,
         }
         else
         {
-            if (highlighter && highlighter.getNodes)
-            {
-                var nodes = highlighter.getNodes(context);
-                if (nodes)
-                    isBoxHighlighter = nodes.offset.parentNode;
-            }
+            isBoxHighlighter = highlighter && highlighter.getNodes;
 
             if (win && highlighter && (isBoxHighlighter || (this.inspecting && !isBoxHighlighter)))
+            {
+                this.clearAllHighlights();
                 highlighter.highlight(context, element, boxFrame, colorObj);
+            }
         }
     },
 
@@ -1028,7 +1026,7 @@ Firebug.Inspector.FrameHighlighter.prototype =
         if (typeof colorObj === "string")
             colorObj = {background: "transparent", border: colorObj};
         else
-            colorObj = colorObj || {background: "transparent", border: "#004bc7"};
+            colorObj = colorObj || {background: "transparent", border: "highlight"};
 
         Firebug.Inspector.attachRepaintInspectListeners(context);
         storeHighlighterParams(this, context, element, null, colorObj, null);
@@ -1062,7 +1060,7 @@ Firebug.Inspector.FrameHighlighter.prototype =
 
             quickInfoBox.show(element);
             var highlighter = this.getHighlighter(context, element);
-
+            var bgDiv = highlighter.firstChild;
             var css = moveImp(null, x, y) + resizeImp(null, w, h);
 
             cs = body.ownerDocument.defaultView.getComputedStyle(element, null);
@@ -1094,12 +1092,12 @@ Firebug.Inspector.FrameHighlighter.prototype =
             if(colorObj && colorObj.border)
                 css += "box-shadow: 0 0 2px 2px " + colorObj.border + " !important; -moz-box-shadow: 0 0 2px 2px " + colorObj.border + " !important;";
             else
-                css += "box-shadow: 0 0 2px 2px #3875d7 !important; -moz-box-shadow: 0 0 2px 2px #004bc7 !important;";
+                css += "box-shadow: 0 0 2px 2px highlight !important; -moz-box-shadow: 0 0 2px 2px highlight !important;";
 
             if(colorObj && colorObj.background)
-                css += "background-color: " + colorObj.background + " !important; opacity: 0.6 !important;";
+                bgDiv.style.cssText = "width: 100%; height: 100%; background-color: " + colorObj.background + " !important; opacity: 0.6 !important;";
             else
-                css += "background-color: transparent !important; opacity: 1 !important;";
+                bgDiv.style.cssText = "background-color: transparent !important;";
 
             highlighter.style.cssText = css;
 
@@ -1157,10 +1155,16 @@ Firebug.Inspector.FrameHighlighter.prototype =
     {
         var doc = context.window.document;
         var div = doc.createElementNS("http://www.w3.org/1999/xhtml", "div");
+        var div2 = doc.createElementNS("http://www.w3.org/1999/xhtml", "div");
 
         hideElementFromInspection(div);
-        div.className = "firebugResetStyles firebugFrameHighlighter";
+        hideElementFromInspection(div2);
 
+        // the firebugFrameHighlighter class name is no longer needed but
+        // let's keep it for debugging purposes
+        div.className = "firebugResetStyles firebugFrameHighlighter";
+        div2.className = "firebugResetStyles";
+        div.appendChild(div2);
         highlighterCache.add(div);
 
         return div;
