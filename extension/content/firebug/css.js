@@ -1757,19 +1757,19 @@ CSSComputedElementPanel.prototype = extend(CSSElementPanel.prototype,
     template: domplate(
     {
         computedTag:
-            DIV({"class": "a11yCSSView", role: "list", "aria-label" : $STR('aria.labels.computed styles')},
+            DIV({"class": "a11yCSSView", role: "list", "aria-label" : $STR("aria.labels.computed styles")},
                 FOR("group", "$groups",
-                    DIV({"class": "computedStylesGroup opened", role: "list"},
+                    DIV({"class": "computedStylesGroup", $opened: "$group.opened", role: "list"},
                         H1({"class": "cssComputedHeader groupHeader focusRow", role: "listitem"},
                             IMG({"class": "twisty", role: "presentation"}),
                             SPAN({"class": "cssComputedLabel"}, "$group.title")
                         ),
                         TABLE({width: "100%", role: 'group'},
-                            TBODY({role: 'presentation'},
+                            TBODY({role: "presentation"},
                                 FOR("prop", "$group.props",
-                                    TR({"class": 'focusRow computedStyleRow', role: 'listitem'},
-                                        TD({"class": "stylePropName", role: 'presentation'}, "$prop.name"),
-                                        TD({"class": "stylePropValue", role: 'presentation'}, "$prop.value")
+                                    TR({"class": "focusRow computedStyleRow", role: "listitem"},
+                                        TD({"class": "stylePropName", role: "presentation"}, "$prop.name"),
+                                        TD({"class": "stylePropValue", role: "presentation"}, "$prop.value")
                                     )
                                 )
                             )
@@ -1802,6 +1802,7 @@ CSSComputedElementPanel.prototype = extend(CSSElementPanel.prototype,
                 if (propValue)
                     group.props.push({name: propName, value: propValue});
             }
+            group.opened = this.groupOpened[title];
         }
 
         var result = this.template.computedTag.replace({groups: groups}, this.panelNode);
@@ -1818,6 +1819,13 @@ CSSComputedElementPanel.prototype = extend(CSSElementPanel.prototype,
     initialize: function()
     {
         Firebug.CSSStyleSheetPanel.prototype.initialize.apply(this, arguments);
+
+        this.groupOpened = [];
+        for (var groupName in styleGroups)
+        {
+            var title = $STR("StyleGroup-" + groupName);
+            this.groupOpened[title] = true;
+        }
 
         this.onMouseDown = bind(this.onMouseDown, this);
     },
@@ -1847,8 +1855,10 @@ CSSComputedElementPanel.prototype = extend(CSSElementPanel.prototype,
     toggleNode: function(event)
     {
         var group = getAncestorByClass(event.target, "computedStylesGroup");
+        var groupName = group.getElementsByClassName("cssComputedLabel")[0].textContent;
 
         toggleClass(group, "opened");
+        this.groupOpened[groupName] = hasClass(group, "opened");
     }
 });
 
