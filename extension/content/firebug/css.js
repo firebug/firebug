@@ -429,7 +429,22 @@ Firebug.CSSStyleSheetPanel.prototype = extend(Firebug.SourceBoxPanel,
             this.stylesheetEditor.styleSheet = this.location;
             Firebug.Editor.startEditing(this.panelNode, css, this.stylesheetEditor);
             //this.stylesheetEditor.scrollToLine(topmost.line, topmost.offset);
+            this.stylesheetEditor.input.scrollTop = this.panelNode.scrollTop;
         }
+    },
+
+    loadOriginalSource: function()
+    {
+        if (!this.location)
+            return;
+
+        var styleSheet = this.location;
+
+        var css = getOriginalStyleSheetCSS(styleSheet, this.context);
+
+        this.stylesheetEditor.setValue(css);
+        this.stylesheetEditor.saveEdit(null, css);
+        //styleSheet.editStyleSheet.showUnformated = true;
     },
 
     getStylesheetURL: function(rule)
@@ -470,11 +485,7 @@ Firebug.CSSStyleSheetPanel.prototype = extend(Firebug.SourceBoxPanel,
 
     getStyleSheetRules: function(context, styleSheet)
     {
-        // Skip all stylesheets marked as 'firebugIgnore', but don't skip the
-        // default stylesheet that is used in case there is no other stylesheet
-        // on the page.
-        var unwrapped = styleSheet ? unwrapObject(styleSheet.ownerNode) : null;
-        if (!styleSheet || unwrapped && unwrapped.firebugIgnore && !unwrapped.defaultStylesheet)
+        if (!styleSheet)
             return [];
 
         var isSystemSheet = isSystemStyleSheet(styleSheet);
@@ -898,11 +909,20 @@ Firebug.CSSStyleSheetPanel.prototype = extend(Firebug.SourceBoxPanel,
         if (FBTrace.DBG_CSS)
             FBTrace.sysout("css.updateLocation; " + (styleSheet ? styleSheet.href : "no stylesheet"));
 
-        if (styleSheet && styleSheet.editStyleSheet)
-            styleSheet = styleSheet.editStyleSheet.sheet;
+        // Skip all stylesheets marked as 'firebugIgnore', but don't skip the
+        // default stylesheet that is used in case there is no other stylesheet
+        // on the page.
+        var unwrapped = styleSheet ? unwrapObject(styleSheet.ownerNode) : null;
+        if (!styleSheet || unwrapped && unwrapped.firebugIgnore && !unwrapped.defaultStylesheet)
+            var rules = [];
+        else
+        {
+            if (styleSheet.editStyleSheet)
+                styleSheet = styleSheet.editStyleSheet.sheet;
+            var rules = this.getStyleSheetRules(this.context, styleSheet);
+        }
 
-        var rules = this.getStyleSheetRules(this.context, styleSheet);
-        if (rules && rules.length)
+        if (rules.length)
         {
             this.template.tag.replace({rules: rules}, this.panelNode);
         }
@@ -1012,6 +1032,17 @@ Firebug.CSSStyleSheetPanel.prototype = extend(Firebug.SourceBoxPanel,
     getContextMenuItems: function(style, target)
     {
         var items = [];
+
+        if (target.nodeName == "TEXTAREA")
+        {
+            items = Firebug.BaseEditor.getContextMenuItems();
+            items.push(
+                '-',
+                {label: "Load Original Source",
+                    command: bindFixed(this.loadOriginalSource, this) }
+            );
+            return items;
+        }
 
         if (hasClass(target, "cssSelector"))
         {
@@ -2295,12 +2326,35 @@ function getTopmostRuleLine(panelNode)
     return 0;
 }
 
-function getStyleSheetCSS(sheet, context)
+function getOriginalStyleSheetCSS(sheet, context)
 {
     if (sheet.ownerNode instanceof HTMLStyleElement)
         return sheet.ownerNode.innerHTML;
     else
         return context.sourceCache.load(sheet.href).join("");
+}
+
+function getStyleSheetCSS(sheet, context)
+{
+    function beutify(css, indent) {
+        var indent='\n'+Array(indent+1).join(' ');
+        var i=css.indexOf('{');
+        var match=css.substr(i+1).match(/(?:[^;\(]*(?:\([^\)]*?\))?[^;\(]*)*;?/g);
+        match.pop();
+        match.pop();
+        return css.substring(0, i+1) + indent
+                + match.sort().join(indent) + '\n}';
+    }
+    var cssRules = sheet.cssRules, css=[];
+    for(var i = 0; i < cssRules.length; i++){
+        var rule = cssRules[i];
+        if(rule instanceof CSSStyleRule)
+            css.push(beutify(rule.cssText, 4));
+        else
+            css.push(rule.cssText);
+    }
+
+    return css.join('\n\n') + '\n';
 }
 
 function getStyleSheetOwnerNode(sheet)
