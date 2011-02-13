@@ -815,8 +815,7 @@ Firebug.Breakpoint.BreakNotification.prototype = domplate(Firebug.InlineEditor.p
             DIV({"class": "notationCaption"},
                 INPUT({"class": "doNotShowBreakNotification", type: "checkbox",
                     change: "$onShowBreakNotificationChanged"},
-                    // xxxHonza localization
-                    "Do not display break notifications (you can enable it again in the panel's tab menu)"
+                    $STR("firebug.breakpoint.doNotShowBreakNotification")
                 )
             )
         ),

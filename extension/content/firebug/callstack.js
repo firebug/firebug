@@ -51,14 +51,7 @@ Firebug.CallstackPanel.prototype = extend(Firebug.Panel,
                 for (var i = 0; i < frameElts.length; i++)
                 {
                     if (state.callstackToggles[i])
-                    {
-                        var object = Firebug.getRepObject(frameElts[i]);
-                        if(object)
-                        {
-                             var rep = Firebug.getRep(object, Firebug.currentContext);
-                             rep.expandArguments(frameElts[i]);
-                        }
-                    }
+                        FirebugReps.StackFrame.expandArguments(frameElts[i]);
                 }
             }
             if (state.selectedCallStackFrameIndex)

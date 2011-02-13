@@ -768,8 +768,8 @@ top.Firebug =
         menuItemControllers.push(menuItemController);
     },
 
-    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
-    // Localization
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+    // Localization API
 
     getStringBundle: function()
     {
@@ -783,7 +783,8 @@ top.Firebug =
         if (!this.defaultStringBundle)
         {
             var ioService = Cc["@mozilla.org/network/io-service;1"].getService(Ci.nsIIOService);
-            var chromeRegistry = Cc["@mozilla.org/chrome/chrome-registry;1"].getService(Ci.nsIChromeRegistry);
+            var chromeRegistry = Cc["@mozilla.org/chrome/chrome-registry;1"].
+                getService(Ci.nsIChromeRegistry);
             var bundle = document.getElementById("strings_firebug");
             var uri = ioService.newURI(bundle.src, "UTF-8", null);
             var fileURI = chromeRegistry.convertChromeURL(uri).spec;
@@ -1049,8 +1050,14 @@ top.Firebug =
             if (FBTrace.DBG_ERRORS)
             {
                 var context = Firebug.TabWatcher.getContextByWindow(browser.contentWindow);
-                if (context) // ASSERT: we should not have showFirebug false on a page with a context
-                    FBTrace.sysout("Firebug.toggleBar: placement "+this.getPlacement()+ " context: "+context.getName()+" Firebug.currentContext: "+(Firebug.currentContext?Firebug.currentContext.getName():"null")+" browser.showFirebug:"+browser.showFirebug);
+                if (context)
+                {
+                    // ASSERT: we should not have showFirebug false on a page with a context
+                    FBTrace.sysout("Firebug.toggleBar: placement "+this.getPlacement()+
+                        " context: "+context.getName()+" Firebug.currentContext: "+
+                        (Firebug.currentContext?Firebug.currentContext.getName():"null")+
+                        " browser.showFirebug:"+browser.showFirebug);
+                }
             }
 
             var created = Firebug.TabWatcher.watchBrowser(browser);  // create a context for this page
@@ -2069,8 +2076,6 @@ Firebug.Panel = extend(new Firebug.Listener(),
     enableA11y: false,    // true if the panel wants to participate in A11y accessibility support.
     deriveA11yFrom: null, // Name of the panel that uses the same a11y logic.
     inspectable: false,   // true to support inspecting elements inside this panel
-    inspectOnlySupportedObjects: true, //when true the inspector won't display objects not supported by the current panel
-                                       //when false, the inspector will select the best suitable panel to display objects being inspected.
 
     initialize: function(context, doc)
     {
@@ -2323,17 +2328,60 @@ Firebug.Panel = extend(new Firebug.Listener(),
         }
     },
 
-    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+    // Inspector
 
+    /**
+     * Called by the framework when the user starts inspecting. Inspecting must be enabled
+     * for the panel (panel.inspectable == true)
+     */
     startInspecting: function()
     {
     },
 
-    stopInspecting: function(object, cancelled)
+    /**
+     * Called by the framework when inspecting is in progress and the user moves mouse over
+     * a new page element. Inspecting must be enabled for the panel (panel.inspectable == true).
+     * This method is called in a timeout to avoid performance penalties when the user moves
+     * the mouse over the page elements too fast.
+     * @param {Element} node The page element beeing inspected
+     * @returns {Boolean} Returns true if the node should be selected within the panel using
+     *      the default panel selection mechanism (i.e. by calling panel.select(node) method).
+     */
+    inspectNode: function(node)
+    {
+        return true;
+    },
+
+    /**
+     * Called by the framework when the user stops inspecting. Inspecting must be enabled
+     * for the panel (panel.inspectable == true)
+     * @param {Element} node The last page element inspected
+     * @param {Boolean} canceled Set to true if inspecing has been canceled
+     *          by pressing the escape key.
+     */
+    stopInspecting: function(node, canceled)
     {
     },
 
-    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+    /**
+     * Called by the framework when inspecting is in progress. Allows to inspect
+     * only nodes that are supported by the panel. Derived panels can provide effective
+     * algorithms to provide these nodes.
+     * @param {Element} node Currently inspected page element.
+     */
+    getInspectNode: function(node)
+    {
+        while (node)
+        {
+            if (this.supportsObject(node, typeof node))
+                return node;
+            node = node.parentNode;
+        }
+        return null;
+    },
+
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
     search: function(text, reverse)
     {

@@ -22,8 +22,65 @@ Firebug.Inspector = extend(Firebug.Module,
     inspecting: false,
     inspectingPanel: null,
 
-    highlightObject: function(element, context, highlightType, boxFrame)
+    /**
+     * @param elementArr Elements to highlight
+     * @param context Context of the elements to be highlighted
+     * @param highlightType (optional) Either "frame" or "boxModel", default is frame.
+     * @param color (optional) any valid html color e.g. red, #f00, #ff0000, etc. Only applies to the frame highlighter.
+     */
+    multiHighlight: function(elementArr, context, highlightType, color)
     {
+        var i, elt, elementLen, highlighter, usingColorArray;
+
+        highlightType = highlightType || "frame";
+        highlighter = getHighlighter(highlightType);
+        usingColorArray = FirebugReps.Arr.isArray(color);
+
+        this.clearAllHighlights();
+
+        if (!elementArr || !FirebugReps.Arr.isArray(elementArr))
+        {
+            this.highlightObject(elementArr, context, highlightType, null, color);
+        }
+        else
+        {
+            if (context && context.window && context.window.document)
+            {
+                for (i = 0, elementLen = elementArr.length; i < elementLen; i++)
+                {
+                    if(highlightType ==="frame")
+                        context.frameHighlighter = null;
+                    else
+                        context.boxModelHighlighter = null;
+
+                    elt = elementArr[i];
+
+                    if (elt)
+                    {
+                        if(elt.nodeType === 3)
+                            elt = elt.parentNode;
+
+                        if (usingColorArray)
+                            highlighter.highlight(context, elt, null, color[i]);
+                        else
+                            highlighter.highlight(context, elt, null, color);
+                    }
+                }
+            }
+        }
+
+        storeHighlighterParams(null, context, elementArr, null, color, highlightType);
+    },
+
+    clearAllHighlights: function() {
+        highlighterCache.clear();
+    },
+
+    highlightObject: function(element, context, highlightType, boxFrame, color)
+    {
+        if (FirebugReps.Arr.isArray(element))
+            return this.multiHighlight(element, context, highlightType, color);
+
         if (!element || !isElement(element) || !isVisible(unwrapObject(element)))
         {
             if(element && element.nodeType == 3)
@@ -41,11 +98,8 @@ Firebug.Inspector = extend(Firebug.Module,
         var highlighter = highlightType ? getHighlighter(highlightType) : this.defaultHighlighter;
 
         var oldContext = this.highlightedContext;
-        if (oldContext && highlighter != this.highlighter)
-        {
-            if (oldContext.window)
-                this.highlighter.unhighlight(oldContext);
-        }
+        if (oldContext && oldContext.window)
+            this.clearAllHighlights();
 
         this.highlighter = highlighter;
         this.highlightedElement = element;
@@ -56,7 +110,7 @@ Firebug.Inspector = extend(Firebug.Module,
             if(!isVisibleElement(element))
                 highlighter.unhighlight(context);
             else if (context && context.window && context.window.document)
-                highlighter.highlight(context, element, boxFrame);
+                highlighter.highlight(context, element, boxFrame, color);
         }
         else if (oldContext)
         {
@@ -83,10 +137,27 @@ Firebug.Inspector = extend(Firebug.Module,
             this.startInspecting(context);
     },
 
+    onPanelChanged: function(event)
+    {
+        if (this.inspecting)
+        {
+            var panelBar1 = $("fbPanelBar1");
+            panel = panelBar1.selectedPanel;
+
+            if (panel && panel.inspectable)
+            {
+                this.inspectNode(null);
+                this.inspectingPanel = panel;
+            }
+        }
+    },
+
     startInspecting: function(context)
     {
         if (this.inspecting || !context || !context.loaded)
             return;
+
+        this.clearAllHighlights();
 
         this.inspecting = true;
         this.inspectingContext = context;
@@ -104,6 +175,8 @@ Firebug.Inspector = extend(Firebug.Module,
 
         this.inspectingPanel.panelNode.focus();
         this.inspectingPanel.startInspecting();
+
+        dispatch(this.fbListeners, "onStartInspecting", [context]);
 
         if (context.stopped)
             Firebug.Debugger.thaw(context);
@@ -131,36 +204,29 @@ Firebug.Inspector = extend(Firebug.Module,
         if (node && node.fbProxyFor)
             node = node.fbProxyFor;
 
+        var inspectingPanel = this.inspectingPanel;
+
+        // Some panels may want to only allow inspection of panel-supported objects
+        node = inspectingPanel ? inspectingPanel.getInspectNode(node) : node;
+
+        var highlightColor = inspectingPanel ? inspectingPanel.inspectHighlightColor : "";
+        this.highlightObject(node, context, "frame", undefined, highlightColor);
+
+        this.inspectingNode = node;
+
         if (node)
         {
-            //some panels may want to only allow inspection of panel-supported objects
-            var panel = this.inspectingPanel;
-            while (node)
+            this.inspectTimeout = context.setTimeout(function()
             {
-                var only = panel.inspectOnlySupportedObjects;
-                if (!only || (only && panel.supportsObject(node, typeof node)))
-                {
-                    this.highlightObject(node, context, "frame");
-                    this.inspectingNode = node;
-
-                    this.inspectTimeout = context.setTimeout(function()
-                    {
-                        Firebug.chrome.select(node);
-                    }, inspectDelay);
-
-                    dispatch(this.fbListeners, "onInspectNode", [context, node]);
-                    return;
-                }
-                node = node.parentNode;
-            }
+                var selection = inspectingPanel.inspectNode(node);
+                dispatch(self.fbListeners, "onInspectNode", [context, node]);
+                if (selection)
+                    inspectingPanel.select(node);
+            }, inspectDelay);
         }
-
-        // node will be undefined
-        this.highlightObject(node, context, "frame");
-        this.inspectingNode = node;
     },
 
-    stopInspecting: function(cancelled, waitForClick)
+    stopInspecting: function(canceled, waitForClick)
     {
         if (!this.inspecting)
             return;
@@ -184,11 +250,10 @@ Firebug.Inspector = extend(Firebug.Module,
 
         this.inspecting = false;
 
-        var panel = Firebug.chrome.unswitchToPanel(context, this.inspectingPanel.name, cancelled);
+        Firebug.chrome.unswitchToPanel(context, this.inspectingPanel.name, canceled);
 
-        panel.stopInspecting(panel.selection, cancelled);
-
-        dispatch(this.fbListeners, "onStopInspecting", [context]);
+        this.inspectingPanel.stopInspecting(this.inspectingNode, canceled);
+        dispatch(this.fbListeners, "onStopInspecting", [context, this.inspectingNode, canceled]);
 
         this.inspectNode(null);
     },
@@ -208,12 +273,14 @@ Firebug.Inspector = extend(Firebug.Module,
     inspectFromContextMenu: function(elt)
     {
         var panel, inspectingPanelName;
-        var context = this.inspectingContext || Firebug.TabWatcher.getContextByWindow(elt.ownerDocument.defaultView);
+        var context = this.inspectingContext ||
+            Firebug.TabWatcher.getContextByWindow(elt.ownerDocument.defaultView);
 
-        inspectingPanelName = this._resolveInspectingPanelName(context);
+        inspectingPanelName = "html";
 
         Firebug.toggleBar(true, inspectingPanelName);
         Firebug.chrome.select(elt, inspectingPanelName);
+
         panel = Firebug.chrome.selectPanel(inspectingPanelName);
         panel.panelNode.focus();
     },
@@ -253,20 +320,45 @@ Firebug.Inspector = extend(Firebug.Module,
         var win = context && context.window;
         var element = rp.element;
         var boxFrame = rp.boxFrame;
+        var colorObj = rp.colorObj;
         var isBoxHighlighter = false;
+        var highlightType = rp.highlightType;
 
-        if (highlighter && highlighter.getNodes)
+        if (highlightType)
         {
-            var nodes = highlighter.getNodes(context);
-            if (nodes)
-                isBoxHighlighter = nodes.offset.parentNode;
+            // highlightType is only used for multiHighlighter
+            this.multiHighlight(element, context, highlightType, colorObj);
         }
+        else
+        {
+            if (highlighter && highlighter.getNodes)
+            {
+                var nodes = highlighter.getNodes(context);
+                if (nodes)
+                    isBoxHighlighter = nodes.offset.parentNode;
+            }
 
-        if (win && highlighter && (isBoxHighlighter || (this.inspecting && !isBoxHighlighter)))
-            highlighter.highlight(context, element, boxFrame);
+            if (win && highlighter && (isBoxHighlighter || (this.inspecting && !isBoxHighlighter)))
+                highlighter.highlight(context, element, boxFrame, colorObj);
+        }
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+
+    attachRepaintInspectListeners: function(context)
+    {
+        var win = context.window;
+        if (!win || !win.document)
+            return;
+
+        if (FBTrace.DBG_INSPECT)
+            FBTrace.sysout("inspector.attachRepaintInspectListeners to " + win.location);
+
+        // there is no way to check if the listeners have already been added and we should avoid adding properties
+        // to the users page. Adding them again will do no harm so lets just do that.
+        win.document.addEventListener("resize", this.onInspectingResizeWindow, true);
+        win.document.addEventListener("scroll", this.onInspectingScroll, true);
+    },
 
     attachInspectListeners: function(context)
     {
@@ -275,7 +367,7 @@ Firebug.Inspector = extend(Firebug.Module,
             return;
 
         if (FBTrace.DBG_INSPECT)
-            FBTrace.sysout("inspector.attacheInspectListeners to alls subWindows of "+win.location);
+            FBTrace.sysout("inspector.attachInspectListeners to all subWindows of " + win.location);
 
         var chrome = Firebug.chrome;
 
@@ -290,11 +382,9 @@ Firebug.Inspector = extend(Firebug.Module,
         iterateWindows(win, bind(function(subWin)
         {
             if (FBTrace.DBG_INSPECT)
-                FBTrace.sysout("inspector.attacheInspectListeners to "+subWin.location+
-                    " subWindow of "+win.location);
+                FBTrace.sysout("inspector.attacheInspectListeners to " + subWin.location +
+                    " subWindow of " + win.location);
 
-            subWin.document.addEventListener("resize", this.onInspectingResizeWindow, true);
-            subWin.document.addEventListener("scroll", this.onInspectingScroll, true);
             subWin.document.addEventListener("mouseover", this.onInspectingMouseOver, true);
             subWin.document.addEventListener("mousedown", this.onInspectingMouseDown, true);
             subWin.document.addEventListener("mouseup", this.onInspectingMouseUp, true);
@@ -322,7 +412,6 @@ Firebug.Inspector = extend(Firebug.Module,
 
         iterateWindows(win, bind(function(subWin)
         {
-            // we don't remove the scroll event listener because we need it outside of inspect mode
             subWin.document.removeEventListener("mouseover", this.onInspectingMouseOver, true);
             subWin.document.removeEventListener("mousedown", this.onInspectingMouseDown, true);
             subWin.document.removeEventListener("mouseup", this.onInspectingMouseUp, true);
@@ -421,9 +510,13 @@ Firebug.Inspector = extend(Firebug.Module,
         this.onInspectingMouseDown = bind(this.onInspectingMouseDown, this);
         this.onInspectingMouseUp = bind(this.onInspectingMouseUp, this);
         this.onInspectingClick = bind(this.onInspectingClick, this);
+        this.onPanelChanged = bind(this.onPanelChanged, this);
 
         this.updateOption("shadeBoxModel", Firebug.shadeBoxModel);
         this.updateOption("showQuickInfoBox", Firebug.showQuickInfoBox);
+
+        var panelBar1 = $("fbPanelBar1");
+        panelBar1.addEventListener("selectPanel", this.onPanelChanged, false);
     },
 
     initContext: function(context)
@@ -605,7 +698,7 @@ function getImageMapHighlighter(context)
             canvas = doc.createElementNS("http://www.w3.org/1999/xhtml", "canvas");
             hideElementFromInspection(canvas);
             canvas.id = "firebugCanvas";
-            canvas.className = "firebugResetStyles firebugCanvas";
+            canvas.className = "firebugResetStyles firebugBlockBackgroundColor firebugCanvas";
             canvas.width = context.window.innerWidth;
             canvas.height = context.window.innerHeight;
             context.window.addEventListener("scroll", function(){
@@ -931,12 +1024,19 @@ Firebug.Inspector.FrameHighlighter.prototype =
         return false; // (element instanceof XULElement);
     },
 
-    highlight: function(context, element)
+    highlight: function(context, element, extra, colorObj)
     {
-        storeHighlighterParams(this, context, element, null);
-
         if (this.doNotHighlight(element))
             return;
+
+        // if a single color was passed in lets use it as the border color
+        if (typeof colorObj === "string")
+            colorObj = {background: "transparent", border: colorObj};
+        else
+            colorObj = colorObj || {background: "transparent", border: "#004bc7"};
+
+        Firebug.Inspector.attachRepaintInspectListeners(context);
+        storeHighlighterParams(this, context, element, null, colorObj, null);
 
         var cs;
         var offset = getLTRBWH(element);
@@ -950,7 +1050,7 @@ Firebug.Inspector.FrameHighlighter.prototype =
         if (wacked)
         {
             if (FBTrace.DBG_INSPECT)
-                FBTrace.sysout("FrameHighlighter.highlight has bad boxObject for "+ element.tagName);
+                FBTrace.sysout("FrameHighlighter.highlight has bad boxObject for " + element.tagName);
 
             return;
         }
@@ -958,7 +1058,7 @@ Firebug.Inspector.FrameHighlighter.prototype =
         if (element.tagName !== "AREA")
         {
             if (FBTrace.DBG_INSPECT)
-                FBTrace.sysout("FrameHighlighter "+element.tagName);
+                FBTrace.sysout("FrameHighlighter " + element.tagName);
             var body = getNonFrameBody(element);
             if (!body)
                 return this.unhighlight(context);
@@ -972,29 +1072,39 @@ Firebug.Inspector.FrameHighlighter.prototype =
 
             cs = body.ownerDocument.defaultView.getComputedStyle(element, null);
 
-            if(cs.MozTransform && cs.MozTransform != 'none')
-                css += '-moz-transform:' + cs.MozTransform + '!important;' +
-                       '-moz-transform-origin:' + cs.MozTransformOrigin + '!important;';
+            if(cs.MozTransform && cs.MozTransform != "none")
+                css += "-moz-transform:" + cs.MozTransform + "!important;" +
+                       "-moz-transform-origin:" + cs.MozTransformOrigin + "!important;";
             if(cs.borderRadius)
-                css += 'border-radius:' + cs.borderRadius + ' !important;';
+                css += "border-radius:" + cs.borderRadius + " !important;";
             if(cs.borderTopLeftRadius)
-                css += 'border-top-left-radius:' + cs.borderTopLeftRadius + ' !important;';
+                css += "border-top-left-radius:" + cs.borderTopLeftRadius + " !important;";
             if(cs.borderTopRightRadius)
-                css += 'border-top-right-radius:' + cs.borderTopRightRadius + ' !important;';
+                css += "border-top-right-radius:" + cs.borderTopRightRadius + " !important;";
             if(cs.borderBottomRightRadius)
-                css += 'border-bottom-right-radius:' + cs.borderBottomRightRadius + ' !important;';
+                css += "border-bottom-right-radius:" + cs.borderBottomRightRadius + " !important;";
             if(cs.borderBottomLeftRadius)
-                css += 'border-bottom-left-radius:' + cs.borderBottomLeftRadius + ' !important;';
+                css += "border-bottom-left-radius:" + cs.borderBottomLeftRadius + " !important;";
             if(cs.MozBorderRadius)
-                css += '-moz-border-radius:' + cs.MozBorderRadius + ' !important;';
+                css += "-moz-border-radius:" + cs.MozBorderRadius + " !important;";
             if(cs.MozBorderRadiusTopleft)
-                css += '-moz-border-radius-topleft:' + cs.MozBorderRadiusTopleft + ' !important;';
+                css += "-moz-border-radius-topleft:" + cs.MozBorderRadiusTopleft + " !important;";
             if(cs.MozBorderRadiusTopright)
-                css += '-moz-border-radius-topright:' + cs.MozBorderRadiusTopright + ' !important;';
+                css += "-moz-border-radius-topright:" + cs.MozBorderRadiusTopright + " !important;";
             if(cs.MozBorderRadiusBottomright)
-                css += '-moz-border-radius-bottomright:' + cs.MozBorderRadiusBottomright + ' !important;';
+                css += "-moz-border-radius-bottomright:" + cs.MozBorderRadiusBottomright + " !important;";
             if(cs.MozBorderRadiusBottomleft)
-                css += '-moz-border-radius-bottomleft:' + cs.MozBorderRadiusBottomleft + ' !important;';
+                css += "-moz-border-radius-bottomleft:" + cs.MozBorderRadiusBottomleft + " !important;";
+
+            if(colorObj && colorObj.border)
+                css += "box-shadow: 0 0 2px 2px " + colorObj.border + " !important; -moz-box-shadow: 0 0 2px 2px " + colorObj.border + " !important;";
+            else
+                css += "box-shadow: 0 0 2px 2px #3875d7 !important; -moz-box-shadow: 0 0 2px 2px #004bc7 !important;";
+
+            if(colorObj && colorObj.background)
+                css += "background-color: " + colorObj.background + " !important; opacity: 0.6 !important;";
+            else
+                css += "background-color: transparent !important; opacity: 1 !important;";
 
             highlighter.style.cssText = css;
 
@@ -1015,7 +1125,7 @@ Firebug.Inspector.FrameHighlighter.prototype =
                 {
                     if (FBTrace.DBG_INSPECT)
                         FBTrace.sysout("inspector.FrameHighlighter.highlight body.appendChild FAILS for body " +
-                            body + " "+exc, exc);
+                            body + " " + exc, exc);
                 }
 
                 // otherwise the proxies take up screen space in browser.xul
@@ -1058,6 +1168,7 @@ Firebug.Inspector.FrameHighlighter.prototype =
             hideElementFromInspection(div);
             div.className = "firebugResetStyles firebugFrameHighlighter";
 
+            highlighterCache.add(div);
             context.frameHighlighter = div;
         }
 
@@ -1075,18 +1186,33 @@ Firebug.Inspector.BoxModelHighlighter = BoxModelHighlighter;
 
 BoxModelHighlighter.prototype =
 {
-    highlight: function(context, element, boxFrame)
+    highlight: function(context, element, boxFrame, colorObj)
     {
-        var line,
+        var line, contentCssText, paddingCssText, borderCssText, marginCssText,
             nodes = this.getNodes(context),
             highlightFrame = boxFrame ? nodes[boxFrame] : null;
 
-        storeHighlighterParams(this, context, element, boxFrame);
+        // if a single color was passed in lets use it as the content box color
+        if (typeof colorObj === "string")
+        {
+            (function() {
+                var tempObj = {padding: "SlateBlue", border: "#444444", margin: "#EDFF64"};
+                tempObj.content = colorObj;
+                colorObj = tempObj;
+            })();
+        }
+        else
+        {
+            colorObj = colorObj || {content: "SkyBlue", padding: "SlateBlue", border: "#444444", margin: "#EDFF64"};
+        }
+
+        Firebug.Inspector.attachRepaintInspectListeners(context);
+        storeHighlighterParams(this, context, element, boxFrame, colorObj, null);
 
         if (context.highlightFrame)
             removeClass(context.highlightFrame, "firebugHighlightBox");
 
-        if(element.tagName !== "AREA")
+        if (element.tagName !== "AREA")
         {
             this.ihl && this.ihl.show(false);
 
@@ -1109,29 +1235,22 @@ BoxModelHighlighter.prototype =
             if (!style)
             {
                 if (FBTrace.DBG_INSPECT)
-                    FBTrace.sysout("highlight: no style for element "+element, element);
+                    FBTrace.sysout("highlight: no style for element " + element, element);
                 return;
             }
 
             var styles = readBoxStyles(style);
-
             var offset = getLTRBWH(element);
-
             var x = offset.left - Math.abs(styles.marginLeft);
             var y = offset.top - Math.abs(styles.marginTop);
-            var w = offset.width - (styles.paddingLeft + styles.paddingRight
-                    + styles.borderLeft + styles.borderRight);
-            var h = offset.height - (styles.paddingTop + styles.paddingBottom
-                    + styles.borderTop + styles.borderBottom);
+            var w = offset.width - (styles.paddingLeft + styles.paddingRight + styles.borderLeft + styles.borderRight);
+            var h = offset.height - (styles.paddingTop + styles.paddingBottom + styles.borderTop + styles.borderBottom);
 
             moveImp(nodes.offset, x, y);
-            pad(nodes.margin, styles.marginTop, styles.marginRight, styles.marginBottom,
-                    styles.marginLeft);
-            pad(nodes.border, styles.borderTop, styles.borderRight, styles.borderBottom,
-                    styles.borderLeft);
-            pad(nodes.padding, styles.paddingTop, styles.paddingRight, styles.paddingBottom,
-                    styles.paddingLeft);
-            resizeImp(nodes.content, w, h);
+            marginCssText = pad(null, styles.marginTop, styles.marginRight, styles.marginBottom, styles.marginLeft);
+            borderCssText = pad(null, styles.borderTop, styles.borderRight, styles.borderBottom, styles.borderLeft);
+            paddingCssText = pad(null, styles.paddingTop, styles.paddingRight, styles.paddingBottom, styles.paddingLeft);
+            contentCssText = resizeImp(null, w, h);
 
             // element.tagName !== "BODY" for issue 2447. hopefully temporary, robc
             var showLines = Firebug.showRulers && boxFrame && element.tagName !== "BODY";
@@ -1183,14 +1302,34 @@ BoxModelHighlighter.prototype =
                 }
 
                 moveImp(nodes.lines.top, 0, top);
-                moveImp(nodes.lines.right, left+width, 0);
-                moveImp(nodes.lines.bottom, 0, top+height);
+                moveImp(nodes.lines.right, left + width, 0);
+                moveImp(nodes.lines.bottom, 0, top + height);
                 moveImp(nodes.lines.left, left, 0)
             }
 
             var body = getNonFrameBody(element);
             if (!body)
                 return this.unhighlight(context);
+
+            if (colorObj.content)
+                nodes.content.style.cssText = contentCssText + " background-color: " + colorObj.content + " !important;";
+            else
+                nodes.content.style.cssText = contentCssText + " background-color: #87CEEB !important;";
+
+            if (colorObj.padding)
+                nodes.padding.style.cssText = paddingCssText + " background-color: " + colorObj.padding + " !important;";
+            else
+                nodes.padding.style.cssText = paddingCssText + " background-color: #6A5ACD !important;";
+
+            if (colorObj.border)
+                nodes.border.style.cssText = borderCssText + " background-color: " + colorObj.border + " !important;";
+            else
+                nodes.border.style.cssText = borderCssText + " background-color: #444444 !important;";
+
+            if (colorObj.margin)
+                nodes.margin.style.cssText = marginCssText + " background-color: " + colorObj.margin + " !important;";
+            else
+                nodes.margin.style.cssText = marginCssText + " background-color: #EDFF64 !important;";
 
             var needsAppend = !nodes.offset.parentNode
                 || nodes.offset.parentNode.ownerDocument != body.ownerDocument;
@@ -1199,6 +1338,7 @@ BoxModelHighlighter.prototype =
             {
                 attachStyles(context, body);
                 body.appendChild(nodes.offset);
+                highlighterCache.add(nodes.offset);
             }
 
             if (showLines)
@@ -1206,10 +1346,16 @@ BoxModelHighlighter.prototype =
                 if (!nodes.lines.top.parentNode)
                 {
                     if (nodes.parent)
+                    {
                         body.appendChild(nodes.parent);
+                        highlighterCache.add(nodes.parent);
+                    }
 
                     for (line in nodes.lines)
+                    {
                         body.appendChild(nodes.lines[line]);
+                        highlighterCache.add(nodes.lines[line]);
+                    }
                 }
             }
             else if (nodes.lines.top.parentNode)
@@ -1259,19 +1405,25 @@ BoxModelHighlighter.prototype =
             var doc = context.window.document;
 
             if (FBTrace.DBG_ERRORS && !doc)
-                FBTrace.sysout("inspector getNodes no document for window:"+window.location);
+                FBTrace.sysout("inspector getNodes no document for window:" + window.location);
             if (FBTrace.DBG_INSPECT && doc)
-                FBTrace.sysout("inspect.getNodes doc: "+doc.location);
+                FBTrace.sysout("inspect.getNodes doc: " + doc.location);
 
-            var Ruler = "firebugResetStyles firebugRuler firebugRuler";
-            var Box = "firebugResetStyles firebugLayoutBox firebugLayoutBox";
-            var Line = "firebugResetStyles firebugLayoutLine firebugLayoutLine";
+            var Ruler = "firebugResetStyles firebugBlockBackgroundColor firebugRuler firebugRuler";
+            var Box = "firebugResetStyles firebugBlockBackgroundColor firebugLayoutBox firebugLayoutBox";
+            var CustomizableBox = "firebugResetStyles firebugLayoutBox";
+            var Line = "firebugResetStyles firebugBlockBackgroundColor firebugLayoutLine firebugLayoutLine";
 
             function create(className, name)
             {
                 var div = doc.createElementNS("http://www.w3.org/1999/xhtml", "div");
                 hideElementFromInspection(div);
-                div.className = className +name;
+
+                if (className !== CustomizableBox)
+                    div.className = className + name;
+                else
+                    div.className = className;
+
                 return div;
             }
 
@@ -1281,10 +1433,10 @@ BoxModelHighlighter.prototype =
                 rulerH: create(Ruler, "H"),
                 rulerV: create(Ruler, "V"),
                 offset: create(Box, "Offset"),
-                margin: create(Box, "Margin"),
-                border: create(Box, "Border"),
-                padding: create(Box, "Padding"),
-                content: create(Box, "Content"),
+                margin: create(CustomizableBox, "Margin"),
+                border: create(CustomizableBox, "Border"),
+                padding: create(CustomizableBox, "Padding"),
+                content: create(CustomizableBox, "Content"),
                 lines: {
                     top: create(Line, "Top"),
                     right: create(Line, "Right"),
@@ -1313,8 +1465,7 @@ BoxModelHighlighter.prototype =
         var parentW = offsetParent.offsetWidth-1;
         var parentH = offsetParent.offsetHeight-1;
 
-        nodes.parent.style.cssText = moveImp(null, parentX, parentY) +
-            resizeImp(null, parentW, parentH);
+        nodes.parent.style.cssText = moveImp(null, parentX, parentY) + resizeImp(null, parentW, parentH);
 
         if (parentX < 14)
             setClass(nodes.parent, "overflowRulerX");
@@ -1328,10 +1479,38 @@ BoxModelHighlighter.prototype =
     }
 };
 
+// ************************************************************************************************
+
+var highlighterCache = {
+    highlighters: [],
+
+    add: function(node)
+    {
+        this.highlighters.push(node);
+    },
+
+    clear: function()
+    {
+        var i, highlighter;
+
+        for(i = this.highlighters.length - 1; i >= 0; i--)
+        {
+            highlighter = this.highlighters[i];
+
+            if (highlighter && highlighter.parentNode)
+                highlighter.parentNode.removeChild(highlighter);
+        }
+
+        this.highlighters = [];
+    }
+};
+
+// ************************************************************************************************
+
 function getNonFrameBody(elt)
 {
     var body = getBody(elt.ownerDocument);
-    return (body.localName && body.localName.toUpperCase() == "FRAMESET") ? null : body;
+    return (body.localName && body.localName.toUpperCase() === "FRAMESET") ? null : body;
 }
 
 function attachStyles(context, body)
@@ -1418,14 +1597,19 @@ function hideElementFromInspection(elt)
     unwrapObject(elt).firebugIgnore = !FBTrace.DBG_INSPECT;
 }
 
-function storeHighlighterParams(highlighter, context, element, boxFrame)
+// highlightType is only to be used for multihighlighters
+function storeHighlighterParams(highlighter, context, element, boxFrame, colorObj, highlightType)
 {
     var fir = Firebug.Inspector.repaint;
 
     fir.highlighter = highlighter;
-    fir.context = context,
-    fir.element = element,
+    fir.context = context;
+    fir.element = element;
     fir.boxFrame = boxFrame;
+    fir.colorObj = colorObj;
+    fir.highlightType = highlightType;
+
+    Firebug.Inspector.highlightedContext = context;
 }
 
 // ************************************************************************************************

@@ -1,16 +1,19 @@
 /* See license.txt for terms of usage */
 
-FBL.ns(function() { with (FBL)
-{
-    const Cc = Components.classes;
-    const Ci = Components.interfaces;
+FBL.ns(function() { with (FBL) {
 
-    const PCMAP_SOURCETEXT = Ci.jsdIScript.PCMAP_SOURCETEXT;
-    const PCMAP_PRETTYPRINT = Ci.jsdIScript.PCMAP_PRETTYPRINT;
+// ********************************************************************************************* //
+// Constants
 
+const Cc = Components.classes;
+const Ci = Components.interfaces;
 
-//* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
-/*
+const PCMAP_SOURCETEXT = Ci.jsdIScript.PCMAP_SOURCETEXT;
+const PCMAP_PRETTYPRINT = Ci.jsdIScript.PCMAP_PRETTYPRINT;
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+/**
  * SourceFile one for every compilation unit.
  * Unique URL for each. (href)
  * Unique outerScript, the statements outside of any function defintion
@@ -19,7 +22,6 @@ FBL.ns(function() { with (FBL)
  * Contains array of jsdIScript for functions (scripts) defined in this unit
  * May contain line table (for sources viewed)
  */
-
 Firebug.SourceFile = function (compilation_unit_type)
 {
     this.compilation_unit_type = compilation_unit_type;
@@ -30,6 +32,11 @@ Firebug.SourceFile.prototype =
     getBaseLineOffset: function()
     {
         return 0;
+    },
+
+    getURL: function()
+    {
+        return this.href;
     },
 
     toString: function()
@@ -379,11 +386,14 @@ Firebug.SourceFile.NestedScriptAnalyzer.prototype =
     // Adjust JSD line numbers based on origin of script
     getSourceLineFromFrame: function(context, frame)
     {
-        if (FBTrace.DBG_SOURCEFILES) FBTrace.sysout("NestedScriptAnalyzer in "+this.sourceFile.compilation_unit_type+": frame.line  - this.sourceFile.getBaseLineOffset()",
-             frame.line +" - "+this.sourceFile.getBaseLineOffset());
+        if (FBTrace.DBG_SOURCEFILES)
+            FBTrace.sysout("NestedScriptAnalyzer in "+this.sourceFile.compilation_unit_type+
+                ": frame.line  - this.sourceFile.getBaseLineOffset() "+
+                frame.line +" - "+this.sourceFile.getBaseLineOffset());
 
         return frame.line - (this.sourceFile.getBaseLineOffset());
     },
+
     // Interpret frame to give fn(args)
     getFunctionDescription: function(script, context, frame)
     {
@@ -472,29 +482,39 @@ Firebug.EvalLevelSourceFile.prototype =
 
     getObjectDescription: function()
     {
-         if (this.hrefKind == "source" || this.hrefKind == "data")
-             return FBL.splitURLBase(this.href);
+        if (this.hrefKind == "source" || this.hrefKind == "data")
+            return FBL.splitURLBase(this.href);
 
-         if (!this.summary)
-         {
-             if (this.evalExpression)
-                 this.summary = Firebug.SourceFile.summarizeSourceLineArray(this.evalExpression.substr(0, 240), 120);
-             if (!this.summary)
-                 this.summary = "";
-             if (this.summary.length < 120)
-                 this.summary = "eval("+this.summary + "...)=" + Firebug.SourceFile.summarizeSourceLineArray(this.source, 120 - this.summary.length);
-         }
-         var containingFileDescription = FBL.splitURLBase(this.containingURL);
-         if (FBTrace.DBG_SOURCEFILES)
-             FBTrace.sysout("EvalLevelSourceFile this.evalExpression.substr(0, 240):"+(this.evalExpression?this.evalExpression.substr(0, 240):"null")+" summary", this.summary);
-         return {path: containingFileDescription.path, name: containingFileDescription.name+"/eval: "+this.summary };
+        if (!this.summary)
+        {
+            if (this.evalExpression)
+                this.summary = Firebug.SourceFile.summarizeSourceLineArray(this.evalExpression.substr(0, 240), 120);
+
+            if (!this.summary)
+                this.summary = "";
+
+            if (this.summary.length < 120)
+                this.summary = "eval("+this.summary + "...)=" +
+                    Firebug.SourceFile.summarizeSourceLineArray(this.source, 120 - this.summary.length);
+        }
+
+        var containingFileDescription = FBL.splitURLBase(this.containingURL);
+
+        if (FBTrace.DBG_SOURCEFILES)
+            FBTrace.sysout("EvalLevelSourceFile this.evalExpression.substr(0, 240):"+
+                (this.evalExpression?this.evalExpression.substr(0, 240):"null")+" summary",
+                this.summary);
+
+        return {
+            path: containingFileDescription.path,
+            name: containingFileDescription.name+"/eval: "+this.summary
+        };
     },
 
     getOuterScriptAnalyzer: function()
     {
         return new Firebug.EvalLevelSourceFile.OuterScriptAnalyzer(this);
     },
-
 });
 
 Firebug.EvalLevelSourceFile.OuterScriptAnalyzer = function(sourceFile)
@@ -520,7 +540,8 @@ Firebug.EvalLevelSourceFile.OuterScriptAnalyzer.prototype =
     }
 }
 
-//------------
+// ********************************************************************************************* //
+
 Firebug.EventSourceFile = function(url, script, title, source, innerScriptEnumerator)
 {
      this.href = url;
@@ -600,7 +621,8 @@ Firebug.EventSourceFile.OuterScriptAnalyzer.prototype =
     }
 }
 
-//------------
+// ********************************************************************************************* //
+
 Firebug.SourceFile.CommonBase =
 {
     getSourceLength: function()
@@ -616,7 +638,9 @@ Firebug.SourceFile.CommonBase =
     },
 
 }
-//-----------
+
+// ********************************************************************************************* //
+
 Firebug.TopLevelSourceFile = function(url, outerScript, sourceLength, innerScriptEnumerator)
 {
     this.href = url;
@@ -629,8 +653,8 @@ Firebug.TopLevelSourceFile = function(url, outerScript, sourceLength, innerScrip
 
 Firebug.TopLevelSourceFile.prototype = descend(new Firebug.SourceFile("top-level"), Firebug.SourceFile.CommonBase);
 
-
-Firebug.TopLevelSourceFile.OuterScriptAnalyzer = {
+Firebug.TopLevelSourceFile.OuterScriptAnalyzer =
+{
     // Adjust JSD line numbers based on origin of script
     getSourceLineFromFrame: function(context, frame)
     {
@@ -649,7 +673,7 @@ Firebug.TopLevelSourceFile.OuterScriptAnalyzer = {
     }
 }
 
-//-------
+// ********************************************************************************************* //
 
 Firebug.EnumeratedSourceFile = function(url) // we don't have the outer script and we delay source load.
 {
@@ -662,7 +686,8 @@ Firebug.EnumeratedSourceFile.prototype = descend(
         new Firebug.SourceFile("enumerated"),
         Firebug.SourceFile.CommonBase);
 
-//---------
+// ********************************************************************************************* //
+
 Firebug.NoScriptSourceFile = function(context, url) // Somehow we got the URL, but not the script
 {
     this.href = url;  // we know this much
@@ -673,7 +698,10 @@ Firebug.NoScriptSourceFile.prototype = descend(
         new Firebug.SourceFile("URLOnly"),
         Firebug.SourceFile.CommonBase);
 
-//---------// javascript in a .xul or .xml file, no outerScript
+
+// ********************************************************************************************* //
+// javascript in a .xul or .xml file, no outerScript
+
 Firebug.XULSourceFile = function(url, outerScript, innerScriptEnumerator)
 {
     this.href = url;
@@ -687,7 +715,8 @@ Firebug.XULSourceFile.prototype = descend(
         new Firebug.SourceFile("xul"),
         Firebug.SourceFile.CommonBase);
 
-//---------
+// ********************************************************************************************* //
+
 Firebug.ScriptTagAppendSourceFile = function(url, outerScript, sourceLength, innerScriptEnumerator) // element.appendChild(scriptTag)
 {
     this.href = url;
@@ -702,7 +731,7 @@ Firebug.ScriptTagAppendSourceFile.prototype = descend(
         new Firebug.SourceFile("scriptTagAppend"),
         Firebug.SourceFile.CommonBase);
 
-//-------------------
+// ********************************************************************************************* //
 
 Firebug.ScriptTagSourceFile = function(context, url, scriptTagNumber) // we don't have the outer script and we delay source load
 {
@@ -717,7 +746,8 @@ Firebug.ScriptTagSourceFile.prototype = descend(
         new Firebug.SourceFile("scriptTag"),
         Firebug.SourceFile.CommonBase);
 
-//-------------------
+// ********************************************************************************************* //
+
 Firebug.SourceFile.getSourceFileByScript = function(context, script)
 {
     if (!context.sourceFileMap)
@@ -792,6 +822,9 @@ Firebug.SourceFile.guessEnclosingFunctionName = function(url, line, context)
     return FBL.guessFunctionName(url, line-1, context);
 };
 
+// ********************************************************************************************* //
 
 return Firebug.SourceFile;
+
+// ********************************************************************************************* //
 }});

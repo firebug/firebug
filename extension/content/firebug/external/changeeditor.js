@@ -35,7 +35,7 @@ function onLoad()
 
     // Localization
     internationalizeUI(document);
-    
+
     window.sizeToContent();
 
     if (document.getAnonymousElementByAttribute && !document.getElementById("executable").file)
@@ -190,6 +190,7 @@ function insertText(text, whole)
     textbox.editor.QueryInterface(Components.interfaces.nsIPlaintextEditor).insertText(text);
     textbox.focus()
 }
+
 // ************************************************************************************************
 
 // would be good to have autosuggest for popular editors

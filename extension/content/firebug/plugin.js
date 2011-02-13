@@ -3,7 +3,8 @@
 FBL.ns(function() { with (FBL) {
 
 // ************************************************************************************************
-
+// This is a panel implemented as its own browser with its own URL
+	
 Firebug.PluginPanel = function() {};
 
 Firebug.PluginPanel.prototype = extend(Firebug.Panel,

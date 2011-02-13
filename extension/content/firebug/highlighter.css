@@ -2,7 +2,6 @@
 /** reset styling **/
 .firebugResetStyles {
     z-index: 2147483646 !important;
-    opacity: 1 !important;
     top: 0 !important;
     left: 0 !important;
     display: block !important;
@@ -20,8 +19,11 @@
     -moz-border-radius: 0 !important;
     -moz-box-shadow: none !important;
     background-image: none !important;
-    background-color: transparent !important;
     pointer-events: none !important;
+}
+
+.firebugBlockBackgroundColor {
+    background-color: transparent !important;
 }
 
 .firebugResetStyles:before, .firebugResetStyles:after {
@@ -30,10 +32,6 @@
 /**actual styling to be modified by firebug theme**/
 .firebugCanvas {
     display: none !important;
-}
-
-.firebugFrameHighlighter {
-    -moz-box-shadow: 0 0 2px 2px highlight !important;
 }
 
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -45,22 +43,6 @@
 .firebugLayoutBoxOffset {
     opacity: 0.8 !important;
     position: fixed !important;
-}
-
-.firebugLayoutBoxMargin {
-    background-color: #EDFF64 !important;
-}
-
-.firebugLayoutBoxBorder {
-    background-color: #444444 !important;
-}
-
-.firebugLayoutBoxPadding {
-    background-color: SlateBlue !important;
-}
-
-.firebugLayoutBoxContent {
-    background-color: SkyBlue !important;
 }
 
 .firebugLayoutLine {

@@ -1427,8 +1427,7 @@ Firebug.AutoCompleter = function(getExprOffset, getRange, evaluator, selectMode,
 
     this.setTabWarning = function(textBox, completionBox)
     {
-        // xxxHonza: localization
-        completionBox.value = textBox.value + "    " + "(no completions)";  // TODO need NLS <<<<<<<<<<<<<<<<
+        completionBox.value = textBox.value + "    " + $STR("firebug.completion.empty");
         completionBox.tabWarning = true;
     };
 
@@ -1437,7 +1436,7 @@ Firebug.AutoCompleter = function(getExprOffset, getRange, evaluator, selectMode,
         if (completionPopup.currentCompletionBox)
         {
             var selected = event.target;
-            while (selected && (selected.localName !== "div") )
+            while (selected && (selected.localName !== "div"))
                 selected = selected.parentNode;
 
             if (selected)

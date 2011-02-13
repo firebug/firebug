@@ -181,6 +181,7 @@ top.FirebugChrome =
             doc1.addEventListener("mouseup", onPanelMouseUp, false);
             doc1.addEventListener("click", onPanelClick, false);
             panelBar1.addEventListener("selectingPanel", onSelectingPanel, false);
+            panelBar1.addEventListener("DOMMouseScroll", onMouseScroll, false);
 
             var doc2 = panelBar2.browser.contentDocument;
             doc2.addEventListener("mouseover", onPanelMouseOver, false);
@@ -241,6 +242,7 @@ top.FirebugChrome =
         doc1.removeEventListener("mousedown", onPanelMouseDown, false);
         doc1.removeEventListener("mouseup", onPanelMouseUp, false);
         doc1.removeEventListener("click", onPanelClick, false);
+        panelBar1.removeEventListener("DOMMouseScroll", onMouseScroll, false);
 
         var doc2 = panelBar2.browser.contentDocument;
         doc2.removeEventListener("mouseover", onPanelMouseOver, false);
@@ -644,7 +646,7 @@ top.FirebugChrome =
                 Firebug.showBar(false);
 
             if (this.previousPanelName == switchToPanelName)
-                this.select(this.previousObject);
+                switchToPanel.select(this.previousObject);
             else
                 this.selectPanel(this.previousPanelName, this.previousSidePanelName);
         }
@@ -1035,22 +1037,25 @@ top.FirebugChrome =
         panelBar1.browser.markupDocumentViewer.textZoom = zoom;
         panelBar2.browser.markupDocumentViewer.textZoom = zoom;
 
-
+        var box = $("fbCommandBox");
         var aNode = panelBar1.selectedPanel ? panelBar1.selectedPanel.panelNode : null ;
         if (aNode)
         {
             Firebug.MeasureBox.startMeasuring(aNode);
             var size = Firebug.MeasureBox.measureText();
-            Firebug.MeasureBox.stopMeasuring();
-            var box = $("fbCommandBox");
             box.style.height = size.height;
-            box.style.fontSize = (zoom * 100)+"%";
+            Firebug.MeasureBox.stopMeasuring();
         }
 
+        var zoomString = (zoom * 100) + "%";
+        box.style.fontSize = zoomString;
+        Firebug.CommandLine.getCommandLineSmall().style.fontSize = zoomString;
+        $("fbCommandLineCompletion").style.fontSize = zoomString;
+
         if(Firebug.CommandLine.getCommandLineLarge().setFontSize)
-            Firebug.CommandLine.getCommandLineLarge().setFontSize((zoom * 100) + "%");
+            Firebug.CommandLine.getCommandLineLarge().setFontSize(zoomString);
         else
-            Firebug.CommandLine.getCommandLineLarge().style.fontSize = (zoom * 100) + "%";
+            Firebug.CommandLine.getCommandLineLarge().style.fontSize = zoomString;
 
         Firebug.dispatchToPanels("onTextSizeChange", [zoom]);
     },
@@ -1123,7 +1128,7 @@ top.FirebugChrome =
             var fbContentBox = this.$("fbContentBox");
             var collapsed = fbContentBox.getAttribute("collapsed");
             toggleFirebug.setAttribute("label", (collapsed == "true"?
-                FBL.$STR("firebug.ShowFirebug") : FBL.$STR("firebug.Hide Firebug"))); // xxxHonza localization
+                FBL.$STR("firebug.ShowFirebug") : FBL.$STR("firebug.HideFirebug")));
 
             // If Firebug is detached, hide the menu (F12 doesn't hide but just focuses the
             // external window)
@@ -1699,6 +1704,14 @@ function onSelectingPanel(event)
     Firebug.chrome.syncSidePanels();
 }
 
+function onMouseScroll(event) {
+    if (FBL.isControlShift(event))
+    {
+        FBL.cancelEvent(event);
+        Firebug.increaseTextSize(-event.detail);
+    }
+}
+
 function onSelectedSidePanel(event)
 {
     var sidePanel = panelBar2.selectedPanel;
@@ -1789,6 +1802,11 @@ function onPanelMouseDown(event)
     if (FBL.isLeftClick(event))
     {
         this.lastMouseDownPosition = {x: event.screenX, y: event.screenY};
+    }
+    else if (FBL.isMiddleClick(event, true) && FBL.isControlShift(event))
+    {
+        FBL.cancelEvent(event);
+        Firebug.setTextSize(0);
     }
     else if (FBL.isMiddleClick(event) && Firebug.getRepNode(event.target))
     {

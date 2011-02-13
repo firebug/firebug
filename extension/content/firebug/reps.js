@@ -339,11 +339,11 @@ FirebugReps.Obj = domplate(Firebug.Rep,
             if (count > max)
             {
                 props[Math.max(1,max-1)] = {
-                    object: "more...", //xxxHonza localization
+                    object: $STR("firebug.reps.more") + "...",
                     tag: FirebugReps.Caption.tag,
                     name: "",
-                    equal:"",
-                    delim:""
+                    equal: "",
+                    delim: ""
                 };
             }
             else if (props.length > 0)
@@ -437,7 +437,7 @@ FirebugReps.Arr = domplate(Firebug.Rep,
         if (array.length > max + 1)
         {
             items[max] = {
-                object: (array.length-max) + " more...", //xxxHonza localization
+                object: (array.length-max) + " " + $STR("firebug.reps.more") + "...",
                 tag: FirebugReps.Caption.tag,
                 delim: ""
             };
@@ -1353,12 +1353,27 @@ FirebugReps.SourceFile = domplate(FirebugReps.SourceLink,
 
     supportsObject: function(object, type)
     {
-        return object.compilation_unit_type; // kinda hacky, but more reliable than type testing
+        // kinda hacky, but more reliable than type testing
+        if (object.compilation_unit_type)
+            return true;
+
+        // CompilationUnit wraps the source file.
+        var sourceFile = object.sourceFile;
+        if (sourceFile && sourceFile.compilation_unit_type)
+            return true;
+
+        return false;
     },
 
     persistObject: function(sourceFile)
     {
-        return bind(this.persistor, top, sourceFile.href);
+        var href = sourceFile.href
+
+        // CompilationUnit wraps the source file.
+        if (!href && sourceFile.sourceFile)
+            href = sourceFile.sourceFile.href;
+
+        return bind(this.persistor, top, href);
     },
 
     browseObject: function(sourceLink, context)
@@ -2032,7 +2047,7 @@ FirebugReps.Storage = domplate(Firebug.Rep,
 
     summarize: function(storage)
     {
-        return storage.length + " items in Storage "; //xxxHonza localization
+        return $STRP("firebug.storage.totalItems", [storage.length]);
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
@@ -2099,7 +2114,7 @@ FirebugReps.Storage = domplate(Firebug.Rep,
             if (count > max)
             {
                 props[Math.max(1,max-1)] = {
-                    object: "more...", //xxxHonza localization
+                    object: $STR("firebug.reps.more") + "...",
                     tag: FirebugReps.Caption.tag,
                     name: "",
                     equal:"",
@@ -2159,7 +2174,8 @@ FirebugReps.StorageList = domplate(Firebug.Rep,
         {
             var context = Firebug.currentContext;
             var domain = getPrettyDomain(context.window.location.href);
-            return globalStorage.namedItem(domain).length + " items in Global Storage "; //xxxHonza localization
+            var length = globalStorage.namedItem(domain).length;
+            return $STRP("firebug.storage.totalItems", [length]) + " ";
         }
         catch (e)
         {
@@ -2258,7 +2274,7 @@ FirebugReps.XPathResult = domplate(FirebugReps.Arr,
         if (xpathresult.snapshotLength > max + 1)
         {
             items[max] = {
-                object: (xpathresult.snapshotLength-max) + " more...", //xxxHonza localization
+                object: (xpathresult.snapshotLength-max) + " " + $STR("firebug.reps.more") + "...",
                 tag: FirebugReps.Caption.tag,
                 delim: ""
             };
@@ -2426,7 +2442,7 @@ FirebugReps.NamedNodeMap = domplate(Firebug.Rep,
         if (object.length > max)
         {
             props[Math.max(1,max-1)] = {
-                object: (object.length-max) + " more...", //xxxHonza localization
+                object: (object.length-max) + " " + $STR("firebug.reps.more") + "...",
                 tag: FirebugReps.Caption.tag,
                 name: "",
                 equal:"",

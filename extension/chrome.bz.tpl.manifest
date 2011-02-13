@@ -11,13 +11,15 @@ locale  firebug ar-SA       locale/ar-SA/
 locale  firebug bg          locale/bg/
 locale  firebug ca-AD       locale/ca-AD/
 locale  firebug cs          locale/cs/
-locale  firebug da-DK       locale/da-DK/
+locale  firebug da          locale/da/
 locale  firebug de          locale/de/
 locale  firebug el          locale/el/
 locale  firebug en-US       locale/en-US/
 locale  firebug es          locale/es/
 locale  firebug es-AR       locale/es-AR/
 locale  firebug es-CL       locale/es-CL/
+locale  firebug es-ES       locale/es-ES/
+locale  firebug et-EE       locale/et-EE/
 locale  firebug fa          locale/fa/
 locale  firebug fi-FI       locale/fi-FI/
 locale  firebug fr          locale/fr/
@@ -52,8 +54,10 @@ locale  firebug vi          locale/vi/
 locale  firebug zh-CN       locale/zh-CN/
 locale  firebug zh-TW       locale/zh-TW/
 
-overlay chrome://browser/content/browser.xul         chrome://firebug/content/browserOverlay.xul
-overlay chrome://global/content/customizeToolbar.xul         chrome://firebug/content/customizeToolbarOverlay.xul
-overlay chrome://mozapps/content/extensions/about.xul         chrome://firebug/content/aboutOverlay.xul
-
+overlay chrome://browser/content/browser.xul            chrome://firebug/content/browserOverlay.xul
+overlay chrome://global/content/customizeToolbar.xul    chrome://firebug/content/start-button/customizeToolbarOverlay.xul
+overlay chrome://mozapps/content/extensions/about.xul   chrome://firebug/content/aboutOverlay.xul
 overlay chrome://navigator/content/navigator.xul        chrome://firebug/content/browserOverlay.xul
+
+# Support for Firebug tracing console. Should not be available in final releases
+overlay chrome://firebug/content/firebugOverlay.xul     chrome://firebug/content/tracingConsoleOverlay.xul

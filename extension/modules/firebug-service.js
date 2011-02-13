@@ -1186,7 +1186,7 @@ var fbs =
                     (urlBreakpoints?urlBreakpoints.length:"null"));
 
             if (!urlBreakpoints)
-                return false;
+                continue;
 
             for(var ibp = 0; ibp < urlBreakpoints.length; ibp++)
             {
