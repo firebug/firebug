@@ -48,11 +48,6 @@ Firebug.Inspector = extend(Firebug.Module,
             {
                 for (i = 0, elementLen = elementArr.length; i < elementLen; i++)
                 {
-                    if(highlightType ==="frame")
-                        context.frameHighlighter = null;
-                    else
-                        context.boxModelHighlighter = null;
-
                     elt = elementArr[i];
 
                     if (elt)
@@ -1160,19 +1155,15 @@ Firebug.Inspector.FrameHighlighter.prototype =
 
     getHighlighter: function(context)
     {
-        if (!context.frameHighlighter)
-        {
-            var doc = context.window.document,
-                div = doc.createElementNS("http://www.w3.org/1999/xhtml", "div");
+        var doc = context.window.document;
+        var div = doc.createElementNS("http://www.w3.org/1999/xhtml", "div");
 
-            hideElementFromInspection(div);
-            div.className = "firebugResetStyles firebugFrameHighlighter";
+        hideElementFromInspection(div);
+        div.className = "firebugResetStyles firebugFrameHighlighter";
 
-            highlighterCache.add(div);
-            context.frameHighlighter = div;
-        }
+        highlighterCache.add(div);
 
-        return context.frameHighlighter;
+        return div;
     }
 };
 
@@ -1400,7 +1391,7 @@ BoxModelHighlighter.prototype =
 
     getNodes: function(context)
     {
-        if (!context.boxModelHighlighter && context.window)
+        if (context.window)
         {
             var doc = context.window.document;
 
@@ -1427,7 +1418,7 @@ BoxModelHighlighter.prototype =
                 return div;
             }
 
-            var nodes = context.boxModelHighlighter =
+            var nodes =
             {
                 parent: create(Box, "Parent"),
                 rulerH: create(Ruler, "H"),
@@ -1453,7 +1444,7 @@ BoxModelHighlighter.prototype =
             nodes.padding.appendChild(nodes.content);
         }
 
-        return context.boxModelHighlighter;
+        return nodes;
     },
 
     setNodesByOffsetParent: function(win, offsetParent, nodes)
