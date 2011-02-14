@@ -178,6 +178,8 @@ top.Firebug =
 
     isInitialized: false,
     migrations: {},
+    positiveZoomFactors: [1, 1.1, 1.2, 1.3, 1.5, 2, 3],
+    negativeZoomFactors: [1, 0.95, 0.8, 0.7, 0.5],
 
     // Custom stylesheets registered by extensions.
     stylesheets: [],
@@ -923,14 +925,21 @@ top.Firebug =
             prefs.clearUserPref(prefName);
     },
 
-    increaseTextSize: function(amt)
+    changeTextSize: function(amt)
     {
-        this.setTextSize(this.textSize+amt);
+        var newTextSize = this.textSize+amt;
+        if ((newTextSize < 0 && Math.abs(newTextSize) < this.negativeZoomFactors.length) || (newTextSize >= 0 && this.textSize+amt < this.positiveZoomFactors.length))
+            this.setTextSize(this.textSize+amt);
     },
 
     setTextSize: function(value)
     {
-        this.setPref(Firebug.prefDomain, "textSize", value);
+        var setValue = value;
+        if (value >= this.positiveZoomFactors.length)
+            setValue = this.positiveZoomFactors[this.positiveZoomFactors.length-1];
+        else if (value < 0 && Math.abs(value) >= this.negativeZoomFactors.length)
+            setValue = this.negativeZoomFactors[this.negativeZoomFactors.length-1];
+        this.setPref(Firebug.prefDomain, "textSize", setValue);
     },
 
     updatePref: function(name, value)
