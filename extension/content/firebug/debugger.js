@@ -1056,7 +1056,7 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
         {
             this.syncCommands(panel.context);
             this.ableWatchSidePanel(panel.context);
-            if (FBTrace.DBG_PANELS) FBTrace.sysout("debugger.showPanel this.location:"+this.location);
+            if (FBTrace.DBG_PANELS) FBTrace.sysout("debugger.showPanel panel.location:"+panel.location);
         }
     },
 

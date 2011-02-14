@@ -463,7 +463,10 @@ Firebug.ScriptPanel.prototype = extend(Firebug.SourceBoxPanel,
         delete this.selection; // We want the location (compilationUnit) to persist, not the selection (eg stackFrame).
         persistObjects(this, state);
 
-        state.location = this.location;
+        if (this.location instanceof CompilationUnit)
+            state.location = this.location;
+        else
+            FBTrace.sysout("script.destroy had location not a CompilationUnit ", this.location);
 
         var sourceBox = this.selectedSourceBox;
         if (sourceBox)
@@ -783,6 +786,8 @@ Firebug.ScriptPanel.prototype = extend(Firebug.SourceBoxPanel,
     {
         if (!compilationUnit)
             return;  // XXXjjb do we need to show a blank?
+        if ( !(compilationUnit instanceof CompilationUnit) )
+            throw new Error("Script panel location not a CompilationUnit: "+compilationUnit);
 
         // Since our last use of the compilationUnit we may have compiled or recompiled the source
         var updatedCompilationUnit = this.context.getCompilationUnit(compilationUnit.getURL());

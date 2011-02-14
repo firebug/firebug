@@ -1336,42 +1336,28 @@ FirebugReps.SourceLink = domplate(Firebug.Rep,
 
 // ************************************************************************************************
 
-FirebugReps.SourceFile = domplate(FirebugReps.SourceLink,
+FirebugReps.CompilationUnit = domplate(FirebugReps.SourceLink,
 {
     tag:
         OBJECTLINK({$collapsed: "$object|hideSourceLink"}, "$object|getSourceLinkTitle"),
 
     persistor: function(context, href)
     {
-        return getSourceFileByHref(href, context);
+        return context.getCompilationUnit(href);
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 
-    className: "sourceFile",
+    className: "CompilationUnit",
 
     supportsObject: function(object, type)
     {
-        // kinda hacky, but more reliable than type testing
-        if (object.compilation_unit_type)
-            return true;
-
-        // CompilationUnit wraps the source file.
-        var sourceFile = object.sourceFile;
-        if (sourceFile && sourceFile.compilation_unit_type)
-            return true;
-
-        return false;
+       return (object instanceof CompilationUnit) ? 2 : 0;
     },
 
-    persistObject: function(sourceFile)
+    persistObject: function(compilationUnit)
     {
-        var href = sourceFile.href
-
-        // CompilationUnit wraps the source file.
-        if (!href && sourceFile.sourceFile)
-            href = sourceFile.sourceFile.href;
-
+        var href = compilationUnit.getURL();
         return bind(this.persistor, top, href);
     },
 
@@ -1379,9 +1365,9 @@ FirebugReps.SourceFile = domplate(FirebugReps.SourceLink,
     {
     },
 
-    getTooltip: function(sourceFile)
+    getTooltip: function(compilationUnit)
     {
-        return sourceFile.href;
+        return compilationUnit.getURL();
     }
 });
 
@@ -2475,7 +2461,7 @@ Firebug.registerRep(
     FirebugReps.StyleSheet,
     FirebugReps.Event,
     FirebugReps.SourceLink,
-    FirebugReps.SourceFile,
+    FirebugReps.CompilationUnit,
     FirebugReps.StackTrace,
     FirebugReps.StackFrame,
     FirebugReps.NetFile,
