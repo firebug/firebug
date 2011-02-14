@@ -1160,9 +1160,7 @@ Firebug.Inspector.FrameHighlighter.prototype =
         hideElementFromInspection(div);
         hideElementFromInspection(div2);
 
-        // the firebugFrameHighlighter class name is no longer needed but
-        // let's keep it for debugging purposes
-        div.className = "firebugResetStyles firebugFrameHighlighter";
+        div.className = "firebugResetStyles firebugBlockBackgroundColor";
         div2.className = "firebugResetStyles";
         div.appendChild(div2);
         highlighterCache.add(div);
