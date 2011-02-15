@@ -22,7 +22,7 @@ var statusText = $("fbStatusText");
  * @module StartButton module represents the UI entry point to Firebug. This "start buttton"
  * formerly known as "the status bar icon" is automatically appended into Firefox toolbar
  * (since Firefox 4).
- * 
+ *
  * Start button is associated with a menu (fbStatusContextMenu) that contains basic actions
  * such as panel activation and also indicates whether Firebug is activated/deactivated for
  * the current page (by changing its color).
@@ -47,8 +47,9 @@ Firebug.StartButton = extend(Firebug.Module,
             // If Firefox version is 4+, let's
             if (versionChecker.compare(appInfo.version, "4.0*") >= 0)
                 startButton.setAttribute("firefox", "4");
-
         }
+        if (FBTrace.DBG_INITIALIZE)
+            FBTrace.sysout("Startbutton initializeUI "+startButton);
     },
 
     shutdown: function()
@@ -96,8 +97,7 @@ Firebug.StartButton = extend(Firebug.Module,
         }
 
         // Don't forget to show the navigation bar - just in case it's hidden.
-        // setToolbarVisibility() comes from browser.js
-        collapse(navBar, true);
+        collapse(navBar, false);
         document.persist("nav-bar", "collapsed");
     },
 
@@ -160,7 +160,7 @@ Firebug.StartButton = extend(Firebug.Module,
             if (firebugButton)
             {
                 firebugButton.removeAttribute("showErrors");
-                
+
                 // Use '0' so, the horizontal space for the number is still allocated.
                 // The button will cause re-layout if there is more than 9 errors.
                 firebugButton.setAttribute("errorCount", "0");
