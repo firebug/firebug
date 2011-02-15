@@ -1757,14 +1757,14 @@ CSSComputedElementPanel.prototype = extend(CSSElementPanel.prototype,
     template: domplate(
     {
         computedTag:
-            DIV({"class": "a11yCSSView", role: "list", "aria-label" : $STR("aria.labels.computed styles")},
+            DIV({"class": "a11yCSSView", role: "list", "aria-label": $STR("aria.labels.computed styles")},
                 FOR("group", "$groups",
                     DIV({"class": "computedStylesGroup", $opened: "$group.opened", role: "list"},
                         H1({"class": "cssComputedHeader groupHeader focusRow", role: "listitem"},
                             IMG({"class": "twisty", role: "presentation"}),
                             SPAN({"class": "cssComputedLabel"}, "$group.title")
                         ),
-                        TABLE({width: "100%", role: 'group'},
+                        TABLE({width: "100%", role: "group"},
                             TBODY({role: "presentation"},
                                 FOR("prop", "$group.props",
                                     TR({"class": "focusRow computedStyleRow", role: "listitem"},
@@ -1776,8 +1776,22 @@ CSSComputedElementPanel.prototype = extend(CSSElementPanel.prototype,
                         )
                     )
                 )
+            ),
+
+        computedAlphabeticalTag:
+            DIV({"class": "a11yCSSView", role: "list", "aria-label" : $STR("aria.labels.computed styles")},
+                TABLE({width: "100%", role: "list"},
+                    TBODY({role: "presentation"},
+                        FOR("prop", "$props",
+                            TR({"class": "focusRow computedStyleRow", role: "listitem"},
+                                TD({"class": "stylePropName", role: "presentation"}, "$prop.name"),
+                                TD({"class": "stylePropValue", role: "presentation"}, "$prop.value")
+                            )
+                        )
+                    )
+                )
             )
-    }),
+  }),
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 
@@ -1786,26 +1800,50 @@ CSSComputedElementPanel.prototype = extend(CSSElementPanel.prototype,
         var win = element.ownerDocument.defaultView;
         var style = win.getComputedStyle(element, "");
 
-        var groups = [];
-
-        for (var groupName in styleGroups)
+        if (Firebug.computedStylesDisplay == "alphabetical")
         {
-            var title = $STR("StyleGroup-" + groupName);
-            var group = {title: title, props: []};
-            groups.push(group);
-
-            var props = styleGroups[groupName];
-            for (var i = 0; i < props.length; ++i)
+            var props = [];
+            
+            for (var groupName in styleGroups)
             {
-                var propName = props[i];
-                var propValue = stripUnits(rgbToHex(style.getPropertyValue(propName)));
-                if (propValue)
-                    group.props.push({name: propName, value: propValue});
+                var groupProps = styleGroups[groupName];
+
+                for (var i = 0; i < groupProps.length; ++i)
+                {
+                    var propName = groupProps[i];
+                    var propValue = stripUnits(rgbToHex(style.getPropertyValue(propName)));
+                    if (propValue)
+                        props.push({name: propName, value: propValue});
+                }
             }
-            group.opened = this.groupOpened[title];
+            sortProperties(props);
+
+            var result = this.template.computedAlphabeticalTag.replace({props: props}, this.panelNode);
+        }
+        else
+        {
+            var groups = [];
+    
+            for (var groupName in styleGroups)
+            {
+                var title = $STR("StyleGroup-" + groupName);
+                var group = {title: title, props: []};
+                groups.push(group);
+    
+                var props = styleGroups[groupName];
+                for (var i = 0; i < props.length; ++i)
+                {
+                    var propName = props[i];
+                    var propValue = stripUnits(rgbToHex(style.getPropertyValue(propName)));
+                    if (propValue)
+                        group.props.push({name: propName, value: propValue});
+                }
+                group.opened = this.groupOpened[title];
+            }
+    
+            var result = this.template.computedTag.replace({groups: groups}, this.panelNode);
         }
 
-        var result = this.template.computedTag.replace({groups: groups}, this.panelNode);
         dispatch(this.fbListeners, 'onCSSRulesAdded', [this, result]);
     },
 
@@ -1835,9 +1873,18 @@ CSSComputedElementPanel.prototype = extend(CSSElementPanel.prototype,
         this.updateComputedView(element);
     },
 
+    updateOption: function(name, value)
+    {
+        if (name == "computedStylesDisplay")
+            this.refresh();
+    },
+
     getOptionsMenuItems: function()
     {
         return [
+            {label: "Sort alphabetically", type: "checkbox", checked: Firebug.computedStylesDisplay == "alphabetical",
+                    command: bind(this.toggleDisplay, this) },
+            "-",
             {label: "Refresh", command: bind(this.refresh, this) }
         ];
     },
@@ -1859,6 +1906,12 @@ CSSComputedElementPanel.prototype = extend(CSSElementPanel.prototype,
 
         toggleClass(group, "opened");
         this.groupOpened[groupName] = hasClass(group, "opened");
+    },
+
+    toggleDisplay: function()
+    {
+        var display = Firebug.computedStylesDisplay == "alphabetical" ? "grouped" : "alphabetical";
+        Firebug.setPref(Firebug.prefDomain, "computedStylesDisplay", display);
     }
 });
 

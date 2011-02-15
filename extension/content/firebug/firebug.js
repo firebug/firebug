@@ -79,6 +79,7 @@ const prefNames =  // XXXjjb TODO distribute to modules
     // CSS
     "showUserAgentCSS",
     "expandShorthandProps",
+    "computedStylesDisplay",
 
     // Script
     "decompileEvals", "replaceTabs",
