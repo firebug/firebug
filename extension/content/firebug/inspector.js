@@ -26,21 +26,21 @@ Firebug.Inspector = extend(Firebug.Module,
      * @param elementArr Elements to highlight
      * @param context Context of the elements to be highlighted
      * @param highlightType (optional) Either "frame" or "boxModel", default is frame.
-     * @param color (optional) any valid html color e.g. red, #f00, #ff0000, etc. Only applies to the frame highlighter.
+     * @param colorObj (optional) any valid html color e.g. red, #f00, #ff0000, etc.
      */
-    multiHighlight: function(elementArr, context, highlightType, color)
+    multiHighlight: function(elementArr, context, highlightType, colorObj)
     {
         var i, elt, elementLen, highlighter, usingColorArray;
 
         highlightType = highlightType || "frame";
         highlighter = getHighlighter(highlightType);
-        usingColorArray = FirebugReps.Arr.isArray(color);
+        usingColorArray = FirebugReps.Arr.isArray(colorObj);
 
         this.clearAllHighlights();
 
         if (!elementArr || !FirebugReps.Arr.isArray(elementArr))
         {
-            this.highlightObject(elementArr, context, highlightType, null, color);
+            this.highlightObject(elementArr, context, highlightType, null, colorObj);
         }
         else
         {
@@ -56,25 +56,25 @@ Firebug.Inspector = extend(Firebug.Module,
                             elt = elt.parentNode;
 
                         if (usingColorArray)
-                            highlighter.highlight(context, elt, null, color[i]);
+                            highlighter.highlight(context, elt, null, colorObj[i]);
                         else
-                            highlighter.highlight(context, elt, null, color);
+                            highlighter.highlight(context, elt, null, colorObj);
                     }
                 }
             }
         }
 
-        storeHighlighterParams(null, context, elementArr, null, color, highlightType);
+        storeHighlighterParams(null, context, elementArr, null, colorObj, highlightType);
     },
 
     clearAllHighlights: function() {
         highlighterCache.clear();
     },
 
-    highlightObject: function(element, context, highlightType, boxFrame, color)
+    highlightObject: function(element, context, highlightType, boxFrame, colorObj)
     {
         if (FirebugReps.Arr.isArray(element))
-            return this.multiHighlight(element, context, highlightType, color);
+            return this.multiHighlight(element, context, highlightType, colorObj);
 
         if (!element || !isElement(element) || !isVisible(unwrapObject(element)))
         {
@@ -105,7 +105,7 @@ Firebug.Inspector = extend(Firebug.Module,
             if(!isVisibleElement(element))
                 highlighter.unhighlight(context);
             else if (context && context.window && context.window.document)
-                highlighter.highlight(context, element, boxFrame, color);
+                highlighter.highlight(context, element, boxFrame, colorObj);
         }
         else if (oldContext)
         {
@@ -1095,7 +1095,7 @@ Firebug.Inspector.FrameHighlighter.prototype =
                 css += "box-shadow: 0 0 2px 2px highlight !important; -moz-box-shadow: 0 0 2px 2px highlight !important;";
 
             if(colorObj && colorObj.background)
-                bgDiv.style.cssText = "width: 100%; height: 100%; background-color: " + colorObj.background + " !important; opacity: 0.6 !important;";
+                bgDiv.style.cssText = "width: 100% !important; height: 100% !important; background-color: " + colorObj.background + " !important; opacity: 0.6 !important;";
             else
                 bgDiv.style.cssText = "background-color: transparent !important;";
 
