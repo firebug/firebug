@@ -464,9 +464,14 @@ Firebug.ScriptPanel.prototype = extend(Firebug.SourceBoxPanel,
         persistObjects(this, state);
 
         if (this.location instanceof CompilationUnit)
-            state.location = this.location;
+        {
+             state.location = this.location;
+        }
         else
-            FBTrace.sysout("script.destroy had location not a CompilationUnit ", this.location);
+        {
+            if (FBTrace.DBG_COMPILATION_UNITS)
+                FBTrace.sysout("script.destroy had location not a CompilationUnit ", this.location);
+        }
 
         var sourceBox = this.selectedSourceBox;
         if (sourceBox)
