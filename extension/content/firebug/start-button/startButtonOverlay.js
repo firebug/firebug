@@ -44,10 +44,11 @@ Firebug.StartButton = extend(Firebug.Module,
             // Append the button into Firefox toolbar automatically.
             this.appendToToolbar();
 
-            // If Firefox version is 4+, let's
+            // In case of Firefox 4+ the button is a bit different.
             if (versionChecker.compare(appInfo.version, "4.0*") >= 0)
                 startButton.setAttribute("firefox", "4");
         }
+
         if (FBTrace.DBG_INITIALIZE)
             FBTrace.sysout("Startbutton initializeUI "+startButton);
     },
@@ -72,18 +73,28 @@ Firebug.StartButton = extend(Firebug.Module,
         // Get the current navigation bar button set (a string of button IDs) and append
         // ID of the Firebug start button into it.
         var startButtonId = "firebug-button";
-        var afterId = "urlbar-container";
-        var navBar = $("nav-bar");
-        var curSet = navBar.currentSet.split(",");
+        var navBarId = "nav-bar";
+        var navBar = $(navBarId);
+
+        // In SeaMonkey we need to read the attribute (see issue 4086)
+        // In Firefox the currentSet property must be used.
+        var currentSet = navBar.getAttribute("currentset");
+        if (!currentSet)
+            currentSet = navBar.currentSet;
+
+        if (FBTrace.DBG_INITIALIZE)
+            FBTrace.sysout("Startbutton; curSet: " + currentSet);
 
         // Append only if the button is not already there.
+        var curSet = currentSet.split(",");
         if (curSet.indexOf(startButtonId) == -1)
         {
             var set = curSet.concat(startButtonId);
-
             navBar.setAttribute("currentset", set.join(","));
-            navBar.currentSet = set.join(",");
-            document.persist(navBar.id, "currentset");
+            document.persist(navBarId, "currentset");
+
+            if (FBTrace.DBG_INITIALIZE)
+                FBTrace.sysout("Startbutton; curSet (after modification): " + set.join(","));
 
             try
             {
@@ -98,7 +109,7 @@ Firebug.StartButton = extend(Firebug.Module,
 
         // Don't forget to show the navigation bar - just in case it's hidden.
         collapse(navBar, false);
-        document.persist("nav-bar", "collapsed");
+        document.persist(navBarId, "collapsed");
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
