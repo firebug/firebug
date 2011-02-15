@@ -585,6 +585,8 @@ function instanceOf(object, Klass)
     {
         if (object == Klass.prototype)
            return true;
+        if ( !(object+"") ) // workaround bug https://bugzilla.mozilla.org/show_bug.cgi?id=634150
+            return false;
         object = object.__proto__;
     }
     return false;
