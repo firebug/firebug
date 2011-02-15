@@ -1234,7 +1234,7 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
         context.breakingCause =
         {
             title: $STR("debugger keyword"),
-            message: $STR("firebug.bon.cause.disableDebuggerKeyword"),
+            message: $STR("firebug.bon.cause.disableDebuggerKeyword2"),
             skipAction: function addSkipperAndGo()
             {
                 // a breakpoint that never hits, but prevents debugger keyword (see fbs.onDebugger as well)
