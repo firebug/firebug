@@ -1219,7 +1219,7 @@ BoxModelHighlighter.prototype =
             else
                 removeClass(nodes.offset, "firebugHighlightGroup");
 
-            var win = element.ownerDocument.defaultView;
+            var win = (element.ownerDocument ? element.ownerDocument.defaultView : null);
             if (!win)
                 return;
 
