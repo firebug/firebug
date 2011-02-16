@@ -3811,7 +3811,7 @@ this.isMiddleClick = function(event, allowKeyModifiers)
 
 this.isRightClick = function(event, allowKeyModifiers)
 {
-    
+
     return event.button == 2 && (allowKeyModifiers || this.noKeyModifiers(event));
 };
 
@@ -5347,7 +5347,7 @@ this.SourceLink.prototype =
 {
     toString: function()
     {
-        return this.href;
+        return this.href+"@"+(this.line || '?');
     },
     toJSON: function() // until 3.1...
     {

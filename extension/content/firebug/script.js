@@ -810,6 +810,7 @@ Firebug.ScriptPanel.prototype = extend(Firebug.SourceBoxPanel,
             // The removal of the warning leaves the panel without a clientHeight, so
             //  the old sourcebox will be out of sync. Just remove it and start over.
             this.removeAllSourceBoxes();
+            this.show(); // we are not passing state so I guess we could miss a restore
         }
 
         this.showSource(updatedCompilationUnit.getURL());
