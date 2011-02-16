@@ -1144,7 +1144,6 @@ Firebug.Inspector.FrameHighlighter.prototype =
         if (body)
         {
             body.removeChild(highlighter);
-            removeProxiesForDisabledElements(body);
             quickInfoBox.hide();
         }
 
@@ -1531,32 +1530,15 @@ function createProxiesForDisabledElements(body)
     for(i = 0; i < l; i++)
     {
         node = result.snapshotItem(i);
-        if(!node.fbHasProxyElement)
-        {
-            rect = node.getBoundingClientRect();
-            div = doc.createElementNS("http://www.w3.org/1999/xhtml", "div");
-            hideElementFromInspection(div);
-            div.className = "fbProxyElement";
-            div.style.cssText = moveImp(null, rect.left, rect.top + body.scrollTop) +
-                resizeImp(null, rect.width, rect.height);
-            div.fbProxyFor = node;
-            node.fbHasProxyElement = true;
+        rect = node.getBoundingClientRect();
+        div = doc.createElementNS("http://www.w3.org/1999/xhtml", "div");
+        hideElementFromInspection(div);
+        div.className = "fbProxyElement";
+        div.style.cssText = moveImp(null, rect.left, rect.top + body.scrollTop) + resizeImp(null, rect.width, rect.height);
+        div.fbProxyFor = node;
 
-            body.appendChild(div);
-        }
-    }
-}
-
-function removeProxiesForDisabledElements(body)
-{
-    var i, doc = body.ownerDocument,
-        proxyElements = doc.getElementsByClassName("fbProxyElement"),
-        proxyElementsLen = proxyElements.length;
-
-    for (i = 0; i < proxyElementsLen; i++)
-    {
-        proxyElements[i].fbProxyFor.fbHasProxyElement = false;
-        proxyElements[i].parentNode.removeChild(proxyElements[i]);
+        body.appendChild(div);
+        highlighterCache.add(div);
     }
 }
 
