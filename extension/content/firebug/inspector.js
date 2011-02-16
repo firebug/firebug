@@ -338,14 +338,15 @@ Firebug.Inspector = extend(Firebug.Module,
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 
-    attachRepaintInspectListeners: function(context)
+    attachRepaintInspectListeners: function(elt)
     {
-        var win = context.window;
-        if (!win || !win.document)
+        if (!elt || !elt.ownerDocument || !elt.ownerDocument.defaultView)
             return;
 
+        var win = elt.ownerDocument.defaultView;
+
         if (FBTrace.DBG_INSPECT)
-            FBTrace.sysout("inspector.attachRepaintInspectListeners to " + win.location);
+            FBTrace.sysout("inspector.attachRepaintInspectListeners to " + win.location.href);
 
         // there is no way to check if the listeners have already been added and we should avoid adding properties
         // to the users page. Adding them again will do no harm so lets just do that.
@@ -1028,7 +1029,7 @@ Firebug.Inspector.FrameHighlighter.prototype =
         else
             colorObj = colorObj || {background: "transparent", border: "highlight"};
 
-        Firebug.Inspector.attachRepaintInspectListeners(context);
+        Firebug.Inspector.attachRepaintInspectListeners(element);
         storeHighlighterParams(this, context, element, null, colorObj, null);
 
         var cs;
@@ -1199,7 +1200,7 @@ BoxModelHighlighter.prototype =
             colorObj = colorObj || {content: "SkyBlue", padding: "SlateBlue", border: "#444444", margin: "#EDFF64"};
         }
 
-        Firebug.Inspector.attachRepaintInspectListeners(context);
+        Firebug.Inspector.attachRepaintInspectListeners(element);
         storeHighlighterParams(this, context, element, boxFrame, colorObj, null);
 
         if (context.highlightFrame)
