@@ -23,27 +23,74 @@ Firebug.Inspector = extend(Firebug.Module,
     inspectingPanel: null,
 
     /**
-     * @param elementArr Elements to highlight
-     * @param context Context of the elements to be highlighted
-     * @param highlightType (optional) Either "frame" or "boxModel", default is frame.
-     * @param colorObj (optional) any valid html color e.g. red, #f00, #ff0000, etc.
+     * This is the main highlighter method and can be used to highlight elements using the box model, frame or image map highlighters. This method can highlight either single or multiple elements.
+     *
+     * @param {Array} elementArr Elements to highlight
+     * @param {Window} context Context of the elements to be highlighted
+     * @param {String} [highlightType] Either "frame" or "boxModel", default is configurable.
+     * @param {String} [boxFrame] Displays the line guides for the box model layout view. Valid values are
+     *        "content", "padding", "border" or "margin"
+     * @param {String, Array} [colorObj] Any valid html color e.g. red, #f00, #ff0000, etc., a valid color object
+     *        or any valid highlighter color array. See the Firebug wiki for details.
      */
-    multiHighlight: function(elementArr, context, highlightType, colorObj)
+    highlightObject: function(elementArr, context, highlightType, boxFrame, colorObj)
     {
-        var i, elt, elementLen, highlighter, usingColorArray;
-
-        highlightType = highlightType || "frame";
-        highlighter = getHighlighter(highlightType);
-        usingColorArray = FirebugReps.Arr.isArray(colorObj);
-
-        this.clearAllHighlights();
+        var i, elt, elementLen, oldContext, usingColorArray;
+        var highlighter = highlightType ? getHighlighter(highlightType) : this.defaultHighlighter;
 
         if (!elementArr || !FirebugReps.Arr.isArray(elementArr))
         {
-            this.highlightObject(elementArr, context, highlightType, null, colorObj);
+            // highlight a single element
+            if (!elementArr || !isElement(elementArr) || !isVisible(unwrapObject(elementArr)))
+            {
+                if(elementArr && elementArr.nodeType == 3)
+                    elementArr = elementArr.parentNode;
+                else
+                    elementArr = null;
+            }
+
+            if (elementArr && context && context.highlightTimeout)
+            {
+                context.clearTimeout(context.highlightTimeout);
+                delete context.highlightTimeout;
+            }
+
+            oldContext = this.highlightedContext;
+            if (oldContext && oldContext.window)
+                this.clearAllHighlights();
+
+            this.highlighter = highlighter;
+            this.highlightedContext = context;
+
+            if (elementArr)
+            {
+                if(!isVisibleElement(elementArr))
+                    highlighter.unhighlight(context);
+                else if (context && context.window && context.window.document)
+                    highlighter.highlight(context, elementArr, boxFrame, colorObj);
+            }
+            else if (oldContext)
+            {
+                oldContext.highlightTimeout = oldContext.setTimeout(function()
+                {
+                    delete oldContext.highlightTimeout;
+                    if (oldContext.window && oldContext.window.document)
+                    {
+                        highlighter.unhighlight(oldContext);
+
+                        if (oldContext.inspectorMouseMove)
+                            oldContext.window.document.removeEventListener("mousemove",
+                                oldContext.inspectorMouseMove, true);
+                    }
+                }, inspectDelay);
+            }
         }
         else
         {
+            // Highlight multiple elements
+            this.clearAllHighlights();
+            usingColorArray = FirebugReps.Arr.isArray(colorObj);
+
             if (context && context.window && context.window.document)
             {
                 for (i = 0, elementLen = elementArr.length; i < elementLen; i++)
@@ -62,66 +109,13 @@ Firebug.Inspector = extend(Firebug.Module,
                     }
                 }
             }
-        }
 
-        storeHighlighterParams(null, context, elementArr, null, colorObj, highlightType);
+            storeHighlighterParams(null, context, elementArr, null, colorObj, highlightType);
+        }
     },
 
     clearAllHighlights: function() {
         highlighterCache.clear();
-    },
-
-    highlightObject: function(element, context, highlightType, boxFrame, colorObj)
-    {
-        if (FirebugReps.Arr.isArray(element))
-            return this.multiHighlight(element, context, highlightType, colorObj);
-
-        if (!element || !isElement(element) || !isVisible(unwrapObject(element)))
-        {
-            if(element && element.nodeType == 3)
-                element = element.parentNode;
-            else
-                element = null;
-        }
-
-        if (element && context && context.highlightTimeout)
-        {
-            context.clearTimeout(context.highlightTimeout);
-            delete context.highlightTimeout;
-        }
-
-        var highlighter = highlightType ? getHighlighter(highlightType) : this.defaultHighlighter;
-
-        var oldContext = this.highlightedContext;
-        if (oldContext && oldContext.window)
-            this.clearAllHighlights();
-
-        this.highlighter = highlighter;
-        this.highlightedElement = element;
-        this.highlightedContext = context;
-
-        if (element)
-        {
-            if(!isVisibleElement(element))
-                highlighter.unhighlight(context);
-            else if (context && context.window && context.window.document)
-                highlighter.highlight(context, element, boxFrame, colorObj);
-        }
-        else if (oldContext)
-        {
-            oldContext.highlightTimeout = oldContext.setTimeout(function()
-            {
-                delete oldContext.highlightTimeout;
-                if (oldContext.window && oldContext.window.document)
-                {
-                    highlighter.unhighlight(oldContext);
-
-                    if (oldContext.inspectorMouseMove)
-                        oldContext.window.document.removeEventListener("mousemove",
-                            oldContext.inspectorMouseMove, true);
-                }
-            }, inspectDelay);
-        }
     },
 
     toggleInspecting: function(context)
@@ -322,7 +316,7 @@ Firebug.Inspector = extend(Firebug.Module,
         if (highlightType)
         {
             // highlightType is only used for multiHighlighter
-            this.multiHighlight(element, context, highlightType, colorObj);
+            this.highlightObject(element, context, highlightType, null, colorObj);
         }
         else
         {
