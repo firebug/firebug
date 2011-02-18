@@ -112,7 +112,7 @@ Firebug.ScriptPanel.prototype = extend(Firebug.SourceBoxPanel,
     initialize: function(context, doc)
     {
         this.location = null;
-        ToolsInterface.addEventListener("onJavaScriptDebugging", this);
+        ToolsInterface.addListener(this);
         Firebug.SourceBoxPanel.initialize.apply(this, arguments);
     },
 
@@ -479,7 +479,7 @@ Firebug.ScriptPanel.prototype = extend(Firebug.SourceBoxPanel,
             state.previousCenterLine = sourceBox.centerLine;
             delete this.selectedSourceBox;
         }
-        Firebug.Debugger.removeListener(this);
+        ToolsInterface.browser.removeListener(this);
         Firebug.SourceBoxPanel.destroy.apply(this, arguments);
     },
 
@@ -1157,11 +1157,20 @@ Firebug.ScriptPanel.prototype = extend(Firebug.SourceBoxPanel,
     {
         if (FBTrace.DBG_CONSOLE || FBTrace.DBG_ACTIVATION)
             FBTrace.sysout("ScriptPanel.onActivationChanged; " + enable);
+        var debuggerTool = Firebug.ToolsInterface.browser.getTool('script');
+        if (debuggerTool)
+        {
+            if (enable)
+                debuggerTool.addListener(this);
+            else
+                debuggerTool.removeListener(this);
+        }
+    },
 
-        if (enable)
-            Firebug.Debugger.addObserver(this);
-        else
-            Firebug.Debugger.removeObserver(this);
+    // implements Tool
+    onActiveTool: function(isActive)
+    {
+        this.onJavaScriptDebugging(isActive, "onActiveTool");
     },
 });
 

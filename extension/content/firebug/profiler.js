@@ -37,9 +37,9 @@ Firebug.Profiler = extend(Firebug.Module,
     setEnabled: function()
     {
         // The profiler is available only if the debugger (script panel) and console are enabled.
-        var debuggerEnabled = Firebug.ToolsInterface.browser.getTool("script").enabled;
-        var consoleEnabled = Firebug.ToolsInterface.browser.getTool("console").enabled;
-        var disabled = !debuggerEnabled || !consoleEnabled;
+    	var debuggerTool = Firebug.ToolsInterface.browser.getTool("script");
+        var consoleTool = Firebug.ToolsInterface.browser.getTool("console");
+        var disabled = (debuggerTool && !debuggerTool.enabled) || (consoleTool && !consoleTool.enabled);
 
         // Attributes must be modified on the <command> element. All toolbar buttons
         // and menuitems are hooked up to the command.

@@ -2239,7 +2239,18 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
         Firebug.ActivableModule.initialize.apply(this, arguments);
     },
 
+    /* Tool Interface */
     toolName: "script",
+
+    addListener: function(listener)
+    {
+         Firebug.Debugger.addObserver(listener);
+    },
+
+    removeListener: function(listener)
+    {
+         Firebug.Debugger.removeObserver(listener);
+    },
 
     /*
      * per-XUL window registration; this method just allows us to keep fbs in this file.
@@ -2493,12 +2504,7 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
     registerDebugger: function() // 1.3.1 safe for multiple calls
     {
         if (FBTrace.DBG_INITIALIZE)
-            FBTrace.sysout("registerDebugger this.registered: "+this.registered);
-
-        if (this.registered)
-            return;
-
-        this.registered = true;
+            FBTrace.sysout("registerDebugger");
 
         var check = fbs.registerDebugger(this);  //  this will eventually set 'jsd' on the statusIcon
 
@@ -2509,18 +2515,13 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
     unregisterDebugger: function() // 1.3.1 safe for multiple calls
     {
         if (FBTrace.DBG_INITIALIZE)
-            FBTrace.sysout("debugger.unregisterDebugger this.registered: "+this.registered);
-
-        if (!this.registered)
-            return;
+            FBTrace.sysout("debugger.unregisterDebugger");
 
         // stay registered if we are profiling across a reload.
         if (Firebug.Profiler.isProfiling())
             return;
 
         var check = fbs.unregisterDebugger(this);
-
-        this.registered = false;
 
         if (FBTrace.DBG_ACTIVATION)
             FBTrace.sysout("debugger.unregisterDebugger: "+check+" debuggers");
@@ -2541,7 +2542,7 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
         if (FBTrace.DBG_ACTIVATION)
         {
             var names = [];
-            this.observers.forEach(function(ob){names.push(ob.name);});
+            this.observers.forEach(function(ob){names.push(ob.name || ob.dispatchName || ob.toolName);});
             FBTrace.sysout("debugger.onObserverChange "+this.hasObservers()+" "+
                 this.observers.length+": "+names.join(','), this.observers);
         }
@@ -2551,7 +2552,7 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
             this.activateDebugger();
             if (Firebug.currentContext)
             {
-                var name = observer.name || observer.dispatchName;
+                var name = observer.name || observer.dispatchName || observer.toolName;
                 Firebug.Console.log("enabling javascript debugger "+(name?"to support "+name:""));
             }
         }
@@ -2565,6 +2566,9 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
     {
         this.registerDebugger();
 
+        // If jsd is already active, we'll notify true; else false and we'll get another event
+        FBL.dispatch2(this.observers, "onActiveTool", [{isActive: fbs.isJSDActive()}]);
+
         if (FBTrace.DBG_PANELS || FBTrace.DBG_ACTIVATION)
             FBTrace.sysout("debugger.activateDebugger requested;");
     },
@@ -2572,6 +2576,9 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
     deactivateDebugger: function()
     {
         this.unregisterDebugger();
+
+        // if jsd deactivated because we unregistered, we'll send false, else true
+        FBL.dispatch2(this.observers, "onActiveTool", [{isActive: fbs.isJSDActive()}]);
 
         if (FBTrace.DBG_PANELS || FBTrace.DBG_ACTIVATION)
             FBTrace.sysout("debugger.deactivate");
@@ -2615,7 +2622,7 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
             FBTrace.sysout("debugger.onResumeFirebug unpaused: "+unpaused+" isAlwaysEnabled " +
                 Firebug.Debugger.isAlwaysEnabled());
 
-        if (FBTrace.DBG_ERRORS && !this.registered && Firebug.Debugger.isAlwaysEnabled())
+        if (FBTrace.DBG_ERRORS && Firebug.Debugger.isAlwaysEnabled())
             FBTrace.sysout("debugger.onResumeFirebug but debugger " +
                 Firebug.Debugger.debuggerName+" not registered! *** ");
     },
@@ -2790,11 +2797,13 @@ Firebug.JSDebugClient =
 {
         onJSDActivate: function(active, fromMsg)
         {
-            dispatch2(this.fbListeners, "onJSDActivate", arguments);
+            Firebug.ToolsInterface.browser.dispatch("onJavaScriptDebugging", {isActive: active});
+            dispatch2(this.fbListeners, "onJSDActivate", arguments);  // TODO remove
         },
         onJSDDeactivate: function(active, fromMsg)
         {
-            dispatch2(this.fbListeners, "onJSDDeactivate", arguments);
+            Firebug.ToolsInterface.browser.dispatch("onJavaScriptDebugging", {isActive: active});
+            dispatch2(this.fbListeners, "onJSDDeactivate", arguments);  // TODO remove
         },
         onPauseJSDRequested: function(rejection)
         {
