@@ -23,7 +23,6 @@ function Browser()
 {
     this.contexts = {}; // map of contexts, indexed by context ID
     this.activeContext = null;
-    this.handlers = {}; // map of event types to array of handler functions
     this.listeners = [];  // array of Browser.listener objects
     this.tools = {};  // registry of known tools
     this.connected = false;
@@ -114,7 +113,7 @@ Browser.prototype.clearAllBreakpoints = function()
  * Returns current status of tools
  *
  * @function
- * @returns  an array of Tools, an object with toolName and enabled boolean
+ * @returns  an array of Tools, an object with {toolName: string, enabled: boolean, enable:function(boolean, fnOfBoolean),}
  *
  */
 Browser.prototype.getTools = function()
@@ -132,6 +131,9 @@ Browser.prototype.getTool = function(name)
     return this.tools[name];
 }
 
+/*
+ * Call on the backend
+ */
 Browser.prototype.registerTool = function(name, tool)
 {
     this.tools[name] = tool;
@@ -228,28 +230,21 @@ Browser.prototype.isConnected = function()
  *   by {@link BrowserEventListener}
  * @exception Error if an unsupported event type is specified
  */
-Browser.prototype.addEventListener = function(eventType, listener)
+Browser.prototype.addListener = function(eventType)
 {
-    if ( !Browser.listener.hasOwnProperty(eventType) )
-    {
-        // unsupported event type
-        throw new Error("eventType '" + eventType + "' is not supported");
-    }
-
-    var list = this.handlers[eventType];
-    if (!list)
-    {
-        list = [];
-        this.handlers[eventType] = list;
-    }
-    list.push(listener);
+    var list = this.listeners;
+    var i = list.indexOf(listener);
+    if (i === -1)
+        list.push(listener);
+    // else no op
 };
 
-Browser.prototype.addListener = function(listener)
+Browser.prototype.removeListener = function(listener)
 {
-    var i = this.listeners.indexOf(listener);
-    if (i === -1)
-        this.listeners.push(listener);
+    var list = this.listeners;
+    var i = list.indexOf(listener);
+    if (i !== -1)
+        list.splice(i, 1);
     // else no-op
 };
 
