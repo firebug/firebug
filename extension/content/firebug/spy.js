@@ -753,15 +753,19 @@ function callPageHandler(spy, event, originalHandler)
         if (FBTrace.DBG_ERRORS)
             FBTrace.sysout("spy.onHTTPSpyReadyStateChange: EXCEPTION "+exc, [exc, event]);
 
-        var error = Firebug.Errors.reparseXPC(exc, spy.context);
-        if (error)
+        var xpcError = Firebug.Errors.reparseXPC(exc, spy.context);
+        if (xpcError) //
         {
             // TODO attach trace
             if (FBTrace.DBG_ERRORS)
-                FBTrace.sysout("spy.onHTTPSpyReadyStateChange: reparseXPC", error);
+                FBTrace.sysout("spy.onHTTPSpyReadyStateChange: reparseXPC", xpcError);
 
             // Make sure the exception is displayed in both Firefox & Firebug console.
-            throw new Error(error.message, error.href, error.lineNo);
+            throw new Error(xpcError.message, xpcError.href, xpcError.lineNo);
+        }
+        else
+        {
+            throw exc;
         }
     }
 }

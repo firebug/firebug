@@ -63,7 +63,6 @@ var annotationService =
     clear: function()
     {
         this.annotations = [];
-        this.flush();
     },
 
     initialize: function()

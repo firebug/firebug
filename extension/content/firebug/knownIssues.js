@@ -35,10 +35,13 @@ Firebug.KnownIssues = extend(Firebug.Module,
         // In Firefox 4.0b7+ the addon-toolbar is not showing up. We'll show it once just
         // in case the user overlooks the new Firebug start-button in the toolbar. As soon
         // as users will get used to the toolbar button this could be removed completely.
-        if (!Firebug.addonBarOpened && window.setToolbarVisibility)
+        if (!Firebug.addonBarOpened)
         {
             var addonBar = document.getElementById("addon-bar");
-            setToolbarVisibility(addonBar, true)
+
+            // Open the addon bar
+            collapse(addonBar, false);
+            document.persist("addon-bar", "collapsed");
 
             // This is just one time operation.
             Firebug.setPref(Firebug.prefDomain, "addonBarOpened", true);

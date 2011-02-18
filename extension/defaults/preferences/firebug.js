@@ -65,6 +65,7 @@ pref("extensions.firebug.displayedAttributeValueLimit", 1024); // Maximum charac
 // CSS
 pref("extensions.firebug.showUserAgentCSS", false);
 pref("extensions.firebug.expandShorthandProps", false);
+pref("extensions.firebug.computedStylesDisplay", "grouped");
 
 // Script
 pref("extensions.firebug.service.breakOnErrors", false);

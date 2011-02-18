@@ -115,11 +115,25 @@ toolbar[iconsize="small"] #firebug-button > .toolbarbutton-icon {
    only anyway, see: https://bugzilla.mozilla.org/show_bug.cgi?id=616472 */
 #firebug-button[firefox="4"] {
     -moz-binding: url("chrome://firebug/content/start-button/startButton.xml#start-button");
+}
+
+#firebug-button[script="on"][firefox="4"],
+#firebug-button[net="on"][firefox="4"],
+#firebug-button[console="on"][firefox="4"] {
     list-style-image: url(chrome://firebug/skin/firebug16.png);
 }
 
+#firebug-button[firefox="4"] {
+    list-style-image: url(chrome://firebug/skin/firebug16.png);
+}
+
+#firebug-button[suspended="suspended"][firefox="4"] {
+    list-style-image: url(chrome://firebug/skin/firebug-gray-16.png);
+}
+
+/* Error badge (displays an error counter) */
 #firebug-button .badge {
-   -moz-box-sizing: border-box;
+    -moz-box-sizing: border-box;
     margin: 6px -10px 0 -8px;
 }
 

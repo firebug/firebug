@@ -12,7 +12,7 @@
                 command="cmd_openInEditor" openFromContext="true">
             <menupopup id="menu_firebugOpenWith"
                     onpopupshowing="return Firebug.ExternalEditors.onEditorsShowing(this, 1);">
-                <menuitem id="menu_configureEditorsContext" label="firebug.ConfigureEditors"
+                <menuitem id="menu_configureEditorsContext" label="firebug.Configure_Editors"
                         openEditorList="true" class="fbInternational"/>
             </menupopup>
         </menu>
@@ -29,7 +29,7 @@
                 class="fbInternational" openFromContext="true" command="cmd_openInEditor">
             <menupopup id="fbFirebugMenu_OpenWith"
                     onpopupshowing="return Firebug.ExternalEditors.onEditorsShowing(this);">
-                <menuitem id="menu_configureEditors" label="firebug.ConfigureEditors"
+                <menuitem id="menu_configureEditors" label="firebug.Configure_Editors"
                         openEditorList="true" class="fbInternational"/>
             </menupopup>
         </menu>
