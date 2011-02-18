@@ -586,7 +586,7 @@ function instanceOf(object, Klass)
     {
         if (object == Klass.prototype)
            return true;
-        
+
         if ( typeof(object) === 'xml')
             return (Klass.prototype === XML.prototype);
 
@@ -1357,7 +1357,7 @@ FirebugReps.CompilationUnit = domplate(FirebugReps.SourceLink,
 
     supportsObject: function(object, type)
     {
-       return (object instanceof CompilationUnit) ? 2 : 0;
+       return (object instanceof Firebug.ToolsInterface.CompilationUnit) ? 2 : 0;
     },
 
     persistObject: function(compilationUnit)
