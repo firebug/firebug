@@ -853,9 +853,15 @@ var fbs =
 
         if (debuggr)
         {
-            debuggers.push(debuggr);
-            if (debuggers.length == 1)
-                this.enableDebugger();
+            var anyDebuggers = (debuggers.length === 1);
+
+            var i = debuggers.indexOf(debuggr);
+            if (i === -1)
+            {
+                debuggers.push(debuggr);
+                if (!anyDebuggers)
+                    this.enableDebugger();
+            }
 
             if (FBTrace.DBG_FBS_FINDDEBUGGER  || FBTrace.DBG_ACTIVATION)
                 FBTrace.sysout("fbs.registerDebugger have "+debuggers.length+
