@@ -652,7 +652,7 @@ Firebug.Inspector = extend(Firebug.Module,
     /**
      * Called when a panel is shown.
      * @param [browser] Browser
-     * @param [panel] Panel
+     * @panel [panel] Panel
      */
     showPanel: function(browser, panel)
     {
