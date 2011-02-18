@@ -1387,7 +1387,7 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
                 var eventOriginIndex = -1;
                 for (var i=0; i<context.windows.length; i++)
                 {
-                    if (context.windows[i] == eventOrigin) {
+                    if (unwrapObject(context.windows[i]) == eventOrigin) {
                         eventOriginIndex = i;
                         break;
                     }
