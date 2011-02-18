@@ -26,9 +26,6 @@ const panelURL = "chrome://firebug/content/panel.html";
 
 const statusCropSize = 20;
 
-const positiveZoomFactors = [1, 1.1, 1.2, 1.3, 1.5, 2, 3];
-const negativeZoomFactors = [1, 0.95, 0.8, 0.7, 0.5, 0.2, 0.1];
-
 // ************************************************************************************************
 // Globals
 
@@ -1032,7 +1029,7 @@ top.FirebugChrome =
 
     applyTextSize: function(value)
     {
-        var zoom = value >= 0 ? positiveZoomFactors[value] : negativeZoomFactors[Math.abs(value)];
+        var zoom = value >= 0 ? Firebug.positiveZoomFactors[value] : Firebug.negativeZoomFactors[Math.abs(value)];
 
         panelBar1.browser.markupDocumentViewer.textZoom = zoom;
         panelBar2.browser.markupDocumentViewer.textZoom = zoom;
@@ -1708,7 +1705,7 @@ function onMouseScroll(event) {
     if (FBL.isControlShift(event))
     {
         FBL.cancelEvent(event);
-        Firebug.increaseTextSize(-event.detail);
+        Firebug.changeTextSize(-event.detail);
     }
 }
 

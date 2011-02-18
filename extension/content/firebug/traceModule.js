@@ -774,12 +774,6 @@ Firebug.TraceModule.MessageTemplate = domplate(Firebug.Rep,
             });
         }
 
-        if (hasClass(target, "stackFrameLink")&& Firebug.ExternalEditors.count())
-        {
-            var sourceLink = new FBL.SourceLink(target.innerHTML, target.getAttribute("lineNumber"));
-            Firebug.ExternalEditors.appendContextMenuItem(items, target.innerHTML, target.getAttribute("lineNumber"));
-        }
-
         if (items.length > 0)
             items.push("-");
 

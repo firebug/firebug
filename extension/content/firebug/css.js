@@ -428,7 +428,22 @@ Firebug.CSSStyleSheetPanel.prototype = extend(Firebug.SourceBoxPanel,
             this.stylesheetEditor.styleSheet = this.location;
             Firebug.Editor.startEditing(this.panelNode, css, this.stylesheetEditor);
             //this.stylesheetEditor.scrollToLine(topmost.line, topmost.offset);
+            this.stylesheetEditor.input.scrollTop = this.panelNode.scrollTop;
         }
+    },
+
+    loadOriginalSource: function()
+    {
+        if (!this.location)
+            return;
+
+        var styleSheet = this.location;
+
+        var css = getOriginalStyleSheetCSS(styleSheet, this.context);
+
+        this.stylesheetEditor.setValue(css);
+        this.stylesheetEditor.saveEdit(null, css);
+        //styleSheet.editStyleSheet.showUnformated = true;
     },
 
     getStylesheetURL: function(rule)
@@ -469,11 +484,7 @@ Firebug.CSSStyleSheetPanel.prototype = extend(Firebug.SourceBoxPanel,
 
     getStyleSheetRules: function(context, styleSheet)
     {
-        // Skip all stylesheets marked as 'firebugIgnore', but don't skip the
-        // default stylesheet that is used in case there is no other stylesheet
-        // on the page.
-        var unwrapped = styleSheet ? unwrapObject(styleSheet.ownerNode) : null;
-        if (!styleSheet || unwrapped && unwrapped.firebugIgnore && !unwrapped.defaultStylesheet)
+        if (!styleSheet)
             return [];
 
         var isSystemSheet = isSystemStyleSheet(styleSheet);
@@ -897,11 +908,20 @@ Firebug.CSSStyleSheetPanel.prototype = extend(Firebug.SourceBoxPanel,
         if (FBTrace.DBG_CSS)
             FBTrace.sysout("css.updateLocation; " + (styleSheet ? styleSheet.href : "no stylesheet"));
 
-        if (styleSheet && styleSheet.editStyleSheet)
-            styleSheet = styleSheet.editStyleSheet.sheet;
+        // Skip all stylesheets marked as 'firebugIgnore', but don't skip the
+        // default stylesheet that is used in case there is no other stylesheet
+        // on the page.
+        var unwrapped = styleSheet ? unwrapObject(styleSheet.ownerNode) : null;
+        if (!styleSheet || unwrapped && unwrapped.firebugIgnore && !unwrapped.defaultStylesheet)
+            var rules = [];
+        else
+        {
+            if (styleSheet.editStyleSheet)
+                styleSheet = styleSheet.editStyleSheet.sheet;
+            var rules = this.getStyleSheetRules(this.context, styleSheet);
+        }
 
-        var rules = this.getStyleSheetRules(this.context, styleSheet);
-        if (rules && rules.length)
+        if (rules.length)
         {
             this.template.tag.replace({rules: rules}, this.panelNode);
         }
@@ -1011,6 +1031,17 @@ Firebug.CSSStyleSheetPanel.prototype = extend(Firebug.SourceBoxPanel,
     getContextMenuItems: function(style, target)
     {
         var items = [];
+
+        if (target.nodeName == "TEXTAREA")
+        {
+            items = Firebug.BaseEditor.getContextMenuItems();
+            items.push(
+                '-',
+                {label: "Load Original Source",
+                    command: bindFixed(this.loadOriginalSource, this) }
+            );
+            return items;
+        }
 
         if (hasClass(target, "cssSelector"))
         {
@@ -1726,27 +1757,41 @@ CSSComputedElementPanel.prototype = extend(CSSElementPanel.prototype,
     template: domplate(
     {
         computedTag:
-            DIV({"class": "a11yCSSView", role: "list", "aria-label" : $STR('aria.labels.computed styles')},
+            DIV({"class": "a11yCSSView", role: "list", "aria-label": $STR("aria.labels.computed styles")},
                 FOR("group", "$groups",
-                    DIV({"class": "computedStylesGroup opened", role: "list"},
+                    DIV({"class": "computedStylesGroup", $opened: "$group.opened", role: "list"},
                         H1({"class": "cssComputedHeader groupHeader focusRow", role: "listitem"},
                             IMG({"class": "twisty", role: "presentation"}),
                             SPAN({"class": "cssComputedLabel"}, "$group.title")
                         ),
-                        TABLE({width: "100%", role: 'group'},
-                            TBODY({role: 'presentation'},
+                        TABLE({width: "100%", role: "group"},
+                            TBODY({role: "presentation"},
                                 FOR("prop", "$group.props",
-                                    TR({"class": 'focusRow computedStyleRow', role: 'listitem'},
-                                        TD({"class": "stylePropName", role: 'presentation'}, "$prop.name"),
-                                        TD({"class": "stylePropValue", role: 'presentation'}, "$prop.value")
+                                    TR({"class": "focusRow computedStyleRow", role: "listitem"},
+                                        TD({"class": "stylePropName", role: "presentation"}, "$prop.name"),
+                                        TD({"class": "stylePropValue", role: "presentation"}, "$prop.value")
                                     )
                                 )
                             )
                         )
                     )
                 )
+            ),
+
+        computedAlphabeticalTag:
+            DIV({"class": "a11yCSSView", role: "list", "aria-label" : $STR("aria.labels.computed styles")},
+                TABLE({width: "100%", role: "list"},
+                    TBODY({role: "presentation"},
+                        FOR("prop", "$props",
+                            TR({"class": "focusRow computedStyleRow", role: "listitem"},
+                                TD({"class": "stylePropName", role: "presentation"}, "$prop.name"),
+                                TD({"class": "stylePropValue", role: "presentation"}, "$prop.value")
+                            )
+                        )
+                    )
+                )
             )
-    }),
+  }),
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 
@@ -1755,25 +1800,50 @@ CSSComputedElementPanel.prototype = extend(CSSElementPanel.prototype,
         var win = element.ownerDocument.defaultView;
         var style = win.getComputedStyle(element, "");
 
-        var groups = [];
-
-        for (var groupName in styleGroups)
+        if (Firebug.computedStylesDisplay == "alphabetical")
         {
-            var title = $STR("StyleGroup-" + groupName);
-            var group = {title: title, props: []};
-            groups.push(group);
-
-            var props = styleGroups[groupName];
-            for (var i = 0; i < props.length; ++i)
+            var props = [];
+            
+            for (var groupName in styleGroups)
             {
-                var propName = props[i];
-                var propValue = stripUnits(rgbToHex(style.getPropertyValue(propName)));
-                if (propValue)
-                    group.props.push({name: propName, value: propValue});
+                var groupProps = styleGroups[groupName];
+
+                for (var i = 0; i < groupProps.length; ++i)
+                {
+                    var propName = groupProps[i];
+                    var propValue = stripUnits(rgbToHex(style.getPropertyValue(propName)));
+                    if (propValue)
+                        props.push({name: propName, value: propValue});
+                }
             }
+            sortProperties(props);
+
+            var result = this.template.computedAlphabeticalTag.replace({props: props}, this.panelNode);
+        }
+        else
+        {
+            var groups = [];
+    
+            for (var groupName in styleGroups)
+            {
+                var title = $STR("StyleGroup-" + groupName);
+                var group = {title: title, props: []};
+                groups.push(group);
+    
+                var props = styleGroups[groupName];
+                for (var i = 0; i < props.length; ++i)
+                {
+                    var propName = props[i];
+                    var propValue = stripUnits(rgbToHex(style.getPropertyValue(propName)));
+                    if (propValue)
+                        group.props.push({name: propName, value: propValue});
+                }
+                group.opened = this.groupOpened[title];
+            }
+    
+            var result = this.template.computedTag.replace({groups: groups}, this.panelNode);
         }
 
-        var result = this.template.computedTag.replace({groups: groups}, this.panelNode);
         dispatch(this.fbListeners, 'onCSSRulesAdded', [this, result]);
     },
 
@@ -1788,6 +1858,13 @@ CSSComputedElementPanel.prototype = extend(CSSElementPanel.prototype,
     {
         Firebug.CSSStyleSheetPanel.prototype.initialize.apply(this, arguments);
 
+        this.groupOpened = [];
+        for (var groupName in styleGroups)
+        {
+            var title = $STR("StyleGroup-" + groupName);
+            this.groupOpened[title] = true;
+        }
+
         this.onMouseDown = bind(this.onMouseDown, this);
     },
 
@@ -1796,9 +1873,18 @@ CSSComputedElementPanel.prototype = extend(CSSElementPanel.prototype,
         this.updateComputedView(element);
     },
 
+    updateOption: function(name, value)
+    {
+        if (name == "computedStylesDisplay")
+            this.refresh();
+    },
+
     getOptionsMenuItems: function()
     {
         return [
+            {label: "Sort alphabetically", type: "checkbox", checked: Firebug.computedStylesDisplay == "alphabetical",
+                    command: bind(this.toggleDisplay, this) },
+            "-",
             {label: "Refresh", command: bind(this.refresh, this) }
         ];
     },
@@ -1816,8 +1902,16 @@ CSSComputedElementPanel.prototype = extend(CSSElementPanel.prototype,
     toggleNode: function(event)
     {
         var group = getAncestorByClass(event.target, "computedStylesGroup");
+        var groupName = group.getElementsByClassName("cssComputedLabel")[0].textContent;
 
         toggleClass(group, "opened");
+        this.groupOpened[groupName] = hasClass(group, "opened");
+    },
+
+    toggleDisplay: function()
+    {
+        var display = Firebug.computedStylesDisplay == "alphabetical" ? "grouped" : "alphabetical";
+        Firebug.setPref(Firebug.prefDomain, "computedStylesDisplay", display);
     }
 });
 
@@ -2295,12 +2389,35 @@ function getTopmostRuleLine(panelNode)
     return 0;
 }
 
-function getStyleSheetCSS(sheet, context)
+function getOriginalStyleSheetCSS(sheet, context)
 {
     if (sheet.ownerNode instanceof HTMLStyleElement)
         return sheet.ownerNode.innerHTML;
     else
         return context.sourceCache.load(sheet.href).join("");
+}
+
+function getStyleSheetCSS(sheet, context)
+{
+    function beutify(css, indent) {
+        var indent='\n'+Array(indent+1).join(' ');
+        var i=css.indexOf('{');
+        var match=css.substr(i+1).match(/(?:[^;\(]*(?:\([^\)]*?\))?[^;\(]*)*;?/g);
+        match.pop();
+        match.pop();
+        return css.substring(0, i+1) + indent
+                + match.sort().join(indent) + '\n}';
+    }
+    var cssRules = sheet.cssRules, css=[];
+    for(var i = 0; i < cssRules.length; i++){
+        var rule = cssRules[i];
+        if(rule instanceof CSSStyleRule)
+            css.push(beutify(rule.cssText, 4));
+        else
+            css.push(rule.cssText);
+    }
+
+    return css.join('\n\n') + '\n';
 }
 
 function getStyleSheetOwnerNode(sheet)

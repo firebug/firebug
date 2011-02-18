@@ -257,6 +257,7 @@ Firebug.Activation = extend(Firebug.Module,
     clearAnnotations: function()
     {
         this.getAnnotationService().clear();
+        this.getAnnotationService().flush();
     },
 
     setPageAnnotation: function(currentURI, annotation)

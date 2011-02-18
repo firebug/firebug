@@ -1056,7 +1056,7 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
         {
             this.syncCommands(panel.context);
             this.ableWatchSidePanel(panel.context);
-            if (FBTrace.DBG_PANELS) FBTrace.sysout("debugger.showPanel this.location:"+this.location);
+            if (FBTrace.DBG_PANELS) FBTrace.sysout("debugger.showPanel panel.location:"+panel.location);
         }
     },
 
@@ -1234,7 +1234,7 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
         context.breakingCause =
         {
             title: $STR("debugger keyword"),
-            message: $STR("firebug.bon.cause.disableDebuggerKeyword"),
+            message: $STR("firebug.bon.cause.disableDebuggerKeyword2"),
             skipAction: function addSkipperAndGo()
             {
                 // a breakpoint that never hits, but prevents debugger keyword (see fbs.onDebugger as well)
@@ -1387,7 +1387,7 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
                 var eventOriginIndex = -1;
                 for (var i=0; i<context.windows.length; i++)
                 {
-                    if (context.windows[i] == eventOrigin) {
+                    if (unwrapObject(context.windows[i]) == eventOrigin) {
                         eventOriginIndex = i;
                         break;
                     }
