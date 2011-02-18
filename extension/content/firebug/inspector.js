@@ -21,6 +21,9 @@ var frameHighlighter = null;
 
 // ************************************************************************************************
 
+/**
+ * @module Implements Firebug Inspector logic.
+ */
 Firebug.Inspector = extend(Firebug.Module,
 {
     dispatchName: "inspector",
@@ -29,13 +32,19 @@ Firebug.Inspector = extend(Firebug.Module,
 
     /**
      * Main highlighter method. Can be used to highlight elements using the box model, frame or image map highlighters. Can highlight single or multiple elements.
+     *
+     * Examples:
+     * Firebug.Inspector.highlightObject([window.content.document.getElementById('gbar'), window.content.document.getElementById('logo')], window.content, "frame", null, ["#ff0000",{background:"#0000ff", border:"#ff0000"}])
+     * or
+     * Firebug.Inspector.highlightObject([window.content.document.getElementById('gbar'), window.content.document.getElementById('logo')], window.content, "boxModel", null, [{content: "#ff0000", padding: "#eeeeee", border: "#00ff00", margin: "#0000ff"},{content: "#00ff00", padding: "#eeeeee", border: "#00ff00", margin: "#0000ff"}])
+     *
      * @param {array} elementArr Elements to highlight
      * @param {window} context Context of the elements to be highlighted
      * @param {string} [highlightType] Either "frame" or "boxModel". Default is configurable.
      * @param {string} [boxFrame] Displays the line guides for the box model layout view. Valid values are
      *        "content", "padding", "border" or "margin"
      * @param {string | array} [colorObj] Any valid html color e.g. red, #f00, #ff0000, etc., a valid color object
-     *        or any valid highlighter color array. See the Firebug wiki for details.
+     *        or any valid highlighter color array.
      */
     highlightObject: function(elementArr, context, highlightType, boxFrame, colorObj)
     {
