@@ -219,8 +219,8 @@ Firebug.ExternalEditors = extend(Firebug.Module,
 
     openContext: function(context, editorId)
     {
-        var location = Firebug.chrome.getSelectedPanelLocation();
-        this.open(location, null, editorId, context)
+        var url = Firebug.chrome.getSelectedPanelURL();
+        this.open(url, null, editorId, context)
     },
 
     open: function(href, line, editorId, context)

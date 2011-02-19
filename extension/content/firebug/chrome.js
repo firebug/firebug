@@ -663,7 +663,7 @@ top.FirebugChrome =
         return switchToPanel;
     },
 
-    getSelectedPanelLocation: function()
+    getSelectedPanelURL: function()
     {
         var location;
         if (Firebug.currentContext)

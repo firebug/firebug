@@ -4434,6 +4434,9 @@ this.normalizeURL = function(url)  // this gets called a lot, any performance im
         // For some reason, JSDS reports file URLs like "file:/" instead of "file:///", so they
         // don't match up with the URLs we get back from the DOM
         url = url.replace(/file:\/([^/])/g, "file:///$1");
+        // For script tags inserted dynamically sometimes the script.fileName is bogus
+        url = url.replace(/[^\s]*\s->\s/, "");
+
         if (url.indexOf('chrome:')==0)
         {
             var m = reChromeCase.exec(url);  // 1 is package name, 2 is path
