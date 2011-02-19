@@ -221,7 +221,7 @@ top.Firebug =
         this.isInitialized = true;
 
         dispatch(modules, "initialize", [this.prefDomain, prefNames]);
-        
+
         FBTrace.timeEnd("INITIALIZATION_TIME");
     },
 
@@ -2369,7 +2369,7 @@ Firebug.Panel = extend(new Firebug.Listener(),
      * a new page element. Inspecting must be enabled for the panel (panel.inspectable == true).
      * This method is called in a timeout to avoid performance penalties when the user moves
      * the mouse over the page elements too fast.
-     * @param {Element} node The page element beeing inspected
+     * @param {Element} node The page element being inspected
      * @returns {Boolean} Returns true if the node should be selected within the panel using
      *      the default panel selection mechanism (i.e. by calling panel.select(node) method).
      */
