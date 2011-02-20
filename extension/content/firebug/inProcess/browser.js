@@ -230,7 +230,7 @@ Browser.prototype.isConnected = function()
  *   by {@link BrowserEventListener}
  * @exception Error if an unsupported event type is specified
  */
-Browser.prototype.addListener = function(eventType)
+Browser.prototype.addListener = function(listener)
 {
     var list = this.listeners;
     var i = list.indexOf(listener);
