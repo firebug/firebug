@@ -7,10 +7,11 @@ FBL.ns(function() { with (FBL) {
 
 const inspectDelay = 200;
 const highlightCSS = "chrome://firebug/content/highlighter.css";
-const cacheType = {
+const ident = {
     frame: 0,
     boxModel: 1,
-    proxyElt: 2
+    imageMap: 2,
+    proxyElt: 3
 };
 
 // ************************************************************************************************
@@ -354,24 +355,25 @@ Firebug.Inspector = extend(Firebug.Module,
         var rp = this.repaint;
         var highlighter = rp.highlighter;
         var context = rp.context;
-        var win = context && context.window;
         var element = rp.element;
         var boxFrame = rp.boxFrame;
         var colorObj = rp.colorObj;
-        var isBoxHighlighter = false;
         var highlightType = rp.highlightType;
         var isMulti = rp.isMulti;
 
-        if (highlightType)
-        {
-            // highlightType is only used for multiHighlighter
+        if(!context || (!highlighter && !isMulti))
+            return;
+
+        if(isMulti && element)
             this.highlightObject(element, context, highlightType, null, colorObj);
-        }
         else
         {
-            isBoxHighlighter = highlighter && highlighter.getNodes;
+            var highlighterNode = highlighterCache.get(highlighter.ident);
 
-            if (win && highlighter && (isBoxHighlighter || (this.inspecting && !isBoxHighlighter)))
+            if(highlighterNode && highlighter.ident === ident.boxModel)
+                highlighterNode = highlighterNode.offset;
+
+            if(highlighterNode && highlighterNode.parentNode)
             {
                 this.clearAllHighlights();
                 highlighter.highlight(context, element, boxFrame, colorObj, isMulti);
@@ -799,7 +801,7 @@ function resizeImp(element, w, h) {
 }
 
 // ************************************************************************************************
-// Imagemap Inspector
+// Imagemap Highlighter
 
 function getImageMapHighlighter(context)
 {
@@ -840,6 +842,8 @@ function getImageMapHighlighter(context)
     {
         context.imageMapHighlighter =
         {
+            ident: ident.imageMap,
+
             show: function(state)
             {
                 if(!canvas)
@@ -1142,6 +1146,8 @@ Firebug.Inspector.FrameHighlighter = function()
 
 Firebug.Inspector.FrameHighlighter.prototype =
 {
+    ident: ident.frame,
+
     doNotHighlight: function(element)
     {
         return false; // (element instanceof XULElement);
@@ -1284,7 +1290,7 @@ Firebug.Inspector.FrameHighlighter.prototype =
     {
         if(!isMulti)
         {
-            var div = highlighterCache.get(cacheType.frame);
+            var div = highlighterCache.get(ident.frame);
             if(div)
                 return div;
         }
@@ -1299,7 +1305,7 @@ Firebug.Inspector.FrameHighlighter.prototype =
         div.className = "firebugResetStyles firebugBlockBackgroundColor";
         div2.className = "firebugResetStyles";
         div.appendChild(div2);
-        div.cacheType = cacheType.frame;
+        div.ident = ident.frame;
         highlighterCache.add(div);
         return div;
     }
@@ -1315,6 +1321,8 @@ Firebug.Inspector.BoxModelHighlighter = BoxModelHighlighter;
 
 BoxModelHighlighter.prototype =
 {
+    ident: ident.boxModel,
+
     highlight: function(context, element, boxFrame, colorObj, isMulti)
     {
         var line, contentCssText, paddingCssText, borderCssText, marginCssText,
@@ -1505,7 +1513,7 @@ BoxModelHighlighter.prototype =
 
             if(!isMulti)
             {
-                var nodes = highlighterCache.get(cacheType.boxModel);
+                var nodes = highlighterCache.get(ident.boxModel);
                 if(nodes)
                     return nodes;
             }
@@ -1554,7 +1562,7 @@ BoxModelHighlighter.prototype =
             nodes.padding.appendChild(nodes.content);
         }
 
-        nodes.cacheType = cacheType.boxModel;
+        nodes.ident = ident.boxModel;
         highlighterCache.add(nodes);
         return nodes;
     },
@@ -1600,7 +1608,7 @@ var highlighterCache =
 
         switch (type)
         {
-            case cacheType.boxModel:
+            case ident.boxModel:
                 if(hl.boxModelArr.length === 1)
                 {
                     node = hl.boxModelArr[0];
@@ -1608,7 +1616,7 @@ var highlighterCache =
                         return node;
                 }
             break;
-            case cacheType.frame:
+            case ident.frame:
                 if(hl.frameArr.length === 1)
                 {
                     node = hl.frameArr[0];
@@ -1616,7 +1624,7 @@ var highlighterCache =
                         return node;
                 }
             break;
-            case cacheType.proxyElt:
+            case ident.proxyElt:
                 if(hl.proxyEltArr.length === 1)
                 {
                     node = hl.proxyEltArr[0];
@@ -1629,15 +1637,15 @@ var highlighterCache =
 
     add: function(node)
     {
-        switch (node.cacheType)
+        switch (node.ident)
         {
-            case cacheType.boxModel:
+            case ident.boxModel:
                 this.highlighters.boxModelArr.push(node);
             break;
-            case cacheType.frame:
+            case ident.frame:
                 this.highlighters.frameArr.push(node);
             break;
-            case cacheType.proxyElt:
+            case ident.proxyElt:
                 this.highlighters.proxyEltArr.push(node);
             break;
         }
@@ -1735,7 +1743,7 @@ function createProxiesForDisabledElements(body)
         div.fbProxyFor = node;
 
         body.appendChild(div);
-        div.cacheType = cacheType.proxyElt;
+        div.ident = ident.proxyElt;
         highlighterCache.add(div);
     }
 }
