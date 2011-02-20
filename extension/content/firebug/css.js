@@ -2443,7 +2443,8 @@ function getOriginalStyleSheetCSS(sheet, context)
 
 function getStyleSheetCSS(sheet, context)
 {
-    function beutify(css, indent) {
+    function beutify(css, indent)
+    {
         var indent='\n'+Array(indent+1).join(' ');
         var i=css.indexOf('{');
         var match=css.substr(i+1).match(/(?:[^;\(]*(?:\([^\)]*?\))?[^;\(]*)*;?/g);
@@ -2453,7 +2454,8 @@ function getStyleSheetCSS(sheet, context)
                 + match.sort().join(indent) + '\n}';
     }
     var cssRules = sheet.cssRules, css=[];
-    for(var i = 0; i < cssRules.length; i++){
+    for(var i = 0; i < cssRules.length; i++)
+    {
         var rule = cssRules[i];
         if(rule instanceof CSSStyleRule)
             css.push(beutify(rule.cssText, 4));
@@ -2461,7 +2463,7 @@ function getStyleSheetCSS(sheet, context)
             css.push(rule.cssText);
     }
 
-    return css.join('\n\n') + '\n';
+    return rgbToHex(css.join('\n\n')) + '\n';
 }
 
 function getStyleSheetOwnerNode(sheet)
