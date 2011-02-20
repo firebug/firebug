@@ -569,6 +569,9 @@ Firebug.InlineEditor.prototype = domplate(Firebug.BaseEditor,
         for (var i = 0; i < classNames.length; ++i)
             setClass(this.box, "editor-" + classNames[i]);
 
+        // remove error information
+        this.input.removeAttribute('saveSuccess');
+
         // Make the editor match the target's font style
         copyTextStyles(target, this.box);
 

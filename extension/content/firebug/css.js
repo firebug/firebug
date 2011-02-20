@@ -1515,7 +1515,8 @@ CSSElementPanel.prototype = extend(Firebug.CSSStyleSheetPanel.prototype,
                         selector: rule.selectorText.replace(/ :/g, " *:"), // Show universal selectors with pseudo-class (http://code.google.com/p/fbug/issues/detail?id=3683)
                         sourceLink: sourceLink,
                         props: props, inherited: inheritMode,
-                        isSystemSheet: isSystemSheet});
+                        isSystemSheet: isSystemSheet,
+                        isSelectorEditable: true});
             }
         }
 
@@ -2037,6 +2038,20 @@ CSSEditor.prototype = domplate(Firebug.InlineEditor.prototype,
                 Firebug.CSSModule.removeProperty(rule, propName);
         }
 
+        if(value)
+        {
+            var saveSuccess = !!rule.style.getPropertyValue(propName || value);
+            if(!saveSuccess && !propName)
+            {
+                propName = value.replace(/-./,function(match) match[1].toUpperCase());
+                if(propName in rule.style)
+                    saveSuccess='almost';
+            }
+            this.input.setAttribute('saveSuccess',saveSuccess);
+        }
+        else
+            this.input.removeAttribute('saveSuccess');
+
         Firebug.Inspector.repaint();
 
         this.panel.markChange(this.panel.name == "stylesheet");
@@ -2127,32 +2142,47 @@ CSSRuleEditor.prototype = domplate(Firebug.InlineEditor.prototype,
             return;
 
         var row = getAncestorByClass(target, "cssRule");
-        var styleSheet = this.panel.location;
 
-        if (!styleSheet)
+        var rule = Firebug.getRepObject(target);
+        var searchRule = rule || Firebug.getRepObject(row.nextSibling);
+        var oldRule, ruleIndex;
+
+        if (searchRule)
         {
-            // If there is no stylesheet on the page we need to create a temporary one,
-            // in order to make a place where to put (custom) user provided rules.
-            // If this code would be in this.getDefaultLocation the default stylesheet
-            // would be created automatically for all pages with not styles, which
-            // could be damaging for special pages (see eg issue 2440)
-            // At this moment the user edits the styles so some CSS changes on the page
-            // are expected.
-            var doc = this.panel.context.window.document;
-            var style = appendStylesheet(doc, "chrome://firebug/default-stylesheet.css");
-            FBL.unwrapObject(style).defaultStylesheet = true;
-            this.panel.location = styleSheet = style.sheet;
-        }
-
-        styleSheet = styleSheet.editStyleSheet ? styleSheet.editStyleSheet.sheet : styleSheet;
-
-        var cssRules = styleSheet.cssRules;
-        var rule = Firebug.getRepObject(target), oldRule = rule;
-        var ruleIndex = cssRules.length;
-        if (rule || Firebug.getRepObject(row.nextSibling))
-        {
-            var searchRule = rule || Firebug.getRepObject(row.nextSibling);
+            var styleSheet = searchRule.parentRule || searchRule.parentStyleSheet;// take care of media rules
+            if(!styleSheet)
+                return;
+            var cssRules = styleSheet.cssRules;
             for (ruleIndex=0; ruleIndex<cssRules.length && searchRule!=cssRules[ruleIndex]; ruleIndex++) {}
+
+            if(rule)
+                oldRule = searchRule;
+            else
+                ruleIndex++;
+        }
+        else
+        {
+            if(this.panel.name != 'stylesheet')
+                return;
+            var styleSheet = this.panel.location;//this must be stylesheet panel
+            if (!styleSheet)
+            {
+                // If there is no stylesheet on the page we need to create a temporary one,
+                // in order to make a place where to put (custom) user provided rules.
+                // If this code would be in this.getDefaultLocation the default stylesheet
+                // would be created automatically for all pages with not styles, which
+                // could be damaging for special pages (see eg issue 2440)
+                // At this moment the user edits the styles so some CSS changes on the page
+                // are expected.
+                var doc = this.panel.context.window.document;
+                var style = appendStylesheet(doc, "chrome://firebug/default-stylesheet.css");
+                FBL.unwrapObject(style).defaultStylesheet = true;
+                this.panel.location = styleSheet = style.sheet;
+            }
+            styleSheet = styleSheet.editStyleSheet ? styleSheet.editStyleSheet.sheet : styleSheet;
+
+            cssRules = styleSheet.cssRules;
+            ruleIndex = cssRules.length;
         }
 
         // Delete in all cases except for new add
@@ -2189,6 +2219,13 @@ CSSRuleEditor.prototype = domplate(Firebug.InlineEditor.prototype,
                 var insertLoc = Firebug.CSSModule.insertRule(styleSheet, cssText, ruleIndex);
                 rule = cssRules[insertLoc];
                 ruleIndex++;
+
+                var saveSuccess = this.panel.name != "css";
+                if(!saveSuccess)
+                    saveSuccess =(this.panel.selection &&
+                        this.panel.selection.mozMatchesSelector(value))? true: 'almost';
+
+                this.input.setAttribute('saveSuccess',saveSuccess);
             }
             catch (err)
             {
@@ -2196,7 +2233,13 @@ CSSRuleEditor.prototype = domplate(Firebug.InlineEditor.prototype,
                     FBTrace.sysout("CSS Insert Error: "+err, err);
 
                 target.innerHTML = escapeForCss(previousValue);
-                row.repObject = undefined;
+                // create dummy rule to be able to recover from error
+                var insertLoc = Firebug.CSSModule.insertRule(styleSheet, 'selectorSavingError{}', ruleIndex);
+                rule = cssRules[insertLoc];
+
+                this.input.setAttribute('saveSuccess',false);
+
+                row.repObject = rule;
                 return;
             }
         }
@@ -2215,7 +2258,6 @@ CSSRuleEditor.prototype = domplate(Firebug.InlineEditor.prototype,
             var ruleId = "new/"+value+"/"+(++CSSRuleEditor.uniquifier);
             row.setAttribute("ruleId", ruleId);
         }
-
         this.panel.markChange(this.panel.name == "stylesheet");
     },
 
