@@ -1399,20 +1399,19 @@ CSSElementPanel.prototype = extend(Firebug.CSSStyleSheetPanel.prototype,
     template: domplate(
     {
         cascadedTag:
-            DIV({"class": "a11yCSSView",  role: 'presentation'},
-                DIV({role: 'list', 'aria-label' : $STR('aria.labels.style rules') },
+            DIV({"class": "a11yCSSView", role: "presentation"},
+                DIV({role: "list", "aria-label": $STR("aria.labels.style rules") },
                     FOR("rule", "$rules",
                         TAG("$ruleTag", {rule: "$rule"})
                     )
                 ),
-                DIV({role: "list", 'aria-label' :$STR('aria.labels.inherited style rules')},
+                DIV({role: "list", "aria-label": $STR("aria.labels.inherited style rules")},
                     FOR("section", "$inherited",
-
-                        H1({"class": "cssInheritHeader groupHeader focusRow", role: 'listitem' },
+                        H1({"class": "cssInheritHeader groupHeader focusRow", role: "listitem" },
                             SPAN({"class": "cssInheritLabel"}, "$inheritLabel"),
                             TAG(FirebugReps.Element.shortTag, {object: "$section.element"})
                         ),
-                        DIV({role: 'group'},
+                        DIV({role: "group"},
                             FOR("rule", "$section.rules",
                                 TAG("$ruleTag", {rule: "$rule"})
                             )
@@ -1441,6 +1440,9 @@ CSSElementPanel.prototype = extend(Firebug.CSSStyleSheetPanel.prototype,
 
         if (rules.length || sections.length)
         {
+            if (Firebug.onlyShowAppliedStyles)
+                this.removeOverriddenProps(rules, sections);
+
             inheritLabel = $STR("InheritedFrom");
             result = this.template.cascadedTag.replace({rules: rules, inherited: sections,
                 inheritLabel: inheritLabel}, this.panelNode);
@@ -1549,6 +1551,46 @@ CSSElementPanel.prototype = extend(Firebug.CSSStyleSheetPanel.prototype,
         }
     },
 
+    removeOverriddenProps: function(rules, sections)
+    {
+        function removeProps(rules)
+        {
+            var i=0;
+            while (i<rules.length)
+            {
+                var props = rules[i].props;
+  
+                var j=0;
+                while (j<props.length)
+                {
+                    if (props[j].overridden)
+                        props.splice(j, 1);
+                    else
+                        ++j;
+                }
+  
+                if (props.length == 0)
+                    rules.splice(i, 1);
+                else
+                    ++i;
+            }
+        }
+
+        removeProps(rules);
+
+        var i=0;
+        while (i<sections.length)
+        {
+            var section = sections[i];
+            removeProps(section.rules);
+
+            if (section.rules.length == 0)
+                sections.splice(i, 1);
+            else
+                ++i;
+        }
+    },
+
     getStyleProperties: function(element, rules, usedProps, inheritMode)
     {
         var props = this.parseCSSProps(element.style, inheritMode);
@@ -1643,13 +1685,15 @@ CSSElementPanel.prototype = extend(Firebug.CSSStyleSheetPanel.prototype,
 
     updateOption: function(name, value)
     {
-        if (name == "showUserAgentCSS" || name == "expandShorthandProps")
+        if (name == "showUserAgentCSS" || name == "expandShorthandProps" || name == "onlyShowAppliedStyles")
             this.refresh();
     },
 
     getOptionsMenuItems: function()
     {
         var ret = [
+            {label: "Only Show Applied Styles", type: "checkbox", checked: Firebug.onlyShowAppliedStyles,
+                    command: bindFixed(Firebug.togglePref, Firebug, "onlyShowAppliedStyles") },
             {label: "Show User Agent CSS", type: "checkbox", checked: Firebug.showUserAgentCSS,
                     command: bindFixed(Firebug.togglePref, Firebug, "showUserAgentCSS") },
             {label: "Expand Shorthand Properties", type: "checkbox", checked: Firebug.expandShorthandProps,
