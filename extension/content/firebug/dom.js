@@ -141,7 +141,7 @@ const DirTablePlate = domplate(Firebug.Rep,
             return members;
 
         return [{
-            name: $STR("firebug.dom.noChildren"),
+            name: $STR("firebug.dom.noChildren2"),
             type: "string",
             rowClass: "memberRow-string",
             tag: Firebug.Rep.tag,
