@@ -237,10 +237,12 @@ Firebug.Inspector = extend(Firebug.Module,
 
         if (node)
         {
+            var _this = this;
+
             this.inspectTimeout = context.setTimeout(function()
             {
                 var selection = inspectingPanel.inspectNode(node);
-                dispatch(self.fbListeners, "onInspectNode", [context, node]);
+                dispatch(_this.fbListeners, "onInspectNode", [context, node]);
                 if (selection)
                     inspectingPanel.select(node);
             }, inspectDelay);
