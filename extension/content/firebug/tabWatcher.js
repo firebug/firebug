@@ -1031,5 +1031,14 @@ var TraceListener =
 };
 
 // ************************************************************************************************
+
+top.__defineGetter__("TabWatcher", function deprecatedTabWatcher() 
+{
+	if (FBTrace.DBG_ERRORS)
+		FBTrace.sysout("deprecated TabWatcher global accessed");
+	
+	return Firebug.TabWatcher; 
+});
+
 return Firebug.TabWatcher;
 }});
