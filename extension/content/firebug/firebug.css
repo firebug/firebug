@@ -219,13 +219,13 @@ panelTab[selected="true"]:hover > panelTabMenu .menuTarget {
 #fbLocationList .scrollbutton-up {
     /* background-color: #FF9933;  Firebug orange */
     padding: 3px;
-    }
+}
 
 #fbLocationList .autorepeatbutton-down,
 #fbLocationList .scrollbutton-down {
     /* background-color: #FF9933;  Firebug orange */
     padding: 3px;
-    }
+}
 
 #fbLocationList .autorepeatbutton-up,
 #fbLocationList .scrollbutton-up {

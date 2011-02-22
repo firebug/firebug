@@ -313,7 +313,7 @@ top.FirebugChrome =
         Firebug.setChrome(Firebug.originalChrome, "minimized");
 
         Firebug.showBar(false);
-        Firebug.resetTooltip();
+        Firebug.StartButton.resetTooltip();
 
         // when we are done here the window.closed will be true so we don't want to hang on to the ref.
         detachedChrome.window = "This is detached chrome!";

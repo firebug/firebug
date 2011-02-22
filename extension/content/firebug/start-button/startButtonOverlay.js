@@ -178,6 +178,62 @@ Firebug.StartButton = extend(Firebug.Module,
             }
         }
     },
+
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+    // Tooltip
+
+    resetTooltip: function()
+    {
+        if (FBTrace.DBG_TOOLTIP)
+            FBTrace.sysout("resetTooltip called");
+
+        var tooltip = "Firebug " + Firebug.getVersion();
+
+        tooltip += "\n" + this.getEnablementStatus();
+
+        if (Firebug.getSuspended())
+            tooltip += "\n" + Firebug.getSuspended();
+        else
+            tooltip += "\n" + $STRP("plural.Total_Firebugs2", [Firebug.TabWatcher.contexts.length]);
+
+        if (Firebug.allPagesActivation == "on")
+        {
+            var label = $STR("enablement.on");
+            tooltip += "\n"+label+" "+$STR("enablement.for all pages");
+        }
+        // else allPagesActivation == "none" we don't show it.
+
+        tooltip += "\n" + $STR(Firebug.getPlacement());
+
+        var firebugStatus = $("firebugStatus");
+        firebugStatus.setAttribute("tooltiptext", tooltip);
+    },
+
+    getEnablementStatus: function()
+    {
+        var strOn = $STR("enablement.on");
+        var strOff = $STR("enablement.off");
+
+        var status = "";
+        var firebugStatus = $("firebugStatus");
+
+        if (firebugStatus.getAttribute("console") == "on")
+            status += "Console: " + strOn + ",";
+        else
+            status += "Console: " + strOff + ",";
+
+        if (firebugStatus.getAttribute("net") == "on")
+            status += " Net: " + strOn + ",";
+        else
+            status += " Net: " + strOff + ",";
+
+        if (firebugStatus.getAttribute("script") == "on")
+            status += " Script: " + strOn;
+        else
+            status += " Script: " + strOff + "";
+
+        return status;
+    },
 });
 
 // ********************************************************************************************* //

@@ -409,7 +409,7 @@ top.Firebug =
         else
             suspendMarker.removeAttribute("suspended");
 
-        Firebug.resetTooltip();
+        Firebug.StartButton.resetTooltip();
     },
 
     toggleSuspend: function()  // TODO XULWindow
@@ -483,57 +483,6 @@ top.Firebug =
         this.setSuspended("resuming");
         dispatch(activableModules, 'onResumeFirebug', [Firebug.currentContext]);// TODO no context arg
         this.setSuspended(null);
-    },
-
-    getEnablementStatus: function()
-    {
-        var strOn = $STR("enablement.on");
-        var strOff = $STR("enablement.off");
-
-        var status = "";
-        var firebugStatus = $('firebugStatus');
-        if (firebugStatus.getAttribute("console") == "on")
-            status +="Console: "+strOn+",";
-        else
-            status +="Console: "+strOff+",";
-
-        if (firebugStatus.getAttribute("net") == "on")
-            status +=" Net: "+strOn+",";
-        else
-            status +=" Net: "+strOff+",";
-
-        if (firebugStatus.getAttribute("script") == "on")
-            status +=" Script: "+strOn;
-        else
-            status +=" Script: "+strOff+"";
-
-        return status;
-    },
-
-    resetTooltip: function()
-    {
-        if (FBTrace.DBG_TOOLTIP)
-          FBTrace.sysout("resetTooltip called");
-
-        var tooltip = "Firebug " + Firebug.getVersion();
-
-        tooltip += "\n" + Firebug.getEnablementStatus();
-
-        if (Firebug.getSuspended())
-            tooltip += "\n" + Firebug.getSuspended();
-        else
-            tooltip += "\n" + $STRP("plural.Total_Firebugs2", [Firebug.TabWatcher.contexts.length]);
-
-        if (Firebug.allPagesActivation == "on")
-        {
-            var label = $STR("enablement.on");
-            tooltip += "\n"+label+" "+$STR("enablement.for all pages");
-        }
-        // else allPagesActivation == "none" we don't show it.
-
-        tooltip += "\n" + $STR(Firebug.getPlacement());
-
-        $('firebugStatus').setAttribute("tooltiptext", tooltip);
     },
 
     getURLsForAllActiveContexts: function()
@@ -1019,7 +968,7 @@ top.Firebug =
         var browser = FirebugChrome.getCurrentBrowser();
 
         Firebug.TabWatcher.unwatchBrowser(browser, userCommand);
-        Firebug.resetTooltip();
+        Firebug.StartButton.resetTooltip();
     },
 
     /*
@@ -1132,7 +1081,7 @@ top.Firebug =
             Firebug.TabWatcher.unwatchBrowser(Firebug.currentContext.browser, userCommands);
         // else the user closed Firebug external window while not looking at a debugged web page.
 
-        Firebug.resetTooltip();
+        Firebug.StartButton.resetTooltip();
     },
 
     setChrome: function(newChrome, newPlacement)
@@ -1571,7 +1520,7 @@ top.Firebug =
         else
             $('firebugStatus').setAttribute("script", "off");
 
-        Firebug.resetTooltip();
+        Firebug.StartButton.resetTooltip();
 
         // Front side state
         Firebug.Debugger.jsDebuggerOn = active;
@@ -1620,7 +1569,7 @@ top.Firebug =
                     Firebug.placement = i;
                     delete Firebug.previousPlacement;
                     Firebug.setPref(Firebug.prefDomain, "previousPlacement", Firebug.placement);
-                    Firebug.resetTooltip();
+                    Firebug.StartButton.resetTooltip();
                 }
                 return Firebug.placement;
             }
@@ -1695,7 +1644,7 @@ top.Firebug =
             Firebug.suspend();
         }
 
-        Firebug.resetTooltip();
+        Firebug.StartButton.resetTooltip();
     },
 
     /*
