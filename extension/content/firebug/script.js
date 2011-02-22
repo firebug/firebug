@@ -883,6 +883,8 @@ Firebug.ScriptPanel.prototype = extend(Firebug.SourceBoxPanel,
         {
             if (this.showThisCompilationUnit(allSources[i]))
                 list.push(allSources[i]);
+            else if (FBTrace.DBG_COMPILATION_UNITS)
+                FBTrace.sysout("scrpt.getLocationList filtered "+allSources[i].getURL(), allSources[i]);
         }
 
         if (!list.length && allSources.length)
@@ -891,7 +893,7 @@ Firebug.ScriptPanel.prototype = extend(Firebug.SourceBoxPanel,
             delete this.context.allScriptsWereFiltered;
 
         if (FBTrace.DBG_COMPILATION_UNITS)
-            FBTrace.sysout("script.getLocationList enabledOnLoad:"+context.onLoadWindowContent+" all:"+allSources.length+" filtered:"+list.length, list);
+            FBTrace.sysout("script.getLocationList enabledOnLoad:"+context.onLoadWindowContent+" all:"+allSources.length+" filtered:"+list.length+" allFiltered: "+this.context.allScriptsWereFiltered, list);
         return list;
     },
 
