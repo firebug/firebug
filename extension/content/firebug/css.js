@@ -1923,8 +1923,6 @@ CSSComputedElementPanel.prototype = extend(CSSElementPanel.prototype,
         return [
             {label: "Sort alphabetically", type: "checkbox", checked: Firebug.computedStylesDisplay == "alphabetical",
                     command: bind(this.toggleDisplay, this) },
-            {label: "Show Mozilla specific styles", type: "checkbox", checked: Firebug.showMozillaSpecificStyles,
-              command:  bindFixed(Firebug.togglePref, Firebug, "showMozillaSpecificStyles") },
             "-",
             {label: "Refresh", command: bind(this.refresh, this) }
         ];
