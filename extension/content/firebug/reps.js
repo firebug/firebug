@@ -2349,7 +2349,34 @@ FirebugReps.Attr = domplate(Firebug.Rep,
     },
 });
 
-// ************************************************************************************************
+// ********************************************************************************************* //
+
+FirebugReps.Date = domplate(Firebug.Rep,
+{
+    tag:
+        OBJECTLINK(
+            SPAN({"class": "objectTitle"}, "$object|getTitle "),
+            SPAN({"class": "objectLeftBrace", role: "presentation"}, "{"),
+            SPAN({"class": "attrEqual"}, "$object|getValue"),
+            SPAN({"class": "objectRightBrace"}, "}")
+        ),
+
+    getValue: function(object)
+    {
+        return object.toString();
+    },
+
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+    className: "Date",
+
+    supportsObject: function(object, type)
+    {
+        return object && object.constructor && object.constructor.name == "Date";
+    },
+});
+
+// ********************************************************************************************* //
 
 FirebugReps.NamedNodeMap = domplate(Firebug.Rep,
 {
@@ -2477,6 +2504,7 @@ Firebug.registerRep(
     FirebugReps.Storage,
     FirebugReps.StorageList,
     FirebugReps.Attr,
+    FirebugReps.Date,
     FirebugReps.NamedNodeMap
 );
 
