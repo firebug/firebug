@@ -1809,34 +1809,28 @@ CSSComputedElementPanel.prototype = extend(CSSElementPanel.prototype,
                             IMG({"class": "twisty", role: "presentation"}),
                             SPAN({"class": "cssComputedLabel"}, "$group.title")
                         ),
-                        TABLE({width: "100%", role: "group"},
-                            TBODY({role: "presentation"},
-                                FOR("prop", "$group.props",
-                                    TR({"class": "focusRow computedStyleRow", role: "listitem"},
-                                        TD({"class": "stylePropName", role: "presentation"}, "$prop.name"),
-                                        TD({"class": "stylePropValue", role: "presentation"}, "$prop.value")
-                                    )
-                                )
-                            )
-                        )
+                        TAG("$stylesTag", {props: "$group.props"})
                     )
                 )
             ),
 
         computedAlphabeticalTag:
             DIV({"class": "a11yCSSView", role: "list", "aria-label" : $STR("aria.labels.computed styles")},
-                TABLE({width: "100%", role: "list"},
-                    TBODY({role: "presentation"},
-                        FOR("prop", "$props",
-                            TR({"class": "focusRow computedStyleRow", role: "listitem"},
-                                TD({"class": "stylePropName", role: "presentation"}, "$prop.name"),
-                                TD({"class": "stylePropValue", role: "presentation"}, "$prop.value")
-                            )
+                TAG("$stylesTag", {props: "$props"})
+            ),
+
+        stylesTag:
+            TABLE({width: "100%", role: "group"},
+                TBODY({role: "presentation"},
+                    FOR("prop", "$props",
+                        TR({"class": "focusRow computedStyleRow", role: "listitem"},
+                            TD({"class": "stylePropName", role: "presentation"}, "$prop.name"),
+                            TD({"class": "stylePropValue", role: "presentation"}, "$prop.value")
                         )
                     )
                 )
             )
-  }),
+    }),
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 
@@ -1929,6 +1923,8 @@ CSSComputedElementPanel.prototype = extend(CSSElementPanel.prototype,
         return [
             {label: "Sort alphabetically", type: "checkbox", checked: Firebug.computedStylesDisplay == "alphabetical",
                     command: bind(this.toggleDisplay, this) },
+            {label: "Show Mozilla specific styles", type: "checkbox", checked: Firebug.showMozillaSpecificStyles,
+              command:  bindFixed(Firebug.togglePref, Firebug, "showMozillaSpecificStyles") },
             "-",
             {label: "Refresh", command: bind(this.refresh, this) }
         ];
@@ -2165,21 +2161,22 @@ CSSRuleEditor.prototype = domplate(Firebug.InlineEditor.prototype,
             if(this.panel.name != 'stylesheet')
                 return;
             var styleSheet = this.panel.location;//this must be stylesheet panel
-            if (!styleSheet)
-            {
-                // If there is no stylesheet on the page we need to create a temporary one,
-                // in order to make a place where to put (custom) user provided rules.
-                // If this code would be in this.getDefaultLocation the default stylesheet
-                // would be created automatically for all pages with not styles, which
-                // could be damaging for special pages (see eg issue 2440)
-                // At this moment the user edits the styles so some CSS changes on the page
-                // are expected.
-                var doc = this.panel.context.window.document;
-                var style = appendStylesheet(doc, "chrome://firebug/default-stylesheet.css");
-                FBL.unwrapObject(style).defaultStylesheet = true;
-                this.panel.location = styleSheet = style.sheet;
-            }
-            styleSheet = styleSheet.editStyleSheet ? styleSheet.editStyleSheet.sheet : styleSheet;
+        if (!styleSheet)
+        {
+            // If there is no stylesheet on the page we need to create a temporary one,
+            // in order to make a place where to put (custom) user provided rules.
+            // If this code would be in this.getDefaultLocation the default stylesheet
+            // would be created automatically for all pages with not styles, which
+            // could be damaging for special pages (see eg issue 2440)
+            // At this moment the user edits the styles so some CSS changes on the page
+            // are expected.
+            var doc = this.panel.context.window.document;
+            var style = appendStylesheet(doc, "chrome://firebug/default-stylesheet.css");
+            FBL.unwrapObject(style).defaultStylesheet = true;
+            this.panel.location = styleSheet = style.sheet;
+        }
+
+        styleSheet = styleSheet.editStyleSheet ? styleSheet.editStyleSheet.sheet : styleSheet;
 
             cssRules = styleSheet.cssRules;
             ruleIndex = cssRules.length;
@@ -2258,6 +2255,7 @@ CSSRuleEditor.prototype = domplate(Firebug.InlineEditor.prototype,
             var ruleId = "new/"+value+"/"+(++CSSRuleEditor.uniquifier);
             row.setAttribute("ruleId", ruleId);
         }
+
         this.panel.markChange(this.panel.name == "stylesheet");
     },
 
