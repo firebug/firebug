@@ -3047,18 +3047,22 @@ var reErrorStackLine2 = /^([^\(]*)\((.*)\)$/;
 
 this.parseToStackFrame = function(line, context) // function name (arg, arg, arg)@fileName:lineNo
 {
-     var m = reErrorStackLine.exec(line);
-     if (m)
-     {
-         var m2 = reErrorStackLine2.exec(m[1]);
-         if (m2)
-         {
-             var params = m2[2].split(',');
-             //FBTrace.sysout("parseToStackFrame",{line:line,paramStr:m2[2],params:params});
-             //var params = JSON.parse("["+m2[2]+"]");
-             return new this.StackFrame({href:m[2]}, m[3], m2[1], params, null, null, context);
-         }
-     }
+	var last255 = line.length - 255;
+	if (last255 > 0)
+		line = line.substr(last255);   // avoid regexp on monster compressed source (issue 4135)
+	
+    var m = reErrorStackLine.exec(line);
+    if (m)
+    {
+        var m2 = reErrorStackLine2.exec(m[1]);
+        if (m2)
+        {
+            var params = m2[2].split(',');
+            //FBTrace.sysout("parseToStackFrame",{line:line,paramStr:m2[2],params:params});
+            //var params = JSON.parse("["+m2[2]+"]");
+            return new this.StackFrame({href:m[2]}, m[3], m2[1], params, null, null, context);
+        }
+    }
 }
 
 this.parseToStackTrace = function(stack, context)
