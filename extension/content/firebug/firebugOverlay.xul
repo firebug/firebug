@@ -347,7 +347,7 @@
                                         The button also allows to pick another one. -->
                                     <hbox id="fbLocationButtons" collapsed="true">
                                         <toolbarseparator id="fbLocationSeparator"/>
-                                        <toolbarbutton id="fbLocationList" type="menu-button"
+                                        <toolbarbutton id="fbLocationList" type="menu"
                                             locationProvider="FirebugChrome.getLocationProvider();"
                                             tooltip="fbTooltip" contextmenu="fbContextMenu"
                                             class="noTabStop fbInternational"
