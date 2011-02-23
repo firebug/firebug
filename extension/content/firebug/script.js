@@ -79,6 +79,10 @@ Firebug.ScriptPanel.decorator = extend(new Firebug.SourceBoxDecorator,
     },
 });
 
+Firebug.ScriptPanel.WindowUI =
+{
+};
+
 // ************************************************************************************************
 
 Firebug.ScriptPanel.prototype = extend(Firebug.SourceBoxPanel,
@@ -275,7 +279,7 @@ Firebug.ScriptPanel.prototype = extend(Firebug.SourceBoxPanel,
         if (lineNode.getAttribute("breakpoint") == "true")
             fbs.clearBreakpoint(href, lineNo);
         else
-            Firebug.Debugger.setBreakpoint(compilationUnit, lineNo);
+            compilationUnit.setBreakpoint(lineNo);
     },
 
     toggleDisableBreakpoint: function(lineNo)
@@ -490,8 +494,8 @@ Firebug.ScriptPanel.prototype = extend(Firebug.SourceBoxPanel,
 
         if (this.context.stopped)
         {
-            Firebug.Debugger.detachListeners(this.context, oldChrome);
-            Firebug.Debugger.attachListeners(this.context, newChrome);
+            Firebug.ScriptPanel.WindowUI.detachListeners(this.context, oldChrome);
+            Firebug.ScriptPanel.WindowUI.attachListeners(this.context, newChrome);
         }
 
         Firebug.Debugger.syncCommands(this.context);
@@ -619,6 +623,9 @@ Firebug.ScriptPanel.prototype = extend(Firebug.SourceBoxPanel,
             var breakpointPanel = this.context.getPanel("breakpoints", true);
             if (breakpointPanel)
                 breakpointPanel.refresh();
+
+            this.syncCommands(this.context);
+            this.ableWatchSidePanel(this.context);
         }
 
         collapse(Firebug.chrome.$("fbToolbar"), !active);
@@ -644,6 +651,18 @@ Firebug.ScriptPanel.prototype = extend(Firebug.SourceBoxPanel,
         FBL.hide(panelStatus, false);
 
         delete this.infoTipExpr;
+    },
+
+    ableWatchSidePanel: function(context)
+    {
+        if (Firebug.Console.isAlwaysEnabled())
+        {
+            var watchPanel = context.getPanel("watches", true);
+            if (watchPanel)
+                return watchPanel;
+        }
+
+        return null;
     },
 
     search: function(text, reverse)
@@ -1174,6 +1193,167 @@ Firebug.ScriptPanel.prototype = extend(Firebug.SourceBoxPanel,
     {
         this.onJavaScriptDebugging(isActive, "onActiveTool");
     },
+
+    // **********************************************************************************
+    // Toolbar functions
+
+    attachListeners: function(context, chrome)
+    {
+        this.keyListeners =
+            [
+                chrome.keyCodeListen("F8", null, bind(this.resume, this, context), true),
+                chrome.keyListen("/", isControl, bind(this.resume, this, context)),
+                chrome.keyCodeListen("F10", null, bind(this.stepOver, this, context), true),
+                chrome.keyListen("'", isControl, bind(this.stepOver, this, context)),
+                chrome.keyCodeListen("F11", null, bind(this.stepInto, this, context)),
+                chrome.keyListen(";", isControl, bind(this.stepInto, this, context)),
+                chrome.keyCodeListen("F11", isShift, bind(this.stepOut, this, context)),
+                chrome.keyListen(",", isControlShift, bind(this.stepOut, this, context))
+            ];
+        },
+
+    detachListeners: function(context, chrome)
+    {
+        if (this.keyListeners)
+        {
+            for (var i = 0; i < this.keyListeners.length; ++i)
+                chrome.keyIgnore(this.keyListeners[i]);
+            delete this.keyListeners;
+        }
+    },
+
+    syncListeners: function(context)
+    {
+        var chrome = Firebug.chrome;
+
+        if (context.stopped)
+            this.attachListeners(context, chrome);
+        else
+            this.detachListeners(context, chrome);
+    },
+
+    syncCommands: function(context)
+    {
+        var chrome = Firebug.chrome;
+        if (!chrome)
+        {
+            if (FBTrace.DBG_ERRORS)
+                FBTrace.sysout("debugger.syncCommand, context with no chrome: "+context.getGlobalScope());
+            return;
+        }
+
+        if (context.stopped)
+        {
+            chrome.setGlobalAttribute("fbDebuggerButtons", "stopped", "true");
+            chrome.setGlobalAttribute("cmd_rerun", "disabled", "false");
+            chrome.setGlobalAttribute("cmd_resumeExecution", "disabled", "false");
+            chrome.setGlobalAttribute("cmd_stepOver", "disabled", "false");
+            chrome.setGlobalAttribute("cmd_stepInto", "disabled", "false");
+            chrome.setGlobalAttribute("cmd_stepOut", "disabled", "false");
+        }
+        else
+        {
+            chrome.setGlobalAttribute("fbDebuggerButtons", "stopped", "false");
+            chrome.setGlobalAttribute("cmd_rerun", "disabled", "true");
+            chrome.setGlobalAttribute("cmd_stepOver", "disabled", "true");
+            chrome.setGlobalAttribute("cmd_stepInto", "disabled", "true");
+            chrome.setGlobalAttribute("cmd_stepOut", "disabled", "true");
+            chrome.setGlobalAttribute("cmd_resumeExecution", "disabled", "true");
+        }
+    },
+
+    resume: function(context)
+    {
+        // tell Firebug.Debugger to resume
+        throw new Error("unimplemented");
+    },
+
+    stepOver: function(context)
+    {
+        throw new Error("unimplemented");
+    },
+
+    stepInto: function(context)
+    {
+        throw new Error("unimplemented");
+    },
+
+    stepOut: function(context)
+    {
+        throw new Error("unimplemented");
+    },
+
+    onStartDebugging: function(context)
+    {
+        if (FBTrace.DBG_UI_LOOP)
+            FBTrace.sysout("script.startDebugging enter context.stopped:"+context.stopped+
+                " for context: "+context.getName()+"\n");
+
+        try
+        {
+            var currentBreakable = Firebug.chrome.getGlobalAttribute("cmd_breakOnNext", "breakable");
+
+            if (FBTrace.DBG_BP)
+                FBTrace.sysout("debugger.startDebugging; currentBreakable "+currentBreakable+
+                    " in " + context.getName()+" currentContext "+Firebug.currentContext.getName());
+
+            if (currentBreakable == "false") // then we are armed but we broke
+                Firebug.chrome.setGlobalAttribute("cmd_breakOnNext", "breakable", "true");
+
+            if (Firebug.isMinimized()) // then open the UI to show we are stopped
+                Firebug.unMinimize();
+
+            this.syncCommands(context);
+            this.syncListeners(context);
+
+            // Update Break on Next lightning.
+            Firebug.Breakpoint.updatePanelTab(this, false);
+            Firebug.chrome.syncPanel("script");  // issue 3463
+            context.stoppedFrameXB = FBL.getStackFrame(context.stoppedFrame, context);
+            Firebug.chrome.select(context.stoppedFrameXB, "script", null, true);
+            Firebug.chrome.focus();
+        }
+        catch(exc)
+        {
+            if (FBTrace.DBG_ERRORS)
+                FBTrace.sysout("Resuming debugger: error during debugging loop: "+exc, exc);
+            Firebug.Console.log("Resuming debugger: error during debugging loop: "+exc);
+            this.resume(context);
+        }
+
+        if (FBTrace.DBG_UI_LOOP)
+            FBTrace.sysout("script.onStartDebugging exit context.stopped:"+context.stopped+" for context: "+
+                context.getName()+"\n");
+    },
+
+    onStopDebugging: function(context)
+    {
+        if (FBTrace.DBG_UI_LOOP) FBTrace.sysout("script.onStopDebugging enter context: "+context.getName()+"\n");
+        try
+        {
+                var chrome = Firebug.chrome;
+
+                this.syncCommands(context);
+                this.syncListeners(context);
+
+                var panel = context.getPanel("script", true);
+                if (panel && panel == Firebug.chrome.getSelectedPanel())
+                    panel.showNoStackFrame(); // unhighlight and remove toolbar-status line
+
+                if (panel)
+                    panel.highlight(false);
+
+                chrome.syncSidePanels();  // after main panel is all updated.
+        }
+        catch (exc)
+        {
+            if (FBTrace.DBG_UI_LOOP) FBTrace.sysout("debugger.stopDebugging FAILS", exc);
+            // If the window is closed while the debugger is stopped,
+            // then all hell will break loose here
+            ERROR(exc);
+        }
+    },
+
 });
 
 // ************************************************************************************************

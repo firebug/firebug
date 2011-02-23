@@ -428,6 +428,7 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
         // this will cause us to return to just after the enterNestedEventLoop call
         var depth = fbs.exitNestedEventLoop();
 
+
         if (FBTrace.DBG_UI_LOOP)
             FBTrace.sysout("debugger.resume, depth:"+depth+"\n");
     },
@@ -875,7 +876,7 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
     startDebugging: function(context)
     {
         if (FBTrace.DBG_UI_LOOP)
-            FBTrace.sysout("startDebugging enter context.stopped:"+context.stopped+
+            FBTrace.sysout("Firebug.Debugger startDebugging enter context.stopped:"+context.stopped+
                 " for context: "+context.getName()+"\n");
 
         try
@@ -896,31 +897,9 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
                 return;
             }
 
-            var currentBreakable = Firebug.chrome.getGlobalAttribute("cmd_breakOnNext", "breakable");
-
-            if (FBTrace.DBG_BP)
-                FBTrace.sysout("debugger.startDebugging; currentBreakable "+currentBreakable+
-                    " in " + context.getName()+" currentContext "+Firebug.currentContext.getName());
-
-            if (currentBreakable == "false") // then we are armed but we broke
-                Firebug.chrome.setGlobalAttribute("cmd_breakOnNext", "breakable", "true");
-
             if (context != Firebug.currentContext)
                 Firebug.selectContext(context);  // Make Firebug.currentContext = context and sync the UI
 
-            if (Firebug.isMinimized()) // then open the UI to show we are stopped
-                Firebug.unMinimize();
-
-            this.syncCommands(context);
-            this.syncListeners(context);
-
-            // Update Break on Next lightning.
-            var panel = context.getPanel("script", true);
-            Firebug.Breakpoint.updatePanelTab(panel, false);
-            Firebug.chrome.syncPanel("script");  // issue 3463
-            context.stoppedFrameXB = FBL.getStackFrame(context.stoppedFrame, context);
-            Firebug.chrome.select(context.stoppedFrameXB, "script", null, true);
-            Firebug.chrome.focus();
         }
         catch(exc)
         {
@@ -958,19 +937,8 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
                 context.executingSourceFile = null;
                 delete context.breakLineNumber;
 
-                var chrome = Firebug.chrome;
+                dispatch(this.fbListeners, "onStopDebugging", [context]);
 
-                this.syncCommands(context);
-                this.syncListeners(context);
-
-                var panel = context.getPanel("script", true);
-                if (panel && panel == Firebug.chrome.getSelectedPanel())
-                    panel.showNoStackFrame(); // unhighlight and remove toolbar-status line
-
-                if (panel)
-                    panel.highlight(false);
-
-                chrome.syncSidePanels();  // after main panel is all updated.
             }
             else
             {
@@ -985,81 +953,6 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
             // If the window is closed while the debugger is stopped,
             // then all hell will break loose here
             ERROR(exc);
-        }
-    },
-
-    syncCommands: function(context)
-    {
-        var chrome = Firebug.chrome;
-        if (!chrome)
-        {
-            if (FBTrace.DBG_ERRORS)
-                FBTrace.sysout("debugger.syncCommand, context with no chrome: "+context.getGlobalScope());
-            return;
-        }
-
-        if (context.stopped)
-        {
-            chrome.setGlobalAttribute("fbDebuggerButtons", "stopped", "true");
-            chrome.setGlobalAttribute("cmd_rerun", "disabled", "false");
-            chrome.setGlobalAttribute("cmd_resumeExecution", "disabled", "false");
-            chrome.setGlobalAttribute("cmd_stepOver", "disabled", "false");
-            chrome.setGlobalAttribute("cmd_stepInto", "disabled", "false");
-            chrome.setGlobalAttribute("cmd_stepOut", "disabled", "false");
-        }
-        else
-        {
-            chrome.setGlobalAttribute("fbDebuggerButtons", "stopped", "false");
-            chrome.setGlobalAttribute("cmd_rerun", "disabled", "true");
-            chrome.setGlobalAttribute("cmd_stepOver", "disabled", "true");
-            chrome.setGlobalAttribute("cmd_stepInto", "disabled", "true");
-            chrome.setGlobalAttribute("cmd_stepOut", "disabled", "true");
-            chrome.setGlobalAttribute("cmd_resumeExecution", "disabled", "true");
-        }
-    },
-
-    syncListeners: function(context)
-    {
-        var chrome = Firebug.chrome;
-
-        if (context.stopped)
-            this.attachListeners(context, chrome);
-        else
-            this.detachListeners(context, chrome);
-    },
-
-    attachListeners: function(context, chrome)
-    {
-        this.keyListeners =
-        [
-            chrome.keyCodeListen("F8", null, bind(this.resume, this, context), true),
-            chrome.keyListen("/", isControl, bind(this.resume, this, context)),
-            chrome.keyCodeListen("F10", null, bind(this.stepOver, this, context), true),
-            chrome.keyListen("'", isControl, bind(this.stepOver, this, context)),
-            chrome.keyCodeListen("F11", null, bind(this.stepInto, this, context)),
-            chrome.keyListen(";", isControl, bind(this.stepInto, this, context)),
-            chrome.keyCodeListen("F11", isShift, bind(this.stepOut, this, context)),
-            chrome.keyListen(",", isControlShift, bind(this.stepOut, this, context))
-        ];
-    },
-
-    detachListeners: function(context, chrome)
-    {
-        if (this.keyListeners)
-        {
-            for (var i = 0; i < this.keyListeners.length; ++i)
-                chrome.keyIgnore(this.keyListeners[i]);
-            delete this.keyListeners;
-        }
-    },
-
-    showPanel: function(browser, panel)
-    {
-        if (panel && panel.name == "script") // this test on name is a sign that this code belongs in panel.show()
-        {
-            this.syncCommands(panel.context);
-            this.ableWatchSidePanel(panel.context);
-            if (FBTrace.DBG_PANELS) FBTrace.sysout("debugger.showPanel panel.location:"+panel.location);
         }
     },
 
@@ -2373,6 +2266,8 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
 
     loadedContext: function(context)
     {
+        FBTrace.sysout("loadedContext needs to trigger watchpanel updates");
+        /*
         var watchPanel = this.ableWatchSidePanel(context);
         var needNow = watchPanel && watchPanel.watches;
         var watchPanelState = Firebug.getPanelState({name: "watches", context: context});
@@ -2388,7 +2283,7 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
                 });
             }
         }
-
+*/
         // context.watchScriptAdditions = bind(this.watchScriptAdditions, this, context);
 
         // context.window.document.addEventListener("DOMNodeInserted", context.watchScriptAdditions, false);
@@ -2503,18 +2398,18 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
 
     registerDebugger: function() // 1.3.1 safe for multiple calls
     {
-        if (FBTrace.DBG_INITIALIZE)
+        if (FBTrace.DBG_ACTIVATION)
             FBTrace.sysout("registerDebugger");
 
         var check = fbs.registerDebugger(this);  //  this will eventually set 'jsd' on the statusIcon
 
-        if (FBTrace.DBG_INITIALIZE)
+        if (FBTrace.DBG_ACTIVATION)
             FBTrace.sysout("debugger.registerDebugger "+check+" debuggers");
     },
 
     unregisterDebugger: function() // 1.3.1 safe for multiple calls
     {
-        if (FBTrace.DBG_INITIALIZE)
+        if (FBTrace.DBG_ACTIVATION)
             FBTrace.sysout("debugger.unregisterDebugger");
 
         // stay registered if we are profiling across a reload.
@@ -2625,18 +2520,6 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
         if (FBTrace.DBG_ERRORS && Firebug.Debugger.isAlwaysEnabled())
             FBTrace.sysout("debugger.onResumeFirebug but debugger " +
                 Firebug.Debugger.debuggerName+" not registered! *** ");
-    },
-
-    ableWatchSidePanel: function(context)
-    {
-        if (Firebug.Console.isAlwaysEnabled())
-        {
-            var watchPanel = context.getPanel("watches", true);
-            if (watchPanel)
-                return watchPanel;
-        }
-
-        return null;
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *

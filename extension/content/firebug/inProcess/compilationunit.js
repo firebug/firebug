@@ -156,7 +156,7 @@ CompilationUnit.prototype.getNumberOfLines = function()
  */
 CompilationUnit.prototype.setBreakpoint = function(lineNumber)
 {
-    // TODO:
+    Firebug.Debugger.setBreakpoint(compilationUnit, lineNo);
 };
 
 // ************************************************************************************************

@@ -3,7 +3,7 @@
 // ************************************************************************************************
 // Module
 
-define([], function factoryBrowser(require){
+define(["firebugModules/inProcess/browsercontext.js"], function factoryBrowser(require){
 
 // ************************************************************************************************
 // Browser

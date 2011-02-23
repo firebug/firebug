@@ -879,7 +879,7 @@ var fbs =
         }
 
         try {
-            if (debuggr.onScriptCreated)
+            if (debuggr.onScriptCreated) // TODO xxxjjb: I don't know who uses this, remove it?
                 scriptListeners.push(debuggr);
         } catch(exc) {
         }
