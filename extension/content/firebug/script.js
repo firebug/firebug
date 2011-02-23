@@ -129,7 +129,7 @@ Firebug.ScriptPanel.prototype = extend(Firebug.SourceBoxPanel,
         else
             $('firebugStatus').setAttribute("script", "off");
 
-        Firebug.resetTooltip();
+        Firebug.StartButton.resetTooltip();
 
         // Front side state
         Firebug.jsDebuggerOn = active;
