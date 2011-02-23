@@ -175,7 +175,7 @@ toolbar[iconsize="small"] #firebug-button > .toolbarbutton-icon {
 
 /* Slightly different positions of the badge for individual toolbars */
 #nav-bar #firebug-button .badge {
-    margin: 5px -10px 0 -8px;
+    margin: 3px -10px 0 -8px;
 }
 
 #addon-bar #firebug-button .badge {
