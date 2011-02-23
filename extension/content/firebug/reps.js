@@ -2155,7 +2155,7 @@ FirebugReps.StorageList = domplate(Firebug.Rep,
     {
         var globalStorage = event.currentTarget.repObject;
         var context = Firebug.currentContext;
-        var domain = getPrettyDomain(context.window.location.href);
+        var domain = context.window.location.hostname;
 
         Firebug.chrome.select(globalStorage.namedItem(domain));
         cancelEvent(event);
@@ -2166,7 +2166,7 @@ FirebugReps.StorageList = domplate(Firebug.Rep,
         try
         {
             var context = Firebug.currentContext;
-            var domain = getPrettyDomain(context.window.location.href);
+            var domain = context.window.location.hostname;
             var length = globalStorage.namedItem(domain).length;
             return $STRP("firebug.storage.totalItems", [length]) + " ";
         }
@@ -2191,7 +2191,7 @@ FirebugReps.StorageList = domplate(Firebug.Rep,
     {
         try
         {
-            var domain = getPrettyDomain(context.window.location.href);
+            var domain = context.window.location.hostname;
             return globalStorage.namedItem(domain);
         }
         catch (e)
@@ -2219,7 +2219,7 @@ FirebugReps.StorageList = domplate(Firebug.Rep,
         try
         {
             var context = Firebug.currentContext;
-            var domain = getPrettyDomain(context.window.location.href);
+            var domain = context.window.location.hostname;
             return FirebugReps.Storage.propIterator(object.namedItem(domain), max);
         }
         catch (e)
@@ -2412,7 +2412,7 @@ FirebugReps.NamedNodeMap = domplate(Firebug.Rep,
     {
         var globalStorage = event.currentTarget.repObject;
         var context = Firebug.currentContext;
-        var domain = getPrettyDomain(context.window.location.href);
+        var domain = context.window.location.hostname;
 
         Firebug.chrome.select(globalStorage.namedItem(domain));
         cancelEvent(event);
