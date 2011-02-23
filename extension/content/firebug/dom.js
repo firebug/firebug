@@ -390,8 +390,13 @@ Firebug.DOMBasePanel.prototype = extend(Firebug.Panel,
             if (isArguments(object))
                 object = cloneArray(object);
 
-            var insecureObject = unwrapObject(object);
+            if (object instanceof StorageList)
+            {
+                var domain = context.window.location.hostname;
+                object = object.namedItem(domain);
+            }
 
+            var insecureObject = unwrapObject(object);
             var properties = [];
 
             for (var name in insecureObject)  // enumeration is safe
@@ -530,6 +535,12 @@ Firebug.DOMBasePanel.prototype = extend(Firebug.Panel,
             // Special case for functions with a protoype that has values
             if (valueType === "function" && proto)
                 hasChildren = hasChildren || hasProperties(proto);
+        }
+
+        if (value instanceof StorageList)
+        {
+            var domain = context.window.location.hostname;
+            hasChildren = value.namedItem(domain).length > 0;
         }
 
         var member = {
