@@ -211,17 +211,21 @@ panelTab[selected="true"]:hover > panelTabMenu .menuTarget {
     padding-right: 5px;
 }
 
+#fbLocationList {
+    height: 20px;
+}
+
 #fbContentBox .autorepeatbutton-up,
 #fbLocationList .scrollbutton-up {
     /* background-color: #FF9933;  Firebug orange */
     padding: 3px;
-    }
+}
 
 #fbLocationList .autorepeatbutton-down,
 #fbLocationList .scrollbutton-down {
     /* background-color: #FF9933;  Firebug orange */
     padding: 3px;
-    }
+}
 
 #fbLocationList .autorepeatbutton-up,
 #fbLocationList .scrollbutton-up {

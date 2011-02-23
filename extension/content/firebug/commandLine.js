@@ -745,22 +745,27 @@ Firebug.CommandLine = extend(Firebug.Module,
     {
         if (event.keyCode === 13 || event.keyCode === 14)  // RETURN , ENTER
         {
+            event.preventDefault();
+
             if (!event.metaKey && !event.shiftKey)
             {
-                event.preventDefault();
                 Firebug.CommandLine.enter(Firebug.currentContext);
-                return true;
+                handled = true;
             }
             else if (event.metaKey && !event.shiftKey)
             {
-                event.preventDefault();
                 Firebug.CommandLine.enterMenu(Firebug.currentContext);
-                return true;
+                handled = true;
             }
             else if(event.shiftKey && !event.metaKey)
             {
-                event.preventDefault();
                 Firebug.CommandLine.enterInspect(Firebug.currentContext);
+                handled = true;
+            }
+
+            if (handled)
+            {
+                this.commandHistory.hide();
                 return true;
             }
         }
@@ -781,6 +786,7 @@ Firebug.CommandLine = extend(Firebug.Module,
             event.preventDefault();
             if (Firebug.CommandLine.cancel(Firebug.currentContext))
                 FBL.cancelEvent(event);
+            this.commandHistory.hide();
             return true;
         }
         return false;
@@ -1313,6 +1319,7 @@ Firebug.CommandLine.CommandHistory = function() {
             $("fbCommandEditorHistoryButton").removeAttribute("disabled");
             commandsPopup.addEventListener("mouseover", this.onMouseOver, true);
             commandsPopup.addEventListener("mouseup", this.onMouseUp, true);
+            commandsPopup.addEventListener("popuphidden", this.onPopupHidden, true);
         }
     };
 
@@ -1354,13 +1361,15 @@ Firebug.CommandLine.CommandHistory = function() {
     };
 
     this.show = function(element) {
+        if (this.isShown())
+            return this.hide;
+
         FBL.eraseNode(commandsPopup);
 
         if(commands.length == 0)
-          return;
+            return;
 
         var vbox = commandsPopup.ownerDocument.createElement("vbox");
-        commandsPopup.appendChild(vbox);
 
         for (var i = 0; i < commands.length; i++)
         {
@@ -1373,9 +1382,10 @@ Firebug.CommandLine.CommandHistory = function() {
             vbox.appendChild(hbox);
 
             if (i === commandPointer)
-              this.selectCommand(hbox);
+                this.selectCommand(hbox);
         }
 
+        commandsPopup.appendChild(vbox);
         commandsPopup.openPopup(element, "before_start", 0, 0, false, false);
 
         return true;
@@ -1386,6 +1396,11 @@ Firebug.CommandLine.CommandHistory = function() {
         commandsPopup.hidePopup();
 
         return true;
+    };
+
+    this.toggle = function(element)
+    {
+        this.isShown() ? this.hide() : this.show(element);
     };
 
     this.removeCommandSelection = function()
@@ -1399,14 +1414,6 @@ Firebug.CommandLine.CommandHistory = function() {
         this.removeCommandSelection();
 
         setClass(element, "selected");
-    };
-
-    this.onKeyUp = function(event)
-    {
-      if (event.keyCode === 38) // Up Key
-          this.cycleCommands(context, -1);
-      else if (event.keyCode === 40) // Down Key
-          this.cycleCommands(context, 1);
     };
 
     this.onMouseOver = function(event)
@@ -1426,7 +1433,13 @@ Firebug.CommandLine.CommandHistory = function() {
         commandLine.value = commands[event.target.value];
         commandPointer = event.target.value;
 
-        commandsPopup.hidePopup();
+        Firebug.CommandLine.commandHistory.hide();
+    };
+
+    this.onPopupHidden = function(event)
+    {
+        Firebug.chrome.setGlobalAttribute("fbCommandLineHistoryButton", "checked", "false");
+        Firebug.chrome.setGlobalAttribute("fbCommandEditorHistoryButton", "checked", "false");
     };
 };
 

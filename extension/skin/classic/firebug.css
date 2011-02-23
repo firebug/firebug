@@ -131,10 +131,16 @@ toolbar[iconsize="small"] #firebug-button > .toolbarbutton-icon {
     list-style-image: url(chrome://firebug/skin/firebug-gray-16.png);
 }
 
-/* Error badge (displays an error counter) */
+/* Error badge (displays an error counter). The badge is only visible if error count
+   should be displayed */
 #firebug-button .badge {
+    display: none;
+}
+
+#firebug-button[showErrors="true"] .badge {
+    display: block;
     -moz-box-sizing: border-box;
-    margin: 6px -10px 0 -8px;
+    margin: 0;
 }
 
 #firebug-button .badge > .label {
@@ -167,8 +173,25 @@ toolbar[iconsize="small"] #firebug-button > .toolbarbutton-icon {
     visibility: visible;
 }
 
+/* Slightly different positions of the badge for individual toolbars */
+#nav-bar #firebug-button .badge {
+    margin: 3px -10px 0 -8px;
+}
+
+#addon-bar #firebug-button .badge {
+    margin-top: 1px;
+}
+
+#TabsToolbar #firebug-button .badge {
+    margin-top: 4px;
+}
+
+#toolbar-menubar #firebug-button .badge {
+    margin-top: 4px;
+}
+
 #firebug-button .fb-toolbarbutton {
-    padding-left: 0;
+    padding: 0;
 }
 
 /*************************************************************************************************/

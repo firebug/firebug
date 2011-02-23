@@ -586,7 +586,7 @@ function instanceOf(object, Klass)
     {
         if (object == Klass.prototype)
            return true;
-        
+
         if ( typeof(object) === 'xml')
             return (Klass.prototype === XML.prototype);
 
@@ -2016,6 +2016,7 @@ FirebugReps.Storage = domplate(Firebug.Rep,
 {
     tag:
         OBJECTLINK(
+            SPAN({"class": "storageTitle"}, "$object|summarize "),
             FOR("prop", "$object|longPropIterator",
                 "$prop.name",
                 SPAN({"class": "objectEqual", role: "presentation"}, "$prop.equal"),
@@ -2085,6 +2086,8 @@ FirebugReps.Storage = domplate(Firebug.Rep,
                 {
                     name = object.key(i);
                     value = object.getItem(name);
+                    if (value instanceof StorageItem)
+                        value = value.value;
                 }
                 catch (exc)
                 {
@@ -2129,6 +2132,7 @@ FirebugReps.StorageList = domplate(Firebug.Rep,
 {
     tag:
         OBJECTLINK(
+            SPAN({"class": "storageTitle"}, "$object|summarize "),
             FOR("prop", "$object|longPropIterator",
                 "$prop.name",
                 SPAN({"class": "objectEqual", role: "presentation"}, "$prop.equal"),
@@ -2152,7 +2156,7 @@ FirebugReps.StorageList = domplate(Firebug.Rep,
     {
         var globalStorage = event.currentTarget.repObject;
         var context = Firebug.currentContext;
-        var domain = getPrettyDomain(context.window.location.href);
+        var domain = context.window.location.hostname;
 
         Firebug.chrome.select(globalStorage.namedItem(domain));
         cancelEvent(event);
@@ -2163,7 +2167,7 @@ FirebugReps.StorageList = domplate(Firebug.Rep,
         try
         {
             var context = Firebug.currentContext;
-            var domain = getPrettyDomain(context.window.location.href);
+            var domain = context.window.location.hostname;
             var length = globalStorage.namedItem(domain).length;
             return $STRP("firebug.storage.totalItems", [length]) + " ";
         }
@@ -2188,7 +2192,7 @@ FirebugReps.StorageList = domplate(Firebug.Rep,
     {
         try
         {
-            var domain = getPrettyDomain(context.window.location.href);
+            var domain = context.window.location.hostname;
             return globalStorage.namedItem(domain);
         }
         catch (e)
@@ -2216,8 +2220,8 @@ FirebugReps.StorageList = domplate(Firebug.Rep,
         try
         {
             var context = Firebug.currentContext;
-            var domain = getPrettyDomain(context.window.location.href);
-            return FirebugReps.Obj.propIterator(object.namedItem(domain), max);
+            var domain = context.window.location.hostname;
+            return FirebugReps.Storage.propIterator(object.namedItem(domain), max);
         }
         catch (e)
         {
@@ -2350,7 +2354,34 @@ FirebugReps.Attr = domplate(Firebug.Rep,
     },
 });
 
-// ************************************************************************************************
+// ********************************************************************************************* //
+
+FirebugReps.Date = domplate(Firebug.Rep,
+{
+    tag:
+        OBJECTLINK(
+            SPAN({"class": "objectTitle"}, "$object|getTitle "),
+            SPAN({"class": "objectLeftBrace", role: "presentation"}, "{"),
+            SPAN({"class": "attrEqual"}, "$object|getValue"),
+            SPAN({"class": "objectRightBrace"}, "}")
+        ),
+
+    getValue: function(object)
+    {
+        return object.toString();
+    },
+
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+    className: "Date",
+
+    supportsObject: function(object, type)
+    {
+        return object && object.constructor && object.constructor.name == "Date";
+    },
+});
+
+// ********************************************************************************************* //
 
 FirebugReps.NamedNodeMap = domplate(Firebug.Rep,
 {
@@ -2382,7 +2413,7 @@ FirebugReps.NamedNodeMap = domplate(Firebug.Rep,
     {
         var globalStorage = event.currentTarget.repObject;
         var context = Firebug.currentContext;
-        var domain = getPrettyDomain(context.window.location.href);
+        var domain = context.window.location.hostname;
 
         Firebug.chrome.select(globalStorage.namedItem(domain));
         cancelEvent(event);
@@ -2478,6 +2509,7 @@ Firebug.registerRep(
     FirebugReps.Storage,
     FirebugReps.StorageList,
     FirebugReps.Attr,
+    FirebugReps.Date,
     FirebugReps.NamedNodeMap
 );
 

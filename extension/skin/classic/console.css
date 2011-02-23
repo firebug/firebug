@@ -369,7 +369,8 @@
 .objectLink-regexp,
 .objectLink-Storage,
 .objectLink-StorageList,
-.objectLink-object {
+.objectLink-object,
+.objectLink-Date {
     font-family: Lucida Grande, sans-serif;
     font-weight: bold;
     color: DarkGreen;

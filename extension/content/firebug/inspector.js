@@ -7,10 +7,11 @@ FBL.ns(function() { with (FBL) {
 
 const inspectDelay = 200;
 const highlightCSS = "chrome://firebug/content/highlighter.css";
-const cacheType = {
+const ident = {
     frame: 0,
     boxModel: 1,
-    proxyElt: 2
+    imageMap: 2,
+    proxyElt: 3
 };
 
 // ************************************************************************************************
@@ -21,6 +22,9 @@ var frameHighlighter = null;
 
 // ************************************************************************************************
 
+/**
+ * @module Implements Firebug Inspector logic.
+ */
 Firebug.Inspector = extend(Firebug.Module,
 {
     dispatchName: "inspector",
@@ -28,15 +32,20 @@ Firebug.Inspector = extend(Firebug.Module,
     inspectingPanel: null,
 
     /**
-     * This is the main highlighter method and can be used to highlight elements using the box model, frame or image map highlighters. This method can highlight either single or multiple elements.
+     * Main highlighter method. Can be used to highlight elements using the box model, frame or image map highlighters. Can highlight single or multiple elements.
+     *
+     * Examples:
+     * Firebug.Inspector.highlightObject([window.content.document.getElementById('gbar'), window.content.document.getElementById('logo')], window.content, "frame", null, ["#ff0000",{background:"#0000ff", border:"#ff0000"}])
+     * or
+     * Firebug.Inspector.highlightObject([window.content.document.getElementById('gbar'), window.content.document.getElementById('logo')], window.content, "boxModel", null, [{content: "#ff0000", padding: "#eeeeee", border: "#00ff00", margin: "#0000ff"},{content: "#00ff00", padding: "#eeeeee", border: "#00ff00", margin: "#0000ff"}])
      *
      * @param {Array} elementArr Elements to highlight
-     * @param {window} context Context of the elements to be highlighted
-     * @param {String} [highlightType] Either "frame" or "boxModel", default is configurable.
+     * @param {Window} context Context of the elements to be highlighted
+     * @param {String} [highlightType] Either "frame" or "boxModel". Default is configurable.
      * @param {String} [boxFrame] Displays the line guides for the box model layout view. Valid values are
      *        "content", "padding", "border" or "margin"
      * @param {String | Array} [colorObj] Any valid html color e.g. red, #f00, #ff0000, etc., a valid color object
-     *        or any valid highlighter color array. See the Firebug wiki for details.
+     *        or any valid highlighter color array.
      */
     highlightObject: function(elementArr, context, highlightType, boxFrame, colorObj)
     {
@@ -119,10 +128,17 @@ Firebug.Inspector = extend(Firebug.Module,
         }
     },
 
+    /**
+     * Clear all highlighted areas on a page.
+     */
     clearAllHighlights: function() {
         highlighterCache.clear();
     },
 
+    /**
+     * Toggle inspecting on / off
+     * @param {Window} [context] The window to begin inspecting in, necessary to toggle inspecting on.
+     */
     toggleInspecting: function(context)
     {
         if (this.inspecting)
@@ -131,12 +147,15 @@ Firebug.Inspector = extend(Firebug.Module,
             this.startInspecting(context);
     },
 
-    onPanelChanged: function(event)
+    /**
+     * Check if the new panel has the inspectable property set. If so set it as the new inspectingPanel.
+     */
+    onPanelChanged: function()
     {
         if (this.inspecting)
         {
             var panelBar1 = $("fbPanelBar1");
-            panel = panelBar1.selectedPanel;
+            var panel = panelBar1.selectedPanel;
 
             if (panel && panel.inspectable)
             {
@@ -146,6 +165,10 @@ Firebug.Inspector = extend(Firebug.Module,
         }
     },
 
+    /**
+     * Turn inspecting on.
+     * @param {Window} context The main browser window
+     */
     startInspecting: function(context)
     {
         if (this.inspecting || !context || !context.loaded)
@@ -179,6 +202,10 @@ Firebug.Inspector = extend(Firebug.Module,
             this.inspectNode(context.hoverNode);
     },
 
+    /**
+     * Highlight a node using the frame highlighter. Can only be used after inspecting has already started.
+     * @param {Element} node The element to inspect
+     */
     inspectNode: function(node)
     {
         if (node && node.nodeType != 1)
@@ -210,16 +237,23 @@ Firebug.Inspector = extend(Firebug.Module,
 
         if (node)
         {
+            var _this = this;
+
             this.inspectTimeout = context.setTimeout(function()
             {
                 var selection = inspectingPanel.inspectNode(node);
-                dispatch(self.fbListeners, "onInspectNode", [context, node]);
+                dispatch(_this.fbListeners, "onInspectNode", [context, node]);
                 if (selection)
                     inspectingPanel.select(node);
             }, inspectDelay);
         }
     },
 
+    /**
+     * Stop inspecting and clear all highlights.
+     * @param {Boolean} canceled Indicates whether inspect was cancelled (usually via the escape key)
+     * @param {Boolean} [waitForClick] Indicates whether the next click will still forward you to the clicked element in the HTML panel
+     */
     stopInspecting: function(canceled, waitForClick)
     {
         if (!this.inspecting)
@@ -252,6 +286,10 @@ Firebug.Inspector = extend(Firebug.Module,
         this.inspectNode(null);
     },
 
+    /**
+     * Get the name of the inspectable panel.
+     * @param {Window} context Context of the panel
+     */
     _resolveInspectingPanelName: function(context)
     {
         var name, requestingPanel = context && context.getPanel(context.panelName);
@@ -264,25 +302,30 @@ Firebug.Inspector = extend(Firebug.Module,
         return name;
     },
 
+    /**
+     * Inspect from context menu.
+     * @param {Element} elt The element to inspect
+     */
     inspectFromContextMenu: function(elt)
     {
-        var panel, inspectingPanelName;
-        var context = this.inspectingContext ||
-            Firebug.TabWatcher.getContextByWindow(elt.ownerDocument.defaultView);
-
-        inspectingPanelName = "html";
+        var panel;
+        //var context = this.inspectingContext || Firebug.TabWatcher.getContextByWindow(elt.ownerDocument.defaultView);
+        var inspectingPanelName = "html";
 
         Firebug.toggleBar(true, inspectingPanelName);
         Firebug.chrome.select(elt, inspectingPanelName);
-
         panel = Firebug.chrome.selectPanel(inspectingPanelName);
         panel.panelNode.focus();
     },
 
+    /**
+     * Navigate up and down through the DOM and highlight the result. This method is used by the key handlers for the up and down arrow keys.
+     * @param {String} dir Direction to navigate the DOM, either "up" or "down"
+     */
     inspectNodeBy: function(dir)
     {
-        var target,
-            node = this.inspectingNode;
+        var target;
+        var node = this.inspectingNode;
 
         if (dir == "up")
         {
@@ -306,29 +349,33 @@ Firebug.Inspector = extend(Firebug.Module,
             beep();
     },
 
+    /**
+     * Repaint the highlighter. Called from the window scroll and resize handlers.
+     */
     repaint: function()
     {
         var rp = this.repaint;
         var highlighter = rp.highlighter;
         var context = rp.context;
-        var win = context && context.window;
         var element = rp.element;
         var boxFrame = rp.boxFrame;
         var colorObj = rp.colorObj;
-        var isBoxHighlighter = false;
         var highlightType = rp.highlightType;
         var isMulti = rp.isMulti;
 
-        if (highlightType)
-        {
-            // highlightType is only used for multiHighlighter
+        if(!context || (!highlighter && !isMulti))
+            return;
+
+        if(isMulti && element)
             this.highlightObject(element, context, highlightType, null, colorObj);
-        }
         else
         {
-            isBoxHighlighter = highlighter && highlighter.getNodes;
+            var highlighterNode = highlighterCache.get(highlighter.ident);
 
-            if (win && highlighter && (isBoxHighlighter || (this.inspecting && !isBoxHighlighter)))
+            if(highlighterNode && highlighter.ident === ident.boxModel)
+                highlighterNode = highlighterNode.offset;
+
+            if(highlighterNode && highlighterNode.parentNode)
             {
                 this.clearAllHighlights();
                 highlighter.highlight(context, element, boxFrame, colorObj, isMulti);
@@ -338,6 +385,10 @@ Firebug.Inspector = extend(Firebug.Module,
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 
+    /**
+     * Attach the scroll and resize handlers to elts window. Called from every highlight call.
+     * @param {Element} elt Passed in order to reliably obtain context
+     */
     attachRepaintInspectListeners: function(elt)
     {
         if (!elt || !elt.ownerDocument || !elt.ownerDocument.defaultView)
@@ -354,6 +405,10 @@ Firebug.Inspector = extend(Firebug.Module,
         win.document.addEventListener("scroll", this.onInspectingScroll, true);
     },
 
+    /**
+     * Attach key and mouse events to windows recursively.
+     * @param {Window} context Context of the main browser window
+     */
     attachInspectListeners: function(context)
     {
         var win = context.window;
@@ -386,6 +441,10 @@ Firebug.Inspector = extend(Firebug.Module,
         }, this));
     },
 
+    /**
+     * Remove all event listeners except click listener from windows recursively.
+     * @param {Window} context Context of the main browser window
+     */
     detachInspectListeners: function(context)
     {
         var i, keyListenersLen;
@@ -412,11 +471,13 @@ Firebug.Inspector = extend(Firebug.Module,
         }, this));
     },
 
-    detachClickInspectListeners: function(win)
+    /**
+     * Remove the click listener independent from detachInspectListeners because if we remove it after mousedown, we won't be able to cancel clicked links.
+     * @param {Window} context Context of the main browser window
+     */
+    detachClickInspectListeners: function(context)
     {
-        // We have to remove the click listener in a second phase because if we remove it
-        // after the mousedown, we won't be able to cancel clicked links
-        iterateWindows(win, bind(function(subWin)
+        iterateWindows(context, bind(function(subWin)
         {
             subWin.document.removeEventListener("click", this.onInspectingClick, true);
         }, this));
@@ -424,6 +485,10 @@ Firebug.Inspector = extend(Firebug.Module,
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
+    /**
+     * Repaint last highlight in the correct position on window resize.
+     * @param {Event} event Passed for tracing
+     */
     onInspectingResizeWindow: function(event)
     {
         if (FBTrace.DBG_INSPECT)
@@ -432,6 +497,10 @@ Firebug.Inspector = extend(Firebug.Module,
         this.repaint();
     },
 
+    /**
+     * Repaint last highlight in the correct position on scroll.
+     * @param {Event} event Passed for tracing
+     */
     onInspectingScroll: function(event)
     {
         if (FBTrace.DBG_INSPECT)
@@ -440,6 +509,10 @@ Firebug.Inspector = extend(Firebug.Module,
         this.repaint();
     },
 
+    /**
+     * Call inspectNode(event.target) highlighting the element that was moused over.
+     * @param {Event} event Passed for tracing and to identify the target of inspection
+     */
     onInspectingMouseOver: function(event)
     {
         if (FBTrace.DBG_INSPECT)
@@ -448,11 +521,15 @@ Firebug.Inspector = extend(Firebug.Module,
         this.inspectNode(event.target);
     },
 
+    /**
+     * Trap mousedown events to prevent clicking a document from triggering a document's mousedown event when inspecting.
+     * @param {Event} event Used for tracing and canceling the event
+     */
     onInspectingMouseDown: function(event)
     {
         if (FBTrace.DBG_INSPECT)
             FBTrace.sysout("onInspectingMouseDown event", {originalTarget: event.originalTarget,
-                tmpRealOriginalTarget:event.tmpRealOriginalTarget,event:event});
+                tmpRealOriginalTarget:event.tmpRealOriginalTarget, event:event});
 
         // Allow to scroll the document while inspecting
         if (event.originalTarget && event.originalTarget.tagName === "xul:thumb")
@@ -461,6 +538,10 @@ Firebug.Inspector = extend(Firebug.Module,
         cancelEvent(event);
     },
 
+    /**
+     * Trap mouseup events to prevent clicking a document from triggering a document's mouseup event when inspecting.
+     * @param {Event} event Used for tracing and canceling the event
+     */
     onInspectingMouseUp: function(event)
     {
         if (FBTrace.DBG_INSPECT)
@@ -476,6 +557,10 @@ Firebug.Inspector = extend(Firebug.Module,
         cancelEvent(event);
     },
 
+    /**
+     * Trap click events to prevent clicking a document from triggering a document's click event when inspecting and removes the click inspect listener.
+     * @param {Event} event Used for tracing and canceling the event
+     */
     onInspectingClick: function(event)
     {
         if (FBTrace.DBG_INSPECT)
@@ -494,6 +579,9 @@ Firebug.Inspector = extend(Firebug.Module,
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
     // extends Module
 
+    /**
+     * Initialize the inspector
+     */
     initialize: function()
     {
         Firebug.Module.initialize.apply(this, arguments);
@@ -513,11 +601,19 @@ Firebug.Inspector = extend(Firebug.Module,
         panelBar1.addEventListener("selectPanel", this.onPanelChanged, false);
     },
 
+    /**
+     * Create a method context.onPreInspectMouseOver that updates context.hoverNode to be equal to event.target. Called on element mouseover.
+     * @param {Window} context Context of the main window
+     */
     initContext: function(context)
     {
         context.onPreInspectMouseOver = function(event) { context.hoverNode = event.target; };
     },
 
+    /**
+     * Stop inspecting and delete timers.
+     * @param {Window} context Context of the main window
+     */
     destroyContext: function(context)
     {
         if (context.highlightTimeout)
@@ -530,28 +626,47 @@ Firebug.Inspector = extend(Firebug.Module,
             this.stopInspecting(true);
     },
 
+    /**
+     * Attach a mouseover event to win that calls context.onPreInspectMouseOver.
+     * @param {Window} context The context of the onPreInspectMouseOver method
+     * @param {Window} win the context of the main window
+     */
     watchWindow: function(context, win)
     {
         win.addEventListener("mouseover", context.onPreInspectMouseOver, true);
     },
 
+    /**
+     * Remove the mouseover event from win that was used to call context.onPreInspectMouseOver.
+     * @param {Window} context The context of the onPreInspectMouseOver method
+     * @param {Window} win the context of the main window
+     */
     unwatchWindow: function(context, win)
     {
         try {
             win.removeEventListener("mouseover", context.onPreInspectMouseOver, true);
             this.hideQuickInfoBox();
         } catch (ex) {
-            // Get unfortunate errors here sometimes, so let's just ignore them
-            // since the window is going away anyhow
+            // Get unfortunate errors here sometimes, so let's just ignore them since the window is going away anyhow
         }
     },
 
+    /**
+     * Called when a FF tab is created or activated (user changes FF tab). We stop inspecting in this situation.
+     * @param {xul:browser} [browser] Browser
+     * @param {Window} [context] The main browser window
+     */
     showContext: function(browser, context)
     {
         if (this.inspecting)
             this.stopInspecting(true);
     },
 
+    /**
+     * Called when a panel is shown.
+     * @param {xul:browser} [browser] Browser
+     * @param {Panel} [panel] Panel
+     */
     showPanel: function(browser, panel)
     {
         // The panel can be null (if disabled) so use the global context.
@@ -560,11 +675,20 @@ Firebug.Inspector = extend(Firebug.Module,
         Firebug.chrome.setGlobalAttribute("cmd_toggleInspecting", "disabled", disabled);
     },
 
+    /**
+     * Called after a context's page gets DOMContentLoaded. We enable inspection here.
+     * @param {Window} [context] Context of the main window
+     */
     loadedContext: function(context)
     {
         Firebug.chrome.setGlobalAttribute("cmd_toggleInspecting", "disabled", "false");
     },
 
+    /**
+     * Update the shadeBoxModel or showQuickInfoBox options
+     * @param {String} name Either "shadeBoxModel" or "showQuickInfoBox"
+     * @param {Boolean} value Enable or Disable the option
+     */
     updateOption: function(name, value)
     {
         if (name == "shadeBoxModel")
@@ -578,24 +702,26 @@ Firebug.Inspector = extend(Firebug.Module,
         }
     },
 
+    /**
+     * Gets stylesheet by URL.
+     * @param {Window} context the main browser window
+     * @param {String} url URL of the stylesheet
+     */
     getObjectByURL: function(context, url)
     {
         var styleSheet = getStyleSheetByHref(url, context);
         if (styleSheet)
             return styleSheet;
-
-        /*var path = getURLPath(url);
-        var xpath = "//*[contains(@src, '" + path + "')]";
-        var elements = getElementsByXPath(context.window.document, xpath);
-        if (elements.length)
-            return elements[0];*/
     },
 
+    /**
+     * Toggle the quick info box.
+     */
     toggleQuickInfoBox: function()
     {
         var qiBox = $('fbQuickInfoPanel');
 
-        if (qiBox.state==="open")
+        if (qiBox.state === "open")
             quickInfoBox.hide();
 
         quickInfoBox.boxEnabled = !quickInfoBox.boxEnabled;
@@ -603,6 +729,9 @@ Firebug.Inspector = extend(Firebug.Module,
         Firebug.setPref(Firebug.prefDomain, "showQuickInfoBox", quickInfoBox.boxEnabled);
     },
 
+    /**
+     * Hide the quick info box.
+     */
     hideQuickInfoBox: function()
     {
         var qiBox = $('fbQuickInfoPanel');
@@ -613,9 +742,13 @@ Firebug.Inspector = extend(Firebug.Module,
         this.inspectNode(null);
     },
 
-    quickInfoBoxHandler: function(e)
+    /**
+     * Pass all quick info box events to quickInfoBox.handleEvent() for handling.
+     * @param {Event} event Event to handle
+     */
+    quickInfoBoxHandler: function(event)
     {
-        quickInfoBox.handleEvent(e);
+        quickInfoBox.handleEvent(event);
     }
 
 });
@@ -670,7 +803,7 @@ function resizeImp(element, w, h) {
 }
 
 // ************************************************************************************************
-// Imagemap Inspector
+// Imagemap Highlighter
 
 function getImageMapHighlighter(context)
 {
@@ -711,6 +844,8 @@ function getImageMapHighlighter(context)
     {
         context.imageMapHighlighter =
         {
+            ident: ident.imageMap,
+
             show: function(state)
             {
                 if(!canvas)
@@ -1013,6 +1148,8 @@ Firebug.Inspector.FrameHighlighter = function()
 
 Firebug.Inspector.FrameHighlighter.prototype =
 {
+    ident: ident.frame,
+
     doNotHighlight: function(element)
     {
         return false; // (element instanceof XULElement);
@@ -1155,7 +1292,7 @@ Firebug.Inspector.FrameHighlighter.prototype =
     {
         if(!isMulti)
         {
-            var div = highlighterCache.get(cacheType.frame);
+            var div = highlighterCache.get(ident.frame);
             if(div)
                 return div;
         }
@@ -1170,7 +1307,7 @@ Firebug.Inspector.FrameHighlighter.prototype =
         div.className = "firebugResetStyles firebugBlockBackgroundColor";
         div2.className = "firebugResetStyles";
         div.appendChild(div2);
-        div.cacheType = cacheType.frame;
+        div.ident = ident.frame;
         highlighterCache.add(div);
         return div;
     }
@@ -1186,6 +1323,8 @@ Firebug.Inspector.BoxModelHighlighter = BoxModelHighlighter;
 
 BoxModelHighlighter.prototype =
 {
+    ident: ident.boxModel,
+
     highlight: function(context, element, boxFrame, colorObj, isMulti)
     {
         var line, contentCssText, paddingCssText, borderCssText, marginCssText,
@@ -1376,7 +1515,7 @@ BoxModelHighlighter.prototype =
 
             if(!isMulti)
             {
-                var nodes = highlighterCache.get(cacheType.boxModel);
+                var nodes = highlighterCache.get(ident.boxModel);
                 if(nodes)
                     return nodes;
             }
@@ -1425,7 +1564,7 @@ BoxModelHighlighter.prototype =
             nodes.padding.appendChild(nodes.content);
         }
 
-        nodes.cacheType = cacheType.boxModel;
+        nodes.ident = ident.boxModel;
         highlighterCache.add(nodes);
         return nodes;
     },
@@ -1466,16 +1605,12 @@ var highlighterCache =
 
     get: function(type)
     {
-if (FBTrace.DBG_INSPECT)
-    FBTrace.sysout("inspector.highlighterCache accessed. frameArr.length = " + this.highlighters.frameArr.length);
-if (FBTrace.DBG_INSPECT)
-    FBTrace.sysout("inspector.highlighterCache accessed. boxModelArr.length = " + this.highlighters.boxModelArr.length);
         var node;
         var hl = this.highlighters;
 
         switch (type)
         {
-            case cacheType.boxModel:
+            case ident.boxModel:
                 if(hl.boxModelArr.length === 1)
                 {
                     node = hl.boxModelArr[0];
@@ -1483,7 +1618,7 @@ if (FBTrace.DBG_INSPECT)
                         return node;
                 }
             break;
-            case cacheType.frame:
+            case ident.frame:
                 if(hl.frameArr.length === 1)
                 {
                     node = hl.frameArr[0];
@@ -1491,7 +1626,7 @@ if (FBTrace.DBG_INSPECT)
                         return node;
                 }
             break;
-            case cacheType.proxyElt:
+            case ident.proxyElt:
                 if(hl.proxyEltArr.length === 1)
                 {
                     node = hl.proxyEltArr[0];
@@ -1504,15 +1639,15 @@ if (FBTrace.DBG_INSPECT)
 
     add: function(node)
     {
-        switch (node.cacheType)
+        switch (node.ident)
         {
-            case cacheType.boxModel:
+            case ident.boxModel:
                 this.highlighters.boxModelArr.push(node);
             break;
-            case cacheType.frame:
+            case ident.frame:
                 this.highlighters.frameArr.push(node);
             break;
-            case cacheType.proxyElt:
+            case ident.proxyElt:
                 this.highlighters.proxyEltArr.push(node);
             break;
         }
@@ -1610,7 +1745,7 @@ function createProxiesForDisabledElements(body)
         div.fbProxyFor = node;
 
         body.appendChild(div);
-        div.cacheType = cacheType.proxyElt;
+        div.ident = ident.proxyElt;
         highlighterCache.add(div);
     }
 }
