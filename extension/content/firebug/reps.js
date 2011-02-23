@@ -585,7 +585,7 @@ function instanceOf(object, Klass)
     {
         if (object == Klass.prototype)
            return true;
-        
+
         if ( typeof(object) === 'xml')
             return (Klass.prototype === XML.prototype);
 
@@ -2015,6 +2015,7 @@ FirebugReps.Storage = domplate(Firebug.Rep,
 {
     tag:
         OBJECTLINK(
+            SPAN({"class": "storageTitle"}, "$object|summarize "),
             FOR("prop", "$object|longPropIterator",
                 "$prop.name",
                 SPAN({"class": "objectEqual", role: "presentation"}, "$prop.equal"),
