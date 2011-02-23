@@ -2085,6 +2085,8 @@ FirebugReps.Storage = domplate(Firebug.Rep,
                 {
                     name = object.key(i);
                     value = object.getItem(name);
+                    if (value instanceof StorageItem)
+                        value = value.value;
                 }
                 catch (exc)
                 {
@@ -2129,6 +2131,7 @@ FirebugReps.StorageList = domplate(Firebug.Rep,
 {
     tag:
         OBJECTLINK(
+            SPAN({"class": "storageTitle"}, "$object|summarize "),
             FOR("prop", "$object|longPropIterator",
                 "$prop.name",
                 SPAN({"class": "objectEqual", role: "presentation"}, "$prop.equal"),
@@ -2217,7 +2220,7 @@ FirebugReps.StorageList = domplate(Firebug.Rep,
         {
             var context = Firebug.currentContext;
             var domain = getPrettyDomain(context.window.location.href);
-            return FirebugReps.Obj.propIterator(object.namedItem(domain), max);
+            return FirebugReps.Storage.propIterator(object.namedItem(domain), max);
         }
         catch (e)
         {
