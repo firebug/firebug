@@ -1617,7 +1617,8 @@ NetPanel.prototype = extend(Firebug.ActivablePanel,
 
         if (!Firebug.currentContext)
         {
-            FBTrace.sysout("net.updateHRefLabelWidth; Firebug.currentContext == NULL");
+            if (FBTrace.DBG_ERRORS)
+                FBTrace.sysout("net.updateHRefLabelWidth; Firebug.currentContext == NULL");
             return;
         }
 
