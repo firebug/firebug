@@ -205,7 +205,7 @@
     -moz-image-region: rect(13px, 13px, 26px, 0);
 }
 
-#fbCommandLineHistoryButton:active {
+#fbCommandLineHistoryButton:active, #fbCommandLineHistoryButton[checked="true"] {
     -moz-image-region: rect(26px, 13px, 39px, 0);
 }
 

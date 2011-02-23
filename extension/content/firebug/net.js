@@ -1619,6 +1619,7 @@ NetPanel.prototype = extend(Firebug.ActivablePanel,
 
         // Update max-width of the netHrefLabel according to the width of the parent column.
         // I don't know if there is a way to do this in CSS.
+        // See Issue 3633: Truncated URLs in net panel
         var netHrefCol = this.table.querySelector("#netHrefCol");
         var hrefLabel = this.table.querySelector(".netHrefLabel");
 
@@ -1627,7 +1628,8 @@ NetPanel.prototype = extend(Firebug.ActivablePanel,
 
         if (!Firebug.currentContext)
         {
-            FBTrace.sysout("net.updateHRefLabelWidth; Firebug.currentContext == NULL");
+            if (FBTrace.DBG_ERRORS)
+                FBTrace.sysout("net.updateHRefLabelWidth; Firebug.currentContext == NULL");
             return;
         }
 

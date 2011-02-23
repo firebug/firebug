@@ -89,8 +89,8 @@ Firebug.NavigationHistory = extend(Firebug.Module,
             var historyItem = list[i];
             var panelType = Firebug.getPanelType(historyItem.panelName);
             var label = Firebug.getPanelTitle(panelType);
-            if (historyItem.location && historyItem.location.href)
-                label += " - " + historyItem.location.href;
+            if (historyItem.location && historyItem.location.url)
+                label += " - " + historyItem.location.url;
 
             var menuInfo = {
                 label: label,
@@ -230,7 +230,7 @@ Firebug.NavigationHistory = extend(Firebug.Module,
         if (FBTrace.DBG_HISTORY)
             FBTrace.sysout("history.onPanelNavigate; " + currIndex + ", " +
                 "Panel: " + (panel ? panel.name : "Unknown Panel") + ", " +
-                "Location: " + (location ? location.href : "No Location") + ", " +
+                "Location: " + (location ? location.url : "No Location") + ", " +
                 context.getName());
 
         // The panel must be always there
@@ -255,7 +255,7 @@ Firebug.NavigationHistory = extend(Firebug.Module,
             return;
 
         if (lastHistoryItem && lastHistoryItem.location && location &&
-            lastHistoryItem.location.href == location.href)
+            lastHistoryItem.location.url == location.url)
             return;
 
         // If the panel is the same, bail out.
@@ -273,7 +273,7 @@ Firebug.NavigationHistory = extend(Firebug.Module,
 
         if (FBTrace.DBG_HISTORY)
             FBTrace.sysout("history.onPanelNavigate; New history record created " + currIndex +
-                ", " + panel.name + ", " + (location ? location.href : "No Location"), list);
+                ", " + panel.name + ", " + (location ? location.url : "No Location"), list);
 
         // Update back and forward buttons in the UI.
         this.updateButtons(context);

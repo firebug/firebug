@@ -1398,20 +1398,19 @@ CSSElementPanel.prototype = extend(Firebug.CSSStyleSheetPanel.prototype,
     template: domplate(
     {
         cascadedTag:
-            DIV({"class": "a11yCSSView",  role: 'presentation'},
-                DIV({role: 'list', 'aria-label' : $STR('aria.labels.style rules') },
+            DIV({"class": "a11yCSSView", role: "presentation"},
+                DIV({role: "list", "aria-label": $STR("aria.labels.style rules") },
                     FOR("rule", "$rules",
                         TAG("$ruleTag", {rule: "$rule"})
                     )
                 ),
-                DIV({role: "list", 'aria-label' :$STR('aria.labels.inherited style rules')},
+                DIV({role: "list", "aria-label": $STR("aria.labels.inherited style rules")},
                     FOR("section", "$inherited",
-
-                        H1({"class": "cssInheritHeader groupHeader focusRow", role: 'listitem' },
+                        H1({"class": "cssInheritHeader groupHeader focusRow", role: "listitem" },
                             SPAN({"class": "cssInheritLabel"}, "$inheritLabel"),
                             TAG(FirebugReps.Element.shortTag, {object: "$section.element"})
                         ),
-                        DIV({role: 'group'},
+                        DIV({role: "group"},
                             FOR("rule", "$section.rules",
                                 TAG("$ruleTag", {rule: "$rule"})
                             )
@@ -1440,6 +1439,9 @@ CSSElementPanel.prototype = extend(Firebug.CSSStyleSheetPanel.prototype,
 
         if (rules.length || sections.length)
         {
+            if (Firebug.onlyShowAppliedStyles)
+                this.removeOverriddenProps(rules, sections);
+
             inheritLabel = $STR("InheritedFrom");
             result = this.template.cascadedTag.replace({rules: rules, inherited: sections,
                 inheritLabel: inheritLabel}, this.panelNode);
@@ -1512,7 +1514,8 @@ CSSElementPanel.prototype = extend(Firebug.CSSStyleSheetPanel.prototype,
                         selector: rule.selectorText.replace(/ :/g, " *:"), // Show universal selectors with pseudo-class (http://code.google.com/p/fbug/issues/detail?id=3683)
                         sourceLink: sourceLink,
                         props: props, inherited: inheritMode,
-                        isSystemSheet: isSystemSheet});
+                        isSystemSheet: isSystemSheet,
+                        isSelectorEditable: true});
             }
         }
 
@@ -1545,6 +1548,46 @@ CSSElementPanel.prototype = extend(Firebug.CSSStyleSheetPanel.prototype,
 
             prop.wasInherited = inheritMode ? true : false;
             usedProps[prop.name].push(prop);  // all occurrences of a property seen so far, by name
+        }
+    },
+
+    removeOverriddenProps: function(rules, sections)
+    {
+        function removeProps(rules)
+        {
+            var i=0;
+            while (i<rules.length)
+            {
+                var props = rules[i].props;
+  
+                var j=0;
+                while (j<props.length)
+                {
+                    if (props[j].overridden)
+                        props.splice(j, 1);
+                    else
+                        ++j;
+                }
+  
+                if (props.length == 0)
+                    rules.splice(i, 1);
+                else
+                    ++i;
+            }
+        }
+
+        removeProps(rules);
+
+        var i=0;
+        while (i<sections.length)
+        {
+            var section = sections[i];
+            removeProps(section.rules);
+
+            if (section.rules.length == 0)
+                sections.splice(i, 1);
+            else
+                ++i;
         }
     },
 
@@ -1642,13 +1685,15 @@ CSSElementPanel.prototype = extend(Firebug.CSSStyleSheetPanel.prototype,
 
     updateOption: function(name, value)
     {
-        if (name == "showUserAgentCSS" || name == "expandShorthandProps")
+        if (name == "showUserAgentCSS" || name == "expandShorthandProps" || name == "onlyShowAppliedStyles")
             this.refresh();
     },
 
     getOptionsMenuItems: function()
     {
         var ret = [
+            {label: "Only Show Applied Styles", type: "checkbox", checked: Firebug.onlyShowAppliedStyles,
+                    command: bindFixed(Firebug.togglePref, Firebug, "onlyShowAppliedStyles") },
             {label: "Show User Agent CSS", type: "checkbox", checked: Firebug.showUserAgentCSS,
                     command: bindFixed(Firebug.togglePref, Firebug, "showUserAgentCSS") },
             {label: "Expand Shorthand Properties", type: "checkbox", checked: Firebug.expandShorthandProps,
@@ -1764,34 +1809,28 @@ CSSComputedElementPanel.prototype = extend(CSSElementPanel.prototype,
                             IMG({"class": "twisty", role: "presentation"}),
                             SPAN({"class": "cssComputedLabel"}, "$group.title")
                         ),
-                        TABLE({width: "100%", role: "group"},
-                            TBODY({role: "presentation"},
-                                FOR("prop", "$group.props",
-                                    TR({"class": "focusRow computedStyleRow", role: "listitem"},
-                                        TD({"class": "stylePropName", role: "presentation"}, "$prop.name"),
-                                        TD({"class": "stylePropValue", role: "presentation"}, "$prop.value")
-                                    )
-                                )
-                            )
-                        )
+                        TAG("$stylesTag", {props: "$group.props"})
                     )
                 )
             ),
 
         computedAlphabeticalTag:
             DIV({"class": "a11yCSSView", role: "list", "aria-label" : $STR("aria.labels.computed styles")},
-                TABLE({width: "100%", role: "list"},
-                    TBODY({role: "presentation"},
-                        FOR("prop", "$props",
-                            TR({"class": "focusRow computedStyleRow", role: "listitem"},
-                                TD({"class": "stylePropName", role: "presentation"}, "$prop.name"),
-                                TD({"class": "stylePropValue", role: "presentation"}, "$prop.value")
-                            )
+                TAG("$stylesTag", {props: "$props"})
+            ),
+
+        stylesTag:
+            TABLE({width: "100%", role: "group"},
+                TBODY({role: "presentation"},
+                    FOR("prop", "$props",
+                        TR({"class": "focusRow computedStyleRow", role: "listitem"},
+                            TD({"class": "stylePropName", role: "presentation"}, "$prop.name"),
+                            TD({"class": "stylePropValue", role: "presentation"}, "$prop.value")
                         )
                     )
                 )
             )
-  }),
+    }),
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 
@@ -1993,6 +2032,20 @@ CSSEditor.prototype = domplate(Firebug.InlineEditor.prototype,
                 Firebug.CSSModule.removeProperty(rule, propName);
         }
 
+        if(value)
+        {
+            var saveSuccess = !!rule.style.getPropertyValue(propName || value);
+            if(!saveSuccess && !propName)
+            {
+                propName = value.replace(/-./,function(match) match[1].toUpperCase());
+                if(propName in rule.style)
+                    saveSuccess='almost';
+            }
+            this.input.setAttribute('saveSuccess',saveSuccess);
+        }
+        else
+            this.input.removeAttribute('saveSuccess');
+
         Firebug.Inspector.repaint();
 
         this.panel.markChange(this.panel.name == "stylesheet");
@@ -2083,8 +2136,29 @@ CSSRuleEditor.prototype = domplate(Firebug.InlineEditor.prototype,
             return;
 
         var row = getAncestorByClass(target, "cssRule");
-        var styleSheet = this.panel.location;
 
+        var rule = Firebug.getRepObject(target);
+        var searchRule = rule || Firebug.getRepObject(row.nextSibling);
+        var oldRule, ruleIndex;
+
+        if (searchRule)
+        {
+            var styleSheet = searchRule.parentRule || searchRule.parentStyleSheet;// take care of media rules
+            if(!styleSheet)
+                return;
+            var cssRules = styleSheet.cssRules;
+            for (ruleIndex=0; ruleIndex<cssRules.length && searchRule!=cssRules[ruleIndex]; ruleIndex++) {}
+
+            if(rule)
+                oldRule = searchRule;
+            else
+                ruleIndex++;
+        }
+        else
+        {
+            if(this.panel.name != 'stylesheet')
+                return;
+            var styleSheet = this.panel.location;//this must be stylesheet panel
         if (!styleSheet)
         {
             // If there is no stylesheet on the page we need to create a temporary one,
@@ -2102,13 +2176,8 @@ CSSRuleEditor.prototype = domplate(Firebug.InlineEditor.prototype,
 
         styleSheet = styleSheet.editStyleSheet ? styleSheet.editStyleSheet.sheet : styleSheet;
 
-        var cssRules = styleSheet.cssRules;
-        var rule = Firebug.getRepObject(target), oldRule = rule;
-        var ruleIndex = cssRules.length;
-        if (rule || Firebug.getRepObject(row.nextSibling))
-        {
-            var searchRule = rule || Firebug.getRepObject(row.nextSibling);
-            for (ruleIndex=0; ruleIndex<cssRules.length && searchRule!=cssRules[ruleIndex]; ruleIndex++) {}
+            cssRules = styleSheet.cssRules;
+            ruleIndex = cssRules.length;
         }
 
         // Delete in all cases except for new add
@@ -2145,6 +2214,13 @@ CSSRuleEditor.prototype = domplate(Firebug.InlineEditor.prototype,
                 var insertLoc = Firebug.CSSModule.insertRule(styleSheet, cssText, ruleIndex);
                 rule = cssRules[insertLoc];
                 ruleIndex++;
+
+                var saveSuccess = this.panel.name != "css";
+                if(!saveSuccess)
+                    saveSuccess =(this.panel.selection &&
+                        this.panel.selection.mozMatchesSelector(value))? true: 'almost';
+
+                this.input.setAttribute('saveSuccess',saveSuccess);
             }
             catch (err)
             {
@@ -2152,7 +2228,13 @@ CSSRuleEditor.prototype = domplate(Firebug.InlineEditor.prototype,
                     FBTrace.sysout("CSS Insert Error: "+err, err);
 
                 target.innerHTML = escapeForCss(previousValue);
-                row.repObject = undefined;
+                // create dummy rule to be able to recover from error
+                var insertLoc = Firebug.CSSModule.insertRule(styleSheet, 'selectorSavingError{}', ruleIndex);
+                rule = cssRules[insertLoc];
+
+                this.input.setAttribute('saveSuccess',false);
+
+                row.repObject = rule;
                 return;
             }
         }
@@ -2399,7 +2481,8 @@ function getOriginalStyleSheetCSS(sheet, context)
 
 function getStyleSheetCSS(sheet, context)
 {
-    function beutify(css, indent) {
+    function beutify(css, indent)
+    {
         var indent='\n'+Array(indent+1).join(' ');
         var i=css.indexOf('{');
         var match=css.substr(i+1).match(/(?:[^;\(]*(?:\([^\)]*?\))?[^;\(]*)*;?/g);
@@ -2409,7 +2492,8 @@ function getStyleSheetCSS(sheet, context)
                 + match.sort().join(indent) + '\n}';
     }
     var cssRules = sheet.cssRules, css=[];
-    for(var i = 0; i < cssRules.length; i++){
+    for(var i = 0; i < cssRules.length; i++)
+    {
         var rule = cssRules[i];
         if(rule instanceof CSSStyleRule)
             css.push(beutify(rule.cssText, 4));
@@ -2417,7 +2501,7 @@ function getStyleSheetCSS(sheet, context)
             css.push(rule.cssText);
     }
 
-    return css.join('\n\n') + '\n';
+    return rgbToHex(css.join('\n\n')) + '\n';
 }
 
 function getStyleSheetOwnerNode(sheet)
