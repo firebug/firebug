@@ -433,9 +433,9 @@
                                     tooltiptext="firebug.Copy_the_script_as_a_bookmarklet"
                                     oncommand="Firebug.CommandLine.copyBookmarklet(Firebug.currentContext)"/>
                                 <toolbarbutton id="fbCommandEditorHistoryButton" label="firebug.History"
-                                    class="toolbarbutton fbInternational"
+                                    class="toolbarbutton fbInternational" type="checkbox" checked="false"
                                     tooltiptext="firebug.Insert_a_previously_entered_command"
-                                    oncommand="Firebug.CommandLine.commandHistory.show(this)" disabled="true"/>
+                                    onmousedown="Firebug.CommandLine.commandHistory.show(this);" disabled="true"/>
                                 <toolbarspacer flex="1"/>
                                 <toolbarbutton id="fbCommandToggleLarge" tooltiptext="firebug.CommandLine" class="toolbarbutton-iconic fbInternational"
                                     oncommand="Firebug.setPref(Firebug.prefDomain, 'largeCommandLine', false)"/>
@@ -464,7 +464,7 @@
         <!-- Command Line (small) -->
         <hbox id="fbCommandBox">
             <toolbarbutton id="fbCommandLineHistoryButton" tooltiptext="Command_History" class="toolbarbutton-iconic fbInternational"
-                oncommand="Firebug.CommandLine.commandHistory.show(this);" disabled="true"/>
+                onmousedown="Firebug.CommandLine.commandHistory.show(this);" disabled="true" type="checkbox" checked="false"/>
             <vbox pack="center">
                 <label id="fbCommandArrow" value="&gt;&gt;&gt;"/>
             </vbox>
