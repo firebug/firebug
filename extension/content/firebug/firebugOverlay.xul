@@ -90,7 +90,7 @@
         <key id="key_toggleInspecting" key="c" modifiers="accel,shift" command="cmd_toggleInspecting" />
         <key id="key_toggleQuickInfoBox" key="i" modifiers="accel,shift" command="cmd_toggleQuickInfoBox" class="fbOnlyKey"/>
         <key id="key_toggleProfiling" key="p" modifiers="accel,shift" command="cmd_toggleProfiling" class="fbOnlyKey"/>
-        <key id="key_focusCommandLine" key="l" modifiers="accel,shift" command="cmd_focusCommandLine" class="fbOnlyKey"/>
+        <key id="key_focusCommandLine" key="l" modifiers="accel,shift" command="cmd_focusCommandLine"/>
         <key id="key_focusFirebugSearch" key="k" modifiers="accel,shift" command="cmd_focusFirebugSearch" class="fbOnlyKey"/>
         <key id="key_focusWatchEditor" key="n" modifiers="accel,shift" command="cmd_focusWatchEditor" class="fbOnlyKey"/>
         <key id="key_focusLocation" key=" " modifiers="accel,shift" command="cmd_focusLocation" class="fbOnlyKey"/>
