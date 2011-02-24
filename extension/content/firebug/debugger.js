@@ -681,6 +681,8 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
 
     clearBreakpoint: function(sourceFile, lineNo)
     {
+        if (sourceFile instanceof CompilationUnit)
+            sourceFile = sourceFile.sourceFile;  // see HACK in tabContext
         fbs.clearBreakpoint(sourceFile.href, lineNo);
     },
 

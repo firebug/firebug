@@ -110,6 +110,14 @@ CompilationUnit.prototype.getBreakpoints = function()
     return bps;
 };
 
+CompilationUnit.prototype.eachBreakpoint = function( fnOfLineProps )
+{
+     Firebug.Debugger.fbs.enumerateBreakpoints(this.getURL(), {call: function(url, line, props, scripts)
+     {
+          fnOfLineProps(line, props);
+     }});
+};
+
 /**
  * Requests the source of this compilation unit asynchronously. Source will be
  * retrieved from the browser and reported back to the listener function when available.
@@ -154,10 +162,8 @@ CompilationUnit.prototype.getNumberOfLines = function()
  * @param lineNumber the source line number in this compilation unit to set the breakpoint on
  * @return the {@link Breakpoint} that was created
  */
-CompilationUnit.prototype.setBreakpoint = function(lineNumber)
-{
-    Firebug.Debugger.setBreakpoint(compilationUnit, lineNo);
-};
+
+
 
 // ************************************************************************************************
 // Private

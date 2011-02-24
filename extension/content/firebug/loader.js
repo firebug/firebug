@@ -105,6 +105,7 @@ var FirebugLoadManager = function () {
         {
             coreModules.push("firebugModules/inProcess/tools.js");  // must be first
             coreModules.push("firebugModules/debugger.js");
+            coreModules.push("firebugModules/inProcess/contextAdapter.js");
         }
         else if (FirebugLoadManager.arch == "remoteClient")
         {
@@ -126,7 +127,6 @@ var FirebugLoadManager = function () {
         }
 
         var defaultModules = [
-         "firebugModules/tabContext.js",
          "firebugModules/sourceBox.js",
          "firebugModules/script.js",
         ];

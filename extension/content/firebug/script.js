@@ -60,7 +60,7 @@ Firebug.ScriptPanel.decorator = extend(new Firebug.SourceBoxDecorator,
 
     setLineBreakpoints: function(compilationUnit, sourceBox)
     {
-        fbs.enumerateBreakpoints(compilationUnit.getURL(), {call: function(url, line, props, scripts)
+        compilationUnit.eachBreakpoint(function setAttributes(line, props)
         {
             var scriptRow = sourceBox.getLineNode(line);
             if (scriptRow)
@@ -71,17 +71,12 @@ Firebug.ScriptPanel.decorator = extend(new Firebug.SourceBoxDecorator,
                 if (props.condition)
                     scriptRow.setAttribute("condition", "true");
             }
-
             if (FBTrace.DBG_LINETABLE)
                 FBTrace.sysout("script.setLineBreakpoints found "+scriptRow+" for "+line+"@"+
                     compilationUnit.getURL()+"\n");
-        }});
+        });
     },
 });
-
-Firebug.ScriptPanel.WindowUI =
-{
-};
 
 // ************************************************************************************************
 
@@ -265,38 +260,40 @@ Firebug.ScriptPanel.prototype = extend(Firebug.SourceBoxPanel,
         var href = this.getSourceBoxURL(this.selectedSourceBox);
         var lineNode = this.selectedSourceBox.getLineNode(lineNo);
 
-        var compilationUnit = this.context.getCompilationUnit(href);
-
-        if (!compilationUnit && FBTrace.DBG_ERRORS)
-            FBTrace.sysout("toggleBreakpoint no compilationUnit! ", this);
+        if(!lineNode)
+        {
+            if (FBTrace.DBG_ERRORS)
+                FBTrace.sysout("script.toggleBreakpoint no lineNode at "+lineNo+" in selectedSourceBox with URL "+href, this.selectedSourceBox);
+            return;
+        }
 
         if (FBTrace.DBG_BP)
-            FBTrace.sysout("script.toggleBreakpoint lineNo="+lineNo+" compilationUnit.href:"+
-                compilationUnit.href+" lineNode.breakpoint:"+
-                (lineNode?lineNode.getAttribute("breakpoint"):"(no lineNode)")+
-                "\n", this.selectedSourceBox);
+            FBTrace.sysout("script.toggleBreakpoint lineNo="+lineNo+
+                " lineNode.breakpoint:"+(lineNode?lineNode.getAttribute("breakpoint"):"(no lineNode)"),
+                 this.selectedSourceBox);
 
         if (lineNode.getAttribute("breakpoint") == "true")
-            fbs.clearBreakpoint(href, lineNo);
+            this.context.clearBreakpoint(href, lineNo);
         else
-            compilationUnit.setBreakpoint(lineNo);
+            this.context.setBreakpoint(href, lineNo);
     },
 
     toggleDisableBreakpoint: function(lineNo)
     {
         var href = this.getSourceBoxURL(this.selectedSourceBox);
+
         var lineNode = this.selectedSourceBox.getLineNode(lineNo);
         if (lineNode.getAttribute("disabledBreakpoint") == "true")
-            fbs.enableBreakpoint(href, lineNo);
+            this.context.enableBreakpoint(href, lineNo);
         else
-            fbs.disableBreakpoint(href, lineNo);
+            this.context.disableBreakpoint(href, lineNo);
     },
 
     editBreakpointCondition: function(lineNo)
     {
         var sourceRow = this.selectedSourceBox.getLineNode(lineNo);
         var sourceLine = getChildByClass(sourceRow, "sourceLine");
-        var condition = fbs.getBreakpointCondition(this.location.href, lineNo);
+        var condition = this.context.getBreakpointCondition(this.location.href, lineNo);
 
         if (condition)
         {
@@ -390,7 +387,7 @@ Firebug.ScriptPanel.prototype = extend(Firebug.SourceBoxPanel,
             this.toggleDisableBreakpoint(lineNo);
         else if (isControlClick(event) || isMiddleClick(event))
         {
-            Firebug.Debugger.runUntil(this.context, compilationUnit, lineNo, Firebug.Debugger);
+            this.context.runUntil(compilationUnit, lineNo);
             cancelEvent(event);
         }
     },
@@ -494,11 +491,11 @@ Firebug.ScriptPanel.prototype = extend(Firebug.SourceBoxPanel,
 
         if (this.context.stopped)
         {
-            Firebug.ScriptPanel.WindowUI.detachListeners(this.context, oldChrome);
-            Firebug.ScriptPanel.WindowUI.attachListeners(this.context, newChrome);
+            this.detachListeners(this.context, oldChrome);
+            this.attachListeners(this.context, newChrome);
         }
 
-        Firebug.Debugger.syncCommands(this.context);
+        this.syncCommands(this.context);
 
         Firebug.SourceBoxPanel.detach.apply(this, arguments);
     },
@@ -558,7 +555,7 @@ Firebug.ScriptPanel.prototype = extend(Firebug.SourceBoxPanel,
         // Fill the panel node with a warning if needed
         var aLocation = this.getDefaultLocation();
         var jsEnabled = Firebug.getPref("javascript", "enabled");
-        if (FBL.fbs.activitySuspended && !this.context.stopped)
+        if (this.context.activitySuspended && !this.context.stopped)
         {
             // Make sure that the content of the panel is restored as soon as
             // the debugger is resumed.
@@ -583,7 +580,8 @@ Firebug.ScriptPanel.prototype = extend(Firebug.SourceBoxPanel,
 
     show: function(state)
     {
-        var enabled = Firebug.Debugger.isAlwaysEnabled();
+        var debuggerTool = Firebug.ToolsInterface.browser.getTool('script');
+        var enabled = debuggerTool.enabled;
 
         if (!enabled)
             return;
@@ -1095,7 +1093,7 @@ Firebug.ScriptPanel.prototype = extend(Firebug.SourceBoxPanel,
         );
         if (hasBreakpoint)
         {
-            var isDisabled = fbs.isBreakpointDisabled(this.location.href, lineNo);
+            var isDisabled = this.context.isBreakpointDisabled(this.location.href, lineNo);
             items.push(
                 {label: "DisableBreakpoint", type: "checkbox", checked: isDisabled,
                     command: bindFixed(this.toggleDisableBreakpoint, this, lineNo) }
@@ -1114,7 +1112,7 @@ Firebug.ScriptPanel.prototype = extend(Firebug.SourceBoxPanel,
                 var compilationUnit = getAncestorByClass(sourceRow, "sourceBox").repObject;
                 var lineNo = parseInt(sourceRow.firstChild.textContent);
 
-                var debuggr = Firebug.Debugger;
+                var debuggr = this;
                 items.push(
                     "-",
                     {label: "Continue",
@@ -1153,9 +1151,9 @@ Firebug.ScriptPanel.prototype = extend(Firebug.SourceBoxPanel,
     breakOnNext: function(enabled)
     {
         if (enabled)
-            Firebug.Debugger.suspend(this.context);
+            this.context.breakOnNextJavaScriptStatement(true);
         else
-            Firebug.Debugger.unSuspend(this.context);
+            this.context.breakOnNextJavaScriptStatement(false);
     },
 
     getBreakOnNextTooltip: function(armed)
@@ -1264,23 +1262,22 @@ Firebug.ScriptPanel.prototype = extend(Firebug.SourceBoxPanel,
 
     resume: function(context)
     {
-        // tell Firebug.Debugger to resume
-        throw new Error("unimplemented");
+        context.resumeJavaScript();
     },
 
     stepOver: function(context)
     {
-        throw new Error("unimplemented");
+        context.stepOver();
     },
 
     stepInto: function(context)
     {
-        throw new Error("unimplemented");
+        context.stepInto();
     },
 
     stepOut: function(context)
     {
-        throw new Error("unimplemented");
+        context.stepOut();
     },
 
     onStartDebugging: function(context)
@@ -1389,13 +1386,7 @@ Firebug.ScriptPanel.WarningRep = domplate(Firebug.Rep,
     {
         Firebug.setPref("javascript", "enabled", true);
 
-        Firebug.Debugger.reloadPageFromMemory(event.target);
-    },
-
-    reloadPageFromMemory: function(event)
-    {
-        var context= Firebug.getElementPanel(event.target).context;
-        Firebug.TabWatcher.reloadPageFromMemory(context);
+        Firebug.TabWatcher.reloadPageFromMemory(this.context);
     },
 
     onFocusDebugger: function(event)
@@ -1412,9 +1403,8 @@ Firebug.ScriptPanel.WarningRep = domplate(Firebug.Rep,
             });
         });
         // No context is stopped
-        var depth = fbs.exitNestedEventLoop();
         if (FBTrace.DBG_UI_LOOP)
-            FBTrace.sysout("Firebug.Debugger.onFocusDebugger FAILS, aborting nested event loop at depth "+depth);
+            FBTrace.sysout("script.onFocusDebugger FAILED");
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
