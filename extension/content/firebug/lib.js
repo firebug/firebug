@@ -1073,6 +1073,17 @@ this.getAncestorByClass = function(node, className)
     return null;
 };
 
+this.getAncestorByTagName = function(node, tagName)
+{
+    for (var parent = node; parent; parent = parent.parentNode)
+    {
+        if (parent.localName && parent.tagName.toLowerCase() == "input")
+            return parent;
+    }
+
+    return null;
+};
+
 /* @Deprecated  Use native Firefox: node.getElementsByClassName(names).item(0) */
 this.getElementByClass = function(node, className)  // className, className, ...
 {

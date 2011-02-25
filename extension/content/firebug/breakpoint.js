@@ -1004,6 +1004,17 @@ Firebug.Breakpoint.BreakNotification.prototype = domplate(Firebug.InlineEditor.p
             balloon.hide(event); // same as click on balloon body
     },
 
+    // Called from Firebug.BalloonNote
+    onClick: function(event)
+    {
+        // Do not hide the balloon if an input (e.g. checkbox) has been clicked.
+        var input = FBL.getAncestorByTagName(event.target)
+        if (input)
+            return;
+
+        this.hide(event);
+    },
+
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
     getBalloon: function(target)
