@@ -82,7 +82,7 @@ Firebug.TabCacheModel = extend(Firebug.Module,
     initializeUI: function(owner)
     {
         if (FBTrace.DBG_CACHE)
-            FBTrace.sysout("tabCache.initializeUI; Cache model initialized.");
+            FBTrace.sysout("tabCache.initializeUI; Cache model initialized, Ci.nsITraceableChannel "+Ci.nsITraceableChannel);
 
         // Read maximum size limit for cached response from preferences.
         responseSizeLimit = Firebug.getPref(Firebug.prefDomain, "cache.responseLimit");

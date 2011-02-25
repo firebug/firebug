@@ -1472,7 +1472,7 @@ top.Firebug =
     onPauseJSDRequested: function(rejection)
     {
         if (top.Firebug.currentContext)  // then we are active in this browser.xul
-            rejection.push(true); // so reject the request
+            rejection.push("Firebug has currentContext active"); // so reject the request
 
         dispatch2(Firebug.Debugger.fbListeners, "onPauseJSDRequested", [rejection]);
     },

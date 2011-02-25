@@ -1661,7 +1661,7 @@ var fbs =
         }
         if (FBTrace.DBG_FBS_FINDDEBUGGER || FBTrace.DBG_ACTIVATION)
         {
-            FBTrace.sysout("fbs.pause depth "+(jsd.isOn?jsd.pauseDepth:"jsd OFF")+" fbs.pauseDepth: "+fbs.pauseDepth+" rejection "+rejection.length+" from "+clients.length+" clients ");
+            FBTrace.sysout("fbs.pause depth "+(jsd.isOn?jsd.pauseDepth:"jsd OFF")+" fbs.pauseDepth: "+fbs.pauseDepth+" rejection "+rejection.length+" from "+clients.length+" clients ", rejection);
             // The next line gives NS_ERROR_NOT_AVAILABLE
             // FBTrace.sysout("fbs.pause depth "+(jsd.isOn?jsd.pauseDepth:"jsd OFF")+" rejection "+rejection.length+" from clients "+clients, rejection);
         }

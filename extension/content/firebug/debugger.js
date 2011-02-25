@@ -2,6 +2,7 @@
 
 define("firebugModules/debugger.js", ["ToolsInterface"], function(ToolsInterface) { with (FBL) {
 
+    Components.utils.import("resource://firebug/firebug-http-observer.js");  // TODO require.js
     var CompilationUnit = ToolsInterface.CompilationUnit;
 
 // ************************************************************************************************
@@ -2462,6 +2463,7 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
     activateDebugger: function()
     {
         this.registerDebugger();
+        httpRequestObserver.registerObservers();
 
         // If jsd is already active, we'll notify true; else false and we'll get another event
         FBL.dispatch2(this.observers, "onActiveTool", [{isActive: fbs.isJSDActive()}]);
@@ -2473,6 +2475,7 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
     deactivateDebugger: function()
     {
         this.unregisterDebugger();
+        httpRequestObserver.unregisterObservers();  // for tabCache
 
         // if jsd deactivated because we unregistered, we'll send false, else true
         FBL.dispatch2(this.observers, "onActiveTool", [{isActive: fbs.isJSDActive()}]);
@@ -2497,6 +2500,7 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
             return;
 
         var paused = fbs.pause();  // can be called multiple times.
+        httpRequestObserver.unregisterObservers();  // for tabCache
 
         if (FBTrace.DBG_ACTIVATION)
             FBTrace.sysout("debugger.onSuspendFirebug paused: "+paused+" isAlwaysEnabled " +
@@ -2514,14 +2518,11 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
             return;
 
         var unpaused = fbs.unPause();
+        httpRequestObserver.registerObservers();
 
         if (FBTrace.DBG_ACTIVATION)
             FBTrace.sysout("debugger.onResumeFirebug unpaused: "+unpaused+" isAlwaysEnabled " +
                 Firebug.Debugger.isAlwaysEnabled());
-
-        if (FBTrace.DBG_ERRORS && Firebug.Debugger.isAlwaysEnabled())
-            FBTrace.sysout("debugger.onResumeFirebug but debugger " +
-                Firebug.Debugger.debuggerName+" not registered! *** ");
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
@@ -2692,7 +2693,8 @@ Firebug.JSDebugClient =
         },
         onPauseJSDRequested: function(rejection)
         {
-            dispatch2(this.fbListeners, "onPauseJSDRequested", arguments);
+            //dispatch2(this.fbListeners, "onPauseJSDRequested", arguments);
+            FBTrace.sysout("Firebug.JSDebugClient onPauseJSDRequested ignored");
         },
 
 }
