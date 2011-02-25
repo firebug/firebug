@@ -1402,16 +1402,22 @@ Firebug.TraceModule.TraceMessage.prototype =
                 {
                     propsTotal++;
 
-                    try {
-                        if (this.obj.__lookupGetter__)
+                    try
+                    {
+                        // If "this.obj.__lookupGetter__(p)" is executed for 'window' when
+                        // p == 'globalStorage' (or local or session) the property is not
+                        // accessbible anymore when iterated in getMembers (dom.js)
+                        if (!isDOMMember(this.obj, p) && this.obj.__lookupGetter__)
                             var getter = this.obj.__lookupGetter__(p);
                         if (getter)
                             var value = "" + getter;
                         else
                             var value = safeToString(this.obj[p]);
+
                         this.props[p] = value;
                     }
-                    catch (err) {
+                    catch (err)
+                    {
                         window.dump(">>>>>>>>>>>>>>>> traceModule.getProperties FAILS with "+err+"\n");
                         window.dump(">>>>>>>>>>>>>>>> traceModule.getProperties FAILS on object "+safeToString(this.obj)+"\n");
                         this.props[p] = "{Error}";
