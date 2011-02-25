@@ -503,8 +503,7 @@ Firebug.SourceBoxPanel = extend(SourceBoxPanelBase,
             }
         }
 
-        this.selectedSourceBox.targetedLineNumber = lineNo;
-        this.selectedSourceBox.highlightedLineNumber = lineNo;  // the targetedLineNumber may not be the highlightedLineNumber
+        this.selectedSourceBox.highlightedLineNumber = lineNo;
         if (FBTrace.DBG_COMPILATION_UNITS)
             FBTrace.sysout("this.selectedSourceBox.highlightedLineNumber "+this.selectedSourceBox.repObject.url+"@"+this.selectedSourceBox.highlightedLineNumber);
 
@@ -602,10 +601,9 @@ Firebug.SourceBoxPanel = extend(SourceBoxPanelBase,
 
     reView: function(sourceBox, clearCache)  // called for all scroll events, including any time sourcebox.scrollTop is set
     {
-        if (sourceBox.targetedLineNumber) // then we requested a certain line
+        if (sourceBox.highlightedLineNumber) // then we requested a certain line
         {
-            var viewRange = this.getViewRangeFromTargetLine(sourceBox, sourceBox.targetedLineNumber);
-            delete sourceBox.targetedLineNumber;
+            var viewRange = this.getViewRangeFromTargetLine(sourceBox, sourceBox.highlightedLineNumber);
         }
         else  // no special line
         {
@@ -1026,7 +1024,11 @@ Firebug.SourceBoxPanel = extend(SourceBoxPanelBase,
                         sourceBox.highlighter);
 
                 if (!sticky)
+                {
                     delete sourceBox.highlighter;
+                    delete sourceBox.highlighedLineNumber;
+                }
+
             }
         }
         catch (exc)
