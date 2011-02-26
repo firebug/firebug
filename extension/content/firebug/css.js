@@ -1850,6 +1850,9 @@ CSSComputedElementPanel.prototype = extend(CSSElementPanel.prototype,
                 for (var i = 0; i < groupProps.length; ++i)
                 {
                     var propName = groupProps[i];
+                    if (!Firebug.showMozillaSpecificStyles && propName.match(/^-moz/))
+                        continue;
+
                     var propValue = stripUnits(rgbToHex(style.getPropertyValue(propName)));
                     if (propValue)
                         props.push({name: propName, value: propValue});
@@ -1873,6 +1876,9 @@ CSSComputedElementPanel.prototype = extend(CSSElementPanel.prototype,
                 for (var i = 0; i < props.length; ++i)
                 {
                     var propName = props[i];
+                    if (!Firebug.showMozillaSpecificStyles && propName.match(/^-moz/))
+                      continue;
+
                     var propValue = stripUnits(rgbToHex(style.getPropertyValue(propName)));
                     if (propValue)
                         group.props.push({name: propName, value: propValue});
@@ -1914,7 +1920,7 @@ CSSComputedElementPanel.prototype = extend(CSSElementPanel.prototype,
 
     updateOption: function(name, value)
     {
-        if (name == "computedStylesDisplay")
+        if (name == "computedStylesDisplay" || name == "showMozillaSpecificStyles")
             this.refresh();
     },
 
@@ -1923,6 +1929,8 @@ CSSComputedElementPanel.prototype = extend(CSSElementPanel.prototype,
         return [
             {label: "Sort alphabetically", type: "checkbox", checked: Firebug.computedStylesDisplay == "alphabetical",
                     command: bind(this.toggleDisplay, this) },
+            {label: "Show Mozilla specific styles", type: "checkbox", checked: Firebug.showMozillaSpecificStyles,
+              command:  bindFixed(Firebug.togglePref, Firebug, "showMozillaSpecificStyles") },
             "-",
             {label: "Refresh", command: bind(this.refresh, this) }
         ];
