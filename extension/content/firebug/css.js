@@ -132,7 +132,10 @@ const styleGroups =
         "direction",
         "column-count",
         "column-gap",
-        "column-width"
+        "column-width",
+        "-moz-tab-size", // FF4.0
+        "-moz-font-feature-settings", // FF4.0
+        "-moz-font-language-override" // FF4.0
     ],
 
     background: [
@@ -141,7 +144,12 @@ const styleGroups =
         "background-repeat",
         "background-position",
         "background-attachment",
-        "opacity"
+        "opacity",
+        "-moz-background-clip",
+        "-moz-background-inline-policy",
+        "-moz-background-origin",
+        "-moz-background-size",
+        "-moz-image-region"
     ],
 
     box: [
@@ -159,22 +167,43 @@ const styleGroups =
         "padding-right",
         "padding-bottom",
         "padding-left",
+        "-moz-padding-start",
+        "-moz-padding-end",
         "border-top-width",
         "border-right-width",
         "border-bottom-width",
         "border-left-width",
         "border-top-color",
+        "-moz-border-top-colors",
         "border-right-color",
+        "-moz-border-right-colors",
         "border-bottom-color",
+        "-moz-border-bottom-colors",
         "border-left-color",
+        "-moz-border-left-colors",
         "border-top-style",
         "border-right-style",
         "border-bottom-style",
         "border-left-style",
+        "-moz-border-end",
+        "-moz-border-end-color",
+        "-moz-border-end-style",
+        "-moz-border-end-width",
+        "-moz-border-image",
+        "-moz-border-start",
+        "-moz-border-start-color",
+        "-moz-border-start-style",
+        "-moz-border-start-width",
         "-moz-border-top-radius",
         "-moz-border-right-radius",
         "-moz-border-bottom-radius",
         "-moz-border-left-radius",
+        "-moz-outline-radius-bottomleft",
+        "-moz-outline-radius-bottomright",
+        "-moz-outline-radius-topleft",
+        "-moz-outline-radius-topright",
+        "-moz-box-shadow",
+        "box-shadow",
         "outline-top-width",
         "outline-right-width",
         "outline-bottom-width",
@@ -186,7 +215,17 @@ const styleGroups =
         "outline-top-style",
         "outline-right-style",
         "outline-bottom-style",
-        "outline-left-style"
+        "outline-left-style",
+        "-moz-box-align",
+        "-moz-box-direction",
+        "-moz-box-flex",
+        "-moz-box-flexgroup",
+        "-moz-box-ordinal-group",
+        "-moz-box-orient",
+        "-moz-box-pack",
+        "-moz-box-sizing",
+        "-moz-margin-start",
+        "-moz-margin-end"
     ],
 
     layout: [
@@ -197,11 +236,22 @@ const styleGroups =
         "overflow-x",  // http://www.w3.org/TR/2002/WD-css3-box-20021024/#overflow
         "overflow-y",
         "overflow-clip",
+        "-moz-transform",
+        "-moz-transform-origin",
         "white-space",
         "clip",
         "float",
         "clear",
-        "-moz-box-sizing"
+        "-moz-appearance",
+        "-moz-stack-sizing",
+        "-moz-column-count",
+        "-moz-column-gap",
+        "-moz-column-width",
+        "-moz-column-rule",
+        "-moz-column-rule-width",
+        "-moz-column-rule-style",
+        "-moz-column-rule-color",
+        "-moz-float-edge"
     ],
 
     other: [
@@ -210,10 +260,17 @@ const styleGroups =
         "list-style-position",
         "list-style-type",
         "marker-offset",
-        "user-focus",
-        "user-select",
-        "user-modify",
-        "user-input"
+        "-moz-user-focus",
+        "-moz-user-select",
+        "-moz-user-modify",
+        "-moz-user-input",
+        "-moz-transition", // FF4.0
+        "-moz-transition-delay", // FF4.0
+        "-moz-transition-duration", // FF4.0
+        "-moz-transition-property", // FF4.0
+        "-moz-transition-timing-function", // FF4.0
+        "-moz-force-broken-image-icon",
+        "-moz-window-shadow"
     ]
 };
 
