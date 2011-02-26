@@ -249,6 +249,11 @@ Firebug.Console = extend(ActivableConsole,
         });
     },
 
+    unwatchWindow: function(context, win)
+    {
+        Firebug.Console.injector.detachConsole(context, win);
+    },
+
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
     // extend ActivableModule
 
