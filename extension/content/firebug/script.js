@@ -95,9 +95,7 @@ Firebug.ScriptPanel.prototype = extend(Firebug.SourceBoxPanel,
     */
     updateSourceBox: function(sourceBox)
     {
-        if (this.scrollInfo && (this.scrollInfo.location == this.location))
-            this.scrollToLine(this.location, this.scrollInfo.previousCenterLine);
-        delete this.scrollInfo;
+        this.location = sourceBox.repObject;
     },
 
     /*
@@ -208,7 +206,7 @@ Firebug.ScriptPanel.prototype = extend(Firebug.SourceBoxPanel,
 
         if (FBTrace.DBG_BP || FBTrace.DBG_STACK || FBTrace.DBG_COMPILATION_UNITS)
             FBTrace.sysout("sourceBox.highlightLine lineNo: "+sourceBox.highlightedLineNumber+
-                " lineNode="+lineNode+" in "+sourceBox.repObject.href);
+                " lineNode="+lineNode+" in "+sourceBox.repObject.getURL());
 
         return (sourceBox.highlightedLineNumber > 0); // sticky if we have a valid line
     },
@@ -267,8 +265,8 @@ Firebug.ScriptPanel.prototype = extend(Firebug.SourceBoxPanel,
             FBTrace.sysout("toggleBreakpoint no compilationUnit! ", this);
 
         if (FBTrace.DBG_BP)
-            FBTrace.sysout("script.toggleBreakpoint lineNo="+lineNo+" compilationUnit.href:"+
-                compilationUnit.href+" lineNode.breakpoint:"+
+            FBTrace.sysout("script.toggleBreakpoint lineNo="+lineNo+" compilationUnit.getURL():"+
+                compilationUnit.getURL()+" lineNode.breakpoint:"+
                 (lineNode?lineNode.getAttribute("breakpoint"):"(no lineNode)")+
                 "\n", this.selectedSourceBox);
 
@@ -292,7 +290,7 @@ Firebug.ScriptPanel.prototype = extend(Firebug.SourceBoxPanel,
     {
         var sourceRow = this.selectedSourceBox.getLineNode(lineNo);
         var sourceLine = getChildByClass(sourceRow, "sourceLine");
-        var condition = fbs.getBreakpointCondition(this.location.href, lineNo);
+        var condition = fbs.getBreakpointCondition(this.location.getURL(), lineNo);
 
         if (condition)
         {
@@ -603,11 +601,14 @@ Firebug.ScriptPanel.prototype = extend(Firebug.SourceBoxPanel,
                     if (!this.selectedSourceBox)  // but somehow we did not make a sourcebox?
                         this.navigate(this.location);
                     else  // then we can sync the location to the sourcebox
-                        this.location = this.selectedSourceBox.repObject;
+                        this.updateSourceBox(this.selectedSourceBox);
                 }
 
                 if (state && this.location)  // then we are restoring and we have a location, so scroll when we can
-                    this.scrollInfo = { location: this.location, previousCenterLine: state.previousCenterLine};
+                {
+                    var sourceLink = new FBL.SourceLink(this.location.getURL(), state.previousCenterLine, 'js');
+                    this.showSourceLink(sourceLink);
+                }
             }
             else // show default
             {
@@ -665,7 +666,7 @@ Firebug.ScriptPanel.prototype = extend(Firebug.SourceBoxPanel,
             var lineNo = parseInt(m[1]);
             if (!isNaN(lineNo) && (lineNo > 0) && (lineNo < sourceBox.lines.length) )
             {
-                this.scrollToLine(sourceBox.repObject.href, lineNo,  this.jumpHighlightFactory(lineNo, this.context))
+                this.scrollToLine(sourceBox.repObject.getURL(), lineNo,  this.jumpHighlightFactory(lineNo, this.context))
                 return true;
             }
         }
@@ -728,7 +729,7 @@ Firebug.ScriptPanel.prototype = extend(Firebug.SourceBoxPanel,
         if (lineNo || lineNo === 0)
         {
             // this lineNo is an zero-based index into sourceBox.lines. Add one for user line numbers
-            this.scrollToLine(sourceBox.repObject.href, lineNo, this.jumpHighlightFactory(lineNo+1, this.context));
+            this.scrollToLine(sourceBox.repObject.getURL(), lineNo, this.jumpHighlightFactory(lineNo+1, this.context));
             dispatch(this.fbListeners, 'onScriptSearchMatchFound', [this, text, sourceBox.repObject, lineNo]);
 
             return true;
@@ -908,7 +909,7 @@ Firebug.ScriptPanel.prototype = extend(Firebug.SourceBoxPanel,
             var url = this.context.getWindowLocation();
             for (var i = 0; i < compilationUnits.length; i++)
             {
-                if (url == compilationUnits[i].href)
+                if (url == compilationUnits[i].getURL())
                     return compilationUnits[i];
             }
             return compilationUnits[0];
@@ -945,7 +946,7 @@ Firebug.ScriptPanel.prototype = extend(Firebug.SourceBoxPanel,
             return;
 
         var lineNo = parseInt(sourceRow.firstChild.textContent);
-        var scripts = findScripts(this.context, this.location.href, lineNo);
+        var scripts = findScripts(this.context, this.location.getURL(), lineNo);
         return scripts; // gee I wonder what will happen?
     },
 
@@ -1076,7 +1077,7 @@ Firebug.ScriptPanel.prototype = extend(Firebug.SourceBoxPanel,
         );
         if (hasBreakpoint)
         {
-            var isDisabled = fbs.isBreakpointDisabled(this.location.href, lineNo);
+            var isDisabled = fbs.isBreakpointDisabled(this.location.getURL(), lineNo);
             items.push(
                 {label: "DisableBreakpoint", type: "checkbox", checked: isDisabled,
                     command: bindFixed(this.toggleDisableBreakpoint, this, lineNo) }
