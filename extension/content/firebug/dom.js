@@ -2006,10 +2006,7 @@ Firebug.DOMModule.BreakpointRep = domplate(Firebug.Rep,
         var bp = row.repObject;
         context.dom.breakpoints.removeBreakpoint(bp.object, bp.propName);
 
-        // Remove from the UI.
-        bpPanel.noRefresh = true;
-        bpPanel.removeRow(row);
-        bpPanel.noRefresh = false;
+        bpPanel.refresh();
 
         var domPanel = context.getPanel("dom", true);
         if (domPanel)

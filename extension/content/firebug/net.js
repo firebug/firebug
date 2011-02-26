@@ -5507,10 +5507,7 @@ Firebug.NetMonitor.BreakpointRep = domplate(Firebug.Rep,
         var bp = row.repObject;
         context.netProgress.breakpoints.removeBreakpoint(bp.href);
 
-        // Remove from the UI.
-        bpPanel.noRefresh = true;
-        bpPanel.removeRow(row);
-        bpPanel.noRefresh = false;
+        bpPanel.refresh();
 
         var panel = context.getPanel(panelName, true);
         if (!panel)

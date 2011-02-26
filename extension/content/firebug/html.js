@@ -2243,10 +2243,7 @@ Firebug.HTMLModule.BreakpointRep = domplate(Firebug.Rep,
             var row = getAncestorByClass(event.target, "breakpointRow");
             context.mutationBreakpoints.removeBreakpoint(row.repObject);
 
-            // Remove from the UI.
-            bpPanel.noRefresh = true;
-            bpPanel.removeRow(row);
-            bpPanel.noRefresh = false;
+            bpPanel.refresh();
         }
     },
 

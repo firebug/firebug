@@ -193,9 +193,9 @@ Firebug.Breakpoint.BreakpointListRep = domplate(Firebug.Rep,
             }
 
             var row = getAncestorByClass(event.target, "breakpointRow");
-            panel.removeRow(row);
-
             panel.noRefresh = false;
+
+            panel.refresh();
         }
     }
 });
@@ -328,7 +328,7 @@ Firebug.Breakpoint.BreakpointsPanel.prototype = extend(Firebug.Panel,
             {
                 if (FBTrace.DBG_BP)
                     FBTrace.sysout("breakpoints.extractBreakpoints type: "+props.type+" in url "+
-                        url+"@"+line+" contxt "+context.getName(), props);
+                        url+"@"+line+" context "+context.getName(), props);
 
                 if (renamer.checkForRename(url, line, props)) // some url in this sourceFileMap has changed, we'll be back.
                     return;
@@ -481,18 +481,7 @@ Firebug.Breakpoint.BreakpointsPanel.prototype = extend(Firebug.Panel,
         event.initMouseEvent("click", true, true, doc.defaultView, 0, 0, 0, 0, 0,
             false, false, false, false, 0, null);
         return node.dispatchEvent(event);
-    },
-
-    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
-
-    removeRow: function(row)
-    {
-        row.parentNode.removeChild(row);
-
-        var bpCount = countBreakpoints(this.context);
-        if (!bpCount)
-            this.refresh();
-    },
+    }
 });
 
 // ************************************************************************************************
