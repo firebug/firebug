@@ -69,7 +69,6 @@ pref("extensions.firebug.computedStylesDisplay", "grouped");
 
 // Script
 pref("extensions.firebug.service.breakOnErrors", false);
-pref("extensions.firebug.service.filterSystemURLs", true);
 pref("extensions.firebug.service.showAllSourceFiles", false);
 pref("extensions.firebug.service.trackThrowCatch", false);
 pref("extensions.firebug.script.enableSites", false);
@@ -78,6 +77,7 @@ pref("extensions.firebug.service.scriptsFilter", "all");
 // If the value is greather than zero, the Script panel replaces tabs
 // by corresponding number of spaces when displaying JavaScript source.
 pref("extensions.firebug.replaceTabs", 4);
+pref("extensions.firebug.filterSystemURLs", true);
 
 // Stack
 pref("extensions.firebug.omitObjectPathStack", false);

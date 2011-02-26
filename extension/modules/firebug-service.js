@@ -1554,7 +1554,7 @@ var fbs =
                 +fbs.scriptsFilter, fbs);
 
         pref = fbs.filterSystemURLs;
-        fbs.filterSystemURLs = prefs.getBoolPref("extensions.firebug.service.filterSystemURLs");  // may not be exposed to users
+        fbs.filterSystemURLs = prefs.getBoolPref("extensions.firebug.filterSystemURLs");  // may not be exposed to users
         mustReset = mustReset || (pref !== fbs.filterSystemURLs);
 
         if (FBTrace.DBG_OPTIONS)
