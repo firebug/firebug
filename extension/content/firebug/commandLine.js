@@ -653,12 +653,6 @@ Firebug.CommandLine = extend(Firebug.Module,
         commandLineSmall.removeEventListener('blur', this.onCommandLineBlur, true);
     },
 
-    showContext: function(browser, context)
-    {
-        var command = Firebug.chrome.$("cmd_focusCommandLine");
-        command.setAttribute("disabled", !context);
-    },
-
     destroyContext: function(context, persistedState)
     {
         this.autoCompleter.clear(this.getCompletionBox());
