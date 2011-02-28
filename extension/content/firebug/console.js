@@ -317,7 +317,7 @@ Firebug.Console = extend(ActivableConsole,
 */
         Firebug.consoleFilterTypes = filterType;
 
-        Firebug.setPref(Firebug.prefDomain, "consoleFilterTypes", Firebug.consoleFilterTypes);
+        Firebug.Options.set("consoleFilterTypes", Firebug.consoleFilterTypes);
 
         var panel = this.getPanel(context, true);
         if (panel)
@@ -473,7 +473,7 @@ Firebug.ConsolePanel.prototype = extend(Firebug.ActivablePanel,
 
         var limitInfo = {
             totalCount: 0,
-            limitPrefsTitle: $STRF("LimitPrefsTitle", [Firebug.prefDomain+".console.logLimit"])
+            limitPrefsTitle: $STRF("LimitPrefsTitle", [Firebug.Options.prefDomain+".console.logLimit"])
         };
 
         var netLimitRep = Firebug.NetMonitor.NetLimit;
@@ -673,7 +673,7 @@ Firebug.ConsolePanel.prototype = extend(Firebug.ActivablePanel,
                 this.insertReloadWarning();
         }
 
-        prefs.addObserver(Firebug.prefDomain, this, false);
+        prefs.addObserver(Firebug.Options.prefDomain, this, false);  // TODO use optins.js
     },
 
     initializeNode : function()
@@ -700,7 +700,7 @@ Firebug.ConsolePanel.prototype = extend(Firebug.ActivablePanel,
 
     shutdown: function()
     {
-        prefs.removeObserver(Firebug.prefDomain, this, false);
+        prefs.removeObserver(Firebug.Options.prefDomain, this, false); // TODO remove to options.js
     },
 
     show: function(state)
@@ -814,7 +814,7 @@ Firebug.ConsolePanel.prototype = extend(Firebug.ActivablePanel,
         // xxxHonza: shouldn't the breakOnErrors be context related?
         // xxxJJB, yes, but we can't support it because we can't yet tell
         // which window the error is on.
-        return Firebug.getPref(Firebug.servicePrefDomain, "breakOnErrors");
+        return Firebug.Options.get("breakOnErrors");
     },
 
     getBreakOnNextTooltip: function(enabled)
@@ -859,7 +859,7 @@ Firebug.ConsolePanel.prototype = extend(Firebug.ActivablePanel,
 
     getShowStackTraceMenuItem: function()
     {
-        var menuItem = serviceOptionMenu("ShowStackTrace", "showStackTrace");
+        var menuItem = optionMenu("ShowStackTrace", "showStackTrace");
         if (Firebug.currentContext && !Firebug.Debugger.isAlwaysEnabled())
             menuItem.disabled = true;
         return menuItem;
@@ -871,7 +871,7 @@ Firebug.ConsolePanel.prototype = extend(Firebug.ActivablePanel,
         var strictName = "strict";
         var strictValue = prefs.getBoolPref(strictDomain+"."+strictName);
         return {label: "JavascriptOptionsStrict", type: "checkbox", checked: strictValue,
-            command: bindFixed(Firebug.setPref, Firebug, strictDomain, strictName, !strictValue) };
+            command: bindFixed(Firebug.Options.setPref, Firebug, strictDomain, strictName, !strictValue) };
     },
 
     getBreakOnMenuItems: function()
@@ -930,7 +930,7 @@ Firebug.ConsolePanel.prototype = extend(Firebug.ActivablePanel,
 
     breakOnNext: function(breaking)
     {
-        Firebug.setPref(Firebug.servicePrefDomain, "breakOnErrors", breaking);
+        Firebug.Options.set("breakOnErrors", breaking);
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
@@ -1007,7 +1007,7 @@ Firebug.ConsolePanel.prototype = extend(Firebug.ActivablePanel,
 
     updateMaxLimit: function()
     {
-        var value = Firebug.getPref(Firebug.prefDomain, "console.logLimit");
+        var value = Firebug.Options.get("console.logLimit");
         maxQueueRequests =  value ? value : maxQueueRequests;
     },
 

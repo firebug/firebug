@@ -165,7 +165,7 @@ Firebug.Search = extend(Firebug.Module,
 
     onToggleSearchOption: function(option)
     {
-        Firebug.setPref(Firebug.prefDomain, option, !Firebug[option]);
+        Firebug.Options.set(option, !Firebug[option]);
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *

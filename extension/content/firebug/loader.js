@@ -66,8 +66,7 @@ var FirebugLoadManager = function () {
                     // on the first call we use it to get a ref to the Cu.import module object
                     this.FBTrace = traceConsoleService.getTracer("extensions.firebug");
                 }
-                this.FBTrace.sysout.apply(this.FBTrace,arguments);
-                throw arguments[0];
+                this.FBTrace.sysout.apply(this.FBTrace, arguments);
             },
             waitSeconds: 0,
             debug: true,
@@ -104,6 +103,8 @@ var FirebugLoadManager = function () {
         if (FirebugLoadManager.arch === 'inProcess')
         {
             coreModules.push("firebugModules/inProcess/tools.js");  // must be first
+            coreModules.push("firebugModules/inProcess/options.js");  // debugger needs Firebug.Options because of $STR() in property initializes, TODO
+            coreModules.push("firebugModules/inProcess/firebugadapter.js");
             coreModules.push("firebugModules/debugger.js");
             coreModules.push("firebugModules/inProcess/javascripttool.js");
         }

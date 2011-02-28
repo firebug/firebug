@@ -913,7 +913,7 @@ top.FirebugChrome =
         panelSplitter.orient = panelPane.orient = newValue;
 
         var option = $("menu_toggleOrient").getAttribute("option");
-        Firebug.setPref(Firebug.prefDomain, option, newValue == "vertical");
+        Firebug.Options.set(option, newValue == "vertical");
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
@@ -1029,7 +1029,7 @@ top.FirebugChrome =
 
     applyTextSize: function(value)
     {
-        var zoom = value >= 0 ? Firebug.positiveZoomFactors[value] : Firebug.negativeZoomFactors[Math.abs(value)];
+        var zoom = Firebug.Options.getZoomByTextSize(value);
 
         panelBar1.browser.markupDocumentViewer.textZoom = zoom;
         panelBar2.browser.markupDocumentViewer.textZoom = zoom;
@@ -1147,7 +1147,7 @@ top.FirebugChrome =
                     if (option == "profiling")
                         checked = fbs.profiling;
                     else
-                        checked = Firebug.getPref(Firebug.prefDomain, option);
+                        checked = Firebug.Options.get(option);
 
                     child.setAttribute("checked", checked);
                 }
@@ -1160,7 +1160,7 @@ top.FirebugChrome =
         var option = menuitem.getAttribute("option");
         var checked = menuitem.getAttribute("checked") == "true";
 
-        Firebug.setPref(Firebug.prefDomain, option, checked);
+        Firebug.Options.set(option, checked);
     },
 
     onContextShowing: function(event)
@@ -1453,7 +1453,7 @@ var FirstRunPage =
             {
                 // Don't forget to update the preference so, the page is not displayed again
                 var version = Firebug.getVersion();
-                Firebug.setPref(Firebug.prefDomain, "currentVersion", version);
+                Firebug.Options.set("currentVersion", version);
                 version = version.replace('X', '', "g");
 
                 // xxxHonza: put the URL in firebugURLs as soon as it's in chrome.js

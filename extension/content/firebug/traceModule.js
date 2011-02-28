@@ -62,7 +62,7 @@ Firebug.TraceOptionsController = function(prefDomain, onPrefChangeHandler)
                 if (changedPrefDomain == prefDomain)
                 {
                     var optionName = data.substr(prefDomain.length+1); // skip dot
-                    var optionValue = Firebug.getPref(prefDomain, m[2]);
+                    var optionValue = Firebug.Options.getPref(prefDomain, m[2]);
                     if (this.prefEventToUserEvent)
                         this.prefEventToUserEvent(optionName, optionValue);
                 }
@@ -90,7 +90,7 @@ Firebug.TraceOptionsController = function(prefDomain, onPrefChangeHandler)
 
             try
             {
-                var prefValue = Firebug.getPref(this.prefDomain, p);
+                var prefValue = Firebug.Options.getPref(this.prefDomain, p);
                 var label = p.substr(4);
                 items.push({
                  label: label,
@@ -125,10 +125,10 @@ Firebug.TraceOptionsController = function(prefDomain, onPrefChangeHandler)
 
         var label = menuitem.getAttribute("label");
         var category = 'DBG_'+label;
-        var value = Firebug.getPref(this.prefDomain, category);
+        var value = Firebug.Options.getPref(this.prefDomain, category);
         var newValue = !value;
 
-        Firebug.setPref(this.prefDomain, category, newValue);
+        Firebug.Options.setPref(this.prefDomain, category, newValue);
         prefService.savePrefFile(null);
 
         if (FBTrace.DBG_OPTIONS)
@@ -155,7 +155,7 @@ Firebug.TraceOptionsController = function(prefDomain, onPrefChangeHandler)
             if (m != 0)
                 continue;
 
-            Firebug.setPref(this.prefDomain, p, false);
+            Firebug.Options.setPref(this.prefDomain, p, false);
         }
         prefService.savePrefFile(null);
     };
@@ -169,21 +169,20 @@ Firebug.TraceModule = extend(Firebug.Module,
 {
     dispatchName: "traceModule",
 
-    initialize: function(prefDomain, prefNames)  // prefDomain is the calling app, firebug or chromebug
+    initialize: function()
     {
         Firebug.Module.initialize.apply(this, arguments);
 
-        FBTrace.DBG_OPTIONS = Firebug.getPref(prefDomain, "DBG_OPTIONS");
-
-        this.prefDomain = prefDomain;
+        this.prefDomain = Firebug.Options.getPrefDomain(); // prefDomain is the calling app, firebug or chromebug
+        FBTrace.DBG_OPTIONS = Firebug.Options.getPref(this.prefDomain, "DBG_OPTIONS");
 
         // Open console automatically if the pref says so.
-        if (Firebug.getPref(this.prefDomain, "alwaysOpenTraceConsole"))
+        if (Firebug.Options.getPref(this.prefDomain, "alwaysOpenTraceConsole"))
             this.openConsole();
 
         if (FBTrace.DBG_OPTIONS)
-            FBTrace.sysout("traceModule.initialize: " + prefDomain+" alwayOpen:"+
-                Firebug.getPref(this.prefDomain, "alwaysOpenTraceConsole"));
+            FBTrace.sysout("traceModule.initialize: " + this.prefDomain+" alwayOpen:"+
+                Firebug.Options.getPref(this.prefDomain, "alwaysOpenTraceConsole"));
     },
 
     shutdown: function()
@@ -590,7 +589,7 @@ Firebug.TraceModule.MessageTemplate = domplate(Firebug.Rep,
 
     getMessageLabel: function(message)
     {
-        var maxLength = Firebug.getPref(Firebug.TraceModule.prefDomain,
+        var maxLength = Firebug.Options.getPref(Firebug.TraceModule.prefDomain,
             "trace.maxMessageLength");
         return message.getLabel(maxLength);
     },
@@ -798,9 +797,9 @@ Firebug.TraceModule.MessageTemplate = domplate(Firebug.Rep,
 
     optionMenu: function(label, option)
     {
-        var checked = Firebug.getPref(Firebug.TraceModule.prefDomain, option);
+        var checked = Firebug.Options.getPref(Firebug.TraceModule.prefDomain, option);
         return {label: label, type: "checkbox", checked: checked, nol10n: true,
-            command: bindFixed(Firebug.setPref, Firebug, Firebug.TraceModule.prefDomain,
+            command: bindFixed(Firebug.Options.setPref, Firebug, Firebug.TraceModule.prefDomain,
                 option, !checked) };
     },
 
@@ -1465,7 +1464,7 @@ Firebug.TraceModule.TraceMessage.prototype =
 
    getScope: function()
    {
-       if (!Firebug.getPref(Firebug.prefDomain, "trace.enableScope"))
+       if (!Firebug.Options.get("trace.enableScope"))
            return null;
 
        if (this.scope)

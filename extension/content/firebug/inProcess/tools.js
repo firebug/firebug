@@ -14,6 +14,7 @@ ToolsInterface.CompilationUnit = CompilationUnit;
 // Create a connection object
 ToolsInterface.browser = new Browser();
 
+ToolsInterface.browser.addListener(Firebug)
 
 // FIXME eventually we want the dependency system to pass around the ToolsInterface
 Firebug.ToolsInterface = ToolsInterface;

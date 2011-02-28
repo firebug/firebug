@@ -502,7 +502,7 @@ function $STR(name, bundle)
 {
     var strKey = name.replace(' ', '_', "g");
 
-    var useDefaultLocale = Firebug.getPref(Firebug.prefDomain, "useDefaultLocale");
+    var useDefaultLocale = Firebug.Options.get("useDefaultLocale");
     if (!useDefaultLocale)
     {
         try
@@ -546,7 +546,7 @@ function $STRF(name, args, bundle)
 {
     var strKey = name.replace(' ', '_', "g");
 
-    var useDefaultLocale = Firebug.getPref(Firebug.prefDomain, "useDefaultLocale");
+    var useDefaultLocale = Firebug.Options.get("useDefaultLocale");
     if (!useDefaultLocale)
     {
         try
@@ -2762,21 +2762,7 @@ this.optionMenu = function(label, option, tooltiptext)
         option: option,
         tooltiptext: tooltiptext,
         command: function() {
-            return Firebug.setPref(Firebug.prefDomain, option, !Firebug[option]);
-        }
-    };
-};
-
-this.serviceOptionMenu = function(label, option, tooltiptext)
-{
-    return {
-        label: label,
-        type: "checkbox",
-        checked: Firebug[option],
-        option: option,
-        tooltiptext: tooltiptext,
-        command: function() {
-            return Firebug.setPref(Firebug.servicePrefDomain, option, !Firebug[option]);
+            return Firebug.Options.set(option, !Firebug[option]);
         }
     };
 };
@@ -3944,7 +3930,7 @@ this.dispatch = function(listeners, name, args)
         }
     }
 };
-
+alert("FBL has "+FBTrace);
 this.dispatch2 = function(listeners, name, args)
 {
     try

@@ -144,7 +144,7 @@
                 }
 
                 // Make sure hidden panels are collapsed.
-                var prefValue = Firebug.getPref(Firebug.prefDomain, "hiddenPanels");
+                var prefValue = Firebug.Options.get("hiddenPanels");
                 if (!prefValue || !prefValue.length)
                     return;
 
@@ -178,7 +178,7 @@
                 var panel = Firebug.currentContext ? Firebug.currentContext.getPanel(panelName) : null;
 
                 if (panelName && !tab.panelType.prototype.parentPanel)
-                    Firebug.setPref(Firebug.prefDomain, "defaultPanelName", panelName);
+                    Firebug.Options.set("defaultPanelName", panelName);
 
                 // Make sure the panel is visible.
                 this.togglePanel(panelName, true);
@@ -388,7 +388,7 @@
                         closedPanels.push(tab.panelType.prototype.name);
                     tab = tab.nextSibling;
                 }
-                Firebug.setPref(Firebug.prefDomain, "hiddenPanels", closedPanels.join(" "));
+                Firebug.Options.set("hiddenPanels", closedPanels.join(" "));
             ]]></body>
         </method>
 
@@ -402,7 +402,7 @@
                         FBL.collapse(tab, false);
                     tab = tab.nextSibling;
                 }
-                Firebug.setPref(Firebug.prefDomain, "hiddenPanels", "");
+                Firebug.Options.set("hiddenPanels", "");
                 FBL.cancelEvent(event);
             ]]></body>
         </method>

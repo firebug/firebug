@@ -438,7 +438,7 @@
                                     onmousedown="Firebug.CommandLine.commandHistory.show(this);" disabled="true"/>
                                 <toolbarspacer flex="1"/>
                                 <toolbarbutton id="fbCommandToggleLarge" tooltiptext="firebug.CommandLine" class="toolbarbutton-iconic fbInternational"
-                                    oncommand="Firebug.setPref(Firebug.prefDomain, 'largeCommandLine', false)"/>
+                                    oncommand="Firebug.Options.set('largeCommandLine', false)"/>
                             </hbox>
                         </vbox>
                     </deck>
@@ -485,7 +485,7 @@
 
             <!-- Toggle into multi-line command line -->
             <toolbarbutton id="fbCommandToggleSmall" tooltiptext="Command_Editor" class="toolbarbutton-iconic fbInternational"
-                oncommand="Firebug.setPref(Firebug.prefDomain, 'largeCommandLine', true)"/>
+                oncommand="Firebug.Options.set('largeCommandLine', true)"/>
         </hbox>
 
         <!-- Firebug Tools & Icon menu & Web Developer menu -->

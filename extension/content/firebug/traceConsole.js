@@ -85,7 +85,7 @@ var TraceConsole =
 
     updateTimeInfo: function()
     {
-        var showTime = Firebug.getPref(this.prefDomain, "trace.showTime");
+        var showTime = Firebug.Options.get("trace.showTime");
         if (showTime)
             FBL.setClass(this.logs.firstChild, "showTime");
         else
@@ -217,7 +217,7 @@ var TraceConsole =
                 foStream.init(fp.file, 0x02 | 0x08 | 0x20, 0666, 0); // write, create, truncate
 
                 var appInfo = Cc["@mozilla.org/xre/app-info;1"].getService(Ci.nsIXULAppInfo);
-                var currLocale = Firebug.getPref("general.useragent", "locale");
+                var currLocale = Firebug.Options.getPref("general.useragent", "locale");
                 var systemInfo = Cc["@mozilla.org/system-info;1"].getService(Ci.nsIPropertyBag);
 
                 var log = { version: "1.0" };

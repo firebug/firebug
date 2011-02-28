@@ -726,7 +726,7 @@ Firebug.Inspector = extend(Firebug.Module,
 
         quickInfoBox.boxEnabled = !quickInfoBox.boxEnabled;
 
-        Firebug.setPref(Firebug.prefDomain, "showQuickInfoBox", quickInfoBox.boxEnabled);
+        Firebug.Options.set("showQuickInfoBox", quickInfoBox.boxEnabled);
     },
 
     /**

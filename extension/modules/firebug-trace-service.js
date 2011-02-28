@@ -146,7 +146,15 @@ var traceConsoleService =
             time: (new Date()).getTime()
         };
         if (toOSConsole)
+        {
             traceConsoleService.osOut(messageType+": "+message+"\n");
+            if (obj && 'stack' in obj)
+            {
+                var stack = obj['stack'];
+                traceConsoleService.osOut(stack+": "+stack+"\n");
+            }
+        }
+
         // Pass JS object properly through XPConnect.
         var wrappedSubject = {wrappedJSObject: messageInfo};
         traceConsoleService.notifyObservers(wrappedSubject, "firebug-trace-on-message", message);

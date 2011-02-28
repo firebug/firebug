@@ -8,15 +8,8 @@
 const Cc = Components.classes;
 const Ci = Components.interfaces;
 
-const nsIPrefBranch = Ci.nsIPrefBranch;
-const nsIPrefBranch2 = Ci.nsIPrefBranch2;
 const nsISupports = Ci.nsISupports;
 
-
-const PrefService = Cc["@mozilla.org/preferences-service;1"];
-
-const nsIPrefService = Ci.nsIPrefService;
-const prefService = PrefService.getService(nsIPrefService);
 
 const observerService = CCSV("@mozilla.org/observer-service;1", "nsIObserverService");
 const categoryManager = CCSV("@mozilla.org/categorymanager;1", "nsICategoryManager");
@@ -33,9 +26,6 @@ const detachCommand = $("cmd_toggleDetachFirebug");
 const versionURL = "chrome://firebug/content/branch.properties";
 const statusBarContextMenu = $("fbStatusContextMenu");
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
-
-const prefs = PrefService.getService(nsIPrefBranch2);
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 
@@ -50,69 +40,6 @@ const firebugURLs =  // TODO chrome.js
     donate: "http://getfirebug.com/getinvolved"
 };
 
-const prefNames =  // XXXjjb TODO distribute to modules
-[
-    // Global
-    "defaultPanelName", "throttleMessages", "textSize", "showInfoTips",
-    "largeCommandLine", "textWrapWidth", "openInWindow", "showErrorCount",
-    "activateSameOrigin", "allPagesActivation", "hiddenPanels",
-    "panelTabMinWidth", "sourceLinkLabelWidth", "currentVersion",
-    "useDefaultLocale", "toolbarCustomizationDone", "addonBarOpened",
-    "showBreakNotification",
-
-    // Search
-    "searchCaseSensitive", "searchGlobal", "searchUseRegularExpression",
-    "netSearchHeaders", "netSearchParameters", "netSearchResponseBody",
-
-    // Console
-    "showJSErrors", "showJSWarnings", "showCSSErrors", "showXMLErrors",
-    "showChromeErrors", "showChromeMessages", "showExternalErrors",
-    "showXMLHttpRequests", "showNetworkErrors", "tabularLogMaxHeight",
-    "consoleFilterTypes",
-
-    // HTML
-    "showFullTextNodes", "showCommentNodes",
-    "showTextNodesWithWhitespace", "showTextNodesWithEntities",
-    "highlightMutations", "expandMutations", "scrollToMutations", "shadeBoxModel",
-    "showQuickInfoBox", "displayedAttributeValueLimit",
-
-    // CSS
-    "onlyShowAppliedStyles",
-    "showUserAgentCSS",
-    "expandShorthandProps",
-    "computedStylesDisplay",
-    "showMozillaSpecificStyles",
-
-    // Script
-    "decompileEvals", "replaceTabs",
-
-    // DOM
-    "showUserProps", "showUserFuncs", "showDOMProps", "showDOMFuncs", "showDOMConstants",
-    "ObjectShortIteratorMax",
-
-    // Layout
-    "showRulers",
-
-    // Net
-    "netFilterCategory", "netDisplayedResponseLimit",
-    "netDisplayedPostBodyLimit", "netPhaseInterval", "sizePrecision",
-    "netParamNameLimit", "netShowPaintEvents", "netShowBFCacheResponses",
-
-    // JSON Preview
-    "sortJsonPreview",
-
-    // Stack
-    "omitObjectPathStack",
-
-    // Debugging
-    "clearDomplate"
-];
-
-const servicePrefNames = [
-    "showStackTrace", // Console
-    "filterSystemURLs", // Stack
-    "showAllSourceFiles", "breakOnErrors",  "trackThrowCatch" // Script
-];
 
 const scriptBlockSize = 20;
 
@@ -136,7 +63,6 @@ var defaultFuncRep = null;
 var menuItemControllers = [];
 
 var panelTypeMap = {};
-var optionUpdateMap = {};
 
 var deadWindows = [];
 var deadWindowTimeout = 0;
@@ -170,8 +96,6 @@ top.Firebug =
     panelTypes: panelTypes,
     uiListeners: [],
     reps: reps,
-    prefDomain: "extensions.firebug",
-    servicePrefDomain: "extensions.firebug.service",
 
     stringCropLength: 50,
 
@@ -181,8 +105,6 @@ top.Firebug =
 
     isInitialized: false,
     migrations: {},
-    positiveZoomFactors: [1, 1.1, 1.2, 1.3, 1.5, 2, 3],
-    negativeZoomFactors: [1, 0.95, 0.8, 0.7, 0.5],
 
     // Custom stylesheets registered by extensions.
     stylesheets: [],
@@ -227,31 +149,13 @@ top.Firebug =
             this.tabBrowser = tabBrowser;
         }
 
-        this.initializePrefs();
-        this.initializeBTI();
-
-        if (FBTrace.DBG_INITIALIZE)
-            FBTrace.sysout("firebug.initialize with prefDomain "+this.prefDomain);
+        Firebug.Options.initialize();
 
         this.isInitialized = true;
 
-        dispatch(modules, "initialize", [this.prefDomain, prefNames]);
+        dispatch(modules, "initialize", []);
 
         FBTrace.timeEnd("INITIALIZATION_TIME");
-    },
-
-
-    initializeBTI: function()
-    {
-        try
-        {
-            // Load Browser Tools Interface definition
-        }
-        catch (err)
-        {
-            if (FBTrace.DBG_INITIALIZE)
-                FBTrace.sysout("firebug.initializeBTI EXCEPTION:" + err, err);
-        }
     },
 
     getVersion: function()
@@ -373,10 +277,6 @@ top.Firebug =
     shutdown: function()
     {
         this.shutdownUI();
-
-        prefService.savePrefFile(null);
-        prefs.removeObserver(this.prefDomain, this, false);
-        prefs.removeObserver(this.servicePrefDomain, this, false);
 
         dispatch(modules, "shutdown");
 
@@ -576,22 +476,7 @@ top.Firebug =
      */
     registerPreference: function(name, value)
     {
-        var currentValue = this.getPref(this.prefDomain, name);
-
-        if (FBTrace.DBG_INITIALIZE)
-            FBTrace.sysout("registerPreference "+name+" -> "+value+" type "+typeof(value)+" with currentValue "+currentValue);
-
-        if (currentValue === undefined)
-        {
-            // https://developer.mozilla.org/en/Code_snippets/Preferences
-            //This is the reason why you should usually pass strings ending with a dot to getBranch(), like prefs.getBranch("accessibility.").
-            var defaultBranch = prefService.getDefaultBranch(this.prefDomain+"."); //
-
-            var type = this.getPreferenceTypeByExample( typeof(value) );
-            if (this.setPreference(name, value, type, defaultBranch))
-                return true;
-        }
-        return false;
+        Firebug.Options.register(name, value);
     },
 
     registerModule: function()
@@ -757,188 +642,28 @@ top.Firebug =
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
-    // Options
-    // TODO create options.js as module, support per context options eg break on error
-
-    initializePrefs: function()
+    getPref: function()
     {
-        for (var i = 0; i < prefNames.length; ++i)
-            this[prefNames[i]] = this.getPref(this.prefDomain, prefNames[i]);
-        for (var i = 0; i < servicePrefNames.length; ++i)
-            this[servicePrefNames[i]] = this.getPref(this.servicePrefDomain, servicePrefNames[i]);
-
-        prefs.addObserver(this.prefDomain, this, false);
-        prefs.addObserver(this.servicePrefDomain, this, false);
-
-        var basePrefNames = prefNames.length;
-
-
-        for (var i = basePrefNames; i < prefNames.length; ++i)
-            this[prefNames[i]] = this.getPref(this.prefDomain, prefNames[i]);
-
-        if (FBTrace.DBG_OPTIONS)
-        {
-             for (var i = 0; i < prefNames.length; ++i)
-                FBTrace.sysout("firebug.initialize option "+this.prefDomain+"."+prefNames[i]+"="+
-                    this[prefNames[i]]+"\n");
-
-             for (var i = 0; i < servicePrefNames.length; ++i)
-                FBTrace.sysout("firebug.initialize option (service) "+this.servicePrefDomain+"."+
-                    servicePrefNames[i]+"="+this[servicePrefNames[i]]+"\n");
-        }
+        // TODO deprecated
+        return Firebug.Options.getPref.apply(Firebug.Options, arguments);
     },
 
-    togglePref: function(name)
+    setPref: function()
     {
-        this.setPref(Firebug.prefDomain, name, !this[name]);
+        // TODO deprecated
+        return Firebug.Options.setPref.apply(Firebug.Options, arguments);
     },
 
-    getPref: function(prefDomain, name)
+    clearPref: function()
     {
-        var prefName = prefDomain + "." + name;
-
-        var type = prefs.getPrefType(prefName);
-        if (type == nsIPrefBranch.PREF_STRING)
-            return prefs.getCharPref(prefName);
-        else if (type == nsIPrefBranch.PREF_INT)
-            return prefs.getIntPref(prefName);
-        else if (type == nsIPrefBranch.PREF_BOOL)
-            return prefs.getBoolPref(prefName);
+        // TODO deprecated
+        return Firebug.Options.clearPref.apply(Firebug.Options, arguments);
     },
 
-    /*
-     * @param prefDomain, eg extensions.firebug, eg Firebug.prefDomain
-     * @param name X for extension.firebug.X
-     * @param value setting for X
-     * @param prefType optional for adding a new pref,
-     */
-    setPref: function(prefDomain, name, value, prefType)
-    {
-        var prefName = prefDomain + "." + name;
-
-        var type = this.getPreferenceTypeByExample( (prefType?prefType:typeof(value)) );
-
-        if (!this.setPreference(prefName, value, type, prefs))
-            return;
-
-        setTimeout(function delaySavePrefs()
-        {
-            if (FBTrace.DBG_OPTIONS)
-                FBTrace.sysout("firebug.delaySavePrefs type="+type+" name="+prefName+" value="+value+"\n");
-            prefs.savePrefFile(null);
-        });
-
-        if (FBTrace.DBG_OPTIONS)
-            FBTrace.sysout("firebug.setPref type="+type+" name="+prefName+" value="+value+"\n");
-    },
-
-    setPreference: function(prefName, value, type, prefBranch)
-    {
-        // xxxHonza, XXXjjb: sometimes I am seeing: extensions.firebugcommandLineShowCompleterPopup
-        // preference that should really be: extensions.firebug.commandLineShowCompleterPopup
-        // Is the better fix for this (this is rather a workaround).
-        //if (prefName.indexOf("extensions.firebug") != 0)
-        //    prefName = "." + prefName;
-        if ((prefBranch.root+prefName).indexOf("bug.") == -1)
-            FBTrace.sysout("WARNING setPreference called without bug.", {prefName: prefName, value: value});
-        // The above lines and comments should be removed once the prefs seem correct
-
-        if (type == nsIPrefBranch.PREF_STRING)
-            prefBranch.setCharPref(prefName, value);
-        else if (type == nsIPrefBranch.PREF_INT)
-            prefBranch.setIntPref(prefName, value);
-        else if (type == nsIPrefBranch.PREF_BOOL)
-            prefBranch.setBoolPref(prefName, value);
-        else if (type == nsIPrefBranch.PREF_INVALID)
-        {
-            FBTrace.sysout("firebug.setPref FAILS: Invalid preference "+prefName+" with type "+type+", check that it is listed in defaults/prefs.js");
-            return false;
-        }
-        return true;
-    },
-
-    getPreferenceTypeByExample: function(prefType)
-    {
-        if (prefType)
-        {
-            if (prefType === typeof("s"))
-                var type = nsIPrefBranch.PREF_STRING;
-            else if (prefType === typeof(1))
-                var type = nsIPrefBranch.PREF_INT;
-            else if (prefType === typeof (true))
-                var type = nsIPrefBranch.PREF_BOOL;
-            else
-                var type = nsIPrefBranch.PREF_INVALID;
-        }
-        else
-        {
-            var type = prefs.getPrefType(prefName);
-        }
-        return type;
-    },
-
-    clearPref: function(prefDomain, name)
-    {
-        var prefName = prefDomain + "." + name;
-        if (prefs.prefHasUserValue(prefName))
-            prefs.clearUserPref(prefName);
-    },
-
-    changeTextSize: function(amt)
-    {
-        var newTextSize = this.textSize+amt;
-        if ((newTextSize < 0 && Math.abs(newTextSize) < this.negativeZoomFactors.length) || (newTextSize >= 0 && this.textSize+amt < this.positiveZoomFactors.length))
-            this.setTextSize(this.textSize+amt);
-    },
-
-    setTextSize: function(value)
-    {
-        var setValue = value;
-        if (value >= this.positiveZoomFactors.length)
-            setValue = this.positiveZoomFactors[this.positiveZoomFactors.length-1];
-        else if (value < 0 && Math.abs(value) >= this.negativeZoomFactors.length)
-            setValue = this.negativeZoomFactors[this.negativeZoomFactors.length-1];
-        this.setPref(Firebug.prefDomain, "textSize", setValue);
-    },
-
-    updatePref: function(name, value)
-    {
-        // Prevent infinite recursion due to pref observer
-        if (optionUpdateMap.hasOwnProperty(name))
-            return;
-
-        try
-        {
-            optionUpdateMap[name] = 1;
-            this[name] = value;
-
-            dispatch(modules, "updateOption", [name, value]);
-
-            // Update the current chrome...
-            Firebug.chrome.updateOption(name, value);
-
-            // ... as well as the original in-browser chrome (if Firebug is currently detached).
-            // xxxHonza, xxxJJB: John, the Firebug.externalChrome is not longer set, is it correct?
-            // it's still used in FirebugChrome.setGlobalAttribute.
-            if (Firebug.chrome != Firebug.originalChrome)
-                Firebug.originalChrome.updateOption(name, value);
-
-        }
-        catch (err)
-        {
-            if (FBTrace.DBG_OPTIONS)
-                FBTrace.sysout("firebug.updatePref EXCEPTION:" + err, err);
-        }
-        finally
-        {
-            delete optionUpdateMap[name];
-        }
-
-        if (FBTrace.DBG_OPTIONS)
-            FBTrace.sysout("firebug.updatePref EXIT: "+name+"="+value+"\n");
-    },
+    prefDomain: "extensions.firebug",
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+
     // Browser Bottom Bar
     // TODO XULWindow
 
@@ -1155,38 +880,11 @@ top.Firebug =
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
-    // TODO to options.js
-    // TODO this needs to be moz_options.js and have BTI call
+    // deprecated
 
-    resetAllOptions: function(confirm)  // to default state
+    resetAllOptions: function(confirm)
     {
-        if (confirm)
-        {
-            if (!promptService.confirm(null, $STR("Firebug"), $STR("confirmation.Reset_All_Firebug_Options")))
-                return;
-        }
-
-        var preferences = prefs.getChildList("extensions.firebug", {});
-        for (var i = 0; i < preferences.length; i++)
-        {
-            if (preferences[i].indexOf("DBG_") == -1 && preferences[i].indexOf("filterSystemURLs") == -1)
-            {
-                if (FBTrace.DBG_OPTIONS)
-                    FBTrace.sysout("Clearing option: "+i+") "+preferences[i]);
-                if (prefs.prefHasUserValue(preferences[i]))  // avoid exception
-                    prefs.clearUserPref(preferences[i]);
-            }
-            else
-            {
-                if (FBTrace.DBG_OPTIONS)
-                    FBTrace.sysout("Skipped clearing option: "+i+") "+preferences[i]);
-            }
-        }
-
-        Firebug.TabWatcher.iterateContexts( function clearBPs(context)
-        {
-            Firebug.Debugger.clearAllBreakpoints(context);
-        });
+        Firebug.Options.resetAllOptions(confirm);
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
@@ -1445,29 +1143,6 @@ top.Firebug =
         throw Components.results.NS_NOINTERFACE;
     },
 
-    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
-    // nsIPrefObserver
-    // TODO options.js
-
-    observe: function(subject, topic, data)
-    {
-        if (data.indexOf("extensions.") == -1)
-            return;
-
-        if (data.substring(0, Firebug.prefDomain.length) == Firebug.prefDomain)
-            var domain = Firebug.prefDomain;
-        if (data.substring(0, Firebug.servicePrefDomain.length) == Firebug.servicePrefDomain)
-            var domain = Firebug.servicePrefDomain;
-
-        if (domain)
-        {
-            var name = data.substr(domain.length+1);
-            var value = this.getPref(domain, name);
-            if (FBTrace.DBG_OPTIONS) FBTrace.sysout("firebug.observe name = value: "+name+"= "+value+"\n");
-            this.updatePref(name, value);
-        }
-    },
-
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
     onPauseJSDRequested: function(rejection)
@@ -1554,7 +1229,7 @@ top.Firebug =
                 {
                     Firebug.placement = i;
                     delete Firebug.previousPlacement;
-                    Firebug.setPref(Firebug.prefDomain, "previousPlacement", Firebug.placement);
+                    Firebug.Options.set("previousPlacement", Firebug.placement);
                     Firebug.StartButton.resetTooltip();
                 }
                 return Firebug.placement;
@@ -1571,7 +1246,7 @@ top.Firebug =
     openMinimized: function()
     {
         if (!Firebug.previousPlacement)
-            Firebug.previousPlacement = Firebug.getPref(Firebug.prefDomain, "previousPlacement");
+            Firebug.previousPlacement = Firebug.Options.get("previousPlacement");
 
         return (Firebug.previousPlacement && (Firebug.previousPlacement == PLACEMENT_MINIMIZED) )
     },
@@ -2597,7 +2272,7 @@ Firebug.ActivablePanel = extend(Firebug.Panel,
         if (!this.name)
             return false;
 
-        return Firebug.getPref(Firebug.prefDomain + "." + this.name, "enableSites");
+        return Firebug.Options.get(this.name+".enableSites");
     },
 
     setEnabled: function(enable)
@@ -2605,18 +2280,7 @@ Firebug.ActivablePanel = extend(Firebug.Panel,
         if (!this.name || !this.activable)
             return;
 
-        var prefDomain = Firebug.prefDomain + "." + this.name;
-
-        // Proper activation preference must be available.
-        var type = prefs.getPrefType(prefDomain + ".enableSites")
-        if (type != Ci.nsIPrefBranch.PREF_BOOL)
-        {
-            if (FBTrace.DBG_ERRORS || FBTrace.DBG_ACTIVATION)
-                FBTrace.sysout("firebug.ActivablePanel.setEnabled FAILS "+prefDomain+".enableSites"+" not a PREF_BOOL: " + type);
-            return;
-        }
-
-        Firebug.setPref(prefDomain, "enableSites", enable);
+        Firebug.Options.set(this.name+".enableSites", enable);
     },
 
     /**
@@ -3049,13 +2713,13 @@ Firebug.Migrator =
     getMigrated: function(elt)
     {
         var id = elt.getAttribute('id');
-        return Firebug.getPref(Firebug.prefDomain, "migrated_"+id);
+        return Firebug.Options.get("migrated_"+id);
     },
 
     setMigrated: function(elt)
     {
         var id = elt.getAttribute('id');
-        Firebug.setPref(Firebug.prefDomain, "migrated_"+id, true, typeof(true));
+        Firebug.Options.set( "migrated_"+id, true, typeof(true));
     },
 
 }

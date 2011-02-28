@@ -862,7 +862,7 @@ Firebug.Breakpoint.BreakNotification.prototype = domplate(Firebug.InlineEditor.p
     onShowBreakNotificationChanged: function(event)
     {
         // Do not display again if the user wishes so.
-        Firebug.setPref(Firebug.prefDomain, "showBreakNotification", !event.target.checked);
+        Firebug.Options.set("showBreakNotification", !event.target.checked);
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

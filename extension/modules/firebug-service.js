@@ -1550,12 +1550,12 @@ var fbs =
 
     obeyPrefs: function()
     {
-        fbs.showStackTrace = prefs.getBoolPref("extensions.firebug.service.showStackTrace");
-        fbs.breakOnErrors = prefs.getBoolPref("extensions.firebug.service.breakOnErrors");
-        fbs.trackThrowCatch = prefs.getBoolPref("extensions.firebug.service.trackThrowCatch");
+        fbs.showStackTrace = prefs.getBoolPref("extensions.firebug.showStackTrace");
+        fbs.breakOnErrors = prefs.getBoolPref("extensions.firebug.breakOnErrors");
+        fbs.trackThrowCatch = prefs.getBoolPref("extensions.firebug.trackThrowCatch");
 
         var pref = fbs.scriptsFilter;
-        fbs.scriptsFilter = prefs.getCharPref("extensions.firebug.service.scriptsFilter");
+        fbs.scriptsFilter = prefs.getCharPref("extensions.firebug.scriptsFilter");
         var mustReset = (pref !== fbs.scriptsFilter);
 
         if (FBTrace.DBG_OPTIONS)
@@ -1639,6 +1639,7 @@ var fbs =
     {
         if (!enabledDebugger)
             return "not enabled";
+
         var rejection = [];
         dispatch(clients, "onPauseJSDRequested", [rejection]);
 

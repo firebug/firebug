@@ -78,6 +78,8 @@ ToolsInterface.JavaScript.runUntil = function(compilationUnit, lineNumber)
 
 ToolsInterface.browser.addListener(ToolsInterface.JavaScript);  // This is how we get events
 
+
+
 ToolsInterface.JavaScript.onStartDebugging = function(context, frame)
 {
     Firebug.selectContext(context);
@@ -96,6 +98,8 @@ ToolsInterface.JavaScript.onStopDebugging = function(context)
         panel.onStopDebugging();
     }
 }
+
+
 
 return exports = {};
 

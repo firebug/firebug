@@ -65,10 +65,10 @@ Firebug.StartButton = extend(Firebug.Module,
      */
     appendToToolbar: function()
     {
-        if (Firebug.getPref(Firebug.prefDomain, "toolbarCustomizationDone"))
+        if (Firebug.Options.get("toolbarCustomizationDone"))
             return;
 
-        Firebug.setPref(Firebug.prefDomain, "toolbarCustomizationDone", true);
+        Firebug.Options.set("toolbarCustomizationDone", true);
 
         // Get the current navigation bar button set (a string of button IDs) and append
         // ID of the Firebug start button into it.

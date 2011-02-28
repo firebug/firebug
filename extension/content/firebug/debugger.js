@@ -2175,6 +2175,8 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
             FBTrace.sysout("debugger.Firebug.Debugger.disable; " + this.enabled);
     },
 
+    selfObserver: {}, // empty listener, registered as observer while Script panel is enabled.
+
     initializeUI: function()
     {
         Firebug.ActivableModule.initializeUI.apply(this, arguments);
@@ -2385,6 +2387,14 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
     {
         if (name == "breakOnErrors")
             $("cmd_breakOnErrors").setAttribute("checked", value);
+
+        if (name == "script.enableSites")
+        {
+            if (value)
+                this.addObserver(this.selfObserver);
+            else
+                this.removeObserver(this.selfObserver);
+        }
     },
 
     getObjectByURL: function(context, url)
@@ -2538,7 +2548,7 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
     onScriptFilterMenuCommand: function(event, context)
     {
         var menu = event.target;
-        Firebug.setPref(Firebug.servicePrefDomain, "scriptsFilter", menu.value);
+        Firebug.Options.set("scriptsFilter", menu.value);
         Firebug.Debugger.filterMenuUpdate();
     },
 
@@ -2591,7 +2601,7 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
 
     filterMenuUpdate: function()
     {
-        var value = Firebug.getPref(Firebug.servicePrefDomain, "scriptsFilter");
+        var value = Firebug.Options.get("scriptsFilter");
         this.filterButton.value = value;
         this.filterButton.label = this.menuShortLabel[value];
         this.filterButton.removeAttribute("disabled");

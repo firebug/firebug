@@ -350,7 +350,7 @@ Firebug.CommandLine = extend(Firebug.Module,
         if (expr == "")
             return;
 
-        var mozJSEnabled = Firebug.getPref("javascript", "enabled");
+        var mozJSEnabled = Firebug.Options.getPref("javascript", "enabled");
         if (mozJSEnabled)
         {
             if (!Firebug.largeCommandLine || context.panelName != "console")
@@ -549,7 +549,7 @@ Firebug.CommandLine = extend(Firebug.Module,
     {
         var large = forceLarge || !Firebug.largeCommandLine;
         if (large != Firebug.largeCommandLine)
-            Firebug.setPref(Firebug.prefDomain, "largeCommandLine", large);
+            Firebug.Options.set("largeCommandLine", large);
     },
 
     checkOverflow: function(context)
@@ -562,7 +562,7 @@ Firebug.CommandLine = extend(Firebug.Module,
         {
             setTimeout(bindFixed(function()
             {
-                Firebug.setPref(Firebug.prefDomain, "largeCommandLine", true);
+                Firebug.Options.set("largeCommandLine", true);
             }, this));
         }
     },
@@ -596,7 +596,7 @@ Firebug.CommandLine = extend(Firebug.Module,
 
     setAutoCompleter: function()
     {
-        var showCompletionPopup = Firebug.getPref(Firebug.prefDomain, "commandLineShowCompleterPopup");
+        var showCompletionPopup = Firebug.Options.get("commandLineShowCompleterPopup");
         this.autoCompleter = new Firebug.AutoCompleter(getExpressionOffset, getDot,
                 bind(autoCompleteEval, this), false, true, true, true, showCompletionPopup, isValidProperty);
     },

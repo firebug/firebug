@@ -73,7 +73,8 @@ Firebug.ExternalEditors = extend(Firebug.Module,
         const editorPrefNames = ["label", "executable", "cmdline", "image"];
 
         externalEditors = [];
-        var list = Firebug.getPref(prefDomain, prefName).split(",");
+        var prefDomain = Firebug.Options.getPrefDomain();
+        var list = Firebug.Options.getPref(prefDomain, prefName).split(",");
         for (var i = 0; i < list.length; ++i)
         {
             var editorId = list[i];
@@ -85,7 +86,7 @@ Firebug.ExternalEditors = extend(Firebug.Module,
             {
                 try
                 {
-                    item[editorPrefNames[j]] = Firebug.getPref(prefDomain, prefName+"."+
+                    item[editorPrefNames[j]] = Firebug.Options.getPref(prefDomain, prefName+"."+
                         editorId+"."+editorPrefNames[j]);
                 }
                 catch(exc)

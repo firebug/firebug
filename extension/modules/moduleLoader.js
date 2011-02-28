@@ -455,7 +455,8 @@ function loadCompilationUnit(moduleLoader, context, url, moduleName) {
     } catch (exc) {
         var errorURL = exc.filename || exc.sourceName || exc.fileName;
         var errorLineNumber = exc.lineNumber;
-        ModuleLoader.onError("loadCompilationUnit got exception "+exc+" on "+errorURL+"@"+errorLineNumber+", trying "+moduleLoader.config.edit);
+
+        ModuleLoader.onError("ModuleLoader.loadCompilationUnit got exception "+exc+" on "+errorURL+"@"+errorLineNumber+", loading "+url+" stack "+exc.stack, exc);
         if (moduleLoader.config.edit) {
             return moduleLoader.config.edit(exc, errorURL, errorLineNumber);
         }

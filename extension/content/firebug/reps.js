@@ -2289,15 +2289,22 @@ FirebugReps.Description = domplate(Firebug.Rep,
 
     render: function(text, parentNode, listener)
     {
-        function clickListener(event)
+        var params = {};
+        if (listener)
         {
-            // Only clicks on links are passed to the original listener.
-            var localName = event.target.localName;
-            if (listener && localName && localName.toLowerCase() == "a")
-                listener(event);
-        };
+            params.onClickLink =
+            {
+                clickListener: function(event)
+                {
+                    // Only clicks on links are passed to the original listener.
+                    var localName = event.target.localName;
+                    if (listener && localName && localName.toLowerCase() == "a")
+                        listener(event);
+                },
+            };
+        }
 
-        var rootNode = this.tag.replace({onClickLink: clickListener}, parentNode, this);
+        var rootNode = this.tag.replace(params, parentNode, this);
 
         var parser = CCIN("@mozilla.org/xmlextras/domparser;1", "nsIDOMParser");
         var doc = parser.parseFromString("<div>" + text + "</div>", "text/xml");

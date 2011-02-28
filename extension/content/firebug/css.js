@@ -2015,7 +2015,7 @@ CSSComputedElementPanel.prototype = extend(CSSElementPanel.prototype,
     toggleDisplay: function()
     {
         var display = Firebug.computedStylesDisplay == "alphabetical" ? "grouped" : "alphabetical";
-        Firebug.setPref(Firebug.prefDomain, "computedStylesDisplay", display);
+        Firebug.Options.set("computedStylesDisplay", display);
     }
 });
 

@@ -268,7 +268,7 @@ Firebug.Activation = extend(Firebug.Module,
                 [$STR("firebug.activation.privateBrowsingMode")],
                 Firebug.currentContext, "info");
             Firebug.chrome.selectPanel('console');
-            Firebug.setPref(Firebug.prefDomain, "defaultPanelName", "console");  // make sure the user sees the warning.
+            Firebug.Options.set("defaultPanelName", "console");  // make sure the user sees the warning.
             return;
         }
 
@@ -338,7 +338,7 @@ Firebug.Activation = extend(Firebug.Module,
             Firebug.allPagesActivation = "none";
         }
 
-        Firebug.setPref(Firebug.prefDomain, "allPagesActivation", Firebug.allPagesActivation);
+        Firebug.Options.set("allPagesActivation", Firebug.allPagesActivation);
         this.updateAllPagesActivation();
     },
 
@@ -395,12 +395,12 @@ Firebug.PanelActivation = extend(Firebug.Module,
 {
     initialize: function()
     {
-        prefs.addObserver(Firebug.prefDomain, this, false);
+        prefs.addObserver(Firebug.Options.getPrefDomain(), this, false);
     },
 
     shutdown: function()
     {
-        prefs.removeObserver(Firebug.prefDomain, this, false);
+        prefs.removeObserver(Firebug.Options.getPrefDomain(), this, false);
     },
 
     showPanel: function(browser, panel)
@@ -512,7 +512,7 @@ Firebug.PanelActivation = extend(Firebug.Module,
         try
         {
             var panelName = parts[2];
-            var enable = Firebug.getPref(Firebug.prefDomain, panelName + ".enableSites");
+            var enable = Firebug.Options.get(panelName + ".enableSites");
 
             var panelType = Firebug.getPanelType(panelName, enable);
             if (panelType)

@@ -52,7 +52,7 @@ Firebug.A11yModel = extend(Firebug.Module,
 
     isEnabled : function()
     {
-        return Firebug.getPref("extensions.firebug", "a11y.enable");
+        return Firebug.Options.get("a11y.enable");
     },
 
     updateOption: function(name, value)

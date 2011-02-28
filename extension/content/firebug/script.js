@@ -567,9 +567,10 @@ Firebug.ScriptPanel.prototype = extend(Firebug.SourceBoxPanel,
 
     showWarning: function()
     {
+        FBTrace.sysout("showWarning "+Firebug.jsDebuggerOn);
         // Fill the panel node with a warning if needed
         var aLocation = this.getDefaultLocation();
-        var jsEnabled = Firebug.getPref("javascript", "enabled");
+        var jsEnabled = Firebug.Options.getPref("javascript", "enabled");
         if (this.context.activitySuspended && !this.context.stopped)
         {
             // Make sure that the content of the panel is restored as soon as
@@ -907,7 +908,7 @@ Firebug.ScriptPanel.prototype = extend(Firebug.SourceBoxPanel,
             return allSources;
         }
 
-        var filter = Firebug.getPref(Firebug.servicePrefDomain, "scriptsFilter");
+        var filter = Firebug.Options.get("scriptsFilter");
         this.showEvents = (filter == "all" || filter == "events");
         this.showEvals = (filter == "all" || filter == "evals");
 
@@ -1059,10 +1060,10 @@ Firebug.ScriptPanel.prototype = extend(Firebug.SourceBoxPanel,
         var context = this.context;
 
         return [
-            serviceOptionMenu("ShowAllSourceFiles", "showAllSourceFiles"),
+            optionMenu("ShowAllSourceFiles", "showAllSourceFiles"),
             // 1.2: always check last line; optionMenu("UseLastLineForEvalName", "useLastLineForEvalName"),
             // 1.2: always use MD5 optionMenu("UseMD5ForEvalName", "useMD5ForEvalName")
-            serviceOptionMenu("TrackThrowCatch", "trackThrowCatch"),
+            optionMenu("TrackThrowCatch", "trackThrowCatch"),
             //"-",
             //1.2 option on toolbar this.optionMenu("DebuggerEnableAlways", enableAlwaysPref)
             optionMenu("Show Break Notifications", "showBreakNotification")
@@ -1071,9 +1072,9 @@ Firebug.ScriptPanel.prototype = extend(Firebug.SourceBoxPanel,
 
     optionMenu: function(label, option)
     {
-        var checked = Firebug.getPref(prefDomain, option);
+        var checked = Firebug.Options.get(option);
         return {label: label, type: "checkbox", checked: checked,
-            command: bindFixed(Firebug.setPref, Firebug, prefDomain, option, !checked) };
+            command: bindFixed(Firebug.Options.set, Firebug, option, !checked) };
     },
 
     getContextMenuItems: function(fn, target)
@@ -1385,7 +1386,7 @@ Firebug.ScriptPanel.WarningRep = domplate(Firebug.Rep,
 
     onEnableScript: function(event)
     {
-        Firebug.setPref("javascript", "enabled", true);
+        Firebug.Options.setPref("javascript", "enabled", true);
 
         Firebug.TabWatcher.reloadPageFromMemory(this.context);
     },

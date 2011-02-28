@@ -85,10 +85,10 @@ Firebug.TabCacheModel = extend(Firebug.Module,
             FBTrace.sysout("tabCache.initializeUI; Cache model initialized, Ci.nsITraceableChannel "+Ci.nsITraceableChannel);
 
         // Read maximum size limit for cached response from preferences.
-        responseSizeLimit = Firebug.getPref(Firebug.prefDomain, "cache.responseLimit");
+        responseSizeLimit = Firebug.Options.get("cache.responseLimit");
 
         // Read additional text mime-types from preferences.
-        var mimeTypes = Firebug.getPref(Firebug.prefDomain, "cache.mimeTypes");
+        var mimeTypes = Firebug.Options.get("cache.mimeTypes");
         if (mimeTypes)
         {
             var list = mimeTypes.split(" ");

@@ -173,7 +173,7 @@ Firebug.NetMonitor = extend(Firebug.ActivableModule,
         if (!context.netProgress)
             return;
 
-        Firebug.setPref(Firebug.prefDomain, "netFilterCategory", filterCategory);
+        Firebug.Options.set("netFilterCategory", filterCategory);
 
         // The content filter has been changed. Make sure that the content
         // of the panel is updated (CSS is used to hide or show individual files).
@@ -204,7 +204,7 @@ Firebug.NetMonitor = extend(Firebug.ActivableModule,
         // Synchronize UI buttons with the current filter.
         this.syncFilterButtons(Firebug.chrome);
 
-        prefs.addObserver(Firebug.prefDomain, NetLimit, false);
+        prefs.addObserver(Firebug.Options.prefDomain, NetLimit, false);  // TODO options.js
     },
 
     initialize: function()
@@ -224,7 +224,7 @@ Firebug.NetMonitor = extend(Firebug.ActivableModule,
 
     shutdown: function()
     {
-        prefs.removeObserver(Firebug.prefDomain, this, false);
+        prefs.removeObserver(Firebug.Options.prefDomain, this, false); // TODO options.js
         if (Firebug.TraceModule)
             Firebug.TraceModule.removeListener(this.TraceListener);
 
@@ -250,7 +250,7 @@ Firebug.NetMonitor = extend(Firebug.ActivableModule,
                     context.netProgress.post(windowPaint, [window, now()]);
             }
 
-            if (Firebug.getPref(Firebug.prefDomain, "netShowPaintEvents"))
+            if (Firebug.Options.get("netShowPaintEvents"))
                 window.addEventListener("MozAfterPaint", onWindowPaintHandler, false);
 
             // Register "load" listener in order to track window load time.
@@ -1054,7 +1054,7 @@ NetPanel.prototype = extend(Firebug.ActivablePanel,
         {
             var limitInfo = {
                 totalCount: 0,
-                limitPrefsTitle: $STRF("LimitPrefsTitle", [Firebug.prefDomain+".net.logLimit"])
+                limitPrefsTitle: $STRF("LimitPrefsTitle", [Firebug.Options.prefDomain+".net.logLimit"])
             };
 
             this.table = NetRequestTable.tableTag.append({}, this.panelNode);
@@ -1065,7 +1065,7 @@ NetPanel.prototype = extend(Firebug.ActivablePanel,
             NetRequestEntry.footerTag.insertRows({}, this.summaryRow);
 
             // Update visibility of columns according to the preferences
-            var hiddenCols = Firebug.getPref(Firebug.prefDomain, "net.hiddenColumns");
+            var hiddenCols = Firebug.Options.get("net.hiddenColumns");
             if (hiddenCols)
                 this.table.setAttribute("hiddenCols", hiddenCols);
         }
@@ -1907,7 +1907,7 @@ Firebug.NetMonitor.NetRequestTable = domplate(Firebug.Rep, new Firebug.Listener(
         }
 
         // Store current state into the preferences.
-        Firebug.setPref(Firebug.prefDomain, "net.hiddenColumns", table.getAttribute("hiddenCols"));
+        Firebug.Options.set("net.hiddenColumns", table.getAttribute("hiddenCols"));
 
         panel.updateHRefLabelWidth();
     },
@@ -1928,7 +1928,7 @@ Firebug.NetMonitor.NetRequestTable = domplate(Firebug.Rep, new Firebug.Listener(
 
         // Reset visibility. Only the Status column is hidden by default.
         panel.table.setAttribute("hiddenCols", "colStatus");
-        Firebug.setPref(Firebug.prefDomain, "net.hiddenColumns", "colStatus");
+        Firebug.Options.set("net.hiddenColumns", "colStatus");
     },
 });
 
@@ -3324,7 +3324,7 @@ Firebug.NetMonitor.NetLimit = domplate(Firebug.Rep,
 
     updateMaxLimit: function()
     {
-        var value = Firebug.getPref(Firebug.prefDomain, "net.logLimit");
+        var value = Firebug.Options.get("net.logLimit");
         maxQueueRequests = value ? value : maxQueueRequests;
     }
 });
@@ -5703,8 +5703,8 @@ Firebug.NetMonitor.BrowserCache =
 
     isEnabled: function()
     {
-        var diskCache = Firebug.getPref(this.cacheDomain, "disk.enable");
-        var memoryCache = Firebug.getPref(this.cacheDomain, "memory.enable");
+        var diskCache = Firebug.Options.getPref(this.cacheDomain, "disk.enable");
+        var memoryCache = Firebug.Options.getPref(this.cacheDomain, "memory.enable");
         return diskCache && memoryCache;
     },
 
@@ -5713,8 +5713,8 @@ Firebug.NetMonitor.BrowserCache =
         if (FBTrace.DBG_NET)
             FBTrace.sysout("net.BrowserCache.enable; " + state);
 
-        Firebug.setPref(this.cacheDomain, "disk.enable", state);
-        Firebug.setPref(this.cacheDomain, "memory.enable", state);
+        Firebug.Options.setPref(this.cacheDomain, "disk.enable", state);
+        Firebug.Options.setPref(this.cacheDomain, "memory.enable", state);
     }
 }
 

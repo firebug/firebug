@@ -44,7 +44,7 @@ pref("extensions.firebug.showChromeMessages", false);
 pref("extensions.firebug.showExternalErrors", false);
 pref("extensions.firebug.showNetworkErrors", false);
 pref("extensions.firebug.showXMLHttpRequests", true);
-pref("extensions.firebug.service.showStackTrace", false);
+pref("extensions.firebug.showStackTrace", false);
 pref("extensions.firebug.console.logLimit", 500);
 pref("extensions.firebug.console.enableSites", false);
 pref("extensions.firebug.tabularLogMaxHeight", 200);      // Max height [px] for tabular output in console (provided e.g. by console.table() method). Set to zero in case of no limit.
@@ -70,11 +70,11 @@ pref("extensions.firebug.showMozillaSpecificStyles", false);
 pref("extensions.firebug.computedStylesDisplay", "grouped");
 
 // Script
-pref("extensions.firebug.service.breakOnErrors", false);
-pref("extensions.firebug.service.showAllSourceFiles", false);
-pref("extensions.firebug.service.trackThrowCatch", false);
+pref("extensions.firebug.breakOnErrors", false);
+pref("extensions.firebug.showAllSourceFiles", false);
+pref("extensions.firebug.trackThrowCatch", false);
 pref("extensions.firebug.script.enableSites", false);
-pref("extensions.firebug.service.scriptsFilter", "all");
+pref("extensions.firebug.scriptsFilter", "all");
 
 // If the value is greather than zero, the Script panel replaces tabs
 // by corresponding number of spaces when displaying JavaScript source.
