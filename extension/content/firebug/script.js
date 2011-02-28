@@ -87,9 +87,7 @@ Firebug.ScriptPanel.prototype = extend(Firebug.SourceBoxPanel,
     */
     updateSourceBox: function(sourceBox)
     {
-        if (this.scrollInfo && (this.scrollInfo.location == this.location))
-            this.scrollToLine(this.location, this.scrollInfo.previousCenterLine);
-        delete this.scrollInfo;
+        this.location = sourceBox.repObject;
     },
 
     /*
@@ -207,7 +205,7 @@ Firebug.ScriptPanel.prototype = extend(Firebug.SourceBoxPanel,
 
         if (FBTrace.DBG_BP || FBTrace.DBG_STACK || FBTrace.DBG_COMPILATION_UNITS)
             FBTrace.sysout("sourceBox.highlightLine lineNo: "+sourceBox.highlightedLineNumber+
-                " lineNode="+lineNode+" in "+sourceBox.repObject.href);
+                " lineNode="+lineNode+" in "+sourceBox.repObject.getURL());
 
         return (sourceBox.highlightedLineNumber > 0); // sticky if we have a valid line
     },
@@ -434,6 +432,22 @@ Firebug.ScriptPanel.prototype = extend(Firebug.SourceBoxPanel,
     {
         var scrollingElement = event.target;
         this.reView(scrollingElement);
+        var searchBox = Firebug.chrome.$("fbSearchBox");
+        searchBox.placeholder = $STR("Use hash plus number to go to line");
+    },
+
+    onKeyPress: function(event)
+    {
+        var ch = String.fromCharCode(event.charCode);
+        var searchBox = Firebug.chrome.$("fbSearchBox");
+
+        if (ch == "l" && isControl(event))
+        {
+            searchBox.value = "#";
+            searchBox.focus();
+
+            cancelEvent(event);
+        }
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
@@ -452,6 +466,7 @@ Firebug.ScriptPanel.prototype = extend(Firebug.SourceBoxPanel,
         this.onMouseOver = bind(this.onMouseOver, this);
         this.onMouseOut = bind(this.onMouseOut, this);
         this.onScroll = bind(this.onScroll, this);
+        this.onKeyPress = bind(this.onKeyPress, this);
 
         this.panelSplitter = $("fbPanelSplitter");
         this.sidePanelDeck = $("fbSidePanelDeck");
@@ -588,6 +603,8 @@ Firebug.ScriptPanel.prototype = extend(Firebug.SourceBoxPanel,
 
         if (active)
         {
+            this.panelNode.ownerDocument.addEventListener("keypress", this.onKeyPress, true);
+
             this.location = this.getDefaultLocation();
 
             if (this.context.loaded)
@@ -603,11 +620,14 @@ Firebug.ScriptPanel.prototype = extend(Firebug.SourceBoxPanel,
                     if (!this.selectedSourceBox)  // but somehow we did not make a sourcebox?
                         this.navigate(this.location);
                     else  // then we can sync the location to the sourcebox
-                        this.location = this.selectedSourceBox.repObject;
+                        this.updateSourceBox(this.selectedSourceBox);
                 }
 
                 if (state && this.location)  // then we are restoring and we have a location, so scroll when we can
-                    this.scrollInfo = { location: this.location, previousCenterLine: state.previousCenterLine};
+                {
+                    var sourceLink = new FBL.SourceLink(this.location.getURL(), state.previousCenterLine, 'js');
+                    this.showSourceLink(sourceLink);
+                }
             }
             else // show default
             {
@@ -643,6 +663,8 @@ Firebug.ScriptPanel.prototype = extend(Firebug.SourceBoxPanel,
     {
         this.highlight(this.context.stopped);
 
+        this.panelNode.ownerDocument.removeEventListener("keypress", this.onKeyPress, true);
+
         var panelStatus = Firebug.chrome.getPanelStatusElements();
         FBL.hide(panelStatus, false);
 
@@ -676,7 +698,7 @@ Firebug.ScriptPanel.prototype = extend(Firebug.SourceBoxPanel,
             var lineNo = parseInt(m[1]);
             if (!isNaN(lineNo) && (lineNo > 0) && (lineNo < sourceBox.lines.length) )
             {
-                this.scrollToLine(sourceBox.repObject.href, lineNo,  this.jumpHighlightFactory(lineNo, this.context))
+                this.scrollToLine(sourceBox.repObject.getURL(), lineNo,  this.jumpHighlightFactory(lineNo, this.context))
                 return true;
             }
         }
@@ -739,7 +761,7 @@ Firebug.ScriptPanel.prototype = extend(Firebug.SourceBoxPanel,
         if (lineNo || lineNo === 0)
         {
             // this lineNo is an zero-based index into sourceBox.lines. Add one for user line numbers
-            this.scrollToLine(sourceBox.repObject.href, lineNo, this.jumpHighlightFactory(lineNo+1, this.context));
+            this.scrollToLine(sourceBox.repObject.getURL(), lineNo, this.jumpHighlightFactory(lineNo+1, this.context));
             dispatch(this.fbListeners, 'onScriptSearchMatchFound', [this, text, sourceBox.repObject, lineNo]);
 
             return true;
@@ -919,7 +941,7 @@ Firebug.ScriptPanel.prototype = extend(Firebug.SourceBoxPanel,
             var url = this.context.getWindowLocation();
             for (var i = 0; i < compilationUnits.length; i++)
             {
-                if (url == compilationUnits[i].href)
+                if (url == compilationUnits[i].getURL())
                     return compilationUnits[i];
             }
             return compilationUnits[0];
@@ -956,7 +978,7 @@ Firebug.ScriptPanel.prototype = extend(Firebug.SourceBoxPanel,
             return;
 
         var lineNo = parseInt(sourceRow.firstChild.textContent);
-        var scripts = findScripts(this.context, this.location.href, lineNo);
+        var scripts = findScripts(this.context, this.location.getURL(), lineNo);
         return scripts; // gee I wonder what will happen?
     },
 

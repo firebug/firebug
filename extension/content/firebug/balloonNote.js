@@ -13,7 +13,7 @@ Firebug.BalloonNote = function(doc, object)
 Firebug.BalloonNote.prototype = domplate(
 {
     tag:
-        DIV({"class": "balloon"},
+        DIV({"class": "balloon", onclick: "$onClick"},
             DIV({"class": "balloonTop1"},
                 DIV({"class": "balloonTop2"})
             ),

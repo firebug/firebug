@@ -114,6 +114,10 @@ Firebug.Console.injector =
         if (!win)
             win = context.window;
 
+        var handler = this.getConsoleHandler(context, win);
+        if (handler)
+            return;
+
         win.document.setUserData("firebug-Version", Firebug.version, null); // Initialize Firebug version.
 
         var handler = createConsoleHandler(context, win);
@@ -184,7 +188,6 @@ function createConsoleHandler(context, win)
     handler.detach = function()
     {
         win.document.removeEventListener('firebugAppendConsole', this.boundHandler, true);
-
         if (FBTrace.DBG_CONSOLE)
             FBTrace.sysout("consoleInjector FirebugConsoleHandler removeEventListener "+this.handler_name);
     };
@@ -218,13 +221,6 @@ function createConsoleHandler(context, win)
 
     handler.win = win;
     handler.context = context;
-
-    handler.onUnload = function()
-    {
-        Firebug.Console.injector.detachConsole(this.context, this.win);
-    };
-
-    win.addEventListener("unload", bind(handler.onUnload, handler), true);
 
     // When raised on our injected element, callback to Firebug and append to console
     handler.boundHandler = bind(handler.handleEvent, handler);

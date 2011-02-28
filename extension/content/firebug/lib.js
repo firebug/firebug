@@ -446,6 +446,7 @@ this.addScript = function(doc, id, src)
         // See issue 1079, the svg test case gives this error
         if (FBTrace.DBG_ERRORS)
             FBTrace.sysout("lib.addScript doc has no documentElement:", doc);
+        return;
     }
     return element;
 }
@@ -1071,6 +1072,17 @@ this.getAncestorByClass = function(node, className)
     for (var parent = node; parent; parent = parent.parentNode)
     {
         if (this.hasClass(parent, className))
+            return parent;
+    }
+
+    return null;
+};
+
+this.getAncestorByTagName = function(node, tagName)
+{
+    for (var parent = node; parent; parent = parent.parentNode)
+    {
+        if (parent.localName && parent.tagName.toLowerCase() == "input")
             return parent;
     }
 
@@ -3054,10 +3066,10 @@ var reErrorStackLine2 = /^([^\(]*)\((.*)\)$/;
 
 this.parseToStackFrame = function(line, context) // function name (arg, arg, arg)@fileName:lineNo
 {
-	var last255 = line.length - 255;
-	if (last255 > 0)
-		line = line.substr(last255);   // avoid regexp on monster compressed source (issue 4135)
-	
+    var last255 = line.length - 255;
+    if (last255 > 0)
+        line = line.substr(last255);   // avoid regexp on monster compressed source (issue 4135)
+
     var m = reErrorStackLine.exec(line);
     if (m)
     {

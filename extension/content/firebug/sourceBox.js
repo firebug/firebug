@@ -300,6 +300,12 @@ Firebug.SourceBoxPanel = extend(SourceBoxPanelBase,
 
     showSource: function(url)
     {
+        var sourceBox = this.getOrCreateSourceBox(url);
+        this.showSourceBox(sourceBox);
+    },
+
+    getOrCreateSourceBox: function(url)
+    {
         var compilationUnit = this.context.getCompilationUnit(url);
 
         if (FBTrace.DBG_COMPILATION_UNITS)
@@ -312,7 +318,7 @@ Firebug.SourceBoxPanel = extend(SourceBoxPanelBase,
         if (!sourceBox)
             sourceBox = this.createSourceBox(compilationUnit);
 
-        this.showSourceBox(sourceBox);
+        return sourceBox;
     },
 
     /*
@@ -320,33 +326,41 @@ Firebug.SourceBoxPanel = extend(SourceBoxPanelBase,
      */
     showSourceLink: function(sourceLink)
     {
-        var compilationUnit = this.context.getCompilationUnit(sourceLink.href);
-        if (compilationUnit)
+        var sourceBox = this.getOrCreateSourceBox(sourceLink.href);
+
+        if (sourceBox)
         {
-            this.navigate(compilationUnit);
             if (sourceLink.line)
             {
+                this.showSourceBox(sourceBox, sourceLink.line);
                 this.scrollToLine(sourceLink.href, sourceLink.line, this.jumpHighlightFactory(sourceLink.line, this.context));
-                dispatch(this.fbListeners, "onShowSourceLink", [this, sourceLink.line]);
             }
-            if (sourceLink == this.selection)  // then clear it so the next link will scroll and highlight.
-                delete this.selection;
+            else
+            {
+                this.showSourceBox(sourceBox);
+            }
+            dispatch(this.fbListeners, "onShowSourceLink", [this, sourceLink.line]);
         }
+        if (sourceLink == this.selection)  // then clear it so the next link will scroll and highlight.
+            delete this.selection;
     },
 
-    showSourceBox: function(sourceBox)
+    showSourceBox: function(sourceBox, lineNo)
     {
         if (this.selectedSourceBox)
             collapse(this.selectedSourceBox, true);
 
+        if (this.selectedSourceBox !== sourceBox)
+            delete this.currentSearch;
+
         this.selectedSourceBox = sourceBox;
-        delete this.currentSearch;
 
         if (sourceBox)
         {
+            sourceBox.highlightedLineNumber = lineNo;
+            collapse(sourceBox, false);
             this.reView(sourceBox);
             this.updateSourceBox(sourceBox);
-            collapse(sourceBox, false);
         }
     },
 
@@ -491,21 +505,10 @@ Firebug.SourceBoxPanel = extend(SourceBoxPanelBase,
 
         if (href)
         {
-            if (!this.selectedSourceBox || this.selectedSourceBox.repObject.href != href)
-            {
-                var compilationUnit = this.context.getCompilationUnit(href);
-                if (!compilationUnit)
-                {
-                    if(FBTrace.DBG_COMPILATION_UNITS)
-                        FBTrace.sysout("scrollToLine FAILS, no compilationUnit for href "+href, this.context.compilationUnits);
-                    return;
-                }
-                this.navigate(compilationUnit);
-            }
+            var sourceBox = this.getOrCreateSourceBox(href);
+            this.showSourceBox(sourceBox, lineNo);
         }
 
-        this.selectedSourceBox.targetedLineNumber = lineNo;
-        this.selectedSourceBox.highlightedLineNumber = lineNo;  // the targetedLineNumber may not be the highlightedLineNumber
         if (FBTrace.DBG_COMPILATION_UNITS)
             FBTrace.sysout("this.selectedSourceBox.highlightedLineNumber "+this.selectedSourceBox.repObject.url+"@"+this.selectedSourceBox.highlightedLineNumber);
 
@@ -603,10 +606,9 @@ Firebug.SourceBoxPanel = extend(SourceBoxPanelBase,
 
     reView: function(sourceBox, clearCache)  // called for all scroll events, including any time sourcebox.scrollTop is set
     {
-        if (sourceBox.targetedLineNumber) // then we requested a certain line
+        if (sourceBox.highlightedLineNumber) // then we requested a certain line
         {
-            var viewRange = this.getViewRangeFromTargetLine(sourceBox, sourceBox.targetedLineNumber);
-            delete sourceBox.targetedLineNumber;
+            var viewRange = this.getViewRangeFromTargetLine(sourceBox, sourceBox.highlightedLineNumber);
         }
         else  // no special line
         {
@@ -660,6 +662,7 @@ Firebug.SourceBoxPanel = extend(SourceBoxPanelBase,
                 FBTrace.sysout("buildViewAround updateViewportCache FAILS "+exc, exc);
         }
 
+        collapse(sourceBox, false); // the elements must be visible for the offset values
         this.setViewportPadding(sourceBox, viewRange);
 
         sourceBox.centralLine = Math.floor( (viewRange.lastLine + viewRange.firstLine)/2 );
@@ -927,6 +930,8 @@ Firebug.SourceBoxPanel = extend(SourceBoxPanelBase,
         var firstRenderedLineOffset = firstRenderedLineElement.offsetTop;
         var firstViewRangeElement = sourceBox.getLineNode(viewRange.firstLine);
         var firstViewRangeOffset = firstViewRangeElement.offsetTop;
+        sourceBox.scrollTop = firstViewRangeOffset;
+
         var topPadding = sourceBox.scrollTop - (firstViewRangeOffset - firstRenderedLineOffset);
         // Because of rounding when converting from pixels to lines, topPadding can be +/- lineHeight/2, round up
         var averageLineHeight = this.getAverageLineHeight(sourceBox);
@@ -1027,7 +1032,11 @@ Firebug.SourceBoxPanel = extend(SourceBoxPanelBase,
                         sourceBox.highlighter);
 
                 if (!sticky)
+                {
                     delete sourceBox.highlighter;
+                    delete sourceBox.highlighedLineNumber;
+                }
+
             }
         }
         catch (exc)

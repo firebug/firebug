@@ -286,7 +286,15 @@ Firebug.CommandLine = extend(Firebug.Module,
     {
         var win = targetWindow || context.window;
         var element = addScript(win.document, "_firebugInWebPage", expr);
-        element.parentNode.removeChild(element);  // we don't need the script element, result is in DOM object
+        if (!element)
+            return;
+
+        setTimeout(function delayRemoveScriptTag()
+        {
+            if (element.parentNode)
+                element.parentNode.removeChild(element);  // we don't need the script element, result is in DOM object
+        });
+
         return "true";
     },
 
@@ -1495,7 +1503,15 @@ Firebug.CommandLine.injector = {
             FBTrace.sysout("commandLine.injectCommandLineScript ", addedElement);
 
         // take it right back out, we don't want users to see the things we do ;-)
-        addedElement.parentNode.removeChild(addedElement);
+        if (addedElement)
+        {
+            setTimeout(function delayRemoveScript()
+            {
+                if (addedElement.parentNode)
+                    addedElement.parentNode.removeChild(addedElement);
+            });
+        }
+
     },
 
     addCommandLineListener: function(context, win)
