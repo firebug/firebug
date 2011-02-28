@@ -33,7 +33,7 @@
 
         <command id="cmd_focusCommandLine" oncommand="if (Firebug.currentContext) Firebug.CommandLine.focus(Firebug.currentContext)"/>
         <command id="cmd_focusFirebugSearch" oncommand="if (Firebug.currentContext) Firebug.Search.focus(Firebug.currentContext);"/>
-        <command id="cmd_focusWatchEditor" oncommand="if (Firebug.currentContext) Firebug.Debugger.focusWatch(Firebug.currentContext);"/>
+        <command id="cmd_focusWatchEditor" oncommand="if (Firebug.currentContext) Firebug.chrome.focusWatch(Firebug.currentContext);"/>
         <command id="cmd_focusLocation" oncommand="if (Firebug.currentContext) FirebugChrome.focusLocationList(Firebug.currentContext);"/>
 
         <command id="cmd_breakOnNext" oncommand="FirebugChrome.breakOnNext(Firebug.currentContext, event);"/>

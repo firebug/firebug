@@ -105,7 +105,7 @@ var FirebugLoadManager = function () {
         {
             coreModules.push("firebugModules/inProcess/tools.js");  // must be first
             coreModules.push("firebugModules/debugger.js");
-            coreModules.push("firebugModules/inProcess/contextAdapter.js");
+            coreModules.push("firebugModules/inProcess/javascripttool.js");
         }
         else if (FirebugLoadManager.arch == "remoteClient")
         {
@@ -127,6 +127,7 @@ var FirebugLoadManager = function () {
         }
 
         var defaultModules = [
+         "firebugModules/tabContext.js",  // should be loaded by being a dep of tabWatcher
          "firebugModules/sourceBox.js",
          "firebugModules/script.js",
         ];

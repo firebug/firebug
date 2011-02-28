@@ -255,7 +255,7 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
         context.currentFrame = frame;  // the frame we show to user, depends on selection
         context.stopped = true;
 
-        var hookReturn = dispatch2(this.fbListeners,"onStop",[context,frame, type,rv]);
+        var hookReturn = ToolsInterface.browser.dispatch("onStop",[context,frame, type,rv]);
         if ( hookReturn && hookReturn >= 0 )
         {
             delete context.stopped;
@@ -294,7 +294,7 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
 
         this.stopDebugging(context);
 
-        dispatch(this.fbListeners,"onResume",[context]);
+        ToolsInterface.browser.dispatch("onResume",[context]);
 
         if (context.aborted)
         {
@@ -316,14 +316,14 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
                 {
                     if (FBTrace.DBG_UI_LOOP)
                         FBTrace.sysout("Firebug.debugger.reExecute success", result);
-                    dispatch(Firebug.Debugger.fbListeners, "onRerunComplete", [true, result]);
+                    ToolsInterface.browser.dispatch( "onRerunComplete", [true, result]);
                 }
 
                 function exceptionFunction(result, context)
                 {
                     if (FBTrace.DBG_ERRORS)
                         FBTrace.sysout("Firebug.debugger.reExecute FAILED "+result, result);
-                    dispatch(Firebug.Debugger.fbListeners, "onRerunComplete", [false, result]);
+                    ToolsInterface.browser.dispatch( "onRerunComplete", [false, result]);
                 }
 
                 Firebug.CommandLine.evaluate("window._firebug.rerunFunction()", context, null,
@@ -673,7 +673,7 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
     // Breakpoints
 
-    setBreakpoint: function(sourceFile, lineNo)
+    setBreakpoint: function(sourceFile, lineNo)  // TODO: arg should be url
     {
         if (sourceFile instanceof CompilationUnit)
             sourceFile = sourceFile.sourceFile;  // see HACK in tabContext
@@ -912,7 +912,8 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
             this.resume(context);
         }
 
-        dispatch(this.fbListeners, "onStartDebugging", [context]);
+        var frame = FBL.getStackFrame(context.stoppedFrame, context);
+        ToolsInterface.browser.dispatch( "onStartDebugging", [context, frame]);
 
         if (FBTrace.DBG_UI_LOOP)
             FBTrace.sysout("startDebugging exit context.stopped:"+context.stopped+" for context: "+
@@ -940,7 +941,7 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
                 context.executingSourceFile = null;
                 delete context.breakLineNumber;
 
-                dispatch(this.fbListeners, "onStopDebugging", [context]);
+                ToolsInterface.browser.dispatch( "onStopDebugging", [context]);
 
             }
             else
@@ -1193,7 +1194,7 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
             FBTrace.sysout("onThrow FAILS: "+exc+"\n");
         }
 
-        if (dispatch2(this.fbListeners,"onThrow",[context, frame, rv]))
+        if (ToolsInterface.browser.dispatch("onThrow",[context, frame, rv]))
             return this.stop(context, frame, TYPE_THROW, rv);
         return RETURN_CONTINUE_THROW;
     },
@@ -1238,7 +1239,7 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
 
         frame = getStackFrame(frame, context);
 
-        dispatch(this.fbListeners,"onMonitorScript",[context, frame]);
+        ToolsInterface.browser.dispatch("onMonitorScript",[context, frame]);
     },
 
     onFunctionCall: function(context, frame, depth, calling)
@@ -1250,7 +1251,7 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
 
         frame = getStackFrame(frame, context);
 
-        dispatch(this.fbListeners,"onFunctionCall",[context, frame, depth, calling]);
+        ToolsInterface.browser.dispatch("onFunctionCall",[context, frame, depth, calling]);
 
         return context;  // returned as first arg on next call from same trace
     },
@@ -1363,7 +1364,7 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
                 FBTrace.sysout("debugger.onError getCorrectedStackTrace FAILED: "+exc, exc);
         }
 
-        var hookReturn = dispatch2(this.fbListeners,"onError",[context, frame, error]);
+        var hookReturn = ToolsInterface.browser.dispatch("onError",[context, frame, error]);
 
         if (!context.breakingCause)
             return 0;
@@ -1418,7 +1419,7 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
                 FBTrace.sysout("debugger.onXULScriptCreated script.fileName="+outerScript.fileName+
                     " in "+context.getName()+" "+sourceFile);
 
-            dispatch(this.fbListeners,"onXULScriptCreated",[context, frame, sourceFile.href]);
+            ToolsInterface.browser.dispatch("onXULScriptCreated",[context, frame, sourceFile.href]);
             return sourceFile;
         }
         catch (e)
@@ -1444,7 +1445,7 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
                 FBTrace.sysout("debugger.onEvalScriptCreated url="+sourceFile.href,
                     FBL.getCorrectedStackTrace(frame, context));
 
-            dispatch(this.fbListeners,"onEvalScriptCreated",[context, frame, sourceFile.href]);
+            ToolsInterface.browser.dispatch("onEvalScriptCreated",[context, frame, sourceFile.href]);
             return sourceFile;
         }
         catch (e)
@@ -1503,7 +1504,7 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
             FBTrace.sysout("debugger.onEventScriptCreated sourcefile="+sourceFile.toString()+
                 " -> "+context.getName()+"\n");
 
-        dispatch(this.fbListeners,"onEventScriptCreated",[context, frame, url]);
+        ToolsInterface.browser.dispatch("onEventScriptCreated",[context, frame, url]);
         return sourceFile;
     },
 
@@ -1573,7 +1574,7 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
             }
         }
 
-        dispatch(this.fbListeners,"onTopLevelScriptCreated",[context, frame, sourceFile.href]);
+        ToolsInterface.browser.dispatch("onTopLevelScriptCreated",[context, frame, sourceFile.href]);
         return sourceFile;
     },
 
@@ -1680,7 +1681,7 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
                     }
                     row.removeAttribute("disabledBreakpoint");
                 }
-                dispatch(this.fbListeners, "onToggleBreakpoint", [context, url, lineNo, isSet]);
+                ToolsInterface.browser.dispatch( "onToggleBreakpoint", [context, url, lineNo, isSet]);
                 found = true;
                 continue;
             }
@@ -1709,7 +1710,7 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
                         else
                             removeClass(row.firstChild, "breakForError");
 
-                        dispatch(this.fbListeners, "onToggleErrorBreakpoint", [context, url, lineNo, isSet]);
+                        ToolsInterface.browser.dispatch( "onToggleErrorBreakpoint", [context, url, lineNo, isSet]);
                     }
                 }
             }
@@ -1764,7 +1765,7 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
                 FBTrace.sysout( traceToString(FBL.getCorrectedStackTrace(frame, context))+"\n" );
             }
 
-            dispatch(this.fbListeners,"onFunctionConstructor",[context, frame, ctor_script, sourceFile.href]);
+            ToolsInterface.browser.dispatch("onFunctionConstructor",[context, frame, ctor_script, sourceFile.href]);
             return sourceFile.href;
         }
         catch(exc)
@@ -2684,16 +2685,16 @@ Firebug.JSDebugClient =
         onJSDActivate: function(active, fromMsg)
         {
             Firebug.ToolsInterface.browser.dispatch("onJavaScriptDebugging", {isActive: active});
-            dispatch2(this.fbListeners, "onJSDActivate", arguments);  // TODO remove
+            ToolsInterface.browser.dispatch( "onJSDActivate", arguments);  // TODO remove
         },
         onJSDDeactivate: function(active, fromMsg)
         {
             Firebug.ToolsInterface.browser.dispatch("onJavaScriptDebugging", {isActive: active});
-            dispatch2(this.fbListeners, "onJSDDeactivate", arguments);  // TODO remove
+            ToolsInterface.browser.dispatch( "onJSDDeactivate", arguments);  // TODO remove
         },
         onPauseJSDRequested: function(rejection)
         {
-            //dispatch2(this.fbListeners, "onPauseJSDRequested", arguments);
+            //ToolsInterface.browser.dispatch( "onPauseJSDRequested", arguments);
             FBTrace.sysout("Firebug.JSDebugClient onPauseJSDRequested ignored");
         },
 

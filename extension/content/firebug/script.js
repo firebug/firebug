@@ -273,9 +273,9 @@ Firebug.ScriptPanel.prototype = extend(Firebug.SourceBoxPanel,
                  this.selectedSourceBox);
 
         if (lineNode.getAttribute("breakpoint") == "true")
-            this.context.clearBreakpoint(href, lineNo);
+            ToolsInterface.JavaScript.clearBreakpoint(this.context, href, lineNo);
         else
-            this.context.setBreakpoint(href, lineNo);
+            ToolsInterface.JavaScript.setBreakpoint(this.context, href, lineNo);
     },
 
     toggleDisableBreakpoint: function(lineNo)
@@ -284,16 +284,16 @@ Firebug.ScriptPanel.prototype = extend(Firebug.SourceBoxPanel,
 
         var lineNode = this.selectedSourceBox.getLineNode(lineNo);
         if (lineNode.getAttribute("disabledBreakpoint") == "true")
-            this.context.enableBreakpoint(href, lineNo);
+            ToolsInterface.JavaScript.enableBreakpoint(this.context, href, lineNo);
         else
-            this.context.disableBreakpoint(href, lineNo);
+            ToolsInterface.JavaScript.disableBreakpoint(this.context, href, lineNo);
     },
 
     editBreakpointCondition: function(lineNo)
     {
         var sourceRow = this.selectedSourceBox.getLineNode(lineNo);
         var sourceLine = getChildByClass(sourceRow, "sourceLine");
-        var condition = this.context.getBreakpointCondition(this.location.href, lineNo);
+        var condition = ToolsInterface.JavaScript.getBreakpointCondition(this.context, this.location.href, lineNo);
 
         if (condition)
         {
@@ -387,7 +387,7 @@ Firebug.ScriptPanel.prototype = extend(Firebug.SourceBoxPanel,
             this.toggleDisableBreakpoint(lineNo);
         else if (isControlClick(event) || isMiddleClick(event))
         {
-            this.context.runUntil(compilationUnit, lineNo);
+            ToolsInterface.JavaScript.runUntil(this.context, compilationUnit, lineNo);
             cancelEvent(event);
         }
     },
@@ -580,9 +580,7 @@ Firebug.ScriptPanel.prototype = extend(Firebug.SourceBoxPanel,
 
     show: function(state)
     {
-        var debuggerTool = Firebug.ToolsInterface.browser.getTool('script');
-        var enabled = debuggerTool.enabled;
-
+        var enabled = this.isEnabled();
         if (!enabled)
             return;
 
@@ -653,14 +651,10 @@ Firebug.ScriptPanel.prototype = extend(Firebug.SourceBoxPanel,
 
     ableWatchSidePanel: function(context)
     {
-        if (Firebug.Console.isAlwaysEnabled())
-        {
-            var watchPanel = context.getPanel("watches", true);
-            if (watchPanel)
-                return watchPanel;
-        }
-
-        return null;
+        // TODO if (commandline is not active, then we should not show the new watch feature)
+        var watchPanel = context.getPanel("watches", true);
+        if (watchPanel)
+            return watchPanel;
     },
 
     search: function(text, reverse)
@@ -1151,9 +1145,9 @@ Firebug.ScriptPanel.prototype = extend(Firebug.SourceBoxPanel,
     breakOnNext: function(enabled)
     {
         if (enabled)
-            this.context.breakOnNextJavaScriptStatement(true);
+            ToolsInterface.JavaScript.breakOnNext(this.context, true);
         else
-            this.context.breakOnNextJavaScriptStatement(false);
+            ToolsInterface.JavaScript.breakOnNext(this.context, false);
     },
 
     getBreakOnNextTooltip: function(armed)
@@ -1176,14 +1170,6 @@ Firebug.ScriptPanel.prototype = extend(Firebug.SourceBoxPanel,
     {
         if (FBTrace.DBG_CONSOLE || FBTrace.DBG_ACTIVATION)
             FBTrace.sysout("ScriptPanel.onActivationChanged; " + enable);
-        var debuggerTool = Firebug.ToolsInterface.browser.getTool('script');
-        if (debuggerTool)
-        {
-            if (enable)
-                debuggerTool.addListener(this);
-            else
-                debuggerTool.removeListener(this);
-        }
     },
 
     // implements Tool
@@ -1262,29 +1248,28 @@ Firebug.ScriptPanel.prototype = extend(Firebug.SourceBoxPanel,
 
     resume: function(context)
     {
-        context.resumeJavaScript();
+        ToolsInterface.JavaScript.resumeJavaScript(context);
     },
 
     stepOver: function(context)
     {
-        context.stepOver();
+        ToolsInterface.JavaScript.stepOver(context);
     },
 
     stepInto: function(context)
     {
-        context.stepInto();
+        ToolsInterface.JavaScript.stepInto(context);
     },
 
     stepOut: function(context)
     {
-        context.stepOut();
+        ToolsInterface.JavaScript.stepOut(context);
     },
 
-    onStartDebugging: function(context)
+    onStartDebugging: function(frame)
     {
         if (FBTrace.DBG_UI_LOOP)
-            FBTrace.sysout("script.startDebugging enter context.stopped:"+context.stopped+
-                " for context: "+context.getName()+"\n");
+            FBTrace.sysout("script.startDebugging enter context: "+this.context.getName()+"\n");
 
         try
         {
@@ -1292,7 +1277,7 @@ Firebug.ScriptPanel.prototype = extend(Firebug.SourceBoxPanel,
 
             if (FBTrace.DBG_BP)
                 FBTrace.sysout("debugger.startDebugging; currentBreakable "+currentBreakable+
-                    " in " + context.getName()+" currentContext "+Firebug.currentContext.getName());
+                    " in " + this.context.getName()+" currentContext "+Firebug.currentContext.getName());
 
             if (currentBreakable == "false") // then we are armed but we broke
                 Firebug.chrome.setGlobalAttribute("cmd_breakOnNext", "breakable", "true");
@@ -1300,14 +1285,14 @@ Firebug.ScriptPanel.prototype = extend(Firebug.SourceBoxPanel,
             if (Firebug.isMinimized()) // then open the UI to show we are stopped
                 Firebug.unMinimize();
 
-            this.syncCommands(context);
-            this.syncListeners(context);
+            this.syncCommands(this.context);
+            this.syncListeners(this.context);
 
             // Update Break on Next lightning.
             Firebug.Breakpoint.updatePanelTab(this, false);
             Firebug.chrome.syncPanel("script");  // issue 3463
-            context.stoppedFrameXB = FBL.getStackFrame(context.stoppedFrame, context);
-            Firebug.chrome.select(context.stoppedFrameXB, "script", null, true);
+            this.context.stoppedFrameXB = frame;
+            Firebug.chrome.select(frame, "script", null, true);
             Firebug.chrome.focus();
         }
         catch(exc)
@@ -1315,30 +1300,24 @@ Firebug.ScriptPanel.prototype = extend(Firebug.SourceBoxPanel,
             if (FBTrace.DBG_ERRORS)
                 FBTrace.sysout("Resuming debugger: error during debugging loop: "+exc, exc);
             Firebug.Console.log("Resuming debugger: error during debugging loop: "+exc);
-            this.resume(context);
+            this.resume(this.context);
         }
 
         if (FBTrace.DBG_UI_LOOP)
-            FBTrace.sysout("script.onStartDebugging exit context.stopped:"+context.stopped+" for context: "+
-                context.getName()+"\n");
+            FBTrace.sysout("script.onStartDebugging exit context.stopped:"+this.context.stopped+" for context: "+
+                this.context.getName()+"\n");
     },
 
-    onStopDebugging: function(context)
+    onStopDebugging: function()
     {
-        if (FBTrace.DBG_UI_LOOP) FBTrace.sysout("script.onStopDebugging enter context: "+context.getName()+"\n");
+        if (FBTrace.DBG_UI_LOOP) FBTrace.sysout("script.onStopDebugging enter context: "+this.context.getName()+"\n");
         try
         {
                 var chrome = Firebug.chrome;
 
-                this.syncCommands(context);
-                this.syncListeners(context);
-
-                var panel = context.getPanel("script", true);
-                if (panel && panel == Firebug.chrome.getSelectedPanel())
-                    panel.showNoStackFrame(); // unhighlight and remove toolbar-status line
-
-                if (panel)
-                    panel.highlight(false);
+                this.syncCommands(this.context);
+                this.syncListeners(this.context);
+                this.highlight(false);
 
                 chrome.syncSidePanels();  // after main panel is all updated.
         }

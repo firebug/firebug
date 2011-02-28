@@ -248,9 +248,13 @@ Browser.prototype.removeListener = function(listener)
     // else no-op
 };
 
+
+/*
+ * Among listeners, return the first truthy value of eventName(args) or false
+ */
 Browser.prototype.dispatch = function(eventName, args)
 {
-    FBL.dispatch2(this.listeners, eventName, args);
+    return FBL.dispatch2(this.listeners, eventName, args);
 }
 
 /**

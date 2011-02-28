@@ -7,15 +7,17 @@ Browser.onDebug = function()
 
 var ToolsInterface = {}
 
-ToolsInterface.browser = new Browser();
-
+// Classes
 ToolsInterface.Browser = Browser;
 ToolsInterface.CompilationUnit = CompilationUnit;
+
+// Create a connection object
+ToolsInterface.browser = new Browser();
+
 
 // FIXME eventually we want the dependency system to pass around the ToolsInterface
 Firebug.ToolsInterface = ToolsInterface;
 
 return ToolsInterface;
-
 
 });

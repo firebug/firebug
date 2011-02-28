@@ -3943,7 +3943,7 @@ this.dispatch2 = function(listeners, name, args)
         if (!listeners)
         {
             if (FBTrace.DBG_DISPATCH)
-                FBTrace.sysout("dispatch2, no listeners");
+                FBTrace.sysout("dispatch2, no listeners for "+name);
             return;
         }
 
