@@ -1342,6 +1342,16 @@
                 searchBox.value = val;
             ]]></xbl:setter>
         </property>
+        <property name="placeholder">
+            <xbl:getter><![CDATA[
+                var searchBox = document.getAnonymousElementByAttribute(this, "anonid", "searchBox");
+                return searchBox.placeholder || searchBox.emptytext;
+            ]]></xbl:getter>
+            <xbl:setter><![CDATA[
+                var searchBox = document.getAnonymousElementByAttribute(this, "anonid", "searchBox");
+                searchBox.placeholder = searchBox.emptytext = val;
+            ]]></xbl:setter>
+        </property>
         <property name="status">
             <xbl:getter><![CDATA[
                 return searchBox.getAttribute("status");
@@ -1349,6 +1359,7 @@
             <xbl:setter><![CDATA[
                 var searchBox = document.getAnonymousElementByAttribute(this, "anonid", "searchBox");
                 searchBox.setAttribute("status", searchBox.value == "" || val);
+                searchBox.placeholder = searchBox.emptytext = "";
             ]]></xbl:setter>
         </property>
         <property name="optionsShown">

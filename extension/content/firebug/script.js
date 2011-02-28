@@ -431,6 +431,22 @@ Firebug.ScriptPanel.prototype = extend(Firebug.SourceBoxPanel,
     {
         var scrollingElement = event.target;
         this.reView(scrollingElement);
+        var searchBox = Firebug.chrome.$("fbSearchBox");
+        searchBox.placeholder = $STR("Use hash plus number to go to line");
+    },
+
+    onKeyPress: function(event)
+    {
+        var ch = String.fromCharCode(event.charCode);
+        var searchBox = Firebug.chrome.$("fbSearchBox");
+
+        if (ch == "l" && isControl(event))
+        {
+            searchBox.value = "#";
+            searchBox.focus();
+
+            cancelEvent(event);
+        }
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
@@ -449,6 +465,7 @@ Firebug.ScriptPanel.prototype = extend(Firebug.SourceBoxPanel,
         this.onMouseOver = bind(this.onMouseOver, this);
         this.onMouseOut = bind(this.onMouseOut, this);
         this.onScroll = bind(this.onScroll, this);
+        this.onKeyPress = bind(this.onKeyPress, this);
 
         this.panelSplitter = $("fbPanelSplitter");
         this.sidePanelDeck = $("fbSidePanelDeck");
@@ -586,6 +603,8 @@ Firebug.ScriptPanel.prototype = extend(Firebug.SourceBoxPanel,
 
         if (active)
         {
+            this.panelNode.ownerDocument.addEventListener("keypress", this.onKeyPress, true);
+
             this.location = this.getDefaultLocation();
 
             if (this.context.loaded)
@@ -640,6 +659,8 @@ Firebug.ScriptPanel.prototype = extend(Firebug.SourceBoxPanel,
     hide: function(state)
     {
         this.highlight(this.context.stopped);
+
+        this.panelNode.ownerDocument.removeEventListener("keypress", this.onKeyPress, true);
 
         var panelStatus = Firebug.chrome.getPanelStatusElements();
         FBL.hide(panelStatus, false);
