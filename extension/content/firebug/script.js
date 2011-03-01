@@ -109,13 +109,12 @@ Firebug.ScriptPanel.prototype = extend(Firebug.SourceBoxPanel,
     initialize: function(context, doc)
     {
         this.location = null;
-        ToolsInterface.addListener(this);
         Firebug.SourceBoxPanel.initialize.apply(this, arguments);
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
-    // Browser.listener
-    onJavaScriptDebugging: function(active, why)
+    // TODO Class method
+    onJavaScriptDebugging: function(active)
     {
         if (Firebug.chrome.getSelectedPanel() === this) // then the change in jsd causes a refresh
             Firebug.chrome.syncPanel(this.name);
@@ -816,9 +815,8 @@ Firebug.ScriptPanel.prototype = extend(Firebug.SourceBoxPanel,
             }
         }
 
-        // then show() has not run, but we have to refresh, so do the default.
-        if (!this.selectedSourceBox)
-            this.navigate();
+        if (!this.selectedSourceBox)  // then show() has not run,
+            this.navigate();          // but we have to refresh, so do the default.
     },
 
     updateLocation: function(compilationUnit)

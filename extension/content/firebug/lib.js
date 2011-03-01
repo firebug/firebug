@@ -3930,7 +3930,7 @@ this.dispatch = function(listeners, name, args)
         }
     }
 };
-alert("FBL has "+FBTrace);
+
 this.dispatch2 = function(listeners, name, args)
 {
     try
@@ -3951,12 +3951,12 @@ this.dispatch2 = function(listeners, name, args)
             if ( listener.hasOwnProperty(name) )
             {
                 var result = listener[name].apply(listener, args);
+
+                if (FBTrace.DBG_DISPATCH)
+                    FBTrace.sysout("dispatch2 "+name+" to #"+i+" of "+listeners.length+" listeners, result "+result, {result: result, listener: listeners[i], fn: listener[name].toSource()});
+
                 if ( result )
-                {
-                    if (FBTrace.DBG_DISPATCH)
-                        FBTrace.sysout("dispatch2 "+name+" to "+listeners.length+" listeners, result "+result, result);
                     return result;
-                }
             }
             else
             {
@@ -3964,7 +3964,7 @@ this.dispatch2 = function(listeners, name, args)
                     noMethods.push(listener);
             }
         }
-        if (FBTrace.DBG_DISPATCH)
+        if (FBTrace.DBG_DISPATCH && noMethods.length == listeners.length)
             FBTrace.sysout("FBL.dispatch2 "+name+" to "+listeners.length+" listeners, "+noMethods.length+" had no such method:", noMethods);
     }
     catch (exc)

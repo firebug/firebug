@@ -6,6 +6,7 @@
 define([ "ToolsInterface"], function initializeJavaScriptTool(ToolsInterface)
 {
 
+
 // ************************************************************************************************
 // Attach the BrowserToolsInterface to our JavaScript Tool
 
@@ -78,6 +79,21 @@ ToolsInterface.JavaScript.runUntil = function(compilationUnit, lineNumber)
 
 ToolsInterface.browser.addListener(ToolsInterface.JavaScript);  // This is how we get events
 
+/*
+ * A previously enabled tool becomes active and sends us an event.
+ */
+ToolsInterface.JavaScript.onActivateTool = function(toolname, active)
+{
+    FBTrace.sysout("ToolsInterface.JavaScript.onActivateTool "+toolname+" = "+active);
+    if (toolname === 'script')
+    {
+        Firebug.ScriptPanel.prototype.onJavaScriptDebugging(active);
+        ToolsInterface.browser.eachContext(function refresh(context)
+        {
+            context.invalidatePanels('script');
+        });
+    }
+},
 
 
 ToolsInterface.JavaScript.onStartDebugging = function(context, frame)

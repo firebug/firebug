@@ -87,9 +87,6 @@ Browser.listener =
     onSuspend: function() {
         Browser.unimplementedHandler.apply(this, arguments);
     },
-    onJavaScriptDebugging: function () {
-        Browser.unimplementedHandler.apply(this, arguments);
-    },
     onToggleBreakpoint: function() {
         Browser.unimplementedHandler.apply(this, arguments);
     },
@@ -174,6 +171,11 @@ Browser.prototype.getBrowserContexts = function()
     return knownContexts;
 };
 
+Browser.prototype.eachContext = function(fnOfContext)
+{
+    return Firebug.TabWatcher.iterateContexts(fnOfContext);
+};
+
 /**
  * Returns the {@link BrowserContext} that currently has focus in the browser
  * or <code>null</code> if none.
@@ -218,7 +220,6 @@ Browser.prototype.isConnected = function()
  *   <li>onResume</li>
  *   <li>onScript</li>
  *   <li>onToggleBreakpoint</li>
- *   <li>onJavaScriptDebugging</li>
  * </ul>
  * <ul>
  * <li>TODO: how can clients remove (deregister) listeners?</li>

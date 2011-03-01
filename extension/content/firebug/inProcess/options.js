@@ -215,7 +215,8 @@ define(["ToolsInterface"], function factoryOptions(ToolsInterface)
             else if (type == nsIPrefBranch.PREF_BOOL)
                 value = prefs.getBoolPref(prefName);
 
-            FBTrace.sysout("Firebug.Options.getPref "+prefName+" has type "+this.getPreferenceTypeName(type)+" and value "+value);
+            if (FBTrace.DBG_OPTIONS)
+                FBTrace.sysout("Firebug.Options.getPref "+prefName+" has type "+this.getPreferenceTypeName(type)+" and value "+value);
 
             return value;
         },
@@ -339,14 +340,12 @@ define(["ToolsInterface"], function factoryOptions(ToolsInterface)
 
         observe: function(subject, topic, data)
         {
-            FBTrace.sysout("options.observe "+topic+" data "+data+" Firebug.Options.prefDomain "+Firebug.Options.prefDomain+" "+" index "+data.indexOf(Firebug.Options.prefDomain));
             if (data.indexOf(Firebug.Options.prefDomain) === -1)
                 return;
 
             var name = data.substr(Firebug.Options.prefDomain.length+1);  // +1 for .
-            FBTrace.sysout("options.observe "+topic+" name "+name);
             var value = this.get(name);
-            //if (FBTrace.DBG_OPTIONS)
+            if (FBTrace.DBG_OPTIONS)
                 FBTrace.sysout("firebug.observe name = value: "+name+"= "+value+"\n");
             this.updatePref(name, value);
         },

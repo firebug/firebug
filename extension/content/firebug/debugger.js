@@ -2180,9 +2180,18 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
     initializeUI: function()
     {
         Firebug.ActivableModule.initializeUI.apply(this, arguments);
-        this.filterButton = $("fbScriptFilterMenu");
+        this.obeyPrefs();
+        this.filterButton = $("fbScriptFilterMenu");  // TODO move to script.js
         this.filterMenuUpdate();
-        Firebug.ToolsInterface.browser.dispatch("onJavaScriptDebugging", {isActive: fbs.isJSDActive()}); // jsd may be active before this XUL window was opened
+        if (fbs.isJSDActive())  // notify frontend of current state
+            Firebug.JSDebugClient.onJSDActivate(true, 'Firebug.Debugger.initializeUI');
+    },
+
+    obeyPrefs: function()
+    {
+        var name = "script.enableSites";
+        var value = Firebug.Options.get("script.enableSites");
+        this.updateOption(name, value);
     },
 
     initContext: function(context, persistedState)
@@ -2476,11 +2485,13 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
         this.registerDebugger();
         httpRequestObserver.registerObservers();
 
-        // If jsd is already active, we'll notify true; else false and we'll get another event
-        FBL.dispatch2(this.observers, "onActiveTool", [{isActive: fbs.isJSDActive()}]);
+        // If jsd is already active, we'll notify true; else we'll get another event
+        var isActive = fbs.isJSDActive();
+        if (isActive)
+            Firebug.JSDebugClient.onJSDActivate(true, 'activated already');
 
         if (FBTrace.DBG_PANELS || FBTrace.DBG_ACTIVATION)
-            FBTrace.sysout("debugger.activateDebugger requested;");
+            FBTrace.sysout("debugger.activateDebugger requested; activated already? "+isActive);
     },
 
     deactivateDebugger: function()
@@ -2488,8 +2499,9 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
         this.unregisterDebugger();
         httpRequestObserver.unregisterObservers();  // for tabCache
 
-        // if jsd deactivated because we unregistered, we'll send false, else true
-        FBL.dispatch2(this.observers, "onActiveTool", [{isActive: fbs.isJSDActive()}]);
+        var isActive = fbs.isJSDActive();
+        if (!isActive)
+            Firebug.JSDebugClient.onJSDDeactivate(false, 'deactivate');
 
         if (FBTrace.DBG_PANELS || FBTrace.DBG_ACTIVATION)
             FBTrace.sysout("debugger.deactivate");
@@ -2694,13 +2706,11 @@ Firebug.JSDebugClient =
 {
         onJSDActivate: function(active, fromMsg)
         {
-            Firebug.ToolsInterface.browser.dispatch("onJavaScriptDebugging", {isActive: active});
-            ToolsInterface.browser.dispatch( "onJSDActivate", arguments);  // TODO remove
+            ToolsInterface.browser.dispatch("onActivateTool", ["script", active]);
         },
         onJSDDeactivate: function(active, fromMsg)
         {
-            Firebug.ToolsInterface.browser.dispatch("onJavaScriptDebugging", {isActive: active});
-            ToolsInterface.browser.dispatch( "onJSDDeactivate", arguments);  // TODO remove
+            ToolsInterface.browser.dispatch("onActivateTool", ["script", active]);
         },
         onPauseJSDRequested: function(rejection)
         {
