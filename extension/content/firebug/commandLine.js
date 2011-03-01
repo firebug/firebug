@@ -821,6 +821,18 @@ Firebug.CommandLine = extend(Firebug.Module,
 
     onCommandLineFocus: function(event)
     {
+        // xxxHonza: does touching readyState field affects more than just returning its value?
+        if (event.target && event.target.ownerDocument.readyState != "complete")
+        {
+            // If the readyState is not "complete" the console should not be attached.
+            // The logic should wait till the document is fully loaded.
+            // For example by overriding document.onreadystatechange
+            // https://developer.mozilla.org/en/DOM/document.onreadystatechange
+            if (FBTrace.DBG_ERRORS)
+                FBTrace.sysout("onCommandLineFocus; Fired too soon, document not yet loaded: " +
+                    "(let Honza know if you see this) " + event.target.ownerDocument.readyState);
+        }
+
         if (this.autoCompleter && this.autoCompleter.linuxFocusHack)
             return;
 
