@@ -329,6 +329,7 @@
     color: rgb(145, 80, 0);
 }
 
+/* Need to have the same colors for background as the styles above for the text color */
 .DBG_WINDOWS_Description {
     background-color: rgb(148, 121, 71);
 }
