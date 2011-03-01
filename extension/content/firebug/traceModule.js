@@ -98,7 +98,7 @@ Firebug.TraceOptionsController = function(prefDomain, onPrefChangeHandler)
                  type: "checkbox",
                  checked: prefValue,
                  pref: p,
-                 command: bind(this.userEventToPrefEvent, this)
+                 description: $STR("tracing.option." + label + "_Description")
                 });
             }
             catch (err)
@@ -326,18 +326,7 @@ Firebug.TraceModule.CommonBaseUI = {
         });
 
         var menuitems = this.optionsController.getOptionsMenuItems();
-        for (var i=0; i<menuitems.length; i++)
-        {
-            var menuitem = menuitems[i];
-            var button = doc.createElement("button");
-            FBL.setClass(button, "traceOption");
-            FBL.setItemIntoElement(button, menuitem);
-            button.innerHTML = menuitem.label;
-            button.setAttribute("id", menuitem.pref);
-            button.removeAttribute("type");
-            button.addEventListener("click", menuitem.command, false);
-            optionsBody.appendChild(button);
-        }
+        rep.options.replace({menuitems: menuitems}, optionsBody, rep);
 
         // Select default tab.
         rep.selectTabByName(parentNode, "Logs");
@@ -352,7 +341,6 @@ Firebug.TraceModule.CommonBaseUI = {
 // Trace Console Rep
 
 Firebug.TraceModule.PanelTemplate = domplate({
-
     tag:
         TABLE({"class": "traceTable", cellpadding: 0, cellspacing: 0},
             TBODY(
@@ -381,6 +369,28 @@ Firebug.TraceModule.PanelTemplate = domplate({
             )
         ),
 
+    options:
+        TABLE({"class": "traceOptions"},
+            TBODY(
+                FOR("menuitem", "$menuitems",
+                    TR({"class": "traceOptionRow"},
+                        TD({"class": "traceOptionContainer"},
+                            BUTTON({"class": "traceOption", id: "$menuitem.pref",
+                                    checked: "$menuitem.checked", onclick: "$onToggleOption"},
+                                "$menuitem.label"
+                            )
+                        ),
+                        TD({"class": "traceOptionDescription"},
+                            "$menuitem.description"
+                        ),
+                        TD({"class": "traceOptionColorContainer"},
+                            DIV({"class": "traceOptionColor $menuitem|getColorClass"})
+                        )
+                    )
+                )
+            )
+        ),
+
     onClickTab: function(event)
     {
         this.selectTab(event.currentTarget);
@@ -391,6 +401,11 @@ Firebug.TraceModule.PanelTemplate = domplate({
         var tab = parentNode.getElementsByClassName("traceInfo" + tabName + "Tab").item(0);
         if (tab)
             this.selectTab(tab);
+    },
+
+    getColorClass: function(menuitem)
+    {
+        return menuitem.pref + "_Description";
     },
 
     selectTab: function(tab)
@@ -411,6 +426,19 @@ Firebug.TraceModule.PanelTemplate = domplate({
 
         messageInfoBody.selectedTab.setAttribute("selected", "true");
         messageInfoBody.selectedText.setAttribute("selected", "true");
+    },
+
+    onToggleOption: function(event) {
+        var button = event.target.wrappedJSObject ? event.target.wrappedJSObject : event.target;
+        var label = button.textContent;
+        var category = 'DBG_'+label;
+        var value = Firebug.getPref(Firebug.prefDomain, category);
+  
+        Firebug.setPref(Firebug.prefDomain, category, !value);
+        prefService.savePrefFile(null);
+  
+        if (FBTrace.DBG_OPTIONS)
+            FBTrace.sysout("traceConsole.setOption: new value "+ Firebug.prefDomain+"."+category+ " = " + newValue, menuitem);
     }
 });
 
