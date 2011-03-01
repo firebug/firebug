@@ -44,7 +44,7 @@ Firebug.KnownIssues = extend(Firebug.Module,
             document.persist("addon-bar", "collapsed");
 
             // This is just one time operation.
-            Firebug.set("addonBarOpened", true);
+            Firebug.Options.set("addonBarOpened", true);
         }
 
         if (FBTrace.DBG_INITIALIZE)
