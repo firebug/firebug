@@ -566,7 +566,6 @@ Firebug.ScriptPanel.prototype = extend(Firebug.SourceBoxPanel,
 
     showWarning: function()
     {
-        FBTrace.sysout("showWarning "+Firebug.jsDebuggerOn);
         // Fill the panel node with a warning if needed
         var aLocation = this.getDefaultLocation();
         var jsEnabled = Firebug.Options.getPref("javascript", "enabled");

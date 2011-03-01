@@ -2445,13 +2445,6 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
             FBTrace.sysout("debugger.unregisterDebugger: "+check+" debuggers");
     },
 
-    onSourceFileCreated: function(context, sourceFile)
-    {
-        // This event can come at any time, eg by frame reloads or ajax,
-        // so we need to update the display.
-        context.invalidatePanels("script", "breakpoints");
-    },
-
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
     // extends ActivableModule
 

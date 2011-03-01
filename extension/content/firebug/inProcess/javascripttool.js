@@ -84,7 +84,9 @@ ToolsInterface.browser.addListener(ToolsInterface.JavaScript);  // This is how w
  */
 ToolsInterface.JavaScript.onActivateTool = function(toolname, active)
 {
-    FBTrace.sysout("ToolsInterface.JavaScript.onActivateTool "+toolname+" = "+active);
+    if (FBTrace.DBG_ACTIVATION)
+        FBTrace.sysout("ToolsInterface.JavaScript.onActivateTool "+toolname+" = "+active);
+
     if (toolname === 'script')
     {
         Firebug.ScriptPanel.prototype.onJavaScriptDebugging(active);

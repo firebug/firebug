@@ -117,7 +117,12 @@ Firebug.TabContext.prototype =
         if (sourceFile.compilation_unit_type == "eval")
             compilationUnit.kind = CompilationUnit.EVAL;
 
-        Firebug.onSourceFileCreated(this, sourceFile);
+        compilationUnit.getSourceLines(-1, -1, function onLines(compilationUnit, firstLineNumber, lastLineNumber, lines)
+        {
+            ToolsInterface.browser.dispatch("onSourceLines", arguments);
+            FBTrace.sysout("onSourceLines "+compilationUnit.getURL());
+        });
+
     },
 
     removeSourceFile: function(sourceFile)
