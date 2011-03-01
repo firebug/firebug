@@ -123,7 +123,6 @@ Firebug.ExternalEditors = extend(Firebug.Module,
         {
             var lastChild = popup.lastChild;
             FBL.eraseNode(popup);
-            var disabled = (!Firebug.currentContext);
             for( var i = 0; i < editors.length; ++i )
             {
                 if (editors[i] == "-")
@@ -132,7 +131,7 @@ Firebug.ExternalEditors = extend(Firebug.Module,
                     continue;
                 }
                 var item = {label: editors[i].label, image: editors[i].image,
-                                nol10n: true, disabled: disabled };
+                                nol10n: true };
                 var menuitem = FBL.createMenuItem(popup, item);
                 menuitem.value = editors[i].id;
             }
