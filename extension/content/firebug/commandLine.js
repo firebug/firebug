@@ -821,8 +821,9 @@ Firebug.CommandLine = extend(Firebug.Module,
 
     onCommandLineFocus: function(event)
     {
-        // xxxHonza: does touching readyState field affects more than just returning its value?
-        if (event.target && event.target.ownerDocument.readyState != "complete")
+        // xxxHonza: what about iframes?
+        var context = Firebug.currentContext;
+        if (context && context.window.document.readyState != "complete")
         {
             // If the readyState is not "complete" the console should not be attached.
             // The logic should wait till the document is fully loaded.
