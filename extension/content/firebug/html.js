@@ -2235,7 +2235,6 @@ Firebug.HTMLModule.BreakpointRep = domplate(Firebug.Rep,
 
         var bpPanel = Firebug.getElementPanel(event.target);
         var context = bpPanel.context;
-        var htmlPanel = context.getPanel("html");
 
         if (hasClass(event.target, "closeButton"))
         {
