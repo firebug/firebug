@@ -144,7 +144,10 @@
                 }
 
                 // Make sure hidden panels are collapsed.
-                var prefValue = Firebug.Options.get("hiddenPanels");
+                if (Firebug.Options)
+                    var prefValue = Firebug.Options.get("hiddenPanels");
+                else
+                    var prefValue = Firebug.getPref(Firebug.prefDomain, "hiddenPanels");
                 if (!prefValue || !prefValue.length)
                     return;
 
@@ -178,7 +181,12 @@
                 var panel = Firebug.currentContext ? Firebug.currentContext.getPanel(panelName) : null;
 
                 if (panelName && !tab.panelType.prototype.parentPanel)
-                    Firebug.Options.set("defaultPanelName", panelName);
+                {
+                    if (Firebug.Options)
+                        Firebug.Options.set("defaultPanelName", panelName);
+                    else
+                        Firebug.setPref(Firebug.prefDomain, "defaultPanelName", panelName);
+                }
 
                 // Make sure the panel is visible.
                 this.togglePanel(panelName, true);
@@ -388,7 +396,10 @@
                         closedPanels.push(tab.panelType.prototype.name);
                     tab = tab.nextSibling;
                 }
-                Firebug.Options.set("hiddenPanels", closedPanels.join(" "));
+                if (Firebug.Options)
+                    Firebug.Options.set("hiddenPanels", closedPanels.join(" "));
+                else
+                    Firebug.setPref(Firebug.prefDomain, "hiddenPanels", closedPanels.join(" "));
             ]]></body>
         </method>
 
@@ -402,7 +413,10 @@
                         FBL.collapse(tab, false);
                     tab = tab.nextSibling;
                 }
-                Firebug.Options.set("hiddenPanels", "");
+                if (Firebug.Options)
+                    Firebug.Options.set("hiddenPanels", "");
+                else
+                    Firebug.setPref(Firebug.prefDomain, "hiddenPanels", "");
                 FBL.cancelEvent(event);
             ]]></body>
         </method>
