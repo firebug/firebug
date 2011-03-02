@@ -68,8 +68,6 @@
 .traceInfoText {
     display: none;
     margin: 0;
-    width: 100%;
-    height: 100%;
     border-top: 1px solid #D7D7D7;
     padding: 0px;
     background-color: #FFFFFF;
@@ -80,15 +78,12 @@
 }
 
 .traceInfoOptionsText {
-    position: absolute;
-    overflow: auto;
-    height: -moz-calc(100% - 27px);
+    float: left;
+    padding: 3px;
 }
 
-.traceOptions {
-    width: 100%;
-    border-collapse: collapse;
-    border-spacing: 2px;
+.traceInfoLogsText {
+    height: 100%;
 }
 
 .traceInfoLogsFrame {
@@ -322,33 +317,11 @@
 
 .DBG_JSERROR,
 .DBG_ERRORS {
-    color: red;
+    color: Red;
 }
 
 .DBG_SPY {
     color: rgb(145, 80, 0);
-}
-
-/* Need to have the same colors for background as the styles above for the text color */
-.DBG_WINDOWS_Description {
-    background-color: rgb(148, 121, 71);
-}
-
-.DBG_NET_Description {
-    background-color: maroon;
-}
-
-.DBG_ACTIVITYOBSERVER_Description {
-    background-color: rgb(164, 123, 123);
-}
-
-.DBG_JSERROR_Description,
-.DBG_ERRORS_Description {
-    background-color: red;
-}
-
-.DBG_SPY_Description {
-    background-color: rgb(145, 80, 0);
 }
 
 /************************************************************************************************/
@@ -398,21 +371,9 @@
 
 /************************************************************************************************/
 
-.traceOptions td {
-    border-bottom: 1px solid #EFEFEF;
-}
-
-.traceOptions td:first-child {
-    width: 220px;
-}
-
-.traceOptions td:last-child {
-    width: 20px;
-}
-
 .traceOption {
-    width: 200px;
-    margin: 2px 10px;
+    width: 160px;
+    margin: 2px 5px;
     cursor: default !important;
     padding: 0 2px 0 2px; 
     border: solid 1px #D7D7D7;
@@ -422,9 +383,4 @@
 
 .traceOption[checked="true"] {
     background-color: #D7D7D7;
-}
-
-.traceOptionColor {
-  width: 16px;
-  height: 16px;
 }
