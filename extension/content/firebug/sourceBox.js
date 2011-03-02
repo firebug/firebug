@@ -356,7 +356,7 @@ Firebug.SourceBoxPanel = extend(SourceBoxPanelBase,
 
         if (sourceBox)
         {
-            sourceBox.highlightedLineNumber = lineNo;
+            sourceBox.targetedLineNumber = lineNo; // signal reView to put this line in the center
             collapse(sourceBox, false);
             this.reView(sourceBox);
             this.updateSourceBox(sourceBox);
@@ -508,9 +508,6 @@ Firebug.SourceBoxPanel = extend(SourceBoxPanelBase,
             this.showSourceBox(sourceBox, lineNo);
         }
 
-        if (FBTrace.DBG_COMPILATION_UNITS)
-            FBTrace.sysout("this.selectedSourceBox.highlightedLineNumber "+this.selectedSourceBox.repObject.url+"@"+this.selectedSourceBox.highlightedLineNumber);
-
         this.context.scrollTimeout = this.context.setTimeout(bindFixed(function()
         {
             if (!this.selectedSourceBox)
@@ -546,10 +543,7 @@ Firebug.SourceBoxPanel = extend(SourceBoxPanelBase,
             }
 
             if (this.selectedSourceBox.highlighter)
-            {
-                if (FBTrace.DBG_COMPILATION_UNITS) FBTrace.sysout("SourceBoxPanel.scrollTimeout, highlightedLineNumber: "+this.selectedSourceBox.highlightedLineNumber);
                 this.applyDecorator(this.selectedSourceBox); // may need to highlight even if we don't scroll
-            }
 
         }, this));
 
@@ -605,13 +599,19 @@ Firebug.SourceBoxPanel = extend(SourceBoxPanelBase,
 
     reView: function(sourceBox, clearCache)  // called for all scroll events, including any time sourcebox.scrollTop is set
     {
-        if (sourceBox.highlightedLineNumber) // then we requested a certain line
+        if (sourceBox.targetedLineNumber) // then we requested a certain line
         {
-            var viewRange = this.getViewRangeFromTargetLine(sourceBox, sourceBox.highlightedLineNumber);
+            var viewRange = this.getViewRangeFromTargetLine(sourceBox, sourceBox.targetedLineNumber);
+            if (FBTrace.DBG_COMPILATION_UNITS)
+                FBTrace.sysout("reView got viewRange from target line: "+sourceBox.targetedLineNumber, viewRange);
+
+            delete sourceBox.targetedLine; // We've positioned on the targeted line. Now the user may scroll
         }
         else  // no special line
         {
             var viewRange = this.getViewRangeFromScrollTop(sourceBox, sourceBox.scrollTop);
+            if (FBTrace.DBG_COMPILATION_UNITS)
+                FBTrace.sysout("reView got viewRange from scrollTop: "+sourceBox.scrollTop, viewRange);
         }
 
         if (clearCache)
@@ -929,7 +929,7 @@ Firebug.SourceBoxPanel = extend(SourceBoxPanelBase,
         var firstRenderedLineOffset = firstRenderedLineElement.offsetTop;
         var firstViewRangeElement = sourceBox.getLineNode(viewRange.firstLine);
         var firstViewRangeOffset = firstViewRangeElement.offsetTop;
-        sourceBox.scrollTop = firstViewRangeOffset;
+        // We want sourceBox.scrollTop === firstViewRangeOffset;
 
         var topPadding = sourceBox.scrollTop - (firstViewRangeOffset - firstRenderedLineOffset);
         // Because of rounding when converting from pixels to lines, topPadding can be +/- lineHeight/2, round up
@@ -997,7 +997,7 @@ Firebug.SourceBoxPanel = extend(SourceBoxPanelBase,
             bindFixed(this.asyncHighlighting, this, sourceBox));
 
         if (FBTrace.DBG_COMPILATION_UNITS)
-            FBTrace.sysout("applyDecorator "+sourceBox.repObject.url+"@"+sourceBox.highlightedLineNumber, sourceBox);
+            FBTrace.sysout("applyDecorator "+sourceBox.repObject.url, sourceBox);
     },
 
     asyncDecorating: function(sourceBox)
@@ -1031,11 +1031,8 @@ Firebug.SourceBoxPanel = extend(SourceBoxPanelBase,
                         sourceBox.highlighter);
 
                 if (!sticky)
-                {
                     delete sourceBox.highlighter;
-                    delete sourceBox.highlighedLineNumber;
-                }
-
+                // else we delete these when we get highlighting call with invalid line (eg -1)
             }
         }
         catch (exc)
