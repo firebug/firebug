@@ -243,7 +243,11 @@ Firebug.ScriptPanel.prototype = extend(Firebug.SourceBoxPanel,
     {
         if (this.selectedSourceBox)
         {
-            this.highlightLine(-1, this.context); // clear highlight
+            // Clear highlight. The scrolling shouldn't happen at this time so, use the current
+            // centralLine as the argument to scrollToLine.
+            this.scrollToLine(null, this.selectedSourceBox.centralLine,
+                this.highlightLine(-1, this.context));
+
             if (FBTrace.DBG_STACK)
                 FBTrace.sysout("showNoStackFrame clear "+this.selectedSourceBox.repObject.url);
         }

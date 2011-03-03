@@ -525,7 +525,9 @@ Firebug.SourceBoxPanel = extend(SourceBoxPanelBase,
                 var linesFromTop = lineNo - this.selectedSourceBox.firstViewableLine;
                 var linesFromBot = this.selectedSourceBox.lastViewableLine - lineNo;
                 skipScrolling = (linesFromTop > 3 && linesFromBot > 3);
-                if (FBTrace.DBG_COMPILATION_UNITS) FBTrace.sysout("SourceBoxPanel.scrollTimeout: skipScrolling: "+skipScrolling+" fromTop:"+linesFromTop+" fromBot:"+linesFromBot);
+                if (FBTrace.DBG_COMPILATION_UNITS)
+                    FBTrace.sysout("SourceBoxPanel.scrollTimeout: skipScrolling: "+skipScrolling+
+                        " fromTop:"+linesFromTop+" fromBot:"+linesFromBot);
             }
             else  // the selectedSourceBox has not been built
             {
@@ -537,9 +539,17 @@ Firebug.SourceBoxPanel = extend(SourceBoxPanelBase,
             {
                 var viewRange = this.getViewRangeFromTargetLine(this.selectedSourceBox, lineNo);
                 this.selectedSourceBox.newScrollTop = this.getScrollTopFromViewRange(this.selectedSourceBox, viewRange);
-                if (FBTrace.DBG_COMPILATION_UNITS) FBTrace.sysout("SourceBoxPanel.scrollTimeout: newScrollTop "+this.selectedSourceBox.newScrollTop+" vs old "+this.selectedSourceBox.scrollTop+" for "+this.selectedSourceBox.repObject.href);
+
+                if (FBTrace.DBG_COMPILATION_UNITS)
+                    FBTrace.sysout("SourceBoxPanel.scrollTimeout: newScrollTop "+
+                        this.selectedSourceBox.newScrollTop+" vs old "+
+                        this.selectedSourceBox.scrollTop+" for "+this.selectedSourceBox.repObject.href);
+
                 this.selectedSourceBox.scrollTop = this.selectedSourceBox.newScrollTop; // *may* cause scrolling
-                if (FBTrace.DBG_COMPILATION_UNITS) FBTrace.sysout("SourceBoxPanel.scrollTimeout: scrollTo "+lineNo+" scrollTop:"+this.selectedSourceBox.scrollTop+ " lineHeight: "+this.selectedSourceBox.lineHeight);
+
+                if (FBTrace.DBG_COMPILATION_UNITS)
+                    FBTrace.sysout("SourceBoxPanel.scrollTimeout: scrollTo "+lineNo+" scrollTop:"+
+                        this.selectedSourceBox.scrollTop+ " lineHeight: "+this.selectedSourceBox.lineHeight);
             }
 
             if (this.selectedSourceBox.highlighter)
