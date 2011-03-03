@@ -605,9 +605,10 @@ Firebug.SourceBoxPanel = extend(SourceBoxPanelBase,
             if (FBTrace.DBG_COMPILATION_UNITS)
                 FBTrace.sysout("reView got viewRange from target line: "+sourceBox.targetedLineNumber, viewRange);
 
-            delete sourceBox.targetedLine; // We've positioned on the targeted line. Now the user may scroll
+            delete sourceBox.targetedLineNumber; // We've positioned on the targeted line. Now the user may scroll
+            delete sourceBox.lastScrollTop; // our current scrolltop is not useful, so clear the saved value to avoid comparing below.
         }
-        else  // no special line
+        else  // no special line, assume scrolling
         {
             var viewRange = this.getViewRangeFromScrollTop(sourceBox, sourceBox.scrollTop);
             if (FBTrace.DBG_COMPILATION_UNITS)
@@ -647,6 +648,9 @@ Firebug.SourceBoxPanel = extend(SourceBoxPanelBase,
 
         sourceBox.lastScrollTop = sourceBox.scrollTop;
         sourceBox.lastClientHeight = sourceBox.clientHeight;
+
+        if (FBTrace.DBG_COMPILATION_UNITS)
+            FBTrace.sysout("sourceBox.reViewOnSourceLinesAvailable sourceBox.lastScrollTop "+sourceBox.lastScrollTop+" sourceBox.lastClientHeight "+sourceBox.lastClientHeight);
     },
 
     buildViewAround: function(sourceBox, viewRange)
@@ -813,14 +817,14 @@ Firebug.SourceBoxPanel = extend(SourceBoxPanelBase,
     {
         var viewRange = {};
         var averageLineHeight = this.getAverageLineHeight(sourceBox);
-        viewRange.firstLine = Math.floor(scrollTop / averageLineHeight + 1);
+        viewRange.firstLine = Math.floor( (scrollTop / averageLineHeight) + 1);
 
         var panelHeight = this.panelNode.clientHeight;
 
         if (panelHeight === 0)  // then we probably have not inserted the elements yet and the clientHeight is bogus
             panelHeight = this.panelNode.ownerDocument.documentElement.clientHeight;
 
-        var viewableLines = Math.ceil((panelHeight / averageLineHeight) + 1);
+        var viewableLines = Math.ceil((panelHeight / averageLineHeight) - 1);
         viewRange.lastLine = viewRange.firstLine + viewableLines;
         if (viewRange.lastLine > sourceBox.maximumLineNumber)
             viewRange.lastLine = sourceBox.maximumLineNumber;
@@ -829,7 +833,7 @@ Firebug.SourceBoxPanel = extend(SourceBoxPanelBase,
 
         if (FBTrace.DBG_COMPILATION_UNITS)
         {
-            FBTrace.sysout("getViewRangeFromScrollTop scrollTop:"+scrollTop+" viewRange: "+viewRange.firstLine+"-"+viewRange.lastLine);
+            FBTrace.sysout("getViewRangeFromScrollTop scrollTop:"+scrollTop+" viewRange: "+viewRange.firstLine+"-"+viewRange.lastLine+" max: "+sourceBox.maximumLineNumber+" panelHeight "+panelHeight);
             if (!this.noRecurse)
             {
                 this.noRecurse = true;
@@ -862,7 +866,7 @@ Firebug.SourceBoxPanel = extend(SourceBoxPanelBase,
                 delete this.noRecurse;
                 var vrStr = viewRange.firstLine+"-"+viewRange.lastLine;
                 var tvrStr = testViewRange.firstLine+"-"+testViewRange.lastLine;
-                FBTrace.sysout("getScrollTopFromCenterLine "+((vrStr==tvrStr)? "checks" : vrStr+"=!viewRange!="+tvrStr));
+                FBTrace.sysout("getScrollTopFromViewRange "+((vrStr==tvrStr)? "checks" : vrStr+"=!viewRange!="+tvrStr));
             }
         }
 
@@ -902,8 +906,8 @@ Firebug.SourceBoxPanel = extend(SourceBoxPanelBase,
         var virtualSourceBoxHeight = Math.floor(max * averageLineHeight);
         if (virtualSourceBoxHeight < sourceBox.clientHeight)
         {
-            var scrollBarHeight = sourceBox.offsetHeight - sourceBox.clientHeight;
             // the total - view-taken-up - scrollbar
+            // clientHeight excludes scrollbar
             var totalPadding = sourceBox.clientHeight - sourceBox.viewport.clientHeight - 1;
         }
         else
@@ -926,20 +930,19 @@ Firebug.SourceBoxPanel = extend(SourceBoxPanelBase,
             return;
         }
 
-        var firstRenderedLineOffset = firstRenderedLineElement.offsetTop;
-        var firstViewRangeElement = sourceBox.getLineNode(viewRange.firstLine);
-        var firstViewRangeOffset = firstViewRangeElement.offsetTop;
-        // We want sourceBox.scrollTop === firstViewRangeOffset;
-
-        var topPadding = sourceBox.scrollTop - (firstViewRangeOffset - firstRenderedLineOffset);
-        // Because of rounding when converting from pixels to lines, topPadding can be +/- lineHeight/2, round up
         var averageLineHeight = this.getAverageLineHeight(sourceBox);
-        var linesOfPadding = Math.floor( (topPadding + averageLineHeight)/ averageLineHeight);
+        // At this point our rendered range should surround our viewRange
+        var linesOfPadding = sourceBox.firstRenderedLine;  // above our viewRange.firstLine might be some rendered lines in the buffer.
+        var topPadding = (linesOfPadding - 1) * averageLineHeight;  // pixels
+        // Because of rounding when converting from pixels to lines, topPadding can be +/- lineHeight/2, round up
+        linesOfPadding = Math.floor( (topPadding + averageLineHeight)/ averageLineHeight);
         var topPadding = (linesOfPadding - 1)* averageLineHeight;
 
         if (FBTrace.DBG_COMPILATION_UNITS)
-            FBTrace.sysout("setViewportPadding sourceBox.scrollTop - (firstViewRangeOffset - firstRenderedLineOffset): "+sourceBox.scrollTop+"-"+"("+firstViewRangeOffset+"-"+firstRenderedLineOffset+")="+topPadding);
+            FBTrace.sysout("setViewportPadding topPadding = "+topPadding+" = (linesOfPadding - 1)* averageLineHeight = ("+linesOfPadding+" - 1)* "+averageLineHeight);
+
         // we want the bottomPadding to take up the rest
+
         var totalPadding = this.getTotalPadding(sourceBox);
         if (totalPadding < 0)
             var bottomPadding = Math.abs(totalPadding);
@@ -949,12 +952,6 @@ Firebug.SourceBoxPanel = extend(SourceBoxPanelBase,
         if (bottomPadding < 0)
             bottomPadding = 0;
 
-        if(FBTrace.DBG_COMPILATION_UNITS)
-        {
-            FBTrace.sysout("setViewportPadding viewport.offsetHeight: "+sourceBox.viewport.offsetHeight+" viewport.clientHeight "+sourceBox.viewport.clientHeight);
-            FBTrace.sysout("setViewportPadding sourceBox.offsetHeight: "+sourceBox.offsetHeight+" sourceBox.clientHeight "+sourceBox.clientHeight);
-            FBTrace.sysout("setViewportPadding scrollTop: "+sourceBox.scrollTop+" firstRenderedLine "+sourceBox.firstRenderedLine+" bottom: "+bottomPadding+" top: "+topPadding);
-        }
         var view = sourceBox.viewport;
 
         // Set the size on the line number field so the padding is filled with same style as source lines.
@@ -968,6 +965,18 @@ Firebug.SourceBoxPanel = extend(SourceBoxPanelBase,
         //sourceLine
         view.previousSibling.firstChild.firstChild.style.height = topPadding + "px";
         view.nextSibling.firstChild.firstChild.style.height = bottomPadding + "px";
+
+        // Finally adjust the scrollTop to position the viewRange.firstLine at the top of the view
+        var firstViewRangeElement = sourceBox.getLineNode(viewRange.firstLine);
+        sourceBox.scrollTop = firstViewRangeElement.offsetTop;
+
+        if(FBTrace.DBG_COMPILATION_UNITS)
+        {
+            FBTrace.sysout("setViewportPadding viewport.offsetHeight: "+sourceBox.viewport.offsetHeight+" viewport.clientHeight "+sourceBox.viewport.clientHeight);
+            FBTrace.sysout("setViewportPadding sourceBox.offsetHeight: "+sourceBox.offsetHeight+" sourceBox.clientHeight "+sourceBox.clientHeight);
+            FBTrace.sysout("setViewportPadding scrollTop: "+sourceBox.scrollTop+" firstLine "+viewRange.firstLine+" bottom: "+bottomPadding+" top: "+topPadding);
+        }
+
     },
 
     applyDecorator: function(sourceBox)
