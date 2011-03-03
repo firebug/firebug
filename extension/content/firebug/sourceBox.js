@@ -982,8 +982,8 @@ Firebug.SourceBoxPanel = extend(SourceBoxPanelBase,
 
         if(FBTrace.DBG_COMPILATION_UNITS)
         {
-            FBTrace.sysout("setViewportPadding viewport.offsetHeight: "+sourceBox.viewport.offsetHeight+" viewport.clientHeight "+sourceBox.viewport.clientHeight);
-            FBTrace.sysout("setViewportPadding sourceBox.offsetHeight: "+sourceBox.offsetHeight+" sourceBox.clientHeight "+sourceBox.clientHeight);
+            FBTrace.sysout("setViewportPadding viewport offsetHeight: "+sourceBox.viewport.offsetHeight+", clientHeight "+sourceBox.viewport.clientHeight);
+            FBTrace.sysout("setViewportPadding sourceBox, offsetHeight: "+sourceBox.offsetHeight+", clientHeight "+sourceBox.clientHeight+", scrollHeight: "+sourceBox.scrollHeight);
             FBTrace.sysout("setViewportPadding scrollTop: "+sourceBox.scrollTop+" firstLine "+viewRange.firstLine+" bottom: "+bottomPadding+" top: "+topPadding);
         }
 
