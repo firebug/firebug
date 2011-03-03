@@ -172,8 +172,9 @@ Firebug.ScriptPanel.prototype = extend(Firebug.SourceBoxPanel,
         }
     },
 
-    highlightLine: function(lineNumber, context) // TODO a factory like jumpH
+    highlightLine: function(lineNumber, context)
     {
+        var panel = this;
         return function exeHighlightFactory(sourceBox)
         {
             var highlightingAttribute = "exe_line";
@@ -199,8 +200,8 @@ Firebug.ScriptPanel.prototype = extend(Firebug.SourceBoxPanel,
                     if (cause && Firebug.showBreakNotification)
                     {
                         var sourceLine = getChildByClass(lineNode, "sourceLine");
-                        sourceBox.breakCauseBox = new Firebug.Breakpoint.BreakNotification(this.document, cause);
-                        sourceBox.breakCauseBox.show(sourceLine, this, "not an editor, yet?");
+                        sourceBox.breakCauseBox = new Firebug.Breakpoint.BreakNotification(panel.document, cause);
+                        sourceBox.breakCauseBox.show(sourceLine, panel, "not an editor, yet?");
                     }
                 }
             }
