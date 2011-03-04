@@ -805,7 +805,9 @@ Firebug.SourceBoxPanel = extend(SourceBoxPanelBase,
 
         var averageLineHeight = this.getAverageLineHeight(sourceBox);
         var panelHeight = this.panelNode.clientHeight;
-        var linesPerViewport = Math.round((panelHeight / averageLineHeight) + 1);
+        //we never want viewableLines * lineHeight > clientHeight
+        //so viewableLines <= clientHeight / lineHeight
+        var linesPerViewport = Math.floor((panelHeight / averageLineHeight));
 
         viewRange.firstLine = Math.round(targetLineNumber - linesPerViewport / 2);
 
@@ -827,19 +829,21 @@ Firebug.SourceBoxPanel = extend(SourceBoxPanelBase,
     {
         var viewRange = {};
         var averageLineHeight = this.getAverageLineHeight(sourceBox);
-        viewRange.firstLine = Math.floor( (scrollTop / averageLineHeight) + 1);
+        // If the scrollTop comes in zero, then we better pick line 1.  (0 / 14) + 1 = 1
+        // If the scrollTop comes in > averageLineHeight/2 pick line 2  (8 / 14) + 1 = 1.57 ==> ceil
+        viewRange.firstLine = Math.ceil( (scrollTop / averageLineHeight) + 1);
 
         var panelHeight = this.panelNode.clientHeight;
 
         if (panelHeight === 0)  // then we probably have not inserted the elements yet and the clientHeight is bogus
             panelHeight = this.panelNode.ownerDocument.documentElement.clientHeight;
 
-        var viewableLines = Math.ceil((panelHeight / averageLineHeight) - 1);
-        viewRange.lastLine = viewRange.firstLine + viewableLines;
+        var viewableLines = Math.floor((panelHeight / averageLineHeight));  // see getViewRangeFromTargetLine
+        viewRange.lastLine = viewRange.firstLine + viewableLines - 1;  // 15 = 1 + 15 - 1;
         if (viewRange.lastLine > sourceBox.maximumLineNumber)
             viewRange.lastLine = sourceBox.maximumLineNumber;
 
-        viewRange.centralLine = Math.floor((viewRange.lastLine - viewRange.firstLine)/2);
+        viewRange.centralLine = Math.ceil((viewRange.lastLine - viewRange.firstLine)/2);
 
         if (FBTrace.DBG_COMPILATION_UNITS)
         {
@@ -864,7 +868,10 @@ Firebug.SourceBoxPanel = extend(SourceBoxPanelBase,
     getScrollTopFromViewRange: function(sourceBox, viewRange)
     {
         var averageLineHeight = this.getAverageLineHeight(sourceBox);
-        var scrollTop = Math.floor(averageLineHeight * (viewRange.firstLine - 1));
+        // If the fist line is 1, scrollTop should be 0   14 * (1 - 1) = 0
+        // If the first line is 2, scrollTop would be lineHeight    14 * (2 - 1) = 14
+
+        var scrollTop = averageLineHeight * (viewRange.firstLine - 1);
 
         if (FBTrace.DBG_COMPILATION_UNITS)
         {
