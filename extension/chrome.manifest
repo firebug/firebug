@@ -15,9 +15,10 @@ locale  firebug cs          locale/cs/
 locale  firebug da-DK       locale/da-DK/
 locale  firebug de          locale/de/
 locale  firebug el          locale/el/
+locale  firebug es          locale/es/
 locale  firebug en-US       locale/en-US/
 locale  firebug es-AR       locale/es-AR/
-locale  firebug es          locale/es/
+locale  firebug es-ES       locale/es-ES/
 locale  firebug fa          locale/fa/
 locale  firebug fr          locale/fr/
 locale  firebug hr-HR       locale/hr-HR/

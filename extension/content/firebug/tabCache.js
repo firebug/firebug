@@ -160,6 +160,9 @@ Firebug.TabCacheModel = extend(Firebug.Module,
 
     registerStreamListener: function(request, win)
     {
+        if (Firebug.getSuspended())
+            return;
+
         try
         {
             if (FBTrace.DBG_CACHE)

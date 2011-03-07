@@ -78,7 +78,7 @@
 }
 
 .traceInfoOptionsText {
-    float:left;
+    float: left;
     padding: 3px;
 }
 
@@ -372,9 +372,8 @@
 /************************************************************************************************/
 
 .traceOption {
-    float:left;
-    display: block;
-    margin: 2px;
+    width: 160px;
+    margin: 2px 5px;
     cursor: default !important;
     padding: 0 2px 0 2px; 
     border: solid 1px #D7D7D7;

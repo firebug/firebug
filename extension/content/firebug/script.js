@@ -170,43 +170,47 @@ Firebug.ScriptPanel.prototype = extend(Firebug.SourceBoxPanel,
         }
     },
 
-    highlightLine: function()
+    highlightLine: function(lineNumber, context)
     {
-        var highlightingAttribute = "exe_line";
-        if (this.selectedLine)  // could point to any node in any sourcebox, private to this function
-            this.selectedLine.removeAttribute(highlightingAttribute);
-
-        var sourceBox = this.selectedSourceBox;
-        var lineNode = sourceBox.getLineNode(sourceBox.highlightedLineNumber);
-        this.selectedLine = lineNode;  // if null, clears
-
-        if (sourceBox.breakCauseBox)
+        var panel = this;
+        return function exeHighlightFactory(sourceBox)
         {
-            sourceBox.breakCauseBox.hide();
-            delete sourceBox.breakCauseBox;
-        }
+            var highlightingAttribute = "exe_line";
+            if (sourceBox.selectedLine)
+                sourceBox.selectedLine.removeAttribute(highlightingAttribute);
 
-        if (this.selectedLine)
-        {
-            lineNode.setAttribute(highlightingAttribute, "true");
-            if (this.context.breakingCause && !this.context.breakingCause.shown)
+            var lineNode = sourceBox.getLineNode(lineNumber);  // we close over lineNumber
+            sourceBox.selectedLine = lineNode;  // if null, clears
+
+            if (sourceBox.breakCauseBox)
             {
-                this.context.breakingCause.shown = true;
-                var cause = this.context.breakingCause;
-                if (cause && Firebug.showBreakNotification)
+                sourceBox.breakCauseBox.hide();
+                delete sourceBox.breakCauseBox;
+            }
+
+            if (sourceBox.selectedLine)
+            {
+                lineNode.setAttribute(highlightingAttribute, "true");
+                if (context.breakingCause && !context.breakingCause.shown)
                 {
-                    var sourceLine = getChildByClass(lineNode, "sourceLine");
-                    sourceBox.breakCauseBox = new Firebug.Breakpoint.BreakNotification(this.document, cause);
-                    sourceBox.breakCauseBox.show(sourceLine, this, "not an editor, yet?");
+                    context.breakingCause.shown = true;
+                    var cause = context.breakingCause;
+                    if (cause && Firebug.showBreakNotification)
+                    {
+                        var sourceLine = getChildByClass(lineNode, "sourceLine");
+                        sourceBox.breakCauseBox = new Firebug.Breakpoint.BreakNotification(panel.document, cause);
+                        sourceBox.breakCauseBox.show(sourceLine, panel, "not an editor, yet?");
+                    }
                 }
             }
-        }
 
-        if (FBTrace.DBG_BP || FBTrace.DBG_STACK || FBTrace.DBG_COMPILATION_UNITS)
-            FBTrace.sysout("sourceBox.highlightLine lineNo: "+sourceBox.highlightedLineNumber+
-                " lineNode="+lineNode+" in "+sourceBox.repObject.getURL());
+            if (FBTrace.DBG_BP || FBTrace.DBG_STACK || FBTrace.DBG_COMPILATION_UNITS)
+                FBTrace.sysout("sourceBox.highlightLine lineNo: "+lineNumber+
+                    " lineNode="+lineNode+" in "+sourceBox.repObject.getURL());
 
-        return (sourceBox.highlightedLineNumber > 0); // sticky if we have a valid line
+            return (sourceBox.selectedLine); // sticky if we have a valid line
+
+        };
     },
 
     showStackFrameXB: function(frameXB)
@@ -228,7 +232,7 @@ Firebug.ScriptPanel.prototype = extend(Firebug.SourceBoxPanel,
          if (this.context.breakingCause)
              this.context.breakingCause.lineNo = lineNo;
 
-         this.scrollToLine(url, lineNo, bind(this.highlightLine, this) );
+         this.scrollToLine(url, lineNo, this.highlightLine(lineNo, this.context));
          this.context.throttle(this.updateInfoTip, this);
          return;
     },
@@ -237,8 +241,11 @@ Firebug.ScriptPanel.prototype = extend(Firebug.SourceBoxPanel,
     {
         if (this.selectedSourceBox)
         {
-            this.selectedSourceBox.highlightedLineNumber = -1;
-            this.highlightLine(); // clear highlight
+            // Clear highlight. The scrolling shouldn't happen at this time so, use the current
+            // centralLine as the argument to scrollToLine.
+            this.scrollToLine(null, this.selectedSourceBox.centralLine,
+                this.highlightLine(-1, this.context));
+
             if (FBTrace.DBG_STACK)
                 FBTrace.sysout("showNoStackFrame clear "+this.selectedSourceBox.repObject.url);
         }

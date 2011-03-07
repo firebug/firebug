@@ -440,12 +440,15 @@ this.addScript = function(doc, id, src)
 
     element.innerHTML = src;
     if (doc.documentElement)
+    {
         doc.documentElement.appendChild(element);
+    }
     else
     {
         // See issue 1079, the svg test case gives this error
         if (FBTrace.DBG_ERRORS)
-            FBTrace.sysout("lib.addScript doc has no documentElement:", doc);
+            FBTrace.sysout("lib.addScript doc has no documentElement (" +
+                doc.readyState + ") " + doc.location, doc);
         return;
     }
     return element;

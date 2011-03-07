@@ -134,7 +134,14 @@ Firebug.InfoTip = extend(Firebug.Module,
         var scrollParent = getOverflowParent(target);
         var scrollX = x + (scrollParent ? scrollParent.scrollLeft : 0);
 
-        if (panel.showInfoTip(infoTip, target, scrollX, y, rangeParent, rangeOffset))
+        var show = panel.showInfoTip(infoTip, target, scrollX, y, rangeParent, rangeOffset);
+        if (!show && this.fbListeners)
+        {
+            show = dispatch2(this.fbListeners, "showInfoTip", [infoTip, target, scrollX, y,
+                rangeParent, rangeOffset]);
+        }
+
+        if (show)
         {
             var htmlElt = infoTip.ownerDocument.documentElement;
             var panelWidth = htmlElt.clientWidth;
@@ -173,7 +180,9 @@ Firebug.InfoTip = extend(Firebug.Module,
             infoTip.setAttribute("active", "true");
         }
         else
+        {
             this.hideInfoTip(infoTip);
+        }
     },
 
     hideInfoTip: function(infoTip)

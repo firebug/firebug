@@ -911,6 +911,9 @@ NetPanel.prototype = extend(Firebug.ActivablePanel,
                 return Firebug.InfoTip.populateImageInfoTip(infoTip, row.repObject.href);
             }
         }
+
+        delete this.infoTipURL;
+        return false;
     },
 
     populateTimeInfoTip: function(infoTip, file)
