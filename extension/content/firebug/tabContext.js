@@ -262,13 +262,18 @@ Firebug.TabContext.prototype =
         // Get "global" panelType, registered using Firebug.registerPanel
         var panelType = Firebug.getPanelType(panelName);
 
-        // The panelType cane be "local", available only within the context.
-        if (!panelType && this.panelTypeMap)
+        // The panelType can be "local", available only within the context.
+        if (!panelType && this.panelTypeMap && this.panelTypeMap.hasOwnProperty(panelName))
             panelType = this.panelTypeMap[panelName];
 
         if (!panelType)
             return null;
 
+        if (!panelType.prototype)
+        {
+            FBTrace.sysout("tabContext.getPanel no prototype "+panelType, panelType);
+            return;
+        }
         var enabled = panelType.prototype.isEnabled ? panelType.prototype.isEnabled() : true;
 
         // Create instance of the panelType only if it's enabled.
