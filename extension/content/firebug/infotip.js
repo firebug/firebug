@@ -24,7 +24,7 @@ Firebug.InfoTip = extend(Firebug.Module,
         imgTag:
             DIV({"class": "infoTipImageBox infoTipLoading"},
                 IMG({"class": "infoTipImage", src: "$urlValue", repeat: "$repeat",
-                    onload: "$onLoadImage"}),
+                    onload: "$onLoadImage", onerror: "$onErrorImage"}),
                 IMG({"class": "infoTipBgImage", collapsed: true, src: "blank.gif"}),
                 DIV({"class": "infoTipCaption"})
             ),
@@ -91,6 +91,25 @@ Firebug.InfoTip = extend(Firebug.Module,
 
             caption.innerHTML = $STRF("Dimensions", [w, h]);
 
+            removeClass(innerBox, "infoTipLoading");
+        },
+
+        onErrorImage: function(event)
+        {
+            var img = event.currentTarget;
+            var bgImg = img.nextSibling;
+            if (!bgImg)
+                return;
+
+            var caption = bgImg.nextSibling;
+
+            // Display an error in the caption (instead of dimensions).
+            if (img.src.indexOf("moz-filedata") == 0)
+                caption.innerHTML = $STR("firebug.failedToPreviewObjectURL");
+            else
+                caption.innerHTML = $STR("firebug.failedToPreviewImageURL");
+
+            var innerBox = img.parentNode;
             removeClass(innerBox, "infoTipLoading");
         }
     }),

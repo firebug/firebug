@@ -1171,7 +1171,7 @@ top.FirebugChrome =
         //    return false;
 
         var popup = event.target;
-        if(popup.id !="fbContextMenu")
+        if (popup.id !="fbContextMenu")
             return;
 
         var target = document.popupNode;
