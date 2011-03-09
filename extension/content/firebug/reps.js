@@ -2292,15 +2292,12 @@ FirebugReps.Description = domplate(Firebug.Rep,
         var params = {};
         if (listener)
         {
-            params.onClickLink =
+            params.onClickLink = function(event)
             {
-                clickListener: function(event)
-                {
-                    // Only clicks on links are passed to the original listener.
-                    var localName = event.target.localName;
-                    if (listener && localName && localName.toLowerCase() == "a")
-                        listener(event);
-                },
+                // Only clicks on links are passed to the original listener.
+                var localName = event.target.localName;
+                if (listener && localName && localName.toLowerCase() == "a")
+                    listener(event);
             };
         }
 
