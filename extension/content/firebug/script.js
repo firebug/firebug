@@ -208,7 +208,8 @@ Firebug.ScriptPanel.prototype = extend(Firebug.SourceBoxPanel,
                 FBTrace.sysout("sourceBox.highlightLine lineNo: "+lineNumber+
                     " lineNode="+lineNode+" in "+sourceBox.repObject.getURL());
 
-            return (sourceBox.selectedLine); // sticky if we have a valid line
+            // xxxHonza: XXXJJB: this is a workaround should be properly fixed
+            return false;//(sourceBox.selectedLine); // sticky if we have a valid line
         };
     },
 
