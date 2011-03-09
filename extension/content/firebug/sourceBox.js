@@ -1052,6 +1052,8 @@ Firebug.SourceBoxPanel = extend(SourceBoxPanelBase,
         {
             if (sourceBox.highlighter)
             {
+                // If the sticky flag is false, the highlight is removed, eg the search and sourcelink highlights.
+                // else the highlight must be removed by the caller, eg breakpoint hit executable line.
                 var sticky = sourceBox.highlighter(sourceBox);
                 if (FBTrace.DBG_COMPILATION_UNITS)
                     FBTrace.sysout("asyncHighlighting highlighter sticky:"+sticky,
