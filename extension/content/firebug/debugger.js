@@ -1147,10 +1147,6 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
 
                 Firebug.Debugger.resume(context);
             },
-            okAction: function justGo()
-            {
-                Firebug.Debugger.resume(context);
-            },
         };
     },
 
@@ -1348,11 +1344,6 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
                                 FBTrace.sysout("debugger.breakon Errors set "+sourceFile.href+"@"+
                                     lineNo+" tag: "+frame.script.tag, bp);
 
-                            Firebug.Debugger.resume(context);
-                        },
-
-                        okAction: function justGo()
-                        {
                             Firebug.Debugger.resume(context);
                         },
                     };
