@@ -759,7 +759,7 @@ Firebug.Breakpoint.ConditionEditor.prototype = domplate(Firebug.InlineEditor.pro
 
 /**
  * Construct a break notification popup
- * @param doc the document to contain the popup
+ * @param doc the document to contain the notification
  * @param cause info object for the popup, with these optional fields:
  *   strings: title, message, attrName
  *   elements: target, relatedTarget: element
@@ -767,56 +767,79 @@ Firebug.Breakpoint.ConditionEditor.prototype = domplate(Firebug.InlineEditor.pro
  */
 Firebug.Breakpoint.BreakNotification = function(doc, cause)
 {
-    this.initialize(doc, cause);
-    setClass(this.box, "breakNotification");
-    this.box.repObject = this;
+    this.document = doc;
+    this.cause = cause;
 }
 
-// xxxHonza: move as much as possible into Firebug.BalloonNote object
-Firebug.Breakpoint.BreakNotification.prototype = domplate(Firebug.InlineEditor.prototype,
+Firebug.Breakpoint.BreakNotification.prototype = domplate(Firebug.Rep,
+/** @lends Firebug.ScriptPanel.Notification */
 {
-    contentTag:
-        DIV(
-            DIV({"class": "notationCaption"},
-                SPAN({"class": "notationTitle"}, "$cause.title"),
-                BUTTON({"class": "notationButton copyButton", onclick: "$onCopyAction",
-                    $collapsed: "$cause|hideCopyAction"},
-                    $STR("Copy")
-                ),
-                BUTTON({"class": "notationButton disableButton", onclick: "$onSkipAction",
-                    $collapsed: "$cause|hideSkipAction"},
-                    $STR("script.balloon.Disable")
-                ),
-                BUTTON({"class": "notationButton ContinueButton", onclick: "$onOkAction",
-                    $collapsed: "$cause|hideOkAction"},
-                    $STR("script.balloon.Continue")
-                )
-            ),
-            DIV({"class": "notationCaption"},
-                SPAN({"class": "notationTitle"}, "$cause|getTitle"),
-                SPAN("&nbsp;"),
-                SPAN({"class": "notationTitle diff"}, "$cause|getDiff"),
-                SPAN("&nbsp;"),
-                TAG("$cause|getTargetTag", {object: "$cause.target"}),
-                SPAN("&nbsp;"),
-                TAG("$cause|getRelatedTargetTag", {object: "$cause.relatedNode"})
-            ),
-            DIV({"class": "notationCaption"},
-                INPUT({"class": "doNotShowBreakNotification", type: "checkbox",
-                    change: "$onShowBreakNotificationChanged"},
-                    $STR("firebug.breakpoint.doNotShowBreakNotification")
+    tag:
+        DIV({"class": "notificationBox"},
+            TABLE({"class": "notificationTable", onclick: "$onHide"},
+                TBODY(
+                    TR(
+                        TD({"class": "imageCol"},
+                            IMG({"class": "notificationImage",
+                                src: "chrome://firebug/skin/breakpoint.png"})
+                        ),
+                        TD({"class": "descCol"},
+                            SPAN({"class": "notificationDesc"}, "$cause|getDescription"),
+                            SPAN("&nbsp;"),
+                            SPAN({"class": "diff"}, "$cause|getDiff"),
+                            SPAN({"class": "targets"}),
+                            DIV({"class": "noNotificationDesc"})
+                        ),
+                        TD({"class": "buttonsCol"},
+                            BUTTON({"class": "notificationButton copyButton",
+                                onclick: "$onCopyAction",
+                                $collapsed: "$cause|hideCopyAction"},
+                                $STR("Copy")
+                            ),
+                            BUTTON({"class": "notificationButton skipButton",
+                                onclick: "$onSkipAction",
+                                $collapsed: "$cause|hideSkipAction"},
+                                $STR("script.balloon.Disable")
+                            ),
+                            BUTTON({"class": "notificationButton okButton",
+                                onclick: "$onOkAction",
+                                $collapsed: "$cause|hideOkAction"},
+                                $STR("script.balloon.Continue")
+                            )
+                        ),
+                        TD(
+                            DIV({"class": "notificationClose", onclick: "$onHide"})
+                        )
+                    )
                 )
             )
         ),
 
-    getElementTag: function(node)
+    targets:
+        SPAN(
+            SPAN("&nbsp;"),
+            TAG("$cause|getTargetTag", {object: "$cause.target"}),
+            SPAN("&nbsp;"),
+            TAG("$cause|getRelatedTargetTag", {object: "$cause.relatedNode"})
+        ),
+
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+    onHide: function(event)
     {
-        if (node)
-        {
-            var rep = Firebug.getRep(node);
-            if (rep)
-                return rep.shortTag || rep.tag;
-        }
+        var notify = this.getNotifyObject(event.target);
+        notify.hide();
+    },
+
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+    getDescription: function(cause)
+    {
+        var str = cause.message + (cause.attrName ? (" '" + cause.attrName + "'") : "");
+        if (this.getDiff(cause))
+            str += ":";
+
+        return str;
     },
 
     getTargetTag: function(cause)
@@ -829,11 +852,87 @@ Firebug.Breakpoint.BreakNotification.prototype = domplate(Firebug.InlineEditor.p
         return this.getElementTag(cause.relatedNode) || null;
     },
 
+    getElementTag: function(node)
+    {
+        if (node)
+        {
+            var rep = Firebug.getRep(node);
+            if (rep)
+                return rep.shortTag || rep.tag;
+        }
+    },
+
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+    // Button Handlers
+
+    hideCopyAction: function(cause)
+    {
+        return !cause.copyAction;
+    },
+
+    hideSkipAction: function(cause)
+    {
+        return !cause.skipAction;
+    },
+
+    hideOkAction: function(cause)
+    {
+        return !cause.okAction;
+    },
+
+    onCopyAction: function(event)
+    {
+        var notify = this.getNotifyObject(event.target);
+        if (notify.cause.copyAction)
+            notify.cause.copyAction();
+    },
+
+    onSkipAction: function(event)
+    {
+        var notify = this.getNotifyObject(event.target);
+        if (notify.cause.skipAction)
+            notify.cause.skipAction();
+    },
+
+    onOkAction: function(event)
+    {
+        var notify = this.getNotifyObject(event.target);
+        if (notify.cause.okAction)
+            notify.cause.okAction();
+    },
+
+    onCloseAction: function(event)
+    {
+        var notify = this.getNotifyObject(event.target);
+        if (notify.cause.onCloseAction)
+            notify.cause.onCloseAction();
+        else
+            notify.hide(event); // same as click on notify body
+    },
+
+    getNotifyObject: function(target)
+    {
+        var parentNode = getAncestorByClass(target, "notificationBox");
+        return parentNode.repObject;
+    },
+
+    onDisableNotification: function(event)
+    {
+        // Do not display again if the user wishes so.
+        Firebug.setPref(Firebug.prefDomain, "showBreakNotification", false);
+        this.onHide(event);
+    },
+
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+    // Helpers
+
     getDiff: function(cause)
     {
         var str = "";
+
         if (cause.prevValue)
             str += cropString(cause.prevValue, 40) + " -> ";
+
         if (cause.newValue)
             str += cropString(cause.newValue, 40);
 
@@ -846,170 +945,84 @@ Firebug.Breakpoint.BreakNotification.prototype = domplate(Firebug.InlineEditor.p
         return str;
     },
 
-    getTitle: function(cause)
-    {
-        var str = cause.message + (cause.attrName ? (" '"+cause.attrName+"'") : "");
-        if (this.getDiff(cause))
-            str += ":";
-        return str;
-    },
-
-    getContentTag: function(object)
-    {
-        return this.contentTag;
-    },
-
-    onShowBreakNotificationChanged: function(event)
-    {
-        // Do not display again if the user wishes so.
-        Firebug.Options.set("showBreakNotification", !event.target.checked);
-    },
-
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+    // Public
 
-    initialize: function(doc, cause)
+    show: function(parentNode)
     {
-        this.cause = cause;
-        this.box = Firebug.BalloonNote.prototype.tag.replace({cause: cause}, doc, this);
+        // Reneder the entire notification box.
+        this.box = this.tag.append(this.cause, parentNode, this);
+        this.box.repObject = this;
 
-        // xxxHonza: it's weird, but I can't associate the event handler using domplate.
-        var checkbox = this.box.querySelector(".doNotShowBreakNotification");
-        checkbox.addEventListener("change", bind(this.onShowBreakNotificationChanged, this), false);
-    },
-
-    show: function(sourceLine, panel, value)
-    {
-        this.target = sourceLine;
-        this.panel = panel;
-
-        hide(this.box, true);
-        panel.selectedSourceBox.appendChild(this.box);
-
-        setTimeout(bindFixed(function()
+        // Appens the HTML targes dynamically. In case they are null, it breaks
+        // click events.
+        // xxxHonza: this problem would deserve clarification.
+        if (this.cause.target || this.cause.relatedNode)
         {
-            var offset = getClientOffset(sourceLine);
+            var targetsNode = this.box.querySelector(".targets");
+            this.targets.replace(this.cause, targetsNode, this);
+        }
 
-            var bottom = offset.y+sourceLine.offsetHeight;
-            var y = bottom - this.box.offsetHeight;
-            if (y < panel.selectedSourceBox.scrollTop)
+        // Render "do not show again" text
+        var descNode = this.box.querySelector(".noNotificationDesc");
+        FirebugReps.Description.render($STR("firebug.breakpoint.doNotShowBreakNotification2"),
+            descNode, bind(this.onDisableNotification, this));
+
+        // Tooltips
+        if (this.cause.skipActionTooltip)
+            this.box.querySelector(".skipButton").setAttribute("title", this.cause.skipActionTooltip);
+        if (this.cause.okActionTooltip)
+            this.box.querySelector(".okButton").setAttribute("title", this.cause.okActionTooltip);
+        if (this.cause.copyActionTooltip)
+            this.box.querySelector(".copyButton").setAttribute("title", this.cause.copyActionTooltip);
+
+        // Animation
+        var self = this;
+        var delta = Math.max(3, Math.floor(this.box.clientHeight/20));
+        var clientHeight = this.box.clientHeight;
+
+        this.box.style.top = -clientHeight + "px";
+        var interval = setInterval(function slide(event)
+        {
+            var top = parseInt(self.box.style.top, 10);
+            if (top >= 0)
             {
-                y = offset.y;
-                setClass(this.box, "upsideDown");
+                clearInterval(interval);
             }
             else
-                removeClass(this.box, "upsideDown");
-
-            this.box.style.top = y + "px";
-            hide(this.box, false);
-        }, this));
-    },
-
-    hide: function(event) // the argument event does not come thru??
-    {
-        // We already called hide
-        if (!this.panel)
-            return;
-
-        // As the box shrinks you don't want text to spill
-        var guts = this.box.getElementsByClassName("balloonContent").item(0);
-        collapse(guts, true);
-
-        var msg = this.cause.message;
-        if (msg)
-        {
-            var self = this;
-            var delta = Math.max(20,Math.floor(self.box.clientWidth/20));
-            var interval = setInterval(function slide(event)
             {
-                if (self.box.clientWidth < delta)
-                {
-                    clearNode(guts);
+                var newTop = (top + delta) > 0 ? 0 : (top + delta);
+                self.box.style.top = newTop + "px";
+            }
+        }, 15);
 
-                    clearInterval(interval);
-                    if (self.box.parentNode)
-                    {
-                        self.box.parentNode.removeChild(self.box);
-                        self.target.setAttribute('title', msg);
-                        setClass(self.target, "noteInToolTip");
-                    }
-                    delete self.target;
-                    delete self.panel;
-                }
-                else
-                    self.box.style.width = (self.box.clientWidth - delta)+"px";
-            }, 15);
-        }
-        else
+        return this.box;
+    },
+
+    hide: function()
+    {
+        var self = this;
+        var delta = Math.max(3, Math.floor(this.box.clientHeight/20));
+        var clientHeight = this.box.clientHeight;
+
+        var interval = setInterval(function slide(event)
         {
-            delete this.target;
-            delete this.panel;
-        }
-    },
+            var top = parseInt(self.box.style.top, 10);
+            if (isNaN(top))
+                top = 0;
 
-    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-    // Notification Actions
+            if (top < -clientHeight)
+            {
+                clearInterval(interval);
 
-    hideCopyAction: function(cause)
-    {
-        return !cause.copyAction;
-    },
-
-    onCopyAction: function(event)
-    {
-        if (this.cause.copyAction)
-            this.cause.copyAction();
-    },
-
-    hideSkipAction: function(cause)
-    {
-        return !cause.skipAction;
-    },
-
-    onSkipAction: function(event)
-    {
-        var balloon = this.getBalloon(event.target);
-        if (balloon.cause.skipAction)
-            balloon.cause.skipAction();
-    },
-
-    hideOkAction: function(cause)
-    {
-        return !cause.okAction;
-    },
-
-    onOkAction: function(event)
-    {
-        var balloon = this.getBalloon(event.target);
-        if (balloon.cause.okAction)
-            balloon.cause.okAction();
-    },
-
-    onCloseAction: function(event)
-    {
-        var balloon = this.getBalloon(event.target);
-        if (balloon.cause.onCloseAction)
-            balloon.cause.onCloseAction();
-        else
-            balloon.hide(event); // same as click on balloon body
-    },
-
-    // Called from Firebug.BalloonNote
-    onClick: function(event)
-    {
-        // Do not hide the balloon if an input (e.g. checkbox) has been clicked.
-        var input = FBL.getAncestorByTagName(event.target)
-        if (input)
-            return;
-
-        this.hide(event);
-    },
-
-    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-    getBalloon: function(target)
-    {
-        var parentNode = getAncestorByClass(target, "balloon");
-        return parentNode.repObject;
+                if (self.box.parentNode)
+                    self.box.parentNode.removeChild(self.box);
+            }
+            else
+            {
+                self.box.style.top = (top - delta) + "px";
+            }
+        }, 15);
     }
 });
 

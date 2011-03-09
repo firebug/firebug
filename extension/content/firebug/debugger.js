@@ -1134,6 +1134,7 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
         context.breakingCause =
         {
             title: $STR("debugger keyword"),
+            skipActionTooltip: $STR("firebug.bon.tooltip.disableDebuggerKeyword2"),
             message: $STR("firebug.bon.cause.disableDebuggerKeyword2"),
             skipAction: function addSkipperAndGo()
             {

@@ -197,9 +197,9 @@ Firebug.ScriptPanel.prototype = extend(Firebug.SourceBoxPanel,
                     var cause = context.breakingCause;
                     if (cause && Firebug.showBreakNotification)
                     {
-                        var sourceLine = getChildByClass(lineNode, "sourceLine");
-                        sourceBox.breakCauseBox = new Firebug.Breakpoint.BreakNotification(panel.document, cause);
-                        sourceBox.breakCauseBox.show(sourceLine, panel, "not an editor, yet?");
+                        var box = new Firebug.Breakpoint.BreakNotification(panel.document, cause);
+                        box.show(panel.panelNode);
+                        sourceBox.breakCauseBox = box;
                     }
                 }
             }
@@ -209,7 +209,6 @@ Firebug.ScriptPanel.prototype = extend(Firebug.SourceBoxPanel,
                     " lineNode="+lineNode+" in "+sourceBox.repObject.getURL());
 
             return (sourceBox.selectedLine); // sticky if we have a valid line
-
         };
     },
 
