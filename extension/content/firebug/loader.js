@@ -111,6 +111,7 @@ var FirebugLoadManager = function () {
         else if (FirebugLoadManager.arch == "remoteClient")
         {
             coreModules.push("crossfireModules/tools.js");
+            coreModules.push("firebugModules/inProcess/options.js");  // debugger needs Firebug.Options because of $STR() in property initializes, TODO
             coreModules.push("firebugModules/debugger.js");
 
         }
@@ -118,6 +119,7 @@ var FirebugLoadManager = function () {
         {
 
             coreModules.push("firebugModules/inProcess/tools.js");  // must be first
+            coreModules.push("firebugModules/inProcess/options.js");  // debugger needs Firebug.Options because of $STR() in property initializes, TODO
             coreModules.push("firebugModules/debugger.js");
 
             coreModules.push("crossfireModules/crossfire-server.js");
