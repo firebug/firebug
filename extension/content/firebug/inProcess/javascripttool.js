@@ -117,7 +117,15 @@ ToolsInterface.JavaScript.onStopDebugging = function(context)
     }
 }
 
+ToolsInterface.JavaScript.onCompilationUnit = function(context, url, kind)
+{
+     var compilationUnit = new ToolsInterface.CompilationUnit(url, context);
 
+     compilationUnit.kind = kind;
+
+     context.compilationUnits[url] = compilationUnit;
+     FBTrace.sysout("ToolsInterface.JavaScript.onCompilationUnit "+url+" added to "+context.getName(), compilationUnit);
+}
 
 return exports = {};
 

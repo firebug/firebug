@@ -107,15 +107,19 @@ Firebug.TabContext.prototype =
 
         this.addTags(sourceFile);
 
-        var compilationUnit = new CompilationUnit(sourceFile.href, this);
-        this.compilationUnits[sourceFile.href] = compilationUnit;
-
-        compilationUnit.sourceFile = sourceFile; // HACK
-
+        var kind = CompilationUnit.SCRIPT_TAG;
         if (sourceFile.compilation_unit_type == "event")
-            compilationUnit.kind = CompilationUnit.BROWSER_GENERATED;
+            var kind = CompilationUnit.BROWSER_GENERATED;
         if (sourceFile.compilation_unit_type == "eval")
-            compilationUnit.kind = CompilationUnit.EVAL;
+            var kind = CompilationUnit.EVAL;
+
+        var url = sourceFile.href;
+        FBTrace.sysout("onCompilationUnit "+url,[this, url, kind] );
+        ToolsInterface.browser.dispatch("onCompilationUnit", [this, url, kind]);
+
+     // HACKs
+        var compilationUnit = this.getCompilationUnit(url);
+        compilationUnit.sourceFile = sourceFile;
 
         compilationUnit.getSourceLines(-1, -1, function onLines(compilationUnit, firstLineNumber, lastLineNumber, lines)
         {
