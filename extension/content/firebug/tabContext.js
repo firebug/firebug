@@ -114,7 +114,9 @@ Firebug.TabContext.prototype =
             var kind = CompilationUnit.EVAL;
 
         var url = sourceFile.href;
-        FBTrace.sysout("onCompilationUnit "+url,[this, url, kind] );
+        if (FBTrace.DBG_COMPILATION_UNITS)
+            FBTrace.sysout("onCompilationUnit "+url,[this, url, kind] );
+
         ToolsInterface.browser.dispatch("onCompilationUnit", [this, url, kind]);
 
      // HACKs
