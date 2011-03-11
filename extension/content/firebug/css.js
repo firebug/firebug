@@ -520,11 +520,17 @@ Firebug.CSSStyleSheetPanel.prototype = extend(Firebug.SourceBoxPanel,
         for (var i = 0; i < cssRules.length; ++i)
         {
             var rule = cssRules[i];
+            var previousRule;
             if (rule instanceof CSSStyleRule)
             {
-                var ruleLine = domUtils.getRuleLine(rule);
-                if (ruleLine >= line)
+                var selectorLine = domUtils.getRuleLine(rule);
+                // The declarations are on lines equal or greater than the selectorLine
+                if (selectorLine === line) // then the line requested is a selector line
                     return rule;
+                if (selectorLine > line) // then we passed the rule for the requested line
+                    return previousRule;
+                // else the requested line is still ahead
+                previousRule = rule;
             }
         }
     },
@@ -1616,7 +1622,7 @@ CSSElementPanel.prototype = extend(Firebug.CSSStyleSheetPanel.prototype,
             while (i<rules.length)
             {
                 var props = rules[i].props;
-  
+
                 var j=0;
                 while (j<props.length)
                 {
@@ -1625,7 +1631,7 @@ CSSElementPanel.prototype = extend(Firebug.CSSStyleSheetPanel.prototype,
                     else
                         ++j;
                 }
-  
+
                 if (props.length == 0)
                     rules.splice(i, 1);
                 else
@@ -1899,7 +1905,7 @@ CSSComputedElementPanel.prototype = extend(CSSElementPanel.prototype,
         if (Firebug.computedStylesDisplay == "alphabetical")
         {
             var props = [];
-            
+
             for (var groupName in styleGroups)
             {
                 var groupProps = styleGroups[groupName];
@@ -1922,13 +1928,13 @@ CSSComputedElementPanel.prototype = extend(CSSElementPanel.prototype,
         else
         {
             var groups = [];
-    
+
             for (var groupName in styleGroups)
             {
                 var title = $STR("StyleGroup-" + groupName);
                 var group = {title: title, props: []};
                 groups.push(group);
-    
+
                 var props = styleGroups[groupName];
                 for (var i = 0; i < props.length; ++i)
                 {
@@ -1942,7 +1948,7 @@ CSSComputedElementPanel.prototype = extend(CSSElementPanel.prototype,
                 }
                 group.opened = this.groupOpened[title];
             }
-    
+
             var result = this.template.computedTag.replace({groups: groups}, this.panelNode);
         }
 
