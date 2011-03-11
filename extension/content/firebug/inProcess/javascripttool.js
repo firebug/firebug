@@ -124,7 +124,9 @@ ToolsInterface.JavaScript.onCompilationUnit = function(context, url, kind)
      compilationUnit.kind = kind;
 
      context.compilationUnits[url] = compilationUnit;
-     FBTrace.sysout("ToolsInterface.JavaScript.onCompilationUnit "+url+" added to "+context.getName(), compilationUnit);
+
+     if (FBTrace.DBG_COMPILATION_UNITS)
+         FBTrace.sysout("ToolsInterface.JavaScript.onCompilationUnit "+url+" added to "+context.getName(), compilationUnit);
 }
 
 return exports = {};

@@ -58,7 +58,7 @@ CompilationUnit.prototype.getKind = function getKind()
 
 CompilationUnit.prototype.isExecutableLine = function isExecutableLine(lineNo)
 {
-    return this.sourceFile.isExecutableLine(lineNo);
+    return this.sourceFile.isExecutableLine(lineNo);  // TODO no sourceFiles!
 }
 
 /**
@@ -132,7 +132,7 @@ CompilationUnit.prototype.eachBreakpoint = function( fnOfLineProps )
  */
 CompilationUnit.prototype.getSourceLines = function(firstLine, lastLine, listener)
 {
-    this.lines = this.sourceFile.loadScriptLines(this.context);
+    this.lines = this.sourceFile.loadScriptLines(this.context);  // TODO remove
     this.numberOfLines = (this.lines ? this.lines.length : 0);
     listener(this, 1, this.numberOfLines, this.lines);
 };
