@@ -23,8 +23,10 @@ var FirebugLoadManager = function () {
         // FIXME, create options.js as dependent of loader. Firebug.architecture = this.getPref(this.prefDomain, "architecture");
     }
 
-    function getModuleLoaderScope()
+    function getModuleLoaderScope(config)
     {
+        Firebug.loadConfiguration = config;  // we need to get the values to options.js somehow.
+
         var firebugScope = // pump the objects from this scope down into module loader
         {
             window : window,
@@ -42,12 +44,12 @@ var FirebugLoadManager = function () {
         return firebugScope;
     }
 
-    function getModuleLoaderConfig(baseURL)
+    function getModuleLoaderConfig(config)
     {
         var uid = Math.random();  // to give each XUL window its own loader (for now)
         var config = {
             context:"Firebug "+uid, // TODO XUL window id on FF4.0+
-            baseUrl: baseURL || "resource://firebug_rjs/",
+            baseUrl: config.baseUrl,
             onDebug: function() {
                 if (!this.FBTrace)
                 {
@@ -85,22 +87,30 @@ var FirebugLoadManager = function () {
         return config;
     }
 
-    function createLoader(baseURL)
+    function createLoader(config)
     {
         preLoadInitialization();
-        var firebugScope = getModuleLoaderScope();// pump the objects from this scope down into module loader
-        var config = getModuleLoaderConfig(baseURL);
-        var loader = new ModuleLoader(firebugScope, config);
+        var firebugScope = getModuleLoaderScope(config);// pump the objects from this scope down into module loader
+        var require_js_config = getModuleLoaderConfig(config);
+        var loader = new ModuleLoader(firebugScope, require_js_config);
         return loader;
     }
 
-    function loadCore(baseURL, coreInitialize)
+    /*
+     * config.arch: architecture to load, 'inProcess', 'remoteClient', 'remoteServer'
+     * config.prefDomain: base for preferences systems, eg 'extension.firebug'
+     * config.baseUrl: base for load path
+     */
+
+    function loadCore(config, coreInitialize)
     {
-        var loader = createLoader(baseURL);
+        setConfigurationDefaults(config);
+
+        var loader = createLoader(config);
 
         var coreModules = [];
 
-        if (FirebugLoadManager.arch === 'inProcess')
+        if (config.arch === 'inProcess')
         {
             coreModules.push("inProcess/tools.js");  // must be first
             coreModules.push("inProcess/options.js");  // debugger needs Firebug.Options because of $STR() in property initializes, TODO
@@ -108,14 +118,14 @@ var FirebugLoadManager = function () {
             coreModules.push("debugger.js");
             coreModules.push("inProcess/javascripttool.js");
         }
-        else if (FirebugLoadManager.arch == "remoteClient")
+        else if (config.arch == "remoteClient")
         {
             coreModules.push("crossfireModules/tools.js");
             coreModules.push("inProcess/options.js");  // debugger needs Firebug.Options because of $STR() in property initializes, TODO
             coreModules.push("debugger.js");
 
         }
-        else if (FirebugLoadManager.arch == "remoteServer")
+        else if (config.arch == "remoteServer")
         {
 
             coreModules.push("inProcess/tools.js");  // must be first
@@ -138,6 +148,13 @@ var FirebugLoadManager = function () {
         var modules = coreModules.concat(defaultModules);
 
         loader.define(modules, coreInitialize);
+    }
+
+    function setConfigurationDefaults(config)
+    {
+        config.arch = config.arch || 'inProcess';
+        config.prefDomain = config.prefDomain || 'extensions.firebug';
+        config.baseUrl = config.baseUrl || 'resource://firebug_rjs/';
     }
 
     return {loadCore: loadCore, arch: "inProcess"};

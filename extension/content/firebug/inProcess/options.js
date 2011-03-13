@@ -90,8 +90,6 @@ define(["ToolsInterface"], function factoryOptions(ToolsInterface)
 
     Firebug.Options =
     {
-        prefDomain: "extensions.firebug",
-
         getPrefDomain: function()
         {
             return this.prefDomain;
@@ -99,7 +97,9 @@ define(["ToolsInterface"], function factoryOptions(ToolsInterface)
 
         initialize: function()
         {
-            if (FBTrace.DBG_INITIALIZE)
+               this.prefDomain = Firebug.loadConfiguration.prefDomain;
+
+               if (FBTrace.DBG_INITIALIZE)
                 FBTrace.sysout("firebug.initialize with prefDomain "+this.prefDomain);
             this.initializePrefs();
         },
