@@ -1,4 +1,4 @@
-define("ToolsInterface", ["firebugModules/inProcess/browser.js", "firebugModules/inProcess/compilationunit.js"], function(Browser, CompilationUnit) {
+define("ToolsInterface", ["inProcess/browser.js", "inProcess/compilationunit.js"], function(Browser, CompilationUnit) {
 
 Browser.onDebug = function()
 {

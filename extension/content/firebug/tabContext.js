@@ -1,6 +1,6 @@
 /* See license.txt for terms of usage */
 
-define("firebugModules/tabContext.js", ["ToolsInterface"], function(ToolsInterface) { with (FBL) {
+define("tabContext.js", ["ToolsInterface"], function(ToolsInterface) { with (FBL) {
 
     var CompilationUnit = ToolsInterface.CompilationUnit;
 
@@ -126,7 +126,7 @@ Firebug.TabContext.prototype =
         compilationUnit.getSourceLines(-1, -1, function onLines(compilationUnit, firstLineNumber, lastLineNumber, lines)
         {
             ToolsInterface.browser.dispatch("onSourceLines", arguments);
-            FBTrace.sysout("onSourceLines "+compilationUnit.getURL());
+            FBTrace.sysout("onSourceLines "+compilationUnit.getURL()+" "+lines.length+" lines", compilationUnit);
         });
 
     },

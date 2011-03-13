@@ -42,12 +42,12 @@ var FirebugLoadManager = function () {
         return firebugScope;
     }
 
-    function getModuleLoaderConfig()
+    function getModuleLoaderConfig(baseURL)
     {
         var uid = Math.random();  // to give each XUL window its own loader (for now)
         var config = {
             context:"Firebug "+uid, // TODO XUL window id on FF4.0+
-            baseUrl: "resource://",
+            baseUrl: baseURL || "resource://firebug_rjs/",
             onDebug: function() {
                 if (!this.FBTrace)
                 {
@@ -85,42 +85,42 @@ var FirebugLoadManager = function () {
         return config;
     }
 
-    function createLoader()
+    function createLoader(baseURL)
     {
         preLoadInitialization();
         var firebugScope = getModuleLoaderScope();// pump the objects from this scope down into module loader
-        var config = getModuleLoaderConfig();
+        var config = getModuleLoaderConfig(baseURL);
         var loader = new ModuleLoader(firebugScope, config);
         return loader;
     }
 
-    function loadCore(coreInitialize)
+    function loadCore(baseURL, coreInitialize)
     {
-        var loader = createLoader();
+        var loader = createLoader(baseURL);
 
         var coreModules = [];
 
         if (FirebugLoadManager.arch === 'inProcess')
         {
-            coreModules.push("firebugModules/inProcess/tools.js");  // must be first
-            coreModules.push("firebugModules/inProcess/options.js");  // debugger needs Firebug.Options because of $STR() in property initializes, TODO
-            coreModules.push("firebugModules/inProcess/firebugadapter.js");
-            coreModules.push("firebugModules/debugger.js");
-            coreModules.push("firebugModules/inProcess/javascripttool.js");
+            coreModules.push("inProcess/tools.js");  // must be first
+            coreModules.push("inProcess/options.js");  // debugger needs Firebug.Options because of $STR() in property initializes, TODO
+            coreModules.push("inProcess/firebugadapter.js");
+            coreModules.push("debugger.js");
+            coreModules.push("inProcess/javascripttool.js");
         }
         else if (FirebugLoadManager.arch == "remoteClient")
         {
             coreModules.push("crossfireModules/tools.js");
-            coreModules.push("firebugModules/inProcess/options.js");  // debugger needs Firebug.Options because of $STR() in property initializes, TODO
-            coreModules.push("firebugModules/debugger.js");
+            coreModules.push("inProcess/options.js");  // debugger needs Firebug.Options because of $STR() in property initializes, TODO
+            coreModules.push("debugger.js");
 
         }
         else if (FirebugLoadManager.arch == "remoteServer")
         {
 
-            coreModules.push("firebugModules/inProcess/tools.js");  // must be first
-            coreModules.push("firebugModules/inProcess/options.js");  // debugger needs Firebug.Options because of $STR() in property initializes, TODO
-            coreModules.push("firebugModules/debugger.js");
+            coreModules.push("inProcess/tools.js");  // must be first
+            coreModules.push("inProcess/options.js");  // debugger needs Firebug.Options because of $STR() in property initializes, TODO
+            coreModules.push("debugger.js");
 
             coreModules.push("crossfireModules/crossfire-server.js");
         }
@@ -130,9 +130,9 @@ var FirebugLoadManager = function () {
         }
 
         var defaultModules = [
-         "firebugModules/tabContext.js",  // should be loaded by being a dep of tabWatcher
-         "firebugModules/sourceBox.js",
-         "firebugModules/script.js",
+         "tabContext.js",  // should be loaded by being a dep of tabWatcher
+         "sourceBox.js",
+         "script.js",
         ];
 
         var modules = coreModules.concat(defaultModules);

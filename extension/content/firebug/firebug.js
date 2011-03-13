@@ -128,7 +128,7 @@ top.Firebug =
         Firebug.LoadManager = FirebugLoadManager;
         delete FirebugLoadManager; // unpollute global
 
-        Firebug.LoadManager.loadCore(function coreInitialize()
+        Firebug.LoadManager.loadCore(window._firebugModuleBaseURL, function coreInitialize()
         {
                 Firebug.completeInitialize(tempPanelTypes);
         });

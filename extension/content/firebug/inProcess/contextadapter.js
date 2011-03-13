@@ -3,7 +3,7 @@
 // ************************************************************************************************
 // Module
 
-define([ "firebugModules/tabContext.js"], function initializeContextAdapter()
+define([ "tabContext.js"], function initializeContextAdapter()
 {
 
 // ************************************************************************************************
