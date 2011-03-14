@@ -126,7 +126,8 @@ Firebug.TabContext.prototype =
         compilationUnit.getSourceLines(-1, -1, function onLines(compilationUnit, firstLineNumber, lastLineNumber, lines)
         {
             ToolsInterface.browser.dispatch("onSourceLines", arguments);
-            FBTrace.sysout("onSourceLines "+compilationUnit.getURL()+" "+lines.length+" lines", compilationUnit);
+            if (FBTrace.DBG_COMPILATION_UNITS)
+                FBTrace.sysout("onSourceLines "+compilationUnit.getURL()+" "+lines.length+" lines", compilationUnit);
         });
 
     },
