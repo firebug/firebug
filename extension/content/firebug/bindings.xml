@@ -756,12 +756,17 @@
                 this.removeAttribute("collapsed");
             ]]></body>
         </method>
-    </implementation>
-    <handlers>
-        <handler event="mousedown" button="0"><![CDATA[
+        <method name="showMenu">
+            <body><![CDATA[
             var popupBoxObject = this.popup.popupBoxObject;
             popupBoxObject.setConsumeRollupEvent(popupBoxObject.ROLLUP_NO_CONSUME);
             this.popup.showPopup(this, -1, -1, "popup", "bottomleft", "topleft");
+            ]]></body>
+        </method>
+    </implementation>
+    <handlers>
+        <handler event="mousedown" button="0"><![CDATA[
+            this.showMenu();
         ]]></handler>
         <handler event="popupshowing"><![CDATA[
             var tab = this.panelBar.selectedTab;

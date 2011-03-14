@@ -916,11 +916,43 @@ Firebug.Breakpoint.BreakNotification.prototype = domplate(Firebug.Rep,
         return parentNode.repObject;
     },
 
-    onDisableNotification: function(event)
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+    // Action handlers from "do not show again" description
+
+    onClickLink: function(event)
     {
-        // Do not display again if the user wishes so.
+        var type = event.target.getAttribute("type");
+        switch (type)
+        {
+            // Do not display again if the user wishes so.
+            case "hide":
+                this.disableNotifications(event);
+                break;
+
+            case "menu":
+                this.showTabMenu(event);
+                break;
+        }
+    },
+
+    disableNotifications: function(event)
+    {
         Firebug.setPref(Firebug.prefDomain, "showBreakNotification", false);
+
+        // Hide the notification, but default processing of this event would hide it anyway.
         this.onHide(event);
+    },
+
+    showTabMenu: function(event)
+    {
+        // Open panel's tab menu to show the "Show Break Notifications" option
+        // to teach the user where to enable it again.
+        var panelBar = Firebug.chrome.$("fbPanelBar1");
+        var tab = panelBar.getTab("script");
+        tab.tabMenu.showMenu();
+
+        // Avoid default processing that hides the notification popup.
+        cancelEvent(event);
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -966,7 +998,7 @@ Firebug.Breakpoint.BreakNotification.prototype = domplate(Firebug.Rep,
         // Render "do not show again" text
         var descNode = this.box.querySelector(".noNotificationDesc");
         FirebugReps.Description.render($STR("firebug.breakpoint.doNotShowBreakNotification2"),
-            descNode, bind(this.onDisableNotification, this));
+            descNode, bind(this.onClickLink, this));
 
         // Tooltips
         if (this.cause.skipActionTooltip)
@@ -1036,4 +1068,6 @@ Firebug.registerModule(Firebug.Breakpoint);
 // ********************************************************************************************* //
 
 return Firebug.Breakpoint;
+
+// ********************************************************************************************* //
 }});
