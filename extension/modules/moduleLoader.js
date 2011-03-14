@@ -264,12 +264,13 @@ ModuleLoader.prototype = {
                 delete this.saveOnError;
             }
         } else {
-            if (ModuleLoader.debug) ModuleLoader.onDebug("ModuleLoader.loadDepsThenCallback(deps, callback), deps string or array of strings, callback called after strings resolved and loaded", this);
+            if (ModuleLoader.debug) {
+                ModuleLoader.onDebug("ModuleLoader.loadDepsThenCallback(deps, callback), missing argument 'deps'", this);
+            }
         }
     },
 
     remapConfig: function(cfg) {
-
         if (cfg.debug)
             ModuleLoader.debug = !!cfg.debug;
         if (cfg.onDebug)
@@ -277,6 +278,10 @@ ModuleLoader.prototype = {
 
         if (cfg.onError)
             ModuleLoader.onError = cfg.onError;
+
+        if (ModuleLoader.debug){
+            ModuleLoader.onDebug("ModuleLoader.remapConfig name: "+(cfg.context||"(none)")+" baseUrl:"+(cfg.baseUrl||"(none given)"));
+        }
 
         if (!cfg.context) {
             // The require.js config object uses 'context' property name to mean 'contextName'.
