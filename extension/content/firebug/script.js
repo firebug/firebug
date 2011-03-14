@@ -170,14 +170,20 @@ Firebug.ScriptPanel.prototype = extend(Firebug.SourceBoxPanel,
         }
     },
 
+    highlightingAttribute: "exe_line",
+
+    removeExeLineHighlight: function(sourceBox)
+    {
+        if (sourceBox.selectedLine)
+            sourceBox.selectedLine.removeAttribute(this.highlightingAttribute);
+    },
+
     highlightLine: function(lineNumber, context)
     {
         var panel = this;
         return function exeHighlightFactory(sourceBox)
         {
-            var highlightingAttribute = "exe_line";
-            if (sourceBox.selectedLine)
-                sourceBox.selectedLine.removeAttribute(highlightingAttribute);
+            panel.removeExeLineHighlight(sourceBox);
 
             var lineNode = sourceBox.getLineNode(lineNumber);  // we close over lineNumber
             sourceBox.selectedLine = lineNode;  // if null, clears
@@ -190,7 +196,7 @@ Firebug.ScriptPanel.prototype = extend(Firebug.SourceBoxPanel,
 
             if (sourceBox.selectedLine)
             {
-                lineNode.setAttribute(highlightingAttribute, "true");
+                lineNode.setAttribute(panel.highlightingAttribute, "true");
                 if (context.breakingCause && !context.breakingCause.shown)
                 {
                     context.breakingCause.shown = true;
@@ -206,10 +212,10 @@ Firebug.ScriptPanel.prototype = extend(Firebug.SourceBoxPanel,
 
             if (FBTrace.DBG_BP || FBTrace.DBG_STACK || FBTrace.DBG_COMPILATION_UNITS)
                 FBTrace.sysout("sourceBox.highlightLine lineNo: "+lineNumber+
-                    " lineNode="+lineNode+" in "+sourceBox.repObject.getURL());
+                    " sourceBox.selectedLine="+sourceBox.selectedLine+" in "+sourceBox.repObject.getURL());
 
             // xxxHonza: XXXJJB: this is a workaround should be properly fixed
-            return false;//(sourceBox.selectedLine); // sticky if we have a valid line
+            return sourceBox.selectedLine; // sticky if we have a valid line
         };
     },
 
@@ -241,10 +247,7 @@ Firebug.ScriptPanel.prototype = extend(Firebug.SourceBoxPanel,
     {
         if (this.selectedSourceBox)
         {
-            // Clear highlight. The scrolling shouldn't happen at this time so, use the current
-            // centralLine as the argument to scrollToLine.
-            this.scrollToLine(null, this.selectedSourceBox.centralLine,
-                this.highlightLine(-1, this.context));
+            this.removeExeLineHighlight(this.selectedSourceBox);
 
             if (FBTrace.DBG_STACK)
                 FBTrace.sysout("showNoStackFrame clear "+this.selectedSourceBox.repObject.url);
@@ -1317,9 +1320,9 @@ Firebug.ScriptPanel.prototype = extend(Firebug.SourceBoxPanel,
 
             // Update Break on Next lightning.
             Firebug.Breakpoint.updatePanelTab(this, false);
-            Firebug.chrome.syncPanel("script");  // issue 3463
             this.context.stoppedFrameXB = frame;
             Firebug.chrome.select(frame, "script", null, true);
+            Firebug.chrome.syncPanel("script");  // issue 3463 and 4213
             Firebug.chrome.focus();
         }
         catch(exc)

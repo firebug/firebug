@@ -520,10 +520,6 @@ Firebug.SourceBoxPanel = extend(SourceBoxPanelBase,
                     this.selectedSourceBox.scrollTop+" for "+this.selectedSourceBox.repObject.href);
 
             this.selectedSourceBox.scrollTop = this.selectedSourceBox.newScrollTop; // *may* cause scrolling
-
-            if (FBTrace.DBG_COMPILATION_UNITS)
-                FBTrace.sysout("SourceBoxPanel.scrollTimeout: scrollTo "+lineNo+" scrollTop:"+
-                    this.selectedSourceBox.scrollTop+ " lineHeight: "+this.selectedSourceBox.lineHeight);
         }
 
         this.context.scrollTimeout = this.context.setTimeout(bindFixed(function()
@@ -538,6 +534,9 @@ Firebug.SourceBoxPanel = extend(SourceBoxPanelBase,
             if (this.selectedSourceBox.highlighter)
                 this.applyDecorator(this.selectedSourceBox); // may need to highlight even if we don't scroll
 
+            if (FBTrace.DBG_COMPILATION_UNITS)
+                FBTrace.sysout("SourceBoxPanel.scrollTimeout: scrollTo "+lineNo+
+                        " this.selectedSourceBox.highlighter: "+this.selectedSourceBox.highlighter);
         }, this));
 
         this.selectedSourceBox.highlighter = highlighter;  // clears if null
@@ -1035,7 +1034,7 @@ Firebug.SourceBoxPanel = extend(SourceBoxPanelBase,
             bindFixed(this.asyncHighlighting, this, sourceBox));
 
         if (FBTrace.DBG_COMPILATION_UNITS)
-            FBTrace.sysout("applyDecorator "+sourceBox.repObject.url, sourceBox);
+            FBTrace.sysout("applyDecorator "+sourceBox.repObject.url+" sourceBox.highlighter "+sourceBox.highlighter, sourceBox);
     },
 
     asyncDecorating: function(sourceBox)
@@ -1061,6 +1060,9 @@ Firebug.SourceBoxPanel = extend(SourceBoxPanelBase,
     {
         try
         {
+            if (FBTrace.DBG_COMPILATION_UNITS)
+                FBTrace.sysout("asyncHighlighting "+sourceBox.repObject.url+" sourceBox.highlighter "+sourceBox.highlighter, sourceBox);
+
             if (sourceBox.highlighter)
             {
                 // If the sticky flag is false, the highlight is removed, eg the search and sourcelink highlights.

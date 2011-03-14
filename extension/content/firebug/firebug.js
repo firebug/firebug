@@ -1882,8 +1882,6 @@ Firebug.Panel = extend(new Firebug.Listener(),
 
     navigate: function(object)
     {
-        if (FBTrace.DBG_PANELS)
-            FBTrace.sysout("navigate "+this.name+" to "+object+" when this.location="+this.location+"\n");
         if (!object)
             object = this.getDefaultLocation();
         if (!object)
@@ -1898,6 +1896,11 @@ Firebug.Panel = extend(new Firebug.Listener(),
             this.updateLocation(object);
 
             dispatch(Firebug.uiListeners, "onPanelNavigate", [object, this]);
+        }
+        else
+        {
+            if (FBTrace.DBG_PANELS)
+                FBTrace.sysout("navigate skipped for panel "+this.name+" when object "+object+" vs this.location="+this.location, {object: object, location: this.location});
         }
     },
 
