@@ -720,32 +720,9 @@ top.Firebug =
         if (panelName)
             Firebug.chrome.selectPanel(panelName);
 
-        if (Firebug.currentContext && browser.showFirebug)  // then we are already debugging the selected tab
+        if (!browser.showFirebug) // then we are not debugging the selected tab
         {
-            if (Firebug.isDetached()) // if we are out of the browser focus the window
-                Firebug.chrome.focus();
-            else if (Firebug.openInWindow)
-                this.detachBar(context);
-            else if (Firebug.isMinimized()) // toggle minimize
-                Firebug.unMinimize();
-            else if (!forceOpen)  // else isInBrowser
-                Firebug.minimizeBar();
-        }
-        else  // closed or no context or no showFirebug
-        {
-            if (FBTrace.DBG_ERRORS)
-            {
-                var context = Firebug.TabWatcher.getContextByWindow(browser.contentWindow);
-                if (context)
-                {
-                    // ASSERT: we should not have showFirebug false on a page with a context
-                    FBTrace.sysout("Firebug.toggleBar: placement "+this.getPlacement()+
-                        " context: "+context.getName()+" Firebug.currentContext: "+
-                        (Firebug.currentContext?Firebug.currentContext.getName():"null")+
-                        " browser.showFirebug:"+browser.showFirebug);
-                }
-            }
-
+            // user requests debugging on this tab
             var created = Firebug.TabWatcher.watchBrowser(browser);  // create a context for this page
             if (!created)
             {
@@ -753,10 +730,23 @@ top.Firebug =
                     FBTrace.sysout("Rejected page should explain to user!");
                 return false;
             }
-
-            if (Firebug.isMinimized()) // then toggle minimize
-                Firebug.unMinimize();
+            if (FBTrace.DBG_ACTIVATION)
+            {
+                var context = Firebug.TabWatcher.getContextByWindow(browser.contentWindow);
+                FBTrace.sysout("toggleBar created context "+(browser.showFirebug?"ok":"ERROR no showFirebug!")+((context === Firebug.currentContext)?"current":"ERROR context not current!"));
+            }
+            forceOpen = true;  // Be sure the UI is open for a newly created context
         }
+
+        if (Firebug.isDetached()) // if we are out of the browser focus the window
+            Firebug.chrome.focus();
+        else if (Firebug.openInWindow)
+            this.detachBar(context);
+        else if (Firebug.isMinimized()) // toggle minimize
+            Firebug.unMinimize();
+        else if (!forceOpen)  // else isInBrowser
+            Firebug.minimizeBar();
+
         return true;
      },
 
