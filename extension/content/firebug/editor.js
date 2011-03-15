@@ -1351,7 +1351,8 @@ Firebug.AutoCompleter = function(getExprOffset, getRange, evaluator, selectMode,
         }
         catch (err)
         {
-            FBTrace.sysout("Firebug.editor; EXCEPTION " + err, err);
+            if (FBTrace.DBG_ERRORS)
+                FBTrace.sysout("Firebug.editor; EXCEPTION " + err, err);
         }
 
         return true;
