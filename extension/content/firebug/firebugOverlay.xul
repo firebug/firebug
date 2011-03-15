@@ -526,7 +526,7 @@
                            id="FirebugMenu_OptionsPopup">
                     <menuitem id="menu_alwaysOpenInWindow"
                               type="checkbox" label="firebug.AlwaysOpenInWindow"
-                              oncommand="FirebugChrome.onToggleOption(this)"
+                              oncommand="FirebugChrome.onToggleAlwaysOpenInWindowOption(this, Firebug.currentContext)"
                               option="openInWindow" class="fbInternational"/>
                     <menuitem id="menu_toggleShowErrorCount"
                               type="checkbox" label="firebug.Show_Error_Count"

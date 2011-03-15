@@ -1163,6 +1163,19 @@ top.FirebugChrome =
         Firebug.Options.set(option, checked);
     },
 
+    onToggleAlwaysOpenInWindowOption: function(menuitem, context)
+    {
+        this.onToggleOption(menuitem);
+
+        var suspended = Firebug.getSuspended();
+        var detached = Firebug.isDetached();
+
+        if (suspended && detached)
+            Firebug.toggleDetachBar(false, false);
+        else if (!suspended)
+            Firebug.toggleDetachBar(false, true);
+    },
+
     onContextShowing: function(event)
     {
         // xxxHonza: This context-menu support can be used even in separate window, which
