@@ -20,7 +20,7 @@
                 <menuitem id="FirebugMenu_Options_alwaysOpenTraceConsole"
                     insertbefore="menu_optionsSeparator"
                     type="checkbox" label="Always_Open_Firebug_Tracing"
-                    oncommand="FirebugChrome.onToggleOption(this)"
+                    oncommand="Firebug.TraceModule.onToggleOption(this)"
                     class="fbInternational" option="alwaysOpenTraceConsole"/>
             </menupopup>
         </menu>

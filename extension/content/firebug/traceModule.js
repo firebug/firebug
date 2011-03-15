@@ -202,6 +202,34 @@ Firebug.TraceModule = extend(Firebug.Module,
         return "chrome://firebug/content/traceConsole.xul";
     },
 
+    onToggleOption: function(target)
+    {
+        FirebugChrome.onToggleOption(target);
+
+        // Open automatically if set to "always open", close otherwise.
+        if (Firebug.getPref(Firebug.prefDomain, "alwaysOpenTraceConsole"))
+            this.openConsole();
+        else
+            this.closeConsole();
+    },
+
+    closeConsole: function(prefDomain)
+    {
+        if (!prefDomain)
+            prefDomain = this.prefDomain;
+
+        var consoleWindow = null;
+        iterateBrowserWindows("FBTraceConsole", function(win) {
+            if (win.TraceConsole.prefDomain == prefDomain) {
+                consoleWindow = win;
+                return true;
+            }
+        });
+
+        if (consoleWindow)
+            consoleWindow.close();
+    },
+
     openConsole: function(prefDomain, windowURL)
     {
         if (!prefDomain)
