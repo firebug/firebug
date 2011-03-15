@@ -53,6 +53,7 @@ define(["ToolsInterface"], function factoryOptions(ToolsInterface)
             "expandShorthandProps",
             "computedStylesDisplay",
             "showMozillaSpecificStyles",
+            "cssEditMode",
 
             // Script
             "decompileEvals", "replaceTabs",

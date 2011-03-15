@@ -68,6 +68,7 @@ pref("extensions.firebug.showUserAgentCSS", false);
 pref("extensions.firebug.expandShorthandProps", false);
 pref("extensions.firebug.showMozillaSpecificStyles", false);
 pref("extensions.firebug.computedStylesDisplay", "grouped");
+pref("extensions.firebug.cssEditMode", "Source");     // 'Source' == Source editing, 'Live' == Live editing
 
 // Script
 pref("extensions.firebug.breakOnErrors", false);

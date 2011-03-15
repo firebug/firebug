@@ -453,7 +453,7 @@ Firebug.CSSStyleSheetPanel.prototype = extend(Firebug.SourceBoxPanel,
                 )
     }),
 
-    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
     refresh: function()
     {
@@ -463,13 +463,27 @@ Firebug.CSSStyleSheetPanel.prototype = extend(Firebug.SourceBoxPanel,
             this.updateSelection(this.selection);
     },
 
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+    // CSS Editing
+
+    updateEditButton: function()
+    {
+        // Update lable of the edit button according to the preferences.
+        var mode = Firebug.Options.getPref(Firebug.Options.prefDomain, "cssEditMode");
+        var label = Firebug.chrome.$("menu_css" + mode + "Edit").label;
+        var command = Firebug.chrome.$("cmd_toggleCSSEditing");
+        command.setAttribute("label", label);
+    },
+
     toggleEditing: function()
     {
         if (!this.stylesheetEditor)
             this.stylesheetEditor = new StyleSheetEditor(this.document);
 
         if (this.editing)
+        {
             Firebug.Editor.stopEditing();
+        }
         else
         {
             if (!this.location)
@@ -484,10 +498,39 @@ Firebug.CSSStyleSheetPanel.prototype = extend(Firebug.SourceBoxPanel,
 
             this.stylesheetEditor.styleSheet = this.location;
             Firebug.Editor.startEditing(this.panelNode, css, this.stylesheetEditor);
+
             //this.stylesheetEditor.scrollToLine(topmost.line, topmost.offset);
             this.stylesheetEditor.input.scrollTop = this.panelNode.scrollTop;
         }
     },
+
+    onEditMode: function(event, menuitem)
+    {
+        var mode = menuitem.getAttribute("mode");
+        if (mode)
+            Firebug.Options.setPref(Firebug.Options.prefDomain, "cssEditMode", mode);
+
+        this.updateEditButton();
+        cancelEvent(event);
+    },
+
+    onOptionsShowing: function(popup)
+    {
+        var mode = Firebug.Options.getPref(Firebug.Options.prefDomain, "cssEditMode");
+
+        for (var child = popup.firstChild; child; child = child.nextSibling)
+        {
+            if (child.localName == "menuitem")
+            {
+                if (child.id == "menu_css" + mode + "Edit")
+                    child.setAttribute("checked", true);
+                else
+                    child.removeAttribute("checked");
+            }
+        }
+    },
+
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
     loadOriginalSource: function()
     {
@@ -934,6 +977,8 @@ Firebug.CSSStyleSheetPanel.prototype = extend(Firebug.SourceBoxPanel,
         Firebug.Inspector.stopInspecting(true);
 
         this.showToolbarButtons("fbCSSButtons", true);
+
+        this.updateEditButton();
 
         if (this.context.loaded && !this.location) // wait for loadedContext to restore the panel
         {
@@ -1491,6 +1536,7 @@ CSSElementPanel.prototype = extend(Firebug.CSSStyleSheetPanel.prototype,
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
     // All calls to this method must call cleanupSheets first
+
     updateCascadeView: function(element)
     {
         var result, warning, inheritLabel;

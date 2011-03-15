@@ -270,9 +270,28 @@
                                             tooltiptext="firebug.EditHTMLTooltip" command="cmd_toggleHTMLEditing"/>
                                     </hbox>
 
+                                    <!-- Toolbar buttons for the CSS panel -->
                                     <hbox id="fbCSSButtons" collapsed="true" class="noTabStop">
-                                        <toolbarbutton id="fbToggleCSSEditing" label="firebug.Edit" class="toolbar-text-button fbInternational"
-                                            tooltiptext="firebug.EditCSSTooltip" command="cmd_toggleCSSEditing"/>
+                                        <toolbarbutton id="fbToggleCSSEditing"
+                                            label="firebug.Edit"
+                                            class="fbInternational"
+                                            tooltiptext="firebug.EditCSSTooltip"
+                                            command="cmd_toggleCSSEditing"
+                                            type="menu-button">
+                                            <menupopup id="fbStatusContextMenu"
+                                                onpopupshowing="Firebug.currentContext.getPanel('stylesheet').onOptionsShowing(this)">
+                                                <menuitem id="menu_cssSourceEdit" mode="Source"
+                                                    label="firebug.css.sourceEdit"
+                                                    oncommand="Firebug.currentContext.getPanel('stylesheet').onEditMode(event, this)"
+                                                    type="radio" autocheck="false"
+                                                    class="fbInternational"/>
+                                                <menuitem id="menu_cssLiveEdit" mode="Live"
+                                                    label="firebug.css.liveEdit"
+                                                    oncommand="Firebug.currentContext.getPanel('stylesheet').onEditMode(event, this)"
+                                                    type="radio" autocheck="false"
+                                                    class="fbInternational"/>
+                                            </menupopup>
+                                        </toolbarbutton>
                                     </hbox>
 
                                     <hbox id="fbScriptButtons" collapsed="true" class="noTabStop">
