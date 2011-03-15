@@ -3684,6 +3684,21 @@ this.getBrowserForWindow = function(win)
 };
 
 // ************************************************************************************************
+this.getWindowId = function(win)
+{
+    var util = win.QueryInterface(Ci.nsIInterfaceRequestor).getInterface(Ci.nsIDOMWindowUtils);
+    var innerWindowID = "(none)";
+    try
+    {
+        var outerWindowID = util.outerWindowID;
+        innerWindowID = util.currentInnerWindowID;
+    }
+    catch(exc)
+    {
+        // no - op
+    }
+    return [outerWindowID, innerWindowID];
+};
 
 this.safeGetWindowLocation = function(window)
 {
