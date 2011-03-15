@@ -417,6 +417,14 @@ Firebug.CSSModule = extend(Firebug.Module,
             this.cleanupSheets(target.ownerDocument, context);
         }
     },
+    // ****************************************************************************************************
+    // Module functions
+
+    initialize: function()
+    {
+           this.cssEditors = {};
+    },
+
     watchWindow: function(context, win)
     {
         var cleanupSheets = bind(this.cleanupSheets, this),
@@ -433,6 +441,39 @@ Firebug.CSSModule = extend(Firebug.Module,
         {
             self.cleanupSheets(subwin.document, context);
         });
+    },
+    initContext: function(context)
+    {
+        context.dirtyListener = new Firebug.CSSDirtyListener(context);
+        this.addListener(context.dirtyListener);
+    },
+    destroyContext: function(context)
+    {
+        this.removeListener(context.dirtyListener);
+    },
+
+    // *****************************************************************
+    registerEditor: function(name, editor)
+    {
+        this.cssEditors[name] = editor;
+    },
+    unregisterEditor: function(name, editor)
+    {
+        delete this.cssEditors[name];
+    },
+    getEditorByName: function(name)
+    {
+        return this.cssEditors[name];
+    },
+    getEditorsNames: function()
+    {
+        var names = [];
+        for (var p in this.cssEditors)
+        {
+            if (this.cssEditors.hasOwnProperty(p))
+                names.push(p);
+        }
+        return names;
     }
 });
 
@@ -475,14 +516,42 @@ Firebug.CSSStyleSheetPanel.prototype = extend(Firebug.SourceBoxPanel,
         command.setAttribute("label", label);
     },
 
-    toggleEditing: function()
+    startBuiltInEditing: function(css)
     {
         if (!this.stylesheetEditor)
             this.stylesheetEditor = new StyleSheetEditor(this.document);
 
+        var styleSheet = this.location.editStyleSheet
+            ? this.location.editStyleSheet.sheet
+            : this.location;
+
+
+        //var topmost = getTopmostRuleLine(this.panelNode);
+
+        this.stylesheetEditor.styleSheet = this.location;
+        Firebug.Editor.startEditing(this.panelNode, css, this.stylesheetEditor);
+
+        //this.stylesheetEditor.scrollToLine(topmost.line, topmost.offset);
+        this.stylesheetEditor.input.scrollTop = this.panelNode.scrollTop;
+    },
+
+    startLiveEditing: function(styleSheet, context)
+    {
+        var css = getStyleSheetCSS(styleSheet, context);
+        this.startBuiltInEditing(css);
+    },
+
+    startSourceEditing: function(styleSheet, context)
+    {
+        var css = getOriginalStyleSheetCSS(styleSheet, context);
+        this.startBuiltInEditing(css);
+    },
+
+    toggleEditing: function()
+    {
         if (this.editing)
         {
-            Firebug.Editor.stopEditing();
+            this.currentCSSEditor.stopEditing();
         }
         else
         {
@@ -493,14 +562,17 @@ Firebug.CSSStyleSheetPanel.prototype = extend(Firebug.SourceBoxPanel,
                 ? this.location.editStyleSheet.sheet
                 : this.location;
 
-            var css = getStyleSheetCSS(styleSheet, this.context);
-            //var topmost = getTopmostRuleLine(this.panelNode);
-
-            this.stylesheetEditor.styleSheet = this.location;
-            Firebug.Editor.startEditing(this.panelNode, css, this.stylesheetEditor);
-
-            //this.stylesheetEditor.scrollToLine(topmost.line, topmost.offset);
-            this.stylesheetEditor.input.scrollTop = this.panelNode.scrollTop;
+            var mode = Firebug.Options.getPref(Firebug.Options.prefDomain, "cssEditMode");
+            this.currentCSSEditor = Firebug.CSSModule.getEditorByName(mode);
+            try
+            {
+                this.currentCSSEditor.startEditing(styleSheet, this.context);
+            }
+            catch(exc)
+            {
+                if (FBTrace.DBG_ERRORS)
+                    FBTrace.sysout("editor.startEditing ERROR "+exc, {name: mode, currentEditor: this.currentCSSEditor, styleSheet: styleSheet});
+            }
         }
     },
 
@@ -943,6 +1015,14 @@ Firebug.CSSStyleSheetPanel.prototype = extend(Firebug.SourceBoxPanel,
         this.onMouseDown = bind(this.onMouseDown, this);
         this.onClick = bind(this.onClick, this);
 
+        this.startLiveEditing = bind(this.startLiveEditing, this);
+        this.stopLiveEditing = bind(Firebug.Editor.stopEditing, Firebug.Editor);
+        Firebug.CSSModule.registerEditor('Live', {startEditing: this.startLiveEditing, stopEditing: this.stopLiveEditing});
+
+        this.startSourceEditing = bind(this.startSourceEditing, this);
+        this.stopSourceEditing = bind(Firebug.Editor.stopEditing, Firebug.Editor);
+        Firebug.CSSModule.registerEditor('Source', {startEditing: this.startSourceEditing, stopEditing: this.stopSourceEditing});
+
         Firebug.SourceBoxPanel.initialize.apply(this, arguments);
     },
 
@@ -953,6 +1033,10 @@ Firebug.CSSStyleSheetPanel.prototype = extend(Firebug.SourceBoxPanel,
         persistObjects(this, state);
 
         Firebug.Editor.stopEditing();
+
+        Firebug.CSSModule.unregisterEditor('Live');
+        Firebug.CSSModule.unregisterEditor('Source');
+
         Firebug.Panel.destroy.apply(this, arguments);
     },
 
@@ -2470,6 +2554,47 @@ StyleSheetEditor.prototype = domplate(Firebug.BaseEditor,
         this.input.scrollTop = (line * lineHeight) + offset;
     }
 });
+
+Firebug.CSSDirtyListener = function(context)
+{
+    this.context = context;
+    this.context.dirtyStyleSheets = [];
+}
+
+Firebug.CSSDirtyListener.prototype =
+{
+    isDirty: function(styleSheet)
+    {
+        var index = this.context.dirtyStyleSheets.indexOf(styleSheet);
+        return (index !== -1);
+    },
+    markSheetDirty: function(styleSheet)
+    {
+        var index = this.context.dirtyStyleSheets.indexOf(styleSheet);
+        if (index ===  -1)
+            this.context.dirtyStyleSheets.push(styleSheet);
+        if (FBTrace.DBG_CSS)
+            FBTrace.sysout("CSSDirtyListener markSheetDirty "+index+" "+styleSheet.href);
+    },
+    onCSSInsertRule: function(styleSheet, cssText, ruleIndex)
+    {
+        this.markSheetDirty(styleSheet);
+    },
+    onCSSDeleteRule: function(styleSheet, ruleIndex)
+    {
+        this.markSheetDirty(styleSheet);
+    },
+    onCSSSetProperty: function(style, propName, propValue, propPriority, prevValue, prevPriority, rule, baseText)
+    {
+        var styleSheet = rule.parentStyleSheet;
+        this.markSheetDirty(styleSheet);
+    },
+    onCSSRemoveProperty: function(style, propName, prevValue, prevPriority, rule, baseText)
+    {
+        var styleSheet = rule.parentStyleSheet;
+        this.markSheetDirty(styleSheet);
+    },
+};
 
 // ************************************************************************************************
 // Local Helpers
