@@ -273,7 +273,7 @@ const styleGroups =
     ]
 };
 
-Firebug.CSSModule = extend(Firebug.Module,
+Firebug.CSSModule = extend(extend(Firebug.Module, Firebug.EditorSelector),
 {
     freeEdit: function(styleSheet, value)
     {
@@ -453,83 +453,6 @@ Firebug.CSSModule = extend(Firebug.Module,
     },
 
     // *****************************************************************
-    registerEditor: function(name, editor)
-    {
-        this.editors[name] = editor;
-    },
-    unregisterEditor: function(name, editor)
-    {
-        delete this.editors[name];
-    },
-    getEditorByName: function(name)
-    {
-        return this.editors[name];
-    },
-    getEditorsNames: function()
-    {
-        var names = [];
-        for (var p in this.editors)
-        {
-            if (this.editors.hasOwnProperty(p))
-                names.push(p);
-        }
-        return names;
-    },
-    getEditorOptionKey: function()
-    {
-        return "cssEditMode";
-    },
-    setCurrentEditorName: function(name)
-    {
-        this.currentEditorName = name;
-        Firebug.Options.set(this.getEditorOptionKey(), name);
-    },
-    getCurrentEditorName: function()
-    {
-        if (!this.currentEditorName)
-            this.currentEditorName = Firebug.Options.get(this.getEditorOptionKey());
-
-        return this.currentEditorName;
-    },
-    getCurrentEditor: function()
-    {
-        return this.getEditorByName(this.getCurrentEditorName());
-    },
-
-    onEditMode: function(event, menuitem)
-    {
-        var mode = menuitem.getAttribute("mode");
-        if (mode)
-            this.setCurrentEditorName(mode);
-
-        this.updateEditButton();
-        cancelEvent(event);
-    },
-
-    updateEditButton: function()
-    {
-        // Update lable of the edit button according to the preferences.
-        var mode = this.getCurrentEditorName();
-        var label = Firebug.chrome.$("menu_"+this.getEditorOptionKey()+mode).label;
-        var command = Firebug.chrome.$("cmd_toggle"+this.getEditorOptionKey());
-        command.setAttribute("label", label);
-    },
-
-    onOptionsShowing: function(popup)
-    {
-        var mode = this.getCurrentEditorName();
-
-        for (var child = popup.firstChild; child; child = child.nextSibling)
-        {
-            if (child.localName == "menuitem")
-            {
-                if (child.id == "menu_"+this.getEditorOptionKey()+mode)
-                    child.setAttribute("checked", true);
-                else
-                    child.removeAttribute("checked");
-            }
-        }
-    },
 });
 
 // ************************************************************************************************
