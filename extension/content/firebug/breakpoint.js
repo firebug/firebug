@@ -921,18 +921,7 @@ Firebug.Breakpoint.BreakNotification.prototype = domplate(Firebug.Rep,
 
     onClickLink: function(event)
     {
-        var type = event.target.getAttribute("type");
-        switch (type)
-        {
-            // Do not display again if the user wishes so.
-            case "hide":
-                this.disableNotifications(event);
-                break;
-
-            case "menu":
-                this.showTabMenu(event);
-                break;
-        }
+        this.showTabMenu(event);
     },
 
     disableNotifications: function(event)
