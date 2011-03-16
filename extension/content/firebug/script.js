@@ -188,12 +188,6 @@ Firebug.ScriptPanel.prototype = extend(Firebug.SourceBoxPanel,
             var lineNode = sourceBox.getLineNode(lineNumber);  // we close over lineNumber
             sourceBox.selectedLine = lineNode;  // if null, clears
 
-            if (sourceBox.breakCauseBox)
-            {
-                sourceBox.breakCauseBox.hide();
-                delete sourceBox.breakCauseBox;
-            }
-
             if (sourceBox.selectedLine)
             {
                 lineNode.setAttribute(panel.highlightingAttribute, "true");
@@ -214,7 +208,6 @@ Firebug.ScriptPanel.prototype = extend(Firebug.SourceBoxPanel,
                 FBTrace.sysout("sourceBox.highlightLine lineNo: "+lineNumber+
                     " sourceBox.selectedLine="+sourceBox.selectedLine+" in "+sourceBox.repObject.getURL());
 
-            // xxxHonza: XXXJJB: this is a workaround should be properly fixed
             return sourceBox.selectedLine; // sticky if we have a valid line
         };
     },
