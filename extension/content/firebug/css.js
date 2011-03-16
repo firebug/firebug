@@ -2585,23 +2585,18 @@ StyleSheetEditor.prototype = domplate(Firebug.BaseEditor,
 
 Firebug.CSSDirtyListener = function(context)
 {
-    this.context = context;
-    this.context.dirtyStyleSheets = [];
 }
 
 Firebug.CSSDirtyListener.isDirty = function(styleSheet, context)
 {
-    var index = context.dirtyStyleSheets.indexOf(styleSheet);
-    return (index !== -1);
+    return (styleSheet.fbDirty == true);
 }
 
 Firebug.CSSDirtyListener.prototype =
 {
     markSheetDirty: function(styleSheet)
     {
-        var index = this.context.dirtyStyleSheets.indexOf(styleSheet);
-        if (index ===  -1)
-            this.context.dirtyStyleSheets.push(styleSheet);
+        styleSheet.fbDirty = true;
         if (FBTrace.DBG_CSS)
             FBTrace.sysout("CSSDirtyListener markSheetDirty "+index+" "+styleSheet.href);
     },
@@ -2622,11 +2617,7 @@ Firebug.CSSDirtyListener.prototype =
     {
         var styleSheet = rule.parentStyleSheet;
         this.markSheetDirty(styleSheet);
-    },
-    onStartCSSEditing: function(styleSheet, context)
-    {
-        this.markSheetDirty(styleSheet);
-    },
+    }
 };
 
 // ************************************************************************************************
