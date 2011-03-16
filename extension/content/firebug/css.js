@@ -1773,14 +1773,14 @@ CSSElementPanel.prototype = extend(Firebug.CSSStyleSheetPanel.prototype,
 
     initialize: function()
     {
-        // We only need the basic panel initialize, not the intermeditate objects
-        Firebug.Panel.initialize.apply(this, arguments);
-
         this.onMouseDown = bind(this.onMouseDown, this);
         this.onClick = bind(this.onClick, this);
         this.onStateChange = bindFixed(this.contentStateCheck, this);
         this.onHoverChange = bindFixed(this.contentStateCheck, this, STATE_HOVER);
         this.onActiveChange = bindFixed(this.contentStateCheck, this, STATE_ACTIVE);
+        
+        // We only need the basic panel initialize, not the intermeditate objects
+        Firebug.Panel.initialize.apply(this, arguments);
     },
 
     show: function(state)
@@ -2063,8 +2063,6 @@ CSSComputedElementPanel.prototype = extend(CSSElementPanel.prototype,
 
     initialize: function()
     {
-        Firebug.Panel.initialize.apply(this, arguments);
-
         this.groupOpened = [];
         for (var groupName in styleGroups)
         {
@@ -2074,6 +2072,8 @@ CSSComputedElementPanel.prototype = extend(CSSElementPanel.prototype,
 
         this.onClick = bind(this.onClick, this);
         this.onMouseDown = bind(this.onMouseDown, this);
+        
+        Firebug.Panel.initialize.apply(this, arguments);
     },
 
     updateView: function(element)
