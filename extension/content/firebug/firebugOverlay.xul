@@ -278,7 +278,7 @@
                                             tooltiptext="firebug.EditCSSTooltip"
                                             command="cmd_toggleCSSEditing"
                                             type="menu-button">
-                                            <menupopup id="fbStatusContextMenu"
+                                            <menupopup id="fbCSSEditorMenu"
                                                 onpopupshowing="Firebug.currentContext.getPanel('stylesheet').onOptionsShowing(this)">
                                                 <menuitem id="menu_cssSourceEdit" mode="Source"
                                                     label="firebug.css.sourceEdit"
