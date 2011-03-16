@@ -525,9 +525,6 @@ Firebug.CSSStyleSheetPanel.prototype = extend(Firebug.SourceBoxPanel,
             ? this.location.editStyleSheet.sheet
             : this.location;
 
-
-        //var topmost = getTopmostRuleLine(this.panelNode);
-
         this.stylesheetEditor.styleSheet = this.location;
         Firebug.Editor.startEditing(this.panelNode, css, this.stylesheetEditor);
 
@@ -547,11 +544,24 @@ Firebug.CSSStyleSheetPanel.prototype = extend(Firebug.SourceBoxPanel,
         this.startBuiltInEditing(css);
     },
 
+    stopEditing: function()
+    {
+        if (this.currentCSSEditor)
+        {
+            this.currentCSSEditor.stopEditing();
+            delete this.currentCSSEditor;
+        }
+        else
+        {
+            Firebug.Editor.stopEditing();
+        }
+    },
+
     toggleEditing: function()
     {
         if (this.editing)
         {
-            this.currentCSSEditor.stopEditing();
+            this.stopEditing();
         }
         else
         {
@@ -1032,7 +1042,7 @@ Firebug.CSSStyleSheetPanel.prototype = extend(Firebug.SourceBoxPanel,
 
         persistObjects(this, state);
 
-        Firebug.Editor.stopEditing();
+        this.stopEditing();
 
         Firebug.CSSModule.unregisterEditor('Live');
         Firebug.CSSModule.unregisterEditor('Source');
@@ -1139,7 +1149,7 @@ Firebug.CSSStyleSheetPanel.prototype = extend(Firebug.SourceBoxPanel,
             this.editing = null;
 
             // Stop the current editing.
-            Firebug.Editor.stopEditing();
+            this.stopEditing();
 
             // ... and open the editor again.
             this.toggleEditing();
@@ -1807,8 +1817,11 @@ CSSElementPanel.prototype = extend(Firebug.CSSStyleSheetPanel.prototype,
 
     initialize: function()
     {
-        Firebug.CSSStyleSheetPanel.prototype.initialize.apply(this, arguments);
+        // We only need the basic panel initialize, not the intermeditate objects
+        Firebug.Panel.initialize.apply(this, arguments);
 
+        this.onMouseDown = bind(this.onMouseDown, this);
+        this.onClick = bind(this.onClick, this);
         this.onStateChange = bindFixed(this.contentStateCheck, this);
         this.onHoverChange = bindFixed(this.contentStateCheck, this, STATE_HOVER);
         this.onActiveChange = bindFixed(this.contentStateCheck, this, STATE_ACTIVE);
@@ -2094,7 +2107,7 @@ CSSComputedElementPanel.prototype = extend(CSSElementPanel.prototype,
 
     initialize: function()
     {
-        Firebug.CSSStyleSheetPanel.prototype.initialize.apply(this, arguments);
+        Firebug.Panel.initialize.apply(this, arguments);
 
         this.groupOpened = [];
         for (var groupName in styleGroups)
@@ -2103,6 +2116,7 @@ CSSComputedElementPanel.prototype = extend(CSSElementPanel.prototype,
             this.groupOpened[title] = true;
         }
 
+        this.onClick = bind(this.onClick, this);
         this.onMouseDown = bind(this.onMouseDown, this);
     },
 
