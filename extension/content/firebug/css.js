@@ -422,7 +422,7 @@ Firebug.CSSModule = extend(Firebug.Module,
 
     initialize: function()
     {
-           this.cssEditors = {};
+           this.editors = {};
     },
 
     watchWindow: function(context, win)
@@ -455,26 +455,81 @@ Firebug.CSSModule = extend(Firebug.Module,
     // *****************************************************************
     registerEditor: function(name, editor)
     {
-        this.cssEditors[name] = editor;
+        this.editors[name] = editor;
     },
     unregisterEditor: function(name, editor)
     {
-        delete this.cssEditors[name];
+        delete this.editors[name];
     },
     getEditorByName: function(name)
     {
-        return this.cssEditors[name];
+        return this.editors[name];
     },
     getEditorsNames: function()
     {
         var names = [];
-        for (var p in this.cssEditors)
+        for (var p in this.editors)
         {
-            if (this.cssEditors.hasOwnProperty(p))
+            if (this.editors.hasOwnProperty(p))
                 names.push(p);
         }
         return names;
-    }
+    },
+    getEditorOptionKey: function()
+    {
+        return "cssEditMode";
+    },
+    setCurrentEditorName: function(name)
+    {
+        this.currentEditorName = name;
+        Firebug.Options.set(this.getEditorOptionKey(), name);
+    },
+    getCurrentEditorName: function()
+    {
+        if (!this.currentEditorName)
+            this.currentEditorName = Firebug.Options.get(this.getEditorOptionKey());
+
+        return this.currentEditorName;
+    },
+    getCurrentEditor: function()
+    {
+        return this.getEditorByName(this.getCurrentEditorName());
+    },
+
+    onEditMode: function(event, menuitem)
+    {
+        var mode = menuitem.getAttribute("mode");
+        if (mode)
+            this.setCurrentEditorName(mode);
+
+        this.updateEditButton();
+        cancelEvent(event);
+    },
+
+    updateEditButton: function()
+    {
+        // Update lable of the edit button according to the preferences.
+        var mode = this.getCurrentEditorName();
+        var label = Firebug.chrome.$("menu_"+this.getEditorOptionKey()+mode).label;
+        var command = Firebug.chrome.$("cmd_toggle"+this.getEditorOptionKey());
+        command.setAttribute("label", label);
+    },
+
+    onOptionsShowing: function(popup)
+    {
+        var mode = this.getCurrentEditorName();
+
+        for (var child = popup.firstChild; child; child = child.nextSibling)
+        {
+            if (child.localName == "menuitem")
+            {
+                if (child.id == "menu_"+this.getEditorOptionKey()+mode)
+                    child.setAttribute("checked", true);
+                else
+                    child.removeAttribute("checked");
+            }
+        }
+    },
 });
 
 // ************************************************************************************************
@@ -506,15 +561,6 @@ Firebug.CSSStyleSheetPanel.prototype = extend(Firebug.SourceBoxPanel,
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
     // CSS Editing
-
-    updateEditButton: function()
-    {
-        // Update lable of the edit button according to the preferences.
-        var mode = Firebug.Options.getPref(Firebug.Options.prefDomain, "cssEditMode");
-        var label = Firebug.chrome.$("menu_css" + mode + "Edit").label;
-        var command = Firebug.chrome.$("cmd_toggleCSSEditing");
-        command.setAttribute("label", label);
-    },
 
     startBuiltInEditing: function(css)
     {
@@ -585,8 +631,7 @@ Firebug.CSSStyleSheetPanel.prototype = extend(Firebug.SourceBoxPanel,
                 ? this.location.editStyleSheet.sheet
                 : this.location;
 
-            var mode = Firebug.Options.getPref(Firebug.Options.prefDomain, "cssEditMode");
-            this.currentCSSEditor = Firebug.CSSModule.getEditorByName(mode);
+            this.currentCSSEditor = Firebug.CSSModule.getCurrentEditor();
             try
             {
                 this.currentCSSEditor.startEditing(styleSheet, this.context);
@@ -596,32 +641,6 @@ Firebug.CSSStyleSheetPanel.prototype = extend(Firebug.SourceBoxPanel,
             {
                 if (FBTrace.DBG_ERRORS)
                     FBTrace.sysout("editor.startEditing ERROR "+exc, {name: mode, currentEditor: this.currentCSSEditor, styleSheet: styleSheet, CSSModule:Firebug.CSSModule});
-            }
-        }
-    },
-
-    onEditMode: function(event, menuitem)
-    {
-        var mode = menuitem.getAttribute("mode");
-        if (mode)
-            Firebug.Options.setPref(Firebug.Options.prefDomain, "cssEditMode", mode);
-
-        this.updateEditButton();
-        cancelEvent(event);
-    },
-
-    onOptionsShowing: function(popup)
-    {
-        var mode = Firebug.Options.getPref(Firebug.Options.prefDomain, "cssEditMode");
-
-        for (var child = popup.firstChild; child; child = child.nextSibling)
-        {
-            if (child.localName == "menuitem")
-            {
-                if (child.id == "menu_css" + mode + "Edit")
-                    child.setAttribute("checked", true);
-                else
-                    child.removeAttribute("checked");
             }
         }
     },
@@ -1086,7 +1105,7 @@ Firebug.CSSStyleSheetPanel.prototype = extend(Firebug.SourceBoxPanel,
 
         this.showToolbarButtons("fbCSSButtons", true);
 
-        this.updateEditButton();
+        Firebug.CSSModule.updateEditButton();
 
         if (this.context.loaded && !this.location) // wait for loadedContext to restore the panel
         {
@@ -2532,13 +2551,13 @@ StyleSheetEditor.prototype = domplate(Firebug.BaseEditor,
         this.input.value = value;
         this.input.focus();
 
-        var command = Firebug.chrome.$("cmd_toggleCSSEditing");
+        var command = Firebug.chrome.$("cmd_togglecssEditMode"); // match CSSModule.getEditorOptionKey
         command.setAttribute("checked", true);
     },
 
     hide: function()
     {
-        var command = Firebug.chrome.$("cmd_toggleCSSEditing");
+        var command = Firebug.chrome.$("cmd_togglecssEditMode");
         command.setAttribute("checked", false);
 
         if (this.box.parentNode == this.panel.panelNode)

@@ -29,7 +29,7 @@
                  checked="false"/>
         <command id="cmd_toggleProfiling" oncommand="Firebug.Profiler.toggleProfiling(Firebug.currentContext)"/>
         <command id="cmd_toggleHTMLEditing" oncommand="Firebug.currentContext.getPanel('html').toggleEditing()"/>
-        <command id="cmd_toggleCSSEditing" oncommand="Firebug.currentContext.getPanel('stylesheet').toggleEditing()"/>
+        <command id="cmd_togglecssEditMode" oncommand="Firebug.currentContext.getPanel('stylesheet').toggleEditing()"/>
 
         <command id="cmd_focusCommandLine" oncommand="if (!Firebug.currentContext) Firebug.toggleBar(true); Firebug.CommandLine.focus(Firebug.currentContext)"/>
         <command id="cmd_focusFirebugSearch" oncommand="if (Firebug.currentContext) Firebug.Search.focus(Firebug.currentContext);"/>
@@ -276,18 +276,19 @@
                                             label="firebug.Edit"
                                             class="fbInternational"
                                             tooltiptext="firebug.EditCSSTooltip"
-                                            command="cmd_toggleCSSEditing"
+                                            command="cmd_togglecssEditMode"
                                             type="menu-button">
                                             <menupopup id="fbCSSEditorMenu"
-                                                onpopupshowing="Firebug.currentContext.getPanel('stylesheet').onOptionsShowing(this)">
-                                                <menuitem id="menu_cssSourceEdit" mode="Source"
+                                                onpopupshowing="Firebug.CSSModule.onOptionsShowing(this)">
+                                                <!-- id must be menu_+getEditOptionKey+mode -->
+                                                <menuitem id="menu_cssEditModeSource" mode="Source"
                                                     label="firebug.css.sourceEdit"
-                                                    oncommand="Firebug.currentContext.getPanel('stylesheet').onEditMode(event, this)"
+                                                    oncommand="Firebug.CSSModule.onEditMode(event, this)"
                                                     type="radio" autocheck="false"
                                                     class="fbInternational"/>
-                                                <menuitem id="menu_cssLiveEdit" mode="Live"
+                                                <menuitem id="menu_cssEditModeLive" mode="Live"
                                                     label="firebug.css.liveEdit"
-                                                    oncommand="Firebug.currentContext.getPanel('stylesheet').onEditMode(event, this)"
+                                                    oncommand="Firebug.CSSModule.onEditMode(event, this)"
                                                     type="radio" autocheck="false"
                                                     class="fbInternational"/>
                                             </menupopup>
