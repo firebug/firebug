@@ -1036,13 +1036,11 @@ Firebug.Breakpoint.BreakNotification.prototype = domplate(Firebug.Rep,
         var self = this;
         var delta = Math.max(3, Math.floor(this.box.clientHeight/20));
         var clientHeight = this.box.clientHeight;
+        var top = 0;
 
         var interval = setInterval(function slide(event)
         {
-            var top = parseInt(self.box.style.top, 10);
-            if (isNaN(top))
-                top = 0;
-
+            top = top - delta;
             if (top < -clientHeight)
             {
                 clearInterval(interval);
@@ -1052,7 +1050,7 @@ Firebug.Breakpoint.BreakNotification.prototype = domplate(Firebug.Rep,
             }
             else
             {
-                self.box.style.top = (top - delta) + "px";
+                self.box.style.top = top + "px";
             }
         }, 15);
     }
