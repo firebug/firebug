@@ -1338,10 +1338,10 @@ Firebug.ScriptPanel.prototype = extend(Firebug.SourceBoxPanel,
         {
                 var chrome = Firebug.chrome;
 
-                if (this.selectedSourceBox.breakCauseBox)
+                if (this.selectedSourcebox && this.selectedSourceBox.breakCauseBox)
                 {
                     this.selectedSourceBox.breakCauseBox.hide();
-                     delete  this.selectedSourceBox.breakCauseBox;
+                    delete this.selectedSourceBox.breakCauseBox;
                 }
 
                 this.syncCommands(this.context);
