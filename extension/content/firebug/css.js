@@ -540,6 +540,18 @@ Firebug.CSSStyleSheetPanel.prototype = extend(Firebug.SourceBoxPanel,
 
     startSourceEditing: function(styleSheet, context)
     {
+        if (Firebug.CSSDirtyListener.isDirty(styleSheet, context))
+        {
+            var prompts = Cc["@mozilla.org/embedcomp/prompt-service;1"].getService(Ci.nsIPromptService);
+            var proceedToEdit = prompts.confirm(null, "Your existing CSS edits will be lost if you edit source", "Are you sure?");
+
+            if (!proceedToEdit)
+            {
+                this.stopEditing();
+                return;
+            }
+        }
+
         var css = getOriginalStyleSheetCSS(styleSheet, context);
         this.startBuiltInEditing(css);
     },
@@ -562,6 +574,7 @@ Firebug.CSSStyleSheetPanel.prototype = extend(Firebug.SourceBoxPanel,
         if (this.editing)
         {
             this.stopEditing();
+            dispatch(this.fbListeners, 'onStopCSSEditing', [this.context]);
         }
         else
         {
@@ -577,6 +590,7 @@ Firebug.CSSStyleSheetPanel.prototype = extend(Firebug.SourceBoxPanel,
             try
             {
                 this.currentCSSEditor.startEditing(styleSheet, this.context);
+                dispatch(this.fbListeners, 'onStartCSSEditing', [styleSheet, this.context]);
             }
             catch(exc)
             {
@@ -2575,13 +2589,14 @@ Firebug.CSSDirtyListener = function(context)
     this.context.dirtyStyleSheets = [];
 }
 
+Firebug.CSSDirtyListener.isDirty = function(styleSheet, context)
+{
+    var index = context.dirtyStyleSheets.indexOf(styleSheet);
+    return (index !== -1);
+}
+
 Firebug.CSSDirtyListener.prototype =
 {
-    isDirty: function(styleSheet)
-    {
-        var index = this.context.dirtyStyleSheets.indexOf(styleSheet);
-        return (index !== -1);
-    },
     markSheetDirty: function(styleSheet)
     {
         var index = this.context.dirtyStyleSheets.indexOf(styleSheet);
@@ -2606,6 +2621,10 @@ Firebug.CSSDirtyListener.prototype =
     onCSSRemoveProperty: function(style, propName, prevValue, prevPriority, rule, baseText)
     {
         var styleSheet = rule.parentStyleSheet;
+        this.markSheetDirty(styleSheet);
+    },
+    onStartCSSEditing: function(styleSheet, context)
+    {
         this.markSheetDirty(styleSheet);
     },
 };
