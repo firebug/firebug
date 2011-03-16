@@ -776,7 +776,8 @@ Firebug.Breakpoint.BreakNotification.prototype = domplate(Firebug.Rep,
 {
     tag:
         DIV({"class": "notificationBox"},
-            TABLE({"class": "notificationTable", onclick: "$onHide"},
+            TABLE({"class": "notificationTable", onclick: "$onHide",
+                onmouseover: "$onMouseOver", onmouseout: "$onMouseOut"},
                 TBODY(
                     TR(
                         TD({"class": "imageCol"},
@@ -822,6 +823,30 @@ Firebug.Breakpoint.BreakNotification.prototype = domplate(Firebug.Rep,
             SPAN("&nbsp;"),
             TAG("$cause|getRelatedTargetTag", {object: "$cause.relatedNode"})
         ),
+
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+    onMouseOver: function(event)
+    {
+        var target = event.target;
+        var box = getAncestorByClass(target, "notificationBox");
+        var close = box.querySelector(".notificationClose");
+
+        // The close button is "active" (red) if the mouse hovers over the notification
+        // area except when it hovers over a button or link.
+        var localName = target.localName ? target.localName.toLowerCase() : "";
+        if (hasClass(target, "notificationButton") || localName == "a")
+            close.removeAttribute("active");
+        else
+            close.setAttribute("active", true);
+    },
+
+    onMouseOut: function(event)
+    {
+        var box = getAncestorByClass(event.target, "notificationBox");
+        var close = box.querySelector(".notificationClose");
+        close.removeAttribute("active");
+    },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -974,6 +999,10 @@ Firebug.Breakpoint.BreakNotification.prototype = domplate(Firebug.Rep,
         // Reneder the entire notification box.
         this.box = this.tag.append(this.cause, parentNode, this);
         this.box.repObject = this;
+
+        this.box.addEventListener("mouseenter", function() {
+            FBTrace.sysout("adfasdfas");
+        }, false);
 
         // Appens the HTML targes dynamically. In case they are null, it breaks
         // click events.
