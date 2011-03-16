@@ -1000,10 +1000,6 @@ Firebug.Breakpoint.BreakNotification.prototype = domplate(Firebug.Rep,
         this.box = this.tag.append(this.cause, parentNode, this);
         this.box.repObject = this;
 
-        this.box.addEventListener("mouseenter", function() {
-            FBTrace.sysout("adfasdfas");
-        }, false);
-
         // Appens the HTML targes dynamically. In case they are null, it breaks
         // click events.
         // xxxHonza: this problem would deserve clarification.
