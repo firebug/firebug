@@ -65,9 +65,11 @@ define("editorSelector.js", ["ToolsInterface"], function(ToolsInterface) { with(
             {
                 // Update lable of the edit button according to the preferences.
                 var mode = this.getCurrentEditorName();
-                var label = Firebug.chrome.$("menu_"+this.getEditorOptionKey()+mode).label;
+                var menuitem = Firebug.chrome.$("menu_" + this.getEditorOptionKey() + mode);
+
                 var command = Firebug.chrome.$("cmd_toggle"+this.getEditorOptionKey());
-                command.setAttribute("label", label);
+                command.setAttribute("label", menuitem.label);
+                command.setAttribute("tooltiptext", menuitem.tooltipText);
             },
 
             onOptionsShowing: function(popup)

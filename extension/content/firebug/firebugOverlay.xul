@@ -283,11 +283,13 @@
                                                 <!-- id must be menu_+getEditOptionKey+mode -->
                                                 <menuitem id="menu_cssEditModeSource" mode="Source"
                                                     label="firebug.css.sourceEdit"
+                                                    tooltiptext="firebug.css.sourceEdit.tooltip"
                                                     oncommand="Firebug.CSSModule.onEditMode(event, this)"
                                                     type="radio" autocheck="false"
                                                     class="fbInternational"/>
                                                 <menuitem id="menu_cssEditModeLive" mode="Live"
                                                     label="firebug.css.liveEdit"
+                                                    tooltiptext="firebug.css.liveEdit.tooltip"
                                                     oncommand="Firebug.CSSModule.onEditMode(event, this)"
                                                     type="radio" autocheck="false"
                                                     class="fbInternational"/>
