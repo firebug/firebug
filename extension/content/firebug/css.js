@@ -562,6 +562,7 @@ Firebug.CSSStyleSheetPanel.prototype = extend(Firebug.SourceBoxPanel,
             }
             catch(exc)
             {
+                var mode = Firebug.CSSModule.getCurrentEditorName();
                 if (FBTrace.DBG_ERRORS)
                     FBTrace.sysout("editor.startEditing ERROR "+exc, {name: mode, currentEditor: this.currentCSSEditor, styleSheet: styleSheet, CSSModule:Firebug.CSSModule});
             }
@@ -1778,7 +1779,7 @@ CSSElementPanel.prototype = extend(Firebug.CSSStyleSheetPanel.prototype,
         this.onStateChange = bindFixed(this.contentStateCheck, this);
         this.onHoverChange = bindFixed(this.contentStateCheck, this, STATE_HOVER);
         this.onActiveChange = bindFixed(this.contentStateCheck, this, STATE_ACTIVE);
-        
+
         // We only need the basic panel initialize, not the intermeditate objects
         Firebug.Panel.initialize.apply(this, arguments);
     },
@@ -2072,7 +2073,7 @@ CSSComputedElementPanel.prototype = extend(CSSElementPanel.prototype,
 
         this.onClick = bind(this.onClick, this);
         this.onMouseDown = bind(this.onMouseDown, this);
-        
+
         Firebug.Panel.initialize.apply(this, arguments);
     },
 
@@ -2524,6 +2525,8 @@ StyleSheetEditor.prototype = domplate(Firebug.BaseEditor,
         this.input.scrollTop = (line * lineHeight) + offset;
     }
 });
+
+Firebug.StyleSheetEditor = StyleSheetEditor;
 
 Firebug.CSSDirtyListener = function(context)
 {
