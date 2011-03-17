@@ -1,12 +1,25 @@
 /* See license.txt for terms of usage */
 
-define("script.js", ["ToolsInterface"], function(ToolsInterface) { with (FBL) {
+define("script.js", ["ToolsInterface", "editorSelector.js"], function(ToolsInterface) { with (FBL) {
 
 var CompilationUnit = ToolsInterface.CompilationUnit;
+
+
 
 // Script panel
 
 Firebug.ScriptPanel = function() {};
+
+for(var p in Firebug.EditorSelector)
+{
+    if (Firebug.EditorSelector.hasOwnProperty(p))
+        Firebug.ScriptPanel[p] = Firebug.EditorSelector[p];
+}
+
+Firebug.ScriptPanel.getEditorOptionKey = function()
+{
+    return "JSEditor";
+}
 
 Firebug.ScriptPanel.reLineNumber = /^[^\\]?#(\d*)$/;
 /*
