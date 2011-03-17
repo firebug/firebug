@@ -459,7 +459,7 @@ Firebug.CSSModule = extend(extend(Firebug.Module, Firebug.EditorSelector),
 
 Firebug.CSSStyleSheetPanel = function() {};
 
-Firebug.CSSStyleSheetPanel.prototype = extend(Firebug.SourceBoxPanel,
+Firebug.CSSStyleSheetPanel.prototype = extend(Firebug.Panel,
 {
     template: domplate(
     {
@@ -971,12 +971,6 @@ Firebug.CSSStyleSheetPanel.prototype = extend(Firebug.SourceBoxPanel,
     deriveA11yFrom: "css",
     order: 30,
 
-    // xxxHonza, XXXjjb
-    // This panel is derived from Firebug.ActivablePanel (predecessor of Firebug.SourceBoxPanel)
-    // but it's apparently not supporting enable/disable. This is a workaround but better
-    // would be to derive only from Firebug.Panel.
-    activable: false,
-
     initialize: function()
     {
         this.onMouseDown = bind(this.onMouseDown, this);
@@ -990,7 +984,7 @@ Firebug.CSSStyleSheetPanel.prototype = extend(Firebug.SourceBoxPanel,
         this.stopSourceEditing = bind(Firebug.Editor.stopEditing, Firebug.Editor);
         Firebug.CSSModule.registerEditor('Source', {startEditing: this.startSourceEditing, stopEditing: this.stopSourceEditing});
 
-        Firebug.SourceBoxPanel.initialize.apply(this, arguments);
+        Firebug.Panel.initialize.apply(this, arguments);
     },
 
     destroy: function(state)
@@ -1012,7 +1006,7 @@ Firebug.CSSStyleSheetPanel.prototype = extend(Firebug.SourceBoxPanel,
         this.panelNode.addEventListener("mousedown", this.onMouseDown, false);
         this.panelNode.addEventListener("click", this.onClick, false);
 
-        Firebug.SourceBoxPanel.initializeNode.apply(this, arguments);
+        Firebug.Panel.initializeNode.apply(this, arguments);
     },
 
     destroyNode: function()
