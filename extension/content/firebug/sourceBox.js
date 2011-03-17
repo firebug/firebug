@@ -266,6 +266,9 @@ Firebug.SourceBoxPanel = extend(SourceBoxPanelBase,
 
     getSourceBoxByURL: function(url)
     {
+        if (!this.sourceBoxes)
+            return null;
+
         return url ? this.sourceBoxes[url] : null;
     },
 
