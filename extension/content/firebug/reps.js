@@ -279,9 +279,15 @@ FirebugReps.Obj = domplate(Firebug.Rep,
 
     getTitleTag: function(object)
     {
-        var title = this.getTitle(object);
+        var title;
+        if (typeof(object) == "string")
+            title = object;
+        else
+            title = this.getTitle(object);
+
         if (title == "Object")
             title = "{...}";
+
         return title;
     },
 
