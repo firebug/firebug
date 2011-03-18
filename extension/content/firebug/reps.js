@@ -333,7 +333,10 @@ FirebugReps.Obj = domplate(Firebug.Rep,
                     if (t == "object")
                     {
                         value = rep.getTitle(value);
-                        tag = rep.titleTag;
+                        if (rep.titleTag)
+                            tag = rep.titleTag;
+                        else
+                            tag = FirebugReps.Obj.titleTag;
                     }
                     count++;
                     if (count <= max)
