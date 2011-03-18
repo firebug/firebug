@@ -1218,7 +1218,7 @@ this.findNext = function(node, criteria, upOnly, maxRoot)
     }
 
     if (node.parentNode && node.parentNode != maxRoot)
-        return this.findNext(node.parentNode, criteria, true);
+        return this.findNext(node.parentNode, criteria, true, maxRoot);
 };
 
 this.findPrevious = function(node, criteria, downOnly, maxRoot)
