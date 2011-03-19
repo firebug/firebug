@@ -83,20 +83,12 @@ Firebug.Inspector = extend(Firebug.Module,
                 else if (context && context.window && context.window.document)
                     highlighter.highlight(context, elementArr, boxFrame, colorObj, false);
             }
-            else if (oldContext)
+            else if (oldContext && oldContext.window && oldContext.window.document)
             {
-                oldContext.highlightTimeout = oldContext.setTimeout(function()
-                {
-                    delete oldContext.highlightTimeout;
-                    if (oldContext.window && oldContext.window.document)
-                    {
-                        highlighter.unhighlight(oldContext);
+                if (FBTrace.DBG_INSPECT)
+                    FBTrace.sysout("Removing inspector highlighter due to null element being passed");
 
-                        if (oldContext.inspectorMouseMove)
-                            oldContext.window.document.removeEventListener("mousemove",
-                                oldContext.inspectorMouseMove, true);
-                    }
-                }, inspectDelay);
+                highlighter.unhighlight(oldContext);
             }
         }
         else
@@ -397,7 +389,7 @@ Firebug.Inspector = extend(Firebug.Module,
         var win = elt.ownerDocument.defaultView;
 
         if (FBTrace.DBG_INSPECT)
-            FBTrace.sysout("inspector.attachRepaintInspectListeners to " + win.location.href);
+            FBTrace.sysout("inspector.attachRepaintInspectListeners to " + win.location.href, elt);
 
         // there is no way to check if the listeners have already been added and we should avoid adding properties
         // to the users page. Adding them again will do no harm so lets just do that.
