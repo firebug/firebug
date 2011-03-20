@@ -83,17 +83,34 @@ Firebug.Inspector = extend(Firebug.Module,
                 else if (context && context.window && context.window.document)
                     highlighter.highlight(context, elementArr, boxFrame, colorObj, false);
             }
-            else if (oldContext && oldContext.window && oldContext.window.document)
+            else if (oldContext)
             {
-                if (FBTrace.DBG_INSPECT)
-                    FBTrace.sysout("Removing inspector highlighter due to null element being passed");
+                oldContext.highlightTimeout = oldContext.setTimeout(function()
+                {
+                    if (FBTrace.DBG_INSPECT)
+                        FBTrace.sysout("Removing inspector highlighter due to setTimeout loop");
 
-                highlighter.unhighlight(oldContext);
+                    delete oldContext.highlightTimeout;
+
+                    if (oldContext.window && oldContext.window.document)
+                    {
+                        highlighter.unhighlight(oldContext);
+
+                        if (oldContext.inspectorMouseMove)
+                            oldContext.window.document.removeEventListener("mousemove",
+                                oldContext.inspectorMouseMove, true);
+                    }
+                }, inspectDelay);
             }
         }
         else
         {
             // Highlight multiple elements
+            if (context && context.highlightTimeout)
+            {
+                context.clearTimeout(context.highlightTimeout);
+                delete context.highlightTimeout;
+            }
             this.clearAllHighlights();
             usingColorArray = FirebugReps.Arr.isArray(colorObj);
 
