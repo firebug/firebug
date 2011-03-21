@@ -371,6 +371,36 @@ Firebug.CSSModule = extend(extend(Firebug.Module, Firebug.EditorSelector),
         }
     },
 
+    /**
+     * Method for atomic propertly removal, such as through the context menu.
+     */
+    deleteProperty: function(rule, propName, context) {
+        dispatch(this.fbListeners, "onBeginFirebugChange", [rule, context]);
+        Firebug.CSSModule.removeProperty(rule, propName);
+        dispatch(this.fbListeners, "onEndFirebugChange", [rule, context]);
+    },
+
+    disableProperty: function(disable, rule, propName, parsedValue, map, context) {
+        dispatch(this.fbListeners, "onBeginFirebugChange", [rule, context]);
+
+        if (disable)
+        {
+            Firebug.CSSModule.removeProperty(rule, propName);
+
+            map.push({"name": propName, "value": parsedValue.value,
+                "important": parsedValue.priority});
+        }
+        else
+        {
+            Firebug.CSSModule.setProperty(rule, propName, parsedValue.value, parsedValue.priority);
+
+            var index = findPropByName(map, propName);
+            map.splice(index, 1);
+        }
+
+        dispatch(this.fbListeners, "onEndFirebugChange", [rule, context]);
+    },
+
     cleanupSheets: function(doc, context)
     {
         // Due to the manner in which the layout engine handles multiple
@@ -863,7 +893,7 @@ Firebug.CSSStyleSheetPanel.prototype = extend(Firebug.Panel,
     {
         var rule = Firebug.getRepObject(row);
         var propName = getChildByClass(row, "cssPropName").textContent;
-        Firebug.CSSModule.removeProperty(rule, propName);
+        Firebug.CSSModule.deleteProperty(rule, propName, this.context);
 
         // Remove the property from the selector map, if it was disabled
         var ruleId = Firebug.getRepNode(row).getAttribute("ruleId");
@@ -904,20 +934,8 @@ Firebug.CSSStyleSheetPanel.prototype = extend(Firebug.Panel,
         var map = this.context.selectorMap[ruleId];
         var propValue = getChildByClass(row, "cssPropValue").textContent;
         var parsedValue = parsePriority(propValue);
-        if (hasClass(row, "disabledStyle"))
-        {
-            Firebug.CSSModule.removeProperty(rule, propName);
 
-            map.push({"name": propName, "value": parsedValue.value,
-                "important": parsedValue.priority});
-        }
-        else
-        {
-            Firebug.CSSModule.setProperty(rule, propName, parsedValue.value, parsedValue.priority);
-
-            var index = findPropByName(map, propName);
-            map.splice(index, 1);
-        }
+        Firebug.CSSModule.disableProperty(hasClass(row, "disabledStyle"), rule, propName, parsedValue, map, this.context);
 
         this.markChange(this.name == "stylesheet");
     },
