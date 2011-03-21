@@ -121,7 +121,16 @@ Firebug.SourceBoxPanel = extend(SourceBoxPanelBase,
     {
         Firebug.ActivablePanel.destroyNode.apply(this, arguments);
 
-        this.resizeEventTarget.removeEventListener("resize", this.onResize, true);
+        if (this.resizeEventTarget)
+        {
+            this.resizeEventTarget.removeEventListener("resize", this.onResize, true);
+        }
+        else
+        {
+            if (FBTrace.DBG_ERRORS)
+                FBTrace.sysout("sourceBox.destroyNode; ERROR this.resizeEventTarget is NULL");
+        }
+
         this.detachFromCache();
     },
 
