@@ -774,13 +774,18 @@ top.FirebugChrome =
 
     syncSidePanels: function()
     {
-        if(FBTrace.DBG_PANELS)
+        if (FBTrace.DBG_PANELS)
             FBTrace.sysout("syncSidePanels "+panelBar1.selectedPanel);
+
         if (!panelBar1.selectedPanel)
             return;
 
-        var panelTypes = Firebug.getSidePanelTypes(Firebug.currentContext, panelBar1.selectedPanel);
-        panelBar2.updatePanels(panelTypes);
+        var panelTypes;
+        if (Firebug.currentContext)
+        {
+            panelTypes = Firebug.getSidePanelTypes(Firebug.currentContext, panelBar1.selectedPanel);
+            panelBar2.updatePanels(panelTypes);
+        }
 
         if (Firebug.currentContext && Firebug.currentContext.sidePanelNames)
         {
