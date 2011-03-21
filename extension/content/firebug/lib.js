@@ -294,6 +294,10 @@ this.hasProperties = function(ob)
 {
     try
     {
+        var obString = FBL.safeToString(ob);
+        if (obString === '[object StorageList]' || obString === '[xpconnect wrapped native prototype]')
+            return true;
+
         for (var name in ob)
         {
             // Try to access the property before declaring existing properties.
@@ -302,7 +306,11 @@ this.hasProperties = function(ob)
             var value = ob[name];
             return true;
         }
-    } catch (exc) {}
+    } catch (exc)
+    {
+        if (FBTrace.DBG_ERRORS)
+            FBTrace.sysout("lib.hasProperties("+FBL.safeToString(ob)+") ERROR "+exc, exc);
+    }
     return false;
 };
 
@@ -3697,7 +3705,7 @@ this.getWindowId = function(win)
     {
         // no - op
     }
-    return [outerWindowID, innerWindowID];
+    return {outer: outerWindowID, inner: innerWindowID};
 };
 
 this.safeGetWindowLocation = function(window)
