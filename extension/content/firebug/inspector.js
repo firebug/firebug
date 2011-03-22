@@ -975,7 +975,7 @@ function getImageMapHighlighter(context)
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-quickInfoBox =
+var quickInfoBox =
 {
     boxEnabled: undefined,
     dragging: false,

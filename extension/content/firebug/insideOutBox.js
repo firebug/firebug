@@ -7,7 +7,7 @@ FBL.ns(function() { with (FBL) {
  *
  * All views must implement this interface (directly or via duck typing).
  */
-InsideOutBoxView = {
+var InsideOutBoxView = {
     /**
      * Retrieves the parent object for a given child object.
      */
