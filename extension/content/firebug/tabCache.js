@@ -443,7 +443,7 @@ Firebug.TabCache.prototype = extend(Firebug.SourceCache.prototype,
                     FBTrace.sysout("tabCache.loadFromCache; Failed to load source for: " + url);
 
                 stream.close();
-                return [$STR("message.Failed to load source for") + ": " + url];
+                return [$STR("message.Failed to load source from cache for") + ": " + url];
             }
 
             // Don't load responses that shouldn't be cached.

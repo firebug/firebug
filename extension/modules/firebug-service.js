@@ -253,7 +253,7 @@ var jsdHandlers =
 
             if (methodName in aHook)
             {
-                if (FBTrace.DBG_FBS_STEP || FBTrace.DBG_DISPATCH)
+                if (FBTrace.DBG_FBS_STEP && FBTrace.DBG_DISPATCH)
                     FBTrace.sysout("firebug-service.jsdHandler.dispatch "+methodName+" to "+aHook+" "+getCallFromType(type)+" frame: "+frameToString(frame), this);
 
                 var rc = aHook[methodName].apply(aHook, [frame, type, rv]);

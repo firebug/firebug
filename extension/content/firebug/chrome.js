@@ -718,7 +718,6 @@ top.FirebugChrome =
     {
          // This sets the global value of Firebug.currentContext in the window that this chrome is compiled into.
          // Note that for firebug.xul, the Firebug object is shared across windows, but not FirebugChrome and Firebug.currentContext
-         FirebugContext = context;
          Firebug.currentContext = context;
 
          if (FBTrace.DBG_WINDOWS || FBTrace.DBG_DISPATCH)
