@@ -57,7 +57,7 @@ Firebug.TabWatcher = extend(new Firebug.Listener(),
             FBTrace.sysout("-> tabWatcher initialize "+tabBrowser);
 
         if (tabBrowser)
-            tabBrowser.addProgressListener(TabProgressListener, NOTIFY_STATE_DOCUMENT);
+            tabBrowser.addProgressListener(TabProgressListener);
 
         httpObserver.addObserver(TabWatcherHttpObserver, "firebug-http-event", false);
     },
@@ -765,7 +765,7 @@ function registerFrameListener(browser)
         return;
 
     browser.frameListener = FrameProgressListener;  // just a mark saying we've registered. TODO remove!
-    browser.addProgressListener(FrameProgressListener, NOTIFY_STATE_DOCUMENT);
+    browser.addProgressListener(FrameProgressListener);
 
     if (FBTrace.DBG_WINDOWS)
     {
@@ -1029,12 +1029,12 @@ var TraceListener =
 
 // ************************************************************************************************
 
-top.__defineGetter__("TabWatcher", function deprecatedTabWatcher() 
+top.__defineGetter__("TabWatcher", function deprecatedTabWatcher()
 {
-	if (FBTrace.DBG_ERRORS)
-		FBTrace.sysout("deprecated TabWatcher global accessed");
-	
-	return Firebug.TabWatcher; 
+    if (FBTrace.DBG_ERRORS)
+        FBTrace.sysout("deprecated TabWatcher global accessed");
+
+    return Firebug.TabWatcher;
 });
 
 return Firebug.TabWatcher;

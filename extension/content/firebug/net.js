@@ -4439,7 +4439,7 @@ function monitorContext(context)
     context.sourceCache.addListener(networkContext.cacheListener);
 
     // This listener is used to observe downlaod progress.
-    context.browser.addProgressListener(listener, NOTIFY_ALL);
+    context.browser.addProgressListener(listener);
 
     // Activate net panel sub-context.
     var panel = context.getPanel(panelName);
