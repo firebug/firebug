@@ -1440,7 +1440,7 @@ Firebug.ScriptPanel.WarningRep = domplate(Firebug.Rep,
         var box = this.tag.replace(args, parentNode, this);
         var description = box.querySelector(".disabledPanelDescription");
         FirebugReps.Description.render(args.suggestion, description,
-            bind(this.reloadPageFromMemory, this));
+            bindFixed(Firebug.TabWatcher.reloadPageFromMemory,  Firebug.TabWatcher, Firebug.currentContext));
 
         return box;
     },
