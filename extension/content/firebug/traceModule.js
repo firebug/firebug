@@ -363,6 +363,11 @@ Firebug.TraceModule.CommonBaseUI = {
             button.setAttribute("id", menuitem.pref);
             button.removeAttribute("type");
             button.addEventListener("click", menuitem.command, false);
+
+            var tooltip = $STR("tracing.option." + menuitem.label + "_Description");
+            if (tooltip)
+                button.setAttribute("title", tooltip);
+
             optionsBody.appendChild(button);
         }
 
