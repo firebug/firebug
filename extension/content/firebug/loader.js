@@ -57,7 +57,8 @@ var FirebugLoadManager = function () {
                     // on the first call we use it to get a ref to the Cu.import module object
                     this.FBTrace = traceConsoleService.getTracer("extensions.firebug");
                 }
-                this.FBTrace.sysout.apply(this.FBTrace,arguments);
+                if (this.FBTrace.DBG_MODULES)
+                    this.FBTrace.sysout.apply(this.FBTrace,arguments);
             },
             onError: function()
             {
@@ -68,7 +69,8 @@ var FirebugLoadManager = function () {
                     // on the first call we use it to get a ref to the Cu.import module object
                     this.FBTrace = traceConsoleService.getTracer("extensions.firebug");
                 }
-                this.FBTrace.sysout.apply(this.FBTrace, arguments);
+                if (this.FBTrace.DBG_ERRORS || this.FBTrace.DBG_MODULES)
+                    this.FBTrace.sysout.apply(this.FBTrace, arguments);
             },
             waitSeconds: 0,
             debug: true,

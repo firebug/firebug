@@ -90,8 +90,8 @@ var traceConsoleService =
             {
                 var optionName = p.substr(1); // drop leading .
                 optionMap[optionName] = this.getPref(prefDomain+p);
-                if (toOSConsole)
-                    this.osOut("traceConsoleService.createManagedOptionMap "+optionName+"="+optionMap[optionName]+"\n");
+                //if (toOSConsole)
+                //    this.osOut("traceConsoleService.createManagedOptionMap "+optionName+"="+optionMap[optionName]+"\n");
             }
         }
 
