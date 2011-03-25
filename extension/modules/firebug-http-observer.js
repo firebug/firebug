@@ -32,7 +32,7 @@ var httpRequestObserver =
     preInitialize: function()
     {
         this.observers = [];
-        this.observerCount = 0;
+        this.observing = 0;
 
         // Get firebug-trace service for logging (the service should be already
         // registered at this moment).
@@ -68,32 +68,32 @@ var httpRequestObserver =
     {
         if (FBTrace.DBG_HTTPOBSERVER)
             FBTrace.sysout("httpObserver.registerObservers; wasObserving: " +
-                this.observerCount + " with observers "+this.observers.length, this.observers);
+                this.observing + " with observers "+this.observers.length, this.observers);
 
-        if (this.observerCount == 0)
+        if (!this.observing)
         {
             observerService.addObserver(this, "http-on-modify-request", false);
             observerService.addObserver(this, "http-on-examine-response", false);
             observerService.addObserver(this, "http-on-examine-cached-response", false);
         }
 
-        this.observerCount++;
+        this.observing = true;
     },
 
     unregisterObservers: function()
     {
         if (FBTrace.DBG_HTTPOBSERVER)
             FBTrace.sysout("httpObserver.unregisterObservers; wasObserving: " +
-                this.observerCount + " with observers "+this.observers.length, this.observers);
+                this.observing + " with observers "+this.observers.length, this.observers);
 
-        if (this.observerCount == 1)
+        if (this.observing)
         {
             observerService.removeObserver(this, "http-on-modify-request");
             observerService.removeObserver(this, "http-on-examine-response");
             observerService.removeObserver(this, "http-on-examine-cached-response");
         }
 
-        this.observerCount--;
+        this.observing = false;
     },
 
     /* nsIObserve */
