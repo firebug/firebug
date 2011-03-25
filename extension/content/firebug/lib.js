@@ -875,21 +875,10 @@ this.iterateWindows = function(win, handler)
 
 this.getRootWindow = function(win)
 {
-    var ff4b7HackWin = null; // let the loop run at least once.
     for (; win; win = win.parent)
     {
         if (!win.parent || win == win.parent || !(win.parent instanceof Window) )
             return win;
-
-        // Do the voodoo
-        var domWindowUtils = win.QueryInterface(Ci.nsIInterfaceRequestor).getInterface(Ci.nsIDOMWindowUtils);
-
-        //FBTrace.sysout("getRootWindow at depth "+(depth++)+" win: "+FBL.safeGetWindowLocation(win)+"@"+domWindowUtils.outerWindowID+" hackWin "+ff4b7HackWin);
-
-        if (ff4b7HackWin && ff4b7HackWin === domWindowUtils.outerWindowID) // then the loop is not making progress
-            return win;
-        else  // store this loop value, because on FF4b7 win == win.parent will never be true.
-            ff4b7HackWin = domWindowUtils.outerWindowID ? domWindowUtils.outerWindowID : null;
     }
     return null;
 };
@@ -5685,7 +5674,7 @@ domMemberMap.Window =
     "postMessage",
     "localStorage",  // FF3.5
     "showModalDialog", // FF 3.0, MS IE4
-    
+
     "InstallTrigger",
 
     "getInterface",
