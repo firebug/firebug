@@ -1032,7 +1032,7 @@ Firebug.CSSStyleSheetPanel.prototype = extend(Firebug.Panel,
         this.panelNode.removeEventListener("mousedown", this.onMouseDown, false);
         this.panelNode.removeEventListener("click", this.onClick, false);
 
-        Firebug.SourceBoxPanel.destroyNode.apply(this, arguments);
+        Firebug.Panel.destroyNode.apply(this, arguments);
     },
 
     show: function(state)

@@ -119,8 +119,6 @@ Firebug.SourceBoxPanel = extend(SourceBoxPanelBase,
 
     destroyNode: function()
     {
-        Firebug.ActivablePanel.destroyNode.apply(this, arguments);
-
         if (this.resizeEventTarget)
         {
             this.resizeEventTarget.removeEventListener("resize", this.onResize, true);
@@ -128,10 +126,12 @@ Firebug.SourceBoxPanel = extend(SourceBoxPanelBase,
         else
         {
             if (FBTrace.DBG_ERRORS)
-                FBTrace.sysout("sourceBox.destroyNode; ERROR this.resizeEventTarget is NULL");
+                FBTrace.sysout("sourceBox.destroyNode; ERROR this.resizeEventTarget is NULL "+this, this);
         }
 
         this.detachFromCache();
+
+        Firebug.ActivablePanel.destroyNode.apply(this, arguments);
     },
 
     attachToCache: function()
