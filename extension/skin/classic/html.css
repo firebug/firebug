@@ -3,12 +3,14 @@
 .panelNode-html {
     -moz-box-sizing: padding-box;
     padding: 4px 0 0 2px;
+    word-wrap: break-word;
 }
 
 .nodeBox {
     position: relative;
     font-family: monospace;
     padding-left: 13px;
+    min-width: 42ch;
 }
 
 .nodeBox.search-selection {
@@ -44,6 +46,7 @@
 .nodeTag {
     cursor: pointer;
     color: blue;
+    word-wrap: normal;
 }
 
 .nodeValue {

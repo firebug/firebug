@@ -1836,7 +1836,7 @@ function onPanelMouseUp(event)
         var target = selection.focusNode || event.target;
         if(selection.focusNode === selection.anchorNode){
             var editable = FBL.getAncestorByClass(target, "editable");
-            if (editable)
+            if (editable || FBL.hasClass(event.target, "inlineExpander"))
             {
                 var selectionData;
                 var selFO = selection.focusOffset,selAO = selection.anchorOffset;
@@ -1854,7 +1854,12 @@ function onPanelMouseUp(event)
                 else
                     selectionData = {start: selAO, end: selFO};
 
-                Firebug.Editor.startEditing(editable, null, null, selectionData);
+                if(editable)
+                    Firebug.Editor.startEditing(editable, null, null, selectionData);
+                else {
+                    Firebug.Editor.setSelection(selectionData || {start: selFO, end: selFO})
+                    selection.removeAllRanges()
+                }
                 FBL.cancelEvent(event);
             }
         }

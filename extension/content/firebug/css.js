@@ -2477,7 +2477,7 @@ StyleSheetEditor.prototype = domplate(Firebug.BaseEditor,
         return this.input.value = value;
     },
 
-    show: function(target, panel, value, textSize, targetSize)
+    show: function(target, panel, value, textSize)
     {
         this.target = target;
         this.panel = panel;

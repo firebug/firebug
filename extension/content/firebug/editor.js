@@ -36,6 +36,12 @@ Firebug.Editor = extend(Firebug.Module,
     dispatchName: "editor",
     tabCharacter: "    ",
 
+    setSelection: function(selectionData)
+    {
+        if (currentEditor && currentEditor.setSelection)
+            currentEditor.setSelection(selectionData);
+    },
+
     startEditing: function(target, value, editor, selectionData)
     {
         this.stopEditing();
@@ -72,15 +78,12 @@ Firebug.Editor = extend(Firebug.Module,
         if (!currentEditor)
             currentEditor = getDefaultEditor(currentPanel);
 
-        var inlineParent = getInlineParent(target);
-        var targetSize = getOffsetSize(inlineParent);
-
         setClass(panel.panelNode, "editing");
         setClass(target, "editing");
         if (currentGroup)
             setClass(currentGroup, "editing");
 
-        currentEditor.show(target, currentPanel, value, targetSize, selectionData);
+        currentEditor.show(target, currentPanel, value, selectionData);
         dispatch(this.fbListeners, "onBeginEditing", [currentPanel, currentEditor, target, value]);
         currentEditor.beginEditing(target, value);
         if (FBTrace.DBG_EDITOR)
@@ -405,7 +408,7 @@ Firebug.Editor = extend(Firebug.Module,
     {
         this.onResize = bindFixed(this.onResize, this);
         this.onBlur = bind(this.onBlur, this);
-        
+
         Firebug.Module.initialize.apply(this, arguments);
     },
 
@@ -438,7 +441,7 @@ Firebug.BaseEditor = extend(Firebug.MeasureBox,
     {
     },
 
-    show: function(target, panel, value, textSize, targetSize)
+    show: function(target, panel, value, textSize)
     {
     },
 
@@ -522,7 +525,7 @@ Firebug.InlineEditor.prototype = domplate(Firebug.BaseEditor,
         ),
 
     expanderTag:
-        IMG({"class": "inlineExpander", src: "blank.gif"}),
+        SPAN({"class": "inlineExpander", style: "-moz-user-focus:ignore;opacity:0.5"}),
 
     initialize: function()
     {
@@ -565,13 +568,20 @@ Firebug.InlineEditor.prototype = domplate(Firebug.BaseEditor,
         return this.input.value = stripNewLines(value);
     },
 
-    show: function(target, panel, value, targetSize, selectionData)
+    setSelection: function(selectionData)
+    {
+        this.input.setSelectionRange(selectionData.start, selectionData.end);
+        // Ci.nsISelectionController SELECTION_NORMAL SELECTION_ANCHOR_REGION SCROLL_SYNCHRONOUS
+        this.input.QueryInterface(Ci.nsIDOMNSEditableElement)
+            .editor.selectionController.scrollSelectionIntoView(1, 0, 2);
+    },
+
+    show: function(target, panel, value, selectionData)
     {
         dispatch(panel.fbListeners, "onInlineEditorShow", [panel, this]);
         this.target = target;
         this.panel = panel;
 
-        this.targetSize = targetSize;
         this.targetOffset = getClientOffset(target);
 
         this.originalClassName = this.box.className;
@@ -601,8 +611,8 @@ Firebug.InlineEditor.prototype = domplate(Firebug.BaseEditor,
 
         panel.panelNode.appendChild(this.box);
         this.input.select();
-        if (selectionData) //transfer slection to input element
-            this.input.setSelectionRange(selectionData.start, selectionData.end);
+        if (selectionData) //transfer selection to input element
+            this.setSelection(selectionData);
 
         // Insert the "expander" to cover the target element with white space
         if (!this.fixedWidth)
@@ -837,49 +847,25 @@ Firebug.InlineEditor.prototype = domplate(Firebug.BaseEditor,
             }
 
             var approxTextWidth = this.textSize.width;
-            var maxWidth = (currentPanel.panelNode.clientWidth - this.targetOffset.x);
+            // Make the input one character wider than the text value so that
+            // typing does not ever cause the textbox to scroll
+            var charWidth = this.measureInputText('m').width;
 
-            var wrapped = initial
-                ? this.noWrap && this.targetSize.height > this.textSize.height+3
-                : this.noWrap && approxTextWidth > maxWidth;
+            // Sometimes we need to make the editor a little wider, specifically when
+            // an overflow happens, otherwise it will scroll off some text on the left
+            if (extraWidth)
+                charWidth *= extraWidth;
 
-            if (wrapped)
-            {
-                var style = this.target.ownerDocument.defaultView.getComputedStyle(this.target, "");
-                targetMargin = parseInt(style.marginLeft) + parseInt(style.marginRight);
+            var inputWidth = approxTextWidth + charWidth;
 
-                // Make the width fit the remaining x-space from the offset to the far right
-                approxTextWidth = maxWidth - targetMargin;
+            var container = currentPanel.panelNode;
+            var maxWidth = container.clientWidth - this.targetOffset.x + container.scrollLeft - 6;
 
-                this.input.style.width = "100%";
-                this.box.style.width = approxTextWidth + "px";
-            }
-            else
-            {
-                // Make the input one character wider than the text value so that
-                // typing does not ever cause the textbox to scroll
-                var charWidth = this.measureInputText('m').width;
+            if(inputWidth > maxWidth)
+                inputWidth = maxWidth;
 
-                // Sometimes we need to make the editor a little wider, specifically when
-                // an overflow happens, otherwise it will scroll off some text on the left
-                if (extraWidth)
-                    charWidth *= extraWidth;
-
-                var inputWidth = approxTextWidth + charWidth;
-
-                if (initial)
-                    this.box.style.width = "auto";
-                else
-                {
-                    var xDiff = this.box.scrollWidth - this.input.offsetWidth;
-                    this.box.style.width = (inputWidth + xDiff) + "px";
-                }
-
-                this.input.style.width = inputWidth + "px";
-            }
-
-            this.expander.style.width = approxTextWidth + "px";
-            this.expander.style.height = (this.textSize.height-3) + "px";
+            this.input.style.width = inputWidth + "px";
+            this.expander.textContent = this.input.value;
         }
 
         if (forceAll)
