@@ -1193,7 +1193,7 @@ Firebug.CSSStyleSheetPanel.prototype = extend(Firebug.Panel,
     {
         return [
             {label: "Expand Shorthand Properties", type: "checkbox", checked: Firebug.expandShorthandProps,
-                    command: bindFixed(Firebug.togglePref, Firebug, "expandShorthandProps") },
+                    command: bindFixed(Firebug.Options.togglePref, Firebug, "expandShorthandProps") },
             "-",
             {label: "Refresh", command: bind(this.refresh, this) }
         ];
@@ -1868,11 +1868,11 @@ CSSElementPanel.prototype = extend(Firebug.CSSStyleSheetPanel.prototype,
     {
         var ret = [
             {label: "Only Show Applied Styles", type: "checkbox", checked: Firebug.onlyShowAppliedStyles,
-                    command: bindFixed(Firebug.togglePref, Firebug, "onlyShowAppliedStyles") },
+                    command: bindFixed(Firebug.Options.togglePref, Firebug, "onlyShowAppliedStyles") },
             {label: "Show User Agent CSS", type: "checkbox", checked: Firebug.showUserAgentCSS,
-                    command: bindFixed(Firebug.togglePref, Firebug, "showUserAgentCSS") },
+                    command: bindFixed(Firebug.Options.togglePref, Firebug, "showUserAgentCSS") },
             {label: "Expand Shorthand Properties", type: "checkbox", checked: Firebug.expandShorthandProps,
-                    command: bindFixed(Firebug.togglePref, Firebug, "expandShorthandProps") }
+                    command: bindFixed(Firebug.Options.togglePref, Firebug, "expandShorthandProps") }
         ];
 
         if (domUtils && this.selection)
@@ -2106,7 +2106,7 @@ CSSComputedElementPanel.prototype = extend(CSSElementPanel.prototype,
             {label: "Sort alphabetically", type: "checkbox", checked: Firebug.computedStylesDisplay == "alphabetical",
                     command: bind(this.toggleDisplay, this) },
             {label: "Show Mozilla specific styles", type: "checkbox", checked: Firebug.showMozillaSpecificStyles,
-              command:  bindFixed(Firebug.togglePref, Firebug, "showMozillaSpecificStyles") },
+              command:  bindFixed(Firebug.Options.togglePref, Firebug, "showMozillaSpecificStyles") },
             "-",
             {label: "Refresh", command: bind(this.refresh, this) }
         ];

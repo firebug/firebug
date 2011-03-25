@@ -52,7 +52,7 @@
         <command id="cmd_previousObject" oncommand="FirebugChrome.gotoNextObject(true)"/>
 
         <command id="cmd_clearAllBreakpoints" oncommand="Firebug.Debugger.clearAllBreakpoints(Firebug.currentContext)"/>
-        <command id="cmd_breakOnErrors" oncommand="Firebug.togglePref('breakOnErrors')"/>
+        <command id="cmd_breakOnErrors" oncommand="Firebug.Options.togglePref('breakOnErrors')"/>
 
         <command id="cmd_toggleTraceConsole" oncommand="Firebug.TraceModule.openConsole()"/>
 
