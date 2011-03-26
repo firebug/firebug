@@ -123,6 +123,7 @@ Firebug.A11yModel = extend(Firebug.Module,
         tmpElem = chrome.$("fbPanelBar2");
         if (tmpElem) setClass(tmpElem.browser.contentDocument.body, 'useA11y');
         Firebug.Editor.addListener(this);
+        this.listeningToEditor = true;
     },
 
     performDisable : function(chrome)
@@ -151,7 +152,9 @@ Firebug.A11yModel = extend(Firebug.Module,
         }
         tmpElem = chrome.$("fbPanelBar2");
         if (tmpElem) removeClass(tmpElem.browser.contentDocument.body, 'useA11y');
-        Firebug.Editor.removeListener(this);
+
+        if(this.listeningToEditor)
+            Firebug.Editor.removeListener(this);
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
