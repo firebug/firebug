@@ -3694,7 +3694,7 @@ this.getWindowId = function(win)
     {
         // no - op
     }
-    return {outer: outerWindowID, inner: innerWindowID};
+    return {outer: outerWindowID, inner: innerWindowID, toString: function(){return this.outer+"."+this.inner;}};
 };
 
 this.safeGetWindowLocation = function(window)
