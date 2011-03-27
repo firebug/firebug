@@ -112,6 +112,16 @@ var FirebugLoadManager = function () {
 
         var loader = createLoader(config);
 
+        if (Firebug.alwaysOpenTraceConsole || true)
+        {
+            loader.define(['traceModule.js'],function(traceModule)
+            {
+                FBTrace.sysout("traceModule scope includes FBL: "+FBL+" Firebug "+Firebug);
+                traceModule.openConsole(config.prefDomain);
+            } );  // synchronous
+
+        }
+
         var coreModules = [];
 
         if (config.arch === 'inProcess')

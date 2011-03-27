@@ -3,8 +3,7 @@
 /**
  * UI control of debug Logging for Firebug internals
  */
-FBL.ns(function() { with (FBL) {
-
+define("traceModule.js", ["inProcess/options.js"], function() { with (FBL) {
 // ************************************************************************************************
 // Shorcuts and Services
 
@@ -1867,5 +1866,6 @@ Firebug.TraceModule.PropertyTree = domplate(Firebug.TraceModule.Tree,
 Firebug.registerModule(Firebug.TraceModule);
 Firebug.registerRep(Firebug.TraceModule.MessageTemplate);
 
+return Firebug.TraceModule;
 // ************************************************************************************************
 }});
