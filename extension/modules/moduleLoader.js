@@ -40,6 +40,7 @@ function ModuleLoader(global, requirejsConfig, securityOrigin) {
     this.registry = {};
     this.totalEvals = 0;
     this.totalEntries = 0;
+    this.loading = [];  // stack of current dependency branch
 
     ModuleLoader.instanceCount += 1;
     this.instanceCount = ModuleLoader.instanceCount;
@@ -49,6 +50,7 @@ function ModuleLoader(global, requirejsConfig, securityOrigin) {
         return self.prefixWithConfig.apply(self, arguments);  // use the bound ref to call apply with proper |this|
     }
     this.define = this.loadDepsThenCallback;
+
 
     ModuleLoader.currentModuleLoader = this;
 
@@ -129,6 +131,11 @@ var coreRequire;
 var define;
 
 ModuleLoader.prototype = {
+    require: function(moduleId) {
+        if ( typeof(moduleId === 'string') )
+            return coreRequire(moduleId);
+        ModuleLoader.onError("The 'require' function accepts a module identifier");
+    },
     /*
      *  @return produces the global object for the execution context associated with moduleLoader.
      */
@@ -174,7 +181,7 @@ ModuleLoader.prototype = {
     },
 
 
-    loadModule: function(mrl, callback) {
+    loadModule: function(mrl, context, callback) {
         try {
             var url = mrl;
 
@@ -194,7 +201,7 @@ ModuleLoader.prototype = {
         if (ModuleLoader.debug) ModuleLoader.onDebug("ModuleLoader loadModule reading "+url+" from baseURL: "+this.baseURL+" and mrl: "+mrl+" ");
 
         var unit = {
-            source: this.mozReadTextFromFile(url),
+            source: this.mozReadTextFromFile(url, mrl, context),
             url: url,
             mrl: mrl, // relative
         }
@@ -257,12 +264,14 @@ ModuleLoader.prototype = {
                 coreRequire.onError = args[0].onError;
             }
 
-            coreRequire.apply(null, args);
+            var rc = coreRequire.apply(null, args);
 
             if (this.saveOnError) {
                 coreRequire.onError = this.saveOnError;
                 delete this.saveOnError;
             }
+
+            return rc;
         } else {
             if (ModuleLoader.debug) {
                 ModuleLoader.onDebug("ModuleLoader.loadDepsThenCallback(deps, callback), missing argument 'deps'", this);
@@ -361,7 +370,7 @@ ModuleLoader.prototype = {
         }
     },
 
-    mozReadTextFromFile: function(pathToFile) {
+    mozReadTextFromFile: function(pathToFile, mrl, context) {
         try {
             var channel = ModuleLoader.mozIOService.newChannel(pathToFile, null, null);
             var inputStream = channel.open();
@@ -397,7 +406,14 @@ ModuleLoader.prototype = {
                     }
                     caller = caller.caller;
                 }
-                return ModuleLoader.onError(new Error("ERROR ModuleLoader file not found "+pathToFile+" from "+callsite), {err:err, pathToFile: pathToFile, moduleLoader: this});
+                var info = {err:err, pathToFile: pathToFile, moduleLoader: this};
+                var namedHow = "";
+                if (context && context.namedHow) {
+                    info.nameHow = context.namedHow;
+                    namedHow = context.namedHow.how;
+                }
+
+                return ModuleLoader.onError(new Error("ERROR ModuleLoader file not found "+pathToFile+" from "+callsite+" "+namedHow), info);
             }
             return ModuleLoader.onError(new Error("mozReadTextFromFile; EXCEPTION "+err), {err:err, pathToFile: pathToFile, moduleLoader: this});
         }
@@ -454,14 +470,16 @@ if (coreRequire) {
 
 function loadCompilationUnit(moduleLoader, context, url, moduleName) {
     try {
-        var unit = moduleLoader.loadModule(url);
+        moduleLoader.loading.push(url);
+        var unit = moduleLoader.loadModule(url, context);
         context.completeLoad(moduleName);             // round up all the dependencies
+        moduleLoader.loading.pop();
         return unit;
     } catch (exc) {
         var errorURL = exc.filename || exc.sourceName || exc.fileName;
         var errorLineNumber = exc.lineNumber;
 
-        ModuleLoader.onError("ModuleLoader.loadCompilationUnit got exception "+exc+" on "+errorURL+"@"+errorLineNumber+", loading "+url+" stack "+exc.stack, exc);
+        ModuleLoader.onError("ModuleLoader.loadCompilationUnit got exception "+exc+" on "+errorURL+"@"+errorLineNumber+", loading "+url+" stack: "+moduleLoader.loading.join('<-'), exc);
         if (moduleLoader.config.edit) {
             return moduleLoader.config.edit(exc, errorURL, errorLineNumber);
         }

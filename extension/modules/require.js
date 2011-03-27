@@ -465,8 +465,8 @@ var require, define;
                     callback: callback,
                     onDep: function (depName, value) {
                         if (!(depName in manager.deps)) {
-                            if (context.config.onDebug && !value) {
-                                context.config.onDebug("require.js:  "+depName+" set to null exports object!", {manager: manager});
+                            if (context.config.onDebug) {
+                                context.config.onDebug("require.js:  "+depName+" set exports type "+typeof(value), {manager: manager});
                             }
                             manager.deps[depName] = value;
                             manager.depCount += 1;
@@ -865,6 +865,7 @@ var require, define;
             managerCallbacks: managerCallbacks,
             makeModuleMap: makeModuleMap,
             normalizeName: normalizeName,
+            namedHow: {},  // info by url
             /**
              * Set a configuration for the context.
              * @param {Object} cfg config object to override current configuration. All properties are optional.
@@ -1115,6 +1116,10 @@ var require, define;
                     url = syms.join('/') +
                           (ext ? ext :
                           (req.jsExtRegExp.test(moduleName) ? "" : ".js"));
+                    if (context.config.onDebug) {
+                        var namedeHow = context.namedHow[url] = {moduleName: moduleName, how: "relative", extension: ext};
+                        context.config.onDebug("require.js "+moduleName+"-("+namedHow.how+")->"+url, namedHow);
+                    }
                 } else {
 
                     //Normalize module name if have a base relative module name to work from.
@@ -1128,6 +1133,11 @@ var require, define;
                         //Add extension if it is included. This is a bit wonky, only non-.js things pass
                         //an extension, this method probably needs to be reworked.
                         url = moduleName + (ext ? ext : "");
+
+                        if (context.config.onDebug) {
+                            var namedHow = context.namedHow[url] = {moduleName: moduleName, how: "plain path", extension: ext};
+                            context.config.onDebug("require.js "+moduleName+"-("+namedHow.how+")->"+url, namedHow);
+                        }
                     } else {
                         //A module that needs to be converted to a path.
                         paths = config.paths;
@@ -1153,11 +1163,31 @@ var require, define;
                                 syms.splice(0, i, pkgPath);
                                 break;
                             }
+                            // parentModule not found in path
+                            if (context.config.onDebug) {
+                                var allPaths = [];
+                                for (var p in paths)
+                                    allPaths.push(p);
+                                context.config.onDebug("require.js "+parentModule+" not found in paths ("+allPaths.join(',')+")");
+                                var allPackages = [];
+                                for (var p in packages)
+                                    allPackages.push(p);
+                                context.config.onDebug("require.js "+parentModule+" not found in packages ("+allPackages.join(',')+")");
+                            }
                         }
 
                         //Join the path parts together, then figure out if baseUrl is needed.
                         url = syms.join("/") + (ext || ".js");
                         url = (url.charAt(0) === '/' || url.match(/^\w+:/) ? "" : config.baseUrl) + url;
+                        if (context.config.onDebug) {
+                            var namedHow = context.namedHow[url] = {moduleName: moduleName, how: "paths", extension: ext, parentModule: parentModule, pathsAtParentModule: paths[parentModule]};
+                            if (!paths[parentModule]) {
+                                context.config.onDebug("require.js ERROR "+moduleName+"-("+namedHow.how+"["+parentModule+"]="+paths[parentModule]+")->"+url, namedHow);
+                            }
+                            else {
+                                context.config.onDebug("require.js "+moduleName+"-("+namedHow.how+"["+parentModule+"]="+paths[parentModule]+")->"+url, namedHow);
+                            }
+                        }
                     }
                 }
 
