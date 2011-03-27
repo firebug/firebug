@@ -112,7 +112,7 @@ var FirebugLoadManager = function () {
 
         var loader = createLoader(config);
 
-        if (Firebug.alwaysOpenTraceConsole || true)
+        if (Firebug.alwaysOpenTraceConsole)
         {
             loader.define(['traceModule.js'],function(traceModule)
             {
@@ -157,6 +157,7 @@ var FirebugLoadManager = function () {
          "tabContext.js",  // should be loaded by being a dep of tabWatcher
          "sourceBox.js",
          "script.js",
+         "traceModule.js"
         ];
 
         var modules = coreModules.concat(defaultModules);
