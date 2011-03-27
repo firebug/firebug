@@ -50,6 +50,7 @@ var FirebugLoadManager = function () {
         var config = {
             context:"Firebug "+uid, // TODO XUL window id on FF4.0+
             baseUrl: config.baseUrl,
+            paths: config.paths,
             onDebug: function() {
                 if (!this.FBTrace)
                 {
@@ -71,6 +72,7 @@ var FirebugLoadManager = function () {
                 }
                 if (this.FBTrace.DBG_ERRORS || this.FBTrace.DBG_MODULES)
                     this.FBTrace.sysout.apply(this.FBTrace, arguments);
+                throw arguments[0];
             },
             waitSeconds: 0,
             debug: true,
@@ -157,6 +159,7 @@ var FirebugLoadManager = function () {
         config.arch = config.arch || 'inProcess';
         config.prefDomain = config.prefDomain || 'extensions.firebug';
         config.baseUrl = config.baseUrl || 'resource://firebug_rjs/';
+        config.paths = {"arch": config.arch};
     }
 
     return {loadCore: loadCore, arch: "inProcess"};

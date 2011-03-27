@@ -1,6 +1,6 @@
 /* See license.txt for terms of usage */
 
-define("tabContext.js", ["ToolsInterface"], function(ToolsInterface) { with (FBL) {
+define("tabContext.js", ["arch/tools"], function(ToolsInterface) { with (FBL) {
 
     var CompilationUnit = ToolsInterface.CompilationUnit;
 

@@ -1,11 +1,11 @@
-define("ToolsInterface", ["inProcess/browser.js", "inProcess/compilationunit.js"], function(Browser, CompilationUnit) {
+define(["inProcess/browser.js", "inProcess/compilationunit.js"], function(Browser, CompilationUnit) {
 
 Browser.onDebug = function()
 {
     FBTrace.sysout.apply(FBTrace, arguments);
 }
 
-var ToolsInterface = {}
+var ToolsInterface = {};
 
 // Classes
 ToolsInterface.Browser = Browser;
@@ -18,7 +18,7 @@ ToolsInterface.browser.addListener(Firebug)
 
 // FIXME eventually we want the dependency system to pass around the ToolsInterface
 Firebug.ToolsInterface = ToolsInterface;
-
+FBTrace.sysout(" has ToolsInterface "+ToolsInterface, ToolsInterface);
 return ToolsInterface;
 
 });

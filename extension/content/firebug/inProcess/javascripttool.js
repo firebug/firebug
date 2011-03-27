@@ -3,7 +3,7 @@
 // ************************************************************************************************
 // Module
 
-define([ "ToolsInterface"], function initializeJavaScriptTool(ToolsInterface)
+define([ "inProcess/tools.js"], function initializeJavaScriptTool(ToolsInterface)
 {
 
 

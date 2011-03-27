@@ -3,7 +3,7 @@
 // ************************************************************************************************
 // Module
 
-define(["ToolsInterface"], function initializeFirebugAdapter(ToolsInterface)
+define(["inProcess/tools.js"], function initializeFirebugAdapter(ToolsInterface)
 {
 
 // ************************************************************************************************

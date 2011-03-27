@@ -7,9 +7,10 @@
  * Backend responds with events when the change is accepted.
  */
 
-define(["ToolsInterface"], function factoryOptions(ToolsInterface)
+define(["inProcess/tools.js"], function factoryOptions(ToolsInterface)
 {
-
+FBTrace.sysout("inProcess/tools has ToolsInterface "+ToolsInterface, ToolsInterface);
+FBTrace.sysout("inProcess/tools has Firebug.ToolsInterface "+Firebug.ToolsInterface, ToolsInterface);
     const Cc = Components.classes;
     const Ci = Components.interfaces;
 
