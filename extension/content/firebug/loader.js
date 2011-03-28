@@ -44,19 +44,19 @@ var FirebugLoadManager = function () {
         return firebugScope;
     }
 
-    function getModuleLoaderConfig(config)
+    function getModuleLoaderConfig(baseConfig)
     {
         var uid = Math.random();  // to give each XUL window its own loader (for now)
         var config = {
             context:"Firebug "+uid, // TODO XUL window id on FF4.0+
-            baseUrl: config.baseUrl,
-            paths: config.paths,
+            baseUrl: baseConfig.baseUrl,
+            paths: baseConfig.paths,
             onDebug: function() {
                 if (!this.FBTrace)
                 {
                     // traceConsoleService is a global of |window| frome trace.js.
                     // on the first call we use it to get a ref to the Cu.import module object
-                    this.FBTrace = traceConsoleService.getTracer(config.prefDomain);
+                    this.FBTrace = traceConsoleService.getTracer(baseConfig.prefDomain);
                 }
                 if (this.FBTrace.DBG_MODULES)
                     this.FBTrace.sysout.apply(this.FBTrace,arguments);
@@ -68,7 +68,7 @@ var FirebugLoadManager = function () {
                 {
                     // traceConsoleService is a global of |window| frome trace.js.
                     // on the first call we use it to get a ref to the Cu.import module object
-                    this.FBTrace = traceConsoleService.getTracer(config.prefDomain);
+                    this.FBTrace = traceConsoleService.getTracer(baseConfig.prefDomain);
                 }
                 if (this.FBTrace.DBG_ERRORS || this.FBTrace.DBG_MODULES)
                     this.FBTrace.sysout.apply(this.FBTrace, arguments);
