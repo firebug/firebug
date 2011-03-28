@@ -63,6 +63,9 @@ var traceConsoleService =
 
     getTracer: function(prefDomain)
     {
+        if (!prefDomain)
+            traceConsoleService.osOut("firebug-trace-service getTracer ERROR no prefDomain "+getStackDump());
+
         if (this.getPref("extensions.firebug-tracing-service.DBG_toOSConsole"))
         {
              toOSConsole = true;  // also need browser.dom.window.dump.enabled true
@@ -347,3 +350,12 @@ TraceBase.prototype.sysout = function(message, obj) {
 }
 
 traceConsoleService.initialize();
+
+function getStackDump()
+{
+    var lines = [];
+    for (var frame = Components.stack; frame; frame = frame.caller)
+        lines.push(frame.filename + " (" + frame.lineNumber + ")");
+
+    return lines.join("\n");
+};
