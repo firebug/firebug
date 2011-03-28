@@ -1605,7 +1605,7 @@ Firebug.TraceModule.TraceMessage.prototype =
 
     getEvent: function()
     {
-        if (!(this.obj instanceof Event))
+        if (!(this.obj instanceof window.Event))
             return;
 
         if (this.eventInfo)
