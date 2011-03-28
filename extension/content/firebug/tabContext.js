@@ -2,7 +2,7 @@
 
 define("tabContext.js", ["arch/tools"], function(ToolsInterface) { with (FBL) {
 
-    var CompilationUnit = ToolsInterface.CompilationUnit;
+var CompilationUnit = ToolsInterface.CompilationUnit;
 
 // ************************************************************************************************
 // Constants
@@ -50,7 +50,9 @@ Firebug.TabContext = function(win, browser, chrome, persistedState)
 
 Firebug.TabContext.prototype =
 {
-    //************************ Browser Tools Interface BrowserContext *******************************
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+    // Browser Tools Interface BrowserContext
+
     getCompilationUnit: function(url)
     {
         return this.compilationUnits[url];
@@ -60,7 +62,9 @@ Firebug.TabContext.prototype =
     {
         return FBL.mapAsArray(this.compilationUnits);
     },
-    //***********************************************************************************************
+
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
     getWindowLocation: function()
     {
         return safeGetWindowLocation(this.window);
@@ -119,17 +123,27 @@ Firebug.TabContext.prototype =
 
         ToolsInterface.browser.dispatch("onCompilationUnit", [this, url, kind]);
 
-     // HACKs
+        // HACKs
         var compilationUnit = this.getCompilationUnit(url);
+        if (!compilationUnit)
+        {
+            if (FBTrace.DBG_COMPILATION_UNITS || FBTrace.DBG_ERRORS)
+                FBTrace.sysout("tabContext.addSourceFile; ERROR Unknown URL: " + url,
+                    this.compilationUnits);
+            return;
+        }
+
         compilationUnit.sourceFile = sourceFile;
 
-        compilationUnit.getSourceLines(-1, -1, function onLines(compilationUnit, firstLineNumber, lastLineNumber, lines)
+        compilationUnit.getSourceLines(-1, -1, function onLines(compilationUnit,
+            firstLineNumber, lastLineNumber, lines)
         {
             ToolsInterface.browser.dispatch("onSourceLines", arguments);
-            if (FBTrace.DBG_COMPILATION_UNITS)
-                FBTrace.sysout("onSourceLines "+compilationUnit.getURL()+" "+lines.length+" lines", compilationUnit);
-        });
 
+            if (FBTrace.DBG_COMPILATION_UNITS)
+                FBTrace.sysout("onSourceLines "+compilationUnit.getURL()+" "+lines.length+
+                    " lines", compilationUnit);
+        });
     },
 
     removeSourceFile: function(sourceFile)
@@ -350,7 +364,8 @@ Firebug.TabContext.prototype =
             else                 // then our panel map is broken, maybe by an extension failure.
             {
                 if (FBTrace.DBG_ERRORS)
-                    FBTrace.sysout("tabContext.createPanel panel.mainPanel missing "+panel.name+" from "+panel.parentPanel.name);
+                    FBTrace.sysout("tabContext.createPanel panel.mainPanel missing "+panel.name+
+                        " from "+panel.parentPanel.name);
             }
 
         }
