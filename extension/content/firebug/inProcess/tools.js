@@ -1,4 +1,4 @@
-define(["inProcess/browser.js", "inProcess/compilationunit.js"], function(Browser, CompilationUnit) {
+define(["../inProcess/browser.js", "../inProcess/compilationunit.js"], function(Browser, CompilationUnit) {
 
 Browser.onDebug = function()
 {
