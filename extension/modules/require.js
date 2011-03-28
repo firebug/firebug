@@ -1117,7 +1117,7 @@ var require, define;
                           (ext ? ext :
                           (req.jsExtRegExp.test(moduleName) ? "" : ".js"));
                     if (context.config.onDebug) {
-                        var namedeHow = context.namedHow[url] = {moduleName: moduleName, how: "relative", extension: ext};
+                        var namedHow = context.namedHow[url] = {moduleName: moduleName, how: "relative", extension: ext};
                         context.config.onDebug("require.js "+moduleName+"-("+namedHow.how+")->"+url, namedHow);
                     }
                 } else {
