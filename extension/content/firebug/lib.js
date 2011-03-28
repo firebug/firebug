@@ -7833,7 +7833,8 @@ this.shouldIgnore = function(name)
 
 function ERROR(exc)
 {
-    if (FBTrace) {
+    if (typeof(FBTrace) !== undefined)
+    {
         if (exc.stack) exc.stack = exc.stack.split('\n');
         FBTrace.sysout("lib.ERROR: "+exc, exc);
     }
@@ -7857,7 +7858,7 @@ function deprecated(msg, fnc)
         if (!this.nagged)
         {
             var explain = "Deprecated function, "+msg;
-            if (FBTrace)
+            if (typeof(FBTrace) !== undefined)
                 FBTrace.sysout(explain, getStackDump());
 
             var caller = Components.stack.caller;  // drop frame with deprecated()

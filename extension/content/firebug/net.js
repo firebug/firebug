@@ -5120,7 +5120,7 @@ Firebug.NetMonitor.NetHttpActivityObserver =
         }
         catch (exc)
         {
-            if (FBTrace)  // then we are in some sane scope
+            if ( (typeof(FBTrace) !== undefined) && this.FBTrace.DBG_ERRORS)  // then we are in some sane scope
                 FBTrace.sysout("net.observeActivity: EXCEPTION "+exc, exc);
         }
     },
