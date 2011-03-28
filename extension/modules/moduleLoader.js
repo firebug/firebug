@@ -180,7 +180,6 @@ ModuleLoader.prototype = {
         }
     },
 
-
     loadModule: function(mrl, context, callback) {
         try {
             var url = mrl;
@@ -230,7 +229,6 @@ ModuleLoader.prototype = {
         }
         this.attachModule(url, unit);  // even if we don't have any valid exports, so we can try to finish dependencies
 
-        if (ModuleLoader.debug) ModuleLoader.onDebug("ModuleLoader loaded "+url, {compilationUnit: unit, moduleLoader: this});
         return unit;
     },
 
@@ -471,8 +469,10 @@ if (coreRequire) {
 function loadCompilationUnit(moduleLoader, context, url, moduleName) {
     try {
         moduleLoader.loading.push(url);
+        if (ModuleLoader.debug) ModuleLoader.onDebug("ModuleLoader depth "+moduleLoader.loading.length+" loading "+url);
         var unit = moduleLoader.loadModule(url, context);
         context.completeLoad(moduleName);             // round up all the dependencies
+        if (ModuleLoader.debug) ModuleLoader.onDebug("ModuleLoader depth "+moduleLoader.loading.length+" loaded "+url);
         moduleLoader.loading.pop();
         return unit;
     } catch (exc) {
@@ -498,13 +498,8 @@ coreRequire.load = function (context, moduleName, url) {
     var moduleLoader = ModuleLoader.get(context.contextName); // set in config for each subsystem
 
     if (moduleLoader) {
-        var unit = null;
-        while (!unit) {
-            ModuleLoader.onDebug("ModuleLoader coreRequire.load loadCompilationUnit "+url);
-            unit = loadCompilationUnit(moduleLoader, context, url, moduleName);
-        }
+        var unit = loadCompilationUnit(moduleLoader, context, url, moduleName);
         unit.exports = context.defined[moduleName];   // remember what we exported.
-        if (ModuleLoader.debug) ModuleLoader.onDebug(context.contextName+" loaded "+url);
     } else {
         return ModuleLoader.onError( new Error("require.attach called with unknown moduleLoaderName "+context.contextName+" for url "+url), ModuleLoader );
     }
