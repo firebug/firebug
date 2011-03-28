@@ -1,6 +1,6 @@
 /* See license.txt for terms of usage */
 
-define("script.js", ["arch/tools", "editorSelector.js"], function(ToolsInterface) { with (FBL) {
+define(["arch/tools", "editorSelector.js"], function(ToolsInterface) { with (FBL) {
 
 var CompilationUnit = ToolsInterface.CompilationUnit;
 

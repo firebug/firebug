@@ -1,6 +1,6 @@
 /* See license.txt for terms of usage */
 
-define("editorSelector.js", ["arch/tools"], function(ToolsInterface) { with(FBL) {
+define(["arch/tools"], function(ToolsInterface) { with(FBL) {
 
 // ********************************************************************************************* //
 // Reusable code for modules that support editing

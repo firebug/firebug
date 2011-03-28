@@ -1,6 +1,6 @@
 /* See license.txt for terms of usage */
 
-define("debugger.js", ["arch/tools"], function(ToolsInterface) { with (FBL) {
+define(["arch/tools"], function(ToolsInterface) { with (FBL) {
 
     Components.utils.import("resource://firebug/firebug-http-observer.js");  // TODO require.js
     var CompilationUnit = ToolsInterface.CompilationUnit;
