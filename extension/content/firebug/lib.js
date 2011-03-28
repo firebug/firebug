@@ -3884,7 +3884,8 @@ this.dispatch = function(listeners, name, args)
     if (!listeners)
         return;
 
-    try {
+    try
+    {
         if (FBTrace.DBG_DISPATCH)
             var noMethods = [];
 
@@ -3897,7 +3898,8 @@ this.dispatch = function(listeners, name, args)
                     FBTrace.sysout("FBL.dispatch ERROR "+i+" "+name+" to null listener.");
                 continue;
             }
-            if ( listener[name] )
+
+            if (listener[name])
             {
                 //FBTrace.sysout("FBL.dispatch "+i+") "+name+" to "+listener.dispatchName);
                 try
@@ -3913,8 +3915,11 @@ this.dispatch = function(listeners, name, args)
                             var stack = exc.stack;
                             exc.stack = stack.split('\n');
                         }
+
                         var culprit = listeners[i] ? listeners[i].dispatchName : null;
-                        FBTrace.sysout(" Exception in lib.dispatch "+(culprit?culprit+".":"")+ name+": "+exc+" in "+(exc.fileName?exc.fileName:"")+(exc.lineNumber?":"+exc.lineNumber:""), exc);
+                        FBTrace.sysout(" Exception in lib.dispatch "+(culprit?culprit+".":"")+
+                            name+": "+exc+" in "+(exc.fileName?exc.fileName:"")+
+                            (exc.lineNumber?":"+exc.lineNumber:""), exc);
                     }
                 }
             }
@@ -3922,13 +3927,16 @@ this.dispatch = function(listeners, name, args)
             {
                 if (FBTrace.DBG_DISPATCH)
                 {
-                    //FBTrace.sysout("FBL.dispatch noMethod in "+i+"/"+listeners.length+") "+name+" to "+listener.dispatchName);
+                    //FBTrace.sysout("FBL.dispatch noMethod in "+i+"/"+listeners.length+") "+
+                    //name+" to "+listener.dispatchName);
                     noMethods.push(listener);
                 }
             }
         }
+
         if (FBTrace.DBG_DISPATCH)
-            FBTrace.sysout("FBL.dispatch "+name+" to "+listeners.length+" listeners, "+noMethods.length+" had no such method:", noMethods);
+            FBTrace.sysout("FBL.dispatch "+name+" to "+listeners.length+" listeners, "+
+                noMethods.length+" had no such method:", noMethods);
     }
     catch (exc)
     {
@@ -3939,8 +3947,11 @@ this.dispatch = function(listeners, name, args)
                 var stack = exc.stack;
                 exc.stack = stack.split('\n');
             }
+
             var culprit = listeners[i] ? listeners[i].dispatchName : null;
-            FBTrace.sysout(" Exception in lib.dispatch "+(culprit?culprit+".":"")+ name+": "+exc, exc);
+            FBTrace.sysout(" Exception in lib.dispatch "+(culprit?culprit+".":"")+ name+
+                ": "+exc, exc);
+
             window.dump(FBL.getStackDump());
         }
     }
