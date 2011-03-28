@@ -1185,8 +1185,8 @@ Firebug.DOMBasePanel.prototype = extend(Firebug.Panel,
 
     getBreakOnNextTooltip: function(enabled)
     {
-        return (enabled ? $STR("dom.Disable Break On Property Change") :
-            $STR("dom.Break On Property Change"));
+        return (enabled ? $STR("dom.disableBreakOnPropertyChange") :
+            $STR("dom.label.breakOnPropertyChange"));
     },
 
     supportsObject: function(object, type)
@@ -1394,7 +1394,7 @@ Firebug.DOMBasePanel.prototype = extend(Firebug.Panel,
             {
                 items.push(
                     "-",
-                    {label: "html.dom.label.Break On Property Change", type: "checkbox",
+                    {label: "dom.label.breakOnPropertyChange", type: "checkbox",
                         checked: this.context.dom.breakpoints.findBreakpoint(rowObject, rowName),
                         command: bindFixed(this.breakOnProperty, this, row)}
                 );

@@ -1079,7 +1079,7 @@ Firebug.ScriptPanel.prototype = extend(Firebug.SourceBoxPanel,
             optionMenu("TrackThrowCatch", "trackThrowCatch"),
             //"-",
             //1.2 option on toolbar this.optionMenu("DebuggerEnableAlways", enableAlwaysPref)
-            optionMenu("Show Break Notifications", "showBreakNotification")
+            optionMenu("firebug.breakpoint.showBreakNotifications", "showBreakNotification")
         ];
     },
 
