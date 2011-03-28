@@ -18,7 +18,7 @@ ToolsInterface.browser.addListener(Firebug)
 
 // FIXME eventually we want the dependency system to pass around the ToolsInterface
 Firebug.ToolsInterface = ToolsInterface;
-FBTrace.sysout(" has ToolsInterface "+ToolsInterface, ToolsInterface);
+FBTrace.sysout(" tools.js has ToolsInterface "+ToolsInterface, ToolsInterface);
 return ToolsInterface;
 
 });

@@ -56,7 +56,7 @@ var FirebugLoadManager = function () {
                 {
                     // traceConsoleService is a global of |window| frome trace.js.
                     // on the first call we use it to get a ref to the Cu.import module object
-                    this.FBTrace = traceConsoleService.getTracer("extensions.firebug");
+                    this.FBTrace = traceConsoleService.getTracer(config.prefDomain);
                 }
                 if (this.FBTrace.DBG_MODULES)
                     this.FBTrace.sysout.apply(this.FBTrace,arguments);
@@ -68,7 +68,7 @@ var FirebugLoadManager = function () {
                 {
                     // traceConsoleService is a global of |window| frome trace.js.
                     // on the first call we use it to get a ref to the Cu.import module object
-                    this.FBTrace = traceConsoleService.getTracer("extensions.firebug");
+                    this.FBTrace = traceConsoleService.getTracer(config.prefDomain);
                 }
                 if (this.FBTrace.DBG_ERRORS || this.FBTrace.DBG_MODULES)
                     this.FBTrace.sysout.apply(this.FBTrace, arguments);

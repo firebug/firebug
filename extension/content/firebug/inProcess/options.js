@@ -9,8 +9,8 @@
 
 define(["inProcess/tools.js"], function factoryOptions(ToolsInterface)
 {
-FBTrace.sysout("inProcess/tools has ToolsInterface "+ToolsInterface, ToolsInterface);
-FBTrace.sysout("inProcess/tools has Firebug.ToolsInterface "+Firebug.ToolsInterface, ToolsInterface);
+FBTrace.sysout("inProcess/options has ToolsInterface "+ToolsInterface, ToolsInterface);
+FBTrace.sysout("inProcess/options has Firebug.ToolsInterface "+Firebug.ToolsInterface, ToolsInterface);
     const Cc = Components.classes;
     const Ci = Components.interfaces;
 
