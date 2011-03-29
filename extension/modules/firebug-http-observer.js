@@ -132,14 +132,23 @@ var httpRequestObserver =
     /* nsIObserverService */
     addObserver: function(observer, topic, weak)
     {
+        if (!topic)
+            topic = "firebug-http-event";
+
         if (topic != "firebug-http-event")
             throw Cr.NS_ERROR_INVALID_ARG;
 
         this.observers.push(observer);
+
+        if (this.observers.length > 0)
+            this.registerObservers();
     },
 
     removeObserver: function(observer, topic)
     {
+        if (!topic)
+            topic = "firebug-http-event";
+
         if (topic != "firebug-http-event")
             throw Cr.NS_ERROR_INVALID_ARG;
 
@@ -148,6 +157,10 @@ var httpRequestObserver =
             if (this.observers[i] == observer)
             {
                 this.observers.splice(i, 1);
+
+                if (this.observers.length == 0)
+                    this.unregisterObservers();
+
                 return;
             }
         }
@@ -162,7 +175,19 @@ var httpRequestObserver =
             FBTrace.sysout("httpObserver.notifyObservers (" + this.observers.length + ") " + topic);
 
         for (var i=0; i<this.observers.length; i++)
-            this.observers[i].observe(subject, topic, data);
+        {
+            var observer = this.observers[i];
+            try
+            {
+                if (observer.observe)
+                    observer.observe(subject, topic, data);
+            }
+            catch (err)
+            {
+                if (FBTrace.DBG_HTTPOBSERVER)
+                    FBTrace.sysout("httpObserver.notifyObservers; EXCEPTION " + err, err);
+            }
+        }
     }
 }
 
