@@ -74,6 +74,9 @@ Firebug.EditorSelector =
     {
         // Update label and tooltip text of the edit button.
         var mode = this.getCurrentEditorName();
+        if (!mode)
+            return;
+
         var menuitem = Firebug.chrome.$("menu_" + this.getEditorOptionKey() + mode);
 
         var command = Firebug.chrome.$("cmd_toggle"+this.getEditorOptionKey());
@@ -84,6 +87,8 @@ Firebug.EditorSelector =
     onOptionsShowing: function(popup)
     {
         var mode = this.getCurrentEditorName();
+        if (!mode)
+            return;
 
         for (var child = popup.firstChild; child; child = child.nextSibling)
         {
