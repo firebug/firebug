@@ -154,7 +154,10 @@ Firebug.SourceBoxPanel = extend(SourceBoxPanelBase,
         for (var url in this.sourceBoxes)
         {
             var sourceBox = this.sourceBoxes[url];
-            this.panelNode.removeChild(sourceBox);
+            if (sourceBox)
+                this.panelNode.removeChild(sourceBox);
+            else if (FBTrace.DBG_ERRORS)
+                FBTrace.sysout("sourceBoxPanel ERROR no sourceBox at "+url+" in context "+this.context.getName());
         }
 
         this.sourceBoxes = {};
