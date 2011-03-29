@@ -1,4 +1,0 @@
-override chrome://firebug/skin/debugger.css chrome://firebug/skin/mac/debugger.css
-override chrome://firebug-os/skin/firebug.css chrome://firebug/skin/mac/firebug.css
-override chrome://firebug-os/skin/panel.css chrome://firebug/skin/mac/panel.css
-override chrome://firebug-os/skin/window.css chrome://firebug/skin/mac/window.css
