@@ -700,7 +700,7 @@ Firebug.TraceModule.MessageTemplate = domplate(Firebug.Rep,
         var winType = "FBTraceConsole-SourceView";
         var lineNumber = event.target.getAttribute("lineNumber");
 
-        openDialog("chrome://global/content/viewSource.xul",
+        event.target.ownerDocument.defaultView.openDialog("chrome://global/content/viewSource.xul",
             winType, "all,dialog=no",
             event.target.innerHTML, null, null, lineNumber, false);
     },
@@ -1111,7 +1111,8 @@ Firebug.TraceModule.MessageTemplate = domplate(Firebug.Rep,
         {
             this.updateInfoImpl(messageInfoBody, view, message, message.getProperties,
                 function (message, valueBox, text) {
-                    if (message.obj instanceof Element)
+                    var win = messageInfoBody.ownerDocument.defaultView;
+                    if (message.obj instanceof win.Element.constructor)
                         Firebug.HTMLPanel.CompleteElement.tag.replace({object: message.obj}, valueBox,
                             Firebug.HTMLPanel.CompleteElement);
                     else
