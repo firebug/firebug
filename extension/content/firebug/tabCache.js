@@ -422,6 +422,9 @@ Firebug.TabCache.prototype = extend(Firebug.SourceCache.prototype,
             if (!url)
                 return responseText;
 
+            if (url === "<unknown>")
+                return [$STR("message.Failed to load source from cache for") + ": " + url];
+
             var channel = ioService.newChannel(url, null, null);
 
             // These flag combination doesn't repost the request.
