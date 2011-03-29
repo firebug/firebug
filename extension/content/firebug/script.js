@@ -681,7 +681,10 @@ Firebug.ScriptPanel.prototype = extend(Firebug.SourceBoxPanel,
 
         this.panelNode.ownerDocument.removeEventListener("keypress", this.onKeyPress, true);
         this.resizeEventTarget.removeEventListener("resize", this.onResize, true);
-FBTrace.sysout("script panel HIDE removed onResize eventhandler");
+
+        if (FBTrace.DBG_PANELS)
+            FBTrace.sysout("script panel HIDE removed onResize eventhandler");
+
         var panelStatus = Firebug.chrome.getPanelStatusElements();
         FBL.hide(panelStatus, false);
 

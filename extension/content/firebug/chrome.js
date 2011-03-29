@@ -1446,8 +1446,9 @@ var FirstRunPage =
         // display the welcome page.
         if (FBL.checkFirebugVersion(Firebug.currentVersion) > 0)
         {
-            FBTrace.sysout("FirstRunPage.initializeUI; current: " + Firebug.getVersion() +
-                "preferences: " + Firebug.currentVersion);
+            if (FBTrace.DBG_INITIALIZE)
+                FBTrace.sysout("FirstRunPage.initializeUI; current: " + Firebug.getVersion() +
+                    "preferences: " + Firebug.currentVersion);
 
             // Wait for session restore and display the welcome page.
             observerService.addObserver(this, "sessionstore-windows-restored" , false);

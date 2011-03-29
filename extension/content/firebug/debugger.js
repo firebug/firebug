@@ -2273,7 +2273,9 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
 
     loadedContext: function(context)
     {
-        FBTrace.sysout("loadedContext needs to trigger watchpanel updates");
+        if (FBTrace.DBG_ACTIVATION)
+            FBTrace.sysout("loadedContext needs to trigger watchpanel updates");
+
         /*
         var watchPanel = this.ableWatchSidePanel(context);
         var needNow = watchPanel && watchPanel.watches;
@@ -2700,7 +2702,9 @@ Firebug.JSDebugClient =
         onPauseJSDRequested: function(rejection)
         {
             //ToolsInterface.browser.dispatch( "onPauseJSDRequested", arguments);
-            FBTrace.sysout("Firebug.JSDebugClient onPauseJSDRequested ignored");
+
+            if (FBTrace.DBG_ACTIVATION)
+                FBTrace.sysout("Firebug.JSDebugClient onPauseJSDRequested ignored");
         },
 
 }
