@@ -260,6 +260,10 @@ var require, define;
                         url = context.nameToUrl(name, null, parentModuleMap);
                     }
 
+                    if (context.config.onDebug) {
+                        context.config.onDebug("makeModuleMap name: "+name+" parentName: "+parentName+" normalizedName: "+normalizedName+" url "+url);
+                    }
+
                     //Store the URL mapping for later.
                     urlMap[normalizedName] = url;
                 }
@@ -447,6 +451,9 @@ var require, define;
         }
 
         function main(inName, depArray, callback, relModuleMap) {
+            if (context.config.onDebug)
+                context.config.onDebug("main calling makeModuleMap with ("+inName+","+ relModuleMap+")");
+
             var moduleMap = makeModuleMap(inName, relModuleMap),
                 name = moduleMap.name,
                 fullName = moduleMap.fullName,
@@ -465,11 +472,11 @@ var require, define;
                     callback: callback,
                     onDep: function (depName, value) {
                         if (!(depName in manager.deps)) {
-                            if (context.config.onDebug) {
-                                context.config.onDebug("require.js:  "+depName+" set exports type "+typeof(value), {manager: manager});
-                            }
                             manager.deps[depName] = value;
                             manager.depCount += 1;
+                            if (context.config.onDebug) {
+                                context.config.onDebug("require.js:  "+depName+" set exports type "+typeof(value)+" "+manager.depCount+"/"+manager.depMax, {manager: manager});
+                            }
                             if (manager.depCount === manager.depMax) {
                                 //All done, execute!
                                 execManager(manager);
@@ -1117,8 +1124,8 @@ var require, define;
                           (ext ? ext :
                           (req.jsExtRegExp.test(moduleName) ? "" : ".js"));
                     if (context.config.onDebug) {
-                        var namedHow = context.namedHow[url] = {moduleName: moduleName, how: "relative", extension: ext};
-                        context.config.onDebug("require.js "+moduleName+"-("+namedHow.how+")->"+url, namedHow);
+                        var namedHow = context.namedHow[url] = {moduleName: moduleName, how: "relative", extension: ext, map: (relModuleMap ? relModuleMap.url : "none")};
+                        context.config.onDebug("require.js "+moduleName+"-("+namedHow.how+")->"+url+" relative to "+namedHow.map, namedHow);
                     }
                 } else {
 
