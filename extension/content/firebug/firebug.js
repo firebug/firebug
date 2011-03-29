@@ -694,6 +694,8 @@ top.Firebug =
         // Panel.show method, which expects the active context to be already registered.
         if (show)
             Firebug.chrome.syncPanel();
+        else
+            Firebug.chrome.selectPanel(); // select null causes hide() on selected
     },
 
     closeFirebug: function(userCommand)  // this is really deactivate

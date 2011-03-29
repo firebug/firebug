@@ -619,6 +619,7 @@ Firebug.ScriptPanel.prototype = extend(Firebug.SourceBoxPanel,
         if (active)
         {
             this.panelNode.ownerDocument.addEventListener("keypress", this.onKeyPress, true);
+            this.resizeEventTarget.addEventListener("resize", this.onResize, true);
 
             this.location = this.getDefaultLocation();
 
@@ -679,7 +680,8 @@ Firebug.ScriptPanel.prototype = extend(Firebug.SourceBoxPanel,
         this.highlight(this.context.stopped);
 
         this.panelNode.ownerDocument.removeEventListener("keypress", this.onKeyPress, true);
-
+        this.resizeEventTarget.removeEventListener("resize", this.onResize, true);
+FBTrace.sysout("script panel HIDE removed onResize eventhandler");
         var panelStatus = Firebug.chrome.getPanelStatusElements();
         FBL.hide(panelStatus, false);
 

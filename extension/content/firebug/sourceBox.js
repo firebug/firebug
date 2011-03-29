@@ -625,7 +625,7 @@ Firebug.SourceBoxPanel = extend(SourceBoxPanelBase,
         if (this.selectedSourceBox && this.visible)
         {
             if (FBTrace.DBG_COMPILATION_UNITS)
-                FBTrace.sysout("resizer event: "+event.type, event);
+                FBTrace.sysout("resizer event: "+event.type+" in panel "+this.name+" for "+this.context.getName(), event);
 
             this.reView(this.selectedSourceBox);
         }
