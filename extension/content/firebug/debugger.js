@@ -2470,7 +2470,7 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
     activateDebugger: function()
     {
         this.registerDebugger();
-        httpRequestObserver.registerObservers();
+        httpRequestObserver.addObserver(this);
 
         // If jsd is already active, we'll notify true; else we'll get another event
         var isActive = fbs.isJSDActive();
@@ -2484,7 +2484,7 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
     deactivateDebugger: function()
     {
         this.unregisterDebugger();
-        httpRequestObserver.unregisterObservers();  // for tabCache
+        httpRequestObserver.removeObserver(this);  // for tabCache
 
         var isActive = fbs.isJSDActive();
         if (!isActive)
@@ -2510,7 +2510,7 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
             return;
 
         var paused = fbs.pause();  // can be called multiple times.
-        httpRequestObserver.unregisterObservers();  // for tabCache
+        httpRequestObserver.addObserver(this);  // for tabCache
 
         if (FBTrace.DBG_ACTIVATION)
             FBTrace.sysout("debugger.onSuspendFirebug paused: "+paused+" isAlwaysEnabled " +
@@ -2528,7 +2528,7 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
             return;
 
         var unpaused = fbs.unPause();
-        httpRequestObserver.registerObservers();
+        httpRequestObserver.removeObserver(this);
 
         if (FBTrace.DBG_ACTIVATION)
             FBTrace.sysout("debugger.onResumeFirebug unpaused: "+unpaused+" isAlwaysEnabled " +

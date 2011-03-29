@@ -365,7 +365,10 @@ Firebug.NetMonitor = extend(Firebug.ActivableModule,
         // Resume only if enabled.
         if (Firebug.NetMonitor.isAlwaysEnabled())
         {
-            httpRequestObserver.registerObservers();  // XXXjjb Honza was called in firebug-http-observer.js on old enableXULWindow
+            // XXXjjb Honza was called in firebug-http-observer.js on old enableXULWindow
+            // Can't be here since resuming happens when the page is loaded and it's too
+            // late since the first (document) requests already happened.
+            //httpRequestObserver.registerObservers();  
             Firebug.TabWatcher.iterateContexts(monitorContext);
         }
 
@@ -379,7 +382,7 @@ Firebug.NetMonitor = extend(Firebug.ActivableModule,
         // Suspend only if enabled.
         if (Firebug.NetMonitor.isAlwaysEnabled())
         {
-            httpRequestObserver.unregisterObservers();  // XXXjjb Honza was called in firebug-http-observer.js on old disableXULWindow
+            //httpRequestObserver.unregisterObservers();  // XXXjjb Honza was called in firebug-http-observer.js on old disableXULWindow
             Firebug.TabWatcher.iterateContexts(unmonitorContext);
         }
 
