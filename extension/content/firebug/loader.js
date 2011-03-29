@@ -126,11 +126,11 @@ var FirebugLoadManager = function () {
 
         if (config.arch === 'inProcess')
         {
-            coreModules.push("inProcess/tools.js");  // must be first
-            coreModules.push("inProcess/options.js");  // debugger needs Firebug.Options because of $STR() in property initializes, TODO
-            coreModules.push("inProcess/firebugadapter.js");
-            coreModules.push("debugger.js");
-            coreModules.push("inProcess/javascripttool.js");
+            coreModules.push("arch/tools");  // must be first
+            coreModules.push("arch/options");  // debugger needs Firebug.Options because of $STR() in property initializes, TODO
+            coreModules.push("arch/firebugadapter");
+            coreModules.push("debugger");
+            coreModules.push("arch/javascripttool");
         }
         else if (config.arch == "remoteClient")
         {

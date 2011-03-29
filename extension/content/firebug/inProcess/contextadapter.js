@@ -3,7 +3,7 @@
 // ************************************************************************************************
 // Module
 
-define([ "tabContext.js"], function initializeContextAdapter()
+define([ "tabContext"], function initializeContextAdapter()
 {
 
 // ************************************************************************************************
