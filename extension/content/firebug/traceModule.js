@@ -3,7 +3,7 @@
 /**
  * UI control of debug Logging for Firebug internals
  */
-define("traceModule.js", ["inProcess/options.js"], function() { with (FBL) {
+define(["arch/options"], function() { with (FBL) {
 // ************************************************************************************************
 // Shorcuts and Services
 
