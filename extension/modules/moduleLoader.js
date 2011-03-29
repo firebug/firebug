@@ -41,6 +41,7 @@ function ModuleLoader(global, requirejsConfig, securityOrigin) {
     this.totalEvals = 0;
     this.totalEntries = 0;
     this.loading = [];  // stack of current dependency branch
+    this.loaded = {}; // modules by URL
 
     ModuleLoader.instanceCount += 1;
     this.instanceCount = ModuleLoader.instanceCount;
@@ -472,7 +473,7 @@ function loadCompilationUnit(moduleLoader, context, url, moduleName) {
         if (ModuleLoader.debug) ModuleLoader.onDebug("ModuleLoader depth "+moduleLoader.loading.length+" loading "+url);
         var unit = moduleLoader.loadModule(url, context);
         context.completeLoad(moduleName);             // round up all the dependencies
-        if (ModuleLoader.debug) ModuleLoader.onDebug("ModuleLoader depth "+moduleLoader.loading.length+" loaded "+url);
+        if (ModuleLoader.debug) ModuleLoader.onDebug("ModuleLoader depth "+moduleLoader.loading.length+" loaded "+url+" completed "+moduleName);
         moduleLoader.loading.pop();
         return unit;
     } catch (exc) {
@@ -498,8 +499,17 @@ coreRequire.load = function (context, moduleName, url) {
     var moduleLoader = ModuleLoader.get(context.contextName); // set in config for each subsystem
 
     if (moduleLoader) {
+        if (moduleLoader.loaded[url])
+        {
+            if (context.config.onDebug)
+                context.config.onDebug("ModuleLoader already loaded "+url);
+            return;
+        }
+
         var unit = loadCompilationUnit(moduleLoader, context, url, moduleName);
         unit.exports = context.defined[moduleName];   // remember what we exported.
+        context.urlFetched[url] = true;  // I don't think this is needed.
+        moduleLoader.loaded[url] = unit;
     } else {
         return ModuleLoader.onError( new Error("require.attach called with unknown moduleLoaderName "+context.contextName+" for url "+url), ModuleLoader );
     }
