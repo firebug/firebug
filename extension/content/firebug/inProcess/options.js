@@ -76,10 +76,8 @@ define(["arch/tools"], function factoryOptions(ToolsInterface)
             "omitObjectPathStack",
 
             // Debugging
-            "clearDomplate"
-        ];
+            "clearDomplate",
 
-        const servicePrefNames = [
             "showStackTrace", // Console
             "filterSystemURLs", // Stack
             "showAllSourceFiles", "breakOnErrors",  "trackThrowCatch" // Script
