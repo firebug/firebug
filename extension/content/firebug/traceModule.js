@@ -203,7 +203,7 @@ Firebug.TraceModule = extend(Firebug.Module,
 
     onToggleOption: function(target)
     {
-        FirebugChrome.onToggleOption(target);
+        window.FirebugChrome.onToggleOption(target);
 
         // Open automatically if set to "always open", close otherwise.
         if (Firebug.getPref(Firebug.prefDomain, "alwaysOpenTraceConsole"))
@@ -831,7 +831,7 @@ Firebug.TraceModule.MessageTemplate = domplate(Firebug.Rep,
     {
         var checked = Firebug.Options.getPref(Firebug.TraceModule.prefDomain, option);
         return {label: label, type: "checkbox", checked: checked, nol10n: true,
-            command: bindFixed(Firebug.Options.setPref, Firebug, Firebug.TraceModule.prefDomain,
+            command: bindFixed(Firebug.Options.setPref, Firebug.Options, Firebug.TraceModule.prefDomain,
                 option, !checked) };
     },
 
