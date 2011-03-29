@@ -5,5 +5,4 @@
 
 <overlay xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul"> 
     <!-- Support for tracing, which is available in Firebug 'X' version only -->
-    <script type="application/x-javascript" src="chrome://firebug/content/traceModule.js"/>
 </overlay>
