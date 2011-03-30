@@ -513,8 +513,7 @@ function $STR(name, bundle)
 {
     var strKey = name.replace(' ', '_', "g");
 
-    var useDefaultLocale = Firebug.Options.get("useDefaultLocale");
-    if (!useDefaultLocale)
+    if (!Firebug.useDefaultLocale)
     {
         try
         {
@@ -557,8 +556,7 @@ function $STRF(name, args, bundle)
 {
     var strKey = name.replace(' ', '_', "g");
 
-    var useDefaultLocale = Firebug.Options.get("useDefaultLocale");
-    if (!useDefaultLocale)
+    if (!Firebug.useDefaultLocale)
     {
         try
         {
