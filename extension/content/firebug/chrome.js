@@ -607,12 +607,12 @@ top.FirebugChrome =
 
     getSelectedPanel: function()
     {
-        return panelBar1.selectedPanel;
+        return panelBar1 ? panelBar1.selectedPanel : null;
     },
 
     getSelectedSidePanel: function()
     {
-        return panelBar2.selectedPanel;
+        return panelBar2 ? panelBar2.selectedPanel : null;
     },
 
     switchToPanel: function(context, switchToPanelName)
