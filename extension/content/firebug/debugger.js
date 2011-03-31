@@ -2627,31 +2627,7 @@ Firebug.Debugger.Breakpoint = function(name, href, lineNumber, checked, sourceLi
 
 Firebug.DebuggerListener =
 {
-    /*
-     * Called before pausing JSD to allow listeners to prevent the pause
-     * @param rejection an array, push boolean true to cause rejection.
-     */
-    onPauseJSDRequested: function(rejection)
-    {
-    },
 
-    /*
-     * @param active the current value of  (jsd && jsd.isOn && (jsd.pauseDepth == 0) )
-     * @param why a string explaining the change
-     */
-    onJSDActivate: function(active, why)  // start or unPause
-    {
-
-    },
-
-    /*
-     * @param active the current value of  (jsd && jsd.isOn && (jsd.pauseDepth == 0) )
-     * @param why a string explaining the change
-     */
-    onJSDDeactivate: function(active, why) // stop or pause
-    {
-
-    },
 
     onStop: function(context, frame, type, rv)
     {
@@ -2693,10 +2669,14 @@ Firebug.JSDebugClient =
 {
         onJSDActivate: function(active, fromMsg)
         {
+            if (FBTrace.DBG_ACTIVATION)
+                FBTrace.sysout("Firebug.JSDebugClient onJSDActivate "+active+" "+fromMsg);
             ToolsInterface.browser.dispatch("onActivateTool", ["script", active]);
         },
         onJSDDeactivate: function(active, fromMsg)
         {
+            if (FBTrace.DBG_ACTIVATION)
+                FBTrace.sysout("Firebug.JSDebugClient onJSDDeactivate "+active+" "+fromMsg);
             ToolsInterface.browser.dispatch("onActivateTool", ["script", active]);
         },
         onPauseJSDRequested: function(rejection)

@@ -1135,54 +1135,6 @@ top.Firebug =
         throw Components.results.NS_NOINTERFACE;
     },
 
-    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-    onPauseJSDRequested: function(rejection)
-    {
-        if (top.Firebug.currentContext)  // then we are active in this browser.xul
-            rejection.push("Firebug has currentContext active"); // so reject the request
-
-        dispatch2(Firebug.Debugger.fbListeners, "onPauseJSDRequested", [rejection]);
-    },
-
-    onJSDActivate: function(active, why)  // just before hooks are set
-    {
-        this.setIsJSDActive(active);
-
-        if (FBTrace.DBG_ACTIVATION)
-            FBTrace.sysout("debugger.onJSDActivate "+why+" active:"+active+"\n");
-
-        dispatch2(Firebug.Debugger.fbListeners, "onJSDActivate", [active, why]);
-    },
-
-    onJSDDeactivate: function(active, why)
-    {
-        this.setIsJSDActive(active);
-
-        if (FBTrace.DBG_ACTIVATION)
-            FBTrace.sysout("debugger.onJSDDeactivate "+why+" active:"+active+"\n");
-
-        dispatch2(Firebug.Debugger.fbListeners, "onJSDDeactivate", [active, why]);
-    },
-
-    setIsJSDActive: function(active)  // should only be call on the jsd activation events, so it correctly reflects jsd state
-    {
-        // Front side UI mark
-        if (active)
-            $('firebugStatus').setAttribute("script", "on");
-        else
-            $('firebugStatus').setAttribute("script", "off");
-
-        Firebug.StartButton.resetTooltip();
-
-        // Front side state
-        Firebug.Debugger.jsDebuggerOn = active;
-
-        if (FBTrace.DBG_ACTIVATION)
-            FBTrace.sysout("debugger.setIsJSDActive "+active+" icon attribute: "+$('firebugStatus').getAttribute("script"));
-
-    },
-
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
     // Placement
 

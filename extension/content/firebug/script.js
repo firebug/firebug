@@ -144,7 +144,7 @@ Firebug.ScriptPanel.prototype = extend(Firebug.SourceBoxPanel,
         Firebug.jsDebuggerOn = active;
 
         if (FBTrace.DBG_ACTIVATION)
-            FBTrace.sysout("debugger.setIsJSDActive "+active+" icon attribute: "+$('firebugStatus').getAttribute("script"));
+            FBTrace.sysout("script.onJavaScriptDebugging "+active+" icon attribute: "+$('firebugStatus').getAttribute("script"));
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
