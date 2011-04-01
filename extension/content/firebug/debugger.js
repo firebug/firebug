@@ -2430,7 +2430,7 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
             FBTrace.sysout("debugger.unregisterDebugger");
 
         // stay registered if we are profiling across a reload.
-        if (Firebug.Profiler.isProfiling())
+        if (Firebug.Profiler && Firebug.Profiler.isProfiling())
             return;
 
         var check = fbs.unregisterDebugger(this);
