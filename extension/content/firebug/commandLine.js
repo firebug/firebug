@@ -831,7 +831,8 @@ Firebug.CommandLine = extend(Firebug.Module,
             // https://developer.mozilla.org/en/DOM/document.onreadystatechange
             if (FBTrace.DBG_ERRORS)
                 FBTrace.sysout("onCommandLineFocus; Fired too soon, document not yet loaded: " +
-                    "(let Honza know if you see this) " + event.target.ownerDocument.readyState);
+                    "(let Honza know if you see this) " +
+                    (event.target ? event.target.ownerDocument.readyState : "event.target is NULL"));
         }
 
         if (this.autoCompleter && this.autoCompleter.linuxFocusHack)
