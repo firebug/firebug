@@ -3,9 +3,8 @@
 // ************************************************************************************************
 // Module
 
-define([ "arch/tools"], function initializeJavaScriptTool(ToolsInterface)
+define(["arch/tools"], function initializeJavaScriptTool(ToolsInterface)
 {
-
 
 // ************************************************************************************************
 // Attach the BrowserToolsInterface to our JavaScript Tool
@@ -75,6 +74,7 @@ ToolsInterface.JavaScript.runUntil = function(compilationUnit, lineNumber)
     Firebug.Debugger.runUntil(compilationUnit.getBrowserContext(), compilationUnit, lineNumber, Firebug.Debugger);
 };
 
+// ********************************************************************************************* //
 // Events
 
 ToolsInterface.browser.addListener(ToolsInterface.JavaScript);  // This is how we get events
@@ -96,7 +96,6 @@ ToolsInterface.JavaScript.onActivateTool = function(toolname, active)
         });
     }
 },
-
 
 ToolsInterface.JavaScript.onStartDebugging = function(context, frame)
 {

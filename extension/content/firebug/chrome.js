@@ -273,9 +273,10 @@ top.FirebugChrome =
 
     updateOption: function(name, value)
     {
-        if (panelBar1.selectedPanel)
+        if (panelBar1 && panelBar1.selectedPanel)
             panelBar1.selectedPanel.updateOption(name, value);
-        if (panelBar2.selectedPanel)
+
+        if (panelBar2 && panelBar2.selectedPanel)
             panelBar2.selectedPanel.updateOption(name, value);
 
         if (name == "textSize")

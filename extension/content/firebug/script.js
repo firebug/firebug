@@ -133,10 +133,14 @@ Firebug.ScriptPanel.prototype = extend(Firebug.SourceBoxPanel,
             Firebug.chrome.syncPanel(this.name);
 
         // Front side UI mark
-        if (active)
-            $('firebugStatus').setAttribute("script", "on");
-        else
-            $('firebugStatus').setAttribute("script", "off");
+        var firebugStatus = $('firebugStatus');
+        if (firebugStatus)
+        {
+            if (active)
+                firebugStatus.setAttribute("script", "on");
+            else
+                firebugStatus.setAttribute("script", "off");
+        }
 
         Firebug.StartButton.resetTooltip();
 
