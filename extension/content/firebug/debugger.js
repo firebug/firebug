@@ -2627,8 +2627,6 @@ Firebug.Debugger.Breakpoint = function(name, href, lineNumber, checked, sourceLi
 
 Firebug.DebuggerListener =
 {
-
-
     onStop: function(context, frame, type, rv)
     {
     },
@@ -2665,29 +2663,32 @@ Firebug.DebuggerListener =
 
 // ************************************************************************************************
 // Signals from fbs, passed along to our listeners
+
 Firebug.JSDebugClient =
 {
-        onJSDActivate: function(active, fromMsg)
-        {
-            if (FBTrace.DBG_ACTIVATION)
-                FBTrace.sysout("Firebug.JSDebugClient onJSDActivate "+active+" "+fromMsg);
-            ToolsInterface.browser.dispatch("onActivateTool", ["script", active]);
-        },
-        onJSDDeactivate: function(active, fromMsg)
-        {
-            if (FBTrace.DBG_ACTIVATION)
-                FBTrace.sysout("Firebug.JSDebugClient onJSDDeactivate "+active+" "+fromMsg);
-            ToolsInterface.browser.dispatch("onActivateTool", ["script", active]);
-        },
-        onPauseJSDRequested: function(rejection)
-        {
-            //ToolsInterface.browser.dispatch( "onPauseJSDRequested", arguments);
+    onJSDActivate: function(active, fromMsg)
+    {
+        if (FBTrace.DBG_ACTIVATION)
+            FBTrace.sysout("Firebug.JSDebugClient onJSDActivate "+active+" "+fromMsg);
+        ToolsInterface.browser.dispatch("onActivateTool", ["script", active]);
+    },
 
-            if (FBTrace.DBG_ACTIVATION)
-                FBTrace.sysout("Firebug.JSDebugClient onPauseJSDRequested ignored");
-        },
+    onJSDDeactivate: function(active, fromMsg)
+    {
+        if (FBTrace.DBG_ACTIVATION)
+            FBTrace.sysout("Firebug.JSDebugClient onJSDDeactivate "+active+" "+fromMsg);
+        ToolsInterface.browser.dispatch("onActivateTool", ["script", active]);
+    },
 
+    onPauseJSDRequested: function(rejection)
+    {
+        //ToolsInterface.browser.dispatch( "onPauseJSDRequested", arguments);
+
+        if (FBTrace.DBG_ACTIVATION)
+            FBTrace.sysout("Firebug.JSDebugClient onPauseJSDRequested ignored");
+    },
 }
+
 // Recursively look for obj in container using array of visited objects
 function findObjectPropertyPath(containerName, container, obj, visited)
 {
