@@ -65,3 +65,4 @@ pref("extensions.firebug.DBG_TOOLTIP", false);      // tooltip debugging      /*
 pref("extensions.firebug.DBG_HISTORY", false);      // panel navigation history                  /*@explore*/
 pref("extensions.firebug.DBG_STORAGE", false);      // storageService                            /*@explore*/
 pref("extensions.firebug.DBG_MODULES", false);      // moduleloading                            /*@explore*/
+pref("extensions.firebug.DBG_PROFILER", false);     // profiler                                 /*@explore*/

@@ -18,7 +18,7 @@ Firebug.Profiler = extend(Firebug.Module,
 
     onPanelEnable: function(panelName)
     {
-        if (FBTrace.DBG_DISPATCH)
+        if (FBTrace.DBG_PROFILER)
             FBTrace.sysout("Profiler.onPanelEnable panelName: "+panelName+"\n");
 
         if (panelName == "console" || panelName == "script")
@@ -27,7 +27,7 @@ Firebug.Profiler = extend(Firebug.Module,
 
     onPanelDisable: function(panelName)
     {
-        if (FBTrace.DBG_DISPATCH)
+        if (FBTrace.DBG_PROFILER)
             FBTrace.sysout("Profiler.onPanelDisable panelName: "+panelName+"\n");
 
         if (panelName == "console" || panelName == "script")
@@ -113,7 +113,7 @@ Firebug.Profiler = extend(Firebug.Module,
         var totalTime = 0;
 
         var sourceFileMap = context.sourceFileMap;
-        if (FBTrace.DBG_SOURCEFILES)
+        if (FBTrace.DBG_PROFILER)
         {
             for (url in sourceFileMap)
                 FBTrace.sysout("logProfileReport: "+sourceFileMap[url]+"\n");
