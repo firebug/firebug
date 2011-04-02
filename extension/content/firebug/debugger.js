@@ -108,7 +108,7 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
     // on bti
     getCurrentFrameKeys: function(context)  // TODO remote
     {
-        var globals = keys(context.getGlobalScope().wrappedJSObject);  // return is safe
+        var globals = keys(FBL.getContentView(context.getGlobalScope()));  // return is safe
 
         if (context.currentFrame)
             return this.getFrameKeys(context.currentFrame, globals);
@@ -993,8 +993,7 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
 
         if (!Firebug.Console.injector.isAttached(context, frameWin))
         {
-            var win = frameWin.wrappedJSObject ? frameWin.wrappedJSObject : frameWin;
-            this.injectConsole(context, win);
+            this.injectConsole(context, frameWin);
         }
         else
         {

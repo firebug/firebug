@@ -690,7 +690,7 @@ var fbs =
 
         fbs = this;
 
-        this.wrappedJSObject = this;
+        this.wrappedJSObject = this;  // XXXjjb remove this and the one in debugger
         this.timeStamp = new Date();  /* explore */
 
         Components.utils.import("resource://firebug/debuggerHalter.js");

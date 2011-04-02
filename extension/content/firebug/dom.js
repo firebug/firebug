@@ -946,7 +946,6 @@ Firebug.DOMBasePanel.prototype = extend(Firebug.Panel,
         var object = this.getRealRowObject(row);
         if (object && !(object instanceof jsdIStackFrame))
         {
-             // unwrappedJSObject.property = unwrappedJSObject
              Firebug.CommandLine.evaluate(value, this.context, object, this.context.getGlobalScope(),
                  function success(result, context)
                  {
@@ -2187,10 +2186,8 @@ DOMBreakpointGroup.prototype = extend(new Firebug.Breakpoint.BreakpointGroup(),
         {
             try
             {
-                // xxxHonza: Firebug.CommandLine.evaluate should be reused if possible.
-                // xxxJJB: The Components.utils.evalInSandbox fails from some reason.
-                var expr = "context.window.wrappedJSObject." + bp.objectPath;
-                bp.object = eval(expr);
+                var contentView = FBL.getContentView(context.window);
+                bp.object = contentView[bp.objectPath];
                 bp.context = context;
                 bp.watchProperty();
 

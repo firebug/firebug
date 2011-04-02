@@ -1865,8 +1865,8 @@ FirebugReps.Except = domplate(Firebug.Rep,
 
     supportsObject: function(object, type, context)
     {
-        var win = context && context.window && context.window.wrappedJSObject;
-        var found = (win && instanceOf(object,win.Error)) || (object instanceof ErrorCopy);
+        var win = context ? FBL.getContentView(context.window) : null;
+        var found = (win && instanceOf(object, win.Error)) || (object instanceof ErrorCopy);
         return found;
     }
 });

@@ -8087,6 +8087,20 @@ this.ReversibleRegExp = function(regex, flags)
 // ************************************************************************************************
 // Wrappers
 
+function getContentView(object)
+{
+    if (typeof(object) === 'undefined' || object == null)
+        return false;
+
+    // There is an expception when accessing StorageList.wrappedJSObject (which is
+    // instance of StorageObsolete)
+    if (object instanceof StorageList)
+        return false;
+
+    return (object.wrappedJSObject);
+}
+this.getContentView = getContentView;
+
 function unwrapObject(object)
 {
     // TODO: We might be able to make this check more authoritative with QueryInterface.
@@ -8103,6 +8117,7 @@ function unwrapObject(object)
 
     return object;
 }
+
 this.unwrapObject = unwrapObject;
 
 this.unwrapIValue = function(object)

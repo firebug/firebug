@@ -118,7 +118,7 @@ Firebug.TraceOptionsController = function(prefDomain, onPrefChangeHandler)
 
     this.userEventToPrefEvent = function(event)  // use as an event listener on UI control
     {
-        var menuitem = event.target.wrappedJSObject;
+        var menuitem = FBL.getContentView(event.target);
         if (!menuitem)
             menuitem = event.target;
 
@@ -942,10 +942,12 @@ Firebug.TraceModule.MessageTemplate = domplate(Firebug.Rep,
 
         // Only if the manifest uses useNativeWrappers=no.
         // The row in embedded frame, which uses type="content-primary", from some
-        // reason, this conten type changes wrapper around the row, so let's set
+        // reason, this content type changes wrapper around the row, so let's set
         // directly thte wrappedJSObject here, so row-expand works.
-        if (row.wrappedJSObject)
-            row.wrappedJSObject.repObject = message;
+        // XXXjjb we should not do this
+        var contentView = FBL.getContentView(row);
+        if (contentView)
+            contentView.repObject = message;
 
         if (scrolledToBottom)
             scrollToBottom(scrollingNode);
@@ -1011,8 +1013,7 @@ Firebug.TraceModule.MessageTemplate = domplate(Firebug.Rep,
         if (hasClass(row, "opened"))
         {
             var message = row.repObject;
-            if (!message && row.wrappedJSObject)
-                message = row.wrappedJSObject.repObject;
+            message = message || FBL.getContentView(row).repObject;
 
             var bodyRow = HelperDomplate.insertRows(this.bodyRow, {}, row)[0];
             var messageInfo = HelperDomplate.replace(this.bodyTag,

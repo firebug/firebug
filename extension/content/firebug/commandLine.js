@@ -702,14 +702,16 @@ Firebug.CommandLine = extend(Firebug.Module,
                 Firebug.CommandLine.injector.attachCommandLine(context, context.windows[i]);
         }
 
-        if (!context.window.wrappedJSObject)  // we need to test for the wrappedJSObject because _FirebugCommandLine is evaluated into the page
+        var contentView = FBL.getContentView(context.window);
+        if (!contentView)
         {
-            FBTrace.sysout("context.window with no wrappedJSObject!", context.window);
+            if (FBTrace.DBG_ERRORS)
+                FBTrace.sysout("CommandLine ERROR context.window invalid", context.window);
             return false;
         }
 
         // the attach is asynchronous, we can report when it is complete:
-        return context.window.wrappedJSObject._FirebugCommandLine;
+        return contentView._FirebugCommandLine;
     },
 
     onCommandLineKeyUp: function(event)
@@ -874,8 +876,10 @@ Firebug.CommandLine = extend(Firebug.Module,
     isAttached: function(context)
     {
         // _FirebugCommandLine is evaluated into the page
-        return ( context && context.window && context.window.wrappedJSObject ) ?
-            context.window.wrappedJSObject._FirebugCommandLine : false;
+        if (!context)
+            return false;
+        var contentView = FBL.getContentView(context.window);
+        return ( contentView ? contentView._FirebugCommandLine : false ) ;
     },
 
     attachConsoleOnFocus: function()
@@ -987,12 +991,14 @@ Firebug.CommandLine.CommandHandler = extend(Object,
         var methodName = win.document.getUserData("firebug-methodName");
 
         // We create this array in the page using JS, so we need to look on the wrappedJSObject for it.
-        var hosed_userObjects = (win.wrappedJSObject?win.wrappedJSObject:win)._firebug.userObjects;
+        var contentView = FBL.getContentView(win);
+        if (contentView)
+            var hosed_userObjects = contentView._firebug.userObjects;
 
         var userObjects = hosed_userObjects ? cloneArray(hosed_userObjects) : [];
 
         if (FBTrace.DBG_COMMANDLINE)
-            FBTrace.sysout("commandLine.CommandHandler: method "+methodName+" userObjects:",  userObjects);
+            FBTrace.sysout("commandLine.CommandHandler for "+FBL.getWindowId(win)+": method "+methodName+" userObjects:",  userObjects);
 
         var subHandler = api[methodName];
         if (!subHandler)
@@ -1114,9 +1120,9 @@ function autoCompleteEval(preExpr, expr, postExpr, context)
                 return Firebug.Debugger.getCurrentFrameKeys(context);
 
             // Cross window type pseudo-comparison
-            var innerWindow = context.window.wrappedJSObject;
-            if (innerWindow && innerWindow.Window && innerWindow.constructor.toString() === innerWindow.Window.toString())
-                completions =  keys(context.window.wrappedJSObject);  // return is safe
+            var contentView = FBL.getContentView(context.window);
+            if (contentView && contentView.Window && contentView.constructor.toString() === contentView.Window.toString())
+                completions =  keys(contentView);  // return is safe
             else  // hopefull sandbox in Chromebug
                 completions = keys(context.global);
 
@@ -1212,7 +1218,7 @@ function FirebugCommandLineAPI(context)
             FBTrace.sysout("commandLine.cd; console ready: " + consoleReady);
 
         // The window object parameter uses XPCSafeJSObjectWrapper, but we need XPCNativeWrapper
-        // (and its wrappedJSObject member). So, look within all registered consoleHandlers for
+        // So, look within all registered consoleHandlers for
         // the same window (from tabWatcher) that uses uses XPCNativeWrapper (operator "==" works).
         var entry = Firebug.Console.injector.getConsoleHandler(context, object);
         if (entry)
@@ -1626,6 +1632,7 @@ function CommandLineHandler(context, win)
 
 function getNoScript()
 {
+    // The wrappedJSObject here is not a security wrapper, it is a property set by the service.
     if (!this.noscript)
         this.noscript = Cc["@maone.net/noscript-service;1"] &&
             Cc["@maone.net/noscript-service;1"].getService().wrappedJSObject;

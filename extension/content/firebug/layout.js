@@ -203,8 +203,9 @@ LayoutPanel.prototype = extend(Firebug.Panel,
         if (isElementSVG(element) || isElementMathML(element) || isElementXUL(element))
         {
             var rect = element.getBoundingClientRect();
-            if (rect.wrappedJSObject)
-                rect = rect.wrappedJSObject;
+            // XXXjjb I believe this is incorrect. We should use the value as given by the call
+            //if (rect.wrappedJSObject)
+            //    rect = rect.wrappedJSObject;
 
             args.width = Math.round(rect.width);
             args.height = Math.round(rect.height);

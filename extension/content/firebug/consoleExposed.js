@@ -33,9 +33,9 @@ function createFirebugConsole(context, win)
 
     console.dirxml = function dirxml(o)
     {
-        if (o instanceof win.wrappedJSObject.Window)
+        if (o instanceof FBL.getContentView(win).Window)
             o = o.document.documentElement;
-        else if (o instanceof winwrappedJSObject.Document)
+        else if (o instanceof FBL.getContentView(win).Document)
             o = o.documentElement;
 
         Firebug.Console.log(o, context, "dirxml", Firebug.HTMLPanel.SoloElement);
