@@ -117,10 +117,11 @@ var Errors = Firebug.Errors = extend(Firebug.Module,
 
                 var context = this.getErrorContext(object);  // after instanceof
 
-                if (!context)
-                    return;
+                if (context)
+                    return this.logScriptError(context, object, isWarning);
 
-                context = this.logScriptError(context, object, isWarning);
+                if (FBTrace.DBG_ERRORS || FBTrace.DBG_ERRORLOG)
+                    FBTrace.sysout("errors.observe nsIScriptError no context! "+object.errorMessage, object);
             }
             else
             {
@@ -307,8 +308,7 @@ var Errors = Firebug.Errors = extend(Firebug.Module,
                     }
                     delete context.styleSheetMap; // clear the cache for next time.
                 }
-            }
-        );
+            });
 
         if (FBTrace.DBG_ERRORLOG && FBTrace.DBG_CSS && 'initTime' in this)
         {

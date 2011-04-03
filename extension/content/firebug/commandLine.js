@@ -100,7 +100,7 @@ Firebug.CommandLine = extend(Firebug.Module,
         if (!attached)
         {
             FBTrace.sysout("commandLine: document does not have command line attached " +
-                "its too early for command line "+safeGetWindowLocation(win), document);
+                "its too early for command line "+FBL.getWindowId(win)+" location:"+safeGetWindowLocation(win), document);
 
             if (isXMLPrettyPrint(context, win))
             {
@@ -683,7 +683,7 @@ Firebug.CommandLine = extend(Firebug.Module,
     isReadyElsePreparing: function(context, win)
     {
         if (FBTrace.DBG_COMMANDLINE)
-            FBTrace.sysout("commandLine.isReadyElsePreparing ", context);
+            FBTrace.sysout("commandLine.isReadyElsePreparing "+context.getName()+" win: "+(win?win.location:"not given"), context);
 
         if (this.isSandbox(context))
             return;
@@ -1469,9 +1469,6 @@ Firebug.CommandLine.injector = {
 
     attachCommandLine: function(context, win)
     {
-        if (!win)
-            return;
-
         if (win instanceof Window)
         {
             // If the command line is already attached then end.
@@ -1480,12 +1477,14 @@ Firebug.CommandLine.injector = {
 
             var doc = win.document;
 
+            var injected = false;
             if (context.stopped)
-                Firebug.CommandLine.injector.evalCommandLineScript(context);
+                injected = Firebug.CommandLine.injector.evalCommandLineScript(context);
             else
-                Firebug.CommandLine.injector.injectCommandLineScript(doc);
+                injected = Firebug.CommandLine.injector.injectCommandLineScript(doc);
 
-            Firebug.CommandLine.injector.addCommandLineListener(context, win);
+            if (injected)
+                Firebug.CommandLine.injector.addCommandLineListener(context, win);
         }
         else if (Firebug.CommandLine.isSandbox(context))
         {
@@ -1496,7 +1495,7 @@ Firebug.CommandLine.injector = {
         else
         {
             if (FBTrace.DBG_COMMANDLINE)
-                FBTrace.sysout("commandLine.injector not a Window or Sandbox", win);
+                FBTrace.sysout("commandLine.injector, win: "+win+" not a Window or Sandbox", win);
         }
     },
 
@@ -1506,6 +1505,7 @@ Firebug.CommandLine.injector = {
         Firebug.Debugger.evaluate(scriptSource, context);
         if (FBTrace.DBG_COMMANDLINE)
             FBTrace.sysout("commandLine.evalCommandLineScript ", scriptSource);
+        return true;
     },
 
     injectCommandLineScript: function(doc)
@@ -1524,8 +1524,14 @@ Firebug.CommandLine.injector = {
                 if (addedElement.parentNode)
                     addedElement.parentNode.removeChild(addedElement);
             });
+            return true;
         }
-
+        else
+        {
+            if(FBTrace.DBG_ERRORS || FBTrace.DBG_COMMANDLINE)
+                FBTrace.sysout("injectCommandLineScript ERROR no addedElement")
+            return false;
+        }
     },
 
     addCommandLineListener: function(context, win)
