@@ -162,7 +162,8 @@ function loadCore(config, coreInitialize)
         "tabContext.js",  // should be loaded by being a dep of tabWatcher
         "sourceBox.js",
         "script.js",
-        "traceModule.js"
+        "traceModule.js",
+        "dragdrop.js"
     ];
 
     var modules = coreModules.concat(defaultModules);

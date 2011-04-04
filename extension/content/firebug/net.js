@@ -2333,7 +2333,8 @@ Firebug.NetMonitor.NetInfoBody = domplate(Firebug.Rep, new Firebug.Listener(),
                 )
             ),
             DIV({"class": "netInfoHtmlText netInfoText", "role": "tabpanel"},
-                IFRAME({"class": "netInfoHtmlPreview", "role": "document"})
+                IFRAME({"class": "netInfoHtmlPreview", "role": "document"}),
+                DIV({"class": "htmlPreviewResizer"})
             )
         ),
 
@@ -2569,13 +2570,49 @@ Firebug.NetMonitor.NetInfoBody = domplate(Firebug.Rep, new Firebug.Listener(),
             netInfoBox.htmlPresented = true;
 
             var text = Utils.getResponseText(file, context);
-            var iframe = netInfoBox.getElementsByClassName("netInfoHtmlPreview").item(0);
-            iframe.contentWindow.document.body.innerHTML = text;
+            this.htmlPreview = netInfoBox.getElementsByClassName("netInfoHtmlPreview").item(0);
+            this.htmlPreview.contentWindow.document.body.innerHTML = text;
+
+            var defaultHeight = parseInt(Firebug.Options.get("netHtmlPreviewHeight"));
+            if (!isNaN(defaultHeight))
+                this.htmlPreview.style.height = defaultHeight + "px";
+
+            var handler = netInfoBox.querySelector(".htmlPreviewResizer");
+            this.resizer = new Firebug.DragDrop.Tracker(handler, {
+                onDragStart: FBL.bind(this.onDragStart, this),
+                onDragOver: FBL.bind(this.onDragOver, this),
+                onDrop: FBL.bind(this.onDrop, this)
+            });
         }
 
         // Notify listeners about update so, content of custom tabs can be updated.
         dispatch(NetInfoBody.fbListeners, "updateTabBody", [netInfoBox, file, context]);
     },
+
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+    // HTML Preview Resizer
+
+    onDragStart: function(tracker)
+    {
+        var body = FBL.getBody(this.htmlPreview.ownerDocument);
+        body.setAttribute("resizingHtmlPreview", "true");
+        this.startHeight = this.htmlPreview.clientHeight;
+    },
+
+    onDragOver: function(newPos, tracker)
+    {
+        var newHeight = (this.startHeight + newPos.y);
+        this.htmlPreview.style.height = newHeight + "px";
+        Firebug.Options.setPref(Firebug.prefDomain, "netHtmlPreviewHeight", newHeight);
+    },
+
+    onDrop: function(tracker)
+    {
+        var body = FBL.getBody(this.htmlPreview.ownerDocument);
+        body.removeAttribute("resizingHtmlPreview");
+    },
+
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
     setResponseText: function(file, netInfoBox, responseTextBox, context)
     {

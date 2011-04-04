@@ -68,6 +68,7 @@ define(["arch/tools"], function factoryOptions(ToolsInterface)
             "netFilterCategory", "netDisplayedResponseLimit",
             "netDisplayedPostBodyLimit", "netPhaseInterval", "sizePrecision",
             "netParamNameLimit", "netShowPaintEvents", "netShowBFCacheResponses",
+            "netHtmlPreviewHeight",
 
             // JSON Preview
             "sortJsonPreview",

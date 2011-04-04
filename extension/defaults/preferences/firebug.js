@@ -108,6 +108,7 @@ pref("extensions.firebug.sizePrecision", 1);       // Number of displayed decima
 pref("extensions.firebug.netParamNameLimit", 25);       // Maximum size [characters] of displayed parameter names in the Net panel (post tab). No limit if zero or less.
 pref("extensions.firebug.netShowPaintEvents", false);
 pref("extensions.firebug.netShowBFCacheResponses", true);   // Show responses coming from the BF (back-forward) cache. These doesn't represent any network activity.
+pref("extensions.firebug.netHtmlPreviewHeight", 100);       // Default height of a preview for net HTML responses.
 
 // JSON Preview
 pref("extensions.firebug.sortJsonPreview", false);   // If true JSON preview in the Net panel is sorted by keys.
