@@ -460,14 +460,17 @@ DomplateTag.prototype =
                     parent = parent.childNodes[index];
 
                 if (FBTrace.DBG_DOMPLATE && !parent)
-                    FBTrace.sysout("domplate.__path__ will return null for root "+root+" and offset "+offset+" arguments["+i+"]="+arguments[i]+' index: '+index, {root: root});
+                    FBTrace.sysout("domplate.__path__ will return null for root "+root+
+                        " and offset "+offset+" arguments["+i+"]="+arguments[i]+' index: '+
+                        index, {root: root});
             }
 
             return parent;
         }
 
         if (FBTrace.DBG_DOMPLATE)
-            fnBlock.push("//@ sourceURL=chrome://firebug/compileDOM_"+(this.tagName?this.tagName:'')+"_"+(uid++)+".js\n");
+            fnBlock.push("//@ sourceURL=chrome://firebug/compileDOM_"+
+                (this.tagName?this.tagName:'')+"_"+(uid++)+".js\n");
 
         var js = fnBlock.join("");
         // Exceptions on this line are often in the eval
