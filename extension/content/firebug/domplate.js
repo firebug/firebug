@@ -194,7 +194,7 @@ DomplateTag.prototype =
 
         function __escape__(value)
         {
-            return FBL.escapeForSourceLine(value);
+            return FBL.escapeForElementAttribute(value);
         }
 
         function isArray(it)
