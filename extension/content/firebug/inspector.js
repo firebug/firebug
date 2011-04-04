@@ -55,7 +55,7 @@ Firebug.Inspector = extend(Firebug.Module,
         if (!elementArr || !FirebugReps.Arr.isArray(elementArr))
         {
             // highlight a single element
-            if (!elementArr || !isElement(elementArr) || !isVisible(unwrapObject(elementArr)))
+            if (!elementArr || !isElement(elementArr) || !isVisible(FBL.getContentView(elementArr)))
             {
                 if(elementArr && elementArr.nodeType == 3)
                     elementArr = elementArr.parentNode;
@@ -220,7 +220,7 @@ Firebug.Inspector = extend(Firebug.Module,
         if (node && node.nodeType != 1)
             node = node.parentNode;
 
-        if (node && unwrapObject(node).firebugIgnore && !node.fbProxyFor)
+        if (node && Firebug.shouldIgnore(node) && !node.fbProxyFor)
             return;
 
         var context = this.inspectingContext;
@@ -1784,7 +1784,8 @@ function isVisibleElement(elt)
 
 function hideElementFromInspection(elt)
 {
-    unwrapObject(elt).firebugIgnore = !FBTrace.DBG_INSPECT;
+    if (!FBTrace.DBG_INSPECT)
+        Firebug.setIgnored(elt);
 }
 
 // highlightType is only to be used for multihighlighters

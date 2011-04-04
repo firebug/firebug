@@ -360,9 +360,16 @@ Firebug.DOMBasePanel.prototype = extend(Firebug.Panel,
     tag: DirTablePlate.tableTag,
     dirTablePlate: DirTablePlate,
 
-    getRealObject: function(object)
+    getObjectView: function(object)
     {
-        return unwrapObject(object);
+        if (!Firebug.viewChrome)
+        {
+            var contentView = FBL.getContentView(object);
+            if (!contentView && FBTrace.DBG_DOM)
+                FBTrace.sysout("getObjectView: no contentView for "+object);
+            return contentView || object;
+        }
+        return object;
     },
 
     rebuild: function(update, scrollTop)
@@ -399,7 +406,7 @@ Firebug.DOMBasePanel.prototype = extend(Firebug.Panel,
                 object = object.namedItem(domain);
             }
 
-            var insecureObject = unwrapObject(object);
+            var insecureObject = this.getObjectView(object);
             var properties = [];
 
             for (var name in insecureObject)  // enumeration is safe
@@ -584,7 +591,7 @@ Firebug.DOMBasePanel.prototype = extend(Firebug.Panel,
 
         // Set prefix for user defined properties. This prefix help the user to distinguish
         // among simple properties and those defined using getter and/or (only a) setter.
-        var o = unwrapObject(object);
+        var o = this.getObjectView(object);
         if (o && !isDOMMember(object, name))
         {
             var getter = o.__lookupGetter__(name);
@@ -771,7 +778,7 @@ Firebug.DOMBasePanel.prototype = extend(Firebug.Panel,
     getRealRowObject: function(row)
     {
         var object = this.getRowObject(row);
-        return this.getRealObject(object);
+        return this.getObjectView(object);
     },
 
     getRowPropertyValue: function(row)
@@ -911,7 +918,7 @@ Firebug.DOMBasePanel.prototype = extend(Firebug.Panel,
             var object = getRowOwnerObject(row);
             if (!object)
                 object = this.selection;
-            object = this.getRealObject(object);
+            object = this.getObjectView(object);
 
             if (object)
             {
@@ -1025,7 +1032,7 @@ Firebug.DOMBasePanel.prototype = extend(Firebug.Panel,
             return;
 
         var object = this.getRowObject(row);
-        object = this.getRealObject(object);
+        object = this.getObjectView(object);
         if (!object)
             return;
 
@@ -1315,7 +1322,7 @@ Firebug.DOMBasePanel.prototype = extend(Firebug.Panel,
 
     getDefaultSelection: function()
     {
-        return unwrapObject(this.context.getGlobalScope());
+        return this.getObjectView(this.context.getGlobalScope());
     },
 
     updateOption: function(name, value)

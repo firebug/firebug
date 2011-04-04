@@ -757,7 +757,7 @@ Firebug.HTMLPanel.prototype = extend(WalkingPanel,
     onMutateAttr: function(event)
     {
         var target = event.target;
-        if (unwrapObject(target).firebugIgnore)
+        if (Firebug.shouldIgnore(target))
             return;
 
         var attrChange = event.attrChange;
@@ -793,7 +793,7 @@ Firebug.HTMLPanel.prototype = extend(WalkingPanel,
     onMutateNode: function(event)
     {
         var target = event.target;
-        if (unwrapObject(target).firebugIgnore)
+        if (Firebug.shouldIgnore(target))
             return;
 
         var parent = event.relatedNode;
@@ -1937,7 +1937,7 @@ function getNodeTag(node, expandAll)
             return Firebug.HTMLPanel.HTMLHtmlElement.tag;
         else if (node instanceof HTMLAppletElement)
             return getEmptyElementTag(node);
-        else if (unwrapObject(node).firebugIgnore)
+        else if (Firebug.shouldIgnore(node))
             return null;
         else if (Firebug.HTMLLib.isContainerElement(node))
             return expandAll ? Firebug.HTMLPanel.CompleteElement.tag : Firebug.HTMLPanel.Element.tag;
@@ -2010,7 +2010,7 @@ Firebug.HTMLModule.MutationBreakpoints =
         if (!context.breakOnNextMutate)
             return false;
 
-        // Ignore changes in trees marked with firebugIgnore.
+        // Ignore changes in ignored branches
         if (isAncestorIgnored(event.target))
             return false;
 

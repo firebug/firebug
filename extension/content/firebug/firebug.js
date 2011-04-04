@@ -662,6 +662,27 @@ top.Firebug =
 
     prefDomain: "extensions.firebug",
 
+
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+    shouldIgnore: function(objectChromeView)
+    {
+        if (objectChromeView)
+        {
+            var contentView = FBL.getContentView(objectChromeView);
+            return (contentView && contentView.firebugIgnore);
+        }
+        // else don't ignore things we don't understand
+    },
+
+    setIgnored: function(objectChromeView)
+    {
+        if (objectChromeView)
+        {
+            var contentView = FBL.getContentView(objectChromeView);
+            if (contentView)
+                contentView.firebugIgnore = true;
+        }
+    },
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 
     // Browser Bottom Bar

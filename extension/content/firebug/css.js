@@ -288,7 +288,7 @@ Firebug.CSSModule = extend(extend(Firebug.Module, Firebug.EditorSelector),
             var editStyleSheet = ownerNode.ownerDocument.createElementNS(
                 "http://www.w3.org/1999/xhtml",
                 "style");
-            unwrapObject(editStyleSheet).firebugIgnore = true;
+            Firebug.setIgnored(editStyleSheet);
             editStyleSheet.setAttribute("type", "text/css");
             editStyleSheet.setAttributeNS(
                 "http://www.w3.org/XML/1998/namespace",
@@ -1079,17 +1079,21 @@ Firebug.CSSStyleSheetPanel.prototype = extend(Firebug.Panel,
         if (FBTrace.DBG_CSS)
             FBTrace.sysout("css.updateLocation; " + (styleSheet ? styleSheet.href : "no stylesheet"));
 
-        // Skip all stylesheets marked as 'firebugIgnore', but don't skip the
-        // default stylesheet that is used in case there is no other stylesheet
-        // on the page.
-        var unwrapped = styleSheet ? unwrapObject(styleSheet.ownerNode) : null;
-        if (!styleSheet || unwrapped && unwrapped.firebugIgnore && !unwrapped.defaultStylesheet)
-            var rules = [];
-        else
+        var rules = [];
+        if (styleSheet)
         {
-            if (styleSheet.editStyleSheet)
-                styleSheet = styleSheet.editStyleSheet.sheet;
-            var rules = this.getStyleSheetRules(this.context, styleSheet);
+            // Skip ignored stylesheets, but don't skip the
+            // default stylesheet that is used in case there is no other stylesheet
+            // on the page.
+            var shouldIgnore = Firebug.shouldIgnore(styleSheet.ownerNode);
+            var contentView = FBL.getContentView(styleSheet);
+            var isDefault = contentView && contentView.defaultStylesheet;
+            if (!shouldIgnore || isDefault)
+            {
+                if (styleSheet.editStyleSheet)
+                    styleSheet = styleSheet.editStyleSheet.sheet;
+                var rules = this.getStyleSheetRules(this.context, styleSheet);
+            }
         }
 
         if (rules.length)
@@ -2354,7 +2358,7 @@ CSSRuleEditor.prototype = domplate(Firebug.InlineEditor.prototype,
             // are expected.
             var doc = this.panel.context.window.document;
             var style = appendStylesheet(doc, "chrome://firebug/default-stylesheet.css");
-            FBL.unwrapObject(style).defaultStylesheet = true;
+            FBL.getContentView(style).defaultStylesheet = true;
             this.panel.location = styleSheet = style.sheet;
         }
 

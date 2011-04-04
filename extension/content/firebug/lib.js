@@ -411,7 +411,7 @@ this.createStyleSheet = function(doc, url)
         style.innerHTML = cssText;
     }
 
-    FBL.unwrapObject(style).firebugIgnore = true;
+    Firebug.setIgnored(style);
     return style;
 }
 
@@ -444,7 +444,7 @@ this.addScript = function(doc, id, src)
     element.setAttribute("type", "text/javascript");
     element.setAttribute("id", id);
     if (!FBTrace.DBG_CONSOLE)
-        FBL.unwrapObject(element).firebugIgnore = true;
+        Firebug.setIgnored(element);
 
     element.innerHTML = src;
     if (doc.documentElement)
@@ -468,7 +468,7 @@ this.isAncestorIgnored = function(node)
 {
     for (var parent = node; parent; parent = parent.parentNode)
     {
-        if (FBL.unwrapObject(parent).firebugIgnore)
+        if (Firebug.shouldIgnore(parent))
             return true;
     }
 
@@ -2029,7 +2029,7 @@ this.getElementHTML = function(element)
     {
         if (elt.nodeType == Node.ELEMENT_NODE)
         {
-            if (unwrapObject(elt).firebugIgnore)
+            if (Firebug.shouldIgnore(elt))
                 return;
 
             var nodeName = getNodeName(elt);
@@ -2102,7 +2102,7 @@ this.getElementXML = function(element)
     {
         if (elt.nodeType == Node.ELEMENT_NODE)
         {
-            if (unwrapObject(elt).firebugIgnore)
+            if (Firebug.shouldIgnore(elt))
                 return;
 
             var nodeName = getNodeName(elt);
@@ -3479,7 +3479,7 @@ this.getAllStyleSheets = function(context)
         if (!Firebug.showUserAgentCSS && FBL.isSystemURL(sheetLocation))
             return;
 
-        if (sheet.ownerNode && unwrapObject(sheet.ownerNode).firebugIgnore)
+        if (sheet.ownerNode && Firebug.shouldIgnore(sheet.ownerNode))
             return;
 
         styleSheets.push(sheet);

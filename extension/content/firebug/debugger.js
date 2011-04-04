@@ -1095,7 +1095,7 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
                 FBTrace.sysout("debugger.firebugDebuggerTracer dropped tracer trace.frames "+
                     trace.frames.length, trace.frames);
 
-            if (unwrapObject(context.window)._firebugStackTrace == "requested")
+            if (FBL.getContentView(context.window)._firebugStackTrace == "requested")
             {
                 trace.frames = trace.frames.slice(1);  // drop console.error() see consoleInjected.js
                 if (FBTrace.DBG_ERRORLOG)
@@ -1283,7 +1283,7 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
                 var eventOriginIndex = -1;
                 for (var i=0; i<context.windows.length; i++)
                 {
-                    if (unwrapObject(context.windows[i]) == eventOrigin) {
+                    if (FBL.getContentView(context.windows[i]) == eventOrigin) {
                         eventOriginIndex = i;
                         break;
                     }

@@ -142,7 +142,10 @@ Firebug.ScriptPanel.prototype = extend(Firebug.SourceBoxPanel,
                 firebugStatus.setAttribute("script", "off");
         }
 
-        Firebug.StartButton.resetTooltip();
+        if (Firebug.StartButton)
+            Firebug.StartButton.resetTooltip();
+        else
+            FBTrace.sysout("No Firebug.StartButton in onJavaScriptDebugging? ");
 
         // Front side state
         Firebug.jsDebuggerOn = active;
