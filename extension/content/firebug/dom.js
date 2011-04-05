@@ -430,6 +430,9 @@ Firebug.DOMBasePanel.prototype = extend(Firebug.Panel,
             if (insecureObject.__proto__ && hasProperties(insecureObject.__proto__))  // XXXjjb I think it is always true ?
                 properties.push('__proto__');
 
+            if (insecureObject.wrappedJSObject)
+                properties.push('wrappedJSObject');
+
             var domMembers = getDOMMembers(object);
             for (var i = 0; i < properties.length; i++)
             {
