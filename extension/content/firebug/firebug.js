@@ -621,10 +621,14 @@ top.Firebug =
     {
         if (!this.defaultStringBundle)
         {
+            var bundle = document.getElementById("strings_firebug");
+            if (!bundle)
+                return null;
+
             var ioService = Cc["@mozilla.org/network/io-service;1"].getService(Ci.nsIIOService);
             var chromeRegistry = Cc["@mozilla.org/chrome/chrome-registry;1"].
                 getService(Ci.nsIChromeRegistry);
-            var bundle = document.getElementById("strings_firebug");
+
             var uri = ioService.newURI(bundle.src, "UTF-8", null);
             var fileURI = chromeRegistry.convertChromeURL(uri).spec;
             var parts = fileURI.split("/");

@@ -536,7 +536,8 @@ function $STR(name, bundle)
     {
         // The en-US string should be always available.
         var bundle = Firebug.getDefaultStringBundle();
-        return bundle.GetStringFromName(strKey);
+        if (bundle)
+            return bundle.GetStringFromName(strKey);
     }
     catch (err)
     {
@@ -583,7 +584,8 @@ function $STRF(name, args, bundle)
     {
         // The en-US string should be always available.
         var bundle = Firebug.getDefaultStringBundle();
-        return bundle.formatStringFromName(strKey, args, args.length);
+        if (bundle)
+            return bundle.formatStringFromName(strKey, args, args.length);
     }
     catch (err)
     {
