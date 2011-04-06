@@ -870,6 +870,9 @@ Firebug.ScriptPanel.prototype = extend(Firebug.SourceBoxPanel,
             //  the old sourcebox will be out of sync. Just remove it and start over.
             this.removeAllSourceBoxes();
             this.show(); // we are not passing state so I guess we could miss a restore
+
+            if (this.activeWarningTag)  // then show() reset the flag,
+                return;                 // obey it.
         }
 
         this.showSource(updatedCompilationUnit.getURL());
