@@ -77,7 +77,7 @@
 
         <command id="cmd_increaseTextSize" oncommand="Firebug.changeTextSize(1);"/>
         <command id="cmd_decreaseTextSize" oncommand="Firebug.changeTextSize(-1);"/>
-        <command id="cmd_normalTextSize" oncommand="Firebug.setTextSize(0);"/>
+        <command id="cmd_normalTextSize" oncommand="Firebug.Options.setTextSize(0);"/>
 
         <command id="cmd_toggleCommandPopup" oncommand="Firebug.CommandLine.Popup.toggle(Firebug.currentContext)"
             checked="false"/>

@@ -1822,7 +1822,7 @@ function onPanelMouseDown(event)
     else if (FBL.isMiddleClick(event, true) && FBL.isControlShift(event))
     {
         FBL.cancelEvent(event);
-        Firebug.setTextSize(0);
+        Firebug.Options.setTextSize(0);
     }
     else if (FBL.isMiddleClick(event) && Firebug.getRepNode(event.target))
     {
