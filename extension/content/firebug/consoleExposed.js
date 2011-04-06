@@ -26,7 +26,7 @@ function createFirebugConsole(context, win)
         return "_firebugIgnore";
     }
 
-    console.dir = function dir(O) {
+    console.dir = function dir(o) {
         Firebug.Console.log(o, context, "dir", Firebug.DOMPanel.DirTable);
         return "_firebugIgnore";
     }
