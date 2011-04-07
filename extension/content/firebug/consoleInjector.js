@@ -44,6 +44,10 @@ Firebug.Console.injector =
 
     attachConsoleInjector: function(context, win)
     {
+        var console = createFirebugConsole(context, win);
+        win.wrappedJSObject.console = console;
+        return;
+/*
         var consoleInjection = this.getConsoleInjectionScript();  // Do it all here.
 
         if (FBTrace.DBG_CONSOLE)
@@ -53,6 +57,7 @@ Firebug.Console.injector =
 
         if (FBTrace.DBG_CONSOLE)
             FBTrace.sysout("attachConsoleInjector evaluation completed for "+win.location);
+*/
     },
 
     getConsoleInjectionScript: function()

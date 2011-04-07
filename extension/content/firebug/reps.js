@@ -474,8 +474,15 @@ FirebugReps.Arr = domplate(Firebug.Rep,
         var n = 0;
         for (var p in array)
         {
-            if (array.hasOwnProperty(p))
-                n++;
+            try
+            {
+                if (array.hasOwnProperty(p))
+                    n++;
+            }
+            catch (err)
+            {
+                FBTrace.sysout("hasSpecialProperties; EXCEPTION " + err, err);
+            }
         }
 
         return (array.length != n) && hasProperties(array);
@@ -1866,7 +1873,8 @@ FirebugReps.Except = domplate(Firebug.Rep,
     supportsObject: function(object, type, context)
     {
         var win = context ? FBL.getContentView(context.window) : null;
-        var found = (win && instanceOf(object, win.Error)) || (object instanceof ErrorCopy);
+        var found = (win && instanceOf(object, win.Error)) || (object instanceof ErrorCopy) ||
+            (object.constructor && object.constructor.name == "ReferenceError");
         return found;
     }
 });

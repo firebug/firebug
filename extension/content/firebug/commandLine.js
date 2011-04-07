@@ -993,7 +993,7 @@ Firebug.CommandLine.CommandHandler = extend(Object,
         // We create this array in the page using JS, so we need to look on the wrappedJSObject for it.
         var contentView = FBL.getContentView(win);
         if (contentView)
-            var hosed_userObjects = contentView._firebug.userObjects;
+            var hosed_userObjects = contentView._FirebugCommandLine.userObjects;
 
         var userObjects = hosed_userObjects ? cloneArray(hosed_userObjects) : [];
 
@@ -1481,7 +1481,7 @@ Firebug.CommandLine.injector = {
             if (context.stopped)
                 injected = Firebug.CommandLine.injector.evalCommandLineScript(context);
             else
-                injected = Firebug.CommandLine.injector.injectCommandLineScript(doc);
+                injected = Firebug.CommandLine.injector.injectCommandLineScript(win, context);
 
             if (injected)
                 Firebug.CommandLine.injector.addCommandLineListener(context, win);
@@ -1501,15 +1501,23 @@ Firebug.CommandLine.injector = {
 
     evalCommandLineScript: function(context)
     {
-        var scriptSource = getResource("chrome://firebug/content/commandLineInjected.js");
-        Firebug.Debugger.evaluate(scriptSource, context);
-        if (FBTrace.DBG_COMMANDLINE)
-            FBTrace.sysout("commandLine.evalCommandLineScript ", scriptSource);
+        var commandLine = createFirebugCommandLine(context, context.window);
+        win.wrappedJSObject._FirebugCommandLine = commandLine;
         return true;
+
+        //var scriptSource = getResource("chrome://firebug/content/commandLineInjected.js");
+        //Firebug.Debugger.evaluate(scriptSource, context);
+        //if (FBTrace.DBG_COMMANDLINE)
+        //    FBTrace.sysout("commandLine.evalCommandLineScript ", scriptSource);
+        //return true;
     },
 
-    injectCommandLineScript: function(doc)
+    injectCommandLineScript: function(win, context)
     {
+        var commandLine = createFirebugCommandLine(context, win);
+        win.wrappedJSObject._FirebugCommandLine = commandLine;
+        return true;
+/*
         // Inject command line script into the page.
         var scriptSource = getResource("chrome://firebug/content/commandLineInjected.js");
         var addedElement = addScript(doc, "_firebugCommandLineInjector", scriptSource);
@@ -1532,6 +1540,7 @@ Firebug.CommandLine.injector = {
                 FBTrace.sysout("injectCommandLineScript ERROR no addedElement")
             return false;
         }
+*/
     },
 
     addCommandLineListener: function(context, win)

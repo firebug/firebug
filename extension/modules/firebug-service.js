@@ -1782,11 +1782,15 @@ var fbs =
             }
             else
             {
-                var bp = this.findBreakpointByScript(frame.script, frame.pc);
+                var peelOurselvesOff = frame;
+                if (peelOurselvesOff.script.fileName.indexOf("consoleExposed.js") > 0)
+                    peelOurselvesOff = frame.callingFrame;
+
+                var bp = this.findBreakpointByScript(peelOurselvesOff.script, peelOurselvesOff.pc);
                 if (bp) // then breakpoints override debugger statements (to allow conditional debugger statements);
-                    return this.onBreakpoint(frame, type, rv);
+                    return this.onBreakpoint(peelOurselvesOff, type, rv);
                 else
-                    return fbs.routeBreakToDebuggr(frame, type, rv);
+                    return fbs.routeBreakToDebuggr(peelOurselvesOff, type, rv);
             }
         }
         catch(exc)

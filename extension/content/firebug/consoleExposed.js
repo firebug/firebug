@@ -42,7 +42,15 @@ function createFirebugConsole(context, win)
         return "_firebugIgnore";
     };
 
-    console.trace = function firebugDebuggerTracer() { debugger; return "_firebugIgnore"; }
+    console.trace = function firebugDebuggerTracer()
+    {
+        var unwrapped = FBL.unwrapObject(win);
+        unwrapped.top._firebugStackTrace = "console-tracer";
+        debugger;
+        delete unwrapped.top._firebugStackTrace;
+
+        return "_firebugIgnore";
+    }
 
     console.group = function group()
     {
@@ -84,7 +92,7 @@ function createFirebugConsole(context, win)
 
     console.count = function(key)
     {
-        var frameId = FBL.getStackFrameId();
+        var frameId = getStackFrameId();
         if (frameId)
         {
             if (!context.frameCounters)
@@ -333,6 +341,19 @@ function createFirebugConsole(context, win)
             return "Firebug failed to get stack trace with any frames";
         }
     }
+
+    function getStackFrameId(inputFrame)
+    {
+        for (var frame = Components.stack; frame; frame = frame.caller)
+        {
+            if (frame.languageName == "JavaScript"
+                && !(frame.filename && frame.filename.indexOf("chrome://firebug/") == 0))
+            {
+                return frame.filename + "/" + frame.lineNumber;
+            }
+        }
+        return null;
+    };
 
     return console;
 }

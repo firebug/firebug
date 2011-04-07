@@ -1065,7 +1065,8 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
 
             if (type == TYPE_DEBUGGER_KEYWORD)
             {
-                if (frame.functionName === 'firebugDebuggerTracer')
+                var trace = FBL.getContentView(context.window)._firebugStackTrace;
+                if (trace == "console-tracer")
                     return this.debuggerTracer(context, frame);
                 else
                     this.setDebuggerKeywordCause(context, frame);
@@ -1090,7 +1091,7 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
 
         if (trace)
         {
-            trace.frames = trace.frames.slice(1); // drop the firebugDebuggerTracer and reorder
+            //trace.frames = trace.frames.slice(1); // drop the firebugDebuggerTracer and reorder
             if (FBTrace.DBG_ERRORLOG)
                 FBTrace.sysout("debugger.firebugDebuggerTracer dropped tracer trace.frames "+
                     trace.frames.length, trace.frames);
