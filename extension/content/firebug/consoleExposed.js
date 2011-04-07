@@ -225,7 +225,7 @@ function createFirebugConsole(context, win)
 
         if (msg.stack)
         {
-            var trace = parseToStackTrace(msg.stack, context);
+            var trace = FBL.parseToStackTrace(msg.stack, context);
             if (FBTrace.DBG_CONSOLE)
                 FBTrace.sysout("logAssert trace from msg.stack", trace);
         }
@@ -242,7 +242,7 @@ function createFirebugConsole(context, win)
                 FBTrace.sysout("logAssert trace from getJSDUserStack", trace);
         }
 
-        trace = cleanStackTraceOfFirebug(trace);
+        trace = FBL.cleanStackTraceOfFirebug(trace);
 
         var url = msg.fileName ? msg.fileName : win.location.href;
         var lineNo = (trace && msg.lineNumber) ? msg.lineNumber : 0; // we may have only the line popped above
@@ -280,10 +280,10 @@ function createFirebugConsole(context, win)
             frame = frame.caller;
 
         // Drop two more frames, the injected console function and firebugAppendConsole()
-        if (frame)
-            frame = frame.caller;
-        if (frame)
-            frame = frame.caller;
+        //if (frame)
+        //    frame = frame.caller;
+        //if (frame)
+        //    frame = frame.caller;
 
         if (FBTrace.DBG_CONSOLE)
             FBTrace.sysout("consoleInjector.getComponentsStackDump final stack for userURL "+userURL, frame);
