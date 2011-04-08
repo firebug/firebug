@@ -603,7 +603,7 @@ IntoStepper.prototype = extend(LineStepper.prototype,
  */
 function LogFunctionStepper()
 {
-    this.initialize();
+    //xxxjjb: not defined this.initialize();
 }
 
 LogFunctionStepper.prototype =
