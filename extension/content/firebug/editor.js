@@ -877,7 +877,7 @@ Firebug.InlineEditor.prototype = domplate(Firebug.BaseEditor,
 // Autocompletion
 
 Firebug.AutoCompleter = function(getExprOffset, getRange, evaluator, selectMode, caseSensitive,
-        noCompleteOnBlank, noShowGlobal, showCompletionPopup, isValidProperty)
+        noCompleteOnBlank, noShowGlobal, showCompletionPopup, isValidProperty, simplifyExpr, killCompletions)
 {
     var candidates = null;
     var originalValue = null;
@@ -891,15 +891,12 @@ Firebug.AutoCompleter = function(getExprOffset, getRange, evaluator, selectMode,
     var postExpr = null;
     var completionPopup = Firebug.chrome.$("fbCommandLineCompletionList");
     var commandCompletionLineLimit = 40;
-    var reJavascriptChar = /[a-zA-Z0-9$_]/;
-    var reJavaScriptGroup = /([\{\"\/\(\'])/;
     // current completion state values
-    var completionEnd = 0;
-    var value = "";
     var preCompletion = "";
     var completionStart = -1;
     var completionEnd = -1;
-    var accepted = false;
+
+    // XXXsilin 'reJavascriptChar', 'value' and 'accepted' seemed to be unused, so I removed them.
 
     this.revert = function(textBox)
     {
@@ -927,7 +924,6 @@ Firebug.AutoCompleter = function(getExprOffset, getRange, evaluator, selectMode,
         lastOffset = 0;
         exprOffset = 0;
         lastIndex = -2;
-        accepted = false;
     };
 
     this.complete = function(context, textBox, completionBox, cycle, reverse, showGlobals)
@@ -939,10 +935,10 @@ Firebug.AutoCompleter = function(getExprOffset, getRange, evaluator, selectMode,
 
         var offset = textBox.selectionStart; // defines the cursor position
 
-        var found =  this.pickCandidates(textBox, offset, context, cycle, reverse, showGlobals);
+        var found = this.pickCandidates(textBox, offset, context, cycle, reverse, showGlobals);
 
         if (completionBox && found)
-                this.showCandidates(textBox, completionBox);
+            this.showCandidates(textBox, completionBox);
 
         return found;
     };
@@ -959,17 +955,41 @@ Firebug.AutoCompleter = function(getExprOffset, getRange, evaluator, selectMode,
             originalOffset = offset;
             originalValue = value;
 
+            // XXXsilin What's the reason for dealing with offsets here? Most
+            // functions seem to ignore them entirely (getExpressionOffset, getDot),
+            // and it seems completions are killed entirely when not at the end
+            // of an expression anyway. If they have to remain, why not just use
+            // value.substr(0, offset) instead of value everywhere?
+
+            // Create a simplified expression by redacting contents/normalizing
+            // delimiters of strings and regexes, to make parsing easier.
+            // Give up if the syntax is too weird.
+            var svalue = simplifyExpr ? simplifyExpr(value, context) : value;
+            if (svalue === null)
+            {
+                this.hide();
+                return false;
+            }
+
+            if (killCompletions && killCompletions(svalue, offset, context))
+            {
+                this.hide();
+                return false;
+            }
+
             // Find the part of the string that will be parsed
-            var parseStart = getExprOffset ? getExprOffset(value, offset, context) : 0;
+            var parseStart = getExprOffset ? getExprOffset(svalue, offset, context) : 0;
             preParsed = value.substr(0, parseStart);
             var parsed = value.substr(parseStart);
+            var sparsed = svalue.substr(parseStart);
 
             // Find the part of the string that is being completed
-            var range = getRange ? getRange(parsed, offset-parseStart, context) : null;
+            var range = getRange ? getRange(sparsed, offset-parseStart, context) : null;
             if (!range)
-                    range = {start: 0, end: parsed.length-1 };
+                range = {start: 0, end: parsed.length-1};
 
             var expr = parsed.substr(range.start, range.end-range.start+1);
+            var spreExpr = sparsed.substr(0, range.start);
             preExpr = parsed.substr(0, range.start);
             postExpr = parsed.substr(range.end+1);
             exprOffset = parseStart + range.start;
@@ -1033,34 +1053,26 @@ Firebug.AutoCompleter = function(getExprOffset, getRange, evaluator, selectMode,
                 return false;
             }
 
-            var m = reJavaScriptGroup.exec(value);
-            if (m) // then we have group operator
+            var values = evaluator(preExpr, expr, postExpr, context, spreExpr);
+            if (!values)
             {
-                return false; // give up, we need at least to balance
+                this.hide();
+                return false;
+            }
+
+            if (expr)
+            {
+                this.setCandidatesByExpr(expr, values, reverse);
+            }
+            else if (searchExpr)
+            {
+                if (!this.setCandidatesBySearchExpr(searchExpr, expr, values))
+                    return false;
+                expr = searchExpr;
             }
             else
             {
-                var values = evaluator(preExpr, expr, postExpr, context);
-                if (!values)
-                {
-                    this.hide();
-                    return false;
-                }
-
-                if (expr)
-                {
-                    this.setCandidatesByExpr(expr, values, reverse);
-                }
-                else if (searchExpr)
-                {
-                    if (!this.setCandidatesBySearchExpr(searchExpr, expr, values))
-                        return false;
-                    expr = searchExpr;
-                }
-                else
-                {
-                    this.setCandidatesByValues(values);
-                }
+                this.setCandidatesByValues(values);
             }
         }
 
@@ -1083,7 +1095,7 @@ Firebug.AutoCompleter = function(getExprOffset, getRange, evaluator, selectMode,
         var offsetEnd = preParsed.length + preExpr.length + completion.length;
 
 
-        if (selectMode) // inline completion  uses this
+        if (selectMode) // inline completion uses this
         {
             textBox.value = line;
             textBox.setSelectionRange(offset, offsetEnd);
@@ -1313,7 +1325,6 @@ Firebug.AutoCompleter = function(getExprOffset, getRange, evaluator, selectMode,
         }
 
         completionPopup.currentCompletionBox = completionBox;
-        var cmdLine = Firebug.CommandLine.getCommandLineSmall();  // should use something relative to textbox
         var anchor = textBox;
         this.linuxFocusHack = textBox;
         completionPopup.openPopup(anchor, "before_start", 0, 0, false, false);
@@ -1410,7 +1421,7 @@ Firebug.AutoCompleter = function(getExprOffset, getRange, evaluator, selectMode,
                 return true;
             }
         }
-        else if (event.keyCode === 38 || event.keyCode === 40) // UP of DOWN arrow
+        else if (event.keyCode === 38 || event.keyCode === 40) // UP or DOWN arrow
         {
             if (this.getCompletionText(completionBox))
             {

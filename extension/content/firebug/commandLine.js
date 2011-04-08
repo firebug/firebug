@@ -12,6 +12,9 @@ const commandPrefix = ">>>";
 
 const reOpenBracket = /[\[\(\{]/;
 const reCloseBracket = /[\]\)\}]/;
+const reJSChar = /[a-zA-Z0-9$_]/;
+const reStringExpr = /^" *"$/;
+const reLiteralExpr = /^[ "0-9,]*$/;
 const reCmdSource = /^with\(_FirebugCommandLine\){(.*)};$/;
 
 // ************************************************************************************************
@@ -598,7 +601,8 @@ Firebug.CommandLine = extend(Firebug.Module,
     {
         var showCompletionPopup = Firebug.Options.get("commandLineShowCompleterPopup");
         this.autoCompleter = new Firebug.AutoCompleter(getExpressionOffset, getDot,
-                bind(autoCompleteEval, this), false, true, true, true, showCompletionPopup, isValidProperty);
+                bind(autoCompleteEval, this), false, true, true, true, showCompletionPopup, isValidProperty,
+                simplifyExpr, killCompletions);
     },
 
     initializeUI: function()
@@ -1027,7 +1031,7 @@ Firebug.CommandLine.CommandHandler = extend(Object,
 // ************************************************************************************************
 // Local Helpers
 
-function getExpressionOffset(command, offset)
+function getExpressionOffset(command)
 {
     // XXXjoe This is kind of a poor-man's JavaScript parser - trying
     // to find the start of the expression that the cursor is inside.
@@ -1035,7 +1039,7 @@ function getExpressionOffset(command, offset)
 
     var bracketCount = 0;
 
-    var start = command.length;
+    var start = command.length, instr = false;
     while (start --> 0)
     {
         var c = command[start];
@@ -1048,14 +1052,16 @@ function getExpressionOffset(command, offset)
         }
         else if (reCloseBracket.test(c))
         {
-            if (bracketCount == 0 && command[start + 1] != '.')
+            var next = command[start + 1];
+            if (bracketCount === 0 && next !== '.' && next !== '[')
                 break;
             else
                 ++bracketCount;
         }
-        else if (bracketCount == 0)
+        else if (bracketCount === 0)
         {
-            if (!/[a-zA-Z0-9$_.]/.test(c))
+            if (c === '"') instr = !instr;
+            else if (!instr && !reJSChar.test(c) && c !== '.')
                 break;
         }
     }
@@ -1072,60 +1078,877 @@ function getDot(expr, offset)
         return {start: lastDot+1, end: expr.length-1};
 }
 
-function autoCompleteEval(preExpr, expr, postExpr, context)
+// Get the index of the last non-whitespace character in the range [0, from)
+// in str, or -1 if none.
+function prevNonWs(str, from)
+{
+    while (from --> 0)
+    {
+        if (str.charAt(from) !== ' ')
+            return from;
+    }
+    return -1;
+}
+
+function prevWord(str, from)
+{
+    while (from --> 0)
+    {
+        if (!reJSChar.test(str.charAt(from)))
+            break;
+    }
+    return from + 1;
+}
+
+function isFunctionName(expr, pos)
+{
+    pos -= 9;
+    return (pos >= 0 && expr.substr(pos, 9) === 'function ' &&
+            (pos === 0 || !reJSChar.test(expr.charAt(pos-1))));
+}
+
+function bwFindMatchingParen(expr, from)
+{
+    var bcount = 1;
+    while (from --> 0)
+    {
+        if (reCloseBracket.test(expr.charAt(from)))
+            ++bcount;
+        else if (reOpenBracket.test(expr.charAt(from)))
+            if (--bcount === 0)
+                return from;
+    }
+    return -1;
+}
+
+// Check if a '/' at the end of 'expr' would be a regex or a division.
+// May also return null if the expression seems invalid.
+function endingDivIsRegex(expr)
+{
+    var kwActions = ['throw', 'return', 'in', 'instanceof', 'delete', 'new',
+        'do', 'else', 'typeof', 'void', 'yield'];
+    var kwCont = ['function', 'if', 'while', 'for', 'switch', 'catch', 'with'];
+
+    var ind = prevNonWs(expr, expr.length), ch = (ind === -1 ? '{' : expr.charAt(ind));
+    if (reJSChar.test(ch))
+    {
+        // Test if the previous word is a keyword usable like 'kw <expr>'.
+        // If so, we have a regex, otherwise, we have a division (a variable
+        // or literal being divided by something).
+        var w = expr.substring(prevWord(expr, ind), ind+1);
+        return (kwActions.indexOf(w) !== -1);
+    }
+    else if (ch === ')')
+    {
+        // We have a regex in the cases 'if (...) /blah/' and 'function name(...) /blah/'.
+        ind = bwFindMatchingParen(expr, ind);
+        if (ind === -1)
+            return null;
+        ind = prevNonWs(expr, ind);
+        if (ind === -1)
+            return false;
+        if (!reJSChar.test(expr.charAt(ind)))
+            return false;
+        var wind = prevWord(expr, ind);
+        if (kwCont.indexOf(expr.substring(wind, ind+1)) !== -1)
+            return true;
+        return isFunctionName(expr, wind);
+    }
+    else if (ch === ']')
+        return false;
+    else return true;
+}
+
+// Check if a '{' in an expression is an object declaration.
+function isObjectDecl(expr, pos)
+{
+    var ind = prevNonWs(expr, pos);
+    if (ind === -1)
+        return false;
+    var ch = expr.charAt(ind);
+    return !(ch === ')' || ch === '{' || ch === '}' || ch === ';');
+}
+
+function isCommaProp(expr, start)
+{
+    var beg = expr.lastIndexOf(',')+1;
+    if (beg < start)
+        beg = start;
+    while (expr.charAt(beg) === ' ')
+        ++beg;
+    var prop = expr.substr(beg);
+    return isValidProperty(prop);
+}
+
+function simplifyExpr(expr)
+{
+    var ret = '', len = expr.length, instr = false, strend, inreg = false, inclass, brackets = [];
+
+    for (var i = 0; i < len; ++i)
+    {
+        var ch = expr.charAt(i);
+        if (instr)
+        {
+            if (ch === strend)
+            {
+                ret += '"';
+                instr = false;
+            }
+            else
+            {
+                if (ch === '\\' && i+1 !== len)
+                {
+                    ret += ' ';
+                    ++i;
+                }
+                ret += ' ';
+            }
+        }
+        else if (inreg)
+        {
+            if (inclass && ch === ']')
+                inclass = false;
+            else if (!inclass && ch === '[')
+                inclass = true;
+            else if (!inclass && ch === '/')
+            {
+                // End of regex, eat regex flags
+                inreg = false;
+                while (i+1 !== len && reJSChar.test(expr.charAt(i+1)))
+                {
+                    ret += ' ';
+                    ++i;
+                }
+                ret += '"';
+            }
+            if (inreg)
+            {
+                if (ch === '\\' && i+1 !== len)
+                {
+                    ret += ' ';
+                    ++i;
+                }
+                ret += ' ';
+            }
+        }
+        else
+        {
+            if (ch === "'" || ch === '"')
+            {
+                instr = true;
+                strend = ch;
+                ret += '"';
+            }
+            else if (ch === '/')
+            {
+                var re = endingDivIsRegex(ret);
+                if (re === null)
+                    return null;
+                if (re)
+                {
+                    inreg = true;
+                    ret += '"';
+                }
+                else
+                    ret += '/';
+            }
+            else
+            {
+                if (reOpenBracket.test(ch))
+                    brackets.push(ch);
+                else if (reCloseBracket.test(ch))
+                {
+                    // Check for mismatched brackets
+                    if (!brackets.length)
+                        return null;
+                    var br = brackets.pop();
+                    if (br === '(' && ch !== ')')
+                        return null;
+                    if (br === '[' && ch !== ']')
+                        return null;
+                    if (br === '{' && ch !== '}')
+                        return null;
+                }
+                ret += ch;
+            }
+        }
+    }
+
+    return ret;
+}
+
+// Check if auto-completion should be killed.
+function killCompletions(expr)
+{
+    // Check for 'function i'.
+    var ind = expr.lastIndexOf(' ');
+    if (isValidProperty(expr.substr(ind+1)) && isFunctionName(expr, ind+1))
+        return true;
+
+    // Check for '{prop: ..., i'.
+    var bwp = bwFindMatchingParen(expr, expr.length);
+    if (bwp !== -1 && expr.charAt(bwp) === '{' &&
+            isObjectDecl(expr, bwp) && isCommaProp(expr, bwp+1))
+    {
+        return true;
+    }
+
+    // Check for 'var prop..., i'.
+    var vind = expr.lastIndexOf('var ');
+    if (bwp < vind && isCommaProp(expr, vind+4))
+    {
+        // Note: This doesn't strictly work, because it kills completions even
+        // when we have started a new expression and used the comma operator
+        // in it (ie. 'var a; a, i'). This happens very seldom though, so it's
+        // not really a problem.
+        return true;
+    }
+
+    // Check for 'function f(i'.
+    while (bwp !== -1 && expr.charAt(bwp) !== '(')
+    {
+        bwp = bwFindMatchingParen(expr, bwp);
+    }
+    if (bwp !== -1)
+    {
+        var ind = prevNonWs(expr, bwp);
+        if (ind !== -1)
+        {
+            var stw = prevWord(expr, ind);
+            if (expr.substring(stw, ind+1) === 'function')
+                return true;
+            ind = prevNonWs(expr, stw);
+            if (ind !== -1 && expr.substring(prevWord(expr, ind), ind+1) === 'function')
+                return true;
+        }
+    }
+    return false;
+}
+
+// Types the autocompletion knows about, some of their non-enumerable properties,
+// and the return types of some member functions, included in the Firebug.CommandLine
+// object to make it more easily extensible.
+// XXXsilin Would this be better placed in the declaration list of Firebug.CommandLine?
+// xxxHonza: what do you mean by the declaratio list?
+
+Firebug.CommandLine.AutoCompletionKnownTypes = {
+    'void': {
+        '_fb_ignorePrototype': true
+    },
+    'Array': {
+        'pop': '|void',
+        'push': '|void',
+        'shift': '|void',
+        'unshift': '|void',
+        'reverse': '|Array',
+        'sort': '|Array',
+        'splice': '|Array',
+        'concat': '|Array',
+        'slice': '|Array',
+        'join': '|String',
+        'indexOf': '|void',
+        'lastIndexOf': '|void',
+        'filter': '|Array',
+        'map': '|Array',
+        'reduce': '|void',
+        'reduceRight': '|void',
+        'every': '|void',
+        'forEach': '|void',
+        'some': '|void',
+        'length': 'void'
+    },
+    'String': {
+        '_fb_contType': 'String',
+        'split': '|Array',
+        'substr': '|String',
+        'substring': '|String',
+        'charAt': '|String',
+        'charCodeAt': '|String',
+        'concat': '|String',
+        'indexOf': '|void',
+        'lastIndexOf': '|void',
+        'localeCompare': '|void',
+        'match': '|Array',
+        'search': '|void',
+        'slice': '|String',
+        'replace': '|String',
+        'toLowerCase': '|String',
+        'toLocaleLowerCase': '|String',
+        'toUpperCase': '|String',
+        'toLocaleUpperCase': '|String',
+        'trim': '|String',
+        'length': 'void'
+    },
+    'RegExp': {
+        'test': '|void',
+        'exec': '|Array',
+        'lastIndex': 'void',
+        'ignoreCase': 'void',
+        'global': 'void',
+        'multiline': 'void',
+        'source': 'String'
+    },
+    'Date': {
+        'getTime': '|void',
+        'getYear': '|void',
+        'getFullYear': '|void',
+        'getMonth': '|void',
+        'getDate': '|void',
+        'getDay': '|void',
+        'getHours': '|void',
+        'getMinutes': '|void',
+        'getSeconds': '|void',
+        'getMilliseconds': '|void',
+        'getUTCFullYear': '|void',
+        'getUTCMonth': '|void',
+        'getUTCDate': '|void',
+        'getUTCDay': '|void',
+        'getUTCHours': '|void',
+        'getUTCMinutes': '|void',
+        'getUTCSeconds': '|void',
+        'getUTCMilliseconds': '|void',
+        'setTime': '|void',
+        'setYear': '|void',
+        'setFullYear': '|void',
+        'setMonth': '|void',
+        'setDate': '|void',
+        'setHours': '|void',
+        'setMinutes': '|void',
+        'setSeconds': '|void',
+        'setMilliseconds': '|void',
+        'setUTCFullYear': '|void',
+        'setUTCMonth': '|void',
+        'setUTCDate': '|void',
+        'setUTCHours': '|void',
+        'setUTCMinutes': '|void',
+        'setUTCSeconds': '|void',
+        'setUTCMilliseconds': '|void',
+        'toUTCString': '|String',
+        'toLocaleDateString': '|String',
+        'toLocaleTimeString': '|String',
+        'toLocaleFormat': '|String',
+        'toDateString': '|String',
+        'toTimeString': '|String',
+        'toISOString': '|String',
+        'toGMTString': '|String',
+        'toJSON': '|String',
+        'toString': '|String',
+        'toLocaleString': '|String',
+        'getTimezoneOffset': '|void'
+    },
+    'Function': {
+        'call': '|void',
+        'apply': '|void',
+        'length': 'void'
+    },
+    'HTMLElement': {
+        'getElementsByClassName': '|NodeList',
+        'getElementsByTagName': '|NodeList',
+        'getElementsByTagNameNS': '|NodeList',
+        'querySelector': '|HTMLElement',
+        'querySelectorAll': '|NodeList',
+        'firstChild': 'HTMLElement',
+        'lastChild': 'HTMLElement',
+        'firstElementChild': 'HTMLElement',
+        'lastElementChild': 'HTMLElement',
+        'parentNode': 'HTMLElement',
+        'previousSibling': 'HTMLElement',
+        'nextSibling': 'HTMLElement',
+        'previousElementSibling': 'HTMLElement',
+        'nextElementSibling': 'HTMLElement',
+        'children': 'NodeList',
+        'childNodes': 'NodeList'
+    },
+    'NodeList': {
+        '_fb_contType': 'HTMLElement',
+        'length': 'void',
+        'item': '|HTMLElement'
+    },
+    'Window': {
+        'encodeURI': '|String',
+        'encodeURIComponent': '|String',
+        'decodeURI': '|String',
+        'decodeURIComponent': '|String',
+        'eval': '|void'
+    },
+    'HTMLDocument': {
+        'getElementsByClassName': '|NodeList',
+        'getElementsByTagName': '|NodeList',
+        'getElementsByTagNameNS': '|NodeList',
+        'querySelector': '|HTMLElement',
+        'querySelectorAll': '|NodeList',
+        'getElementById': '|HTMLElement'
+    }
+};
+
+function getKnownType(t)
+{
+    var known = Firebug.CommandLine.AutoCompletionKnownTypes;
+    if (known.hasOwnProperty(t))
+        return known[t];
+    return null;
+}
+
+function getKnownTypeInfo(r)
+{
+    if (typeof r !== 'string')
+        return r;
+    if (r.charAt(0) === '|')
+        return {'val': 'Function', 'ret': {'val': r.substr(1)}};
+    return {'val': r};
+}
+
+function getFakeCompleteKeys(name)
+{
+    var ret = [], type = getKnownType(name);
+    if (!type)
+        return ret;
+    for (var prop in type) {
+        if (prop.substr(0, 4) !== '_fb_' && !type[prop].splice)
+            ret.push(prop);
+    }
+    return ret;
+}
+
+function eatProp(expr, start)
+{
+    for (var i = start; i < expr.length; ++i)
+        if (!reJSChar.test(expr.charAt(i)))
+            break;
+    return i;
+}
+
+function matchingBracket(expr, start)
+{
+    var count = 1;
+    for (var i = start + 1; i < expr.length; ++i) {
+        var ch = expr.charAt(i);
+        if (reOpenBracket.test(ch))
+            ++count;
+        else if (reCloseBracket.test(ch))
+            if (!--count)
+                return i;
+    }
+    return -1;
+}
+
+function getTypeExtractionExpression(command)
+{
+    // Return a JavaScript expression for determining the type of an object
+    // given by another JavaScript expression. For DOM nodes, return HTMLElement
+    // instead of HTML[node type]Element, for simplicity.
+    var ret = '(function() { var v = ' + command + '; ';
+    ret += 'if (window.HTMLElement && v instanceof HTMLElement) return "HTMLElement"; ';
+    ret += 'var cr = Object.prototype.toString.call(v).slice(8, -1); ';
+    ret += 'if (v instanceof window[cr]) return cr;})()';
+    return ret;
+}
+
+function propChainBuildComplete(out, context, tempExpr, result)
+{
+    var complete = null, command = null;
+    if (tempExpr.type === 'fake')
+    {
+        var name = tempExpr.value.val;
+        complete = getFakeCompleteKeys(name);
+        if (!getKnownType(name)._fb_ignorePrototype)
+            command = name + '.prototype';
+    }
+    else
+    {
+        // XXXsilin Why isn't Object.getOwnPropertyNames used when supported?
+        if (typeof result === 'string')
+        {
+            // Strings only have indices as properties, use the fake object
+            // completions instead.
+            tempExpr.type = 'fake';
+            tempExpr.value = getKnownTypeInfo('String');
+            propChainBuildComplete(out, context, tempExpr);
+            return;
+        }
+        else if (FirebugReps.Arr.isArray(result))
+            complete = nonNumericKeys(result);
+        else
+            complete = keys(result);
+        command = getTypeExtractionExpression(tempExpr.command);
+    }
+
+    var done = function()
+    {
+        complete.sort();
+        var resComplete = [];
+        // Properties may be taken from several sources, so filter out duplicates.
+        for (var i = 0; i < complete.length; ++i)
+        {
+            if (!i || complete[i-1] !== complete[i])
+                resComplete.push(complete[i]);
+        }
+        out.complete = resComplete;
+    };
+
+    if (command === null)
+        done();
+    else
+    {
+        Firebug.CommandLine.evaluate(command, context, context.thisValue, null,
+            function found(result, context)
+            {
+                if (tempExpr.type === 'fake')
+                {
+                    complete = complete.concat(keys(result));
+                }
+                else
+                {
+                    // XXXsilin Is using userland strings safe?
+                    if (typeof result === 'string' && getKnownType(result))
+                    {
+                        complete = complete.concat(getFakeCompleteKeys(result));
+                    }
+                }
+                done();
+            },
+            function failed(result, context)
+            {
+                done();
+            }
+        );
+    }
+}
+
+function evalPropChainStep(step, tempExpr, evalChain, out, context)
+{
+    if (tempExpr.type === 'fake')
+    {
+        if (step === evalChain.length)
+        {
+            propChainBuildComplete(out, context, tempExpr);
+            return;
+        }
+
+        var link = evalChain[step], type = link.type;
+        if (type === 'property' || type === 'index')
+        {
+            // Use the accessed property if it exists and is unique (in case
+            // of multiple-definition functions), otherwise abort. It would
+            // be possible to continue with a 'real' expression of
+            // `tempExpr.value.val`.prototype, but since prototypes seldom
+            // contain actual values of things this doesn't work very well.
+            var mem = (type === 'index' ? '_fb_contType' : link.name);
+            var t = getKnownType(tempExpr.value.val);
+            if (t.hasOwnProperty(mem) && !t[mem].splice)
+                tempExpr.value = getKnownTypeInfo(t[mem]);
+            else
+                return;
+        }
+        else if (type === 'call')
+        {
+            if (tempExpr.value.ret)
+                tempExpr.value = tempExpr.value.ret;
+            else
+                return;
+        }
+        evalPropChainStep(step+1, tempExpr, evalChain, out, context);
+    }
+    else
+    {
+        var funcCommand = null, link, type;
+        while (step !== evalChain.length)
+        {
+            link = evalChain[step];
+            type = link.type;
+            if (type === 'property')
+            {
+                tempExpr.thisCommand = tempExpr.command;
+                tempExpr.command += '.' + link.name;
+            }
+            else if (type === 'index')
+            {
+                tempExpr.thisCommand = 'window';
+                tempExpr.command += '[' + link.cont + ']';
+            }
+            else if (type === 'safecall')
+            {
+                tempExpr.thisCommand = 'window';
+                tempExpr.command += '(' + link.cont + ')';
+            }
+            else if (type === 'call')
+            {
+                if (link.name === '')
+                {
+                    // We cannot know about functions without name, try the
+                    // heuristic directly.
+                    link.type = 'retval-heuristic';
+                    evalPropChainStep(step, tempExpr, evalChain, out, context);
+                    return;
+                }
+
+                funcCommand = getTypeExtractionExpression(tempExpr.thisCommand);
+                break;
+            }
+            else if (type === 'retval-heuristic')
+            {
+                if (link.name.substr(0, 3) === 'get' && link.cont !== null)
+                {
+                    // Names beginning with get are almost always getters, so
+                    // assume the it is a safecall and start over.
+                    // XXXsilin This feels like a good compromise to me. Is
+                    // it okay to make an exception like this?
+                    link.type = 'safecall';
+                    evalPropChainStep(step, tempExpr, evalChain, out, context);
+                    return;
+                }
+                funcCommand = 'Function.prototype.toString.call(' + tempExpr.command + ')';
+                break;
+            }
+            ++step;
+        }
+
+        var func = (funcCommand !== null), command = (func ? funcCommand : tempExpr.command);
+        Firebug.CommandLine.evaluate(command, context, context.thisValue, null,
+            function found(result, context)
+            {
+                if (func)
+                {
+                    // XXXsilin Is using userland values of types 'number' and 'string' safe?
+                    if (type === 'call')
+                    {
+                        if (typeof result !== 'string')
+                            return;
+
+                        var t = getKnownType(result);
+                        if (t && t.hasOwnProperty(link.name))
+                        {
+                            var propVal = getKnownTypeInfo(t[link.name]);
+
+                            // Make sure the property is a callable function
+                            if (!propVal.ret)
+                                return;
+
+                            tempExpr.type = 'fake';
+                            tempExpr.value = getKnownTypeInfo(propVal.ret);
+                            evalPropChainStep(step+1, tempExpr, evalChain, out, context);
+                        }
+                        else
+                        {
+                            // Unknown 'this' type or function name, use
+                            // heuristics on the function instead.
+                            link.type = 'retval-heuristic';
+                            evalPropChainStep(step, tempExpr, evalChain, out, context);
+                        }
+                    }
+                    else if (type === 'retval-heuristic')
+                    {
+                        if (typeof result !== 'string')
+                            return;
+
+                        // Perform some crude heuristics for figuring out the
+                        // return value of a function based on its contents.
+                        // It's certainly not perfect, and it's easily fooled
+                        // into giving wrong results,  but it might work in
+                        // some common cases.
+
+                        // Don't support nested functions.
+                        if (result.lastIndexOf('function ') !== 0)
+                            return;
+
+                        // Check for chaining functions.
+                        if (result.indexOf('return this;') !== -1)
+                        {
+                            tempExpr.command = tempExpr.thisCommand;
+                            tempExpr.thisCommand = 'window';
+                            evalPropChainStep(step+1, tempExpr, evalChain, out, context);
+                            return;
+                        }
+
+                        // Check for 'return new Type(...);', and use the
+                        // prototype as a pseudo-object for those (since it
+                        // is probably not a known type that we can fake).
+                        var newPos = result.indexOf('return new ');
+                        if (newPos !== -1)
+                        {
+                            var rest = result.substr(newPos + 11),
+                                epos = rest.search(/[^a-zA-Z0-9_$.]/);
+                            if (epos !== -1)
+                            {
+                                rest = rest.substring(0, epos);
+                                tempExpr.command = rest + '.prototype';
+                                evalPropChainStep(step+1, tempExpr, evalChain, out, context);
+                                return;
+                            }
+                        }
+                    }
+                }
+                else
+                {
+                    propChainBuildComplete(out, context, tempExpr, result);
+                }
+            },
+            function failed(result, context) { }
+        );
+    }
+}
+
+function evalPropChain(self, preExpr, origExpr, context)
+{
+    var evalChain = [], linkStart = 0, len = preExpr.length, lastProp = '';
+    var tempExpr = {'type': 'real', 'command': 'window', 'thisCommand': 'window'};
+    while (linkStart !== len)
+    {
+        var ch = preExpr.charAt(linkStart);
+        if (linkStart === 0)
+        {
+            if (ch === '[')
+            {
+                tempExpr.type = 'fake';
+                tempExpr.value = {'val': 'Array'};
+                linkStart = matchingBracket(preExpr, linkStart) + 1;
+                if (linkStart === 0)
+                    return false;
+            }
+            else if (ch === '"')
+            {
+                var isRegex = (origExpr.charAt(0) === '/');
+                tempExpr.type = 'fake';
+                tempExpr.value = {'val': (isRegex ? 'RegExp' : 'String')};
+                linkStart = preExpr.indexOf('"', 1) + 1;
+                if (linkStart === 0)
+                    return false;
+            }
+            else if (ch === '(' || ch === '{')
+            {
+                // Expression either looks like '(...).prop', which is
+                // too complicated, or '{...}.prop', which is uncommon
+                // and thus pointless to implement.
+                return false;
+            }
+            else if (reJSChar.test(ch))
+            {
+                // The expression begins with a regular property name
+                var nextLink = eatProp(preExpr, linkStart);
+                lastProp = preExpr.substring(linkStart, nextLink);
+                linkStart = nextLink;
+                evalChain.push({'type': 'property', 'name': lastProp});
+            }
+            else
+            {
+                // Syntax error, like '.'.
+                return false;
+            }
+        }
+        else
+        {
+            if (ch === '.')
+            {
+                // Property access
+                var nextLink = eatProp(preExpr, linkStart+1);
+                lastProp = preExpr.substring(linkStart+1, nextLink);
+                linkStart = nextLink;
+                evalChain.push({'type': 'property', 'name': lastProp});
+            }
+            else if (ch === '(')
+            {
+                // Function call. Save the function name and the arguments if
+                // they are safe to evaluate.
+                var endCont = matchingBracket(preExpr, linkStart);
+                var cont = preExpr.substring(linkStart+1, endCont);
+                if (reLiteralExpr.test(cont))
+                    cont = origExpr.substring(linkStart+1, endCont);
+                else
+                    cont = null;
+                linkStart = endCont + 1;
+                evalChain.push({'type': 'call', 'name': lastProp, 'cont': cont});
+                lastProp = '';
+            }
+            else if (ch === '[')
+            {
+                // Index. Use the supplied index if it is a literal; otherwise
+                // it is probably a loop index with a variable not yet defined
+                // (like 'for(var i = 0; i < ar.length; ++i) ar[i].prop'), and
+                // '0' seems like a reasonably good guess at a valid index.
+                var endInd = matchingBracket(preExpr, linkStart);
+                var ind = preExpr.substring(linkStart+1, endInd);
+                if (reLiteralExpr.test(ind))
+                    ind = origExpr.substring(linkStart+1, endInd);
+                else
+                    ind = '0';
+                linkStart = endInd+1;
+                evalChain.push({'type': 'index', 'cont': ind});
+                lastProp = '';
+            }
+            else
+            {
+                // Syntax error
+                return false;
+            }
+        }
+    }
+
+    evalPropChainStep(0, tempExpr, evalChain, self, context);
+    return true;
+}
+
+function autoCompleteEval(preExpr, expr, postExpr, context, spreExpr)
 {
     var completions;
 
     try
     {
-        if (preExpr)
+        if (spreExpr)
         {
             // Remove the trailing dot (if there is one)
-            var lastDot = preExpr.lastIndexOf(".");
-            if (lastDot != -1)
+            var lastDot = spreExpr.lastIndexOf(".");
+            if (lastDot !== -1)
+            {
+                spreExpr = spreExpr.substr(0, lastDot);
                 preExpr = preExpr.substr(0, lastDot);
+            }
 
-            var self = this;
-            self.complete = [];
-            Firebug.CommandLine.evaluate(preExpr, context, context.thisValue, null,
-                function found(result, context)
-                {
-                    if (FBTrace.DBG_COMMANDLINE)
-                        FBTrace.sysout("commandLine.autoCompleteEval \'"+preExpr+"\' found result", result);
+            this.complete = [];
 
-                    if (typeof result === 'string')
-                        self.complete = [];
-                    else if (FirebugReps.Arr.isArray(result))
-                        self.complete = nonNumericKeys(result).sort();
-                    else
-                        self.complete = keys(result).sort();
-                },
-                function failed(result, context)
-                {
-                    if (FBTrace.DBG_COMMANDLINE)
-                        FBTrace.sysout("commandLine.autoCompleteEval \'"+preExpr+"\' failed result", result);
+            if (FBTrace.DBG_COMMANDLINE)
+                FBTrace.sysout("commandLine.autoCompleteEval pre:'" + preExpr + "' spre:'" + spreExpr + "'.");
 
-                    self.complete = [];
-                }
-            );
+            // Don't auto-complete '.'.
+            if (spreExpr === '')
+                return this.complete;
 
-            if (lastDot !== -1) // if we had no dot, add a keyword that matches exactly
-                addMatchingKeyword(preExpr, self.complete);
-
-            return self.complete;
+            evalPropChain(this, spreExpr, preExpr, context);
+            return this.complete;
         }
         else
         {
+            // XXXsilin Why is this so entirely different from the above? The only real
+            // change I can see is the addition of keywords; other than that wouldn't
+            // running the above code with preExpr = spreExpr = 'window.' work?
+            // (Help! It looks scary.)
+
             if (context.stopped)
                 return Firebug.Debugger.getCurrentFrameKeys(context);
 
             // Cross window type pseudo-comparison
             var contentView = FBL.getContentView(context.window);
             if (contentView && contentView.Window && contentView.constructor.toString() === contentView.Window.toString())
-                completions =  keys(contentView);  // return is safe
+            {
+                // XXXsilin I assume keys(innerWindow)? I'm not familiar enough with
+                // wrapped objects to change it.
+                completions = keys(contentView); // return is safe
+
+                // Add some known window properties, without duplicates.
+                completions = completions.concat(getFakeCompleteKeys('Window'));
+                var dupCompletions = completions.sort();
+                completions = [];
+                for (var i = 0; i < dupCompletions.length; ++i)
+                {
+                    if (!i || dupCompletions[i-1] !== dupCompletions[i])
+                        completions.push(dupCompletions[i]);
+                }
+            }
             else  // hopefull sandbox in Chromebug
                 completions = keys(context.global);
 
+            // XXXsilin Is this still necessary, now that '(' doesn't autocomplete?
+            // It does help '...; return<CR>' if variables beginning with 'return'
+            // exist, but I'm not even sure that's a good use case.
             addMatchingKeyword(expr, completions);
 
             return completions.sort();
@@ -1164,6 +1987,37 @@ function injectScript(script, win)
 {
     win.location = "javascript: " + script;
 }
+
+// XXXsilin only cover positive numbers
+const rePositiveNumber = /^[1-9][0-9]*$/;
+function nonNumericKeys(map)  // At least sometimes the keys will be on user-level window objects
+{
+    var keys = [];
+    try
+    {
+        for (var name in map)  // enumeration is safe
+        {
+            // XXXsilin Wait, what? "number" seems like a typo for "Number", and
+            // I'm also pretty sure numeric indices are strings, not numbers (when
+            // traversed as properties) - even if they were, they propably wouldn't
+            // be proper objects and so not instances of anything). AFAICT, this
+            // breaks completion for arrays and jQuery objects.
+            // Changing this for now, but do look over it because I'm not sure if
+            // it's safe.
+            // if (! (name instanceof number) )
+                // keys.push(name);   // name is string, safe
+
+            if (! (name === '0' || rePositiveNumber.test(name)) )
+                keys.push(name);
+        }
+    }
+    catch (exc)
+    {
+        // Sometimes we get exceptions trying to iterate properties
+    }
+
+    return keys;  // return is safe
+};
 
 // ************************************************************************************************
 // Command line APIs definition
@@ -1314,7 +2168,9 @@ function FirebugCommandLineAPI(context)
 }
 
 // ************************************************************************************************
-Firebug.CommandLine.CommandHistory = function() {
+
+Firebug.CommandLine.CommandHistory = function()
+{
     const commandHistoryMax = 1000;
 
     var commandsPopup = $("fbCommandHistory");
@@ -1464,6 +2320,8 @@ Firebug.CommandLine.CommandHistory = function() {
         Firebug.chrome.setGlobalAttribute("fbCommandEditorHistoryButton", "checked", "false");
     };
 };
+
+// ************************************************************************************************
 
 Firebug.CommandLine.injector = {
 
@@ -1659,6 +2517,7 @@ function getNoScript()
 
 Firebug.registerModule(Firebug.CommandLine);
 
-// ************************************************************************************************
 return Firebug.CommandLine;
+
+// ************************************************************************************************
 }});
