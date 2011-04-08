@@ -269,7 +269,8 @@ function createFirebugConsole(context, win)
         }
 
         var row = Firebug.Console.log(errorObject, context, "errorMessage");
-        row.scrollIntoView();
+        if (row)
+            row.scrollIntoView();
 
         return "_firebugIgnore";
     }
