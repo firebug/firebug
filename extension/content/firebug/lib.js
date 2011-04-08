@@ -3107,12 +3107,12 @@ this.getStackSourceLink = function()
 {
     for (var frame = Components.stack; frame; frame = frame.caller)
     {
-        if (frame.filename && frame.filename.indexOf("chrome://firebug/") == 0)
+        if (frame.filename && frame.filename.indexOf("://firebug/") > 0)
         {
             for (; frame; frame = frame.caller)
             {
                 var firebugComponent = "/modules/firebug-";
-                if (frame.filename && frame.filename.indexOf("chrome://firebug/") != 0 &&
+                if (frame.filename && frame.filename.indexOf("://firebug/") < 0 &&
                     frame.filename.indexOf(firebugComponent) == -1)
                     break;
             }
@@ -3136,7 +3136,7 @@ this.getStackFrameId = function()
     for (var frame = Components.stack; frame; frame = frame.caller)
     {
         if (frame.languageName == "JavaScript"
-            && !(frame.filename && frame.filename.indexOf("chrome://firebug/") == 0))
+            && !(frame.filename && frame.filename.indexOf("://firebug/") > 0))
         {
             return frame.filename + "/" + frame.lineNumber;
         }

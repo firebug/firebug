@@ -348,7 +348,7 @@ function createFirebugConsole(context, win)
         for (var frame = Components.stack; frame; frame = frame.caller)
         {
             if (frame.languageName == "JavaScript"
-                && !(frame.filename && frame.filename.indexOf("chrome://firebug/") == 0))
+                && !(frame.filename && frame.filename.indexOf("://firebug/") > 0))
             {
                 return frame.filename + "/" + frame.lineNumber;
             }
