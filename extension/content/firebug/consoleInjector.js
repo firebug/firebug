@@ -500,7 +500,7 @@ Firebug.Console.createConsole = function createConsole(context, win)
                 errorObject.objects.push(args[i]);
         }
 
-        var row = Firebug.Console.log(errorObject, context, "errorMessage", null, true); // noThrottle
+        var row = Firebug.Console.log(errorObject, context, "errorMessage");
         row.scrollIntoView();
 
         return "_firebugIgnore";
