@@ -481,7 +481,7 @@ FirebugReps.Arr = domplate(Firebug.Rep,
             }
             catch (err)
             {
-                FBTrace.sysout("hasSpecialProperties; EXCEPTION " + err, err);
+                FBTrace.sysout("hasSpecialProperties; EXCEPTION " + err, {err:err, array: array, p: p});
             }
         }
 
