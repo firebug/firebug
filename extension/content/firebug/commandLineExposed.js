@@ -95,7 +95,7 @@ function createFirebugCommandLine(context, win)
                 // DBG window.dump("attachCommandLine firebugCommandLine "+window.location+"\n");
                 var expr = contentView.document.getUserData("firebug-expr"); // see commandLine.js
                 self.evaluate(expr);
-                window.dump("attachCommandLine did evaluate on "+expr+"\n");
+                // DBG window.dump("attachCommandLine did evaluate on "+expr+"\n");
             }
 
             contentView.document.addEventListener("firebugCommandLine",this._firebugEvalEvent, true);
