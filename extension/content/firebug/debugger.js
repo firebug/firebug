@@ -75,7 +75,7 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
         // be evil and get Components.classes results in a permission denied error.
         var ok = frame.eval(scriptToEval, "", 1, result);
 
-        var value = unwrapIValue(result.value);
+        var value = unwrapIValue(result.value, Firebug.viewChrome);
         if (ok)
             return value;
         else
@@ -92,7 +92,7 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
 
             var result = {};
             var ok = frame.eval(js, fileName, lineNo, result);
-            var value = unwrapIValue(result.value);
+            var value = unwrapIValue(result.value, Firebug.viewChrome);
             if (ok)
                 return value;
             else
@@ -2756,7 +2756,7 @@ function getFrameWindow(frame)
     var result = {};
     if (frame.eval("window", "", 1, result))
     {
-        var win = unwrapIValue(result.value);
+        var win = unwrapIValue(result.value, Firebug.viewChrome);
         return getRootWindow(win);
     }
 }

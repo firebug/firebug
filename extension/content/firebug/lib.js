@@ -2958,7 +2958,7 @@ this.StackFrame.prototype =
     getThisValue: function()
     {
         if (this.nativeFrame && !this.thisVar)
-             this.thisVar = FBL.unwrapIValue(this.nativeFrame.thisValue);
+             this.thisVar = FBL.unwrapIValue(this.nativeFrame.thisValue, Firebug.viewChrome);
         return this.thisVar;
     },
 
@@ -2991,7 +2991,7 @@ this.StackFrame.prototype =
              }
              else
              {
-                 scopeVars = FBL.unwrapIValue(scope);
+                 scopeVars = FBL.unwrapIValue(scope, Firebug.viewChrome);
 
                  if (scopeVars && scopeVars.hasOwnProperty)
                  {
@@ -3352,7 +3352,7 @@ this.getFunctionArgValues = function(frame)
 this.getArgumentsFromObjectScope = function(frame)
 {
     var argNames = frame.script.getParameterNames();
-    var scope = FBL.unwrapIValue(frame.scope);
+    var scope = FBL.unwrapIValue(frame.scope, Firebug.viewChrome);
 
     var values = [];
 
@@ -3384,14 +3384,14 @@ this.getArgumentsFromCallScope = function(frame)
     {
         var argName = argNames[i];
         var pvalue = scope.getProperty(argName); // jsdIValue in jsdIDebuggerService
-        var value = pvalue ? FBL.unwrapIValue(pvalue.value) : undefined;
+        var value = pvalue ? FBL.unwrapIValue(pvalue.value, Firebug.viewChrome) : undefined;
         values.push({name: argName, value: value});
     }
 
     return values;
 };
 
-this.unwrapIValueObject = function(scope)
+this.unwrapIValueObject = function(scope, viewChrome)
 {
     var scopeVars = {};
     var listValue = {value: null}, lengthValue = {value: 0};
@@ -3402,7 +3402,7 @@ this.unwrapIValueObject = function(scope)
         var prop = listValue.value[i];
         var name = FBL.unwrapIValue(prop.name);
         if (!FBL.shouldIgnore(name))
-            scopeVars[name] = FBL.unwrapIValue(prop.value);
+            scopeVars[name] = FBL.unwrapIValue(prop.value, viewChrome);
     }
     return scopeVars;
 };
@@ -8103,9 +8103,12 @@ function unwrapObject(object)
 
 this.unwrapObject = unwrapObject;
 
-this.unwrapIValue = function(object)
+this.unwrapIValue = function(object, viewChrome)
 {
     var unwrapped = object.getWrappedValue();
+    if (viewChrome)
+        return unwrapped;
+
     try
     {
         // XPCSafeJSObjectWrapper is not defined in Firefox 4.0
