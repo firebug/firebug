@@ -20,7 +20,7 @@ Components.utils.import("resource://gre/modules/PluralForm.jsm");
 
 try
 {
-    Components.utils.import("resource://firebug/firebug-service.js");
+Components.utils.import("resource://firebug/firebug-service.js");
     this.fbs = fbs; // left over from component.
 }
 catch(err)
@@ -46,7 +46,6 @@ const reNotWhitespace = /[^\s]/;
 const reSplitFile = /:\/{1,3}(.*?)\/([^\/]*?)\/?($|\?.*)/;
 const reURL = /(([^:]+:)\/{1,2}[^\/]*)(.*?)$/;  // This RE and the previous one should changed to be consistent
 const reChromeCase = /chrome:\/\/([^/]*)\/(.*?)$/;
-
 // Globals
 this.reDataURL = /data:text\/javascript;fileName=([^;]*);baseLineNumber=(\d*?),((?:.*?%0A)|(?:.*))/g;
 this.reJavascript = /\s*javascript:\s*(.*)/;
@@ -6970,6 +6969,7 @@ this.cssKeywords =
         "DarkGoldenRod",
         "DarkGray",
         "DarkGreen",
+        "DarkGrey",
         "DarkKhaki",
         "DarkMagenta",
         "DarkOliveGreen",
@@ -6980,13 +6980,14 @@ this.cssKeywords =
         "DarkSeaGreen",
         "DarkSlateBlue",
         "DarkSlateGray",
+        "DarkSlateGrey",
         "DarkTurquoise",
         "DarkViolet",
         "DeepPink",
-        "DarkSkyBlue",
+        "DeepSkyBlue",
         "DimGray",
+        "DimGrey",
         "DodgerBlue",
-        "Feldspar",
         "FireBrick",
         "FloralWhite",
         "ForestGreen",
@@ -6998,6 +6999,7 @@ this.cssKeywords =
         "Gray",
         "Green",
         "GreenYellow",
+        "Grey",
         "HoneyDew",
         "HotPink",
         "IndianRed",
@@ -7012,14 +7014,15 @@ this.cssKeywords =
         "LightCoral",
         "LightCyan",
         "LightGoldenRodYellow",
-        "LightGrey",
+        "LightGray",
         "LightGreen",
+        "LightGrey",
         "LightPink",
         "LightSalmon",
         "LightSeaGreen",
         "LightSkyBlue",
-        "LightSlateBlue",
         "LightSlateGray",
+        "LightSlateGrey",
         "LightSteelBlue",
         "LightYellow",
         "Lime",
@@ -7072,6 +7075,7 @@ this.cssKeywords =
         "SkyBlue",
         "SlateBlue",
         "SlateGray",
+        "SlateGrey",
         "Snow",
         "SpringGreen",
         "SteelBlue",
@@ -7081,7 +7085,6 @@ this.cssKeywords =
         "Tomato",
         "Turquoise",
         "Violet",
-        "VioletRed",
         "Wheat",
         "White",
         "WhiteSmoke",
