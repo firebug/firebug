@@ -32,7 +32,6 @@ catch(err)
 // ************************************************************************************************
 // Shortcuts
 
-this.fbs = fbs; // left over from component.
 this.jsd = this.CCSV("@mozilla.org/js/jsd/debugger-service;1", "jsdIDebuggerService");
 this.domUtils = this.CCSV("@mozilla.org/inspector/dom-utils;1", "inIDOMUtils");
 
