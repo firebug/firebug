@@ -7,8 +7,13 @@ var FirebugLoadManager = function () {
 
 try
 {
+    var moduleLoader = "resource://firebug/moduleLoader.js";
+    if (typeof(FirebugConfig) != "undefined")
+        moduleLoader = FirebugConfig.moduleLoader ? FirebugConfig.moduleLoader : moduleLoader;
+
     // Get ModuleLoader implementation (it's Mozilla JS code module)
-    Components.utils["import"]("resource://firebug/moduleLoader.js");
+    Components.utils["import"](moduleLoader);
+
     if (FBTrace.DBG_MODULES)
         FBTrace.sysout("Loaded ModuleLoader");
 }
