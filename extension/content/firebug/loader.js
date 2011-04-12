@@ -1,18 +1,18 @@
 /* See license.txt for terms of usage */
 
-var FirebugLoadManager = function () {
+var FirebugLoadManager = function(config) {
 
 // ********************************************************************************************* //
 // Firebug Load Manager
 
 try
 {
-    var moduleLoader = "resource://firebug/moduleLoader.js";
-    if (typeof(FirebugConfig) != "undefined")
-        moduleLoader = FirebugConfig.moduleLoader ? FirebugConfig.moduleLoader : moduleLoader;
+    var baseLoaderUrl = config.baseLoaderUrl ? config.baseLoaderUrl : "resource://firebug/";
+    var moduleLoader = baseLoaderUrl + "moduleLoader.js";
 
     // Get ModuleLoader implementation (it's Mozilla JS code module)
     Components.utils["import"](moduleLoader);
+    ModuleLoader.init(config);
 
     if (FBTrace.DBG_MODULES)
         FBTrace.sysout("Loaded ModuleLoader");
@@ -189,4 +189,4 @@ function setConfigurationDefaults(config)
 return {loadCore: loadCore, arch: "inProcess"};
 
 // ********************************************************************************************* //
-}();
+}(window._firebugLoadConfig || {});

@@ -457,14 +457,25 @@ ModuleLoader.onDebug = function (err, object) {
 
 // *** load require.js and override its methods as needed. ****
 
-ModuleLoader.requireJSFileName = "resource://firebug/require.js";
+ModuleLoader.init = function(config)
+{
 
-coreRequire = ModuleLoader.bootStrap(ModuleLoader.requireJSFileName).require;
+try
+{
+    var baseLoaderUrl = config.baseLoaderUrl ? config.baseLoaderUrl : "resource://firebug/";
+    ModuleLoader.requireJSFileName = baseLoaderUrl + "require.js";
 
-if (coreRequire) {
-    define = coreRequire.def; // see require.js
-} else {
-    ModuleLoader.onError("ModuleLoader ERROR bootStrap has no require property from "+ModuleLoader.requireJSFileName);
+    coreRequire = ModuleLoader.bootStrap(ModuleLoader.requireJSFileName).require;
+
+    if (coreRequire) {
+        define = coreRequire.def; // see require.js
+    } else {
+        ModuleLoader.onError("ModuleLoader ERROR bootStrap has no require property from "+ModuleLoader.requireJSFileName);
+    }
+}
+catch (e)
+{
+    dump("ModuleLoader; EXCEPTION" + e + "\n");
 }
 
 function loadCompilationUnit(moduleLoader, context, url, moduleName) {
@@ -539,4 +550,6 @@ coreRequire.analyzeFailure = function(context, managers, specified, loaded) {
             context.config.onDebug("require.js: "+j+" specified: "+specified[id]+" loaded: "+loaded[id]+" "+id+" "+module);
         }
     }
+}
+
 }
