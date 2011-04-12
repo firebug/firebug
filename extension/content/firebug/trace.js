@@ -6,8 +6,7 @@ var FBTrace = {};
 
 try
 {
-    // The tracing component is part of FBTrace extension.
-    Components.utils["import"]("resource://fbtrace-firebug/firebug-trace-service.js");
+    Components.utils.import("resource://firebug/firebug-trace-service.js");
 
     FBTrace = traceConsoleService.getTracer("extensions.firebug");
     FBTrace.setScope(window);
@@ -23,7 +22,6 @@ try
 }
 catch (err)
 {
-    dump("FBTrace extension is not installed.\n");
     dump("FBTrace; " + err);
 }
 
