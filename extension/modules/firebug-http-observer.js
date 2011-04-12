@@ -39,17 +39,11 @@ var httpRequestObserver =
         Components.utils["import"]("resource://firebug/firebug-trace-service.js");
         FBTrace = traceConsoleService.getTracer("extensions.firebug");
 
-        // Get firebug-service to listen for suspendFirebug and resumeFirebug events.
-        // TODO is this really the way we want to do suspendFirebug?
-        Components.utils["import"]("resource://firebug/firebug-service.js");
-
-        this.initialize(fbs);
+        this.initialize();
     },
 
-    initialize: function(fbs)
+    initialize: function()
     {
-        this.firebugService = fbs;
-
         observerService.addObserver(this, "quit-application", false);
 
         if (FBTrace.DBG_HTTPOBSERVER)
