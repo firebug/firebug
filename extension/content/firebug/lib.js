@@ -8,16 +8,29 @@ try {
 (function() {
 
 // ************************************************************************************************
-// Modules
-
-Components.utils.import("resource://gre/modules/PluralForm.jsm");
-Components.utils.import("resource://firebug/firebug-service.js");
-
-// ************************************************************************************************
 // Constants
 
 const Cc = Components.classes;
 const Ci = Components.interfaces;
+
+// ************************************************************************************************
+// Modules
+
+Components.utils.import("resource://gre/modules/PluralForm.jsm");
+
+try
+{
+    Components.utils.import("resource://firebug/firebug-service.js");
+    this.fbs = fbs; // left over from component.
+}
+catch(err)
+{
+    if (FBTrace.DBG_ERRORS)
+        FBTrace.sysout("lib; FAILED to get firebug-service", err);
+}
+
+// ************************************************************************************************
+// Shortcuts
 
 this.fbs = fbs; // left over from component.
 this.jsd = this.CCSV("@mozilla.org/js/jsd/debugger-service;1", "jsdIDebuggerService");
@@ -34,6 +47,7 @@ const reNotWhitespace = /[^\s]/;
 const reSplitFile = /:\/{1,3}(.*?)\/([^\/]*?)\/?($|\?.*)/;
 const reURL = /(([^:]+:)\/{1,2}[^\/]*)(.*?)$/;  // This RE and the previous one should changed to be consistent
 const reChromeCase = /chrome:\/\/([^/]*)\/(.*?)$/;
+
 // Globals
 this.reDataURL = /data:text\/javascript;fileName=([^;]*);baseLineNumber=(\d*?),((?:.*?%0A)|(?:.*))/g;
 this.reJavascript = /\s*javascript:\s*(.*)/;
