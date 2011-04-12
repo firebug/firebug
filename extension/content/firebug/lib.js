@@ -20,7 +20,7 @@ Components.utils.import("resource://gre/modules/PluralForm.jsm");
 
 try
 {
-Components.utils.import("resource://firebug/firebug-service.js");
+    Components.utils.import("resource://firebug/firebug-service.js");
     this.fbs = fbs; // left over from component.
 }
 catch(err)

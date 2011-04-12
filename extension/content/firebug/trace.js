@@ -2,18 +2,30 @@
 
 // Our global trace object.
 
-Components.utils.import("resource://firebug/firebug-trace-service.js");
-var FBTrace = traceConsoleService.getTracer("extensions.firebug");
+var FBTrace = {};
 
-FBTrace.setScope(window);
-function clearFBTraceScope()
+try
 {
-    window.removeEventListener('unload', clearFBTraceScope, true);
-    FBTrace.setScope(null);
-}
-window.addEventListener('unload', clearFBTraceScope, true);
+    // The tracing component is part of FBTrace extension.
+    Components.utils["import"]("resource://fbtrace-firebug/firebug-trace-service.js");
 
-FBTrace.time("SCRIPTTAG_TIME");
+    FBTrace = traceConsoleService.getTracer("extensions.firebug");
+    FBTrace.setScope(window);
+
+    function clearFBTraceScope()
+    {
+        window.removeEventListener('unload', clearFBTraceScope, true);
+        FBTrace.setScope(null);
+    }
+
+    window.addEventListener('unload', clearFBTraceScope, true);
+    FBTrace.time("SCRIPTTAG_TIME");
+}
+catch (err)
+{
+    dump("FBTrace extension is not installed.\n");
+    dump("FBTrace; " + err);
+}
 
 // ************************************************************************************************
 // Some examples of tracing APIs
