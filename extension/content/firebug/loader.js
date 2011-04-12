@@ -135,7 +135,11 @@ function loadCore(config, coreInitialize)
 
     var coreModules = [];
 
-    if (config.arch === 'inProcess')
+    if (config.coreModules)
+    {
+        coreModules = config.coreModules;
+    }
+    else if (config.arch === 'inProcess')
     {
         coreModules.push("arch/tools");  // must be first
         coreModules.push("arch/options");  // debugger needs Firebug.Options because of $STR() in property initializes, TODO
@@ -152,7 +156,6 @@ function loadCore(config, coreInitialize)
     }
     else if (config.arch == "remoteServer")
     {
-
         coreModules.push("inProcess/tools.js");  // must be first
         coreModules.push("inProcess/options.js");  // debugger needs Firebug.Options because of $STR() in property initializes, TODO
         coreModules.push("debugger.js");
@@ -164,17 +167,20 @@ function loadCore(config, coreInitialize)
         throw new Error("ERROR Firebug.LoadManager.loadCore unknown architechture requested: "+Firebug.arch);
     }
 
-    var defaultModules = [
-        "tabContext.js",  // should be loaded by being a dep of tabWatcher
-        "sourceBox.js",
-        "script.js",
-        "traceModule.js",
-        "dragdrop.js"
-    ];
+    if (!config.coreModules)
+    {
+        var defaultModules = [
+            "tabContext.js",  // should be loaded by being a dep of tabWatcher
+            "sourceBox.js",
+            "script.js",
+            "traceModule.js",
+            "dragdrop.js"
+        ];
 
-    var modules = coreModules.concat(defaultModules);
+        coreModules = coreModules.concat(defaultModules);
+    }
 
-    loader.define(modules, coreInitialize);
+    loader.define(coreModules, coreInitialize);
 }
 
 function setConfigurationDefaults(config)
@@ -190,4 +196,4 @@ function setConfigurationDefaults(config)
 return {loadCore: loadCore, arch: "inProcess"};
 
 // ********************************************************************************************* //
-}(window._firebugLoadConfig || {});
+}(window.FirebugConfig || {});

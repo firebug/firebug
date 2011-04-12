@@ -10,7 +10,6 @@ const Ci = Components.interfaces;
 
 const nsISupports = Ci.nsISupports;
 
-
 const observerService = CCSV("@mozilla.org/observer-service;1", "nsIObserverService");
 const categoryManager = CCSV("@mozilla.org/categorymanager;1", "nsICategoryManager");
 const stringBundleService = CCSV("@mozilla.org/intl/stringbundle;1", "nsIStringBundleService");
@@ -26,7 +25,6 @@ const detachCommand = $("cmd_toggleDetachFirebug");
 const versionURL = "chrome://firebug/content/branch.properties";
 const statusBarContextMenu = $("fbStatusContextMenu");
 
-
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 
 const firebugURLs =  // TODO chrome.js
@@ -39,7 +37,6 @@ const firebugURLs =  // TODO chrome.js
     issues: "http://code.google.com/p/fbug/issues/list",
     donate: "http://getfirebug.com/getinvolved"
 };
-
 
 const scriptBlockSize = 20;
 
@@ -67,7 +64,6 @@ var panelTypeMap = {};
 var deadWindows = [];
 var deadWindowTimeout = 0;
 var clearContextTimeout = 0;
-
 
 try
 {
@@ -112,10 +108,15 @@ top.Firebug =
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
     // Initialization
 
-    initialize: function()
+    initialize: function(config)
     {
+        // xxxjjb: where except of unblocker.js is _firebugLoadConfig used?
+        config = config || window._firebugLoadConfig;
+        config = config || {};
+
         FBTrace.timeEnd("SCRIPTTAG_TIME");
         FBTrace.time("MODULE_TIME");
+
         if (FBTrace.sysout && (!FBL || !FBL.initialize) )
             FBTrace.sysout("Firebug is broken, FBL incomplete, if the last function is QI, check lib.js:", FBL);
         else if (FBTrace.DBG_INITIALIZE)
@@ -128,9 +129,9 @@ top.Firebug =
         Firebug.LoadManager = FirebugLoadManager;
         delete FirebugLoadManager; // unpollute global
 
-        Firebug.LoadManager.loadCore(window._firebugLoadConfig || {}, function coreInitialize()
+        Firebug.LoadManager.loadCore(config, function coreInitialize()
         {
-                Firebug.completeInitialize(tempPanelTypes);
+            Firebug.completeInitialize(tempPanelTypes);
         });
     },
 
