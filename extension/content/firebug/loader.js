@@ -31,7 +31,8 @@ catch (exc)
 
 function preLoadInitialization()
 {
-    // FIXME, create options.js as dependent of loader. Firebug.architecture = this.getPref(this.prefDomain, "architecture");
+    // FIXME, create options.js as dependent of loader.
+    // Firebug.architecture = this.getPref(this.prefDomain, "architecture");
 }
 
 function getModuleLoaderScope(config)
