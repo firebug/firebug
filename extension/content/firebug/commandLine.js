@@ -674,6 +674,13 @@ Firebug.CommandLine = extend(Firebug.Module,
         var panelState = getPersistedState(this, "console");
         var value = panel && panel.context.commandLineText ? panel.context.commandLineText : panelState.commandLineText;
 
+        if (!Firebug.currentContext)
+        {
+            if (FBTrace.DBG_ERRORS)
+                FBTrace.sysout("commandLine.showPanel; ERROR NO CONTEXT");
+            return;
+        }
+
         var commandLine = this.getCommandLine(browser);
         Firebug.currentContext.commandLineText = value ? value : "";
         commandLine.value = Firebug.currentContext.commandLineText;
