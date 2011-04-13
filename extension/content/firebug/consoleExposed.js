@@ -1,21 +1,51 @@
 /* See license.txt for terms of usage */
-// win maybe an iframe inside of context.window.
+
+// ********************************************************************************************* //
+
+/**
+ * Returns a console object (bundled with passed window through closure). The object
+ * provides all necessary APIs as described here: http://getfirebug.com/wiki/index.php/Console_API
+ * 
+ * @param {Object} context
+ * @param {Object} win
+ */
 function createFirebugConsole(context, win)
 {
-    var console = {__exposedProperties__: {} };  // A Chrome object
+    // Defined as a chrome object, but exposed into the web content scope.
+    var console = {
+        __exposedProperties__: {}
+    };
 
-    // ---- Exposed Properties of Chrome Object
-    console.log = function log() { return logFormatted(arguments, "log"); }
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+    // Exposed Properties
 
-    console.debug = function debug() { return logFormatted(arguments, "debug", true); }
+    console.log = function log()
+    {
+        return logFormatted(arguments, "log");
+    };
 
-    console.info = function info() {  return logFormatted(arguments, "info", true); }
+    console.debug = function debug()
+    {
+        return logFormatted(arguments, "debug", true);
+    };
 
-    console.warn = function warn() { return logFormatted(arguments, "warn", true); }
+    console.info = function info()
+    {
+        return logFormatted(arguments, "info", true);
+    };
 
-    console.exception = function exception() { return logAssert("error", arguments); }
+    console.warn = function warn()
+    {
+        return logFormatted(arguments, "warn", true);
+    };
 
-    console.assert = function assert(x) {
+    console.exception = function exception()
+    {
+        return logAssert("error", arguments);
+    };
+
+    console.assert = function assert(x)
+    {
         if (!x)
         {
             var rest = [];
@@ -23,13 +53,15 @@ function createFirebugConsole(context, win)
                 rest.push(arguments[i]);
             return logAssert("assert", rest);
         }
-        return "_firebugIgnore";
-    }
 
-    console.dir = function dir(o) {
+        return "_firebugIgnore";
+    };
+
+    console.dir = function dir(o)
+    {
         Firebug.Console.log(o, context, "dir", Firebug.DOMPanel.DirTable);
         return "_firebugIgnore";
-    }
+    };
 
     console.dirxml = function dirxml(o)
     {
@@ -50,7 +82,7 @@ function createFirebugConsole(context, win)
         delete unwrapped.top._firebugStackTrace;
 
         return "_firebugIgnore";
-    }
+    };
 
     console.group = function group()
     {
@@ -186,10 +218,11 @@ function createFirebugConsole(context, win)
             Firebug.Errors.increaseCount(context);
             return logFormatted(arguments, "error", true);  // user already added info
         }
-    }
+    };
 
     console.firebug = Firebug.version;
 
+    // Expose only these properties to the content scope (read only).
     console.__exposedProperties__.log = "r";
     console.__exposedProperties__.debug = "r";
     console.__exposedProperties__.info = "r";
@@ -213,14 +246,15 @@ function createFirebugConsole(context, win)
     console.__exposedProperties__.firebug = "r";
     // DBG console.uid = Math.random();
 
-    // --- End Exposed Functions
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+    // Helpers (not accessible from web content)
 
     function logFormatted(args, className, linkToSource, noThrottle)
     {
         var sourceLink = linkToSource ? getStackLink() : null;
         var rc = Firebug.Console.logFormatted(args, context, className, noThrottle, sourceLink);
         return rc ? rc : "_firebugIgnore";
-    }
+    };
 
     function logAssert(category, args)
     {
@@ -273,7 +307,7 @@ function createFirebugConsole(context, win)
             row.scrollIntoView();
 
         return "_firebugIgnore";
-    }
+    };
 
     function getComponentsStackDump()
     {
@@ -298,12 +332,12 @@ function createFirebugConsole(context, win)
             FBTrace.sysout("consoleInjector.getComponentsStackDump final stack for userURL "+userURL, frame);
 
         return frame;
-    }
+    };
 
     function getStackLink()
     {
         return FBL.getFrameSourceLink(getComponentsStackDump());
-    }
+    };
 
     function getJSDUserStack()
     {
@@ -341,7 +375,7 @@ function createFirebugConsole(context, win)
         {
             return "Firebug failed to get stack trace with any frames";
         }
-    }
+    };
 
     function getStackFrameId(inputFrame)
     {
@@ -359,5 +393,4 @@ function createFirebugConsole(context, win)
     return console;
 }
 
-
-
+// ********************************************************************************************* //
