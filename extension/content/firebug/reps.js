@@ -579,6 +579,9 @@ FirebugReps.NetFile = domplate(FirebugReps.Obj,
 {
     supportsObject: function(object, type)
     {
+        if (typeof(Firebug.NetFile) == "undefined")
+            return false;
+
         return object instanceof Firebug.NetFile;
     },
 
