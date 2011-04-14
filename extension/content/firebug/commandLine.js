@@ -926,14 +926,6 @@ Firebug.CommandLine = extend(Firebug.Module,
                     FBTrace.sysout("commandLine.attachConsoleOnFocus: No Firebug.currentContext\n");
             }
         }
-        else
-        {
-            Firebug.Console.injector.forceConsoleCompilationInPage(Firebug.currentContext, Firebug.currentContext.window);
-
-            if (FBTrace.DBG_COMMANDLINE)
-                FBTrace.sysout("commandLine.attachConsoleOnFocus, attachConsole "+
-                    Firebug.currentContext.window.location);
-        }
         return true;
     },
 
