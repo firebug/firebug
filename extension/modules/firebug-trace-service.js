@@ -31,7 +31,7 @@ catch (err)
             var TraceAPI = ["dump", "sysout", "setScope", "matchesNode", "time", "timeEnd"];
             var TraceObj = {};
             for (var i=0; i<TraceAPI.length; i++)
-                TraceObj[TraceAPI[i]] = function() { dump("xxx\n"); };
+                TraceObj[TraceAPI[i]] = function() {};
             return TraceObj;
         }
     };
