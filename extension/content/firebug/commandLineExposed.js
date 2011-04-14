@@ -23,7 +23,7 @@ function createFirebugCommandLine(context, win)
 
     // The commandLine object
     var commandLine = {
-        __exposedProperties__: {}
+        __exposedProps__: {}
     };
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -51,7 +51,7 @@ function createFirebugCommandLine(context, win)
         }
 
         commandLine[command] = createCommandHandler(command);
-        commandLine.__exposedProperties__[command] = "r";
+        commandLine.__exposedProps__[command] = "r";
     }
 
     // Define shortcuts for some console methods
@@ -71,7 +71,7 @@ function createFirebugCommandLine(context, win)
         }
 
         commandLine[command] = createShortcutHandler(command);
-        commandLine.__exposedProperties__[command] = "r";
+        commandLine.__exposedProps__[command] = "r";
     }
 
     // Define console variables (inspector history).
@@ -89,7 +89,7 @@ function createFirebugCommandLine(context, win)
         }
 
         commandLine.__defineGetter__(prop, createVariableHandler(prop));
-        commandLine.__exposedProperties__[prop] = "r";
+        commandLine.__exposedProps__[prop] = "r";
     }
 
     attachCommandLine();
