@@ -1,13 +1,15 @@
 /* See license.txt for terms of usage */
 
-//
 FBL.ns(function() { with (FBL) {
 
-// ************************************************************************************************
+// ********************************************************************************************* //
 // Constants
 
 const Cc = Components.classes;
 const Ci = Components.interfaces;
+
+// ********************************************************************************************* //
+// Console Injector
 
 Firebug.Console.injector =
 {
@@ -16,7 +18,8 @@ Firebug.Console.injector =
         var handler = this.getConsoleHandler(context, win);
 
         if (FBTrace.DBG_CONSOLE)
-                FBTrace.sysout("Console.isAttached "+handler+" in context "+context.getName()+" and win "+safeGetWindowLocation(win), handler);
+            FBTrace.sysout("Console.isAttached "+handler+" in context "+context.getName()+
+                " and win "+safeGetWindowLocation(win), handler);
 
         return handler;
     },
@@ -171,7 +174,9 @@ Firebug.Console.injector =
         context.activeConsoleHandlers.push(handler);
 
         if (FBTrace.DBG_CONSOLE)
-            FBTrace.sysout("consoleInjector addConsoleListener set token "+handler.token+" and  attached handler("+handler.handler_name+") to _firebugConsole in : "+safeGetWindowLocation(win));
+            FBTrace.sysout("consoleInjector addConsoleListener set token "+handler.token+
+                " and  attached handler("+handler.handler_name+") to _firebugConsole in : "+
+                safeGetWindowLocation(win));
 
     },
 
@@ -184,6 +189,8 @@ Firebug.Console.injector =
     },
 }
 
+// ********************************************************************************************* //
+
 var total_handlers = 0;
 function createConsoleHandler(context, win)
 {
@@ -193,8 +200,10 @@ function createConsoleHandler(context, win)
     handler.detach = function()
     {
         win.document.removeEventListener('firebugAppendConsole', this.boundHandler, true);
+
         if (FBTrace.DBG_CONSOLE)
-            FBTrace.sysout("consoleInjector FirebugConsoleHandler removeEventListener "+this.handler_name);
+            FBTrace.sysout("consoleInjector FirebugConsoleHandler removeEventListener "+
+                this.handler_name);
     };
 
     handler.handler_name = ++total_handlers;
@@ -203,7 +212,9 @@ function createConsoleHandler(context, win)
     handler.handleEvent = function(event)
     {
         if (FBTrace.DBG_CONSOLE)
-            FBTrace.sysout("FirebugConsoleHandler("+this.handler_name+") "+win.document.getUserData("firebug-methodName")+", event", event);
+            FBTrace.sysout("FirebugConsoleHandler("+this.handler_name+") "+
+                win.document.getUserData("firebug-methodName")+", event", event);
+
         if (!Firebug.CommandLine.CommandHandler.handle(event, this.console, win))
         {
             if (FBTrace.DBG_CONSOLE)
@@ -232,10 +243,13 @@ function createConsoleHandler(context, win)
     win.document.addEventListener('firebugAppendConsole', handler.boundHandler, true); // capturing
 
     if (FBTrace.DBG_CONSOLE)
-        FBTrace.sysout("consoleInjector FirebugConsoleHandler addEventListener "+handler.handler_name);
+        FBTrace.sysout("consoleInjector FirebugConsoleHandler addEventListener "+
+            handler.handler_name);
 
     return handler;
 }
+
+// ********************************************************************************************* //
 
 Firebug.Console.createConsole = function createConsole(context, win)
 {
@@ -429,9 +443,9 @@ Firebug.Console.createConsole = function createConsole(context, win)
         return "_firebugIgnore";
     };
 
-    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
-
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
     // These functions are over-ridden by commandLine
+
     console.evaluated = function(result, context)
     {
         if (FBTrace.DBG_CONSOLE)
@@ -445,7 +459,7 @@ Firebug.Console.createConsole = function createConsole(context, win)
         Firebug.Console.log(result, context, "errorMessage");
     };
 
-    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
     function logFormatted(args, className, linkToSource, noThrottle)
     {
@@ -514,7 +528,8 @@ Firebug.Console.createConsole = function createConsole(context, win)
         var userURL = win.location.href.toString();
 
         if (FBTrace.DBG_CONSOLE)
-            FBTrace.sysout("consoleInjector.getComponentsStackDump initial stack for userURL "+userURL, frame);
+            FBTrace.sysout("consoleInjector.getComponentsStackDump initial stack for userURL "+
+                userURL, frame);
 
         // Drop frames until we get into user code.
         while (frame && FBL.isSystemURL(frame.filename) )
@@ -527,7 +542,8 @@ Firebug.Console.createConsole = function createConsole(context, win)
             frame = frame.caller;
 
         if (FBTrace.DBG_CONSOLE)
-            FBTrace.sysout("consoleInjector.getComponentsStackDump final stack for userURL "+userURL, frame);
+            FBTrace.sysout("consoleInjector.getComponentsStackDump final stack for userURL "+
+                userURL, frame);
 
         return frame;
     }
@@ -578,5 +594,9 @@ Firebug.Console.createConsole = function createConsole(context, win)
     return console;
 }
 
+// ********************************************************************************************* //
+
 return Firebug.Console.injector;
+
+// ********************************************************************************************* //
 }});
