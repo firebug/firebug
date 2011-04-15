@@ -1682,6 +1682,15 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
             FBTrace.sysout("debugger("+this.debuggerName+").onToggleBreakpoint no find context");
     },
 
+    // xxxHonza, xxxjjb: duplicated in script.js, does it belong here? But onToggleBreakpoint needs it.
+    ableWatchSidePanel: function(context)
+    {
+        // TODO if (commandline is not active, then we should not show the new watch feature)
+        var watchPanel = context.getPanel("watches", true);
+        if (watchPanel)
+            return watchPanel;
+    },
+
     onToggleErrorBreakpoint: function(url, lineNo, isSet)
     {
         for (var i = 0; i < Firebug.TabWatcher.contexts.length; ++i)

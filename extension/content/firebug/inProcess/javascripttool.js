@@ -47,6 +47,11 @@ ToolsInterface.JavaScript.isBreakpointDisabled = function(context, url, lineNumb
     Firebug.Debugger.fbs.isBreakpointDisabled(url, lineNumber);
 };
 
+ToolsInterface.JavaScript.getBreakpointCondition = function(context, url, lineNumber)
+{
+    Firebug.Debugger.fbs.getBreakpointCondition(url, lineNumber);
+};
+
 // These functions should be on stack instead
 
 ToolsInterface.JavaScript.resumeJavaScript = function(context)
