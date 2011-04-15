@@ -1,6 +1,6 @@
 /* See license.txt for terms of usage */
 
-FBL.ns(function() { with (FBL) {
+FBL.ns(function() {
 
 // ********************************************************************************************* //
 // Constants
@@ -16,7 +16,7 @@ const appInfo = Cc["@mozilla.org/xre/app-info;1"].getService(Ci.nsIXULAppInfo);
 /**
  * This module is responsible for varisous hacky solutions related to known issues.
  */
-Firebug.KnownIssues = extend(Firebug.Module,
+Firebug.KnownIssues = FBL.extend(Firebug.Module,
 /** @lends Firebug.KnownIssues */
 {
     dispatchName: "knownIssues",
@@ -39,7 +39,7 @@ Firebug.KnownIssues = extend(Firebug.Module,
             var addonBar = document.getElementById("addon-bar");
 
             // Open the addon bar
-            collapse(addonBar, false);
+            FBL.collapse(addonBar, false);
             document.persist("addon-bar", "collapsed");
 
             // This is just one time operation.
@@ -61,4 +61,4 @@ Firebug.registerModule(Firebug.KnownIssues);
 return Firebug.KnownIssues;
 
 // ********************************************************************************************* //
-}});
+});

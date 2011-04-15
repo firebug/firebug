@@ -1,6 +1,6 @@
 /* See license.txt for terms of usage */
 
-FBL.ns(function() { with (FBL) {
+FBL.ns(function() {
 
 // ********************************************************************************************* //
 // Constants
@@ -10,6 +10,7 @@ Firebug.BalloonNote = function(doc, object)
     this.initialize(doc, object);
 }
 
+with (Domplate) {
 Firebug.BalloonNote.prototype = domplate(
 {
     tag:
@@ -51,7 +52,7 @@ Firebug.BalloonNote.prototype = domplate(
         // xxxHonza: TODO: this object should implement the whole show/hide logic
         // move from Firebug.BreakNotification
     },
-});
+})};
 
 // ********************************************************************************************* //
-}});
+});

@@ -1,6 +1,6 @@
 /* See license.txt for terms of usage */
 
-define(["arch/options"], function() { with (FBL) {
+define(["arch/options"], function() {
 
 // ************************************************************************************************
 // Trace Module
@@ -12,7 +12,7 @@ define(["arch/options"], function() { with (FBL) {
  * Firebug.TraceModule.addListener - appends a tracing listener.
  * Firebug.TraceModule.removeListener - removes a tracing listener.
  */
-Firebug.TraceModule = extend(Firebug.Module,
+Firebug.TraceModule = FBL.extend(Firebug.Module,
 {
     dispatchName: "traceModule",
 });
@@ -20,4 +20,4 @@ Firebug.TraceModule = extend(Firebug.Module,
 return Firebug.TraceModule;
 
 // ************************************************************************************************
-}});
+});
