@@ -48,6 +48,7 @@ function getModuleLoaderScope(config)
         FirebugReps: FirebugReps,
         FBTrace: FBTrace,
         domplate: domplate,
+        Domplate: Domplate, // xxxHonza: Domplate should be the only global namespace for entire domplate engine.
         setTimeout: function(fn, delay) { return window.setTimeout(fn, delay); }, // bind window via closure
         clearTimeout: function(timeout) { return window.clearTimeout(timeout); }, // bind window via closure
         setInterval: function(fn, delay) { return window.setInterval(fn, delay); }, // bind window via closure

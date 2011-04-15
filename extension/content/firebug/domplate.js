@@ -1,11 +1,19 @@
 /* See license.txt for terms of usage */
 
+// ********************************************************************************************* //
+
+var Domplate = {};
+
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+
+(function() {
 
 function DomplateTag(tagName)
 {
     this.tagName = tagName;
 }
+
+Domplate.DomplateTag = DomplateTag;
 
 function DomplateEmbed()
 {
@@ -17,12 +25,10 @@ function DomplateLoop()
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 
-(function() {
-
 var womb = null;
 var uid = 0;
 
-top.domplate = function()
+var domplate = top.domplate = function()
 {
     var lastSubject;
     for (var i = 0; i < arguments.length; ++i)
@@ -46,13 +52,15 @@ domplate.context = function(context, fn)
     domplate.topContext = lastContext;
 };
 
-FBL.TAG = function()
+Domplate.domplate = domplate;
+
+Domplate.TAG = FBL.TAG = function()
 {
     var embed = new DomplateEmbed();
     return embed.merge(arguments);
 };
 
-FBL.FOR = function()
+Domplate.FOR = FBL.FOR = function()
 {
     var loop = new DomplateLoop();
     return loop.merge(arguments);
@@ -1168,10 +1176,10 @@ function defineTags()
     for (var i = 0; i < arguments.length; ++i)
     {
         var tagName = arguments[i];
-        var fn = new Function("var newTag = new DomplateTag('"+tagName+"'); return newTag.merge(arguments);");
+        var fn = new Function("var newTag = new Domplate.DomplateTag('"+tagName+"'); return newTag.merge(arguments);");
 
         var fnName = tagName.toUpperCase();
-        FBL[fnName] = fn;
+        Domplate[fnName] = FBL[fnName] = fn;
     }
 }
 
