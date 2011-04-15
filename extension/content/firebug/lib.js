@@ -303,6 +303,8 @@ this.hasProperties = function(ob)
     {
         if (FBTrace.DBG_ERRORS)
             FBTrace.sysout("lib.hasProperties("+FBL.safeToString(ob)+") ERROR "+exc, exc);
+        if (ob.wrappedJSObject)  // workaround for https://bugzilla.mozilla.org/show_bug.cgi?id=648560
+            return true;
     }
     return false;
 };
@@ -2974,17 +2976,17 @@ this.StackFrame.prototype =
         return this.thisVar;
     },
 
-    getScopes: function()
+    getScopes: function(viewChrome)
     {
         if (this.nativeFrame && !this.scope)
-             this.scope = this.generateScopeChain(this.nativeFrame.scope);
+             this.scope = this.generateScopeChain(this.nativeFrame.scope, viewChrome);
         return this.scope;
     },
 
 
      // Private
 
-     generateScopeChain: function (scope)
+     generateScopeChain: function (scope, viewChrome)
      {
          var ret = [];
          while (scope) {
@@ -2993,12 +2995,12 @@ this.StackFrame.prototype =
              // scopes, so we want to special case this to get all variables
              // in all cases.
              if (scope.jsClassName == "Call") {
-                 scopeVars = FBL.unwrapIValueObject(scope)
+                 scopeVars = FBL.unwrapIValueObject(scope, viewChrome)
                  scopeVars.toString = function() {return $STR("Closure Scope");}
              }
              else if (scope.jsClassName == "Block")
              {
-                 scopeVars = FBL.unwrapIValueObject(scope)
+                 scopeVars = FBL.unwrapIValueObject(scope, viewChrome)
                  scopeVars.toString = function() {return $STR("Block Scope");}
              }
              else

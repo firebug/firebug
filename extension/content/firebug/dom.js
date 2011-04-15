@@ -409,26 +409,46 @@ Firebug.DOMBasePanel.prototype = extend(Firebug.Panel,
             var insecureObject = this.getObjectView(object);
             var properties = [];
 
-            for (var name in insecureObject)  // enumeration is safe
+            try
             {
-                // Ignore only global variables (properties of the |window| object).
-                if (shouldIgnore(name) && (object instanceof Window))
+                for (var name in insecureObject)  // enumeration is safe
                 {
-                    if (FBTrace.DBG_DOM)
-                        FBTrace.sysout("dom.getMembers: ignoreVars: " + name + ", " + level, object);
-                    continue;
+                    // Ignore only global variables (properties of the |window| object).
+                    if (shouldIgnore(name) && (object instanceof Window))
+                    {
+                        if (FBTrace.DBG_DOM)
+                            FBTrace.sysout("dom.getMembers: ignoreVars: " + name + ", " + level, object);
+                        continue;
+                    }
+                    properties.push(name);
                 }
-                properties.push(name);
+                if (insecureObject.hasOwnProperty('constructor') && properties.indexOf('constructor') == -1)
+                    properties.push('constructor');
+
+                if (insecureObject.hasOwnProperty('prototype') && properties.indexOf('prototype') == -1)
+                    properties.push('prototype');
+
+                if (insecureObject.__proto__ && hasProperties(insecureObject.__proto__))  // XXXjjb I think it is always true ?
+                    properties.push('__proto__');
             }
+            catch(exc)
+            {
+                 // workaround for https://bugzilla.mozilla.org/show_bug.cgi?id=648560
+                if (insecureObject.wrappedJSObject)
+                {
+                    if (FBTrace.DBG_ERRORS || FBTrace.DBG_DOM)
+                        FBTrace.sysout("dom DOM bz:"+(XPCNativeWrapper.unwrap(insecureObject) !== insecureObject)+" insecureObject("+insecureObject+").wrappedJSObject "+insecureObject.wrappedJSObject);
 
-            if (insecureObject.hasOwnProperty('constructor') && properties.indexOf('constructor') == -1)
-                properties.push('constructor');
-
-            if (insecureObject.hasOwnProperty('prototype') && properties.indexOf('prototype') == -1)
-                properties.push('prototype');
-
-            if (insecureObject.__proto__ && hasProperties(insecureObject.__proto__))  // XXXjjb I think it is always true ?
-                properties.push('__proto__');
+                    var wrapperToString = insecureObject+"";
+                    insecureObject =
+                    {
+                        wrappedJSObject: XPCNativeWrapper.unwrap(insecureObject),
+                        toString: function() { return wrapperToString; },
+                        isXPCNativeWrapper: (XPCNativeWrapper.unwrap(insecureObject) !== insecureObject),
+                    }
+                    object = insecureObject;
+                }
+            }
 
             if (insecureObject.wrappedJSObject)
                 properties.push('wrappedJSObject');
@@ -595,7 +615,7 @@ Firebug.DOMBasePanel.prototype = extend(Firebug.Panel,
         // Set prefix for user defined properties. This prefix help the user to distinguish
         // among simple properties and those defined using getter and/or (only a) setter.
         var o = this.getObjectView(object);
-        if (o && !isDOMMember(object, name))
+        if (o && !isDOMMember(object, name) && (XPCNativeWrapper.unwrap(object) !== object) )
         {
             var getter = o.__lookupGetter__(name);
             var setter = o.__lookupSetter__(name);
@@ -1774,12 +1794,12 @@ Firebug.WatchPanel.prototype = extend(Firebug.DOMBasePanel.prototype,
         }
 
         if (frame instanceof StackFrame)
-            var scopes = frame.getScopes();
+            var scopes = frame.getScopes(Firebug.viewChrome);
         else
             var scopes = [this.context.getGlobalScope()];
 
         if (FBTrace.DBG_STACK)
-            FBTrace.sysout("dom watch panel updateSelection scopes "+scopes.length, scopes);
+            FBTrace.sysout("dom watch frame isStackFrame "+(frame instanceof StackFrame)+" updateSelection scopes "+scopes.length, scopes);
 
         var members = [];
 
