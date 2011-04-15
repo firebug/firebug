@@ -3,6 +3,8 @@ content firebug content/firebug/ contentaccessible=yes
 
 # Maps resource://firebug/* to files in modules/*
 resource firebug modules/
+# require js modules
+resource firebug_rjs content/firebug/
 
 skin    firebug classic/1.0 skin/classic/
 skin    firebug-os  classic/1.0 skin/classic/win/
@@ -59,9 +61,6 @@ overlay chrome://browser/content/browser.xul            chrome://firebug/content
 overlay chrome://global/content/customizeToolbar.xul    chrome://firebug/content/start-button/customizeToolbarOverlay.xul
 overlay chrome://mozapps/content/extensions/about.xul   chrome://firebug/content/aboutOverlay.xul
 overlay chrome://navigator/content/navigator.xul        chrome://firebug/content/browserOverlay.xul
-
-# Support for Firebug tracing console. Should not be available in final releases
-overlay chrome://firebug/content/firebugOverlay.xul     chrome://firebug/content/tracingConsoleOverlay.xul
 
 # Support for Mac 
 override chrome://firebug/skin/debugger.css chrome://firebug/skin/mac/debugger.css os=Darwin
