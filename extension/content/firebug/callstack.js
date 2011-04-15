@@ -295,13 +295,13 @@ function getReferents(frame, fnName)
             try
             {
                 var fn = result.value.getWrappedValue();
-                var thisObject = unwrapIValueObject(frame.thisValue);
+                var thisObject = unwrapIValueObject(frame.thisValue, Firebug.viewChrome);
                 var referents = findObjectPropertyPath("this", thisObject, fn, []);
 
                 if (FBTrace.DBG_STACK)
                     FBTrace.sysout("Firebug.Debugger.showReferents found from thisObject "+referents.length, {thisObject: thisObject, fn: fn, referents: referents});
 
-                var containingScope = unwrapIValueObject(result.value.jsParent);
+                var containingScope = unwrapIValueObject(result.value.jsParent, Firebug.viewwChrome);
 
                 if (FBTrace.DBG_STACK)
                     FBTrace.sysout("Firebug.Debugger.showReferents containingScope from "+result.value.jsParent.jsClassName, containingScope);
