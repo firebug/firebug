@@ -136,6 +136,7 @@ Firebug.ExternalEditors = extend(Firebug.Module,
         }
         if ( editors.length > 0 )
             FBL.createMenuItem(popup, "-");
+
         FBL.createMenuItem(popup, {
             label: FBL.$STR('firebug.Configure_Editors'),
             option: 'openEditorList'

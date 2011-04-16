@@ -7,6 +7,9 @@ var item;
 var FBL;
 var internalFilefieldTextbox;
 var browseButton;
+// browsing for a new file modifies image and label only if they are autogenereted from filename
+var origLabel = '';
+var origImage = null;
 
 function onLoad()
 {
@@ -19,11 +22,13 @@ function onLoad()
     document.getElementById("name").value = item.label;
     if (item.executable)
     {
+        origImage = FBL.getIconURLForFile(item.executable);
         try
         {
             var file = fbXPCOMUtils.CCIN("@mozilla.org/file/local;1", "nsILocalFile");
             file.initWithPath(item.executable);
             document.getElementById("executable").file = file;
+            origLabel = file.leafName.replace(".exe","");
         }
         catch(exc) {}
     }
@@ -109,6 +114,8 @@ function onAccept()
     }
 
     item.cmdline = document.getElementById("cmdline").value;
+    if (item.image == origImage)
+        item.image = FBL.getIconURLForFile(item.executable);
 
     try
     {
@@ -171,8 +178,8 @@ function onBrowse()
         if (internalFilefieldTextbox)
             internalFilefieldTextbox.readOnly = true;
 
-        if (nameField.value == "")
-            nameField.value = execField.file.leafName.replace(".exe","");
+        if (nameField.value == origLabel || nameField.value == "")
+            origLabel = nameField.value = execField.file.leafName.replace(".exe","");
 
         onChange();
         return true;
