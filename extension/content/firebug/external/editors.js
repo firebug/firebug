@@ -87,10 +87,10 @@ var gEditorManager =
 
     onSelectionChanged: function()
     {
-        var selection = this._tree.view.selection;
-        this._removeButton.disabled = (selection.count != 1);
-        this._changeButton.disabled = (selection.count != 1);
-        this._moveUpButton.disabled = (selection.count != 1) || (selection.currentIndex == 0);
+        var selection = this._tree.view.selection, disabled = (selection.count != 1);
+        this._removeButton.disabled = disabled;
+        this._changeButton.disabled = disabled;
+        this._moveUpButton.disabled = disabled || (selection.currentIndex == 0);
     },
 
     addEditorHandler: function()
@@ -148,6 +148,9 @@ var gEditorManager =
         {
             this._FBL.ERROR(exc);
         }
+        // update disabled state of buttons
+        if (this._data.length == 0)
+            selection.clearSelection();
     },
 
     changeEditorHandler: function()
