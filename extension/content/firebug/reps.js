@@ -1095,7 +1095,7 @@ FirebugReps.StyleSheet = domplate(Firebug.Rep,
 FirebugReps.Window = domplate(Firebug.Rep,
 {
     tag:
-        OBJECTLINK("Window ", SPAN({"class": "objectPropValue"}, "$object|getLocation")),
+        OBJECTLINK("$object|getWindowTitle ", SPAN({"class": "objectPropValue"}, "$object|getLocation")),
 
     getLocation: function(win)
     {
@@ -1138,6 +1138,16 @@ FirebugReps.Window = domplate(Firebug.Rep,
     getTitle: function(win, context)
     {
         return "window";
+    },
+
+    getWindowTitle: function(win)
+    {
+        if (Firebug.viewChrome)
+        {
+            if (win.toString().indexOf('XrayWrapper') !== -1)
+                return "XrayWrapper[Window]";
+        }
+        return "Window";
     },
 
     getTooltip: function(win)
