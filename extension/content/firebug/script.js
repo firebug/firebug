@@ -1160,15 +1160,15 @@ Firebug.ScriptPanel.prototype = extend(Firebug.SourceBoxPanel,
                 var debuggr = this;
                 items.push(
                     "-",
-                    {label: "Continue",
+                    {label: "firebug.Continue",
                         command: bindFixed(debuggr.resume, debuggr, this.context) },
-                    {label: "StepOver",
+                    {label: "firebug.StepOver",
                         command: bindFixed(debuggr.stepOver, debuggr, this.context) },
-                    {label: "StepInto",
+                    {label: "firebug.StepInto",
                         command: bindFixed(debuggr.stepInto, debuggr, this.context) },
-                    {label: "StepOut",
+                    {label: "firebug.StepOut",
                         command: bindFixed(debuggr.stepOut, debuggr, this.context) },
-                    {label: "RunUntil",
+                    {label: "firebug.RunUntil",
                         command: bindFixed(debuggr.runUntil, debuggr, this.context,
                         compilationUnit, lineNo) }
                 );
