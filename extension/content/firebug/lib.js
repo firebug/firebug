@@ -3869,6 +3869,11 @@ this.isControlShift = function(event)
     return (event.metaKey || event.ctrlKey) && event.shiftKey && !event.altKey;
 };
 
+this.isControlAlt = function(event)
+{
+    return (event.metaKey || event.ctrlKey) && !event.shiftKey && event.altKey;
+};
+
 this.isShift = function(event)
 {
     return event.shiftKey && !event.metaKey && !event.ctrlKey && !event.altKey;

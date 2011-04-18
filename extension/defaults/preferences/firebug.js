@@ -138,9 +138,9 @@ pref("extensions.firebug.key.shortcut.previousFirebugTab", "control `");
 pref("extensions.firebug.key.shortcut.clearConsole", "accel shift r");
 pref("extensions.firebug.key.shortcut.navBack", "accel shift VK_LEFT");
 pref("extensions.firebug.key.shortcut.navForward", "accel shift VK_RIGHT");
-pref("extensions.firebug.key.shortcut.increaseTextSize", "accel shift +");
-pref("extensions.firebug.key.shortcut.decreaseTextSize", "accel shift -");
-pref("extensions.firebug.key.shortcut.normalTextSize", "accel VK_INSERT");
+pref("extensions.firebug.key.shortcut.increaseTextSize", "alt accel +");
+pref("extensions.firebug.key.shortcut.decreaseTextSize", "alt accel -");
+pref("extensions.firebug.key.shortcut.normalTextSize", "alt accel 0");
 
 // Accessibility
 pref("extensions.firebug.a11y.enable", false);

@@ -75,8 +75,8 @@
         <command id="cmd_navForward" oncommand="Firebug.NavigationHistory.goForward(Firebug.currentContext)" />
         <command id="cmd_toggleFreezeWindow" oncommand="Firebug.Debugger.toggleFreezeWindow(Firebug.currentContext)" />
 
-        <command id="cmd_increaseTextSize" oncommand="Firebug.changeTextSize(1);"/>
-        <command id="cmd_decreaseTextSize" oncommand="Firebug.changeTextSize(-1);"/>
+        <command id="cmd_increaseTextSize" oncommand="Firebug.Options.changeTextSize(1);"/>
+        <command id="cmd_decreaseTextSize" oncommand="Firebug.Options.changeTextSize(-1);"/>
         <command id="cmd_normalTextSize" oncommand="Firebug.Options.setTextSize(0);"/>
 
         <command id="cmd_toggleCommandPopup" oncommand="Firebug.CommandLine.Popup.toggle(Firebug.currentContext)"
