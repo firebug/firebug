@@ -298,7 +298,7 @@ Firebug.Breakpoint.BreakpointsPanel.prototype = extend(Firebug.Panel,
             groups.push({name: "monitors", title: $STR("LoggedFunctions"),
                 breakpoints: monitors});
 
-        dispatch(Firebug.Debugger.fbListeners, "getBreakpoints", [this.context, groups]);
+        Firebug.ToolsInterface.browser.dispatch("getBreakpoints", [this.context, groups]);
 
         if (groups.length)
             Firebug.Breakpoint.BreakpointListRep.tag.replace({groups: groups}, this.panelNode);
