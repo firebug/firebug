@@ -123,7 +123,7 @@ Firebug.MemoryProfiler = FBL.extend(Firebug.Module,
         else
         {
             context.memoryProfileResult[entryId] = {
-                callCount: 0,
+                callCount: 1,
                 report: diff,
                 frame: frame
             };
@@ -192,6 +192,8 @@ Firebug.MemoryProfiler = FBL.extend(Firebug.Module,
 
     logProfileReport: function(context, memoryReport, cancel)
     {
+        FBTrace.sysout("memoryProfiler; logProfileReport", memoryReport);
+
         // Get an existing console log (with throbber) or create a new one.
         var groupRow = context.memoryProfileRow && context.memoryProfileRow.ownerDocument
             ? context.memoryProfileRow
