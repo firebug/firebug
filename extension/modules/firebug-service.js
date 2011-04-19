@@ -1322,12 +1322,26 @@ var fbs =
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+    // JSD Handlers
+
+    addHandler: function(handler)
+    {
+        jsdHandlers.add(handler);
+        jsdHandlers.hook();
+    },
+
+    removeHandler: function(handler)
+    {
+        jsdHandlers.unhook();
+        jsdHandlers.remove(handler);
+    },
+
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 
     traceAll: function(urls, debuggr)
     {
         this.hookCalls(debuggr.onFunctionCall, false);  // call on all passed urls
     },
-
 
     untraceAll: function(debuggr)
     {

@@ -28,6 +28,7 @@
         <command id="cmd_toggleQuickInfoBox" oncommand="Firebug.Inspector.toggleQuickInfoBox()"
                  checked="false"/>
         <command id="cmd_toggleProfiling" oncommand="Firebug.Profiler.toggleProfiling(Firebug.currentContext)"/>
+        <command id="cmd_toggleMemoryProfiling" oncommand="Firebug.MemoryProfiler.toggleProfiling(Firebug.currentContext)"/>
         <command id="cmd_toggleHTMLEditing" oncommand="Firebug.currentContext.getPanel('html').toggleEditing()"/>
         <command id="cmd_togglecssEditMode" oncommand="Firebug.currentContext.getPanel('stylesheet').toggleEditing()"/>
 
@@ -246,6 +247,9 @@
                                             type="checkbox" tooltiptext="firebug.console.Do Not Clear On Reload" command="cmd_togglePersistConsole"/>
                                         <toolbarbutton id="fbToggleProfiling" label="firebug.Profile" class="toolbar-text-button fbInternational"
                                             type="checkbox" command="cmd_toggleProfiling"/>
+                                        <toolbarbutton id="fbToggleMemoryProfiling" label="firebug.MemoryProfile"
+                                            class="toolbar-text-button fbInternational"
+                                            type="checkbox" command="cmd_toggleMemoryProfiling"/>
                                         <toolbarseparator class="fbPanelSpecificButtonsSeparator"/>
                                         <toolbarbutton id="fbConsoleFilter-all" label="firebug.All" type="radio"
                                             class="toolbar-text-button fbInternational" tooltiptext="firebug.console.Show All Log Entries"
