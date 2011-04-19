@@ -1979,13 +1979,13 @@ function getPath(row)
     return path;
 }
 
-function findRow(parentNode, object)
+function findRow(parentNode, object, propName)
 {
     var rows = parentNode.getElementsByClassName("memberRow");
     for (var i=0; i<rows.length; i++)
     {
         var row = rows[i];
-        if (object == row.domObject.object)
+        if (object == row.domObject.object && propName == row.domObject.name)
             return row;
     }
 
@@ -2047,7 +2047,7 @@ Firebug.DOMModule.BreakpointRep = domplate(Firebug.Rep,
         var domPanel = context.getPanel("dom", true);
         if (domPanel)
         {
-            var domRow = findRow(domPanel.panelNode, bp.object);
+            var domRow = findRow(domPanel.panelNode, bp.object, bp.propName);
             if (domRow)
             {
                 domRow.removeAttribute("breakpoint");
@@ -2074,7 +2074,7 @@ Firebug.DOMModule.BreakpointRep = domplate(Firebug.Rep,
             // xxxsz: Needs a better way to update display of breakpoint than invalidate the whole panel's display
             domPanel.context.invalidatePanels("breakpoints");
 
-            var row = findRow(domPanel.panelNode, bp.object);
+            var row = findRow(domPanel.panelNode, bp.object, bp.propName);
             if (row)
                 row.setAttribute("disabledBreakpoint", bp.checked ? "false" : "true");
         }
