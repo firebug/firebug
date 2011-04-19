@@ -19,7 +19,8 @@ var MEMORY_PATHS =
     "malloc/allocated": true,
     "js/gc-heap": true,
     "js/string-data": true,
-    "js/mjit-code": true
+    "js/mjit-code": true,
+    "images/content/used/raw": true,
 };
 
 // ********************************************************************************************* //
@@ -63,12 +64,20 @@ Firebug.MemoryProfiler = FBL.extend(Firebug.Module,
 
         context.memoryProfileRow = row;
         context.memoryProfileRow.customMessage = false;
+
+        // For absolute numbers
+        context.memoryProfileStack.push(this.getMemoryReport());
     },
 
     stop: function(context)
     {
         FBL.fbs.removeHandler(this);
         context.memoryProfiling = false;
+
+        // Calculate total diff
+        var oldReport = context.memoryProfileStack.pop();
+        var newReport = this.getMemoryReport();
+        context.memoryProfileSummary = this.diffMemoryReport(oldReport, newReport);
 
         this.logProfileReport(context, context.memoryProfileResult);
 
@@ -193,6 +202,7 @@ Firebug.MemoryProfiler = FBL.extend(Firebug.Module,
     logProfileReport: function(context, memoryReport, cancel)
     {
         FBTrace.sysout("memoryProfiler; logProfileReport", memoryReport);
+        FBTrace.sysout("memoryProfiler; logProfileReport SUMMARY", context.memoryProfileSummary);
 
         // Get an existing console log (with throbber) or create a new one.
         var groupRow = context.memoryProfileRow && context.memoryProfileRow.ownerDocument
@@ -226,7 +236,18 @@ Firebug.MemoryProfiler = FBL.extend(Firebug.Module,
         {
             var captionBox = groupRow.getElementsByClassName("profileCaption").item(0);
             if (!groupRow.customMessage)
+            {
                 captionBox.textContent = FBL.$STR("Profile");
+                //captionBox.textContent += context.memoryProfileSummary;
+            }
+
+            var row = Firebug.Console.openCollapsedGroup(["Memory Profiling Summary"], context);
+            for (var p in MEMORY_PATHS)
+            {
+                var value = context.memoryProfileSummary[p];
+                Firebug.Console.logFormatted([p + ": ", FBL.formatSize(value)], context);
+            }
+            Firebug.Console.closeGroup(context, false);
 
             //var timeBox = groupRow.getElementsByClassName("profileTime").item(0);
             //timeBox.textContent = FBL.$STRP("plural.Profile_Time2", [totalTime, totalCalls], 1);
