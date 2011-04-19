@@ -7906,6 +7906,9 @@ this.formatNumber = function(number)
 
 this.formatSize = function(bytes)
 {
+    var negative = (bytes < 0);
+    bytes = Math.abs(bytes);
+
     // xxxHonza, XXXjjb: Why Firebug.sizePrecision is not set in Chromebug?
     if (typeof(Firebug.sizePrecision) == "undefined")
         Firebug.sizePrecision = 2;
@@ -7916,8 +7919,10 @@ this.formatSize = function(bytes)
     sizePrecision = (sizePrecision > 2) ? 2 : sizePrecision;
     sizePrecision = (sizePrecision < -1) ? -1 : sizePrecision;
 
+    var result;
+
     if (sizePrecision == -1)
-        return bytes + " B";
+        result = bytes + " B";
 
     var a = Math.pow(10, sizePrecision);
 
@@ -7926,11 +7931,13 @@ this.formatSize = function(bytes)
     else if (bytes == 0)
         return "0";
     else if (bytes < 1024)
-        return bytes + " B";
+        result = bytes + " B";
     else if (bytes < (1024*1024))
-        return Math.round((bytes/1024)*a)/a + " KB";
+        result = Math.round((bytes/1024)*a)/a + " KB";
     else
-        return Math.round((bytes/(1024*1024))*a)/a + " MB";
+        result = Math.round((bytes/(1024*1024))*a)/a + " MB";
+
+    return negative ? "-" + result : result;
 }
 
 // ************************************************************************************************
