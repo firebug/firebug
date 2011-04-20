@@ -243,7 +243,8 @@
     margin: 0;
 }
 
-/************************************************************************************************/
+/*************************************************************************************************/
+/* Profiler */
 
 .logRow-profile > .logRow > .objectBox-text {
     font-family: Lucida Grande, Tahoma, sans-serif;
@@ -264,6 +265,17 @@
     padding-left: 22px !important;
 }
 
+/* Remove left border for the log body. It'll be applied to the profile table so, there
+   can be a little padding at the bottom when the profile-log is exapanded */
+.logRow-profile .logGroupBody {
+    border-left: 0;
+}
+
+.logGroup .profileTable {
+    border: none;
+    border-left: 1px solid #D7D7D7;
+}
+
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 .logRow-table {
@@ -272,18 +284,11 @@
 
 .profileSizer {
     width: 100%;
+    padding-bottom: 5px;
 }
 
 .profileSizer:focus {
     outline: none;
-}
-
-.profileTable {
-}
-
-/* If the table is displayed within a group the border is provided by that group. */
-.logGroup .profileTable {
-    border: none;
 }
 
 .profileTable TBODY {
@@ -295,6 +300,16 @@
     background-color: #EFEFEF;
 }
 
+.profileTable tr:nth-child(even) {
+    background-color: #EFEFEF;
+}
+
+.profileTable .profileSummaryRow {
+    height: 30px;
+    background: #BBBBBB !important;
+    font-weight: bold;
+}
+
 .profileTable a {
     vertical-align:middle;
 }
@@ -302,6 +317,9 @@
 .profileTable td {
     padding: 1px 4px 0 4px;
 }
+
+/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+/* Profiler Heaer */
 
 .headerCell {
     cursor: pointer;
@@ -352,7 +370,7 @@
     outline-offset: -2px;
 }
 
-/*****************************************************************************************/
+/*************************************************************************************************/
 
 .logRow-stackTrace {
     padding-top: 0;
@@ -364,7 +382,7 @@
     padding-top: 2px;
 }
 
-/************************************************************************************************/
+/*************************************************************************************************/
 
 .objectLink-regexp,
 .objectLink-Storage,
