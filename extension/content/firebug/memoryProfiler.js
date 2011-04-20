@@ -59,6 +59,7 @@ Firebug.MemoryProfiler = FBL.extend(Firebug.Module,
         // Initialize structures for collected memory data.
         context.memoryProfileStack = []; // Hold memory reports for called fucntions.
         context.memoryProfileResult = {}; // Holds differences between function-call and function-return.
+        context.memoryProfileTime = (new Date()).getTime();
 
         this.mark(context);
 
@@ -80,7 +81,9 @@ Firebug.MemoryProfiler = FBL.extend(Firebug.Module,
         // Calculate total diff
         var oldReport = context.memoryProfileStack.pop();
         var newReport = this.getMemoryReport();
+
         context.memoryProfileSummary = this.diffMemoryReport(oldReport, newReport);
+        context.memoryProfileTime = (new Date()).getTime() - context.memoryProfileTime;
 
         this.logProfileReport(context, context.memoryProfileResult);
 
@@ -170,7 +173,7 @@ Firebug.MemoryProfiler = FBL.extend(Firebug.Module,
 
     diffMemoryReport: function(oldReport, newReport)
     {
-        var diff = [];
+        var diff = {};
         for (var p in oldReport)
         {
             var oldVal = oldReport[p];
@@ -193,6 +196,7 @@ Firebug.MemoryProfiler = FBL.extend(Firebug.Module,
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
     mark: function(context)
     {
         var contentView = FBL.getContentView(context.window);
@@ -360,25 +364,21 @@ Firebug.MemoryProfiler = FBL.extend(Firebug.Module,
             }
         }
 
+        // Summary log
+        var call = new MemoryProfileSummary(context, context.memoryProfileSummary);
+        calls.push(call);
+        totalCalls++;
+
         if (totalCalls > 0)
         {
             var captionBox = groupRow.getElementsByClassName("profileCaption").item(0);
             if (!groupRow.customMessage)
             {
-                captionBox.textContent = FBL.$STR("Profile");
-                //captionBox.textContent += context.memoryProfileSummary;
+                captionBox.textContent = FBL.$STR("Memory Profiler Results");
             }
 
-            var row = Firebug.Console.openCollapsedGroup(["Memory Profiling Summary"], context);
-            for (var p in MEMORY_PATHS)
-            {
-                var value = context.memoryProfileSummary[p];
-                Firebug.Console.logFormatted([p + ": ", FBL.formatSize(value)], context);
-            }
-            Firebug.Console.closeGroup(context, false);
-
-            //var timeBox = groupRow.getElementsByClassName("profileTime").item(0);
-            //timeBox.textContent = FBL.$STRP("plural.Profile_Time2", [totalTime, totalCalls], 1);
+            var timeBox = groupRow.getElementsByClassName("profileTime").item(0);
+            timeBox.textContent = "(" + FBL.formatTime(context.memoryProfileTime) + ")";
 
             var groupBody = groupRow.lastChild;
             var sizer = Firebug.MemoryProfiler.ProfileTable.tag.replace(
@@ -387,13 +387,15 @@ Firebug.MemoryProfiler = FBL.extend(Firebug.Module,
             var table = sizer.firstChild;
             var tHeader = table.lastChild;  // no rows inserted.
 
-            var tag = Firebug.MemoryProfiler.ProfileCall.tag;
-            var insert = tag.insertRows;
+            var callTag = Firebug.MemoryProfiler.ProfileCall.tag;
+            var sumTag = Firebug.MemoryProfiler.ProfileSummary.tag;
 
             for (var i = 0; i < calls.length; ++i)
             {
-                calls[i].index = i;
-                context.throttle(insert, tag, [{object: calls[i]}, tHeader]);
+                var call = calls[i];
+                call.index = i;
+                var tag = (call instanceof MemoryProfileCall) ? callTag : sumTag;
+                context.throttle(tag.insertRows, tag, [{object: call}, tHeader]);
             }
 
             context.throttle(groupRow.scrollIntoView, groupRow, []);
@@ -415,6 +417,12 @@ function MemoryProfileCall(script, context, callCount, report, sourceLink)
     this.callCount = callCount;
     this.report = report;
     this.sourceLink = sourceLink;
+}
+
+function MemoryProfileSummary(context, report)
+{
+    this.context = context;
+    this.report = report;
 }
 
 // ********************************************************************************************* //
@@ -587,7 +595,7 @@ Firebug.MemoryProfiler.ProfileCall = domplate(Firebug.Rep,
                 "$object.callCount"
             ),
             FOR("column", "$object|getColumns",
-                TD({"class": "a11yFocus dataTableCell", "role": "gridcell", _sortValue: "$column"},
+                TD({"class": "a11yFocus profileCell", "role": "gridcell", _sortValue: "$column"},
                     "$column|getColumnLabel"
                 )
             ),
@@ -614,11 +622,6 @@ Firebug.MemoryProfiler.ProfileCall = domplate(Firebug.Rep,
     getColumnLabel: function(call)
     {
         return FBL.formatSize(call);
-    },
-
-    getMemoryReport2: function(call)
-    {
-        return FBL.formatSize(call.report["js/gc-heap"]);
     },
 
     getSourceLink: function(call)
@@ -660,6 +663,40 @@ Firebug.MemoryProfiler.ProfileCall = domplate(Firebug.Rep,
         var fn = FBL.unwrapIValue(call.script.functionObject);
         return FirebugReps.Func.getContextMenuItems(fn, call.script, context);
     }
+});
+
+// ********************************************************************************************* //
+
+Firebug.MemoryProfiler.ProfileSummary = domplate(Firebug.Rep,
+{
+    tag:
+        TR({"class": "focusRow profileSummaryRow subFocusRow", "role": "row"},
+            TD({"class": "profileCell", "role": "presentation", colspan: 2},
+                FBL.$STR("Entire Session")
+            ),
+            FOR("column", "$object|getColumns",
+                TD({"class": "a11yFocus profileCell", "role": "gridcell", _sortValue: "$column"},
+                    "$column|getColumnLabel"
+                )
+            ),
+            TD({"class": "linkCell profileCell", "role": "presentation"})
+        ),
+
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+    className: "profile",
+
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+    getColumns: function(call)
+    {
+        return Firebug.MemoryProfiler.ProfileCall.getColumns(call)
+    },
+
+    getColumnLabel: function(call)
+    {
+        return Firebug.MemoryProfiler.ProfileCall.getColumnLabel(call);
+    },
 });
 
 } // END with Domplate
