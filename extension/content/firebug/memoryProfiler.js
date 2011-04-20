@@ -116,8 +116,14 @@ Firebug.MemoryProfiler = FBL.extend(Firebug.Module,
 
         var deltaObjects = this.sweep(context);
 
-        //Firebug.Console.log(deltaObjects, context, "memoryDelta", Firebug.DOMPanel.DirTable);
-        Firebug.Console.logFormatted([deltaObjects], context, "memoryDelta");
+        var title = FBL.$STR("Objects Added While Profiling");
+        var row = Firebug.Console.openCollapsedGroup(title, context, "profile",
+                Firebug.MemoryProfiler.ProfileCaption, true, null, true);
+
+        Firebug.Console.log(deltaObjects, context, "memoryDelta", Firebug.DOMPanel.DirTable);
+        Firebug.Console.closeGroup(context, true);
+
+        //Firebug.Console.logFormatted([deltaObjects], context, "memoryDelta");
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -252,8 +258,9 @@ Firebug.MemoryProfiler = FBL.extend(Firebug.Module,
                 var name = names[i];
                 if ( FBL.isDOMMember(obj, name) || FBL.isDOMConstant(obj, name) )
                     continue;
-
                 var prop = obj[name];
+                if (name === "HTMLBodyElement")
+                    FBTrace.sysout("mark HTMLBodyElement "+name+" instanceof "+(prop instanceof HTMLBodyElement));
                 if (typeof(prop) === 'object')  // TODO function
                     this.markRecursive(prop, name);
             }
@@ -313,6 +320,8 @@ Firebug.MemoryProfiler = FBL.extend(Firebug.Module,
             try
             {
                 var prop = obj[name];
+                if (name === "HTMLBodyElement")
+                    FBTrace.sysout("sweep HTMLBodyElement "+name+" instanceof: "+(prop instanceof HTMLBodyElement)+" toString:"+prop);
                 if (typeof(prop) === 'object')  // TODO function
                     this.sweepRecursive(deltaObjects, prop, path+'.'+name);
             }
