@@ -49,6 +49,8 @@ Firebug.StartButton = extend(Firebug.Module,
                 startButton.setAttribute("firefox", "4");
         }
 
+        this.removeStatusIcon();
+
         if (FBTrace.DBG_INITIALIZE)
             FBTrace.sysout("Startbutton initializeUI "+startButton);
     },
@@ -114,6 +116,16 @@ Firebug.StartButton = extend(Firebug.Module,
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
     // Support for the status bar (OBSOLETE in Fx4)
+
+    removeStatusIcon: function()
+    {
+        if (Firebug.Options.get("showStatusIcon"))
+            return;
+
+        var statusBar = $("fbStatusBar");
+        if (statusBar)
+            statusBar.parentNode.removeChild(statusBar);
+    },
 
     onClickStatusText: function(context, event)
     {

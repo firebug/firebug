@@ -379,7 +379,6 @@ top.FirebugChrome =
     savePanels: function()
     {
         var path = this.writePanels(panelBar1.browser.contentDocument);
-        $("fbStatusText").setAttribute("value", path);
         if (FBTrace.DBG_PANELS)
             FBTrace.sysout("Wrote panels to "+path+"\n");
     },

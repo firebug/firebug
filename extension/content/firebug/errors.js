@@ -17,8 +17,6 @@ const WARNING_FLAG = nsIScriptError.warningFlag;
 const urlRe = new RegExp("([^:]*):(//)?([^/]*)");
 const reUncaught = /uncaught exception/;
 const reException = /uncaught exception:\s\[Exception...\s\"([^\"]*)\".*nsresult:.*\(([^\)]*)\).*location:\s\"([^\s]*)\sLine:\s(\d*)\"/;
-const statusBar = $("fbStatusBar");
-const statusText = $("fbStatusText");
 
 const pointlessErrors =
 {
