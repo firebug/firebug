@@ -59,6 +59,8 @@ Firebug.MemoryProfiler = FBL.extend(Firebug.Module,
         context.memoryProfileStack = []; // Hold memory reports for called fucntions.
         context.memoryProfileResult = {}; // Holds differences between function-call and function-return.
 
+        this.mark(context);
+
         var title = FBL.$STR("Memory Profiler Started");
         var row = this.logProfileRow(context, title);
 
@@ -84,6 +86,10 @@ Firebug.MemoryProfiler = FBL.extend(Firebug.Module,
         delete context.memoryProfileRow;
         delete context.memoryProfileStack;
         delete context.memoryProfileResult;
+
+        var deltaObjects = this.sweep(context);
+        //Firebug.Console.log(deltaObjects, context, "memoryDelta", Firebug.DOMPanel.DirTable);
+        Firebug.Console.logFormatted([deltaObjects], context, "memoryDelta");
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -186,6 +192,100 @@ Firebug.MemoryProfiler = FBL.extend(Firebug.Module,
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+    mark: function(context)
+    {
+        var contentView = FBL.getContentView(context.window);
+        this.markRecursive(contentView);
+    },
+
+    markRecursive: function(obj)
+    {
+        if (obj.__fbugMemMark)
+            return;
+
+        if (FirebugReps.Arr.isArray(obj))
+        {
+            obj.__fbugMemMark = obj.length;
+        }
+        else
+        {
+            obj.__fbugMemMark = true;
+        }
+        FBTrace.sysout("mark "+obj.__fbugMemMark);
+        var names = Object.getOwnPropertyNames(obj);
+        for (var i = 0; i < names.length; i++)
+        {
+            try
+            {
+                var prop = obj[names[i]];
+                if (typeof(prop) === 'object')  // TODO function
+                    this.markRecursive(prop);
+            }
+            catch(exc)
+            {
+                // bad objects
+            }
+        }
+
+        var proto = Object.getPrototypeOf(obj);
+        if (proto && typeof(proto) === 'object')
+            this.markRecursive(proto);
+    },
+
+    sweep: function(context)
+    {
+        var deltaObjects = {};
+        var contentView = FBL.getContentView(context.window);
+        this.sweepRecursive(deltaObjects, contentView, "window");
+        return deltaObjects;
+    },
+
+    sweepRecursive: function(deltaObjects, obj, path)
+    {
+        if (obj.__fbugMemSweep)
+            return;
+
+        obj.__fbugMemSweep = true;
+        FBTrace.sysout("sweep "+path);
+
+        if (FirebugReps.Arr.isArray(obj))
+        {
+            if (obj.__fbugMemMark !== obj.length)
+                deltaObjects[path] = obj;
+        }
+        else
+        {
+            if (!obj.__fbugMemMark)
+                deltaObjects[path] = obj;
+        }
+
+        var names = Object.getOwnPropertyNames(obj);
+        for (var i = 0; i < names.length; i++)
+        {
+            var name = names[i];
+            if (name === "__fbugMemSweep" || name === "__fbugMemMark")
+                continue;
+
+            try
+            {
+                var prop = obj[names[i]];
+                if (typeof(prop) === 'object')  // TODO function
+                    this.sweepRecursive(deltaObjects, prop, path+'.'+names[i]);
+            }
+            catch(exc)
+            {
+                // bad objects from Firefox land here
+            }
+        }
+
+        var proto = Object.getPrototypeOf(obj);
+        if (proto && typeof(proto) === 'object')
+            this.sweepRecursive(deltaObjects, proto, path+'.__proto__');
+
+        return deltaObjects;
+    },
+
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
     // UI
 
     logProfileRow: function(context, title)
@@ -220,6 +320,12 @@ Firebug.MemoryProfiler = FBL.extend(Firebug.Module,
         {
             var entry = memoryReport[p];
             totalCalls++;
+
+            if (!entry.frame)
+            {
+                FBTrace.sysout("memoryProfiler no entry.frame? for p="+p, entry);
+                continue;
+            }
 
             var script = entry.frame.script;
             var sourceLink = FBL.getSourceLinkForScript(script, context);
