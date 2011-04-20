@@ -45,10 +45,18 @@ Firebug.MemoryProfiler = FBL.extend(Firebug.Module,
 
     toggleProfiling: function(context)
     {
-        if (context.memoryProfiling)
-            this.stop(context);
-        else
-            this.start(context);
+        try
+        {
+            if (context.memoryProfiling)
+                this.stop(context);
+            else
+                this.start(context);
+        }
+        catch (err)
+        {
+            if (FBTrace.DBG_ERRORS)
+                FBTrace.sysout("memoryProfiler; toggleProfiling EXCEPTION " + err, err);
+        }
     },
 
     start: function(context)
@@ -57,7 +65,7 @@ Firebug.MemoryProfiler = FBL.extend(Firebug.Module,
         FBL.fbs.addHandler(this);
 
         // Initialize structures for collected memory data.
-        context.memoryProfileStack = []; // Hold memory reports for called fucntions.
+        context.memoryProfileStack = []; // Holds memory reports for called fucntions.
         context.memoryProfileResult = {}; // Holds differences between function-call and function-return.
         context.memoryProfileTime = (new Date()).getTime();
 
@@ -69,7 +77,7 @@ Firebug.MemoryProfiler = FBL.extend(Firebug.Module,
         context.memoryProfileRow = row;
         context.memoryProfileRow.customMessage = false;
 
-        // For absolute numbers
+        // For summary numbers (difference between profiling-start and profiling-end)
         context.memoryProfileStack.push(this.getMemoryReport());
     },
 
@@ -92,6 +100,7 @@ Firebug.MemoryProfiler = FBL.extend(Firebug.Module,
         delete context.memoryProfileResult;
 
         var deltaObjects = this.sweep(context);
+
         //Firebug.Console.log(deltaObjects, context, "memoryDelta", Firebug.DOMPanel.DirTable);
         Firebug.Console.logFormatted([deltaObjects], context, "memoryDelta");
     },
@@ -240,9 +249,9 @@ Firebug.MemoryProfiler = FBL.extend(Firebug.Module,
             }
         }
 
-        var proto = Object.getPrototypeOf(obj);
-        if (proto && typeof(proto) === 'object')
-            this.markRecursive(proto);
+        //var proto = Object.getPrototypeOf(obj);
+        //if (proto && typeof(proto) === 'object')
+        //    this.markRecursive(proto);
     },
 
     sweep: function(context)
@@ -256,7 +265,8 @@ Firebug.MemoryProfiler = FBL.extend(Firebug.Module,
     sweepRecursive: function(deltaObjects, obj, path)
     {
         if (FBTrace.DBG_MEMORY_PROFILER)
-            FBTrace.sysout("sweep "+path+" "+obj.hasOwnProperty("__fbugMemSweep")+" view: "+FBL.getContentView(obj), obj);
+            FBTrace.sysout("sweep "+path+" "+obj.hasOwnProperty("__fbugMemSweep")+" view: "+
+                FBL.getContentView(obj), obj);
 
         if (obj.hasOwnProperty("__fbugMemSweep"))
             return;
@@ -270,7 +280,8 @@ Firebug.MemoryProfiler = FBL.extend(Firebug.Module,
         }
         else // we did see it
         {
-            if (FirebugReps.Arr.isArray(obj) && (obj.__fbugMemMark !== obj.length) )  // but it was an array with a different size
+            // but it was an array with a different size
+            if (FirebugReps.Arr.isArray(obj) && (obj.__fbugMemMark !== obj.length) )
                 deltaObjects[path] = obj;
         }
 
@@ -297,9 +308,9 @@ Firebug.MemoryProfiler = FBL.extend(Firebug.Module,
             }
         }
 
-        var proto = Object.getPrototypeOf(obj);
-        if (proto && typeof(proto) === 'object')
-            this.sweepRecursive(deltaObjects, proto, path+'.__proto__');
+        //var proto = Object.getPrototypeOf(obj);
+        //if (proto && typeof(proto) === 'object')
+        //    this.sweepRecursive(deltaObjects, proto, path+'.__proto__');
 
         return deltaObjects;
     },
