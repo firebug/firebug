@@ -31,7 +31,7 @@ Firebug.MemoryProfiler = FBL.extend(Firebug.Module,
     {
         Firebug.Module.initialize.apply(this, arguments);
 
-        if(FBTrace.DBG_MEMORY_PROFILER)
+        if (FBTrace.DBG_MEMORY_PROFILER)
             FBTrace.sysout("memoryProfiler; initialize");
     },
 
@@ -213,7 +213,7 @@ Firebug.MemoryProfiler = FBL.extend(Firebug.Module,
             obj.__fbugMemMark = true;
         }
 
-        if(FBTrace.DBG_MEMORY_PROFILER)
+        if (FBTrace.DBG_MEMORY_PROFILER)
             FBTrace.sysout("mark "+path+": "+obj.__fbugMemMark+" view: "+FBL.getContentView(obj));
 
         var names = Object.getOwnPropertyNames(obj);
@@ -231,7 +231,7 @@ Firebug.MemoryProfiler = FBL.extend(Firebug.Module,
             }
             catch(exc)
             {
-                if(FBTrace.DBG_MEMORY_PROFILER)
+                if (FBTrace.DBG_MEMORY_PROFILER)
                     FBTrace.sysout("markRecursive fails on "+name);
             }
         }
@@ -251,7 +251,7 @@ Firebug.MemoryProfiler = FBL.extend(Firebug.Module,
 
     sweepRecursive: function(deltaObjects, obj, path)
     {
-        if(FBTrace.DBG_MEMORY_PROFILER)
+        if (FBTrace.DBG_MEMORY_PROFILER)
             FBTrace.sysout("sweep "+path+" "+obj.hasOwnProperty("__fbugMemSweep")+" view: "+FBL.getContentView(obj), obj);
 
         if (obj.hasOwnProperty("__fbugMemSweep"))
@@ -288,7 +288,7 @@ Firebug.MemoryProfiler = FBL.extend(Firebug.Module,
             }
             catch(exc)
             {
-                if(FBTrace.DBG_MEMORY_PROFILER)
+                if (FBTrace.DBG_MEMORY_PROFILER)
                     FBTrace.sysout("sweepRecursive fails on "+path+'.'+name);
             }
         }
@@ -316,7 +316,7 @@ Firebug.MemoryProfiler = FBL.extend(Firebug.Module,
 
     logProfileReport: function(context, memoryReport, cancel)
     {
-        if(FBTrace.DBG_MEMORY_PROFILER)
+        if (FBTrace.DBG_MEMORY_PROFILER)
         {
             FBTrace.sysout("memoryProfiler; logProfileReport", memoryReport);
             FBTrace.sysout("memoryProfiler; logProfileReport SUMMARY", context.memoryProfileSummary);
@@ -344,7 +344,7 @@ Firebug.MemoryProfiler = FBL.extend(Firebug.Module,
 
             if (!entry.frame)
             {
-                if(FBTrace.DBG_MEMORY_PROFILER)
+                if (FBTrace.DBG_MEMORY_PROFILER)
                     FBTrace.sysout("memoryProfiler no entry.frame? for p="+p, entry);
                 continue;
             }
