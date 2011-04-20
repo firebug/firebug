@@ -262,12 +262,12 @@ Firebug.MemoryProfiler = FBL.extend(Firebug.Module,
                 if (name === "HTMLBodyElement")
                     FBTrace.sysout("mark HTMLBodyElement "+name+" instanceof "+(prop instanceof HTMLBodyElement));
                 if (typeof(prop) === 'object')  // TODO function
-                    this.markRecursive(prop, name);
+                    this.markRecursive(prop, path+'.'+name);
             }
             catch(exc)
             {
                 if (FBTrace.DBG_MEMORY_PROFILER)
-                    FBTrace.sysout("markRecursive fails on "+name);
+                    FBTrace.sysout("markRecursive fails on "+path+'.'+name);
             }
         }
 
