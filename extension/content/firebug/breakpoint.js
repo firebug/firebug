@@ -134,7 +134,7 @@ Firebug.Breakpoint = extend(Firebug.Module,
 Firebug.Breakpoint.BreakpointListRep = domplate(Firebug.Rep,
 {
     tag:
-        DIV({onclick: "$onClick", role : "list"},
+        DIV({role : "list"},
             FOR("group", "$groups",
                 DIV({"class": "breakpointBlock breakpointBlock-$group.name", role: "listitem"},
                     H1({"class": "breakpointHeader groupHeader"},
@@ -153,50 +153,6 @@ Firebug.Breakpoint.BreakpointListRep = domplate(Firebug.Rep,
     {
         var rep = Firebug.getRep(bp, Firebug.currentContext);
         return rep.tag;
-    },
-
-    onClick: function(event)
-    {
-        var panel = Firebug.getElementPanel(event.target);
-
-        if (getAncestorByClass(event.target, "breakpointCheckbox"))
-        {
-            var node = event.target.parentNode.getElementsByClassName("objectLink-sourceLink").item(0);
-            if (!node)
-                return;
-
-            var sourceLink = node.repObject;
-
-            // XXXjjb this prevents the UI from updating why?  panel.noRefresh = true;
-            if (event.target.checked)
-                fbs.enableBreakpoint(sourceLink.href, sourceLink.line);
-            else
-                fbs.disableBreakpoint(sourceLink.href, sourceLink.line);
-            // XXX jjb panel.noRefresh = false;
-        }
-        else if (getAncestorByClass(event.target, "closeButton"))
-        {
-            var sourceLink =
-                event.target.parentNode.getElementsByClassName("objectLink-sourceLink").item(0).repObject;
-
-            panel.noRefresh = true;
-
-            var head = getAncestorByClass(event.target, "breakpointBlock");
-            var groupName = getClassValue(head, "breakpointBlock");
-            if (groupName == "breakpoints")
-                fbs.clearBreakpoint(sourceLink.href, sourceLink.line);
-            else if (groupName == "errorBreakpoints")
-                fbs.clearErrorBreakpoint(sourceLink.href, sourceLink.line);
-            else if (groupName == "monitors")
-            {
-                fbs.unmonitor(sourceLink.href, sourceLink.line)
-            }
-
-            var row = getAncestorByClass(event.target, "breakpointRow");
-            panel.noRefresh = false;
-
-            panel.refresh();
-        }
     }
 });
 
@@ -205,7 +161,8 @@ Firebug.Breakpoint.BreakpointListRep = domplate(Firebug.Rep,
 Firebug.Breakpoint.BreakpointRep = domplate(Firebug.Rep,
 {
     tag:
-        DIV({"class": "breakpointRow focusRow", role: "option", "aria-checked": "$bp.checked"},
+        DIV({"class": "breakpointRow focusRow", role: "option", "aria-checked": "$bp.checked",
+                _repObject: "$bp", onclick: "$onClick"},
             DIV({"class": "breakpointBlockHead"},
                 INPUT({"class": "breakpointCheckbox", type: "checkbox",
                     _checked: "$bp.checked", tabindex : '-1'}),
@@ -221,9 +178,97 @@ Firebug.Breakpoint.BreakpointRep = domplate(Firebug.Rep,
         return new SourceLink(bp.href, bp.lineNumber, "js");
     },
 
+    removeBreakpoint: function(groupName, href, lineNumber)
+    {
+        if (groupName == "breakpoints")
+            fbs.clearBreakpoint(href, lineNumber);
+        else if (groupName == "errorBreakpoints")
+            fbs.clearErrorBreakpoint(href, lineNumber);
+        else if (groupName == "monitors")
+            fbs.unmonitor(href, lineNumber);
+    },
+
+    enableBreakpoint: function(href, lineNumber)
+    {
+        fbs.enableBreakpoint(href, lineNumber);
+    },
+
+    disableBreakpoint: function(href, lineNumber)
+    {
+        fbs.disableBreakpoint(href, lineNumber);
+    },
+    
+    getContextMenuItems: function(breakpoint, target)
+    {
+        var head = getAncestorByClass(target, "breakpointBlock");
+        var groupName = getClassValue(head, "breakpointBlock");
+
+        var items = [{label: "Remove Breakpoint", command: bindFixed(this.removeBreakpoint, this, groupName, breakpoint.href, breakpoint.lineNumber)}];
+
+        if (groupName == "breakpoints")
+        {
+            if (breakpoint.checked)
+            {
+                items.push(
+                    {label: "Disable Breakpoint", command: bindFixed(this.disableBreakpoint, this, breakpoint.href, breakpoint.lineNumber)}
+                );
+            }
+            else
+            {
+                items.push(
+                    {label: "Enable Breakpoint", command: bindFixed(this.enableBreakpoint, this, breakpoint.href, breakpoint.lineNumber)}
+                );
+            }
+        }
+
+        items.push(
+             "-"
+        );
+
+        return items;
+    },
+
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+
+    inspectable: false,
+
     supportsObject: function(object, type)
     {
         return (object instanceof Firebug.Debugger.Breakpoint);  // FIXME moz back end
+    },
+
+    onClick: function(event)
+    {
+        var panel = Firebug.getElementPanel(event.target);
+
+        if (getAncestorByClass(event.target, "breakpointCheckbox"))
+        {
+            var node = event.target.parentNode.getElementsByClassName("objectLink-sourceLink").item(0);
+            if (!node)
+                return;
+
+            var sourceLink = node.repObject;
+
+            panel.noRefresh = true;
+            if (event.target.checked)
+                this.enableBreakpoint(sourceLink.href, sourceLink.line);
+            else
+                this.disableBreakpoint(sourceLink.href, sourceLink.line);
+            panel.noRefresh = false;
+        }
+        else if (getAncestorByClass(event.target, "closeButton"))
+        {
+            panel.noRefresh = true;
+            var sourceLink =
+              event.target.parentNode.getElementsByClassName("objectLink-sourceLink").item(0).repObject;
+            var head = getAncestorByClass(event.target, "breakpointBlock");
+            var groupName = getClassValue(head, "breakpointBlock");
+
+            this.removeBreakpoint(groupName, sourceLink.href, sourceLink.line);
+
+            panel.noRefresh = false;
+        }
+        panel.refresh();
     }
 });
 
@@ -434,6 +479,11 @@ Firebug.Breakpoint.BreakpointsPanel.prototype = extend(Firebug.Panel,
         );
 
         return items;
+    },
+
+    getContextMenuItems: function(object, target, context)
+    {
+        return this.getOptionsMenuItems();
     },
 
     enableAllBreakpoints: function(context, status)
