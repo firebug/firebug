@@ -31,7 +31,8 @@ Firebug.MemoryProfiler = FBL.extend(Firebug.Module,
     {
         Firebug.Module.initialize.apply(this, arguments);
 
-        FBTrace.sysout("memoryProfiler; initialize");
+        if(FBTrace.DBG_MEMORY_PROFILER)
+            FBTrace.sysout("memoryProfiler; initialize");
     },
 
     shutdown: function()
@@ -195,12 +196,12 @@ Firebug.MemoryProfiler = FBL.extend(Firebug.Module,
     mark: function(context)
     {
         var contentView = FBL.getContentView(context.window);
-        this.markRecursive(contentView);
+        this.markRecursive(contentView, "window");
     },
 
-    markRecursive: function(obj)
+    markRecursive: function(obj, path)
     {
-        if (obj.__fbugMemMark)
+        if (obj.hasOwnProperty("__fbugMemMark"))
             return;
 
         if (FirebugReps.Arr.isArray(obj))
@@ -211,19 +212,27 @@ Firebug.MemoryProfiler = FBL.extend(Firebug.Module,
         {
             obj.__fbugMemMark = true;
         }
-        FBTrace.sysout("mark "+obj.__fbugMemMark);
+
+        if(FBTrace.DBG_MEMORY_PROFILER)
+            FBTrace.sysout("mark "+path+": "+obj.__fbugMemMark+" view: "+FBL.getContentView(obj));
+
         var names = Object.getOwnPropertyNames(obj);
         for (var i = 0; i < names.length; i++)
         {
             try
             {
-                var prop = obj[names[i]];
+                var name = names[i];
+                if ( FBL.isDOMMember(obj, name) || FBL.isDOMConstant(obj, name) )
+                    continue;
+
+                var prop = obj[name];
                 if (typeof(prop) === 'object')  // TODO function
-                    this.markRecursive(prop);
+                    this.markRecursive(prop, name);
             }
             catch(exc)
             {
-                // bad objects
+                if(FBTrace.DBG_MEMORY_PROFILER)
+                    FBTrace.sysout("markRecursive fails on "+name);
             }
         }
 
@@ -242,20 +251,22 @@ Firebug.MemoryProfiler = FBL.extend(Firebug.Module,
 
     sweepRecursive: function(deltaObjects, obj, path)
     {
-        if (obj.__fbugMemSweep)
+        if(FBTrace.DBG_MEMORY_PROFILER)
+            FBTrace.sysout("sweep "+path+" "+obj.hasOwnProperty("__fbugMemSweep")+" view: "+FBL.getContentView(obj), obj);
+
+        if (obj.hasOwnProperty("__fbugMemSweep"))
             return;
 
         obj.__fbugMemSweep = true;
-        FBTrace.sysout("sweep "+path);
 
-        if (FirebugReps.Arr.isArray(obj))
+
+        if (!obj.hasOwnProperty("__fbugMemMark")) // then we did not see this object 'before'
         {
-            if (obj.__fbugMemMark !== obj.length)
-                deltaObjects[path] = obj;
+            deltaObjects[path] = obj;
         }
-        else
+        else // we did see it
         {
-            if (!obj.__fbugMemMark)
+            if (FirebugReps.Arr.isArray(obj) && (obj.__fbugMemMark !== obj.length) )  // but it was an array with a different size
                 deltaObjects[path] = obj;
         }
 
@@ -266,15 +277,19 @@ Firebug.MemoryProfiler = FBL.extend(Firebug.Module,
             if (name === "__fbugMemSweep" || name === "__fbugMemMark")
                 continue;
 
+            if ( FBL.isDOMMember(obj, name) || FBL.isDOMConstant(obj, name) )
+                    continue;
+
             try
             {
-                var prop = obj[names[i]];
+                var prop = obj[name];
                 if (typeof(prop) === 'object')  // TODO function
-                    this.sweepRecursive(deltaObjects, prop, path+'.'+names[i]);
+                    this.sweepRecursive(deltaObjects, prop, path+'.'+name);
             }
             catch(exc)
             {
-                // bad objects from Firefox land here
+                if(FBTrace.DBG_MEMORY_PROFILER)
+                    FBTrace.sysout("sweepRecursive fails on "+path+'.'+name);
             }
         }
 
@@ -301,8 +316,11 @@ Firebug.MemoryProfiler = FBL.extend(Firebug.Module,
 
     logProfileReport: function(context, memoryReport, cancel)
     {
-        FBTrace.sysout("memoryProfiler; logProfileReport", memoryReport);
-        FBTrace.sysout("memoryProfiler; logProfileReport SUMMARY", context.memoryProfileSummary);
+        if(FBTrace.DBG_MEMORY_PROFILER)
+        {
+            FBTrace.sysout("memoryProfiler; logProfileReport", memoryReport);
+            FBTrace.sysout("memoryProfiler; logProfileReport SUMMARY", context.memoryProfileSummary);
+        }
 
         // Get an existing console log (with throbber) or create a new one.
         var groupRow = context.memoryProfileRow && context.memoryProfileRow.ownerDocument
@@ -318,12 +336,16 @@ Firebug.MemoryProfiler = FBL.extend(Firebug.Module,
 
         for (var p in memoryReport)
         {
+            if (!memoryReport.hasOwnProperty(p))
+                continue;
+
             var entry = memoryReport[p];
             totalCalls++;
 
             if (!entry.frame)
             {
-                FBTrace.sysout("memoryProfiler no entry.frame? for p="+p, entry);
+                if(FBTrace.DBG_MEMORY_PROFILER)
+                    FBTrace.sysout("memoryProfiler no entry.frame? for p="+p, entry);
                 continue;
             }
 

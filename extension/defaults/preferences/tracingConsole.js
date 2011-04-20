@@ -41,6 +41,7 @@ pref("extensions.firebug.DBG_DISPATCH", false);     //                          
 pref("extensions.firebug.DBG_HTML", false);         //                                           /*@explore*/
 pref("extensions.firebug.DBG_LINETABLE", false);    //                                           /*@explore*/
 pref("extensions.firebug.DBG_LOCATIONS", false);    // panelFileList                             /*@explore*/
+pref("extensions.firebug.DBG_MEMORY_PROFILER", false);
 pref("extensions.firebug.DBG_SOURCEFILES", false);  // debugger and sourceCache                  /*@explore*/
 pref("extensions.firebug.DBG_WINDOWS", false);      // tabWatcher, dispatch events; very useful for understand modules/panels  /*@explore*/
 pref("extensions.firebug.DBG_NET", false);          // net.js                                    /*@explore*/
