@@ -523,6 +523,8 @@ FirebugReps.Arr = domplate(Firebug.Rep,
                 return false;
             else if (obj instanceof StorageList) // do this first to avoid security 1000 errors
                 return false;
+            else if (obj.toString() === "[xpconnect wrapped native prototype]")  // do this first to avoid exceptions
+                return false;
             else if (isFinite(obj.length) && typeof obj.splice === 'function')
                 return true;
             else if (isFinite(obj.length) && typeof obj.callee === 'function') // arguments
