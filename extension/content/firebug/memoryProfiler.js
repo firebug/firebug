@@ -40,6 +40,16 @@ Firebug.MemoryProfiler = FBL.extend(Firebug.Module,
         Firebug.Module.shutdown.apply(this, arguments);
     },
 
+    initContext: function(context)
+    {
+        Firebug.Module.initContext.apply(this, arguments);
+
+        // xxxHonza: If profiling is on and the user reloads,needs better testing
+        // Profilinig should support reloads to profile page load.
+        if (this.profiling)
+            this.start(context);
+    },
+
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
     // Activation/deactivation
 
@@ -47,7 +57,7 @@ Firebug.MemoryProfiler = FBL.extend(Firebug.Module,
     {
         try
         {
-            if (context.memoryProfiling)
+            if (this.profiling)
                 this.stop(context);
             else
                 this.start(context);
@@ -59,9 +69,14 @@ Firebug.MemoryProfiler = FBL.extend(Firebug.Module,
         }
     },
 
+    isProfiling: function()
+    {
+        return this.profiling;
+    },
+
     start: function(context)
     {
-        context.memoryProfiling = true;
+        this.profiling = true;
         FBL.fbs.addHandler(this);
 
         // Initialize structures for collected memory data.
@@ -84,7 +99,7 @@ Firebug.MemoryProfiler = FBL.extend(Firebug.Module,
     stop: function(context)
     {
         FBL.fbs.removeHandler(this);
-        context.memoryProfiling = false;
+        this.profiling = false;
 
         // Calculate total diff
         var oldReport = context.memoryProfileStack.pop();
