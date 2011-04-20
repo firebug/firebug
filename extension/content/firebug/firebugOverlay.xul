@@ -247,7 +247,7 @@
                                             type="checkbox" tooltiptext="firebug.console.Do Not Clear On Reload" command="cmd_togglePersistConsole"/>
                                         <toolbarbutton id="fbToggleProfiling" label="firebug.Profile" class="toolbar-text-button fbInternational"
                                             type="checkbox" command="cmd_toggleProfiling"/>
-                                        <toolbarbutton id="fbToggleMemoryProfiling" label="firebug.MemoryProfile"
+                                        <toolbarbutton id="fbToggleMemoryProfiling" label="firebug.Memory Profile"
                                             class="toolbar-text-button fbInternational"
                                             type="checkbox" command="cmd_toggleMemoryProfiling"/>
                                         <toolbarseparator class="fbPanelSpecificButtonsSeparator"/>
