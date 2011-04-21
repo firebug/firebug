@@ -538,10 +538,17 @@ FirebugReps.Arr = domplate(Firebug.Rep,
         }
         catch(exc)
         {
-            if (FBTrace.DBG_ERRORS)
+            try
             {
-                FBTrace.sysout("isArray FAILS:", exc);  /* Something weird: without the try/catch, OOM, with no exception?? */
-                FBTrace.sysout("isArray Fails on obj "+obj);
+                if (FBTrace.DBG_ERRORS)
+                {
+                    FBTrace.sysout("isArray FAILS: "+exc, exc);  /* Something weird: without the try/catch, OOM, with no exception?? */
+                    FBTrace.sysout("isArray Fails on obj "+obj);
+                }
+            }
+            catch(exexc)
+            {
+                FBTrace.sysout("isArray double ERROR "+exexc, exexc);
             }
         }
 
