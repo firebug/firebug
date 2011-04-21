@@ -28,7 +28,7 @@ define(["arch/tools"], function factoryOptions(ToolsInterface)
             "activateSameOrigin", "allPagesActivation", "hiddenPanels",
             "panelTabMinWidth", "sourceLinkLabelWidth", "currentVersion",
             "useDefaultLocale", "toolbarCustomizationDone", "addonBarOpened",
-            "showBreakNotification",
+            "showBreakNotification", "showStatusIcon",
 
             // Search
             "searchCaseSensitive", "searchGlobal", "searchUseRegularExpression",
