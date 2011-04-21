@@ -55,7 +55,7 @@ Firebug.Inspector = extend(Firebug.Module,
         if (!elementArr || !FirebugReps.Arr.isArray(elementArr))
         {
             // highlight a single element
-            if (!elementArr || !isElement(elementArr) || !isVisible(FBL.getContentView(elementArr)))
+            if (!elementArr || !isElement(elementArr) || (FBL.getContentView(elementArr) && !isVisible(FBL.getContentView(elementArr))) )
             {
                 if(elementArr && elementArr.nodeType == 3)
                     elementArr = elementArr.parentNode;
