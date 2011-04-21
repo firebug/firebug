@@ -27,6 +27,7 @@ pref("extensions.firebug.showStatusIcon", true);
 
 // Command line
 pref("extensions.firebug.largeCommandLine", false);
+pref("extensions.firebug.alwaysShowCommandLine", false);
 
 // Search
 pref("extensions.firebug.searchCaseSensitive", false);

@@ -38,7 +38,7 @@ define(["arch/tools"], function factoryOptions(ToolsInterface)
             "showJSErrors", "showJSWarnings", "showCSSErrors", "showXMLErrors",
             "showChromeErrors", "showChromeMessages", "showExternalErrors",
             "showXMLHttpRequests", "showNetworkErrors", "tabularLogMaxHeight",
-            "consoleFilterTypes",
+            "consoleFilterTypes", "alwaysShowCommandLine",
 
             // HTML
             "showFullTextNodes", "showCommentNodes",

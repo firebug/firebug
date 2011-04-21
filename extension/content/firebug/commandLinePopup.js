@@ -31,10 +31,23 @@ Firebug.CommandLine.Popup = extend(Firebug.Module,
         Firebug.chrome.$("fbContentBox").removeEventListener("keypress", this.onKeyPress, false);
     },
 
+    initContext: function(context)
+    {
+        Firebug.Module.showContext.apply(this, arguments);
+
+        var show = Firebug.Options.get("alwaysShowCommandLine");
+        if (show && !this.isVisible())
+            this.toggle(context);
+    },
+
     reattachContext: function(browser, context)
     {
         this.setPopupBrowserStyle(Firebug.chrome);
         this.attachListeners();
+
+        var show = Firebug.Options.get("alwaysShowCommandLine");
+        if (show && !this.isVisible())
+            this.toggle(context);
     },
 
     showPanel: function(browser, panel)
@@ -110,6 +123,8 @@ Firebug.CommandLine.Popup = extend(Firebug.Module,
 
         var newState = !this.isVisible();
         Firebug.chrome.setGlobalAttribute("cmd_toggleCommandPopup", "checked", newState);
+        Firebug.Options.set("alwaysShowCommandLine", newState);
+
         this.updateVisibility(newState);
 
         this.reattach(context);
