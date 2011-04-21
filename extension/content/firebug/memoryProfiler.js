@@ -84,6 +84,7 @@ Firebug.MemoryProfiler = FBL.extend(Firebug.Module,
         context.memoryProfileResult = {}; // Holds differences between function-call and function-return.
         context.memoryProfileTime = (new Date()).getTime();
 
+        // Memory leak detection
         this.mark(context);
 
         var title = FBL.$STR("Memory Profiler Started");
@@ -114,11 +115,13 @@ Firebug.MemoryProfiler = FBL.extend(Firebug.Module,
         delete context.memoryProfileStack;
         delete context.memoryProfileResult;
 
+        // Memory leak detection
         var deltaObjects = this.sweep(context);
+        this.cleanUp(context);
 
         var title = FBL.$STR("Objects Added While Profiling");
         var row = Firebug.Console.openCollapsedGroup(title, context, "profile",
-                Firebug.MemoryProfiler.ProfileCaption, true, null, true);
+            Firebug.MemoryProfiler.ProfileCaption, true, null, true);
 
         Firebug.Console.log(deltaObjects, context, "memoryDelta", Firebug.DOMPanel.DirTable);
         Firebug.Console.closeGroup(context, true);
@@ -226,120 +229,85 @@ Firebug.MemoryProfiler = FBL.extend(Firebug.Module,
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+    // Memory leak detection
 
     mark: function(context)
     {
+        // Iterate all objects of the content window.
+        var iter = new ObjectIterator();
         var contentView = FBL.getContentView(context.window);
-        this.markRecursive(contentView, "window");
-    },
-
-    markRecursive: function(obj, path)
-    {
-        if (obj.hasOwnProperty("__fbugMemMark"))
-            return;
-
-        if (FirebugReps.Arr.isArray(obj))
+        iter.iterate(contentView, "window", function(obj, path)
         {
-            obj.__fbugMemMark = obj.length;
-        }
-        else
-        {
-            obj.__fbugMemMark = true;
-        }
+            // We have been here, bail out.
+            if (obj.hasOwnProperty("__fbugMemMark"))
+                return false;
 
-        if (FBTrace.DBG_MEMORY_PROFILER)
-            FBTrace.sysout("mark "+path+": "+obj.__fbugMemMark+" view: "+FBL.getContentView(obj));
+            if (FirebugReps.Arr.isArray(obj))
+                obj.__fbugMemMark = obj.length;
+            else
+                obj.__fbugMemMark = true;
 
-        var names = Object.keys(obj);
-        for (var i = 0; i < names.length; i++)
-        {
-            try
-            {
-                var name = names[i];
-                if ( FBL.isDOMMember(obj, name) || FBL.isDOMConstant(obj, name) )
-                    continue;
-                var prop = obj[name];
-                if (name === "HTMLBodyElement")
-                    FBTrace.sysout("mark HTMLBodyElement "+name+" instanceof "+(prop instanceof HTMLBodyElement));
-                if (typeof(prop) === 'object')  // TODO function
-                    this.markRecursive(prop, path+'.'+name);
-            }
-            catch(exc)
-            {
-                if (FBTrace.DBG_MEMORY_PROFILER)
-                    FBTrace.sysout("markRecursive fails on "+path+'.'+name);
-            }
-        }
+            if (FBTrace.DBG_MEMORY_PROFILER)
+                FBTrace.sysout("mark "+path+": "+obj.__fbugMemMark+" view: "+
+                    FBL.getContentView(obj));
 
-        /*
-        var proto = Object.getPrototypeOf(obj);
-        if (proto && typeof(proto) === 'object')
-            this.markRecursive(proto);
-        */
+            // Continue with children
+            return true;
+        });
     },
 
     sweep: function(context)
     {
-        var deltaObjects = {};
+        var iter = new ObjectIterator();
+        iter.deltaObjects = {};
+
         var contentView = FBL.getContentView(context.window);
-        this.sweepRecursive(deltaObjects, contentView, "window");
-        return deltaObjects;
+        iter.iterate(contentView, "window", function(obj, path)
+        {
+            if (FBTrace.DBG_MEMORY_PROFILER)
+                FBTrace.sysout("sweep "+path+" "+obj.hasOwnProperty("__fbugMemSweep")+" view: "+
+                    FBL.getContentView(obj), obj);
+
+            if (obj.hasOwnProperty("__fbugMemSweep"))
+                return false;
+
+            obj.__fbugMemSweep = true;
+
+            if (!obj.hasOwnProperty("__fbugMemMark")) // then we did not see this object 'before'
+            {
+                this.deltaObjects[path] = obj;
+            }
+            else // we did see it
+            {
+                // but it was an array with a different size
+                if (FirebugReps.Arr.isArray(obj) && (obj.__fbugMemMark !== obj.length) )
+                    this.deltaObjects[path] = obj;
+            }
+
+            // Iterate children
+            return true;
+        });
+
+        return iter.deltaObjects;
     },
 
-    sweepRecursive: function(deltaObjects, obj, path)
+    cleanUp: function(context)
     {
-        if (FBTrace.DBG_MEMORY_PROFILER)
-            FBTrace.sysout("sweep "+path+" "+obj.hasOwnProperty("__fbugMemSweep")+" view: "+
-                FBL.getContentView(obj), obj);
-
-        if (obj.hasOwnProperty("__fbugMemSweep"))
-            return;
-
-        obj.__fbugMemSweep = true;
-
-
-        if (!obj.hasOwnProperty("__fbugMemMark")) // then we did not see this object 'before'
+        var iter = new ObjectIterator();
+        var contentView = FBL.getContentView(context.window);
+        iter.iterate(contentView, "window", function(obj, path)
         {
-            deltaObjects[path] = obj;
-        }
-        else // we did see it
-        {
-            // but it was an array with a different size
-            if (FirebugReps.Arr.isArray(obj) && (obj.__fbugMemMark !== obj.length) )
-                deltaObjects[path] = obj;
-        }
+            if (!obj.hasOwnProperty("__fbugMemSweep"))
+                return false;
 
-        var names = Object.keys(obj);
-        for (var i = 0; i < names.length; i++)
-        {
-            var name = names[i];
-            if (name === "__fbugMemSweep" || name === "__fbugMemMark")
-                continue;
+            FBTrace.sysout("memoryProfiler; cleanUp " + path);
 
-            if ( FBL.isDOMMember(obj, name) || FBL.isDOMConstant(obj, name) )
-                    continue;
+            // Clean up
+            delete obj.__fbugMemSweep;
+            delete obj.__fbugMemMark;
 
-            try
-            {
-                var prop = obj[name];
-                if (name === "HTMLBodyElement")
-                    FBTrace.sysout("sweep HTMLBodyElement "+name+" instanceof: "+(prop instanceof HTMLBodyElement)+" toString:"+prop);
-                if (typeof(prop) === 'object')  // TODO function
-                    this.sweepRecursive(deltaObjects, prop, path+'.'+name);
-            }
-            catch(exc)
-            {
-                if (FBTrace.DBG_MEMORY_PROFILER)
-                    FBTrace.sysout("sweepRecursive fails on "+path+'.'+name);
-            }
-        }
-
-        /*
-         var proto = Object.getPrototypeOf(obj);
-        if (proto && typeof(proto) === 'object')
-            this.sweepRecursive(deltaObjects, proto, path+'.__proto__');
-        */
-        return deltaObjects;
+            return true;
+        });
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -462,6 +430,72 @@ function MemoryProfileSummary(context, report)
     this.context = context;
     this.report = report;
 }
+
+// ********************************************************************************************* //
+// Object Iterator
+
+/**
+ * Recursively iterates all children objects.
+ */
+function ObjectIterator()
+{
+}
+
+ObjectIterator.prototype =
+/** @lends ObjectIterator */
+{
+    /**
+     * Recursive iteration over all children of given object
+     * @param {Object} obj The object to iterate
+     * @param {String} path helper path for logging.
+     * @param {Function} callback Callback function executed for each object.
+     */
+    iterate: function(obj, path, callback)
+    {
+        if (!callback.apply(this, [obj, path]))
+            return;
+
+        var names = Object.keys(obj);
+        for (var i=0; i<names.length; i++)
+        {
+            var name = names[i];
+
+            // Ignore memory-profiler helper fields
+            if (name === "__fbugMemSweep" || name === "__fbugMemMark")
+                continue;
+
+            // Ignore built-in objects
+            if (FBL.isDOMMember(obj, name) || FBL.isDOMConstant(obj, name))
+                continue;
+
+            try
+            {
+                var child = obj[name];
+
+                // xxxHonza, xxxJJB: this should be removed once the problem is clear.
+                if (name === "HTMLBodyElement")
+                    FBTrace.sysout("memoryProfiler; HTMLBodyElement " + name + " instanceof: " +
+                        (prop instanceof HTMLBodyElement) + " toString: " + child);
+
+                // Recursion
+                if (typeof(child) === "object")  // TODO function
+                    this.iterate(child, path + "." + name, callback);
+            }
+            catch (exc)
+            {
+                if (FBTrace.DBG_MEMORY_PROFILER)
+                    FBTrace.sysout("memoryProfiler; iteration fails on " + path + "." + name, exc);
+            }
+        }
+
+        //xxxHonza, xxxJBB: iterate also prototype as soon as we understand the consequences.
+        /*
+         var proto = Object.getPrototypeOf(obj);
+        if (proto && typeof(proto) === 'object')
+            this.sweepRecursive(deltaObjects, proto, path+'.__proto__');
+        */
+    },
+};
 
 // ********************************************************************************************* //
 // Domplate Templates
