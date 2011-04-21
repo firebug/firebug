@@ -250,7 +250,7 @@ Firebug.MemoryProfiler = FBL.extend(Firebug.Module,
         if (FBTrace.DBG_MEMORY_PROFILER)
             FBTrace.sysout("mark "+path+": "+obj.__fbugMemMark+" view: "+FBL.getContentView(obj));
 
-        var names = Object.getOwnPropertyNames(obj);
+        var names = Object.keys(obj);
         for (var i = 0; i < names.length; i++)
         {
             try
@@ -271,9 +271,11 @@ Firebug.MemoryProfiler = FBL.extend(Firebug.Module,
             }
         }
 
-        //var proto = Object.getPrototypeOf(obj);
-        //if (proto && typeof(proto) === 'object')
-        //    this.markRecursive(proto);
+        /*
+        var proto = Object.getPrototypeOf(obj);
+        if (proto && typeof(proto) === 'object')
+            this.markRecursive(proto);
+        */
     },
 
     sweep: function(context)
@@ -307,7 +309,7 @@ Firebug.MemoryProfiler = FBL.extend(Firebug.Module,
                 deltaObjects[path] = obj;
         }
 
-        var names = Object.getOwnPropertyNames(obj);
+        var names = Object.keys(obj);
         for (var i = 0; i < names.length; i++)
         {
             var name = names[i];
@@ -332,10 +334,11 @@ Firebug.MemoryProfiler = FBL.extend(Firebug.Module,
             }
         }
 
-        //var proto = Object.getPrototypeOf(obj);
-        //if (proto && typeof(proto) === 'object')
-        //    this.sweepRecursive(deltaObjects, proto, path+'.__proto__');
-
+        /*
+         var proto = Object.getPrototypeOf(obj);
+        if (proto && typeof(proto) === 'object')
+            this.sweepRecursive(deltaObjects, proto, path+'.__proto__');
+        */
         return deltaObjects;
     },
 
