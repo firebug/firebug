@@ -372,6 +372,24 @@ Firebug.DOMBasePanel.prototype = extend(Firebug.Panel,
         return object;
     },
 
+    getObjectProperties: function(object)
+    {
+        var properties = [];
+        if (Firebug.showOwnProperties)
+        {
+            if (Firebug.showEnumerableProperties)
+                properties = Object.keys(object);
+            else
+                properties = Object.getOwnPropertyNames(object);
+        }
+        else
+        {
+            for (var name in object)
+                properties.push(name);
+        }
+        return properties;
+    },
+
     rebuild: function(update, scrollTop)
     {
         dispatch(this.fbListeners, 'onBeforeDomUpdateSelection', [this]);
@@ -406,61 +424,59 @@ Firebug.DOMBasePanel.prototype = extend(Firebug.Panel,
                 object = object.namedItem(domain);
             }
 
-            var insecureObject = this.getObjectView(object);
-            var properties = [];
-
             try
             {
-                for (var name in insecureObject)  // enumeration is safe
-                {
-                    // Ignore only global variables (properties of the |window| object).
-                    if (shouldIgnore(name) && (object instanceof Window))
-                    {
-                        if (FBTrace.DBG_DOM)
-                            FBTrace.sysout("dom.getMembers: ignoreVars: " + name + ", " + level, object);
-                        continue;
-                    }
-                    properties.push(name);
-                }
-                if (insecureObject.hasOwnProperty('constructor') && properties.indexOf('constructor') == -1)
+                var contentView = this.getObjectView(object);
+                var properties = this.getObjectProperties(contentView);
+
+                if (contentView.hasOwnProperty('constructor') && properties.indexOf('constructor') == -1)
                     properties.push('constructor');
 
-                if (insecureObject.hasOwnProperty('prototype') && properties.indexOf('prototype') == -1)
+                if (contentView.hasOwnProperty('prototype') && properties.indexOf('prototype') == -1)
                     properties.push('prototype');
 
-                if (insecureObject.__proto__ && hasProperties(insecureObject.__proto__))  // XXXjjb I think it is always true ?
+                if (contentView.__proto__ && hasProperties(contentView.__proto__))  // XXXjjb I think it is always true ?
                     properties.push('__proto__');
             }
             catch(exc)
             {
                  // workaround for https://bugzilla.mozilla.org/show_bug.cgi?id=648560
-                if (insecureObject.wrappedJSObject)
+                if (contentView.wrappedJSObject)
                 {
                     if (FBTrace.DBG_ERRORS || FBTrace.DBG_DOM)
-                        FBTrace.sysout("dom DOM bz:"+(XPCNativeWrapper.unwrap(insecureObject) !== insecureObject)+" insecureObject("+insecureObject+").wrappedJSObject "+insecureObject.wrappedJSObject);
+                        FBTrace.sysout("dom DOM bz:"+(XPCNativeWrapper.unwrap(contentView) !== contentView)+" contentView("+contentView+").wrappedJSObject "+contentView.wrappedJSObject);
 
-                    var wrapperToString = insecureObject+"";
-                    insecureObject =
+                    var wrapperToString = contentView+"";
+                    contentView =
                     {
-                        wrappedJSObject: XPCNativeWrapper.unwrap(insecureObject),
+                        wrappedJSObject: XPCNativeWrapper.unwrap(contentView),
                         toString: function() { return wrapperToString; },
-                        isXPCNativeWrapper: (XPCNativeWrapper.unwrap(insecureObject) !== insecureObject),
+                        isXPCNativeWrapper: (XPCNativeWrapper.unwrap(contentView) !== contentView),
                     }
-                    object = insecureObject;
+                    object = contentView;
                 }
             }
 
-            if (insecureObject.wrappedJSObject)
+            if (contentView.wrappedJSObject)
                 properties.push('wrappedJSObject');
 
             var domMembers = getDOMMembers(object);
             for (var i = 0; i < properties.length; i++)
             {
                 var name = properties[i];
+
+                // Ignore only global variables (properties of the |window| object).
+                if (shouldIgnore(name) && (object instanceof Window))
+                {
+                    if (FBTrace.DBG_DOM)
+                        FBTrace.sysout("dom.getMembers: ignoreVars: " + name + ", " + level, object);
+                    continue;
+                }
+
                 var val;
                 try
                 {
-                    val = insecureObject[name];  // getter is safe
+                    val = contentView[name];  // getter is safe
                 }
                 catch (exc)
                 {

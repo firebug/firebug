@@ -23,7 +23,7 @@ pref("extensions.firebug.activateSameOrigin", true);
 pref("extensions.firebug.toolbarCustomizationDone", false);
 pref("extensions.firebug.addonBarOpened", false);
 pref("extensions.firebug.showBreakNotification", true);
-pref("extensions.firebug.showStatusIcon", false);
+pref("extensions.firebug.showStatusIcon", true);
 
 // Command line
 pref("extensions.firebug.largeCommandLine", false);
@@ -92,6 +92,8 @@ pref("extensions.firebug.showDOMProps", true);
 pref("extensions.firebug.showDOMFuncs", false);
 pref("extensions.firebug.showDOMConstants", false);
 pref("extensions.firebug.ObjectShortIteratorMax", 3);
+pref("extensions.firebug.showEnumerableProperties", false);
+pref("extensions.firebug.showOwnProperties", false);
 
 // Layout
 pref("extensions.firebug.showRulers", true);

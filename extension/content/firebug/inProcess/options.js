@@ -59,7 +59,7 @@ define(["arch/tools"], function factoryOptions(ToolsInterface)
 
             // DOM
             "showUserProps", "showUserFuncs", "showDOMProps", "showDOMFuncs", "showDOMConstants",
-            "ObjectShortIteratorMax",
+            "ObjectShortIteratorMax", "showEnumerableProperties", "showOwnProperties",
 
             // Layout
             "showRulers",
