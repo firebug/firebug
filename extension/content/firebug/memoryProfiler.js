@@ -87,7 +87,7 @@ Firebug.MemoryProfiler = FBL.extend(Firebug.Module,
         // Memory leak detection
         this.mark(context);
 
-        var title = FBL.$STR("Memory Profiler Started");
+        var title = FBL.$STR("firebug.Memory Profiler Started");
         var row = this.logProfileRow(context, title);
 
         context.memoryProfileRow = row;
@@ -119,7 +119,7 @@ Firebug.MemoryProfiler = FBL.extend(Firebug.Module,
         var deltaObjects = this.sweep(context);
         this.cleanUp(context);
 
-        var title = FBL.$STR("Objects Added While Profiling");
+        var title = FBL.$STR("firebug.Objects Added While Profiling");
         var row = Firebug.Console.openCollapsedGroup(title, context, "profile",
             Firebug.MemoryProfiler.ProfileCaption, true, null, true);
 
@@ -380,7 +380,7 @@ Firebug.MemoryProfiler = FBL.extend(Firebug.Module,
             var captionBox = groupRow.getElementsByClassName("profileCaption").item(0);
             if (!groupRow.customMessage)
             {
-                captionBox.textContent = FBL.$STR("Memory Profiler Results");
+                captionBox.textContent = FBL.$STR("firebug.Memory Profiler Results");
             }
 
             var timeBox = groupRow.getElementsByClassName("profileTime").item(0);
@@ -744,7 +744,7 @@ Firebug.MemoryProfiler.ProfileSummary = domplate(Firebug.Rep,
     tag:
         TR({"class": "focusRow profileSummaryRow subFocusRow", "role": "row"},
             TD({"class": "profileCell", "role": "presentation", colspan: 2},
-                FBL.$STR("Entire Session")
+                FBL.$STR("firebug.Entire Session")
             ),
             FOR("column", "$object|getColumns",
                 TD({"class": "a11yFocus profileCell", "role": "gridcell", _sortValue: "$column"},
