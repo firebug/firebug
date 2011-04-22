@@ -1374,6 +1374,10 @@ Firebug.DOMBasePanel.prototype = extend(Firebug.Panel,
 
     getOptionsMenuItems: function()
     {
+        var enumerablePropertiesItem = optionMenu("ShowEnumerableProperties", "showEnumerableProperties", "ShowEnumerablePropertiesTooltip");
+        if (!Firebug.showOwnProperties)  // see getObjectProperites
+            enumerablePropertiesItem.disabled = true;
+
         return [
             optionMenu("ShowUserProps", "showUserProps"),
             optionMenu("ShowUserFuncs", "showUserFuncs"),
@@ -1382,7 +1386,7 @@ Firebug.DOMBasePanel.prototype = extend(Firebug.Panel,
             optionMenu("ShowDOMConstants", "showDOMConstants"),
             "-",
             optionMenu("ShowOwnProperties", "showOwnProperties", "ShowOwnPropertiesTooltip"),
-            optionMenu("ShowEnumerableProperties", "showEnumerableProperties", "ShowEnumerablePropertiesTooltip"),
+            enumerablePropertiesItem,
             "-",
             {label: "Refresh", command: bindFixed(this.rebuild, this, true) }
         ];

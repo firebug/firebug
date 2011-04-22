@@ -93,7 +93,7 @@ pref("extensions.firebug.showDOMProps", true);
 pref("extensions.firebug.showDOMFuncs", false);
 pref("extensions.firebug.showDOMConstants", false);
 pref("extensions.firebug.ObjectShortIteratorMax", 3);
-pref("extensions.firebug.showEnumerableProperties", false);
+pref("extensions.firebug.showEnumerableProperties", true);
 pref("extensions.firebug.showOwnProperties", false);
 
 // Layout
