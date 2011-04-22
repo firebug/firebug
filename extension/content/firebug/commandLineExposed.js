@@ -94,6 +94,10 @@ function createFirebugCommandLine(context, win)
 
     attachCommandLine();
 
+    // xxxHonza: TODO make this private.
+    commandLine["detachCommandLine"] = detachCommandLine;
+    commandLine.__exposedProps__["detachCommandLine"] = "r";
+
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
     // Helpers (not accessible from web content)
 

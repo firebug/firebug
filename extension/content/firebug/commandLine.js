@@ -843,18 +843,6 @@ Firebug.CommandLine = extend(Firebug.Module,
     {
         // xxxHonza: what about iframes?
         var context = Firebug.currentContext;
-        if (context && context.window.document.readyState != "complete")
-        {
-            // If the readyState is not "complete" the console should not be attached.
-            // The logic should wait till the document is fully loaded.
-            // For example by overriding document.onreadystatechange
-            // https://developer.mozilla.org/en/DOM/document.onreadystatechange
-            if (FBTrace.DBG_ERRORS)
-                FBTrace.sysout("onCommandLineFocus; Fired too soon, document not yet loaded: " +
-                    "(let Honza know if you see this) " +
-                    (event.target ? event.target.ownerDocument.readyState : "event.target is NULL"));
-        }
-
         if (this.autoCompleter && this.autoCompleter.linuxFocusHack)
             return;
 
