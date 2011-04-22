@@ -106,6 +106,28 @@ Browser.prototype.clearAllBreakpoints = function()
 }
 
 
+Browser.Tool = function(name)
+{
+    this.toolName = name;
+    this.active = false;
+}
+
+Browser.Tool.prototype =
+{
+    getName: function()
+    {
+        return this.toolName;
+    },
+    getActive: function()
+    {
+        return this.active;
+    },
+    setActive: function(active)
+    {
+        this.active = !!active;
+    }
+}
+
 /**
  * Returns current status of tools
  *
@@ -131,9 +153,11 @@ Browser.prototype.getTool = function(name)
 /*
  * Call on the backend
  */
-Browser.prototype.registerTool = function(name, tool)
+Browser.prototype.registerTool = function(tool)
 {
-    this.tools[name] = tool;
+    var name = tool.getName();
+    if (name)
+        this.tools[name] = tool;
 }
 
 /**

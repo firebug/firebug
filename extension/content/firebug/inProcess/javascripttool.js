@@ -100,6 +100,10 @@ ToolsInterface.JavaScript.onActivateTool = function(toolname, active)
             context.invalidatePanels('script');
         });
     }
+    // This work should be done somewhere more generic that .JavaScript, maybe ToolManager listening to browser.
+    var tool = ToolsInterface.browser.getTool(toolname);
+    if (tool)
+        tool.setActive(active);
 },
 
 ToolsInterface.JavaScript.onStartDebugging = function(context, frame)

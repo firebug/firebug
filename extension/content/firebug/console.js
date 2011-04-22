@@ -189,8 +189,11 @@ Firebug.Console = extend(ActivableConsole,
     {
         Firebug.consoleFilterTypes = "";
         Firebug.ActivableModule.initialize.apply(this, arguments);
+
+        this.asTool = new Firebug.ToolsInterface.Browser.Tool('console');
         Firebug.ToolsInterface.browser.addListener(this);
-        Firebug.ToolsInterface.browser.registerTool('console', this);
+        Firebug.ToolsInterface.browser.registerTool(this.asTool);
+
         this.syncFilterButtons(Firebug.chrome);
     },
 
@@ -375,6 +378,23 @@ Firebug.Console = extend(ActivableConsole,
             Firebug.Console.closeGroup(context);
     },
 
+    //*************************************************************************************
+    /*
+     * A previously enabled tool becomes active and sends us an event.
+     */
+    onActivateTool: function(toolname, active)
+    {
+        if (FBTrace.DBG_ACTIVATION)
+            FBTrace.sysout("Console.onActivateTool "+toolname+" = "+active);
+
+        if (toolname === 'script')  // Console depends on script to get injected (for now)
+        {
+            if (this.isAlwaysEnabled())
+            {
+                this.asTool.setActive(active);  // then track the activation of the debugger;
+            }
+        }
+    },
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 
     logRow: function(appender, objects, context, className, rep, sourceLink, noThrottle, noRow)

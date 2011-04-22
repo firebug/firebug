@@ -2127,8 +2127,16 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
             FBTrace.sysout("debugger.initialize "+ this.debuggerName+" Firebug.clientID "+Firebug.clientID);
 
         this.hash_service = CCSV("@mozilla.org/security/hash;1", "nsICryptoHash");
+        try
+        {
+            this.asTool = new Firebug.ToolsInterface.Browser.Tool('script');
+            Firebug.ToolsInterface.browser.registerTool(this.asTool);
+        }
+        catch(exc)
+        {
+            FBTrace.sysout("debugger inititialze tool ERROR "+exc, exc);
+        }
 
-        Firebug.ToolsInterface.browser.registerTool('script', this);
 
         this.wrappedJSObject = this;  // how we communicate with fbs
 
