@@ -1534,7 +1534,7 @@ function getTypeExtractionExpression(command)
     var ret = '(function() { var v = ' + command + '; ';
     ret += 'if (window.HTMLElement && v instanceof HTMLElement) return "HTMLElement"; ';
     ret += 'var cr = Object.prototype.toString.call(v).slice(8, -1); ';
-    ret += 'if (v instanceof window[cr]) return cr;})()';
+    ret += 'if (v instanceof window[cr] || v === window[cr].prototype) return cr;})()';
     return ret;
 }
 
