@@ -873,7 +873,12 @@ var fbs =
                     " jsd.pauseDepth:"+(jsd?jsd.pauseDepth:"off")+" fbs.pauseDepth:"+fbs.pauseDepth);
         }
         else
-            throw "firebug-service debuggers must have wrappedJSObject";
+        {
+            var err = new Error("firebug-service debuggers must have wrappedJSObject ");
+            err.debuggrWrapper = debuggrWrapper;
+            throw err;
+        }
+
 
         try {
             if (debuggr.suspendActivity)
