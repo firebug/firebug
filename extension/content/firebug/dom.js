@@ -1381,6 +1381,9 @@ Firebug.DOMBasePanel.prototype = extend(Firebug.Panel,
             optionMenu("ShowDOMFuncs", "showDOMFuncs"),
             optionMenu("ShowDOMConstants", "showDOMConstants"),
             "-",
+            optionMenu("ShowOwnProperties", "showOwnProperties", "ShowOwnPropertiesTooltip"),
+            optionMenu("ShowEnumerableProperties", "showEnumerableProperties", "ShowEnumerablePropertiesTooltip"),
+            "-",
             {label: "Refresh", command: bindFixed(this.rebuild, this, true) }
         ];
     },
