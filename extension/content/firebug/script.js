@@ -313,7 +313,7 @@ Firebug.ScriptPanel.prototype = extend(Firebug.SourceBoxPanel,
     {
         var sourceRow = this.selectedSourceBox.getLineNode(lineNo);
         var sourceLine = getChildByClass(sourceRow, "sourceLine");
-        var condition = ToolsInterface.JavaScript.getBreakpointCondition(this.context, this.location.href, lineNo);
+        var condition = ToolsInterface.JavaScript.getBreakpointCondition(this.context, this.location.getURL(), lineNo);
 
         if (condition)
         {

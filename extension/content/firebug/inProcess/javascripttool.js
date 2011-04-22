@@ -44,12 +44,12 @@ ToolsInterface.JavaScript.disableBreakpoint = function(context, url, lineNumber)
 
 ToolsInterface.JavaScript.isBreakpointDisabled = function(context, url, lineNumber)
 {
-    Firebug.Debugger.fbs.isBreakpointDisabled(url, lineNumber);
+    return Firebug.Debugger.fbs.isBreakpointDisabled(url, lineNumber);
 };
 
 ToolsInterface.JavaScript.getBreakpointCondition = function(context, url, lineNumber)
 {
-    Firebug.Debugger.fbs.getBreakpointCondition(url, lineNumber);
+    return Firebug.Debugger.fbs.getBreakpointCondition(url, lineNumber);
 };
 
 // These functions should be on stack instead
