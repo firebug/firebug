@@ -937,8 +937,13 @@ Firebug.AutoCompleter = function(getExprOffset, getRange, evaluator, selectMode,
 
         var found = this.pickCandidates(textBox, offset, context, cycle, reverse, showGlobals);
 
-        if (completionBox && found)
-            this.showCandidates(textBox, completionBox);
+        if (completionBox)
+        {
+            if (found)
+                this.showCandidates(textBox, completionBox);
+            else
+                this.clear(completionBox);
+        }
 
         return found;
     };
@@ -966,16 +971,10 @@ Firebug.AutoCompleter = function(getExprOffset, getRange, evaluator, selectMode,
             // Give up if the syntax is too weird.
             var svalue = simplifyExpr ? simplifyExpr(value, context) : value;
             if (svalue === null)
-            {
-                this.hide();
                 return false;
-            }
 
             if (killCompletions && killCompletions(svalue, offset, context))
-            {
-                this.hide();
                 return false;
-            }
 
             // Find the part of the string that will be parsed
             var parseStart = getExprOffset ? getExprOffset(svalue, offset, context) : 0;
@@ -1004,7 +1003,6 @@ Firebug.AutoCompleter = function(getExprOffset, getRange, evaluator, selectMode,
             {
                 if (!expr)
                 {
-                    this.hide();
                     return false;
                 }
                 else if (lastExpr && lastExpr.indexOf(expr) != 0)
@@ -1015,7 +1013,6 @@ Firebug.AutoCompleter = function(getExprOffset, getRange, evaluator, selectMode,
                 {
                     candidates = null;
                     lastExpr = expr;
-                    this.hide();
                     return false;
                 }
             }
@@ -1041,7 +1038,6 @@ Firebug.AutoCompleter = function(getExprOffset, getRange, evaluator, selectMode,
                 else
                 {
                     // We can't complete unless we are at the ridge edge
-                    this.hide();
                     return false;
                 }
             }
@@ -1049,16 +1045,12 @@ Firebug.AutoCompleter = function(getExprOffset, getRange, evaluator, selectMode,
             if (!showGlobals && !preExpr && !expr && !postExpr)
             {
                 // Don't complete globals unless we are forced to do so.
-                this.hide();
                 return false;
             }
 
             var values = evaluator(preExpr, expr, postExpr, context, spreExpr);
             if (!values)
-            {
-                this.hide();
                 return false;
-            }
 
             if (expr)
             {
@@ -1081,7 +1073,6 @@ Firebug.AutoCompleter = function(getExprOffset, getRange, evaluator, selectMode,
 
         if (!candidates.length)
         {
-            this.hide();
             return false;
         }
 
