@@ -127,6 +127,12 @@ Firebug.StartButton = extend(Firebug.Module,
             statusBar.parentNode.removeChild(statusBar);
     },
 
+    updateOption: function(name, value)
+    {
+        if (name === "showStatusIcon")
+            this.removeStatusIcon();
+    },
+
     onClickStatusText: function(context, event)
     {
         if (event.button != 0)

@@ -11,6 +11,15 @@ define(["arch/tools"], function initializeJavaScriptTool(ToolsInterface)
 
 ToolsInterface.JavaScript = {};
 
+/*
+ * A Turn is an callstack for an active being-handled event, similar to a Thread.
+ * Currently it only makes sense when we have stopped the server.
+ * Currently only one or zero Turn objects can exist ("single-threaded").
+ */
+ToolsInterface.JavaScript.Turn =
+{
+}
+
 ToolsInterface.JavaScript.breakOnNext = function(context, enable)
 {
     if (enable)
@@ -105,11 +114,15 @@ ToolsInterface.JavaScript.onActivateTool = function(toolname, active)
     if (tool)
         tool.setActive(active);
 },
-
+/*
+ * @param context context of the newest frame, where the breakpoint hit
+ * @param frame newest StackFrame (crossbrowser) eg where the break point hit
+ */
 ToolsInterface.JavaScript.onStartDebugging = function(context, frame)
 {
     Firebug.selectContext(context);
     var panel = Firebug.chrome.selectPanel("script");
+    ToolsInterface.JavaScript.Turn.currentFrame = frame;
     panel.onStartDebugging(frame);
 }
 
@@ -123,6 +136,7 @@ ToolsInterface.JavaScript.onStopDebugging = function(context)
     {
         panel.onStopDebugging();
     }
+    delete ToolsInterface.JavaScript.Turn.currentFrame;
 }
 
 ToolsInterface.JavaScript.onCompilationUnit = function(context, url, kind)

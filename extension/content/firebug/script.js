@@ -589,6 +589,8 @@ Firebug.ScriptPanel.prototype = extend(Firebug.SourceBoxPanel,
 
     showWarning: function()
     {
+	    if (FBTrace.DBG_PANELS)
+	        FBTrace.sysout("showWarning Firebug.jsDebuggerOn:"+Firebug.jsDebuggerOn+" jsDebuggerCalledUs "+this.context.jsDebuggerCalledUs+' in '+this.context.getName());
         // Fill the panel node with a warning if needed
         var aLocation = this.getDefaultLocation();
         var jsEnabled = Firebug.Options.getPref("javascript", "enabled");
@@ -1341,7 +1343,6 @@ Firebug.ScriptPanel.prototype = extend(Firebug.SourceBoxPanel,
 
             // Update Break on Next lightning.
             Firebug.Breakpoint.updatePanelTab(this, false);
-            this.context.stoppedFrameXB = frame;
             Firebug.chrome.select(frame, "script", null, true);
             Firebug.chrome.syncPanel("script");  // issue 3463 and 4213
             Firebug.chrome.focus();

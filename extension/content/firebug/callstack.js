@@ -13,7 +13,7 @@ const Ci = Components.interfaces;
 
 /**
  * @Panel This panel is responsible for displaying a call-stack (list of function calls)
- * at specified point of Javascript execution. It's used as a side panel fro the Script
+ * at specified point of Javascript execution. It's used as a side panel for the Script
  * panel.
  */
 Firebug.CallstackPanel = function() {}
@@ -38,10 +38,14 @@ Firebug.CallstackPanel.prototype = extend(Firebug.Panel,
 
     show: function(state)
     {
-        this.rebuild();  // hack: should not have to call
+        if (!this.location){
+            this.location = FBL.buildStackTrace(Firebug.ToolsInterface.JavaScript.Turn.currentFrame);
+            this.updateLocation(this.location);
+        } // then we are lazy
+
 
         if (FBTrace.DBG_STACK)
-            FBTrace.sysout("callstack.show state: "+state, state);
+            FBTrace.sysout("callstack.show state: "+state+" this.location: "+this.location, {state: state, panel: this});
 
         if (state)
         {
@@ -71,7 +75,7 @@ Firebug.CallstackPanel.prototype = extend(Firebug.Panel,
             if (item.classList.contains("opened"))
                 state.callstackToggles[i] = true;
             if (item.getAttribute("selected") == "true")
-                state.selectedCallStackFrameIndex = i;
+                state.selectedCallStackFrameIndex = i + 1;  // traces are 1 base
         }
         if (FBTrace.DBG_STACK)
             FBTrace.sysout("callstack.hide state: "+state, state);
@@ -86,13 +90,22 @@ Firebug.CallstackPanel.prototype = extend(Firebug.Panel,
     // this.selection is a StackFrame in our this.location
     updateSelection: function(object)
     {
+        if (!this.location) // then we are lazy
+        {
+            this.location = FBL.buildStackTrace(Firebug.ToolsInterface.JavaScript.Turn.currentFrame);
+            this.updateLocation(this.location);
+        }
+
         // The selection object should be StackFrame
         if (object instanceof StackFrame)
         {
             var trace = this.location;
-            trace.currentFrameIndex = object.frameIndex;
-            if (trace.currentFrameIndex != undefined)
-                this.selectFrame(trace.currentFrameIndex);
+            var frameIndex = object.getFrameIndex();
+            if (frameIndex)
+            {
+                trace.currentFrameIndex = frameIndex;
+                this.selectFrame(frameIndex);
+            }
 
             if (FBTrace.DBG_STACK)
                 FBTrace.sysout("Callstack updateSelection index:"+trace.currentFrameIndex+
@@ -124,20 +137,9 @@ Firebug.CallstackPanel.prototype = extend(Firebug.Panel,
             this.showStackFrame(object);
     },
 
-    rebuild: function()
-    {
-        var trace = getCorrectedStackTrace(this.context.stoppedFrame, this.context);
-        this.navigate(trace);
-    },
-
     showStackFrame: function(frame)
     {
-        var trace = new StackTrace();
-        while(frame)
-        {
-            trace.frames.push(frame);
-            frame = frame.getCallingFrame();
-        }
+        var trace = FBL.buildStackTrace(frame);
         this.navigate(trace);
     },
 
@@ -164,7 +166,7 @@ Firebug.CallstackPanel.prototype = extend(Firebug.Panel,
     selectFrame: function(frameIndex)
     {
         var frameElts = this.panelNode.getElementsByClassName("objectBox-stackFrame");
-        this.selectItem(frameElts[frameIndex]);
+        this.selectItem(frameElts[frameIndex - 1]);
     },
 
     selectItem: function(item)
@@ -213,8 +215,9 @@ Firebug.CallstackPanel.prototype = extend(Firebug.Panel,
             FirebugReps.StackFrame.collapseArguments(elements[i]);
     },
 
+
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
-    // Referents xxxHonza, xxxJJB: what is this?
+    // Referents xxxHonza, xxxJJB: what is this? Incomplete feature for finding all references to a function
 
     showReferents: function()
     {

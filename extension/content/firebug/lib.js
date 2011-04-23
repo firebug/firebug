@@ -5436,6 +5436,7 @@ this.StackTrace.prototype =
         trace += "<bottom>\n";
         return trace;
     },
+
     reverse: function()
     {
         this.frames.reverse();
@@ -5459,7 +5460,20 @@ this.traceToString = function(trace)
         str += "\n" + trace.frames[i];
     str += "\n<bottom>";
     return str;
-}
+};
+
+this.buildStackTrace = function(frame)
+{
+    var trace = new FBL.StackTrace();
+    while(frame)
+    {
+        trace.frames.push(frame);
+        frame.frameIndex = trace.frames.length;
+        frame = frame.getCallingFrame();
+    }
+    return trace;
+};
+
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 
