@@ -956,7 +956,7 @@ Firebug.CSSStyleSheetPanel.prototype = extend(Firebug.Panel,
         // XXjoe Hack to only allow clicking on the checkbox
         if ( (event.clientX <= 20) && (event.detail == 1) )
         {
-            if (hasClass(event.target, "textEditor"))
+            if (hasClass(event.target, "textEditor inlineExpander"))
                 return;
             row = getAncestorByClass(event.target, "cssProp");
             if (row && hasClass(row, "editGroup"))
@@ -2225,14 +2225,14 @@ CSSEditor.prototype = domplate(Firebug.InlineEditor.prototype,
             var saveSuccess = !!rule.style.getPropertyValue(propName || value);
             if(!saveSuccess && !propName)
             {
-                propName = value.replace(/-./,function(match) match[1].toUpperCase());
-                if(propName in rule.style)
-                    saveSuccess='almost';
+                propName = value.replace(/-./g,function(match) match[1].toUpperCase());
+                if(propName in rule.style || propName=='float')
+                    saveSuccess = 'almost';
             }
-            this.input.setAttribute('saveSuccess',saveSuccess);
+            this.box.setAttribute('saveSuccess',saveSuccess);
         }
         else
-            this.input.removeAttribute('saveSuccess');
+            this.box.removeAttribute('saveSuccess');
 
         Firebug.Inspector.repaint();
 
@@ -2347,22 +2347,21 @@ CSSRuleEditor.prototype = domplate(Firebug.InlineEditor.prototype,
             if(this.panel.name != 'stylesheet')
                 return;
             var styleSheet = this.panel.location;//this must be stylesheet panel
-        if (!styleSheet)
-        {
-            // If there is no stylesheet on the page we need to create a temporary one,
-            // in order to make a place where to put (custom) user provided rules.
-            // If this code would be in this.getDefaultLocation the default stylesheet
-            // would be created automatically for all pages with not styles, which
-            // could be damaging for special pages (see eg issue 2440)
-            // At this moment the user edits the styles so some CSS changes on the page
-            // are expected.
-            var doc = this.panel.context.window.document;
-            var style = appendStylesheet(doc, "chrome://firebug/default-stylesheet.css");
-            FBL.getContentView(style).defaultStylesheet = true;
-            this.panel.location = styleSheet = style.sheet;
-        }
-
-        styleSheet = styleSheet.editStyleSheet ? styleSheet.editStyleSheet.sheet : styleSheet;
+            if (!styleSheet)
+            {
+                // If there is no stylesheet on the page we need to create a temporary one,
+                // in order to make a place where to put (custom) user provided rules.
+                // If this code would be in this.getDefaultLocation the default stylesheet
+                // would be created automatically for all pages with not styles, which
+                // could be damaging for special pages (see eg issue 2440)
+                // At this moment the user edits the styles so some CSS changes on the page
+                // are expected.
+                var doc = this.panel.context.window.document;
+                var style = appendStylesheet(doc, "chrome://firebug/default-stylesheet.css");
+                FBL.getContentView(style).defaultStylesheet = true;
+                this.panel.location = styleSheet = style.sheet;
+            }
+            styleSheet = styleSheet.editStyleSheet ? styleSheet.editStyleSheet.sheet : styleSheet;
 
             cssRules = styleSheet.cssRules;
             ruleIndex = cssRules.length;
@@ -2408,7 +2407,7 @@ CSSRuleEditor.prototype = domplate(Firebug.InlineEditor.prototype,
                     saveSuccess =(this.panel.selection &&
                         this.panel.selection.mozMatchesSelector(value))? true: 'almost';
 
-                this.input.setAttribute('saveSuccess',saveSuccess);
+                this.box.setAttribute('saveSuccess',saveSuccess);
             }
             catch (err)
             {
@@ -2420,7 +2419,7 @@ CSSRuleEditor.prototype = domplate(Firebug.InlineEditor.prototype,
                 var insertLoc = Firebug.CSSModule.insertRule(styleSheet, 'selectorSavingError{}', ruleIndex);
                 rule = cssRules[insertLoc];
 
-                this.input.setAttribute('saveSuccess',false);
+                this.box.setAttribute('saveSuccess',false);
 
                 row.repObject = rule;
                 return;

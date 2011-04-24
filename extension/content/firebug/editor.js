@@ -591,21 +591,12 @@ Firebug.InlineEditor.prototype = domplate(Firebug.BaseEditor,
             setClass(this.box, "editor-" + classNames[i]);
 
         // remove error information
-        this.input.removeAttribute('saveSuccess');
+        this.box.removeAttribute('saveSuccess');
 
         // Make the editor match the target's font style
         copyTextStyles(target, this.box);
 
         this.setValue(value);
-
-        if (this.fixedWidth)
-            this.updateLayout(true);
-        else
-        {
-            this.startMeasuring(target);
-            this.textSize = this.measureInputText(value);
-            this.updateLayout(true);
-        }
 
         this.getAutoCompleter().reset();
 
@@ -617,12 +608,15 @@ Firebug.InlineEditor.prototype = domplate(Firebug.BaseEditor,
         // Insert the "expander" to cover the target element with white space
         if (!this.fixedWidth)
         {
-            copyBoxStyles(target, this.expander);
+            this.startMeasuring(target);
 
+            copyBoxStyles(target, this.expander);
             target.parentNode.replaceChild(this.expander, target);
             collapse(target, true);
             this.expander.parentNode.insertBefore(target, this.expander);
+            this.textSize = this.measureInputText(value);
         }
+        this.updateLayout(true);
 
         scrollIntoCenterView(this.box, null, true);
     },
@@ -840,32 +834,66 @@ Firebug.InlineEditor.prototype = domplate(Firebug.BaseEditor,
         }
         else
         {
-            if (initial || forceAll)
+            this.expander.textContent = this.input.value;
+
+            var clR = this.expander.getClientRects(),
+                wasWrapped = this.wrapped, inputWidth = Infinity;
+            if(clR.length == 1)
+                this.wrapped = false;
+            else if (clR.length == 2)
             {
-                this.box.style.left = this.targetOffset.x + "px";
-                this.box.style.top = this.targetOffset.y + "px";
+                var w1 = clR[0].width;
+                var w2 = clR[1].width;
+
+                if (w2 > w1){
+                    this.wrapped = true;
+                    inputWidth = w2
+                } else
+                    this.wrapped = false;
+            }
+            else if (clR.length == 3)
+            {
+                this.wrapped = true;
+                if (clR[2].width > 50)
+                    inputWidth = clR[1].width;
+            }
+            else // clR.length>3
+                this.wrapped = true
+
+            if(this.wrapped)
+            {
+                var fixupL = clR[1].left - clR[0].left,
+                    fixupT = clR[1].top - clR[0].top;
+            }
+            else
+            {
+                var fixupL = 0, fixupT = 0;
+                var approxTextWidth = this.textSize.width;
+                // Make the input one character wider than the text value so that
+                // typing does not ever cause the textbox to scroll
+                var charWidth = this.measureInputText('m').width;
+
+                // Sometimes we need to make the editor a little wider, specifically when
+                // an overflow happens, otherwise it will scroll off some text on the left
+                if (extraWidth)
+                    charWidth *= extraWidth;
+
+                var inputWidth = approxTextWidth + charWidth;
             }
 
-            var approxTextWidth = this.textSize.width;
-            // Make the input one character wider than the text value so that
-            // typing does not ever cause the textbox to scroll
-            var charWidth = this.measureInputText('m').width;
-
-            // Sometimes we need to make the editor a little wider, specifically when
-            // an overflow happens, otherwise it will scroll off some text on the left
-            if (extraWidth)
-                charWidth *= extraWidth;
-
-            var inputWidth = approxTextWidth + charWidth;
 
             var container = currentPanel.panelNode;
-            var maxWidth = container.clientWidth - this.targetOffset.x + container.scrollLeft - 6;
+            var maxWidth = container.clientWidth - this.targetOffset.x - fixupL + container.scrollLeft-6;
 
             if(inputWidth > maxWidth)
                 inputWidth = maxWidth;
 
+            if (forceAll || initial || this.wrapped != wasWrapped)
+            {
+                this.box.style.left = (this.targetOffset.x + fixupL) + "px";
+                this.box.style.top = (this.targetOffset.y + fixupT) + "px";
+            }
             this.input.style.width = inputWidth + "px";
-            this.expander.textContent = this.input.value;
         }
 
         if (forceAll)
