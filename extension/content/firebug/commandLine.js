@@ -2159,6 +2159,16 @@ function FirebugCommandLineAPI(context)
     {
         FBL.copyToClipboard(x);
     };
+
+    this.memoryProfile = function(title)
+    {
+        Firebug.MemoryProfiler.start(context, title);
+    };
+
+    this.memoryProfileEnd = function()
+    {
+        Firebug.MemoryProfiler.stop(context);
+    };
 }
 
 // ************************************************************************************************

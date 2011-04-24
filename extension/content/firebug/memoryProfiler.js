@@ -74,7 +74,7 @@ Firebug.MemoryProfiler = FBL.extend(Firebug.Module,
         return this.profiling;
     },
 
-    start: function(context)
+    start: function(context, title)
     {
         this.profiling = true;
         FBL.fbs.addHandler(this);
@@ -87,11 +87,12 @@ Firebug.MemoryProfiler = FBL.extend(Firebug.Module,
         // Memory leak detection
         this.mark(context);
 
-        var title = FBL.$STR("firebug.Memory Profiler Started");
-        var row = this.logProfileRow(context, title);
+        var isCustomMessage = !!title;
+        if (!isCustomMessage)
+            title = FBL.$STR("firebug.Memory Profiler Started");
 
-        context.memoryProfileRow = row;
-        context.memoryProfileRow.customMessage = false;
+        context.memoryProfileRow = this.logProfileRow(context, title);
+        context.memoryProfileRow.customMessage = isCustomMessage;
 
         // For summary numbers (difference between profiling-start and profiling-end)
         context.memoryProfileStack.push(this.getMemoryReport());
@@ -379,9 +380,7 @@ Firebug.MemoryProfiler = FBL.extend(Firebug.Module,
         {
             var captionBox = groupRow.getElementsByClassName("profileCaption").item(0);
             if (!groupRow.customMessage)
-            {
                 captionBox.textContent = FBL.$STR("firebug.Memory Profiler Results");
-            }
 
             var timeBox = groupRow.getElementsByClassName("profileTime").item(0);
             timeBox.textContent = "(" + FBL.formatTime(context.memoryProfileTime) + ")";

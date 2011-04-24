@@ -33,7 +33,7 @@ function createFirebugCommandLine(context, win)
     var commands = ["$", "$$", "$x", "$n", "cd", "clear", "inspect", "keys",
         "values", "debug", "undebug", "monitor", "unmonitor", "traceCalls", "untraceCalls",
         "traceAll", "untraceAll", "monitorEvents", "unmonitorEvents", "profile", "profileEnd",
-        "copy"];
+        "copy", "memoryProfile", "memoryProfileEnd"];
 
     // Define command line methods
     for (var i=0; i<commands.length; i++)
