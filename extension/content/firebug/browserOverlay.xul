@@ -60,7 +60,6 @@
     <script type="application/x-javascript" src="chrome://firebug/content/a11y.js"/>
     <script type="application/x-javascript" src="chrome://firebug/content/knownIssues.js"/>
     <script type="application/x-javascript" src="chrome://firebug/content/balloonNote.js"/>
-    <script type="application/x-javascript" src="chrome://firebug/content/memoryProfiler.js"/>
 
     <!-- Firefox page context menu -->
     <menupopup id="contentAreaContextMenu">

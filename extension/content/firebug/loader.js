@@ -175,7 +175,8 @@ function loadCore(config, coreInitialize)
             "sourceBox.js",
             "script.js",
             "traceModule.js",
-            "dragdrop.js"
+            "dragdrop.js",
+            "memoryProfiler.js"
         ];
 
         coreModules = coreModules.concat(defaultModules);

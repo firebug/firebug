@@ -1,6 +1,6 @@
 /* See license.txt for terms of usage */
 
-FBL.ns(function() {
+define([], function() {
 
 // ********************************************************************************************* //
 
@@ -658,7 +658,7 @@ Firebug.MemoryProfiler.ProfileCall = domplate(Firebug.Rep,
     tag:
         TR({"class": "focusRow profileRow subFocusRow", "role": "row"},
             TD({"class": "profileCell", "role": "presentation"},
-                FirebugReps.OBJECTLINK("$object|getCallName")
+                TAG("$object|getObjectLink", {object: "$object"})
             ),
             TD({"class": "a11yFocus profileCell", "role": "gridcell"},
                 "$object.callCount"
@@ -669,11 +669,21 @@ Firebug.MemoryProfiler.ProfileCall = domplate(Firebug.Rep,
                 )
             ),
             TD({"class": "linkCell profileCell", "role": "presentation"},
-                TAG(FirebugReps.SourceLink.tag, {object: "$object|getSourceLink"})
+                TAG("$object|getSourceLinkTag", {object: "$object|getSourceLink"})
             )
         ),
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+    getObjectLink: function(object)
+    {
+        return FirebugReps.OBJECTLINK("$object|getCallName");
+    },
+
+    getSourceLinkTag: function(object)
+    {
+        return FirebugReps.SourceLink.tag;
+    },
 
     getCallName: function(call)
     {
