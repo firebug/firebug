@@ -248,9 +248,9 @@ Firebug.MemoryProfiler = FBL.extend(Firebug.Module,
             else
                 obj.__fbugMemMark = true;
 
-            if (FBTrace.DBG_MEMORY_PROFILER)
-                FBTrace.sysout("mark "+path+": "+obj.__fbugMemMark+" view: "+
-                    FBL.getContentView(obj));
+            //if (FBTrace.DBG_MEMORY_PROFILER)
+            //    FBTrace.sysout("mark "+path+": "+obj.__fbugMemMark+" view: "+
+            //       FBL.getContentView(obj));
 
             // Continue with children
             return true;
@@ -265,9 +265,9 @@ Firebug.MemoryProfiler = FBL.extend(Firebug.Module,
         var contentView = FBL.getContentView(context.window);
         iter.iterate(contentView, "window", function(obj, path)
         {
-            if (FBTrace.DBG_MEMORY_PROFILER)
-                FBTrace.sysout("sweep "+path+" "+obj.hasOwnProperty("__fbugMemSweep")+" view: "+
-                    FBL.getContentView(obj), obj);
+            //if (FBTrace.DBG_MEMORY_PROFILER)
+            //    FBTrace.sysout("sweep "+path+" "+obj.hasOwnProperty("__fbugMemSweep")+" view: "+
+            //        FBL.getContentView(obj), obj);
 
             if (obj.hasOwnProperty("__fbugMemSweep"))
                 return false;
@@ -300,8 +300,6 @@ Firebug.MemoryProfiler = FBL.extend(Firebug.Module,
         {
             if (!obj.hasOwnProperty("__fbugMemSweep"))
                 return false;
-
-            FBTrace.sysout("memoryProfiler; cleanUp " + path);
 
             // Clean up
             delete obj.__fbugMemSweep;
