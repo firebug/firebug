@@ -31,7 +31,7 @@ Firebug.HTMLLib =
     {
         root = root.documentElement || root;
         walker = walker || new Firebug.HTMLLib.DOMWalker(root);
-        var re = new ReversibleRegExp(text, "m");
+        var re = new FBL.ReversibleRegExp(text, "m");
         var matchCount = 0;
 
         /**
@@ -59,7 +59,7 @@ Firebug.HTMLLib =
             else
             {
                 this.noMatch = true;
-                dispatch([Firebug.A11yModel], 'onHTMLSearchNoMatchFound', [panelNode.ownerPanel, text]);
+                FBL.dispatch([Firebug.A11yModel], 'onHTMLSearchNoMatchFound', [panelNode.ownerPanel, text]);
             }
         };
 
@@ -219,7 +219,7 @@ Firebug.HTMLLib =
             {
                 var reMatch = match.match;
                 this.selectNodeText(nodeBox, node, reMatch[0], reMatch.index, reverse, reMatch.caseSensitive);
-                dispatch([Firebug.A11yModel], 'onHTMLSearchMatchFound', [panelNode.ownerPanel, match]);
+                FBL.dispatch([Firebug.A11yModel], 'onHTMLSearchMatchFound', [panelNode.ownerPanel, match]);
             }, this));
         };
 
@@ -243,7 +243,7 @@ Firebug.HTMLLib =
             {
                 // Search for the first instance of the string inside the node
                 function findRow(node) { return node.nodeType == Node.ELEMENT_NODE ? node : node.parentNode; }
-                this.textSearch = new TextSearch(nodeBox, findRow);
+                this.textSearch = new FBL.TextSearch(nodeBox, findRow);
                 row = this.textSearch.find(text, reverse, caseSensitive);
                 this.lastNodeBox = nodeBox;
             }
@@ -251,7 +251,7 @@ Firebug.HTMLLib =
             if (row)
             {
                 var trueNodeBox = getAncestorByClass(nodeBox, "nodeBox");
-                setClass(trueNodeBox,'search-selection');
+                FBL.setClass(trueNodeBox,'search-selection');
 
                 scrollIntoCenterView(row, panelNode);
                 var sel = panelNode.ownerDocument.defaultView.getSelection();
@@ -357,7 +357,7 @@ Firebug.HTMLLib =
             setTimeout(bindFixed(function()
             {
                 ioBox.select(node, true, true);
-                dispatch([Firebug.A11yModel], 'onHTMLSearchMatchFound', [panelNode.ownerPanel, match]);
+                FBL.dispatch([Firebug.A11yModel], 'onHTMLSearchMatchFound', [panelNode.ownerPanel, match]);
             }, this));
         };
     },

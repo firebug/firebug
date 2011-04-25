@@ -167,7 +167,7 @@ FirebugReps.Func = domplate(Firebug.Rep,
 
     summarizeFunction: function(fn)
     {
-        var fnText = safeToString(fn);
+        var fnText = FBL.safeToString(fn);
         var namedFn = /^function ([^(]+\([^)]*\)) \{/.exec(fnText);
         var anonFn  = /^function \(/.test(fnText);
         return namedFn ? namedFn[1] : (anonFn ? "function()" : fnText);
@@ -178,7 +178,7 @@ FirebugReps.Func = domplate(Firebug.Rep,
     copySource: function(fn)
     {
         if (fn && typeof (fn['toSource']) == 'function')
-            copyToClipboard(fn.toSource());
+            FBL.copyToClipboard(fn.toSource());
     },
 
     monitor: function(fn, monitored)
@@ -200,7 +200,7 @@ FirebugReps.Func = domplate(Firebug.Rep,
 
     inspectObject: function(fn, context)
     {
-        var sourceLink = findSourceForFunction(fn, context);
+        var sourceLink = FBL.findSourceForFunction(fn, context);
         if (sourceLink)
             Firebug.chrome.select(sourceLink);
         if (FBTrace.DBG_FUNCTION_NAME)
@@ -209,9 +209,9 @@ FirebugReps.Func = domplate(Firebug.Rep,
 
     getTooltip: function(fn, context)
     {
-        var script = findScriptForFunctionInContext(context, fn);
+        var script = FBL.findScriptForFunctionInContext(context, fn);
         if (script)
-            return $STRF("Line", [normalizeURL(script.fileName), script.baseLineNumber]);
+            return FBL.$STRF("Line", [FBL.normalizeURL(script.fileName), script.baseLineNumber]);
         else
             if (fn.toString)
                 return fn.toString();
@@ -226,20 +226,20 @@ FirebugReps.Func = domplate(Firebug.Rep,
     getContextMenuItems: function(fn, target, context, script)
     {
         if (!script)
-            script = findScriptForFunctionInContext(context, fn);
+            script = FBL.findScriptForFunctionInContext(context, fn);
         if (!script)
             return;
 
         var scriptInfo = Firebug.SourceFile.getSourceFileAndLineByScript(context, script);
-        var monitored = scriptInfo ? fbs.isMonitored(scriptInfo.sourceFile.href, scriptInfo.lineNo) : false;
+        var monitored = scriptInfo ? FBL.fbs.isMonitored(scriptInfo.sourceFile.href, scriptInfo.lineNo) : false;
 
-        var name = script ? getFunctionName(script, context) : fn.name;
+        var name = script ? FBL.getFunctionName(script, context) : fn.name;
         return [
-            {label: "CopySource", command: bindFixed(this.copySource, this, fn) },
+            {label: "CopySource", command: FBL.bindFixed(this.copySource, this, fn) },
             "-",
-            {label: $STRF("ShowCallsInConsole", [name]), nol10n: true,
+            {label: FBL.$STRF("ShowCallsInConsole", [name]), nol10n: true,
              type: "checkbox", checked: monitored,
-             command: bindFixed(this.monitor, this, fn, monitored) }
+             command: FBL.bindFixed(this.monitor, this, fn, monitored) }
         ];
     }
 });
@@ -348,7 +348,7 @@ FirebugReps.Obj = domplate(Firebug.Rep,
             if (count > max)
             {
                 props[Math.max(1,max-1)] = {
-                    object: $STR("firebug.reps.more") + "...",
+                    object: FBL.$STR("firebug.reps.more") + "...",
                     tag: FirebugReps.Caption.tag,
                     name: "",
                     equal: "",
@@ -446,7 +446,7 @@ FirebugReps.Arr = domplate(Firebug.Rep,
         if (array.length > max + 1)
         {
             items[max] = {
-                object: (array.length-max) + " " + $STR("firebug.reps.more") + "...",
+                object: (array.length-max) + " " + FBL.$STR("firebug.reps.more") + "...",
                 tag: FirebugReps.Caption.tag,
                 delim: ""
             };
@@ -455,7 +455,7 @@ FirebugReps.Arr = domplate(Firebug.Rep,
         return items;
     },
 
-    toggles: new ToggleBranch(),
+    toggles: new FBL.ToggleBranch(),
 
     getItemIndex: function(child)
     {
@@ -485,22 +485,22 @@ FirebugReps.Arr = domplate(Firebug.Rep,
             }
         }
 
-        return (array.length != n) && hasProperties(array);
+        return (array.length != n) && FBL.hasProperties(array);
     },
 
     onToggleProperties: function(event)
     {
         var target = event.originalTarget;
-        if (hasClass(target, "objectBox-array"))
+        if (FBL.hasClass(target, "objectBox-array"))
         {
-            toggleClass(target, "opened");
+            FBL.toggleClass(target, "opened");
 
             var propBox = target.getElementsByClassName("arrayProperties").item(0);
-            if (hasClass(target, "opened"))
+            if (FBL.hasClass(target, "opened"))
                 Firebug.DOMPanel.DirTable.tag.replace(
                     {object: target.repObject, toggles: this.toggles}, propBox);
             else
-                clearNode(propBox);
+                FBL.clearNode(propBox);
         }
     },
 
@@ -596,7 +596,7 @@ FirebugReps.NetFile = domplate(FirebugReps.Obj,
 
     browseObject: function(file, context)
     {
-        openNewTab(file.href);
+        FBL.openNewTab(file.href);
         return true;
     },
 
@@ -655,7 +655,7 @@ FirebugReps.Element = domplate(Firebug.Rep,
     {
         try
         {
-            return getLocalName(object);
+            return FBL.getLocalName(object);
         }
         catch (err)
         {
@@ -667,7 +667,7 @@ FirebugReps.Element = domplate(Firebug.Rep,
     {
         try
         {
-            return getNodeName(object);
+            return FBL.getNodeName(object);
         }
         catch (err)
         {
@@ -678,12 +678,12 @@ FirebugReps.Element = domplate(Firebug.Rep,
     getAttrValue: function(attr)
     {
         var limit = Firebug.displayedAttributeValueLimit;
-        return (limit > 0) ? cropString(attr.nodeValue, limit) : attr.nodeValue;
+        return (limit > 0) ? FBL.cropString(attr.nodeValue, limit) : attr.nodeValue;
     },
 
     getVisible: function(elt)
     {
-        return isVisible(elt) ? "" : "selectorHidden";
+        return FBL.isVisible(elt) ? "" : "selectorHidden";
     },
 
     getSelectorTag: function(elt)
@@ -722,17 +722,17 @@ FirebugReps.Element = domplate(Firebug.Rep,
         var value;
 
         if (elt instanceof HTMLImageElement)
-            value = getFileName(elt.getAttribute("src"));
+            value = FBL.getFileName(elt.getAttribute("src"));
         else if (elt instanceof HTMLAnchorElement)
-            value = getFileName(elt.getAttribute("href"));
+            value = FBL.getFileName(elt.getAttribute("href"));
         else if (elt instanceof HTMLInputElement)
             value = elt.getAttribute("value");
         else if (elt instanceof HTMLFormElement)
-            value = getFileName(elt.getAttribute("action"));
+            value = FBL.getFileName(elt.getAttribute("action"));
         else if (elt instanceof HTMLScriptElement)
-            value = getFileName(elt.getAttribute("src"));
+            value = FBL.getFileName(elt.getAttribute("src"));
 
-        return value ? " " + cropMultipleLines(value, 20) : "";
+        return value ? " " + FBL.cropMultipleLines(value, 20) : "";
     },
 
     attrIterator: function(elt)
@@ -784,12 +784,12 @@ FirebugReps.Element = domplate(Firebug.Rep,
 
     getHidden: function(elt)
     {
-        return isVisible(elt) ? "" : "nodeHidden";
+        return FBL.isVisible(elt) ? "" : "nodeHidden";
     },
 
     getXPath: function(elt)
     {
-        return getElementTreeXPath(elt);
+        return FBL.getElementTreeXPath(elt);
     },
 
     getNodeTextGroups: function(element)
@@ -797,7 +797,7 @@ FirebugReps.Element = domplate(Firebug.Rep,
         var text =  element.textContent;
         if (!Firebug.showFullTextNodes)
         {
-            text=cropString(text,50);
+            text = FBL.cropString(text,50);
         }
 
         var escapeGroups=[];
@@ -821,7 +821,7 @@ FirebugReps.Element = domplate(Firebug.Rep,
             });
 
         if (escapeGroups.length)
-            return escapeGroupsForEntities(text, escapeGroups);
+            return FBL.escapeGroupsForEntities(text, escapeGroups);
         else
             return [{str:text,'class':'',extra:''}];
     },
@@ -830,31 +830,31 @@ FirebugReps.Element = domplate(Firebug.Rep,
 
     copyHTML: function(elt)
     {
-        var html = getElementHTML(elt);
-        copyToClipboard(html);
+        var html = FBL.getElementHTML(elt);
+        FBL.copyToClipboard(html);
     },
 
     copyInnerHTML: function(elt)
     {
-        copyToClipboard(elt.innerHTML);
+        FBL.copyToClipboard(elt.innerHTML);
     },
 
     copyXPath: function(elt)
     {
-        var xpath = getElementXPath(elt);
-        copyToClipboard(xpath);
+        var xpath = FBL.getElementXPath(elt);
+        FBL.copyToClipboard(xpath);
     },
 
     copyCSSPath: function(elt)
     {
-        var csspath = getElementCSSPath(elt);
-        copyToClipboard(csspath);
+        var csspath = FBL.getElementCSSPath(elt);
+        FBL.copyToClipboard(csspath);
     },
 
     persistor: function(context, xpath)
     {
         var elts = xpath
-            ? getElementsByXPath(context.window.document, xpath)
+            ? FBL.getElementsByXPath(context.window.document, xpath)
             : null;
 
         return elts && elts.length ? elts[0] : null;
@@ -873,27 +873,27 @@ FirebugReps.Element = domplate(Firebug.Rep,
     {
         var tag = elt.localName.toLowerCase();
         if (tag == "script")
-            openNewTab(elt.src);
+            FBL.openNewTab(elt.src);
         else if (tag == "link")
-            openNewTab(elt.href);
+            FBL.openNewTab(elt.href);
         else if (tag == "a")
-            openNewTab(elt.href);
+            FBL.openNewTab(elt.href);
         else if (tag == "img")
-            openNewTab(elt.src);
+            FBL.openNewTab(elt.src);
 
         return true;
     },
 
     persistObject: function(elt, context)
     {
-        var xpath = getElementXPath(elt);
+        var xpath = FBL.getElementXPath(elt);
 
-        return bind(this.persistor, top, xpath);
+        return FBL.bind(this.persistor, top, xpath);
     },
 
     getTitle: function(element, context)
     {
-        return getElementCSSSelector(element);
+        return FBL.getElementCSSSelector(element);
     },
 
     getTooltip: function(elt)
@@ -903,25 +903,25 @@ FirebugReps.Element = domplate(Firebug.Rep,
 
     getContextMenuItems: function(elt, target, context)
     {
-        var monitored = areEventsMonitored(elt, null, context);
+        var monitored = FBL.areEventsMonitored(elt, null, context);
         var CopyElement = "CopyHTML";
-        if (isElementSVG(elt))
+        if (FBL.isElementSVG(elt))
             CopyElement = "CopySVG";
-        if (isElementMathML(elt))
+        if (FBL.isElementMathML(elt))
             CopyElement = "CopyMathML";
 
-        var items=[{label: CopyElement, command: bindFixed(this.copyHTML, this, elt)}];
-        if (!isElementSVG(elt) && !isElementMathML(elt))
-            items.push({label: "CopyInnerHTML", command: bindFixed(this.copyInnerHTML, this, elt) });
+        var items=[{label: CopyElement, command: FBL.bindFixed(this.copyHTML, this, elt)}];
+        if (!FBL.isElementSVG(elt) && !FBL.isElementMathML(elt))
+            items.push({label: "CopyInnerHTML", command: FBL.bindFixed(this.copyInnerHTML, this, elt) });
 
         return items.concat([
-            {label: "CopyXPath", id: "fbCopyXPath", command: bindFixed(this.copyXPath, this, elt) },
-            {label: "Copy CSS Path", id: "fbCopyCSSPath", command: bindFixed(this.copyCSSPath, this, elt) },
+            {label: "CopyXPath", id: "fbCopyXPath", command: FBL.bindFixed(this.copyXPath, this, elt) },
+            {label: "Copy CSS Path", id: "fbCopyCSSPath", command: FBL.bindFixed(this.copyCSSPath, this, elt) },
             "-",
             {label: "ShowEventsInConsole", id: "fbShowEventsInConsole", type: "checkbox", checked: monitored,
-             command: bindFixed(toggleMonitorEvents, FBL, elt, null, monitored, context) },
+             command: FBL.bindFixed(FBL.toggleMonitorEvents, FBL, elt, null, monitored, context) },
             "-",
-            {label: "ScrollIntoView", id: "fbScrollIntoView", command: bindFixed(elt.scrollIntoView, elt) }
+            {label: "ScrollIntoView", id: "fbScrollIntoView", command: FBL.bindFixed(elt.scrollIntoView, elt) }
         ]);
     }
 });
@@ -996,7 +996,7 @@ FirebugReps.Document = domplate(Firebug.Rep,
 
     getLocation: function(doc)
     {
-        return doc.location ? getFileName(doc.location.href) : "";
+        return doc.location ? FBL.getFileName(doc.location.href) : "";
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
@@ -1010,7 +1010,7 @@ FirebugReps.Document = domplate(Firebug.Rep,
 
     browseObject: function(doc, context)
     {
-        openNewTab(doc.location.href);
+        FBL.openNewTab(doc.location.href);
         return true;
     },
 
@@ -1044,19 +1044,19 @@ FirebugReps.StyleSheet = domplate(Firebug.Rep,
 
     getLocation: function(styleSheet)
     {
-        return getFileName(styleSheet.href);
+        return FBL.getFileName(styleSheet.href);
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 
     copyURL: function(styleSheet)
     {
-        copyToClipboard(styleSheet.href);
+        FBL.copyToClipboard(styleSheet.href);
     },
 
     openInTab: function(styleSheet)
     {
-        openNewTab(styleSheet.href);
+        FBL.openNewTab(styleSheet.href);
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
@@ -1070,13 +1070,13 @@ FirebugReps.StyleSheet = domplate(Firebug.Rep,
 
     browseObject: function(styleSheet, context)
     {
-        openNewTab(styleSheet.href);
+        FBL.openNewTab(styleSheet.href);
         return true;
     },
 
     persistObject: function(styleSheet, context)
     {
-        return bind(this.persistor, top, styleSheet.href);
+        return FBL.bind(this.persistor, top, styleSheet.href);
     },
 
     getTooltip: function(styleSheet)
@@ -1087,15 +1087,15 @@ FirebugReps.StyleSheet = domplate(Firebug.Rep,
     getContextMenuItems: function(styleSheet, target, context)
     {
         return [
-            {label: "CopyLocation", command: bindFixed(this.copyURL, this, styleSheet) },
+            {label: "CopyLocation", command: FBL.bindFixed(this.copyURL, this, styleSheet) },
             "-",
-            {label: "OpenInTab", command: bindFixed(this.openInTab, this, styleSheet) }
+            {label: "OpenInTab", command: FBL.bindFixed(this.openInTab, this, styleSheet) }
         ];
     },
 
     persistor: function(context, href)
     {
-        return getStyleSheetByHref(href, context);
+        return FBL.getStyleSheetByHref(href, context);
     }
 });
 
@@ -1110,7 +1110,7 @@ FirebugReps.Window = domplate(Firebug.Rep,
     {
         try
         {
-            return (win && win.location && !win.closed) ? getFileName(win.location.href) : "";
+            return (win && win.location && !win.closed) ? FBL.getFileName(win.location.href) : "";
         }
         catch (exc)
         {
@@ -1130,7 +1130,7 @@ FirebugReps.Window = domplate(Firebug.Rep,
 
     browseObject: function(win, context)
     {
-        openNewTab(win.location.href);
+        FBL.openNewTab(win.location.href);
         return true;
     },
 
@@ -1179,7 +1179,7 @@ FirebugReps.Event = domplate(Firebug.Rep,
     {
         var info = [event.type, ' '];
 
-        var eventFamily = getEventFamily(event.type);
+        var eventFamily = FBL.getEventFamily(event.type);
         if (eventFamily == "mouse")
             info.push("clientX=", event.clientX, ", clientY=", event.clientY);
         else if (eventFamily == "key")
@@ -1190,7 +1190,7 @@ FirebugReps.Event = domplate(Firebug.Rep,
 
     copyEvent: function(event)
     {
-        return new EventCopy(event);
+        return new FBL.EventCopy(event);
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
@@ -1199,7 +1199,7 @@ FirebugReps.Event = domplate(Firebug.Rep,
 
     supportsObject: function(object, type)
     {
-        return object instanceof Event || object instanceof EventCopy;
+        return object instanceof Event || object instanceof FBL.EventCopy;
     },
 
     getTitle: function(event, context)
@@ -1220,7 +1220,7 @@ FirebugReps.SourceLink = domplate(Firebug.Rep,
 
     isSystemLink: function(sourceLink)
     {
-        return sourceLink && isSystemURL(sourceLink.href);
+        return sourceLink && FBL.isSystemURL(sourceLink.href);
     },
 
     hideSourceLink: function(sourceLink)
@@ -1248,7 +1248,7 @@ FirebugReps.SourceLink = domplate(Firebug.Rep,
 
         try
         {
-            var fileName = getFileName(sourceLink.href);
+            var fileName = FBL.getFileName(sourceLink.href);
             fileName = decodeURIComponent(fileName);
         }
         catch(exc)
@@ -1260,12 +1260,12 @@ FirebugReps.SourceLink = domplate(Firebug.Rep,
 
         var maxWidth = Firebug.sourceLinkLabelWidth;
         if (maxWidth > 0)
-            fileName = cropString(fileName, maxWidth);
+            fileName = FBL.cropString(fileName, maxWidth);
 
         if (sourceLink.instance)
-            return $STRF("InstanceLine", [fileName, sourceLink.instance+1, sourceLink.line]);
+            return FBL.$STRF("InstanceLine", [fileName, sourceLink.instance+1, sourceLink.line]);
         else if (sourceLink.line)
-            return $STRF("Line", [fileName, sourceLink.line]);
+            return FBL.$STRF("Line", [fileName, sourceLink.line]);
         else
             return fileName;
     },
@@ -1273,19 +1273,19 @@ FirebugReps.SourceLink = domplate(Firebug.Rep,
     getSystemFlagTitle: function(sourceLink)
     {
         if (this.isSystemLink(sourceLink))
-            return $STRF("SystemItem", [""]);
+            return FBL.$STRF("SystemItem", [""]);
         else
             return "";
     },
 
     copyLink: function(sourceLink)
     {
-        copyToClipboard(sourceLink.href);
+        FBL.copyToClipboard(sourceLink.href);
     },
 
     openInTab: function(sourceLink)
     {
-        openNewTab(sourceLink.href);
+        FBL.openNewTab(sourceLink.href);
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
@@ -1312,7 +1312,7 @@ FirebugReps.SourceLink = domplate(Firebug.Rep,
 
         text = unescape(sourceLink.href);
 
-        var lines = splitLines(text);
+        var lines = FBL.splitLines(text);
         if (lines.length < 10)
             return text;
 
@@ -1324,7 +1324,7 @@ FirebugReps.SourceLink = domplate(Firebug.Rep,
     {
         if (sourceLink.type == "js")
         {
-            var scriptFile = getSourceFileByHref(sourceLink.href, context);
+            var scriptFile = FBL.getSourceFileByHref(sourceLink.href, context);
             if (scriptFile)
                 return Firebug.chrome.select(sourceLink);
         }
@@ -1337,7 +1337,7 @@ FirebugReps.SourceLink = domplate(Firebug.Rep,
                 return;
             }
 
-            var stylesheet = getStyleSheetByHref(sourceLink.href, context);
+            var stylesheet = FBL.getStyleSheetByHref(sourceLink.href, context);
             if (stylesheet)
             {
                 var ownerNode = stylesheet.ownerNode;
@@ -1358,21 +1358,21 @@ FirebugReps.SourceLink = domplate(Firebug.Rep,
         }
 
         // Fallback is to just open the view-source window on the file
-        viewSource(sourceLink.href, sourceLink.line);
+        FBL.viewSource(sourceLink.href, sourceLink.line);
     },
 
     browseObject: function(sourceLink, context)
     {
-        openNewTab(sourceLink.href);
+        FBL.openNewTab(sourceLink.href);
         return true;
     },
 
     getContextMenuItems: function(sourceLink, target, context)
     {
         return [
-            {label: "CopyLocation", command: bindFixed(this.copyLink, this, sourceLink) },
+            {label: "CopyLocation", command: FBL.bindFixed(this.copyLink, this, sourceLink) },
             "-",
-            {label: "OpenInTab", command: bindFixed(this.openInTab, this, sourceLink) }
+            {label: "OpenInTab", command: FBL.bindFixed(this.openInTab, this, sourceLink) }
         ];
     }
 });
@@ -1401,7 +1401,7 @@ FirebugReps.CompilationUnit = domplate(FirebugReps.SourceLink,
     persistObject: function(compilationUnit)
     {
         var href = compilationUnit.getURL();
-        return bind(this.persistor, top, href);
+        return FBL.bind(this.persistor, top, href);
     },
 
     browseObject: function(sourceLink, context)
@@ -1470,8 +1470,8 @@ FirebugReps.StackFrame = domplate(Firebug.Rep,  // XXXjjb Since the repObject is
 
     getSourceLinkTitle: function(frame)
     {
-        var fileName = cropString(getFileName(frame.href), 17);
-        return $STRF("Line", [fileName, frame.line]);
+        var fileName = FBL.cropString(FBL.getFileName(frame.href), 17);
+        return FBL.$STRF("Line", [fileName, frame.line]);
     },
 
     argIterator: function(frame)
@@ -1519,7 +1519,7 @@ FirebugReps.StackFrame = domplate(Firebug.Rep,  // XXXjjb Since the repObject is
 
     getSourceLink: function(stackFrame)
     {
-        var sourceLink = new SourceLink(stackFrame.href, stackFrame.line, "js");
+        var sourceLink = new FBL.SourceLink(stackFrame.href, stackFrame.line, "js");
         return sourceLink;
     },
 
@@ -1530,9 +1530,9 @@ FirebugReps.StackFrame = domplate(Firebug.Rep,  // XXXjjb Since the repObject is
 
     toggleArguments: function(target)
     {
-        if (hasClass(target, "objectBox-stackFrame"))
+        if (FBL.hasClass(target, "objectBox-stackFrame"))
         {
-            if (hasClass(target, "opened"))
+            if (FBL.hasClass(target, "opened"))
                 this.collapseArguments(target);
             else
                 this.expandArguments(target);
@@ -1541,25 +1541,25 @@ FirebugReps.StackFrame = domplate(Firebug.Rep,  // XXXjjb Since the repObject is
 
     collapseArguments: function(target)
     {
-        if (!hasClass(target, "opened"))
+        if (!FBL.hasClass(target, "opened"))
             return;
 
-        toggleClass(target, "opened");
+        FBL.toggleClass(target, "opened");
 
         var argList = target.getElementsByClassName("argList").item(0);
-        clearNode(argList);
+        FBL.clearNode(argList);
     },
 
     expandArguments: function(target)
     {
-        if (hasClass(target, "opened"))
+        if (FBL.hasClass(target, "opened"))
             return;
 
         var frame = target.repObject;
         if (!this.hasArguments(frame))
             return;
 
-        toggleClass(target, "opened");
+        FBL.toggleClass(target, "opened");
 
         var argList = target.getElementsByClassName("argList").item(0);
         this.argList.replace({object: frame}, argList);
@@ -1568,12 +1568,12 @@ FirebugReps.StackFrame = domplate(Firebug.Rep,  // XXXjjb Since the repObject is
     onSelectFrame: function(event)
     {
         var target = event.currentTarget;
-        if (hasClass(target, "argListBox"))
+        if (FBL.hasClass(target, "argListBox"))
         {
-            var stackFrame = getAncestorByClass(target, "objectBox-stackFrame");
+            var stackFrame = FBL.getAncestorByClass(target, "objectBox-stackFrame");
             var panel = Firebug.getElementPanel(target);
             this.inspectObject(stackFrame.repObject, panel.context);
-            cancelEvent(event);
+            FBL.cancelEvent(event);
         }
     },
 
@@ -1584,7 +1584,7 @@ FirebugReps.StackFrame = domplate(Firebug.Rep,  // XXXjjb Since the repObject is
 
     supportsObject: function(object, type)
     {
-        return object instanceof StackFrame;
+        return object instanceof FBL.StackFrame;
     },
 
     inspectObject: function(stackFrame, context)
@@ -1597,7 +1597,7 @@ FirebugReps.StackFrame = domplate(Firebug.Rep,  // XXXjjb Since the repObject is
 
     getTooltip: function(stackFrame, context)
     {
-        return $STRF("Line", [stackFrame.href, stackFrame.line]);
+        return FBL.$STRF("Line", [stackFrame.href, stackFrame.line]);
     }
 });
 
@@ -1606,7 +1606,7 @@ FirebugReps.StackFrame = domplate(Firebug.Rep,  // XXXjjb Since the repObject is
 FirebugReps.StackTrace = domplate(Firebug.Rep,
 {
     tag:
-        DIV({role : "group", 'aria-label' : $STR('aria.labels.stack trace')},
+        DIV({role : "group", 'aria-label' : FBL.$STR('aria.labels.stack trace')},
             FOR("frame", "$object.frames",
                 TAG(FirebugReps.StackFrame.tag, {object: "$frame"})
             )
@@ -1618,7 +1618,7 @@ FirebugReps.StackTrace = domplate(Firebug.Rep,
 
     supportsObject: function(object, type)
     {
-        return object instanceof StackTrace;
+        return object instanceof FBL.StackTrace;
     }
 });
 
@@ -1643,7 +1643,7 @@ FirebugReps.ErrorMessage = domplate(Firebug.Rep,
             DIV({"class": "errorTrace", role : 'presentation'}),
             TAG("$object|getObjectsTag", {object: "$object.objects"}),
             DIV({"class": "errorSourceBox errorSource-$object|getSourceType focusRow subLogRow", role : "listitem"},
-                IMG({"class": "$object|isBreakableError a11yFocus", src:"blank.gif", role : 'checkbox', 'aria-checked':"$object|hasErrorBreak", title: $STR("console.Break On This Error")}),
+                IMG({"class": "$object|isBreakableError a11yFocus", src:"blank.gif", role : 'checkbox', 'aria-checked':"$object|hasErrorBreak", title: FBL.$STR("console.Break On This Error")}),
                 A({"class": "errorSource a11yFocus", title: "$object|getSourceTitle"}, "$object|getSource"),
                 TAG(FirebugReps.SourceLink.tag, {object: "$object|getSourceLink"})
             )
@@ -1676,7 +1676,7 @@ FirebugReps.ErrorMessage = domplate(Firebug.Rep,
 
     hasErrorBreak: function(error)
     {
-        return fbs.hasErrorBreakpoint(normalizeURL(error.href), error.lineNo);
+        return FBL.fbs.hasErrorBreakpoint(FBL.normalizeURL(error.href), error.lineNo);
     },
 
     getMessage: function(message)
@@ -1694,27 +1694,27 @@ FirebugReps.ErrorMessage = domplate(Firebug.Rep,
     getSource: function(error)
     {
         if (error.source)
-            return cropString(error.source, 80);
+            return FBL.cropString(error.source, 80);
         if (error.category == "js" && error.href && error.href.indexOf("XPCSafeJSObjectWrapper") != -1)
             return "";
         var source = error.getSourceLine();
         if (source)
-            return cropString(source, 80);
+            return FBL.cropString(source, 80);
         return "";
     },
 
     getSourceTitle: function(error)
     {
-      var source = error.getSourceLine();
-      if (source)
-        return trim(source);
-      return "";
+        var source = error.getSourceLine();
+        if (source)
+            return FBL.trim(source);
+        return "";
     },
 
     getSourceLink: function(error)
     {
         var ext = error.category == "css" ? "css" : "js";
-        return error.lineNo ? new SourceLink(error.href, error.lineNo, ext) : null;
+        return error.lineNo ? new FBL.SourceLink(error.href, error.lineNo, ext) : null;
     },
 
     getSourceType: function(error)
@@ -1723,7 +1723,7 @@ FirebugReps.ErrorMessage = domplate(Firebug.Rep,
         // so let's try to skip those
         if (error.source)
             return "syntax";
-        else if (error.lineNo == 1 && getFileExtension(error.href) != "js")
+        else if (error.lineNo == 1 && FBL.getFileExtension(error.href) != "js")
             return "none";
         else if (error.category == "css")
             return "show";
@@ -1736,27 +1736,27 @@ FirebugReps.ErrorMessage = domplate(Firebug.Rep,
     onToggleError: function(event)
     {
         var target = event.currentTarget;
-        if (hasClass(event.target, "errorBreak"))
+        if (FBL.hasClass(event.target, "errorBreak"))
         {
             var panel = Firebug.getElementPanel(event.target);
             this.breakOnThisError(target.repObject, panel.context);
             return;
         }
-        else if (hasClass(event.target, "errorSource"))
+        else if (FBL.hasClass(event.target, "errorSource"))
         {
             var panel = Firebug.getElementPanel(event.target);
             this.inspectObject(target.repObject, panel.context);
             return;
         }
 
-        var errorTitle = getAncestorByClass(event.target, "errorTitle");
+        var errorTitle = FBL.getAncestorByClass(event.target, "errorTitle");
         if (errorTitle)
         {
             var traceBox = target.childNodes[1];
-            toggleClass(target, "opened");
-            event.target.setAttribute('aria-expanded', hasClass(target, "opened"));
+            FBL.toggleClass(target, "opened");
+            event.target.setAttribute('aria-expanded', FBL.hasClass(target, "opened"));
 
-            if (hasClass(target, "opened"))
+            if (FBL.hasClass(target, "opened"))
             {
                 if (target.stackTrace)
                     FirebugReps.StackTrace.tag.append({object: target.stackTrace}, traceBox);
@@ -1764,12 +1764,12 @@ FirebugReps.ErrorMessage = domplate(Firebug.Rep,
                 if (Firebug.A11yModel.enabled)
                 {
                     var panel = Firebug.getElementPanel(event.target);
-                    dispatch(panel.fbListeners, "modifyLogRow", [panel , traceBox]);
+                    FBL.dispatch(panel.fbListeners, "modifyLogRow", [panel , traceBox]);
                 }
             }
             else
             {
-                clearNode(traceBox);
+                FBL.clearNode(traceBox);
             }
         }
     },
@@ -1783,12 +1783,12 @@ FirebugReps.ErrorMessage = domplate(Firebug.Rep,
             error.href,
             "Line " +  error.lineNo
         ];
-        copyToClipboard(message.join(lineBreak()));
+        FBL.copyToClipboard(message.join(FBL.lineBreak()));
     },
 
     breakOnThisError: function(error, context)
     {
-        var compilationUnit = context.getCompilationUnit(normalizeURL(error.href));
+        var compilationUnit = context.getCompilationUnit(FBL.normalizeURL(error.href));
         if (!compilationUnit)
         {
             if (FBTrace.DBG_ERRORS)
@@ -1809,7 +1809,7 @@ FirebugReps.ErrorMessage = domplate(Firebug.Rep,
 
     supportsObject: function(object, type, context)
     {
-        return object instanceof ErrorMessage;
+        return object instanceof FBL.ErrorMessage;
     },
 
     inspectObject: function(error, context)
@@ -1823,7 +1823,7 @@ FirebugReps.ErrorMessage = domplate(Firebug.Rep,
         var breakOnThisError = this.hasErrorBreak(error);
 
         var items = [
-            {label: "CopyError", command: bindFixed(this.copyError, this, error) }
+            {label: "CopyError", command: FBL.bindFixed(this.copyError, this, error) }
         ];
 
         if (error.category == "css")
@@ -1831,9 +1831,9 @@ FirebugReps.ErrorMessage = domplate(Firebug.Rep,
             items.push(
                 "-",
                 {label: "BreakOnThisError", type: "checkbox", checked: breakOnThisError,
-                 command: bindFixed(this.breakOnThisError, this, error) },
+                 command: FBL.bindFixed(this.breakOnThisError, this, error) },
 
-                optionMenu("BreakOnAllErrors", "breakOnErrors")
+                FBL.optionMenu("BreakOnAllErrors", "breakOnErrors")
             );
         }
 
@@ -1878,7 +1878,7 @@ FirebugReps.Except = domplate(Firebug.Rep,
         if (object.stack)
         {
             trace = FBL.parseToStackTrace(object.stack, context);
-            trace = cleanStackTraceOfFirebug(trace);
+            trace = FBL.cleanStackTraceOfFirebug(trace);
             if (!trace)
                 lineNo = 0;
         }
@@ -1895,7 +1895,7 @@ FirebugReps.Except = domplate(Firebug.Rep,
     supportsObject: function(object, type, context)
     {
         var win = context ? FBL.getContentView(context.window) : null;
-        var found = (win && instanceOf(object, win.Error)) || (object instanceof ErrorCopy) ||
+        var found = (win && instanceOf(object, win.Error)) || (object instanceof FBL.ErrorCopy) ||
             (object.constructor && object.constructor.name == "ReferenceError");
         return found;
     }
@@ -1926,12 +1926,12 @@ FirebugReps.Assert = domplate(Firebug.Rep,
         var breakOnThisError = this.hasErrorBreak(error);
 
         return [
-            {label: "CopyError", command: bindFixed(this.copyError, this, error) },
+            {label: "CopyError", command: FBL.bindFixed(this.copyError, this, error) },
             "-",
             {label: "BreakOnThisError", type: "checkbox", checked: breakOnThisError,
-             command: bindFixed(this.breakOnThisError, this, error) },
+             command: FBL.bindFixed(this.breakOnThisError, this, error) },
             {label: "BreakOnAllErrors", type: "checkbox", checked: Firebug.breakOnErrors,
-             command: bindFixed(this.breakOnAllErrors, this, error) }
+             command: FBL.bindFixed(this.breakOnAllErrors, this, error) }
         ];
     }
 });
@@ -2077,7 +2077,7 @@ FirebugReps.Storage = domplate(Firebug.Rep,
 
     summarize: function(storage)
     {
-        return $STRP("firebug.storage.totalItems", [storage.length]);
+        return FBL.$STRP("firebug.storage.totalItems", [storage.length]);
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
@@ -2146,7 +2146,7 @@ FirebugReps.Storage = domplate(Firebug.Rep,
             if (count > max)
             {
                 props[Math.max(1,max-1)] = {
-                    object: $STR("firebug.reps.more") + "...",
+                    object: FBL.$STR("firebug.reps.more") + "...",
                     tag: FirebugReps.Caption.tag,
                     name: "",
                     equal:"",
@@ -2198,7 +2198,7 @@ FirebugReps.StorageList = domplate(Firebug.Rep,
         var domain = context.window.location.hostname;
 
         Firebug.chrome.select(globalStorage.namedItem(domain));
-        cancelEvent(event);
+        FBL.cancelEvent(event);
     },
 
     summarize: function(globalStorage)
@@ -2208,7 +2208,7 @@ FirebugReps.StorageList = domplate(Firebug.Rep,
             var context = Firebug.currentContext;
             var domain = context.window.location.hostname;
             var length = globalStorage.namedItem(domain).length;
-            return $STRP("firebug.storage.totalItems", [length]) + " ";
+            return FBL.$STRP("firebug.storage.totalItems", [length]) + " ";
         }
         catch (e)
         {
@@ -2276,7 +2276,7 @@ FirebugReps.StorageList = domplate(Firebug.Rep,
 FirebugReps.XPathResult = domplate(FirebugReps.Arr,
 {
     className: "array xPathResult",
-    toggles: new ToggleBranch(),
+    toggles: new FBL.ToggleBranch(),
 
     tag:
         SPAN(FirebugReps.Arr.tag),
@@ -2307,7 +2307,7 @@ FirebugReps.XPathResult = domplate(FirebugReps.Arr,
         if (xpathresult.snapshotLength > max + 1)
         {
             items[max] = {
-                object: (xpathresult.snapshotLength-max) + " " + $STR("firebug.reps.more") + "...",
+                object: (xpathresult.snapshotLength-max) + " " + FBL.$STR("firebug.reps.more") + "...",
                 tag: FirebugReps.Caption.tag,
                 delim: ""
             };
@@ -2459,7 +2459,7 @@ FirebugReps.NamedNodeMap = domplate(Firebug.Rep,
         var domain = context.window.location.hostname;
 
         Firebug.chrome.select(globalStorage.namedItem(domain));
-        cancelEvent(event);
+        FBL.cancelEvent(event);
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
@@ -2506,7 +2506,7 @@ FirebugReps.NamedNodeMap = domplate(Firebug.Rep,
         if (object.length > max)
         {
             props[Math.max(1,max-1)] = {
-                object: (object.length-max) + " " + $STR("firebug.reps.more") + "...",
+                object: (object.length-max) + " " + FBL.$STR("firebug.reps.more") + "...",
                 tag: FirebugReps.Caption.tag,
                 name: "",
                 equal:"",

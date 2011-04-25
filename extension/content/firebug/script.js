@@ -26,7 +26,7 @@ Firebug.ScriptPanel.reLineNumber = /^[^\\]?#(\d*)$/;
  * object used to markup Javascript source lines.
  * In the namespace Firebug.ScriptPanel.
  */
-Firebug.ScriptPanel.decorator = extend(new Firebug.SourceBoxDecorator,
+Firebug.ScriptPanel.decorator = FBL.extend(new Firebug.SourceBoxDecorator,
 {
     decorate: function(sourceBox, unused)
     {
@@ -93,7 +93,7 @@ Firebug.ScriptPanel.decorator = extend(new Firebug.SourceBoxDecorator,
 
 // ************************************************************************************************
 
-Firebug.ScriptPanel.prototype = extend(Firebug.SourceBoxPanel,
+Firebug.ScriptPanel.prototype = FBL.extend(Firebug.SourceBoxPanel,
 {
     /*
     * Framework connection
@@ -133,7 +133,7 @@ Firebug.ScriptPanel.prototype = extend(Firebug.SourceBoxPanel,
             Firebug.chrome.syncPanel(this.name);
 
         // Front side UI mark
-        var firebugStatus = $('firebugStatus');
+        var firebugStatus = FBL.$('firebugStatus');
         if (firebugStatus)
         {
             if (active)
@@ -151,14 +151,14 @@ Firebug.ScriptPanel.prototype = extend(Firebug.SourceBoxPanel,
         Firebug.jsDebuggerOn = active;
 
         if (FBTrace.DBG_ACTIVATION)
-            FBTrace.sysout("script.onJavaScriptDebugging "+active+" icon attribute: "+$('firebugStatus').getAttribute("script"));
+            FBTrace.sysout("script.onJavaScriptDebugging "+active+" icon attribute: "+FBL.$('firebugStatus').getAttribute("script"));
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 
     showFunction: function(fn)
     {
-        var sourceLink = findSourceForFunction(fn, this.context);
+        var sourceLink = FBL.findSourceForFunction(fn, this.context);
         if (sourceLink)
         {
             this.showSourceLink(sourceLink);
@@ -181,7 +181,7 @@ Firebug.ScriptPanel.prototype = extend(Firebug.SourceBoxPanel,
                 this.scrollToLine(sourceLink.href, sourceLink.line,
                     this.jumpHighlightFactory(sourceLink.line, this.context));
 
-                dispatch(this.fbListeners, "onShowSourceLink", [this, sourceLink.line]);
+                FBL.dispatch(this.fbListeners, "onShowSourceLink", [this, sourceLink.line]);
             }
 
             // then clear it so the next link will scroll and highlight.
@@ -312,7 +312,7 @@ Firebug.ScriptPanel.prototype = extend(Firebug.SourceBoxPanel,
     editBreakpointCondition: function(lineNo)
     {
         var sourceRow = this.selectedSourceBox.getLineNode(lineNo);
-        var sourceLine = getChildByClass(sourceRow, "sourceLine");
+        var sourceLine = FBL.getChildByClass(sourceRow, "sourceLine");
         var condition = ToolsInterface.JavaScript.getBreakpointCondition(this.context, this.location.getURL(), lineNo);
 
         if (condition)
@@ -342,7 +342,7 @@ Firebug.ScriptPanel.prototype = extend(Firebug.SourceBoxPanel,
     {
         var selection = this.document.defaultView.getSelection();
         var source = this.getSourceLinesFrom(selection);
-        copyToClipboard(source);
+        FBL.copyToClipboard(source);
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
@@ -356,7 +356,7 @@ Firebug.ScriptPanel.prototype = extend(Firebug.SourceBoxPanel,
 
     populateInfoTip: function(infoTip, expr)
     {
-        if (!expr || isJavaScriptKeyword(expr))
+        if (!expr || FBL.isJavaScriptKeyword(expr))
             return false;
 
         var self = this;
@@ -390,10 +390,10 @@ Firebug.ScriptPanel.prototype = extend(Firebug.SourceBoxPanel,
     onMouseDown: function(event)
     {
         // Don't interfere with clicks made into a notification editor.
-        if (getAncestorByClass(event.target, "breakNotification"))
+        if (FBL.getAncestorByClass(event.target, "breakNotification"))
             return;
 
-        var sourceLine = getAncestorByClass(event.target, "sourceLine");
+        var sourceLine = FBL.getAncestorByClass(event.target, "sourceLine");
         if (!sourceLine)
             return;
 
@@ -401,50 +401,50 @@ Firebug.ScriptPanel.prototype = extend(Firebug.SourceBoxPanel,
         var compilationUnit = sourceRow.parentNode.repObject;
         var lineNo = parseInt(sourceLine.textContent);
 
-        if (isLeftClick(event))
+        if (FBL.isLeftClick(event))
             this.toggleBreakpoint(lineNo);
-        else if (isShiftClick(event))
+        else if (FBL.isShiftClick(event))
             this.toggleDisableBreakpoint(lineNo);
-        else if (isControlClick(event) || isMiddleClick(event))
+        else if (FBL.isControlClick(event) || FBL.isMiddleClick(event))
         {
             ToolsInterface.JavaScript.runUntil(this.context, compilationUnit, lineNo);
-            cancelEvent(event);
+            FBL.cancelEvent(event);
         }
     },
 
     onContextMenu: function(event)
     {
-        var sourceLine = getAncestorByClass(event.target, "sourceLine");
+        var sourceLine = FBL.getAncestorByClass(event.target, "sourceLine");
         if (!sourceLine)
             return;
 
         var lineNo = parseInt(sourceLine.textContent);
         this.editBreakpointCondition(lineNo);
-        cancelEvent(event);
+        FBL.cancelEvent(event);
     },
 
     onMouseOver: function(event)
     {
-        var sourceLine = getAncestorByClass(event.target, "sourceLine");
+        var sourceLine = FBL.getAncestorByClass(event.target, "sourceLine");
         if (sourceLine)
         {
             if (this.hoveredLine)
-                removeClass(this.hoveredLine.parentNode, "hovered");
+                FBL.removeClass(this.hoveredLine.parentNode, "hovered");
 
             this.hoveredLine = sourceLine;
 
-            if (getAncestorByClass(sourceLine, "sourceViewport"))
-                setClass(sourceLine.parentNode, "hovered");
+            if (FBL.getAncestorByClass(sourceLine, "sourceViewport"))
+                FBL.setClass(sourceLine.parentNode, "hovered");
         }
     },
 
     onMouseOut: function(event)
     {
-        var sourceLine = getAncestorByClass(event.relatedTarget, "sourceLine");
+        var sourceLine = FBL.getAncestorByClass(event.relatedTarget, "sourceLine");
         if (!sourceLine)
         {
             if (this.hoveredLine)
-                removeClass(this.hoveredLine.parentNode, "hovered");
+                FBL.removeClass(this.hoveredLine.parentNode, "hovered");
 
             delete this.hoveredLine;
         }
@@ -455,7 +455,7 @@ Firebug.ScriptPanel.prototype = extend(Firebug.SourceBoxPanel,
         var scrollingElement = event.target;
         this.reView(scrollingElement);
         var searchBox = Firebug.chrome.$("fbSearchBox");
-        searchBox.placeholder = $STR("Use hash plus number to go to line");
+        searchBox.placeholder = FBL.$STR("Use hash plus number to go to line");
     },
 
     onKeyPress: function(event)
@@ -463,12 +463,12 @@ Firebug.ScriptPanel.prototype = extend(Firebug.SourceBoxPanel,
         var ch = String.fromCharCode(event.charCode);
         var searchBox = Firebug.chrome.$("fbSearchBox");
 
-        if (ch == "l" && isControl(event))
+        if (ch == "l" && FBL.isControl(event))
         {
             searchBox.value = "#";
             searchBox.focus();
 
-            cancelEvent(event);
+            FBL.cancelEvent(event);
         }
     },
 
@@ -483,15 +483,15 @@ Firebug.ScriptPanel.prototype = extend(Firebug.SourceBoxPanel,
 
     initialize: function(context, doc)
     {
-        this.onMouseDown = bind(this.onMouseDown, this);
-        this.onContextMenu = bind(this.onContextMenu, this);
-        this.onMouseOver = bind(this.onMouseOver, this);
-        this.onMouseOut = bind(this.onMouseOut, this);
-        this.onScroll = bind(this.onScroll, this);
-        this.onKeyPress = bind(this.onKeyPress, this);
+        this.onMouseDown = FBL.bind(this.onMouseDown, this);
+        this.onContextMenu = FBL.bind(this.onContextMenu, this);
+        this.onMouseOver = FBL.bind(this.onMouseOver, this);
+        this.onMouseOut = FBL.bind(this.onMouseOut, this);
+        this.onScroll = FBL.bind(this.onScroll, this);
+        this.onKeyPress = FBL.bind(this.onKeyPress, this);
 
-        this.panelSplitter = $("fbPanelSplitter");
-        this.sidePanelDeck = $("fbSidePanelDeck");
+        this.panelSplitter = FBL.$("fbPanelSplitter");
+        this.sidePanelDeck = FBL.$("fbSidePanelDeck");
 
         Firebug.SourceBoxPanel.initialize.apply(this, arguments);
     },
@@ -499,7 +499,7 @@ Firebug.ScriptPanel.prototype = extend(Firebug.SourceBoxPanel,
     destroy: function(state)
     {
         delete this.selection; // We want the location (compilationUnit) to persist, not the selection (eg stackFrame).
-        persistObjects(this, state);
+        FBL.persistObjects(this, state);
 
         if (this.location instanceof CompilationUnit)
         {
@@ -541,7 +541,7 @@ Firebug.ScriptPanel.prototype = extend(Firebug.SourceBoxPanel,
     {
         Firebug.SourceBoxPanel.reattach.apply(this, arguments);
 
-        setTimeout(bind(function delayScrollToLastTop()
+        setTimeout(FBL.bind(function delayScrollToLastTop()
         {
             if (this.lastSourceScrollTop)
             {
@@ -554,9 +554,9 @@ Firebug.ScriptPanel.prototype = extend(Firebug.SourceBoxPanel,
     initializeNode: function(oldPanelNode)
     {
         this.tooltip = this.document.createElement("div");
-        setClass(this.tooltip, "scriptTooltip");
+        FBL.setClass(this.tooltip, "scriptTooltip");
         this.tooltip.setAttribute('aria-live', 'polite')
-        obscure(this.tooltip, true);
+        FBL.obscure(this.tooltip, true);
         this.panelNode.appendChild(this.tooltip);
 
         this.panelNode.addEventListener("mousedown", this.onMouseDown, true);
@@ -584,7 +584,7 @@ Firebug.ScriptPanel.prototype = extend(Firebug.SourceBoxPanel,
 
     clear: function()
     {
-        clearNode(this.panelNode);
+        FBL.clearNode(this.panelNode);
     },
 
     showWarning: function()
@@ -637,7 +637,7 @@ Firebug.ScriptPanel.prototype = extend(Firebug.SourceBoxPanel,
                 if (!this.restored)
                 {
                     delete this.location;  // remove the default location if any
-                    restoreLocation(this, state);
+                    FBL.restoreLocation(this, state);
                     this.restored = true;
                 }
                 else // we already restored
@@ -669,7 +669,7 @@ Firebug.ScriptPanel.prototype = extend(Firebug.SourceBoxPanel,
             this.ableWatchSidePanel(this.context);
         }
 
-        collapse(Firebug.chrome.$("fbToolbar"), !active);
+        FBL.collapse(Firebug.chrome.$("fbToolbar"), !active);
 
         // These buttons are visible only if debugger is enabled.
         this.showToolbarButtons("fbLocationSeparator", active);
@@ -783,7 +783,7 @@ Firebug.ScriptPanel.prototype = extend(Firebug.SourceBoxPanel,
             lineNo = this.currentSearch.findNext(wrapSearch, reverse, Firebug.Search.isCaseSensitive(text));
         else
         {
-            this.currentSearch = new SourceBoxTextSearch(sourceBox);
+            this.currentSearch = new FBL.SourceBoxTextSearch(sourceBox);
             lineNo = this.currentSearch.find(text, reverse, Firebug.Search.isCaseSensitive(text));
         }
 
@@ -791,13 +791,13 @@ Firebug.ScriptPanel.prototype = extend(Firebug.SourceBoxPanel,
         {
             // this lineNo is an zero-based index into sourceBox.lines. Add one for user line numbers
             this.scrollToLine(sourceBox.repObject.getURL(), lineNo, this.jumpHighlightFactory(lineNo+1, this.context));
-            dispatch(this.fbListeners, 'onScriptSearchMatchFound', [this, text, sourceBox.repObject, lineNo]);
+            FBL.dispatch(this.fbListeners, 'onScriptSearchMatchFound', [this, text, sourceBox.repObject, lineNo]);
 
             return true;
         }
         else
         {
-            dispatch(this.fbListeners, 'onScriptSearchMatchFound', [this, text, null, null]);
+            FBL.dispatch(this.fbListeners, 'onScriptSearchMatchFound', [this, text, null, null]);
             return false;
         }
     },
@@ -814,9 +814,9 @@ Firebug.ScriptPanel.prototype = extend(Firebug.SourceBoxPanel,
     supportsObject: function(object, type)
     {
         if( object instanceof CompilationUnit
-            || (object instanceof SourceLink && object.type == "js")
+            || (object instanceof FBL.SourceLink && object.type == "js")
             || typeof(object) == "function"
-            || object instanceof StackFrame)
+            || object instanceof FBL.StackFrame)
             return 1;
         else return 0;
     },
@@ -835,7 +835,7 @@ Firebug.ScriptPanel.prototype = extend(Firebug.SourceBoxPanel,
                    delete this.sourceBoxes[url];
                    if (this.selectedSourceBox == victim)
                    {
-                        collapse(this.selectedSourceBox, true);
+                        FBL.collapse(this.selectedSourceBox, true);
                         delete this.selectedSourceBox;
                    }
                    if (FBTrace.DBG_COMPILATION_UNITS)
@@ -864,7 +864,7 @@ Firebug.ScriptPanel.prototype = extend(Firebug.SourceBoxPanel,
 
         if (this.activeWarningTag)
         {
-            clearNode(this.panelNode);
+            FBL.clearNode(this.panelNode);
             delete this.activeWarningTag;
 
             // The user was seeing the warning, but selected a file to show in the script panel.
@@ -878,7 +878,7 @@ Firebug.ScriptPanel.prototype = extend(Firebug.SourceBoxPanel,
         }
 
         this.showSource(updatedCompilationUnit.getURL());
-        dispatch(this.fbListeners, "onUpdateScriptLocation", [this, updatedCompilationUnit]);
+        FBL.dispatch(this.fbListeners, "onUpdateScriptLocation", [this, updatedCompilationUnit]);
     },
 
     updateSelection: function(object)
@@ -888,11 +888,11 @@ Firebug.ScriptPanel.prototype = extend(Firebug.SourceBoxPanel,
             FBTrace.sysout("script updateSelection object:"+object+" of type "+typeof(object), object);
             if (object instanceof CompilationUnit)
                 FBTrace.sysout("script updateSelection this.navigate(object)", object);
-            else if (object instanceof SourceLink)
+            else if (object instanceof FBL.SourceLink)
                 FBTrace.sysout("script updateSelection this.showSourceLink(object)", object);
             else if (typeof(object) == "function")
                 FBTrace.sysout("script updateSelection this.showFunction(object)", object);
-            else if (object instanceof StackFrame)
+            else if (object instanceof FBL.StackFrame)
                 FBTrace.sysout("script updateSelection this.showStackFrameXB(object)", object);
             else
                 FBTrace.sysout("script updateSelection this.showStackFrame(null)", object);
@@ -900,11 +900,11 @@ Firebug.ScriptPanel.prototype = extend(Firebug.SourceBoxPanel,
 
         if (object instanceof CompilationUnit)
             this.navigate(object);
-        else if (object instanceof SourceLink)
+        else if (object instanceof FBL.SourceLink)
             this.showSourceLink(object);
         else if (typeof(object) == "function")
             this.showFunction(object);
-        else if (object instanceof StackFrame)
+        else if (object instanceof FBL.StackFrame)
             this.showStackFrameXB(object);
     },
 
@@ -989,7 +989,7 @@ Firebug.ScriptPanel.prototype = extend(Firebug.SourceBoxPanel,
     getTooltipObject: function(target)
     {
         // Target should be A element with class = sourceLine
-        if ( hasClass(target, 'sourceLine') )
+        if ( FBL.hasClass(target, 'sourceLine') )
         {
            return null; // TODO
         }
@@ -1000,16 +1000,16 @@ Firebug.ScriptPanel.prototype = extend(Firebug.SourceBoxPanel,
     {
         // Don't show popup over the line numbers, we show the conditional breakpoint
         // editor there instead
-        var sourceLine = getAncestorByClass(target, "sourceLine");
+        var sourceLine = FBL.getAncestorByClass(target, "sourceLine");
         if (sourceLine)
             return;
 
-        var sourceRow = getAncestorByClass(target, "sourceRow");
+        var sourceRow = FBL.getAncestorByClass(target, "sourceRow");
         if (!sourceRow)
             return;
 
         var lineNo = parseInt(sourceRow.firstChild.textContent);
-        var scripts = findScripts(this.context, this.location.getURL(), lineNo);
+        var scripts = FBL.findScripts(this.context, this.location.getURL(), lineNo);
         return scripts; // gee I wonder what will happen?
     },
 
@@ -1019,7 +1019,7 @@ Firebug.ScriptPanel.prototype = extend(Firebug.SourceBoxPanel,
         if (!frame)
             return;
 
-        var sourceRowText = getAncestorByClass(target, "sourceRowText");
+        var sourceRowText = FBL.getAncestorByClass(target, "sourceRowText");
         if (!sourceRowText)
             return;
 
@@ -1028,7 +1028,7 @@ Firebug.ScriptPanel.prototype = extend(Firebug.SourceBoxPanel,
         if (!rangeParent)
             return;
         rangeOffset = rangeOffset || 0;
-        var expr = getExpressionAt(rangeParent.data, rangeOffset);
+        var expr = FBL.getExpressionAt(rangeParent.data, rangeOffset);
         if (!expr || !expr.expr)
             return;
 
@@ -1076,11 +1076,11 @@ Firebug.ScriptPanel.prototype = extend(Firebug.SourceBoxPanel,
 
     getSourceLink: function(target, object)
     {
-        var sourceRow = getAncestorByClass(target, "sourceRow");
+        var sourceRow = FBL.getAncestorByClass(target, "sourceRow");
         if (!sourceRow)
             return;
 
-        var sourceLine = getChildByClass(sourceRow, "sourceLine");
+        var sourceLine = FBL.getChildByClass(sourceRow, "sourceLine");
         var lineNo = parseInt(sourceLine.textContent);
         return new FBL.SourceLink(this.location.url, lineNo, 'js');
     },
@@ -1090,33 +1090,35 @@ Firebug.ScriptPanel.prototype = extend(Firebug.SourceBoxPanel,
         var context = this.context;
 
         return [
-            optionMenu("ShowAllSourceFiles", "showAllSourceFiles"),
+            FBL.optionMenu("ShowAllSourceFiles", "showAllSourceFiles"),
             // 1.2: always check last line; optionMenu("UseLastLineForEvalName", "useLastLineForEvalName"),
             // 1.2: always use MD5 optionMenu("UseMD5ForEvalName", "useMD5ForEvalName")
-            optionMenu("TrackThrowCatch", "trackThrowCatch"),
+            FBL.optionMenu("TrackThrowCatch", "trackThrowCatch"),
             //"-",
             //1.2 option on toolbar this.optionMenu("DebuggerEnableAlways", enableAlwaysPref)
-            optionMenu("firebug.breakpoint.showBreakNotifications", "showBreakNotification")
-        ];
+            FBL.optionMenu("firebug.breakpoint.showBreakNotifications", "showBreakNotification")
+        ];/*
+
+*/
     },
 
     optionMenu: function(label, option)
     {
         var checked = Firebug.Options.get(option);
         return {label: label, type: "checkbox", checked: checked,
-            command: bindFixed(Firebug.Options.set, Firebug, option, !checked) };
+            command: FBL.bindFixed(Firebug.Options.set, Firebug, option, !checked) };
     },
 
     getContextMenuItems: function(fn, target)
     {
-        if (getAncestorByClass(target, "sourceLine"))
+        if (FBL.getAncestorByClass(target, "sourceLine"))
             return;
 
-        var sourceRow = getAncestorByClass(target, "sourceRow");
+        var sourceRow = FBL.getAncestorByClass(target, "sourceRow");
         if (!sourceRow)
             return;
 
-        var sourceLine = getChildByClass(sourceRow, "sourceLine");
+        var sourceLine = FBL.getChildByClass(sourceRow, "sourceLine");
         var lineNo = parseInt(sourceLine.textContent);
 
         var items = [];
@@ -1125,9 +1127,9 @@ Firebug.ScriptPanel.prototype = extend(Firebug.SourceBoxPanel,
         if (selection.toString())
         {
             items.push(
-                {label: "CopySourceCode", command: bind(this.copySource, this) },
+                {label: "CopySourceCode", command: FBL.bind(this.copySource, this) },
                 "-",
-                {label: "AddWatch", command: bind(this.addSelectionWatch, this) }
+                {label: "AddWatch", command: FBL.bind(this.addSelectionWatch, this) }
             );
         }
 
@@ -1136,42 +1138,42 @@ Firebug.ScriptPanel.prototype = extend(Firebug.SourceBoxPanel,
         items.push(
             "-",
             {label: "SetBreakpoint", type: "checkbox", checked: hasBreakpoint,
-                command: bindFixed(this.toggleBreakpoint, this, lineNo) }
+                command: FBL.bindFixed(this.toggleBreakpoint, this, lineNo) }
         );
         if (hasBreakpoint)
         {
             var isDisabled = this.context.isBreakpointDisabled(this.location.href, lineNo);
             items.push(
                 {label: "DisableBreakpoint", type: "checkbox", checked: isDisabled,
-                    command: bindFixed(this.toggleDisableBreakpoint, this, lineNo) }
+                    command: FBL.bindFixed(this.toggleDisableBreakpoint, this, lineNo) }
             );
         }
         items.push(
             {label: "EditBreakpointCondition",
-                command: bindFixed(this.editBreakpointCondition, this, lineNo) }
+                command: FBL.bindFixed(this.editBreakpointCondition, this, lineNo) }
         );
 
         if (this.context.stopped)
         {
-            var sourceRow = getAncestorByClass(target, "sourceRow");
+            var sourceRow = FBL.getAncestorByClass(target, "sourceRow");
             if (sourceRow)
             {
-                var compilationUnit = getAncestorByClass(sourceRow, "sourceBox").repObject;
+                var compilationUnit = FBL.getAncestorByClass(sourceRow, "sourceBox").repObject;
                 var lineNo = parseInt(sourceRow.firstChild.textContent);
 
                 var debuggr = this;
                 items.push(
                     "-",
                     {label: "firebug.Continue",
-                        command: bindFixed(debuggr.resume, debuggr, this.context) },
+                        command: FBL.bindFixed(debuggr.resume, debuggr, this.context) },
                     {label: "firebug.StepOver",
-                        command: bindFixed(debuggr.stepOver, debuggr, this.context) },
+                        command: FBL.bindFixed(debuggr.stepOver, debuggr, this.context) },
                     {label: "firebug.StepInto",
-                        command: bindFixed(debuggr.stepInto, debuggr, this.context) },
+                        command: FBL.bindFixed(debuggr.stepInto, debuggr, this.context) },
                     {label: "firebug.StepOut",
-                        command: bindFixed(debuggr.stepOut, debuggr, this.context) },
+                        command: FBL.bindFixed(debuggr.stepOut, debuggr, this.context) },
                     {label: "firebug.RunUntil",
-                        command: bindFixed(debuggr.runUntil, debuggr, this.context,
+                        command: FBL.bindFixed(debuggr.runUntil, debuggr, this.context,
                         compilationUnit, lineNo) }
                 );
             }
@@ -1205,7 +1207,7 @@ Firebug.ScriptPanel.prototype = extend(Firebug.SourceBoxPanel,
 
     getBreakOnNextTooltip: function(armed)
     {
-        return (armed ? $STR("script.Disable Break On Next") : $STR("script.Break On Next"));
+        return (armed ? FBL.$STR("script.Disable Break On Next") : FBL.$STR("script.Break On Next"));
     },
 
     shouldBreakOnNext: function()
@@ -1238,14 +1240,14 @@ Firebug.ScriptPanel.prototype = extend(Firebug.SourceBoxPanel,
     {
         this.keyListeners =
             [
-                chrome.keyCodeListen("F8", null, bind(this.resume, this, context), true),
-                chrome.keyListen("/", isControl, bind(this.resume, this, context)),
-                chrome.keyCodeListen("F10", null, bind(this.stepOver, this, context), true),
-                chrome.keyListen("'", isControl, bind(this.stepOver, this, context)),
-                chrome.keyCodeListen("F11", null, bind(this.stepInto, this, context)),
-                chrome.keyListen(";", isControl, bind(this.stepInto, this, context)),
-                chrome.keyCodeListen("F11", isShift, bind(this.stepOut, this, context)),
-                chrome.keyListen(",", isControlShift, bind(this.stepOut, this, context))
+                chrome.keyCodeListen("F8", null, FBL.bind(this.resume, this, context), true),
+                chrome.keyListen("/", FBL.isControl, FBL.bind(this.resume, this, context)),
+                chrome.keyCodeListen("F10", null, FBL.bind(this.stepOver, this, context), true),
+                chrome.keyListen("'", FBL.isControl, FBL.bind(this.stepOver, this, context)),
+                chrome.keyCodeListen("F11", null, FBL.bind(this.stepInto, this, context)),
+                chrome.keyListen(";", FBL.isControl, FBL.bind(this.stepInto, this, context)),
+                chrome.keyCodeListen("F11", FBL.isShift, FBL.bind(this.stepOut, this, context)),
+                chrome.keyListen(",", FBL.isControlShift, FBL.bind(this.stepOut, this, context))
             ];
         },
 
@@ -1381,10 +1383,12 @@ Firebug.ScriptPanel.prototype = extend(Firebug.SourceBoxPanel,
         }
         catch (exc)
         {
-            if (FBTrace.DBG_UI_LOOP) FBTrace.sysout("debugger.stopDebugging FAILS", exc);
+            if (FBTrace.DBG_UI_LOOP)
+                FBTrace.sysout("debugger.stopDebugging FAILS", exc);
+
             // If the window is closed while the debugger is stopped,
             // then all hell will break loose here
-            ERROR(exc);
+            FBL.ERROR(exc);
         }
     },
 
@@ -1409,12 +1413,12 @@ Firebug.ScriptPanel.WarningRep = domplate(Firebug.Rep,
 
     enableScriptTag:
         SPAN({"class": "objectLink", onclick: "$onEnableScript", style: "color: blue"},
-            $STR("script.button.enable_javascript")
+            FBL.$STR("script.button.enable_javascript")
         ),
 
     focusDebuggerTag:
         SPAN({"class": "objectLink", onclick: "$onFocusDebugger", style: "color: blue"},
-            $STR("script.button.Go to that page")
+            FBL.$STR("script.button.Go to that page")
         ),
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
@@ -1428,7 +1432,7 @@ Firebug.ScriptPanel.WarningRep = domplate(Firebug.Rep,
 
     onFocusDebugger: function(event)
     {
-        iterateBrowserWindows("navigator:browser", function(win)
+        FBL.iterateBrowserWindows("navigator:browser", function(win)
         {
             return win.Firebug.TabWatcher.iterateContexts(function(context)
             {
@@ -1449,14 +1453,14 @@ Firebug.ScriptPanel.WarningRep = domplate(Firebug.Rep,
     showInactive: function(parentNode)
     {
         var args = {
-            pageTitle: $STR("script.warning.inactive_during_page_load"),
-            suggestion: $STR("script.suggestion.inactive_during_page_load2")
+            pageTitle: FBL.$STR("script.warning.inactive_during_page_load"),
+            suggestion: FBL.$STR("script.suggestion.inactive_during_page_load2")
         };
 
         var box = this.tag.replace(args, parentNode, this);
         var description = box.querySelector(".disabledPanelDescription");
         FirebugReps.Description.render(args.suggestion, description,
-            bindFixed(Firebug.TabWatcher.reloadPageFromMemory,  Firebug.TabWatcher, Firebug.currentContext));
+            FBL.bindFixed(Firebug.TabWatcher.reloadPageFromMemory,  Firebug.TabWatcher, Firebug.currentContext));
 
         return box;
     },
@@ -1464,8 +1468,8 @@ Firebug.ScriptPanel.WarningRep = domplate(Firebug.Rep,
     showNotEnabled: function(parentNode)
     {
         var args = {
-            pageTitle: $STR("script.warning.javascript_not_enabled"),
-            suggestion: $STR("script.suggestion.javascript_not_enabled")
+            pageTitle: FBL.$STR("script.warning.javascript_not_enabled"),
+            suggestion: FBL.$STR("script.suggestion.javascript_not_enabled")
         }
 
         var box = this.tag.replace(args, parentNode, this);
@@ -1477,8 +1481,8 @@ Firebug.ScriptPanel.WarningRep = domplate(Firebug.Rep,
     showDebuggerInactive: function(parentNode)
     {
         var args = {
-            pageTitle: $STR("script.warning.debugger_not_activated"),
-            suggestion: $STR("script.suggestion.debugger_not_activated")
+            pageTitle: FBL.$STR("script.warning.debugger_not_activated"),
+            suggestion: FBL.$STR("script.suggestion.debugger_not_activated")
         }
 
         var box = this.tag.replace(args, parentNode, this);
@@ -1489,8 +1493,8 @@ Firebug.ScriptPanel.WarningRep = domplate(Firebug.Rep,
     showFiltered: function(parentNode)
     {
         var args = {
-            pageTitle: $STR("script.warning.all_scripts_filtered"),
-            suggestion: $STR("script.suggestion.all_scripts_filtered")
+            pageTitle: FBL.$STR("script.warning.all_scripts_filtered"),
+            suggestion: FBL.$STR("script.suggestion.all_scripts_filtered")
         };
         return this.tag.replace(args, parentNode, this);
     },
@@ -1498,8 +1502,8 @@ Firebug.ScriptPanel.WarningRep = domplate(Firebug.Rep,
     showNoScript: function(parentNode)
     {
         var args = {
-            pageTitle: $STR("script.warning.no_javascript"),
-            suggestion: $STR("script.suggestion.no_javascript")
+            pageTitle: FBL.$STR("script.warning.no_javascript"),
+            suggestion: FBL.$STR("script.suggestion.no_javascript")
         }
         return this.tag.replace(args, parentNode, this);
     },
@@ -1507,8 +1511,8 @@ Firebug.ScriptPanel.WarningRep = domplate(Firebug.Rep,
     showActivitySuspended: function(parentNode)
     {
         var args = {
-            pageTitle: $STR("script.warning.debugger_active"),
-            suggestion: $STR("script.suggestion.debugger_active")
+            pageTitle: FBL.$STR("script.warning.debugger_active"),
+            suggestion: FBL.$STR("script.suggestion.debugger_active")
         }
 
         var box = this.tag.replace(args, parentNode, this);

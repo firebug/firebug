@@ -15,7 +15,7 @@ const MAX_HISTORY_MENU_ITEMS = 15;
 /**
  * @class Support for back and forward pattern for navigating within Firebug UI (panels).
  */
-Firebug.NavigationHistory = extend(Firebug.Module,
+Firebug.NavigationHistory = FBL.extend(Firebug.Module,
 {
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
     // Extending Module
@@ -80,9 +80,9 @@ Firebug.NavigationHistory = extend(Firebug.Module,
         if (end == count)
             start = Math.max(count - maxItems, 0);
 
-        var tooltipBack = $STR("firebug.history.Go back to this panel");
-        var tooltipCurrent = $STR("firebug.history.Stay on this panel");
-        var tooltipForward = $STR("firebug.history.Go forward to this panel");
+        var tooltipBack = FBL.$STR("firebug.history.Go back to this panel");
+        var tooltipCurrent = FBL.$STR("firebug.history.Stay on this panel");
+        var tooltipForward = FBL.$STR("firebug.history.Go forward to this panel");
 
         for (var i=end-1; i>=start; i--)
         {

@@ -309,14 +309,18 @@ Firebug.ExternalEditors = extend(Firebug.Module,
             }
 
             FBL.launchProgram(editor.executable, args);
-        } catch(exc) { ERROR(exc); }
+        }
+        catch(exc)
+        {
+            FBL.ERROR(exc);
+        }
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
     getLocalSourceFile: function(context, href)
     {
-        var filePath = getLocalOrSystemPath(href)
+        var filePath = FBL.getLocalOrSystemPath(href)
         if ( filePath )
             return filePath;
 

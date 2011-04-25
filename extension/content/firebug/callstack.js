@@ -17,7 +17,7 @@ const Ci = Components.interfaces;
  * panel.
  */
 Firebug.CallstackPanel = function() {}
-Firebug.CallstackPanel.prototype = extend(Firebug.Panel,
+Firebug.CallstackPanel.prototype = FBL.extend(Firebug.Panel,
 /** @lends Firebug.CallstackPanel */
 {
     name: "callstack",
@@ -83,8 +83,8 @@ Firebug.CallstackPanel.prototype = extend(Firebug.Panel,
 
     supportsObject: function(object, type)
     {
-        return (object instanceof StackTrace) || (object instanceof Ci.jsdIStackFrame) ||
-            (object instanceof StackFrame);
+        return (object instanceof FBL.StackTrace) || (object instanceof Ci.jsdIStackFrame) ||
+            (object instanceof FBL.StackFrame);
     },
 
     // this.selection is a StackFrame in our this.location
@@ -97,7 +97,7 @@ Firebug.CallstackPanel.prototype = extend(Firebug.Panel,
         }
 
         // The selection object should be StackFrame
-        if (object instanceof StackFrame)
+        if (object instanceof FBL.StackFrame)
         {
             var trace = this.location;
             var frameIndex = object.getFrameIndex();
@@ -129,11 +129,11 @@ Firebug.CallstackPanel.prototype = extend(Firebug.Panel,
     updateLocation: function(object)
     {
         // All paths lead to showStackTrace
-        if (object instanceof StackTrace)
+        if (object instanceof FBL.StackTrace)
             this.showStackTrace(object);
         else if (object instanceof Ci.jsdIStackFrame)
-            this.navigate(getCorrectedStackTrace(object, this.context));
-        else if (object instanceof StackFrame)
+            this.navigate(FBL.getCorrectedStackTrace(object, this.context));
+        else if (object instanceof FBL.StackFrame)
             this.showStackFrame(object);
     },
 
@@ -145,7 +145,7 @@ Firebug.CallstackPanel.prototype = extend(Firebug.Panel,
 
     showStackTrace: function(trace)
     {
-        clearNode(this.panelNode);
+        FBL.clearNode(this.panelNode);
 
         FBL.setClass(this.panelNode, "objectBox-stackTrace");
 
@@ -160,7 +160,7 @@ Firebug.CallstackPanel.prototype = extend(Firebug.Panel,
         if (trace.currentFrameIndex)
             this.select(trace[trace.currentFrameIndex]);
 
-        dispatch(this.fbListeners, "onStackCreated", [this]);
+        FBL.dispatch(this.fbListeners, "onStackCreated", [this]);
     },
 
     selectFrame: function(frameIndex)
@@ -186,17 +186,17 @@ Firebug.CallstackPanel.prototype = extend(Firebug.Panel,
     getOptionsMenuItems: function()
     {
         var items = [
-            optionMenu("OmitObjectPathStack", "omitObjectPathStack"),  // an option handled by chrome.js
+            FBL.optionMenu("OmitObjectPathStack", "omitObjectPathStack"),  // an option handled by chrome.js
         ];
         return items;
     },
 
     getContextMenuItems: function(nada, target)
     {
-        FBTrace.sysout("panel.getContextMenuItems", cloneArray(arguments));
+        FBTrace.sysout("panel.getContextMenuItems", FBL.cloneArray(arguments));
         var items = [
-            {label: "Expand All", command: bindFixed(this.onExpandAll, this, target)},
-            {label: "Collapse All", command: bindFixed(this.onCollapseAll, this, target)}
+            {label: "Expand All", command: FBL.bindFixed(this.onExpandAll, this, target)},
+            {label: "Collapse All", command: FBL.bindFixed(this.onCollapseAll, this, target)}
         ];
         return items;
     },
@@ -227,7 +227,7 @@ Firebug.CallstackPanel.prototype = extend(Firebug.Panel,
         delete this.parent;
 
         var frame = this.context.currentFrame;
-        var fnName = getFunctionName(frame.script, this.context, frame, true);
+        var fnName = FBL.getFunctionName(frame.script, this.context, frame, true);
 
         var referents = this.getReferents(frame, fnName);
 
@@ -298,13 +298,13 @@ function getReferents(frame, fnName)
             try
             {
                 var fn = result.value.getWrappedValue();
-                var thisObject = unwrapIValueObject(frame.thisValue, Firebug.viewChrome);
+                var thisObject = FBL.unwrapIValueObject(frame.thisValue, Firebug.viewChrome);
                 var referents = findObjectPropertyPath("this", thisObject, fn, []);
 
                 if (FBTrace.DBG_STACK)
                     FBTrace.sysout("Firebug.Debugger.showReferents found from thisObject "+referents.length, {thisObject: thisObject, fn: fn, referents: referents});
 
-                var containingScope = unwrapIValueObject(result.value.jsParent, Firebug.viewwChrome);
+                var containingScope = FBL.unwrapIValueObject(result.value.jsParent, Firebug.viewwChrome);
 
                 if (FBTrace.DBG_STACK)
                     FBTrace.sysout("Firebug.Debugger.showReferents containingScope from "+result.value.jsParent.jsClassName, containingScope);

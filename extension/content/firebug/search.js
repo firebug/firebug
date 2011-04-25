@@ -16,7 +16,7 @@ const searchDelay = 150;
  * available for panels that have <code>searchable<code> property set to true (set to
  * false by default).
  */
-Firebug.Search = extend(Firebug.Module,
+Firebug.Search = FBL.extend(Firebug.Module,
 {
     dispatchName: "search",
 
@@ -42,9 +42,9 @@ Firebug.Search = extend(Firebug.Module,
         var searchBox = Firebug.chrome.$("fbSearchBox");
 
         if (text && text.length > 0)
-            setClass(searchBox, "fbSearchBox-attention");
+            FBL.setClass(searchBox, "fbSearchBox-attention");
         else
-            removeClass(searchBox, "fbSearchBox-attention");
+            FBL.removeClass(searchBox, "fbSearchBox-attention");
 
         searchBox.value = text;
     },
@@ -76,7 +76,7 @@ Firebug.Search = extend(Firebug.Module,
         // have to make sure to make them all visible unless the user is appending to the
         // last string, in which case it's ok to just search the set of visible nodes
         if (!panel.searchText || value == panel.searchText || value.indexOf(panel.searchText) != 0)
-            removeClass(panelNode, "searching");
+            FBL.removeClass(panelNode, "searching");
 
         // Cancel the previous search to keep typing smooth
         clearTimeout(panelNode.searchTimeout);
@@ -85,17 +85,17 @@ Firebug.Search = extend(Firebug.Module,
         {
             var found = panel.search(value, reverse);
             if (!found && value)
-                beep();
+                FBL.beep();
 
             if (value)
             {
                 // Hides all nodes that didn't pass the filter
-                setClass(panelNode, "searching");
+                FBL.setClass(panelNode, "searching");
             }
             else
             {
                 // Makes all nodes visible again
-                removeClass(panelNode, "searching");
+                FBL.removeClass(panelNode, "searching");
             }
 
             panel.searchText = value;
@@ -114,12 +114,12 @@ Firebug.Search = extend(Firebug.Module,
                 if (value)
                 {
                     // Hides all nodes that didn't pass the filter
-                    setClass(panelNode, "searching");
+                    FBL.setClass(panelNode, "searching");
                 }
                 else
                 {
                     // Makes all nodes visible again
-                    removeClass(panelNode, "searching");
+                    FBL.removeClass(panelNode, "searching");
                 }
 
                 panel.searchText = value;
@@ -131,7 +131,7 @@ Firebug.Search = extend(Firebug.Module,
 
     onNotFound: function()
     {
-        beep();
+        FBL.beep();
     },
 
     isCaseSensitive: function(text)
@@ -153,14 +153,14 @@ Firebug.Search = extend(Firebug.Module,
         {
             // The user entered an invalid regex. Duck type the regex object
             // to support literal searches when an invalid regex is entered
-            return new LiteralRegExp(text, false, caseSensitive);
+            return new FBL.LiteralRegExp(text, false, caseSensitive);
         }
     },
 
     searchOptionMenu: function(label, option)
     {
         return { label: label, checked: Firebug[option], option: option,
-            command: bindFixed(this.onToggleSearchOption, this, option) };
+            command: FBL.bindFixed(this.onToggleSearchOption, this, option) };
     },
 
     onToggleSearchOption: function(option)
@@ -184,7 +184,7 @@ Firebug.Search = extend(Firebug.Module,
         // Manage visibility of the search-box according to the searchable flag.
         var searchBox = Firebug.chrome.$("fbSearchBox");
         searchBox.value = "";
-        removeClass(searchBox, "fbSearchBox-attention");
+        FBL.removeClass(searchBox, "fbSearchBox-attention");
 
         if (panel)
         {

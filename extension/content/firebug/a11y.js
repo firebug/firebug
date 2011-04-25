@@ -10,34 +10,34 @@ var singleSpaceTag = DIV({'class' : 'a11y1emSize'}, "x");
 // ************************************************************************************************
 // Module Management
 
-Firebug.A11yModel = extend(Firebug.Module,
+Firebug.A11yModel = FBL.extend(Firebug.Module,
 {
     dispatchName: "a11y",
 
     initialize : function()
     {
-        this.handleTabBarFocus = bind(this.handleTabBarFocus, this);
-        this.handleTabBarBlur = bind(this.handleTabBarBlur, this);
-        this.handlePanelBarKeyPress = bind(this.handlePanelBarKeyPress, this);
-        this.onNavigablePanelKeyPress = bind(this.onNavigablePanelKeyPress, this);
-        this.onConsoleMouseDown = bind(this.onConsoleMouseDown, this);
-        this.onLayoutKeyPress = bind(this.onLayoutKeyPress, this);
-        this.onCSSKeyPress = bind(this.onCSSKeyPress, this);
-        this.onCSSMouseDown = bind(this.onCSSMouseDown, this);
-        this.onHTMLKeyPress = bind(this.onHTMLKeyPress, this);
-        this.onHTMLFocus = bind(this.onHTMLFocus, this);
-        this.onHTMLBlur = bind(this.onHTMLBlur, this);
-        this.onPanelFocus = bind(this.onPanelFocus, this);
-        this.onLayoutFocus = bind(this.onLayoutFocus, this);
-        this.onLayoutBlur = bind(this.onLayoutBlur, this);
-        this.onScriptContextMenu = bind(this.onScriptContextMenu, this);
-        this.onCSSPanelContextMenu = bind(this.onCSSPanelContextMenu, this);
-        this.onScriptKeyPress = bind(this.onScriptKeyPress, this);
-        this.onScriptKeyUp = bind(this.onScriptKeyUp, this);
-        this.onScriptMouseUp = bind(this.onScriptMouseUp, this);
-        this.onNetMouseDown = bind(this.onNetMouseDown, this);
-        this.onNetFocus = bind(this.onNetFocus, this);
-        this.onNetBlur = bind(this.onNetBlur, this);
+        this.handleTabBarFocus = FBL.bind(this.handleTabBarFocus, this);
+        this.handleTabBarBlur = FBL.bind(this.handleTabBarBlur, this);
+        this.handlePanelBarKeyPress = FBL.bind(this.handlePanelBarKeyPress, this);
+        this.onNavigablePanelKeyPress = FBL.bind(this.onNavigablePanelKeyPress, this);
+        this.onConsoleMouseDown = FBL.bind(this.onConsoleMouseDown, this);
+        this.onLayoutKeyPress = FBL.bind(this.onLayoutKeyPress, this);
+        this.onCSSKeyPress = FBL.bind(this.onCSSKeyPress, this);
+        this.onCSSMouseDown = FBL.bind(this.onCSSMouseDown, this);
+        this.onHTMLKeyPress = FBL.bind(this.onHTMLKeyPress, this);
+        this.onHTMLFocus = FBL.bind(this.onHTMLFocus, this);
+        this.onHTMLBlur = FBL.bind(this.onHTMLBlur, this);
+        this.onPanelFocus = FBL.bind(this.onPanelFocus, this);
+        this.onLayoutFocus = FBL.bind(this.onLayoutFocus, this);
+        this.onLayoutBlur = FBL.bind(this.onLayoutBlur, this);
+        this.onScriptContextMenu = FBL.bind(this.onScriptContextMenu, this);
+        this.onCSSPanelContextMenu = FBL.bind(this.onCSSPanelContextMenu, this);
+        this.onScriptKeyPress = FBL.bind(this.onScriptKeyPress, this);
+        this.onScriptKeyUp = FBL.bind(this.onScriptKeyUp, this);
+        this.onScriptMouseUp = FBL.bind(this.onScriptMouseUp, this);
+        this.onNetMouseDown = FBL.bind(this.onNetMouseDown, this);
+        this.onNetFocus = FBL.bind(this.onNetFocus, this);
+        this.onNetBlur = FBL.bind(this.onNetBlur, this);
         Firebug.chrome.window.a11yEnabled = false; // mark ourselves disabled so we don't performDisable() if we are not enabled.
         Firebug.ToolsInterface.browser.addListener(this);
         Firebug.Console.addListener(this);
@@ -99,10 +99,10 @@ Firebug.A11yModel = extend(Firebug.Module,
     {
         var tmpElem;
         //add class used by all a11y related css styles (e.g. :focus and -moz-user-focus styles)
-        setClass(chrome.$('fbContentBox'), 'useA11y');
-        setClass(chrome.$('fbStatusBar'), 'useA11y');
+        FBL.setClass(chrome.$('fbContentBox'), 'useA11y');
+        FBL.setClass(chrome.$('fbStatusBar'), 'useA11y');
         tmpElem = chrome.$('fbStatusPrefix');
-        if (tmpElem) tmpElem.setAttribute('value', $STR("a11y.labels.firebug status"));
+        if (tmpElem) tmpElem.setAttribute('value', FBL.$STR("a11y.labels.firebug status"));
 
         //manage all key events in toolbox (including tablists)
         tmpElem = chrome.$("fbContentBox");
@@ -119,9 +119,9 @@ Firebug.A11yModel = extend(Firebug.Module,
         tmpELem = chrome.$('fbPanelBar2-panelTabs');
         if (tmpElem) tmpElem.addEventListener('blur', this.handleTabBarBlur, true);
         tmpElem = chrome.$("fbPanelBar1");
-        if (tmpElem) setClass(tmpElem.browser.contentDocument.body, 'useA11y');
+        if (tmpElem) FBL.setClass(tmpElem.browser.contentDocument.body, 'useA11y');
         tmpElem = chrome.$("fbPanelBar2");
-        if (tmpElem) setClass(tmpElem.browser.contentDocument.body, 'useA11y');
+        if (tmpElem) FBL.setClass(tmpElem.browser.contentDocument.body, 'useA11y');
         Firebug.Editor.addListener(this);
         this.listeningToEditor = true;
     },
@@ -130,8 +130,8 @@ Firebug.A11yModel = extend(Firebug.Module,
     {
         var tmpElem;
         //undo everything we did in performEnable
-        removeClass(chrome.$('fbContentBox'), 'useA11y');
-        removeClass(chrome.$('fbStatusBar'), 'useA11y');
+        FBL.removeClass(chrome.$('fbContentBox'), 'useA11y');
+        FBL.removeClass(chrome.$('fbStatusBar'), 'useA11y');
         tmpElem = chrome.$("fbPanelBar1");
         if (tmpElem) tmpElem.removeEventListener("keypress", this.handlePanelBarKeyPress , true);
         tmpElem = chrome.$("fbInspectButton");
@@ -147,11 +147,11 @@ Firebug.A11yModel = extend(Firebug.Module,
         tmpElem = chrome.$("fbPanelBar1");
         if (tmpElem)
         {
-            removeClass(tmpElem.browser.contentDocument.body, 'useA11y');
+            FBL.removeClass(tmpElem.browser.contentDocument.body, 'useA11y');
             tmpElem.browser.setAttribute('showcaret', false);
         }
         tmpElem = chrome.$("fbPanelBar2");
-        if (tmpElem) removeClass(tmpElem.browser.contentDocument.body, 'useA11y');
+        if (tmpElem) FBL.removeClass(tmpElem.browser.contentDocument.body, 'useA11y');
 
         if(this.listeningToEditor)
             Firebug.Editor.removeListener(this);
@@ -191,14 +191,14 @@ Firebug.A11yModel = extend(Firebug.Module,
                 panelA11y.manageFocus = true;
                 if (panel.name == "console")
                 {
-                    panel.panelNode.setAttribute('aria-label', $STR('a11y.labels.log rows'));
+                    panel.panelNode.setAttribute('aria-label', FBL.$STR('a11y.labels.log rows'));
                     panelA11y.lastIsDefault = true;
                     panel.panelNode.setAttribute('role', 'list');
                 }
                 else if (panel.name == "callstack")
                 {
                     panel.panelNode.setAttribute('role', 'list');
-                    panel.panelNode.setAttribute('aria-label', $STR('a11y.labels.call stack'));
+                    panel.panelNode.setAttribute('aria-label', FBL.$STR('a11y.labels.call stack'));
                 }
                 else
                     panel.panelNode.setAttribute('role', 'presentation');
@@ -212,7 +212,7 @@ Firebug.A11yModel = extend(Firebug.Module,
                 break;
             case 'html':
                 panel.panelNode.setAttribute('role', 'tree');
-                panel.panelNode.setAttribute('aria-label', $STR('a11y.labels.document structure'));
+                panel.panelNode.setAttribute('aria-label', FBL.$STR('a11y.labels.document structure'));
                 panel.panelNode.addEventListener("keypress", this.onHTMLKeyPress, false);
                 panel.panelNode.addEventListener("focus", this.onHTMLFocus, true);
                 panel.panelNode.addEventListener("blur", this.onHTMLBlur, true);
@@ -223,7 +223,7 @@ Firebug.A11yModel = extend(Firebug.Module,
                 panel.panelNode.addEventListener("mousedown", this.onCSSMouseDown, false);
                 panel.panelNode.addEventListener("focus", this.onPanelFocus, true);
                 panel.panelNode.addEventListener('contextmenu', this.onCSSPanelContextMenu, false)
-                this.insertHiddenText(panel, panel.panelNode, $STR('a11y.labels.overridden'), false, "CSSOverriddenDescription");
+                this.insertHiddenText(panel, panel.panelNode, FBL.$STR('a11y.labels.overridden'), false, "CSSOverriddenDescription");
                 panel.panelNode.setAttribute('role', panel.name == "stylesheet" ? 'list' : "presentation");
                 break;
             case 'layout':
@@ -309,10 +309,10 @@ Firebug.A11yModel = extend(Firebug.Module,
         var panelType = Firebug.getPanelType(panel.name);
         if (panelType)
             title = Firebug.getPanelTitle(panelType);
-        Firebug.chrome.$('fbToolbar').setAttribute('aria-label', title + " " + $STR("a11y.labels.panel tools"))
+        Firebug.chrome.$('fbToolbar').setAttribute('aria-label', title + " " + FBL.$STR("a11y.labels.panel tools"))
         var panelBrowser = Firebug.chrome.getPanelBrowser(panel);
         panelBrowser.setAttribute('showcaret', (panel.name == "script"));
-        panelBrowser.contentDocument.body.setAttribute('aria-label', $STRF("a11y.labels.title panel", [title]));
+        panelBrowser.contentDocument.body.setAttribute('aria-label', FBL.$STRF("a11y.labels.title panel", [title]));
     },
 
     showSidePanel : function(browser, sidePanel)
@@ -324,7 +324,7 @@ Firebug.A11yModel = extend(Firebug.Module,
         var panelType = Firebug.getPanelType(sidePanel.name);
         if (panelType)
             title = Firebug.getPanelTitle(panelType);
-            panelBrowser.contentDocument.body.setAttribute('aria-label', $STRF("a11y.labels.title side panel", [title]));
+            panelBrowser.contentDocument.body.setAttribute('aria-label', FBL.$STRF("a11y.labels.title side panel", [title]));
     },
 
     addLiveElem : function(panel, role, politeness)
@@ -332,7 +332,7 @@ Firebug.A11yModel = extend(Firebug.Module,
         var panelA11y = this.getPanelA11y(panel);
         if (!panelA11y)
             return;
-        if (panelA11y.liveElem && isElement(panelA11y.liveElem))
+        if (panelA11y.liveElem && FBL.isElement(panelA11y.liveElem))
             return;
         var attrName = attrValue = "";
         if (role)
@@ -406,8 +406,8 @@ Firebug.A11yModel = extend(Firebug.Module,
                             siblingTab = target.parentNode[forward ? 'firstChild' : 'lastChild'];
                         if (siblingTab)
                         {
-                            var panelBar = getAncestorByClass(target, 'panelBar')
-                            setTimeout(bindFixed(function()
+                            var panelBar = FBL.getAncestorByClass(target, 'panelBar')
+                            setTimeout(FBL.bindFixed(function()
                             {
                                 panelBar.selectTab(siblingTab);
                                 this.focus(siblingTab);
@@ -418,32 +418,32 @@ Firebug.A11yModel = extend(Firebug.Module,
                    {
                        if (target.id=="fbFirebugMenu" && !forward)
                        {
-                            cancelEvent(event);
+                            FBL.cancelEvent(event);
                             return;
                        }
-                       toolbar = getAncestorByClass(target, 'innerToolbar');
+                       toolbar = FBL.getAncestorByClass(target, 'innerToolbar');
                        if (toolbar)
                        {
                            var doc = target.ownerDocument;
                            //temporarily make all buttons in the toolbar part of the tab order,
                            //to allow smooth, native focus advancement
-                           setClass(toolbar, 'hasTabOrder');
-                           setTimeout(bindFixed(function() // time out needed to fix this behavior in 3.6
+                           FBL.setClass(toolbar, 'hasTabOrder');
+                           setTimeout(FBL.bindFixed(function() // time out needed to fix this behavior in 3.6
                            {
                                doc.commandDispatcher[forward ? 'advanceFocus' : 'rewindFocus']();
                                //remove the buttons from the tab order again, so that it will remain uncluttered
                                //Very ugly hack, but it works well. This prevents focus to 'spill out' of a
                                //toolbar when using the left and right arrow keys
-                               if (!isAncestor(doc.commandDispatcher.focusedElement, toolbar))
+                               if (!FBL.isAncestor(doc.commandDispatcher.focusedElement, toolbar))
                                {
                                    //we moved focus to somewhere out of the toolbar: not good. Move it back to where it was.
                                    doc.commandDispatcher[!forward ? 'advanceFocus' : 'rewindFocus']();
                                }
-                               removeClass(toolbar, 'hasTabOrder');
+                               FBL.removeClass(toolbar, 'hasTabOrder');
                            }, this));
 
                        }
-                        cancelEvent(event);
+                        FBL.cancelEvent(event);
                         return;
                    }
                 break;
@@ -459,7 +459,7 @@ Firebug.A11yModel = extend(Firebug.Module,
                                 target.showPopup();
                             else
                                 target.open = true;
-                            cancelEvent(event);
+                            FBL.cancelEvent(event);
                             return false;
                         }
                     }
@@ -514,7 +514,7 @@ Firebug.A11yModel = extend(Firebug.Module,
         if (panelA11y.manageFocus)
         {
             var tabStop = this.getPanelTabStop(panel);
-            if (!tabStop || !this.isVisibleByStyle(tabStop) || !isVisible(tabStop))
+            if (!tabStop || !this.isVisibleByStyle(tabStop) || !FBL.isVisible(tabStop))
             {
                 this.tabStop = null;
                 this.findPanelTabStop(panel, 'focusRow', panelA11y.lastIsDefault);
@@ -534,7 +534,7 @@ Firebug.A11yModel = extend(Firebug.Module,
         switch (panelA11y.type)
         {
             case  'console' :
-                if (hasClass(elem, 'focusRow'))
+                if (FBL.hasClass(elem, 'focusRow'))
                     this.modifyPanelRow(panel, elem, makeTab);
                 break;
         }
@@ -565,7 +565,7 @@ Firebug.A11yModel = extend(Firebug.Module,
     findPanelTabStop : function(panel, className, last)
     {
         var candidates = panel.panelNode.getElementsByClassName(className);
-        candidates= Array.filter(candidates, function(e,i,a){return this.isVisibleByStyle(e) && isVisible(e);}, this);
+        candidates= Array.filter(candidates, function(e,i,a){return this.isVisibleByStyle(e) && FBL.isVisible(e);}, this);
         if (candidates.length > 0)
         {
             var chosenRow = candidates[last ? candidates.length -1 : 0];
@@ -584,40 +584,40 @@ Firebug.A11yModel = extend(Firebug.Module,
         var panelA11y = this.getPanelA11y(panel);
         if (!panelA11y)
             return;
-        if (hasClass(row, 'logRow-dir'))
+        if (FBL.hasClass(row, 'logRow-dir'))
         {
             row.setAttribute('role', 'listitem');
-            setClass(row, 'outerFocusRow');
+            FBL.setClass(row, 'outerFocusRow');
             var memberRows = row.getElementsByClassName('memberRow');
             if (memberRows.length > 0)
                 this.onMemberRowsAdded(panel, memberRows);
         }
-        else if (hasClass(row, 'logRow-group') || hasClass(row, 'logRow-profile'))
+        else if (FBL.hasClass(row, 'logRow-group') || FBL.hasClass(row, 'logRow-profile'))
         {
             row.setAttribute('role', 'presentation');
             var focusRow = row.getElementsByClassName('logGroupLabel').item(0);
             if (focusRow)
             {
                 this.setPanelTabStop(panel, focusRow);
-                focusRow.setAttribute('aria-expanded', hasClass(row, 'opened') + "");
-                if (!hasClass(row, 'logRow-profile'))
+                focusRow.setAttribute('aria-expanded', FBL.hasClass(row, 'opened') + "");
+                if (!FBL.hasClass(row, 'logRow-profile'))
                     this.insertHiddenText(panel, focusRow, 'group label: ');
             }
         }
-        else if (hasClass(row, 'logRow-errorMessage') || hasClass(row, 'logRow-warningMessage'))
+        else if (FBL.hasClass(row, 'logRow-errorMessage') || FBL.hasClass(row, 'logRow-warningMessage'))
         {
-            setClass(row, 'outerFocusRow');
+            FBL.setClass(row, 'outerFocusRow');
             row.setAttribute('role', 'presentation');
             var focusRow = row.getElementsByClassName('errorTitle').item(0);
             if (focusRow)
             {
                 this.setPanelTabStop(panel, focusRow);
-                focusRow.setAttribute('aria-expanded', hasClass(focusRow.parentNode, 'opened') + "");
+                focusRow.setAttribute('aria-expanded', FBL.hasClass(focusRow.parentNode, 'opened') + "");
             }
         }
-        else if (hasClass(row, 'logRow-stackTrace'))
+        else if (FBL.hasClass(row, 'logRow-stackTrace'))
         {
-            setClass(row, 'outerFocusRow');
+            FBL.setClass(row, 'outerFocusRow');
             row.setAttribute('role', 'listitem');
             var stackFrames = row.getElementsByClassName('focusRow');
             Array.forEach(stackFrames, function(e,i,a){
@@ -628,18 +628,18 @@ Firebug.A11yModel = extend(Firebug.Module,
                     this.makeFocusable(e, false);
                 }, this);
         }
-        else if (hasClass(row, 'logRow-spy'))
+        else if (FBL.hasClass(row, 'logRow-spy'))
         {
-            var focusRow = getChildByClass(row, 'spyHeadTable');
+            var focusRow = FBL.getChildByClass(row, 'spyHeadTable');
             if (focusRow)
                 this.makeFocusable(focusRow, true);
         }
         else
         {
             row.setAttribute('role', 'listitem');
-            setClass(row, 'focusRow');
-            setClass(row, 'outerFocusRow');
-            if (isVisible(row))
+            FBL.setClass(row, 'focusRow');
+            FBL.setClass(row, 'outerFocusRow');
+            if (FBL.isVisible(row))
                 this.setPanelTabStop(panel, row);
         }
     },
@@ -650,7 +650,7 @@ Firebug.A11yModel = extend(Firebug.Module,
         var logRowType = this.getLogRowType(row);
         if (logRowType)
             this.insertHiddenText(panel, row, logRowType + ": ");
-        var arrayNode = getChildByClass(row, 'objectBox-array');
+        var arrayNode = FBL.getChildByClass(row, 'objectBox-array');
         if (arrayNode)
         {
             arrayNode.setAttribute('role', 'group');
@@ -691,7 +691,7 @@ Firebug.A11yModel = extend(Firebug.Module,
                 if (newTarget)
                     newTarget = [33, 38].indexOf(keyCode) == -1 ? this.getLastFocusChild(newTarget) : this.getFirstFocusChild(newTarget)
             }
-            else if (!this.isDirCell(target) || hasClass(target, 'netInfoTab') || hasClass(target, 'netCol'))
+            else if (!this.isDirCell(target) || FBL.hasClass(target, 'netInfoTab') || FBL.hasClass(target, 'netCol'))
                 newTarget = this.getAncestorRow(target, true);
             if (!newTarget)
                 newTarget = target;
@@ -703,7 +703,7 @@ Firebug.A11yModel = extend(Firebug.Module,
             if (!this.isFocusNoTabObject(target))
             {
                 this.focusSiblingRow(panel, newTarget, keyCode == 38);
-                cancelEvent(event);
+                FBL.cancelEvent(event);
             }
                 break;
             case 37://left
@@ -711,15 +711,15 @@ Firebug.A11yModel = extend(Firebug.Module,
             var goLeft = keyCode == 37;
             if (this.isDirCell(target))
             {
-                var row = getAncestorByClass(target, 'memberRow');
-                var toggleElem = getChildByClass(row.cells[1], "memberLabel")
-                if (!goLeft && hasClass(row, 'hasChildren'))
+                var row = FBL.getAncestorByClass(target, 'memberRow');
+                var toggleElem = FBL.getChildByClass(row.cells[1], "memberLabel")
+                if (!goLeft && FBL.hasClass(row, 'hasChildren'))
                 {
-                    if (hasClass(row, 'opened'))
+                    if (FBL.hasClass(row, 'opened'))
                         this.focusSiblingRow(panel, target , false);
                     else if (toggleElem)
                     {
-                        if (hasClass(row, 'hasChildren'))
+                        if (FBL.hasClass(row, 'hasChildren'))
                             target.setAttribute('aria-expanded', 'true');
                         this.dispatchMouseEvent(toggleElem, 'click');
                     }
@@ -727,9 +727,9 @@ Firebug.A11yModel = extend(Firebug.Module,
                 else if (goLeft)
                 {
                     var level = parseInt(row.getAttribute("level"));
-                    if (hasClass(row, 'opened'))
+                    if (FBL.hasClass(row, 'opened'))
                     {
-                        if (hasClass(row, 'hasChildren'))
+                        if (FBL.hasClass(row, 'hasChildren'))
                             target.setAttribute('aria-expanded', 'false');
                         this.dispatchMouseEvent(toggleElem, 'click');
                     }
@@ -743,35 +743,35 @@ Firebug.A11yModel = extend(Firebug.Module,
                             this.focus(newRows[newRows.length -1].cells[2].firstChild);
                     }
                 }
-                cancelEvent(event);
+                FBL.cancelEvent(event);
             }
             else if (this.isOuterFocusRow(target, true))
             {
                 if (target.hasAttribute('aria-expanded'))
                 {
-                    if (target.getAttribute('role') == 'row' || hasClass(target, 'spyHeadTable'))
+                    if (target.getAttribute('role') == 'row' || FBL.hasClass(target, 'spyHeadTable'))
                     {
                         if (goLeft && target.getAttribute('aria-expanded') == "true")
                         {
-                            var toggleElem = hasClass(target, 'spyHeadTable') ? target.getElementsByClassName('spyTitleCol').item(0) : target;
+                            var toggleElem = FBL.hasClass(target, 'spyHeadTable') ? target.getElementsByClassName('spyTitleCol').item(0) : target;
                             if (toggleElem)
                                 this.dispatchMouseEvent(toggleElem, 'click');
                         }
                     }
                     else if (target.getAttribute('aria-expanded') == (goLeft ? "true" : "false"))
-                        this.dispatchMouseEvent(target, hasClass(target, 'logGroupLabel') ? 'mousedown' : 'click');
+                        this.dispatchMouseEvent(target, FBL.hasClass(target, 'logGroupLabel') ? 'mousedown' : 'click');
                 }
                 if (goLeft)
                 {
                     //check if we're in an expanded section
                     var inExpanded = false, groupClass, groupLabelClass, group, groupLabel;
-                    if (hasClass(target, 'objectBox-stackFrame'))
+                    if (FBL.hasClass(target, 'objectBox-stackFrame'))
                     {
                         inExpanded = true;
                         groupClass = "errorTrace";
                         groupLabelClass = "errorTitle";
                     }
-                    else if (getAncestorByClass(target, 'logGroupBody'))
+                    else if (FBL.getAncestorByClass(target, 'logGroupBody'))
                     {
                         inExpanded = true;
                         groupClass = "logGroupBody";
@@ -779,7 +779,7 @@ Firebug.A11yModel = extend(Firebug.Module,
                     }
                     if (inExpanded)
                     {
-                        group = getAncestorByClass(target, groupClass);
+                        group = FBL.getAncestorByClass(target, groupClass);
                         if (group)
                         {
                             groupLabel = this.getPreviousByClass(target, groupLabelClass, false, panel.panelNode);
@@ -814,30 +814,30 @@ Firebug.A11yModel = extend(Firebug.Module,
                 }
                 else
                     this.focus(goLeft ? parentRow : focusObjects[focusObjects.length -1]);
-                cancelEvent(event);
+                FBL.cancelEvent(event);
             }
             break;
         case 35://end
         case 36://home
             this.focusEdgeRow(panel, newTarget, keyCode == 36);
-            cancelEvent(event);
+            FBL.cancelEvent(event);
             break;
         case 33://pgup
         case 34://pgdn
             this.focusPageSiblingRow(panel, newTarget, keyCode == 33);
-            cancelEvent(event);
+            FBL.cancelEvent(event);
             break;
         case 13://enter
             if (this.isFocusObject(target))
             {
                 this.dispatchMouseEvent(target, 'click');
             }
-            else if(hasClass(target, 'watchEditBox'))
+            else if(FBL.hasClass(target, 'watchEditBox'))
             {
                 this.dispatchMouseEvent(target, 'mousedown');
-                cancelEvent(event);
+                FBL.cancelEvent(event);
             }
-            else if (hasClass(target, 'breakpointRow'))
+            else if (FBL.hasClass(target, 'breakpointRow'))
             {
                 var sourceLink = target.getElementsByClassName("objectLink-sourceLink").item(0);
                 if (sourceLink)
@@ -845,7 +845,7 @@ Firebug.A11yModel = extend(Firebug.Module,
             }
             else if (target.hasAttribute('aria-expanded') && (target.getAttribute('role') == 'row' || target.getAttribute('role') == 'listitem'))
             {
-                var toggleElem = hasClass(target, 'spyHeadTable') ? target.getElementsByClassName('spyTitleCol').item(0) : target;
+                var toggleElem = FBL.hasClass(target, 'spyHeadTable') ? target.getElementsByClassName('spyTitleCol').item(0) : target;
                 if (toggleElem)
                     this.dispatchMouseEvent(toggleElem, 'click');
             }
@@ -854,11 +854,11 @@ Firebug.A11yModel = extend(Firebug.Module,
         if (this.isFocusObject(target) && target.hasAttribute('role', 'checkbox'))
         {
             this.dispatchMouseEvent(target, 'click');
-            var objectBox = getAncestorByClass(target, 'hasBreakSwitch');
+            var objectBox = FBL.getAncestorByClass(target, 'hasBreakSwitch');
             if (objectBox)
-                target.setAttribute('aria-checked', hasClass(objectBox, 'breakForError') + "");
+                target.setAttribute('aria-checked', FBL.hasClass(objectBox, 'breakForError') + "");
         }
-        else if (hasClass(target, 'breakpointRow'))
+        else if (FBL.hasClass(target, 'breakpointRow'))
         {
             var checkbox = target.getElementsByClassName('breakpointCheckbox').item(0);
             if (checkbox)
@@ -869,12 +869,12 @@ Firebug.A11yModel = extend(Firebug.Module,
         }
         break;
         case 46://del
-            if (hasClass(target, 'breakpointRow'))
+            if (FBL.hasClass(target, 'breakpointRow'))
             {
                 var closeBtn = target.getElementsByClassName('closeButton').item(0);
                 if (closeBtn)
                 {
-                    var prevBreakpoint = getPreviousByClass(target, 'breakpointRow');
+                    var prevBreakpoint = FBL.getPreviousByClass(target, 'breakpointRow');
                     if (prevBreakpoint)
                         this.makeFocusable(prevBreakpoint, true);
                     Firebug.chrome.window.document.commandDispatcher.rewindFocus();
@@ -894,11 +894,11 @@ Firebug.A11yModel = extend(Firebug.Module,
         if (panelA11y.cellIndex !== undefined && row.cells && row.cells[panelA11y.cellIndex]) //allows up / down navigation in columns, if columns are used in this panel
         {
             var cell = row.cells[panelA11y.cellIndex];
-            if (!hasClass(cell, "a11yFocus"))
-                cell = getChildByClass(cell, 'a11yFocus');
+            if (!FBL.hasClass(cell, "a11yFocus"))
+                cell = FBL.getChildByClass(cell, 'a11yFocus');
             this.focus(cell);
         }
-        else if (hasClass(row, 'netInfoTabs')) // for Net Panel. Focus selected tab rather than the tablist
+        else if (FBL.hasClass(row, 'netInfoTabs')) // for Net Panel. Focus selected tab rather than the tablist
         {
             var tabs = row.getElementsByClassName('netInfoTab');
             tabs = Array.filter(tabs, function(e,i,a){return e.hasAttribute('selected');})
@@ -915,26 +915,26 @@ Firebug.A11yModel = extend(Firebug.Module,
 
     getAncestorRow : function(elem, useSubRow)
     {
-        return getAncestorByClass(elem, useSubRow ? 'focusRow' : 'outerFocusRow');
+        return FBL.getAncestorByClass(elem, useSubRow ? 'focusRow' : 'outerFocusRow');
     },
 
     onConsoleMouseDown : function(event)
     {
-        var node = getAncestorByClass(event.target, 'focusRow');
+        var node = FBL.getAncestorByClass(event.target, 'focusRow');
         if (node)
             this.modifyPanelRow(Firebug.getElementPanel(node), node, false);
         else
         {
-            node = getAncestorByClass(event.target, 'memberRow');
+            node = FBL.getAncestorByClass(event.target, 'memberRow');
             if (!node)
                 return;
             var focusRow = node.getElementsByClassName('focusRow').item(0);
             if (!focusRow)
                 return;
             this.focusPanelRow(Firebug.getElementPanel(focusRow), focusRow);
-            node = getAncestorByClass(event.target, 'memberLabel')
-            if (!(node && hasClass(node, 'hasChildren')))
-                cancelEvent(event);
+            node = FBL.getAncestorByClass(event.target, 'memberLabel')
+            if (!(node && FBL.hasClass(node, 'hasChildren')))
+                FBL.cancelEvent(event);
         }
     },
 
@@ -960,7 +960,7 @@ Firebug.A11yModel = extend(Firebug.Module,
             this.modifyProfileRow(panel, row, inTabOrder);
         else if (this.isOuterFocusRow(row, true))
         {
-            if (hasClass(row, 'spyHeadTable') || hasClass(row, 'netInfoTabs'))
+            if (FBL.hasClass(row, 'spyHeadTable') || FBL.hasClass(row, 'netInfoTabs'))
                 this.modifyNetRow(panel, row, row.getAttribute('tabindex')=== '0');
             else
                 this.modifyLogRow(panel, row, row.getAttribute('tabindex')=== '0');
@@ -977,7 +977,7 @@ Firebug.A11yModel = extend(Firebug.Module,
             var focusObjects = this.getFocusObjects(row);
             Array.forEach(focusObjects, function(e,i,a) {
                 this.makeFocusable(e);
-                if (hasClass(e.parentNode, "profileCell"))
+                if (FBL.hasClass(e.parentNode, "profileCell"))
                     e.setAttribute("role", "gridcell");
             }, this);
     },
@@ -989,9 +989,9 @@ Firebug.A11yModel = extend(Firebug.Module,
             return;
         var matchFeedback = "";
         if (!matches || matches.length == 0)
-            matchFeedback = $STRF('a11y.updates.no matches found', [text]);
+            matchFeedback = FBL.$STRF('a11y.updates.no matches found', [text]);
         else
-            matchFeedback = $STRF('a11y.updates.match found in logrows', [text, matches.length]);
+            matchFeedback = FBL.$STRF('a11y.updates.match found in logrows', [text, matches.length]);
         this.updateLiveElem(panel, matchFeedback, true); //should not use alert
     },
 
@@ -1004,7 +1004,7 @@ Firebug.A11yModel = extend(Firebug.Module,
         var keyCode = event.keyCode || (event.type=='keypress' ? event.charCode : null);
         if ([13, 32, KeyEvent.DOM_VK_F2].indexOf(keyCode) == -1)
             return;
-        if (!hasClass(target, "nodeLabelBox"))
+        if (!FBL.hasClass(target, "nodeLabelBox"))
             return;
         var panel = Firebug.getElementPanel(target);
         switch(keyCode)
@@ -1019,23 +1019,23 @@ Firebug.A11yModel = extend(Firebug.Module,
                     if (nodeLabels.length > 0)
                     {
                         Firebug.Editor.startEditing(nodeLabels[0]);
-                        cancelEvent(event);
+                        FBL.cancelEvent(event);
                     }
                 }
                 if (!isEnter || nodeLabels.length == 0)
                 {
-                    var nodeBox = getAncestorByClass(target, 'nodeBox');
+                    var nodeBox = FBL.getAncestorByClass(target, 'nodeBox');
                     if (nodeBox.repObject && panel.editNewAttribute)
                     {
                         panel.editNewAttribute(nodeBox.repObject)
-                        cancelEvent(event);
+                        FBL.cancelEvent(event);
                     }
                 }
                 break;
             case KeyEvent.DOM_VK_F2:
-                if (hasClass(target.parentNode.parentNode, 'textNodeBox'))
+                if (FBL.hasClass(target.parentNode.parentNode, 'textNodeBox'))
                 {
-                    var textNode = getChildByClass(target, 'nodeText');
+                    var textNode = FBL.getChildByClass(target, 'nodeText');
                     if (textNode)
                         Firebug.Editor.startEditing(textNode);
                 }
@@ -1045,27 +1045,27 @@ Firebug.A11yModel = extend(Firebug.Module,
 
     onHTMLFocus : function(event)
     {
-        if (hasClass(event.target, 'nodeLabelBox'))
+        if (FBL.hasClass(event.target, 'nodeLabelBox'))
         {
             this.dispatchMouseEvent(event.target, 'mouseover');
-            var nodeLabel = getAncestorByClass(event.target, 'nodeLabel');
+            var nodeLabel = FBL.getAncestorByClass(event.target, 'nodeLabel');
             if (nodeLabel)
-                setClass(nodeLabel, 'focused');
+                FBL.setClass(nodeLabel, 'focused');
             event.target.setAttribute("aria-selected", "true");
-            cancelEvent(event);
+            FBL.cancelEvent(event);
         }
     },
 
     onHTMLBlur : function(event)
     {
-        if (hasClass(event.target, 'nodeLabelBox'))
+        if (FBL.hasClass(event.target, 'nodeLabelBox'))
         {
             this.dispatchMouseEvent(event.target, 'mouseout');
-            var nodeLabel = getAncestorByClass(event.target, 'nodeLabel');
+            var nodeLabel = FBL.getAncestorByClass(event.target, 'nodeLabel');
             if (nodeLabel)
-                removeClass(nodeLabel, 'focused');
+                FBL.removeClass(nodeLabel, 'focused');
             event.target.setAttribute("aria-selected", "false");
-            cancelEvent(event);
+            FBL.cancelEvent(event);
         }
     },
 
@@ -1105,17 +1105,17 @@ Firebug.A11yModel = extend(Firebug.Module,
         {
             case 1: //element
                 elem = node;
-                matchFeedback += $STRF("a11y.updates.match found in element", [match.match[0], elem.nodeName, getElementTreeXPath(elem)]);
+                matchFeedback += FBL.$STRF("a11y.updates.match found in element", [match.match[0], elem.nodeName, FBL.getElementTreeXPath(elem)]);
                 break;
             case 2: //attribute
                 elem = node.ownerElement;
-                matchFeedback += $STRF("a11y.updates.match found in attribute",
-                    [match.match[0], node.nodeName, node.nodeValue, elem.nodeName, getElementTreeXPath(elem)]);
+                matchFeedback += FBL.$STRF("a11y.updates.match found in attribute",
+                    [match.match[0], node.nodeName, node.nodeValue, elem.nodeName, FBL.getElementTreeXPath(elem)]);
                 break;
 
             case 3: //text content
                 elem = node.parentNode;
-                matchFeedback += $STRF("a11y.updates.match found in text content", [match.match[0], match.match.input]);
+                matchFeedback += FBL.$STRF("a11y.updates.match found in text content", [match.match[0], match.match.input]);
                 break;
         }
         this.updateLiveElem(panel, matchFeedback, true); //should not use alert
@@ -1123,7 +1123,7 @@ Firebug.A11yModel = extend(Firebug.Module,
 
     onHTMLSearchNoMatchFound: function(panel, text)
     {
-        this.updateLiveElem(panel, $STRF('a11y.updates.no matches found', [text]), true); //should not use alert
+        this.updateLiveElem(panel, FBL.$STRF('a11y.updates.no matches found', [text]), true); //should not use alert
     },
 
     moveToSearchMatch: function()
@@ -1147,7 +1147,7 @@ Firebug.A11yModel = extend(Firebug.Module,
                 var nodeBox = panel.lastSearch.openToNode(match.node, match.isValue);
                 if (!nodeBox)
                     return;
-                nodeBox = getAncestorByClass(nodeBox, 'nodeBox');
+                nodeBox = FBL.getAncestorByClass(nodeBox, 'nodeBox');
                 //select call will not trigger focus because focus is outside the HTML panel (i.e. the search field),
                 panel.select(nodeBox.repObject, true);
                 // Manually force selected node to be focused
@@ -1156,7 +1156,7 @@ Firebug.A11yModel = extend(Firebug.Module,
             case 'css':
                 if (panel.currentSearch && panel.currentSearch.currentNode)
                 {
-                    var focusRow = getAncestorByClass(panel.currentSearch.currentNode, 'focusRow');
+                    var focusRow = FBL.getAncestorByClass(panel.currentSearch.currentNode, 'focusRow');
                     if (focusRow)
                     {
                         this.focusPanelRow(panel, focusRow);
@@ -1192,7 +1192,7 @@ Firebug.A11yModel = extend(Firebug.Module,
             case 'net':
                 if (panel.currentSearch && panel.currentSearch.currentNode)
                 {
-                    var focusRow = getAncestorByClass(panel.currentSearch.currentNode, 'focusRow');
+                    var focusRow = FBL.getAncestorByClass(panel.currentSearch.currentNode, 'focusRow');
                     if (focusRow)
                     {
                         this.focusPanelRow(panel, focusRow);
@@ -1257,36 +1257,36 @@ Firebug.A11yModel = extend(Firebug.Module,
                     this.focusPageSiblingCSSRow(panel, target, keyCode == 33);
                 break;
             case 13://enter
-                if (hasClass(target, 'cssProp'))
+                if (FBL.hasClass(target, 'cssProp'))
                 {
-                    var node = getChildByClass(target, 'cssPropName');
+                    var node = FBL.getChildByClass(target, 'cssPropName');
                     if (node)
                         Firebug.Editor.startEditing(node);
-                    cancelEvent(event);
+                    FBL.cancelEvent(event);
                 }
-                else if (hasClass(target, 'cssHead'))
+                else if (FBL.hasClass(target, 'cssHead'))
                 {
-                    var node = getChildByClass(target, 'cssSelector');
-                    if (node && hasClass(node, 'editable'))
+                    var node = FBL.getChildByClass(target, 'cssSelector');
+                    if (node && FBL.hasClass(node, 'editable'))
                         Firebug.Editor.startEditing(node);
-                    cancelEvent(event);
+                    FBL.cancelEvent(event);
                 }
-                else if (hasClass(target, 'importRule'))
+                else if (FBL.hasClass(target, 'importRule'))
                 {
-                    var node = getChildByClass(target, 'objectLink');
+                    var node = FBL.getChildByClass(target, 'objectLink');
                     if (node)
                         this.dispatchMouseEvent(node, 'click');
                 }
                 break;
             case 32://space
-                if (hasClass(target, 'cssProp'))
+                if (FBL.hasClass(target, 'cssProp'))
                 {
                     //our focus is about to be wiped out, we'll try to get it back after
-                    panelA11y.reFocusId = getElementXPath(target);
+                    panelA11y.reFocusId = FBL.getElementXPath(target);
                     panel.disablePropertyRow(target);
                     if (panel.name == "stylesheet")
-                        target.setAttribute('aria-checked', !hasClass(target, 'disabledStyle'));
-                    cancelEvent(event);
+                        target.setAttribute('aria-checked', !FBL.hasClass(target, 'disabledStyle'));
+                    FBL.cancelEvent(event);
                 }
                 break;
         }
@@ -1296,7 +1296,7 @@ Firebug.A11yModel = extend(Firebug.Module,
 
     onCSSMouseDown : function(event)
     {
-        var row = getAncestorByClass(event.target, 'focusRow');
+        var row = FBL.getAncestorByClass(event.target, 'focusRow');
         if (row)
             this.modifyPanelRow(Firebug.getElementPanel(row), row, false);
     },
@@ -1327,8 +1327,8 @@ Firebug.A11yModel = extend(Firebug.Module,
     getHeadRowsAndIndex: function(panel, elem)
     {
         var rows = this.getFocusRows(panel);
-        var headRow = hasClass(elem, 'cssHead') ? elem : getPreviousByClass(elem, 'cssHead');
-        var headRows = Array.filter(rows, function(e,i,a){return hasClass(e, 'cssHead')});
+        var headRow = FBL.hasClass(elem, 'cssHead') ? elem : FBL.getPreviousByClass(elem, 'cssHead');
+        var headRows = Array.filter(rows, function(e,i,a){return FBL.hasClass(e, 'cssHead')});
         var index = Array.indexOf(headRows, headRow);
         if (index == -1)
             index = 0;
@@ -1363,8 +1363,8 @@ Firebug.A11yModel = extend(Firebug.Module,
         var panelA11y = this.getPanelA11y(panel);
         if (!panelA11y || !this.panelHasFocus(panel))
             return;
-        if (panelA11y.tabStop && hasClass(panelA11y.tabStop, 'focusRow'))
-            panelA11y.reFocusId = getElementXPath(panelA11y.tabStop);
+        if (panelA11y.tabStop && FBL.hasClass(panelA11y.tabStop, 'focusRow'))
+            panelA11y.reFocusId = FBL.getElementXPath(panelA11y.tabStop);
     },
 
     onCSSRulesAdded : function(panel, rootNode)
@@ -1375,7 +1375,7 @@ Firebug.A11yModel = extend(Firebug.Module,
         var row;
         if (panelA11y.reFocusId)
         {   //we need to put focus back to where it was before it was wiped out
-            var reFocusRows = getElementsByXPath(rootNode.ownerDocument, panelA11y.reFocusId);
+            var reFocusRows = FBL.getElementsByXPath(rootNode.ownerDocument, panelA11y.reFocusId);
             panelA11y.reFocusId = null;
             if (reFocusRows.length > 0)
             {
@@ -1398,33 +1398,33 @@ Firebug.A11yModel = extend(Firebug.Module,
     {
         if (!panel || !row)
             return;
-        var rule = getAncestorByClass(row, "cssRule");
+        var rule = FBL.getAncestorByClass(row, "cssRule");
         if (inTabOrder)
             this.setPanelTabStop(panel, row);
         else
             this.makeFocusable(row);
-        if (rule && !hasClass(rule, 'a11yModified'))
+        if (rule && !FBL.hasClass(rule, 'a11yModified'))
         {
             var listBox = rule.getElementsByClassName('cssPropertyListBox').item(0);
             var selector = rule.getElementsByClassName('cssSelector').item(0);
             if (listBox && selector)
-                listBox.setAttribute('aria-label', $STRF("a11y.labels.declarations for selector", [selector.textContent]));
-            setClass(rule, 'a11yModified')
+                listBox.setAttribute('aria-label', FBL.$STRF("a11y.labels.declarations for selector", [selector.textContent]));
+            FBL.setClass(rule, 'a11yModified')
         }
-        if (hasClass(row, 'cssHead'))
+        if (FBL.hasClass(row, 'cssHead'))
         {
             if (panel.name == "css")
             {
                 var sourceLink = rule.parentNode.lastChild;
-                if (sourceLink && hasClass(sourceLink, "objectLink"))
-                    row.setAttribute('aria-label', row.textContent + " " + $STRF('a11y.labels.defined in file', [sourceLink.textContent]));
+                if (sourceLink && FBL.hasClass(sourceLink, "objectLink"))
+                    row.setAttribute('aria-label', row.textContent + " " + FBL.$STRF('a11y.labels.defined in file', [sourceLink.textContent]));
             }
         }
-        else if (hasClass(row, 'cssProp'))
+        else if (FBL.hasClass(row, 'cssProp'))
         {
-            row.setAttribute('aria-checked', !hasClass(row, 'disabledStyle'));
-            if (hasClass(row, 'cssOverridden'))
-                row.setAttribute('aria-label', $STR('aria.labels.overridden') + " " + row.textContent);
+            row.setAttribute('aria-checked', !FBL.hasClass(row, 'disabledStyle'));
+            if (FBL.hasClass(row, 'cssOverridden'))
+                row.setAttribute('aria-label', FBL.$STR('aria.labels.overridden') + " " + row.textContent);
         }
         return;
     },
@@ -1437,23 +1437,23 @@ Firebug.A11yModel = extend(Firebug.Module,
         if (event.button == 0) //the event was created by keyboard, not right mouse click
         {
             var panel = Firebug.getElementPanel(event.target);
-            if (panel && hasClass(event.target, 'focusRow'))
+            if (panel && FBL.hasClass(event.target, 'focusRow'))
             {
                 var node = event.target;
                 if (panel.name == "css")
                 {
-                    if (hasClass(event.target, 'cssHead'))
+                    if (FBL.hasClass(event.target, 'cssHead'))
                         node = event.target.parentNode.getElementsByClassName('objectLink').item(0);
-                    else if (hasClass(event.target, 'cssInheritHeader'))
+                    else if (FBL.hasClass(event.target, 'cssInheritHeader'))
                         node = event.target.getElementsByClassName('objectLink').item(0);
-                    if (!node || hasClass(node, 'collapsed'))
+                    if (!node || FBL.hasClass(node, 'collapsed'))
                         node = event.target;
                 }
                 //these context menu options are likely to destroy current focus
-                panelA11y.reFocusId = getElementXPath(event.target);
+                panelA11y.reFocusId = FBL.getElementXPath(event.target);
                 document.popupNode = node;
                 Firebug.chrome.$('fbContextMenu').openPopup(node, 'overlap', 0,0,true);
-                cancelEvent(event); //no need for default handlers anymore
+                FBL.cancelEvent(event); //no need for default handlers anymore
             }
         }
     },
@@ -1465,23 +1465,23 @@ Firebug.A11yModel = extend(Firebug.Module,
             return;
         if (!matchRow)
         {
-            this.updateLiveElem(panel, $STRF('a11y.updates.no matches found', [text]), true); //should not use alert
+            this.updateLiveElem(panel, FBL.$STRF('a11y.updates.no matches found', [text]), true); //should not use alert
             return;
         }
         var matchFeedback = "";
         var matchType = '';
         var selector;
-        if (hasClass(matchRow, 'cssSelector'))
-            matchFeedback = " " + $STRF('a11y.updates.match found in selector', [text, matchRow.textContent]);
+        if (FBL.hasClass(matchRow, 'cssSelector'))
+            matchFeedback = " " + FBL.$STRF('a11y.updates.match found in selector', [text, matchRow.textContent]);
         else
         {
-            selector = getPreviousByClass(matchRow, 'cssSelector');
+            selector = FBL.getPreviousByClass(matchRow, 'cssSelector');
             selector = selector ? selector.textContent : "";
-            if (hasClass(matchRow, 'cssPropName') || hasClass(matchRow, 'cssPropValue'))
+            if (FBL.hasClass(matchRow, 'cssPropName') || FBL.hasClass(matchRow, 'cssPropValue'))
             {
-                var propRow = getAncestorByClass(matchRow, 'cssProp');
+                var propRow = FBL.getAncestorByClass(matchRow, 'cssProp');
                 if (propRow)
-                    matchFeedback = $STRF('a11y.updates.match found in style declaration', [text, propRow.textContent, selector]);
+                    matchFeedback = FBL.$STRF('a11y.updates.match found in style declaration', [text, propRow.textContent, selector]);
             }
         }
         this.updateLiveElem(panel, matchFeedback, true); // should not use alert
@@ -1497,7 +1497,7 @@ Firebug.A11yModel = extend(Firebug.Module,
             return;
         var focusGroups = node.getElementsByClassName('focusGroup');
         Array.forEach(focusGroups, function(e,i,a){
-            if (hasClass(e, 'positionLayoutBox'))
+            if (FBL.hasClass(e, 'positionLayoutBox'))
                 this.makeFocusable(e, true);
             else
                 this.makeFocusable(e, false);
@@ -1518,20 +1518,20 @@ Firebug.A11yModel = extend(Firebug.Module,
         switch(styleName)
         {
             case "position":
-                output += hasClass(elem, "blankEdge") ? '' : $STR("a11y.layout.position");
+                output += FBL.hasClass(elem, "blankEdge") ? '' : FBL.$STR("a11y.layout.position");
                 styleName = "outer";
                 break;
             case "margin":
-                output += $STR("a11y.layout.margin");
+                output += FBL.$STR("a11y.layout.margin");
                 break;
             case "border":
-                output += $STR("a11y.layout.border");
+                output += FBL.$STR("a11y.layout.border");
                 break;
             case "padding":
-                output += $STR("a11y.layout.padding");
+                output += FBL.$STR("a11y.layout.padding");
                 break;
             case "content":
-                output += $STR("a11y.layout.size");
+                output += FBL.$STR("a11y.layout.size");
                 break;
         }
         output += ": ";
@@ -1562,7 +1562,7 @@ Firebug.A11yModel = extend(Firebug.Module,
 
         for (var i = 0 ; i < valNames.length; i++)
         {
-            output += $STR("a11y.layout." + valNames[i]) + " = " + vals[valNames[i]];
+            output += FBL.$STR("a11y.layout." + valNames[i]) + " = " + vals[valNames[i]];
             output += i == valNames.length -1 ? "" : ", ";
         }
         return output;
@@ -1574,7 +1574,7 @@ Firebug.A11yModel = extend(Firebug.Module,
         var keyCode = event.keyCode || (event.type=='keypress' ? event.charCode : null);
         if ([13, 37, 38, 39, 40].indexOf(keyCode) == -1)
             return;
-        if (!hasClass(target, 'focusGroup'))
+        if (!FBL.hasClass(target, 'focusGroup'))
             return;
         var panel = Firebug.getElementPanel(target);
         switch(keyCode)
@@ -1585,9 +1585,9 @@ Firebug.A11yModel = extend(Firebug.Module,
             case 40:
                 var node, goLeft = keyCode == 37 || keyCode == 38;
                 if (goLeft)
-                    node = getAncestorByClass(target.parentNode, 'focusGroup');
+                    node = FBL.getAncestorByClass(target.parentNode, 'focusGroup');
                 else
-                    node = getChildByClass(target, 'focusGroup');
+                    node = FBL.getChildByClass(target, 'focusGroup');
                 if (node)
                     this.focus(node);
                 break;
@@ -1595,14 +1595,14 @@ Firebug.A11yModel = extend(Firebug.Module,
                 var editable = target.getElementsByClassName('editable').item(0);
                 if (editable)
                     Firebug.Editor.startEditing(editable);
-                cancelEvent(event);
+                FBL.cancelEvent(event);
                 break;
         }
     },
 
     onLayoutFocus : function(event)
     {
-        if (hasClass(event.target, 'focusGroup'))
+        if (FBL.hasClass(event.target, 'focusGroup'))
         {
             this.dispatchMouseEvent(event.target, 'mouseover');
             this.setPanelTabStop(Firebug.getElementPanel(event.target), event.target);
@@ -1611,7 +1611,7 @@ Firebug.A11yModel = extend(Firebug.Module,
 
     onLayoutBlur : function(event)
     {
-        if (hasClass(event.target, 'focusGroup'))
+        if (FBL.hasClass(event.target, 'focusGroup'))
             this.dispatchMouseEvent(event.target, 'mouseout');
     },
 
@@ -1638,47 +1638,47 @@ Firebug.A11yModel = extend(Firebug.Module,
             case 'html':
                 var tagName= nodeName = null;
                 var setSize = posInSet = 0; var setElems;
-                var label = $STR("a11y.labels.inline editor") + ": ";
-                if (hasClass(target, 'nodeName') || hasClass(target, 'nodeValue'))
+                var label = FBL.$STR("a11y.labels.inline editor") + ": ";
+                if (FBL.hasClass(target, 'nodeName') || FBL.hasClass(target, 'nodeValue'))
                 {
-                    var isName = hasClass(target, 'nodeName');
+                    var isName = FBL.hasClass(target, 'nodeName');
                     setElems = target.parentNode.parentNode.getElementsByClassName(isName ? 'nodeName' : 'nodeValue');
                     setSize = (setElems.length * 2);
                     posInSet = ((Array.indexOf(setElems, target) + 1) * 2) - (isName ? 1 : 0);
                     editor.input.setAttribute('role', 'listitem');
                     editor.input.setAttribute('aria-setsize', setSize);
                     editor.input.setAttribute('aria-posinset', posInSet);
-                    nodeTag = getPreviousByClass(target, 'nodeTag');
+                    nodeTag = FBL.getPreviousByClass(target, 'nodeTag');
                     if (!isName)
                     {
-                        nodeName = getPreviousByClass(target, 'nodeName');
-                        label += $STRF('a11y.labels.value for attribute in element', [nodeName.textContent, nodeTag.textContent]);
+                        nodeName = FBL.getPreviousByClass(target, 'nodeName');
+                        label += FBL.$STRF('a11y.labels.value for attribute in element', [nodeName.textContent, nodeTag.textContent]);
                     }
                     else
-                        label += $STRF("a11y.label.attribute for element", [nodeTag.textContent]);
+                        label += FBL.$STRF("a11y.label.attribute for element", [nodeTag.textContent]);
                 }
-                else if (hasClass(target, 'nodeText'))
+                else if (FBL.hasClass(target, 'nodeText'))
                 {
-                    nodeTag = getPreviousByClass(target, 'nodeTag');
-                    label += $STRF("a11y.labels.text contents for element", [nodeTag.textContent]);
+                    nodeTag = FBL.getPreviousByClass(target, 'nodeTag');
+                    label += FBL.$STRF("a11y.labels.text contents for element", [nodeTag.textContent]);
                 }
                 editor.input.setAttribute('aria-label', label);
                 break;
             case 'css':
             case 'stylesheet':
-                var selector = getPreviousByClass(target, 'cssSelector');
+                var selector = FBL.getPreviousByClass(target, 'cssSelector');
                 selector = selector ? selector.textContent : "";
-                var label = $STR("a11y.labels.inline editor") + ": ";
-                if (hasClass(target, 'cssPropName'))
-                    label += $STRF('a11y.labels.property for selector', [selector]);
-                else if (hasClass(target, 'cssPropValue'))
+                var label = FBL.$STR("a11y.labels.inline editor") + ": ";
+                if (FBL.hasClass(target, 'cssPropName'))
+                    label += FBL.$STRF('a11y.labels.property for selector', [selector]);
+                else if (FBL.hasClass(target, 'cssPropValue'))
                 {
-                    var propName = getPreviousByClass(target, 'cssPropName');
+                    var propName = FBL.getPreviousByClass(target, 'cssPropName');
                     propName = propName ? propName.textContent : "";
-                    label += $STRF('a11y.labels.value property in selector', [propName, selector]);
+                    label += FBL.$STRF('a11y.labels.value property in selector', [propName, selector]);
                 }
-                else if (hasClass(target, 'cssSelector'))
-                    label += $STR('a11y.labels.css selector');
+                else if (FBL.hasClass(target, 'cssSelector'))
+                    label += FBL.$STR('a11y.labels.css selector');
                 editor.input.setAttribute('aria-label', label);
                 editor.setAttribute('aria-autocomplete', 'inline');
                 break;
@@ -1701,7 +1701,7 @@ Firebug.A11yModel = extend(Firebug.Module,
         switch (panelA11y.type)
         {
             case 'layout':
-                var box = getAncestorByClass(target, 'focusGroup')
+                var box = FBL.getAncestorByClass(target, 'focusGroup')
                 if (box)
                     this.focus(box, true);
                 break;
@@ -1716,7 +1716,7 @@ Firebug.A11yModel = extend(Firebug.Module,
                 }
                 break;
             case 'html':
-                var box = getAncestorByClass(target, 'nodeBox')
+                var box = FBL.getAncestorByClass(target, 'nodeBox')
                 if (box)
                     panel.select(box.repObject, true);
                 break;
@@ -1746,7 +1746,7 @@ Firebug.A11yModel = extend(Firebug.Module,
         var fileName =  frame.script.fileName.split("/");  // XXXjjb I think this should be contxt.executingSourceFile.href
         fileName = fileName.pop();
         // XXXjjb the frame.functionName is often anonymous, since the compiler is lame.
-        var alertString = $STRF("a11y.updates.script_suspended_on_line_in_file",[frame.line, frame.functionName, fileName]);
+        var alertString = FBL.$STRF("a11y.updates.script_suspended_on_line_in_file",[frame.line, frame.functionName, fileName]);
         this.updateLiveElem(panel, alertString, true);
         this.onShowSourceLink(panel, frame.line);
     },
@@ -1769,7 +1769,7 @@ Firebug.A11yModel = extend(Firebug.Module,
     {
         var target = event.target;
         var keyCode = event.keyCode || (event.type=='keypress' ? event.charCode : null);
-        if (!hasClass(target, 'sourceViewport'))
+        if (!FBL.hasClass(target, 'sourceViewport'))
             return;
       if ([13, 33, 34, 35, 36, 37, 38, 39, 40].indexOf(keyCode) == -1)
          return;
@@ -1783,7 +1783,7 @@ Firebug.A11yModel = extend(Firebug.Module,
         var caretDetails = this.getCaretDetails(event.target.ownerDocument);
         if (!caretDetails || caretDetails.length != 2)
             return;
-        var lineNode = getAncestorByClass(caretDetails[0].parentNode, 'sourceRow');
+        var lineNode = FBL.getAncestorByClass(caretDetails[0].parentNode, 'sourceRow');
         if (!lineNode )
             return;
         var lineNo = parseInt(lineNode.getElementsByClassName('sourceLine').item(0).textContent);
@@ -1816,13 +1816,13 @@ Firebug.A11yModel = extend(Firebug.Module,
                     box.a11yCaretLine = goUp ? 0 : box.totalMax;
                     box.a11yCaretOffset = 0;
                     this.insertCaretIntoLine(panel, box);
-                    cancelEvent(event);
+                    FBL.cancelEvent(event);
                     return;
                 }
                 box.a11yCaretLine = goUp ? lineNo - box.viewableLines : lineNo + box.viewableLines;
                 linesToScroll = goUp ? -box.viewableLines : box.viewableLines;
                 box.scrollTop = box.scrollTop + (linesToScroll * box.lineHeight);
-                cancelEvent(event);
+                FBL.cancelEvent(event);
                 break;
             case 36://home
             case 35://end
@@ -1835,7 +1835,7 @@ Firebug.A11yModel = extend(Firebug.Module,
                         this.insertCaretIntoLine(panel, box);
                     else
                         box.scrollTop = goUp ? 0 : box.scrollHeight - box.clientHeight;;
-                    cancelEvent(event);
+                    FBL.cancelEvent(event);
                     return;
                 }
                 if (goUp)
@@ -1843,13 +1843,13 @@ Firebug.A11yModel = extend(Firebug.Module,
                     //move caret to beginning of line. Override default behavior, as that would take the caret into the line number
                     this.insertCaretIntoLine(panel, box, lineNo, 0);
                     box.scrollLeft = 0; //in case beginning of line is scrolled out of view
-                    cancelEvent(event);
+                    FBL.cancelEvent(event);
                 }
                 break;
             case 13:
                 var liveString = "";
                 var caretDetails = this.getCaretDetails(event.target.ownerDocument);
-                var lineNode = getAncestorByClass(caretDetails[0].parentNode, 'sourceRow');
+                var lineNode = FBL.getAncestorByClass(caretDetails[0].parentNode, 'sourceRow');
                 var lineNo = parseInt(lineNode.getElementsByClassName('sourceLine').item(0).textContent);
                 liveString += "Line " + lineNo;
                 if (lineNode.getAttribute('breakpoint') == 'true')
@@ -1859,7 +1859,7 @@ Firebug.A11yModel = extend(Firebug.Module,
                         breakpointStr = "a11y.updates.hasdisabled breakpoint";
                     if (lineNode.getAttribute('condition') == 'true')
                         breakpointStr = "a11y.updates.has conditional breakpoint";
-                    liveString += ", " + $STR(breakpointStr);
+                    liveString += ", " + FBL.$STR(breakpointStr);
                 }
                 if (lineNode.getAttribute('executable') == 'true')
                     liveString += ", executable";
@@ -1877,7 +1877,7 @@ Firebug.A11yModel = extend(Firebug.Module,
     {
         var target = event.target;
         var keyCode = event.keyCode || (event.type=='keypress' ? event.charCode : null);
-        if (!hasClass(target, 'sourceViewport'))
+        if (!FBL.hasClass(target, 'sourceViewport'))
             return;
         if ([13, 33, 34, 35, 36, 37, 38, 39, 40].indexOf(keyCode) == -1)
             return;
@@ -1887,7 +1887,7 @@ Firebug.A11yModel = extend(Firebug.Module,
             return;
         var box = panel.selectedSourceBox
         var caretDetails = this.getCaretDetails(target.ownerDocument);
-        var lineNode = getAncestorByClass(caretDetails[0].parentNode, 'sourceRow');
+        var lineNode = FBL.getAncestorByClass(caretDetails[0].parentNode, 'sourceRow');
         if (!lineNode )
             return;
         var lineNo = parseInt(lineNode.getElementsByClassName('sourceLine').item(0).textContent);
@@ -1908,7 +1908,7 @@ Firebug.A11yModel = extend(Firebug.Module,
         var caretDetails = this.getCaretDetails(target.ownerDocument);
         var lineNode = null;
         if (caretDetails[0] && caretDetails[0].parentNode)
-            lineNode = getAncestorByClass(caretDetails[0].parentNode, 'sourceRow');
+            lineNode = FBL.getAncestorByClass(caretDetails[0].parentNode, 'sourceRow');
         if (!lineNode )
             return;
         var lineNo = parseInt(lineNode.getElementsByClassName('sourceLine').item(0).textContent);
@@ -1984,8 +1984,8 @@ Firebug.A11yModel = extend(Firebug.Module,
         viewport.setAttribute('role', 'textbox');
         viewport.setAttribute('aria-multiline', 'true');
         viewport.setAttribute('aria-readonly', 'true');
-        fileName = getFileName(file.href);
-        viewport.setAttribute('aria-label', $STRF('a11y.labels.source code for file', [fileName]));
+        fileName = FBL.getFileName(file.href);
+        viewport.setAttribute('aria-label', FBL.$STRF('a11y.labels.source code for file', [fileName]));
         //bit ugly, but not sure how else I can get the caret into the sourcebox without a mouse
         var focusElem = Firebug.chrome.window.document.commandDispatcher.focusedElement;
         var line = box.getLineNode(box.firstViewableLine);
@@ -2033,7 +2033,7 @@ Firebug.A11yModel = extend(Firebug.Module,
             }
             Firebug.chrome.window.document.popupNode = node;
             Firebug.chrome.$('fbContextMenu').openPopup(node.ownerDocument.body, "overlap", x, y, true);
-            cancelEvent(event);
+            FBL.cancelEvent(event);
         }
     },
 
@@ -2079,7 +2079,7 @@ Firebug.A11yModel = extend(Firebug.Module,
         var groupHeaders = rootNode.getElementsByClassName('breakpointHeader');
         for ( i = 0; i < groupHeaders.length; i++)
         {
-            var listBox = getNextByClass(groupHeaders[i], 'breakpointsGroupListBox');
+            var listBox = FBL.getNextByClass(groupHeaders[i], 'breakpointsGroupListBox');
             if (listBox)
                 listBox.setAttribute('aria-label', groupHeaders[i].textContent);
         }
@@ -2092,12 +2092,12 @@ Firebug.A11yModel = extend(Firebug.Module,
             return;
         var matchFeedback = "";
         if (!sourceBox || lineNo === null)
-            matchFeedback = $STRF('a11y.updates.no matches found', [text]);
+            matchFeedback = FBL.$STRF('a11y.updates.no matches found', [text]);
         else
         {
             var line = sourceBox.getLine(panel.context, lineNo + 1);
             if (!line) line = "";
-            matchFeedback = $STRF("a11y.updates.match found for on line", [text, lineNo + 1, getFileName(sourceBox.href)]);
+            matchFeedback = FBL.$STRF("a11y.updates.match found for on line", [text, lineNo + 1, FBL.getFileName(sourceBox.href)]);
         }
         this.updateLiveElem(panel, matchFeedback, true);
     },
@@ -2155,8 +2155,8 @@ Firebug.A11yModel = extend(Firebug.Module,
         var cellChild = row.cells[2].firstChild;
         if (cellChild)
         {
-            if (hasClass(row, 'hasChildren'))
-                cellChild.setAttribute('aria-expanded', hasClass(row, 'opened'));
+            if (FBL.hasClass(row, 'hasChildren'))
+                cellChild.setAttribute('aria-expanded', FBL.hasClass(row, 'opened'));
             if (makeTab)
                 this.modifyPanelRow(panel, cellChild, true);
             cellChild.setAttribute('role', 'treeitem');
@@ -2166,7 +2166,7 @@ Firebug.A11yModel = extend(Firebug.Module,
                 cellChild.setAttribute('aria-setsize', setSize);
                 cellChild.setAttribute('aria-posinset', posInSet);
             }
-            setClass(cellChild, 'focusRow');
+            FBL.setClass(cellChild, 'focusRow');
             if (typeof reFocusId == "number" && row.rowIndex == reFocusId)
             {
                 this.modifyMemberRow(panel, cellChild, true);
@@ -2219,11 +2219,11 @@ Firebug.A11yModel = extend(Firebug.Module,
             {
                 this.modifyPanelRow(panel, dirCell);
                 var rowLabel = dirCell.getAttribute('aria-label');
-                matchFeedback = $STRF('a11y.updates.match found in dom property', [text, rowLabel]);
+                matchFeedback = FBL.$STRF('a11y.updates.match found in dom property', [text, rowLabel]);
             }
         }
         else
-            matchFeedback = $STRF('a11y.updates.no matches found', [text]);
+            matchFeedback = FBL.$STRF('a11y.updates.no matches found', [text]);
         this.updateLiveElem(panel, matchFeedback, true);
     },
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
@@ -2231,7 +2231,7 @@ Firebug.A11yModel = extend(Firebug.Module,
 
     isSubFocusRow : function(elem)
     {
-        return hasClass(elem, 'focusRow') || hasClass(elem, 'wrappedText');
+        return FBL.hasClass(elem, 'focusRow') || FBL.hasClass(elem, 'wrappedText');
     },
 
     modifyNetRow : function(panel, row, inTabOrder)
@@ -2241,15 +2241,15 @@ Firebug.A11yModel = extend(Firebug.Module,
             return;
         if (this.isOuterFocusRow(row, true))
         {
-            if (!hasClass(row, 'netInfoTabs'))
+            if (!FBL.hasClass(row, 'netInfoTabs'))
                 this.makeFocusable(row, inTabOrder);
-            if ((hasClass(row, 'netRow') || hasClass(row, 'spyHeadTable')) && !row.hasAttribute('aria-expanded'))
-                row.setAttribute('aria-expanded', hasClass(row, 'opened') + "");
+            if ((FBL.hasClass(row, 'netRow') || FBL.hasClass(row, 'spyHeadTable')) && !row.hasAttribute('aria-expanded'))
+                row.setAttribute('aria-expanded', FBL.hasClass(row, 'opened') + "");
             var focusObjects = this.getFocusObjects(row);
             Array.forEach(focusObjects, function(e,i,a) {
                 this.makeFocusable(e);
-                if (hasClass(e, 'netTimeCol') && getAncestorByClass(e, 'fromCache'))
-                    e.setAttribute('aria-label', e.textContent + " (" + $STR("a11y.labels.cached") +")");
+                if (FBL.hasClass(e, 'netTimeCol') && FBL.getAncestorByClass(e, 'fromCache'))
+                    e.setAttribute('aria-label', e.textContent + " (" + FBL.$STR("a11y.labels.cached") +")");
             }, this);
         }
         else return;
@@ -2257,17 +2257,17 @@ Firebug.A11yModel = extend(Firebug.Module,
 
     getNetAncestorRow : function(elem, useSubRow)
     {
-        return useSubRow ? getAncestorByClass(elem, 'subFocusRow') || getAncestorByClass(elem, 'netRow') : getAncestorByClass(elem, 'netRow');
+        return useSubRow ? FBL.getAncestorByClass(elem, 'subFocusRow') || FBL.getAncestorByClass(elem, 'netRow') : FBL.getAncestorByClass(elem, 'netRow');
     },
 
     onNetMouseDown : function(event)
     {
-        var node = getAncestorByClass(event.target, 'focusRow');
+        var node = FBL.getAncestorByClass(event.target, 'focusRow');
         if (node)
             this.modifyPanelRow(Firebug.getElementPanel(node), node, false);
         else
         {
-            node = getAncestorByClass(event.target, 'subFocusRow');
+            node = FBL.getAncestorByClass(event.target, 'subFocusRow');
             if (!node)
                 return;
             var focusRow = node.getElementsByClassName('focusRow').item(0);
@@ -2284,28 +2284,28 @@ Firebug.A11yModel = extend(Firebug.Module,
         var panelA11y = this.getPanelA11y(panel);
         if (!panelA11y)
             return;
-        if (!hasClass(target, 'netCol') && !hasClass(target, 'netHeaderCell'))
+        if (!FBL.hasClass(target, 'netCol') && !FBL.hasClass(target, 'netHeaderCell'))
         {
             return;
         }
-        if (hasClass(target, 'netHrefCol'))
+        if (FBL.hasClass(target, 'netHrefCol'))
         {
             var hrefLabel = target.getElementsByClassName('netHrefLabel').item(0);
             var fullHrefLabel = target.getElementsByClassName('netFullHrefLabel').item(0);
             if (hrefLabel && fullHrefLabel)
             {
-                setClass(fullHrefLabel, 'a11yShowFullLabel');
+                FBL.setClass(fullHrefLabel, 'a11yShowFullLabel');
                 fullHrefLabel.style.marginTop = (hrefLabel.offsetHeight  + 4) + "px";
             return;
             }
         }
-        var rangeParent = getAncestorByClass(target, 'netRow');
+        var rangeParent = FBL.getAncestorByClass(target, 'netRow');
         var browser = Firebug.chrome.getPanelBrowser(panel);
         // these two lines are necessary, because otherwise the infoTip will not have the correct dimensions when it's positioned, and the contents
         // could be placed outside FB's viewport (making it impossible to read for keyboard users)
         panel.showInfoTip(browser.infoTip, target, target.offsetLeft, target.offsetTop, rangeParent, 0); //will be called again in showInfoTip
         browser.infoTip.setAttribute("active", "true");
-        var left = hasClass(target, 'netTimeCol') ? target.offsetLeft - browser.infoTip.offsetWidth - 12 : target.offsetLeft + target.offsetWidth - 4;
+        var left = FBL.hasClass(target, 'netTimeCol') ? target.offsetLeft - browser.infoTip.offsetWidth - 12 : target.offsetLeft + target.offsetWidth - 4;
         Firebug.InfoTip.showInfoTip(browser.infoTip, panel, target, left, target.offsetTop - panel.panelNode.scrollTop - 12, rangeParent, 0);
     },
 
@@ -2315,13 +2315,13 @@ Firebug.A11yModel = extend(Firebug.Module,
         var panelA11y = this.getPanelA11y(panel);
         if (!panelA11y)
             return;
-        if (hasClass(target, 'netHrefCol'))
+        if (FBL.hasClass(target, 'netHrefCol'))
         {
             var hrefLabel = target.getElementsByClassName('netHrefLabel').item(0);
             var fullHrefLabel = target.getElementsByClassName('netFullHrefLabel').item(0);
             if (hrefLabel && fullHrefLabel)
             {
-                removeClass(fullHrefLabel, 'a11yShowFullLabel');
+                FBL.removeClass(fullHrefLabel, 'a11yShowFullLabel');
                 fullHrefLabel.style.marginTop = "0px";
             }
         }
@@ -2337,37 +2337,37 @@ Firebug.A11yModel = extend(Firebug.Module,
             return;
         var matchFeedback = "";
         if (!row)
-            matchFeedback = $STRF('a11y.updates.no matches found', [text]);
+            matchFeedback = FBL.$STRF('a11y.updates.no matches found', [text]);
         else
         {
             var foundWhere = '';
-            var parentRow = getAncestorByClass(row, "netRow");
+            var parentRow = FBL.getAncestorByClass(row, "netRow");
             if (!parentRow)
             {
-                parentRow = getAncestorByClass(row, "netInfoRow");
+                parentRow = FBL.getAncestorByClass(row, "netInfoRow");
                 if (parentRow)
                     parentRow = parentRow.previousSibling;
             }
-            if (hasClass(row, "netHrefLabel"))
-                foundWhere = $STR("net.header.URL");
-            else if (hasClass(row, "netStatusLabel"))
-                foundWhere = $STR("net.header.Status");
-            else if (hasClass(row, "netDomainLabel"))
-                foundWhere = $STR("net.header.Domain");
-            else if (hasClass(row, "netSizeLabel"))
-                foundWhere = $STR("net.header.Size");
-            else if (hasClass(row, "netTimeLabel"))
-                foundWhere = $STR("net.header.Timeline");
+            if (FBL.hasClass(row, "netHrefLabel"))
+                foundWhere = FBL.$STR("net.header.URL");
+            else if (FBL.hasClass(row, "netStatusLabel"))
+                foundWhere = FBL.$STR("net.header.Status");
+            else if (FBL.hasClass(row, "netDomainLabel"))
+                foundWhere = FBL.$STR("net.header.Domain");
+            else if (FBL.hasClass(row, "netSizeLabel"))
+                foundWhere = FBL.$STR("net.header.Size");
+            else if (FBL.hasClass(row, "netTimeLabel"))
+                foundWhere = FBL.$STR("net.header.Timeline");
             else
                 foundWhere = "request details";
             if (parentRow && parentRow.repObject)
             {
                 var file = parentRow.repObject;
-                var href =  (file.method ? file.method.toUpperCase() : "?") + " " + getFileName(file.href);
-                matchFeedback = $STRF("a11y.updates.match found in net row",[text, href, foundWhere, row.textContent]);
+                var href =  (file.method ? file.method.toUpperCase() : "?") + " " + FBL.getFileName(file.href);
+                matchFeedback = FBL.$STRF("a11y.updates.match found in net row",[text, href, foundWhere, row.textContent]);
             }
-            else if (getAncestorByClass(row, "netSummaryRow"))
-                matchFeedback = $STRF("a11y.updates.match found in net summary row",[text, row.textContent]);
+            else if (FBL.getAncestorByClass(row, "netSummaryRow"))
+                matchFeedback = FBL.$STRF("a11y.updates.match found in net summary row",[text, row.textContent]);
         }
         this.updateLiveElem(panel, matchFeedback, true); //should not use alert
     },
@@ -2398,9 +2398,9 @@ Firebug.A11yModel = extend(Firebug.Module,
             type = className[1];
         if (!type)
         {
-            if (hasClass(elem, 'errorTitle'))
+            if (FBL.hasClass(elem, 'errorTitle'))
                 type = "detailed error";
-            else if (hasClass(elem, 'errorSourceBox'))
+            else if (FBL.hasClass(elem, 'errorSourceBox'))
                 type = "error source line";
             else
                 type = this.getObjectType(elem);
@@ -2443,7 +2443,7 @@ Firebug.A11yModel = extend(Firebug.Module,
 
     modifyPanelRow : function (panel, row, inTabOrder)
     {
-        if (hasClass(row, 'a11yModified'))
+        if (FBL.hasClass(row, 'a11yModified'))
             return;
         var panelA11y = this.getPanelA11y(panel);
         if (!panelA11y || !row)
@@ -2460,7 +2460,7 @@ Firebug.A11yModel = extend(Firebug.Module,
                 this.modifyNetRow(panel, row, inTabOrder);
                break;
         }
-        setClass(row, 'a11yModified');
+        FBL.setClass(row, 'a11yModified');
     },
 
     focusSiblingRow : function(panel, target, goUp)
@@ -2505,7 +2505,7 @@ Firebug.A11yModel = extend(Firebug.Module,
         }
         else
         {
-            if (hasClass(target, 'netInfoTab'))
+            if (FBL.hasClass(target, 'netInfoTab'))
                 this.dispatchMouseEvent(target, 'click');
             panelA11y.cellIndex = undefined; //reset if no longer in grid
         }
@@ -2514,7 +2514,7 @@ Firebug.A11yModel = extend(Firebug.Module,
     getFocusRows : function(panel)
     {
         var nodes = panel.panelNode.getElementsByClassName('focusRow');
-        return Array.filter(nodes, function(e,i,a){return this.isVisibleByStyle(e) && isVisible(e);}, this);
+        return Array.filter(nodes, function(e,i,a){return this.isVisibleByStyle(e) && FBL.isVisible(e);}, this);
     },
 
     getLastFocusChild : function(target)
@@ -2531,7 +2531,7 @@ Firebug.A11yModel = extend(Firebug.Module,
 
     focus : function(elem, noVisiCheck, needsMoreTime)
     {
-        if (isElement(elem) && (noVisiCheck || this.isVisibleByStyle(elem)))
+        if (FBL.isElement(elem) && (noVisiCheck || this.isVisibleByStyle(elem)))
             Firebug.currentContext.setTimeout(function(){
                 elem.focus()
                 }, needsMoreTime ? 500 :10);
@@ -2563,7 +2563,7 @@ Firebug.A11yModel = extend(Firebug.Module,
         if (!button)
             button = 0;
         if (typeof node == "string")
-            node = $(node);
+            node = FBL.$(node);
         var doc = node.ownerDocument;
         var event = doc.createEvent('MouseEvents');
         event.initMouseEvent(eventType, true, true, doc.defaultView,
@@ -2586,32 +2586,32 @@ Firebug.A11yModel = extend(Firebug.Module,
 
     isOuterFocusRow : function(elem, includeSubRow)
     {
-        return includeSubRow ? this.isSubFocusRow(elem) : hasClass(elem, 'outerFocusRow');
+        return includeSubRow ? this.isSubFocusRow(elem) : FBL.hasClass(elem, 'outerFocusRow');
     },
 
     isProfileRow : function(elem)
     {
-        return hasClass(elem, 'profileRow');
+        return FBL.hasClass(elem, 'profileRow');
     },
 
     isFocusRow : function(elem)
     {
-        return hasClass(elem, 'focusRow');
+        return FBL.hasClass(elem, 'focusRow');
     },
 
     isFocusObject : function(elem)
     {
-        return hasClass(elem, 'a11yFocus');
+        return FBL.hasClass(elem, 'a11yFocus');
     },
 
     isFocusNoTabObject : function(elem)
     {
-        return hasClass(elem, 'a11yFocusNoTab');
+        return FBL.hasClass(elem, 'a11yFocusNoTab');
     },
 
     isDirCell : function(elem)
     {
-        return hasClass(elem.parentNode, 'memberValueCell');
+        return FBL.hasClass(elem.parentNode, 'memberValueCell');
     },
 
     panelHasFocus : function(panel)
@@ -2649,10 +2649,10 @@ Firebug.A11yModel = extend(Firebug.Module,
     {
         if (!node)
             return null;
-        function criteria(node) { return node.nodeType == 1 && hasClass(node, className); }
+        function criteria(node) { return node.nodeType == 1 && FBL.hasClass(node, className); }
         for (var sib = node.previousSibling; sib; sib = sib.previousSibling)
         {
-            if (!this.isVisibleByStyle(sib) || !isVisible(sib))
+            if (!this.isVisibleByStyle(sib) || !FBL.isVisible(sib))
                 continue;
             var prev = this.findPreviousUp(sib, criteria);
             if (prev)
@@ -2678,7 +2678,7 @@ Firebug.A11yModel = extend(Firebug.Module,
     {
         if (!node)
             return null;
-        function criteria(node) { return node.nodeType == 1 && hasClass(node, className); }
+        function criteria(node) { return node.nodeType == 1 && FBL.hasClass(node, className); }
         if (!upOnly)
         {
             var next = this.findNextDown(node, criteria);
@@ -2687,7 +2687,7 @@ Firebug.A11yModel = extend(Firebug.Module,
         }
         for (var sib = node.nextSibling; sib; sib = sib.nextSibling)
         {
-            if (!this.isVisibleByStyle(sib) || !isVisible(sib))
+            if (!this.isVisibleByStyle(sib) || !FBL.isVisible(sib))
                 continue;
             if (criteria(sib))
                 return sib;
@@ -2705,7 +2705,7 @@ Firebug.A11yModel = extend(Firebug.Module,
             return null;
         for (var child = node.firstChild; child; child = child.nextSibling)
         {
-            if (!this.isVisibleByStyle(child) || !isVisible(child))
+            if (!this.isVisibleByStyle(child) || !FBL.isVisible(child))
                 continue;
             if (criteria(child))
                 return child;
@@ -2721,7 +2721,7 @@ Firebug.A11yModel = extend(Firebug.Module,
             return null;
         for (var child = node.lastChild; child; child = child.previousSibling)
         {
-            if (!this.isVisibleByStyle(child) || !isVisible(child))
+            if (!this.isVisibleByStyle(child) || !FBL.isVisible(child))
                 continue;
             var next = this.findPreviousUp(child, criteria);
             if (next)

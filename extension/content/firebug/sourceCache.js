@@ -32,7 +32,7 @@ Firebug.SourceCache = function(context)
     this.cache = {};
 };
 
-Firebug.SourceCache.prototype = extend(new Firebug.Listener(),
+Firebug.SourceCache.prototype = FBL.extend(new Firebug.Listener(),
 {
     isCached: function(url)
     {
@@ -76,7 +76,7 @@ Firebug.SourceCache.prototype = extend(new Firebug.Listener(),
         {
             var src = d.encodedContent;
             var data = decodeURIComponent(src);
-            var lines = splitLines(data)
+            var lines = FBL.splitLines(data)
             this.cache[url] = lines;
 
             return lines;
@@ -86,7 +86,7 @@ Firebug.SourceCache.prototype = extend(new Firebug.Listener(),
         if (j)
         {
             var src = url.substring(FBL.reJavascript.lastIndex);
-            var lines = splitLines(src);
+            var lines = FBL.splitLines(src);
             this.cache[url] = lines;
 
             return lines;
@@ -108,7 +108,7 @@ Firebug.SourceCache.prototype = extend(new Firebug.Listener(),
                     FBTrace.sysout("sourceCache found munged xpcnativewrapper url and set it to "+url+" m "+m+" m[0]:"+m[0]+" [1]"+m[1], m);
             }
 
-            var chromeURI = makeURI(url);
+            var chromeURI = FBL.makeURI(url);
             if (!chromeURI)
             {
                 if (FBTrace.DBG_CACHE)
@@ -148,7 +148,7 @@ Firebug.SourceCache.prototype = extend(new Firebug.Listener(),
             FBTrace.sysout("sourceCache for " + this.context.getName() + " store url=" +
                 url + ((tempURL != url) ? " -> " + tempURL : ""), text);
 
-        var lines = splitLines(text);
+        var lines = FBL.splitLines(text);
         return this.storeSplitLines(tempURL, lines);
     },
 
@@ -164,10 +164,10 @@ Firebug.SourceCache.prototype = extend(new Firebug.Listener(),
     loadFromLocal: function(url)
     {
         // if we get this far then we have either a file: or chrome: url converted to file:
-        var src = getResource(url);
+        var src = FBL.getResource(url);
         if (src)
         {
-            var lines = splitLines(src);
+            var lines = FBL.splitLines(src);
             this.cache[url] = lines;
 
             return lines;
@@ -232,7 +232,7 @@ Firebug.SourceCache.prototype = extend(new Firebug.Listener(),
                 var postData = getPostText(file, this.context);
                 if (postData)
                 {
-                    var postDataStream = getInputStreamFromString(postData);
+                    var postDataStream = FBL.getInputStreamFromString(postData);
                     var uploadChannel = QI(channel, nsIUploadChannel);
                     uploadChannel.setUploadStream(postDataStream, "application/x-www-form-urlencoded", -1);
                     if (FBTrace.DBG_CACHE) FBTrace.sysout("sourceCache.load uploadChannel set\n");
@@ -261,8 +261,8 @@ Firebug.SourceCache.prototype = extend(new Firebug.Listener(),
 
         try
         {
-            var data = readFromStream(stream, charset);
-            var lines = splitLines(data);
+            var data = FBL.readFromStream(stream, charset);
+            var lines = FBL.splitLines(data);
             this.cache[url] = lines;
             return lines;
         }
@@ -310,16 +310,16 @@ Firebug.SourceCache.prototype = extend(new Firebug.Listener(),
     }
 });
 
-// xxxHonza getPostText and readPostTextFromRequest are copied from
+// xxxHonza getPostText and FBL.readPostTextFromRequest are copied from
 // net.js. These functions should be removed when this cache is
 // refactored due to the double-load problem.
 function getPostText(file, context)
 {
     if (!file.postText)
-        file.postText = readPostTextFromPage(file.href, context);
+        file.postText = FBL.readPostTextFromPage(file.href, context);
 
     if (!file.postText)
-        file.postText = readPostTextFromRequest(file.request, context);
+        file.postText = FBL.readPostTextFromRequest(file.request, context);
 
     return file.postText;
 }

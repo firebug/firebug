@@ -34,7 +34,7 @@ const privateBrowsingEnabled = ("@mozilla.org/privatebrowsing;1" in Cc) &&
  *    This logic has higher priority over the URL annotations.
  *    If "off" options is selected, all existing URL annotations are removed.
  */
-Firebug.Activation = extend(Firebug.Module,
+Firebug.Activation = FBL.extend(Firebug.Module,
 {
     dispatchName: "activation",
 
@@ -78,9 +78,9 @@ Firebug.Activation = extend(Firebug.Module,
         // Remove fragment, it shouldn't have any impact on the activation.
         url = url.replace(/#.*/, "");
 
-        var uri = makeURI(normalizeURL(url));
+        var uri = FBL.makeURI(FBL.normalizeURL(url));
 
-        if (Firebug.filterSystemURLs && isSystemURL(url))
+        if (Firebug.filterSystemURLs && FBL.isSystemURL(url))
             return uri;
 
         if (url == "about:blank")  // avoid exceptions.
@@ -91,7 +91,7 @@ Firebug.Activation = extend(Firebug.Module,
             try
             {
                 var prePath = uri.prePath; // returns the string before the path (such as "scheme://user:password@host:port").
-                var shortURI = makeURI(prePath);
+                var shortURI = FBL.makeURI(prePath);
                 if (!shortURI)
                     return uri;
 
@@ -136,7 +136,7 @@ Firebug.Activation = extend(Firebug.Module,
         if (Firebug.allPagesActivation == "on")
             return true;
 
-        if (Firebug.filterSystemURLs && isSystemURL(url)) // if about:blank gets thru, 1483 fails
+        if (Firebug.filterSystemURLs && FBL.isSystemURL(url)) // if about:blank gets thru, 1483 fails
             return false;
 
         if (userCommands)
@@ -265,7 +265,7 @@ Firebug.Activation = extend(Firebug.Module,
         if (privateBrowsingEnabled)
         {
             Firebug.Console.logFormatted(
-                [$STR("firebug.activation.privateBrowsingMode")],
+                [FBL.$STR("firebug.activation.privateBrowsingMode")],
                 Firebug.currentContext, "info");
             Firebug.chrome.selectPanel('console');
             Firebug.Options.set("defaultPanelName", "console");  // make sure the user sees the warning.
@@ -352,7 +352,7 @@ Firebug.Activation = extend(Firebug.Module,
     {
         var allOn = Firebug.allPagesActivation == "on";
 
-        var menu = $('menu_AllOn');
+        var menu = FBL.$('menu_AllOn');
         if (menu)
             menu.setAttribute("checked", allOn);
 
@@ -390,7 +390,7 @@ Firebug.Activation.TabWatcherListener =
  * Such panel must be derived from {@link Firebug.ActivablePanel} and appropriate activable
  * module from {@link Firebug.ActivableModule}
  */
-Firebug.PanelActivation = extend(Firebug.Module,
+Firebug.PanelActivation = FBL.extend(Firebug.Module,
 /** @lends Firebug.PanelActivation */
 {
     initialize: function()
@@ -410,7 +410,7 @@ Firebug.PanelActivation = extend(Firebug.Module,
 
         // Panel toolbar is not displayed for disabled panels.
         var chrome = Firebug.chrome;
-        collapse(chrome.$("fbToolbar"), !panel);
+        FBL.collapse(chrome.$("fbToolbar"), !panel);
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
@@ -556,12 +556,12 @@ Firebug.DisabledPanelBox = domplate(Firebug.Rep,
                 SPAN("$pageTitle")
             ),
             P({"class": "disabledPanelDescription", style: "margin-top: 15px;"},
-                $STR("moduleManager.desc3"),
+                FBL.$STR("moduleManager.desc3"),
                 SPAN("&nbsp;"),
                 SPAN({"class": "descImage descImage-$panelName"})
             ),
             A({"class": "objectLink", onclick: "$onEnable"},
-                $STR("moduleManager.Enable")
+                FBL.$STR("moduleManager.Enable")
             )
             /* need something here that pushes down any thing appended to the panel */
         ),
@@ -586,7 +586,7 @@ Firebug.DisabledPanelBox = domplate(Firebug.Rep,
         var panel = Firebug.getPanelType(panelName);
         var panelTitle = Firebug.getPanelTitle(panel);
         var args = {
-            pageTitle: $STRF("moduleManager.title", [panelTitle]),
+            pageTitle: FBL.$STRF("moduleManager.title", [panelTitle]),
             panelName: panelName
         };
 
@@ -601,7 +601,7 @@ Firebug.DisabledPanelBox = domplate(Firebug.Rep,
     hide: function(browser)
     {
         var parentNode = this.getParentNode(browser);
-        clearNode(parentNode);
+        FBL.clearNode(parentNode);
         parentNode.setAttribute("collapsed", true);
     },
 

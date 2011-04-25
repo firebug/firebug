@@ -24,7 +24,7 @@ Firebug.TabContext = function(win, browser, chrome, persistedState)
 
     browser.__defineGetter__("chrome", function() { return Firebug.chrome; }); // backward compat
 
-    this.name = normalizeURL(this.getWindowLocation().toString());
+    this.name = FBL.normalizeURL(this.getWindowLocation().toString());
 
     this.windows = [];
     this.panelMap = {};
@@ -67,7 +67,7 @@ Firebug.TabContext.prototype =
 
     getWindowLocation: function()
     {
-        return safeGetWindowLocation(this.window);
+        return FBL.safeGetWindowLocation(this.window);
     },
 
     getTitle: function()
@@ -83,17 +83,17 @@ Firebug.TabContext.prototype =
         if (!this.name || this.name === "about:blank")
         {
             var url = this.getWindowLocation().toString();
-            if (isDataURL(url))
+            if (FBL.isDataURL(url))
             {
-                var props = splitDataURL(url);
+                var props = FBL.splitDataURL(url);
                 if (props.fileName)
-                     this.name = "data url from "+props.fileName;
+                    this.name = "data url from "+props.fileName;
             }
             else
             {
-                this.name = normalizeURL(url);
+                this.name = FBL.normalizeURL(url);
                 if (this.name === "about:blank" && this.window.frameElement)
-                    this.name += " in "+getElementCSSSelector(this.window.frameElement);
+                    this.name += " in "+FBL.getElementCSSSelector(this.window.frameElement);
             }
         }
         return this.name;
@@ -243,7 +243,7 @@ Firebug.TabContext.prototype =
 
     addPanelType: function(url, title, parentPanel)
     {
-        url = absoluteURL(url, this.window.location.href);
+        url = FBL.absoluteURL(url, this.window.location.href);
         if (!url)
         {
             // XXXjoe Need some kind of notification to console that URL is invalid
@@ -353,7 +353,7 @@ Firebug.TabContext.prototype =
         if (FBTrace.DBG_PANELS)
             FBTrace.sysout("tabContext.createPanel; Panel created: " + panel.name, panel);
 
-        dispatch(Firebug.modules, "onCreatePanel", [this, panel, panelType]);
+        FBL.dispatch(Firebug.modules, "onCreatePanel", [this, panel, panelType]);
 
         // Initialize panel and associate with a document.
         if (panel.parentPanel) // then this new panel is a side panel
@@ -438,7 +438,7 @@ Firebug.TabContext.prototype =
             delete this.refreshTimeout;
         }
 
-        this.refreshTimeout = this.setTimeout(bindFixed(function()
+        this.refreshTimeout = this.setTimeout(FBL.bindFixed(function()
         {
             var invalids = [];
 
@@ -604,7 +604,7 @@ Firebug.TabContext.prototype =
 function createPanelType(name, url, title, parentPanel)
 {
     var panelType = new Function("");
-    panelType.prototype = extend(new Firebug.PluginPanel(),
+    panelType.prototype = FBL.extend(new Firebug.PluginPanel(),
     {
         name: name,
         url: url,

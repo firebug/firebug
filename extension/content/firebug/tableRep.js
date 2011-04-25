@@ -6,6 +6,7 @@ FBL.ns(function() { with (FBL) {
 // Constants
 
 // ************************************************************************************************
+
 FirebugReps.Table = domplate(Firebug.Rep,
 {
     className: "table",
@@ -89,7 +90,7 @@ FirebugReps.Table = domplate(Firebug.Rep,
             return [obj];
 
         if (obj.length)
-            return cloneArray(obj);
+            return FBL.cloneArray(obj);
 
         var arr = [];
         for (var p in obj)
@@ -106,12 +107,12 @@ FirebugReps.Table = domplate(Firebug.Rep,
 
     onClickHeader: function(event)
     {
-        var table = getAncestorByClass(event.target, "dataTable");
-        var header = getAncestorByClass(event.target, "headerCell");
+        var table = FBL.getAncestorByClass(event.target, "dataTable");
+        var header = FBL.getAncestorByClass(event.target, "headerCell");
         if (!header)
             return;
 
-        var numerical = !hasClass(header, "alphaValue");
+        var numerical = !FBL.hasClass(header, "alphaValue");
 
         var colIndex = 0;
         for (header = header.previousSibling; header; header = header.previousSibling)
@@ -122,8 +123,8 @@ FirebugReps.Table = domplate(Firebug.Rep,
 
     sort: function(table, colIndex, numerical)
     {
-        var tbody = getChildByClass(table, "dataTableTbody");
-        var thead = getChildByClass(table, "dataTableThead");
+        var tbody = FBL.getChildByClass(table, "dataTableTbody");
+        var thead = FBL.getChildByClass(table, "dataTableThead");
 
         var values = [];
         for (var row = tbody.childNodes[0]; row; row = row.nextSibling)
@@ -136,18 +137,18 @@ FirebugReps.Table = domplate(Firebug.Rep,
         values.sort(function(a, b) { return a.value < b.value ? -1 : 1; });
 
         var headerRow = thead.firstChild;
-        var headerSorted = getChildByClass(headerRow, "headerSorted");
-        removeClass(headerSorted, "headerSorted");
+        var headerSorted = FBL.getChildByClass(headerRow, "headerSorted");
+        FBL.removeClass(headerSorted, "headerSorted");
         if (headerSorted)
             headerSorted.removeAttribute('aria-sort');
 
         var header = headerRow.childNodes[colIndex];
-        setClass(header, "headerSorted");
+        FBL.setClass(header, "headerSorted");
 
         if (!header.sorted || header.sorted == 1)
         {
-            removeClass(header, "sortedDescending");
-            setClass(header, "sortedAscending");
+            FBL.removeClass(header, "sortedDescending");
+            FBL.setClass(header, "sortedAscending");
             header.setAttribute("aria-sort", "ascending");
 
             header.sorted = -1;
@@ -157,8 +158,8 @@ FirebugReps.Table = domplate(Firebug.Rep,
         }
         else
         {
-            removeClass(header, "sortedAscending");
-            setClass(header, "sortedDescending");
+            FBL.removeClass(header, "sortedAscending");
+            FBL.setClass(header, "sortedDescending");
             header.setAttribute("aria-sort", "descending")
 
             header.sorted = 1;
@@ -240,7 +241,7 @@ FirebugReps.Table = domplate(Firebug.Rep,
         }
 
         if (typeof(firstRow) != "object")
-            return [{label: $STR("firebug.reps.table.ObjectProperties")}];
+            return [{label: FBL.$STR("firebug.reps.table.ObjectProperties")}];
 
         // Put together a column property, label and type (type for default sorting logic).
         var header = [];
@@ -268,20 +269,20 @@ FirebugReps.Table = domplate(Firebug.Rep,
      */
     domFilter: function(object, name)
     {
-        var domMembers = getDOMMembers(object, name);
+        var domMembers = FBL.getDOMMembers(object, name);
 
         if (typeof(object) == "function")
         {
-            if (isDOMMember(object, name) && !Firebug.showDOMFuncs)
+            if (FBL.isDOMMember(object, name) && !Firebug.showDOMFuncs)
                 return false;
             else if (!Firebug.showUserFuncs)
                 return false;
         }
         else
         {
-            if (isDOMMember(object, name) && !Firebug.showDOMProps)
+            if (FBL.isDOMMember(object, name) && !Firebug.showDOMProps)
                 return false;
-            else if (isDOMConstant(object, name) && !Firebug.showDOMConstants)
+            else if (FBL.isDOMConstant(object, name) && !Firebug.showDOMConstants)
                 return false;
             else if (!Firebug.showUserProps)
                 return false;
@@ -290,7 +291,9 @@ FirebugReps.Table = domplate(Firebug.Rep,
         return true;
     }
 });
+// ************************************************************************************************
 
 return FirebugReps.Table;
+
 // ************************************************************************************************
 }});

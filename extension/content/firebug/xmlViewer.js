@@ -26,7 +26,7 @@ var xmlContentTypes =
  * tab wihin network request detail, a listener is registered into
  * <code>Firebug.NetMonitor.NetInfoBody</code> object.
  */
-Firebug.XMLViewerModel = extend(Firebug.Module,
+Firebug.XMLViewerModel = FBL.extend(Firebug.Module,
 {
     dispatchName: "xmlViewer",
 
@@ -51,10 +51,10 @@ Firebug.XMLViewerModel = extend(Firebug.Module,
             FBTrace.sysout("xmlviewer.initTabBody", infoBox);
 
         // If the response is XML let's display a pretty preview.
-        if (this.isXML(safeGetContentType(file.request)))
+        if (this.isXML(FBL.safeGetContentType(file.request)))
         {
             Firebug.NetMonitor.NetInfoBody.appendTab(infoBox, "XML",
-                $STR("xmlviewer.tab.XML"));
+                FBL.$STR("xmlviewer.tab.XML"));
 
             if (FBTrace.DBG_XMLVIEWER)
                 FBTrace.sysout("xmlviewer.initTabBody; XML response available");
@@ -83,7 +83,7 @@ Firebug.XMLViewerModel = extend(Firebug.Module,
     {
         var tab = infoBox.selectedTab;
         var tabBody = infoBox.getElementsByClassName("netInfoXMLText").item(0);
-        if (!hasClass(tab, "netInfoXMLTab") || tabBody.updated)
+        if (!FBL.hasClass(tab, "netInfoXMLTab") || tabBody.updated)
             return;
 
         tabBody.updated = true;

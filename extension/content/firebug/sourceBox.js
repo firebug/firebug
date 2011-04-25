@@ -45,7 +45,7 @@ Firebug.SourceBoxDecorator.prototype =
     */
     getLineHTML: function(sourceBox, lineNo)
     {
-        var html = escapeForSourceLine(sourceBox.lines[lineNo-1]);
+        var html = FBL.escapeForSourceLine(sourceBox.lines[lineNo-1]);
 
         // If the pref says so, replace tabs by corresponding number of spaces.
         if (Firebug.replaceTabs > 0)
@@ -80,13 +80,13 @@ Firebug.SourceBoxDecorator.prototype =
  */
 Firebug.SourceBoxPanel = function() {};
 
-var SourceBoxPanelBase = extend(Firebug.MeasureBox, Firebug.ActivablePanel);
-Firebug.SourceBoxPanel = extend(SourceBoxPanelBase,
+var SourceBoxPanelBase = FBL.extend(Firebug.MeasureBox, Firebug.ActivablePanel);
+Firebug.SourceBoxPanel = FBL.extend(SourceBoxPanelBase,
 /** @lends Firebug.SourceBoxPanel */
 {
     initialize: function(context, doc)
     {
-        this.onResize =  bind(this.resizer, this);
+        this.onResize =  FBL.bind(this.resizer, this);
         this.sourceBoxes = {};
         this.decorator = this.getDecorator();
 
@@ -225,8 +225,8 @@ Firebug.SourceBoxPanel = extend(SourceBoxPanelBase,
         if (selection.isCollapsed)
             return "";
 
-        var anchorSourceRow = getAncestorByClass(selection.anchorNode, "sourceRow");
-        var focusSourceRow = getAncestorByClass(selection.focusNode, "sourceRow");
+        var anchorSourceRow = FBL.getAncestorByClass(selection.anchorNode, "sourceRow");
+        var focusSourceRow = FBL.getAncestorByClass(selection.focusNode, "sourceRow");
         if (anchorSourceRow == focusSourceRow)
         {
             return selection.toString();// trivial case
@@ -234,7 +234,7 @@ Firebug.SourceBoxPanel = extend(SourceBoxPanelBase,
         var buf = this.getSourceLine(anchorSourceRow, selection.anchorOffset);
 
         var currentSourceRow = anchorSourceRow.nextSibling;
-        while(currentSourceRow && (currentSourceRow != focusSourceRow) && hasClass(currentSourceRow, "sourceRow"))
+        while(currentSourceRow && (currentSourceRow != focusSourceRow) && FBL.hasClass(currentSourceRow, "sourceRow"))
         {
             buf += this.getSourceLine(currentSourceRow);
             currentSourceRow = currentSourceRow.nextSibling;
@@ -245,7 +245,7 @@ Firebug.SourceBoxPanel = extend(SourceBoxPanelBase,
 
     getSourceLine: function(sourceRow, beginOffset, endOffset)
     {
-        var source = getChildByClass(sourceRow, "sourceRowText").textContent;
+        var source = FBL.getChildByClass(sourceRow, "sourceRowText").textContent;
         if (endOffset)
             source = source.substring(beginOffset, endOffset);
         else if (beginOffset)
@@ -354,7 +354,7 @@ Firebug.SourceBoxPanel = extend(SourceBoxPanelBase,
             {
                 this.showSourceBox(sourceBox);
             }
-            dispatch(this.fbListeners, "onShowSourceLink", [this, sourceLink.line]);
+            FBL.dispatch(this.fbListeners, "onShowSourceLink", [this, sourceLink.line]);
         }
         if (sourceLink == this.selection)  // then clear it so the next link will scroll and highlight.
             delete this.selection;
@@ -363,7 +363,7 @@ Firebug.SourceBoxPanel = extend(SourceBoxPanelBase,
     showSourceBox: function(sourceBox, lineNo)
     {
         if (this.selectedSourceBox)
-            collapse(this.selectedSourceBox, true);
+            FBL.collapse(this.selectedSourceBox, true);
 
         if (this.selectedSourceBox !== sourceBox)
             delete this.currentSearch;
@@ -373,7 +373,7 @@ Firebug.SourceBoxPanel = extend(SourceBoxPanelBase,
         if (sourceBox)
         {
             sourceBox.targetedLineNumber = lineNo; // signal reView to put this line in the center
-            collapse(sourceBox, false);
+            FBL.collapse(sourceBox, false);
             this.reView(sourceBox);
             this.updateSourceBox(sourceBox);
         }
@@ -411,15 +411,15 @@ Firebug.SourceBoxPanel = extend(SourceBoxPanelBase,
     initializeSourceBox: function(compilationUnit)
     {
         var sourceBox = this.document.createElement("div");
-        setClass(sourceBox, "sourceBox");
-        collapse(sourceBox, true);
+        FBL.setClass(sourceBox, "sourceBox");
+        FBL.collapse(sourceBox, true);
         sourceBox.repObject = compilationUnit;
         compilationUnit.sourceBox = sourceBox;
 
         sourceBox.getLineNode =  function(lineNo)
         {
             // XXXjjb this method is supposed to return null if the lineNo is not in the viewport
-            return $(this.decorator.getLineId(this, lineNo), this.ownerDocument);
+            return FBL.$(this.decorator.getLineId(this, lineNo), this.ownerDocument);
         };
 
         var paddedSource =
@@ -431,9 +431,9 @@ Firebug.SourceBoxPanel = extend(SourceBoxPanelBase,
                 "<div class='sourceRow'><div class='sourceLine'></div><div class='sourceRowText'></div></div>"+
             "</div>";
 
-        appendInnerHTML(sourceBox, paddedSource);
+        FBL.appendInnerHTML(sourceBox, paddedSource);
 
-        sourceBox.viewport = getChildByClass(sourceBox, 'sourceViewport');
+        sourceBox.viewport = FBL.getChildByClass(sourceBox, 'sourceViewport');
         return sourceBox;
     },
 
@@ -499,7 +499,7 @@ Firebug.SourceBoxPanel = extend(SourceBoxPanelBase,
             return;
         if (!lineNo)
             lineNo = this.getCentralLine(this.selectedSourceBox);
-        return new SourceLink(this.selectedSourceBox.repObject.href, lineNo, this.getSourceType());
+        return new FBL.SourceLink(this.selectedSourceBox.repObject.href, lineNo, this.getSourceType());
     },
 
     /* Select sourcebox with href, scroll lineNo into center, highlight lineNo with highlighter given
@@ -537,7 +537,7 @@ Firebug.SourceBoxPanel = extend(SourceBoxPanelBase,
             this.selectedSourceBox.scrollTop = this.selectedSourceBox.newScrollTop; // *may* cause scrolling
         }
 
-        this.context.scrollTimeout = this.context.setTimeout(bindFixed(function()
+        this.context.scrollTimeout = this.context.setTimeout(FBL.bindFixed(function()
         {
             if (!this.selectedSourceBox)
             {
@@ -597,11 +597,11 @@ Firebug.SourceBoxPanel = extend(SourceBoxPanelBase,
             var  lineNode = sourceBox.getLineNode(lineNo);
 
             if (context.highlightedRow)
-              cancelClassTimed(context.highlightedRow, "jumpHighlight", context);
+              FBL.cancelClassTimed(context.highlightedRow, "jumpHighlight", context);
 
             if (lineNode)
             {
-                setClassTimed(lineNode, "jumpHighlight", context);
+                FBL.setClassTimed(lineNode, "jumpHighlight", context);
 
                 context.highlightedRow = lineNode;
 
@@ -669,18 +669,18 @@ Firebug.SourceBoxPanel = extend(SourceBoxPanelBase,
 
         var compilationUnit = sourceBox.repObject;
         compilationUnit.pendingViewRange = viewRange;
-        compilationUnit.getSourceLines(viewRange.firstLine, viewRange.lastLine, bind(this.onSourceLinesAvailable, this));
+        compilationUnit.getSourceLines(viewRange.firstLine, viewRange.lastLine, FBL.bind(this.onSourceLinesAvailable, this));
     },
 
     reViewOnSourceLinesAvailable: function(sourceBox, viewRange)
     {
-        dispatch(this.fbListeners, "onBeforeViewportChange", [this]);  // XXXjjb TODO where should this be?
+        FBL.dispatch(this.fbListeners, "onBeforeViewportChange", [this]);  // XXXjjb TODO where should this be?
         this.buildViewAround(sourceBox, viewRange);
 
         if (Firebug.uiListeners.length > 0)
         {
-            var link = new SourceLink(sourceBox.repObject.href, sourceBox.centralLine, this.getSourceType());
-            dispatch(Firebug.uiListeners, "onViewportChange", [link]);
+            var link = new FBL.SourceLink(sourceBox.repObject.href, sourceBox.centralLine, this.getSourceType());
+            FBL.dispatch(Firebug.uiListeners, "onViewportChange", [link]);
         }
 
         sourceBox.lastScrollTop = sourceBox.scrollTop;
@@ -702,7 +702,7 @@ Firebug.SourceBoxPanel = extend(SourceBoxPanelBase,
                 FBTrace.sysout("buildViewAround updateViewportCache FAILS "+exc, exc);
         }
 
-        collapse(sourceBox, false); // the elements must be visible for the offset values
+        FBL.collapse(sourceBox, false); // the elements must be visible for the offset values
         this.setViewportPadding(sourceBox, viewRange);
 
         sourceBox.centralLine = Math.floor( (viewRange.lastLine + viewRange.firstLine)/2 );
@@ -761,7 +761,7 @@ Firebug.SourceBoxPanel = extend(SourceBoxPanelBase,
                 ref = topCacheLine;
             }
 
-            var newElement = appendInnerHTML(sourceBox.viewport, lineHTML, ref);
+            var newElement = FBL.appendInnerHTML(sourceBox.viewport, lineHTML, ref);
         }
         return cacheHit;
     },
@@ -1035,7 +1035,7 @@ Firebug.SourceBoxPanel = extend(SourceBoxPanelBase,
         // scroll-bar thumb (or quickly clicking on scroll-arrows), the source code is
         // not decorated (the timeout cleared by the code above) and the scrolling is fast.
         this.context.sourceBoxDecoratorTimeout = this.context.setTimeout(
-            bindFixed(this.asyncDecorating, this, sourceBox), 150);
+            FBL.bindFixed(this.asyncDecorating, this, sourceBox), 150);
 
         if (this.context.sourceBoxHighlighterTimeout)
         {
@@ -1046,7 +1046,7 @@ Firebug.SourceBoxPanel = extend(SourceBoxPanelBase,
         // Source code highlighting is using different timeout: 0ms. When searching
         // within the Script panel, the user expects immediate response.
         this.context.sourceBoxHighlighterTimeout = this.context.setTimeout(
-            bindFixed(this.asyncHighlighting, this, sourceBox));
+            FBL.bindFixed(this.asyncHighlighting, this, sourceBox));
 
         if (FBTrace.DBG_COMPILATION_UNITS)
             FBTrace.sysout("applyDecorator "+sourceBox.repObject.url+" sourceBox.highlighter "+sourceBox.highlighter, sourceBox);
@@ -1059,7 +1059,7 @@ Firebug.SourceBoxPanel = extend(SourceBoxPanelBase,
             sourceBox.decorator.decorate(sourceBox, sourceBox.repObject);
 
             if (Firebug.uiListeners.length > 0)
-                dispatch(Firebug.uiListeners, "onApplyDecorator", [sourceBox]);
+                FBL.dispatch(Firebug.uiListeners, "onApplyDecorator", [sourceBox]);
 
             if (FBTrace.DBG_COMPILATION_UNITS)
                 FBTrace.sysout("sourceBoxDecoratorTimeout "+sourceBox.repObject, sourceBox);

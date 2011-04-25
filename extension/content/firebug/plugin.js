@@ -7,7 +7,7 @@ FBL.ns(function() { with (FBL) {
 	
 Firebug.PluginPanel = function() {};
 
-Firebug.PluginPanel.prototype = extend(Firebug.Panel,
+Firebug.PluginPanel.prototype = FBL.extend(Firebug.Panel,
 {
     createBrowser: function()
     {
@@ -49,7 +49,7 @@ Firebug.PluginPanel.prototype = extend(Firebug.Panel,
 
     initialize: function()
     {
-        this.browserReady = bindFixed(this.browserReady, this);
+        this.browserReady = FBL.bindFixed(this.browserReady, this);
         Firebug.Panel.initialize.apply(this, arguments);
     },
 
@@ -126,7 +126,7 @@ function innerCall(innerPanel, name, args)
     }
     catch (exc)
     {
-        ERROR(exc);
+        FBL.ERROR(exc);
     }
 }
 

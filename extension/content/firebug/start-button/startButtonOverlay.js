@@ -27,7 +27,7 @@ var statusText = $("fbStatusText");
  * such as panel activation and also indicates whether Firebug is activated/deactivated for
  * the current page (by changing its color).
  */
-Firebug.StartButton = extend(Firebug.Module,
+Firebug.StartButton = FBL.extend(Firebug.Module,
 /** @lends Firebug.StartButton */
 {
     initializeUI: function()
@@ -76,7 +76,7 @@ Firebug.StartButton = extend(Firebug.Module,
         // ID of the Firebug start button into it.
         var startButtonId = "firebug-button";
         var navBarId = "nav-bar";
-        var navBar = $(navBarId);
+        var navBar = FBL.$(navBarId);
 
         // In SeaMonkey we need to read the attribute (see issue 4086)
         // In Firefox the currentSet property must be used.
@@ -110,7 +110,7 @@ Firebug.StartButton = extend(Firebug.Module,
         }
 
         // Don't forget to show the navigation bar - just in case it's hidden.
-        collapse(navBar, false);
+        FBL.collapse(navBar, false);
         document.persist(navBarId, "collapsed");
     },
 
@@ -145,7 +145,7 @@ Firebug.StartButton = extend(Firebug.Module,
         if (panel && panel.name != "console")
         {
             Firebug.chrome.selectPanel("console");
-            cancelEvent(event);
+            FBL.cancelEvent(event);
         }
     },
 
@@ -153,7 +153,7 @@ Firebug.StartButton = extend(Firebug.Module,
     {
         if (event.button != 0)
             return;
-        else if (isControl(event))
+        else if (FBL.isControl(event))
             Firebug.toggleDetachBar(true);
         else if (context && context.errorCount)
             Firebug.toggleBar(undefined, "console");
@@ -169,11 +169,11 @@ Firebug.StartButton = extend(Firebug.Module,
         if (!statusBar)
             return;
 
-        var firebugButton = $("firebug-button");
+        var firebugButton = FBL.$("firebug-button");
         if (errorCount && Firebug.showErrorCount)
         {
             statusBar.setAttribute("showErrors", "true")
-            statusText.setAttribute("value", $STRP("plural.Error_Count2", [errorCount]));
+            statusText.setAttribute("value", FBL.$STRP("plural.Error_Count2", [errorCount]));
 
             if (firebugButton)
             {
@@ -221,19 +221,19 @@ Firebug.StartButton = extend(Firebug.Module,
         }
         // else allPagesActivation == "none" we don't show it.
 
-        tooltip += "\n" + $STR(Firebug.getPlacement());
+        tooltip += "\n" + FBL.$STR(Firebug.getPlacement());
 
-        var firebugStatus = $("firebugStatus");
+        var firebugStatus = FBL.$("firebugStatus");
         firebugStatus.setAttribute("tooltiptext", tooltip);
     },
 
     getEnablementStatus: function()
     {
-        var strOn = $STR("enablement.on");
-        var strOff = $STR("enablement.off");
+        var strOn = FBL.$STR("enablement.on");
+        var strOff = FBL.$STR("enablement.off");
 
         var status = "";
-        var firebugStatus = $("firebugStatus");
+        var firebugStatus = FBL.$("firebugStatus");
 
         if (firebugStatus.getAttribute("console") == "on")
             status += "Console: " + strOn + ",";

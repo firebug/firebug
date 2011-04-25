@@ -12,7 +12,7 @@ const prefs = Cc["@mozilla.org/preferences-service;1"].getService(Ci.nsIPrefBran
 /**
  * ShortcutsModel object implements keyboard shortcuts logic.
  */
-Firebug.ShortcutsModel = extend(Firebug.Module,
+Firebug.ShortcutsModel = FBL.extend(Firebug.Module,
 {
     dispatchName: "shortcuts",
 
@@ -47,7 +47,7 @@ Firebug.ShortcutsModel = extend(Firebug.Module,
             keyElem.className = "fbOnlyKey";
             keyElem.id = "key_" + element;
             keyElem.command = "cmd_" + element;
-            $('mainKeyset').appendChild(keyElem);
+            FBL.$('mainKeyset').appendChild(keyElem);
         }
 
         //choose between key or keycode attribute

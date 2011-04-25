@@ -534,7 +534,7 @@ top.FirebugChrome =
         if (nextObject)
             this.select(nextObject);
         else
-            beep();
+            FBL.beep();
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
@@ -1149,7 +1149,7 @@ top.FirebugChrome =
                 {
                     var checked = false;
                     if (option == "profiling")
-                        checked = fbs.profiling;
+                        checked = FBL.fbs.profiling;
                     else
                         checked = Firebug.Options.get(option);
 

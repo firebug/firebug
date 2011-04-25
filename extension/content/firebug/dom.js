@@ -18,7 +18,7 @@ const rxIdentifier = /^[$_A-Za-z][$_A-Za-z0-9]*$/
 
 // ************************************************************************************************
 
-Firebug.DOMModule = extend(Firebug.Module,
+Firebug.DOMModule = FBL.extend(Firebug.Module,
 {
     initialize: function(prefDomain, prefNames)
     {
@@ -59,8 +59,8 @@ const WatchRowTag =
     TR({"class": "watchNewRow", level: 0},
         TD({"class": "watchEditCell", colspan: 3},
             DIV({"class": "watchEditBox a11yFocusNoTab", role: "button", 'tabindex' : '0',
-                'aria-label' : $STR('a11y.labels.press enter to add new watch expression')},
-                    $STR("NewWatch")
+                'aria-label' : FBL.$STR('a11y.labels.press enter to add new watch expression')},
+                    FBL.$STR("NewWatch")
             )
         )
     );
@@ -102,7 +102,7 @@ const DirTablePlate = domplate(Firebug.Rep,
 
     tag:
         TABLE({"class": "domTable", cellpadding: 0, cellspacing: 0, onclick: "$onClick",
-            _repObject: "$object", role: "tree", 'aria-label': $STR('aria.labels.dom properties')},
+            _repObject: "$object", role: "tree", 'aria-label': FBL.$STR('aria.labels.dom properties')},
             TBODY({role: 'presentation'},
                 SizerRow,
                 FOR("member", "$object|memberIterator",
@@ -123,7 +123,7 @@ const DirTablePlate = domplate(Firebug.Rep,
     tableTag:
         TABLE({"class": "domTable", cellpadding: 0, cellspacing: 0,
             _toggles: "$toggles", _domPanel: "$domPanel", onclick: "$onClick",
-            role: 'tree', 'aria-label': $STR('a11y.labels.dom_properties')},
+            role: 'tree', 'aria-label': FBL.$STR('a11y.labels.dom_properties')},
             TBODY({role : 'presentation'},
                 SizerRow
             )
@@ -141,7 +141,7 @@ const DirTablePlate = domplate(Firebug.Rep,
             return members;
 
         return [{
-            name: $STR("firebug.dom.noChildren2"),
+            name: FBL.$STR("firebug.dom.noChildren2"),
             type: "string",
             rowClass: "memberRow-string",
             tag: Firebug.Rep.tag,
@@ -153,29 +153,29 @@ const DirTablePlate = domplate(Firebug.Rep,
 
     onClick: function(event)
     {
-        if (!isLeftClick(event))
+        if (!FBL.isLeftClick(event))
             return;
 
-        var row = getAncestorByClass(event.target, "memberRow");
-        var label = getAncestorByClass(event.target, "memberLabel");
+        var row = FBL.getAncestorByClass(event.target, "memberRow");
+        var label = FBL.getAncestorByClass(event.target, "memberLabel");
         var valueCell = row.getElementsByClassName("memberValueCell").item(0);
         var object = Firebug.getRepObject(event.target);
         var target = row.lastChild.firstChild;
-        var isString = hasClass(target,"objectBox-string");
+        var isString = FBL.hasClass(target,"objectBox-string");
         var inValueCell = event.target == valueCell || event.target == target;
 
-        if (label && hasClass(row, "hasChildren") && !(isString && inValueCell))
+        if (label && FBL.hasClass(row, "hasChildren") && !(isString && inValueCell))
         {
             var row = label.parentNode.parentNode;
             this.toggleRow(row);
-            cancelEvent(event);
+            FBL.cancelEvent(event);
         }
         else
         {
             if (typeof(object) == "function")
             {
                 Firebug.chrome.select(object, "script");
-                cancelEvent(event);
+                FBL.cancelEvent(event);
             }
             else if (event.detail == 2 && !object)
             {
@@ -187,7 +187,7 @@ const DirTablePlate = domplate(Firebug.Rep,
                         panel.setPropertyValue(row, !rowValue);
                     else
                         panel.editProperty(row);
-                    cancelEvent(event);
+                    FBL.cancelEvent(event);
                 }
             }
         }
@@ -196,7 +196,7 @@ const DirTablePlate = domplate(Firebug.Rep,
     toggleRow: function(row)
     {
         var level = parseInt(row.getAttribute("level"));
-        var table = getAncestorByClass(row, "domTable");
+        var table = FBL.getAncestorByClass(row, "domTable");
         var toggles = table.toggles;
         if (!toggles)
             toggles = table.repObject.toggles;
@@ -213,16 +213,16 @@ const DirTablePlate = domplate(Firebug.Rep,
 
         var context = domPanel.context;
         var target = row.lastChild.firstChild;
-        var isString = hasClass(target, "objectBox-string");
+        var isString = FBL.hasClass(target, "objectBox-string");
 
-        if (hasClass(row, "opened"))
+        if (FBL.hasClass(row, "opened"))
         {
-            removeClass(row, "opened");
+            FBL.removeClass(row, "opened");
 
             if (isString)
             {
                 var rowValue = row.domObject.value
-                row.lastChild.firstChild.textContent = '"' + cropMultipleLines(rowValue) + '"';
+                row.lastChild.firstChild.textContent = '"' + FBL.cropMultipleLines(rowValue) + '"';
             }
             else
             {
@@ -257,7 +257,7 @@ const DirTablePlate = domplate(Firebug.Rep,
         }
         else
         {
-            setClass(row, "opened");
+            FBL.setClass(row, "opened");
             if (isString)
             {
                 var rowValue = row.domObject.value
@@ -277,7 +277,7 @@ const DirTablePlate = domplate(Firebug.Rep,
                         if (toggles.get(name))
                             toggles = toggles.get(name);
                         else
-                            toggles = toggles.set(name, new ToggleBranch());
+                            toggles = toggles.set(name, new FBL.ToggleBranch());
                     }
                     if (FBTrace.DBG_DOMPLATE)
                         FBTrace.sysout("toggleRow mark path "+toggles);
@@ -301,7 +301,7 @@ const DirTablePlate = domplate(Firebug.Rep,
                             {
                                 var result = rowTag.insertRows({members: slice}, lastRow);
                                 lastRow = result[1];
-                                dispatch(Firebug.DOMModule.fbListeners, 'onMemberRowSliceAdded', [null, result, rowCount, setSize]);
+                                FBL.dispatch(Firebug.DOMModule.fbListeners, 'onMemberRowSliceAdded', [null, result, rowCount, setSize]);
                                 rowCount += insertSliceSize;
                             }
                             if (isLast)
@@ -319,13 +319,13 @@ const DirTablePlate = domplate(Firebug.Rep,
 
     onClickRowHeader: function(event)
     {
-        cancelEvent(event);
+        FBL.cancelEvent(event);
 
         var rowHeader = event.target;
-        if (!hasClass(rowHeader, "memberRowHeader"))
+        if (!FBL.hasClass(rowHeader, "memberRowHeader"))
             return;
 
-        var row = getAncestorByClass(event.target, "memberRow");
+        var row = FBL.getAncestorByClass(event.target, "memberRow");
         if (!row)
             return;
 
@@ -355,7 +355,7 @@ Firebug.DOMBasePanel = function() {}
 
 Firebug.DOMBasePanel.ToolboxPlate = ToolboxPlate;
 
-Firebug.DOMBasePanel.prototype = extend(Firebug.Panel,
+Firebug.DOMBasePanel.prototype = FBL.extend(Firebug.Panel,
 {
     tag: DirTablePlate.tableTag,
     dirTablePlate: DirTablePlate,
@@ -392,7 +392,7 @@ Firebug.DOMBasePanel.prototype = extend(Firebug.Panel,
 
     rebuild: function(update, scrollTop)
     {
-        dispatch(this.fbListeners, 'onBeforeDomUpdateSelection', [this]);
+        FBL.dispatch(this.fbListeners, 'onBeforeDomUpdateSelection', [this]);
         var members = this.getMembers(this.selection, 0, this.context);
         this.expandMembers(members, this.toggles, 0, 0, this.context);
 
@@ -416,7 +416,7 @@ Firebug.DOMBasePanel.prototype = extend(Firebug.Panel,
         {
             // Special case for "arguments", which is not enumerable by for...in statement.
             if (isArguments(object))
-                object = cloneArray(object);
+                object = FBL.cloneArray(object);
 
             if (object instanceof StorageList)
             {
@@ -435,7 +435,7 @@ Firebug.DOMBasePanel.prototype = extend(Firebug.Panel,
                 if (contentView.hasOwnProperty('prototype') && properties.indexOf('prototype') == -1)
                     properties.push('prototype');
 
-                if (contentView.__proto__ && hasProperties(contentView.__proto__))  // XXXjjb I think it is always true ?
+                if (contentView.__proto__ && FBL.hasProperties(contentView.__proto__))  // XXXjjb I think it is always true ?
                     properties.push('__proto__');
             }
             catch(exc)
@@ -460,16 +460,16 @@ Firebug.DOMBasePanel.prototype = extend(Firebug.Panel,
             if (contentView.wrappedJSObject)
                 properties.push('wrappedJSObject');
 
-            var domMembers = getDOMMembers(object);
+            var domMembers = FBL.getDOMMembers(object);
             for (var i = 0; i < properties.length; i++)
             {
                 var name = properties[i];
 
                 // Ignore only global variables (properties of the |window| object).
-                if (shouldIgnore(name) && (object instanceof Window))
+                if (FBL.shouldIgnore(name) && (object instanceof Window))
                 {
                     if (FBTrace.DBG_DOM)
-                        FBTrace.sysout("dom.getMembers: ignoreVars: " + name + ", " + level, object);
+                        FBTrace.sysout("dom.getMembers: FBL.ignoreVars: " + name + ", " + level, object);
                     continue;
                 }
 
@@ -494,7 +494,7 @@ Firebug.DOMBasePanel.prototype = extend(Firebug.Panel,
                 {
                     if (isClassFunction(val))
                         this.addMember(object, "userClass", userClasses, name, val, level, 0, context);
-                    else if (isDOMMember(object, name))
+                    else if (FBL.isDOMMember(object, name))
                         this.addMember(object, "domFunction", domFuncs, name, val, level, domMembers[name], context);
                     else
                         this.addMember(object, "userFunction", userFuncs, name, val, level, 0, context);
@@ -503,9 +503,9 @@ Firebug.DOMBasePanel.prototype = extend(Firebug.Panel,
                 {
                     if (isPrototype(name))
                         this.addMember(object, "proto", proto, name, val, level, 0, context);
-                    else if (isDOMMember(object, name))
+                    else if (FBL.isDOMMember(object, name))
                         this.addMember(object, "dom", domProps, name, val, level, domMembers[name], context);
-                    else if (isDOMConstant(object, name))
+                    else if (FBL.isDOMConstant(object, name))
                         this.addMember(object, "dom", domConstants, name, val, level, 0, context);
                     else
                         this.addMember(object, "user", userProps, name, val, level, 0, context);
@@ -569,21 +569,21 @@ Firebug.DOMBasePanel.prototype = extend(Firebug.Panel,
         var tag = rep.shortTag ? rep.shortTag : rep.tag;
 
         var valueType = typeof(value);
-        var hasChildren = hasProperties(value) && !(value instanceof ErrorCopy) &&
+        var hasChildren = FBL.hasProperties(value) && !(value instanceof FBL.ErrorCopy) &&
             (valueType == "function" || (valueType == "object" && value != null)
             || (valueType == "string" && value.length > Firebug.stringCropLength));
 
         // Special case for "arguments", which is not enumerable by for...in statement
-        // and so, hasProperties always returns false.
+        // and so, FBL.hasProperties always returns false.
         if (!hasChildren && value) // arguments will never be falsy if the arguments exist
             hasChildren = isArguments(value);
 
         if (value)
         {
-            var proto = getPrototype(value);
+            var proto = FBL.getPrototype(value);
             // Special case for functions with a protoype that has values
             if (valueType === "function" && proto)
-                hasChildren = hasChildren || hasProperties(proto);
+                hasChildren = hasChildren || FBL.hasProperties(proto);
         }
 
         if (value instanceof StorageList)
@@ -631,7 +631,7 @@ Firebug.DOMBasePanel.prototype = extend(Firebug.Panel,
         // Set prefix for user defined properties. This prefix help the user to distinguish
         // among simple properties and those defined using getter and/or (only a) setter.
         var o = this.getObjectView(object);
-        if (o && !isDOMMember(object, name) && (XPCNativeWrapper.unwrap(object) !== object) )
+        if (o && !FBL.isDOMMember(object, name) && (XPCNativeWrapper.unwrap(object) !== object) )
         {
             var getter = o.__lookupGetter__(name);
             var setter = o.__lookupSetter__(name);
@@ -736,7 +736,7 @@ Firebug.DOMBasePanel.prototype = extend(Firebug.Panel,
         var result = rowTag.insertRows({members: slice}, tbody.lastChild);
         var rowCount = 1;
         var panel = this;
-        dispatch(this.fbListeners, 'onMemberRowSliceAdded', [panel, result, rowCount, setSize]);
+        FBL.dispatch(this.fbListeners, 'onMemberRowSliceAdded', [panel, result, rowCount, setSize]);
         var timeouts = [];
 
         var delay = 0;
@@ -748,7 +748,7 @@ Firebug.DOMBasePanel.prototype = extend(Firebug.Panel,
                 {
                     result = rowTag.insertRows({members: slice}, tbody.lastChild);
                     rowCount += insertSliceSize;
-                    dispatch(Firebug.DOMModule.fbListeners, 'onMemberRowSliceAdded', [panel, result, rowCount, setSize]);
+                    FBL.dispatch(Firebug.DOMModule.fbListeners, 'onMemberRowSliceAdded', [panel, result, rowCount, setSize]);
 
                     if ((panelNode.scrollHeight+panelNode.offsetHeight) >= priorScrollTop)
                         panelNode.scrollTop = priorScrollTop;
@@ -866,13 +866,13 @@ Firebug.DOMBasePanel.prototype = extend(Firebug.Panel,
     {
         var value = this.getRowPathName(row);
         value = value[1];//don't want the seperator
-        copyToClipboard(value);
+        FBL.copyToClipboard(value);
     },
 
     copyPath: function(row)
     {
         var path = this.getPropertyPath(row);
-        copyToClipboard(path.join(""));
+        FBL.copyToClipboard(path.join(""));
     },
 
     /*
@@ -891,7 +891,7 @@ Firebug.DOMBasePanel.prototype = extend(Firebug.Panel,
     copyProperty: function(row)
     {
         var value = this.getRowPropertyValue(row);
-        copyToClipboard(value);
+        FBL.copyToClipboard(value);
     },
 
     editProperty: function(row, editValue)
@@ -900,7 +900,7 @@ Firebug.DOMBasePanel.prototype = extend(Firebug.Panel,
         if (member && member.readOnly)
             return;
 
-        if (hasClass(row, "watchNewRow"))
+        if (FBL.hasClass(row, "watchNewRow"))
         {
             if (this.context.stopped)
             {
@@ -911,14 +911,14 @@ Firebug.DOMBasePanel.prototype = extend(Firebug.Panel,
                 if (Firebug.CommandLine.onCommandLineFocus())
                     Firebug.Editor.startEditing(row, "");
                 else
-                    row.innerHTML = $STR("warning.Command line blocked?");
+                    row.innerHTML = FBL.$STR("warning.Command line blocked?");
             }
             else
             {
-                row.innerHTML = $STR("warning.Console must be enabled");
+                row.innerHTML = FBL.$STR("warning.Console must be enabled");
             }
         }
-        else if (hasClass(row, "watchRow"))
+        else if (FBL.hasClass(row, "watchRow"))
         {
             Firebug.Editor.startEditing(row, getRowName(row));
         }
@@ -950,7 +950,7 @@ Firebug.DOMBasePanel.prototype = extend(Firebug.Panel,
 
     deleteProperty: function(row)
     {
-        if (hasClass(row, "watchRow"))
+        if (FBL.hasClass(row, "watchRow"))
             this.deleteWatch(row);
         else
         {
@@ -1044,12 +1044,12 @@ Firebug.DOMBasePanel.prototype = extend(Firebug.Panel,
     highlightRow: function(row)
     {
         if (this.highlightedRow)
-            cancelClassTimed(this.highlightedRow, "jumpHighlight", this.context);
+            FBL.cancelClassTimed(this.highlightedRow, "jumpHighlight", this.context);
 
         this.highlightedRow = row;
 
         if (row)
-            setClassTimed(row, "jumpHighlight", this.context);
+            FBL.setClassTimed(row, "jumpHighlight", this.context);
     },
 
     breakOnProperty: function(row)
@@ -1099,7 +1099,7 @@ Firebug.DOMBasePanel.prototype = extend(Firebug.Panel,
         this.propertyPath = [];
         this.viewPath = [];
         this.pathIndex = -1;
-        this.toggles = new ToggleBranch();
+        this.toggles = new FBL.ToggleBranch();
 
         Firebug.Panel.initialize.apply(this, arguments);
     },
@@ -1128,7 +1128,7 @@ Firebug.DOMBasePanel.prototype = extend(Firebug.Panel,
             state.propertyPath = this.propertyPath;
 
         if (this.propertyPath.length > 0 && !this.propertyPath[1])
-            state.firstSelection = persistObject(this.getPathObject(1), this.context);
+            state.firstSelection = FBL.persistObject(this.getPathObject(1), this.context);
 
         if (FBTrace.DBG_DOM)
             FBTrace.sysout("dom.destroy; state:", state);
@@ -1207,7 +1207,7 @@ Firebug.DOMBasePanel.prototype = extend(Firebug.Panel,
 
             if (selectObject)
             {
-                this.objectPath.push(new Property(object, name));
+                this.objectPath.push(new FBL.Property(object, name));
             }
             else
             {
@@ -1230,8 +1230,8 @@ Firebug.DOMBasePanel.prototype = extend(Firebug.Panel,
 
     getBreakOnNextTooltip: function(enabled)
     {
-        return (enabled ? $STR("dom.disableBreakOnPropertyChange") :
-            $STR("dom.label.breakOnPropertyChange"));
+        return (enabled ? FBL.$STR("dom.disableBreakOnPropertyChange") :
+            FBL.$STR("dom.label.breakOnPropertyChange"));
     },
 
     supportsObject: function(object, type)
@@ -1241,7 +1241,7 @@ Firebug.DOMBasePanel.prototype = extend(Firebug.Panel,
 
         if (typeof(object) == "undefined")
             return 1000;
-        else if (object instanceof SourceLink)
+        else if (object instanceof FBL.SourceLink)
             return 0;
         else
             return 1; // just agree to support everything but not aggressively.
@@ -1266,7 +1266,7 @@ Firebug.DOMBasePanel.prototype = extend(Firebug.Panel,
         var pathIndex = this.findPathIndex(object);
         if (newPath || pathIndex == -1)
         {
-            this.toggles = new ToggleBranch();
+            this.toggles = new FBL.ToggleBranch();
 
             if (newPath)
             {
@@ -1306,14 +1306,14 @@ Firebug.DOMBasePanel.prototype = extend(Firebug.Panel,
                     }
 
                     ++this.pathIndex;
-                    this.objectPath.push(new Property(object, name));
+                    this.objectPath.push(new FBL.Property(object, name));
                     this.propertyPath.push(name);
                     this.viewPath.push({toggles: this.toggles, scrollTop: 0});
                 }
             }
             else
             {
-                this.toggles = new ToggleBranch();
+                this.toggles = new FBL.ToggleBranch();
 
                 var win = this.getDefaultSelection();
                 if (object == win)
@@ -1329,7 +1329,7 @@ Firebug.DOMBasePanel.prototype = extend(Firebug.Panel,
                     this.objectPath = [win, object];
                     this.propertyPath = [null, null];
                     this.viewPath = [
-                        {toggles: new ToggleBranch(), scrollTop: 0},
+                        {toggles: new FBL.ToggleBranch(), scrollTop: 0},
                         {toggles: this.toggles, scrollTop: 0}
                     ];
                 }
@@ -1343,7 +1343,7 @@ Firebug.DOMBasePanel.prototype = extend(Firebug.Panel,
             this.pathIndex = pathIndex;
 
             var view = this.viewPath[pathIndex];
-            this.toggles = view ? view.toggles : new ToggleBranch();
+            this.toggles = view ? view.toggles : new FBL.ToggleBranch();
 
             // Persist the current scroll location
             if (previousView && this.panelNode.scrollTop)
@@ -1374,21 +1374,21 @@ Firebug.DOMBasePanel.prototype = extend(Firebug.Panel,
 
     getOptionsMenuItems: function()
     {
-        var enumerablePropertiesItem = optionMenu("ShowEnumerableProperties", "showEnumerableProperties", "ShowEnumerablePropertiesTooltip");
+        var enumerablePropertiesItem = FBL.optionMenu("ShowEnumerableProperties", "showEnumerableProperties", "ShowEnumerablePropertiesTooltip");
         if (!Firebug.showOwnProperties)  // see getObjectProperites
             enumerablePropertiesItem.disabled = true;
 
         return [
-            optionMenu("ShowUserProps", "showUserProps"),
-            optionMenu("ShowUserFuncs", "showUserFuncs"),
-            optionMenu("ShowDOMProps", "showDOMProps"),
-            optionMenu("ShowDOMFuncs", "showDOMFuncs"),
-            optionMenu("ShowDOMConstants", "showDOMConstants"),
+            FBL.optionMenu("ShowUserProps", "showUserProps"),
+            FBL.optionMenu("ShowUserFuncs", "showUserFuncs"),
+            FBL.optionMenu("ShowDOMProps", "showDOMProps"),
+            FBL.optionMenu("ShowDOMFuncs", "showDOMFuncs"),
+            FBL.optionMenu("ShowDOMConstants", "showDOMConstants"),
             "-",
-            optionMenu("ShowOwnProperties", "showOwnProperties", "ShowOwnPropertiesTooltip"),
+            FBL.optionMenu("ShowOwnProperties", "showOwnProperties", "ShowOwnPropertiesTooltip"),
             enumerablePropertiesItem,
             "-",
-            {label: "Refresh", command: bindFixed(this.rebuild, this, true) }
+            {label: "Refresh", command: FBL.bindFixed(this.rebuild, this, true) }
         ];
     },
 
@@ -1397,7 +1397,7 @@ Firebug.DOMBasePanel.prototype = extend(Firebug.Panel,
         if (FBTrace.DBG_DOM)
             FBTrace.sysout("dom.getContextMenuItems;", object);
 
-        var row = getAncestorByClass(target, "memberRow");
+        var row = FBL.getAncestorByClass(target, "memberRow");
 
         var items = [];
 
@@ -1407,15 +1407,15 @@ Firebug.DOMBasePanel.prototype = extend(Firebug.Panel,
             var rowObject = this.getRowObject(row);
             var rowValue = this.getRowPropertyValue(row);
 
-            var isWatch = hasClass(row, "watchRow");
+            var isWatch = FBL.hasClass(row, "watchRow");
             var isStackFrame = rowObject instanceof jsdIStackFrame;
 
             items.push(
                 "-",
                 {label: "Copy Name",  // xxxJJB internationalize
-                    command: bindFixed(this.copyName, this, row) },
+                    command: FBL.bindFixed(this.copyName, this, row) },
                 {label: "Copy Path",
-                    command: bindFixed(this.copyPath, this, row) }
+                    command: FBL.bindFixed(this.copyPath, this, row) }
             );
 
             if (typeof(rowValue) == "string" || typeof(rowValue) == "number")
@@ -1423,39 +1423,39 @@ Firebug.DOMBasePanel.prototype = extend(Firebug.Panel,
                 // Functions already have a copy item in their context menu
                 items.push(
                     {label: "CopyValue",
-                        command: bindFixed(this.copyProperty, this, row) }
+                        command: FBL.bindFixed(this.copyProperty, this, row) }
                 );
             }
 
             items.push(
                 "-",
                 {label: isWatch ? "EditWatch" : (isStackFrame ? "EditVariable" : "EditProperty"),
-                    command: bindFixed(this.editProperty, this, row) }
+                    command: FBL.bindFixed(this.editProperty, this, row) }
             );
 
-            if (isWatch || (!isStackFrame && !isDOMMember(rowObject, rowName)))
+            if (isWatch || (!isStackFrame && !FBL.isDOMMember(rowObject, rowName)))
             {
                 items.push(
                     {label: isWatch ? "DeleteWatch" : "DeleteProperty",
-                        command: bindFixed(this.deleteProperty, this, row) }
+                        command: FBL.bindFixed(this.deleteProperty, this, row) }
                 );
             }
 
             var member = row ? row.domObject : null;
-            if (!isDOMMember(rowObject, rowName) && member && member.breakable)
+            if (!FBL.isDOMMember(rowObject, rowName) && member && member.breakable)
             {
                 items.push(
                     "-",
                     {label: "dom.label.breakOnPropertyChange", type: "checkbox",
                         checked: this.context.dom.breakpoints.findBreakpoint(rowObject, rowName),
-                        command: bindFixed(this.breakOnProperty, this, row)}
+                        command: FBL.bindFixed(this.breakOnProperty, this, row)}
                 );
             }
         }
 
         items.push(
             "-",
-            {label: "Refresh", command: bindFixed(this.rebuild, this, true) }
+            {label: "Refresh", command: FBL.bindFixed(this.rebuild, this, true) }
         );
 
         return items;
@@ -1476,7 +1476,7 @@ var DOMMainPanel = Firebug.DOMPanel = function () {};
 
 Firebug.DOMPanel.DirTable = DirTablePlate;
 
-DOMMainPanel.prototype = extend(Firebug.DOMBasePanel.prototype,
+DOMMainPanel.prototype = FBL.extend(Firebug.DOMBasePanel.prototype,
 {
     selectRow: function(row, target)
     {
@@ -1490,7 +1490,7 @@ DOMMainPanel.prototype = extend(Firebug.DOMBasePanel.prototype,
 
         // If the object is inside an array, look up its index
         var valueBox = row.lastChild.firstChild;
-        if (hasClass(valueBox, "objectBox-array"))
+        if (FBL.hasClass(valueBox, "objectBox-array"))
         {
             var arrayIndex = FirebugReps.Arr.getItemIndex(target);
             this.pathToAppend.push(arrayIndex);
@@ -1510,11 +1510,11 @@ DOMMainPanel.prototype = extend(Firebug.DOMBasePanel.prototype,
         var repNode = Firebug.getRepNode(event.target);
         if (repNode)
         {
-            var row = getAncestorByClass(event.target, "memberRow");
+            var row = FBL.getAncestorByClass(event.target, "memberRow");
             if (row)
             {
                 this.selectRow(row, repNode);
-                cancelEvent(event);
+                FBL.cancelEvent(event);
             }
         }
     },
@@ -1532,7 +1532,7 @@ DOMMainPanel.prototype = extend(Firebug.DOMBasePanel.prototype,
 
     initialize: function()
     {
-        this.onClick = bind(this.onClick, this);
+        this.onClick = FBL.bind(this.onClick, this);
 
         Firebug.DOMBasePanel.prototype.initialize.apply(this, arguments);
     },
@@ -1566,8 +1566,8 @@ DOMMainPanel.prototype = extend(Firebug.DOMBasePanel.prototype,
             row = this.currentSearch.findNext(true, undefined, reverse, Firebug.Search.isCaseSensitive(text));
         else
         {
-            function findRow(node) { return getAncestorByClass(node, "memberRow"); }
-            this.currentSearch = new TextSearch(this.panelNode, findRow);
+            function findRow(node) { return FBL.getAncestorByClass(node, "memberRow"); }
+            this.currentSearch = new FBL.TextSearch(this.panelNode, findRow);
             row = this.currentSearch.find(text, reverse, Firebug.Search.isCaseSensitive(text));
         }
 
@@ -1577,16 +1577,16 @@ DOMMainPanel.prototype = extend(Firebug.DOMBasePanel.prototype,
             sel.removeAllRanges();
             sel.addRange(this.currentSearch.range);
 
-            scrollIntoCenterView(row, this.panelNode);
+            FBL.scrollIntoCenterView(row, this.panelNode);
 
             this.highlightRow(row);
-            dispatch(this.fbListeners, 'onDomSearchMatchFound', [this, text, row]);
+            FBL.dispatch(this.fbListeners, 'onDomSearchMatchFound', [this, text, row]);
             return true;
         }
         else
         {
             this.document.defaultView.getSelection().removeAllRanges();
-            dispatch(this.fbListeners, 'onDomSearchMatchFound', [this, text, null]);
+            FBL.dispatch(this.fbListeners, 'onDomSearchMatchFound', [this, text, null]);
             return false;
         }
     }
@@ -1596,7 +1596,7 @@ DOMMainPanel.prototype = extend(Firebug.DOMBasePanel.prototype,
 
 function DOMSidePanel() {}
 
-DOMSidePanel.prototype = extend(Firebug.DOMBasePanel.prototype,
+DOMSidePanel.prototype = FBL.extend(Firebug.DOMBasePanel.prototype,
 {
     name: "domSide",
     parentPanel: "html",
@@ -1609,7 +1609,7 @@ DOMSidePanel.prototype = extend(Firebug.DOMBasePanel.prototype,
 
 Firebug.WatchPanel = function() {}
 
-Firebug.WatchPanel.prototype = extend(Firebug.DOMBasePanel.prototype,
+Firebug.WatchPanel.prototype = FBL.extend(Firebug.DOMBasePanel.prototype,
 {
     tag: DirTablePlate.watchTag,
 
@@ -1620,7 +1620,7 @@ Firebug.WatchPanel.prototype = extend(Firebug.DOMBasePanel.prototype,
 
     showEmptyMembers: function()
     {
-        this.tag.replace({domPanel: this, toggles: new ToggleBranch()}, this.panelNode);
+        this.tag.replace({domPanel: this, toggles: new FBL.ToggleBranch()}, this.panelNode);
     },
 
     addWatch: function(expression)
@@ -1668,7 +1668,7 @@ Firebug.WatchPanel.prototype = extend(Firebug.DOMBasePanel.prototype,
         this.watches.splice(rowIndex, 1);
         this.rebuild(true);
 
-        this.context.setTimeout(bindFixed(function()
+        this.context.setTimeout(FBL.bindFixed(function()
         {
             this.showToolbox(null);
         }, this));
@@ -1681,12 +1681,12 @@ Firebug.WatchPanel.prototype = extend(Firebug.DOMBasePanel.prototype,
         var toolbox = this.getToolbox();
         if (row)
         {
-            if (hasClass(row, "editing"))
+            if (FBL.hasClass(row, "editing"))
                 return;
 
             toolbox.watchRow = row;
 
-            var offset = getClientOffset(row);
+            var offset = FBL.getClientOffset(row);
             toolbox.style.top = offset.y + "px";
             this.panelNode.appendChild(toolbox);
         }
@@ -1710,27 +1710,27 @@ Firebug.WatchPanel.prototype = extend(Firebug.DOMBasePanel.prototype,
 
     onMouseDown: function(event)
     {
-        var watchNewRow = getAncestorByClass(event.target, "watchNewRow");
+        var watchNewRow = FBL.getAncestorByClass(event.target, "watchNewRow");
         if (watchNewRow)
         {
             this.editProperty(watchNewRow);
-            cancelEvent(event);
+            FBL.cancelEvent(event);
         }
     },
 
     onMouseOver: function(event)
     {
-        var watchRow = getAncestorByClass(event.target, "watchRow");
+        var watchRow = FBL.getAncestorByClass(event.target, "watchRow");
         if (watchRow)
             this.showToolbox(watchRow);
     },
 
     onMouseOut: function(event)
     {
-        if (isAncestor(event.relatedTarget, this.getToolbox()))
+        if (FBL.isAncestor(event.relatedTarget, this.getToolbox()))
             return;
 
-        var watchRow = getAncestorByClass(event.relatedTarget, "watchRow");
+        var watchRow = FBL.getAncestorByClass(event.relatedTarget, "watchRow");
         if (!watchRow)
             this.showToolbox(null);
     },
@@ -1746,9 +1746,9 @@ Firebug.WatchPanel.prototype = extend(Firebug.DOMBasePanel.prototype,
 
     initialize: function()
     {
-        this.onMouseDown = bind(this.onMouseDown, this);
-        this.onMouseOver = bind(this.onMouseOver, this);
-        this.onMouseOut = bind(this.onMouseOut, this);
+        this.onMouseDown = FBL.bind(this.onMouseDown, this);
+        this.onMouseOver = FBL.bind(this.onMouseOver, this);
+        this.onMouseOut = FBL.bind(this.onMouseOut, this);
 
         Firebug.DOMBasePanel.prototype.initialize.apply(this, arguments);
     },
@@ -1807,16 +1807,16 @@ Firebug.WatchPanel.prototype = extend(Firebug.DOMBasePanel.prototype,
         if (FBTrace.DBG_STACK)
             FBTrace.sysout("dom watch panel updateSelection frame "+frame, frame);
 
-        dispatch(this.fbListeners, 'onBeforeDomUpdateSelection', [this]);
+        FBL.dispatch(this.fbListeners, 'onBeforeDomUpdateSelection', [this]);
 
         var newFrame = frame && ('signature' in frame) && (frame.signature() != this.frameSignature);
         if (newFrame)
         {
-            this.toggles = new ToggleBranch();
+            this.toggles = new FBL.ToggleBranch();
             this.frameSignature = frame.signature();
         }
 
-        if (frame instanceof StackFrame)
+        if (frame instanceof FBL.StackFrame)
             var scopes = frame.getScopes(Firebug.viewChrome);
         else
             var scopes = [this.context.getGlobalScope()];
@@ -1840,7 +1840,7 @@ Firebug.WatchPanel.prototype = extend(Firebug.DOMBasePanel.prototype,
                     function failed(result, context)
                     {
                         var exc = result;
-                        value = new ErrorCopy(exc+"");
+                        value = new FBL.ErrorCopy(exc+"");
                     }
                 );
 
@@ -1852,7 +1852,7 @@ Firebug.WatchPanel.prototype = extend(Firebug.DOMBasePanel.prototype,
             }
         }
 
-        if (frame && frame instanceof StackFrame)
+        if (frame && frame instanceof FBL.StackFrame)
         {
             var thisVar = frame.getThisValue();
             if (thisVar)
@@ -1895,7 +1895,7 @@ DOMEditor.prototype = domplate(Firebug.InlineEditor.prototype,
 {
     tag:
         INPUT({"class": "fixedWidthEditor a11yFocusNoTab",
-            type: "text", title:$STR("NewWatch"),
+            type: "text", title:FBL.$STR("NewWatch"),
             oninput: "$onInput", onkeypress: "$onKeyPress"}),
 
     endEditing: function(target, value, cancel)
@@ -1906,11 +1906,11 @@ DOMEditor.prototype = domplate(Firebug.InlineEditor.prototype,
         if (cancel || value == "")
             return;
 
-        var row = getAncestorByClass(target, "memberRow");
-        dispatch(this.panel.fbListeners, 'onWatchEndEditing', [this.panel]);
+        var row = FBL.getAncestorByClass(target, "memberRow");
+        FBL.dispatch(this.panel.fbListeners, 'onWatchEndEditing', [this.panel]);
         if (!row)
             this.panel.addWatch(value);
-        else if (hasClass(row, "watchRow"))
+        else if (FBL.hasClass(row, "watchRow"))
             this.panel.setWatchValue(row, value);
         else
             this.panel.setPropertyValue(row, value);
@@ -1947,7 +1947,7 @@ function isPrototype(name)
 function getWatchRowIndex(row)
 {
     var index = -1;
-    for (; row && hasClass(row, "watchRow"); row = row.previousSibling)
+    for (; row && FBL.hasClass(row, "watchRow"); row = row.previousSibling)
         ++index;
     return index;
 }
@@ -2052,16 +2052,16 @@ Firebug.DOMModule.BreakpointRep = domplate(Firebug.Rep,
 
     onRemove: function(event)
     {
-        cancelEvent(event);
+        FBL.cancelEvent(event);
 
-        if (!hasClass(event.target, "closeButton"))
+        if (!FBL.hasClass(event.target, "closeButton"))
             return;
 
         var bpPanel = Firebug.getElementPanel(event.target);
         var context = bpPanel.context;
 
         // Remove from list of breakpoints.
-        var row = getAncestorByClass(event.target, "breakpointRow");
+        var row = FBL.getAncestorByClass(event.target, "breakpointRow");
         var bp = row.repObject;
         context.dom.breakpoints.removeBreakpoint(bp.object, bp.propName);
 
@@ -2082,13 +2082,13 @@ Firebug.DOMModule.BreakpointRep = domplate(Firebug.Rep,
     onEnable: function(event)
     {
         var checkBox = event.target;
-        if (!hasClass(checkBox, "breakpointCheckbox"))
+        if (!FBL.hasClass(checkBox, "breakpointCheckbox"))
             return;
 
         var bpPanel = Firebug.getElementPanel(event.target);
         var context = bpPanel.context;
 
-        var bp = getAncestorByClass(checkBox, "breakpointRow").repObject;
+        var bp = FBL.getAncestorByClass(checkBox, "breakpointRow").repObject;
         bp.checked = checkBox.checked;
 
         var domPanel = context.getPanel("dom", true);
@@ -2140,8 +2140,8 @@ Breakpoint.prototype =
                 if (self.checked)
                 {
                     self.context.breakingCause = {
-                        title: $STR("dom.Break On Property"),
-                        message: cropString(prop, 200),
+                        title: FBL.$STR("dom.Break On Property"),
+                        message: FBL.cropString(prop, 200),
                         prevValue: oldval,
                         newValue: newval
                     };
@@ -2188,10 +2188,10 @@ function DOMBreakpointGroup()
     this.breakpoints = [];
 }
 
-DOMBreakpointGroup.prototype = extend(new Firebug.Breakpoint.BreakpointGroup(),
+DOMBreakpointGroup.prototype = FBL.extend(new Firebug.Breakpoint.BreakpointGroup(),
 {
     name: "domBreakpoints",
-    title: $STR("dom.label.DOM Breakpoints"),
+    title: FBL.$STR("dom.label.DOM Breakpoints"),
 
     addBreakpoint: function(object, propName, panel, row)
     {
@@ -2217,7 +2217,7 @@ DOMBreakpointGroup.prototype = extend(new Firebug.Breakpoint.BreakpointGroup(),
         if (bp)
         {
             bp.unwatchProperty();
-            remove(this.breakpoints, bp);
+            FBL.remove(this.breakpoints, bp);
         }
     },
 
@@ -2231,7 +2231,7 @@ DOMBreakpointGroup.prototype = extend(new Firebug.Breakpoint.BreakpointGroup(),
     // Persistence
     load: function(context)
     {
-        var panelState = getPersistedState(context, "dom");
+        var panelState = FBL.getPersistedState(context, "dom");
         if (panelState.breakpoints)
             this.breakpoints = panelState.breakpoints;
 
@@ -2262,7 +2262,7 @@ DOMBreakpointGroup.prototype = extend(new Firebug.Breakpoint.BreakpointGroup(),
             bp.object = null;
         });
 
-        var panelState = getPersistedState(context, "dom");
+        var panelState = FBL.getPersistedState(context, "dom");
         panelState.breakpoints = this.breakpoints;
     },
 });

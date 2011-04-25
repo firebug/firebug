@@ -19,7 +19,7 @@ Firebug.Console.injector =
 
         if (FBTrace.DBG_CONSOLE)
             FBTrace.sysout("Console.isAttached "+handler+" in context "+context.getName()+
-                " and win "+safeGetWindowLocation(win), handler);
+                " and win "+FBL.safeGetWindowLocation(win), handler);
 
         return handler;
     },
@@ -31,7 +31,7 @@ Firebug.Console.injector =
 
         if (FBTrace.DBG_CONSOLE)
             FBTrace.sysout("Console.attachIfNeeded found isAttached false " +
-                safeGetWindowLocation(win));
+                FBL.safeGetWindowLocation(win));
 
         this.attachConsoleInjector(context, win);
         this.addConsoleListener(context, win);
@@ -40,7 +40,7 @@ Firebug.Console.injector =
 
         var attached =  this.isAttached(context, win);
         if (attached)
-            dispatch(Firebug.Console.fbListeners, "onConsoleInjected", [context, win]);
+            FBL.dispatch(Firebug.Console.fbListeners, "onConsoleInjected", [context, win]);
 
         return attached;
     },
@@ -96,7 +96,7 @@ Firebug.Console.injector =
         if (handler)
         {
             handler.detach();
-            remove(context.activeConsoleHandlers, handler);
+            FBL.remove(context.activeConsoleHandlers, handler);
         }
     },
 
@@ -110,7 +110,7 @@ Firebug.Console.injector =
         if (FBTrace.DBG_CONSOLE)
             FBTrace.sysout("consoleInjector addConsoleListener set token "+handler.token+
                 " and  attached handler("+handler.handler_name+") to _firebugConsole in : "+
-                safeGetWindowLocation(win));
+                FBL.safeGetWindowLocation(win));
 
     },
 
@@ -155,7 +155,7 @@ function createConsoleHandler(context, win)
                 FBTrace.sysout("FirebugConsoleHandler", this);
 
             var methodName = win.document.getUserData("firebug-methodName");
-            Firebug.Console.log($STRF("console.MethodNotSupported", [methodName]));
+            Firebug.Console.log(FBL.$STRF("console.MethodNotSupported", [methodName]));
         }
     };
 
@@ -173,7 +173,7 @@ function createConsoleHandler(context, win)
     handler.context = context;
 
     // When raised on our injected element, callback to Firebug and append to console
-    handler.boundHandler = bind(handler.handleEvent, handler);
+    handler.boundHandler = FBL.bind(handler.handleEvent, handler);
     win.document.addEventListener('firebugAppendConsole', handler.boundHandler, true); // capturing
 
     if (FBTrace.DBG_CONSOLE)
@@ -413,7 +413,7 @@ Firebug.Console.createConsole = function createConsole(context, win)
 
         if (msg.stack)
         {
-            var trace = parseToStackTrace(msg.stack, context);
+            var trace = FBL.parseToStackTrace(msg.stack, context);
             if (FBTrace.DBG_CONSOLE)
                 FBTrace.sysout("logAssert trace from msg.stack", trace);
         }
@@ -430,7 +430,7 @@ Firebug.Console.createConsole = function createConsole(context, win)
                 FBTrace.sysout("logAssert trace from getJSDUserStack", trace);
         }
 
-        trace = cleanStackTraceOfFirebug(trace);
+        trace = FBL.cleanStackTraceOfFirebug(trace);
 
         var url = msg.fileName ? msg.fileName : win.location.href;
         var lineNo = (trace && msg.lineNumber) ? msg.lineNumber : 0; // we may have only the line popped above

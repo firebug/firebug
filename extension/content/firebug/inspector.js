@@ -25,7 +25,7 @@ var frameHighlighter = null;
 /**
  * @module Implements Firebug Inspector logic.
  */
-Firebug.Inspector = extend(Firebug.Module,
+Firebug.Inspector = FBL.extend(Firebug.Module,
 {
     dispatchName: "inspector",
     inspecting: false,
@@ -55,7 +55,7 @@ Firebug.Inspector = extend(Firebug.Module,
         if (!elementArr || !FirebugReps.Arr.isArray(elementArr))
         {
             // highlight a single element
-            if (!elementArr || !isElement(elementArr) || (FBL.getContentView(elementArr) && !isVisible(FBL.getContentView(elementArr))) )
+            if (!elementArr || !FBL.isElement(elementArr) || (FBL.getContentView(elementArr) && !FBL.isVisible(FBL.getContentView(elementArr))) )
             {
                 if(elementArr && elementArr.nodeType == 3)
                     elementArr = elementArr.parentNode;
@@ -163,7 +163,7 @@ Firebug.Inspector = extend(Firebug.Module,
     {
         if (this.inspecting)
         {
-            var panelBar1 = $("fbPanelBar1");
+            var panelBar1 = FBL.$("fbPanelBar1");
             var panel = panelBar1.selectedPanel;
 
             if (panel && panel.inspectable)
@@ -202,7 +202,7 @@ Firebug.Inspector = extend(Firebug.Module,
         this.inspectingPanel.panelNode.focus();
         this.inspectingPanel.startInspecting();
 
-        dispatch(this.fbListeners, "onStartInspecting", [context]);
+        FBL.dispatch(this.fbListeners, "onStartInspecting", [context]);
 
         if (context.stopped)
             Firebug.Debugger.thaw(context);
@@ -251,7 +251,7 @@ Firebug.Inspector = extend(Firebug.Module,
             this.inspectTimeout = context.setTimeout(function()
             {
                 var selection = inspectingPanel.inspectNode(node);
-                dispatch(_this.fbListeners, "onInspectNode", [context, node]);
+                FBL.dispatch(_this.fbListeners, "onInspectNode", [context, node]);
                 if (selection)
                     inspectingPanel.select(node);
             }, inspectDelay);
@@ -290,7 +290,7 @@ Firebug.Inspector = extend(Firebug.Module,
         Firebug.chrome.unswitchToPanel(context, this.inspectingPanel.name, canceled);
 
         this.inspectingPanel.stopInspecting(this.inspectingNode, canceled);
-        dispatch(this.fbListeners, "onStopInspecting", [context, this.inspectingNode, canceled]);
+        FBL.dispatch(this.fbListeners, "onStopInspecting", [context, this.inspectingNode, canceled]);
 
         this.inspectNode(null);
     },
@@ -348,14 +348,14 @@ Firebug.Inspector = extend(Firebug.Module,
                 if (node.contentDocument)
                     target = node.contentDocument.documentElement;
                 else
-                    target = getNextElement(node.firstChild);
+                    target = FBL.getNextElement(node.firstChild);
             }
         }
 
-        if (target && isElement(target))
+        if (target && FBL.isElement(target))
             this.inspectNode(target);
         else
-            beep();
+            FBL.beep();
     },
 
     /**
@@ -431,13 +431,13 @@ Firebug.Inspector = extend(Firebug.Module,
 
         this.keyListeners =
         [
-            chrome.keyCodeListen("RETURN", null, bindFixed(this.stopInspecting, this)),
-            chrome.keyCodeListen("ESCAPE", null, bindFixed(this.stopInspecting, this, true)),
-            chrome.keyCodeListen("UP", isControl, bindFixed(this.inspectNodeBy, this, "up"), true),
-            chrome.keyCodeListen("DOWN", isControl, bindFixed(this.inspectNodeBy, this, "down"), true),
+            chrome.keyCodeListen("RETURN", null, FBL.bindFixed(this.stopInspecting, this)),
+            chrome.keyCodeListen("ESCAPE", null, FBL.bindFixed(this.stopInspecting, this, true)),
+            chrome.keyCodeListen("UP", FBL.isControl, FBL.bindFixed(this.inspectNodeBy, this, "up"), true),
+            chrome.keyCodeListen("DOWN", FBL.isControl, FBL.bindFixed(this.inspectNodeBy, this, "down"), true),
         ];
 
-        iterateWindows(win, bind(function(subWin)
+        FBL.iterateWindows(win, FBL.bind(function(subWin)
         {
             if (FBTrace.DBG_INSPECT)
                 FBTrace.sysout("inspector.attacheInspectListeners to " + subWin.location +
@@ -472,7 +472,7 @@ Firebug.Inspector = extend(Firebug.Module,
             delete this.keyListeners;
         }
 
-        iterateWindows(win, bind(function(subWin)
+        FBL.iterateWindows(win, FBL.bind(function(subWin)
         {
             subWin.document.removeEventListener("mouseover", this.onInspectingMouseOver, true);
             subWin.document.removeEventListener("mousedown", this.onInspectingMouseDown, true);
@@ -486,7 +486,7 @@ Firebug.Inspector = extend(Firebug.Module,
      */
     detachClickInspectListeners: function(context)
     {
-        iterateWindows(context, bind(function(subWin)
+        FBL.iterateWindows(context, FBL.bind(function(subWin)
         {
             subWin.document.removeEventListener("click", this.onInspectingClick, true);
         }, this));
@@ -544,7 +544,7 @@ Firebug.Inspector = extend(Firebug.Module,
         if (event.originalTarget && event.originalTarget.tagName === "xul:thumb")
             return;
 
-        cancelEvent(event);
+        FBL.cancelEvent(event);
     },
 
     /**
@@ -563,7 +563,7 @@ Firebug.Inspector = extend(Firebug.Module,
 
         this.stopInspecting(false, true);
 
-        cancelEvent(event);
+        FBL.cancelEvent(event);
     },
 
     /**
@@ -578,11 +578,11 @@ Firebug.Inspector = extend(Firebug.Module,
         var win = event.currentTarget.defaultView;
         if (win)
         {
-            win = getRootWindow(win);
+            win = FBL.getRootWindow(win);
             this.detachClickInspectListeners(win);
         }
 
-        cancelEvent(event);
+        FBL.cancelEvent(event);
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
@@ -595,18 +595,18 @@ Firebug.Inspector = extend(Firebug.Module,
     {
         Firebug.Module.initialize.apply(this, arguments);
 
-        this.onInspectingResizeWindow = bind(this.onInspectingResizeWindow, this);
-        this.onInspectingScroll = bind(this.onInspectingScroll, this);
-        this.onInspectingMouseOver = bind(this.onInspectingMouseOver, this);
-        this.onInspectingMouseDown = bind(this.onInspectingMouseDown, this);
-        this.onInspectingMouseUp = bind(this.onInspectingMouseUp, this);
-        this.onInspectingClick = bind(this.onInspectingClick, this);
-        this.onPanelChanged = bind(this.onPanelChanged, this);
+        this.onInspectingResizeWindow = FBL.bind(this.onInspectingResizeWindow, this);
+        this.onInspectingScroll = FBL.bind(this.onInspectingScroll, this);
+        this.onInspectingMouseOver = FBL.bind(this.onInspectingMouseOver, this);
+        this.onInspectingMouseDown = FBL.bind(this.onInspectingMouseDown, this);
+        this.onInspectingMouseUp = FBL.bind(this.onInspectingMouseUp, this);
+        this.onInspectingClick = FBL.bind(this.onInspectingClick, this);
+        this.onPanelChanged = FBL.bind(this.onPanelChanged, this);
 
         this.updateOption("shadeBoxModel", Firebug.shadeBoxModel);
         this.updateOption("showQuickInfoBox", Firebug.showQuickInfoBox);
 
-        var panelBar1 = $("fbPanelBar1");
+        var panelBar1 = FBL.$("fbPanelBar1");
         panelBar1.addEventListener("selectPanel", this.onPanelChanged, false);
     },
 
@@ -718,7 +718,7 @@ Firebug.Inspector = extend(Firebug.Module,
      */
     getObjectByURL: function(context, url)
     {
-        var styleSheet = getStyleSheetByHref(url, context);
+        var styleSheet = FBL.getStyleSheetByHref(url, context);
         if (styleSheet)
             return styleSheet;
     },
@@ -728,7 +728,7 @@ Firebug.Inspector = extend(Firebug.Module,
      */
     toggleQuickInfoBox: function()
     {
-        var qiBox = $('fbQuickInfoPanel');
+        var qiBox = FBL.$('fbQuickInfoPanel');
 
         if (qiBox.state === "open")
             quickInfoBox.hide();
@@ -743,7 +743,7 @@ Firebug.Inspector = extend(Firebug.Module,
      */
     hideQuickInfoBox: function()
     {
-        var qiBox = $('fbQuickInfoPanel');
+        var qiBox = FBL.$('fbQuickInfoPanel');
 
         if (qiBox.state==="open")
             quickInfoBox.hide();
@@ -888,7 +888,7 @@ function getImageMapHighlighter(context)
                 for (i = 0; i < eltsLen; i++)
                 {
                     elt = elts.snapshotItem(i);
-                    rect = getLTRBWH(elt);
+                    rect = FBL.getLTRBWH(elt);
 
                     if (multi)
                     {
@@ -930,7 +930,7 @@ function getImageMapHighlighter(context)
 
                     for(j = 0; j < imagesLen; j++)
                     {
-                        rect = getLTRBWH(images[j], context);
+                        rect = FBL.getLTRBWH(images[j], context);
 
                         ctx.beginPath();
 
@@ -999,14 +999,14 @@ var quickInfoBox =
             compAttribs = ['width', 'height', 'zIndex', 'position', 'top', 'right', 'bottom', 'left',
                            'margin-top', 'margin-right', 'margin-bottom', 'margin-left', 'color', 'backgroundColor',
                            'fontFamily', 'cssFloat', 'display', 'visibility'],
-            qiBox = $('fbQuickInfoPanel');
+            qiBox = FBL.$('fbQuickInfoPanel');
 
         if (qiBox.state==="closed")
         {
             qiBox.hidePopup();
 
-            this.storedX = this.storedX || $('content').tabContainer.boxObject.screenX + 5;
-            this.storedY = this.storedY || $('content').tabContainer.boxObject.screenY + 35;
+            this.storedX = this.storedX || FBL.$('content').tabContainer.boxObject.screenX + 5;
+            this.storedY = this.storedY || FBL.$('content').tabContainer.boxObject.screenY + 35;
 
             qiBox.openPopupAtScreen(this.storedX, this.storedY, false);
         }
@@ -1022,13 +1022,13 @@ var quickInfoBox =
         {
             lab = document.createElement("label");
             lab.setAttribute("class", "fbQuickInfoBoxTitle");
-            lab.setAttribute("value", $STR("quickInfo"));
+            lab.setAttribute("value", FBL.$STR("quickInfo"));
             vbox.insertBefore(lab, vbox.firstChild);
         }
 
         lab = document.createElement("label");
         lab.setAttribute("class", "fbQuickInfoBoxTitle");
-        lab.setAttribute("value", $STR("computedStyle"));
+        lab.setAttribute("value", FBL.$STR("computedStyle"));
         vbox.appendChild(lab);
 
         this.addRows(element, vbox, compAttribs, true);
@@ -1042,7 +1042,7 @@ var quickInfoBox =
             return;
         }
 
-        var qiBox = $('fbQuickInfoPanel');
+        var qiBox = FBL.$('fbQuickInfoPanel');
         this.prevX = null;
         this.prevY = null;
         this.needsToHide = false;
@@ -1074,7 +1074,7 @@ var quickInfoBox =
                 this.storedY = boxY;
                 break;
             case "mousedown":
-                this.qiPanel = $('fbQuickInfoPanel');
+                this.qiPanel = FBL.$('fbQuickInfoPanel');
                 this.qiBox = this.qiPanel.boxObject;
                 this.qiPanel.addEventListener('mousemove', this, true);
                 this.qiPanel.addEventListener('mouseup', this, true);
@@ -1179,7 +1179,7 @@ Firebug.Inspector.FrameHighlighter.prototype =
         storeHighlighterParams(this, context, element, null, colorObj, null, isMulti);
 
         var cs;
-        var offset = getLTRBWH(element);
+        var offset = FBL.getLTRBWH(element);
         var x = offset.left, y = offset.top;
         var w = offset.width, h = offset.height;
 
@@ -1350,7 +1350,7 @@ BoxModelHighlighter.prototype =
         storeHighlighterParams(this, context, element, boxFrame, colorObj, null, isMulti);
 
         if (context.highlightFrame)
-            removeClass(context.highlightFrame, "firebugHighlightBox");
+            FBL.removeClass(context.highlightFrame, "firebugHighlightBox");
 
         if (element.tagName !== "AREA")
         {
@@ -1361,11 +1361,11 @@ BoxModelHighlighter.prototype =
 
             if (highlightFrame)
             {
-                setClass(nodes.offset, "firebugHighlightGroup");
-                setClass(highlightFrame, "firebugHighlightBox");
+                FBL.setClass(nodes.offset, "firebugHighlightGroup");
+                FBL.setClass(highlightFrame, "firebugHighlightBox");
             }
             else
-                removeClass(nodes.offset, "firebugHighlightGroup");
+                FBL.removeClass(nodes.offset, "firebugHighlightGroup");
 
             var win = (element.ownerDocument ? element.ownerDocument.defaultView : null);
             if (!win)
@@ -1379,8 +1379,8 @@ BoxModelHighlighter.prototype =
                 return;
             }
 
-            var styles = readBoxStyles(style);
-            var offset = getLTRBWH(element);
+            var styles = FBL.readBoxStyles(style);
+            var offset = FBL.getLTRBWH(element);
             var x = offset.left - Math.abs(styles.marginLeft);
             var y = offset.top - Math.abs(styles.marginTop);
             var w = offset.width - (styles.paddingLeft + styles.paddingRight + styles.borderLeft + styles.borderRight);
@@ -1581,7 +1581,7 @@ BoxModelHighlighter.prototype =
     setNodesByOffsetParent: function(win, offsetParent, nodes)
     {
         var parentStyle = win.getComputedStyle(offsetParent, "");
-        var parentOffset = getLTRBWH(offsetParent);
+        var parentOffset = FBL.getLTRBWH(offsetParent);
         var parentX = parentOffset.left + parseInt(parentStyle.borderLeftWidth, 10);
         var parentY = parentOffset.top + parseInt(parentStyle.borderTopWidth, 10);
         var parentW = offsetParent.offsetWidth-1;
@@ -1590,14 +1590,14 @@ BoxModelHighlighter.prototype =
         nodes.parent.style.cssText = moveImp(null, parentX, parentY) + resizeImp(null, parentW, parentH);
 
         if (parentX < 14)
-            setClass(nodes.parent, "overflowRulerX");
+            FBL.setClass(nodes.parent, "overflowRulerX");
         else
-            removeClass(nodes.parent, "overflowRulerX");
+            FBL.removeClass(nodes.parent, "overflowRulerX");
 
         if (parentY < 14)
-            setClass(nodes.parent, "overflowRulerY");
+            FBL.setClass(nodes.parent, "overflowRulerY");
         else
-            removeClass(nodes.parent, "overflowRulerY");
+            FBL.removeClass(nodes.parent, "overflowRulerY");
     }
 };
 
@@ -1715,7 +1715,7 @@ var highlighterCache =
 
 function getNonFrameBody(elt)
 {
-    var body = getBody(elt.ownerDocument);
+    var body = FBL.getBody(elt.ownerDocument);
     return (body.localName && body.localName.toUpperCase() === "FRAMESET") ? null : body;
 }
 
@@ -1723,10 +1723,10 @@ function attachStyles(context, body)
 {
     var doc = body.ownerDocument;
     if (!context.highlightStyle)
-        context.highlightStyle = createStyleSheet(doc, highlightCSS);
+        context.highlightStyle = FBL.createStyleSheet(doc, highlightCSS);
 
     if (!context.highlightStyle.parentNode || context.highlightStyle.ownerDocument != doc)
-        addStyleSheet(body.ownerDocument, context.highlightStyle);
+        FBL.addStyleSheet(body.ownerDocument, context.highlightStyle);
 }
 
 function createProxiesForDisabledElements(body)

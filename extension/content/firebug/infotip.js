@@ -11,7 +11,7 @@ const infoTipWindowPadding = 25;
 
 // ************************************************************************************************
 
-Firebug.InfoTip = extend(Firebug.Module,
+Firebug.InfoTip = FBL.extend(Firebug.Module,
 {
     dispatchName: "infoTip",
     tags: domplate(
@@ -44,8 +44,8 @@ Firebug.InfoTip = extend(Firebug.Module,
 
             if (repeat == "repeat-x" || (w == 1 && h > 1))
             {
-                collapse(img, true);
-                collapse(bgImg, false);
+                FBL.collapse(img, true);
+                FBL.collapse(bgImg, false);
                 bgImg.style.background = "url(" + img.src + ") repeat-x";
                 bgImg.style.width = maxWidth + "px";
                 if (h > maxHeight)
@@ -55,8 +55,8 @@ Firebug.InfoTip = extend(Firebug.Module,
             }
             else if (repeat == "repeat-y" || (h == 1 && w > 1))
             {
-                collapse(img, true);
-                collapse(bgImg, false);
+                FBL.collapse(img, true);
+                FBL.collapse(bgImg, false);
                 bgImg.style.background = "url(" + img.src + ") repeat-y";
                 bgImg.style.height = maxHeight + "px";
                 if (w > maxWidth)
@@ -66,8 +66,8 @@ Firebug.InfoTip = extend(Firebug.Module,
             }
             else if (repeat == "repeat" || (w == 1 && h == 1))
             {
-                collapse(img, true);
-                collapse(bgImg, false);
+                FBL.collapse(img, true);
+                FBL.collapse(bgImg, false);
                 bgImg.style.background = "url(" + img.src + ") repeat";
                 bgImg.style.width = maxWidth + "px";
                 bgImg.style.height = maxHeight + "px";
@@ -89,9 +89,9 @@ Firebug.InfoTip = extend(Firebug.Module,
                 }
             }
 
-            caption.innerHTML = $STRF("Dimensions", [w, h]);
+            caption.innerHTML = FBL.$STRF("Dimensions", [w, h]);
 
-            removeClass(innerBox, "infoTipLoading");
+            FBL.removeClass(innerBox, "infoTipLoading");
         },
 
         onErrorImage: function(event)
@@ -105,19 +105,19 @@ Firebug.InfoTip = extend(Firebug.Module,
 
             // Display an error in the caption (instead of dimensions).
             if (img.src.indexOf("moz-filedata") == 0)
-                caption.innerHTML = $STR("firebug.failedToPreviewObjectURL");
+                caption.innerHTML = FBL.$STR("firebug.failedToPreviewObjectURL");
             else
-                caption.innerHTML = $STR("firebug.failedToPreviewImageURL");
+                caption.innerHTML = FBL.$STR("firebug.failedToPreviewImageURL");
 
             var innerBox = img.parentNode;
-            removeClass(innerBox, "infoTipLoading");
+            FBL.removeClass(innerBox, "infoTipLoading");
         }
     }),
 
     initializeBrowser: function(browser)
     {
-        browser.onInfoTipMouseOut = bind(this.onMouseOut, this, browser);
-        browser.onInfoTipMouseMove = bind(this.onMouseMove, this, browser);
+        browser.onInfoTipMouseOut = FBL.bind(this.onMouseOut, this, browser);
+        browser.onInfoTipMouseMove = FBL.bind(this.onMouseMove, this, browser);
 
         var doc = browser.contentDocument;
         if (!doc)
@@ -127,7 +127,7 @@ Firebug.InfoTip = extend(Firebug.Module,
         doc.addEventListener("mouseout", browser.onInfoTipMouseOut, true);
         doc.addEventListener("mousemove", browser.onInfoTipMouseMove, true);
 
-        return browser.infoTip = this.tags.infoTipTag.append({}, getBody(doc));
+        return browser.infoTip = this.tags.infoTipTag.append({}, FBL.getBody(doc));
     },
 
     uninitializeBrowser: function(browser)
@@ -150,13 +150,13 @@ Firebug.InfoTip = extend(Firebug.Module,
         if (!Firebug.showInfoTips)
             return;
 
-        var scrollParent = getOverflowParent(target);
+        var scrollParent = FBL.getOverflowParent(target);
         var scrollX = x + (scrollParent ? scrollParent.scrollLeft : 0);
 
         var show = panel.showInfoTip(infoTip, target, scrollX, y, rangeParent, rangeOffset);
         if (!show && this.fbListeners)
         {
-            show = dispatch2(this.fbListeners, "showInfoTip", [infoTip, target, scrollX, y,
+            show = FBL.dispatch2(this.fbListeners, "showInfoTip", [infoTip, target, scrollX, y,
                 rangeParent, rangeOffset]);
         }
 
@@ -219,7 +219,7 @@ Firebug.InfoTip = extend(Firebug.Module,
     onMouseMove: function(event, browser)
     {
         // Ignore if the mouse is moving over the existing info tip.
-        if (getAncestorByClass(event.target, "infoTip"))
+        if (FBL.getAncestorByClass(event.target, "infoTip"))
             return;
 
         if (browser.currentPanel)

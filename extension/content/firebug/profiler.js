@@ -3,11 +3,11 @@
 
 FBL.ns(function() { with (FBL) {
 
-var toggleProfiling = $("fbToggleProfiling");
+var toggleProfiling = FBL.$("fbToggleProfiling");
 
 // ************************************************************************************************
 
-Firebug.Profiler = extend(Firebug.Module,
+Firebug.Profiler = FBL.extend(Firebug.Module,
 {
     dispatchName: "profiler",
 
@@ -47,14 +47,14 @@ Firebug.Profiler = extend(Firebug.Module,
             disabled ? "true" : "false");
 
         // Update button's tooltip.
-        var tooltipText = disabled ? $STR("ProfileButton.Disabled.Tooltip")
-            : $STR("ProfileButton.Enabled.Tooltip");
+        var tooltipText = disabled ? FBL.$STR("ProfileButton.Disabled.Tooltip")
+            : FBL.$STR("ProfileButton.Enabled.Tooltip");
         Firebug.chrome.setGlobalAttribute("cmd_toggleProfiling", "tooltiptext", tooltipText);
     },
 
     toggleProfiling: function(context)
     {
-        if (fbs.profiling)
+        if (FBL.fbs.profiling)
             this.stopProfiling(context);
         else
             this.startProfiling(context);
@@ -62,13 +62,13 @@ Firebug.Profiler = extend(Firebug.Module,
 
     startProfiling: function(context, title)
     {
-        fbs.startProfiling();
+        FBL.fbs.startProfiling();
 
         Firebug.chrome.setGlobalAttribute("cmd_toggleProfiling", "checked", "true");
 
         var isCustomMessage = !!title;
         if (!isCustomMessage)
-            title = $STR("ProfilerStarted");
+            title = FBL.$STR("ProfilerStarted");
 
         context.profileRow = this.logProfileRow(context, title);
         context.profileRow.customMessage = isCustomMessage ;
@@ -81,7 +81,7 @@ Firebug.Profiler = extend(Firebug.Module,
 
     stopProfiling: function(context, cancelReport)
     {
-        var totalTime = fbs.stopProfiling();
+        var totalTime = FBL.fbs.stopProfiling();
         if (totalTime == -1)
             return;
 
@@ -99,7 +99,7 @@ Firebug.Profiler = extend(Firebug.Module,
     {
         var row = Firebug.Console.openGroup(title, context, "profile",
             Firebug.Profiler.ProfileCaption, true, null, true);
-        setClass(row, "profilerRunning");
+        FBL.setClass(row, "profilerRunning");
 
         Firebug.Console.closeGroup(context, true);
 
@@ -119,11 +119,11 @@ Firebug.Profiler = extend(Firebug.Module,
                 FBTrace.sysout("logProfileReport: "+sourceFileMap[url]+"\n");
         }
 
-        jsd.enumerateScripts({enumerateScript: function(script)
+        FBL.jsd.enumerateScripts({enumerateScript: function(script)
         {
             if (script.callCount)
             {
-                if (!Firebug.filterSystemURLs || !isSystemURL(script.fileName))
+                if (!Firebug.filterSystemURLs || !FBL.isSystemURL(script.fileName))
                 {
                     var sourceLink = FBL.getSourceLinkForScript(script, context);
                     if (sourceLink && sourceLink.href in sourceFileMap)
@@ -155,15 +155,15 @@ Firebug.Profiler = extend(Firebug.Module,
             : this.logProfileRow(context, "");
         delete context.profileRow;
 
-        removeClass(groupRow, "profilerRunning");
+        FBL.removeClass(groupRow, "profilerRunning");
 
         if (totalCalls > 0)
         {
             var captionBox = groupRow.getElementsByClassName("profileCaption").item(0);
             if (!groupRow.customMessage)
-                captionBox.textContent = $STR("Profile");
+                captionBox.textContent = FBL.$STR("Profile");
             var timeBox = groupRow.getElementsByClassName("profileTime").item(0);
-            timeBox.textContent = $STRP("plural.Profile_Time2", [totalTime, totalCalls], 1);
+            timeBox.textContent = FBL.$STRP("plural.Profile_Time2", [totalTime, totalCalls], 1);
 
             var groupBody = groupRow.lastChild;
             var sizer = Firebug.Profiler.ProfileTable.tag.replace({}, groupBody);
@@ -183,7 +183,7 @@ Firebug.Profiler = extend(Firebug.Module,
         else
         {
             var captionBox = groupRow.getElementsByClassName("profileCaption").item(0);
-            captionBox.textContent = $STR("NothingToProfile");
+            captionBox.textContent = FBL.$STR("NothingToProfile");
         }
     }
 });
@@ -199,47 +199,47 @@ Firebug.Profiler.ProfileTable = domplate(
                     TR({"class": "headerRow focusRow profileRow subFocusRow", onclick: "$onClick", "role": "row"},
                         TH({"class": "headerCell alphaValue a11yFocus", "role": "columnheader"},
                             DIV({"class": "headerCellBox"},
-                                $STR("Function")
+                                FBL.$STR("Function")
                             )
                         ),
                         TH({"class": "headerCell a11yFocus" , "role": "columnheader"},
-                            DIV({"class": "headerCellBox", title: $STR("CallsHeaderTooltip")},
-                                $STR("Calls")
+                            DIV({"class": "headerCellBox", title: FBL.$STR("CallsHeaderTooltip")},
+                                FBL.$STR("Calls")
                             )
                         ),
                         TH({"class": "headerCell headerSorted a11yFocus", "role": "columnheader", "aria-sort": "descending"},
-                            DIV({"class": "headerCellBox", title: $STR("PercentTooltip")},
-                                $STR("Percent")
+                            DIV({"class": "headerCellBox", title: FBL.$STR("PercentTooltip")},
+                                FBL.$STR("Percent")
                             )
                         ),
                         TH({"class": "headerCell a11yFocus", "role": "columnheader"},
-                            DIV({"class": "headerCellBox", title: $STR("OwnTimeHeaderTooltip")},
-                                $STR("OwnTime")
+                            DIV({"class": "headerCellBox", title: FBL.$STR("OwnTimeHeaderTooltip")},
+                                FBL.$STR("OwnTime")
                             )
                         ),
                         TH({"class": "headerCell a11yFocus", "role": "columnheader"},
-                            DIV({"class": "headerCellBox", title: $STR("TimeHeaderTooltip")},
-                                $STR("Time")
+                            DIV({"class": "headerCellBox", title: FBL.$STR("TimeHeaderTooltip")},
+                                FBL.$STR("Time")
                             )
                         ),
                         TH({"class": "headerCell a11yFocus", "role": "columnheader"},
-                            DIV({"class": "headerCellBox", title: $STR("AvgHeaderTooltip")},
-                                $STR("Avg")
+                            DIV({"class": "headerCellBox", title: FBL.$STR("AvgHeaderTooltip")},
+                                FBL.$STR("Avg")
                             )
                         ),
                         TH({"class": "headerCell a11yFocus", "role": "columnheader"},
-                            DIV({"class": "headerCellBox", title: $STR("MinHeaderTooltip")},
-                                $STR("Min")
+                            DIV({"class": "headerCellBox", title: FBL.$STR("MinHeaderTooltip")},
+                                FBL.$STR("Min")
                             )
                         ),
                         TH({"class": "headerCell a11yFocus", "role": "columnheader"},
-                            DIV({"class": "headerCellBox", title: $STR("MaxHeaderTooltip")},
-                                $STR("Max")
+                            DIV({"class": "headerCellBox", title: FBL.$STR("MaxHeaderTooltip")},
+                                FBL.$STR("Max")
                             )
                         ),
                         TH({"class": "headerCell alphaValue a11yFocus", "role": "columnheader"},
                             DIV({"class": "headerCellBox"},
-                                $STR("File")
+                                FBL.$STR("File")
                             )
                         )
                     )
@@ -250,12 +250,12 @@ Firebug.Profiler.ProfileTable = domplate(
 
     onClick: function(event)
     {
-        var table = getAncestorByClass(event.target, "profileTable");
-        var header = getAncestorByClass(event.target, "headerCell");
+        var table = FBL.getAncestorByClass(event.target, "profileTable");
+        var header = FBL.getAncestorByClass(event.target, "headerCell");
         if (!header)
             return;
 
-        var numerical = !hasClass(header, "alphaValue");
+        var numerical = !FBL.hasClass(header, "alphaValue");
 
         var colIndex = 0;
         for (header = header.previousSibling; header; header = header.previousSibling)
@@ -268,8 +268,8 @@ Firebug.Profiler.ProfileTable = domplate(
     {
         sortAscending = function()
         {
-            removeClass(header, "sortedDescending");
-            setClass(header, "sortedAscending");
+            FBL.removeClass(header, "sortedDescending");
+            FBL.setClass(header, "sortedAscending");
             header.setAttribute("aria-sort", "ascending");
 
             header.sorted = -1;
@@ -280,8 +280,8 @@ Firebug.Profiler.ProfileTable = domplate(
 
         sortDescending = function()
         {
-          removeClass(header, "sortedAscending");
-          setClass(header, "sortedDescending");
+          FBL.removeClass(header, "sortedAscending");
+          FBL.setClass(header, "sortedDescending");
           header.setAttribute("aria-sort", "descending")
 
           header.sorted = 1;
@@ -290,8 +290,8 @@ Firebug.Profiler.ProfileTable = domplate(
               tbody.appendChild(values[i].row);
         }
 
-        var tbody = getChildByClass(table, "profileTbody");
-        var thead = getChildByClass(table, "profileThead");
+        var tbody = FBL.getChildByClass(table, "profileTbody");
+        var thead = FBL.getChildByClass(table, "profileThead");
 
         var values = [];
         for (var row = tbody.childNodes[0]; row; row = row.nextSibling)
@@ -304,13 +304,13 @@ Firebug.Profiler.ProfileTable = domplate(
         values.sort(function(a, b) { return a.value < b.value ? -1 : 1; });
 
         var headerRow = thead.firstChild;
-        var headerSorted = getChildByClass(headerRow, "headerSorted");
-        removeClass(headerSorted, "headerSorted");
+        var headerSorted = FBL.getChildByClass(headerRow, "headerSorted");
+        FBL.removeClass(headerSorted, "headerSorted");
         if (headerSorted)
             headerSorted.removeAttribute('aria-sort');
 
         var header = headerRow.childNodes[colIndex];
-        setClass(header, "headerSorted");
+        FBL.setClass(header, "headerSorted");
 
         if (numerical)
         {
@@ -374,7 +374,7 @@ Firebug.Profiler.ProfileCall = domplate(Firebug.Rep,
 
     getCallName: function(call)
     {
-        return cropString(getFunctionName(call.script, call.context), 60);
+        return FBL.cropString(FBL.getFunctionName(call.script, call.context), 60);
     },
 
     avgTime: function(call)
@@ -411,7 +411,7 @@ Firebug.Profiler.ProfileCall = domplate(Firebug.Rep,
     {
         try
         {
-            var fn = getFunctionName(call.script, call.context);
+            var fn = FBL.getFunctionName(call.script, call.context);
             return FirebugReps.Func.getTooltip(fn, call.context);
         }
         catch (exc)
@@ -423,7 +423,7 @@ Firebug.Profiler.ProfileCall = domplate(Firebug.Rep,
 
     getContextMenuItems: function(call, target, context)
     {
-        var fn = unwrapIValue(call.script.functionObject);
+        var fn = FBL.unwrapIValue(call.script.functionObject);
         return FirebugReps.Func.getContextMenuItems(fn, call.script, context);
     }
 });

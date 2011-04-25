@@ -29,7 +29,7 @@ var ignoreNextInput = false;
 
 // ************************************************************************************************
 
-Firebug.Editor = extend(Firebug.Module,
+Firebug.Editor = FBL.extend(Firebug.Module,
 {
     supportsStopEvent: true,
 
@@ -46,7 +46,7 @@ Firebug.Editor = extend(Firebug.Module,
     {
         this.stopEditing();
 
-        if (hasClass(target, "insertBefore") || hasClass(target, "insertAfter"))
+        if (FBL.hasClass(target, "insertBefore") || FBL.hasClass(target, "insertAfter"))
             return;
 
         var panel = Firebug.getElementPanel(target);
@@ -69,7 +69,7 @@ Firebug.Editor = extend(Firebug.Module,
         invalidEditor = false;
         currentTarget = target;
         currentPanel = panel;
-        currentGroup = getAncestorByClass(target, "editGroup");
+        currentGroup = FBL.getAncestorByClass(target, "editGroup");
 
         currentPanel.editing = true;
 
@@ -78,13 +78,13 @@ Firebug.Editor = extend(Firebug.Module,
         if (!currentEditor)
             currentEditor = getDefaultEditor(currentPanel);
 
-        setClass(panel.panelNode, "editing");
-        setClass(target, "editing");
+        FBL.setClass(panel.panelNode, "editing");
+        FBL.setClass(target, "editing");
         if (currentGroup)
-            setClass(currentGroup, "editing");
+            FBL.setClass(currentGroup, "editing");
 
         currentEditor.show(target, currentPanel, value, selectionData);
-        dispatch(this.fbListeners, "onBeginEditing", [currentPanel, currentEditor, target, value]);
+        FBL.dispatch(this.fbListeners, "onBeginEditing", [currentPanel, currentEditor, target, value]);
         currentEditor.beginEditing(target, value);
         if (FBTrace.DBG_EDITOR)
             FBTrace.sysout("Editor start panel "+currentPanel.name);
@@ -96,7 +96,7 @@ Firebug.Editor = extend(Firebug.Module,
         if (!currentTarget)
             return;
 
-        dispatch(currentPanel.fbListeners, 'onInlineEditorClose', [currentPanel, currentTarget, !originalValue]);
+        FBL.dispatch(currentPanel.fbListeners, 'onInlineEditorClose', [currentPanel, currentTarget, !originalValue]);
         this.stopEditing();
     },
 
@@ -113,10 +113,10 @@ Firebug.Editor = extend(Firebug.Module,
 
         this.detachListeners(currentEditor, currentPanel.context);
 
-        removeClass(currentPanel.panelNode, "editing");
-        removeClass(currentTarget, "editing");
+        FBL.removeClass(currentPanel.panelNode, "editing");
+        FBL.removeClass(currentTarget, "editing");
         if (currentGroup)
-            removeClass(currentGroup, "editing");
+            FBL.removeClass(currentGroup, "editing");
 
         var value = currentEditor.getValue();
         if (value == defaultValue)
@@ -132,7 +132,7 @@ Firebug.Editor = extend(Firebug.Module,
         {
             if (cancel)
             {
-                dispatch(currentPanel.fbListeners, 'onInlineEditorClose', [currentPanel, currentTarget, removeGroup && !originalValue]);
+                FBL.dispatch(currentPanel.fbListeners, 'onInlineEditorClose', [currentPanel, currentTarget, removeGroup && !originalValue]);
                 if (value != originalValue)
                     this.saveEditAndNotifyListeners(currentTarget, originalValue, previousValue);
 
@@ -151,13 +151,13 @@ Firebug.Editor = extend(Firebug.Module,
         }
         catch (exc)
         {
-            ERROR(exc);
+            FBL.ERROR(exc);
         }
 
         currentEditor.hide();
         currentPanel.editing = false;
 
-        dispatch(this.fbListeners, "onStopEdit", [currentPanel, currentEditor, currentTarget]);
+        FBL.dispatch(this.fbListeners, "onStopEdit", [currentPanel, currentEditor, currentTarget]);
         if (FBTrace.DBG_EDITOR)
             FBTrace.sysout("Editor stop panel "+currentPanel.name);
         currentTarget = null;
@@ -189,7 +189,7 @@ Firebug.Editor = extend(Firebug.Module,
         else
         {
             var context = currentPanel.context;
-            this.saveTimeout = context.setTimeout(bindFixed(this.save, this), saveTimeout);
+            this.saveTimeout = context.setTimeout(FBL.bindFixed(this.save, this), saveTimeout);
             if (FBTrace.DBG_EDITOR)
                 FBTrace.sysout("editor.update saveTimeout: "+this.saveTimeout);
         }
@@ -221,19 +221,19 @@ Firebug.Editor = extend(Firebug.Module,
     saveEditAndNotifyListeners: function(currentTarget, value, previousValue)
     {
         currentEditor.saveEdit(currentTarget, value, previousValue);
-        dispatch(this.fbListeners, "onSaveEdit", [currentPanel, currentEditor, currentTarget, value, previousValue]);
+        FBL.dispatch(this.fbListeners, "onSaveEdit", [currentPanel, currentEditor, currentTarget, value, previousValue]);
     },
 
     setEditTarget: function(element)
     {
         if (!element)
         {
-            dispatch(currentPanel.fbListeners, 'onInlineEditorClose', [currentPanel, currentTarget, true]);
+            FBL.dispatch(currentPanel.fbListeners, 'onInlineEditorClose', [currentPanel, currentTarget, true]);
             this.stopEditing();
         }
-        else if (hasClass(element, "insertBefore"))
+        else if (FBL.hasClass(element, "insertBefore"))
             this.insertRow(element, "before");
-        else if (hasClass(element, "insertAfter"))
+        else if (FBL.hasClass(element, "insertAfter"))
             this.insertRow(element, "after");
         else
             this.startEditing(element);
@@ -250,7 +250,7 @@ Firebug.Editor = extend(Firebug.Module,
         {
             nextEditable = !value && currentGroup
                 ? getNextOutsider(nextEditable, currentGroup)
-                : getNextByClass(nextEditable, "editable");
+                : FBL.getNextByClass(nextEditable, "editable");
         }
         while (nextEditable && !nextEditable.offsetHeight);
 
@@ -268,7 +268,7 @@ Firebug.Editor = extend(Firebug.Module,
         {
             prevEditable = !value && currentGroup
                 ? getPreviousOutsider(prevEditable, currentGroup)
-                : getPreviousByClass(prevEditable, "editable");
+                : FBL.getPreviousByClass(prevEditable, "editable");
         }
         while (prevEditable && !prevEditable.offsetHeight);
 
@@ -278,7 +278,7 @@ Firebug.Editor = extend(Firebug.Module,
     insertRow: function(relative, insertWhere)
     {
         var group =
-            relative || getAncestorByClass(currentTarget, "editGroup") || currentTarget;
+            relative || FBL.getAncestorByClass(currentTarget, "editGroup") || currentTarget;
         var value = this.stopEditing();
 
         currentPanel = Firebug.getElementPanel(group);
@@ -291,9 +291,9 @@ Firebug.Editor = extend(Firebug.Module,
         if (!currentGroup)
             return;
 
-        var editable = hasClass(currentGroup, "editable")
+        var editable = FBL.hasClass(currentGroup, "editable")
             ? currentGroup
-            : getNextByClass(currentGroup, "editable");
+            : FBL.getNextByClass(currentGroup, "editable");
 
         if (editable)
             this.setEditTarget(editable);
@@ -301,10 +301,10 @@ Firebug.Editor = extend(Firebug.Module,
 
     insertRowForObject: function(relative)
     {
-        var container = getAncestorByClass(relative, "insertInto");
+        var container = FBL.getAncestorByClass(relative, "insertInto");
         if (container)
         {
-            relative = getChildByClass(container, "insertBefore");
+            relative = FBL.getChildByClass(container, "insertBefore");
             if (relative)
                 this.insertRow(relative, "before");
         }
@@ -321,27 +321,27 @@ Firebug.Editor = extend(Firebug.Module,
         var chrome = Firebug.chrome;
 
         this.listeners = [
-            chrome.keyCodeListen("ESCAPE", null, bind(this.cancelEditing, this)),
+            chrome.keyCodeListen("ESCAPE", null, FBL.bind(this.cancelEditing, this)),
         ];
 
         if (editor.arrowCompletion)
         {
             this.listeners.push(
-                chrome.keyCodeListen("UP", null, bindFixed(editor.completeValue, editor, -1)),
-                chrome.keyCodeListen("DOWN", null, bindFixed(editor.completeValue, editor, 1)),
-                chrome.keyCodeListen("PAGE_UP", null, bindFixed(editor.completeValue, editor, -pageAmount)),
-                chrome.keyCodeListen("PAGE_DOWN", null, bindFixed(editor.completeValue, editor, pageAmount))
+                chrome.keyCodeListen("UP", null, FBL.bindFixed(editor.completeValue, editor, -1)),
+                chrome.keyCodeListen("DOWN", null, FBL.bindFixed(editor.completeValue, editor, 1)),
+                chrome.keyCodeListen("PAGE_UP", null, FBL.bindFixed(editor.completeValue, editor, -pageAmount)),
+                chrome.keyCodeListen("PAGE_DOWN", null, FBL.bindFixed(editor.completeValue, editor, pageAmount))
             );
         }
 
         if (currentEditor.tabNavigation)
         {
             this.listeners.push(
-                chrome.keyCodeListen("RETURN", null, bind(this.tabNextEditor, this)),
-                chrome.keyCodeListen("RETURN", isShift, bind(this.saveAndClose, this)),
-                chrome.keyCodeListen("RETURN", isControl, bind(this.insertRow, this, null, "after")),
-                chrome.keyCodeListen("TAB", null, bind(this.tabNextEditor, this)),
-                chrome.keyCodeListen("TAB", isShift, bind(this.tabPreviousEditor, this))
+                chrome.keyCodeListen("RETURN", null, FBL.bind(this.tabNextEditor, this)),
+                chrome.keyCodeListen("RETURN", FBL.isShift, FBL.bind(this.saveAndClose, this)),
+                chrome.keyCodeListen("RETURN", FBL.isControl, FBL.bind(this.insertRow, this, null, "after")),
+                chrome.keyCodeListen("TAB", null, FBL.bind(this.tabNextEditor, this)),
+                chrome.keyCodeListen("TAB", FBL.isShift, FBL.bind(this.tabPreviousEditor, this))
             );
         }
         else if (currentEditor.multiLine)
@@ -353,18 +353,18 @@ Firebug.Editor = extend(Firebug.Module,
         else
         {
             this.listeners.push(
-                chrome.keyCodeListen("RETURN", null, bindFixed(this.stopEditing, this))
+                chrome.keyCodeListen("RETURN", null, FBL.bindFixed(this.stopEditing, this))
             );
 
             if (currentEditor.tabCompletion)
             {
                 this.listeners.push(
-                    chrome.keyCodeListen("TAB", null, bind(editor.completeValue, editor, 1)),
-                    chrome.keyCodeListen("TAB", isShift, bind(editor.completeValue, editor, -1)),
-                    chrome.keyCodeListen("UP", null, bindFixed(editor.completeValue, editor, -1, true)),
-                    chrome.keyCodeListen("DOWN", null, bindFixed(editor.completeValue, editor, 1, true)),
-                    chrome.keyCodeListen("PAGE_UP", null, bindFixed(editor.completeValue, editor, -pageAmount, true)),
-                    chrome.keyCodeListen("PAGE_DOWN", null, bindFixed(editor.completeValue, editor, pageAmount, true))
+                    chrome.keyCodeListen("TAB", null, FBL.bind(editor.completeValue, editor, 1)),
+                    chrome.keyCodeListen("TAB", FBL.isShift, FBL.bind(editor.completeValue, editor, -1)),
+                    chrome.keyCodeListen("UP", null, FBL.bindFixed(editor.completeValue, editor, -1, true)),
+                    chrome.keyCodeListen("DOWN", null, FBL.bindFixed(editor.completeValue, editor, 1, true)),
+                    chrome.keyCodeListen("PAGE_UP", null, FBL.bindFixed(editor.completeValue, editor, -pageAmount, true)),
+                    chrome.keyCodeListen("PAGE_DOWN", null, FBL.bindFixed(editor.completeValue, editor, pageAmount, true))
                 );
             }
         }
@@ -397,7 +397,7 @@ Firebug.Editor = extend(Firebug.Module,
 
     onBlur: function(event)
     {
-        if (currentEditor.enterOnBlur && isAncestor(event.target, currentEditor.box))
+        if (currentEditor.enterOnBlur && FBL.isAncestor(event.target, currentEditor.box))
             this.stopEditing();
     },
 
@@ -406,8 +406,8 @@ Firebug.Editor = extend(Firebug.Module,
 
     initialize: function()
     {
-        this.onResize = bindFixed(this.onResize, this);
-        this.onBlur = bind(this.onBlur, this);
+        this.onResize = FBL.bindFixed(this.onResize, this);
+        this.onBlur = FBL.bind(this.onBlur, this);
 
         Firebug.Module.initialize.apply(this, arguments);
     },
@@ -431,7 +431,7 @@ Firebug.Editor = extend(Firebug.Module,
 // ************************************************************************************************
 // BaseEditor
 
-Firebug.BaseEditor = extend(Firebug.MeasureBox,
+Firebug.BaseEditor = FBL.extend(Firebug.MeasureBox,
 {
     getValue: function()
     {
@@ -459,9 +459,9 @@ Firebug.BaseEditor = extend(Firebug.MeasureBox,
     getContextMenuItems: function(target)
     {
         var items = [];
-        items.push({label: "Cut", command: bind(this.onCommand, this, "cmd_cut")});
-        items.push({label: "Copy", command: bind(this.onCommand, this, "cmd_copy")});
-        items.push({label: "Paste", command: bind(this.onCommand, this, "cmd_paste")});
+        items.push({label: "Cut", command: FBL.bind(this.onCommand, this, "cmd_cut")});
+        items.push({label: "Copy", command: FBL.bind(this.onCommand, this, "cmd_copy")});
+        items.push({label: "Paste", command: FBL.bind(this.onCommand, this, "cmd_paste")});
         return items;
     },
 
@@ -565,7 +565,7 @@ Firebug.InlineEditor.prototype = domplate(Firebug.BaseEditor,
     setValue: function(value)
     {
         // It's only a one-line editor, so new lines shouldn't be allowed
-        return this.input.value = stripNewLines(value);
+        return this.input.value = FBL.stripNewLines(value);
     },
 
     setSelection: function(selectionData)
@@ -578,23 +578,23 @@ Firebug.InlineEditor.prototype = domplate(Firebug.BaseEditor,
 
     show: function(target, panel, value, selectionData)
     {
-        dispatch(panel.fbListeners, "onInlineEditorShow", [panel, this]);
+        FBL.dispatch(panel.fbListeners, "onInlineEditorShow", [panel, this]);
         this.target = target;
         this.panel = panel;
 
-        this.targetOffset = getClientOffset(target);
+        this.targetOffset = FBL.getClientOffset(target);
 
         this.originalClassName = this.box.className;
 
         var classNames = target.className.split(" ");
         for (var i = 0; i < classNames.length; ++i)
-            setClass(this.box, "editor-" + classNames[i]);
+            FBL.setClass(this.box, "editor-" + classNames[i]);
 
         // remove error information
         this.box.removeAttribute('saveSuccess');
 
         // Make the editor match the target's font style
-        copyTextStyles(target, this.box);
+        FBL.copyTextStyles(target, this.box);
 
         this.setValue(value);
 
@@ -610,15 +610,15 @@ Firebug.InlineEditor.prototype = domplate(Firebug.BaseEditor,
         {
             this.startMeasuring(target);
 
-            copyBoxStyles(target, this.expander);
+            FBL.copyBoxStyles(target, this.expander);
             target.parentNode.replaceChild(this.expander, target);
-            collapse(target, true);
+            FBL.collapse(target, true);
             this.expander.parentNode.insertBefore(target, this.expander);
             this.textSize = this.measureInputText(value);
         }
         this.updateLayout(true);
 
-        scrollIntoCenterView(this.box, null, true);
+        FBL.scrollIntoCenterView(this.box, null, true);
     },
 
     hide: function()
@@ -629,7 +629,7 @@ Firebug.InlineEditor.prototype = domplate(Firebug.BaseEditor,
         {
             this.stopMeasuring();
 
-            collapse(this.target, false);
+            FBL.collapse(this.target, false);
 
             if (this.expander.parentNode)
                 this.expander.parentNode.removeChild(this.expander);
@@ -651,7 +651,7 @@ Firebug.InlineEditor.prototype = domplate(Firebug.BaseEditor,
             this.textSize = this.measureInputText(this.input.value);
 
         if (forceAll)
-            this.targetOffset = getClientOffset(this.expander);
+            this.targetOffset = FBL.getClientOffset(this.expander);
 
         this.updateLayout(false, forceAll);
     },
@@ -703,8 +703,8 @@ Firebug.InlineEditor.prototype = domplate(Firebug.BaseEditor,
         if (!this.autoCompleter)
         {
             this.autoCompleter = new Firebug.AutoCompleter(null,
-                bind(this.getAutoCompleteRange, this), bind(this.getAutoCompleteList, this),
-                true, false, undefined, undefined, undefined, bind(this.isValidAutoCompleteProperty, this));
+                FBL.bind(this.getAutoCompleteRange, this), FBL.bind(this.getAutoCompleteList, this),
+                true, false, undefined, undefined, undefined, FBL.bind(this.isValidAutoCompleteProperty, this));
         }
 
         return this.autoCompleter;
@@ -758,12 +758,12 @@ Firebug.InlineEditor.prototype = domplate(Firebug.BaseEditor,
         {
             var reverted = this.getAutoCompleter().revert(this.input);
             if (reverted)
-                cancelEvent(event);
+                FBL.cancelEvent(event);
         }
         else if (event.charCode && this.advanceToNext(this.target, event.charCode))
         {
             Firebug.Editor.tabNextEditor();
-            cancelEvent(event);
+            FBL.cancelEvent(event);
         }
         else if (this.numeric && event.charCode && (event.charCode < 48 || event.charCode > 57) && event.charCode != 45 && event.charCode != 46)
         {
@@ -798,9 +798,9 @@ Firebug.InlineEditor.prototype = domplate(Firebug.BaseEditor,
 
     onContextMenu: function(event)
     {
-        cancelEvent(event);
+        FBL.cancelEvent(event);
 
-        var popup = $("fbInlineEditorPopup");
+        var popup = FBL.$("fbInlineEditorPopup");
         FBL.eraseNode(popup);
 
         var target = event.target;
@@ -897,7 +897,7 @@ Firebug.InlineEditor.prototype = domplate(Firebug.BaseEditor,
         }
 
         if (forceAll)
-            scrollIntoCenterView(this.box, null, true);
+            FBL.scrollIntoCenterView(this.box, null, true);
     }
 });
 
@@ -1192,7 +1192,7 @@ Firebug.AutoCompleter = function(getExprOffset, getRange, evaluator, selectMode,
             return false;
         }
 
-        candidates = cloneArray(values);
+        candidates = FBL.cloneArray(values);
         lastIndex = searchIndex;
         return true;
     };
@@ -1295,7 +1295,7 @@ Firebug.AutoCompleter = function(getExprOffset, getRange, evaluator, selectMode,
         vbox.classList.add("fbCommandLineCompletions");
 
         var title = completionPopup.ownerDocument.createElementNS("http://www.w3.org/1999/xhtml","div");
-        title.innerHTML = $STR("console.Use Arrow keys or Enter");
+        title.innerHTML = FBL.$STR("console.Use Arrow keys or Enter");
         title.classList.add('fbPopupTitle');
         vbox.appendChild(title);
 
@@ -1329,10 +1329,10 @@ Firebug.AutoCompleter = function(getExprOffset, getRange, evaluator, selectMode,
         {
             var hbox = completionPopup.ownerDocument.createElementNS("http://www.w3.org/1999/xhtml","div");
             pre = completionPopup.ownerDocument.createElementNS("http://www.w3.org/1999/xhtml","span");
-            pre.innerHTML = escapeForTextNode(prefix);
+            pre.innerHTML = FBL.escapeForTextNode(prefix);
             var post = completionPopup.ownerDocument.createElementNS("http://www.w3.org/1999/xhtml","span");
             var completion = candidates[i].substr(preCompletion.length);
-            post.innerHTML = escapeForTextNode(completion);
+            post.innerHTML = FBL.escapeForTextNode(completion);
             if (i === lastIndex)
                 post.setAttribute('selected', 'true');
 
@@ -1422,13 +1422,13 @@ Firebug.AutoCompleter = function(getExprOffset, getRange, evaluator, selectMode,
                     return false; //  pass TAB along
 
                 this.setTabWarning(textBox, completionBox);
-                cancelEvent(event);
+                FBL.cancelEvent(event);
                 return true;
             }
             else  // complete
             {
                 this.acceptCompletionInTextBox(textBox, completionBox);
-                cancelEvent(event);
+                FBL.cancelEvent(event);
                 return true;
             }
         }
@@ -1436,7 +1436,7 @@ Firebug.AutoCompleter = function(getExprOffset, getRange, evaluator, selectMode,
         {
             if (this.hide(completionBox))  // then we closed the popup
             {
-                cancelEvent(event); // Stop event bubbling if it was used to close the popup.
+                FBL.cancelEvent(event); // Stop event bubbling if it was used to close the popup.
                 return true;
             }
         }
@@ -1446,7 +1446,7 @@ Firebug.AutoCompleter = function(getExprOffset, getRange, evaluator, selectMode,
             {
                 if (this.cycle(event.keyCode === 38))
                     this.showCandidates(textBox, completionBox);
-                cancelEvent(event);
+                FBL.cancelEvent(event);
                 return true;
             }
             // else the arrow will fall through to command history
@@ -1466,7 +1466,7 @@ Firebug.AutoCompleter = function(getExprOffset, getRange, evaluator, selectMode,
 
     this.setTabWarning = function(textBox, completionBox)
     {
-        completionBox.value = textBox.value + "    " + $STR("firebug.completion.empty");
+        completionBox.value = textBox.value + "    " + FBL.$STR("firebug.completion.empty");
         completionBox.tabWarning = true;
     };
 
@@ -1507,7 +1507,7 @@ Firebug.AutoCompleter = function(getExprOffset, getRange, evaluator, selectMode,
             this.acceptCompletionInTextBox(Firebug.CommandLine.getCommandLineSmall(), Firebug.CommandLine.getCompletionBox());
     };
 
-    this.acceptCompletion = bind(this.acceptCompletion, this);
+    this.acceptCompletion = FBL.bind(this.acceptCompletion, this);
 
     this.focusHack = function(event)
     {
@@ -1547,31 +1547,31 @@ function getDefaultEditor(panel)
  */
 function getOutsider(element, group, stepper)
 {
-    var parentGroup = getAncestorByClass(group.parentNode, "editGroup");
+    var parentGroup = FBL.getAncestorByClass(group.parentNode, "editGroup");
     var next;
     do
     {
         next = stepper(next || element);
     }
-    while (isAncestor(next, group) || isGroupInsert(next, parentGroup));
+    while (FBL.isAncestor(next, group) || isGroupInsert(next, parentGroup));
 
     return next;
 }
 
 function isGroupInsert(next, group)
 {
-    return (!group || isAncestor(next, group))
-        && (hasClass(next, "insertBefore") || hasClass(next, "insertAfter"));
+    return (!group || FBL.isAncestor(next, group))
+        && (FBL.hasClass(next, "insertBefore") || FBL.hasClass(next, "insertAfter"));
 }
 
 function getNextOutsider(element, group)
 {
-    return getOutsider(element, group, bind(getNextByClass, FBL, "editable"));
+    return getOutsider(element, group, FBL.bind(FBL.getNextByClass, FBL, "editable"));
 }
 
 function getPreviousOutsider(element, group)
 {
-    return getOutsider(element, group, bind(getPreviousByClass, FBL, "editable"));
+    return getOutsider(element, group, FBL.bind(getPreviousByClass, FBL, "editable"));
 }
 
 function getInlineParent(element)
@@ -1590,7 +1590,7 @@ function getInlineParent(element)
 
 function insertTab()
 {
-    insertTextIntoElement(currentEditor.input, Firebug.Editor.tabCharacter);
+    FBL.insertTextIntoElement(currentEditor.input, Firebug.Editor.tabCharacter);
 }
 
 // ************************************************************************************************

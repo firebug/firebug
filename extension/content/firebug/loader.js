@@ -143,7 +143,7 @@ function loadCore(config, coreInitialize)
     else if (config.arch === 'inProcess')
     {
         coreModules.push("arch/tools");  // must be first
-        coreModules.push("arch/options");  // debugger needs Firebug.Options because of $STR() in property initializes, TODO
+        coreModules.push("arch/options");  // debugger needs Firebug.Options because of FBL.$STR() in property initializes, TODO
         coreModules.push("arch/firebugadapter");
         coreModules.push("debugger");
         coreModules.push("arch/javascripttool");
@@ -151,14 +151,14 @@ function loadCore(config, coreInitialize)
     else if (config.arch == "remoteClient")
     {
         coreModules.push("crossfireModules/tools.js");
-        coreModules.push("inProcess/options.js");  // debugger needs Firebug.Options because of $STR() in property initializes, TODO
+        coreModules.push("inProcess/options.js");  // debugger needs Firebug.Options because of FBL.$STR() in property initializes, TODO
         coreModules.push("debugger.js");
 
     }
     else if (config.arch == "remoteServer")
     {
         coreModules.push("inProcess/tools.js");  // must be first
-        coreModules.push("inProcess/options.js");  // debugger needs Firebug.Options because of $STR() in property initializes, TODO
+        coreModules.push("inProcess/options.js");  // debugger needs Firebug.Options because of FBL.$STR() in property initializes, TODO
         coreModules.push("debugger.js");
 
         coreModules.push("crossfireModules/crossfire-server.js");

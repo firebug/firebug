@@ -37,7 +37,7 @@ const consoleService = CCSV("@mozilla.org/consoleservice;1", "nsIConsoleService"
 
 // **********************************************************************************************//
 
-var Errors = Firebug.Errors = extend(Firebug.Module,
+var Errors = Firebug.Errors = FBL.extend(Firebug.Module,
 {
     dispatchName: "errors",
 
@@ -207,7 +207,7 @@ var Errors = Firebug.Errors = extend(Firebug.Module,
         var isJSError = category == "js" && !isWarning;
 
         // the sourceLine will cause the source to be loaded.
-        var error = new ErrorMessage(object.errorMessage, object.sourceName,
+        var error = new FBL.ErrorMessage(object.errorMessage, object.sourceName,
             object.lineNumber, object.sourceLine, category, context, null, msgId);
 
         if (Firebug.showStackTrace && Firebug.errorStackTrace)
@@ -241,7 +241,7 @@ var Errors = Firebug.Errors = extend(Firebug.Module,
 
     delayedLogging: function()
     {
-        var args = cloneArray(arguments);
+        var args = FBL.cloneArray(arguments);
         var msgId = args.shift();
         var context = args.shift();
         var row = Firebug.Console.log.apply(Firebug.Console, args);
@@ -337,12 +337,12 @@ var Errors = Firebug.Errors = extend(Firebug.Module,
             var win1 = this.getErrorWindow(object);
             var win2 = errorContext ? errorContext.window : null;
 
-            win1 = getRootWindow(win1);
-            win2 = getRootWindow(win2);
+            win1 = FBL.getRootWindow(win1);
+            win2 = FBL.getRootWindow(win2);
             if (win1 && win1 != win2)
             {
-                var win1Name = safeGetWindowLocation(win1);
-                var win2Name = safeGetWindowLocation(win2);
+                var win1Name = FBL.safeGetWindowLocation(win1);
+                var win2Name = FBL.safeGetWindowLocation(win2);
                 var moreInfo =  {object: object, fromError2: win1, fromFirebug: win2};
                 FBTrace.sysout("errors.getErrorContext; ERROR wrong parent window? "+
                     win1Name+" !== "+win2Name, moreInfo);
@@ -488,8 +488,8 @@ var Errors = Firebug.Errors = extend(Firebug.Module,
         if (sourceFile && sourceLineNo && sourceLineNo != 0)
             sourceLine = context.sourceCache.getLine(sourceFile, sourceLineNo);
 
-        var error = new ErrorMessage(msg, sourceFile,
-                sourceLineNo, sourceLine, "error", context, null);
+        var error = new FBL.ErrorMessage(msg, sourceFile,
+            sourceLineNo, sourceLine, "error", context, null);
         return error;
     }
 });
@@ -675,7 +675,7 @@ function checkForUncaughtException(context, object)
 
 function getExceptionContext(context)
 {
-    var errorWin = fbs.lastErrorWindow;  // not available unless Script panel is enabled.
+    var errorWin = FBL.fbs.lastErrorWindow;  // not available unless Script panel is enabled.
     if (errorWin)
     {
         var errorContext = Firebug.TabWatcher.getContextByWindow(errorWin);

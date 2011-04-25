@@ -40,13 +40,13 @@ Firebug.ConsoleBase =
 {
     log: function(object, context, className, rep, noThrottle, sourceLink)
     {
-        dispatch(this.fbListeners,"log",[context, object, className, sourceLink]);
+        FBL.dispatch(this.fbListeners,"log",[context, object, className, sourceLink]);
         return this.logRow(appendObject, object, context, className, rep, sourceLink, noThrottle);
     },
 
     logFormatted: function(objects, context, className, noThrottle, sourceLink)
     {
-        dispatch(this.fbListeners,"logFormatted",[context, objects, className, sourceLink]);
+        FBL.dispatch(this.fbListeners,"logFormatted",[context, objects, className, sourceLink]);
         return this.logRow(appendFormatted, objects, context, className, null, sourceLink, noThrottle);
     },
 
@@ -87,12 +87,12 @@ Firebug.ConsoleBase =
 
                 while (container.childNodes.length > maxQueueRequests + 1)
                 {
-                    clearDomplate(container.firstChild.nextSibling);
+                    FBL.clearDomplate(container.firstChild.nextSibling);
                     container.removeChild(container.firstChild.nextSibling);
                     panel.limit.limitInfo.totalCount++;
                     template.updateCounter(panel.limit);
                 }
-                dispatch(this.fbListeners, "onLogRowCreated", [panel , row]);
+                FBL.dispatch(this.fbListeners, "onLogRowCreated", [panel , row]);
                 return row;
             }
         }
@@ -140,9 +140,9 @@ Firebug.ConsoleBase =
 
 // ************************************************************************************************
 
-var ActivableConsole = extend(Firebug.ActivableModule, Firebug.ConsoleBase);
+var ActivableConsole = FBL.extend(Firebug.ActivableModule, Firebug.ConsoleBase);
 
-Firebug.Console = extend(ActivableConsole,
+Firebug.Console = FBL.extend(ActivableConsole,
 {
     dispatchName: "console",
     toolName: "console",
@@ -161,7 +161,7 @@ Firebug.Console = extend(ActivableConsole,
                 (win?"an argument: ":"null, context.window: ") +
                 (win?win.location:context.window.location), (win?win:context.window));
 
-        if (isXMLPrettyPrint(context, win))
+        if (FBL.isXMLPrettyPrint(context, win))
             return false;
 
         if (win)
@@ -247,7 +247,7 @@ Firebug.Console = extend(ActivableConsole,
 
     destroyContext: function(context, persistedState)
     {
-        iterateWindows(context.window, function detachOneConsole(win)
+        FBL.iterateWindows(context.window, function detachOneConsole(win)
         {
             Firebug.CommandLine.injector.detachCommandLine(context, win);  // remove this first since it needs the console
             Firebug.Console.injector.detachConsole(context, win);
@@ -353,13 +353,13 @@ Firebug.Console = extend(ActivableConsole,
     watchForErrors: function()
     {
         Firebug.Errors.checkEnabled();
-        $('firebugStatus').setAttribute("console", "on");
+        FBL.$('firebugStatus').setAttribute("console", "on");
     },
 
     unwatchForErrors: function()
     {
         Firebug.Errors.checkEnabled();
-        $('firebugStatus').removeAttribute("console");
+        FBL.$('firebugStatus').removeAttribute("console");
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
@@ -427,7 +427,7 @@ Firebug.ConsoleListener =
 
 Firebug.ConsolePanel = function () {};
 
-Firebug.ConsolePanel.prototype = extend(Firebug.ActivablePanel,
+Firebug.ConsolePanel.prototype = FBL.extend(Firebug.ActivablePanel,
 {
     wasScrolledToBottom: false,
     messageCount: 0,
@@ -461,7 +461,7 @@ Firebug.ConsolePanel.prototype = extend(Firebug.ActivablePanel,
                 FBTrace.sysout("console.append; wasScrolledToBottom " + this.wasScrolledToBottom+" "+row.textContent);
 
             if (this.wasScrolledToBottom)
-                scrollToBottom(this.panelNode);
+                FBL.scrollToBottom(this.panelNode);
 
             return row;
         }
@@ -473,10 +473,10 @@ Firebug.ConsolePanel.prototype = extend(Firebug.ActivablePanel,
         {
             if (FBTrace.DBG_CONSOLE)
                 FBTrace.sysout("ConsolePanel.clear");
-            clearNode(this.panelNode);
+            FBL.clearNode(this.panelNode);
             this.insertLogLimit(this.context);
 
-            scrollToBottom(this.panelNode);
+            FBL.scrollToBottom(this.panelNode);
             this.wasScrolledToBottom = true;
 
             // Don't forget to clear opened groups, if any.
@@ -493,7 +493,7 @@ Firebug.ConsolePanel.prototype = extend(Firebug.ActivablePanel,
 
         var limitInfo = {
             totalCount: 0,
-            limitPrefsTitle: $STRF("LimitPrefsTitle", [Firebug.Options.prefDomain+".console.logLimit"])
+            limitPrefsTitle: FBL.$STRF("LimitPrefsTitle", [Firebug.Options.prefDomain+".console.logLimit"])
         };
 
         var netLimitRep = Firebug.NetMonitor.NetLimit;
@@ -508,7 +508,7 @@ Firebug.ConsolePanel.prototype = extend(Firebug.ActivablePanel,
     insertReloadWarning: function()
     {
         // put the message in, we will clear if the window console is injected.
-        this.warningRow = this.append(appendObject, $STR("message.Reload to activate window console"), "info");
+        this.warningRow = this.append(appendObject, FBL.$STR("message.Reload to activate window console"), "info");
     },
 
     clearReloadWarning: function()
@@ -614,7 +614,7 @@ Firebug.ConsolePanel.prototype = extend(Firebug.ActivablePanel,
     appendCollapsedGroup: function(objects, row, rep)
     {
         this.appendOpenGroup(objects, row, rep);
-        removeClass(row, "opened");
+        FBL.removeClass(row, "opened");
     },
 
     appendOpenGroup: function(objects, row, rep)
@@ -622,11 +622,11 @@ Firebug.ConsolePanel.prototype = extend(Firebug.ActivablePanel,
         if (!this.groups)
             this.groups = [];
 
-        setClass(row, "logGroup");
-        setClass(row, "opened");
+        FBL.setClass(row, "logGroup");
+        FBL.setClass(row, "opened");
 
         var innerRow = this.createRow("logRow");
-        setClass(innerRow, "logGroupLabel");
+        FBL.setClass(innerRow, "logGroupLabel");
 
         // Custom rep is used in place of group label.
         if (rep)
@@ -635,7 +635,7 @@ Firebug.ConsolePanel.prototype = extend(Firebug.ActivablePanel,
             this.appendFormatted(objects, innerRow, rep);
 
         row.appendChild(innerRow);
-        dispatch(this.fbListeners, 'onLogRowCreated', [this, innerRow]);
+        FBL.dispatch(this.fbListeners, 'onLogRowCreated', [this, innerRow]);
 
         // Create group body, which is displayed when the group is expanded.
         var groupBody = this.createRow("logGroupBody");
@@ -646,17 +646,17 @@ Firebug.ConsolePanel.prototype = extend(Firebug.ActivablePanel,
         // Expand/collapse logic.
         innerRow.addEventListener("mousedown", function(event)
         {
-            if (isLeftClick(event))
+            if (FBL.isLeftClick(event))
             {
                 var groupRow = event.currentTarget.parentNode;
-                if (hasClass(groupRow, "opened"))
+                if (FBL.hasClass(groupRow, "opened"))
                 {
-                    removeClass(groupRow, "opened");
+                    FBL.removeClass(groupRow, "opened");
                     event.target.setAttribute('aria-expanded', 'false');
                 }
                 else
                 {
-                    setClass(groupRow, "opened");
+                    FBL.setClass(groupRow, "opened");
                     event.target.setAttribute('aria-expanded', 'true');
                 }
             }
@@ -700,10 +700,10 @@ Firebug.ConsolePanel.prototype = extend(Firebug.ActivablePanel,
     {
         Firebug.ActivablePanel.initializeNode.apply(this, arguments);
 
-        this.onScroller = bind(this.onScroll, this);
+        this.onScroller = FBL.bind(this.onScroll, this);
         this.panelNode.addEventListener("scroll", this.onScroller, true);
 
-        this.onResizer = bind(this.onResize, this);
+        this.onResizer = FBL.bind(this.onResize, this);
         this.resizeEventTarget = Firebug.chrome.$('fbContentBox');
         this.resizeEventTarget.addEventListener("resize", this.onResizer, true);
     },
@@ -760,7 +760,7 @@ Firebug.ConsolePanel.prototype = extend(Firebug.ActivablePanel,
         }
 
         if (this.wasScrolledToBottom)
-            scrollToBottom(this.panelNode);
+            FBL.scrollToBottom(this.panelNode);
 
         if (FBTrace.DBG_CONSOLE)
             FBTrace.sysout("console.show; wasScrolledToBottom: " +
@@ -839,8 +839,8 @@ Firebug.ConsolePanel.prototype = extend(Firebug.ActivablePanel,
 
     getBreakOnNextTooltip: function(enabled)
     {
-        return (enabled ? $STR("console.Disable Break On All Errors") :
-            $STR("console.Break On All Errors"));
+        return (enabled ? FBL.$STR("console.Disable Break On All Errors") :
+            FBL.$STR("console.Break On All Errors"));
     },
 
     /**
@@ -860,26 +860,26 @@ Firebug.ConsolePanel.prototype = extend(Firebug.ActivablePanel,
     getOptionsMenuItems: function()
     {
         return [
-            optionMenu("ShowJavaScriptErrors", "showJSErrors"),
-            optionMenu("ShowJavaScriptWarnings", "showJSWarnings"),
-            optionMenu("ShowCSSErrors", "showCSSErrors"),
-            optionMenu("ShowXMLErrors", "showXMLErrors"),
-            optionMenu("ShowXMLHttpRequests", "showXMLHttpRequests"),
-            optionMenu("ShowChromeErrors", "showChromeErrors"),
-            optionMenu("ShowChromeMessages", "showChromeMessages"),
-            optionMenu("ShowExternalErrors", "showExternalErrors"),
-            optionMenu("ShowNetworkErrors", "showNetworkErrors"),
+            FBL.optionMenu("ShowJavaScriptErrors", "showJSErrors"),
+            FBL.optionMenu("ShowJavaScriptWarnings", "showJSWarnings"),
+            FBL.optionMenu("ShowCSSErrors", "showCSSErrors"),
+            FBL.optionMenu("ShowXMLErrors", "showXMLErrors"),
+            FBL.optionMenu("ShowXMLHttpRequests", "showXMLHttpRequests"),
+            FBL.optionMenu("ShowChromeErrors", "showChromeErrors"),
+            FBL.optionMenu("ShowChromeMessages", "showChromeMessages"),
+            FBL.optionMenu("ShowExternalErrors", "showExternalErrors"),
+            FBL.optionMenu("ShowNetworkErrors", "showNetworkErrors"),
             this.getShowStackTraceMenuItem(),
             this.getStrictOptionMenuItem(),
             "-",
-            optionMenu("Command_Editor", "largeCommandLine"),
-            optionMenu("commandLineShowCompleterPopup", "commandLineShowCompleterPopup")
+            FBL.optionMenu("Command_Editor", "largeCommandLine"),
+            FBL.optionMenu("commandLineShowCompleterPopup", "commandLineShowCompleterPopup")
         ];
     },
 
     getShowStackTraceMenuItem: function()
     {
-        var menuItem = optionMenu("ShowStackTrace", "showStackTrace");
+        var menuItem = FBL.optionMenu("ShowStackTrace", "showStackTrace");
         if (Firebug.currentContext && !Firebug.Debugger.isAlwaysEnabled())
             menuItem.disabled = true;
         return menuItem;
@@ -891,7 +891,7 @@ Firebug.ConsolePanel.prototype = extend(Firebug.ActivablePanel,
         var strictName = "strict";
         var strictValue = prefs.getBoolPref(strictDomain+"."+strictName);
         return {label: "JavascriptOptionsStrict", type: "checkbox", checked: strictValue,
-            command: bindFixed(Firebug.Options.setPref, Firebug, strictDomain, strictName, !strictValue) };
+            command: FBL.bindFixed(Firebug.Options.setPref, Firebug, strictDomain, strictName, !strictValue) };
     },
 
     getBreakOnMenuItems: function()
@@ -909,10 +909,10 @@ Firebug.ConsolePanel.prototype = extend(Firebug.ActivablePanel,
                 (filterTypes.indexOf("error") != -1 && (type == "error" || type == "errorMessage")) ||
                 (filterTypes.indexOf("warning") != -1 && (type == "warn" || type == "warningMessage")))
             {
-                removeClass(panelNode, "hideType-"+type);
+                FBL.removeClass(panelNode, "hideType-"+type);
             }
             else
-                setClass(panelNode, "hideType-"+type);
+                FBL.setClass(panelNode, "hideType-"+type);
         }
     },
 
@@ -922,7 +922,7 @@ Firebug.ConsolePanel.prototype = extend(Firebug.ActivablePanel,
         if (this.matchSet)
         {
             for (var i in this.matchSet)
-                removeClass(this.matchSet[i], "matched");
+                FBL.removeClass(this.matchSet[i], "matched");
         }
 
         if (!text)
@@ -930,21 +930,21 @@ Firebug.ConsolePanel.prototype = extend(Firebug.ActivablePanel,
 
         this.matchSet = [];
 
-        function findRow(node) { return getAncestorByClass(node, "logRow"); }
-        var search = new TextSearch(this.panelNode, findRow);
+        function findRow(node) { return FBL.getAncestorByClass(node, "logRow"); }
+        var search = new FBL.TextSearch(this.panelNode, findRow);
 
         var logRow = search.find(text);
         if (!logRow)
         {
-            dispatch(this.fbListeners, 'onConsoleSearchMatchFound', [this, text, []]);
+            FBL.dispatch(this.fbListeners, 'onConsoleSearchMatchFound', [this, text, []]);
             return false;
         }
         for (; logRow; logRow = search.findNext())
         {
-            setClass(logRow, "matched");
+            FBL.setClass(logRow, "matched");
             this.matchSet.push(logRow);
         }
-        dispatch(this.fbListeners, 'onConsoleSearchMatchFound', [this, text, this.matchSet]);
+        FBL.dispatch(this.fbListeners, 'onConsoleSearchMatchFound', [this, text, this.matchSet]);
         return true;
     },
 
@@ -975,22 +975,22 @@ Firebug.ConsolePanel.prototype = extend(Firebug.ActivablePanel,
     {
         if (this.searchText)
         {
-            setClass(logRow, "matching");
-            setClass(logRow, "matched");
+            FBL.setClass(logRow, "matching");
+            FBL.setClass(logRow, "matched");
 
             // Search after a delay because we must wait for a frame to be created for
             // the new logRow so that the finder will be able to locate it
-            setTimeout(bindFixed(function()
+            setTimeout(FBL.bindFixed(function()
             {
                 if (this.searchFilter(this.searchText, logRow))
                     this.matchSet.push(logRow);
                 else
-                    removeClass(logRow, "matched");
+                    FBL.removeClass(logRow, "matched");
 
-                removeClass(logRow, "matching");
+                FBL.removeClass(logRow, "matching");
 
                 if (scrolledToBottom)
-                    scrollToBottom(this.panelNode);
+                    FBL.scrollToBottom(this.panelNode);
             }, this), 100);
         }
     },
@@ -1035,7 +1035,7 @@ Firebug.ConsolePanel.prototype = extend(Firebug.ActivablePanel,
     {
         if (shouldShow)
         {
-            collapse(Firebug.chrome.$("fbCommandBox"), false);
+            FBL.collapse(Firebug.chrome.$("fbCommandBox"), false);
             Firebug.CommandLine.setMultiLine(Firebug.largeCommandLine, Firebug.chrome);
         }
         else
@@ -1043,7 +1043,7 @@ Firebug.ConsolePanel.prototype = extend(Firebug.ActivablePanel,
             // Make sure that entire content of the Console panel is hidden when
             // the panel is disabled.
             Firebug.CommandLine.setMultiLine(false, Firebug.chrome, Firebug.largeCommandLine);
-            collapse(Firebug.chrome.$("fbCommandBox"), true);
+            FBL.collapse(Firebug.chrome.$("fbCommandBox"), true);
         }
     },
 
@@ -1067,7 +1067,7 @@ Firebug.ConsolePanel.prototype = extend(Firebug.ActivablePanel,
                 this.panelNode.scrollHeight + ", " + this.context.getName(), event);
 
         if (this.wasScrolledToBottom)
-            scrollToBottom(this.panelNode);
+            FBL.scrollToBottom(this.panelNode);
     },
 });
 

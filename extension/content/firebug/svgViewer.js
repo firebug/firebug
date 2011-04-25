@@ -19,7 +19,7 @@ var contentTypes =
  * tab wihin network request detail, a listener is registered into
  * <code>Firebug.NetMonitor.NetInfoBody</code> object.
  */
-Firebug.SVGViewerModel = extend(Firebug.Module,
+Firebug.SVGViewerModel = FBL.extend(Firebug.Module,
 {
     dispatchName: "svgViewer",
 
@@ -44,10 +44,10 @@ Firebug.SVGViewerModel = extend(Firebug.Module,
             FBTrace.sysout("svgviewer.initTabBody", infoBox);
 
         // If the response is SVG let's display a pretty preview.
-        if (this.isSVG(safeGetContentType(file.request)))
+        if (this.isSVG(FBL.safeGetContentType(file.request)))
         {
             Firebug.NetMonitor.NetInfoBody.appendTab(infoBox, "SVG",
-                $STR("svgviewer.tab.SVG"));
+                FBL.$STR("svgviewer.tab.SVG"));
 
             if (FBTrace.DBG_SVGVIEWER)
                 FBTrace.sysout("svgviewer.initTabBody; SVG response available");
@@ -76,7 +76,7 @@ Firebug.SVGViewerModel = extend(Firebug.Module,
     {
         var tab = infoBox.selectedTab;
         var tabBody = infoBox.getElementsByClassName("netInfoSVGText").item(0);
-        if (!hasClass(tab, "netInfoSVGTab") || tabBody.updated)
+        if (!FBL.hasClass(tab, "netInfoSVGTab") || tabBody.updated)
             return;
 
         tabBody.updated = true;

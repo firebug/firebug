@@ -73,7 +73,7 @@ var httpObserver = httpRequestObserver;  // XXXjjb Honza should we just use the 
  * observer so, HTTP communication can be interecepted and all incoming data stored within
  * a cache.
  */
-Firebug.TabCacheModel = extend(Firebug.Module,
+Firebug.TabCacheModel = FBL.extend(Firebug.Module,
 {
     dispatchName: "tabCache",
     contentTypes: contentTypes,
@@ -123,8 +123,8 @@ Firebug.TabCacheModel = extend(Firebug.Module,
         {
             if (!(subject instanceof Ci.nsIHttpChannel))
                 return;
-// XXXjjb this same code is in net.js, better to have it only once
-            var win = getWindowForRequest(subject);
+            // XXXjjb this same code is in net.js, better to have it only once
+            var win = FBL.getWindowForRequest(subject);
             if (win)
                 var tabId = Firebug.getTabIdForWindow(win); // TODO remove, the tabId is not used after all
             if (!tabId)
@@ -166,7 +166,7 @@ Firebug.TabCacheModel = extend(Firebug.Module,
         try
         {
             if (FBTrace.DBG_CACHE)
-                FBTrace.sysout("tabCache.registerStreamListener; " + safeGetRequestName(request));
+                FBTrace.sysout("tabCache.registerStreamListener; " + FBL.safeGetRequestName(request));
 
             // Due to #489317, the content type must be checked in onStartRequest
             //if (!this.shouldCacheRequest(request))
@@ -259,7 +259,7 @@ Firebug.TabCacheModel = extend(Firebug.Module,
             return;
 
         // Allow to customize caching rules.
-        if (dispatch2(this.fbListeners, "shouldCacheRequest", [request]))
+        if (FBL.dispatch2(this.fbListeners, "shouldCacheRequest", [request]))
             return true;
 
         // Cache only text responses for now.
@@ -267,13 +267,13 @@ Firebug.TabCacheModel = extend(Firebug.Module,
         if (contentType)
             contentType = contentType.split(";")[0];
 
-        contentType = trim(contentType);
+        contentType = FBL.trim(contentType);
         if (contentTypes[contentType])
             return true;
 
         // Hack to work around application/octet-stream for js files (2063).
         // Let's cache all files with js extensions.
-        var extension = getFileExtension(safeGetName(request));
+        var extension = FBL.getFileExtension(safeGetName(request));
         if (extension == "js")
             return true;
 
@@ -306,7 +306,7 @@ Firebug.TabCache = function(context)
     Firebug.SourceCache.call(this, context);
 };
 
-Firebug.TabCache.prototype = extend(Firebug.SourceCache.prototype,
+Firebug.TabCache.prototype = FBL.extend(Firebug.SourceCache.prototype,
 {
     responses: [],       // responses in progress.
 
@@ -423,7 +423,7 @@ Firebug.TabCache.prototype = extend(Firebug.SourceCache.prototype,
                 return responseText;
 
             if (url === "<unknown>")
-                return [$STR("message.Failed to load source from cache for") + ": " + url];
+                return [FBL.$STR("message.Failed to load source from cache for") + ": " + url];
 
             var channel = ioService.newChannel(url, null, null);
 
@@ -446,7 +446,7 @@ Firebug.TabCache.prototype = extend(Firebug.SourceCache.prototype,
                     FBTrace.sysout("tabCache.loadFromCache; Failed to load source for: " + url);
 
                 stream.close();
-                return [$STR("message.Failed to load source from cache for") + ": " + url];
+                return [FBL.$STR("message.Failed to load source from cache for") + ": " + url];
             }
 
             // Don't load responses that shouldn't be cached.
@@ -456,10 +456,10 @@ Firebug.TabCache.prototype = extend(Firebug.SourceCache.prototype,
                     FBTrace.sysout("tabCache.loadFromCache; The resource from this URL is not text: " + url);
 
                 stream.close();
-                return [$STR("message.The resource from this URL is not text") + ": " + url];
+                return [FBL.$STR("message.The resource from this URL is not text") + ": " + url];
             }
 
-            responseText = readFromStream(stream, charset);
+            responseText = FBL.readFromStream(stream, charset);
 
             if (FBTrace.DBG_CACHE)
                 FBTrace.sysout("tabCache.loadFromCache (response coming from FF Cache) " +
@@ -491,8 +491,8 @@ Firebug.TabCache.prototype = extend(Firebug.SourceCache.prototype,
         // initialized (cleared) now. If no data is received, the response entry remains empty.
         var response = this.getResponse(request);
 
-        dispatch(Firebug.TabCacheModel.fbListeners, "onStartRequest", [this.context, request]);
-        dispatch(this.fbListeners, "onStartRequest", [this.context, request]);
+        FBL.dispatch(Firebug.TabCacheModel.fbListeners, "onStartRequest", [this.context, request]);
+        FBL.dispatch(this.fbListeners, "onStartRequest", [this.context, request]);
     },
 
     onDataAvailable: function(request, requestContext, inputStream, offset, count)
@@ -506,9 +506,9 @@ Firebug.TabCache.prototype = extend(Firebug.SourceCache.prototype,
             value: inputStream
         };
 
-        dispatch(Firebug.TabCacheModel.fbListeners, "onDataAvailable",
+        FBL.dispatch(Firebug.TabCacheModel.fbListeners, "onDataAvailable",
             [this.context, request, requestContext, stream, offset, count]);
-        dispatch(this.fbListeners, "onDataAvailable", [this.context,
+        FBL.dispatch(this.fbListeners, "onDataAvailable", [this.context,
             request, requestContext, stream, offset, count]);
 
         return stream.value;
@@ -525,10 +525,10 @@ Firebug.TabCache.prototype = extend(Firebug.SourceCache.prototype,
         var responseText = lines ? lines.join("") : "";
 
         if (FBTrace.DBG_CACHE)
-            FBTrace.sysout("tabCache.channel.stopRequest: " + safeGetRequestName(request), responseText);
+            FBTrace.sysout("tabCache.channel.stopRequest: " + FBL.safeGetRequestName(request), responseText);
 
-        dispatch(Firebug.TabCacheModel.fbListeners, "onStopRequest", [this.context, request, responseText]);
-        dispatch(this.fbListeners, "onStopRequest", [this.context, request, responseText]);
+        FBL.dispatch(Firebug.TabCacheModel.fbListeners, "onStopRequest", [this.context, request, responseText]);
+        FBL.dispatch(this.fbListeners, "onStopRequest", [this.context, request, responseText]);
     }
 });
 
