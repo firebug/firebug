@@ -220,6 +220,18 @@ function createFirebugConsole(context, win)
         }
     };
 
+    console.memoryProfile = function(title)
+    {
+        Firebug.MemoryProfiler.start(context, title);
+        return "_firebugIgnore";
+    };
+
+    console.memoryProfileEnd = function()
+    {
+        Firebug.MemoryProfiler.stop(context);
+        return "_firebugIgnore";
+    };
+
     console.firebug = Firebug.version;
 
     // Expose only these properties to the content scope (read only).
@@ -244,6 +256,8 @@ function createFirebugConsole(context, win)
     console.__exposedProps__.table = "r";
     console.__exposedProps__.error = "r";
     console.__exposedProps__.firebug = "r";
+    console.__exposedProps__.memoryProfile = "r";
+    console.__exposedProps__.memoryProfileEnd = "r";
     // DBG console.uid = Math.random();
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
