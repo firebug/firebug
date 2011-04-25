@@ -653,12 +653,19 @@ Firebug.MemoryProfiler.ProfileCaption = domplate(Firebug.Rep,
 
 // ********************************************************************************************* //
 
+// FirebugReps.OBJECTLINK is not yet initialized (the FBL.ns not executed) at this moment.
+var OBJECTLINK =
+    A({
+        "class": "objectLink objectLink-$className a11yFocus",
+        _repObject: "$object"
+    });
+
 Firebug.MemoryProfiler.ProfileCall = domplate(Firebug.Rep,
 {
     tag:
         TR({"class": "focusRow profileRow subFocusRow", "role": "row"},
             TD({"class": "profileCell", "role": "presentation"},
-                TAG("$object|getObjectLink", {object: "$object"})
+                OBJECTLINK("$object|getCallName")
             ),
             TD({"class": "a11yFocus profileCell", "role": "gridcell"},
                 "$object.callCount"
@@ -669,16 +676,11 @@ Firebug.MemoryProfiler.ProfileCall = domplate(Firebug.Rep,
                 )
             ),
             TD({"class": "linkCell profileCell", "role": "presentation"},
-                TAG("$object|getSourceLinkTag", {object: "$object|getSourceLink"})
+                 TAG("$object|getSourceLinkTag", {object: "$object|getSourceLink"})
             )
         ),
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-    getObjectLink: function(object)
-    {
-        return FirebugReps.OBJECTLINK("$object|getCallName");
-    },
 
     getSourceLinkTag: function(object)
     {
