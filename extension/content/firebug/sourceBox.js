@@ -1,8 +1,11 @@
 /* See license.txt for terms of usage */
 
-define(["arch/tools"], function(ToolsInterface) { with (FBL) {
+define(["arch/tools"], function(ToolsInterface) {
 
-    var CompilationUnit = ToolsInterface.CompilationUnit;
+// ************************************************************************************************
+// Constants
+
+var CompilationUnit = ToolsInterface.CompilationUnit;
 
 // ************************************************************************************************
 
@@ -1101,5 +1104,9 @@ Firebug.SourceBoxPanel = FBL.extend(SourceBoxPanelBase,
 });
 
 // ************************************************************************************************
+// Registration
+
 return Firebug.SourceBoxPanel;
-}});
+
+// ************************************************************************************************
+});

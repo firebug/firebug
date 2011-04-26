@@ -1,6 +1,5 @@
 /* See license.txt for terms of usage */
 
-
 FBL.ns(function() { with (FBL) {
 
 var toggleProfiling = FBL.$("fbToggleProfiling");
@@ -443,11 +442,12 @@ function ProfileCall(script, context, callCount, totalTime, totalOwnTime, minTim
 }
 
 // ************************************************************************************************
+// Registration
 
 Firebug.registerModule(Firebug.Profiler);
 Firebug.registerRep(Firebug.Profiler.ProfileCall);
 
-// ************************************************************************************************
-
 return Firebug.Profiler;
+
+// ************************************************************************************************
 }});

@@ -2342,7 +2342,7 @@ FirebugReps.Description = domplate(Firebug.Rep,
 
         var rootNode = this.tag.replace(params, parentNode, this);
 
-        var parser = CCIN("@mozilla.org/xmlextras/domparser;1", "nsIDOMParser");
+        var parser = fbXPCOMUtils.CCIN("@mozilla.org/xmlextras/domparser;1", "nsIDOMParser");
         var doc = parser.parseFromString("<div>" + text + "</div>", "text/xml");
         var root = doc.documentElement;
 

@@ -213,6 +213,7 @@ JSONTreePlate.prototype = FBL.extend(Firebug.DOMBasePanel.prototype,
 
 Firebug.registerModule(Firebug.JSONViewerModel);
 
-// ************************************************************************************************
 return Firebug.JSONViewerModel;
+
+// ************************************************************************************************
 }});

@@ -1,6 +1,6 @@
 /* See license.txt for terms of usage */
 
-FBL.ns(function() { with (FBL) {
+FBL.ns(function() {
 
 // ************************************************************************************************
 // Constants
@@ -131,6 +131,7 @@ Firebug.Breakpoint = FBL.extend(Firebug.Module,
 
 // ************************************************************************************************
 
+with (Domplate) {
 Firebug.Breakpoint.BreakpointListRep = domplate(Firebug.Rep,
 {
     tag:
@@ -270,7 +271,7 @@ Firebug.Breakpoint.BreakpointRep = domplate(Firebug.Rep,
         }
         panel.refresh();
     }
-});
+})};
 
 // ************************************************************************************************
 
@@ -707,6 +708,7 @@ Firebug.Breakpoint.ConditionEditor = function(doc)
     this.initialize(doc);
 }
 
+with (Domplate) {
 Firebug.Breakpoint.ConditionEditor.prototype = domplate(Firebug.InlineEditor.prototype,
 {
     tag:
@@ -802,7 +804,6 @@ Firebug.Breakpoint.ConditionEditor.prototype = domplate(Firebug.InlineEditor.pro
             FBL.fbs.setBreakpointCondition(sourceFile, lineNo, value, Firebug.Debugger);
         }
     },
-
 });
 
 // ********************************************************************************************* //
@@ -1118,7 +1119,7 @@ Firebug.Breakpoint.BreakNotification.prototype = domplate(Firebug.Rep,
             }
         }, 15);
     }
-});
+})};
 
 // ********************************************************************************************* //
 // Registration
@@ -1127,9 +1128,7 @@ Firebug.registerPanel(Firebug.Breakpoint.BreakpointsPanel);
 Firebug.registerRep(Firebug.Breakpoint.BreakpointRep);
 Firebug.registerModule(Firebug.Breakpoint);
 
-// ********************************************************************************************* //
-
 return Firebug.Breakpoint;
 
 // ********************************************************************************************* //
-}});
+});

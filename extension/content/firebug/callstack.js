@@ -1,6 +1,6 @@
 /* See license.txt for terms of usage */
 
-FBL.ns(function() { with (FBL) {
+FBL.ns(function() {
 
 // ************************************************************************************************
 // Constants
@@ -348,6 +348,7 @@ function getReferents(frame, fnName)
 
 Firebug.registerPanel(Firebug.CallstackPanel);
 
-// ************************************************************************************************
 return Firebug.CallstackPanel;
-}});
+
+// ************************************************************************************************
+});

@@ -1,6 +1,6 @@
 /* See license.txt for terms of usage */
 
-FBL.ns( function() { with (FBL) {
+FBL.ns( function() {
 
 // ************************************************************************************************
 // Constants
@@ -85,6 +85,7 @@ Firebug.ShortcutsModel = FBL.extend(Firebug.Module,
 
 Firebug.registerModule(Firebug.ShortcutsModel);
 
-// ************************************************************************************************
 return Firebug.ShortcutsModel;
-}});
+
+// ************************************************************************************************
+});

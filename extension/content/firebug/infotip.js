@@ -1,6 +1,6 @@
 /* See license.txt for terms of usage */
 
-FBL.ns(function() { with (FBL) {
+FBL.ns(function() {
 
 // ************************************************************************************************
 // Constants
@@ -11,6 +11,7 @@ const infoTipWindowPadding = 25;
 
 // ************************************************************************************************
 
+with (Domplate) {
 Firebug.InfoTip = FBL.extend(Firebug.Module,
 {
     dispatchName: "infoTip",
@@ -273,12 +274,14 @@ Firebug.InfoTip = FBL.extend(Firebug.Module,
     {
         this.showPanel(browser, panel);
     }
-});
+})};
 
 // ************************************************************************************************
+// Registration
 
 Firebug.registerModule(Firebug.InfoTip);
 
-// ************************************************************************************************
 return Firebug.InfoTip;
-}});
+
+// ************************************************************************************************
+});

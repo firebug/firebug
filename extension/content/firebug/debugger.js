@@ -1,8 +1,10 @@
 /* See license.txt for terms of usage */
 
-define(["arch/tools"], function(ToolsInterface) { with (FBL) {
+define(["arch/tools"], function(ToolsInterface) {
 
-Components.utils.import("resource://firebug/firebug-http-observer.js");  // TODO require.js
+// ********************************************************************************************* //
+
+Components.utils["import"]("resource://firebug/firebug-http-observer.js");  // TODO require.js
 var CompilationUnit = ToolsInterface.CompilationUnit;
 
 // ************************************************************************************************
@@ -48,7 +50,7 @@ const reTooMuchRecursion = /too\smuch\srecursion/;
 Firebug.Debugger = FBL.extend(Firebug.ActivableModule,
 {
     dispatchName: "debugger",
-    fbs: fbs, // access to firebug-service in chromebug under browser.xul.DOM.Firebug.Debugger.fbs
+    fbs: FBL.fbs, // access to firebug-service in chromebug under browser.xul.DOM.Firebug.Debugger.fbs
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
     // Debugging
@@ -2130,7 +2132,7 @@ Firebug.Debugger = FBL.extend(Firebug.ActivableModule,
         if (FBTrace.DBG_INITIALIZE)
             FBTrace.sysout("debugger.initialize "+ this.debuggerName+" Firebug.clientID "+Firebug.clientID);
 
-        this.hash_service = CCSV("@mozilla.org/security/hash;1", "nsICryptoHash");
+        this.hash_service = fbXPCOMUtils.CCSV("@mozilla.org/security/hash;1", "nsICryptoHash");
         try
         {
             this.asTool = new Firebug.ToolsInterface.Browser.Tool('script');
@@ -2574,7 +2576,7 @@ Firebug.Debugger = FBL.extend(Firebug.ActivableModule,
 
     menuFullLabel:
     {
-        static: FBL.$STR("ScriptsFilterStatic"),
+        "static": FBL.$STR("ScriptsFilterStatic"),
         evals: FBL.$STR("ScriptsFilterEval"),
         events: FBL.$STR("ScriptsFilterEvent"),
         all: FBL.$STR("ScriptsFilterAll"),
@@ -2582,7 +2584,7 @@ Firebug.Debugger = FBL.extend(Firebug.ActivableModule,
 
     menuShortLabel:
     {
-        static: FBL.$STR("ScriptsFilterStaticShort"),
+        "static": FBL.$STR("ScriptsFilterStaticShort"),
         evals: FBL.$STR("ScriptsFilterEvalShort"),
         events: FBL.$STR("ScriptsFilterEventShort"),
         all: FBL.$STR("ScriptsFilterAllShort"),
@@ -2797,10 +2799,11 @@ function ArrayEnumerator(array)
 }
 
 // ************************************************************************************************
+// Registration
 
 Firebug.registerActivableModule(Firebug.Debugger);
 
-// ************************************************************************************************
-
 return Firebug.Debugger;
-}});
+
+// ************************************************************************************************
+});

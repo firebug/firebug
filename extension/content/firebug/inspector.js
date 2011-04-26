@@ -1,6 +1,6 @@
 /* See license.txt for terms of usage */
 
-FBL.ns(function() { with (FBL) {
+FBL.ns(function() {
 
 // ************************************************************************************************
 // Constants
@@ -1805,9 +1805,11 @@ function storeHighlighterParams(highlighter, context, element, boxFrame, colorOb
 }
 
 // ************************************************************************************************
+// Registration
 
 Firebug.registerModule(Firebug.Inspector);
 
-// ************************************************************************************************
 return Firebug.Inspector;
-}});
+
+// ************************************************************************************************
+});

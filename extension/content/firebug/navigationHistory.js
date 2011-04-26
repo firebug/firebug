@@ -1,6 +1,6 @@
 /* See license.txt for terms of usage */
 
-FBL.ns(function() { with (FBL) {
+FBL.ns(function() {
 
 // ************************************************************************************************
 // Constants
@@ -286,6 +286,7 @@ Firebug.NavigationHistory = FBL.extend(Firebug.Module,
 Firebug.registerModule(Firebug.NavigationHistory);
 Firebug.registerUIListener(Firebug.NavigationHistory);
 
-// ************************************************************************************************
 return Firebug.NavigationHistory;
-}});
+
+// ************************************************************************************************
+});

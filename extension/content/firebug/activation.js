@@ -547,6 +547,7 @@ Firebug.PanelActivation = FBL.extend(Firebug.Module,
 /**
  * @domplate This template renders default content for disabled panels.
  */
+with (Domplate) {
 Firebug.DisabledPanelBox = domplate(Firebug.Rep,
 /** @lends Firebug.DisabledPanelBox */
 {
@@ -610,13 +611,15 @@ Firebug.DisabledPanelBox = domplate(Firebug.Rep,
         var doc = browser.contentDocument;
         return doc.documentElement.querySelector(".disabledPanelNode");
     },
-});
+})};
 
 // ************************************************************************************************
+// Registration
 
 Firebug.registerModule(Firebug.Activation);
 Firebug.registerModule(Firebug.PanelActivation);
 
-// ************************************************************************************************
 return Firebug.Activation;
+
+// ************************************************************************************************
 }});

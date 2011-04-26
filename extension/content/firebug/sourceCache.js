@@ -1,6 +1,6 @@
 /* See license.txt for terms of usage */
 
-FBL.ns(function() { with (FBL) {
+FBL.ns(function() {
 
 // ************************************************************************************************
 // Constants
@@ -17,7 +17,7 @@ const nsIHttpChannel = Ci.nsIHttpChannel;
 const IOService = Cc["@mozilla.org/network/io-service;1"];
 const ioService = IOService.getService(nsIIOService);
 const ScriptableInputStream = Cc["@mozilla.org/scriptableinputstream;1"];
-const chromeReg = CCSV("@mozilla.org/chrome/chrome-registry;1", "nsIToolkitChromeRegistry");
+const chromeReg = fbXPCOMUtils.CCSV("@mozilla.org/chrome/chrome-registry;1", "nsIToolkitChromeRegistry");
 
 const LOAD_FROM_CACHE = nsIRequest.LOAD_FROM_CACHE;
 const LOAD_BYPASS_LOCAL_CACHE_IF_BUSY = nsICachingChannel.LOAD_BYPASS_LOCAL_CACHE_IF_BUSY;
@@ -192,7 +192,7 @@ Firebug.SourceCache.prototype = FBL.extend(new Firebug.Listener(),
 
             if (method && (channel instanceof nsIHttpChannel))
             {
-                var httpChannel = QI(channel, nsIHttpChannel);
+                var httpChannel = fbXPCOMUtils.QI(channel, nsIHttpChannel);
                 httpChannel.requestMethod = method;
             }
         }
@@ -211,7 +211,7 @@ Firebug.SourceCache.prototype = FBL.extend(new Firebug.Listener(),
                 var postData = getPostStream(this.context);
                 if (postData)
                 {
-                    var uploadChannel = QI(channel, nsIUploadChannel);
+                    var uploadChannel = fbXPCOMUtils.QI(channel, nsIUploadChannel);
                     uploadChannel.setUploadStream(postData, "", -1);
                     if (FBTrace.DBG_CACHE) FBTrace.sysout("sourceCache.load uploadChannel set\n");
                 }
@@ -219,7 +219,7 @@ Firebug.SourceCache.prototype = FBL.extend(new Firebug.Listener(),
 
             if (channel instanceof nsICachingChannel)
             {
-                var cacheChannel = QI(channel, nsICachingChannel);
+                var cacheChannel = fbXPCOMUtils.QI(channel, nsICachingChannel);
                 cacheChannel.cacheKey = getCacheKey(this.context);
                 if (FBTrace.DBG_CACHE) FBTrace.sysout("sourceCache.load cacheChannel key"+cacheChannel.cacheKey+"\n");
             }
@@ -233,7 +233,7 @@ Firebug.SourceCache.prototype = FBL.extend(new Firebug.Listener(),
                 if (postData)
                 {
                     var postDataStream = FBL.getInputStreamFromString(postData);
-                    var uploadChannel = QI(channel, nsIUploadChannel);
+                    var uploadChannel = fbXPCOMUtils.QI(channel, nsIUploadChannel);
                     uploadChannel.setUploadStream(postDataStream, "application/x-www-form-urlencoded", -1);
                     if (FBTrace.DBG_CACHE) FBTrace.sysout("sourceCache.load uploadChannel set\n");
                 }
@@ -331,13 +331,13 @@ function getPostStream(context)
     try
     {
         var webNav = context.browser.webNavigation;
-        var descriptor = QI(webNav, Ci.nsIWebPageDescriptor).currentDescriptor;
-        var entry = QI(descriptor, Ci.nsISHEntry);
+        var descriptor = fbXPCOMUtils.QI(webNav, Ci.nsIWebPageDescriptor).currentDescriptor;
+        var entry = fbXPCOMUtils.QI(descriptor, Ci.nsISHEntry);
 
         if (entry.postData)
         {
             // Seek to the beginning, or it will probably start reading at the end
-            var postStream = QI(entry.postData, Ci.nsISeekableStream);
+            var postStream = fbXPCOMUtils.QI(entry.postData, Ci.nsISeekableStream);
             postStream.seek(0, 0);
             return postStream;
         }
@@ -352,8 +352,8 @@ function getCacheKey(context)
     try
     {
         var webNav = context.browser.webNavigation;
-        var descriptor = QI(webNav, Ci.nsIWebPageDescriptor).currentDescriptor;
-        var entry = QI(descriptor, Ci.nsISHEntry);
+        var descriptor = fbXPCOMUtils.QI(webNav, Ci.nsIWebPageDescriptor).currentDescriptor;
+        var entry = fbXPCOMUtils.QI(descriptor, Ci.nsISHEntry);
         return entry.cacheKey;
      }
      catch (exc)
@@ -362,5 +362,9 @@ function getCacheKey(context)
 }
 
 // ************************************************************************************************
+// Registration
+
 return Firebug.SourceCache;
-}});
+
+// ************************************************************************************************
+});

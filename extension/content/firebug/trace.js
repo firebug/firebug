@@ -1,12 +1,13 @@
 /* See license.txt for terms of usage */
 
+// ************************************************************************************************
 // Our global trace object.
 
 var FBTrace = {};
 
 try
 {
-    Components.utils.import("resource://firebug/firebug-trace-service.js");
+    Components.utils["import"]("resource://firebug/firebug-trace-service.js");
 
     FBTrace = traceConsoleService.getTracer("extensions.firebug");
     FBTrace.setScope(window);

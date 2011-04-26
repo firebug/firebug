@@ -1,94 +1,95 @@
 /* See license.txt for terms of usage */
 
-FBL.ns(function() { with (FBL) {
+FBL.ns(function() {
 
 // ************************************************************************************************
 
 function LayoutPanel() {}
 
+with (Domplate) {
 LayoutPanel.prototype = FBL.extend(Firebug.Panel,
 {
     template: domplate(
     {
         tag:
-            DIV({class: "outerLayoutBox"},
-                DIV({class: "positionLayoutBox $outerTopMode $outerRightMode $outerBottomMode $outerLeftMode focusGroup"},
-                    DIV({class: "layoutEdgeTop layoutEdge"}),
-                    DIV({class: "layoutEdgeRight layoutEdge"}),
-                    DIV({class: "layoutEdgeBottom layoutEdge"}),
-                    DIV({class: "layoutEdgeLeft layoutEdge"}),
+            DIV({"class": "outerLayoutBox"},
+                DIV({"class": "positionLayoutBox $outerTopMode $outerRightMode $outerBottomMode $outerLeftMode focusGroup"},
+                    DIV({"class": "layoutEdgeTop layoutEdge"}),
+                    DIV({"class": "layoutEdgeRight layoutEdge"}),
+                    DIV({"class": "layoutEdgeBottom layoutEdge"}),
+                    DIV({"class": "layoutEdgeLeft layoutEdge"}),
 
-                    DIV({class: "layoutLabelBottom layoutLabel layoutLabelPosition"},
-                            SPAN({class: "layoutPosition layoutCaption", 'aria-label' : FBL.$STR('a11y.layout.position')}, FBL.$STR('position')+": "+'$position'),
-                            SPAN({class: "layoutZIndex v$zIndex", 'aria-label' : FBL.$STR('a11y.layout.z-index')}, "z: "+'$zIndex')
+                    DIV({"class": "layoutLabelBottom layoutLabel layoutLabelPosition"},
+                            SPAN({"class": "layoutPosition layoutCaption", 'aria-label' : FBL.$STR('a11y.layout.position')}, FBL.$STR('position')+": "+'$position'),
+                            SPAN({"class": "layoutZIndex v$zIndex", 'aria-label' : FBL.$STR('a11y.layout.z-index')}, "z: "+'$zIndex')
                         ),
 
-                    DIV({class: "layoutLabelTop layoutLabel v$outerTop"},
-                        SPAN({class: "editable focusStart", 'aria-label' : FBL.$STR('a11y.layout.position top')}, '$outerTop')
+                    DIV({"class": "layoutLabelTop layoutLabel v$outerTop"},
+                        SPAN({"class": "editable focusStart", 'aria-label' : FBL.$STR('a11y.layout.position top')}, '$outerTop')
                     ),
-                    DIV({class: "layoutLabelRight layoutLabel v$outerRight"},
-                        SPAN({class: "editable", 'aria-label' : FBL.$STR('a11y.layout.position right')}, '$outerRight')
+                    DIV({"class": "layoutLabelRight layoutLabel v$outerRight"},
+                        SPAN({"class": "editable", 'aria-label' : FBL.$STR('a11y.layout.position right')}, '$outerRight')
                     ),
-                    DIV({class: "layoutLabelBottom layoutLabel v$outerBottom"},
-                        SPAN({class: "editable", 'aria-label' : FBL.$STR('a11y.layout.position bottom')}, '$outerBottom')
+                    DIV({"class": "layoutLabelBottom layoutLabel v$outerBottom"},
+                        SPAN({"class": "editable", 'aria-label' : FBL.$STR('a11y.layout.position bottom')}, '$outerBottom')
                     ),
-                    DIV({class: "layoutLabelLeft layoutLabel v$outerLeft"},
-                        SPAN({class: "editable", 'aria-label' : FBL.$STR('a11y.layout.position left')}, '$outerLeft')
+                    DIV({"class": "layoutLabelLeft layoutLabel v$outerLeft"},
+                        SPAN({"class": "editable", 'aria-label' : FBL.$STR('a11y.layout.position left')}, '$outerLeft')
                     ),
 
-                    DIV({class: "layoutCaption"}, '$outerLabel'),
+                    DIV({"class": "layoutCaption"}, '$outerLabel'),
 
 
-                    DIV({class: "marginLayoutBox layoutBox editGroup focusGroup"},
-                        DIV({class: "layoutCaption"}, FBL.$STR("LayoutMargin")),
-                        DIV({class: "layoutLabelTop layoutLabel v$marginTop"},
-                            SPAN({class: "editable focusStart", 'aria-label' : FBL.$STR('a11y.layout.margin top')}, '$marginTop')
+                    DIV({"class": "marginLayoutBox layoutBox editGroup focusGroup"},
+                        DIV({"class": "layoutCaption"}, FBL.$STR("LayoutMargin")),
+                        DIV({"class": "layoutLabelTop layoutLabel v$marginTop"},
+                            SPAN({"class": "editable focusStart", 'aria-label' : FBL.$STR('a11y.layout.margin top')}, '$marginTop')
                         ),
-                        DIV({class: "layoutLabelRight layoutLabel v$marginRight"},
-                            SPAN({class: "editable", 'aria-label' : FBL.$STR('a11y.layout..margin right')}, '$marginRight')
+                        DIV({"class": "layoutLabelRight layoutLabel v$marginRight"},
+                            SPAN({"class": "editable", 'aria-label' : FBL.$STR('a11y.layout..margin right')}, '$marginRight')
                         ),
-                        DIV({class: "layoutLabelBottom layoutLabel v$marginBottom"},
-                            SPAN({class: "editable", 'aria-label' : FBL.$STR('a11y.layout.margin bottom')}, '$marginBottom')
+                        DIV({"class": "layoutLabelBottom layoutLabel v$marginBottom"},
+                            SPAN({"class": "editable", 'aria-label' : FBL.$STR('a11y.layout.margin bottom')}, '$marginBottom')
                         ),
-                        DIV({class: "layoutLabelLeft layoutLabel v$marginLeft"},
-                            SPAN({class: "editable", 'aria-label' : FBL.$STR('a11y.layout.margin left')}, '$marginLeft')
+                        DIV({"class": "layoutLabelLeft layoutLabel v$marginLeft"},
+                            SPAN({"class": "editable", 'aria-label' : FBL.$STR('a11y.layout.margin left')}, '$marginLeft')
                         ),
 
-                        DIV({class: "borderLayoutBox layoutBox editGroup focusGroup"},
-                            DIV({class: "layoutCaption"}, FBL.$STR("LayoutBorder")),
-                            DIV({class: "layoutLabelTop layoutLabel v$borderTop"},
-                                SPAN({class: "editable  focusStart", 'aria-label' : FBL.$STR('a11y.layout.border top')}, '$borderTop')
+                        DIV({"class": "borderLayoutBox layoutBox editGroup focusGroup"},
+                            DIV({"class": "layoutCaption"}, FBL.$STR("LayoutBorder")),
+                            DIV({"class": "layoutLabelTop layoutLabel v$borderTop"},
+                                SPAN({"class": "editable  focusStart", 'aria-label' : FBL.$STR('a11y.layout.border top')}, '$borderTop')
                             ),
-                            DIV({class: "layoutLabelRight layoutLabel v$borderRight"},
-                                SPAN({class: "editable", 'aria-label' : FBL.$STR('a11y.layout.border right')}, '$borderRight')
+                            DIV({"class": "layoutLabelRight layoutLabel v$borderRight"},
+                                SPAN({"class": "editable", 'aria-label' : FBL.$STR('a11y.layout.border right')}, '$borderRight')
                             ),
-                            DIV({class: "layoutLabelBottom layoutLabel v$borderBottom"},
-                                SPAN({class: "editable", 'aria-label' : FBL.$STR('a11y.layout.border bottom')}, '$borderBottom')
+                            DIV({"class": "layoutLabelBottom layoutLabel v$borderBottom"},
+                                SPAN({"class": "editable", 'aria-label' : FBL.$STR('a11y.layout.border bottom')}, '$borderBottom')
                             ),
-                            DIV({class: "layoutLabelLeft layoutLabel v$borderLeft"},
-                                SPAN({class: "editable", 'aria-label' : FBL.$STR('a11y.layout.border left')}, '$borderLeft')
+                            DIV({"class": "layoutLabelLeft layoutLabel v$borderLeft"},
+                                SPAN({"class": "editable", 'aria-label' : FBL.$STR('a11y.layout.border left')}, '$borderLeft')
                             ),
 
-                            DIV({class: "paddingLayoutBox layoutBox editGroup focusGroup"},
-                                DIV({class: "layoutCaption"}, FBL.$STR("LayoutPadding")),
-                                DIV({class: "layoutLabelTop layoutLabel v$paddingTop"},
-                                    SPAN({class: "editable focusStart", 'aria-label' : FBL.$STR('a11y.layout.padding top')}, '$paddingTop')
+                            DIV({"class": "paddingLayoutBox layoutBox editGroup focusGroup"},
+                                DIV({"class": "layoutCaption"}, FBL.$STR("LayoutPadding")),
+                                DIV({"class": "layoutLabelTop layoutLabel v$paddingTop"},
+                                    SPAN({"class": "editable focusStart", 'aria-label' : FBL.$STR('a11y.layout.padding top')}, '$paddingTop')
                                 ),
-                                DIV({class: "layoutLabelRight layoutLabel v$paddingRight"},
-                                    SPAN({class: "editable", 'aria-label' : FBL.$STR('a11y.layout.padding right')}, '$paddingRight')
+                                DIV({"class": "layoutLabelRight layoutLabel v$paddingRight"},
+                                    SPAN({"class": "editable", 'aria-label' : FBL.$STR('a11y.layout.padding right')}, '$paddingRight')
                                 ),
-                                DIV({class: "layoutLabelBottom layoutLabel v$paddingBottom"},
-                                    SPAN({class: "editable", 'aria-label' : FBL.$STR('a11y.layout.padding bottom')}, '$paddingBottom')
+                                DIV({"class": "layoutLabelBottom layoutLabel v$paddingBottom"},
+                                    SPAN({"class": "editable", 'aria-label' : FBL.$STR('a11y.layout.padding bottom')}, '$paddingBottom')
                                 ),
-                                DIV({class: "layoutLabelLeft layoutLabel v$paddingLeft"},
-                                    SPAN({class: "editable", 'aria-label' : FBL.$STR('a11y.layout.padding left')}, '$paddingLeft')
+                                DIV({"class": "layoutLabelLeft layoutLabel v$paddingLeft"},
+                                    SPAN({"class": "editable", 'aria-label' : FBL.$STR('a11y.layout.padding left')}, '$paddingLeft')
                                 ),
 
-                                DIV({class: "contentLayoutBox layoutBox editGroup focusGroup"},
-                                    DIV({class: "layoutLabelCenter layoutLabel"},
-                                        SPAN({class: "layoutLabelWidth layoutLabel editable focusStart", 'aria-label' : FBL.$STR('a11y.layout.width')}, '$width'),
+                                DIV({"class": "contentLayoutBox layoutBox editGroup focusGroup"},
+                                    DIV({"class": "layoutLabelCenter layoutLabel"},
+                                        SPAN({"class": "layoutLabelWidth layoutLabel editable focusStart", 'aria-label' : FBL.$STR('a11y.layout.width')}, '$width'),
                                         " x ",
-                                        SPAN({class: "layoutLabelHeight layoutLabel editable", 'aria-label' : FBL.$STR('a11y.layout.height')}, '$height')
+                                        SPAN({"class": "layoutLabelHeight layoutLabel editable", 'aria-label' : FBL.$STR('a11y.layout.height')}, '$height')
                                     )
                                 )
                             )
@@ -372,7 +373,7 @@ LayoutEditor.prototype = domplate(Firebug.InlineEditor.prototype,
         // Don't remove groups
         return false;
     }
-});
+})};
 
 // ************************************************************************************************
 // Local Helpers
@@ -411,9 +412,11 @@ function getVerticalText(n)
 }
 
 // ************************************************************************************************
+// Registration
 
 Firebug.registerPanel(LayoutPanel);
 
-// ************************************************************************************************
 return LayoutPanel;  // move into Firebug.Layout ?
-}});
+
+// ************************************************************************************************
+});

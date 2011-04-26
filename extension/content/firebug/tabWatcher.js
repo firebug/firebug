@@ -1,6 +1,6 @@
 /* See license.txt for terms of usage */
 
-FBL.ns(function() { with (FBL) {
+FBL.ns(function() {
 
 // ************************************************************************************************
 // Constants
@@ -37,8 +37,9 @@ const tabBrowser = FBL.$("content");
 // Globals
 
 var contexts = [];
+
 //TODO requirejs
-Components.utils.import("resource://firebug/firebug-http-observer.js");
+Components.utils["import"]("resource://firebug/firebug-http-observer.js");
 var httpObserver = httpRequestObserver;  // XXXjjb Honza should we just use the RHS here?
 
 // ************************************************************************************************
@@ -777,7 +778,7 @@ function registerFrameListener(browser)
 
 function getRefererHeader(request)
 {
-    var http = QI(request, Ci.nsIHttpChannel);
+    var http = fbXPCOMUtils.QI(request, Ci.nsIHttpChannel);
     var referer = null;
     http.visitRequestHeaders({
         visitHeader: function(name, value)
@@ -1038,5 +1039,10 @@ top.__defineGetter__("TabWatcher", function deprecatedTabWatcher()
     return Firebug.TabWatcher;
 });
 
+// ************************************************************************************************
+// Registration
+
 return Firebug.TabWatcher;
-}});
+
+// ************************************************************************************************
+});

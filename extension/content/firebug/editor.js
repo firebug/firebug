@@ -1,6 +1,6 @@
 /* See license.txt for terms of usage */
 
-FBL.ns(function() { with (FBL) {
+FBL.ns(function() {
 
 // ************************************************************************************************
 // Constants
@@ -507,6 +507,7 @@ Firebug.InlineEditor = function(doc)
     this.initializeInline(doc);
 };
 
+with (Domplate) {
 Firebug.InlineEditor.prototype = domplate(Firebug.BaseEditor,
 {
     enterOnBlur: true,
@@ -899,13 +900,14 @@ Firebug.InlineEditor.prototype = domplate(Firebug.BaseEditor,
         if (forceAll)
             FBL.scrollIntoCenterView(this.box, null, true);
     }
-});
+})};
 
 // ************************************************************************************************
 // Autocompletion
 
 Firebug.AutoCompleter = function(getExprOffset, getRange, evaluator, selectMode, caseSensitive,
-        noCompleteOnBlank, noShowGlobal, showCompletionPopup, isValidProperty, simplifyExpr, killCompletions)
+    noCompleteOnBlank, noShowGlobal, showCompletionPopup, isValidProperty, simplifyExpr,
+    killCompletions)
 {
     var candidates = null;
     var originalValue = null;
@@ -1024,7 +1026,8 @@ Firebug.AutoCompleter = function(getExprOffset, getRange, evaluator, selectMode,
             if (FBTrace.DBG_EDITOR)
             {
                 var sep = (parsed.indexOf('|') > -1) ? '^' : '|';
-                FBTrace.sysout(preExpr+sep+expr+sep+postExpr+" offset: "+offset+" parseStart:"+parseStart);
+                FBTrace.sysout(preExpr+sep+expr+sep+postExpr+" offset: "+offset+
+                    " parseStart:"+parseStart);
             }
 
             if (!cycle)
@@ -1594,9 +1597,11 @@ function insertTab()
 }
 
 // ************************************************************************************************
+// Registration
 
 Firebug.registerModule(Firebug.Editor);
 
-// ************************************************************************************************
 return Firebug.Editor;
-}});
+
+// ************************************************************************************************
+});

@@ -1,6 +1,6 @@
 /* See license.txt for terms of usage */
 
-FBL.ns(function() { with (FBL) {
+FBL.ns(function() {
 
 // **********************************************************************************************//
 // Constants
@@ -32,11 +32,12 @@ const pointlessErrors =
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-Components.utils.import("resource://firebug/firebug-service.js");
-const consoleService = CCSV("@mozilla.org/consoleservice;1", "nsIConsoleService");
+Components.utils["import"]("resource://firebug/firebug-service.js");
+const consoleService = fbXPCOMUtils.CCSV("@mozilla.org/consoleservice;1", "nsIConsoleService");
 
 const domWindowUtils = window.QueryInterface(Ci.nsIInterfaceRequestor)
     .getInterface(Ci.nsIDOMWindowUtils);
+
 // **********************************************************************************************//
 
 var Errors = Firebug.Errors = FBL.extend(Firebug.Module,
@@ -713,10 +714,11 @@ function correctLineNumbersOnExceptions(object, error)
 }
 
 // ************************************************************************************************
+// Registration
 
 Firebug.registerModule(Errors);
 
-// ************************************************************************************************
-
 return Firebug.Errors;
-}});
+
+// ************************************************************************************************
+});

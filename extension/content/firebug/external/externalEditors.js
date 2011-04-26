@@ -1,6 +1,6 @@
 /* See license.txt for terms of usage */
 
-FBL.ns(function() { with (FBL) {
+FBL.ns(function() {
 
 // ********************************************************************************************* //
 // Constants
@@ -8,7 +8,7 @@ FBL.ns(function() { with (FBL) {
 const Cc = Components.classes;
 const Ci = Components.interfaces;
 
-const DirService =  CCSV("@mozilla.org/file/directory_service;1", "nsIDirectoryServiceProvider");
+const DirService =  fbXPCOMUtils.CCSV("@mozilla.org/file/directory_service;1", "nsIDirectoryServiceProvider");
 const NS_OS_TEMP_DIR = "TmpD"
 const nsIFile = Ci.nsIFile;
 const nsILocalFile = Ci.nsILocalFile;
@@ -25,7 +25,7 @@ var temporaryDirectory = null;
 // ********************************************************************************************* //
 // Module Implementation
 
-Firebug.ExternalEditors = extend(Firebug.Module,
+Firebug.ExternalEditors = FBL.extend(Firebug.Module,
 {
     initializeUI: function()
     {
@@ -55,13 +55,14 @@ Firebug.ExternalEditors = extend(Firebug.Module,
     getRegisteredEditors: function()
     {
         var newArray = [];
-        if ( editors.length > 0 )
+        if (editors.length > 0)
         {
             newArray.push.apply(newArray, editors);
-            if ( externalEditors.length > 0 )
+            if (externalEditors.length > 0)
                 newArray.push("-");
         }
-        if ( externalEditors.length > 0 )
+
+        if (externalEditors.length > 0)
             newArray.push.apply(newArray, externalEditors);
 
         return newArray;
@@ -129,18 +130,23 @@ Firebug.ExternalEditors = extend(Firebug.Module,
                 FBL.createMenuItem(popup, "-");
                 continue;
             }
-            var item = {label: editors[i].label, image: editors[i].image,
-                        nol10n: true };
+            var item = {
+                label: editors[i].label,
+                image: editors[i].image,
+                nol10n: true
+            };
+
             var menuitem = FBL.createMenuItem(popup, item);
             menuitem.value = editors[i].id;
         }
-        if ( editors.length > 0 )
+
+        if (editors.length > 0)
             FBL.createMenuItem(popup, "-");
 
         FBL.createMenuItem(popup, {
             label: FBL.$STR('firebug.Configure_Editors'),
             option: 'openEditorList'
-        });        
+        });
     },
 
     openEditorList: function()
@@ -172,7 +178,7 @@ Firebug.ExternalEditors = extend(Firebug.Module,
                 this.appendContextMenuItem(popup, sourceLink.href,
                     sourceLink.line);
         }
-        else if (hasClass(target, "stackFrameLink"))
+        else if (FBL.hasClass(target, "stackFrameLink"))
             this.appendContextMenuItem(popup, target.innerHTML, target.getAttribute("lineNumber"));
     },
 
@@ -235,8 +241,8 @@ Firebug.ExternalEditors = extend(Firebug.Module,
             var editor = null;
             if (editorId)
             {
-                var list = extendArray(externalEditors, editors);
-                for( var i = 0; i < list.length; ++i )
+                var list = FBL.extendArray(externalEditors, editors);
+                for (var i = 0; i < list.length; ++i)
                 {
                     if (editorId == list[i].id)
                     {
@@ -258,6 +264,7 @@ Firebug.ExternalEditors = extend(Firebug.Module,
                 editor.handler(href,line);
                 return;
             }
+
             var args = [];
             var localFile = null;
             var targetAdded = false;
@@ -266,10 +273,10 @@ Firebug.ExternalEditors = extend(Firebug.Module,
             {
                 cmdline = cmdline.replace(' ', '\x00', 'g')
 
-                if(cmdline.indexOf("%line")>-1)
+                if (cmdline.indexOf("%line")>-1)
                 {
                     line = parseInt(line);
-                    if(typeof line == 'number' && !isNaN(line))
+                    if (typeof line == 'number' && !isNaN(line))
                         cmdline = cmdline.replace('%line', line, 'g');
                     else //don't send argument with bogus line number
                     {
@@ -300,6 +307,7 @@ Firebug.ExternalEditors = extend(Firebug.Module,
 
                 cmdline.split(/\x00+/).forEach(function(x){ if(x) args.push(x) })
             }
+
             if (!targetAdded)
             {
                 localFile = this.getLocalSourceFile(context, href);
@@ -321,7 +329,7 @@ Firebug.ExternalEditors = extend(Firebug.Module,
     getLocalSourceFile: function(context, href)
     {
         var filePath = FBL.getLocalOrSystemPath(href)
-        if ( filePath )
+        if (filePath)
             return filePath;
 
         var data;
@@ -354,27 +362,27 @@ Firebug.ExternalEditors = extend(Firebug.Module,
 
         var lpath = href.replace(/^[^:]+:\/*/g, "").replace(/\?.*$/g, "").replace(/[^0-9a-zA-Z\/.]/g, "_");
         /* dummy comment to workaround eclipse bug */
-        if ( !/\.[\w]{1,5}$/.test(lpath) )
+        if (!/\.[\w]{1,5}$/.test(lpath))
         {
             if ( lpath.charAt(lpath.length-1) == '/' )
                 lpath += "index";
             lpath += ".html";
         }
 
-        if ( getPlatformName() == "WINNT" )
+        if (getPlatformName() == "WINNT")
             lpath = lpath.replace(/\//g, "\\");
 
-        var file = QI(temporaryDirectory.clone(), nsILocalFile);
+        var file = fbXPCOMUtils.QI(temporaryDirectory.clone(), nsILocalFile);
         file.appendRelativePath(lpath);
         if (!file.exists())
             file.create(nsIFile.NORMAL_FILE_TYPE, 0664);
         temporaryFiles.push(file.path);
 
-        var converter = CCIN("@mozilla.org/intl/scriptableunicodeconverter", "nsIScriptableUnicodeConverter");
+        var converter = fbXPCOMUtils.CCIN("@mozilla.org/intl/scriptableunicodeconverter", "nsIScriptableUnicodeConverter");
         converter.charset = 'UTF-8'; // TODO detect charset from current tab
         data = converter.ConvertFromUnicode(data);
 
-        var stream = CCIN("@mozilla.org/network/safe-file-output-stream;1", "nsIFileOutputStream");
+        var stream = fbXPCOMUtils.CCIN("@mozilla.org/network/safe-file-output-stream;1", "nsIFileOutputStream");
         stream.init(file, 0x04 | 0x08 | 0x20, 0664, 0); // write, create, truncate
         stream.write(data, data.length);
         if (stream instanceof nsISafeOutputStream)
@@ -387,8 +395,9 @@ Firebug.ExternalEditors = extend(Firebug.Module,
 
     deleteTemporaryFiles: function()  // TODO call on "shutdown" event to modules
     {
-        try {
-            var file = CCIN("@mozilla.org/file/local;1", "nsILocalFile");
+        try
+        {
+            var file = fbXPCOMUtils.CCIN("@mozilla.org/file/local;1", "nsILocalFile");
             for( var i = 0; i < temporaryFiles.length; ++i)
             {
                 file.initWithPath(temporaryFiles[i]);
@@ -399,10 +408,13 @@ Firebug.ExternalEditors = extend(Firebug.Module,
         catch(exc)
         {
         }
-        try {
+
+        try
+        {
             if (temporaryDirectory && temporaryDirectory.exists())
                 temporaryDirectory.remove(true);
-        } catch(exc)
+        }
+        catch(exc)
         {
         }
     },
@@ -414,4 +426,4 @@ Firebug.ExternalEditors = extend(Firebug.Module,
 Firebug.registerModule(Firebug.ExternalEditors);
 
 // ********************************************************************************************* //
-}});
+});

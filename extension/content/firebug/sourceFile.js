@@ -1,6 +1,6 @@
 /* See license.txt for terms of usage */
 
-FBL.ns(function() { with (FBL) {
+FBL.ns(function() {
 
 // ********************************************************************************************* //
 // Constants
@@ -827,4 +827,4 @@ Firebug.SourceFile.guessEnclosingFunctionName = function(url, line, context)
 return Firebug.SourceFile;
 
 // ********************************************************************************************* //
-}});
+});

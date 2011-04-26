@@ -1,6 +1,8 @@
 /* See license.txt for terms of usage */
 
-FBL.ns(function() { with (FBL) {
+FBL.ns(function() {
+
+// ************************************************************************************************
 
 /**
  * View interface used to populate an InsideOutBox object.
@@ -678,5 +680,10 @@ function getObjectPath(element, aView)
     return path;
 }
 
+// ************************************************************************************************
+// Registration
+
 return Firebug.InsideOutBox;
-}});
+
+// ************************************************************************************************
+});

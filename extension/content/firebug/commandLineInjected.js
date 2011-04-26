@@ -1,7 +1,7 @@
 /* See license.txt for terms of usage */
 
-
-// This code is evaluated into a web page
+// ********************************************************************************************* //
+// Firebug Command Line Scope
 
 var _FirebugCommandLine =
 {
@@ -97,6 +97,8 @@ var _FirebugCommandLine =
     },
 };
 
+// ********************************************************************************************* //
+
 (function()
 {
     try
@@ -114,3 +116,5 @@ var _FirebugCommandLine =
         throw wrappedException;
     }
 })();
+
+// ********************************************************************************************* //

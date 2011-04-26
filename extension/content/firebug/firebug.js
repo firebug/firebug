@@ -1,6 +1,6 @@
 /* See license.txt for terms of usage */
 
-(function() { with (FBL) {
+(function() {
 
 // ************************************************************************************************
 // Constants
@@ -10,10 +10,10 @@ const Ci = Components.interfaces;
 
 const nsISupports = Ci.nsISupports;
 
-const observerService = CCSV("@mozilla.org/observer-service;1", "nsIObserverService");
-const categoryManager = CCSV("@mozilla.org/categorymanager;1", "nsICategoryManager");
-const stringBundleService = CCSV("@mozilla.org/intl/stringbundle;1", "nsIStringBundleService");
-const promptService = CCSV("@mozilla.org/embedcomp/prompt-service;1", "nsIPromptService");
+const observerService = fbXPCOMUtils.CCSV("@mozilla.org/observer-service;1", "nsIObserverService");
+const categoryManager = fbXPCOMUtils.CCSV("@mozilla.org/categorymanager;1", "nsICategoryManager");
+const stringBundleService = fbXPCOMUtils.CCSV("@mozilla.org/intl/stringbundle;1", "nsIStringBundleService");
+const promptService = fbXPCOMUtils.CCSV("@mozilla.org/embedcomp/prompt-service;1", "nsIPromptService");
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 // There is one Firebug object per browser.xul
@@ -2444,6 +2444,7 @@ Firebug.MeasureBox =
 
 // ************************************************************************************************
 
+with (Domplate) {
 Firebug.Rep = domplate(
 {
     className: "",
@@ -2552,7 +2553,7 @@ Firebug.Rep = domplate(
     {
         return n == 1 ? "" : "s";
     }
-});
+})};
 
 // ************************************************************************************************
 
@@ -2718,4 +2719,4 @@ function shutdownFirebug()
 }
 
 // ************************************************************************************************
-}})();
+})();

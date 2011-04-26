@@ -794,11 +794,10 @@ function frameId(frame, depth)
 }
 
 // ********************************************************************************************* //
+// Registration
 
 Firebug.registerModule(Firebug.MemoryProfiler);
 Firebug.registerRep(Firebug.MemoryProfiler.ProfileCall);
-
-// ********************************************************************************************* //
 
 return Firebug.MemoryProfiler;
 

@@ -2268,6 +2268,7 @@ DOMBreakpointGroup.prototype = FBL.extend(new Firebug.Breakpoint.BreakpointGroup
 });
 
 // ************************************************************************************************
+// Registration
 
 Firebug.registerModule(Firebug.DOMModule);
 Firebug.registerPanel(DOMMainPanel);
@@ -2275,8 +2276,8 @@ Firebug.registerPanel(DOMSidePanel);
 Firebug.registerPanel(Firebug.WatchPanel);
 Firebug.registerRep(Firebug.DOMModule.BreakpointRep);
 
-// ************************************************************************************************
-
 return Firebug.DOMModule;
+
+// ************************************************************************************************
 }});
 

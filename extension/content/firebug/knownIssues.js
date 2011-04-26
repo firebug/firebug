@@ -53,10 +53,9 @@ Firebug.KnownIssues = FBL.extend(Firebug.Module,
 });
 
 // ********************************************************************************************* //
+// Registration
 
 Firebug.registerModule(Firebug.KnownIssues);
-
-// ********************************************************************************************* //
 
 return Firebug.KnownIssues;
 

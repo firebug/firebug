@@ -2345,6 +2345,7 @@ Firebug.registerPanel(Firebug.HTMLPanel);
 Firebug.registerModule(Firebug.HTMLModule);
 Firebug.registerRep(Firebug.HTMLModule.BreakpointRep);
 
-// ************************************************************************************************
 return Firebug.HTMLModule;
+
+// ************************************************************************************************
 }});

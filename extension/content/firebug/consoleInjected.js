@@ -1,4 +1,7 @@
 /* See license.txt for terms of usage */
+
+// ********************************************************************************************* //
+
 function _createFirebugConsole()
 {
     var console = {};
@@ -71,4 +74,4 @@ function _createFirebugConsole()
     return console;
 }
 
-
+// ********************************************************************************************* //

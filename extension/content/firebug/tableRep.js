@@ -7,6 +7,7 @@ FBL.ns(function() { with (FBL) {
 
 // ************************************************************************************************
 
+with (Domplate) {
 FirebugReps.Table = domplate(Firebug.Rep,
 {
     className: "table",
@@ -290,8 +291,10 @@ FirebugReps.Table = domplate(Firebug.Rep,
 
         return true;
     }
-});
+})};
+
 // ************************************************************************************************
+// Registration
 
 return FirebugReps.Table;
 

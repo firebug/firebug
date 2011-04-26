@@ -1,11 +1,11 @@
 /* See license.txt for terms of usage */
 
-define(["arch/tools"], function(ToolsInterface) { with (FBL) {
-
-var CompilationUnit = ToolsInterface.CompilationUnit;
+define(["arch/tools"], function(ToolsInterface) {
 
 // ************************************************************************************************
 // Constants
+
+var CompilationUnit = ToolsInterface.CompilationUnit;
 
 const throttleTimeWindow = 200;
 const throttleMessageLimit = 30;
@@ -621,5 +621,9 @@ function createPanelName(url)
 }
 
 // ************************************************************************************************
+// Registration
+
 return Firebug.TabContext;
-}});
+
+// ************************************************************************************************
+});

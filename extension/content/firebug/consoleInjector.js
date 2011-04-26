@@ -1,6 +1,6 @@
 /* See license.txt for terms of usage */
 
-FBL.ns(function() { with (FBL) {
+FBL.ns(function() {
 
 // ********************************************************************************************* //
 // Constants
@@ -529,8 +529,9 @@ Firebug.Console.createConsole = function createConsole(context, win)
 }
 
 // ********************************************************************************************* //
+// Registration
 
 return Firebug.Console.injector;
 
 // ********************************************************************************************* //
-}});
+});

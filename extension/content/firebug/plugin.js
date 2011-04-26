@@ -1,6 +1,6 @@
 /* See license.txt for terms of usage */
 
-FBL.ns(function() { with (FBL) {
+FBL.ns(function() {
 
 // ************************************************************************************************
 // This is a panel implemented as its own browser with its own URL
@@ -131,5 +131,9 @@ function innerCall(innerPanel, name, args)
 }
 
 // ************************************************************************************************
+// Registration
+
 return Firebug.PluginPanel;
-}});
+
+// ************************************************************************************************
+});

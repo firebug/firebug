@@ -1,6 +1,6 @@
 /* See license.txt for terms of usage */
 
-define(["arch/tools"], function(ToolsInterface) { with(FBL) {
+define(["arch/tools"], function(ToolsInterface) {
 
 // ********************************************************************************************* //
 // Reusable code for modules that support editing
@@ -104,8 +104,9 @@ Firebug.EditorSelector =
 };
 
 // ********************************************************************************************* //
+// Registration
 
 return Firebug.EditorSelector;
 
 // ********************************************************************************************* //
-}});
+});

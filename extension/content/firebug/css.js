@@ -1,4 +1,5 @@
 /* See license.txt for terms of usage */
+
 FBL.ns(function() { with (FBL) {
 
 // ************************************************************************************************
@@ -65,22 +66,27 @@ var CSSImportRuleTag = domplate(
     )
 });
 
-var CSSFontFaceRuleTag = domplate(CSSDomplateBase, {
-  tag: DIV({class: "cssRule cssFontFaceRule",
-          $cssEditableRule: "$rule|isEditable",
-          $insertInto: "$rule|isEditable",
-          _repObject: "$rule.rule",
-          role : 'presentation'},
-      DIV({class: "cssHead focusRow", role : 'listitem'}, "@font-face {"),
-      DIV({role : 'group'},
-          DIV({class : "cssPropertyListBox", role : 'listbox'},
-              FOR("prop", "$rule.props",
-                  TAG(CSSPropTag.tag, {rule: "$rule", prop: "$prop"})
-              )
-          )
-      ),
-      DIV({$editable: "$rule|isEditable", $insertBefore:"$rule|isEditable", role:"presentation"}, "}")
-  )
+var CSSFontFaceRuleTag = domplate(CSSDomplateBase,
+{
+    tag:
+        DIV({"class": "cssRule cssFontFaceRule",
+            $cssEditableRule: "$rule|isEditable",
+            $insertInto: "$rule|isEditable",
+            _repObject: "$rule.rule",
+            role : 'presentation'},
+            DIV({"class": "cssHead focusRow", role : "listitem"}, "@font-face {"),
+            DIV({role : "group"},
+                DIV({"class": "cssPropertyListBox", role: "listbox"},
+                    FOR("prop", "$rule.props",
+                        TAG(CSSPropTag.tag, {rule: "$rule", prop: "$prop"})
+                    )
+                )
+            ),
+            DIV({$editable: "$rule|isEditable", $insertBefore:"$rule|isEditable",
+                role:"presentation"},
+                "}"
+            )
+        )
 });
 
 var CSSStyleRuleTag = domplate(CSSDomplateBase,
@@ -91,25 +97,30 @@ var CSSStyleRuleTag = domplate(CSSDomplateBase,
             $insertInto: "$rule|isEditable",
             $editGroup: "$rule|isSelectorEditable",
             _repObject: "$rule.rule",
-            "ruleId": "$rule.id", role: 'presentation'},
-        DIV({"class": "cssHead focusRow", role: 'listitem'},
-            SPAN({"class": "cssSelector", $editable: "$rule|isSelectorEditable"}, "$rule.selector"), " {"
-        ),
-        DIV({role: 'group'},
-            DIV({"class": "cssPropertyListBox", _rule: "$rule", role: 'listbox'},
-                FOR("prop", "$rule.props",
-                    TAG(CSSPropTag.tag, {rule: "$rule", prop: "$prop"})
+            "ruleId": "$rule.id", role: "presentation"},
+            DIV({"class": "cssHead focusRow", role: "listitem"},
+                SPAN({"class": "cssSelector", $editable: "$rule|isSelectorEditable"},
+                    "$rule.selector"),
+                    " {"
+                ),
+            DIV({role: "group"},
+                DIV({"class": "cssPropertyListBox", _rule: "$rule", role: "listbox"},
+                    FOR("prop", "$rule.props",
+                        TAG(CSSPropTag.tag, {rule: "$rule", prop: "$prop"})
+                    )
                 )
+            ),
+            DIV({$editable: "$rule|isEditable", $insertBefore: "$rule|isEditable",
+                role:"presentation"},
+                "}"
             )
-        ),
-        DIV({$editable: "$rule|isEditable", $insertBefore: "$rule|isEditable", role:"presentation"}, "}")
-    )
+        )
 });
 
+// ********************************************************************************************* //
+
 const reSplitCSS =  /(url\("?[^"\)]+?"?\))|(rgb\(.*?\))|(#[\dA-Fa-f]+)|(-?\d+(\.\d+)?(%|[a-z]{1,2})?)|([^,\s\/!]+)|"(.*?)"|(!(.*)?)/;
-
 const reURL = /url\("?([^"\)]+)?"?\)/;
-
 const reRepeat = /no-repeat|repeat-x|repeat-y|repeat/;
 
 const sothinkInstalled = !!FBL.$("swfcatcherKey_sidebar");
@@ -282,7 +293,7 @@ Firebug.CSSModule = FBL.extend(FBL.extend(Firebug.Module, Firebug.EditorSelector
             var ownerNode = getStyleSheetOwnerNode(styleSheet);
             styleSheet.disabled = true;
 
-            var url = CCSV("@mozilla.org/network/standard-url;1", Components.interfaces.nsIURL);
+            var url = fbXPCOMUtils.CCSV("@mozilla.org/network/standard-url;1", Components.interfaces.nsIURL);
             url.spec = styleSheet.href;
 
             var editStyleSheet = ownerNode.ownerDocument.createElementNS(
@@ -1671,7 +1682,7 @@ CSSElementPanel.prototype = FBL.extend(Firebug.CSSStyleSheetPanel.prototype,
         {
             for (var i = 0; i < inspectedRules.Count(); ++i)
             {
-                var rule = QI(inspectedRules.GetElementAt(i), nsIDOMCSSStyleRule);
+                var rule = fbXPCOMUtils.QI(inspectedRules.GetElementAt(i), nsIDOMCSSStyleRule);
 
                 var isSystemSheet = FBL.isSystemStyleSheet(rule.parentStyleSheet);
                 if (!Firebug.showUserAgentCSS && isSystemSheet) // This removes user agent rules
@@ -2545,6 +2556,8 @@ StyleSheetEditor.prototype = domplate(Firebug.BaseEditor,
 
 Firebug.StyleSheetEditor = StyleSheetEditor;
 
+// ************************************************************************************************
+
 Firebug.CSSDirtyListener = function(context)
 {
 }
@@ -2558,23 +2571,34 @@ Firebug.CSSDirtyListener.prototype =
 {
     markSheetDirty: function(styleSheet)
     {
+        if (!styleSheet && FBTrace.DBG_ERRORS)
+        {
+            FBTrace.sysout("css; CSSDirtyListener markSheetDirty; styleSheet == NULL");
+            return;
+        }
+
         styleSheet.fbDirty = true;
+
         if (FBTrace.DBG_CSS)
             FBTrace.sysout("CSSDirtyListener markSheetDirty "+index+" "+styleSheet.href);
     },
+
     onCSSInsertRule: function(styleSheet, cssText, ruleIndex)
     {
         this.markSheetDirty(styleSheet);
     },
+
     onCSSDeleteRule: function(styleSheet, ruleIndex)
     {
         this.markSheetDirty(styleSheet);
     },
+
     onCSSSetProperty: function(style, propName, propValue, propPriority, prevValue, prevPriority, rule, baseText)
     {
         var styleSheet = rule.parentStyleSheet;
         this.markSheetDirty(styleSheet);
     },
+
     onCSSRemoveProperty: function(style, propName, prevValue, prevPriority, rule, baseText)
     {
         var styleSheet = rule.parentStyleSheet;
@@ -2587,17 +2611,20 @@ Firebug.CSSDirtyListener.prototype =
 
 function rgbToHex(value)
 {
-    return value.replace(/\brgb\((\d{1,3}),\s*(\d{1,3}),\s*(\d{1,3})\)/gi, function(_, r, g, b) {
-    return '#' + ((1 << 24) + (r << 16) + (g << 8) + (b << 0)).toString(16).substr(-6).toUpperCase();
-    });
+    return value.replace(/\brgb\((\d{1,3}),\s*(\d{1,3}),\s*(\d{1,3})\)/gi,
+        function(_, r, g, b) {
+            return '#' + ((1 << 24) + (r << 16) + (g << 8) + (b << 0)).
+                toString(16).substr(-6).toUpperCase();
+        });
 }
 
 function stripUnits(value)
 {
     // remove units from '0px', '0em' etc. leave non-zero units in-tact.
-    return value.replace(/(url\(.*?\)|[^0]\S*\s*)|0(%|em|ex|px|in|cm|mm|pt|pc)(\s|$)/gi, function(_, skip, remove, whitespace) {
-    return skip || ('0' + whitespace);
-    });
+    return value.replace(/(url\(.*?\)|[^0]\S*\s*)|0(%|em|ex|px|in|cm|mm|pt|pc)(\s|$)/gi,
+        function(_, skip, remove, whitespace) {
+            return skip || ('0' + whitespace);
+        });
 }
 
 function parsePriority(value)
@@ -2745,8 +2772,8 @@ function scrollSelectionIntoView(panel)
 {
     var selCon = getSelectionController(panel);
     selCon.scrollSelectionIntoView(
-            nsISelectionController.SELECTION_NORMAL,
-            nsISelectionController.SELECTION_FOCUS_REGION, true);
+        nsISelectionController.SELECTION_NORMAL,
+        nsISelectionController.SELECTION_FOCUS_REGION, true);
 }
 
 function getSelectionController(panel)
@@ -2766,6 +2793,7 @@ function getRuleId(rule)
 }
 
 // ************************************************************************************************
+// Registration
 
 Firebug.registerModule(Firebug.CSSModule);
 Firebug.registerPanel(Firebug.CSSStyleSheetPanel);

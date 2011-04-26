@@ -1,6 +1,6 @@
 /* See license.txt for terms of usage */
 
-FBL.ns(function() { with (FBL) {
+FBL.ns(function() {
 
 // ************************************************************************************************
 // Constants
@@ -1129,10 +1129,12 @@ var appendCollapsedGroup = Firebug.ConsolePanel.prototype.appendCollapsedGroup;
 var appendCloseGroup = Firebug.ConsolePanel.prototype.appendCloseGroup;
 
 // ************************************************************************************************
+// Registration
 
 Firebug.registerActivableModule(Firebug.Console);
 Firebug.registerPanel(Firebug.ConsolePanel);
 
-// ************************************************************************************************
 return Firebug.Console;
-}});
+
+// ************************************************************************************************
+});

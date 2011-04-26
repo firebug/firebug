@@ -1402,7 +1402,7 @@ top.FirebugChrome =
         }
         else
         {
-            var extensionManager = FBL.CCSV("@mozilla.org/extensions/manager;1",
+            var extensionManager = fbXPCOMUtils.CCSV("@mozilla.org/extensions/manager;1",
                 "nsIExtensionManager");
 
             openDialog("chrome://mozapps/content/extensions/about.xul", "",
@@ -1934,6 +1934,7 @@ if (top.hasOwnProperty('TidyBrowser'))
 
 // ************************************************************************************************
 
+//xxxHonza: what is this? Marking as OBSOLETE, will be deleted (global namespace polluted)
 function dddx()
 {
     Firebug.Console.logFormatted(arguments);

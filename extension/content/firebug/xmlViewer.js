@@ -1,6 +1,6 @@
 /* See license.txt for terms of usage */
 
-FBL.ns(function() { with (FBL) {
+FBL.ns(function() {
 
 // ************************************************************************************************
 // Constants
@@ -93,7 +93,7 @@ Firebug.XMLViewerModel = FBL.extend(Firebug.Module,
 
     insertXML: function(parentNode, text)
     {
-        var parser = CCIN("@mozilla.org/xmlextras/domparser;1", "nsIDOMParser");
+        var parser = fbXPCOMUtils.CCIN("@mozilla.org/xmlextras/domparser;1", "nsIDOMParser");
         var doc = parser.parseFromString(text, "text/xml");
         var root = doc.documentElement;
 
@@ -145,6 +145,7 @@ Firebug.XMLViewerModel = FBL.extend(Firebug.Module,
  * @domplate Represents a template for displaying XML parser errors. Used by
  * <code>Firebug.XMLViewerModel</code>.
  */
+with (Domplate) {
 Firebug.XMLViewerModel.ParseError = domplate(Firebug.Rep,
 {
     tag:
@@ -171,11 +172,14 @@ Firebug.XMLViewerModel.ParseError = domplate(Firebug.Rep,
 
         return parts.join("\n");
     }
-});
+})};
 
 // ************************************************************************************************
 // Registration
 
 Firebug.registerModule(Firebug.XMLViewerModel);
+
 return Firebug.XMLViewerModel;
-}});
+
+// ************************************************************************************************
+});

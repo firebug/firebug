@@ -11,7 +11,7 @@ const Ci = Components.interfaces;
 var sss = Cc["@mozilla.org/content/style-sheet-service;1"].getService(Ci.nsIStyleSheetService);
 var ios = Cc["@mozilla.org/network/io-service;1"].getService(Ci.nsIIOService);
 
-Components.utils.import("resource://firebug/firebug-trace-service.js");
+Components.utils["import"]("resource://firebug/firebug-trace-service.js");
 var FBTrace = traceConsoleService.getTracer("extensions.firebug");
 
 // ************************************************************************************************

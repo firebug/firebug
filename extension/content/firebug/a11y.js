@@ -1,11 +1,11 @@
 /* See license.txt for terms of usage */
 
-FBL.ns(function() { with (FBL) {
+FBL.ns(function() {
 
 // ************************************************************************************************
 // Constants
 
-var singleSpaceTag = DIV({'class' : 'a11y1emSize'}, "x");
+var singleSpaceTag = Domplate.DIV({'class' : 'a11y1emSize'}, "x");
 
 // ************************************************************************************************
 // Module Management
@@ -2737,6 +2737,7 @@ Firebug.A11yModel = FBL.extend(Firebug.Module,
 
 Firebug.registerModule(Firebug.A11yModel);
 
-// ************************************************************************************************
 return Firebug.A11yModel;
-}});
+
+// ************************************************************************************************
+});

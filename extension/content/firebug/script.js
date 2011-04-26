@@ -1,11 +1,13 @@
 /* See license.txt for terms of usage */
 
-define(["arch/tools", "editorSelector.js"], function(ToolsInterface) { with (FBL) {
+define(["arch/tools", "editorSelector.js"], function(ToolsInterface) {
+
+// ********************************************************************************************* //
+// Constants
 
 var CompilationUnit = ToolsInterface.CompilationUnit;
 
-
-
+// ********************************************************************************************* //
 // Script panel
 
 Firebug.ScriptPanel = function() {};
@@ -22,7 +24,8 @@ Firebug.ScriptPanel.getEditorOptionKey = function()
 }
 
 Firebug.ScriptPanel.reLineNumber = /^[^\\]?#(\d*)$/;
-/*
+
+/**
  * object used to markup Javascript source lines.
  * In the namespace Firebug.ScriptPanel.
  */
@@ -1399,6 +1402,7 @@ Firebug.ScriptPanel.prototype = FBL.extend(Firebug.SourceBoxPanel,
 /**
  * @domplate Displays various warning messages within the Script panel.
  */
+with (Domplate) {
 Firebug.ScriptPanel.WarningRep = domplate(Firebug.Rep,
 {
     tag:
@@ -1520,7 +1524,7 @@ Firebug.ScriptPanel.WarningRep = domplate(Firebug.Rep,
 
         return box;
     }
-});
+})};
 
 var WarningRep = Firebug.ScriptPanel.WarningRep;
 
@@ -1529,6 +1533,8 @@ var WarningRep = Firebug.ScriptPanel.WarningRep;
 
 Firebug.registerPanel(Firebug.ScriptPanel);
 
-// ************************************************************************************************
 return Firebug.ScriptPanel;
-}});
+
+// ************************************************************************************************
+});
+

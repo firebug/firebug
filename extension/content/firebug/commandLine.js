@@ -1,6 +1,6 @@
 /* See license.txt for terms of usage */
 
-FBL.ns(function() { with (FBL) {
+FBL.ns(function() {
 
 // ************************************************************************************************
 // Constants
@@ -2524,4 +2524,4 @@ Firebug.registerModule(Firebug.CommandLine);
 return Firebug.CommandLine;
 
 // ************************************************************************************************
-}});
+});
