@@ -1,6 +1,6 @@
 /* See license.txt for terms of usage */
 
-FBL.ns(function() { with (FBL) {
+FBL.ns(function() {
 
 // ************************************************************************************************
 
@@ -106,6 +106,7 @@ Firebug.JSONViewerModel = FBL.extend(Firebug.Module,
 
 // ************************************************************************************************
 
+with (Domplate) {
 Firebug.JSONViewerModel.Preview = domplate(
 {
     bodyTag:
@@ -152,7 +153,7 @@ Firebug.JSONViewerModel.Preview = domplate(
 
         body.jsonTree.render(file.jsonObject, parentNode, context);
     }
-});
+})};
 
 // ************************************************************************************************
 
@@ -216,4 +217,4 @@ Firebug.registerModule(Firebug.JSONViewerModel);
 return Firebug.JSONViewerModel;
 
 // ************************************************************************************************
-}});
+});

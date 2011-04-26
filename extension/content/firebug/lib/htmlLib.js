@@ -1,9 +1,14 @@
 /* See license.txt for terms of usage */
 
-FBL.ns(function() { with (FBL) {
+FBL.ns(function() {
+
+// ********************************************************************************************* //
+// Constants
 
 const Ci = Components.interfaces;
 const SHOW_ALL = Ci.nsIDOMNodeFilter.SHOW_ALL;
+
+// ********************************************************************************************* //
 
 /**
  * @class Static utility class. Contains utilities used for displaying and
@@ -11,9 +16,9 @@ const SHOW_ALL = Ci.nsIDOMNodeFilter.SHOW_ALL;
  */
 Firebug.HTMLLib =
 {
-    //* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
     // Node Search Utilities
-    //* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+
     /**
      * Constructs a NodeSearch instance.
      *
@@ -59,7 +64,8 @@ Firebug.HTMLLib =
             else
             {
                 this.noMatch = true;
-                FBL.dispatch([Firebug.A11yModel], 'onHTMLSearchNoMatchFound', [panelNode.ownerPanel, text]);
+                FBL.dispatch([Firebug.A11yModel], 'onHTMLSearchNoMatchFound',
+                    [panelNode.ownerPanel, text]);
             }
         };
 
@@ -131,8 +137,8 @@ Firebug.HTMLLib =
                 }
 
                 // May need to check the pair for attributes
-                if (lastMatchNode.nodeType == Node.ATTRIBUTE_NODE
-                        && this.lastMatch.isValue == !!reverse)
+                if (lastMatchNode.nodeType == Node.ATTRIBUTE_NODE &&
+                    this.lastMatch.isValue == !!reverse)
                 {
                     return this.checkNode(lastMatchNode, reverse, caseSensitive, 1);
                 }
@@ -158,7 +164,8 @@ Firebug.HTMLLib =
                 checkOrder = [{name: "nodeValue", isValue: false, caseSensitive: caseSensitive }];
             }
 
-            for (var i = firstStep || 0; i < checkOrder.length; i++) {
+            for (var i = firstStep || 0; i < checkOrder.length; i++)
+            {
                 var m = re.exec(node[checkOrder[i].name], reverse, checkOrder[i].caseSensitive);
                 if (m)
                     return {
@@ -188,20 +195,22 @@ Firebug.HTMLLib =
                 {
                     var attrNodeBox = Firebug.HTMLLib.findNodeAttrBox(nodeBox, node.nodeName);
                     if (isValue)
-                        return getChildByClass(attrNodeBox, "nodeValue");
+                        return FBL.getChildByClass(attrNodeBox, "nodeValue");
                     else
-                        return getChildByClass(attrNodeBox, "nodeName");
+                        return FBL.getChildByClass(attrNodeBox, "nodeName");
                 }
             }
             else if (node.nodeType == Node.TEXT_NODE)
             {
                 var nodeBox = ioBox.openToObject(node);
                 if (nodeBox)
+                {
                     return nodeBox;
+                }
                 else
                 {
                     var nodeBox = ioBox.openToObject(node.parentNode);
-                    if (hasClass(nodeBox, "textNodeBox"))
+                    if (FBL.hasClass(nodeBox, "textNodeBox"))
                         nodeBox = Firebug.HTMLLib.getTextElementTextBox(nodeBox);
                     return nodeBox;
                 }
@@ -215,11 +224,14 @@ Firebug.HTMLLib =
          */
         this.selectMatched = function(nodeBox, node, match, reverse)
         {
-            setTimeout(bindFixed(function()
+            setTimeout(FBL.bindFixed(function()
             {
                 var reMatch = match.match;
-                this.selectNodeText(nodeBox, node, reMatch[0], reMatch.index, reverse, reMatch.caseSensitive);
-                FBL.dispatch([Firebug.A11yModel], 'onHTMLSearchMatchFound', [panelNode.ownerPanel, match]);
+                this.selectNodeText(nodeBox, node, reMatch[0], reMatch.index, reverse,
+                    reMatch.caseSensitive);
+
+                FBL.dispatch([Firebug.A11yModel], 'onHTMLSearchMatchFound',
+                    [panelNode.ownerPanel, match]);
             }, this));
         };
 
@@ -242,7 +254,11 @@ Firebug.HTMLLib =
             if (!row)
             {
                 // Search for the first instance of the string inside the node
-                function findRow(node) { return node.nodeType == Node.ELEMENT_NODE ? node : node.parentNode; }
+                function findRow(node)
+                {
+                    return node.nodeType == Node.ELEMENT_NODE ? node : node.parentNode;
+                }
+
                 this.textSearch = new FBL.TextSearch(nodeBox, findRow);
                 row = this.textSearch.find(text, reverse, caseSensitive);
                 this.lastNodeBox = nodeBox;
@@ -250,23 +266,24 @@ Firebug.HTMLLib =
 
             if (row)
             {
-                var trueNodeBox = getAncestorByClass(nodeBox, "nodeBox");
+                var trueNodeBox = FBL.getAncestorByClass(nodeBox, "nodeBox");
                 FBL.setClass(trueNodeBox,'search-selection');
 
-                scrollIntoCenterView(row, panelNode);
+                FBL.scrollIntoCenterView(row, panelNode);
                 var sel = panelNode.ownerDocument.defaultView.getSelection();
                 sel.removeAllRanges();
                 sel.addRange(this.textSearch.range);
 
-                removeClass(trueNodeBox,'search-selection');
+                FBL.removeClass(trueNodeBox,'search-selection');
                 return true;
             }
         };
     },
 
-    //* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-    /**  XXXjjb this code is no longer called and won't be in 1.5; if FireFinder works out we can delete this.
+    /**
+     * XXXjjb this code is no longer called and won't be in 1.5; if FireFinder works out we can delete this.
      * Constructs a SelectorSearch instance.
      *
      * @class Class used to search a DOM tree for elements matching the given
@@ -354,7 +371,7 @@ Firebug.HTMLLib =
          */
         this.selectMatched = function(nodeBox, node, match, reverse)
         {
-            setTimeout(bindFixed(function()
+            setTimeout(FBL.bindFixed(function()
             {
                 ioBox.select(node, true, true);
                 FBL.dispatch([Firebug.A11yModel], 'onHTMLSearchMatchFound', [panelNode.ownerPanel, match]);
@@ -395,7 +412,8 @@ Firebug.HTMLLib =
          *
          * @return The previous node if one exists, undefined otherwise.
          */
-        this.previousNode = function() {
+        this.previousNode = function()
+        {
             if (pastStart) {
                 return undefined;
             }
@@ -443,7 +461,8 @@ Firebug.HTMLLib =
          *
          * @return The next node if one exists, otherwise undefined.
          */
-        this.nextNode = function() {
+        this.nextNode = function()
+        {
             if (pastEnd) {
                 return undefined;
             }
@@ -488,7 +507,8 @@ Firebug.HTMLLib =
          *
          * @return The current node, if not past the beginning or end of the iteration.
          */
-        this.currentNode = function() {
+        this.currentNode = function()
+        {
             if (!attrIndex) {
                 return currentNode;
             } else {
@@ -499,7 +519,8 @@ Firebug.HTMLLib =
         /**
          * Resets the walker position back to the initial position.
          */
-        this.reset = function() {
+        this.reset = function()
+        {
             pastStart = false;
             pastEnd = false;
             walker = [];
@@ -512,9 +533,8 @@ Firebug.HTMLLib =
         this.reset();
     },
 
-    //* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
     // Node/Element Utilities
-    //* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 
     /**
      * Determines if the given element is the source for a non-DOM resource such
@@ -605,7 +625,9 @@ Firebug.HTMLLib =
         if (element.ownerDocument instanceof Ci.nsIDOMDocumentXBL)
         {
             if (FBTrace.DBG_HTML)
-                FBTrace.sysout("hasNoElementChildren "+FBL.getElementCSSSelector(element)+" (element.ownerDocument instanceof Ci.nsIDOMDocumentXBL) "+(element.ownerDocument instanceof Ci.nsIDOMDocumentXBL), element);
+                FBTrace.sysout("hasNoElementChildren "+FBL.getElementCSSSelector(element)+
+                    " (element.ownerDocument instanceof Ci.nsIDOMDocumentXBL) "+
+                    (element.ownerDocument instanceof Ci.nsIDOMDocumentXBL), element);
 
             var walker = new Firebug.HTMLLib.ElementWalker();
             var child = walker.getFirstChild(element);
@@ -617,8 +639,12 @@ Firebug.HTMLLib =
                 child = walker.getNextSibling(child);
             }
         }
+
         if (FBTrace.DBG_HTML)
-            FBTrace.sysout("hasNoElementChildren TRUE "+element.tagName+" (element.ownerDocument instanceof Ci.nsIDOMDocumentXBL) "+(element.ownerDocument instanceof Ci.nsIDOMDocumentXBL), element);
+            FBTrace.sysout("hasNoElementChildren TRUE "+element.tagName+
+                " (element.ownerDocument instanceof Ci.nsIDOMDocumentXBL) "+
+                (element.ownerDocument instanceof Ci.nsIDOMDocumentXBL), element);
+
         return true;
     },
 
@@ -654,7 +680,7 @@ Firebug.HTMLLib =
     {
         if (node instanceof HTMLAppletElement)
             return false;
-        return node.nodeType == Node.TEXT_NODE && isWhitespace(node.nodeValue);
+        return node.nodeType == Node.TEXT_NODE && FBL.isWhitespace(node.nodeValue);
     },
 
     /**
@@ -676,7 +702,7 @@ Firebug.HTMLLib =
         // XXXsroussey reverted above but added a check for self closing tags
         if (Firebug.showTextNodesWithWhitespace)
         {
-            return !element.firstChild && isSelfClosing(element);
+            return !element.firstChild && FBL.isSelfClosing(element);
         }
         else
         {
@@ -686,7 +712,7 @@ Firebug.HTMLLib =
                     return false;
             }
         }
-        return isSelfClosing(element);
+        return FBL.isSelfClosing(element);
     },
 
     /**
@@ -713,9 +739,8 @@ Firebug.HTMLLib =
         }
     },
 
-    //* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
     // Domplate Utilities
-    //* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 
     /**
      * Locates the attribute domplate node for a given element domplate. This method will
@@ -731,7 +756,7 @@ Firebug.HTMLLib =
         var child = objectNodeBox.firstChild.lastChild.firstChild;
         for (; child; child = child.nextSibling)
         {
-            if (hasClass(child, "nodeAttr") && child.childNodes[1].firstChild
+            if (FBL.hasClass(child, "nodeAttr") && child.childNodes[1].firstChild
                 && child.childNodes[1].firstChild.nodeValue == attrName)
             {
                 return child;
@@ -747,10 +772,12 @@ Firebug.HTMLLib =
     getTextElementTextBox: function(nodeBox)
     {
         var nodeLabelBox = nodeBox.firstChild.lastChild;
-        return getChildByClass(nodeLabelBox, "nodeText");
+        return FBL.getChildByClass(nodeLabelBox, "nodeText");
     },
 
-    ElementWalkerFunctions:  // These functions can be copied to add tree walking feature, they allow Chromebug to reuse the HTML panel
+    // These functions can be copied to add tree walking feature, they allow Chromebug
+    // to reuse the HTML panel
+    ElementWalkerFunctions:
     {
         getTreeWalker: function(node)
         {
@@ -783,9 +810,12 @@ Firebug.HTMLLib =
     {
 
     },
-
 };
+
+// ********************************************************************************************* //
+// Registration
 
 Firebug.HTMLLib.ElementWalker.prototype = Firebug.HTMLLib.ElementWalkerFunctions;
 
-}});
+// ********************************************************************************************* //
+});

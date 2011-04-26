@@ -1,6 +1,6 @@
 /* See license.txt for terms of usage */
 
-FBL.ns(function() { with (FBL) {
+FBL.ns(function() {
 
 // ********************************************************************************************* //
 // Constants
@@ -11,9 +11,9 @@ const Ci = Components.interfaces;
 var appInfo = Cc["@mozilla.org/xre/app-info;1"].getService(Ci.nsIXULAppInfo);
 var versionChecker = Cc["@mozilla.org/xpcom/version-comparator;1"].getService(Ci.nsIVersionComparator);
 
-var popup = $("fbStatusContextMenu");
-var statusBar = $("fbStatusBar");
-var statusText = $("fbStatusText");
+var popup = FBL.$("fbStatusContextMenu");
+var statusBar = FBL.$("fbStatusBar");
+var statusText = FBL.$("fbStatusText");
 
 // ********************************************************************************************* //
 // Module Implementation
@@ -36,7 +36,7 @@ Firebug.StartButton = FBL.extend(Firebug.Module,
 
         // Associate a popup-menu with the start button (the same as it's
         // used for the obsolete status bar icon.
-        var startButton = $("firebug-button");
+        var startButton = FBL.$("firebug-button");
         if (startButton)
         {
             startButton.appendChild(popup.cloneNode(true));
@@ -122,7 +122,7 @@ Firebug.StartButton = FBL.extend(Firebug.Module,
         if (Firebug.Options.get("showStatusIcon"))
             return;
 
-        var statusBar = $("fbStatusBar");
+        var statusBar = FBL.$("fbStatusBar");
         if (statusBar)
             statusBar.parentNode.removeChild(statusBar);
     },
@@ -212,12 +212,12 @@ Firebug.StartButton = FBL.extend(Firebug.Module,
         if (Firebug.getSuspended())
             tooltip += "\n" + Firebug.getSuspended();
         else
-            tooltip += "\n" + $STRP("plural.Total_Firebugs2", [Firebug.TabWatcher.contexts.length]);
+            tooltip += "\n" + FBL.$STRP("plural.Total_Firebugs2", [Firebug.TabWatcher.contexts.length]);
 
         if (Firebug.allPagesActivation == "on")
         {
-            var label = $STR("enablement.on");
-            tooltip += "\n"+label+" "+$STR("enablement.for all pages");
+            var label = FBL.$STR("enablement.on");
+            tooltip += "\n"+label+" "+FBL.$STR("enablement.for all pages");
         }
         // else allPagesActivation == "none" we don't show it.
 
@@ -260,4 +260,4 @@ Firebug.StartButton = FBL.extend(Firebug.Module,
 Firebug.registerModule(Firebug.StartButton);
 
 // ********************************************************************************************* //
-}});
+});

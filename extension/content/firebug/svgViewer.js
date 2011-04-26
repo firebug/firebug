@@ -1,6 +1,6 @@
 /* See license.txt for terms of usage */
 
-FBL.ns(function() { with (FBL) {
+FBL.ns(function() {
 
 // ************************************************************************************************
 // Constants
@@ -138,6 +138,7 @@ Firebug.SVGViewerModel = FBL.extend(Firebug.Module,
  * @domplate Represents a template for displaying SVG parser errors. Used by
  * <code>Firebug.SVGViewerModel</code>.
  */
+with (Domplate) {
 Firebug.SVGViewerModel.ParseError = domplate(Firebug.Rep,
 {
     tag:
@@ -164,7 +165,7 @@ Firebug.SVGViewerModel.ParseError = domplate(Firebug.Rep,
 
         return parts.join("\n");
     }
-});
+})};
 
 // ************************************************************************************************
 // Registration
@@ -174,4 +175,4 @@ Firebug.registerModule(Firebug.SVGViewerModel);
 return Firebug.SVGViewerModel;
 
 // ************************************************************************************************
-}});
+});
