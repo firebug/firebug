@@ -11,7 +11,7 @@
 
 const Cc = Components.classes;
 const Ci = Components.interfaces;
-
+const Cu = Components.utils;
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 const PrefService = Cc["@mozilla.org/preferences-service;1"];
@@ -821,13 +821,6 @@ var fbs =
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
-
-    get lastErrorWindow()
-    {
-        var win = this._lastErrorWindow;
-        this._lastErrorWindow = null; // Release to avoid leaks
-        return win;
-    },
 
     registerClient: function(client)  // clients are essentially XUL windows
     {
@@ -1998,11 +1991,6 @@ var fbs =
             delete fbs._lastErrorCaller; // throw is not recursion either
         }
 
-        // Remember the error where the last exception is thrown - this will
-        // be used later when the console service reports the error, since
-        // it doesn't currently report the window where the error occurred
-        fbs._lastErrorWindow = null;
-
         if (this.showStackTrace)  // store these in case the throw is not caught
         {
             var debuggr = this.findDebugger(frame);  // sets debuggr.breakContext
@@ -2012,13 +2000,10 @@ var fbs =
                 fbs._lastErrorLine = frame.line;
                 fbs._lastErrorDebuggr = debuggr;
                 fbs._lastErrorContext = debuggr.breakContext; // XXXjjb this is bad API
-                fbs._lastErrorWindow = fbs._lastErrorContext.window;
             }
             else
                 delete fbs._lastErrorDebuggr;
         }
-        if (!fbs._lastErrorWindow)
-            this._lastErrorWindow =  this.getOutermostScope(frame);
 
         if (fbs.trackThrowCatch)
         {
@@ -3772,7 +3757,7 @@ function dispatch(listeners, name, args)
     for (var i = 0; i < totalListeners; ++i)
     {
         var listener = listeners[i];
-        if ( listener.hasOwnProperty(name) )
+        if ( listener.hasOwnProperty(name) && listener[name])
             listener[name].apply(listener, args);
     }
     //if (FBTrace.DBG_FBS_ERRORS)
@@ -4005,7 +3990,8 @@ function ERROR(text, exc)
     }
     catch(exc)
     {
-        consoleService.logStringMessage("ERROR in ERROR: "+exc);
+        var msg = exc.toString() +" "+(exc.fileName || exc.sourceName) + "@" + exc.lineNumber;
+        Cu.reportError("firebug-service ERROR in ERROR: "+msg);
     }
     finally
     {

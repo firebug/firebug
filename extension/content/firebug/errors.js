@@ -35,6 +35,8 @@ const pointlessErrors =
 Components.utils.import("resource://firebug/firebug-service.js");
 const consoleService = CCSV("@mozilla.org/consoleservice;1", "nsIConsoleService");
 
+const domWindowUtils = window.QueryInterface(Ci.nsIInterfaceRequestor)
+    .getInterface(Ci.nsIDOMWindowUtils);
 // **********************************************************************************************//
 
 var Errors = Firebug.Errors = FBL.extend(Firebug.Module,
@@ -216,7 +218,7 @@ var Errors = Firebug.Errors = FBL.extend(Firebug.Module,
         }
         else if (checkForUncaughtException(context, object))
         {
-            context = getExceptionContext(context);
+            context = getExceptionContext(context, object);
             correctLineNumbersOnExceptions(object, error);
         }
 
@@ -352,40 +354,6 @@ var Errors = Firebug.Errors = FBL.extend(Firebug.Module,
         return errorContext; // we looked everywhere...
     },
 
-    /**
-     * Returns a parent window (outer window) for given error object (an object
-     * that is passed int a consoleListener).
-     * This method should be the primary way how to find the parent window for any
-     * error object.
-     *
-     * @param {Object} object Error object (implementing nsIScriptError2 since Fx40)
-     */
-    getErrorWindow: function(object)
-    {
-        try
-        {
-            // Bug 605492 introduces new API: nsIScriptError2.outerWindowID so use it
-            // if it's available.
-            if (!Ci["nsIScriptError2"])
-                return null;
-
-            if (!(object instanceof Ci.nsIScriptError2))
-                return null;
-
-            var domWindowUtils = window.QueryInterface(Ci.nsIInterfaceRequestor)
-                .getInterface(Ci.nsIDOMWindowUtils);
-
-            if (!object.outerWindowID)
-                return null;
-
-            return domWindowUtils.getOuterWindowWithId(object.outerWindowID);
-        }
-        catch (err)
-        {
-            if (FBTrace.DBG_ERRORS)
-                FBTrace.sysout("errors.getErrorWindowl; EXCEPTION" + err, err);
-        }
-    },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
     // extends Module
@@ -673,9 +641,42 @@ function checkForUncaughtException(context, object)
     return false;
 }
 
-function getExceptionContext(context)
+/**
+ * Returns a parent window (outer window) for given error object (an object
+ * that is passed int a consoleListener).
+ * This method should be the primary way how to find the parent window for any
+ * error object.
+ *
+ * @param {Object} object Error object (implementing nsIScriptError2 since Fx40)
+ */
+function getErrorWindow(object)
 {
-    var errorWin = FBL.fbs.lastErrorWindow;  // not available unless Script panel is enabled.
+    try
+    {
+        // Bug 605492 introduces new API: nsIScriptError2.outerWindowID so use it
+        // if it's available.
+        if (!Ci["nsIScriptError2"])
+            return null;
+
+        if (!(object instanceof Ci.nsIScriptError2))
+            return null;
+
+        if (!object.outerWindowID)
+            return null;
+
+        return domWindowUtils.getOuterWindowWithId(object.outerWindowID);
+    }
+    catch (err)
+    {
+        if (FBTrace.DBG_ERRORS)
+            FBTrace.sysout("errors.getErrorWindowl; EXCEPTION" + err, err);
+    }
+}
+
+
+function getExceptionContext(context, object)
+{
+    var errorWin = getErrorWindow(object)
     if (errorWin)
     {
         var errorContext = Firebug.TabWatcher.getContextByWindow(errorWin);
