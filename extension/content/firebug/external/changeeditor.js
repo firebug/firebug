@@ -25,7 +25,7 @@ function onLoad()
         origImage = FBL.getIconURLForFile(item.executable);
         try
         {
-            var file = fbXPCOMUtils.CCIN("@mozilla.org/file/local;1", "nsILocalFile");
+            var file = Cc["@mozilla.org/file/local;1"].createInstance(Ci.nsILocalFile);
             file.initWithPath(item.executable);
             document.getElementById("executable").file = file;
             origLabel = file.leafName.replace(".exe","");
@@ -71,7 +71,7 @@ function internationalizeUI(doc)
         if (elements[i].nodeName == "description")
         {
             var localized = FBL.$STR(elements[i].textContent);
-            var parser = fbXPCOMUtils.CCIN("@mozilla.org/xmlextras/domparser;1", "nsIDOMParser");
+            var parser = Cc["@mozilla.org/xmlextras/domparser;1"].createInstance(Ci.nsIDOMParser);
             var doc = parser.parseFromString("<vbox>" + localized + "</vbox>", "text/xml");
             var root = doc.documentElement;
 
@@ -119,7 +119,7 @@ function onAccept()
 
     try
     {
-        var file = fbXPCOMUtils.CCIN("@mozilla.org/file/local;1", "nsILocalFile");
+        var file = Cc["@mozilla.org/file/local;1"].createInstance(Ci.nsILocalFile);
         file.initWithPath(item.executable);
         if (!file.isExecutable())
            throw "NotAnExecutable";
@@ -131,8 +131,8 @@ function onAccept()
     {
         const Ci = Components.interfaces;
         const nsIPromptService = nsIPromptService;
-        var promptService = fbXPCOMUtils.CCIN("@mozilla.org/embedcomp/prompt-service;1",
-            "nsIPromptService");
+        var promptService = Cc["@mozilla.org/embedcomp/prompt-service;1"].createInstance(
+            Ci.nsIPromptService);
 
         if (exc == "NotAnExecutable")
         {
@@ -165,7 +165,7 @@ function onBrowse()
 {
     const Ci = Components.interfaces;
     const nsIFilePicker = Ci.nsIFilePicker;
-    var picker = fbXPCOMUtils.CCIN("@mozilla.org/filepicker;1", "nsIFilePicker");
+    var picker = Cc["@mozilla.org/filepicker;1"].createInstance(Ci.nsIFilePicker);
     picker.init(window, "", nsIFilePicker.modeOpen);
     picker.appendFilters(nsIFilePicker.filterApps);
 

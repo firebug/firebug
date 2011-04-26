@@ -751,7 +751,7 @@ NetPanel.prototype = FBL.extend(Firebug.ActivablePanel,
         {
             var response = Utils.getResponseText(file, this.context);
             var inputStream = FBL.getInputStreamFromString(response);
-            var stream = fbXPCOMUtils.CCIN("@mozilla.org/binaryinputstream;1", "nsIBinaryInputStream");
+            var stream = Firebug.XPCOM.CCIN("@mozilla.org/binaryinputstream;1", "nsIBinaryInputStream");
             stream.setInputStream(inputStream);
             var encodedResponse = btoa(stream.readBytes(stream.available()));
             var dataURI = "data:" + file.request.contentType + ";base64," + encodedResponse;
@@ -1644,7 +1644,7 @@ NetPanel.prototype = FBL.extend(Firebug.ActivablePanel,
         var rules = FBL.domUtils.getCSSStyleRules(hrefLabel);
         for (var i = 0; i < rules.Count(); ++i)
         {
-            var rule = fbXPCOMUtils.QI(rules.GetElementAt(i), Ci.nsIDOMCSSStyleRule);
+            var rule = Firebug.XPCOM.QI(rules.GetElementAt(i), Ci.nsIDOMCSSStyleRule);
             if (rule.selectorText == ".netHrefLabel")
             {
                 var style = rule.style;

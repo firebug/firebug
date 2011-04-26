@@ -8,7 +8,7 @@ FBL.ns(function() {
 const Cc = Components.classes;
 const Ci = Components.interfaces;
 
-const DirService =  fbXPCOMUtils.CCSV("@mozilla.org/file/directory_service;1", "nsIDirectoryServiceProvider");
+const DirService = Firebug.XPCOM.CCSV("@mozilla.org/file/directory_service;1", "nsIDirectoryServiceProvider");
 const NS_OS_TEMP_DIR = "TmpD"
 const nsIFile = Ci.nsIFile;
 const nsILocalFile = Ci.nsILocalFile;
@@ -372,17 +372,17 @@ Firebug.ExternalEditors = FBL.extend(Firebug.Module,
         if (getPlatformName() == "WINNT")
             lpath = lpath.replace(/\//g, "\\");
 
-        var file = fbXPCOMUtils.QI(temporaryDirectory.clone(), nsILocalFile);
+        var file = Firebug.XPCOM.QI(temporaryDirectory.clone(), nsILocalFile);
         file.appendRelativePath(lpath);
         if (!file.exists())
             file.create(nsIFile.NORMAL_FILE_TYPE, 0664);
         temporaryFiles.push(file.path);
 
-        var converter = fbXPCOMUtils.CCIN("@mozilla.org/intl/scriptableunicodeconverter", "nsIScriptableUnicodeConverter");
+        var converter = Firebug.XPCOM.CCIN("@mozilla.org/intl/scriptableunicodeconverter", "nsIScriptableUnicodeConverter");
         converter.charset = 'UTF-8'; // TODO detect charset from current tab
         data = converter.ConvertFromUnicode(data);
 
-        var stream = fbXPCOMUtils.CCIN("@mozilla.org/network/safe-file-output-stream;1", "nsIFileOutputStream");
+        var stream = Firebug.XPCOM.CCIN("@mozilla.org/network/safe-file-output-stream;1", "nsIFileOutputStream");
         stream.init(file, 0x04 | 0x08 | 0x20, 0664, 0); // write, create, truncate
         stream.write(data, data.length);
         if (stream instanceof nsISafeOutputStream)
@@ -397,7 +397,7 @@ Firebug.ExternalEditors = FBL.extend(Firebug.Module,
     {
         try
         {
-            var file = fbXPCOMUtils.CCIN("@mozilla.org/file/local;1", "nsILocalFile");
+            var file = Firebug.XPCOM.CCIN("@mozilla.org/file/local;1", "nsILocalFile");
             for( var i = 0; i < temporaryFiles.length; ++i)
             {
                 file.initWithPath(temporaryFiles[i]);

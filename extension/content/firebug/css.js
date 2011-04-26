@@ -293,7 +293,7 @@ Firebug.CSSModule = FBL.extend(FBL.extend(Firebug.Module, Firebug.EditorSelector
             var ownerNode = getStyleSheetOwnerNode(styleSheet);
             styleSheet.disabled = true;
 
-            var url = fbXPCOMUtils.CCSV("@mozilla.org/network/standard-url;1", Components.interfaces.nsIURL);
+            var url = Firebug.XPCOM.CCSV("@mozilla.org/network/standard-url;1", Components.interfaces.nsIURL);
             url.spec = styleSheet.href;
 
             var editStyleSheet = ownerNode.ownerDocument.createElementNS(
@@ -1682,7 +1682,7 @@ CSSElementPanel.prototype = FBL.extend(Firebug.CSSStyleSheetPanel.prototype,
         {
             for (var i = 0; i < inspectedRules.Count(); ++i)
             {
-                var rule = fbXPCOMUtils.QI(inspectedRules.GetElementAt(i), nsIDOMCSSStyleRule);
+                var rule = Firebug.XPCOM.QI(inspectedRules.GetElementAt(i), nsIDOMCSSStyleRule);
 
                 var isSystemSheet = FBL.isSystemStyleSheet(rule.parentStyleSheet);
                 if (!Firebug.showUserAgentCSS && isSystemSheet) // This removes user agent rules

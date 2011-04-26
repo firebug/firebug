@@ -3,7 +3,7 @@
 // ************************************************************************************************
 // Constants
 
-const prefs = fbXPCOMUtils.CCSV("@mozilla.org/preferences-service;1", "nsIPrefBranch");
+const prefs = Cc["@mozilla.org/preferences-service;1"].getService(Ci.nsIPrefBranch);
 const names = ["label", "executable", "cmdline", "image"];
 
 // ************************************************************************************************

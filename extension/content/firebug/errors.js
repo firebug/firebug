@@ -29,11 +29,10 @@ const pointlessErrors =
     "Key event not available on GTK2:": 1
 };
 
-
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 Components.utils["import"]("resource://firebug/firebug-service.js");
-const consoleService = fbXPCOMUtils.CCSV("@mozilla.org/consoleservice;1", "nsIConsoleService");
+const consoleService = Firebug.XPCOM.CCSV("@mozilla.org/consoleservice;1", "nsIConsoleService");
 
 const domWindowUtils = window.QueryInterface(Ci.nsIInterfaceRequestor)
     .getInterface(Ci.nsIDOMWindowUtils);

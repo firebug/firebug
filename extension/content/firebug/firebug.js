@@ -10,10 +10,10 @@ const Ci = Components.interfaces;
 
 const nsISupports = Ci.nsISupports;
 
-const observerService = fbXPCOMUtils.CCSV("@mozilla.org/observer-service;1", "nsIObserverService");
-const categoryManager = fbXPCOMUtils.CCSV("@mozilla.org/categorymanager;1", "nsICategoryManager");
-const stringBundleService = fbXPCOMUtils.CCSV("@mozilla.org/intl/stringbundle;1", "nsIStringBundleService");
-const promptService = fbXPCOMUtils.CCSV("@mozilla.org/embedcomp/prompt-service;1", "nsIPromptService");
+const observerService = Cc["@mozilla.org/observer-service;1"].getService(Ci.nsIObserverService);
+const categoryManager = Cc["@mozilla.org/categorymanager;1"].getService(Ci.nsICategoryManager);
+const stringBundleService = Cc["@mozilla.org/intl/stringbundle;1"].getService(Ci.nsIStringBundleService);
+const promptService = Cc["@mozilla.org/embedcomp/prompt-service;1"].getService(Ci.nsIPromptService);
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 // There is one Firebug object per browser.xul
@@ -137,6 +137,13 @@ top.Firebug =
 
     completeInitialize: function(tempPanelTypes)
     {
+        // Inject old fbXPCOMUtils into FBL (for backward compatibility)
+        // Real AMD module should depend on "lib/xpcom"
+        // xxxHonza: FBL.CCIN, FBL.CCSV and FBL.QI should be marked as deprecated and
+        // removed from 1.8.next
+        for (var p in Firebug.XPCOM)
+            FBL[p] = Firebug.XPCOM[p];
+
         FBL.initialize();  // non require.js modules
 
         // Append early registered panels at the end.

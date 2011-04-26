@@ -43,7 +43,6 @@ function getModuleLoaderScope(config)
     {
         window : window,
         Firebug: Firebug,
-        fbXPCOMUtils: fbXPCOMUtils,
         FBL: FBL,
         FirebugReps: FirebugReps,
         FBTrace: FBTrace,
@@ -130,8 +129,7 @@ function loadCore(config, coreInitialize)
         loader.define(['traceModule.js'],function(traceModule)
         {
             FBTrace.sysout("traceModule scope includes FBL: "+FBL+" Firebug "+Firebug);
-            traceModule.openConsole(config.prefDomain);
-        } );  // synchronous
+        });  // synchronous
     }
 
     var coreModules = [];
@@ -176,7 +174,8 @@ function loadCore(config, coreInitialize)
             "script.js",
             "traceModule.js",
             "dragdrop.js",
-            "memoryProfiler.js"
+            "memoryProfiler.js",
+            "lib/xpcom.js"
         ];
 
         coreModules = coreModules.concat(defaultModules);

@@ -14,7 +14,7 @@ var EXPORTED_SYMBOLS = ["traceConsoleService"];
 
 /**
  * This implementation serves as a proxy to the FBTrace extension. All logs are forwarded
- * to t
+ * to the FBTrace service.
  */
 try
 {

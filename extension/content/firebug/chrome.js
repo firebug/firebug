@@ -1402,8 +1402,8 @@ top.FirebugChrome =
         }
         else
         {
-            var extensionManager = fbXPCOMUtils.CCSV("@mozilla.org/extensions/manager;1",
-                "nsIExtensionManager");
+            var extensionManager = Cc["@mozilla.org/extensions/manager;1"].getService(
+                Ci.nsIExtensionManager);
 
             openDialog("chrome://mozapps/content/extensions/about.xul", "",
                 "chrome,centerscreen,modal", "urn:mozilla:item:firebug@software.joehewitt.com",

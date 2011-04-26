@@ -86,7 +86,7 @@ Firebug.SVGViewerModel = FBL.extend(Firebug.Module,
 
     insertSVG: function(parentNode, text)
     {
-        var parser = fbXPCOMUtils.CCIN("@mozilla.org/xmlextras/domparser;1", "nsIDOMParser");
+        var parser = Firebug.XPCOM.CCIN("@mozilla.org/xmlextras/domparser;1", "nsIDOMParser");
         var doc = parser.parseFromString(text, "text/xml");
         var root = doc.documentElement;
 

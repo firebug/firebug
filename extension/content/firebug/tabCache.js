@@ -193,7 +193,7 @@ Firebug.TabCacheModel = FBL.extend(Firebug.Module,
             // 1.9.3: adds third parameter to the existing init method.
             if (versionChecker.compare(appInfo.version, "3.6*") >= 0)
             {
-                var tee = fbXPCOMUtils.CCIN("@mozilla.org/network/stream-listener-tee;1", "nsIStreamListenerTee");
+                var tee = Firebug.XPCOM.CCIN("@mozilla.org/network/stream-listener-tee;1", "nsIStreamListenerTee");
                 tee = tee.QueryInterface(Ci.nsIStreamListenerTee);
 
                 if (Ci.nsIStreamListenerTee_1_9_2)
@@ -201,7 +201,7 @@ Firebug.TabCacheModel = FBL.extend(Firebug.Module,
 
                 // The response will be written into the outputStream of this pipe.
                 // Both ends of the pipe must be blocking.
-                var sink = fbXPCOMUtils.CCIN("@mozilla.org/pipe;1", "nsIPipe");
+                var sink = Firebug.XPCOM.CCIN("@mozilla.org/pipe;1", "nsIPipe");
                 sink.init(false, false, 0x20000, 0x4000, null);
 
                 // Remember the input stream, so it isn't released by GC.

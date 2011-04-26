@@ -1,6 +1,6 @@
 /* See license.txt for terms of usage */
 
-define(["arch/tools"], function(ToolsInterface) {
+define(["arch/tools", "lib/xpcom.js"], function(ToolsInterface, XPCOM) {
 
 // ********************************************************************************************* //
 
@@ -2129,10 +2129,12 @@ Firebug.Debugger = FBL.extend(Firebug.ActivableModule,
 
         this.debuggerName =  window.location.href +"-@-"+FBL.getUniqueId();
         this.toString = function() { return this.debuggerName; }
+
         if (FBTrace.DBG_INITIALIZE)
             FBTrace.sysout("debugger.initialize "+ this.debuggerName+" Firebug.clientID "+Firebug.clientID);
 
-        this.hash_service = fbXPCOMUtils.CCSV("@mozilla.org/security/hash;1", "nsICryptoHash");
+        this.hash_service = XPCOM.CCSV("@mozilla.org/security/hash;1", "nsICryptoHash");
+
         try
         {
             this.asTool = new Firebug.ToolsInterface.Browser.Tool('script');
@@ -2142,7 +2144,6 @@ Firebug.Debugger = FBL.extend(Firebug.ActivableModule,
         {
             FBTrace.sysout("debugger inititialze tool ERROR "+exc, exc);
         }
-
 
         this.wrappedJSObject = this;  // how we communicate with fbs
 

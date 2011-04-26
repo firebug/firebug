@@ -1,6 +1,7 @@
 /* See license.txt for terms of usage */
 
-var FBL = fbXPCOMUtils;
+// xxxHonza: the only global should be Firebug object.
+var FBL = {};
 
 try {
 // ************************************************************************************************
@@ -16,16 +17,16 @@ const Ci = Components.interfaces;
 // ************************************************************************************************
 // Modules
 
-Components.utils.import("resource://gre/modules/PluralForm.jsm");
+Components.utils["import"]("resource://gre/modules/PluralForm.jsm");
 
 try
 {
-    Components.utils.import("resource://firebug/firebug-service.js");
+    Components.utils["import"]("resource://firebug/firebug-service.js");
 
     // use only with FBL prefix
     this.fbs = fbs; // left over from component.
 }
-catch(err)
+catch (err)
 {
     if (FBTrace.DBG_ERRORS)
         FBTrace.sysout("lib; FAILED to get firebug-service", err);
@@ -35,14 +36,14 @@ catch(err)
 // Shortcuts
 
 // use only with FBL prefix
-this.jsd = this.CCSV("@mozilla.org/js/jsd/debugger-service;1", "jsdIDebuggerService");
+this.jsd = Cc["@mozilla.org/js/jsd/debugger-service;1"].getService(Ci.jsdIDebuggerService);
 
 // use only with FBL prefix
-this.domUtils = this.CCSV("@mozilla.org/inspector/dom-utils;1", "inIDOMUtils");
+this.domUtils = Cc["@mozilla.org/inspector/dom-utils;1"].getService(Ci.inIDOMUtils);
 
-const finder = this.finder = this.CCIN("@mozilla.org/embedcomp/rangefind;1", "nsIFind");
-const wm = this.CCSV("@mozilla.org/appshell/window-mediator;1", "nsIWindowMediator");
-const ioService = this.CCSV("@mozilla.org/network/io-service;1", "nsIIOService");
+const finder = this.finder = Cc["@mozilla.org/embedcomp/rangefind;1"].createInstance(Ci.nsIFind);
+const wm = Cc["@mozilla.org/appshell/window-mediator;1"].getService(Ci.nsIWindowMediator);
+const ioService = Cc["@mozilla.org/network/io-service;1"].getService(Ci.nsIIOService);
 const versionChecker = Cc["@mozilla.org/xpcom/version-comparator;1"].getService(Ci.nsIVersionComparator);
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
@@ -351,8 +352,8 @@ this.convertToUnicode = function(text, charset)
 
     try
     {
-        var conv = this.CCIN("@mozilla.org/intl/scriptableunicodeconverter",
-            "nsIScriptableUnicodeConverter");
+        var conv = Cc["@mozilla.org/intl/scriptableunicodeconverter"].getService(
+            Ci.nsIScriptableUnicodeConverter);
         conv.charset = charset ? charset : "UTF-8";
         return conv.ConvertToUnicode(text);
     }
@@ -376,8 +377,8 @@ this.convertFromUnicode = function(text, charset)
 
     try
     {
-        var conv = this.CCIN("@mozilla.org/intl/scriptableunicodeconverter",
-            "nsIScriptableUnicodeConverter");
+        var conv = Cc["@mozilla.org/intl/scriptableunicodeconverter"].createInstance(
+            Ci.nsIScriptableUnicodeConverter);
         conv.charset = charset ? charset : "UTF-8";
         return conv.ConvertFromUnicode(text);
     }
@@ -392,13 +393,13 @@ this.convertFromUnicode = function(text, charset)
 // use only with FBL prefix
 this.getPlatformName = function()
 {
-    return this.CCSV("@mozilla.org/xre/app-info;1", "nsIXULRuntime").OS;
+    return Cc["@mozilla.org/xre/app-info;1"].getService(Ci.nsIXULRuntime).OS;
 };
 
 // use only with FBL prefix
 this.beep = function()
 {
-    var sounder = this.CCSV("@mozilla.org/sound;1", "nsISound");
+    var sounder = Cc["@mozilla.org/sound;1"].getService(Ci.nsISound);
     sounder.beep();
 };
 
@@ -1436,11 +1437,11 @@ this.insertTextIntoElement = function(element, text)
     if (!controller || !controller.isCommandEnabled(command))
         return;
 
-    var params = this.CCIN("@mozilla.org/embedcomp/command-params;1", "nsICommandParams");
+    var params = Cc["@mozilla.org/embedcomp/command-params;1"].createInstance(Ci.nsICommandParams);
     params.setStringValue("state_data", text);
 
-    controller = this.QI(controller, Ci.nsICommandController);
-    controller.doCommandWithParams(command, params);
+    if (controller instanceof Ci.nsICommandController)
+        controller.doCommandWithParams(command, params);
 };
 
 // ************************************************************************************************
@@ -1640,7 +1641,7 @@ this.getRuleMatchingElements = function(rule, doc)
 // use only with FBL prefix
 this.copyToClipboard = function(string)
 {
-    var clipboard = this.CCSV("@mozilla.org/widget/clipboardhelper;1", "nsIClipboardHelper");
+    var clipboard = Cc["@mozilla.org/widget/clipboardhelper;1"].getService(Ci.nsIClipboardHelper);
     clipboard.copyString(string);
 };
 
@@ -3791,7 +3792,7 @@ this.openNewTab = function(url, postText)
     if (postText)
     {
         var stringStream = this.getInputStreamFromString(postText);
-        postData = this.CCIN("@mozilla.org/network/mime-input-stream;1", "nsIMIMEInputStream");
+        postData = Cc["@mozilla.org/network/mime-input-stream;1"].createInstance(Ci.nsIMIMEInputStream);
         postData.addHeader("Content-Type", "application/x-www-form-urlencoded");
         postData.addContentLength = true;
         postData.setData(stringStream);
@@ -4945,7 +4946,7 @@ this.parseJSONPString = function(jsonString, originURL)
 // use only with FBL prefix
 this.readFromStream = function(stream, charset, noClose)
 {
-    var sis = this.CCIN("@mozilla.org/binaryinputstream;1", "nsIBinaryInputStream");
+    var sis = Cc["@mozilla.org/binaryinputstream;1"].createInstance(Ci.nsIBinaryInputStream);
     sis.setInputStream(stream);
 
     var segments = [];
@@ -4978,11 +4979,18 @@ this.readPostTextFromPage = function(url, context)
         try
         {
             var webNav = context.browser.webNavigation;
-            var descriptor = this.QI(webNav, Ci.nsIWebPageDescriptor).currentDescriptor;
-            var entry = this.QI(descriptor, Ci.nsISHEntry);
+            var descriptor = (webNav instanceof Ci.nsIWebPageDescriptor) ?
+                webNav.currentDescriptor : null;
+
+            if (!(descriptor instanceof Ci.nsISHEntry))
+                return;
+
             if (entry && entry.postData)
             {
-                var postStream = this.QI(entry.postData, Ci.nsISeekableStream);
+                if (!(entry.postData instanceof Ci.nsISeekableStream))
+                    return;
+
+                var postStream = entry.postData;
                 postStream.seek(NS_SEEK_SET, 0);
 
                 var charset = context.window.document.characterSet;
@@ -5002,10 +5010,13 @@ this.readPostTextFromRequest = function(request, context)
 {
     try
     {
-        var is = this.QI(request, Ci.nsIUploadChannel).uploadStream;
+        var is = (request instanceof Ci.nsIUploadChannel) ? request.uploadStream : null;
         if (is)
         {
-            var ss = this.QI(is, Ci.nsISeekableStream);
+            if (!(is instanceof Ci.nsISeekableStream))
+                return;
+
+            var ss = is;
             var prevOffset;
             if (ss)
             {
@@ -5037,7 +5048,7 @@ this.readPostTextFromRequest = function(request, context)
 // use only with FBL prefix
 this.getInputStreamFromString = function(dataString)
 {
-    var stringStream = this.CCIN("@mozilla.org/io/string-input-stream;1", "nsIStringInputStream");
+    var stringStream = Cc["@mozilla.org/io/string-input-stream;1"].createInstance(Ci.nsIStringInputStream);
 
     if ("data" in stringStream) // Gecko 1.9 or newer
         stringStream.data = dataString;
@@ -5229,8 +5240,9 @@ this.getLoadFlagsDescription = function(loadFlags)
 // use only with FBL prefix
 this.launchProgram = function(exePath, args)
 {
-    try {
-        var file = this.CCIN("@mozilla.org/file/local;1", "nsILocalFile");
+    try
+    {
+        var file = Cc["@mozilla.org/file/local;1"].createInstance(Ci.nsILocalFile);
         file.initWithPath(exePath);
         if (this.getPlatformName() == "Darwin" && file.isDirectory())
         {
@@ -5239,7 +5251,7 @@ this.launchProgram = function(exePath, args)
         }
         if (!file.exists())
             return false;
-        var process = this.CCIN("@mozilla.org/process/util;1", "nsIProcess");
+        var process = Cc["@mozilla.org/process/util;1"].createInstance(Ci.nsIProcess);
         process.init(file);
         process.run(false, args, args.length, {});
         return true;
@@ -5256,7 +5268,7 @@ this.getIconURLForFile = function(path)
 {
     var fileHandler = ioService.getProtocolHandler("file").QueryInterface(Ci.nsIFileProtocolHandler);
     try {
-        var file = this.CCIN("@mozilla.org/file/local;1", "nsILocalFile");
+        var file = Cc["@mozilla.org/file/local;1"].createInstance(Ci.nsILocalFile);
         file.initWithPath(path);
         if ((this.getPlatformName() == "Darwin") && !file.isDirectory() && (path.indexOf(".app/") != -1))
         {

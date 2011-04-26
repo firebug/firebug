@@ -778,7 +778,7 @@ function registerFrameListener(browser)
 
 function getRefererHeader(request)
 {
-    var http = fbXPCOMUtils.QI(request, Ci.nsIHttpChannel);
+    var http = Firebug.XPCOM.QI(request, Ci.nsIHttpChannel);
     var referer = null;
     http.visitRequestHeaders({
         visitHeader: function(name, value)
