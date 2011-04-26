@@ -1008,7 +1008,7 @@ Firebug.ConsolePanel.prototype = FBL.extend(Firebug.ActivablePanel,
         var endPt = this.document.createRange();
         endPt.setStartAfter(logRow);
 
-        return finder.Find(text, searchRange, startPt, endPt) != null;
+        return FBL.finder.Find(text, searchRange, startPt, endPt) != null;
     },
 
     // nsIPrefObserver

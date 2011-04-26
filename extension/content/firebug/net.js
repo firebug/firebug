@@ -1,6 +1,6 @@
 /* See license.txt for terms of usage */
 
-FBL.ns(function() { with (FBL) {
+FBL.ns(function() { with (Domplate) {
 
 // ************************************************************************************************
 // Constants
@@ -2194,7 +2194,7 @@ Firebug.NetMonitor.NetRequestEntry = domplate(Firebug.Rep, new Firebug.Listener(
 
     formatSize: function(bytes)
     {
-        return formatSize(bytes);
+        return FBL.formatSize(bytes);
     },
 
     formatTime: function(elapsed)
@@ -5384,8 +5384,8 @@ var NetPanelSearch = function(panel, rowFinder)
     {
         this.text = text;
 
-        finder.findBackwards = !!reverse;
-        finder.caseSensitive = !!caseSensitive;
+        FBL.finder.findBackwards = !!reverse;
+        FBL.finder.caseSensitive = !!caseSensitive;
 
         this.currentRow = this.getFirstRow();
         this.resetRange();
@@ -5422,7 +5422,7 @@ var NetPanelSearch = function(panel, rowFinder)
             else
                 startPt.setStart(this.currentNode, this.range.endOffset);
 
-            this.range = finder.Find(this.text, searchRange, startPt, searchRange);
+            this.range = FBL.finder.Find(this.text, searchRange, startPt, searchRange);
             if (this.range)
             {
                 this.currentNode = this.range ? this.range.startContainer : null;
@@ -5439,7 +5439,7 @@ var NetPanelSearch = function(panel, rowFinder)
                 startPt.setStartAfter(this.currentNode);
         }
 
-        this.range = finder.Find(this.text, searchRange, startPt, searchRange);
+        this.range = FBL.finder.Find(this.text, searchRange, startPt, searchRange);
         this.currentNode = this.range ? this.range.startContainer : null;
         return this.currentNode ? this.currentNode.parentNode : null;
     },

@@ -1,7 +1,6 @@
 /* See license.txt for terms of usage */
 
-// Set this global to an empty object, and populate the object during FBL.initialize
-var FirebugReps = FBL.ns(function() { with (FBL) {
+var FirebugReps = FBL.ns(function() { with (Domplate) {
 
 // ************************************************************************************************
 // Constants
@@ -9,7 +8,7 @@ var FirebugReps = FBL.ns(function() { with (FBL) {
 const Cc = Components.classes;
 const Ci = Components.interfaces;
 
-Components.utils.import("resource://firebug/firebug-service.js");
+Components.utils["import"]("resource://firebug/firebug-service.js");
 
 // ************************************************************************************************
 // Common Tags
@@ -568,7 +567,7 @@ FirebugReps.Property = domplate(Firebug.Rep,
 {
     supportsObject: function(object, type)
     {
-        return object instanceof Property;
+        return object instanceof FBL.Property;
     },
 
     getRealObject: function(prop, context)
@@ -1294,7 +1293,7 @@ FirebugReps.SourceLink = domplate(Firebug.Rep,
 
     supportsObject: function(object, type)
     {
-        return object instanceof SourceLink;
+        return object instanceof FBL.SourceLink;
     },
 
     getTooltip: function(sourceLink)
@@ -2522,7 +2521,8 @@ FirebugReps.NamedNodeMap = domplate(Firebug.Rep,
     },
 });
 
-// ************************************************************************************************
+// ********************************************************************************************* //
+// Registration
 
 Firebug.registerRep(
     FirebugReps.nsIDOMHistory, // make this early to avoid exceptions
@@ -2559,12 +2559,15 @@ Firebug.registerRep(
 Firebug.setDefaultReps(FirebugReps.Func, FirebugReps.Obj);
 
 return FirebugReps;
+
+// ********************************************************************************************* //
 }});
 
-// ************************************************************************************************
+// ********************************************************************************************* //
+
 /*
- * The following is http://developer.yahoo.com/yui/license.txt and applies to only code labeled "Yahoo BSD Source"
- * in only this file reps.js.  John J. Barton June 2007.
+ * The following is http://developer.yahoo.com/yui/license.txt and applies to only code labeled
+ * "Yahoo BSD Source" in only this file reps.js.  John J. Barton June 2007.
  *
 Software License Agreement (BSD License)
 
@@ -2596,5 +2599,6 @@ LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR P
 INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR
 TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
 ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
- * /
- */
+*/
+
+// ********************************************************************************************* //

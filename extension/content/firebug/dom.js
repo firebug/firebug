@@ -1,6 +1,6 @@
 /* See license.txt for terms of usage */
 
-FBL.ns(function() { with (FBL) {
+FBL.ns(function() { with (Domplate) {
 
 // ************************************************************************************************
 // Constants
@@ -802,7 +802,7 @@ Firebug.DOMBasePanel.prototype = FBL.extend(Firebug.Panel,
     getPathObject: function(index)
     {
         var object = this.objectPath[index];
-        if (object instanceof Property)
+        if (object instanceof FBL.Property)
             return object.getObject();
         else
             return object;
@@ -935,7 +935,7 @@ Firebug.DOMBasePanel.prototype = FBL.extend(Firebug.Panel,
                 if (type == "undefined" || type == "number" || type == "boolean")
                     editValue = propValue;
                 else if (type == "string")
-                    editValue = "\"" + escapeJS(propValue) + "\"";
+                    editValue = "\"" + FBL.escapeJS(propValue) + "\"";
                 else if (propValue == null)
                     editValue = "null";
                 else if (object instanceof Window || object instanceof jsdIStackFrame)

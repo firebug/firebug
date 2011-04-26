@@ -12,7 +12,7 @@ const Ci = Components.interfaces;
 var contexts = [];
 
 //TODO requirejs
-Components.utils.import("resource://firebug/firebug-http-observer.js");
+Components.utils["import"]("resource://firebug/firebug-http-observer.js");
 var httpObserver = httpRequestObserver;  // XXXjjb Honza should we just use the RHS here?
 
 
@@ -776,6 +776,7 @@ function callPageHandler(spy, event, originalHandler)
  * @domplate Represents a template for XHRs logged in the Console panel. The body of the
  * log (displayed when expanded) is rendered using {@link Firebug.NetMonitor.NetInfoBody}.
  */
+with (Domplate) {
 Firebug.Spy.XHR = domplate(Firebug.Rep,
 /** @lends Firebug.Spy.XHR */
 {
@@ -927,7 +928,7 @@ Firebug.Spy.XHR = domplate(Firebug.Rep,
 
         return items;
     }
-});
+})};
 
 // ************************************************************************************************
 

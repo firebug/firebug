@@ -189,6 +189,7 @@ Firebug.Profiler = FBL.extend(Firebug.Module,
 
 // ************************************************************************************************
 
+with (Domplate) {
 Firebug.Profiler.ProfileTable = domplate(
 {
     tag:
@@ -426,6 +427,8 @@ Firebug.Profiler.ProfileCall = domplate(Firebug.Rep,
         return FirebugReps.Func.getContextMenuItems(fn, call.script, context);
     }
 });
+
+} // END Domplate
 
 // ************************************************************************************************
 
