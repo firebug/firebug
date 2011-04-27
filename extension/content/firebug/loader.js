@@ -1,7 +1,8 @@
 /* See license.txt for terms of usage */
 
 (function() {
-
+    const Cc = Components.classes;
+    const Ci = Components.interfaces;
 // ********************************************************************************************* //
 // Firebug Load Manager
 
@@ -109,7 +110,7 @@ function getModuleLoaderScope(config)
 
     // Pump the objects from this scope down into module loader. Note that the window
     // object used within timetou and interval methods is bind via closure.
-    var firebugScope = 
+    var firebugScope =
     {
         window : window,
         Firebug: Firebug,
@@ -189,7 +190,7 @@ function getModuleLoaderConfig(baseConfig)
 /**
  * Default config file can be specified before this file is loaded into XUL (chrome) scope.
  * You can see an example of custom config here: chrome//fbtrace/content/traceConsole.xul
- * 
+ *
  * config.arch:         architecture to load, 'inProcess', 'remoteClient', 'remoteServer'
  * config.prefDomain:   base for preferences systems, eg 'extension.firebug'
  * config.baseUrl:      base for load path
