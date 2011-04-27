@@ -1831,90 +1831,89 @@ function HTMLEditor(doc)
 
 HTMLEditor.prototype = domplate(Firebug.BaseEditor,
 {
- tag: DIV(
-     TEXTAREA({"class": "htmlEditor fullPanelEditor", oninput: "$onInput"})
- ),
+    tag: DIV(
+        TEXTAREA({"class": "htmlEditor fullPanelEditor", oninput: "$onInput"})
+    ),
 
- getValue: function()
- {
-     return this.input.value;
- },
+    getValue: function()
+    {
+        return this.input.value;
+    },
 
- setValue: function(value)
- {
-     return this.input.value = value;
- },
+    setValue: function(value)
+    {
+        return this.input.value = value;
+    },
 
- show: function(target, panel, value, textSize)
- {
-     this.target = target;
-     this.panel = panel;
-     this.editingElements = [target.repObject, null];
+    show: function(target, panel, value, textSize)
+    {
+        this.target = target;
+        this.panel = panel;
+        this.editingElements = [target.repObject, null];
 
-     this.panel.panelNode.appendChild(this.box);
+        this.panel.panelNode.appendChild(this.box);
 
-     this.input.value = value;
-     this.input.focus();
+        this.input.value = value;
+        this.input.focus();
 
-     var command = Firebug.chrome.$("cmd_toggleHTMLEditing");
-     command.setAttribute("checked", true);
- },
+        var command = Firebug.chrome.$("cmd_toggleHTMLEditing");
+        command.setAttribute("checked", true);
+    },
 
- hide: function()
- {
-     var command = Firebug.chrome.$("cmd_toggleHTMLEditing");
-     command.setAttribute("checked", false);
+    hide: function()
+    {
+        var command = Firebug.chrome.$("cmd_toggleHTMLEditing");
+        command.setAttribute("checked", false);
 
-     this.panel.panelNode.removeChild(this.box);
+        this.panel.panelNode.removeChild(this.box);
 
-     delete this.editingElements;
-     delete this.target;
-     delete this.panel;
- },
+        delete this.editingElements;
+        delete this.target;
+        delete this.panel;
+    },
 
- saveEdit: function(target, value, previousValue)
- {
-     // Remove all of the nodes in the last range we created, except for
-     // the first one, because setOuterHTML will replace it
-     var first = this.editingElements[0], last = this.editingElements[1];
-     if (last && last != first)
-     {
-         for (var child = first.nextSibling; child;)
-         {
-             var next = child.nextSibling;
-             child.parentNode.removeChild(child);
-             if (child == last)
-                 break;
-             else
-                 child = next;
-         }
-     }
+    saveEdit: function(target, value, previousValue)
+    {
+        // Remove all of the nodes in the last range we created, except for
+        // the first one, because setOuterHTML will replace it
+        var first = this.editingElements[0], last = this.editingElements[1];
+        if (last && last != first)
+        {
+            for (var child = first.nextSibling; child;)
+            {
+                var next = child.nextSibling;
+                child.parentNode.removeChild(child);
+                if (child == last)
+                    break;
+                else
+                    child = next;
+            }
+        }
 
-     // Make sure that we create at least one node here, even if it's just
-     // an empty space, because this code depends on having something to replace
-     if (!value)
-         value = " ";
+        // Make sure that we create at least one node here, even if it's just
+        // an empty space, because this code depends on having something to replace
+        if (!value)
+            value = " ";
 
-     if (this.innerEditMode)
-         this.editingElements[0].innerHTML = value;
-     else
-         this.editingElements = FBL.setOuterHTML(this.editingElements[0], value);
- },
+        if (this.innerEditMode)
+            this.editingElements[0].innerHTML = value;
+        else
+            this.editingElements = FBL.setOuterHTML(this.editingElements[0], value);
+    },
 
- endEditing: function()
- {
-     //this.panel.markChange();
-     return true;
- },
+    endEditing: function()
+    {
+        //this.panel.markChange();
+        return true;
+    },
 
- // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
- onInput: function()
- {
-     Firebug.Editor.update();
- }
+    onInput: function()
+    {
+        Firebug.Editor.update();
+    }
 });
-
 
 // ************************************************************************************************
 // Editors
