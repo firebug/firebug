@@ -331,7 +331,12 @@ const DirTablePlate = domplate(Firebug.Rep,
 
         var panel = row.parentNode.parentNode.domPanel;
         if (panel)
+        {
+            var scriptPanel = panel.context.getPanel("script", true);
+            if (!scriptPanel || !scriptPanel.isEnabled())
+                return;     // set the breakpoint only if the script panel will respond.
             panel.breakOnProperty(row);
+        }
     }
 });
 
