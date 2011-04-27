@@ -1831,9 +1831,10 @@ function HTMLEditor(doc)
 
 HTMLEditor.prototype = domplate(Firebug.BaseEditor,
 {
-    tag: DIV(
-        TEXTAREA({"class": "htmlEditor fullPanelEditor", oninput: "$onInput"})
-    ),
+    tag:
+        DIV(
+            TEXTAREA({"class": "htmlEditor fullPanelEditor", oninput: "$onInput"})
+        ),
 
     getValue: function()
     {

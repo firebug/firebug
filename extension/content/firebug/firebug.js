@@ -105,33 +105,49 @@ top.Firebug =
     // Custom stylesheets registered by extensions.
     stylesheets: [],
 
-    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
     // Initialization
 
-    initialize: function(config)
+    initialize: function()
     {
-        // xxxjjb: where except of unblocker.js is _firebugLoadConfig used?
-        config = config || window._firebugLoadConfig;
-        config = config || {};
-
+        // This says how much time was necessary to load Firebug overlay (+ all script tags).
         FBTrace.timeEnd("SCRIPTTAG_TIME");
-        FBTrace.time("MODULE_TIME");
 
-        if (FBTrace.sysout && (!FBL || !FBL.initialize) )
-            FBTrace.sysout("Firebug is broken, FBL incomplete, if the last function is QI, check lib.js:", FBL);
+        // Measure the entire Firebug initialiation time.
+        FBTrace.time("INITIALIZATION_TIME");
+
+        if (FBTrace.sysout && (!FBL || !FBL.initialize))
+        {
+            FBTrace.sysout("Firebug is broken, FBL incomplete, if the last function is QI, " +
+                "check lib.js:", FBL);
+        }
         else if (FBTrace.DBG_INITIALIZE)
+        {
             FBTrace.sysout("firebug.initialize FBL: " + FBL);
+        }
 
-        // Till now all registered panels (too soon) have been inserted into earlyRegPanelTypes.
+        // Till now all registered panels have been inserted into earlyRegPanelTypes.
         var tempPanelTypes = earlyRegPanelTypes;
         earlyRegPanelTypes = null;
 
+        // Inject FirebugManage into Firebug namespace and unpollute global scope.
         Firebug.LoadManager = FirebugLoadManager;
-        delete FirebugLoadManager; // unpollute global
+        delete FirebugLoadManager;
 
+        // Load all Firebug modules now.
+        var config = top.FirebugConfig || {};
         Firebug.LoadManager.loadCore(config, function coreInitialize()
         {
-            Firebug.completeInitialize(tempPanelTypes);
+            FBTrace.sysout("firebug; Firebug modules loaded.");
+
+            try
+            {
+                Firebug.completeInitialize(tempPanelTypes);
+            }
+            catch (e)
+            {
+                FBTrace.sysout("firebug; Initialization EXCEPTION " + e, e);
+            }
         });
     },
 
@@ -163,6 +179,7 @@ top.Firebug =
 
         FBL.dispatch(modules, "initialize", []);
 
+        // This is the final of Firebug initialization.
         FBTrace.timeEnd("INITIALIZATION_TIME");
     },
 
