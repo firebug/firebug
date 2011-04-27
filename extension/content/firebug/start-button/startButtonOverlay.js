@@ -49,7 +49,7 @@ Firebug.StartButton = FBL.extend(Firebug.Module,
                 startButton.setAttribute("firefox", "4");
         }
 
-        this.removeStatusIcon();
+        this.updateStatusIcon();
 
         if (FBTrace.DBG_INITIALIZE)
             FBTrace.sysout("Startbutton initializeUI "+startButton);
@@ -115,22 +115,24 @@ Firebug.StartButton = FBL.extend(Firebug.Module,
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-    // Support for the status bar (OBSOLETE in Fx4)
+    // Support for the status bar
 
-    removeStatusIcon: function()
+    /**
+     * The status bar icon is hidden by default since Firebug 1.8 (Firefox 4).
+     * The toolbar icon (start button) is the preferred Firebug entry point.
+     */
+    updateStatusIcon: function()
     {
-        if (Firebug.Options.get("showStatusIcon"))
-            return;
-
+        var show = Firebug.Options.get("showStatusIcon");
         var statusBar = FBL.$("fbStatusBar");
         if (statusBar)
-            statusBar.parentNode.removeChild(statusBar);
+            FBL.collapse(statusBar, !show);
     },
 
     updateOption: function(name, value)
     {
         if (name === "showStatusIcon")
-            this.removeStatusIcon();
+            this.updateStatusIcon();
     },
 
     onClickStatusText: function(context, event)

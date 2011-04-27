@@ -23,7 +23,7 @@ pref("extensions.firebug.activateSameOrigin", true);
 pref("extensions.firebug.toolbarCustomizationDone", false);
 pref("extensions.firebug.addonBarOpened", false);
 pref("extensions.firebug.showBreakNotification", true);
-pref("extensions.firebug.showStatusIcon", true);
+pref("extensions.firebug.showStatusIcon", false);
 
 // Command line
 pref("extensions.firebug.largeCommandLine", false);
