@@ -58,9 +58,7 @@ var reps = [];
 var defaultRep = null;
 var defaultFuncRep = null;
 var menuItemControllers = [];
-
 var panelTypeMap = {};
-
 var deadWindows = [];
 var deadWindowTimeout = 0;
 var clearContextTimeout = 0;

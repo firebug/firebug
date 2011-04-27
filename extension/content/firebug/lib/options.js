@@ -1,6 +1,6 @@
 /* See license.txt for terms of usage */
 
-define([""], function factoryOptions() {
+define([], function factoryOptions() {
 
 // ********************************************************************************************* //
 // Constants

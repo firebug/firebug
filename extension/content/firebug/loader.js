@@ -15,84 +15,92 @@ top.FirebugLoadManager =
     loadCore: function(config, callback)
     {
         // Set configuration defaults.
-        config.arch = config.arch || "inProcess";
         config.prefDomain = config.prefDomain || "extensions.firebug";
+        config.arch = getArchitectureType(config.prefDomain) || "inProcess";
         config.baseUrl = config.baseUrl || "resource://firebug_rjs/";
         config.paths = {"arch": config.arch};
 
-        // xxxHonza: is this necessary? It's already in the config, no?
-        // this.arch = config.arch;
-        // FIXME, create options.js as dependent of loader.
-        // Firebug.architecture = this.getPref(this.prefDomain, "architecture");
-
-        // pump the objects from this scope down into module loader
+        // Prepare scope objects to pupm them down into module loader and create
+        // config for RequireJS.
         var firebugScope = getModuleLoaderScope(config);
         var requireJSConfig = getModuleLoaderConfig(config);
 
-        // Create loader used to load all Firebug modules.
+        // Get list of default modules to load
+        var modules = this.getModules(config);
+
+        // Finally, load all Firebug modules with all dependencies and call execute
+        // the callback as soon as it's done.
         var loader = new ModuleLoader(firebugScope, requireJSConfig);
+        loader.define(modules, callback);
+    },
 
-        // Load basic modules.
-        loader.define(["traceModule", "lib/options"], function(traceModule)
+    getModules: function(config)
+    {
+        var modules = [
+            "traceModule",
+            "lib/options",
+            "lib/xpcom",
+            "dragdrop",
+            "tabContext",  // should be loaded by being a dep of tabWatcher
+            "sourceBox",
+            "script",
+            "memoryProfiler",
+        ];
+
+        // Compute list of further modules that depend on the current architecture type.
+        // xxxHonza: this should be somehow configurable from outside
+        if (config.modules)
         {
-            FBTrace.sysout("loader; Firebug.TraceModule loaded");
-        });
-
-        // Specify list of core modules that should be loaded.
-        var coreModules = [];
-
-        if (config.coreModules)
-        {
-            coreModules = config.coreModules;
+            modules = config.coreModules;
         }
         else if (config.arch === "inProcess")
         {
-            coreModules.push("arch/tools");  // must be first
-            coreModules.push("arch/firebugadapter");
-            coreModules.push("debugger");
-            coreModules.push("arch/javascripttool");
+            modules.push("arch/tools");  // must be first
+            modules.push("arch/firebugadapter");
+            modules.push("debugger");
+            modules.push("arch/javascripttool");
         }
         else if (config.arch == "remoteClient")
         {
-            coreModules.push("crossfireModules/tools.js");
-            coreModules.push("debugger.js");
-
+            modules.push("crossfireModules/tools.js");
+            modules.push("debugger.js");
         }
         else if (config.arch == "remoteServer")
         {
-            coreModules.push("inProcess/tools.js");  // must be first
-            coreModules.push("debugger.js");
-
-            coreModules.push("crossfireModules/crossfire-server.js");
+            modules.push("inProcess/tools.js");  // must be first
+            modules.push("debugger.js");
+            modules.push("crossfireModules/crossfire-server.js");
         }
         else
         {
-            throw new Error("ERROR Firebug.LoadManager.loadCore unknown architechture requested: "+Firebug.arch);
+            throw new Error("ERROR Firebug.LoadManager.loadCore unknown " +
+                "architechture requested: " + config.arch);
         }
 
         if (!config.coreModules)
-        {
-            var defaultModules = [
-                "tabContext.js",  // should be loaded by being a dep of tabWatcher
-                "sourceBox.js",
-                "script.js",
-                "traceModule.js",
-                "dragdrop.js",
-                "memoryProfiler.js",
-                "lib/xpcom.js"
-            ];
+            modules = modules.concat(config.coreModules);
 
-            coreModules = coreModules.concat(defaultModules);
-        }
-
-        // Finally, load all Firebug modules with all dependencies. As soon as the load
-        // is done passed callback is executed.
-        loader.define(coreModules, callback);
+        return modules;
     }
 }
 
 // ********************************************************************************************* //
 // Private Helpers
+
+function getArchitectureType(prefDomain)
+{
+    try
+    {
+        // The architecture pref can't be loaded using Optiosn module since this pref
+        // is essention for the loader and since yet before we can even load
+        // the options module.
+        var prefs = Cc["@mozilla.org/preferences-service;1"].getService(Ci.nsIPrefBranch2);
+        return prefs.getCharPref(prefDomain + "." + "arch");
+    }
+    catch (err)
+    {
+    }
+}
 
 function getModuleLoaderScope(config)
 {
