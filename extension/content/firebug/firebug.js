@@ -2,7 +2,7 @@
 
 (function() {
 
-// ************************************************************************************************
+// ********************************************************************************************* //
 // Constants
 
 const Cc = Components.classes;
@@ -173,6 +173,7 @@ top.Firebug =
             this.tabBrowser = tabBrowser;
         }
 
+        Firebug.Options.addListener(this);
         Firebug.Options.initialize();
 
         this.isInitialized = true;
@@ -306,6 +307,9 @@ top.Firebug =
         FBL.dispatch(modules, "shutdown");
 
         this.closeDeadWindows();
+
+        Firebug.Options.shutdown();
+        Firebug.Options.removeListener(this);
 
         if (FBTrace.DBG_INITIALIZE)
             FBTrace.sysout("firebug.shutdown exited ");
@@ -670,7 +674,9 @@ top.Firebug =
         } catch (err) { }
     },
 
-    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+    // Options
+
     getPref: function()
     {
         // TODO deprecated
@@ -691,8 +697,18 @@ top.Firebug =
 
     prefDomain: "extensions.firebug",
 
+    updateOption: function(name, value)
+    {
+        // Distribute to the current chrome.
+        Firebug.chrome.updateOption(name, value);
 
-    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+        // If Firebug is detached distribute also into the in-browser chrome.
+        if (Firebug.chrome != Firebug.originalChrome)
+            Firebug.originalChrome.updateOption(name, value);
+    },
+
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
     shouldIgnore: function(objectChromeView)
     {
         if (objectChromeView)
@@ -712,11 +728,11 @@ top.Firebug =
                 contentView.firebugIgnore = true;
         }
     },
+
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 
     // Browser Bottom Bar
     // TODO XULWindow
-
     showBar: function(show)
     {
         var browser = Firebug.chrome.getCurrentBrowser();

@@ -3,7 +3,7 @@
 // ************************************************************************************************
 // Module
 
-define([], function factoryBrowser(){
+define([], function factoryBrowser() {
 
 // ************************************************************************************************
 // Browser
@@ -40,7 +40,9 @@ Browser.onDebug = function()
 
 Browser.unimplementedHandler = function()
 {
-    if (Browser.debug && Browser.debug.handlers) Browser.onDebug("Browser.listener unimplemented event handler called ", {handler: this, args: arguments});
+    if (Browser.debug && Browser.debug.handlers)
+        Browser.onDebug("Browser.listener unimplemented event handler called ",
+            {handler: this, args: arguments});
 }
 
 Browser.listener =
@@ -132,8 +134,8 @@ Browser.Tool.prototype =
  * Returns current status of tools
  *
  * @function
- * @returns  an array of Tools, an object with {toolName: string, enabled: boolean, enable:function(boolean, fnOfBoolean),}
- *
+ * @returns  an array of Tools, an object with {toolName: string, enabled: boolean,
+ *  enable:function(boolean, fnOfBoolean),}
  */
 Browser.prototype.getTools = function()
 {
@@ -556,9 +558,10 @@ Browser.EventListener = {
     onBreakpointError: function(breakpoint) {}
 };
 
-// ************************************************************************************************
+// ********************************************************************************************* //
 // CommonJS
 
 return exports = Browser;
 
+// ********************************************************************************************* //
 });

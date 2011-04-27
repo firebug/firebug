@@ -1,6 +1,6 @@
 /* See license.txt for terms of usage */
 
-define(["arch/options"], function() {
+define([], function() {
 
 // ************************************************************************************************
 // Trace Module

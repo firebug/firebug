@@ -32,9 +32,8 @@ top.FirebugLoadManager =
         // Create loader used to load all Firebug modules.
         var loader = new ModuleLoader(firebugScope, requireJSConfig);
 
-        // Synchronously load Firebug.TraceModule first. This module is responsible
-        // for dispathing event to all registered listeners for FBTrace customization.
-        loader.define(["traceModule.js"], function(traceModule)
+        // Load basic modules.
+        loader.define(["traceModule", "lib/options"], function(traceModule)
         {
             FBTrace.sysout("loader; Firebug.TraceModule loaded");
         });
@@ -49,7 +48,6 @@ top.FirebugLoadManager =
         else if (config.arch === "inProcess")
         {
             coreModules.push("arch/tools");  // must be first
-            coreModules.push("arch/options");  // debugger needs Firebug.Options because of FBL.$STR() in property initializes, TODO
             coreModules.push("arch/firebugadapter");
             coreModules.push("debugger");
             coreModules.push("arch/javascripttool");
@@ -57,14 +55,12 @@ top.FirebugLoadManager =
         else if (config.arch == "remoteClient")
         {
             coreModules.push("crossfireModules/tools.js");
-            coreModules.push("inProcess/options.js");  // debugger needs Firebug.Options because of FBL.$STR() in property initializes, TODO
             coreModules.push("debugger.js");
 
         }
         else if (config.arch == "remoteServer")
         {
             coreModules.push("inProcess/tools.js");  // must be first
-            coreModules.push("inProcess/options.js");  // debugger needs Firebug.Options because of FBL.$STR() in property initializes, TODO
             coreModules.push("debugger.js");
 
             coreModules.push("crossfireModules/crossfire-server.js");
