@@ -172,7 +172,6 @@ top.Firebug =
         }
 
         Firebug.Options.addListener(this);
-        Firebug.Options.initialize();
 
         this.isInitialized = true;
 
