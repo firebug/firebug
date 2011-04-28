@@ -453,18 +453,11 @@ ModuleLoader.onDebug = function (err, object) {
     }
 }
 
-
-
 // *** load require.js and override its methods as needed. ****
-
-ModuleLoader.init = function(config)
-{
+ModuleLoader.requireJSFileName = "resource://moduleloader/require.js";
 
 try
 {
-    var baseLoaderUrl = config.baseLoaderUrl ? config.baseLoaderUrl : "resource://firebug/";
-    ModuleLoader.requireJSFileName = baseLoaderUrl + "require.js";
-
     coreRequire = ModuleLoader.bootStrap(ModuleLoader.requireJSFileName).require;
 
     if (coreRequire) {
@@ -550,6 +543,4 @@ coreRequire.analyzeFailure = function(context, managers, specified, loaded) {
             context.config.onDebug("require.js: "+j+" specified: "+specified[id]+" loaded: "+loaded[id]+" "+id+" "+module);
         }
     }
-}
-
 }

@@ -17,7 +17,7 @@ top.FirebugLoadManager =
     {
         // Set configuration defaults.
         config.prefDomain = config.prefDomain || "extensions.firebug";
-        config.arch = getArchitectureType(config.prefDomain) || "inProcess";
+        config.arch = config.arch || getArchitectureType(config.prefDomain) || "inProcess";
         config.baseUrl = config.baseUrl || "resource://firebug_rjs/";
         config.paths = {"arch": config.arch};
 
@@ -197,15 +197,11 @@ function getModuleLoaderConfig(baseConfig)
  */
 try
 {
-    var config = window.FirebugConfig || {};
-    var baseLoaderUrl = config.baseLoaderUrl ? config.baseLoaderUrl : "resource://firebug/";
-    var moduleLoader = baseLoaderUrl + "moduleLoader.js";
-
     // Get ModuleLoader implementation. This should be the only on 'Mozilla JS code module'
     // used within Firebug soure base. All the other modules should use
     // Asynchronoud Module Definition (AMD).
+    var moduleLoader = "resource://moduleLoader/moduleLoader.js";
     Components.utils["import"](moduleLoader);
-    ModuleLoader.init(config);
 
     if (FBTrace.DBG_MODULES)
         FBTrace.sysout("loader; Firebug Module Loader initialized.");
