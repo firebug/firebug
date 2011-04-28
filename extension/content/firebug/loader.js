@@ -1,8 +1,13 @@
 /* See license.txt for terms of usage */
 
 (function() {
-    const Cc = Components.classes;
-    const Ci = Components.interfaces;
+
+// ********************************************************************************************* //
+// Constants
+
+const Cc = Components.classes;
+const Ci = Components.interfaces;
+
 // ********************************************************************************************* //
 // Firebug Load Manager
 
