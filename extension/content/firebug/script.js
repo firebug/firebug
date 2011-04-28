@@ -1,6 +1,6 @@
 /* See license.txt for terms of usage */
 
-define(["arch/tools", "editorSelector.js"], function(ToolsInterface) {
+define(["arch/tools", "common/editorSelector"], function(ToolsInterface) {
 
 // ********************************************************************************************* //
 // Constants
@@ -592,8 +592,8 @@ Firebug.ScriptPanel.prototype = FBL.extend(Firebug.SourceBoxPanel,
 
     showWarning: function()
     {
-	    if (FBTrace.DBG_PANELS)
-	        FBTrace.sysout("showWarning Firebug.jsDebuggerOn:"+Firebug.jsDebuggerOn+" jsDebuggerCalledUs "+this.context.jsDebuggerCalledUs+' in '+this.context.getName());
+        if (FBTrace.DBG_PANELS)
+            FBTrace.sysout("showWarning Firebug.jsDebuggerOn:"+Firebug.jsDebuggerOn+" jsDebuggerCalledUs "+this.context.jsDebuggerCalledUs+' in '+this.context.getName());
         // Fill the panel node with a warning if needed
         var aLocation = this.getDefaultLocation();
         var jsEnabled = Firebug.Options.getPref("javascript", "enabled");

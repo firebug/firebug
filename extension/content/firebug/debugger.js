@@ -1,6 +1,6 @@
 /* See license.txt for terms of usage */
 
-define(["arch/tools", "lib/xpcom.js"], function(ToolsInterface, XPCOM) {
+define(["arch/tools", "common/lib/xpcom"], function(ToolsInterface, XPCOM) {
 
 // ********************************************************************************************* //
 

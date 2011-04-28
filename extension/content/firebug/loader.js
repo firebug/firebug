@@ -17,9 +17,9 @@ top.FirebugLoadManager =
     {
         // Set configuration defaults.
         config.prefDomain = config.prefDomain || "extensions.firebug";
-        config.arch = config.arch || getArchitectureType(config.prefDomain) || "inProcess";
-        config.baseUrl = config.baseUrl || "resource://firebug_rjs/";
-        config.paths = {"arch": config.arch};
+        config.arch = config.arch || getArchitectureType(config.prefDomain) || "firebug_rjs/inProcess";
+        config.baseUrl = config.baseUrl || "resource://";
+        config.paths = {"arch": config.arch, "common": "firebug_rjs"};
 
         // Prepare scope objects to pupm them down into module loader and create
         // config for RequireJS.
@@ -38,27 +38,28 @@ top.FirebugLoadManager =
     getModules: function(config)
     {
         var modules = [
-            "traceModule",
-            "lib/options",
-            "lib/xpcom",
-            "dragdrop",
-            "tabContext",  // should be loaded by being a dep of tabWatcher
-            "sourceBox",
-            "script",
-            "memoryProfiler",
+            "common/traceModule",
+            "common/lib/options",
+            "common/lib/xpcom",
+            "common/dragdrop",
+            "common/tabContext",  // should be loaded by being a dep of tabWatcher
+            "common/sourceBox",
+            "common/script",
+            "common/memoryProfiler",
         ];
 
         // Compute list of further modules that depend on the current architecture type.
         // xxxHonza: this should be somehow configurable from outside
+        // XXXjjb: yes this is just wrong
         if (config.modules)
         {
             modules = config.coreModules;
         }
-        else if (config.arch === "inProcess")
+        else if (config.arch === "firebug_rjs/inProcess")
         {
             modules.push("arch/tools");  // must be first
             modules.push("arch/firebugadapter");
-            modules.push("debugger");
+            modules.push("common/debugger");
             modules.push("arch/javascripttool");
         }
         else if (config.arch == "remoteClient")
