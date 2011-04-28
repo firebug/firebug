@@ -1827,7 +1827,7 @@ Firebug.WatchPanel.prototype = FBL.extend(Firebug.DOMBasePanel.prototype,
             var scopes = [this.context.getGlobalScope()];
 
         if (FBTrace.DBG_STACK)
-            FBTrace.sysout("dom watch frame isStackFrame "+(frame instanceof StackFrame)+" updateSelection scopes "+scopes.length, scopes);
+            FBTrace.sysout("dom watch frame isStackFrame "+(frame instanceof FBL.StackFrame)+" updateSelection scopes "+scopes.length, scopes);
 
         var members = [];
 
