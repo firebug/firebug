@@ -2404,7 +2404,7 @@ var fbs =
             {
                 // We need to detect eval() and grab its source.
                 var hasCaller = fbs.createdScriptHasCaller();
-                if (FBTrace.DBG_FBS_SRCUNITS) FBTrace.sysout("createdScriptHasCaller "+hasCaller);
+                if (FBTrace.DBG_FBS_SRCUNITS) FBTrace.sysout("top or eval case createdScriptHasCaller "+hasCaller);
 
                 if (hasCaller)
                 {
@@ -2425,6 +2425,12 @@ var fbs =
                 // could be a 1) Browser-generated event handler or 2) a nested script at the top of a file
                 // One way to tell is assume both then wait to see which we hit first:
                 // 1) bp at pc=0 for this script or 2) for a top-level on at the same filename
+
+                if (FBTrace.DBG_FBS_SRCUNITS)
+                {
+                    var hasCaller = fbs.createdScriptHasCaller();
+                    FBTrace.sysout("browser generated createdScriptHasCaller "+hasCaller);
+                }
 
                 fbs.onXScriptCreatedByTag[script.tag] = this.onEventScriptCreated; // for case 1
                 script.setBreakpoint(0);
@@ -2451,12 +2457,7 @@ var fbs =
     createdScriptHasCaller: function()
     {
         if (FBTrace.DBG_FBS_SRCUNITS)
-        {
-            var msg = [];
-            for (var frame = Components.stack; frame; frame = frame.caller)
-                msg.push( frame.filename + "@" + frame.lineNumber +": "+frame.sourceLine  );
-            FBTrace.sysout("createdScriptHasCaller "+msg.length, msg);
-        }
+            dumpComponentsStack("createdScriptHasCaller ");
 
         var frame = Components.stack; // createdScriptHasCaller
 
@@ -3846,6 +3847,14 @@ function frameToString(frame)
     }
 
     return frame.script.tag+" in "+frame.script.fileName+"@"+frame.line+"(pc="+frame.pc+")";
+}
+
+function dumpComponentsStack(from)
+{
+    var msg = [];
+    for (var frame = Components.stack; frame; frame = frame.caller)
+        msg.push( {desc:frame.filename + "@" + frame.lineNumber +": "+frame.sourceLine,frame:frame}  );
+    FBTrace.sysout(from+" has stack size:" +msg.length, msg);
 }
 
 function testBreakpoint(frame, bp)
