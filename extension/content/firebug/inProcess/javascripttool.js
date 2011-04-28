@@ -122,6 +122,13 @@ ToolsInterface.JavaScript.onStartDebugging = function(context, frame)
 {
     Firebug.selectContext(context);
     var panel = Firebug.chrome.selectPanel("script");
+    if (!panel)
+    {
+        // Bail out if there is no UI
+        ToolsInterface.JavaScript.resumeJavaScript(context);
+        return;
+    }
+
     ToolsInterface.JavaScript.Turn.currentFrame = frame;
     panel.onStartDebugging(frame);
 }
