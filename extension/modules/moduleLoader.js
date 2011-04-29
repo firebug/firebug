@@ -97,7 +97,7 @@ ModuleLoader.copyProperties = function(lhs, rhs) {
 }
 
 ModuleLoader.systemPrincipal = Cc["@mozilla.org/systemprincipal;1"].createInstance(Ci.nsIPrincipal);
-ModuleLoader.mozIOService = Cc['@mozilla.org/network/io-service;1'].getService(Ci.nsIIOService);
+ModuleLoader.nsIIOService = Cc['@mozilla.org/network/io-service;1'].getService(Ci.nsIIOService);
 
 ModuleLoader.isRelativeURL = function(url)
 {
@@ -189,7 +189,7 @@ ModuleLoader.prototype = {
                 url = (this.baseURL || "") + mrl;
 
             // we can't use baseURI because resource:// is not a valid URI
-            var mozURI = ModuleLoader.mozIOService.newURI(url, null, null);
+            var mozURI = ModuleLoader.nsIIOService.newURI(url, null, null);
             var url = mozURI.spec;
 
             if (!this.baseURL) {  // then we did not have one configured before, use the first one we see
@@ -371,7 +371,7 @@ ModuleLoader.prototype = {
 
     mozReadTextFromFile: function(pathToFile, mrl, context) {
         try {
-            var channel = ModuleLoader.mozIOService.newChannel(pathToFile, null, null);
+            var channel = ModuleLoader.nsIIOService.newChannel(pathToFile, null, null);
             var inputStream = channel.open();
 
             var ciStream = Cc["@mozilla.org/intl/converter-input-stream;1"]
@@ -393,26 +393,21 @@ ModuleLoader.prototype = {
             return data;
         } catch (err) {
             if (err.name === "NS_ERROR_FILE_NOT_FOUND") {
-                // TODO: The call stack needs to point to the caller here
-                var callsite = "";
-                var caller = err.location ? err.location.caller : null;
-                while (caller) {
-                    if (caller.filename === "resource://firebug/moduleLoader.js" && caller.lineNumber === 49) {
-                        if (caller.caller) {
-                            callsite = caller.caller.filename +"@"+caller.caller.lineNumber;
-                        }
-                        break;
-                    }
-                    caller = caller.caller;
-                }
                 var info = {err:err, pathToFile: pathToFile, moduleLoader: this};
                 var namedHow = "";
                 if (context && context.namedHow) {
                     info.nameHow = context.namedHow;
                     namedHow = context.namedHow.how;
                 }
+                try {
+                    if (this.baseURL)
+                        var basePath = ModuleLoader.getLocalOrSystemPath(this.baseURL, true);
+                } catch(exc) {
+                    var basePath = exc;
+                }
 
-                return ModuleLoader.onError(new Error("ERROR ModuleLoader file not found "+pathToFile+" from "+callsite+" "+namedHow), info);
+
+                return ModuleLoader.onError(new Error("ERROR ModuleLoader file not found "+pathToFile+" from "+mrl+" how: "+namedHow+" basePath: "+basePath), info);
             }
             return ModuleLoader.onError(new Error("mozReadTextFromFile; EXCEPTION "+err), {err:err, pathToFile: pathToFile, moduleLoader: this});
         }
@@ -452,6 +447,47 @@ ModuleLoader.onDebug = function (err, object) {
         }
     }
 }
+
+ModuleLoader.getLocalSystemURI = function(url)
+{
+    try
+    {
+        var uri = ModuleLoader.nsIIOService.newURI(url, null, null);
+        if (uri.schemeIs("resource"))
+        {
+            var ph = ModuleLoader.nsIIOService.getProtocolHandler("resource").QueryInterface(Ci.nsIResProtocolHandler);
+            var abspath = ph.getSubstitution(uri.host);
+            uri = ModuleLoader.nsIIOService.newURI(uri.path.substr(1), null, abspath);
+        }
+        if (uri.schemeIs("chrome"))
+        {
+            var chromeRegistry = Cc["@mozilla.org/chrome/chrome-registry;1"].getService(Ci.nsIChromeRegistry);
+            uri = chromeRegistry.convertChromeURL(uri);
+        }
+        return uri;
+    }
+    catch(exc)
+    {
+        ModuleLoader.onError("getLocalSystemURI failed for "+url+", "+exc);
+    }
+}
+
+/*
+ * Mozilla native path for local URL
+ */
+ModuleLoader.getLocalOrSystemPath = function(url, allowDirectories)
+{
+    var uri = ModuleLoader.getLocalSystemURI(url);
+    if (uri instanceof Ci.nsIFileURL)
+    {
+        var file = uri.file;
+        if (allowDirectories)
+            return file && file.path;
+        else
+            return file && !file.isDirectory() && file.path;
+    }
+}
+
 
 // *** load require.js and override its methods as needed. ****
 ModuleLoader.requireJSFileName = "resource://moduleloader/require.js";

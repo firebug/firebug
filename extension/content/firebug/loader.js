@@ -24,7 +24,7 @@ top.FirebugLoadManager =
         config.prefDomain = config.prefDomain || "extensions.firebug";
         config.arch = config.arch || getArchitectureType(config.prefDomain) || "firebug_rjs/inProcess";
         config.baseUrl = config.baseUrl || "resource://";
-        config.paths = {"arch": config.arch, "common": "firebug_rjs"};
+        config.paths = config.paths || {"arch": config.arch, "common": "firebug_rjs"};
 
         // Prepare scope objects to pupm them down into module loader and create
         // config for RequireJS.
@@ -145,20 +145,36 @@ function getModuleLoaderConfig(baseConfig)
         paths: baseConfig.paths,
         onDebug: function()
         {
-            if (!this.FBTrace)
+            try
             {
-                // traceConsoleService is a global of |window| frome trace.js.
-                // on the first call we use it to get a ref to the Cu.import module object
-                this.FBTrace = traceConsoleService.getTracer(baseConfig.prefDomain);
-            }
+                if (!this.FBTrace)
+                {
+                    // traceConsoleService is a global of |window| frome trace.js.
+                    // on the first call we use it to get a ref to the Cu.import module object
+                    this.FBTrace = traceConsoleService.getTracer(baseConfig.prefDomain);
+                }
 
-            if (this.FBTrace.DBG_MODULES)
-                this.FBTrace.sysout.apply(this.FBTrace,arguments);
+                if (this.FBTrace.DBG_MODULES)
+                    this.FBTrace.sysout.apply(this.FBTrace,arguments);
+            }
+            catch(exc)
+            {
+                var msg = "";
+                for (var i = 0; i < arguments.length; i++)
+                    msg += arguments[i]+", ";
+
+                Components.utils.reportError("Loader; onDebug:"+msg);  // put something out for sure
+                window.dump("Loader; onDebug:"+msg+"\n");
+            }
         },
         onError: function()
         {
-            Components.utils.reportError(arguments[0]);  // put something out for sure
+            var msg = "";
+            for (var i = 0; i < arguments.length; i++)
+                msg += arguments[i]+", ";
 
+            Components.utils.reportError("Loader; onError:"+msg);  // put something out for sure
+            window.dump("Loader; onError:"+msg+"\n");
             if (!this.FBTrace)
             {
                 // traceConsoleService is a global of |window| frome trace.js.
