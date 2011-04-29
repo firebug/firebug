@@ -68,7 +68,7 @@ top.FirebugChrome =
             var msg = exc.toString() +" "+(exc.fileName || exc.sourceName) + "@" + exc.lineNumber;
             Components.utils.reportError(msg);
             if (FBTrace.sysout)
-                FBTrace.sysout("chrome.panelBarReady FAILS: "+exc, exc);
+                FBTrace.sysout("chrome.panelBarReady FAILS: "+msg, exc);
             return false;
         }
         return true; // the panel bar is ready
