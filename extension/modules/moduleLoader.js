@@ -205,6 +205,15 @@ ModuleLoader.prototype = {
             url: url,
             mrl: mrl, // relative
         }
+
+        this.compileUnitInSandbox(unit, callback);
+        this.attachModule(url, unit);  // even if we don't have any valid exports, so we can try to finish dependencies
+
+        return unit;
+    },
+
+    compileUnitInSandbox: function(unit, callback)
+    {
         var thatGlobal = unit.sandbox = this.getSandbox(unit);
 
         // **** For security analysis we need to recognize that these added properties are visible to evaled code. ****
@@ -228,9 +237,6 @@ ModuleLoader.prototype = {
                 }
             }
         }
-        this.attachModule(url, unit);  // even if we don't have any valid exports, so we can try to finish dependencies
-
-        return unit;
     },
 
     loadModuleLoading: function(thatGlobal) {
