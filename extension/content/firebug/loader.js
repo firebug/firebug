@@ -20,19 +20,16 @@ top.FirebugLoadManager =
 {
     loadCore: function(config, callback)
     {
-        // Set configuration defaults.
-        config.prefDomain = config.prefDomain || "extensions.firebug";
-        config.arch = config.arch || getArchitectureType(config.prefDomain) || "firebug_rjs/inProcess";
-        config.baseUrl = config.baseUrl || "resource://";
-        config.paths = config.paths || {"arch": config.arch, "common": "firebug_rjs"};
-
-        // Prepare scope objects to pupm them down into module loader and create
-        // config for RequireJS.
-        var firebugScope = getModuleLoaderScope(config);
+        // Merge defaults create config for RequireJS.
         var requireJSConfig = getModuleLoaderConfig(config);
+
+        // Prepare scope objects to pump them down into module loader
+        var firebugScope = getModuleLoaderScope(config);
 
         // Get list of default modules to load
         var modules = this.getModules(config);
+
+        loadModuleLoader(config.baseLoaderUrl);
 
         // Finally, load all Firebug modules with all dependencies and call execute
         // the callback as soon as it's done.
@@ -135,6 +132,13 @@ function getModuleLoaderScope(config)
 
 function getModuleLoaderConfig(baseConfig)
 {
+    // Set configuration defaults.
+    baseConfig.baseLoaderUrl = baseConfig.baseLoaderUrl || "resource://moduleLoader/";
+    baseConfig.prefDomain = baseConfig.prefDomain || "extensions.firebug";
+    baseConfig.arch = baseConfig.arch || getArchitectureType(baseConfig.prefDomain) || "firebug_rjs/inProcess";
+    baseConfig.baseUrl = baseConfig.baseUrl || "resource://";
+    baseConfig.paths = baseConfig.paths || {"arch": baseConfig.arch, "common": "firebug_rjs"};
+
     // to give each XUL window its own loader (for now)
     var uid = Math.random();
 
@@ -217,27 +221,37 @@ function getModuleLoaderConfig(baseConfig)
  * config.prefDomain:   base for preferences systems, eg 'extension.firebug'
  * config.baseUrl:      base for load path
  */
-try
-{
-    // Get ModuleLoader implementation. This should be the only on 'Mozilla JS code module'
-    // used within Firebug soure base. All the other modules should use
-    // Asynchronoud Module Definition (AMD).
-    var moduleLoader = "resource://moduleLoader/moduleLoader.js";
-    Components.utils["import"](moduleLoader);
 
-    if (FBTrace.DBG_MODULES)
-        FBTrace.sysout("loader; Firebug Module Loader initialized.");
-}
-catch (exc)
+/*
+ * @param baseURL string, eg 'resource://firebug/content/modules'
+ */
+function loadModuleLoader(baseURL)
 {
-    var msg = exc.toString() +" "+(exc.fileName || exc.sourceName) + "@" + exc.lineNumber;
-    if (FBTrace.DBG_MODULES)
+    try
     {
-        dump("Import moduleLoader.js FAILS: "+msg+"\n");
-        FBTrace.sysout("Import moduleLoader.js ERROR "+msg, exc);
+        // Get ModuleLoader implementation. This should be the only on 'Mozilla JS code module'
+        // used within Firebug soucre base. All the other modules should use
+        // Asynchronous Module Definition (AMD).
+        var moduleLoader = baseURL+"moduleLoader.js";
+        Components.utils["import"](moduleLoader);
+        ModuleLoader.bootstrap(baseURL+"require.js");
+
+        if (FBTrace.DBG_MODULES)
+            FBTrace.sysout("loader; Firebug Module Loader initialized.");
     }
-    Components.utils.reportError(msg);
-    throw exc;
+    catch (exc)
+    {
+        var msg = "loader; loadModuleLoader("+baseURL+") ";
+        msg += exc.toString() +" "+(exc.fileName || exc.sourceName) + "@" + exc.lineNumber;
+        if (FBTrace.DBG_MODULES)
+        {
+            dump("Import moduleLoader.js FAILS: "+msg+"\n");
+            FBTrace.sysout("Import moduleLoader.js ERROR "+msg, exc);
+        }
+        Components.utils.reportError(msg);
+        throw exc;
+    }
+
 }
 
 // ********************************************************************************************* //

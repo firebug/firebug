@@ -110,21 +110,36 @@ ModuleLoader.isRelativeURL = function(url)
 }
 
 
-ModuleLoader.bootStrap = function(requirejsPath) {
-    var primordialLoader = new ModuleLoader(null, {context: "_Primordial"});
+ModuleLoader.loadRequireJS = function(requirejsPath) {
+    var config = {
+            context: "_Primordial",
+            onDebug: function()
+            {
+                consoleService.logStringMessage("loadRequireJS.onDebug; "+arguments[0]);
+            },
+            onError: function()
+            {
+                consoleService.logStringMessage("loadRequireJS.onError; "+arguments[0]);
+            },
+    };
+
+    var primordialLoader = new ModuleLoader(null, config);
     try {
-        if (ModuleLoader.debug) consoleService.logStringMessage("ModuleLoader bootstrap from "+requirejsPath);
-        ModuleLoader.bootstrapUnit = primordialLoader.loadModule(requirejsPath);
+        if (ModuleLoader.debug) consoleService.logStringMessage("ModuleLoader loadRequireJS from "+requirejsPath);
+        ModuleLoader.loadRequireJSUnit = primordialLoader.loadModule(requirejsPath);
     } catch (exc) {
-        consoleService.logStringMessage("ModuleLoader bootstrap ERROR "+exc);
+        consoleService.logStringMessage("ModuleLoader loadRequireJS ERROR "+exc);
     }
 
     // require.js does not export so we need to fix that
-    ModuleLoader.bootstrapUnit.exports = {
-        require: ModuleLoader.bootstrapUnit.sandbox.require,
-        define: ModuleLoader.bootstrapUnit.sandbox.define
-    };
-    return ModuleLoader.bootstrapUnit.exports;
+    if (ModuleLoader.loadRequireJSUnit.sandbox)
+    {
+        ModuleLoader.loadRequireJSUnit.exports = {
+                require: ModuleLoader.loadRequireJSUnit.sandbox.require,
+                define: ModuleLoader.loadRequireJSUnit.sandbox.define
+            };
+    }
+    return ModuleLoader.loadRequireJSUnit.exports;
 }
 
 // The ModuleLoader.prototype will close over these globals which will be set when the outer function runs.
@@ -171,12 +186,32 @@ ModuleLoader.prototype = {
             unit.url = unit.url || (this.getModuleLoaderName() + this.totalEvals)
             unit.startingLineNumber = unit.startingLineNumber || 1;
             // beforeCompilationUnit
-            var evalResult = Cu.evalInSandbox(unit.source, unit.sandbox,  unit.jsVersion, unit.url, unit.startingLineNumber);
+            ModuleLoader.onDebug("evalScript before");
+            if (unit.sandbox)
+            {
+                var evalResult = Cu.evalInSandbox(unit.source, unit.sandbox,  unit.jsVersion, unit.url, unit.startingLineNumber);
+            }
+            else
+            {
+                var sourceURL = "\n//@ sourceURL="+unit.url;
+                ModuleLoader.onDebug("evalScript "+sourceURL);
+                var source = unit.source + sourceURL;
+                var evalResult = globalEval(source);
+                ModuleLoader.onDebug("after globalEval index require.js "+unit.url.indexOf('require.js')+" in "+unit.url)
+                if (unit.url.indexOf('require.js') != -1)
+                {
+                    unit.exports.require = require;
+                    unit.exports.define = define;
+                }
+            }
+
             // afterCompilationUnit
             this.totalEvals += 1;
             return evalResult;
         } catch (exc) {
             var msg = exc.toString() +" "+(exc.fileName || exc.sourceName) + "@" + exc.lineNumber;
+            var localPath = ModuleLoader.getLocalOrSystemPath(exc.fileName, true);
+            msg+" => "+localPath;
             return ModuleLoader.onError(msg, {exception: exc, compilationUnit: unit, moduleLoader: this});
         }
     },
@@ -234,6 +269,37 @@ ModuleLoader.prototype = {
             if (unit.exports.hasOwnProperty(p)) { // then we had at least on export
                 if (callback) {
                     callback(unit.exports);  // this call throws we do not register the module?
+                }
+            }
+        }
+    },
+
+    // xxxjjb does not work for require.js??
+    compileUnitInThisScope: function(unit, callback)
+    {
+        var thatGlobal = {};
+
+        // **** For security analysis we need to recognize that these added properties are visible to evaled code. ****
+
+        // Any properties of this.global that are functions compiled in chrome scope become exposed to evaled code.
+        if (this.global) {
+            ModuleLoader.copyProperties(thatGlobal, this.global);
+        }
+
+        this.loadModuleLoading(thatGlobal);  // only for system sandboxes.
+
+        // *** end of added properties ****
+
+        thatGlobal.exports = {}; // create the container for the module to fill with exported properties
+        unit.exports = thatGlobal.exports; // point to the container before the source can muck with it.
+        with(thatGlobal)
+        {
+            unit.evalResult = this.evalScript(unit);
+            for (var p in unit.exports) {
+                if (unit.exports.hasOwnProperty(p)) { // then we had at least on export
+                    if (callback) {
+                        callback(unit.exports);  // this call throws we do not register the module?
+                    }
                 }
             }
         }
@@ -493,96 +559,142 @@ ModuleLoader.getLocalOrSystemPath = function(url, allowDirectories)
             return file && !file.isDirectory() && file.path;
     }
 }
+// http://perfectionkills.com/global-eval-what-are-the-options/
+var globalEval = (function() {
 
+      var isIndirectEvalGlobal = (function(original, Object) {
+        try {
+          // Does `Object` resolve to a local variable, or to a global, built-in `Object`,
+          // reference to which we passed as a first argument?
+          return (1,eval)('Object') === original;
+        }
+        catch(err) {
+          // if indirect eval errors out (as allowed per ES3), then just bail out with `false`
+          return false;
+        }
+      })(Object, 123);
 
+      if (isIndirectEvalGlobal) {
+
+        // if indirect eval executes code globally, use it
+        return function(expression) {
+          return (1,eval)(expression);
+        };
+      }
+      else if (typeof window.execScript !== 'undefined') {
+
+        // if `window.execScript exists`, use it
+        return function(expression) {
+          return window.execScript(expression);
+        };
+      }
+
+      // otherwise, globalEval is `undefined` since nothing is returned
+    })();
 // *** load require.js and override its methods as needed. ****
-ModuleLoader.requireJSFileName = "resource://moduleloader/require.js";
+ModuleLoader.bootstrap = function(requireJSFileName) {
 
-try
-{
-    coreRequire = ModuleLoader.bootStrap(ModuleLoader.requireJSFileName).require;
-
-    if (coreRequire) {
-        define = coreRequire.def; // see require.js
-    } else {
-        ModuleLoader.onError("ModuleLoader ERROR bootStrap has no require property from "+ModuleLoader.requireJSFileName);
+    // We have global state that cannot be reset in this implementation
+    if (ModuleLoader.requireJSFileName)
+    {
+        var msg = "ModuleLoader.bootstrap called twice 1) "+ModuleLoader.requireJSFileName;
+        msg += " 2) "+requireJSFileName;
+        throw new Error(msg);
     }
-}
-catch (e)
-{
-    dump("ModuleLoader; EXCEPTION" + e + "\n");
-}
 
-function loadCompilationUnit(moduleLoader, context, url, moduleName) {
-    try {
-        moduleLoader.loading.push(url);
-        if (ModuleLoader.debug) ModuleLoader.onDebug("ModuleLoader depth "+moduleLoader.loading.length+" loading "+url);
-        var unit = moduleLoader.loadModule(url, context);
-        context.completeLoad(moduleName);             // round up all the dependencies
-        if (ModuleLoader.debug) ModuleLoader.onDebug("ModuleLoader depth "+moduleLoader.loading.length+" loaded "+url+" completed "+moduleName);
-        moduleLoader.loading.pop();
-        return unit;
-    } catch (exc) {
-        var errorURL = exc.filename || exc.sourceName || exc.fileName;
-        var errorLineNumber = exc.lineNumber;
+    ModuleLoader.requireJSFileName = requireJSFileName;
 
-        ModuleLoader.onError("ModuleLoader.loadCompilationUnit got exception "+exc+" on "+errorURL+"@"+errorLineNumber+", loading "+url+" stack: "+moduleLoader.loading.join('<-'), exc);
-        if (moduleLoader.config.edit) {
-            return moduleLoader.config.edit(exc, errorURL, errorLineNumber);
-        }
-        throw exc;
-    }
-}
+    try
+    {
+        coreRequire = ModuleLoader.loadRequireJS(ModuleLoader.requireJSFileName).require;
 
-// Override to connect require.js to our loader
-coreRequire.load = function (context, moduleName, url) {
-
-    this.s.isDone = false; // signal for require.ready()
-
-    context.loaded[moduleName] = false; //in process of loading.
-    context.scriptCount += 1;
-
-    var moduleLoader = ModuleLoader.get(context.contextName); // set in config for each subsystem
-
-    if (moduleLoader) {
-        if (moduleLoader.loaded[url])
-        {
-            if (context.config.onDebug)
-                context.config.onDebug("ModuleLoader already loaded "+url);
-            return;
-        }
-
-        var unit = loadCompilationUnit(moduleLoader, context, url, moduleName);
-        unit.exports = context.defined[moduleName];   // remember what we exported.
-        context.urlFetched[url] = true;  // I don't think this is needed.
-        moduleLoader.loaded[url] = unit;
-    } else {
-        return ModuleLoader.onError( new Error("require.attach called with unknown moduleLoaderName "+context.contextName+" for url "+url), ModuleLoader );
-    }
-};
-
-coreRequire.analyzeFailure = function(context, managers, specified, loaded) {
-    for (var i = 0; i < managers.length; i++) {
-        var manager = managers[i];
-        context.config.onDebug("require.js ERROR failed to complete "+manager.fullName+" isDone:"+manager.isDone+" #defined: "+manager.depCount+" #required: "+manager.depMax);
-        var theNulls = [];
-        var theUndefineds = [];
-        var theUnstrucks = manager.strikeList;
-        var depsTotal = 0;
-        for( var depName in manager.deps) {
-            if (typeof (manager.deps[depName]) === "undefined") theUndefineds.push(depName);
-            if (manager.deps[depName] === null) theNulls.push(depName);
-            var strikeIndex = manager.strikeList.indexOf(depName);
-            manager.strikeList.splice(strikeIndex, 1);
-        }
-        context.config.onDebug("require.js: "+theNulls.length+" null dependencies "+theNulls.join(',')+" << check module ids.", theNulls);
-        context.config.onDebug("require.js: "+theUndefineds.length+" undefined dependencies: "+theUndefineds.join(',')+" << check module return values.", theUndefineds);
-        context.config.onDebug("require.js: "+theUnstrucks.length+" unstruck dependencies "+theUnstrucks.join(',')+" << check duplicate requires", theUnstrucks);
-
-        for (var j = 0; j < manager.depArray.length; j++) {
-            var id = manager.depArray[j];
-            var module = manager.deps[id];
-            context.config.onDebug("require.js: "+j+" specified: "+specified[id]+" loaded: "+loaded[id]+" "+id+" "+module);
+        if (coreRequire) {
+            define = coreRequire.def; // see require.js
+        } else {
+            ModuleLoader.onError("ModuleLoader ERROR loadRequireJS has no require property from "+ModuleLoader.requireJSFileName);
         }
     }
+    catch (e)
+    {
+        dump("ModuleLoader; EXCEPTION" + e + "\n");
+    }
+
+    function loadCompilationUnit(moduleLoader, context, url, moduleName) {
+        try {
+            moduleLoader.loading.push(url);
+
+            if (ModuleLoader.debug) ModuleLoader.onDebug("ModuleLoader depth "+moduleLoader.loading.length+" loading "+url);
+
+            var unit = moduleLoader.loadModule(url, context);
+            context.completeLoad(moduleName);             // round up all the dependencies
+
+            if (ModuleLoader.debug) ModuleLoader.onDebug("ModuleLoader depth "+moduleLoader.loading.length+" loaded "+url+" completed "+moduleName);
+
+            moduleLoader.loading.pop();
+            return unit;
+        } catch (exc) {
+            var errorURL = exc.filename || exc.sourceName || exc.fileName;
+            var errorLineNumber = exc.lineNumber;
+
+            ModuleLoader.onError("ModuleLoader.loadCompilationUnit got exception "+exc+" on "+errorURL+"@"+errorLineNumber+", loading "+url+" stack: "+moduleLoader.loading.join('<-'), exc);
+            if (moduleLoader.config.edit) {
+                return moduleLoader.config.edit(exc, errorURL, errorLineNumber);
+            }
+            throw exc;
+        }
+    }
+
+    // Override to connect require.js to our loader
+    coreRequire.load = function (context, moduleName, url) {
+
+        this.s.isDone = false; // signal for require.ready()
+
+        context.loaded[moduleName] = false; //in process of loading.
+        context.scriptCount += 1;
+
+        var moduleLoader = ModuleLoader.get(context.contextName); // set in config for each subsystem
+
+        if (moduleLoader) {
+            if (moduleLoader.loaded[url])
+            {
+                if (context.config.onDebug)
+                    context.config.onDebug("ModuleLoader already loaded "+url);
+                return;
+            }
+
+            var unit = loadCompilationUnit(moduleLoader, context, url, moduleName);
+            unit.exports = context.defined[moduleName];   // remember what we exported.
+            context.urlFetched[url] = true;  // I don't think this is needed.
+            moduleLoader.loaded[url] = unit;
+        } else {
+            return ModuleLoader.onError( new Error("require.attach called with unknown moduleLoaderName "+context.contextName+" for url "+url), ModuleLoader );
+        }
+    };
+
+    coreRequire.analyzeFailure = function(context, managers, specified, loaded) {
+        for (var i = 0; i < managers.length; i++) {
+            var manager = managers[i];
+            context.config.onDebug("require.js ERROR failed to complete "+manager.fullName+" isDone:"+manager.isDone+" #defined: "+manager.depCount+" #required: "+manager.depMax);
+            var theNulls = [];
+            var theUndefineds = [];
+            var theUnstrucks = manager.strikeList;
+            var depsTotal = 0;
+            for( var depName in manager.deps) {
+                if (typeof (manager.deps[depName]) === "undefined") theUndefineds.push(depName);
+                if (manager.deps[depName] === null) theNulls.push(depName);
+                var strikeIndex = manager.strikeList.indexOf(depName);
+                manager.strikeList.splice(strikeIndex, 1);
+            }
+            context.config.onDebug("require.js: "+theNulls.length+" null dependencies "+theNulls.join(',')+" << check module ids.", theNulls);
+            context.config.onDebug("require.js: "+theUndefineds.length+" undefined dependencies: "+theUndefineds.join(',')+" << check module return values.", theUndefineds);
+            context.config.onDebug("require.js: "+theUnstrucks.length+" unstruck dependencies "+theUnstrucks.join(',')+" << check duplicate requires", theUnstrucks);
+
+            for (var j = 0; j < manager.depArray.length; j++) {
+                var id = manager.depArray[j];
+                var module = manager.deps[id];
+                context.config.onDebug("require.js: "+j+" specified: "+specified[id]+" loaded: "+loaded[id]+" "+id+" "+module);
+            }
+        }
+    }
+
 }
