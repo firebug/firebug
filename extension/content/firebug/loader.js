@@ -234,7 +234,7 @@ function loadModuleLoader(baseURL)
         // Asynchronous Module Definition (AMD).
         var moduleLoader = baseURL+"moduleLoader.js";
         Components.utils["import"](moduleLoader);
-        //ModuleLoader.bootstrap(baseURL+"require.js");
+        ModuleLoader.bootstrap(baseURL+"require.js");
 
         if (FBTrace.DBG_MODULES)
             FBTrace.sysout("loader; Firebug Module Loader initialized.");

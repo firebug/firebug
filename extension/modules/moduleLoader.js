@@ -599,7 +599,8 @@ ModuleLoader.bootstrap = function(requireJSFileName) {
     {
         var msg = "ModuleLoader.bootstrap called twice 1) "+ModuleLoader.requireJSFileName;
         msg += " 2) "+requireJSFileName;
-        throw new Error(msg);
+        consoleService.logStringMessage("ModuleLoader.bootstrap; "+msg);
+        return;
     }
 
     ModuleLoader.requireJSFileName = requireJSFileName;
