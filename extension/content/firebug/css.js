@@ -2611,7 +2611,7 @@ Firebug.CSSDirtyListener.prototype =
 
 function rgbToHex(value)
 {
-    return value.replace(/\brgba?\((\d{1,3}),\s*(\d{1,3}),\s*(\d{1,3})(,\s*(\d{1,3}%|\d\.\d+))?\)/gi,
+    return value.replace(/\brgb\((\d{1,3}),\s*(\d{1,3}),\s*(\d{1,3})\)/gi,
         function(_, r, g, b) {
             return '#' + ((1 << 24) + (r << 16) + (g << 8) + (b << 0)).
                 toString(16).substr(-6).toUpperCase();
