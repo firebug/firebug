@@ -7,6 +7,7 @@ html {
 body {
     margin: 0;
     overflow: hidden;
+    /* Aspect    0.547          0.547   0.547 */
     font-family: Lucida Grande, Tahoma, sans-serif;
     font-size: 11px;
 }

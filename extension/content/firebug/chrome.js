@@ -1035,30 +1035,21 @@ top.FirebugChrome =
     {
         var zoom = Firebug.Options.getZoomByTextSize(value);
 
-        panelBar1.browser.markupDocumentViewer.textZoom = zoom;
-        panelBar2.browser.markupDocumentViewer.textZoom = zoom;
+        var fontSizeAdjust = zoom * 0.547; // scale the aspect relative to 11pt Lucida Grande
+
+        var contentBox = $('fbContentBox');
+        contentBox.style.fontSizeAdjust = fontSizeAdjust;
+
+        panelBar1.browser.contentDocument.documentElement.style.fontSizeAdjust = fontSizeAdjust;
 
         var box = $("fbCommandBox");
-        var aNode = panelBar1.selectedPanel ? panelBar1.selectedPanel.panelNode : null ;
-        if (aNode)
-        {
-            Firebug.MeasureBox.startMeasuring(aNode);
-            var size = Firebug.MeasureBox.measureText();
-            box.style.height = size.height;
-            Firebug.MeasureBox.stopMeasuring();
-        }
 
-        var zoomString = (zoom * 100) + "%";
-        box.style.fontSize = zoomString;
-        Firebug.CommandLine.getCommandLineSmall().style.fontSize = zoomString;
-        $("fbCommandLineCompletion").style.fontSize = zoomString;
+        box.style.fontSizeAdjust = fontSizeAdjust;
+        Firebug.CommandLine.getCommandLineSmall().style.fontSizeAdjust = fontSizeAdjust;
+        $("fbCommandLineCompletion").style.fontSizeAdjust = fontSizeAdjust;
+        Firebug.CommandLine.getCommandLineLarge().style.fontSizeAdjust = fontSizeAdjust;
 
-        if(Firebug.CommandLine.getCommandLineLarge().setFontSize)
-            Firebug.CommandLine.getCommandLineLarge().setFontSize(zoomString);
-        else
-            Firebug.CommandLine.getCommandLineLarge().style.fontSize = zoomString;
-
-        Firebug.dispatchToPanels("onTextSizeChange", [zoom]);
+        Firebug.dispatchToPanels("onTextSizeChange", [zoom, fontSizeAdjust]);
     },
 
     obeyOmitObjectPathStack: function(value)
