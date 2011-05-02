@@ -147,3 +147,13 @@
  .useA11y .a11yCSSView .groupHeader:focus {
     outline-offset: -2px;
  }
+
+.infoTipColorBox {
+    background-image: -moz-repeating-linear-gradient(
+        left top -45deg,
+        #E6E6E6,
+        #E6E6E6 5px,
+        #FFFFFF 5px,
+        #FFFFFF 10px
+    );
+}

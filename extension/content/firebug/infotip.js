@@ -20,7 +20,9 @@ Firebug.InfoTip = FBL.extend(Firebug.Module,
         infoTipTag: DIV({"class": "infoTip"}),
 
         colorTag:
-            DIV({style: "background: $rgbValue; width: 100px; height: 40px"}, "&nbsp;"),
+            DIV({"class": "infoTipColorBox"},
+                DIV({style: "background: $rgbValue; width: 100px; height: 40px;"})
+            ),
 
         imgTag:
             DIV({"class": "infoTipImageBox infoTipLoading"},

@@ -119,7 +119,7 @@ var CSSStyleRuleTag = domplate(CSSDomplateBase,
 
 // ********************************************************************************************* //
 
-const reSplitCSS =  /(url\("?[^"\)]+?"?\))|(rgb\(.*?\))|(#[\dA-Fa-f]+)|(-?\d+(\.\d+)?(%|[a-z]{1,2})?)|([^,\s\/!]+)|"(.*?)"|(!(.*)?)/;
+const reSplitCSS =  /(url\("?[^"\)]+?"?\))|(rgba?\(.*?\))|(hsla?\(.*?\))|(#[\dA-Fa-f]+)|(-?\d+(\.\d+)?(%|[a-z]{1,2})?)|([^,\s\/!]+)|"(.*?)"|(!(.*)?)/;
 const reURL = /url\("?([^"\)]+)?"?\)/;
 const reRepeat = /no-repeat|repeat-x|repeat-y|repeat/;
 
@@ -1331,7 +1331,7 @@ Firebug.CSSStyleSheetPanel.prototype = FBL.extend(Firebug.Panel,
 
                 this.infoTipValue = cssValue.value;
 
-                if (cssValue.type == "rgb" || (!cssValue.type && FBL.isColorKeyword(cssValue.value)))
+                if (cssValue.type == "rgb" || cssValue.type == "hsl" || (!cssValue.type && FBL.isColorKeyword(cssValue.value)))
                 {
                     this.infoTipType = "color";
                     this.infoTipObject = cssValue.value;
@@ -2611,7 +2611,7 @@ Firebug.CSSDirtyListener.prototype =
 
 function rgbToHex(value)
 {
-    return value.replace(/\brgb\((\d{1,3}),\s*(\d{1,3}),\s*(\d{1,3})\)/gi,
+    return value.replace(/\brgba?\((\d{1,3}),\s*(\d{1,3}),\s*(\d{1,3})(,\s*(\d{1,3}%|\d\.\d+))?\)/gi,
         function(_, r, g, b) {
             return '#' + ((1 << 24) + (r << 16) + (g << 8) + (b << 0)).
                 toString(16).substr(-6).toUpperCase();
@@ -2670,9 +2670,11 @@ function parseCSSValue(value, offset)
         var type;
         if (m[1])
             type = "url";
-        else if (m[2] || m[3])
+        else if (m[2] || m[4])
             type = "rgb";
-        else if (m[4])
+        else if (m[3])
+            type = "hsl";
+        else if (m[5])
             type = "int";
 
         return {value: m[0], start: start+m.index, end: start+m.index+(m[0].length-1), type: type};
