@@ -2758,11 +2758,12 @@ var fbs =
 
         // frameScopeRoot should be the top window for the scope of the frame function
         // or null
-        fbs.last_debuggr = fbs.askDebuggersForSupport(frameScopeRoot, frame);
-        if (fbs.last_debuggr)
-             return fbs.last_debuggr;
-        else
-            return null;
+        var the_debuggr = fbs.askDebuggersForSupport(frameScopeRoot, frame);
+        if (the_debuggr)
+             return the_debuggr;
+        if (FBTrace.DBG_FBS_FINDDEBUGGER)
+            FBTrace.sysout("fbs.findDebugger no debuggr on bottom frame", frame);
+        return null;
     },
 
     isChromebug: function(location)
@@ -3351,8 +3352,7 @@ var fbs =
                 var debuggr = this.reFindDebugger(frame, stepStayOnDebuggr);
                 if (FBTrace.DBG_FBS_STEP)
                     FBTrace.sysout("fbs.routeBreakToDebuggr type="+getExecutionStopNameFromType(type)+
-                        " stepStayOnDebuggr "+stepStayOnDebuggr+" debuggr:"+(debuggr?debuggr:"null")+
-                        " last_debuggr="+(fbs.last_debuggr?fbs.last_debuggr.debuggerName:"null"));
+                        " stepStayOnDebuggr "+stepStayOnDebuggr+" debuggr:"+(debuggr?debuggr:"null"));
 
                 if (!debuggr) // then the frame is not for our debugger
                     return RETURN_CONTINUE;  // This means that we will continue to take interrupts until  when?
@@ -3363,8 +3363,7 @@ var fbs =
 
                 if (FBTrace.DBG_FBS_STEP)
                     FBTrace.sysout("fbs.routeBreakToDebuggr type="+getExecutionStopNameFromType(type)+
-                        " debuggr:"+(debuggr?debuggr:"null")+" last_debuggr="+
-                        (fbs.last_debuggr?fbs.last_debuggr.debuggerName:"null"));
+                        " debuggr:"+(debuggr?debuggr:"null"));
             }
 
             if (debuggr)
