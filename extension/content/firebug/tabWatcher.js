@@ -81,6 +81,7 @@ Firebug.TabWatcher = FBL.extend(new Firebug.Listener(),
             {
                 var browser = browsers[i];
                 this.unwatchTopWindow(browser.contentWindow);
+                unregisterFrameListener(browser);
             }
         }
 
@@ -450,6 +451,8 @@ Firebug.TabWatcher = FBL.extend(new Firebug.Listener(),
 
         delete browser.showFirebug;
 
+        unregisterFrameListener(browser);
+
         var shouldDispatch = this.unwatchTopWindow(browser.contentWindow);
 
         if (shouldDispatch)
@@ -772,6 +775,19 @@ function registerFrameListener(browser)
     {
         var win = browser.contentWindow;
         FBTrace.sysout("-> tabWatcher register FrameProgressListener for: "+
+            FBL.safeGetWindowLocation(win)+", tab: "+Firebug.getTabIdForWindow(win)+"\n");
+    }
+}
+
+function unregisterFrameListener(browser)
+{
+    browser.removeProgressListener(FrameProgressListener);
+    delete browser.frameListener;
+
+    if (FBTrace.DBG_WINDOWS)
+    {
+        var win = browser.contentWindow;
+        FBTrace.sysout("-> tabWatcher unregister FrameProgressListener for: "+
             FBL.safeGetWindowLocation(win)+", tab: "+Firebug.getTabIdForWindow(win)+"\n");
     }
 }
