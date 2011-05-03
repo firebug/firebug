@@ -103,31 +103,37 @@ function createFirebugCommandLine(context, win)
 
     function attachCommandLine()
     {
-        // DBG window.dump("attachCommandLine "+window.location+"\n");
+        if (FBTrace.DBG_COMMANDLINE)
+            FBTrace.sysout("commandLine.Exposed.attachCommandLine; "+window.location);
+
         if (!contentView.console)
         {
             var console = createFirebugConsole(context, win);
             contentView.console = console;
         }
 
-        this._firebugEvalEvent = function _firebugEvalEvent(event)
-        {
-            // DBG window.dump("attachCommandLine firebugCommandLine "+window.location+"\n");
-            var expr = contentView.document.getUserData("firebug-expr"); // see commandLine.js
-            evaluate(expr);
-            // DBG window.dump("attachCommandLine did evaluate on "+expr+"\n");
-        }
-
-        contentView.document.addEventListener("firebugCommandLine",this._firebugEvalEvent, true);
-        contentView.document.setUserData("firebug-CommandLineAttached", "true", null);
-        // DBG window.dump("Added listener for firebugCommandLine event "+window.location+"\n");
+        contentView.document.addEventListener("firebugCommandLine", firebugEvalEvent, true);
     }
 
     function detachCommandLine()
     {
-         contentView.document.removeEventListener("firebugCommandLine", this._firebugEvalEvent, true);
-         delete contentView._FirebugCommandLine; // suicide!
-         // DBG window.dump("detachCommmandLine<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<\n")
+        contentView.document.removeEventListener("firebugCommandLine", firebugEvalEvent, true);
+        delete contentView._FirebugCommandLine; // suicide!
+
+        if (FBTrace.DBG_COMMANDLINE)
+            FBTrace.sysout("commandLine.Exposed.detachCommandLine; "+window.location);
+    }
+
+    function firebugEvalEvent(event)
+    {
+        if (FBTrace.DBG_COMMANDLINE)
+            FBTrace.sysout("commandLine.Exposed.firebugEvalEvent "+window.location);
+
+        var expr = contentView.document.getUserData("firebug-expr"); // see commandLine.js
+        evaluate(expr);
+
+        if (FBTrace.DBG_COMMANDLINE)
+            FBTrace.sysout("commandLine.Exposed; did evaluate on "+expr);
     }
 
     function evaluate(expr)
@@ -159,7 +165,9 @@ function createFirebugCommandLine(context, win)
 
         contentView.document.dispatchEvent(event);
 
-        // DBG dump("FirebugConsole dispatched event "+methodName+" via "+eventID+" with "+length+ " user objects, [0]:"+console.userObjects[0]+"\n");
+        if (FBTrace.DBG_COMMANDLINE)
+            FBTrace.sysout("commandLine.Exposed; dispatched event "+methodName+" via "+
+                eventID+" with "+objs.length+ " user objects, [0]:"+commandLine.userObjects[0]);
 
         var result;
         if (contentView.document.getUserData("firebug-retValueType") == "array")
@@ -173,14 +181,6 @@ function createFirebugCommandLine(context, win)
 
         return result;
     }
-
-    function sysout(message)
-    {
-        
-    }
-
-    // DBG window.dump("_FirebugCommandLine init console is "+window.console+
-    // " in "+window.location+"\n");
 
     return commandLine;
 };

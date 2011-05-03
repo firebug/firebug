@@ -95,12 +95,15 @@ Firebug.CommandLine = FBL.extend(Firebug.Module,
             return;
         }
 
-        // We're going to use some command-line facilities, but it may not have initialized yet.
+        // Detach the commandline API (if attached) to reinitialize it. If e.g.jQuery
+        // has been loaded in the meantime, the $ functions shouldn't be overwritten.
+        Firebug.CommandLine.injector.detachCommandLine(context, win);
+
+        // Inject commandLine APIs again.
         this.initializeCommandLineIfNeeded(context, win);
 
         // Make sure the command line script is attached.
-        var attached = win.document.getUserData("firebug-CommandLineAttached");
-        if (!attached)
+        if (!Firebug.CommandLine.isAttached(context, win))
         {
             FBTrace.sysout("commandLine: document does not have command line attached " +
                 "its too early for command line "+FBL.getWindowId(win)+" location:"+FBL.safeGetWindowLocation(win), document);
@@ -185,6 +188,9 @@ Firebug.CommandLine = FBL.extend(Firebug.Module,
         try
         {
             win.document.dispatchEvent(event);
+
+            // Clean up the command line APIs.
+            Firebug.CommandLine.injector.detachCommandLine(context, win);
         }
         catch(exc)
         {
@@ -841,7 +847,7 @@ Firebug.CommandLine = FBL.extend(Firebug.Module,
 
     onCommandLineFocus: function(event)
     {
-        // xxxHonza: what about iframes?
+        // xxxHonza: do we need to attach CMD API on focus?
         var context = Firebug.currentContext;
         if (this.autoCompleter && this.autoCompleter.linuxFocusHack)
             return;
@@ -879,13 +885,12 @@ Firebug.CommandLine = FBL.extend(Firebug.Module,
         }
     },
 
-    isAttached: function(context)
+    isAttached: function(context, win)
     {
-        // _FirebugCommandLine is evaluated into the page
         if (!context)
             return false;
-        var contentView = FBL.getContentView(context.window);
-        return ( contentView ? contentView._FirebugCommandLine : false ) ;
+
+        return Firebug.CommandLine.injector.isAttached(win ? win : context.window);
     },
 
     attachConsoleOnFocus: function()
@@ -2325,34 +2330,35 @@ Firebug.CommandLine.CommandHistory = function()
     };
 };
 
-// ************************************************************************************************
+// ********************************************************************************************* //
+// CommandLine Injector
 
-Firebug.CommandLine.injector = {
+Firebug.CommandLine.injector =
+{
+    isAttached: function(win)
+    {
+        var contentView = FBL.getContentView(win);
+        return contentView._FirebugCommandLine ? true : false;
+    },
 
     attachCommandLine: function(context, win)
     {
+        win = win ? win : context.window;
         if (win instanceof Window)
         {
             // If the command line is already attached then end.
-            if (win.document.getUserData("firebug-CommandLineListener") === "true")
+            if (this.isAttached(win))
                 return;
 
-            var doc = win.document;
+            var contentView = FBL.getContentView(win);
+            contentView._FirebugCommandLine = createFirebugCommandLine(context, win);
 
-            var injected = false;
-            if (context.stopped)
-                injected = Firebug.CommandLine.injector.evalCommandLineScript(context);
-            else
-                injected = Firebug.CommandLine.injector.injectCommandLineScript(win, context);
-
-            if (injected)
-                Firebug.CommandLine.injector.addCommandLineListener(context, win);
+            this.addCommandLineListener(context, win);
         }
         else if (Firebug.CommandLine.isSandbox(context))
         {
             if (FBTrace.DBG_COMMANDLINE)
                 FBTrace.sysout("commandLine.injector context.global "+context.global, context.global);
-            // no-op
         }
         else
         {
@@ -2361,64 +2367,56 @@ Firebug.CommandLine.injector = {
         }
     },
 
-    evalCommandLineScript: function(context)
+    detachCommandLine: function(context, win)
     {
-        var commandLine = createFirebugCommandLine(context, context.window);
-        win.wrappedJSObject._FirebugCommandLine = commandLine;
-        return true;
-
-        //var scriptSource = FBL.getResource("chrome://firebug/content/commandLineInjected.js");
-        //Firebug.Debugger.evaluate(scriptSource, context);
-        //if (FBTrace.DBG_COMMANDLINE)
-        //    FBTrace.sysout("commandLine.evalCommandLineScript ", scriptSource);
-        //return true;
-    },
-
-    injectCommandLineScript: function(win, context)
-    {
-        var commandLine = createFirebugCommandLine(context, win);
-        win.wrappedJSObject._FirebugCommandLine = commandLine;
-        return true;
-/*
-        // Inject command line script into the page.
-        var scriptSource = FBL.getResource("chrome://firebug/content/commandLineInjected.js");
-        var addedElement = FBL.addScript(doc, "_firebugCommandLineInjector", scriptSource);
-        if (FBTrace.DBG_COMMANDLINE)
-            FBTrace.sysout("commandLine.injectCommandLineScript ", addedElement);
-
-        // take it right back out, we don't want users to see the things we do ;-)
-        if (addedElement)
+        win = win ? win : context.window;
+        if (this.isAttached(win))
         {
-            setTimeout(function delayRemoveScript()
+            function failureCallback(result, context)
             {
-                if (addedElement.parentNode)
-                    addedElement.parentNode.removeChild(addedElement);
-            });
-            return true;
+                if (FBTrace.DBG_ERRORS)
+                    FBTrace.sysout("Firebug.CommandLine.evaluate FAILS  "+result, result);
+            }
+
+            //Firebug.CommandLine.evaluate("window._FirebugCommandLine.detachCommandLine()",
+            //    context, null, win, null, failureCallback );
+            var contentView = FBL.getContentView(win);
+            contentView._FirebugCommandLine.detachCommandLine();
+
+            this.removeCommandLineListener(context, win);
         }
-        else
-        {
-            if(FBTrace.DBG_ERRORS || FBTrace.DBG_COMMANDLINE)
-                FBTrace.sysout("injectCommandLineScript ERROR no addedElement")
-            return false;
-        }
-*/
     },
+
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+    // Listener
 
     addCommandLineListener: function(context, win)
     {
         // Register listener for command-line execution events.
         var handler = new CommandLineHandler(context, win);
-
         var boundHandler = FBL.bind(handler.handleEvent, handler);
 
-        this.setCommandLineListener(context, win, boundHandler);
+        if (!context.activeCommandLineHandlers)
+            context.activeCommandLineHandlers = {};
+
+        var consoleHandler = Firebug.Console.injector.getConsoleHandler(context, win);
+        context.activeCommandLineHandlers[consoleHandler.token] = boundHandler;
 
         win.document.addEventListener("firebugExecuteCommand", boundHandler, true);
-        win.document.setUserData("firebug-CommandLineListener", "true", null);
 
         if (FBTrace.DBG_COMMANDLINE)
             FBTrace.sysout("commandLine.addCommandLineListener to document in window"+win.location+" with console ", win.console);
+    },
+
+    removeCommandLineListener: function(context, win)
+    {
+        var boundHandler = this.getCommandLineListener(context, win);
+        if (boundHandler)
+            win.document.removeEventListener("firebugExecuteCommand", boundHandler, true);
+
+        if (FBTrace.DBG_COMMANDLINE)
+            FBTrace.sysout("commandLine.detachCommandLineListener "+boundHandler+
+                " in window with console "+win.location);
     },
 
     getCommandLineListener: function(context, win)
@@ -2433,39 +2431,10 @@ Firebug.CommandLine.injector = {
                 FBTrace.sysout("getCommandLineListener no consoleHandler for "+context.getName()+" win "+FBL.safeGetWindowLocation(win));
         }
     },
-
-    setCommandLineListener: function(context, win, boundHandler)
-    {
-        if (!context.activeCommandLineHandlers)
-            context.activeCommandLineHandlers = {};
-
-        var consoleHandler = Firebug.Console.injector.getConsoleHandler(context, win);
-        context.activeCommandLineHandlers[consoleHandler.token] = boundHandler;
-    },
-
-    detachCommandLine: function(context, win)
-    {
-        if (win.document.getUserData("firebug-CommandLineListener") === "true")
-        {
-            if (FBTrace.DBG_ERRORS)
-            {
-                function failureCallback(result, context)
-                {
-                    FBTrace.sysout("Firebug.CommandLine.evaluate FAILS  "+result, result);
-                }
-            }
-            Firebug.CommandLine.evaluate("window._FirebugCommandLine.detachCommandLine()", context, null, win, null, failureCallback );
-
-            var boundHandler = this.getCommandLineListener(context, win);
-            if (boundHandler)
-                win.document.removeEventListener("firebugExecuteCommand", boundHandler, true);
-
-            win.document.setUserData("firebug-CommandLineListener", null, null);
-            if (FBTrace.DBG_COMMANDLINE)
-                FBTrace.sysout("commandLine.detachCommandLineListener "+boundHandler+" in window with console "+win.location);
-        }
-    }
 };
+
+// ********************************************************************************************* //
+// CommandLine Handler
 
 function CommandLineHandler(context, win)
 {
