@@ -38,14 +38,15 @@ Firebug.CallstackPanel.prototype = FBL.extend(Firebug.Panel,
 
     show: function(state)
     {
-        if (!this.location){
+        if (!this.location)
+        {
             this.location = FBL.buildStackTrace(Firebug.ToolsInterface.JavaScript.Turn.currentFrame);
             this.updateLocation(this.location);
         } // then we are lazy
 
-
         if (FBTrace.DBG_STACK)
-            FBTrace.sysout("callstack.show state: "+state+" this.location: "+this.location, {state: state, panel: this});
+            FBTrace.sysout("callstack.show state: "+state+" this.location: "+this.location,
+                {state: state, panel: this});
 
         if (state)
         {
@@ -217,7 +218,8 @@ Firebug.CallstackPanel.prototype = FBL.extend(Firebug.Panel,
 
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
-    // Referents xxxHonza, xxxJJB: what is this? Incomplete feature for finding all references to a function
+    // Referents xxxHonza, xxxJJB: what is this? Incomplete feature for finding all
+    // references to a function
 
     showReferents: function()
     {
@@ -252,7 +254,7 @@ Referent.prototype =
         return this.container;
     },
 
-    /*
+    /**
      * A string of identifiers separated by dots such that container[string] gives obj
      */
     getObjectPathExpression: function()
@@ -294,7 +296,9 @@ function getReferents(frame, fnName)
         if (result.value instanceof Ci.jsdIValue)
         {
             if (FBTrace.DBG_STACK)
-                FBTrace.sysout("Firebug.Debugger.showReferents evaled "+js+" and got "+result.value, result);
+                FBTrace.sysout("Firebug.Debugger.showReferents evaled "+js+" and got "+
+                    result.value, result);
+
             try
             {
                 var fn = result.value.getWrappedValue();
@@ -302,25 +306,34 @@ function getReferents(frame, fnName)
                 var referents = findObjectPropertyPath("this", thisObject, fn, []);
 
                 if (FBTrace.DBG_STACK)
-                    FBTrace.sysout("Firebug.Debugger.showReferents found from thisObject "+referents.length, {thisObject: thisObject, fn: fn, referents: referents});
+                    FBTrace.sysout("Firebug.Debugger.showReferents found from thisObject "+
+                        referents.length, {thisObject: thisObject, fn: fn, referents: referents});
 
                 var containingScope = FBL.unwrapIValueObject(result.value.jsParent, Firebug.viewwChrome);
 
                 if (FBTrace.DBG_STACK)
-                    FBTrace.sysout("Firebug.Debugger.showReferents containingScope from "+result.value.jsParent.jsClassName, containingScope);
+                    FBTrace.sysout("Firebug.Debugger.showReferents containingScope from "+
+                        result.value.jsParent.jsClassName, containingScope);
 
-                var scopeReferents = findObjectPropertyPath(result.value.jsParent.jsClassName, containingScope, fn, []);
+                var scopeReferents = findObjectPropertyPath(result.value.jsParent.jsClassName,
+                    containingScope, fn, []);
                 // Do we need to look in the entire scope chain? I think yes
 
                 if (FBTrace.DBG_STACK)
-                    FBTrace.sysout("Firebug.Debugger.showReferents found scope referents "+scopeReferents.length, {containingScope: containingScope, fn: fn, referents: scopeReferents});
+                    FBTrace.sysout("Firebug.Debugger.showReferents found scope referents "+
+                        scopeReferents.length, {containingScope: containingScope, fn: fn,
+                            referents: scopeReferents});
 
                 referents = referents.concat(scopeReferents);
-                FBTrace.sysout("Firebug.Debugger.showReferents found total referents "+referents.length, {fn: fn, referents: referents});
+                FBTrace.sysout("Firebug.Debugger.showReferents found total referents "+
+                    referents.length, {fn: fn, referents: referents});
+
                 for (var i = 0; i < referents.length; i++)
                 {
                     if (FBTrace.DBG_STACK)
-                        FBTrace.sysout("Firebug.Debugger.showReferents found referent "+referents[i].getObjectPathExpression(), {fn: fn, referent: referents[i], path:referents[i].getObjectPathObjects() });
+                        FBTrace.sysout("Firebug.Debugger.showReferents found referent "+
+                            referents[i].getObjectPathExpression(), {fn: fn, referent: referents[i],
+                            path:referents[i].getObjectPathObjects() });
                 }
             }
             catch(exc)
@@ -332,14 +345,16 @@ function getReferents(frame, fnName)
         else
         {
             if (FBTrace.DBG_STACK || FBTrace.DBG_ERRORS)
-                FBTrace.sysout("Firebug.Debugger.showReferents evaled "+js+" but result.value not instanceof Ci.jsdIValue "+result.value, result);
+                FBTrace.sysout("Firebug.Debugger.showReferents evaled "+js+
+                    " but result.value not instanceof Ci.jsdIValue "+result.value, result);
         }
         return referents;
     }
     else
     {
         if (FBTrace.DBG_STACK || FBTrace.DBG_ERRORS)
-            FBTrace.sysout("Firebug.Debugger.showReferents eval failed with "+ok+" result "+result.value, result);
+            FBTrace.sysout("Firebug.Debugger.showReferents eval failed with "+ok+" result "+
+                result.value, result);
     }
 }
 
