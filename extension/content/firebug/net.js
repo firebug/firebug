@@ -368,7 +368,7 @@ Firebug.NetMonitor = FBL.extend(Firebug.ActivableModule,
             // XXXjjb Honza was called in firebug-http-observer.js on old enableXULWindow
             // Can't be here since resuming happens when the page is loaded and it's too
             // late since the first (document) requests already happened.
-            //httpRequestObserver.registerObservers();  
+            //httpRequestObserver.registerObservers();
             Firebug.TabWatcher.iterateContexts(monitorContext);
         }
 
@@ -5154,13 +5154,16 @@ Firebug.NetMonitor.NetHttpActivityObserver =
     {
         try
         {
-            if (httpChannel instanceof Ci.nsIHttpChannel)
-                this.observeRequest(httpChannel, activityType, activitySubtype, timestamp,
-                    extraSizeData, extraStringData);
+            if (typeof(FBL) !== "undefined")
+            {
+                if (httpChannel instanceof Ci.nsIHttpChannel)
+                    this.observeRequest(httpChannel, activityType, activitySubtype, timestamp,
+                        extraSizeData, extraStringData);
+            }
         }
         catch (exc)
         {
-            if ( (typeof(FBTrace) !== undefined) && this.FBTrace.DBG_ERRORS)  // then we are in some sane scope
+            if ( (typeof(FBTrace) !== undefined) && FBTrace && FBTrace.DBG_ERRORS)  // then we are in some sane scope
                 FBTrace.sysout("net.observeActivity: EXCEPTION "+exc, exc);
         }
     },
