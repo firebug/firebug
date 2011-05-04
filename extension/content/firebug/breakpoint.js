@@ -312,7 +312,7 @@ Firebug.Breakpoint.BreakpointsPanel.prototype = FBL.extend(Firebug.Panel,
         var monitors = extracted.monitors;
 
         if (FBTrace.DBG_BP)
-            FBTrace.sysout("breakpoints.breakpoints.refresh extracted " +
+            FBTrace.sysout("breakpoints.refresh extracted " +
                 breakpoints.length+errorBreakpoints.length+monitors.length,
                 [breakpoints, errorBreakpoints, monitors]);
 
@@ -329,7 +329,7 @@ Firebug.Breakpoint.BreakpointsPanel.prototype = FBL.extend(Firebug.Panel,
         monitors.sort(sortBreakpoints);
 
         if (FBTrace.DBG_BP)
-            FBTrace.sysout("breakpoints.breakpoints.refresh sorted "+breakpoints.length+
+            FBTrace.sysout("breakpoints.refresh sorted "+breakpoints.length+
                 errorBreakpoints.length+monitors.length, [breakpoints, errorBreakpoints, monitors]);
 
         var groups = [];
@@ -352,7 +352,7 @@ Firebug.Breakpoint.BreakpointsPanel.prototype = FBL.extend(Firebug.Panel,
             FirebugReps.Warning.tag.replace({object: "NoBreakpointsWarning"}, this.panelNode);
 
         if (FBTrace.DBG_BP)
-            FBTrace.sysout("breakpoints.breakpoints.refresh "+breakpoints.length+
+            FBTrace.sysout("breakpoints.refresh "+breakpoints.length+
                 errorBreakpoints.length+monitors.length, [breakpoints, errorBreakpoints, monitors]);
 
         FBL.dispatch(this.fbListeners, 'onBreakRowsRefreshed', [this, this.panelNode]);
@@ -1047,11 +1047,14 @@ Firebug.Breakpoint.BreakNotification.prototype = domplate(Firebug.Rep,
 
     show: function(parentNode)
     {
+        if (FBTrace.DBG_BP)
+            FBTrace.sysout("breakNotification.show; " + this.id);
+
         // Reneder the entire notification box.
         this.box = this.tag.append(this.cause, parentNode, this);
         this.box.repObject = this;
 
-        // Appens the HTML targes dynamically. In case they are null, it breaks
+        // Appends the HTML targets dynamically. In case they are null, it breaks
         // click events.
         // xxxHonza: this problem would deserve clarification.
         if (this.cause.target || this.cause.relatedNode)
@@ -1073,9 +1076,13 @@ Firebug.Breakpoint.BreakNotification.prototype = domplate(Firebug.Rep,
         if (this.cause.copyActionTooltip)
             this.box.querySelector(".copyButton").setAttribute("title", this.cause.copyActionTooltip);
 
+        // xxxHonza: disable the animation, the interval seems to be frozen during debugger break.
+        this.box.style.top = "0";
+        return;
+
         // Animation
         var self = this;
-        var delta = Math.max(3, Math.floor(this.box.clientHeight/20));
+        var delta = Math.max(3, Math.floor(this.box.clientHeight/5));
         var clientHeight = this.box.clientHeight;
 
         this.box.style.top = -clientHeight + "px";
@@ -1098,8 +1105,17 @@ Firebug.Breakpoint.BreakNotification.prototype = domplate(Firebug.Rep,
 
     hide: function()
     {
+        if (FBTrace.DBG_BP)
+            FBTrace.sysout("breakNotification.hide;");
+
+        // xxxHonza: disable the animation, the interval seems to be frozen during debugger break.
+        if (this.box.parentNode)
+            this.box.parentNode.removeChild(this.box);
+        return;
+
+        // Animation
         var self = this;
-        var delta = Math.max(3, Math.floor(this.box.clientHeight/20));
+        var delta = Math.max(3, Math.floor(this.box.clientHeight/5));
         var clientHeight = this.box.clientHeight;
         var top = 0;
 

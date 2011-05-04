@@ -1600,38 +1600,60 @@ FirebugReps.StackFrame = domplate(Firebug.Rep,  // XXXjjb Since the repObject is
     }
 });
 
-// ************************************************************************************************
+// ********************************************************************************************* //
 
 FirebugReps.StackTrace = domplate(Firebug.Rep,
 {
     tag:
-        DIV({role : "group", 'aria-label' : FBL.$STR('aria.labels.stack trace')},
-            FOR("frame", "$object.frames",
+        DIV({role : "group", "aria-label" : FBL.$STR("aria.labels.stack trace")},
+            FOR("frame", "$object.frames|frameIterator",
                 TAG(FirebugReps.StackFrame.tag, {object: "$frame"})
             )
         ),
 
-    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
     className: "stackTrace",
 
     supportsObject: function(object, type)
     {
         return object instanceof FBL.StackTrace;
+    },
+
+    frameIterator: function(frames)
+    {
+        // Skip Firebug internal frames.
+        // xxxHonza: this is anoter place where stack frame is peeling off.
+        var result = [];
+        for (var i=0; i<frames.length; i++)
+        {
+            var frame = frames[i];
+            var sf = frame.sourceFile;
+            FBTrace.sysout("frame"+i+": "+sf.href, frame);
+            if ((sf && sf.href && sf.href.indexOf("chrome") == 0) ||
+                (frame.fn == "_firebugRerun"))
+            {
+                continue;
+            }
+
+            result.push(frames[i]);
+        }
+        return result;
     }
 });
 
+// ********************************************************************************************* //
 
 FirebugReps.ErrorMessage = domplate(Firebug.Rep,
 {
     tag:
         OBJECTBOX({
-                $hasTwisty: "$object|hasStackTrace",
-                $hasBreakSwitch: "$object|hasBreakSwitch",
-                $breakForError: "$object|hasErrorBreak",
-                _repObject: "$object",
-                _stackTrace: "$object|getLastErrorStackTrace",
-                onclick: "$onToggleError"},
+            $hasTwisty: "$object|hasStackTrace",
+            $hasBreakSwitch: "$object|hasBreakSwitch",
+            $breakForError: "$object|hasErrorBreak",
+            _repObject: "$object",
+            _stackTrace: "$object|getLastErrorStackTrace",
+            onclick: "$onToggleError"},
 
             DIV({"class": "errorTitle focusRow subLogRow", role : 'listitem'},
                 SPAN({"class": "errorDuplication"}, "$object.msgId|getDuplication"),
