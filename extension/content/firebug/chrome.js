@@ -51,12 +51,41 @@ top.FirebugChrome =
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
     // Initialization
 
-    panelBarReady: function(panelBar)
+    waitLimit: 100,
+
+    waitForPanelBar: function(modulesLoaded) {
+        if (modulesLoaded)
+            FirebugChrome.modulesLoaded = true;
+
+        FirebugChrome.waitLimit -= 1;
+        if(!FirebugChrome.initializeOnPanelBarReady()){
+            if (FBTrace.DBG_INITIALIZE)
+            {
+                var msg = "main; waitForPanelBar "+FirebugChrome.waitLimit;
+                msg += " waitingPanelBarCount: "+waitingPanelBarCount;
+                msg += " modulesLoaded: "+FirebugChrome.modulesLoaded;
+                FBTrace.sysout(msg);
+            }
+
+            setTimeout(FirebugChrome.waitForPanelBar, 10);
+        }
+    },
+
+    panelBarReady: function()
+    {
+        waitingPanelBarCount -= 1;
+        if (FBTrace.DBG_INITIALIZE)
+            FBTrace.sysout("chrome; panelBarReady "+waitingPanelBarCount+" modulesLoaded: "+FirebugChrome.modulesLoaded);
+
+        this.initializeOnPanelBarReady();
+    },
+
+    initializeOnPanelBarReady: function()
     {
         try
         {
             // Wait until all panelBar bindings are ready before initializing
-            if (--waitingPanelBarCount == 0)
+            if (waitingPanelBarCount == 0 && FirebugChrome.modulesLoaded)
                 this.initialize();
             else
                 return false;

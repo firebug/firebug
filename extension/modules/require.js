@@ -506,7 +506,16 @@ var require, define;
                 if (context.config.onDebug) {
                     context.config.onDebug("require.js: defining "+fullName+" with "+args.length+" dependents", {defineFunction: manager.callback, dependents: args});
                 }
-                                ret = req.execCb(fullName, manager.callback, args, defined[fullName]);                if (fullName) {
+                try {
+                    ret = req.execCb(fullName, manager.callback, args, defined[fullName]);
+                } catch(exc) {
+                    if (context.config.onDebug) {
+                        var msg = exc.toString() +" "+(exc.fileName || exc.sourceName) + "@" + exc.lineNumber;
+                        context.config.onError("require.js: define "+fullName+" ERROR "+msg);
+                    }
+                    ret = defined[fullName] = exc;
+                }
+                if (fullName) {
                     //If exports is in play, favor that since it helps circular
                     //dependencies. If setting exports via "module" is in play,
                     //favor that but only if the value is different from default
@@ -514,6 +523,7 @@ var require, define;
                     if (manager.usingExports && manager.cjsModule &&
                         manager.cjsModule.exports !== defined[fullName]) {
                         ret = defined[fullName] = manager.cjsModule.exports;
+
                     } else if (fullName in defined) {
                         //This case is when usingExports is in play and
                         //module.exports/setExports was not used. It could also
@@ -523,11 +533,23 @@ var require, define;
                         //if it does for some reason, only the original definition
                         //will be used for integrity.
                         ret = defined[fullName];
+                        if (context.config.onDebug) {
+                            context.config.onDebug("require.js: defined "+fullName+" using previously defined value");
+                        }
                     } else {
                         //Use the return value from the function.
                         defined[fullName] = ret;
+
+                        if (context.config.onDebug) {
+                            context.config.onDebug("require.js: defined "+fullName+" using function return");
+                        }
+                    }
+                } else {
+                    if (context.config.onDebug) {
+                        context.config.onDebug("require.js: defined found no fullName");
                     }
                 }
+
             } else if (fullName) {
                 //May just be an object definition for the module. Only
                 //worry about defining if have a module name.

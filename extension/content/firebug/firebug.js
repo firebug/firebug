@@ -127,26 +127,7 @@ top.Firebug =
         // Till now all registered panels have been inserted into earlyRegPanelTypes.
         var tempPanelTypes = earlyRegPanelTypes;
         earlyRegPanelTypes = null;
-
-        // Inject FirebugManage into Firebug namespace and unpollute global scope.
-        Firebug.LoadManager = FirebugLoadManager;
-        delete FirebugLoadManager;
-
-        // Load all Firebug modules now.
-        var config = top.FirebugConfig || {};
-        Firebug.LoadManager.loadCore(config, function coreInitialize()
-        {
-            FBTrace.sysout("firebug; Firebug modules loaded.");
-
-            try
-            {
-                Firebug.completeInitialize(tempPanelTypes);
-            }
-            catch (e)
-            {
-                FBTrace.sysout("firebug; Initialization EXCEPTION " + e, e);
-            }
-        });
+        Firebug.completeInitialize(tempPanelTypes);
     },
 
     completeInitialize: function(tempPanelTypes)

@@ -97,9 +97,9 @@ Firebug.Options =
         return this.prefDomain;
     },
 
-    initialize: function()
+    initialize: function(prefDomain)
     {
-        this.prefDomain = Firebug.loadConfiguration.prefDomain;
+        this.prefDomain = prefDomain;
 
         if (FBTrace.DBG_INITIALIZE)
             FBTrace.sysout("firebug.initialize with prefDomain " + this.prefDomain);
@@ -416,7 +416,7 @@ Firebug.Options =
 // ********************************************************************************************* //
 // Registration
 
-Firebug.Options.initialize();
+//Firebug.Options.initialize();
 
 return Firebug.Options;
 

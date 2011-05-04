@@ -28,6 +28,7 @@
         // shared here (see FirebugChrome.initialize). It's not desirable to create
         // these objects again.
         top.FBL = { ns: function(fn) {} }
+        FirebugChrome.modulesLoaded = true;  // until we complete the module loading story
     </script>
 
     <stringbundleset id="stringbundleset"/>

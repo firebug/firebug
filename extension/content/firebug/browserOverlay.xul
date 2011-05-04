@@ -6,7 +6,9 @@
 <overlay xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul">
 
     <script type="application/x-javascript" src="chrome://firebug/content/trace.js"/>
-    <script type="application/x-javascript" src="chrome://firebug/content/loader.js"/>
+    <!-- <script type="application/x-javascript" src="chrome://firebug/content/loader.js"/> -->
+
+    <script  data-main="main" type="application/x-javascript" src="resource://firebug/require.js"/>
 
     <!-- <script type="application/x-javascript" src="chrome://firebug/content/xpcom.js"/> -->
     <script type="application/x-javascript" src="chrome://firebug/content/chrome.js"/>
@@ -60,6 +62,9 @@
     <script type="application/x-javascript" src="chrome://firebug/content/a11y.js"/>
     <script type="application/x-javascript" src="chrome://firebug/content/knownIssues.js"/>
     <script type="application/x-javascript" src="chrome://firebug/content/balloonNote.js"/>
+
+
+    <script type="application/x-javascript" src="chrome://firebug/content/main.js"/>
 
     <!-- Firefox page context menu -->
     <menupopup id="contentAreaContextMenu">
