@@ -129,6 +129,8 @@ ToolsInterface.JavaScript.onStartDebugging = function(context, frame)
         return;
     }
 
+    if (FBTrace.DBG_STACK)
+        FBTrace.sysout("javascripttool currentFrame ", frame);
     ToolsInterface.JavaScript.Turn.currentFrame = frame;
     panel.onStartDebugging(frame);
 }

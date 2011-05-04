@@ -1,5 +1,5 @@
 /* See license.txt for terms of usage */
-
+// depends on ToolsInterface.browser
 FBL.ns(function() {
 
 // ************************************************************************************************
@@ -29,12 +29,33 @@ Firebug.CallstackPanel.prototype = FBL.extend(Firebug.Panel,
     initialize: function(context, doc)
     {
         Firebug.Panel.initialize.apply(this, arguments);
+        Firebug.ToolsInterface.browser.addListener(this);
     },
 
     destroy: function(state)
     {
+        Firebug.ToolsInterface.browser.addListener(this);
         Firebug.Panel.destroy.apply(this, arguments);
     },
+
+    // ******************************************************************************
+    onStartDebugging: function(context, frame)
+    {
+        delete this.location;  // if we get a show() call then create and set new location
+        if (this.visible)     // then we should reshow
+            this.show();
+        if (FBTrace.DBG_STACK)
+            FBTrace.sysout("callstack; onStartDebugging "+this.visible, this)
+    },
+
+    onStopDebugging: function(context)
+    {
+        if (FBTrace.DBG_STACK)
+            FBTrace.sysout("callstack; onStopDebugging ")
+
+        this.showStackTrace(null);  // clear the view
+    },
+    // *****************************************************************************
 
     show: function(state)
     {
@@ -46,7 +67,8 @@ Firebug.CallstackPanel.prototype = FBL.extend(Firebug.Panel,
 
         if (FBTrace.DBG_STACK)
             FBTrace.sysout("callstack.show state: "+state+" this.location: "+this.location,
-                {state: state, panel: this});
+                {state: state, panel: this,
+                  currentFrame: Firebug.ToolsInterface.JavaScript.Turn.currentFrame});
 
         if (state)
         {
@@ -129,6 +151,8 @@ Firebug.CallstackPanel.prototype = FBL.extend(Firebug.Panel,
     // this.location is a StackTrace
     updateLocation: function(object)
     {
+        if (FBTrace.DBG_STACK)
+            FBTrace.sysout("callstack; updateLocation "+object, object);
         // All paths lead to showStackTrace
         if (object instanceof FBL.StackTrace)
             this.showStackTrace(object);
@@ -149,6 +173,9 @@ Firebug.CallstackPanel.prototype = FBL.extend(Firebug.Panel,
         FBL.clearNode(this.panelNode);
 
         FBL.setClass(this.panelNode, "objectBox-stackTrace");
+
+        if (!trace)
+            return;
 
         var rep = Firebug.getRep(trace, this.context);
 
