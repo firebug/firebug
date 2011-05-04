@@ -259,7 +259,7 @@ Firebug.Options =
 
     /**
      * Set a preference value.
-     * 
+     *
      * @param prefDomain, e.g. "extensions.firebug"
      * @param name Name of the preference (the part after prfDomain without dot)
      * @param value New value for the preference.

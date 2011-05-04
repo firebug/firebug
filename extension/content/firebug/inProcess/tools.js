@@ -1,6 +1,6 @@
 /* See license.txt for terms of usage */
 
-define(["arch/browser", "arch/compilationunit"], function(Browser, CompilationUnit) {
+define(["arch/browser", "arch/compilationunit", "firebug/lib/options"], function(Browser, CompilationUnit) {
 
 // ********************************************************************************************* //
 

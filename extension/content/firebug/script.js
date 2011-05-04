@@ -1,6 +1,6 @@
 /* See license.txt for terms of usage */
 
-define(["arch/tools", "common/editorSelector"], function(ToolsInterface) {
+define(["arch/tools", "firebug/editorSelector"], function(ToolsInterface) {
 
 // ********************************************************************************************* //
 // Constants

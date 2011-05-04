@@ -40,14 +40,14 @@ top.FirebugLoadManager =
     getModules: function(config)
     {
         var modules = [
-            "common/traceModule",
-            "common/lib/options",
-            "common/lib/xpcom",
-            "common/dragdrop",
-            "common/tabContext",  // should be loaded by being a dep of tabWatcher
-            "common/sourceBox",
-            "common/script",
-            "common/memoryProfiler",
+            "firebug/traceModule",
+            "firebug/lib/options",
+            "firebug/lib/xpcom",
+            "firebug/dragdrop",
+            "firebug/tabContext",  // should be loaded by being a dep of tabWatcher
+            "firebug/sourceBox",
+            "firebug/script",
+            "firebug/memoryProfiler",
         ];
 
         // Compute list of further modules that depend on the current architecture type.
@@ -61,7 +61,7 @@ top.FirebugLoadManager =
         {
             modules.push("arch/tools");  // must be first
             modules.push("arch/firebugadapter");
-            modules.push("common/debugger");
+            modules.push("firebug/debugger");
             modules.push("arch/javascripttool");
         }
         else if (config.arch == "remoteClient")
@@ -137,7 +137,7 @@ function getModuleLoaderConfig(baseConfig)
     baseConfig.prefDomain = baseConfig.prefDomain || "extensions.firebug";
     baseConfig.arch = baseConfig.arch || getArchitectureType(baseConfig.prefDomain) || "firebug_rjs/inProcess";
     baseConfig.baseUrl = baseConfig.baseUrl || "resource://";
-    baseConfig.paths = baseConfig.paths || {"arch": baseConfig.arch, "common": "firebug_rjs"};
+    baseConfig.paths = baseConfig.paths || {"arch": baseConfig.arch, "firebug": "firebug_rjs"};
 
     // to give each XUL window its own loader (for now)
     var uid = Math.random();
