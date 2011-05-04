@@ -802,8 +802,12 @@ var require, define;
         function checkLoaded() {
             if (context.config.onDebug){
                 context.config.onDebug("checkLoaded waitCount:"+context.waitCount+" pausedCount: "+context.pausedCount+" scriptCount: "+context.scriptCount);
-                if (context.scriptCount)
-                    context.config.onDebug("checkLoaded context.counted:"+context.counted[context.scriptCount - 1]);
+                if (context.scriptCount) {
+                    for (var p in context.counted)
+                    {
+                        context.config.onDebug("checkLoaded context.counted["+p+"]"+context.counted[p]);
+                    }
+                }
             }
             var waitInterval = config.waitSeconds * 1000,
                 //It is possible to disable the wait interval by using waitSeconds of 0.
@@ -1040,8 +1044,6 @@ var require, define;
                 //require() calls that also do not end up loading scripts could
                 //push the number negative too.
                 context.scriptCount = 0;
-                if (context.config.onDebug)
-                    context.counted = [];
             }
 
             //Make sure any remaining defQueue items get properly processed.
@@ -1327,19 +1329,28 @@ var require, define;
                 //that cost, decrement beforehand.
                 if (req.isAsync) {
                     if (context.config.onDebug) {
-                        context.config.onDebug("context.counted async pop "+context.counted[context.scriptCount - 1]);
+                        var removeCountedIndex = context.counted.indexOf(moduleName);
+                        if (removeCountedIndex === -1) {
+                            context.config.onDebug("context.counted async "+(removeCountedIndex)+" pop  ERROR "+moduleName);
+                            for (var p in context.counted)
+                                context.config.onDebug("context.counted["+p+"] "+context.counted[p]+" "+(context.counted[p] === moduleName));
+                        }
+                        else {
+                            context.config.onDebug("context.counted async "+(removeCountedIndex)+" pop "+context.counted[removeCountedIndex]+" "+moduleName);
+                            context.counted.splice(removeCountedIndex, 1);
+                        }
                     }
 
                     context.scriptCount -= 1;
-                    context.counted.pop();
                 }
                 resume();
                 if (!req.isAsync) {
                     if (context.config.onDebug) {
-                        context.config.onDebug("context.counted not async pop "+context.counted[context.scriptCount - 1]);
+                        var removeCountedIndex = context.counted.indexOf(moduleName);
+                        context.config.onDebug("context.counted not async "+(removeCountedIndex)+" pop "+context.counted[removeCountedIndex]+" "+moduleName);
+                        context.counted.splice(removeCountedIndex, 1);
                     }
                     context.scriptCount -= 1;
-                    context.counted.pop();
                 }
             },
 
@@ -1575,10 +1586,14 @@ var require, define;
 
         if (!urlFetched[url]) {
             context.scriptCount += 1;
-            if (!context.counted) context.counted = [];
-            context.counted.push(moduleName);
             if (context.config.onDebug){
-                context.config.onDebug("context.scriptCount: "+context.scriptCount+" attach: "+url+" moduleName: "+moduleName+" isBrowser: :"+isBrowser, {context: context});
+                if (!context.counted) {
+                    context.config.onDebug("context.counted ------------ reset");
+                    context.counted = [];
+                }
+                context.counted.push(moduleName);
+                var index = context.counted.indexOf(moduleName);
+                context.config.onDebug("context.counted push "+moduleName+" context.scriptCount:"+context.scriptCount+" index "+index);
             }
             req.attach(url, contextName, moduleName);
             urlFetched[url] = true;
