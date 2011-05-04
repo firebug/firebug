@@ -27,6 +27,12 @@ Firebug.HTMLModule = FBL.extend(Firebug.Module,
         Firebug.ToolsInterface.browser.addListener(this.DebuggerListener);
     },
 
+    shutdown: function()
+    {
+        Firebug.Module.shutdown.apply(this, arguments);
+        Firebug.ToolsInterface.browser.removeListener(this.DebuggerListener);
+    },
+
     initContext: function(context, persistedState)
     {
         Firebug.Module.initContext.apply(this, arguments);
@@ -43,12 +49,6 @@ Firebug.HTMLModule = FBL.extend(Firebug.Module,
         Firebug.Module.destroyContext.apply(this, arguments);
 
         context.mutationBreakpoints.store(context);
-    },
-
-    shutdown: function()
-    {
-        Firebug.Module.shutdown.apply(this, arguments);
-        Firebug.Debugger.removeListener(this.DebuggerListener);
     },
 
     deleteNode: function(node, context)

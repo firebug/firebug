@@ -23,13 +23,23 @@ Firebug.DOMModule = FBL.extend(Firebug.Module,
     initialize: function(prefDomain, prefNames)
     {
         Firebug.Module.initialize.apply(this, arguments);
+
         if (Firebug.Debugger)
             Firebug.ToolsInterface.browser.addListener(this.DebuggerListener);
+    },
+
+    shutdown: function()
+    {
+        Firebug.Module.shutdown.apply(this, arguments);
+
+        if (Firebug.Debugger)
+            Firebug.ToolsInterface.browser.removeListener(this.DebuggerListener);
     },
 
     initContext: function(context, persistedState)
     {
         Firebug.Module.initContext.apply(this, arguments);
+
         context.dom = {breakpoints: new DOMBreakpointGroup()};
     },
 
@@ -43,13 +53,6 @@ Firebug.DOMModule = FBL.extend(Firebug.Module,
         Firebug.Module.destroyContext.apply(this, arguments);
 
         context.dom.breakpoints.store(context);
-    },
-
-    shutdown: function()
-    {
-        Firebug.Module.shutdown.apply(this, arguments);
-        if (Firebug.Debugger)
-            Firebug.Debugger.removeListener(this.DebuggerListener);
     },
 });
 

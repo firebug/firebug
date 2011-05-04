@@ -29,16 +29,19 @@ Firebug.CallstackPanel.prototype = FBL.extend(Firebug.Panel,
     initialize: function(context, doc)
     {
         Firebug.Panel.initialize.apply(this, arguments);
+
         Firebug.ToolsInterface.browser.addListener(this);
     },
 
     destroy: function(state)
     {
-        Firebug.ToolsInterface.browser.addListener(this);
+        Firebug.ToolsInterface.browser.removeListener(this);
+
         Firebug.Panel.destroy.apply(this, arguments);
     },
 
-    // ******************************************************************************
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
     onStartDebugging: function(context, frame)
     {
         delete this.location;  // if we get a show() call then create and set new location
@@ -55,7 +58,8 @@ Firebug.CallstackPanel.prototype = FBL.extend(Firebug.Panel,
 
         this.showStackTrace(null);  // clear the view
     },
-    // *****************************************************************************
+
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
     show: function(state)
     {

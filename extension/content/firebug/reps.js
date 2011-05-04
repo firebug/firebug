@@ -1629,7 +1629,6 @@ FirebugReps.StackTrace = domplate(Firebug.Rep,
         {
             var frame = frames[i];
             var sf = frame.sourceFile;
-            FBTrace.sysout("frame"+i+": "+sf.href, frame);
             if ((sf && sf.href && sf.href.indexOf("chrome") == 0) ||
                 (frame.fn == "_firebugRerun"))
             {

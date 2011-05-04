@@ -224,6 +224,8 @@ Firebug.NetMonitor = FBL.extend(Firebug.ActivableModule,
 
     shutdown: function()
     {
+        Firebug.ActivableModule.shutdown.apply(this, arguments);
+
         prefs.removeObserver(Firebug.Options.prefDomain, this, false); // TODO options.js
         if (Firebug.TraceModule)
             Firebug.TraceModule.removeListener(this.TraceListener);
@@ -231,7 +233,7 @@ Firebug.NetMonitor = FBL.extend(Firebug.ActivableModule,
         Firebug.NetMonitor.NetHttpObserver.unregisterObserver();
         NetHttpActivityObserver.unregisterObserver();
 
-        Firebug.Debugger.removeListener(this.DebuggerListener);
+        Firebug.ToolsInterface.browser.removeListener(this.DebuggerListener);
     },
 
     initContext: function(context, persistedState)
@@ -5159,6 +5161,10 @@ Firebug.NetMonitor.NetHttpActivityObserver =
                 if (httpChannel instanceof Ci.nsIHttpChannel)
                     this.observeRequest(httpChannel, activityType, activitySubtype, timestamp,
                         extraSizeData, extraStringData);
+            }
+            else
+            {
+                FBTrace.sysout("net.observeActivity; ERROR FBL is unknown.");
             }
         }
         catch (exc)

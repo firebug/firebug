@@ -109,11 +109,14 @@ ToolsInterface.JavaScript.onActivateTool = function(toolname, active)
             context.invalidatePanels('script');
         });
     }
-    // This work should be done somewhere more generic that .JavaScript, maybe ToolManager listening to browser.
+
+    // This work should be done somewhere more generic that .JavaScript, maybe ToolManager
+    // listening to browser.
     var tool = ToolsInterface.browser.getTool(toolname);
     if (tool)
         tool.setActive(active);
 },
+
 /*
  * @param context context of the newest frame, where the breakpoint hit
  * @param frame newest StackFrame (crossbrowser) eg where the break point hit

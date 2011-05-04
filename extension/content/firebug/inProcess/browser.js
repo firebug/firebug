@@ -159,7 +159,24 @@ Browser.prototype.registerTool = function(tool)
 {
     var name = tool.getName();
     if (name)
+    {
+        if (this.tools[name])
+            FBTrace.sysout("BTI.Browser.unregisterTool; Already registered tool: " + name);
+
         this.tools[name] = tool;
+    }
+}
+
+Browser.prototype.unregisterTool = function(tool)
+{
+    var name = tool.getName();
+    if (name)
+    {
+        if (!this.tools[name])
+            FBTrace.sysout("BTI.Browser.unregisterTool; Unknown tool: " + name);
+
+        delete this.tools[name];
+    }
 }
 
 /**
@@ -199,7 +216,15 @@ Browser.prototype.getBrowserContexts = function()
 
 Browser.prototype.eachContext = function(fnOfContext)
 {
-    return Firebug.TabWatcher.iterateContexts(fnOfContext);
+    try
+    {
+        return Firebug.TabWatcher.iterateContexts(fnOfContext);
+    }
+    catch (e)
+    {
+        if (FBTrace.DBG_ERRORS)
+            FBTrace.sysout("BTI.browser.eachContext; EXCEPTION " + e, e);
+    }
 };
 
 /**
@@ -263,7 +288,9 @@ Browser.prototype.addListener = function(listener)
     var i = list.indexOf(listener);
     if (i === -1)
         list.push(listener);
-    // else no op
+    else
+        FBTrace.sysout("BTI.Browser.addListener; ERROR The listener is already appended " +
+            listener.dispatchName ? listener.dispatchName : "");
 };
 
 Browser.prototype.removeListener = function(listener)
@@ -272,16 +299,24 @@ Browser.prototype.removeListener = function(listener)
     var i = list.indexOf(listener);
     if (i !== -1)
         list.splice(i, 1);
-    // else no-op
+    else
+        FBTrace.sysout("BTI.Browser.removeListener; ERROR Unknown listener " +
+            listener.dispatchName ? listener.dispatchName : "");
 };
 
-
-/*
+/**
  * Among listeners, return the first truthy value of eventName(args) or false
  */
 Browser.prototype.dispatch = function(eventName, args)
 {
-    return FBL.dispatch2(this.listeners, eventName, args);
+    try
+    {
+        return FBL.dispatch2(this.listeners, eventName, args);
+    }
+    catch (exc)
+    {
+        FBTrace.sysout("BTI.Browser.dispatch; EXCEPTION " + exc, exc);
+    }
 }
 
 /**

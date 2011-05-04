@@ -16,6 +16,8 @@ Firebug.A11yModel = FBL.extend(Firebug.Module,
 
     initialize : function()
     {
+        Firebug.Module.initialize.apply(this, arguments);
+
         this.handleTabBarFocus = FBL.bind(this.handleTabBarFocus, this);
         this.handleTabBarBlur = FBL.bind(this.handleTabBarBlur, this);
         this.handlePanelBarKeyPress = FBL.bind(this.handlePanelBarKeyPress, this);
@@ -38,10 +40,22 @@ Firebug.A11yModel = FBL.extend(Firebug.Module,
         this.onNetMouseDown = FBL.bind(this.onNetMouseDown, this);
         this.onNetFocus = FBL.bind(this.onNetFocus, this);
         this.onNetBlur = FBL.bind(this.onNetBlur, this);
-        Firebug.chrome.window.a11yEnabled = false; // mark ourselves disabled so we don't performDisable() if we are not enabled.
+
+        // mark ourselves disabled so we don't performDisable() if we are not enabled.
+        Firebug.chrome.window.a11yEnabled = false;
+
         Firebug.ToolsInterface.browser.addListener(this);
         Firebug.Console.addListener(this);
         Firebug.DOMModule.addListener(this);
+    },
+
+    shutdown: function()
+    {
+        Firebug.ToolsInterface.browser.removeListener(this);
+        Firebug.Console.removeListener(this);
+        Firebug.DOMModule.removeListener(this);
+
+        Firebug.Module.shutdown.apply(this, arguments);
     },
 
     initializeUI : function()

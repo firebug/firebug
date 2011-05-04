@@ -2131,7 +2131,8 @@ Firebug.Debugger = FBL.extend(Firebug.ActivableModule,
         this.toString = function() { return this.debuggerName; }
 
         if (FBTrace.DBG_INITIALIZE)
-            FBTrace.sysout("debugger.initialize "+ this.debuggerName+" Firebug.clientID "+Firebug.clientID);
+            FBTrace.sysout("debugger.initialize "+ this.debuggerName+" Firebug.clientID "+
+                Firebug.clientID);
 
         this.hash_service = XPCOM.CCSV("@mozilla.org/security/hash;1", "nsICryptoHash");
 
@@ -2152,7 +2153,16 @@ Firebug.Debugger = FBL.extend(Firebug.ActivableModule,
         Firebug.ActivableModule.initialize.apply(this, arguments);
     },
 
-    /* Tool Interface */
+    shutdown: function()
+    {
+        Firebug.ToolsInterface.browser.unregisterTool(this.asTool);
+
+        Firebug.ActivableModule.destroy.apply(this, arguments);
+    },
+
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+    // BTI
+
     toolName: "script",
 
     addListener: function(listener)
@@ -2165,7 +2175,9 @@ Firebug.Debugger = FBL.extend(Firebug.ActivableModule,
          Firebug.Debugger.removeObserver(listener);
     },
 
-    /*
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+    /**
      * per-XUL window registration; this method just allows us to keep fbs in this file.
      * @param clientAPI an object that implements functions called by fbs for clients.
      */

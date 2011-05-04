@@ -308,6 +308,12 @@ top.Firebug =
         Firebug.Options.shutdown();
         Firebug.Options.removeListener(this);
 
+        // xxxHonza: Firebug is registered as a listener within bti/tools.js
+        // I think it's wrong, should be done in Firebug.initialize
+        Firebug.ToolsInterface.browser.removeListener(Firebug);
+        Firebug.ToolsInterface.browser.removeListener(ToolsInterface.JavaScript);//javascripttool.js 
+        Firebug.ToolsInterface.browser.removeListener(Firebug.ToolsAdapter);//firebugadapter.js
+
         if (FBTrace.DBG_INITIALIZE)
             FBTrace.sysout("firebug.shutdown exited ");
     },
@@ -1533,7 +1539,9 @@ Firebug.getConsoleByGlobal = function getConsoleByGlobal(global)
             FBTrace.sysout("Firebug.getConsoleByGlobal FAILS "+exc, exc);
     }
 }
+
 //************************************************************************************************
+
 /**
  * Support for listeners registration. This object also extended by Firebug.Module so,
  * all modules supports listening automatically. Notice that array of listeners

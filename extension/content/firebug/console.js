@@ -188,6 +188,7 @@ Firebug.Console = FBL.extend(ActivableConsole,
     initialize: function()
     {
         Firebug.consoleFilterTypes = "";
+
         Firebug.ActivableModule.initialize.apply(this, arguments);
 
         this.asTool = new Firebug.ToolsInterface.Browser.Tool('console');
@@ -195,6 +196,14 @@ Firebug.Console = FBL.extend(ActivableConsole,
         Firebug.ToolsInterface.browser.registerTool(this.asTool);
 
         this.syncFilterButtons(Firebug.chrome);
+    },
+
+    shutdown: function()
+    {
+        Firebug.ToolsInterface.browser.removeListener(this);
+        Firebug.ToolsInterface.browser.unregisterTool(this.asTool);
+
+        Firebug.ActivableModule.shutdown.apply(this, arguments);
     },
 
     initContext: function(context, persistedState)
@@ -305,7 +314,8 @@ Firebug.Console = FBL.extend(ActivableConsole,
         if (!context)
             context = Firebug.currentContext;
 
-/* Preparation for multiple filters
+        // xxxHonza: what is the issue number?
+        /* Preparation for multiple filters
         if (filterType == "")
             Firebug.consoleFilterTypes = "";
         else
@@ -317,7 +327,8 @@ Firebug.Console = FBL.extend(ActivableConsole,
             else
                 Firebug.consoleFilterTypes += " " + filterType;
         }
-*/
+        */
+
         Firebug.consoleFilterTypes = filterType;
 
         Firebug.Options.set("consoleFilterTypes", Firebug.consoleFilterTypes);
@@ -378,8 +389,10 @@ Firebug.Console = FBL.extend(ActivableConsole,
             Firebug.Console.closeGroup(context);
     },
 
-    //*************************************************************************************
-    /*
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+    // BTI
+
+    /**
      * A previously enabled tool becomes active and sends us an event.
      */
     onActivateTool: function(toolname, active)
@@ -395,6 +408,7 @@ Firebug.Console = FBL.extend(ActivableConsole,
             }
         }
     },
+
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 
     logRow: function(appender, objects, context, className, rep, sourceLink, noThrottle, noRow)
@@ -696,6 +710,29 @@ Firebug.ConsolePanel.prototype = FBL.extend(Firebug.ActivablePanel,
         prefs.addObserver(Firebug.Options.prefDomain, this, false);  // TODO use optins.js
     },
 
+    destroy: function(state)
+    {
+        if (FBTrace.DBG_CONSOLE)
+            FBTrace.sysout("console.destroy; wasScrolledToBottom: " +
+                this.wasScrolledToBottom + " " + this.context.getName());
+
+        if (state)
+            state.wasScrolledToBottom = this.wasScrolledToBottom;
+
+        // If we are profiling and reloading, save the profileRow for the new context
+        if (this.context.profileRow && this.context.profileRow.ownerDocument)
+        {
+            this.context.profileRow.parentNode.removeChild(this.context.profileRow);
+            state.profileRow = this.context.profileRow;
+        }
+
+        if (FBTrace.DBG_CONSOLE)
+            FBTrace.sysout("console.destroy; wasScrolledToBottom: " +
+                this.wasScrolledToBottom + ", " + this.context.getName());
+
+        Firebug.ActivablePanel.destroy.apply(this, arguments);  // must be called last
+    },
+
     initializeNode : function()
     {
         Firebug.ActivablePanel.initializeNode.apply(this, arguments);
@@ -804,29 +841,6 @@ Firebug.ConsolePanel.prototype = FBL.extend(Firebug.ActivablePanel,
                 Firebug.Console.onToggleFilter(context, value);
             }
         }
-    },
-
-    destroy: function(state)
-    {
-        if (FBTrace.DBG_CONSOLE)
-            FBTrace.sysout("console.destroy; wasScrolledToBottom: " +
-                this.wasScrolledToBottom + " " + this.context.getName());
-
-        if (state)
-            state.wasScrolledToBottom = this.wasScrolledToBottom;
-
-        // If we are profiling and reloading, save the profileRow for the new context
-        if (this.context.profileRow && this.context.profileRow.ownerDocument)
-        {
-            this.context.profileRow.parentNode.removeChild(this.context.profileRow);
-            state.profileRow = this.context.profileRow;
-        }
-
-        if (FBTrace.DBG_CONSOLE)
-            FBTrace.sysout("console.destroy ------------------ wasScrolledToBottom: " +
-                this.wasScrolledToBottom + ", " + this.context.getName());
-
-        Firebug.ActivablePanel.destroy.apply(this, arguments);  // must be called last
     },
 
     shouldBreakOnNext: function()

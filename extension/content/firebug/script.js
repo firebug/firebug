@@ -526,7 +526,10 @@ Firebug.ScriptPanel.prototype = FBL.extend(Firebug.SourceBoxPanel,
             state.previousCenterLine = sourceBox.centerLine;
             delete this.selectedSourceBox;
         }
-        ToolsInterface.browser.removeListener(this);
+
+        // xxxHonza: why this is here? I don't see addListener.
+        //ToolsInterface.browser.removeListener(this);
+
         Firebug.SourceBoxPanel.destroy.apply(this, arguments);
     },
 
