@@ -824,12 +824,6 @@ var require, define;
         function checkLoaded() {
             if (context.config.onDebug){
                 context.config.onDebug("checkLoaded waitCount:"+context.waitCount+" pausedCount: "+context.pausedCount+" scriptCount: "+context.scriptCount);
-                if (context.scriptCount) {
-                    for (var p in context.counted)
-                    {
-                        context.config.onDebug("checkLoaded context.counted["+p+"]"+context.counted[p]);
-                    }
-                }
             }
             var waitInterval = config.waitSeconds * 1000,
                 //It is possible to disable the wait interval by using waitSeconds of 0.
@@ -881,9 +875,15 @@ var require, define;
             }
             if (expired && noLoads) {
                 //If wait time expired, throw error of unloaded modules.
-                err = new Error("require.js load timeout for modules: " + noLoads);
+                err = new Error("require.js load timeout (waitSeconds: "+config.waitSeconds+")for modules: " + noLoads);
                 err.requireType = "timeout";
                 err.requireModules = noLoads;
+                if (context.scriptCount) {
+                    for (var p in context.counted)
+                    {
+                        context.config.onDebug("checkLoaded context.counted["+p+"]"+context.counted[p]);
+                    }
+                }
                 return req.onError(err);
             }
             if (stillLoading || context.scriptCount) {
