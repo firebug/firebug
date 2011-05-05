@@ -66,7 +66,7 @@ function getModuleLoaderConfig(baseConfig)
             throw arguments[0];
         },
         //waitSeconds: 0,
-        debug: true,
+        //debug: false,
         /* edit: function(errorMsg, errorURL, errorLineNumber)
         {
             window.alert(errorMsg+" "+errorURL+"@"+errorLineNumber);
@@ -132,7 +132,14 @@ require.analyzeFailure = function(context, managers, specified, loaded)
 var config = getModuleLoaderConfig({});
 
 if (FBTrace.DBG_INITIALIZE || FBTrace.DBG_MODULES)
+{
+    if (FBTrace.DBG_MODULES)
+        config.debug = true;
+
     FBTrace.sysout("main.js; Loading Firebug modules...");
+    var startLoading = new Date().getTime();
+}
+
 
 require(config,
 [
@@ -178,7 +185,10 @@ require(config,
 function()
 {
     if (FBTrace.DBG_INITIALIZE || FBTrace.DBG_MODULES)
-        FBTrace.sysout("main.js; Firebug modules loaded using RequireJS!");
+    {
+        var delta = (new Date().getTime()) - startLoading;
+        FBTrace.sysout("main.js; Firebug modules loaded using RequireJS in "+delta+" ms");
+    }
 
     Firebug.Options.initialize("extensions.firebug");
     FirebugChrome.waitForPanelBar(true);
