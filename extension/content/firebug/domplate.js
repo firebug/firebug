@@ -954,6 +954,11 @@ function ArrayIterator(array)
 
 function StopIteration() {}
 
+FBL.$break = function()
+{
+    throw StopIteration;
+};
+
 // ************************************************************************************************
 
 var Renderer =

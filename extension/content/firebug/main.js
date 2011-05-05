@@ -130,14 +130,12 @@ require.analyzeFailure = function(context, managers, specified, loaded)
 // Modules
 
 var config = getModuleLoaderConfig({});
-//Firebug.loadConfiguration = config;
 
 if (FBTrace.DBG_INITIALIZE || FBTrace.DBG_MODULES)
     FBTrace.sysout("main.js; Loading Firebug modules...");
 
 require(config,
 [
-    //"firebug/chrome",
     "firebug/lib",
     "firebug/domplate",
     "firebug/firebug",
