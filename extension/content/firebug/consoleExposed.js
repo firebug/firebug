@@ -1,5 +1,11 @@
 /* See license.txt for terms of usage */
 
+define([
+    "firebug/lib",
+    "firebug/reps"
+],
+function(FBL, FirebugReps) {
+
 // ********************************************************************************************* //
 
 /**
@@ -408,3 +414,14 @@ function createFirebugConsole(context, win)
 }
 
 // ********************************************************************************************* //
+// Registration
+
+Firebug.ConsoleExposed =
+{
+    createFirebugConsole: createFirebugConsole
+};
+
+return Firebug.ConsoleExposed;
+
+// ********************************************************************************************* //
+});

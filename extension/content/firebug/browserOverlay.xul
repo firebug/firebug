@@ -6,64 +6,10 @@
 <overlay xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul">
 
     <script type="application/x-javascript" src="chrome://firebug/content/trace.js"/>
-    <!-- <script type="application/x-javascript" src="chrome://firebug/content/loader.js"/> -->
-
-    <script  data-main="main" type="application/x-javascript" src="resource://firebug/require.js"/>
-
-    <!-- <script type="application/x-javascript" src="chrome://firebug/content/xpcom.js"/> -->
+    <script type="application/x-javascript" src="chrome://firebug/content/legacy.js"/>
     <script type="application/x-javascript" src="chrome://firebug/content/chrome.js"/>
-    <script type="application/x-javascript" src="chrome://firebug/content/lib.js"/>
 
-    <script type="application/x-javascript" src="chrome://firebug/content/domplate.js"/>
-    <script type="application/x-javascript" src="chrome://firebug/content/insideOutBox.js"/>
-    <script type="application/x-javascript" src="chrome://firebug/content/firebug.js"/>
-    <script type="application/x-javascript" src="chrome://firebug/content/sourceFile.js"/>
-    <!-- <script type="application/x-javascript" src="chrome://firebug/content/sourceBox.js"/> -->
-    <script type="application/x-javascript" src="chrome://firebug/content/tabWatcher.js"/>
-    <script type="application/x-javascript" src="chrome://firebug/content/activation.js"/>
-
-    <script type="application/x-javascript" src="chrome://firebug/content/sourceCache.js"/>
-    <!-- <script type="application/x-javascript" src="chrome://firebug/content/tabContext.js"/> -->
-    <script type="application/x-javascript" src="chrome://firebug/content/tabCache.js"/>
-
-    <script type="application/x-javascript" src="chrome://firebug/content/lib/htmlLib.js"/>
-
-    <script type="application/x-javascript" src="chrome://firebug/content/reps.js"/>
-    <script type="application/x-javascript" src="chrome://firebug/content/tableRep.js"/>
-    <script type="application/x-javascript" src="chrome://firebug/content/editor.js"/>
-    <script type="application/x-javascript" src="chrome://firebug/content/infotip.js"/>
-    <script type="application/x-javascript" src="chrome://firebug/content/commandLine.js"/>
-    <script type="application/x-javascript" src="chrome://firebug/content/commandLineExposed.js"/>
-    <script type="application/x-javascript" src="chrome://firebug/content/commandLinePopup.js"/>
-    <script type="application/x-javascript" src="chrome://firebug/content/search.js"/>
-    <script type="application/x-javascript" src="chrome://firebug/content/inspector.js"/>
-
-    <script type="application/x-javascript" src="chrome://firebug/content/plugin.js"/>
-    <script type="application/x-javascript" src="chrome://firebug/content/breakpoint.js"/>
-    <script type="application/x-javascript" src="chrome://firebug/content/console.js"/>
-    <script type="application/x-javascript" src="chrome://firebug/content/html.js"/>
-    <script type="application/x-javascript" src="chrome://firebug/content/css.js"/>
-    <script type="application/x-javascript" src="chrome://firebug/content/layout.js"/>
-    <!-- ModuleLoaded <script type="application/x-javascript" src="chrome://firebug/content/debugger.js"/> -->
-    <!-- <script type="application/x-javascript" src="chrome://firebug/content/script.js"/> -->
-    <script type="application/x-javascript" src="chrome://firebug/content/callstack.js"/>
-    <script type="application/x-javascript" src="chrome://firebug/content/navigationHistory.js"/>
-    <script type="application/x-javascript" src="chrome://firebug/content/dom.js"/>
-    <script type="application/x-javascript" src="chrome://firebug/content/net.js"/>
-    <script type="application/x-javascript" src="chrome://firebug/content/profiler.js"/>
-    <script type="application/x-javascript" src="chrome://firebug/content/errors.js"/>
-    <script type="application/x-javascript" src="chrome://firebug/content/spy.js"/>
-    <script type="application/x-javascript" src="chrome://firebug/content/consoleInjector.js"/>
-    <script type="application/x-javascript" src="chrome://firebug/content/consoleExposed.js"/>
-    <script type="application/x-javascript" src="chrome://firebug/content/jsonViewer.js"/>
-    <script type="application/x-javascript" src="chrome://firebug/content/xmlViewer.js"/>
-    <script type="application/x-javascript" src="chrome://firebug/content/svgViewer.js"/>
-    <script type="application/x-javascript" src="chrome://firebug/content/shortcuts.js"/>
-    <script type="application/x-javascript" src="chrome://firebug/content/a11y.js"/>
-    <script type="application/x-javascript" src="chrome://firebug/content/knownIssues.js"/>
-    <script type="application/x-javascript" src="chrome://firebug/content/balloonNote.js"/>
-
-
+    <script type="application/x-javascript" src="resource://firebug/require.js"/>
     <script type="application/x-javascript" src="chrome://firebug/content/main.js"/>
 
     <!-- Firefox page context menu -->

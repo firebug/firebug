@@ -3,13 +3,12 @@
 define([], function() {
 
 // ********************************************************************************************* //
-// Globals
+// Constants
 
 var Ci = Components.interfaces;
 var Cc = Components.classes;
 var Cu = Components.utils;
 
-// Module Object
 var XPCOM = {};
 
 // ********************************************************************************************* //
@@ -29,7 +28,8 @@ XPCOM.CCSV = function(cName, ifaceName)
     }
     catch (exc)
     {
-        Cu.reportError(cName + "@" + ifaceName + " FAILED " + exc);
+        Cu.reportError(cName + "@" + ifaceName + " FAILED " + exc + " " +
+            (exc.stack ? exc.stack : ""));
 
         if (!Cc[cName])
             Cu.reportError("XPCOM.CCSV; No Components.classes entry for " + cName);
@@ -78,8 +78,6 @@ XPCOM.QI = function(obj, iface)
 };
 
 // ********************************************************************************************* //
-
-Firebug.XPCOM = XPCOM;
 
 return XPCOM;
 

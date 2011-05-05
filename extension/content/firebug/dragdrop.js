@@ -1,6 +1,9 @@
 /* See license.txt for terms of usage */
 
-define([], function() {
+define([
+    "firebug/lib"
+],
+function(FBL) {
 
 // ********************************************************************************************* //
 

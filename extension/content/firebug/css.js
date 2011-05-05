@@ -1,6 +1,14 @@
 /* See license.txt for terms of usage */
 
-FBL.ns(function() { with (Domplate) {
+define([
+    "firebug/lib",
+    "firebug/domplate",
+    "firebug/reps",
+    "firebug/lib/xpcom",
+    "firebug/editor",
+    "firebug/editorSelector"
+],
+function(FBL, Domplate, FirebugReps, XPCOM) { with (Domplate) {
 
 // ************************************************************************************************
 // Constants
@@ -286,6 +294,8 @@ const styleGroups =
 
 Firebug.CSSModule = FBL.extend(FBL.extend(Firebug.Module, Firebug.EditorSelector),
 {
+    dispatchName: "cssModule",
+
     freeEdit: function(styleSheet, value)
     {
         if (!styleSheet.editStyleSheet)
@@ -293,7 +303,7 @@ Firebug.CSSModule = FBL.extend(FBL.extend(Firebug.Module, Firebug.EditorSelector
             var ownerNode = getStyleSheetOwnerNode(styleSheet);
             styleSheet.disabled = true;
 
-            var url = Firebug.XPCOM.CCSV("@mozilla.org/network/standard-url;1", Components.interfaces.nsIURL);
+            var url = XPCOM.CCSV("@mozilla.org/network/standard-url;1", Components.interfaces.nsIURL);
             url.spec = styleSheet.href;
 
             var editStyleSheet = ownerNode.ownerDocument.createElementNS(
@@ -644,7 +654,7 @@ Firebug.CSSStyleSheetPanel.prototype = FBL.extend(Firebug.Panel,
         {
             var rule = cssRules[i];
             var previousRule;
-            if (rule instanceof CSSStyleRule)
+            if (rule instanceof window.CSSStyleRule)
             {
                 var selectorLine = FBL.domUtils.getRuleLine(rule);
                 // The declarations are on lines equal or greater than the selectorLine
@@ -685,7 +695,7 @@ Firebug.CSSStyleSheetPanel.prototype = FBL.extend(Firebug.Panel,
             for (i=0; i<cssRules.length; ++i)
             {
                 var rule = cssRules[i];
-                if (rule instanceof CSSStyleRule)
+                if (rule instanceof window.CSSStyleRule)
                 {
                     props = this.getRuleProperties(context, rule);
                     ruleId = getRuleId(rule);
@@ -701,15 +711,15 @@ Firebug.CSSStyleSheetPanel.prototype = FBL.extend(Firebug.Panel,
                         isSelectorEditable: true
                     });
                 }
-                else if (rule instanceof CSSImportRule)
+                else if (rule instanceof window.CSSImportRule)
                 {
                     rules.push({tag: CSSImportRuleTag.tag, rule: rule});
                 }
-                else if (rule instanceof CSSMediaRule)
+                else if (rule instanceof window.CSSMediaRule)
                 {
                     appendRules.apply(this, [FBL.safeGetCSSRules(rule)]);
                 }
-                else if (rule instanceof CSSFontFaceRule)
+                else if (rule instanceof window.CSSFontFaceRule)
                 {
                     props = this.parseCSSProps(rule.style);
                     sortProperties(props);
@@ -1073,13 +1083,14 @@ Firebug.CSSStyleSheetPanel.prototype = FBL.extend(Firebug.Panel,
 
     supportsObject: function(object, type)
     {
-        if (object instanceof CSSStyleSheet)
+        if (object instanceof window.CSSStyleSheet)
             return 1;
-        else if (object instanceof CSSStyleRule)
+        else if (object instanceof window.CSSStyleRule)
             return 2;
-        else if (object instanceof CSSStyleDeclaration)
+        else if (object instanceof window.CSSStyleDeclaration)
             return 2;
-        else if (object instanceof FBL.SourceLink && object.type == "css" && FBL.reCSS.test(object.href))
+        else if (object instanceof FBL.SourceLink && object.type == "css" &&
+            FBL.reCSS.test(object.href))
             return 2;
         else
             return 0;
@@ -1144,16 +1155,16 @@ Firebug.CSSStyleSheetPanel.prototype = FBL.extend(Firebug.Panel,
     {
         this.selection = null;
 
-        if (object instanceof CSSStyleDeclaration) {
+        if (object instanceof window.CSSStyleDeclaration) {
             object = object.parentRule;
         }
 
-        if (object instanceof CSSStyleRule)
+        if (object instanceof window.CSSStyleRule)
         {
             this.navigate(object.parentStyleSheet);
             this.highlightRule(object);
         }
-        else if (object instanceof CSSStyleSheet)
+        else if (object instanceof window.CSSStyleSheet)
         {
             this.navigate(object);
         }
@@ -1256,7 +1267,7 @@ Firebug.CSSStyleSheetPanel.prototype = FBL.extend(Firebug.Panel,
             );
         }
 
-        if (this.selection instanceof Element)
+        if (this.selection instanceof window.Element)
         {
             items.push(
                 "-",
@@ -1682,7 +1693,7 @@ CSSElementPanel.prototype = FBL.extend(Firebug.CSSStyleSheetPanel.prototype,
         {
             for (var i = 0; i < inspectedRules.Count(); ++i)
             {
-                var rule = Firebug.XPCOM.QI(inspectedRules.GetElementAt(i), nsIDOMCSSStyleRule);
+                var rule = XPCOM.QI(inspectedRules.GetElementAt(i), nsIDOMCSSStyleRule);
 
                 var isSystemSheet = FBL.isSystemStyleSheet(rule.parentStyleSheet);
                 if (!Firebug.showUserAgentCSS && isSystemSheet) // This removes user agent rules
@@ -1841,7 +1852,7 @@ CSSElementPanel.prototype = FBL.extend(Firebug.CSSStyleSheetPanel.prototype,
 
     supportsObject: function(object, type)
     {
-        return object instanceof Element ? 1 : 0;
+        return object instanceof window.Element ? 1 : 0;
     },
 
     updateView: function(element)
@@ -2732,7 +2743,7 @@ function getTopmostRuleLine(panelNode)
 
 function getOriginalStyleSheetCSS(sheet, context)
 {
-    if (sheet.ownerNode instanceof HTMLStyleElement)
+    if (sheet.ownerNode instanceof window.HTMLStyleElement)
         return sheet.ownerNode.innerHTML;
     else
         return context.sourceCache.load(sheet.href).join("");
@@ -2754,7 +2765,7 @@ function getStyleSheetCSS(sheet, context)
     for(var i = 0; i < cssRules.length; i++)
     {
         var rule = cssRules[i];
-        if(rule instanceof CSSStyleRule)
+        if(rule instanceof window.CSSStyleRule)
             css.push(beutify(rule.cssText, 4));
         else
             css.push(rule.cssText);
@@ -2798,9 +2809,13 @@ function getRuleId(rule)
 // Registration
 
 Firebug.registerModule(Firebug.CSSModule);
+
+// xxxHonza: every panel should have its own module/file
 Firebug.registerPanel(Firebug.CSSStyleSheetPanel);
 Firebug.registerPanel(CSSElementPanel);
 Firebug.registerPanel(CSSComputedElementPanel);
+
+return Firebug.CSSModule;
 
 // ************************************************************************************************
 }});

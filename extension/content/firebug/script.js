@@ -1,6 +1,13 @@
 /* See license.txt for terms of usage */
 
-define(["arch/tools", "firebug/editorSelector"], function(ToolsInterface) {
+define([
+    "firebug/lib",
+    "firebug/reps",
+    "firebug/domplate",
+    "arch/tools",
+    "firebug/editorSelector"
+],
+function(FBL, FirebugReps, Domplate, ToolsInterface) {
 
 // ********************************************************************************************* //
 // Constants

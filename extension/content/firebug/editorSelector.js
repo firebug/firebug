@@ -1,6 +1,10 @@
 /* See license.txt for terms of usage */
 
-define(["arch/tools"], function(ToolsInterface) {
+define([
+    "firebug/lib",
+    "arch/tools"
+],
+function(FBL, ToolsInterface) {
 
 // ********************************************************************************************* //
 // Reusable code for modules that support editing

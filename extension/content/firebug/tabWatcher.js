@@ -1,6 +1,11 @@
 /* See license.txt for terms of usage */
 
-FBL.ns(function() {
+define([
+    "firebug/lib",
+    "firebug/lib/xpcom",
+    "firebug/tabContext"
+],
+function(FBL, XPCOM) {
 
 // ************************************************************************************************
 // Constants
@@ -794,7 +799,7 @@ function unregisterFrameListener(browser)
 
 function getRefererHeader(request)
 {
-    var http = Firebug.XPCOM.QI(request, Ci.nsIHttpChannel);
+    var http = XPCOM.QI(request, Ci.nsIHttpChannel);
     var referer = null;
     http.visitRequestHeaders({
         visitHeader: function(name, value)
@@ -1047,7 +1052,7 @@ var TraceListener =
 
 // ************************************************************************************************
 
-top.__defineGetter__("TabWatcher", function deprecatedTabWatcher()
+window.__defineGetter__("TabWatcher", function deprecatedTabWatcher()
 {
     if (FBTrace.DBG_ERRORS)
         FBTrace.sysout("deprecated TabWatcher global accessed");

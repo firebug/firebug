@@ -1,6 +1,15 @@
 /* See license.txt for terms of usage */
 
-(function() {
+/**
+ * Firebug module can depend only on modules that don't use the 'Firebug' namespace.
+ * So, be careful before you create a new dependency.
+ */
+define([
+    "firebug/lib",
+    "firebug/domplate",
+    "firebug/lib/options",
+],
+function(FBL, Domplate, Options) {
 
 // ********************************************************************************************* //
 // Constants
@@ -81,13 +90,14 @@ catch (exc)
  * @class Represents the main Firebug application object. An instance of this object is
  * created for each browser window (browser.xul).
  */
-top.Firebug =
+var Firebug =
 {
     version: "1.6",
 
     dispatchName: "Firebug",
     modules: modules,
     panelTypes: panelTypes,
+    earlyRegPanelTypes: earlyRegPanelTypes,
     uiListeners: [],
     reps: reps,
 
@@ -102,6 +112,9 @@ top.Firebug =
 
     // Custom stylesheets registered by extensions.
     stylesheets: [],
+
+    // xxxHonza: hack
+    Options: Options,
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
     // Initialization
@@ -132,13 +145,7 @@ top.Firebug =
 
     completeInitialize: function(tempPanelTypes)
     {
-        // Inject old fbXPCOMUtils into FBL (for backward compatibility)
-        // Real AMD module should depend on "lib/xpcom"
-        // xxxHonza: FBL.CCIN, FBL.CCSV and FBL.QI should be marked as deprecated and
-        // removed from 1.8.next
-        for (var p in Firebug.XPCOM)
-            FBL[p] = Firebug.XPCOM[p];
-
+        
         FBL.initialize();  // non require.js modules
 
         // Append early registered panels at the end.
@@ -290,9 +297,9 @@ top.Firebug =
         Firebug.Options.removeListener(this);
 
         // xxxHonza: Firebug is registered as a listener within bti/tools.js
-        // I think it's wrong, should be done in Firebug.initialize
+        // I think it's wrong, should be done in the same modules as addListener.
         Firebug.ToolsInterface.browser.removeListener(Firebug);
-        Firebug.ToolsInterface.browser.removeListener(ToolsInterface.JavaScript);//javascripttool.js 
+        Firebug.ToolsInterface.browser.removeListener(Firebug.ToolsInterface.JavaScript);//javascripttool.js 
         Firebug.ToolsInterface.browser.removeListener(Firebug.ToolsAdapter);//firebugadapter.js
 
         if (FBTrace.DBG_INITIALIZE)
@@ -313,7 +320,7 @@ top.Firebug =
         FBL.dispatch(modules, "disable", [FirebugChrome]);
     },
 
-    // ----------------------------------------------------------------------------------------------------------------
+    // ***************************************************************************************** //
     // TODO this entire section to XULWindow
 
     getSuspended: function()  // TODO XULWindow
@@ -738,7 +745,8 @@ top.Firebug =
             contentSplitter.setAttribute("collapsed", !shouldShow);
 
         //xxxHonza: should be removed.
-        FBL.dispatch(Firebug.uiListeners, show ? "showUI" : "hideUI", [browser, Firebug.currentContext]);
+        FBL.dispatch(Firebug.uiListeners, show ? "showUI" : "hideUI",
+            [browser, Firebug.currentContext]);
 
         // Sync panel state after the showUI event is dispatched. syncPanel method calls
         // Panel.show method, which expects the active context to be already registered.
@@ -782,10 +790,13 @@ top.Firebug =
                     FBTrace.sysout("Rejected page should explain to user!");
                 return false;
             }
+
             if (FBTrace.DBG_ACTIVATION)
             {
                 var context = Firebug.TabWatcher.getContextByWindow(browser.contentWindow);
-                FBTrace.sysout("toggleBar created context "+(browser.showFirebug?"ok":"ERROR no showFirebug!")+((context === Firebug.currentContext)?"current":"ERROR context not current!"));
+                FBTrace.sysout("toggleBar created context "+(browser.showFirebug?
+                    "ok":"ERROR no showFirebug!")+((context === Firebug.currentContext)?
+                    "current":"ERROR context not current!"));
             }
             forceOpen = true;  // Be sure the UI is open for a newly created context
         }
@@ -1896,7 +1907,8 @@ Firebug.Panel = FBL.extend(new Firebug.Listener(),
         else
         {
             if (FBTrace.DBG_PANELS)
-                FBTrace.sysout("navigate skipped for panel "+this.name+" when object "+object+" vs this.location="+this.location, {object: object, location: this.location});
+                FBTrace.sysout("navigate skipped for panel "+this.name+" when object "+object+
+                    " vs this.location="+this.location, {object: object, location: this.location});
         }
     },
 
@@ -1914,8 +1926,9 @@ Firebug.Panel = FBL.extend(new Firebug.Listener(),
         if (!object)
             object = this.getDefaultSelection();
 
-        if(FBTrace.DBG_PANELS)
-            FBTrace.sysout("firebug.select "+this.name+" forceUpdate: "+forceUpdate+" "+object+((object==this.selection)?"==":"!=")+this.selection);
+        if (FBTrace.DBG_PANELS)
+            FBTrace.sysout("firebug.select "+this.name+" forceUpdate: "+forceUpdate+" "+
+                object+((object==this.selection)?"==":"!=")+this.selection);
 
         if (forceUpdate || object != this.selection)
         {
@@ -2397,7 +2410,8 @@ Firebug.ActivableModule = FBL.extend(Firebug.Module,
     setDefaultState: function(enable)
     {
         //@deprecated
-        Firebug.Console.log("Deprecated: don't use ActivableModule.setDefaultState!", Firebug.currentContext);
+        Firebug.Console.log("Deprecated: don't use ActivableModule.setDefaultState!",
+            Firebug.currentContext);
     },
 
     isEnabled: function()
@@ -2744,5 +2758,10 @@ function shutdownFirebug()
     Firebug.shutdown();
 }
 
-// ************************************************************************************************
-})();
+// ********************************************************************************************* //
+// Registration
+
+return top.Firebug = Firebug;
+
+// ********************************************************************************************* //
+});

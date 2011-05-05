@@ -1,6 +1,6 @@
 /* See license.txt for terms of usage */
 
-FBL.ns(function() {
+define(["firebug/domplate"], function(Domplate) {
 
 // ********************************************************************************************* //
 // Constants

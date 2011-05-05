@@ -1,6 +1,11 @@
 /* See license.txt for terms of usage */
 
-FBL.ns(function() {
+define([
+    "firebug/lib",
+    "firebug/domplate",
+    "firebug/lib/xpcom"
+],
+function(FBL, Domplate, XPCOM) {
 
 // ************************************************************************************************
 // Constants
@@ -86,7 +91,7 @@ Firebug.SVGViewerModel = FBL.extend(Firebug.Module,
 
     insertSVG: function(parentNode, text)
     {
-        var parser = Firebug.XPCOM.CCIN("@mozilla.org/xmlextras/domparser;1", "nsIDOMParser");
+        var parser = XPCOM.CCIN("@mozilla.org/xmlextras/domparser;1", "nsIDOMParser");
         var doc = parser.parseFromString(text, "text/xml");
         var root = doc.documentElement;
 

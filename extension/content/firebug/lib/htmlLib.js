@@ -1,6 +1,6 @@
 /* See license.txt for terms of usage */
 
-FBL.ns(function() {
+define([], function() {
 
 // ********************************************************************************************* //
 // Constants
@@ -678,9 +678,9 @@ Firebug.HTMLLib =
      */
     isWhitespaceText: function(node)
     {
-        if (node instanceof HTMLAppletElement)
+        if (node instanceof window.HTMLAppletElement)
             return false;
-        return node.nodeType == Node.TEXT_NODE && FBL.isWhitespace(node.nodeValue);
+        return node.nodeType == window.Node.TEXT_NODE && FBL.isWhitespace(node.nodeValue);
     },
 
     /**

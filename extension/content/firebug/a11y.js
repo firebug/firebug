@@ -1,11 +1,19 @@
 /* See license.txt for terms of usage */
 
-FBL.ns(function() {
+define([
+    "firebug/lib",
+    "firebug/domplate",
+    "arch/tools",
+    "firebug/console",
+],
+function(FBL, Domplate, ToolsInterface) {
 
 // ************************************************************************************************
 // Constants
 
 var singleSpaceTag = Domplate.DIV({'class' : 'a11y1emSize'}, "x");
+
+var KeyEvent = window.KeyEvent;
 
 // ************************************************************************************************
 // Module Management
@@ -44,14 +52,14 @@ Firebug.A11yModel = FBL.extend(Firebug.Module,
         // mark ourselves disabled so we don't performDisable() if we are not enabled.
         Firebug.chrome.window.a11yEnabled = false;
 
-        Firebug.ToolsInterface.browser.addListener(this);
+        ToolsInterface.browser.addListener(this);
         Firebug.Console.addListener(this);
         Firebug.DOMModule.addListener(this);
     },
 
     shutdown: function()
     {
-        Firebug.ToolsInterface.browser.removeListener(this);
+        ToolsInterface.browser.removeListener(this);
         Firebug.Console.removeListener(this);
         Firebug.DOMModule.removeListener(this);
 

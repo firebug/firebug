@@ -1,6 +1,12 @@
 /* See license.txt for terms of usage */
 
-FBL.ns(function() {
+define([
+    "firebug/lib",
+    "firebug/reps",
+    "firebug/console",
+    "firebug/consoleExposed"
+],
+function(FBL, FirebugReps) {
 
 // ********************************************************************************************* //
 // Constants
@@ -47,7 +53,7 @@ Firebug.Console.injector =
 
     attachConsoleInjector: function(context, win)
     {
-        var console = createFirebugConsole(context, win);
+        var console = Firebug.ConsoleExposed.createFirebugConsole(context, win);
         win.wrappedJSObject.console = console;
     },
 
@@ -246,9 +252,9 @@ Firebug.Console.createConsole = function createConsole(context, win)
 
     console.dirxml = function(o)
     {
-        if (o instanceof Window)
+        if (o instanceof window.Window)
             o = o.document.documentElement;
-        else if (o instanceof Document)
+        else if (o instanceof window.Document)
             o = o.documentElement;
 
         Firebug.Console.log(o, context, "dirxml", Firebug.HTMLPanel.SoloElement);

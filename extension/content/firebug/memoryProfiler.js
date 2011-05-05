@@ -1,6 +1,11 @@
 /* See license.txt for terms of usage */
 
-define([], function() {
+define([
+    "firebug/lib",
+    "firebug/domplate",
+    "firebug/reps"
+],
+function(FBL, Domplate, FirebugReps) {
 
 // ********************************************************************************************* //
 
@@ -27,6 +32,8 @@ var MEMORY_PATHS =
 
 Firebug.MemoryProfiler = FBL.extend(Firebug.Module,
 {
+    dispatchName: "memoryProfiler",
+
     initialize: function()  // called once
     {
         Firebug.Module.initialize.apply(this, arguments);
@@ -472,7 +479,7 @@ ObjectIterator.prototype =
                 // xxxHonza, xxxJJB: this should be removed once the problem is clear.
                 if (name === "HTMLBodyElement")
                     FBTrace.sysout("memoryProfiler; HTMLBodyElement " + name + " instanceof: " +
-                        (prop instanceof HTMLBodyElement) + " toString: " + child);
+                        (prop instanceof window.HTMLBodyElement) + " toString: " + child);
 
                 // Recursion
                 if (typeof(child) === "object")  // TODO function

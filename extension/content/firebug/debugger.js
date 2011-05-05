@@ -1,6 +1,12 @@
 /* See license.txt for terms of usage */
 
-define(["arch/tools", "firebug/lib/xpcom"], function(ToolsInterface, XPCOM) {
+define([
+    "firebug/lib",
+    "arch/tools",
+    "firebug/lib/xpcom",
+    "firebug/reps"
+],
+function(FBL, ToolsInterface, XPCOM, FirebugReps) {
 
 // ********************************************************************************************* //
 
@@ -2138,8 +2144,8 @@ Firebug.Debugger = FBL.extend(Firebug.ActivableModule,
 
         try
         {
-            this.asTool = new Firebug.ToolsInterface.Browser.Tool('script');
-            Firebug.ToolsInterface.browser.registerTool(this.asTool);
+            this.asTool = new ToolsInterface.Browser.Tool('script');
+            ToolsInterface.browser.registerTool(this.asTool);
         }
         catch(exc)
         {
@@ -2155,7 +2161,7 @@ Firebug.Debugger = FBL.extend(Firebug.ActivableModule,
 
     shutdown: function()
     {
-        Firebug.ToolsInterface.browser.unregisterTool(this.asTool);
+        ToolsInterface.browser.unregisterTool(this.asTool);
 
         Firebug.ActivableModule.destroy.apply(this, arguments);
     },

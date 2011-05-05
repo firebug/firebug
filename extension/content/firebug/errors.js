@@ -1,6 +1,11 @@
 /* See license.txt for terms of usage */
 
-FBL.ns(function() {
+define([
+    "firebug/lib",
+    "firebug/reps",
+    "firebug/lib/xpcom"
+],
+function(FBL, FirebugReps, XPCOM) {
 
 // **********************************************************************************************//
 // Constants
@@ -32,16 +37,59 @@ const pointlessErrors =
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 Components.utils["import"]("resource://firebug/firebug-service.js");
-const consoleService = Firebug.XPCOM.CCSV("@mozilla.org/consoleservice;1", "nsIConsoleService");
+const consoleService = XPCOM.CCSV("@mozilla.org/consoleservice;1", "nsIConsoleService");
 
 const domWindowUtils = window.QueryInterface(Ci.nsIInterfaceRequestor)
     .getInterface(Ci.nsIDOMWindowUtils);
 
-// **********************************************************************************************//
+// ********************************************************************************************* //
 
 var Errors = Firebug.Errors = FBL.extend(Firebug.Module,
 {
     dispatchName: "errors",
+
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+    // extends Module
+
+    initContext: function(context)
+    {
+        this.clear(context);
+
+        if (FBTrace.DBG_ERRORLOG && FBTrace.DBG_CSS)
+        {
+            FBL.totalSheets = 0;
+            FBL.totalRules = 0;
+            this.initTime = new Date();
+        }
+    },
+
+    showContext: function(browser, context)
+    {
+        this.showCount(context ? context.errorCount : 0);
+    },
+
+    unwatchWindow: function(context, win)  // called for top window and frames.
+    {
+        this.clear(context);  // If we ever get errors by window from Firefox we can cache by window.
+    },
+
+    destroyContext: function(context, persistedState)
+    {
+        this.showCount(0);
+        if (FBTrace.DBG_ERRORLOG && FBTrace.DBG_CSS && 'initTime' in this)
+        {
+            var deltaT = new Date().getTime() - this.initTime.getTime();
+            FBTrace.sysout("errors.destroyContext sheets: "+FBL.totalSheets+" rules: "+
+                FBL.totalRules+" time: "+deltaT);
+        }
+    },
+
+    updateOption: function(name, value)
+    {
+        this.checkEnabled();
+    },
+
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
     clear: function(context)
     {
@@ -354,48 +402,6 @@ var Errors = Firebug.Errors = FBL.extend(Firebug.Module,
         return errorContext; // we looked everywhere...
     },
 
-
-    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
-    // extends Module
-
-    initContext: function(context)
-    {
-        this.clear(context);
-
-        if (FBTrace.DBG_ERRORLOG && FBTrace.DBG_CSS)
-        {
-            FBL.totalSheets = 0;
-            FBL.totalRules = 0;
-            this.initTime = new Date();
-        }
-    },
-
-    showContext: function(browser, context)
-    {
-        this.showCount(context ? context.errorCount : 0);
-    },
-
-    unwatchWindow: function(context, win)  // called for top window and frames.
-    {
-        this.clear(context);  // If we ever get errors by window from Firefox we can cache by window.
-    },
-
-    destroyContext: function(context, persistedState)
-    {
-        this.showCount(0);
-        if (FBTrace.DBG_ERRORLOG && FBTrace.DBG_CSS && 'initTime' in this)
-        {
-            var deltaT = new Date().getTime() - this.initTime.getTime();
-            FBTrace.sysout("errors.destroyContext sheets: "+FBL.totalSheets+" rules: "+
-                FBL.totalRules+" time: "+deltaT);
-        }
-    },
-
-    updateOption: function(name, value)
-    {
-        this.checkEnabled();
-    },
-
     checkEnabled: function()
     {
         if (this.mustBeEnabled())
@@ -418,15 +424,19 @@ var Errors = Firebug.Errors = FBL.extend(Firebug.Module,
 
     mustBeEnabled: function()
     {
-        const optionMap = {showJSErrors:1, showJSWarnings:1, showCSSErrors:1, showXMLErrors: 1,
-                showChromeErrors: 1, showChromeMessages: 1, showExternalErrors: 1, showXMLHttpRequests: 1,
-                showStackTrace: 1};
+        var optionMap =
+        {
+            showJSErrors:1, showJSWarnings:1, showCSSErrors:1, showXMLErrors: 1,
+            showChromeErrors: 1, showChromeMessages: 1, showExternalErrors: 1,
+            showXMLHttpRequests: 1, showStackTrace: 1
+        };
 
         for (var p in optionMap)
         {
             if (Firebug[p])
                 return true;
         }
+
         return false;
     },
 

@@ -1,6 +1,12 @@
 /* See license.txt for terms of usage */
 
-FBL.ns(function() {
+define([
+    "firebug/lib",
+    "firebug/reps",
+    "firebug/console",
+    "firebug/commandLineExposed"
+],
+function(FBL, FirebugReps) {
 
 // ************************************************************************************************
 // Constants
@@ -1038,7 +1044,7 @@ Firebug.CommandLine.CommandHandler = FBL.extend(Object,
         var result = subHandler.apply(api, userObjects);
         if (typeof result != "undefined")
         {
-            if (result instanceof Array)
+            if (result instanceof window.Array)
             {
                 win.document.setUserData("firebug-retValueType", "array", null);
                 for (var item in result)
@@ -2091,7 +2097,7 @@ function FirebugCommandLineAPI(context)
 
     this.cd = function(object)
     {
-        if (!(object instanceof Window))
+        if (!(object instanceof window.Window))
             throw "Object must be a window.";
 
         // Make sure the command line is attached into the target iframe.
@@ -2374,14 +2380,15 @@ Firebug.CommandLine.injector =
     attachCommandLine: function(context, win)
     {
         win = win ? win : context.window;
-        if (win instanceof Window)
+        if (win instanceof win.Window)
         {
             // If the command line is already attached then end.
             if (this.isAttached(win))
                 return;
 
             var contentView = FBL.getContentView(win);
-            contentView._FirebugCommandLine = createFirebugCommandLine(context, win);
+            contentView._FirebugCommandLine =
+                Firebug.CommandLineExposed.createFirebugCommandLine(context, win);
 
             this.addCommandLineListener(context, win);
         }

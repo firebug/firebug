@@ -1,6 +1,9 @@
 /* See license.txt for terms of usage */
 
-FBL.ns(function() {
+define([
+    "firebug/lib"
+],
+function(FBL) {
 
 // ********************************************************************************************* //
 // Constants
@@ -11,7 +14,6 @@ const Ci = Components.interfaces;
 var appInfo = Cc["@mozilla.org/xre/app-info;1"].getService(Ci.nsIXULAppInfo);
 var versionChecker = Cc["@mozilla.org/xpcom/version-comparator;1"].getService(Ci.nsIVersionComparator);
 
-var popup = FBL.$("fbStatusContextMenu");
 var statusBar = FBL.$("fbStatusBar");
 var statusText = FBL.$("fbStatusText");
 
@@ -30,6 +32,8 @@ var statusText = FBL.$("fbStatusText");
 Firebug.StartButton = FBL.extend(Firebug.Module,
 /** @lends Firebug.StartButton */
 {
+    dispatchName: "startButton",
+
     initializeUI: function()
     {
         Firebug.Module.initializeUI.apply(this, arguments);
@@ -39,6 +43,7 @@ Firebug.StartButton = FBL.extend(Firebug.Module,
         var startButton = FBL.$("firebug-button");
         if (startButton)
         {
+            var popup = FBL.$("fbStatusContextMenu");
             startButton.appendChild(popup.cloneNode(true));
 
             // Append the button into Firefox toolbar automatically.

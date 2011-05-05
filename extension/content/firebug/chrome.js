@@ -2,7 +2,9 @@
 
 var Firebug = null;
 
-/* The 'context' in this file is always 'Firebug.currentContext' */
+/**
+ * The 'context' in this file is always 'Firebug.currentContext'
+ */
 
 (function() {
 
@@ -59,7 +61,7 @@ top.FirebugChrome =
             FirebugChrome.modulesLoaded = true;
 
         FirebugChrome.waitLimit -= 1;
-        if (!FirebugChrome.initializeOnPanelBarReady())
+        if (!FirebugChrome.initializeOnPanelBarReady() && FirebugChrome.waitLimit > 0)
         {
             if (FBTrace.DBG_INITIALIZE)
             {
@@ -76,9 +78,10 @@ top.FirebugChrome =
     panelBarReady: function()
     {
         waitingPanelBarCount -= 1;
+
         if (FBTrace.DBG_INITIALIZE)
-            FBTrace.sysout("chrome; panelBarReady "+waitingPanelBarCount+" modulesLoaded: "+
-                FirebugChrome.modulesLoaded);
+            FBTrace.sysout("chrome; panelBarReady (" + waitingPanelBarCount + ") "+
+                (FirebugChrome.modulesLoaded ? "Modules loaded" : "Modules not yet loaded"));
 
         this.initializeOnPanelBarReady();
     },
@@ -87,6 +90,9 @@ top.FirebugChrome =
     {
         try
         {
+            FBTrace.sysout("chrome.initializeOnPanelBarReady " + FirebugChrome.modulesLoaded +
+                " " + waitingPanelBarCount);
+
             // Wait until all panelBar bindings are ready before initializing
             if (waitingPanelBarCount == 0 && FirebugChrome.modulesLoaded)
                 this.initialize();
@@ -1968,12 +1974,3 @@ if (top.hasOwnProperty('TidyBrowser'))
         });
     }
 }
-
-// ************************************************************************************************
-
-//xxxHonza: what is this? Marking as OBSOLETE, will be deleted (global namespace polluted)
-function dddx()
-{
-    Firebug.Console.logFormatted(arguments);
-}
-

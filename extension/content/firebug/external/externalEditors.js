@@ -1,6 +1,10 @@
 /* See license.txt for terms of usage */
 
-FBL.ns(function() {
+define([
+    "firebug/lib",
+    "firebug/lib/xpcom"
+],
+function(FBL, XPCOM) {
 
 // ********************************************************************************************* //
 // Constants
@@ -8,7 +12,7 @@ FBL.ns(function() {
 const Cc = Components.classes;
 const Ci = Components.interfaces;
 
-const DirService = Firebug.XPCOM.CCSV("@mozilla.org/file/directory_service;1", "nsIDirectoryServiceProvider");
+const DirService = XPCOM.CCSV("@mozilla.org/file/directory_service;1", "nsIDirectoryServiceProvider");
 const NS_OS_TEMP_DIR = "TmpD"
 const nsIFile = Ci.nsIFile;
 const nsILocalFile = Ci.nsILocalFile;
@@ -27,6 +31,8 @@ var temporaryDirectory = null;
 
 Firebug.ExternalEditors = FBL.extend(Firebug.Module,
 {
+    dispatchName: "externalEditors",
+
     initializeUI: function()
     {
         Firebug.Module.initializeUI.apply(this, arguments);
@@ -424,6 +430,8 @@ Firebug.ExternalEditors = FBL.extend(Firebug.Module,
 // Registration
 
 Firebug.registerModule(Firebug.ExternalEditors);
+
+return Firebug.ExternalEditors;
 
 // ********************************************************************************************* //
 });

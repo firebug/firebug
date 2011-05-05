@@ -1,6 +1,9 @@
 /* See license.txt for terms of usage */
 
-FBL.ns( function() {
+define([
+    "firebug/lib"
+],
+function(FBL) {
 
 // ************************************************************************************************
 // Constants
@@ -8,6 +11,10 @@ FBL.ns( function() {
 const Cc = Components.classes;
 const Ci = Components.interfaces;
 const prefs = Cc["@mozilla.org/preferences-service;1"].getService(Ci.nsIPrefBranch2);
+
+var KeyEvent = window.KeyEvent;
+
+// ************************************************************************************************
 
 /**
  * ShortcutsModel object implements keyboard shortcuts logic.

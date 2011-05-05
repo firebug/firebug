@@ -1,6 +1,14 @@
 /* See license.txt for terms of usage */
 
-FBL.ns(function() { with (Domplate) {
+define([
+    "firebug/lib",
+    "firebug/domplate",
+    "firebug/reps",
+    "arch/tools",
+    "firebug/editor",
+    "firebug/breakpoint"
+],
+function(FBL, Domplate, FirebugReps, ToolsInterface) { with (Domplate) {
 
 // ************************************************************************************************
 // Constants
@@ -20,12 +28,14 @@ const rxIdentifier = /^[$_A-Za-z][$_A-Za-z0-9]*$/
 
 Firebug.DOMModule = FBL.extend(Firebug.Module,
 {
+    dispatchName: "domModule",
+
     initialize: function(prefDomain, prefNames)
     {
         Firebug.Module.initialize.apply(this, arguments);
 
         if (Firebug.Debugger)
-            Firebug.ToolsInterface.browser.addListener(this.DebuggerListener);
+            ToolsInterface.browser.addListener(this.DebuggerListener);
     },
 
     shutdown: function()
@@ -33,7 +43,7 @@ Firebug.DOMModule = FBL.extend(Firebug.Module,
         Firebug.Module.shutdown.apply(this, arguments);
 
         if (Firebug.Debugger)
-            Firebug.ToolsInterface.browser.removeListener(this.DebuggerListener);
+            ToolsInterface.browser.removeListener(this.DebuggerListener);
     },
 
     initContext: function(context, persistedState)
@@ -426,7 +436,7 @@ Firebug.DOMBasePanel.prototype = FBL.extend(Firebug.Panel,
             if (isArguments(object))
                 object = FBL.cloneArray(object);
 
-            if (object instanceof StorageList)
+            if (object instanceof window.StorageList)
             {
                 var domain = context.window.location.hostname;
                 object = object.namedItem(domain);
@@ -594,7 +604,7 @@ Firebug.DOMBasePanel.prototype = FBL.extend(Firebug.Panel,
                 hasChildren = hasChildren || FBL.hasProperties(proto);
         }
 
-        if (value instanceof StorageList)
+        if (value instanceof window.StorageList)
         {
             var domain = context.window.location.hostname;
             hasChildren = value.namedItem(domain).length > 0;
@@ -946,7 +956,7 @@ Firebug.DOMBasePanel.prototype = FBL.extend(Firebug.Panel,
                     editValue = "\"" + FBL.escapeJS(propValue) + "\"";
                 else if (propValue == null)
                     editValue = "null";
-                else if (object instanceof Window || object instanceof jsdIStackFrame)
+                else if (object instanceof window.Window || object instanceof jsdIStackFrame)
                     editValue = getRowName(row);
                 else
                     editValue = "this." + getRowName(row);
@@ -1830,7 +1840,8 @@ Firebug.WatchPanel.prototype = FBL.extend(Firebug.DOMBasePanel.prototype,
             var scopes = [this.context.getGlobalScope()];
 
         if (FBTrace.DBG_STACK)
-            FBTrace.sysout("dom watch frame isStackFrame "+(frame instanceof FBL.StackFrame)+" updateSelection scopes "+scopes.length, scopes);
+            FBTrace.sysout("dom watch frame isStackFrame "+(frame instanceof FBL.StackFrame)+
+                " updateSelection scopes "+scopes.length, scopes);
 
         var members = [];
 

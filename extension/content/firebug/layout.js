@@ -1,6 +1,11 @@
 /* See license.txt for terms of usage */
 
-FBL.ns(function() {
+define([
+    "firebug/lib",
+    "firebug/domplate",
+    "firebug/editor"
+],
+function(FBL, Domplate) {
 
 // ************************************************************************************************
 
@@ -170,7 +175,7 @@ LayoutPanel.prototype = FBL.extend(Firebug.Panel,
 
     supportsObject: function(object, type)
     {
-        return object instanceof Element ? 1 : 0;
+        return object instanceof window.Element ? 1 : 0;
     },
 
     refresh: function()

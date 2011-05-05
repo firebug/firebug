@@ -1,6 +1,10 @@
 /* See license.txt for terms of usage */
 
-FBL.ns(function() {
+define([
+    "firebug/lib",
+    "firebug/commandLine"
+],
+function(FBL) {
 
 // ************************************************************************************************
 // Constants
@@ -13,6 +17,7 @@ FBL.ns(function() {
  */
 Firebug.CommandLine.Popup = FBL.extend(Firebug.Module,
 {
+    dispatchName: "commandLinePopup",
     lastFocused : null,
 
     initializeUI: function()

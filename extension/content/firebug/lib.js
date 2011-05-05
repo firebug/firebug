@@ -1,10 +1,22 @@
 /* See license.txt for terms of usage */
 
-// xxxHonza: the only global should be Firebug object.
-var FBL = {};
+define([
+    "firebug/lib/xpcom"
+],
+function(XPCOM) {
+
+// ********************************************************************************************* //
+
+var FBL = top.FBL;
 
 try {
-// ************************************************************************************************
+
+// Inject old fbXPCOMUtils into FBL (for backward compatibility)
+// Real AMD module should depend on "lib/xpcom"
+// xxxHonza: FBL.CCIN, FBL.CCSV and FBL.QI should be marked as deprecated and
+// removed from 1.8.next
+for (var p in XPCOM)
+    FBL[p] = XPCOM[p];
 
 (function() {
 
@@ -23,7 +35,6 @@ try
 {
     Components.utils["import"]("resource://firebug/firebug-service.js");
 
-    // use only with FBL prefix
     this.fbs = fbs; // left over from component.
 }
 catch (err)
@@ -35,10 +46,8 @@ catch (err)
 // ************************************************************************************************
 // Shortcuts
 
-// use only with FBL prefix
 this.jsd = Cc["@mozilla.org/js/jsd/debugger-service;1"].getService(Ci.jsdIDebuggerService);
 
-// use only with FBL prefix
 this.domUtils = Cc["@mozilla.org/inspector/dom-utils;1"].getService(Ci.inIDOMUtils);
 
 const finder = this.finder = Cc["@mozilla.org/embedcomp/rangefind;1"].createInstance(Ci.nsIFind);
@@ -54,7 +63,6 @@ const reURL = /(([^:]+:)\/{1,2}[^\/]*)(.*?)$/;  // This RE and the previous one 
 const reChromeCase = /chrome:\/\/([^/]*)\/(.*?)$/;
 
 // Globals
-// use only with FBL prefix
 this.reDataURL = /data:text\/javascript;fileName=([^;]*);baseLineNumber=(\d*?),((?:.*?%0A)|(?:.*))/g;
 this.reJavascript = /\s*javascript:\s*(.*)/;
 this.reChrome = /chrome:\/\/([^\/]*)\//;
@@ -74,63 +82,21 @@ const NS_SEEK_SET = Ci.nsISeekableStream.NS_SEEK_SET;
 // ************************************************************************************************
 // Namespaces
 
-var namespaces = [];
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
-
-// use only with FBL prefix
-this.ns = function(fn)
-{
-    var ns = {};
-    namespaces.push(fn, ns);
-    return ns;
-};
-
-// use only with FBL prefix
-this.initialize = function() // use only with FBL prefix
-{
-    if (FBTrace.DBG_INITIALIZE)
-        FBTrace.sysout("FBL.initialize BEGIN "+namespaces.length+" namespaces\n");
-
-    for (var i = 0; i < namespaces.length; i += 2)
-    {
-        var fn = namespaces[i];
-        var ns = namespaces[i+1];
-        try
-        {
-            fn.apply(ns);
-        }
-        catch (exc)
-        {
-            if (exc.stack)
-                Components.utils.reportError("Firebug initialize FAILS "+exc+" "+exc.stack);
-            else
-                Components.utils.reportError("Firebug initialize FAILS "+exc+" "+fn.toSource().substr(0,500));
-        }
-    }
-
-    if (FBTrace.DBG_INITIALIZE)
-        FBTrace.sysout("FBL.initialize END "+namespaces.length+" namespaces\n");
-};
-
 // ************************************************************************************************
 // Basics
 
-// use only with FBL prefix
 this.bind = function()  // fn, thisObject, args => thisObject.fn(arguments, args);
 {
    var args = cloneArray(arguments), fn = args.shift(), object = args.shift();
    return function bind() { return fn.apply(object, arrayInsert(cloneArray(args), 0, arguments)); }
 };
 
-// use only with FBL prefix
 this.bindFixed = function() // fn, thisObject, args => thisObject.fn(args);
 {
     var args = cloneArray(arguments), fn = args.shift(), object = args.shift();
     return function() { return fn.apply(object, args); }
 };
 
-// use only with FBL prefix
 this.extend = function(l, r)
 {
     if (!l || !r)
@@ -144,7 +110,6 @@ this.extend = function(l, r)
     return newOb;
 };
 
-// use only with FBL prefix
 this.descend = function(prototypeParent, childProperties)
 {
     function protoSetter() {};
@@ -158,7 +123,6 @@ this.descend = function(prototypeParent, childProperties)
 // ************************************************************************************************
 // Arrays
 
-// use only with FBL prefix
 this.keys = function(map)  // At least sometimes the keys will be on user-level window objects
 {
     var keys = [];
@@ -175,7 +139,6 @@ this.keys = function(map)  // At least sometimes the keys will be on user-level 
     return keys;  // return is safe
 };
 
-// use only with FBL prefix
 this.values = function(map)
 {
     var values = [];
@@ -206,7 +169,6 @@ this.values = function(map)
     return values;
 };
 
-// use only with FBL prefix
 this.remove = function(list, item)
 {
     for (var i = 0; i < list.length; ++i)
@@ -219,7 +181,6 @@ this.remove = function(list, item)
     }
 };
 
-// use only with FBL prefix
 this.sliceArray = function(array, index)
 {
     var slice = [];
@@ -229,7 +190,6 @@ this.sliceArray = function(array, index)
     return slice;
 };
 
-// use only with FBL prefix
 function cloneArray(array, fn)
 {
    var newArray = [];
@@ -244,7 +204,6 @@ function cloneArray(array, fn)
    return newArray;
 }
 
-// use only with FBL prefix
 function extendArray(array, array2)
 {
    var newArray = [];
@@ -256,7 +215,6 @@ function extendArray(array, array2)
 this.extendArray = extendArray;
 this.cloneArray = cloneArray;
 
-// use only with FBL prefix
 function arrayInsert(array, index, other)
 {
    for (var i = 0; i < other.length; ++i)
@@ -269,7 +227,6 @@ this.arrayInsert = arrayInsert;
 
 // ************************************************************************************************
 
-// use only with FBL prefix
 this.safeToString = function(ob)
 {
     try
@@ -305,7 +262,6 @@ this.safeToString = function(ob)
 
 // ************************************************************************************************
 
-// use only with FBL prefix
 this.hasProperties = function(ob)
 {
     try
@@ -332,7 +288,6 @@ this.hasProperties = function(ob)
     return false;
 };
 
-// use only with FBL prefix
 this.getPrototype = function(ob)
 {
     try
@@ -344,7 +299,6 @@ this.getPrototype = function(ob)
 
 // ************************************************************************************************
 
-// use only with FBL prefix
 this.convertToUnicode = function(text, charset)
 {
     if (!text)
@@ -369,7 +323,6 @@ this.convertToUnicode = function(text, charset)
     }
 };
 
-// use only with FBL prefix
 this.convertFromUnicode = function(text, charset)
 {
     if (!text)
@@ -390,26 +343,22 @@ this.convertFromUnicode = function(text, charset)
     }
 };
 
-// use only with FBL prefix
 this.getPlatformName = function()
 {
     return Cc["@mozilla.org/xre/app-info;1"].getService(Ci.nsIXULRuntime).OS;
 };
 
-// use only with FBL prefix
 this.beep = function()
 {
     var sounder = Cc["@mozilla.org/sound;1"].getService(Ci.nsISound);
     sounder.beep();
 };
 
-// use only with FBL prefix
 this.getUniqueId = function()
 {
     return this.getRandomInt(0,65536);
 }
 
-// use only with FBL prefix
 this.getRandomInt = function(min, max)
 {
     return Math.floor(Math.random() * (max - min + 1) + min);
@@ -417,7 +366,6 @@ this.getRandomInt = function(min, max)
 
 // ************************************************************************************************
 
-// use only with FBL prefix
 this.createStyleSheet = function(doc, url)
 {
     var style = doc.createElementNS("http://www.w3.org/1999/xhtml", "style");
@@ -443,7 +391,6 @@ this.createStyleSheet = function(doc, url)
     return style;
 }
 
-// use only with FBL prefix
 this.addStyleSheet = function(doc, style)
 {
     var heads = doc.getElementsByTagName("head");
@@ -453,7 +400,6 @@ this.addStyleSheet = function(doc, style)
         doc.documentElement.appendChild(style);
 };
 
-// use only with FBL prefix
 this.appendStylesheet = function(doc, uri)
 {
     // Make sure the stylesheet is not appended twice.
@@ -468,7 +414,6 @@ this.appendStylesheet = function(doc, uri)
     return styleSheet;
 },
 
-// use only with FBL prefix
 this.addScript = function(doc, id, src)
 {
     var element = doc.createElementNS("http://www.w3.org/1999/xhtml", "html:script");
@@ -495,7 +440,6 @@ this.addScript = function(doc, id, src)
 
 // ************************************************************************************************
 
-// use only with FBL prefix
 this.isAncestorIgnored = function(node)
 {
     for (var parent = node; parent; parent = parent.parentNode)
@@ -541,7 +485,6 @@ this.isAncestorIgnored = function(node)
  *   are inserted at specified places (%S) in the same order as they are passed. If the
  *   key doesn't exist the method returns "Request Time".
  */
-// use only with FBL prefix
 function $STR(name, bundle)
 {
     var strKey = name.replace(' ', '_', "g");
@@ -586,7 +529,6 @@ function $STR(name, bundle)
     return name;
 }
 
-// use only with FBL prefix
 function $STRF(name, args, bundle)
 {
     var strKey = name.replace(' ', '_', "g");
@@ -635,7 +577,6 @@ function $STRF(name, args, bundle)
     return name;
 }
 
-// use only with FBL prefix
 function $STRP(name, args, index, bundle)
 {
     // xxxHonza:
@@ -671,7 +612,6 @@ this.$STRP = $STRP;
 /*
  * Use the current value of the attribute as a key to look up the localized value.
  */
-// use only with FBL prefix
 this.internationalize = function(element, attr, args)
 {
     if (typeof element == "string")
@@ -695,7 +635,6 @@ this.internationalize = function(element, attr, args)
     }
 }
 
-// use only with FBL prefix
 this.internationalizeElements = function(doc, elements, attributes)
 {
     for (var i=0; i<elements.length; i++)
@@ -715,7 +654,6 @@ this.internationalizeElements = function(doc, elements, attributes)
 // ************************************************************************************************
 // Visibility
 
-// use only with FBL prefix
 this.isVisible = function(elt)
 {
     if (FBL.isElementXUL(elt))
@@ -741,19 +679,16 @@ this.isVisible = function(elt)
     return false;
 };
 
-// use only with FBL prefix
 this.collapse = function(elt, collapsed)
 {
     elt.setAttribute("collapsed", collapsed ? "true" : "false");
 };
 
-// use only with FBL prefix
 this.isCollapsed = function(elt)
 {
     return (elt.getAttribute("collapsed") == "true") ? true : false;
 };
 
-// use only with FBL prefix
 this.obscure = function(elt, obscured)
 {
     if (obscured)
@@ -762,20 +697,17 @@ this.obscure = function(elt, obscured)
         this.removeClass(elt, "obscured");
 };
 
-// use only with FBL prefix
 this.hide = function(elt, hidden)
 {
     elt.style.visibility = hidden ? "hidden" : "visible";
 };
 
-// use only with FBL prefix
 this.clearNode = function(node)
 {
     this.clearDomplate(node);
     node.innerHTML = "";
 };
 
-// use only with FBL prefix
 this.eraseNode = function(node)
 {
     this.clearDomplate(node);
@@ -783,14 +715,12 @@ this.eraseNode = function(node)
         node.removeChild(node.lastChild);
 };
 
-// use only with FBL prefix
 this.ToggleBranch = function()
 {
     this.normal = {};
     this.meta = {};
 }
 
-// use only with FBL prefix
 this.metaNames =
 [
  'prototype',
@@ -865,7 +795,6 @@ this.ToggleBranch.prototype =
     },
 };
 
-// use only with FBL prefix
 this.clearDomplate = function(node)
 {
     if (!Firebug.clearDomplate)
@@ -901,7 +830,6 @@ this.clearDomplate = function(node)
 // ************************************************************************************************
 // Window iteration
 
-// use only with FBL prefix
 this.iterateWindows = function(win, handler)
 {
     if (!win || !win.document)
@@ -919,7 +847,6 @@ this.iterateWindows = function(win, handler)
     }
 };
 
-// use only with FBL prefix
 this.getRootWindow = function(win)
 {
     for (; win; win = win.parent)
@@ -935,7 +862,6 @@ this.getRootWindow = function(win)
 
 var classNameReCache={};
 
-// use only with FBL prefix
 this.hasClass = function(node, name)
 {
     if (!node || node.nodeType != 1 || !node.className || name == '')
@@ -965,7 +891,6 @@ this.hasClass = function(node, name)
     return node.className.search(re) != -1;
 };
 
-// use only with FBL prefix
 this.setClass = function(node, name)
 {
     if (!node || node.nodeType != 1 || name == '')
@@ -988,7 +913,6 @@ this.setClass = function(node, name)
         node.className = node.className.trim() + " " + name;
 };
 
-// use only with FBL prefix
 this.getClassValue = function(node, name)
 {
     var re = new RegExp(name+"-([^ ]+)");
@@ -996,7 +920,6 @@ this.getClassValue = function(node, name)
     return m ? m[1] : "";
 };
 
-// use only with FBL prefix
 this.removeClass = function(node, name)
 {
     if (!node || node.nodeType != 1 || node.className == '' || name == '')
@@ -1027,7 +950,6 @@ this.removeClass = function(node, name)
 
 };
 
-// use only with FBL prefix
 this.toggleClass = function(elt, name)
 {
     if (this.hasClass(elt, name))
@@ -1036,7 +958,6 @@ this.toggleClass = function(elt, name)
         this.setClass(elt, name);
 };
 
-// use only with FBL prefix
 this.setClassTimed = function(elt, name, context, timeout)
 {
     if (FBTrace.DBG_HTML || FBTrace.DBG_SOURCEFILES)
@@ -1080,7 +1001,6 @@ this.setClassTimed = function(elt, name, context, timeout)
     }, timeout);
 };
 
-// use only with FBL prefix
 this.cancelClassTimed = function(elt, name, context)
 {
     if (elt.__setClassTimeout)
@@ -1094,7 +1014,6 @@ this.cancelClassTimed = function(elt, name, context)
 // ************************************************************************************************
 // DOM queries
 
-// use only with FBL prefix
 this.$ = function(id, doc)
 {
     if (doc)
@@ -1103,7 +1022,6 @@ this.$ = function(id, doc)
         return document.getElementById(id);
 };
 
-// use only with FBL prefix
 this.getChildByClass = function(node) // ,classname, classname, classname...
 {
     for (var i = 1; i < arguments.length; ++i)
@@ -1124,7 +1042,6 @@ this.getChildByClass = function(node) // ,classname, classname, classname...
     return node;
 };
 
-// use only with FBL prefix
 this.getAncestorByClass = function(node, className)
 {
     for (var parent = node; parent; parent = parent.parentNode)
@@ -1136,7 +1053,6 @@ this.getAncestorByClass = function(node, className)
     return null;
 };
 
-// use only with FBL prefix
 this.getAncestorByTagName = function(node, tagName)
 {
     for (var parent = node; parent; parent = parent.parentNode)
@@ -1149,14 +1065,12 @@ this.getAncestorByTagName = function(node, tagName)
 };
 
 /* @Deprecated  Use native Firefox: node.getElementsByClassName(names).item(0) */
-// use only with FBL prefix
 this.getElementByClass = function(node, className)  // className, className, ...
 {
     return FBL.getElementsByClass.apply(this,arguments).item(0);
 };
 
 /* @Deprecated  Use native Firefox: node.getElementsByClassName(names) */
-// use only with FBL prefix
 this.getElementsByClass = function(node, className)  // className, className, ...
 {
     var args = cloneArray(arguments); args.splice(0, 1);
@@ -1164,7 +1078,6 @@ this.getElementsByClass = function(node, className)  // className, className, ..
     return node.getElementsByClassName(className);
 };
 
-// use only with FBL prefix
 this.getElementsByAttribute = function(node, attrName, attrValue)
 {
     function iteratorHelper(node, attrName, attrValue, result)
@@ -1183,7 +1096,6 @@ this.getElementsByAttribute = function(node, attrName, attrValue)
     return result;
 }
 
-// use only with FBL prefix
 this.isAncestor = function(node, potentialAncestor)
 {
     for (var parent = node; parent; parent = parent.parentNode)
@@ -1195,7 +1107,6 @@ this.isAncestor = function(node, potentialAncestor)
     return false;
 };
 
-// use only with FBL prefix
 this.getNextElement = function(node)
 {
     while (node && node.nodeType != 1)
@@ -1204,7 +1115,6 @@ this.getNextElement = function(node)
     return node;
 };
 
-// use only with FBL prefix
 this.getPreviousElement = function(node)
 {
     while (node && node.nodeType != 1)
@@ -1213,7 +1123,6 @@ this.getPreviousElement = function(node)
     return node;
 };
 
-// use only with FBL prefix
 this.getBody = function(doc)
 {
     if (doc.body)
@@ -1226,7 +1135,7 @@ this.getBody = function(doc)
     return doc.documentElement;  // For non-HTML docs
 };
 
-// use only with FBL prefix xxxHonza: move to a11y.js?
+// xxxHonza: move to a11y.js?
 this.findNextDown = function(node, criteria)
 {
     if (!node)
@@ -1243,7 +1152,7 @@ this.findNextDown = function(node, criteria)
     }
 };
 
-// use only with FBL prefix xxxHonza: move to a11y.js?
+// xxxHonza: move to a11y.js?
 this.findPreviousUp = function(node, criteria)
 {
     if (!node)
@@ -1260,7 +1169,7 @@ this.findPreviousUp = function(node, criteria)
     }
 };
 
-// use only with FBL prefix insideOutBox.js only
+// insideOutBox.js only
 this.findNext = function(node, criteria, upOnly, maxRoot)
 {
     if (!node)
@@ -1287,7 +1196,7 @@ this.findNext = function(node, criteria, upOnly, maxRoot)
         return this.findNext(node.parentNode, criteria, true, maxRoot);
 };
 
-// use only with FBL prefix insideOutBox.js
+// insideOutBox.js
 this.findPrevious = function(node, criteria, downOnly, maxRoot)
 {
     if (!node)
@@ -1319,21 +1228,18 @@ this.findPrevious = function(node, criteria, downOnly, maxRoot)
     }
 };
 
-// use only with FBL prefix
 this.getNextByClass = function(root, state)
 {
     function iter(node) { return node.nodeType == 1 && FBL.hasClass(node, state); }
     return this.findNext(root, iter);
 };
 
-// use only with FBL prefix
 this.getPreviousByClass = function(root, state)
 {
     function iter(node) { return node.nodeType == 1 && FBL.hasClass(node, state); }
     return this.findPrevious(root, iter);
 };
 
-// use only with FBL prefix
 this.hasChildElements = function(node)
 {
     if (node.contentDocument) // iframes
@@ -1348,7 +1254,6 @@ this.hasChildElements = function(node)
     return false;
 };
 
-// use only with FBL prefix
 this.isElement = function(o)
 {
     try {
@@ -1359,7 +1264,6 @@ this.isElement = function(o)
     }
 };
 
-// use only with FBL prefix
 this.isNode = function(o)
 {
     try {
@@ -1370,7 +1274,6 @@ this.isNode = function(o)
     }
 };
 
-// use only with FBL prefix
 this.XW_instanceof = function(obj, type) // Cross Window instanceof; type is local to this window
 {
     if (obj instanceof type)
@@ -1396,7 +1299,6 @@ this.XW_instanceof = function(obj, type) // Cross Window instanceof; type is loc
 // ************************************************************************************************
 // DOM Modification
 
-// use only with FBL prefix
 this.setOuterHTML = function(element, html)
 {
     var doc = element.ownerDocument;
@@ -1415,7 +1317,6 @@ this.setOuterHTML = function(element, html)
     }
 };
 
-// use only with FBL prefix
 this.appendInnerHTML = function(element, html, referenceElement)
 {
     var doc = element.ownerDocument;
@@ -1428,7 +1329,6 @@ this.appendInnerHTML = function(element, html, referenceElement)
     return firstChild;
 };
 
-// use only with FBL prefix
 this.insertTextIntoElement = function(element, text)
 {
     var command = "cmd_insertText";
@@ -1450,7 +1350,6 @@ this.insertTextIntoElement = function(element, text)
 /**
  * Gets an XPath for an element which describes its hierarchical location.
  */
-// use only with FBL prefix
 this.getElementXPath = function(element)
 {
     if (element && element.id)
@@ -1459,7 +1358,6 @@ this.getElementXPath = function(element)
         return this.getElementTreeXPath(element);
 };
 
-// use only with FBL prefix
 this.getElementTreeXPath = function(element)
 {
     var paths = [];
@@ -1486,7 +1384,6 @@ this.getElementTreeXPath = function(element)
     return paths.length ? "/" + paths.join("/") : null;
 };
 
-// use only with FBL prefix
 this.getElementCSSPath = function(element)
 {
     var paths = [];
@@ -1500,7 +1397,6 @@ this.getElementCSSPath = function(element)
     return paths.length ? paths.join(" ") : null;
 };
 
-// use only with FBL prefix
 this.cssToXPath = function(rule)
 {
     var regElement = /^([#.]?)([a-z0-9\\*_-]*)((\|)([a-z0-9\\*_-]*))?/i;
@@ -1601,14 +1497,12 @@ this.cssToXPath = function(rule)
     return xpath;
 };
 
-// use only with FBL prefix
 this.getElementsBySelector = function(doc, css)
 {
     var xpath = this.cssToXPath(css);
     return this.getElementsByXPath(doc, xpath);
 };
 
-// use only with FBL prefix
 this.getElementsByXPath = function(doc, xpath)
 {
     var nodes = [];
@@ -1627,7 +1521,6 @@ this.getElementsByXPath = function(doc, xpath)
     return nodes;
 };
 
-// use only with FBL prefix
 this.getRuleMatchingElements = function(rule, doc)
 {
     var css = rule.selectorText;
@@ -1638,7 +1531,6 @@ this.getRuleMatchingElements = function(rule, doc)
 // ************************************************************************************************
 // Clipboard
 
-// use only with FBL prefix
 this.copyToClipboard = function(string)
 {
     var clipboard = Cc["@mozilla.org/widget/clipboardhelper;1"].getService(Ci.nsIClipboardHelper);
@@ -1648,7 +1540,6 @@ this.copyToClipboard = function(string)
 // ************************************************************************************************
 // Graphics
 
-// use only with FBL prefix
 this.getClientOffset = function(elt)
 {
     function addOffset(elt, coords, view)
@@ -1681,7 +1572,6 @@ this.getClientOffset = function(elt)
     return coords;
 };
 
-// use only with FBL prefix
 this.getLTRBWH = function(elt)
 {
     var bcrect,
@@ -1709,13 +1599,11 @@ this.getLTRBWH = function(elt)
     return dims;
 };
 
-// use only with FBL prefix
 this.getOffsetSize = function(elt)
 {
     return {width: elt.offsetWidth, height: elt.offsetHeight};
 };
 
-// use only with FBL prefix
 this.getOverflowParent = function(element)
 {
     for (var scrollParent = element.parentNode; scrollParent; scrollParent = scrollParent.offsetParent)
@@ -1725,7 +1613,6 @@ this.getOverflowParent = function(element)
     }
 };
 
-// use only with FBL prefix
 this.isScrolledToBottom = function(element)
 {
     var onBottom = (element.scrollTop + element.offsetHeight) == element.scrollHeight;
@@ -1736,7 +1623,6 @@ this.isScrolledToBottom = function(element)
     return onBottom;
 };
 
-// use only with FBL prefix
 this.scrollToBottom = function(element)
 {
     element.scrollTop = element.scrollHeight;
@@ -1751,21 +1637,18 @@ this.scrollToBottom = function(element)
     return (element.scrollTop == element.scrollHeight);
 };
 
-// use only with FBL prefix
 this.move = function(element, x, y)
 {
     element.style.left = x + "px";
     element.style.top = y + "px";
 };
 
-// use only with FBL prefix
 this.resize = function(element, w, h)
 {
     element.style.width = w + "px";
     element.style.height = h + "px";
 };
 
-// use only with FBL prefix
 this.linesIntoCenterView = function(element, scrollBox)  // {before: int, after: int}
 {
     if (!scrollBox)
@@ -1793,7 +1676,6 @@ this.linesIntoCenterView = function(element, scrollBox)  // {before: int, after:
             after: Math.round((bottomSpace/element.offsetHeight) + 0.5) }
 };
 
-// use only with FBL prefix
 this.scrollIntoCenterView = function(element, scrollBox, notX, notY)
 {
     if (!element)
@@ -1844,7 +1726,6 @@ var cssPropNames = {};
 var cssColorNames = null;
 var imageRules = null;
 
-// use only with FBL prefix
 this.getCSSKeywordsByProperty = function(nodeType,propName)
 {
     if (!cssKeywordMap[nodeType])
@@ -1870,7 +1751,6 @@ this.getCSSKeywordsByProperty = function(nodeType,propName)
     return propName in cssKeywordMap[nodeType] ? cssKeywordMap[nodeType][propName] : [];
 };
 
-// use only with FBL prefix
 this.getCSSPropertyNames = function(nodeType)
 {
     if (!cssPropNames[nodeType])
@@ -1884,7 +1764,6 @@ this.getCSSPropertyNames = function(nodeType)
     return cssPropNames[nodeType];
 };
 
-// use only with FBL prefix
 this.isColorKeyword = function(keyword)
 {
     if (keyword == "transparent")
@@ -1906,7 +1785,6 @@ this.isColorKeyword = function(keyword)
     return cssColorNames.indexOf(keyword.toLowerCase()) != -1;
 };
 
-// use only with FBL prefix
 this.isImageRule = function(nodeType,rule)
 {
     if (!imageRules)
@@ -1925,7 +1803,6 @@ this.isImageRule = function(nodeType,rule)
     return imageRules.indexOf(rule.toLowerCase()) != -1;
 };
 
-// use only with FBL prefix
 this.copyTextStyles = function(fromNode, toNode, style)
 {
     var view = fromNode.ownerDocument.defaultView;
@@ -1943,7 +1820,6 @@ this.copyTextStyles = function(fromNode, toNode, style)
     }
 };
 
-// use only with FBL prefix
 this.copyBoxStyles = function(fromNode, toNode, style)
 {
     var view = fromNode.ownerDocument.defaultView;
@@ -1965,7 +1841,6 @@ this.copyBoxStyles = function(fromNode, toNode, style)
     }
 };
 
-// use only with FBL prefix
 this.readBoxStyles = function(style)
 {
     const styleNames = {
@@ -1986,7 +1861,6 @@ this.readBoxStyles = function(style)
     return styles;
 };
 
-// use only with FBL prefix
 this.getBoxFromStyles = function(style, element)
 {
     var args = this.readBoxStyles(style);
@@ -1997,7 +1871,6 @@ this.getBoxFromStyles = function(style, element)
     return args;
 };
 
-// use only with FBL prefix
 this.getElementCSSSelector = function(element)
 {
     if (!element || !element.localName)
@@ -2013,7 +1886,6 @@ this.getElementCSSSelector = function(element)
     return label;
 };
 
-// use only with FBL prefix
 this.getURLForStyleSheet = function(styleSheet)
 {
     // http://www.w3.org/TR/DOM-Level-2-Style/stylesheets.html#StyleSheets-StyleSheet.
@@ -2021,7 +1893,6 @@ this.getURLForStyleSheet = function(styleSheet)
     return (styleSheet.href ? styleSheet.href : styleSheet.ownerNode.ownerDocument.URL);
 };
 
-// use only with FBL prefix
 this.getDocumentForStyleSheet = function(styleSheet)
 {
     while (styleSheet.parentStyleSheet && !styleSheet.ownerNode)
@@ -2036,7 +1907,6 @@ this.getDocumentForStyleSheet = function(styleSheet)
  * Retrieves the instance number for a given style sheet. The instance number
  * is sheet's index within the set of all other sheets whose URL is the same.
  */
-// use only with FBL prefix
 this.getInstanceForStyleSheet = function(styleSheet, ownerDocument)
 {
     // ownerDocument is an optional hint for performance
@@ -2065,7 +1935,6 @@ this.getInstanceForStyleSheet = function(styleSheet, ownerDocument)
 // ************************************************************************************************
 // HTML and XML Serialization
 
-// use only with FBL prefix
 var getElementType = this.getElementType = function(node)
 {
     if (isElementXUL(node))
@@ -2080,7 +1949,6 @@ var getElementType = this.getElementType = function(node)
         return 'html';
 }
 
-// use only with FBL prefix
 var getElementSimpleType = this.getElementSimpleType = function(node)
 {
     if (isElementSVG(node))
@@ -2091,51 +1959,43 @@ var getElementSimpleType = this.getElementSimpleType = function(node)
         return 'html';
 }
 
-// use only with FBL prefix
 var isElementHTML = this.isElementHTML = function(node)
 {
     return node.nodeName == node.nodeName.toUpperCase() && node.namespaceURI == 'http://www.w3.org/1999/xhtml';
 }
 
-// use only with FBL prefix
 var isElementXHTML = this.isElementXHTML = function(node)
 {
     return node.nodeName != node.nodeName.toUpperCase() && node.namespaceURI == 'http://www.w3.org/1999/xhtml';
 }
 
-// use only with FBL prefix
 var isElementMathML = this.isElementMathML = function(node)
 {
     return node.namespaceURI == 'http://www.w3.org/1998/Math/MathML';
 }
 
-// use only with FBL prefix
 var isElementSVG = this.isElementSVG = function(node)
 {
     return node.namespaceURI == 'http://www.w3.org/2000/svg';
 }
 
-// use only with FBL prefix
 var isElementXUL = this.isElementXUL = function(node)
 {
     return node instanceof XULElement;
 }
 
-// use only with FBL prefix
 var getNodeName = this.getNodeName = function(node)
 {
     var name = node.nodeName;
     return isElementHTML(node) ? name.toLowerCase() : name;
 }
 
-// use only with FBL prefix
 var getLocalName = this.getLocalName = function(node)
 {
     var name = node.localName;
     return isElementHTML(node) ? name.toLowerCase() : name;
 }
 
-// use only with FBL prefix
 this.isSelfClosing = function(element)
 {
     if (isElementSVG(element) || isElementMathML(element))
@@ -2144,7 +2004,6 @@ this.isSelfClosing = function(element)
     return (this.selfClosingTags.hasOwnProperty(tag));
 };
 
-// use only with FBL prefix
 this.getElementHTML = function(element)
 {
     var self=this;
@@ -2219,7 +2078,6 @@ this.getElementHTML = function(element)
     return html.join("");
 };
 
-// use only with FBL prefix
 this.getElementXML = function(element)
 {
     function toXML(elt)
@@ -2281,7 +2139,6 @@ this.getElementXML = function(element)
 /**
  * Returns true if given document is based on a XML and so displaying pretty printed XML elements.
  */
-// use only with FBL prefix
 this.isXMLPrettyPrint = function(context, win)
 {
     if (context.isXMLPrettyPrintDetected)
@@ -2321,7 +2178,6 @@ this.isXMLPrettyPrint = function(context, win)
 // ************************************************************************************************
 // Whitespace and Entity conversions
 
-// use only with FBL prefix
 var entityConversionLists = this.entityConversionLists = {
     normal : {
         whitespace : {
@@ -2520,9 +2376,7 @@ function escapeGroupsForEntities(str, lists)
     return results;
 }
 
-// use only with FBL prefix
 this.escapeGroupsForEntities = escapeGroupsForEntities;
-
 
 function unescapeEntities(str, lists)
 {
@@ -2560,7 +2414,6 @@ function unescapeEntities(str, lists)
 // ************************************************************************************************
 // String escaping
 
-// use only with FBL prefix all escaping functions.
 var escapeForTextNode = this.escapeForTextNode = createSimpleEscape('text', 'normal');
 var escapeForHtmlEditor = this.escapeForHtmlEditor = createSimpleEscape('editor', 'normal');
 var escapeForElementAttribute = this.escapeForElementAttribute = createSimpleEscape('attributes', 'normal');
@@ -2576,7 +2429,6 @@ var escapeForSourceLine = this.escapeForSourceLine = createSimpleEscape('text', 
 
 var unescapeWhitespace = createSimpleEscape('whitespace', 'reverse');
 
-// use only with FBL prefix
 this.unescapeForTextNode = function(str)
 {
     if (Firebug.showTextNodesWithWhitespace)
@@ -2586,28 +2438,23 @@ this.unescapeForTextNode = function(str)
     return str;
 }
 
-// use only with FBL prefix
 this.unescapeForURL = createSimpleEscape('text', 'reverse');
 
-// use only with FBL prefix
 this.escapeNewLines = function(value)
 {
     return value.replace(/\r/gm, "\\r").replace(/\n/gm, "\\n");
 };
 
-// use only with FBL prefix
 this.stripNewLines = function(value)
 {
     return typeof(value) == "string" ? value.replace(/[\r\n]/gm, " ") : value;
 };
 
-// use only with FBL prefix
 this.escapeJS = function(value)
 {
     return value.replace(/\r/gm, "\\r").replace(/\n/gm, "\\n").replace('"', '\\"', "g");
 };
 
-// use only with FBL prefix
 this.cropString = function(text, limit, alterText)
 {
     if (!alterText)
@@ -2633,7 +2480,6 @@ this.cropString = function(text, limit, alterText)
     return text;
 };
 
-// use only with FBL prefix
 this.lineBreak = function()
 {
     if (navigator.appVersion.indexOf("Win") != -1)
@@ -2649,19 +2495,16 @@ this.lineBreak = function()
     return '\n';
 };
 
-// use only with FBL prefix
 this.cropMultipleLines = function(text, limit)
 {
     return this.escapeNewLines(this.cropString(text, limit));
 };
 
-// use only with FBL prefix HTMLLib.js
 this.isWhitespace = function(text)
 {
     return !reNotWhitespace.exec(text);
 };
 
-// use only with FBL prefix
 this.splitLines = function(text)
 {
     const reSplitLines2 = /.*(:?\r\n|\n|\r)?/mg;
@@ -2679,25 +2522,21 @@ this.splitLines = function(text)
     return lines;
 };
 
-// use only with FBL prefix
 this.trim = function(text)
 {
     return text.replace(/^\s*|\s*$/g,"");
 }
 
-// use only with FBL prefix
 this.trimLeft = function(text)
 {
     return text.replace(/^\s+/,"");
 }
 
-// use only with FBL prefix
 this.trimRight = function(text)
 {
     return text.replace(/\s+$/,"");
 }
 
-// use only with FBL prefix
 this.wrapText = function(text, noEscapeHTML)
 {
     var reNonAlphaNumeric = /[^A-Za-z_$0-9'"-]/;
@@ -2738,7 +2577,6 @@ this.wrapText = function(text, noEscapeHTML)
     return html;
 }
 
-// use only with FBL prefix
 this.insertWrappedText = function(text, textBox, noEscapeHTML)
 {
     var html = this.wrapText(text, noEscapeHTML);
@@ -2756,7 +2594,6 @@ function getIndent(line)
     return m ? m[0].length : 0;
 }
 
-// use only with FBL prefix
 this.cleanIndentation = function(text)
 {
     var lines = this.splitLines(text);
@@ -2777,7 +2614,6 @@ this.cleanIndentation = function(text)
 // ************************************************************************************************
 // Menus
 
-// use only with FBL prefix
 this.createMenu = function(popup, label)
 {
     var menu = popup.ownerDocument.createElement("menu");
@@ -2791,7 +2627,6 @@ this.createMenu = function(popup, label)
     return menuPopup;
 };
 
-// use only with FBL prefix
 this.createMenuItem = function(popup, item, before)
 {
     if (typeof(item) == "string" && item.indexOf("-") == 0)
@@ -2809,7 +2644,6 @@ this.createMenuItem = function(popup, item, before)
     return menuitem;
 };
 
-// use only with FBL prefix
 this.setItemIntoElement = function(element, item)
 {
     var label = item.nol10n ? item.label : this.$STR(item.label);
@@ -2863,7 +2697,6 @@ this.setItemIntoElement = function(element, item)
     return element;
 }
 
-// use only with FBL prefix
 this.createMenuHeader = function(popup, item)
 {
     var header = popup.ownerDocument.createElement("label");
@@ -2877,7 +2710,6 @@ this.createMenuHeader = function(popup, item)
     return header;
 };
 
-// use only with FBL prefix
 this.createMenuSeparator = function(popup, before)
 {
     if (!popup.firstChild)
@@ -2900,7 +2732,6 @@ this.createMenuSeparator = function(popup, before)
  * @param {String, Optional} tooltiptext Optional name of the string from *.properties file
  *      that should be used as a tooltip for the menu.
  */
-// use only with FBL prefix
 this.optionMenu = function(label, option, tooltiptext)
 {
     return {
@@ -2918,13 +2749,11 @@ this.optionMenu = function(label, option, tooltiptext)
 // ************************************************************************************************
 // Stack Traces
 
-// use only with FBL prefix
 this.getStackTrace = deprecated("name change for self-documentation", this.getCorrectedStackTrace);
 
 /*
  * Converts a Mozilla stack frame to a frameXB
  */
-// use only with FBL prefix
 this.getCorrectedStackTrace = function(frame, context)
 {
     try
@@ -2977,7 +2806,6 @@ this.getCorrectedStackTrace = function(frame, context)
 /*
  * Converts from Mozilla stack frame to frameXB
  */
-// use only with FBL prefix
 this.getStackFrame = function(frame, context, newestFrameXB)
 {
     if (frame.isNative || frame.isDebugger)
@@ -3026,26 +2854,25 @@ this.getStackFrame = function(frame, context, newestFrameXB)
 // ********************************************************************************************* //
 // frameXB, cross-browser frame
 
-// use only with FBL prefix
 this.StackFrame = function(sourceFile, lineNo, functionName, args, nativeFrame, pc, context, newestFrame)
 {
- // Essential fields
- this.sourceFile = sourceFile;
- this.line = lineNo;
- this.fn = functionName;  // cache?
- this.context = context;
- this.newestFrame = (newestFrame ? newestFrame : this); // the newest frame in the stack containing 'this' frame
+    // Essential fields
+    this.sourceFile = sourceFile;
+    this.line = lineNo;
+    this.fn = functionName;  // cache?
+    this.context = context;
+    this.newestFrame = (newestFrame ? newestFrame : this); // the newest frame in the stack containing 'this' frame
 
- // optional
- this.args = args;
+    // optional
+    this.args = args;
 
- // Derived from sourceFile
- this.href = sourceFile.href;
+    // Derived from sourceFile
+    this.href = sourceFile.href;
 
- // Mozilla
- this.nativeFrame = nativeFrame;
- this.pc = pc;
- this.script = nativeFrame ? nativeFrame.script : null;  // TODO-XB
+    // Mozilla
+    this.nativeFrame = nativeFrame;
+    this.pc = pc;
+    this.script = nativeFrame ? nativeFrame.script : null;  // TODO-XB
 };
 
 this.StackFrame.prototype =
@@ -3137,61 +2964,61 @@ this.StackFrame.prototype =
         return this.scope;
     },
 
+    // Private
+    generateScopeChain: function (scope, viewChrome)
+    {
+        var ret = [];
+        while (scope)
+        {
+            var scopeVars;
+            // getWrappedValue will not contain any variables for closure
+            // scopes, so we want to special case this to get all variables
+            // in all cases.
+            if (scope.jsClassName == "Call")
+            {
+                scopeVars = FBL.unwrapIValueObject(scope, viewChrome)
+                scopeVars.toString = function() {return $STR("Closure Scope");}
+            }
+            else if (scope.jsClassName == "Block")
+            {
+                scopeVars = FBL.unwrapIValueObject(scope, viewChrome)
+                scopeVars.toString = function() {return $STR("Block Scope");}
+            }
+            else
+            {
+                scopeVars = FBL.unwrapIValue(scope, Firebug.viewChrome);
 
-     // Private
+                if (scopeVars && scopeVars.hasOwnProperty)
+                {
+                    if (!scopeVars.hasOwnProperty("toString")) {
+                        (function() {
+                            var className = scope.jsClassName;
+                            scopeVars.toString = function() {
+                                return $STR(className + " Scope");
+                            };
+                        })();
+                    }
+                }
+                else
+                {
+                    if (FBTrace.DBG_ERRORS)
+                        FBTrace.sysout("dom .generateScopeChain: bad scopeVars for scope.jsClassName:"+scope.jsClassName); // do not trace scopeVars, you will get a uncatchable exception
+                    scopeVars = {error: "Mozilla error: invalid scope variables"};
+                }
+            }
 
-     generateScopeChain: function (scope, viewChrome)
-     {
-         var ret = [];
-         while (scope) {
-             var scopeVars;
-             // getWrappedValue will not contain any variables for closure
-             // scopes, so we want to special case this to get all variables
-             // in all cases.
-             if (scope.jsClassName == "Call") {
-                 scopeVars = FBL.unwrapIValueObject(scope, viewChrome)
-                 scopeVars.toString = function() {return $STR("Closure Scope");}
-             }
-             else if (scope.jsClassName == "Block")
-             {
-                 scopeVars = FBL.unwrapIValueObject(scope, viewChrome)
-                 scopeVars.toString = function() {return $STR("Block Scope");}
-             }
-             else
-             {
-                 scopeVars = FBL.unwrapIValue(scope, Firebug.viewChrome);
+            if (scopeVars)
+                ret.push(scopeVars);
 
-                 if (scopeVars && scopeVars.hasOwnProperty)
-                 {
-                     if (!scopeVars.hasOwnProperty("toString")) {
-                         (function() {
-                             var className = scope.jsClassName;
-                             scopeVars.toString = function() {
-                                 return $STR(className + " Scope");
-                             };
-                         })();
-                     }
-                 }
-                 else
-                 {
-                     if (FBTrace.DBG_ERRORS)
-                         FBTrace.sysout("dom .generateScopeChain: bad scopeVars for scope.jsClassName:"+scope.jsClassName); // do not trace scopeVars, you will get a uncatchable exception
-                     scopeVars = {error: "Mozilla error: invalid scope variables"};
-                 }
-             }
+            scope = scope.jsParent;
+        }
 
-             if (scopeVars)
-                 ret.push(scopeVars);
+        ret.toString = function() {
+            return $STR("Scope Chain");
+        };
 
-             scope = scope.jsParent;
-         }
-
-         ret.toString = function() {
-             return $STR("Scope Chain");
-         };
-
-         return ret;
-     },
+        return ret;
+    },
 
 };
 
@@ -3199,7 +3026,6 @@ this.StackFrame.prototype =
 var reErrorStackLine = /^(.*)@(.*):(\d*)$/;
 var reErrorStackLine2 = /^([^\(]*)\((.*)\)$/;
 
-// use only with FBL prefix
 this.parseToStackFrame = function(line, context) // function name (arg, arg, arg)@fileName:lineNo
 {
     var last255 = line.length - 255;
@@ -3220,7 +3046,6 @@ this.parseToStackFrame = function(line, context) // function name (arg, arg, arg
     }
 }
 
-// use only with FBL prefix
 this.parseToStackTrace = function(stack, context)
 {
      var lines = stack.split('\n');
@@ -3236,7 +3061,6 @@ this.parseToStackTrace = function(stack, context)
      return trace;
 }
 
-// use only with FBL prefix
 this.cleanStackTraceOfFirebug = function(trace)
 {
     if (trace && trace.frames){
@@ -3264,10 +3088,8 @@ function getStackDump()
     return lines.join("\n");
 };
 
-// use only with FBL prefix
 this.getStackDump = getStackDump;
 
-// use only with FBL prefix
 this.getJSDStackDump = function(newestFrame)
 {
     var lines = [];
@@ -3277,7 +3099,6 @@ this.getJSDStackDump = function(newestFrame)
     return lines.join("\n");
 };
 
-// use only with FBL prefix
 this.getStackSourceLink = function()
 {
     for (var frame = Components.stack; frame; frame = frame.caller)
@@ -3297,7 +3118,6 @@ this.getStackSourceLink = function()
     return this.getFrameSourceLink(frame);
 }
 
-// use only with FBL prefix
 this.getFrameSourceLink = function(frame)
 {
     if (frame && frame.filename && frame.filename.indexOf("XPCSafeJSObjectWrapper") == -1)
@@ -3307,7 +3127,6 @@ this.getFrameSourceLink = function(frame)
 };
 
 // TODO delete this, only used by console and console injector.
-// use only with FBL prefix
 this.getStackFrameId = function()
 {
     for (var frame = Components.stack; frame; frame = frame.caller)
@@ -3324,7 +3143,6 @@ this.getStackFrameId = function()
 // ************************************************************************************************
 // Event Monitoring
 
-// use only with FBL prefix
 this.toggleMonitorEvents = function(object, type, state, context)
 {
     if (state)
@@ -3333,7 +3151,6 @@ this.toggleMonitorEvents = function(object, type, state, context)
         this.monitorEvents(object, type, context);
 };
 
-// use only with FBL prefix
 this.monitorEvents = function(object, type, context)
 {
     if (!this.areEventsMonitored(object, type, context) && object && object.addEventListener)
@@ -3353,7 +3170,6 @@ this.monitorEvents = function(object, type, context)
     }
 };
 
-// use only with FBL prefix
 this.unmonitorEvents = function(object, type, context)
 {
     var eventsMonitored = context.eventsMonitored;
@@ -3373,7 +3189,6 @@ this.unmonitorEvents = function(object, type, context)
     }
 };
 
-// use only with FBL prefix
 this.areEventsMonitored = function(object, type, context)
 {
     var eventsMonitored = context.eventsMonitored;
@@ -3392,7 +3207,6 @@ this.areEventsMonitored = function(object, type, context)
 // ************************************************************************************************
 // Functions
 
-// use only with FBL prefix
 this.findScripts = function(context, url, line)
 {
     var sourceFile = context.sourceFileMap[url];
@@ -3406,7 +3220,6 @@ this.findScripts = function(context, url, line)
     return scripts;
 };
 
-// use only with FBL prefix
 this.findScriptForFunctionInContext = function(context, fn)
 {
     var found = null;
@@ -3427,14 +3240,12 @@ this.findScriptForFunctionInContext = function(context, fn)
     return found;
 }
 
-// use only with FBL prefix
 this.findSourceForFunction = function(fn, context)
 {
     var script = this.findScriptForFunctionInContext(context, fn);
     return (script)? this.getSourceLinkForScript(script, context) : null;
 };
 
-// use only with FBL prefix
 this.getSourceLinkForScript = function(script, context)
 {
     var sourceFile = Firebug.SourceFile.getSourceFileByScript(context, script);
@@ -3451,7 +3262,6 @@ this.getSourceLinkForScript = function(script, context)
     }
 };
 
-// use only with FBL prefix
 this.getFunctionName = function(script, context, frame, noArgs)
 {
     if (!script)
@@ -3483,7 +3293,6 @@ this.getFunctionName = function(script, context, frame, noArgs)
     return name;
 };
 
-// use only with FBL prefix
 this.guessFunctionName = function(url, lineNo, context)
 {
     if (context)
@@ -3494,7 +3303,6 @@ this.guessFunctionName = function(url, lineNo, context)
     return "? in "+this.getFileName(url)+"@"+lineNo;
 };
 
-// use only with FBL prefix
 this.guessFunctionNameFromLines = function(url, lineNo, sourceCache)
 {
     // Walk backwards from the first line in the function until we find the line which
@@ -3523,7 +3331,6 @@ this.guessFunctionNameFromLines = function(url, lineNo, sourceCache)
 };
 
 // Mozilla
-// use only with FBL prefix
 this.getFunctionArgValues = function(frame)
 {
     if (frame.isValid && frame.scope.jsClassName == "Call")
@@ -3538,7 +3345,6 @@ this.getFunctionArgValues = function(frame)
 }
 
 // Mozilla
-// use only with FBL prefix
 this.getArgumentsFromObjectScope = function(frame)
 {
     var argNames = frame.script.getParameterNames();
@@ -3565,7 +3371,6 @@ this.getArgumentsFromObjectScope = function(frame)
     return values;
 };
 
-// use only with FBL prefix
 this.getArgumentsFromCallScope = function(frame)
 {
     var argNames = frame.script.getParameterNames();
@@ -3582,7 +3387,6 @@ this.getArgumentsFromCallScope = function(frame)
     return values;
 };
 
-// use only with FBL prefix
 this.unwrapIValueObject = function(scope, viewChrome)
 {
     var scopeVars = {};
@@ -3602,13 +3406,11 @@ this.unwrapIValueObject = function(scope, viewChrome)
 // ************************************************************************************************
 // Source Files
 
-// use only with FBL prefix
 this.getSourceFileByHref = function(url, context)
 {
     return context.sourceFileMap[url];
 };
 
-// use only with FBL prefix
 this.sourceURLsAsArray = function(context)
 {
     var urls = [];
@@ -3623,7 +3425,6 @@ this.sourceURLsAsArray = function(context)
 };
 
 // deprecated, use mapAsArray
-// use only with FBL prefix
 this.sourceFilesAsArray = function(sourceFileMap)
 {
     var sourceFiles = [];
@@ -3636,7 +3437,6 @@ this.sourceFilesAsArray = function(sourceFileMap)
     return sourceFiles;
 };
 
-// use only with FBL prefix
 this.mapAsArray = function(map)
 {
     var entries = [];
@@ -3649,7 +3449,6 @@ this.mapAsArray = function(map)
 // ************************************************************************************************
 // CSS
 
-// use only with FBL prefix
 this.getAllStyleSheets = function(context)
 {
     var styleSheets = [];
@@ -3691,7 +3490,6 @@ this.getAllStyleSheets = function(context)
     return styleSheets;
 };
 
-// use only with FBL prefix
 this.getStyleSheetByHref = function(url, context)
 {
     if (FBTrace.DBG_ERRORS && FBTrace.DBG_CSS)
@@ -3711,7 +3509,6 @@ this.getStyleSheetByHref = function(url, context)
     return context.styleSheetMap.hasOwnProperty(url) ? context.styleSheetMap[url] : undefined;
 };
 
-// use only with FBL prefix
 this.createStyleSheetMap = function(context)
 {
     context.styleSheetMap = {};
@@ -3765,7 +3562,6 @@ this.createStyleSheetMap = function(context)
     return context.styleSheetMap;
 };
 
-// use only with FBL prefix
 this.safeGetCSSRules = function(styleSheet)
 {
     try
@@ -3782,7 +3578,6 @@ this.safeGetCSSRules = function(styleSheet)
 // ************************************************************************************************
 // Firefox browsing
 
-// use only with FBL prefix
 this.openNewTab = function(url, postText)
 {
     if (!url)
@@ -3801,7 +3596,6 @@ this.openNewTab = function(url, postText)
     return gBrowser.selectedTab = gBrowser.addTab(url, null, null, postData);
 };
 
-// use only with FBL prefix
 this.openWindow = function(windowType, url, features, params)
 {
     var win = windowType ? wm.getMostRecentWindow(windowType) : null;
@@ -3818,7 +3612,6 @@ this.openWindow = function(windowType, url, features, params)
     return win;
 };
 
-// use only with FBL prefix
 this.viewSource = function(url, lineNo)
 {
     window.openDialog("chrome://global/content/viewSource.xul", "_blank",
@@ -3827,7 +3620,6 @@ this.viewSource = function(url, lineNo)
 
 // Iterate over all opened firefox windows of the given type. If the callback returns true
 // the iteration is stopped.
-// use only with FBL prefix
 this.iterateBrowserWindows = function(windowType, callback)
 {
     var windowList = wm.getZOrderDOMWindowEnumerator(windowType, true);
@@ -3842,7 +3634,6 @@ this.iterateBrowserWindows = function(windowType, callback)
     return false;
 };
 
-// use only with FBL prefix
 this.iterateBrowserTabs = function(browserWindow, callback)
 {
     var tabBrowser = browserWindow.getBrowser();
@@ -3861,7 +3652,6 @@ this.iterateBrowserTabs = function(browserWindow, callback)
  * Returns <browser> element for specified content window.
  * @param {Object} win - Content window
  */
-// use only with FBL prefix
 this.getBrowserForWindow = function(win)
 {
     var tabBrowser = document.getElementById("content");
@@ -3871,7 +3661,6 @@ this.getBrowserForWindow = function(win)
 
 // ************************************************************************************************
 
-// use only with FBL prefix
 this.getWindowId = function(win)
 {
     var util = win.QueryInterface(Ci.nsIInterfaceRequestor).getInterface(Ci.nsIDOMWindowUtils);
@@ -3888,7 +3677,6 @@ this.getWindowId = function(win)
     return {outer: outerWindowID, inner: innerWindowID, toString: function(){return this.outer+"."+this.inner;}};
 };
 
-// use only with FBL prefix
 this.safeGetWindowLocation = function(window)
 {
     try
@@ -3914,7 +3702,6 @@ this.safeGetWindowLocation = function(window)
     }
 };
 
-// use only with FBL prefix
 this.safeGetRequestName = function(request)
 {
     try
@@ -3928,7 +3715,6 @@ this.safeGetRequestName = function(request)
     return null;
 }
 
-// use only with FBL prefix
 this.safeGetContentType = function(request)
 {
     try
@@ -3945,7 +3731,6 @@ this.safeGetContentType = function(request)
 // ************************************************************************************************
 // JavaScript Parsing
 
-// use only with FBL prefix
 this.getExpressionAt = function(text, charOffset)
 {
     var offset = 0;
@@ -3967,7 +3752,6 @@ this.getExpressionAt = function(text, charOffset)
     return {expr: null, offset: -1};
 };
 
-// use only with FBL prefix
 this.jsKeywords =
 {
     "var": 1,
@@ -4005,7 +3789,6 @@ this.jsKeywords =
     "default": 1
 };
 
-// use only with FBL prefix
 this.isJavaScriptKeyword = function(name)
 {
     return name in FBL.jsKeywords;
@@ -4014,87 +3797,73 @@ this.isJavaScriptKeyword = function(name)
 // ************************************************************************************************
 // Events
 
-// use only with FBL prefix
 this.cancelEvent = function(event)
 {
     event.stopPropagation();
     event.preventDefault();
 };
 
-// use only with FBL prefix
 this.isLeftClick = function(event, allowKeyModifiers)
 {
     return event.button == 0 && (allowKeyModifiers || this.noKeyModifiers(event));
 };
 
-// use only with FBL prefix
 this.isMiddleClick = function(event, allowKeyModifiers)
 {
     return event.button == 1 && (allowKeyModifiers || this.noKeyModifiers(event));
 };
 
-// use only with FBL prefix
 this.isRightClick = function(event, allowKeyModifiers)
 {
 
     return event.button == 2 && (allowKeyModifiers || this.noKeyModifiers(event));
 };
 
-// use only with FBL prefix
 this.noKeyModifiers = function(event)
 {
     return !event.ctrlKey && !event.shiftKey && !event.altKey && !event.metaKey;
 };
 
-// use only with FBL prefix
 this.isControlClick = function(event)
 {
     return event.button == 0 && this.isControl(event);
 };
 
-// use only with FBL prefix
 this.isShiftClick = function(event)
 {
     return event.button == 0 && this.isShift(event);
 };
 
-// use only with FBL prefix
 this.isControl = function(event)
 {
     return (event.metaKey || event.ctrlKey) && !event.shiftKey && !event.altKey;
 };
 
-// use only with FBL prefix
 this.isAlt = function(event)
 {
     return event.altKey && !event.ctrlKey && !event.shiftKey && !event.metaKey;
 };
 
-// use only with FBL prefix
 this.isAltClick = function(event)
 {
     return event.button == 0 && this.isAlt(event);
 };
 
-// use only with FBL prefix
 this.isControlShift = function(event)
 {
     return (event.metaKey || event.ctrlKey) && event.shiftKey && !event.altKey;
 };
 
-// use only with FBL prefix
 this.isControlAlt = function(event)
 {
     return (event.metaKey || event.ctrlKey) && !event.shiftKey && event.altKey;
 };
 
-// use only with FBL prefix
 this.isShift = function(event)
 {
     return event.shiftKey && !event.metaKey && !event.ctrlKey && !event.altKey;
 };
 
-// use only with FBL prefix
 this.dispatch = function(listeners, name, args)
 {
     if (!listeners)
@@ -4173,7 +3942,6 @@ this.dispatch = function(listeners, name, args)
     }
 };
 
-// use only with FBL prefix
 this.dispatch2 = function(listeners, name, args)
 {
     try
@@ -4301,7 +4069,6 @@ const eventTypes =
         "paste" ],
 };
 
-// use only with FBL prefix
 this.getEventFamily = function(eventType)
 {
     if (!this.families)
@@ -4319,7 +4086,6 @@ this.getEventFamily = function(eventType)
     return this.families[eventType];
 };
 
-// use only with FBL prefix
 this.attachAllListeners = function(object, listener)
 {
     for (var family in eventTypes)
@@ -4329,7 +4095,6 @@ this.attachAllListeners = function(object, listener)
     }
 };
 
-// use only with FBL prefix
 this.detachAllListeners = function(object, listener)
 {
     for (var family in eventTypes)
@@ -4339,7 +4104,6 @@ this.detachAllListeners = function(object, listener)
     }
 };
 
-// use only with FBL prefix
 this.attachFamilyListeners = function(family, object, listener)
 {
     var types = eventTypes[family];
@@ -4347,7 +4111,6 @@ this.attachFamilyListeners = function(family, object, listener)
         object.addEventListener(types[i], listener, false);
 };
 
-// use only with FBL prefix
 this.detachFamilyListeners = function(family, object, listener)
 {
     var types = eventTypes[family];
@@ -4358,14 +4121,12 @@ this.detachFamilyListeners = function(family, object, listener)
 // ************************************************************************************************
 // URLs
 
-// use only with FBL prefix
 this.getFileName = function(url)
 {
     var split = this.splitURLBase(url);
     return split.name;
 };
 
-// use only with FBL prefix
 this.splitURLBase = function(url)
 {
     if (this.isDataURL(url))
@@ -4373,7 +4134,6 @@ this.splitURLBase = function(url)
     return this.splitURLTrue(url);
 };
 
-// use only with FBL prefix
 this.splitDataURL = function(url)
 {
     var mark = url.indexOf('data:');
@@ -4427,7 +4187,6 @@ this.splitDataURL = function(url)
     return props;
 };
 
-// use only with FBL prefix
 this.splitURLTrue = function(url)
 {
     var m = reSplitFile.exec(url);
@@ -4439,7 +4198,6 @@ this.splitURLTrue = function(url)
         return {path: m[1], name: m[2]+m[3]};
 };
 
-// use only with FBL prefix
 this.getFileExtension = function(url)
 {
     if (!url)
@@ -4455,7 +4213,6 @@ this.getFileExtension = function(url)
     return url.substr(lastDot+1);
 };
 
-// use only with FBL prefix
 this.isSystemURL = function(url)
 {
     if (!url) return true;
@@ -4477,7 +4234,6 @@ this.isSystemURL = function(url)
         return false;
 };
 
-// use only with FBL prefix
 this.isSystemPage = function(win)
 {
     try
@@ -4504,14 +4260,12 @@ this.isSystemPage = function(win)
     }
 }
 
-// use only with FBL prefix
 this.isSystemStyleSheet = function(sheet)
 {
     var href = sheet && sheet.href;
     return href && FBL.isSystemURL(href);
 };
 
-// use only with FBL prefix
 this.getURIHost = function(uri)
 {
     try
@@ -4527,7 +4281,6 @@ this.getURIHost = function(uri)
     }
 }
 
-// use only with FBL prefix
 this.isLocalURL = function(url)
 {
     if (url.substr(0, 5) == "file:")
@@ -4538,13 +4291,11 @@ this.isLocalURL = function(url)
         return false;
 };
 
-// use only with FBL prefix
 this.isDataURL = function(url)
 {
     return (url && url.substr(0,5) == "data:");
 };
 
-// use only with FBL prefix
 this.getLocalPath = function(url)
 {
     if (this.isLocalURL(url))
@@ -4560,7 +4311,6 @@ this.getLocalPath = function(url)
  * @param URL
  * @returns undefined or nsIURI
  */
-// use only with FBL prefix
 this.getLocalSystemURI = function(url)
 {
     try
@@ -4589,7 +4339,6 @@ this.getLocalSystemURI = function(url)
 /*
  * Mozilla native path for local URL
  */
-// use only with FBL prefix
 this.getLocalOrSystemPath = function(url, allowDirectories)
 {
     var uri = FBL.getLocalSystemURI(url);
@@ -4603,7 +4352,6 @@ this.getLocalOrSystemPath = function(url, allowDirectories)
     }
 }
 
-// use only with FBL prefix
 this.getURLFromLocalFile = function(file)
 {
     var fileHandler = ioService.getProtocolHandler("file").QueryInterface(Ci.nsIFileProtocolHandler);
@@ -4611,7 +4359,6 @@ this.getURLFromLocalFile = function(file)
     return URL;
 };
 
-// use only with FBL prefix
 this.getDataURLForContent = function(content, url)
 {
     // data:text/javascript;fileName=x%2Cy.js;baseLineNumber=10,<the-url-encoded-data>
@@ -4621,28 +4368,24 @@ this.getDataURLForContent = function(content, url)
     return uri;
 },
 
-// use only with FBL prefix
 this.getDomain = function(url)
 {
     var m = /[^:]+:\/{1,3}([^\/]+)/.exec(url);
     return m ? m[1] : "";
 };
 
-// use only with FBL prefix
 this.getURLPath = function(url)
 {
     var m = /[^:]+:\/{1,3}[^\/]+(\/.*?)$/.exec(url);
     return m ? m[1] : "";
 };
 
-// use only with FBL prefix
 this.getPrettyDomain = function(url)
 {
     var m = /[^:]+:\/{1,3}(www\.)?([^\/]+)/.exec(url);
     return m ? m[2] : "";
 };
 
-// use only with FBL prefix
 this.absoluteURL = function(url, baseURL)
 {
     // Replace "/./" with "/" using regular expressions (don't use string since /./
@@ -4650,7 +4393,6 @@ this.absoluteURL = function(url, baseURL)
     return this.absoluteURLWithDots(url, baseURL).replace(/\/\.\//, "/", "g");
 };
 
-// use only with FBL prefix
 this.absoluteURLWithDots = function(url, baseURL)
 {
     // Should implement http://www.apps.ietf.org/rfc/rfc3986.html#sec-5
@@ -4704,7 +4446,6 @@ this.absoluteURLWithDots = function(url, baseURL)
     }
 }
 
-// use only with FBL prefix
 this.normalizeURL = function(url)  // this gets called a lot, any performance improvement welcome
 {
     if (!url)
@@ -4734,13 +4475,11 @@ this.normalizeURL = function(url)  // this gets called a lot, any performance im
     return url;
 };
 
-// use only with FBL prefix
 this.denormalizeURL = function(url)
 {
     return url.replace(/file:\/\/\//g, "file:/");
 };
 
-// use only with FBL prefix
 this.parseURLParams = function(url)
 {
     var q = url ? url.indexOf("?") : -1;
@@ -4758,7 +4497,6 @@ this.parseURLParams = function(url)
     return this.parseURLEncodedText(search);
 };
 
-// use only with FBL prefix
 this.parseURLEncodedText = function(text, noLimit)
 {
     const maxValueLength = 25000;
@@ -4825,7 +4563,6 @@ this.parseURLEncodedText = function(text, noLimit)
     return params;
 };
 
-// use only with FBL prefix
 this.reEncodeURL = function(file, text, noLimit)
 {
     var lines = text.split("\n");
@@ -4841,7 +4578,6 @@ this.reEncodeURL = function(file, text, noLimit)
     return url;
 };
 
-// use only with FBL prefix
 this.getResource = function(aURL)
 {
     try
@@ -4860,7 +4596,6 @@ this.getResource = function(aURL)
 // ************************************************************************************************
 // JSON
 
-// use only with FBL prefix
 this.parseJSONString = function(jsonString, originURL)
 {
     if (FBTrace.DBG_JSONVIEWER)
@@ -4935,7 +4670,6 @@ this.parseJSONString = function(jsonString, originURL)
     return null;
 };
 
-// use only with FBL prefix
 this.parseJSONPString = function(jsonString, originURL)
 {
 }
@@ -4943,7 +4677,6 @@ this.parseJSONPString = function(jsonString, originURL)
 // ************************************************************************************************
 // Network
 
-// use only with FBL prefix
 this.readFromStream = function(stream, charset, noClose)
 {
     var sis = Cc["@mozilla.org/binaryinputstream;1"].createInstance(Ci.nsIBinaryInputStream);
@@ -4971,7 +4704,6 @@ this.readFromStream = function(stream, charset, noClose)
     return text;
 };
 
-// use only with FBL prefix
 this.readPostTextFromPage = function(url, context)
 {
     if (url == context.browser.contentWindow.location.href)
@@ -5005,7 +4737,6 @@ this.readPostTextFromPage = function(url, context)
      }
 };
 
-// use only with FBL prefix
 this.readPostTextFromRequest = function(request, context)
 {
     try
@@ -5045,7 +4776,6 @@ this.readPostTextFromRequest = function(request, context)
     return null;
 };
 
-// use only with FBL prefix
 this.getInputStreamFromString = function(dataString)
 {
     var stringStream = Cc["@mozilla.org/io/string-input-stream;1"].createInstance(Ci.nsIStringInputStream);
@@ -5058,7 +4788,6 @@ this.getInputStreamFromString = function(dataString)
     return stringStream;
 };
 
-// use only with FBL prefix
 this.getWindowForRequest = function(request)
 {
     var loadContext = this.getRequestLoadContext(request);
@@ -5074,7 +4803,6 @@ this.getWindowForRequest = function(request)
     return null;
 };
 
-// use only with FBL prefix
 this.getRequestLoadContext = function(request)
 {
     try
@@ -5112,7 +4840,6 @@ this.getRequestLoadContext = function(request)
     return null;
 };
 
-// use only with FBL prefix
 this.getRequestWebProgress = deprecated("Use getRequestLoadContext function", this.getRequestLoadContext);
 
 
@@ -5124,7 +4851,6 @@ var saveShowStackTrace = {};
 /*
  * use in the try{} around a call to getInterface to prevent fbs from generating stack traces
  */
-// use only with FBL prefix
 this.suspendShowStackTrace = function()
 {
     saveShowStackTrace = Firebug.showStackTrace;
@@ -5134,7 +4860,6 @@ this.suspendShowStackTrace = function()
 /*
  * use in the finally{} to undo the suspendShowStackTrace
  */
-// use only with FBL prefix
 this.resumeShowStackTrace = function()
 {
     Firebug.showStackTrace = saveShowStackTrace;
@@ -5142,7 +4867,6 @@ this.resumeShowStackTrace = function()
 
 // ************************************************************************************************
 
-// use only with FBL prefix
 this.BaseProgressListener =
 {
     QueryInterface : function(iid)
@@ -5169,7 +4893,6 @@ this.BaseProgressListener =
 // ************************************************************************************************
 // Network Tracing
 
-// use only with FBL prefix
 this.getStateDescription = function(flag)
 {
     var state = [];
@@ -5195,7 +4918,6 @@ this.getStateDescription = function(flag)
     return state.join(", ");
 };
 
-// use only with FBL prefix
 this.getStatusDescription = function(status)
 {
     var nsISocketTransport = Ci.nsISocketTransport;
@@ -5211,7 +4933,6 @@ this.getStatusDescription = function(status)
     if (status == nsITransport.STATUS_WRITING) return "STATUS_WRITING";
 };
 
-// use only with FBL prefix
 this.getLoadFlagsDescription = function(loadFlags)
 {
     var flags = [];
@@ -5237,7 +4958,6 @@ this.getLoadFlagsDescription = function(loadFlags)
 // ************************************************************************************************
 // Programs
 
-// use only with FBL prefix
 this.launchProgram = function(exePath, args)
 {
     try
@@ -5263,7 +4983,6 @@ this.launchProgram = function(exePath, args)
     return false;
 };
 
-// use only with FBL prefix
 this.getIconURLForFile = function(path)
 {
     var fileHandler = ioService.getProtocolHandler("file").QueryInterface(Ci.nsIFileProtocolHandler);
@@ -5285,7 +5004,6 @@ this.getIconURLForFile = function(path)
     return null;
 }
 
-// use only with FBL prefix
 this.makeURI = function(urlString)
 {
     try
@@ -5306,7 +5024,6 @@ this.makeURI = function(urlString)
 // ************************************************************************************************
 // Persistence (cross page refresh)
 
-// use only with FBL prefix
 this.persistObjects = function(panel, panelState)
 {
     // Persist the location and selection so we can restore them in case of a reload
@@ -5321,14 +5038,12 @@ this.persistObjects = function(panel, panelState)
             " panel.selection:"+panel.selection+" panelState:", panelState);
 };
 
-// use only with FBL prefix
 this.persistObject = function(object, context)
 {
     var rep = Firebug.getRep(object, context);
     return rep ? rep.persistObject(object, context) : null;
 };
 
-// use only with FBL prefix
 this.restoreLocation =  function(panel, panelState)
 {
     var restored = false;
@@ -5358,7 +5073,6 @@ this.restoreLocation =  function(panel, panelState)
     return restored;
 };
 
-// use only with FBL prefix
 this.restoreSelection = function(panel, panelState)
 {
     var needRetry = false;
@@ -5402,14 +5116,12 @@ this.restoreSelection = function(panel, panelState)
             panel.selection+" panelState:", panelState);
 };
 
-// use only with FBL prefix
 this.restoreObjects = function(panel, panelState)
 {
     this.restoreLocation(panel, panelState);
     this.restoreSelection(panel, panelState);
 };
 
-// use only with FBL prefix
 this.getPersistedState = function(context, panelName)
 {
     if (!context)
@@ -5432,7 +5144,6 @@ this.getPersistedState = function(context, panelName)
 // ************************************************************************************************
 // Error Message
 
-// use only with FBL prefix
 this.ErrorMessage = function(message, href, lineNo, source, category, context, trace, msgId)
 {
     this.message = message;
@@ -5487,7 +5198,6 @@ this.ErrorMessage.prototype =
  *      with the node containing the matched text as the first parameter. This may
  *      be undefined to return the node as is.
  */
-// use only with FBL prefix
 this.TextSearch = function(rootNode, rowFinder)
 {
     var doc = rootNode.ownerDocument;
@@ -5595,7 +5305,6 @@ this.TextSearch = function(rootNode, rowFinder)
 
 // ************************************************************************************************
 
-// use only with FBL prefix
 this.SourceBoxTextSearch = function(sourceBox)
 {
     this.find = function(text, reverse, caseSensitive)
@@ -5640,7 +5349,6 @@ this.SourceBoxTextSearch = function(sourceBox)
 
 // ********************************************************************************************* //
 
-// use only with FBL prefix
 this.Continued = function()
 {
 };
@@ -5666,7 +5374,6 @@ this.Continued.prototype =
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 
-// use only with FBL prefix
 this.SourceLink = function(url, line, type, object, instance)
 {
     this.href = url;
@@ -5694,7 +5401,6 @@ this.SourceLink.prototype =
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 
-// use only with FBL prefix
 this.SourceText = function(lines, owner)
 {
     this.lines = lines;
@@ -5708,7 +5414,6 @@ this.SourceText.getLineAsHTML = function(lineNo)
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 
-// use only with FBL prefix
 this.StackTrace = function(adoptFrames)
 {
     this.frames = adoptFrames || [];
@@ -5743,7 +5448,6 @@ this.StackTrace.prototype =
     }
 };
 
-// use only with FBL prefix
 this.traceToString = function(trace)
 {
     var str = "<top>";
@@ -5753,7 +5457,6 @@ this.traceToString = function(trace)
     return str;
 };
 
-// use only with FBL prefix
 this.buildStackTrace = function(frame)
 {
     var trace = new FBL.StackTrace();
@@ -5768,7 +5471,6 @@ this.buildStackTrace = function(frame)
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 
-// use only with FBL prefix
 this.Property = function(object, name)
 {
     this.object = object;
@@ -5780,7 +5482,6 @@ this.Property = function(object, name)
     };
 };
 
-// use only with FBL prefix
 this.ErrorCopy = function(message)
 {
     this.message = message;
@@ -5798,13 +5499,11 @@ function EventCopy(event)
     }
 }
 
-// use only with FBL prefix
 this.EventCopy = EventCopy;
 
 // ************************************************************************************************
 // DOM Constants
 
-// use only with FBL prefix
 this.getDOMMembers = function(object)
 {
     if (!domMemberCache)
@@ -5869,7 +5568,6 @@ this.getDOMMembers = function(object)
     return null;
 };
 
-// use only with FBL prefix
 this.isDOMMember = function(object, propName)
 {
     var members = this.getDOMMembers(object);
@@ -6668,7 +6366,6 @@ domMemberMap.Event =
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 
-// use only with FBL prefix
 this.isDOMConstant = function(object, name)
 {
     if (name == undefined)
@@ -6888,7 +6585,6 @@ var domConstantMap = this.domConstantMap =
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 
-// use only with FBL prefix
 this.cssInfo = {};
 this.cssInfo.html =
 {
@@ -7133,7 +6829,6 @@ this.cssInfo.svg = {
     "writing-mode": ["writingMode"]
 };
 
-// use only with FBL prefix
 this.inheritedStyleNames =
 {
     "border-collapse": 1,
@@ -7169,7 +6864,6 @@ this.inheritedStyleNames =
     "word-wrap": 1
 };
 
-// use only with FBL prefix
 this.cssKeywords =
 {
     "mozAppearance":
@@ -8063,7 +7757,6 @@ this.cssKeywords =
     ]
 };
 
-// use only with FBL prefix
 this.nonEditableTags =
 {
     "HTML": 1,
@@ -8072,14 +7765,12 @@ this.nonEditableTags =
     "head": 1
 };
 
-// use only with FBL prefix
 this.innerEditableTags =
 {
     "BODY": 1,
     "body": 1
 };
 
-// use only with FBL prefix
 this.selfClosingTags =
 { // End tags for void elements are forbidden http://wiki.whatwg.org/wiki/HTML_vs._XHTML
     "meta": 1,
@@ -8095,7 +7786,6 @@ this.selfClosingTags =
     "embed":1
 };
 
-// use only with FBL prefix
 const invisibleTags = this.invisibleTags =
 {
     "HTML": 1,
@@ -8133,7 +7823,6 @@ const invisibleTags = this.invisibleTags =
     */
 };
 
-// use only with FBL prefix
 this.ignoreVars =
 {
     "__firebug__": 1,
@@ -8156,7 +7845,6 @@ this.ignoreVars =
     "loadFirebugConsole": 1,
 };
 
-// use only with FBL prefix
 this.shouldIgnore = function(name)
 {
     return (this.ignoreVars[name] === 1);
@@ -8176,7 +7864,6 @@ function ERROR(exc)
         ddd("FIREBUG WARNING: " + exc);
 }
 
-// use only with FBL prefix
 this.ERROR = ERROR;
 
 function ddd(text)
@@ -8186,7 +7873,6 @@ function ddd(text)
         consoleService.logStringMessage(text + "");
 }
 
-// use only with FBL prefix
 this.ddd = ddd;
 
 function deprecated(msg, fnc)
@@ -8208,13 +7894,11 @@ function deprecated(msg, fnc)
     }
 }
 
-// use only with FBL prefix
 this.deprecated = deprecated;
 
 // ************************************************************************************************
 // Math Utils
 
-// use only with FBL prefix
 this.formatNumber = function(number)
 {
     number += "";
@@ -8269,7 +7953,6 @@ this.formatSize = function(bytes)
 // ************************************************************************************************
 // Time Utils
 
-// use only with FBL prefix
 this.formatTime = function(elapsed)
 {
     if (elapsed == -1)
@@ -8290,7 +7973,6 @@ this.formatTime = function(elapsed)
 
 // ************************************************************************************************
 
-// use only with FBL prefix
 this.ReversibleIterator = function(length, start, reverse)
 {
     this.length = length;
@@ -8321,7 +8003,6 @@ this.ReversibleIterator = function(length, start, reverse)
  * @param {Boolean} reverse Truthy to preform a reverse search, falsy to perform a forward seach
  * @param {Boolean} caseSensitive Truthy to perform a case sensitive search, falsy to perform a case insensitive search.
  */
-// use only with FBL prefix
 this.LiteralRegExp = function(literal, reverse, caseSensitive)
 {
     var searchToken = (!caseSensitive) ? literal.toLowerCase() : literal;
@@ -8369,7 +8050,6 @@ this.LiteralRegExp = function(literal, reverse, caseSensitive)
     };
 };
 
-// use only with FBL prefix
 this.ReversibleRegExp = function(regex, flags)
 {
     var re = {};
@@ -8443,7 +8123,6 @@ function getContentView(object)
     return (object.wrappedJSObject);
 }
 
-// use only with FBL prefix
 this.getContentView = getContentView;
 
 function unwrapObject(object)
@@ -8463,10 +8142,8 @@ function unwrapObject(object)
     return object;
 }
 
-// use only with FBL prefix
 this.unwrapObject = unwrapObject;
 
-// use only with FBL prefix
 this.unwrapIValue = function(object, viewChrome)
 {
     var unwrapped = object.getWrappedValue();
@@ -8498,7 +8175,6 @@ this.unwrapIValue = function(object, viewChrome)
  * Converts resource: to file: URL.
  * @param {String} resourceURL
  */
-// use only with FBL prefix
 this.resourceToFile = function(resourceURL)
 {
     var resHandler = ioService.getProtocolHandler("resource")
@@ -8529,7 +8205,6 @@ this.resourceToFile = function(resourceURL)
  *     // The current version is Firebug 1.6+
  * }
  */
-// use only with FBL prefix
 this.checkFirebugVersion = function(expectedVersion)
 {
     if (!expectedVersion)
@@ -8547,8 +8222,6 @@ this.checkFirebugVersion = function(expectedVersion)
 
 // ************************************************************************************************
 }).apply(FBL);
-
-// ************************************************************************************************
 }
 catch(e)
 {
@@ -8560,4 +8233,11 @@ catch(e)
     dump("If the service @joehewitt.com/firebug;1 fails, try deleting compreg.dat, xpti.dat\n");
     dump("Another cause can be mangled install.rdf.\n");
 }
-// ************************************************************************************************
+
+// ********************************************************************************************* //
+// Registration
+
+return FBL;
+
+// ********************************************************************************************* //
+});

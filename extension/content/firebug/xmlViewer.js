@@ -1,6 +1,11 @@
 /* See license.txt for terms of usage */
 
-FBL.ns(function() {
+define([
+    "firebug/lib",
+    "firebug/Domplate",
+    "firebug/lib/xpcom"
+],
+function(FBL, Domplate, XPCOM) {
 
 // ************************************************************************************************
 // Constants
@@ -93,7 +98,7 @@ Firebug.XMLViewerModel = FBL.extend(Firebug.Module,
 
     insertXML: function(parentNode, text)
     {
-        var parser = Firebug.XPCOM.CCIN("@mozilla.org/xmlextras/domparser;1", "nsIDOMParser");
+        var parser = XPCOM.CCIN("@mozilla.org/xmlextras/domparser;1", "nsIDOMParser");
         var doc = parser.parseFromString(text, "text/xml");
         var root = doc.documentElement;
 

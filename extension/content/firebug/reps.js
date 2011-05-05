@@ -1,6 +1,12 @@
 /* See license.txt for terms of usage */
 
-var FirebugReps = FBL.ns(function() { with (Domplate) {
+define([
+    "firebug/lib",
+    "firebug/domplate",
+    "firebug/lib/xpcom",
+    "arch/tools"
+],
+function(FBL, Domplate, XPCOM, ToolsInterface) { with (Domplate) {
 
 // ************************************************************************************************
 // Constants
@@ -8,7 +14,10 @@ var FirebugReps = FBL.ns(function() { with (Domplate) {
 const Cc = Components.classes;
 const Ci = Components.interfaces;
 
+// xxxHonza: RJS
 Components.utils["import"]("resource://firebug/firebug-service.js");
+
+var FirebugReps = {};
 
 // ************************************************************************************************
 // Common Tags
@@ -520,7 +529,7 @@ FirebugReps.Arr = domplate(Firebug.Rep,
                 return false;
             else if (obj instanceof Ci.nsIDOMHistory) // do this first to avoid security 1000 errors
                 return false;
-            else if (obj instanceof StorageList) // do this first to avoid security 1000 errors
+            else if (obj instanceof window.StorageList) // do this first to avoid security 1000 errors
                 return false;
             else if (obj.toString() === "[xpconnect wrapped native prototype]")  // do this first to avoid exceptions
                 return false;
@@ -528,9 +537,9 @@ FirebugReps.Arr = domplate(Firebug.Rep,
                 return true;
             else if (isFinite(obj.length) && typeof obj.callee === 'function') // arguments
                 return true;
-            else if (obj instanceof HTMLCollection)
+            else if (obj instanceof window.HTMLCollection)
                 return true;
-            else if (obj instanceof NodeList)
+            else if (obj instanceof window.NodeList)
                 return true;
             else
                 return false;
@@ -720,15 +729,15 @@ FirebugReps.Element = domplate(Firebug.Rep,
     {
         var value;
 
-        if (elt instanceof HTMLImageElement)
+        if (elt instanceof window.HTMLImageElement)
             value = FBL.getFileName(elt.getAttribute("src"));
-        else if (elt instanceof HTMLAnchorElement)
+        else if (elt instanceof window.HTMLAnchorElement)
             value = FBL.getFileName(elt.getAttribute("href"));
-        else if (elt instanceof HTMLInputElement)
+        else if (elt instanceof window.HTMLInputElement)
             value = elt.getAttribute("value");
-        else if (elt instanceof HTMLFormElement)
+        else if (elt instanceof window.HTMLFormElement)
             value = FBL.getFileName(elt.getAttribute("action"));
-        else if (elt instanceof HTMLScriptElement)
+        else if (elt instanceof window.HTMLScriptElement)
             value = FBL.getFileName(elt.getAttribute("src"));
 
         return value ? " " + FBL.cropMultipleLines(value, 20) : "";
@@ -865,7 +874,7 @@ FirebugReps.Element = domplate(Firebug.Rep,
 
     supportsObject: function(object, type)
     {
-        return object instanceof Element;
+        return object instanceof window.Element;
     },
 
     browseObject: function(elt, context)
@@ -887,7 +896,7 @@ FirebugReps.Element = domplate(Firebug.Rep,
     {
         var xpath = FBL.getElementXPath(elt);
 
-        return FBL.bind(this.persistor, top, xpath);
+        return FBL.bind(this.persistor, window.top, xpath);
     },
 
     getTitle: function(element, context)
@@ -958,7 +967,7 @@ FirebugReps.TextNode = domplate(Firebug.Rep,
 
     supportsObject: function(object, type)
     {
-        return object instanceof Text;
+        return object instanceof window.Text;
     },
 
     getTitle: function(win, context)
@@ -1004,7 +1013,7 @@ FirebugReps.Document = domplate(Firebug.Rep,
 
     supportsObject: function(object, type)
     {
-        return object instanceof Document || object instanceof XMLDocument;
+        return object instanceof window.Document || object instanceof window.XMLDocument;
     },
 
     browseObject: function(doc, context)
@@ -1064,7 +1073,7 @@ FirebugReps.StyleSheet = domplate(Firebug.Rep,
 
     supportsObject: function(object, type)
     {
-        return object instanceof CSSStyleSheet;
+        return object instanceof window.CSSStyleSheet;
     },
 
     browseObject: function(styleSheet, context)
@@ -1124,7 +1133,7 @@ FirebugReps.Window = domplate(Firebug.Rep,
 
     supportsObject: function(object, type)
     {
-        return object instanceof Window;
+        return object instanceof window.Window;
     },
 
     browseObject: function(win, context)
@@ -1198,7 +1207,7 @@ FirebugReps.Event = domplate(Firebug.Rep,
 
     supportsObject: function(object, type)
     {
-        return object instanceof Event || object instanceof FBL.EventCopy;
+        return object instanceof window.Event || object instanceof FBL.EventCopy;
     },
 
     getTitle: function(event, context)
@@ -1394,7 +1403,7 @@ FirebugReps.CompilationUnit = domplate(FirebugReps.SourceLink,
 
     supportsObject: function(object, type)
     {
-       return (object instanceof Firebug.ToolsInterface.CompilationUnit) ? 2 : 0;
+       return (object instanceof ToolsInterface.CompilationUnit) ? 2 : 0;
     },
 
     persistObject: function(compilationUnit)
@@ -1630,7 +1639,8 @@ FirebugReps.StackTrace = domplate(Firebug.Rep,
             var frame = frames[i];
             var sf = frame.sourceFile;
             if ((sf && sf.href && sf.href.indexOf("chrome") == 0) ||
-                (frame.fn == "_firebugRerun"))
+                (frame.fn == "_firebugRerun") ||
+                (frame.fn == "jsdbug_NoScriptFunctionName"))
             {
                 continue;
             }
@@ -2106,7 +2116,7 @@ FirebugReps.Storage = domplate(Firebug.Rep,
 
     supportsObject: function(object, type)
     {
-        return (object instanceof Storage);
+        return (object instanceof window.Storage);
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
@@ -2145,7 +2155,7 @@ FirebugReps.Storage = domplate(Firebug.Rep,
                 {
                     name = object.key(i);
                     value = object.getItem(name);
-                    if (value instanceof StorageItem)
+                    if (value instanceof window.StorageItem)
                         value = value.value;
                 }
                 catch (exc)
@@ -2244,7 +2254,7 @@ FirebugReps.StorageList = domplate(Firebug.Rep,
 
     supportsObject: function(object, type)
     {
-        return (object instanceof StorageList);
+        return (object instanceof window.StorageList);
     },
 
     getRealObject: function(object, context)
@@ -2308,7 +2318,7 @@ FirebugReps.XPathResult = domplate(FirebugReps.Arr,
 
     supportsObject: function(xpathresult, type)
     {
-        return (xpathresult instanceof XPathResult);
+        return (xpathresult instanceof window.XPathResult);
     },
 
     arrayIterator: function(xpathresult, max)
@@ -2362,7 +2372,7 @@ FirebugReps.Description = domplate(Firebug.Rep,
 
         var rootNode = this.tag.replace(params, parentNode, this);
 
-        var parser = Firebug.XPCOM.CCIN("@mozilla.org/xmlextras/domparser;1", "nsIDOMParser");
+        var parser = XPCOM.CCIN("@mozilla.org/xmlextras/domparser;1", "nsIDOMParser");
         var doc = parser.parseFromString("<div>" + text + "</div>", "text/xml");
         var root = doc.documentElement;
 
@@ -2413,7 +2423,7 @@ FirebugReps.Attr = domplate(Firebug.Rep,
 
     supportsObject: function(object, type)
     {
-        return (object instanceof Attr);
+        return (object instanceof window.Attr);
     },
 });
 
@@ -2488,7 +2498,7 @@ FirebugReps.NamedNodeMap = domplate(Firebug.Rep,
 
     supportsObject: function(object, type)
     {
-        return (object instanceof NamedNodeMap);
+        return (object instanceof window.NamedNodeMap);
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
@@ -2579,7 +2589,7 @@ Firebug.registerRep(
 
 Firebug.setDefaultReps(FirebugReps.Func, FirebugReps.Obj);
 
-return FirebugReps;
+return Firebug.Reps = FirebugReps;
 
 // ********************************************************************************************* //
 }});

@@ -1,5 +1,6 @@
 /* See license.txt for terms of usage */
 
+(function() {
 // ********************************************************************************************* //
 
 // Inside scripts/main.js
@@ -129,30 +130,76 @@ require.analyzeFailure = function(context, managers, specified, loaded)
 // Modules
 
 var config = getModuleLoaderConfig({});
-Firebug.loadConfiguration = config;
+//Firebug.loadConfiguration = config;
+
+if (FBTrace.DBG_INITIALIZE || FBTrace.DBG_MODULES)
+    FBTrace.sysout("main.js; Loading Firebug modules...");
 
 require(config,
 [
-    "firebug/traceModule",
+    //"firebug/chrome",
+    "firebug/lib",
+    "firebug/domplate",
+    "firebug/firebug",
     "firebug/lib/options",
-    "firebug/lib/xpcom",
-    "firebug/dragdrop",
-    "firebug/tabContext",  // should be loaded by being a dep of tabWatcher
-    "firebug/sourceBox",
-    "firebug/script",
-    "firebug/memoryProfiler",
     "arch/tools",
     "arch/firebugadapter",
     "firebug/debugger",
-    "arch/javascripttool"
+    "arch/javascripttool",
+    "firebug/traceModule",
+    "firebug/lib/xpcom",
+    "firebug/dragdrop",
+    "firebug/tabWatcher",
+    "firebug/sourceBox",
+    "firebug/script",
+    "firebug/memoryProfiler",
+    "firebug/commandLine",
+    "firebug/jsonViewer",
+    "firebug/errors",
+    "firebug/navigationHistory",
+    "firebug/html",
+    "firebug/css",
+    "firebug/consoleInjector",
+    "firebug/inspector",
+    "firebug/xmlViewer",
+    "firebug/layout",
+    "firebug/net",
+    "firebug/knownIssues",
+    "firebug/balloonNote",
+    "firebug/plugin",
+    "firebug/profiler",
+    "firebug/search",
+    "firebug/infotip",
+    "firebug/tabCache",
+    "firebug/activation",
+    "firebug/sourceFile",
+    "firebug/insideOutBox",
+    "firebug/navigationHistory",
+    "firebug/a11y",
+    "firebug/shortcuts",
+    "firebug/start-button/startButtonOverlay",
+    "firebug/external/externalEditors",
+    "firebug/callstack",
+    "firebug/callstack",
+    "firebug/spy",
+    "firebug/svgViewer",
+    "firebug/tableRep",
+    "firebug/commandLinePopup",
+    "firebug/commandLineExposed",
+    "firebug/consoleExposed"
 ],
-function(someModule)
+function()
 {
     if (FBTrace.DBG_INITIALIZE || FBTrace.DBG_MODULES)
-        FBTrace.sysout("main.js require!\n");
+        FBTrace.sysout("main.js; Firebug modules loaded using RequireJS!");
 
     Firebug.Options.initialize("extensions.firebug");
     FirebugChrome.waitForPanelBar(true);
+
+    // xxxHonza: the only global should be Firebug object.
+    // for extensions compatibility
+    top.FirebugReps = Firebug.Reps;
 });
 
 // ********************************************************************************************* //
+})();

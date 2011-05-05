@@ -1,6 +1,9 @@
 /* See license.txt for terms of usage */
 
-FBL.ns(function() {
+define([
+    "firebug/lib"
+],
+function(FBL) {
 
 // ************************************************************************************************
 // Constants
@@ -17,6 +20,8 @@ const MAX_HISTORY_MENU_ITEMS = 15;
  */
 Firebug.NavigationHistory = FBL.extend(Firebug.Module,
 {
+    dispatchName: "navigationHistory",
+
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
     // Extending Module
 

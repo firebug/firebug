@@ -1,6 +1,10 @@
 /* See license.txt for terms of usage */
 
-FBL.ns(function() {
+define([
+    "firebug/lib",
+    "firebug/lib/xpcom"
+],
+function(FBL, XPCOM) {
 
 // ************************************************************************************************
 // Constants
@@ -17,7 +21,7 @@ const nsIHttpChannel = Ci.nsIHttpChannel;
 const IOService = Cc["@mozilla.org/network/io-service;1"];
 const ioService = IOService.getService(nsIIOService);
 const ScriptableInputStream = Cc["@mozilla.org/scriptableinputstream;1"];
-const chromeReg = Firebug.XPCOM.CCSV("@mozilla.org/chrome/chrome-registry;1", "nsIToolkitChromeRegistry");
+const chromeReg = XPCOM.CCSV("@mozilla.org/chrome/chrome-registry;1", "nsIToolkitChromeRegistry");
 
 const LOAD_FROM_CACHE = nsIRequest.LOAD_FROM_CACHE;
 const LOAD_BYPASS_LOCAL_CACHE_IF_BUSY = nsICachingChannel.LOAD_BYPASS_LOCAL_CACHE_IF_BUSY;
@@ -192,7 +196,7 @@ Firebug.SourceCache.prototype = FBL.extend(new Firebug.Listener(),
 
             if (method && (channel instanceof nsIHttpChannel))
             {
-                var httpChannel = Firebug.XPCOM.QI(channel, nsIHttpChannel);
+                var httpChannel = XPCOM.QI(channel, nsIHttpChannel);
                 httpChannel.requestMethod = method;
             }
         }
@@ -211,7 +215,7 @@ Firebug.SourceCache.prototype = FBL.extend(new Firebug.Listener(),
                 var postData = getPostStream(this.context);
                 if (postData)
                 {
-                    var uploadChannel = Firebug.XPCOM.QI(channel, nsIUploadChannel);
+                    var uploadChannel = XPCOM.QI(channel, nsIUploadChannel);
                     uploadChannel.setUploadStream(postData, "", -1);
                     if (FBTrace.DBG_CACHE) FBTrace.sysout("sourceCache.load uploadChannel set\n");
                 }
@@ -219,7 +223,7 @@ Firebug.SourceCache.prototype = FBL.extend(new Firebug.Listener(),
 
             if (channel instanceof nsICachingChannel)
             {
-                var cacheChannel = Firebug.XPCOM.QI(channel, nsICachingChannel);
+                var cacheChannel = XPCOM.QI(channel, nsICachingChannel);
                 cacheChannel.cacheKey = getCacheKey(this.context);
                 if (FBTrace.DBG_CACHE) FBTrace.sysout("sourceCache.load cacheChannel key"+cacheChannel.cacheKey+"\n");
             }
@@ -233,7 +237,7 @@ Firebug.SourceCache.prototype = FBL.extend(new Firebug.Listener(),
                 if (postData)
                 {
                     var postDataStream = FBL.getInputStreamFromString(postData);
-                    var uploadChannel = Firebug.XPCOM.QI(channel, nsIUploadChannel);
+                    var uploadChannel = XPCOM.QI(channel, nsIUploadChannel);
                     uploadChannel.setUploadStream(postDataStream, "application/x-www-form-urlencoded", -1);
                     if (FBTrace.DBG_CACHE) FBTrace.sysout("sourceCache.load uploadChannel set\n");
                 }
@@ -331,13 +335,13 @@ function getPostStream(context)
     try
     {
         var webNav = context.browser.webNavigation;
-        var descriptor = Firebug.XPCOM.QI(webNav, Ci.nsIWebPageDescriptor).currentDescriptor;
-        var entry = Firebug.XPCOM.QI(descriptor, Ci.nsISHEntry);
+        var descriptor = XPCOM.QI(webNav, Ci.nsIWebPageDescriptor).currentDescriptor;
+        var entry = XPCOM.QI(descriptor, Ci.nsISHEntry);
 
         if (entry.postData)
         {
             // Seek to the beginning, or it will probably start reading at the end
-            var postStream = Firebug.XPCOM.QI(entry.postData, Ci.nsISeekableStream);
+            var postStream = XPCOM.QI(entry.postData, Ci.nsISeekableStream);
             postStream.seek(0, 0);
             return postStream;
         }
@@ -352,8 +356,8 @@ function getCacheKey(context)
     try
     {
         var webNav = context.browser.webNavigation;
-        var descriptor = Firebug.XPCOM.QI(webNav, Ci.nsIWebPageDescriptor).currentDescriptor;
-        var entry = Firebug.XPCOM.QI(descriptor, Ci.nsISHEntry);
+        var descriptor = XPCOM.QI(webNav, Ci.nsIWebPageDescriptor).currentDescriptor;
+        var entry = XPCOM.QI(descriptor, Ci.nsISHEntry);
         return entry.cacheKey;
      }
      catch (exc)

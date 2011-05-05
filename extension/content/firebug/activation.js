@@ -1,6 +1,10 @@
 /* See license.txt for terms of usage */
 
-FBL.ns(function() {
+define([
+    "firebug/lib",
+    "firebug/domplate"
+],
+function(FBL, Domplate) {
 
 // ************************************************************************************************
 // Constants
@@ -393,6 +397,10 @@ Firebug.Activation.TabWatcherListener =
 Firebug.PanelActivation = FBL.extend(Firebug.Module,
 /** @lends Firebug.PanelActivation */
 {
+    dispatchName: "panelActivation",
+
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
     initialize: function()
     {
         prefs.addObserver(Firebug.Options.getPrefDomain(), this, false);

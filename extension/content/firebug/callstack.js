@@ -1,6 +1,11 @@
 /* See license.txt for terms of usage */
-// depends on ToolsInterface.browser
-FBL.ns(function() {
+
+define([
+    "firebug/lib",
+    "firebug/reps",
+    "arch/tools"
+],
+function(FBL, FirebugReps, ToolsInterface) {
 
 // ************************************************************************************************
 // Constants
@@ -30,12 +35,12 @@ Firebug.CallstackPanel.prototype = FBL.extend(Firebug.Panel,
     {
         Firebug.Panel.initialize.apply(this, arguments);
 
-        Firebug.ToolsInterface.browser.addListener(this);
+        ToolsInterface.browser.addListener(this);
     },
 
     destroy: function(state)
     {
-        Firebug.ToolsInterface.browser.removeListener(this);
+        ToolsInterface.browser.removeListener(this);
 
         Firebug.Panel.destroy.apply(this, arguments);
     },
@@ -65,14 +70,14 @@ Firebug.CallstackPanel.prototype = FBL.extend(Firebug.Panel,
     {
         if (!this.location)
         {
-            this.location = FBL.buildStackTrace(Firebug.ToolsInterface.JavaScript.Turn.currentFrame);
+            this.location = FBL.buildStackTrace(ToolsInterface.JavaScript.Turn.currentFrame);
             this.updateLocation(this.location);
         } // then we are lazy
 
         if (FBTrace.DBG_STACK)
             FBTrace.sysout("callstack.show state: "+state+" this.location: "+this.location,
                 {state: state, panel: this,
-                  currentFrame: Firebug.ToolsInterface.JavaScript.Turn.currentFrame});
+                  currentFrame: ToolsInterface.JavaScript.Turn.currentFrame});
 
         if (state)
         {
@@ -119,7 +124,7 @@ Firebug.CallstackPanel.prototype = FBL.extend(Firebug.Panel,
     {
         if (!this.location) // then we are lazy
         {
-            this.location = FBL.buildStackTrace(Firebug.ToolsInterface.JavaScript.Turn.currentFrame);
+            this.location = FBL.buildStackTrace(ToolsInterface.JavaScript.Turn.currentFrame);
             this.updateLocation(this.location);
         }
 

@@ -1,6 +1,9 @@
 /* See license.txt for terms of usage */
 
-define([], function factoryOptions() {
+define([
+    "firebug/lib"
+],
+function factoryOptions(FBL) {
 
 // ********************************************************************************************* //
 // Constants
@@ -89,7 +92,7 @@ var optionUpdateMap = {};
  * Panels send commands to request option change.
  * Backend responds with events when the change is accepted.
  */
-Firebug.Options =
+var Options =
 /** @lends Firebug.Options */
 {
     getPrefDomain: function()
@@ -416,9 +419,7 @@ Firebug.Options =
 // ********************************************************************************************* //
 // Registration
 
-//Firebug.Options.initialize();
-
-return Firebug.Options;
+return Options;
 
 // ********************************************************************************************* //
 });

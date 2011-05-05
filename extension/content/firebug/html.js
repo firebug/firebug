@@ -1,6 +1,15 @@
 /* See license.txt for terms of usage */
 
-FBL.ns(function() { with (Domplate) {
+define([
+    "firebug/lib",
+    "firebug/domplate",
+    "firebug/reps",
+    "arch/tools",
+    "firebug/lib/htmlLib",
+    "firebug/breakpoint",
+    "firebug/editor"
+],
+function(FBL, Domplate, FirebugReps, ToolsInterface) { with (Domplate) {
 
 // ************************************************************************************************
 // Constants
@@ -17,20 +26,24 @@ const BP_BREAKONCHILDCHANGE = 2;
 const BP_BREAKONREMOVE = 3;
 const BP_BREAKONTEXT = 4;
 
+var KeyEvent = window.KeyEvent;
+
 // ************************************************************************************************
 
 Firebug.HTMLModule = FBL.extend(Firebug.Module,
 {
+    dispatchName: "htmlModule",
+
     initialize: function(prefDomain, prefNames)
     {
         Firebug.Module.initialize.apply(this, arguments);
-        Firebug.ToolsInterface.browser.addListener(this.DebuggerListener);
+        ToolsInterface.browser.addListener(this.DebuggerListener);
     },
 
     shutdown: function()
     {
         Firebug.Module.shutdown.apply(this, arguments);
-        Firebug.ToolsInterface.browser.removeListener(this.DebuggerListener);
+        ToolsInterface.browser.removeListener(this.DebuggerListener);
     },
 
     initContext: function(context, persistedState)
@@ -490,7 +503,7 @@ Firebug.HTMLPanel.prototype = FBL.extend(WalkingPanel,
                     {
                         while (
                                 (!Firebug.showTextNodesWithWhitespace && Firebug.HTMLLib.isWhitespaceText(nextSibling)) ||
-                                (!Firebug.showCommentNodes && nextSibling instanceof Comment)
+                                (!Firebug.showCommentNodes && nextSibling instanceof window.Comment)
                               )
                         {
                             nextSibling = this.findNextSibling(nextSibling);
@@ -677,7 +690,7 @@ Firebug.HTMLPanel.prototype = FBL.extend(WalkingPanel,
             else
                 return null;  // no siblings of source elements
         }
-        else if (node instanceof Document)
+        else if (node instanceof window.Document)
         {
             if (previousSibling !== null)
                 return this.getNextSibling(previousSibling);
@@ -1076,7 +1089,7 @@ Firebug.HTMLPanel.prototype = FBL.extend(WalkingPanel,
 
     supportsObject: function(object, type)
     {
-        if (object instanceof Element || object instanceof Text || object instanceof CDATASection)
+        if (object instanceof window.Element || object instanceof window.Text || object instanceof window.CDATASection)
             return 2;
         else if (object instanceof FBL.SourceLink && object.type == "css" && !FBL.reCSS.test(object.href))
             return 2;
@@ -1241,7 +1254,7 @@ Firebug.HTMLPanel.prototype = FBL.extend(WalkingPanel,
         {
             // Ignore the document itself, it shouldn't be displayed in
             // the object path (aka breadcrumbs).
-            if (element instanceof Document)
+            if (element instanceof window.Document)
                 continue;
 
             path.push(element);
@@ -1709,7 +1722,7 @@ TextNodeEditor.prototype = domplate(Firebug.InlineEditor.prototype,
     beginEditing: function(target, value)
     {
         var node = Firebug.getRepObject(target);
-        if (!node || node instanceof Element)
+        if (!node || node instanceof window.Element)
             return;
         var document = node.ownerDocument;
         this.range = document.createRange();
@@ -1735,7 +1748,7 @@ TextNodeEditor.prototype = domplate(Firebug.InlineEditor.prototype,
             return;
         value = FBL.unescapeForTextNode(value || '');
         target.innerHTML = FBL.escapeForTextNode(value);
-        if (node instanceof Element)
+        if (node instanceof window.Element)
         {
             if (FBL.isElementMathML(node) || FBL.isElementSVG(node))
                 node.textContent=value;
@@ -1941,11 +1954,11 @@ function getEmptyElementTag(node)
 
 function getNodeTag(node, expandAll)
 {
-    if (node instanceof Element)
+    if (node instanceof window.Element)
     {
-        if (node instanceof HTMLHtmlElement && node.ownerDocument && node.ownerDocument.doctype)
+        if (node instanceof window.HTMLHtmlElement && node.ownerDocument && node.ownerDocument.doctype)
             return Firebug.HTMLPanel.HTMLHtmlElement.tag;
-        else if (node instanceof HTMLAppletElement)
+        else if (node instanceof window.HTMLAppletElement)
             return getEmptyElementTag(node);
         else if (Firebug.shouldIgnore(node))
             return null;
@@ -1960,17 +1973,17 @@ function getNodeTag(node, expandAll)
         else
             return expandAll ? Firebug.HTMLPanel.CompleteElement.tag : Firebug.HTMLPanel.Element.tag;
     }
-    else if (node instanceof Text)
+    else if (node instanceof window.Text)
         return Firebug.HTMLPanel.TextNode.tag;
-    else if (node instanceof CDATASection)
+    else if (node instanceof window.CDATASection)
         return Firebug.HTMLPanel.CDATANode.tag;
-    else if (node instanceof Comment && (Firebug.showCommentNodes || expandAll))
+    else if (node instanceof window.Comment && (Firebug.showCommentNodes || expandAll))
         return Firebug.HTMLPanel.CommentNode.tag;
     else if (node instanceof FBL.SourceText)
         return FirebugReps.SourceText.tag;
-    else if (node instanceof Document)
+    else if (node instanceof window.Document)
         return Firebug.HTMLPanel.HTMLDocument.tag;
-    else if (node instanceof DocumentType)
+    else if (node instanceof window.DocumentType)
         return Firebug.HTMLPanel.HTMLDocType.tag;
     else
         return FirebugReps.Nada.tag;

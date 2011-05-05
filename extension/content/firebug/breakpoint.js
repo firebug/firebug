@@ -1,11 +1,16 @@
 /* See license.txt for terms of usage */
 
-FBL.ns(function() {
+define([
+    "firebug/lib",
+    "firebug/domplate",
+    "firebug/reps",
+    "arch/tools",
+    "firebug/editor",
+],
+function(FBL, Domplate, FirebugReps, ToolsInterface) {
 
 // ************************************************************************************************
-// Constants
-
-// ************************************************************************************************
+// Breakpoints
 
 Firebug.Breakpoint = FBL.extend(Firebug.Module,
 {
@@ -344,7 +349,7 @@ Firebug.Breakpoint.BreakpointsPanel.prototype = FBL.extend(Firebug.Panel,
             groups.push({name: "monitors", title: FBL.$STR("LoggedFunctions"),
                 breakpoints: monitors});
 
-        Firebug.ToolsInterface.browser.dispatch("getBreakpoints", [this.context, groups]);
+        ToolsInterface.browser.dispatch("getBreakpoints", [this.context, groups]);
 
         if (groups.length)
             Firebug.Breakpoint.BreakpointListRep.tag.replace({groups: groups}, this.panelNode);

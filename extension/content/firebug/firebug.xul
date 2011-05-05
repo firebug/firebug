@@ -20,7 +20,6 @@
 
     <script type="application/x-javascript" src="chrome://global/content/globalOverlay.js"/>
     <script type="application/x-javascript" src="chrome://firebug/content/trace.js"/>
-    <script type="application/x-javascript" src="chrome://firebug/content/xpcom.js"/>
     <script type="application/x-javascript" src="chrome://firebug/content/chrome.js"/>
     <script type="application/x-javascript">
         // To avoid error messages when Firebug extensions are loaded into this window.

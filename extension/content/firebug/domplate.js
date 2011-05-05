@@ -1,12 +1,16 @@
 /* See license.txt for terms of usage */
 
+// xxxHonza: remove deps on FBL.
+define([
+    "firebug/lib"
+],
+function(FBL) {
+
 // ********************************************************************************************* //
 
 var Domplate = {};
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
-
-(function() {
 
 function DomplateTag(tagName)
 {
@@ -28,6 +32,7 @@ function DomplateLoop()
 var womb = null;
 var uid = 0;
 
+// xxxHonza: the only global should be Firebug object.
 var domplate = top.domplate = function()
 {
     var lastSubject;
@@ -54,13 +59,13 @@ domplate.context = function(context, fn)
 
 Domplate.domplate = domplate;
 
-Domplate.TAG = FBL.TAG = function()
+Domplate.TAG = function()
 {
     var embed = new DomplateEmbed();
     return embed.merge(arguments);
 };
 
-Domplate.FOR = FBL.FOR = function()
+Domplate.FOR = function()
 {
     var loop = new DomplateLoop();
     return loop.merge(arguments);
@@ -535,7 +540,7 @@ DomplateTag.prototype =
 
         blocks.push(");\n");
 
-        if(FBTrace.DBG_DOMPLATE)
+        if (FBTrace.DBG_DOMPLATE)
         {
             var nBlocks = 2*path.length + 2;
             var genTrace = "FBTrace.sysout(\'"+blocks.slice(-nBlocks).join("").replace("\n","")+"\'+'->'+(node?FBL.getElementHTML(node):'null'), node);\n";
@@ -949,11 +954,6 @@ function ArrayIterator(array)
 
 function StopIteration() {}
 
-FBL.$break = function()
-{
-    throw StopIteration;
-};
-
 // ************************************************************************************************
 
 var Renderer =
@@ -1176,18 +1176,34 @@ function defineTags()
     for (var i = 0; i < arguments.length; ++i)
     {
         var tagName = arguments[i];
-        var fn = new Function("var newTag = new Domplate.DomplateTag('"+tagName+"'); return newTag.merge(arguments);");
-
+        var fn = createTagHandler(tagName);
         var fnName = tagName.toUpperCase();
-        Domplate[fnName] = FBL[fnName] = fn;
+
+        // xxxHonza: Domplate is injected into FBL namesapce only for backward
+        // compatibility with extensions.
+        Domplate[fnName] = FBL[fnName]= fn;
+    }
+
+    function createTagHandler(tagName)
+    {
+        return function() {
+            var newTag = new Domplate.DomplateTag(tagName);
+            return newTag.merge(arguments);
+        }
     }
 }
 
+// xxxHonza: Domplate is injected into FBL namesapce only for backward
+// compatibility with extensions.
+// We need to mark this as deprecated.
+FBL.TAG = Domplate.TAG;
+FBL.FOR = Domplate.FOR;
+
 defineTags(
-    "a", "button", "br", "canvas", "col", "colgroup", "div", "fieldset", "form", "h1", "h2", "h3", "hr",
-     "img", "input", "label", "legend", "li", "ol", "optgroup", "option", "p", "pre", "select", "b",
-    "span", "strong", "table", "tbody", "td", "textarea", "tfoot", "th", "thead", "tr", "tt", "ul",
-    "iframe", "code",
+    "a", "button", "br", "canvas", "col", "colgroup", "div", "fieldset", "form", "h1", "h2",
+    "h3", "hr", "img", "input", "label", "legend", "li", "ol", "optgroup", "option", "p",
+    "pre", "select", "b", "span", "strong", "table", "tbody", "td", "textarea", "tfoot", "th",
+    "thead", "tr", "tt", "ul", "iframe", "code",
 
     // HTML5
     "article", "aside", "audio", "bb", "canvas", "command", "datagrid", "datalist", "details",
@@ -1196,4 +1212,9 @@ defineTags(
 );
 
 // ************************************************************************************************
-})();
+// Registration
+
+return Domplate;
+
+// ************************************************************************************************
+});

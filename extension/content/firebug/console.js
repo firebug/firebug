@@ -1,6 +1,11 @@
 /* See license.txt for terms of usage */
 
-FBL.ns(function() {
+define([
+    "firebug/lib",
+    "firebug/reps",
+    "arch/tools"
+],
+function(FBL, FirebugReps, ToolsInterface) {
 
 // ************************************************************************************************
 // Constants
@@ -191,17 +196,17 @@ Firebug.Console = FBL.extend(ActivableConsole,
 
         Firebug.ActivableModule.initialize.apply(this, arguments);
 
-        this.asTool = new Firebug.ToolsInterface.Browser.Tool('console');
-        Firebug.ToolsInterface.browser.addListener(this);
-        Firebug.ToolsInterface.browser.registerTool(this.asTool);
+        this.asTool = new ToolsInterface.Browser.Tool('console');
+        ToolsInterface.browser.addListener(this);
+        ToolsInterface.browser.registerTool(this.asTool);
 
         this.syncFilterButtons(Firebug.chrome);
     },
 
     shutdown: function()
     {
-        Firebug.ToolsInterface.browser.removeListener(this);
-        Firebug.ToolsInterface.browser.unregisterTool(this.asTool);
+        ToolsInterface.browser.removeListener(this);
+        ToolsInterface.browser.unregisterTool(this.asTool);
 
         Firebug.ActivableModule.shutdown.apply(this, arguments);
     },

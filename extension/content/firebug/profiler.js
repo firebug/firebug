@@ -1,10 +1,17 @@
 /* See license.txt for terms of usage */
 
-FBL.ns(function() { with (FBL) {
-
-var toggleProfiling = FBL.$("fbToggleProfiling");
+define([
+    "firebug/lib",
+    "firebug/domplate",
+    "firebug/reps",
+    "arch/tools"
+],
+function(FBL, Domplate, FirebugReps, ToolsInterface) {
 
 // ************************************************************************************************
+// Profiler
+
+var toggleProfiling = FBL.$("fbToggleProfiling");
 
 Firebug.Profiler = FBL.extend(Firebug.Module,
 {
@@ -47,8 +54,8 @@ Firebug.Profiler = FBL.extend(Firebug.Module,
         if (!disabled)
         {
             // The profiler is available only if the Debugger and Console are activated
-            var debuggerTool = Firebug.ToolsInterface.browser.getTool("script");
-            var consoleTool = Firebug.ToolsInterface.browser.getTool("console");
+            var debuggerTool = ToolsInterface.browser.getTool("script");
+            var consoleTool = ToolsInterface.browser.getTool("console");
             disabled = (debuggerTool && !debuggerTool.getActive()) || (consoleTool && !consoleTool.getActive());
         }
 
@@ -465,4 +472,4 @@ Firebug.registerRep(Firebug.Profiler.ProfileCall);
 return Firebug.Profiler;
 
 // ************************************************************************************************
-}});
+});

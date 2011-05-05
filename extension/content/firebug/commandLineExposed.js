@@ -1,5 +1,11 @@
 /* See license.txt for terms of usage */
 
+define([
+    "firebug/lib",
+    "firebug/commandLine"
+],
+function(FBL) {
+
 // ********************************************************************************************* //
 // Command Line APIs
 
@@ -186,3 +192,14 @@ function createFirebugCommandLine(context, win)
 };
 
 // ********************************************************************************************* //
+// Registration
+
+Firebug.CommandLineExposed =
+{
+    createFirebugCommandLine: createFirebugCommandLine
+};
+
+return Firebug.CommandLineExposed;
+
+// ********************************************************************************************* //
+});

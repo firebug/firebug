@@ -1,6 +1,12 @@
 /* See license.txt for terms of usage */
 
-FBL.ns(function() {
+define([
+    "firebug/lib",
+    "firebug/domplate",
+    "firebug/reps",
+    "firebug/net"
+],
+function(FBL, Domplate, FirebugReps) {
 
 // ************************************************************************************************
 // Constants

@@ -1,6 +1,9 @@
 /* See license.txt for terms of usage */
 
-FBL.ns(function() {
+define([
+    "firebug/lib"
+],
+function(FBL) {
 
 // ************************************************************************************************
 

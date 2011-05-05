@@ -1,6 +1,10 @@
 /* See license.txt for terms of usage */
 
-define([], function() {
+define([
+    "firebug/lib",
+    "firebug/firebug"
+],
+function(FBL, Firebug) {
 
 // ************************************************************************************************
 // Trace Module
