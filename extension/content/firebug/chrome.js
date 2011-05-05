@@ -53,12 +53,14 @@ top.FirebugChrome =
 
     waitLimit: 100,
 
-    waitForPanelBar: function(modulesLoaded) {
+    waitForPanelBar: function(modulesLoaded)
+    {
         if (modulesLoaded)
             FirebugChrome.modulesLoaded = true;
 
         FirebugChrome.waitLimit -= 1;
-        if(!FirebugChrome.initializeOnPanelBarReady()){
+        if (!FirebugChrome.initializeOnPanelBarReady())
+        {
             if (FBTrace.DBG_INITIALIZE)
             {
                 var msg = "main; waitForPanelBar "+FirebugChrome.waitLimit;
@@ -75,7 +77,8 @@ top.FirebugChrome =
     {
         waitingPanelBarCount -= 1;
         if (FBTrace.DBG_INITIALIZE)
-            FBTrace.sysout("chrome; panelBarReady "+waitingPanelBarCount+" modulesLoaded: "+FirebugChrome.modulesLoaded);
+            FBTrace.sysout("chrome; panelBarReady "+waitingPanelBarCount+" modulesLoaded: "+
+                FirebugChrome.modulesLoaded);
 
         this.initializeOnPanelBarReady();
     },
@@ -351,7 +354,8 @@ top.FirebugChrome =
 
     disableOff: function(collapse)
     {
-        FBL.collapse($("fbCloseButton"), collapse);  // disable/enable this button in the Firebug.chrome window.
+        // disable/enable this button in the Firebug.chrome window.
+        FBL.collapse($("fbCloseButton"), collapse);
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
@@ -529,7 +533,9 @@ top.FirebugChrome =
 
         if (currentIndex != -1)
         {
-            newIndex = goRight ? (currentIndex == panelTypes.length - 1 ? 0 : ++currentIndex) : (currentIndex == 0 ? panelTypes.length - 1 : --currentIndex);
+            newIndex = goRight ? (currentIndex == panelTypes.length - 1 ?
+                0 : ++currentIndex) : (currentIndex == 0 ? panelTypes.length - 1 : --currentIndex);
+
             newPanel = panelTypes[newIndex].prototype;
             if (newPanel && newPanel.name)
             {
@@ -599,7 +605,9 @@ top.FirebugChrome =
     select: function(object, panelName, sidePanelName, forceUpdate)
     {
         if (FBTrace.DBG_PANELS)
-            FBTrace.sysout("chrome.select object:"+object+" panelName:"+panelName+" sidePanelName:"+sidePanelName+" forceUpdate:"+forceUpdate+"\n");
+            FBTrace.sysout("chrome.select object:"+object+" panelName:"+panelName+
+                " sidePanelName:"+sidePanelName+" forceUpdate:"+forceUpdate+"\n");
+
         var bestPanelName = getBestPanelName(object, Firebug.currentContext, panelName);
         var panel = this.selectPanel(bestPanelName, sidePanelName, true);
         if (panel)
@@ -611,7 +619,8 @@ top.FirebugChrome =
         if (panelName && sidePanelName)
             Firebug.currentContext.sidePanelNames[panelName] = sidePanelName;
 
-        return panelBar1.selectPanel(panelName, false, noRefresh);  // cause panel visibility changes and events
+        // cause panel visibility changes and events
+        return panelBar1.selectPanel(panelName, false, noRefresh);
     },
 
     selectSidePanel: function(panelName)
@@ -745,12 +754,14 @@ top.FirebugChrome =
 
     setFirebugContext: function(context)
     {
-         // This sets the global value of Firebug.currentContext in the window that this chrome is compiled into.
-         // Note that for firebug.xul, the Firebug object is shared across windows, but not FirebugChrome and Firebug.currentContext
+         // This sets the global value of Firebug.currentContext in the window that this
+         // chrome is compiled into. Note that for firebug.xul, the Firebug object is shared
+         // across windows, but not FirebugChrome and Firebug.currentContext
          Firebug.currentContext = context;
 
          if (FBTrace.DBG_WINDOWS || FBTrace.DBG_DISPATCH)
-             FBTrace.sysout("setFirebugContext "+(Firebug.currentContext?Firebug.currentContext.getName():" **> NULL <** ") + " in "+window.location);
+             FBTrace.sysout("setFirebugContext "+(Firebug.currentContext?
+                Firebug.currentContext.getName():" **> NULL <** ") + " in "+window.location);
     },
 
     hidePanel: function()
@@ -817,9 +828,11 @@ top.FirebugChrome =
 
         if (Firebug.currentContext && Firebug.currentContext.sidePanelNames)
         {
-            if ( !panelBar2.selectedPanel || (panelBar2.selectedPanel.parentPanel !== panelBar1.selectedPanel.name) )
+            if (!panelBar2.selectedPanel ||
+                (panelBar2.selectedPanel.parentPanel !== panelBar1.selectedPanel.name))
             {
-                var sidePanelName = Firebug.currentContext.sidePanelNames[Firebug.currentContext.panelName];
+                var sidePanelName = Firebug.currentContext.sidePanelNames[
+                    Firebug.currentContext.panelName];
                 sidePanelName = getBestSidePanelName(sidePanelName, panelTypes);
                 panelBar2.selectPanel(sidePanelName, true);
             }
@@ -1245,7 +1258,8 @@ top.FirebugChrome =
         var realRep = realObject ? Firebug.getRep(realObject, Firebug.currentContext) : null;
 
         if (FBTrace.DBG_OPTIONS)
-            FBTrace.sysout("chrome.onContextShowing object:"+object+" rep: "+rep+" realObject: "+realObject+" realRep:"+realRep+"\n");
+            FBTrace.sysout("chrome.onContextShowing object:"+object+" rep: "+rep+
+                " realObject: "+realObject+" realRep:"+realRep+"\n");
 
         if (realObject && realRep)
         {
@@ -1407,7 +1421,7 @@ top.FirebugChrome =
         {
             // Firefox 4.0 implements new AddonManager. In case of Firefox 3.6 the module
             // is not avaialble and there is an exception.
-            Components.utils.import("resource://gre/modules/AddonManager.jsm");
+            Components.utils["import"]("resource://gre/modules/AddonManager.jsm");
         }
         catch (err)
         {
@@ -1620,7 +1634,9 @@ function getBestPanelSupportingObject(object, context)
                 bestPanel = panelType;
             }
             if (FBTrace.DBG_PANELS)
-                FBTrace.sysout("chrome.getBestPanelName panelType: "+panelType.prototype.name+" level: "+level+" bestPanel: "+ (bestPanel ? bestPanel.prototype.name : "null")+" bestLevel: "+bestLevel+"\n");
+                FBTrace.sysout("chrome.getBestPanelName panelType: "+panelType.prototype.name+
+                    " level: "+level+" bestPanel: "+ (bestPanel ? bestPanel.prototype.name : "null")+
+                    " bestLevel: "+bestLevel+"\n");
         }
     }
 
@@ -1761,7 +1777,7 @@ function onSelectedSidePanel(event)
     }
 
     if (FBTrace.DBG_PANELS)
-        FBTrace.sysout("chrome.onSelectedSidePanel name="+(sidePanel?sidePanel.name:"undefined")+"\n");
+        FBTrace.sysout("chrome.onSelectedSidePanel name="+(sidePanel?sidePanel.name:"undefined"));
 
     var panel = panelBar1.selectedPanel;
     if (panel && sidePanel)
@@ -1849,6 +1865,7 @@ function onPanelMouseDown(event)
         FBL.cancelEvent(event);
     }
 }
+
 function onPanelMouseUp(event)
 {
     if (FBL.isLeftClick(event))

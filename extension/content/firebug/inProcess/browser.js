@@ -290,7 +290,7 @@ Browser.prototype.addListener = function(listener)
         list.push(listener);
     else
         FBTrace.sysout("BTI.Browser.addListener; ERROR The listener is already appended " +
-            listener.dispatchName ? listener.dispatchName : "");
+            (listener.dispatchName ? listener.dispatchName : ""));
 };
 
 Browser.prototype.removeListener = function(listener)
@@ -301,7 +301,7 @@ Browser.prototype.removeListener = function(listener)
         list.splice(i, 1);
     else
         FBTrace.sysout("BTI.Browser.removeListener; ERROR Unknown listener " +
-            listener.dispatchName ? listener.dispatchName : "");
+            (listener.dispatchName ? listener.dispatchName : ""));
 };
 
 /**
