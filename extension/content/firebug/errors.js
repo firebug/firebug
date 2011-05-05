@@ -51,6 +51,14 @@ var Errors = Firebug.Errors = FBL.extend(Firebug.Module,
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
     // extends Module
 
+    shutdown: function()
+    {
+        // Make sure the error obsever is removed.
+        this.stopObserving();
+
+        Firebug.Module.shutdown.apply(this, arguments);
+    },
+
     initContext: function(context)
     {
         this.clear(context);
