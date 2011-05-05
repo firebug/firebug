@@ -4,7 +4,8 @@ define([
     "firebug/lib",
     "firebug/domplate",
     "firebug/reps",
-    "firebug/net"
+    "firebug/net",
+    "firebug/errors",
 ],
 function(FBL, Domplate, FirebugReps) {
 

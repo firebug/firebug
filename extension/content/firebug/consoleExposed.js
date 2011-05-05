@@ -2,7 +2,8 @@
 
 define([
     "firebug/lib",
-    "firebug/reps"
+    "firebug/reps",
+    "firebug/errors",
 ],
 function(FBL, FirebugReps) {
 

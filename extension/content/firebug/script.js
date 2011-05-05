@@ -5,7 +5,9 @@ define([
     "firebug/reps",
     "firebug/domplate",
     "arch/tools",
-    "firebug/editorSelector"
+    "firebug/editorSelector",
+    "firebug/infotip",
+    "firebug/search",
 ],
 function(FBL, FirebugReps, Domplate, ToolsInterface) {
 

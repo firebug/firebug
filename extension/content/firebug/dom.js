@@ -6,7 +6,8 @@ define([
     "firebug/reps",
     "arch/tools",
     "firebug/editor",
-    "firebug/breakpoint"
+    "firebug/breakpoint",
+    "firebug/search",
 ],
 function(FBL, Domplate, FirebugReps, ToolsInterface) { with (Domplate) {
 

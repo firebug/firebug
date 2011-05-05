@@ -4,7 +4,8 @@ define([
     "firebug/lib",
     "firebug/reps",
     "firebug/console",
-    "firebug/consoleExposed"
+    "firebug/consoleExposed",
+    "firebug/errors",
 ],
 function(FBL, FirebugReps) {
 

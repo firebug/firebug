@@ -2,7 +2,8 @@
 
 define([
     "firebug/lib",
-    "arch/tools"
+    "arch/tools",
+    "firebug/plugin"
 ],
 function(FBL, ToolsInterface) {
 

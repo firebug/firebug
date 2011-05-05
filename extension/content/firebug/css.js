@@ -6,7 +6,9 @@ define([
     "firebug/reps",
     "firebug/lib/xpcom",
     "firebug/editor",
-    "firebug/editorSelector"
+    "firebug/editorSelector",
+    "firebug/infotip",
+    "firebug/search",
 ],
 function(FBL, Domplate, FirebugReps, XPCOM) { with (Domplate) {
 

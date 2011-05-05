@@ -3,7 +3,10 @@
 define([
     "firebug/lib",
     "firebug/reps",
-    "arch/tools"
+    "arch/tools",
+    "firebug/profiler",
+    "firebug/search",
+    "firebug/errors",
 ],
 function(FBL, FirebugReps, ToolsInterface) {
 

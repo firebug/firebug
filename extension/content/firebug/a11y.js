@@ -5,6 +5,7 @@ define([
     "firebug/domplate",
     "arch/tools",
     "firebug/console",
+    "firebug/infotip",
 ],
 function(FBL, Domplate, ToolsInterface) {
 

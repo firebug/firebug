@@ -4,7 +4,8 @@ define([
     "firebug/lib",
     "arch/tools",
     "firebug/lib/xpcom",
-    "firebug/reps"
+    "firebug/reps",
+    "firebug/errors",
 ],
 function(FBL, ToolsInterface, XPCOM, FirebugReps) {
 

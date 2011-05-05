@@ -7,7 +7,10 @@ define([
     "arch/tools",
     "firebug/lib/htmlLib",
     "firebug/breakpoint",
-    "firebug/editor"
+    "firebug/editor",
+    "firebug/infotip",
+    "firebug/search",
+    "firebug/insideOutBox",
 ],
 function(FBL, Domplate, FirebugReps, ToolsInterface) { with (Domplate) {
 

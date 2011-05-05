@@ -7,7 +7,13 @@ define([
     "arch/tools",
     "firebug/lib/options",
     "firebug/breakpoint",
-    "firebug/css"
+    "firebug/xmlViewer",
+    "firebug/svgViewer",
+    "firebug/jsonViewer",
+    "firebug/infotip",
+    "firebug/css",
+    "firebug/search",
+    "firebug/errors",
 ],
 function(FBL, Domplate, XPCOM, ToolsInterface) { with (Domplate) {
 
