@@ -2,7 +2,7 @@
 
 define([
     "firebug/lib",
-    "firebug/Domplate",
+    "firebug/domplate",
     "firebug/lib/xpcom"
 ],
 function(FBL, Domplate, XPCOM) {
