@@ -8,6 +8,7 @@ define([
     "firebug/editorSelector",
     "firebug/infotip",
     "firebug/search",
+    "firebug/sourceBox",
 ],
 function(FBL, FirebugReps, Domplate, ToolsInterface) {
 
