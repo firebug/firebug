@@ -62,7 +62,6 @@ var cacheSession = null;
 var contexts = new Array();
 var panelName = "net";
 var maxQueueRequests = 500;
-var panelBar1 = FBL.$("fbPanelBar1");
 var activeRequests = [];
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *

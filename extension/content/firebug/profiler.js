@@ -11,8 +11,6 @@ function(FBL, Domplate, FirebugReps, ToolsInterface) {
 // ************************************************************************************************
 // Profiler
 
-var toggleProfiling = FBL.$("fbToggleProfiling");
-
 Firebug.Profiler = FBL.extend(Firebug.Module,
 {
     dispatchName: "profiler",

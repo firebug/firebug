@@ -34,10 +34,6 @@ const STOP_ALL = nsIWebNavigation.STOP_ALL;
 const dummyURI = "about:layout-dummy-request";
 const aboutBlank = "about:blank";
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
-
-const tabBrowser = FBL.$("content");
-
 // ************************************************************************************************
 // Globals
 
@@ -62,6 +58,7 @@ Firebug.TabWatcher = FBL.extend(new Firebug.Listener(),
         if (FBTrace.DBG_INITIALIZE)
             FBTrace.sysout("-> tabWatcher initialize "+tabBrowser);
 
+        var tabBrowser = FBL.$("content");
         if (tabBrowser)
             tabBrowser.addProgressListener(TabProgressListener);
 
@@ -77,6 +74,7 @@ Firebug.TabWatcher = FBL.extend(new Firebug.Listener(),
 
         httpObserver.removeObserver(TabWatcherHttpObserver, "firebug-http-event");
 
+        var tabBrowser = FBL.$("content");
         if (tabBrowser)
         {
             tabBrowser.removeProgressListener(TabProgressListener);

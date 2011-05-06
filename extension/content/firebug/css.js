@@ -133,7 +133,6 @@ const reSplitCSS =  /(url\("?[^"\)]+?"?\))|(rgba?\(.*?\))|(hsla?\(.*?\))|(#[\dA-
 const reURL = /url\("?([^"\)]+)?"?\)/;
 const reRepeat = /no-repeat|repeat-x|repeat-y|repeat/;
 
-const sothinkInstalled = !!FBL.$("swfcatcherKey_sidebar");
 const styleGroups =
 {
     text: [
@@ -1873,6 +1872,7 @@ CSSElementPanel.prototype = FBL.extend(Firebug.CSSStyleSheetPanel.prototype,
         if ( !(element instanceof window.Element) ) // html supports SourceLink
             return;
 
+        var sothinkInstalled = !!FBL.$("swfcatcherKey_sidebar");
         if (sothinkInstalled)
         {
             var div = FirebugReps.Warning.tag.replace({object: "SothinkWarning"}, this.panelNode);

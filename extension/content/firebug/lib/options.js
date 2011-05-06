@@ -190,7 +190,7 @@ var Options =
             // getBranch(), like prefs.getBranch("accessibility.").
             var defaultBranch = prefService.getDefaultBranch(this.prefDomain+"."); //
 
-            var type = this.getPreferenceTypeByExample( typeof(value) );
+            var type = this.getPreferenceTypeByExample(typeof(value));
             if (this.setPreference(name, value, type, defaultBranch))
                 return true;
         }
@@ -272,8 +272,7 @@ var Options =
     {
         var prefName = prefDomain + "." + name;
 
-        var type = this.getPreferenceTypeByExample( (prefType?prefType:typeof(value)) );
-
+        var type = this.getPreferenceTypeByExample((prefType ? prefType : typeof(value)));
         if (!this.setPreference(prefName, value, type, prefs))
             return;
 
@@ -395,7 +394,8 @@ var Options =
         var preferences = prefs.getChildList("extensions.firebug", {});
         for (var i = 0; i < preferences.length; i++)
         {
-            if (preferences[i].indexOf("DBG_") == -1 && preferences[i].indexOf("filterSystemURLs") == -1)
+            if (preferences[i].indexOf("DBG_") == -1 &&
+                preferences[i].indexOf("filterSystemURLs") == -1)
             {
                 if (FBTrace.DBG_OPTIONS)
                     FBTrace.sysout("Clearing option: "+i+") "+preferences[i]);

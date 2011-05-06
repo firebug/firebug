@@ -14,9 +14,6 @@ const Ci = Components.interfaces;
 var appInfo = Cc["@mozilla.org/xre/app-info;1"].getService(Ci.nsIXULAppInfo);
 var versionChecker = Cc["@mozilla.org/xpcom/version-comparator;1"].getService(Ci.nsIVersionComparator);
 
-var statusBar = FBL.$("fbStatusBar");
-var statusText = FBL.$("fbStatusText");
-
 // ********************************************************************************************* //
 // Module Implementation
 
@@ -173,6 +170,9 @@ Firebug.StartButton = FBL.extend(Firebug.Module,
 
     showCount: function(errorCount)
     {
+        var statusBar = FBL.$("fbStatusBar");
+        var statusText = FBL.$("fbStatusText");
+
         if (!statusBar)
             return;
 

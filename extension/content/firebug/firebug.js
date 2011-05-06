@@ -24,17 +24,9 @@ const categoryManager = Cc["@mozilla.org/categorymanager;1"].getService(Ci.nsICa
 const stringBundleService = Cc["@mozilla.org/intl/stringbundle;1"].getService(Ci.nsIStringBundleService);
 const promptService = Cc["@mozilla.org/embedcomp/prompt-service;1"].getService(Ci.nsIPromptService);
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
-// There is one Firebug object per browser.xul
-
-const contentBox = FBL.$("fbContentBox");
-const contentSplitter = FBL.$("fbContentSplitter");
-const toggleCommand = FBL.$("cmd_toggleFirebug");
-const detachCommand = FBL.$("cmd_toggleDetachFirebug");
 const versionURL = "chrome://firebug/content/branch.properties";
-const statusBarContextMenu = FBL.$("fbStatusContextMenu");
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 const firebugURLs =  // TODO chrome.js
 {
@@ -54,8 +46,7 @@ const PLACEMENT_INBROWSER = 1;
 const PLACEMENT_DETACHED = 2;
 const PLACEMENT_MINIMIZED = 3;
 
-// ************************************************************************************************
-// Globals
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 var modules = [];
 var activeContexts = [];
@@ -72,6 +63,8 @@ var deadWindows = [];
 var deadWindowTimeout = 0;
 var clearContextTimeout = 0;
 
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
 try
 {
     // Register default Firebug string bundle (yet before domplate templates).
@@ -84,7 +77,7 @@ catch (exc)
     dump("Register default string bundle FAILS: "+exc+"\n");
 }
 
-// ************************************************************************************************
+// ********************************************************************************************* //
 
 /**
  * @class Represents the main Firebug application object. An instance of this object is
@@ -145,7 +138,6 @@ var Firebug =
 
     completeInitialize: function(tempPanelTypes)
     {
-        
         FBL.initialize();  // non require.js modules
 
         // Append early registered panels at the end.
@@ -198,7 +190,7 @@ var Firebug =
         return version+""+release;
     },
 
-    /*
+    /**
      *  Substitute strings in the UI, with fall back to en-US
      */
     internationalizeUI: function(doc) // TODO chrome.js
@@ -261,6 +253,7 @@ var Firebug =
             {
                 var node = nodes[i];
                 var aboutLabel = node.getAttribute("label");
+                FBTrace.sysout("about " + aboutLabel + " " + version);
                 node.setAttribute("label", aboutLabel + " " + version);
             }
         }
@@ -282,7 +275,7 @@ var Firebug =
         FBL.dispatch(modules, "initializeUI", [detachArgs]);
     },
 
-    /*
+    /**
      * called in browser when Firefox closes and in externalMode when fbs gets quitApplicationGranted.
      */
     shutdown: function()
@@ -443,7 +436,8 @@ var Firebug =
             catch(e)
             {
                 if (FBTrace.DBG_ERRORS)
-                    FBTrace.sysout("firebug.getURLsForAllActiveContexts could not get window.location for a context", e);
+                    FBTrace.sysout("firebug.getURLsForAllActiveContexts could not get " +
+                        "window.location for a context", e);
             }
         });
 
@@ -488,9 +482,10 @@ var Firebug =
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
     // Registration
 
-    /*
+    /**
      * Set a default value for a preference into the firebug preferences list.
-     * @param name preference name, possibly dot segmented, will be stored under extensions.firebug.<name>
+     * @param name preference name, possibly dot segmented, will be stored under
+     *      extensions.firebug.<name>
      * @param value default value of preference
      * @return true if default set, else false
      */
@@ -720,9 +715,9 @@ var Firebug =
         }
     },
 
-    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
-
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
     // Browser Bottom Bar
+
     // TODO XULWindow
     showBar: function(show)
     {
@@ -764,7 +759,7 @@ var Firebug =
         Firebug.StartButton.resetTooltip();
     },
 
-    /*
+    /**
      * Primary function to activate or minimize firebug. Used by
      * <ol>
      * <li>the status bar icon click action</li>
