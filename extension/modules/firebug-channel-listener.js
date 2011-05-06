@@ -6,6 +6,7 @@
 const Cc = Components.classes;
 const Ci = Components.interfaces;
 const Cr = Components.results;
+const Cu = Components.utils;
 
 var EXPORTED_SYMBOLS = ["ChannelListener"];
 
@@ -44,9 +45,11 @@ function ChannelListener()
 
     if (FBTrace.DBG_FAKE)  // cause the detrace to remove this statement and check for cached tracer
     {
-        Components.utils.import("resource://firebug/firebug-trace-service.js");
+        Cu["import"]("resource://firebug/firebug-trace-service.js");
         FBTrace = traceConsoleService.getTracer("extensions.firebug");
     }
+
+    this.downloadCounter = 0;
 }
 
 ChannelListener.prototype =
@@ -163,6 +166,15 @@ ChannelListener.prototype =
     {
         try
         {
+            // Force a garbage collection cycle, see:
+            // https://bugzilla.mozilla.org/show_bug.cgi?id=638075
+            this.downloadCounter += count;
+            if (this.downloadCounter > (1024*1024*2))
+            {
+                this.downloadCounter = 0;
+                Cu.forceGC();
+            }
+
             // Use wrappedJSObject to bypass IDL definition that doesn't return any value.
             var newStream = this.proxyListener.wrappedJSObject.onDataAvailable(request, requestContext,
                 inputStream, offset, count);
