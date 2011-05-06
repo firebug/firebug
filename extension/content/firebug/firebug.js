@@ -253,7 +253,6 @@ var Firebug =
             {
                 var node = nodes[i];
                 var aboutLabel = node.getAttribute("label");
-                FBTrace.sysout("about " + aboutLabel + " " + version);
                 node.setAttribute("label", aboutLabel + " " + version);
             }
         }

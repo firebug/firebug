@@ -90,9 +90,6 @@ top.FirebugChrome =
     {
         try
         {
-            FBTrace.sysout("chrome.initializeOnPanelBarReady " + FirebugChrome.modulesLoaded +
-                " " + waitingPanelBarCount);
-
             // Wait until all panelBar bindings are ready before initializing
             if (waitingPanelBarCount == 0 && FirebugChrome.modulesLoaded)
                 this.initialize();
@@ -1086,8 +1083,10 @@ top.FirebugChrome =
 
     applyTextSize: function(value)
     {
-        var zoom = Firebug.Options.getZoomByTextSize(value);
+        if (!panelBar1)
+            return;
 
+        var zoom = Firebug.Options.getZoomByTextSize(value);
         var fontSizeAdjust = zoom * 0.547; // scale the aspect relative to 11pt Lucida Grande
 
         var contentBox = $('fbContentBox');
@@ -1096,7 +1095,6 @@ top.FirebugChrome =
         panelBar1.browser.contentDocument.documentElement.style.fontSizeAdjust = fontSizeAdjust;
 
         var box = $("fbCommandBox");
-
         box.style.fontSizeAdjust = fontSizeAdjust;
         Firebug.CommandLine.getCommandLineSmall().style.fontSizeAdjust = fontSizeAdjust;
         $("fbCommandLineCompletion").style.fontSizeAdjust = fontSizeAdjust;
