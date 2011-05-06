@@ -513,7 +513,7 @@ var require, define;
                         var msg = exc.toString() +" "+(exc.fileName || exc.sourceName) + "@" + exc.lineNumber;
                         context.config.onError("require.js: define "+fullName+" ERROR "+msg);
                     }
-                    ret = defined[fullName] = exc;
+                    throw exc;
                 }
                 if (fullName) {
                     //If exports is in play, favor that since it helps circular
@@ -583,8 +583,9 @@ var require, define;
         }
 
         function main(inName, depArray, callback, relModuleMap) {
-            if (context.config.debug && context.config.onDebug)
+            if (context.config.debug && context.config.onDebug) {
                 context.config.onDebug("main calling makeModuleMap with ("+inName+","+ relModuleMap+")");
+            }
 
             var moduleMap = makeModuleMap(inName, relModuleMap),
                 name = moduleMap.name,
@@ -878,12 +879,6 @@ var require, define;
                 err = new Error("require.js load timeout (waitSeconds: "+config.waitSeconds+")for modules: " + noLoads);
                 err.requireType = "timeout";
                 err.requireModules = noLoads;
-                if (context.scriptCount) {
-                    for (var p in context.counted)
-                    {
-                        context.config.onDebug("checkLoaded context.counted["+p+"]"+context.counted[p]);
-                    }
-                }
                 return req.onError(err);
             }
             if (stillLoading || context.scriptCount) {
