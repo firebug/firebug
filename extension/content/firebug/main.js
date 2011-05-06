@@ -65,20 +65,6 @@ function getModuleLoaderConfig(baseConfig)
 
             throw arguments[0];
         },
-        //waitSeconds: 0,
-        //debug: false,
-        /* edit: function(errorMsg, errorURL, errorLineNumber)
-        {
-            window.alert(errorMsg+" "+errorURL+"@"+errorLineNumber);
-        },
-        edit: function(context, url, module)
-        {
-            FBTrace.sysout("opening window modal on "+url);
-            var a = {url: url};
-            return window.showModalDialog("chrome://firebug/content/external/editors.xul",{},
-                "resizable:yes;scroll:yes;dialogheight:480;dialogwidth:600;center:yes");
-        }
-        */
     };
 
     return config;
@@ -130,6 +116,7 @@ require.analyzeFailure = function(context, managers, specified, loaded)
 // Modules
 
 var config = getModuleLoaderConfig({});
+require.onError = config.onError;
 
 if (FBTrace.DBG_INITIALIZE || FBTrace.DBG_MODULES)
 {
