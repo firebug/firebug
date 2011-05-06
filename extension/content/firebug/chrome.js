@@ -114,6 +114,11 @@ top.FirebugChrome =
 
     initialize: function()
     {
+        if (this.initialized)
+            return;
+
+        this.initialized = true;
+
         panelBox = $("fbPanelBox");
         panelSplitter = $("fbPanelSplitter");
         sidePanelDeck = $("fbSidePanelDeck");
