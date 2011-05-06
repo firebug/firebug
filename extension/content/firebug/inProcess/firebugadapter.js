@@ -12,6 +12,7 @@ Firebug.ToolsAdapter =
 {
     updateOption: function()
     {
+        // Tell the front end modules that the back end sent us an option update event
         FBL.dispatch(Firebug.modules, 'updateOption', arguments);
     }
 };
