@@ -1,6 +1,12 @@
 /* See license.txt for terms of usage */
 
-// ************************************************************************************************
+define([
+    "firebug/lib/xpcom",
+    "firebug/lib/trace",
+],
+function(XPCOM, FBTrace) {
+
+// ********************************************************************************************* //
 // Constants
 
 const Cc = Components.classes;
@@ -8,14 +14,10 @@ const Ci = Components.interfaces;
 const Cr = Components.results;
 const Cu = Components.utils;
 
-var EXPORTED_SYMBOLS = ["ChannelListener"];
-
-var FBTrace = {DBG_FAKE: "fake"};
-
 const PrefService = Cc["@mozilla.org/preferences-service;1"].getService(Ci.nsIPrefBranch2);
 var redirectionLimit = PrefService.getIntPref("network.http.redirection-limit");
 
-// ************************************************************************************************
+// ********************************************************************************************* //
 // ChannelListener implementation
 
 /**
@@ -24,10 +26,11 @@ var redirectionLimit = PrefService.getIntPref("network.http.redirection-limit");
  * channel. See Firebug.TabCacheModel.onExamineResponse method.
  */
 
-function ChannelListener()
+function ChannelListener(win, request, listener)
 {
-    this.window = null;
-    this.request = null;
+    this.window = win;
+    this.request = request;
+    this.proxyListener = listener;
 
     this.endOfLine = false;
     this.ignore = false;
@@ -35,26 +38,29 @@ function ChannelListener()
     // The original channel listener (see nsITraceableChannel for more).
     this.listener = null;
 
-    // The proxy listener is used to send events to possible listeners (e.g. net panel)
-    // and properly pass the request object through nsIStreamListner to chrome-window space.
-    this.proxyListener = null;
-
     // The response will be written into the outputStream of this pipe.
-    // Both ends of the pipe must be blocking. Initialized in TabCacheModel.registerStreamListener.
-    this.sink = null;
+    // Both ends of the pipe must be blocking.
+    this.sink = XPCOM.CCIN("@mozilla.org/pipe;1", "nsIPipe");
+    this.sink.init(false, false, 0x20000, 0x4000, null);
 
-    if (FBTrace.DBG_FAKE)  // cause the detrace to remove this statement and check for cached tracer
-    {
-        Cu["import"]("resource://firebug/firebug-trace-service.js");
-        FBTrace = traceConsoleService.getTracer("extensions.firebug");
-    }
+    // Remember the input stream, so it isn't released by GC.
+    // See issue 2788 for more details.
+    this.inputStream = this.sink.inputStream;
 
     this.downloadCounter = 0;
+
+    // Add tee listener into the chain of request stream listeners so, the chain
+    // doesn't include a JS code. This way all exceptions are propertly distributed
+    // (#515051).
+    var tee = XPCOM.CCIN("@mozilla.org/network/stream-listener-tee;1", "nsIStreamListenerTee");
+    tee = tee.QueryInterface(Ci.nsIStreamListenerTee);
+
+    var originalListener = request.setNewListener(tee);
+    tee.init(originalListener, this.sink.outputStream, this);
 }
 
 ChannelListener.prototype =
 {
-
     setAsyncListener: function(request, stream, listener)
     {
         try
@@ -68,13 +74,13 @@ ChannelListener.prototype =
             if (err.name == "NS_BASE_STREAM_CLOSED")
             {
                 if (FBTrace.DBG_CACHE)
-                    FBTrace.sysout("tabCache.ChannelListener.setAsyncListener; " +
+                    FBTrace.sysout("ChannelListener.setAsyncListener; " +
                         "Don't set, the stream is closed.");
                 return;
             }
 
             if (FBTrace.DBG_CACHE || FBTrace.DBG_ERRORS)
-                FBTrace.sysout("tabCache.ChannelListener.setAsyncListener; EXCEPTION " +
+                FBTrace.sysout("ChannelListener.setAsyncListener; EXCEPTION " +
                     safeGetName(request), err);
             return;
         }
@@ -87,7 +93,7 @@ ChannelListener.prototype =
         catch (err)
         {
             if (FBTrace.DBG_CACHE || FBTrace.DBG_ERRORS)
-                FBTrace.sysout("tabCache.ChannelListener.setAsyncListener; EXCEPTION " +
+                FBTrace.sysout("ChannelListener.setAsyncListener; EXCEPTION " +
                     safeGetName(request), err);
         }
     },
@@ -95,13 +101,13 @@ ChannelListener.prototype =
     onCollectData: function(request, context, inputStream, offset, count)
     {
         if (FBTrace.DBG_CACHE && this.ignore)
-            FBTrace.sysout("tabCache.ChannelListener.onCollectData; IGNORE stopping further onCollectData");
+            FBTrace.sysout("ChannelListener.onCollectData; IGNORE stopping further onCollectData");
 
         try
         {
             if (this.sink)
             {
-                var bis = CCIN("@mozilla.org/binaryinputstream;1", "nsIBinaryInputStream");
+                var bis = XPCOM.CCIN("@mozilla.org/binaryinputstream;1", "nsIBinaryInputStream");
                 bis.setInputStream(inputStream);
                 var data = bis.readBytes(count);
 
@@ -115,9 +121,12 @@ ChannelListener.prototype =
                 if (this.ignore)
                     return;
 
-                var binaryInputStream = CCIN("@mozilla.org/binaryinputstream;1", "nsIBinaryInputStream");
-                var storageStream = CCIN("@mozilla.org/storagestream;1", "nsIStorageStream");
-                var binaryOutputStream = CCIN("@mozilla.org/binaryoutputstream;1", "nsIBinaryOutputStream");
+                var binaryInputStream =
+                    XPCOM.CCIN("@mozilla.org/binaryinputstream;1", "nsIBinaryInputStream");
+                var storageStream =
+                    XPCOM.CCIN("@mozilla.org/storagestream;1", "nsIStorageStream");
+                var binaryOutputStream =
+                    XPCOM.CCIN("@mozilla.org/binaryoutputstream;1", "nsIBinaryOutputStream");
 
                 binaryInputStream.setInputStream(inputStream);
                 storageStream.init(8192, count, null);
@@ -137,15 +146,11 @@ ChannelListener.prototype =
             if (data.length)
                 this.endOfLine = data[data.length-1] == "\r";
 
-            // Store received data into the cache as they come. If the method returns
-            // false, the rest of the response is ignored (not cached). This is used
-            // to limit size of a cached response.
-            if (!context.sourceCache.storePartialResponse(request, data, this.window, offset))
+            // If the method returns false, the rest of the response is ignored (not cached).
+            // This is used to limit size of a cached response.
+            if (!this.proxyListener.onCollectData(request, data, offset))
             {
                 this.ignore = true;
-                if (FBTrace.DBG_CACHE)
-                    FBTrace.sysout("tabCache.ChannelListener.onCollectData IGNORE SET " +
-                        "because of storePartialResponse");
             }
 
             // Let other listeners use the stream.
@@ -155,7 +160,7 @@ ChannelListener.prototype =
         catch (err)
         {
             if (FBTrace.DBG_CACHE || FBTrace.DBG_ERRORS)
-                FBTrace.sysout("tabCache.ChannelListener.onCollectData EXCEPTION\n", err);
+                FBTrace.sysout("ChannelListener.onCollectData EXCEPTION\n", err);
         }
 
         return null;
@@ -175,25 +180,20 @@ ChannelListener.prototype =
                 Cu.forceGC();
             }
 
-            // Use wrappedJSObject to bypass IDL definition that doesn't return any value.
-            var newStream = this.proxyListener.wrappedJSObject.onDataAvailable(request, requestContext,
+            var newStream = this.proxyListener.onDataAvailable(request, requestContext,
                 inputStream, offset, count);
 
             if (newStream)
                 inputStream = newStream;
 
-            var context = this.getContext(this.window);
-            if (context)
-            {
-                newStream = this.onCollectData(request, context, inputStream, offset, count);
-                if (newStream)
-                    inputStream = newStream;
-            }
+            newStream = this.onCollectData(request, null, inputStream, offset, count);
+            if (newStream)
+                inputStream = newStream;
         }
         catch (err)
         {
             if (FBTrace.DBG_CACHE || FBTrace.DBG_ERRORS)
-                FBTrace.sysout("tabCache.ChannelListener.onDataAvailable onCollectData FAILS " +
+                FBTrace.sysout("ChannelListener.onDataAvailable onCollectData FAILS " +
                     "(" + offset + ", " + count + ") EXCEPTION: " +
                     safeGetName(request), err);
         }
@@ -207,9 +207,8 @@ ChannelListener.prototype =
             catch(exc)
             {
                 if (FBTrace.DBG_CACHE)
-                    FBTrace.sysout("tabCache.ChannelListener.onDataAvailable cancelling request at " +
-                    "(" + offset + ", " + count + ") EXCEPTION: " +
-                    safeGetName(request), exc);
+                    FBTrace.sysout("ChannelListener.onDataAvailable cancelling request at " +
+                        "(" + offset + ", " + count + ") EXCEPTION: " + safeGetName(request), exc);
 
                 request.cancel(exc.result);
             }
@@ -223,7 +222,7 @@ ChannelListener.prototype =
             this.request = request.QueryInterface(Ci.nsIHttpChannel);
 
             if (FBTrace.DBG_CACHE)
-                FBTrace.sysout("tabCache.ChannelListener.onStartRequest; " +
+                FBTrace.sysout("ChannelListener.onStartRequest; " +
                     this.request.contentType + ", " + safeGetName(this.request));
 
             // Don't register listener twice (redirects, see also bug529536).
@@ -233,39 +232,36 @@ ChannelListener.prototype =
             if (request.redirectionLimit < redirectionLimit)
             {
                 if (FBTrace.DBG_CACHE)
-                    FBTrace.sysout("tabCache.ChannelListener.onStartRequest; redirected request " +
+                    FBTrace.sysout("ChannelListener.onStartRequest; redirected request " +
                         request.redirectionLimit + " (max=" + redirectionLimit + ")");
                 return;
             }
 
-            // Pass to the proxy only if the associated context exists (the window is not unloaded)
-            var context = this.getContext(this.window);
-            if (context)
-            {
-                // Due to #489317, the check whether this response should be cached
-                // must be done here (the content type is not valid before calling
-                // onStartRequest). Let's ignore the response if it should not be cached.
-                this.ignore = !this.shouldCacheRequest(request);
+            // Due to #489317, the check whether this response should be cached
+            // must be done here (the content type is not valid before calling
+            // onStartRequest). Let's ignore the response if it should not be cached.
+            this.ignore = !this.proxyListener.shouldCacheRequest(request);
 
-                // Notify proxy listener.
-                this.proxyListener.onStartRequest(request, requestContext);
+            // Notify proxy listener.
+            this.proxyListener.onStartRequest(request, requestContext);
 
-                // Listen for incoming data.
-                if (FBTrace.DBG_CACHE && !this.sink)
-                    FBTrace.sysout("tabCache.ChannelListener.onStartRequest NO SINK stopping setAsyncListener");
-                if (FBTrace.DBG_CACHE && this.ignore && this.sink)
-                    FBTrace.sysout("tabCache.ChannelListener.onStartRequest IGNORE(shouldCacheRequest) stopping setAsyncListener");
+            // Listen for incoming data.
+            if (FBTrace.DBG_CACHE && !this.sink)
+                FBTrace.sysout("ChannelListener.onStartRequest NO SINK stopping setAsyncListener");
 
-                // Even if the response is marked as ignored we need to read the sink
-                // to avoid mem leaks.
-                if (this.sink)
-                    this.setAsyncListener(request, this.sink.inputStream, this);
-            }
+            if (FBTrace.DBG_CACHE && this.ignore && this.sink)
+                FBTrace.sysout("ChannelListener.onStartRequest IGNORE(shouldCacheRequest) " +
+                    "stopping setAsyncListener");
+
+            // Even if the response is marked as ignored we need to read the sink
+            // to avoid mem leaks.
+            if (this.sink)
+                this.setAsyncListener(request, this.sink.inputStream, this);
         }
         catch (err)
         {
             if (FBTrace.DBG_CACHE || FBTrace.DBG_ERRORS)
-                FBTrace.sysout("tabCache.ChannelListener.onStartRequest EXCEPTION\n", err);
+                FBTrace.sysout("ChannelListener.onStartRequest EXCEPTION\n", err);
         }
 
         if (this.listener)
@@ -277,7 +273,7 @@ ChannelListener.prototype =
             catch(exc)
             {
                 if (FBTrace.DBG_CACHE)
-                    FBTrace.sysout("tabCache.ChannelListener.onStartRequest cancelling request " +
+                    FBTrace.sysout("ChannelListener.onStartRequest cancelling request " +
                     "EXCEPTION: " + safeGetName(request), exc);
 
                 request.cancel(exc.result);
@@ -290,17 +286,15 @@ ChannelListener.prototype =
         try
         {
             if (FBTrace.DBG_CACHE)
-                FBTrace.sysout("tabCache.ChannelListener.onStopRequest; " +
+                FBTrace.sysout("ChannelListener.onStopRequest; " +
                     request.contentType + ", " + safeGetName(request));
 
-            var context = this.getContext(this.window);
-            if (context)
-                this.proxyListener.onStopRequest(request, requestContext, statusCode);
+            this.proxyListener.onStopRequest(request, requestContext, statusCode);
         }
         catch (err)
         {
             if (FBTrace.DBG_CACHE || FBTrace.DBG_ERRORS)
-                FBTrace.sysout("tabCache.ChannelListener.onStopRequest EXCEPTION\n", err);
+                FBTrace.sysout("ChannelListener.onStopRequest EXCEPTION\n", err);
         }
 
         // The request body has been downloaded. Remove the listener (the last parameter
@@ -325,8 +319,7 @@ ChannelListener.prototype =
         try
         {
             if (FBTrace.DBG_CACHE)
-                FBTrace.sysout("tabCache.ChannelListener.onInputStreamReady " +
-                    safeGetName(this.request));
+                FBTrace.sysout("ChannelListener.onInputStreamReady " + safeGetName(this.request));
 
             if (stream instanceof Ci.nsIAsyncInputStream)
             {
@@ -342,26 +335,26 @@ ChannelListener.prototype =
                     // which is ok, since this callback can be called even in this
                     // situations.
                     if (FBTrace.DBG_CACHE)
-                        FBTrace.sysout("tabCache.ChannelListener.onInputStreamReady EXCEPTION calling onDataAvailable:  " +
+                        FBTrace.sysout("ChannelListener.onInputStreamReady EXCEPTION calling onDataAvailable:  " +
                             safeGetName(this.request), err);
                 }
 
                 // Listen for further incoming data.
                 if (FBTrace.DBG_CACHE && this.ignore)
-                    FBTrace.sysout("tabCache.ChannelListener.onInputStreamReady IGNORE stopping setAsyncListener");
+                    FBTrace.sysout("ChannelListener.onInputStreamReady IGNORE stopping setAsyncListener");
 
                 this.setAsyncListener(this.request, stream, this);
             }
             else
             {
                 if (FBTrace.DBG_CACHE)
-                    FBTrace.sysout("tabCache.ChannelListener.onInputStreamReady NOT a nsIAsyncInputStream",stream);
+                    FBTrace.sysout("ChannelListener.onInputStreamReady NOT a nsIAsyncInputStream",stream);
             }
         }
         catch (err)
         {
             if (FBTrace.DBG_CACHE || FBTrace.DBG_ERRORS)
-                FBTrace.sysout("tabCache.ChannelListener.onInputStreamReady EXCEPTION " +
+                FBTrace.sysout("ChannelListener.onInputStreamReady EXCEPTION " +
                     safeGetName(this.request), err);
         }
     },
@@ -380,16 +373,9 @@ ChannelListener.prototype =
 
         throw Components.results.NS_NOINTERFACE;
     },
-
-    getContext: function(win)
-    {
-        // This must be overridden in tabCache. This scope doesn't have an
-        // access to Firebug.TabWatcher and its getContextByWindow method.
-        return null;
-    }
 }
 
-// ************************************************************************************************
+// ********************************************************************************************* //
 
 function safeGetName(request)
 {
@@ -403,8 +389,20 @@ function safeGetName(request)
     }
 }
 
-function CCIN(cName, ifaceName)
+// ********************************************************************************************* //
+
+var HttpResponseObserver =
 {
-    return Cc[cName].createInstance(Ci[ifaceName]);
+    register: function(win, request, listener)
+    {
+        if (request instanceof Ci.nsITraceableChannel)
+            return new ChannelListener(win, request, listener);
+
+        return null;
+    }
 }
 
+return HttpResponseObserver;
+
+// ********************************************************************************************* //
+});

@@ -3,9 +3,10 @@
 define([
     "firebug/lib",
     "firebug/lib/xpcom",
-    "firebug/sourceCache"
+    "firebug/http/responseObserver",
+    "firebug/sourceCache",
 ],
-function(FBL, XPCOM) {
+function(FBL, XPCOM, HttpResponseObserver) {
 
 // ************************************************************************************************
 // Constants
@@ -67,7 +68,7 @@ var contentTypes =
 };
 
 //TODO requirejs
-Components.utils.import("resource://firebug/firebug-http-observer.js");
+Components.utils["import"]("resource://firebug/firebug-http-observer.js");
 var httpObserver = httpRequestObserver;  // XXXjjb Honza should we just use the RHS here?
 
 // ************************************************************************************************
@@ -171,85 +172,10 @@ Firebug.TabCacheModel = FBL.extend(Firebug.Module,
         try
         {
             if (FBTrace.DBG_CACHE)
-                FBTrace.sysout("tabCache.registerStreamListener; " + FBL.safeGetRequestName(request));
+                FBTrace.sysout("tabCache.registerStreamListener; " +
+                    FBL.safeGetRequestName(request));
 
-            // Due to #489317, the content type must be checked in onStartRequest
-            //if (!this.shouldCacheRequest(request))
-            //    return;
-
-            request.QueryInterface(Ci.nsITraceableChannel);
-
-            // Create Firebug's stream listener that is tracing HTTP responses.
-            Components.utils.import("resource://firebug/firebug-channel-listener.js");
-            var newListener = new ChannelListener();  // TODO pass args rather than set properties
-            newListener.window = win;
-
-            // Set proxy listener for back notification from XPCOM to chrome (using real interface
-            // so nsIRequest object is properly passed from XPCOM scope).
-            newListener.QueryInterface(Ci.nsITraceableChannel);
-            newListener.setNewListener(new ChannelListenerProxy(win));
-
-            // Add tee listener into the chain of request stream listeners so, the chain
-            // doesn't include a JS code. This way all exceptions are propertly distributed
-            // (#515051).
-            // The nsIStreamListenerTee differes in following branches:
-            // 1.9.1: not possible to registere nsIRequestObserver with tee
-            // 1.9.2: implements nsIStreamListenerTee_1_9_2 with initWithObserver methods
-            // 1.9.3: adds third parameter to the existing init method.
-            if (versionChecker.compare(appInfo.version, "3.6*") >= 0)
-            {
-                var tee = XPCOM.CCIN("@mozilla.org/network/stream-listener-tee;1", "nsIStreamListenerTee");
-                tee = tee.QueryInterface(Ci.nsIStreamListenerTee);
-
-                if (Ci.nsIStreamListenerTee_1_9_2)
-                    tee = tee.QueryInterface(Ci.nsIStreamListenerTee_1_9_2);
-
-                // The response will be written into the outputStream of this pipe.
-                // Both ends of the pipe must be blocking.
-                var sink = XPCOM.CCIN("@mozilla.org/pipe;1", "nsIPipe");
-                sink.init(false, false, 0x20000, 0x4000, null);
-
-                // Remember the input stream, so it isn't released by GC.
-                // See issue 2788 for more details.
-                newListener.inputStream = sink.inputStream;
-
-                var originalListener = request.setNewListener(tee);
-                newListener.sink = sink;
-
-                if (tee.initWithObserver)
-                    tee.initWithObserver(originalListener, sink.outputStream, newListener);
-                else
-                    tee.init(originalListener, sink.outputStream, newListener);
-            }
-            else
-            {
-                newListener.listener = request.setNewListener(newListener);
-            }
-
-            // xxxHonza: this is a workaround for #489317. Just passing
-            // shouldCacheRequest method to the component so, onStartRequest
-            // can decide whether to cache or not.
-            newListener.shouldCacheRequest = function(request)
-            {
-                try {
-                    return Firebug.TabCacheModel.shouldCacheRequest(request)
-                } catch (err) {}
-                return false;
-            }
-
-            // xxxHonza: this is a workaround for the tracing-listener to get the
-            // right context. Notice that if the window (parent browser) is closed
-            // during the response download the Firebug.TabWatcher (used within this method)
-            // is undefined. But in such a case no cache is needed anyway.
-            // Another thing is that the context isn't available now, but will be
-            // as soon as this method is used from the stream listener.
-            newListener.getContext = function(win)
-            {
-                try {
-                    return Firebug.TabWatcher.getContextByWindow(win);
-                } catch (err){}
-                return null;
-            }
+            HttpResponseObserver.register(win, request, new ChannelListenerProxy(win));
         }
         catch (err)
         {
@@ -260,7 +186,7 @@ Firebug.TabCacheModel = FBL.extend(Firebug.Module,
 
     shouldCacheRequest: function(request)
     {
-        if ( !(request instanceof Ci.nsIHttpChannel) )
+        if (!(request instanceof Ci.nsIHttpChannel))
             return;
 
         // Allow to customize caching rules.
@@ -542,13 +468,11 @@ Firebug.TabCache.prototype = FBL.extend(Firebug.SourceCache.prototype,
 
 function ChannelListenerProxy(win)
 {
-    this.wrappedJSObject = this;
     this.window = win;
 }
 
 ChannelListenerProxy.prototype =
 {
-    /* nsIStreamListener */
     onStartRequest: function(request, requestContext)
     {
         var context = this.getContext();
@@ -572,26 +496,41 @@ ChannelListenerProxy.prototype =
             context.sourceCache.onStopRequest(request, requestContext, statusCode);
     },
 
-    /* nsISupports */
-    QueryInterface: function(iid)
+    onCollectData: function(request, data, offset)
     {
-        if (iid.equals(Ci.nsIStreamListener) ||
-            iid.equals(Ci.nsISupportsWeakReference) ||
-            iid.equals(Ci.nsISupports))
-        {
-            return this;
-        }
+        var context = this.getContext();
+        if (!context)
+            return;
 
-        throw Components.results.NS_NOINTERFACE;
+        // Store received data into the cache as they come. If the method returns
+        // false, the rest of the response is ignored (not cached). This is used
+        // to limit size of a cached response.
+        return context.sourceCache.storePartialResponse(request, data, this.window, offset);
     },
 
     getContext: function()
     {
-        try {
+        try
+        {
             return Firebug.TabWatcher.getContextByWindow(this.window);
-        } catch (e) {}
+        }
+        catch (e)
+        {
+        }
         return null;
-    }
+    },
+
+    shouldCacheRequest: function(request)
+    {
+        try
+        {
+            return Firebug.TabCacheModel.shouldCacheRequest(request)
+        }
+        catch (err)
+        {
+        }
+        return false;
+    },
 }
 
 // ************************************************************************************************
@@ -599,10 +538,12 @@ ChannelListenerProxy.prototype =
 
 function safeGetName(request)
 {
-    try {
+    try
+    {
         return request.name;
     }
-    catch (exc) {
+    catch (exc)
+    {
     }
 
     return null;

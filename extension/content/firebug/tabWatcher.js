@@ -532,7 +532,8 @@ Firebug.TabWatcher = FBL.extend(new Firebug.Listener(),
         var rootWindow = FBL.getRootWindow(winIn);
 
         if (FBTrace.DBG_ROOT_WINDOW) // too much output to use INITIALIZE
-            FBTrace.sysout("winIn: "+FBL.safeGetWindowLocation(winIn).substr(0,50)+" rootWindow: "+FBL.safeGetWindowLocation(rootWindow));
+            FBTrace.sysout("winIn: "+FBL.safeGetWindowLocation(winIn).substr(0,50)+
+                " rootWindow: "+FBL.safeGetWindowLocation(rootWindow));
 
         if (rootWindow)
         {
