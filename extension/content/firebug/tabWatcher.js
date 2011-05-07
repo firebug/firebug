@@ -3,9 +3,10 @@
 define([
     "firebug/lib",
     "firebug/lib/xpcom",
+    "firebug/http/requestObserver",
     "firebug/tabContext"
 ],
-function(FBL, XPCOM) {
+function(FBL, XPCOM, HttpRequestObserver) {
 
 // ************************************************************************************************
 // Constants
@@ -39,10 +40,6 @@ const aboutBlank = "about:blank";
 
 var contexts = [];
 
-//TODO requirejs
-Components.utils["import"]("resource://firebug/firebug-http-observer.js");
-var httpObserver = httpRequestObserver;  // XXXjjb Honza should we just use the RHS here?
-
 // ************************************************************************************************
 
 Firebug.TabWatcher = FBL.extend(new Firebug.Listener(),
@@ -62,7 +59,7 @@ Firebug.TabWatcher = FBL.extend(new Firebug.Listener(),
         if (tabBrowser)
             tabBrowser.addProgressListener(TabProgressListener);
 
-        httpObserver.addObserver(TabWatcherHttpObserver, "firebug-http-event", false);
+        HttpRequestObserver.addObserver(TabWatcherHttpObserver, "firebug-http-event", false);
     },
 
     destroy: function()
@@ -72,7 +69,7 @@ Firebug.TabWatcher = FBL.extend(new Firebug.Listener(),
 
         this.shuttingDown = true;
 
-        httpObserver.removeObserver(TabWatcherHttpObserver, "firebug-http-event");
+        HttpRequestObserver.removeObserver(TabWatcherHttpObserver, "firebug-http-event");
 
         var tabBrowser = FBL.$("content");
         if (tabBrowser)

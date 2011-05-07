@@ -4,10 +4,11 @@ define([
     "firebug/lib",
     "firebug/domplate",
     "firebug/reps",
+    "firebug/http/requestObserver",
     "firebug/net",
     "firebug/errors",
 ],
-function(FBL, Domplate, FirebugReps) {
+function(FBL, Domplate, FirebugReps, HttpRequestObserver) {
 
 // ************************************************************************************************
 // Constants
@@ -17,11 +18,6 @@ const Ci = Components.interfaces;
 
 // List of contexts with XHR spy attached.
 var contexts = [];
-
-//TODO requirejs
-Components.utils["import"]("resource://firebug/firebug-http-observer.js");
-var httpObserver = httpRequestObserver;  // XXXjjb Honza should we just use the RHS here?
-
 
 // ************************************************************************************************
 // Spy Module
@@ -152,7 +148,7 @@ Firebug.Spy = FBL.extend(Firebug.Module,
         // Register HTTP observers only once.
         if (contexts.length == 0)
         {
-            httpObserver.addObserver(SpyHttpObserver, "firebug-http-event", false);
+            HttpRequestObserver.addObserver(SpyHttpObserver, "firebug-http-event", false);
             SpyHttpActivityObserver.registerObserver();
         }
 
@@ -176,7 +172,7 @@ Firebug.Spy = FBL.extend(Firebug.Module,
                 // If no context is using spy, remvove the (only one) HTTP observer.
                 if (contexts.length == 0)
                 {
-                    httpObserver.removeObserver(SpyHttpObserver, "firebug-http-event");
+                    HttpRequestObserver.removeObserver(SpyHttpObserver, "firebug-http-event");
                     SpyHttpActivityObserver.unregisterObserver();
                 }
 

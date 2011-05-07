@@ -5,16 +5,16 @@ define([
     "arch/tools",
     "firebug/lib/xpcom",
     "firebug/reps",
+    "firebug/http/requestObserver",
     "firebug/errors",
 ],
-function(FBL, ToolsInterface, XPCOM, FirebugReps) {
+function(FBL, ToolsInterface, XPCOM, FirebugReps, HttpRequestObserver) {
 
 // ********************************************************************************************* //
 
-Components.utils["import"]("resource://firebug/firebug-http-observer.js");  // TODO require.js
 var CompilationUnit = ToolsInterface.CompilationUnit;
 
-// ************************************************************************************************
+// ********************************************************************************************* //
 // Constants
 
 const Cc = Components.classes;
@@ -43,7 +43,7 @@ const STEP_OVER = 1;
 const STEP_INTO = 2;
 const STEP_OUT = 3;
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 const tooltipTimeout = 300;
 
@@ -2513,7 +2513,7 @@ Firebug.Debugger = FBL.extend(Firebug.ActivableModule,
     activateDebugger: function()
     {
         this.registerDebugger();
-        httpRequestObserver.addObserver(this);
+        HttpRequestObserver.addObserver(this);
 
         // If jsd is already active, we'll notify true; else we'll get another event
         var isActive = FBL.fbs.isJSDActive();
@@ -2527,7 +2527,7 @@ Firebug.Debugger = FBL.extend(Firebug.ActivableModule,
     deactivateDebugger: function()
     {
         this.unregisterDebugger();
-        httpRequestObserver.removeObserver(this);  // for tabCache
+        HttpRequestObserver.removeObserver(this);  // for tabCache
 
         var isActive = FBL.fbs.isJSDActive();
         if (!isActive)
@@ -2553,7 +2553,7 @@ Firebug.Debugger = FBL.extend(Firebug.ActivableModule,
             return;
 
         var paused = FBL.fbs.pause();  // can be called multiple times.
-        httpRequestObserver.addObserver(this);  // for tabCache
+        HttpRequestObserver.addObserver(this);  // for tabCache
 
         if (FBTrace.DBG_ACTIVATION)
             FBTrace.sysout("debugger.onSuspendFirebug paused: "+paused+" isAlwaysEnabled " +
@@ -2571,7 +2571,7 @@ Firebug.Debugger = FBL.extend(Firebug.ActivableModule,
             return;
 
         var unpaused = FBL.fbs.unPause();
-        httpRequestObserver.removeObserver(this);
+        HttpRequestObserver.removeObserver(this);
 
         if (FBTrace.DBG_ACTIVATION)
             FBTrace.sysout("debugger.onResumeFirebug unpaused: "+unpaused+" isAlwaysEnabled " +

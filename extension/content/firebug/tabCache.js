@@ -3,12 +3,13 @@
 define([
     "firebug/lib",
     "firebug/lib/xpcom",
+    "firebug/http/requestObserver",
     "firebug/http/responseObserver",
     "firebug/sourceCache",
 ],
-function(FBL, XPCOM, HttpResponseObserver) {
+function(FBL, XPCOM, HttpRequestObserver, HttpResponseObserver) {
 
-// ************************************************************************************************
+// ********************************************************************************************* //
 // Constants
 
 const Cc = Components.classes;
@@ -67,11 +68,7 @@ var contentTypes =
     "image/svg+xml" : 1
 };
 
-//TODO requirejs
-Components.utils["import"]("resource://firebug/firebug-http-observer.js");
-var httpObserver = httpRequestObserver;  // XXXjjb Honza should we just use the RHS here?
-
-// ************************************************************************************************
+// ********************************************************************************************* //
 // Model implementation
 
 /**
@@ -88,7 +85,8 @@ Firebug.TabCacheModel = FBL.extend(Firebug.Module,
     initializeUI: function(owner)
     {
         if (FBTrace.DBG_CACHE)
-            FBTrace.sysout("tabCache.initializeUI; Cache model initialized, Ci.nsITraceableChannel "+Ci.nsITraceableChannel);
+            FBTrace.sysout("tabCache.initializeUI; Cache model initialized, " +
+                "Ci.nsITraceableChannel "+Ci.nsITraceableChannel);
 
         // Read maximum size limit for cached response from preferences.
         responseSizeLimit = Firebug.Options.get("cache.responseLimit");
@@ -103,8 +101,7 @@ Firebug.TabCacheModel = FBL.extend(Firebug.Module,
         }
 
         // Register for HTTP events.
-        if (Ci.nsITraceableChannel)
-            httpObserver.addObserver(this, "firebug-http-event", false);
+        HttpRequestObserver.addObserver(this, "firebug-http-event", false);
     },
 
     shutdown: function()
@@ -112,8 +109,7 @@ Firebug.TabCacheModel = FBL.extend(Firebug.Module,
         if (FBTrace.DBG_CACHE)
             FBTrace.sysout("tabCache.shutdown; Cache model destroyed.");
 
-        if (Ci.nsITraceableChannel)
-            httpObserver.removeObserver(this, "firebug-http-event");
+        HttpRequestObserver.removeObserver(this, "firebug-http-event");
     },
 
     initContext: function(context)
@@ -216,7 +212,7 @@ Firebug.TabCacheModel = FBL.extend(Firebug.Module,
     },
 });
 
-// ************************************************************************************************
+// ********************************************************************************************* //
 
 /**
  * This cache object is intended to cache all responses made by a specific tab.
@@ -456,14 +452,16 @@ Firebug.TabCache.prototype = FBL.extend(Firebug.SourceCache.prototype,
         var responseText = lines ? lines.join("") : "";
 
         if (FBTrace.DBG_CACHE)
-            FBTrace.sysout("tabCache.channel.stopRequest: " + FBL.safeGetRequestName(request), responseText);
+            FBTrace.sysout("tabCache.channel.stopRequest: " + FBL.safeGetRequestName(request),
+                responseText);
 
-        FBL.dispatch(Firebug.TabCacheModel.fbListeners, "onStopRequest", [this.context, request, responseText]);
+        FBL.dispatch(Firebug.TabCacheModel.fbListeners, "onStopRequest",
+            [this.context, request, responseText]);
         FBL.dispatch(this.fbListeners, "onStopRequest", [this.context, request, responseText]);
     }
 });
 
-// ************************************************************************************************
+// ********************************************************************************************* //
 // Proxy Listener
 
 function ChannelListenerProxy(win)
@@ -486,7 +484,8 @@ ChannelListenerProxy.prototype =
         if (!context)
             return null;
 
-        return context.sourceCache.onDataAvailable(request, requestContext, inputStream, offset, count);
+        return context.sourceCache.onDataAvailable(request, requestContext,
+            inputStream, offset, count);
     },
 
     onStopRequest: function(request, requestContext, statusCode)
@@ -533,7 +532,7 @@ ChannelListenerProxy.prototype =
     },
 }
 
-// ************************************************************************************************
+// ********************************************************************************************* //
 // Helpers
 
 function safeGetName(request)
@@ -549,12 +548,12 @@ function safeGetName(request)
     return null;
 }
 
-// ************************************************************************************************
+// ********************************************************************************************* //
 // Registration
 
 Firebug.registerModule(Firebug.TabCacheModel);
 
 return Firebug.TabCacheModel;
 
-// ************************************************************************************************
+// ********************************************************************************************* //
 });

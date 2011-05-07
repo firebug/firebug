@@ -5,6 +5,7 @@ define([
     "firebug/domplate",
     "firebug/lib/xpcom",
     "arch/tools",
+    "firebug/http/requestObserver",
     "firebug/lib/options",
     "firebug/breakpoint",
     "firebug/xmlViewer",
@@ -15,7 +16,7 @@ define([
     "firebug/search",
     "firebug/errors",
 ],
-function(FBL, Domplate, XPCOM, ToolsInterface) { with (Domplate) {
+function(FBL, Domplate, XPCOM, ToolsInterface, HttpRequestObserver) { with (Domplate) {
 
 // ************************************************************************************************
 // Constants
@@ -159,9 +160,6 @@ const binaryCategoryMap =
     "flash" : 1
 };
 
-// TODO requirejs
-Components.utils.import("resource://firebug/firebug-http-observer.js");
-var httpObserver = httpRequestObserver;  // XXXjjb Honza should we just use the RHS here?
 // ************************************************************************************************
 
 /**
@@ -4938,7 +4936,7 @@ Firebug.NetMonitor.NetHttpObserver =
         if (this.registered)
             return;
 
-        httpObserver.addObserver(this, "firebug-http-event", false);
+        HttpRequestObserver.addObserver(this, "firebug-http-event", false);
         this.registered = true;
     },
 
@@ -4947,7 +4945,7 @@ Firebug.NetMonitor.NetHttpObserver =
         if (!this.registered)
             return;
 
-        httpObserver.removeObserver(this, "firebug-http-event");
+        HttpRequestObserver.removeObserver(this, "firebug-http-event");
         this.registered = false;
     },
 
