@@ -133,6 +133,7 @@ var CSSStyleRuleTag = domplate(CSSDomplateBase,
 const reSplitCSS =  /(url\("?[^"\)]+?"?\))|(rgba?\(.*?\))|(hsla?\(.*?\))|(#[\dA-Fa-f]+)|(-?\d+(\.\d+)?(%|[a-z]{1,2})?)|([^,\s\/!\(\)]+)|"(.*?)"|(!(.*)?)/;
 const reURL = /url\("?([^"\)]+)?"?\)/;
 const reRepeat = /no-repeat|repeat-x|repeat-y|repeat/;
+const pseudoElements = ["", ":first-letter", ":first-line", ":before", ":after"];
 
 const styleGroups =
 {
@@ -1686,36 +1687,43 @@ CSSElementPanel.prototype = FBL.extend(Firebug.CSSStyleSheetPanel.prototype,
     getElementRules: function(element, rules, usedProps, inheritMode)
     {
         var inspectedRules, displayedRules = {};
-        try
-        {
-            inspectedRules = FBL.domUtils ? FBL.domUtils.getCSSStyleRules(element) : null;
-        } catch (exc) {}
 
-        if (inspectedRules)
+        for(var p in pseudoElements)
         {
-            for (var i = 0; i < inspectedRules.Count(); ++i)
+            try
             {
-                var rule = XPCOM.QI(inspectedRules.GetElementAt(i), nsIDOMCSSStyleRule);
+                inspectedRules = FBL.domUtils ? FBL.domUtils.getCSSStyleRules(element, pseudoElements[p]) : null;
+            } catch (exc) {}
 
-                var isSystemSheet = FBL.isSystemStyleSheet(rule.parentStyleSheet);
-                if (!Firebug.showUserAgentCSS && isSystemSheet) // This removes user agent rules
-                    continue;
+            if (inspectedRules)
+            {
+                for (var i = 0; i < inspectedRules.Count(); ++i)
+                {
+                    var rule = XPCOM.QI(inspectedRules.GetElementAt(i), nsIDOMCSSStyleRule);
 
-                var props = this.getRuleProperties(this.context, rule, inheritMode);
-                if (inheritMode && !props.length)
-                    continue;
+                    var isSystemSheet = FBL.isSystemStyleSheet(rule.parentStyleSheet);
+                    if (!Firebug.showUserAgentCSS && isSystemSheet) // This removes user agent rules
+                        continue;
 
-                var sourceLink = this.getSourceLink(null, rule);
+                    var props = this.getRuleProperties(this.context, rule, inheritMode);
+                    if (inheritMode && !props.length)
+                        continue;
 
-                this.markOverriddenProps(props, usedProps, inheritMode);
+                    var isPseudoElementSheet = (pseudoElements[p] != "");
+                    var sourceLink = this.getSourceLink(null, rule);
 
-                var ruleId = getRuleId(rule);
-                rules.splice(0, 0, {rule: rule, id: ruleId,
-                        selector: rule.selectorText.replace(/ :/g, " *:"), // Show universal selectors with pseudo-class (http://code.google.com/p/fbug/issues/detail?id=3683)
-                        sourceLink: sourceLink,
-                        props: props, inherited: inheritMode,
-                        isSystemSheet: isSystemSheet,
-                        isSelectorEditable: true});
+                    if (!isPseudoElementSheet)
+                        this.markOverriddenProps(props, usedProps, inheritMode);
+
+                    var ruleId = getRuleId(rule);
+                    rules.splice(0, 0, {rule: rule, id: ruleId,
+                            selector: rule.selectorText.replace(/ :/g, " *:"), // Show universal selectors with pseudo-class (http://code.google.com/p/fbug/issues/detail?id=3683)
+                            sourceLink: sourceLink,
+                            props: props, inherited: inheritMode,
+                            isSystemSheet: isSystemSheet,
+                            isPseudoElementSheet: isPseudoElementSheet,
+                            isSelectorEditable: true});
+                }
             }
         }
 
