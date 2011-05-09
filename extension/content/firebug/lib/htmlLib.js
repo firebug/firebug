@@ -1,6 +1,8 @@
 /* See license.txt for terms of usage */
 
-define([], function() {
+define([
+    "firebug/lib/events",
+], function(Events) {
 
 // ********************************************************************************************* //
 // Constants
@@ -64,7 +66,7 @@ var HTMLLib =
             else
             {
                 this.noMatch = true;
-                FBL.dispatch([Firebug.A11yModel], 'onHTMLSearchNoMatchFound',
+                Events.dispatch([Firebug.A11yModel], 'onHTMLSearchNoMatchFound',
                     [panelNode.ownerPanel, text]);
             }
         };
@@ -230,7 +232,7 @@ var HTMLLib =
                 this.selectNodeText(nodeBox, node, reMatch[0], reMatch.index, reverse,
                     reMatch.caseSensitive);
 
-                FBL.dispatch([Firebug.A11yModel], 'onHTMLSearchMatchFound',
+                Events.dispatch([Firebug.A11yModel], 'onHTMLSearchMatchFound',
                     [panelNode.ownerPanel, match]);
             }, this));
         };
@@ -374,7 +376,7 @@ var HTMLLib =
             setTimeout(FBL.bindFixed(function()
             {
                 ioBox.select(node, true, true);
-                FBL.dispatch([Firebug.A11yModel], 'onHTMLSearchMatchFound', [panelNode.ownerPanel, match]);
+                Events.dispatch([Firebug.A11yModel], 'onHTMLSearchMatchFound', [panelNode.ownerPanel, match]);
             }, this));
         };
     },

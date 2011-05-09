@@ -7,6 +7,7 @@ define([
     "arch/tools",
     "firebug/http/requestObserver",
     "firebug/lib/locale",
+    "firebug/lib/events",
     "firebug/lib/options",
     "firebug/breakpoint",
     "firebug/xmlViewer",
@@ -17,7 +18,7 @@ define([
     "firebug/search",
     "firebug/errors",
 ],
-function(FBL, Domplate, XPCOM, ToolsInterface, HttpRequestObserver, Locale) { with (Domplate) {
+function(FBL, Domplate, XPCOM, ToolsInterface, HttpRequestObserver, Locale, Events) { with (Domplate) {
 
 // ************************************************************************************************
 // Constants
@@ -1008,12 +1009,12 @@ NetPanel.prototype = FBL.extend(Firebug.ActivablePanel,
                 this.highlightRow(row)
             else
                 this.highlightRow(FBL.getAncestorByClass(row, "netRow"));
-            FBL.dispatch(this.fbListeners, 'onNetMatchFound', [this, text, row]);
+            Events.dispatch(this.fbListeners, 'onNetMatchFound', [this, text, row]);
             return true;
         }
         else
         {
-            FBL.dispatch(this.fbListeners, 'onNetMatchFound', [this, text, null]);
+            Events.dispatch(this.fbListeners, 'onNetMatchFound', [this, text, null]);
             return false;
         }
     },
@@ -1139,7 +1140,7 @@ NetPanel.prototype = FBL.extend(Firebug.ActivablePanel,
 
             // Allow customization of request entries in the list. A row is represented
             // by <TR> HTML element.
-            FBL.dispatch(NetRequestTable.fbListeners, "onCreateRequestEntry", [this, row]);
+            Events.dispatch(NetRequestTable.fbListeners, "onCreateRequestEntry", [this, row]);
 
             row = row.nextSibling;
         }
@@ -2111,7 +2112,7 @@ Firebug.NetMonitor.NetRequestEntry = domplate(Firebug.Rep, new Firebug.Listener(
             var netInfoBox = NetInfoBody.tag.replace({file: file}, netInfoCol);
 
             // Notify listeners so additional tabs can be created.
-            FBL.dispatch(NetInfoBody.fbListeners, "initTabBody", [netInfoBox, file]);
+            Events.dispatch(NetInfoBody.fbListeners, "initTabBody", [netInfoBox, file]);
 
             // Select "Headers" tab by default, if no other tab is selected already.
             // (e.g. by a third party Firebug extension in 'initTabBody' event)
@@ -2128,7 +2129,7 @@ Firebug.NetMonitor.NetRequestEntry = domplate(Firebug.Rep, new Firebug.Listener(
             var netInfoRow = row.nextSibling;
             var netInfoBox = netInfoRow.getElementsByClassName("netInfoBody").item(0);
 
-            FBL.dispatch(NetInfoBody.fbListeners, "destroyTabBody", [netInfoBox, file]);
+            Events.dispatch(NetInfoBody.fbListeners, "destroyTabBody", [netInfoBox, file]);
 
             row.parentNode.removeChild(netInfoRow);
             row.setAttribute('aria-expanded', 'false');
@@ -2601,7 +2602,7 @@ Firebug.NetMonitor.NetInfoBody = domplate(Firebug.Rep, new Firebug.Listener(),
         }
 
         // Notify listeners about update so, content of custom tabs can be updated.
-        FBL.dispatch(NetInfoBody.fbListeners, "updateTabBody", [netInfoBox, file, context]);
+        Events.dispatch(NetInfoBody.fbListeners, "updateTabBody", [netInfoBox, file, context]);
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -3518,7 +3519,7 @@ NetProgress.prototype =
 
             this.requestedFile(request, time, win, xhr);
 
-            FBL.dispatch(Firebug.NetMonitor.fbListeners, "onRequest", [this.context, file]);
+            Events.dispatch(Firebug.NetMonitor.fbListeners, "onRequest", [this.context, file]);
         }
     },
 
@@ -3634,7 +3635,7 @@ NetProgress.prototype =
 
     respondedFile: function respondedFile(request, time, info)
     {
-        FBL.dispatch(Firebug.NetMonitor.fbListeners, "onExamineResponse", [this.context, request]);
+        Events.dispatch(Firebug.NetMonitor.fbListeners, "onExamineResponse", [this.context, request]);
 
         var file = this.getRequestFile(request);
         if (file)
@@ -3692,14 +3693,14 @@ NetProgress.prototype =
                 Firebug.Console.log(message, this.context, "error", null, true, file.getFileLink(message));
             }
 
-            FBL.dispatch(Firebug.NetMonitor.fbListeners, "onResponse", [this.context, file]);
+            Events.dispatch(Firebug.NetMonitor.fbListeners, "onResponse", [this.context, file]);
             return file;
         }
     },
 
     respondedCacheFile: function respondedCacheFile(request, time, info)
     {
-        FBL.dispatch(Firebug.NetMonitor.fbListeners, "onExamineCachedResponse", [this.context, request]);
+        Events.dispatch(Firebug.NetMonitor.fbListeners, "onExamineCachedResponse", [this.context, request]);
 
         var file = this.getRequestFile(request, null, true);
         if (file)
@@ -3730,7 +3731,7 @@ NetProgress.prototype =
 
             this.endLoad(file);
 
-            FBL.dispatch(Firebug.NetMonitor.fbListeners, "onCachedResponse", [this.context, file]);
+            Events.dispatch(Firebug.NetMonitor.fbListeners, "onCachedResponse", [this.context, file]);
             return file;
         }
         else
@@ -4272,7 +4273,7 @@ NetCacheListener.prototype =
         if (file)
             file.responseText = responseText;
 
-        FBL.dispatch(Firebug.NetMonitor.fbListeners, "onResponseBody", [context, file]);
+        Events.dispatch(Firebug.NetMonitor.fbListeners, "onResponseBody", [context, file]);
     }
 }
 

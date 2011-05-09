@@ -4,8 +4,9 @@ define([
     "firebug/lib",
     "firebug/domplate",
     "firebug/lib/locale",
+    "firebug/lib/events",
 ],
-function(FBL, Domplate, Locale) {
+function(FBL, Domplate, Locale, Events) {
 
 // ************************************************************************************************
 // Constants
@@ -89,7 +90,7 @@ Firebug.Editor = FBL.extend(Firebug.Module,
             FBL.setClass(currentGroup, "editing");
 
         currentEditor.show(target, currentPanel, value, selectionData);
-        FBL.dispatch(this.fbListeners, "onBeginEditing", [currentPanel, currentEditor, target, value]);
+        Events.dispatch(this.fbListeners, "onBeginEditing", [currentPanel, currentEditor, target, value]);
         currentEditor.beginEditing(target, value);
         if (FBTrace.DBG_EDITOR)
             FBTrace.sysout("Editor start panel "+currentPanel.name);
@@ -101,7 +102,7 @@ Firebug.Editor = FBL.extend(Firebug.Module,
         if (!currentTarget)
             return;
 
-        FBL.dispatch(currentPanel.fbListeners, 'onInlineEditorClose', [currentPanel, currentTarget, !originalValue]);
+        Events.dispatch(currentPanel.fbListeners, 'onInlineEditorClose', [currentPanel, currentTarget, !originalValue]);
         this.stopEditing();
     },
 
@@ -137,7 +138,7 @@ Firebug.Editor = FBL.extend(Firebug.Module,
         {
             if (cancel)
             {
-                FBL.dispatch(currentPanel.fbListeners, 'onInlineEditorClose', [currentPanel, currentTarget, removeGroup && !originalValue]);
+                Events.dispatch(currentPanel.fbListeners, 'onInlineEditorClose', [currentPanel, currentTarget, removeGroup && !originalValue]);
                 if (value != originalValue)
                     this.saveEditAndNotifyListeners(currentTarget, originalValue, previousValue);
 
@@ -162,7 +163,7 @@ Firebug.Editor = FBL.extend(Firebug.Module,
         currentEditor.hide();
         currentPanel.editing = false;
 
-        FBL.dispatch(this.fbListeners, "onStopEdit", [currentPanel, currentEditor, currentTarget]);
+        Events.dispatch(this.fbListeners, "onStopEdit", [currentPanel, currentEditor, currentTarget]);
         if (FBTrace.DBG_EDITOR)
             FBTrace.sysout("Editor stop panel "+currentPanel.name);
         currentTarget = null;
@@ -226,14 +227,14 @@ Firebug.Editor = FBL.extend(Firebug.Module,
     saveEditAndNotifyListeners: function(currentTarget, value, previousValue)
     {
         currentEditor.saveEdit(currentTarget, value, previousValue);
-        FBL.dispatch(this.fbListeners, "onSaveEdit", [currentPanel, currentEditor, currentTarget, value, previousValue]);
+        Events.dispatch(this.fbListeners, "onSaveEdit", [currentPanel, currentEditor, currentTarget, value, previousValue]);
     },
 
     setEditTarget: function(element)
     {
         if (!element)
         {
-            FBL.dispatch(currentPanel.fbListeners, 'onInlineEditorClose', [currentPanel, currentTarget, true]);
+            Events.dispatch(currentPanel.fbListeners, 'onInlineEditorClose', [currentPanel, currentTarget, true]);
             this.stopEditing();
         }
         else if (FBL.hasClass(element, "insertBefore"))
@@ -584,7 +585,7 @@ Firebug.InlineEditor.prototype = domplate(Firebug.BaseEditor,
 
     show: function(target, panel, value, selectionData)
     {
-        FBL.dispatch(panel.fbListeners, "onInlineEditorShow", [panel, this]);
+        Events.dispatch(panel.fbListeners, "onInlineEditorShow", [panel, this]);
         this.target = target;
         this.panel = panel;
 

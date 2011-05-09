@@ -1,9 +1,10 @@
 /* See license.txt for terms of usage */
 
 define([
-    "firebug/lib"
+    "firebug/lib/events",
+    "firebug/lib/trace"
 ],
-function factoryOptions(FBL) {
+function factoryOptions(Events, FBTrace) {
 
 // ********************************************************************************************* //
 // Constants
@@ -128,7 +129,9 @@ var Options =
 
     removeListener: function(listener)
     {
-        FBL.remove(this.listeners, listener);
+        for (var i=0; i<this.listeners.length; ++i)
+            if (this.listeners[i] == listener)
+                return this.listeners.splice(i, 1);
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -159,7 +162,7 @@ var Options =
             Firebug[name] = value;
 
             // Distribute the change (Firebug, FirebugChrome, BTI)
-            FBL.dispatch(this.listeners, "updateOption", [name, value]);
+            Events.dispatch(this.listeners, "updateOption", [name, value]);
         }
         catch (err)
         {

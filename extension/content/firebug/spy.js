@@ -4,11 +4,12 @@ define([
     "firebug/lib",
     "firebug/domplate",
     "firebug/reps",
+    "firebug/lib/events",
     "firebug/http/requestObserver",
     "firebug/net",
     "firebug/errors",
 ],
-function(FBL, Domplate, FirebugReps, HttpRequestObserver) {
+function(FBL, Domplate, FirebugReps, Events, HttpRequestObserver) {
 
 // ************************************************************************************************
 // Constants
@@ -320,7 +321,7 @@ var SpyHttpObserver =
         var name = request.URI.asciiSpec;
         var origName = request.originalURI.asciiSpec;
         if (name == origName)
-            FBL.dispatch(Firebug.Spy.fbListeners, "onStart", [context, spy]);
+            Events.dispatch(Firebug.Spy.fbListeners, "onStart", [context, spy]);
 
         // Remember the start time et the end, so it's most accurate.
         spy.sendTime = new Date().getTime();
@@ -668,7 +669,7 @@ function onHTTPSpyReadyStateChange(spy, event)
             netProgress.post(netProgress.stopFile, [spy.request, spy.endTime, spy.postText, spy.responseText]);
 
         // Notify registered listeners about finish of the XHR.
-        FBL.dispatch(Firebug.Spy.fbListeners, "onLoad", [spy.context, spy]);
+        Events.dispatch(Firebug.Spy.fbListeners, "onLoad", [spy.context, spy]);
     }
 
     // Pass the event to the original page handler.
@@ -857,7 +858,7 @@ Firebug.Spy.XHR = domplate(Firebug.Rep,
             else
             {
                 var netInfoBox = FBL.getChildByClass(spy.logRow, "spyHead", "netInfoBody");
-                FBL.dispatch(Firebug.NetMonitor.NetInfoBody.fbListeners, "destroyTabBody", [netInfoBox, spy]);
+                Events.dispatch(Firebug.NetMonitor.NetInfoBody.fbListeners, "destroyTabBody", [netInfoBox, spy]);
                 if (spyHeadTable)
                     spyHeadTable.setAttribute('aria-expanded', 'false');
             }
@@ -996,7 +997,7 @@ function updateHttpSpyInfo(spy)
     {
         var head = FBL.getChildByClass(spy.logRow, "spyHead");
         netInfoBox = template.tag.append({"file": spy}, head);
-        FBL.dispatch(template.fbListeners, "initTabBody", [netInfoBox, spy]);
+        Events.dispatch(template.fbListeners, "initTabBody", [netInfoBox, spy]);
         template.selectTabByName(netInfoBox, "Response");
     }
     else

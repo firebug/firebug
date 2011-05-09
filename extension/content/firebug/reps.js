@@ -7,8 +7,9 @@ define([
     "firebug/lib/locale",
     "arch/tools",
     "firebug/lib/htmlLib",
+    "firebug/lib/events",
 ],
-function(FBL, Domplate, XPCOM, Locale, ToolsInterface, HTMLLib) { with (Domplate) {
+function(FBL, Domplate, XPCOM, Locale, ToolsInterface, HTMLLib, Events) { with (Domplate) {
 
 // ************************************************************************************************
 // Constants
@@ -1796,7 +1797,7 @@ FirebugReps.ErrorMessage = domplate(Firebug.Rep,
                 if (Firebug.A11yModel.enabled)
                 {
                     var panel = Firebug.getElementPanel(event.target);
-                    FBL.dispatch(panel.fbListeners, "modifyLogRow", [panel , traceBox]);
+                    Events.dispatch(panel.fbListeners, "modifyLogRow", [panel , traceBox]);
                 }
             }
             else

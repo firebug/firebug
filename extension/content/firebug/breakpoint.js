@@ -5,10 +5,11 @@ define([
     "firebug/domplate",
     "firebug/reps",
     "firebug/lib/locale",
+    "firebug/lib/events",
     "arch/tools",
     "firebug/editor",
 ],
-function(FBL, Domplate, FirebugReps, Locale, ToolsInterface) {
+function(FBL, Domplate, FirebugReps, Locale, Events, ToolsInterface) {
 
 // ************************************************************************************************
 // Breakpoints
@@ -361,7 +362,7 @@ Firebug.Breakpoint.BreakpointsPanel.prototype = FBL.extend(Firebug.Panel,
             FBTrace.sysout("breakpoints.refresh "+breakpoints.length+
                 errorBreakpoints.length+monitors.length, [breakpoints, errorBreakpoints, monitors]);
 
-        FBL.dispatch(this.fbListeners, 'onBreakRowsRefreshed', [this, this.panelNode]);
+        Events.dispatch(this.fbListeners, 'onBreakRowsRefreshed', [this, this.panelNode]);
     },
 
     extractBreakpoints: function(context, breakpoints, errorBreakpoints, monitors)

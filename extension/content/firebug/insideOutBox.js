@@ -2,9 +2,10 @@
 
 define([
     "firebug/lib",
-    "firebug/firebug"
+    "firebug/firebug",
+    "firebug/lib/events",
 ],
-function(FBL, Firebug) {
+function(FBL, Firebug, Events) {
 
 // ************************************************************************************************
 
@@ -170,7 +171,7 @@ Firebug.InsideOutBox.prototype =
         if (!isSelected)
         {
             FBL.removeClass(this.selectedObjectBox, "selected");
-            FBL.dispatch(panel.fbListeners, 'onObjectBoxUnselected', [this.selectedObjectBox]);
+            Events.dispatch(panel.fbListeners, 'onObjectBoxUnselected', [this.selectedObjectBox]);
             this.selectedObjectBox = objectBox;
 
             if (objectBox)
@@ -182,7 +183,7 @@ Firebug.InsideOutBox.prototype =
                     this.toggleObjectBox(objectBox, true);
             }
         }
-        FBL.dispatch(panel.fbListeners, 'onObjectBoxSelected', [objectBox]);
+        Events.dispatch(panel.fbListeners, 'onObjectBoxSelected', [objectBox]);
     },
 
     openObjectBox: function(objectBox)

@@ -4,9 +4,10 @@
 // Module
 
 define([
-    "firebug/lib"
+    "firebug/lib",
+    "firebug/lib/events",
 ],
-function factoryBrowser(FBL) {
+function factoryBrowser(FBL, Events) {
 
 // ************************************************************************************************
 // Browser
@@ -314,7 +315,7 @@ Browser.prototype.dispatch = function(eventName, args)
 {
     try
     {
-        return FBL.dispatch2(this.listeners, eventName, args);
+        return Events.dispatch2(this.listeners, eventName, args);
     }
     catch (exc)
     {

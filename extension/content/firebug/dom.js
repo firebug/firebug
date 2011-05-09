@@ -6,11 +6,12 @@ define([
     "firebug/reps",
     "firebug/lib/locale",
     "arch/tools",
+    "firebug/lib/events",
     "firebug/editor",
     "firebug/breakpoint",
     "firebug/search",
 ],
-function(FBL, Domplate, FirebugReps, Locale, ToolsInterface) { with (Domplate) {
+function(FBL, Domplate, FirebugReps, Locale, ToolsInterface, Events) { with (Domplate) {
 
 // ************************************************************************************************
 // Constants
@@ -316,7 +317,7 @@ const DirTablePlate = domplate(Firebug.Rep,
                             {
                                 var result = rowTag.insertRows({members: slice}, lastRow);
                                 lastRow = result[1];
-                                FBL.dispatch(Firebug.DOMModule.fbListeners, 'onMemberRowSliceAdded', [null, result, rowCount, setSize]);
+                                Events.dispatch(Firebug.DOMModule.fbListeners, 'onMemberRowSliceAdded', [null, result, rowCount, setSize]);
                                 rowCount += insertSliceSize;
                             }
                             if (isLast)
@@ -412,7 +413,7 @@ Firebug.DOMBasePanel.prototype = FBL.extend(Firebug.Panel,
 
     rebuild: function(update, scrollTop)
     {
-        FBL.dispatch(this.fbListeners, 'onBeforeDomUpdateSelection', [this]);
+        Events.dispatch(this.fbListeners, 'onBeforeDomUpdateSelection', [this]);
         var members = this.getMembers(this.selection, 0, this.context);
         this.expandMembers(members, this.toggles, 0, 0, this.context);
 
@@ -756,7 +757,7 @@ Firebug.DOMBasePanel.prototype = FBL.extend(Firebug.Panel,
         var result = rowTag.insertRows({members: slice}, tbody.lastChild);
         var rowCount = 1;
         var panel = this;
-        FBL.dispatch(this.fbListeners, 'onMemberRowSliceAdded', [panel, result, rowCount, setSize]);
+        Events.dispatch(this.fbListeners, 'onMemberRowSliceAdded', [panel, result, rowCount, setSize]);
         var timeouts = [];
 
         var delay = 0;
@@ -768,7 +769,7 @@ Firebug.DOMBasePanel.prototype = FBL.extend(Firebug.Panel,
                 {
                     result = rowTag.insertRows({members: slice}, tbody.lastChild);
                     rowCount += insertSliceSize;
-                    FBL.dispatch(Firebug.DOMModule.fbListeners, 'onMemberRowSliceAdded', [panel, result, rowCount, setSize]);
+                    Events.dispatch(Firebug.DOMModule.fbListeners, 'onMemberRowSliceAdded', [panel, result, rowCount, setSize]);
 
                     if ((panelNode.scrollHeight+panelNode.offsetHeight) >= priorScrollTop)
                         panelNode.scrollTop = priorScrollTop;
@@ -1600,13 +1601,13 @@ DOMMainPanel.prototype = FBL.extend(Firebug.DOMBasePanel.prototype,
             FBL.scrollIntoCenterView(row, this.panelNode);
 
             this.highlightRow(row);
-            FBL.dispatch(this.fbListeners, 'onDomSearchMatchFound', [this, text, row]);
+            Events.dispatch(this.fbListeners, 'onDomSearchMatchFound', [this, text, row]);
             return true;
         }
         else
         {
             this.document.defaultView.getSelection().removeAllRanges();
-            FBL.dispatch(this.fbListeners, 'onDomSearchMatchFound', [this, text, null]);
+            Events.dispatch(this.fbListeners, 'onDomSearchMatchFound', [this, text, null]);
             return false;
         }
     }
@@ -1827,7 +1828,7 @@ Firebug.WatchPanel.prototype = FBL.extend(Firebug.DOMBasePanel.prototype,
         if (FBTrace.DBG_STACK)
             FBTrace.sysout("dom watch panel updateSelection frame "+frame, frame);
 
-        FBL.dispatch(this.fbListeners, 'onBeforeDomUpdateSelection', [this]);
+        Events.dispatch(this.fbListeners, 'onBeforeDomUpdateSelection', [this]);
 
         var newFrame = frame && ('signature' in frame) && (frame.signature() != this.frameSignature);
         if (newFrame)
@@ -1928,7 +1929,7 @@ DOMEditor.prototype = domplate(Firebug.InlineEditor.prototype,
             return;
 
         var row = FBL.getAncestorByClass(target, "memberRow");
-        FBL.dispatch(this.panel.fbListeners, 'onWatchEndEditing', [this.panel]);
+        Events.dispatch(this.panel.fbListeners, 'onWatchEndEditing', [this.panel]);
         if (!row)
             this.panel.addWatch(value);
         else if (FBL.hasClass(row, "watchRow"))

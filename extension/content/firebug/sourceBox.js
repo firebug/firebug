@@ -2,9 +2,10 @@
 
 define([
     "firebug/lib",
-    "arch/tools"
+    "arch/tools",
+    "firebug/lib/events",
 ],
-function(FBL, ToolsInterface) {
+function(FBL, ToolsInterface, Events) {
 
 // ************************************************************************************************
 // Constants
@@ -361,7 +362,7 @@ Firebug.SourceBoxPanel = FBL.extend(SourceBoxPanelBase,
             {
                 this.showSourceBox(sourceBox);
             }
-            FBL.dispatch(this.fbListeners, "onShowSourceLink", [this, sourceLink.line]);
+            Events.dispatch(this.fbListeners, "onShowSourceLink", [this, sourceLink.line]);
         }
         if (sourceLink == this.selection)  // then clear it so the next link will scroll and highlight.
             delete this.selection;
@@ -681,13 +682,13 @@ Firebug.SourceBoxPanel = FBL.extend(SourceBoxPanelBase,
 
     reViewOnSourceLinesAvailable: function(sourceBox, viewRange)
     {
-        FBL.dispatch(this.fbListeners, "onBeforeViewportChange", [this]);  // XXXjjb TODO where should this be?
+        Events.dispatch(this.fbListeners, "onBeforeViewportChange", [this]);  // XXXjjb TODO where should this be?
         this.buildViewAround(sourceBox, viewRange);
 
         if (Firebug.uiListeners.length > 0)
         {
             var link = new FBL.SourceLink(sourceBox.repObject.href, sourceBox.centralLine, this.getSourceType());
-            FBL.dispatch(Firebug.uiListeners, "onViewportChange", [link]);
+            Events.dispatch(Firebug.uiListeners, "onViewportChange", [link]);
         }
 
         sourceBox.lastScrollTop = sourceBox.scrollTop;
@@ -1066,7 +1067,7 @@ Firebug.SourceBoxPanel = FBL.extend(SourceBoxPanelBase,
             sourceBox.decorator.decorate(sourceBox, sourceBox.repObject);
 
             if (Firebug.uiListeners.length > 0)
-                FBL.dispatch(Firebug.uiListeners, "onApplyDecorator", [sourceBox]);
+                Events.dispatch(Firebug.uiListeners, "onApplyDecorator", [sourceBox]);
 
             if (FBTrace.DBG_COMPILATION_UNITS)
                 FBTrace.sysout("sourceBoxDecoratorTimeout "+sourceBox.repObject, sourceBox);

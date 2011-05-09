@@ -4,8 +4,9 @@ define([
     "firebug/lib",
     "firebug/reps",
     "firebug/lib/locale",
+    "firebug/lib/events",
 ],
-function(FBL, FirebugRepsi, Locale) {
+function(FBL, FirebugRepsi, Locale, Events) {
 
 // ************************************************************************************************
 // Constants
@@ -207,7 +208,7 @@ Firebug.Inspector = FBL.extend(Firebug.Module,
         this.inspectingPanel.panelNode.focus();
         this.inspectingPanel.startInspecting();
 
-        FBL.dispatch(this.fbListeners, "onStartInspecting", [context]);
+        Events.dispatch(this.fbListeners, "onStartInspecting", [context]);
 
         if (context.stopped)
             Firebug.Debugger.thaw(context);
@@ -256,7 +257,7 @@ Firebug.Inspector = FBL.extend(Firebug.Module,
             this.inspectTimeout = context.setTimeout(function()
             {
                 var selection = inspectingPanel.inspectNode(node);
-                FBL.dispatch(_this.fbListeners, "onInspectNode", [context, node]);
+                Events.dispatch(_this.fbListeners, "onInspectNode", [context, node]);
                 if (selection)
                     inspectingPanel.select(node);
             }, inspectDelay);
@@ -295,7 +296,7 @@ Firebug.Inspector = FBL.extend(Firebug.Module,
         Firebug.chrome.unswitchToPanel(context, this.inspectingPanel.name, canceled);
 
         this.inspectingPanel.stopInspecting(this.inspectingNode, canceled);
-        FBL.dispatch(this.fbListeners, "onStopInspecting", [context, this.inspectingNode, canceled]);
+        Events.dispatch(this.fbListeners, "onStopInspecting", [context, this.inspectingNode, canceled]);
 
         this.inspectNode(null);
     },

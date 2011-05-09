@@ -4,11 +4,12 @@ define([
     "firebug/lib",
     "firebug/reps",
     "firebug/lib/locale",
+    "firebug/lib/events",
     "firebug/console",
     "firebug/consoleExposed",
     "firebug/errors",
 ],
-function(FBL, FirebugReps, Locale) {
+function(FBL, FirebugReps, Locale, Events) {
 
 // ********************************************************************************************* //
 // Constants
@@ -48,7 +49,7 @@ Firebug.Console.injector =
 
         var attached =  this.isAttached(context, win);
         if (attached)
-            FBL.dispatch(Firebug.Console.fbListeners, "onConsoleInjected", [context, win]);
+            Events.dispatch(Firebug.Console.fbListeners, "onConsoleInjected", [context, win]);
 
         return attached;
     },

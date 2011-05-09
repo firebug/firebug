@@ -2,9 +2,10 @@
 
 define([
     "firebug/lib",
+    "firebug/lib/options",
     "firebug/firebug",
 ],
-function(FBL, Firebug) {
+function(FBL, Options, Firebug) {
 
 // ********************************************************************************************* //
 // Constants
@@ -29,9 +30,9 @@ Firebug.KnownIssues = FBL.extend(Firebug.Module,
     {
         var popupPrefName = "commandLineShowCompleterPopup";
         if (/Linux/.test(window.navigator.platform))
-            Firebug.registerPreference(popupPrefName, false);
+            Options.register(popupPrefName, false);
         else
-            Firebug.registerPreference(popupPrefName, true);
+            Options.register(popupPrefName, true);
 
         Firebug.commandLineShowCompleterPopup = Firebug.Options.get(popupPrefName);
 

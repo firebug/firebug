@@ -6,9 +6,10 @@ define([
     "firebug/http/requestObserver",
     "firebug/http/responseObserver",
     "firebug/lib/locale",
+    "firebug/lib/events",
     "firebug/sourceCache",
 ],
-function(FBL, XPCOM, HttpRequestObserver, HttpResponseObserver, Locale) {
+function(FBL, XPCOM, HttpRequestObserver, HttpResponseObserver, Locale, Events) {
 
 // ********************************************************************************************* //
 // Constants
@@ -187,7 +188,7 @@ Firebug.TabCacheModel = FBL.extend(Firebug.Module,
             return;
 
         // Allow to customize caching rules.
-        if (FBL.dispatch2(this.fbListeners, "shouldCacheRequest", [request]))
+        if (Events.dispatch2(this.fbListeners, "shouldCacheRequest", [request]))
             return true;
 
         // Cache only text responses for now.
@@ -419,8 +420,8 @@ Firebug.TabCache.prototype = FBL.extend(Firebug.SourceCache.prototype,
         // initialized (cleared) now. If no data is received, the response entry remains empty.
         var response = this.getResponse(request);
 
-        FBL.dispatch(Firebug.TabCacheModel.fbListeners, "onStartRequest", [this.context, request]);
-        FBL.dispatch(this.fbListeners, "onStartRequest", [this.context, request]);
+        Events.dispatch(Firebug.TabCacheModel.fbListeners, "onStartRequest", [this.context, request]);
+        Events.dispatch(this.fbListeners, "onStartRequest", [this.context, request]);
     },
 
     onDataAvailable: function(request, requestContext, inputStream, offset, count)
@@ -434,9 +435,9 @@ Firebug.TabCache.prototype = FBL.extend(Firebug.SourceCache.prototype,
             value: inputStream
         };
 
-        FBL.dispatch(Firebug.TabCacheModel.fbListeners, "onDataAvailable",
+        Events.dispatch(Firebug.TabCacheModel.fbListeners, "onDataAvailable",
             [this.context, request, requestContext, stream, offset, count]);
-        FBL.dispatch(this.fbListeners, "onDataAvailable", [this.context,
+        Events.dispatch(this.fbListeners, "onDataAvailable", [this.context,
             request, requestContext, stream, offset, count]);
 
         return stream.value;
@@ -456,9 +457,9 @@ Firebug.TabCache.prototype = FBL.extend(Firebug.SourceCache.prototype,
             FBTrace.sysout("tabCache.channel.stopRequest: " + FBL.safeGetRequestName(request),
                 responseText);
 
-        FBL.dispatch(Firebug.TabCacheModel.fbListeners, "onStopRequest",
+        Events.dispatch(Firebug.TabCacheModel.fbListeners, "onStopRequest",
             [this.context, request, responseText]);
-        FBL.dispatch(this.fbListeners, "onStopRequest", [this.context, request, responseText]);
+        Events.dispatch(this.fbListeners, "onStopRequest", [this.context, request, responseText]);
     }
 });
 

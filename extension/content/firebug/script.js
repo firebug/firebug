@@ -6,12 +6,13 @@ define([
     "firebug/domplate",
     "arch/tools",
     "firebug/lib/locale",
+    "firebug/lib/events",
     "firebug/editorSelector",
     "firebug/infotip",
     "firebug/search",
     "firebug/sourceBox",
 ],
-function(FBL, FirebugReps, Domplate, ToolsInterface, Locale) {
+function(FBL, FirebugReps, Domplate, ToolsInterface, Locale, Events) {
 
 // ********************************************************************************************* //
 // Constants
@@ -197,7 +198,7 @@ Firebug.ScriptPanel.prototype = FBL.extend(Firebug.SourceBoxPanel,
                 this.scrollToLine(sourceLink.href, sourceLink.line,
                     this.jumpHighlightFactory(sourceLink.line, this.context));
 
-                FBL.dispatch(this.fbListeners, "onShowSourceLink", [this, sourceLink.line]);
+                Events.dispatch(this.fbListeners, "onShowSourceLink", [this, sourceLink.line]);
             }
 
             // then clear it so the next link will scroll and highlight.
@@ -823,14 +824,14 @@ Firebug.ScriptPanel.prototype = FBL.extend(Firebug.SourceBoxPanel,
             this.scrollToLine(sourceBox.repObject.getURL(), lineNo,
                 this.jumpHighlightFactory(lineNo+1, this.context));
 
-            FBL.dispatch(this.fbListeners, 'onScriptSearchMatchFound',
+            Events.dispatch(this.fbListeners, 'onScriptSearchMatchFound',
                 [this, text, sourceBox.repObject, lineNo]);
 
             return true;
         }
         else
         {
-            FBL.dispatch(this.fbListeners, 'onScriptSearchMatchFound', [this, text, null, null]);
+            Events.dispatch(this.fbListeners, 'onScriptSearchMatchFound', [this, text, null, null]);
             return false;
         }
     },
@@ -911,7 +912,7 @@ Firebug.ScriptPanel.prototype = FBL.extend(Firebug.SourceBoxPanel,
         }
 
         this.showSource(updatedCompilationUnit.getURL());
-        FBL.dispatch(this.fbListeners, "onUpdateScriptLocation", [this, updatedCompilationUnit]);
+        Events.dispatch(this.fbListeners, "onUpdateScriptLocation", [this, updatedCompilationUnit]);
     },
 
     updateSelection: function(object)

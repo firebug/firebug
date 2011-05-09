@@ -2,18 +2,24 @@
 
 define([
     "firebug/lib/trace",
+    "firebug/lib/options",
 ],
-function(FBTrace) {
+function(FBTrace, Options) {
 
 // ********************************************************************************************* //
 // Globals
 
+var Ci = Components.interfaces;
+var Cc = Components.classes;
+
 // Import of PluralForm object.
 Components.utils["import"]("resource://gre/modules/PluralForm.jsm");
 
-var Locale = {};
+var stringBundleService = Cc["@mozilla.org/intl/stringbundle;1"].getService(Ci.nsIStringBundleService);
+var categoryManager = Cc["@mozilla.org/categorymanager;1"].getService(Ci.nsICategoryManager);
 
-//xxxHonza: remove usage of Fierebug namespace.
+// This module
+var Locale = {};
 
 // ********************************************************************************************* //
 // Localization
@@ -53,7 +59,7 @@ Locale.$STR = function(name, bundle)
 {
     var strKey = name.replace(' ', '_', "g");
 
-    if (!Firebug.useDefaultLocale)
+    if (!Options.get("useDefaultLocale"))
     {
         try
         {
@@ -63,7 +69,7 @@ Locale.$STR = function(name, bundle)
             if (bundle)
                 return bundle.getString(strKey);
             else
-                return Firebug.getStringBundle().GetStringFromName(strKey);
+                return Locale.getStringBundle().GetStringFromName(strKey);
         }
         catch (err)
         {
@@ -75,7 +81,7 @@ Locale.$STR = function(name, bundle)
     try
     {
         // The en-US string should be always available.
-        var bundle = Firebug.getDefaultStringBundle();
+        var bundle = Locale.getDefaultStringBundle();
         if (bundle)
             return bundle.GetStringFromName(strKey);
     }
@@ -97,7 +103,7 @@ Locale.$STRF = function(name, args, bundle)
 {
     var strKey = name.replace(' ', '_', "g");
 
-    if (!Firebug.useDefaultLocale)
+    if (!Options.get("useDefaultLocale"))
     {
         try
         {
@@ -111,7 +117,7 @@ Locale.$STRF = function(name, args, bundle)
             if (bundle)
                 return bundle.getFormattedString(strKey, args);
             else
-                return Firebug.getStringBundle().formatStringFromName(strKey, args, args.length);
+                return Locale.getStringBundle().formatStringFromName(strKey, args, args.length);
         }
         catch (err)
         {
@@ -123,7 +129,7 @@ Locale.$STRF = function(name, args, bundle)
     try
     {
         // The en-US string should be always available.
-        var bundle = Firebug.getDefaultStringBundle();
+        var bundle = Locale.getDefaultStringBundle();
         if (bundle)
             return bundle.formatStringFromName(strKey, args, args.length);
     }
@@ -152,7 +158,7 @@ Locale.$STRP = function(name, args, index, bundle)
 
     // Get custom plural rule; otherwise the rule from chrome://global/locale/intl.properties
     // (depends on the current locale) is used.
-    var pluralRule = Firebug.getPluralRule();
+    var pluralRule = Locale.getPluralRule();
     if (!isNaN(parseInt(pluralRule, 10)))
         [getPluralForm, getNumForms] = PluralForm.makeGetter(pluralRule);
 
@@ -208,6 +214,52 @@ Locale.internationalizeElements = function(doc, elements, attributes)
             if (element.hasAttribute(attributes[j]))
                 Locale.internationalize(element, attributes[j]);
         }
+    }
+}
+
+Locale.registerStringBundle = function(bundleURI)
+{
+    // Notice that this category entry must not be persistent in Fx 4.0
+    categoryManager.addCategoryEntry("strings_firebug", bundleURI, "", false, true);
+    this.stringBundle = null;
+}
+
+Locale.getStringBundle = function()
+{
+    if (!this.stringBundle)
+        this.stringBundle = stringBundleService.createExtensibleBundle("strings_firebug");
+    return this.stringBundle;
+}
+
+Locale.getDefaultStringBundle = function()
+{
+    if (!this.defaultStringBundle)
+    {
+        var bundle = document.getElementById("strings_firebug");
+        if (!bundle)
+            return null;
+
+        var ioService = Cc["@mozilla.org/network/io-service;1"].getService(Ci.nsIIOService);
+        var chromeRegistry = Cc["@mozilla.org/chrome/chrome-registry;1"].
+            getService(Ci.nsIChromeRegistry);
+
+        var uri = ioService.newURI(bundle.src, "UTF-8", null);
+        var fileURI = chromeRegistry.convertChromeURL(uri).spec;
+        var parts = fileURI.split("/");
+        parts[parts.length - 2] = "en-US";
+        this.defaultStringBundle = stringBundleService.createBundle(parts.join("/"));
+    }
+    return this.defaultStringBundle;
+}
+
+Locale.getPluralRule = function()
+{
+    try
+    {
+        return this.getStringBundle().GetStringFromName("pluralRule");
+    }
+    catch (err)
+    {
     }
 }
 

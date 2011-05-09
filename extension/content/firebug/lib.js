@@ -3,8 +3,9 @@
 define([
     "firebug/lib/xpcom",
     "firebug/lib/locale",
+    "firebug/lib/events",
 ],
-function(XPCOM, Locale) {
+function(XPCOM, Locale, Events) {
 
 // ********************************************************************************************* //
 
@@ -25,6 +26,10 @@ for (var p in XPCOM)
 for (var p in Locale)
     FBL[p] = Locale[p];
 
+// Backward compatibility with extensions
+// xxxHonza: mark as obsolete
+for (var p in Events)
+    FBL[p] = Events[p];
 
 (function() {
 
@@ -3671,130 +3676,6 @@ this.isControlAlt = function(event)
 this.isShift = function(event)
 {
     return event.shiftKey && !event.metaKey && !event.ctrlKey && !event.altKey;
-};
-
-this.dispatch = function(listeners, name, args)
-{
-    if (!listeners)
-        return;
-
-    try
-    {
-        if (FBTrace.DBG_DISPATCH)
-            var noMethods = [];
-
-        for (var i = 0; i < listeners.length; ++i)
-        {
-            var listener = listeners[i];
-            if (!listener)
-            {
-                if (FBTrace.DBG_DISPATCH || FBTrace.DBG_ERRORS)
-                    FBTrace.sysout("FBL.dispatch ERROR "+i+" "+name+" to null listener.");
-                continue;
-            }
-
-            if (listener[name])
-            {
-                //FBTrace.sysout("FBL.dispatch "+i+") "+name+" to "+listener.dispatchName);
-                try
-                {
-                    listener[name].apply(listener, args);
-                }
-                catch(exc)
-                {
-                    if (FBTrace.DBG_ERRORS)
-                    {
-                        if (exc.stack)
-                        {
-                            var stack = exc.stack;
-                            exc.stack = stack.split('\n');
-                        }
-
-                        var culprit = listeners[i] ? listeners[i].dispatchName : null;
-                        FBTrace.sysout(" Exception in lib.dispatch "+(culprit?culprit+".":"")+
-                            name+": "+exc+" in "+(exc.fileName?exc.fileName:"")+
-                            (exc.lineNumber?":"+exc.lineNumber:""), exc);
-                    }
-                }
-            }
-            else
-            {
-                if (FBTrace.DBG_DISPATCH)
-                {
-                    //FBTrace.sysout("FBL.dispatch noMethod in "+i+"/"+listeners.length+") "+
-                    //name+" to "+listener.dispatchName);
-                    noMethods.push(listener);
-                }
-            }
-        }
-
-        if (FBTrace.DBG_DISPATCH)
-            FBTrace.sysout("FBL.dispatch "+name+" to "+listeners.length+" listeners, "+
-                noMethods.length+" had no such method:", noMethods);
-    }
-    catch (exc)
-    {
-        if (FBTrace.DBG_ERRORS)
-        {
-            if (exc.stack)
-            {
-                var stack = exc.stack;
-                exc.stack = stack.split('\n');
-            }
-
-            var culprit = listeners[i] ? listeners[i].dispatchName : null;
-            FBTrace.sysout(" Exception in lib.dispatch "+(culprit?culprit+".":"")+ name+
-                ": "+exc, exc);
-
-            window.dump(FBL.getStackDump());
-        }
-    }
-};
-
-this.dispatch2 = function(listeners, name, args)
-{
-    try
-    {
-        if (FBTrace.DBG_DISPATCH)
-            var noMethods = [];
-
-        if (!listeners)
-        {
-            if (FBTrace.DBG_DISPATCH)
-                FBTrace.sysout("dispatch2, no listeners for "+name);
-            return;
-        }
-
-        for (var i = 0; i < listeners.length; ++i)
-        {
-            var listener = listeners[i];
-            if ( listener[name] )
-            {
-                var result = listener[name].apply(listener, args);
-
-                if (FBTrace.DBG_DISPATCH)
-                    FBTrace.sysout("dispatch2 "+name+" to #"+i+" of "+listeners.length+" listeners, result "+result, {result: result, listener: listeners[i], fn: listener[name].toSource()});
-
-                if ( result )
-                    return result;
-            }
-            else
-            {
-                if (FBTrace.DBG_DISPATCH)
-                    noMethods.push(listener);
-            }
-        }
-        if (FBTrace.DBG_DISPATCH && noMethods.length == listeners.length)
-            FBTrace.sysout("FBL.dispatch2 "+name+" to "+listeners.length+" listeners, "+noMethods.length+" had no such method:", noMethods);
-    }
-    catch (exc)
-    {
-        if (typeof(FBTrace) != "undefined" && FBTrace.DBG_ERRORS)
-        {
-            if (exc.stack) exc.stack = exc.stack.split('/n');
-            FBTrace.sysout(" Exception in lib.dispatch2 "+ name+" exc:"+exc, exc);
-        }
-    }
 };
 
 // ************************************************************************************************

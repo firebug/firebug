@@ -4,9 +4,10 @@ define([
     "firebug/lib",
     "firebug/domplate",
     "firebug/lib/locale",
+    "firebug/lib/events",
     "firebug/editor"
 ],
-function(FBL, Domplate, Locale) {
+function(FBL, Domplate, Locale, Events) {
 
 // ************************************************************************************************
 
@@ -240,7 +241,7 @@ LayoutPanel.prototype = FBL.extend(Firebug.Panel,
         var node = this.template.tag.replace(args, this.panelNode);
         this.adjustCharWidth(this.getMaxCharWidth(args, node), this.panelNode);
 
-        FBL.dispatch(this.fbListeners, 'onLayoutBoxCreated', [this, node, args]);
+        Events.dispatch(this.fbListeners, 'onLayoutBoxCreated', [this, node, args]);
     },
 
     /*

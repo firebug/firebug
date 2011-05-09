@@ -3,9 +3,10 @@
 define([
     "firebug/lib",
     "firebug/reps",
-    "arch/tools"
+    "arch/tools",
+    "firebug/lib/events",
 ],
-function(FBL, FirebugReps, ToolsInterface) {
+function(FBL, FirebugReps, ToolsInterface, Events) {
 
 // ************************************************************************************************
 // Constants
@@ -197,7 +198,7 @@ Firebug.CallstackPanel.prototype = FBL.extend(Firebug.Panel,
         if (trace.currentFrameIndex)
             this.select(trace[trace.currentFrameIndex]);
 
-        FBL.dispatch(this.fbListeners, "onStackCreated", [this]);
+        Events.dispatch(this.fbListeners, "onStackCreated", [this]);
     },
 
     selectFrame: function(frameIndex)

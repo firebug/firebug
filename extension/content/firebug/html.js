@@ -7,13 +7,14 @@ define([
     "firebug/lib/locale",
     "arch/tools",
     "firebug/lib/htmlLib",
+    "firebug/lib/events",
     "firebug/breakpoint",
     "firebug/editor",
     "firebug/infotip",
     "firebug/search",
     "firebug/insideOutBox",
 ],
-function(FBL, Domplate, FirebugReps, Locale, ToolsInterface, HTMLLib) { with (Domplate) {
+function(FBL, Domplate, FirebugReps, Locale, ToolsInterface, HTMLLib, Events) { with (Domplate) {
 
 // ************************************************************************************************
 // Constants
@@ -70,16 +71,16 @@ Firebug.HTMLModule = FBL.extend(Firebug.Module,
 
     deleteNode: function(node, context)
     {
-        FBL.dispatch(this.fbListeners, "onBeginFirebugChange", [node, context]);
+        Events.dispatch(this.fbListeners, "onBeginFirebugChange", [node, context]);
         node.parentNode.removeChild(node);
-        FBL.dispatch(this.fbListeners, "onEndFirebugChange", [node, context]);
+        Events.dispatch(this.fbListeners, "onEndFirebugChange", [node, context]);
     },
 
     deleteAttribute: function(node, attr, context)
     {
-        FBL.dispatch(this.fbListeners, "onBeginFirebugChange", [node, context]);
+        Events.dispatch(this.fbListeners, "onBeginFirebugChange", [node, context]);
         node.removeAttribute(attr);
-        FBL.dispatch(this.fbListeners, "onEndFirebugChange", [node, context]);
+        Events.dispatch(this.fbListeners, "onEndFirebugChange", [node, context]);
     }
 });
 
@@ -118,7 +119,7 @@ Firebug.HTMLPanel.prototype = FBL.extend(WalkingPanel,
         {
             this.selection = object;
             this.updateSelection(object);
-            FBL.dispatch(Firebug.uiListeners, "onObjectSelected", [object, this]);
+            Events.dispatch(Firebug.uiListeners, "onObjectSelected", [object, this]);
 
             if (this.editing && FBL.$("fbToggleHTMLEditing").getAttribute("checked") === "true")
                 this.editNode(object);
@@ -2199,7 +2200,7 @@ Firebug.HTMLModule.MutationBreakpoints =
         else
             context.mutationBreakpoints.addBreakpoint(node, type);
 
-        FBL.dispatch( Firebug.HTMLModule.fbListeners, "onModifyBreakpoint", [context, xpath, type]);
+        Events.dispatch( Firebug.HTMLModule.fbListeners, "onModifyBreakpoint", [context, xpath, type]);
     },
 };
 

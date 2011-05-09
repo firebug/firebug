@@ -5,11 +5,12 @@ define([
     "firebug/reps",
     "firebug/lib/locale",
     "arch/tools",
+    "firebug/lib/events",
     "firebug/profiler",
     "firebug/search",
     "firebug/errors",
 ],
-function(FBL, FirebugReps, Locale, ToolsInterface) {
+function(FBL, FirebugReps, Locale, ToolsInterface, Events) {
 
 // ************************************************************************************************
 // Constants
@@ -49,13 +50,13 @@ Firebug.ConsoleBase =
 {
     log: function(object, context, className, rep, noThrottle, sourceLink)
     {
-        FBL.dispatch(this.fbListeners,"log",[context, object, className, sourceLink]);
+        Events.dispatch(this.fbListeners,"log",[context, object, className, sourceLink]);
         return this.logRow(appendObject, object, context, className, rep, sourceLink, noThrottle);
     },
 
     logFormatted: function(objects, context, className, noThrottle, sourceLink)
     {
-        FBL.dispatch(this.fbListeners,"logFormatted",[context, objects, className, sourceLink]);
+        Events.dispatch(this.fbListeners,"logFormatted",[context, objects, className, sourceLink]);
         return this.logRow(appendFormatted, objects, context, className, null, sourceLink, noThrottle);
     },
 
@@ -101,7 +102,7 @@ Firebug.ConsoleBase =
                     panel.limit.limitInfo.totalCount++;
                     template.updateCounter(panel.limit);
                 }
-                FBL.dispatch(this.fbListeners, "onLogRowCreated", [panel , row]);
+                Events.dispatch(this.fbListeners, "onLogRowCreated", [panel , row]);
                 return row;
             }
         }
@@ -658,7 +659,7 @@ Firebug.ConsolePanel.prototype = FBL.extend(Firebug.ActivablePanel,
             this.appendFormatted(objects, innerRow, rep);
 
         row.appendChild(innerRow);
-        FBL.dispatch(this.fbListeners, 'onLogRowCreated', [this, innerRow]);
+        Events.dispatch(this.fbListeners, 'onLogRowCreated', [this, innerRow]);
 
         // Create group body, which is displayed when the group is expanded.
         var groupBody = this.createRow("logGroupBody");
@@ -959,7 +960,7 @@ Firebug.ConsolePanel.prototype = FBL.extend(Firebug.ActivablePanel,
         var logRow = search.find(text);
         if (!logRow)
         {
-            FBL.dispatch(this.fbListeners, 'onConsoleSearchMatchFound', [this, text, []]);
+            Events.dispatch(this.fbListeners, 'onConsoleSearchMatchFound', [this, text, []]);
             return false;
         }
         for (; logRow; logRow = search.findNext())
@@ -967,7 +968,7 @@ Firebug.ConsolePanel.prototype = FBL.extend(Firebug.ActivablePanel,
             FBL.setClass(logRow, "matched");
             this.matchSet.push(logRow);
         }
-        FBL.dispatch(this.fbListeners, 'onConsoleSearchMatchFound', [this, text, this.matchSet]);
+        Events.dispatch(this.fbListeners, 'onConsoleSearchMatchFound', [this, text, this.matchSet]);
         return true;
     },
 

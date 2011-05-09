@@ -3,9 +3,10 @@
 define([
     "firebug/lib",
     "arch/tools",
-    "firebug/plugin"
+    "firebug/lib/events",
+    "firebug/plugin",
 ],
-function(FBL, ToolsInterface) {
+function(FBL, ToolsInterface, Events) {
 
 // ************************************************************************************************
 // Constants
@@ -358,7 +359,7 @@ Firebug.TabContext.prototype =
         if (FBTrace.DBG_PANELS)
             FBTrace.sysout("tabContext.createPanel; Panel created: " + panel.name, panel);
 
-        FBL.dispatch(Firebug.modules, "onCreatePanel", [this, panel, panelType]);
+        Events.dispatch(Firebug.modules, "onCreatePanel", [this, panel, panelType]);
 
         // Initialize panel and associate with a document.
         if (panel.parentPanel) // then this new panel is a side panel

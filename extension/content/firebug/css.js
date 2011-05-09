@@ -6,12 +6,13 @@ define([
     "firebug/reps",
     "firebug/lib/xpcom",
     "firebug/lib/locale",
+    "firebug/lib/events",
     "firebug/editor",
     "firebug/editorSelector",
     "firebug/infotip",
     "firebug/search",
 ],
-function(FBL, Domplate, FirebugReps, XPCOM, Locale) { with (Domplate) {
+function(FBL, Domplate, FirebugReps, XPCOM, Locale, Events) { with (Domplate) {
 
 // ************************************************************************************************
 // Constants
@@ -336,7 +337,7 @@ Firebug.CSSModule = FBL.extend(FBL.extend(Firebug.Module, Firebug.EditorSelector
         if (FBTrace.DBG_CSS)
             FBTrace.sysout("css.saveEdit styleSheet.href:"+styleSheet.href+" got innerHTML:"+value+"\n");
 
-        FBL.dispatch(this.fbListeners, "onCSSFreeEdit", [styleSheet, value]);
+        Events.dispatch(this.fbListeners, "onCSSFreeEdit", [styleSheet, value]);
     },
 
     insertRule: function(styleSheet, cssText, ruleIndex)
@@ -344,7 +345,7 @@ Firebug.CSSModule = FBL.extend(FBL.extend(Firebug.Module, Firebug.EditorSelector
         if (FBTrace.DBG_CSS) FBTrace.sysout("Insert: " + ruleIndex + " " + cssText);
         var insertIndex = styleSheet.insertRule(cssText, ruleIndex);
 
-        FBL.dispatch(this.fbListeners, "onCSSInsertRule", [styleSheet, cssText, ruleIndex]);
+        Events.dispatch(this.fbListeners, "onCSSInsertRule", [styleSheet, cssText, ruleIndex]);
 
         return insertIndex;
     },
@@ -352,7 +353,7 @@ Firebug.CSSModule = FBL.extend(FBL.extend(Firebug.Module, Firebug.EditorSelector
     deleteRule: function(styleSheet, ruleIndex)
     {
         if (FBTrace.DBG_CSS) FBTrace.sysout("deleteRule: " + ruleIndex + " " + styleSheet.cssRules.length, styleSheet.cssRules);
-        FBL.dispatch(this.fbListeners, "onCSSDeleteRule", [styleSheet, ruleIndex]);
+        Events.dispatch(this.fbListeners, "onCSSDeleteRule", [styleSheet, ruleIndex]);
 
         styleSheet.deleteRule(ruleIndex);
     },
@@ -375,7 +376,7 @@ Firebug.CSSModule = FBL.extend(FBL.extend(Firebug.Module, Firebug.EditorSelector
         style.setProperty(propName, propValue, propPriority);
 
         if (propName) {
-            FBL.dispatch(this.fbListeners, "onCSSSetProperty", [style, propName, propValue, propPriority, prevValue, prevPriority, rule, baseText]);
+            Events.dispatch(this.fbListeners, "onCSSSetProperty", [style, propName, propValue, propPriority, prevValue, prevPriority, rule, baseText]);
         }
     },
 
@@ -393,7 +394,7 @@ Firebug.CSSModule = FBL.extend(FBL.extend(Firebug.Module, Firebug.EditorSelector
         style.removeProperty(propName);
 
         if (propName) {
-            FBL.dispatch(this.fbListeners, "onCSSRemoveProperty", [style, propName, prevValue, prevPriority, rule, baseText]);
+            Events.dispatch(this.fbListeners, "onCSSRemoveProperty", [style, propName, prevValue, prevPriority, rule, baseText]);
         }
     },
 
@@ -401,13 +402,13 @@ Firebug.CSSModule = FBL.extend(FBL.extend(Firebug.Module, Firebug.EditorSelector
      * Method for atomic propertly removal, such as through the context menu.
      */
     deleteProperty: function(rule, propName, context) {
-        FBL.dispatch(this.fbListeners, "onBeginFirebugChange", [rule, context]);
+        Events.dispatch(this.fbListeners, "onBeginFirebugChange", [rule, context]);
         Firebug.CSSModule.removeProperty(rule, propName);
-        FBL.dispatch(this.fbListeners, "onEndFirebugChange", [rule, context]);
+        Events.dispatch(this.fbListeners, "onEndFirebugChange", [rule, context]);
     },
 
     disableProperty: function(disable, rule, propName, parsedValue, map, context) {
-        FBL.dispatch(this.fbListeners, "onBeginFirebugChange", [rule, context]);
+        Events.dispatch(this.fbListeners, "onBeginFirebugChange", [rule, context]);
 
         if (disable)
         {
@@ -424,7 +425,7 @@ Firebug.CSSModule = FBL.extend(FBL.extend(Firebug.Module, Firebug.EditorSelector
             map.splice(index, 1);
         }
 
-        FBL.dispatch(this.fbListeners, "onEndFirebugChange", [rule, context]);
+        Events.dispatch(this.fbListeners, "onEndFirebugChange", [rule, context]);
     },
 
     cleanupSheets: function(doc, context)
@@ -599,7 +600,7 @@ Firebug.CSSStyleSheetPanel.prototype = FBL.extend(Firebug.Panel,
         if (this.editing)
         {
             this.stopEditing();
-            FBL.dispatch(this.fbListeners, 'onStopCSSEditing', [this.context]);
+            Events.dispatch(this.fbListeners, 'onStopCSSEditing', [this.context]);
         }
         else
         {
@@ -614,7 +615,7 @@ Firebug.CSSStyleSheetPanel.prototype = FBL.extend(Firebug.Panel,
             try
             {
                 this.currentCSSEditor.startEditing(styleSheet, this.context);
-                FBL.dispatch(this.fbListeners, 'onStartCSSEditing', [styleSheet, this.context]);
+                Events.dispatch(this.fbListeners, 'onStartCSSEditing', [styleSheet, this.context]);
             }
             catch(exc)
             {
@@ -936,7 +937,7 @@ Firebug.CSSStyleSheetPanel.prototype = FBL.extend(Firebug.Panel,
             }
         }
         if (this.name == "stylesheet")
-            FBL.dispatch(this.fbListeners, 'onInlineEditorClose', [this, row.firstChild, true]);
+            Events.dispatch(this.fbListeners, 'onInlineEditorClose', [this, row.firstChild, true]);
         row.parentNode.removeChild(row);
 
         this.markChange(this.name == "stylesheet");
@@ -1138,7 +1139,7 @@ Firebug.CSSStyleSheetPanel.prototype = FBL.extend(Firebug.Panel,
 
         this.showToolbarButtons("fbCSSButtons", !FBL.isSystemStyleSheet(this.location));
 
-        FBL.dispatch(this.fbListeners, "onCSSRulesAdded", [this, this.panelNode]);
+        Events.dispatch(this.fbListeners, "onCSSRulesAdded", [this, this.panelNode]);
 
         // If the full editing mode (not the inline) is on while the location changes,
         // open the editor again for another file.
@@ -1542,13 +1543,13 @@ Firebug.CSSStyleSheetPanel.prototype = FBL.extend(Firebug.Panel,
             FBL.scrollIntoCenterView(row, this.panelNode);
             this.highlightRow(row.parentNode);
 
-            FBL.dispatch(this.fbListeners, 'onCSSSearchMatchFound', [this, text, row]);
+            Events.dispatch(this.fbListeners, 'onCSSSearchMatchFound', [this, text, row]);
             return true;
         }
         else
         {
             this.document.defaultView.getSelection().removeAllRanges();
-            FBL.dispatch(this.fbListeners, 'onCSSSearchMatchFound', [this, text, null]);
+            Events.dispatch(this.fbListeners, 'onCSSSearchMatchFound', [this, text, null]);
             return false;
         }
     },
@@ -1635,7 +1636,7 @@ CSSElementPanel.prototype = FBL.extend(Firebug.CSSStyleSheetPanel.prototype,
     {
         var result, warning, inheritLabel;
 
-        FBL.dispatch(this.fbListeners, 'onBeforeCSSRulesAdded', [this]);
+        Events.dispatch(this.fbListeners, 'onBeforeCSSRulesAdded', [this]);
         var rules = [], sections = [], usedProps = {};
         this.getInheritedRules(element, sections, usedProps);
         this.getElementRules(element, rules, usedProps);
@@ -1648,14 +1649,14 @@ CSSElementPanel.prototype = FBL.extend(Firebug.CSSStyleSheetPanel.prototype,
             inheritLabel = Locale.$STR("InheritedFrom");
             result = this.template.cascadedTag.replace({rules: rules, inherited: sections,
                 inheritLabel: inheritLabel}, this.panelNode);
-            FBL.dispatch(this.fbListeners, 'onCSSRulesAdded', [this, result]);
+            Events.dispatch(this.fbListeners, 'onCSSRulesAdded', [this, result]);
         }
         else
         {
             warning = FirebugReps.Warning.tag.replace({object: ""}, this.panelNode);
             result = FirebugReps.Description.render(Locale.$STR("css.EmptyElementCSS"),
                 warning, FBL.bind(this.editElementStyle, this));
-            FBL.dispatch([Firebug.A11yModel], 'onCSSRulesAdded', [this, result]);
+            Events.dispatch([Firebug.A11yModel], 'onCSSRulesAdded', [this, result]);
         }
     },
 
@@ -2110,7 +2111,7 @@ CSSComputedElementPanel.prototype = FBL.extend(CSSElementPanel.prototype,
             var result = this.template.computedTag.replace({groups: groups}, this.panelNode);
         }
 
-        FBL.dispatch(this.fbListeners, 'onCSSRulesAdded', [this, result]);
+        Events.dispatch(this.fbListeners, 'onCSSRulesAdded', [this, result]);
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *

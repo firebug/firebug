@@ -4,10 +4,11 @@ define([
     "firebug/lib",
     "firebug/domplate",
     "firebug/lib/locale",
+    "firebug/lib/events",
     "firebug/dom",
     "firebug/reps"
 ],
-function(FBL, Domplate, Locale) {
+function(FBL, Domplate, Locale, Events) {
 
 // ************************************************************************************************
 
@@ -49,7 +50,7 @@ Firebug.JSONViewerModel = FBL.extend(Firebug.Module,
             FBTrace.sysout("jsonviewer.initTabBody", infoBox);
 
         // Let listeners to parse the JSON.
-        FBL.dispatch(this.fbListeners, "onParseJSON", [file]);
+        Events.dispatch(this.fbListeners, "onParseJSON", [file]);
 
         // The JSON is still no there, try to parse most common cases.
         if (!file.jsonObject)

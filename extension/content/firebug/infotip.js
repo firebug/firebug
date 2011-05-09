@@ -4,8 +4,9 @@ define([
     "firebug/lib",
     "firebug/domplate",
     "firebug/lib/locale",
+    "firebug/lib/events",
 ],
-function(FBL, Domplate, Locale) {
+function(FBL, Domplate, Locale, Events) {
 
 // ************************************************************************************************
 // Constants
@@ -164,7 +165,7 @@ Firebug.InfoTip = FBL.extend(Firebug.Module,
         var show = panel.showInfoTip(infoTip, target, scrollX, y, rangeParent, rangeOffset);
         if (!show && this.fbListeners)
         {
-            show = FBL.dispatch2(this.fbListeners, "showInfoTip", [infoTip, target, scrollX, y,
+            show = Events.dispatch2(this.fbListeners, "showInfoTip", [infoTip, target, scrollX, y,
                 rangeParent, rangeOffset]);
         }
 
