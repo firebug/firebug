@@ -842,7 +842,7 @@ Firebug.Spy.XHR = domplate(Firebug.Rep,
         var target = event.currentTarget;
         var logRow = FBL.getAncestorByClass(target, "logRow-spy");
 
-        if (FBL.isLeftClick(event))
+        if (Events.isLeftClick(event))
         {
             FBL.toggleClass(logRow, "opened");
 

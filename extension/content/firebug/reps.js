@@ -1190,7 +1190,7 @@ FirebugReps.Event = domplate(Firebug.Rep,
     {
         var info = [event.type, ' '];
 
-        var eventFamily = FBL.getEventFamily(event.type);
+        var eventFamily = Events.getEventFamily(event.type);
         if (eventFamily == "mouse")
             info.push("clientX=", event.clientX, ", clientY=", event.clientY);
         else if (eventFamily == "key")
@@ -1584,7 +1584,7 @@ FirebugReps.StackFrame = domplate(Firebug.Rep,  // XXXjjb Since the repObject is
             var stackFrame = FBL.getAncestorByClass(target, "objectBox-stackFrame");
             var panel = Firebug.getElementPanel(target);
             this.inspectObject(stackFrame.repObject, panel.context);
-            FBL.cancelEvent(event);
+            Events.cancelEvent(event);
         }
     },
 
@@ -2231,7 +2231,7 @@ FirebugReps.StorageList = domplate(Firebug.Rep,
         var domain = context.window.location.hostname;
 
         Firebug.chrome.select(globalStorage.namedItem(domain));
-        FBL.cancelEvent(event);
+        Events.cancelEvent(event);
     },
 
     summarize: function(globalStorage)
@@ -2492,7 +2492,7 @@ FirebugReps.NamedNodeMap = domplate(Firebug.Rep,
         var domain = context.window.location.hostname;
 
         Firebug.chrome.select(globalStorage.namedItem(domain));
-        FBL.cancelEvent(event);
+        Events.cancelEvent(event);
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *

@@ -3,8 +3,9 @@
 define([
     "firebug/lib",
     "firebug/lib/locale",
+    "firebug/firebug",
 ],
-function(FBL, Locale) {
+function(FBL, Locale, Firebug) {
 
 // ************************************************************************************************
 // Constants

@@ -2,9 +2,10 @@
 
 define([
     "firebug/lib",
+    "firebug/lib/events",
     "arch/tools"
 ],
-function(FBL, ToolsInterface) {
+function(FBL, Events, ToolsInterface) {
 
 // ********************************************************************************************* //
 // Reusable code for modules that support editing
@@ -71,7 +72,7 @@ Firebug.EditorSelector =
             this.setCurrentEditorName(mode);
 
         this.updateEditButton();
-        FBL.cancelEvent(event);
+        Events.cancelEvent(event);
     },
 
     updateEditButton: function()

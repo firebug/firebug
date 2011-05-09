@@ -978,7 +978,7 @@ Firebug.CSSStyleSheetPanel.prototype = FBL.extend(Firebug.Panel,
     {
         var row;
 
-        if (!FBL.isLeftClick(event))
+        if (!Events.isLeftClick(event))
             return;
         // XXjoe Hack to only allow clicking on the checkbox
         if ( (event.clientX <= 20) && (event.detail == 1) )
@@ -989,7 +989,7 @@ Firebug.CSSStyleSheetPanel.prototype = FBL.extend(Firebug.Panel,
             if (row && FBL.hasClass(row, "editGroup"))
             {
                 this.disablePropertyRow(row);
-                FBL.cancelEvent(event);
+                Events.cancelEvent(event);
             }
         }
         else if( (event.clientX >= 20) && (event.detail == 2) )
@@ -999,7 +999,7 @@ Firebug.CSSStyleSheetPanel.prototype = FBL.extend(Firebug.Panel,
                 && !FBL.getAncestorByClass(event.target, "cssPropValue"))
             {
                 this.insertPropertyRow(row);
-                FBL.cancelEvent(event);
+                Events.cancelEvent(event);
             }
         }
     },
@@ -2161,7 +2161,7 @@ CSSComputedElementPanel.prototype = FBL.extend(CSSElementPanel.prototype,
 
     onMouseDown: function(event)
     {
-        if (!FBL.isLeftClick(event))
+        if (!Events.isLeftClick(event))
             return;
 
         var cssComputedHeader = FBL.getAncestorByClass(event.target, "cssComputedHeader");

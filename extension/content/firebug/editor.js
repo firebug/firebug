@@ -344,10 +344,10 @@ Firebug.Editor = FBL.extend(Firebug.Module,
         {
             this.listeners.push(
                 chrome.keyCodeListen("RETURN", null, FBL.bind(this.tabNextEditor, this)),
-                chrome.keyCodeListen("RETURN", FBL.isShift, FBL.bind(this.saveAndClose, this)),
-                chrome.keyCodeListen("RETURN", FBL.isControl, FBL.bind(this.insertRow, this, null, "after")),
+                chrome.keyCodeListen("RETURN", Events.isShift, FBL.bind(this.saveAndClose, this)),
+                chrome.keyCodeListen("RETURN", Events.isControl, FBL.bind(this.insertRow, this, null, "after")),
                 chrome.keyCodeListen("TAB", null, FBL.bind(this.tabNextEditor, this)),
-                chrome.keyCodeListen("TAB", FBL.isShift, FBL.bind(this.tabPreviousEditor, this))
+                chrome.keyCodeListen("TAB", Events.isShift, FBL.bind(this.tabPreviousEditor, this))
             );
         }
         else if (currentEditor.multiLine)
@@ -366,7 +366,7 @@ Firebug.Editor = FBL.extend(Firebug.Module,
             {
                 this.listeners.push(
                     chrome.keyCodeListen("TAB", null, FBL.bind(editor.completeValue, editor, 1)),
-                    chrome.keyCodeListen("TAB", FBL.isShift, FBL.bind(editor.completeValue, editor, -1)),
+                    chrome.keyCodeListen("TAB", Events.isShift, FBL.bind(editor.completeValue, editor, -1)),
                     chrome.keyCodeListen("UP", null, FBL.bindFixed(editor.completeValue, editor, -1, true)),
                     chrome.keyCodeListen("DOWN", null, FBL.bindFixed(editor.completeValue, editor, 1, true)),
                     chrome.keyCodeListen("PAGE_UP", null, FBL.bindFixed(editor.completeValue, editor, -pageAmount, true)),
@@ -765,16 +765,16 @@ Firebug.InlineEditor.prototype = domplate(Firebug.BaseEditor,
         {
             var reverted = this.getAutoCompleter().revert(this.input);
             if (reverted)
-                FBL.cancelEvent(event);
+                Events.cancelEvent(event);
         }
         else if (event.charCode && this.advanceToNext(this.target, event.charCode))
         {
             Firebug.Editor.tabNextEditor();
-            FBL.cancelEvent(event);
+            Events.cancelEvent(event);
         }
         else if (this.numeric && event.charCode && (event.charCode < 48 || event.charCode > 57) && event.charCode != 45 && event.charCode != 46)
         {
-            FBL.cancelEvent(event);
+            Events.cancelEvent(event);
         }
         else
         {
@@ -805,7 +805,7 @@ Firebug.InlineEditor.prototype = domplate(Firebug.BaseEditor,
 
     onContextMenu: function(event)
     {
-        FBL.cancelEvent(event);
+        Events.cancelEvent(event);
 
         var popup = FBL.$("fbInlineEditorPopup");
         FBL.eraseNode(popup);
@@ -1431,13 +1431,13 @@ Firebug.AutoCompleter = function(getExprOffset, getRange, evaluator, selectMode,
                     return false; //  pass TAB along
 
                 this.setTabWarning(textBox, completionBox);
-                FBL.cancelEvent(event);
+                Events.cancelEvent(event);
                 return true;
             }
             else  // complete
             {
                 this.acceptCompletionInTextBox(textBox, completionBox);
-                FBL.cancelEvent(event);
+                Events.cancelEvent(event);
                 return true;
             }
         }
@@ -1445,7 +1445,7 @@ Firebug.AutoCompleter = function(getExprOffset, getRange, evaluator, selectMode,
         {
             if (this.hide(completionBox))  // then we closed the popup
             {
-                FBL.cancelEvent(event); // Stop event bubbling if it was used to close the popup.
+                Events.cancelEvent(event); // Stop event bubbling if it was used to close the popup.
                 return true;
             }
         }
@@ -1455,7 +1455,7 @@ Firebug.AutoCompleter = function(getExprOffset, getRange, evaluator, selectMode,
             {
                 if (this.cycle(event.keyCode === 38))
                     this.showCandidates(textBox, completionBox);
-                FBL.cancelEvent(event);
+                Events.cancelEvent(event);
                 return true;
             }
             // else the arrow will fall through to command history

@@ -670,7 +670,7 @@ Firebug.ConsolePanel.prototype = FBL.extend(Firebug.ActivablePanel,
         // Expand/collapse logic.
         innerRow.addEventListener("mousedown", function(event)
         {
-            if (FBL.isLeftClick(event))
+            if (Events.isLeftClick(event))
             {
                 var groupRow = event.currentTarget.parentNode;
                 if (FBL.hasClass(groupRow, "opened"))

@@ -1024,7 +1024,7 @@ Firebug.Breakpoint.BreakNotification.prototype = domplate(Firebug.Rep,
         tab.tabMenu.showMenu();
 
         // Avoid default processing that hides the notification popup.
-        FBL.cancelEvent(event);
+        Events.cancelEvent(event);
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

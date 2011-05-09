@@ -2978,7 +2978,7 @@ this.monitorEvents = function(object, type, context)
         context.eventsMonitored.push({object: object, type: type});
 
         if (!type)
-            this.attachAllListeners(object, context.onMonitorEvent, context);
+            Events.attachAllListeners(object, context.onMonitorEvent, context);
         else
             object.addEventListener(type, context.onMonitorEvent, false);
     }
@@ -2995,7 +2995,7 @@ this.unmonitorEvents = function(object, type, context)
             eventsMonitored.splice(i, 1);
 
             if (!type)
-                this.detachAllListeners(object, context.onMonitorEvent, context);
+                Events.detachAllListeners(object, context.onMonitorEvent, context);
             else
                 object.removeEventListener(type, context.onMonitorEvent, false);
             break;
@@ -3606,206 +3606,6 @@ this.jsKeywords =
 this.isJavaScriptKeyword = function(name)
 {
     return name in FBL.jsKeywords;
-};
-
-// ************************************************************************************************
-// Events
-
-this.cancelEvent = function(event)
-{
-    event.stopPropagation();
-    event.preventDefault();
-};
-
-this.isLeftClick = function(event, allowKeyModifiers)
-{
-    return event.button == 0 && (allowKeyModifiers || this.noKeyModifiers(event));
-};
-
-this.isMiddleClick = function(event, allowKeyModifiers)
-{
-    return event.button == 1 && (allowKeyModifiers || this.noKeyModifiers(event));
-};
-
-this.isRightClick = function(event, allowKeyModifiers)
-{
-
-    return event.button == 2 && (allowKeyModifiers || this.noKeyModifiers(event));
-};
-
-this.noKeyModifiers = function(event)
-{
-    return !event.ctrlKey && !event.shiftKey && !event.altKey && !event.metaKey;
-};
-
-this.isControlClick = function(event)
-{
-    return event.button == 0 && this.isControl(event);
-};
-
-this.isShiftClick = function(event)
-{
-    return event.button == 0 && this.isShift(event);
-};
-
-this.isControl = function(event)
-{
-    return (event.metaKey || event.ctrlKey) && !event.shiftKey && !event.altKey;
-};
-
-this.isAlt = function(event)
-{
-    return event.altKey && !event.ctrlKey && !event.shiftKey && !event.metaKey;
-};
-
-this.isAltClick = function(event)
-{
-    return event.button == 0 && this.isAlt(event);
-};
-
-this.isControlShift = function(event)
-{
-    return (event.metaKey || event.ctrlKey) && event.shiftKey && !event.altKey;
-};
-
-this.isControlAlt = function(event)
-{
-    return (event.metaKey || event.ctrlKey) && !event.shiftKey && event.altKey;
-};
-
-this.isShift = function(event)
-{
-    return event.shiftKey && !event.metaKey && !event.ctrlKey && !event.altKey;
-};
-
-// ************************************************************************************************
-// DOM Events
-
-const eventTypes =
-{
-    composition: [
-        "composition",
-        "compositionstart",
-        "compositionend" ],
-    contextmenu: [
-        "contextmenu" ],
-    drag: [
-        "dragenter",
-        "dragover",
-        "dragexit",
-        "dragdrop",
-        "draggesture" ],
-    focus: [
-        "focus",
-        "blur" ],
-    form: [
-        "submit",
-        "reset",
-        "change",
-        "select",
-        "input" ],
-    key: [
-        "keydown",
-        "keyup",
-        "keypress" ],
-    load: [
-        "load",
-        "beforeunload",
-        "unload",
-        "abort",
-        "error" ],
-    mouse: [
-        "mousedown",
-        "mouseup",
-        "click",
-        "dblclick",
-        "mouseover",
-        "mouseout",
-        "mousemove" ],
-    mutation: [
-        "DOMSubtreeModified",
-        "DOMNodeInserted",
-        "DOMNodeRemoved",
-        "DOMNodeRemovedFromDocument",
-        "DOMNodeInsertedIntoDocument",
-        "DOMAttrModified",
-        "DOMCharacterDataModified" ],
-    paint: [
-        "paint",
-        "resize",
-        "scroll" ],
-    scroll: [
-        "overflow",
-        "underflow",
-        "overflowchanged" ],
-    text: [
-        "text" ],
-    ui: [
-        "DOMActivate",
-        "DOMFocusIn",
-        "DOMFocusOut" ],
-    xul: [
-        "popupshowing",
-        "popupshown",
-        "popuphiding",
-        "popuphidden",
-        "close",
-        "command",
-        "broadcast",
-        "commandupdate" ],
-    clipboard: [
-        "cut",
-        "copy",
-        "paste" ],
-};
-
-this.getEventFamily = function(eventType)
-{
-    if (!this.families)
-    {
-        this.families = {};
-
-        for (var family in eventTypes)
-        {
-            var types = eventTypes[family];
-            for (var i = 0; i < types.length; ++i)
-                this.families[types[i]] = family;
-        }
-    }
-
-    return this.families[eventType];
-};
-
-this.attachAllListeners = function(object, listener)
-{
-    for (var family in eventTypes)
-    {
-        if (family != "mutation" || Firebug.attachMutationEvents)
-            this.attachFamilyListeners(family, object, listener);
-    }
-};
-
-this.detachAllListeners = function(object, listener)
-{
-    for (var family in eventTypes)
-    {
-        if (family != "mutation" || Firebug.attachMutationEvents)
-            this.detachFamilyListeners(family, object, listener);
-    }
-};
-
-this.attachFamilyListeners = function(family, object, listener)
-{
-    var types = eventTypes[family];
-    for (var i = 0; i < types.length; ++i)
-        object.addEventListener(types[i], listener, false);
-};
-
-this.detachFamilyListeners = function(family, object, listener)
-{
-    var types = eventTypes[family];
-    for (var i = 0; i < types.length; ++i)
-        object.removeEventListener(types[i], listener, false);
 };
 
 // ************************************************************************************************

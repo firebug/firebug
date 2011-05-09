@@ -1764,7 +1764,8 @@ function onSelectingPanel(event)
     Firebug.chrome.syncSidePanels();
 }
 
-function onMouseScroll(event) {
+function onMouseScroll(event)
+{
     if (FBL.isControlAlt(event))
     {
         FBL.cancelEvent(event);

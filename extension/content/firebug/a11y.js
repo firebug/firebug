@@ -5,10 +5,11 @@ define([
     "firebug/domplate",
     "firebug/lib/locale",
     "arch/tools",
+    "firebug/lib/events",
     "firebug/console",
     "firebug/infotip",
 ],
-function(FBL, Domplate, Locale, ToolsInterface) {
+function(FBL, Domplate, Locale, ToolsInterface, Events) {
 
 // ************************************************************************************************
 // Constants
@@ -442,7 +443,7 @@ Firebug.A11yModel = FBL.extend(Firebug.Module,
                    {
                        if (target.id=="fbFirebugMenu" && !forward)
                        {
-                            FBL.cancelEvent(event);
+                            Events.cancelEvent(event);
                             return;
                        }
                        toolbar = FBL.getAncestorByClass(target, 'innerToolbar');
@@ -467,7 +468,7 @@ Firebug.A11yModel = FBL.extend(Firebug.Module,
                            }, this));
 
                        }
-                        FBL.cancelEvent(event);
+                        Events.cancelEvent(event);
                         return;
                    }
                 break;
@@ -483,7 +484,7 @@ Firebug.A11yModel = FBL.extend(Firebug.Module,
                                 target.showPopup();
                             else
                                 target.open = true;
-                            FBL.cancelEvent(event);
+                            Events.cancelEvent(event);
                             return false;
                         }
                     }
@@ -727,7 +728,7 @@ Firebug.A11yModel = FBL.extend(Firebug.Module,
             if (!this.isFocusNoTabObject(target))
             {
                 this.focusSiblingRow(panel, newTarget, keyCode == 38);
-                FBL.cancelEvent(event);
+                Events.cancelEvent(event);
             }
                 break;
             case 37://left
@@ -767,7 +768,7 @@ Firebug.A11yModel = FBL.extend(Firebug.Module,
                             this.focus(newRows[newRows.length -1].cells[2].firstChild);
                     }
                 }
-                FBL.cancelEvent(event);
+                Events.cancelEvent(event);
             }
             else if (this.isOuterFocusRow(target, true))
             {
@@ -838,18 +839,18 @@ Firebug.A11yModel = FBL.extend(Firebug.Module,
                 }
                 else
                     this.focus(goLeft ? parentRow : focusObjects[focusObjects.length -1]);
-                FBL.cancelEvent(event);
+                Events.cancelEvent(event);
             }
             break;
         case 35://end
         case 36://home
             this.focusEdgeRow(panel, newTarget, keyCode == 36);
-            FBL.cancelEvent(event);
+            Events.cancelEvent(event);
             break;
         case 33://pgup
         case 34://pgdn
             this.focusPageSiblingRow(panel, newTarget, keyCode == 33);
-            FBL.cancelEvent(event);
+            Events.cancelEvent(event);
             break;
         case 13://enter
             if (this.isFocusObject(target))
@@ -859,7 +860,7 @@ Firebug.A11yModel = FBL.extend(Firebug.Module,
             else if(FBL.hasClass(target, 'watchEditBox'))
             {
                 this.dispatchMouseEvent(target, 'mousedown');
-                FBL.cancelEvent(event);
+                Events.cancelEvent(event);
             }
             else if (FBL.hasClass(target, 'breakpointRow'))
             {
@@ -958,7 +959,7 @@ Firebug.A11yModel = FBL.extend(Firebug.Module,
             this.focusPanelRow(Firebug.getElementPanel(focusRow), focusRow);
             node = FBL.getAncestorByClass(event.target, 'memberLabel')
             if (!(node && FBL.hasClass(node, 'hasChildren')))
-                FBL.cancelEvent(event);
+                Events.cancelEvent(event);
         }
     },
 
@@ -1043,7 +1044,7 @@ Firebug.A11yModel = FBL.extend(Firebug.Module,
                     if (nodeLabels.length > 0)
                     {
                         Firebug.Editor.startEditing(nodeLabels[0]);
-                        FBL.cancelEvent(event);
+                        Events.cancelEvent(event);
                     }
                 }
                 if (!isEnter || nodeLabels.length == 0)
@@ -1052,7 +1053,7 @@ Firebug.A11yModel = FBL.extend(Firebug.Module,
                     if (nodeBox.repObject && panel.editNewAttribute)
                     {
                         panel.editNewAttribute(nodeBox.repObject)
-                        FBL.cancelEvent(event);
+                        Events.cancelEvent(event);
                     }
                 }
                 break;
@@ -1076,7 +1077,7 @@ Firebug.A11yModel = FBL.extend(Firebug.Module,
             if (nodeLabel)
                 FBL.setClass(nodeLabel, 'focused');
             event.target.setAttribute("aria-selected", "true");
-            FBL.cancelEvent(event);
+            Events.cancelEvent(event);
         }
     },
 
@@ -1089,7 +1090,7 @@ Firebug.A11yModel = FBL.extend(Firebug.Module,
             if (nodeLabel)
                 FBL.removeClass(nodeLabel, 'focused');
             event.target.setAttribute("aria-selected", "false");
-            FBL.cancelEvent(event);
+            Events.cancelEvent(event);
         }
     },
 
@@ -1286,14 +1287,14 @@ Firebug.A11yModel = FBL.extend(Firebug.Module,
                     var node = FBL.getChildByClass(target, 'cssPropName');
                     if (node)
                         Firebug.Editor.startEditing(node);
-                    FBL.cancelEvent(event);
+                    Events.cancelEvent(event);
                 }
                 else if (FBL.hasClass(target, 'cssHead'))
                 {
                     var node = FBL.getChildByClass(target, 'cssSelector');
                     if (node && FBL.hasClass(node, 'editable'))
                         Firebug.Editor.startEditing(node);
-                    FBL.cancelEvent(event);
+                    Events.cancelEvent(event);
                 }
                 else if (FBL.hasClass(target, 'importRule'))
                 {
@@ -1310,7 +1311,7 @@ Firebug.A11yModel = FBL.extend(Firebug.Module,
                     panel.disablePropertyRow(target);
                     if (panel.name == "stylesheet")
                         target.setAttribute('aria-checked', !FBL.hasClass(target, 'disabledStyle'));
-                    FBL.cancelEvent(event);
+                    Events.cancelEvent(event);
                 }
                 break;
         }
@@ -1477,7 +1478,7 @@ Firebug.A11yModel = FBL.extend(Firebug.Module,
                 panelA11y.reFocusId = FBL.getElementXPath(event.target);
                 document.popupNode = node;
                 Firebug.chrome.$('fbContextMenu').openPopup(node, 'overlap', 0,0,true);
-                FBL.cancelEvent(event); //no need for default handlers anymore
+                Events.cancelEvent(event); //no need for default handlers anymore
             }
         }
     },
@@ -1619,7 +1620,7 @@ Firebug.A11yModel = FBL.extend(Firebug.Module,
                 var editable = target.getElementsByClassName('editable').item(0);
                 if (editable)
                     Firebug.Editor.startEditing(editable);
-                FBL.cancelEvent(event);
+                Events.cancelEvent(event);
                 break;
         }
     },
@@ -1840,13 +1841,13 @@ Firebug.A11yModel = FBL.extend(Firebug.Module,
                     box.a11yCaretLine = goUp ? 0 : box.totalMax;
                     box.a11yCaretOffset = 0;
                     this.insertCaretIntoLine(panel, box);
-                    FBL.cancelEvent(event);
+                    Events.cancelEvent(event);
                     return;
                 }
                 box.a11yCaretLine = goUp ? lineNo - box.viewableLines : lineNo + box.viewableLines;
                 linesToScroll = goUp ? -box.viewableLines : box.viewableLines;
                 box.scrollTop = box.scrollTop + (linesToScroll * box.lineHeight);
-                FBL.cancelEvent(event);
+                Events.cancelEvent(event);
                 break;
             case 36://home
             case 35://end
@@ -1859,7 +1860,7 @@ Firebug.A11yModel = FBL.extend(Firebug.Module,
                         this.insertCaretIntoLine(panel, box);
                     else
                         box.scrollTop = goUp ? 0 : box.scrollHeight - box.clientHeight;;
-                    FBL.cancelEvent(event);
+                    Events.cancelEvent(event);
                     return;
                 }
                 if (goUp)
@@ -1867,7 +1868,7 @@ Firebug.A11yModel = FBL.extend(Firebug.Module,
                     //move caret to beginning of line. Override default behavior, as that would take the caret into the line number
                     this.insertCaretIntoLine(panel, box, lineNo, 0);
                     box.scrollLeft = 0; //in case beginning of line is scrolled out of view
-                    FBL.cancelEvent(event);
+                    Events.cancelEvent(event);
                 }
                 break;
             case 13:
@@ -2057,7 +2058,7 @@ Firebug.A11yModel = FBL.extend(Firebug.Module,
             }
             Firebug.chrome.window.document.popupNode = node;
             Firebug.chrome.$('fbContextMenu').openPopup(node.ownerDocument.body, "overlap", x, y, true);
-            FBL.cancelEvent(event);
+            Events.cancelEvent(event);
         }
     },
 

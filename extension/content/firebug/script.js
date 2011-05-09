@@ -421,14 +421,14 @@ Firebug.ScriptPanel.prototype = FBL.extend(Firebug.SourceBoxPanel,
         var compilationUnit = sourceRow.parentNode.repObject;
         var lineNo = parseInt(sourceLine.textContent);
 
-        if (FBL.isLeftClick(event))
+        if (Events.isLeftClick(event))
             this.toggleBreakpoint(lineNo);
-        else if (FBL.isShiftClick(event))
+        else if (Events.isShiftClick(event))
             this.toggleDisableBreakpoint(lineNo);
-        else if (FBL.isControlClick(event) || FBL.isMiddleClick(event))
+        else if (Events.isControlClick(event) || Events.isMiddleClick(event))
         {
             ToolsInterface.JavaScript.runUntil(this.context, compilationUnit, lineNo);
-            FBL.cancelEvent(event);
+            Events.cancelEvent(event);
         }
     },
 
@@ -440,7 +440,7 @@ Firebug.ScriptPanel.prototype = FBL.extend(Firebug.SourceBoxPanel,
 
         var lineNo = parseInt(sourceLine.textContent);
         this.editBreakpointCondition(lineNo);
-        FBL.cancelEvent(event);
+        Events.cancelEvent(event);
     },
 
     onMouseOver: function(event)
@@ -483,12 +483,12 @@ Firebug.ScriptPanel.prototype = FBL.extend(Firebug.SourceBoxPanel,
         var ch = String.fromCharCode(event.charCode);
         var searchBox = Firebug.chrome.$("fbSearchBox");
 
-        if (ch == "l" && FBL.isControl(event))
+        if (ch == "l" && Events.isControl(event))
         {
             searchBox.value = "#";
             searchBox.focus();
 
-            FBL.cancelEvent(event);
+            Events.cancelEvent(event);
         }
     },
 
@@ -1279,13 +1279,13 @@ Firebug.ScriptPanel.prototype = FBL.extend(Firebug.SourceBoxPanel,
         this.keyListeners =
             [
                 chrome.keyCodeListen("F8", null, FBL.bind(this.resume, this, context), true),
-                chrome.keyListen("/", FBL.isControl, FBL.bind(this.resume, this, context)),
+                chrome.keyListen("/", Events.isControl, FBL.bind(this.resume, this, context)),
                 chrome.keyCodeListen("F10", null, FBL.bind(this.stepOver, this, context), true),
-                chrome.keyListen("'", FBL.isControl, FBL.bind(this.stepOver, this, context)),
+                chrome.keyListen("'", Events.isControl, FBL.bind(this.stepOver, this, context)),
                 chrome.keyCodeListen("F11", null, FBL.bind(this.stepInto, this, context)),
-                chrome.keyListen(";", FBL.isControl, FBL.bind(this.stepInto, this, context)),
-                chrome.keyCodeListen("F11", FBL.isShift, FBL.bind(this.stepOut, this, context)),
-                chrome.keyListen(",", FBL.isControlShift, FBL.bind(this.stepOut, this, context))
+                chrome.keyListen(";", Events.isControl, FBL.bind(this.stepInto, this, context)),
+                chrome.keyCodeListen("F11", Events.isShift, FBL.bind(this.stepOut, this, context)),
+                chrome.keyListen(",", Events.isControlShift, FBL.bind(this.stepOut, this, context))
             ];
         },
 

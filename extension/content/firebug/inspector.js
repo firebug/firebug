@@ -439,8 +439,8 @@ Firebug.Inspector = FBL.extend(Firebug.Module,
         [
             chrome.keyCodeListen("RETURN", null, FBL.bindFixed(this.stopInspecting, this)),
             chrome.keyCodeListen("ESCAPE", null, FBL.bindFixed(this.stopInspecting, this, true)),
-            chrome.keyCodeListen("UP", FBL.isControl, FBL.bindFixed(this.inspectNodeBy, this, "up"), true),
-            chrome.keyCodeListen("DOWN", FBL.isControl, FBL.bindFixed(this.inspectNodeBy, this, "down"), true),
+            chrome.keyCodeListen("UP", Events.isControl, FBL.bindFixed(this.inspectNodeBy, this, "up"), true),
+            chrome.keyCodeListen("DOWN", Events.isControl, FBL.bindFixed(this.inspectNodeBy, this, "down"), true),
         ];
 
         FBL.iterateWindows(win, FBL.bind(function(subWin)
@@ -550,7 +550,7 @@ Firebug.Inspector = FBL.extend(Firebug.Module,
         if (event.originalTarget && event.originalTarget.tagName === "xul:thumb")
             return;
 
-        FBL.cancelEvent(event);
+        Events.cancelEvent(event);
     },
 
     /**
@@ -569,7 +569,7 @@ Firebug.Inspector = FBL.extend(Firebug.Module,
 
         this.stopInspecting(false, true);
 
-        FBL.cancelEvent(event);
+        Events.cancelEvent(event);
     },
 
     /**
@@ -588,7 +588,7 @@ Firebug.Inspector = FBL.extend(Firebug.Module,
             this.detachClickInspectListeners(win);
         }
 
-        FBL.cancelEvent(event);
+        Events.cancelEvent(event);
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *

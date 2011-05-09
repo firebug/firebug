@@ -839,7 +839,7 @@ Firebug.HTMLPanel.prototype = FBL.extend(WalkingPanel,
 
     onClick: function(event)
     {
-        if (FBL.isLeftClick(event) && event.detail == 2)
+        if (Events.isLeftClick(event) && event.detail == 2)
         {
             // The double-click (detail == 2) expands an HTML element, but the user must click
             // on the element itself not on the twisty.
@@ -850,7 +850,7 @@ Firebug.HTMLPanel.prototype = FBL.extend(WalkingPanel,
             if (!FBL.hasClass(event.target, "twisty") && !FBL.hasClass(event.target, "nodeLabel"))
                 this.toggleNode(event);
         }
-        else if (FBL.isAltClick(event) && event.detail == 2 && !this.editing)
+        else if (Events.isAltClick(event) && event.detail == 2 && !this.editing)
         {
             this.editNode(this.selection);
         }
@@ -858,7 +858,7 @@ Firebug.HTMLPanel.prototype = FBL.extend(WalkingPanel,
 
     onMouseDown: function(event)
     {
-        if (!FBL.isLeftClick(event))
+        if (!Events.isLeftClick(event))
             return;
 
         if (FBL.getAncestorByClass(event.target, "nodeTag"))
@@ -895,7 +895,7 @@ Firebug.HTMLPanel.prototype = FBL.extend(WalkingPanel,
         if (!node)
             return;
 
-        if (!FBL.noKeyModifiers(event))
+        if (!Events.noKeyModifiers(event))
           return;
 
         // * expands the node with all its children
@@ -928,7 +928,7 @@ Firebug.HTMLPanel.prototype = FBL.extend(WalkingPanel,
         else
             return;
 
-        FBL.cancelEvent(event);
+        Events.cancelEvent(event);
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
@@ -2261,7 +2261,7 @@ Firebug.HTMLModule.BreakpointRep = domplate(Firebug.Rep,
 
     onRemove: function(event)
     {
-        FBL.cancelEvent(event);
+        Events.cancelEvent(event);
 
         var bpPanel = Firebug.getElementPanel(event.target);
         var context = bpPanel.context;

@@ -4,10 +4,11 @@ define([
     "firebug/lib",
     "firebug/reps",
     "firebug/lib/locale",
+    "firebug/lib/events",
     "firebug/console",
     "firebug/commandLineExposed"
 ],
-function(FBL, FirebugReps, Locale) {
+function(FBL, FirebugReps, Locale, Events) {
 
 // ************************************************************************************************
 // Constants
@@ -846,7 +847,7 @@ Firebug.CommandLine = FBL.extend(Firebug.Module,
         {
             event.preventDefault();
             if (Firebug.CommandLine.cancel(Firebug.currentContext))
-                FBL.cancelEvent(event);
+                Events.cancelEvent(event);
             this.commandHistory.hide();
             return true;
         }

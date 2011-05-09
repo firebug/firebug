@@ -2,9 +2,11 @@
 
 define([
     "firebug/lib",
-    "firebug/lib/locale"
+    "firebug/lib/locale",
+    "firebug/lib/events",
+    "firebug/firebug",
 ],
-function(FBL, Locale) {
+function(FBL, Locale, Events, Firebug) {
 
 // ********************************************************************************************* //
 // Constants
@@ -150,7 +152,7 @@ Firebug.StartButton = FBL.extend(Firebug.Module,
         if (panel && panel.name != "console")
         {
             Firebug.chrome.selectPanel("console");
-            FBL.cancelEvent(event);
+            Events.cancelEvent(event);
         }
     },
 
@@ -158,7 +160,7 @@ Firebug.StartButton = FBL.extend(Firebug.Module,
     {
         if (event.button != 0)
             return;
-        else if (FBL.isControl(event))
+        else if (Events.isControl(event))
             Firebug.toggleDetachBar(true);
         else if (context && context.errorCount)
             Firebug.toggleBar(undefined, "console");

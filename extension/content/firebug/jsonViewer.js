@@ -135,7 +135,7 @@ Firebug.JSONViewerModel.Preview = domplate(
         if (!sortLink)
             return;
 
-        FBL.cancelEvent(event);
+        Events.cancelEvent(event);
 
         FBL.toggleClass(sortLink, "sorted");
         Firebug.Options.set("sortJsonPreview", !Firebug.sortJsonPreview);

@@ -169,7 +169,7 @@ const DirTablePlate = domplate(Firebug.Rep,
 
     onClick: function(event)
     {
-        if (!FBL.isLeftClick(event))
+        if (!Events.isLeftClick(event))
             return;
 
         var row = FBL.getAncestorByClass(event.target, "memberRow");
@@ -184,14 +184,14 @@ const DirTablePlate = domplate(Firebug.Rep,
         {
             var row = label.parentNode.parentNode;
             this.toggleRow(row);
-            FBL.cancelEvent(event);
+            Events.cancelEvent(event);
         }
         else
         {
             if (typeof(object) == "function")
             {
                 Firebug.chrome.select(object, "script");
-                FBL.cancelEvent(event);
+                Events.cancelEvent(event);
             }
             else if (event.detail == 2 && !object)
             {
@@ -203,7 +203,7 @@ const DirTablePlate = domplate(Firebug.Rep,
                         panel.setPropertyValue(row, !rowValue);
                     else
                         panel.editProperty(row);
-                    FBL.cancelEvent(event);
+                    Events.cancelEvent(event);
                 }
             }
         }
@@ -335,7 +335,7 @@ const DirTablePlate = domplate(Firebug.Rep,
 
     onClickRowHeader: function(event)
     {
-        FBL.cancelEvent(event);
+        Events.cancelEvent(event);
 
         var rowHeader = event.target;
         if (!FBL.hasClass(rowHeader, "memberRowHeader"))
@@ -1535,7 +1535,7 @@ DOMMainPanel.prototype = FBL.extend(Firebug.DOMBasePanel.prototype,
             if (row)
             {
                 this.selectRow(row, repNode);
-                FBL.cancelEvent(event);
+                Events.cancelEvent(event);
             }
         }
     },
@@ -1735,7 +1735,7 @@ Firebug.WatchPanel.prototype = FBL.extend(Firebug.DOMBasePanel.prototype,
         if (watchNewRow)
         {
             this.editProperty(watchNewRow);
-            FBL.cancelEvent(event);
+            Events.cancelEvent(event);
         }
     },
 
@@ -2074,7 +2074,7 @@ Firebug.DOMModule.BreakpointRep = domplate(Firebug.Rep,
 
     onRemove: function(event)
     {
-        FBL.cancelEvent(event);
+        Events.cancelEvent(event);
 
         if (!FBL.hasClass(event.target, "closeButton"))
             return;

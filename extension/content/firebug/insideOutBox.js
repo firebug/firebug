@@ -236,7 +236,7 @@ Firebug.InsideOutBox.prototype =
                     // The user can force expanding by pressing SHIFT key.
                     // xxxHonza: I believe this entire logic belongs int html.js
                     //    Refactor when implementing the breakpoint column.
-                    if ((localName == "script" || localName == "link") && !FBL.isShift(event))
+                    if ((localName == "script" || localName == "link") && !Events.isShift(event))
                         continue;
                 }
 

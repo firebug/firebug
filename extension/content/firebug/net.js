@@ -829,7 +829,7 @@ NetPanel.prototype = FBL.extend(Firebug.ActivablePanel,
             return;
 
         this.editBreakpointCondition(file);
-        FBL.cancelEvent(event);
+        Events.cancelEvent(event);
     },
 
     editBreakpointCondition: function(file)
@@ -1733,7 +1733,7 @@ Firebug.NetMonitor.NetRequestTable = domplate(Firebug.Rep, new Firebug.Listener(
             FBTrace.sysout("net.onClickHeader\n");
 
         // Also support enter key for sorting
-        if (!FBL.isLeftClick(event) && !(event.type == "keypress" && event.keyCode == 13))
+        if (!Events.isLeftClick(event) && !(event.type == "keypress" && event.keyCode == 13))
             return;
 
         var table = FBL.getAncestorByClass(event.target, "netTable");
@@ -2064,7 +2064,7 @@ Firebug.NetMonitor.NetRequestEntry = domplate(Firebug.Rep, new Firebug.Listener(
 
     onClickRowHeader: function(event)
     {
-        FBL.cancelEvent(event);
+        Events.cancelEvent(event);
 
         var rowHeader = event.target;
         if (!FBL.hasClass(rowHeader, "netRowHeader"))
@@ -2082,7 +2082,7 @@ Firebug.NetMonitor.NetRequestEntry = domplate(Firebug.Rep, new Firebug.Listener(
 
     onClick: function(event)
     {
-        if (FBL.isLeftClick(event))
+        if (Events.isLeftClick(event))
         {
             var row = FBL.getAncestorByClass(event.target, "netRow");
             if (row)
@@ -2092,7 +2092,7 @@ Firebug.NetMonitor.NetRequestEntry = domplate(Firebug.Rep, new Firebug.Listener(
                     return;
 
                 this.toggleHeadersRow(row);
-                FBL.cancelEvent(event);
+                Events.cancelEvent(event);
             }
         }
     },
@@ -2245,7 +2245,7 @@ Firebug.NetMonitor.NetPage = domplate(Firebug.Rep,
 
     onPageClick: function(event)
     {
-        if (!FBL.isLeftClick(event))
+        if (!Events.isLeftClick(event))
             return;
 
         var target = event.target;
@@ -3010,7 +3010,7 @@ Firebug.NetMonitor.NetInfoHeaders = domplate(Firebug.Rep, new Firebug.Listener()
 
         target.sourceDisplayed = !target.sourceDisplayed;
 
-        FBL.cancelEvent(event);
+        Events.cancelEvent(event);
     },
 
     insertSource: function(netInfoBox, source, rowName)
@@ -5569,7 +5569,7 @@ Firebug.NetMonitor.BreakpointRep = domplate(Firebug.Rep,
 
     onRemove: function(event)
     {
-        FBL.cancelEvent(event);
+        Events.cancelEvent(event);
 
         if (!FBL.hasClass(event.target, "closeButton"))
             return;

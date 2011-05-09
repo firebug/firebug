@@ -2,9 +2,10 @@
 
 define([
     "firebug/lib",
-    "firebug/firebug"
+    "firebug/firebug",
+    "firebug/lib/events",
 ],
-function(FBL, Firebug) {
+function(FBL, Firebug, Events) {
 
 // ********************************************************************************************* //
 
@@ -54,7 +55,7 @@ Tracker.prototype =
         this.element.ownerDocument.addEventListener("mousemove", this.onDragOver, false);
         this.element.ownerDocument.addEventListener("mouseup", this.onDrop, false);
 
-        FBL.cancelEvent(e);
+        Events.cancelEvent(e);
     },
 
     onDragOver: function(event)
@@ -62,7 +63,7 @@ Tracker.prototype =
         if (!this.dragging)
             return;
 
-        FBL.cancelEvent(event);
+        Events.cancelEvent(event);
 
         var newPos = absoluteCursorPostion(event);
         //newPos = newPos.Add(this.elementStartPos);
@@ -85,7 +86,7 @@ Tracker.prototype =
         if (!this.dragging)
             return;
 
-        FBL.cancelEvent(event);
+        Events.cancelEvent(event);
 
         this.dragStop();
     },
