@@ -4,8 +4,9 @@ define([
     "firebug/lib/xpcom",
     "firebug/lib/locale",
     "firebug/lib/events",
+    "firebug/lib/options",
 ],
-function(XPCOM, Locale, Events) {
+function(XPCOM, Locale, Events, Options) {
 
 // ********************************************************************************************* //
 
@@ -2244,10 +2245,12 @@ var unescapeWhitespace = createSimpleEscape('whitespace', 'reverse');
 
 this.unescapeForTextNode = function(str)
 {
-    if (Firebug.showTextNodesWithWhitespace)
+    if (Options.get("showTextNodesWithWhitespace"))
         str = unescapeWhitespace(str);
-    if (!Firebug.showTextNodesWithEntities)
+
+    if (!Options.get("showTextNodesWithEntities"))
         str = escapeForElementAttribute(str);
+
     return str;
 }
 
@@ -2278,7 +2281,7 @@ this.cropString = function(text, limit, alterText)
 
     // Use default limit if necessary.
     if (!limit)
-        limit = Firebug.stringCropLength;
+        limit = Options.get("stringCropLength");
 
     // Crop the string only if a limit is actualy specified.
     if (limit <= 0)
@@ -2355,7 +2358,7 @@ this.wrapText = function(text, noEscapeHTML)
     var reNonAlphaNumeric = /[^A-Za-z_$0-9'"-]/;
 
     var html = [];
-    var wrapWidth = Firebug.textWrapWidth;
+    var wrapWidth = Options.get("textWrapWidth");
 
     // Split long text into lines and put every line into a <code> element (only in case
     // if noEscapeHTML is false). This is useful for automatic scrolling when searching
@@ -2554,7 +2557,7 @@ this.optionMenu = function(label, option, tooltiptext)
         option: option,
         tooltiptext: tooltiptext,
         command: function() {
-            return Firebug.Options.set(option, !Firebug[option]);
+            return Options.set(option, !Firebug[option]);
         }
     };
 };
@@ -2576,7 +2579,8 @@ this.getCorrectedStackTrace = function(frame, context)
         var nextOlderFrame = null;
         for (; frame && frame.isValid; frame = frame.callingFrame)
         {
-            if (!(Firebug.filterSystemURLs && this.isSystemURL(FBL.normalizeURL(frame.script.fileName))))
+            if (!(Options.get("filterSystemURLs") &&
+                this.isSystemURL(FBL.normalizeURL(frame.script.fileName))))
             {
                 var stackFrame = this.getStackFrame(frame, context, newestFrame);
                 if (stackFrame)
@@ -3271,7 +3275,7 @@ this.getAllStyleSheets = function(context)
     {
         var sheetLocation =  FBL.getURLForStyleSheet(sheet);
 
-        if (!Firebug.showUserAgentCSS && FBL.isSystemURL(sheetLocation))
+        if (!Options.get("showUserAgentCSS") && FBL.isSystemURL(sheetLocation))
             return;
 
         if (sheet.ownerNode && Firebug.shouldIgnore(sheet.ownerNode))
@@ -4343,8 +4347,8 @@ var saveShowStackTrace = {};
  */
 this.suspendShowStackTrace = function()
 {
-    saveShowStackTrace = Firebug.showStackTrace;
-    Firebug.showStackTrace = false;
+    saveShowStackTrace = Options.get("showStackTrace");
+    Options.set("showStackTrace", false);
 };
 
 /*
@@ -4352,7 +4356,7 @@ this.suspendShowStackTrace = function()
  */
 this.resumeShowStackTrace = function()
 {
-    Firebug.showStackTrace = saveShowStackTrace;
+    Options.set("saveShowStackTrace", saveShowStackTrace);
 };
 
 // ************************************************************************************************
@@ -7410,12 +7414,15 @@ this.formatSize = function(bytes)
     bytes = Math.abs(bytes);
 
     // xxxHonza, XXXjjb: Why Firebug.sizePrecision is not set in Chromebug?
-    if (typeof(Firebug.sizePrecision) == "undefined")
-        Firebug.sizePrecision = 2;
+    var sizePrecision = Options.get("sizePrecision");
+    if (typeof(sizePrecision) == "undefined")
+    {
+        Options.set("sizePrecision", 2);
+        sizePrecision = 2;
+    }
 
     // Get size precision (number of decimal places from the preferences)
     // and make sure it's within limits.
-    var sizePrecision = Firebug.sizePrecision;
     sizePrecision = (sizePrecision > 2) ? 2 : sizePrecision;
     sizePrecision = (sizePrecision < -1) ? -1 : sizePrecision;
 
@@ -7559,7 +7566,7 @@ this.ReversibleRegExp = function(regex, flags)
         {
             try
             {
-                if (Firebug.searchUseRegularExpression)
+                if (Options.get("searchUseRegularExpression"))
                     re[key] = new RegExp(expression(regex, reverse), flag(flags, caseSensitive));
                 else
                     re[key] = new FBL.LiteralRegExp(regex, reverse, caseSensitive);
