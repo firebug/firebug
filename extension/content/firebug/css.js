@@ -24,6 +24,9 @@ const nsIInterfaceRequestor = Ci.nsIInterfaceRequestor;
 const nsISelectionDisplay = Ci.nsISelectionDisplay;
 const nsISelectionController = Ci.nsISelectionController;
 
+var appInfo = Cc["@mozilla.org/xre/app-info;1"].getService(Ci.nsIXULAppInfo);
+var versionChecker = Cc["@mozilla.org/xpcom/version-comparator;1"].getService(Ci.nsIVersionComparator);
+
 // See: http://mxr.mozilla.org/mozilla1.9.2/source/content/events/public/nsIEventStateManager.h#153
 const STATE_ACTIVE  = 0x01;
 const STATE_FOCUS   = 0x02;
@@ -133,7 +136,6 @@ var CSSStyleRuleTag = domplate(CSSDomplateBase,
 const reSplitCSS =  /(url\("?[^"\)]+?"?\))|(rgba?\(.*?\))|(hsla?\(.*?\))|(#[\dA-Fa-f]+)|(-?\d+(\.\d+)?(%|[a-z]{1,2})?)|([^,\s\/!\(\)]+)|"(.*?)"|(!(.*)?)/;
 const reURL = /url\("?([^"\)]+)?"?\)/;
 const reRepeat = /no-repeat|repeat-x|repeat-y|repeat/;
-const pseudoElements = ["", ":first-letter", ":first-line", ":before", ":after"];
 
 const styleGroups =
 {
@@ -1686,7 +1688,12 @@ CSSElementPanel.prototype = FBL.extend(Firebug.CSSStyleSheetPanel.prototype,
     // All calls to this method must call cleanupSheets first
     getElementRules: function(element, rules, usedProps, inheritMode)
     {
+        var pseudoElements = [""];
         var inspectedRules, displayedRules = {};
+
+        // Firefox 5+ allows inspecting of pseudo-elements (see issue 537) 
+        if (versionChecker.compare(appInfo.version, "5.0*") >= 0)
+            pseudoElements = FBL.extendArray(pseudoElements, [":first-letter", ":first-line", ":before", ":after"]);
 
         for(var p in pseudoElements)
         {
