@@ -8,8 +8,9 @@ define([
     "firebug/lib",
     "firebug/domplate",
     "firebug/lib/options",
+    "firebug/lib/locale",
 ],
-function(FBL, Domplate, Options) {
+function(FBL, Domplate, Options, Locale) {
 
 // ********************************************************************************************* //
 // Constants
@@ -208,7 +209,7 @@ var Firebug =
             for(var j=0; j<attributes.length; j++)
             {
                 if (elements[i].hasAttribute(attributes[j]))
-                    FBL.internationalize(elements[i], attributes[j]);
+                    Locale.internationalize(elements[i], attributes[j]);
             }
         }
 
@@ -831,8 +832,8 @@ var Firebug =
 
     onShowDetachTooltip: function(tooltip)
     {
-        tooltip.label = Firebug.isDetached() ? FBL.$STR("firebug.AttachFirebug") :
-            FBL.$STR("firebug.DetachFirebug");
+        tooltip.label = Firebug.isDetached() ? Locale.$STR("firebug.AttachFirebug") :
+            Locale.$STR("firebug.DetachFirebug");
         return true;
     },
 
@@ -948,7 +949,7 @@ var Firebug =
     getPanelTitle: function(panelType)
     {
         return panelType.prototype.title ? panelType.prototype.title
-            : FBL.$STR("Panel-"+panelType.prototype.name);
+            : Locale.$STR("Panel-"+panelType.prototype.name);
     },
 
     getPanelTooltip: function(panelType)
@@ -1368,7 +1369,7 @@ var Firebug =
         {
             FBL.collapse(contentBox, true);
             FBL.collapse(resumeBox, false);
-            Firebug.chrome.window.document.title = FBL.$STR("Firebug - inactive for current website");
+            Firebug.chrome.window.document.title = Locale.$STR("Firebug - inactive for current website");
         }
     },
 
@@ -2565,7 +2566,7 @@ Firebug.Rep = domplate(
 
     STR: function(name)
     {
-        return FBL.$STR(name);
+        return Locale.$STR(name);
     },
 
     cropString: function(text)

@@ -3,11 +3,12 @@
 define([
     "firebug/lib",
     "firebug/reps",
+    "firebug/lib/locale",
     "firebug/console",
     "firebug/consoleExposed",
     "firebug/errors",
 ],
-function(FBL, FirebugReps) {
+function(FBL, FirebugReps, Locale) {
 
 // ********************************************************************************************* //
 // Constants
@@ -162,7 +163,7 @@ function createConsoleHandler(context, win)
                 FBTrace.sysout("FirebugConsoleHandler", this);
 
             var methodName = win.document.getUserData("firebug-methodName");
-            Firebug.Console.log(FBL.$STRF("console.MethodNotSupported", [methodName]));
+            Firebug.Console.log(Locale.$STRF("console.MethodNotSupported", [methodName]));
         }
     };
 
@@ -414,7 +415,7 @@ Firebug.Console.createConsole = function createConsole(context, win)
         Firebug.Errors.increaseCount(context);
 
         if (!args || !args.length || args.length == 0)
-            var msg = [FBL.$STR("Assertion")];
+            var msg = [Locale.$STR("Assertion")];
         else
             var msg = args[0];
 

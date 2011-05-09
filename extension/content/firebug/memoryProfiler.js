@@ -3,9 +3,10 @@
 define([
     "firebug/lib",
     "firebug/domplate",
-    "firebug/reps"
+    "firebug/reps",
+    "firebug/lib/locale",
 ],
-function(FBL, Domplate, FirebugReps) {
+function(FBL, Domplate, FirebugReps, Locale) {
 
 // ********************************************************************************************* //
 
@@ -96,7 +97,7 @@ Firebug.MemoryProfiler = FBL.extend(Firebug.Module,
 
         var isCustomMessage = !!title;
         if (!isCustomMessage)
-            title = FBL.$STR("firebug.Memory Profiler Started");
+            title = Locale.$STR("firebug.Memory Profiler Started");
 
         context.memoryProfileRow = this.logProfileRow(context, title);
         context.memoryProfileRow.customMessage = isCustomMessage;
@@ -127,7 +128,7 @@ Firebug.MemoryProfiler = FBL.extend(Firebug.Module,
         var deltaObjects = this.sweep(context);
         this.cleanUp(context);
 
-        var title = FBL.$STR("firebug.Objects Added While Profiling");
+        var title = Locale.$STR("firebug.Objects Added While Profiling");
         var row = Firebug.Console.openCollapsedGroup(title, context, "profile",
             Firebug.MemoryProfiler.ProfileCaption, true, null, true);
 
@@ -385,7 +386,7 @@ Firebug.MemoryProfiler = FBL.extend(Firebug.Module,
         {
             var captionBox = groupRow.getElementsByClassName("profileCaption").item(0);
             if (!groupRow.customMessage)
-                captionBox.textContent = FBL.$STR("firebug.Memory Profiler Results");
+                captionBox.textContent = Locale.$STR("firebug.Memory Profiler Results");
 
             var timeBox = groupRow.getElementsByClassName("profileTime").item(0);
             timeBox.textContent = "(" + FBL.formatTime(context.memoryProfileTime) + ")";
@@ -413,7 +414,7 @@ Firebug.MemoryProfiler = FBL.extend(Firebug.Module,
         else
         {
             var captionBox = groupRow.getElementsByClassName("profileCaption").item(0);
-            captionBox.textContent = FBL.$STR("NothingToProfile");
+            captionBox.textContent = Locale.$STR("NothingToProfile");
         }
     }
 });
@@ -516,25 +517,25 @@ Firebug.MemoryProfiler.ProfileTable = domplate(
                         onclick: "$onClick", "role": "row"},
                         TH({"class": "headerCell alphaValue a11yFocus", "role": "columnheader"},
                             DIV({"class": "headerCellBox"},
-                                FBL.$STR("Function")
+                                Locale.$STR("Function")
                             )
                         ),
                         TH({"class": "headerCell a11yFocus" , "role": "columnheader"},
-                            DIV({"class": "headerCellBox", title: FBL.$STR("CallsHeaderTooltip")},
-                                FBL.$STR("Calls")
+                            DIV({"class": "headerCellBox", title: Locale.$STR("CallsHeaderTooltip")},
+                                Locale.$STR("Calls")
                             )
                         ),
                         FOR("column", "$object|getColumns",
                             TH({"class": "headerCell a11yFocus", "role": "columnheader",
                                 "aria-sort": "descending"},
                                 DIV({"class": "headerCellBox"},
-                                    FBL.$STR("$column|getColumnLabel")
+                                    Locale.$STR("$column|getColumnLabel")
                                 )
                             )
                         ),
                         TH({"class": "headerCell alphaValue a11yFocus", "role": "columnheader"},
                             DIV({"class": "headerCellBox"},
-                                FBL.$STR("File")
+                                Locale.$STR("File")
                             )
                         )
                     )
@@ -760,7 +761,7 @@ Firebug.MemoryProfiler.ProfileSummary = domplate(Firebug.Rep,
     tag:
         TR({"class": "focusRow profileSummaryRow subFocusRow", "role": "row"},
             TD({"class": "profileCell", "role": "presentation", colspan: 2},
-                FBL.$STR("firebug.Entire Session")
+                Locale.$STR("firebug.Entire Session")
             ),
             FOR("column", "$object|getColumns",
                 TD({"class": "a11yFocus profileCell", "role": "gridcell", _sortValue: "$column"},

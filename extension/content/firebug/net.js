@@ -6,6 +6,7 @@ define([
     "firebug/lib/xpcom",
     "arch/tools",
     "firebug/http/requestObserver",
+    "firebug/lib/locale",
     "firebug/lib/options",
     "firebug/breakpoint",
     "firebug/xmlViewer",
@@ -16,7 +17,7 @@ define([
     "firebug/search",
     "firebug/errors",
 ],
-function(FBL, Domplate, XPCOM, ToolsInterface, HttpRequestObserver) { with (Domplate) {
+function(FBL, Domplate, XPCOM, ToolsInterface, HttpRequestObserver, Locale) { with (Domplate) {
 
 // ************************************************************************************************
 // Constants
@@ -879,7 +880,7 @@ NetPanel.prototype = FBL.extend(Firebug.ActivablePanel,
 
     getBreakOnNextTooltip: function(enabled)
     {
-        return (enabled ? FBL.$STR("net.Disable Break On XHR") : FBL.$STR("net.Break On XHR"));
+        return (enabled ? Locale.$STR("net.Disable Break On XHR") : Locale.$STR("net.Break On XHR"));
     },
 
     // Support for info tips.
@@ -1074,7 +1075,7 @@ NetPanel.prototype = FBL.extend(Firebug.ActivablePanel,
         {
             var limitInfo = {
                 totalCount: 0,
-                limitPrefsTitle: FBL.$STRF("LimitPrefsTitle", [Firebug.Options.prefDomain+".net.logLimit"])
+                limitPrefsTitle: Locale.$STRF("LimitPrefsTitle", [Firebug.Options.prefDomain+".net.logLimit"])
             };
 
             this.table = NetRequestTable.tableTag.append({}, this.panelNode);
@@ -1379,7 +1380,7 @@ NetPanel.prototype = FBL.extend(Firebug.ActivablePanel,
             return;
 
         var countLabel = row.childNodes[1].firstChild;
-        countLabel.firstChild.nodeValue = FBL.$STRP("plural.Request_Count2", [fileCount]);
+        countLabel.firstChild.nodeValue = Locale.$STRP("plural.Request_Count2", [fileCount]);
 
         var sizeLabel = row.childNodes[4].firstChild;
         sizeLabel.setAttribute("totalSize", totalSize);
@@ -1693,32 +1694,32 @@ Firebug.NetMonitor.NetRequestTable = domplate(Firebug.Rep, new Firebug.Listener(
                     TD({id: "netHrefCol", width: "18%", "class": "netHeaderCell alphaValue a11yFocus",
                         "role": "columnheader"},
                         DIV({"class": "netHeaderCellBox",
-                        title: FBL.$STR("net.header.URL Tooltip")},
-                        FBL.$STR("net.header.URL"))
+                        title: Locale.$STR("net.header.URL Tooltip")},
+                        Locale.$STR("net.header.URL"))
                     ),
                     TD({id: "netStatusCol", width: "12%", "class": "netHeaderCell alphaValue a11yFocus",
                         "role": "columnheader"},
                         DIV({"class": "netHeaderCellBox",
-                        title: FBL.$STR("net.header.Status Tooltip")},
-                        FBL.$STR("net.header.Status"))
+                        title: Locale.$STR("net.header.Status Tooltip")},
+                        Locale.$STR("net.header.Status"))
                     ),
                     TD({id: "netDomainCol", width: "12%", "class": "netHeaderCell alphaValue a11yFocus",
                         "role": "columnheader"},
                         DIV({"class": "netHeaderCellBox",
-                        title: FBL.$STR("net.header.Domain Tooltip")},
-                        FBL.$STR("net.header.Domain"))
+                        title: Locale.$STR("net.header.Domain Tooltip")},
+                        Locale.$STR("net.header.Domain"))
                     ),
                     TD({id: "netSizeCol", width: "4%", "class": "netHeaderCell a11yFocus",
                         "role": "columnheader"},
                         DIV({"class": "netHeaderCellBox",
-                        title: FBL.$STR("net.header.Size Tooltip")},
-                        FBL.$STR("net.header.Size"))
+                        title: Locale.$STR("net.header.Size Tooltip")},
+                        Locale.$STR("net.header.Size"))
                     ),
                     TD({id: "netTimeCol", width: "53%", "class": "netHeaderCell a11yFocus",
                         "role": "columnheader"},
                         DIV({"class": "netHeaderCellBox",
-                        title: FBL.$STR("net.header.Timeline Tooltip")},
-                        FBL.$STR("net.header.Timeline"))
+                        title: Locale.$STR("net.header.Timeline Tooltip")},
+                        Locale.$STR("net.header.Timeline"))
                     )
                 )
             ),
@@ -1899,7 +1900,7 @@ Firebug.NetMonitor.NetRequestTable = domplate(Firebug.Rep, new Firebug.Listener(
 
         items.push("-");
         items.push({
-            label: FBL.$STR("net.header.Reset_Header"),
+            label: Locale.$STR("net.header.Reset_Header"),
             nol10n: true,
             command: FBL.bindFixed(this.onResetColumns, this, context)
         });
@@ -2025,7 +2026,7 @@ Firebug.NetMonitor.NetRequestEntry = domplate(Firebug.Rep, new Firebug.Listener(
     activationTag:
         TR({"class": "netRow netActivationRow"},
             TD({"class": "netCol netActivationLabel", colspan: 6, "role": "status"},
-                FBL.$STR("net.ActivationMessage")
+                Locale.$STR("net.ActivationMessage")
             )
         ),
 
@@ -2045,7 +2046,7 @@ Firebug.NetMonitor.NetRequestEntry = domplate(Firebug.Rep, new Firebug.Listener(
                     DIV({"class": "netCacheSizeLabel netSummaryLabel", collapsed: "true"},
                         "(",
                         SPAN("0KB"),
-                        SPAN(" " + FBL.$STR("FromCache")),
+                        SPAN(" " + Locale.$STR("FromCache")),
                         ")"
                     ),
                     DIV({"class": "netTimeBar"},
@@ -2300,36 +2301,36 @@ Firebug.NetMonitor.NetInfoBody = domplate(Firebug.Rep, new Firebug.Listener(),
             A({"class": "netInfoParamsTab netInfoTab a11yFocus", onclick: "$onClickTab", "role": "tab",
                 view: "Params",
                 $collapsed: "$file|hideParams"},
-                FBL.$STR("URLParameters")
+                Locale.$STR("URLParameters")
             ),
             A({"class": "netInfoHeadersTab netInfoTab a11yFocus", onclick: "$onClickTab", "role": "tab",
                 view: "Headers"},
-                FBL.$STR("Headers")
+                Locale.$STR("Headers")
             ),
             A({"class": "netInfoPostTab netInfoTab a11yFocus", onclick: "$onClickTab", "role": "tab",
                 view: "Post",
                 $collapsed: "$file|hidePost"},
-                FBL.$STR("Post")
+                Locale.$STR("Post")
             ),
             A({"class": "netInfoPutTab netInfoTab a11yFocus", onclick: "$onClickTab", "role": "tab",
                 view: "Put",
                 $collapsed: "$file|hidePut"},
-                FBL.$STR("Put")
+                Locale.$STR("Put")
             ),
             A({"class": "netInfoResponseTab netInfoTab a11yFocus", onclick: "$onClickTab", "role": "tab",
                 view: "Response",
                 $collapsed: "$file|hideResponse"},
-                FBL.$STR("Response")
+                Locale.$STR("Response")
             ),
             A({"class": "netInfoCacheTab netInfoTab a11yFocus", onclick: "$onClickTab", "role": "tab",
                view: "Cache",
                $collapsed: "$file|hideCache"},
-               FBL.$STR("Cache")
+               Locale.$STR("Cache")
             ),
             A({"class": "netInfoHtmlTab netInfoTab a11yFocus", onclick: "$onClickTab", "role": "tab",
                view: "Html",
                $collapsed: "$file|hideHtml"},
-               FBL.$STR("HTML")
+               Locale.$STR("HTML")
             )
         ),
 
@@ -2343,7 +2344,7 @@ Firebug.NetMonitor.NetInfoBody = domplate(Firebug.Rep, new Firebug.Listener(),
             DIV({"class": "netInfoResponseText netInfoText", "role": "tabpanel"}),
             DIV({"class": "netInfoCacheText netInfoText", "role": "tabpanel"},
                 TABLE({"class": "netInfoCacheTable", cellpadding: 0, cellspacing: 0, "role": "presentation"},
-                    TBODY({"role": "list", "aria-label": FBL.$STR("Cache")})
+                    TBODY({"role": "list", "aria-label": Locale.$STR("Cache")})
                 )
             ),
             DIV({"class": "netInfoHtmlText netInfoText", "role": "tabpanel"},
@@ -2647,7 +2648,7 @@ Firebug.NetMonitor.NetInfoBody = domplate(Firebug.Rep, new Firebug.Listener(),
         if (limitReached)
         {
             var object = {
-                text: FBL.$STR("net.responseSizeLimitMessage"),
+                text: Locale.$STR("net.responseSizeLimitMessage"),
                 onClickLink: function() {
                     var panel = context.getPanel("net", true);
                     panel.openResponseInTab(file);
@@ -2691,11 +2692,11 @@ Firebug.NetMonitor.NetInfoPostData = domplate(Firebug.Rep, new Firebug.Listener(
     // application/x-www-form-urlencoded
     paramsTable:
         TABLE({"class": "netInfoPostParamsTable", cellpadding: 0, cellspacing: 0, "role": "presentation"},
-            TBODY({"role": "list", "aria-label": FBL.$STR("net.label.Parameters")},
+            TBODY({"role": "list", "aria-label": Locale.$STR("net.label.Parameters")},
                 TR({"class": "netInfoPostParamsTitle", "role": "presentation"},
                     TD({colspan: 2, "role": "presentation"},
                         DIV({"class": "netInfoPostParams"},
-                            FBL.$STR("net.label.Parameters"),
+                            Locale.$STR("net.label.Parameters"),
                             SPAN({"class": "netInfoPostContentType"},
                                 "application/x-www-form-urlencoded"
                             )
@@ -2708,11 +2709,11 @@ Firebug.NetMonitor.NetInfoPostData = domplate(Firebug.Rep, new Firebug.Listener(
     // multipart/form-data
     partsTable:
         TABLE({"class": "netInfoPostPartsTable", cellpadding: 0, cellspacing: 0, "role": "presentation"},
-            TBODY({"role": "list", "aria-label": FBL.$STR("net.label.Parts")},
+            TBODY({"role": "list", "aria-label": Locale.$STR("net.label.Parts")},
                 TR({"class": "netInfoPostPartsTitle", "role": "presentation"},
                     TD({colspan: 2, "role":"presentation" },
                         DIV({"class": "netInfoPostParams"},
-                            FBL.$STR("net.label.Parts"),
+                            Locale.$STR("net.label.Parts"),
                             SPAN({"class": "netInfoPostContentType"},
                                 "multipart/form-data"
                             )
@@ -2725,11 +2726,11 @@ Firebug.NetMonitor.NetInfoPostData = domplate(Firebug.Rep, new Firebug.Listener(
     // application/json
     jsonTable:
         TABLE({"class": "netInfoPostJSONTable", cellpadding: 0, cellspacing: 0, "role": "presentation"},
-            TBODY({"role": "list", "aria-label": FBL.$STR("jsonviewer.tab.JSON")},
+            TBODY({"role": "list", "aria-label": Locale.$STR("jsonviewer.tab.JSON")},
                 TR({"class": "netInfoPostJSONTitle", "role": "presentation"},
                     TD({"role": "presentation" },
                         DIV({"class": "netInfoPostParams"},
-                            FBL.$STR("jsonviewer.tab.JSON")
+                            Locale.$STR("jsonviewer.tab.JSON")
                         )
                     )
                 ),
@@ -2742,11 +2743,11 @@ Firebug.NetMonitor.NetInfoPostData = domplate(Firebug.Rep, new Firebug.Listener(
     // application/xml
     xmlTable:
         TABLE({"class": "netInfoPostXMLTable", cellpadding: 0, cellspacing: 0, "role": "presentation"},
-            TBODY({"role": "list", "aria-label": FBL.$STR("xmlviewer.tab.XML")},
+            TBODY({"role": "list", "aria-label": Locale.$STR("xmlviewer.tab.XML")},
                 TR({"class": "netInfoPostXMLTitle", "role": "presentation"},
                     TD({"role": "presentation" },
                         DIV({"class": "netInfoPostParams"},
-                            FBL.$STR("xmlviewer.tab.XML")
+                            Locale.$STR("xmlviewer.tab.XML")
                         )
                     )
                 ),
@@ -2759,11 +2760,11 @@ Firebug.NetMonitor.NetInfoPostData = domplate(Firebug.Rep, new Firebug.Listener(
     // image/svg+xml
     svgTable:
         TABLE({"class": "netInfoPostSVGTable", cellpadding: 0, cellspacing: 0, "role": "presentation"},
-            TBODY({"role": "list", "aria-label": FBL.$STR("svgviewer.tab.SVG")},
+            TBODY({"role": "list", "aria-label": Locale.$STR("svgviewer.tab.SVG")},
                 TR({"class": "netInfoPostSVGTitle", "role": "presentation"},
                     TD({"role": "presentation" },
                         DIV({"class": "netInfoPostParams"},
-                            FBL.$STR("svgviewer.tab.SVG")
+                            Locale.$STR("svgviewer.tab.SVG")
                         )
                     )
                 ),
@@ -2775,11 +2776,11 @@ Firebug.NetMonitor.NetInfoPostData = domplate(Firebug.Rep, new Firebug.Listener(
 
     sourceTable:
         TABLE({"class": "netInfoPostSourceTable", cellpadding: 0, cellspacing: 0, "role": "presentation"},
-            TBODY({"role": "list", "aria-label": FBL.$STR("net.label.Source")},
+            TBODY({"role": "list", "aria-label": Locale.$STR("net.label.Source")},
                 TR({"class": "netInfoPostSourceTitle", "role": "presentation"},
                     TD({colspan: 2, "role": "presentation"},
                         DIV({"class": "netInfoPostSource"},
-                            FBL.$STR("net.label.Source")
+                            Locale.$STR("net.label.Source")
                         )
                     )
                 )
@@ -2955,26 +2956,26 @@ Firebug.NetMonitor.NetInfoHeaders = domplate(Firebug.Rep, new Firebug.Listener()
     tag:
         DIV({"class": "netInfoHeadersTable", "role": "tabpanel"},
             DIV({"class": "netInfoHeadersGroup netInfoResponseHeadersTitle"},
-                SPAN(FBL.$STR("ResponseHeaders")),
+                SPAN(Locale.$STR("ResponseHeaders")),
                 SPAN({"class": "netHeadersViewSource response collapsed", onclick: "$onViewSource",
                     _sourceDisplayed: false, _rowName: "ResponseHeaders"},
-                    FBL.$STR("net.headers.view source")
+                    Locale.$STR("net.headers.view source")
                 )
             ),
             TABLE({cellpadding: 0, cellspacing: 0},
                 TBODY({"class": "netInfoResponseHeadersBody", "role": "list",
-                    "aria-label": FBL.$STR("ResponseHeaders")})
+                    "aria-label": Locale.$STR("ResponseHeaders")})
             ),
             DIV({"class": "netInfoHeadersGroup netInfoRequestHeadersTitle"},
-                SPAN(FBL.$STR("RequestHeaders")),
+                SPAN(Locale.$STR("RequestHeaders")),
                 SPAN({"class": "netHeadersViewSource request collapsed", onclick: "$onViewSource",
                     _sourceDisplayed: false, _rowName: "RequestHeaders"},
-                    FBL.$STR("net.headers.view source")
+                    Locale.$STR("net.headers.view source")
                 )
             ),
             TABLE({cellpadding: 0, cellspacing: 0},
                 TBODY({"class": "netInfoRequestHeadersBody", "role": "list",
-                    "aria-label": FBL.$STR("RequestHeaders")})
+                    "aria-label": Locale.$STR("RequestHeaders")})
             )
         ),
 
@@ -2997,13 +2998,13 @@ Firebug.NetMonitor.NetInfoHeaders = domplate(Firebug.Rep, new Firebug.Listener()
         {
             var headers = requestHeaders ? file.requestHeaders : file.responseHeaders;
             this.insertHeaderRows(netInfoBox, headers, target.rowName);
-            target.innerHTML = FBL.$STR("net.headers.view source");
+            target.innerHTML = Locale.$STR("net.headers.view source");
         }
         else
         {
             var source = requestHeaders ? file.requestHeadersText : file.responseHeadersText;
             this.insertSource(netInfoBox, source, target.rowName);
-            target.innerHTML = FBL.$STR("net.headers.pretty print");
+            target.innerHTML = Locale.$STR("net.headers.pretty print");
         }
 
         target.sourceDisplayed = !target.sourceDisplayed;
@@ -3149,7 +3150,7 @@ Firebug.NetMonitor.TimeInfoTip = domplate(Firebug.Rep,
 
     getLabel: function(obj)
     {
-        return FBL.$STR("requestinfo." + obj.bar);
+        return Locale.$STR("requestinfo." + obj.bar);
     },
 
     render: function(file, parentNode)
@@ -3278,19 +3279,19 @@ Firebug.NetMonitor.SizeInfoTip = domplate(Firebug.Rep,
         postText = postText ? postText : "";
 
         var sizeInfo = [];
-        sizeInfo.push({label: FBL.$STR("net.sizeinfo.Response Body"), size: file.size});
-        sizeInfo.push({label: FBL.$STR("net.sizeinfo.Post Body"), size: postText.length});
+        sizeInfo.push({label: Locale.$STR("net.sizeinfo.Response Body"), size: file.size});
+        sizeInfo.push({label: Locale.$STR("net.sizeinfo.Post Body"), size: postText.length});
 
         if (file.requestHeadersText)
         {
             var responseHeaders = file.responseHeadersText ? file.responseHeadersText : 0;
 
             sizeInfo.push({label: "-", size: 0});
-            sizeInfo.push({label: FBL.$STR("net.sizeinfo.Total Received") + "*",
+            sizeInfo.push({label: Locale.$STR("net.sizeinfo.Total Received") + "*",
                 size: responseHeaders.length + file.size});
-            sizeInfo.push({label: FBL.$STR("net.sizeinfo.Total Sent") + "*",
+            sizeInfo.push({label: Locale.$STR("net.sizeinfo.Total Sent") + "*",
                 size: file.requestHeadersText.length + postText.length});
-            sizeInfo.push({label: "*" + FBL.$STR("net.sizeinfo.Including Headers"), size: -2});
+            sizeInfo.push({label: "*" + Locale.$STR("net.sizeinfo.Including Headers"), size: -2});
         }
 
         this.tag.replace({sizeInfo: sizeInfo}, parentNode);
@@ -3318,14 +3319,14 @@ Firebug.NetMonitor.NetLimit = domplate(Firebug.Rep,
                         TR(
                             TD(
                                 SPAN({"class": "netLimitLabel"},
-                                    FBL.$STRP("plural.Limit_Exceeded2", [0])
+                                    Locale.$STRP("plural.Limit_Exceeded2", [0])
                                 )
                             ),
                             TD({style: "width:100%"}),
                             TD(
                                 BUTTON({"class": "netLimitButton", title: "$limitPrefsTitle",
                                     onclick: "$onPreferences"},
-                                  FBL.$STR("LimitPrefs")
+                                  Locale.$STR("LimitPrefs")
                                 )
                             ),
                             TD("&nbsp;")
@@ -3351,7 +3352,7 @@ Firebug.NetMonitor.NetLimit = domplate(Firebug.Rep,
 
         // Update info within the limit row.
         var limitLabel = row.getElementsByClassName("netLimitLabel").item(0);
-        limitLabel.firstChild.nodeValue = FBL.$STRP("plural.Limit_Exceeded2", [row.limitInfo.totalCount]);
+        limitLabel.firstChild.nodeValue = Locale.$STRP("plural.Limit_Exceeded2", [row.limitInfo.totalCount]);
     },
 
     createTable: function(parent, limitInfo)
@@ -3585,7 +3586,7 @@ NetProgress.prototype =
         if (this.context.breakOnXHR && !conditionIsFalse)
         {
             this.context.breakingCause = {
-                title: FBL.$STR("net.Break On XHR"),
+                title: Locale.$STR("net.Break On XHR"),
                 message: FBL.cropString(file.href, 200),
                 copyAction: FBL.bindFixed(FBL.copyToClipboard, FBL, file.href)
             };
@@ -4722,7 +4723,7 @@ Firebug.NetMonitor.Utils =
         if (file.postText.length > limit && !noLimit)
         {
             return FBL.cropString(file.postText, limit,
-                "\n\n... " + FBL.$STR("net.postDataSizeLimitMessage") + " ...\n\n");
+                "\n\n... " + Locale.$STR("net.postDataSizeLimitMessage") + " ...\n\n");
         }
 
         return file.postText;
@@ -5689,7 +5690,7 @@ Breakpoint.prototype =
             return;
 
         context.breakingCause = {
-            title: FBL.$STR("net.Break On XHR"),
+            title: Locale.$STR("net.Break On XHR"),
             message: this.condition
         };
     },
@@ -5698,7 +5699,7 @@ Breakpoint.prototype =
     {
         // Break if there is an error when evaluating the condition (to display the error).
         context.breakingCause = {
-            title: FBL.$STR("net.Break On XHR"),
+            title: Locale.$STR("net.Break On XHR"),
             message: "Breakpoint condition evaluation fails ",
             prevValue: this.condition,
             newValue:result
@@ -5716,7 +5717,7 @@ function NetBreakpointGroup()
 NetBreakpointGroup.prototype = FBL.extend(new Firebug.Breakpoint.BreakpointGroup(),
 {
     name: "netBreakpoints",
-    title: FBL.$STR("net.label.XHR Breakpoints"),
+    title: Locale.$STR("net.label.XHR Breakpoints"),
 
     addBreakpoint: function(href)
     {

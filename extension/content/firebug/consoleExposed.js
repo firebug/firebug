@@ -3,9 +3,10 @@
 define([
     "firebug/lib",
     "firebug/reps",
+    "firebug/lib/locale",
     "firebug/errors",
 ],
-function(FBL, FirebugReps) {
+function(FBL, FirebugReps, Locale) {
 
 // ********************************************************************************************* //
 
@@ -282,7 +283,7 @@ function createFirebugConsole(context, win)
         Firebug.Errors.increaseCount(context);
 
         if (!args || !args.length || args.length == 0)
-            var msg = [FBL.$STR("Assertion")];
+            var msg = [Locale.$STR("Assertion")];
         else
             var msg = args[0];
 

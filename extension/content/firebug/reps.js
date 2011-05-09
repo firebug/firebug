@@ -4,9 +4,11 @@ define([
     "firebug/lib",
     "firebug/domplate",
     "firebug/lib/xpcom",
-    "arch/tools"
+    "firebug/lib/locale",
+    "arch/tools",
+    "firebug/lib/htmlLib",
 ],
-function(FBL, Domplate, XPCOM, ToolsInterface) { with (Domplate) {
+function(FBL, Domplate, XPCOM, Locale, ToolsInterface, HTMLLib) { with (Domplate) {
 
 // ************************************************************************************************
 // Constants
@@ -219,7 +221,7 @@ FirebugReps.Func = domplate(Firebug.Rep,
     {
         var script = FBL.findScriptForFunctionInContext(context, fn);
         if (script)
-            return FBL.$STRF("Line", [FBL.normalizeURL(script.fileName), script.baseLineNumber]);
+            return Locale.$STRF("Line", [FBL.normalizeURL(script.fileName), script.baseLineNumber]);
         else
             if (fn.toString)
                 return fn.toString();
@@ -245,7 +247,7 @@ FirebugReps.Func = domplate(Firebug.Rep,
         return [
             {label: "CopySource", command: FBL.bindFixed(this.copySource, this, fn) },
             "-",
-            {label: FBL.$STRF("ShowCallsInConsole", [name]), nol10n: true,
+            {label: Locale.$STRF("ShowCallsInConsole", [name]), nol10n: true,
              type: "checkbox", checked: monitored,
              command: FBL.bindFixed(this.monitor, this, fn, monitored) }
         ];
@@ -356,7 +358,7 @@ FirebugReps.Obj = domplate(Firebug.Rep,
             if (count > max)
             {
                 props[Math.max(1,max-1)] = {
-                    object: FBL.$STR("firebug.reps.more") + "...",
+                    object: Locale.$STR("firebug.reps.more") + "...",
                     tag: FirebugReps.Caption.tag,
                     name: "",
                     equal: "",
@@ -454,7 +456,7 @@ FirebugReps.Arr = domplate(Firebug.Rep,
         if (array.length > max + 1)
         {
             items[max] = {
-                object: (array.length-max) + " " + FBL.$STR("firebug.reps.more") + "...",
+                object: (array.length-max) + " " + Locale.$STR("firebug.reps.more") + "...",
                 tag: FirebugReps.Caption.tag,
                 delim: ""
             };
@@ -957,7 +959,7 @@ FirebugReps.TextNode = domplate(Firebug.Rep,
         // Text nodes have two displays in HTML panel, inline and distinct
         // node. We need to examine which case we are dealing with in order to
         // select the proper object.
-        if (Firebug.HTMLLib.hasNoElementChildren(node.parentNode))
+        if (HTMLLib.hasNoElementChildren(node.parentNode))
         {
             node = node.parentNode;
         }
@@ -1271,9 +1273,9 @@ FirebugReps.SourceLink = domplate(Firebug.Rep,
             fileName = FBL.cropString(fileName, maxWidth);
 
         if (sourceLink.instance)
-            return FBL.$STRF("InstanceLine", [fileName, sourceLink.instance+1, sourceLink.line]);
+            return Locale.$STRF("InstanceLine", [fileName, sourceLink.instance+1, sourceLink.line]);
         else if (sourceLink.line)
-            return FBL.$STRF("Line", [fileName, sourceLink.line]);
+            return Locale.$STRF("Line", [fileName, sourceLink.line]);
         else
             return fileName;
     },
@@ -1281,7 +1283,7 @@ FirebugReps.SourceLink = domplate(Firebug.Rep,
     getSystemFlagTitle: function(sourceLink)
     {
         if (this.isSystemLink(sourceLink))
-            return FBL.$STRF("SystemItem", [""]);
+            return Locale.$STRF("SystemItem", [""]);
         else
             return "";
     },
@@ -1479,7 +1481,7 @@ FirebugReps.StackFrame = domplate(Firebug.Rep,  // XXXjjb Since the repObject is
     getSourceLinkTitle: function(frame)
     {
         var fileName = FBL.cropString(FBL.getFileName(frame.href), 17);
-        return FBL.$STRF("Line", [fileName, frame.line]);
+        return Locale.$STRF("Line", [fileName, frame.line]);
     },
 
     argIterator: function(frame)
@@ -1605,7 +1607,7 @@ FirebugReps.StackFrame = domplate(Firebug.Rep,  // XXXjjb Since the repObject is
 
     getTooltip: function(stackFrame, context)
     {
-        return FBL.$STRF("Line", [stackFrame.href, stackFrame.line]);
+        return Locale.$STRF("Line", [stackFrame.href, stackFrame.line]);
     }
 });
 
@@ -1614,7 +1616,7 @@ FirebugReps.StackFrame = domplate(Firebug.Rep,  // XXXjjb Since the repObject is
 FirebugReps.StackTrace = domplate(Firebug.Rep,
 {
     tag:
-        DIV({role : "group", "aria-label" : FBL.$STR("aria.labels.stack trace")},
+        DIV({role : "group", "aria-label" : Locale.$STR("aria.labels.stack trace")},
             FOR("frame", "$object.frames|frameIterator",
                 TAG(FirebugReps.StackFrame.tag, {object: "$frame"})
             )
@@ -1673,7 +1675,7 @@ FirebugReps.ErrorMessage = domplate(Firebug.Rep,
             DIV({"class": "errorTrace", role : 'presentation'}),
             TAG("$object|getObjectsTag", {object: "$object.objects"}),
             DIV({"class": "errorSourceBox errorSource-$object|getSourceType focusRow subLogRow", role : "listitem"},
-                IMG({"class": "$object|isBreakableError a11yFocus", src:"blank.gif", role : 'checkbox', 'aria-checked':"$object|hasErrorBreak", title: FBL.$STR("console.Break On This Error")}),
+                IMG({"class": "$object|isBreakableError a11yFocus", src:"blank.gif", role : 'checkbox', 'aria-checked':"$object|hasErrorBreak", title: Locale.$STR("console.Break On This Error")}),
                 A({"class": "errorSource a11yFocus", title: "$object|getSourceTitle"}, "$object|getSource"),
                 TAG(FirebugReps.SourceLink.tag, {object: "$object|getSourceLink"})
             )
@@ -2107,7 +2109,7 @@ FirebugReps.Storage = domplate(Firebug.Rep,
 
     summarize: function(storage)
     {
-        return FBL.$STRP("firebug.storage.totalItems", [storage.length]);
+        return Locale.$STRP("firebug.storage.totalItems", [storage.length]);
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
@@ -2176,7 +2178,7 @@ FirebugReps.Storage = domplate(Firebug.Rep,
             if (count > max)
             {
                 props[Math.max(1,max-1)] = {
-                    object: FBL.$STR("firebug.reps.more") + "...",
+                    object: Locale.$STR("firebug.reps.more") + "...",
                     tag: FirebugReps.Caption.tag,
                     name: "",
                     equal:"",
@@ -2238,7 +2240,7 @@ FirebugReps.StorageList = domplate(Firebug.Rep,
             var context = Firebug.currentContext;
             var domain = context.window.location.hostname;
             var length = globalStorage.namedItem(domain).length;
-            return FBL.$STRP("firebug.storage.totalItems", [length]) + " ";
+            return Locale.$STRP("firebug.storage.totalItems", [length]) + " ";
         }
         catch (e)
         {
@@ -2337,7 +2339,7 @@ FirebugReps.XPathResult = domplate(FirebugReps.Arr,
         if (xpathresult.snapshotLength > max + 1)
         {
             items[max] = {
-                object: (xpathresult.snapshotLength-max) + " " + FBL.$STR("firebug.reps.more") + "...",
+                object: (xpathresult.snapshotLength-max) + " " + Locale.$STR("firebug.reps.more") + "...",
                 tag: FirebugReps.Caption.tag,
                 delim: ""
             };
@@ -2536,7 +2538,7 @@ FirebugReps.NamedNodeMap = domplate(Firebug.Rep,
         if (object.length > max)
         {
             props[Math.max(1,max-1)] = {
-                object: (object.length-max) + " " + FBL.$STR("firebug.reps.more") + "...",
+                object: (object.length-max) + " " + Locale.$STR("firebug.reps.more") + "...",
                 tag: FirebugReps.Caption.tag,
                 name: "",
                 equal:"",

@@ -5,12 +5,13 @@ define([
     "firebug/reps",
     "firebug/domplate",
     "arch/tools",
+    "firebug/lib/locale",
     "firebug/editorSelector",
     "firebug/infotip",
     "firebug/search",
     "firebug/sourceBox",
 ],
-function(FBL, FirebugReps, Domplate, ToolsInterface) {
+function(FBL, FirebugReps, Domplate, ToolsInterface, Locale) {
 
 // ********************************************************************************************* //
 // Constants
@@ -473,7 +474,7 @@ Firebug.ScriptPanel.prototype = FBL.extend(Firebug.SourceBoxPanel,
         var scrollingElement = event.target;
         this.reView(scrollingElement);
         var searchBox = Firebug.chrome.$("fbSearchBox");
-        searchBox.placeholder = FBL.$STR("Use hash plus number to go to line");
+        searchBox.placeholder = Locale.$STR("Use hash plus number to go to line");
     },
 
     onKeyPress: function(event)
@@ -1243,7 +1244,7 @@ Firebug.ScriptPanel.prototype = FBL.extend(Firebug.SourceBoxPanel,
 
     getBreakOnNextTooltip: function(armed)
     {
-        return (armed ? FBL.$STR("script.Disable Break On Next") : FBL.$STR("script.Break On Next"));
+        return (armed ? Locale.$STR("script.Disable Break On Next") : Locale.$STR("script.Break On Next"));
     },
 
     shouldBreakOnNext: function()
@@ -1453,12 +1454,12 @@ Firebug.ScriptPanel.WarningRep = domplate(Firebug.Rep,
 
     enableScriptTag:
         SPAN({"class": "objectLink", onclick: "$onEnableScript", style: "color: blue"},
-            FBL.$STR("script.button.enable_javascript")
+            Locale.$STR("script.button.enable_javascript")
         ),
 
     focusDebuggerTag:
         SPAN({"class": "objectLink", onclick: "$onFocusDebugger", style: "color: blue"},
-            FBL.$STR("script.button.Go to that page")
+            Locale.$STR("script.button.Go to that page")
         ),
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
@@ -1493,8 +1494,8 @@ Firebug.ScriptPanel.WarningRep = domplate(Firebug.Rep,
     showInactive: function(parentNode)
     {
         var args = {
-            pageTitle: FBL.$STR("script.warning.inactive_during_page_load"),
-            suggestion: FBL.$STR("script.suggestion.inactive_during_page_load2")
+            pageTitle: Locale.$STR("script.warning.inactive_during_page_load"),
+            suggestion: Locale.$STR("script.suggestion.inactive_during_page_load2")
         };
 
         var box = this.tag.replace(args, parentNode, this);
@@ -1509,8 +1510,8 @@ Firebug.ScriptPanel.WarningRep = domplate(Firebug.Rep,
     showNotEnabled: function(parentNode)
     {
         var args = {
-            pageTitle: FBL.$STR("script.warning.javascript_not_enabled"),
-            suggestion: FBL.$STR("script.suggestion.javascript_not_enabled")
+            pageTitle: Locale.$STR("script.warning.javascript_not_enabled"),
+            suggestion: Locale.$STR("script.suggestion.javascript_not_enabled")
         }
 
         var box = this.tag.replace(args, parentNode, this);
@@ -1522,8 +1523,8 @@ Firebug.ScriptPanel.WarningRep = domplate(Firebug.Rep,
     showDebuggerInactive: function(parentNode)
     {
         var args = {
-            pageTitle: FBL.$STR("script.warning.debugger_not_activated"),
-            suggestion: FBL.$STR("script.suggestion.debugger_not_activated")
+            pageTitle: Locale.$STR("script.warning.debugger_not_activated"),
+            suggestion: Locale.$STR("script.suggestion.debugger_not_activated")
         }
 
         var box = this.tag.replace(args, parentNode, this);
@@ -1534,8 +1535,8 @@ Firebug.ScriptPanel.WarningRep = domplate(Firebug.Rep,
     showFiltered: function(parentNode)
     {
         var args = {
-            pageTitle: FBL.$STR("script.warning.all_scripts_filtered"),
-            suggestion: FBL.$STR("script.suggestion.all_scripts_filtered")
+            pageTitle: Locale.$STR("script.warning.all_scripts_filtered"),
+            suggestion: Locale.$STR("script.suggestion.all_scripts_filtered")
         };
         return this.tag.replace(args, parentNode, this);
     },
@@ -1543,8 +1544,8 @@ Firebug.ScriptPanel.WarningRep = domplate(Firebug.Rep,
     showNoScript: function(parentNode)
     {
         var args = {
-            pageTitle: FBL.$STR("script.warning.no_javascript"),
-            suggestion: FBL.$STR("script.suggestion.no_javascript")
+            pageTitle: Locale.$STR("script.warning.no_javascript"),
+            suggestion: Locale.$STR("script.suggestion.no_javascript")
         }
         return this.tag.replace(args, parentNode, this);
     },
@@ -1552,8 +1553,8 @@ Firebug.ScriptPanel.WarningRep = domplate(Firebug.Rep,
     showActivitySuspended: function(parentNode)
     {
         var args = {
-            pageTitle: FBL.$STR("script.warning.debugger_active"),
-            suggestion: FBL.$STR("script.suggestion.debugger_active")
+            pageTitle: Locale.$STR("script.warning.debugger_active"),
+            suggestion: Locale.$STR("script.suggestion.debugger_active")
         }
 
         var box = this.tag.replace(args, parentNode, this);

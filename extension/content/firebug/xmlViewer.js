@@ -3,9 +3,10 @@
 define([
     "firebug/lib",
     "firebug/domplate",
+    "firebug/lib/locale",
     "firebug/lib/xpcom"
 ],
-function(FBL, Domplate, XPCOM) {
+function(FBL, Domplate, Locale, XPCOM) {
 
 // ************************************************************************************************
 // Constants
@@ -59,7 +60,7 @@ Firebug.XMLViewerModel = FBL.extend(Firebug.Module,
         if (this.isXML(FBL.safeGetContentType(file.request)))
         {
             Firebug.NetMonitor.NetInfoBody.appendTab(infoBox, "XML",
-                FBL.$STR("xmlviewer.tab.XML"));
+                Locale.$STR("xmlviewer.tab.XML"));
 
             if (FBTrace.DBG_XMLVIEWER)
                 FBTrace.sysout("xmlviewer.initTabBody; XML response available");

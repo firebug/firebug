@@ -4,12 +4,13 @@ define([
     "firebug/lib",
     "firebug/domplate",
     "firebug/reps",
+    "firebug/lib/locale",
     "arch/tools",
     "firebug/editor",
     "firebug/breakpoint",
     "firebug/search",
 ],
-function(FBL, Domplate, FirebugReps, ToolsInterface) { with (Domplate) {
+function(FBL, Domplate, FirebugReps, Locale, ToolsInterface) { with (Domplate) {
 
 // ************************************************************************************************
 // Constants
@@ -73,8 +74,8 @@ const WatchRowTag =
     TR({"class": "watchNewRow", level: 0},
         TD({"class": "watchEditCell", colspan: 3},
             DIV({"class": "watchEditBox a11yFocusNoTab", role: "button", 'tabindex' : '0',
-                'aria-label' : FBL.$STR('a11y.labels.press enter to add new watch expression')},
-                    FBL.$STR("NewWatch")
+                'aria-label' : Locale.$STR('a11y.labels.press enter to add new watch expression')},
+                    Locale.$STR("NewWatch")
             )
         )
     );
@@ -116,7 +117,7 @@ const DirTablePlate = domplate(Firebug.Rep,
 
     tag:
         TABLE({"class": "domTable", cellpadding: 0, cellspacing: 0, onclick: "$onClick",
-            _repObject: "$object", role: "tree", 'aria-label': FBL.$STR('aria.labels.dom properties')},
+            _repObject: "$object", role: "tree", 'aria-label': Locale.$STR('aria.labels.dom properties')},
             TBODY({role: 'presentation'},
                 SizerRow,
                 FOR("member", "$object|memberIterator",
@@ -137,7 +138,7 @@ const DirTablePlate = domplate(Firebug.Rep,
     tableTag:
         TABLE({"class": "domTable", cellpadding: 0, cellspacing: 0,
             _toggles: "$toggles", _domPanel: "$domPanel", onclick: "$onClick",
-            role: 'tree', 'aria-label': FBL.$STR('a11y.labels.dom_properties')},
+            role: 'tree', 'aria-label': Locale.$STR('a11y.labels.dom_properties')},
             TBODY({role : 'presentation'},
                 SizerRow
             )
@@ -155,7 +156,7 @@ const DirTablePlate = domplate(Firebug.Rep,
             return members;
 
         return [{
-            name: FBL.$STR("firebug.dom.noChildren2"),
+            name: Locale.$STR("firebug.dom.noChildren2"),
             type: "string",
             rowClass: "memberRow-string",
             tag: Firebug.Rep.tag,
@@ -930,11 +931,11 @@ Firebug.DOMBasePanel.prototype = FBL.extend(Firebug.Panel,
                 if (Firebug.CommandLine.onCommandLineFocus())
                     Firebug.Editor.startEditing(row, "");
                 else
-                    row.innerHTML = FBL.$STR("warning.Command line blocked?");
+                    row.innerHTML = Locale.$STR("warning.Command line blocked?");
             }
             else
             {
-                row.innerHTML = FBL.$STR("warning.Console must be enabled");
+                row.innerHTML = Locale.$STR("warning.Console must be enabled");
             }
         }
         else if (FBL.hasClass(row, "watchRow"))
@@ -1249,8 +1250,8 @@ Firebug.DOMBasePanel.prototype = FBL.extend(Firebug.Panel,
 
     getBreakOnNextTooltip: function(enabled)
     {
-        return (enabled ? FBL.$STR("dom.disableBreakOnPropertyChange") :
-            FBL.$STR("dom.label.breakOnPropertyChange"));
+        return (enabled ? Locale.$STR("dom.disableBreakOnPropertyChange") :
+            Locale.$STR("dom.label.breakOnPropertyChange"));
     },
 
     supportsObject: function(object, type)
@@ -1915,7 +1916,7 @@ DOMEditor.prototype = domplate(Firebug.InlineEditor.prototype,
 {
     tag:
         INPUT({"class": "fixedWidthEditor a11yFocusNoTab",
-            type: "text", title:FBL.$STR("NewWatch"),
+            type: "text", title:Locale.$STR("NewWatch"),
             oninput: "$onInput", onkeypress: "$onKeyPress"}),
 
     endEditing: function(target, value, cancel)
@@ -2160,7 +2161,7 @@ Breakpoint.prototype =
                 if (self.checked)
                 {
                     self.context.breakingCause = {
-                        title: FBL.$STR("dom.Break On Property"),
+                        title: Locale.$STR("dom.Break On Property"),
                         message: FBL.cropString(prop, 200),
                         prevValue: oldval,
                         newValue: newval
@@ -2211,7 +2212,7 @@ function DOMBreakpointGroup()
 DOMBreakpointGroup.prototype = FBL.extend(new Firebug.Breakpoint.BreakpointGroup(),
 {
     name: "domBreakpoints",
-    title: FBL.$STR("dom.label.DOM Breakpoints"),
+    title: Locale.$STR("dom.label.DOM Breakpoints"),
 
     addBreakpoint: function(object, propName, panel, row)
     {

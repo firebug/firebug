@@ -1,9 +1,10 @@
 /* See license.txt for terms of usage */
 
 define([
-    "firebug/lib"
+    "firebug/lib",
+    "firebug/lib/locale"
 ],
-function(FBL) {
+function(FBL, Locale) {
 
 // ********************************************************************************************* //
 // Constants
@@ -180,7 +181,7 @@ Firebug.StartButton = FBL.extend(Firebug.Module,
         if (errorCount && Firebug.showErrorCount)
         {
             statusBar.setAttribute("showErrors", "true")
-            statusText.setAttribute("value", FBL.$STRP("plural.Error_Count2", [errorCount]));
+            statusText.setAttribute("value", Locale.$STRP("plural.Error_Count2", [errorCount]));
 
             if (firebugButton)
             {
@@ -219,16 +220,16 @@ Firebug.StartButton = FBL.extend(Firebug.Module,
         if (Firebug.getSuspended())
             tooltip += "\n" + Firebug.getSuspended();
         else
-            tooltip += "\n" + FBL.$STRP("plural.Total_Firebugs2", [Firebug.TabWatcher.contexts.length]);
+            tooltip += "\n" + Locale.$STRP("plural.Total_Firebugs2", [Firebug.TabWatcher.contexts.length]);
 
         if (Firebug.allPagesActivation == "on")
         {
-            var label = FBL.$STR("enablement.on");
-            tooltip += "\n"+label+" "+FBL.$STR("enablement.for all pages");
+            var label = Locale.$STR("enablement.on");
+            tooltip += "\n"+label+" "+Locale.$STR("enablement.for all pages");
         }
         // else allPagesActivation == "none" we don't show it.
 
-        tooltip += "\n" + FBL.$STR(Firebug.getPlacement());
+        tooltip += "\n" + Locale.$STR(Firebug.getPlacement());
 
         var firebugStatus = FBL.$("firebugStatus");
         firebugStatus.setAttribute("tooltiptext", tooltip);
@@ -236,8 +237,8 @@ Firebug.StartButton = FBL.extend(Firebug.Module,
 
     getEnablementStatus: function()
     {
-        var strOn = FBL.$STR("enablement.on");
-        var strOff = FBL.$STR("enablement.off");
+        var strOn = Locale.$STR("enablement.on");
+        var strOff = Locale.$STR("enablement.off");
 
         var status = "";
         var firebugStatus = FBL.$("firebugStatus");

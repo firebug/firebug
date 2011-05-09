@@ -1,9 +1,10 @@
 /* See license.txt for terms of usage */
 
 define([
-    "firebug/lib"
+    "firebug/lib",
+    "firebug/lib/locale",
 ],
-function(FBL) {
+function(FBL, Locale) {
 
 // ************************************************************************************************
 // Constants
@@ -85,9 +86,9 @@ Firebug.NavigationHistory = FBL.extend(Firebug.Module,
         if (end == count)
             start = Math.max(count - maxItems, 0);
 
-        var tooltipBack = FBL.$STR("firebug.history.Go back to this panel");
-        var tooltipCurrent = FBL.$STR("firebug.history.Stay on this panel");
-        var tooltipForward = FBL.$STR("firebug.history.Go forward to this panel");
+        var tooltipBack = Locale.$STR("firebug.history.Go back to this panel");
+        var tooltipCurrent = Locale.$STR("firebug.history.Stay on this panel");
+        var tooltipForward = Locale.$STR("firebug.history.Go forward to this panel");
 
         for (var i=end-1; i>=start; i--)
         {

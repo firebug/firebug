@@ -4,9 +4,10 @@ define([
     "firebug/lib",
     "firebug/domplate",
     "firebug/reps",
+    "firebug/lib/locale",
     "arch/tools"
 ],
-function(FBL, Domplate, FirebugReps, ToolsInterface) {
+function(FBL, Domplate, FirebugReps, Locale, ToolsInterface) {
 
 // ************************************************************************************************
 // Profiler
@@ -63,8 +64,8 @@ Firebug.Profiler = FBL.extend(Firebug.Module,
             disabled ? "true" : "false");
 
         // Update button's tooltip.
-        var tooltipText = disabled ? FBL.$STR("ProfileButton.Disabled.Tooltip")
-            : FBL.$STR("ProfileButton.Enabled.Tooltip");
+        var tooltipText = disabled ? Locale.$STR("ProfileButton.Disabled.Tooltip")
+            : Locale.$STR("ProfileButton.Enabled.Tooltip");
         Firebug.chrome.setGlobalAttribute("cmd_toggleProfiling", "tooltiptext", tooltipText);
     },
 
@@ -84,7 +85,7 @@ Firebug.Profiler = FBL.extend(Firebug.Module,
 
         var isCustomMessage = !!title;
         if (!isCustomMessage)
-            title = FBL.$STR("ProfilerStarted");
+            title = Locale.$STR("ProfilerStarted");
 
         context.profileRow = this.logProfileRow(context, title);
         context.profileRow.customMessage = isCustomMessage ;
@@ -177,9 +178,9 @@ Firebug.Profiler = FBL.extend(Firebug.Module,
         {
             var captionBox = groupRow.getElementsByClassName("profileCaption").item(0);
             if (!groupRow.customMessage)
-                captionBox.textContent = FBL.$STR("Profile");
+                captionBox.textContent = Locale.$STR("Profile");
             var timeBox = groupRow.getElementsByClassName("profileTime").item(0);
-            timeBox.textContent = FBL.$STRP("plural.Profile_Time2", [totalTime, totalCalls], 1);
+            timeBox.textContent = Locale.$STRP("plural.Profile_Time2", [totalTime, totalCalls], 1);
 
             var groupBody = groupRow.lastChild;
             var sizer = Firebug.Profiler.ProfileTable.tag.replace({}, groupBody);
@@ -199,7 +200,7 @@ Firebug.Profiler = FBL.extend(Firebug.Module,
         else
         {
             var captionBox = groupRow.getElementsByClassName("profileCaption").item(0);
-            captionBox.textContent = FBL.$STR("NothingToProfile");
+            captionBox.textContent = Locale.$STR("NothingToProfile");
         }
     }
 });
@@ -216,47 +217,47 @@ Firebug.Profiler.ProfileTable = domplate(
                     TR({"class": "headerRow focusRow profileRow subFocusRow", onclick: "$onClick", "role": "row"},
                         TH({"class": "headerCell alphaValue a11yFocus", "role": "columnheader"},
                             DIV({"class": "headerCellBox"},
-                                FBL.$STR("Function")
+                                Locale.$STR("Function")
                             )
                         ),
                         TH({"class": "headerCell a11yFocus" , "role": "columnheader"},
-                            DIV({"class": "headerCellBox", title: FBL.$STR("CallsHeaderTooltip")},
-                                FBL.$STR("Calls")
+                            DIV({"class": "headerCellBox", title: Locale.$STR("CallsHeaderTooltip")},
+                                Locale.$STR("Calls")
                             )
                         ),
                         TH({"class": "headerCell headerSorted a11yFocus", "role": "columnheader", "aria-sort": "descending"},
-                            DIV({"class": "headerCellBox", title: FBL.$STR("PercentTooltip")},
-                                FBL.$STR("Percent")
+                            DIV({"class": "headerCellBox", title: Locale.$STR("PercentTooltip")},
+                                Locale.$STR("Percent")
                             )
                         ),
                         TH({"class": "headerCell a11yFocus", "role": "columnheader"},
-                            DIV({"class": "headerCellBox", title: FBL.$STR("OwnTimeHeaderTooltip")},
-                                FBL.$STR("OwnTime")
+                            DIV({"class": "headerCellBox", title: Locale.$STR("OwnTimeHeaderTooltip")},
+                                Locale.$STR("OwnTime")
                             )
                         ),
                         TH({"class": "headerCell a11yFocus", "role": "columnheader"},
-                            DIV({"class": "headerCellBox", title: FBL.$STR("TimeHeaderTooltip")},
-                                FBL.$STR("Time")
+                            DIV({"class": "headerCellBox", title: Locale.$STR("TimeHeaderTooltip")},
+                                Locale.$STR("Time")
                             )
                         ),
                         TH({"class": "headerCell a11yFocus", "role": "columnheader"},
-                            DIV({"class": "headerCellBox", title: FBL.$STR("AvgHeaderTooltip")},
-                                FBL.$STR("Avg")
+                            DIV({"class": "headerCellBox", title: Locale.$STR("AvgHeaderTooltip")},
+                                Locale.$STR("Avg")
                             )
                         ),
                         TH({"class": "headerCell a11yFocus", "role": "columnheader"},
-                            DIV({"class": "headerCellBox", title: FBL.$STR("MinHeaderTooltip")},
-                                FBL.$STR("Min")
+                            DIV({"class": "headerCellBox", title: Locale.$STR("MinHeaderTooltip")},
+                                Locale.$STR("Min")
                             )
                         ),
                         TH({"class": "headerCell a11yFocus", "role": "columnheader"},
-                            DIV({"class": "headerCellBox", title: FBL.$STR("MaxHeaderTooltip")},
-                                FBL.$STR("Max")
+                            DIV({"class": "headerCellBox", title: Locale.$STR("MaxHeaderTooltip")},
+                                Locale.$STR("Max")
                             )
                         ),
                         TH({"class": "headerCell alphaValue a11yFocus", "role": "columnheader"},
                             DIV({"class": "headerCellBox"},
-                                FBL.$STR("File")
+                                Locale.$STR("File")
                             )
                         )
                     )

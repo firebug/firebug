@@ -5,9 +5,10 @@ define([
     "firebug/lib/xpcom",
     "firebug/http/requestObserver",
     "firebug/http/responseObserver",
+    "firebug/lib/locale",
     "firebug/sourceCache",
 ],
-function(FBL, XPCOM, HttpRequestObserver, HttpResponseObserver) {
+function(FBL, XPCOM, HttpRequestObserver, HttpResponseObserver, Locale) {
 
 // ********************************************************************************************* //
 // Constants
@@ -350,7 +351,7 @@ Firebug.TabCache.prototype = FBL.extend(Firebug.SourceCache.prototype,
                 return responseText;
 
             if (url === "<unknown>")
-                return [FBL.$STR("message.Failed to load source from cache for") + ": " + url];
+                return [Locale.$STR("message.Failed to load source from cache for") + ": " + url];
 
             var channel = ioService.newChannel(url, null, null);
 
@@ -373,7 +374,7 @@ Firebug.TabCache.prototype = FBL.extend(Firebug.SourceCache.prototype,
                     FBTrace.sysout("tabCache.loadFromCache; Failed to load source for: " + url);
 
                 stream.close();
-                return [FBL.$STR("message.Failed to load source from cache for") + ": " + url];
+                return [Locale.$STR("message.Failed to load source from cache for") + ": " + url];
             }
 
             // Don't load responses that shouldn't be cached.
@@ -383,7 +384,7 @@ Firebug.TabCache.prototype = FBL.extend(Firebug.SourceCache.prototype,
                     FBTrace.sysout("tabCache.loadFromCache; The resource from this URL is not text: " + url);
 
                 stream.close();
-                return [FBL.$STR("message.The resource from this URL is not text") + ": " + url];
+                return [Locale.$STR("message.The resource from this URL is not text") + ": " + url];
             }
 
             responseText = FBL.readFromStream(stream, charset);

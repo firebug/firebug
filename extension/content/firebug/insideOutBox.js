@@ -1,9 +1,10 @@
 /* See license.txt for terms of usage */
 
 define([
-    "firebug/lib"
+    "firebug/lib",
+    "firebug/firebug"
 ],
-function(FBL) {
+function(FBL, Firebug) {
 
 // ************************************************************************************************
 

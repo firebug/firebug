@@ -4,6 +4,7 @@ define([
     "firebug/lib",
     "firebug/domplate",
     "firebug/reps",
+    "firebug/lib/locale",
     "arch/tools",
     "firebug/lib/htmlLib",
     "firebug/breakpoint",
@@ -12,7 +13,7 @@ define([
     "firebug/search",
     "firebug/insideOutBox",
 ],
-function(FBL, Domplate, FirebugReps, ToolsInterface) { with (Domplate) {
+function(FBL, Domplate, FirebugReps, Locale, ToolsInterface, HTMLLib) { with (Domplate) {
 
 // ************************************************************************************************
 // Constants
@@ -86,7 +87,7 @@ Firebug.HTMLModule = FBL.extend(Firebug.Module,
 
 Firebug.HTMLPanel = function() {};
 
-var WalkingPanel = FBL.extend(Firebug.Panel, Firebug.HTMLLib.ElementWalkerFunctions);
+var WalkingPanel = FBL.extend(Firebug.Panel, HTMLLib.ElementWalkerFunctions);
 
 Firebug.HTMLPanel.prototype = FBL.extend(WalkingPanel,
 {
@@ -194,7 +195,7 @@ Firebug.HTMLPanel.prototype = FBL.extend(WalkingPanel,
         var objectNodeBox = this.ioBox.findObjectBox(elt);
         if (objectNodeBox)
         {
-            var attrBox = Firebug.HTMLLib.findNodeAttrBox(objectNodeBox, attrName);
+            var attrBox = HTMLLib.findNodeAttrBox(objectNodeBox, attrName);
             if (attrBox)
             {
                 var attrValueBox = attrBox.childNodes[3];
@@ -285,12 +286,12 @@ Firebug.HTMLPanel.prototype = FBL.extend(WalkingPanel,
 
         var lines;
 
-        var url = Firebug.HTMLLib.getSourceHref(node);
+        var url = HTMLLib.getSourceHref(node);
         if (url)
             lines = this.context.sourceCache.load(url);
         else
         {
-            var text = Firebug.HTMLLib.getSourceText(node);
+            var text = HTMLLib.getSourceText(node);
             lines = FBL.splitLines(text);
         }
 
@@ -345,7 +346,7 @@ Firebug.HTMLPanel.prototype = FBL.extend(WalkingPanel,
 
         if (attrChange == MODIFICATION || attrChange == ADDITION)
         {
-            var nodeAttr = Firebug.HTMLLib.findNodeAttrBox(objectNodeBox, attrName);
+            var nodeAttr = HTMLLib.findNodeAttrBox(objectNodeBox, attrName);
             if (FBTrace.DBG_HTML)
                 FBTrace.sysout("mutateAttr "+attrChange+" "+attrName+"="+attrValue+" node: "+nodeAttr, nodeAttr);
             if (nodeAttr && nodeAttr.childNodes.length > 3)
@@ -377,7 +378,7 @@ Firebug.HTMLPanel.prototype = FBL.extend(WalkingPanel,
         }
         else if (attrChange == REMOVAL)
         {
-            var nodeAttr = Firebug.HTMLLib.findNodeAttrBox(objectNodeBox, attrName);
+            var nodeAttr = HTMLLib.findNodeAttrBox(objectNodeBox, attrName);
             if (nodeAttr)
             {
                 nodeAttr.parentNode.removeChild(nodeAttr);
@@ -421,7 +422,7 @@ Firebug.HTMLPanel.prototype = FBL.extend(WalkingPanel,
             if (FBTrace.DBG_HTML)
                 FBTrace.sysout("html.mutateText target: " + target + " parent: " + parent);
 
-            var nodeText = Firebug.HTMLLib.getTextElementTextBox(parentNodeBox);
+            var nodeText = HTMLLib.getTextElementTextBox(parentNodeBox);
             if (!nodeText.firstChild)
             {
                 if (FBTrace.DBG_HTML)   FBTrace.sysout("html.mutateText failed to update text, TextElement firstChild does not exist");
@@ -505,7 +506,7 @@ Firebug.HTMLPanel.prototype = FBL.extend(WalkingPanel,
                     if (nextSibling)
                     {
                         while (
-                                (!Firebug.showTextNodesWithWhitespace && Firebug.HTMLLib.isWhitespaceText(nextSibling)) ||
+                                (!Firebug.showTextNodesWithWhitespace && HTMLLib.isWhitespaceText(nextSibling)) ||
                                 (!Firebug.showCommentNodes && nextSibling instanceof window.Comment)
                               )
                         {
@@ -757,17 +758,17 @@ Firebug.HTMLPanel.prototype = FBL.extend(WalkingPanel,
 
     isWhitespaceText: function(node)
     {
-        return Firebug.HTMLLib.isWhitespaceText(node);
+        return HTMLLib.isWhitespaceText(node);
     },
 
     findNextSibling: function (node)
     {
-        return Firebug.HTMLLib.findNextSibling(node);
+        return HTMLLib.findNextSibling(node);
     },
 
     isSourceElement: function(element)
     {
-        return Firebug.HTMLLib.isSourceElement(element);
+        return HTMLLib.isSourceElement(element);
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
@@ -1217,7 +1218,7 @@ Firebug.HTMLPanel.prototype = FBL.extend(WalkingPanel,
         else
         {
             var doc = this.context.window.document;
-            search = this.lastSearch = new Firebug.HTMLLib.NodeSearch(text, doc, this.panelNode, this.ioBox);
+            search = this.lastSearch = new HTMLLib.NodeSearch(text, doc, this.panelNode, this.ioBox);
         }
 
         var loopAround = search.find(reverse, Firebug.Search.isCaseSensitive(text));
@@ -1313,9 +1314,9 @@ Firebug.HTMLPanel.prototype = FBL.extend(WalkingPanel,
                 var attrName = attrBox.childNodes[1].textContent;
 
                 items.push(
-                    {label: FBL.$STRF("EditAttribute", [attrName]), nol10n: true,
+                    {label: Locale.$STRF("EditAttribute", [attrName]), nol10n: true,
                         command: FBL.bindFixed(this.editAttribute, this, node, attrName) },
-                    {label: FBL.$STRF("DeleteAttribute", [attrName]), nol10n: true,
+                    {label: Locale.$STRF("DeleteAttribute", [attrName]), nol10n: true,
                         command: FBL.bindFixed(this.deleteAttribute, this, node, attrName) }
                 );
             }
@@ -1426,7 +1427,7 @@ Firebug.HTMLPanel.prototype = FBL.extend(WalkingPanel,
 
     getBreakOnNextTooltip: function(enabled)
     {
-        return (enabled ? FBL.$STR("html.Disable Break On Mutate") : FBL.$STR("html.Break On Mutate"));
+        return (enabled ? Locale.$STR("html.Disable Break On Mutate") : Locale.$STR("html.Break On Mutate"));
     },
 });
 
@@ -1486,11 +1487,11 @@ Firebug.HTMLPanel.CompleteElement = domplate(FirebugReps.Element,
         else
         {
             var nodes = [];
-            var walker = new Firebug.HTMLLib.ElementWalker();
+            var walker = new HTMLLib.ElementWalker();
 
             for (var child = walker.getFirstChild(node); child; child = walker.getNextSibling(child))
             {
-                if (child.nodeType != Node.TEXT_NODE || !Firebug.HTMLLib.isWhitespaceText(child))
+                if (child.nodeType != Node.TEXT_NODE || !HTMLLib.isWhitespaceText(child))
                     nodes.push(child);
             }
             return nodes;
@@ -1965,13 +1966,13 @@ function getNodeTag(node, expandAll)
             return getEmptyElementTag(node);
         else if (Firebug.shouldIgnore(node))
             return null;
-        else if (Firebug.HTMLLib.isContainerElement(node))
+        else if (HTMLLib.isContainerElement(node))
             return expandAll ? Firebug.HTMLPanel.CompleteElement.tag : Firebug.HTMLPanel.Element.tag;
-        else if (Firebug.HTMLLib.isEmptyElement(node))
+        else if (HTMLLib.isEmptyElement(node))
             return getEmptyElementTag(node);
-        else if (Firebug.showCommentNodes && Firebug.HTMLLib.hasCommentChildren(node))
+        else if (Firebug.showCommentNodes && HTMLLib.hasCommentChildren(node))
             return expandAll ? Firebug.HTMLPanel.CompleteElement.tag : Firebug.HTMLPanel.Element.tag;
-        else if (Firebug.HTMLLib.hasNoElementChildren(node))
+        else if (HTMLLib.hasNoElementChildren(node))
             return Firebug.HTMLPanel.TextElement.tag;
         else
             return expandAll ? Firebug.HTMLPanel.CompleteElement.tag : Firebug.HTMLPanel.Element.tag;
@@ -2049,7 +2050,7 @@ Firebug.HTMLModule.MutationBreakpoints =
     {
         var changeLabel = Firebug.HTMLModule.BreakpointRep.getChangeLabel({type: type});
         context.breakingCause = {
-            title: FBL.$STR("html.Break On Mutate"),
+            title: Locale.$STR("html.Break On Mutate"),
             message: changeLabel,
             type: event.type,
             target: event.target,
@@ -2245,13 +2246,13 @@ Firebug.HTMLModule.BreakpointRep = domplate(Firebug.Rep,
         switch (bp.type)
         {
         case BP_BREAKONATTRCHANGE:
-            return FBL.$STR("html.label.Break On Attribute Change");
+            return Locale.$STR("html.label.Break On Attribute Change");
         case BP_BREAKONCHILDCHANGE:
-            return FBL.$STR("html.label.Break On Child Addition or Removal");
+            return Locale.$STR("html.label.Break On Child Addition or Removal");
         case BP_BREAKONREMOVE:
-            return FBL.$STR("html.label.Break On Element Removal");
+            return Locale.$STR("html.label.Break On Element Removal");
         case BP_BREAKONTEXT:
-            return FBL.$STR("html.label.Break On Text Change");
+            return Locale.$STR("html.label.Break On Text Change");
         }
 
         return "";
@@ -2308,7 +2309,7 @@ function MutationBreakpointGroup()
 MutationBreakpointGroup.prototype = FBL.extend(new Firebug.Breakpoint.BreakpointGroup(),
 {
     name: "mutationBreakpoints",
-    title: FBL.$STR("html.label.HTML Breakpoints"),
+    title: Locale.$STR("html.label.HTML Breakpoints"),
 
     addBreakpoint: function(node, type)
     {

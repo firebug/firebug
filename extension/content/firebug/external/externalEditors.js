@@ -2,9 +2,10 @@
 
 define([
     "firebug/lib",
+    "firebug/lib/locale",
     "firebug/lib/xpcom"
 ],
-function(FBL, XPCOM) {
+function(FBL, Locale, XPCOM) {
 
 // ********************************************************************************************* //
 // Constants
@@ -150,7 +151,7 @@ Firebug.ExternalEditors = FBL.extend(Firebug.Module,
             FBL.createMenuItem(popup, "-");
 
         FBL.createMenuItem(popup, {
-            label: FBL.$STR('firebug.Configure_Editors'),
+            label: Locale.$STR('firebug.Configure_Editors'),
             option: 'openEditorList'
         });
     },

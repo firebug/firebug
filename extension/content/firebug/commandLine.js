@@ -3,10 +3,11 @@
 define([
     "firebug/lib",
     "firebug/reps",
+    "firebug/lib/locale",
     "firebug/console",
     "firebug/commandLineExposed"
 ],
-function(FBL, FirebugReps) {
+function(FBL, FirebugReps, Locale) {
 
 // ************************************************************************************************
 // Constants
@@ -128,7 +129,7 @@ Firebug.CommandLine = FBL.extend(Firebug.Module,
 
             if (FBL.isXMLPrettyPrint(context, win))
             {
-                var msg = FBL.$STR("commandline.disabledForXMLDocs");
+                var msg = Locale.$STR("commandline.disabledForXMLDocs");
                 var row = Firebug.Console.logFormatted([msg], context, "warn", true);
                 var objectBox = row.querySelector(".objectBox");
 
@@ -425,7 +426,7 @@ Firebug.CommandLine = FBL.extend(Firebug.Module,
         }
         else
         {
-            Firebug.Console.log(FBL.$STR("console.JSDisabledInFirefoxPrefs"), context, "info");
+            Firebug.Console.log(Locale.$STR("console.JSDisabledInFirefoxPrefs"), context, "info");
         }
     },
 
@@ -2505,7 +2506,7 @@ function CommandLineHandler(context, win)
         if (!Firebug.CommandLine.CommandHandler.handle(event, this.api, win))
         {
             var methodName = win.document.getUserData("firebug-methodName");
-            Firebug.Console.log(FBL.$STRF("commandline.MethodNotSupported", [methodName]));
+            Firebug.Console.log(Locale.$STRF("commandline.MethodNotSupported", [methodName]));
         }
 
         if (FBTrace.DBG_COMMANDLINE)

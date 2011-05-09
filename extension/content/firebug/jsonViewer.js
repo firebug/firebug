@@ -3,10 +3,11 @@
 define([
     "firebug/lib",
     "firebug/domplate",
+    "firebug/lib/locale",
     "firebug/dom",
     "firebug/reps"
 ],
-function(FBL, Domplate) {
+function(FBL, Domplate, Locale) {
 
 // ************************************************************************************************
 
@@ -61,7 +62,7 @@ Firebug.JSONViewerModel = FBL.extend(Firebug.Module,
         if (file.jsonObject && FBL.hasProperties(file.jsonObject))
         {
             Firebug.NetMonitor.NetInfoBody.appendTab(infoBox, "JSON",
-                FBL.$STR("jsonviewer.tab.JSON"));
+                Locale.$STR("jsonviewer.tab.JSON"));
 
             if (FBTrace.DBG_JSONVIEWER)
                 FBTrace.sysout("jsonviewer.initTabBody; JSON object available " +
@@ -119,8 +120,8 @@ Firebug.JSONViewerModel.Preview = domplate(
         DIV({"class": "jsonPreview", _repObject: "$file"},
             DIV({"class": "title"},
                 DIV({"class": "sortLink", onclick: "$onSort", $sorted: "$sorted"},
-                    SPAN({"class": "doSort"}, FBL.$STR("jsonviewer.sort")),
-                    SPAN({"class": "doNotSort"}, FBL.$STR("jsonviewer.do not sort"))
+                    SPAN({"class": "doSort"}, Locale.$STR("jsonviewer.sort")),
+                    SPAN({"class": "doNotSort"}, Locale.$STR("jsonviewer.do not sort"))
                 )
             ),
             DIV({"class": "jsonPreviewBody"})

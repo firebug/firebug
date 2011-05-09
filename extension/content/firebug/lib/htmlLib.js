@@ -14,7 +14,7 @@ const SHOW_ALL = Ci.nsIDOMNodeFilter.SHOW_ALL;
  * @class Static utility class. Contains utilities used for displaying and
  *        searching a HTML tree.
  */
-Firebug.HTMLLib =
+var HTMLLib =
 {
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
     // Node Search Utilities
@@ -35,7 +35,7 @@ Firebug.HTMLLib =
     NodeSearch: function(text, root, panelNode, ioBox, walker)
     {
         root = root.documentElement || root;
-        walker = walker || new Firebug.HTMLLib.DOMWalker(root);
+        walker = walker || new HTMLLib.DOMWalker(root);
         var re = new FBL.ReversibleRegExp(text, "m");
         var matchCount = 0;
 
@@ -104,7 +104,7 @@ Firebug.HTMLLib =
             {
                 if (node.nodeType == Node.TEXT_NODE)
                 {
-                    if (Firebug.HTMLLib.isSourceElement(node.parentNode))
+                    if (HTMLLib.isSourceElement(node.parentNode))
                         continue;
                 }
 
@@ -193,7 +193,7 @@ Firebug.HTMLLib =
                 var nodeBox = ioBox.openToObject(node.ownerElement);
                 if (nodeBox)
                 {
-                    var attrNodeBox = Firebug.HTMLLib.findNodeAttrBox(nodeBox, node.nodeName);
+                    var attrNodeBox = HTMLLib.findNodeAttrBox(nodeBox, node.nodeName);
                     if (isValue)
                         return FBL.getChildByClass(attrNodeBox, "nodeValue");
                     else
@@ -211,7 +211,7 @@ Firebug.HTMLLib =
                 {
                     var nodeBox = ioBox.openToObject(node.parentNode);
                     if (FBL.hasClass(nodeBox, "textNodeBox"))
-                        nodeBox = Firebug.HTMLLib.getTextElementTextBox(nodeBox);
+                        nodeBox = HTMLLib.getTextElementTextBox(nodeBox);
                     return nodeBox;
                 }
             }
@@ -297,7 +297,7 @@ Firebug.HTMLLib =
      */
     SelectorSearch: function(text, doc, panelNode, ioBox)
     {
-        this.parent = new Firebug.HTMLLib.NodeSearch(text, doc, panelNode, ioBox);
+        this.parent = new HTMLLib.NodeSearch(text, doc, panelNode, ioBox);
 
         /**
          * Finds the first match within the document.
@@ -629,7 +629,7 @@ Firebug.HTMLLib =
                     " (element.ownerDocument instanceof Ci.nsIDOMDocumentXBL) "+
                     (element.ownerDocument instanceof Ci.nsIDOMDocumentXBL), element);
 
-            var walker = new Firebug.HTMLLib.ElementWalker();
+            var walker = new HTMLLib.ElementWalker();
             var child = walker.getFirstChild(element);
 
             while (child)
@@ -708,7 +708,7 @@ Firebug.HTMLLib =
         {
             for (var child = element.firstChild; child; child = child.nextSibling)
             {
-                if (!Firebug.HTMLLib.isWhitespaceText(child))
+                if (!HTMLLib.isWhitespaceText(child))
                     return false;
             }
         }
@@ -733,7 +733,7 @@ Firebug.HTMLLib =
             // only return a non-whitespace node
             for (var child = node.nextSibling; child; child = child.nextSibling)
             {
-                if (!Firebug.HTMLLib.isWhitespaceText(child))
+                if (!HTMLLib.isWhitespaceText(child))
                     return child;
             }
         }
@@ -815,7 +815,9 @@ Firebug.HTMLLib =
 // ********************************************************************************************* //
 // Registration
 
-Firebug.HTMLLib.ElementWalker.prototype = Firebug.HTMLLib.ElementWalkerFunctions;
+HTMLLib.ElementWalker.prototype = HTMLLib.ElementWalkerFunctions;
+
+return HTMLLib;
 
 // ********************************************************************************************* //
 });

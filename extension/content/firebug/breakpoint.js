@@ -4,10 +4,11 @@ define([
     "firebug/lib",
     "firebug/domplate",
     "firebug/reps",
+    "firebug/lib/locale",
     "arch/tools",
     "firebug/editor",
 ],
-function(FBL, Domplate, FirebugReps, ToolsInterface) {
+function(FBL, Domplate, FirebugReps, Locale, ToolsInterface) {
 
 // ************************************************************************************************
 // Breakpoints
@@ -340,13 +341,13 @@ Firebug.Breakpoint.BreakpointsPanel.prototype = FBL.extend(Firebug.Panel,
         var groups = [];
 
         if (breakpoints.length)
-            groups.push({name: "breakpoints", title: FBL.$STR("Breakpoints"),
+            groups.push({name: "breakpoints", title: Locale.$STR("Breakpoints"),
                 breakpoints: breakpoints});
         if (errorBreakpoints.length)
-            groups.push({name: "errorBreakpoints", title: FBL.$STR("ErrorBreakpoints"),
+            groups.push({name: "errorBreakpoints", title: Locale.$STR("ErrorBreakpoints"),
                 breakpoints: errorBreakpoints});
         if (monitors.length)
-            groups.push({name: "monitors", title: FBL.$STR("LoggedFunctions"),
+            groups.push({name: "monitors", title: Locale.$STR("LoggedFunctions"),
                 breakpoints: monitors});
 
         ToolsInterface.browser.dispatch("getBreakpoints", [this.context, groups]);
@@ -724,9 +725,9 @@ Firebug.Breakpoint.ConditionEditor.prototype = domplate(Firebug.InlineEditor.pro
             DIV({"class": "conditionEditorInner1"},
                 DIV({"class": "conditionEditorInner2"},
                     DIV({"class": "conditionEditorInner"},
-                        DIV({"class": "conditionCaption"}, FBL.$STR("ConditionInput")),
+                        DIV({"class": "conditionCaption"}, Locale.$STR("ConditionInput")),
                         INPUT({"class": "conditionInput", type: "text",
-                            "aria-label": FBL.$STR("ConditionInput")}
+                            "aria-label": Locale.$STR("ConditionInput")}
                         )
                     )
                 )
@@ -851,17 +852,17 @@ Firebug.Breakpoint.BreakNotification.prototype = domplate(Firebug.Rep,
                             BUTTON({"class": "notificationButton copyButton",
                                 onclick: "$onCopyAction",
                                 $collapsed: "$cause|hideCopyAction"},
-                                FBL.$STR("Copy")
+                                Locale.$STR("Copy")
                             ),
                             BUTTON({"class": "notificationButton skipButton",
                                 onclick: "$onSkipAction",
                                 $collapsed: "$cause|hideSkipAction"},
-                                FBL.$STR("script.balloon.Disable")
+                                Locale.$STR("script.balloon.Disable")
                             ),
                             BUTTON({"class": "notificationButton okButton",
                                 onclick: "$onOkAction",
                                 $collapsed: "$cause|hideOkAction"},
-                                FBL.$STR("script.balloon.Continue")
+                                Locale.$STR("script.balloon.Continue")
                             )
                         ),
                         TD(
@@ -1070,7 +1071,7 @@ Firebug.Breakpoint.BreakNotification.prototype = domplate(Firebug.Rep,
 
         // Render "do not show again" text
         var descNode = this.box.querySelector(".noNotificationDesc");
-        FirebugReps.Description.render(FBL.$STR("firebug.breakpoint.doNotShowBreakNotification2"),
+        FirebugReps.Description.render(Locale.$STR("firebug.breakpoint.doNotShowBreakNotification2"),
             descNode, FBL.bind(this.onClickLink, this));
 
         // Tooltips

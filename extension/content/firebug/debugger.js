@@ -5,10 +5,11 @@ define([
     "arch/tools",
     "firebug/lib/xpcom",
     "firebug/reps",
+    "firebug/lib/locale",
     "firebug/http/requestObserver",
     "firebug/errors",
 ],
-function(FBL, ToolsInterface, XPCOM, FirebugReps, HttpRequestObserver) {
+function(FBL, ToolsInterface, XPCOM, FirebugReps, Locale, HttpRequestObserver) {
 
 // ********************************************************************************************* //
 
@@ -1144,9 +1145,9 @@ Firebug.Debugger = FBL.extend(Firebug.ActivableModule,
 
         context.breakingCause =
         {
-            title: FBL.$STR("debugger keyword"),
-            skipActionTooltip: FBL.$STR("firebug.bon.tooltip.disableDebuggerKeyword2"),
-            message: FBL.$STR("firebug.bon.cause.disableDebuggerKeyword2"),
+            title: Locale.$STR("debugger keyword"),
+            skipActionTooltip: Locale.$STR("firebug.bon.tooltip.disableDebuggerKeyword2"),
+            message: Locale.$STR("firebug.bon.cause.disableDebuggerKeyword2"),
             skipAction: function addSkipperAndGo()
             {
                 // a breakpoint that never hits, but prevents debugger keyword (see FBL.fbs.onDebugger as well)
@@ -1340,7 +1341,7 @@ Firebug.Debugger = FBL.extend(Firebug.ActivableModule,
                 {
                     context.breakingCause =
                     {
-                        title: FBL.$STR("Break on Error"),
+                        title: Locale.$STR("Break on Error"),
                         message: error.message,
                         copyAction: FBL.bindFixed(FirebugReps.ErrorMessage.copyError,
                             FirebugReps.ErrorMessage, error),
@@ -2596,18 +2597,18 @@ Firebug.Debugger = FBL.extend(Firebug.ActivableModule,
 
     menuFullLabel:
     {
-        "static": FBL.$STR("ScriptsFilterStatic"),
-        evals: FBL.$STR("ScriptsFilterEval"),
-        events: FBL.$STR("ScriptsFilterEvent"),
-        all: FBL.$STR("ScriptsFilterAll"),
+        "static": Locale.$STR("ScriptsFilterStatic"),
+        evals: Locale.$STR("ScriptsFilterEval"),
+        events: Locale.$STR("ScriptsFilterEvent"),
+        all: Locale.$STR("ScriptsFilterAll"),
     },
 
     menuShortLabel:
     {
-        "static": FBL.$STR("ScriptsFilterStaticShort"),
-        evals: FBL.$STR("ScriptsFilterEvalShort"),
-        events: FBL.$STR("ScriptsFilterEventShort"),
-        all: FBL.$STR("ScriptsFilterAllShort"),
+        "static": Locale.$STR("ScriptsFilterStaticShort"),
+        evals: Locale.$STR("ScriptsFilterEvalShort"),
+        events: Locale.$STR("ScriptsFilterEventShort"),
+        all: Locale.$STR("ScriptsFilterAllShort"),
     },
 
     onScriptFilterMenuPopupShowing: function(menu, context)

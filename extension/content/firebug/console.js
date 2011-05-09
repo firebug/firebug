@@ -3,12 +3,13 @@
 define([
     "firebug/lib",
     "firebug/reps",
+    "firebug/lib/locale",
     "arch/tools",
     "firebug/profiler",
     "firebug/search",
     "firebug/errors",
 ],
-function(FBL, FirebugReps, ToolsInterface) {
+function(FBL, FirebugReps, Locale, ToolsInterface) {
 
 // ************************************************************************************************
 // Constants
@@ -515,7 +516,7 @@ Firebug.ConsolePanel.prototype = FBL.extend(Firebug.ActivablePanel,
 
         var limitInfo = {
             totalCount: 0,
-            limitPrefsTitle: FBL.$STRF("LimitPrefsTitle", [Firebug.Options.prefDomain+".console.logLimit"])
+            limitPrefsTitle: Locale.$STRF("LimitPrefsTitle", [Firebug.Options.prefDomain+".console.logLimit"])
         };
 
         var netLimitRep = Firebug.NetMonitor.NetLimit;
@@ -530,7 +531,7 @@ Firebug.ConsolePanel.prototype = FBL.extend(Firebug.ActivablePanel,
     insertReloadWarning: function()
     {
         // put the message in, we will clear if the window console is injected.
-        this.warningRow = this.append(appendObject, FBL.$STR("message.Reload to activate window console"), "info");
+        this.warningRow = this.append(appendObject, Locale.$STR("message.Reload to activate window console"), "info");
     },
 
     clearReloadWarning: function()
@@ -861,8 +862,8 @@ Firebug.ConsolePanel.prototype = FBL.extend(Firebug.ActivablePanel,
 
     getBreakOnNextTooltip: function(enabled)
     {
-        return (enabled ? FBL.$STR("console.Disable Break On All Errors") :
-            FBL.$STR("console.Break On All Errors"));
+        return (enabled ? Locale.$STR("console.Disable Break On All Errors") :
+            Locale.$STR("console.Break On All Errors"));
     },
 
     /**

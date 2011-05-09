@@ -2,9 +2,10 @@
 
 define([
     "firebug/lib",
+    "firebug/lib/locale",
     "firebug/domplate"
 ],
-function(FBL, Domplate) {
+function(FBL, Locale, Domplate) {
 
 // ************************************************************************************************
 // Constants
@@ -269,7 +270,7 @@ Firebug.Activation = FBL.extend(Firebug.Module,
         if (privateBrowsingEnabled)
         {
             Firebug.Console.logFormatted(
-                [FBL.$STR("firebug.activation.privateBrowsingMode")],
+                [Locale.$STR("firebug.activation.privateBrowsingMode")],
                 Firebug.currentContext, "info");
             Firebug.chrome.selectPanel('console');
             Firebug.Options.set("defaultPanelName", "console");  // make sure the user sees the warning.
@@ -565,12 +566,12 @@ Firebug.DisabledPanelBox = domplate(Firebug.Rep,
                 SPAN("$pageTitle")
             ),
             P({"class": "disabledPanelDescription", style: "margin-top: 15px;"},
-                FBL.$STR("moduleManager.desc3"),
+                Locale.$STR("moduleManager.desc3"),
                 SPAN("&nbsp;"),
                 SPAN({"class": "descImage descImage-$panelName"})
             ),
             A({"class": "objectLink", onclick: "$onEnable"},
-                FBL.$STR("moduleManager.Enable")
+                Locale.$STR("moduleManager.Enable")
             )
             /* need something here that pushes down any thing appended to the panel */
         ),
@@ -595,7 +596,7 @@ Firebug.DisabledPanelBox = domplate(Firebug.Rep,
         var panel = Firebug.getPanelType(panelName);
         var panelTitle = Firebug.getPanelTitle(panel);
         var args = {
-            pageTitle: FBL.$STRF("moduleManager.title", [panelTitle]),
+            pageTitle: Locale.$STRF("moduleManager.title", [panelTitle]),
             panelName: panelName
         };
 

@@ -70,7 +70,7 @@ function internationalizeUI(doc)
     {
         if (elements[i].nodeName == "description")
         {
-            var localized = FBL.$STR(elements[i].textContent);
+            var localized = Locale.$STR(elements[i].textContent);
             var parser = Cc["@mozilla.org/xmlextras/domparser;1"].createInstance(Ci.nsIDOMParser);
             var doc = parser.parseFromString("<vbox>" + localized + "</vbox>", "text/xml");
             var root = doc.documentElement;
@@ -136,13 +136,13 @@ function onAccept()
 
         if (exc == "NotAnExecutable")
         {
-            promptService.alert(null, FBL.$STR("changeEditor.Invalid_Application_Path"),
-                FBL.$STR("changeEditor.Path_is_not_an_executable"));
+            promptService.alert(null, Locale.$STR("changeEditor.Invalid_Application_Path"),
+                Locale.$STR("changeEditor.Path_is_not_an_executable"));
         }
         else
         {
-            promptService.alert(null, FBL.$STR("changeEditor.Invalid_Application_Path"),
-                FBL.$STR("changeEditor.Application_does_not_exist"));
+            promptService.alert(null, Locale.$STR("changeEditor.Invalid_Application_Path"),
+                Locale.$STR("changeEditor.Application_does_not_exist"));
         }
 
         return false;

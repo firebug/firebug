@@ -3,9 +3,10 @@
 define([
     "firebug/lib",
     "firebug/domplate",
+    "firebug/lib/locale",
     "firebug/reps"
 ],
-function(FBL, Domplate, FirebugReps) {
+function(FBL, Domplate, Locale, FirebugReps) {
 
 // ************************************************************************************************
 // Constants
@@ -247,7 +248,7 @@ FirebugReps.Table = domplate(Firebug.Rep,
         }
 
         if (typeof(firstRow) != "object")
-            return [{label: FBL.$STR("firebug.reps.table.ObjectProperties")}];
+            return [{label: Locale.$STR("firebug.reps.table.ObjectProperties")}];
 
         // Put together a column property, label and type (type for default sorting logic).
         var header = [];

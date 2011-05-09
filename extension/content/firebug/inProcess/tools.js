@@ -1,10 +1,11 @@
 /* See license.txt for terms of usage */
 
 define([
+    "firebug/firebug", //xxxHonza: this dependency seems to be wrong.
     "arch/browser",
     "arch/compilationunit"
 ],
-function(Browser, CompilationUnit) {
+function(Firebug, Browser, CompilationUnit) {
 
 // ********************************************************************************************* //
 

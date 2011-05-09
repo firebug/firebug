@@ -2,9 +2,10 @@
 
 define([
     "firebug/lib",
-    "firebug/reps"
+    "firebug/reps",
+    "firebug/lib/locale",
 ],
-function(FBL, FirebugReps) {
+function(FBL, FirebugRepsi, Locale) {
 
 // ************************************************************************************************
 // Constants
@@ -1026,13 +1027,13 @@ var quickInfoBox =
         {
             lab = document.createElement("label");
             lab.setAttribute("class", "fbQuickInfoBoxTitle");
-            lab.setAttribute("value", FBL.$STR("quickInfo"));
+            lab.setAttribute("value", Locale.$STR("quickInfo"));
             vbox.insertBefore(lab, vbox.firstChild);
         }
 
         lab = document.createElement("label");
         lab.setAttribute("class", "fbQuickInfoBoxTitle");
-        lab.setAttribute("value", FBL.$STR("computedStyle"));
+        lab.setAttribute("value", Locale.$STR("computedStyle"));
         vbox.appendChild(lab);
 
         this.addRows(element, vbox, compAttribs, true);

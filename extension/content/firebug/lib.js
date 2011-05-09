@@ -1,9 +1,10 @@
 /* See license.txt for terms of usage */
 
 define([
-    "firebug/lib/xpcom"
+    "firebug/lib/xpcom",
+    "firebug/lib/locale",
 ],
-function(XPCOM) {
+function(XPCOM, Locale) {
 
 // ********************************************************************************************* //
 
@@ -11,12 +12,19 @@ var FBL = top.FBL;
 
 try {
 
+// xxxHonza: removed from 1.8.next
+
 // Inject old fbXPCOMUtils into FBL (for backward compatibility)
 // Real AMD module should depend on "lib/xpcom"
 // xxxHonza: FBL.CCIN, FBL.CCSV and FBL.QI should be marked as deprecated and
-// removed from 1.8.next
 for (var p in XPCOM)
     FBL[p] = XPCOM[p];
+
+// Backward compatibility with extensions
+// xxxHonza: mark as obsolete
+for (var p in Locale)
+    FBL[p] = Locale[p];
+
 
 (function() {
 
@@ -449,206 +457,6 @@ this.isAncestorIgnored = function(node)
     }
 
     return false;
-}
-
-// ************************************************************************************************
-// Localization
-
-/*
- * $STR - intended for localization of a static string.
- * $STRF - intended for localization of a string with dynamically inserted values.
- * $STRP - intended for localization of a string with dynamically plural forms.
- *
- * Notes:
- * 1) Name with _ in place of spaces is the key in the firebug.properties file.
- * 2) If the specified key isn't localized for particular language, both methods use
- *    the part after the last dot (in the specified name) as the return value.
- *
- * Examples:
- * $STR("Label"); - search for key "Label" within the firebug.properties file
- *                 and returns its value. If the key doesn't exist returns "Label".
- *
- * $STR("Button Label"); - search for key "Button_Label" withing the firebug.properties
- *                        file. If the key doesn't exist returns "Button Label".
- *
- * $STR("net.Response Header"); - search for key "net.Response_Header". If the key doesn't
- *                               exist returns "Response Header".
- *
- * firebug.properties:
- * net.timing.Request_Time=Request Time: %S [%S]
- *
- * var param1 = 10;
- * var param2 = "ms";
- * $STRF("net.timing.Request Time", param1, param2);  -> "Request Time: 10 [ms]"
- *
- * - search for key "net.timing.Request_Time" within the firebug.properties file. Parameters
- *   are inserted at specified places (%S) in the same order as they are passed. If the
- *   key doesn't exist the method returns "Request Time".
- */
-function $STR(name, bundle)
-{
-    var strKey = name.replace(' ', '_', "g");
-
-    if (!Firebug.useDefaultLocale)
-    {
-        try
-        {
-            if (typeof bundle == "string")
-                bundle = document.getElementById(bundle);
-
-            if (bundle)
-                return bundle.getString(strKey);
-            else
-                return Firebug.getStringBundle().GetStringFromName(strKey);
-        }
-        catch (err)
-        {
-            if (FBTrace.DBG_LOCALE)
-                FBTrace.sysout("lib.getString FAILS '" + name + "'", err);
-        }
-    }
-
-    try
-    {
-        // The en-US string should be always available.
-        var bundle = Firebug.getDefaultStringBundle();
-        if (bundle)
-            return bundle.GetStringFromName(strKey);
-    }
-    catch (err)
-    {
-        if (FBTrace.DBG_LOCALE)
-            FBTrace.sysout("lib.getString (default) FAILS '" + name + "'", err);
-    }
-
-    // Don't panic now and use only the label after last dot.
-    var index = name.lastIndexOf(".");
-    if (index > 0 && name.charAt(index-1) != "\\")
-        name = name.substr(index + 1);
-    name = name.replace("_", " ", "g");
-    return name;
-}
-
-function $STRF(name, args, bundle)
-{
-    var strKey = name.replace(' ', '_', "g");
-
-    if (!Firebug.useDefaultLocale)
-    {
-        try
-        {
-            // xxxHonza: Workaround for #485511
-            if (!bundle)
-                bundle = "strings_firebug";
-
-            if (typeof bundle == "string")
-                bundle = document.getElementById(bundle);
-
-            if (bundle)
-                return bundle.getFormattedString(strKey, args);
-            else
-                return Firebug.getStringBundle().formatStringFromName(strKey, args, args.length);
-        }
-        catch (err)
-        {
-            if (FBTrace.DBG_LOCALE)
-                FBTrace.sysout("lib.getString FAILS '" + name + "'", err);
-        }
-    }
-
-    try
-    {
-        // The en-US string should be always available.
-        var bundle = Firebug.getDefaultStringBundle();
-        if (bundle)
-            return bundle.formatStringFromName(strKey, args, args.length);
-    }
-    catch (err)
-    {
-        if (FBTrace.DBG_LOCALE)
-            FBTrace.sysout("lib.getString (default) FAILS '" + name + "'", err);
-    }
-
-    // Don't panic now and use only the label after last dot.
-    var index = name.lastIndexOf(".");
-    if (index > 0)
-        name = name.substr(index + 1);
-
-    return name;
-}
-
-function $STRP(name, args, index, bundle)
-{
-    // xxxHonza:
-    // pluralRule from chrome://global/locale/intl.properties for Chinese is 1,
-    // which is wrong, it should be 0.
-
-    var getPluralForm = PluralForm.get;
-    var getNumForms = PluralForm.numForms;
-
-    // Get custom plural rule; otherwise the rule from chrome://global/locale/intl.properties
-    // (depends on the current locale) is used.
-    var pluralRule = Firebug.getPluralRule();
-    if (!isNaN(parseInt(pluralRule, 10)))
-        [getPluralForm, getNumForms] = PluralForm.makeGetter(pluralRule);
-
-    // Index of the argument with plural form (there must be only one arg that needs plural form).
-    if (!index)
-        index = 0;
-
-    // Get proper plural form from the string (depends on the current Firefox locale).
-    var translatedString = $STRF(name, args, bundle);
-    if (translatedString.search(";") > 0)
-        return getPluralForm(args[index], translatedString);
-
-    // translatedString contains no ";", either rule 0 or getString fails
-    return translatedString;
-}
-
-this.$STR = $STR;
-this.$STRF = $STRF;
-this.$STRP = $STRP;
-
-/*
- * Use the current value of the attribute as a key to look up the localized value.
- */
-this.internationalize = function(element, attr, args)
-{
-    if (typeof element == "string")
-        element = document.getElementById(element);
-
-    if (element)
-    {
-        var xulString = element.getAttribute(attr);
-        if (xulString)
-        {
-            var localized = args ? $STRF(xulString, args) : $STR(xulString);
-
-            // Set localized value of the attribute.
-            element.setAttribute(attr, localized);
-        }
-    }
-    else
-    {
-        if (FBTrace.DBG_LOCALE)
-            FBTrace.sysout("Failed to internationalize element with attr "+attr+' args:'+args);
-    }
-}
-
-this.internationalizeElements = function(doc, elements, attributes)
-{
-    for (var i=0; i<elements.length; i++)
-    {
-        var element = doc.getElementById(elements[i]);
-        if (!element)
-            continue;
-
-        for (var j=0; j<attributes.length; j++)
-        {
-            if (element.hasAttribute(attributes[j]))
-                FBL.internationalize(element, attributes[j]);
-        }
-    }
 }
 
 // ************************************************************************************************
@@ -2646,7 +2454,7 @@ this.createMenuItem = function(popup, item, before)
 
 this.setItemIntoElement = function(element, item)
 {
-    var label = item.nol10n ? item.label : this.$STR(item.label);
+    var label = item.nol10n ? item.label : Locale.$STR(item.label);
 
     element.setAttribute("label", label);
 
@@ -2684,7 +2492,7 @@ this.setItemIntoElement = function(element, item)
 
     if (item.tooltiptext)
     {
-        var tooltiptext = item.nol10n ? item.tooltiptext : this.$STR(item.tooltiptext);
+        var tooltiptext = item.nol10n ? item.tooltiptext : Locale.$STR(item.tooltiptext);
         element.setAttribute("tooltiptext", tooltiptext);
     }
 
@@ -2702,7 +2510,7 @@ this.createMenuHeader = function(popup, item)
     var header = popup.ownerDocument.createElement("label");
     header.setAttribute("class", "menuHeader");
 
-    var label = item.nol10n ? item.label : this.$STR(item.label);
+    var label = item.nol10n ? item.label : Locale.$STR(item.label);
 
     header.setAttribute("value", label);
 
@@ -2977,12 +2785,12 @@ this.StackFrame.prototype =
             if (scope.jsClassName == "Call")
             {
                 scopeVars = FBL.unwrapIValueObject(scope, viewChrome)
-                scopeVars.toString = function() {return $STR("Closure Scope");}
+                scopeVars.toString = function() {return Locale.$STR("Closure Scope");}
             }
             else if (scope.jsClassName == "Block")
             {
                 scopeVars = FBL.unwrapIValueObject(scope, viewChrome)
-                scopeVars.toString = function() {return $STR("Block Scope");}
+                scopeVars.toString = function() {return Locale.$STR("Block Scope");}
             }
             else
             {
@@ -2994,7 +2802,7 @@ this.StackFrame.prototype =
                         (function() {
                             var className = scope.jsClassName;
                             scopeVars.toString = function() {
-                                return $STR(className + " Scope");
+                                return Locale.$STR(className + " Scope");
                             };
                         })();
                     }
@@ -3013,8 +2821,9 @@ this.StackFrame.prototype =
             scope = scope.jsParent;
         }
 
-        ret.toString = function() {
-            return $STR("Scope Chain");
+        ret.toString = function()
+        {
+            return Locale.$STR("Scope Chain");
         };
 
         return ret;
@@ -4538,7 +4347,7 @@ this.parseURLEncodedText = function(text, noLimit)
                 var paramValue = args[i].substring(index + 1);
 
                 if (paramValue.length > maxValueLength && !noLimit)
-                    paramValue = this.$STR("LargeData");
+                    paramValue = Locale.$STR("LargeData");
 
                 params.push({name: decodeText(paramName), value: decodeText(paramValue)});
             }

@@ -2,9 +2,10 @@
 
 define([
     "firebug/lib",
-    "firebug/domplate"
+    "firebug/domplate",
+    "firebug/lib/locale",
 ],
-function(FBL, Domplate) {
+function(FBL, Domplate, Locale) {
 
 // ************************************************************************************************
 // Constants
@@ -96,7 +97,7 @@ Firebug.InfoTip = FBL.extend(Firebug.Module,
                 }
             }
 
-            caption.innerHTML = FBL.$STRF("Dimensions", [w, h]);
+            caption.innerHTML = Locale.$STRF("Dimensions", [w, h]);
 
             FBL.removeClass(innerBox, "infoTipLoading");
         },
@@ -112,9 +113,9 @@ Firebug.InfoTip = FBL.extend(Firebug.Module,
 
             // Display an error in the caption (instead of dimensions).
             if (img.src.indexOf("moz-filedata") == 0)
-                caption.innerHTML = FBL.$STR("firebug.failedToPreviewObjectURL");
+                caption.innerHTML = Locale.$STR("firebug.failedToPreviewObjectURL");
             else
-                caption.innerHTML = FBL.$STR("firebug.failedToPreviewImageURL");
+                caption.innerHTML = Locale.$STR("firebug.failedToPreviewImageURL");
 
             var innerBox = img.parentNode;
             FBL.removeClass(innerBox, "infoTipLoading");

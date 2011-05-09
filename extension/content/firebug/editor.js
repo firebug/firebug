@@ -3,8 +3,9 @@
 define([
     "firebug/lib",
     "firebug/domplate",
+    "firebug/lib/locale",
 ],
-function(FBL, Domplate) {
+function(FBL, Domplate, Locale) {
 
 // ************************************************************************************************
 // Constants
@@ -1302,7 +1303,7 @@ Firebug.AutoCompleter = function(getExprOffset, getRange, evaluator, selectMode,
         vbox.classList.add("fbCommandLineCompletions");
 
         var title = completionPopup.ownerDocument.createElementNS("http://www.w3.org/1999/xhtml","div");
-        title.innerHTML = FBL.$STR("console.Use Arrow keys or Enter");
+        title.innerHTML = Locale.$STR("console.Use Arrow keys or Enter");
         title.classList.add('fbPopupTitle');
         vbox.appendChild(title);
 
@@ -1473,7 +1474,7 @@ Firebug.AutoCompleter = function(getExprOffset, getRange, evaluator, selectMode,
 
     this.setTabWarning = function(textBox, completionBox)
     {
-        completionBox.value = textBox.value + "    " + FBL.$STR("firebug.completion.empty");
+        completionBox.value = textBox.value + "    " + Locale.$STR("firebug.completion.empty");
         completionBox.tabWarning = true;
     };
 

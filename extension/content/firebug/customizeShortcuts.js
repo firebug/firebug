@@ -53,7 +53,7 @@ function init()
     shortcutNames.sort();
     shortcutNames.forEach(addShortcutRow);
     setHandlers();
-    document.title = FBL.$STR('customizeShortcuts');
+    document.title = Locale.$STR('customizeShortcuts');
 
     if (FBTrace.DBG_SHORTCUTS)
         FBTrace.sysout("shortcuts.init; Customize Shortcuts dialog initialized.");
@@ -63,11 +63,11 @@ function setKeyInfo()
 {
     gLocaleKeys = document.getElementById("localeKeys");
     var platformKeys = document.getElementById("platformKeys");
-    gPlatformKeys.shift = FBL.$STR("VK_SHIFT", platformKeys);
-    gPlatformKeys.meta = FBL.$STR("VK_META", platformKeys);
-    gPlatformKeys.alt = FBL.$STR("VK_ALT", platformKeys);
-    gPlatformKeys.ctrl = FBL.$STR("VK_CONTROL", platformKeys);
-    gPlatformKeys.sep = FBL.$STR("MODIFIER_SEPARATOR", platformKeys);
+    gPlatformKeys.shift = Locale.$STR("VK_SHIFT", platformKeys);
+    gPlatformKeys.meta = Locale.$STR("VK_META", platformKeys);
+    gPlatformKeys.alt = Locale.$STR("VK_ALT", platformKeys);
+    gPlatformKeys.ctrl = Locale.$STR("VK_CONTROL", platformKeys);
+    gPlatformKeys.sep = Locale.$STR("MODIFIER_SEPARATOR", platformKeys);
 
     switch (prefs.getIntPref("ui.key.accelKey"))
     {
@@ -111,7 +111,7 @@ function saveChanges()
     if (!modified)
         return true;
 
-    if (window.confirm(FBL.$STR('keybindConfirmMsg')))
+    if (window.confirm(Locale.$STR('keybindConfirmMsg')))
     {
         shortcutNames.forEach(saveShortcut);
         window.opener.Firebug.ShortcutsModel.initShortcuts();
@@ -163,7 +163,7 @@ function addShortcutRow(element, index, array)
 
     var label = document.createElement("label");
     // Get the label from firebug.properties
-    labelText = FBL.$STR('firebug.shortcut.' + element + ".label");
+    labelText = Locale.$STR('firebug.shortcut.' + element + ".label");
     if (labelText == "label") // $STR defaults to property name (label) if it's not defined. We don't want that
         labelText = element
     label.setAttribute("value", labelText);
@@ -178,8 +178,8 @@ function addShortcutRow(element, index, array)
 
     var resetBtn = document.createElement('button');
     resetBtn.id = element + "_reset";
-    resetBtn.setAttribute('label', FBL.$STR("a11y.labels.reset"));
-    resetBtn.setAttribute('aria-label', FBL.$STRF("a11y.labels.reset_shortcut", [labelText]));
+    resetBtn.setAttribute('label', Locale.$STR("a11y.labels.reset"));
+    resetBtn.setAttribute('aria-label', Locale.$STRF("a11y.labels.reset_shortcut", [labelText]));
     resetBtn.className = "shortcutResetBtn";
     row.appendChild(resetBtn);
     rows.appendChild(row);

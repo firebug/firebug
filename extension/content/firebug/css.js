@@ -5,12 +5,13 @@ define([
     "firebug/domplate",
     "firebug/reps",
     "firebug/lib/xpcom",
+    "firebug/lib/locale",
     "firebug/editor",
     "firebug/editorSelector",
     "firebug/infotip",
     "firebug/search",
 ],
-function(FBL, Domplate, FirebugReps, XPCOM) { with (Domplate) {
+function(FBL, Domplate, FirebugReps, XPCOM, Locale) { with (Domplate) {
 
 // ************************************************************************************************
 // Constants
@@ -866,7 +867,7 @@ Firebug.CSSStyleSheetPanel.prototype = FBL.extend(Firebug.Panel,
                 // The element did not have any displayed styles. We need to create the whole tree and remove
                 // the no styles message
                 styleRuleBox = this.template.cascadedTag.replace({
-                    rules: [rule], inherited: [], inheritLabel: FBL.$STR("InheritedFrom")
+                    rules: [rule], inherited: [], inheritLabel: Locale.$STR("InheritedFrom")
                 }, this.panelNode);
 
                 styleRuleBox = styleRuleBox.getElementsByClassName("cssElementRuleContainer")[0];
@@ -1128,7 +1129,7 @@ Firebug.CSSStyleSheetPanel.prototype = FBL.extend(Firebug.Panel,
             // If there are no rules on the page display a description that also
             // contains a link "create a rule".
             var warning = FirebugReps.Warning.tag.replace({object: ""}, this.panelNode);
-            FirebugReps.Description.render(FBL.$STR("css.EmptyStyleSheet"),
+            FirebugReps.Description.render(Locale.$STR("css.EmptyStyleSheet"),
                 warning, FBL.bind(this.insertRule, this));
         }
 
@@ -1301,11 +1302,11 @@ Firebug.CSSStyleSheetPanel.prototype = FBL.extend(Firebug.Panel,
                 var isDisabled = FBL.hasClass(propRow, "disabledStyle");
 
                 items.push(
-                    {label: FBL.$STRF("EditProp", [propName]), nol10n: true,
+                    {label: Locale.$STRF("EditProp", [propName]), nol10n: true,
                         command: FBL.bindFixed(this.editPropertyRow, this, propRow) },
-                    {label: FBL.$STRF("DeleteProp", [propName]), nol10n: true,
+                    {label: Locale.$STRF("DeleteProp", [propName]), nol10n: true,
                         command: FBL.bindFixed(this.deletePropertyRow, this, propRow) },
-                    {label: FBL.$STRF("DisableProp", [propName]), nol10n: true,
+                    {label: Locale.$STRF("DisableProp", [propName]), nol10n: true,
                         type: "checkbox", checked: isDisabled,
                         command: FBL.bindFixed(this.disablePropertyRow, this, propRow) }
                 );
@@ -1597,12 +1598,12 @@ CSSElementPanel.prototype = FBL.extend(Firebug.CSSStyleSheetPanel.prototype,
     {
         cascadedTag:
             DIV({"class": "a11yCSSView", role: "presentation"},
-                DIV({role: "list", "aria-label": FBL.$STR("aria.labels.style rules") },
+                DIV({role: "list", "aria-label": Locale.$STR("aria.labels.style rules") },
                     FOR("rule", "$rules",
                         TAG("$ruleTag", {rule: "$rule"})
                     )
                 ),
-                DIV({role: "list", "aria-label": FBL.$STR("aria.labels.inherited style rules")},
+                DIV({role: "list", "aria-label": Locale.$STR("aria.labels.inherited style rules")},
                     FOR("section", "$inherited",
                         H1({"class": "cssInheritHeader groupHeader focusRow", role: "listitem" },
                             SPAN({"class": "cssInheritLabel"}, "$inheritLabel"),
@@ -1641,7 +1642,7 @@ CSSElementPanel.prototype = FBL.extend(Firebug.CSSStyleSheetPanel.prototype,
             if (Firebug.onlyShowAppliedStyles)
                 this.removeOverriddenProps(rules, sections);
 
-            inheritLabel = FBL.$STR("InheritedFrom");
+            inheritLabel = Locale.$STR("InheritedFrom");
             result = this.template.cascadedTag.replace({rules: rules, inherited: sections,
                 inheritLabel: inheritLabel}, this.panelNode);
             FBL.dispatch(this.fbListeners, 'onCSSRulesAdded', [this, result]);
@@ -1649,7 +1650,7 @@ CSSElementPanel.prototype = FBL.extend(Firebug.CSSStyleSheetPanel.prototype,
         else
         {
             warning = FirebugReps.Warning.tag.replace({object: ""}, this.panelNode);
-            result = FirebugReps.Description.render(FBL.$STR("css.EmptyElementCSS"),
+            result = FirebugReps.Description.render(Locale.$STR("css.EmptyElementCSS"),
                 warning, FBL.bind(this.editElementStyle, this));
             FBL.dispatch([Firebug.A11yModel], 'onCSSRulesAdded', [this, result]);
         }
@@ -1876,7 +1877,7 @@ CSSElementPanel.prototype = FBL.extend(Firebug.CSSStyleSheetPanel.prototype,
         if (sothinkInstalled)
         {
             var div = FirebugReps.Warning.tag.replace({object: "SothinkWarning"}, this.panelNode);
-            div.innerHTML = FBL.$STR("SothinkWarning");
+            div.innerHTML = Locale.$STR("SothinkWarning");
             return;
         }
 
@@ -2007,7 +2008,7 @@ CSSComputedElementPanel.prototype = FBL.extend(CSSElementPanel.prototype,
     template: domplate(
     {
         computedTag:
-            DIV({"class": "a11yCSSView", role: "list", "aria-label": FBL.$STR("aria.labels.computed styles")},
+            DIV({"class": "a11yCSSView", role: "list", "aria-label": Locale.$STR("aria.labels.computed styles")},
                 FOR("group", "$groups",
                     DIV({"class": "computedStylesGroup", $opened: "$group.opened", role: "list"},
                         H1({"class": "cssComputedHeader groupHeader focusRow", role: "listitem"},
@@ -2020,7 +2021,7 @@ CSSComputedElementPanel.prototype = FBL.extend(CSSElementPanel.prototype,
             ),
 
         computedAlphabeticalTag:
-            DIV({"class": "a11yCSSView", role: "list", "aria-label" : FBL.$STR("aria.labels.computed styles")},
+            DIV({"class": "a11yCSSView", role: "list", "aria-label" : Locale.$STR("aria.labels.computed styles")},
                 TAG("$stylesTag", {props: "$props"})
             ),
 
@@ -2073,7 +2074,7 @@ CSSComputedElementPanel.prototype = FBL.extend(CSSElementPanel.prototype,
 
             for (var groupName in styleGroups)
             {
-                var title = FBL.$STR("StyleGroup-" + groupName);
+                var title = Locale.$STR("StyleGroup-" + groupName);
                 var group = {title: title, props: []};
                 groups.push(group);
 
@@ -2109,7 +2110,7 @@ CSSComputedElementPanel.prototype = FBL.extend(CSSElementPanel.prototype,
         this.groupOpened = [];
         for (var groupName in styleGroups)
         {
-            var title = FBL.$STR("StyleGroup-" + groupName);
+            var title = Locale.$STR("StyleGroup-" + groupName);
             this.groupOpened[title] = true;
         }
 
