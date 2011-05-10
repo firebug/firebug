@@ -595,7 +595,7 @@ this.ToggleBranch.prototype =
             var value = null;
 
         if (FBTrace.DBG_DOMPLATE)
-            if (value && !(value instanceof ToggleBranch)) FBTrace.sysout("ERROR ToggleBranch.get("+name+") not set to a ToggleBranch!");
+            if (value && !(value instanceof FBL.ToggleBranch)) FBTrace.sysout("ERROR ToggleBranch.get("+name+") not set to a ToggleBranch!");
 
         return value;
     },
@@ -603,7 +603,7 @@ this.ToggleBranch.prototype =
     set: function(name, value)  // value will be another toggle branch
     {
         if (FBTrace.DBG_DOMPLATE)
-            if (value && !(value instanceof ToggleBranch)) FBTrace.sysout("ERROR ToggleBranch.set("+name+","+value+") not set to a ToggleBranch!");
+            if (value && !(value instanceof FBL.ToggleBranch)) FBTrace.sysout("ERROR ToggleBranch.set("+name+","+value+") not set to a ToggleBranch!");
 
         var metaName = this.getMeta(name);
         if (metaName)
