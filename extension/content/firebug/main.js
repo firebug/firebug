@@ -224,7 +224,7 @@ function(FBL)
     // xxxHonza: the only global should be Firebug object.
     // for extensions compatibility
     window.FirebugReps = Firebug.Reps;
-    window.domplate = Firebug.Domplate.domplateFunction;
+    window.domplate = Firebug.Domplate.domplate;
 
     if (FBTrace.DBG_MODULES)
         dumpDependencyTree(depTree);
