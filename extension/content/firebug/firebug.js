@@ -82,7 +82,7 @@ catch (exc)
  * @class Represents the main Firebug application object. An instance of this object is
  * created for each browser window (browser.xul).
  */
-var Firebug =
+window.Firebug =
 {
     version: "1.6",
 
@@ -2719,7 +2719,9 @@ function shutdownFirebug()
 // ********************************************************************************************* //
 // Registration
 
-return top.Firebug = Firebug;
+Firebug.Domplate = Domplate;
+
+return Firebug;
 
 // ********************************************************************************************* //
 });

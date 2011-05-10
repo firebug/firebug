@@ -10,7 +10,7 @@ function(XPCOM, Locale, Events, Options) {
 
 // ********************************************************************************************* //
 
-var FBL = top.FBL || {};
+var FBL = top.FBL || {};  // legacy.js adds top.FBL, FIXME, remove after iframe version
 
 try {
 
@@ -32,7 +32,7 @@ for (var p in Locale)
 for (var p in Events)
     FBL[p] = Events[p];
 
-(function() {
+(function() {  // fill 'this' with functions, then apply(FBL)
 
 // ************************************************************************************************
 // Constants

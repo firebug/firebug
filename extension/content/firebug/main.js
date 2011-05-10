@@ -194,7 +194,9 @@ function()
 
     // xxxHonza: the only global should be Firebug object.
     // for extensions compatibility
-    top.FirebugReps = Firebug.Reps;
+    window.FirebugReps = Firebug.Reps;
+    window.domplate = Firebug.Domplate.domplateFunction;
+    Components.utils.reportError("set window.domplate "+window.domplate+" in "+window.location);
 });
 
 // ********************************************************************************************* //

@@ -140,7 +140,7 @@ FirebugChrome =
         if (detachArgs && detachArgs.Firebug)
         {
             // we've been opened in a new window by an already initialized Firebug
-            top.FBL = detachArgs.FBL;
+            window.FBL = detachArgs.FBL;
             Firebug = detachArgs.Firebug;
             Firebug.currentContext = detachArgs.Firebug.currentContext;
         }

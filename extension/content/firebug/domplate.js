@@ -33,7 +33,7 @@ var womb = null;
 var uid = 0;
 
 // xxxHonza: the only global should be Firebug object.
-var domplate = top.domplate = function()
+var domplate = function()
 {
     var lastSubject;
     for (var i = 0; i < arguments.length; ++i)
@@ -1203,6 +1203,7 @@ function defineTags()
 // We need to mark this as deprecated.
 FBL.TAG = Domplate.TAG;
 FBL.FOR = Domplate.FOR;
+Domplate.domplateFunction = domplate;
 
 defineTags(
     "a", "button", "br", "canvas", "col", "colgroup", "div", "fieldset", "form", "h1", "h2",
