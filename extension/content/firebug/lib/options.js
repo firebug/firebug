@@ -93,8 +93,8 @@ var optionUpdateMap = {};
  * Panels send commands to request option change.
  * Backend responds with events when the change is accepted.
  */
-Firebug.Options =
-/** @lends Firebug.Options */
+var Options =
+/** @lends Options */
 {
     getPrefDomain: function()
     {
@@ -106,7 +106,7 @@ Firebug.Options =
         this.prefDomain = prefDomain;
 
         if (FBTrace.DBG_INITIALIZE)
-            FBTrace.sysout("firebug.initialize with prefDomain " + this.prefDomain);
+            FBTrace.sysout("options.initialize with prefDomain " + this.prefDomain);
 
         this.initializePrefs();
     },
@@ -139,13 +139,14 @@ Firebug.Options =
 
     observe: function(subject, topic, data)
     {
-        if (data.indexOf(Firebug.Options.prefDomain) === -1)
+        if (data.indexOf(Options.prefDomain) === -1)
             return;
 
-        var name = data.substr(Firebug.Options.prefDomain.length+1);  // +1 for .
+        var name = data.substr(Options.prefDomain.length+1);  // +1 for .
         var value = this.get(name);
+
         if (FBTrace.DBG_OPTIONS)
-            FBTrace.sysout("firebug.observe name = value: "+name+"= "+value+"\n");
+            FBTrace.sysout("options.observe name = value: "+name+"= "+value+"\n");
 
         this.updatePref(name, value);
     },
@@ -167,7 +168,7 @@ Firebug.Options =
         catch (err)
         {
             if (FBTrace.DBG_OPTIONS || FBTrace.DBG_ERRORS)
-                FBTrace.sysout("firebug.updatePref EXCEPTION:" + err, err);
+                FBTrace.sysout("options.updatePref EXCEPTION:" + err, err);
         }
         finally
         {
@@ -175,7 +176,7 @@ Firebug.Options =
         }
 
         if (FBTrace.DBG_OPTIONS)
-            FBTrace.sysout("firebug.updatePref EXIT: "+name+"="+value+"\n");
+            FBTrace.sysout("options.updatePref EXIT: "+name+"="+value+"\n");
     },
 
     register: function(name, value)
@@ -221,7 +222,7 @@ Firebug.Options =
         {
              for (var i = 0; i < prefNames.length; ++i)
              {
-                FBTrace.sysout("firebug.initialize option "+this.prefDomain+"."+prefNames[i]+"="+
+                FBTrace.sysout("options.initialize option "+this.prefDomain+"."+prefNames[i]+"="+
                     Firebug[prefNames[i]]+"\n");
              }
         }
@@ -229,12 +230,12 @@ Firebug.Options =
 
     togglePref: function(name)
     {
-        this.setPref(Firebug.Options.prefDomain, name, !Firebug[name]);
+        this.setPref(Options.prefDomain, name, !Firebug[name]);
     },
 
     get: function(name)
     {
-        return Firebug.Options.getPref(this.prefDomain, name);
+        return Options.getPref(this.prefDomain, name);
     },
 
     getPref: function(prefDomain, name)
@@ -252,7 +253,7 @@ Firebug.Options =
             value = prefs.getBoolPref(prefName);
 
         if (FBTrace.DBG_OPTIONS)
-            FBTrace.sysout("Firebug.Options.getPref "+prefName+" has type "+
+            FBTrace.sysout("options.getPref "+prefName+" has type "+
                 this.getPreferenceTypeName(type)+" and value "+value);
 
         return value;
@@ -260,7 +261,7 @@ Firebug.Options =
 
     set: function(name, value)
     {
-        Firebug.Options.setPref(Firebug.Options.prefDomain, name, value);
+        Options.setPref(Options.prefDomain, name, value);
     },
 
     /**
@@ -282,14 +283,14 @@ Firebug.Options =
         setTimeout(function delaySavePrefs()
         {
             if (FBTrace.DBG_OPTIONS)
-                FBTrace.sysout("firebug.delaySavePrefs type="+type+" name="+prefName+
+                FBTrace.sysout("options.delaySavePrefs type="+type+" name="+prefName+
                     " value="+value+"\n");
 
             prefs.savePrefFile(null);
         });
 
         if (FBTrace.DBG_OPTIONS)
-            FBTrace.sysout("firebug.setPref type="+type+" name="+prefName+" value="+value+"\n");
+            FBTrace.sysout("options.setPref type="+type+" name="+prefName+" value="+value+"\n");
     },
 
     setPreference: function(prefName, value, type, prefBranch)
@@ -305,7 +306,7 @@ Firebug.Options =
             prefBranch.setBoolPref(prefName, value);
         else if (type == nsIPrefBranch.PREF_INVALID)
         {
-            FBTrace.sysout("firebug.setPref FAILS: Invalid preference "+prefName+" with type "+
+            FBTrace.sysout("options.setPref FAILS: Invalid preference "+prefName+" with type "+
                 type+", check that it is listed in defaults/prefs.js");
 
             return false;
@@ -354,11 +355,12 @@ Firebug.Options =
 
     changeTextSize: function(amt)
     {
-        var newTextSize = Firebug.textSize+amt;
+        var textSize = Options.get("textSize");
+        var newTextSize = textSize + amt;
         if ((newTextSize < 0 && Math.abs(newTextSize) < this.negativeZoomFactors.length) ||
-            (newTextSize >= 0 && Firebug.textSize+amt < this.positiveZoomFactors.length))
+            (newTextSize >= 0 && textSize+amt < this.positiveZoomFactors.length))
         {
-            this.setTextSize(Firebug.textSize+amt);
+            this.setTextSize(textSize+amt);
         }
     },
 
@@ -387,6 +389,7 @@ Firebug.Options =
     {
         if (confirm)
         {
+            // xxxHonza: Options can't be dependent on firebug/lib/locale
             if (!promptService.confirm(null, $STR("Firebug"),
                 $STR("confirmation.Reset_All_Firebug_Options")))
             {
@@ -422,7 +425,7 @@ Firebug.Options =
 // ********************************************************************************************* //
 // Registration
 
-return Firebug.Options;
+return Options;
 
 // ********************************************************************************************* //
 });

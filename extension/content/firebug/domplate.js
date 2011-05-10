@@ -57,7 +57,7 @@ domplate.context = function(context, fn)
     domplate.topContext = lastContext;
 };
 
-Domplate.domplate = domplate;
+Domplate.domplate = FBL.domplate = domplate;
 
 Domplate.TAG = function()
 {
@@ -1203,7 +1203,7 @@ function defineTags()
 // We need to mark this as deprecated.
 FBL.TAG = Domplate.TAG;
 FBL.FOR = Domplate.FOR;
-Domplate.domplateFunction = domplate;
+//Domplate.domplateFunction = domplate;
 
 defineTags(
     "a", "button", "br", "canvas", "col", "colgroup", "div", "fieldset", "form", "h1", "h2",

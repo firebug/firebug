@@ -142,7 +142,7 @@ window.Firebug =
         // Append early registered panels at the end.
         panelTypes.push.apply(panelTypes, tempPanelTypes);
 
-        const tabBrowser = FBL.$("content");
+        var tabBrowser = FBL.$("content");
         if (tabBrowser) // TODO Firebug.TabWatcher
         {
             if (FBTrace.DBG_INITIALIZE)
@@ -151,7 +151,9 @@ window.Firebug =
         }
         else
         {
-            throw new Error("Firebug ERROR no 'content' in "+document.location);
+            // xxxHonza: the content element doesn't have to exist in cases
+            // where Firebug is embedded in another XUL application (e.g. FBTrace).
+            //throw new Error("Firebug ERROR no 'content' in "+document.location);
         }
 
         Firebug.Options.addListener(this);
