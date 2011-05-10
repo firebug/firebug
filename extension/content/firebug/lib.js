@@ -3486,8 +3486,8 @@ var saveShowStackTrace = {};
  */
 this.suspendShowStackTrace = function()
 {
-    saveShowStackTrace = Options.get("showStackTrace");
-    Options.set("showStackTrace", false);
+    saveShowStackTrace = Firebug.showStackTrace;
+    Firebug.showStackTrace = false;
 };
 
 /*
@@ -3495,7 +3495,7 @@ this.suspendShowStackTrace = function()
  */
 this.resumeShowStackTrace = function()
 {
-    Options.set("saveShowStackTrace", saveShowStackTrace);
+    Firebug.showStackTrace = saveShowStackTrace;
 };
 
 // ************************************************************************************************
