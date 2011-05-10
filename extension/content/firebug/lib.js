@@ -18,7 +18,7 @@ function(XPCOM, Locale, Events, Options, Deprecated, Wrapper, URL, SourceLink, S
 
 // ********************************************************************************************* //
 
-var FBL = top.FBL || {};  // legacy.js adds top.FBL, FIXME, remove after iframe version
+var FBL = window.FBL || {};  // legacy.js adds top.FBL, FIXME, remove after iframe version
 
 try {
 

@@ -6,7 +6,7 @@
 // xxxHonza: the only global should be Firebug object, but extensions use FBL
 // to register namespaces (and bindings.xml uses it too). So, FBL must be
 // available before extension's scripts are loaded.
-top.FBL =
+window.FBL =
 {
     namespaces: [],
 

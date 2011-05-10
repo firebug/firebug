@@ -173,24 +173,20 @@ require(config,
     "firebug/commandLineExposed",
     "firebug/consoleExposed"
 ],
-function()
+function(FBL)
 {
     if (FBTrace.DBG_INITIALIZE || FBTrace.DBG_MODULES)
     {
         var delta = (new Date().getTime()) - startLoading;
         FBTrace.sysout("main.js; Firebug modules loaded using RequireJS in "+delta+" ms");
     }
-    // <?xml-stylesheet href="chrome://firebug/content/firebug.css"?>
-   // loadXULCSS("chrome://firebug/content/firebug.css");
-   // Components.utils.reportError("main loaded firebug.css");
     Firebug.Options.initialize("extensions.firebug");
     FirebugChrome.waitForPanelBar(true);
 
     // xxxHonza: the only global should be Firebug object.
     // for extensions compatibility
     window.FirebugReps = Firebug.Reps;
-    //window.domplate = Firebug.Domplate.domplateFunction;
-    //Components.utils.reportError("set window.domplate "+window.domplate+" in "+window.location);
+    window.domplate = Firebug.Domplate.domplateFunction;
 });
 
 // ********************************************************************************************* //
