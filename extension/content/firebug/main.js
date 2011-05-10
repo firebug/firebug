@@ -60,7 +60,7 @@ function getModuleLoaderConfig(baseConfig)
 
             if (this.FBTrace.DBG_ERRORS || this.FBTrace.DBG_MODULES)
                 this.FBTrace.sysout("Loader; Error: "+msg, exc);
-alert("Loader "+msg);
+
             if (exc instanceof Error)
                 throw arguments[0];
             else
