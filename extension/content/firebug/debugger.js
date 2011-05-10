@@ -8,9 +8,11 @@ define([
     "firebug/reps",
     "firebug/lib/locale",
     "firebug/http/requestObserver",
+    "firebug/lib/wrapper",
     "firebug/errors",
 ],
-function(FBL, Firebug, ToolsInterface, XPCOM, FirebugReps, Locale, HttpRequestObserver) {
+function(FBL, Firebug, ToolsInterface, XPCOM, FirebugReps, Locale, HttpRequestObserver,
+    Wrapper) {
 
 // ********************************************************************************************* //
 
@@ -86,7 +88,7 @@ Firebug.Debugger = FBL.extend(Firebug.ActivableModule,
         // be evil and get Components.classes results in a permission denied error.
         var ok = frame.eval(scriptToEval, "", 1, result);
 
-        var value = FBL.unwrapIValue(result.value, Firebug.viewChrome);
+        var value = Wrapper.unwrapIValue(result.value, Firebug.viewChrome);
         if (ok)
             return value;
         else
@@ -103,7 +105,7 @@ Firebug.Debugger = FBL.extend(Firebug.ActivableModule,
 
             var result = {};
             var ok = frame.eval(js, fileName, lineNo, result);
-            var value = FBL.unwrapIValue(result.value, Firebug.viewChrome);
+            var value = Wrapper.unwrapIValue(result.value, Firebug.viewChrome);
             if (ok)
                 return value;
             else
@@ -119,7 +121,7 @@ Firebug.Debugger = FBL.extend(Firebug.ActivableModule,
     // on bti
     getCurrentFrameKeys: function(context)  // TODO remote
     {
-        var globals = FBL.keys(FBL.getContentView(context.getGlobalScope()));  // return is safe
+        var globals = FBL.keys(Wrapper.getContentView(context.getGlobalScope()));  // return is safe
 
         if (context.currentFrame)
             return this.getFrameKeys(context.currentFrame, globals);
@@ -139,7 +141,7 @@ Firebug.Debugger = FBL.extend(Firebug.ActivableModule,
         for (var i = 0; i < lengthValue.value; ++i)
         {
             var prop = listValue.value[i];
-            var name = FBL.unwrapIValue(prop.name);
+            var name = Wrapper.unwrapIValue(prop.name);
             names.push(name);
         }
         return names;
@@ -1078,7 +1080,7 @@ Firebug.Debugger = FBL.extend(Firebug.ActivableModule,
 
             if (type == TYPE_DEBUGGER_KEYWORD)
             {
-                var trace = FBL.getContentView(context.window)._firebugStackTrace;
+                var trace = Wrapper.getContentView(context.window)._firebugStackTrace;
                 if (trace == "console-tracer")
                     return this.debuggerTracer(context, frame);
                 else
@@ -1109,7 +1111,7 @@ Firebug.Debugger = FBL.extend(Firebug.ActivableModule,
                 FBTrace.sysout("debugger.firebugDebuggerTracer dropped tracer trace.frames "+
                     trace.frames.length, trace.frames);
 
-            if (FBL.getContentView(context.window)._firebugStackTrace == "requested")
+            if (Wrapper.getContentView(context.window)._firebugStackTrace == "requested")
             {
                 trace.frames = trace.frames.slice(1);  // drop console.error() see consoleInjected.js
                 if (FBTrace.DBG_ERRORLOG)
@@ -1289,7 +1291,7 @@ Firebug.Debugger = FBL.extend(Firebug.ActivableModule,
 
             if (Firebug.breakOnErrors)
             {
-                var eventOrigin = FBL.unwrapIValue(frame.executionContext.globalObject);
+                var eventOrigin = Wrapper.unwrapIValue(frame.executionContext.globalObject);
                 if (!eventOrigin)
                     return 0;
 
@@ -1297,7 +1299,7 @@ Firebug.Debugger = FBL.extend(Firebug.ActivableModule,
                 var eventOriginIndex = -1;
                 for (var i=0; i<context.windows.length; i++)
                 {
-                    if (FBL.getContentView(context.windows[i]) == eventOrigin) {
+                    if (Wrapper.getContentView(context.windows[i]) == eventOrigin) {
                         eventOriginIndex = i;
                         break;
                     }
@@ -2109,7 +2111,7 @@ Firebug.Debugger = FBL.extend(Firebug.ActivableModule,
 
             if (evaled)
             {
-                var src = FBL.unwrapIValue(result_src.value);
+                var src = Wrapper.unwrapIValue(result_src.value);
                 return src+"";
             }
             else
@@ -2801,7 +2803,7 @@ function getFrameWindow(frame)
     var result = {};
     if (frame.eval("window", "", 1, result))
     {
-        var win = FBL.unwrapIValue(result.value, Firebug.viewChrome);
+        var win = Wrapper.unwrapIValue(result.value, Firebug.viewChrome);
         return FBL.getRootWindow(win);
     }
 }

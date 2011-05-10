@@ -6,8 +6,9 @@ define([
     "firebug/reps",
     "firebug/lib/locale",
     "firebug/lib/events",
+    "firebug/lib/wrapper",
 ],
-function(FBL, Firebug, FirebugReps, Locale, Events) {
+function(FBL, Firebug, FirebugReps, Locale, Events, Wrapper) {
 
 // ************************************************************************************************
 // Constants
@@ -62,7 +63,7 @@ Firebug.Inspector = FBL.extend(Firebug.Module,
         if (!elementArr || !FirebugReps.Arr.isArray(elementArr))
         {
             // highlight a single element
-            if (!elementArr || !FBL.isElement(elementArr) || (FBL.getContentView(elementArr) && !FBL.isVisible(FBL.getContentView(elementArr))) )
+            if (!elementArr || !FBL.isElement(elementArr) || (Wrapper.getContentView(elementArr) && !FBL.isVisible(Wrapper.getContentView(elementArr))) )
             {
                 if(elementArr && elementArr.nodeType == 3)
                     elementArr = elementArr.parentNode;

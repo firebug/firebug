@@ -9,8 +9,10 @@ define([
     "arch/tools",
     "firebug/lib/htmlLib",
     "firebug/lib/events",
+    "firebug/lib/wrapper",
 ],
-function(FBL, Firebug, Domplate, XPCOM, Locale, ToolsInterface, HTMLLib, Events) { with (Domplate) {
+function(FBL, Firebug, Domplate, XPCOM, Locale, ToolsInterface, HTMLLib, Events, Wrapper) {
+with (Domplate) {
 
 // ************************************************************************************************
 // Constants
@@ -1928,7 +1930,7 @@ FirebugReps.Except = domplate(Firebug.Rep,
 
     supportsObject: function(object, type, context)
     {
-        var win = context ? FBL.getContentView(context.window) : null;
+        var win = context ? Wrapper.getContentView(context.window) : null;
         var found = (win && instanceOf(object, win.Error)) || (object instanceof FBL.ErrorCopy) ||
             (object.constructor && object.constructor.name == "ReferenceError");
         return found;

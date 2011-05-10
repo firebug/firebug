@@ -5,8 +5,10 @@ define([
     "firebug/lib/locale",
     "firebug/lib/events",
     "firebug/lib/options",
+    "firebug/lib/deprecated",
+    "firebug/lib/wrapper",
 ],
-function(XPCOM, Locale, Events, Options) {
+function(XPCOM, Locale, Events, Options, Deprecated, Wrapper) {
 
 // ********************************************************************************************* //
 
@@ -14,6 +16,7 @@ var FBL = top.FBL || {};  // legacy.js adds top.FBL, FIXME, remove after iframe 
 
 try {
 
+// ********************************************************************************************* //
 // xxxHonza: removed from 1.8.next
 
 // Inject old fbXPCOMUtils into FBL (for backward compatibility)
@@ -32,15 +35,24 @@ for (var p in Locale)
 for (var p in Events)
     FBL[p] = Events[p];
 
+// Backward compatibility with extensions
+// xxxHonza: mark as obsolete
+for (var p in Wrapper)
+    FBL[p] = Wrapper[p];
+
+FBL.deprecated = Deprecated.deprecated;
+
+// ********************************************************************************************* //
+
 (function() {  // fill 'this' with functions, then apply(FBL)
 
-// ************************************************************************************************
+// ********************************************************************************************* //
 // Constants
 
 const Cc = Components.classes;
 const Ci = Components.interfaces;
 
-// ************************************************************************************************
+// ********************************************************************************************* //
 // Modules
 
 Components.utils["import"]("resource://gre/modules/PluralForm.jsm");
@@ -2236,8 +2248,11 @@ var escapeForCss = this.escapeForCss = createSimpleEscape('css', 'normal');
 // deprecated compatibility functions
 this.deprecateEscapeHTML = createSimpleEscape('text', 'normal');
 this.deprecatedUnescapeHTML = createSimpleEscape('text', 'reverse');
-this.escapeHTML = deprecated("use appropriate escapeFor... function", this.deprecateEscapeHTML);
-this.unescapeHTML = deprecated("use appropriate unescapeFor... function", this.deprecatedUnescapeHTML);
+
+this.escapeHTML = Deprecated.deprecated("use appropriate escapeFor... function",
+    this.deprecateEscapeHTML);
+this.unescapeHTML = Deprecated.deprecated("use appropriate unescapeFor... function",
+    this.deprecatedUnescapeHTML);
 
 var escapeForSourceLine = this.escapeForSourceLine = createSimpleEscape('text', 'normal');
 
@@ -2565,7 +2580,8 @@ this.optionMenu = function(label, option, tooltiptext)
 // ************************************************************************************************
 // Stack Traces
 
-this.getStackTrace = deprecated("name change for self-documentation", this.getCorrectedStackTrace);
+this.getStackTrace = Deprecated.deprecated("name change for self-documentation",
+    this.getCorrectedStackTrace);
 
 /*
  * Converts a Mozilla stack frame to a frameXB
@@ -2770,7 +2786,7 @@ this.StackFrame.prototype =
     getThisValue: function()
     {
         if (this.nativeFrame && !this.thisVar)
-             this.thisVar = FBL.unwrapIValue(this.nativeFrame.thisValue, Firebug.viewChrome);
+             this.thisVar = Wrapper.unwrapIValue(this.nativeFrame.thisValue, Firebug.viewChrome);
         return this.thisVar;
     },
 
@@ -2793,17 +2809,17 @@ this.StackFrame.prototype =
             // in all cases.
             if (scope.jsClassName == "Call")
             {
-                scopeVars = FBL.unwrapIValueObject(scope, viewChrome)
+                scopeVars = Wrapper.unwrapIValueObject(scope, viewChrome)
                 scopeVars.toString = function() {return Locale.$STR("Closure Scope");}
             }
             else if (scope.jsClassName == "Block")
             {
-                scopeVars = FBL.unwrapIValueObject(scope, viewChrome)
+                scopeVars = Wrapper.unwrapIValueObject(scope, viewChrome)
                 scopeVars.toString = function() {return Locale.$STR("Block Scope");}
             }
             else
             {
-                scopeVars = FBL.unwrapIValue(scope, Firebug.viewChrome);
+                scopeVars = Wrapper.unwrapIValue(scope, Firebug.viewChrome);
 
                 if (scopeVars && scopeVars.hasOwnProperty)
                 {
@@ -3166,7 +3182,7 @@ this.getFunctionArgValues = function(frame)
 this.getArgumentsFromObjectScope = function(frame)
 {
     var argNames = frame.script.getParameterNames();
-    var scope = FBL.unwrapIValue(frame.scope, Firebug.viewChrome);
+    var scope = Wrapper.unwrapIValue(frame.scope, Firebug.viewChrome);
 
     var values = [];
 
@@ -3177,7 +3193,7 @@ this.getArgumentsFromObjectScope = function(frame)
         {
             var pvalue = scope[argName];
             //?? XXXjjb why are we unwrapping here, scope is a normal object
-            //var value = pvalue ? FBL.unwrapIValue(pvalue.value) : undefined;
+            //var value = pvalue ? Wrapper.unwrapIValue(pvalue.value) : undefined;
             values.push({name: argName, value: pvalue});
         }
         else
@@ -3198,27 +3214,11 @@ this.getArgumentsFromCallScope = function(frame)
     {
         var argName = argNames[i];
         var pvalue = scope.getProperty(argName); // jsdIValue in jsdIDebuggerService
-        var value = pvalue ? FBL.unwrapIValue(pvalue.value, Firebug.viewChrome) : undefined;
+        var value = pvalue ? Wrapper.unwrapIValue(pvalue.value, Firebug.viewChrome) : undefined;
         values.push({name: argName, value: value});
     }
 
     return values;
-};
-
-this.unwrapIValueObject = function(scope, viewChrome)
-{
-    var scopeVars = {};
-    var listValue = {value: null}, lengthValue = {value: 0};
-    scope.getProperties(listValue, lengthValue);
-
-    for (var i = 0; i < lengthValue.value; ++i)
-    {
-        var prop = listValue.value[i];
-        var name = FBL.unwrapIValue(prop.name);
-        if (!FBL.shouldIgnore(name))
-            scopeVars[name] = FBL.unwrapIValue(prop.value, viewChrome);
-    }
-    return scopeVars;
 };
 
 // ************************************************************************************************
@@ -4334,7 +4334,8 @@ this.getRequestLoadContext = function(request)
     return null;
 };
 
-this.getRequestWebProgress = deprecated("Use getRequestLoadContext function", this.getRequestLoadContext);
+this.getRequestWebProgress = Deprecated.deprecated("Use getRequestLoadContext function",
+    this.getRequestLoadContext);
 
 
 // ************************************************************************************************
@@ -5880,7 +5881,8 @@ this.isDOMConstant = function(object, name)
 
     return domConstantMap.hasOwnProperty(name);
 }
-var isDOMConstantDep = deprecated("isDOMConstant(name) signature changed (object,name)",this.isDOMConstant);
+var isDOMConstantDep = Deprecated.deprecated("isDOMConstant(name) signature changed (object,name)",
+    this.isDOMConstant);
 
 var domConstantMap = this.domConstantMap =
 {
@@ -7317,33 +7319,6 @@ const invisibleTags = this.invisibleTags =
     */
 };
 
-this.ignoreVars =
-{
-    "__firebug__": 1,
-    "eval": 1,
-
-    // We are forced to ignore Java-related variables, because
-    // trying to access them causes browser freeze
-    "java": 1,
-    "sun": 1,
-    "Packages": 1,
-    "JavaArray": 1,
-    "JavaMember": 1,
-    "JavaObject": 1,
-    "JavaClass": 1,
-    "JavaPackage": 1,
-    // internal firebug things XXXjjb todo we should privatize these
-    "_firebug": 1,
-    "_createFirebugConsole": 1,
-    "_FirebugCommandLine": 1,
-    "loadFirebugConsole": 1,
-};
-
-this.shouldIgnore = function(name)
-{
-    return (this.ignoreVars[name] === 1);
-};
-
 // ************************************************************************************************
 // Debug Logging
 
@@ -7366,29 +7341,6 @@ function ddd(text)
     if (consoleService)
         consoleService.logStringMessage(text + "");
 }
-
-this.ddd = ddd;
-
-function deprecated(msg, fnc)
-{
-    return function deprecationWrapper()
-    {
-        if (!this.nagged)
-        {
-            var explain = "Deprecated function, "+msg;
-            if (typeof(FBTrace) !== undefined)
-                FBTrace.sysout(explain, getStackDump());
-
-            var caller = Components.stack.caller;  // drop frame with deprecated()
-            ERROR(explain+" "+ caller.toString());
-
-            this.nagged = true;
-        }
-        return fnc.apply(this, arguments);
-    }
-}
-
-this.deprecated = deprecated;
 
 // ************************************************************************************************
 // Math Utils
@@ -7603,67 +7555,6 @@ this.ReversibleRegExp = function(regex, flags)
         return ret;
     };
 };
-
-// ************************************************************************************************
-// Wrappers
-
-function getContentView(object)
-{
-    if (typeof(object) === 'undefined' || object == null)
-        return false;
-
-    // There is an expception when accessing StorageList.wrappedJSObject (which is
-    // instance of StorageObsolete)
-    if (object instanceof StorageList)
-        return false;
-
-    return (object.wrappedJSObject);
-}
-
-this.getContentView = getContentView;
-
-function unwrapObject(object)
-{
-    // TODO: We might be able to make this check more authoritative with QueryInterface.
-    if (typeof(object) === 'undefined' || object == null)
-        return object;
-
-    // There is an expception when accessing StorageList.wrappedJSObject (which is
-    // instance of StorageObsolete)
-    if (object instanceof StorageList)
-        return object;
-
-    if (object.wrappedJSObject)
-        return object.wrappedJSObject;
-
-    return object;
-}
-
-this.unwrapObject = unwrapObject;
-
-this.unwrapIValue = function(object, viewChrome)
-{
-    var unwrapped = object.getWrappedValue();
-    if (viewChrome)
-        return unwrapped;
-
-    try
-    {
-        // XPCSafeJSObjectWrapper is not defined in Firefox 4.0
-        // this should be the only call to getWrappedValue in firebug
-        if (typeof(XPCSafeJSObjectWrapper) != "undefined")
-            return XPCSafeJSObjectWrapper(unwrapped);
-        else if (typeof(unwrapped) == "object")
-            return XPCNativeWrapper.unwrap(unwrapped);
-        else
-            return unwrapped;
-    }
-    catch (exc)
-    {
-        if (FBTrace.DBG_ERRORS)
-            FBTrace.sysout("unwrapIValue FAILS for "+object+" cause: "+exc,{exc: exc, object: object, unwrapped: unwrapped});
-    }
-}
 
 // ************************************************************************************************
 // URLs

@@ -6,8 +6,9 @@ define([
     "firebug/domplate",
     "firebug/reps",
     "firebug/lib/locale",
+    "firebug/lib/wrapper",
 ],
-function(FBL, Firebug, Domplate, FirebugReps, Locale) {
+function(FBL, Firebug, Domplate, FirebugReps, Locale, Wrapper) {
 
 // ********************************************************************************************* //
 
@@ -245,7 +246,7 @@ Firebug.MemoryProfiler = FBL.extend(Firebug.Module,
     {
         // Iterate all objects of the content window.
         var iter = new ObjectIterator();
-        var contentView = FBL.getContentView(context.window);
+        var contentView = Wrapper.getContentView(context.window);
         iter.iterate(contentView, "window", function(obj, path)
         {
             // We have been here, bail out.
@@ -259,7 +260,7 @@ Firebug.MemoryProfiler = FBL.extend(Firebug.Module,
 
             //if (FBTrace.DBG_MEMORY_PROFILER)
             //    FBTrace.sysout("mark "+path+": "+obj.__fbugMemMark+" view: "+
-            //       FBL.getContentView(obj));
+            //       Wrapper.getContentView(obj));
 
             // Continue with children
             return true;
@@ -271,12 +272,12 @@ Firebug.MemoryProfiler = FBL.extend(Firebug.Module,
         var iter = new ObjectIterator();
         iter.deltaObjects = {};
 
-        var contentView = FBL.getContentView(context.window);
+        var contentView = Wrapper.getContentView(context.window);
         iter.iterate(contentView, "window", function(obj, path)
         {
             //if (FBTrace.DBG_MEMORY_PROFILER)
             //    FBTrace.sysout("sweep "+path+" "+obj.hasOwnProperty("__fbugMemSweep")+" view: "+
-            //        FBL.getContentView(obj), obj);
+            //        Wrapper.getContentView(obj), obj);
 
             if (obj.hasOwnProperty("__fbugMemSweep"))
                 return false;
@@ -304,7 +305,7 @@ Firebug.MemoryProfiler = FBL.extend(Firebug.Module,
     cleanUp: function(context)
     {
         var iter = new ObjectIterator();
-        var contentView = FBL.getContentView(context.window);
+        var contentView = Wrapper.getContentView(context.window);
         iter.iterate(contentView, "window", function(obj, path)
         {
             if (!obj.hasOwnProperty("__fbugMemSweep"))
@@ -750,7 +751,7 @@ Firebug.MemoryProfiler.ProfileCall = domplate(Firebug.Rep,
 
     getContextMenuItems: function(call, target, context)
     {
-        var fn = FBL.unwrapIValue(call.script.functionObject);
+        var fn = Wrapper.unwrapIValue(call.script.functionObject);
         return FirebugReps.Func.getContextMenuItems(fn, call.script, context);
     }
 });

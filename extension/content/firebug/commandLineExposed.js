@@ -3,8 +3,9 @@
 define([
     "firebug/lib",
     "firebug/firebug",
+    "firebug/lib/wrapper",
 ],
-function(FBL) {
+function(FBL, Firebug, Wrapper) {
 
 // ********************************************************************************************* //
 // Command Line APIs
@@ -19,7 +20,7 @@ function(FBL) {
  */
 function createFirebugCommandLine(context, win)
 {
-    var contentView = FBL.getContentView(win);
+    var contentView = Wrapper.getContentView(win);
     if (!contentView)
     {
         if (FBTrace.DBG_COMMANDLINE || FBTrace.DBG_ERRORS)

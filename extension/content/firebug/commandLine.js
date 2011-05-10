@@ -6,10 +6,11 @@ define([
     "firebug/reps",
     "firebug/lib/locale",
     "firebug/lib/events",
+    "firebug/lib/wrapper",
     "firebug/console",
     "firebug/commandLineExposed"
 ],
-function(FBL, Firebug, FirebugReps, Locale, Events) {
+function(FBL, Firebug, FirebugReps, Locale, Events, Wrapper) {
 
 // ************************************************************************************************
 // Constants
@@ -761,7 +762,7 @@ Firebug.CommandLine = FBL.extend(Firebug.Module,
                 Firebug.CommandLine.injector.attachCommandLine(context, context.windows[i]);
         }
 
-        var contentView = FBL.getContentView(context.window);
+        var contentView = Wrapper.getContentView(context.window);
         if (!contentView)
         {
             if (FBTrace.DBG_ERRORS)
@@ -1029,7 +1030,7 @@ Firebug.CommandLine.CommandHandler = FBL.extend(Object,
         var methodName = win.document.getUserData("firebug-methodName");
 
         // We create this array in the page using JS, so we need to look on the wrappedJSObject for it.
-        var contentView = FBL.getContentView(win);
+        var contentView = Wrapper.getContentView(win);
         if (contentView)
             var hosed_userObjects = contentView._FirebugCommandLine.userObjects;
 
@@ -1962,7 +1963,7 @@ function autoCompleteEval(preExpr, expr, postExpr, context, spreExpr)
                 return Firebug.Debugger.getCurrentFrameKeys(context);
 
             // Cross window type pseudo-comparison
-            var contentView = FBL.getContentView(context.window);
+            var contentView = Wrapper.getContentView(context.window);
             if (contentView && contentView.Window &&
                 contentView.constructor.toString() === contentView.Window.toString())
             {
@@ -2068,18 +2069,18 @@ function FirebugCommandLineAPI(context)
 {
     this.$ = function(id)  // returns unwrapped elements from the page
     {
-        return FBL.unwrapObject(context.baseWindow.document).getElementById(id);
+        return Wrapper.unwrapObject(context.baseWindow.document).getElementById(id);
     };
 
     this.$$ = function(selector) // returns unwrapped elements from the page
     {
-        var result = FBL.unwrapObject(context.baseWindow.document).querySelectorAll(selector);
+        var result = Wrapper.unwrapObject(context.baseWindow.document).querySelectorAll(selector);
         return FBL.cloneArray(result);
     };
 
     this.$x = function(xpath) // returns unwrapped elements from the page
     {
-        return FBL.getElementsByXPath(FBL.unwrapObject(context.baseWindow.document), xpath);
+        return FBL.getElementsByXPath(Wrapper.unwrapObject(context.baseWindow.document), xpath);
     };
 
     this.$n = function(index) // values from the extension space
@@ -2095,7 +2096,7 @@ function FirebugCommandLineAPI(context)
         if (!node)
             return node;
 
-        return FBL.unwrapObject(node);
+        return Wrapper.unwrapObject(node);
     };
 
     this.cd = function(object)
@@ -2376,7 +2377,7 @@ Firebug.CommandLine.injector =
 {
     isAttached: function(win)
     {
-        var contentView = FBL.getContentView(win);
+        var contentView = Wrapper.getContentView(win);
         return contentView._FirebugCommandLine ? true : false;
     },
 
@@ -2389,7 +2390,7 @@ Firebug.CommandLine.injector =
             if (this.isAttached(win))
                 return;
 
-            var contentView = FBL.getContentView(win);
+            var contentView = Wrapper.getContentView(win);
             contentView._FirebugCommandLine =
                 Firebug.CommandLineExposed.createFirebugCommandLine(context, win);
 
@@ -2420,7 +2421,7 @@ Firebug.CommandLine.injector =
 
             //Firebug.CommandLine.evaluate("window._FirebugCommandLine.detachCommandLine()",
             //    context, null, win, null, failureCallback );
-            var contentView = FBL.getContentView(win);
+            var contentView = Wrapper.getContentView(win);
             contentView._FirebugCommandLine.detachCommandLine();
 
             this.removeCommandLineListener(context, win);
@@ -2499,7 +2500,7 @@ function CommandLineHandler(context, win)
                 return function() {
                     if (FBTrace.DBG_COMMANDLINE)
                         FBTrace.sysout("commandLine.getInspectorHistory: " + p, vars);
-                    return FBL.unwrapObject(vars[p]);
+                    return Wrapper.unwrapObject(vars[p]);
                 }
             }
             this.api[prop] = createHandler(prop);  // XXXjjb should these be removed?

@@ -2,7 +2,8 @@
 
 define([
     "firebug/lib/events",
-], function(Events) {
+],
+function(Events) {
 
 // ********************************************************************************************* //
 // Constants

@@ -6,8 +6,9 @@ define([
     "firebug/reps",
     "arch/tools",
     "firebug/lib/events",
+    "firebug/lib/wrapper",
 ],
-function(FBL, Firebug, FirebugReps, ToolsInterface, Events) {
+function(FBL, Firebug, FirebugReps, ToolsInterface, Events, Wrapper) {
 
 // ************************************************************************************************
 // Constants
@@ -340,14 +341,14 @@ function getReferents(frame, fnName)
             try
             {
                 var fn = result.value.getWrappedValue();
-                var thisObject = FBL.unwrapIValueObject(frame.thisValue, Firebug.viewChrome);
+                var thisObject = Wrapper.unwrapIValueObject(frame.thisValue, Firebug.viewChrome);
                 var referents = findObjectPropertyPath("this", thisObject, fn, []);
 
                 if (FBTrace.DBG_STACK)
                     FBTrace.sysout("Firebug.Debugger.showReferents found from thisObject "+
                         referents.length, {thisObject: thisObject, fn: fn, referents: referents});
 
-                var containingScope = FBL.unwrapIValueObject(result.value.jsParent, Firebug.viewwChrome);
+                var containingScope = Wrapper.unwrapIValueObject(result.value.jsParent, Firebug.viewwChrome);
 
                 if (FBTrace.DBG_STACK)
                     FBTrace.sysout("Firebug.Debugger.showReferents containingScope from "+

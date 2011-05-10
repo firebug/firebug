@@ -10,8 +10,9 @@ define([
     "firebug/lib/options",
     "firebug/lib/locale",
     "firebug/lib/events",
+    "firebug/lib/wrapper",
 ],
-function(FBL, Domplate, Options, Locale, Events) {
+function(FBL, Domplate, Options, Locale, Events, Wrapper) {
 
 // ********************************************************************************************* //
 // Constants
@@ -664,7 +665,7 @@ window.Firebug =
     {
         if (objectChromeView)
         {
-            var contentView = FBL.getContentView(objectChromeView);
+            var contentView = Wrapper.getContentView(objectChromeView);
             return (contentView && contentView.firebugIgnore);
         }
         // else don't ignore things we don't understand
@@ -674,7 +675,7 @@ window.Firebug =
     {
         if (objectChromeView)
         {
-            var contentView = FBL.getContentView(objectChromeView);
+            var contentView = Wrapper.getContentView(objectChromeView);
             if (contentView)
                 contentView.firebugIgnore = true;
         }

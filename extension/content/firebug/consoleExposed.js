@@ -4,9 +4,10 @@ define([
     "firebug/lib",
     "firebug/reps",
     "firebug/lib/locale",
+    "firebug/lib/wrapper",
     "firebug/errors",
 ],
-function(FBL, FirebugReps, Locale) {
+function(FBL, FirebugReps, Locale, Wrapper) {
 
 // ********************************************************************************************* //
 
@@ -73,9 +74,9 @@ function createFirebugConsole(context, win)
 
     console.dirxml = function dirxml(o)
     {
-        if (o instanceof FBL.getContentView(win).Window)
+        if (o instanceof Wrapper.getContentView(win).Window)
             o = o.document.documentElement;
-        else if (o instanceof FBL.getContentView(win).Document)
+        else if (o instanceof Wrapper.getContentView(win).Document)
             o = o.documentElement;
 
         Firebug.Console.log(o, context, "dirxml", Firebug.HTMLPanel.SoloElement);
@@ -84,7 +85,7 @@ function createFirebugConsole(context, win)
 
     console.trace = function firebugDebuggerTracer()
     {
-        var unwrapped = FBL.unwrapObject(win);
+        var unwrapped = Wrapper.unwrapObject(win);
         unwrapped.top._firebugStackTrace = "console-tracer";
         debugger;
         delete unwrapped.top._firebugStackTrace;

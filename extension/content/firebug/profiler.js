@@ -6,9 +6,10 @@ define([
     "firebug/domplate",
     "firebug/reps",
     "firebug/lib/locale",
+    "firebug/lib/wrapper",
     "arch/tools"
 ],
-function(FBL, Firebug, Domplate, FirebugReps, Locale, ToolsInterface) {
+function(FBL, Firebug, Domplate, FirebugReps, Locale, Wrapper, ToolsInterface) {
 
 // ************************************************************************************************
 // Profiler
@@ -442,7 +443,7 @@ Firebug.Profiler.ProfileCall = domplate(Firebug.Rep,
 
     getContextMenuItems: function(call, target, context)
     {
-        var fn = FBL.unwrapIValue(call.script.functionObject);
+        var fn = Wrapper.unwrapIValue(call.script.functionObject);
         return FirebugReps.Func.getContextMenuItems(fn, call.script, context);
     }
 });

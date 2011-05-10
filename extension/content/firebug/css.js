@@ -8,12 +8,14 @@ define([
     "firebug/lib/xpcom",
     "firebug/lib/locale",
     "firebug/lib/events",
+    "firebug/lib/wrapper",
     "firebug/editor",
     "firebug/editorSelector",
     "firebug/infotip",
     "firebug/search",
 ],
-function(FBL, Firebug, Domplate, FirebugReps, XPCOM, Locale, Events) { with (Domplate) {
+function(FBL, Firebug, Domplate, FirebugReps, XPCOM, Locale, Events, Wrapper) {
+with (Domplate) {
 
 // ************************************************************************************************
 // Constants
@@ -1115,7 +1117,7 @@ Firebug.CSSStyleSheetPanel.prototype = FBL.extend(Firebug.Panel,
             // default stylesheet that is used in case there is no other stylesheet
             // on the page.
             var shouldIgnore = Firebug.shouldIgnore(styleSheet.ownerNode);
-            var contentView = FBL.getContentView(styleSheet);
+            var contentView = Wrapper.getContentView(styleSheet);
             var isDefault = contentView && contentView.defaultStylesheet;
             if (!shouldIgnore || isDefault)
             {
@@ -2402,7 +2404,7 @@ CSSRuleEditor.prototype = domplate(Firebug.InlineEditor.prototype,
                 // are expected.
                 var doc = this.panel.context.window.document;
                 var style = FBL.appendStylesheet(doc, "chrome://firebug/default-stylesheet.css");
-                FBL.getContentView(style).defaultStylesheet = true;
+                Wrapper.getContentView(style).defaultStylesheet = true;
                 this.panel.location = styleSheet = style.sheet;
             }
             styleSheet = styleSheet.editStyleSheet ? styleSheet.editStyleSheet.sheet : styleSheet;

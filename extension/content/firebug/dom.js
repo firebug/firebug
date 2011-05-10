@@ -8,11 +8,13 @@ define([
     "firebug/lib/locale",
     "arch/tools",
     "firebug/lib/events",
+    "firebug/lib/wrapper",
     "firebug/editor",
     "firebug/breakpoint",
     "firebug/search",
 ],
-function(FBL, Firebug, Domplate, FirebugReps, Locale, ToolsInterface, Events) { with (Domplate) {
+function(FBL, Firebug, Domplate, FirebugReps, Locale, ToolsInterface, Events, Wrapper) {
+with (Domplate) {
 
 // ************************************************************************************************
 // Constants
@@ -386,7 +388,7 @@ Firebug.DOMBasePanel.prototype = FBL.extend(Firebug.Panel,
     {
         if (!Firebug.viewChrome)
         {
-            var contentView = FBL.getContentView(object);
+            var contentView = Wrapper.getContentView(object);
             if (!contentView && FBTrace.DBG_DOM)
                 FBTrace.sysout("getObjectView: no contentView for "+object);
             return contentView || object;
@@ -488,10 +490,10 @@ Firebug.DOMBasePanel.prototype = FBL.extend(Firebug.Panel,
                 var name = properties[i];
 
                 // Ignore only global variables (properties of the |window| object).
-                if (FBL.shouldIgnore(name) && (object instanceof Window))
+                if (Wrapper.shouldIgnore(name) && (object instanceof Window))
                 {
                     if (FBTrace.DBG_DOM)
-                        FBTrace.sysout("dom.getMembers: FBL.ignoreVars: " + name + ", " + level, object);
+                        FBTrace.sysout("dom.getMembers: Wrapper.ignoreVars: " + name + ", " + level, object);
                     continue;
                 }
 
@@ -2262,7 +2264,7 @@ DOMBreakpointGroup.prototype = FBL.extend(new Firebug.Breakpoint.BreakpointGroup
         {
             try
             {
-                var contentView = FBL.getContentView(context.window);
+                var contentView = Wrapper.getContentView(context.window);
                 bp.object = contentView[bp.objectPath];
                 bp.context = context;
                 bp.watchProperty();
