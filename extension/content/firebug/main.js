@@ -140,16 +140,10 @@ if (FBTrace.DBG_INITIALIZE || FBTrace.DBG_MODULES)
 
 require(config,
 [
-    "firebug/lib",
-    "firebug/domplate",
-    "firebug/firebug",
-    "firebug/lib/options",
-    "arch/tools",
     "arch/firebugadapter",
     "firebug/debugger",
     "arch/javascripttool",
     "firebug/traceModule",
-    "firebug/lib/xpcom",
     "firebug/dragdrop",
     "firebug/tabWatcher",
     "firebug/sourceBox",
