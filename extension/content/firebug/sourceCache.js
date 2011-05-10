@@ -3,9 +3,10 @@
 define([
     "firebug/lib",
     "firebug/firebug",
-    "firebug/lib/xpcom"
+    "firebug/lib/xpcom",
+    "firebug/lib/url",
 ],
-function(FBL, Firebug, XPCOM) {
+function(FBL, Firebug, XPCOM, URL) {
 
 // ************************************************************************************************
 // Constants
@@ -76,7 +77,7 @@ Firebug.SourceCache.prototype = FBL.extend(new Firebug.Listener(),
             FBTrace.sysout("sourceCache.load: Not in the Firebug internal cache", urls);
         }
 
-        var d = FBL.splitDataURL(url);  //TODO the RE should not have baseLine
+        var d = URL.splitDataURL(url);  //TODO the RE should not have baseLine
         if (d)
         {
             var src = d.encodedContent;

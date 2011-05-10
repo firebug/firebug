@@ -9,10 +9,11 @@ define([
     "firebug/lib/locale",
     "firebug/http/requestObserver",
     "firebug/lib/wrapper",
+    "firebug/lib/url",
     "firebug/errors",
 ],
 function(FBL, Firebug, ToolsInterface, XPCOM, FirebugReps, Locale, HttpRequestObserver,
-    Wrapper) {
+    Wrapper, URL) {
 
 // ********************************************************************************************* //
 
@@ -1471,7 +1472,7 @@ Firebug.Debugger = FBL.extend(Firebug.ActivableModule,
         delete this.breakContext;
 
         var script = frame.script;
-        var creatorURL = FBL.normalizeURL(frame.script.fileName);
+        var creatorURL = URL.normalizeURL(frame.script.fileName);
         var innerScriptArray = [];
         try {
             var source = script.functionSource;
@@ -1490,7 +1491,7 @@ Firebug.Debugger = FBL.extend(Firebug.ActivableModule,
 
         var lines = FBL.splitLines(source);
 
-        var urlDescribed = this.getDynamicURL(context, FBL.normalizeURL(frame.script.fileName), lines, "event");
+        var urlDescribed = this.getDynamicURL(context, URL.normalizeURL(frame.script.fileName), lines, "event");
         var url = urlDescribed.href;
 
         context.sourceCache.invalidate(url);
@@ -1527,7 +1528,7 @@ Firebug.Debugger = FBL.extend(Firebug.ActivableModule,
 
         // This is our only chance to get the linetable for the outerScript since it will run and be GC next.
         var script = frame.script;
-        var url = FBL.normalizeURL(script.fileName);
+        var url = URL.normalizeURL(script.fileName);
 
         if (FBTrace.DBG_TOPLEVEL)
             FBTrace.sysout("debugger.onTopLevelScriptCreated frame.script.tag="+frame.script.tag+
@@ -1810,7 +1811,7 @@ Firebug.Debugger = FBL.extend(Firebug.ActivableModule,
         if (FBTrace.DBG_EVAL)
             FBTrace.sysout("createSourceFileForFunctionConstructor source:"+source+"\n");
 
-        var url = this.getDynamicURL(context, FBL.normalizeURL(caller_frame.script.fileName), source, "Function");
+        var url = this.getDynamicURL(context, URL.normalizeURL(caller_frame.script.fileName), source, "Function");
 
         var lines = context.sourceCache.store(url.href, source);
         var sourceFile = new Firebug.FunctionConstructorSourceFile(url, caller_frame.script, ctor_expr, lines.length);
@@ -1889,7 +1890,7 @@ Firebug.Debugger = FBL.extend(Firebug.ActivableModule,
             FBTrace.sysout("getEvalLevelSourceFile "+lines.length+ "lines, mapType:"+
                 ((mapType==PCMAP_SOURCETEXT)?"SOURCE":"PRETTY")+" source:"+source+"\n");
 
-        var url = this.getDynamicURL(context, FBL.normalizeURL(frame.script.fileName), lines, "eval");
+        var url = this.getDynamicURL(context, URL.normalizeURL(frame.script.fileName), lines, "eval");
 
         context.sourceCache.invalidate(url.href);
         context.sourceCache.storeSplitLines(url.href, lines);
@@ -2023,7 +2024,7 @@ Firebug.Debugger = FBL.extend(Firebug.ActivableModule,
     {
         var expr = this.getEvalExpressionFromEval(frame, context);  // eval in eval
 
-        return (expr) ? expr : this.getEvalExpressionFromFile(FBL.normalizeURL(frame.script.fileName),
+        return (expr) ? expr : this.getEvalExpressionFromFile(URL.normalizeURL(frame.script.fileName),
             frame.script.baseLineNumber, context);
     },
 
@@ -2277,7 +2278,7 @@ Firebug.Debugger = FBL.extend(Firebug.ActivableModule,
             if (!win.document.documentElement)
                 return;
 
-            var url = FBL.normalizeURL(win.location.href);
+            var url = URL.normalizeURL(win.location.href);
 
             if (url)
             {
@@ -2301,8 +2302,8 @@ Firebug.Debugger = FBL.extend(Firebug.ActivableModule,
             for (var i = 0; i < scripts.length; ++i)
             {
                 var scriptSrc = scripts[i].getAttribute('src'); // for XUL use attribute
-                var url = scriptSrc ? FBL.absoluteURL(scriptSrc, baseUrl) : win.location.href;
-                url = FBL.normalizeURL(url ? url : win.location.href);
+                var url = scriptSrc ? URL.absoluteURL(scriptSrc, baseUrl) : win.location.href;
+                url = URL.normalizeURL(url ? url : win.location.href);
                 var added = addFile(url, i, (scriptSrc?win.location.href:null));
 
                 if (FBTrace.DBG_SOURCEFILES)
@@ -2364,7 +2365,7 @@ Firebug.Debugger = FBL.extend(Firebug.ActivableModule,
 
         FBL.jsd.enumerateScripts({enumerateScript: function(script)
         {
-            if (FBL.normalizeURL(script.fileName) === location)
+            if (URL.normalizeURL(script.fileName) === location)
             {
                 var sourceFile = Firebug.SourceFile.getSourceFileByScript(context, script);
                 FBTrace.sysout('debugger.watchScriptAdditions '+script.tag+" in "+
@@ -2400,7 +2401,7 @@ Firebug.Debugger = FBL.extend(Firebug.ActivableModule,
 
             // If the src is not in the source map, try to use absolute url.
             if (!context.sourceFileMap[src])
-                src = FBL.absoluteURL(src, win.location.href);
+                src = URL.absoluteURL(src, win.location.href);
 
             delete context.sourceFileMap[src];
 

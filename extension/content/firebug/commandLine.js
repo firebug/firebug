@@ -7,10 +7,11 @@ define([
     "firebug/lib/locale",
     "firebug/lib/events",
     "firebug/lib/wrapper",
+    "firebug/lib/url",
     "firebug/console",
     "firebug/commandLineExposed"
 ],
-function(FBL, Firebug, FirebugReps, Locale, Events, Wrapper) {
+function(FBL, Firebug, FirebugReps, Locale, Events, Wrapper, URL) {
 
 // ************************************************************************************************
 // Constants
@@ -360,7 +361,7 @@ Firebug.CommandLine = FBL.extend(Firebug.Module,
             exceptionFunction(e, context);
 
             result = new FBL.ErrorMessage("commandLine.evaluateInSandbox FAILED: " + e,
-                FBL.getDataURLForContent(scriptToEval, "FirebugCommandLineEvaluate"),
+                URL.getDataURLForContent(scriptToEval, "FirebugCommandLineEvaluate"),
                 e.lineNumber, 0, "js", context, null);
         }
         return result;

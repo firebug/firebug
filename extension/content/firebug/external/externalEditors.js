@@ -4,9 +4,10 @@ define([
     "firebug/lib",
     "firebug/firebug",
     "firebug/lib/locale",
-    "firebug/lib/xpcom"
+    "firebug/lib/xpcom",
+    "firebug/lib/url",
 ],
-function(FBL, Firebug, Locale, XPCOM) {
+function(FBL, Firebug, Locale, XPCOM, URL) {
 
 // ********************************************************************************************* //
 // Constants
@@ -336,7 +337,7 @@ Firebug.ExternalEditors = FBL.extend(Firebug.Module,
 
     getLocalSourceFile: function(context, href)
     {
-        var filePath = FBL.getLocalOrSystemPath(href)
+        var filePath = URL.getLocalOrSystemPath(href)
         if (filePath)
             return filePath;
 

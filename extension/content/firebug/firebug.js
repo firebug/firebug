@@ -11,8 +11,9 @@ define([
     "firebug/lib/locale",
     "firebug/lib/events",
     "firebug/lib/wrapper",
+    "firebug/lib/url",
 ],
-function(FBL, Domplate, Options, Locale, Events, Wrapper) {
+function(FBL, Domplate, Options, Locale, Events, Wrapper, URL) {
 
 // ********************************************************************************************* //
 // Constants
@@ -2140,7 +2141,7 @@ Firebug.Panel = FBL.extend(new Firebug.Listener(),
     getObjectDescription: function(object)
     {
         var url = this.getObjectLocation(object);
-        return FBL.splitURLBase(url);
+        return URL.splitURLBase(url);
     },
 
     /*

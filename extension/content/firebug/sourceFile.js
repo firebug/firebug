@@ -2,9 +2,10 @@
 
 define([
     "firebug/lib",
-    "firebug/firebug"
+    "firebug/firebug",
+    "firebug/lib/url",
 ],
-function(FBL, Firebug) {
+function(FBL, Firebug, URL) {
 
 // ********************************************************************************************* //
 // Constants
@@ -336,7 +337,7 @@ Firebug.SourceFile.prototype =
      // return.path: group/category label, return.name: item label
      getObjectDescription: function()
      {
-         return FBL.splitURLBase(this.href);
+         return URL.splitURLBase(this.href);
      },
 
      isEval: function()
@@ -487,7 +488,7 @@ Firebug.EvalLevelSourceFile.prototype =
     getObjectDescription: function()
     {
         if (this.hrefKind == "source" || this.hrefKind == "data")
-            return FBL.splitURLBase(this.href);
+            return URL.splitURLBase(this.href);
 
         if (!this.summary)
         {
@@ -502,7 +503,7 @@ Firebug.EvalLevelSourceFile.prototype =
                     Firebug.SourceFile.summarizeSourceLineArray(this.source, 120 - this.summary.length);
         }
 
-        var containingFileDescription = FBL.splitURLBase(this.containingURL);
+        var containingFileDescription = URL.splitURLBase(this.containingURL);
 
         if (FBTrace.DBG_SOURCEFILES)
             FBTrace.sysout("EvalLevelSourceFile this.evalExpression.substr(0, 240):"+
@@ -576,7 +577,7 @@ Firebug.EventSourceFile.prototype = FBL.descend(new Firebug.SourceFile("event"),
         if (!this.summary)
              this.summary = Firebug.SourceFile.summarizeSourceLineArray(this.source, 120);
 
-        var containingFileDescription = FBL.splitURLBase(this.containingURL);
+        var containingFileDescription = URL.splitURLBase(this.containingURL);
 
         return {path: containingFileDescription.path, name: containingFileDescription.name+"/event: "+this.summary };
     },
@@ -667,13 +668,13 @@ Firebug.TopLevelSourceFile.OuterScriptAnalyzer =
     // Interpret frame to give fn(args)
     getFunctionDescription: function(script, context, frame)
     {
-        var file_name = FBL.getFileName(FBL.normalizeURL(script.fileName)); // this is more useful that just "top_level"
+        var file_name = URL.getFileName(URL.normalizeURL(script.fileName)); // this is more useful that just "top_level"
         file_name = file_name ? file_name: "__top_level__";
         return {name: file_name, args: []};
     },
     getSourceLinkForScript: function (script)
     {
-        return FBL.SourceLink(FBL.normalizeURL(script.fileName), script.baseLineNumber, "js")
+        return FBL.SourceLink(URL.normalizeURL(script.fileName), script.baseLineNumber, "js")
     }
 }
 

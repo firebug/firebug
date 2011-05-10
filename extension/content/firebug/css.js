@@ -9,12 +9,13 @@ define([
     "firebug/lib/locale",
     "firebug/lib/events",
     "firebug/lib/wrapper",
+    "firebug/lib/url",
     "firebug/editor",
     "firebug/editorSelector",
     "firebug/infotip",
     "firebug/search",
 ],
-function(FBL, Firebug, Domplate, FirebugReps, XPCOM, Locale, Events, Wrapper) {
+function(FBL, Firebug, Domplate, FirebugReps, XPCOM, Locale, Events, Wrapper, URL) {
 with (Domplate) {
 
 // ************************************************************************************************
@@ -692,7 +693,7 @@ Firebug.CSSStyleSheetPanel.prototype = FBL.extend(Firebug.Panel,
         if (!styleSheet)
             return [];
 
-        var isSystemSheet = FBL.isSystemStyleSheet(styleSheet);
+        var isSystemSheet = URL.isSystemStyleSheet(styleSheet);
 
         function appendRules(cssRules)
         {
@@ -1140,7 +1141,7 @@ Firebug.CSSStyleSheetPanel.prototype = FBL.extend(Firebug.Panel,
                 warning, FBL.bind(this.insertRule, this));
         }
 
-        this.showToolbarButtons("fbCSSButtons", !FBL.isSystemStyleSheet(this.location));
+        this.showToolbarButtons("fbCSSButtons", !URL.isSystemStyleSheet(this.location));
 
         Events.dispatch(this.fbListeners, "onCSSRulesAdded", [this, this.panelNode]);
 
@@ -1284,7 +1285,7 @@ Firebug.CSSStyleSheetPanel.prototype = FBL.extend(Firebug.Panel,
                     command: FBL.bindFixed(this.editElementStyle, this) }
             );
         }
-        else if (!FBL.isSystemStyleSheet(this.selection))
+        else if (!URL.isSystemStyleSheet(this.selection))
         {
             items.push(
                     "-",
@@ -1366,7 +1367,7 @@ Firebug.CSSStyleSheetPanel.prototype = FBL.extend(Firebug.Panel,
                         var rule = Firebug.getRepObject(target);
                         var baseURL = this.getStylesheetURL(rule);
                         var relURL = parseURLValue(cssValue.value);
-                        var absURL = FBL.isDataURL(relURL) ? relURL : FBL.absoluteURL(relURL, baseURL);
+                        var absURL = URL.isDataURL(relURL) ? relURL : URL.absoluteURL(relURL, baseURL);
                         var repeat = parseRepeatValue(text);
 
                         this.infoTipType = "image";
@@ -1411,7 +1412,7 @@ Firebug.CSSStyleSheetPanel.prototype = FBL.extend(Firebug.Panel,
             if (styleSheets.length)
             {
                 var sheet = styleSheets[0];
-                return (Firebug.filterSystemURLs && FBL.isSystemURL(FBL.getURLForStyleSheet(sheet))) ? null : sheet;
+                return (Firebug.filterSystemURLs && URL.isSystemURL(FBL.getURLForStyleSheet(sheet))) ? null : sheet;
             }
         }
         catch (exc)
@@ -1426,7 +1427,7 @@ Firebug.CSSStyleSheetPanel.prototype = FBL.extend(Firebug.Panel,
         var url = FBL.getURLForStyleSheet(styleSheet);
         var instance = FBL.getInstanceForStyleSheet(styleSheet);
 
-        var baseDescription = FBL.splitURLBase(url);
+        var baseDescription = URL.splitURLBase(url);
         if (instance) {
           baseDescription.name = baseDescription.name + " #" + (instance + 1);
         }
@@ -1712,7 +1713,7 @@ CSSElementPanel.prototype = FBL.extend(Firebug.CSSStyleSheetPanel.prototype,
                 {
                     var rule = XPCOM.QI(inspectedRules.GetElementAt(i), nsIDOMCSSStyleRule);
 
-                    var isSystemSheet = FBL.isSystemStyleSheet(rule.parentStyleSheet);
+                    var isSystemSheet = URL.isSystemStyleSheet(rule.parentStyleSheet);
                     if (!Firebug.showUserAgentCSS && isSystemSheet) // This removes user agent rules
                         continue;
 

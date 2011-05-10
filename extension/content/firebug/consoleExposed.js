@@ -5,9 +5,10 @@ define([
     "firebug/reps",
     "firebug/lib/locale",
     "firebug/lib/wrapper",
+    "firebug/lib/url",
     "firebug/errors",
 ],
-function(FBL, FirebugReps, Locale, Wrapper) {
+function(FBL, FirebugReps, Locale, Wrapper, URL) {
 
 // ********************************************************************************************* //
 
@@ -342,7 +343,7 @@ function createFirebugConsole(context, win)
             FBTrace.sysout("consoleInjector.getComponentsStackDump initial stack for userURL "+userURL, frame);
 
         // Drop frames until we get into user code.
-        while (frame && FBL.isSystemURL(frame.filename) )
+        while (frame && URL.isSystemURL(frame.filename) )
             frame = frame.caller;
 
         // Drop two more frames, the injected console function and firebugAppendConsole()

@@ -7,10 +7,11 @@ define([
     "firebug/lib/locale",
     "arch/tools",
     "firebug/lib/events",
+    "firebug/lib/url",
     "firebug/console",
     "firebug/infotip",
 ],
-function(FBL, Firebug, Domplate, Locale, ToolsInterface, Events) {
+function(FBL, Firebug, Domplate, Locale, ToolsInterface, Events, URL) {
 
 // ************************************************************************************************
 // Constants
@@ -2010,7 +2011,7 @@ Firebug.A11yModel = FBL.extend(Firebug.Module,
         viewport.setAttribute('role', 'textbox');
         viewport.setAttribute('aria-multiline', 'true');
         viewport.setAttribute('aria-readonly', 'true');
-        fileName = FBL.getFileName(file.href);
+        fileName = URL.getFileName(file.href);
         viewport.setAttribute('aria-label', Locale.$STRF('a11y.labels.source code for file', [fileName]));
         //bit ugly, but not sure how else I can get the caret into the sourcebox without a mouse
         var focusElem = Firebug.chrome.window.document.commandDispatcher.focusedElement;
@@ -2123,7 +2124,7 @@ Firebug.A11yModel = FBL.extend(Firebug.Module,
         {
             var line = sourceBox.getLine(panel.context, lineNo + 1);
             if (!line) line = "";
-            matchFeedback = Locale.$STRF("a11y.updates.match found for on line", [text, lineNo + 1, FBL.getFileName(sourceBox.href)]);
+            matchFeedback = Locale.$STRF("a11y.updates.match found for on line", [text, lineNo + 1, URL.getFileName(sourceBox.href)]);
         }
         this.updateLiveElem(panel, matchFeedback, true);
     },
@@ -2389,7 +2390,7 @@ Firebug.A11yModel = FBL.extend(Firebug.Module,
             if (parentRow && parentRow.repObject)
             {
                 var file = parentRow.repObject;
-                var href =  (file.method ? file.method.toUpperCase() : "?") + " " + FBL.getFileName(file.href);
+                var href =  (file.method ? file.method.toUpperCase() : "?") + " " + URL.getFileName(file.href);
                 matchFeedback = Locale.$STRF("a11y.updates.match found in net row",[text, href, foundWhere, row.textContent]);
             }
             else if (FBL.getAncestorByClass(row, "netSummaryRow"))

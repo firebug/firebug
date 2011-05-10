@@ -10,6 +10,7 @@ define([
     "firebug/lib/locale",
     "firebug/lib/events",
     "firebug/lib/options",
+    "firebug/lib/url",
     "firebug/breakpoint",
     "firebug/xmlViewer",
     "firebug/svgViewer",
@@ -19,7 +20,8 @@ define([
     "firebug/search",
     "firebug/errors",
 ],
-function(FBL, Firebug, Domplate, XPCOM, ToolsInterface, HttpRequestObserver, Locale, Events) { with (Domplate) {
+function(FBL, Firebug, Domplate, XPCOM, ToolsInterface, HttpRequestObserver, Locale, Events,
+    Options, URL) { with (Domplate) {
 
 // ************************************************************************************************
 // Constants
@@ -2170,7 +2172,7 @@ Firebug.NetMonitor.NetRequestEntry = domplate(Firebug.Rep, new Firebug.Listener(
 
     getHref: function(file)
     {
-        return (file.method ? file.method.toUpperCase() : "?") + " " + FBL.getFileName(file.href);
+        return (file.method ? file.method.toUpperCase() : "?") + " " + URL.getFileName(file.href);
     },
 
     getStatus: function(file)
@@ -2188,7 +2190,7 @@ Firebug.NetMonitor.NetRequestEntry = domplate(Firebug.Rep, new Firebug.Listener(
 
     getDomain: function(file)
     {
-        return FBL.getPrettyDomain(file.href);
+        return URL.getPrettyDomain(file.href);
     },
 
     getSize: function(file)
@@ -4766,7 +4768,7 @@ Firebug.NetMonitor.Utils =
     {
         if (!mimeType || !(mimeCategoryMap.hasOwnProperty(mimeType)))
         {
-            var ext = FBL.getFileExtension(uri);
+            var ext = URL.getFileExtension(uri);
             if (!ext)
                 return mimeType;
             else
@@ -4881,7 +4883,7 @@ Firebug.NetMonitor.Utils =
 
         if (!file.mimeType)
         {
-            var ext = FBL.getFileExtension(file.href);
+            var ext = URL.getFileExtension(file.href);
             if (ext)
                 file.mimeType = mimeExtensionMap[ext.toLowerCase()];
         }
@@ -5565,7 +5567,7 @@ Firebug.NetMonitor.BreakpointRep = domplate(Firebug.Rep,
 
     getName: function(bp)
     {
-        return FBL.getFileName(bp.href);
+        return URL.getFileName(bp.href);
     },
 
     onRemove: function(event)

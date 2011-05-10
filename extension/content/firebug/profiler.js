@@ -7,9 +7,10 @@ define([
     "firebug/reps",
     "firebug/lib/locale",
     "firebug/lib/wrapper",
-    "arch/tools"
+    "arch/tools",
+    "firebug/lib/url",
 ],
-function(FBL, Firebug, Domplate, FirebugReps, Locale, Wrapper, ToolsInterface) {
+function(FBL, Firebug, Domplate, FirebugReps, Locale, Wrapper, ToolsInterface, URL) {
 
 // ************************************************************************************************
 // Profiler
@@ -142,7 +143,7 @@ Firebug.Profiler = FBL.extend(Firebug.Module,
         {
             if (script.callCount)
             {
-                if (!Firebug.filterSystemURLs || !FBL.isSystemURL(script.fileName))
+                if (!Firebug.filterSystemURLs || !URL.isSystemURL(script.fileName))
                 {
                     var sourceLink = FBL.getSourceLinkForScript(script, context);
                     if (sourceLink && sourceLink.href in sourceFileMap)

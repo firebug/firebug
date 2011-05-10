@@ -1,0 +1,391 @@
+/* See license.txt for terms of usage */
+
+define([
+    "firebug/lib/trace",
+],
+function (FBTrace) {
+
+// ********************************************************************************************* //
+// Constants
+
+const Cc = Components.classes;
+const Ci = Components.interfaces;
+
+const ioService = Cc["@mozilla.org/network/io-service;1"].getService(Ci.nsIIOService);
+
+// ********************************************************************************************* //
+// Implementation
+
+var URL = {};
+
+// ************************************************************************************************
+// URLs
+
+URL.getFileName = function(url)
+{
+    var split = URL.splitURLBase(url);
+    return split.name;
+};
+
+URL.splitURLBase = function(url)
+{
+    if (URL.isDataURL(url))
+        return URL.splitDataURL(url);
+    return URL.splitURLTrue(url);
+};
+
+URL.splitDataURL = function(url)
+{
+    var mark = url.indexOf('data:');
+    if (mark != 0)
+        return false; //  the first 5 chars must be 'data:'
+
+    var point = url.indexOf(',', 5);
+    if (point < 5)
+        return false; // syntax error
+
+    var props = { encodedContent: url.substr(point+1) };
+
+    var metadataBuffer = url.substring(5, point);
+    var metadata = metadataBuffer.split(';');
+    for (var i = 0; i < metadata.length; i++)
+    {
+        var nv = metadata[i].split('=');
+        if (nv.length == 2)
+            props[nv[0]] = nv[1];
+    }
+
+    // Additional Firebug-specific properties
+    if (props.hasOwnProperty('fileName'))
+    {
+         var caller_URL = decodeURIComponent(props['fileName']);
+         var caller_split = URL.splitURLTrue(caller_URL);
+
+         props['fileName'] = caller_URL;
+
+        if (props.hasOwnProperty('baseLineNumber'))  // this means it's probably an eval()
+        {
+            props['path'] = caller_split.path;
+            props['line'] = props['baseLineNumber'];
+            var hint = decodeURIComponent(props['encodedContent']).substr(0,200).replace(/\s*$/, "");
+            props['name'] =  'eval->'+hint;
+        }
+        else
+        {
+            props['name'] = caller_split.name;
+            props['path'] = caller_split.path;
+        }
+    }
+    else
+    {
+        if (!props.hasOwnProperty('path'))
+            props['path'] = "data:";
+        if (!props.hasOwnProperty('name'))
+            props['name'] =  decodeURIComponent(props['encodedContent']).substr(0,200).replace(/\s*$/, "");
+    }
+
+    return props;
+};
+
+const reSplitFile = /:\/{1,3}(.*?)\/([^\/]*?)\/?($|\?.*)/;
+URL.splitURLTrue = function(url)
+{
+    var m = reSplitFile.exec(url);
+    if (!m)
+        return {name: url, path: url};
+    else if (!m[2])
+        return {path: m[1], name: m[1]};
+    else
+        return {path: m[1], name: m[2]+m[3]};
+};
+
+URL.getFileExtension = function(url)
+{
+    if (!url)
+        return null;
+
+    // Remove query string from the URL if any.
+    var queryString = url.indexOf("?");
+    if (queryString != -1)
+        url = url.substr(0, queryString);
+
+    // Now get the file extension.
+    var lastDot = url.lastIndexOf(".");
+    return url.substr(lastDot+1);
+};
+
+URL.isSystemURL = function(url)
+{
+    if (!url) return true;
+    if (url.length == 0) return true;
+    if (url[0] == 'h') return false;
+    if (url.substr(0, 9) == "resource:")
+        return true;
+    else if (url.substr(0, 16) == "chrome://firebug")
+        return true;
+    else if (url  == "XPCSafeJSObjectWrapper.cpp")
+        return true;
+    else if (url.substr(0, 6) == "about:")
+        return true;
+    else if (url.indexOf("firebug-service.js") != -1)
+        return true;
+    else if (url.indexOf("/modules/debuggerHalter.js") != -1)
+        return true;
+    else
+        return false;
+};
+
+URL.isSystemPage = function(win)
+{
+    try
+    {
+        var doc = win.document;
+        if (!doc)
+            return false;
+
+        // Detect pages for pretty printed XML
+        if ((doc.styleSheets.length && doc.styleSheets[0].href
+                == "chrome://global/content/xml/XMLPrettyPrint.css")
+            || (doc.styleSheets.length > 1 && doc.styleSheets[1].href
+                == "chrome://browser/skin/feeds/subscribe.css"))
+            return true;
+
+        return URL.isSystemURL(win.location.href);
+    }
+    catch (exc)
+    {
+        // Sometimes documents just aren't ready to be manipulated here, but don't let that
+        // gum up the works
+        FBTrace.sysout("URL.isSystemPage; EXCEPTION document not ready?: " + exc);
+        return false;
+    }
+}
+
+URL.isSystemStyleSheet = function(sheet)
+{
+    var href = sheet && sheet.href;
+    return href && URL.isSystemURL(href);
+};
+
+URL.getURIHost = function(uri)
+{
+    try
+    {
+        if (uri)
+            return uri.host;
+        else
+            return "";
+    }
+    catch (exc)
+    {
+        return "";
+    }
+}
+
+URL.isLocalURL = function(url)
+{
+    if (url.substr(0, 5) == "file:")
+        return true;
+    else if (url.substr(0, 8) == "wyciwyg:")
+        return true;
+    else
+        return false;
+};
+
+URL.isDataURL = function(url)
+{
+    return (url && url.substr(0,5) == "data:");
+};
+
+URL.getLocalPath = function(url)
+{
+    if (this.isLocalURL(url))
+    {
+        var fileHandler = ioService.getProtocolHandler("file").QueryInterface(Ci.nsIFileProtocolHandler);
+        var file = fileHandler.getFileFromURLSpec(url);
+        return file.path;
+    }
+};
+
+/**
+ * Mozilla URI from non-web URL
+ * @param URL
+ * @returns undefined or nsIURI
+ */
+URL.getLocalSystemURI = function(url)
+{
+    try
+    {
+        var uri = ioService.newURI(url, null, null);
+        if (uri.schemeIs("resource"))
+        {
+            var ph = ioService.getProtocolHandler("resource").QueryInterface(Ci.nsIResProtocolHandler);
+            var abspath = ph.getSubstitution(uri.host);
+            uri = ioService.newURI(uri.path.substr(1), null, abspath);
+        }
+        if (uri.schemeIs("chrome"))
+        {
+            var chromeRegistry = Cc["@mozilla.org/chrome/chrome-registry;1"].getService(Ci.nsIChromeRegistry);
+            uri = chromeRegistry.convertChromeURL(uri);
+        }
+        return uri;
+    }
+    catch(exc)
+    {
+        if (FBTrace.DBG_ERRORS)
+            FBTrace.sysout("getLocalSystemURI failed for "+url);
+    }
+}
+
+/*
+ * Mozilla native path for local URL
+ */
+URL.getLocalOrSystemPath = function(url, allowDirectories)
+{
+    var uri = URL.getLocalSystemURI(url);
+    if (uri instanceof Ci.nsIFileURL)
+    {
+        var file = uri.file;
+        if (allowDirectories)
+            return file && file.path;
+        else
+            return file && !file.isDirectory() && file.path;
+    }
+}
+
+URL.getURLFromLocalFile = function(file)
+{
+    var fileHandler = ioService.getProtocolHandler("file").QueryInterface(Ci.nsIFileProtocolHandler);
+    var URL = fileHandler.getURLSpecFromFile(file);
+    return URL;
+};
+
+URL.getDataURLForContent = function(content, url)
+{
+    // data:text/javascript;fileName=x%2Cy.js;baseLineNumber=10,<the-url-encoded-data>
+    var uri = "data:text/html;";
+    uri += "fileName="+encodeURIComponent(url)+ ","
+    uri += encodeURIComponent(content);
+    return uri;
+},
+
+URL.getDomain = function(url)
+{
+    var m = /[^:]+:\/{1,3}([^\/]+)/.exec(url);
+    return m ? m[1] : "";
+};
+
+URL.getURLPath = function(url)
+{
+    var m = /[^:]+:\/{1,3}[^\/]+(\/.*?)$/.exec(url);
+    return m ? m[1] : "";
+};
+
+URL.getPrettyDomain = function(url)
+{
+    var m = /[^:]+:\/{1,3}(www\.)?([^\/]+)/.exec(url);
+    return m ? m[2] : "";
+};
+
+URL.absoluteURL = function(url, baseURL)
+{
+    // Replace "/./" with "/" using regular expressions (don't use string since /./
+    // can be treated as regular expressoin too, see 3551).
+    return URL.absoluteURLWithDots(url, baseURL).replace(/\/\.\//, "/", "g");
+};
+
+URL.absoluteURLWithDots = function(url, baseURL)
+{
+    // Should implement http://www.apps.ietf.org/rfc/rfc3986.html#sec-5
+    // or use the newURI approach described in issue 3110.
+    // See tests/content/lib/absoluteURLs.js
+
+    if (url.length === 0)
+        return baseURL;
+
+    var R_query_index = url.indexOf('?');
+    var R_head = url;
+    if (R_query_index !== -1)
+        R_head = url.substr(0, R_query_index);
+
+    if (url.indexOf(':') !== -1)
+        return url;
+
+    var reURL = /(([^:]+:)\/{1,2}[^\/]*)(.*?)$/;
+    var m_url = reURL.exec(R_head);
+    if (m_url)
+        return url;
+
+    var B_query_index = baseURL.indexOf('?');
+    var B_head = baseURL;
+    if (B_query_index !== -1)
+        B_head = baseURL.substr(0, B_query_index);
+
+    if (url[0] === "?")   // cases where R.path is empty.
+        return B_head + url;
+    if  (url[0] === "#")
+        return baseURL.split('#')[0]+url;
+
+    var m = reURL.exec(B_head);
+    if (!m)
+        return "";
+
+    var head = m[1];
+    var tail = m[3];
+    if (url.substr(0, 2) == "//")
+        return m[2] + url;
+    else if (url[0] == "/")
+    {
+        return head + url;
+    }
+    else if (tail[tail.length-1] == "/")
+        return baseURL + url;
+    else
+    {
+        var parts = tail.split("/");
+        return head + parts.slice(0, parts.length-1).join("/") + "/" + url;
+    }
+}
+
+var reChromeCase = /chrome:\/\/([^/]*)\/(.*?)$/;
+URL.normalizeURL = function(url)  // this gets called a lot, any performance improvement welcome
+{
+    if (!url)
+        return "";
+    // Replace one or more characters that are not forward-slash followed by /.., by space.
+    if (url.length < 255) // guard against monsters.
+    {
+        // Replace one or more characters that are not forward-slash followed by /.., by space.
+        url = url.replace(/[^/]+\/\.\.\//, "", "g");
+        // Issue 1496, avoid #
+        url = url.replace(/#.*/,"");
+        // For some reason, JSDS reports file URLs like "file:/" instead of "file:///", so they
+        // don't match up with the URLs we get back from the DOM
+        url = url.replace(/file:\/([^/])/g, "file:///$1");
+        // For script tags inserted dynamically sometimes the script.fileName is bogus
+        url = url.replace(/[^\s]*\s->\s/, "");
+
+        if (url.indexOf('chrome:')==0)
+        {
+            var m = reChromeCase.exec(url);  // 1 is package name, 2 is path
+            if (m)
+            {
+                url = "chrome://"+m[1].toLowerCase()+"/"+m[2];
+            }
+        }
+    }
+    return url;
+};
+
+URL.denormalizeURL = function(url)
+{
+    return url.replace(/file:\/\/\//g, "file:/");
+};
+
+// ********************************************************************************************* //
+// Registration
+
+return URL;
+
+// ********************************************************************************************* //
+});

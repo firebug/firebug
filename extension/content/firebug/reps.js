@@ -10,8 +10,9 @@ define([
     "firebug/lib/htmlLib",
     "firebug/lib/events",
     "firebug/lib/wrapper",
+    "firebug/lib/url",
 ],
-function(FBL, Firebug, Domplate, XPCOM, Locale, ToolsInterface, HTMLLib, Events, Wrapper) {
+function(FBL, Firebug, Domplate, XPCOM, Locale, ToolsInterface, HTMLLib, Events, Wrapper, URL) {
 with (Domplate) {
 
 // ************************************************************************************************
@@ -225,7 +226,7 @@ FirebugReps.Func = domplate(Firebug.Rep,
     {
         var script = FBL.findScriptForFunctionInContext(context, fn);
         if (script)
-            return Locale.$STRF("Line", [FBL.normalizeURL(script.fileName), script.baseLineNumber]);
+            return Locale.$STRF("Line", [URL.normalizeURL(script.fileName), script.baseLineNumber]);
         else
             if (fn.toString)
                 return fn.toString();
@@ -736,15 +737,15 @@ FirebugReps.Element = domplate(Firebug.Rep,
         var value;
 
         if (elt instanceof window.HTMLImageElement)
-            value = FBL.getFileName(elt.getAttribute("src"));
+            value = URL.getFileName(elt.getAttribute("src"));
         else if (elt instanceof window.HTMLAnchorElement)
-            value = FBL.getFileName(elt.getAttribute("href"));
+            value = URL.getFileName(elt.getAttribute("href"));
         else if (elt instanceof window.HTMLInputElement)
             value = elt.getAttribute("value");
         else if (elt instanceof window.HTMLFormElement)
-            value = FBL.getFileName(elt.getAttribute("action"));
+            value = URL.getFileName(elt.getAttribute("action"));
         else if (elt instanceof window.HTMLScriptElement)
-            value = FBL.getFileName(elt.getAttribute("src"));
+            value = URL.getFileName(elt.getAttribute("src"));
 
         return value ? " " + FBL.cropMultipleLines(value, 20) : "";
     },
@@ -1010,7 +1011,7 @@ FirebugReps.Document = domplate(Firebug.Rep,
 
     getLocation: function(doc)
     {
-        return doc.location ? FBL.getFileName(doc.location.href) : "";
+        return doc.location ? URL.getFileName(doc.location.href) : "";
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
@@ -1058,7 +1059,7 @@ FirebugReps.StyleSheet = domplate(Firebug.Rep,
 
     getLocation: function(styleSheet)
     {
-        return FBL.getFileName(styleSheet.href);
+        return URL.getFileName(styleSheet.href);
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
@@ -1124,7 +1125,7 @@ FirebugReps.Window = domplate(Firebug.Rep,
     {
         try
         {
-            return (win && win.location && !win.closed) ? FBL.getFileName(win.location.href) : "";
+            return (win && win.location && !win.closed) ? URL.getFileName(win.location.href) : "";
         }
         catch (exc)
         {
@@ -1234,7 +1235,7 @@ FirebugReps.SourceLink = domplate(Firebug.Rep,
 
     isSystemLink: function(sourceLink)
     {
-        return sourceLink && FBL.isSystemURL(sourceLink.href);
+        return sourceLink && URL.isSystemURL(sourceLink.href);
     },
 
     hideSourceLink: function(sourceLink)
@@ -1262,7 +1263,7 @@ FirebugReps.SourceLink = domplate(Firebug.Rep,
 
         try
         {
-            var fileName = FBL.getFileName(sourceLink.href);
+            var fileName = URL.getFileName(sourceLink.href);
             fileName = decodeURIComponent(fileName);
         }
         catch(exc)
@@ -1484,7 +1485,7 @@ FirebugReps.StackFrame = domplate(Firebug.Rep,  // XXXjjb Since the repObject is
 
     getSourceLinkTitle: function(frame)
     {
-        var fileName = FBL.cropString(FBL.getFileName(frame.href), 17);
+        var fileName = FBL.cropString(URL.getFileName(frame.href), 17);
         return Locale.$STRF("Line", [fileName, frame.line]);
     },
 
@@ -1712,7 +1713,7 @@ FirebugReps.ErrorMessage = domplate(Firebug.Rep,
 
     hasErrorBreak: function(error)
     {
-        return FBL.fbs.hasErrorBreakpoint(FBL.normalizeURL(error.href), error.lineNo);
+        return FBL.fbs.hasErrorBreakpoint(URL.normalizeURL(error.href), error.lineNo);
     },
 
     getMessage: function(message)
@@ -1759,7 +1760,7 @@ FirebugReps.ErrorMessage = domplate(Firebug.Rep,
         // so let's try to skip those
         if (error.source)
             return "syntax";
-        else if (error.lineNo == 1 && FBL.getFileExtension(error.href) != "js")
+        else if (error.lineNo == 1 && URL.getFileExtension(error.href) != "js")
             return "none";
         else if (error.category == "css")
             return "show";
@@ -1824,7 +1825,7 @@ FirebugReps.ErrorMessage = domplate(Firebug.Rep,
 
     breakOnThisError: function(error, context)
     {
-        var compilationUnit = context.getCompilationUnit(FBL.normalizeURL(error.href));
+        var compilationUnit = context.getCompilationUnit(URL.normalizeURL(error.href));
         if (!compilationUnit)
         {
             if (FBTrace.DBG_ERRORS)

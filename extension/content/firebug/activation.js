@@ -4,9 +4,10 @@ define([
     "firebug/lib",
     "firebug/firebug",
     "firebug/lib/locale",
-    "firebug/domplate"
+    "firebug/domplate",
+    "firebug/lib/url",
 ],
-function(FBL, Firebug, Locale, Domplate) {
+function(FBL, Firebug, Locale, Domplate, URL) {
 
 // ************************************************************************************************
 // Constants
@@ -84,9 +85,9 @@ Firebug.Activation = FBL.extend(Firebug.Module,
         // Remove fragment, it shouldn't have any impact on the activation.
         url = url.replace(/#.*/, "");
 
-        var uri = FBL.makeURI(FBL.normalizeURL(url));
+        var uri = FBL.makeURI(URL.normalizeURL(url));
 
-        if (Firebug.filterSystemURLs && FBL.isSystemURL(url))
+        if (Firebug.filterSystemURLs && URL.isSystemURL(url))
             return uri;
 
         if (url == "about:blank")  // avoid exceptions.
@@ -142,7 +143,7 @@ Firebug.Activation = FBL.extend(Firebug.Module,
         if (Firebug.allPagesActivation == "on")
             return true;
 
-        if (Firebug.filterSystemURLs && FBL.isSystemURL(url)) // if about:blank gets thru, 1483 fails
+        if (Firebug.filterSystemURLs && URL.isSystemURL(url)) // if about:blank gets thru, 1483 fails
             return false;
 
         if (userCommands)

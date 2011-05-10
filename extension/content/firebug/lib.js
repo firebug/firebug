@@ -7,8 +7,9 @@ define([
     "firebug/lib/options",
     "firebug/lib/deprecated",
     "firebug/lib/wrapper",
+    "firebug/lib/url",
 ],
-function(XPCOM, Locale, Events, Options, Deprecated, Wrapper) {
+function(XPCOM, Locale, Events, Options, Deprecated, Wrapper, URL) {
 
 // ********************************************************************************************* //
 
@@ -39,6 +40,11 @@ for (var p in Events)
 // xxxHonza: mark as obsolete
 for (var p in Wrapper)
     FBL[p] = Wrapper[p];
+
+// Backward compatibility with extensions
+// xxxHonza: mark as obsolete
+for (var p in URL)
+    FBL[p] = URL[p];
 
 FBL.deprecated = Deprecated.deprecated;
 
@@ -2596,7 +2602,7 @@ this.getCorrectedStackTrace = function(frame, context)
         for (; frame && frame.isValid; frame = frame.callingFrame)
         {
             if (!(Options.get("filterSystemURLs") &&
-                this.isSystemURL(FBL.normalizeURL(frame.script.fileName))))
+                URL.isSystemURL(URL.normalizeURL(frame.script.fileName))))
             {
                 var stackFrame = this.getStackFrame(frame, context, newestFrame);
                 if (stackFrame)
@@ -2674,7 +2680,7 @@ this.getStackFrame = function(frame, context, newestFrameXB)
 
             var script = frame.script;
 
-            return new this.StackFrame({href: FBL.normalizeURL(script.fileName)}, frame.line, script.functionName, [], frame, null, context, newestFrameXB);
+            return new this.StackFrame({href: URL.normalizeURL(script.fileName)}, frame.line, script.functionName, [], frame, null, context, newestFrameXB);
         }
     }
     catch (exc)
@@ -3119,7 +3125,7 @@ this.getFunctionName = function(script, context, frame, noArgs)
         if (!name || name == "anonymous")
         {
             if (FBTrace.DBG_STACK) FBTrace.sysout("getFunctionName no analyzer, "+script.baseLineNumber+"@"+script.fileName+"\n");
-            name =  this.guessFunctionName(FBL.normalizeURL(script.fileName), script.baseLineNumber, context);
+            name =  this.guessFunctionName(URL.normalizeURL(script.fileName), script.baseLineNumber, context);
         }
     }
     if (FBTrace.DBG_STACK) FBTrace.sysout("getFunctionName "+script.tag+" ="+name+"\n");
@@ -3134,7 +3140,7 @@ this.guessFunctionName = function(url, lineNo, context)
         if (context.sourceCache)
             return this.guessFunctionNameFromLines(url, lineNo, context.sourceCache);
     }
-    return "? in "+this.getFileName(url)+"@"+lineNo;
+    return "? in "+URL.getFileName(url)+"@"+lineNo;
 };
 
 this.guessFunctionNameFromLines = function(url, lineNo, sourceCache)
@@ -3275,7 +3281,7 @@ this.getAllStyleSheets = function(context)
     {
         var sheetLocation =  FBL.getURLForStyleSheet(sheet);
 
-        if (!Options.get("showUserAgentCSS") && FBL.isSystemURL(sheetLocation))
+        if (!Options.get("showUserAgentCSS") && URL.isSystemURL(sheetLocation))
             return;
 
         if (sheet.ownerNode && Firebug.shouldIgnore(sheet.ownerNode))
@@ -3614,365 +3620,6 @@ this.isJavaScriptKeyword = function(name)
 
 // ************************************************************************************************
 // URLs
-
-this.getFileName = function(url)
-{
-    var split = this.splitURLBase(url);
-    return split.name;
-};
-
-this.splitURLBase = function(url)
-{
-    if (this.isDataURL(url))
-        return this.splitDataURL(url);
-    return this.splitURLTrue(url);
-};
-
-this.splitDataURL = function(url)
-{
-    var mark = url.indexOf('data:');
-    if (mark != 0)
-        return false; //  the first 5 chars must be 'data:'
-
-    var point = url.indexOf(',', 5);
-    if (point < 5)
-        return false; // syntax error
-
-    var props = { encodedContent: url.substr(point+1) };
-
-    var metadataBuffer = url.substring(5, point);
-    var metadata = metadataBuffer.split(';');
-    for (var i = 0; i < metadata.length; i++)
-    {
-        var nv = metadata[i].split('=');
-        if (nv.length == 2)
-            props[nv[0]] = nv[1];
-    }
-
-    // Additional Firebug-specific properties
-    if (props.hasOwnProperty('fileName'))
-    {
-         var caller_URL = decodeURIComponent(props['fileName']);
-         var caller_split = this.splitURLTrue(caller_URL);
-
-         props['fileName'] = caller_URL;
-
-        if (props.hasOwnProperty('baseLineNumber'))  // this means it's probably an eval()
-        {
-            props['path'] = caller_split.path;
-            props['line'] = props['baseLineNumber'];
-            var hint = decodeURIComponent(props['encodedContent']).substr(0,200).replace(/\s*$/, "");
-            props['name'] =  'eval->'+hint;
-        }
-        else
-        {
-            props['name'] = caller_split.name;
-            props['path'] = caller_split.path;
-        }
-    }
-    else
-    {
-        if (!props.hasOwnProperty('path'))
-            props['path'] = "data:";
-        if (!props.hasOwnProperty('name'))
-            props['name'] =  decodeURIComponent(props['encodedContent']).substr(0,200).replace(/\s*$/, "");
-    }
-
-    return props;
-};
-
-this.splitURLTrue = function(url)
-{
-    var m = reSplitFile.exec(url);
-    if (!m)
-        return {name: url, path: url};
-    else if (!m[2])
-        return {path: m[1], name: m[1]};
-    else
-        return {path: m[1], name: m[2]+m[3]};
-};
-
-this.getFileExtension = function(url)
-{
-    if (!url)
-        return null;
-
-    // Remove query string from the URL if any.
-    var queryString = url.indexOf("?");
-    if (queryString != -1)
-        url = url.substr(0, queryString);
-
-    // Now get the file extension.
-    var lastDot = url.lastIndexOf(".");
-    return url.substr(lastDot+1);
-};
-
-this.isSystemURL = function(url)
-{
-    if (!url) return true;
-    if (url.length == 0) return true;
-    if (url[0] == 'h') return false;
-    if (url.substr(0, 9) == "resource:")
-        return true;
-    else if (url.substr(0, 16) == "chrome://firebug")
-        return true;
-    else if (url  == "XPCSafeJSObjectWrapper.cpp")
-        return true;
-    else if (url.substr(0, 6) == "about:")
-        return true;
-    else if (url.indexOf("firebug-service.js") != -1)
-        return true;
-    else if (url.indexOf("/modules/debuggerHalter.js") != -1)
-        return true;
-    else
-        return false;
-};
-
-this.isSystemPage = function(win)
-{
-    try
-    {
-        var doc = win.document;
-        if (!doc)
-            return false;
-
-        // Detect pages for pretty printed XML
-        if ((doc.styleSheets.length && doc.styleSheets[0].href
-                == "chrome://global/content/xml/XMLPrettyPrint.css")
-            || (doc.styleSheets.length > 1 && doc.styleSheets[1].href
-                == "chrome://browser/skin/feeds/subscribe.css"))
-            return true;
-
-        return FBL.isSystemURL(win.location.href);
-    }
-    catch (exc)
-    {
-        // Sometimes documents just aren't ready to be manipulated here, but don't let that
-        // gum up the works
-        ERROR("tabWatcher.isSystemPage document not ready:"+ exc);
-        return false;
-    }
-}
-
-this.isSystemStyleSheet = function(sheet)
-{
-    var href = sheet && sheet.href;
-    return href && FBL.isSystemURL(href);
-};
-
-this.getURIHost = function(uri)
-{
-    try
-    {
-        if (uri)
-            return uri.host;
-        else
-            return "";
-    }
-    catch (exc)
-    {
-        return "";
-    }
-}
-
-this.isLocalURL = function(url)
-{
-    if (url.substr(0, 5) == "file:")
-        return true;
-    else if (url.substr(0, 8) == "wyciwyg:")
-        return true;
-    else
-        return false;
-};
-
-this.isDataURL = function(url)
-{
-    return (url && url.substr(0,5) == "data:");
-};
-
-this.getLocalPath = function(url)
-{
-    if (this.isLocalURL(url))
-    {
-        var fileHandler = ioService.getProtocolHandler("file").QueryInterface(Ci.nsIFileProtocolHandler);
-        var file = fileHandler.getFileFromURLSpec(url);
-        return file.path;
-    }
-};
-
-/*
- * Mozilla URI from non-web URL
- * @param URL
- * @returns undefined or nsIURI
- */
-this.getLocalSystemURI = function(url)
-{
-    try
-    {
-        var uri = ioService.newURI(url, null, null);
-        if (uri.schemeIs("resource"))
-        {
-            var ph = ioService.getProtocolHandler("resource").QueryInterface(Ci.nsIResProtocolHandler);
-            var abspath = ph.getSubstitution(uri.host);
-            uri = ioService.newURI(uri.path.substr(1), null, abspath);
-        }
-        if (uri.schemeIs("chrome"))
-        {
-            var chromeRegistry = Cc["@mozilla.org/chrome/chrome-registry;1"].getService(Ci.nsIChromeRegistry);
-            uri = chromeRegistry.convertChromeURL(uri);
-        }
-        return uri;
-    }
-    catch(exc)
-    {
-        if (FBTrace.DBG_ERRORS)
-            FBTrace.sysout("getLocalSystemURI failed for "+url);
-    }
-}
-
-/*
- * Mozilla native path for local URL
- */
-this.getLocalOrSystemPath = function(url, allowDirectories)
-{
-    var uri = FBL.getLocalSystemURI(url);
-    if (uri instanceof Ci.nsIFileURL)
-    {
-        var file = uri.file;
-        if (allowDirectories)
-            return file && file.path;
-        else
-            return file && !file.isDirectory() && file.path;
-    }
-}
-
-this.getURLFromLocalFile = function(file)
-{
-    var fileHandler = ioService.getProtocolHandler("file").QueryInterface(Ci.nsIFileProtocolHandler);
-    var URL = fileHandler.getURLSpecFromFile(file);
-    return URL;
-};
-
-this.getDataURLForContent = function(content, url)
-{
-    // data:text/javascript;fileName=x%2Cy.js;baseLineNumber=10,<the-url-encoded-data>
-    var uri = "data:text/html;";
-    uri += "fileName="+encodeURIComponent(url)+ ","
-    uri += encodeURIComponent(content);
-    return uri;
-},
-
-this.getDomain = function(url)
-{
-    var m = /[^:]+:\/{1,3}([^\/]+)/.exec(url);
-    return m ? m[1] : "";
-};
-
-this.getURLPath = function(url)
-{
-    var m = /[^:]+:\/{1,3}[^\/]+(\/.*?)$/.exec(url);
-    return m ? m[1] : "";
-};
-
-this.getPrettyDomain = function(url)
-{
-    var m = /[^:]+:\/{1,3}(www\.)?([^\/]+)/.exec(url);
-    return m ? m[2] : "";
-};
-
-this.absoluteURL = function(url, baseURL)
-{
-    // Replace "/./" with "/" using regular expressions (don't use string since /./
-    // can be treated as regular expressoin too, see 3551).
-    return this.absoluteURLWithDots(url, baseURL).replace(/\/\.\//, "/", "g");
-};
-
-this.absoluteURLWithDots = function(url, baseURL)
-{
-    // Should implement http://www.apps.ietf.org/rfc/rfc3986.html#sec-5
-    // or use the newURI approach described in issue 3110.
-    // See tests/content/lib/absoluteURLs.js
-
-    if (url.length === 0)
-        return baseURL;
-
-    var R_query_index = url.indexOf('?');
-    var R_head = url;
-    if (R_query_index !== -1)
-        R_head = url.substr(0, R_query_index);
-
-    if (url.indexOf(':') !== -1)
-        return url;
-
-    var reURL = /(([^:]+:)\/{1,2}[^\/]*)(.*?)$/;
-    var m_url = reURL.exec(R_head);
-    if (m_url)
-        return url;
-
-    var B_query_index = baseURL.indexOf('?');
-    var B_head = baseURL;
-    if (B_query_index !== -1)
-        B_head = baseURL.substr(0, B_query_index);
-
-    if (url[0] === "?")   // cases where R.path is empty.
-        return B_head + url;
-    if  (url[0] === "#")
-        return baseURL.split('#')[0]+url;
-
-    var m = reURL.exec(B_head);
-    if (!m)
-        return "";
-
-    var head = m[1];
-    var tail = m[3];
-    if (url.substr(0, 2) == "//")
-        return m[2] + url;
-    else if (url[0] == "/")
-    {
-        return head + url;
-    }
-    else if (tail[tail.length-1] == "/")
-        return baseURL + url;
-    else
-    {
-        var parts = tail.split("/");
-        return head + parts.slice(0, parts.length-1).join("/") + "/" + url;
-    }
-}
-
-this.normalizeURL = function(url)  // this gets called a lot, any performance improvement welcome
-{
-    if (!url)
-        return "";
-    // Replace one or more characters that are not forward-slash followed by /.., by space.
-    if (url.length < 255) // guard against monsters.
-    {
-        // Replace one or more characters that are not forward-slash followed by /.., by space.
-        url = url.replace(/[^/]+\/\.\.\//, "", "g");
-        // Issue 1496, avoid #
-        url = url.replace(/#.*/,"");
-        // For some reason, JSDS reports file URLs like "file:/" instead of "file:///", so they
-        // don't match up with the URLs we get back from the DOM
-        url = url.replace(/file:\/([^/])/g, "file:///$1");
-        // For script tags inserted dynamically sometimes the script.fileName is bogus
-        url = url.replace(/[^\s]*\s->\s/, "");
-
-        if (url.indexOf('chrome:')==0)
-        {
-            var m = reChromeCase.exec(url);  // 1 is package name, 2 is path
-            if (m)
-            {
-                url = "chrome://"+m[1].toLowerCase()+"/"+m[2];
-            }
-        }
-    }
-    return url;
-};
-
-this.denormalizeURL = function(url)
-{
-    return url.replace(/file:\/\/\//g, "file:/");
-};
 
 this.parseURLParams = function(url)
 {

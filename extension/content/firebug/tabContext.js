@@ -4,9 +4,10 @@ define([
     "firebug/lib",
     "arch/tools",
     "firebug/lib/events",
+    "firebug/lib/url",
     "firebug/plugin",
 ],
-function(FBL, ToolsInterface, Events) {
+function(FBL, ToolsInterface, Events, URL) {
 
 // ************************************************************************************************
 // Constants
@@ -30,7 +31,7 @@ Firebug.TabContext = function(win, browser, chrome, persistedState)
 
     browser.__defineGetter__("chrome", function() { return Firebug.chrome; }); // backward compat
 
-    this.name = FBL.normalizeURL(this.getWindowLocation().toString());
+    this.name = URL.normalizeURL(this.getWindowLocation().toString());
 
     this.windows = [];
     this.panelMap = {};
@@ -89,15 +90,15 @@ Firebug.TabContext.prototype =
         if (!this.name || this.name === "about:blank")
         {
             var url = this.getWindowLocation().toString();
-            if (FBL.isDataURL(url))
+            if (URL.isDataURL(url))
             {
-                var props = FBL.splitDataURL(url);
+                var props = URL.splitDataURL(url);
                 if (props.fileName)
                     this.name = "data url from "+props.fileName;
             }
             else
             {
-                this.name = FBL.normalizeURL(url);
+                this.name = URL.normalizeURL(url);
                 if (this.name === "about:blank" && this.window.frameElement)
                     this.name += " in "+FBL.getElementCSSSelector(this.window.frameElement);
             }
@@ -249,7 +250,7 @@ Firebug.TabContext.prototype =
 
     addPanelType: function(url, title, parentPanel)
     {
-        url = FBL.absoluteURL(url, this.window.location.href);
+        url = URL.absoluteURL(url, this.window.location.href);
         if (!url)
         {
             // XXXjoe Need some kind of notification to console that URL is invalid

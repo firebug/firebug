@@ -8,12 +8,13 @@ define([
     "arch/tools",
     "firebug/lib/locale",
     "firebug/lib/events",
+    "firebug/lib/url",
     "firebug/editorSelector",
     "firebug/infotip",
     "firebug/search",
     "firebug/sourceBox",
 ],
-function(FBL, Firebug, FirebugReps, Domplate, ToolsInterface, Locale, Events) {
+function(FBL, Firebug, FirebugReps, Domplate, ToolsInterface, Locale, Events, URL) {
 
 // ********************************************************************************************* //
 // Constants
@@ -1107,10 +1108,10 @@ Firebug.ScriptPanel.prototype = FBL.extend(Firebug.SourceBoxPanel,
             var url = compilationUnit.getURL()
             var i = url.indexOf("/event/seq");
             var container = url.substr(0,i);
-            var split = FBL.splitURLBase(container);  // path & name
+            var split = URL.splitURLBase(container);  // path & name
             return {path: split.path, name: split.name+url.substr(i) };
         }
-        return FBL.splitURLBase(compilationUnit.getURL());
+        return URL.splitURLBase(compilationUnit.getURL());
     },
 
     getSourceLink: function(target, object)

@@ -8,9 +8,10 @@ define([
     "firebug/http/responseObserver",
     "firebug/lib/locale",
     "firebug/lib/events",
+    "firebug/lib/url",
     "firebug/sourceCache",
 ],
-function(FBL, Firebug, XPCOM, HttpRequestObserver, HttpResponseObserver, Locale, Events) {
+function(FBL, Firebug, XPCOM, HttpRequestObserver, HttpResponseObserver, Locale, Events, URL) {
 
 // ********************************************************************************************* //
 // Constants
@@ -203,7 +204,7 @@ Firebug.TabCacheModel = FBL.extend(Firebug.Module,
 
         // Hack to work around application/octet-stream for js files (2063).
         // Let's cache all files with js extensions.
-        var extension = FBL.getFileExtension(safeGetName(request));
+        var extension = URL.getFileExtension(safeGetName(request));
         if (extension == "js")
             return true;
 

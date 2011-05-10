@@ -6,9 +6,10 @@ define([
     "firebug/lib/xpcom",
     "firebug/http/requestObserver",
     "firebug/lib/events",
+    "firebug/lib/url",
     "firebug/tabContext",
 ],
-function(FBL, Firebug, XPCOM, HttpRequestObserver, Events) {
+function(FBL, Firebug, XPCOM, HttpRequestObserver, Events, URL) {
 
 // ************************************************************************************************
 // Constants
@@ -270,8 +271,8 @@ Firebug.TabWatcher = FBL.extend(new Firebug.Listener(),
         //    persistedState = null;
 
         // xxxHonza, xxxJJB: web application detection. Based on domain check.
-        var prevDomain = persistedState ? FBL.getDomain(persistedState.location) : null;
-        var domain = FBL.getDomain(location);
+        var prevDomain = persistedState ? URL.getDomain(persistedState.location) : null;
+        var domain = URL.getDomain(location);
         // Remove this, see 3484
         //if (!persistedState || prevDomain != domain)
         //    persistedState = null;
@@ -301,7 +302,7 @@ Firebug.TabWatcher = FBL.extend(new Firebug.Listener(),
      */
     watchLoadedTopWindow: function(win)
     {
-        var isSystem = FBL.isSystemPage(win);
+        var isSystem = URL.isSystemPage(win);
 
         var context = this.getContextByWindow(win);
         if ((context && !context.window))

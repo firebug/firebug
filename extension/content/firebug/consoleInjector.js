@@ -6,11 +6,12 @@ define([
     "firebug/reps",
     "firebug/lib/locale",
     "firebug/lib/events",
+    "firebug/lib/url",
     "firebug/console",
     "firebug/consoleExposed",
     "firebug/errors",
 ],
-function(FBL, Firebug, FirebugReps, Locale, Events, Console) {
+function(FBL, Firebug, FirebugReps, Locale, Events, URL, Console) {
 
 // ********************************************************************************************* //
 // Constants
@@ -476,7 +477,7 @@ Firebug.Console.createConsole = function createConsole(context, win)
                 userURL, frame);
 
         // Drop frames until we get into user code.
-        while (frame && FBL.isSystemURL(frame.filename) )
+        while (frame && URL.isSystemURL(frame.filename) )
             frame = frame.caller;
 
         // Drop two more frames, the injected console function and firebugAppendConsole()
