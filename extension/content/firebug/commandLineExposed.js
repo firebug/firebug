@@ -2,6 +2,7 @@
 
 define([
     "firebug/lib",
+    "firebug/firebug",
 ],
 function(FBL) {
 

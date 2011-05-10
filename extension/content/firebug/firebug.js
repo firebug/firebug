@@ -105,7 +105,7 @@ window.Firebug =
     // Custom stylesheets registered by extensions.
     stylesheets: [],
 
-    // xxxHonza: hack
+    // xxxHonza: hack, all "Firebug.Options" occurences should be replaced by "Options"
     Options: Options,
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
