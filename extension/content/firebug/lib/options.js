@@ -93,7 +93,7 @@ var optionUpdateMap = {};
  * Panels send commands to request option change.
  * Backend responds with events when the change is accepted.
  */
-var Options =
+Firebug.Options =
 /** @lends Firebug.Options */
 {
     getPrefDomain: function()
@@ -422,7 +422,7 @@ var Options =
 // ********************************************************************************************* //
 // Registration
 
-return Options;
+return Firebug.Options;
 
 // ********************************************************************************************* //
 });

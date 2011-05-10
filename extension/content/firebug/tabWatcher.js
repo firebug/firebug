@@ -2,12 +2,13 @@
 
 define([
     "firebug/lib",
+    "firebug/firebug",
     "firebug/lib/xpcom",
     "firebug/http/requestObserver",
     "firebug/lib/events",
     "firebug/tabContext",
 ],
-function(FBL, XPCOM, HttpRequestObserver, Events) {
+function(FBL, Firebug, XPCOM, HttpRequestObserver, Events) {
 
 // ************************************************************************************************
 // Constants

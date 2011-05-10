@@ -2,6 +2,7 @@
 
 define([
     "firebug/lib",
+    "firebug/firebug",
     "firebug/domplate",
     "firebug/reps",
     "firebug/lib/xpcom",
@@ -12,7 +13,7 @@ define([
     "firebug/infotip",
     "firebug/search",
 ],
-function(FBL, Domplate, FirebugReps, XPCOM, Locale, Events) { with (Domplate) {
+function(FBL, Firebug, Domplate, FirebugReps, XPCOM, Locale, Events) { with (Domplate) {
 
 // ************************************************************************************************
 // Constants
@@ -1692,7 +1693,7 @@ CSSElementPanel.prototype = FBL.extend(Firebug.CSSStyleSheetPanel.prototype,
         var pseudoElements = [""];
         var inspectedRules, displayedRules = {};
 
-        // Firefox 5+ allows inspecting of pseudo-elements (see issue 537) 
+        // Firefox 5+ allows inspecting of pseudo-elements (see issue 537)
         if (versionChecker.compare(appInfo.version, "5.0*") >= 0)
             pseudoElements = FBL.extendArray(pseudoElements, [":first-letter", ":first-line", ":before", ":after"]);
 
@@ -2738,7 +2739,7 @@ function getRuleLine(rule)
     }
     catch(e)
     {
-        
+
     }
     return 0;
 }

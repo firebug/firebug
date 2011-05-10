@@ -2,13 +2,14 @@
 
 define([
     "firebug/lib",
+    "firebug/firebug",
     "firebug/reps",
     "firebug/lib/locale",
     "firebug/lib/events",
     "firebug/console",
     "firebug/commandLineExposed"
 ],
-function(FBL, FirebugReps, Locale, Events) {
+function(FBL, Firebug, FirebugReps, Locale, Events) {
 
 // ************************************************************************************************
 // Constants

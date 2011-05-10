@@ -2,6 +2,7 @@
 
 define([
     "firebug/lib",
+    "firebug/firebug",
     "firebug/domplate",
     "firebug/reps",
     "firebug/lib/locale",
@@ -9,7 +10,7 @@ define([
     "arch/tools",
     "firebug/editor",
 ],
-function(FBL, Domplate, FirebugReps, Locale, Events, ToolsInterface) {
+function(FBL, Firebug, Domplate, FirebugReps, Locale, Events, ToolsInterface) {
 
 // ************************************************************************************************
 // Breakpoints
@@ -205,7 +206,7 @@ Firebug.Breakpoint.BreakpointRep = domplate(Firebug.Rep,
     {
         FBL.fbs.disableBreakpoint(href, lineNumber);
     },
-    
+
     getContextMenuItems: function(breakpoint, target)
     {
         var head = FBL.getAncestorByClass(target, "breakpointBlock");

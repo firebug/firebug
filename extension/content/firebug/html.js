@@ -2,6 +2,7 @@
 
 define([
     "firebug/lib",
+    "firebug/firebug",
     "firebug/domplate",
     "firebug/reps",
     "firebug/lib/locale",
@@ -14,7 +15,7 @@ define([
     "firebug/search",
     "firebug/insideOutBox",
 ],
-function(FBL, Domplate, FirebugReps, Locale, ToolsInterface, HTMLLib, Events) { with (Domplate) {
+function(FBL, Firebug, Domplate, FirebugReps, Locale, ToolsInterface, HTMLLib, Events) { with (Domplate) {
 
 // ************************************************************************************************
 // Constants

@@ -2,13 +2,14 @@
 
 define([
     "firebug/lib",
+    "firebug/firebug",
     "firebug/domplate",
     "firebug/lib/locale",
     "firebug/lib/events",
     "firebug/dom",
     "firebug/reps"
 ],
-function(FBL, Domplate, Locale, Events) {
+function(FBL, Firebug, Domplate, Locale, Events) {
 
 // ************************************************************************************************
 

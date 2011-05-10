@@ -45,13 +45,11 @@ function getModuleLoaderConfig(baseConfig)
                 window.dump("Loader; onDebug:"+msg+"\n");
             }
         },
-        onError: function()
+        onError: function(exc)
         {
-            var msg = "";
-            for (var i = 0; i < arguments.length; i++)
-                msg += arguments[i]+", ";
+            var msg = exc.toString() +" "+(exc.fileName || exc.sourceName) + "@" + exc.lineNumber;
 
-            Components.utils.reportError("Loader; onError:"+msg);  // put something out for sure
+            Components.utils.reportError("Loader; Error: "+msg);  // put something out for sure
             window.dump("Loader; onError:"+msg+"\n");
             if (!this.FBTrace)
             {
@@ -61,9 +59,12 @@ function getModuleLoaderConfig(baseConfig)
             }
 
             if (this.FBTrace.DBG_ERRORS || this.FBTrace.DBG_MODULES)
-                this.FBTrace.sysout.apply(this.FBTrace, arguments);
-
-            throw arguments[0];
+                this.FBTrace.sysout("Loader; Error: "+msg, exc);
+alert("Loader "+msg);
+            if (exc instanceof Error)
+                throw arguments[0];
+            else
+                throw new Error(msg);
         },
     };
 
@@ -111,7 +112,16 @@ require.analyzeFailure = function(context, managers, specified, loaded)
         }
     }
 }
+//
 
+function loadXULCSS(cssURL) {
+    var sss = Components.classes["@mozilla.org/content/style-sheet-service;1"]
+    .getService(Components.interfaces.nsIStyleSheetService);
+    var ios = Components.classes["@mozilla.org/network/io-service;1"]
+    .getService(Components.interfaces.nsIIOService);
+    var uri = ios.newURI(cssURL, null, null);
+    sss.loadAndRegisterSheet(uri, sss.USER_SHEET);
+}
 // ********************************************************************************************* //
 // Modules
 
@@ -176,7 +186,9 @@ function()
         var delta = (new Date().getTime()) - startLoading;
         FBTrace.sysout("main.js; Firebug modules loaded using RequireJS in "+delta+" ms");
     }
-
+    // <?xml-stylesheet href="chrome://firebug/content/firebug.css"?>
+   // loadXULCSS("chrome://firebug/content/firebug.css");
+   // Components.utils.reportError("main loaded firebug.css");
     Firebug.Options.initialize("extensions.firebug");
     FirebugChrome.waitForPanelBar(true);
 

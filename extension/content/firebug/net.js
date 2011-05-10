@@ -2,6 +2,7 @@
 
 define([
     "firebug/lib",
+    "firebug/firebug",
     "firebug/domplate",
     "firebug/lib/xpcom",
     "arch/tools",
@@ -18,7 +19,7 @@ define([
     "firebug/search",
     "firebug/errors",
 ],
-function(FBL, Domplate, XPCOM, ToolsInterface, HttpRequestObserver, Locale, Events) { with (Domplate) {
+function(FBL, Firebug, Domplate, XPCOM, ToolsInterface, HttpRequestObserver, Locale, Events) { with (Domplate) {
 
 // ************************************************************************************************
 // Constants

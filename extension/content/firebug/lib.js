@@ -10,7 +10,7 @@ function(XPCOM, Locale, Events, Options) {
 
 // ********************************************************************************************* //
 
-var FBL = top.FBL;
+var FBL = top.FBL || {};
 
 try {
 

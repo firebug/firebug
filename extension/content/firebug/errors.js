@@ -2,10 +2,11 @@
 
 define([
     "firebug/lib",
+    "firebug/firebug",
     "firebug/reps",
     "firebug/lib/xpcom"
 ],
-function(FBL, FirebugReps, XPCOM) {
+function(FBL, Firebug, FirebugReps, XPCOM) {
 
 // **********************************************************************************************//
 // Constants

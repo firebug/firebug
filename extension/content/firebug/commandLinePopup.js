@@ -2,9 +2,10 @@
 
 define([
     "firebug/lib",
+    "firebug/firebug",
     "firebug/commandLine"
 ],
-function(FBL) {
+function(FBL, Firebug, CommandLine) {
 
 // ************************************************************************************************
 // Constants

@@ -2,6 +2,7 @@
 
 define([
     "firebug/lib",
+    "firebug/firebug",
     "firebug/domplate",
     "firebug/reps",
     "firebug/lib/locale",
@@ -11,7 +12,7 @@ define([
     "firebug/breakpoint",
     "firebug/search",
 ],
-function(FBL, Domplate, FirebugReps, Locale, ToolsInterface, Events) { with (Domplate) {
+function(FBL, Firebug, Domplate, FirebugReps, Locale, ToolsInterface, Events) { with (Domplate) {
 
 // ************************************************************************************************
 // Constants

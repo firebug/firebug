@@ -2,6 +2,7 @@
 
 define([
     "firebug/lib",
+    "firebug/firebug",
     "firebug/domplate",
     "firebug/lib/xpcom",
     "firebug/lib/locale",
@@ -9,7 +10,7 @@ define([
     "firebug/lib/htmlLib",
     "firebug/lib/events",
 ],
-function(FBL, Domplate, XPCOM, Locale, ToolsInterface, HTMLLib, Events) { with (Domplate) {
+function(FBL, Firebug, Domplate, XPCOM, Locale, ToolsInterface, HTMLLib, Events) { with (Domplate) {
 
 // ************************************************************************************************
 // Constants

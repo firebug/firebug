@@ -4,10 +4,11 @@
 // Module
 
 define([
+    "firebug/firebug",
     "firebug/lib/events",
     "arch/tools"
 ],
-function initializeFirebugAdapter(Events, ToolsInterface) {
+function initializeFirebugAdapter(Firebug, Events, ToolsInterface) {
 
 // ************************************************************************************************
 // Attach the BrowserToolsInterface to Firebug object

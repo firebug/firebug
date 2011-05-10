@@ -2,10 +2,11 @@
 
 define([
     "firebug/lib",
+    "firebug/firebug",
     "firebug/lib/locale",
     "firebug/domplate"
 ],
-function(FBL, Locale, Domplate) {
+function(FBL, Firebug, Locale, Domplate) {
 
 // ************************************************************************************************
 // Constants

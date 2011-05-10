@@ -509,11 +509,7 @@ var require, define;
                 try {
                     ret = req.execCb(fullName, manager.callback, args, defined[fullName]);
                 } catch(exc) {
-                    if (context.config.debug && context.config.onDebug) {
-                        var msg = exc.toString() +" "+(exc.fileName || exc.sourceName) + "@" + exc.lineNumber;
-                        context.config.onError("require.js: define "+fullName+" ERROR "+msg);
-                    }
-                    throw exc;
+                    req.onError(exc);
                 }
                 if (fullName) {
                     //If exports is in play, favor that since it helps circular
@@ -523,7 +519,9 @@ var require, define;
                     if (manager.usingExports && manager.cjsModule &&
                         manager.cjsModule.exports !== defined[fullName]) {
                         ret = defined[fullName] = manager.cjsModule.exports;
-
+                        if (context.config.debug && context.config.onDebug) {
+                            context.config.onDebug("require.js: defined "+fullName+" using exports");
+                        }
                     } else if (fullName in defined) {
                         //This case is when usingExports is in play and
                         //module.exports/setExports was not used. It could also
@@ -707,23 +705,12 @@ var require, define;
                     for (var p in defined) {
                         allDefined += p + ", ";
                     }
-                    context.config.onDebug("require; defined: "+allDefined, allDefined);
+                    context.config.onDebug("require; defined: "+(allDefined ? allDefined : " NONE"), allDefined);
                     var unresolvedDeps = "";
                     for (var i = 0; i < manager.depArray.length; i++) {
                         if (depArray[i] in defined) continue;
 
                         unresolvedDeps += depArray[i]+",";
-                        for (var managerWaitId in waiting)	{
-                            if (waiting.hasOwnProperty(managerWaitId)) {
-                                if (waiting[managerWaitId].fullName === depArray[i]) { // undefined new waiter deps on queued waiter
-                                    var waitingDepArray = waiting[managerWaitId].depArray;
-                                    for (var j = 0; j < waitingDepArray.length; j++) {
-                                        if (waitingDepArray[j] in defined) continue;
-                                        context.config.onDebug("require; circular dependency? "+manager.fullName+" depends on "+depArray[i]+" depends on "+waitingDepArray[j])
-                                    }
-                                }
-                            }
-                        }
                     }
 
                     var waitingOn = manager.depCount+"/"+manager.depMax+" "+unresolvedDeps;
@@ -795,11 +782,27 @@ var require, define;
                 depName, i;
             if (fullName) {
                 if (traced[fullName]) {
+                    if (context.config.onError || context.config.onDebug) {
+                        var cycle = Object.keys(traced).join("->")+"->"+fullName;
+                        if (defined[fullName]) {
+                            context.config.onDebug("require.js; traced "+fullName+" already defined");
+                        } else {
+                            context.config.onError("require.js; circular dependency: "+cycle);
+                        }
+                    }
                     return defined[fullName];
                 }
 
                 traced[fullName] = true;
+                if (context.config.onDebug) {
+                    context.config.onDebug("require.js; "+fullName+" added to traced: "+Object.keys(traced));
+                }
+            } else {
+                if (context.config.onDebug) {
+                    context.config.onDebug("require.js; forceExec,  no fullName");
+                }
             }
+
 
             //forceExec all of its dependencies.
             for (i = 0; i < depArray.length; i++) {
@@ -823,14 +826,19 @@ var require, define;
          * @private
          */
         function checkLoaded() {
-            if (context.config.debug && context.config.onDebug){
-                context.config.onDebug("checkLoaded waitCount:"+context.waitCount+" pausedCount: "+context.pausedCount+" scriptCount: "+context.scriptCount);
-            }
             var waitInterval = config.waitSeconds * 1000,
                 //It is possible to disable the wait interval by using waitSeconds of 0.
                 expired = waitInterval && (context.startTime + waitInterval) < new Date().getTime(),
                 noLoads = "", hasLoadedProp = false, stillLoading = false, prop,
                 err, manager;
+
+            if (context.config.debug && context.config.onDebug){
+                var msg = "waitCount:"+context.waitCount;
+                msg += " pausedCount: "+context.pausedCount;
+                msg += " scriptCount: "+context.scriptCount;
+                msg += (expired ? " EXPIRED: " : " remaining ") + (new Date().getTime() - context.startTime) + "/" + waitInterval +" secs";
+                context.config.onDebug("checkLoaded "+msg);
+            }
 
             //If there are items still in the paused queue processing wait.
             //This is particularly important in the sync case where each paused
@@ -852,8 +860,9 @@ var require, define;
             }
 
             //See if anything is still in flight.
+            var inLoadedAndNotInEmpty = [];
             for (prop in loaded) {
-                if (!(prop in empty)) {
+                if (!(prop in empty)) {  // loaded.hasOwnProperty(prop)
                     hasLoadedProp = true;
                     if (!loaded[prop]) {
                         if (expired) {
@@ -866,7 +875,11 @@ var require, define;
                 }
             }
             if (context.config.debug && context.config.onDebug) {
-                context.config.onDebug("checkLoaded stillLoading: "+stillLoading+" noLoads: "+noLoads);
+                var msg = "checkLoaded";
+                msg += " hasLoadedProp "+hasLoadedProp;
+                msg += " stillLoading: "+stillLoading;
+                msg += " noLoads: "+noLoads;
+                context.config.onDebug(msg);
             }
             //Check for exit conditions.
             if (!hasLoadedProp && !context.waitCount) {
@@ -874,16 +887,26 @@ var require, define;
                 //the work below does not need to be done.
                 return undefined;
             }
-            if (expired && noLoads) {
-                //If wait time expired, throw error of unloaded modules.
-                err = new Error("require.js load timeout (waitSeconds: "+config.waitSeconds+")for modules: " + noLoads);
-                err.requireType = "timeout";
-                err.requireModules = noLoads;
-                return req.onError(err);
+            if (expired) {
+                if (noLoads) {
+                    //If wait time expired, throw error of unloaded modules.
+                    err = new Error("require.js load timeout (waitSeconds: "+config.waitSeconds+") for modules: " + noLoads);
+                    err.requireType = "timeout";
+                    err.requireModules = noLoads;
+                    return req.onError(err);
+                } else {
+                    //If wait time expired, throw error of unloaded modules.
+                    noLoads = context.counted.join(", ");
+                    err = new Error("require.js checkLoaded("+context.checkLoaded+") timeout (waitSeconds: "+config.waitSeconds+") for counted modules: " + noLoads);
+                    err.requireType = "timeout";
+                    err.requireModules = noLoads;
+                    return req.onError(err);
+                }
             }
             if (stillLoading || context.scriptCount) {
                 //Something is still waiting to load. Wait for it.
                 if (isBrowser || isWebWorker) {
+                    context.checkLoaded = context.checkLoaded ? context.checkLoaded++ : 1;
                     setTimeout(checkLoaded, 50);
                 }
                 return undefined;
@@ -905,7 +928,7 @@ var require, define;
                 if (!context.checkLoadedDepth) {
                     context.checkLoadedDepth = 0;
                 }
-                if (context.config.debug && context.config.onDebug)
+                if (context.config.onDebug)
                     context.config.onDebug("context.checkLoadedDepth "+context.checkLoadedDepth);
                 if (context.checkLoadedDepth++ > 15) {
                     if (req.analyzeFailure && context.config.onDebug) {

@@ -2,6 +2,7 @@
 
 define([
     "firebug/lib",
+    "firebug/firebug",
     "firebug/lib/xpcom",
     "firebug/http/requestObserver",
     "firebug/http/responseObserver",
@@ -9,7 +10,7 @@ define([
     "firebug/lib/events",
     "firebug/sourceCache",
 ],
-function(FBL, XPCOM, HttpRequestObserver, HttpResponseObserver, Locale, Events) {
+function(FBL, Firebug, XPCOM, HttpRequestObserver, HttpResponseObserver, Locale, Events) {
 
 // ********************************************************************************************* //
 // Constants

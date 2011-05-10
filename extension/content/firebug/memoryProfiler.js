@@ -2,11 +2,12 @@
 
 define([
     "firebug/lib",
+    "firebug/firebug",
     "firebug/domplate",
     "firebug/reps",
     "firebug/lib/locale",
 ],
-function(FBL, Domplate, FirebugReps, Locale) {
+function(FBL, Firebug, Domplate, FirebugReps, Locale) {
 
 // ********************************************************************************************* //
 

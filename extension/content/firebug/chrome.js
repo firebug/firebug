@@ -6,6 +6,8 @@ var Firebug = null;
  * The 'context' in this file is always 'Firebug.currentContext'
  */
 
+var FirebugChrome;  // TODO module return
+
 (function() {
 
 // ************************************************************************************************
@@ -45,9 +47,9 @@ var enableSystemPagesLink = null;
 var enableAlwaysLink = null;
 
 // ************************************************************************************************
-
-top.FirebugChrome =
+FirebugChrome =
 {
+    // TODO: remove this property, add getters for location, title , focusedElement, setter popup
     window: window,
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
@@ -99,11 +101,11 @@ top.FirebugChrome =
         catch (exc)
         {
             // Disaster!
-            window.dump("getStackDump:"+FBL.getStackDump()+"\n");
             var msg = exc.toString() +" "+(exc.fileName || exc.sourceName) + "@" + exc.lineNumber;
             Components.utils.reportError(msg);
             if (FBTrace.sysout)
                 FBTrace.sysout("chrome.panelBarReady FAILS: "+msg, exc);
+            window.dump("getStackDump:"+FBL.getStackDump()+"\n");
             return false;
         }
         return true; // the panel bar is ready

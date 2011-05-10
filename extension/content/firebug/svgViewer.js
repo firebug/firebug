@@ -2,11 +2,12 @@
 
 define([
     "firebug/lib",
+    "firebug/firebug",
     "firebug/domplate",
     "firebug/lib/locale",
     "firebug/lib/xpcom"
 ],
-function(FBL, Domplate, Locale, XPCOM) {
+function(FBL, Firebug, Domplate, Locale, XPCOM) {
 
 // ************************************************************************************************
 // Constants

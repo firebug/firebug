@@ -149,6 +149,10 @@ var Firebug =
                 FBTrace.sysout("firebug.initialize has a tabBrowser");
             this.tabBrowser = tabBrowser;
         }
+        else
+        {
+            throw new Error("Firebug ERROR no 'content' in "+document.location);
+        }
 
         Firebug.Options.addListener(this);
 
@@ -290,7 +294,7 @@ var Firebug =
         // xxxHonza: Firebug is registered as a listener within bti/tools.js
         // I think it's wrong, should be done in the same modules as addListener.
         Firebug.ToolsInterface.browser.removeListener(Firebug);
-        Firebug.ToolsInterface.browser.removeListener(Firebug.ToolsInterface.JavaScript);//javascripttool.js 
+        Firebug.ToolsInterface.browser.removeListener(Firebug.ToolsInterface.JavaScript);//javascripttool.js
         Firebug.ToolsInterface.browser.removeListener(Firebug.ToolsAdapter);//firebugadapter.js
 
         if (FBTrace.DBG_INITIALIZE)

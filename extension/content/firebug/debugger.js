@@ -2,6 +2,7 @@
 
 define([
     "firebug/lib",
+    "firebug/firebug",
     "arch/tools",
     "firebug/lib/xpcom",
     "firebug/reps",
@@ -9,7 +10,7 @@ define([
     "firebug/http/requestObserver",
     "firebug/errors",
 ],
-function(FBL, ToolsInterface, XPCOM, FirebugReps, Locale, HttpRequestObserver) {
+function(FBL, Firebug, ToolsInterface, XPCOM, FirebugReps, Locale, HttpRequestObserver) {
 
 // ********************************************************************************************* //
 

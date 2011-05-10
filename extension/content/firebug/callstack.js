@@ -2,11 +2,12 @@
 
 define([
     "firebug/lib",
+    "firebug/firebug",
     "firebug/reps",
     "arch/tools",
     "firebug/lib/events",
 ],
-function(FBL, FirebugReps, ToolsInterface, Events) {
+function(FBL, Firebug, FirebugReps, ToolsInterface, Events) {
 
 // ************************************************************************************************
 // Constants

@@ -2,12 +2,13 @@
 
 define([
     "firebug/lib",
+    "firebug/firebug",
     "firebug/domplate",
     "firebug/reps",
     "firebug/lib/locale",
     "arch/tools"
 ],
-function(FBL, Domplate, FirebugReps, Locale, ToolsInterface) {
+function(FBL, Firebug, Domplate, FirebugReps, Locale, ToolsInterface) {
 
 // ************************************************************************************************
 // Profiler
