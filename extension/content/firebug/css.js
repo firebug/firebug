@@ -11,13 +11,14 @@ define([
     "firebug/lib/wrapper",
     "firebug/lib/url",
     "firebug/sourceLink",
+    "firebug/lib/css",
     "firebug/editor",
     "firebug/editorSelector",
     "firebug/infotip",
     "firebug/search",
 ],
 function(FBL, Firebug, Domplate, FirebugReps, XPCOM, Locale, Events, Wrapper, URL,
-    SourceLink) { with (Domplate) {
+    SourceLink, CSS) { with (Domplate) {
 
 // ************************************************************************************************
 // Constants
@@ -812,7 +813,7 @@ Firebug.CSSStyleSheetPanel.prototype = FBL.extend(Firebug.Panel,
 
     addProperty: function(name, value, important, disabled, inheritMode, props)
     {
-        if (inheritMode && !FBL.inheritedStyleNames[name])
+        if (inheritMode && !CSS.inheritedStyleNames[name])
             return;
 
         name = this.translateName(name, value);

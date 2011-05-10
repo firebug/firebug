@@ -8,8 +8,9 @@ define([
     "firebug/lib/locale",
     "firebug/lib/wrapper",
     "firebug/lib/stackFrame",
+    "firebug/lib/dom",
 ],
-function(FBL, Firebug, Domplate, FirebugReps, Locale, Wrapper, StackFrame) {
+function(FBL, Firebug, Domplate, FirebugReps, Locale, Wrapper, StackFrame, DOM) {
 
 // ********************************************************************************************* //
 
@@ -473,7 +474,7 @@ ObjectIterator.prototype =
                 continue;
 
             // Ignore built-in objects
-            if (FBL.isDOMMember(obj, name) || FBL.isDOMConstant(obj, name))
+            if (DOM.isDOMMember(obj, name) || DOM.isDOMConstant(obj, name))
                 continue;
 
             try

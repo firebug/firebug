@@ -11,12 +11,13 @@ define([
     "firebug/lib/wrapper",
     "firebug/sourceLink",
     "firebug/lib/stackFrame",
+    "firebug/lib/dom",
     "firebug/editor",
     "firebug/breakpoint",
     "firebug/search",
 ],
 function(FBL, Firebug, Domplate, FirebugReps, Locale, ToolsInterface, Events, Wrapper,
-    SourceLink, StackFrame) { with (Domplate) {
+    SourceLink, StackFrame, DOM) { with (Domplate) {
 
 // ************************************************************************************************
 // Constants
@@ -486,7 +487,7 @@ Firebug.DOMBasePanel.prototype = FBL.extend(Firebug.Panel,
             if (contentView.wrappedJSObject)
                 properties.push('wrappedJSObject');
 
-            var domMembers = FBL.getDOMMembers(object);
+            var domMembers = DOM.getDOMMembers(object);
             for (var i = 0; i < properties.length; i++)
             {
                 var name = properties[i];
@@ -520,7 +521,7 @@ Firebug.DOMBasePanel.prototype = FBL.extend(Firebug.Panel,
                 {
                     if (isClassFunction(val))
                         this.addMember(object, "userClass", userClasses, name, val, level, 0, context);
-                    else if (FBL.isDOMMember(object, name))
+                    else if (DOM.isDOMMember(object, name))
                         this.addMember(object, "domFunction", domFuncs, name, val, level, domMembers[name], context);
                     else
                         this.addMember(object, "userFunction", userFuncs, name, val, level, 0, context);
@@ -529,9 +530,9 @@ Firebug.DOMBasePanel.prototype = FBL.extend(Firebug.Panel,
                 {
                     if (isPrototype(name))
                         this.addMember(object, "proto", proto, name, val, level, 0, context);
-                    else if (FBL.isDOMMember(object, name))
+                    else if (DOM.isDOMMember(object, name))
                         this.addMember(object, "dom", domProps, name, val, level, domMembers[name], context);
-                    else if (FBL.isDOMConstant(object, name))
+                    else if (DOM.isDOMConstant(object, name))
                         this.addMember(object, "dom", domConstants, name, val, level, 0, context);
                     else
                         this.addMember(object, "user", userProps, name, val, level, 0, context);
@@ -657,7 +658,7 @@ Firebug.DOMBasePanel.prototype = FBL.extend(Firebug.Panel,
         // Set prefix for user defined properties. This prefix help the user to distinguish
         // among simple properties and those defined using getter and/or (only a) setter.
         var o = this.getObjectView(object);
-        if (o && !FBL.isDOMMember(object, name) && (XPCNativeWrapper.unwrap(object) !== object) )
+        if (o && !DOM.isDOMMember(object, name) && (XPCNativeWrapper.unwrap(object) !== object) )
         {
             var getter = o.__lookupGetter__(name);
             var setter = o.__lookupSetter__(name);
@@ -1459,7 +1460,7 @@ Firebug.DOMBasePanel.prototype = FBL.extend(Firebug.Panel,
                     command: FBL.bindFixed(this.editProperty, this, row) }
             );
 
-            if (isWatch || (!isStackFrame && !FBL.isDOMMember(rowObject, rowName)))
+            if (isWatch || (!isStackFrame && !DOM.isDOMMember(rowObject, rowName)))
             {
                 items.push(
                     {label: isWatch ? "DeleteWatch" : "DeleteProperty",
@@ -1468,7 +1469,7 @@ Firebug.DOMBasePanel.prototype = FBL.extend(Firebug.Panel,
             }
 
             var member = row ? row.domObject : null;
-            if (!FBL.isDOMMember(rowObject, rowName) && member && member.breakable)
+            if (!DOM.isDOMMember(rowObject, rowName) && member && member.breakable)
             {
                 items.push(
                     "-",

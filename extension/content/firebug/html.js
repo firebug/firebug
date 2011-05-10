@@ -10,6 +10,7 @@ define([
     "firebug/lib/htmlLib",
     "firebug/lib/events",
     "firebug/sourceLink",
+    "firebug/lib/css",
     "firebug/breakpoint",
     "firebug/editor",
     "firebug/infotip",
@@ -17,7 +18,7 @@ define([
     "firebug/insideOutBox",
 ],
 function(FBL, Firebug, Domplate, FirebugReps, Locale, ToolsInterface, HTMLLib, Events,
-    SourceLink) { with (Domplate) {
+    SourceLink, CSS) { with (Domplate) {
 
 // ************************************************************************************************
 // Constants
@@ -253,10 +254,10 @@ Firebug.HTMLPanel.prototype = FBL.extend(WalkingPanel,
 
     startEditingHTMLNode: function(node, box, editor)
     {
-        if (FBL.nonEditableTags.hasOwnProperty(node.localName))
+        if (CSS.nonEditableTags.hasOwnProperty(node.localName))
             return;
 
-        editor.innerEditMode = node.localName in FBL.innerEditableTags;
+        editor.innerEditMode = node.localName in CSS.innerEditableTags;
 
         var html = editor.innerEditMode ? node.innerHTML : FBL.getElementHTML(node);
         Firebug.Editor.startEditing(box, html, editor);
@@ -871,7 +872,7 @@ Firebug.HTMLPanel.prototype = FBL.extend(WalkingPanel,
             this.select(node);
 
             FBL.$('fbToggleHTMLEditing').disabled =
-                FBL.nonEditableTags.hasOwnProperty(node.localName);
+                CSS.nonEditableTags.hasOwnProperty(node.localName);
 
             delete this.noScrollIntoView;
             if (FBL.hasClass(event.target, "twisty"))
@@ -921,12 +922,12 @@ Firebug.HTMLPanel.prototype = FBL.extend(WalkingPanel,
         else if (event.keyCode == KeyEvent.DOM_VK_RIGHT)
             this.selectNodeBy("right");
         else if (event.keyCode == KeyEvent.DOM_VK_BACK_SPACE &&
-            !(node.localName in FBL.innerEditableTags) &&
-            !(FBL.nonEditableTags.hasOwnProperty(node.localName)))
+            !(node.localName in CSS.innerEditableTags) &&
+            !(CSS.nonEditableTags.hasOwnProperty(node.localName)))
             this.deleteNode(node, "up");
         else if (event.keyCode == KeyEvent.DOM_VK_DELETE &&
-            !(node.localName in FBL.innerEditableTags) &&
-            !(FBL.nonEditableTags.hasOwnProperty(node.localName)))
+            !(node.localName in CSS.innerEditableTags) &&
+            !(CSS.nonEditableTags.hasOwnProperty(node.localName)))
             this.deleteNode(node, "down");
         else
             return;
@@ -1327,7 +1328,7 @@ Firebug.HTMLPanel.prototype = FBL.extend(WalkingPanel,
                 );
             }
 
-            if (!(FBL.nonEditableTags.hasOwnProperty(node.localName)))
+            if (!(CSS.nonEditableTags.hasOwnProperty(node.localName)))
             {
                 var EditElement = "EditHTMLElement";
 
@@ -1339,7 +1340,7 @@ Firebug.HTMLPanel.prototype = FBL.extend(WalkingPanel,
                 items.push("-",
                     {label: EditElement, command: FBL.bindFixed(this.editNode, this, node)},
                     {label: "DeleteElement", command: FBL.bindFixed(this.deleteNode, this, node),
-                        disabled:(node.localName in FBL.innerEditableTags)}
+                        disabled:(node.localName in CSS.innerEditableTags)}
                 );
             }
 
@@ -2167,7 +2168,7 @@ Firebug.HTMLModule.MutationBreakpoints =
         {
         }
 
-        if (!(FBL.nonEditableTags.hasOwnProperty(node.localName)))
+        if (!(CSS.nonEditableTags.hasOwnProperty(node.localName)))
         {
             items.push(
                 "-",

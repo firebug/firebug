@@ -4,9 +4,10 @@ define([
     "firebug/lib",
     "firebug/domplate",
     "firebug/lib/locale",
-    "firebug/reps"
+    "firebug/reps",
+    "firebug/lib/dom",
 ],
-function(FBL, Domplate, Locale, FirebugReps) {
+function(FBL, Domplate, Locale, FirebugReps, DOM) {
 
 // ************************************************************************************************
 // Constants
@@ -276,20 +277,20 @@ FirebugReps.Table = domplate(Firebug.Rep,
      */
     domFilter: function(object, name)
     {
-        var domMembers = FBL.getDOMMembers(object, name);
+        var domMembers = DOM.getDOMMembers(object, name);
 
         if (typeof(object) == "function")
         {
-            if (FBL.isDOMMember(object, name) && !Firebug.showDOMFuncs)
+            if (DOM.isDOMMember(object, name) && !Firebug.showDOMFuncs)
                 return false;
             else if (!Firebug.showUserFuncs)
                 return false;
         }
         else
         {
-            if (FBL.isDOMMember(object, name) && !Firebug.showDOMProps)
+            if (DOM.isDOMMember(object, name) && !Firebug.showDOMProps)
                 return false;
-            else if (FBL.isDOMConstant(object, name) && !Firebug.showDOMConstants)
+            else if (DOM.isDOMConstant(object, name) && !Firebug.showDOMConstants)
                 return false;
             else if (!Firebug.showUserProps)
                 return false;
