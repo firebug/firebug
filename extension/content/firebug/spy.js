@@ -7,10 +7,11 @@ define([
     "firebug/reps",
     "firebug/lib/events",
     "firebug/http/requestObserver",
+    "firebug/lib/stackFrame",
     "firebug/net",
     "firebug/errors",
 ],
-function(FBL, Firebug, Domplate, FirebugReps, Events, HttpRequestObserver) {
+function(FBL, Firebug, Domplate, FirebugReps, Events, HttpRequestObserver, StackFrame) {
 
 // ************************************************************************************************
 // Constants
@@ -305,7 +306,7 @@ var SpyHttpObserver =
         spy.urlParams = FBL.parseURLParams(spy.href);
 
         // In case of redirects there is no stack and the source link is null.
-        spy.sourceLink = FBL.getStackSourceLink();
+        spy.sourceLink = StackFrame.getStackSourceLink();
 
         if (!spy.requestHeaders)
             spy.requestHeaders = getRequestHeaders(spy);

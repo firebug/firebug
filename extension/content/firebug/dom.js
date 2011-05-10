@@ -10,12 +10,13 @@ define([
     "firebug/lib/events",
     "firebug/lib/wrapper",
     "firebug/sourceLink",
+    "firebug/lib/stackFrame",
     "firebug/editor",
     "firebug/breakpoint",
     "firebug/search",
 ],
 function(FBL, Firebug, Domplate, FirebugReps, Locale, ToolsInterface, Events, Wrapper,
-    SourceLink) { with (Domplate) {
+    SourceLink, StackFrame) { with (Domplate) {
 
 // ************************************************************************************************
 // Constants
@@ -1841,13 +1842,13 @@ Firebug.WatchPanel.prototype = FBL.extend(Firebug.DOMBasePanel.prototype,
             this.frameSignature = frame.signature();
         }
 
-        if (frame instanceof FBL.StackFrame)
+        if (frame instanceof StackFrame.StackFrame)
             var scopes = frame.getScopes(Firebug.viewChrome);
         else
             var scopes = [this.context.getGlobalScope()];
 
         if (FBTrace.DBG_STACK)
-            FBTrace.sysout("dom watch frame isStackFrame "+(frame instanceof FBL.StackFrame)+
+            FBTrace.sysout("dom watch frame isStackFrame "+(frame instanceof StackFrame.StackFrame)+
                 " updateSelection scopes "+scopes.length, scopes);
 
         var members = [];
@@ -1878,7 +1879,7 @@ Firebug.WatchPanel.prototype = FBL.extend(Firebug.DOMBasePanel.prototype,
             }
         }
 
-        if (frame && frame instanceof FBL.StackFrame)
+        if (frame && frame instanceof StackFrame.StackFrame)
         {
             var thisVar = frame.getThisValue();
             if (thisVar)

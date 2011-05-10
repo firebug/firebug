@@ -12,9 +12,10 @@ define([
     "firebug/lib/wrapper",
     "firebug/lib/url",
     "firebug/sourceLink",
+    "firebug/lib/stackFrame",
 ],
 function(FBL, Firebug, Domplate, XPCOM, Locale, ToolsInterface, HTMLLib, Events, Wrapper,
-    URL, SourceLink) { with (Domplate) {
+    URL, SourceLink, StackFrame) { with (Domplate) {
 
 // ************************************************************************************************
 // Constants
@@ -249,7 +250,7 @@ FirebugReps.Func = domplate(Firebug.Rep,
         var scriptInfo = Firebug.SourceFile.getSourceFileAndLineByScript(context, script);
         var monitored = scriptInfo ? FBL.fbs.isMonitored(scriptInfo.sourceFile.href, scriptInfo.lineNo) : false;
 
-        var name = script ? FBL.getFunctionName(script, context) : fn.name;
+        var name = script ? StackFrame.getFunctionName(script, context) : fn.name;
         return [
             {label: "CopySource", command: FBL.bindFixed(this.copySource, this, fn) },
             "-",
@@ -1600,7 +1601,7 @@ FirebugReps.StackFrame = domplate(Firebug.Rep,  // XXXjjb Since the repObject is
 
     supportsObject: function(object, type)
     {
-        return object instanceof FBL.StackFrame;
+        return object instanceof StackFrame.StackFrame;
     },
 
     inspectObject: function(stackFrame, context)
@@ -1634,7 +1635,7 @@ FirebugReps.StackTrace = domplate(Firebug.Rep,
 
     supportsObject: function(object, type)
     {
-        return object instanceof FBL.StackTrace;
+        return object instanceof StackFrame.StackTrace;
     },
 
     frameIterator: function(frames)
@@ -1915,8 +1916,8 @@ FirebugReps.Except = domplate(Firebug.Rep,
 
         if (object.stack)
         {
-            trace = FBL.parseToStackTrace(object.stack, context);
-            trace = FBL.cleanStackTraceOfFirebug(trace);
+            trace = StackFrame.parseToStackTrace(object.stack, context);
+            trace = StackFrame.cleanStackTraceOfFirebug(trace);
             if (!trace)
                 lineNo = 0;
         }

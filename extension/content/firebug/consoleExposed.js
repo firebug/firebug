@@ -6,9 +6,10 @@ define([
     "firebug/lib/locale",
     "firebug/lib/wrapper",
     "firebug/lib/url",
+    "firebug/lib/stackFrame",
     "firebug/errors",
 ],
-function(FBL, FirebugReps, Locale, Wrapper, URL) {
+function(FBL, FirebugReps, Locale, Wrapper, URL, StackFrame) {
 
 // ********************************************************************************************* //
 
@@ -291,7 +292,7 @@ function createFirebugConsole(context, win)
 
         if (msg.stack)
         {
-            var trace = FBL.parseToStackTrace(msg.stack, context);
+            var trace = StackFrame.parseToStackTrace(msg.stack, context);
             if (FBTrace.DBG_CONSOLE)
                 FBTrace.sysout("logAssert trace from msg.stack", trace);
         }
@@ -308,7 +309,7 @@ function createFirebugConsole(context, win)
                 FBTrace.sysout("logAssert trace from getJSDUserStack", trace);
         }
 
-        trace = FBL.cleanStackTraceOfFirebug(trace);
+        trace = StackFrame.cleanStackTraceOfFirebug(trace);
 
         var url = msg.fileName ? msg.fileName : win.location.href;
         var lineNo = (trace && msg.lineNumber) ? msg.lineNumber : 0; // we may have only the line popped above
@@ -360,7 +361,7 @@ function createFirebugConsole(context, win)
 
     function getStackLink()
     {
-        return FBL.getFrameSourceLink(getComponentsStackDump());
+        return StackFrame.getFrameSourceLink(getComponentsStackDump());
     };
 
     function getJSDUserStack()

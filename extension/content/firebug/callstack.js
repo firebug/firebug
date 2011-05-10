@@ -7,8 +7,9 @@ define([
     "arch/tools",
     "firebug/lib/events",
     "firebug/lib/wrapper",
+    "firebug/lib/stackFrame",
 ],
-function(FBL, Firebug, FirebugReps, ToolsInterface, Events, Wrapper) {
+function(FBL, Firebug, FirebugReps, ToolsInterface, Events, Wrapper, StackFrame) {
 
 // ************************************************************************************************
 // Constants
@@ -73,7 +74,7 @@ Firebug.CallstackPanel.prototype = FBL.extend(Firebug.Panel,
     {
         if (!this.location)
         {
-            this.location = FBL.buildStackTrace(ToolsInterface.JavaScript.Turn.currentFrame);
+            this.location = StackFrame.buildStackTrace(ToolsInterface.JavaScript.Turn.currentFrame);
             this.updateLocation(this.location);
         } // then we are lazy
 
@@ -118,8 +119,9 @@ Firebug.CallstackPanel.prototype = FBL.extend(Firebug.Panel,
 
     supportsObject: function(object, type)
     {
-        return (object instanceof FBL.StackTrace) || (object instanceof Ci.jsdIStackFrame) ||
-            (object instanceof FBL.StackFrame);
+        return (object instanceof StackFrame.StackTrace) ||
+            (object instanceof Ci.jsdIStackFrame) ||
+            (object instanceof StackFrame.StackFrame);
     },
 
     // this.selection is a StackFrame in our this.location
@@ -127,12 +129,12 @@ Firebug.CallstackPanel.prototype = FBL.extend(Firebug.Panel,
     {
         if (!this.location) // then we are lazy
         {
-            this.location = FBL.buildStackTrace(ToolsInterface.JavaScript.Turn.currentFrame);
+            this.location = StackFrame.buildStackTrace(ToolsInterface.JavaScript.Turn.currentFrame);
             this.updateLocation(this.location);
         }
 
         // The selection object should be StackFrame
-        if (object instanceof FBL.StackFrame)
+        if (object instanceof StackFrame.StackFrame)
         {
             var trace = this.location;
             var frameIndex = object.getFrameIndex();
@@ -166,17 +168,17 @@ Firebug.CallstackPanel.prototype = FBL.extend(Firebug.Panel,
         if (FBTrace.DBG_STACK)
             FBTrace.sysout("callstack; updateLocation "+object, object);
         // All paths lead to showStackTrace
-        if (object instanceof FBL.StackTrace)
+        if (object instanceof StackFrame.StackTrace)
             this.showStackTrace(object);
         else if (object instanceof Ci.jsdIStackFrame)
-            this.navigate(FBL.getCorrectedStackTrace(object, this.context));
-        else if (object instanceof FBL.StackFrame)
+            this.navigate(StackFrame.getCorrectedStackTrace(object, this.context));
+        else if (object instanceof StackFrame.StackFrame)
             this.showStackFrame(object);
     },
 
     showStackFrame: function(frame)
     {
-        var trace = FBL.buildStackTrace(frame);
+        var trace = StackFrame.buildStackTrace(frame);
         this.navigate(trace);
     },
 
@@ -268,7 +270,7 @@ Firebug.CallstackPanel.prototype = FBL.extend(Firebug.Panel,
         delete this.parent;
 
         var frame = this.context.currentFrame;
-        var fnName = FBL.getFunctionName(frame.script, this.context, frame, true);
+        var fnName = StackFrame.getFunctionName(frame.script, this.context, frame, true);
 
         var referents = this.getReferents(frame, fnName);
 

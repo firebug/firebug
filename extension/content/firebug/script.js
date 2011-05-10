@@ -10,12 +10,14 @@ define([
     "firebug/lib/events",
     "firebug/lib/url",
     "firebug/sourceLink",
+    "firebug/lib/stackFrame",
     "firebug/editorSelector",
     "firebug/infotip",
     "firebug/search",
     "firebug/sourceBox",
 ],
-function(FBL, Firebug, FirebugReps, Domplate, ToolsInterface, Locale, Events, URL, SourceLink) {
+function(FBL, Firebug, FirebugReps, Domplate, ToolsInterface, Locale, Events, URL, SourceLink,
+    StackFrame) {
 
 // ********************************************************************************************* //
 // Constants
@@ -853,7 +855,7 @@ Firebug.ScriptPanel.prototype = FBL.extend(Firebug.SourceBoxPanel,
         if( object instanceof CompilationUnit
             || (object instanceof SourceLink.SourceLink && object.type == "js")
             || typeof(object) == "function"
-            || object instanceof FBL.StackFrame)
+            || object instanceof StackFrame.StackFrame)
             return 1;
         else return 0;
     },
@@ -929,7 +931,7 @@ Firebug.ScriptPanel.prototype = FBL.extend(Firebug.SourceBoxPanel,
                 FBTrace.sysout("script updateSelection this.showSourceLink(object)", object);
             else if (typeof(object) == "function")
                 FBTrace.sysout("script updateSelection this.showFunction(object)", object);
-            else if (object instanceof FBL.StackFrame)
+            else if (object instanceof StackFrame.StackFrame)
                 FBTrace.sysout("script updateSelection this.showStackFrameXB(object)", object);
             else
                 FBTrace.sysout("script updateSelection this.showStackFrame(null)", object);
@@ -941,7 +943,7 @@ Firebug.ScriptPanel.prototype = FBL.extend(Firebug.SourceBoxPanel,
             this.showSourceLink(object);
         else if (typeof(object) == "function")
             this.showFunction(object);
-        else if (object instanceof FBL.StackFrame)
+        else if (object instanceof StackFrame.StackFrame)
             this.showStackFrameXB(object);
     },
 

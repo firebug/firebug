@@ -7,8 +7,9 @@ define([
     "firebug/reps",
     "firebug/lib/locale",
     "firebug/lib/wrapper",
+    "firebug/lib/stackFrame",
 ],
-function(FBL, Firebug, Domplate, FirebugReps, Locale, Wrapper) {
+function(FBL, Firebug, Domplate, FirebugReps, Locale, Wrapper, StackFrame) {
 
 // ********************************************************************************************* //
 
@@ -168,7 +169,7 @@ Firebug.MemoryProfiler = FBL.extend(Firebug.Module,
         if (!context)
             return RETURN_CONTINUE;
 
-        frame = FBL.getStackFrame(frame, context);
+        frame = StackFrame.getStackFrame(frame, context);
 
         var oldReport = context.memoryProfileStack.pop();
         var newReport = this.getMemoryReport();
@@ -699,7 +700,7 @@ Firebug.MemoryProfiler.ProfileCall = domplate(Firebug.Rep,
 
     getCallName: function(call)
     {
-        return FBL.cropString(FBL.getFunctionName(call.script, call.context), 60);
+        return FBL.cropString(StackFrame.getFunctionName(call.script, call.context), 60);
     },
 
     getColumns: function(call)
@@ -739,7 +740,7 @@ Firebug.MemoryProfiler.ProfileCall = domplate(Firebug.Rep,
     {
         try
         {
-            var fn = FBL.getFunctionName(call.script, call.context);
+            var fn = StackFrame.getFunctionName(call.script, call.context);
             return FirebugReps.Func.getTooltip(fn, call.context);
         }
         catch (exc)

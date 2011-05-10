@@ -5,8 +5,9 @@ define([
     "firebug/firebug",
     "firebug/lib/url",
     "firebug/sourceLink",
+    "firebug/lib/stackFrame",
 ],
-function(FBL, Firebug, URL, SourceLink) {
+function(FBL, Firebug, URL, SourceLink, StackFrame) {
 
 // ********************************************************************************************* //
 // Constants
@@ -406,7 +407,7 @@ Firebug.SourceFile.NestedScriptAnalyzer.prototype =
         if (frame)
         {
             var name = frame.name;
-            var args = FBL.getFunctionArgValues(frame);
+            var args = StackFrame.getFunctionArgValues(frame);
         }
         else
         {
@@ -416,7 +417,7 @@ Firebug.SourceFile.NestedScriptAnalyzer.prototype =
 
         if (name ==  "anonymous")
         {
-            name = FBL.guessFunctionName(this.sourceFile.href, this.getBaseLineNumberByScript(script), context);
+            name = StackFrame.guessFunctionName(this.sourceFile.href, this.getBaseLineNumberByScript(script), context);
         }
 
         return {name: name, args: args};
@@ -613,7 +614,7 @@ Firebug.EventSourceFile.OuterScriptAnalyzer.prototype =
 
         if (frame)
         {
-            var args = FBL.getFunctionArgValues(frame);
+            var args = StackFrame.getFunctionArgValues(frame);
         }
         else
         {
@@ -825,7 +826,7 @@ Firebug.SourceFile.guessEnclosingFunctionName = function(url, line, context)
             line = analyzer.getBaseLineNumberByScript(script);
         }
     }
-    return FBL.guessFunctionName(url, line-1, context);
+    return StackFrame.guessFunctionName(url, line-1, context);
 };
 
 // ********************************************************************************************* //

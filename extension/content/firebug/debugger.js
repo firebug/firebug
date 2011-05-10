@@ -11,10 +11,11 @@ define([
     "firebug/lib/wrapper",
     "firebug/lib/url",
     "firebug/sourceLink",
+    "firebug/lib/stackFrame",
     "firebug/errors",
 ],
 function(FBL, Firebug, ToolsInterface, XPCOM, FirebugReps, Locale, HttpRequestObserver,
-    Wrapper, URL, SourceLink) {
+    Wrapper, URL, SourceLink, StackFrame) {
 
 // ********************************************************************************************* //
 
@@ -103,7 +104,7 @@ Firebug.Debugger = FBL.extend(Firebug.ActivableModule,
         return this.halt(function evalInFrame(frame)
         {
             window.dump("evaluateInCallingFrame "+frame.script.fileName+" stack: "+
-                FBL.getJSDStackDump(frame)+"\n");
+                StackFrame.getJSDStackDump(frame)+"\n");
 
             var result = {};
             var ok = frame.eval(js, fileName, lineNo, result);
@@ -194,7 +195,7 @@ Firebug.Debugger = FBL.extend(Firebug.ActivableModule,
             if (FBTrace.DBG_STACK)
                 FBTrace.sysout("lib.getCurrentStackTrace frame:", frame);
 
-            trace = FBL.getCorrectedStackTrace(frame, context);
+            trace = StackFrame.getCorrectedStackTrace(frame, context);
 
             if (FBTrace.DBG_STACK)
                 FBTrace.sysout("lib.getCurrentStackTrace trace:", trace.toString().split('\n'));
@@ -223,7 +224,7 @@ Firebug.Debugger = FBL.extend(Firebug.ActivableModule,
         {
             if (FBTrace.DBG_UI_LOOP)
                 FBTrace.sysout("debugger.breakNow: frame "+frame.script.fileName+" context "+
-                    context.getName(), FBL.getJSDStackDump(frame) );
+                    context.getName(), StackFrame.getJSDStackDump(frame) );
 
             for (; frame && frame.isValid; frame = frame.callingFrame)
             {
@@ -412,7 +413,7 @@ Firebug.Debugger = FBL.extend(Firebug.ActivableModule,
 
             var rerun = {};
 
-            var fnName = FBL.getFunctionName(frame.script, context, frame, true);
+            var fnName = StackFrame.getFunctionName(frame.script, context, frame, true);
             rerun.script = getStoreRerunInfoScript(fnName);
             var jsdFunctionName = frame.script.functionName;
 
@@ -927,7 +928,7 @@ Firebug.Debugger = FBL.extend(Firebug.ActivableModule,
             this.resume(context);
         }
 
-        var frame = FBL.getStackFrame(context.stoppedFrame, context);
+        var frame = StackFrame.getStackFrame(context.stoppedFrame, context);
         ToolsInterface.browser.dispatch( "onStartDebugging", [context, frame]);
 
         if (FBTrace.DBG_UI_LOOP)
@@ -1073,7 +1074,7 @@ Firebug.Debugger = FBL.extend(Firebug.ActivableModule,
 
             if (FBTrace.DBG_BP || (!context && FBTrace.DBG_FBS_ERRORS))
                 FBTrace.sysout("debugger.onBreak breakContext: " +
-                    (context ? context.getName() : " none!"), FBL.getJSDStackDump(frame) );
+                    (context ? context.getName() : " none!"), StackFrame.getJSDStackDump(frame) );
 
             delete this.breakContext;
 
@@ -1101,7 +1102,7 @@ Firebug.Debugger = FBL.extend(Firebug.ActivableModule,
 
     debuggerTracer: function(context, frame)
     {
-        var trace = FBL.getCorrectedStackTrace(frame, context);
+        var trace = StackFrame.getCorrectedStackTrace(frame, context);
         if (FBTrace.DBG_ERRORLOG)
             FBTrace.sysout("debugger.firebugDebuggerTracer corrected trace.frames "+
                 trace.frames.length, trace.frames);
@@ -1193,7 +1194,7 @@ Firebug.Debugger = FBL.extend(Firebug.ActivableModule,
             var isCatch = this.isCatchFromPreviousThrow(frame, context);
             if (!isCatch)
             {
-                context.thrownStackTrace = FBL.getCorrectedStackTrace(frame, context);
+                context.thrownStackTrace = StackFrame.getCorrectedStackTrace(frame, context);
                 if (FBTrace.DBG_BP)
                     FBTrace.sysout("debugger.onThrow reset context.thrownStackTrace",
                         context.thrownStackTrace.frames);
@@ -1251,7 +1252,7 @@ Firebug.Debugger = FBL.extend(Firebug.ActivableModule,
         if (!context)
             return RETURN_CONTINUE;
 
-        frame = FBL.getStackFrame(frame, context);
+        frame = StackFrame.getStackFrame(frame, context);
 
         ToolsInterface.browser.dispatch("onMonitorScript",[context, frame]);
     },
@@ -1263,7 +1264,7 @@ Firebug.Debugger = FBL.extend(Firebug.ActivableModule,
         if (!context)
             return RETURN_CONTINUE;
 
-        frame = FBL.getStackFrame(frame, context);
+        frame = StackFrame.getStackFrame(frame, context);
 
         ToolsInterface.browser.dispatch("onFunctionCall",[context, frame, depth, calling]);
 
@@ -1284,7 +1285,7 @@ Firebug.Debugger = FBL.extend(Firebug.ActivableModule,
             if (reTooMuchRecursion.test(error.errorMessage))
                 frame = FBL.fbs.discardRecursionFrames(frame);
 
-            Firebug.errorStackTrace = FBL.getCorrectedStackTrace(frame, context);
+            Firebug.errorStackTrace = StackFrame.getCorrectedStackTrace(frame, context);
             if (FBTrace.DBG_ERRORS)
                 FBTrace.sysout("debugger.onError; break=" + Firebug.breakOnErrors +
                     ", errorStackTrace:", Firebug.errorStackTrace);
@@ -1452,7 +1453,7 @@ Firebug.Debugger = FBL.extend(Firebug.ActivableModule,
 
             if (FBTrace.DBG_EVAL)
                 FBTrace.sysout("debugger.onEvalScriptCreated url="+sourceFile.href,
-                    FBL.getCorrectedStackTrace(frame, context));
+                    StackFrame.getCorrectedStackTrace(frame, context));
 
             ToolsInterface.browser.dispatch("onEvalScriptCreated",[context, frame, sourceFile.href]);
             return sourceFile;
@@ -1780,7 +1781,7 @@ Firebug.Debugger = FBL.extend(Firebug.ActivableModule,
             if (FBTrace.DBG_EVAL)
             {
                 FBTrace.sysout("debugger.onFunctionConstructor tag="+ctor_script.tag+" url="+sourceFile.href+"\n");
-                FBTrace.sysout(FBL.traceToString(FBL.getCorrectedStackTrace(frame, context))+"\n");
+                FBTrace.sysout(StackFrame.traceToString(StackFrame.getCorrectedStackTrace(frame, context))+"\n");
             }
 
             ToolsInterface.browser.dispatch("onFunctionConstructor",[context, frame, ctor_script, sourceFile.href]);

@@ -7,11 +7,12 @@ define([
     "firebug/lib/locale",
     "firebug/lib/events",
     "firebug/lib/url",
+    "firebug/lib/stackFrame",
     "firebug/console",
     "firebug/consoleExposed",
     "firebug/errors",
 ],
-function(FBL, Firebug, FirebugReps, Locale, Events, URL, Console) {
+function(FBL, Firebug, FirebugReps, Locale, Events, URL, StackFrame, Console) {
 
 // ********************************************************************************************* //
 // Constants
@@ -306,7 +307,7 @@ Firebug.Console.createConsole = function createConsole(context, win)
 
     console.count = function(key)
     {
-        var frameId = FBL.getStackFrameId();
+        var frameId = StackFrame.getStackFrameId();
         if (frameId)
         {
             if (!context.frameCounters)
@@ -424,7 +425,7 @@ Firebug.Console.createConsole = function createConsole(context, win)
 
         if (msg.stack)
         {
-            var trace = FBL.parseToStackTrace(msg.stack, context);
+            var trace = StackFrame.parseToStackTrace(msg.stack, context);
             if (FBTrace.DBG_CONSOLE)
                 FBTrace.sysout("logAssert trace from msg.stack", trace);
         }
@@ -441,7 +442,7 @@ Firebug.Console.createConsole = function createConsole(context, win)
                 FBTrace.sysout("logAssert trace from getJSDUserStack", trace);
         }
 
-        trace = FBL.cleanStackTraceOfFirebug(trace);
+        trace = StackFrame.cleanStackTraceOfFirebug(trace);
 
         var url = msg.fileName ? msg.fileName : win.location.href;
         var lineNo = (trace && msg.lineNumber) ? msg.lineNumber : 0; // we may have only the line popped above
@@ -495,7 +496,7 @@ Firebug.Console.createConsole = function createConsole(context, win)
 
     function getStackLink()
     {
-        return FBL.getFrameSourceLink(getComponentsStackDump());
+        return StackFrame.getFrameSourceLink(getComponentsStackDump());
     }
 
     function getJSDUserStack()

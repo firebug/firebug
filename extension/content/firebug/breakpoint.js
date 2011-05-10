@@ -9,9 +9,11 @@ define([
     "firebug/lib/events",
     "arch/tools",
     "firebug/sourceLink",
+    "firebug/lib/stackFrame",
     "firebug/editor",
 ],
-function(FBL, Firebug, Domplate, FirebugReps, Locale, Events, ToolsInterface, SourceLink) {
+function(FBL, Firebug, Domplate, FirebugReps, Locale, Events, ToolsInterface, SourceLink,
+    StackFrame) {
 
 // ************************************************************************************************
 // Breakpoints
@@ -400,7 +402,7 @@ Firebug.Breakpoint.BreakpointsPanel.prototype = FBL.extend(Firebug.Panel,
                     if (analyzer)
                         var name = analyzer.getFunctionDescription(script, context).name;
                     else
-                        var name = FBL.guessFunctionName(url, 1, context);
+                        var name = StackFrame.guessFunctionName(url, 1, context);
 
                     var isFuture = false;
                 }
