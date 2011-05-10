@@ -11,9 +11,10 @@ define([
     "firebug/lib/events",
     "firebug/lib/wrapper",
     "firebug/lib/url",
+    "firebug/sourceLink",
 ],
-function(FBL, Firebug, Domplate, XPCOM, Locale, ToolsInterface, HTMLLib, Events, Wrapper, URL) {
-with (Domplate) {
+function(FBL, Firebug, Domplate, XPCOM, Locale, ToolsInterface, HTMLLib, Events, Wrapper,
+    URL, SourceLink) { with (Domplate) {
 
 // ************************************************************************************************
 // Constants
@@ -1309,7 +1310,7 @@ FirebugReps.SourceLink = domplate(Firebug.Rep,
 
     supportsObject: function(object, type)
     {
-        return object instanceof FBL.SourceLink;
+        return object instanceof SourceLink.SourceLink;
     },
 
     getTooltip: function(sourceLink)
@@ -1534,7 +1535,7 @@ FirebugReps.StackFrame = domplate(Firebug.Rep,  // XXXjjb Since the repObject is
 
     getSourceLink: function(stackFrame)
     {
-        var sourceLink = new FBL.SourceLink(stackFrame.href, stackFrame.line, "js");
+        var sourceLink = new SourceLink.SourceLink(stackFrame.href, stackFrame.line, "js");
         return sourceLink;
     },
 
@@ -1751,7 +1752,7 @@ FirebugReps.ErrorMessage = domplate(Firebug.Rep,
     getSourceLink: function(error)
     {
         var ext = error.category == "css" ? "css" : "js";
-        return error.lineNo ? new FBL.SourceLink(error.href, error.lineNo, ext) : null;
+        return error.lineNo ? new SourceLink.SourceLink(error.href, error.lineNo, ext) : null;
     },
 
     getSourceType: function(error)

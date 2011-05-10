@@ -9,12 +9,13 @@ define([
     "firebug/lib/locale",
     "firebug/lib/events",
     "firebug/lib/url",
+    "firebug/sourceLink",
     "firebug/editorSelector",
     "firebug/infotip",
     "firebug/search",
     "firebug/sourceBox",
 ],
-function(FBL, Firebug, FirebugReps, Domplate, ToolsInterface, Locale, Events, URL) {
+function(FBL, Firebug, FirebugReps, Domplate, ToolsInterface, Locale, Events, URL, SourceLink) {
 
 // ********************************************************************************************* //
 // Constants
@@ -678,7 +679,7 @@ Firebug.ScriptPanel.prototype = FBL.extend(Firebug.SourceBoxPanel,
 
                 if (state && this.location)  // then we are restoring and we have a location, so scroll when we can
                 {
-                    var sourceLink = new FBL.SourceLink(this.location.getURL(), state.previousCenterLine, 'js');
+                    var sourceLink = new SourceLink.SourceLink(this.location.getURL(), state.previousCenterLine, 'js');
                     this.showSourceLink(sourceLink);
                 }
             }
@@ -850,7 +851,7 @@ Firebug.ScriptPanel.prototype = FBL.extend(Firebug.SourceBoxPanel,
     supportsObject: function(object, type)
     {
         if( object instanceof CompilationUnit
-            || (object instanceof FBL.SourceLink && object.type == "js")
+            || (object instanceof SourceLink.SourceLink && object.type == "js")
             || typeof(object) == "function"
             || object instanceof FBL.StackFrame)
             return 1;
@@ -924,7 +925,7 @@ Firebug.ScriptPanel.prototype = FBL.extend(Firebug.SourceBoxPanel,
             FBTrace.sysout("script updateSelection object:"+object+" of type "+typeof(object), object);
             if (object instanceof CompilationUnit)
                 FBTrace.sysout("script updateSelection this.navigate(object)", object);
-            else if (object instanceof FBL.SourceLink)
+            else if (object instanceof SourceLink.SourceLink)
                 FBTrace.sysout("script updateSelection this.showSourceLink(object)", object);
             else if (typeof(object) == "function")
                 FBTrace.sysout("script updateSelection this.showFunction(object)", object);
@@ -936,7 +937,7 @@ Firebug.ScriptPanel.prototype = FBL.extend(Firebug.SourceBoxPanel,
 
         if (object instanceof CompilationUnit)
             this.navigate(object);
-        else if (object instanceof FBL.SourceLink)
+        else if (object instanceof SourceLink.SourceLink)
             this.showSourceLink(object);
         else if (typeof(object) == "function")
             this.showFunction(object);
@@ -1122,7 +1123,7 @@ Firebug.ScriptPanel.prototype = FBL.extend(Firebug.SourceBoxPanel,
 
         var sourceLine = FBL.getChildByClass(sourceRow, "sourceLine");
         var lineNo = parseInt(sourceLine.textContent);
-        return new FBL.SourceLink(this.location.url, lineNo, 'js');
+        return new SourceLink.SourceLink(this.location.url, lineNo, 'js');
     },
 
     getOptionsMenuItems: function()

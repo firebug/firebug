@@ -10,13 +10,14 @@ define([
     "firebug/lib/events",
     "firebug/lib/wrapper",
     "firebug/lib/url",
+    "firebug/sourceLink",
     "firebug/editor",
     "firebug/editorSelector",
     "firebug/infotip",
     "firebug/search",
 ],
-function(FBL, Firebug, Domplate, FirebugReps, XPCOM, Locale, Events, Wrapper, URL) {
-with (Domplate) {
+function(FBL, Firebug, Domplate, FirebugReps, XPCOM, Locale, Events, Wrapper, URL,
+    SourceLink) { with (Domplate) {
 
 // ************************************************************************************************
 // Constants
@@ -1099,7 +1100,7 @@ Firebug.CSSStyleSheetPanel.prototype = FBL.extend(Firebug.Panel,
             return 2;
         else if (object instanceof window.CSSStyleDeclaration)
             return 2;
-        else if (object instanceof FBL.SourceLink && object.type == "css" &&
+        else if (object instanceof SourceLink.SourceLink && object.type == "css" &&
             FBL.reCSS.test(object.href))
             return 2;
         else
@@ -1178,7 +1179,7 @@ Firebug.CSSStyleSheetPanel.prototype = FBL.extend(Firebug.Panel,
         {
             this.navigate(object);
         }
-        else if (object instanceof FBL.SourceLink)
+        else if (object instanceof SourceLink.SourceLink)
         {
             try
             {
@@ -1443,7 +1444,7 @@ Firebug.CSSStyleSheetPanel.prototype = FBL.extend(Firebug.Panel,
 
         var line = getRuleLine(rule);
         var instance = FBL.getInstanceForStyleSheet(rule.parentStyleSheet);
-        var sourceLink = new FBL.SourceLink(href, line, "css", rule, instance);
+        var sourceLink = new SourceLink.SourceLink(href, line, "css", rule, instance);
 
         return sourceLink;
     },

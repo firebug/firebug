@@ -976,7 +976,8 @@ var Renderer =
         catch (e)
         {
             if (FBTrace.DBG_DOMPLATE || FBTrace.DBG_ERRORS)
-                FBTrace.sysout("domplate.renderHTML; EXCEPTION " + e, {exc: e, render: this.tag.renderMarkup.toSource()});
+                FBTrace.sysout("domplate.renderHTML; EXCEPTION " + e,
+                    {exc: e, render: this.tag.renderMarkup.toSource()});
         }
     },
 

@@ -8,9 +8,10 @@ define([
     "firebug/lib/locale",
     "firebug/lib/events",
     "arch/tools",
+    "firebug/sourceLink",
     "firebug/editor",
 ],
-function(FBL, Firebug, Domplate, FirebugReps, Locale, Events, ToolsInterface) {
+function(FBL, Firebug, Domplate, FirebugReps, Locale, Events, ToolsInterface, SourceLink) {
 
 // ************************************************************************************************
 // Breakpoints
@@ -184,7 +185,7 @@ Firebug.Breakpoint.BreakpointRep = domplate(Firebug.Rep,
 
     getSourceLink: function(bp)
     {
-        return new FBL.SourceLink(bp.href, bp.lineNumber, "js");
+        return new SourceLink.SourceLink(bp.href, bp.lineNumber, "js");
     },
 
     removeBreakpoint: function(groupName, href, lineNumber)

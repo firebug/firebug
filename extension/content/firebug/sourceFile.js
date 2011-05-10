@@ -4,8 +4,9 @@ define([
     "firebug/lib",
     "firebug/firebug",
     "firebug/lib/url",
+    "firebug/sourceLink",
 ],
-function(FBL, Firebug, URL) {
+function(FBL, Firebug, URL, SourceLink) {
 
 // ********************************************************************************************* //
 // Constants
@@ -425,7 +426,7 @@ Firebug.SourceFile.NestedScriptAnalyzer.prototype =
     getSourceLinkForScript: function (script)
     {
         var line = this.getBaseLineNumberByScript(script);
-        return new FBL.SourceLink(this.sourceFile.href, line, "js");
+        return new SourceLink.SourceLink(this.sourceFile.href, line, "js");
     },
 
     getBaseLineNumberByScript: function(script)
@@ -541,7 +542,7 @@ Firebug.EvalLevelSourceFile.OuterScriptAnalyzer.prototype =
     },
     getSourceLinkForScript: function (script)
     {
-        return new FBL.SourceLink(this.sourceFile.href, 1, "js");
+        return new SourceLink.SourceLink(this.sourceFile.href, 1, "js");
     }
 }
 
@@ -622,7 +623,7 @@ Firebug.EventSourceFile.OuterScriptAnalyzer.prototype =
     },
     getSourceLinkForScript: function (script)
     {
-        return new FBL.SourceLink(this.sourceFile.href, 1, "js");  // XXXjjb why do we need FBL.??
+        return new SourceLink.SourceLink(this.sourceFile.href, 1, "js");  // XXXjjb why do we need FBL.??
     }
 }
 
@@ -674,7 +675,7 @@ Firebug.TopLevelSourceFile.OuterScriptAnalyzer =
     },
     getSourceLinkForScript: function (script)
     {
-        return FBL.SourceLink(URL.normalizeURL(script.fileName), script.baseLineNumber, "js")
+        return SourceLink.SourceLink(URL.normalizeURL(script.fileName), script.baseLineNumber, "js")
     }
 }
 

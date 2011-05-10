@@ -6,8 +6,9 @@ define([
     "firebug/lib/locale",
     "firebug/lib/xpcom",
     "firebug/lib/url",
+    "firebug/sourceLink",
 ],
-function(FBL, Firebug, Locale, XPCOM, URL) {
+function(FBL, Firebug, Locale, XPCOM, URL, SourceLink) {
 
 // ********************************************************************************************* //
 // Constants
@@ -174,7 +175,7 @@ Firebug.ExternalEditors = FBL.extend(Firebug.Module,
         if (!this.count())
             return
 
-        if (object instanceof FBL.SourceLink)
+        if (object instanceof SourceLink.SourceLink)
         {
             var sourceLink = object;
             this.appendContextMenuItem(popup, sourceLink.href,

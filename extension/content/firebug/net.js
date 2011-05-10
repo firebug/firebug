@@ -11,6 +11,7 @@ define([
     "firebug/lib/events",
     "firebug/lib/options",
     "firebug/lib/url",
+    "firebug/sourceLink",
     "firebug/breakpoint",
     "firebug/xmlViewer",
     "firebug/svgViewer",
@@ -21,7 +22,7 @@ define([
     "firebug/errors",
 ],
 function(FBL, Firebug, Domplate, XPCOM, ToolsInterface, HttpRequestObserver, Locale, Events,
-    Options, URL) { with (Domplate) {
+    Options, URL, SourceLink) { with (Domplate) {
 
 // ************************************************************************************************
 // Constants
@@ -616,7 +617,7 @@ NetPanel.prototype = FBL.extend(Firebug.ActivablePanel,
 
     supportsObject: function(object, type)
     {
-        return ((object instanceof FBL.SourceLink && object.type == "net") ? 2 : 0);
+        return ((object instanceof SourceLink.SourceLink && object.type == "net") ? 2 : 0);
     },
 
     getOptionsMenuItems: function()
@@ -4328,7 +4329,8 @@ NetFile.prototype =
 
     getFileLink: function(message)
     {
-        var link = new FBL.SourceLink(this.href, null, "net", this.request);  // this.SourceLink = function(url, line, type, object, instance)
+        // this.SourceLink = function(url, line, type, object, instance)
+        var link = new SourceLink.SourceLink(this.href, null, "net", this.request);
         return link;
     },
 

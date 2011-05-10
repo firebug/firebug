@@ -9,13 +9,15 @@ define([
     "arch/tools",
     "firebug/lib/htmlLib",
     "firebug/lib/events",
+    "firebug/sourceLink",
     "firebug/breakpoint",
     "firebug/editor",
     "firebug/infotip",
     "firebug/search",
     "firebug/insideOutBox",
 ],
-function(FBL, Firebug, Domplate, FirebugReps, Locale, ToolsInterface, HTMLLib, Events) { with (Domplate) {
+function(FBL, Firebug, Domplate, FirebugReps, Locale, ToolsInterface, HTMLLib, Events,
+    SourceLink) { with (Domplate) {
 
 // ************************************************************************************************
 // Constants
@@ -1095,9 +1097,11 @@ Firebug.HTMLPanel.prototype = FBL.extend(WalkingPanel,
 
     supportsObject: function(object, type)
     {
-        if (object instanceof window.Element || object instanceof window.Text || object instanceof window.CDATASection)
+        if (object instanceof window.Element || object instanceof window.Text ||
+            object instanceof window.CDATASection)
             return 2;
-        else if (object instanceof FBL.SourceLink && object.type == "css" && !FBL.reCSS.test(object.href))
+        else if (object instanceof SourceLink.SourceLink && object.type == "css" &&
+            !FBL.reCSS.test(object.href))
             return 2;
         else
             return 0;
@@ -1130,7 +1134,7 @@ Firebug.HTMLPanel.prototype = FBL.extend(WalkingPanel,
         if (this.ioBox.sourceRow)
             this.ioBox.sourceRow.removeAttribute("exe_line");
 
-        if (object instanceof FBL.SourceLink) // && object.type == "css" and !FBL.reCSS(object.href) by supports
+        if (object instanceof SourceLink.SourceLink) // && object.type == "css" and !FBL.reCSS(object.href) by supports
         {
             var sourceLink = object;
             var stylesheet = FBL.getStyleSheetByHref(sourceLink.href, this.context);

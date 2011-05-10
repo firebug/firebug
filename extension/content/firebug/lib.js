@@ -8,8 +8,9 @@ define([
     "firebug/lib/deprecated",
     "firebug/lib/wrapper",
     "firebug/lib/url",
+    "firebug/sourceLink",
 ],
-function(XPCOM, Locale, Events, Options, Deprecated, Wrapper, URL) {
+function(XPCOM, Locale, Events, Options, Deprecated, Wrapper, URL, SourceLink) {
 
 // ********************************************************************************************* //
 
@@ -47,6 +48,7 @@ for (var p in URL)
     FBL[p] = URL[p];
 
 FBL.deprecated = Deprecated.deprecated;
+FBL.SourceLink = SourceLink.SourceLink;
 
 // ********************************************************************************************* //
 
@@ -2738,7 +2740,7 @@ this.StackFrame.prototype =
 
     toSourceLink: function()
     {
-        return new FBL.SourceLink(this.sourceFile.href, this.line, "js");
+        return new SourceLink.SourceLink(this.sourceFile.href, this.line, "js");
     },
 
     toString: function()
@@ -2961,7 +2963,7 @@ this.getStackSourceLink = function()
 this.getFrameSourceLink = function(frame)
 {
     if (frame && frame.filename && frame.filename.indexOf("XPCSafeJSObjectWrapper") == -1)
-        return new FBL.SourceLink(frame.filename, frame.lineNumber, "js");
+        return new SourceLink.SourceLink(frame.filename, frame.lineNumber, "js");
     else
         return null;
 };
@@ -4512,33 +4514,6 @@ this.Continued.prototype =
         else
             this.callback = cb;
     }
-};
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
-
-this.SourceLink = function(url, line, type, object, instance)
-{
-    this.href = url;
-    this.instance = instance;
-    this.line = line;
-    this.type = type;
-    this.object = object;
-};
-
-this.SourceLink.prototype =
-{
-    toString: function()
-    {
-        return this.href+"@"+(this.line || '?');
-    },
-    toJSON: function() // until 3.1...
-    {
-        return "{\"href\":\""+this.href+"\", "+
-            (this.line?("\"line\":"+this.line+","):"")+
-            (this.type?(" \"type\":\""+this.type+"\","):"")+
-                    "}";
-    }
-
 };
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *

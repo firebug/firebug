@@ -9,12 +9,13 @@ define([
     "arch/tools",
     "firebug/lib/events",
     "firebug/lib/wrapper",
+    "firebug/sourceLink",
     "firebug/editor",
     "firebug/breakpoint",
     "firebug/search",
 ],
-function(FBL, Firebug, Domplate, FirebugReps, Locale, ToolsInterface, Events, Wrapper) {
-with (Domplate) {
+function(FBL, Firebug, Domplate, FirebugReps, Locale, ToolsInterface, Events, Wrapper,
+    SourceLink) { with (Domplate) {
 
 // ************************************************************************************************
 // Constants
@@ -1265,7 +1266,7 @@ Firebug.DOMBasePanel.prototype = FBL.extend(Firebug.Panel,
 
         if (typeof(object) == "undefined")
             return 1000;
-        else if (object instanceof FBL.SourceLink)
+        else if (object instanceof SourceLink.SourceLink)
             return 0;
         else
             return 1; // just agree to support everything but not aggressively.

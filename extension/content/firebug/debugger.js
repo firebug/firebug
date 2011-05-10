@@ -10,10 +10,11 @@ define([
     "firebug/http/requestObserver",
     "firebug/lib/wrapper",
     "firebug/lib/url",
+    "firebug/sourceLink",
     "firebug/errors",
 ],
 function(FBL, Firebug, ToolsInterface, XPCOM, FirebugReps, Locale, HttpRequestObserver,
-    Wrapper, URL) {
+    Wrapper, URL, SourceLink) {
 
 // ********************************************************************************************* //
 
@@ -2452,7 +2453,7 @@ Firebug.Debugger = FBL.extend(Firebug.ActivableModule,
     {
         var sourceFile = FBL.getSourceFileByHref(url, context);
         if (sourceFile)
-            return new FBL.SourceLink(sourceFile.href, 0, "js");
+            return new SourceLink.SourceLink(sourceFile.href, 0, "js");
     },
 
     shutdown: function()

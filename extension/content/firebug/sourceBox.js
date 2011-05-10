@@ -5,8 +5,9 @@ define([
     "firebug/firebug",
     "arch/tools",
     "firebug/lib/events",
+    "firebug/sourceLink",
 ],
-function(FBL, Firebug, ToolsInterface, Events) {
+function(FBL, Firebug, ToolsInterface, Events, SourceLink) {
 
 // ************************************************************************************************
 // Constants
@@ -506,9 +507,12 @@ Firebug.SourceBoxPanel = FBL.extend(SourceBoxPanelBase,
     {
         if (!this.selectedSourceBox)
             return;
+
         if (!lineNo)
             lineNo = this.getCentralLine(this.selectedSourceBox);
-        return new FBL.SourceLink(this.selectedSourceBox.repObject.href, lineNo, this.getSourceType());
+
+        return new SourceLink.SourceLink(this.selectedSourceBox.repObject.href, lineNo,
+            this.getSourceType());
     },
 
     /* Select sourcebox with href, scroll lineNo into center, highlight lineNo with highlighter given
@@ -678,7 +682,8 @@ Firebug.SourceBoxPanel = FBL.extend(SourceBoxPanelBase,
 
         var compilationUnit = sourceBox.repObject;
         compilationUnit.pendingViewRange = viewRange;
-        compilationUnit.getSourceLines(viewRange.firstLine, viewRange.lastLine, FBL.bind(this.onSourceLinesAvailable, this));
+        compilationUnit.getSourceLines(viewRange.firstLine, viewRange.lastLine,
+            FBL.bind(this.onSourceLinesAvailable, this));
     },
 
     reViewOnSourceLinesAvailable: function(sourceBox, viewRange)
@@ -688,7 +693,9 @@ Firebug.SourceBoxPanel = FBL.extend(SourceBoxPanelBase,
 
         if (Firebug.uiListeners.length > 0)
         {
-            var link = new FBL.SourceLink(sourceBox.repObject.href, sourceBox.centralLine, this.getSourceType());
+            var link = new SourceLink.SourceLink(sourceBox.repObject.href, sourceBox.centralLine,
+                this.getSourceType());
+
             Events.dispatch(Firebug.uiListeners, "onViewportChange", [link]);
         }
 
@@ -696,7 +703,8 @@ Firebug.SourceBoxPanel = FBL.extend(SourceBoxPanelBase,
         sourceBox.lastClientHeight = sourceBox.clientHeight;
 
         if (FBTrace.DBG_COMPILATION_UNITS)
-            FBTrace.sysout("sourceBox.reViewOnSourceLinesAvailable sourceBox.lastScrollTop "+sourceBox.lastScrollTop+" sourceBox.lastClientHeight "+sourceBox.lastClientHeight);
+            FBTrace.sysout("sourceBox.reViewOnSourceLinesAvailable sourceBox.lastScrollTop "+
+                sourceBox.lastScrollTop+" sourceBox.lastClientHeight "+sourceBox.lastClientHeight);
     },
 
     buildViewAround: function(sourceBox, viewRange)
