@@ -493,6 +493,10 @@ var require, define;
                 args = [],
                 ary = manager.depArray;
 
+            if (context.config.debug && context.config.onCollectDeps) {
+                context.config.onCollectDeps(fullName, manager.deps);
+            }
+
             //Call the callback to define the module, if necessary.
             if (cb && isFunction(cb)) {
                 //Pull out the defined dependencies and pass the ordered

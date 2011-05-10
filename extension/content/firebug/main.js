@@ -66,10 +66,48 @@ function getModuleLoaderConfig(baseConfig)
             else
                 throw new Error(msg);
         },
+        onCollectDeps: function(fullName, deps)
+        {
+            var arr = [];
+            for (var p in deps)
+                arr.push(p);
+            depTree[fullName] = arr;
+        }
     };
 
     return config;
 }
+
+// ********************************************************************************************* //
+
+var depTree = {};
+function dumpDependencyTree(tree)
+{
+    function resolveDeps(id, deps, path)
+    {
+        var result = {};
+        for (var p in deps)
+        {
+            var depID = deps[p];
+            if (path.indexOf(":" + depID + ":") == -1)
+                result[depID] = resolveDeps(depID, tree[depID], path + ":" + depID + ":");
+            else
+                FBTrace.sysout("Circular dependency: " + path + ":" + depID + ":");
+        }
+        return result;
+    }
+
+    var result = {};
+    for (var p in tree)
+    {
+        if (p == "undefined")
+            result["main"] = resolveDeps(p, tree[p], "");
+    }
+
+    FBTrace.sysout("Firebug module dependecy tree: ", result);
+}
+
+// ********************************************************************************************* //
 
 require.analyzeFailure = function(context, managers, specified, loaded)
 {
@@ -187,6 +225,9 @@ function(FBL)
     // for extensions compatibility
     window.FirebugReps = Firebug.Reps;
     window.domplate = Firebug.Domplate.domplateFunction;
+
+    if (FBTrace.DBG_MODULES)
+        dumpDependencyTree(depTree);
 });
 
 // ********************************************************************************************* //
