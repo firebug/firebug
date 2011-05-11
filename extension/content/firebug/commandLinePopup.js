@@ -5,8 +5,9 @@ define([
     "firebug/firebug",
     "firebug/commandLine",
     "firebug/lib/css",
+    "firebug/lib/dom",
 ],
-function(FBL, Firebug, CommandLine, CSS) {
+function(FBL, Firebug, CommandLine, DOM) {
 
 // ************************************************************************************************
 // Constants
@@ -109,7 +110,7 @@ Firebug.CommandLine.Popup = FBL.extend(Firebug.Module,
         // Set additional style so we can make the panelNode-console node
         // always visible regardless of the currently selected panel.
         var doc = chrome.$("fbCommandPopupBrowser").contentDocument;
-        var body = FBL.getBody(doc);
+        var body = DOM.getBody(doc);
         CSS.setClass(body, "commandPopup");
     },
 

@@ -11,6 +11,7 @@ define([
     "firebug/lib/events",
     "firebug/sourceLink",
     "firebug/lib/css",
+    "firebug/lib/dom",
     "firebug/breakpoint",
     "firebug/editor",
     "firebug/infotip",
@@ -18,7 +19,7 @@ define([
     "firebug/insideOutBox",
 ],
 function(FBL, Firebug, Domplate, FirebugReps, Locale, ToolsInterface, HTMLLib, Events,
-    SourceLink, CSS) { with (Domplate) {
+    SourceLink, CSS, DOM) { with (Domplate) {
 
 // ************************************************************************************************
 // Constants
@@ -865,7 +866,7 @@ Firebug.HTMLPanel.prototype = FBL.extend(WalkingPanel,
         if (!Events.isLeftClick(event))
             return;
 
-        if (FBL.getAncestorByClass(event.target, "nodeTag"))
+        if (DOM.getAncestorByClass(event.target, "nodeTag"))
         {
             var node = Firebug.getRepObject(event.target);
             this.noScrollIntoView = true;
@@ -1250,7 +1251,7 @@ Firebug.HTMLPanel.prototype = FBL.extend(WalkingPanel,
         try
         {
             var doc = this.context.window.document;
-            return doc.body ? doc.body : FBL.getPreviousElement(doc.documentElement.lastChild);
+            return doc.body ? doc.body : DOM.getPreviousElement(doc.documentElement.lastChild);
         }
         catch (exc)
         {
@@ -1315,8 +1316,8 @@ Firebug.HTMLPanel.prototype = FBL.extend(WalkingPanel,
                 {label: "NewAttribute", command: FBL.bindFixed(this.editNewAttribute, this, node) }
             );
 
-            var attrBox = FBL.getAncestorByClass(target, "nodeAttr");
-            if (FBL.getAncestorByClass(target, "nodeAttr"))
+            var attrBox = DOM.getAncestorByClass(target, "nodeAttr");
+            if (DOM.getAncestorByClass(target, "nodeAttr"))
             {
                 var attrName = attrBox.childNodes[1].textContent;
 
@@ -1344,7 +1345,7 @@ Firebug.HTMLPanel.prototype = FBL.extend(WalkingPanel,
                 );
             }
 
-            var objectBox = FBL.getAncestorByClass(target, "nodeBox");
+            var objectBox = DOM.getAncestorByClass(target, "nodeBox");
             var nodeChildBox = this.ioBox.getChildObjectBox(objectBox);
             if (nodeChildBox)
             {
@@ -2163,8 +2164,8 @@ Firebug.HTMLModule.MutationBreakpoints =
 
         var breakpoints = context.mutationBreakpoints;
 
-        var attrBox = FBL.getAncestorByClass(target, "nodeAttr");
-        if (FBL.getAncestorByClass(target, "nodeAttr"))
+        var attrBox = DOM.getAncestorByClass(target, "nodeAttr");
+        if (DOM.getAncestorByClass(target, "nodeAttr"))
         {
         }
 
@@ -2275,7 +2276,7 @@ Firebug.HTMLModule.BreakpointRep = domplate(Firebug.Rep,
         if (CSS.hasClass(event.target, "closeButton"))
         {
             // Remove from list of breakpoints.
-            var row = FBL.getAncestorByClass(event.target, "breakpointRow");
+            var row = DOM.getAncestorByClass(event.target, "breakpointRow");
             context.mutationBreakpoints.removeBreakpoint(row.repObject);
 
             bpPanel.refresh();
@@ -2296,7 +2297,7 @@ Firebug.HTMLModule.BreakpointRep = domplate(Firebug.Rep,
             // xxxsz: Needs a better way to update display of breakpoint than invalidate the whole panel's display
             panel.context.invalidatePanels("breakpoints");
 
-        var bp = FBL.getAncestorByClass(checkBox, "breakpointRow").repObject;
+        var bp = DOM.getAncestorByClass(checkBox, "breakpointRow").repObject;
         bp.checked = checkBox.checked;
     },
 

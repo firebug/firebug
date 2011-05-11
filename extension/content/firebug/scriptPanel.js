@@ -13,13 +13,14 @@ define([
     "firebug/sourceLink",
     "firebug/lib/stackFrame",
     "firebug/lib/css",
+    "firebug/lib/dom",
     "firebug/editorSelector",
     "firebug/infotip",
     "firebug/search",
     "firebug/sourceBox",
 ],
 function(FBL, Firebug, Firefox, FirebugReps, Domplate, ToolsInterface, Locale, Events, URL, SourceLink,
-    StackFrame, CSS) {
+    StackFrame, CSS, DOM) {
 
 // ********************************************************************************************* //
 // Constants
@@ -338,7 +339,7 @@ Firebug.ScriptPanel.prototype = FBL.extend(Firebug.SourceBoxPanel,
     editBreakpointCondition: function(lineNo)
     {
         var sourceRow = this.selectedSourceBox.getLineNode(lineNo);
-        var sourceLine = FBL.getChildByClass(sourceRow, "sourceLine");
+        var sourceLine = DOM.getChildByClass(sourceRow, "sourceLine");
         var condition = ToolsInterface.JavaScript.getBreakpointCondition(this.context,
             this.location.getURL(), lineNo);
 
@@ -417,10 +418,10 @@ Firebug.ScriptPanel.prototype = FBL.extend(Firebug.SourceBoxPanel,
     onMouseDown: function(event)
     {
         // Don't interfere with clicks made into a notification editor.
-        if (FBL.getAncestorByClass(event.target, "breakNotification"))
+        if (DOM.getAncestorByClass(event.target, "breakNotification"))
             return;
 
-        var sourceLine = FBL.getAncestorByClass(event.target, "sourceLine");
+        var sourceLine = DOM.getAncestorByClass(event.target, "sourceLine");
         if (!sourceLine)
             return;
 
@@ -441,7 +442,7 @@ Firebug.ScriptPanel.prototype = FBL.extend(Firebug.SourceBoxPanel,
 
     onContextMenu: function(event)
     {
-        var sourceLine = FBL.getAncestorByClass(event.target, "sourceLine");
+        var sourceLine = DOM.getAncestorByClass(event.target, "sourceLine");
         if (!sourceLine)
             return;
 
@@ -452,7 +453,7 @@ Firebug.ScriptPanel.prototype = FBL.extend(Firebug.SourceBoxPanel,
 
     onMouseOver: function(event)
     {
-        var sourceLine = FBL.getAncestorByClass(event.target, "sourceLine");
+        var sourceLine = DOM.getAncestorByClass(event.target, "sourceLine");
         if (sourceLine)
         {
             if (this.hoveredLine)
@@ -460,14 +461,14 @@ Firebug.ScriptPanel.prototype = FBL.extend(Firebug.SourceBoxPanel,
 
             this.hoveredLine = sourceLine;
 
-            if (FBL.getAncestorByClass(sourceLine, "sourceViewport"))
+            if (DOM.getAncestorByClass(sourceLine, "sourceViewport"))
                 CSS.setClass(sourceLine.parentNode, "hovered");
         }
     },
 
     onMouseOut: function(event)
     {
-        var sourceLine = FBL.getAncestorByClass(event.relatedTarget, "sourceLine");
+        var sourceLine = DOM.getAncestorByClass(event.relatedTarget, "sourceLine");
         if (!sourceLine)
         {
             if (this.hoveredLine)
@@ -1045,11 +1046,11 @@ Firebug.ScriptPanel.prototype = FBL.extend(Firebug.SourceBoxPanel,
     {
         // Don't show popup over the line numbers, we show the conditional breakpoint
         // editor there instead
-        var sourceLine = FBL.getAncestorByClass(target, "sourceLine");
+        var sourceLine = DOM.getAncestorByClass(target, "sourceLine");
         if (sourceLine)
             return;
 
-        var sourceRow = FBL.getAncestorByClass(target, "sourceRow");
+        var sourceRow = DOM.getAncestorByClass(target, "sourceRow");
         if (!sourceRow)
             return;
 
@@ -1064,7 +1065,7 @@ Firebug.ScriptPanel.prototype = FBL.extend(Firebug.SourceBoxPanel,
         if (!frame)
             return;
 
-        var sourceRowText = FBL.getAncestorByClass(target, "sourceRowText");
+        var sourceRowText = DOM.getAncestorByClass(target, "sourceRowText");
         if (!sourceRowText)
             return;
 
@@ -1121,11 +1122,11 @@ Firebug.ScriptPanel.prototype = FBL.extend(Firebug.SourceBoxPanel,
 
     getSourceLink: function(target, object)
     {
-        var sourceRow = FBL.getAncestorByClass(target, "sourceRow");
+        var sourceRow = DOM.getAncestorByClass(target, "sourceRow");
         if (!sourceRow)
             return;
 
-        var sourceLine = FBL.getChildByClass(sourceRow, "sourceLine");
+        var sourceLine = DOM.getChildByClass(sourceRow, "sourceLine");
         var lineNo = parseInt(sourceLine.textContent);
         return new SourceLink.SourceLink(this.location.url, lineNo, 'js');
     },
@@ -1156,14 +1157,14 @@ Firebug.ScriptPanel.prototype = FBL.extend(Firebug.SourceBoxPanel,
 
     getContextMenuItems: function(fn, target)
     {
-        if (FBL.getAncestorByClass(target, "sourceLine"))
+        if (DOM.getAncestorByClass(target, "sourceLine"))
             return;
 
-        var sourceRow = FBL.getAncestorByClass(target, "sourceRow");
+        var sourceRow = DOM.getAncestorByClass(target, "sourceRow");
         if (!sourceRow)
             return;
 
-        var sourceLine = FBL.getChildByClass(sourceRow, "sourceLine");
+        var sourceLine = DOM.getChildByClass(sourceRow, "sourceLine");
         var lineNo = parseInt(sourceLine.textContent);
 
         var items = [];
@@ -1200,10 +1201,10 @@ Firebug.ScriptPanel.prototype = FBL.extend(Firebug.SourceBoxPanel,
 
         if (this.context.stopped)
         {
-            var sourceRow = FBL.getAncestorByClass(target, "sourceRow");
+            var sourceRow = DOM.getAncestorByClass(target, "sourceRow");
             if (sourceRow)
             {
-                var compilationUnit = FBL.getAncestorByClass(sourceRow, "sourceBox").repObject;
+                var compilationUnit = DOM.getAncestorByClass(sourceRow, "sourceBox").repObject;
                 var lineNo = parseInt(sourceRow.firstChild.textContent);
 
                 var debuggr = this;

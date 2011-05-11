@@ -7,8 +7,9 @@ define([
     "firebug/lib/locale",
     "firebug/lib/events",
     "firebug/lib/css",
+    "firebug/lib/dom",
 ],
-function(FBL, Firebug, Domplate, Locale, Events, CSS) {
+function(FBL, Firebug, Domplate, Locale, Events, CSS, DOM) {
 
 // ************************************************************************************************
 // Constants
@@ -77,7 +78,7 @@ Firebug.Editor = FBL.extend(Firebug.Module,
         invalidEditor = false;
         currentTarget = target;
         currentPanel = panel;
-        currentGroup = FBL.getAncestorByClass(target, "editGroup");
+        currentGroup = DOM.getAncestorByClass(target, "editGroup");
 
         currentPanel.editing = true;
 
@@ -286,7 +287,7 @@ Firebug.Editor = FBL.extend(Firebug.Module,
     insertRow: function(relative, insertWhere)
     {
         var group =
-            relative || FBL.getAncestorByClass(currentTarget, "editGroup") || currentTarget;
+            relative || DOM.getAncestorByClass(currentTarget, "editGroup") || currentTarget;
         var value = this.stopEditing();
 
         currentPanel = Firebug.getElementPanel(group);
@@ -309,10 +310,10 @@ Firebug.Editor = FBL.extend(Firebug.Module,
 
     insertRowForObject: function(relative)
     {
-        var container = FBL.getAncestorByClass(relative, "insertInto");
+        var container = DOM.getAncestorByClass(relative, "insertInto");
         if (container)
         {
-            relative = FBL.getChildByClass(container, "insertBefore");
+            relative = DOM.getChildByClass(container, "insertBefore");
             if (relative)
                 this.insertRow(relative, "before");
         }
@@ -405,7 +406,7 @@ Firebug.Editor = FBL.extend(Firebug.Module,
 
     onBlur: function(event)
     {
-        if (currentEditor.enterOnBlur && FBL.isAncestor(event.target, currentEditor.box))
+        if (currentEditor.enterOnBlur && DOM.isAncestor(event.target, currentEditor.box))
             this.stopEditing();
     },
 
@@ -1558,20 +1559,20 @@ function getDefaultEditor(panel)
  */
 function getOutsider(element, group, stepper)
 {
-    var parentGroup = FBL.getAncestorByClass(group.parentNode, "editGroup");
+    var parentGroup = DOM.getAncestorByClass(group.parentNode, "editGroup");
     var next;
     do
     {
         next = stepper(next || element);
     }
-    while (FBL.isAncestor(next, group) || isGroupInsert(next, parentGroup));
+    while (DOM.isAncestor(next, group) || isGroupInsert(next, parentGroup));
 
     return next;
 }
 
 function isGroupInsert(next, group)
 {
-    return (!group || FBL.isAncestor(next, group))
+    return (!group || DOM.isAncestor(next, group))
         && (CSS.hasClass(next, "insertBefore") || CSS.hasClass(next, "insertAfter"));
 }
 

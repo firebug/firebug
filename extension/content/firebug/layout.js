@@ -7,9 +7,10 @@ define([
     "firebug/lib/locale",
     "firebug/lib/events",
     "firebug/lib/css",
+    "firebug/lib/dom",
     "firebug/editor",
 ],
-function(FBL, Firebug, Domplate, Locale, Events, CSS) {
+function(FBL, Firebug, Domplate, Locale, Events, CSS, DOM) {
 
 // ************************************************************************************************
 
@@ -117,7 +118,7 @@ LayoutPanel.prototype = FBL.extend(Firebug.Panel,
 
     onMouseOver: function(event)
     {
-        var layoutBox = FBL.getAncestorByClass(event.target, "layoutBox");
+        var layoutBox = DOM.getAncestorByClass(event.target, "layoutBox");
         var boxFrame = layoutBox ? getBoxFrame(layoutBox) : null;
 
         if (this.highlightedBox)
@@ -134,7 +135,7 @@ LayoutPanel.prototype = FBL.extend(Firebug.Panel,
     onMouseOut: function(event)
     {
         var nextTarget = event.relatedTarget;
-        if (nextTarget && FBL.getAncestorByClass(nextTarget, "layoutBox"))
+        if (nextTarget && DOM.getAncestorByClass(nextTarget, "layoutBox"))
             return;
 
         if (this.highlightedBox)
@@ -193,8 +194,8 @@ LayoutPanel.prototype = FBL.extend(Firebug.Panel,
         if (!view)
             return this.panelNode.innerHTML = "";
 
-        var prev = FBL.getPreviousElement(element.previousSibling);
-        var next = FBL.getNextElement(element.nextSibling);
+        var prev = DOM.getPreviousElement(element.previousSibling);
+        var next = DOM.getNextElement(element.nextSibling);
 
         var style = view.getComputedStyle(element, "");
         var prevStyle = prev ? view.getComputedStyle(prev, "") : null;
@@ -343,7 +344,7 @@ LayoutEditor.prototype = domplate(Firebug.InlineEditor.prototype,
         if (!this.panel.selection.style)
             return;
 
-        var labelBox = FBL.getAncestorByClass(target, "layoutLabel");
+        var labelBox = DOM.getAncestorByClass(target, "layoutLabel");
         var layoutBox = getLayoutBox(labelBox);
 
         var boxFrame = getBoxFrame(layoutBox);

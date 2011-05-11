@@ -7,8 +7,9 @@ define([
     "firebug/lib/locale",
     "firebug/lib/events",
     "firebug/lib/css",
+    "firebug/lib/dom",
 ],
-function(FBL, Firebug, Domplate, Locale, Events, CSS) {
+function(FBL, Firebug, Domplate, Locale, Events, CSS, DOM) {
 
 // ************************************************************************************************
 // Constants
@@ -138,7 +139,7 @@ Firebug.InfoTip = FBL.extend(Firebug.Module,
         doc.addEventListener("mouseout", browser.onInfoTipMouseOut, true);
         doc.addEventListener("mousemove", browser.onInfoTipMouseMove, true);
 
-        return browser.infoTip = this.tags.infoTipTag.append({}, FBL.getBody(doc));
+        return browser.infoTip = this.tags.infoTipTag.append({}, DOM.getBody(doc));
     },
 
     uninitializeBrowser: function(browser)
@@ -230,7 +231,7 @@ Firebug.InfoTip = FBL.extend(Firebug.Module,
     onMouseMove: function(event, browser)
     {
         // Ignore if the mouse is moving over the existing info tip.
-        if (FBL.getAncestorByClass(event.target, "infoTip"))
+        if (DOM.getAncestorByClass(event.target, "infoTip"))
             return;
 
         if (browser.currentPanel)

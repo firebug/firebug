@@ -14,9 +14,10 @@ define([
     "firebug/sourceLink",
     "firebug/lib/stackFrame",
     "firebug/lib/css",
+    "firebug/lib/dom",
 ],
 function(FBL, Firebug, Domplate, XPCOM, Locale, ToolsInterface, HTMLLib, Events, Wrapper,
-    URL, SourceLink, StackFrame, CSS) { with (Domplate) {
+    URL, SourceLink, StackFrame, CSS, DOM) { with (Domplate) {
 
 // ************************************************************************************************
 // Constants
@@ -1589,7 +1590,7 @@ FirebugReps.StackFrame = domplate(Firebug.Rep,  // XXXjjb Since the repObject is
         var target = event.currentTarget;
         if (CSS.hasClass(target, "argListBox"))
         {
-            var stackFrame = FBL.getAncestorByClass(target, "objectBox-stackFrame");
+            var stackFrame = DOM.getAncestorByClass(target, "objectBox-stackFrame");
             var panel = Firebug.getElementPanel(target);
             this.inspectObject(stackFrame.repObject, panel.context);
             Events.cancelEvent(event);
@@ -1790,7 +1791,7 @@ FirebugReps.ErrorMessage = domplate(Firebug.Rep,
             return;
         }
 
-        var errorTitle = FBL.getAncestorByClass(event.target, "errorTitle");
+        var errorTitle = DOM.getAncestorByClass(event.target, "errorTitle");
         if (errorTitle)
         {
             var traceBox = target.childNodes[1];

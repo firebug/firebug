@@ -7,8 +7,9 @@ define([
     "firebug/lib/events",
     "firebug/sourceLink",
     "firebug/lib/css",
+    "firebug/lib/dom",
 ],
-function(FBL, Firebug, ToolsInterface, Events, SourceLink, CSS) {
+function(FBL, Firebug, ToolsInterface, Events, SourceLink, CSS, DOM) {
 
 // ************************************************************************************************
 // Constants
@@ -236,8 +237,8 @@ Firebug.SourceBoxPanel = FBL.extend(SourceBoxPanelBase,
         if (selection.isCollapsed)
             return "";
 
-        var anchorSourceRow = FBL.getAncestorByClass(selection.anchorNode, "sourceRow");
-        var focusSourceRow = FBL.getAncestorByClass(selection.focusNode, "sourceRow");
+        var anchorSourceRow = DOM.getAncestorByClass(selection.anchorNode, "sourceRow");
+        var focusSourceRow = DOM.getAncestorByClass(selection.focusNode, "sourceRow");
         if (anchorSourceRow == focusSourceRow)
         {
             return selection.toString();// trivial case
@@ -256,7 +257,7 @@ Firebug.SourceBoxPanel = FBL.extend(SourceBoxPanelBase,
 
     getSourceLine: function(sourceRow, beginOffset, endOffset)
     {
-        var source = FBL.getChildByClass(sourceRow, "sourceRowText").textContent;
+        var source = DOM.getChildByClass(sourceRow, "sourceRowText").textContent;
         if (endOffset)
             source = source.substring(beginOffset, endOffset);
         else if (beginOffset)
@@ -444,7 +445,7 @@ Firebug.SourceBoxPanel = FBL.extend(SourceBoxPanelBase,
 
         FBL.appendInnerHTML(sourceBox, paddedSource);
 
-        sourceBox.viewport = FBL.getChildByClass(sourceBox, 'sourceViewport');
+        sourceBox.viewport = DOM.getChildByClass(sourceBox, 'sourceViewport');
         return sourceBox;
     },
 

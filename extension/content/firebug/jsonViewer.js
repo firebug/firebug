@@ -7,10 +7,11 @@ define([
     "firebug/lib/locale",
     "firebug/lib/events",
     "firebug/lib/css",
+    "firebug/lib/dom",
     "firebug/domPanel",
     "firebug/reps"
 ],
-function(FBL, Firebug, Domplate, Locale, Events, CSS) {
+function(FBL, Firebug, Domplate, Locale, Events, CSS, DOM) {
 
 // ************************************************************************************************
 
@@ -133,7 +134,7 @@ Firebug.JSONViewerModel.Preview = domplate(
     onSort: function(event)
     {
         var target = event.target;
-        var sortLink = FBL.getAncestorByClass(target, "sortLink");
+        var sortLink = DOM.getAncestorByClass(target, "sortLink");
         if (!sortLink)
             return;
 
@@ -142,8 +143,8 @@ Firebug.JSONViewerModel.Preview = domplate(
         CSS.toggleClass(sortLink, "sorted");
         Firebug.Options.set("sortJsonPreview", !Firebug.sortJsonPreview);
 
-        var preview = FBL.getAncestorByClass(sortLink, "jsonPreview");
-        var body = FBL.getAncestorByClass(sortLink, "netInfoJSONText");
+        var preview = DOM.getAncestorByClass(sortLink, "jsonPreview");
+        var body = DOM.getAncestorByClass(sortLink, "netInfoJSONText");
         this.render(body, preview.repObject, body.context);
     },
 

@@ -10,11 +10,12 @@ define([
     "firebug/lib/stackFrame",
     "firebug/http/httpLib",
     "firebug/lib/css",
+    "firebug/lib/dom",
     "firebug/netPanel",
     "firebug/errors",
 ],
 function(FBL, Firebug, Domplate, FirebugReps, Events, HttpRequestObserver, StackFrame,
-    HTTP, CSS) {
+    HTTP, CSS, DOM) {
 
 // ************************************************************************************************
 // Constants
@@ -632,7 +633,7 @@ function onHTTPSpyReadyStateChange(spy, event)
     // has been already expanded and the response tab selected).
     if (spy.logRow && spy.xhrRequest.readyState >= 3)
     {
-        var netInfoBox = FBL.getChildByClass(spy.logRow, "spyHead", "netInfoBody");
+        var netInfoBox = DOM.getChildByClass(spy.logRow, "spyHead", "netInfoBody");
         if (netInfoBox)
         {
             netInfoBox.htmlPresented = false;
@@ -845,14 +846,14 @@ Firebug.Spy.XHR = domplate(Firebug.Rep,
     onToggleBody: function(event)
     {
         var target = event.currentTarget;
-        var logRow = FBL.getAncestorByClass(target, "logRow-spy");
+        var logRow = DOM.getAncestorByClass(target, "logRow-spy");
 
         if (Events.isLeftClick(event))
         {
             CSS.toggleClass(logRow, "opened");
 
-            var spy = FBL.getChildByClass(logRow, "spyHead").repObject;
-            var spyHeadTable = FBL.getAncestorByClass(target, "spyHeadTable");
+            var spy = DOM.getChildByClass(logRow, "spyHead").repObject;
+            var spyHeadTable = DOM.getAncestorByClass(target, "spyHeadTable");
 
             if (CSS.hasClass(logRow, "opened"))
             {
@@ -862,7 +863,7 @@ Firebug.Spy.XHR = domplate(Firebug.Rep,
             }
             else
             {
-                var netInfoBox = FBL.getChildByClass(spy.logRow, "spyHead", "netInfoBody");
+                var netInfoBox = DOM.getChildByClass(spy.logRow, "spyHead", "netInfoBody");
                 Events.dispatch(Firebug.NetMonitor.NetInfoBody.fbListeners, "destroyTabBody", [netInfoBox, spy]);
                 if (spyHeadTable)
                     spyHeadTable.setAttribute('aria-expanded', 'false');
@@ -997,10 +998,10 @@ function updateHttpSpyInfo(spy)
         spy.responseHeaders = getResponseHeaders(spy);
 
     var template = Firebug.NetMonitor.NetInfoBody;
-    var netInfoBox = FBL.getChildByClass(spy.logRow, "spyHead", "netInfoBody");
+    var netInfoBox = DOM.getChildByClass(spy.logRow, "spyHead", "netInfoBody");
     if (!netInfoBox)
     {
-        var head = FBL.getChildByClass(spy.logRow, "spyHead");
+        var head = DOM.getChildByClass(spy.logRow, "spyHead");
         netInfoBox = template.tag.append({"file": spy}, head);
         Events.dispatch(template.fbListeners, "initTabBody", [netInfoBox, spy]);
         template.selectTabByName(netInfoBox, "Response");

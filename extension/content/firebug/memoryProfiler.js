@@ -564,8 +564,8 @@ Firebug.MemoryProfiler.ProfileTable = domplate(
 
     onClick: function(event)
     {
-        var table = FBL.getAncestorByClass(event.target, "profileTable");
-        var header = FBL.getAncestorByClass(event.target, "headerCell");
+        var table = DOM.getAncestorByClass(event.target, "profileTable");
+        var header = DOM.getAncestorByClass(event.target, "headerCell");
         if (!header)
             return;
 
@@ -604,8 +604,8 @@ Firebug.MemoryProfiler.ProfileTable = domplate(
                 tbody.appendChild(values[i].row);
         }
 
-        var tbody = FBL.getChildByClass(table, "profileTbody");
-        var thead = FBL.getChildByClass(table, "profileThead");
+        var tbody = DOM.getChildByClass(table, "profileTbody");
+        var thead = DOM.getChildByClass(table, "profileThead");
 
         var values = [];
         for (var row = tbody.childNodes[0]; row; row = row.nextSibling)
@@ -619,7 +619,7 @@ Firebug.MemoryProfiler.ProfileTable = domplate(
         values.sort(function(a, b) { return a.value < b.value ? -1 : 1; });
 
         var headerRow = thead.firstChild;
-        var headerSorted = FBL.getChildByClass(headerRow, "headerSorted");
+        var headerSorted = DOM.getChildByClass(headerRow, "headerSorted");
         CSS.removeClass(headerSorted, "headerSorted");
         if (headerSorted)
             headerSorted.removeAttribute('aria-sort');

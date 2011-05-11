@@ -2,9 +2,10 @@
 
 define([
     "firebug/lib/trace",
-    "firebug/lib/deprecated"
+    "firebug/lib/deprecated",
+    "firebug/lib/css",
 ],
-function(FBTrace, Deprecated) {
+function(FBTrace, Deprecated, CSS) {
 
 // ********************************************************************************************* //
 // Constants
@@ -14,7 +15,123 @@ var domMemberCache = null;
 var domMemberMap = {};
 
 // ********************************************************************************************* //
-// Module Implementation
+// DOM APIs
+
+DOM.getChildByClass = function(node) // ,classname, classname, classname...
+{
+    for (var i = 1; i < arguments.length; ++i)
+    {
+        var className = arguments[i];
+        var child = node.firstChild;
+        node = null;
+        for (; child; child = child.nextSibling)
+        {
+            if (CSS.hasClass(child, className))
+            {
+                node = child;
+                break;
+            }
+        }
+    }
+
+    return node;
+};
+
+DOM.getAncestorByClass = function(node, className)
+{
+    for (var parent = node; parent; parent = parent.parentNode)
+    {
+        if (CSS.hasClass(parent, className))
+            return parent;
+    }
+
+    return null;
+};
+
+DOM.getAncestorByTagName = function(node, tagName)
+{
+    for (var parent = node; parent; parent = parent.parentNode)
+    {
+        if (parent.localName && parent.tagName.toLowerCase() == "input")
+            return parent;
+    }
+
+    return null;
+};
+
+/* @Deprecated  Use native Firefox: node.getElementsByClassName(names).item(0) */
+DOM.getElementByClass = function(node, className)  // className, className, ...
+{
+    return DOM.getElementsByClass.apply(this,arguments).item(0);
+};
+
+/* @Deprecated  Use native Firefox: node.getElementsByClassName(names) */
+DOM.getElementsByClass = function(node, className)  // className, className, ...
+{
+    var args = FBL.cloneArray(arguments); args.splice(0, 1);
+    var className = args.join(" ");
+    return node.getElementsByClassName(className);
+};
+
+DOM.getElementsByAttribute = function(node, attrName, attrValue)
+{
+    function iteratorHelper(node, attrName, attrValue, result)
+    {
+        for (var child = node.firstChild; child; child = child.nextSibling)
+        {
+            if (child.getAttribute(attrName) == attrValue)
+                result.push(child);
+
+            iteratorHelper(child, attrName, attrValue, result);
+        }
+    }
+
+    var result = [];
+    iteratorHelper(node, attrName, attrValue, result);
+    return result;
+}
+
+DOM.isAncestor = function(node, potentialAncestor)
+{
+    for (var parent = node; parent; parent = parent.parentNode)
+    {
+        if (parent == potentialAncestor)
+            return true;
+    }
+
+    return false;
+};
+
+DOM.getNextElement = function(node)
+{
+    while (node && node.nodeType != 1)
+        node = node.nextSibling;
+
+    return node;
+};
+
+DOM.getPreviousElement = function(node)
+{
+    while (node && node.nodeType != 1)
+        node = node.previousSibling;
+
+    return node;
+};
+
+DOM.getBody = function(doc)
+{
+    if (doc.body)
+        return doc.body;
+
+    var body = doc.getElementsByTagName("body")[0];
+    if (body)
+        return body;
+
+    return doc.documentElement;  // For non-HTML docs
+};
+
+// ********************************************************************************************* //
+// DOM Members
 
 DOM.getDOMMembers = function(object)
 {

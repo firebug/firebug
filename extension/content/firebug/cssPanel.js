@@ -13,13 +13,14 @@ define([
     "firebug/lib/url",
     "firebug/sourceLink",
     "firebug/lib/css",
+    "firebug/lib/dom",
     "firebug/editor",
     "firebug/editorSelector",
     "firebug/infotip",
     "firebug/search",
 ],
 function(FBL, Firebug, Firefox, Domplate, FirebugReps, XPCOM, Locale, Events, Wrapper, URL,
-    SourceLink, CSS) { with (Domplate) {
+    SourceLink, CSS, DOM) { with (Domplate) {
 
 // ************************************************************************************************
 // Constants
@@ -899,16 +900,16 @@ Firebug.CSSStyleSheetPanel.prototype = FBL.extend(Firebug.Panel,
 
     insertRule: function(row)
     {
-        var location = FBL.getAncestorByClass(row, "cssRule");
+        var location = DOM.getAncestorByClass(row, "cssRule");
         if (!location)
         {
-            location = FBL.getChildByClass(this.panelNode, "cssSheet");
+            location = DOM.getChildByClass(this.panelNode, "cssSheet");
 
             // Stylesheet has no rules
             if (!location)
                 this.template.tag.replace({rules: []}, this.panelNode);
 
-            location = FBL.getChildByClass(this.panelNode, "cssSheet");
+            location = DOM.getChildByClass(this.panelNode, "cssSheet");
             Firebug.Editor.insertRowForObject(location);
         }
         else
@@ -919,14 +920,14 @@ Firebug.CSSStyleSheetPanel.prototype = FBL.extend(Firebug.Panel,
 
     editPropertyRow: function(row)
     {
-        var propValueBox = FBL.getChildByClass(row, "cssPropValue");
+        var propValueBox = DOM.getChildByClass(row, "cssPropValue");
         Firebug.Editor.startEditing(propValueBox);
     },
 
     deletePropertyRow: function(row)
     {
         var rule = Firebug.getRepObject(row);
-        var propName = FBL.getChildByClass(row, "cssPropName").textContent;
+        var propName = DOM.getChildByClass(row, "cssPropName").textContent;
         Firebug.CSSModule.deleteProperty(rule, propName, this.context);
 
         // Remove the property from the selector map, if it was disabled
@@ -955,7 +956,7 @@ Firebug.CSSStyleSheetPanel.prototype = FBL.extend(Firebug.Panel,
         CSS.toggleClass(row, "disabledStyle");
 
         var rule = Firebug.getRepObject(row);
-        var propName = FBL.getChildByClass(row, "cssPropName").textContent;
+        var propName = DOM.getChildByClass(row, "cssPropName").textContent;
 
         if (!this.context.selectorMap)
             this.context.selectorMap = {};
@@ -966,7 +967,7 @@ Firebug.CSSStyleSheetPanel.prototype = FBL.extend(Firebug.Panel,
             this.context.selectorMap[ruleId] = [];
 
         var map = this.context.selectorMap[ruleId];
-        var propValue = FBL.getChildByClass(row, "cssPropValue").textContent;
+        var propValue = DOM.getChildByClass(row, "cssPropValue").textContent;
         var parsedValue = parsePriority(propValue);
 
         Firebug.CSSModule.disableProperty(CSS.hasClass(row, "disabledStyle"), rule, propName, parsedValue, map, this.context);
@@ -992,7 +993,7 @@ Firebug.CSSStyleSheetPanel.prototype = FBL.extend(Firebug.Panel,
         {
             if (CSS.hasClass(event.target, "textEditor inlineExpander"))
                 return;
-            row = FBL.getAncestorByClass(event.target, "cssProp");
+            row = DOM.getAncestorByClass(event.target, "cssProp");
             if (row && CSS.hasClass(row, "editGroup"))
             {
                 this.disablePropertyRow(row);
@@ -1001,9 +1002,9 @@ Firebug.CSSStyleSheetPanel.prototype = FBL.extend(Firebug.Panel,
         }
         else if( (event.clientX >= 20) && (event.detail == 2) )
         {
-            row = FBL.getAncestorByClass(event.target, "cssRule");
-            if (row && !FBL.getAncestorByClass(event.target, "cssPropName")
-                && !FBL.getAncestorByClass(event.target, "cssPropValue"))
+            row = DOM.getAncestorByClass(event.target, "cssRule");
+            if (row && !DOM.getAncestorByClass(event.target, "cssPropName")
+                && !DOM.getAncestorByClass(event.target, "cssPropValue"))
             {
                 this.insertPropertyRow(row);
                 Events.cancelEvent(event);
@@ -1297,7 +1298,7 @@ Firebug.CSSStyleSheetPanel.prototype = FBL.extend(Firebug.Panel,
                 );
         }
 
-        var cssRule = FBL.getAncestorByClass(target, "cssRule");
+        var cssRule = DOM.getAncestorByClass(target, "cssRule");
         if (cssRule && CSS.hasClass(cssRule, "cssEditableRule"))
         {
             items.push(
@@ -1306,10 +1307,10 @@ Firebug.CSSStyleSheetPanel.prototype = FBL.extend(Firebug.Panel,
                     command: FBL.bindFixed(this.insertPropertyRow, this, target) }
             );
 
-            var propRow = FBL.getAncestorByClass(target, "cssProp");
+            var propRow = DOM.getAncestorByClass(target, "cssProp");
             if (propRow)
             {
-                var propName = FBL.getChildByClass(propRow, "cssPropName").textContent;
+                var propName = DOM.getChildByClass(propRow, "cssPropName").textContent;
                 var isDisabled = CSS.hasClass(propRow, "disabledStyle");
 
                 items.push(
@@ -1343,7 +1344,7 @@ Firebug.CSSStyleSheetPanel.prototype = FBL.extend(Firebug.Panel,
 
     showInfoTip: function(infoTip, target, x, y, rangeParent, rangeOffset)
     {
-        var propValue = FBL.getAncestorByClass(target, "cssPropValue");
+        var propValue = DOM.getAncestorByClass(target, "cssPropValue");
         if (propValue)
         {
             var text = propValue.textContent;
@@ -1572,7 +1573,7 @@ Firebug.CSSStyleSheetPanel.prototype = FBL.extend(Firebug.Panel,
 
     getStyleDeclaration: function(cssSelector)
     {
-        var cssRule = FBL.getAncestorByClass(cssSelector, "cssRule");
+        var cssRule = DOM.getAncestorByClass(cssSelector, "cssRule");
         var cssRules = cssRule.getElementsByClassName("cssPropertyListBox")[0].rule;
         var props = [];
 
@@ -1869,7 +1870,7 @@ CSSElementPanel.prototype = FBL.extend(Firebug.CSSStyleSheetPanel.prototype,
         doc.removeEventListener("mouseover", this.onHoverChange, false);
         doc.removeEventListener("mousedown", this.onActiveChange, false);
 
-        if (FBL.isAncestor(this.stateChangeEl, doc))
+        if (DOM.isAncestor(this.stateChangeEl, doc))
         {
             this.removeStateChangeHandlers();
         }
@@ -2171,14 +2172,14 @@ CSSComputedElementPanel.prototype = FBL.extend(CSSElementPanel.prototype,
         if (!Events.isLeftClick(event))
             return;
 
-        var cssComputedHeader = FBL.getAncestorByClass(event.target, "cssComputedHeader");
+        var cssComputedHeader = DOM.getAncestorByClass(event.target, "cssComputedHeader");
         if (cssComputedHeader)
             this.toggleNode(event);
     },
 
     toggleNode: function(event)
     {
-        var group = FBL.getAncestorByClass(event.target, "computedStylesGroup");
+        var group = DOM.getAncestorByClass(event.target, "computedStylesGroup");
         var groupName = group.getElementsByClassName("cssComputedLabel")[0].textContent;
 
         CSS.toggleClass(group, "opened");
@@ -2226,7 +2227,7 @@ CSSEditor.prototype = domplate(Firebug.InlineEditor.prototype,
 
         target.innerHTML = FBL.escapeForCss(value);
 
-        var row = FBL.getAncestorByClass(target, "cssProp");
+        var row = DOM.getAncestorByClass(target, "cssProp");
         if (CSS.hasClass(row, "disabledStyle"))
             CSS.toggleClass(row, "disabledStyle");
 
@@ -2236,7 +2237,7 @@ CSSEditor.prototype = domplate(Firebug.InlineEditor.prototype,
         {
             if (value && previousValue != value)  // name of property has changed.
             {
-                propValue = FBL.getChildByClass(row, "cssPropValue").textContent;
+                propValue = DOM.getChildByClass(row, "cssPropValue").textContent;
                 parsedValue = parsePriority(propValue);
 
                 if (propValue && propValue != "undefined") {
@@ -2250,10 +2251,10 @@ CSSEditor.prototype = domplate(Firebug.InlineEditor.prototype,
             else if (!value) // name of the property has been deleted, so remove the property.
                 Firebug.CSSModule.removeProperty(rule, previousValue);
         }
-        else if (FBL.getAncestorByClass(target, "cssPropValue"))
+        else if (DOM.getAncestorByClass(target, "cssPropValue"))
         {
-            propName = FBL.getChildByClass(row, "cssPropName").textContent;
-            propValue = FBL.getChildByClass(row, "cssPropValue").textContent;
+            propName = DOM.getChildByClass(row, "cssPropName").textContent;
+            propValue = DOM.getChildByClass(row, "cssPropValue").textContent;
 
             if (FBTrace.DBG_CSS)
             {
@@ -2323,8 +2324,8 @@ CSSEditor.prototype = domplate(Firebug.InlineEditor.prototype,
         }
         else
         {
-            var row = FBL.getAncestorByClass(this.target, "cssProp");
-            var propName = FBL.getChildByClass(row, "cssPropName").textContent;
+            var row = DOM.getAncestorByClass(this.target, "cssProp");
+            var propName = DOM.getChildByClass(row, "cssPropName").textContent;
             return FBL.getCSSKeywordsByProperty(FBL.getElementSimpleType(Firebug.getRepObject(this.target)),propName);
         }
     },
@@ -2373,7 +2374,7 @@ CSSRuleEditor.prototype = domplate(Firebug.InlineEditor.prototype,
         if (value === previousValue)
             return;
 
-        var row = FBL.getAncestorByClass(target, "cssRule");
+        var row = DOM.getAncestorByClass(target, "cssRule");
 
         var rule = Firebug.getRepObject(target);
         var searchRule = rule || Firebug.getRepObject(row.nextSibling);
@@ -2437,9 +2438,9 @@ CSSRuleEditor.prototype = domplate(Firebug.InlineEditor.prototype,
             for (var i = 0; i < props.length; i++) {
                 var propEl = props[i];
                 if (!CSS.hasClass(propEl, "disabledStyle")) {
-                    cssText.push(FBL.getChildByClass(propEl, "cssPropName").textContent);
+                    cssText.push(DOM.getChildByClass(propEl, "cssPropName").textContent);
                     cssText.push(":");
-                    cssText.push(FBL.getChildByClass(propEl, "cssPropValue").textContent);
+                    cssText.push(DOM.getChildByClass(propEl, "cssPropValue").textContent);
                     cssText.push(";");
                 }
             }

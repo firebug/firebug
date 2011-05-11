@@ -179,8 +179,8 @@ const DirTablePlate = domplate(Firebug.Rep,
         if (!Events.isLeftClick(event))
             return;
 
-        var row = FBL.getAncestorByClass(event.target, "memberRow");
-        var label = FBL.getAncestorByClass(event.target, "memberLabel");
+        var row = DOM.getAncestorByClass(event.target, "memberRow");
+        var label = DOM.getAncestorByClass(event.target, "memberLabel");
         var valueCell = row.getElementsByClassName("memberValueCell").item(0);
         var object = Firebug.getRepObject(event.target);
         var target = row.lastChild.firstChild;
@@ -219,7 +219,7 @@ const DirTablePlate = domplate(Firebug.Rep,
     toggleRow: function(row)
     {
         var level = parseInt(row.getAttribute("level"));
-        var table = FBL.getAncestorByClass(row, "domTable");
+        var table = DOM.getAncestorByClass(row, "domTable");
         var toggles = table.toggles;
         if (!toggles)
             toggles = table.repObject.toggles;
@@ -348,7 +348,7 @@ const DirTablePlate = domplate(Firebug.Rep,
         if (!CSS.hasClass(rowHeader, "memberRowHeader"))
             return;
 
-        var row = FBL.getAncestorByClass(event.target, "memberRow");
+        var row = DOM.getAncestorByClass(event.target, "memberRow");
         if (!row)
             return;
 
@@ -1425,7 +1425,7 @@ Firebug.DOMBasePanel.prototype = FBL.extend(Firebug.Panel,
         if (FBTrace.DBG_DOM)
             FBTrace.sysout("dom.getContextMenuItems;", object);
 
-        var row = FBL.getAncestorByClass(target, "memberRow");
+        var row = DOM.getAncestorByClass(target, "memberRow");
 
         var items = [];
 
@@ -1538,7 +1538,7 @@ DOMMainPanel.prototype = FBL.extend(Firebug.DOMBasePanel.prototype,
         var repNode = Firebug.getRepNode(event.target);
         if (repNode)
         {
-            var row = FBL.getAncestorByClass(event.target, "memberRow");
+            var row = DOM.getAncestorByClass(event.target, "memberRow");
             if (row)
             {
                 this.selectRow(row, repNode);
@@ -1594,7 +1594,7 @@ DOMMainPanel.prototype = FBL.extend(Firebug.DOMBasePanel.prototype,
             row = this.currentSearch.findNext(true, undefined, reverse, Firebug.Search.isCaseSensitive(text));
         else
         {
-            function findRow(node) { return FBL.getAncestorByClass(node, "memberRow"); }
+            function findRow(node) { return DOM.getAncestorByClass(node, "memberRow"); }
             this.currentSearch = new FBL.TextSearch(this.panelNode, findRow);
             row = this.currentSearch.find(text, reverse, Firebug.Search.isCaseSensitive(text));
         }
@@ -1738,7 +1738,7 @@ Firebug.WatchPanel.prototype = FBL.extend(Firebug.DOMBasePanel.prototype,
 
     onMouseDown: function(event)
     {
-        var watchNewRow = FBL.getAncestorByClass(event.target, "watchNewRow");
+        var watchNewRow = DOM.getAncestorByClass(event.target, "watchNewRow");
         if (watchNewRow)
         {
             this.editProperty(watchNewRow);
@@ -1748,17 +1748,17 @@ Firebug.WatchPanel.prototype = FBL.extend(Firebug.DOMBasePanel.prototype,
 
     onMouseOver: function(event)
     {
-        var watchRow = FBL.getAncestorByClass(event.target, "watchRow");
+        var watchRow = DOM.getAncestorByClass(event.target, "watchRow");
         if (watchRow)
             this.showToolbox(watchRow);
     },
 
     onMouseOut: function(event)
     {
-        if (FBL.isAncestor(event.relatedTarget, this.getToolbox()))
+        if (DOM.isAncestor(event.relatedTarget, this.getToolbox()))
             return;
 
-        var watchRow = FBL.getAncestorByClass(event.relatedTarget, "watchRow");
+        var watchRow = DOM.getAncestorByClass(event.relatedTarget, "watchRow");
         if (!watchRow)
             this.showToolbox(null);
     },
@@ -1935,7 +1935,7 @@ DOMEditor.prototype = domplate(Firebug.InlineEditor.prototype,
         if (cancel || value == "")
             return;
 
-        var row = FBL.getAncestorByClass(target, "memberRow");
+        var row = DOM.getAncestorByClass(target, "memberRow");
         Events.dispatch(this.panel.fbListeners, 'onWatchEndEditing', [this.panel]);
         if (!row)
             this.panel.addWatch(value);
@@ -2090,7 +2090,7 @@ Firebug.DOMModule.BreakpointRep = domplate(Firebug.Rep,
         var context = bpPanel.context;
 
         // Remove from list of breakpoints.
-        var row = FBL.getAncestorByClass(event.target, "breakpointRow");
+        var row = DOM.getAncestorByClass(event.target, "breakpointRow");
         var bp = row.repObject;
         context.dom.breakpoints.removeBreakpoint(bp.object, bp.propName);
 
@@ -2117,7 +2117,7 @@ Firebug.DOMModule.BreakpointRep = domplate(Firebug.Rep,
         var bpPanel = Firebug.getElementPanel(event.target);
         var context = bpPanel.context;
 
-        var bp = FBL.getAncestorByClass(checkBox, "breakpointRow").repObject;
+        var bp = DOM.getAncestorByClass(checkBox, "breakpointRow").repObject;
         bp.checked = checkBox.checked;
 
         var domPanel = context.getPanel("dom", true);

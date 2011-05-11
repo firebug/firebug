@@ -9,8 +9,9 @@ define([
     "firebug/lib/events",
     "firebug/lib/wrapper",
     "firebug/lib/css",
+    "firebug/lib/dom",
 ],
-function(FBL, Firebug, Firefox, FirebugReps, Locale, Events, Wrapper, CSS) {
+function(FBL, Firebug, Firefox, FirebugReps, Locale, Events, Wrapper, CSS, DOM) {
 
 // ************************************************************************************************
 // Constants
@@ -358,7 +359,7 @@ Firebug.Inspector = FBL.extend(Firebug.Module,
                 if (node.contentDocument)
                     target = node.contentDocument.documentElement;
                 else
-                    target = FBL.getNextElement(node.firstChild);
+                    target = DOM.getNextElement(node.firstChild);
             }
         }
 
@@ -1725,7 +1726,7 @@ var highlighterCache =
 
 function getNonFrameBody(elt)
 {
-    var body = FBL.getBody(elt.ownerDocument);
+    var body = DOM.getBody(elt.ownerDocument);
     return (body.localName && body.localName.toUpperCase() === "FRAMESET") ? null : body;
 }
 

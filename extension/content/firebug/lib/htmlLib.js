@@ -3,8 +3,9 @@
 define([
     "firebug/lib/events",
     "firebug/lib/css",
+    "firebug/lib/dom",
 ],
-function(Events, CSS) {
+function(Events, CSS, DOM) {
 
 // ********************************************************************************************* //
 // Constants
@@ -199,9 +200,9 @@ var HTMLLib =
                 {
                     var attrNodeBox = HTMLLib.findNodeAttrBox(nodeBox, node.nodeName);
                     if (isValue)
-                        return FBL.getChildByClass(attrNodeBox, "nodeValue");
+                        return DOM.getChildByClass(attrNodeBox, "nodeValue");
                     else
-                        return FBL.getChildByClass(attrNodeBox, "nodeName");
+                        return DOM.getChildByClass(attrNodeBox, "nodeName");
                 }
             }
             else if (node.nodeType == Node.TEXT_NODE)
@@ -270,7 +271,7 @@ var HTMLLib =
 
             if (row)
             {
-                var trueNodeBox = FBL.getAncestorByClass(nodeBox, "nodeBox");
+                var trueNodeBox = DOM.getAncestorByClass(nodeBox, "nodeBox");
                 CSS.setClass(trueNodeBox,'search-selection');
 
                 FBL.scrollIntoCenterView(row, panelNode);
@@ -776,7 +777,7 @@ var HTMLLib =
     getTextElementTextBox: function(nodeBox)
     {
         var nodeLabelBox = nodeBox.firstChild.lastChild;
-        return FBL.getChildByClass(nodeLabelBox, "nodeText");
+        return DOM.getChildByClass(nodeLabelBox, "nodeText");
     },
 
     // These functions can be copied to add tree walking feature, they allow Chromebug

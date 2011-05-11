@@ -11,10 +11,11 @@ define([
     "firebug/sourceLink",
     "firebug/lib/stackFrame",
     "firebug/lib/css",
+    "firebug/lib/dom",
     "firebug/editor",
 ],
 function(FBL, Firebug, Domplate, FirebugReps, Locale, Events, ToolsInterface, SourceLink,
-    StackFrame, CSS) {
+    StackFrame, CSS, DOM) {
 
 // ************************************************************************************************
 // Breakpoints
@@ -213,7 +214,7 @@ Firebug.Breakpoint.BreakpointRep = domplate(Firebug.Rep,
 
     getContextMenuItems: function(breakpoint, target)
     {
-        var head = FBL.getAncestorByClass(target, "breakpointBlock");
+        var head = DOM.getAncestorByClass(target, "breakpointBlock");
         var groupName = CSS.getClassValue(head, "breakpointBlock");
 
         var items = [{label: "Remove Breakpoint", command: FBL.bindFixed(this.removeBreakpoint, this, groupName, breakpoint.href, breakpoint.lineNumber)}];
@@ -254,7 +255,7 @@ Firebug.Breakpoint.BreakpointRep = domplate(Firebug.Rep,
     {
         var panel = Firebug.getElementPanel(event.target);
 
-        if (FBL.getAncestorByClass(event.target, "breakpointCheckbox"))
+        if (DOM.getAncestorByClass(event.target, "breakpointCheckbox"))
         {
             var node = event.target.parentNode.getElementsByClassName("objectLink-sourceLink").item(0);
             if (!node)
@@ -269,12 +270,12 @@ Firebug.Breakpoint.BreakpointRep = domplate(Firebug.Rep,
                 this.disableBreakpoint(sourceLink.href, sourceLink.line);
             panel.noRefresh = false;
         }
-        else if (FBL.getAncestorByClass(event.target, "closeButton"))
+        else if (DOM.getAncestorByClass(event.target, "closeButton"))
         {
             panel.noRefresh = true;
             var sourceLink =
               event.target.parentNode.getElementsByClassName("objectLink-sourceLink").item(0).repObject;
-            var head = FBL.getAncestorByClass(event.target, "breakpointBlock");
+            var head = DOM.getAncestorByClass(event.target, "breakpointBlock");
             var groupName = CSS.getClassValue(head, "breakpointBlock");
 
             this.removeBreakpoint(groupName, sourceLink.href, sourceLink.line);
@@ -892,7 +893,7 @@ Firebug.Breakpoint.BreakNotification.prototype = domplate(Firebug.Rep,
     onMouseOver: function(event)
     {
         var target = event.target;
-        var box = FBL.getAncestorByClass(target, "notificationBox");
+        var box = DOM.getAncestorByClass(target, "notificationBox");
         var close = box.querySelector(".notificationClose");
 
         // The close button is "active" (red) if the mouse hovers over the notification
@@ -906,7 +907,7 @@ Firebug.Breakpoint.BreakNotification.prototype = domplate(Firebug.Rep,
 
     onMouseOut: function(event)
     {
-        var box = FBL.getAncestorByClass(event.target, "notificationBox");
+        var box = DOM.getAncestorByClass(event.target, "notificationBox");
         var close = box.querySelector(".notificationClose");
         close.removeAttribute("active");
     },
@@ -1000,7 +1001,7 @@ Firebug.Breakpoint.BreakNotification.prototype = domplate(Firebug.Rep,
 
     getNotifyObject: function(target)
     {
-        var parentNode = FBL.getAncestorByClass(target, "notificationBox");
+        var parentNode = DOM.getAncestorByClass(target, "notificationBox");
         return parentNode.repObject;
     },
 

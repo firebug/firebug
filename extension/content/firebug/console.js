@@ -9,11 +9,12 @@ define([
     "arch/tools",
     "firebug/lib/events",
     "firebug/lib/css",
+    "firebug/lib/dom",
     "firebug/profiler",
     "firebug/search",
     "firebug/errors",
 ],
-function(FBL, Firebug, Firefox, FirebugReps, Locale, ToolsInterface, Events, CSS) {
+function(FBL, Firebug, Firefox, FirebugReps, Locale, ToolsInterface, Events, CSS, DOM) {
 
 // ************************************************************************************************
 // Constants
@@ -957,7 +958,7 @@ Firebug.ConsolePanel.prototype = FBL.extend(Firebug.ActivablePanel,
 
         this.matchSet = [];
 
-        function findRow(node) { return FBL.getAncestorByClass(node, "logRow"); }
+        function findRow(node) { return DOM.getAncestorByClass(node, "logRow"); }
         var search = new FBL.TextSearch(this.panelNode, findRow);
 
         var logRow = search.find(text);

@@ -116,8 +116,8 @@ FirebugReps.Table = domplate(Firebug.Rep,
 
     onClickHeader: function(event)
     {
-        var table = FBL.getAncestorByClass(event.target, "dataTable");
-        var header = FBL.getAncestorByClass(event.target, "headerCell");
+        var table = DOM.getAncestorByClass(event.target, "dataTable");
+        var header = DOM.getAncestorByClass(event.target, "headerCell");
         if (!header)
             return;
 
@@ -132,8 +132,8 @@ FirebugReps.Table = domplate(Firebug.Rep,
 
     sort: function(table, colIndex, numerical)
     {
-        var tbody = FBL.getChildByClass(table, "dataTableTbody");
-        var thead = FBL.getChildByClass(table, "dataTableThead");
+        var tbody = DOM.getChildByClass(table, "dataTableTbody");
+        var thead = DOM.getChildByClass(table, "dataTableThead");
 
         var values = [];
         for (var row = tbody.childNodes[0]; row; row = row.nextSibling)
@@ -146,7 +146,7 @@ FirebugReps.Table = domplate(Firebug.Rep,
         values.sort(function(a, b) { return a.value < b.value ? -1 : 1; });
 
         var headerRow = thead.firstChild;
-        var headerSorted = FBL.getChildByClass(headerRow, "headerSorted");
+        var headerSorted = DOM.getChildByClass(headerRow, "headerSorted");
         CSS.removeClass(headerSorted, "headerSorted");
         if (headerSorted)
             headerSorted.removeAttribute('aria-sort');

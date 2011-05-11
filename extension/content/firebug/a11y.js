@@ -9,10 +9,11 @@ define([
     "firebug/lib/events",
     "firebug/lib/url",
     "firebug/lib/css",
+    "firebug/lib/dom",
     "firebug/console",
     "firebug/infotip",
 ],
-function(FBL, Firebug, Domplate, Locale, ToolsInterface, Events, URL, CSS) {
+function(FBL, Firebug, Domplate, Locale, ToolsInterface, Events, URL, CSS, DOM) {
 
 // ************************************************************************************************
 // Constants
@@ -434,7 +435,7 @@ Firebug.A11yModel = FBL.extend(Firebug.Module,
                             siblingTab = target.parentNode[forward ? 'firstChild' : 'lastChild'];
                         if (siblingTab)
                         {
-                            var panelBar = FBL.getAncestorByClass(target, 'panelBar')
+                            var panelBar = DOM.getAncestorByClass(target, 'panelBar')
                             setTimeout(FBL.bindFixed(function()
                             {
                                 panelBar.selectTab(siblingTab);
@@ -449,7 +450,7 @@ Firebug.A11yModel = FBL.extend(Firebug.Module,
                             Events.cancelEvent(event);
                             return;
                        }
-                       toolbar = FBL.getAncestorByClass(target, 'innerToolbar');
+                       toolbar = DOM.getAncestorByClass(target, 'innerToolbar');
                        if (toolbar)
                        {
                            var doc = target.ownerDocument;
@@ -462,7 +463,7 @@ Firebug.A11yModel = FBL.extend(Firebug.Module,
                                //remove the buttons from the tab order again, so that it will remain uncluttered
                                //Very ugly hack, but it works well. This prevents focus to 'spill out' of a
                                //toolbar when using the left and right arrow keys
-                               if (!FBL.isAncestor(doc.commandDispatcher.focusedElement, toolbar))
+                               if (!DOM.isAncestor(doc.commandDispatcher.focusedElement, toolbar))
                                {
                                    //we moved focus to somewhere out of the toolbar: not good. Move it back to where it was.
                                    doc.commandDispatcher[!forward ? 'advanceFocus' : 'rewindFocus']();
@@ -658,7 +659,7 @@ Firebug.A11yModel = FBL.extend(Firebug.Module,
         }
         else if (CSS.hasClass(row, 'logRow-spy'))
         {
-            var focusRow = FBL.getChildByClass(row, 'spyHeadTable');
+            var focusRow = DOM.getChildByClass(row, 'spyHeadTable');
             if (focusRow)
                 this.makeFocusable(focusRow, true);
         }
@@ -678,7 +679,7 @@ Firebug.A11yModel = FBL.extend(Firebug.Module,
         var logRowType = this.getLogRowType(row);
         if (logRowType)
             this.insertHiddenText(panel, row, logRowType + ": ");
-        var arrayNode = FBL.getChildByClass(row, 'objectBox-array');
+        var arrayNode = DOM.getChildByClass(row, 'objectBox-array');
         if (arrayNode)
         {
             arrayNode.setAttribute('role', 'group');
@@ -739,8 +740,8 @@ Firebug.A11yModel = FBL.extend(Firebug.Module,
             var goLeft = keyCode == 37;
             if (this.isDirCell(target))
             {
-                var row = FBL.getAncestorByClass(target, 'memberRow');
-                var toggleElem = FBL.getChildByClass(row.cells[1], "memberLabel")
+                var row = DOM.getAncestorByClass(target, 'memberRow');
+                var toggleElem = DOM.getChildByClass(row.cells[1], "memberLabel")
                 if (!goLeft && CSS.hasClass(row, 'hasChildren'))
                 {
                     if (CSS.hasClass(row, 'opened'))
@@ -799,7 +800,7 @@ Firebug.A11yModel = FBL.extend(Firebug.Module,
                         groupClass = "errorTrace";
                         groupLabelClass = "errorTitle";
                     }
-                    else if (FBL.getAncestorByClass(target, 'logGroupBody'))
+                    else if (DOM.getAncestorByClass(target, 'logGroupBody'))
                     {
                         inExpanded = true;
                         groupClass = "logGroupBody";
@@ -807,7 +808,7 @@ Firebug.A11yModel = FBL.extend(Firebug.Module,
                     }
                     if (inExpanded)
                     {
-                        group = FBL.getAncestorByClass(target, groupClass);
+                        group = DOM.getAncestorByClass(target, groupClass);
                         if (group)
                         {
                             groupLabel = this.getPreviousByClass(target, groupLabelClass, false, panel.panelNode);
@@ -882,7 +883,7 @@ Firebug.A11yModel = FBL.extend(Firebug.Module,
         if (this.isFocusObject(target) && target.hasAttribute('role', 'checkbox'))
         {
             this.dispatchMouseEvent(target, 'click');
-            var objectBox = FBL.getAncestorByClass(target, 'hasBreakSwitch');
+            var objectBox = DOM.getAncestorByClass(target, 'hasBreakSwitch');
             if (objectBox)
                 target.setAttribute('aria-checked', CSS.hasClass(objectBox, 'breakForError') + "");
         }
@@ -923,7 +924,7 @@ Firebug.A11yModel = FBL.extend(Firebug.Module,
         {
             var cell = row.cells[panelA11y.cellIndex];
             if (!CSS.hasClass(cell, "a11yFocus"))
-                cell = FBL.getChildByClass(cell, 'a11yFocus');
+                cell = DOM.getChildByClass(cell, 'a11yFocus');
             this.focus(cell);
         }
         else if (CSS.hasClass(row, 'netInfoTabs')) // for Net Panel. Focus selected tab rather than the tablist
@@ -943,24 +944,24 @@ Firebug.A11yModel = FBL.extend(Firebug.Module,
 
     getAncestorRow : function(elem, useSubRow)
     {
-        return FBL.getAncestorByClass(elem, useSubRow ? 'focusRow' : 'outerFocusRow');
+        return DOM.getAncestorByClass(elem, useSubRow ? 'focusRow' : 'outerFocusRow');
     },
 
     onConsoleMouseDown : function(event)
     {
-        var node = FBL.getAncestorByClass(event.target, 'focusRow');
+        var node = DOM.getAncestorByClass(event.target, 'focusRow');
         if (node)
             this.modifyPanelRow(Firebug.getElementPanel(node), node, false);
         else
         {
-            node = FBL.getAncestorByClass(event.target, 'memberRow');
+            node = DOM.getAncestorByClass(event.target, 'memberRow');
             if (!node)
                 return;
             var focusRow = node.getElementsByClassName('focusRow').item(0);
             if (!focusRow)
                 return;
             this.focusPanelRow(Firebug.getElementPanel(focusRow), focusRow);
-            node = FBL.getAncestorByClass(event.target, 'memberLabel')
+            node = DOM.getAncestorByClass(event.target, 'memberLabel')
             if (!(node && CSS.hasClass(node, 'hasChildren')))
                 Events.cancelEvent(event);
         }
@@ -1052,7 +1053,7 @@ Firebug.A11yModel = FBL.extend(Firebug.Module,
                 }
                 if (!isEnter || nodeLabels.length == 0)
                 {
-                    var nodeBox = FBL.getAncestorByClass(target, 'nodeBox');
+                    var nodeBox = DOM.getAncestorByClass(target, 'nodeBox');
                     if (nodeBox.repObject && panel.editNewAttribute)
                     {
                         panel.editNewAttribute(nodeBox.repObject)
@@ -1063,7 +1064,7 @@ Firebug.A11yModel = FBL.extend(Firebug.Module,
             case KeyEvent.DOM_VK_F2:
                 if (CSS.hasClass(target.parentNode.parentNode, 'textNodeBox'))
                 {
-                    var textNode = FBL.getChildByClass(target, 'nodeText');
+                    var textNode = DOM.getChildByClass(target, 'nodeText');
                     if (textNode)
                         Firebug.Editor.startEditing(textNode);
                 }
@@ -1076,7 +1077,7 @@ Firebug.A11yModel = FBL.extend(Firebug.Module,
         if (CSS.hasClass(event.target, 'nodeLabelBox'))
         {
             this.dispatchMouseEvent(event.target, 'mouseover');
-            var nodeLabel = FBL.getAncestorByClass(event.target, 'nodeLabel');
+            var nodeLabel = DOM.getAncestorByClass(event.target, 'nodeLabel');
             if (nodeLabel)
                 CSS.setClass(nodeLabel, 'focused');
             event.target.setAttribute("aria-selected", "true");
@@ -1089,7 +1090,7 @@ Firebug.A11yModel = FBL.extend(Firebug.Module,
         if (CSS.hasClass(event.target, 'nodeLabelBox'))
         {
             this.dispatchMouseEvent(event.target, 'mouseout');
-            var nodeLabel = FBL.getAncestorByClass(event.target, 'nodeLabel');
+            var nodeLabel = DOM.getAncestorByClass(event.target, 'nodeLabel');
             if (nodeLabel)
                 CSS.removeClass(nodeLabel, 'focused');
             event.target.setAttribute("aria-selected", "false");
@@ -1175,7 +1176,7 @@ Firebug.A11yModel = FBL.extend(Firebug.Module,
                 var nodeBox = panel.lastSearch.openToNode(match.node, match.isValue);
                 if (!nodeBox)
                     return;
-                nodeBox = FBL.getAncestorByClass(nodeBox, 'nodeBox');
+                nodeBox = DOM.getAncestorByClass(nodeBox, 'nodeBox');
                 //select call will not trigger focus because focus is outside the HTML panel (i.e. the search field),
                 panel.select(nodeBox.repObject, true);
                 // Manually force selected node to be focused
@@ -1184,7 +1185,7 @@ Firebug.A11yModel = FBL.extend(Firebug.Module,
             case 'css':
                 if (panel.currentSearch && panel.currentSearch.currentNode)
                 {
-                    var focusRow = FBL.getAncestorByClass(panel.currentSearch.currentNode, 'focusRow');
+                    var focusRow = DOM.getAncestorByClass(panel.currentSearch.currentNode, 'focusRow');
                     if (focusRow)
                     {
                         this.focusPanelRow(panel, focusRow);
@@ -1220,7 +1221,7 @@ Firebug.A11yModel = FBL.extend(Firebug.Module,
             case 'net':
                 if (panel.currentSearch && panel.currentSearch.currentNode)
                 {
-                    var focusRow = FBL.getAncestorByClass(panel.currentSearch.currentNode, 'focusRow');
+                    var focusRow = DOM.getAncestorByClass(panel.currentSearch.currentNode, 'focusRow');
                     if (focusRow)
                     {
                         this.focusPanelRow(panel, focusRow);
@@ -1287,21 +1288,21 @@ Firebug.A11yModel = FBL.extend(Firebug.Module,
             case 13://enter
                 if (CSS.hasClass(target, 'cssProp'))
                 {
-                    var node = FBL.getChildByClass(target, 'cssPropName');
+                    var node = DOM.getChildByClass(target, 'cssPropName');
                     if (node)
                         Firebug.Editor.startEditing(node);
                     Events.cancelEvent(event);
                 }
                 else if (CSS.hasClass(target, 'cssHead'))
                 {
-                    var node = FBL.getChildByClass(target, 'cssSelector');
+                    var node = DOM.getChildByClass(target, 'cssSelector');
                     if (node && CSS.hasClass(node, 'editable'))
                         Firebug.Editor.startEditing(node);
                     Events.cancelEvent(event);
                 }
                 else if (CSS.hasClass(target, 'importRule'))
                 {
-                    var node = FBL.getChildByClass(target, 'objectLink');
+                    var node = DOM.getChildByClass(target, 'objectLink');
                     if (node)
                         this.dispatchMouseEvent(node, 'click');
                 }
@@ -1324,7 +1325,7 @@ Firebug.A11yModel = FBL.extend(Firebug.Module,
 
     onCSSMouseDown : function(event)
     {
-        var row = FBL.getAncestorByClass(event.target, 'focusRow');
+        var row = DOM.getAncestorByClass(event.target, 'focusRow');
         if (row)
             this.modifyPanelRow(Firebug.getElementPanel(row), row, false);
     },
@@ -1426,7 +1427,7 @@ Firebug.A11yModel = FBL.extend(Firebug.Module,
     {
         if (!panel || !row)
             return;
-        var rule = FBL.getAncestorByClass(row, "cssRule");
+        var rule = DOM.getAncestorByClass(row, "cssRule");
         if (inTabOrder)
             this.setPanelTabStop(panel, row);
         else
@@ -1507,7 +1508,7 @@ Firebug.A11yModel = FBL.extend(Firebug.Module,
             selector = selector ? selector.textContent : "";
             if (CSS.hasClass(matchRow, 'cssPropName') || CSS.hasClass(matchRow, 'cssPropValue'))
             {
-                var propRow = FBL.getAncestorByClass(matchRow, 'cssProp');
+                var propRow = DOM.getAncestorByClass(matchRow, 'cssProp');
                 if (propRow)
                     matchFeedback = Locale.$STRF('a11y.updates.match found in style declaration', [text, propRow.textContent, selector]);
             }
@@ -1613,9 +1614,9 @@ Firebug.A11yModel = FBL.extend(Firebug.Module,
             case 40:
                 var node, goLeft = keyCode == 37 || keyCode == 38;
                 if (goLeft)
-                    node = FBL.getAncestorByClass(target.parentNode, 'focusGroup');
+                    node = DOM.getAncestorByClass(target.parentNode, 'focusGroup');
                 else
-                    node = FBL.getChildByClass(target, 'focusGroup');
+                    node = DOM.getChildByClass(target, 'focusGroup');
                 if (node)
                     this.focus(node);
                 break;
@@ -1729,7 +1730,7 @@ Firebug.A11yModel = FBL.extend(Firebug.Module,
         switch (panelA11y.type)
         {
             case 'layout':
-                var box = FBL.getAncestorByClass(target, 'focusGroup')
+                var box = DOM.getAncestorByClass(target, 'focusGroup')
                 if (box)
                     this.focus(box, true);
                 break;
@@ -1744,7 +1745,7 @@ Firebug.A11yModel = FBL.extend(Firebug.Module,
                 }
                 break;
             case 'html':
-                var box = FBL.getAncestorByClass(target, 'nodeBox')
+                var box = DOM.getAncestorByClass(target, 'nodeBox')
                 if (box)
                     panel.select(box.repObject, true);
                 break;
@@ -1811,7 +1812,7 @@ Firebug.A11yModel = FBL.extend(Firebug.Module,
         var caretDetails = this.getCaretDetails(event.target.ownerDocument);
         if (!caretDetails || caretDetails.length != 2)
             return;
-        var lineNode = FBL.getAncestorByClass(caretDetails[0].parentNode, 'sourceRow');
+        var lineNode = DOM.getAncestorByClass(caretDetails[0].parentNode, 'sourceRow');
         if (!lineNode )
             return;
         var lineNo = parseInt(lineNode.getElementsByClassName('sourceLine').item(0).textContent);
@@ -1877,7 +1878,7 @@ Firebug.A11yModel = FBL.extend(Firebug.Module,
             case 13:
                 var liveString = "";
                 var caretDetails = this.getCaretDetails(event.target.ownerDocument);
-                var lineNode = FBL.getAncestorByClass(caretDetails[0].parentNode, 'sourceRow');
+                var lineNode = DOM.getAncestorByClass(caretDetails[0].parentNode, 'sourceRow');
                 var lineNo = parseInt(lineNode.getElementsByClassName('sourceLine').item(0).textContent);
                 liveString += "Line " + lineNo;
                 if (lineNode.getAttribute('breakpoint') == 'true')
@@ -1915,7 +1916,7 @@ Firebug.A11yModel = FBL.extend(Firebug.Module,
             return;
         var box = panel.selectedSourceBox
         var caretDetails = this.getCaretDetails(target.ownerDocument);
-        var lineNode = FBL.getAncestorByClass(caretDetails[0].parentNode, 'sourceRow');
+        var lineNode = DOM.getAncestorByClass(caretDetails[0].parentNode, 'sourceRow');
         if (!lineNode )
             return;
         var lineNo = parseInt(lineNode.getElementsByClassName('sourceLine').item(0).textContent);
@@ -1936,7 +1937,7 @@ Firebug.A11yModel = FBL.extend(Firebug.Module,
         var caretDetails = this.getCaretDetails(target.ownerDocument);
         var lineNode = null;
         if (caretDetails[0] && caretDetails[0].parentNode)
-            lineNode = FBL.getAncestorByClass(caretDetails[0].parentNode, 'sourceRow');
+            lineNode = DOM.getAncestorByClass(caretDetails[0].parentNode, 'sourceRow');
         if (!lineNode )
             return;
         var lineNo = parseInt(lineNode.getElementsByClassName('sourceLine').item(0).textContent);
@@ -2276,7 +2277,7 @@ Firebug.A11yModel = FBL.extend(Firebug.Module,
             var focusObjects = this.getFocusObjects(row);
             Array.forEach(focusObjects, function(e,i,a) {
                 this.makeFocusable(e);
-                if (CSS.hasClass(e, 'netTimeCol') && FBL.getAncestorByClass(e, 'fromCache'))
+                if (CSS.hasClass(e, 'netTimeCol') && DOM.getAncestorByClass(e, 'fromCache'))
                     e.setAttribute('aria-label', e.textContent + " (" + Locale.$STR("a11y.labels.cached") +")");
             }, this);
         }
@@ -2285,17 +2286,17 @@ Firebug.A11yModel = FBL.extend(Firebug.Module,
 
     getNetAncestorRow : function(elem, useSubRow)
     {
-        return useSubRow ? FBL.getAncestorByClass(elem, 'subFocusRow') || FBL.getAncestorByClass(elem, 'netRow') : FBL.getAncestorByClass(elem, 'netRow');
+        return useSubRow ? DOM.getAncestorByClass(elem, 'subFocusRow') || DOM.getAncestorByClass(elem, 'netRow') : DOM.getAncestorByClass(elem, 'netRow');
     },
 
     onNetMouseDown : function(event)
     {
-        var node = FBL.getAncestorByClass(event.target, 'focusRow');
+        var node = DOM.getAncestorByClass(event.target, 'focusRow');
         if (node)
             this.modifyPanelRow(Firebug.getElementPanel(node), node, false);
         else
         {
-            node = FBL.getAncestorByClass(event.target, 'subFocusRow');
+            node = DOM.getAncestorByClass(event.target, 'subFocusRow');
             if (!node)
                 return;
             var focusRow = node.getElementsByClassName('focusRow').item(0);
@@ -2327,7 +2328,7 @@ Firebug.A11yModel = FBL.extend(Firebug.Module,
             return;
             }
         }
-        var rangeParent = FBL.getAncestorByClass(target, 'netRow');
+        var rangeParent = DOM.getAncestorByClass(target, 'netRow');
         var browser = Firebug.chrome.getPanelBrowser(panel);
         // these two lines are necessary, because otherwise the infoTip will not have the correct dimensions when it's positioned, and the contents
         // could be placed outside FB's viewport (making it impossible to read for keyboard users)
@@ -2369,10 +2370,10 @@ Firebug.A11yModel = FBL.extend(Firebug.Module,
         else
         {
             var foundWhere = '';
-            var parentRow = FBL.getAncestorByClass(row, "netRow");
+            var parentRow = DOM.getAncestorByClass(row, "netRow");
             if (!parentRow)
             {
-                parentRow = FBL.getAncestorByClass(row, "netInfoRow");
+                parentRow = DOM.getAncestorByClass(row, "netInfoRow");
                 if (parentRow)
                     parentRow = parentRow.previousSibling;
             }
@@ -2394,7 +2395,7 @@ Firebug.A11yModel = FBL.extend(Firebug.Module,
                 var href =  (file.method ? file.method.toUpperCase() : "?") + " " + URL.getFileName(file.href);
                 matchFeedback = Locale.$STRF("a11y.updates.match found in net row",[text, href, foundWhere, row.textContent]);
             }
-            else if (FBL.getAncestorByClass(row, "netSummaryRow"))
+            else if (DOM.getAncestorByClass(row, "netSummaryRow"))
                 matchFeedback = Locale.$STRF("a11y.updates.match found in net summary row",[text, row.textContent]);
         }
         this.updateLiveElem(panel, matchFeedback, true); //should not use alert

@@ -5,8 +5,9 @@ define([
     "firebug/firebug",
     "firebug/lib/events",
     "firebug/lib/css",
+    "firebug/lib/dom",
 ],
-function(FBL, Firebug, Events, CSS) {
+function(FBL, Firebug, Events, CSS, DOM) {
 
 // ************************************************************************************************
 
@@ -477,7 +478,7 @@ Firebug.InsideOutBox.prototype =
         if (!repObject)
             return null;
 
-        var parentObjectBox = FBL.getAncestorByClass(nodeChildBox, "nodeBox");
+        var parentObjectBox = DOM.getAncestorByClass(nodeChildBox, "nodeBox");
         if (FBTrace.DBG_HTML)
             FBTrace.sysout("+++insideOutBox.populateChildBox("+FBL.getElementCSSSelector(repObject)+") parentObjectBox.populated "+parentObjectBox.populated+"\n");
         if (parentObjectBox.populated)
