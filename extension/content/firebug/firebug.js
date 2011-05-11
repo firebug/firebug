@@ -320,7 +320,7 @@ window.Firebug =
         // consequently to all registered modules.
         Firebug.TabWatcher.removeListener(this);
 
-        Events.dispatch(modules, "disable", [FirebugChrome]);
+        Events.dispatch(modules, "disable", [Firebug.chrome]);
     },
 
     // ***************************************************************************************** //
@@ -724,7 +724,7 @@ window.Firebug =
 
     closeFirebug: function(userCommand)  // this is really deactivate
     {
-        var browser = FirebugChrome.getCurrentBrowser();
+        var browser = Firebug.chrome.getCurrentBrowser();
 
         Firebug.TabWatcher.unwatchBrowser(browser, userCommand);
         Firebug.StartButton.resetTooltip();
@@ -741,7 +741,7 @@ window.Firebug =
      */
     toggleBar: function(forceOpen, panelName)
     {
-        var browser = FirebugChrome.getCurrentBrowser();
+        var browser = Firebug.chrome.getCurrentBrowser();
 
         if (panelName)
             Firebug.chrome.selectPanel(panelName);
@@ -894,7 +894,7 @@ window.Firebug =
 
     syncBar: function()  // show firebug if we should
     {
-        var browser = FirebugChrome.getCurrentBrowser();
+        var browser = Firebug.chrome.getCurrentBrowser();
         this.showBar(browser && browser.showFirebug);  // implicitly this is operating in the chrome of browser.xul
     },
 

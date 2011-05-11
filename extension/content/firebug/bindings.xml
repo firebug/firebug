@@ -7,7 +7,7 @@
 <binding id="initializer">
     <implementation>
         <destructor><![CDATA[
-           FirebugChrome.shutdown();
+           Firebug.chrome.shutdown();
         ]]></destructor>
     </implementation>
 </binding>

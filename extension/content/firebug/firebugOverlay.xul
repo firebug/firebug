@@ -35,9 +35,9 @@
         <command id="cmd_focusCommandLine" oncommand="if (!Firebug.currentContext) Firebug.toggleBar(true); Firebug.CommandLine.focus(Firebug.currentContext)"/>
         <command id="cmd_focusFirebugSearch" oncommand="if (Firebug.currentContext) Firebug.Search.focus(Firebug.currentContext);"/>
         <command id="cmd_focusWatchEditor" oncommand="if (Firebug.currentContext) Firebug.chrome.focusWatch(Firebug.currentContext);"/>
-        <command id="cmd_focusLocation" oncommand="if (Firebug.currentContext) FirebugChrome.focusLocationList(Firebug.currentContext);"/>
+        <command id="cmd_focusLocation" oncommand="if (Firebug.currentContext) Firebug.chrome.focusLocationList(Firebug.currentContext);"/>
 
-        <command id="cmd_breakOnNext" oncommand="FirebugChrome.breakOnNext(Firebug.currentContext, event);"/>
+        <command id="cmd_breakOnNext" oncommand="Firebug.chrome.breakOnNext(Firebug.currentContext, event);"/>
 
         <command id="cmd_rerun" oncommand="Firebug.Debugger.rerun(Firebug.currentContext)" disabled="true"/>
         <command id="cmd_resumeExecution" oncommand="Firebug.Debugger.resume(Firebug.currentContext)" disabled="true"/>
@@ -46,11 +46,11 @@
         <command id="cmd_stepOut" oncommand="Firebug.Debugger.stepOut(Firebug.currentContext)" disabled="true"/>
         <command id="cmd_reenterCommand" oncommand="Firebug.CommandLine.reenter(Firebug.currentContext)"/>
 
-        <command id="cmd_previousFirebugTab" oncommand="FirebugChrome.gotoPreviousTab()"/>
-        <command id="cmd_leftFirebugTab" oncommand="FirebugChrome.gotoSiblingTab(false)"/>
-        <command id="cmd_rightFirebugTab" oncommand="FirebugChrome.gotoSiblingTab(true)"/>
-        <command id="cmd_nextObject" oncommand="FirebugChrome.gotoNextObject()"/>
-        <command id="cmd_previousObject" oncommand="FirebugChrome.gotoNextObject(true)"/>
+        <command id="cmd_previousFirebugTab" oncommand="Firebug.chrome.gotoPreviousTab()"/>
+        <command id="cmd_leftFirebugTab" oncommand="Firebug.chrome.gotoSiblingTab(false)"/>
+        <command id="cmd_rightFirebugTab" oncommand="Firebug.chrome.gotoSiblingTab(true)"/>
+        <command id="cmd_nextObject" oncommand="Firebug.chrome.gotoNextObject()"/>
+        <command id="cmd_previousObject" oncommand="Firebug.chrome.gotoNextObject(true)"/>
 
         <command id="cmd_clearAllBreakpoints" oncommand="Firebug.Debugger.clearAllBreakpoints(Firebug.currentContext)"/>
         <command id="cmd_breakOnErrors" oncommand="Firebug.Options.togglePref('breakOnErrors')"/>
@@ -70,8 +70,8 @@
         <command id="cmd_inspect" oncommand="Firebug.Inspector.inspectFromContextMenu(document.popupNode);"/>
 
         <command id="cmd_togglePersistNet" oncommand="Firebug.NetMonitor.togglePersist(Firebug.currentContext)"/>
-        <command id="cmd_toggleOrient" oncommand="FirebugChrome.toggleOrient()" />
-        <command id="cmd_toggleShowErrorCount" oncommand="FirebugChrome.toggleShowErrorCount();" />
+        <command id="cmd_toggleOrient" oncommand="Firebug.chrome.toggleOrient()" />
+        <command id="cmd_toggleShowErrorCount" oncommand="Firebug.chrome.toggleShowErrorCount();" />
         <command id="cmd_navBack" oncommand="Firebug.NavigationHistory.goBack(Firebug.currentContext)" />
         <command id="cmd_navForward" oncommand="Firebug.NavigationHistory.goForward(Firebug.currentContext)" />
         <command id="cmd_toggleFreezeWindow" oncommand="Firebug.Debugger.toggleFreezeWindow(Firebug.currentContext)" />
@@ -116,12 +116,12 @@
     </keyset>
 
     <popupset id="mainPopupSet">
-        <menupopup id="fbContextMenu" onpopupshowing="return FirebugChrome.onContextShowing(event);">
+        <menupopup id="fbContextMenu" onpopupshowing="return Firebug.chrome.onContextShowing(event);">
             <menuitem label="&copyCmd.label;" accesskey="&copyCmd.accesskey;" command="cmd_copy"/>
         </menupopup>
         <menupopup id="fbInlineEditorPopup" />
         <tooltip id="fbTooltip" class="fbURLMenuItem"
-            onpopupshowing="return FirebugChrome.onTooltipShowing(event);"/>
+            onpopupshowing="return Firebug.chrome.onTooltipShowing(event);"/>
         <panel id="fbQuickInfoPanel" width="210" noautohide="true" noautofocus="true"
             onmousedown="Firebug.Inspector.quickInfoBoxHandler(event);"
             onmouseover="Firebug.Inspector.quickInfoBoxHandler(event);"
@@ -374,7 +374,7 @@
                                     <hbox id="fbLocationButtons" collapsed="true">
                                         <toolbarseparator id="fbLocationSeparator"/>
                                         <toolbarbutton id="fbLocationList" type="menu"
-                                            locationProvider="FirebugChrome.getLocationProvider();"
+                                            locationProvider="Firebug.chrome.getLocationProvider();"
                                             tooltip="fbTooltip" contextmenu="fbContextMenu"
                                             class="noTabStop fbInternational"
                                             role="button" aria-haspopup="true"
@@ -515,7 +515,7 @@
 
         <!-- Firebug Tools & Icon menu & Web Developer menu -->
         <menupopup id="fbFirebugMenuPopup" role="menu"
-                   onpopupshowing="return FirebugChrome.onMenuShowing(this);">
+                   onpopupshowing="return Firebug.chrome.onMenuShowing(this);">
 
             <!-- Open -->
             <menuitem id="menu_toggleFirebug"
@@ -547,38 +547,38 @@
 
             <!-- Options -->
             <menu id="FirebugMenu_Options" label="firebug.Options" class="fbInternational">
-                <menupopup onpopupshowing="return FirebugChrome.onOptionsShowing(this);"
+                <menupopup onpopupshowing="return Firebug.chrome.onOptionsShowing(this);"
                            id="FirebugMenu_OptionsPopup">
                     <menuitem id="menu_alwaysOpenInWindow"
                               type="checkbox" label="firebug.AlwaysOpenInWindow"
-                              oncommand="FirebugChrome.onToggleAlwaysOpenInWindowOption(this, Firebug.currentContext)"
+                              oncommand="Firebug.chrome.onToggleAlwaysOpenInWindowOption(this, Firebug.currentContext)"
                               option="openInWindow" class="fbInternational"/>
                     <menuitem id="menu_toggleShowErrorCount"
                               type="checkbox" label="firebug.Show_Error_Count"
-                              oncommand="FirebugChrome.onToggleOption(this)"
+                              oncommand="Firebug.chrome.onToggleOption(this)"
                               option="showErrorCount"
                               class="fbInternational"/>
                     <menuitem id="menu_showTooltips"
                               type="checkbox" label="firebug.ShowTooltips"
-                              oncommand="FirebugChrome.onToggleOption(this)"
+                              oncommand="Firebug.chrome.onToggleOption(this)"
                               option="showInfoTips" class="fbInternational"/>
                     <menuitem id="menu_shadeBoxModel"
                               type="checkbox" label="firebug.ShadeBoxModel"
-                              oncommand="FirebugChrome.onToggleOption(this)"
+                              oncommand="Firebug.chrome.onToggleOption(this)"
                               option="shadeBoxModel" class="fbInternational"/>
                     <menuitem id="showQuickInfoBox"
                               type="checkbox" label="firebug.Show_Quick_Info_Box"
-                              oncommand="FirebugChrome.onToggleOption(this)"
+                              oncommand="Firebug.chrome.onToggleOption(this)"
                               option="showQuickInfoBox" class="fbInternational"/>
                     <menuitem id="menu_enableA11y"
                               type="checkbox"
                               label="firebug.menu.Enable Accessibility Enhancements"
-                              oncommand="FirebugChrome.onToggleOption(this)"
+                              oncommand="Firebug.chrome.onToggleOption(this)"
                               option="a11y.enable"
                               class="fbInternational"/>
                     <menuitem id="menu_activateSameOrigin"
                               type="checkbox" label="firebug.menu.Activate Same Origin URLs"
-                              oncommand="FirebugChrome.onToggleOption(this)"
+                              oncommand="Firebug.chrome.onToggleOption(this)"
                               option="activateSameOrigin" class="fbInternational"/>
                     <menuitem id="menu_toggleOrient"
                               type="checkbox" label="firebug.Vertical"
@@ -636,7 +636,7 @@
             <menuseparator id="menu_aboutSeparator"/>
 
             <menuitem id="Firebug_About" class="firebugAbout fbInternational"
-                label="firebug.About" oncommand="FirebugChrome.openAboutDialog()"/>
+                label="firebug.About" oncommand="Firebug.chrome.openAboutDialog()"/>
         </menupopup>
 
         <panel id="fbMigrator" noautohide='true'>

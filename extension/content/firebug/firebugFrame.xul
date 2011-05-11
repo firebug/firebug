@@ -43,9 +43,9 @@
             valueDefault="&deleteCmd.label;"/>
         <command id="cmd_selectAll" oncommand="goDoCommand('cmd_selectAll')" disabled="true"/>
         <command id="cmd_closeWindow" oncommand="window.close()"/>
-        <command id="cmd_reload" oncommand="FirebugChrome.reload()"/>
-        <command id="cmd_reloadSkipCache" oncommand="FirebugChrome.reload(true)"/>
-        <command id="cmd_toggleOrient" oncommand="FirebugChrome.toggleOrient()"/>
+        <command id="cmd_reload" oncommand="Firebug.chrome.reload()"/>
+        <command id="cmd_reloadSkipCache" oncommand="Firebug.chrome.reload(true)"/>
+        <command id="cmd_toggleOrient" oncommand="Firebug.chrome.toggleOrient()"/>
     </commandset>
 
     <keyset id="mainKeyset">

@@ -9,7 +9,7 @@
         <!-- Popup menu shared by the Status bar icon and Firebug button (the toolbar button
              available in Customizable Toolbar dialog, see below) -->
         <menupopup id="fbStatusContextMenu"
-            onpopupshowing="FirebugChrome.onOptionsShowing(this)">
+            onpopupshowing="Firebug.chrome.onOptionsShowing(this)">
             <menuitem
                 id="menu_detachFirebugContext"
                 label="firebug.DetachFirebug"
@@ -27,7 +27,7 @@
                 id="menu_showErrorCount"
                 type="checkbox"
                 label="firebug.Show Error Count"
-                oncommand="FirebugChrome.onToggleOption(this)"
+                oncommand="Firebug.chrome.onToggleOption(this)"
                 option="showErrorCount"
                 class="fbInternational"/>
             <menuseparator/>
