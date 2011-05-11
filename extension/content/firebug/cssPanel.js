@@ -19,7 +19,7 @@ define([
     "firebug/editor",
     "firebug/editorSelector",
     "firebug/infotip",
-    "firebug/search",
+    "firebug/searchBox",
 ],
 function(FBL, Firebug, Firefox, Domplate, FirebugReps, XPCOM, Locale, Events, Wrapper, URL,
     SourceLink, CSS, DOM, WIN, Search) { with (Domplate) {

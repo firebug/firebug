@@ -16,7 +16,7 @@ define([
     "firebug/lib/search",
     "firebug/editor",
     "firebug/breakpoint",
-    "firebug/search",
+    "firebug/searchBox",
 ],
 function(FBL, Firebug, Domplate, FirebugReps, Locale, ToolsInterface, Events, Wrapper,
     SourceLink, StackFrame, DOM, CSS, Search) { with (Domplate) {

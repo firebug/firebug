@@ -16,7 +16,7 @@ define([
     "firebug/breakpoint",
     "firebug/editor",
     "firebug/infotip",
-    "firebug/search",
+    "firebug/searchBox",
     "firebug/insideOutBox",
 ],
 function(FBL, Firebug, Domplate, FirebugReps, Locale, ToolsInterface, HTMLLib, Events,

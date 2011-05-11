@@ -25,7 +25,7 @@ define([
     "firebug/jsonViewer",
     "firebug/infotip",
     "firebug/cssPanel",
-    "firebug/search",
+    "firebug/searchBox",
     "firebug/errors",
 ],
 function(FBL, Firebug, Firefox, Domplate, XPCOM, ToolsInterface, HttpRequestObserver, Locale,

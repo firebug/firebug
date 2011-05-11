@@ -13,7 +13,7 @@ define([
     "firebug/firefox/window",
     "firebug/lib/search",
     "firebug/profiler",
-    "firebug/search",
+    "firebug/searchBox",
     "firebug/errors",
 ],
 function(FBL, Firebug, Firefox, FirebugReps, Locale, ToolsInterface, Events, CSS, DOM,

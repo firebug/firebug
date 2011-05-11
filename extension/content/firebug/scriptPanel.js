@@ -18,7 +18,7 @@ define([
     "firebug/lib/search",
     "firebug/editorSelector",
     "firebug/infotip",
-    "firebug/search",
+    "firebug/searchBox",
     "firebug/sourceBox",
 ],
 function(FBL, Firebug, Firefox, FirebugReps, Domplate, ToolsInterface, Locale, Events, URL, SourceLink,
