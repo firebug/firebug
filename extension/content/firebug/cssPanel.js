@@ -446,15 +446,15 @@ Firebug.CSSModule = FBL.extend(FBL.extend(Firebug.Module, Firebug.EditorSelector
         // See http://code.google.com/p/fbug/issues/detail?id=2440
         if (!FBL.isXMLPrettyPrint(context))
         {
-            var style = FBL.createStyleSheet(doc);
+            var style = CSS.createStyleSheet(doc);
             style.innerHTML = "#fbIgnoreStyleDO_NOT_USE {}";
-            FBL.addStyleSheet(doc, style);
+            CSS.addStyleSheet(doc, style);
             style.parentNode.removeChild(style);
         }
 
         // https://bugzilla.mozilla.org/show_bug.cgi?id=500365
         // This voodoo touches each style sheet to force some Firefox internal change to allow edits.
-        var styleSheets = FBL.getAllStyleSheets(context);
+        var styleSheets = CSS.getAllStyleSheets(context);
         for(var i = 0; i < styleSheets.length; i++)
         {
             try
@@ -730,7 +730,7 @@ Firebug.CSSStyleSheetPanel.prototype = FBL.extend(Firebug.Panel,
                 }
                 else if (rule instanceof window.CSSMediaRule)
                 {
-                    appendRules.apply(this, [FBL.safeGetCSSRules(rule)]);
+                    appendRules.apply(this, [CSS.safeGetCSSRules(rule)]);
                 }
                 else if (rule instanceof window.CSSFontFaceRule)
                 {
@@ -751,7 +751,7 @@ Firebug.CSSStyleSheetPanel.prototype = FBL.extend(Firebug.Panel,
         }
 
         var rules = [];
-        appendRules.apply(this, [FBL.safeGetCSSRules(styleSheet)]);
+        appendRules.apply(this, [CSS.safeGetCSSRules(styleSheet)]);
         return rules;
     },
 
@@ -1199,7 +1199,7 @@ Firebug.CSSStyleSheetPanel.prototype = FBL.extend(Firebug.Panel,
                 }
                 else // XXXjjb we should not be taking this path
                 {
-                    var stylesheet = FBL.getStyleSheetByHref(sourceLink.href, this.context);
+                    var stylesheet = CSS.getStyleSheetByHref(sourceLink.href, this.context);
                     if (stylesheet)
                         this.navigate(stylesheet);
                     else
@@ -1224,7 +1224,7 @@ Firebug.CSSStyleSheetPanel.prototype = FBL.extend(Firebug.Panel,
 
     getLocationList: function()
     {
-        var styleSheets = FBL.getAllStyleSheets(this.context);
+        var styleSheets = CSS.getAllStyleSheets(this.context);
         return styleSheets;
     },
 
@@ -1415,7 +1415,7 @@ Firebug.CSSStyleSheetPanel.prototype = FBL.extend(Firebug.Panel,
             if (styleSheets.length)
             {
                 var sheet = styleSheets[0];
-                return (Firebug.filterSystemURLs && URL.isSystemURL(FBL.getURLForStyleSheet(sheet))) ? null : sheet;
+                return (Firebug.filterSystemURLs && URL.isSystemURL(CSS.getURLForStyleSheet(sheet))) ? null : sheet;
             }
         }
         catch (exc)
@@ -1427,8 +1427,8 @@ Firebug.CSSStyleSheetPanel.prototype = FBL.extend(Firebug.Panel,
 
     getObjectDescription: function(styleSheet)
     {
-        var url = FBL.getURLForStyleSheet(styleSheet);
-        var instance = FBL.getInstanceForStyleSheet(styleSheet);
+        var url = CSS.getURLForStyleSheet(styleSheet);
+        var instance = CSS.getInstanceForStyleSheet(styleSheet);
 
         var baseDescription = URL.splitURLBase(url);
         if (instance) {
@@ -1445,7 +1445,7 @@ Firebug.CSSStyleSheetPanel.prototype = FBL.extend(Firebug.Panel,
             href = element.ownerDocument.location.href;  // http://code.google.com/p/fbug/issues/detail?id=452
 
         var line = getRuleLine(rule);
-        var instance = FBL.getInstanceForStyleSheet(rule.parentStyleSheet);
+        var instance = CSS.getInstanceForStyleSheet(rule.parentStyleSheet);
         var sourceLink = new SourceLink.SourceLink(href, line, "css", rule, instance);
 
         return sourceLink;
@@ -2407,7 +2407,7 @@ CSSRuleEditor.prototype = domplate(Firebug.InlineEditor.prototype,
                 // At this moment the user edits the styles so some CSS changes on the page
                 // are expected.
                 var doc = this.panel.context.window.document;
-                var style = FBL.appendStylesheet(doc, "chrome://firebug/default-stylesheet.css");
+                var style = CSS.appendStylesheet(doc, "chrome://firebug/default-stylesheet.css");
                 Wrapper.getContentView(style).defaultStylesheet = true;
                 this.panel.location = styleSheet = style.sheet;
             }

@@ -1138,7 +1138,7 @@ Firebug.HTMLPanel.prototype = FBL.extend(WalkingPanel,
         if (object instanceof SourceLink.SourceLink) // && object.type == "css" and !FBL.reCSS(object.href) by supports
         {
             var sourceLink = object;
-            var stylesheet = FBL.getStyleSheetByHref(sourceLink.href, this.context);
+            var stylesheet = CSS.getStyleSheetByHref(sourceLink.href, this.context);
             if (stylesheet)
             {
                 var ownerNode = stylesheet.ownerNode;

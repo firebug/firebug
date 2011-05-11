@@ -1,14 +1,259 @@
 /* See license.txt for terms of usage */
 
 define([
-    "firebug/lib/trace"
+    "firebug/lib/trace",
+    "firebug/lib/url",
+    "firebug/lib/options",
 ],
-function(FBTrace) {
+function(FBTrace, URL, Options) {
 
 // ********************************************************************************************* //
 // Module Implementation
 
 var CSS = {};
+
+// ********************************************************************************************* //
+// CSS API
+
+CSS.safeGetCSSRules = function(styleSheet)
+{
+    try
+    {
+        return styleSheet.cssRules;
+    }
+    catch (e)
+    {
+    }
+
+    return null;
+}
+
+// ********************************************************************************************* //
+// Stylesheet API
+
+CSS.createStyleSheet = function(doc, url)
+{
+    var style = doc.createElementNS("http://www.w3.org/1999/xhtml", "style");
+    style.setAttribute("charset","utf-8");
+    style.setAttribute("type", "text/css");
+
+    var cssText = url ? FBL.getResource(url) : null;
+    if (cssText)
+    {
+        var index = url.lastIndexOf("/");
+        var absURL = url.substr(0, index+1);
+
+        // Replace all relative URLs with absolute (using the passed url).
+        // Note that stylesheets can come from various extensions and the source can
+        // be even used in a browser env where relative URLs make more sense.
+        var expr = /url\(([\'"]?)(?![\'"]?(?:[a-z]+:|\/))/gi;
+        cssText = cssText.replace(expr, "url($1" + absURL);
+
+        style.innerHTML = cssText;
+    }
+
+    Firebug.setIgnored(style);
+    return style;
+}
+
+CSS.addStyleSheet = function(doc, style)
+{
+    var heads = doc.getElementsByTagName("head");
+    if (heads.length)
+        heads[0].appendChild(style);
+    else
+        doc.documentElement.appendChild(style);
+};
+
+CSS.appendStylesheet = function(doc, uri)
+{
+    // Make sure the stylesheet is not appended twice.
+    var styleSheet = FBL.$(uri, doc);
+    if (styleSheet)
+        return styleSheet;
+
+    var styleSheet = CSS.createStyleSheet(doc, uri);
+    styleSheet.setAttribute("id", uri);
+    CSS.addStyleSheet(doc, styleSheet);
+
+    return styleSheet;
+},
+
+CSS.getStyleSheetByHref = function(url, context)
+{
+    if (FBTrace.DBG_ERRORS && FBTrace.DBG_CSS)
+    {
+        var r = CSS.totalRules;
+        var s = CSS.totalSheets;
+        var t = new Date();
+    }
+
+    if (!context.styleSheetMap)
+        CSS.createStyleSheetMap(context);  // fill cache
+
+    if (FBTrace.DBG_ERRORS && FBTrace.DBG_CSS)
+        FBTrace.sysout((CSS.totalRules-r)+" rules in "+ (CSS.totalSheets-s)+
+            " sheets required "+(new Date().getTime() - t.getTime())+" ms",
+            context.styleSheetMap);
+
+    // hasOwnProperty is called to prevent possible conflicts with prototype extensions
+    // and strict mode warnings
+    return context.styleSheetMap.hasOwnProperty(url) ? context.styleSheetMap[url] : undefined;
+};
+
+CSS.createStyleSheetMap = function(context)
+{
+    context.styleSheetMap = {};
+
+    function addSheet(sheet)
+    {
+        var sheetURL = CSS.getURLForStyleSheet(sheet);
+        context.styleSheetMap[sheetURL] = sheet;
+
+        if (FBTrace.DBG_ERRORS && FBTrace.DBG_CSS)
+        {
+            CSS.totalSheets++;
+            FBTrace.sysout("addSheet "+CSS.totalSheets+" "+sheetURL);
+        }
+
+        // recurse for imported sheets
+
+        for (var i = 0; i < sheet.cssRules.length; ++i)
+        {
+            if (FBTrace.DBG_ERRORS && FBTrace.DBG_CSS)
+                CSS.totalRules++;
+
+            var rule = sheet.cssRules[i];
+            if (rule instanceof CSSStyleRule)
+            {
+                if (rule.type == CSSRule.STYLE_RULE)  // once we get here no more imports
+                    return;
+            }
+            else if (rule instanceof CSSImportRule)
+            {
+                addSheet(rule.styleSheet);
+            }
+        }
+    }
+
+    FBL.iterateWindows(context.window, function(subwin)
+    {
+        var rootSheets = subwin.document.styleSheets;
+        if (!rootSheets)
+            return; // XUL?
+
+        for (var i = 0; i < rootSheets.length; ++i)
+        {
+            addSheet(rootSheets[i]);
+        }
+    });
+
+    if (FBTrace.DBG_ERRORS && FBTrace.DBG_CSS)
+        FBTrace.sysout("css.createStyleSheetMap for "+context.getName(), context.styleSheetMap);
+
+    return context.styleSheetMap;
+};
+
+CSS.getAllStyleSheets = function(context)
+{
+    var styleSheets = [];
+
+    function addSheet(sheet)
+    {
+        var sheetLocation =  CSS.getURLForStyleSheet(sheet);
+
+        if (!Options.get("showUserAgentCSS") && URL.isSystemURL(sheetLocation))
+            return;
+
+        if (sheet.ownerNode && Firebug.shouldIgnore(sheet.ownerNode))
+            return;
+
+        styleSheets.push(sheet);
+
+        try
+        {
+            for (var i = 0; i < sheet.cssRules.length; ++i)
+            {
+                var rule = sheet.cssRules[i];
+                if (rule instanceof window.CSSImportRule)
+                    addSheet(rule.styleSheet);
+            }
+        }
+        catch(e)
+        {
+            if (FBTrace.DBG_ERRORS)
+                FBTrace.sysout("getAllStyleSheets sheet.cssRules FAILS for "+
+                    (sheet?sheet.href:"null sheet")+e, e);
+        }
+    }
+
+    FBL.iterateWindows(context.window, function(subwin)
+    {
+        var rootSheets = subwin.document.styleSheets;
+        for (var i = 0; i < rootSheets.length; ++i)
+            addSheet(rootSheets[i]);
+    });
+
+    return styleSheets;
+};
+
+CSS.getURLForStyleSheet = function(styleSheet)
+{
+    // http://www.w3.org/TR/DOM-Level-2-Style/stylesheets.html#StyleSheets-StyleSheet.
+    // For inline style sheets, the value of this attribute is null.
+    return (styleSheet.href ? styleSheet.href : styleSheet.ownerNode.ownerDocument.URL);
+};
+
+/**
+ * Retrieves the instance number for a given style sheet. The instance number
+ * is sheet's index within the set of all other sheets whose URL is the same.
+ */
+CSS.getInstanceForStyleSheet = function(styleSheet, ownerDocument)
+{
+    // ownerDocument is an optional hint for performance
+    if (FBTrace.DBG_CSS)
+        FBTrace.sysout("getInstanceForStyleSheet href:" + styleSheet.href + " mediaText:" +
+            styleSheet.media.mediaText + " path to ownerNode" +
+            (styleSheet.ownerNode && FBL.getElementXPath(styleSheet.ownerNode)), ownerDocument);
+
+    ownerDocument = ownerDocument || CSS.getDocumentForStyleSheet(styleSheet);
+    if (!ownerDocument)
+        return;
+
+    var ret = 0,
+        styleSheets = ownerDocument.styleSheets,
+        href = styleSheet.href;
+
+    for (var i = 0; i < styleSheets.length; i++)
+    {
+        var curSheet = styleSheets[i];
+        if (FBTrace.DBG_CSS)
+            FBTrace.sysout("getInstanceForStyleSheet: compare href " + i +
+                " " + curSheet.href + " " + curSheet.media.mediaText + " " +
+                (curSheet.ownerNode && FBL.getElementXPath(curSheet.ownerNode)));
+
+        if (curSheet == styleSheet)
+            break;
+
+        if (curSheet.href == href)
+            ret++;
+    }
+    return ret;
+};
+
+CSS.getDocumentForStyleSheet = function(styleSheet)
+{
+    while (styleSheet.parentStyleSheet && !styleSheet.ownerNode)
+    {
+        styleSheet = styleSheet.parentStyleSheet;
+    }
+
+    if (styleSheet.ownerNode)
+        return styleSheet.ownerNode.ownerDocument;
+};
+
+// ********************************************************************************************* //
+// CSS Info
 
 CSS.cssInfo = {};
 CSS.cssInfo.html =

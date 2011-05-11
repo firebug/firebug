@@ -4,9 +4,10 @@ define([
     "firebug/lib",
     "firebug/firebug",
     "firebug/reps",
-    "firebug/lib/xpcom"
+    "firebug/lib/xpcom",
+    "firebug/lib/css",
 ],
-function(FBL, Firebug, FirebugReps, XPCOM) {
+function(FBL, Firebug, FirebugReps, XPCOM, CSS) {
 
 // **********************************************************************************************//
 // Constants
@@ -66,8 +67,8 @@ var Errors = Firebug.Errors = FBL.extend(Firebug.Module,
 
         if (FBTrace.DBG_ERRORLOG && FBTrace.DBG_CSS)
         {
-            FBL.totalSheets = 0;
-            FBL.totalRules = 0;
+            CSS.totalSheets = 0;
+            CSS.totalRules = 0;
             this.initTime = new Date();
         }
     },
@@ -88,8 +89,8 @@ var Errors = Firebug.Errors = FBL.extend(Firebug.Module,
         if (FBTrace.DBG_ERRORLOG && FBTrace.DBG_CSS && 'initTime' in this)
         {
             var deltaT = new Date().getTime() - this.initTime.getTime();
-            FBTrace.sysout("errors.destroyContext sheets: "+FBL.totalSheets+" rules: "+
-                FBL.totalRules+" time: "+deltaT);
+            FBTrace.sysout("errors.destroyContext sheets: "+CSS.totalSheets+" rules: "+
+                CSS.totalRules+" time: "+deltaT);
         }
     },
 
@@ -348,7 +349,7 @@ var Errors = Firebug.Errors = FBL.extend(Firebug.Module,
 
                 if (context.loaded)
                 {
-                    if (FBL.getStyleSheetByHref(url, context))
+                    if (CSS.getStyleSheetByHref(url, context))
                     {
                         if (FBTrace.DBG_ERRORLOG && FBTrace.DBG_CSS)
                             FBTrace.sysout("findContextByURL found match to in loaded styleSheetMap");
@@ -366,7 +367,7 @@ var Errors = Firebug.Errors = FBL.extend(Firebug.Module,
                         return errorContext = context;
                     }
 
-                    if (FBL.getStyleSheetByHref(url, context))
+                    if (CSS.getStyleSheetByHref(url, context))
                     {
                         if (FBTrace.DBG_ERRORLOG && FBTrace.DBG_CSS)
                             FBTrace.sysout("findContextByURL found match to in non-loaded styleSheetMap");
@@ -379,8 +380,8 @@ var Errors = Firebug.Errors = FBL.extend(Firebug.Module,
         if (FBTrace.DBG_ERRORLOG && FBTrace.DBG_CSS && 'initTime' in this)
         {
             var deltaT = new Date().getTime() - this.initTime.getTime();
-            FBTrace.sysout("errors.getErrorContext sheets: "+FBL.totalSheets+
-                " rules: "+FBL.totalRules+" time: "+deltaT);
+            FBTrace.sysout("errors.getErrorContext sheets: "+CSS.totalSheets+
+                " rules: "+CSS.totalRules+" time: "+deltaT);
         }
 
         if (!errorContext)

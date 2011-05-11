@@ -8,8 +8,9 @@ define([
     "firebug/lib/locale",
     "firebug/lib/events",
     "firebug/lib/wrapper",
+    "firebug/lib/css",
 ],
-function(FBL, Firebug, Firefox, FirebugReps, Locale, Events, Wrapper) {
+function(FBL, Firebug, Firefox, FirebugReps, Locale, Events, Wrapper, CSS) {
 
 // ************************************************************************************************
 // Constants
@@ -727,7 +728,7 @@ Firebug.Inspector = FBL.extend(Firebug.Module,
      */
     getObjectByURL: function(context, url)
     {
-        var styleSheet = FBL.getStyleSheetByHref(url, context);
+        var styleSheet = CSS.getStyleSheetByHref(url, context);
         if (styleSheet)
             return styleSheet;
     },
@@ -1732,10 +1733,10 @@ function attachStyles(context, body)
 {
     var doc = body.ownerDocument;
     if (!context.highlightStyle)
-        context.highlightStyle = FBL.createStyleSheet(doc, highlightCSS);
+        context.highlightStyle = CSS.createStyleSheet(doc, highlightCSS);
 
     if (!context.highlightStyle.parentNode || context.highlightStyle.ownerDocument != doc)
-        FBL.addStyleSheet(body.ownerDocument, context.highlightStyle);
+        CSS.addStyleSheet(body.ownerDocument, context.highlightStyle);
 }
 
 function createProxiesForDisabledElements(body)

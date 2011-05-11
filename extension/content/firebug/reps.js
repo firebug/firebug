@@ -13,9 +13,10 @@ define([
     "firebug/lib/url",
     "firebug/sourceLink",
     "firebug/lib/stackFrame",
+    "firebug/lib/css",
 ],
 function(FBL, Firebug, Domplate, XPCOM, Locale, ToolsInterface, HTMLLib, Events, Wrapper,
-    URL, SourceLink, StackFrame) { with (Domplate) {
+    URL, SourceLink, StackFrame, CSS) { with (Domplate) {
 
 // ************************************************************************************************
 // Constants
@@ -1113,7 +1114,7 @@ FirebugReps.StyleSheet = domplate(Firebug.Rep,
 
     persistor: function(context, href)
     {
-        return FBL.getStyleSheetByHref(href, context);
+        return CSS.getStyleSheetByHref(href, context);
     }
 });
 
@@ -1355,7 +1356,7 @@ FirebugReps.SourceLink = domplate(Firebug.Rep,
                 return;
             }
 
-            var stylesheet = FBL.getStyleSheetByHref(sourceLink.href, context);
+            var stylesheet = CSS.getStyleSheetByHref(sourceLink.href, context);
             if (stylesheet)
             {
                 var ownerNode = stylesheet.ownerNode;
