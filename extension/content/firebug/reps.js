@@ -192,7 +192,7 @@ FirebugReps.Func = domplate(Firebug.Rep,
 
     summarizeFunction: function(fn)
     {
-        var fnText = FBL.safeToString(fn);
+        var fnText = STR.safeToString(fn);
         var namedFn = /^function ([^(]+\([^)]*\)) \{/.exec(fnText);
         var anonFn  = /^function \(/.test(fnText);
         return namedFn ? namedFn[1] : (anonFn ? "function()" : fnText);

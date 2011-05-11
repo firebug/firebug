@@ -280,46 +280,11 @@ this.arrayInsert = arrayInsert;
 
 // ************************************************************************************************
 
-this.safeToString = function(ob)
-{
-    try
-    {
-        if (!ob)
-        {
-            if (ob == undefined)
-                return 'undefined';
-            if (ob == null)
-                return 'null';
-            if (ob == false)
-                return 'false';
-            return "";
-        }
-        if (ob && (typeof (ob['toString']) == "function") )
-            return ob.toString();
-        if (ob && typeof (ob['toSource']) == 'function')
-            return ob.toSource();
-       /* https://bugzilla.mozilla.org/show_bug.cgi?id=522590 */
-        var str = "[";
-        for (var p in ob)
-            str += p+',';
-        return str + ']';
-
-    }
-    catch (exc)
-    {
-        if (FBTrace.DBG_ERRORS)
-            FBTrace.sysout("safeToString FAILS "+exc, exc);
-    }
-    return "[unsupported: no toString() function in type "+typeof(ob)+"]";
-};
-
-// ************************************************************************************************
-
 this.hasProperties = function(ob)
 {
     try
     {
-        var obString = FBL.safeToString(ob);
+        var obString = STR.safeToString(ob);
         if (obString === '[object StorageList]' || obString === '[xpconnect wrapped native prototype]')
             return true;
 
@@ -331,10 +296,12 @@ this.hasProperties = function(ob)
             var value = ob[name];
             return true;
         }
-    } catch (exc)
+    }
+    catch (exc)
     {
         if (FBTrace.DBG_ERRORS)
-            FBTrace.sysout("lib.hasProperties("+FBL.safeToString(ob)+") ERROR "+exc, exc);
+            FBTrace.sysout("lib.hasProperties("+STR.safeToString(ob)+") ERROR "+exc, exc);
+
         if (ob.wrappedJSObject)  // workaround for https://bugzilla.mozilla.org/show_bug.cgi?id=648560
             return true;
     }
