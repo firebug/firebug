@@ -18,12 +18,12 @@ define([
     "firebug/svgViewer",
     "firebug/jsonViewer",
     "firebug/infotip",
-    "firebug/css",
+    "firebug/cssPanel",
     "firebug/search",
     "firebug/errors",
 ],
-function(FBL, Firebug, Firefox, Domplate, XPCOM, ToolsInterface, HttpRequestObserver, Locale, Events,
-    Options, URL, SourceLink) { with (Domplate) {
+function(FBL, Firebug, Firefox, Domplate, XPCOM, ToolsInterface, HttpRequestObserver, Locale,
+    Events, Options, URL, SourceLink) { with (Domplate) {
 
 // ************************************************************************************************
 // Constants

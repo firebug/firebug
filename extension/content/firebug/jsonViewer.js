@@ -6,7 +6,7 @@ define([
     "firebug/domplate",
     "firebug/lib/locale",
     "firebug/lib/events",
-    "firebug/dom",
+    "firebug/domPanel",
     "firebug/reps"
 ],
 function(FBL, Firebug, Domplate, Locale, Events) {

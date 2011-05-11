@@ -8,7 +8,7 @@ define([
     "firebug/lib/events",
     "firebug/http/requestObserver",
     "firebug/lib/stackFrame",
-    "firebug/net",
+    "firebug/netPanel",
     "firebug/errors",
 ],
 function(FBL, Firebug, Domplate, FirebugReps, Events, HttpRequestObserver, StackFrame) {
