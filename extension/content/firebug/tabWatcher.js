@@ -3,13 +3,14 @@
 define([
     "firebug/lib",
     "firebug/firebug",
+    "firebug/firefox/firefox",
     "firebug/lib/xpcom",
     "firebug/http/requestObserver",
     "firebug/lib/events",
     "firebug/lib/url",
     "firebug/tabContext",
 ],
-function(FBL, Firebug, XPCOM, HttpRequestObserver, Events, URL) {
+function(FBL, Firebug, Firefox, XPCOM, HttpRequestObserver, Events, URL) {
 
 // ************************************************************************************************
 // Constants
@@ -58,7 +59,7 @@ Firebug.TabWatcher = FBL.extend(new Firebug.Listener(),
         if (FBTrace.DBG_INITIALIZE)
             FBTrace.sysout("-> tabWatcher initialize "+tabBrowser);
 
-        var tabBrowser = FBL.$("content");
+        var tabBrowser = Firefox.getElementById("content");
         if (tabBrowser)
             tabBrowser.addProgressListener(TabProgressListener);
 
@@ -74,7 +75,7 @@ Firebug.TabWatcher = FBL.extend(new Firebug.Listener(),
 
         HttpRequestObserver.removeObserver(TabWatcherHttpObserver, "firebug-http-event");
 
-        var tabBrowser = FBL.$("content");
+        var tabBrowser = Firefox.getElementById("content");
         if (tabBrowser)
         {
             tabBrowser.removeProgressListener(TabProgressListener);

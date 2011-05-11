@@ -208,7 +208,7 @@ Firebug.ExternalEditors = FBL.extend(Firebug.Module,
     {
         var editor = this.getDefaultEditor();
         var doc = popup.ownerDocument;
-        var item = FBL.$('menu_firebugOpenWithEditor', doc);
+        var item = doc.getElementById('menu_firebugOpenWithEditor');
         if (item)
         {
             item = item.cloneNode(true);

@@ -2590,7 +2590,7 @@ Firebug.A11yModel = FBL.extend(Firebug.Module,
         if (!button)
             button = 0;
         if (typeof node == "string")
-            node = FBL.$(node);
+            throw new Error("a11y.dispatchMouseEvent obsolete API"); // not used; was node = FBL.$(node);
         var doc = node.ownerDocument;
         var event = doc.createEvent('MouseEvents');
         event.initMouseEvent(eventType, true, true, doc.defaultView,

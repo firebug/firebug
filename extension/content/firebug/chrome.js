@@ -266,7 +266,7 @@ FirebugChrome =
         }
         catch (exc)
         {
-            FBTrace.sysout("chrome.initializeUI fails "+exc, exc);
+            FBL.fatalError("chrome.initializeUI ERROR "+exc, exc);
         }
     },
 
@@ -1078,7 +1078,7 @@ FirebugChrome =
 
     $: function(id)
     {
-        return $(id);
+        return document.getElementById(id);  // The iframe, not the browser.xul
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *

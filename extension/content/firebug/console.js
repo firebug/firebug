@@ -3,6 +3,7 @@
 define([
     "firebug/lib",
     "firebug/firebug",
+    "firebug/firefox/firefox",
     "firebug/reps",
     "firebug/lib/locale",
     "arch/tools",
@@ -11,7 +12,7 @@ define([
     "firebug/search",
     "firebug/errors",
 ],
-function(FBL, Firebug, FirebugReps, Locale, ToolsInterface, Events) {
+function(FBL, Firebug, Firefox, FirebugReps, Locale, ToolsInterface, Events) {
 
 // ************************************************************************************************
 // Constants
@@ -375,13 +376,13 @@ Firebug.Console = FBL.extend(ActivableConsole,
     watchForErrors: function()
     {
         Firebug.Errors.checkEnabled();
-        FBL.$('firebugStatus').setAttribute("console", "on");
+        Firefox.getElementById('firebugStatus').setAttribute("console", "on");
     },
 
     unwatchForErrors: function()
     {
         Firebug.Errors.checkEnabled();
-        FBL.$('firebugStatus').removeAttribute("console");
+        Firefox.getElementById('firebugStatus').removeAttribute("console");
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *

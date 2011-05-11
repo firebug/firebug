@@ -4053,7 +4053,17 @@ function EventCopy(event)
 
 this.EventCopy = EventCopy;
 
-// ************************************************************************************************
+//************************************************************************************************
+this.fatalError = function(summary, exc)
+{
+    if (typeof(FBTrace) !== undefined)
+        FBTrace.sysout.apply(FBTrace, arguments);
+
+    Components.utils.reportError(summary);
+
+    throw exc;
+}
+//************************************************************************************************
 // Debug Logging
 
 function ERROR(exc)

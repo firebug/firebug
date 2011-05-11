@@ -2,9 +2,10 @@
 
 define([
     "firebug/lib",
-    "firebug/firebug"
+    "firebug/firebug",
+    "firebug/firefox/firefox",
 ],
-function(FBL, Firebug) {
+function(FBL, Firebug, Firefox) {
 
 // ************************************************************************************************
 // Constants
@@ -55,7 +56,7 @@ Firebug.ShortcutsModel = FBL.extend(Firebug.Module,
             keyElem.className = "fbOnlyKey";
             keyElem.id = "key_" + element;
             keyElem.command = "cmd_" + element;
-            FBL.$('mainKeyset').appendChild(keyElem);
+            Firefox.getElementById('mainKeyset').appendChild(keyElem);
         }
 
         //choose between key or keycode attribute

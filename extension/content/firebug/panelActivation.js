@@ -3,12 +3,13 @@
 define([
     "firebug/lib",
     "firebug/firebug",
+    "firebug/firefox/firefox",
     "arch/tools",
     "firebug/lib/locale",
     "firebug/domplate",
     "firebug/lib/url",
 ],
-function(FBL, Firebug, ToolsInterface, Locale, Domplate, URL) {
+function(FBL, Firebug, Firefox, ToolsInterface, Locale, Domplate, URL) {
 
 // ************************************************************************************************
 // Constants
@@ -243,7 +244,7 @@ Firebug.PanelActivation = FBL.extend(Firebug.Module,
     {
         var allOn = Firebug.allPagesActivation == "on";
 
-        var menu = FBL.$('menu_AllOn');
+        var menu = Firefox.getElementById('menu_AllOn');
         if (menu)
             menu.setAttribute("checked", allOn);
 

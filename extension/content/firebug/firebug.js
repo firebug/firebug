@@ -6,6 +6,7 @@
  */
 define([
     "firebug/lib",
+    "firebug/firefox/firefox",
     "firebug/domplate",
     "firebug/lib/options",
     "firebug/lib/locale",
@@ -13,7 +14,7 @@ define([
     "firebug/lib/wrapper",
     "firebug/lib/url",
 ],
-function(FBL, Domplate, Options, Locale, Events, Wrapper, URL) {
+function(FBL, Firefox, Domplate, Options, Locale, Events, Wrapper, URL) {
 
 // ********************************************************************************************* //
 // Constants
@@ -144,7 +145,7 @@ window.Firebug =
         // Append early registered panels at the end.
         panelTypes.push.apply(panelTypes, tempPanelTypes);
 
-        var tabBrowser = FBL.$("content");
+        var tabBrowser = Firefox.getElementById("content");
         if (tabBrowser) // TODO Firebug.TabWatcher
         {
             if (FBTrace.DBG_INITIALIZE)
@@ -252,7 +253,7 @@ window.Firebug =
         if (version)
         {
             this.version = version;
-            FBL.$('fbStatusBar').setAttribute("tooltiptext", "Firebug " + version);
+            Firefox.getElementById('fbStatusBar').setAttribute("tooltiptext", "Firebug " + version);
 
             // At this moment there is more 'Firebug About' items (in the icon and tools menu).
             var nodes = document.querySelectorAll(".firebugAbout");
@@ -324,7 +325,7 @@ window.Firebug =
 
     getSuspended: function()  // TODO XULWindow
     {
-        var suspendMarker = FBL.$("firebugStatus");
+        var suspendMarker = Firefox.getElementById("firebugStatus");
         if (suspendMarker.hasAttribute("suspended"))
             return suspendMarker.getAttribute("suspended");
         return null;
@@ -332,7 +333,7 @@ window.Firebug =
 
     setSuspended: function(value)  // TODO XULWindow
     {
-        var suspendMarker = FBL.$("firebugStatus");
+        var suspendMarker = Firefox.getElementById("firebugStatus");
         if (FBTrace.DBG_ACTIVATION)
             FBTrace.sysout("Firebug.setSuspended to "+value+". Browser: " +
                 Firebug.chrome.window.document.title);

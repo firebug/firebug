@@ -1,0 +1,92 @@
+<?xml version="1.0"?>
+
+<?xul-overlay href="chrome://firebug/content/firebugOverlay.xul"?>
+
+<?xml-stylesheet href="chrome://global/skin/global.css"?>
+<?xml-stylesheet href="chrome://firebug/content/firebug.css"?>
+<?xml-stylesheet href="chrome://firebug/skin/window.css"?>
+<?xml-stylesheet href="chrome://browser/skin/browser.css"?>
+
+<!DOCTYPE window [
+<!ENTITY % browserDTD SYSTEM "chrome://browser/locale/browser.dtd" >
+%browserDTD;
+]>
+
+<window xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul"
+        id="firebug"
+        title="Firebug"
+        width="800" height="600"
+        persist="screenX,screenY,width,height,sizemode">
+
+    <script type="application/x-javascript" src="chrome://global/content/globalOverlay.js"/>
+    <script type="application/x-javascript" src="chrome://firebug/content/trace.js"/>
+    <script type="application/x-javascript" src="chrome://firebug/content/legacy.js"/>
+    <script type="application/x-javascript" src="chrome://firebug/content/chrome.js"/>
+
+    <script type="application/x-javascript" src="resource://firebug/require.js"/>
+    <script type="application/x-javascript">
+       window.Firebug = {};
+    </script>
+    <script type="application/x-javascript" src="chrome://firebug/content/main.js"/>
+
+    <stringbundleset id="stringbundleset"/>
+    <commandset id="baseMenuCommandSet"/>
+    <keyset id="baseMenuKeyset"/>
+
+    <commandset id="mainCommandSet">
+        <command id="cmd_undo" oncommand="goDoCommand('cmd_undo')" disabled="true"/>
+        <command id="cmd_redo" oncommand="goDoCommand('cmd_redo')" disabled="true"/>
+        <command id="cmd_cut" oncommand="goDoCommand('cmd_cut')" disabled="true"/>
+        <command id="cmd_copy" oncommand="goDoCommand('cmd_copy')" disabled="true"/>
+        <command id="cmd_paste" oncommand="goDoCommand('cmd_paste')" disabled="true"/>
+        <command id="cmd_delete" oncommand="goDoCommand('cmd_delete')" disabled="true"
+            valueDefault="&deleteCmd.label;"/>
+        <command id="cmd_selectAll" oncommand="goDoCommand('cmd_selectAll')" disabled="true"/>
+        <command id="cmd_closeWindow" oncommand="window.close()"/>
+        <command id="cmd_reload" oncommand="FirebugChrome.reload()"/>
+        <command id="cmd_reloadSkipCache" oncommand="FirebugChrome.reload(true)"/>
+        <command id="cmd_toggleOrient" oncommand="FirebugChrome.toggleOrient()"/>
+    </commandset>
+
+    <keyset id="mainKeyset">
+        <key id="key_undo" key="&undoCmd.key;" modifiers="accel"/>
+        <key id="key_redo" key="&undoCmd.key;" modifiers="accel,shift"/>
+        <key id="key_cut" key="&cutCmd.key;" modifiers="accel"/>
+        <key id="key_copy" key="&copyCmd.key;" modifiers="accel"/>
+        <key id="key_paste" key="&pasteCmd.key;" modifiers="accel"/>
+        <key id="key_delete" keycode="VK_DELETE" command="cmd_delete"/>
+        <key id="key_selectAll" key="&selectAllCmd.key;" modifiers="accel"/>
+        <key key="&reloadCmd.commandkey;" command="cmd_reload" modifiers="accel" id="key_reload"/>
+        <key key="&reloadCmd.commandkey;" command="cmd_reload" modifiers="accel,shift"/>
+        <key id="key_closeWindow" key="w" command="cmd_closeWindow" modifiers="accel"/>
+    </keyset>
+
+    <broadcasterset id="mainBroadcasterSet"/>
+
+    <popupset id="mainPopupSet"/>
+
+    <!-- Entire Firebug UI -->
+    <vbox id="fbContentBox" flex="1">
+    </vbox>
+
+    <!-- If Firebug is displayed in this external window, but not active for currently selected
+         Firefox tab, the following button allows to resume it. -->
+    <vbox id="fbResumeBox" flex="1" collapsed="true">
+        <hbox id="fbWindowButtons" role="toolbar" class="innerToolbar" aria-label="a11y.labels.firebug window">
+            <spacer flex="1"/>
+            <!-- Allow to minimize/attach Firebug if deactivated -->
+            <toolbarbutton id="fbMinimizeButton" class="toolbarbutton-iconic fbInternational"
+                tooltiptext="Minimize Firebug" command="cmd_minimizeFirebug"/>
+        </hbox>
+        <spacer flex="1"/>
+        <hbox>
+            <spacer flex="1"/>
+            <button id="fbResumeBoxButton"
+                label="label.Activate Firebug for the current website"
+                command="cmd_toggleSuspendFirebug" class="fbInternational"/>
+            <spacer flex="1"/>
+        </hbox>
+        <spacer flex="1"/>
+    </vbox>
+
+</window>

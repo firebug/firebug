@@ -429,7 +429,7 @@ Firebug.SourceBoxPanel = FBL.extend(SourceBoxPanelBase,
         sourceBox.getLineNode =  function(lineNo)
         {
             // XXXjjb this method is supposed to return null if the lineNo is not in the viewport
-            return FBL.$(this.decorator.getLineId(this, lineNo), this.ownerDocument);
+            return this.ownerDocument.getElementById(this.decorator.getLineId(this, lineNo));
         };
 
         var paddedSource =

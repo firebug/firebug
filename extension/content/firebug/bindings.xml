@@ -308,7 +308,7 @@
         <method name="updateToolbarVisibility">
             <body><![CDATA[
                 var noButtons = true;
-                var toolbarInner = FBL.$("fbToolbarInner");
+                var toolbarInner = Firebug.chrome.$("fbToolbarInner");
                 var box = toolbarInner.firstChild;
                 while (box)
                 {
@@ -329,7 +329,7 @@
                     box = box.nextSibling;
                 }
 
-                var toolbar = FBL.$("fbToolbox");
+                var toolbar = Firebug.chrome.$("fbToolbox");
                 FBL.collapse(toolbar, noButtons);
             ]]></body>
         </method>
@@ -641,7 +641,7 @@
             this.setAttribute("checked", checked ? "false" : "true");
             this.panelBar.togglePanel(panelName, !checked);
 
-            FBL.$("panelBarTabList").updateMenuItems();
+            Firebug.chrome.$("panelBarTabList").updateMenuItems();
             ]]></body>
         </method>
         <method name="onOverToggleCheckmark">

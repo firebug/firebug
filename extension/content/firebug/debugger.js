@@ -3,6 +3,7 @@
 define([
     "firebug/lib",
     "firebug/firebug",
+    "firebug/firefox/firefox",
     "arch/tools",
     "firebug/lib/xpcom",
     "firebug/reps",
@@ -14,7 +15,7 @@ define([
     "firebug/lib/stackFrame",
     "firebug/errors",
 ],
-function(FBL, Firebug, ToolsInterface, XPCOM, FirebugReps, Locale, HttpRequestObserver,
+function(FBL, Firebug, Firefox, ToolsInterface, XPCOM, FirebugReps, Locale, HttpRequestObserver,
     Wrapper, URL, SourceLink, StackFrame) {
 
 // ********************************************************************************************* //
@@ -2223,7 +2224,7 @@ Firebug.Debugger = FBL.extend(Firebug.ActivableModule,
     {
         Firebug.ActivableModule.initializeUI.apply(this, arguments);
         this.obeyPrefs();
-        this.filterButton = FBL.$("fbScriptFilterMenu");  // TODO move to script.js
+        this.filterButton = Firebug.chrome.$("fbScriptFilterMenu");  // TODO move to script.js
         this.filterMenuUpdate();
         if (FBL.fbs.isJSDActive())  // notify frontend of current state
             Firebug.JSDebugClient.onJSDActivate(true, 'Firebug.Debugger.initializeUI');
@@ -2439,7 +2440,7 @@ Firebug.Debugger = FBL.extend(Firebug.ActivableModule,
     updateOption: function(name, value)
     {
         if (name == "breakOnErrors")
-            FBL.$("cmd_breakOnErrors").setAttribute("checked", value);
+            Firefox.getElementById("cmd_breakOnErrors").setAttribute("checked", value);
 
         if (name == "script.enableSites")
         {

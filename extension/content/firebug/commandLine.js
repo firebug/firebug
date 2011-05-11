@@ -711,17 +711,13 @@ Firebug.CommandLine = FBL.extend(Firebug.Module,
 
     showPanel: function(browser, panel)
     {
+        if (!Firebug.currentContext)
+            return;
+
         var chrome = Firebug.chrome;
         var panelState = FBL.getPersistedState(this, "console");
         var value = panel && panel.context.commandLineText ? panel.context.commandLineText :
             panelState.commandLineText;
-
-        if (!Firebug.currentContext)
-        {
-            if (FBTrace.DBG_ERRORS)
-                FBTrace.sysout("commandLine.showPanel; ERROR NO CONTEXT");
-            return;
-        }
 
         var commandLine = this.getCommandLine(browser);
         Firebug.currentContext.commandLineText = value ? value : "";
@@ -2222,7 +2218,7 @@ Firebug.CommandLine.CommandHistory = function()
 {
     const commandHistoryMax = 1000;
 
-    var commandsPopup = FBL.$("fbCommandHistory");
+    var commandsPopup = Firebug.chrome.$("fbCommandHistory");
     var commands = [];
     var commandPointer = 0;
     var commandInsertPointer = -1;
@@ -2240,10 +2236,10 @@ Firebug.CommandLine.CommandHistory = function()
         commandPointer = commandInsertPointer + 1;
         commands[commandInsertPointer] = command;
 
-        if (FBL.$("fbCommandLineHistoryButton").hasAttribute("disabled"))
+        if (Firebug.chrome.$("fbCommandLineHistoryButton").hasAttribute("disabled"))
         {
-            FBL.$("fbCommandLineHistoryButton").removeAttribute("disabled");
-            FBL.$("fbCommandEditorHistoryButton").removeAttribute("disabled");
+            Firebug.chrome.$("fbCommandLineHistoryButton").removeAttribute("disabled");
+            Firebug.chrome.$("fbCommandEditorHistoryButton").removeAttribute("disabled");
             commandsPopup.addEventListener("mouseover", this.onMouseOver, true);
             commandsPopup.addEventListener("mouseup", this.onMouseUp, true);
             commandsPopup.addEventListener("popuphidden", this.onPopupHidden, true);

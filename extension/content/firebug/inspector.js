@@ -3,12 +3,13 @@
 define([
     "firebug/lib",
     "firebug/firebug",
+    "firebug/firefox/firefox",
     "firebug/reps",
     "firebug/lib/locale",
     "firebug/lib/events",
     "firebug/lib/wrapper",
 ],
-function(FBL, Firebug, FirebugReps, Locale, Events, Wrapper) {
+function(FBL, Firebug, Firefox, FirebugReps, Locale, Events, Wrapper) {
 
 // ************************************************************************************************
 // Constants
@@ -171,7 +172,7 @@ Firebug.Inspector = FBL.extend(Firebug.Module,
     {
         if (this.inspecting)
         {
-            var panelBar1 = FBL.$("fbPanelBar1");
+            var panelBar1 = Firebug.chrome.$("fbPanelBar1");
             var panel = panelBar1.selectedPanel;
 
             if (panel && panel.inspectable)
@@ -614,7 +615,7 @@ Firebug.Inspector = FBL.extend(Firebug.Module,
         this.updateOption("shadeBoxModel", Firebug.shadeBoxModel);
         this.updateOption("showQuickInfoBox", Firebug.showQuickInfoBox);
 
-        var panelBar1 = FBL.$("fbPanelBar1");
+        var panelBar1 = Firebug.chrome.$("fbPanelBar1");
         panelBar1.addEventListener("selectPanel", this.onPanelChanged, false);
     },
 
@@ -736,7 +737,7 @@ Firebug.Inspector = FBL.extend(Firebug.Module,
      */
     toggleQuickInfoBox: function()
     {
-        var qiBox = FBL.$('fbQuickInfoPanel');
+        var qiBox = Firebug.chrome.$('fbQuickInfoPanel');
 
         if (qiBox.state === "open")
             quickInfoBox.hide();
@@ -751,7 +752,7 @@ Firebug.Inspector = FBL.extend(Firebug.Module,
      */
     hideQuickInfoBox: function()
     {
-        var qiBox = FBL.$('fbQuickInfoPanel');
+        var qiBox = Firebug.chrome.$('fbQuickInfoPanel');
 
         if (qiBox.state==="open")
             quickInfoBox.hide();
@@ -1007,14 +1008,14 @@ var quickInfoBox =
             compAttribs = ['width', 'height', 'zIndex', 'position', 'top', 'right', 'bottom', 'left',
                            'margin-top', 'margin-right', 'margin-bottom', 'margin-left', 'color', 'backgroundColor',
                            'fontFamily', 'cssFloat', 'display', 'visibility'],
-            qiBox = FBL.$('fbQuickInfoPanel');
+            qiBox = Firebug.chrome.$('fbQuickInfoPanel');
 
         if (qiBox.state==="closed")
         {
             qiBox.hidePopup();
 
-            this.storedX = this.storedX || FBL.$('content').tabContainer.boxObject.screenX + 5;
-            this.storedY = this.storedY || FBL.$('content').tabContainer.boxObject.screenY + 35;
+            this.storedX = this.storedX || Firefox.getElementById('content').tabContainer.boxObject.screenX + 5;
+            this.storedY = this.storedY || Firefox.getElementById('content').tabContainer.boxObject.screenY + 35;
 
             qiBox.openPopupAtScreen(this.storedX, this.storedY, false);
         }
@@ -1050,7 +1051,7 @@ var quickInfoBox =
             return;
         }
 
-        var qiBox = FBL.$('fbQuickInfoPanel');
+        var qiBox = Firebug.chrome.$('fbQuickInfoPanel');
         this.prevX = null;
         this.prevY = null;
         this.needsToHide = false;
@@ -1082,7 +1083,7 @@ var quickInfoBox =
                 this.storedY = boxY;
                 break;
             case "mousedown":
-                this.qiPanel = FBL.$('fbQuickInfoPanel');
+                this.qiPanel = Firebug.chrome.$('fbQuickInfoPanel');
                 this.qiBox = this.qiPanel.boxObject;
                 this.qiPanel.addEventListener('mousemove', this, true);
                 this.qiPanel.addEventListener('mouseup', this, true);

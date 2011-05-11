@@ -546,6 +546,9 @@ var require, define;
                             context.config.onDebug("require.js: defined "+fullName+" using function return");
                         }
                     }
+                    if (typeof(ret) === 'undefined') {
+                         req.onError("require.js "+fullName+" set exports undefined!");
+                    }
                 } else {
                     if (context.config.debug && context.config.onDebug) {
                         context.config.onDebug("require.js: defined found no fullName");
@@ -611,7 +614,7 @@ var require, define;
                             manager.deps[depName] = value;
                             manager.depCount += 1;
                             if (context.config.debug && context.config.onDebug) {
-                                context.config.onDebug("require.js:  "+depName+" set exports type "+typeof(value)+" "+manager.depCount+"/"+manager.depMax, {manager: manager});
+                                context.config.onDebug("require.js:  "+manager.fullName+"["+depName+"]= "+typeof(value)+" "+manager.depCount+"/"+manager.depMax, {manager: manager});
                             }
                             if (manager.depCount === manager.depMax) {
                                 //All done, execute!
@@ -841,7 +844,7 @@ var require, define;
                 msg += " pausedCount: "+context.pausedCount;
                 msg += " scriptCount: "+context.scriptCount;
                 msg += (expired ? " EXPIRED: " : " remaining ") + (new Date().getTime() - context.startTime) + "/" + waitInterval +" secs";
-                context.config.onDebug("checkLoaded "+msg);
+                context.config.onDebug("checkLoaded "+checkLoaded.timeOutIndex+": "+msg);
             }
 
             //If there are items still in the paused queue processing wait.
@@ -899,19 +902,21 @@ var require, define;
                     err.requireModules = noLoads;
                     return req.onError(err);
                 } else {
-                    //If wait time expired, throw error of unloaded modules.
+                    //If wait time expired but no modules wait, throw error of counted modules.
                     noLoads = context.counted.join(", ");
-                    err = new Error("require.js checkLoaded("+context.checkLoaded+") timeout (waitSeconds: "+config.waitSeconds+") for counted modules: " + noLoads);
-                    err.requireType = "timeout";
-                    err.requireModules = noLoads;
-                    return req.onError(err);
+                    if(noLoads) {
+                        err = new Error("require.js checkLoaded("+checkLoaded.timeOutIndex+") timeout (waitSeconds: "+config.waitSeconds+") for counted modules: " + noLoads);
+                        err.requireType = "timeout";
+                        err.requireModules = noLoads;
+                        return req.onError(err);
+                    }
                 }
             }
             if (stillLoading || context.scriptCount) {
                 //Something is still waiting to load. Wait for it.
                 if (isBrowser || isWebWorker) {
-                    context.checkLoaded = context.checkLoaded ? context.checkLoaded++ : 1;
-                    setTimeout(checkLoaded, 50);
+                    checkLoaded.depth = checkLoaded.depth ? checkLoaded.depth++ : 1;
+                    checkLoaded.timeOutIndex = setTimeout(checkLoaded, 50);
                 }
                 return undefined;
             }

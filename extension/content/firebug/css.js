@@ -3,6 +3,7 @@
 define([
     "firebug/lib",
     "firebug/firebug",
+    "firebug/firefox/firefox",
     "firebug/domplate",
     "firebug/reps",
     "firebug/lib/xpcom",
@@ -17,7 +18,7 @@ define([
     "firebug/infotip",
     "firebug/search",
 ],
-function(FBL, Firebug, Domplate, FirebugReps, XPCOM, Locale, Events, Wrapper, URL,
+function(FBL, Firebug, Firefox, Domplate, FirebugReps, XPCOM, Locale, Events, Wrapper, URL,
     SourceLink, CSS) { with (Domplate) {
 
 // ************************************************************************************************
@@ -1895,7 +1896,7 @@ CSSElementPanel.prototype = FBL.extend(Firebug.CSSStyleSheetPanel.prototype,
         if ( !(element instanceof window.Element) ) // html supports SourceLink
             return;
 
-        var sothinkInstalled = !!FBL.$("swfcatcherKey_sidebar");
+        var sothinkInstalled = !!Firefox.getElementById("swfcatcherKey_sidebar");
         if (sothinkInstalled)
         {
             var div = FirebugReps.Warning.tag.replace({object: "SothinkWarning"}, this.panelNode);

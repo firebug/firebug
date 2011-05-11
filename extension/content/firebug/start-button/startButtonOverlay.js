@@ -2,11 +2,13 @@
 
 define([
     "firebug/lib",
+    "firebug/firebug",
+    "firebug/firefox/firefox",
     "firebug/lib/locale",
     "firebug/lib/events",
-    "firebug/firebug",
+
 ],
-function(FBL, Locale, Events, Firebug) {
+function(FBL, Firebug, Firefox, Locale, Events) {
 
 // ********************************************************************************************* //
 // Constants
@@ -40,10 +42,10 @@ Firebug.StartButton = FBL.extend(Firebug.Module,
 
         // Associate a popup-menu with the start button (the same as it's
         // used for the obsolete status bar icon.
-        var startButton = FBL.$("firebug-button");
+        var startButton = Firefox.getElementById("firebug-button");
         if (startButton)
         {
-            var popup = FBL.$("fbStatusContextMenu");
+            var popup = Firefox.getElementById("fbStatusContextMenu");
             startButton.appendChild(popup.cloneNode(true));
 
             // Append the button into Firefox toolbar automatically.
@@ -81,7 +83,7 @@ Firebug.StartButton = FBL.extend(Firebug.Module,
         // ID of the Firebug start button into it.
         var startButtonId = "firebug-button";
         var navBarId = "nav-bar";
-        var navBar = FBL.$(navBarId);
+        var navBar = Firefox.getElementById(navBarId);
 
         // In SeaMonkey we need to read the attribute (see issue 4086)
         // In Firefox the currentSet property must be used.
@@ -129,7 +131,7 @@ Firebug.StartButton = FBL.extend(Firebug.Module,
     updateStatusIcon: function()
     {
         var show = Firebug.Options.get("showStatusIcon");
-        var statusBar = FBL.$("fbStatusBar");
+        var statusBar = Firefox.getElementById("fbStatusBar");
         if (statusBar)
             FBL.collapse(statusBar, !show);
     },
@@ -173,13 +175,13 @@ Firebug.StartButton = FBL.extend(Firebug.Module,
 
     showCount: function(errorCount)
     {
-        var statusBar = FBL.$("fbStatusBar");
-        var statusText = FBL.$("fbStatusText");
+        var statusBar = Firefox.getElementById("fbStatusBar");
+        var statusText = Firefox.getElementById("fbStatusText");
 
         if (!statusBar)
             return;
 
-        var firebugButton = FBL.$("firebug-button");
+        var firebugButton = Firefox.getElementById("firebug-button");
         if (errorCount && Firebug.showErrorCount)
         {
             statusBar.setAttribute("showErrors", "true")
@@ -233,7 +235,7 @@ Firebug.StartButton = FBL.extend(Firebug.Module,
 
         tooltip += "\n" + Locale.$STR(Firebug.getPlacement());
 
-        var firebugStatus = FBL.$("firebugStatus");
+        var firebugStatus = Firefox.getElementById("firebugStatus");
         firebugStatus.setAttribute("tooltiptext", tooltip);
     },
 
@@ -243,7 +245,7 @@ Firebug.StartButton = FBL.extend(Firebug.Module,
         var strOff = Locale.$STR("enablement.off");
 
         var status = "";
-        var firebugStatus = FBL.$("firebugStatus");
+        var firebugStatus = Firefox.getElementById("firebugStatus");
 
         if (firebugStatus.getAttribute("console") == "on")
             status += "Console: " + strOn + ",";
@@ -270,4 +272,6 @@ Firebug.StartButton = FBL.extend(Firebug.Module,
 Firebug.registerModule(Firebug.StartButton);
 
 // ********************************************************************************************* //
+
+return Firebug.StartButton;
 });

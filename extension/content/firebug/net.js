@@ -3,6 +3,7 @@
 define([
     "firebug/lib",
     "firebug/firebug",
+    "firebug/firefox/firefox",
     "firebug/domplate",
     "firebug/lib/xpcom",
     "arch/tools",
@@ -21,7 +22,7 @@ define([
     "firebug/search",
     "firebug/errors",
 ],
-function(FBL, Firebug, Domplate, XPCOM, ToolsInterface, HttpRequestObserver, Locale, Events,
+function(FBL, Firebug, Firefox, Domplate, XPCOM, ToolsInterface, HttpRequestObserver, Locale, Events,
     Options, URL, SourceLink) { with (Domplate) {
 
 // ************************************************************************************************
@@ -1862,7 +1863,7 @@ Firebug.NetMonitor.NetRequestTable = domplate(Firebug.Rep, new Firebug.Listener(
      */
     getContextMenuItems: function(object, target, context)
     {
-        var popup = FBL.$("fbContextMenu");
+        var popup = Firefox.getElementById("fbContextMenu");
         if (popup.firstChild && popup.firstChild.getAttribute("command") == "cmd_copy")
             popup.removeChild(popup.firstChild);
 
@@ -4511,7 +4512,7 @@ function monitorContext(context)
         panel.insertActivationMessage();
 
     // Update status bar icon.
-    FBL.$('firebugStatus').setAttribute("net", "on");
+    Firefox.getElementById('firebugStatus').setAttribute("net", "on");
 }
 
 function unmonitorContext(context)
@@ -4542,7 +4543,7 @@ function unmonitorContext(context)
     context.netProgress.activate(null);
 
     // Update status bar icon.
-    FBL.$('firebugStatus').removeAttribute("net");
+    Firefox.getElementById('firebugStatus').removeAttribute("net");
 
     // And finaly destroy the net panel sub context.
     delete context.netProgress;

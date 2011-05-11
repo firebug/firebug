@@ -808,7 +808,7 @@ Firebug.InlineEditor.prototype = domplate(Firebug.BaseEditor,
     {
         Events.cancelEvent(event);
 
-        var popup = FBL.$("fbInlineEditorPopup");
+        var popup = Firebug.chrome.$("fbInlineEditorPopup");
         FBL.eraseNode(popup);
 
         var target = event.target;

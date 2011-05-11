@@ -3,6 +3,7 @@
 define([
     "firebug/lib",
     "firebug/firebug",
+    "firebug/firefox/firefox",
     "firebug/reps",
     "firebug/domplate",
     "arch/tools",
@@ -16,7 +17,7 @@ define([
     "firebug/search",
     "firebug/sourceBox",
 ],
-function(FBL, Firebug, FirebugReps, Domplate, ToolsInterface, Locale, Events, URL, SourceLink,
+function(FBL, Firebug, Firefox, FirebugReps, Domplate, ToolsInterface, Locale, Events, URL, SourceLink,
     StackFrame) {
 
 // ********************************************************************************************* //
@@ -154,7 +155,7 @@ Firebug.ScriptPanel.prototype = FBL.extend(Firebug.SourceBoxPanel,
             Firebug.chrome.syncPanel(this.name);
 
         // Front side UI mark
-        var firebugStatus = FBL.$('firebugStatus');
+        var firebugStatus = Firefox.getElementById('firebugStatus');
         if (firebugStatus)
         {
             if (active)
@@ -173,7 +174,7 @@ Firebug.ScriptPanel.prototype = FBL.extend(Firebug.SourceBoxPanel,
 
         if (FBTrace.DBG_ACTIVATION)
             FBTrace.sysout("script.onJavaScriptDebugging "+active+" icon attribute: "+
-                FBL.$('firebugStatus').getAttribute("script"));
+                Firefox.getElementById('firebugStatus').getAttribute("script"));
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
@@ -515,8 +516,8 @@ Firebug.ScriptPanel.prototype = FBL.extend(Firebug.SourceBoxPanel,
         this.onScroll = FBL.bind(this.onScroll, this);
         this.onKeyPress = FBL.bind(this.onKeyPress, this);
 
-        this.panelSplitter = FBL.$("fbPanelSplitter");
-        this.sidePanelDeck = FBL.$("fbSidePanelDeck");
+        this.panelSplitter = Firebug.chrome.$("fbPanelSplitter");
+        this.sidePanelDeck = Firebug.chrome.$("fbSidePanelDeck");
 
         Firebug.SourceBoxPanel.initialize.apply(this, arguments);
     },

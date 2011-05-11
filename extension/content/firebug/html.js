@@ -125,7 +125,7 @@ Firebug.HTMLPanel.prototype = FBL.extend(WalkingPanel,
             this.updateSelection(object);
             Events.dispatch(Firebug.uiListeners, "onObjectSelected", [object, this]);
 
-            if (this.editing && FBL.$("fbToggleHTMLEditing").getAttribute("checked") === "true")
+            if (this.editing && Firebug.chrome.$("fbToggleHTMLEditing").getAttribute("checked") === "true")
                 this.editNode(object);
         }
     },
@@ -871,7 +871,7 @@ Firebug.HTMLPanel.prototype = FBL.extend(WalkingPanel,
             this.noScrollIntoView = true;
             this.select(node);
 
-            FBL.$('fbToggleHTMLEditing').disabled =
+            Firebug.chrome.$('fbToggleHTMLEditing').disabled =
                 CSS.nonEditableTags.hasOwnProperty(node.localName);
 
             delete this.noScrollIntoView;
