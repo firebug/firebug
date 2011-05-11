@@ -917,7 +917,7 @@ FirebugReps.Element = domplate(Firebug.Rep,
 
     getTitle: function(element, context)
     {
-        return FBL.getElementCSSSelector(element);
+        return CSS.getElementCSSSelector(element);
     },
 
     getTooltip: function(elt)

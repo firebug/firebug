@@ -6,9 +6,10 @@ define([
     "firebug/lib/events",
     "firebug/lib/url",
     "firebug/firefox/window",
+    "firebug/lib/css",
     "firebug/plugin",
 ],
-function(FBL, ToolsInterface, Events, URL, WIN) {
+function(FBL, ToolsInterface, Events, URL, WIN, CSS) {
 
 // ************************************************************************************************
 // Constants
@@ -101,7 +102,7 @@ Firebug.TabContext.prototype =
             {
                 this.name = URL.normalizeURL(url);
                 if (this.name === "about:blank" && this.window.frameElement)
-                    this.name += " in "+FBL.getElementCSSSelector(this.window.frameElement);
+                    this.name += " in "+CSS.getElementCSSSelector(this.window.frameElement);
             }
         }
         return this.name;

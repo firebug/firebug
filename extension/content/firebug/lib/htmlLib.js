@@ -631,7 +631,7 @@ var HTMLLib =
         if (element.ownerDocument instanceof Ci.nsIDOMDocumentXBL)
         {
             if (FBTrace.DBG_HTML)
-                FBTrace.sysout("hasNoElementChildren "+FBL.getElementCSSSelector(element)+
+                FBTrace.sysout("hasNoElementChildren "+CSS.getElementCSSSelector(element)+
                     " (element.ownerDocument instanceof Ci.nsIDOMDocumentXBL) "+
                     (element.ownerDocument instanceof Ci.nsIDOMDocumentXBL), element);
 

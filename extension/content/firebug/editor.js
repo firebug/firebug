@@ -604,7 +604,7 @@ Firebug.InlineEditor.prototype = domplate(Firebug.BaseEditor,
         this.box.removeAttribute('saveSuccess');
 
         // Make the editor match the target's font style
-        FBL.copyTextStyles(target, this.box);
+        CSS.copyTextStyles(target, this.box);
 
         this.setValue(value);
 
@@ -620,7 +620,7 @@ Firebug.InlineEditor.prototype = domplate(Firebug.BaseEditor,
         {
             this.startMeasuring(target);
 
-            FBL.copyBoxStyles(target, this.expander);
+            CSS.copyBoxStyles(target, this.expander);
             target.parentNode.replaceChild(this.expander, target);
             FBL.collapse(target, true);
             this.expander.parentNode.insertBefore(target, this.expander);

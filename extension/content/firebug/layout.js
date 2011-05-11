@@ -201,7 +201,7 @@ LayoutPanel.prototype = FBL.extend(Firebug.Panel,
         var prevStyle = prev ? view.getComputedStyle(prev, "") : null;
         var nextStyle = next ? view.getComputedStyle(next, "") : null;
 
-        var args = FBL.getBoxFromStyles(style, element);
+        var args = CSS.getBoxFromStyles(style, element);
 
         args.outerLeft = args.outerRight = args.outerTop = args.outerBottom = '';
         args.outerLeftMode = args.outerRightMode = args.outerTopMode = args.outerBottomMode = "";

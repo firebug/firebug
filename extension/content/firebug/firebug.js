@@ -2410,7 +2410,7 @@ Firebug.MeasureBox =
             this.measureBox.className = "measureBox";
         }
 
-        FBL.copyTextStyles(target, this.measureBox);
+        CSS.copyTextStyles(target, this.measureBox);
         target.ownerDocument.body.appendChild(this.measureBox);
     },
 
@@ -2437,7 +2437,7 @@ Firebug.MeasureBox =
     getBox: function(target)
     {
         var style = this.measureBox.ownerDocument.defaultView.getComputedStyle(this.measureBox, "");
-        var box = FBL.getBoxFromStyles(style, this.measureBox);
+        var box = CSS.getBoxFromStyles(style, this.measureBox);
         return box;
     },
 

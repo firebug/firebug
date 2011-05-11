@@ -480,7 +480,7 @@ Firebug.InsideOutBox.prototype =
 
         var parentObjectBox = DOM.getAncestorByClass(nodeChildBox, "nodeBox");
         if (FBTrace.DBG_HTML)
-            FBTrace.sysout("+++insideOutBox.populateChildBox("+FBL.getElementCSSSelector(repObject)+") parentObjectBox.populated "+parentObjectBox.populated+"\n");
+            FBTrace.sysout("+++insideOutBox.populateChildBox("+CSS.getElementCSSSelector(repObject)+") parentObjectBox.populated "+parentObjectBox.populated+"\n");
         if (parentObjectBox.populated)
             return this.findChildObjectBox(nodeChildBox, repObject);
 
@@ -660,7 +660,7 @@ function formatNode(object)
             else
                 return "(an object with no localName or toString result)";
         }
-        else  return FBL.getElementCSSSelector(object);
+        else  return CSS.getElementCSSSelector(object);
     }
     else
         return "(null object)";
@@ -671,7 +671,7 @@ function formatObjectBox(object)
     if (object)
     {
         if (object.localName)
-            return FBL.getElementCSSSelector(object);
+            return CSS.getElementCSSSelector(object);
         return object.textContent;
     }
     else

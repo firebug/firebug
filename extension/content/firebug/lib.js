@@ -15,9 +15,10 @@ define([
     "firebug/http/httpLib",
     "firebug/firefox/window",
     "firebug/lib/search",
+    "firebug/lib/xpath",
 ],
 function(XPCOM, Locale, Events, Options, Deprecated, Wrapper, URL, SourceLink, StackFrame,
-    CSS, DOM, HTTP, WIN, Search) {
+    CSS, DOM, HTTP, WIN, Search, XPATH) {
 
 // ********************************************************************************************* //
 
@@ -71,6 +72,9 @@ for (var p in WIN)
 
 for (var p in Search)
     FBL[p] = Search[p];
+
+for (var p in XPATH)
+    FBL[p] = XPATH[p];
 
 FBL.deprecated = Deprecated.deprecated;
 FBL.SourceLink = SourceLink.SourceLink;
@@ -1010,174 +1014,6 @@ this.scrollIntoCenterView = function(element, scrollBox, notX, notY)
     }
     if (FBTrace.DBG_SOURCEFILES)
         FBTrace.sysout("lib.scrollIntoCenterView ","Element:"+element.innerHTML);
-};
-
-// ************************************************************************************************
-// CSS
-
-var cssKeywordMap = {};
-var cssPropNames = {};
-var cssColorNames = null;
-var imageRules = null;
-
-this.getCSSKeywordsByProperty = function(nodeType,propName)
-{
-    if (!cssKeywordMap[nodeType])
-    {
-        cssKeywordMap[nodeType] = {};
-
-        for (var name in CSS.cssInfo[nodeType])
-        {
-            var list = [];
-
-            var types = CSS.cssInfo[nodeType][name];
-            for (var i = 0; i < types.length; ++i)
-            {
-                var keywords = this.cssKeywords[types[i]];
-                if (keywords)
-                    list.push.apply(list, keywords);
-            }
-
-            cssKeywordMap[nodeType][name] = list;
-        }
-    }
-
-    return propName in cssKeywordMap[nodeType] ? cssKeywordMap[nodeType][propName] : [];
-};
-
-this.getCSSPropertyNames = function(nodeType)
-{
-    if (!cssPropNames[nodeType])
-    {
-        cssPropNames[nodeType] = [];
-
-        for (var name in CSS.cssInfo[nodeType])
-            cssPropNames[nodeType].push(name);
-    }
-
-    return cssPropNames[nodeType];
-};
-
-this.isColorKeyword = function(keyword)
-{
-    if (keyword == "transparent")
-        return false;
-
-    if (!cssColorNames)
-    {
-        cssColorNames = [];
-
-        var colors = this.cssKeywords["color"];
-        for (var i = 0; i < colors.length; ++i)
-            cssColorNames.push(colors[i].toLowerCase());
-
-        var systemColors = this.cssKeywords["systemColor"];
-        for (var i = 0; i < systemColors.length; ++i)
-            cssColorNames.push(systemColors[i].toLowerCase());
-    }
-
-    return cssColorNames.indexOf(keyword.toLowerCase()) != -1;
-};
-
-this.isImageRule = function(nodeType,rule)
-{
-    if (!imageRules)
-    {
-        imageRules = [];
-
-        for (var i in CSS.cssInfo[nodeType])
-        {
-            var r = i.toLowerCase();
-            var suffix = "image";
-            if (r.match(suffix + "$") == suffix || r == "background")
-                imageRules.push(r);
-        }
-    }
-
-    return imageRules.indexOf(rule.toLowerCase()) != -1;
-};
-
-this.copyTextStyles = function(fromNode, toNode, style)
-{
-    var view = fromNode.ownerDocument.defaultView;
-    if (view)
-    {
-        if (!style)
-            style = view.getComputedStyle(fromNode, "");
-
-        toNode.style.fontFamily = style.getPropertyCSSValue("font-family").cssText;
-        toNode.style.fontSize = style.getPropertyCSSValue("font-size").cssText;
-        toNode.style.fontWeight = style.getPropertyCSSValue("font-weight").cssText;
-        toNode.style.fontStyle = style.getPropertyCSSValue("font-style").cssText;
-
-        return style;
-    }
-};
-
-this.copyBoxStyles = function(fromNode, toNode, style)
-{
-    var view = fromNode.ownerDocument.defaultView;
-    if (view)
-    {
-        if (!style)
-            style = view.getComputedStyle(fromNode, "");
-
-        toNode.style.marginTop = style.getPropertyCSSValue("margin-top").cssText;
-        toNode.style.marginRight = style.getPropertyCSSValue("margin-right").cssText;
-        toNode.style.marginBottom = style.getPropertyCSSValue("margin-bottom").cssText;
-        toNode.style.marginLeft = style.getPropertyCSSValue("margin-left").cssText;
-        toNode.style.borderTopWidth = style.getPropertyCSSValue("border-top-width").cssText;
-        toNode.style.borderRightWidth = style.getPropertyCSSValue("border-right-width").cssText;
-        toNode.style.borderBottomWidth = style.getPropertyCSSValue("border-bottom-width").cssText;
-        toNode.style.borderLeftWidth = style.getPropertyCSSValue("border-left-width").cssText;
-
-        return style;
-    }
-};
-
-this.readBoxStyles = function(style)
-{
-    const styleNames = {
-        "margin-top": "marginTop", "margin-right": "marginRight",
-        "margin-left": "marginLeft", "margin-bottom": "marginBottom",
-        "border-top-width": "borderTop", "border-right-width": "borderRight",
-        "border-left-width": "borderLeft", "border-bottom-width": "borderBottom",
-        "padding-top": "paddingTop", "padding-right": "paddingRight",
-        "padding-left": "paddingLeft", "padding-bottom": "paddingBottom",
-        "z-index": "zIndex",
-    };
-
-    var styles = {};
-    for (var styleName in styleNames)
-        styles[styleNames[styleName]] = parseInt(style.getPropertyCSSValue(styleName).cssText) || 0;
-    if (FBTrace.DBG_INSPECT)
-        FBTrace.sysout("readBoxStyles ", styles);
-    return styles;
-};
-
-this.getBoxFromStyles = function(style, element)
-{
-    var args = this.readBoxStyles(style);
-    args.width = element.offsetWidth
-        - (args.paddingLeft+args.paddingRight+args.borderLeft+args.borderRight);
-    args.height = element.offsetHeight
-        - (args.paddingTop+args.paddingBottom+args.borderTop+args.borderBottom);
-    return args;
-};
-
-this.getElementCSSSelector = function(element)
-{
-    if (!element || !element.localName)
-        return "null";
-
-    var label = getLocalName(element);
-    if (element.id)
-        label += "#" + element.id;
-
-    if (element.classList && element.classList.length > 0)
-        label += "." + element.classList.item(0);
-
-    return label;
 };
 
 // ************************************************************************************************

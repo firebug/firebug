@@ -1391,7 +1391,7 @@ BoxModelHighlighter.prototype =
                 return;
             }
 
-            var styles = FBL.readBoxStyles(style);
+            var styles = CSS.readBoxStyles(style);
             var offset = FBL.getLTRBWH(element);
             var x = offset.left - Math.abs(styles.marginLeft);
             var y = offset.top - Math.abs(styles.marginTop);

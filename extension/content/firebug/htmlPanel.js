@@ -606,7 +606,7 @@ Firebug.HTMLPanel.prototype = FBL.extend(WalkingPanel,
     createObjectBox: function(object, isRoot)
     {
         if (FBTrace.DBG_HTML)
-            FBTrace.sysout("html.createObjectBox("+FBL.getElementCSSSelector(object)+", isRoot:"+(isRoot?"true":"false")+")\n");
+            FBTrace.sysout("html.createObjectBox("+CSS.getElementCSSSelector(object)+", isRoot:"+(isRoot?"true":"false")+")\n");
         var tag = getNodeTag(object);
         if (tag)
             return tag.replace({object: object}, this.document);
@@ -624,7 +624,7 @@ Firebug.HTMLPanel.prototype = FBL.extend(WalkingPanel,
             return null;
 
         //if (FBTrace.DBG_HTML)
-        //    FBTrace.sysout("html.getParentObject for "+node.nodeName+" parentNode:"+FBL.getElementCSSSelector(parentNode));
+        //    FBTrace.sysout("html.getParentObject for "+node.nodeName+" parentNode:"+CSS.getElementCSSSelector(parentNode));
 
         if (parentNode)
         {
@@ -692,7 +692,7 @@ Firebug.HTMLPanel.prototype = FBL.extend(WalkingPanel,
         }
         if (FBTrace.DBG_HTML)
             FBTrace.sysout("getChildObject "+node.tagName+" index "+index+" previousSibling: "+
-                (previousSibling?FBL.getElementCSSSelector(previousSibling):"null"),
+                (previousSibling?CSS.getElementCSSSelector(previousSibling):"null"),
                 {node: node, previousSibling:previousSibling});
 
         if (this.isSourceElement(node))
@@ -719,7 +719,7 @@ Firebug.HTMLPanel.prototype = FBL.extend(WalkingPanel,
                 var skipChild = node.contentDocument.documentElement;  // punch thru and adopt the root element as our child
                 this.embeddedBrowserParents[skipChild] = node;         // store our adopted childe in a side table
                 if (FBTrace.DBG_HTML)
-                    FBTrace.sysout("Found skipChild "+FBL.getElementCSSSelector(skipChild)+" for  "+FBL.getElementCSSSelector(node)+ " with node.contentDocument "+node.contentDocument);
+                    FBTrace.sysout("Found skipChild "+CSS.getElementCSSSelector(skipChild)+" for  "+CSS.getElementCSSSelector(node)+ " with node.contentDocument "+node.contentDocument);
                 return skipChild;  // (the node's).(type 9 document).(HTMLElement)
             }
             else if (previousSibling)
@@ -749,7 +749,7 @@ Firebug.HTMLPanel.prototype = FBL.extend(WalkingPanel,
             var child = this.getFirstChild(node); // child is set to at the beginning of an iteration.
 
         if (FBTrace.DBG_HTML)
-            FBTrace.sysout("getChildObject firstChild "+FBL.getElementCSSSelector(child)+ " with Firebug.showTextNodesWithWhitespace "+Firebug.showTextNodesWithWhitespace);
+            FBTrace.sysout("getChildObject firstChild "+CSS.getElementCSSSelector(child)+ " with Firebug.showTextNodesWithWhitespace "+Firebug.showTextNodesWithWhitespace);
 
         if (Firebug.showTextNodesWithWhitespace)  // then the index is true to the node list
             return child;
@@ -1186,7 +1186,7 @@ Firebug.HTMLPanel.prototype = FBL.extend(WalkingPanel,
                 var parentNode = this.getParentObject(object);
 
                 if (FBTrace.DBG_ERRORS && FBTrace.DBG_HTML)
-                    FBTrace.sysout("html.updateSelect no objectBox for object:"+FBL.getElementCSSSelector(object) + " trying "+FBL.getElementCSSSelector(parentNode));
+                    FBTrace.sysout("html.updateSelect no objectBox for object:"+CSS.getElementCSSSelector(object) + " trying "+CSS.getElementCSSSelector(parentNode));
 
                 this.updateSelection(parentNode);
                 return;

@@ -1359,7 +1359,8 @@ Firebug.CSSStyleSheetPanel.prototype = FBL.extend(Firebug.Panel,
 
                 this.infoTipValue = cssValue.value;
 
-                if (cssValue.type == "rgb" || cssValue.type == "hsl" || (!cssValue.type && FBL.isColorKeyword(cssValue.value)))
+                if (cssValue.type == "rgb" || cssValue.type == "hsl" ||
+                    (!cssValue.type && CSS.isColorKeyword(cssValue.value)))
                 {
                     this.infoTipType = "color";
                     this.infoTipObject = cssValue.value;
@@ -1369,7 +1370,8 @@ Firebug.CSSStyleSheetPanel.prototype = FBL.extend(Firebug.Panel,
                 else if (cssValue.type == "url")
                 {
                     var propNameNode = target.parentNode.getElementsByClassName("cssPropName").item(0);
-                    if (propNameNode && FBL.isImageRule(FBL.getElementSimpleType(Firebug.getRepObject(target)),propNameNode.textContent))
+                    if (propNameNode && CSS.isImageRule(FBL.getElementSimpleType(
+                        Firebug.getRepObject(target)),propNameNode.textContent))
                     {
                         var rule = Firebug.getRepObject(target);
                         var baseURL = this.getStylesheetURL(rule);
@@ -2324,13 +2326,14 @@ CSSEditor.prototype = domplate(Firebug.InlineEditor.prototype,
         }
         else if (CSS.hasClass(this.target, "cssPropName"))
         {
-            return FBL.getCSSPropertyNames(FBL.getElementSimpleType(Firebug.getRepObject(this.target)));
+            return CSS.getCSSPropertyNames(FBL.getElementSimpleType(Firebug.getRepObject(this.target)));
         }
         else
         {
             var row = DOM.getAncestorByClass(this.target, "cssProp");
             var propName = DOM.getChildByClass(row, "cssPropName").textContent;
-            return FBL.getCSSKeywordsByProperty(FBL.getElementSimpleType(Firebug.getRepObject(this.target)),propName);
+            return CSS.getCSSKeywordsByProperty(FBL.getElementSimpleType(
+                Firebug.getRepObject(this.target)),propName);
         }
     },
 
