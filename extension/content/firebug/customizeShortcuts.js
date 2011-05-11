@@ -13,6 +13,7 @@ var branch = prefs.getBranch("extensions.firebug.key.shortcut.");
 // Initialized from window parameters.
 var FBL; 
 var FBTrace;
+var Locale;
 
 // Global variables used by this dialog.
 var shortcutNames = null;
@@ -47,6 +48,7 @@ function init()
     var args = window.arguments[0];
     FBL = args.FBL;
     FBTrace = args.FBTrace;
+    Locale = FBL;
 
     setKeyInfo();
     shortcutNames = branch.getChildList("", {});
