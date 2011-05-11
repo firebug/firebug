@@ -111,6 +111,13 @@ Browser.prototype.clearAllBreakpoints = function()
     Firebug.Debugger.clearAllBreakpoints();
 }
 
+/*
+ * Command: clearAnnotations
+ */
+Browser.prototype.clearAnnotations = function()
+{
+    Firebug.Activation.clearAnnotations();  // should trigger event onClearAnnotations
+}
 
 Browser.Tool = function(name)
 {

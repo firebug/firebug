@@ -3,11 +3,12 @@
 define([
     "firebug/lib",
     "firebug/firebug",
+    "arch/tools",
     "firebug/lib/locale",
     "firebug/domplate",
     "firebug/lib/url",
 ],
-function(FBL, Firebug, Locale, Domplate, URL) {
+function(FBL, Firebug, ToolsInterface, Locale, Domplate, URL) {
 
 // ************************************************************************************************
 // Constants
@@ -39,11 +40,24 @@ Firebug.PanelActivation = FBL.extend(Firebug.Module,
     initialize: function()
     {
         prefs.addObserver(Firebug.Options.getPrefDomain(), this, false);
+        ToolsInterface.browser.addListener(this);
+    },
+
+    initializeUI: function()
+    {
+        // The "off" option is removed so make sure to convert previsous prev value
+        // into "none" if necessary.
+        if (Firebug.allPagesActivation == "off")
+            Firebug.allPagesActivation = "none";
+
+        // Update option menu item.
+        this.updateAllPagesActivation();
     },
 
     shutdown: function()
     {
         prefs.removeObserver(Firebug.Options.getPrefDomain(), this, false);
+        ToolsInterface.browser.removeListener(this);
     },
 
     showPanel: function(browser, panel)
@@ -184,7 +198,18 @@ Firebug.PanelActivation = FBL.extend(Firebug.Module,
         Firebug.chrome.syncPanel();
     },
 
+    // respond to event
+    onClearAnnotations: function()
+    {
+        Firebug.toggleBar(false);  // and we turn off as it now cannot be enabled
+    },
     // *******************************************************************************************
+    // UI commands
+
+    clearAnnotations: function()
+    {
+        ToolsInterface.browser.clearAnnotations();
+    },
 
     toggleAll: function(state)
     {

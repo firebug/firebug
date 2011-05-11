@@ -64,7 +64,7 @@
         <command id="cmd_enablePanels" oncommand="Firebug.PanelActivation.enableAllPanels()"/>
         <command id="cmd_disablePanels" oncommand="Firebug.PanelActivation.disableAllPanels()"/>
         <command id="cmd_allOn" oncommand="Firebug.PanelActivation.toggleAll('on')"/>
-        <command id="cmd_clearActivationList" oncommand="Firebug.Activation.clearAnnotations()"/>
+        <command id="cmd_clearActivationList" oncommand="Firebug.PanelActivation.clearAnnotations()"/>
         <command id="cmd_customizeFBKeys" oncommand="Firebug.ShortcutsModel.customizeShortcuts()"/>
         <command id="cmd_resetAllOptions" oncommand="Firebug.resetAllOptions(true);"/>
         <command id="cmd_inspect" oncommand="Firebug.Inspector.inspectFromContextMenu(document.popupNode);"/>

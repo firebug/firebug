@@ -3,10 +3,11 @@
 define([
     "firebug/lib",
     "firebug/firebug",
+    "arch/tools",
     "firebug/lib/locale",
     "firebug/lib/url",
 ],
-function(FBL, Firebug, Locale, URL) {
+function(FBL, Firebug, ToolsInterface, Locale, URL) {
 
 // ************************************************************************************************
 // Constants
@@ -42,6 +43,7 @@ const privateBrowsingEnabled = ("@mozilla.org/privatebrowsing;1" in Cc) &&
  */
 Firebug.Activation = FBL.extend(Firebug.Module,
 {
+    // *******************************************************************************************
     dispatchName: "activation",
 
     initializeUI: function()  // called once
@@ -49,14 +51,6 @@ Firebug.Activation = FBL.extend(Firebug.Module,
         Firebug.Module.initializeUI.apply(this, arguments);
 
         Firebug.TabWatcher.addListener(this.TabWatcherListener);
-
-        // The "off" option is removed so make sure to convert previsous prev value
-        // into "none" if necessary.
-        if (Firebug.allPagesActivation == "off")
-            Firebug.allPagesActivation = "none";
-
-        // Update option menu item.
-        this.updateAllPagesActivation();
     },
 
     shutdown: function()
@@ -180,6 +174,13 @@ Firebug.Activation = FBL.extend(Firebug.Module,
             this.removePageAnnotation(uri); // unmark this URI
     },
 
+    clearAnnotations: function()
+    {
+        this.getAnnotationService().clear();
+        this.getAnnotationService().flush();
+        ToolsInterface.browser.dispatch("onClearAnnotations", []);
+    },
+
     getAnnotationService: function()
     {
         if (!this.annotationSvc)
@@ -258,13 +259,6 @@ Firebug.Activation = FBL.extend(Firebug.Module,
             return false; // annotated as 'closed', don't create
         else
             return true;    // annotated, createContext
-    },
-
-
-    clearAnnotations: function()
-    {
-        this.getAnnotationService().clear();
-        this.getAnnotationService().flush();
     },
 
     setPageAnnotation: function(currentURI, annotation)
