@@ -16,13 +16,14 @@ define([
     "firebug/lib/dom",
     "firebug/firefox/window",
     "firebug/lib/search",
+    "firebug/lib/xpath",
     "firebug/editor",
     "firebug/editorSelector",
     "firebug/infotip",
     "firebug/searchBox",
 ],
 function(FBL, Firebug, Firefox, Domplate, FirebugReps, XPCOM, Locale, Events, Wrapper, URL,
-    SourceLink, CSS, DOM, WIN, Search) { with (Domplate) {
+    SourceLink, CSS, DOM, WIN, Search, XPATH) { with (Domplate) {
 
 // ************************************************************************************************
 // Constants
@@ -1749,7 +1750,8 @@ CSSElementPanel.prototype = FBL.extend(Firebug.CSSStyleSheetPanel.prototype,
             this.getStyleProperties(element, rules, usedProps, inheritMode);
 
         if (FBTrace.DBG_CSS)
-            FBTrace.sysout("getElementRules "+rules.length+" rules for "+FBL.getElementXPath(element), rules);
+            FBTrace.sysout("getElementRules "+rules.length+" rules for "+
+                XPATH.getElementXPath(element), rules);
     },
 
     markOverriddenProps: function(props, usedProps, inheritMode)
@@ -1820,14 +1822,14 @@ CSSElementPanel.prototype = FBL.extend(Firebug.CSSStyleSheetPanel.prototype,
     getStyleProperties: function(element, rules, usedProps, inheritMode)
     {
         var props = this.parseCSSProps(element.style, inheritMode);
-        this.addOldProperties(this.context, FBL.getElementXPath(element), inheritMode, props);
+        this.addOldProperties(this.context, XPATH.getElementXPath(element), inheritMode, props);
 
         sortProperties(props);
         this.markOverriddenProps(props, usedProps, inheritMode);
 
         if (props.length)
             rules.splice(0, 0,
-                    {rule: element, id: FBL.getElementXPath(element),
+                    {rule: element, id: XPATH.getElementXPath(element),
                         selector: "element.style", props: props, inherited: inheritMode});
     },
 

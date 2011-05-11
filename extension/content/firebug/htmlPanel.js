@@ -13,6 +13,7 @@ define([
     "firebug/lib/css",
     "firebug/lib/dom",
     "firebug/firefox/window",
+    "firebug/lib/xpath",
     "firebug/breakpoint",
     "firebug/editor",
     "firebug/infotip",
@@ -20,7 +21,7 @@ define([
     "firebug/insideOutBox",
 ],
 function(FBL, Firebug, Domplate, FirebugReps, Locale, ToolsInterface, HTMLLib, Events,
-    SourceLink, CSS, DOM, WIN) { with (Domplate) {
+    SourceLink, CSS, DOM, WIN, XPATH) { with (Domplate) {
 
 // ************************************************************************************************
 // Constants
@@ -2195,7 +2196,7 @@ Firebug.HTMLModule.MutationBreakpoints =
 
     onModifyBreakpoint: function(context, node, type)
     {
-        var xpath = FBL.getElementXPath(node);
+        var xpath = XPATH.getElementXPath(node);
         if (FBTrace.DBG_HTML)
             FBTrace.sysout("html.onModifyBreakpoint " + xpath );
 
@@ -2215,7 +2216,7 @@ Firebug.HTMLModule.MutationBreakpoints =
 Firebug.HTMLModule.Breakpoint = function(node, type)
 {
     this.node = node;
-    this.xpath = FBL.getElementXPath(node);
+    this.xpath = XPATH.getElementXPath(node);
     this.checked = true;
     this.type = type;
 };
@@ -2346,7 +2347,7 @@ MutationBreakpointGroup.prototype = FBL.extend(new Firebug.Breakpoint.Breakpoint
 
         this.enumerateBreakpoints(function(bp)
         {
-            var elts = FBL.getElementsByXPath(context.window.document, bp.xpath);
+            var elts = XPATH.getElementsByXPath(context.window.document, bp.xpath);
             bp.node = elts && elts.length ? elts[0] : null;
         });
     },

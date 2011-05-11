@@ -16,9 +16,12 @@ define([
     "firebug/lib/css",
     "firebug/lib/dom",
     "firebug/firefox/window",
+    "firebug/lib/xpath",
 ],
 function(FBL, Firebug, Domplate, XPCOM, Locale, ToolsInterface, HTMLLib, Events, Wrapper,
-    URL, SourceLink, StackFrame, CSS, DOM, WIN) { with (Domplate) {
+    URL, SourceLink, StackFrame, CSS, DOM, WIN, XPATH) {
+
+with (Domplate) {
 
 // ************************************************************************************************
 // Constants
@@ -810,7 +813,7 @@ FirebugReps.Element = domplate(Firebug.Rep,
 
     getXPath: function(elt)
     {
-        return FBL.getElementTreeXPath(elt);
+        return XPATH.getElementTreeXPath(elt);
     },
 
     getNodeTextGroups: function(element)
@@ -862,7 +865,7 @@ FirebugReps.Element = domplate(Firebug.Rep,
 
     copyXPath: function(elt)
     {
-        var xpath = FBL.getElementXPath(elt);
+        var xpath = XPATH.getElementXPath(elt);
         FBL.copyToClipboard(xpath);
     },
 
@@ -875,7 +878,7 @@ FirebugReps.Element = domplate(Firebug.Rep,
     persistor: function(context, xpath)
     {
         var elts = xpath
-            ? FBL.getElementsByXPath(context.window.document, xpath)
+            ? XPATH.getElementsByXPath(context.window.document, xpath)
             : null;
 
         return elts && elts.length ? elts[0] : null;
@@ -907,7 +910,7 @@ FirebugReps.Element = domplate(Firebug.Rep,
 
     persistObject: function(elt, context)
     {
-        var xpath = FBL.getElementXPath(elt);
+        var xpath = XPATH.getElementXPath(elt);
 
         return FBL.bind(this.persistor, window.top, xpath);
     },

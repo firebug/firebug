@@ -10,10 +10,11 @@ define([
     "firebug/lib/url",
     "firebug/lib/css",
     "firebug/firefox/window",
+    "firebug/lib/xpath",
     "firebug/console",
     "firebug/commandLineExposed"
 ],
-function(FBL, Firebug, FirebugReps, Locale, Events, Wrapper, URL, CSS, WIN) {
+function(FBL, Firebug, FirebugReps, Locale, Events, Wrapper, URL, CSS, WIN, XPATH) {
 
 // ************************************************************************************************
 // Constants
@@ -2079,7 +2080,7 @@ function FirebugCommandLineAPI(context)
 
     this.$x = function(xpath) // returns unwrapped elements from the page
     {
-        return FBL.getElementsByXPath(Wrapper.unwrapObject(context.baseWindow.document), xpath);
+        return XPATH.getElementsByXPath(Wrapper.unwrapObject(context.baseWindow.document), xpath);
     };
 
     this.$n = function(index) // values from the extension space

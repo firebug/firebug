@@ -10,10 +10,11 @@ define([
     "firebug/lib/url",
     "firebug/lib/css",
     "firebug/lib/dom",
+    "firebug/lib/xpath",
     "firebug/console",
     "firebug/infotip",
 ],
-function(FBL, Firebug, Domplate, Locale, ToolsInterface, Events, URL, CSS, DOM) {
+function(FBL, Firebug, Domplate, Locale, ToolsInterface, Events, URL, CSS, DOM, XPATH) {
 
 // ************************************************************************************************
 // Constants
@@ -1134,12 +1135,14 @@ Firebug.A11yModel = FBL.extend(Firebug.Module,
         {
             case 1: //element
                 elem = node;
-                matchFeedback += Locale.$STRF("a11y.updates.match found in element", [match.match[0], elem.nodeName, FBL.getElementTreeXPath(elem)]);
+                matchFeedback += Locale.$STRF("a11y.updates.match found in element",
+                    [match.match[0], elem.nodeName, XPATH.getElementTreeXPath(elem)]);
                 break;
             case 2: //attribute
                 elem = node.ownerElement;
                 matchFeedback += Locale.$STRF("a11y.updates.match found in attribute",
-                    [match.match[0], node.nodeName, node.nodeValue, elem.nodeName, FBL.getElementTreeXPath(elem)]);
+                    [match.match[0], node.nodeName, node.nodeValue, elem.nodeName,
+                        XPATH.getElementTreeXPath(elem)]);
                 break;
 
             case 3: //text content
@@ -1311,7 +1314,7 @@ Firebug.A11yModel = FBL.extend(Firebug.Module,
                 if (CSS.hasClass(target, 'cssProp'))
                 {
                     //our focus is about to be wiped out, we'll try to get it back after
-                    panelA11y.reFocusId = FBL.getElementXPath(target);
+                    panelA11y.reFocusId = XPATH.getElementXPath(target);
                     panel.disablePropertyRow(target);
                     if (panel.name == "stylesheet")
                         target.setAttribute('aria-checked', !CSS.hasClass(target, 'disabledStyle'));
@@ -1393,7 +1396,7 @@ Firebug.A11yModel = FBL.extend(Firebug.Module,
         if (!panelA11y || !this.panelHasFocus(panel))
             return;
         if (panelA11y.tabStop && CSS.hasClass(panelA11y.tabStop, 'focusRow'))
-            panelA11y.reFocusId = FBL.getElementXPath(panelA11y.tabStop);
+            panelA11y.reFocusId = XPATH.getElementXPath(panelA11y.tabStop);
     },
 
     onCSSRulesAdded : function(panel, rootNode)
@@ -1404,7 +1407,7 @@ Firebug.A11yModel = FBL.extend(Firebug.Module,
         var row;
         if (panelA11y.reFocusId)
         {   //we need to put focus back to where it was before it was wiped out
-            var reFocusRows = FBL.getElementsByXPath(rootNode.ownerDocument, panelA11y.reFocusId);
+            var reFocusRows = XPATH.getElementsByXPath(rootNode.ownerDocument, panelA11y.reFocusId);
             panelA11y.reFocusId = null;
             if (reFocusRows.length > 0)
             {
@@ -1479,7 +1482,7 @@ Firebug.A11yModel = FBL.extend(Firebug.Module,
                         node = event.target;
                 }
                 //these context menu options are likely to destroy current focus
-                panelA11y.reFocusId = FBL.getElementXPath(event.target);
+                panelA11y.reFocusId = XPATH.getElementXPath(event.target);
                 document.popupNode = node;
                 Firebug.chrome.$('fbContextMenu').openPopup(node, 'overlap', 0,0,true);
                 Events.cancelEvent(event); //no need for default handlers anymore
