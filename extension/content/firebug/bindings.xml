@@ -30,20 +30,7 @@
             this.panelTabs = this.getChildElement("panelTabs");
             this.tabMap = {};
 
-            // We initialize Firebug from here instead of from the onload event because
-            // we need to make sure it is initialized before the browser starts loading
-            // the home page
-            try
-            {
-                if(FirebugChrome.panelBarReady(this))
-                {
-                }
-            }
-            catch (e)
-            {
-                dump("bindings panelBar ctor FAILs: "+ e+"\n");
-                dump("window.top "+window.top.location+" window.opener: "+window.opener+"\n");
-            }
+            window.panelBarWaiter.panelBarReady();
         ]]></constructor>
 
         <method name="getChildElement">

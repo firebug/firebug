@@ -20,14 +20,25 @@
 
     <script type="application/x-javascript" src="chrome://global/content/globalOverlay.js"/>
     <script type="application/x-javascript" src="chrome://firebug/content/trace.js"/>
+    <script type="application/x-javascript" src="chrome://firebug/content/firefox/panelBarWaiter.js"/>
     <script type="application/x-javascript" src="chrome://firebug/content/chrome.js"/>
     <script type="application/x-javascript">
-        // To avoid error messages when Firebug extensions are loaded into this window.
-        // All necessary JS objects are already created in the browser window space and
-        // shared here (see FirebugChrome.initialize). It's not desirable to create
-        // these objects again.
-        top.FBL = { ns: function(fn) {} }
-        FirebugChrome.modulesLoaded = true;  // until we complete the module loading story
+        if (window.arguments)
+            var detachArgs = window.arguments[0];
+
+        if (detachArgs)
+        {
+            window.FBL = detachArgs.FBL;
+            Firebug = detachArgs.Firebug;
+            Firebug.currentContext = detachArgs.Firebug.currentContext;
+        }
+        else
+        {
+            throw new Error("firebug.xul expected window arguments");
+        }
+
+        // the modules are loaded in the browser.xul window. They are passed via Firebug
+        panelBarWaiter.waitForPanelBar(true);
     </script>
 
     <stringbundleset id="stringbundleset"/>

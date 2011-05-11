@@ -213,16 +213,25 @@ require(config,
 ],
 function(FBL)
 {
-    if (FBTrace.DBG_INITIALIZE || FBTrace.DBG_MODULES)
+    try
     {
-        var delta = (new Date().getTime()) - startLoading;
-        FBTrace.sysout("main.js; Firebug modules loaded using RequireJS in "+delta+" ms");
-    }
-    Firebug.Options.initialize("extensions.firebug");
-    FirebugChrome.waitForPanelBar(true);
+        if (FBTrace.DBG_INITIALIZE || FBTrace.DBG_MODULES)
+        {
+            var delta = (new Date().getTime()) - startLoading;
+            FBTrace.sysout("main.js; Firebug modules loaded using RequireJS in "+delta+" ms");
+        }
 
-    if (FBTrace.DBG_MODULES)
-        dumpDependencyTree(depTree);
+        Firebug.Options.initialize("extensions.firebug");
+        window.panelBarWaiter.waitForPanelBar(true);
+
+        if (FBTrace.DBG_MODULES)
+            dumpDependencyTree(depTree);
+    }
+    catch(exc)
+    {
+        window.dump("Firebug main initialization ERROR "+exc);
+        Component.utils.reportError(exc);
+    }
 });
 
 // ********************************************************************************************* //

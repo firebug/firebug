@@ -1,6 +1,6 @@
 /* See license.txt for terms of usage */
 
-var Firebug = null;
+
 
 /**
  * The 'context' in this file is always 'Firebug.currentContext'
@@ -36,8 +36,6 @@ const statusCropSize = 20;
 var panelBox, panelSplitter, sidePanelDeck, panelBar1, panelBar2, locationList, locationButtons,
     panelStatus, panelStatusSeparator, cmdPopup, cmdPopupBrowser;
 
-var waitingPanelBarCount = 2;
-
 var inDetachedScope = (window.location == "chrome://firebug/content/firebug.xul");
 
 var disabledHead = null;
@@ -55,69 +53,8 @@ FirebugChrome =
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
     // Initialization
 
-    waitLimit: 100,
-
-    waitForPanelBar: function(modulesLoaded)
-    {
-        if (modulesLoaded)
-            FirebugChrome.modulesLoaded = true;
-
-        FirebugChrome.waitLimit -= 1;
-        if (!FirebugChrome.initializeOnPanelBarReady() && FirebugChrome.waitLimit > 0)
-        {
-            if (FBTrace.DBG_INITIALIZE)
-            {
-                var msg = "main; waitForPanelBar "+FirebugChrome.waitLimit;
-                msg += " waitingPanelBarCount: "+waitingPanelBarCount;
-                msg += " modulesLoaded: "+FirebugChrome.modulesLoaded;
-                FBTrace.sysout(msg);
-            }
-
-            setTimeout(FirebugChrome.waitForPanelBar, 10);
-        }
-    },
-
-    panelBarReady: function()
-    {
-        waitingPanelBarCount -= 1;
-
-        if (FBTrace.DBG_INITIALIZE)
-            FBTrace.sysout("chrome; panelBarReady (" + waitingPanelBarCount + ") "+
-                (FirebugChrome.modulesLoaded ? "Modules loaded" : "Modules not yet loaded"));
-
-        this.initializeOnPanelBarReady();
-    },
-
-    initializeOnPanelBarReady: function()
-    {
-        try
-        {
-            // Wait until all panelBar bindings are ready before initializing
-            if (waitingPanelBarCount == 0 && FirebugChrome.modulesLoaded)
-                this.initialize();
-            else
-                return false;
-        }
-        catch (exc)
-        {
-            // Disaster!
-            var msg = exc.toString() +" "+(exc.fileName || exc.sourceName) + "@" + exc.lineNumber;
-            Components.utils.reportError(msg);
-            if (FBTrace.sysout)
-                FBTrace.sysout("chrome.panelBarReady FAILS: "+msg, exc);
-            window.dump("getStackDump:"+FBL.getStackDump()+"\n");
-            return false;
-        }
-        return true; // the panel bar is ready
-    },
-
     initialize: function()
     {
-        if (this.initialized)
-            return;
-
-        this.initialized = true;
-
         panelBox = $("fbPanelBox");
         panelSplitter = $("fbPanelSplitter");
         sidePanelDeck = $("fbSidePanelDeck");
@@ -182,6 +119,9 @@ FirebugChrome =
         // Register handlers for (de)activation of key bindings.
         KeyBindingsManager.initialize();
 
+        // Now fire the load events
+        panelBar1.browser.setAttribute("src", "chrome://firebug/content/panel.html");
+        panelBar2.browser.setAttribute("src", "chrome://firebug/content/panel.html");
         if (FBTrace.DBG_INITIALIZE)
             FBTrace.sysout("chrome.initialized ", window);
     },
