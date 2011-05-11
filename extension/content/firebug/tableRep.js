@@ -6,8 +6,9 @@ define([
     "firebug/lib/locale",
     "firebug/reps",
     "firebug/lib/dom",
+    "firebug/lib/css",
 ],
-function(FBL, Domplate, Locale, FirebugReps, DOM) {
+function(FBL, Domplate, Locale, FirebugReps, DOM, CSS) {
 
 // ************************************************************************************************
 // Constants
@@ -120,7 +121,7 @@ FirebugReps.Table = domplate(Firebug.Rep,
         if (!header)
             return;
 
-        var numerical = !FBL.hasClass(header, "alphaValue");
+        var numerical = !CSS.hasClass(header, "alphaValue");
 
         var colIndex = 0;
         for (header = header.previousSibling; header; header = header.previousSibling)
@@ -146,17 +147,17 @@ FirebugReps.Table = domplate(Firebug.Rep,
 
         var headerRow = thead.firstChild;
         var headerSorted = FBL.getChildByClass(headerRow, "headerSorted");
-        FBL.removeClass(headerSorted, "headerSorted");
+        CSS.removeClass(headerSorted, "headerSorted");
         if (headerSorted)
             headerSorted.removeAttribute('aria-sort');
 
         var header = headerRow.childNodes[colIndex];
-        FBL.setClass(header, "headerSorted");
+        CSS.setClass(header, "headerSorted");
 
         if (!header.sorted || header.sorted == 1)
         {
-            FBL.removeClass(header, "sortedDescending");
-            FBL.setClass(header, "sortedAscending");
+            CSS.removeClass(header, "sortedDescending");
+            CSS.setClass(header, "sortedAscending");
             header.setAttribute("aria-sort", "ascending");
 
             header.sorted = -1;
@@ -166,8 +167,8 @@ FirebugReps.Table = domplate(Firebug.Rep,
         }
         else
         {
-            FBL.removeClass(header, "sortedAscending");
-            FBL.setClass(header, "sortedDescending");
+            CSS.removeClass(header, "sortedAscending");
+            CSS.setClass(header, "sortedDescending");
             header.setAttribute("aria-sort", "descending")
 
             header.sorted = 1;

@@ -4,8 +4,9 @@ define([
     "firebug/lib",
     "firebug/firebug",
     "firebug/lib/events",
+    "firebug/lib/css",
 ],
-function(FBL, Firebug, Events) {
+function(FBL, Firebug, Events, CSS) {
 
 // ************************************************************************************************
 
@@ -110,7 +111,7 @@ Firebug.InsideOutBox.prototype =
         if (!objectBox)
             return;
 
-        if (FBL.hasClass(objectBox, "open"))
+        if (CSS.hasClass(objectBox, "open"))
             this.contractObjectBox(objectBox, all);
         else
             this.expandObjectBox(objectBox, all, event);
@@ -134,22 +135,22 @@ Firebug.InsideOutBox.prototype =
     {
         if (this.highlightedObjectBox)
         {
-            FBL.removeClass(this.highlightedObjectBox, "highlighted");
+            CSS.removeClass(this.highlightedObjectBox, "highlighted");
 
             var highlightedBox = this.getParentObjectBox(this.highlightedObjectBox);
             for (; highlightedBox; highlightedBox = this.getParentObjectBox(highlightedBox))
-                FBL.removeClass(highlightedBox, "highlightOpen");
+                CSS.removeClass(highlightedBox, "highlightOpen");
         }
 
         this.highlightedObjectBox = objectBox;
 
         if (objectBox)
         {
-            FBL.setClass(objectBox, "highlighted");
+            CSS.setClass(objectBox, "highlighted");
 
             var highlightedBox = this.getParentObjectBox(objectBox);
             for (; highlightedBox; highlightedBox = this.getParentObjectBox(highlightedBox))
-                FBL.setClass(highlightedBox, "highlightOpen");
+                CSS.setClass(highlightedBox, "highlightOpen");
 
            FBL.scrollIntoCenterView(objectBox);
         }
@@ -170,13 +171,13 @@ Firebug.InsideOutBox.prototype =
         var isSelected = this.selectedObjectBox && objectBox == this.selectedObjectBox;
         if (!isSelected)
         {
-            FBL.removeClass(this.selectedObjectBox, "selected");
+            CSS.removeClass(this.selectedObjectBox, "selected");
             Events.dispatch(panel.fbListeners, 'onObjectBoxUnselected', [this.selectedObjectBox]);
             this.selectedObjectBox = objectBox;
 
             if (objectBox)
             {
-                FBL.setClass(objectBox, "selected");
+                CSS.setClass(objectBox, "selected");
 
                 // Force it open the first time it is selected
                 if (forceOpen)
@@ -195,7 +196,7 @@ Firebug.InsideOutBox.prototype =
             var labelBox;
             for (; parentBox; parentBox = this.getParentObjectBox(parentBox))
             {
-                FBL.setClass(parentBox, "open");
+                CSS.setClass(parentBox, "open");
                 labelBox = parentBox.getElementsByClassName('nodeLabelBox').item(0);
                 if (labelBox)
                     labelBox.setAttribute('aria-expanded', 'true')
@@ -218,7 +219,7 @@ Firebug.InsideOutBox.prototype =
         var labelBox = objectBox.getElementsByClassName('nodeLabelBox').item(0);
         if (labelBox)
             labelBox.setAttribute('aria-expanded', 'true');
-        FBL.setClass(objectBox, "open");
+        CSS.setClass(objectBox, "open");
 
         // Recursively expand all child boxes
         if (expandAll)
@@ -240,7 +241,7 @@ Firebug.InsideOutBox.prototype =
                         continue;
                 }
 
-                if (FBL.hasClass(child, "containerNodeBox"))
+                if (CSS.hasClass(child, "containerNodeBox"))
                     this.expandObjectBox(child, expandAll);
             }
         }
@@ -248,7 +249,7 @@ Firebug.InsideOutBox.prototype =
 
     contractObjectBox: function(objectBox, contractAll)
     {
-        FBL.removeClass(objectBox, "open");
+        CSS.removeClass(objectBox, "open");
 
         var nodeLabel = objectBox.getElementsByClassName("nodeLabel").item(0);
         var labelBox = nodeLabel.getElementsByClassName('nodeLabelBox').item(0);
@@ -264,7 +265,7 @@ Firebug.InsideOutBox.prototype =
         {
             for (var child = nodeChildBox.firstChild; child; child = child.nextSibling)
             {
-                if (FBL.hasClass(child, "containerNodeBox") && FBL.hasClass(child, "open"))
+                if (CSS.hasClass(child, "containerNodeBox") && CSS.hasClass(child, "open"))
                     this.contractObjectBox(child, contractAll);
             }
         }
@@ -272,7 +273,7 @@ Firebug.InsideOutBox.prototype =
 
     toggleObjectBox: function(objectBox, forceOpen)
     {
-        var isOpen = FBL.hasClass(objectBox, "open");
+        var isOpen = CSS.hasClass(objectBox, "open");
         var nodeLabel = objectBox.getElementsByClassName("nodeLabel").item(0);
         var labelBox = nodeLabel.getElementsByClassName('nodeLabelBox').item(0);
         if (labelBox)
@@ -616,7 +617,7 @@ Firebug.InsideOutBox.prototype =
         var hitTwisty = false;
         for (var child = event.target; child; child = child.parentNode)
         {
-            if (FBL.hasClass(child, "twisty"))
+            if (CSS.hasClass(child, "twisty"))
                 hitTwisty = true;
             else if (child.repObject)
             {
@@ -637,9 +638,9 @@ function isVisibleTarget(node)
     {
         for (var parent = node.parentNode; parent; parent = parent.parentNode)
         {
-            if (FBL.hasClass(parent, "nodeChildBox")
-                && !FBL.hasClass(parent.parentNode, "open")
-                && !FBL.hasClass(parent.parentNode, "highlightOpen"))
+            if (CSS.hasClass(parent, "nodeChildBox")
+                && !CSS.hasClass(parent.parentNode, "open")
+                && !CSS.hasClass(parent.parentNode, "highlightOpen"))
                 return false;
         }
         return true;

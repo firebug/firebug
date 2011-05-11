@@ -1360,7 +1360,7 @@ BoxModelHighlighter.prototype =
         storeHighlighterParams(this, context, element, boxFrame, colorObj, null, isMulti);
 
         if (context.highlightFrame)
-            FBL.removeClass(context.highlightFrame, "firebugHighlightBox");
+            CSS.removeClass(context.highlightFrame, "firebugHighlightBox");
 
         if (element.tagName !== "AREA")
         {
@@ -1371,11 +1371,11 @@ BoxModelHighlighter.prototype =
 
             if (highlightFrame)
             {
-                FBL.setClass(nodes.offset, "firebugHighlightGroup");
-                FBL.setClass(highlightFrame, "firebugHighlightBox");
+                CSS.setClass(nodes.offset, "firebugHighlightGroup");
+                CSS.setClass(highlightFrame, "firebugHighlightBox");
             }
             else
-                FBL.removeClass(nodes.offset, "firebugHighlightGroup");
+                CSS.removeClass(nodes.offset, "firebugHighlightGroup");
 
             var win = (element.ownerDocument ? element.ownerDocument.defaultView : null);
             if (!win)
@@ -1600,14 +1600,14 @@ BoxModelHighlighter.prototype =
         nodes.parent.style.cssText = moveImp(null, parentX, parentY) + resizeImp(null, parentW, parentH);
 
         if (parentX < 14)
-            FBL.setClass(nodes.parent, "overflowRulerX");
+            CSS.setClass(nodes.parent, "overflowRulerX");
         else
-            FBL.removeClass(nodes.parent, "overflowRulerX");
+            CSS.removeClass(nodes.parent, "overflowRulerX");
 
         if (parentY < 14)
-            FBL.setClass(nodes.parent, "overflowRulerY");
+            CSS.setClass(nodes.parent, "overflowRulerY");
         else
-            FBL.removeClass(nodes.parent, "overflowRulerY");
+            CSS.removeClass(nodes.parent, "overflowRulerY");
     }
 };
 

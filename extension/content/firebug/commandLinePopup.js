@@ -3,9 +3,10 @@
 define([
     "firebug/lib",
     "firebug/firebug",
-    "firebug/commandLine"
+    "firebug/commandLine",
+    "firebug/lib/css",
 ],
-function(FBL, Firebug, CommandLine) {
+function(FBL, Firebug, CommandLine, CSS) {
 
 // ************************************************************************************************
 // Constants
@@ -109,7 +110,7 @@ Firebug.CommandLine.Popup = FBL.extend(Firebug.Module,
         // always visible regardless of the currently selected panel.
         var doc = chrome.$("fbCommandPopupBrowser").contentDocument;
         var body = FBL.getBody(doc);
-        FBL.setClass(body, "commandPopup");
+        CSS.setClass(body, "commandPopup");
     },
 
     attachListeners: function()
@@ -224,7 +225,7 @@ Firebug.CommandLine.Popup = FBL.extend(Firebug.Module,
         // ESC
         var target = event.target;
         // prevent conflict with inline editors being closed
-        if (target && event.keyCode == 27 && !FBL.hasClass(event.target, "textEditorInner"))
+        if (target && event.keyCode == 27 && !CSS.hasClass(event.target, "textEditorInner"))
             this.toggle(Firebug.currentContext);
     }
 });

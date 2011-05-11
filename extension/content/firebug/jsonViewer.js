@@ -6,10 +6,11 @@ define([
     "firebug/domplate",
     "firebug/lib/locale",
     "firebug/lib/events",
+    "firebug/lib/css",
     "firebug/domPanel",
     "firebug/reps"
 ],
-function(FBL, Firebug, Domplate, Locale, Events) {
+function(FBL, Firebug, Domplate, Locale, Events, CSS) {
 
 // ************************************************************************************************
 
@@ -97,7 +98,7 @@ Firebug.JSONViewerModel = FBL.extend(Firebug.Module,
     {
         var tab = infoBox.selectedTab;
         var tabBody = infoBox.getElementsByClassName("netInfoJSONText").item(0);
-        if (!FBL.hasClass(tab, "netInfoJSONTab") || tabBody.updated)
+        if (!CSS.hasClass(tab, "netInfoJSONTab") || tabBody.updated)
             return;
 
         tabBody.updated = true;
@@ -138,7 +139,7 @@ Firebug.JSONViewerModel.Preview = domplate(
 
         Events.cancelEvent(event);
 
-        FBL.toggleClass(sortLink, "sorted");
+        CSS.toggleClass(sortLink, "sorted");
         Firebug.Options.set("sortJsonPreview", !Firebug.sortJsonPreview);
 
         var preview = FBL.getAncestorByClass(sortLink, "jsonPreview");

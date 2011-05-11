@@ -5,9 +5,10 @@ define([
     "firebug/firebug",
     "firebug/domplate",
     "firebug/lib/locale",
-    "firebug/lib/xpcom"
+    "firebug/lib/xpcom",
+    "firebug/lib/css",
 ],
-function(FBL, Firebug, Domplate, Locale, XPCOM) {
+function(FBL, Firebug, Domplate, Locale, XPCOM, CSS) {
 
 // ************************************************************************************************
 // Constants
@@ -83,7 +84,7 @@ Firebug.SVGViewerModel = FBL.extend(Firebug.Module,
     {
         var tab = infoBox.selectedTab;
         var tabBody = infoBox.getElementsByClassName("netInfoSVGText").item(0);
-        if (!FBL.hasClass(tab, "netInfoSVGTab") || tabBody.updated)
+        if (!CSS.hasClass(tab, "netInfoSVGTab") || tabBody.updated)
             return;
 
         tabBody.updated = true;

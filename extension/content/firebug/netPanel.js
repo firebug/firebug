@@ -15,6 +15,7 @@ define([
     "firebug/sourceLink",
     "firebug/http/httpLib",
     "firebug/lib/stackFrame",
+    "firebug/lib/css",
     "firebug/breakpoint",
     "firebug/xmlViewer",
     "firebug/svgViewer",
@@ -25,7 +26,7 @@ define([
     "firebug/errors",
 ],
 function(FBL, Firebug, Firefox, Domplate, XPCOM, ToolsInterface, HttpRequestObserver, Locale,
-    Events, Options, URL, SourceLink, HTTP, StackFrame) { with (Domplate) {
+    Events, Options, URL, SourceLink, HTTP, StackFrame, CSS) { with (Domplate) {
 
 // ************************************************************************************************
 // Constants
@@ -490,7 +491,7 @@ NetPanel.prototype = FBL.extend(Firebug.ActivablePanel,
         while (prevTableBody.firstChild)
         {
             var row = prevTableBody.firstChild;
-            if (FBL.hasClass(row, "netRow") && FBL.hasClass(row, "hasHeaders") && !FBL.hasClass(row, "history"))
+            if (CSS.hasClass(row, "netRow") && CSS.hasClass(row, "hasHeaders") && !CSS.hasClass(row, "history"))
             {
                 row.repObject.history = true;
                 files.push({
@@ -501,9 +502,9 @@ NetPanel.prototype = FBL.extend(Firebug.ActivablePanel,
                 });
             }
 
-            if (FBL.hasClass(row, "netPageRow"))
+            if (CSS.hasClass(row, "netPageRow"))
             {
-                FBL.removeClass(row, "opened");
+                CSS.removeClass(row, "opened");
                 tbody.insertBefore(row, lastRow);
             }
             else
@@ -604,7 +605,7 @@ NetPanel.prototype = FBL.extend(Firebug.ActivablePanel,
         if (file)
         {
             FBL.scrollIntoCenterView(file.row);
-            if (!FBL.hasClass(file.row, "opened"))
+            if (!CSS.hasClass(file.row, "opened"))
                 NetRequestEntry.toggleHeadersRow(file.row);
         }
     },
@@ -823,7 +824,7 @@ NetPanel.prototype = FBL.extend(Firebug.ActivablePanel,
     // Support for xhr breakpoint conditions.
     onContextMenu: function(event)
     {
-        if (!FBL.hasClass(event.target, "sourceLine"))
+        if (!CSS.hasClass(event.target, "sourceLine"))
             return;
 
         var row = FBL.getAncestorByClass(event.target, "netRow");
@@ -926,7 +927,7 @@ NetPanel.prototype = FBL.extend(Firebug.ActivablePanel,
                 this.infoTipFile = row.repObject;
                 return this.populateTimeInfoTip(infoTip, row.repObject);
             }
-            else if (FBL.hasClass(row, "category-image") &&
+            else if (CSS.hasClass(row, "category-image") &&
                 !FBL.getAncestorByClass(target, "netRowHeader"))
             {
                 var infoTipURL = row.repObject.href + "-image";
@@ -977,12 +978,12 @@ NetPanel.prototype = FBL.extend(Firebug.ActivablePanel,
     highlightRow: function(row)
     {
         if (this.highlightedRow)
-            FBL.cancelClassTimed(this.highlightedRow, "jumpHighlight", this.context);
+            CSS.cancelClassTimed(this.highlightedRow, "jumpHighlight", this.context);
 
         this.highlightedRow = row;
 
         if (row)
-            FBL.setClassTimed(row, "jumpHighlight", this.context);
+            CSS.setClassTimed(row, "jumpHighlight", this.context);
     },
 
     search: function(text, reverse)
@@ -1197,33 +1198,33 @@ NetPanel.prototype = FBL.extend(Firebug.ActivablePanel,
                 // Force update category.
                 file.category = null;
                 for (var category in fileCategories)
-                    FBL.removeClass(row, "category-" + category);
-                FBL.setClass(row, "category-" + Utils.getFileCategory(file));
+                    CSS.removeClass(row, "category-" + category);
+                CSS.setClass(row, "category-" + Utils.getFileCategory(file));
             }
 
             if (file.requestHeaders)
-                FBL.setClass(row, "hasHeaders");
+                CSS.setClass(row, "hasHeaders");
 
             if (file.fromCache)
-                FBL.setClass(row, "fromCache");
+                CSS.setClass(row, "fromCache");
             else
-                FBL.removeClass(row, "fromCache");
+                CSS.removeClass(row, "fromCache");
 
             if (NetRequestEntry.isError(file))
-                FBL.setClass(row, "responseError");
+                CSS.setClass(row, "responseError");
             else
-                FBL.removeClass(row, "responseError");
+                CSS.removeClass(row, "responseError");
 
             var netBar = row.childNodes[5].childNodes[1];
             var timeLabel = FBL.getChildByClass(netBar, "netReceivingBar").firstChild;
             timeLabel.innerHTML = NetRequestEntry.getElapsedTime({elapsed: this.elapsed});
 
             if (file.loaded)
-                FBL.setClass(row, "loaded");
+                CSS.setClass(row, "loaded");
             else
-                FBL.removeClass(row, "loaded");
+                CSS.removeClass(row, "loaded");
 
-            if (FBL.hasClass(row, "opened"))
+            if (CSS.hasClass(row, "opened"))
             {
                 var netInfoBox = row.nextSibling.getElementsByClassName("netInfoBody").item(0);
                 NetInfoBody.updateInfo(netInfoBox, file, this.context);
@@ -1563,7 +1564,7 @@ NetPanel.prototype = FBL.extend(Firebug.ActivablePanel,
         var lastRow = this.summaryRow.previousSibling;
 
         // Insert an activation message (if the last row isn't the message already);
-        if (FBL.hasClass(lastRow, "netActivationRow"))
+        if (CSS.hasClass(lastRow, "netActivationRow"))
             return;
 
         var message = NetRequestEntry.activationTag.insertRows({}, lastRow)[0];
@@ -1581,12 +1582,12 @@ NetPanel.prototype = FBL.extend(Firebug.ActivablePanel,
         for (var i=0; i<rows.length; i++)
         {
             var row = rows[i];
-            var pageRow = FBL.hasClass(row, "netPageRow");
+            var pageRow = CSS.hasClass(row, "netPageRow");
 
-            if (FBL.hasClass(row, "collapsed") && !pageRow)
+            if (CSS.hasClass(row, "collapsed") && !pageRow)
                 continue;
 
-            if (FBL.hasClass(row, "history"))
+            if (CSS.hasClass(row, "history"))
                 continue;
 
             // Export also history. These requests can be collpased and so not visible.
@@ -1610,9 +1611,9 @@ NetPanel.prototype = FBL.extend(Firebug.ActivablePanel,
         for (var category in fileCategories)
         {
             if (filterCategory != "all" && category != filterCategory)
-                FBL.setClass(panelNode, "hideCategory-"+category);
+                CSS.setClass(panelNode, "hideCategory-"+category);
             else
-                FBL.removeClass(panelNode, "hideCategory-"+category);
+                CSS.removeClass(panelNode, "hideCategory-"+category);
         }
     },
 
@@ -1753,7 +1754,7 @@ Firebug.NetMonitor.NetRequestTable = domplate(Firebug.Rep, new Firebug.Listener(
         if (!col)
             return;
 
-        var numerical = !FBL.hasClass(col, "alphaValue");
+        var numerical = !CSS.hasClass(col, "alphaValue");
 
         var colIndex = 0;
         for (col = col.previousSibling; col; col = col.previousSibling)
@@ -1772,13 +1773,13 @@ Firebug.NetMonitor.NetRequestTable = domplate(Firebug.Rep, new Firebug.Listener(
 
         // Remove class from the currently sorted column
         var headerSorted = FBL.getChildByClass(headerRow, "netHeaderSorted");
-        FBL.removeClass(headerSorted, "netHeaderSorted");
+        CSS.removeClass(headerSorted, "netHeaderSorted");
         if (headerSorted)
             headerSorted.removeAttribute("aria-sort");
 
         // Mark new column as sorted.
         var header = headerRow.childNodes[colIndex];
-        FBL.setClass(header, "netHeaderSorted");
+        CSS.setClass(header, "netHeaderSorted");
 
         // If the column is already using required sort direction, bubble out.
         if ((direction == "desc" && header.sorted == 1) ||
@@ -1797,7 +1798,7 @@ Firebug.NetMonitor.NetRequestTable = domplate(Firebug.Rep, new Firebug.Listener(
             if (!row.repObject)
                 continue;
 
-            if (FBL.hasClass(row, "history"))
+            if (CSS.hasClass(row, "history"))
                 continue;
 
             var cell = row.childNodes[colIndex];
@@ -1808,7 +1809,7 @@ Firebug.NetMonitor.NetRequestTable = domplate(Firebug.Rep, new Firebug.Listener(
             else if (colID == "netSizeCol")
                 value = row.repObject.size;
 
-            if (FBL.hasClass(row, "opened"))
+            if (CSS.hasClass(row, "opened"))
             {
                 var netInfoRow = row.nextSibling;
                 values.push({row: row, value: value, info: netInfoRow});
@@ -1824,8 +1825,8 @@ Firebug.NetMonitor.NetRequestTable = domplate(Firebug.Rep, new Firebug.Listener(
 
         if ((header.sorted && header.sorted == 1) || (!header.sorted && direction == "asc"))
         {
-            FBL.removeClass(header, "sortedDescending");
-            FBL.setClass(header, "sortedAscending");
+            CSS.removeClass(header, "sortedDescending");
+            CSS.setClass(header, "sortedAscending");
             header.sorted = -1;
 
             for (var i = 0; i < values.length; ++i)
@@ -1837,8 +1838,8 @@ Firebug.NetMonitor.NetRequestTable = domplate(Firebug.Rep, new Firebug.Listener(
         }
         else
         {
-            FBL.removeClass(header, "sortedAscending");
-            FBL.setClass(header, "sortedDescending");
+            CSS.removeClass(header, "sortedAscending");
+            CSS.setClass(header, "sortedDescending");
 
             header.sorted = 1;
 
@@ -2074,7 +2075,7 @@ Firebug.NetMonitor.NetRequestEntry = domplate(Firebug.Rep, new Firebug.Listener(
         Events.cancelEvent(event);
 
         var rowHeader = event.target;
-        if (!FBL.hasClass(rowHeader, "netRowHeader"))
+        if (!CSS.hasClass(rowHeader, "netRowHeader"))
             return;
 
         var row = FBL.getAncestorByClass(event.target, "netRow");
@@ -2106,13 +2107,13 @@ Firebug.NetMonitor.NetRequestEntry = domplate(Firebug.Rep, new Firebug.Listener(
 
     toggleHeadersRow: function(row)
     {
-        if (!FBL.hasClass(row, "hasHeaders"))
+        if (!CSS.hasClass(row, "hasHeaders"))
             return;
 
         var file = row.repObject;
 
-        FBL.toggleClass(row, "opened");
-        if (FBL.hasClass(row, "opened"))
+        CSS.toggleClass(row, "opened");
+        if (CSS.hasClass(row, "opened"))
         {
             var netInfoRow = this.netInfoTag.insertRows({file: file}, row)[0];
             var netInfoCol = netInfoRow.getElementsByClassName("netInfoCol").item(0);
@@ -2128,7 +2129,7 @@ Firebug.NetMonitor.NetRequestEntry = domplate(Firebug.Rep, new Firebug.Listener(
 
             var category = Utils.getFileCategory(row.repObject);
             if (category)
-                FBL.setClass(netInfoBox, "category-" + category);
+                CSS.setClass(netInfoBox, "category-" + category);
             row.setAttribute('aria-expanded', 'true');
         }
         else
@@ -2259,9 +2260,9 @@ Firebug.NetMonitor.NetPage = domplate(Firebug.Rep,
         var pageRow = FBL.getAncestorByClass(event.target, "netPageRow");
         var panel = Firebug.getElementPanel(pageRow);
 
-        if (!FBL.hasClass(pageRow, "opened"))
+        if (!CSS.hasClass(pageRow, "opened"))
         {
-            FBL.setClass(pageRow, "opened");
+            CSS.setClass(pageRow, "opened");
 
             var files = pageRow.files;
 
@@ -2275,10 +2276,10 @@ Firebug.NetMonitor.NetPage = domplate(Firebug.Rep,
         }
         else
         {
-            FBL.removeClass(pageRow, "opened");
+            CSS.removeClass(pageRow, "opened");
 
             var nextRow = pageRow.nextSibling;
-            while (!FBL.hasClass(nextRow, "netPageRow") && !FBL.hasClass(nextRow, "netPageSeparatorRow"))
+            while (!CSS.hasClass(nextRow, "netPageRow") && !CSS.hasClass(nextRow, "netPageSeparatorRow"))
             {
                 var nextSibling = nextRow.nextSibling;
                 nextRow.parentNode.removeChild(nextRow);
@@ -2514,7 +2515,7 @@ Firebug.NetMonitor.NetInfoBody = domplate(Firebug.Rep, new Firebug.Listener(),
         }
 
         var tab = netInfoBox.selectedTab;
-        if (FBL.hasClass(tab, "netInfoParamsTab"))
+        if (CSS.hasClass(tab, "netInfoParamsTab"))
         {
             if (file.urlParams && !netInfoBox.urlParamsPresented)
             {
@@ -2523,7 +2524,7 @@ Firebug.NetMonitor.NetInfoBody = domplate(Firebug.Rep, new Firebug.Listener(),
             }
         }
 
-        if (FBL.hasClass(tab, "netInfoHeadersTab"))
+        if (CSS.hasClass(tab, "netInfoHeadersTab"))
         {
             var headersText = netInfoBox.getElementsByClassName("netInfoHeadersText").item(0);
 
@@ -2540,7 +2541,7 @@ Firebug.NetMonitor.NetInfoBody = domplate(Firebug.Rep, new Firebug.Listener(),
             }
         }
 
-        if (FBL.hasClass(tab, "netInfoPostTab"))
+        if (CSS.hasClass(tab, "netInfoPostTab"))
         {
             if (!netInfoBox.postPresented)
             {
@@ -2550,7 +2551,7 @@ Firebug.NetMonitor.NetInfoBody = domplate(Firebug.Rep, new Firebug.Listener(),
             }
         }
 
-        if (FBL.hasClass(tab, "netInfoPutTab"))
+        if (CSS.hasClass(tab, "netInfoPutTab"))
         {
             if (!netInfoBox.putPresented)
             {
@@ -2560,7 +2561,7 @@ Firebug.NetMonitor.NetInfoBody = domplate(Firebug.Rep, new Firebug.Listener(),
             }
         }
 
-        if (FBL.hasClass(tab, "netInfoResponseTab") && file.loaded && !netInfoBox.responsePresented)
+        if (CSS.hasClass(tab, "netInfoResponseTab") && file.loaded && !netInfoBox.responsePresented)
         {
             var responseTextBox = netInfoBox.getElementsByClassName("netInfoResponseText").item(0);
             if (file.category == "image")
@@ -2579,7 +2580,7 @@ Firebug.NetMonitor.NetInfoBody = domplate(Firebug.Rep, new Firebug.Listener(),
             }
         }
 
-        if (FBL.hasClass(tab, "netInfoCacheTab") && file.loaded && !netInfoBox.cachePresented)
+        if (CSS.hasClass(tab, "netInfoCacheTab") && file.loaded && !netInfoBox.cachePresented)
         {
             var responseTextBox = netInfoBox.getElementsByClassName("netInfoCacheText").item(0);
             if (file.cacheEntry) {
@@ -2588,7 +2589,7 @@ Firebug.NetMonitor.NetInfoBody = domplate(Firebug.Rep, new Firebug.Listener(),
             }
         }
 
-        if (FBL.hasClass(tab, "netInfoHtmlTab") && file.loaded && !netInfoBox.htmlPresented)
+        if (CSS.hasClass(tab, "netInfoHtmlTab") && file.loaded && !netInfoBox.htmlPresented)
         {
             netInfoBox.htmlPresented = true;
 
@@ -2683,7 +2684,7 @@ Firebug.NetMonitor.NetInfoBody = domplate(Firebug.Rep, new Firebug.Listener(),
         var titleRow = FBL.getChildByClass(tbody, "netInfo" + rowName + "Title");
 
         this.headerDataTag.insertRows({headers: headers}, titleRow ? titleRow : tbody);
-        FBL.removeClass(titleRow, "collapsed");
+        CSS.removeClass(titleRow, "collapsed");
     },
 });
 
@@ -3043,7 +3044,7 @@ Firebug.NetMonitor.NetInfoHeaders = domplate(Firebug.Rep, new Firebug.Listener()
         NetInfoBody.headerDataTag.insertRows({headers: headers}, tbody);
 
         var titleRow = FBL.getChildByClass(headersTable, "netInfo" + rowName + "Title");
-        FBL.removeClass(titleRow, "collapsed");
+        CSS.removeClass(titleRow, "collapsed");
     },
 
     init: function(parent)
@@ -3057,11 +3058,11 @@ Firebug.NetMonitor.NetInfoHeaders = domplate(Firebug.Rep, new Firebug.Listener()
 
         viewSource = rootNode.getElementsByClassName("netHeadersViewSource request").item(0);
         if (file.requestHeadersText)
-            FBL.removeClass(viewSource, "collapsed");
+            CSS.removeClass(viewSource, "collapsed");
 
         viewSource = rootNode.getElementsByClassName("netHeadersViewSource response").item(0);
         if (file.responseHeadersText)
-            FBL.removeClass(viewSource, "collapsed");
+            CSS.removeClass(viewSource, "collapsed");
     },
 
     renderHeaders: function(parent, headers, rowName)
@@ -3356,7 +3357,7 @@ Firebug.NetMonitor.NetLimit = domplate(Firebug.Rep,
 
     updateCounter: function(row)
     {
-        FBL.removeClass(row, "collapsed");
+        CSS.removeClass(row, "collapsed");
 
         // Update info within the limit row.
         var limitLabel = row.getElementsByClassName("netLimitLabel").item(0);
@@ -3832,7 +3833,7 @@ NetProgress.prototype =
                 file.phase.lastFinishedFile = file;
 
             // Force update UI.
-            if (file.row && FBL.hasClass(file.row, "opened"))
+            if (file.row && CSS.hasClass(file.row, "opened"))
             {
                 var netInfoBox = file.row.nextSibling.getElementsByClassName("netInfoBody").item(0);
                 if (netInfoBox)
@@ -5484,7 +5485,7 @@ var NetPanelSearch = function(panel, rowFinder)
         var scanRE = Firebug.Search.getTestingRegex(this.text);
         if (scanRE.test(file.responseText))
         {
-            if (!FBL.hasClass(this.currentRow, "opened"))
+            if (!CSS.hasClass(this.currentRow, "opened"))
                 NetRequestEntry.toggleHeadersRow(this.currentRow);
 
             var netInfoRow = this.currentRow.nextSibling;
@@ -5522,7 +5523,7 @@ var NetPanelSearch = function(panel, rowFinder)
         {
             if (this.shouldSearchResponses())
                 return sib;
-            else if (FBL.hasClass(sib, "netRow"))
+            else if (CSS.hasClass(sib, "netRow"))
                 return sib;
         }
 
@@ -5579,7 +5580,7 @@ Firebug.NetMonitor.BreakpointRep = domplate(Firebug.Rep,
     {
         Events.cancelEvent(event);
 
-        if (!FBL.hasClass(event.target, "closeButton"))
+        if (!CSS.hasClass(event.target, "closeButton"))
             return;
 
         var bpPanel = Firebug.getElementPanel(event.target);
@@ -5609,7 +5610,7 @@ Firebug.NetMonitor.BreakpointRep = domplate(Firebug.Rep,
     onEnable: function(event)
     {
         var checkBox = event.target;
-        if (!FBL.hasClass(checkBox, "breakpointCheckbox"))
+        if (!CSS.hasClass(checkBox, "breakpointCheckbox"))
             return;
 
         var bpPanel = Firebug.getElementPanel(event.target);

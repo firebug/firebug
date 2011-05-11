@@ -687,7 +687,7 @@ Firebug.CSSStyleSheetPanel.prototype = FBL.extend(Firebug.Panel,
         if (ruleElement)
         {
             FBL.scrollIntoCenterView(ruleElement, this.panelNode);
-            FBL.setClassTimed(ruleElement, "jumpHighlight", this.context);
+            CSS.setClassTimed(ruleElement, "jumpHighlight", this.context);
         }
     },
 
@@ -952,7 +952,7 @@ Firebug.CSSStyleSheetPanel.prototype = FBL.extend(Firebug.Panel,
 
     disablePropertyRow: function(row)
     {
-        FBL.toggleClass(row, "disabledStyle");
+        CSS.toggleClass(row, "disabledStyle");
 
         var rule = Firebug.getRepObject(row);
         var propName = FBL.getChildByClass(row, "cssPropName").textContent;
@@ -969,7 +969,7 @@ Firebug.CSSStyleSheetPanel.prototype = FBL.extend(Firebug.Panel,
         var propValue = FBL.getChildByClass(row, "cssPropValue").textContent;
         var parsedValue = parsePriority(propValue);
 
-        Firebug.CSSModule.disableProperty(FBL.hasClass(row, "disabledStyle"), rule, propName, parsedValue, map, this.context);
+        Firebug.CSSModule.disableProperty(CSS.hasClass(row, "disabledStyle"), rule, propName, parsedValue, map, this.context);
 
         this.markChange(this.name == "stylesheet");
     },
@@ -990,10 +990,10 @@ Firebug.CSSStyleSheetPanel.prototype = FBL.extend(Firebug.Panel,
         // XXjoe Hack to only allow clicking on the checkbox
         if ( (event.clientX <= 20) && (event.detail == 1) )
         {
-            if (FBL.hasClass(event.target, "textEditor inlineExpander"))
+            if (CSS.hasClass(event.target, "textEditor inlineExpander"))
                 return;
             row = FBL.getAncestorByClass(event.target, "cssProp");
-            if (row && FBL.hasClass(row, "editGroup"))
+            if (row && CSS.hasClass(row, "editGroup"))
             {
                 this.disablePropertyRow(row);
                 Events.cancelEvent(event);
@@ -1253,7 +1253,7 @@ Firebug.CSSStyleSheetPanel.prototype = FBL.extend(Firebug.Panel,
             return items;
         }
 
-        if (FBL.hasClass(target, "cssSelector"))
+        if (CSS.hasClass(target, "cssSelector"))
         {
             items.push(
                 {label: "Copy Rule Declaration", id: "fbCopyRuleDeclaration",
@@ -1298,7 +1298,7 @@ Firebug.CSSStyleSheetPanel.prototype = FBL.extend(Firebug.Panel,
         }
 
         var cssRule = FBL.getAncestorByClass(target, "cssRule");
-        if (cssRule && FBL.hasClass(cssRule, "cssEditableRule"))
+        if (cssRule && CSS.hasClass(cssRule, "cssEditableRule"))
         {
             items.push(
                 "-",
@@ -1310,7 +1310,7 @@ Firebug.CSSStyleSheetPanel.prototype = FBL.extend(Firebug.Panel,
             if (propRow)
             {
                 var propName = FBL.getChildByClass(propRow, "cssPropName").textContent;
-                var isDisabled = FBL.hasClass(propRow, "disabledStyle");
+                var isDisabled = CSS.hasClass(propRow, "disabledStyle");
 
                 items.push(
                     {label: Locale.$STRF("EditProp", [propName]), nol10n: true,
@@ -1390,8 +1390,8 @@ Firebug.CSSStyleSheetPanel.prototype = FBL.extend(Firebug.Panel,
     getEditor: function(target, value)
     {
         if (target == this.panelNode
-            || FBL.hasClass(target, "cssSelector") || FBL.hasClass(target, "cssRule")
-            || FBL.hasClass(target, "cssSheet"))
+            || CSS.hasClass(target, "cssSelector") || CSS.hasClass(target, "cssRule")
+            || CSS.hasClass(target, "cssSheet"))
         {
             if (!this.ruleEditor)
                 this.ruleEditor = new CSSRuleEditor(this.document);
@@ -1454,12 +1454,12 @@ Firebug.CSSStyleSheetPanel.prototype = FBL.extend(Firebug.Panel,
     highlightRow: function(row)
     {
         if (this.highlightedRow)
-            FBL.cancelClassTimed(this.highlightedRow, "jumpHighlight", this.context);
+            CSS.cancelClassTimed(this.highlightedRow, "jumpHighlight", this.context);
 
         this.highlightedRow = row;
 
         if (row)
-            FBL.setClassTimed(row, "jumpHighlight", this.context);
+            CSS.setClassTimed(row, "jumpHighlight", this.context);
     },
 
     search: function(text, reverse)
@@ -2181,8 +2181,8 @@ CSSComputedElementPanel.prototype = FBL.extend(CSSElementPanel.prototype,
         var group = FBL.getAncestorByClass(event.target, "computedStylesGroup");
         var groupName = group.getElementsByClassName("cssComputedLabel")[0].textContent;
 
-        FBL.toggleClass(group, "opened");
-        this.groupOpened[groupName] = FBL.hasClass(group, "opened");
+        CSS.toggleClass(group, "opened");
+        this.groupOpened[groupName] = CSS.hasClass(group, "opened");
     },
 
     toggleDisplay: function()
@@ -2227,12 +2227,12 @@ CSSEditor.prototype = domplate(Firebug.InlineEditor.prototype,
         target.innerHTML = FBL.escapeForCss(value);
 
         var row = FBL.getAncestorByClass(target, "cssProp");
-        if (FBL.hasClass(row, "disabledStyle"))
-            FBL.toggleClass(row, "disabledStyle");
+        if (CSS.hasClass(row, "disabledStyle"))
+            CSS.toggleClass(row, "disabledStyle");
 
         var rule = Firebug.getRepObject(target);
 
-        if (FBL.hasClass(target, "cssPropName"))
+        if (CSS.hasClass(target, "cssPropName"))
         {
             if (value && previousValue != value)  // name of property has changed.
             {
@@ -2291,11 +2291,11 @@ CSSEditor.prototype = domplate(Firebug.InlineEditor.prototype,
 
     advanceToNext: function(target, charCode)
     {
-        if (charCode == 58 /*":"*/ && FBL.hasClass(target, "cssPropName"))
+        if (charCode == 58 /*":"*/ && CSS.hasClass(target, "cssPropName"))
         {
             return true;
         }
-        else if (charCode == 59 /*";"*/ && FBL.hasClass(target, "cssPropValue"))
+        else if (charCode == 59 /*";"*/ && CSS.hasClass(target, "cssPropValue"))
         {
             return true;
         }
@@ -2305,7 +2305,7 @@ CSSEditor.prototype = domplate(Firebug.InlineEditor.prototype,
 
     getAutoCompleteRange: function(value, offset)
     {
-        if (FBL.hasClass(this.target, "cssPropName"))
+        if (CSS.hasClass(this.target, "cssPropName"))
             return {start: 0, end: value.length-1};
         else
             return parseCSSValue(value, offset);
@@ -2317,7 +2317,7 @@ CSSEditor.prototype = domplate(Firebug.InlineEditor.prototype,
         {
             return ["!important"];
         }
-        else if (FBL.hasClass(this.target, "cssPropName"))
+        else if (CSS.hasClass(this.target, "cssPropName"))
         {
             return FBL.getCSSPropertyNames(FBL.getElementSimpleType(Firebug.getRepObject(this.target)));
         }
@@ -2436,7 +2436,7 @@ CSSRuleEditor.prototype = domplate(Firebug.InlineEditor.prototype,
             var props = row.getElementsByClassName("cssProp");
             for (var i = 0; i < props.length; i++) {
                 var propEl = props[i];
-                if (!FBL.hasClass(propEl, "disabledStyle")) {
+                if (!CSS.hasClass(propEl, "disabledStyle")) {
                     cssText.push(FBL.getChildByClass(propEl, "cssPropName").textContent);
                     cssText.push(":");
                     cssText.push(FBL.getChildByClass(propEl, "cssPropValue").textContent);

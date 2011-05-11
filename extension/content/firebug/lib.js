@@ -611,160 +611,6 @@ this.getRootWindow = function(win)
 };
 
 // ************************************************************************************************
-// CSS classes
-
-var classNameReCache={};
-
-this.hasClass = function(node, name)
-{
-    if (!node || node.nodeType != 1 || !node.className || name == '')
-        return false;
-
-    if (name.indexOf(" ") != -1)
-    {
-        var classes = name.split(" "), len = classes.length, found=false;
-        for (var i = 0; i < len; i++)
-        {
-            var cls = classes[i].trim();
-            if (cls != "")
-            {
-                if (this.hasClass(node, cls) == false)
-                    return false;
-                found = true;
-            }
-        }
-        return found;
-    }
-
-    var re;
-    if (name.indexOf("-") == -1)
-        re = classNameReCache[name] = classNameReCache[name] || new RegExp('(^|\\s)' + name + '(\\s|$)', "g");
-    else // XXXsroussey don't cache these, they are often setting values. Should be using setUserData/getUserData???
-        re = new RegExp('(^|\\s)' + name + '(\\s|$)', "g")
-    return node.className.search(re) != -1;
-};
-
-this.setClass = function(node, name)
-{
-    if (!node || node.nodeType != 1 || name == '')
-        return;
-
-    if (name.indexOf(" ") != -1)
-    {
-        var classes = name.split(" "), len = classes.length;
-        for (var i = 0; i < len; i++)
-        {
-            var cls = classes[i].trim();
-            if (cls != "")
-            {
-                this.setClass(node, cls);
-            }
-        }
-        return;
-    }
-    if (!this.hasClass(node, name))
-        node.className = node.className.trim() + " " + name;
-};
-
-this.getClassValue = function(node, name)
-{
-    var re = new RegExp(name+"-([^ ]+)");
-    var m = re.exec(node.className);
-    return m ? m[1] : "";
-};
-
-this.removeClass = function(node, name)
-{
-    if (!node || node.nodeType != 1 || node.className == '' || name == '')
-        return;
-
-    if (name.indexOf(" ") != -1)
-    {
-        var classes = name.split(" "), len = classes.length;
-        for (var i = 0; i < len; i++)
-        {
-            var cls = classes[i].trim();
-            if (cls != "")
-            {
-                if (this.hasClass(node, cls) == false)
-                    this.removeClass(node, cls);
-            }
-        }
-        return;
-    }
-
-    var re;
-    if (name.indexOf("-") == -1)
-        re = classNameReCache[name] = classNameReCache[name] || new RegExp('(^|\\s)' + name + '(\\s|$)', "g");
-    else // XXXsroussey don't cache these, they are often setting values. Should be using setUserData/getUserData???
-        re = new RegExp('(^|\\s)' + name + '(\\s|$)', "g")
-
-    node.className = node.className.replace(re, " ");
-
-};
-
-this.toggleClass = function(elt, name)
-{
-    if (this.hasClass(elt, name))
-        this.removeClass(elt, name);
-    else
-        this.setClass(elt, name);
-};
-
-this.setClassTimed = function(elt, name, context, timeout)
-{
-    if (FBTrace.DBG_HTML || FBTrace.DBG_SOURCEFILES)
-    {
-        FBTrace.sysout("FBL.setClassTimed elt.__setClassTimeout: "+elt.__setClassTimeout+
-                " this.isVisible(elt): "+this.isVisible(elt)+
-                " elt.__invisibleAtSetPoint: "+elt.__invisibleAtSetPoint);
-    }
-
-    if (!timeout)
-        timeout = 1300;
-
-    if (elt.__setClassTimeout)  // then we are already waiting to remove the class mark
-        context.clearTimeout(elt.__setClassTimeout);  // reset the timer
-    else                        // then we are not waiting to remove the mark
-        this.setClass(elt, name);
-
-    if (!this.isVisible(elt))
-    {
-        if (elt.__invisibleAtSetPoint)
-            elt.__invisibleAtSetPoint--;
-        else
-            elt.__invisibleAtSetPoint = 5;
-    }
-    else
-    {
-        delete elt.__invisibleAtSetPoint;
-    }
-
-    elt.__setClassTimeout = context.setTimeout(function()
-    {
-        delete elt.__setClassTimeout;
-
-        if (elt.__invisibleAtSetPoint)  // then user can't see it, try again later
-            FBL.setClassTimed(elt, name, context, timeout);
-        else
-        {
-            delete elt.__invisibleAtSetPoint;  // may be zero
-            FBL.removeClass(elt, name);
-        }
-    }, timeout);
-};
-
-this.cancelClassTimed = function(elt, name, context)
-{
-    if (elt.__setClassTimeout)
-    {
-        FBL.removeClass(elt, name);
-        context.clearTimeout(elt.__setClassTimeout);
-        delete elt.__setClassTimeout;
-    }
-};
-
-// ************************************************************************************************
 // DOM queries
 
 this.$ = function(id, doc)
@@ -983,13 +829,13 @@ this.findPrevious = function(node, criteria, downOnly, maxRoot)
 
 this.getNextByClass = function(root, state)
 {
-    function iter(node) { return node.nodeType == 1 && FBL.hasClass(node, state); }
+    function iter(node) { return node.nodeType == 1 && CSS.hasClass(node, state); }
     return this.findNext(root, iter);
 };
 
 this.getPreviousByClass = function(root, state)
 {
-    function iter(node) { return node.nodeType == 1 && FBL.hasClass(node, state); }
+    function iter(node) { return node.nodeType == 1 && CSS.hasClass(node, state); }
     return this.findPrevious(root, iter);
 };
 
@@ -2404,7 +2250,7 @@ this.setItemIntoElement = function(element, item)
     }
 
     if (item.className)
-        FBL.setClass(element, item.className);
+        CSS.setClass(element, item.className);
 
     if (item.acceltext)
         element.setAttribute("acceltext", item.acceltext);

@@ -510,12 +510,12 @@ FirebugReps.Arr = domplate(Firebug.Rep,
     onToggleProperties: function(event)
     {
         var target = event.originalTarget;
-        if (FBL.hasClass(target, "objectBox-array"))
+        if (CSS.hasClass(target, "objectBox-array"))
         {
-            FBL.toggleClass(target, "opened");
+            CSS.toggleClass(target, "opened");
 
             var propBox = target.getElementsByClassName("arrayProperties").item(0);
-            if (FBL.hasClass(target, "opened"))
+            if (CSS.hasClass(target, "opened"))
                 Firebug.DOMPanel.DirTable.tag.replace(
                     {object: target.repObject, toggles: this.toggles}, propBox);
             else
@@ -1549,9 +1549,9 @@ FirebugReps.StackFrame = domplate(Firebug.Rep,  // XXXjjb Since the repObject is
 
     toggleArguments: function(target)
     {
-        if (FBL.hasClass(target, "objectBox-stackFrame"))
+        if (CSS.hasClass(target, "objectBox-stackFrame"))
         {
-            if (FBL.hasClass(target, "opened"))
+            if (CSS.hasClass(target, "opened"))
                 this.collapseArguments(target);
             else
                 this.expandArguments(target);
@@ -1560,10 +1560,10 @@ FirebugReps.StackFrame = domplate(Firebug.Rep,  // XXXjjb Since the repObject is
 
     collapseArguments: function(target)
     {
-        if (!FBL.hasClass(target, "opened"))
+        if (!CSS.hasClass(target, "opened"))
             return;
 
-        FBL.toggleClass(target, "opened");
+        CSS.toggleClass(target, "opened");
 
         var argList = target.getElementsByClassName("argList").item(0);
         FBL.clearNode(argList);
@@ -1571,14 +1571,14 @@ FirebugReps.StackFrame = domplate(Firebug.Rep,  // XXXjjb Since the repObject is
 
     expandArguments: function(target)
     {
-        if (FBL.hasClass(target, "opened"))
+        if (CSS.hasClass(target, "opened"))
             return;
 
         var frame = target.repObject;
         if (!this.hasArguments(frame))
             return;
 
-        FBL.toggleClass(target, "opened");
+        CSS.toggleClass(target, "opened");
 
         var argList = target.getElementsByClassName("argList").item(0);
         this.argList.replace({object: frame}, argList);
@@ -1587,7 +1587,7 @@ FirebugReps.StackFrame = domplate(Firebug.Rep,  // XXXjjb Since the repObject is
     onSelectFrame: function(event)
     {
         var target = event.currentTarget;
-        if (FBL.hasClass(target, "argListBox"))
+        if (CSS.hasClass(target, "argListBox"))
         {
             var stackFrame = FBL.getAncestorByClass(target, "objectBox-stackFrame");
             var panel = Firebug.getElementPanel(target);
@@ -1777,13 +1777,13 @@ FirebugReps.ErrorMessage = domplate(Firebug.Rep,
     onToggleError: function(event)
     {
         var target = event.currentTarget;
-        if (FBL.hasClass(event.target, "errorBreak"))
+        if (CSS.hasClass(event.target, "errorBreak"))
         {
             var panel = Firebug.getElementPanel(event.target);
             this.breakOnThisError(target.repObject, panel.context);
             return;
         }
-        else if (FBL.hasClass(event.target, "errorSource"))
+        else if (CSS.hasClass(event.target, "errorSource"))
         {
             var panel = Firebug.getElementPanel(event.target);
             this.inspectObject(target.repObject, panel.context);
@@ -1794,10 +1794,10 @@ FirebugReps.ErrorMessage = domplate(Firebug.Rep,
         if (errorTitle)
         {
             var traceBox = target.childNodes[1];
-            FBL.toggleClass(target, "opened");
-            event.target.setAttribute('aria-expanded', FBL.hasClass(target, "opened"));
+            CSS.toggleClass(target, "opened");
+            event.target.setAttribute('aria-expanded', CSS.hasClass(target, "opened"));
 
-            if (FBL.hasClass(target, "opened"))
+            if (CSS.hasClass(target, "opened"))
             {
                 if (target.stackTrace)
                     FirebugReps.StackTrace.tag.append({object: target.stackTrace}, traceBox);

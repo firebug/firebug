@@ -11,9 +11,10 @@ define([
     "firebug/lib/url",
     "firebug/lib/stackFrame",
     "firebug/lib/events",
+    "firebug/lib/css",
 ],
 function(FBL, Firebug, Domplate, FirebugReps, Locale, Wrapper, ToolsInterface, URL,
-    StackFrame, Events) {
+    StackFrame, Events, CSS) {
 
 // ********************************************************************************************* //
 // Profiler
@@ -136,7 +137,7 @@ Firebug.Profiler = FBL.extend(Firebug.Module,
     {
         var row = Firebug.Console.openGroup(title, context, "profile",
             Firebug.Profiler.ProfileCaption, true, null, true);
-        FBL.setClass(row, "profilerRunning");
+        CSS.setClass(row, "profilerRunning");
 
         Firebug.Console.closeGroup(context, true);
 
@@ -194,7 +195,7 @@ Firebug.Profiler = FBL.extend(Firebug.Module,
             : this.logProfileRow(context, "");
         delete context.profileRow;
 
-        FBL.removeClass(groupRow, "profilerRunning");
+        CSS.removeClass(groupRow, "profilerRunning");
 
         if (totalCalls > 0)
         {
@@ -302,7 +303,7 @@ Firebug.Profiler.ProfileTable = domplate(
         if (!header)
             return;
 
-        var numerical = !FBL.hasClass(header, "alphaValue");
+        var numerical = !CSS.hasClass(header, "alphaValue");
 
         var colIndex = 0;
         for (header = header.previousSibling; header; header = header.previousSibling)
@@ -315,8 +316,8 @@ Firebug.Profiler.ProfileTable = domplate(
     {
         sortAscending = function()
         {
-            FBL.removeClass(header, "sortedDescending");
-            FBL.setClass(header, "sortedAscending");
+            CSS.removeClass(header, "sortedDescending");
+            CSS.setClass(header, "sortedAscending");
             header.setAttribute("aria-sort", "ascending");
 
             header.sorted = -1;
@@ -327,8 +328,8 @@ Firebug.Profiler.ProfileTable = domplate(
 
         sortDescending = function()
         {
-          FBL.removeClass(header, "sortedAscending");
-          FBL.setClass(header, "sortedDescending");
+          CSS.removeClass(header, "sortedAscending");
+          CSS.setClass(header, "sortedDescending");
           header.setAttribute("aria-sort", "descending")
 
           header.sorted = 1;
@@ -352,12 +353,12 @@ Firebug.Profiler.ProfileTable = domplate(
 
         var headerRow = thead.firstChild;
         var headerSorted = FBL.getChildByClass(headerRow, "headerSorted");
-        FBL.removeClass(headerSorted, "headerSorted");
+        CSS.removeClass(headerSorted, "headerSorted");
         if (headerSorted)
             headerSorted.removeAttribute('aria-sort');
 
         var header = headerRow.childNodes[colIndex];
-        FBL.setClass(header, "headerSorted");
+        CSS.setClass(header, "headerSorted");
 
         if (numerical)
         {

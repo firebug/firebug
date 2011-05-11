@@ -6,8 +6,9 @@ define([
     "arch/tools",
     "firebug/lib/events",
     "firebug/sourceLink",
+    "firebug/lib/css",
 ],
-function(FBL, Firebug, ToolsInterface, Events, SourceLink) {
+function(FBL, Firebug, ToolsInterface, Events, SourceLink, CSS) {
 
 // ************************************************************************************************
 // Constants
@@ -244,7 +245,7 @@ Firebug.SourceBoxPanel = FBL.extend(SourceBoxPanelBase,
         var buf = this.getSourceLine(anchorSourceRow, selection.anchorOffset);
 
         var currentSourceRow = anchorSourceRow.nextSibling;
-        while(currentSourceRow && (currentSourceRow != focusSourceRow) && FBL.hasClass(currentSourceRow, "sourceRow"))
+        while(currentSourceRow && (currentSourceRow != focusSourceRow) && CSS.hasClass(currentSourceRow, "sourceRow"))
         {
             buf += this.getSourceLine(currentSourceRow);
             currentSourceRow = currentSourceRow.nextSibling;
@@ -421,7 +422,7 @@ Firebug.SourceBoxPanel = FBL.extend(SourceBoxPanelBase,
     initializeSourceBox: function(compilationUnit)
     {
         var sourceBox = this.document.createElement("div");
-        FBL.setClass(sourceBox, "sourceBox");
+        CSS.setClass(sourceBox, "sourceBox");
         FBL.collapse(sourceBox, true);
         sourceBox.repObject = compilationUnit;
         compilationUnit.sourceBox = sourceBox;
@@ -610,11 +611,11 @@ Firebug.SourceBoxPanel = FBL.extend(SourceBoxPanelBase,
             var  lineNode = sourceBox.getLineNode(lineNo);
 
             if (context.highlightedRow)
-              FBL.cancelClassTimed(context.highlightedRow, "jumpHighlight", context);
+              CSS.cancelClassTimed(context.highlightedRow, "jumpHighlight", context);
 
             if (lineNode)
             {
-                FBL.setClassTimed(lineNode, "jumpHighlight", context);
+                CSS.setClassTimed(lineNode, "jumpHighlight", context);
 
                 context.highlightedRow = lineNode;
 

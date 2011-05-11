@@ -166,7 +166,7 @@ Firebug.HTMLPanel.prototype = FBL.extend(WalkingPanel,
         else if (dir == "left")
         {
             var box = this.ioBox.createObjectBox(this.selection);
-            if (!FBL.hasClass(box, "open"))
+            if (!CSS.hasClass(box, "open"))
                 this.select(this.ioBox.getParentObjectBox(box).repObject);
             else
                 this.ioBox.contractObject(this.selection);
@@ -174,7 +174,7 @@ Firebug.HTMLPanel.prototype = FBL.extend(WalkingPanel,
         else if (dir == "right")
         {
             var box = this.ioBox.createObjectBox(this.selection);
-            if (!FBL.hasClass(box, "open"))
+            if (!CSS.hasClass(box, "open"))
                 this.ioBox.expandObject(this.selection);
             else
                 this.selectNext();
@@ -267,7 +267,7 @@ Firebug.HTMLPanel.prototype = FBL.extend(WalkingPanel,
     {
         dir = dir || 'up';
         var box = this.ioBox.createObjectBox(node);
-        if (FBL.hasClass(box, "open"))
+        if (CSS.hasClass(box, "open"))
             this.ioBox.contractObject(this.selection);
         this.selectNodeBy(dir);
         Firebug.HTMLModule.deleteNode(node, this.context);
@@ -345,9 +345,9 @@ Firebug.HTMLPanel.prototype = FBL.extend(WalkingPanel,
             return;
 
         if (FBL.isVisible(objectNodeBox.repObject))
-            FBL.removeClass(objectNodeBox, "nodeHidden");
+            CSS.removeClass(objectNodeBox, "nodeHidden");
         else
-            FBL.setClass(objectNodeBox, "nodeHidden");
+            CSS.setClass(objectNodeBox, "nodeHidden");
 
         if (attrChange == MODIFICATION || attrChange == ADDITION)
         {
@@ -549,7 +549,7 @@ Firebug.HTMLPanel.prototype = FBL.extend(WalkingPanel,
             if (parentNodeBox.parentNode)
                 parentNodeBox.parentNode.replaceChild(newParentNodeBox, parentNodeBox);
 
-            if (FBL.hasClass(parentNodeBox, "open"))
+            if (CSS.hasClass(parentNodeBox, "open"))
                 this.ioBox.toggleObjectBox(newParentNodeBox, true);
 
             if (this.selection && (!this.selection.parentNode || parent == this.selection))
@@ -594,7 +594,7 @@ Firebug.HTMLPanel.prototype = FBL.extend(WalkingPanel,
         }
 
         if (Firebug.highlightMutations)
-            FBL.setClassTimed(elt, type, this.context);
+            CSS.setClassTimed(elt, type, this.context);
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
@@ -851,7 +851,7 @@ Firebug.HTMLPanel.prototype = FBL.extend(WalkingPanel,
             // - click on the twisty expands/collapses the element
             // - double click on the element name expands/collapses it
             // - click on the element name selects it
-            if (!FBL.hasClass(event.target, "twisty") && !FBL.hasClass(event.target, "nodeLabel"))
+            if (!CSS.hasClass(event.target, "twisty") && !CSS.hasClass(event.target, "nodeLabel"))
                 this.toggleNode(event);
         }
         else if (Events.isAltClick(event) && event.detail == 2 && !this.editing)
@@ -875,7 +875,7 @@ Firebug.HTMLPanel.prototype = FBL.extend(WalkingPanel,
                 CSS.nonEditableTags.hasOwnProperty(node.localName);
 
             delete this.noScrollIntoView;
-            if (FBL.hasClass(event.target, "twisty"))
+            if (CSS.hasClass(event.target, "twisty"))
                 this.toggleNode(event);
         }
     },
@@ -884,7 +884,7 @@ Firebug.HTMLPanel.prototype = FBL.extend(WalkingPanel,
     {
         var node = Firebug.getRepObject(event.target);
         var box = this.ioBox.createObjectBox(node);
-        if (!FBL.hasClass(box, "open"))
+        if (!CSS.hasClass(box, "open"))
             this.ioBox.expandObject(node);
         else
             this.ioBox.contractObject(this.selection);
@@ -1370,7 +1370,7 @@ Firebug.HTMLPanel.prototype = FBL.extend(WalkingPanel,
 
     showInfoTip: function(infoTip, target, x, y)
     {
-        if (!FBL.hasClass(target, "nodeValue"))
+        if (!CSS.hasClass(target, "nodeValue"))
             return;
 
         var targetNode = Firebug.getRepObject(target);
@@ -1387,21 +1387,21 @@ Firebug.HTMLPanel.prototype = FBL.extend(WalkingPanel,
 
     getEditor: function(target, value)
     {
-        if (FBL.hasClass(target, "nodeName") || FBL.hasClass(target, "nodeValue") || FBL.hasClass(target, "nodeBracket"))
+        if (CSS.hasClass(target, "nodeName") || CSS.hasClass(target, "nodeValue") || CSS.hasClass(target, "nodeBracket"))
         {
             if (!this.attrEditor)
                 this.attrEditor = new Firebug.HTMLPanel.Editors.Attribute(this.document);
 
             return this.attrEditor;
         }
-        else if (FBL.hasClass(target, "nodeComment") || FBL.hasClass(target, "nodeCDATA"))
+        else if (CSS.hasClass(target, "nodeComment") || CSS.hasClass(target, "nodeCDATA"))
         {
             if (!this.textDataEditor)
                 this.textDataEditor = new Firebug.HTMLPanel.Editors.TextData(this.document);
 
             return this.textDataEditor;
         }
-        else if (FBL.hasClass(target, "nodeText"))
+        else if (CSS.hasClass(target, "nodeText"))
         {
             if (!this.textNodeEditor)
                 this.textNodeEditor = new Firebug.HTMLPanel.Editors.TextNode(this.document);
@@ -1801,7 +1801,7 @@ AttributeEditor.prototype = domplate(Firebug.InlineEditor.prototype,
 
         target.innerHTML = FBL.escapeForElementAttribute(value);
 
-        if (FBL.hasClass(target, "nodeName"))
+        if (CSS.hasClass(target, "nodeName"))
         {
             if (value != previousValue)
                 element.removeAttribute(previousValue);
@@ -1813,7 +1813,7 @@ AttributeEditor.prototype = domplate(Firebug.InlineEditor.prototype,
             else
                 element.removeAttribute(value);
         }
-        else if (FBL.hasClass(target, "nodeValue"))
+        else if (CSS.hasClass(target, "nodeValue"))
         {
             var attrName = FBL.getPreviousByClass(target, "nodeName").textContent;
             element.setAttribute(attrName, value);
@@ -1823,11 +1823,11 @@ AttributeEditor.prototype = domplate(Firebug.InlineEditor.prototype,
 
     advanceToNext: function(target, charCode)
     {
-        if (charCode == 61 /* '=' */ && FBL.hasClass(target, "nodeName"))
+        if (charCode == 61 /* '=' */ && CSS.hasClass(target, "nodeName"))
         {
             return true;
         }
-        else if ((charCode == 34 /* '"' */ || charCode == 39 /* ''' */) && FBL.hasClass(target, "nodeValue"))
+        else if ((charCode == 34 /* '"' */ || charCode == 39 /* ''' */) && CSS.hasClass(target, "nodeValue"))
         {
             return true;
         }
@@ -2272,7 +2272,7 @@ Firebug.HTMLModule.BreakpointRep = domplate(Firebug.Rep,
         var bpPanel = Firebug.getElementPanel(event.target);
         var context = bpPanel.context;
 
-        if (FBL.hasClass(event.target, "closeButton"))
+        if (CSS.hasClass(event.target, "closeButton"))
         {
             // Remove from list of breakpoints.
             var row = FBL.getAncestorByClass(event.target, "breakpointRow");
@@ -2285,7 +2285,7 @@ Firebug.HTMLModule.BreakpointRep = domplate(Firebug.Rep,
     onEnable: function(event)
     {
         var checkBox = event.target;
-        if (!FBL.hasClass(checkBox, "breakpointCheckbox"))
+        if (!CSS.hasClass(checkBox, "breakpointCheckbox"))
             return;
 
         var bpPanel = Firebug.getElementPanel(event.target);

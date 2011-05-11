@@ -10,10 +10,11 @@ define([
     "arch/tools",
     "firebug/sourceLink",
     "firebug/lib/stackFrame",
+    "firebug/lib/css",
     "firebug/editor",
 ],
 function(FBL, Firebug, Domplate, FirebugReps, Locale, Events, ToolsInterface, SourceLink,
-    StackFrame) {
+    StackFrame, CSS) {
 
 // ************************************************************************************************
 // Breakpoints
@@ -213,7 +214,7 @@ Firebug.Breakpoint.BreakpointRep = domplate(Firebug.Rep,
     getContextMenuItems: function(breakpoint, target)
     {
         var head = FBL.getAncestorByClass(target, "breakpointBlock");
-        var groupName = FBL.getClassValue(head, "breakpointBlock");
+        var groupName = CSS.getClassValue(head, "breakpointBlock");
 
         var items = [{label: "Remove Breakpoint", command: FBL.bindFixed(this.removeBreakpoint, this, groupName, breakpoint.href, breakpoint.lineNumber)}];
 
@@ -274,7 +275,7 @@ Firebug.Breakpoint.BreakpointRep = domplate(Firebug.Rep,
             var sourceLink =
               event.target.parentNode.getElementsByClassName("objectLink-sourceLink").item(0).repObject;
             var head = FBL.getAncestorByClass(event.target, "breakpointBlock");
-            var groupName = FBL.getClassValue(head, "breakpointBlock");
+            var groupName = CSS.getClassValue(head, "breakpointBlock");
 
             this.removeBreakpoint(groupName, sourceLink.href, sourceLink.line);
 
@@ -774,10 +775,10 @@ Firebug.Breakpoint.ConditionEditor.prototype = domplate(Firebug.InlineEditor.pro
             if (y < panel.selectedSourceBox.scrollTop)
             {
                 y = offset.y;
-                FBL.setClass(this.box, "upsideDown");
+                CSS.setClass(this.box, "upsideDown");
             }
             else
-                FBL.removeClass(this.box, "upsideDown");
+                CSS.removeClass(this.box, "upsideDown");
 
             this.box.style.top = y + "px";
             FBL.hide(this.box, false);
@@ -897,7 +898,7 @@ Firebug.Breakpoint.BreakNotification.prototype = domplate(Firebug.Rep,
         // The close button is "active" (red) if the mouse hovers over the notification
         // area except when it hovers over a button or link.
         var localName = target.localName ? target.localName.toLowerCase() : "";
-        if (FBL.hasClass(target, "notificationButton") || localName == "a")
+        if (CSS.hasClass(target, "notificationButton") || localName == "a")
             close.removeAttribute("active");
         else
             close.setAttribute("active", true);

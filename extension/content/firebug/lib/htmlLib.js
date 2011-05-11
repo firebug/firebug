@@ -2,8 +2,9 @@
 
 define([
     "firebug/lib/events",
+    "firebug/lib/css",
 ],
-function(Events) {
+function(Events, CSS) {
 
 // ********************************************************************************************* //
 // Constants
@@ -213,7 +214,7 @@ var HTMLLib =
                 else
                 {
                     var nodeBox = ioBox.openToObject(node.parentNode);
-                    if (FBL.hasClass(nodeBox, "textNodeBox"))
+                    if (CSS.hasClass(nodeBox, "textNodeBox"))
                         nodeBox = HTMLLib.getTextElementTextBox(nodeBox);
                     return nodeBox;
                 }
@@ -270,14 +271,14 @@ var HTMLLib =
             if (row)
             {
                 var trueNodeBox = FBL.getAncestorByClass(nodeBox, "nodeBox");
-                FBL.setClass(trueNodeBox,'search-selection');
+                CSS.setClass(trueNodeBox,'search-selection');
 
                 FBL.scrollIntoCenterView(row, panelNode);
                 var sel = panelNode.ownerDocument.defaultView.getSelection();
                 sel.removeAllRanges();
                 sel.addRange(this.textSearch.range);
 
-                FBL.removeClass(trueNodeBox,'search-selection');
+                CSS.removeClass(trueNodeBox,'search-selection');
                 return true;
             }
         };
@@ -759,7 +760,7 @@ var HTMLLib =
         var child = objectNodeBox.firstChild.lastChild.firstChild;
         for (; child; child = child.nextSibling)
         {
-            if (FBL.hasClass(child, "nodeAttr") && child.childNodes[1].firstChild
+            if (CSS.hasClass(child, "nodeAttr") && child.childNodes[1].firstChild
                 && child.childNodes[1].firstChild.nodeValue == attrName)
             {
                 return child;

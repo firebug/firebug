@@ -2,9 +2,10 @@
 
 define([
     "firebug/lib",
-    "firebug/firebug"
+    "firebug/firebug",
+    "firebug/lib/css",
 ],
-function(FBL, Firebug) {
+function(FBL, Firebug, CSS) {
 
 // ************************************************************************************************
 // Constants
@@ -46,9 +47,9 @@ Firebug.Search = FBL.extend(Firebug.Module,
         var searchBox = Firebug.chrome.$("fbSearchBox");
 
         if (text && text.length > 0)
-            FBL.setClass(searchBox, "fbSearchBox-attention");
+            CSS.setClass(searchBox, "fbSearchBox-attention");
         else
-            FBL.removeClass(searchBox, "fbSearchBox-attention");
+            CSS.removeClass(searchBox, "fbSearchBox-attention");
 
         searchBox.value = text;
     },
@@ -80,7 +81,7 @@ Firebug.Search = FBL.extend(Firebug.Module,
         // have to make sure to make them all visible unless the user is appending to the
         // last string, in which case it's ok to just search the set of visible nodes
         if (!panel.searchText || value == panel.searchText || value.indexOf(panel.searchText) != 0)
-            FBL.removeClass(panelNode, "searching");
+            CSS.removeClass(panelNode, "searching");
 
         // Cancel the previous search to keep typing smooth
         clearTimeout(panelNode.searchTimeout);
@@ -94,12 +95,12 @@ Firebug.Search = FBL.extend(Firebug.Module,
             if (value)
             {
                 // Hides all nodes that didn't pass the filter
-                FBL.setClass(panelNode, "searching");
+                CSS.setClass(panelNode, "searching");
             }
             else
             {
                 // Makes all nodes visible again
-                FBL.removeClass(panelNode, "searching");
+                CSS.removeClass(panelNode, "searching");
             }
 
             panel.searchText = value;
@@ -118,12 +119,12 @@ Firebug.Search = FBL.extend(Firebug.Module,
                 if (value)
                 {
                     // Hides all nodes that didn't pass the filter
-                    FBL.setClass(panelNode, "searching");
+                    CSS.setClass(panelNode, "searching");
                 }
                 else
                 {
                     // Makes all nodes visible again
-                    FBL.removeClass(panelNode, "searching");
+                    CSS.removeClass(panelNode, "searching");
                 }
 
                 panel.searchText = value;
@@ -188,7 +189,7 @@ Firebug.Search = FBL.extend(Firebug.Module,
         // Manage visibility of the search-box according to the searchable flag.
         var searchBox = Firebug.chrome.$("fbSearchBox");
         searchBox.value = "";
-        FBL.removeClass(searchBox, "fbSearchBox-attention");
+        CSS.removeClass(searchBox, "fbSearchBox-attention");
 
         if (panel)
         {

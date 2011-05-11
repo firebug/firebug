@@ -12,12 +12,13 @@ define([
     "firebug/sourceLink",
     "firebug/lib/stackFrame",
     "firebug/lib/dom",
+    "firebug/lib/css",
     "firebug/editor",
     "firebug/breakpoint",
     "firebug/search",
 ],
 function(FBL, Firebug, Domplate, FirebugReps, Locale, ToolsInterface, Events, Wrapper,
-    SourceLink, StackFrame, DOM) { with (Domplate) {
+    SourceLink, StackFrame, DOM, CSS) { with (Domplate) {
 
 // ************************************************************************************************
 // Constants
@@ -183,10 +184,10 @@ const DirTablePlate = domplate(Firebug.Rep,
         var valueCell = row.getElementsByClassName("memberValueCell").item(0);
         var object = Firebug.getRepObject(event.target);
         var target = row.lastChild.firstChild;
-        var isString = FBL.hasClass(target,"objectBox-string");
+        var isString = CSS.hasClass(target,"objectBox-string");
         var inValueCell = event.target == valueCell || event.target == target;
 
-        if (label && FBL.hasClass(row, "hasChildren") && !(isString && inValueCell))
+        if (label && CSS.hasClass(row, "hasChildren") && !(isString && inValueCell))
         {
             var row = label.parentNode.parentNode;
             this.toggleRow(row);
@@ -235,11 +236,11 @@ const DirTablePlate = domplate(Firebug.Rep,
 
         var context = domPanel.context;
         var target = row.lastChild.firstChild;
-        var isString = FBL.hasClass(target, "objectBox-string");
+        var isString = CSS.hasClass(target, "objectBox-string");
 
-        if (FBL.hasClass(row, "opened"))
+        if (CSS.hasClass(row, "opened"))
         {
-            FBL.removeClass(row, "opened");
+            CSS.removeClass(row, "opened");
 
             if (isString)
             {
@@ -279,7 +280,7 @@ const DirTablePlate = domplate(Firebug.Rep,
         }
         else
         {
-            FBL.setClass(row, "opened");
+            CSS.setClass(row, "opened");
             if (isString)
             {
                 var rowValue = row.domObject.value
@@ -344,7 +345,7 @@ const DirTablePlate = domplate(Firebug.Rep,
         Events.cancelEvent(event);
 
         var rowHeader = event.target;
-        if (!FBL.hasClass(rowHeader, "memberRowHeader"))
+        if (!CSS.hasClass(rowHeader, "memberRowHeader"))
             return;
 
         var row = FBL.getAncestorByClass(event.target, "memberRow");
@@ -927,7 +928,7 @@ Firebug.DOMBasePanel.prototype = FBL.extend(Firebug.Panel,
         if (member && member.readOnly)
             return;
 
-        if (FBL.hasClass(row, "watchNewRow"))
+        if (CSS.hasClass(row, "watchNewRow"))
         {
             if (this.context.stopped)
             {
@@ -945,7 +946,7 @@ Firebug.DOMBasePanel.prototype = FBL.extend(Firebug.Panel,
                 row.innerHTML = Locale.$STR("warning.Console must be enabled");
             }
         }
-        else if (FBL.hasClass(row, "watchRow"))
+        else if (CSS.hasClass(row, "watchRow"))
         {
             Firebug.Editor.startEditing(row, getRowName(row));
         }
@@ -977,7 +978,7 @@ Firebug.DOMBasePanel.prototype = FBL.extend(Firebug.Panel,
 
     deleteProperty: function(row)
     {
-        if (FBL.hasClass(row, "watchRow"))
+        if (CSS.hasClass(row, "watchRow"))
             this.deleteWatch(row);
         else
         {
@@ -1071,12 +1072,12 @@ Firebug.DOMBasePanel.prototype = FBL.extend(Firebug.Panel,
     highlightRow: function(row)
     {
         if (this.highlightedRow)
-            FBL.cancelClassTimed(this.highlightedRow, "jumpHighlight", this.context);
+            CSS.cancelClassTimed(this.highlightedRow, "jumpHighlight", this.context);
 
         this.highlightedRow = row;
 
         if (row)
-            FBL.setClassTimed(row, "jumpHighlight", this.context);
+            CSS.setClassTimed(row, "jumpHighlight", this.context);
     },
 
     breakOnProperty: function(row)
@@ -1434,7 +1435,7 @@ Firebug.DOMBasePanel.prototype = FBL.extend(Firebug.Panel,
             var rowObject = this.getRowObject(row);
             var rowValue = this.getRowPropertyValue(row);
 
-            var isWatch = FBL.hasClass(row, "watchRow");
+            var isWatch = CSS.hasClass(row, "watchRow");
             var isStackFrame = rowObject instanceof jsdIStackFrame;
 
             items.push(
@@ -1517,7 +1518,7 @@ DOMMainPanel.prototype = FBL.extend(Firebug.DOMBasePanel.prototype,
 
         // If the object is inside an array, look up its index
         var valueBox = row.lastChild.firstChild;
-        if (FBL.hasClass(valueBox, "objectBox-array"))
+        if (CSS.hasClass(valueBox, "objectBox-array"))
         {
             var arrayIndex = FirebugReps.Arr.getItemIndex(target);
             this.pathToAppend.push(arrayIndex);
@@ -1708,7 +1709,7 @@ Firebug.WatchPanel.prototype = FBL.extend(Firebug.DOMBasePanel.prototype,
         var toolbox = this.getToolbox();
         if (row)
         {
-            if (FBL.hasClass(row, "editing"))
+            if (CSS.hasClass(row, "editing"))
                 return;
 
             toolbox.watchRow = row;
@@ -1938,7 +1939,7 @@ DOMEditor.prototype = domplate(Firebug.InlineEditor.prototype,
         Events.dispatch(this.panel.fbListeners, 'onWatchEndEditing', [this.panel]);
         if (!row)
             this.panel.addWatch(value);
-        else if (FBL.hasClass(row, "watchRow"))
+        else if (CSS.hasClass(row, "watchRow"))
             this.panel.setWatchValue(row, value);
         else
             this.panel.setPropertyValue(row, value);
@@ -1975,7 +1976,7 @@ function isPrototype(name)
 function getWatchRowIndex(row)
 {
     var index = -1;
-    for (; row && FBL.hasClass(row, "watchRow"); row = row.previousSibling)
+    for (; row && CSS.hasClass(row, "watchRow"); row = row.previousSibling)
         ++index;
     return index;
 }
@@ -2082,7 +2083,7 @@ Firebug.DOMModule.BreakpointRep = domplate(Firebug.Rep,
     {
         Events.cancelEvent(event);
 
-        if (!FBL.hasClass(event.target, "closeButton"))
+        if (!CSS.hasClass(event.target, "closeButton"))
             return;
 
         var bpPanel = Firebug.getElementPanel(event.target);
@@ -2110,7 +2111,7 @@ Firebug.DOMModule.BreakpointRep = domplate(Firebug.Rep,
     onEnable: function(event)
     {
         var checkBox = event.target;
-        if (!FBL.hasClass(checkBox, "breakpointCheckbox"))
+        if (!CSS.hasClass(checkBox, "breakpointCheckbox"))
             return;
 
         var bpPanel = Firebug.getElementPanel(event.target);

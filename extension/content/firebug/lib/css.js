@@ -15,6 +15,160 @@ var CSS = {};
 // ********************************************************************************************* //
 // CSS API
 
+// ************************************************************************************************
+// CSS classes
+
+var classNameReCache={};
+
+CSS.hasClass = function(node, name)
+{
+    if (!node || node.nodeType != 1 || !node.className || name == '')
+        return false;
+
+    if (name.indexOf(" ") != -1)
+    {
+        var classes = name.split(" "), len = classes.length, found=false;
+        for (var i = 0; i < len; i++)
+        {
+            var cls = classes[i].trim();
+            if (cls != "")
+            {
+                if (this.hasClass(node, cls) == false)
+                    return false;
+                found = true;
+            }
+        }
+        return found;
+    }
+
+    var re;
+    if (name.indexOf("-") == -1)
+        re = classNameReCache[name] = classNameReCache[name] || new RegExp('(^|\\s)' + name + '(\\s|$)', "g");
+    else // XXXsroussey don't cache these, they are often setting values. Should be using setUserData/getUserData???
+        re = new RegExp('(^|\\s)' + name + '(\\s|$)', "g")
+    return node.className.search(re) != -1;
+};
+
+CSS.setClass = function(node, name)
+{
+    if (!node || node.nodeType != 1 || name == '')
+        return;
+
+    if (name.indexOf(" ") != -1)
+    {
+        var classes = name.split(" "), len = classes.length;
+        for (var i = 0; i < len; i++)
+        {
+            var cls = classes[i].trim();
+            if (cls != "")
+            {
+                CSS.setClass(node, cls);
+            }
+        }
+        return;
+    }
+    if (!CSS.hasClass(node, name))
+        node.className = node.className.trim() + " " + name;
+};
+
+CSS.getClassValue = function(node, name)
+{
+    var re = new RegExp(name+"-([^ ]+)");
+    var m = re.exec(node.className);
+    return m ? m[1] : "";
+};
+
+CSS.removeClass = function(node, name)
+{
+    if (!node || node.nodeType != 1 || node.className == '' || name == '')
+        return;
+
+    if (name.indexOf(" ") != -1)
+    {
+        var classes = name.split(" "), len = classes.length;
+        for (var i = 0; i < len; i++)
+        {
+            var cls = classes[i].trim();
+            if (cls != "")
+            {
+                if (CSS.hasClass(node, cls) == false)
+                    CSS.removeClass(node, cls);
+            }
+        }
+        return;
+    }
+
+    var re;
+    if (name.indexOf("-") == -1)
+        re = classNameReCache[name] = classNameReCache[name] || new RegExp('(^|\\s)' + name + '(\\s|$)', "g");
+    else // XXXsroussey don't cache these, they are often setting values. Should be using setUserData/getUserData???
+        re = new RegExp('(^|\\s)' + name + '(\\s|$)', "g")
+
+    node.className = node.className.replace(re, " ");
+
+};
+
+CSS.toggleClass = function(elt, name)
+{
+    if (CSS.hasClass(elt, name))
+        CSS.removeClass(elt, name);
+    else
+        CSS.setClass(elt, name);
+};
+
+CSS.setClassTimed = function(elt, name, context, timeout)
+{
+    if (FBTrace.DBG_HTML || FBTrace.DBG_SOURCEFILES)
+    {
+        FBTrace.sysout("css.setClassTimed elt.__setClassTimeout: "+elt.__setClassTimeout+
+                " this.isVisible(elt): "+FBL.isVisible(elt)+
+                " elt.__invisibleAtSetPoint: "+elt.__invisibleAtSetPoint);
+    }
+
+    if (!timeout)
+        timeout = 1300;
+
+    if (elt.__setClassTimeout)  // then we are already waiting to remove the class mark
+        context.clearTimeout(elt.__setClassTimeout);  // reset the timer
+    else                        // then we are not waiting to remove the mark
+        CSS.setClass(elt, name);
+
+    if (!FBL.isVisible(elt))
+    {
+        if (elt.__invisibleAtSetPoint)
+            elt.__invisibleAtSetPoint--;
+        else
+            elt.__invisibleAtSetPoint = 5;
+    }
+    else
+    {
+        delete elt.__invisibleAtSetPoint;
+    }
+
+    elt.__setClassTimeout = context.setTimeout(function()
+    {
+        delete elt.__setClassTimeout;
+
+        if (elt.__invisibleAtSetPoint)  // then user can't see it, try again later
+            CSS.setClassTimed(elt, name, context, timeout);
+        else
+        {
+            delete elt.__invisibleAtSetPoint;  // may be zero
+            CSS.removeClass(elt, name);
+        }
+    }, timeout);
+};
+
+CSS.cancelClassTimed = function(elt, name, context)
+{
+    if (elt.__setClassTimeout)
+    {
+        CSS.removeClass(elt, name);
+        context.clearTimeout(elt.__setClassTimeout);
+        delete elt.__setClassTimeout;
+    }
+};
+
 CSS.safeGetCSSRules = function(styleSheet)
 {
     try

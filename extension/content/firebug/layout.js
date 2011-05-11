@@ -6,9 +6,10 @@ define([
     "firebug/domplate",
     "firebug/lib/locale",
     "firebug/lib/events",
-    "firebug/editor"
+    "firebug/lib/css",
+    "firebug/editor",
 ],
-function(FBL, Firebug, Domplate, Locale, Events) {
+function(FBL, Firebug, Domplate, Locale, Events, CSS) {
 
 // ************************************************************************************************
 
@@ -120,12 +121,12 @@ LayoutPanel.prototype = FBL.extend(Firebug.Panel,
         var boxFrame = layoutBox ? getBoxFrame(layoutBox) : null;
 
         if (this.highlightedBox)
-            FBL.removeClass(this.highlightedBox, "highlighted");
+            CSS.removeClass(this.highlightedBox, "highlighted");
 
         this.highlightedBox = layoutBox;
 
         if (layoutBox)
-            FBL.setClass(layoutBox, "highlighted");
+            CSS.setClass(layoutBox, "highlighted");
 
         Firebug.Inspector.highlightObject(this.selection, this.context, "boxModel", boxFrame);
     },
@@ -137,7 +138,7 @@ LayoutPanel.prototype = FBL.extend(Firebug.Panel,
             return;
 
         if (this.highlightedBox)
-            FBL.removeClass(this.highlightedBox, "highlighted");
+            CSS.removeClass(this.highlightedBox, "highlighted");
 
         this.highlightedBox = null;
 
@@ -365,15 +366,15 @@ LayoutEditor.prototype = domplate(Firebug.InlineEditor.prototype,
             Firebug.Inspector.highlightObject(this.panel.selection, this.panel.context, "boxModel", boxFrame);
         }
 
-        if (FBL.hasClass(target, "layoutVerticalText"))
+        if (CSS.hasClass(target, "layoutVerticalText"))
             target.innerHTML = getVerticalText(intValue);
         else
             target.innerHTML = intValue;
 
         if (previousValue == "0" && !!value)
-            FBL.removeClass(target.parentNode, "v0");
+            CSS.removeClass(target.parentNode, "v0");
         else if (!value)
-            FBL.setClass(target.parentNode, "v0");
+            CSS.setClass(target.parentNode, "v0");
     },
 
     endEditing: function(target, value, cancel)

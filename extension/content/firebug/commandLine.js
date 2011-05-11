@@ -8,10 +8,11 @@ define([
     "firebug/lib/events",
     "firebug/lib/wrapper",
     "firebug/lib/url",
+    "firebug/lib/css",
     "firebug/console",
     "firebug/commandLineExposed"
 ],
-function(FBL, Firebug, FirebugReps, Locale, Events, Wrapper, URL) {
+function(FBL, Firebug, FirebugReps, Locale, Events, Wrapper, URL, CSS) {
 
 // ************************************************************************************************
 // Constants
@@ -2330,14 +2331,14 @@ Firebug.CommandLine.CommandHistory = function()
     this.removeCommandSelection = function()
     {
         var selected = commandsPopup.ownerDocument.getElementsByClassName("selected")[0];
-        FBL.removeClass(selected, "selected");
+        CSS.removeClass(selected, "selected");
     };
 
     this.selectCommand = function(element)
     {
         this.removeCommandSelection();
 
-        FBL.setClass(element, "selected");
+        CSS.setClass(element, "selected");
     };
 
     this.onMouseOver = function(event)

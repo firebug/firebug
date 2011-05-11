@@ -9,10 +9,12 @@ define([
     "firebug/http/requestObserver",
     "firebug/lib/stackFrame",
     "firebug/http/httpLib",
+    "firebug/lib/css",
     "firebug/netPanel",
     "firebug/errors",
 ],
-function(FBL, Firebug, Domplate, FirebugReps, Events, HttpRequestObserver, StackFrame, HTTP) {
+function(FBL, Firebug, Domplate, FirebugReps, Events, HttpRequestObserver, StackFrame,
+    HTTP, CSS) {
 
 // ************************************************************************************************
 // Constants
@@ -316,7 +318,7 @@ var SpyHttpObserver =
         if (Firebug.showXMLHttpRequests && Firebug.Console.isAlwaysEnabled())
         {
             spy.logRow = Firebug.Console.log(spy, spy.context, "spy", null, true);
-            FBL.setClass(spy.logRow, "loading");
+            CSS.setClass(spy.logRow, "loading");
         }
 
         // Notify registered listeners. The onStart event is fired once for entire XHR
@@ -711,8 +713,8 @@ function onHTTPSpyError(spy)
 
     if (spy.logRow)
     {
-        FBL.removeClass(spy.logRow, "loading");
-        FBL.setClass(spy.logRow, "error");
+        CSS.removeClass(spy.logRow, "loading");
+        CSS.setClass(spy.logRow, "error");
     }
 }
 
@@ -730,8 +732,8 @@ function onHTTPSpyAbort(spy)
 
     if (spy.logRow)
     {
-        FBL.removeClass(spy.logRow, "loading");
-        FBL.setClass(spy.logRow, "error");
+        CSS.removeClass(spy.logRow, "loading");
+        CSS.setClass(spy.logRow, "error");
     }
 
     spy.statusText = "Aborted";
@@ -847,12 +849,12 @@ Firebug.Spy.XHR = domplate(Firebug.Rep,
 
         if (Events.isLeftClick(event))
         {
-            FBL.toggleClass(logRow, "opened");
+            CSS.toggleClass(logRow, "opened");
 
             var spy = FBL.getChildByClass(logRow, "spyHead").repObject;
             var spyHeadTable = FBL.getAncestorByClass(target, "spyHeadTable");
 
-            if (FBL.hasClass(logRow, "opened"))
+            if (CSS.hasClass(logRow, "opened"))
             {
                 updateHttpSpyInfo(spy);
                 if (spyHeadTable)
@@ -966,14 +968,14 @@ function updateLogRow(spy)
     var statusBox = spy.logRow.getElementsByClassName("spyStatus").item(0);
     statusBox.textContent = Firebug.Spy.XHR.getStatus(spy);
 
-    FBL.removeClass(spy.logRow, "loading");
-    FBL.setClass(spy.logRow, "loaded");
+    CSS.removeClass(spy.logRow, "loading");
+    CSS.setClass(spy.logRow, "loaded");
 
     try
     {
         var errorRange = Math.floor(spy.xhrRequest.status/100);
         if (errorRange == 4 || errorRange == 5)
-            FBL.setClass(spy.logRow, "error");
+            CSS.setClass(spy.logRow, "error");
     }
     catch (exc)
     {
@@ -982,7 +984,7 @@ function updateLogRow(spy)
 
 function updateHttpSpyInfo(spy)
 {
-    if (!spy.logRow || !FBL.hasClass(spy.logRow, "opened"))
+    if (!spy.logRow || !CSS.hasClass(spy.logRow, "opened"))
         return;
 
     if (!spy.params)

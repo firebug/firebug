@@ -7,8 +7,9 @@ define([
     "firebug/lib/xpcom",
     "firebug/lib/url",
     "firebug/sourceLink",
+    "firebug/lib/css",
 ],
-function(FBL, Firebug, Locale, XPCOM, URL, SourceLink) {
+function(FBL, Firebug, Locale, XPCOM, URL, SourceLink, CSS) {
 
 // ********************************************************************************************* //
 // Constants
@@ -188,7 +189,7 @@ Firebug.ExternalEditors = FBL.extend(Firebug.Module,
                 this.appendContextMenuItem(popup, sourceLink.href,
                     sourceLink.line);
         }
-        else if (FBL.hasClass(target, "stackFrameLink"))
+        else if (CSS.hasClass(target, "stackFrameLink"))
             this.appendContextMenuItem(popup, target.innerHTML, target.getAttribute("lineNumber"));
     },
 

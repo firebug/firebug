@@ -12,13 +12,14 @@ define([
     "firebug/lib/url",
     "firebug/sourceLink",
     "firebug/lib/stackFrame",
+    "firebug/lib/css",
     "firebug/editorSelector",
     "firebug/infotip",
     "firebug/search",
     "firebug/sourceBox",
 ],
 function(FBL, Firebug, Firefox, FirebugReps, Domplate, ToolsInterface, Locale, Events, URL, SourceLink,
-    StackFrame) {
+    StackFrame, CSS) {
 
 // ********************************************************************************************* //
 // Constants
@@ -455,12 +456,12 @@ Firebug.ScriptPanel.prototype = FBL.extend(Firebug.SourceBoxPanel,
         if (sourceLine)
         {
             if (this.hoveredLine)
-                FBL.removeClass(this.hoveredLine.parentNode, "hovered");
+                CSS.removeClass(this.hoveredLine.parentNode, "hovered");
 
             this.hoveredLine = sourceLine;
 
             if (FBL.getAncestorByClass(sourceLine, "sourceViewport"))
-                FBL.setClass(sourceLine.parentNode, "hovered");
+                CSS.setClass(sourceLine.parentNode, "hovered");
         }
     },
 
@@ -470,7 +471,7 @@ Firebug.ScriptPanel.prototype = FBL.extend(Firebug.SourceBoxPanel,
         if (!sourceLine)
         {
             if (this.hoveredLine)
-                FBL.removeClass(this.hoveredLine.parentNode, "hovered");
+                CSS.removeClass(this.hoveredLine.parentNode, "hovered");
 
             delete this.hoveredLine;
         }
@@ -584,7 +585,7 @@ Firebug.ScriptPanel.prototype = FBL.extend(Firebug.SourceBoxPanel,
     initializeNode: function(oldPanelNode)
     {
         this.tooltip = this.document.createElement("div");
-        FBL.setClass(this.tooltip, "scriptTooltip");
+        CSS.setClass(this.tooltip, "scriptTooltip");
         this.tooltip.setAttribute('aria-live', 'polite')
         FBL.obscure(this.tooltip, true);
         this.panelNode.appendChild(this.tooltip);
@@ -1033,7 +1034,7 @@ Firebug.ScriptPanel.prototype = FBL.extend(Firebug.SourceBoxPanel,
     getTooltipObject: function(target)
     {
         // Target should be A element with class = sourceLine
-        if ( FBL.hasClass(target, 'sourceLine') )
+        if ( CSS.hasClass(target, 'sourceLine') )
         {
            return null; // TODO
         }

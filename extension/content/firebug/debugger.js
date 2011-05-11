@@ -13,10 +13,11 @@ define([
     "firebug/lib/url",
     "firebug/sourceLink",
     "firebug/lib/stackFrame",
+    "firebug/lib/css",
     "firebug/errors",
 ],
 function(FBL, Firebug, Firefox, ToolsInterface, XPCOM, FirebugReps, Locale, HttpRequestObserver,
-    Wrapper, URL, SourceLink, StackFrame) {
+    Wrapper, URL, SourceLink, StackFrame, CSS) {
 
 // ********************************************************************************************* //
 
@@ -1726,9 +1727,9 @@ Firebug.Debugger = FBL.extend(Firebug.ActivableModule,
                     if (error instanceof FBL.ErrorMessage && error.href == url && error.lineNo == lineNo)
                     {
                         if (isSet)
-                            FBL.setClass(row.firstChild, "breakForError");
+                            CSS.setClass(row.firstChild, "breakForError");
                         else
-                            FBL.removeClass(row.firstChild, "breakForError");
+                            CSS.removeClass(row.firstChild, "breakForError");
 
                         ToolsInterface.browser.dispatch( "onToggleErrorBreakpoint", [context, url, lineNo, isSet]);
                     }

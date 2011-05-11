@@ -13,8 +13,9 @@ define([
     "firebug/lib/events",
     "firebug/lib/wrapper",
     "firebug/lib/url",
+    "firebug/lib/css",
 ],
-function(FBL, Firefox, Domplate, Options, Locale, Events, Wrapper, URL) {
+function(FBL, Firefox, Domplate, Options, Locale, Events, Wrapper, URL, CSS) {
 
 // ********************************************************************************************* //
 // Constants
@@ -1093,12 +1094,12 @@ window.Firebug =
         var target = null;
         for (var child = node; child; child = child.parentNode)
         {
-            if (FBL.hasClass(child, "repTarget"))
+            if (CSS.hasClass(child, "repTarget"))
                 target = child;
 
             if (child.repObject)
             {
-                if (!target && FBL.hasClass(child, "repIgnore"))
+                if (!target && CSS.hasClass(child, "repIgnore"))
                     break;
                 else
                     return child.repObject;
@@ -1698,7 +1699,7 @@ Firebug.Panel = FBL.extend(new Firebug.Listener(),
         this.panelNode = doc.createElement("div");
         this.panelNode.ownerPanel = this;
 
-        FBL.setClass(this.panelNode, "panelNode panelNode-"+this.name+" contextUID="+context.uid);
+        CSS.setClass(this.panelNode, "panelNode panelNode-"+this.name+" contextUID="+context.uid);
 
         // Load persistent content if any.
         var persistedState = Firebug.getPanelState(this);

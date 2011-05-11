@@ -6,8 +6,9 @@ define([
     "firebug/domplate",
     "firebug/lib/locale",
     "firebug/lib/events",
+    "firebug/lib/css",
 ],
-function(FBL, Firebug, Domplate, Locale, Events) {
+function(FBL, Firebug, Domplate, Locale, Events, CSS) {
 
 // ************************************************************************************************
 // Constants
@@ -53,7 +54,7 @@ Firebug.Editor = FBL.extend(Firebug.Module,
     {
         this.stopEditing();
 
-        if (FBL.hasClass(target, "insertBefore") || FBL.hasClass(target, "insertAfter"))
+        if (CSS.hasClass(target, "insertBefore") || CSS.hasClass(target, "insertAfter"))
             return;
 
         var panel = Firebug.getElementPanel(target);
@@ -85,10 +86,10 @@ Firebug.Editor = FBL.extend(Firebug.Module,
         if (!currentEditor)
             currentEditor = getDefaultEditor(currentPanel);
 
-        FBL.setClass(panel.panelNode, "editing");
-        FBL.setClass(target, "editing");
+        CSS.setClass(panel.panelNode, "editing");
+        CSS.setClass(target, "editing");
         if (currentGroup)
-            FBL.setClass(currentGroup, "editing");
+            CSS.setClass(currentGroup, "editing");
 
         currentEditor.show(target, currentPanel, value, selectionData);
         Events.dispatch(this.fbListeners, "onBeginEditing", [currentPanel, currentEditor, target, value]);
@@ -120,10 +121,10 @@ Firebug.Editor = FBL.extend(Firebug.Module,
 
         this.detachListeners(currentEditor, currentPanel.context);
 
-        FBL.removeClass(currentPanel.panelNode, "editing");
-        FBL.removeClass(currentTarget, "editing");
+        CSS.removeClass(currentPanel.panelNode, "editing");
+        CSS.removeClass(currentTarget, "editing");
         if (currentGroup)
-            FBL.removeClass(currentGroup, "editing");
+            CSS.removeClass(currentGroup, "editing");
 
         var value = currentEditor.getValue();
         if (value == defaultValue)
@@ -238,9 +239,9 @@ Firebug.Editor = FBL.extend(Firebug.Module,
             Events.dispatch(currentPanel.fbListeners, 'onInlineEditorClose', [currentPanel, currentTarget, true]);
             this.stopEditing();
         }
-        else if (FBL.hasClass(element, "insertBefore"))
+        else if (CSS.hasClass(element, "insertBefore"))
             this.insertRow(element, "before");
-        else if (FBL.hasClass(element, "insertAfter"))
+        else if (CSS.hasClass(element, "insertAfter"))
             this.insertRow(element, "after");
         else
             this.startEditing(element);
@@ -298,7 +299,7 @@ Firebug.Editor = FBL.extend(Firebug.Module,
         if (!currentGroup)
             return;
 
-        var editable = FBL.hasClass(currentGroup, "editable")
+        var editable = CSS.hasClass(currentGroup, "editable")
             ? currentGroup
             : FBL.getNextByClass(currentGroup, "editable");
 
@@ -596,7 +597,7 @@ Firebug.InlineEditor.prototype = domplate(Firebug.BaseEditor,
 
         var classNames = target.className.split(" ");
         for (var i = 0; i < classNames.length; ++i)
-            FBL.setClass(this.box, "editor-" + classNames[i]);
+            CSS.setClass(this.box, "editor-" + classNames[i]);
 
         // remove error information
         this.box.removeAttribute('saveSuccess');
@@ -1571,7 +1572,7 @@ function getOutsider(element, group, stepper)
 function isGroupInsert(next, group)
 {
     return (!group || FBL.isAncestor(next, group))
-        && (FBL.hasClass(next, "insertBefore") || FBL.hasClass(next, "insertAfter"));
+        && (CSS.hasClass(next, "insertBefore") || CSS.hasClass(next, "insertAfter"));
 }
 
 function getNextOutsider(element, group)

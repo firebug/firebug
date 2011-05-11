@@ -6,8 +6,9 @@ define([
     "firebug/domplate",
     "firebug/lib/locale",
     "firebug/lib/events",
+    "firebug/lib/css",
 ],
-function(FBL, Firebug, Domplate, Locale, Events) {
+function(FBL, Firebug, Domplate, Locale, Events, CSS) {
 
 // ************************************************************************************************
 // Constants
@@ -101,7 +102,7 @@ Firebug.InfoTip = FBL.extend(Firebug.Module,
 
             caption.innerHTML = Locale.$STRF("Dimensions", [w, h]);
 
-            FBL.removeClass(innerBox, "infoTipLoading");
+            CSS.removeClass(innerBox, "infoTipLoading");
         },
 
         onErrorImage: function(event)
@@ -120,7 +121,7 @@ Firebug.InfoTip = FBL.extend(Firebug.Module,
                 caption.innerHTML = Locale.$STR("firebug.failedToPreviewImageURL");
 
             var innerBox = img.parentNode;
-            FBL.removeClass(innerBox, "infoTipLoading");
+            CSS.removeClass(innerBox, "infoTipLoading");
         }
     }),
 

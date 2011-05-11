@@ -8,11 +8,12 @@ define([
     "firebug/lib/locale",
     "arch/tools",
     "firebug/lib/events",
+    "firebug/lib/css",
     "firebug/profiler",
     "firebug/search",
     "firebug/errors",
 ],
-function(FBL, Firebug, Firefox, FirebugReps, Locale, ToolsInterface, Events) {
+function(FBL, Firebug, Firefox, FirebugReps, Locale, ToolsInterface, Events, CSS) {
 
 // ************************************************************************************************
 // Constants
@@ -640,7 +641,7 @@ Firebug.ConsolePanel.prototype = FBL.extend(Firebug.ActivablePanel,
     appendCollapsedGroup: function(objects, row, rep)
     {
         this.appendOpenGroup(objects, row, rep);
-        FBL.removeClass(row, "opened");
+        CSS.removeClass(row, "opened");
     },
 
     appendOpenGroup: function(objects, row, rep)
@@ -648,11 +649,11 @@ Firebug.ConsolePanel.prototype = FBL.extend(Firebug.ActivablePanel,
         if (!this.groups)
             this.groups = [];
 
-        FBL.setClass(row, "logGroup");
-        FBL.setClass(row, "opened");
+        CSS.setClass(row, "logGroup");
+        CSS.setClass(row, "opened");
 
         var innerRow = this.createRow("logRow");
-        FBL.setClass(innerRow, "logGroupLabel");
+        CSS.setClass(innerRow, "logGroupLabel");
 
         // Custom rep is used in place of group label.
         if (rep)
@@ -675,14 +676,14 @@ Firebug.ConsolePanel.prototype = FBL.extend(Firebug.ActivablePanel,
             if (Events.isLeftClick(event))
             {
                 var groupRow = event.currentTarget.parentNode;
-                if (FBL.hasClass(groupRow, "opened"))
+                if (CSS.hasClass(groupRow, "opened"))
                 {
-                    FBL.removeClass(groupRow, "opened");
+                    CSS.removeClass(groupRow, "opened");
                     event.target.setAttribute('aria-expanded', 'false');
                 }
                 else
                 {
-                    FBL.setClass(groupRow, "opened");
+                    CSS.setClass(groupRow, "opened");
                     event.target.setAttribute('aria-expanded', 'true');
                 }
             }
@@ -935,10 +936,10 @@ Firebug.ConsolePanel.prototype = FBL.extend(Firebug.ActivablePanel,
                 (filterTypes.indexOf("error") != -1 && (type == "error" || type == "errorMessage")) ||
                 (filterTypes.indexOf("warning") != -1 && (type == "warn" || type == "warningMessage")))
             {
-                FBL.removeClass(panelNode, "hideType-"+type);
+                CSS.removeClass(panelNode, "hideType-"+type);
             }
             else
-                FBL.setClass(panelNode, "hideType-"+type);
+                CSS.setClass(panelNode, "hideType-"+type);
         }
     },
 
@@ -948,7 +949,7 @@ Firebug.ConsolePanel.prototype = FBL.extend(Firebug.ActivablePanel,
         if (this.matchSet)
         {
             for (var i in this.matchSet)
-                FBL.removeClass(this.matchSet[i], "matched");
+                CSS.removeClass(this.matchSet[i], "matched");
         }
 
         if (!text)
@@ -967,7 +968,7 @@ Firebug.ConsolePanel.prototype = FBL.extend(Firebug.ActivablePanel,
         }
         for (; logRow; logRow = search.findNext())
         {
-            FBL.setClass(logRow, "matched");
+            CSS.setClass(logRow, "matched");
             this.matchSet.push(logRow);
         }
         Events.dispatch(this.fbListeners, 'onConsoleSearchMatchFound', [this, text, this.matchSet]);
@@ -1001,8 +1002,8 @@ Firebug.ConsolePanel.prototype = FBL.extend(Firebug.ActivablePanel,
     {
         if (this.searchText)
         {
-            FBL.setClass(logRow, "matching");
-            FBL.setClass(logRow, "matched");
+            CSS.setClass(logRow, "matching");
+            CSS.setClass(logRow, "matched");
 
             // Search after a delay because we must wait for a frame to be created for
             // the new logRow so that the finder will be able to locate it
@@ -1011,9 +1012,9 @@ Firebug.ConsolePanel.prototype = FBL.extend(Firebug.ActivablePanel,
                 if (this.searchFilter(this.searchText, logRow))
                     this.matchSet.push(logRow);
                 else
-                    FBL.removeClass(logRow, "matched");
+                    CSS.removeClass(logRow, "matched");
 
-                FBL.removeClass(logRow, "matching");
+                CSS.removeClass(logRow, "matching");
 
                 if (scrolledToBottom)
                     FBL.scrollToBottom(this.panelNode);
