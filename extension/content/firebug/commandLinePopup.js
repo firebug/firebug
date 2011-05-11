@@ -7,7 +7,7 @@ define([
     "firebug/lib/css",
     "firebug/lib/dom",
 ],
-function(FBL, Firebug, CommandLine, DOM) {
+function(FBL, Firebug, CommandLine, CSS, DOM) {
 
 // ************************************************************************************************
 // Constants

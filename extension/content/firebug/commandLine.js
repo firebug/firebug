@@ -9,10 +9,11 @@ define([
     "firebug/lib/wrapper",
     "firebug/lib/url",
     "firebug/lib/css",
+    "firebug/firefox/window",
     "firebug/console",
     "firebug/commandLineExposed"
 ],
-function(FBL, Firebug, FirebugReps, Locale, Events, Wrapper, URL, CSS) {
+function(FBL, Firebug, FirebugReps, Locale, Events, Wrapper, URL, CSS, WIN) {
 
 // ************************************************************************************************
 // Constants
@@ -129,8 +130,8 @@ Firebug.CommandLine = FBL.extend(Firebug.Module,
         if (!Firebug.CommandLine.isAttached(context, win))
         {
             FBTrace.sysout("commandLine: document does not have command line attached " +
-                "its too early for command line "+FBL.getWindowId(win)+" location:"+
-                FBL.safeGetWindowLocation(win), document);
+                "its too early for command line "+WIN.getWindowId(win)+" location:"+
+                WIN.safeGetWindowLocation(win), document);
 
             if (FBL.isXMLPrettyPrint(context, win))
             {
@@ -172,7 +173,7 @@ Firebug.CommandLine = FBL.extend(Firebug.Module,
         if (!consoleHandler)
         {
             FBTrace.sysout("commandLine evaluateByEventPassing no consoleHandler "+
-                FBL.safeGetWindowLocation(win));
+                WIN.safeGetWindowLocation(win));
             return;
         }
 
@@ -283,7 +284,7 @@ Firebug.CommandLine = FBL.extend(Firebug.Module,
         if (!consoleHandler)
         {
             FBTrace.sysout("commandLine evaluateByPostMessage no consoleHandler "+
-                FBL.safeGetWindowLocation(win));
+                WIN.safeGetWindowLocation(win));
             return;
         }
 
@@ -1035,7 +1036,7 @@ Firebug.CommandLine.CommandHandler = FBL.extend(Object,
         var userObjects = hosed_userObjects ? FBL.cloneArray(hosed_userObjects) : [];
 
         if (FBTrace.DBG_COMMANDLINE)
-            FBTrace.sysout("commandLine.CommandHandler for "+FBL.getWindowId(win)+": method "+
+            FBTrace.sysout("commandLine.CommandHandler for "+WIN.getWindowId(win)+": method "+
                 methodName+" userObjects:",  userObjects);
 
         var subHandler = api[methodName];
@@ -2469,7 +2470,7 @@ Firebug.CommandLine.injector =
 
             if (FBTrace.DBG_CONSOLE)
                 FBTrace.sysout("getCommandLineListener no consoleHandler for "+context.getName()+
-                    " win "+FBL.safeGetWindowLocation(win));
+                    " win "+WIN.safeGetWindowLocation(win));
         }
     },
 };

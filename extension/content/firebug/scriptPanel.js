@@ -14,13 +14,14 @@ define([
     "firebug/lib/stackFrame",
     "firebug/lib/css",
     "firebug/lib/dom",
+    "firebug/firefox/window",
     "firebug/editorSelector",
     "firebug/infotip",
     "firebug/search",
     "firebug/sourceBox",
 ],
 function(FBL, Firebug, Firefox, FirebugReps, Domplate, ToolsInterface, Locale, Events, URL, SourceLink,
-    StackFrame, CSS, DOM) {
+    StackFrame, CSS, DOM, WIN) {
 
 // ********************************************************************************************* //
 // Constants
@@ -1482,7 +1483,7 @@ Firebug.ScriptPanel.WarningRep = domplate(Firebug.Rep,
 
     onFocusDebugger: function(event)
     {
-        FBL.iterateBrowserWindows("navigator:browser", function(win)
+        WIN.iterateBrowserWindows("navigator:browser", function(win)
         {
             return win.Firebug.TabWatcher.iterateContexts(function(context)
             {

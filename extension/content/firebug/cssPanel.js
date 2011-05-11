@@ -14,13 +14,14 @@ define([
     "firebug/sourceLink",
     "firebug/lib/css",
     "firebug/lib/dom",
+    "firebug/firefox/window",
     "firebug/editor",
     "firebug/editorSelector",
     "firebug/infotip",
     "firebug/search",
 ],
 function(FBL, Firebug, Firefox, Domplate, FirebugReps, XPCOM, Locale, Events, Wrapper, URL,
-    SourceLink, CSS, DOM) { with (Domplate) {
+    SourceLink, CSS, DOM, WIN) { with (Domplate) {
 
 // ************************************************************************************************
 // Constants
@@ -502,7 +503,7 @@ Firebug.CSSModule = FBL.extend(FBL.extend(Firebug.Module, Firebug.EditorSelector
     loadedContext: function(context)
     {
         var self = this;
-        FBL.iterateWindows(context.browser.contentWindow, function(subwin)
+        WIN.iterateWindows(context.browser.contentWindow, function(subwin)
         {
             self.cleanupSheets(subwin.document, context);
         });
@@ -1277,7 +1278,7 @@ Firebug.CSSStyleSheetPanel.prototype = FBL.extend(Firebug.Panel,
                 {label: "CopyImageLocation",
                     command: FBL.bindFixed(FBL.copyToClipboard, FBL, this.infoTipObject) },
                 {label: "OpenImageInNewTab",
-                    command: FBL.bindFixed(FBL.openNewTab, FBL, this.infoTipObject) }
+                    command: FBL.bindFixed(WIN.openNewTab, FBL, this.infoTipObject) }
             );
         }
 
@@ -1337,7 +1338,7 @@ Firebug.CSSStyleSheetPanel.prototype = FBL.extend(Firebug.Panel,
     {
         if (this.infoTipType == "image")
         {
-            FBL.openNewTab(this.infoTipObject);
+            WIN.openNewTab(this.infoTipObject);
             return true;
         }
     },

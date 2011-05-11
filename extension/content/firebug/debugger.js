@@ -14,10 +14,11 @@ define([
     "firebug/sourceLink",
     "firebug/lib/stackFrame",
     "firebug/lib/css",
+    "firebug/firefox/window",
     "firebug/errors",
 ],
 function(FBL, Firebug, Firefox, ToolsInterface, XPCOM, FirebugReps, Locale, HttpRequestObserver,
-    Wrapper, URL, SourceLink, StackFrame, CSS) {
+    Wrapper, URL, SourceLink, StackFrame, CSS, WIN) {
 
 // ********************************************************************************************* //
 
@@ -966,7 +967,7 @@ Firebug.Debugger = FBL.extend(Firebug.ActivableModule,
             {
                 if (FBTrace.DBG_UI_LOOP)
                     FBTrace.sysout("debugger.stopDebugging else "+context.getName()+" "+
-                        FBL.safeGetWindowLocation(context.window));
+                        WIN.safeGetWindowLocation(context.window));
             }
         }
         catch (exc)
@@ -1019,7 +1020,7 @@ Firebug.Debugger = FBL.extend(Firebug.ActivableModule,
         {
             if (FBTrace.DBG_CONSOLE)
                 FBTrace.sysout("debugger.supportsGlobal console isAttached to "+
-                    FBL.safeGetWindowLocation(frameWin)+" in  "+context.getName());
+                    WIN.safeGetWindowLocation(frameWin)+" in  "+context.getName());
         }
 
         this.breakContext = context;
@@ -1541,9 +1542,9 @@ Firebug.Debugger = FBL.extend(Firebug.ActivableModule,
         var isInline = false;
         /* The primary purpose here was to deal with http://code.google.com/p/fbug/issues/detail?id=2912
          * This approach could be applied to inline scripts, so I'll leave the code here until we decide.
-        FBL.iterateWindows(context.window, function isInlineScriptTag(win)
+        WIN.iterateWindows(context.window, function isInlineScriptTag(win)
         {
-            var location = FBL.safeGetWindowLocation(win);
+            var location = WIN.safeGetWindowLocation(win);
             if (location === url)
             {
                 isInline = true;
@@ -2273,10 +2274,10 @@ Firebug.Debugger = FBL.extend(Firebug.ActivableModule,
             return true;
         }
 
-        FBL.iterateWindows(context.window, function updateEachWin(win)
+        WIN.iterateWindows(context.window, function updateEachWin(win)
         {
             if (FBTrace.DBG_SOURCEFILES)
-                FBTrace.sysout("updateScriptFiles FBL.iterateWindows: "+win.location.href+
+                FBTrace.sysout("updateScriptFiles WIN.iterateWindows: "+win.location.href+
                     " documentElement: "+win.document.documentElement);
 
             if (!win.document.documentElement)
@@ -2365,7 +2366,7 @@ Firebug.Debugger = FBL.extend(Firebug.ActivableModule,
         if (event.target.tagName.toLowerCase() !== "script")
             return;
         FBTrace.sysout("debugger.watchScriptAdditions ", event.target.innerHTML);
-        var location = FBL.safeGetWindowLocation(context.window);
+        var location = WIN.safeGetWindowLocation(context.window);
 
         FBL.jsd.enumerateScripts({enumerateScript: function(script)
         {
@@ -2401,7 +2402,7 @@ Firebug.Debugger = FBL.extend(Firebug.ActivableModule,
         for (var i = 0; i < scriptTags.length; i++)
         {
             var src = scriptTags[i].getAttribute("src");
-            src = src ? src : FBL.safeGetWindowLocation(win);
+            src = src ? src : WIN.safeGetWindowLocation(win);
 
             // If the src is not in the source map, try to use absolute url.
             if (!context.sourceFileMap[src])
@@ -2809,7 +2810,7 @@ function getFrameWindow(frame)
     if (frame.eval("window", "", 1, result))
     {
         var win = Wrapper.unwrapIValue(result.value, Firebug.viewChrome);
-        return FBL.getRootWindow(win);
+        return WIN.getRootWindow(win);
     }
 }
 

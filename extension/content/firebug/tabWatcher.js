@@ -9,9 +9,10 @@ define([
     "firebug/lib/events",
     "firebug/lib/url",
     "firebug/http/httpLib",
+    "firebug/firefox/window",
     "firebug/tabContext",
 ],
-function(FBL, Firebug, Firefox, XPCOM, HttpRequestObserver, Events, URL, HTTP) {
+function(FBL, Firebug, Firefox, XPCOM, HttpRequestObserver, Events, URL, HTTP, WIN) {
 
 // ************************************************************************************************
 // Constants
@@ -156,7 +157,7 @@ Firebug.TabWatcher = FBL.extend(new Firebug.Listener(),
             win.addEventListener("pageshow", onLoadWindowContent, onLoadWindowContent.capturing);
             win.addEventListener("DOMContentLoaded", onLoadWindowContent, onLoadWindowContent.capturing);
             if (FBTrace.DBG_WINDOWS)
-                FBTrace.sysout("-> tabWatcher.watchTopWindow addEventListener for pageshow, DomContentLoaded "+FBL.safeGetWindowLocation(win));
+                FBTrace.sysout("-> tabWatcher.watchTopWindow addEventListener for pageshow, DomContentLoaded "+WIN.safeGetWindowLocation(win));
         }
 
         // Dispatch watchWindow for the outer most DOM window
@@ -268,7 +269,7 @@ Firebug.TabWatcher = FBL.extend(new Firebug.Listener(),
         // page on the new context
         var persistedState = browser.persistedState;
         delete browser.persistedState;
-        var location = FBL.safeGetWindowLocation(win).toString();
+        var location = WIN.safeGetWindowLocation(win).toString();
         //if (!persistedState || persistedState.location != location)
         //    persistedState = null;
 
@@ -291,7 +292,7 @@ Firebug.TabWatcher = FBL.extend(new Firebug.Listener(),
 
         if (FBTrace.DBG_WINDOWS || FBTrace.DBG_ACTIVATION) {
             FBTrace.sysout("-> tabWatcher *** INIT *** context, id: "+context.uid+
-                ", "+context.getName()+" browser "+browser.currentURI.spec+" Firebug.chrome.window: "+Firebug.chrome.window.location+" context.window: "+FBL.safeGetWindowLocation(context.window));
+                ", "+context.getName()+" browser "+browser.currentURI.spec+" Firebug.chrome.window: "+Firebug.chrome.window.location+" context.window: "+WIN.safeGetWindowLocation(context.window));
         }
 
         Events.dispatch(this.fbListeners, "initContext", [context, persistedState]);
@@ -321,7 +322,7 @@ Firebug.TabWatcher = FBL.extend(new Firebug.Listener(),
         if (FBTrace.DBG_WINDOWS)
             FBTrace.sysout("-> watchLoadedTopWindow context: "+
                 (context?(context.uid+", loaded="+context.loaded):'undefined')+
-                ", "+FBL.safeGetWindowLocation(win)+"\n");
+                ", "+WIN.safeGetWindowLocation(win)+"\n");
 
         if (context && !context.loaded)
         {
@@ -329,7 +330,7 @@ Firebug.TabWatcher = FBL.extend(new Firebug.Listener(),
 
             if (FBTrace.DBG_WINDOWS)
                 FBTrace.sysout("-> Context *** LOADED *** in watchLoadedTopWindow, id: "+context.uid+
-                    ", uri: "+FBL.safeGetWindowLocation(win)+"\n");
+                    ", uri: "+WIN.safeGetWindowLocation(win)+"\n");
 
             Events.dispatch(this.fbListeners, "loadedContext", [context]);
 
@@ -344,9 +345,9 @@ Firebug.TabWatcher = FBL.extend(new Firebug.Listener(),
     watchWindow: function(win, context)
     {
         if (!context)
-            context = this.getContextByWindow(FBL.getRootWindow(win));
+            context = this.getContextByWindow(WIN.getRootWindow(win));
 
-        var location = FBL.safeGetWindowLocation(win);
+        var location = WIN.safeGetWindowLocation(win);
 
         // For every window we watch, prepare for unwatch. It's OK if this is called
         // more times (see 2695).
@@ -402,7 +403,7 @@ Firebug.TabWatcher = FBL.extend(new Firebug.Listener(),
         if (!context)
         {
             if (FBTrace.DBG_ERRORS)
-                FBTrace.sysout("unwatchWindow: no context for win "+FBL.safeGetWindowLocation(win));
+                FBTrace.sysout("unwatchWindow: no context for win "+WIN.safeGetWindowLocation(win));
             return;
         }
 
@@ -502,7 +503,7 @@ Firebug.TabWatcher = FBL.extend(new Firebug.Listener(),
         var persistedState = {location: context.getWindowLocation()};
         context.browser.persistedState = persistedState;  // store our state on FF browser elt
 
-        FBL.iterateWindows(context.window, function(win)
+        WIN.iterateWindows(context.window, function(win)
         {
             Events.dispatch(Firebug.TabWatcher.fbListeners, "unwatchWindow", [context, win]);
         });
@@ -531,11 +532,11 @@ Firebug.TabWatcher = FBL.extend(new Firebug.Listener(),
         if (!winIn)
             return;
 
-        var rootWindow = FBL.getRootWindow(winIn);
+        var rootWindow = WIN.getRootWindow(winIn);
 
         if (FBTrace.DBG_ROOT_WINDOW) // too much output to use INITIALIZE
-            FBTrace.sysout("winIn: "+FBL.safeGetWindowLocation(winIn).substr(0,50)+
-                " rootWindow: "+FBL.safeGetWindowLocation(rootWindow));
+            FBTrace.sysout("winIn: "+WIN.safeGetWindowLocation(winIn).substr(0,50)+
+                " rootWindow: "+WIN.safeGetWindowLocation(rootWindow));
 
         if (rootWindow)
         {
@@ -621,7 +622,7 @@ var TabWatcherUnloader =
         win.addEventListener(eventName, listener, false);
 
         if (FBTrace.DBG_WINDOWS)
-            FBTrace.sysout("-> tabWatcher.watchWindow addEventListener for " + eventName+" on "+FBL.safeGetWindowLocation(win));
+            FBTrace.sysout("-> tabWatcher.watchWindow addEventListener for " + eventName+" on "+WIN.safeGetWindowLocation(win));
 
         this.listeners.push({
             window: win,
@@ -781,7 +782,7 @@ function registerFrameListener(browser)
     {
         var win = browser.contentWindow;
         FBTrace.sysout("-> tabWatcher register FrameProgressListener for: "+
-            FBL.safeGetWindowLocation(win)+", tab: "+Firebug.getTabIdForWindow(win)+"\n");
+            WIN.safeGetWindowLocation(win)+", tab: "+Firebug.getTabIdForWindow(win)+"\n");
     }
 }
 
@@ -794,7 +795,7 @@ function unregisterFrameListener(browser)
     {
         var win = browser.contentWindow;
         FBTrace.sysout("-> tabWatcher unregister FrameProgressListener for: "+
-            FBL.safeGetWindowLocation(win)+", tab: "+Firebug.getTabIdForWindow(win)+"\n");
+            WIN.safeGetWindowLocation(win)+", tab: "+Firebug.getTabIdForWindow(win)+"\n");
     }
 }
 
@@ -851,7 +852,7 @@ var TabWatcherHttpObserver = FBL.extend(Object,
             if ( (FBTrace.DBG_ACTIVATION || FBTrace.DBG_WINDOWS) && win == win.parent)
             {
                 FBTrace.sysout("-> tabWatcher Firebug.TabWatcherHttpObserver *** START *** " +
-                    "document request for: " + request.URI.spec + " window for request is "+FBL.safeGetWindowLocation(win)+"\n");
+                    "document request for: " + request.URI.spec + " window for request is "+WIN.safeGetWindowLocation(win)+"\n");
             }
 
             if (win == win.parent)
@@ -865,7 +866,7 @@ var TabWatcherHttpObserver = FBL.extend(Object,
 
                 delete browser.FirebugLink;
 
-                if (FBL.safeGetWindowLocation(win).toString() == "about:blank") // then this page is opened in new tab or window
+                if (WIN.safeGetWindowLocation(win).toString() == "about:blank") // then this page is opened in new tab or window
                 {
                     var referer = getRefererHeader(request);
                     if (referer)
@@ -917,15 +918,15 @@ function onPageHideTopWindow(event)
         return; // ignore page hides on interior windows
 
     if (FBTrace.DBG_WINDOWS)
-        FBTrace.sysout("-> tabWatcher pagehide event.currentTarget "+FBL.safeGetWindowLocation(win), event);
+        FBTrace.sysout("-> tabWatcher pagehide event.currentTarget "+WIN.safeGetWindowLocation(win), event);
 
     // http://developer.mozilla.org/en/docs/Using_Firefox_1.5_caching#pagehide_event
-    if (event.persisted || FBL.safeGetWindowLocation(win) === aboutBlank) // then the page is cached and there cannot be an unload handler
+    if (event.persisted || WIN.safeGetWindowLocation(win) === aboutBlank) // then the page is cached and there cannot be an unload handler
     {
         //  see Bug 484710 -  add pageIgnore event for pages that are ejected from the bfcache
 
         if (FBTrace.DBG_WINDOWS)
-            FBTrace.sysout("-> tabWatcher onPageHideTopWindow for: "+FBL.safeGetWindowLocation(win)+"\n");
+            FBTrace.sysout("-> tabWatcher onPageHideTopWindow for: "+WIN.safeGetWindowLocation(win)+"\n");
         Firebug.TabWatcher.unwatchTopWindow(win);
     }
     else
@@ -933,14 +934,14 @@ function onPageHideTopWindow(event)
         // Page is not cached, there may be an unload
         win.addEventListener("unload", onUnloadTopWindow, true);
         if (FBTrace.DBG_WINDOWS)
-            FBTrace.sysout("-> tabWatcher onPageHideTopWindow set unload handler "+FBL.safeGetWindowLocation(win)+"\n");
+            FBTrace.sysout("-> tabWatcher onPageHideTopWindow set unload handler "+WIN.safeGetWindowLocation(win)+"\n");
     }
 }
 
 function evictTopWindow(win, uri)
 {
     if (FBTrace.DBG_WINDOWS)
-        FBTrace.sysout("-> tabWatcher evictTopWindow win "+FBL.safeGetWindowLocation(win)+" uri "+uri.spec);
+        FBTrace.sysout("-> tabWatcher evictTopWindow win "+WIN.safeGetWindowLocation(win)+" uri "+uri.spec);
     Firebug.TabWatcher.unwatchTopWindow(win);
 }
 
@@ -949,7 +950,7 @@ function onUnloadTopWindow(event)
     var win = event.currentTarget;
     win.removeEventListener("unload", onUnloadTopWindow, true);
     if (FBTrace.DBG_WINDOWS)
-        FBTrace.sysout("-> tabWatcher onUnloadTopWindow for: "+FBL.safeGetWindowLocation(win)+" typeof :"+typeof(win)+"\n");
+        FBTrace.sysout("-> tabWatcher onUnloadTopWindow for: "+WIN.safeGetWindowLocation(win)+" typeof :"+typeof(win)+"\n");
     Firebug.TabWatcher.unwatchTopWindow(win);
 }
 
@@ -962,7 +963,7 @@ function onLoadWindowContent(event)
     try
     {
         win.removeEventListener("pageshow", onLoadWindowContent, onLoadWindowContent.capturing);
-        if (FBTrace.DBG_WINDOWS) FBTrace.sysout("-> tabWatcher.onLoadWindowContent pageshow removeEventListener "+FBL.safeGetWindowLocation(win));
+        if (FBTrace.DBG_WINDOWS) FBTrace.sysout("-> tabWatcher.onLoadWindowContent pageshow removeEventListener "+WIN.safeGetWindowLocation(win));
     }
     catch (exc)
     {
@@ -973,7 +974,7 @@ function onLoadWindowContent(event)
     try
     {
         win.removeEventListener("DOMContentLoaded", onLoadWindowContent, onLoadWindowContent.capturing);
-        if (FBTrace.DBG_WINDOWS) FBTrace.sysout("-> tabWatcher.onLoadWindowContent DOMContentLoaded removeEventListener "+FBL.safeGetWindowLocation(win));
+        if (FBTrace.DBG_WINDOWS) FBTrace.sysout("-> tabWatcher.onLoadWindowContent DOMContentLoaded removeEventListener "+WIN.safeGetWindowLocation(win));
     }
     catch (exc)
     {
@@ -989,7 +990,7 @@ function onLoadWindowContent(event)
     try
     {
         if (FBTrace.DBG_WINDOWS)
-            FBTrace.sysout("-> tabWatcher.onLoadWindowContent:"+FBL.safeGetWindowLocation(win), win);
+            FBTrace.sysout("-> tabWatcher.onLoadWindowContent:"+WIN.safeGetWindowLocation(win), win);
         Firebug.TabWatcher.watchLoadedTopWindow(win);
     }
     catch(exc)
@@ -1006,7 +1007,7 @@ function onUnloadWindow(event)
     var win = event.currentTarget;
     var eventType = "unload";
     if (FBTrace.DBG_WINDOWS)
-        FBTrace.sysout("-> tabWatcher.onUnloadWindow for: "+FBL.safeGetWindowLocation(win) +
+        FBTrace.sysout("-> tabWatcher.onUnloadWindow for: "+WIN.safeGetWindowLocation(win) +
             " removeEventListener: "+ eventType+"\n");
     Firebug.TabWatcher.unwatchWindow(win);
 }

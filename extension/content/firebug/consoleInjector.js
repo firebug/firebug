@@ -8,11 +8,12 @@ define([
     "firebug/lib/events",
     "firebug/lib/url",
     "firebug/lib/stackFrame",
+    "firebug/firefox/window",
     "firebug/console",
     "firebug/consoleExposed",
     "firebug/errors",
 ],
-function(FBL, Firebug, FirebugReps, Locale, Events, URL, StackFrame, Console) {
+function(FBL, Firebug, FirebugReps, Locale, Events, URL, StackFrame, WIN, Console) {
 
 // ********************************************************************************************* //
 // Constants
@@ -31,7 +32,7 @@ Firebug.Console.injector =
 
         if (FBTrace.DBG_CONSOLE)
             FBTrace.sysout("Console.isAttached "+handler+" in context "+context.getName()+
-                " and win "+FBL.safeGetWindowLocation(win), handler);
+                " and win "+WIN.safeGetWindowLocation(win), handler);
 
         return handler;
     },
@@ -43,7 +44,7 @@ Firebug.Console.injector =
 
         if (FBTrace.DBG_CONSOLE)
             FBTrace.sysout("Console.attachIfNeeded found isAttached false " +
-                FBL.safeGetWindowLocation(win));
+                WIN.safeGetWindowLocation(win));
 
         this.attachConsoleInjector(context, win);
         this.addConsoleListener(context, win);
@@ -122,7 +123,7 @@ Firebug.Console.injector =
         if (FBTrace.DBG_CONSOLE)
             FBTrace.sysout("consoleInjector addConsoleListener set token "+handler.token+
                 " and  attached handler("+handler.handler_name+") to _firebugConsole in : "+
-                FBL.safeGetWindowLocation(win));
+                WIN.safeGetWindowLocation(win));
 
     },
 

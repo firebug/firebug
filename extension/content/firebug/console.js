@@ -10,11 +10,12 @@ define([
     "firebug/lib/events",
     "firebug/lib/css",
     "firebug/lib/dom",
+    "firebug/firefox/window",
     "firebug/profiler",
     "firebug/search",
     "firebug/errors",
 ],
-function(FBL, Firebug, Firefox, FirebugReps, Locale, ToolsInterface, Events, CSS, DOM) {
+function(FBL, Firebug, Firefox, FirebugReps, Locale, ToolsInterface, Events, CSS, WIN) {
 
 // ************************************************************************************************
 // Constants
@@ -270,7 +271,7 @@ Firebug.Console = FBL.extend(ActivableConsole,
 
     destroyContext: function(context, persistedState)
     {
-        FBL.iterateWindows(context.window, function detachOneConsole(win)
+        WIN.iterateWindows(context.window, function detachOneConsole(win)
         {
             Firebug.CommandLine.injector.detachCommandLine(context, win);  // remove this first since it needs the console
             Firebug.Console.injector.detachConsole(context, win);

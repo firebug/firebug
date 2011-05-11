@@ -4,8 +4,9 @@ define([
     "firebug/lib/trace",
     "firebug/lib/url",
     "firebug/lib/options",
+    "firebug/firefox/window",
 ],
-function(FBTrace, URL, Options) {
+function(FBTrace, URL, Options, WIN) {
 
 // ********************************************************************************************* //
 // Module Implementation
@@ -290,7 +291,7 @@ CSS.createStyleSheetMap = function(context)
         }
     }
 
-    FBL.iterateWindows(context.window, function(subwin)
+    WIN.iterateWindows(context.window, function(subwin)
     {
         var rootSheets = subwin.document.styleSheets;
         if (!rootSheets)
@@ -341,7 +342,7 @@ CSS.getAllStyleSheets = function(context)
         }
     }
 
-    FBL.iterateWindows(context.window, function(subwin)
+    WIN.iterateWindows(context.window, function(subwin)
     {
         var rootSheets = subwin.document.styleSheets;
         for (var i = 0; i < rootSheets.length; ++i)

@@ -12,6 +12,7 @@ define([
     "firebug/sourceLink",
     "firebug/lib/css",
     "firebug/lib/dom",
+    "firebug/firefox/window",
     "firebug/breakpoint",
     "firebug/editor",
     "firebug/infotip",
@@ -19,7 +20,7 @@ define([
     "firebug/insideOutBox",
 ],
 function(FBL, Firebug, Domplate, FirebugReps, Locale, ToolsInterface, HTMLLib, Events,
-    SourceLink, CSS, DOM) { with (Domplate) {
+    SourceLink, CSS, DOM, WIN) { with (Domplate) {
 
 // ************************************************************************************************
 // Constants
@@ -1005,7 +1006,7 @@ Firebug.HTMLPanel.prototype = FBL.extend(WalkingPanel,
             {
                 this.context.attachedMutation = true;
 
-                FBL.iterateWindows(this.context.window, FBL.bind(function(win)
+                WIN.iterateWindows(this.context.window, FBL.bind(function(win)
                 {
                     var doc = win.document;
                     doc.addEventListener("DOMAttrModified", this.onMutateAttr, false);
@@ -1038,7 +1039,7 @@ Firebug.HTMLPanel.prototype = FBL.extend(WalkingPanel,
         if (this.context.window && this.context.window != win) // then I guess we are an embedded window
         {
             var htmlPanel = this;
-            FBL.iterateWindows(this.context.window, function(subwin)
+            WIN.iterateWindows(this.context.window, function(subwin)
             {
                 if (win == subwin)
                 {
@@ -1064,7 +1065,7 @@ Firebug.HTMLPanel.prototype = FBL.extend(WalkingPanel,
         if (this.context.window && this.context.window != win) // then I guess we are an embedded window
         {
             var htmlPanel = this;
-            FBL.iterateWindows(this.context.window, function(subwin)
+            WIN.iterateWindows(this.context.window, function(subwin)
             {
                 if (win == subwin)
                 {

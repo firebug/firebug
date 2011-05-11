@@ -5,9 +5,10 @@ define([
     "arch/tools",
     "firebug/lib/events",
     "firebug/lib/url",
+    "firebug/firefox/window",
     "firebug/plugin",
 ],
-function(FBL, ToolsInterface, Events, URL) {
+function(FBL, ToolsInterface, Events, URL, WIN) {
 
 // ************************************************************************************************
 // Constants
@@ -74,7 +75,7 @@ Firebug.TabContext.prototype =
 
     getWindowLocation: function()
     {
-        return FBL.safeGetWindowLocation(this.window);
+        return WIN.safeGetWindowLocation(this.window);
     },
 
     getTitle: function()

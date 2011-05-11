@@ -10,8 +10,9 @@ define([
     "firebug/lib/wrapper",
     "firebug/lib/css",
     "firebug/lib/dom",
+    "firebug/firefox/window",
 ],
-function(FBL, Firebug, Firefox, FirebugReps, Locale, Events, Wrapper, CSS, DOM) {
+function(FBL, Firebug, Firefox, FirebugReps, Locale, Events, Wrapper, CSS, DOM, WIN) {
 
 // ************************************************************************************************
 // Constants
@@ -448,7 +449,7 @@ Firebug.Inspector = FBL.extend(Firebug.Module,
             chrome.keyCodeListen("DOWN", Events.isControl, FBL.bindFixed(this.inspectNodeBy, this, "down"), true),
         ];
 
-        FBL.iterateWindows(win, FBL.bind(function(subWin)
+        WIN.iterateWindows(win, FBL.bind(function(subWin)
         {
             if (FBTrace.DBG_INSPECT)
                 FBTrace.sysout("inspector.attacheInspectListeners to " + subWin.location +
@@ -483,7 +484,7 @@ Firebug.Inspector = FBL.extend(Firebug.Module,
             delete this.keyListeners;
         }
 
-        FBL.iterateWindows(win, FBL.bind(function(subWin)
+        WIN.iterateWindows(win, FBL.bind(function(subWin)
         {
             subWin.document.removeEventListener("mouseover", this.onInspectingMouseOver, true);
             subWin.document.removeEventListener("mousedown", this.onInspectingMouseDown, true);
@@ -497,7 +498,7 @@ Firebug.Inspector = FBL.extend(Firebug.Module,
      */
     detachClickInspectListeners: function(context)
     {
-        FBL.iterateWindows(context, FBL.bind(function(subWin)
+        WIN.iterateWindows(context, FBL.bind(function(subWin)
         {
             subWin.document.removeEventListener("click", this.onInspectingClick, true);
         }, this));
@@ -589,7 +590,7 @@ Firebug.Inspector = FBL.extend(Firebug.Module,
         var win = event.currentTarget.defaultView;
         if (win)
         {
-            win = FBL.getRootWindow(win);
+            win = WIN.getRootWindow(win);
             this.detachClickInspectListeners(win);
         }
 

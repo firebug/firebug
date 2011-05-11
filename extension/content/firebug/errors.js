@@ -6,8 +6,9 @@ define([
     "firebug/reps",
     "firebug/lib/xpcom",
     "firebug/lib/css",
+    "firebug/firefox/window",
 ],
-function(FBL, Firebug, FirebugReps, XPCOM, CSS) {
+function(FBL, Firebug, FirebugReps, XPCOM, CSS, WIN) {
 
 // **********************************************************************************************//
 // Constants
@@ -397,12 +398,12 @@ var Errors = Firebug.Errors = FBL.extend(Firebug.Module,
             var win1 = this.getErrorWindow(object);
             var win2 = errorContext ? errorContext.window : null;
 
-            win1 = FBL.getRootWindow(win1);
-            win2 = FBL.getRootWindow(win2);
+            win1 = WIN.getRootWindow(win1);
+            win2 = WIN.getRootWindow(win2);
             if (win1 && win1 != win2)
             {
-                var win1Name = FBL.safeGetWindowLocation(win1);
-                var win2Name = FBL.safeGetWindowLocation(win2);
+                var win1Name = WIN.safeGetWindowLocation(win1);
+                var win2Name = WIN.safeGetWindowLocation(win2);
                 var moreInfo =  {object: object, fromError2: win1, fromFirebug: win2};
                 FBTrace.sysout("errors.getErrorContext; ERROR wrong parent window? "+
                     win1Name+" !== "+win2Name, moreInfo);

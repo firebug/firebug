@@ -11,11 +11,12 @@ define([
     "firebug/http/httpLib",
     "firebug/lib/css",
     "firebug/lib/dom",
+    "firebug/firefox/window",
     "firebug/netPanel",
     "firebug/errors",
 ],
 function(FBL, Firebug, Domplate, FirebugReps, Events, HttpRequestObserver, StackFrame,
-    HTTP, CSS, DOM) {
+    HTTP, CSS, DOM, WIN) {
 
 // ************************************************************************************************
 // Constants
@@ -116,7 +117,7 @@ Firebug.Spy = FBL.extend(Firebug.Module,
             for (var i = 0; i < Firebug.TabWatcher.contexts.length; ++i)
             {
                 var context = Firebug.TabWatcher.contexts[i];
-                FBL.iterateWindows(context.window, function(win)
+                WIN.iterateWindows(context.window, function(win)
                 {
                     tach.apply(this, [context, win]);
                 });
@@ -136,7 +137,7 @@ Firebug.Spy = FBL.extend(Firebug.Module,
             return true;
 
         // Don't attach spy to chrome.
-        var uri = FBL.safeGetWindowLocation(win);
+        var uri = WIN.safeGetWindowLocation(win);
         if (uri && (uri.indexOf("about:") == 0 || uri.indexOf("chrome:") == 0))
             return true;
     },
@@ -895,7 +896,7 @@ Firebug.Spy.XHR = domplate(Firebug.Rep,
 
     openInTab: function(spy)
     {
-        FBL.openNewTab(spy.getURL(), spy.postText);
+        WIN.openNewTab(spy.getURL(), spy.postText);
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
@@ -908,7 +909,7 @@ Firebug.Spy.XHR = domplate(Firebug.Rep,
     browseObject: function(spy, context)
     {
         var url = spy.getURL();
-        FBL.openNewTab(url);
+        WIN.openNewTab(url);
         return true;
     },
 

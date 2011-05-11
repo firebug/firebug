@@ -17,6 +17,7 @@ define([
     "firebug/lib/stackFrame",
     "firebug/lib/css",
     "firebug/lib/dom",
+    "firebug/firefox/window",
     "firebug/breakpoint",
     "firebug/xmlViewer",
     "firebug/svgViewer",
@@ -27,7 +28,7 @@ define([
     "firebug/errors",
 ],
 function(FBL, Firebug, Firefox, Domplate, XPCOM, ToolsInterface, HttpRequestObserver, Locale,
-    Events, Options, URL, SourceLink, HTTP, StackFrame, CSS, DOM) { with (Domplate) {
+    Events, Options, URL, SourceLink, HTTP, StackFrame, CSS, DOM, WIN) { with (Domplate) {
 
 // ************************************************************************************************
 // Constants

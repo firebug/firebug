@@ -15,9 +15,10 @@ define([
     "firebug/lib/stackFrame",
     "firebug/lib/css",
     "firebug/lib/dom",
+    "firebug/firefox/window",
 ],
 function(FBL, Firebug, Domplate, XPCOM, Locale, ToolsInterface, HTMLLib, Events, Wrapper,
-    URL, SourceLink, StackFrame, CSS, DOM) { with (Domplate) {
+    URL, SourceLink, StackFrame, CSS, DOM, WIN) { with (Domplate) {
 
 // ************************************************************************************************
 // Constants
@@ -616,7 +617,7 @@ FirebugReps.NetFile = domplate(FirebugReps.Obj,
 
     browseObject: function(file, context)
     {
-        FBL.openNewTab(file.href);
+        WIN.openNewTab(file.href);
         return true;
     },
 
@@ -893,13 +894,13 @@ FirebugReps.Element = domplate(Firebug.Rep,
     {
         var tag = elt.localName.toLowerCase();
         if (tag == "script")
-            FBL.openNewTab(elt.src);
+            WIN.openNewTab(elt.src);
         else if (tag == "link")
-            FBL.openNewTab(elt.href);
+            WIN.openNewTab(elt.href);
         else if (tag == "a")
-            FBL.openNewTab(elt.href);
+            WIN.openNewTab(elt.href);
         else if (tag == "img")
-            FBL.openNewTab(elt.src);
+            WIN.openNewTab(elt.src);
 
         return true;
     },
@@ -1030,7 +1031,7 @@ FirebugReps.Document = domplate(Firebug.Rep,
 
     browseObject: function(doc, context)
     {
-        FBL.openNewTab(doc.location.href);
+        WIN.openNewTab(doc.location.href);
         return true;
     },
 
@@ -1076,7 +1077,7 @@ FirebugReps.StyleSheet = domplate(Firebug.Rep,
 
     openInTab: function(styleSheet)
     {
-        FBL.openNewTab(styleSheet.href);
+        WIN.openNewTab(styleSheet.href);
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
@@ -1090,7 +1091,7 @@ FirebugReps.StyleSheet = domplate(Firebug.Rep,
 
     browseObject: function(styleSheet, context)
     {
-        FBL.openNewTab(styleSheet.href);
+        WIN.openNewTab(styleSheet.href);
         return true;
     },
 
@@ -1150,7 +1151,7 @@ FirebugReps.Window = domplate(Firebug.Rep,
 
     browseObject: function(win, context)
     {
-        FBL.openNewTab(win.location.href);
+        WIN.openNewTab(win.location.href);
         return true;
     },
 
@@ -1305,7 +1306,7 @@ FirebugReps.SourceLink = domplate(Firebug.Rep,
 
     openInTab: function(sourceLink)
     {
-        FBL.openNewTab(sourceLink.href);
+        WIN.openNewTab(sourceLink.href);
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
@@ -1378,12 +1379,12 @@ FirebugReps.SourceLink = domplate(Firebug.Rep,
         }
 
         // Fallback is to just open the view-source window on the file
-        FBL.viewSource(sourceLink.href, sourceLink.line);
+        WIN.viewSource(sourceLink.href, sourceLink.line);
     },
 
     browseObject: function(sourceLink, context)
     {
-        FBL.openNewTab(sourceLink.href);
+        WIN.openNewTab(sourceLink.href);
         return true;
     },
 

@@ -14,8 +14,9 @@ define([
     "firebug/lib/wrapper",
     "firebug/lib/url",
     "firebug/lib/css",
+    "firebug/firefox/window",
 ],
-function(FBL, Firefox, Domplate, Options, Locale, Events, Wrapper, URL, CSS) {
+function(FBL, Firefox, Domplate, Options, Locale, Events, Wrapper, URL, CSS, WIN) {
 
 // ********************************************************************************************* //
 // Constants
@@ -885,7 +886,7 @@ window.Firebug =
             Firebug: this,
             browser: context.browser,
         };
-        var win = FBL.openWindow("Firebug", "chrome://firebug/content/firebug.xul", "", args);
+        var win = WIN.openWindow("Firebug", "chrome://firebug/content/firebug.xul", "", args);
 
         return win;
     },
@@ -1144,7 +1145,7 @@ window.Firebug =
 
     visitWebsite: function(which)
     {
-        FBL.openNewTab(firebugURLs[which]);
+        WIN.openNewTab(firebugURLs[which]);
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
@@ -1418,7 +1419,7 @@ window.Firebug =
 
     getTabForWindow: function(aWindow)  // TODO move to FBL, only used by getTabIdForWindow
     {
-        aWindow = FBL.getRootWindow(aWindow);
+        aWindow = WIN.getRootWindow(aWindow);
 
         if (!aWindow || !this.tabBrowser || !this.tabBrowser.getBrowserIndexForDocument)
             return null;
@@ -1484,7 +1485,7 @@ Firebug.getConsoleByGlobal = function getConsoleByGlobal(global)
                 return handler.console;
             }
             if (FBTrace.DBG_ERRORS)
-                FBTrace.sysout("Firebug.getConsoleByGlobal FAILS, no handler for global "+global+" "+FBL.safeGetWindowLocation(global), global);
+                FBTrace.sysout("Firebug.getConsoleByGlobal FAILS, no handler for global "+global+" "+WIN.safeGetWindowLocation(global), global);
         }
         if (FBTrace.DBG_ERRORS)
             FBTrace.sysout("Firebug.getConsoleByGlobal FAILS, no context for global "+global, global);
