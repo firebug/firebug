@@ -8,10 +8,11 @@ define([
     "firebug/lib/events",
     "firebug/lib/css",
     "firebug/lib/dom",
+    "firebug/http/httpLib",
     "firebug/domPanel",
     "firebug/reps"
 ],
-function(FBL, Firebug, Domplate, Locale, Events, CSS, DOM) {
+function(FBL, Firebug, Domplate, Locale, Events, CSS, DOM, HTTP) {
 
 // ************************************************************************************************
 
@@ -58,7 +59,7 @@ Firebug.JSONViewerModel = FBL.extend(Firebug.Module,
         // The JSON is still no there, try to parse most common cases.
         if (!file.jsonObject)
         {
-            if (this.isJSON(FBL.safeGetContentType(file.request), file.responseText))
+            if (this.isJSON(HTTP.safeGetContentType(file.request), file.responseText))
                 file.jsonObject = this.parseJSON(file);
         }
 

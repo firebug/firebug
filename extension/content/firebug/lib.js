@@ -1955,7 +1955,8 @@ this.getSourceLinkForScript = function(script, context)
         else
         {
             // no-op for detrace
-            if (FBTrace.DBG_ERRORS) FBTrace.sysout("getSourceLineForScript FAILS no scriptAnalyser for sourceFile "+sourceFile);
+            if (FBTrace.DBG_ERRORS)
+                FBTrace.sysout("getSourceLineForScript FAILS no scriptAnalyser for sourceFile "+sourceFile);
         }
     }
 };
@@ -2002,32 +2003,6 @@ this.mapAsArray = function(map)
 
     return entries;
 };
-
-this.safeGetRequestName = function(request)
-{
-    try
-    {
-        return request.name;
-    }
-    catch (exc)
-    {
-    }
-
-    return null;
-}
-
-this.safeGetContentType = function(request)
-{
-    try
-    {
-        return new String(request.contentType).toLowerCase();
-    }
-    catch (err)
-    {
-    }
-
-    return null;
-}
 
 // ************************************************************************************************
 // JavaScript Parsing

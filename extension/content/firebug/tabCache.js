@@ -175,7 +175,7 @@ Firebug.TabCacheModel = FBL.extend(Firebug.Module,
         {
             if (FBTrace.DBG_CACHE)
                 FBTrace.sysout("tabCache.registerStreamListener; " +
-                    FBL.safeGetRequestName(request));
+                    HTTP.safeGetRequestName(request));
 
             HttpResponseObserver.register(win, request, new ChannelListenerProxy(win));
         }
@@ -458,7 +458,7 @@ Firebug.TabCache.prototype = FBL.extend(Firebug.SourceCache.prototype,
         var responseText = lines ? lines.join("") : "";
 
         if (FBTrace.DBG_CACHE)
-            FBTrace.sysout("tabCache.channel.stopRequest: " + FBL.safeGetRequestName(request),
+            FBTrace.sysout("tabCache.channel.stopRequest: " + HTTP.safeGetRequestName(request),
                 responseText);
 
         Events.dispatch(Firebug.TabCacheModel.fbListeners, "onStopRequest",

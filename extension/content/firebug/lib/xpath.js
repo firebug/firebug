@@ -69,7 +69,7 @@ XPATH.cssToXPath = function(rule)
         lastRule = rule;
 
         // Trim leading whitespace
-        rule = this.trim(rule);
+        rule = FBL.trim(rule);
         if (!rule.length)
             break;
 

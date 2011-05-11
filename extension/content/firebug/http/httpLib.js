@@ -189,6 +189,32 @@ HTTP.getRequestLoadContext = function(request)
 HTTP.getRequestWebProgress = Deprecated.deprecated("Use getRequestLoadContext function",
     HTTP.getRequestLoadContext);
 
+HTTP.safeGetRequestName = function(request)
+{
+    try
+    {
+        return request.name;
+    }
+    catch (exc)
+    {
+    }
+
+    return null;
+}
+
+HTTP.safeGetContentType = function(request)
+{
+    try
+    {
+        return new String(request.contentType).toLowerCase();
+    }
+    catch (err)
+    {
+    }
+
+    return null;
+}
+
 // ********************************************************************************************* //
 
 HTTP.convertToUnicode = function(text, charset)

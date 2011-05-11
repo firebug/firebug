@@ -3901,7 +3901,7 @@ NetProgress.prototype =
             if (!file.loaded && !file.responseHeadersText)
             {
                 if (FBTrace.DBG_NET_EVENTS)
-                    FBTrace.sysout("net.events; TIMEOUT " + FBL.safeGetRequestName(request));
+                    FBTrace.sysout("net.events; TIMEOUT " + HTTP.safeGetRequestName(request));
 
                 this.endLoad(file);
 
@@ -4068,7 +4068,7 @@ NetProgress.prototype =
         this.files.push(file);
 
         if (FBTrace.DBG_NET)
-            FBTrace.sysout("net.createFile; " + FBL.safeGetRequestName(request) +
+            FBTrace.sysout("net.createFile; " + HTTP.safeGetRequestName(request) +
                 "(" + this.files.length + ")");
 
         return file;

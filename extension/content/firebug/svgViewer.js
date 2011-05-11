@@ -7,8 +7,9 @@ define([
     "firebug/lib/locale",
     "firebug/lib/xpcom",
     "firebug/lib/css",
+    "firebug/http/httpLib",
 ],
-function(FBL, Firebug, Domplate, Locale, XPCOM, CSS) {
+function(FBL, Firebug, Domplate, Locale, XPCOM, CSS, HTTP) {
 
 // ************************************************************************************************
 // Constants
@@ -52,7 +53,7 @@ Firebug.SVGViewerModel = FBL.extend(Firebug.Module,
             FBTrace.sysout("svgviewer.initTabBody", infoBox);
 
         // If the response is SVG let's display a pretty preview.
-        if (this.isSVG(FBL.safeGetContentType(file.request)))
+        if (this.isSVG(HTTP.safeGetContentType(file.request)))
         {
             Firebug.NetMonitor.NetInfoBody.appendTab(infoBox, "SVG",
                 Locale.$STR("svgviewer.tab.SVG"));

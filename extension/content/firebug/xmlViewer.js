@@ -7,8 +7,9 @@ define([
     "firebug/lib/locale",
     "firebug/lib/xpcom",
     "firebug/lib/css",
+    "firebug/http/httpLib",
 ],
-function(FBL, Firebug, Domplate, Locale, XPCOM, CSS) {
+function(FBL, Firebug, Domplate, Locale, XPCOM, CSS, HTTP) {
 
 // ************************************************************************************************
 // Constants
@@ -59,7 +60,7 @@ Firebug.XMLViewerModel = FBL.extend(Firebug.Module,
             FBTrace.sysout("xmlviewer.initTabBody", infoBox);
 
         // If the response is XML let's display a pretty preview.
-        if (this.isXML(FBL.safeGetContentType(file.request)))
+        if (this.isXML(HTTP.safeGetContentType(file.request)))
         {
             Firebug.NetMonitor.NetInfoBody.appendTab(infoBox, "XML",
                 Locale.$STR("xmlviewer.tab.XML"));

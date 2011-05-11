@@ -217,7 +217,7 @@ Firebug.Spy = FBL.extend(Firebug.Module,
             {
                 if (FBTrace.DBG_SPY)
                     FBTrace.sysout("spy.getXHR; Request is not nsIXMLHttpRequest: " +
-                        FBL.safeGetRequestName(request));
+                        HTTP.safeGetRequestName(request));
             }
         }
         finally
@@ -438,7 +438,7 @@ var SpyHttpActivityObserver = FBL.extend(Firebug.NetMonitor.NetHttpActivityObser
         if (activitySubtype == Ci.nsIHttpActivityObserver.ACTIVITY_SUBTYPE_REQUEST_HEADER)
         {
             if (FBTrace.DBG_SPY)
-                FBTrace.sysout("spy.observeXHRActivity REQUEST_HEADER " + FBL.safeGetRequestName(request));
+                FBTrace.sysout("spy.observeXHRActivity REQUEST_HEADER " + HTTP.safeGetRequestName(request));
 
             this.activeRequests.push(request);
             this.activeRequests.push(win);
@@ -449,7 +449,7 @@ var SpyHttpActivityObserver = FBL.extend(Firebug.NetMonitor.NetHttpActivityObser
         else if (activitySubtype == Ci.nsIHttpActivityObserver.ACTIVITY_SUBTYPE_TRANSACTION_CLOSE)
         {
             if (FBTrace.DBG_SPY)
-                FBTrace.sysout("spy.observeXHRActivity TRANSACTION_CLOSE " + FBL.safeGetRequestName(request));
+                FBTrace.sysout("spy.observeXHRActivity TRANSACTION_CLOSE " + HTTP.safeGetRequestName(request));
 
             var index = this.activeRequests.indexOf(request);
             this.activeRequests.splice(index, 2);
@@ -609,7 +609,7 @@ Firebug.Spy.XMLHttpRequestSpy.prototype =
     onStopRequest: function(context, request, responseText)
     {
         if (FBTrace.DBG_SPY)
-            FBTrace.sysout("spy.onStopRequest: " + FBL.safeGetRequestName(request), responseText);
+            FBTrace.sysout("spy.onStopRequest: " + HTTP.safeGetRequestName(request), responseText);
 
         if (!responseText)
             return;
@@ -1054,7 +1054,7 @@ function getResponseHeaders(spy)
     {
         if (FBTrace.DBG_SPY || FBTrace.DBG_ERRORS)
             FBTrace.sysout("spy.getResponseHeaders; EXCEPTION " +
-                FBL.safeGetRequestName(spy.request), exc);
+                HTTP.safeGetRequestName(spy.request), exc);
     }
 
     return headers;
