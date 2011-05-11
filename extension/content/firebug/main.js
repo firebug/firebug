@@ -222,11 +222,6 @@ function(FBL)
     Firebug.Options.initialize("extensions.firebug");
     FirebugChrome.waitForPanelBar(true);
 
-    // xxxHonza: the only global should be Firebug object.
-    // for extensions compatibility
-    window.FirebugReps = Firebug.Reps;
-    window.domplate = Firebug.Domplate.domplate;
-
     if (FBTrace.DBG_MODULES)
         dumpDependencyTree(depTree);
 });

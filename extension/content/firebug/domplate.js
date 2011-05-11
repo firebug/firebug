@@ -57,7 +57,8 @@ domplate.context = function(context, fn)
     domplate.topContext = lastContext;
 };
 
-Domplate.domplate = FBL.domplate = domplate;
+// xxxHonza: the only global should be Firebug object.
+Domplate.domplate = FBL.domplate = window.domplate = domplate;
 
 Domplate.TAG = function()
 {

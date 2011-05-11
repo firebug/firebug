@@ -26,7 +26,8 @@ const Ci = Components.interfaces;
 // xxxHonza: RJS
 Components.utils["import"]("resource://firebug/firebug-service.js");
 
-var FirebugReps = {};
+// xxxHonza: the only global should be Firebug object.
+var FirebugReps = window.FirebugReps = {};
 
 // ************************************************************************************************
 // Common Tags
