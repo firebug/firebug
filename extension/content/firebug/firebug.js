@@ -15,8 +15,9 @@ define([
     "firebug/lib/url",
     "firebug/lib/css",
     "firebug/firefox/window",
+    "firebug/lib/string",
 ],
-function(FBL, Firefox, Domplate, Options, Locale, Events, Wrapper, URL, CSS, WIN) {
+function(FBL, Firefox, Domplate, Options, Locale, Events, Wrapper, URL, CSS, WIN, STR) {
 
 // ********************************************************************************************* //
 // Constants
@@ -2421,13 +2422,13 @@ Firebug.MeasureBox =
 
     measureText: function(value)
     {
-        this.measureBox.innerHTML = value ? FBL.escapeForSourceLine(value) : "m";
+        this.measureBox.innerHTML = value ? STR.escapeForSourceLine(value) : "m";
         return {width: this.measureBox.offsetWidth, height: this.measureBox.offsetHeight-1};
     },
 
     measureInputText: function(value)
     {
-        value = value ? FBL.escapeForTextNode(value) : "m";
+        value = value ? STR.escapeForTextNode(value) : "m";
         if (!Firebug.showTextNodesWithWhitespace)
             value = value.replace(/\t/g,'mmmmmm').replace(/\ /g,'m');
         this.measureBox.innerHTML = value;
@@ -2541,12 +2542,12 @@ Firebug.Rep = domplate(
 
     cropString: function(text)
     {
-        return FBL.cropString(text);
+        return STR.cropString(text);
     },
 
     cropMultipleLines: function(text, limit)
     {
-        return FBL.cropMultipleLines(text, limit);
+        return STR.cropMultipleLines(text, limit);
     },
 
     toLowerCase: function(text)

@@ -15,10 +15,11 @@ define([
     "firebug/lib/stackFrame",
     "firebug/lib/css",
     "firebug/firefox/window",
+    "firebug/lib/string",
     "firebug/errors",
 ],
 function(FBL, Firebug, Firefox, ToolsInterface, XPCOM, FirebugReps, Locale, HttpRequestObserver,
-    Wrapper, URL, SourceLink, StackFrame, CSS, WIN) {
+    Wrapper, URL, SourceLink, StackFrame, CSS, WIN, STR) {
 
 // ********************************************************************************************* //
 
@@ -1494,7 +1495,7 @@ Firebug.Debugger = FBL.extend(Firebug.ActivableModule,
             var source = creatorURL + "/"+FBL.getUniqueId();
         }
 
-        var lines = FBL.splitLines(source);
+        var lines = STR.splitLines(source);
 
         var urlDescribed = this.getDynamicURL(context, URL.normalizeURL(frame.script.fileName), lines, "event");
         var url = urlDescribed.href;
@@ -1836,7 +1837,7 @@ Firebug.Debugger = FBL.extend(Firebug.ActivableModule,
         if (FBTrace.DBG_EVAL)
             FBTrace.sysout("debugger.getConstructoreExpression decompiled_lineno:"+decompiled_lineno+"\n");
 
-        var decompiled_lines = FBL.splitLines(caller_frame.script.functionSource);  // TODO place in sourceCache?
+        var decompiled_lines = STR.splitLines(caller_frame.script.functionSource);  // TODO place in sourceCache?
         if (FBTrace.DBG_EVAL)
             FBTrace.sysout("debugger.getConstructoreExpression decompiled_lines:",decompiled_lines);
 
@@ -1889,7 +1890,7 @@ Firebug.Debugger = FBL.extend(Firebug.ActivableModule,
             var mapType = PCMAP_PRETTYPRINT;
         }
 
-        var lines = FBL.splitLines(source);
+        var lines = STR.splitLines(source);
 
         if (FBTrace.DBG_EVAL)
             FBTrace.sysout("getEvalLevelSourceFile "+lines.length+ "lines, mapType:"+
@@ -2384,7 +2385,7 @@ Firebug.Debugger = FBL.extend(Firebug.ActivableModule,
         {
             var sourceFile = context.pendingScriptTagSourceFile;
             sourceFile.scriptTag = event.target;
-            sourceFile.source = FBL.splitLines(event.target.innerHTML);
+            sourceFile.source = STR.splitLines(event.target.innerHTML);
 
             var panel = context.getPanel("script", true);
             if (panel)

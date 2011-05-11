@@ -6,8 +6,9 @@ define([
     "firebug/lib/xpcom",
     "firebug/lib/url",
     "firebug/http/httpLib",
+    "firebug/lib/string",
 ],
-function(FBL, Firebug, XPCOM, URL, HTTP) {
+function(FBL, Firebug, XPCOM, URL, HTTP, STR) {
 
 // ************************************************************************************************
 // Constants
@@ -83,7 +84,7 @@ Firebug.SourceCache.prototype = FBL.extend(new Firebug.Listener(),
         {
             var src = d.encodedContent;
             var data = decodeURIComponent(src);
-            var lines = FBL.splitLines(data)
+            var lines = STR.splitLines(data)
             this.cache[url] = lines;
 
             return lines;
@@ -93,7 +94,7 @@ Firebug.SourceCache.prototype = FBL.extend(new Firebug.Listener(),
         if (j)
         {
             var src = url.substring(FBL.reJavascript.lastIndex);
-            var lines = FBL.splitLines(src);
+            var lines = STR.splitLines(src);
             this.cache[url] = lines;
 
             return lines;
@@ -155,7 +156,7 @@ Firebug.SourceCache.prototype = FBL.extend(new Firebug.Listener(),
             FBTrace.sysout("sourceCache for " + this.context.getName() + " store url=" +
                 url + ((tempURL != url) ? " -> " + tempURL : ""), text);
 
-        var lines = FBL.splitLines(text);
+        var lines = STR.splitLines(text);
         return this.storeSplitLines(tempURL, lines);
     },
 
@@ -174,7 +175,7 @@ Firebug.SourceCache.prototype = FBL.extend(new Firebug.Listener(),
         var src = FBL.getResource(url);
         if (src)
         {
-            var lines = FBL.splitLines(src);
+            var lines = STR.splitLines(src);
             this.cache[url] = lines;
 
             return lines;
@@ -269,7 +270,7 @@ Firebug.SourceCache.prototype = FBL.extend(new Firebug.Listener(),
         try
         {
             var data = HTTP.readFromStream(stream, charset);
-            var lines = FBL.splitLines(data);
+            var lines = STR.splitLines(data);
             this.cache[url] = lines;
             return lines;
         }

@@ -12,10 +12,11 @@ define([
     "firebug/lib/stackFrame",
     "firebug/lib/css",
     "firebug/lib/dom",
+    "firebug/lib/string",
     "firebug/editor",
 ],
 function(FBL, Firebug, Domplate, FirebugReps, Locale, Events, ToolsInterface, SourceLink,
-    StackFrame, CSS, DOM) {
+    StackFrame, CSS, DOM, STR) {
 
 // ************************************************************************************************
 // Breakpoints
@@ -1041,10 +1042,10 @@ Firebug.Breakpoint.BreakNotification.prototype = domplate(Firebug.Rep,
         var str = "";
 
         if (cause.prevValue)
-            str += FBL.cropString(cause.prevValue, 40) + " -> ";
+            str += STR.cropString(cause.prevValue, 40) + " -> ";
 
         if (cause.newValue)
-            str += FBL.cropString(cause.newValue, 40);
+            str += STR.cropString(cause.newValue, 40);
 
         if (!str.length)
             return "";

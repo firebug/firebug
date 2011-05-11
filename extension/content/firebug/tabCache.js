@@ -10,10 +10,11 @@ define([
     "firebug/lib/events",
     "firebug/lib/url",
     "firebug/http/httpLib",
+    "firebug/lib/string",
     "firebug/sourceCache",
 ],
 function(FBL, Firebug, XPCOM, HttpRequestObserver, HttpResponseObserver, Locale, Events,
-    URL, HTTP) {
+    URL, HTTP, STR) {
 
 // ********************************************************************************************* //
 // Constants
@@ -200,7 +201,7 @@ Firebug.TabCacheModel = FBL.extend(Firebug.Module,
         if (contentType)
             contentType = contentType.split(";")[0];
 
-        contentType = FBL.trim(contentType);
+        contentType = STR.trim(contentType);
         if (contentTypes[contentType])
             return true;
 

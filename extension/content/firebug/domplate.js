@@ -2,9 +2,10 @@
 
 // xxxHonza: remove deps on FBL.
 define([
-    "firebug/lib"
+    "firebug/lib",
+    "firebug/lib/string"
 ],
-function(FBL) {
+function(FBL, STR) {
 
 // ********************************************************************************************* //
 
@@ -208,7 +209,7 @@ DomplateTag.prototype =
 
         function __escape__(value)
         {
-            return FBL.escapeForElementAttribute(value);
+            return STR.escapeForElementAttribute(value);
         }
 
         function isArray(it)

@@ -19,6 +19,7 @@ define([
     "firebug/lib/dom",
     "firebug/firefox/window",
     "firebug/lib/search",
+    "firebug/lib/string",
     "firebug/breakpoint",
     "firebug/xmlViewer",
     "firebug/svgViewer",
@@ -29,7 +30,7 @@ define([
     "firebug/errors",
 ],
 function(FBL, Firebug, Firefox, Domplate, XPCOM, ToolsInterface, HttpRequestObserver, Locale,
-    Events, Options, URL, SourceLink, HTTP, StackFrame, CSS, DOM, WIN, Search) {
+    Events, Options, URL, SourceLink, HTTP, StackFrame, CSS, DOM, WIN, Search, STR) {
 
 with (Domplate) {
 
@@ -743,7 +744,7 @@ NetPanel.prototype = FBL.extend(Firebug.ActivablePanel,
     copyParams: function(file)
     {
         var text = Utils.getPostText(file, this.context, true);
-        var url = FBL.reEncodeURL(file, text, true);
+        var url = URL.reEncodeURL(file, text, true);
         FBL.copyToClipboard(url);
     },
 
@@ -1188,7 +1189,7 @@ NetPanel.prototype = FBL.extend(Firebug.ActivablePanel,
 
             // Show also total downloaded size for requests in progress.
             if (file.totalReceived)
-                sizeText += " (" + FBL.formatSize(file.totalReceived) + ")";
+                sizeText += " (" + STR.formatSize(file.totalReceived) + ")";
 
             sizeLabel.firstChild.nodeValue = sizeText;
 
@@ -2195,7 +2196,7 @@ Firebug.NetMonitor.NetRequestEntry = domplate(Firebug.Rep, new Firebug.Listener(
         if (file.responseStatusText)
             text += file.responseStatusText;
 
-        return text ? FBL.cropString(text) : " ";
+        return text ? STR.cropString(text) : " ";
     },
 
     getDomain: function(file)
@@ -2223,7 +2224,7 @@ Firebug.NetMonitor.NetRequestEntry = domplate(Firebug.Rep, new Firebug.Listener(
 
     formatSize: function(bytes)
     {
-        return FBL.formatSize(bytes);
+        return STR.formatSize(bytes);
     },
 
     formatTime: function(elapsed)
@@ -2461,7 +2462,7 @@ Firebug.NetMonitor.NetInfoBody = domplate(Firebug.Rep, new Firebug.Listener(),
         // The CODE (with style white-space:pre) element preserves whitespaces so they are
         // displayed the same, as they come from the server (1194).
         // In case of a long header values of post parameters the value must be wrapped (2105).
-        return FBL.wrapText(param.value, true);
+        return STR.wrapText(param.value, true);
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
@@ -2654,9 +2655,9 @@ Firebug.NetMonitor.NetInfoBody = domplate(Firebug.Rep, new Firebug.Listener(),
 
         // Insert the response into the UI.
         if (text)
-            FBL.insertWrappedText(text, responseTextBox);
+            STR.insertWrappedText(text, responseTextBox);
         else
-            FBL.insertWrappedText("", responseTextBox);
+            STR.insertWrappedText("", responseTextBox);
 
         // Append a message informing the user that the response isn't fully displayed.
         if (limitReached)
@@ -2824,7 +2825,7 @@ Firebug.NetMonitor.NetInfoPostData = domplate(Firebug.Rep, new Firebug.Listener(
         if (Utils.isURLEncodedRequest(file, context))
         {
             var lines = text.split("\n");
-            var params = FBL.parseURLEncodedText(lines[lines.length-1]);
+            var params = URL.parseURLEncodedText(lines[lines.length-1]);
             if (params)
                 this.insertParameters(parentNode, params);
         }
@@ -2949,7 +2950,7 @@ Firebug.NetMonitor.NetInfoPostData = domplate(Firebug.Rep, new Firebug.Listener(
             var m = part[0].match(/\s*name=\"(.*)\"(;|$)/);
             postData.params.push({
                 name: (m && m.length > 1) ? m[1] : "",
-                value: FBL.trim(part[1])
+                value: STR.trim(part[1])
             })
         }
 
@@ -3279,12 +3280,12 @@ Firebug.NetMonitor.SizeInfoTip = domplate(Firebug.Rep,
 
     formatSize: function(size)
     {
-        return formatSize(size.size);
+        return STR.formatSize(size.size);
     },
 
     formatNumber: function(size)
     {
-        return size.size ? ("(" + FBL.formatNumber(size.size) + ")") : "";
+        return size.size ? ("(" + STR.formatNumber(size.size) + ")") : "";
     },
 
     render: function(file, parentNode)
@@ -3518,7 +3519,7 @@ NetProgress.prototype =
         if (file)
         {
             // Parse URL params so, they are available for conditional breakpoints.
-            file.urlParams = FBL.parseURLParams(file.href);
+            file.urlParams = URL.parseURLParams(file.href);
             this.breakOnXHR(file);
         }
     },
@@ -3601,7 +3602,7 @@ NetProgress.prototype =
         {
             this.context.breakingCause = {
                 title: Locale.$STR("net.Break On XHR"),
-                message: FBL.cropString(file.href, 200),
+                message: STR.cropString(file.href, 200),
                 copyAction: FBL.bindFixed(FBL.copyToClipboard, FBL, file.href)
             };
 
@@ -3826,7 +3827,7 @@ NetProgress.prototype =
             if (FBTrace.DBG_NET_EVENTS)
                 FBTrace.sysout("net.events.receivingFile +" + time + " " +
                     getPrintableTime() + ", " +
-                    formatSize(size) + " (" + size + "B), " +
+                    STR.formatSize(size) + " (" + size + "B), " +
                     request.URI.path, file);
 
             file.endTime = time;
@@ -4737,7 +4738,7 @@ Firebug.NetMonitor.Utils =
         var limit = Firebug.netDisplayedPostBodyLimit;
         if (file.postText.length > limit && !noLimit)
         {
-            return FBL.cropString(file.postText, limit,
+            return STR.cropString(file.postText, limit,
                 "\n\n... " + Locale.$STR("net.postDataSizeLimitMessage") + " ...\n\n");
         }
 
@@ -4806,7 +4807,7 @@ Firebug.NetMonitor.Utils =
 
         // xxxHonza: is there any problem to do this in requestedFile method?
         file.method = request.requestMethod;
-        file.urlParams = FBL.parseURLParams(file.href);
+        file.urlParams = URL.parseURLParams(file.href);
 
         try
         {
@@ -5393,7 +5394,7 @@ Firebug.NetMonitor.TraceListener =
         if (index == 0)
         {
             message.text = message.text.substr("net.".length);
-            message.text = FBL.trim(message.text);
+            message.text = STR.trim(message.text);
             message.type = "DBG_NET";
         }
 
@@ -5402,7 +5403,7 @@ Firebug.NetMonitor.TraceListener =
         if (index == 0)
         {
             message.text = message.text.substr(prefix.length);
-            message.text = FBL.trim(message.text);
+            message.text = STR.trim(message.text);
             message.type = "DBG_ACTIVITYOBSERVER";
         }
     }

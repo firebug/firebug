@@ -14,12 +14,15 @@ define([
     "firebug/lib/dom",
     "firebug/lib/css",
     "firebug/lib/search",
+    "firebug/lib/string",
     "firebug/editor",
     "firebug/breakpoint",
     "firebug/searchBox",
 ],
 function(FBL, Firebug, Domplate, FirebugReps, Locale, ToolsInterface, Events, Wrapper,
-    SourceLink, StackFrame, DOM, CSS, Search) { with (Domplate) {
+    SourceLink, StackFrame, DOM, CSS, Search, STR) {
+
+with (Domplate) {
 
 // ************************************************************************************************
 // Constants
@@ -246,7 +249,7 @@ const DirTablePlate = domplate(Firebug.Rep,
             if (isString)
             {
                 var rowValue = row.domObject.value
-                row.lastChild.firstChild.textContent = '"' + FBL.cropMultipleLines(rowValue) + '"';
+                row.lastChild.firstChild.textContent = '"' + STR.cropMultipleLines(rowValue) + '"';
             }
             else
             {
@@ -964,7 +967,7 @@ Firebug.DOMBasePanel.prototype = FBL.extend(Firebug.Panel,
                 if (type == "undefined" || type == "number" || type == "boolean")
                     editValue = propValue;
                 else if (type == "string")
-                    editValue = "\"" + FBL.escapeJS(propValue) + "\"";
+                    editValue = "\"" + STR.escapeJS(propValue) + "\"";
                 else if (propValue == null)
                     editValue = "null";
                 else if (object instanceof window.Window || object instanceof jsdIStackFrame)
@@ -2171,7 +2174,7 @@ Breakpoint.prototype =
                 {
                     self.context.breakingCause = {
                         title: Locale.$STR("dom.Break On Property"),
-                        message: FBL.cropString(prop, 200),
+                        message: STR.cropString(prop, 200),
                         prevValue: oldval,
                         newValue: newval
                     };

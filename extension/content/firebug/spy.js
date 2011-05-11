@@ -12,11 +12,13 @@ define([
     "firebug/lib/css",
     "firebug/lib/dom",
     "firebug/firefox/window",
+    "firebug/lib/string",
+    "firebug/lib/url",
     "firebug/netPanel",
     "firebug/errors",
 ],
 function(FBL, Firebug, Domplate, FirebugReps, Events, HttpRequestObserver, StackFrame,
-    HTTP, CSS, DOM, WIN) {
+    HTTP, CSS, DOM, WIN, STR, URL) {
 
 // ************************************************************************************************
 // Constants
@@ -308,7 +310,7 @@ var SpyHttpObserver =
         if (method == "POST" || method == "PUT")
             spy.postText = HTTP.readPostTextFromRequest(request, context);
 
-        spy.urlParams = FBL.parseURLParams(spy.href);
+        spy.urlParams = URL.parseURLParams(spy.href);
 
         // In case of redirects there is no stack and the source link is null.
         spy.sourceLink = StackFrame.getStackSourceLink();
@@ -824,7 +826,7 @@ Firebug.Spy.XHR = domplate(Firebug.Rep,
 
     getCaption: function(spy)
     {
-        return spy.method.toUpperCase() + " " + FBL.cropString(spy.getURL(), 100);
+        return spy.method.toUpperCase() + " " + STR.cropString(spy.getURL(), 100);
     },
 
     getFullUri: function(spy)
@@ -885,7 +887,7 @@ Firebug.Spy.XHR = domplate(Firebug.Rep,
         if (!text)
             return;
 
-        var url = FBL.reEncodeURL(spy, text, true);
+        var url = URL.reEncodeURL(spy, text, true);
         FBL.copyToClipboard(url);
     },
 
@@ -990,7 +992,7 @@ function updateHttpSpyInfo(spy)
         return;
 
     if (!spy.params)
-        spy.params = FBL.parseURLParams(spy.href+"");
+        spy.params = URL.parseURLParams(spy.href+"");
 
     if (!spy.requestHeaders)
         spy.requestHeaders = getRequestHeaders(spy);
@@ -1072,7 +1074,7 @@ Firebug.Spy.TraceListener =
         if (index == 0)
         {
             message.text = message.text.substr(prefix.length);
-            message.text = FBL.trim(message.text);
+            message.text = STR.trim(message.text);
             message.type = "DBG_SPY";
         }
     }

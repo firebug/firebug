@@ -9,10 +9,11 @@ define([
     "firebug/lib/css",
     "firebug/lib/dom",
     "firebug/http/httpLib",
+    "firebug/lib/string",
     "firebug/domPanel",
     "firebug/reps"
 ],
-function(FBL, Firebug, Domplate, Locale, Events, CSS, DOM, HTTP) {
+function(FBL, Firebug, Domplate, Locale, Events, CSS, DOM, HTTP, STR) {
 
 // ************************************************************************************************
 
@@ -83,7 +84,7 @@ Firebug.JSONViewerModel = FBL.extend(Firebug.Module,
         // responses (and post data) (with "{") can be parsed unnecessarily,
         // which represents a little overhead, but this happens only if the request
         // is actually expanded by the user in the UI (Net & Console panels).
-        var responseText = data ? FBL.trimLeft(data) : null;
+        var responseText = data ? STR.trimLeft(data) : null;
         if (responseText && responseText.indexOf("{") == 0)
             return true;
 
@@ -91,7 +92,7 @@ Firebug.JSONViewerModel = FBL.extend(Firebug.Module,
             return false;
 
         contentType = contentType.split(";")[0];
-        contentType = FBL.trim(contentType);
+        contentType = STR.trim(contentType);
         return contentTypes[contentType];
     },
 

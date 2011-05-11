@@ -6,8 +6,9 @@ define([
     "firebug/commandLine",
     "firebug/lib/css",
     "firebug/lib/dom",
+    "firebug/lib/string",
 ],
-function(FBL, Firebug, CommandLine, CSS, DOM) {
+function(FBL, Firebug, CommandLine, CSS, DOM, STR) {
 
 // ************************************************************************************************
 // Constants
@@ -192,9 +193,9 @@ Firebug.CommandLine.Popup = FBL.extend(Firebug.Module,
         if (Firebug.largeCommandLine)
         {
             if (visible)
-                commandLineSmall.value = FBL.stripNewLines(commandLineLarge.value);
+                commandLineSmall.value = STR.stripNewLines(commandLineLarge.value);
             else
-                commandLineLarge.value = FBL.cleanIndentation(commandLineSmall.value);
+                commandLineLarge.value = STR.cleanIndentation(commandLineSmall.value);
         }
     },
 

@@ -14,6 +14,7 @@ define([
     "firebug/lib/dom",
     "firebug/firefox/window",
     "firebug/lib/xpath",
+    "firebug/lib/string",
     "firebug/breakpoint",
     "firebug/editor",
     "firebug/infotip",
@@ -21,7 +22,7 @@ define([
     "firebug/insideOutBox",
 ],
 function(FBL, Firebug, Domplate, FirebugReps, Locale, ToolsInterface, HTMLLib, Events,
-    SourceLink, CSS, DOM, WIN, XPATH) { with (Domplate) {
+    SourceLink, CSS, DOM, WIN, XPATH, STR) { with (Domplate) {
 
 // ************************************************************************************************
 // Constants
@@ -300,7 +301,7 @@ Firebug.HTMLPanel.prototype = FBL.extend(WalkingPanel,
         else
         {
             var text = HTMLLib.getSourceText(node);
-            lines = FBL.splitLines(text);
+            lines = STR.splitLines(text);
         }
 
         var sourceElt = new FBL.SourceText(lines, node);
@@ -422,7 +423,7 @@ Firebug.HTMLPanel.prototype = FBL.extend(WalkingPanel,
         }
 
         if (!Firebug.showFullTextNodes)
-            textValue = FBL.cropMultipleLines(textValue);
+            textValue = STR.cropMultipleLines(textValue);
 
         var parentTag = getNodeBoxTag(parentNodeBox);
         if (parentTag == Firebug.HTMLPanel.TextElement.tag)
@@ -1760,8 +1761,8 @@ TextNodeEditor.prototype = domplate(Firebug.InlineEditor.prototype,
         var node = Firebug.getRepObject(target);
         if (!node)
             return;
-        value = FBL.unescapeForTextNode(value || '');
-        target.innerHTML = FBL.escapeForTextNode(value);
+        value = STR.unescapeForTextNode(value || '');
+        target.innerHTML = STR.escapeForTextNode(value);
         if (node instanceof window.Element)
         {
             if (FBL.isElementMathML(node) || FBL.isElementSVG(node))
@@ -1802,7 +1803,7 @@ AttributeEditor.prototype = domplate(Firebug.InlineEditor.prototype,
 
         // XXXstr unescape value
 
-        target.innerHTML = FBL.escapeForElementAttribute(value);
+        target.innerHTML = STR.escapeForElementAttribute(value);
 
         if (CSS.hasClass(target, "nodeName"))
         {

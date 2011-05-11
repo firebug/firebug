@@ -8,8 +8,9 @@ define([
     "firebug/lib/events",
     "firebug/lib/css",
     "firebug/lib/dom",
+    "firebug/lib/string",
 ],
-function(FBL, Firebug, Domplate, Locale, Events, CSS, DOM) {
+function(FBL, Firebug, Domplate, Locale, Events, CSS, DOM, STR) {
 
 // ************************************************************************************************
 // Constants
@@ -575,7 +576,7 @@ Firebug.InlineEditor.prototype = domplate(Firebug.BaseEditor,
     setValue: function(value)
     {
         // It's only a one-line editor, so new lines shouldn't be allowed
-        return this.input.value = FBL.stripNewLines(value);
+        return this.input.value = STR.stripNewLines(value);
     },
 
     setSelection: function(selectionData)
@@ -1341,10 +1342,10 @@ Firebug.AutoCompleter = function(getExprOffset, getRange, evaluator, selectMode,
         {
             var hbox = completionPopup.ownerDocument.createElementNS("http://www.w3.org/1999/xhtml","div");
             pre = completionPopup.ownerDocument.createElementNS("http://www.w3.org/1999/xhtml","span");
-            pre.innerHTML = FBL.escapeForTextNode(prefix);
+            pre.innerHTML = STR.escapeForTextNode(prefix);
             var post = completionPopup.ownerDocument.createElementNS("http://www.w3.org/1999/xhtml","span");
             var completion = candidates[i].substr(preCompletion.length);
-            post.innerHTML = FBL.escapeForTextNode(completion);
+            post.innerHTML = STR.escapeForTextNode(completion);
             if (i === lastIndex)
                 post.setAttribute('selected', 'true');
 

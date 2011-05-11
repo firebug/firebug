@@ -10,9 +10,10 @@ define([
     "firebug/lib/url",
     "firebug/http/httpLib",
     "firebug/firefox/window",
+    "firebug/lib/string",
     "firebug/tabContext",
 ],
-function(FBL, Firebug, Firefox, XPCOM, HttpRequestObserver, Events, URL, HTTP, WIN) {
+function(FBL, Firebug, Firefox, XPCOM, HttpRequestObserver, Events, URL, HTTP, WIN, STR) {
 
 // ************************************************************************************************
 // Constants
@@ -1046,7 +1047,7 @@ var TraceListener =
         if (message.text.indexOf(prefix) == 0)
         {
             message.text = message.text.substr(prefix.length);
-            message.text = FBL.trim(message.text);
+            message.text = STR.trim(message.text);
             message.type = "DBG_WINDOWS";
         }
     }

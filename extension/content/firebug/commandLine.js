@@ -11,10 +11,11 @@ define([
     "firebug/lib/css",
     "firebug/firefox/window",
     "firebug/lib/xpath",
+    "firebug/lib/string",
     "firebug/console",
     "firebug/commandLineExposed"
 ],
-function(FBL, Firebug, FirebugReps, Locale, Events, Wrapper, URL, CSS, WIN, XPATH) {
+function(FBL, Firebug, FirebugReps, Locale, Events, Wrapper, URL, CSS, WIN, XPATH, STR) {
 
 // ************************************************************************************************
 // Constants
@@ -404,7 +405,7 @@ Firebug.CommandLine = FBL.extend(Firebug.Module,
             }
             else
             {
-                var shortExpr = FBL.cropString(FBL.stripNewLines(expr), 100);
+                var shortExpr = STR.cropString(STR.stripNewLines(expr), 100);
                 Firebug.Console.log(commandPrefix + " " + shortExpr, context, "command",
                     FirebugReps.Text);
             }
@@ -484,7 +485,7 @@ Firebug.CommandLine = FBL.extend(Firebug.Module,
     copyBookmarklet: function(context)
     {
         var commandLine = this.getCommandLine(context);
-        var expr = "javascript: " + FBL.stripNewLines(this.autoCompleter.getVerifiedText(commandLine));
+        var expr = "javascript: " + STR.stripNewLines(this.autoCompleter.getVerifiedText(commandLine));
         FBL.copyToClipboard(expr);
     },
 
@@ -585,9 +586,9 @@ Firebug.CommandLine = FBL.extend(Firebug.Module,
             Firebug.currentContext.commandLineText = Firebug.currentContext.commandLineText || "";
 
             if (multiLine)
-                commandLineLarge.value = FBL.cleanIndentation(Firebug.currentContext.commandLineText);
+                commandLineLarge.value = STR.cleanIndentation(Firebug.currentContext.commandLineText);
             else
-                commandLineSmall.value = FBL.stripNewLines(Firebug.currentContext.commandLineText);
+                commandLineSmall.value = STR.stripNewLines(Firebug.currentContext.commandLineText);
         }
         // else we may be hiding a panel while turning Firebug off
     },
@@ -2303,8 +2304,8 @@ Firebug.CommandLine.CommandHistory = function()
             var hbox = commandsPopup.ownerDocument.createElementNS("http://www.w3.org/1999/xhtml", "div");
 
             hbox.classList.add("commandHistoryItem");
-            var shortExpr = FBL.cropString(FBL.stripNewLines(commands[i]), 50);
-            hbox.innerHTML = FBL.escapeForTextNode(shortExpr);
+            var shortExpr = STR.cropString(STR.stripNewLines(commands[i]), 50);
+            hbox.innerHTML = STR.escapeForTextNode(shortExpr);
             hbox.value = i;
             vbox.appendChild(hbox);
 

@@ -8,8 +8,9 @@ define([
     "firebug/sourceLink",
     "firebug/lib/css",
     "firebug/lib/dom",
+    "firebug/lib/string",
 ],
-function(FBL, Firebug, ToolsInterface, Events, SourceLink, CSS, DOM) {
+function(FBL, Firebug, ToolsInterface, Events, SourceLink, CSS, DOM, STR) {
 
 // ************************************************************************************************
 // Constants
@@ -57,7 +58,7 @@ Firebug.SourceBoxDecorator.prototype =
     */
     getLineHTML: function(sourceBox, lineNo)
     {
-        var html = FBL.escapeForSourceLine(sourceBox.lines[lineNo-1]);
+        var html = STR.escapeForSourceLine(sourceBox.lines[lineNo-1]);
 
         // If the pref says so, replace tabs by corresponding number of spaces.
         if (Firebug.replaceTabs > 0)

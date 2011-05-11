@@ -10,8 +10,9 @@ define([
     "firebug/lib/stackFrame",
     "firebug/lib/dom",
     "firebug/lib/css",
+    "firebug/lib/string",
 ],
-function(FBL, Firebug, Domplate, FirebugReps, Locale, Wrapper, StackFrame, DOM, CSS) {
+function(FBL, Firebug, Domplate, FirebugReps, Locale, Wrapper, StackFrame, DOM, CSS, STR) {
 
 // ********************************************************************************************* //
 
@@ -702,7 +703,7 @@ Firebug.MemoryProfiler.ProfileCall = domplate(Firebug.Rep,
 
     getCallName: function(call)
     {
-        return FBL.cropString(StackFrame.getFunctionName(call.script, call.context), 60);
+        return STR.cropString(StackFrame.getFunctionName(call.script, call.context), 60);
     },
 
     getColumns: function(call)
@@ -715,7 +716,7 @@ Firebug.MemoryProfiler.ProfileCall = domplate(Firebug.Rep,
 
     getColumnLabel: function(call)
     {
-        return FBL.formatSize(call);
+        return STR.formatSize(call);
     },
 
     getSourceLink: function(call)

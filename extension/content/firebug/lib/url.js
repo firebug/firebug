@@ -2,8 +2,9 @@
 
 define([
     "firebug/lib/trace",
+    "firebug/lib/string",
 ],
-function (FBTrace) {
+function (FBTrace, STR) {
 
 // ********************************************************************************************* //
 // Constants
@@ -380,6 +381,106 @@ URL.normalizeURL = function(url)  // this gets called a lot, any performance imp
 URL.denormalizeURL = function(url)
 {
     return url.replace(/file:\/\/\//g, "file:/");
+};
+
+// ********************************************************************************************* //
+
+URL.parseURLParams = function(url)
+{
+    var q = url ? url.indexOf("?") : -1;
+    if (q == -1)
+        return [];
+
+    var search = url.substr(q+1);
+    var h = search.lastIndexOf("#");
+    if (h != -1)
+        search = search.substr(0, h);
+
+    if (!search)
+        return [];
+
+    return URL.parseURLEncodedText(search);
+};
+
+URL.parseURLEncodedText = function(text, noLimit)
+{
+    const maxValueLength = 25000;
+
+    var params = [];
+
+    // In case the text is empty just return the empty parameters
+    if (text == '')
+        return params;
+
+    // Unescape '+' characters that are used to encode a space.
+    // See section 2.2.in RFC 3986: http://www.ietf.org/rfc/rfc3986.txt
+    text = text.replace(/\+/g, " ");
+
+    // Unescape '&amp;' character
+    text = STR.unescapeForURL(text);
+
+    function decodeText(text)
+    {
+        try
+        {
+            return decodeURIComponent(text);
+        }
+        catch (e)
+        {
+            return decodeURIComponent(unescape(text));
+        }
+    }
+
+    var args = text.split("&");
+    for (var i = 0; i < args.length; ++i)
+    {
+        try
+        {
+            var index = args[i].indexOf("=");
+            if (index != -1)
+            {
+                var paramName = args[i].substring(0, index);
+                var paramValue = args[i].substring(index + 1);
+
+                if (paramValue.length > maxValueLength && !noLimit)
+                    paramValue = Locale.$STR("LargeData");
+
+                params.push({name: decodeText(paramName), value: decodeText(paramValue)});
+            }
+            else
+            {
+                var paramName = args[i];
+                params.push({name: decodeText(paramName), value: ""});
+            }
+        }
+        catch (e)
+        {
+            if (FBTrace.DBG_ERRORS)
+            {
+                FBTrace.sysout("parseURLEncodedText EXCEPTION ", e);
+                FBTrace.sysout("parseURLEncodedText EXCEPTION URI", args[i]);
+            }
+        }
+    }
+
+    params.sort(function(a, b) { return a.name <= b.name ? -1 : 1; });
+
+    return params;
+};
+
+URL.reEncodeURL = function(file, text, noLimit)
+{
+    var lines = text.split("\n");
+    var params = URL.parseURLEncodedText(lines[lines.length-1], noLimit);
+
+    var args = [];
+    for (var i = 0; i < params.length; ++i)
+        args.push(encodeURIComponent(params[i].name)+"="+encodeURIComponent(params[i].value));
+
+    var url = file.href;
+    url += (url.indexOf("?") == -1 ? "?" : "&") + args.join("&");
+
+    return url;
 };
 
 // ********************************************************************************************* //

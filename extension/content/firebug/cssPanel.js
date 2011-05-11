@@ -17,13 +17,16 @@ define([
     "firebug/firefox/window",
     "firebug/lib/search",
     "firebug/lib/xpath",
+    "firebug/lib/string",
     "firebug/editor",
     "firebug/editorSelector",
     "firebug/infotip",
     "firebug/searchBox",
 ],
 function(FBL, Firebug, Firefox, Domplate, FirebugReps, XPCOM, Locale, Events, Wrapper, URL,
-    SourceLink, CSS, DOM, WIN, Search, XPATH) { with (Domplate) {
+    SourceLink, CSS, DOM, WIN, Search, XPATH, STR) {
+
+with (Domplate) {
 
 // ************************************************************************************************
 // Constants
@@ -1595,13 +1598,14 @@ Firebug.CSSStyleSheetPanel.prototype = FBL.extend(Firebug.Panel,
     copyRuleDeclaration: function(cssSelector)
     {
         var props = this.getStyleDeclaration(cssSelector);
-        FBL.copyToClipboard(cssSelector.textContent + " {" + FBL.lineBreak() + "  " + props.join(lineBreak() + "  ") + lineBreak() + "}");
+        FBL.copyToClipboard(cssSelector.textContent + " {" + STR.lineBreak() + "  " +
+            props.join(STR.lineBreak() + "  ") + STR.lineBreak() + "}");
     },
 
     copyStyleDeclaration: function(cssSelector)
     {
         var props = this.getStyleDeclaration(cssSelector);
-        FBL.copyToClipboard(props.join(FBL.lineBreak()));
+        FBL.copyToClipboard(props.join(STR.lineBreak()));
     }
 });
 
@@ -2231,7 +2235,7 @@ CSSEditor.prototype = domplate(Firebug.InlineEditor.prototype,
     {
         var propValue, parsedValue, propName;
 
-        target.innerHTML = FBL.escapeForCss(value);
+        target.innerHTML = STR.escapeForCss(value);
 
         var row = DOM.getAncestorByClass(target, "cssProp");
         if (CSS.hasClass(row, "disabledStyle"))
@@ -2376,7 +2380,7 @@ CSSRuleEditor.prototype = domplate(Firebug.InlineEditor.prototype,
         if (FBTrace.DBG_CSS)
             FBTrace.sysout("CSSRuleEditor.saveEdit: '" + value + "'  '" + previousValue + "'", target);
 
-        target.innerHTML = FBL.escapeForCss(value);
+        target.innerHTML = STR.escapeForCss(value);
 
         if (value === previousValue)
             return;
@@ -2472,7 +2476,7 @@ CSSRuleEditor.prototype = domplate(Firebug.InlineEditor.prototype,
                 if (FBTrace.DBG_CSS || FBTrace.DBG_ERRORS)
                     FBTrace.sysout("CSS Insert Error: "+err, err);
 
-                target.innerHTML = FBL.escapeForCss(previousValue);
+                target.innerHTML = STR.escapeForCss(previousValue);
                 // create dummy rule to be able to recover from error
                 var insertLoc = Firebug.CSSModule.insertRule(styleSheet, 'selectorSavingError{}', ruleIndex);
                 rule = cssRules[insertLoc];

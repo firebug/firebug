@@ -17,9 +17,10 @@ define([
     "firebug/lib/dom",
     "firebug/firefox/window",
     "firebug/lib/xpath",
+    "firebug/lib/string",
 ],
 function(FBL, Firebug, Domplate, XPCOM, Locale, ToolsInterface, HTMLLib, Events, Wrapper,
-    URL, SourceLink, StackFrame, CSS, DOM, WIN, XPATH) {
+    URL, SourceLink, StackFrame, CSS, DOM, WIN, XPATH, STR) {
 
 with (Domplate) {
 
@@ -702,7 +703,7 @@ FirebugReps.Element = domplate(Firebug.Rep,
     getAttrValue: function(attr)
     {
         var limit = Firebug.displayedAttributeValueLimit;
-        return (limit > 0) ? FBL.cropString(attr.nodeValue, limit) : attr.nodeValue;
+        return (limit > 0) ? STR.cropString(attr.nodeValue, limit) : attr.nodeValue;
     },
 
     getVisible: function(elt)
@@ -756,7 +757,7 @@ FirebugReps.Element = domplate(Firebug.Rep,
         else if (elt instanceof window.HTMLScriptElement)
             value = URL.getFileName(elt.getAttribute("src"));
 
-        return value ? " " + FBL.cropMultipleLines(value, 20) : "";
+        return value ? " " + STR.cropMultipleLines(value, 20) : "";
     },
 
     attrIterator: function(elt)
@@ -821,7 +822,7 @@ FirebugReps.Element = domplate(Firebug.Rep,
         var text =  element.textContent;
         if (!Firebug.showFullTextNodes)
         {
-            text = FBL.cropString(text,50);
+            text = STR.cropString(text,50);
         }
 
         var escapeGroups=[];
@@ -845,7 +846,7 @@ FirebugReps.Element = domplate(Firebug.Rep,
             });
 
         if (escapeGroups.length)
-            return FBL.escapeGroupsForEntities(text, escapeGroups);
+            return STR.escapeGroupsForEntities(text, escapeGroups);
         else
             return [{str:text,'class':'',extra:''}];
     },
@@ -1284,7 +1285,7 @@ FirebugReps.SourceLink = domplate(Firebug.Rep,
 
         var maxWidth = Firebug.sourceLinkLabelWidth;
         if (maxWidth > 0)
-            fileName = FBL.cropString(fileName, maxWidth);
+            fileName = STR.cropString(fileName, maxWidth);
 
         if (sourceLink.instance)
             return Locale.$STRF("InstanceLine", [fileName, sourceLink.instance+1, sourceLink.line]);
@@ -1336,7 +1337,7 @@ FirebugReps.SourceLink = domplate(Firebug.Rep,
 
         text = unescape(sourceLink.href);
 
-        var lines = FBL.splitLines(text);
+        var lines = STR.splitLines(text);
         if (lines.length < 10)
             return text;
 
@@ -1494,7 +1495,7 @@ FirebugReps.StackFrame = domplate(Firebug.Rep,  // XXXjjb Since the repObject is
 
     getSourceLinkTitle: function(frame)
     {
-        var fileName = FBL.cropString(URL.getFileName(frame.href), 17);
+        var fileName = STR.cropString(URL.getFileName(frame.href), 17);
         return Locale.$STRF("Line", [fileName, frame.line]);
     },
 
@@ -1740,12 +1741,12 @@ FirebugReps.ErrorMessage = domplate(Firebug.Rep,
     getSource: function(error)
     {
         if (error.source)
-            return FBL.cropString(error.source, 80);
+            return STR.cropString(error.source, 80);
         if (error.category == "js" && error.href && error.href.indexOf("XPCSafeJSObjectWrapper") != -1)
             return "";
         var source = error.getSourceLine();
         if (source)
-            return FBL.cropString(source, 80);
+            return STR.cropString(source, 80);
         return "";
     },
 
@@ -1753,7 +1754,7 @@ FirebugReps.ErrorMessage = domplate(Firebug.Rep,
     {
         var source = error.getSourceLine();
         if (source)
-            return FBL.trim(source);
+            return STR.trim(source);
         return "";
     },
 
@@ -1829,7 +1830,7 @@ FirebugReps.ErrorMessage = domplate(Firebug.Rep,
             error.href,
             "Line " +  error.lineNo
         ];
-        FBL.copyToClipboard(message.join(FBL.lineBreak()));
+        FBL.copyToClipboard(message.join(STR.lineBreak()));
     },
 
     breakOnThisError: function(error, context)

@@ -13,9 +13,10 @@ define([
     "firebug/lib/events",
     "firebug/lib/css",
     "firebug/lib/dom",
+    "firebug/lib/string",
 ],
 function(FBL, Firebug, Domplate, FirebugReps, Locale, Wrapper, ToolsInterface, URL,
-    StackFrame, Events, CSS, DOM) {
+    StackFrame, Events, CSS, DOM, STR) {
 
 // ********************************************************************************************* //
 // Profiler
@@ -423,7 +424,7 @@ Firebug.Profiler.ProfileCall = domplate(Firebug.Rep,
 
     getCallName: function(call)
     {
-        return FBL.cropString(StackFrame.getFunctionName(call.script, call.context), 60);
+        return STR.cropString(StackFrame.getFunctionName(call.script, call.context), 60);
     },
 
     avgTime: function(call)
