@@ -11,11 +11,13 @@ define([
     "firebug/lib/css",
     "firebug/lib/dom",
     "firebug/firefox/window",
+    "firebug/lib/search",
     "firebug/profiler",
     "firebug/search",
     "firebug/errors",
 ],
-function(FBL, Firebug, Firefox, FirebugReps, Locale, ToolsInterface, Events, CSS, WIN) {
+function(FBL, Firebug, Firefox, FirebugReps, Locale, ToolsInterface, Events, CSS, DOM,
+    WIN, Search) {
 
 // ************************************************************************************************
 // Constants
@@ -960,7 +962,7 @@ Firebug.ConsolePanel.prototype = FBL.extend(Firebug.ActivablePanel,
         this.matchSet = [];
 
         function findRow(node) { return DOM.getAncestorByClass(node, "logRow"); }
-        var search = new FBL.TextSearch(this.panelNode, findRow);
+        var search = new Search.TextSearch(this.panelNode, findRow);
 
         var logRow = search.find(text);
         if (!logRow)
@@ -1037,7 +1039,7 @@ Firebug.ConsolePanel.prototype = FBL.extend(Firebug.ActivablePanel,
         var endPt = this.document.createRange();
         endPt.setStartAfter(logRow);
 
-        return FBL.finder.Find(text, searchRange, startPt, endPt) != null;
+        return Search.finder.Find(text, searchRange, startPt, endPt) != null;
     },
 
     // nsIPrefObserver

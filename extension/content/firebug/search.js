@@ -4,8 +4,9 @@ define([
     "firebug/lib",
     "firebug/firebug",
     "firebug/lib/css",
+    "firebug/lib/search",
 ],
-function(FBL, Firebug, CSS) {
+function(FBL, Firebug, CSS, Search) {
 
 // ************************************************************************************************
 // Constants
@@ -152,13 +153,13 @@ Firebug.Search = FBL.extend(Firebug.Module,
             if (Firebug.searchUseRegularExpression)
                 return new RegExp(text, caseSensitive ? "g" : "gi");
             else
-                return new FBL.LiteralRegExp(text, false, caseSensitive);
+                return new Search.LiteralRegExp(text, false, caseSensitive);
         }
         catch (err)
         {
             // The user entered an invalid regex. Duck type the regex object
             // to support literal searches when an invalid regex is entered
-            return new FBL.LiteralRegExp(text, false, caseSensitive);
+            return new Search.LiteralRegExp(text, false, caseSensitive);
         }
     },
 

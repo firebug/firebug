@@ -4,8 +4,9 @@ define([
     "firebug/lib/events",
     "firebug/lib/css",
     "firebug/lib/dom",
+    "firebug/lib/search",
 ],
-function(Events, CSS, DOM) {
+function(Events, CSS, DOM, Search) {
 
 // ********************************************************************************************* //
 // Constants
@@ -41,7 +42,7 @@ var HTMLLib =
     {
         root = root.documentElement || root;
         walker = walker || new HTMLLib.DOMWalker(root);
-        var re = new FBL.ReversibleRegExp(text, "m");
+        var re = new Search.ReversibleRegExp(text, "m");
         var matchCount = 0;
 
         /**
@@ -264,7 +265,7 @@ var HTMLLib =
                     return node.nodeType == Node.ELEMENT_NODE ? node : node.parentNode;
                 }
 
-                this.textSearch = new FBL.TextSearch(nodeBox, findRow);
+                this.textSearch = new Search.TextSearch(nodeBox, findRow);
                 row = this.textSearch.find(text, reverse, caseSensitive);
                 this.lastNodeBox = nodeBox;
             }

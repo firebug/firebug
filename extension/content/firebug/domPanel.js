@@ -13,12 +13,13 @@ define([
     "firebug/lib/stackFrame",
     "firebug/lib/dom",
     "firebug/lib/css",
+    "firebug/lib/search",
     "firebug/editor",
     "firebug/breakpoint",
     "firebug/search",
 ],
 function(FBL, Firebug, Domplate, FirebugReps, Locale, ToolsInterface, Events, Wrapper,
-    SourceLink, StackFrame, DOM, CSS) { with (Domplate) {
+    SourceLink, StackFrame, DOM, CSS, Search) { with (Domplate) {
 
 // ************************************************************************************************
 // Constants
@@ -1595,7 +1596,7 @@ DOMMainPanel.prototype = FBL.extend(Firebug.DOMBasePanel.prototype,
         else
         {
             function findRow(node) { return DOM.getAncestorByClass(node, "memberRow"); }
-            this.currentSearch = new FBL.TextSearch(this.panelNode, findRow);
+            this.currentSearch = new Search.TextSearch(this.panelNode, findRow);
             row = this.currentSearch.find(text, reverse, Firebug.Search.isCaseSensitive(text));
         }
 

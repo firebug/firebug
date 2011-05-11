@@ -18,6 +18,7 @@ define([
     "firebug/lib/css",
     "firebug/lib/dom",
     "firebug/firefox/window",
+    "firebug/lib/search",
     "firebug/breakpoint",
     "firebug/xmlViewer",
     "firebug/svgViewer",
@@ -28,7 +29,9 @@ define([
     "firebug/errors",
 ],
 function(FBL, Firebug, Firefox, Domplate, XPCOM, ToolsInterface, HttpRequestObserver, Locale,
-    Events, Options, URL, SourceLink, HTTP, StackFrame, CSS, DOM, WIN) { with (Domplate) {
+    Events, Options, URL, SourceLink, HTTP, StackFrame, CSS, DOM, WIN, Search) {
+
+with (Domplate) {
 
 // ************************************************************************************************
 // Constants
@@ -5418,8 +5421,8 @@ var NetPanelSearch = function(panel, rowFinder)
     {
         this.text = text;
 
-        FBL.finder.findBackwards = !!reverse;
-        FBL.finder.caseSensitive = !!caseSensitive;
+        Search.finder.findBackwards = !!reverse;
+        Search.finder.caseSensitive = !!caseSensitive;
 
         this.currentRow = this.getFirstRow();
         this.resetRange();
@@ -5456,7 +5459,7 @@ var NetPanelSearch = function(panel, rowFinder)
             else
                 startPt.setStart(this.currentNode, this.range.endOffset);
 
-            this.range = FBL.finder.Find(this.text, searchRange, startPt, searchRange);
+            this.range = Search.finder.Find(this.text, searchRange, startPt, searchRange);
             if (this.range)
             {
                 this.currentNode = this.range ? this.range.startContainer : null;
@@ -5473,7 +5476,7 @@ var NetPanelSearch = function(panel, rowFinder)
                 startPt.setStartAfter(this.currentNode);
         }
 
-        this.range = FBL.finder.Find(this.text, searchRange, startPt, searchRange);
+        this.range = Search.finder.Find(this.text, searchRange, startPt, searchRange);
         this.currentNode = this.range ? this.range.startContainer : null;
         return this.currentNode ? this.currentNode.parentNode : null;
     },

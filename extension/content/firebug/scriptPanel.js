@@ -15,13 +15,14 @@ define([
     "firebug/lib/css",
     "firebug/lib/dom",
     "firebug/firefox/window",
+    "firebug/lib/search",
     "firebug/editorSelector",
     "firebug/infotip",
     "firebug/search",
     "firebug/sourceBox",
 ],
 function(FBL, Firebug, Firefox, FirebugReps, Domplate, ToolsInterface, Locale, Events, URL, SourceLink,
-    StackFrame, CSS, DOM, WIN) {
+    StackFrame, CSS, DOM, WIN, Search) {
 
 // ********************************************************************************************* //
 // Constants
@@ -823,7 +824,7 @@ Firebug.ScriptPanel.prototype = FBL.extend(Firebug.SourceBoxPanel,
         }
         else
         {
-            this.currentSearch = new FBL.SourceBoxTextSearch(sourceBox);
+            this.currentSearch = new Search.SourceBoxTextSearch(sourceBox);
             lineNo = this.currentSearch.find(text, reverse, Firebug.Search.isCaseSensitive(text));
         }
 

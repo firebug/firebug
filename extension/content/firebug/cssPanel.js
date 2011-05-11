@@ -15,13 +15,14 @@ define([
     "firebug/lib/css",
     "firebug/lib/dom",
     "firebug/firefox/window",
+    "firebug/lib/search",
     "firebug/editor",
     "firebug/editorSelector",
     "firebug/infotip",
     "firebug/search",
 ],
 function(FBL, Firebug, Firefox, Domplate, FirebugReps, XPCOM, Locale, Events, Wrapper, URL,
-    SourceLink, CSS, DOM, WIN) { with (Domplate) {
+    SourceLink, CSS, DOM, WIN, Search) { with (Domplate) {
 
 // ************************************************************************************************
 // Constants
@@ -1515,7 +1516,7 @@ Firebug.CSSStyleSheetPanel.prototype = FBL.extend(Firebug.Panel,
         {
             if (this.editing)
             {
-                this.currentSearch = new FBL.TextSearch(this.stylesheetEditor.box);
+                this.currentSearch = new Search.TextSearch(this.stylesheetEditor.box);
                 row = this.currentSearch.find(text, reverse, Firebug.Search.isCaseSensitive(text));
 
                 if (row)
@@ -1535,7 +1536,7 @@ Firebug.CSSStyleSheetPanel.prototype = FBL.extend(Firebug.Panel,
             else
             {
                 function findRow(node) { return node.nodeType == 1 ? node : node.parentNode; }
-                this.currentSearch = new FBL.TextSearch(this.panelNode, findRow);
+                this.currentSearch = new Search.TextSearch(this.panelNode, findRow);
                 row = this.currentSearch.find(text, reverse, Firebug.Search.isCaseSensitive(text));
             }
         }
