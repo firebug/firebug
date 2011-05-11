@@ -1986,6 +1986,9 @@ this.getElementXML = function(element)
  */
 this.isXMLPrettyPrint = function(context, win)
 {
+    if (!context)
+        return;
+
     if (context.isXMLPrettyPrintDetected)
         return context.isXMLPrettyPrint;
 
