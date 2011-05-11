@@ -5,8 +5,9 @@ define([
     "firebug/firebug",
     "firebug/lib/xpcom",
     "firebug/lib/url",
+    "firebug/http/httpLib",
 ],
-function(FBL, Firebug, XPCOM, URL) {
+function(FBL, Firebug, XPCOM, URL, HTTP) {
 
 // ************************************************************************************************
 // Constants
@@ -238,7 +239,7 @@ Firebug.SourceCache.prototype = FBL.extend(new Firebug.Listener(),
                 var postData = getPostText(file, this.context);
                 if (postData)
                 {
-                    var postDataStream = FBL.getInputStreamFromString(postData);
+                    var postDataStream = HTTP.getInputStreamFromString(postData);
                     var uploadChannel = XPCOM.QI(channel, nsIUploadChannel);
                     uploadChannel.setUploadStream(postDataStream, "application/x-www-form-urlencoded", -1);
                     if (FBTrace.DBG_CACHE) FBTrace.sysout("sourceCache.load uploadChannel set\n");
@@ -267,7 +268,7 @@ Firebug.SourceCache.prototype = FBL.extend(new Firebug.Listener(),
 
         try
         {
-            var data = FBL.readFromStream(stream, charset);
+            var data = HTTP.readFromStream(stream, charset);
             var lines = FBL.splitLines(data);
             this.cache[url] = lines;
             return lines;
@@ -316,16 +317,16 @@ Firebug.SourceCache.prototype = FBL.extend(new Firebug.Listener(),
     }
 });
 
-// xxxHonza getPostText and FBL.readPostTextFromRequest are copied from
+// xxxHonza getPostText and HTTP.readPostTextFromRequest are copied from
 // net.js. These functions should be removed when this cache is
 // refactored due to the double-load problem.
 function getPostText(file, context)
 {
     if (!file.postText)
-        file.postText = FBL.readPostTextFromPage(file.href, context);
+        file.postText = HTTP.readPostTextFromPage(file.href, context);
 
     if (!file.postText)
-        file.postText = FBL.readPostTextFromRequest(file.request, context);
+        file.postText = HTTP.readPostTextFromRequest(file.request, context);
 
     return file.postText;
 }

@@ -8,9 +8,10 @@ define([
     "firebug/http/requestObserver",
     "firebug/lib/events",
     "firebug/lib/url",
+    "firebug/http/httpLib",
     "firebug/tabContext",
 ],
-function(FBL, Firebug, Firefox, XPCOM, HttpRequestObserver, Events, URL) {
+function(FBL, Firebug, Firefox, XPCOM, HttpRequestObserver, Events, URL, HTTP) {
 
 // ************************************************************************************************
 // Constants
@@ -671,14 +672,14 @@ var TabWatcherUnloader =
 
 // ************************************************************************************************
 
-var TabProgressListener = FBL.extend(FBL.BaseProgressListener,
+var TabProgressListener = FBL.extend(HTTP.BaseProgressListener,
 {
     onLocationChange: function(progress, request, uri)
     {
         // Only watch windows that are their own parent - e.g. not frames
         if (progress.DOMWindow.parent == progress.DOMWindow)
         {
-            var srcWindow = FBL.getWindowForRequest(request);
+            var srcWindow = HTTP.getWindowForRequest(request);
             var browser = srcWindow ? Firebug.TabWatcher.getBrowserByWindow(srcWindow) : null;
 
             if (FBTrace.DBG_WINDOWS || FBTrace.DBG_ACTIVATION)
@@ -712,14 +713,14 @@ var TabProgressListener = FBL.extend(FBL.BaseProgressListener,
             FBTrace.sysout("-> TabProgressListener.onStateChanged for: " +
                 safeGetName(request) + ", win: " + win.location.href +
                 ", content URL: " + (win.document ? win.document.URL : "no content URL") +
-                " " + FBL.getStateDescription(flag));
+                " " + HTTP.getStateDescription(flag));
         }
     }
 });
 
 // ************************************************************************************************
 
-var FrameProgressListener = FBL.extend(FBL.BaseProgressListener,
+var FrameProgressListener = FBL.extend(HTTP.BaseProgressListener,
 {
     onStateChange: function(progress, request, flag, status)
     {
@@ -729,7 +730,7 @@ var FrameProgressListener = FBL.extend(FBL.BaseProgressListener,
             FBTrace.sysout("-> FrameProgressListener.onStateChanged for: " +
                 safeGetName(request) + ", win: " + win.location.href +
                 ", content URL: " + (win.document ? win.document.URL : "no content URL") +
-                " " + FBL.getStateDescription(flag));
+                " " + HTTP.getStateDescription(flag));
         }
 
         if (flag & STATE_IS_REQUEST && flag & STATE_START)
@@ -832,7 +833,7 @@ var TabWatcherHttpObserver = FBL.extend(Object,
 
     onModifyRequest: function(request)
     {
-        var win = FBL.getWindowForRequest(request);
+        var win = HTTP.getWindowForRequest(request);
         var tabId = Firebug.getTabIdForWindow(win);
 
         // Tab watcher is only interested in tab related requests.

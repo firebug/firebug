@@ -9,9 +9,11 @@ define([
     "firebug/lib/locale",
     "firebug/lib/events",
     "firebug/lib/url",
+    "firebug/http/httpLib",
     "firebug/sourceCache",
 ],
-function(FBL, Firebug, XPCOM, HttpRequestObserver, HttpResponseObserver, Locale, Events, URL) {
+function(FBL, Firebug, XPCOM, HttpRequestObserver, HttpResponseObserver, Locale, Events,
+    URL, HTTP) {
 
 // ********************************************************************************************* //
 // Constants
@@ -130,7 +132,7 @@ Firebug.TabCacheModel = FBL.extend(Firebug.Module,
             if (!(subject instanceof Ci.nsIHttpChannel))
                 return;
             // XXXjjb this same code is in net.js, better to have it only once
-            var win = FBL.getWindowForRequest(subject);
+            var win = HTTP.getWindowForRequest(subject);
             if (win)
                 var tabId = Firebug.getTabIdForWindow(win); // TODO remove, the tabId is not used after all
             if (!tabId)
@@ -262,7 +264,7 @@ Firebug.TabCache.prototype = FBL.extend(Firebug.SourceCache.prototype,
 
         try
         {
-            responseText = FBL.convertToUnicode(responseText, win.document.characterSet);
+            responseText = HTTP.convertToUnicode(responseText, win.document.characterSet);
         }
         catch (err)
         {
@@ -390,7 +392,7 @@ Firebug.TabCache.prototype = FBL.extend(Firebug.SourceCache.prototype,
                 return [Locale.$STR("message.The resource from this URL is not text") + ": " + url];
             }
 
-            responseText = FBL.readFromStream(stream, charset);
+            responseText = HTTP.readFromStream(stream, charset);
 
             if (FBTrace.DBG_CACHE)
                 FBTrace.sysout("tabCache.loadFromCache (response coming from FF Cache) " +

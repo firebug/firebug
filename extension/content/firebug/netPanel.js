@@ -13,6 +13,8 @@ define([
     "firebug/lib/options",
     "firebug/lib/url",
     "firebug/sourceLink",
+    "firebug/http/httpLib",
+    "firebug/lib/stackFrame",
     "firebug/breakpoint",
     "firebug/xmlViewer",
     "firebug/svgViewer",
@@ -23,7 +25,7 @@ define([
     "firebug/errors",
 ],
 function(FBL, Firebug, Firefox, Domplate, XPCOM, ToolsInterface, HttpRequestObserver, Locale,
-    Events, Options, URL, SourceLink) { with (Domplate) {
+    Events, Options, URL, SourceLink, HTTP, StackFrame) { with (Domplate) {
 
 // ************************************************************************************************
 // Constants
@@ -771,7 +773,7 @@ NetPanel.prototype = FBL.extend(Firebug.ActivablePanel,
         try
         {
             var response = Utils.getResponseText(file, this.context);
-            var inputStream = FBL.getInputStreamFromString(response);
+            var inputStream = HTTP.getInputStreamFromString(response);
             var stream = XPCOM.CCIN("@mozilla.org/binaryinputstream;1", "nsIBinaryInputStream");
             stream.setInputStream(inputStream);
             var encodedResponse = btoa(stream.readBytes(stream.available()));
@@ -4201,7 +4203,7 @@ NetProgress.prototype =
         {
             if (FBTrace.DBG_NET)
                 FBTrace.sysout("net.onStatusChange +" + (now() - file.startTime) + " " +
-                    getPrintableTime() + ", " + FBL.getStatusDescription(status) +
+                    getPrintableTime() + ", " + HTTP.getStatusDescription(status) +
                     ", " + message + ", " + request.URI.path, file);
 
             if (status == Ci.nsISocketTransport.STATUS_RESOLVING)
@@ -4717,10 +4719,10 @@ Firebug.NetMonitor.Utils =
     {
         if (!file.postText)
         {
-            file.postText = FBL.readPostTextFromRequest(file.request, context);
+            file.postText = HTTP.readPostTextFromRequest(file.request, context);
 
             if (!file.postText && context)
-                file.postText = FBL.readPostTextFromPage(file.href, context);
+                file.postText = HTTP.readPostTextFromPage(file.href, context);
         }
 
         if (!file.postText)
@@ -4850,7 +4852,7 @@ Firebug.NetMonitor.Utils =
         try
         {
             var callbacks = request.notificationCallbacks;
-            FBL.suspendShowStackTrace();
+            StackFrame.suspendShowStackTrace();
             var xhrRequest = callbacks ? callbacks.getInterface(Ci.nsIXMLHttpRequest) : null;
             if (FBTrace.DBG_NET)
                 FBTrace.sysout("net.isXHR; " + (xhrRequest != null) + ", " + safeGetName(request));
@@ -4862,7 +4864,7 @@ Firebug.NetMonitor.Utils =
         }
         finally
         {
-            FBL.resumeShowStackTrace();
+            StackFrame.resumeShowStackTrace();
         }
 
        return false;
@@ -4972,7 +4974,7 @@ Firebug.NetMonitor.NetHttpObserver =
             if (!(subject instanceof Ci.nsIHttpChannel))
                 return;
 
-            var win = FBL.getWindowForRequest(subject);
+            var win = HTTP.getWindowForRequest(subject);
             var context = Firebug.TabWatcher.getContextByWindow(win);
 
             // The context doesn't have to exist yet. In such cases a temp Net context is
@@ -5197,7 +5199,7 @@ Firebug.NetMonitor.NetHttpActivityObserver =
     observeRequest: function(httpChannel, activityType, activitySubtype, timestamp,
         extraSizeData, extraStringData)
     {
-        var win = FBL.getWindowForRequest(httpChannel);
+        var win = HTTP.getWindowForRequest(httpChannel);
         if (!win)
         {
             var index = activeRequests.indexOf(httpChannel);

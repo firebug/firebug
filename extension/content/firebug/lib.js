@@ -12,9 +12,10 @@ define([
     "firebug/lib/stackFrame",
     "firebug/lib/css",
     "firebug/lib/dom",
+    "firebug/http/httpLib",
 ],
 function(XPCOM, Locale, Events, Options, Deprecated, Wrapper, URL, SourceLink, StackFrame,
-    CSS, DOM) {
+    CSS, DOM, HTTP) {
 
 // ********************************************************************************************* //
 
@@ -59,6 +60,9 @@ for (var p in CSS)
 
 for (var p in DOM)
     FBL[p] = DOM[p];
+
+for (var p in HTTP)
+    FBL[p] = HTTP[p];
 
 FBL.deprecated = Deprecated.deprecated;
 FBL.SourceLink = SourceLink.SourceLink;
@@ -121,8 +125,6 @@ const reSplitLines = /\r\n|\r|\n/;
 const reWord = /([A-Za-z_$][A-Za-z_$0-9]*)(\.([A-Za-z_$][A-Za-z_$0-9]*))*/;
 
 const overrideDefaultsWithPersistedValuesTimeout = 500;
-
-const NS_SEEK_SET = Ci.nsISeekableStream.NS_SEEK_SET;
 
 // ************************************************************************************************
 // Namespaces
@@ -340,52 +342,6 @@ this.getPrototype = function(ob)
         return ob.prototype;
     } catch (exc) {}
     return null;
-};
-
-// ************************************************************************************************
-
-this.convertToUnicode = function(text, charset)
-{
-    if (!text)
-        return "";
-
-    try
-    {
-        var conv = Cc["@mozilla.org/intl/scriptableunicodeconverter"].getService(
-            Ci.nsIScriptableUnicodeConverter);
-        conv.charset = charset ? charset : "UTF-8";
-        return conv.ConvertToUnicode(text);
-    }
-    catch (exc)
-    {
-        if (FBTrace.DBG_ERRORS)
-            FBTrace.sysout("lib.convertToUnicode: fails: for charset "+charset+" conv.charset:"+
-                conv.charset+" exc: "+exc, exc);
-
-        // the exception is worthless, make up a new one
-        throw new Error("Firebug failed to convert to unicode using charset: "+conv.charset+
-            " in @mozilla.org/intl/scriptableunicodeconverter");
-    }
-};
-
-this.convertFromUnicode = function(text, charset)
-{
-    if (!text)
-        return "";
-
-    try
-    {
-        var conv = Cc["@mozilla.org/intl/scriptableunicodeconverter"].createInstance(
-            Ci.nsIScriptableUnicodeConverter);
-        conv.charset = charset ? charset : "UTF-8";
-        return conv.ConvertFromUnicode(text);
-    }
-    catch (exc)
-    {
-        if (FBTrace.DBG_ERRORS)
-            FBTrace.sysout("lib.convertFromUnicode: fails: for charset "+charset+" conv.charset:"+
-                conv.charset+" exc: "+exc, exc);
-    }
 };
 
 this.getPlatformName = function()
@@ -3219,7 +3175,7 @@ this.getResource = function(aURL)
     {
         var channel=ioService.newChannel(aURL,null,null);
         var input=channel.open();
-        return FBL.readFromStream(input);
+        return HTTP.readFromStream(input);
     }
     catch (e)
     {
@@ -3308,288 +3264,6 @@ this.parseJSONString = function(jsonString, originURL)
 this.parseJSONPString = function(jsonString, originURL)
 {
 }
-
-// ************************************************************************************************
-// Network
-
-this.readFromStream = function(stream, charset, noClose)
-{
-    var sis = Cc["@mozilla.org/binaryinputstream;1"].createInstance(Ci.nsIBinaryInputStream);
-    sis.setInputStream(stream);
-
-    var segments = [];
-    for (var count = stream.available(); count; count = stream.available())
-        segments.push(sis.readBytes(count));
-
-    if (!noClose)
-        sis.close();
-
-    var text = segments.join("");
-
-    try
-    {
-        return this.convertToUnicode(text, charset);
-    }
-    catch (err)
-    {
-        if (FBTrace.DBG_ERRORS)
-            FBTrace.sysout("LIB.readFromStream EXCEPTION charset: " + charset, err);
-    }
-
-    return text;
-};
-
-this.readPostTextFromPage = function(url, context)
-{
-    if (url == context.browser.contentWindow.location.href)
-    {
-        try
-        {
-            var webNav = context.browser.webNavigation;
-            var descriptor = (webNav instanceof Ci.nsIWebPageDescriptor) ?
-                webNav.currentDescriptor : null;
-
-            if (!(descriptor instanceof Ci.nsISHEntry))
-                return;
-
-            if (entry && entry.postData)
-            {
-                if (!(entry.postData instanceof Ci.nsISeekableStream))
-                    return;
-
-                var postStream = entry.postData;
-                postStream.seek(NS_SEEK_SET, 0);
-
-                var charset = context.window.document.characterSet;
-                return this.readFromStream(postStream, charset, true);
-            }
-         }
-         catch (exc)
-         {
-             if (FBTrace.DBG_ERRORS)
-                FBTrace.sysout("lib.readPostText FAILS, url:"+url, exc);
-         }
-     }
-};
-
-this.readPostTextFromRequest = function(request, context)
-{
-    try
-    {
-        var is = (request instanceof Ci.nsIUploadChannel) ? request.uploadStream : null;
-        if (is)
-        {
-            if (!(is instanceof Ci.nsISeekableStream))
-                return;
-
-            var ss = is;
-            var prevOffset;
-            if (ss)
-            {
-                prevOffset = ss.tell();
-                ss.seek(NS_SEEK_SET, 0);
-            }
-
-            // Read data from the stream..
-            var charset = (context && context.window) ? context.window.document.characterSet : null;
-            var text = this.readFromStream(is, charset, true);
-
-            // Seek locks the file so, seek to the beginning only if necko hasn't read it yet,
-            // since necko doesn't seek to 0 before reading (at lest not till 459384 is fixed).
-            if (ss && prevOffset == 0)
-                ss.seek(NS_SEEK_SET, 0);
-
-            return text;
-        }
-    }
-    catch(exc)
-    {
-        if (FBTrace.DBG_ERRORS)
-            FBTrace.sysout("lib.readPostTextFromRequest FAILS ", exc);
-    }
-
-    return null;
-};
-
-this.getInputStreamFromString = function(dataString)
-{
-    var stringStream = Cc["@mozilla.org/io/string-input-stream;1"].createInstance(Ci.nsIStringInputStream);
-
-    if ("data" in stringStream) // Gecko 1.9 or newer
-        stringStream.data = dataString;
-    else // 1.8 or older
-        stringStream.setData(dataString, dataString.length);
-
-    return stringStream;
-};
-
-this.getWindowForRequest = function(request)
-{
-    var loadContext = this.getRequestLoadContext(request);
-    try
-    {
-        if (loadContext)
-            return loadContext.associatedWindow;
-    }
-    catch (ex)
-    {
-    }
-
-    return null;
-};
-
-this.getRequestLoadContext = function(request)
-{
-    try
-    {
-        if (request && request.notificationCallbacks)
-        {
-            FBL.suspendShowStackTrace();
-            return request.notificationCallbacks.getInterface(Ci.nsILoadContext);
-        }
-    }
-    catch (exc)
-    {
-    }
-    finally
-    {
-        FBL.resumeShowStackTrace();
-    }
-
-    try
-    {
-        if (request && request.loadGroup && request.loadGroup.notificationCallbacks)
-        {
-            FBL.suspendShowStackTrace();
-            return request.loadGroup.notificationCallbacks.getInterface(Ci.nsILoadContext);
-        }
-    }
-    catch (exc)
-    {
-    }
-    finally
-    {
-        FBL.resumeShowStackTrace();
-    }
-
-    return null;
-};
-
-this.getRequestWebProgress = Deprecated.deprecated("Use getRequestLoadContext function",
-    this.getRequestLoadContext);
-
-
-// ************************************************************************************************
-// Stack Trace
-
-var saveShowStackTrace = {};
-
-/*
- * use in the try{} around a call to getInterface to prevent fbs from generating stack traces
- */
-this.suspendShowStackTrace = function()
-{
-    saveShowStackTrace = Firebug.showStackTrace;
-    Firebug.showStackTrace = false;
-};
-
-/*
- * use in the finally{} to undo the suspendShowStackTrace
- */
-this.resumeShowStackTrace = function()
-{
-    Firebug.showStackTrace = saveShowStackTrace;
-};
-
-// ************************************************************************************************
-
-this.BaseProgressListener =
-{
-    QueryInterface : function(iid)
-    {
-        if (iid.equals(Ci.nsIWebProgressListener) ||
-            iid.equals(Ci.nsISupportsWeakReference) ||
-            iid.equals(Ci.nsISupports))
-        {
-            return this;
-        }
-
-        throw Components.results.NS_NOINTERFACE;
-    },
-
-    stateIsRequest: false,
-    onLocationChange: function() {},
-    onStateChange : function() {},
-    onProgressChange : function() {},
-    onStatusChange : function() {},
-    onSecurityChange : function() {},
-    onLinkIconAvailable : function() {}
-};
-
-// ************************************************************************************************
-// Network Tracing
-
-this.getStateDescription = function(flag)
-{
-    var state = [];
-    var nsIWebProgressListener = Ci.nsIWebProgressListener;
-    if (flag & nsIWebProgressListener.STATE_START) state.push("STATE_START");
-    else if (flag & nsIWebProgressListener.STATE_REDIRECTING) state.push("STATE_REDIRECTING");
-    else if (flag & nsIWebProgressListener.STATE_TRANSFERRING) state.push("STATE_TRANSFERRING");
-    else if (flag & nsIWebProgressListener.STATE_NEGOTIATING) state.push("STATE_NEGOTIATING");
-    else if (flag & nsIWebProgressListener.STATE_STOP) state.push("STATE_STOP");
-
-    if (flag & nsIWebProgressListener.STATE_IS_REQUEST) state.push("STATE_IS_REQUEST");
-    if (flag & nsIWebProgressListener.STATE_IS_DOCUMENT) state.push("STATE_IS_DOCUMENT");
-    if (flag & nsIWebProgressListener.STATE_IS_NETWORK) state.push("STATE_IS_NETWORK");
-    if (flag & nsIWebProgressListener.STATE_IS_WINDOW) state.push("STATE_IS_WINDOW");
-    if (flag & nsIWebProgressListener.STATE_RESTORING) state.push("STATE_RESTORING");
-    if (flag & nsIWebProgressListener.STATE_IS_INSECURE) state.push("STATE_IS_INSECURE");
-    if (flag & nsIWebProgressListener.STATE_IS_BROKEN) state.push("STATE_IS_BROKEN");
-    if (flag & nsIWebProgressListener.STATE_IS_SECURE) state.push("STATE_IS_SECURE");
-    if (flag & nsIWebProgressListener.STATE_SECURE_HIGH) state.push("STATE_SECURE_HIGH");
-    if (flag & nsIWebProgressListener.STATE_SECURE_MED) state.push("STATE_SECURE_MED");
-    if (flag & nsIWebProgressListener.STATE_SECURE_LOW) state.push("STATE_SECURE_LOW");
-
-    return state.join(", ");
-};
-
-this.getStatusDescription = function(status)
-{
-    var nsISocketTransport = Ci.nsISocketTransport;
-    var nsITransport = Ci.nsITransport;
-
-    if (status == nsISocketTransport.STATUS_RESOLVING) return "STATUS_RESOLVING";
-    if (status == nsISocketTransport.STATUS_CONNECTING_TO) return "STATUS_CONNECTING_TO";
-    if (status == nsISocketTransport.STATUS_CONNECTED_TO) return "STATUS_CONNECTED_TO";
-    if (status == nsISocketTransport.STATUS_SENDING_TO) return "STATUS_SENDING_TO";
-    if (status == nsISocketTransport.STATUS_WAITING_FOR) return "STATUS_WAITING_FOR";
-    if (status == nsISocketTransport.STATUS_RECEIVING_FROM) return "STATUS_RECEIVING_FROM";
-    if (status == nsITransport.STATUS_READING) return "STATUS_READING";
-    if (status == nsITransport.STATUS_WRITING) return "STATUS_WRITING";
-};
-
-this.getLoadFlagsDescription = function(loadFlags)
-{
-    var flags = [];
-    var nsIChannel = Ci.nsIChannel;
-    var nsICachingChannel = Ci.nsICachingChannel;
-
-    if (loadFlags & nsIChannel.LOAD_DOCUMENT_URI) flags.push("LOAD_DOCUMENT_URI");
-    if (loadFlags & nsIChannel.LOAD_RETARGETED_DOCUMENT_URI) flags.push("LOAD_RETARGETED_DOCUMENT_URI");
-    if (loadFlags & nsIChannel.LOAD_REPLACE) flags.push("LOAD_REPLACE");
-    if (loadFlags & nsIChannel.LOAD_INITIAL_DOCUMENT_URI) flags.push("LOAD_INITIAL_DOCUMENT_URI");
-    if (loadFlags & nsIChannel.LOAD_TARGETED) flags.push("LOAD_TARGETED");
-    if (loadFlags & nsIChannel.LOAD_CALL_CONTENT_SNIFFERS) flags.push("LOAD_CALL_CONTENT_SNIFFERS");
-    if (loadFlags & nsICachingChannel.LOAD_NO_NETWORK_IO) flags.push("LOAD_NO_NETWORK_IO");
-    if (loadFlags & nsICachingChannel.LOAD_CHECK_OFFLINE_CACHE) flags.push("LOAD_CHECK_OFFLINE_CACHE");
-    if (loadFlags & nsICachingChannel.LOAD_BYPASS_LOCAL_CACHE) flags.push("LOAD_BYPASS_LOCAL_CACHE");
-    if (loadFlags & nsICachingChannel.LOAD_BYPASS_LOCAL_CACHE_IF_BUSY) flags.push("LOAD_BYPASS_LOCAL_CACHE_IF_BUSY");
-    if (loadFlags & nsICachingChannel.LOAD_ONLY_FROM_CACHE) flags.push("LOAD_ONLY_FROM_CACHE");
-    if (loadFlags & nsICachingChannel.LOAD_ONLY_IF_MODIFIED) flags.push("LOAD_ONLY_IF_MODIFIED");
-
-    return flags.join(", ");
-};
 
 // ************************************************************************************************
 // Programs

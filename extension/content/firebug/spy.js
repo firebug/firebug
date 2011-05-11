@@ -8,10 +8,11 @@ define([
     "firebug/lib/events",
     "firebug/http/requestObserver",
     "firebug/lib/stackFrame",
+    "firebug/http/httpLib",
     "firebug/netPanel",
     "firebug/errors",
 ],
-function(FBL, Firebug, Domplate, FirebugReps, Events, HttpRequestObserver, StackFrame) {
+function(FBL, Firebug, Domplate, FirebugReps, Events, HttpRequestObserver, StackFrame, HTTP) {
 
 // ************************************************************************************************
 // Constants
@@ -202,7 +203,7 @@ Firebug.Spy = FBL.extend(Firebug.Module,
             var callbacks = request.notificationCallbacks;
             if (callbacks)
             {
-                FBL.suspendShowStackTrace();
+                StackFrame.suspendShowStackTrace();
                 return callbacks.getInterface(Ci.nsIXMLHttpRequest);
             }
         }
@@ -217,7 +218,7 @@ Firebug.Spy = FBL.extend(Firebug.Module,
         }
         finally
         {
-            FBL.resumeShowStackTrace();
+            StackFrame.resumeShowStackTrace();
         }
 
        return null;
@@ -260,7 +261,7 @@ var SpyHttpObserver =
 
     observeRequest: function(request, topic)
     {
-        var win = FBL.getWindowForRequest(request);
+        var win = HTTP.getWindowForRequest(request);
         var xhr = Firebug.Spy.getXHR(request);
 
         // The request must be associated with window (i.e. tab) and it also must be
@@ -301,7 +302,7 @@ var SpyHttpObserver =
         // Get "body" for POST and PUT requests. It will be displayed in
         // appropriate tab of the XHR.
         if (method == "POST" || method == "PUT")
-            spy.postText = FBL.readPostTextFromRequest(request, context);
+            spy.postText = HTTP.readPostTextFromRequest(request, context);
 
         spy.urlParams = FBL.parseURLParams(spy.href);
 
@@ -399,7 +400,7 @@ var SpyHttpActivityObserver = FBL.extend(Firebug.NetMonitor.NetHttpActivityObser
             return;
 
         // xxxHonza: this code is duplicated in net.js, it should be refactored.
-        var win = FBL.getWindowForRequest(request);
+        var win = HTTP.getWindowForRequest(request);
         if (!win)
         {
             var index = this.activeRequests.indexOf(request);
