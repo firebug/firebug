@@ -33,7 +33,7 @@ const statusCropSize = 20;
 
 
 // ************************************************************************************************
-window.FirebugChromeFactory =  // factory is global in module loading window
+var ChromeFactory =  // factory is global in module loading window
 {
 
 createFirebugChrome: function(win)  // chrome is created in caller window.
@@ -1916,9 +1916,9 @@ function bindFixed()
 return FirebugChrome; // end of createFirebugChrome(win)
 }
 
-}; // end of window.FirebugChromeFactory object
+}; // end of var ChromeFactory object
 
-return window.FirebugChromeFactory;
+return ChromeFactory;
 });
 
 

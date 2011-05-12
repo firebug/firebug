@@ -21,7 +21,6 @@
     <script type="application/x-javascript" src="chrome://global/content/globalOverlay.js"/>
     <script type="application/x-javascript" src="chrome://firebug/content/trace.js"/>
     <script type="application/x-javascript" src="chrome://firebug/content/firefox/panelBarWaiter.js"/>
-    <script type="application/x-javascript" src="resource://firebug/require.js"/>
     <script type="application/x-javascript">
         if (window.arguments)
             var detachArgs = window.arguments[0];
@@ -80,7 +79,7 @@
 
     <!-- Entire Firebug UI -->
        <vbox id="fbContentBox" flex="2">
-       </vbox>
+    </vbox>
 
     <!-- If Firebug is displayed in this external window, but not active for currently selected
          Firefox tab, the following button allows to resume it. -->

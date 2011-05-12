@@ -646,6 +646,10 @@ window.Firebug =
 
     updateOption: function(name, value)
     {
+        // fbtest changes options which change prefs which trigger updates in fbtrace
+        if (!Firebug.chrome)
+            return;
+
         // Distribute to the current chrome.
         Firebug.chrome.updateOption(name, value);
 
