@@ -178,6 +178,7 @@ if (FBTrace.DBG_INITIALIZE || FBTrace.DBG_MODULES)
 
 require(config,
 [
+    "firebug/chrome",
     "arch/firebugadapter",
     "arch/javascripttool",
     "firebug/debugger",
@@ -211,7 +212,7 @@ require(config,
     "firebug/commandLineExposed",
     "firebug/consoleExposed"
 ],
-function(FBL)
+function(ChromeFactory)
 {
     try
     {
@@ -222,7 +223,7 @@ function(FBL)
         }
 
         Firebug.Options.initialize("extensions.firebug");
-        window.panelBarWaiter.waitForPanelBar(true);
+        window.panelBarWaiter.waitForPanelBar(ChromeFactory);
 
         if (FBTrace.DBG_MODULES)
             dumpDependencyTree(depTree);

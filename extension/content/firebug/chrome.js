@@ -6,9 +6,10 @@
  * The 'context' in this file is always 'Firebug.currentContext'
  */
 
-var FirebugChrome;  // TODO module return
 
-(function() {
+define([
+        "firebug/firefox/firefox"
+], function chromeFactory(Firefox) {
 
 // ************************************************************************************************
 // Constants
@@ -30,46 +31,53 @@ const panelURL = "chrome://firebug/content/panel.html";
 
 const statusCropSize = 20;
 
-// ************************************************************************************************
-// Globals
-
-var panelBox, panelSplitter, sidePanelDeck, panelBar1, panelBar2, locationList, locationButtons,
-    panelStatus, panelStatusSeparator, cmdPopup, cmdPopupBrowser;
-
-var inDetachedScope = (window.location == "chrome://firebug/content/firebug.xul");
-
-var disabledHead = null;
-var disabledCaption = null;
-var enableSiteLink = null;
-var enableSystemPagesLink = null;
-var enableAlwaysLink = null;
 
 // ************************************************************************************************
-FirebugChrome =
+window.FirebugChromeFactory =  // factory is global in module loading window
+{
+
+createFirebugChrome: function(win)  // chrome is created in caller window.
+{
+     // ************************************************************************************************
+     // Private
+    var inDetachedScope = (win.location == "chrome://firebug/content/firebug.xul");
+
+
+    var panelBox, panelSplitter, sidePanelDeck, panelBar1, panelBar2, locationList, locationButtons,
+        panelStatus, panelStatusSeparator, cmdPopup, cmdPopupBrowser;
+
+    var disabledHead = null;
+    var disabledCaption = null;
+    var enableSiteLink = null;
+    var enableSystemPagesLink = null;
+    var enableAlwaysLink = null;
+
+var FirebugChrome =
 {
     // TODO: remove this property, add getters for location, title , focusedElement, setter popup
-    window: window,
+
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
     // Initialization
 
     initialize: function()
     {
-        panelBox = $("fbPanelBox");
-        panelSplitter = $("fbPanelSplitter");
-        sidePanelDeck = $("fbSidePanelDeck");
-        panelBar1 = $("fbPanelBar1");
-        panelBar2 = $("fbPanelBar2");
-        locationList = $("fbLocationList");
-        locationButtons = $("fbLocationButtons");
-        panelStatus = $("fbPanelStatus");
-        panelStatusSeparator = $("fbStatusSeparator");
+        this.window = win;
+        panelBox = win.document.getElementById("fbPanelBox");
+        panelSplitter = win.document.getElementById("fbPanelSplitter");
+        sidePanelDeck = win.document.getElementById("fbSidePanelDeck");
+        panelBar1 = win.document.getElementById("fbPanelBar1");
+        panelBar2 = win.document.getElementById("fbPanelBar2");
+        locationList = win.document.getElementById("fbLocationList");
+        locationButtons = win.document.getElementById("fbLocationButtons");
+        panelStatus = win.document.getElementById("fbPanelStatus");
+        panelStatusSeparator = win.document.getElementById("fbStatusSeparator");
 
-        cmdPopup = $("fbCommandPopup");
-        cmdPopupBrowser = $("fbCommandPopupBrowser");
+        cmdPopup = win.document.getElementById("fbCommandPopup");
+        cmdPopupBrowser = win.document.getElementById("fbCommandPopupBrowser");
 
-        if (window.arguments)
-            var detachArgs = window.arguments[0];
+        if (win.arguments)
+            var detachArgs = win.arguments[0];
 
         if (FBTrace.DBG_INITIALIZE)
             FBTrace.sysout("chrome.initialize w/detachArgs=", detachArgs);
@@ -77,7 +85,7 @@ FirebugChrome =
         if (detachArgs && detachArgs.Firebug)
         {
             // we've been opened in a new window by an already initialized Firebug
-            window.FBL = detachArgs.FBL;
+            win.FBL = detachArgs.FBL;
             Firebug = detachArgs.Firebug;
             Firebug.currentContext = detachArgs.Firebug.currentContext;
         }
@@ -85,14 +93,14 @@ FirebugChrome =
         {
             // Firebug has not been initialized yet
             if (!Firebug.isInitialized)
-                Firebug.initialize();
+                Firebug.initialize(this);
         }
 
         // FBL should be available
         if (FBTrace.sysout && (!FBL || !FBL.initialize) )
             FBTrace.sysout("Firebug is broken, FBL incomplete, if the last function is QI, check lib.js:", FBL);
 
-        Firebug.internationalizeUI(window.document);
+        Firebug.internationalizeUI(win.document);
 
         var browser1 = panelBar1.browser;
         browser1.addEventListener("load", browser1Loaded, true);
@@ -108,13 +116,13 @@ FirebugChrome =
             return false;
         };
 
-        window.addEventListener("blur", onBlur, true);
+        win.addEventListener("blur", onBlur, true);
 
         // Initialize Firebug Tools, Web Developer and Firebug Icon menus.
-        var firebugMenuPopup = $("fbFirebugMenuPopup");
-        this.initializeMenu($("menu_firebug"), firebugMenuPopup);
-        this.initializeMenu($("appmenu_firebug"), firebugMenuPopup);
-        this.initializeMenu($("fbFirebugMenu"), firebugMenuPopup);
+        var firebugMenuPopup = FirebugChrome.$("fbFirebugMenuPopup");
+        this.initializeMenu(FirebugChrome.$("menu_firebug"), firebugMenuPopup);
+        this.initializeMenu(FirebugChrome.$("appmenu_firebug"), firebugMenuPopup);
+        this.initializeMenu(FirebugChrome.$("fbFirebugMenu"), firebugMenuPopup);
 
         // Register handlers for (de)activation of key bindings.
         KeyBindingsManager.initialize();
@@ -123,7 +131,7 @@ FirebugChrome =
         panelBar1.browser.setAttribute("src", "chrome://firebug/content/panel.html");
         panelBar2.browser.setAttribute("src", "chrome://firebug/content/panel.html");
         if (FBTrace.DBG_INITIALIZE)
-            FBTrace.sysout("chrome.initialized ", window);
+            FBTrace.sysout("chrome.initialized in "+win.location+" with "+panelBar1.browser.ownerDocument.documentURI, win);
     },
 
     initializeMenu: function(parentMenu, popupMenu)
@@ -148,8 +156,8 @@ FirebugChrome =
 
         try
         {
-            if (window.arguments)
-                var detachArgs = window.arguments[0];
+            if (win.arguments)
+                var detachArgs = win.arguments[0];
 
             this.applyTextSize(Firebug.textSize);
 
@@ -213,7 +221,7 @@ FirebugChrome =
     shutdown: function()
     {
         if (FBTrace.DBG_INITIALIZE || !panelBar1)
-            FBTrace.sysout("chrome.shutdown entered for "+window.location+"\n");
+            FBTrace.sysout("chrome.shutdown entered for "+win.location+"\n");
 
         var doc1 = panelBar1.browser.contentDocument;
         doc1.removeEventListener("mouseover", onPanelMouseOver, false);
@@ -241,7 +249,7 @@ FirebugChrome =
 
         locationList.removeEventListener("selectObject", onSelectLocation, false);
 
-        window.removeEventListener("blur", onBlur, true);
+        win.removeEventListener("blur", onBlur, true);
 
         Firebug.unregisterUIListener(this);
 
@@ -276,7 +284,7 @@ FirebugChrome =
         if (FBTrace.DBG_ACTIVATION)
             FBTrace.sysout("chrome.attachBrowser with inDetachedScope="+inDetachedScope +
                 " context="+context+" context==Firebug.currentContext: "+(context==Firebug.currentContext)+
-                " in window: "+window.location);
+                " in window: "+win.location);
 
         if (inDetachedScope)  // then we are initializing in external window
         {
@@ -305,32 +313,10 @@ FirebugChrome =
     disableOff: function(collapse)
     {
         // disable/enable this button in the Firebug.chrome window.
-        FBL.collapse($("fbCloseButton"), collapse);
+        FBL.collapse(FirebugChrome.$("fbCloseButton"), collapse);
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
-
-    getBrowsers: function()
-    {
-          return Firebug.tabBrowser.browsers;
-    },
-
-    getCurrentBrowser: function()
-    {
-        return Firebug.tabBrowser.selectedBrowser;
-    },
-
-    getCurrentURI: function()
-    {
-        try
-        {
-            return Firebug.tabBrowser.currentURI;
-        }
-        catch (exc)
-        {
-            return null;
-        }
-    },
 
     getPanelDocument: function(panelType)
     {
@@ -400,25 +386,25 @@ FirebugChrome =
 
     getName: function()
     {
-        return window ? window.location.href : null;
+        return win ? win.location.href : null;
     },
 
     close: function()
     {
         if (FBTrace.DBG_INITIALIZE)
-            FBTrace.sysout("chrome.close closing window "+window.location);
-        window.close();
+            FBTrace.sysout("chrome.close closing window "+win.location);
+        win.close();
     },
 
     focus: function()
     {
-        window.focus();
+        win.focus();
         panelBar1.browser.contentWindow.focus();
     },
 
     isFocused: function()
     {
-        return wm.getMostRecentWindow(null) == window;
+        return wm.getMostRecentWindow(null) == win;
     },
 
     focusWatch: function(context)
@@ -440,7 +426,43 @@ FirebugChrome =
 
     isOpen: function()
     {
-        return !($("fbContentBox").collapsed);
+        return !(FirebugChrome.$("fbContentBox").collapsed);
+    },
+
+    toggleOpen: function(shouldShow)
+    {
+        var contentBox = Firebug.chrome.$("fbContentBox");
+        var contentSplitter = Firebug.chrome.$("fbContentSplitter");
+
+        contentBox.setAttribute("collapsed", !shouldShow);
+        if (!inDetachedScope)
+        {
+            FBL.collapse(Firefox.getElementById('fbMainFrame'), !shouldShow);
+        }
+
+        if (contentSplitter)
+            contentSplitter.setAttribute("collapsed", !shouldShow);
+    },
+
+    syncResumeBox: function(context)
+    {
+        var resumeBox = Firebug.chrome.$('fbResumeBox');
+
+        if (!resumeBox) // the showContext is being called before the reattachContext, we'll get a second showContext
+            return;
+
+        if (context)
+        {
+            Firebug.chrome.toggleOpen(true);
+            Firebug.chrome.syncPanel();
+            FBL.collapse(resumeBox, true);
+        }
+        else
+        {
+            Firebug.chrome.toggleOpen(false);
+            FBL.collapse(resumeBox, false);
+            Firebug.chrome.window.document.title = Locale.$STR("Firebug - inactive for current website");
+        }
     },
 
     reload: function(skipCache)
@@ -450,7 +472,7 @@ FirebugChrome =
             : LOAD_FLAGS_NONE;
 
         // Make sure the selected tab in the attached browser window is refreshed.
-        var browser = Firebug.chrome.getCurrentBrowser();
+        var browser = Firefox.getCurrentBrowser();
         browser.firebugReload = true;
         browser.webNavigation.reload(reloadFlags);
 
@@ -466,7 +488,7 @@ FirebugChrome =
 
     gotoSiblingTab : function(goRight)
     {
-        if ($('fbContentBox').collapsed)
+        if (FirebugChrome.$('fbContentBox').collapsed)
             return;
         var i, currentIndex = newIndex = -1, currentPanel = this.getSelectedPanel(), newPanel;
         var panelTypes = Firebug.getMainPanelTypes(Firebug.currentContext);
@@ -608,7 +630,7 @@ FirebugChrome =
         // Remember the previous panel and bar state so we can revert if the user cancels
         this.previousPanelName = context.panelName;
         this.previousSidePanelName = context.sidePanelName;
-        this.previouslyCollapsed = $("fbContentBox").collapsed;
+        this.previouslyCollapsed = FirebugChrome.$("fbContentBox").collapsed;
         this.previouslyFocused = Firebug.isDetached() && this.isFocused();  // TODO previouslyMinimized
 
         var switchPanel = this.selectPanel(switchToPanelName);
@@ -673,8 +695,9 @@ FirebugChrome =
 
         if (!location)
         {
-            if (Firebug.tabBrowser.currentURI)
-                location = Firebug.tabBrowser.currentURI.asciiSpec;
+            var currentURI = Firefox.getCurrentURI();
+            if (currentURI)
+                location = currentURI.asciiSpec;
         }
 
         if (!location)
@@ -711,7 +734,7 @@ FirebugChrome =
 
          if (FBTrace.DBG_WINDOWS || FBTrace.DBG_DISPATCH)
              FBTrace.sysout("setFirebugContext "+(Firebug.currentContext?
-                Firebug.currentContext.getName():" **> NULL <** ") + " in "+window.location);
+                Firebug.currentContext.getName():" **> NULL <** ") + " in "+win.location);
     },
 
     hidePanel: function()
@@ -805,10 +828,10 @@ FirebugChrome =
         if (Firebug.currentContext)
         {
             var title = Firebug.currentContext.getTitle();
-            window.document.title = FBL.$STRF("WindowTitle", [title]);
+            win.document.title = FBL.$STRF("WindowTitle", [title]);
         }
         else
-            window.document.title = FBL.$STR("Firebug");
+            win.document.title = FBL.$STR("Firebug");
     },
 
     focusLocationList: function()
@@ -904,11 +927,11 @@ FirebugChrome =
 
     toggleOrient: function()
     {
-        var panelPane = $("fbPanelPane");
+        var panelPane = FirebugChrome.$("fbPanelPane");
         var newValue = panelPane.orient == "vertical" ? "horizontal" : "vertical";
         panelSplitter.orient = panelPane.orient = newValue;
 
-        var option = $("menu_toggleOrient").getAttribute("option");
+        var option = FirebugChrome.$("menu_toggleOrient").getAttribute("option");
         Firebug.Options.set(option, newValue == "vertical");
     },
 
@@ -941,13 +964,13 @@ FirebugChrome =
 
     getGlobalAttribute: function(id, name)
     {
-        var elt = $(id);
+        var elt = FirebugChrome.$(id);
         return elt.getAttribute(name);
     },
 
     setGlobalAttribute: function(id, name, value)
     {
-        var elt = $(id);
+        var elt = FirebugChrome.$(id);
         if (elt)
         {
             if (value == null)
@@ -964,7 +987,7 @@ FirebugChrome =
     setChromeDocumentAttribute: function(id, name, value)
     {
         // Call as  Firebug.chrome.setChromeDocumentAttribute() to set attributes in another window.
-        var elt = $(id);
+        var elt = FirebugChrome.$(id);
         if (elt)
             elt.setAttribute(name, value);
     },
@@ -985,7 +1008,7 @@ FirebugChrome =
             }
         }
 
-        window.addEventListener("keypress", fn, capture);
+        win.addEventListener("keypress", fn, capture);
 
         return [fn, capture];
     },
@@ -1006,19 +1029,19 @@ FirebugChrome =
             }
         }
 
-        window.addEventListener("keypress", fn, capture);
+        win.addEventListener("keypress", fn, capture);
 
         return [fn, capture];
     },
 
     keyIgnore: function(listener)
     {
-        window.removeEventListener("keypress", listener[0], listener[1]);
+        win.removeEventListener("keypress", listener[0], listener[1]);
     },
 
     $: function(id)
     {
-        return document.getElementById(id);  // The iframe, not the browser.xul
+        return win.document.getElementById(id);  //document we close over not the global
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
@@ -1031,15 +1054,15 @@ FirebugChrome =
         var zoom = Firebug.Options.getZoomByTextSize(value);
         var fontSizeAdjust = zoom * 0.547; // scale the aspect relative to 11pt Lucida Grande
 
-        var contentBox = $('fbContentBox');
+        var contentBox = Firebug.chrome.$('fbContentBox');
         contentBox.style.fontSizeAdjust = fontSizeAdjust;
 
         panelBar1.browser.contentDocument.documentElement.style.fontSizeAdjust = fontSizeAdjust;
 
-        var box = $("fbCommandBox");
+        var box = Firebug.chrome.$("fbCommandBox");
         box.style.fontSizeAdjust = fontSizeAdjust;
         Firebug.CommandLine.getCommandLineSmall().style.fontSizeAdjust = fontSizeAdjust;
-        $("fbCommandLineCompletion").style.fontSizeAdjust = fontSizeAdjust;
+        Firebug.chrome.$("fbCommandLineCompletion").style.fontSizeAdjust = fontSizeAdjust;
         Firebug.CommandLine.getCommandLineLarge().style.fontSizeAdjust = fontSizeAdjust;
 
         Firebug.dispatchToPanels("onTextSizeChange", [zoom, fontSizeAdjust]);
@@ -1110,7 +1133,7 @@ FirebugChrome =
         var toggleFirebug = FBL.getElementsByAttribute(popup, "id", "menu_toggleFirebug")[0];
         if (toggleFirebug)
         {
-            var fbContentBox = this.$("fbContentBox");
+            var fbContentBox = FirebugChrome.$("fbContentBox");
             var collapsed = fbContentBox.getAttribute("collapsed");
             toggleFirebug.setAttribute("label", (collapsed == "true"?
                 FBL.$STR("firebug.ShowFirebug") : FBL.$STR("firebug.HideFirebug")));
@@ -1175,7 +1198,7 @@ FirebugChrome =
         if (popup.id !="fbContextMenu")
             return;
 
-        var target = document.popupNode;
+        var target = win.document.popupNode;
         var panel = target ? Firebug.getElementPanel(target) : null;
 
         if (!panel)
@@ -1186,7 +1209,7 @@ FirebugChrome =
         // Make sure the Copy action is only available if there is actually someting
         // selected in the panel.
         var sel = target.ownerDocument.defaultView.getSelection();
-        if (!this.contextMenuObject && !$("cmd_copy").getAttribute("disabled") && !sel.isCollapsed)
+        if (!this.contextMenuObject && !FirebugChrome.$("cmd_copy").getAttribute("disabled") && !sel.isCollapsed)
         {
             var menuitem = FBL.createMenuItem(popup, {label: "Copy"});
             menuitem.setAttribute("command", "cmd_copy");
@@ -1312,8 +1335,8 @@ FirebugChrome =
         //if (!panelBar1.selectedPanel)
         //    return false;
 
-        var tooltip = $("fbTooltip");
-        var target = document.tooltipNode;
+        var tooltip = FirebugChrome.$("fbTooltip");
+        var target = win.document.tooltipNode;
 
         var panel = target ? Firebug.getElementPanel(target) : null;
 
@@ -1418,8 +1441,7 @@ FirebugChrome =
         if (panel && panel.breakable)
             Firebug.Breakpoint.toggleBreakOnNext(panel);
     },
-};
-
+};  // end of FirebugChrome
 // ************************************************************************************************
 // Welcome Page (first run)
 
@@ -1448,7 +1470,7 @@ var FirstRunPage =
         setTimeout(function()
         {
             // Open the page in the top most window so, the user can see it immediately.
-            if (wm.getMostRecentWindow("navigator:browser") != window)
+            if (wm.getMostRecentWindow("navigator:browser") != win)
                 return;
 
             // Avoid opening of the page in a second browser window.
@@ -1482,7 +1504,7 @@ var KeyBindingsManager =
         this.onFocus = FBL.bind(this.onFocus, this);
         this.onBlur = FBL.bind(this.onBlur, this);
 
-        var contentBox = $("fbContentBox");
+        var contentBox = FirebugChrome.$("fbContentBox");
         contentBox.addEventListener("focus", this.onFocus, true);
         contentBox.addEventListener("blur", this.onBlur, true);
 
@@ -1492,7 +1514,7 @@ var KeyBindingsManager =
 
     shutdown: function()
     {
-        var contentBox = $("fbContentBox");
+        var contentBox = FirebugChrome.$("fbContentBox");
         contentBox.removeEventListener("focus", this.onFocus, true);
         contentBox.removeEventListener("blur", this.onBlur, true);
     },
@@ -1684,7 +1706,7 @@ function onSelectingPanel(event)
     // those toolbars that are necessary. This avoids the situation when naughty panel
     // doesn't clean up its toolbars. This must be done before showPanel where visibility
     // of the BON buttons is managed.
-    var toolbar = $("fbToolbarInner");
+    var toolbar = FirebugChrome.$("fbToolbarInner");
     var child = toolbar.firstChild;
     while (child)
     {
@@ -1693,7 +1715,7 @@ function onSelectingPanel(event)
     }
 
     // Calling Firebug.showPanel causes dispatching "showPanel" to all modules.
-    var browser = panel ? panel.context.browser : FirebugChrome.getCurrentBrowser();
+    var browser = panel ? panel.context.browser : Firefox.getCurrentBrowser();
     Firebug.showPanel(browser, panel);
 
     // Synchronize UI around panels. Execute the sync after showPanel so the logic
@@ -1735,7 +1757,7 @@ function onSelectedSidePanel(event)
     if (panel && sidePanel)
         sidePanel.select(panel.selection);
 
-    var browser = sidePanel ? sidePanel.context.browser : FirebugChrome.getCurrentBrowser();
+    var browser = sidePanel ? sidePanel.context.browser : Firefox.getCurrentBrowser();
     Firebug.showSidePanel(browser, sidePanel);  // dispatch to modules
 }
 
@@ -1860,7 +1882,7 @@ function onMainTabBoxMouseDown(event)
 {
     if (Firebug.isInBrowser())
     {
-        var contentSplitter = Firebug.chrome.$("fbContentSplitter");
+        var contentSplitter = FirebugChrome.$("fbContentSplitter");
         // TODO: grab the splitter here.
     }
 }
@@ -1874,14 +1896,6 @@ function getRealObject(object)
 
 // ************************************************************************************************
 // Utils (duplicated from lib.js)
-
-function $(id, doc)
-{
-    if (doc)
-        return doc.getElementById(id);
-    else
-        return document.getElementById(id);
-}
 
 function cloneArray(array, fn)
 {
@@ -1899,24 +1913,12 @@ function bindFixed()
     return function() { return fn.apply(object, args); }
 }
 
-})();
-
-// ************************************************************************************************
-
-// XXXjoe This horrible hack works around a focus bug in Firefox which is caused when
-// the HTML Validator extension and Firebug are installed.  It causes the keyboard to
-// behave erratically when typing, and the only solution I've found is to delay
-// the initialization of HTML Validator by overriding this function with a timeout.
-// XXXrobc Do we still need this? Does this extension even exist anymore?
-if (top.hasOwnProperty('TidyBrowser'))
-{
-    var prev = TidyBrowser.prototype.updateStatusBar;
-    TidyBrowser.prototype.updateStatusBar = function()
-    {
-        var self = this, args = arguments;
-        setTimeout(function()
-        {
-            prev.apply(self, args);
-        });
-    }
+return FirebugChrome; // end of createFirebugChrome(win)
 }
+
+}; // end of window.FirebugChromeFactory object
+
+return window.FirebugChromeFactory;
+});
+
+

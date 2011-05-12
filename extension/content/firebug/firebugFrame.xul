@@ -21,7 +21,6 @@
     <script type="application/x-javascript" src="chrome://global/content/globalOverlay.js"/>
     <script type="application/x-javascript" src="chrome://firebug/content/trace.js"/>
     <script type="application/x-javascript" src="chrome://firebug/content/legacy.js"/>
-    <script type="application/x-javascript" src="chrome://firebug/content/chrome.js"/>
 
     <script type="application/x-javascript" src="resource://firebug/require.js"/>
     <script type="application/x-javascript">

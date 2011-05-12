@@ -645,5 +645,12 @@
         <button id="fbMigrationOk" label="Ok"/> -->
         </panel>
     </vbox>
-
+<script>
+window.addEventListener("load", function overlayLoad()
+{
+    var p1 = document.getElementById("fbPanelBar1-browser");
+    window.dump("firebugOverlay load p1.src: "+p1.getAttribute('src')+" in "+p1.ownerDocument.documentURI+"\n");
+    p1.addEventListener('load', function(){ window.dump("panelBar1 load\n");}, false);
+}, true);
+</script>
 </overlay>

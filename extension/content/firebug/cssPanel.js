@@ -447,6 +447,8 @@ Firebug.CSSModule = FBL.extend(FBL.extend(Firebug.Module, Firebug.EditorSelector
 
     cleanupSheets: function(doc, context)
     {
+        if (!context)
+            return;
         // Due to the manner in which the layout engine handles multiple
         // references to the same sheet we need to kick it a little bit.
         // The injecting a simple stylesheet then removing it will force

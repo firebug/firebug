@@ -21,7 +21,7 @@
     <script type="application/x-javascript" src="chrome://global/content/globalOverlay.js"/>
     <script type="application/x-javascript" src="chrome://firebug/content/trace.js"/>
     <script type="application/x-javascript" src="chrome://firebug/content/firefox/panelBarWaiter.js"/>
-    <script type="application/x-javascript" src="chrome://firebug/content/chrome.js"/>
+    <script type="application/x-javascript" src="resource://firebug/require.js"/>
     <script type="application/x-javascript">
         if (window.arguments)
             var detachArgs = window.arguments[0];
@@ -31,6 +31,7 @@
             window.FBL = detachArgs.FBL;
             Firebug = detachArgs.Firebug;
             Firebug.currentContext = detachArgs.Firebug.currentContext;
+            ChromeFactory = Firebug.ChromeFactory;
         }
         else
         {
@@ -38,7 +39,7 @@
         }
 
         // the modules are loaded in the browser.xul window. They are passed via Firebug
-        panelBarWaiter.waitForPanelBar(true);
+        panelBarWaiter.waitForPanelBar(ChromeFactory);
     </script>
 
     <stringbundleset id="stringbundleset"/>
@@ -78,8 +79,8 @@
     <popupset id="mainPopupSet"/>
 
     <!-- Entire Firebug UI -->
-    <vbox id="fbContentBox" flex="1">
-    </vbox>
+       <vbox id="fbContentBox" flex="2">
+       </vbox>
 
     <!-- If Firebug is displayed in this external window, but not active for currently selected
          Firefox tab, the following button allows to resume it. -->

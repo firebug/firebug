@@ -11,7 +11,6 @@
        window.Firebug = {};
     </script>
     <script type="application/x-javascript" src="chrome://firebug/content/firefox/panelBarWaiter.js"/>
-    <script type="application/x-javascript" src="chrome://firebug/content/chrome.js"/>
 
     <script type="application/x-javascript" src="resource://firebug/require.js"/>
     <script type="application/x-javascript" src="chrome://firebug/content/main.js"/>
@@ -69,7 +68,9 @@
     <!-- Firebug panel -->
     <vbox id="appcontent">
         <splitter id="fbContentSplitter" collapsed="true"/>
-        <vbox id="fbContentBox" collapsed="true" persist="height">
+        <vbox id="fbMainFrame" persist="height" collapsed="true">
+            <vbox id="fbContentBox" flex="2" /><vbox>
+        </vbox>
         </vbox>
     </vbox>
 

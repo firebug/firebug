@@ -7,6 +7,7 @@
 define([
     "firebug/lib",
     "firebug/firefox/firefox",
+    "firebug/chrome",
     "firebug/domplate",
     "firebug/lib/options",
     "firebug/lib/locale",
@@ -18,7 +19,7 @@ define([
     "firebug/lib/string",
     "firebug/lib/array",
 ],
-function(FBL, Firefox, Domplate, Options, Locale, Events, Wrapper, URL, CSS, WIN, STR, ARR) {
+function(FBL, Firefox, ChromeFactory, Domplate, Options, Locale, Events, Wrapper, URL, CSS, WIN, STR, ARR) {
 
 // ********************************************************************************************* //
 // Constants
@@ -102,10 +103,6 @@ window.Firebug =
 
     stringCropLength: 50,
 
-    tabBrowser: null,
-    originalChrome: FirebugChrome,
-    chrome: FirebugChrome,
-
     isInitialized: false,
     migrations: {},
 
@@ -118,13 +115,16 @@ window.Firebug =
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
     // Initialization
 
-    initialize: function()
+    initialize: function(chrome)
     {
         // This says how much time was necessary to load Firebug overlay (+ all script tags).
         FBTrace.timeEnd("SCRIPTTAG_TIME");
 
         // Measure the entire Firebug initialiation time.
         FBTrace.time("INITIALIZATION_TIME");
+
+        Firebug.chrome = chrome;
+        Firebug.originalChrome = Firebug.chrome;
 
         if (FBTrace.sysout && (!FBL || !FBL.initialize))
         {
@@ -148,20 +148,6 @@ window.Firebug =
 
         // Append early registered panels at the end.
         panelTypes.push.apply(panelTypes, tempPanelTypes);
-
-        var tabBrowser = Firefox.getElementById("content");
-        if (tabBrowser) // TODO Firebug.TabWatcher
-        {
-            if (FBTrace.DBG_INITIALIZE)
-                FBTrace.sysout("firebug.initialize has a tabBrowser");
-            this.tabBrowser = tabBrowser;
-        }
-        else
-        {
-            // xxxHonza: the content element doesn't have to exist in cases
-            // where Firebug is embedded in another XUL application (e.g. FBTrace).
-            //throw new Error("Firebug ERROR no 'content' in "+document.location);
-        }
 
         Firebug.Options.addListener(this);
 
@@ -257,7 +243,10 @@ window.Firebug =
         if (version)
         {
             this.version = version;
-            Firefox.getElementById('fbStatusBar').setAttribute("tooltiptext", "Firebug " + version);
+
+            var fbStatusBar = Firefox.getElementById('fbStatusBar')
+            if (fbStatusBar)
+                fbStatusBar.setAttribute("tooltiptext", "Firebug " + version);
 
             // At this moment there is more 'Firebug About' items (in the icon and tools menu).
             var nodes = document.querySelectorAll(".firebugAbout");
@@ -330,7 +319,7 @@ window.Firebug =
     getSuspended: function()  // TODO XULWindow
     {
         var suspendMarker = Firefox.getElementById("firebugStatus");
-        if (suspendMarker.hasAttribute("suspended"))
+        if (suspendMarker && suspendMarker.hasAttribute("suspended"))
             return suspendMarker.getAttribute("suspended");
         return null;
     },
@@ -693,23 +682,16 @@ window.Firebug =
     // TODO XULWindow
     showBar: function(show)
     {
-        var browser = Firebug.chrome.getCurrentBrowser();
+        var browser = Firefox.getCurrentBrowser();
 
         if (FBTrace.DBG_WINDOWS || FBTrace.DBG_ACTIVATION)
             FBTrace.sysout("showBar("+show+") for browser "+browser.currentURI.spec+
                 " Firebug.currentContext "+Firebug.currentContext);
 
-        var contentBox = Firebug.chrome.$("fbContentBox");
-        var contentSplitter = Firebug.chrome.$("fbContentSplitter");
-
-        var shouldShow = show/* && !Firebug.isDetached()*/;
-        contentBox.setAttribute("collapsed", !shouldShow);
+        Firebug.chrome.toggleOpen(show);
 
         if(!show)
             Firebug.Inspector.inspectNode(null);
-
-        if (contentSplitter)
-            contentSplitter.setAttribute("collapsed", !shouldShow);
 
         //xxxHonza: should be removed.
         Events.dispatch(Firebug.uiListeners, show ? "showUI" : "hideUI",
@@ -725,7 +707,7 @@ window.Firebug =
 
     closeFirebug: function(userCommand)  // this is really deactivate
     {
-        var browser = Firebug.chrome.getCurrentBrowser();
+        var browser = Firefox.getCurrentBrowser();
 
         Firebug.TabWatcher.unwatchBrowser(browser, userCommand);
         Firebug.StartButton.resetTooltip();
@@ -742,7 +724,7 @@ window.Firebug =
      */
     toggleBar: function(forceOpen, panelName)
     {
-        var browser = Firebug.chrome.getCurrentBrowser();
+        var browser = Firefox.getCurrentBrowser();
 
         if (panelName)
             Firebug.chrome.selectPanel(panelName);
@@ -844,6 +826,12 @@ window.Firebug =
         Firebug.chrome = newChrome;
         Firebug.setPlacement(newPlacement);
 
+        if (FBTrace.DBG_INITIALIZE)
+        {
+            var msg = "old: "+oldChrome.window.location;
+            msg    += " new: "+newChrome.window.location;
+            FBTrace.sysout("firebug; setChrome "+msg);
+        }
         // reattach all contexts to the new chrome
         Firebug.TabWatcher.iterateContexts(function reattach(context)
         {
@@ -857,7 +845,7 @@ window.Firebug =
     {
         if (!context)
         {
-            var browser = Firebug.chrome.getCurrentBrowser();
+            var browser = Firefox.getCurrentBrowser();
             var created = Firebug.TabWatcher.watchBrowser(browser);  // create a context for this page
             if (!created)
             {
@@ -895,7 +883,7 @@ window.Firebug =
 
     syncBar: function()  // show firebug if we should
     {
-        var browser = Firebug.chrome.getCurrentBrowser();
+        var browser = Firefox.getCurrentBrowser();
         this.showBar(browser && browser.showFirebug);  // implicitly this is operating in the chrome of browser.xul
     },
 
@@ -1317,32 +1305,10 @@ window.Firebug =
         if (Firebug.isMinimized())
             this.showBar(false);  // don't show, we are minimized
         else if (Firebug.isDetached())
-            this.syncResumeBox(context);
+            Firebug.chrome.syncResumeBox(context);
         else  // inBrowser
             this.showBar(context?true:false);
 
-    },
-
-    syncResumeBox: function(context)
-    {
-        var contentBox = Firebug.chrome.$('fbContentBox');
-        var resumeBox = Firebug.chrome.$('fbResumeBox');
-
-        if (!resumeBox) // the showContext is being called before the reattachContext, we'll get a second showContext
-            return;
-
-        if (context)
-        {
-            FBL.collapse(contentBox, false);
-            Firebug.chrome.syncPanel();
-            FBL.collapse(resumeBox, true);
-        }
-        else
-        {
-            FBL.collapse(contentBox, true);
-            FBL.collapse(resumeBox, false);
-            Firebug.chrome.window.document.title = Locale.$STR("Firebug - inactive for current website");
-        }
     },
 
     unwatchBrowser: function(browser)  // the context for this browser has been destroyed and removed
@@ -1419,38 +1385,10 @@ window.Firebug =
 
     //*********************************************************************************************
 
-    getTabForWindow: function(aWindow)  // TODO move to FBL, only used by getTabIdForWindow
-    {
-        aWindow = WIN.getRootWindow(aWindow);
-
-        if (!aWindow || !this.tabBrowser || !this.tabBrowser.getBrowserIndexForDocument)
-            return null;
-
-        try {
-            var targetDoc = aWindow.document;
-
-            var tab = null;
-            var targetBrowserIndex = this.tabBrowser.getBrowserIndexForDocument(targetDoc);
-
-            if (targetBrowserIndex != -1)
-            {
-                tab = this.tabBrowser.tabContainer.childNodes[targetBrowserIndex];
-                return tab;
-            }
-        } catch (ex) {}
-
-        return null;
-    },
-
-    getTabIdForWindow: function(win)  // TODO move to FBL, rename to getIdForWindow, at 1.7 reimplement with bug 534149
-    {
-        var tab = this.getTabForWindow(win);
-        return tab ? tab.linkedPanel : null;
-    },
 
     focusBrowserTab: function(win)    // TODO move to FBL
     {
-        this.tabBrowser.selectedTab = this.getTabForWindow(win);
+        Firefox.selectTabByWindow(win);
         this.chrome.focus();
     },
 
@@ -2729,6 +2667,7 @@ function shutdownFirebug()
 // Registration
 
 Firebug.Domplate = Domplate;
+Firebug.ChromeFactory = ChromeFactory;
 
 return Firebug;
 

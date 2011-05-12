@@ -11,15 +11,15 @@ window.panelBarWaiter = function()
 
         var waitingPanelBarCount = 2;
         var waitLimit = 200;
-        var modulesLoaded = false;
+        var chromeFactory = false;
 
         /*
          * Called by module loader to signal modules loaded
          */
-        panelBarWaiter.waitForPanelBar = function(modulesAreLoaded)
+        panelBarWaiter.waitForPanelBar = function(chromeFactoryIn)
         {
-            if (modulesAreLoaded)
-                modulesLoaded = true;
+            if (chromeFactoryIn)
+                chromeFactory = chromeFactoryIn;
 
             waitLimit -= 1;
 
@@ -29,10 +29,10 @@ window.panelBarWaiter = function()
                 {
                     var msg = "panelBarWaiter; waitForPanelBar "+waitLimit;
                     msg += " waitingPanelBarCount: "+waitingPanelBarCount;
-                    msg += " modulesLoaded: "+ modulesLoaded;
+                    msg += " chromeFactory: "+ chromeFactory;
                     FBTrace.sysout(msg);
                 }
-                if (!modulesLoaded)
+                if (!chromeFactory)
                     setTimeout(panelBarWaiter.waitForPanelBar, 10);
             }
         };
@@ -42,12 +42,12 @@ window.panelBarWaiter = function()
             try
             {
                 // Wait until all panelBar bindings are ready before initializing
-                if (waitingPanelBarCount == 0 && modulesLoaded)
+                if (waitingPanelBarCount == 0 && chromeFactory)
                 {
                     if (FBTrace.DBG_INITIALIZE)
                         FBTrace.sysout("panelBarWaiter; initializing now");
-
-                    window.FirebugChrome.initialize(); // This needs to be the window-specific chrome
+                    var chrome = chromeFactory.createFirebugChrome(window);
+                    chrome.initialize(); // This needs to be the window-specific chrome
                     delete window.panelBarWaiter;
                     return true; // the panel bar is ready
                 }
@@ -77,7 +77,7 @@ window.panelBarWaiter = function()
                waitingPanelBarCount -= 1;
 
                 window.dump("chrome; panelBarReady (" + waitingPanelBarCount + ") "+
-                        (modulesLoaded ? "Modules loaded" : "Modules not yet loaded")+" in "+window.location+"\n");
+                        (chromeFactory ? "Modules loaded" : "Modules not yet loaded")+" in "+window.location+"\n");
 
                 panelBarWaiter.initializeWhenReady();
             }
