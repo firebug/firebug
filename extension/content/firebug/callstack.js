@@ -9,8 +9,9 @@ define([
     "firebug/lib/wrapper",
     "firebug/lib/stackFrame",
     "firebug/lib/css",
+    "firebug/lib/array",
 ],
-function(FBL, Firebug, FirebugReps, ToolsInterface, Events, Wrapper, StackFrame, CSS) {
+function(FBL, Firebug, FirebugReps, ToolsInterface, Events, Wrapper, StackFrame, CSS, ARR) {
 
 // ************************************************************************************************
 // Constants
@@ -236,7 +237,7 @@ Firebug.CallstackPanel.prototype = FBL.extend(Firebug.Panel,
 
     getContextMenuItems: function(nada, target)
     {
-        FBTrace.sysout("panel.getContextMenuItems", FBL.cloneArray(arguments));
+        FBTrace.sysout("panel.getContextMenuItems", ARR.cloneArray(arguments));
         var items = [
             {label: "Expand All", command: FBL.bindFixed(this.onExpandAll, this, target)},
             {label: "Collapse All", command: FBL.bindFixed(this.onCollapseAll, this, target)}
@@ -301,13 +302,13 @@ Referent.prototype =
      */
     getObjectPathExpression: function()
     {
-        this.objectPathExpr = FBL.cloneArray(this.names).reverse().join('.');
+        this.objectPathExpr = ARR.cloneArray(this.names).reverse().join('.');
         return this.objectPathExpr;
     },
 
     getObjectPathObjects: function()
     {
-        this.objChain = FBL.cloneArray(this.values);
+        this.objChain = ARR.cloneArray(this.values);
         this.objChain.push(this.object);
         this.objChain.reverse();
         return this.objChain;

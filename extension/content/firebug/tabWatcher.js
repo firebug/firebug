@@ -11,9 +11,10 @@ define([
     "firebug/http/httpLib",
     "firebug/firefox/window",
     "firebug/lib/string",
+    "firebug/lib/array",
     "firebug/tabContext",
 ],
-function(FBL, Firebug, Firefox, XPCOM, HttpRequestObserver, Events, URL, HTTP, WIN, STR) {
+function(FBL, Firebug, Firefox, XPCOM, HttpRequestObserver, Events, URL, HTTP, WIN, STR, ARR) {
 
 // ************************************************************************************************
 // Constants
@@ -516,7 +517,7 @@ Firebug.TabWatcher = FBL.extend(new Firebug.Listener(),
                 (context.window && !context.window.closed?context.window.location:"no window or closed ")+" aborted: "+context.aborted);
 
         context.destroy(persistedState);
-        FBL.remove(contexts, context);
+        ARR.remove(contexts, context);
 
         for (var name in context)
             delete context[name];

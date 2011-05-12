@@ -4,8 +4,9 @@ define([
     "firebug/lib/trace",
     "firebug/lib/deprecated",
     "firebug/lib/css",
+    "firebug/lib/array",
 ],
-function(FBTrace, Deprecated, CSS) {
+function(FBTrace, Deprecated, CSS, ARR) {
 
 // ********************************************************************************************* //
 // Constants
@@ -73,7 +74,7 @@ DOM.getElementByClass = function(node, className)  // className, className, ...
 /* @Deprecated  Use native Firefox: node.getElementsByClassName(names) */
 DOM.getElementsByClass = function(node, className)  // className, className, ...
 {
-    var args = FBL.cloneArray(arguments); args.splice(0, 1);
+    var args = ARR.cloneArray(arguments); args.splice(0, 1);
     var className = args.join(" ");
     return node.getElementsByClassName(className);
 };

@@ -18,9 +18,13 @@ define([
     "firebug/lib/xpath",
     "firebug/lib/string",
     "firebug/lib/xml",
+    "firebug/persist",
+    "firebug/lib/array",
+    "firebug/firefox/system",
+    "firebug/lib/json",
 ],
 function(XPCOM, Locale, Events, Options, Deprecated, Wrapper, URL, SourceLink, StackFrame,
-    CSS, DOM, HTTP, WIN, Search, XPATH, STR, XML) {
+    CSS, DOM, HTTP, WIN, Search, XPATH, STR, XML, Persist, ARR, System, JSONLib) {
 
 // ********************************************************************************************* //
 
@@ -84,6 +88,18 @@ for (var p in STR)
 for (var p in XML)
     FBL[p] = XML[p];
 
+for (var p in Persist)
+    FBL[p] = Persist[p];
+
+for (var p in ARR)
+    FBL[p] = ARR[p];
+
+for (var p in System)
+    FBL[p] = System[p];
+
+for (var p in JSONLib)
+    FBL[p] = JSONLib[p];
+
 FBL.deprecated = Deprecated.deprecated;
 FBL.SourceLink = SourceLink.SourceLink;
 
@@ -142,13 +158,13 @@ const overrideDefaultsWithPersistedValuesTimeout = 500;
 
 this.bind = function()  // fn, thisObject, args => thisObject.fn(arguments, args);
 {
-   var args = cloneArray(arguments), fn = args.shift(), object = args.shift();
-   return function bind() { return fn.apply(object, arrayInsert(cloneArray(args), 0, arguments)); }
+   var args = ARR.cloneArray(arguments), fn = args.shift(), object = args.shift();
+   return function bind() { return fn.apply(object, ARR.arrayInsert(ARR.cloneArray(args), 0, arguments)); }
 };
 
 this.bindFixed = function() // fn, thisObject, args => thisObject.fn(args);
 {
-    var args = cloneArray(arguments), fn = args.shift(), object = args.shift();
+    var args = ARR.cloneArray(arguments), fn = args.shift(), object = args.shift();
     return function() { return fn.apply(object, args); }
 };
 
@@ -174,111 +190,6 @@ this.descend = function(prototypeParent, childProperties)
         newOb[n] = childProperties[n];
     return newOb;
 };
-
-// ************************************************************************************************
-// Arrays
-
-this.keys = function(map)  // At least sometimes the keys will be on user-level window objects
-{
-    var keys = [];
-    try
-    {
-        for (var name in map)  // enumeration is safe
-            keys.push(name);   // name is string, safe
-    }
-    catch (exc)
-    {
-        // Sometimes we get exceptions trying to iterate properties
-    }
-
-    return keys;  // return is safe
-};
-
-this.values = function(map)
-{
-    var values = [];
-    try
-    {
-        for (var name in map)
-        {
-            try
-            {
-                values.push(map[name]);
-            }
-            catch (exc)
-            {
-                // Sometimes we get exceptions trying to access properties
-                if (FBTrace.DBG_ERRORS)
-                    FBTrace.dumpPropreties("lib.values FAILED ", exc);
-            }
-
-        }
-    }
-    catch (exc)
-    {
-        // Sometimes we get exceptions trying to iterate properties
-        if (FBTrace.DBG_ERRORS)
-            FBTrace.dumpPropreties("lib.values FAILED ", exc);
-    }
-
-    return values;
-};
-
-this.remove = function(list, item)
-{
-    for (var i = 0; i < list.length; ++i)
-    {
-        if (list[i] == item)
-        {
-            list.splice(i, 1);
-            break;
-        }
-    }
-};
-
-this.sliceArray = function(array, index)
-{
-    var slice = [];
-    for (var i = index; i < array.length; ++i)
-        slice.push(array[i]);
-
-    return slice;
-};
-
-function cloneArray(array, fn)
-{
-   var newArray = [];
-
-   if (fn)
-       for (var i = 0; i < array.length; ++i)
-           newArray.push(fn(array[i]));
-   else
-       for (var i = 0; i < array.length; ++i)
-           newArray.push(array[i]);
-
-   return newArray;
-}
-
-function extendArray(array, array2)
-{
-   var newArray = [];
-   newArray.push.apply(newArray, array);
-   newArray.push.apply(newArray, array2);
-   return newArray;
-}
-
-this.extendArray = extendArray;
-this.cloneArray = cloneArray;
-
-function arrayInsert(array, index, other)
-{
-   for (var i = 0; i < other.length; ++i)
-       array.splice(i+index, 0, other[i]);
-
-   return array;
-}
-
-this.arrayInsert = arrayInsert;
 
 // ************************************************************************************************
 
@@ -319,16 +230,6 @@ this.getPrototype = function(ob)
     return null;
 };
 
-this.getPlatformName = function()
-{
-    return Cc["@mozilla.org/xre/app-info;1"].getService(Ci.nsIXULRuntime).OS;
-};
-
-this.beep = function()
-{
-    var sounder = Cc["@mozilla.org/sound;1"].getService(Ci.nsISound);
-    sounder.beep();
-};
 
 this.getUniqueId = function()
 {
@@ -1165,136 +1066,6 @@ this.getResource = function(aURL)
     }
 };
 
-// ************************************************************************************************
-// JSON
-
-this.parseJSONString = function(jsonString, originURL)
-{
-    if (FBTrace.DBG_JSONVIEWER)
-        FBTrace.sysout("jsonviewer.parseJSON; " + jsonString);
-
-    // See if this is a Prototype style *-secure request.
-    var regex = new RegExp(/\s*\/\*-secure-([\s\S]*)\*\/\s*$/);
-    var matches = regex.exec(jsonString);
-
-    if (matches)
-    {
-        jsonString = matches[1];
-
-        if (jsonString[0] == "\\" && jsonString[1] == "n")
-            jsonString = jsonString.substr(2);
-
-        if (jsonString[jsonString.length-2] == "\\" && jsonString[jsonString.length-1] == "n")
-            jsonString = jsonString.substr(0, jsonString.length-2);
-    }
-
-    if (jsonString.indexOf("&&&START&&&"))
-    {
-        regex = new RegExp(/&&&START&&& (.+) &&&END&&&/);
-        matches = regex.exec(jsonString);
-        if (matches)
-            jsonString = matches[1];
-    }
-
-    try
-    {
-        var s = Components.utils.Sandbox(originURL);
-
-        // throw on the extra parentheses
-        return Components.utils.evalInSandbox("(" + jsonString + ")", s);
-    }
-    catch(e)
-    {
-        if (FBTrace.DBG_JSONVIEWER)
-            FBTrace.sysout("jsonviewer.parseJSON FAILS on "+originURL+" for \""+jsonString+
-                "\" with EXCEPTION "+e, e);
-    }
-
-    // Let's try to parse it as JSONP.
-    var reJSONP = /^\s*([A-Za-z0-9_.]+\s*(?:\[.*\]|))\s*\(.*\)/;
-    var m = reJSONP.exec(jsonString);
-    if (!m || !m[1])
-        return null;
-
-    if (FBTrace.DBG_JSONVIEWER)
-        FBTrace.sysout("jsonviewer.parseJSONP; " + jsonString);
-
-    var callbackName = m[1];
-
-    if (FBTrace.DBG_JSONVIEWER)
-        FBTrace.sysout("jsonviewer.parseJSONP; Look like we have a JSONP callback: " + callbackName);
-
-    // Replace the original callback (it can be e.g. foo.bar[1]) with simple function name.
-    jsonString = jsonString.replace(callbackName, "callback");
-
-    try
-    {
-        var s = Components.utils.Sandbox(originURL);
-        s["callback"] = function(object) { return object; };
-        return Components.utils.evalInSandbox(jsonString, s);
-    }
-    catch(ex)
-    {
-        if (FBTrace.DBG_JSONVIEWER)
-            FBTrace.sysout("jsonviewer.parseJSON EXCEPTION", e);
-    }
-
-    return null;
-};
-
-this.parseJSONPString = function(jsonString, originURL)
-{
-}
-
-// ************************************************************************************************
-// Programs
-
-this.launchProgram = function(exePath, args)
-{
-    try
-    {
-        var file = Cc["@mozilla.org/file/local;1"].createInstance(Ci.nsILocalFile);
-        file.initWithPath(exePath);
-        if (this.getPlatformName() == "Darwin" && file.isDirectory())
-        {
-            args = this.extendArray(["-a", exePath], args);
-            file.initWithPath("/usr/bin/open");
-        }
-        if (!file.exists())
-            return false;
-        var process = Cc["@mozilla.org/process/util;1"].createInstance(Ci.nsIProcess);
-        process.init(file);
-        process.run(false, args, args.length, {});
-        return true;
-    }
-    catch(exc)
-    {
-        this.ERROR(exc);
-    }
-    return false;
-};
-
-this.getIconURLForFile = function(path)
-{
-    var fileHandler = ioService.getProtocolHandler("file").QueryInterface(Ci.nsIFileProtocolHandler);
-    try {
-        var file = Cc["@mozilla.org/file/local;1"].createInstance(Ci.nsILocalFile);
-        file.initWithPath(path);
-        if ((this.getPlatformName() == "Darwin") && !file.isDirectory() && (path.indexOf(".app/") != -1))
-        {
-            path = path.substr(0,path.lastIndexOf(".app/")+4);
-            file.initWithPath(path);
-        }
-        return "moz-icon://" + fileHandler.getURLSpecFromFile(file) + "?size=16";
-    }
-    catch(exc)
-    {
-        if (FBTrace.DBG_ERRORS)
-            FBTrace.sysout("getIconURLForFile ERROR "+exc+" for "+path, exc);
-    }
-    return null;
-}
-
 this.makeURI = function(urlString)
 {
     try
@@ -1312,125 +1083,6 @@ this.makeURI = function(urlString)
     }
 }
 
-// ************************************************************************************************
-// Persistence (cross page refresh)
-
-this.persistObjects = function(panel, panelState)
-{
-    // Persist the location and selection so we can restore them in case of a reload
-    if (panel.location)
-        panelState.persistedLocation = this.persistObject(panel.location, panel.context); // fn(context)->location
-
-    if (panel.selection)
-        panelState.persistedSelection = this.persistObject(panel.selection, panel.context);
-
-    if (FBTrace.DBG_INITIALIZE)
-        FBTrace.sysout("lib.persistObjects "+panel.name+" panel.location:"+panel.location+
-            " panel.selection:"+panel.selection+" panelState:", panelState);
-};
-
-this.persistObject = function(object, context)
-{
-    var rep = Firebug.getRep(object, context);
-    return rep ? rep.persistObject(object, context) : null;
-};
-
-this.restoreLocation =  function(panel, panelState)
-{
-    var restored = false;
-
-    if (!panel.location && panelState && panelState.persistedLocation)
-    {
-        var location = panelState.persistedLocation(panel.context);
-
-        if (FBTrace.DBG_INITIALIZE)
-            FBTrace.sysout("lib.restoreObjects "+panel.name+" persistedLocation: "+location+
-                " panelState:", panelState);
-
-        if (location)
-        {
-            panel.navigate(location);
-            restored = true;
-        }
-    }
-
-    if (!panel.location)
-        panel.navigate(null);
-
-    if (FBTrace.DBG_INITIALIZE)
-        FBTrace.sysout("lib.restoreLocation panel.location: "+panel.location+" restored: "+
-            restored+" panelState:", panelState);
-
-    return restored;
-};
-
-this.restoreSelection = function(panel, panelState)
-{
-    var needRetry = false;
-
-    if (!panel.selection && panelState && panelState.persistedSelection)
-    {
-        var selection = panelState.persistedSelection(panel.context);
-        if (selection)
-            panel.select(selection);
-        else
-            needRetry = true;
-    }
-
-    if (!panel.selection)  // Couldn't restore the selection, so select the default object
-        panel.select(null);
-
-    if (needRetry)
-    {
-        function overrideDefaultWithPersistedSelection()
-        {
-            if (panel.selection == panel.getDefaultSelection() && panelState.persistedSelection)
-            {
-                var selection = panelState.persistedSelection(panel.context);
-                if (selection)
-                    panel.select(selection);
-            }
-
-            if (FBTrace.DBG_INITIALIZE)
-                FBTrace.sysout("lib.overrideDefaultsWithPersistedValues "+panel.name+
-                    " panel.location: "+panel.location+" panel.selection: "+panel.selection+
-                    " panelState:", panelState);
-        }
-
-        // If we couldn't restore the selection, wait a bit and try again
-        panel.context.setTimeout(overrideDefaultWithPersistedSelection,
-            overrideDefaultsWithPersistedValuesTimeout);
-    }
-
-    if (FBTrace.DBG_INITIALIZE)
-        FBTrace.sysout("lib.restore "+panel.name+" needRetry "+needRetry+" panel.selection: "+
-            panel.selection+" panelState:", panelState);
-};
-
-this.restoreObjects = function(panel, panelState)
-{
-    this.restoreLocation(panel, panelState);
-    this.restoreSelection(panel, panelState);
-};
-
-this.getPersistedState = function(context, panelName)
-{
-    if (!context)
-        return null;
-
-    var persistedState = context.persistedState;
-    if (!persistedState)
-        persistedState = context.persistedState = {};
-
-    if (!persistedState.panelState)
-        persistedState.panelState = {};
-
-    var panelState = persistedState.panelState[panelName];
-    if (!panelState)
-        panelState = persistedState.panelState[panelName] = {};
-
-    return panelState;
-};
 
 // ************************************************************************************************
 // Error Message
@@ -1491,7 +1143,7 @@ this.Continued.prototype =
         if (this.callback)
             this.callback.apply(top, arguments);
         else
-            this.result = cloneArray(arguments);
+            this.result = ARR.cloneArray(arguments);
     },
 
     wait: function(cb)

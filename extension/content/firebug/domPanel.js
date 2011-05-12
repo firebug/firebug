@@ -15,12 +15,14 @@ define([
     "firebug/lib/css",
     "firebug/lib/search",
     "firebug/lib/string",
+    "firebug/lib/array",
+    "firebug/persist",
     "firebug/editor",
     "firebug/breakpoint",
     "firebug/searchBox",
 ],
 function(FBL, Firebug, Domplate, FirebugReps, Locale, ToolsInterface, Events, Wrapper,
-    SourceLink, StackFrame, DOM, CSS, Search, STR) {
+    SourceLink, StackFrame, DOM, CSS, Search, STR, ARR, Persist) {
 
 with (Domplate) {
 
@@ -448,7 +450,7 @@ Firebug.DOMBasePanel.prototype = FBL.extend(Firebug.Panel,
         {
             // Special case for "arguments", which is not enumerable by for...in statement.
             if (isArguments(object))
-                object = FBL.cloneArray(object);
+                object = ARR.cloneArray(object);
 
             if (object instanceof window.StorageList)
             {
@@ -1160,7 +1162,7 @@ Firebug.DOMBasePanel.prototype = FBL.extend(Firebug.Panel,
             state.propertyPath = this.propertyPath;
 
         if (this.propertyPath.length > 0 && !this.propertyPath[1])
-            state.firstSelection = FBL.persistObject(this.getPathObject(1), this.context);
+            state.firstSelection = Persist.persistObject(this.getPathObject(1), this.context);
 
         if (FBTrace.DBG_DOM)
             FBTrace.sysout("dom.destroy; state:", state);
@@ -2250,7 +2252,7 @@ DOMBreakpointGroup.prototype = FBL.extend(new Firebug.Breakpoint.BreakpointGroup
         if (bp)
         {
             bp.unwatchProperty();
-            FBL.remove(this.breakpoints, bp);
+            ARR.remove(this.breakpoints, bp);
         }
     },
 
@@ -2264,7 +2266,7 @@ DOMBreakpointGroup.prototype = FBL.extend(new Firebug.Breakpoint.BreakpointGroup
     // Persistence
     load: function(context)
     {
-        var panelState = FBL.getPersistedState(context, "dom");
+        var panelState = Persist.getPersistedState(context, "dom");
         if (panelState.breakpoints)
             this.breakpoints = panelState.breakpoints;
 
@@ -2295,7 +2297,7 @@ DOMBreakpointGroup.prototype = FBL.extend(new Firebug.Breakpoint.BreakpointGroup
             bp.object = null;
         });
 
-        var panelState = FBL.getPersistedState(context, "dom");
+        var panelState = Persist.getPersistedState(context, "dom");
         panelState.breakpoints = this.breakpoints;
     },
 });

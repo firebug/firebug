@@ -10,10 +10,11 @@ define([
     "firebug/lib/dom",
     "firebug/http/httpLib",
     "firebug/lib/string",
+    "firebug/lib/json",
     "firebug/domPanel",
     "firebug/reps"
 ],
-function(FBL, Firebug, Domplate, Locale, Events, CSS, DOM, HTTP, STR) {
+function(FBL, Firebug, Domplate, Locale, Events, CSS, DOM, HTTP, STR, JSONLib) {
 
 // ************************************************************************************************
 
@@ -113,7 +114,7 @@ Firebug.JSONViewerModel = FBL.extend(Firebug.Module,
     parseJSON: function(file)
     {
         var jsonString = new String(file.responseText);
-        return FBL.parseJSONString(jsonString, "http://" + file.request.originalURI.host);
+        return JSONLib.parseJSONString(jsonString, "http://" + file.request.originalURI.host);
     },
 });
 

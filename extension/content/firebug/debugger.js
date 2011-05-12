@@ -16,10 +16,11 @@ define([
     "firebug/lib/css",
     "firebug/firefox/window",
     "firebug/lib/string",
+    "firebug/lib/array",
     "firebug/errors",
 ],
 function(FBL, Firebug, Firefox, ToolsInterface, XPCOM, FirebugReps, Locale, HttpRequestObserver,
-    Wrapper, URL, SourceLink, StackFrame, CSS, WIN, STR) {
+    Wrapper, URL, SourceLink, StackFrame, CSS, WIN, STR, ARR) {
 
 // ********************************************************************************************* //
 
@@ -128,7 +129,7 @@ Firebug.Debugger = FBL.extend(Firebug.ActivableModule,
     // on bti
     getCurrentFrameKeys: function(context)  // TODO remote
     {
-        var globals = FBL.keys(Wrapper.getContentView(context.getGlobalScope()));  // return is safe
+        var globals = ARR.keys(Wrapper.getContentView(context.getGlobalScope()));  // return is safe
 
         if (context.currentFrame)
             return this.getFrameKeys(context.currentFrame, globals);

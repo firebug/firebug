@@ -14,11 +14,12 @@ define([
     "firebug/firefox/window",
     "firebug/lib/string",
     "firebug/lib/url",
+    "firebug/lib/array",
     "firebug/netPanel",
     "firebug/errors",
 ],
 function(FBL, Firebug, Domplate, FirebugReps, Events, HttpRequestObserver, StackFrame,
-    HTTP, CSS, DOM, WIN, STR, URL) {
+    HTTP, CSS, DOM, WIN, STR, URL, ARR) {
 
 // ************************************************************************************************
 // Constants
@@ -376,7 +377,7 @@ var SpyHttpObserver =
         // xxxHonza: These requests are not observer by the activityObserver now
         // (if they should be observed we have to remove them in the activityObserver)
         if (!spy.onLoad && spy.context.spies)
-            FBL.remove(spy.context.spies, spy);
+            ARR.remove(spy.context.spies, spy);
 
         if (FBTrace.DBG_SPY)
             FBTrace.sysout("spy.requestStopped: " + spy.href + ", responseTime: " +
@@ -583,7 +584,7 @@ Firebug.Spy.XMLHttpRequestSpy.prototype =
             FBTrace.sysout("spy.detach; " + this.href);
 
         // Remove itself from the list of active spies.
-        FBL.remove(this.context.spies, this);
+        ARR.remove(this.context.spies, this);
 
         if (this.onreadystatechange)
             this.xhrRequest.onreadystatechange = this.onreadystatechange;

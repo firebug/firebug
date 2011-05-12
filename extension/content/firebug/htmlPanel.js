@@ -16,6 +16,8 @@ define([
     "firebug/lib/xpath",
     "firebug/lib/string",
     "firebug/lib/xml",
+    "firebug/lib/array",
+    "firebug/persist",
     "firebug/breakpoint",
     "firebug/editor",
     "firebug/infotip",
@@ -23,7 +25,7 @@ define([
     "firebug/insideOutBox",
 ],
 function(FBL, Firebug, Domplate, FirebugReps, Locale, ToolsInterface, HTMLLib, Events,
-    SourceLink, CSS, DOM, WIN, XPATH, STR, XML) { with (Domplate) {
+    SourceLink, CSS, DOM, WIN, XPATH, STR, XML, ARR, Persist) { with (Domplate) {
 
 // ************************************************************************************************
 // Constants
@@ -965,7 +967,7 @@ Firebug.HTMLPanel.prototype = FBL.extend(WalkingPanel,
 
     destroy: function(state)
     {
-        FBL.persistObjects(this, state);
+        Persist.persistObjects(this, state);
 
         Firebug.Panel.destroy.apply(this, arguments);
     },
@@ -1019,7 +1021,7 @@ Firebug.HTMLPanel.prototype = FBL.extend(WalkingPanel,
                 }, this));
             }
 
-            FBL.restoreObjects(this, state);
+            Persist.restoreObjects(this, state);
         }
     },
 
@@ -1495,7 +1497,7 @@ Firebug.HTMLPanel.CompleteElement = domplate(FirebugReps.Element,
             return [node.contentDocument.documentElement];
 
         if (Firebug.showTextNodesWithWhitespace)
-            return FBL.cloneArray(node.childNodes);
+            return ARR.cloneArray(node.childNodes);
         else
         {
             var nodes = [];
@@ -2337,13 +2339,13 @@ MutationBreakpointGroup.prototype = FBL.extend(new Firebug.Breakpoint.Breakpoint
 
     removeBreakpoint: function(bp)
     {
-        FBL.remove(this.breakpoints, bp);
+        ARR.remove(this.breakpoints, bp);
     },
 
     // Persistence
     load: function(context)
     {
-        var panelState = FBL.getPersistedState(context, "html");
+        var panelState = Persist.getPersistedState(context, "html");
         if (panelState.breakpoints)
             this.breakpoints = panelState.breakpoints;
 
@@ -2361,7 +2363,7 @@ MutationBreakpointGroup.prototype = FBL.extend(new Firebug.Breakpoint.Breakpoint
             bp.node = null;
         });
 
-        var panelState = FBL.getPersistedState(context, "html");
+        var panelState = Persist.getPersistedState(context, "html");
         panelState.breakpoints = this.breakpoints;
     },
 });

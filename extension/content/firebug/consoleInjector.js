@@ -10,10 +10,11 @@ define([
     "firebug/lib/stackFrame",
     "firebug/firefox/window",
     "firebug/console",
+    "firebug/lib/array",
     "firebug/consoleExposed",
     "firebug/errors",
 ],
-function(FBL, Firebug, FirebugReps, Locale, Events, URL, StackFrame, WIN, Console) {
+function(FBL, Firebug, FirebugReps, Locale, Events, URL, StackFrame, WIN, Console, ARR) {
 
 // ********************************************************************************************* //
 // Constants
@@ -109,7 +110,7 @@ Firebug.Console.injector =
         if (handler)
         {
             handler.detach();
-            FBL.remove(context.activeConsoleHandlers, handler);
+            ARR.remove(context.activeConsoleHandlers, handler);
         }
     },
 

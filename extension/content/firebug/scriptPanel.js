@@ -16,13 +16,14 @@ define([
     "firebug/lib/dom",
     "firebug/firefox/window",
     "firebug/lib/search",
+    "firebug/persist",
     "firebug/editorSelector",
     "firebug/infotip",
     "firebug/searchBox",
     "firebug/sourceBox",
 ],
 function(FBL, Firebug, Firefox, FirebugReps, Domplate, ToolsInterface, Locale, Events, URL, SourceLink,
-    StackFrame, CSS, DOM, WIN, Search) {
+    StackFrame, CSS, DOM, WIN, Search, Persist) {
 
 // ********************************************************************************************* //
 // Constants
@@ -530,7 +531,7 @@ Firebug.ScriptPanel.prototype = FBL.extend(Firebug.SourceBoxPanel,
     {
         // We want the location (compilationUnit) to persist, not the selection (eg stackFrame).
         delete this.selection;
-        FBL.persistObjects(this, state);
+        Persist.persistObjects(this, state);
 
         if (this.location instanceof CompilationUnit)
         {
@@ -673,7 +674,7 @@ Firebug.ScriptPanel.prototype = FBL.extend(Firebug.SourceBoxPanel,
                 if (!this.restored)
                 {
                     delete this.location;  // remove the default location if any
-                    FBL.restoreLocation(this, state);
+                    Persist.restoreLocation(this, state);
                     this.restored = true;
                 }
                 else // we already restored

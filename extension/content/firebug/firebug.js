@@ -16,8 +16,9 @@ define([
     "firebug/lib/css",
     "firebug/firefox/window",
     "firebug/lib/string",
+    "firebug/lib/array",
 ],
-function(FBL, Firefox, Domplate, Options, Locale, Events, Wrapper, URL, CSS, WIN, STR) {
+function(FBL, Firefox, Domplate, Options, Locale, Events, Wrapper, URL, CSS, WIN, STR, ARR) {
 
 // ********************************************************************************************* //
 // Constants
@@ -518,7 +519,7 @@ window.Firebug =
     unregisterModule: function()
     {
         for (var i = 0; i < arguments.length; ++i)
-            FBL.remove(modules, arguments[i]);
+            ARR.remove(modules, arguments[i]);
     },
 
     registerActivableModule: function()
@@ -543,8 +544,8 @@ window.Firebug =
         for (var i = 0; i < arguments.length; ++i)
         {
             Firebug.TabWatcher.removeListener(arguments[i]);
-            FBL.remove(Firebug.uiListeners, arguments[i]);
-            FBL.remove(extensions, arguments[i])
+            ARR.remove(Firebug.uiListeners, arguments[i]);
+            ARR.remove(extensions, arguments[i])
         }
     },
 
@@ -557,7 +558,7 @@ window.Firebug =
     unregisterUIListener: function()
     {
         for (var i = 0; i < arguments.length; ++i)
-            FBL.remove(Firebug.uiListeners, arguments[i]);
+            ARR.remove(Firebug.uiListeners, arguments[i]);
     },
 
     registerPanel: function()
@@ -601,7 +602,7 @@ window.Firebug =
     unregisterRep: function()
     {
         for (var i = 0; i < arguments.length; ++i)
-            FBL.remove(reps, arguments[i]);
+            ARR.remove(reps, arguments[i]);
     },
 
     setDefaultReps: function(funcRep, rep)
@@ -1535,7 +1536,7 @@ Firebug.Listener.prototype =
 
     removeListener: function(listener)
     {
-        FBL.remove(this.fbListeners, listener);  // if this.fbListeners is null, remove is being called with no add
+        ARR.remove(this.fbListeners, listener);  // if this.fbListeners is null, remove is being called with no add
     }
 };
 
@@ -2335,7 +2336,7 @@ Firebug.ActivableModule = FBL.extend(Firebug.Module,
 
         if (this.observers.indexOf(observer) !== -1)
         {
-            FBL.remove(this.observers, observer);
+            ARR.remove(this.observers, observer);
             this.onObserverChange(observer);  // targeted, not dispatched
         }
         // else no-op

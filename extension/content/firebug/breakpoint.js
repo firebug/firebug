@@ -13,10 +13,11 @@ define([
     "firebug/lib/css",
     "firebug/lib/dom",
     "firebug/lib/string",
+    "firebug/lib/array",
     "firebug/editor",
 ],
 function(FBL, Firebug, Domplate, FirebugReps, Locale, Events, ToolsInterface, SourceLink,
-    StackFrame, CSS, DOM, STR) {
+    StackFrame, CSS, DOM, STR, ARR) {
 
 // ************************************************************************************************
 // Breakpoints
@@ -575,12 +576,12 @@ Firebug.Breakpoint.BreakpointGroup.prototype =
 {
     removeBreakpoint: function(bp)
     {
-        FBL.remove(this.breakpoints, bp);
+        ARR.remove(this.breakpoints, bp);
     },
 
     enumerateBreakpoints: function(callback)
     {
-        var breakpoints = FBL.cloneArray(this.breakpoints);
+        var breakpoints = ARR.cloneArray(this.breakpoints);
         for (var i=0; i<breakpoints.length; i++)
         {
             var bp = breakpoints[i];

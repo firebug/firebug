@@ -7,8 +7,9 @@ define([
     "firebug/lib/xpcom",
     "firebug/lib/css",
     "firebug/firefox/window",
+    "firebug/lib/array",
 ],
-function(FBL, Firebug, FirebugReps, XPCOM, CSS, WIN) {
+function(FBL, Firebug, FirebugReps, XPCOM, CSS, WIN, ARR) {
 
 // **********************************************************************************************//
 // Constants
@@ -302,7 +303,7 @@ var Errors = Firebug.Errors = FBL.extend(Firebug.Module,
 
     delayedLogging: function()
     {
-        var args = FBL.cloneArray(arguments);
+        var args = ARR.cloneArray(arguments);
         var msgId = args.shift();
         var context = args.shift();
         var row = Firebug.Console.log.apply(Firebug.Console, args);

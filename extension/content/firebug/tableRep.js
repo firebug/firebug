@@ -7,8 +7,9 @@ define([
     "firebug/reps",
     "firebug/lib/dom",
     "firebug/lib/css",
+    "firebug/lib/array",
 ],
-function(FBL, Domplate, Locale, FirebugReps, DOM, CSS) {
+function(FBL, Domplate, Locale, FirebugReps, DOM, CSS, ARR) {
 
 // ************************************************************************************************
 // Constants
@@ -99,7 +100,7 @@ FirebugReps.Table = domplate(Firebug.Rep,
             return [obj];
 
         if (obj.length)
-            return FBL.cloneArray(obj);
+            return ARR.cloneArray(obj);
 
         var arr = [];
         for (var p in obj)

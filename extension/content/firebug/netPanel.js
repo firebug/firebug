@@ -21,6 +21,9 @@ define([
     "firebug/lib/search",
     "firebug/lib/string",
     "firebug/lib/xml",
+    "firebug/lib/json",
+    "firebug/lib/array",
+    "firebug/persist",
     "firebug/breakpoint",
     "firebug/xmlViewer",
     "firebug/svgViewer",
@@ -31,7 +34,8 @@ define([
     "firebug/errors",
 ],
 function(FBL, Firebug, Firefox, Domplate, XPCOM, ToolsInterface, HttpRequestObserver, Locale,
-    Events, Options, URL, SourceLink, HTTP, StackFrame, CSS, DOM, WIN, Search, STR, XML) {
+    Events, Options, URL, SourceLink, HTTP, StackFrame, CSS, DOM, WIN, Search, STR, XML,
+    JSONLib, ARR, Persist) {
 
 with (Domplate) {
 
@@ -313,7 +317,7 @@ Firebug.NetMonitor = FBL.extend(Firebug.ActivableModule,
         if (context.netProgress)
         {
             // Load existing breakpoints
-            var persistedPanelState = FBL.getPersistedState(context, panelName);
+            var persistedPanelState = Persist.getPersistedState(context, panelName);
             if (persistedPanelState.breakpoints)
                 context.netProgress.breakpoints = persistedPanelState.breakpoints;
         }
@@ -332,7 +336,7 @@ Firebug.NetMonitor = FBL.extend(Firebug.ActivableModule,
         if (context.netProgress)
         {
             // Remember existing breakpoints.
-            var persistedPanelState = FBL.getPersistedState(context, panelName);
+            var persistedPanelState = Persist.getPersistedState(context, panelName);
             persistedPanelState.breakpoints = context.netProgress.breakpoints;
         }
 
@@ -1548,7 +1552,7 @@ NetPanel.prototype = FBL.extend(Firebug.ActivablePanel,
         phase.removeFile(file);
         if (!phase.files.length)
         {
-            FBL.remove(netProgress.phases, phase);
+            ARR.remove(netProgress.phases, phase);
 
             if (netProgress.currentPhase == phase)
                 netProgress.currentPhase = null;
@@ -1888,7 +1892,7 @@ Firebug.NetMonitor.NetRequestTable = domplate(Firebug.Rep, new Firebug.Listener(
 
         // Iterate all columns except of the first one for breakpoints.
         var header = DOM.getAncestorByClass(target, "netHeaderRow");
-        var columns = FBL.cloneArray(header.childNodes);
+        var columns = ARR.cloneArray(header.childNodes);
         columns.shift();
         for (var i=0; i<columns.length; i++)
         {
@@ -2880,7 +2884,7 @@ Firebug.NetMonitor.NetInfoPostData = domplate(Firebug.Rep, new Firebug.Listener(
     insertJSON: function(parentNode, file, context)
     {
         var text = Utils.getPostText(file, context);
-        var data = FBL.parseJSONString(text, "http://" + file.request.originalURI.host);
+        var data = JSONLib.parseJSONString(text, "http://" + file.request.originalURI.host);
         if (!data)
             return;
 
@@ -4413,7 +4417,7 @@ NetPhase.prototype =
 
     removeFile: function removeFile(file)
     {
-        FBL.remove(this.files, file);
+        ARR.remove(this.files, file);
 
         // The file don't have a parent phase now.
         file.phase = null;
@@ -5744,7 +5748,7 @@ NetBreakpointGroup.prototype = FBL.extend(new Firebug.Breakpoint.BreakpointGroup
     removeBreakpoint: function(href)
     {
         var bp = this.findBreakpoint(href);
-        FBL.remove(this.breakpoints, bp);
+        ARR.remove(this.breakpoints, bp);
     },
 
     matchBreakpoint: function(bp, args)

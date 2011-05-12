@@ -13,10 +13,13 @@ define([
     "firebug/lib/xpath",
     "firebug/lib/string",
     "firebug/lib/xml",
+    "firebug/lib/array",
+    "firebug/persist",
     "firebug/console",
     "firebug/commandLineExposed"
 ],
-function(FBL, Firebug, FirebugReps, Locale, Events, Wrapper, URL, CSS, WIN, XPATH, STR, XML) {
+function(FBL, Firebug, FirebugReps, Locale, Events, Wrapper, URL, CSS, WIN, XPATH,
+    STR, XML, ARR, Persist) {
 
 // ************************************************************************************************
 // Constants
@@ -707,11 +710,11 @@ Firebug.CommandLine = FBL.extend(Firebug.Module,
 
     destroyContext: function(context, persistedState)
     {
-        var panelState = FBL.getPersistedState(this, "console");
+        var panelState = Persist.getPersistedState(this, "console");
         panelState.commandLineText = context.commandLineText
 
         this.autoCompleter.clear(this.getCompletionBox());
-        FBL.persistObjects(this, panelState);
+        Persist.persistObjects(this, panelState);
         // more of our work is done in the Console
     },
 
@@ -721,7 +724,7 @@ Firebug.CommandLine = FBL.extend(Firebug.Module,
             return;
 
         var chrome = Firebug.chrome;
-        var panelState = FBL.getPersistedState(this, "console");
+        var panelState = Persist.getPersistedState(this, "console");
         var value = panel && panel.context.commandLineText ? panel.context.commandLineText :
             panelState.commandLineText;
 
@@ -1037,7 +1040,7 @@ Firebug.CommandLine.CommandHandler = FBL.extend(Object,
         if (contentView)
             var hosed_userObjects = contentView._FirebugCommandLine.userObjects;
 
-        var userObjects = hosed_userObjects ? FBL.cloneArray(hosed_userObjects) : [];
+        var userObjects = hosed_userObjects ? ARR.cloneArray(hosed_userObjects) : [];
 
         if (FBTrace.DBG_COMMANDLINE)
             FBTrace.sysout("commandLine.CommandHandler for "+WIN.getWindowId(win)+": method "+
@@ -1608,7 +1611,7 @@ function propChainBuildComplete(out, context, tempExpr, result)
         else if (FirebugReps.Arr.isArray(result))
             complete = nonNumericKeys(result);
         else
-            complete = FBL.keys(result);
+            complete = ARR.keys(result);
         command = getTypeExtractionExpression(tempExpr.command);
     }
 
@@ -1634,7 +1637,7 @@ function propChainBuildComplete(out, context, tempExpr, result)
             {
                 if (tempExpr.type === 'fake')
                 {
-                    complete = complete.concat(FBL.keys(result));
+                    complete = complete.concat(ARR.keys(result));
                 }
                 else
                 {
@@ -1972,7 +1975,7 @@ function autoCompleteEval(preExpr, expr, postExpr, context, spreExpr)
             {
                 // XXXsilin I assume keys(innerWindow)? I'm not familiar enough with
                 // wrapped objects to change it.
-                completions = FBL.keys(contentView); // return is safe
+                completions = ARR.keys(contentView); // return is safe
 
                 // Add some known window properties, without duplicates.
                 completions = completions.concat(getFakeCompleteKeys('Window'));
@@ -1985,7 +1988,7 @@ function autoCompleteEval(preExpr, expr, postExpr, context, spreExpr)
                 }
             }
             else  // hopefull sandbox in Chromebug
-                completions = FBL.keys(context.global);
+                completions = ARR.keys(context.global);
 
             // XXXsilin Is this still necessary, now that '(' doesn't autocomplete?
             // It does help '...; return<CR>' if variables beginning with 'return'
@@ -2078,7 +2081,7 @@ function FirebugCommandLineAPI(context)
     this.$$ = function(selector) // returns unwrapped elements from the page
     {
         var result = Wrapper.unwrapObject(context.baseWindow.document).querySelectorAll(selector);
-        return FBL.cloneArray(result);
+        return ARR.cloneArray(result);
     };
 
     this.$x = function(xpath) // returns unwrapped elements from the page
@@ -2134,12 +2137,12 @@ function FirebugCommandLineAPI(context)
 
     this.keys = function(o)
     {
-        return FBL.keys(o);  // the object is from the page, unwrapped
+        return ARR.keys(o);  // the object is from the page, unwrapped
     };
 
     this.values = function(o)
     {
-        return FBL.values(o); // the object is from the page, unwrapped
+        return ARR.values(o); // the object is from the page, unwrapped
     };
 
     this.debug = function(fn)

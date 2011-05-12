@@ -9,8 +9,9 @@ define([
     "firebug/lib/css",
     "firebug/lib/dom",
     "firebug/lib/string",
+    "firebug/lib/array",
 ],
-function(FBL, Firebug, Domplate, Locale, Events, CSS, DOM, STR) {
+function(FBL, Firebug, Domplate, Locale, Events, CSS, DOM, STR, ARR) {
 
 // ************************************************************************************************
 // Constants
@@ -1205,7 +1206,7 @@ Firebug.AutoCompleter = function(getExprOffset, getRange, evaluator, selectMode,
             return false;
         }
 
-        candidates = FBL.cloneArray(values);
+        candidates = ARR.cloneArray(values);
         lastIndex = searchIndex;
         return true;
     };

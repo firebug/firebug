@@ -8,8 +8,10 @@ define([
     "firebug/lib/url",
     "firebug/sourceLink",
     "firebug/lib/css",
+    "firebug/firefox/system",
+    "firebug/lib/array",
 ],
-function(FBL, Firebug, Locale, XPCOM, URL, SourceLink, CSS) {
+function(FBL, Firebug, Locale, XPCOM, URL, SourceLink, CSS, System, ARR) {
 
 // ********************************************************************************************* //
 // Constants
@@ -109,7 +111,7 @@ Firebug.ExternalEditors = FBL.extend(Firebug.Module,
             if (item.label && item.executable)
             {
                 if (!item.image)
-                    item.image = getIconURLForFile(item.executable);
+                    item.image = System.getIconURLForFile(item.executable);
                 externalEditors.push(item);
             }
         }
@@ -252,7 +254,7 @@ Firebug.ExternalEditors = FBL.extend(Firebug.Module,
             var editor = null;
             if (editorId)
             {
-                var list = FBL.extendArray(externalEditors, editors);
+                var list = ARR.extendArray(externalEditors, editors);
                 for (var i = 0; i < list.length; ++i)
                 {
                     if (editorId == list[i].id)
@@ -327,7 +329,7 @@ Firebug.ExternalEditors = FBL.extend(Firebug.Module,
                 args.push(localFile);
             }
 
-            FBL.launchProgram(editor.executable, args);
+            System.launchProgram(editor.executable, args);
         }
         catch(exc)
         {

@@ -19,13 +19,15 @@ define([
     "firebug/lib/xpath",
     "firebug/lib/string",
     "firebug/lib/xml",
+    "firebug/lib/array",
+    "firebug/persist",
     "firebug/editor",
     "firebug/editorSelector",
     "firebug/infotip",
     "firebug/searchBox",
 ],
 function(FBL, Firebug, Firefox, Domplate, FirebugReps, XPCOM, Locale, Events, Wrapper, URL,
-    SourceLink, CSS, DOM, WIN, Search, XPATH, STR, XML) {
+    SourceLink, CSS, DOM, WIN, Search, XPATH, STR, XML, ARR, Persist) {
 
 with (Domplate) {
 
@@ -1051,7 +1053,7 @@ Firebug.CSSStyleSheetPanel.prototype = FBL.extend(Firebug.Panel,
     {
         state.scrollTop = this.panelNode.scrollTop ? this.panelNode.scrollTop : this.lastScrollTop;
 
-        FBL.persistObjects(this, state);
+        Persist.persistObjects(this, state);
 
         this.stopEditing();
 
@@ -1087,7 +1089,7 @@ Firebug.CSSStyleSheetPanel.prototype = FBL.extend(Firebug.Panel,
 
         if (this.context.loaded && !this.location) // wait for loadedContext to restore the panel
         {
-            FBL.restoreObjects(this, state);
+            Persist.restoreObjects(this, state);
 
             if (!this.location)
                 this.location = this.getDefaultLocation();
@@ -1712,7 +1714,7 @@ CSSElementPanel.prototype = FBL.extend(Firebug.CSSStyleSheetPanel.prototype,
 
         // Firefox 5+ allows inspecting of pseudo-elements (see issue 537)
         if (versionChecker.compare(appInfo.version, "5.0*") >= 0)
-            pseudoElements = FBL.extendArray(pseudoElements, [":first-letter", ":first-line", ":before", ":after"]);
+            pseudoElements = ARR.extendArray(pseudoElements, [":first-letter", ":first-line", ":before", ":after"]);
 
         for(var p in pseudoElements)
         {
