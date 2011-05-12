@@ -415,7 +415,8 @@ Firebug.CommandLine = FBL.extend(Firebug.Module,
             var noscript = getNoScript();
             if (noscript)
             {
-                var noScriptURI = noscript.getSite(Firebug.chrome.getCurrentURI().spec);
+                var currentURI = Firefox.getCurrentURI();
+                var noScriptURI = currentURI ? noscript.getSite(currentURI.spec) : null;
                 if (noScriptURI)
                     noScriptURI = (noscript.jsEnabled || noscript.isJSEnabled(noScriptURI)) ?
                         null : noScriptURI;

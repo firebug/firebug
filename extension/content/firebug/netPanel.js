@@ -352,7 +352,7 @@ Firebug.NetMonitor = FBL.extend(Firebug.ActivableModule,
         if (FBTrace.DBG_NET)
             FBTrace.sysout("net.loadedContext; Remove temp context (if not removed yet) " + tabId);
 
-        var tabId = Firebug.getTabIdForWindow(context.browser.contentWindow);
+        var tabId = WIN.getWindowProxyIdForWindow(context.browser.contentWindow);
         delete contexts[tabId];
 
         var netProgress = context.netProgress;
@@ -4478,7 +4478,7 @@ function monitorContext(context)
 
     // Use an existing context associated with the browser tab if any
     // or create a pure new network context.
-    var tabId = Firebug.getTabIdForWindow(context.window);
+    var tabId = WIN.getWindowProxyIdForWindow(context.window);
     networkContext = contexts[tabId];
 
     if (FBTrace.DBG_NET)
@@ -4989,7 +4989,7 @@ Firebug.NetMonitor.NetHttpObserver =
 
             // Some requests are not associated with any page (e.g. favicon).
             // These are ignored as Net panel shows only page requests.
-            var tabId = win ? Firebug.getTabIdForWindow(win) : null;
+            var tabId = win ? WIN.getWindowProxyIdForWindow(win) : null;
             if (!tabId)
             {
                 if (FBTrace.DBG_NET)
@@ -5218,7 +5218,7 @@ Firebug.NetMonitor.NetHttpActivityObserver =
         }
 
         var context = Firebug.TabWatcher.getContextByWindow(win);
-        var tabId = Firebug.getTabIdForWindow(win);
+        var tabId = WIN.getWindowProxyIdForWindow(win);
         if (!(tabId && win))
             return;
 

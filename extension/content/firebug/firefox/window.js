@@ -1,9 +1,11 @@
 /* See license.txt for terms of usage */
 
 define([
-    "firebug/http/httpLib"
+    "firebug/lib/trace",
+    "firebug/http/httpLib",
+    "firebug/firefox/firefox",
 ],
-function(HTTP) {
+function(FBTrace, HTTP, Firefox) {
 
 // ********************************************************************************************* //
 // Constants
@@ -15,6 +17,56 @@ var Cu = Components.utils;
 var wm = Cc["@mozilla.org/appshell/window-mediator;1"].getService(Ci.nsIWindowMediator);
 
 var WIN = {};
+
+// ***********************************************************************************************
+// Crossbrowser API
+
+WIN.getWindowProxyIdForWindow = function(win)
+{
+    var id = WIN.getWindowId(win).outerWindowID;
+
+    // xxxJJB, xxxHonza: the id is often null, what could be the problem?
+    if (!id)
+        return WIN.getTabIdForWindow(win);
+
+    return id;
+},
+
+WIN.getTabForWindow = function(aWindow)
+{
+    aWindow = WIN.getRootWindow(aWindow);
+
+    var tabBrowser = Firefox.getTabBrowser();
+    if (!aWindow || !tabBrowser || !tabBrowser.getBrowserIndexForDocument)
+    {
+        FBTrace.sysout("ERROR no tabBrowser");
+        return null;
+    }
+
+    try
+    {
+        var targetDoc = aWindow.document;
+
+        var tab = null;
+        var targetBrowserIndex = tabBrowser.getBrowserIndexForDocument(targetDoc);
+        if (targetBrowserIndex != -1)
+        {
+            tab = tabBrowser.tabContainer.childNodes[targetBrowserIndex];
+            return tab;
+        }
+    }
+    catch (ex)
+    {
+    }
+
+    return null;
+},
+
+WIN.getTabIdForWindow = function(win)
+{
+    var tab = WIN.getTabForWindow(win);
+    return tab ? tab.linkedPanel : null;
+},
 
 // ************************************************************************************************
 // Window iteration

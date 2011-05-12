@@ -83,7 +83,7 @@ Firebug.TabWatcher = FBL.extend(new Firebug.Listener(),
         {
             tabBrowser.removeProgressListener(TabProgressListener);
 
-            var browsers = Firebug.chrome.getBrowsers();
+            var browsers = Firefox.getBrowsers();
             for (var i = 0; i < browsers.length; ++i)
             {
                 var browser = browsers[i];
@@ -106,7 +106,7 @@ Firebug.TabWatcher = FBL.extend(new Firebug.Listener(),
     {
         if (FBTrace.DBG_WINDOWS)
             FBTrace.sysout("-> tabWatcher.watchTopWindow for: "+(uri instanceof nsIURI?uri.spec:uri)+
-                ", tab: "+Firebug.getTabIdForWindow(win)+"\n");
+                ", tab: "+WIN.getWindowProxyIdForWindow(win)+"\n");
 
         if (!win)
         {
@@ -115,7 +115,7 @@ Firebug.TabWatcher = FBL.extend(new Firebug.Listener(),
             return false;
         }
 
-        var selectedBrowser = Firebug.chrome.getCurrentBrowser();
+        var selectedBrowser = Firefox.getCurrentBrowser();
 
         var context = this.getContextByWindow(win);
         if (context) // then we've looked at this window before in this FF session...
@@ -211,7 +211,7 @@ Firebug.TabWatcher = FBL.extend(new Firebug.Listener(),
         delete context.showContextTimeout;
 
         // Call showContext only for currently active tab.
-        var currentURI = Firebug.chrome.getCurrentURI();
+        var currentURI = Firefox.getCurrentURI();
         if (!currentURI || currentURI.spec != context.browser.currentURI.spec)
         {
             if (FBTrace.DBG_WINDOWS)
@@ -521,7 +521,7 @@ Firebug.TabWatcher = FBL.extend(new Firebug.Listener(),
         for (var name in context)
             delete context[name];
 
-        var currentBrowser = Firebug.chrome.getCurrentBrowser();
+        var currentBrowser = Firefox.getCurrentBrowser();
         if (!currentBrowser.showFirebug)  // unwatchContext can be called on an unload event after another tab is selected
             Events.dispatch(this.fbListeners, "showContext", [browser, null]); // context is null if we don't want to debug this browser
     },
@@ -574,7 +574,7 @@ Firebug.TabWatcher = FBL.extend(new Firebug.Listener(),
 
     getBrowserByWindow: function(win)
     {
-        var browsers = Firebug.chrome.getBrowsers();
+        var browsers = Firefox.getBrowsers();
         for (var i = 0; i < browsers.length; ++i)
         {
             var browser = browsers[i];
@@ -783,7 +783,7 @@ function registerFrameListener(browser)
     {
         var win = browser.contentWindow;
         FBTrace.sysout("-> tabWatcher register FrameProgressListener for: "+
-            WIN.safeGetWindowLocation(win)+", tab: "+Firebug.getTabIdForWindow(win)+"\n");
+            WIN.safeGetWindowLocation(win)+", tab: "+WIN.getWindowProxyIdForWindow(win)+"\n");
     }
 }
 
@@ -796,7 +796,7 @@ function unregisterFrameListener(browser)
     {
         var win = browser.contentWindow;
         FBTrace.sysout("-> tabWatcher unregister FrameProgressListener for: "+
-            WIN.safeGetWindowLocation(win)+", tab: "+Firebug.getTabIdForWindow(win)+"\n");
+            WIN.safeGetWindowLocation(win)+", tab: "+WIN.getWindowProxyIdForWindow(win)+"\n");
     }
 }
 
@@ -836,7 +836,8 @@ var TabWatcherHttpObserver = FBL.extend(Object,
     onModifyRequest: function(request)
     {
         var win = HTTP.getWindowForRequest(request);
-        var tabId = Firebug.getTabIdForWindow(win);
+        if (win)
+            var tabId = WIN.getWindowProxyIdForWindow(win);
 
         // Tab watcher is only interested in tab related requests.
         if (!tabId)

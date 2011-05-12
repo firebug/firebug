@@ -11,10 +11,11 @@ define([
     "firebug/lib/url",
     "firebug/http/httpLib",
     "firebug/lib/string",
+    "firebug/firefox/window",
     "firebug/sourceCache",
 ],
 function(FBL, Firebug, XPCOM, HttpRequestObserver, HttpResponseObserver, Locale, Events,
-    URL, HTTP, STR) {
+    URL, HTTP, STR, WIN) {
 
 // ********************************************************************************************* //
 // Constants
@@ -135,7 +136,7 @@ Firebug.TabCacheModel = FBL.extend(Firebug.Module,
             // XXXjjb this same code is in net.js, better to have it only once
             var win = HTTP.getWindowForRequest(subject);
             if (win)
-                var tabId = Firebug.getTabIdForWindow(win); // TODO remove, the tabId is not used after all
+                var tabId = WIN.getWindowProxyIdForWindow(win); // TODO remove, the tabId is not used after all
             if (!tabId)
                 return;
 

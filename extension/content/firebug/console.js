@@ -381,13 +381,17 @@ Firebug.Console = FBL.extend(ActivableConsole,
     watchForErrors: function()
     {
         Firebug.Errors.checkEnabled();
-        Firefox.getElementById('firebugStatus').setAttribute("console", "on");
+        var fbStatus = Firefox.getElementById('firebugStatus');
+        if (fbStatus)
+            fbStatus.setAttribute("console", "on");
     },
 
     unwatchForErrors: function()
     {
         Firebug.Errors.checkEnabled();
-        Firefox.getElementById('firebugStatus').removeAttribute("console");
+        var fbStatus = Firefox.getElementById('firebugStatus');
+        if (fbStatus)
+            fbStatus.removeAttribute("console");
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *

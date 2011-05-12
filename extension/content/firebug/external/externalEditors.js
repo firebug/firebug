@@ -352,7 +352,7 @@ Firebug.ExternalEditors = FBL.extend(Firebug.Module,
         {
             // xxxHonza: if the fake context is used the source code is always get using
             // (a) the browser cache or (b) request to the server.
-            var selectedBrowser = Firebug.chrome.getCurrentBrowser();
+            var selectedBrowser = Firefox.getCurrentBrowser();
             var ctx = {
                 browser: selectedBrowser,
                 window: selectedBrowser.contentWindow

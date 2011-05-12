@@ -478,6 +478,9 @@ CSS.createStyleSheetMap = function(context)
 
 CSS.getAllStyleSheets = function(context)
 {
+    if (!context)
+        return;
+
     var styleSheets = [];
 
     function addSheet(sheet)

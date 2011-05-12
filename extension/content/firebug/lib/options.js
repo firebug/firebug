@@ -162,7 +162,6 @@ var Options =
             optionUpdateMap[name] = 1;
             Firebug[name] = value;
 
-            // Distribute the change (Firebug, FirebugChrome, BTI)
             Events.dispatch(this.listeners, "updateOption", [name, value]);
         }
         catch (err)

@@ -236,6 +236,9 @@ Firebug.StartButton = FBL.extend(Firebug.Module,
         tooltip += "\n" + Locale.$STR(Firebug.getPlacement());
 
         var firebugStatus = Firefox.getElementById("firebugStatus");
+        if (!firebugStatus)
+            return;
+
         firebugStatus.setAttribute("tooltiptext", tooltip);
     },
 
@@ -246,6 +249,9 @@ Firebug.StartButton = FBL.extend(Firebug.Module,
 
         var status = "";
         var firebugStatus = Firefox.getElementById("firebugStatus");
+
+        if (!firebugStatus)
+            return;
 
         if (firebugStatus.getAttribute("console") == "on")
             status += "Console: " + strOn + ",";
