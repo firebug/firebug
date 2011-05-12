@@ -288,12 +288,12 @@ Firebug.InsideOutBox.prototype =
 
     getNextObjectBox: function(objectBox)
     {
-        return FBL.findNext(objectBox, isVisibleTarget, false, this.box);
+        return DOM.findNext(objectBox, isVisibleTarget, false, this.box);
     },
 
     getPreviousObjectBox: function(objectBox)
     {
-        return FBL.findPrevious(objectBox, isVisibleTarget, true, this.box);
+        return DOM.findPrevious(objectBox, isVisibleTarget, true, this.box);
     },
 
     /**

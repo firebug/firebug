@@ -444,7 +444,7 @@ Firebug.SourceBoxPanel = FBL.extend(SourceBoxPanelBase,
                 "<div class='sourceRow'><div class='sourceLine'></div><div class='sourceRowText'></div></div>"+
             "</div>";
 
-        FBL.appendInnerHTML(sourceBox, paddedSource);
+        DOM.appendInnerHTML(sourceBox, paddedSource);
 
         sourceBox.viewport = DOM.getChildByClass(sourceBox, 'sourceViewport');
         return sourceBox;
@@ -781,7 +781,7 @@ Firebug.SourceBoxPanel = FBL.extend(SourceBoxPanelBase,
                 ref = topCacheLine;
             }
 
-            var newElement = FBL.appendInnerHTML(sourceBox.viewport, lineHTML, ref);
+            var newElement = DOM.appendInnerHTML(sourceBox.viewport, lineHTML, ref);
         }
         return cacheHit;
     },

@@ -1603,7 +1603,7 @@ function getInlineParent(element)
 
 function insertTab()
 {
-    FBL.insertTextIntoElement(currentEditor.input, Firebug.Editor.tabCharacter);
+    DOM.insertTextIntoElement(currentEditor.input, Firebug.Editor.tabCharacter);
 }
 
 // ************************************************************************************************

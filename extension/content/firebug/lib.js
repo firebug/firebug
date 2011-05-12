@@ -17,9 +17,10 @@ define([
     "firebug/lib/search",
     "firebug/lib/xpath",
     "firebug/lib/string",
+    "firebug/lib/xml",
 ],
 function(XPCOM, Locale, Events, Options, Deprecated, Wrapper, URL, SourceLink, StackFrame,
-    CSS, DOM, HTTP, WIN, Search, XPATH, STR) {
+    CSS, DOM, HTTP, WIN, Search, XPATH, STR, XML) {
 
 // ********************************************************************************************* //
 
@@ -80,6 +81,9 @@ for (var p in XPATH)
 for (var p in STR)
     FBL[p] = STR[p];
 
+for (var p in XML)
+    FBL[p] = XML[p];
+
 FBL.deprecated = Deprecated.deprecated;
 FBL.SourceLink = SourceLink.SourceLink;
 
@@ -114,8 +118,6 @@ catch (err)
 // Shortcuts
 
 this.jsd = Cc["@mozilla.org/js/jsd/debugger-service;1"].getService(Ci.jsdIDebuggerService);
-
-this.domUtils = Cc["@mozilla.org/inspector/dom-utils;1"].getService(Ci.inIDOMUtils);
 
 const ioService = Cc["@mozilla.org/network/io-service;1"].getService(Ci.nsIIOService);
 const versionChecker = Cc["@mozilla.org/xpcom/version-comparator;1"].getService(Ci.nsIVersionComparator);
@@ -382,7 +384,7 @@ this.isAncestorIgnored = function(node)
 
 this.isVisible = function(elt)
 {
-    if (FBL.isElementXUL(elt))
+    if (XML.isElementXUL(elt))
     {
         //FBTrace.sysout("isVisible elt.offsetWidth: "+elt.offsetWidth+" offsetHeight:"+ elt.offsetHeight+" localName:"+ elt.localName+" nameSpace:"+elt.nameSpaceURI+"\n");
         return (!elt.hidden && !elt.collapsed);
@@ -393,8 +395,8 @@ this.isVisible = function(elt)
         return elt.offsetWidth > 0 ||
             elt.offsetHeight > 0 ||
             elt.localName in CSS.invisibleTags ||
-            isElementSVG(elt) ||
-            isElementMathML(elt);
+            XML.isElementSVG(elt) ||
+            XML.isElementMathML(elt);
     }
     catch (err)
     {
@@ -564,145 +566,6 @@ this.$ = function(id, doc)
         return document.getElementById(id);
 };
 
-// xxxHonza: move to a11y.js?
-this.findNextDown = function(node, criteria)
-{
-    if (!node)
-        return null;
-
-    for (var child = node.firstChild; child; child = child.nextSibling)
-    {
-        if (criteria(child))
-            return child;
-
-        var next = this.findNextDown(child, criteria);
-        if (next)
-            return next;
-    }
-};
-
-// xxxHonza: move to a11y.js?
-this.findPreviousUp = function(node, criteria)
-{
-    if (!node)
-        return null;
-
-    for (var child = node.lastChild; child; child = child.previousSibling)
-    {
-        var next = this.findPreviousUp(child, criteria);
-        if (next)
-            return next;
-
-        if (criteria(child))
-            return child;
-    }
-};
-
-// insideOutBox.js only
-this.findNext = function(node, criteria, upOnly, maxRoot)
-{
-    if (!node)
-        return null;
-
-    if (!upOnly)
-    {
-        var next = this.findNextDown(node, criteria);
-        if (next)
-            return next;
-    }
-
-    for (var sib = node.nextSibling; sib; sib = sib.nextSibling)
-    {
-        if (criteria(sib))
-            return sib;
-
-        var next = this.findNextDown(sib, criteria);
-        if (next)
-            return next;
-    }
-
-    if (node.parentNode && node.parentNode != maxRoot)
-        return this.findNext(node.parentNode, criteria, true, maxRoot);
-};
-
-// insideOutBox.js
-this.findPrevious = function(node, criteria, downOnly, maxRoot)
-{
-    if (!node)
-        return null;
-
-    for (var sib = node.previousSibling; sib; sib = sib.previousSibling)
-    {
-        var prev = this.findPreviousUp(sib, criteria);
-        if (prev)
-            return prev;
-
-        if (criteria(sib))
-            return sib;
-    }
-
-    if (!downOnly)
-    {
-        var next = this.findPreviousUp(node, criteria);
-        if (next)
-            return next;
-    }
-
-    if (node.parentNode && node.parentNode != maxRoot)
-    {
-        if (criteria(node.parentNode))
-            return node.parentNode;
-
-        return this.findPrevious(node.parentNode, criteria, true);
-    }
-};
-
-this.getNextByClass = function(root, state)
-{
-    function iter(node) { return node.nodeType == 1 && CSS.hasClass(node, state); }
-    return this.findNext(root, iter);
-};
-
-this.getPreviousByClass = function(root, state)
-{
-    function iter(node) { return node.nodeType == 1 && CSS.hasClass(node, state); }
-    return this.findPrevious(root, iter);
-};
-
-this.hasChildElements = function(node)
-{
-    if (node.contentDocument) // iframes
-        return true;
-
-    for (var child = node.firstChild; child; child = child.nextSibling)
-    {
-        if (child.nodeType == 1)
-            return true;
-    }
-
-    return false;
-};
-
-this.isElement = function(o)
-{
-    try {
-        return o && o instanceof Element;
-    }
-    catch (ex) {
-        return false;
-    }
-};
-
-this.isNode = function(o)
-{
-    try {
-        return o && o instanceof Node;
-    }
-    catch (ex) {
-        return false;
-    }
-};
-
 this.XW_instanceof = function(obj, type) // Cross Window instanceof; type is local to this window
 {
     if (obj instanceof type)
@@ -724,70 +587,6 @@ this.XW_instanceof = function(obj, type) // Cross Window instanceof; type is loc
     return false;
     // https://developer.mozilla.org/en/Core_JavaScript_1.5_Guide/Property_Inheritance_Revisited/Determining_Instance_Relationships
 }
-
-// ************************************************************************************************
-// DOM Modification
-
-this.setOuterHTML = function(element, html)
-{
-    var doc = element.ownerDocument;
-    var range = doc.createRange();
-    range.selectNode(element || doc.documentElement);
-    try
-    {
-        var fragment = range.createContextualFragment(html);
-        var first = fragment.firstChild;
-        var last = fragment.lastChild;
-        element.parentNode.replaceChild(fragment, element);
-        return [first, last];
-    } catch (e)
-    {
-        return [element,element]
-    }
-};
-
-this.appendInnerHTML = function(element, html, referenceElement)
-{
-    var doc = element.ownerDocument;
-    var range = doc.createRange();  // a helper object
-    range.selectNodeContents(element); // the environment to interpret the html
-
-    var fragment = range.createContextualFragment(html);  // parse
-    var firstChild = fragment.firstChild;
-    element.insertBefore(fragment, referenceElement);
-    return firstChild;
-};
-
-this.insertTextIntoElement = function(element, text)
-{
-    var command = "cmd_insertText";
-
-    var controller = element.controllers.getControllerForCommand(command);
-    if (!controller || !controller.isCommandEnabled(command))
-        return;
-
-    var params = Cc["@mozilla.org/embedcomp/command-params;1"].createInstance(Ci.nsICommandParams);
-    params.setStringValue("state_data", text);
-
-    if (controller instanceof Ci.nsICommandController)
-        controller.doCommandWithParams(command, params);
-};
-
-// ************************************************************************************************
-// XPath
-
-this.getElementCSSPath = function(element)
-{
-    var paths = [];
-
-    for (; element && element.nodeType == 1; element = element.parentNode)
-    {
-        var selector = this.getElementCSSSelector(element);
-        paths.splice(0, 0, selector);
-    }
-
-    return paths.length ? paths.join(" ") : null;
-};
 
 // ************************************************************************************************
 // Clipboard
@@ -977,252 +776,6 @@ this.scrollIntoCenterView = function(element, scrollBox, notX, notY)
     }
     if (FBTrace.DBG_SOURCEFILES)
         FBTrace.sysout("lib.scrollIntoCenterView ","Element:"+element.innerHTML);
-};
-
-// ************************************************************************************************
-// HTML and XML Serialization
-
-var getElementType = this.getElementType = function(node)
-{
-    if (isElementXUL(node))
-        return 'xul';
-    else if (isElementSVG(node))
-        return 'svg';
-    else if (isElementMathML(node))
-        return 'mathml';
-    else if (isElementXHTML(node))
-        return 'xhtml';
-    else if (isElementHTML(node))
-        return 'html';
-}
-
-var getElementSimpleType = this.getElementSimpleType = function(node)
-{
-    if (isElementSVG(node))
-        return 'svg';
-    else if (isElementMathML(node))
-        return 'mathml';
-    else
-        return 'html';
-}
-
-var isElementHTML = this.isElementHTML = function(node)
-{
-    return node.nodeName == node.nodeName.toUpperCase() && node.namespaceURI == 'http://www.w3.org/1999/xhtml';
-}
-
-var isElementXHTML = this.isElementXHTML = function(node)
-{
-    return node.nodeName != node.nodeName.toUpperCase() && node.namespaceURI == 'http://www.w3.org/1999/xhtml';
-}
-
-var isElementMathML = this.isElementMathML = function(node)
-{
-    return node.namespaceURI == 'http://www.w3.org/1998/Math/MathML';
-}
-
-var isElementSVG = this.isElementSVG = function(node)
-{
-    return node.namespaceURI == 'http://www.w3.org/2000/svg';
-}
-
-var isElementXUL = this.isElementXUL = function(node)
-{
-    return node instanceof XULElement;
-}
-
-var getNodeName = this.getNodeName = function(node)
-{
-    var name = node.nodeName;
-    return isElementHTML(node) ? name.toLowerCase() : name;
-}
-
-var getLocalName = this.getLocalName = function(node)
-{
-    var name = node.localName;
-    return isElementHTML(node) ? name.toLowerCase() : name;
-}
-
-this.isSelfClosing = function(element)
-{
-    if (isElementSVG(element) || isElementMathML(element))
-        return true;
-    var tag = element.localName.toLowerCase();
-    return (CSS.selfClosingTags.hasOwnProperty(tag));
-};
-
-this.getElementHTML = function(element)
-{
-    var self=this;
-    function toHTML(elt)
-    {
-        if (elt.nodeType == Node.ELEMENT_NODE)
-        {
-            if (Firebug.shouldIgnore(elt))
-                return;
-
-            var nodeName = getNodeName(elt);
-            html.push('<', nodeName);
-
-            for (var i = 0; i < elt.attributes.length; ++i)
-            {
-                var attr = elt.attributes[i];
-
-                // Hide attributes set by Firebug
-                if (attr.localName.indexOf("firebug-") == 0)
-                    continue;
-
-                // MathML
-                if (attr.localName.indexOf("-moz-math") == 0)
-                {
-                    // just hide for now
-                    continue;
-                }
-
-                html.push(' ', attr.nodeName, '="', STR.escapeForElementAttribute(attr.nodeValue),'"');
-            }
-
-            if (elt.firstChild)
-            {
-                html.push('>');
-
-                var pureText=true;
-                for (var child = element.firstChild; child; child = child.nextSibling)
-                    pureText=pureText && (child.nodeType == Node.TEXT_NODE);
-
-                if (pureText)
-                    html.push(STR.escapeForHtmlEditor(elt.textContent));
-                else {
-                    for (var child = elt.firstChild; child; child = child.nextSibling)
-                        toHTML(child);
-                }
-
-                html.push('</', nodeName, '>');
-            }
-            else if (isElementSVG(elt) || isElementMathML(elt))
-            {
-                html.push('/>');
-            }
-            else if (self.isSelfClosing(elt))
-            {
-                html.push((isElementXHTML(elt))?'/>':'>');
-            }
-            else
-            {
-                html.push('></', nodeName, '>');
-            }
-        }
-        else if (elt.nodeType == Node.TEXT_NODE)
-            html.push(escapeForTextNode(elt.textContent));
-        else if (elt.nodeType == Node.CDATA_SECTION_NODE)
-            html.push('<![CDATA[', elt.nodeValue, ']]>');
-        else if (elt.nodeType == Node.COMMENT_NODE)
-            html.push('<!--', elt.nodeValue, '-->');
-    }
-
-    var html = [];
-    toHTML(element);
-    return html.join("");
-};
-
-this.getElementXML = function(element)
-{
-    function toXML(elt)
-    {
-        if (elt.nodeType == Node.ELEMENT_NODE)
-        {
-            if (Firebug.shouldIgnore(elt))
-                return;
-
-            var nodeName = getNodeName(elt);
-            xml.push('<', nodeName);
-
-            for (var i = 0; i < elt.attributes.length; ++i)
-            {
-                var attr = elt.attributes[i];
-
-                // Hide attributes set by Firebug
-                if (attr.localName.indexOf("firebug-") == 0)
-                    continue;
-
-                // MathML
-                if (attr.localName.indexOf("-moz-math") == 0)
-                {
-                    // just hide for now
-                    continue;
-                }
-
-                xml.push(' ', attr.nodeName, '="', STR.escapeForElementAttribute(attr.nodeValue),'"');
-            }
-
-            if (elt.firstChild)
-            {
-                xml.push('>');
-
-                for (var child = elt.firstChild; child; child = child.nextSibling)
-                    toXML(child);
-
-                xml.push('</', nodeName, '>');
-            }
-            else
-                xml.push('/>');
-        }
-        else if (elt.nodeType == Node.TEXT_NODE)
-            xml.push(elt.nodeValue);
-        else if (elt.nodeType == Node.CDATA_SECTION_NODE)
-            xml.push('<![CDATA[', elt.nodeValue, ']]>');
-        else if (elt.nodeType == Node.COMMENT_NODE)
-            xml.push('<!--', elt.nodeValue, '-->');
-    }
-
-    var xml = [];
-    toXML(element);
-    return xml.join("");
-};
-
-// ************************************************************************************************
-// Whitespace and Entity conversions
-
-/**
- * Returns true if given document is based on a XML and so displaying pretty printed XML elements.
- */
-this.isXMLPrettyPrint = function(context, win)
-{
-    if (!context)
-        return;
-
-    if (context.isXMLPrettyPrintDetected)
-        return context.isXMLPrettyPrint;
-
-    try
-    {
-        var doc = win ? win.document : context.window.document;
-        if (!doc)
-        {
-            if (FBTrace.DBG_ERRORS)
-                FBTrace.sysout("lib.isXMLPrettyPrint; NO DOCUMENT", {win:win, context:context});
-            return false;
-        }
-        if (!doc.documentElement)
-            return false;
-
-        var bindings = this.domUtils.getBindingURLs(doc.documentElement);
-        for (var i = 0; i < bindings.length; i++)
-        {
-            var bindingURI = bindings.queryElementAt(i, Ci.nsIURI);
-            if (FBTrace.DBG_CSS)
-                FBTrace.sysout("bindingURL: " + i + " " + bindingURI.resolve(""));
-
-            context.isXMLPrettyPrintDetected = true;
-            return context.isXMLPrettyPrint = (bindingURI.resolve("") ===
-                "chrome://global/content/xml/XMLPrettyPrint.xml");
-        }
-    }
-    catch (e)
-    {
-        if (FBTrace.DBG_ERRORS)
-            FBTrace.sysout("css.isXMLPrettyPrint; EXCEPTION "+e, e);
-    }
 };
 
 // ************************************************************************************************

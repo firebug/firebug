@@ -362,7 +362,7 @@ Firebug.A11yModel = FBL.extend(Firebug.Module,
         var panelA11y = this.getPanelA11y(panel);
         if (!panelA11y)
             return;
-        if (panelA11y.liveElem && FBL.isElement(panelA11y.liveElem))
+        if (panelA11y.liveElem && DOM.isElement(panelA11y.liveElem))
             return;
         var attrName = attrValue = "";
         if (role)
@@ -904,7 +904,7 @@ Firebug.A11yModel = FBL.extend(Firebug.Module,
                 var closeBtn = target.getElementsByClassName('closeButton').item(0);
                 if (closeBtn)
                 {
-                    var prevBreakpoint = FBL.getPreviousByClass(target, 'breakpointRow');
+                    var prevBreakpoint = DOM.getPreviousByClass(target, 'breakpointRow');
                     if (prevBreakpoint)
                         this.makeFocusable(prevBreakpoint, true);
                     Firebug.chrome.window.document.commandDispatcher.rewindFocus();
@@ -1359,7 +1359,7 @@ Firebug.A11yModel = FBL.extend(Firebug.Module,
     getHeadRowsAndIndex: function(panel, elem)
     {
         var rows = this.getFocusRows(panel);
-        var headRow = CSS.hasClass(elem, 'cssHead') ? elem : FBL.getPreviousByClass(elem, 'cssHead');
+        var headRow = CSS.hasClass(elem, 'cssHead') ? elem : DOM.getPreviousByClass(elem, 'cssHead');
         var headRows = Array.filter(rows, function(e,i,a){return CSS.hasClass(e, 'cssHead')});
         var index = Array.indexOf(headRows, headRow);
         if (index == -1)
@@ -1507,7 +1507,7 @@ Firebug.A11yModel = FBL.extend(Firebug.Module,
             matchFeedback = " " + Locale.$STRF('a11y.updates.match found in selector', [text, matchRow.textContent]);
         else
         {
-            selector = FBL.getPreviousByClass(matchRow, 'cssSelector');
+            selector = DOM.getPreviousByClass(matchRow, 'cssSelector');
             selector = selector ? selector.textContent : "";
             if (CSS.hasClass(matchRow, 'cssPropName') || CSS.hasClass(matchRow, 'cssPropValue'))
             {
@@ -1680,10 +1680,10 @@ Firebug.A11yModel = FBL.extend(Firebug.Module,
                     editor.input.setAttribute('role', 'listitem');
                     editor.input.setAttribute('aria-setsize', setSize);
                     editor.input.setAttribute('aria-posinset', posInSet);
-                    nodeTag = FBL.getPreviousByClass(target, 'nodeTag');
+                    nodeTag = DOM.getPreviousByClass(target, 'nodeTag');
                     if (!isName)
                     {
-                        nodeName = FBL.getPreviousByClass(target, 'nodeName');
+                        nodeName = DOM.getPreviousByClass(target, 'nodeName');
                         label += Locale.$STRF('a11y.labels.value for attribute in element', [nodeName.textContent, nodeTag.textContent]);
                     }
                     else
@@ -1691,21 +1691,21 @@ Firebug.A11yModel = FBL.extend(Firebug.Module,
                 }
                 else if (CSS.hasClass(target, 'nodeText'))
                 {
-                    nodeTag = FBL.getPreviousByClass(target, 'nodeTag');
+                    nodeTag = DOM.getPreviousByClass(target, 'nodeTag');
                     label += Locale.$STRF("a11y.labels.text contents for element", [nodeTag.textContent]);
                 }
                 editor.input.setAttribute('aria-label', label);
                 break;
             case 'css':
             case 'stylesheet':
-                var selector = FBL.getPreviousByClass(target, 'cssSelector');
+                var selector = DOM.getPreviousByClass(target, 'cssSelector');
                 selector = selector ? selector.textContent : "";
                 var label = Locale.$STR("a11y.labels.inline editor") + ": ";
                 if (CSS.hasClass(target, 'cssPropName'))
                     label += Locale.$STRF('a11y.labels.property for selector', [selector]);
                 else if (CSS.hasClass(target, 'cssPropValue'))
                 {
-                    var propName = FBL.getPreviousByClass(target, 'cssPropName');
+                    var propName = DOM.getPreviousByClass(target, 'cssPropName');
                     propName = propName ? propName.textContent : "";
                     label += Locale.$STRF('a11y.labels.value property in selector', [propName, selector]);
                 }
@@ -2111,7 +2111,7 @@ Firebug.A11yModel = FBL.extend(Firebug.Module,
         var groupHeaders = rootNode.getElementsByClassName('breakpointHeader');
         for ( i = 0; i < groupHeaders.length; i++)
         {
-            var listBox = FBL.getNextByClass(groupHeaders[i], 'breakpointsGroupListBox');
+            var listBox = DOM.getNextByClass(groupHeaders[i], 'breakpointsGroupListBox');
             if (listBox)
                 listBox.setAttribute('aria-label', groupHeaders[i].textContent);
         }
@@ -2563,7 +2563,7 @@ Firebug.A11yModel = FBL.extend(Firebug.Module,
 
     focus : function(elem, noVisiCheck, needsMoreTime)
     {
-        if (FBL.isElement(elem) && (noVisiCheck || this.isVisibleByStyle(elem)))
+        if (DOM.isElement(elem) && (noVisiCheck || this.isVisibleByStyle(elem)))
             Firebug.currentContext.setTimeout(function(){
                 elem.focus()
                 }, needsMoreTime ? 500 :10);

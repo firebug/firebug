@@ -18,13 +18,14 @@ define([
     "firebug/lib/search",
     "firebug/lib/xpath",
     "firebug/lib/string",
+    "firebug/lib/xml",
     "firebug/editor",
     "firebug/editorSelector",
     "firebug/infotip",
     "firebug/searchBox",
 ],
 function(FBL, Firebug, Firefox, Domplate, FirebugReps, XPCOM, Locale, Events, Wrapper, URL,
-    SourceLink, CSS, DOM, WIN, Search, XPATH, STR) {
+    SourceLink, CSS, DOM, WIN, Search, XPATH, STR, XML) {
 
 with (Domplate) {
 
@@ -451,7 +452,7 @@ Firebug.CSSModule = FBL.extend(FBL.extend(Firebug.Module, Firebug.EditorSelector
         //
         // WARN: This behavior was determined anecdotally.
         // See http://code.google.com/p/fbug/issues/detail?id=2440
-        if (!FBL.isXMLPrettyPrint(context))
+        if (!XML.isXMLPrettyPrint(context))
         {
             var style = CSS.createStyleSheet(doc);
             style.innerHTML = "#fbIgnoreStyleDO_NOT_USE {}";
@@ -666,7 +667,7 @@ Firebug.CSSStyleSheetPanel.prototype = FBL.extend(Firebug.Panel,
 
     getRuleByLine: function(styleSheet, line)
     {
-        if (!FBL.domUtils)
+        if (!DOM.domUtils)
             return null;
 
         var cssRules = styleSheet.cssRules;
@@ -676,7 +677,7 @@ Firebug.CSSStyleSheetPanel.prototype = FBL.extend(Firebug.Panel,
             var previousRule;
             if (rule instanceof window.CSSStyleRule)
             {
-                var selectorLine = FBL.domUtils.getRuleLine(rule);
+                var selectorLine = DOM.domUtils.getRuleLine(rule);
                 // The declarations are on lines equal or greater than the selectorLine
                 if (selectorLine === line) // then the line requested is a selector line
                     return rule;
@@ -1373,7 +1374,7 @@ Firebug.CSSStyleSheetPanel.prototype = FBL.extend(Firebug.Panel,
                 else if (cssValue.type == "url")
                 {
                     var propNameNode = target.parentNode.getElementsByClassName("cssPropName").item(0);
-                    if (propNameNode && CSS.isImageRule(FBL.getElementSimpleType(
+                    if (propNameNode && CSS.isImageRule(XML.getElementSimpleType(
                         Firebug.getRepObject(target)),propNameNode.textContent))
                     {
                         var rule = Firebug.getRepObject(target);
@@ -1717,7 +1718,7 @@ CSSElementPanel.prototype = FBL.extend(Firebug.CSSStyleSheetPanel.prototype,
         {
             try
             {
-                inspectedRules = FBL.domUtils ? FBL.domUtils.getCSSStyleRules(element, pseudoElements[p]) : null;
+                inspectedRules = DOM.domUtils ? DOM.domUtils.getCSSStyleRules(element, pseudoElements[p]) : null;
             } catch (exc) {}
 
             if (inspectedRules)
@@ -1864,7 +1865,7 @@ CSSElementPanel.prototype = FBL.extend(Firebug.CSSStyleSheetPanel.prototype,
 
     watchWindow: function(win)
     {
-        if (FBL.domUtils)
+        if (DOM.domUtils)
         {
             // Normally these would not be required, but in order to update after the state is set
             // using the options menu we need to monitor these global events as well
@@ -1895,7 +1896,7 @@ CSSElementPanel.prototype = FBL.extend(Firebug.CSSStyleSheetPanel.prototype,
     {
         Firebug.CSSModule.cleanupSheets(element.ownerDocument, Firebug.currentContext);
         this.updateCascadeView(element);
-        if (FBL.domUtils)
+        if (DOM.domUtils)
         {
             this.contentState = safeGetContentState(element);
             this.addStateChangeHandlers(element);
@@ -1938,7 +1939,7 @@ CSSElementPanel.prototype = FBL.extend(Firebug.CSSStyleSheetPanel.prototype,
                     command: FBL.bindFixed(Firebug.Options.togglePref, Firebug, "expandShorthandProps") }
         ];
 
-        if (FBL.domUtils && this.selection)
+        if (DOM.domUtils && this.selection)
         {
             var state = safeGetContentState(this.selection);
             var self = this;
@@ -1966,7 +1967,7 @@ CSSElementPanel.prototype = FBL.extend(Firebug.CSSStyleSheetPanel.prototype,
         if (FBTrace.DBG_CSS)
             FBTrace.sysout("css.updateContentState; state: " + state + ", remove: " + remove);
 
-        FBL.domUtils.setContentState(remove ? this.selection.ownerDocument.documentElement :
+        DOM.domUtils.setContentState(remove ? this.selection.ownerDocument.documentElement :
             this.selection, state);
 
         this.refresh();
@@ -2024,7 +2025,7 @@ function safeGetContentState(selection)
     try
     {
         if (selection && selection.ownerDocument)
-            return FBL.domUtils.getContentState(selection);
+            return DOM.domUtils.getContentState(selection);
     }
     catch (e)
     {
@@ -2330,13 +2331,13 @@ CSSEditor.prototype = domplate(Firebug.InlineEditor.prototype,
         }
         else if (CSS.hasClass(this.target, "cssPropName"))
         {
-            return CSS.getCSSPropertyNames(FBL.getElementSimpleType(Firebug.getRepObject(this.target)));
+            return CSS.getCSSPropertyNames(XML.getElementSimpleType(Firebug.getRepObject(this.target)));
         }
         else
         {
             var row = DOM.getAncestorByClass(this.target, "cssProp");
             var propName = DOM.getChildByClass(row, "cssPropName").textContent;
-            return CSS.getCSSKeywordsByProperty(FBL.getElementSimpleType(
+            return CSS.getCSSKeywordsByProperty(XML.getElementSimpleType(
                 Firebug.getRepObject(this.target)),propName);
         }
     },
@@ -2753,7 +2754,7 @@ function getRuleLine(rule)
     // and keep track of edited rule lines
     try
     {
-        return FBL.domUtils.getRuleLine(rule);
+        return DOM.domUtils.getRuleLine(rule);
     }
     catch(e)
     {
@@ -2838,7 +2839,7 @@ function getSelectionController(panel)
 const reQuotes = /['"]/g;
 function getRuleId(rule)
 {
-    var line = FBL.domUtils.getRuleLine(rule);
+    var line = DOM.domUtils.getRuleLine(rule);
     var ruleId = rule.selectorText.replace(reQuotes,"%")+"/"+line; // xxxjjb I hope % is invalid in selectortext
     return ruleId;
 }

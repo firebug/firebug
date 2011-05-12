@@ -18,9 +18,10 @@ define([
     "firebug/firefox/window",
     "firebug/lib/xpath",
     "firebug/lib/string",
+    "firebug/lib/xml",
 ],
 function(FBL, Firebug, Domplate, XPCOM, Locale, ToolsInterface, HTMLLib, Events, Wrapper,
-    URL, SourceLink, StackFrame, CSS, DOM, WIN, XPATH, STR) {
+    URL, SourceLink, StackFrame, CSS, DOM, WIN, XPATH, STR, XML) {
 
 with (Domplate) {
 
@@ -680,7 +681,7 @@ FirebugReps.Element = domplate(Firebug.Rep,
     {
         try
         {
-            return FBL.getLocalName(object);
+            return XML.getLocalName(object);
         }
         catch (err)
         {
@@ -692,7 +693,7 @@ FirebugReps.Element = domplate(Firebug.Rep,
     {
         try
         {
-            return FBL.getNodeName(object);
+            return XML.getNodeName(object);
         }
         catch (err)
         {
@@ -855,7 +856,7 @@ FirebugReps.Element = domplate(Firebug.Rep,
 
     copyHTML: function(elt)
     {
-        var html = FBL.getElementHTML(elt);
+        var html = XML.getElementHTML(elt);
         FBL.copyToClipboard(html);
     },
 
@@ -872,7 +873,7 @@ FirebugReps.Element = domplate(Firebug.Rep,
 
     copyCSSPath: function(elt)
     {
-        var csspath = FBL.getElementCSSPath(elt);
+        var csspath = CSS.getElementCSSPath(elt);
         FBL.copyToClipboard(csspath);
     },
 
@@ -930,13 +931,13 @@ FirebugReps.Element = domplate(Firebug.Rep,
     {
         var monitored = FBL.areEventsMonitored(elt, null, context);
         var CopyElement = "CopyHTML";
-        if (FBL.isElementSVG(elt))
+        if (XML.isElementSVG(elt))
             CopyElement = "CopySVG";
-        if (FBL.isElementMathML(elt))
+        if (XML.isElementMathML(elt))
             CopyElement = "CopyMathML";
 
         var items=[{label: CopyElement, command: FBL.bindFixed(this.copyHTML, this, elt)}];
-        if (!FBL.isElementSVG(elt) && !FBL.isElementMathML(elt))
+        if (!XML.isElementSVG(elt) && !XML.isElementMathML(elt))
             items.push({label: "CopyInnerHTML", command: FBL.bindFixed(this.copyInnerHTML, this, elt) });
 
         return items.concat([

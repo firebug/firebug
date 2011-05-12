@@ -5,8 +5,9 @@ define([
     "firebug/lib/css",
     "firebug/lib/dom",
     "firebug/lib/search",
+    "firebug/lib/xml",
 ],
-function(Events, CSS, DOM, Search) {
+function(Events, CSS, DOM, Search, XML) {
 
 // ********************************************************************************************* //
 // Constants
@@ -708,7 +709,7 @@ var HTMLLib =
         // XXXsroussey reverted above but added a check for self closing tags
         if (Firebug.showTextNodesWithWhitespace)
         {
-            return !element.firstChild && FBL.isSelfClosing(element);
+            return !element.firstChild && XML.isSelfClosing(element);
         }
         else
         {
@@ -718,7 +719,7 @@ var HTMLLib =
                     return false;
             }
         }
-        return FBL.isSelfClosing(element);
+        return XML.isSelfClosing(element);
     },
 
     /**

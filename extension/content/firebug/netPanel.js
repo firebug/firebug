@@ -20,6 +20,7 @@ define([
     "firebug/firefox/window",
     "firebug/lib/search",
     "firebug/lib/string",
+    "firebug/lib/xml",
     "firebug/breakpoint",
     "firebug/xmlViewer",
     "firebug/svgViewer",
@@ -30,7 +31,7 @@ define([
     "firebug/errors",
 ],
 function(FBL, Firebug, Firefox, Domplate, XPCOM, ToolsInterface, HttpRequestObserver, Locale,
-    Events, Options, URL, SourceLink, HTTP, StackFrame, CSS, DOM, WIN, Search, STR) {
+    Events, Options, URL, SourceLink, HTTP, StackFrame, CSS, DOM, WIN, Search, STR, XML) {
 
 with (Domplate) {
 
@@ -1671,7 +1672,7 @@ NetPanel.prototype = FBL.extend(Firebug.ActivablePanel,
 
         // This call must precede all getCSSStyleRules calls  FIXME not needed after 3.6
         Firebug.CSSModule.cleanupSheets(hrefLabel.ownerDocument, this.context);
-        var rules = FBL.domUtils.getCSSStyleRules(hrefLabel);
+        var rules = DOM.domUtils.getCSSStyleRules(hrefLabel);
         for (var i = 0; i < rules.Count(); ++i)
         {
             var rule = XPCOM.QI(rules.GetElementAt(i), Ci.nsIDOMCSSStyleRule);
@@ -4717,7 +4718,7 @@ Firebug.NetMonitor.Utils =
     formatPostText: function(text)
     {
         if (text instanceof window.XMLDocument)
-            return FBL.getElementXML(text.documentElement);
+            return XML.getElementXML(text.documentElement);
         else
             return text;
     },

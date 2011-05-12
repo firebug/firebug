@@ -5,8 +5,9 @@ define([
     "firebug/lib/url",
     "firebug/lib/options",
     "firebug/firefox/window",
+    "firebug/lib/xml",
 ],
-function(FBTrace, URL, Options, WIN) {
+function(FBTrace, URL, Options, WIN, XML) {
 
 // ********************************************************************************************* //
 // Module Implementation
@@ -173,7 +174,7 @@ CSS.getElementCSSSelector = function(element)
     if (!element || !element.localName)
         return "null";
 
-    var label = FBL.getLocalName(element);
+    var label = XML.getLocalName(element);
     if (element.id)
         label += "#" + element.id;
 
@@ -181,6 +182,19 @@ CSS.getElementCSSSelector = function(element)
         label += "." + element.classList.item(0);
 
     return label;
+};
+
+CSS.getElementCSSPath = function(element)
+{
+    var paths = [];
+
+    for (; element && element.nodeType == 1; element = element.parentNode)
+    {
+        var selector = CSS.getElementCSSSelector(element);
+        paths.splice(0, 0, selector);
+    }
+
+    return paths.length ? paths.join(" ") : null;
 };
 
 // ************************************************************************************************
@@ -1765,21 +1779,6 @@ CSS.innerEditableTags =
 {
     "BODY": 1,
     "body": 1
-};
-
-CSS.selfClosingTags =
-{ // End tags for void elements are forbidden http://wiki.whatwg.org/wiki/HTML_vs._XHTML
-    "meta": 1,
-    "link": 1,
-    "area": 1,
-    "base": 1,
-    "col": 1,
-    "input": 1,
-    "img": 1,
-    "br": 1,
-    "hr": 1,
-    "param":1,
-    "embed":1
 };
 
 var invisibleTags = CSS.invisibleTags =

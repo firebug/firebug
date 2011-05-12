@@ -10,9 +10,14 @@ function(FBTrace, Deprecated, CSS) {
 // ********************************************************************************************* //
 // Constants
 
+var Ci = Components.interfaces;
+var Cc = Components.classes;
+
 var DOM = {};
 var domMemberCache = null;
 var domMemberMap = {};
+
+DOM.domUtils = Cc["@mozilla.org/inspector/dom-utils;1"].getService(Ci.inIDOMUtils);
 
 // ********************************************************************************************* //
 // DOM APIs
@@ -128,6 +133,196 @@ DOM.getBody = function(doc)
         return body;
 
     return doc.documentElement;  // For non-HTML docs
+};
+
+// ************************************************************************************************
+// DOM Modification
+
+DOM.setOuterHTML = function(element, html)
+{
+    var doc = element.ownerDocument;
+    var range = doc.createRange();
+    range.selectNode(element || doc.documentElement);
+
+    try
+    {
+        var fragment = range.createContextualFragment(html);
+        var first = fragment.firstChild;
+        var last = fragment.lastChild;
+        element.parentNode.replaceChild(fragment, element);
+        return [first, last];
+    }
+    catch (e)
+    {
+        return [element, element]
+    }
+};
+
+DOM.appendInnerHTML = function(element, html, referenceElement)
+{
+    var doc = element.ownerDocument;
+    var range = doc.createRange();  // a helper object
+    range.selectNodeContents(element); // the environment to interpret the html
+
+    var fragment = range.createContextualFragment(html);  // parse
+    var firstChild = fragment.firstChild;
+    element.insertBefore(fragment, referenceElement);
+
+    return firstChild;
+};
+
+DOM.insertTextIntoElement = function(element, text)
+{
+    var command = "cmd_insertText";
+
+    var controller = element.controllers.getControllerForCommand(command);
+    if (!controller || !controller.isCommandEnabled(command))
+        return;
+
+    var params = Cc["@mozilla.org/embedcomp/command-params;1"].createInstance(Ci.nsICommandParams);
+    params.setStringValue("state_data", text);
+
+    if (controller instanceof Ci.nsICommandController)
+        controller.doCommandWithParams(command, params);
+};
+
+// ********************************************************************************************* //
+
+DOM.isNode = function(o)
+{
+    try {
+        return o && o instanceof window.Node;
+    }
+    catch (ex) {
+        return false;
+    }
+};
+
+DOM.isElement = function(o)
+{
+    try {
+        return o && o instanceof window.Element;
+    }
+    catch (ex) {
+        return false;
+    }
+};
+
+DOM.hasChildElements = function(node)
+{
+    if (node.contentDocument) // iframes
+        return true;
+
+    for (var child = node.firstChild; child; child = child.nextSibling)
+    {
+        if (child.nodeType == 1)
+            return true;
+    }
+
+    return false;
+};
+
+// ********************************************************************************************* //
+
+DOM.getNextByClass = function(root, state)
+{
+    function iter(node) { return node.nodeType == 1 && CSS.hasClass(node, state); }
+    return DOM.findNext(root, iter);
+};
+
+DOM.getPreviousByClass = function(root, state)
+{
+    function iter(node) { return node.nodeType == 1 && CSS.hasClass(node, state); }
+    return DOM.findPrevious(root, iter);
+};
+
+DOM.findNextDown = function(node, criteria)
+{
+    if (!node)
+        return null;
+
+    for (var child = node.firstChild; child; child = child.nextSibling)
+    {
+        if (criteria(child))
+            return child;
+
+        var next = DOM.findNextDown(child, criteria);
+        if (next)
+            return next;
+    }
+};
+
+DOM.findPreviousUp = function(node, criteria)
+{
+    if (!node)
+        return null;
+
+    for (var child = node.lastChild; child; child = child.previousSibling)
+    {
+        var next = DOM.findPreviousUp(child, criteria);
+        if (next)
+            return next;
+
+        if (criteria(child))
+            return child;
+    }
+};
+
+DOM.findNext = function(node, criteria, upOnly, maxRoot)
+{
+    if (!node)
+        return null;
+
+    if (!upOnly)
+    {
+        var next = DOM.findNextDown(node, criteria);
+        if (next)
+            return next;
+    }
+
+    for (var sib = node.nextSibling; sib; sib = sib.nextSibling)
+    {
+        if (criteria(sib))
+            return sib;
+
+        var next = DOM.findNextDown(sib, criteria);
+        if (next)
+            return next;
+    }
+
+    if (node.parentNode && node.parentNode != maxRoot)
+        return DOM.findNext(node.parentNode, criteria, true, maxRoot);
+};
+
+DOM.findPrevious = function(node, criteria, downOnly, maxRoot)
+{
+    if (!node)
+        return null;
+
+    for (var sib = node.previousSibling; sib; sib = sib.previousSibling)
+    {
+        var prev = DOM.findPreviousUp(sib, criteria);
+        if (prev)
+            return prev;
+
+        if (criteria(sib))
+            return sib;
+    }
+
+    if (!downOnly)
+    {
+        var next = DOM.findPreviousUp(node, criteria);
+        if (next)
+            return next;
+    }
+
+    if (node.parentNode && node.parentNode != maxRoot)
+    {
+        if (criteria(node.parentNode))
+            return node.parentNode;
+
+        return DOM.findPrevious(node.parentNode, criteria, true);
+    }
 };
 
 // ********************************************************************************************* //

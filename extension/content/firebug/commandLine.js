@@ -12,10 +12,11 @@ define([
     "firebug/firefox/window",
     "firebug/lib/xpath",
     "firebug/lib/string",
+    "firebug/lib/xml",
     "firebug/console",
     "firebug/commandLineExposed"
 ],
-function(FBL, Firebug, FirebugReps, Locale, Events, Wrapper, URL, CSS, WIN, XPATH, STR) {
+function(FBL, Firebug, FirebugReps, Locale, Events, Wrapper, URL, CSS, WIN, XPATH, STR, XML) {
 
 // ************************************************************************************************
 // Constants
@@ -135,7 +136,7 @@ Firebug.CommandLine = FBL.extend(Firebug.Module,
                 "its too early for command line "+WIN.getWindowId(win)+" location:"+
                 WIN.safeGetWindowLocation(win), document);
 
-            if (FBL.isXMLPrettyPrint(context, win))
+            if (XML.isXMLPrettyPrint(context, win))
             {
                 var msg = Locale.$STR("commandline.disabledForXMLDocs");
                 var row = Firebug.Console.logFormatted([msg], context, "warn", true);
@@ -750,7 +751,7 @@ Firebug.CommandLine = FBL.extend(Firebug.Module,
         if (this.isSandbox(context))
             return;
 
-        if (FBL.isXMLPrettyPrint(context, win))
+        if (XML.isXMLPrettyPrint(context, win))
             return false;
 
         if (win)

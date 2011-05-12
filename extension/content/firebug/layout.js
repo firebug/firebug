@@ -8,9 +8,10 @@ define([
     "firebug/lib/events",
     "firebug/lib/css",
     "firebug/lib/dom",
+    "firebug/lib/xml",
     "firebug/editor",
 ],
-function(FBL, Firebug, Domplate, Locale, Events, CSS, DOM) {
+function(FBL, Firebug, Domplate, Locale, Events, CSS, DOM, XML) {
 
 // ************************************************************************************************
 
@@ -211,7 +212,7 @@ LayoutPanel.prototype = FBL.extend(Firebug.Panel,
         args.position = position;
         args.outerLabel = '';
 
-        if (FBL.isElementSVG(element) || FBL.isElementMathML(element) || FBL.isElementXUL(element))
+        if (XML.isElementSVG(element) || XML.isElementMathML(element) || XML.isElementXUL(element))
         {
             var rect = element.getBoundingClientRect();
             // XXXjjb I believe this is incorrect. We should use the value as given by the call

@@ -15,6 +15,7 @@ define([
     "firebug/firefox/window",
     "firebug/lib/xpath",
     "firebug/lib/string",
+    "firebug/lib/xml",
     "firebug/breakpoint",
     "firebug/editor",
     "firebug/infotip",
@@ -22,7 +23,7 @@ define([
     "firebug/insideOutBox",
 ],
 function(FBL, Firebug, Domplate, FirebugReps, Locale, ToolsInterface, HTMLLib, Events,
-    SourceLink, CSS, DOM, WIN, XPATH, STR) { with (Domplate) {
+    SourceLink, CSS, DOM, WIN, XPATH, STR, XML) { with (Domplate) {
 
 // ************************************************************************************************
 // Constants
@@ -225,7 +226,7 @@ Firebug.HTMLPanel.prototype = FBL.extend(WalkingPanel,
         var objectNodeBox = this.ioBox.findObjectBox(node);
         if (objectNodeBox)
         {
-            var type = FBL.getElementType(node);
+            var type = XML.getElementType(node);
             var editor = this.localEditors[type];
             if (!editor)
             {
@@ -252,7 +253,7 @@ Firebug.HTMLPanel.prototype = FBL.extend(WalkingPanel,
 
     startEditingXMLNode: function(node, box, editor)
     {
-        var xml = FBL.getElementXML(node);
+        var xml = XML.getElementXML(node);
         Firebug.Editor.startEditing(box, xml, editor);
     },
 
@@ -263,7 +264,7 @@ Firebug.HTMLPanel.prototype = FBL.extend(WalkingPanel,
 
         editor.innerEditMode = node.localName in CSS.innerEditableTags;
 
-        var html = editor.innerEditMode ? node.innerHTML : FBL.getElementHTML(node);
+        var html = editor.innerEditMode ? node.innerHTML : XML.getElementHTML(node);
         Firebug.Editor.startEditing(box, html, editor);
     },
 
@@ -1336,9 +1337,9 @@ Firebug.HTMLPanel.prototype = FBL.extend(WalkingPanel,
             {
                 var EditElement = "EditHTMLElement";
 
-                if (FBL.isElementMathML(node))
+                if (XML.isElementMathML(node))
                     EditElement = "EditMathMLElement";
-                else if (FBL.isElementSVG(node))
+                else if (XML.isElementSVG(node))
                     EditElement = "EditSVGElement";
 
                 items.push("-",
@@ -1765,7 +1766,7 @@ TextNodeEditor.prototype = domplate(Firebug.InlineEditor.prototype,
         target.innerHTML = STR.escapeForTextNode(value);
         if (node instanceof window.Element)
         {
-            if (FBL.isElementMathML(node) || FBL.isElementSVG(node))
+            if (XML.isElementMathML(node) || XML.isElementSVG(node))
                 node.textContent=value;
             else
                 node.innerHTML=value;
@@ -1927,7 +1928,7 @@ HTMLEditor.prototype = domplate(Firebug.BaseEditor,
         if (this.innerEditMode)
             this.editingElements[0].innerHTML = value;
         else
-            this.editingElements = FBL.setOuterHTML(this.editingElements[0], value);
+            this.editingElements = DOM.setOuterHTML(this.editingElements[0], value);
     },
 
     endEditing: function()
@@ -1960,7 +1961,7 @@ Firebug.HTMLPanel.Editors = {
 
 function getEmptyElementTag(node)
 {
-    var isXhtml= FBL.isElementXHTML(node);
+    var isXhtml= XML.isElementXHTML(node);
     if (isXhtml)
         return Firebug.HTMLPanel.XEmptyElement.tag;
     else

@@ -12,12 +12,13 @@ define([
     "firebug/lib/dom",
     "firebug/firefox/window",
     "firebug/lib/search",
+    "firebug/lib/xml",
     "firebug/profiler",
     "firebug/searchBox",
     "firebug/errors",
 ],
 function(FBL, Firebug, Firefox, FirebugReps, Locale, ToolsInterface, Events, CSS, DOM,
-    WIN, Search) {
+    WIN, Search, XML) {
 
 // ************************************************************************************************
 // Constants
@@ -178,7 +179,7 @@ Firebug.Console = FBL.extend(ActivableConsole,
                 (win?"an argument: ":"null, context.window: ") +
                 (win?win.location:context.window.location), (win?win:context.window));
 
-        if (FBL.isXMLPrettyPrint(context, win))
+        if (XML.isXMLPrettyPrint(context, win))
             return false;
 
         if (win)
