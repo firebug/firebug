@@ -69,8 +69,7 @@
     <vbox id="appcontent">
         <splitter id="fbContentSplitter" collapsed="true"/>
         <vbox id="fbMainFrame" persist="height" collapsed="true">
-            <vbox id="fbContentBox" flex="2" /><vbox>
-        </vbox>
+            <vbox id="fbContentBox" flex="2" />
         </vbox>
     </vbox>
 
