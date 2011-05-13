@@ -18,6 +18,8 @@ var wm = Cc["@mozilla.org/appshell/window-mediator;1"].getService(Ci.nsIWindowMe
 
 var WIN = {};
 
+var window = {};     // these declarations exist to cause errors if we accidently
+var document = {};   // reference these globals
 // ***********************************************************************************************
 // Crossbrowser API
 
@@ -93,7 +95,7 @@ WIN.getRootWindow = function(win)
 {
     for (; win; win = win.parent)
     {
-        if (!win.parent || win == win.parent || !(win.parent instanceof window.Window) )
+        if (!win.parent || win == win.parent || !(win.parent instanceof win.Window) )
             return win;
     }
     return null;
@@ -120,29 +122,7 @@ WIN.openNewTab = function(url, postText)
     return gBrowser.selectedTab = gBrowser.addTab(url, null, null, postData);
 };
 
-WIN.openWindow = function(windowType, url, features, params)
-{
-    var win = windowType ? wm.getMostRecentWindow(windowType) : null;
-    if (win)
-    {
-        if ("initWithParams" in win)
-            win.initWithParams(params);
-        win.focus();
-    }
-    else
-    {
-        var winFeatures = "resizable,dialog=no,centerscreen" + (features != "" ? ("," + features) : "");
-        var parentWindow = (this.instantApply || !window.opener || window.opener.closed) ? window : window.opener;
-        win = parentWindow.openDialog(url, "_blank", winFeatures, params);
-    }
-    return win;
-};
 
-WIN.viewSource = function(url, lineNo)
-{
-    window.openDialog("chrome://global/content/viewSource.xul", "_blank",
-        "all,dialog=no", url, null, null, lineNo);
-};
 
 // Iterate over all opened firefox windows of the given type. If the callback returns true
 // the iteration is stopped.
@@ -175,17 +155,6 @@ WIN.iterateBrowserTabs = function(browserWindow, callback)
 
     return false;
 }
-
-/**
- * Returns <browser> element for specified content window.
- * @param {Object} win - Content window
- */
-WIN.getBrowserForWindow = function(win)
-{
-    var tabBrowser = document.getElementById("content");
-    if (tabBrowser && win.document)
-        return tabBrowser.getBrowserForDocument(win.document);
-};
 
 // ************************************************************************************************
 

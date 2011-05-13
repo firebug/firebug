@@ -1384,7 +1384,7 @@ FirebugReps.SourceLink = domplate(Firebug.Rep,
         }
 
         // Fallback is to just open the view-source window on the file
-        WIN.viewSource(sourceLink.href, sourceLink.line);
+        Firefox.viewSource(sourceLink.href, sourceLink.line);
     },
 
     browseObject: function(sourceLink, context)

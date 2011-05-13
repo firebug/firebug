@@ -5028,7 +5028,7 @@ Firebug.NetMonitor.NetHttpObserver =
             request.loadGroup && request.loadGroup.groupObserver &&
             win == win.parent && !isRedirect)
         {
-            var browser = FBL.getBrowserForWindow(win);
+            var browser = Firefox.getBrowserForWindow(win);
             if (!Firebug.TabWatcher.shouldCreateContext(browser, name, null))
             {
                 if (FBTrace.DBG_NET)

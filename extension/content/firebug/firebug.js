@@ -880,7 +880,7 @@ window.Firebug =
             Firebug: this,
             browser: context.browser,
         };
-        var win = WIN.openWindow("Firebug", "chrome://firebug/content/firebug.xul", "", args);
+        var win = Firefox.openWindow("Firebug", "chrome://firebug/content/firebug.xul", "", args);
 
         return win;
     },
