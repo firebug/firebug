@@ -903,7 +903,7 @@ var require, define;
                     return req.onError(err);
                 } else {
                     //If wait time expired but no modules wait, throw error of counted modules.
-                    noLoads = context.counted.join(", ");
+                    noLoads = context.counted ? context.counted.join(", ") : " rerun with debug";
                     if(noLoads) {
                         err = new Error("require.js checkLoaded("+checkLoaded.timeOutIndex+") timeout (waitSeconds: "+config.waitSeconds+") for counted modules: " + noLoads);
                         err.requireType = "timeout";
