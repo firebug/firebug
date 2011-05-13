@@ -10,6 +10,8 @@ function(FBTrace) {
 
 var Persist = {};
 
+const overrideDefaultsWithPersistedValuesTimeout = 500;
+
 // ********************************************************************************************* //
 // Persistence (cross page refresh)
 

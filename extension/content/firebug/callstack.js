@@ -2,6 +2,7 @@
 
 define([
     "firebug/lib",
+    "firebug/lib/object",
     "firebug/firebug",
     "firebug/reps",
     "arch/tools",
@@ -12,7 +13,7 @@ define([
     "firebug/lib/array",
     "firebug/lib/dom",
 ],
-function(FBL, Firebug, FirebugReps, ToolsInterface, Events, Wrapper, StackFrame, CSS, ARR, DOM) {
+function(FBL, OBJECT, Firebug, FirebugReps, ToolsInterface, Events, Wrapper, StackFrame, CSS, ARR, DOM) {
 
 // ************************************************************************************************
 // Constants
@@ -29,7 +30,7 @@ const Ci = Components.interfaces;
  * panel.
  */
 Firebug.CallstackPanel = function() {}
-Firebug.CallstackPanel.prototype = FBL.extend(Firebug.Panel,
+Firebug.CallstackPanel.prototype = OBJECT.extend(Firebug.Panel,
 /** @lends Firebug.CallstackPanel */
 {
     name: "callstack",
@@ -240,8 +241,8 @@ Firebug.CallstackPanel.prototype = FBL.extend(Firebug.Panel,
     {
         FBTrace.sysout("panel.getContextMenuItems", ARR.cloneArray(arguments));
         var items = [
-            {label: "Expand All", command: FBL.bindFixed(this.onExpandAll, this, target)},
-            {label: "Collapse All", command: FBL.bindFixed(this.onCollapseAll, this, target)}
+            {label: "Expand All", command: OBJECT.bindFixed(this.onExpandAll, this, target)},
+            {label: "Collapse All", command: OBJECT.bindFixed(this.onCollapseAll, this, target)}
         ];
         return items;
     },

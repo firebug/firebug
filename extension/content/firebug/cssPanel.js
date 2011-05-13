@@ -2,6 +2,7 @@
 
 define([
     "firebug/lib",
+    "firebug/lib/object",
     "firebug/firebug",
     "firebug/firefox/firefox",
     "firebug/domplate",
@@ -27,7 +28,7 @@ define([
     "firebug/infotip",
     "firebug/searchBox",
 ],
-function(FBL, Firebug, Firefox, Domplate, FirebugReps, XPCOM, Locale, Events, Wrapper, URL,
+function(FBL, OBJECT, Firebug, Firefox, Domplate, FirebugReps, XPCOM, Locale, Events, Wrapper, URL,
     SourceLink, CSS, DOM, WIN, Search, XPATH, STR, XML, ARR, Persist, System) {
 
 with (Domplate) {
@@ -316,7 +317,7 @@ const styleGroups =
     ]
 };
 
-Firebug.CSSModule = FBL.extend(FBL.extend(Firebug.Module, Firebug.EditorSelector),
+Firebug.CSSModule = OBJECT.extend(OBJECT.extend(Firebug.Module, Firebug.EditorSelector),
 {
     dispatchName: "cssModule",
 
@@ -504,8 +505,8 @@ Firebug.CSSModule = FBL.extend(FBL.extend(Firebug.Module, Firebug.EditorSelector
 
     watchWindow: function(context, win)
     {
-        var cleanupSheets = FBL.bind(this.cleanupSheets, this),
-            cleanupSheetHandler = FBL.bind(this.cleanupSheetHandler, this, context),
+        var cleanupSheets = OBJECT.bind(this.cleanupSheets, this),
+            cleanupSheetHandler = OBJECT.bind(this.cleanupSheetHandler, this, context),
             doc = win.document;
 
         doc.addEventListener("DOMAttrModified", cleanupSheetHandler, false);
@@ -536,7 +537,7 @@ Firebug.CSSModule = FBL.extend(FBL.extend(Firebug.Module, Firebug.EditorSelector
 
 Firebug.CSSStyleSheetPanel = function() {};
 
-Firebug.CSSStyleSheetPanel.prototype = FBL.extend(Firebug.Panel,
+Firebug.CSSStyleSheetPanel.prototype = OBJECT.extend(Firebug.Panel,
 {
     template: domplate(
     {
@@ -1038,15 +1039,15 @@ Firebug.CSSStyleSheetPanel.prototype = FBL.extend(Firebug.Panel,
 
     initialize: function()
     {
-        this.onMouseDown = FBL.bind(this.onMouseDown, this);
-        this.onClick = FBL.bind(this.onClick, this);
+        this.onMouseDown = OBJECT.bind(this.onMouseDown, this);
+        this.onClick = OBJECT.bind(this.onClick, this);
 
-        this.startLiveEditing = FBL.bind(this.startLiveEditing, this);
-        this.stopLiveEditing = FBL.bind(Firebug.Editor.stopEditing, Firebug.Editor);
+        this.startLiveEditing = OBJECT.bind(this.startLiveEditing, this);
+        this.stopLiveEditing = OBJECT.bind(Firebug.Editor.stopEditing, Firebug.Editor);
         Firebug.CSSModule.registerEditor('Live', {startEditing: this.startLiveEditing, stopEditing: this.stopLiveEditing});
 
-        this.startSourceEditing = FBL.bind(this.startSourceEditing, this);
-        this.stopSourceEditing = FBL.bind(Firebug.Editor.stopEditing, Firebug.Editor);
+        this.startSourceEditing = OBJECT.bind(this.startSourceEditing, this);
+        this.stopSourceEditing = OBJECT.bind(Firebug.Editor.stopEditing, Firebug.Editor);
         Firebug.CSSModule.registerEditor('Source', {startEditing: this.startSourceEditing, stopEditing: this.stopSourceEditing});
 
         Firebug.Panel.initialize.apply(this, arguments);
@@ -1154,7 +1155,7 @@ Firebug.CSSStyleSheetPanel.prototype = FBL.extend(Firebug.Panel,
             // contains a link "create a rule".
             var warning = FirebugReps.Warning.tag.replace({object: ""}, this.panelNode);
             FirebugReps.Description.render(Locale.$STR("css.EmptyStyleSheet"),
-                warning, FBL.bind(this.insertRule, this));
+                warning, OBJECT.bind(this.insertRule, this));
         }
 
         this.showToolbarButtons("fbCSSButtons", !URL.isSystemStyleSheet(this.location));
@@ -1245,9 +1246,9 @@ Firebug.CSSStyleSheetPanel.prototype = FBL.extend(Firebug.Panel,
     {
         return [
             {label: "Expand Shorthand Properties", type: "checkbox", checked: Firebug.expandShorthandProps,
-                    command: FBL.bindFixed(Firebug.Options.togglePref, Firebug, "expandShorthandProps") },
+                    command: OBJECT.bindFixed(Firebug.Options.togglePref, Firebug, "expandShorthandProps") },
             "-",
-            {label: "Refresh", command: FBL.bind(this.refresh, this) }
+            {label: "Refresh", command: OBJECT.bind(this.refresh, this) }
         ];
     },
 
@@ -1261,7 +1262,7 @@ Firebug.CSSStyleSheetPanel.prototype = FBL.extend(Firebug.Panel,
             items.push(
                 '-',
                 {label: "Load Original Source",
-                    command: FBL.bindFixed(this.loadOriginalSource, this) }
+                    command: OBJECT.bindFixed(this.loadOriginalSource, this) }
             );
             return items;
         }
@@ -1270,9 +1271,9 @@ Firebug.CSSStyleSheetPanel.prototype = FBL.extend(Firebug.Panel,
         {
             items.push(
                 {label: "Copy Rule Declaration", id: "fbCopyRuleDeclaration",
-                    command: FBL.bindFixed(this.copyRuleDeclaration, this, target) },
+                    command: OBJECT.bindFixed(this.copyRuleDeclaration, this, target) },
                 {label: "Copy Style Declaration", id: "fbCopyStyleDeclaration",
-                    command: FBL.bindFixed(this.copyStyleDeclaration, this, target) }
+                    command: OBJECT.bindFixed(this.copyStyleDeclaration, this, target) }
             );
         }
 
@@ -1280,16 +1281,16 @@ Firebug.CSSStyleSheetPanel.prototype = FBL.extend(Firebug.Panel,
         {
             items.push(
                 {label: "CopyColor",
-                    command: FBL.bindFixed(System.copyToClipboard, FBL, this.infoTipObject) }
+                    command: OBJECT.bindFixed(System.copyToClipboard, FBL, this.infoTipObject) }
             );
         }
         else if (this.infoTipType == "image")
         {
             items.push(
                 {label: "CopyImageLocation",
-                    command: FBL.bindFixed(System.copyToClipboard, FBL, this.infoTipObject) },
+                    command: OBJECT.bindFixed(System.copyToClipboard, FBL, this.infoTipObject) },
                 {label: "OpenImageInNewTab",
-                    command: FBL.bindFixed(WIN.openNewTab, FBL, this.infoTipObject) }
+                    command: OBJECT.bindFixed(WIN.openNewTab, FBL, this.infoTipObject) }
             );
         }
 
@@ -1298,7 +1299,7 @@ Firebug.CSSStyleSheetPanel.prototype = FBL.extend(Firebug.Panel,
             items.push(
                 "-",
                 {label: "EditStyle",
-                    command: FBL.bindFixed(this.editElementStyle, this) }
+                    command: OBJECT.bindFixed(this.editElementStyle, this) }
             );
         }
         else if (!URL.isSystemStyleSheet(this.selection))
@@ -1306,7 +1307,7 @@ Firebug.CSSStyleSheetPanel.prototype = FBL.extend(Firebug.Panel,
             items.push(
                     "-",
                     {label: "NewRule",
-                        command: FBL.bindFixed(this.insertRule, this, target) }
+                        command: OBJECT.bindFixed(this.insertRule, this, target) }
                 );
         }
 
@@ -1316,7 +1317,7 @@ Firebug.CSSStyleSheetPanel.prototype = FBL.extend(Firebug.Panel,
             items.push(
                 "-",
                 {label: "NewProp",
-                    command: FBL.bindFixed(this.insertPropertyRow, this, target) }
+                    command: OBJECT.bindFixed(this.insertPropertyRow, this, target) }
             );
 
             var propRow = DOM.getAncestorByClass(target, "cssProp");
@@ -1327,19 +1328,19 @@ Firebug.CSSStyleSheetPanel.prototype = FBL.extend(Firebug.Panel,
 
                 items.push(
                     {label: Locale.$STRF("EditProp", [propName]), nol10n: true,
-                        command: FBL.bindFixed(this.editPropertyRow, this, propRow) },
+                        command: OBJECT.bindFixed(this.editPropertyRow, this, propRow) },
                     {label: Locale.$STRF("DeleteProp", [propName]), nol10n: true,
-                        command: FBL.bindFixed(this.deletePropertyRow, this, propRow) },
+                        command: OBJECT.bindFixed(this.deletePropertyRow, this, propRow) },
                     {label: Locale.$STRF("DisableProp", [propName]), nol10n: true,
                         type: "checkbox", checked: isDisabled,
-                        command: FBL.bindFixed(this.disablePropertyRow, this, propRow) }
+                        command: OBJECT.bindFixed(this.disablePropertyRow, this, propRow) }
                 );
             }
         }
 
         items.push(
             "-",
-            {label: "Refresh", command: FBL.bind(this.refresh, this) }
+            {label: "Refresh", command: OBJECT.bind(this.refresh, this) }
         );
 
         return items;
@@ -1619,7 +1620,7 @@ Firebug.CSSStyleSheetPanel.prototype = FBL.extend(Firebug.Panel,
 
 function CSSElementPanel() {}
 
-CSSElementPanel.prototype = FBL.extend(Firebug.CSSStyleSheetPanel.prototype,
+CSSElementPanel.prototype = OBJECT.extend(Firebug.CSSStyleSheetPanel.prototype,
 {
     template: domplate(
     {
@@ -1678,7 +1679,7 @@ CSSElementPanel.prototype = FBL.extend(Firebug.CSSStyleSheetPanel.prototype,
         {
             warning = FirebugReps.Warning.tag.replace({object: ""}, this.panelNode);
             result = FirebugReps.Description.render(Locale.$STR("css.EmptyElementCSS"),
-                warning, FBL.bind(this.editElementStyle, this));
+                warning, OBJECT.bind(this.editElementStyle, this));
             Events.dispatch([Firebug.A11yModel], 'onCSSRulesAdded', [this, result]);
         }
     },
@@ -1854,11 +1855,11 @@ CSSElementPanel.prototype = FBL.extend(Firebug.CSSStyleSheetPanel.prototype,
 
     initialize: function()
     {
-        this.onMouseDown = FBL.bind(this.onMouseDown, this);
-        this.onClick = FBL.bind(this.onClick, this);
-        this.onStateChange = FBL.bindFixed(this.contentStateCheck, this);
-        this.onHoverChange = FBL.bindFixed(this.contentStateCheck, this, STATE_HOVER);
-        this.onActiveChange = FBL.bindFixed(this.contentStateCheck, this, STATE_ACTIVE);
+        this.onMouseDown = OBJECT.bind(this.onMouseDown, this);
+        this.onClick = OBJECT.bind(this.onClick, this);
+        this.onStateChange = OBJECT.bindFixed(this.contentStateCheck, this);
+        this.onHoverChange = OBJECT.bindFixed(this.contentStateCheck, this, STATE_HOVER);
+        this.onActiveChange = OBJECT.bindFixed(this.contentStateCheck, this, STATE_ACTIVE);
 
         // We only need the basic panel initialize, not the intermeditate objects
         Firebug.Panel.initialize.apply(this, arguments);
@@ -1937,11 +1938,11 @@ CSSElementPanel.prototype = FBL.extend(Firebug.CSSStyleSheetPanel.prototype,
     {
         var ret = [
             {label: "Only Show Applied Styles", type: "checkbox", checked: Firebug.onlyShowAppliedStyles,
-                    command: FBL.bindFixed(Firebug.Options.togglePref, Firebug, "onlyShowAppliedStyles") },
+                    command: OBJECT.bindFixed(Firebug.Options.togglePref, Firebug, "onlyShowAppliedStyles") },
             {label: "Show User Agent CSS", type: "checkbox", checked: Firebug.showUserAgentCSS,
-                    command: FBL.bindFixed(Firebug.Options.togglePref, Firebug, "showUserAgentCSS") },
+                    command: OBJECT.bindFixed(Firebug.Options.togglePref, Firebug, "showUserAgentCSS") },
             {label: "Expand Shorthand Properties", type: "checkbox", checked: Firebug.expandShorthandProps,
-                    command: FBL.bindFixed(Firebug.Options.togglePref, Firebug, "expandShorthandProps") }
+                    command: OBJECT.bindFixed(Firebug.Options.togglePref, Firebug, "expandShorthandProps") }
         ];
 
         if (DOM.domUtils && this.selection)
@@ -2010,7 +2011,7 @@ CSSElementPanel.prototype = FBL.extend(Firebug.CSSStyleSheetPanel.prototype,
     {
       if (!state || this.contentState & state)
       {
-          var timeoutRunner = FBL.bindFixed(function()
+          var timeoutRunner = OBJECT.bindFixed(function()
               {
                   var newState = safeGetContentState(this.selection);
                   if (newState != this.contentState)
@@ -2043,7 +2044,7 @@ function safeGetContentState(selection)
 
 function CSSComputedElementPanel() {}
 
-CSSComputedElementPanel.prototype = FBL.extend(CSSElementPanel.prototype,
+CSSComputedElementPanel.prototype = OBJECT.extend(CSSElementPanel.prototype,
 {
     template: domplate(
     {
@@ -2154,8 +2155,8 @@ CSSComputedElementPanel.prototype = FBL.extend(CSSElementPanel.prototype,
             this.groupOpened[title] = true;
         }
 
-        this.onClick = FBL.bind(this.onClick, this);
-        this.onMouseDown = FBL.bind(this.onMouseDown, this);
+        this.onClick = OBJECT.bind(this.onClick, this);
+        this.onMouseDown = OBJECT.bind(this.onMouseDown, this);
 
         Firebug.Panel.initialize.apply(this, arguments);
     },
@@ -2175,11 +2176,11 @@ CSSComputedElementPanel.prototype = FBL.extend(CSSElementPanel.prototype,
     {
         return [
             {label: "Sort alphabetically", type: "checkbox", checked: Firebug.computedStylesDisplay == "alphabetical",
-                    command: FBL.bind(this.toggleDisplay, this) },
+                    command: OBJECT.bind(this.toggleDisplay, this) },
             {label: "Show Mozilla specific styles", type: "checkbox", checked: Firebug.showMozillaSpecificStyles,
-              command:  FBL.bindFixed(Firebug.Options.togglePref, Firebug, "showMozillaSpecificStyles") },
+              command:  OBJECT.bindFixed(Firebug.Options.togglePref, Firebug, "showMozillaSpecificStyles") },
             "-",
-            {label: "Refresh", command: FBL.bind(this.refresh, this) }
+            {label: "Refresh", command: OBJECT.bind(this.refresh, this) }
         ];
     },
 

@@ -2,6 +2,7 @@
 
 define([
     "firebug/lib",
+    "firebug/lib/object",
     "firebug/firebug",
     "firebug/reps",
     "firebug/lib/locale",
@@ -22,7 +23,7 @@ define([
     "firebug/console",
     "firebug/commandLineExposed"
 ],
-function(FBL, Firebug, FirebugReps, Locale, Events, Wrapper, URL, CSS, DOM, WIN, System, XPATH,
+function(FBL, OBJECT, Firebug, FirebugReps, Locale, Events, Wrapper, URL, CSS, DOM, WIN, System, XPATH,
     STR, XML, ARR, Persist, EventMonitor, Keywords) {
 
 // ************************************************************************************************
@@ -45,7 +46,7 @@ const reCmdSource = /^with\(_FirebugCommandLine\){(.*)};$/;
 
 // ************************************************************************************************
 
-Firebug.CommandLine = FBL.extend(Firebug.Module,
+Firebug.CommandLine = OBJECT.extend(Firebug.Module,
 {
     dispatchName: "commandLine",
 
@@ -152,7 +153,7 @@ Firebug.CommandLine = FBL.extend(Firebug.Module,
                 // Log a message with a clickable link that can be used to enable
                 // the command line - but the page will switch into HTML. The listener
                 // passed into the function is called when the user clicks the link.
-                FirebugReps.Description.render(msg, objectBox, FBL.bind(function()
+                FirebugReps.Description.render(msg, objectBox, OBJECT.bind(function()
                 {
                     // Reset the flag that protect script injection into the page.
                     context.isXMLPrettyPrint = false;
@@ -433,7 +434,7 @@ Firebug.CommandLine = FBL.extend(Firebug.Module,
             if (noscript && noScriptURI)
                 noscript.setJSEnabled(noScriptURI, true);
 
-            var goodOrBad = FBL.bind(Firebug.Console.log, Firebug.Console);
+            var goodOrBad = OBJECT.bind(Firebug.Console.log, Firebug.Console);
             this.evaluate(expr, context, null, null, goodOrBad, goodOrBad);
 
             if (noscript && noScriptURI)
@@ -617,7 +618,7 @@ Firebug.CommandLine = FBL.extend(Firebug.Module,
         var commandLine = this.getCommandLine(context);
         if (commandLine.value.indexOf("\n") >= 0)
         {
-            setTimeout(FBL.bindFixed(function()
+            setTimeout(OBJECT.bindFixed(function()
             {
                 Firebug.Options.set("largeCommandLine", true);
             }, this));
@@ -656,19 +657,19 @@ Firebug.CommandLine = FBL.extend(Firebug.Module,
     {
         var showCompletionPopup = Firebug.Options.get("commandLineShowCompleterPopup");
         this.autoCompleter = new Firebug.AutoCompleter(getExpressionOffset, getDot,
-            FBL.bind(autoCompleteEval, this), false, true, true, true, showCompletionPopup,
+            OBJECT.bind(autoCompleteEval, this), false, true, true, true, showCompletionPopup,
             isValidProperty, simplifyExpr, killCompletions);
     },
 
     initializeUI: function()
     {
-        this.onCommandLineFocus = FBL.bind(this.onCommandLineFocus, true);
-        this.onCommandLineInput = FBL.bind(this.onCommandLineInput, this);
-        this.onCommandLineBlur = FBL.bind(this.onCommandLineBlur, this);
-        this.onCommandLineKeyUp = FBL.bind(this.onCommandLineKeyUp, this);
-        this.onCommandLineKeyDown = FBL.bind(this.onCommandLineKeyDown, this);
-        this.onCommandLineKeyPress = FBL.bind(this.onCommandLineKeyPress, this);
-        this.onCommandLineOverflow = FBL.bind(this.onCommandLineOverflow, this);
+        this.onCommandLineFocus = OBJECT.bind(this.onCommandLineFocus, true);
+        this.onCommandLineInput = OBJECT.bind(this.onCommandLineInput, this);
+        this.onCommandLineBlur = OBJECT.bind(this.onCommandLineBlur, this);
+        this.onCommandLineKeyUp = OBJECT.bind(this.onCommandLineKeyUp, this);
+        this.onCommandLineKeyDown = OBJECT.bind(this.onCommandLineKeyDown, this);
+        this.onCommandLineKeyPress = OBJECT.bind(this.onCommandLineKeyPress, this);
+        this.onCommandLineOverflow = OBJECT.bind(this.onCommandLineOverflow, this);
         this.attachListeners();
     },
 
@@ -1032,7 +1033,7 @@ Firebug.CommandLine = FBL.extend(Firebug.Module,
 // ************************************************************************************************
 // Shared Helpers
 
-Firebug.CommandLine.CommandHandler = FBL.extend(Object,
+Firebug.CommandLine.CommandHandler = OBJECT.extend(Object,
 {
     handle: function(event, api, win)
     {
@@ -2445,7 +2446,7 @@ Firebug.CommandLine.injector =
     {
         // Register listener for command-line execution events.
         var handler = new CommandLineHandler(context, win);
-        var boundHandler = FBL.bind(handler.handleEvent, handler);
+        var boundHandler = OBJECT.bind(handler.handleEvent, handler);
 
         if (!context.activeCommandLineHandlers)
             context.activeCommandLineHandlers = {};

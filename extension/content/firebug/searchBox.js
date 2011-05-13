@@ -2,11 +2,12 @@
 
 define([
     "firebug/lib",
+    "firebug/lib/object",
     "firebug/firebug",
     "firebug/lib/css",
     "firebug/lib/search",
 ],
-function(FBL, Firebug, CSS, Search) {
+function(FBL, OBJECT, Firebug, CSS, Search) {
 
 // ************************************************************************************************
 // Constants
@@ -22,7 +23,7 @@ const searchDelay = 150;
  * available for panels that have <code>searchable<code> property set to true (set to
  * false by default).
  */
-Firebug.Search = FBL.extend(Firebug.Module,
+Firebug.Search = OBJECT.extend(Firebug.Module,
 {
     dispatchName: "search",
 
@@ -166,7 +167,7 @@ Firebug.Search = FBL.extend(Firebug.Module,
     searchOptionMenu: function(label, option)
     {
         return { label: label, checked: Firebug[option], option: option,
-            command: FBL.bindFixed(this.onToggleSearchOption, this, option) };
+            command: OBJECT.bindFixed(this.onToggleSearchOption, this, option) };
     },
 
     onToggleSearchOption: function(option)

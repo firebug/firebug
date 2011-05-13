@@ -2,6 +2,7 @@
 
 define([
     "firebug/lib",
+    "firebug/lib/object",
     "firebug/firebug",
     "firebug/domplate",
     "firebug/reps",
@@ -15,13 +16,13 @@ define([
     "firebug/lib/dom",
     "firebug/lib/string",
 ],
-function(FBL, Firebug, Domplate, FirebugReps, Locale, Wrapper, ToolsInterface, URL,
+function(FBL, OBJECT, Firebug, Domplate, FirebugReps, Locale, Wrapper, ToolsInterface, URL,
     StackFrame, Events, CSS, DOM, STR) {
 
 // ********************************************************************************************* //
 // Profiler
 
-Firebug.Profiler = FBL.extend(Firebug.Module,
+Firebug.Profiler = OBJECT.extend(Firebug.Module,
 {
     dispatchName: "profiler",
 

@@ -2,6 +2,7 @@
 
 define([
     "firebug/lib",
+    "firebug/lib/object",
     "firebug/firebug",
     "firebug/domplate",
     "firebug/lib/locale",
@@ -11,14 +12,14 @@ define([
     "firebug/lib/xml",
     "firebug/editor",
 ],
-function(FBL, Firebug, Domplate, Locale, Events, CSS, DOM, XML) {
+function(FBL, OBJECT, Firebug, Domplate, Locale, Events, CSS, DOM, XML) {
 
 // ************************************************************************************************
 
 function LayoutPanel() {}
 
 with (Domplate) {
-LayoutPanel.prototype = FBL.extend(Firebug.Panel,
+LayoutPanel.prototype = OBJECT.extend(Firebug.Panel,
 {
     template: domplate(
     {
@@ -157,8 +158,8 @@ LayoutPanel.prototype = FBL.extend(Firebug.Panel,
 
     initialize: function()
     {
-        this.onMouseOver = FBL.bind(this.onMouseOver, this);
-        this.onMouseOut = FBL.bind(this.onMouseOut, this);
+        this.onMouseOver = OBJECT.bind(this.onMouseOver, this);
+        this.onMouseOut = OBJECT.bind(this.onMouseOut, this);
 
         Firebug.Panel.initialize.apply(this, arguments);
     },

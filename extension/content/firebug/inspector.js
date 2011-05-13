@@ -2,6 +2,7 @@
 
 define([
     "firebug/lib",
+    "firebug/lib/object",
     "firebug/firebug",
     "firebug/firefox/firefox",
     "firebug/reps",
@@ -13,7 +14,7 @@ define([
     "firebug/lib/xml",
     "firebug/firefox/window",
 ],
-function(FBL, Firebug, Firefox, FirebugReps, Locale, Events, Wrapper, CSS, DOM, XML, WIN) {
+function(FBL, OBJECT, Firebug, Firefox, FirebugReps, Locale, Events, Wrapper, CSS, DOM, XML, WIN) {
 
 // ************************************************************************************************
 // Constants
@@ -38,7 +39,7 @@ var frameHighlighter = null;
 /**
  * @module Implements Firebug Inspector logic.
  */
-Firebug.Inspector = FBL.extend(Firebug.Module,
+Firebug.Inspector = OBJECT.extend(Firebug.Module,
 {
     dispatchName: "inspector",
     inspecting: false,
@@ -446,13 +447,13 @@ Firebug.Inspector = FBL.extend(Firebug.Module,
 
         this.keyListeners =
         [
-            chrome.keyCodeListen("RETURN", null, FBL.bindFixed(this.stopInspecting, this)),
-            chrome.keyCodeListen("ESCAPE", null, FBL.bindFixed(this.stopInspecting, this, true)),
-            chrome.keyCodeListen("UP", Events.isControl, FBL.bindFixed(this.inspectNodeBy, this, "up"), true),
-            chrome.keyCodeListen("DOWN", Events.isControl, FBL.bindFixed(this.inspectNodeBy, this, "down"), true),
+            chrome.keyCodeListen("RETURN", null, OBJECT.bindFixed(this.stopInspecting, this)),
+            chrome.keyCodeListen("ESCAPE", null, OBJECT.bindFixed(this.stopInspecting, this, true)),
+            chrome.keyCodeListen("UP", Events.isControl, OBJECT.bindFixed(this.inspectNodeBy, this, "up"), true),
+            chrome.keyCodeListen("DOWN", Events.isControl, OBJECT.bindFixed(this.inspectNodeBy, this, "down"), true),
         ];
 
-        WIN.iterateWindows(win, FBL.bind(function(subWin)
+        WIN.iterateWindows(win, OBJECT.bind(function(subWin)
         {
             if (FBTrace.DBG_INSPECT)
                 FBTrace.sysout("inspector.attacheInspectListeners to " + subWin.location +
@@ -487,7 +488,7 @@ Firebug.Inspector = FBL.extend(Firebug.Module,
             delete this.keyListeners;
         }
 
-        WIN.iterateWindows(win, FBL.bind(function(subWin)
+        WIN.iterateWindows(win, OBJECT.bind(function(subWin)
         {
             subWin.document.removeEventListener("mouseover", this.onInspectingMouseOver, true);
             subWin.document.removeEventListener("mousedown", this.onInspectingMouseDown, true);
@@ -501,7 +502,7 @@ Firebug.Inspector = FBL.extend(Firebug.Module,
      */
     detachClickInspectListeners: function(context)
     {
-        WIN.iterateWindows(context, FBL.bind(function(subWin)
+        WIN.iterateWindows(context, OBJECT.bind(function(subWin)
         {
             subWin.document.removeEventListener("click", this.onInspectingClick, true);
         }, this));
@@ -610,13 +611,13 @@ Firebug.Inspector = FBL.extend(Firebug.Module,
     {
         Firebug.Module.initialize.apply(this, arguments);
 
-        this.onInspectingResizeWindow = FBL.bind(this.onInspectingResizeWindow, this);
-        this.onInspectingScroll = FBL.bind(this.onInspectingScroll, this);
-        this.onInspectingMouseOver = FBL.bind(this.onInspectingMouseOver, this);
-        this.onInspectingMouseDown = FBL.bind(this.onInspectingMouseDown, this);
-        this.onInspectingMouseUp = FBL.bind(this.onInspectingMouseUp, this);
-        this.onInspectingClick = FBL.bind(this.onInspectingClick, this);
-        this.onPanelChanged = FBL.bind(this.onPanelChanged, this);
+        this.onInspectingResizeWindow = OBJECT.bind(this.onInspectingResizeWindow, this);
+        this.onInspectingScroll = OBJECT.bind(this.onInspectingScroll, this);
+        this.onInspectingMouseOver = OBJECT.bind(this.onInspectingMouseOver, this);
+        this.onInspectingMouseDown = OBJECT.bind(this.onInspectingMouseDown, this);
+        this.onInspectingMouseUp = OBJECT.bind(this.onInspectingMouseUp, this);
+        this.onInspectingClick = OBJECT.bind(this.onInspectingClick, this);
+        this.onPanelChanged = OBJECT.bind(this.onPanelChanged, this);
 
         this.updateOption("shadeBoxModel", Firebug.shadeBoxModel);
         this.updateOption("showQuickInfoBox", Firebug.showQuickInfoBox);

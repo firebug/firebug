@@ -2,6 +2,7 @@
 
 define([
     "firebug/lib",
+    "firebug/lib/object",
     "firebug/firebug",
     "firebug/commandLine",
     "firebug/lib/css",
@@ -9,7 +10,7 @@ define([
     "firebug/lib/string",
     "firebug/lib/xml",
 ],
-function(FBL, Firebug, CommandLine, CSS, DOM, STR, XML) {
+function(FBL, OBJECT, Firebug, CommandLine, CSS, DOM, STR, XML) {
 
 // ************************************************************************************************
 // Constants
@@ -20,7 +21,7 @@ function(FBL, Firebug, CommandLine, CSS, DOM, STR, XML) {
 /**
  * @module Command Line availability in other panels.
  */
-Firebug.CommandLine.Popup = FBL.extend(Firebug.Module,
+Firebug.CommandLine.Popup = OBJECT.extend(Firebug.Module,
 {
     dispatchName: "commandLinePopup",
     lastFocused : null,
@@ -31,7 +32,7 @@ Firebug.CommandLine.Popup = FBL.extend(Firebug.Module,
 
         this.setPopupBrowserStyle(Firebug.chrome);
 
-        this.onKeyPress = FBL.bind(this.onKeyPress, this);
+        this.onKeyPress = OBJECT.bind(this.onKeyPress, this);
 
         this.attachListeners();
     },

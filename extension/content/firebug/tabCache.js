@@ -2,6 +2,7 @@
 
 define([
     "firebug/lib",
+    "firebug/lib/object",
     "firebug/firebug",
     "firebug/lib/xpcom",
     "firebug/http/requestObserver",
@@ -14,7 +15,7 @@ define([
     "firebug/firefox/window",
     "firebug/sourceCache",
 ],
-function(FBL, Firebug, XPCOM, HttpRequestObserver, HttpResponseObserver, Locale, Events,
+function(FBL, OBJECT, Firebug, XPCOM, HttpRequestObserver, HttpResponseObserver, Locale, Events,
     URL, HTTP, STR, WIN) {
 
 // ********************************************************************************************* //
@@ -84,7 +85,7 @@ var contentTypes =
  * observer so, HTTP communication can be interecepted and all incoming data stored within
  * a cache.
  */
-Firebug.TabCacheModel = FBL.extend(Firebug.Module,
+Firebug.TabCacheModel = OBJECT.extend(Firebug.Module,
 {
     dispatchName: "tabCache",
     contentTypes: contentTypes,
@@ -241,7 +242,7 @@ Firebug.TabCache = function(context)
     Firebug.SourceCache.call(this, context);
 };
 
-Firebug.TabCache.prototype = FBL.extend(Firebug.SourceCache.prototype,
+Firebug.TabCache.prototype = OBJECT.extend(Firebug.SourceCache.prototype,
 {
     responses: [],       // responses in progress.
 

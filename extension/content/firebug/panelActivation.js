@@ -2,6 +2,7 @@
 
 define([
     "firebug/lib",
+    "firebug/lib/object",
     "firebug/firebug",
     "firebug/firefox/firefox",
     "arch/tools",
@@ -10,7 +11,7 @@ define([
     "firebug/lib/url",
     "firebug/lib/dom",
 ],
-function(FBL, Firebug, Firefox, ToolsInterface, Locale, Domplate, URL, DOM) {
+function(FBL, OBJECT, Firebug, Firefox, ToolsInterface, Locale, Domplate, URL, DOM) {
 
 // ************************************************************************************************
 // Constants
@@ -32,7 +33,7 @@ const privateBrowsingEnabled = ("@mozilla.org/privatebrowsing;1" in Cc) &&
  * Such panel must be derived from {@link Firebug.ActivablePanel} and appropriate activable
  * module from {@link Firebug.ActivableModule}
  */
-Firebug.PanelActivation = FBL.extend(Firebug.Module,
+Firebug.PanelActivation = OBJECT.extend(Firebug.Module,
 /** @lends Firebug.PanelActivation */
 {
     dispatchName: "panelActivation",

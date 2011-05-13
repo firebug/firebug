@@ -2,6 +2,7 @@
 
 define([
     "firebug/lib",
+    "firebug/lib/object",
     "firebug/firebug",
     "firebug/domplate",
     "firebug/lib/locale",
@@ -9,7 +10,7 @@ define([
     "firebug/lib/css",
     "firebug/lib/dom",
 ],
-function(FBL, Firebug, Domplate, Locale, Events, CSS, DOM) {
+function(FBL, OBJECT, Firebug, Domplate, Locale, Events, CSS, DOM) {
 
 // ************************************************************************************************
 // Constants
@@ -21,7 +22,7 @@ const infoTipWindowPadding = 25;
 // ************************************************************************************************
 
 with (Domplate) {
-Firebug.InfoTip = FBL.extend(Firebug.Module,
+Firebug.InfoTip = OBJECT.extend(Firebug.Module,
 {
     dispatchName: "infoTip",
     tags: domplate(
@@ -128,8 +129,8 @@ Firebug.InfoTip = FBL.extend(Firebug.Module,
 
     initializeBrowser: function(browser)
     {
-        browser.onInfoTipMouseOut = FBL.bind(this.onMouseOut, this, browser);
-        browser.onInfoTipMouseMove = FBL.bind(this.onMouseMove, this, browser);
+        browser.onInfoTipMouseOut = OBJECT.bind(this.onMouseOut, this, browser);
+        browser.onInfoTipMouseMove = OBJECT.bind(this.onMouseMove, this, browser);
 
         var doc = browser.contentDocument;
         if (!doc)

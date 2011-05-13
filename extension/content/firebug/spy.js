@@ -2,6 +2,7 @@
 
 define([
     "firebug/lib",
+    "firebug/lib/object",
     "firebug/firebug",
     "firebug/domplate",
     "firebug/reps",
@@ -20,7 +21,7 @@ define([
     "firebug/netPanel",
     "firebug/errors",
 ],
-function(FBL, Firebug, Domplate, FirebugReps, Events, HttpRequestObserver, StackFrame,
+function(FBL, OBJECT, Firebug, Domplate, FirebugReps, Events, HttpRequestObserver, StackFrame,
     HTTP, CSS, DOM, WIN, System, STR, URL, ARR, Debug) {
 
 // ************************************************************************************************
@@ -44,7 +45,7 @@ var contexts = [];
  * The module is responsible for attaching/detaching a HTTP Observers when Firebug is
  * activated/deactivated for a site.
  */
-Firebug.Spy = FBL.extend(Firebug.Module,
+Firebug.Spy = OBJECT.extend(Firebug.Module,
 /** @lends Firebug.Spy */
 {
     dispatchName: "spy",
@@ -395,7 +396,7 @@ var SpyHttpObserver =
  * @class This observer is used to properly monitor even mulipart XHRs. It's based on
  * an activity-observer component that has been introduced in Firefox 3.6.
  */
-var SpyHttpActivityObserver = FBL.extend(Firebug.NetMonitor.NetHttpActivityObserver,
+var SpyHttpActivityObserver = OBJECT.extend(Firebug.NetMonitor.NetHttpActivityObserver,
 /** @lends SpyHttpActivityObserver */
 {
     activeRequests: [],
@@ -926,20 +927,20 @@ Firebug.Spy.XHR = domplate(Firebug.Rep,
     getContextMenuItems: function(spy)
     {
         var items = [
-            {label: "CopyLocation", command: FBL.bindFixed(this.copyURL, this, spy) }
+            {label: "CopyLocation", command: OBJECT.bindFixed(this.copyURL, this, spy) }
         ];
 
         if (spy.postText)
         {
             items.push(
-                {label: "CopyLocationParameters", command: FBL.bindFixed(this.copyParams, this, spy) }
+                {label: "CopyLocationParameters", command: OBJECT.bindFixed(this.copyParams, this, spy) }
             );
         }
 
         items.push(
-            {label: "CopyResponse", command: FBL.bindFixed(this.copyResponse, this, spy) },
+            {label: "CopyResponse", command: OBJECT.bindFixed(this.copyResponse, this, spy) },
             "-",
-            {label: "OpenInTab", command: FBL.bindFixed(this.openInTab, this, spy) }
+            {label: "OpenInTab", command: OBJECT.bindFixed(this.openInTab, this, spy) }
         );
 
         return items;

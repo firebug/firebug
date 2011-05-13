@@ -2,12 +2,13 @@
 
 define([
     "firebug/lib",
+    "firebug/lib/object",
     "firebug/firebug",
     "firebug/lib/events",
     "firebug/lib/css",
     "firebug/lib/dom",
 ],
-function(FBL, Firebug, Events, CSS, DOM) {
+function(FBL, OBJECT, Firebug, Events, CSS, DOM) {
 
 // ************************************************************************************************
 
@@ -55,7 +56,7 @@ Firebug.InsideOutBox = function(view, box)
     this.selectedObjectBox = null;
     this.highlightedObjectBox = null;
 
-    this.onMouseDown = FBL.bind(this.onMouseDown, this);
+    this.onMouseDown = OBJECT.bind(this.onMouseDown, this);
     box.addEventListener("mousedown", this.onMouseDown, false);
 };
 

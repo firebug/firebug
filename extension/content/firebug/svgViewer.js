@@ -2,6 +2,7 @@
 
 define([
     "firebug/lib",
+    "firebug/lib/object",
     "firebug/firebug",
     "firebug/domplate",
     "firebug/lib/locale",
@@ -9,7 +10,7 @@ define([
     "firebug/lib/css",
     "firebug/http/httpLib",
 ],
-function(FBL, Firebug, Domplate, Locale, XPCOM, CSS, HTTP) {
+function(FBL, OBJECT, Firebug, Domplate, Locale, XPCOM, CSS, HTTP) {
 
 // ************************************************************************************************
 // Constants
@@ -28,7 +29,7 @@ var contentTypes =
  * tab wihin network request detail, a listener is registered into
  * <code>Firebug.NetMonitor.NetInfoBody</code> object.
  */
-Firebug.SVGViewerModel = FBL.extend(Firebug.Module,
+Firebug.SVGViewerModel = OBJECT.extend(Firebug.Module,
 {
     dispatchName: "svgViewer",
 

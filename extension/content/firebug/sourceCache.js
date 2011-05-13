@@ -2,13 +2,14 @@
 
 define([
     "firebug/lib",
+    "firebug/lib/object",
     "firebug/firebug",
     "firebug/lib/xpcom",
     "firebug/lib/url",
     "firebug/http/httpLib",
     "firebug/lib/string",
 ],
-function(FBL, Firebug, XPCOM, URL, HTTP, STR) {
+function(FBL, OBJECT, Firebug, XPCOM, URL, HTTP, STR) {
 
 // ************************************************************************************************
 // Constants
@@ -40,7 +41,7 @@ Firebug.SourceCache = function(context)
     this.cache = {};
 };
 
-Firebug.SourceCache.prototype = FBL.extend(new Firebug.Listener(),
+Firebug.SourceCache.prototype = OBJECT.extend(new Firebug.Listener(),
 {
     isCached: function(url)
     {

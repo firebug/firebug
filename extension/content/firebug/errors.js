@@ -2,6 +2,7 @@
 
 define([
     "firebug/lib",
+    "firebug/lib/object",
     "firebug/firebug",
     "firebug/reps",
     "firebug/lib/xpcom",
@@ -9,7 +10,7 @@ define([
     "firebug/firefox/window",
     "firebug/lib/array",
 ],
-function(FBL, Firebug, FirebugReps, XPCOM, CSS, WIN, ARR) {
+function(FBL, OBJECT, Firebug, FirebugReps, XPCOM, CSS, WIN, ARR) {
 
 // **********************************************************************************************//
 // Constants
@@ -48,7 +49,7 @@ const domWindowUtils = window.QueryInterface(Ci.nsIInterfaceRequestor)
 
 // ********************************************************************************************* //
 
-var Errors = Firebug.Errors = FBL.extend(Firebug.Module,
+var Errors = Firebug.Errors = OBJECT.extend(Firebug.Module,
 {
     dispatchName: "errors",
 

@@ -2,11 +2,12 @@
 
 define([
     "firebug/lib",
+    "firebug/lib/object",
     "firebug/lib/options",
     "firebug/firebug",
     "firebug/lib/dom",
 ],
-function(FBL, Options, Firebug, DOM) {
+function(FBL, OBJECT, Options, Firebug, DOM) {
 
 // ********************************************************************************************* //
 // Constants
@@ -22,7 +23,7 @@ const appInfo = Cc["@mozilla.org/xre/app-info;1"].getService(Ci.nsIXULAppInfo);
 /**
  * This module is responsible for varisous hacky solutions related to known issues.
  */
-Firebug.KnownIssues = FBL.extend(Firebug.Module,
+Firebug.KnownIssues = OBJECT.extend(Firebug.Module,
 /** @lends Firebug.KnownIssues */
 {
     dispatchName: "knownIssues",

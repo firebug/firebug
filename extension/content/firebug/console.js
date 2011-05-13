@@ -2,6 +2,7 @@
 
 define([
     "firebug/lib",
+    "firebug/lib/object",
     "firebug/firebug",
     "firebug/firefox/firefox",
     "firebug/reps",
@@ -17,7 +18,7 @@ define([
     "firebug/searchBox",
     "firebug/errors",
 ],
-function(FBL, Firebug, Firefox, FirebugReps, Locale, ToolsInterface, Events, CSS, DOM,
+function(FBL, OBJECT, Firebug, Firefox, FirebugReps, Locale, ToolsInterface, Events, CSS, DOM,
     WIN, Search, XML) {
 
 // ************************************************************************************************
@@ -157,9 +158,9 @@ Firebug.ConsoleBase =
 
 // ************************************************************************************************
 
-var ActivableConsole = FBL.extend(Firebug.ActivableModule, Firebug.ConsoleBase);
+var ActivableConsole = OBJECT.extend(Firebug.ActivableModule, Firebug.ConsoleBase);
 
-Firebug.Console = FBL.extend(ActivableConsole,
+Firebug.Console = OBJECT.extend(ActivableConsole,
 {
     dispatchName: "console",
     toolName: "console",
@@ -462,7 +463,7 @@ Firebug.ConsoleListener =
 
 Firebug.ConsolePanel = function () {};
 
-Firebug.ConsolePanel.prototype = FBL.extend(Firebug.ActivablePanel,
+Firebug.ConsolePanel.prototype = OBJECT.extend(Firebug.ActivablePanel,
 {
     wasScrolledToBottom: false,
     messageCount: 0,
@@ -758,10 +759,10 @@ Firebug.ConsolePanel.prototype = FBL.extend(Firebug.ActivablePanel,
     {
         Firebug.ActivablePanel.initializeNode.apply(this, arguments);
 
-        this.onScroller = FBL.bind(this.onScroll, this);
+        this.onScroller = OBJECT.bind(this.onScroll, this);
         this.panelNode.addEventListener("scroll", this.onScroller, true);
 
-        this.onResizer = FBL.bind(this.onResize, this);
+        this.onResizer = OBJECT.bind(this.onResize, this);
         this.resizeEventTarget = Firebug.chrome.$('fbContentBox');
         this.resizeEventTarget.addEventListener("resize", this.onResizer, true);
     },
@@ -926,7 +927,7 @@ Firebug.ConsolePanel.prototype = FBL.extend(Firebug.ActivablePanel,
         var strictName = "strict";
         var strictValue = prefs.getBoolPref(strictDomain+"."+strictName);
         return {label: "JavascriptOptionsStrict", type: "checkbox", checked: strictValue,
-            command: FBL.bindFixed(Firebug.Options.setPref, Firebug, strictDomain, strictName, !strictValue) };
+            command: OBJECT.bindFixed(Firebug.Options.setPref, Firebug, strictDomain, strictName, !strictValue) };
     },
 
     getBreakOnMenuItems: function()
@@ -1015,7 +1016,7 @@ Firebug.ConsolePanel.prototype = FBL.extend(Firebug.ActivablePanel,
 
             // Search after a delay because we must wait for a frame to be created for
             // the new logRow so that the finder will be able to locate it
-            setTimeout(FBL.bindFixed(function()
+            setTimeout(OBJECT.bindFixed(function()
             {
                 if (this.searchFilter(this.searchText, logRow))
                     this.matchSet.push(logRow);

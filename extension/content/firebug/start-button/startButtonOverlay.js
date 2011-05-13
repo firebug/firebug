@@ -2,13 +2,14 @@
 
 define([
     "firebug/lib",
+    "firebug/lib/object",
     "firebug/firebug",
     "firebug/firefox/firefox",
     "firebug/lib/locale",
     "firebug/lib/events",
     "firebug/lib/dom",
 ],
-function(FBL, Firebug, Firefox, Locale, Events, DOM) {
+function(FBL, OBJECT, Firebug, Firefox, Locale, Events, DOM) {
 
 // ********************************************************************************************* //
 // Constants
@@ -31,7 +32,7 @@ var versionChecker = Cc["@mozilla.org/xpcom/version-comparator;1"].getService(Ci
  * such as panel activation and also indicates whether Firebug is activated/deactivated for
  * the current page (by changing its color).
  */
-Firebug.StartButton = FBL.extend(Firebug.Module,
+Firebug.StartButton = OBJECT.extend(Firebug.Module,
 /** @lends Firebug.StartButton */
 {
     dispatchName: "startButton",

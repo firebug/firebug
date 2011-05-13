@@ -2,9 +2,10 @@
 
 define([
     "firebug/lib",
+    "firebug/lib/object",
     "firebug/firebug"
 ],
-function(FBL, Firebug) {
+function(FBL, OBJECT, Firebug) {
 
 // ************************************************************************************************
 // Trace Module
@@ -16,7 +17,7 @@ function(FBL, Firebug) {
  * Firebug.TraceModule.addListener - appends a tracing listener.
  * Firebug.TraceModule.removeListener - removes a tracing listener.
  */
-Firebug.TraceModule = FBL.extend(Firebug.Module,
+Firebug.TraceModule = OBJECT.extend(Firebug.Module,
 {
     dispatchName: "traceModule",
 });

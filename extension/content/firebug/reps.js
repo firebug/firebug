@@ -2,6 +2,7 @@
 
 define([
     "firebug/lib",
+    "firebug/lib/object",
     "firebug/firebug",
     "firebug/domplate",
     "firebug/lib/xpcom",
@@ -23,7 +24,7 @@ define([
     "firebug/toggleBranch",
     "firebug/eventMonitor",
 ],
-function(FBL, Firebug, Domplate, XPCOM, Locale, ToolsInterface, HTMLLib, Events, Wrapper,
+function(FBL, OBJECT, Firebug, Domplate, XPCOM, Locale, ToolsInterface, HTMLLib, Events, Wrapper,
     URL, SourceLink, StackFrame, CSS, DOM, WIN, System, XPATH, STR, XML, ToggleBranch,
     EventMonitor) {
 
@@ -265,11 +266,11 @@ FirebugReps.Func = domplate(Firebug.Rep,
 
         var name = script ? StackFrame.getFunctionName(script, context) : fn.name;
         return [
-            {label: "CopySource", command: FBL.bindFixed(this.copySource, this, fn) },
+            {label: "CopySource", command: OBJECT.bindFixed(this.copySource, this, fn) },
             "-",
             {label: Locale.$STRF("ShowCallsInConsole", [name]), nol10n: true,
              type: "checkbox", checked: monitored,
-             command: FBL.bindFixed(this.monitor, this, fn, monitored) }
+             command: OBJECT.bindFixed(this.monitor, this, fn, monitored) }
         ];
     }
 });
@@ -515,7 +516,7 @@ FirebugReps.Arr = domplate(Firebug.Rep,
             }
         }
 
-        return (array.length != n) && FBL.hasProperties(array);
+        return (array.length != n) && OBJECT.hasProperties(array);
     },
 
     onToggleProperties: function(event)
@@ -931,7 +932,7 @@ FirebugReps.Element = domplate(Firebug.Rep,
     {
         var xpath = XPATH.getElementXPath(elt);
 
-        return FBL.bind(this.persistor, window.top, xpath);
+        return OBJECT.bind(this.persistor, window.top, xpath);
     },
 
     getTitle: function(element, context)
@@ -953,18 +954,18 @@ FirebugReps.Element = domplate(Firebug.Rep,
         if (XML.isElementMathML(elt))
             CopyElement = "CopyMathML";
 
-        var items=[{label: CopyElement, command: FBL.bindFixed(this.copyHTML, this, elt)}];
+        var items=[{label: CopyElement, command: OBJECT.bindFixed(this.copyHTML, this, elt)}];
         if (!XML.isElementSVG(elt) && !XML.isElementMathML(elt))
-            items.push({label: "CopyInnerHTML", command: FBL.bindFixed(this.copyInnerHTML, this, elt) });
+            items.push({label: "CopyInnerHTML", command: OBJECT.bindFixed(this.copyInnerHTML, this, elt) });
 
         return items.concat([
-            {label: "CopyXPath", id: "fbCopyXPath", command: FBL.bindFixed(this.copyXPath, this, elt) },
-            {label: "Copy CSS Path", id: "fbCopyCSSPath", command: FBL.bindFixed(this.copyCSSPath, this, elt) },
+            {label: "CopyXPath", id: "fbCopyXPath", command: OBJECT.bindFixed(this.copyXPath, this, elt) },
+            {label: "Copy CSS Path", id: "fbCopyCSSPath", command: OBJECT.bindFixed(this.copyCSSPath, this, elt) },
             "-",
             {label: "ShowEventsInConsole", id: "fbShowEventsInConsole", type: "checkbox", checked: monitored,
-             command: FBL.bindFixed(EventMonitor.toggleMonitorEvents, FBL, elt, null, monitored, context) },
+             command: OBJECT.bindFixed(EventMonitor.toggleMonitorEvents, FBL, elt, null, monitored, context) },
             "-",
-            {label: "ScrollIntoView", id: "fbScrollIntoView", command: FBL.bindFixed(elt.scrollIntoView, elt) }
+            {label: "ScrollIntoView", id: "fbScrollIntoView", command: OBJECT.bindFixed(elt.scrollIntoView, elt) }
         ]);
     }
 });
@@ -1119,7 +1120,7 @@ FirebugReps.StyleSheet = domplate(Firebug.Rep,
 
     persistObject: function(styleSheet, context)
     {
-        return FBL.bind(this.persistor, top, styleSheet.href);
+        return OBJECT.bind(this.persistor, top, styleSheet.href);
     },
 
     getTooltip: function(styleSheet)
@@ -1130,9 +1131,9 @@ FirebugReps.StyleSheet = domplate(Firebug.Rep,
     getContextMenuItems: function(styleSheet, target, context)
     {
         return [
-            {label: "CopyLocation", command: FBL.bindFixed(this.copyURL, this, styleSheet) },
+            {label: "CopyLocation", command: OBJECT.bindFixed(this.copyURL, this, styleSheet) },
             "-",
-            {label: "OpenInTab", command: FBL.bindFixed(this.openInTab, this, styleSheet) }
+            {label: "OpenInTab", command: OBJECT.bindFixed(this.openInTab, this, styleSheet) }
         ];
     },
 
@@ -1413,9 +1414,9 @@ FirebugReps.SourceLink = domplate(Firebug.Rep,
     getContextMenuItems: function(sourceLink, target, context)
     {
         return [
-            {label: "CopyLocation", command: FBL.bindFixed(this.copyLink, this, sourceLink) },
+            {label: "CopyLocation", command: OBJECT.bindFixed(this.copyLink, this, sourceLink) },
             "-",
-            {label: "OpenInTab", command: FBL.bindFixed(this.openInTab, this, sourceLink) }
+            {label: "OpenInTab", command: OBJECT.bindFixed(this.openInTab, this, sourceLink) }
         ];
     }
 });
@@ -1444,7 +1445,7 @@ FirebugReps.CompilationUnit = domplate(FirebugReps.SourceLink,
     persistObject: function(compilationUnit)
     {
         var href = compilationUnit.getURL();
-        return FBL.bind(this.persistor, top, href);
+        return OBJECT.bind(this.persistor, top, href);
     },
 
     browseObject: function(sourceLink, context)
@@ -1888,7 +1889,7 @@ FirebugReps.ErrorMessage = domplate(Firebug.Rep,
         var breakOnThisError = this.hasErrorBreak(error);
 
         var items = [
-            {label: "CopyError", command: FBL.bindFixed(this.copyError, this, error) }
+            {label: "CopyError", command: OBJECT.bindFixed(this.copyError, this, error) }
         ];
 
         if (error.category == "css")
@@ -1896,7 +1897,7 @@ FirebugReps.ErrorMessage = domplate(Firebug.Rep,
             items.push(
                 "-",
                 {label: "BreakOnThisError", type: "checkbox", checked: breakOnThisError,
-                 command: FBL.bindFixed(this.breakOnThisError, this, error) },
+                 command: OBJECT.bindFixed(this.breakOnThisError, this, error) },
 
                 FBL.optionMenu("BreakOnAllErrors", "breakOnErrors")
             );
@@ -1991,12 +1992,12 @@ FirebugReps.Assert = domplate(Firebug.Rep,
         var breakOnThisError = this.hasErrorBreak(error);
 
         return [
-            {label: "CopyError", command: FBL.bindFixed(this.copyError, this, error) },
+            {label: "CopyError", command: OBJECT.bindFixed(this.copyError, this, error) },
             "-",
             {label: "BreakOnThisError", type: "checkbox", checked: breakOnThisError,
-             command: FBL.bindFixed(this.breakOnThisError, this, error) },
+             command: OBJECT.bindFixed(this.breakOnThisError, this, error) },
             {label: "BreakOnAllErrors", type: "checkbox", checked: Firebug.breakOnErrors,
-             command: FBL.bindFixed(this.breakOnAllErrors, this, error) }
+             command: OBJECT.bindFixed(this.breakOnAllErrors, this, error) }
         ];
     }
 });

@@ -2,12 +2,13 @@
 
 define([
     "firebug/lib",
+    "firebug/lib/object",
     "firebug/firebug",
     "arch/tools",
     "firebug/lib/locale",
     "firebug/lib/url",
 ],
-function(FBL, Firebug, ToolsInterface, Locale, URL) {
+function(FBL, OBJECT, Firebug, ToolsInterface, Locale, URL) {
 
 // ************************************************************************************************
 // Constants
@@ -41,7 +42,7 @@ const privateBrowsingEnabled = ("@mozilla.org/privatebrowsing;1" in Cc) &&
  *    This logic has higher priority over the URL annotations.
  *    If "off" options is selected, all existing URL annotations are removed.
  */
-Firebug.Activation = FBL.extend(Firebug.Module,
+Firebug.Activation = OBJECT.extend(Firebug.Module,
 {
     // *******************************************************************************************
     dispatchName: "activation",

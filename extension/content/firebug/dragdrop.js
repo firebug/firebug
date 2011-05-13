@@ -2,10 +2,11 @@
 
 define([
     "firebug/lib",
+    "firebug/lib/object",
     "firebug/firebug",
     "firebug/lib/events",
 ],
-function(FBL, Firebug, Events) {
+function(FBL, OBJECT, Firebug, Events) {
 
 // ********************************************************************************************* //
 
@@ -27,9 +28,9 @@ function Tracker(handle, callbacks)
     this.dragging = false;
 
     // Start listening
-    this.onDragStart = FBL.bind(this.onDragStart, this);
-    this.onDragOver = FBL.bind(this.onDragOver, this);
-    this.onDrop = FBL.bind(this.onDrop, this);
+    this.onDragStart = OBJECT.bind(this.onDragStart, this);
+    this.onDragOver = OBJECT.bind(this.onDragOver, this);
+    this.onDrop = OBJECT.bind(this.onDrop, this);
 
     this.element.addEventListener("mousedown", this.onDragStart, false);
     this.active = true;

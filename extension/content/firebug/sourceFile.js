@@ -2,12 +2,13 @@
 
 define([
     "firebug/lib",
+    "firebug/lib/object",
     "firebug/firebug",
     "firebug/lib/url",
     "firebug/sourceLink",
     "firebug/lib/stackFrame",
 ],
-function(FBL, Firebug, URL, SourceLink, StackFrame) {
+function(FBL, OBJECT, Firebug, URL, SourceLink, StackFrame) {
 
 // ********************************************************************************************* //
 // Constants
@@ -485,7 +486,7 @@ Firebug.EvalLevelSourceFile = function(url, script, eval_expr, source, mapType,
 };
 
 Firebug.EvalLevelSourceFile.prototype =
-    FBL.descend(new Firebug.SourceFile("eval-level"), // shared prototype
+    OBJECT.descend(new Firebug.SourceFile("eval-level"), // shared prototype
 {
     getLine: function(context, lineNo)
     {
@@ -572,7 +573,7 @@ Firebug.EventSourceFile = function(url, script, title, source, innerScriptEnumer
      Firebug.SourceFile.addScriptsToSourceFile(this, script, innerScriptEnumerator);
 };
 
-Firebug.EventSourceFile.prototype = FBL.descend(new Firebug.SourceFile("event"),
+Firebug.EventSourceFile.prototype = OBJECT.descend(new Firebug.SourceFile("event"),
 {
     getLine: function(context, lineNo)
     {
@@ -671,7 +672,7 @@ Firebug.TopLevelSourceFile = function(url, outerScript, sourceLength, innerScrip
     Firebug.SourceFile.addScriptsToSourceFile(this, outerScript, innerScriptEnumerator);
 }
 
-Firebug.TopLevelSourceFile.prototype = FBL.descend(new Firebug.SourceFile("top-level"),
+Firebug.TopLevelSourceFile.prototype = OBJECT.descend(new Firebug.SourceFile("top-level"),
     Firebug.SourceFile.CommonBase);
 
 Firebug.TopLevelSourceFile.OuterScriptAnalyzer =
@@ -703,7 +704,7 @@ Firebug.EnumeratedSourceFile = function(url) // we don't have the outer script a
     this.pcmap_type = PCMAP_SOURCETEXT;
 }
 
-Firebug.EnumeratedSourceFile.prototype = FBL.descend(
+Firebug.EnumeratedSourceFile.prototype = OBJECT.descend(
     new Firebug.SourceFile("enumerated"),
     Firebug.SourceFile.CommonBase);
 
@@ -715,7 +716,7 @@ Firebug.NoScriptSourceFile = function(context, url) // Somehow we got the URL, b
     this.innerScripts = {};
 }
 
-Firebug.NoScriptSourceFile.prototype = FBL.descend(
+Firebug.NoScriptSourceFile.prototype = OBJECT.descend(
     new Firebug.SourceFile("URLOnly"),
     Firebug.SourceFile.CommonBase);
 
@@ -732,7 +733,7 @@ Firebug.XULSourceFile = function(url, outerScript, innerScriptEnumerator)
     Firebug.SourceFile.addScriptsToSourceFile(this, outerScript, innerScriptEnumerator);
 }
 
-Firebug.XULSourceFile.prototype = FBL.descend(
+Firebug.XULSourceFile.prototype = OBJECT.descend(
     new Firebug.SourceFile("xul"),
     Firebug.SourceFile.CommonBase);
 
@@ -748,7 +749,7 @@ Firebug.ScriptTagAppendSourceFile = function(url, outerScript, sourceLength, inn
     Firebug.SourceFile.addScriptsToSourceFile(this, outerScript, innerScriptEnumerator);
 }
 
-Firebug.ScriptTagAppendSourceFile.prototype = FBL.descend(
+Firebug.ScriptTagAppendSourceFile.prototype = OBJECT.descend(
     new Firebug.SourceFile("scriptTagAppend"),
     Firebug.SourceFile.CommonBase);
 
@@ -763,7 +764,7 @@ Firebug.ScriptTagSourceFile = function(context, url, scriptTagNumber) // we don'
     this.pcmap_type = PCMAP_SOURCETEXT;
 }
 
-Firebug.ScriptTagSourceFile.prototype = FBL.descend(
+Firebug.ScriptTagSourceFile.prototype = OBJECT.descend(
     new Firebug.SourceFile("scriptTag"),
     Firebug.SourceFile.CommonBase);
 

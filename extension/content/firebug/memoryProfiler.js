@@ -2,6 +2,7 @@
 
 define([
     "firebug/lib",
+    "firebug/lib/object",
     "firebug/firebug",
     "firebug/domplate",
     "firebug/reps",
@@ -12,7 +13,7 @@ define([
     "firebug/lib/css",
     "firebug/lib/string",
 ],
-function(FBL, Firebug, Domplate, FirebugReps, Locale, Wrapper, StackFrame, DOM, CSS, STR) {
+function(FBL, OBJECT, Firebug, Domplate, FirebugReps, Locale, Wrapper, StackFrame, DOM, CSS, STR) {
 
 // ********************************************************************************************* //
 
@@ -37,7 +38,7 @@ var MEMORY_PATHS =
 
 // ********************************************************************************************* //
 
-Firebug.MemoryProfiler = FBL.extend(Firebug.Module,
+Firebug.MemoryProfiler = OBJECT.extend(Firebug.Module,
 {
     dispatchName: "memoryProfiler",
 

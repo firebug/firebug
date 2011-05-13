@@ -2,6 +2,7 @@
 
 define([
     "firebug/lib",
+    "firebug/lib/object",
     "firebug/firebug",
     "firebug/firefox/firefox",
     "firebug/reps",
@@ -25,7 +26,7 @@ define([
     "firebug/searchBox",
     "firebug/sourceBox",
 ],
-function(FBL, Firebug, Firefox, FirebugReps, Domplate, ToolsInterface, Locale, Events, URL, SourceLink,
+function(FBL, OBJECT, Firebug, Firefox, FirebugReps, Domplate, ToolsInterface, Locale, Events, URL, SourceLink,
     StackFrame, CSS, DOM, WIN, Search, Persist, System, Debug, Keywords) {
 
 // ********************************************************************************************* //
@@ -55,7 +56,7 @@ Firebug.ScriptPanel.reLineNumber = /^[^\\]?#(\d*)$/;
  * object used to markup Javascript source lines.
  * In the namespace Firebug.ScriptPanel.
  */
-Firebug.ScriptPanel.decorator = FBL.extend(new Firebug.SourceBoxDecorator,
+Firebug.ScriptPanel.decorator = OBJECT.extend(new Firebug.SourceBoxDecorator,
 {
     decorate: function(sourceBox, unused)
     {
@@ -122,7 +123,7 @@ Firebug.ScriptPanel.decorator = FBL.extend(new Firebug.SourceBoxDecorator,
 
 // ************************************************************************************************
 
-Firebug.ScriptPanel.prototype = FBL.extend(Firebug.SourceBoxPanel,
+Firebug.ScriptPanel.prototype = OBJECT.extend(Firebug.SourceBoxPanel,
 {
     /*
     * Framework connection
@@ -517,12 +518,12 @@ Firebug.ScriptPanel.prototype = FBL.extend(Firebug.SourceBoxPanel,
 
     initialize: function(context, doc)
     {
-        this.onMouseDown = FBL.bind(this.onMouseDown, this);
-        this.onContextMenu = FBL.bind(this.onContextMenu, this);
-        this.onMouseOver = FBL.bind(this.onMouseOver, this);
-        this.onMouseOut = FBL.bind(this.onMouseOut, this);
-        this.onScroll = FBL.bind(this.onScroll, this);
-        this.onKeyPress = FBL.bind(this.onKeyPress, this);
+        this.onMouseDown = OBJECT.bind(this.onMouseDown, this);
+        this.onContextMenu = OBJECT.bind(this.onContextMenu, this);
+        this.onMouseOver = OBJECT.bind(this.onMouseOver, this);
+        this.onMouseOut = OBJECT.bind(this.onMouseOut, this);
+        this.onScroll = OBJECT.bind(this.onScroll, this);
+        this.onKeyPress = OBJECT.bind(this.onKeyPress, this);
 
         this.panelSplitter = Firebug.chrome.$("fbPanelSplitter");
         this.sidePanelDeck = Firebug.chrome.$("fbSidePanelDeck");
@@ -579,7 +580,7 @@ Firebug.ScriptPanel.prototype = FBL.extend(Firebug.SourceBoxPanel,
     {
         Firebug.SourceBoxPanel.reattach.apply(this, arguments);
 
-        setTimeout(FBL.bind(function delayScrollToLastTop()
+        setTimeout(OBJECT.bind(function delayScrollToLastTop()
         {
             if (this.lastSourceScrollTop)
             {
@@ -1158,7 +1159,7 @@ Firebug.ScriptPanel.prototype = FBL.extend(Firebug.SourceBoxPanel,
     {
         var checked = Firebug.Options.get(option);
         return {label: label, type: "checkbox", checked: checked,
-            command: FBL.bindFixed(Firebug.Options.set, Firebug, option, !checked) };
+            command: OBJECT.bindFixed(Firebug.Options.set, Firebug, option, !checked) };
     },
 
     getContextMenuItems: function(fn, target)
@@ -1179,9 +1180,9 @@ Firebug.ScriptPanel.prototype = FBL.extend(Firebug.SourceBoxPanel,
         if (selection.toString())
         {
             items.push(
-                {label: "CopySourceCode", command: FBL.bind(this.copySource, this) },
+                {label: "CopySourceCode", command: OBJECT.bind(this.copySource, this) },
                 "-",
-                {label: "AddWatch", command: FBL.bind(this.addSelectionWatch, this) }
+                {label: "AddWatch", command: OBJECT.bind(this.addSelectionWatch, this) }
             );
         }
 
@@ -1190,19 +1191,19 @@ Firebug.ScriptPanel.prototype = FBL.extend(Firebug.SourceBoxPanel,
         items.push(
             "-",
             {label: "SetBreakpoint", type: "checkbox", checked: hasBreakpoint,
-                command: FBL.bindFixed(this.toggleBreakpoint, this, lineNo) }
+                command: OBJECT.bindFixed(this.toggleBreakpoint, this, lineNo) }
         );
         if (hasBreakpoint)
         {
             var isDisabled = ToolsInterface.JavaScript.isBreakpointDisabled(this.location.href, lineNo);
             items.push(
                 {label: "DisableBreakpoint", type: "checkbox", checked: isDisabled,
-                    command: FBL.bindFixed(this.toggleDisableBreakpoint, this, lineNo) }
+                    command: OBJECT.bindFixed(this.toggleDisableBreakpoint, this, lineNo) }
             );
         }
         items.push(
             {label: "EditBreakpointCondition",
-                command: FBL.bindFixed(this.editBreakpointCondition, this, lineNo) }
+                command: OBJECT.bindFixed(this.editBreakpointCondition, this, lineNo) }
         );
 
         if (this.context.stopped)
@@ -1217,15 +1218,15 @@ Firebug.ScriptPanel.prototype = FBL.extend(Firebug.SourceBoxPanel,
                 items.push(
                     "-",
                     {label: "firebug.Continue",
-                        command: FBL.bindFixed(debuggr.resume, debuggr, this.context) },
+                        command: OBJECT.bindFixed(debuggr.resume, debuggr, this.context) },
                     {label: "firebug.StepOver",
-                        command: FBL.bindFixed(debuggr.stepOver, debuggr, this.context) },
+                        command: OBJECT.bindFixed(debuggr.stepOver, debuggr, this.context) },
                     {label: "firebug.StepInto",
-                        command: FBL.bindFixed(debuggr.stepInto, debuggr, this.context) },
+                        command: OBJECT.bindFixed(debuggr.stepInto, debuggr, this.context) },
                     {label: "firebug.StepOut",
-                        command: FBL.bindFixed(debuggr.stepOut, debuggr, this.context) },
+                        command: OBJECT.bindFixed(debuggr.stepOut, debuggr, this.context) },
                     {label: "firebug.RunUntil",
-                        command: FBL.bindFixed(debuggr.runUntil, debuggr, this.context,
+                        command: OBJECT.bindFixed(debuggr.runUntil, debuggr, this.context,
                         compilationUnit, lineNo) }
                 );
             }
@@ -1292,14 +1293,14 @@ Firebug.ScriptPanel.prototype = FBL.extend(Firebug.SourceBoxPanel,
     {
         this.keyListeners =
             [
-                chrome.keyCodeListen("F8", null, FBL.bind(this.resume, this, context), true),
-                chrome.keyListen("/", Events.isControl, FBL.bind(this.resume, this, context)),
-                chrome.keyCodeListen("F10", null, FBL.bind(this.stepOver, this, context), true),
-                chrome.keyListen("'", Events.isControl, FBL.bind(this.stepOver, this, context)),
-                chrome.keyCodeListen("F11", null, FBL.bind(this.stepInto, this, context)),
-                chrome.keyListen(";", Events.isControl, FBL.bind(this.stepInto, this, context)),
-                chrome.keyCodeListen("F11", Events.isShift, FBL.bind(this.stepOut, this, context)),
-                chrome.keyListen(",", Events.isControlShift, FBL.bind(this.stepOut, this, context))
+                chrome.keyCodeListen("F8", null, OBJECT.bind(this.resume, this, context), true),
+                chrome.keyListen("/", Events.isControl, OBJECT.bind(this.resume, this, context)),
+                chrome.keyCodeListen("F10", null, OBJECT.bind(this.stepOver, this, context), true),
+                chrome.keyListen("'", Events.isControl, OBJECT.bind(this.stepOver, this, context)),
+                chrome.keyCodeListen("F11", null, OBJECT.bind(this.stepInto, this, context)),
+                chrome.keyListen(";", Events.isControl, OBJECT.bind(this.stepInto, this, context)),
+                chrome.keyCodeListen("F11", Events.isShift, OBJECT.bind(this.stepOut, this, context)),
+                chrome.keyListen(",", Events.isControlShift, OBJECT.bind(this.stepOut, this, context))
             ];
         },
 
@@ -1541,7 +1542,7 @@ Firebug.ScriptPanel.WarningRep = domplate(Firebug.Rep,
         var box = this.tag.replace(args, parentNode, this);
         var description = box.querySelector(".disabledPanelDescription");
         FirebugReps.Description.render(args.suggestion, description,
-            FBL.bindFixed(Firebug.TabWatcher.reloadPageFromMemory,  Firebug.TabWatcher,
+            OBJECT.bindFixed(Firebug.TabWatcher.reloadPageFromMemory,  Firebug.TabWatcher,
             Firebug.currentContext));
 
         return box;

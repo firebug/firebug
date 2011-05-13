@@ -2,6 +2,7 @@
 
 define([
     "firebug/lib",
+    "firebug/lib/object",
     "firebug/firebug",
     "firebug/domplate",
     "firebug/reps",
@@ -24,7 +25,7 @@ define([
     "firebug/searchBox",
     "firebug/insideOutBox",
 ],
-function(FBL, Firebug, Domplate, FirebugReps, Locale, ToolsInterface, HTMLLib, Events,
+function(FBL, OBJECT, Firebug, Domplate, FirebugReps, Locale, ToolsInterface, HTMLLib, Events,
     SourceLink, CSS, DOM, WIN, XPATH, STR, XML, ARR, Persist) { with (Domplate) {
 
 // ************************************************************************************************
@@ -46,7 +47,7 @@ var KeyEvent = window.KeyEvent;
 
 // ************************************************************************************************
 
-Firebug.HTMLModule = FBL.extend(Firebug.Module,
+Firebug.HTMLModule = OBJECT.extend(Firebug.Module,
 {
     dispatchName: "htmlModule",
 
@@ -99,9 +100,9 @@ Firebug.HTMLModule = FBL.extend(Firebug.Module,
 
 Firebug.HTMLPanel = function() {};
 
-var WalkingPanel = FBL.extend(Firebug.Panel, HTMLLib.ElementWalkerFunctions);
+var WalkingPanel = OBJECT.extend(Firebug.Panel, HTMLLib.ElementWalkerFunctions);
 
-Firebug.HTMLPanel.prototype = FBL.extend(WalkingPanel,
+Firebug.HTMLPanel.prototype = OBJECT.extend(WalkingPanel,
 {
     inspectable: true,
 
@@ -955,12 +956,12 @@ Firebug.HTMLPanel.prototype = FBL.extend(WalkingPanel,
 
     initialize: function()
     {
-        this.onMutateText = FBL.bind(this.onMutateText, this);
-        this.onMutateAttr = FBL.bind(this.onMutateAttr, this);
-        this.onMutateNode = FBL.bind(this.onMutateNode, this);
-        this.onClick = FBL.bind(this.onClick, this);
-        this.onMouseDown = FBL.bind(this.onMouseDown, this);
-        this.onKeyPress = FBL.bind(this.onKeyPress, this);
+        this.onMutateText = OBJECT.bind(this.onMutateText, this);
+        this.onMutateAttr = OBJECT.bind(this.onMutateAttr, this);
+        this.onMutateNode = OBJECT.bind(this.onMutateNode, this);
+        this.onClick = OBJECT.bind(this.onClick, this);
+        this.onMouseDown = OBJECT.bind(this.onMouseDown, this);
+        this.onKeyPress = OBJECT.bind(this.onKeyPress, this);
 
         Firebug.Panel.initialize.apply(this, arguments);
     },
@@ -1011,7 +1012,7 @@ Firebug.HTMLPanel.prototype = FBL.extend(WalkingPanel,
             {
                 this.context.attachedMutation = true;
 
-                WIN.iterateWindows(this.context.window, FBL.bind(function(win)
+                WIN.iterateWindows(this.context.window, OBJECT.bind(function(win)
                 {
                     var doc = win.document;
                     doc.addEventListener("DOMAttrModified", this.onMutateAttr, false);
@@ -1319,7 +1320,7 @@ Firebug.HTMLPanel.prototype = FBL.extend(WalkingPanel,
         {
             items.push(
                 "-",
-                {label: "NewAttribute", command: FBL.bindFixed(this.editNewAttribute, this, node) }
+                {label: "NewAttribute", command: OBJECT.bindFixed(this.editNewAttribute, this, node) }
             );
 
             var attrBox = DOM.getAncestorByClass(target, "nodeAttr");
@@ -1329,9 +1330,9 @@ Firebug.HTMLPanel.prototype = FBL.extend(WalkingPanel,
 
                 items.push(
                     {label: Locale.$STRF("EditAttribute", [attrName]), nol10n: true,
-                        command: FBL.bindFixed(this.editAttribute, this, node, attrName) },
+                        command: OBJECT.bindFixed(this.editAttribute, this, node, attrName) },
                     {label: Locale.$STRF("DeleteAttribute", [attrName]), nol10n: true,
-                        command: FBL.bindFixed(this.deleteAttribute, this, node, attrName) }
+                        command: OBJECT.bindFixed(this.deleteAttribute, this, node, attrName) }
                 );
             }
 
@@ -1345,8 +1346,8 @@ Firebug.HTMLPanel.prototype = FBL.extend(WalkingPanel,
                     EditElement = "EditSVGElement";
 
                 items.push("-",
-                    {label: EditElement, command: FBL.bindFixed(this.editNode, this, node)},
-                    {label: "DeleteElement", command: FBL.bindFixed(this.deleteNode, this, node),
+                    {label: EditElement, command: OBJECT.bindFixed(this.editNode, this, node)},
+                    {label: "DeleteElement", command: OBJECT.bindFixed(this.deleteNode, this, node),
                         disabled:(node.localName in CSS.innerEditableTags)}
                 );
             }
@@ -1357,15 +1358,15 @@ Firebug.HTMLPanel.prototype = FBL.extend(WalkingPanel,
             {
                 items.push("-",
                     {label: "html.label.Expand/Contract All", acceltext: "*",
-                        command: FBL.bindFixed(this.toggleAll, this, node)});
+                        command: OBJECT.bindFixed(this.toggleAll, this, node)});
             }
         }
         else
         {
             items.push(
                 "-",
-                {label: "EditNode", command: FBL.bindFixed(this.editNode, this, node) },
-                {label: "DeleteNode", command: FBL.bindFixed(this.deleteNode, this, node) }
+                {label: "EditNode", command: OBJECT.bindFixed(this.editNode, this, node) },
+                {label: "DeleteNode", command: OBJECT.bindFixed(this.deleteNode, this, node) }
             );
         }
 
@@ -2195,17 +2196,17 @@ Firebug.HTMLModule.MutationBreakpoints =
                 {label: "html.label.Break On Attribute Change",
                     type: "checkbox",
                     checked: breakpoints.findBreakpoint(node, BP_BREAKONATTRCHANGE),
-                    command: FBL.bindFixed(this.onModifyBreakpoint, this, context, node,
+                    command: OBJECT.bindFixed(this.onModifyBreakpoint, this, context, node,
                         BP_BREAKONATTRCHANGE)},
                 {label: "html.label.Break On Child Addition or Removal",
                     type: "checkbox",
                     checked: breakpoints.findBreakpoint(node, BP_BREAKONCHILDCHANGE),
-                    command: FBL.bindFixed(this.onModifyBreakpoint, this, context, node,
+                    command: OBJECT.bindFixed(this.onModifyBreakpoint, this, context, node,
                         BP_BREAKONCHILDCHANGE)},
                 {label: "html.label.Break On Element Removal",
                     type: "checkbox",
                     checked: breakpoints.findBreakpoint(node, BP_BREAKONREMOVE),
-                    command: FBL.bindFixed(this.onModifyBreakpoint, this, context, node,
+                    command: OBJECT.bindFixed(this.onModifyBreakpoint, this, context, node,
                         BP_BREAKONREMOVE)}
             );
         }
@@ -2333,7 +2334,7 @@ function MutationBreakpointGroup()
     this.breakpoints = [];
 }
 
-MutationBreakpointGroup.prototype = FBL.extend(new Firebug.Breakpoint.BreakpointGroup(),
+MutationBreakpointGroup.prototype = OBJECT.extend(new Firebug.Breakpoint.BreakpointGroup(),
 {
     name: "mutationBreakpoints",
     title: Locale.$STR("html.label.HTML Breakpoints"),

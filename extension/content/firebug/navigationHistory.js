@@ -2,12 +2,13 @@
 
 define([
     "firebug/lib",
+    "firebug/lib/object",
     "firebug/lib/locale",
     "firebug/firebug",
     "firebug/lib/dom",
     "firebug/firefox/menu",
 ],
-function(FBL, Locale, Firebug, DOM, Menu) {
+function(FBL, OBJECT, Locale, Firebug, DOM, Menu) {
 
 // ************************************************************************************************
 // Constants
@@ -22,7 +23,7 @@ const MAX_HISTORY_MENU_ITEMS = 15;
 /**
  * @class Support for back and forward pattern for navigating within Firebug UI (panels).
  */
-Firebug.NavigationHistory = FBL.extend(Firebug.Module,
+Firebug.NavigationHistory = OBJECT.extend(Firebug.Module,
 {
     dispatchName: "navigationHistory",
 

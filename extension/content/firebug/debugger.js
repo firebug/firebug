@@ -2,6 +2,7 @@
 
 define([
     "firebug/lib",
+    "firebug/lib/object",
     "firebug/firebug",
     "firebug/firefox/firefox",
     "arch/tools",
@@ -20,7 +21,7 @@ define([
     "firebug/lib/debug",
     "firebug/errors",
 ],
-function(FBL, Firebug, Firefox, ToolsInterface, XPCOM, FirebugReps, Locale, HttpRequestObserver,
+function(FBL, OBJECT, Firebug, Firefox, ToolsInterface, XPCOM, FirebugReps, Locale, HttpRequestObserver,
     Wrapper, URL, SourceLink, StackFrame, CSS, WIN, STR, ARR, Debug) {
 
 // ********************************************************************************************* //
@@ -67,7 +68,7 @@ const reTooMuchRecursion = /too\smuch\srecursion/;
 
 // ************************************************************************************************
 
-Firebug.Debugger = FBL.extend(Firebug.ActivableModule,
+Firebug.Debugger = OBJECT.extend(Firebug.ActivableModule,
 {
     dispatchName: "debugger",
     fbs: FBL.fbs, // access to firebug-service in chromebug under browser.xul.DOM.Firebug.Debugger.fbs
@@ -294,7 +295,7 @@ Firebug.Debugger = FBL.extend(Firebug.ActivableModule,
             this.freeze(context);
 
             // We will pause here until resume is called
-            var depth = FBL.fbs.enterNestedEventLoop({onNest: FBL.bindFixed(this.startDebugging, this, context)});
+            var depth = FBL.fbs.enterNestedEventLoop({onNest: OBJECT.bindFixed(this.startDebugging, this, context)});
             // For some reason we don't always end up here
 
             if (FBTrace.DBG_UI_LOOP)
@@ -1355,7 +1356,7 @@ Firebug.Debugger = FBL.extend(Firebug.ActivableModule,
                     {
                         title: Locale.$STR("Break on Error"),
                         message: error.message,
-                        copyAction: FBL.bindFixed(FirebugReps.ErrorMessage.copyError,
+                        copyAction: OBJECT.bindFixed(FirebugReps.ErrorMessage.copyError,
                             FirebugReps.ErrorMessage, error),
 
                         skipAction: function addSkipperAndGo()
@@ -1494,7 +1495,7 @@ Firebug.Debugger = FBL.extend(Firebug.ActivableModule,
 
         } catch (exc) {
             /*Bug 426692 */
-            var source = creatorURL + "/"+FBL.getUniqueId();
+            var source = creatorURL + "/"+OBJECT.getUniqueId();
         }
 
         var lines = STR.splitLines(source);
@@ -2149,7 +2150,7 @@ Firebug.Debugger = FBL.extend(Firebug.ActivableModule,
         Firebug.clientID = this.registerClient(Firebug.JSDebugClient);
         this.nsICryptoHash = Components.interfaces["nsICryptoHash"];
 
-        this.debuggerName =  window.location.href +"-@-"+FBL.getUniqueId();
+        this.debuggerName =  window.location.href +"-@-"+OBJECT.getUniqueId();
         this.toString = function() { return this.debuggerName; }
 
         if (FBTrace.DBG_INITIALIZE)
@@ -2170,7 +2171,7 @@ Firebug.Debugger = FBL.extend(Firebug.ActivableModule,
 
         this.wrappedJSObject = this;  // how we communicate with fbs
 
-        this.onFunctionCall = FBL.bind(this.onFunctionCall, this);
+        this.onFunctionCall = OBJECT.bind(this.onFunctionCall, this);
 
         Firebug.ActivableModule.initialize.apply(this, arguments);
     },
@@ -2352,7 +2353,7 @@ Firebug.Debugger = FBL.extend(Firebug.ActivableModule,
             }
         }
 */
-        // context.watchScriptAdditions = FBL.bind(this.watchScriptAdditions, this, context);
+        // context.watchScriptAdditions = OBJECT.bind(this.watchScriptAdditions, this, context);
 
         // context.window.document.addEventListener("DOMNodeInserted", context.watchScriptAdditions, false);
 

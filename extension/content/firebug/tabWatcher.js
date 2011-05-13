@@ -2,6 +2,7 @@
 
 define([
     "firebug/lib",
+    "firebug/lib/object",
     "firebug/firebug",
     "firebug/firefox/firefox",
     "firebug/lib/xpcom",
@@ -15,7 +16,7 @@ define([
     "firebug/lib/debug",
     "firebug/tabContext",
 ],
-function(FBL, Firebug, Firefox, XPCOM, HttpRequestObserver, Events, URL, HTTP, WIN,
+function(FBL, OBJECT, Firebug, Firefox, XPCOM, HttpRequestObserver, Events, URL, HTTP, WIN,
     STR, ARR, Debug) {
 
 // ************************************************************************************************
@@ -52,7 +53,7 @@ var contexts = [];
 
 // ************************************************************************************************
 
-Firebug.TabWatcher = FBL.extend(new Firebug.Listener(),
+Firebug.TabWatcher = OBJECT.extend(new Firebug.Listener(),
 {
     // Store contexts where they can be accessed externally
     contexts: contexts,
@@ -184,7 +185,7 @@ Firebug.TabWatcher = FBL.extend(new Firebug.Listener(),
         if (context && !context.loaded && !context.showContextTimeout)
         {
             // still loading, we want to showContext one time but not too agressively
-            context.showContextTimeout = window.setTimeout(FBL.bindFixed( function delayShowContext()
+            context.showContextTimeout = window.setTimeout(OBJECT.bindFixed( function delayShowContext()
             {
                 if (FBTrace.DBG_WINDOWS)
                     FBTrace.sysout("-> watchTopWindow delayShowContext id:"+context.showContextTimeout, context);
@@ -290,7 +291,7 @@ Firebug.TabWatcher = FBL.extend(new Firebug.Listener(),
         var context = new contextType(win, browser, Firebug.chrome, persistedState);
         contexts.push(context);
 
-        context.uid =  FBL.getUniqueId();
+        context.uid =  OBJECT.getUniqueId();
 
         browser.showFirebug = true; // this is the only place we should set showFirebug.
 
@@ -622,7 +623,7 @@ var TabWatcherUnloader =
     {
         var root = (win.parent == win);
         var eventName = (root && (win.location.href !== "about:blank")) ? "pagehide" : "unload";
-        var listener = FBL.bind(root ? this.onPageHide : this.onUnload, this);
+        var listener = OBJECT.bind(root ? this.onPageHide : this.onUnload, this);
         win.addEventListener(eventName, listener, false);
 
         if (FBTrace.DBG_WINDOWS)
@@ -677,7 +678,7 @@ var TabWatcherUnloader =
 
 // ************************************************************************************************
 
-var TabProgressListener = FBL.extend(HTTP.BaseProgressListener,
+var TabProgressListener = OBJECT.extend(HTTP.BaseProgressListener,
 {
     onLocationChange: function(progress, request, uri)
     {
@@ -725,7 +726,7 @@ var TabProgressListener = FBL.extend(HTTP.BaseProgressListener,
 
 // ************************************************************************************************
 
-var FrameProgressListener = FBL.extend(HTTP.BaseProgressListener,
+var FrameProgressListener = OBJECT.extend(HTTP.BaseProgressListener,
 {
     onStateChange: function(progress, request, flag, status)
     {
@@ -817,7 +818,7 @@ function getRefererHeader(request)
     return referer;
 }
 
-var TabWatcherHttpObserver = FBL.extend(Object,
+var TabWatcherHttpObserver = OBJECT.extend(Object,
 {
     // nsIObserver
     observe: function(aSubject, aTopic, aData)

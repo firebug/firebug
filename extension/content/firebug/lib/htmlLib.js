@@ -1,13 +1,14 @@
 /* See license.txt for terms of usage */
 
 define([
+    "firebug/lib/object",
     "firebug/lib/events",
     "firebug/lib/css",
     "firebug/lib/dom",
     "firebug/lib/search",
     "firebug/lib/xml",
 ],
-function(Events, CSS, DOM, Search, XML) {
+function(OBJECT, Events, CSS, DOM, Search, XML) {
 
 // ********************************************************************************************* //
 // Constants
@@ -231,7 +232,7 @@ var HTMLLib =
          */
         this.selectMatched = function(nodeBox, node, match, reverse)
         {
-            setTimeout(FBL.bindFixed(function()
+            setTimeout(OBJECT.bindFixed(function()
             {
                 var reMatch = match.match;
                 this.selectNodeText(nodeBox, node, reMatch[0], reMatch.index, reverse,
@@ -378,7 +379,7 @@ var HTMLLib =
          */
         this.selectMatched = function(nodeBox, node, match, reverse)
         {
-            setTimeout(FBL.bindFixed(function()
+            setTimeout(OBJECT.bindFixed(function()
             {
                 ioBox.select(node, true, true);
                 Events.dispatch([Firebug.A11yModel], 'onHTMLSearchMatchFound', [panelNode.ownerPanel, match]);

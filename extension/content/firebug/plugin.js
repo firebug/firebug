@@ -2,17 +2,18 @@
 
 define([
     "firebug/lib",
+    "firebug/lib/object",
     "firebug/firebug",
     "firebug/lib/debug",
 ],
-function(FBL, Firebug, Debug) {
+function(FBL, OBJECT, Firebug, Debug) {
 
 // ************************************************************************************************
 // This is a panel implemented as its own browser with its own URL
 	
 Firebug.PluginPanel = function() {};
 
-Firebug.PluginPanel.prototype = FBL.extend(Firebug.Panel,
+Firebug.PluginPanel.prototype = OBJECT.extend(Firebug.Panel,
 {
     createBrowser: function()
     {
@@ -54,7 +55,7 @@ Firebug.PluginPanel.prototype = FBL.extend(Firebug.Panel,
 
     initialize: function()
     {
-        this.browserReady = FBL.bindFixed(this.browserReady, this);
+        this.browserReady = OBJECT.bindFixed(this.browserReady, this);
         Firebug.Panel.initialize.apply(this, arguments);
     },
 

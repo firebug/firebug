@@ -2,6 +2,7 @@
 
 define([
     "firebug/lib",
+    "firebug/lib/object",
     "arch/tools",
     "firebug/lib/events",
     "firebug/lib/url",
@@ -9,7 +10,7 @@ define([
     "firebug/lib/css",
     "firebug/plugin",
 ],
-function(FBL, ToolsInterface, Events, URL, WIN, CSS) {
+function(FBL, OBJECT, ToolsInterface, Events, URL, WIN, CSS) {
 
 // ************************************************************************************************
 // Constants
@@ -447,7 +448,7 @@ Firebug.TabContext.prototype =
             delete this.refreshTimeout;
         }
 
-        this.refreshTimeout = this.setTimeout(FBL.bindFixed(function()
+        this.refreshTimeout = this.setTimeout(OBJECT.bindFixed(function()
         {
             var invalids = [];
 
@@ -613,7 +614,7 @@ Firebug.TabContext.prototype =
 function createPanelType(name, url, title, parentPanel)
 {
     var panelType = new Function("");
-    panelType.prototype = FBL.extend(new Firebug.PluginPanel(),
+    panelType.prototype = OBJECT.extend(new Firebug.PluginPanel(),
     {
         name: name,
         url: url,

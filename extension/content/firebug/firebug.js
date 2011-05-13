@@ -6,6 +6,7 @@
  */
 define([
     "firebug/lib",
+    "firebug/lib/object",
     "firebug/firefox/firefox",
     "firebug/chrome",
     "firebug/domplate",
@@ -21,7 +22,7 @@ define([
     "firebug/lib/dom",
     "firebug/http/httpLib",
 ],
-function(FBL, Firefox, ChromeFactory, Domplate, Options, Locale, Events, Wrapper, URL, CSS,
+function(FBL, OBJECT, Firefox, ChromeFactory, Domplate, Options, Locale, Events, Wrapper, URL, CSS,
     WIN, STR, ARR, DOM, HTTP) {
 
 // ********************************************************************************************* //
@@ -1493,7 +1494,7 @@ Firebug.Listener.prototype =
  * <code>Firebug.registerModule</code> method. There is always one instance of a module object
  * per browser window.
  */
-Firebug.Module = FBL.extend(new Firebug.Listener(),
+Firebug.Module = OBJECT.extend(new Firebug.Listener(),
 /** @lends Firebug.Module */
 {
     /**
@@ -1621,7 +1622,7 @@ Firebug.Extension =
  * register with <code>Firebug.registerPanel</code> method. An instance of the panel
  * object is created by the framework for each browser tab where Firebug is activated.
  */
-Firebug.Panel = FBL.extend(new Firebug.Listener(),
+Firebug.Panel = OBJECT.extend(new Firebug.Listener(),
 /** @lends Firebug.Panel */
 {
     searchable: false,    // supports search
@@ -2178,7 +2179,7 @@ Firebug.Panel = FBL.extend(new Firebug.Listener(),
  * All methods in this object are used on the prototype object (they reprent class methods)
  * and so, |this| points to the panel's prototype and *not* to the panel instance.
  */
-Firebug.ActivablePanel = FBL.extend(Firebug.Panel,
+Firebug.ActivablePanel = OBJECT.extend(Firebug.Panel,
 {
     activable: true,
 
@@ -2226,7 +2227,7 @@ Firebug.ActivablePanel = FBL.extend(Firebug.Panel,
  * {@link Firebug.Debugger}, which can be disabled in order to avoid performance
  * penalties (in cases where the user doesn't need a debugger for the moment).
  */
-Firebug.ActivableModule = FBL.extend(Firebug.Module,
+Firebug.ActivableModule = OBJECT.extend(Firebug.Module,
 /** @lends Firebug.ActivableModule */
 {
     /**

@@ -4,11 +4,12 @@
  * The 'context' in this file is always 'Firebug.currentContext'
  */
 define([
+    "firebug/lib/object",
     "firebug/firefox/firefox",
     "firebug/lib/dom",
     "firebug/firefox/menu",
 ],
-function chromeFactory(Firefox, DOM, Menu) {
+function chromeFactory(OBJECT, Firefox, DOM, Menu) {
 
 // ************************************************************************************************
 // Constants
@@ -1511,8 +1512,8 @@ var KeyBindingsManager =
 {
     initialize: function()
     {
-        this.onFocus = FBL.bind(this.onFocus, this);
-        this.onBlur = FBL.bind(this.onBlur, this);
+        this.onFocus = OBJECT.bind(this.onFocus, this);
+        this.onBlur = OBJECT.bind(this.onBlur, this);
 
         var contentBox = FirebugChrome.$("fbContentBox");
         if (contentBox)
