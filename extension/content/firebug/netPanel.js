@@ -27,6 +27,7 @@ define([
     "firebug/persist",
     "firebug/toggleBranch",
     "firebug/firefox/system",
+    "firebug/firefox/menu",
     "firebug/breakpoint",
     "firebug/xmlViewer",
     "firebug/svgViewer",
@@ -38,7 +39,7 @@ define([
 ],
 function(FBL, OBJECT, Firebug, Firefox, Domplate, XPCOM, ToolsInterface, HttpRequestObserver, Locale,
     Events, Options, URL, SourceLink, HTTP, StackFrame, CSS, DOM, WIN, Search, STR, XML,
-    JSONLib, ARR, Persist, ToggleBranch, System) {
+    JSONLib, ARR, Persist, ToggleBranch, System, Menu) {
 
 with (Domplate) {
 
@@ -643,8 +644,8 @@ NetPanel.prototype = OBJECT.extend(Firebug.ActivablePanel,
         return [
             this.disableCacheOption(),
             "-",
-            FBL.optionMenu("net.option.Show Paint Events", "netShowPaintEvents"),
-            FBL.optionMenu("net.option.Show BF Cache Responses", "netShowBFCacheResponses",
+            Menu.optionMenu("net.option.Show Paint Events", "netShowPaintEvents"),
+            Menu.optionMenu("net.option.Show BF Cache Responses", "netShowBFCacheResponses",
                 "net.option.tip.Show_BF_Cache_Responses")
         ];
     },

@@ -20,12 +20,13 @@ define([
     "firebug/persist",
     "firebug/toggleBranch",
     "firebug/firefox/system",
+    "firebug/firefox/menu",
     "firebug/editor",
     "firebug/breakpoint",
     "firebug/searchBox",
 ],
 function(FBL, OBJECT, Firebug, Domplate, FirebugReps, Locale, ToolsInterface, Events, Wrapper,
-    SourceLink, StackFrame, DOM, CSS, Search, STR, ARR, Persist, ToggleBranch, System) {
+    SourceLink, StackFrame, DOM, CSS, Search, STR, ARR, Persist, ToggleBranch, System, Menu) {
 
 with (Domplate) {
 
@@ -1411,18 +1412,18 @@ Firebug.DOMBasePanel.prototype = OBJECT.extend(Firebug.Panel,
 
     getOptionsMenuItems: function()
     {
-        var enumerablePropertiesItem = FBL.optionMenu("ShowEnumerableProperties", "showEnumerableProperties", "ShowEnumerablePropertiesTooltip");
+        var enumerablePropertiesItem = Menu.optionMenu("ShowEnumerableProperties", "showEnumerableProperties", "ShowEnumerablePropertiesTooltip");
         if (!Firebug.showOwnProperties)  // see getObjectProperites
             enumerablePropertiesItem.disabled = true;
 
         return [
-            FBL.optionMenu("ShowUserProps", "showUserProps"),
-            FBL.optionMenu("ShowUserFuncs", "showUserFuncs"),
-            FBL.optionMenu("ShowDOMProps", "showDOMProps"),
-            FBL.optionMenu("ShowDOMFuncs", "showDOMFuncs"),
-            FBL.optionMenu("ShowDOMConstants", "showDOMConstants"),
+            Menu.optionMenu("ShowUserProps", "showUserProps"),
+            Menu.optionMenu("ShowUserFuncs", "showUserFuncs"),
+            Menu.optionMenu("ShowDOMProps", "showDOMProps"),
+            Menu.optionMenu("ShowDOMFuncs", "showDOMFuncs"),
+            Menu.optionMenu("ShowDOMConstants", "showDOMConstants"),
             "-",
-            FBL.optionMenu("ShowOwnProperties", "showOwnProperties", "ShowOwnPropertiesTooltip"),
+            Menu.optionMenu("ShowOwnProperties", "showOwnProperties", "ShowOwnPropertiesTooltip"),
             enumerablePropertiesItem,
             "-",
             {label: "Refresh", command: OBJECT.bindFixed(this.rebuild, this, true) }

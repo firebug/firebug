@@ -19,6 +19,7 @@ define([
     "firebug/lib/search",
     "firebug/persist",
     "firebug/firefox/system",
+    "firebug/firefox/menu",
     "firebug/lib/debug",
     "firebug/lib/keywords",
     "firebug/editorSelector",
@@ -27,7 +28,7 @@ define([
     "firebug/sourceBox",
 ],
 function(FBL, OBJECT, Firebug, Firefox, FirebugReps, Domplate, ToolsInterface, Locale, Events, URL, SourceLink,
-    StackFrame, CSS, DOM, WIN, Search, Persist, System, Debug, Keywords) {
+    StackFrame, CSS, DOM, WIN, Search, Persist, System, Menu, Debug, Keywords) {
 
 // ********************************************************************************************* //
 // Constants
@@ -1143,13 +1144,13 @@ Firebug.ScriptPanel.prototype = OBJECT.extend(Firebug.SourceBoxPanel,
         var context = this.context;
 
         return [
-            FBL.optionMenu("ShowAllSourceFiles", "showAllSourceFiles"),
+            Menu.optionMenu("ShowAllSourceFiles", "showAllSourceFiles"),
             // 1.2: always check last line; optionMenu("UseLastLineForEvalName", "useLastLineForEvalName"),
             // 1.2: always use MD5 optionMenu("UseMD5ForEvalName", "useMD5ForEvalName")
-            FBL.optionMenu("TrackThrowCatch", "trackThrowCatch"),
+            Menu.optionMenu("TrackThrowCatch", "trackThrowCatch"),
             //"-",
             //1.2 option on toolbar this.optionMenu("DebuggerEnableAlways", enableAlwaysPref)
-            FBL.optionMenu("firebug.breakpoint.showBreakNotifications", "showBreakNotification")
+            Menu.optionMenu("firebug.breakpoint.showBreakNotifications", "showBreakNotification")
         ];/*
 
 */

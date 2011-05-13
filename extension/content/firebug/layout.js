@@ -10,9 +10,10 @@ define([
     "firebug/lib/css",
     "firebug/lib/dom",
     "firebug/lib/xml",
+    "firebug/firefox/menu",
     "firebug/editor",
 ],
-function(FBL, OBJECT, Firebug, Domplate, Locale, Events, CSS, DOM, XML) {
+function(FBL, OBJECT, Firebug, Domplate, Locale, Events, CSS, DOM, XML, Menu) {
 
 // ************************************************************************************************
 
@@ -315,7 +316,7 @@ LayoutPanel.prototype = OBJECT.extend(Firebug.Panel,
     getOptionsMenuItems: function()
     {
         return [
-            FBL.optionMenu("ShowRulers", "showRulers")
+            Menu.optionMenu("ShowRulers", "showRulers")
         ];
     },
 

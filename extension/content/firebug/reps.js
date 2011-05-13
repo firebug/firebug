@@ -23,10 +23,11 @@ define([
     "firebug/lib/xml",
     "firebug/toggleBranch",
     "firebug/eventMonitor",
+    "firebug/firefox/menu",
 ],
 function(FBL, OBJECT, Firebug, Domplate, XPCOM, Locale, ToolsInterface, HTMLLib, Events, Wrapper,
     URL, SourceLink, StackFrame, CSS, DOM, WIN, System, XPATH, STR, XML, ToggleBranch,
-    EventMonitor) {
+    EventMonitor, Menu) {
 
 with (Domplate) {
 
@@ -1899,7 +1900,7 @@ FirebugReps.ErrorMessage = domplate(Firebug.Rep,
                 {label: "BreakOnThisError", type: "checkbox", checked: breakOnThisError,
                  command: OBJECT.bindFixed(this.breakOnThisError, this, error) },
 
-                FBL.optionMenu("BreakOnAllErrors", "breakOnErrors")
+                Menu.optionMenu("BreakOnAllErrors", "breakOnErrors")
             );
         }
 

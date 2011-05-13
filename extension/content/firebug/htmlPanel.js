@@ -19,6 +19,7 @@ define([
     "firebug/lib/xml",
     "firebug/lib/array",
     "firebug/persist",
+    "firebug/firefox/menu",
     "firebug/breakpoint",
     "firebug/editor",
     "firebug/infotip",
@@ -26,7 +27,7 @@ define([
     "firebug/insideOutBox",
 ],
 function(FBL, OBJECT, Firebug, Domplate, FirebugReps, Locale, ToolsInterface, HTMLLib, Events,
-    SourceLink, CSS, DOM, WIN, XPATH, STR, XML, ARR, Persist) { with (Domplate) {
+    SourceLink, CSS, DOM, WIN, XPATH, STR, XML, ARR, Persist, Menu) { with (Domplate) {
 
 // ************************************************************************************************
 // Constants
@@ -1295,17 +1296,17 @@ Firebug.HTMLPanel.prototype = OBJECT.extend(WalkingPanel,
     getOptionsMenuItems: function()
     {
         return [
-            FBL.optionMenu("ShowFullText", "showFullTextNodes"),
-            FBL.optionMenu("ShowWhitespace", "showTextNodesWithWhitespace"),
-            FBL.optionMenu("ShowComments", "showCommentNodes"),
-            FBL.optionMenu("ShowTextNodesWithEntities", "showTextNodesWithEntities"),
+            Menu.optionMenu("ShowFullText", "showFullTextNodes"),
+            Menu.optionMenu("ShowWhitespace", "showTextNodesWithWhitespace"),
+            Menu.optionMenu("ShowComments", "showCommentNodes"),
+            Menu.optionMenu("ShowTextNodesWithEntities", "showTextNodesWithEntities"),
             "-",
-            FBL.optionMenu("HighlightMutations", "highlightMutations"),
-            FBL.optionMenu("ExpandMutations", "expandMutations"),
-            FBL.optionMenu("ScrollToMutations", "scrollToMutations"),
+            Menu.optionMenu("HighlightMutations", "highlightMutations"),
+            Menu.optionMenu("ExpandMutations", "expandMutations"),
+            Menu.optionMenu("ScrollToMutations", "scrollToMutations"),
             "-",
-            FBL.optionMenu("ShadeBoxModel", "shadeBoxModel"),
-            FBL.optionMenu("ShowQuickInfoBox","showQuickInfoBox")
+            Menu.optionMenu("ShadeBoxModel", "shadeBoxModel"),
+            Menu.optionMenu("ShowQuickInfoBox","showQuickInfoBox")
         ];
     },
 

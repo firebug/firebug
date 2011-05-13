@@ -14,12 +14,13 @@ define([
     "firebug/firefox/window",
     "firebug/lib/search",
     "firebug/lib/xml",
+    "firebug/firefox/menu",
     "firebug/profiler",
     "firebug/searchBox",
     "firebug/errors",
 ],
 function(FBL, OBJECT, Firebug, Firefox, FirebugReps, Locale, ToolsInterface, Events, CSS, DOM,
-    WIN, Search, XML) {
+    WIN, Search, XML, Menu) {
 
 // ************************************************************************************************
 // Constants
@@ -896,26 +897,26 @@ Firebug.ConsolePanel.prototype = OBJECT.extend(Firebug.ActivablePanel,
     getOptionsMenuItems: function()
     {
         return [
-            FBL.optionMenu("ShowJavaScriptErrors", "showJSErrors"),
-            FBL.optionMenu("ShowJavaScriptWarnings", "showJSWarnings"),
-            FBL.optionMenu("ShowCSSErrors", "showCSSErrors"),
-            FBL.optionMenu("ShowXMLErrors", "showXMLErrors"),
-            FBL.optionMenu("ShowXMLHttpRequests", "showXMLHttpRequests"),
-            FBL.optionMenu("ShowChromeErrors", "showChromeErrors"),
-            FBL.optionMenu("ShowChromeMessages", "showChromeMessages"),
-            FBL.optionMenu("ShowExternalErrors", "showExternalErrors"),
-            FBL.optionMenu("ShowNetworkErrors", "showNetworkErrors"),
+            Menu.optionMenu("ShowJavaScriptErrors", "showJSErrors"),
+            Menu.optionMenu("ShowJavaScriptWarnings", "showJSWarnings"),
+            Menu.optionMenu("ShowCSSErrors", "showCSSErrors"),
+            Menu.optionMenu("ShowXMLErrors", "showXMLErrors"),
+            Menu.optionMenu("ShowXMLHttpRequests", "showXMLHttpRequests"),
+            Menu.optionMenu("ShowChromeErrors", "showChromeErrors"),
+            Menu.optionMenu("ShowChromeMessages", "showChromeMessages"),
+            Menu.optionMenu("ShowExternalErrors", "showExternalErrors"),
+            Menu.optionMenu("ShowNetworkErrors", "showNetworkErrors"),
             this.getShowStackTraceMenuItem(),
             this.getStrictOptionMenuItem(),
             "-",
-            FBL.optionMenu("Command_Editor", "largeCommandLine"),
-            FBL.optionMenu("commandLineShowCompleterPopup", "commandLineShowCompleterPopup")
+            Menu.optionMenu("Command_Editor", "largeCommandLine"),
+            Menu.optionMenu("commandLineShowCompleterPopup", "commandLineShowCompleterPopup")
         ];
     },
 
     getShowStackTraceMenuItem: function()
     {
-        var menuItem = FBL.optionMenu("ShowStackTrace", "showStackTrace");
+        var menuItem = Menu.optionMenu("ShowStackTrace", "showStackTrace");
         if (Firebug.currentContext && !Firebug.Debugger.isAlwaysEnabled())
             menuItem.disabled = true;
         return menuItem;

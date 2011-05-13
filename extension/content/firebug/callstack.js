@@ -12,8 +12,10 @@ define([
     "firebug/lib/css",
     "firebug/lib/array",
     "firebug/lib/dom",
+    "firebug/firefox/menu",
 ],
-function(FBL, OBJECT, Firebug, FirebugReps, ToolsInterface, Events, Wrapper, StackFrame, CSS, ARR, DOM) {
+function(FBL, OBJECT, Firebug, FirebugReps, ToolsInterface, Events, Wrapper, StackFrame,
+    CSS, ARR, DOM, Menu) {
 
 // ************************************************************************************************
 // Constants
@@ -232,7 +234,7 @@ Firebug.CallstackPanel.prototype = OBJECT.extend(Firebug.Panel,
     getOptionsMenuItems: function()
     {
         var items = [
-            FBL.optionMenu("OmitObjectPathStack", "omitObjectPathStack"),  // an option handled by chrome.js
+            Menu.optionMenu("OmitObjectPathStack", "omitObjectPathStack"),  // an option handled by chrome.js
         ];
         return items;
     },
