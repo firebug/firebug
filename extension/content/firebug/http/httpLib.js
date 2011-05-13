@@ -16,6 +16,7 @@ const Ci = Components.interfaces;
 const Cr = Components.results;
 
 const NS_SEEK_SET = Ci.nsISeekableStream.NS_SEEK_SET;
+const ioService = Cc["@mozilla.org/network/io-service;1"].getService(Ci.nsIIOService);
 
 var HTTP = {};
 
@@ -80,6 +81,22 @@ HTTP.readPostTextFromPage = function(url, context)
                 FBTrace.sysout("httpLib.readPostText FAILS, url:"+url, exc);
          }
      }
+};
+
+HTTP.getResource = function(aURL)
+{
+    try
+    {
+        var channel = ioService.newChannel(aURL, null, null);
+        var input = channel.open();
+
+        return HTTP.readFromStream(input);
+    }
+    catch (e)
+    {
+        if (FBTrace.DBG_ERRORS)
+            FBTrace.sysout("lib.getResource FAILS for \'"+aURL+"\'", e);
+    }
 };
 
 HTTP.readPostTextFromRequest = function(request, context)

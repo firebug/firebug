@@ -900,7 +900,7 @@ function getImageMapHighlighter(context)
                 for (i = 0; i < eltsLen; i++)
                 {
                     elt = elts.snapshotItem(i);
-                    rect = FBL.getLTRBWH(elt);
+                    rect = DOM.getLTRBWH(elt);
 
                     if (multi)
                     {
@@ -942,7 +942,7 @@ function getImageMapHighlighter(context)
 
                     for(j = 0; j < imagesLen; j++)
                     {
-                        rect = FBL.getLTRBWH(images[j], context);
+                        rect = DOM.getLTRBWH(images[j], context);
 
                         ctx.beginPath();
 
@@ -1191,7 +1191,7 @@ Firebug.Inspector.FrameHighlighter.prototype =
         storeHighlighterParams(this, context, element, null, colorObj, null, isMulti);
 
         var cs;
-        var offset = FBL.getLTRBWH(element);
+        var offset = DOM.getLTRBWH(element);
         var x = offset.left, y = offset.top;
         var w = offset.width, h = offset.height;
 
@@ -1392,7 +1392,7 @@ BoxModelHighlighter.prototype =
             }
 
             var styles = CSS.readBoxStyles(style);
-            var offset = FBL.getLTRBWH(element);
+            var offset = DOM.getLTRBWH(element);
             var x = offset.left - Math.abs(styles.marginLeft);
             var y = offset.top - Math.abs(styles.marginTop);
             var w = offset.width - (styles.paddingLeft + styles.paddingRight + styles.borderLeft + styles.borderRight);
@@ -1593,7 +1593,7 @@ BoxModelHighlighter.prototype =
     setNodesByOffsetParent: function(win, offsetParent, nodes)
     {
         var parentStyle = win.getComputedStyle(offsetParent, "");
-        var parentOffset = FBL.getLTRBWH(offsetParent);
+        var parentOffset = DOM.getLTRBWH(offsetParent);
         var parentX = parentOffset.left + parseInt(parentStyle.borderLeftWidth, 10);
         var parentY = parentOffset.top + parseInt(parentStyle.borderTopWidth, 10);
         var parentW = offsetParent.offsetWidth-1;

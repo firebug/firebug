@@ -105,7 +105,6 @@ Firebug.ConsoleBase =
 
                 while (container.childNodes.length > maxQueueRequests + 1)
                 {
-                    FBL.clearDomplate(container.firstChild.nextSibling);
                     container.removeChild(container.firstChild.nextSibling);
                     panel.limit.limitInfo.totalCount++;
                     template.updateCounter(panel.limit);
@@ -497,7 +496,7 @@ Firebug.ConsolePanel.prototype = FBL.extend(Firebug.ActivablePanel,
                 FBTrace.sysout("console.append; wasScrolledToBottom " + this.wasScrolledToBottom+" "+row.textContent);
 
             if (this.wasScrolledToBottom)
-                FBL.scrollToBottom(this.panelNode);
+                DOM.scrollToBottom(this.panelNode);
 
             return row;
         }
@@ -509,10 +508,10 @@ Firebug.ConsolePanel.prototype = FBL.extend(Firebug.ActivablePanel,
         {
             if (FBTrace.DBG_CONSOLE)
                 FBTrace.sysout("ConsolePanel.clear");
-            FBL.clearNode(this.panelNode);
+            DOM.clearNode(this.panelNode);
             this.insertLogLimit(this.context);
 
-            FBL.scrollToBottom(this.panelNode);
+            DOM.scrollToBottom(this.panelNode);
             this.wasScrolledToBottom = true;
 
             // Don't forget to clear opened groups, if any.
@@ -819,7 +818,7 @@ Firebug.ConsolePanel.prototype = FBL.extend(Firebug.ActivablePanel,
         }
 
         if (this.wasScrolledToBottom)
-            FBL.scrollToBottom(this.panelNode);
+            DOM.scrollToBottom(this.panelNode);
 
         if (FBTrace.DBG_CONSOLE)
             FBTrace.sysout("console.show; wasScrolledToBottom: " +
@@ -1026,7 +1025,7 @@ Firebug.ConsolePanel.prototype = FBL.extend(Firebug.ActivablePanel,
                 CSS.removeClass(logRow, "matching");
 
                 if (scrolledToBottom)
-                    FBL.scrollToBottom(this.panelNode);
+                    DOM.scrollToBottom(this.panelNode);
             }, this), 100);
         }
     },
@@ -1071,7 +1070,7 @@ Firebug.ConsolePanel.prototype = FBL.extend(Firebug.ActivablePanel,
     {
         if (shouldShow)
         {
-            FBL.collapse(Firebug.chrome.$("fbCommandBox"), false);
+            DOM.collapse(Firebug.chrome.$("fbCommandBox"), false);
             Firebug.CommandLine.setMultiLine(Firebug.largeCommandLine, Firebug.chrome);
         }
         else
@@ -1079,14 +1078,14 @@ Firebug.ConsolePanel.prototype = FBL.extend(Firebug.ActivablePanel,
             // Make sure that entire content of the Console panel is hidden when
             // the panel is disabled.
             Firebug.CommandLine.setMultiLine(false, Firebug.chrome, Firebug.largeCommandLine);
-            FBL.collapse(Firebug.chrome.$("fbCommandBox"), true);
+            DOM.collapse(Firebug.chrome.$("fbCommandBox"), true);
         }
     },
 
     onScroll: function(event)
     {
         // Update the scroll position flag if the position changes.
-        this.wasScrolledToBottom = FBL.isScrolledToBottom(this.panelNode);
+        this.wasScrolledToBottom = DOM.isScrolledToBottom(this.panelNode);
 
         if (FBTrace.DBG_CONSOLE)
             FBTrace.sysout("console.onScroll; wasScrolledToBottom: " +
@@ -1103,7 +1102,7 @@ Firebug.ConsolePanel.prototype = FBL.extend(Firebug.ActivablePanel,
                 this.panelNode.scrollHeight + ", " + this.context.getName(), event);
 
         if (this.wasScrolledToBottom)
-            FBL.scrollToBottom(this.panelNode);
+            DOM.scrollToBottom(this.panelNode);
     },
 });
 

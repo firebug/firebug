@@ -135,7 +135,6 @@ catch (err)
 
 this.jsd = Cc["@mozilla.org/js/jsd/debugger-service;1"].getService(Ci.jsdIDebuggerService);
 
-const ioService = Cc["@mozilla.org/network/io-service;1"].getService(Ci.nsIIOService);
 const versionChecker = Cc["@mozilla.org/xpcom/version-comparator;1"].getService(Ci.nsIVersionComparator);
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
@@ -243,32 +242,6 @@ this.getRandomInt = function(min, max)
 
 // ************************************************************************************************
 
-this.addScript = function(doc, id, src)
-{
-    var element = doc.createElementNS("http://www.w3.org/1999/xhtml", "html:script");
-    element.setAttribute("type", "text/javascript");
-    element.setAttribute("id", id);
-    if (!FBTrace.DBG_CONSOLE)
-        Firebug.setIgnored(element);
-
-    element.innerHTML = src;
-    if (doc.documentElement)
-    {
-        doc.documentElement.appendChild(element);
-    }
-    else
-    {
-        // See issue 1079, the svg test case gives this error
-        if (FBTrace.DBG_ERRORS)
-            FBTrace.sysout("lib.addScript doc has no documentElement (" +
-                doc.readyState + ") " + doc.location, doc);
-        return;
-    }
-    return element;
-}
-
-// ************************************************************************************************
-
 this.isAncestorIgnored = function(node)
 {
     for (var parent = node; parent; parent = parent.parentNode)
@@ -306,42 +279,6 @@ this.isVisible = function(elt)
     }
 
     return false;
-};
-
-this.collapse = function(elt, collapsed)
-{
-    elt.setAttribute("collapsed", collapsed ? "true" : "false");
-};
-
-this.isCollapsed = function(elt)
-{
-    return (elt.getAttribute("collapsed") == "true") ? true : false;
-};
-
-this.obscure = function(elt, obscured)
-{
-    if (obscured)
-        this.setClass(elt, "obscured");
-    else
-        this.removeClass(elt, "obscured");
-};
-
-this.hide = function(elt, hidden)
-{
-    elt.style.visibility = hidden ? "hidden" : "visible";
-};
-
-this.clearNode = function(node)
-{
-    this.clearDomplate(node);
-    node.innerHTML = "";
-};
-
-this.eraseNode = function(node)
-{
-    this.clearDomplate(node);
-    while (node.lastChild)
-        node.removeChild(node.lastChild);
 };
 
 this.ToggleBranch = function()
@@ -424,38 +361,6 @@ this.ToggleBranch.prototype =
     },
 };
 
-this.clearDomplate = function(node)
-{
-    if (!Firebug.clearDomplate)
-        return;
-
-    var walker = node.ownerDocument.createTreeWalker(node,
-        Ci.nsIDOMNodeFilter.SHOW_ALL, null, true);
-
-    while (node)
-    {
-        if (node.repObject)
-            node.repObject = null;
-
-        if (node.stackTrace)
-            node.stackTrace = null;
-
-        if (node.checked)
-            node.checked = null;
-
-        if (node.domObject)
-            node.domObject = null;
-
-        if (node.toggles)
-            node.toggles = null;
-
-        if (node.domPanel)
-            node.domPanel = null;
-
-        node = walker.nextNode();
-    }
-}
-
 // ************************************************************************************************
 // DOM queries
 
@@ -467,26 +372,33 @@ this.$ = function(id, doc)
         return document.getElementById(id);
 };
 
-this.XW_instanceof = function(obj, type) // Cross Window instanceof; type is local to this window
+// Cross Window instanceof; type is local to this window
+this.XW_instanceof = function(obj, type)
 {
     if (obj instanceof type)
         return true;  // within-window test
 
     if (!type)
         return false;
+
     if (!obj)
         return (type == "undefined");
 
     // compare strings: obj constructor.name to type.name.
-    // This is not perfect, we should compare type.prototype to object.__proto__, but mostly code does not change the constructor object.
+    // This is not perfect, we should compare type.prototype to object.__proto__,
+    // but mostly code does not change the constructor object.
     do
     {
-        if (obj.constructor && obj.constructor.name == type.name)  // then the function that constructed us is the argument
+        // then the function that constructed us is the argument
+        if (obj.constructor && obj.constructor.name == type.name)
             return true;
     }
     while(obj = obj.__proto__);  // walk the prototype chain.
+
     return false;
-    // https://developer.mozilla.org/en/Core_JavaScript_1.5_Guide/Property_Inheritance_Revisited/Determining_Instance_Relationships
+
+    // https://developer.mozilla.org/en/Core_JavaScript_1.5_Guide/Property_Inheritance_Revisited
+    // /Determining_Instance_Relationships
 }
 
 // ************************************************************************************************
@@ -496,187 +408,6 @@ this.copyToClipboard = function(string)
 {
     var clipboard = Cc["@mozilla.org/widget/clipboardhelper;1"].getService(Ci.nsIClipboardHelper);
     clipboard.copyString(string);
-};
-
-// ************************************************************************************************
-// Graphics
-
-this.getClientOffset = function(elt)
-{
-    function addOffset(elt, coords, view)
-    {
-        var p = elt.offsetParent;
-
-        var style = view.getComputedStyle(elt, "");
-
-        if (elt.offsetLeft)
-            coords.x += elt.offsetLeft + parseInt(style.borderLeftWidth);
-        if (elt.offsetTop)
-            coords.y += elt.offsetTop + parseInt(style.borderTopWidth);
-
-        if (p)
-        {
-            if (p.nodeType == 1)
-                addOffset(p, coords, view);
-        }
-        else if (elt.ownerDocument.defaultView.frameElement)
-            addOffset(elt.ownerDocument.defaultView.frameElement, coords, elt.ownerDocument.defaultView);
-    }
-
-    var coords = {x: 0, y: 0};
-    if (elt)
-    {
-        var view = elt.ownerDocument.defaultView;
-        addOffset(elt, coords, view);
-    }
-
-    return coords;
-};
-
-this.getLTRBWH = function(elt)
-{
-    var bcrect,
-        dims = {"left": 0, "top": 0, "right": 0, "bottom": 0, "width": 0, "height": 0};
-
-    if (elt)
-    {
-        bcrect = elt.getBoundingClientRect();
-        dims.left = bcrect.left;
-        dims.top = bcrect.top;
-        dims.right = bcrect.right;
-        dims.bottom = bcrect.bottom;
-
-        if(bcrect.width)
-        {
-            dims.width = bcrect.width;
-            dims.height = bcrect.height;
-        }
-        else
-        {
-            dims.width = dims.right - dims.left;
-            dims.height = dims.bottom - dims.top;
-        }
-    }
-    return dims;
-};
-
-this.getOffsetSize = function(elt)
-{
-    return {width: elt.offsetWidth, height: elt.offsetHeight};
-};
-
-this.getOverflowParent = function(element)
-{
-    for (var scrollParent = element.parentNode; scrollParent; scrollParent = scrollParent.offsetParent)
-    {
-        if (scrollParent.scrollHeight > scrollParent.offsetHeight)
-            return scrollParent;
-    }
-};
-
-this.isScrolledToBottom = function(element)
-{
-    var onBottom = (element.scrollTop + element.offsetHeight) == element.scrollHeight;
-    if (FBTrace.DBG_CONSOLE)
-        FBTrace.sysout("FBL.isScrolledToBottom offsetHeight: " + element.offsetHeight +
-            ", scrollTop: " + element.scrollTop + ", scrollHeight: " + element.scrollHeight +
-            ", onBottom: " + onBottom);
-    return onBottom;
-};
-
-this.scrollToBottom = function(element)
-{
-    element.scrollTop = element.scrollHeight;
-
-    if (FBTrace.DBG_CONSOLE)
-    {
-        FBTrace.sysout("scrollToBottom reset scrollTop "+element.scrollTop+" = "+element.scrollHeight);
-        if (element.scrollHeight == element.offsetHeight)
-            FBTrace.sysout("scrollToBottom attempt to scroll non-scrollable element "+element, element);
-    }
-
-    return (element.scrollTop == element.scrollHeight);
-};
-
-this.move = function(element, x, y)
-{
-    element.style.left = x + "px";
-    element.style.top = y + "px";
-};
-
-this.resize = function(element, w, h)
-{
-    element.style.width = w + "px";
-    element.style.height = h + "px";
-};
-
-this.linesIntoCenterView = function(element, scrollBox)  // {before: int, after: int}
-{
-    if (!scrollBox)
-        scrollBox = this.getOverflowParent(element);
-
-    if (!scrollBox)
-        return;
-
-    var offset = this.getClientOffset(element);
-
-    var topSpace = offset.y - scrollBox.scrollTop;
-    var bottomSpace = (scrollBox.scrollTop + scrollBox.clientHeight)
-            - (offset.y + element.offsetHeight);
-
-    if (topSpace < 0 || bottomSpace < 0)
-    {
-        var split = (scrollBox.clientHeight/2);
-        var centerY = offset.y - split;
-        scrollBox.scrollTop = centerY;
-        topSpace = split;
-        bottomSpace = split -  element.offsetHeight;
-    }
-
-    return {before: Math.round((topSpace/element.offsetHeight) + 0.5),
-            after: Math.round((bottomSpace/element.offsetHeight) + 0.5) }
-};
-
-this.scrollIntoCenterView = function(element, scrollBox, notX, notY)
-{
-    if (!element)
-        return;
-
-    if (!scrollBox)
-        scrollBox = this.getOverflowParent(element);
-
-    if (!scrollBox)
-        return;
-
-    var offset = this.getClientOffset(element);
-
-    if (!notY)
-    {
-        var topSpace = offset.y - scrollBox.scrollTop;
-        var bottomSpace = (scrollBox.scrollTop + scrollBox.clientHeight)
-            - (offset.y + element.offsetHeight);
-
-        if (topSpace < 0 || bottomSpace < 0)
-        {
-            var centerY = offset.y - (scrollBox.clientHeight/2);
-            scrollBox.scrollTop = centerY;
-        }
-    }
-
-    if (!notX)
-    {
-        var leftSpace = offset.x - scrollBox.scrollLeft;
-        var rightSpace = (scrollBox.scrollLeft + scrollBox.clientWidth)
-            - (offset.x + element.clientWidth);
-
-        if (leftSpace < 0 || rightSpace < 0)
-        {
-            var centerX = offset.x - (scrollBox.clientWidth/2);
-            scrollBox.scrollLeft = centerX;
-        }
-    }
-    if (FBTrace.DBG_SOURCEFILES)
-        FBTrace.sysout("lib.scrollIntoCenterView ","Element:"+element.innerHTML);
 };
 
 // ************************************************************************************************
@@ -1049,42 +780,6 @@ this.isJavaScriptKeyword = function(name)
 };
 
 // ************************************************************************************************
-// URLs
-
-this.getResource = function(aURL)
-{
-    try
-    {
-        var channel=ioService.newChannel(aURL,null,null);
-        var input=channel.open();
-        return HTTP.readFromStream(input);
-    }
-    catch (e)
-    {
-        if (FBTrace.DBG_ERRORS)
-            FBTrace.sysout("lib.getResource FAILS for \'"+aURL+"\'", e);
-    }
-};
-
-this.makeURI = function(urlString)
-{
-    try
-    {
-        if (urlString)
-            return ioService.newURI(urlString, null, null);
-    }
-    catch(exc)
-    {
-        //var explain = {message: "Firebug.lib.makeURI FAILS", url: urlString, exception: exc};
-        // todo convert explain to json and then to data url
-        if (FBTrace.DBG_ERRORS)
-            FBTrace.sysout("makeURI FAILS for \""+urlString+"\" ", exc);
-        return false;
-    }
-}
-
-
-// ************************************************************************************************
 // Error Message
 
 this.ErrorMessage = function(message, href, lineNo, source, category, context, trace, msgId)
@@ -1157,19 +852,6 @@ this.Continued.prototype =
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 
-this.SourceText = function(lines, owner)
-{
-    this.lines = lines;
-    this.owner = owner;
-};
-
-this.SourceText.getLineAsHTML = function(lineNo)
-{
-    return STR.escapeForSourceLine(this.lines[lineNo-1]);
-};
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
-
 this.Property = function(object, name)
 {
     this.object = object;
@@ -1237,23 +919,6 @@ function ddd(text)
 
 // ************************************************************************************************
 // URLs
-
-/**
- * Converts resource: to file: URL.
- * @param {String} resourceURL
- */
-this.resourceToFile = function(resourceURL)
-{
-    var resHandler = ioService.getProtocolHandler("resource")
-        .QueryInterface(Ci.nsIResProtocolHandler);
-
-    var justURL = resourceURL.split("resource://")[1];
-    var splitted = justURL.split("/");
-    var sub = splitted.shift();
-
-    var path = resHandler.getSubstitution(sub).spec;
-    return path + splitted.join("/");
-}
 
 // ************************************************************************************************
 // Firebug Version Comparator

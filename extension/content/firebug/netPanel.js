@@ -533,7 +533,7 @@ NetPanel.prototype = FBL.extend(Firebug.ActivablePanel,
         if (this.table.getElementsByClassName("netPageRow").item(0))
             NetPage.separatorTag.insertRows({}, lastRow);
 
-        FBL.scrollToBottom(this.panelNode);
+        DOM.scrollToBottom(this.panelNode);
     },
 
     savePersistedContent: function(state)
@@ -568,7 +568,7 @@ NetPanel.prototype = FBL.extend(Firebug.ActivablePanel,
             this.layoutInterval = setInterval(FBL.bindFixed(this.updateLayout, this), layoutInterval);
 
         if (this.wasScrolledToBottom)
-            FBL.scrollToBottom(this.panelNode);
+            DOM.scrollToBottom(this.panelNode);
     },
 
     hide: function()
@@ -577,7 +577,7 @@ NetPanel.prototype = FBL.extend(Firebug.ActivablePanel,
             FBTrace.sysout("net.netPanel.hide; " + this.context.getName());
 
         delete this.infoTipURL;  // clear the state that is tracking the infotip so it is reset after next show()
-        this.wasScrolledToBottom = FBL.isScrolledToBottom(this.panelNode);
+        this.wasScrolledToBottom = DOM.isScrolledToBottom(this.panelNode);
 
         clearInterval(this.layoutInterval);
         delete this.layoutInterval;
@@ -615,7 +615,7 @@ NetPanel.prototype = FBL.extend(Firebug.ActivablePanel,
 
         if (file)
         {
-            FBL.scrollIntoCenterView(file.row);
+            DOM.scrollIntoCenterView(file.row);
             if (!CSS.hasClass(file.row, "opened"))
                 NetRequestEntry.toggleHeadersRow(file.row);
         }
@@ -1023,7 +1023,7 @@ NetPanel.prototype = FBL.extend(Firebug.ActivablePanel,
             sel.removeAllRanges();
             sel.addRange(this.currentSearch.range);
 
-            FBL.scrollIntoCenterView(row, this.panelNode);
+            DOM.scrollIntoCenterView(row, this.panelNode);
             if(this.currentSearch.shouldSearchResponses() && DOM.getAncestorByClass(row, "netInfoResponseText"))
                 this.highlightRow(row)
             else
@@ -1060,12 +1060,12 @@ NetPanel.prototype = FBL.extend(Firebug.ActivablePanel,
         var length = this.queue.length;
 
         if (this.panelNode.offsetHeight)
-            this.wasScrolledToBottom = FBL.isScrolledToBottom(this.panelNode);
+            this.wasScrolledToBottom = DOM.isScrolledToBottom(this.panelNode);
 
         this.layout();
 
         if (this.wasScrolledToBottom)
-            FBL.scrollToBottom(this.panelNode);
+            DOM.scrollToBottom(this.panelNode);
 
         this.updateHRefLabelWidth();
 
@@ -1515,7 +1515,6 @@ NetPanel.prototype = FBL.extend(Firebug.ActivablePanel,
         if (file.row)
         {
             // The file is loaded and there is a row that has to be removed from the UI.
-            FBL.clearDomplate(file.row);
             tbody.removeChild(file.row);
         }
 
@@ -1630,7 +1629,7 @@ NetPanel.prototype = FBL.extend(Firebug.ActivablePanel,
 
     clear: function()
     {
-        FBL.clearNode(this.panelNode);
+        DOM.clearNode(this.panelNode);
 
         this.table = null;
         this.summaryRow = null;
@@ -2582,7 +2581,7 @@ Firebug.NetMonitor.NetInfoBody = domplate(Firebug.Rep, new Firebug.Listener(),
                 var responseImage = netInfoBox.ownerDocument.createElement("img");
                 responseImage.src = file.href;
 
-                FBL.clearNode(responseTextBox);
+                DOM.clearNode(responseTextBox);
                 responseTextBox.appendChild(responseImage, responseTextBox);
             }
             else if (!(binaryCategoryMap.hasOwnProperty(file.category)))
@@ -3049,7 +3048,7 @@ Firebug.NetMonitor.NetInfoHeaders = domplate(Firebug.Rep, new Firebug.Listener()
         var headersTable = netInfoBox.getElementsByClassName("netInfoHeadersTable").item(0);
         var tbody = headersTable.getElementsByClassName("netInfo" + rowName + "Body").item(0);
 
-        FBL.clearNode(tbody);
+        DOM.clearNode(tbody);
 
         if (headers && headers.length)
         NetInfoBody.headerDataTag.insertRows({headers: headers}, tbody);

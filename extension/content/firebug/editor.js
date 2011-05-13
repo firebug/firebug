@@ -594,7 +594,7 @@ Firebug.InlineEditor.prototype = domplate(Firebug.BaseEditor,
         this.target = target;
         this.panel = panel;
 
-        this.targetOffset = FBL.getClientOffset(target);
+        this.targetOffset = DOM.getClientOffset(target);
 
         this.originalClassName = this.box.className;
 
@@ -624,13 +624,13 @@ Firebug.InlineEditor.prototype = domplate(Firebug.BaseEditor,
 
             CSS.copyBoxStyles(target, this.expander);
             target.parentNode.replaceChild(this.expander, target);
-            FBL.collapse(target, true);
+            DOM.collapse(target, true);
             this.expander.parentNode.insertBefore(target, this.expander);
             this.textSize = this.measureInputText(value);
         }
         this.updateLayout(true);
 
-        FBL.scrollIntoCenterView(this.box, null, true);
+        DOM.scrollIntoCenterView(this.box, null, true);
     },
 
     hide: function()
@@ -641,7 +641,7 @@ Firebug.InlineEditor.prototype = domplate(Firebug.BaseEditor,
         {
             this.stopMeasuring();
 
-            FBL.collapse(this.target, false);
+            DOM.collapse(this.target, false);
 
             if (this.expander.parentNode)
                 this.expander.parentNode.removeChild(this.expander);
@@ -663,7 +663,7 @@ Firebug.InlineEditor.prototype = domplate(Firebug.BaseEditor,
             this.textSize = this.measureInputText(this.input.value);
 
         if (forceAll)
-            this.targetOffset = FBL.getClientOffset(this.expander);
+            this.targetOffset = DOM.getClientOffset(this.expander);
 
         this.updateLayout(false, forceAll);
     },
@@ -813,7 +813,7 @@ Firebug.InlineEditor.prototype = domplate(Firebug.BaseEditor,
         Events.cancelEvent(event);
 
         var popup = Firebug.chrome.$("fbInlineEditorPopup");
-        FBL.eraseNode(popup);
+        DOM.eraseNode(popup);
 
         var target = event.target;
         var menu = this.getContextMenuItems(target);
@@ -909,7 +909,7 @@ Firebug.InlineEditor.prototype = domplate(Firebug.BaseEditor,
         }
 
         if (forceAll)
-            FBL.scrollIntoCenterView(this.box, null, true);
+            DOM.scrollIntoCenterView(this.box, null, true);
     }
 })};
 
@@ -1302,7 +1302,7 @@ Firebug.AutoCompleter = function(getExprOffset, getRange, evaluator, selectMode,
     this.popupCandidates = function(candidates, textBox, completionBox)
     {
         // This method should not operate on the textBox or candidates list
-        FBL.eraseNode(completionPopup);
+        DOM.eraseNode(completionPopup);
 
         var vbox = completionPopup.ownerDocument.createElement("vbox");
         completionPopup.appendChild(vbox);

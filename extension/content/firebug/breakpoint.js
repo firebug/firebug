@@ -62,7 +62,7 @@ Firebug.Breakpoint = FBL.extend(Firebug.Module,
             breakButton.setAttribute("panelName", panel.name);
 
         breakButton.removeAttribute("type");
-        FBL.collapse(Firebug.chrome.$("fbBonButtons"), !panel.breakable);
+        DOM.collapse(Firebug.chrome.$("fbBonButtons"), !panel.breakable);
 
         // Disable break-on-next if it isn't supported by the current panel.
         if (!panel.supportsBreakOnNext())
@@ -84,7 +84,7 @@ Firebug.Breakpoint = FBL.extend(Firebug.Module,
         breakButton.setAttribute("type", "menu-button");
 
         var menuPopup = Firebug.chrome.$("fbBreakOnNextOptions");
-        FBL.eraseNode(menuPopup);
+        DOM.eraseNode(menuPopup);
 
         for (var i=0; i<menuItems.length; ++i)
             FBL.createMenuItem(menuPopup, menuItems[i]);
@@ -763,7 +763,7 @@ Firebug.Breakpoint.ConditionEditor.prototype = domplate(Firebug.InlineEditor.pro
         if (this.getAutoCompleter)
             this.getAutoCompleter().reset();
 
-        FBL.hide(this.box, true);
+        DOM.hide(this.box, true);
         panel.selectedSourceBox.appendChild(this.box);
 
         if (this.input)
@@ -771,7 +771,7 @@ Firebug.Breakpoint.ConditionEditor.prototype = domplate(Firebug.InlineEditor.pro
 
         setTimeout(FBL.bindFixed(function()
         {
-            var offset = FBL.getClientOffset(sourceLine);
+            var offset = DOM.getClientOffset(sourceLine);
 
             var bottom = offset.y+sourceLine.offsetHeight;
             var y = bottom - this.box.offsetHeight;
@@ -784,7 +784,7 @@ Firebug.Breakpoint.ConditionEditor.prototype = domplate(Firebug.InlineEditor.pro
                 CSS.removeClass(this.box, "upsideDown");
 
             this.box.style.top = y + "px";
-            FBL.hide(this.box, false);
+            DOM.hide(this.box, false);
 
             if (this.input)
             {

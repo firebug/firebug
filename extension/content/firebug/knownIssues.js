@@ -4,8 +4,9 @@ define([
     "firebug/lib",
     "firebug/lib/options",
     "firebug/firebug",
+    "firebug/lib/dom",
 ],
-function(FBL, Options, Firebug) {
+function(FBL, Options, Firebug, DOM) {
 
 // ********************************************************************************************* //
 // Constants
@@ -44,7 +45,7 @@ Firebug.KnownIssues = FBL.extend(Firebug.Module,
             var addonBar = document.getElementById("addon-bar");
 
             // Open the addon bar
-            FBL.collapse(addonBar, false);
+            DOM.collapse(addonBar, false);
             document.persist("addon-bar", "collapsed");
 
             // This is just one time operation.

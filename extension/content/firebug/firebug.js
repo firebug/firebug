@@ -18,8 +18,11 @@ define([
     "firebug/firefox/window",
     "firebug/lib/string",
     "firebug/lib/array",
+    "firebug/lib/dom",
+    "firebug/http/httpLib",
 ],
-function(FBL, Firefox, ChromeFactory, Domplate, Options, Locale, Events, Wrapper, URL, CSS, WIN, STR, ARR) {
+function(FBL, Firefox, ChromeFactory, Domplate, Options, Locale, Events, Wrapper, URL, CSS,
+    WIN, STR, ARR, DOM, HTTP) {
 
 // ********************************************************************************************* //
 // Constants
@@ -169,7 +172,7 @@ window.Firebug =
 
     loadVersion: function(versionURL)
     {
-        var content = FBL.getResource(versionURL);
+        var content = HTTP.getResource(versionURL);
         if (!content)
             return "no content at "+versionURL;
 
@@ -1683,8 +1686,6 @@ Firebug.Panel = FBL.extend(new Firebug.Listener(),
         }
 
         this.destroyNode();
-
-        FBL.clearDomplate(this.panelNode);
     },
 
     savePersistedContent: function(state)
@@ -1699,7 +1700,7 @@ Firebug.Panel = FBL.extend(new Firebug.Listener(),
         while (persistedState.panelNode.firstChild)
             this.panelNode.appendChild(persistedState.panelNode.firstChild);
 
-        FBL.scrollToBottom(this.panelNode);
+        DOM.scrollToBottom(this.panelNode);
     },
 
     // called when a panel in one XUL window is about to disappear to later reappear another XUL window.
@@ -1770,7 +1771,7 @@ Firebug.Panel = FBL.extend(new Firebug.Listener(),
         try
         {
             var buttons = Firebug.chrome.$(buttonsId);
-            FBL.collapse(buttons, !show);
+            DOM.collapse(buttons, !show);
         }
         catch (exc)
         {

@@ -6,9 +6,9 @@ define([
     "firebug/firefox/firefox",
     "firebug/lib/locale",
     "firebug/lib/events",
-
+    "firebug/lib/dom",
 ],
-function(FBL, Firebug, Firefox, Locale, Events) {
+function(FBL, Firebug, Firefox, Locale, Events, DOM) {
 
 // ********************************************************************************************* //
 // Constants
@@ -117,7 +117,7 @@ Firebug.StartButton = FBL.extend(Firebug.Module,
         }
 
         // Don't forget to show the navigation bar - just in case it's hidden.
-        FBL.collapse(navBar, false);
+        DOM.collapse(navBar, false);
         document.persist(navBarId, "collapsed");
     },
 
@@ -133,7 +133,7 @@ Firebug.StartButton = FBL.extend(Firebug.Module,
         var show = Firebug.Options.get("showStatusIcon");
         var statusBar = Firefox.getElementById("fbStatusBar");
         if (statusBar)
-            FBL.collapse(statusBar, !show);
+            DOM.collapse(statusBar, !show);
     },
 
     updateOption: function(name, value)

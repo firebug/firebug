@@ -4,9 +4,10 @@
  * The 'context' in this file is always 'Firebug.currentContext'
  */
 define([
-    "firebug/firefox/firefox"
+    "firebug/firefox/firefox",
+    "firebug/lib/dom",
 ],
-function chromeFactory(Firefox) {
+function chromeFactory(Firefox, DOM) {
 
 // ************************************************************************************************
 // Constants
@@ -321,7 +322,7 @@ var FirebugChrome =
     disableOff: function(collapse)
     {
         // disable/enable this button in the Firebug.chrome window.
-        FBL.collapse(FirebugChrome.$("fbCloseButton"), collapse);
+        DOM.collapse(FirebugChrome.$("fbCloseButton"), collapse);
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
@@ -334,7 +335,7 @@ var FirebugChrome =
         var consolePanelType = Firebug.getPanelType("console");
         if (consolePanelType == panelType)
         {
-            if (!FBL.isCollapsed(cmdPopup))
+            if (!DOM.isCollapsed(cmdPopup))
                 return cmdPopupBrowser.contentDocument;
         }
 
@@ -445,7 +446,7 @@ var FirebugChrome =
         contentBox.setAttribute("collapsed", !shouldShow);
         if (!inDetachedScope)
         {
-            FBL.collapse(Firefox.getElementById('fbMainFrame'), !shouldShow);
+            DOM.collapse(Firefox.getElementById('fbMainFrame'), !shouldShow);
         }
 
         if (contentSplitter)
@@ -463,12 +464,12 @@ var FirebugChrome =
         {
             Firebug.chrome.toggleOpen(true);
             Firebug.chrome.syncPanel();
-            FBL.collapse(resumeBox, true);
+            DOM.collapse(resumeBox, true);
         }
         else
         {
             Firebug.chrome.toggleOpen(false);
-            FBL.collapse(resumeBox, false);
+            DOM.collapse(resumeBox, false);
             Firebug.chrome.window.document.title = Locale.$STR("Firebug - inactive for current website");
         }
     },
@@ -827,8 +828,8 @@ var FirebugChrome =
             panelBar2.selectPanel(null);
 
         sidePanelDeck.selectedPanel = panelBar2;
-        FBL.collapse(sidePanelDeck, !panelBar2.selectedPanel);
-        FBL.collapse(panelSplitter, !panelBar2.selectedPanel);
+        DOM.collapse(sidePanelDeck, !panelBar2.selectedPanel);
+        DOM.collapse(panelSplitter, !panelBar2.selectedPanel);
     },
 
     syncTitle: function()
@@ -853,11 +854,11 @@ var FirebugChrome =
         if (panel && panel.location)
         {
             locationList.location = panel.location;
-            FBL.collapse(locationButtons, false);
+            DOM.collapse(locationButtons, false);
         }
         else
         {
-            FBL.collapse(locationButtons, true);
+            DOM.collapse(locationButtons, true);
         }
     },
 
@@ -878,7 +879,7 @@ var FirebugChrome =
             var path = panel.getObjectPath(panel.selection);
             if (!path || !path.length)
             {
-                FBL.hide(panelStatusSeparator, true);
+                DOM.hide(panelStatusSeparator, true);
                 panelStatus.clear();
             }
             else
@@ -891,14 +892,14 @@ var FirebugChrome =
                 var sibling = panelStatusSeparator.parentNode.previousSibling;
                 while (sibling)
                 {
-                    if (!FBL.isCollapsed(sibling))
+                    if (!DOM.isCollapsed(sibling))
                     {
                         hide = false;
                         break;
                     }
                     sibling = sibling.previousSibling;
                 }
-                FBL.hide(panelStatusSeparator, hide);
+                DOM.hide(panelStatusSeparator, hide);
 
                 if (panel.name != panelStatus.lastPanelName)
                     panelStatus.clear();
@@ -1078,7 +1079,7 @@ var FirebugChrome =
 
     obeyOmitObjectPathStack: function(value)
     {
-        FBL.hide(panelStatus, (value?true:false));
+        DOM.hide(panelStatus, (value?true:false));
     },
 
     toggleShowErrorCount: function()
@@ -1212,7 +1213,7 @@ var FirebugChrome =
         if (!panel)
             panel = panelBar1 ? panelBar1.selectedPanel : null; // the event must be on our chrome not inside the panel
 
-        FBL.eraseNode(popup);
+        DOM.eraseNode(popup);
 
         // Make sure the Copy action is only available if there is actually someting
         // selected in the panel.
@@ -1725,7 +1726,7 @@ function onSelectingPanel(event)
     var child = toolbar.firstChild;
     while (child)
     {
-        FBL.collapse(child, true);
+        DOM.collapse(child, true);
         child = child.nextSibling;
     }
 

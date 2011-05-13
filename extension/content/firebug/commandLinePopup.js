@@ -80,15 +80,15 @@ Firebug.CommandLine.Popup = FBL.extend(Firebug.Module,
 
         if ((largeCmd && isConsole) || !panel)
         {
-            FBL.collapse(chrome.$("fbPanelSplitter"), panel ? false : true);
-            FBL.collapse(chrome.$("fbSidePanelDeck"), panel ? false : true);
-            FBL.collapse(chrome.$("fbCommandBox"), true);
+            DOM.collapse(chrome.$("fbPanelSplitter"), panel ? false : true);
+            DOM.collapse(chrome.$("fbSidePanelDeck"), panel ? false : true);
+            DOM.collapse(chrome.$("fbCommandBox"), true);
             chrome.$("fbSidePanelDeck").selectedPanel = chrome.$("fbLargeCommandBox");
         }
 
         // The console can't be multiline on other panels so, hide the toggle-to-multiline
         // button (displayed at the end of the one line command line)
-        FBL.collapse(chrome.$("fbCommandToggleSmall"), !isConsole);
+        DOM.collapse(chrome.$("fbCommandToggleSmall"), !isConsole);
 
         // Update visibility of the console-popup (hidden if the Console panel is selected).
         this.updateVisibility(visible && !isConsole && panel && disabled != "true");
@@ -163,16 +163,16 @@ Firebug.CommandLine.Popup = FBL.extend(Firebug.Module,
         var toggle = chrome.$("fbCommandToggleSmall");
 
         // If all the visual parts are already visible then bail out.
-        if (visible && !FBL.isCollapsed(popup) && !FBL.isCollapsed(splitter) &&
-            !FBL.isCollapsed(cmdbox) && !FBL.isCollapsed(toggle))
+        if (visible && !DOM.isCollapsed(popup) && !DOM.isCollapsed(splitter) &&
+            !DOM.isCollapsed(cmdbox) && !DOM.isCollapsed(toggle))
             return;
 
-        FBL.collapse(popup, !visible);
-        FBL.collapse(splitter, !visible);
-        FBL.collapse(cmdbox, !visible);
+        DOM.collapse(popup, !visible);
+        DOM.collapse(splitter, !visible);
+        DOM.collapse(cmdbox, !visible);
 
         // The command line can't be multiline in other panels.
-        FBL.collapse(toggle, visible);
+        DOM.collapse(toggle, visible);
 
         var commandLineSmall = Firebug.CommandLine.getCommandLineLarge();
         var commandLineLarge = Firebug.CommandLine.getCommandLineSmall();

@@ -591,7 +591,7 @@ Firebug.ScriptPanel.prototype = FBL.extend(Firebug.SourceBoxPanel,
         this.tooltip = this.document.createElement("div");
         CSS.setClass(this.tooltip, "scriptTooltip");
         this.tooltip.setAttribute('aria-live', 'polite')
-        FBL.obscure(this.tooltip, true);
+        CSS.obscure(this.tooltip, true);
         this.panelNode.appendChild(this.tooltip);
 
         this.panelNode.addEventListener("mousedown", this.onMouseDown, true);
@@ -619,7 +619,7 @@ Firebug.ScriptPanel.prototype = FBL.extend(Firebug.SourceBoxPanel,
 
     clear: function()
     {
-        FBL.clearNode(this.panelNode);
+        DOM.clearNode(this.panelNode);
     },
 
     showWarning: function()
@@ -706,7 +706,7 @@ Firebug.ScriptPanel.prototype = FBL.extend(Firebug.SourceBoxPanel,
             this.ableWatchSidePanel(this.context);
         }
 
-        FBL.collapse(Firebug.chrome.$("fbToolbar"), !active);
+        DOM.collapse(Firebug.chrome.$("fbToolbar"), !active);
 
         // These buttons are visible only if debugger is enabled.
         this.showToolbarButtons("fbLocationSeparator", active);
@@ -732,7 +732,7 @@ Firebug.ScriptPanel.prototype = FBL.extend(Firebug.SourceBoxPanel,
             FBTrace.sysout("script panel HIDE removed onResize eventhandler");
 
         var panelStatus = Firebug.chrome.getPanelStatusElements();
-        FBL.hide(panelStatus, false);
+        DOM.hide(panelStatus, false);
 
         delete this.infoTipExpr;
     },
@@ -880,7 +880,7 @@ Firebug.ScriptPanel.prototype = FBL.extend(Firebug.SourceBoxPanel,
                    delete this.sourceBoxes[url];
                    if (this.selectedSourceBox == victim)
                    {
-                        FBL.collapse(this.selectedSourceBox, true);
+                        DOM.collapse(this.selectedSourceBox, true);
                         delete this.selectedSourceBox;
                    }
                    if (FBTrace.DBG_COMPILATION_UNITS)
@@ -909,7 +909,7 @@ Firebug.ScriptPanel.prototype = FBL.extend(Firebug.SourceBoxPanel,
 
         if (this.activeWarningTag)
         {
-            FBL.clearNode(this.panelNode);
+            DOM.clearNode(this.panelNode);
             delete this.activeWarningTag;
 
             // The user was seeing the warning, but selected a file to show in the script panel.

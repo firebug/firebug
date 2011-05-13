@@ -4,8 +4,9 @@ define([
     "firebug/lib",
     "firebug/lib/locale",
     "firebug/firebug",
+    "firebug/lib/dom",
 ],
-function(FBL, Locale, Firebug) {
+function(FBL, Locale, Firebug, DOM) {
 
 // ************************************************************************************************
 // Constants
@@ -70,7 +71,7 @@ Firebug.NavigationHistory = FBL.extend(Firebug.Module,
         if (FBTrace.DBG_HISTORY)
             FBTrace.sysout("history.onPopupShowing; " + currIndex + ", " + context.getName(), context);
 
-        FBL.eraseNode(popup);
+        DOM.eraseNode(popup);
 
         var list = this.getHistory(context);
 

@@ -9,6 +9,7 @@ define([
     "firebug/lib/wrapper",
     "firebug/lib/url",
     "firebug/lib/css",
+    "firebug/lib/dom",
     "firebug/firefox/window",
     "firebug/lib/xpath",
     "firebug/lib/string",
@@ -18,7 +19,7 @@ define([
     "firebug/console",
     "firebug/commandLineExposed"
 ],
-function(FBL, Firebug, FirebugReps, Locale, Events, Wrapper, URL, CSS, WIN, XPATH,
+function(FBL, Firebug, FirebugReps, Locale, Events, Wrapper, URL, CSS, DOM, WIN, XPATH,
     STR, XML, ARR, Persist) {
 
 // ************************************************************************************************
@@ -332,7 +333,7 @@ Firebug.CommandLine = FBL.extend(Firebug.Module,
     evaluateInWebPage: function(expr, context, targetWindow)
     {
         var win = targetWindow || context.window;
-        var element = FBL.addScript(win.document, "_firebugInWebPage", expr);
+        var element = DOM.addScript(win.document, "_firebugInWebPage", expr);
         if (!element)
             return;
 
@@ -570,9 +571,9 @@ Firebug.CommandLine = FBL.extend(Firebug.Module,
         if (Firebug.currentContext && Firebug.currentContext.panelName != "console")
             return;
 
-        FBL.collapse(chrome.$("fbCommandBox"), multiLine);
-        FBL.collapse(chrome.$("fbPanelSplitter"), !multiLine);
-        FBL.collapse(chrome.$("fbSidePanelDeck"), !multiLine);
+        DOM.collapse(chrome.$("fbCommandBox"), multiLine);
+        DOM.collapse(chrome.$("fbPanelSplitter"), !multiLine);
+        DOM.collapse(chrome.$("fbSidePanelDeck"), !multiLine);
 
         if (multiLine)
             chrome.$("fbSidePanelDeck").selectedPanel = chrome.$("fbLargeCommandBox");
@@ -966,9 +967,9 @@ Firebug.CommandLine = FBL.extend(Firebug.Module,
 
     onPanelEnable: function(panelName)
     {
-        FBL.collapse(Firebug.chrome.$("fbCommandBox"), true);
-        FBL.collapse(Firebug.chrome.$("fbPanelSplitter"), true);
-        FBL.collapse(Firebug.chrome.$("fbSidePanelDeck"), true);
+        DOM.collapse(Firebug.chrome.$("fbCommandBox"), true);
+        DOM.collapse(Firebug.chrome.$("fbPanelSplitter"), true);
+        DOM.collapse(Firebug.chrome.$("fbSidePanelDeck"), true);
 
         this.setMultiLine(Firebug.largeCommandLine, Firebug.chrome);
     },
@@ -978,9 +979,9 @@ Firebug.CommandLine = FBL.extend(Firebug.Module,
         if (panelName != 'console')  // we don't care about other panels
             return;
 
-        FBL.collapse(Firebug.chrome.$("fbCommandBox"), true);
-        FBL.collapse(Firebug.chrome.$("fbPanelSplitter"), true);
-        FBL.collapse(Firebug.chrome.$("fbSidePanelDeck"), true);
+        DOM.collapse(Firebug.chrome.$("fbCommandBox"), true);
+        DOM.collapse(Firebug.chrome.$("fbPanelSplitter"), true);
+        DOM.collapse(Firebug.chrome.$("fbSidePanelDeck"), true);
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
@@ -2297,7 +2298,7 @@ Firebug.CommandLine.CommandHistory = function()
         if (this.isShown())
             return this.hide;
 
-        FBL.eraseNode(commandsPopup);
+        DOM.eraseNode(commandsPopup);
 
         if(commands.length == 0)
             return;

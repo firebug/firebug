@@ -116,7 +116,7 @@ Firebug.SourceCache.prototype = FBL.extend(new Firebug.Listener(),
                     FBTrace.sysout("sourceCache found munged xpcnativewrapper url and set it to "+url+" m "+m+" m[0]:"+m[0]+" [1]"+m[1], m);
             }
 
-            var chromeURI = FBL.makeURI(url);
+            var chromeURI = URL.makeURI(url);
             if (!chromeURI)
             {
                 if (FBTrace.DBG_CACHE)
@@ -136,9 +136,9 @@ Firebug.SourceCache.prototype = FBL.extend(new Firebug.Listener(),
             return this.loadFromLocal(url);
         }
 
-        if ( url.indexOf('resource://') === 0)
+        if (url.indexOf('resource://') === 0)
         {
-            var fileURL = FBL.resourceToFile(url);
+            var fileURL = URL.resourceToFile(url);
             return this.loadFromLocal(url);
         }
 
@@ -172,7 +172,7 @@ Firebug.SourceCache.prototype = FBL.extend(new Firebug.Listener(),
     loadFromLocal: function(url)
     {
         // if we get this far then we have either a file: or chrome: url converted to file:
-        var src = FBL.getResource(url);
+        var src = HTTP.getResource(url);
         if (src)
         {
             var lines = STR.splitLines(src);

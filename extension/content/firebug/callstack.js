@@ -10,8 +10,9 @@ define([
     "firebug/lib/stackFrame",
     "firebug/lib/css",
     "firebug/lib/array",
+    "firebug/lib/dom",
 ],
-function(FBL, Firebug, FirebugReps, ToolsInterface, Events, Wrapper, StackFrame, CSS, ARR) {
+function(FBL, Firebug, FirebugReps, ToolsInterface, Events, Wrapper, StackFrame, CSS, ARR, DOM) {
 
 // ************************************************************************************************
 // Constants
@@ -186,7 +187,7 @@ Firebug.CallstackPanel.prototype = FBL.extend(Firebug.Panel,
 
     showStackTrace: function(trace)
     {
-        FBL.clearNode(this.panelNode);
+        DOM.clearNode(this.panelNode);
 
         CSS.setClass(this.panelNode, "objectBox-stackTrace");
 

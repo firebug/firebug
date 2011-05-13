@@ -6,8 +6,9 @@ define([
     "firebug/lib/options",
     "firebug/firefox/window",
     "firebug/lib/xml",
+    "firebug/http/httpLib",
 ],
-function(FBTrace, URL, Options, WIN, XML) {
+function(FBTrace, URL, Options, WIN, XML, HTTP) {
 
 // ********************************************************************************************* //
 // Module Implementation
@@ -298,6 +299,14 @@ CSS.toggleClass = function(elt, name)
         CSS.setClass(elt, name);
 };
 
+CSS.obscure = function(elt, obscured)
+{
+    if (obscured)
+        CSS.setClass(elt, "obscured");
+    else
+        CSS.removeClass(elt, "obscured");
+};
+
 CSS.setClassTimed = function(elt, name, context, timeout)
 {
     if (FBTrace.DBG_HTML || FBTrace.DBG_SOURCEFILES)
@@ -373,7 +382,7 @@ CSS.createStyleSheet = function(doc, url)
     style.setAttribute("charset","utf-8");
     style.setAttribute("type", "text/css");
 
-    var cssText = url ? FBL.getResource(url) : null;
+    var cssText = url ? HTTP.getResource(url) : null;
     if (cssText)
     {
         var index = url.lastIndexOf("/");

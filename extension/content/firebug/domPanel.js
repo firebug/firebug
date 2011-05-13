@@ -1611,7 +1611,7 @@ DOMMainPanel.prototype = FBL.extend(Firebug.DOMBasePanel.prototype,
             sel.removeAllRanges();
             sel.addRange(this.currentSearch.range);
 
-            FBL.scrollIntoCenterView(row, this.panelNode);
+            DOM.scrollIntoCenterView(row, this.panelNode);
 
             this.highlightRow(row);
             Events.dispatch(this.fbListeners, 'onDomSearchMatchFound', [this, text, row]);
@@ -1720,7 +1720,7 @@ Firebug.WatchPanel.prototype = FBL.extend(Firebug.DOMBasePanel.prototype,
 
             toolbox.watchRow = row;
 
-            var offset = FBL.getClientOffset(row);
+            var offset = DOM.getClientOffset(row);
             toolbox.style.top = offset.y + "px";
             this.panelNode.appendChild(toolbox);
         }

@@ -876,7 +876,7 @@ var TabWatcherHttpObserver = FBL.extend(Object,
                     {
                         try
                         {
-                            var srcURI = FBL.makeURI(referer);
+                            var srcURI = URL.makeURI(referer);
                             browser.FirebugLink = {src: srcURI, dst: request.URI};
                         }
                         catch(e)

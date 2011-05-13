@@ -376,7 +376,7 @@ Firebug.SourceBoxPanel = FBL.extend(SourceBoxPanelBase,
     showSourceBox: function(sourceBox, lineNo)
     {
         if (this.selectedSourceBox)
-            FBL.collapse(this.selectedSourceBox, true);
+            DOM.collapse(this.selectedSourceBox, true);
 
         if (this.selectedSourceBox !== sourceBox)
             delete this.currentSearch;
@@ -386,7 +386,7 @@ Firebug.SourceBoxPanel = FBL.extend(SourceBoxPanelBase,
         if (sourceBox)
         {
             sourceBox.targetedLineNumber = lineNo; // signal reView to put this line in the center
-            FBL.collapse(sourceBox, false);
+            DOM.collapse(sourceBox, false);
             this.reView(sourceBox);
             this.updateSourceBox(sourceBox);
         }
@@ -425,7 +425,7 @@ Firebug.SourceBoxPanel = FBL.extend(SourceBoxPanelBase,
     {
         var sourceBox = this.document.createElement("div");
         CSS.setClass(sourceBox, "sourceBox");
-        FBL.collapse(sourceBox, true);
+        DOM.collapse(sourceBox, true);
         sourceBox.repObject = compilationUnit;
         compilationUnit.sourceBox = sourceBox;
 
@@ -722,7 +722,7 @@ Firebug.SourceBoxPanel = FBL.extend(SourceBoxPanelBase,
                 FBTrace.sysout("buildViewAround updateViewportCache FAILS "+exc, exc);
         }
 
-        FBL.collapse(sourceBox, false); // the elements must be visible for the offset values
+        DOM.collapse(sourceBox, false); // the elements must be visible for the offset values
         this.setViewportPadding(sourceBox, viewRange);
 
         sourceBox.centralLine = Math.floor( (viewRange.lastLine + viewRange.firstLine)/2 );

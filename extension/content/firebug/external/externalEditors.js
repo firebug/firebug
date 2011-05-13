@@ -10,8 +10,9 @@ define([
     "firebug/lib/css",
     "firebug/firefox/system",
     "firebug/lib/array",
+    "firebug/lib/dom",
 ],
-function(FBL, Firebug, Locale, XPCOM, URL, SourceLink, CSS, System, ARR) {
+function(FBL, Firebug, Locale, XPCOM, URL, SourceLink, CSS, System, ARR, DOM) {
 
 // ********************************************************************************************* //
 // Constants
@@ -135,7 +136,7 @@ Firebug.ExternalEditors = FBL.extend(Firebug.Module,
     {
         var editors = this.getRegisteredEditors();
 
-        FBL.eraseNode(popup);
+        DOM.eraseNode(popup);
         for( var i = 0; i < editors.length; ++i )
         {
             if (editors[i] == "-")

@@ -698,7 +698,7 @@ Firebug.CSSStyleSheetPanel.prototype = FBL.extend(Firebug.Panel,
         var ruleElement = Firebug.getElementByRepObject(this.panelNode.firstChild, rule);
         if (ruleElement)
         {
-            FBL.scrollIntoCenterView(ruleElement, this.panelNode);
+            DOM.scrollIntoCenterView(ruleElement, this.panelNode);
             CSS.setClassTimed(ruleElement, "jumpHighlight", this.context);
         }
     },
@@ -1202,7 +1202,7 @@ Firebug.CSSStyleSheetPanel.prototype = FBL.extend(Firebug.Panel,
                 var sourceFile = FBL.getSourceFileByHref(sourceLink.href, this.context);
                 if (sourceFile)
                 {
-                    FBL.clearNode(this.panelNode);  // replace rendered stylesheets
+                    DOM.clearNode(this.panelNode);  // replace rendered stylesheets
                     this.showSourceFile(sourceFile);
 
                     var lineNo = object.line;
@@ -1561,7 +1561,7 @@ Firebug.CSSStyleSheetPanel.prototype = FBL.extend(Firebug.Panel,
             // Should be replaced by scrollToLine() of sourceBox,
             // though first jumpHighlightFactory() has to be adjusted to
             // remove the current highlighting when called again
-            FBL.scrollIntoCenterView(row, this.panelNode);
+            DOM.scrollIntoCenterView(row, this.panelNode);
             this.highlightRow(row.parentNode);
 
             Events.dispatch(this.fbListeners, 'onCSSSearchMatchFound', [this, text, row]);

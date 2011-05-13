@@ -197,7 +197,7 @@ Firebug.Activation = FBL.extend(Firebug.Module,
         // Remove fragment, it shouldn't have any impact on the activation.
         url = url.replace(/#.*/, "");
 
-        var uri = FBL.makeURI(URL.normalizeURL(url));
+        var uri = URL.makeURI(URL.normalizeURL(url));
 
         if (Firebug.filterSystemURLs && URL.isSystemURL(url))
             return uri;
@@ -210,7 +210,7 @@ Firebug.Activation = FBL.extend(Firebug.Module,
             try
             {
                 var prePath = uri.prePath; // returns the string before the path (such as "scheme://user:password@host:port").
-                var shortURI = FBL.makeURI(prePath);
+                var shortURI = URL.makeURI(prePath);
                 if (!shortURI)
                     return uri;
 

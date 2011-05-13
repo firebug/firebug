@@ -136,8 +136,34 @@ DOM.getBody = function(doc)
     return doc.documentElement;  // For non-HTML docs
 };
 
-// ************************************************************************************************
+// ********************************************************************************************* //
 // DOM Modification
+
+DOM.addScript = function(doc, id, src)
+{
+    var element = doc.createElementNS("http://www.w3.org/1999/xhtml", "html:script");
+    element.setAttribute("type", "text/javascript");
+    element.setAttribute("id", id);
+
+    if (!FBTrace.DBG_CONSOLE)
+        Firebug.setIgnored(element);
+
+    element.innerHTML = src;
+
+    if (doc.documentElement)
+    {
+        doc.documentElement.appendChild(element);
+    }
+    else
+    {
+        // See issue 1079, the svg test case gives this error
+        if (FBTrace.DBG_ERRORS)
+            FBTrace.sysout("lib.addScript doc has no documentElement (" +
+                doc.readyState + ") " + doc.location, doc);
+        return;
+    }
+    return element;
+}
 
 DOM.setOuterHTML = function(element, html)
 {
@@ -185,6 +211,34 @@ DOM.insertTextIntoElement = function(element, text)
 
     if (controller instanceof Ci.nsICommandController)
         controller.doCommandWithParams(command, params);
+};
+
+// ********************************************************************************************* //
+
+DOM.collapse = function(elt, collapsed)
+{
+    elt.setAttribute("collapsed", collapsed ? "true" : "false");
+};
+
+DOM.isCollapsed = function(elt)
+{
+    return (elt.getAttribute("collapsed") == "true") ? true : false;
+};
+
+DOM.hide = function(elt, hidden)
+{
+    elt.style.visibility = hidden ? "hidden" : "visible";
+};
+
+DOM.clearNode = function(node)
+{
+    node.innerHTML = "";
+};
+
+DOM.eraseNode = function(node)
+{
+    while (node.lastChild)
+        node.removeChild(node.lastChild);
 };
 
 // ********************************************************************************************* //
@@ -324,6 +378,191 @@ DOM.findPrevious = function(node, criteria, downOnly, maxRoot)
 
         return DOM.findPrevious(node.parentNode, criteria, true);
     }
+};
+
+// ************************************************************************************************
+// Graphics
+
+DOM.getClientOffset = function(elt)
+{
+    function addOffset(elt, coords, view)
+    {
+        var p = elt.offsetParent;
+
+        var style = view.getComputedStyle(elt, "");
+
+        if (elt.offsetLeft)
+            coords.x += elt.offsetLeft + parseInt(style.borderLeftWidth);
+        if (elt.offsetTop)
+            coords.y += elt.offsetTop + parseInt(style.borderTopWidth);
+
+        if (p)
+        {
+            if (p.nodeType == 1)
+                addOffset(p, coords, view);
+        }
+        else if (elt.ownerDocument.defaultView.frameElement)
+            addOffset(elt.ownerDocument.defaultView.frameElement, coords, elt.ownerDocument.defaultView);
+    }
+
+    var coords = {x: 0, y: 0};
+    if (elt)
+    {
+        var view = elt.ownerDocument.defaultView;
+        addOffset(elt, coords, view);
+    }
+
+    return coords;
+};
+
+DOM.getLTRBWH = function(elt)
+{
+    var bcrect,
+        dims = {"left": 0, "top": 0, "right": 0, "bottom": 0, "width": 0, "height": 0};
+
+    if (elt)
+    {
+        bcrect = elt.getBoundingClientRect();
+        dims.left = bcrect.left;
+        dims.top = bcrect.top;
+        dims.right = bcrect.right;
+        dims.bottom = bcrect.bottom;
+
+        if (bcrect.width)
+        {
+            dims.width = bcrect.width;
+            dims.height = bcrect.height;
+        }
+        else
+        {
+            dims.width = dims.right - dims.left;
+            dims.height = dims.bottom - dims.top;
+        }
+    }
+    return dims;
+};
+
+DOM.getOffsetSize = function(elt)
+{
+    return {width: elt.offsetWidth, height: elt.offsetHeight};
+};
+
+DOM.getOverflowParent = function(element)
+{
+    for (var scrollParent = element.parentNode; scrollParent; scrollParent = scrollParent.offsetParent)
+    {
+        if (scrollParent.scrollHeight > scrollParent.offsetHeight)
+            return scrollParent;
+    }
+};
+
+DOM.isScrolledToBottom = function(element)
+{
+    var onBottom = (element.scrollTop + element.offsetHeight) == element.scrollHeight;
+
+    if (FBTrace.DBG_CONSOLE)
+        FBTrace.sysout("DOM.isScrolledToBottom offsetHeight: " + element.offsetHeight +
+            ", scrollTop: " + element.scrollTop + ", scrollHeight: " + element.scrollHeight +
+            ", onBottom: " + onBottom);
+
+    return onBottom;
+};
+
+DOM.scrollToBottom = function(element)
+{
+    element.scrollTop = element.scrollHeight;
+
+    if (FBTrace.DBG_CONSOLE)
+    {
+        FBTrace.sysout("scrollToBottom reset scrollTop "+element.scrollTop+" = "+element.scrollHeight);
+        if (element.scrollHeight == element.offsetHeight)
+            FBTrace.sysout("scrollToBottom attempt to scroll non-scrollable element "+element, element);
+    }
+
+    return (element.scrollTop == element.scrollHeight);
+};
+
+DOM.move = function(element, x, y)
+{
+    element.style.left = x + "px";
+    element.style.top = y + "px";
+};
+
+DOM.resize = function(element, w, h)
+{
+    element.style.width = w + "px";
+    element.style.height = h + "px";
+};
+
+DOM.linesIntoCenterView = function(element, scrollBox)  // {before: int, after: int}
+{
+    if (!scrollBox)
+        scrollBox = DOM.getOverflowParent(element);
+
+    if (!scrollBox)
+        return;
+
+    var offset = DOM.getClientOffset(element);
+
+    var topSpace = offset.y - scrollBox.scrollTop;
+    var bottomSpace = (scrollBox.scrollTop + scrollBox.clientHeight)
+        - (offset.y + element.offsetHeight);
+
+    if (topSpace < 0 || bottomSpace < 0)
+    {
+        var split = (scrollBox.clientHeight/2);
+        var centerY = offset.y - split;
+        scrollBox.scrollTop = centerY;
+        topSpace = split;
+        bottomSpace = split -  element.offsetHeight;
+    }
+
+    return {
+        before: Math.round((topSpace/element.offsetHeight) + 0.5),
+        after: Math.round((bottomSpace/element.offsetHeight) + 0.5)
+    }
+};
+
+DOM.scrollIntoCenterView = function(element, scrollBox, notX, notY)
+{
+    if (!element)
+        return;
+
+    if (!scrollBox)
+        scrollBox = DOM.getOverflowParent(element);
+
+    if (!scrollBox)
+        return;
+
+    var offset = DOM.getClientOffset(element);
+
+    if (!notY)
+    {
+        var topSpace = offset.y - scrollBox.scrollTop;
+        var bottomSpace = (scrollBox.scrollTop + scrollBox.clientHeight)
+            - (offset.y + element.offsetHeight);
+
+        if (topSpace < 0 || bottomSpace < 0)
+        {
+            var centerY = offset.y - (scrollBox.clientHeight/2);
+            scrollBox.scrollTop = centerY;
+        }
+    }
+
+    if (!notX)
+    {
+        var leftSpace = offset.x - scrollBox.scrollLeft;
+        var rightSpace = (scrollBox.scrollLeft + scrollBox.clientWidth)
+            - (offset.x + element.clientWidth);
+
+        if (leftSpace < 0 || rightSpace < 0)
+        {
+            var centerX = offset.x - (scrollBox.clientWidth/2);
+            scrollBox.scrollLeft = centerX;
+        }
+    }
+    if (FBTrace.DBG_SOURCEFILES)
+        FBTrace.sysout("lib.scrollIntoCenterView ","Element:"+element.innerHTML);
 };
 
 // ********************************************************************************************* //

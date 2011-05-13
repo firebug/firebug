@@ -307,7 +307,7 @@ Firebug.HTMLPanel.prototype = FBL.extend(WalkingPanel,
             lines = STR.splitLines(text);
         }
 
-        var sourceElt = new FBL.SourceText(lines, node);
+        var sourceElt = new Firebug.HTMLModule.SourceText(lines, node);
 
         if (!this.sourceElements)
         {
@@ -596,7 +596,7 @@ Firebug.HTMLPanel.prototype = FBL.extend(WalkingPanel,
                 ioBox.openObjectBox(objectBox);
 
                 if (Firebug.scrollToMutations)
-                    FBL.scrollIntoCenterView(objectBox, panelNode);
+                    DOM.scrollIntoCenterView(objectBox, panelNode);
             }, 200);
         }
 
@@ -618,7 +618,7 @@ Firebug.HTMLPanel.prototype = FBL.extend(WalkingPanel,
 
     getParentObject: function(node)
     {
-        if (node instanceof FBL.SourceText)
+        if (node instanceof Firebug.HTMLModule.SourceText)
             return node.owner;
 
         var parentNode = this.getParentNode(node);
@@ -1126,7 +1126,7 @@ Firebug.HTMLPanel.prototype = FBL.extend(WalkingPanel,
         if (name in viewOptionNames)
         {
             this.resetSearch();
-            FBL.clearNode(this.panelNode);
+            DOM.clearNode(this.panelNode);
             if (this.ioBox)
                 this.ioBox.destroy();
 
@@ -1171,7 +1171,7 @@ Firebug.HTMLPanel.prototype = FBL.extend(WalkingPanel,
                     {
                         this.ioBox.sourceRow = sourceRow;
                         this.ioBox.sourceRow.setAttribute("exe_line", "true");
-                        FBL.scrollIntoCenterView(sourceRow);
+                        DOM.scrollIntoCenterView(sourceRow);
                         this.ioBox.selectObjectBox(sourceRow, false);  // sourceRow isn't an objectBox, but the function should work anyway...
                     }
                 }
@@ -1997,7 +1997,7 @@ function getNodeTag(node, expandAll)
         return Firebug.HTMLPanel.CDATANode.tag;
     else if (node instanceof window.Comment && (Firebug.showCommentNodes || expandAll))
         return Firebug.HTMLPanel.CommentNode.tag;
-    else if (node instanceof FBL.SourceText)
+    else if (node instanceof Firebug.HTMLModule.SourceText)
         return FirebugReps.SourceText.tag;
     else if (node instanceof window.Document)
         return Firebug.HTMLPanel.HTMLDocument.tag;
@@ -2023,7 +2023,20 @@ function getNodeBoxTag(nodeBox)
         return Firebug.HTMLPanel.EmptyElement.tag;
 }
 
-// ************************************************************************************************
+// ********************************************************************************************* //
+
+Firebug.HTMLModule.SourceText = function(lines, owner)
+{
+    this.lines = lines;
+    this.owner = owner;
+};
+
+Firebug.HTMLModule.SourceText.getLineAsHTML = function(lineNo)
+{
+    return STR.escapeForSourceLine(this.lines[lineNo-1]);
+};
+
+// ********************************************************************************************* //
 // Mutation Breakpoints
 
 /**

@@ -8,8 +8,9 @@ define([
     "firebug/lib/locale",
     "firebug/domplate",
     "firebug/lib/url",
+    "firebug/lib/dom",
 ],
-function(FBL, Firebug, Firefox, ToolsInterface, Locale, Domplate, URL) {
+function(FBL, Firebug, Firefox, ToolsInterface, Locale, Domplate, URL, DOM) {
 
 // ************************************************************************************************
 // Constants
@@ -68,7 +69,7 @@ Firebug.PanelActivation = FBL.extend(Firebug.Module,
 
         // Panel toolbar is not displayed for disabled panels.
         var chrome = Firebug.chrome;
-        FBL.collapse(chrome.$("fbToolbar"), !panel);
+        DOM.collapse(chrome.$("fbToolbar"), !panel);
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
@@ -319,7 +320,7 @@ Firebug.DisabledPanelBox = domplate(Firebug.Rep,
     hide: function(browser)
     {
         var parentNode = this.getParentNode(browser);
-        FBL.clearNode(parentNode);
+        DOM.clearNode(parentNode);
         parentNode.setAttribute("collapsed", true);
     },
 

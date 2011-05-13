@@ -276,7 +276,7 @@ var HTMLLib =
                 var trueNodeBox = DOM.getAncestorByClass(nodeBox, "nodeBox");
                 CSS.setClass(trueNodeBox,'search-selection');
 
-                FBL.scrollIntoCenterView(row, panelNode);
+                DOM.scrollIntoCenterView(row, panelNode);
                 var sel = panelNode.ownerDocument.defaultView.getSelection();
                 sel.removeAllRanges();
                 sel.addRange(this.textSearch.range);

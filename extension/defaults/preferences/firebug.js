@@ -148,6 +148,3 @@ pref("extensions.firebug.key.shortcut.normalTextSize", "alt accel 0");
 
 // Accessibility
 pref("extensions.firebug.a11y.enable", false);
-
-// Debugging
-pref("extensions.firebug.clearDomplate", false);

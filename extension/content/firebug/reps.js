@@ -526,7 +526,7 @@ FirebugReps.Arr = domplate(Firebug.Rep,
                 Firebug.DOMPanel.DirTable.tag.replace(
                     {object: target.repObject, toggles: this.toggles}, propBox);
             else
-                FBL.clearNode(propBox);
+                DOM.clearNode(propBox);
         }
     },
 
@@ -1573,7 +1573,7 @@ FirebugReps.StackFrame = domplate(Firebug.Rep,  // XXXjjb Since the repObject is
         CSS.toggleClass(target, "opened");
 
         var argList = target.getElementsByClassName("argList").item(0);
-        FBL.clearNode(argList);
+        DOM.clearNode(argList);
     },
 
     expandArguments: function(target)
@@ -1817,7 +1817,7 @@ FirebugReps.ErrorMessage = domplate(Firebug.Rep,
             }
             else
             {
-                FBL.clearNode(traceBox);
+                DOM.clearNode(traceBox);
             }
         }
     },

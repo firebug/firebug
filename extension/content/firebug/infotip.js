@@ -56,8 +56,8 @@ Firebug.InfoTip = FBL.extend(Firebug.Module,
 
             if (repeat == "repeat-x" || (w == 1 && h > 1))
             {
-                FBL.collapse(img, true);
-                FBL.collapse(bgImg, false);
+                DOM.collapse(img, true);
+                DOM.collapse(bgImg, false);
                 bgImg.style.background = "url(" + img.src + ") repeat-x";
                 bgImg.style.width = maxWidth + "px";
                 if (h > maxHeight)
@@ -67,8 +67,8 @@ Firebug.InfoTip = FBL.extend(Firebug.Module,
             }
             else if (repeat == "repeat-y" || (h == 1 && w > 1))
             {
-                FBL.collapse(img, true);
-                FBL.collapse(bgImg, false);
+                DOM.collapse(img, true);
+                DOM.collapse(bgImg, false);
                 bgImg.style.background = "url(" + img.src + ") repeat-y";
                 bgImg.style.height = maxHeight + "px";
                 if (w > maxWidth)
@@ -78,8 +78,8 @@ Firebug.InfoTip = FBL.extend(Firebug.Module,
             }
             else if (repeat == "repeat" || (w == 1 && h == 1))
             {
-                FBL.collapse(img, true);
-                FBL.collapse(bgImg, false);
+                DOM.collapse(img, true);
+                DOM.collapse(bgImg, false);
                 bgImg.style.background = "url(" + img.src + ") repeat";
                 bgImg.style.width = maxWidth + "px";
                 bgImg.style.height = maxHeight + "px";
@@ -162,7 +162,7 @@ Firebug.InfoTip = FBL.extend(Firebug.Module,
         if (!Firebug.showInfoTips)
             return;
 
-        var scrollParent = FBL.getOverflowParent(target);
+        var scrollParent = DOM.getOverflowParent(target);
         var scrollX = x + (scrollParent ? scrollParent.scrollLeft : 0);
 
         var show = panel.showInfoTip(infoTip, target, scrollX, y, rangeParent, rangeOffset);

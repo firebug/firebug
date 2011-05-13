@@ -483,6 +483,41 @@ URL.reEncodeURL = function(file, text, noLimit)
     return url;
 };
 
+URL.makeURI = function(urlString)
+{
+    try
+    {
+        if (urlString)
+            return ioService.newURI(urlString, null, null);
+    }
+    catch (exc)
+    {
+        //var explain = {message: "Firebug.lib.makeURI FAILS", url: urlString, exception: exc};
+        // todo convert explain to json and then to data url
+        if (FBTrace.DBG_ERRORS)
+            FBTrace.sysout("makeURI FAILS for \""+urlString+"\" ", exc);
+
+        return false;
+    }
+}
+
+/**
+ * Converts resource: to file: URL.
+ * @param {String} resourceURL
+ */
+URL.resourceToFile = function(resourceURL)
+{
+    var resHandler = ioService.getProtocolHandler("resource")
+        .QueryInterface(Ci.nsIResProtocolHandler);
+
+    var justURL = resourceURL.split("resource://")[1];
+    var splitted = justURL.split("/");
+    var sub = splitted.shift();
+
+    var path = resHandler.getSubstitution(sub).spec;
+    return path + splitted.join("/");
+}
+
 // ********************************************************************************************* //
 // Registration
 

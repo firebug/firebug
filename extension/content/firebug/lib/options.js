@@ -76,9 +76,6 @@ const prefNames =  // XXXjjb TODO distribute to modules
     // Stack
     "omitObjectPathStack",
 
-    // Debugging
-    "clearDomplate",
-
     "showStackTrace", // Console
     "filterSystemURLs", // Stack
     "showAllSourceFiles", "breakOnErrors",  "trackThrowCatch" // Script
