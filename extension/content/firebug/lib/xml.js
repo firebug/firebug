@@ -164,7 +164,7 @@ XML.getElementHTML = function(element)
             }
         }
         else if (elt.nodeType == Node.TEXT_NODE)
-            html.push(escapeForTextNode(elt.textContent));
+            html.push(STR.escapeForTextNode(elt.textContent));
         else if (elt.nodeType == Node.CDATA_SECTION_NODE)
             html.push('<![CDATA[', elt.nodeValue, ']]>');
         else if (elt.nodeType == Node.COMMENT_NODE)
