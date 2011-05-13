@@ -1,15 +1,12 @@
 /* See license.txt for terms of usage */
 
-
-
 /**
  * The 'context' in this file is always 'Firebug.currentContext'
  */
-
-
 define([
-        "firebug/firefox/firefox"
-], function chromeFactory(Firefox) {
+    "firebug/firefox/firefox"
+],
+function chromeFactory(Firefox) {
 
 // ************************************************************************************************
 // Constants
@@ -33,15 +30,16 @@ const statusCropSize = 20;
 
 
 // ************************************************************************************************
+
 var ChromeFactory =  // factory is global in module loading window
 {
 
 createFirebugChrome: function(win)  // chrome is created in caller window.
 {
-     // ************************************************************************************************
-     // Private
-    var inDetachedScope = (win.location == "chrome://firebug/content/firebug.xul");
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+    // Private
 
+    var inDetachedScope = (win.location == "chrome://firebug/content/firebug.xul");
 
     var panelBox, panelSplitter, sidePanelDeck, panelBar1, panelBar2, locationList, locationButtons,
         panelStatus, panelStatusSeparator, cmdPopup, cmdPopupBrowser;
@@ -56,8 +54,7 @@ var FirebugChrome =
 {
     // TODO: remove this property, add getters for location, title , focusedElement, setter popup
 
-
-    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
     // Initialization
 
     initialize: function()
@@ -102,19 +99,25 @@ var FirebugChrome =
 
         Firebug.internationalizeUI(win.document);
 
-        var browser1 = panelBar1.browser;
-        browser1.addEventListener("load", browser1Loaded, true);
-        browser1.droppedLinkHandler = function()
+        if (panelBar1)
         {
-            return false;
-        };
+            var browser1 = panelBar1.browser;
+            browser1.addEventListener("load", browser1Loaded, true);
+            browser1.droppedLinkHandler = function()
+            {
+                return false;
+            };
+        }
 
-        var browser2 = panelBar2.browser;
-        browser2.addEventListener("load", browser2Loaded, true);
-        browser2.droppedLinkHandler = function()
+        if (panelBar2)
         {
-            return false;
-        };
+            var browser2 = panelBar2.browser;
+            browser2.addEventListener("load", browser2Loaded, true);
+            browser2.droppedLinkHandler = function()
+            {
+                return false;
+            };
+        }
 
         win.addEventListener("blur", onBlur, true);
 
@@ -128,10 +131,15 @@ var FirebugChrome =
         KeyBindingsManager.initialize();
 
         // Now fire the load events
-        panelBar1.browser.setAttribute("src", "chrome://firebug/content/panel.html");
-        panelBar2.browser.setAttribute("src", "chrome://firebug/content/panel.html");
+        if (panelBar1)
+        {
+            panelBar1.browser.setAttribute("src", "chrome://firebug/content/panel.html");
+            panelBar2.browser.setAttribute("src", "chrome://firebug/content/panel.html");
+        }
+
         if (FBTrace.DBG_INITIALIZE)
-            FBTrace.sysout("chrome.initialized in "+win.location+" with "+panelBar1.browser.ownerDocument.documentURI, win);
+            FBTrace.sysout("chrome.initialized in "+win.location+" with "+
+                (panelBar1 ? panelBar1.browser.ownerDocument.documentURI : "no panel bar"), win);
     },
 
     initializeMenu: function(parentMenu, popupMenu)
@@ -1195,7 +1203,7 @@ var FirebugChrome =
         //    return false;
 
         var popup = event.target;
-        if (popup.id !="fbContextMenu")
+        if (popup.id != "fbContextMenu")
             return;
 
         var target = win.document.popupNode;
@@ -1505,8 +1513,11 @@ var KeyBindingsManager =
         this.onBlur = FBL.bind(this.onBlur, this);
 
         var contentBox = FirebugChrome.$("fbContentBox");
-        contentBox.addEventListener("focus", this.onFocus, true);
-        contentBox.addEventListener("blur", this.onBlur, true);
+        if (contentBox)
+        {
+            contentBox.addEventListener("focus", this.onFocus, true);
+            contentBox.addEventListener("blur", this.onBlur, true);
+        }
 
         // Shortcuts are disabled by default.
         this.enableKeys(false);
@@ -1515,8 +1526,11 @@ var KeyBindingsManager =
     shutdown: function()
     {
         var contentBox = FirebugChrome.$("fbContentBox");
-        contentBox.removeEventListener("focus", this.onFocus, true);
-        contentBox.removeEventListener("blur", this.onBlur, true);
+        if (contentBox)
+        {
+            contentBox.removeEventListener("focus", this.onFocus, true);
+            contentBox.removeEventListener("blur", this.onBlur, true);
+        }
     },
 
     onFocus: function()
@@ -1546,12 +1560,13 @@ var KeyBindingsManager =
         if (!this.fbOnlyKeys)
         {
             var keyset = document.getElementById("mainKeyset");
-            this.fbOnlyKeys = keyset.querySelectorAll(".fbOnlyKey");
+            if (keyset)
+                this.fbOnlyKeys = keyset.querySelectorAll(".fbOnlyKey");
         }
 
         // Iterate over all key bindings and disable them if Firebug UI is not opened.
         var keys = this.fbOnlyKeys;
-        for (var i = 0; i < keys.length; i++)
+        for (var i=0; keys && i<keys.length; i++)
             keys[i].setAttribute("disabled", enable ? "false" : "true");
     }
 };
@@ -1894,7 +1909,7 @@ function getRealObject(object)
     return realObject ? realObject : object;
 }
 
-// ************************************************************************************************
+// ********************************************************************************************* //
 // Utils (duplicated from lib.js)
 
 function cloneArray(array, fn)
@@ -1918,7 +1933,10 @@ return FirebugChrome; // end of createFirebugChrome(win)
 
 }; // end of var ChromeFactory object
 
-return ChromeFactory;
-});
+// ********************************************************************************************* //
 
+return ChromeFactory;
+
+// ********************************************************************************************* //
+});
 
