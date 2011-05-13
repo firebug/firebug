@@ -66,6 +66,7 @@ Wrapper.unwrapIValue = function(object, viewChrome)
         if (FBTrace.DBG_ERRORS)
             FBTrace.sysout("unwrapIValue FAILS for "+object+" cause: "+exc,
                 {exc: exc, object: object, unwrapped: unwrapped});
+        return unwrapped;
     }
 }
 
