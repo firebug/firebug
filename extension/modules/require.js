@@ -794,7 +794,7 @@ var require, define;
                         if (defined[fullName]) {
                             context.config.onDebug("require.js; traced "+fullName+" already defined");
                         } else {
-                            context.config.onError("require.js; circular dependency: "+cycle);
+                            context.config.onDebug("require.js; "+fullName+" traced but not defined, circular dependency? "+cycle);
                         }
                     }
                     return defined[fullName];
@@ -1099,7 +1099,9 @@ var require, define;
             while (defQueue.length) {
                 args = defQueue.shift();
                 if (args[0] === null) {
-                    return req.onError(new Error('Mismatched anonymous require.def modules'));
+                    var causes = 'Mismatched anonymous require.def modules';
+                    causes += " or script tag matches module";
+                    return req.onError(new Error(causes));
                 } else {
                     callDefMain(args);
                 }
