@@ -11,8 +11,9 @@ define([
     "firebug/lib/string",
     "firebug/lib/array",
     "firebug/firefox/menu",
+    "firebug/lib/debug",
 ],
-function(FBL, Firebug, Domplate, Locale, Events, CSS, DOM, STR, ARR, Menu) {
+function(FBL, Firebug, Domplate, Locale, Events, CSS, DOM, STR, ARR, Menu, Debug) {
 
 // ************************************************************************************************
 // Constants
@@ -163,7 +164,7 @@ Firebug.Editor = FBL.extend(Firebug.Module,
         }
         catch (exc)
         {
-            FBL.ERROR(exc);
+            Debug.ERROR(exc);
         }
 
         currentEditor.hide();

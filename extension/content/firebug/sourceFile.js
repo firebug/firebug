@@ -845,6 +845,110 @@ Firebug.SourceFile.guessEnclosingFunctionName = function(url, line, context)
 };
 
 // ********************************************************************************************* //
+// Functions
+
+Firebug.SourceFile.findScripts = function(context, url, line)
+{
+    var sourceFile = context.sourceFileMap[url];
+    if (sourceFile)
+        var scripts = sourceFile.scriptsIfLineCouldBeExecutable(line);
+    else
+    {
+        if (FBTrace.DBG_STACK)
+            FBTrace.sysout("lib.findScript, no sourceFile in context for url=", url);
+    }
+    return scripts;
+};
+
+Firebug.SourceFile.findScriptForFunctionInContext = function(context, fn)
+{
+    var found = null;
+
+    if (!fn || typeof(fn) !== 'function')
+        return found;
+
+    var wrapped = FBL.jsd.wrapValue(fn);
+    found = wrapped.script;
+    if (!found)
+        found = wrapped.jsParent.script;
+
+    if (!found && FBTrace.DBG_ERRORS)
+        FBTrace.sysout("findScriptForFunctionInContext ",{fn: fn, wrapValue: FBL.jsd.wrapValue(fn),
+            found: found});
+
+    if (FBTrace.DBG_FUNCTION_NAMES)
+        FBTrace.sysout("findScriptForFunctionInContext found "+(found?found.tag:"none")+"\n");
+
+    return found;
+}
+
+Firebug.SourceFile.findSourceForFunction = function(fn, context)
+{
+    var script = Firebug.SourceFile.findScriptForFunctionInContext(context, fn);
+    return script ? Firebug.SourceFile.getSourceLinkForScript(script, context) : null;
+};
+
+Firebug.SourceFile.getSourceLinkForScript = function(script, context)
+{
+    var sourceFile = Firebug.SourceFile.getSourceFileByScript(context, script);
+    if (sourceFile)
+    {
+        var scriptAnalyzer = sourceFile.getScriptAnalyzer(script);
+        if (scriptAnalyzer)
+            return scriptAnalyzer.getSourceLinkForScript(script);
+        else
+        {
+            // no-op for detrace
+            if (FBTrace.DBG_ERRORS)
+                FBTrace.sysout("getSourceLineForScript FAILS no scriptAnalyser for sourceFile "+sourceFile);
+        }
+    }
+};
+
+// ************************************************************************************************
+// Source Files
+
+Firebug.SourceFile.getSourceFileByHref = function(url, context)
+{
+    return context.sourceFileMap[url];
+};
+
+Firebug.SourceFile.sourceURLsAsArray = function(context)
+{
+    var urls = [];
+    var sourceFileMap = context.sourceFileMap;
+    for (var url in sourceFileMap)
+        urls.push(url);
+
+    if (FBTrace.DBG_SOURCEFILES)
+        FBTrace.sysout("sourceURLsAsArray urls="+urls.length+" in context "+context.getName());
+
+    return urls;
+};
+
+// deprecated, use mapAsArray
+Firebug.SourceFile.sourceFilesAsArray = function(sourceFileMap)
+{
+    var sourceFiles = [];
+    for (var url in sourceFileMap)
+        sourceFiles.push(sourceFileMap[url]);
+
+    if (FBTrace.DBG_SOURCEFILES)
+        FBTrace.sysout("sourceFilesAsArray sourcefiles="+sourceFiles.length, sourceFiles);
+
+    return sourceFiles;
+};
+
+Firebug.SourceFile.mapAsArray = function(map)
+{
+    var entries = [];
+    for (var url in map)
+        entries.push(map[url]);
+
+    return entries;
+};
+
+// ********************************************************************************************* //
 
 return Firebug.SourceFile;
 

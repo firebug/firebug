@@ -69,7 +69,7 @@ Firebug.TabContext.prototype =
 
     getAllCompilationUnits: function()
     {
-        return FBL.mapAsArray(this.compilationUnits);
+        return Firebug.SourceFile.mapAsArray(this.compilationUnits);
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

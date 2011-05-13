@@ -24,10 +24,12 @@ define([
     "firebug/lib/json",
     "firebug/firefox/menu",
     "firebug/toggleBranch",
+    "firebug/lib/debug",
+    "firebug/lib/keywords",
 ],
 function(XPCOM, Locale, Events, Options, Deprecated, Wrapper, URL, SourceLink, StackFrame,
     CSS, DOM, HTTP, WIN, Search, XPATH, STR, XML, Persist, ARR, System, JSONLib, Menu,
-    ToggleBranch) {
+    ToggleBranch, Debug, Keywords) {
 
 // ********************************************************************************************* //
 
@@ -106,12 +108,16 @@ for (var p in JSONLib)
 for (var p in Menu)
     FBL[p] = Menu[p];
 
+for (var p in Debug)
+    FBL[p] = Debug[p];
+
+for (var p in Keywords)
+    FBL[p] = Keywords[p];
+
 //xxxHonza: also iterate over all props.
 FBL.deprecated = Deprecated.deprecated;
 FBL.SourceLink = SourceLink.SourceLink;
 FBL.ToggleBranch = Menu.ToggleBranch;
-
-// ********************************************************************************************* //
 
 (function() {  // fill 'this' with functions, then apply(FBL)
 
@@ -274,172 +280,6 @@ this.XW_instanceof = function(obj, type)
     // /Determining_Instance_Relationships
 }
 
-// ************************************************************************************************
-// Event Monitoring
-
-this.toggleMonitorEvents = function(object, type, state, context)
-{
-    if (state)
-        this.unmonitorEvents(object, type, context);
-    else
-        this.monitorEvents(object, type, context);
-};
-
-this.monitorEvents = function(object, type, context)
-{
-    if (!this.areEventsMonitored(object, type, context) && object && object.addEventListener)
-    {
-        if (!context.onMonitorEvent)
-            context.onMonitorEvent = function(event) { Firebug.Console.log(event, context); };
-
-        if (!context.eventsMonitored)
-            context.eventsMonitored = [];
-
-        context.eventsMonitored.push({object: object, type: type});
-
-        if (!type)
-            Events.attachAllListeners(object, context.onMonitorEvent, context);
-        else
-            object.addEventListener(type, context.onMonitorEvent, false);
-    }
-};
-
-this.unmonitorEvents = function(object, type, context)
-{
-    var eventsMonitored = context.eventsMonitored;
-
-    for (var i = 0; i < eventsMonitored.length; ++i)
-    {
-        if (eventsMonitored[i].object == object && eventsMonitored[i].type == type)
-        {
-            eventsMonitored.splice(i, 1);
-
-            if (!type)
-                Events.detachAllListeners(object, context.onMonitorEvent, context);
-            else
-                object.removeEventListener(type, context.onMonitorEvent, false);
-            break;
-        }
-    }
-};
-
-this.areEventsMonitored = function(object, type, context)
-{
-    var eventsMonitored = context.eventsMonitored;
-    if (eventsMonitored)
-    {
-        for (var i = 0; i < eventsMonitored.length; ++i)
-        {
-            if (eventsMonitored[i].object == object && eventsMonitored[i].type == type)
-                return true;
-        }
-    }
-
-    return false;
-};
-
-// ************************************************************************************************
-// Functions
-
-this.findScripts = function(context, url, line)
-{
-    var sourceFile = context.sourceFileMap[url];
-    if (sourceFile)
-        var scripts = sourceFile.scriptsIfLineCouldBeExecutable(line);
-    else
-    {
-        if (FBTrace.DBG_STACK)
-            FBTrace.sysout("lib.findScript, no sourceFile in context for url=", url);
-    }
-    return scripts;
-};
-
-this.findScriptForFunctionInContext = function(context, fn)
-{
-    var found = null;
-
-    if (!fn || typeof(fn) !== 'function')
-        return found;
-
-    var wrapped = this.jsd.wrapValue(fn);
-    found = wrapped.script;
-    if (!found)
-        found = wrapped.jsParent.script;
-
-    if (!found && FBTrace.DBG_ERRORS)
-        FBTrace.sysout("findScriptForFunctionInContext ",{fn: fn, wrapValue: this.jsd.wrapValue(fn), found: found});
-    if (FBTrace.DBG_FUNCTION_NAMES)
-        FBTrace.sysout("findScriptForFunctionInContext found "+(found?found.tag:"none")+"\n");
-
-    return found;
-}
-
-this.findSourceForFunction = function(fn, context)
-{
-    var script = this.findScriptForFunctionInContext(context, fn);
-    return (script)? this.getSourceLinkForScript(script, context) : null;
-};
-
-this.getSourceLinkForScript = function(script, context)
-{
-    var sourceFile = Firebug.SourceFile.getSourceFileByScript(context, script);
-    if (sourceFile)
-    {
-        var scriptAnalyzer = sourceFile.getScriptAnalyzer(script);
-        if (scriptAnalyzer)
-            return scriptAnalyzer.getSourceLinkForScript(script);
-        else
-        {
-            // no-op for detrace
-            if (FBTrace.DBG_ERRORS)
-                FBTrace.sysout("getSourceLineForScript FAILS no scriptAnalyser for sourceFile "+sourceFile);
-        }
-    }
-};
-
-// ************************************************************************************************
-// Source Files
-
-this.getSourceFileByHref = function(url, context)
-{
-    return context.sourceFileMap[url];
-};
-
-this.sourceURLsAsArray = function(context)
-{
-    var urls = [];
-    var sourceFileMap = context.sourceFileMap;
-    for (var url in sourceFileMap)
-        urls.push(url);
-
-    if (FBTrace.DBG_SOURCEFILES)
-        FBTrace.sysout("sourceURLsAsArray urls="+urls.length+" in context "+context.getName()+"\n");
-
-    return urls;
-};
-
-// deprecated, use mapAsArray
-this.sourceFilesAsArray = function(sourceFileMap)
-{
-    var sourceFiles = [];
-    for (var url in sourceFileMap)
-        sourceFiles.push(sourceFileMap[url]);
-
-    if (FBTrace.DBG_SOURCEFILES)
-        FBTrace.sysout("sourceFilesAsArray sourcefiles="+sourceFiles.length, sourceFiles);
-
-    return sourceFiles;
-};
-
-this.mapAsArray = function(map)
-{
-    var entries = [];
-    for (var url in map)
-        entries.push(map[url]);
-
-    return entries;
-};
-
 this.$ = function(id, doc)
 {
     if (doc)
@@ -447,67 +287,6 @@ this.$ = function(id, doc)
     else
         return document.getElementById(id);
 };
-
-// ************************************************************************************************
-// JavaScript Parsing
-
-this.jsKeywords =
-{
-    "var": 1,
-    "const": 1,
-    "class": 1,
-    "extends": 1,
-    "import": 1,
-    "namespace": 1,
-    "function": 1,
-    "debugger": 1,
-    "new": 1,
-    "delete": 1,
-    "null": 1,
-    "undefined": 1,
-    "true": 1,
-    "false": 1,
-    "void": 1,
-    "typeof": 1,
-    "instanceof": 1,
-    "break": 1,
-    "continue": 1,
-    "return": 1,
-    "throw": 1,
-    "try": 1,
-    "catch": 1,
-    "finally": 1,
-    "if": 1,
-    "else": 1,
-    "for": 1,
-    "while": 1,
-    "do": 1,
-    "with": 1,
-    "switch": 1,
-    "case": 1,
-    "default": 1
-};
-
-this.isJavaScriptKeyword = function(name)
-{
-    return name in FBL.jsKeywords;
-};
-
-//************************************************************************************************
-// Debug Logging
-
-this.ERROR = function(exc)
-{
-    if (typeof(FBTrace) !== undefined)
-    {
-        if (exc.stack) exc.stack = exc.stack.split('\n');
-        FBTrace.sysout("lib.ERROR: "+exc, exc);
-    }
-
-    var consoleService = Cc["@mozilla.org/consoleservice;1"].getService(Ci["nsIConsoleService"]);
-    if (consoleService)
-        consoleService.logStringMessage("FIREBUG WARNING: " + exc);
-}
 
 // ************************************************************************************************
 }).apply(FBL);

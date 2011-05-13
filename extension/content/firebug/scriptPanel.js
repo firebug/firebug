@@ -18,13 +18,15 @@ define([
     "firebug/lib/search",
     "firebug/persist",
     "firebug/firefox/system",
+    "firebug/lib/debug",
+    "firebug/lib/keywords",
     "firebug/editorSelector",
     "firebug/infotip",
     "firebug/searchBox",
     "firebug/sourceBox",
 ],
 function(FBL, Firebug, Firefox, FirebugReps, Domplate, ToolsInterface, Locale, Events, URL, SourceLink,
-    StackFrame, CSS, DOM, WIN, Search, Persist, System) {
+    StackFrame, CSS, DOM, WIN, Search, Persist, System, Debug, Keywords) {
 
 // ********************************************************************************************* //
 // Constants
@@ -187,7 +189,7 @@ Firebug.ScriptPanel.prototype = FBL.extend(Firebug.SourceBoxPanel,
 
     showFunction: function(fn)
     {
-        var sourceLink = FBL.findSourceForFunction(fn, this.context);
+        var sourceLink = Firebug.SourceFile.findSourceForFunction(fn, this.context);
         if (sourceLink)
         {
             this.showSourceLink(sourceLink);
@@ -388,7 +390,7 @@ Firebug.ScriptPanel.prototype = FBL.extend(Firebug.SourceBoxPanel,
 
     populateInfoTip: function(infoTip, expr)
     {
-        if (!expr || FBL.isJavaScriptKeyword(expr))
+        if (!expr || Keywords.isJavaScriptKeyword(expr))
             return false;
 
         var self = this;
@@ -1059,7 +1061,7 @@ Firebug.ScriptPanel.prototype = FBL.extend(Firebug.SourceBoxPanel,
             return;
 
         var lineNo = parseInt(sourceRow.firstChild.textContent);
-        var scripts = FBL.findScripts(this.context, this.location.getURL(), lineNo);
+        var scripts = Firebug.SourceFile.findScripts(this.context, this.location.getURL(), lineNo);
         return scripts; // gee I wonder what will happen?
     },
 
@@ -1441,7 +1443,7 @@ Firebug.ScriptPanel.prototype = FBL.extend(Firebug.SourceBoxPanel,
 
             // If the window is closed while the debugger is stopped,
             // then all hell will break loose here
-            FBL.ERROR(exc);
+            Debug.ERROR(exc);
         }
     },
 

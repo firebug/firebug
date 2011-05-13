@@ -21,9 +21,11 @@ define([
     "firebug/lib/string",
     "firebug/lib/xml",
     "firebug/toggleBranch",
+    "firebug/eventMonitor",
 ],
 function(FBL, Firebug, Domplate, XPCOM, Locale, ToolsInterface, HTMLLib, Events, Wrapper,
-    URL, SourceLink, StackFrame, CSS, DOM, WIN, System, XPATH, STR, XML, ToggleBranch) {
+    URL, SourceLink, StackFrame, CSS, DOM, WIN, System, XPATH, STR, XML, ToggleBranch,
+    EventMonitor) {
 
 with (Domplate) {
 
@@ -228,7 +230,7 @@ FirebugReps.Func = domplate(Firebug.Rep,
 
     inspectObject: function(fn, context)
     {
-        var sourceLink = FBL.findSourceForFunction(fn, context);
+        var sourceLink = Firebug.SourceFile.findSourceForFunction(fn, context);
         if (sourceLink)
             Firebug.chrome.select(sourceLink);
         if (FBTrace.DBG_FUNCTION_NAME)
@@ -237,7 +239,7 @@ FirebugReps.Func = domplate(Firebug.Rep,
 
     getTooltip: function(fn, context)
     {
-        var script = FBL.findScriptForFunctionInContext(context, fn);
+        var script = Firebug.SourceFile.findScriptForFunctionInContext(context, fn);
         if (script)
             return Locale.$STRF("Line", [URL.normalizeURL(script.fileName), script.baseLineNumber]);
         else
@@ -254,7 +256,7 @@ FirebugReps.Func = domplate(Firebug.Rep,
     getContextMenuItems: function(fn, target, context, script)
     {
         if (!script)
-            script = FBL.findScriptForFunctionInContext(context, fn);
+            script = Firebug.SourceFile.findScriptForFunctionInContext(context, fn);
         if (!script)
             return;
 
@@ -944,7 +946,7 @@ FirebugReps.Element = domplate(Firebug.Rep,
 
     getContextMenuItems: function(elt, target, context)
     {
-        var monitored = FBL.areEventsMonitored(elt, null, context);
+        var monitored = EventMonitor.areEventsMonitored(elt, null, context);
         var CopyElement = "CopyHTML";
         if (XML.isElementSVG(elt))
             CopyElement = "CopySVG";
@@ -960,7 +962,7 @@ FirebugReps.Element = domplate(Firebug.Rep,
             {label: "Copy CSS Path", id: "fbCopyCSSPath", command: FBL.bindFixed(this.copyCSSPath, this, elt) },
             "-",
             {label: "ShowEventsInConsole", id: "fbShowEventsInConsole", type: "checkbox", checked: monitored,
-             command: FBL.bindFixed(FBL.toggleMonitorEvents, FBL, elt, null, monitored, context) },
+             command: FBL.bindFixed(EventMonitor.toggleMonitorEvents, FBL, elt, null, monitored, context) },
             "-",
             {label: "ScrollIntoView", id: "fbScrollIntoView", command: FBL.bindFixed(elt.scrollIntoView, elt) }
         ]);
@@ -1365,7 +1367,7 @@ FirebugReps.SourceLink = domplate(Firebug.Rep,
     {
         if (sourceLink.type == "js")
         {
-            var scriptFile = FBL.getSourceFileByHref(sourceLink.href, context);
+            var scriptFile = Firebug.SourceFile.getSourceFileByHref(sourceLink.href, context);
             if (scriptFile)
                 return Firebug.chrome.select(sourceLink);
         }

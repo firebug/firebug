@@ -12,8 +12,9 @@ define([
     "firebug/lib/array",
     "firebug/lib/dom",
     "firebug/firefox/menu",
+    "firebug/lib/debug",
 ],
-function(FBL, Firebug, Locale, XPCOM, URL, SourceLink, CSS, System, ARR, DOM, Menu) {
+function(FBL, Firebug, Locale, XPCOM, URL, SourceLink, CSS, System, ARR, DOM, Menu, Debug) {
 
 // ********************************************************************************************* //
 // Constants
@@ -335,7 +336,7 @@ Firebug.ExternalEditors = FBL.extend(Firebug.Module,
         }
         catch(exc)
         {
-            FBL.ERROR(exc);
+            Debug.ERROR(exc);
         }
     },
 

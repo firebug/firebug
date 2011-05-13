@@ -12,9 +12,11 @@ define([
     "firebug/firefox/window",
     "firebug/lib/string",
     "firebug/lib/array",
+    "firebug/lib/debug",
     "firebug/tabContext",
 ],
-function(FBL, Firebug, Firefox, XPCOM, HttpRequestObserver, Events, URL, HTTP, WIN, STR, ARR) {
+function(FBL, Firebug, Firefox, XPCOM, HttpRequestObserver, Events, URL, HTTP, WIN,
+    STR, ARR, Debug) {
 
 // ************************************************************************************************
 // Constants
@@ -830,7 +832,7 @@ var TabWatcherHttpObserver = FBL.extend(Object,
         }
         catch (err)
         {
-            FBL.ERROR(err);
+            Debug.ERROR(err);
         }
     },
 

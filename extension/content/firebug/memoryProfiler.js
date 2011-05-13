@@ -373,7 +373,7 @@ Firebug.MemoryProfiler = FBL.extend(Firebug.Module,
             }
 
             var script = entry.frame.script;
-            var sourceLink = FBL.getSourceLinkForScript(script, context);
+            var sourceLink = Firebug.SourceFile.getSourceLinkForScript(script, context);
 
             if (sourceLink && sourceLink.href in sourceFileMap)
             {

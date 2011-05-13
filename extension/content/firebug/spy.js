@@ -16,11 +16,12 @@ define([
     "firebug/lib/string",
     "firebug/lib/url",
     "firebug/lib/array",
+    "firebug/lib/debug",
     "firebug/netPanel",
     "firebug/errors",
 ],
 function(FBL, Firebug, Domplate, FirebugReps, Events, HttpRequestObserver, StackFrame,
-    HTTP, CSS, DOM, WIN, System, STR, URL, ARR) {
+    HTTP, CSS, DOM, WIN, System, STR, URL, ARR, Debug) {
 
 // ************************************************************************************************
 // Constants
@@ -107,7 +108,7 @@ Firebug.Spy = FBL.extend(Firebug.Module,
         {
             // Get exceptions here sometimes, so let's just ignore them
             // since the window is going away anyhow
-            FBL.ERROR(ex);
+            Debug.ERROR(ex);
         }
     },
 

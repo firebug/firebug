@@ -17,11 +17,13 @@ define([
     "firebug/lib/xml",
     "firebug/lib/array",
     "firebug/persist",
+    "firebug/eventMonitor",
+    "firebug/lib/keywords",
     "firebug/console",
     "firebug/commandLineExposed"
 ],
 function(FBL, Firebug, FirebugReps, Locale, Events, Wrapper, URL, CSS, DOM, WIN, System, XPATH,
-    STR, XML, ARR, Persist) {
+    STR, XML, ARR, Persist, EventMonitor, Keywords) {
 
 // ************************************************************************************************
 // Constants
@@ -2025,7 +2027,7 @@ function isValidProperty(value)
 
 function addMatchingKeyword(expr, completions)
 {
-    if (FBL.isJavaScriptKeyword(expr))
+    if (Keywords.isJavaScriptKeyword(expr))
         completions.push(expr);
 }
 
@@ -2189,12 +2191,12 @@ function FirebugCommandLineAPI(context)
 
     this.monitorEvents = function(object, types)
     {
-        FBL.monitorEvents(object, types, context);
+        EventMonitor.monitorEvents(object, types, context);
     };
 
     this.unmonitorEvents = function(object, types)
     {
-        FBL.unmonitorEvents(object, types, context);
+        EventMonitor.unmonitorEvents(object, types, context);
     };
 
     this.profile = function(title)

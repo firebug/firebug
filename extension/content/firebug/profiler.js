@@ -165,7 +165,7 @@ Firebug.Profiler = FBL.extend(Firebug.Module,
             {
                 if (!Firebug.filterSystemURLs || !URL.isSystemURL(script.fileName))
                 {
-                    var sourceLink = FBL.getSourceLinkForScript(script, context);
+                    var sourceLink = Firebug.SourceFile.getSourceLinkForScript(script, context);
                     if (sourceLink && sourceLink.href in sourceFileMap)
                     {
                         var call = new ProfileCall(script, context, script.callCount,

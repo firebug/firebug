@@ -17,10 +17,11 @@ define([
     "firebug/firefox/window",
     "firebug/lib/string",
     "firebug/lib/array",
+    "firebug/lib/debug",
     "firebug/errors",
 ],
 function(FBL, Firebug, Firefox, ToolsInterface, XPCOM, FirebugReps, Locale, HttpRequestObserver,
-    Wrapper, URL, SourceLink, StackFrame, CSS, WIN, STR, ARR) {
+    Wrapper, URL, SourceLink, StackFrame, CSS, WIN, STR, ARR, Debug) {
 
 // ********************************************************************************************* //
 
@@ -306,7 +307,7 @@ Firebug.Debugger = FBL.extend(Firebug.ActivableModule,
             if (FBTrace.DBG_ERRORS)
                 FBTrace.sysout("debugger exception in nested event loop: "+exc, exc);
             else
-                FBL.ERROR("debugger exception in nested event loop: "+exc+"\n");
+                Debug.ERROR("debugger exception in nested event loop: "+exc+"\n");
         }
         finally
         {
@@ -794,7 +795,7 @@ Firebug.Debugger = FBL.extend(Firebug.ActivableModule,
 
     traceAll: function(context)
     {
-        FBL.fbs.traceAll(FBL.sourceURLsAsArray(context), this);
+        FBL.fbs.traceAll(Firebug.SourceFile.sourceURLsAsArray(context), this);
     },
 
     untraceAll: function(context)
@@ -806,7 +807,7 @@ Firebug.Debugger = FBL.extend(Firebug.ActivableModule,
     {
         if (typeof(fn) == "function" || fn instanceof Function)
         {
-            var script = FBL.findScriptForFunctionInContext(Firebug.currentContext, fn);
+            var script = Firebug.SourceFile.findScriptForFunctionInContext(Firebug.currentContext, fn);
             if (script)
                 this.monitorScript(fn, script, mode);
             else
@@ -822,7 +823,7 @@ Firebug.Debugger = FBL.extend(Firebug.ActivableModule,
     {
         if (typeof(fn) == "function" || fn instanceof Function)
         {
-            var script = FBL.findScriptForFunctionInContext(Firebug.currentContext, fn);
+            var script = Firebug.SourceFile.findScriptForFunctionInContext(Firebug.currentContext, fn);
             if (script)
                 this.unmonitorScript(fn, script, mode);
         }
@@ -856,7 +857,7 @@ Firebug.Debugger = FBL.extend(Firebug.ActivableModule,
     {
         if (typeof(fn) == "function" || fn instanceof Function)
         {
-            var script = FBL.findScriptForFunctionInContext(context, fn);
+            var script = Firebug.SourceFile.findScriptForFunctionInContext(context, fn);
             if (script)
                 this.traceScriptCalls(context, script);
             else
@@ -871,7 +872,7 @@ Firebug.Debugger = FBL.extend(Firebug.ActivableModule,
     {
         if (typeof(fn) == "function" || fn instanceof Function)
         {
-            var script = FBL.findScriptForFunctionInContext(context, fn);
+            var script = Firebug.SourceFile.findScriptForFunctionInContext(context, fn);
             if (script)
                 this.untraceScriptCalls(context, script);
         }
@@ -979,7 +980,7 @@ Firebug.Debugger = FBL.extend(Firebug.ActivableModule,
 
             // If the window is closed while the debugger is stopped,
             // then all hell will break loose here
-            FBL.ERROR(exc);
+            Debug.ERROR(exc);
         }
     },
 
@@ -1796,7 +1797,7 @@ Firebug.Debugger = FBL.extend(Firebug.ActivableModule,
         }
         catch(exc)
         {
-            FBL.ERROR("debugger.onFunctionConstructor failed: "+exc);
+            Debug.ERROR("debugger.onFunctionConstructor failed: "+exc);
 
             if (FBTrace.DBG_EVAL)
                 FBTrace.sysout("debugger.onFunctionConstructor failed: ",exc);
@@ -2324,7 +2325,8 @@ Firebug.Debugger = FBL.extend(Firebug.ActivableModule,
 
         if (FBTrace.DBG_SOURCEFILES)
         {
-            FBTrace.sysout("updateScriptFiles sourcefiles:", FBL.sourceFilesAsArray(context.sourceFileMap));
+            FBTrace.sysout("updateScriptFiles sourcefiles:",
+                Firebug.SourceFile.sourceFilesAsArray(context.sourceFileMap));
         }
     },
 
@@ -2459,7 +2461,7 @@ Firebug.Debugger = FBL.extend(Firebug.ActivableModule,
 
     getObjectByURL: function(context, url)
     {
-        var sourceFile = FBL.getSourceFileByHref(url, context);
+        var sourceFile = Firebug.SourceFile.getSourceFileByHref(url, context);
         if (sourceFile)
             return new SourceLink.SourceLink(sourceFile.href, 0, "js");
     },

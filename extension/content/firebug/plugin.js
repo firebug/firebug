@@ -2,9 +2,10 @@
 
 define([
     "firebug/lib",
-    "firebug/firebug"
+    "firebug/firebug",
+    "firebug/lib/debug",
 ],
-function(FBL, Firebug) {
+function(FBL, Firebug, Debug) {
 
 // ************************************************************************************************
 // This is a panel implemented as its own browser with its own URL
@@ -130,7 +131,7 @@ function innerCall(innerPanel, name, args)
     }
     catch (exc)
     {
-        FBL.ERROR(exc);
+        Debug.ERROR(exc);
     }
 }
 
