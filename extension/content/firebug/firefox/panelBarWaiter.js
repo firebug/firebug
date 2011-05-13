@@ -12,18 +12,22 @@ window.panelBarWaiter = function()
     var waitingPanelBarCount = 2;
     var waitLimit = 200;
     var chromeFactory = false;
+    var callbackWithChrome = null;
 
     /*
      * Called by module loader to signal modules loaded
      */
-    panelBarWaiter.waitForPanelBar = function(chromeFactoryIn)
+    panelBarWaiter.waitForPanelBar = function(chromeFactoryIn, callback)
     {
         if (chromeFactoryIn)
             chromeFactory = chromeFactoryIn;
 
+        if (callback)
+            callbackWithChrome = callback;
+
         waitLimit -= 1;
 
-        if (!panelBarWaiter.initializeWhenReady() && waitLimit > 0)
+        if (!panelBarWaiter.initializeWhenReady(callbackWithChrome) && waitLimit > 0)
         {
             if (FBTrace.DBG_INITIALIZE)
             {
@@ -37,7 +41,7 @@ window.panelBarWaiter = function()
         }
     };
 
-    panelBarWaiter.initializeWhenReady = function()
+    panelBarWaiter.initializeWhenReady = function(callbackWithChrome)
     {
         try
         {
@@ -46,7 +50,15 @@ window.panelBarWaiter = function()
             {
                 if (FBTrace.DBG_INITIALIZE)
                     FBTrace.sysout("panelBarWaiter; initializing now");
+
                 var chrome = chromeFactory.createFirebugChrome(window);
+
+                if (FBTrace.DBG_INITIALIZE)
+                    FBTrace.sysout("panelBarWaiter; callback "+callbackWithChrome);
+
+                if (callbackWithChrome)
+                    callbackWithChrome(chrome);
+
                 chrome.initialize(); // This needs to be the window-specific chrome
                 delete window.panelBarWaiter;
                 return true; // the panel bar is ready
@@ -67,19 +79,22 @@ window.panelBarWaiter = function()
     /*
      * Called by binding.xml to signal ctor for a panel
      */
-    panelBarWaiter.panelBarReady = function()
+    panelBarWaiter.panelBarReady = function(callback)
     {
         // We initialize Firebug from here instead of from the onload event because
         // we need to make sure it is initialized before the browser starts loading
         // the home page
         try
         {
-           waitingPanelBarCount -= 1;
+            if(callback)
+                callbackWithChrome = callback;
+
+               waitingPanelBarCount -= 1;
 
             window.dump("chrome; panelBarReady (" + waitingPanelBarCount + ") "+
                 (chromeFactory ? "Modules loaded" : "Modules not yet loaded")+" in "+window.location+"\n");
 
-            panelBarWaiter.initializeWhenReady();
+            panelBarWaiter.initializeWhenReady(callbackWithChrome);
         }
         catch (e)
         {

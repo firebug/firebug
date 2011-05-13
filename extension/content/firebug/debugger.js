@@ -110,7 +110,7 @@ Firebug.Debugger = OBJECT.extend(Firebug.ActivableModule,
     {
         return this.halt(function evalInFrame(frame)
         {
-            window.dump("evaluateInCallingFrame "+frame.script.fileName+" stack: "+
+            FBTrace.sysout("evaluateInCallingFrame "+js+" fileName: "+frame.script.fileName+" stack: "+
                 StackFrame.getJSDStackDump(frame)+"\n");
 
             var result = {};
