@@ -11,8 +11,9 @@ define([
     "firebug/firefox/system",
     "firebug/lib/array",
     "firebug/lib/dom",
+    "firebug/firefox/menu",
 ],
-function(FBL, Firebug, Locale, XPCOM, URL, SourceLink, CSS, System, ARR, DOM) {
+function(FBL, Firebug, Locale, XPCOM, URL, SourceLink, CSS, System, ARR, DOM, Menu) {
 
 // ********************************************************************************************* //
 // Constants
@@ -141,7 +142,7 @@ Firebug.ExternalEditors = FBL.extend(Firebug.Module,
         {
             if (editors[i] == "-")
             {
-                FBL.createMenuItem(popup, "-");
+                Menu.createMenuItem(popup, "-");
                 continue;
             }
             var item = {
@@ -150,14 +151,14 @@ Firebug.ExternalEditors = FBL.extend(Firebug.Module,
                 nol10n: true
             };
 
-            var menuitem = FBL.createMenuItem(popup, item);
+            var menuitem = Menu.createMenuItem(popup, item);
             menuitem.value = editors[i].id;
         }
 
         if (editors.length > 0)
-            FBL.createMenuItem(popup, "-");
+            Menu.createMenuItem(popup, "-");
 
-        FBL.createMenuItem(popup, {
+        Menu.createMenuItem(popup, {
             label: Locale.$STR('firebug.Configure_Editors'),
             option: 'openEditorList'
         });

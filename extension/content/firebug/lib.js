@@ -22,9 +22,12 @@ define([
     "firebug/lib/array",
     "firebug/firefox/system",
     "firebug/lib/json",
+    "firebug/firefox/menu",
+    "firebug/toggleBranch",
 ],
 function(XPCOM, Locale, Events, Options, Deprecated, Wrapper, URL, SourceLink, StackFrame,
-    CSS, DOM, HTTP, WIN, Search, XPATH, STR, XML, Persist, ARR, System, JSONLib) {
+    CSS, DOM, HTTP, WIN, Search, XPATH, STR, XML, Persist, ARR, System, JSONLib, Menu,
+    ToggleBranch) {
 
 // ********************************************************************************************* //
 
@@ -100,8 +103,13 @@ for (var p in System)
 for (var p in JSONLib)
     FBL[p] = JSONLib[p];
 
+for (var p in Menu)
+    FBL[p] = Menu[p];
+
+//xxxHonza: also iterate over all props.
 FBL.deprecated = Deprecated.deprecated;
 FBL.SourceLink = SourceLink.SourceLink;
+FBL.ToggleBranch = Menu.ToggleBranch;
 
 // ********************************************************************************************* //
 
@@ -116,10 +124,9 @@ const Ci = Components.interfaces;
 // ********************************************************************************************* //
 // Modules
 
-Components.utils["import"]("resource://gre/modules/PluralForm.jsm");
-
 try
 {
+    Components.utils["import"]("resource://gre/modules/PluralForm.jsm");
     Components.utils["import"]("resource://firebug/firebug-service.js");
 
     this.fbs = fbs; // left over from component.
@@ -134,8 +141,6 @@ catch (err)
 // Shortcuts
 
 this.jsd = Cc["@mozilla.org/js/jsd/debugger-service;1"].getService(Ci.jsdIDebuggerService);
-
-const versionChecker = Cc["@mozilla.org/xpcom/version-comparator;1"].getService(Ci.nsIVersionComparator);
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 
@@ -240,138 +245,6 @@ this.getRandomInt = function(min, max)
     return Math.floor(Math.random() * (max - min + 1) + min);
 }
 
-// ************************************************************************************************
-
-this.isAncestorIgnored = function(node)
-{
-    for (var parent = node; parent; parent = parent.parentNode)
-    {
-        if (Firebug.shouldIgnore(parent))
-            return true;
-    }
-
-    return false;
-}
-
-// ************************************************************************************************
-// Visibility
-
-this.isVisible = function(elt)
-{
-    if (XML.isElementXUL(elt))
-    {
-        //FBTrace.sysout("isVisible elt.offsetWidth: "+elt.offsetWidth+" offsetHeight:"+ elt.offsetHeight+" localName:"+ elt.localName+" nameSpace:"+elt.nameSpaceURI+"\n");
-        return (!elt.hidden && !elt.collapsed);
-    }
-
-    try
-    {
-        return elt.offsetWidth > 0 ||
-            elt.offsetHeight > 0 ||
-            elt.localName in CSS.invisibleTags ||
-            XML.isElementSVG(elt) ||
-            XML.isElementMathML(elt);
-    }
-    catch (err)
-    {
-        if (FBTrace.DBG_ERRORS)
-            FBTrace.sysout("lib.isVisible; EXCEPTION " + err, err);
-    }
-
-    return false;
-};
-
-this.ToggleBranch = function()
-{
-    this.normal = {};
-    this.meta = {};
-}
-
-this.metaNames =
-[
- 'prototype',
- 'constructor',
- '__proto__',
- 'toString',
- 'toSource',
- 'hasOwnProperty',
- 'getPrototypeOf',
- '__defineGetter__',
- '__defineSetter__',
- '__lookupGetter__',
- '__lookupSetter__',
- '__noSuchMethod__',
- 'propertyIsEnumerable',
- 'isPrototypeOf',
- 'watch',
- 'unwatch',
- 'valueOf',
- 'toLocaleString'
-];
-
-this.ToggleBranch.prototype =
-{
-    // Another implementation could simply prefix all keys with "#".
-    getMeta: function(name)
-    {
-        if (FBL.metaNames.indexOf(name) !== -1)
-            return "meta_"+name;
-    },
-
-    get: function(name)  // return the toggle branch at name
-    {
-        var metaName = this.getMeta(name);
-        if (metaName)
-            var value = this.meta[metaName];
-        else if (this.normal.hasOwnProperty(name))
-            var value = this.normal[name];
-        else
-            var value = null;
-
-        if (FBTrace.DBG_DOMPLATE)
-            if (value && !(value instanceof FBL.ToggleBranch)) FBTrace.sysout("ERROR ToggleBranch.get("+name+") not set to a ToggleBranch!");
-
-        return value;
-    },
-
-    set: function(name, value)  // value will be another toggle branch
-    {
-        if (FBTrace.DBG_DOMPLATE)
-            if (value && !(value instanceof FBL.ToggleBranch)) FBTrace.sysout("ERROR ToggleBranch.set("+name+","+value+") not set to a ToggleBranch!");
-
-        var metaName = this.getMeta(name);
-        if (metaName)
-            return this.meta[metaName] = value;
-        else
-            return this.normal[name] = value;
-    },
-
-    remove: function(name)  // remove the toggle branch at name
-    {
-        var metaName = this.getMeta(name);
-        if (metaName)
-            delete this.meta[metaName];
-        else
-            delete this.normal[name];
-    },
-
-    toString: function()
-    {
-        return "[ToggleBranch]";
-    },
-};
-
-// ************************************************************************************************
-// DOM queries
-
-this.$ = function(id, doc)
-{
-    if (doc)
-        return doc.getElementById(id);
-    else
-        return document.getElementById(id);
-};
-
 // Cross Window instanceof; type is local to this window
 this.XW_instanceof = function(obj, type)
 {
@@ -400,150 +273,6 @@ this.XW_instanceof = function(obj, type)
     // https://developer.mozilla.org/en/Core_JavaScript_1.5_Guide/Property_Inheritance_Revisited
     // /Determining_Instance_Relationships
 }
-
-// ************************************************************************************************
-// Clipboard
-
-this.copyToClipboard = function(string)
-{
-    var clipboard = Cc["@mozilla.org/widget/clipboardhelper;1"].getService(Ci.nsIClipboardHelper);
-    clipboard.copyString(string);
-};
-
-// ************************************************************************************************
-// Menus
-
-this.createMenu = function(popup, label)
-{
-    var menu = popup.ownerDocument.createElement("menu");
-    menu.setAttribute("label", label);
-
-    var menuPopup = popup.ownerDocument.createElement("menupopup");
-
-    popup.appendChild(menu);
-    menu.appendChild(menuPopup);
-
-    return menuPopup;
-};
-
-this.createMenuItem = function(popup, item, before)
-{
-    if (typeof(item) == "string" && item.indexOf("-") == 0)
-        return this.createMenuSeparator(popup, before);
-
-    var menuitem = popup.ownerDocument.createElement("menuitem");
-
-    this.setItemIntoElement(menuitem, item);
-
-    if (before)
-        popup.insertBefore(menuitem, before);
-    else
-        popup.appendChild(menuitem);
-
-    return menuitem;
-};
-
-this.setItemIntoElement = function(element, item)
-{
-    var label = item.nol10n ? item.label : Locale.$STR(item.label);
-
-    element.setAttribute("label", label);
-
-    if (item.id)
-        element.setAttribute("id", item.id);
-
-    if (item.type)
-        element.setAttribute("type", item.type);
-
-    // Avoid closing the popup menu if a preference has been changed.
-    // This allows to quickly change more options.
-    if (item.type == "checkbox")
-        element.setAttribute("closemenu", "none");
-
-    if (item.checked)
-        element.setAttribute("checked", "true");
-
-    if (item.disabled)
-        element.setAttribute("disabled", "true");
-
-    if (item.image)
-    {
-        element.setAttribute("class", "menuitem-iconic");
-        element.setAttribute("image", item.image);
-    }
-
-    if (item.command)
-        element.addEventListener("command", item.command, false);
-
-    if (item.commandID)
-        element.setAttribute("command", item.commandID);
-
-    if (item.option)
-        element.setAttribute("option", item.option);
-
-    if (item.tooltiptext)
-    {
-        var tooltiptext = item.nol10n ? item.tooltiptext : Locale.$STR(item.tooltiptext);
-        element.setAttribute("tooltiptext", tooltiptext);
-    }
-
-    if (item.className)
-        CSS.setClass(element, item.className);
-
-    if (item.acceltext)
-        element.setAttribute("acceltext", item.acceltext);
-
-    return element;
-}
-
-this.createMenuHeader = function(popup, item)
-{
-    var header = popup.ownerDocument.createElement("label");
-    header.setAttribute("class", "menuHeader");
-
-    var label = item.nol10n ? item.label : Locale.$STR(item.label);
-
-    header.setAttribute("value", label);
-
-    popup.appendChild(header);
-    return header;
-};
-
-this.createMenuSeparator = function(popup, before)
-{
-    if (!popup.firstChild)
-        return;
-
-    var menuitem = popup.ownerDocument.createElement("menuseparator");
-    if (before)
-        popup.insertBefore(menuitem, before);
-    else
-        popup.appendChild(menuitem);
-    return menuitem;
-};
-
-/**
- * Create an option menu item definition. This method is usually used in methods like:
- * {@link Firebug.Panel.getOptionsMenuItems} or {@link Firebug.Panel.getContextMenuItems}.
- *
- * @param {String} label Name of the string from *.properties file.
- * @param {String} option Name of the associated option.
- * @param {String, Optional} tooltiptext Optional name of the string from *.properties file
- *      that should be used as a tooltip for the menu.
- */
-this.optionMenu = function(label, option, tooltiptext)
-{
-    return {
-        label: label,
-        type: "checkbox",
-        checked: Firebug[option],
-        option: option,
-        tooltiptext: tooltiptext,
-        command: function() {
-            return Options.set(option, !Firebug[option]);
-        }
-    };
-};
 
 // ************************************************************************************************
 // Event Monitoring
@@ -711,31 +440,16 @@ this.mapAsArray = function(map)
     return entries;
 };
 
+this.$ = function(id, doc)
+{
+    if (doc)
+        return doc.getElementById(id);
+    else
+        return document.getElementById(id);
+};
+
 // ************************************************************************************************
 // JavaScript Parsing
-
-const reWord = /([A-Za-z_$][A-Za-z_$0-9]*)(\.([A-Za-z_$][A-Za-z_$0-9]*))*/;
-
-this.getExpressionAt = function(text, charOffset)
-{
-    var offset = 0;
-    for (var m = reWord.exec(text); m; m = reWord.exec(text.substr(offset)))
-    {
-        var word = m[0];
-        var wordOffset = offset+m.index;
-        if (charOffset >= wordOffset && charOffset <= wordOffset+word.length)
-        {
-            var innerOffset = charOffset-wordOffset;
-            var dots = word.substr(0, innerOffset).split(".").length;
-            var subExpr = word.split(".").slice(0, dots).join(".");
-            return {expr: subExpr, offset: wordOffset};
-        }
-
-        offset = wordOffset+word.length;
-    }
-
-    return {expr: null, offset: -1};
-};
 
 this.jsKeywords =
 {
@@ -779,125 +493,10 @@ this.isJavaScriptKeyword = function(name)
     return name in FBL.jsKeywords;
 };
 
-// ************************************************************************************************
-// Error Message
-
-this.ErrorMessage = function(message, href, lineNo, source, category, context, trace, msgId)
-{
-    this.message = message;
-    this.href = href;
-    this.lineNo = lineNo;
-    this.source = source;
-    this.category = category;
-    this.context = context;
-    this.trace = trace;
-    this.msgId = msgId;
-};
-
-this.ErrorMessage.prototype =
-{
-    getSourceLine: function()
-    {
-        return this.context.sourceCache.getLine(this.href, this.lineNo);
-    },
-
-    resetSource: function()
-    {
-        if (this.href && this.lineNo)
-            this.source = this.getSourceLine();
-    },
-
-    correctWithStackTrace: function(trace)
-    {
-        var frame = trace.frames[0];
-        if (frame)
-        {
-            this.href = frame.href;
-            this.lineNo = frame.line;
-            this.trace = trace;
-        }
-    },
-
-    correctSourcePoint: function(sourceName, lineNumber)
-    {
-        this.href = sourceName;
-        this.lineNo = lineNumber;
-    },
-};
-
-// ************************************************************************************************
-
-this.Continued = function()
-{
-};
-
-this.Continued.prototype =
-{
-    complete: function()
-    {
-        if (this.callback)
-            this.callback.apply(top, arguments);
-        else
-            this.result = ARR.cloneArray(arguments);
-    },
-
-    wait: function(cb)
-    {
-        if ("result" in this)
-            cb.apply(top, this.result);
-        else
-            this.callback = cb;
-    }
-};
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
-
-this.Property = function(object, name)
-{
-    this.object = object;
-    this.name = name;
-
-    this.getObject = function()
-    {
-        return object[name];
-    };
-};
-
-this.ErrorCopy = function(message)
-{
-    this.message = message;
-};
-
-function EventCopy(event)
-{
-    // Because event objects are destroyed arbitrarily by Gecko, we must make a copy of them to
-    // represent them long term in the inspector.
-    for (var name in event)
-    {
-        try {
-            this[name] = event[name];
-        } catch (exc) { }
-    }
-}
-
-this.EventCopy = EventCopy;
-
-//************************************************************************************************
-
-this.fatalError = function(summary, exc)
-{
-    if (typeof(FBTrace) !== undefined)
-        FBTrace.sysout.apply(FBTrace, arguments);
-
-    Components.utils.reportError(summary);
-
-    throw exc;
-}
-
 //************************************************************************************************
 // Debug Logging
 
-function ERROR(exc)
+this.ERROR = function(exc)
 {
     if (typeof(FBTrace) !== undefined)
     {
@@ -905,51 +504,9 @@ function ERROR(exc)
         FBTrace.sysout("lib.ERROR: "+exc, exc);
     }
 
-    ddd("FIREBUG WARNING: " + exc);
-}
-
-this.ERROR = ERROR;
-
-function ddd(text)
-{
     var consoleService = Cc["@mozilla.org/consoleservice;1"].getService(Ci["nsIConsoleService"]);
     if (consoleService)
-        consoleService.logStringMessage(text + "");
-}
-
-// ************************************************************************************************
-// URLs
-
-// ************************************************************************************************
-// Firebug Version Comparator
-
-/**
- * Compare expected Firebug version with the current Firebug installed.
- * @param {Object} expectedVersion Expected version of Firebug.
- * @returns
- * -1 the current version is smaller
- *  0 the current version is the same
- *  1 the current version is bigger
- *
- * @example:
- * if (compareFirebugVersion("1.6") >= 0)
- * {
- *     // The current version is Firebug 1.6+
- * }
- */
-this.checkFirebugVersion = function(expectedVersion)
-{
-    if (!expectedVersion)
-        return 1;
-
-    var version = Firebug.getVersion();
-
-    // Adapt to Firefox version scheme.
-    expectedVersion = expectedVersion.replace('X', '', "g");
-    version = version.replace('X', '', "g");
-
-    // Use Firefox comparator service.
-    return versionChecker.compare(version, expectedVersion);
+        consoleService.logStringMessage("FIREBUG WARNING: " + exc);
 }
 
 // ************************************************************************************************

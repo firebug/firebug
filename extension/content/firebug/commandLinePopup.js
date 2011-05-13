@@ -7,8 +7,9 @@ define([
     "firebug/lib/css",
     "firebug/lib/dom",
     "firebug/lib/string",
+    "firebug/lib/xml",
 ],
-function(FBL, Firebug, CommandLine, CSS, DOM, STR) {
+function(FBL, Firebug, CommandLine, CSS, DOM, STR, XML) {
 
 // ************************************************************************************************
 // Constants
@@ -183,7 +184,7 @@ Firebug.CommandLine.Popup = FBL.extend(Firebug.Module,
             this.lastFocused = document.commandDispatcher.focusedElement;
             commandLineSmall.focus();
         }
-        else if (this.lastFocused && FBL.isVisible(this.lastFocused) &&
+        else if (this.lastFocused && XML.isVisible(this.lastFocused) &&
             typeof this.lastFocused.focus == "function")
         {
             this.lastFocused.focus();

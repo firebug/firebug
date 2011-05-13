@@ -10,8 +10,9 @@ define([
     "firebug/lib/dom",
     "firebug/lib/string",
     "firebug/lib/array",
+    "firebug/firefox/menu",
 ],
-function(FBL, Firebug, Domplate, Locale, Events, CSS, DOM, STR, ARR) {
+function(FBL, Firebug, Domplate, Locale, Events, CSS, DOM, STR, ARR, Menu) {
 
 // ************************************************************************************************
 // Constants
@@ -820,7 +821,7 @@ Firebug.InlineEditor.prototype = domplate(Firebug.BaseEditor,
         if (menu)
         {
             for (var i = 0; i < menu.length; ++i)
-                FBL.createMenuItem(popup, menu[i]);
+                Menu.createMenuItem(popup, menu[i]);
         }
 
         if (!popup.firstChild)

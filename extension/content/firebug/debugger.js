@@ -1727,14 +1727,16 @@ Firebug.Debugger = FBL.extend(Firebug.ActivableModule,
                 for (var row = panel.panelNode.firstChild; row; row = row.nextSibling)
                 {
                     var error = row.firstChild.repObject;
-                    if (error instanceof FBL.ErrorMessage && error.href == url && error.lineNo == lineNo)
+                    if (error instanceof FirebugReps.ErrorMessageObj && error.href == url &&
+                        error.lineNo == lineNo)
                     {
                         if (isSet)
                             CSS.setClass(row.firstChild, "breakForError");
                         else
                             CSS.removeClass(row.firstChild, "breakForError");
 
-                        ToolsInterface.browser.dispatch( "onToggleErrorBreakpoint", [context, url, lineNo, isSet]);
+                        ToolsInterface.browser.dispatch( "onToggleErrorBreakpoint",
+                            [context, url, lineNo, isSet]);
                     }
                 }
             }

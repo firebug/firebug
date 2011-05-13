@@ -6,8 +6,9 @@
 define([
     "firebug/firefox/firefox",
     "firebug/lib/dom",
+    "firebug/firefox/menu",
 ],
-function chromeFactory(Firefox, DOM) {
+function chromeFactory(Firefox, DOM, Menu) {
 
 // ************************************************************************************************
 // Constants
@@ -223,7 +224,7 @@ var FirebugChrome =
         }
         catch (exc)
         {
-            FBL.fatalError("chrome.initializeUI ERROR "+exc, exc);
+            fatalError("chrome.initializeUI ERROR "+exc, exc);
         }
     },
 
@@ -1220,7 +1221,7 @@ var FirebugChrome =
         var sel = target.ownerDocument.defaultView.getSelection();
         if (!this.contextMenuObject && !FirebugChrome.$("cmd_copy").getAttribute("disabled") && !sel.isCollapsed)
         {
-            var menuitem = FBL.createMenuItem(popup, {label: "Copy"});
+            var menuitem = Menu.createMenuItem(popup, {label: "Copy"});
             menuitem.setAttribute("command", "cmd_copy");
         }
 
@@ -1251,7 +1252,7 @@ var FirebugChrome =
             if (menu)
             {
                 for (var i = 0; i < menu.length; ++i)
-                    FBL.createMenuItem(popup, menu[i]);
+                    Menu.createMenuItem(popup, menu[i]);
             }
         }
 
@@ -1262,7 +1263,7 @@ var FirebugChrome =
             if (items)
             {
                 for (var i = 0; i < items.length; ++i)
-                    FBL.createMenuItem(popup, items[i]);
+                    Menu.createMenuItem(popup, items[i]);
             }
         }
 
@@ -1273,7 +1274,7 @@ var FirebugChrome =
             if (items)
             {
                 for (var i = 0; i < items.length; ++i)
-                    FBL.createMenuItem(popup, items[i]);
+                    Menu.createMenuItem(popup, items[i]);
             }
         }
 
@@ -1286,9 +1287,9 @@ var FirebugChrome =
             for (var i = 0; i < items.length; ++i)
             {
                 if (popup.firstChild && !separator)
-                    separator = FBL.createMenuSeparator(popup);
+                    separator = Menu.createMenuSeparator(popup);
 
-                FBL.createMenuItem(popup, items[i]);
+                Menu.createMenuItem(popup, items[i]);
             }
         }
 
@@ -1300,7 +1301,7 @@ var FirebugChrome =
         if (items)
         {
             for (var i = 0; i < items.length; ++i)
-                FBL.createMenuItem(popup, items[i]);
+                Menu.createMenuItem(popup, items[i]);
         }
 
         if (!popup.firstChild)
@@ -1908,6 +1909,16 @@ function getRealObject(object)
     var rep = Firebug.getRep(object, Firebug.currentContext);
     var realObject = rep ? rep.getRealObject(object, Firebug.currentContext) : null;
     return realObject ? realObject : object;
+}
+
+function fatalError(summary, exc)
+{
+    if (typeof(FBTrace) !== undefined)
+        FBTrace.sysout.apply(FBTrace, arguments);
+
+    Components.utils.reportError(summary);
+
+    throw exc;
 }
 
 // ********************************************************************************************* //

@@ -7,8 +7,9 @@ define([
     "firebug/firefox/window",
     "firebug/lib/xml",
     "firebug/http/httpLib",
+    "firebug/lib/xpath",
 ],
-function(FBTrace, URL, Options, WIN, XML, HTTP) {
+function(FBTrace, URL, Options, WIN, XML, HTTP, XPATH) {
 
 // ********************************************************************************************* //
 // Module Implementation
@@ -312,7 +313,7 @@ CSS.setClassTimed = function(elt, name, context, timeout)
     if (FBTrace.DBG_HTML || FBTrace.DBG_SOURCEFILES)
     {
         FBTrace.sysout("css.setClassTimed elt.__setClassTimeout: "+elt.__setClassTimeout+
-                " this.isVisible(elt): "+FBL.isVisible(elt)+
+                " XML.isVisible(elt): "+XML.isVisible(elt)+
                 " elt.__invisibleAtSetPoint: "+elt.__invisibleAtSetPoint);
     }
 
@@ -324,7 +325,7 @@ CSS.setClassTimed = function(elt, name, context, timeout)
     else                        // then we are not waiting to remove the mark
         CSS.setClass(elt, name);
 
-    if (!FBL.isVisible(elt))
+    if (!XML.isVisible(elt))
     {
         if (elt.__invisibleAtSetPoint)
             elt.__invisibleAtSetPoint--;
@@ -413,7 +414,7 @@ CSS.addStyleSheet = function(doc, style)
 CSS.appendStylesheet = function(doc, uri)
 {
     // Make sure the stylesheet is not appended twice.
-    var styleSheet = FBL.$(uri, doc);
+    var styleSheet = doc.getElementById(uri);
     if (styleSheet)
         return styleSheet;
 
@@ -562,7 +563,7 @@ CSS.getInstanceForStyleSheet = function(styleSheet, ownerDocument)
     if (FBTrace.DBG_CSS)
         FBTrace.sysout("getInstanceForStyleSheet href:" + styleSheet.href + " mediaText:" +
             styleSheet.media.mediaText + " path to ownerNode" +
-            (styleSheet.ownerNode && FBL.getElementXPath(styleSheet.ownerNode)), ownerDocument);
+            (styleSheet.ownerNode && XPATH.getElementXPath(styleSheet.ownerNode)), ownerDocument);
 
     ownerDocument = ownerDocument || CSS.getDocumentForStyleSheet(styleSheet);
     if (!ownerDocument)
@@ -578,7 +579,7 @@ CSS.getInstanceForStyleSheet = function(styleSheet, ownerDocument)
         if (FBTrace.DBG_CSS)
             FBTrace.sysout("getInstanceForStyleSheet: compare href " + i +
                 " " + curSheet.href + " " + curSheet.media.mediaText + " " +
-                (curSheet.ownerNode && FBL.getElementXPath(curSheet.ownerNode)));
+                (curSheet.ownerNode && XPATH.getElementXPath(curSheet.ownerNode)));
 
         if (curSheet == styleSheet)
             break;
@@ -1788,43 +1789,6 @@ CSS.innerEditableTags =
 {
     "BODY": 1,
     "body": 1
-};
-
-var invisibleTags = CSS.invisibleTags =
-{
-    "HTML": 1,
-    "HEAD": 1,
-    "TITLE": 1,
-    "META": 1,
-    "LINK": 1,
-    "STYLE": 1,
-    "SCRIPT": 1,
-    "NOSCRIPT": 1,
-    "BR": 1,
-    "PARAM": 1,
-    "COL": 1,
-
-    "html": 1,
-    "head": 1,
-    "title": 1,
-    "meta": 1,
-    "link": 1,
-    "style": 1,
-    "script": 1,
-    "noscript": 1,
-    "br": 1,
-    "param": 1,
-    "col": 1,
-    /*
-    "window": 1,
-    "browser": 1,
-    "frame": 1,
-    "tabbrowser": 1,
-    "WINDOW": 1,
-    "BROWSER": 1,
-    "FRAME": 1,
-    "TABBROWSER": 1,
-    */
 };
 
 // ********************************************************************************************* //

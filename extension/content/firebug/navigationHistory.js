@@ -5,8 +5,9 @@ define([
     "firebug/lib/locale",
     "firebug/firebug",
     "firebug/lib/dom",
+    "firebug/firefox/menu",
 ],
-function(FBL, Locale, Firebug, DOM) {
+function(FBL, Locale, Firebug, DOM, Menu) {
 
 // ************************************************************************************************
 // Constants
@@ -124,7 +125,7 @@ Firebug.NavigationHistory = FBL.extend(Firebug.Module,
                 menuInfo.tooltiptext = tooltipForward;
             }
 
-            var menuItem = FBL.createMenuItem(popup, menuInfo);
+            var menuItem = Menu.createMenuItem(popup, menuInfo);
             menuItem.repObject = location;
             menuItem.setAttribute("index", i);
         }

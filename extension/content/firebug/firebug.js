@@ -1076,7 +1076,8 @@ window.Firebug =
                 if (FBTrace.DBG_ERRORS)
                 {
                     FBTrace.sysout("firebug.getRep FAILS: "+ exc, exc);
-                    FBTrace.sysout("firebug.getRep reps["+i+"/"+reps.length+"]: "+(typeof(reps[i])), reps[i]);
+                    FBTrace.sysout("firebug.getRep reps["+i+"/"+reps.length+"]: "+
+                        (typeof(reps[i])), reps[i]);
                 }
             }
         }

@@ -269,7 +269,7 @@ var Errors = Firebug.Errors = FBL.extend(Firebug.Module,
         var isJSError = category == "js" && !isWarning;
 
         // the sourceLine will cause the source to be loaded.
-        var error = new FBL.ErrorMessage(object.errorMessage, object.sourceName,
+        var error = new FirebugReps.ErrorMessageObj(object.errorMessage, object.sourceName,
             object.lineNumber, object.sourceLine, category, context, null, msgId);
 
         if (Firebug.showStackTrace && Firebug.errorStackTrace)
@@ -478,7 +478,7 @@ var Errors = Firebug.Errors = FBL.extend(Firebug.Module,
         if (sourceFile && sourceLineNo && sourceLineNo != 0)
             sourceLine = context.sourceCache.getLine(sourceFile, sourceLineNo);
 
-        var error = new FBL.ErrorMessage(msg, sourceFile,
+        var error = new FirebugReps.ErrorMessageObj(msg, sourceFile,
             sourceLineNo, sourceLine, "error", context, null);
         return error;
     }

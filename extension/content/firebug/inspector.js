@@ -10,9 +10,10 @@ define([
     "firebug/lib/wrapper",
     "firebug/lib/css",
     "firebug/lib/dom",
+    "firebug/lib/xml",
     "firebug/firefox/window",
 ],
-function(FBL, Firebug, Firefox, FirebugReps, Locale, Events, Wrapper, CSS, DOM, WIN) {
+function(FBL, Firebug, Firefox, FirebugReps, Locale, Events, Wrapper, CSS, DOM, XML, WIN) {
 
 // ************************************************************************************************
 // Constants
@@ -67,7 +68,9 @@ Firebug.Inspector = FBL.extend(Firebug.Module,
         if (!elementArr || !FirebugReps.Arr.isArray(elementArr))
         {
             // highlight a single element
-            if (!elementArr || !FBL.isElement(elementArr) || (Wrapper.getContentView(elementArr) && !FBL.isVisible(Wrapper.getContentView(elementArr))) )
+            if (!elementArr || !DOM.isElement(elementArr) ||
+                (Wrapper.getContentView(elementArr) &&
+                    !XML.isVisible(Wrapper.getContentView(elementArr))) )
             {
                 if(elementArr && elementArr.nodeType == 3)
                     elementArr = elementArr.parentNode;
@@ -364,7 +367,7 @@ Firebug.Inspector = FBL.extend(Firebug.Module,
             }
         }
 
-        if (target && FBL.isElement(target))
+        if (target && DOM.isElement(target))
             this.inspectNode(target);
         else
             FBL.beep();

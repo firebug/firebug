@@ -313,7 +313,7 @@ function createFirebugConsole(context, win)
 
         var url = msg.fileName ? msg.fileName : win.location.href;
         var lineNo = (trace && msg.lineNumber) ? msg.lineNumber : 0; // we may have only the line popped above
-        var errorObject = new FBL.ErrorMessage(msg, url, lineNo, "", category, context, trace);
+        var errorObject = new FirebugReps.ErrorMessageObj(msg, url, lineNo, "", category, context, trace);
 
         if (trace && trace.frames && trace.frames[0])
            errorObject.correctWithStackTrace(trace);

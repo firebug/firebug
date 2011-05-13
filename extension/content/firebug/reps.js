@@ -16,12 +16,14 @@ define([
     "firebug/lib/css",
     "firebug/lib/dom",
     "firebug/firefox/window",
+    "firebug/firefox/system",
     "firebug/lib/xpath",
     "firebug/lib/string",
     "firebug/lib/xml",
+    "firebug/toggleBranch",
 ],
 function(FBL, Firebug, Domplate, XPCOM, Locale, ToolsInterface, HTMLLib, Events, Wrapper,
-    URL, SourceLink, StackFrame, CSS, DOM, WIN, XPATH, STR, XML) {
+    URL, SourceLink, StackFrame, CSS, DOM, WIN, System, XPATH, STR, XML, ToggleBranch) {
 
 with (Domplate) {
 
@@ -204,7 +206,7 @@ FirebugReps.Func = domplate(Firebug.Rep,
     copySource: function(fn)
     {
         if (fn && typeof (fn['toSource']) == 'function')
-            FBL.copyToClipboard(fn.toSource());
+            System.copyToClipboard(fn.toSource());
     },
 
     monitor: function(fn, monitored)
@@ -481,7 +483,7 @@ FirebugReps.Arr = domplate(Firebug.Rep,
         return items;
     },
 
-    toggles: new FBL.ToggleBranch(),
+    toggles: new ToggleBranch.ToggleBranch(),
 
     getItemIndex: function(child)
     {
@@ -594,7 +596,7 @@ FirebugReps.Property = domplate(Firebug.Rep,
 {
     supportsObject: function(object, type)
     {
-        return object instanceof FBL.Property;
+        return object instanceof FirebugReps.PropertyObj;
     },
 
     getRealObject: function(prop, context)
@@ -607,6 +609,19 @@ FirebugReps.Property = domplate(Firebug.Rep,
         return prop.name;
     }
 });
+
+// ************************************************************************************************
+
+FirebugReps.PropertyObj = function(object, name)
+{
+    this.object = object;
+    this.name = name;
+
+    this.getObject = function()
+    {
+        return object[name];
+    };
+};
 
 // ************************************************************************************************
 
@@ -709,7 +724,7 @@ FirebugReps.Element = domplate(Firebug.Rep,
 
     getVisible: function(elt)
     {
-        return FBL.isVisible(elt) ? "" : "selectorHidden";
+        return XML.isVisible(elt) ? "" : "selectorHidden";
     },
 
     getSelectorTag: function(elt)
@@ -810,7 +825,7 @@ FirebugReps.Element = domplate(Firebug.Rep,
 
     getHidden: function(elt)
     {
-        return FBL.isVisible(elt) ? "" : "nodeHidden";
+        return XML.isVisible(elt) ? "" : "nodeHidden";
     },
 
     getXPath: function(elt)
@@ -857,24 +872,24 @@ FirebugReps.Element = domplate(Firebug.Rep,
     copyHTML: function(elt)
     {
         var html = XML.getElementHTML(elt);
-        FBL.copyToClipboard(html);
+        System.copyToClipboard(html);
     },
 
     copyInnerHTML: function(elt)
     {
-        FBL.copyToClipboard(elt.innerHTML);
+        System.copyToClipboard(elt.innerHTML);
     },
 
     copyXPath: function(elt)
     {
         var xpath = XPATH.getElementXPath(elt);
-        FBL.copyToClipboard(xpath);
+        System.copyToClipboard(xpath);
     },
 
     copyCSSPath: function(elt)
     {
         var csspath = CSS.getElementCSSPath(elt);
-        FBL.copyToClipboard(csspath);
+        System.copyToClipboard(csspath);
     },
 
     persistor: function(context, xpath)
@@ -1077,7 +1092,7 @@ FirebugReps.StyleSheet = domplate(Firebug.Rep,
 
     copyURL: function(styleSheet)
     {
-        FBL.copyToClipboard(styleSheet.href);
+        System.copyToClipboard(styleSheet.href);
     },
 
     openInTab: function(styleSheet)
@@ -1216,7 +1231,7 @@ FirebugReps.Event = domplate(Firebug.Rep,
 
     copyEvent: function(event)
     {
-        return new FBL.EventCopy(event);
+        return new DOM.EventCopy(event);
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
@@ -1225,7 +1240,7 @@ FirebugReps.Event = domplate(Firebug.Rep,
 
     supportsObject: function(object, type)
     {
-        return object instanceof window.Event || object instanceof FBL.EventCopy;
+        return object instanceof window.Event || object instanceof DOM.EventCopy;
     },
 
     getTitle: function(event, context)
@@ -1306,7 +1321,7 @@ FirebugReps.SourceLink = domplate(Firebug.Rep,
 
     copyLink: function(sourceLink)
     {
-        FBL.copyToClipboard(sourceLink.href);
+        System.copyToClipboard(sourceLink.href);
     },
 
     openInTab: function(sourceLink)
@@ -1831,7 +1846,7 @@ FirebugReps.ErrorMessage = domplate(Firebug.Rep,
             error.href,
             "Line " +  error.lineNo
         ];
-        FBL.copyToClipboard(message.join(STR.lineBreak()));
+        System.copyToClipboard(message.join(STR.lineBreak()));
     },
 
     breakOnThisError: function(error, context)
@@ -1857,7 +1872,7 @@ FirebugReps.ErrorMessage = domplate(Firebug.Rep,
 
     supportsObject: function(object, type, context)
     {
-        return object instanceof FBL.ErrorMessage;
+        return object instanceof FirebugReps.ErrorMessageObj;
     },
 
     inspectObject: function(error, context)
@@ -1930,7 +1945,7 @@ FirebugReps.Except = domplate(Firebug.Rep,
             if (!trace)
                 lineNo = 0;
         }
-        errorObject = new FBL.ErrorMessage(message, url, lineNo, '', 'js',
+        errorObject = new FirebugReps.ErrorMessageObj(message, url, lineNo, '', 'js',
             context, trace);
 
         if (trace && trace.frames && trace.frames[0])
@@ -1943,7 +1958,7 @@ FirebugReps.Except = domplate(Firebug.Rep,
     supportsObject: function(object, type, context)
     {
         var win = context ? Wrapper.getContentView(context.window) : null;
-        var found = (win && instanceOf(object, win.Error)) || (object instanceof FBL.ErrorCopy) ||
+        var found = (win && instanceOf(object, win.Error)) || (object instanceof FirebugReps.ErrorCopy) ||
             (object.constructor && object.constructor.name == "ReferenceError");
         return found;
     }
@@ -2324,7 +2339,7 @@ FirebugReps.StorageList = domplate(Firebug.Rep,
 FirebugReps.XPathResult = domplate(FirebugReps.Arr,
 {
     className: "array xPathResult",
-    toggles: new FBL.ToggleBranch(),
+    toggles: new ToggleBranch.ToggleBranch(),
 
     tag:
         SPAN(FirebugReps.Arr.tag),
@@ -2569,6 +2584,59 @@ FirebugReps.NamedNodeMap = domplate(Firebug.Rep,
         return props;
     },
 });
+
+// ************************************************************************************************
+// Error Message
+
+FirebugReps.ErrorMessageObj = function(message, href, lineNo, source, category, context, trace, msgId)
+{
+    this.message = message;
+    this.href = href;
+    this.lineNo = lineNo;
+    this.source = source;
+    this.category = category;
+    this.context = context;
+    this.trace = trace;
+    this.msgId = msgId;
+};
+
+FirebugReps.ErrorMessageObj.prototype =
+{
+    getSourceLine: function()
+    {
+        return this.context.sourceCache.getLine(this.href, this.lineNo);
+    },
+
+    resetSource: function()
+    {
+        if (this.href && this.lineNo)
+            this.source = this.getSourceLine();
+    },
+
+    correctWithStackTrace: function(trace)
+    {
+        var frame = trace.frames[0];
+        if (frame)
+        {
+            this.href = frame.href;
+            this.lineNo = frame.line;
+            this.trace = trace;
+        }
+    },
+
+    correctSourcePoint: function(sourceName, lineNumber)
+    {
+        this.href = sourceName;
+        this.lineNo = lineNumber;
+    },
+};
+
+// ********************************************************************************************* //
+
+FirebugReps.ErrorCopy = function(message)
+{
+    this.message = message;
+};
 
 // ********************************************************************************************* //
 // Registration

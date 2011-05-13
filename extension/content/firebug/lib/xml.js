@@ -278,6 +278,71 @@ XML.isXMLPrettyPrint = function(context, win)
     }
 };
 
+// ************************************************************************************************
+
+XML.isVisible = function(elt)
+{
+    if (XML.isElementXUL(elt))
+    {
+        //FBTrace.sysout("isVisible elt.offsetWidth: "+elt.offsetWidth+" offsetHeight:"+
+        // elt.offsetHeight+" localName:"+ elt.localName+" nameSpace:"+elt.nameSpaceURI+"\n");
+        return (!elt.hidden && !elt.collapsed);
+    }
+
+    try
+    {
+        return elt.offsetWidth > 0 ||
+            elt.offsetHeight > 0 ||
+            elt.localName in XML.invisibleTags ||
+            XML.isElementSVG(elt) ||
+            XML.isElementMathML(elt);
+    }
+    catch (err)
+    {
+        if (FBTrace.DBG_ERRORS)
+            FBTrace.sysout("lib.isVisible; EXCEPTION " + err, err);
+    }
+
+    return false;
+};
+
+var invisibleTags = XML.invisibleTags =
+{
+    "HTML": 1,
+    "HEAD": 1,
+    "TITLE": 1,
+    "META": 1,
+    "LINK": 1,
+    "STYLE": 1,
+    "SCRIPT": 1,
+    "NOSCRIPT": 1,
+    "BR": 1,
+    "PARAM": 1,
+    "COL": 1,
+
+    "html": 1,
+    "head": 1,
+    "title": 1,
+    "meta": 1,
+    "link": 1,
+    "style": 1,
+    "script": 1,
+    "noscript": 1,
+    "br": 1,
+    "param": 1,
+    "col": 1,
+    /*
+    "window": 1,
+    "browser": 1,
+    "frame": 1,
+    "tabbrowser": 1,
+    "WINDOW": 1,
+    "BROWSER": 1,
+    "FRAME": 1,
+    "TABBROWSER": 1,
+    */
+};
+
 // ********************************************************************************************* //
 
 return XML;

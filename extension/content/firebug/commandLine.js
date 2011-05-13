@@ -11,6 +11,7 @@ define([
     "firebug/lib/css",
     "firebug/lib/dom",
     "firebug/firefox/window",
+    "firebug/firefox/system",
     "firebug/lib/xpath",
     "firebug/lib/string",
     "firebug/lib/xml",
@@ -19,7 +20,7 @@ define([
     "firebug/console",
     "firebug/commandLineExposed"
 ],
-function(FBL, Firebug, FirebugReps, Locale, Events, Wrapper, URL, CSS, DOM, WIN, XPATH,
+function(FBL, Firebug, FirebugReps, Locale, Events, Wrapper, URL, CSS, DOM, WIN, System, XPATH,
     STR, XML, ARR, Persist) {
 
 // ************************************************************************************************
@@ -369,7 +370,7 @@ Firebug.CommandLine = FBL.extend(Firebug.Module,
 
             exceptionFunction(e, context);
 
-            result = new FBL.ErrorMessage("commandLine.evaluateInSandbox FAILED: " + e,
+            result = new FirebugReps.ErrorMessageObj("commandLine.evaluateInSandbox FAILED: " + e,
                 URL.getDataURLForContent(scriptToEval, "FirebugCommandLineEvaluate"),
                 e.lineNumber, 0, "js", context, null);
         }
@@ -492,7 +493,7 @@ Firebug.CommandLine = FBL.extend(Firebug.Module,
     {
         var commandLine = this.getCommandLine(context);
         var expr = "javascript: " + STR.stripNewLines(this.autoCompleter.getVerifiedText(commandLine));
-        FBL.copyToClipboard(expr);
+        System.copyToClipboard(expr);
     },
 
     focus: function(context)
@@ -2208,7 +2209,7 @@ function FirebugCommandLineAPI(context)
 
     this.copy = function(x)
     {
-        FBL.copyToClipboard(x);
+        System.copyToClipboard(x);
     };
 
     this.memoryProfile = function(title)

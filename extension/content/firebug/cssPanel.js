@@ -21,13 +21,14 @@ define([
     "firebug/lib/xml",
     "firebug/lib/array",
     "firebug/persist",
+    "firebug/firefox/system",
     "firebug/editor",
     "firebug/editorSelector",
     "firebug/infotip",
     "firebug/searchBox",
 ],
 function(FBL, Firebug, Firefox, Domplate, FirebugReps, XPCOM, Locale, Events, Wrapper, URL,
-    SourceLink, CSS, DOM, WIN, Search, XPATH, STR, XML, ARR, Persist) {
+    SourceLink, CSS, DOM, WIN, Search, XPATH, STR, XML, ARR, Persist, System) {
 
 with (Domplate) {
 
@@ -1279,14 +1280,14 @@ Firebug.CSSStyleSheetPanel.prototype = FBL.extend(Firebug.Panel,
         {
             items.push(
                 {label: "CopyColor",
-                    command: FBL.bindFixed(FBL.copyToClipboard, FBL, this.infoTipObject) }
+                    command: FBL.bindFixed(System.copyToClipboard, FBL, this.infoTipObject) }
             );
         }
         else if (this.infoTipType == "image")
         {
             items.push(
                 {label: "CopyImageLocation",
-                    command: FBL.bindFixed(FBL.copyToClipboard, FBL, this.infoTipObject) },
+                    command: FBL.bindFixed(System.copyToClipboard, FBL, this.infoTipObject) },
                 {label: "OpenImageInNewTab",
                     command: FBL.bindFixed(WIN.openNewTab, FBL, this.infoTipObject) }
             );
@@ -1603,14 +1604,14 @@ Firebug.CSSStyleSheetPanel.prototype = FBL.extend(Firebug.Panel,
     copyRuleDeclaration: function(cssSelector)
     {
         var props = this.getStyleDeclaration(cssSelector);
-        FBL.copyToClipboard(cssSelector.textContent + " {" + STR.lineBreak() + "  " +
+        System.copyToClipboard(cssSelector.textContent + " {" + STR.lineBreak() + "  " +
             props.join(STR.lineBreak() + "  ") + STR.lineBreak() + "}");
     },
 
     copyStyleDeclaration: function(cssSelector)
     {
         var props = this.getStyleDeclaration(cssSelector);
-        FBL.copyToClipboard(props.join(STR.lineBreak()));
+        System.copyToClipboard(props.join(STR.lineBreak()));
     }
 });
 

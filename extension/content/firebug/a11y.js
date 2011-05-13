@@ -10,11 +10,12 @@ define([
     "firebug/lib/url",
     "firebug/lib/css",
     "firebug/lib/dom",
+    "firebug/lib/xml",
     "firebug/lib/xpath",
     "firebug/console",
     "firebug/infotip",
 ],
-function(FBL, Firebug, Domplate, Locale, ToolsInterface, Events, URL, CSS, DOM, XPATH) {
+function(FBL, Firebug, Domplate, Locale, ToolsInterface, Events, URL, CSS, DOM, XML, XPATH) {
 
 // ************************************************************************************************
 // Constants
@@ -544,7 +545,7 @@ Firebug.A11yModel = FBL.extend(Firebug.Module,
         if (panelA11y.manageFocus)
         {
             var tabStop = this.getPanelTabStop(panel);
-            if (!tabStop || !this.isVisibleByStyle(tabStop) || !FBL.isVisible(tabStop))
+            if (!tabStop || !this.isVisibleByStyle(tabStop) || !XML.isVisible(tabStop))
             {
                 this.tabStop = null;
                 this.findPanelTabStop(panel, 'focusRow', panelA11y.lastIsDefault);
@@ -595,7 +596,7 @@ Firebug.A11yModel = FBL.extend(Firebug.Module,
     findPanelTabStop : function(panel, className, last)
     {
         var candidates = panel.panelNode.getElementsByClassName(className);
-        candidates= Array.filter(candidates, function(e,i,a){return this.isVisibleByStyle(e) && FBL.isVisible(e);}, this);
+        candidates= Array.filter(candidates, function(e,i,a){return this.isVisibleByStyle(e) && XML.isVisible(e);}, this);
         if (candidates.length > 0)
         {
             var chosenRow = candidates[last ? candidates.length -1 : 0];
@@ -669,7 +670,7 @@ Firebug.A11yModel = FBL.extend(Firebug.Module,
             row.setAttribute('role', 'listitem');
             CSS.setClass(row, 'focusRow');
             CSS.setClass(row, 'outerFocusRow');
-            if (FBL.isVisible(row))
+            if (XML.isVisible(row))
                 this.setPanelTabStop(panel, row);
         }
     },
@@ -2546,7 +2547,7 @@ Firebug.A11yModel = FBL.extend(Firebug.Module,
     getFocusRows : function(panel)
     {
         var nodes = panel.panelNode.getElementsByClassName('focusRow');
-        return Array.filter(nodes, function(e,i,a){return this.isVisibleByStyle(e) && FBL.isVisible(e);}, this);
+        return Array.filter(nodes, function(e,i,a){return this.isVisibleByStyle(e) && XML.isVisible(e);}, this);
     },
 
     getLastFocusChild : function(target)
@@ -2684,7 +2685,7 @@ Firebug.A11yModel = FBL.extend(Firebug.Module,
         function criteria(node) { return node.nodeType == 1 && CSS.hasClass(node, className); }
         for (var sib = node.previousSibling; sib; sib = sib.previousSibling)
         {
-            if (!this.isVisibleByStyle(sib) || !FBL.isVisible(sib))
+            if (!this.isVisibleByStyle(sib) || !XML.isVisible(sib))
                 continue;
             var prev = this.findPreviousUp(sib, criteria);
             if (prev)
@@ -2719,7 +2720,7 @@ Firebug.A11yModel = FBL.extend(Firebug.Module,
         }
         for (var sib = node.nextSibling; sib; sib = sib.nextSibling)
         {
-            if (!this.isVisibleByStyle(sib) || !FBL.isVisible(sib))
+            if (!this.isVisibleByStyle(sib) || !XML.isVisible(sib))
                 continue;
             if (criteria(sib))
                 return sib;
@@ -2737,7 +2738,7 @@ Firebug.A11yModel = FBL.extend(Firebug.Module,
             return null;
         for (var child = node.firstChild; child; child = child.nextSibling)
         {
-            if (!this.isVisibleByStyle(child) || !FBL.isVisible(child))
+            if (!this.isVisibleByStyle(child) || !XML.isVisible(child))
                 continue;
             if (criteria(child))
                 return child;
@@ -2753,7 +2754,7 @@ Firebug.A11yModel = FBL.extend(Firebug.Module,
             return null;
         for (var child = node.lastChild; child; child = child.previousSibling)
         {
-            if (!this.isVisibleByStyle(child) || !FBL.isVisible(child))
+            if (!this.isVisibleByStyle(child) || !XML.isVisible(child))
                 continue;
             var next = this.findPreviousUp(child, criteria);
             if (next)

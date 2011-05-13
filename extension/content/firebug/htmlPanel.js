@@ -351,7 +351,7 @@ Firebug.HTMLPanel.prototype = FBL.extend(WalkingPanel,
         if (!objectNodeBox)
             return;
 
-        if (FBL.isVisible(objectNodeBox.repObject))
+        if (XML.isVisible(objectNodeBox.repObject))
             CSS.removeClass(objectNodeBox, "nodeHidden");
         else
             CSS.setClass(objectNodeBox, "nodeHidden");
@@ -2065,7 +2065,7 @@ Firebug.HTMLModule.MutationBreakpoints =
             return false;
 
         // Ignore changes in ignored branches
-        if (FBL.isAncestorIgnored(event.target))
+        if (isAncestorIgnored(event.target))
             return false;
 
         context.breakOnNextMutate = false;
@@ -2381,6 +2381,16 @@ MutationBreakpointGroup.prototype = FBL.extend(new Firebug.Breakpoint.Breakpoint
     },
 });
 
+function isAncestorIgnored(node)
+{
+    for (var parent = node; parent; parent = parent.parentNode)
+    {
+        if (Firebug.shouldIgnore(parent))
+            return true;
+    }
+
+    return false;
+}
 
 // ************************************************************************************************
 // Registration

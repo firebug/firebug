@@ -11,10 +11,11 @@ define([
     "firebug/http/httpLib",
     "firebug/lib/string",
     "firebug/lib/json",
+    "firebug/toggleBranch",
     "firebug/domPanel",
     "firebug/reps"
 ],
-function(FBL, Firebug, Domplate, Locale, Events, CSS, DOM, HTTP, STR, JSONLib) {
+function(FBL, Firebug, Domplate, Locale, Events, CSS, DOM, HTTP, STR, JSONLib, ToggleBranch) {
 
 // ************************************************************************************************
 
@@ -174,7 +175,7 @@ Firebug.JSONViewerModel.Preview = domplate(
 function JSONTreePlate()
 {
     // Used by Firebug.DOMPanel.DirTable domplate.
-    this.toggles = new FBL.ToggleBranch();
+    this.toggles = new ToggleBranch.ToggleBranch();
 }
 
 // xxxHonza: this object is *not* a panel (using Firebug terminology), but

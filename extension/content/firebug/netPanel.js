@@ -24,6 +24,8 @@ define([
     "firebug/lib/json",
     "firebug/lib/array",
     "firebug/persist",
+    "firebug/toggleBranch",
+    "firebug/firefox/system",
     "firebug/breakpoint",
     "firebug/xmlViewer",
     "firebug/svgViewer",
@@ -35,7 +37,7 @@ define([
 ],
 function(FBL, Firebug, Firefox, Domplate, XPCOM, ToolsInterface, HttpRequestObserver, Locale,
     Events, Options, URL, SourceLink, HTTP, StackFrame, CSS, DOM, WIN, Search, STR, XML,
-    JSONLib, ARR, Persist) {
+    JSONLib, ARR, Persist, ToggleBranch, System) {
 
 with (Domplate) {
 
@@ -669,7 +671,7 @@ NetPanel.prototype = FBL.extend(Firebug.ActivablePanel,
         var isPost = Utils.isURLEncodedRequest(file, this.context);
 
         items.push(
-            {label: "CopyLocation", command: FBL.bindFixed(FBL.copyToClipboard, FBL, file.href) }
+            {label: "CopyLocation", command: FBL.bindFixed(System.copyToClipboard, FBL, file.href) }
         );
 
         if (isPost)
@@ -750,7 +752,7 @@ NetPanel.prototype = FBL.extend(Firebug.ActivablePanel,
     {
         var text = Utils.getPostText(file, this.context, true);
         var url = URL.reEncodeURL(file, text, true);
-        FBL.copyToClipboard(url);
+        System.copyToClipboard(url);
     },
 
     copyHeaders: function(headers)
@@ -766,13 +768,13 @@ NetPanel.prototype = FBL.extend(Firebug.ActivablePanel,
         }
 
         var text = lines.join("\r\n");
-        FBL.copyToClipboard(text);
+        System.copyToClipboard(text);
     },
 
     copyResponse: function(file)
     {
         // Copy response to the clipboard
-        FBL.copyToClipboard(Utils.getResponseText(file, this.context));
+        System.copyToClipboard(Utils.getResponseText(file, this.context));
     },
 
     openRequestInTab: function(file)
@@ -2891,7 +2893,7 @@ Firebug.NetMonitor.NetInfoPostData = domplate(Firebug.Rep, new Firebug.Listener(
         var jsonBody = jsonTable.getElementsByClassName("netInfoPostJSONBody").item(0);
 
         if (!this.toggles)
-            this.toggles = new FBL.ToggleBranch();
+            this.toggles = new ToggleBranch.ToggleBranch();
 
         Firebug.DOMPanel.DirTable.tag.replace(
             {object: data, toggles: this.toggles}, jsonBody);
@@ -3607,7 +3609,7 @@ NetProgress.prototype =
             this.context.breakingCause = {
                 title: Locale.$STR("net.Break On XHR"),
                 message: STR.cropString(file.href, 200),
-                copyAction: FBL.bindFixed(FBL.copyToClipboard, FBL, file.href)
+                copyAction: FBL.bindFixed(System.copyToClipboard, FBL, file.href)
             };
 
             halt = true;

@@ -17,13 +17,14 @@ define([
     "firebug/firefox/window",
     "firebug/lib/search",
     "firebug/persist",
+    "firebug/firefox/system",
     "firebug/editorSelector",
     "firebug/infotip",
     "firebug/searchBox",
     "firebug/sourceBox",
 ],
 function(FBL, Firebug, Firefox, FirebugReps, Domplate, ToolsInterface, Locale, Events, URL, SourceLink,
-    StackFrame, CSS, DOM, WIN, Search, Persist) {
+    StackFrame, CSS, DOM, WIN, Search, Persist, System) {
 
 // ********************************************************************************************* //
 // Constants
@@ -373,7 +374,7 @@ Firebug.ScriptPanel.prototype = FBL.extend(Firebug.SourceBoxPanel,
     {
         var selection = this.document.defaultView.getSelection();
         var source = this.getSourceLinesFrom(selection);
-        FBL.copyToClipboard(source);
+        System.copyToClipboard(source);
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
@@ -1077,7 +1078,7 @@ Firebug.ScriptPanel.prototype = FBL.extend(Firebug.SourceBoxPanel,
         if (!rangeParent)
             return;
         rangeOffset = rangeOffset || 0;
-        var expr = FBL.getExpressionAt(rangeParent.data, rangeOffset);
+        var expr = getExpressionAt(rangeParent.data, rangeOffset);
         if (!expr || !expr.expr)
             return;
 
@@ -1445,6 +1446,31 @@ Firebug.ScriptPanel.prototype = FBL.extend(Firebug.SourceBoxPanel,
     },
 
 });
+
+// ************************************************************************************************
+
+const reWord = /([A-Za-z_$][A-Za-z_$0-9]*)(\.([A-Za-z_$][A-Za-z_$0-9]*))*/;
+
+function getExpressionAt(text, charOffset)
+{
+    var offset = 0;
+    for (var m = reWord.exec(text); m; m = reWord.exec(text.substr(offset)))
+    {
+        var word = m[0];
+        var wordOffset = offset+m.index;
+        if (charOffset >= wordOffset && charOffset <= wordOffset+word.length)
+        {
+            var innerOffset = charOffset-wordOffset;
+            var dots = word.substr(0, innerOffset).split(".").length;
+            var subExpr = word.split(".").slice(0, dots).join(".");
+            return {expr: subExpr, offset: wordOffset};
+        }
+
+        offset = wordOffset+word.length;
+    }
+
+    return {expr: null, offset: -1};
+};
 
 // ************************************************************************************************
 

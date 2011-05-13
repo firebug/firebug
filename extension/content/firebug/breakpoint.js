@@ -14,10 +14,11 @@ define([
     "firebug/lib/dom",
     "firebug/lib/string",
     "firebug/lib/array",
+    "firebug/firefox/menu",
     "firebug/editor",
 ],
 function(FBL, Firebug, Domplate, FirebugReps, Locale, Events, ToolsInterface, SourceLink,
-    StackFrame, CSS, DOM, STR, ARR) {
+    StackFrame, CSS, DOM, STR, ARR, Menu) {
 
 // ************************************************************************************************
 // Breakpoints
@@ -87,7 +88,7 @@ Firebug.Breakpoint = FBL.extend(Firebug.Module,
         DOM.eraseNode(menuPopup);
 
         for (var i=0; i<menuItems.length; ++i)
-            FBL.createMenuItem(menuPopup, menuItems[i]);
+            Menu.createMenuItem(menuPopup, menuItems[i]);
     },
 
     updateBreakOnNextTooltips: function(panel)

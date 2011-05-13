@@ -80,6 +80,46 @@ System.getIconURLForFile = function(path)
     return null;
 }
 
+System.copyToClipboard = function(string)
+{
+    var clipboard = Cc["@mozilla.org/widget/clipboardhelper;1"].getService(Ci.nsIClipboardHelper);
+    clipboard.copyString(string);
+};
+
+// ************************************************************************************************
+// Firebug Version Comparator
+
+/**
+ * Compare expected Firebug version with the current Firebug installed.
+ * @param {Object} expectedVersion Expected version of Firebug.
+ * @returns
+ * -1 the current version is smaller
+ *  0 the current version is the same
+ *  1 the current version is bigger
+ *
+ * @example:
+ * if (compareFirebugVersion("1.6") >= 0)
+ * {
+ *     // The current version is Firebug 1.6+
+ * }
+ */
+System.checkFirebugVersion = function(expectedVersion)
+{
+    if (!expectedVersion)
+        return 1;
+
+    var version = Firebug.getVersion();
+
+    // Adapt to Firefox version scheme.
+    expectedVersion = expectedVersion.replace('X', '', "g");
+    version = version.replace('X', '', "g");
+
+    // Use Firefox comparator service.
+    var versionChecker = Cc["@mozilla.org/xpcom/version-comparator;1"].
+        getService(Ci.nsIVersionComparator);
+    return versionChecker.compare(version, expectedVersion);
+}
+
 // ********************************************************************************************* //
 
 return System;

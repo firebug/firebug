@@ -5,8 +5,9 @@ define([
     "firebug/lib/deprecated",
     "firebug/lib/css",
     "firebug/lib/array",
+    "firebug/lib/xml",
 ],
-function(FBTrace, Deprecated, CSS, ARR) {
+function(FBTrace, Deprecated, CSS, ARR, XML) {
 
 // ********************************************************************************************* //
 // Constants
@@ -25,6 +26,8 @@ DOM.domUtils = Cc["@mozilla.org/inspector/dom-utils;1"].getService(Ci.inIDOMUtil
 
 DOM.getChildByClass = function(node) // ,classname, classname, classname...
 {
+    if (!node)
+        FBTrace.sysout("asfasdfasd");
     for (var i = 1; i < arguments.length; ++i)
     {
         var className = arguments[i];
@@ -626,7 +629,7 @@ DOM.getDOMMembers = function(object)
         { return domMemberCache.Attr; }
     else if (object instanceof Node)
         { return domMemberCache.Node; }
-    else if (object instanceof Event || object instanceof FBL.EventCopy)
+    else if (object instanceof Event || object instanceof DOM.EventCopy)
         { return domMemberCache.Event; }
 
     return null;
@@ -651,10 +654,22 @@ DOM.isDOMConstant = function(object, name)
         object instanceof Node ||
         object instanceof Location ||
         object instanceof Event ||
-        object instanceof FBL.EventCopy)) // FBL dep is wrong
+        object instanceof DOM.EventCopy)) // FBL dep is wrong
         return false;
 
     return DOM.domConstantMap.hasOwnProperty(name);
+}
+
+DOM.EventCopy = function(event)
+{
+    // Because event objects are destroyed arbitrarily by Gecko, we must make a copy of them to
+    // represent them long term in the inspector.
+    for (var name in event)
+    {
+        try {
+            this[name] = event[name];
+        } catch (exc) { }
+    }
 }
 
 var isDOMConstantDep = Deprecated.deprecated(

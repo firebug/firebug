@@ -12,6 +12,7 @@ define([
     "firebug/lib/css",
     "firebug/lib/dom",
     "firebug/firefox/window",
+    "firebug/firefox/system",
     "firebug/lib/string",
     "firebug/lib/url",
     "firebug/lib/array",
@@ -19,7 +20,7 @@ define([
     "firebug/errors",
 ],
 function(FBL, Firebug, Domplate, FirebugReps, Events, HttpRequestObserver, StackFrame,
-    HTTP, CSS, DOM, WIN, STR, URL, ARR) {
+    HTTP, CSS, DOM, WIN, System, STR, URL, ARR) {
 
 // ************************************************************************************************
 // Constants
@@ -879,7 +880,7 @@ Firebug.Spy.XHR = domplate(Firebug.Rep,
 
     copyURL: function(spy)
     {
-        FBL.copyToClipboard(spy.getURL());
+        System.copyToClipboard(spy.getURL());
     },
 
     copyParams: function(spy)
@@ -889,12 +890,12 @@ Firebug.Spy.XHR = domplate(Firebug.Rep,
             return;
 
         var url = URL.reEncodeURL(spy, text, true);
-        FBL.copyToClipboard(url);
+        System.copyToClipboard(url);
     },
 
     copyResponse: function(spy)
     {
-        FBL.copyToClipboard(spy.responseText);
+        System.copyToClipboard(spy.responseText);
     },
 
     openInTab: function(spy)
