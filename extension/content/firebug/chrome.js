@@ -443,14 +443,14 @@ var FirebugChrome =
     toggleOpen: function(shouldShow)
     {
         var contentBox = Firebug.chrome.$("fbContentBox");
-        var contentSplitter = Firebug.chrome.$("fbContentSplitter");
-
         contentBox.setAttribute("collapsed", !shouldShow);
         if (!inDetachedScope)
         {
             DOM.collapse(Firefox.getElementById('fbMainFrame'), !shouldShow);
         }
 
+        // The content splitter is in firefox for the iframe version
+        var contentSplitter = Firebug.chrome.$("fbContentSplitter") || Firefox.getElementById('fbContentSplitter');
         if (contentSplitter)
             contentSplitter.setAttribute("collapsed", !shouldShow);
     },

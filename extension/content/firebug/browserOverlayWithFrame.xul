@@ -1,0 +1,17 @@
+<?xml version="1.0"?>
+
+<?xul-overlay href="chrome://firebug/content/start-button/startButtonOverlay.xul"?>
+
+<overlay xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul">
+
+
+    <script type="application/x-javascript" src="chrome://firebug/content/trace.js"/>
+    <script type="application/x-javascript" src="chrome://firebug/content/legacy.js"/>
+
+    <!-- Firebug panel -->
+    <vbox id="appcontent">
+        <splitter id="fbContentSplitter" collapsed="true"/>
+        <iframe id="fbMainFrame" flex="2" height="200px" src="chrome://firebug/content/firebugFrame.xul"/>
+    </vbox>
+
+</overlay>

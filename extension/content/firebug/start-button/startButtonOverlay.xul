@@ -1,8 +1,69 @@
 <?xml version="1.0"?>
-
+<?xml-stylesheet href="chrome://firebug/content/start-button/startButton.css"?>
 <overlay xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul">
     <!-- <script type="application/x-javascript"
         src="chrome://firebug/content/start-button/startButtonOverlay.js"/> -->
+    <stringbundleset id="stringbundleset">
+        <stringbundle id="strings_firebug" src="chrome://firebug/locale/firebug.properties"/>
+    </stringbundleset>
+    <commandset id="mainCommandSet">
+        <command id="cmd_toggleFirebug" oncommand="Firebug.toggleBar()"/>
+    </commandset>
+
+    <keyset id="mainKeyset">
+        <key id="key_toggleFirebug" keycode="VK_F12" command="cmd_toggleFirebug"/>
+    </keyset>
+
+    <!-- Firefox page context menu -->
+    <menupopup id="contentAreaContextMenu">
+        <menuseparator/>
+        <menuitem id="menu_firebugInspect" label="firebug.InspectElement"
+                  command="cmd_inspect" class="menuitem-iconic fbInternational" />
+    </menupopup>
+
+    <!-- Firefox View menu -->
+    <menupopup id="menu_viewPopup">
+        <menuitem id="menu_viewToggleFirebug" insertbefore="toggle_taskbar"
+                  label="firebug.Firebug" type="checkbox"
+                  key="key_toggleFirebug" command="cmd_toggleFirebug"
+                  class="fbInternational"/>
+    </menupopup>
+
+    <!-- SeaMonkey View menu -->
+    <menupopup id="menu_View_Popup">
+        <menuitem id="menu_viewToggleFirebug" insertafter="menuitem_fullScreen"
+                  label="firebug.Firebug" type="checkbox"
+                  key="key_toggleFirebug" command="cmd_toggleFirebug"
+                  class="fbInternational"/>
+    </menupopup>
+
+    <!-- Firefox Tools menu -->
+    <menupopup id="menu_ToolsPopup">
+        <menu id="menu_firebug" class="menu-iconic fbInternational"
+              label="firebug.Firebug" insertbefore="javascriptConsole">
+              <!-- Content comes from fbFirebugMenuPopup -->
+        </menu>
+    </menupopup>
+
+    <!-- Firefox 4 Web Developer menu -->
+    <menupopup id="appmenu_webDeveloper_popup">
+        <splitmenu id="appmenu_firebug" class="fbInternational" iconic="true"
+            label="firebug.Firebug" insertbefore="appmenu_webConsole"
+            command="cmd_toggleFirebug" key="key_toggleFirebug">
+                <!-- Content comes from fbFirebugMenuPopup -->
+        </splitmenu>
+        <menuseparator insertbefore="appmenu_webConsole" />
+    </menupopup>
+
+    <!-- SeaMonkey Tools menu -->
+    <menupopup id="toolsPopup">
+        <menu id="menu_firebug" class="menuitem-iconic fbInternational"
+              label="firebug.Firebug"
+              insertbefore="appmenu_webConsole">
+              <!-- Content comes from fbFirebugMenuPopup -->
+        </menu>
+    </menupopup>
+
 
     <popupset id="mainPopupSet">
 

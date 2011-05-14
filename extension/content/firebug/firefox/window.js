@@ -28,6 +28,7 @@ WIN.getWindowProxyIdForWindow = function(win)
     var id = WIN.getWindowId(win).outerWindowID;
 
     // xxxJJB, xxxHonza: the id is often null, what could be the problem?
+    // jjb: My guess: just another Mozilla bug
     if (!id)
         return WIN.getTabIdForWindow(win);
 

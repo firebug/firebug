@@ -4486,8 +4486,11 @@ function monitorContext(context)
 
     // Use an existing context associated with the browser tab if any
     // or create a pure new network context.
-    var tabId = WIN.getWindowProxyIdForWindow(context.window);
-    networkContext = contexts[tabId];
+    if (context.window)
+    {
+        var tabId = WIN.getWindowProxyIdForWindow(context.window);
+        networkContext = contexts[tabId];
+    }
 
     if (FBTrace.DBG_NET)
         FBTrace.sysout("net.monitorContext; (" + networkContext + ") " +

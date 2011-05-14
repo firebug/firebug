@@ -1,6 +1,6 @@
 <?xml version="1.0"?>
 
-<?xml-stylesheet href="chrome://firebug/content/firebug.css"?>
+<?xml-stylesheet href="chrome://firebug/content/start-button/startButton.css"?>
 
 <overlay id="FirebugOverlay"
     xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul">

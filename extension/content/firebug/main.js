@@ -179,6 +179,8 @@ if (FBTrace.DBG_INITIALIZE || FBTrace.DBG_MODULES)
 require(config,
 [
     "firebug/chrome",
+    "firebug/lib",
+    "firebug/firebug",
     "arch/firebugadapter",
     "arch/javascripttool",
     "firebug/debugger",
@@ -212,7 +214,7 @@ require(config,
     "firebug/commandLineExposed",
     "firebug/consoleExposed"
 ],
-function(ChromeFactory)
+function(ChromeFactory, FBL, Firebug)
 {
     try
     {
@@ -225,13 +227,22 @@ function(ChromeFactory)
         Firebug.Options.initialize("extensions.firebug");
         window.panelBarWaiter.waitForPanelBar(ChromeFactory);
 
+        if (window.legacyPatch)
+        {
+            FBTrace.sysout("firebug main.js; legacyPatch");
+            window.legacyPatch(FBL, Firebug);
+        }
+
         if (FBTrace.DBG_MODULES)
             dumpDependencyTree(depTree);
     }
     catch(exc)
     {
-        window.dump("Firebug main initialization ERROR "+exc);
-        Component.utils.reportError(exc);
+        if (FBTrace)
+            FBTrace.sysout("Firebug main initialization ERROR "+exc, exc);
+        window.dump("Firebug main initialization ERROR "+exc+"\n");
+        if (Component)
+            Component.utils.reportError(exc);
     }
 });
 

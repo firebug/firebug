@@ -148,7 +148,8 @@ window.Firebug =
 
     completeInitialize: function(tempPanelTypes)
     {
-        FBL.initialize();  // non require.js modules
+        if(FBL)
+            FBL.initialize();  // non require.js modules
 
         // Append early registered panels at the end.
         panelTypes.push.apply(panelTypes, tempPanelTypes);

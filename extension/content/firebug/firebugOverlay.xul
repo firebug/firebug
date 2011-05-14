@@ -15,7 +15,6 @@
     <stringbundleset id="stringbundleset">
         <stringbundle id="strings_firebug" src="chrome://firebug/locale/firebug.properties"/>
     </stringbundleset>
-
     <commandset id="mainCommandSet">
         <command id="cmd_clearConsole" oncommand="Firebug.Console.clear(Firebug.currentContext)"/>
         <command id="cmd_togglePersistConsole" oncommand="Firebug.Console.togglePersist(Firebug.currentContext)"/>
@@ -57,7 +56,6 @@
 
         <command id="cmd_toggleTraceConsole" oncommand="Firebug.TraceModule.openConsole()"/>
 
-        <command id="cmd_toggleFirebug" oncommand="Firebug.toggleBar()"/>
         <command id="cmd_detachFirebug" oncommand="Firebug.toggleDetachBar(false, true)"/>
         <command id="cmd_minimizeFirebug" oncommand="Firebug.minimizeBar()"/>
         <command id="cmd_toggleDetachFirebug" oncommand="Firebug.toggleDetachBar(false, true)"/>
@@ -102,7 +100,6 @@
         <key id="key_leftFirebugTab" keycode="VK_PAGE_UP" modifiers="accel shift" command="cmd_leftFirebugTab" class="fbOnlyKey"/>
         <key id="key_rightFirebugTab" keycode="VK_PAGE_DOWN" modifiers="accel shift" command="cmd_rightFirebugTab" class="fbOnlyKey"/>
         <key id="key_customizeFBKeys" key="b" modifiers=",accel shift alt" command="cmd_customizeFBKeys" class="fbOnlyKey"/>
-        <key id="key_toggleFirebug" keycode="VK_F12" command="cmd_toggleFirebug"/>
         <key id="key_detachFirebug" keycode="VK_F12" modifiers="accel" command="cmd_detachFirebug"/>
         <key id="key_closeFirebug" keycode="VK_F12" modifiers="shift" command="cmd_closeFirebug"/>
         <key id="key_clearConsole" key="r" modifiers="accel,shift" command="cmd_clearConsole" class="fbOnlyKey"/>

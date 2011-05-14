@@ -53,3 +53,12 @@ window.FBL =
 }
 
 // ********************************************************************************************* //
+// Called by firebugFrame main.js to pump global back up to top window.
+window.legacyPatch = function(FBL, Firebug)
+{
+    if (top === window)
+        return;
+
+    top.FBL = FBL;
+    top.Firebug = Firebug;
+}
