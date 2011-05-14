@@ -104,7 +104,7 @@ function dumpDependencyTree(tree)
             result["main"] = resolveDeps(p, tree[p], "");
     }
 
-    FBTrace.sysout("Firebug module dependecy tree: ", result);
+    FBTrace.sysout("Firebug module dependency tree: ", result);
 }
 
 // ********************************************************************************************* //
