@@ -38,10 +38,15 @@ const Cc = Components.classes;
 const Ci = Components.interfaces;
 
 // xxxHonza: RJS
-Components.utils["import"]("resource://firebug/firebug-service.js");
+var FBS = {};
+Components.utils["import"]("resource://firebug/firebug-service.js", FBS);
 
 // xxxHonza: the only global should be Firebug object.
 var FirebugReps = window.FirebugReps = {};
+
+var jsd = Components.classes["@mozilla.org/js/jsd/debugger-service;1"].
+    getService(Components.interfaces.jsdIDebuggerService);
+
 
 // ************************************************************************************************
 // Common Tags
@@ -263,7 +268,7 @@ FirebugReps.Func = domplate(Firebug.Rep,
             return;
 
         var scriptInfo = Firebug.SourceFile.getSourceFileAndLineByScript(context, script);
-        var monitored = scriptInfo ? FBL.fbs.isMonitored(scriptInfo.sourceFile.href, scriptInfo.lineNo) : false;
+        var monitored = scriptInfo ? FBS.fbs.isMonitored(scriptInfo.sourceFile.href, scriptInfo.lineNo) : false;
 
         var name = script ? StackFrame.getFunctionName(script, context) : fn.name;
         return [
@@ -964,7 +969,7 @@ FirebugReps.Element = domplate(Firebug.Rep,
             {label: "Copy CSS Path", id: "fbCopyCSSPath", command: OBJECT.bindFixed(this.copyCSSPath, this, elt) },
             "-",
             {label: "ShowEventsInConsole", id: "fbShowEventsInConsole", type: "checkbox", checked: monitored,
-             command: OBJECT.bindFixed(EventMonitor.toggleMonitorEvents, FBL, elt, null, monitored, context) },
+             command: OBJECT.bindFixed(EventMonitor.toggleMonitorEvents, EventMonitor, elt, null, monitored, context) },
             "-",
             {label: "ScrollIntoView", id: "fbScrollIntoView", command: OBJECT.bindFixed(elt.scrollIntoView, elt) }
         ]);
@@ -1743,7 +1748,7 @@ FirebugReps.ErrorMessage = domplate(Firebug.Rep,
 
     hasErrorBreak: function(error)
     {
-        return FBL.fbs.hasErrorBreakpoint(URL.normalizeURL(error.href), error.lineNo);
+        return FBS.fbs.hasErrorBreakpoint(URL.normalizeURL(error.href), error.lineNo);
     },
 
     getMessage: function(message)

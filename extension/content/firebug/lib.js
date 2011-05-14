@@ -103,6 +103,9 @@ for (var p in JSONLib)
 for (var p in Menu)
     FBL[p] = Menu[p];
 
+for (var p in ToggleBranch)
+    FBL[p] = ToggleBranch[p];
+
 for (var p in Debug)
     FBL[p] = Debug[p];
 
@@ -113,6 +116,11 @@ for (var p in Keywords)
 FBL.deprecated = Deprecated.deprecated;
 FBL.SourceLink = SourceLink.SourceLink;
 FBL.ToggleBranch = Menu.ToggleBranch;
+
+//FBL.ErrorCopy = FirebugReps.ErrorCopy;
+//FBL.ErrorMessageObj = FirebugReps.ErrorMessageObj;
+//FBL.EventCopy = DOM.EventCopy;
+//FBL.PropertyObj = FirebugReps.PropertyObj;
 
 // deprecated
 FBL.$ = function(id, doc)
