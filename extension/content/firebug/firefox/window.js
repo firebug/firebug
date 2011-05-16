@@ -73,7 +73,6 @@ WIN.getTabIdForWindow = function(win)
 },
 
 // ********************************************************************************************* //
-
 // Window iteration
 
 WIN.iterateWindows = function(win, handler)
@@ -158,7 +157,7 @@ WIN.iterateBrowserTabs = function(browserWindow, callback)
     return false;
 }
 
-// ************************************************************************************************
+// ********************************************************************************************* //
 
 WIN.getWindowId = function(win)
 {
