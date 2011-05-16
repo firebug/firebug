@@ -20,7 +20,8 @@ var WIN = {};
 
 var window = {};     // these declarations exist to cause errors if we accidently
 var document = {};   // reference these globals
-// ***********************************************************************************************
+
+// ********************************************************************************************* //
 // Crossbrowser API
 
 WIN.getWindowProxyIdForWindow = function(win)
@@ -71,7 +72,8 @@ WIN.getTabIdForWindow = function(win)
     return tab ? tab.linkedPanel : null;
 },
 
-// ************************************************************************************************
+// ********************************************************************************************* //
+
 // Window iteration
 
 WIN.iterateWindows = function(win, handler)
@@ -102,7 +104,7 @@ WIN.getRootWindow = function(win)
     return null;
 };
 
-// ************************************************************************************************
+// ********************************************************************************************* //
 // Firefox browsing
 
 WIN.openNewTab = function(url, postText)
@@ -120,10 +122,9 @@ WIN.openNewTab = function(url, postText)
         postData.setData(stringStream);
     }
 
-    return gBrowser.selectedTab = gBrowser.addTab(url, null, null, postData);
+    var tabBrowser = Firefox.getTabBrowser();
+    return tabBrowser.selectedTab = tabBrowser.addTab(url, null, null, postData);
 };
-
-
 
 // Iterate over all opened firefox windows of the given type. If the callback returns true
 // the iteration is stopped.
