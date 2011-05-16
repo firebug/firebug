@@ -7,9 +7,18 @@ define([
     "firebug/lib/object",
     "firebug/firefox/firefox",
     "firebug/lib/dom",
+    "firebug/lib/css",
+    "firebug/firefox/system",
     "firebug/firefox/menu",
+    "firebug/lib/url",
+    "firebug/lib/locale",
+    "firebug/lib/string",
+    "firebug/lib/events",
+    "firebug/js/fbs",
+    "firebug/firefox/window",
 ],
-function chromeFactory(OBJECT, Firefox, DOM, Menu) {
+function chromeFactory(OBJECT, Firefox, DOM, CSS, System, Menu, URL, Locale, String,
+    Events, FBS, WIN) {
 
 // ************************************************************************************************
 // Constants
@@ -216,9 +225,9 @@ var FirebugChrome =
             // Append all registered styleesheets into Firebug UI.
             for (var uri in Firebug.stylesheets)
             {
-                FBL.appendStylesheet(doc1, Firebug.stylesheets[uri]);
-                FBL.appendStylesheet(doc2, Firebug.stylesheets[uri]);
-                FBL.appendStylesheet(doc3, Firebug.stylesheets[uri]);
+                CSS.appendStylesheet(doc1, Firebug.stylesheets[uri]);
+                CSS.appendStylesheet(doc2, Firebug.stylesheets[uri]);
+                CSS.appendStylesheet(doc3, Firebug.stylesheets[uri]);
             }
 
             FirstRunPage.initializeUI();
@@ -552,7 +561,7 @@ var FirebugChrome =
         if (nextObject)
             this.select(nextObject);
         else
-            FBL.beep();
+            System.beep();
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
@@ -715,7 +724,7 @@ var FirebugChrome =
             return;
 
         location = location.href || location.url || location.toString();
-        if (Firebug.filterSystemURLs && FBL.isSystemURL(location))
+        if (Firebug.filterSystemURLs && URL.isSystemURL(location))
             return;
 
         return location;
@@ -839,10 +848,10 @@ var FirebugChrome =
         if (Firebug.currentContext)
         {
             var title = Firebug.currentContext.getTitle();
-            win.document.title = FBL.$STRF("WindowTitle", [title]);
+            win.document.title = Locale.$STRF("WindowTitle", [title]);
         }
         else
-            win.document.title = FBL.$STR("Firebug");
+            win.document.title = Locale.$STR("Firebug");
     },
 
     focusLocationList: function()
@@ -924,7 +933,7 @@ var FirebugChrome =
                         var rep = Firebug.getRep(object, Firebug.currentContext);
                         var objectTitle = rep.getTitle(object, Firebug.currentContext);
 
-                        var title = FBL.cropMultipleLines(objectTitle, statusCropSize);
+                        var title = String.cropMultipleLines(objectTitle, statusCropSize);
                         panelStatus.addItem(title, object, rep, panel.statusSeparator);
                     }
 
@@ -1006,7 +1015,7 @@ var FirebugChrome =
     keyCodeListen: function(key, filter, listener, capture)
     {
         if (!filter)
-            filter = FBL.noKeyModifiers;
+            filter = Events.noKeyModifiers;
 
         var keyCode = KeyEvent["DOM_VK_"+key];
 
@@ -1015,7 +1024,7 @@ var FirebugChrome =
             if (event.keyCode == keyCode && (!filter || filter(event)))
             {
                 listener();
-                FBL.cancelEvent(event);
+                Events.cancelEvent(event);
             }
         }
 
@@ -1027,7 +1036,7 @@ var FirebugChrome =
     keyListen: function(ch, filter, listener, capture)
     {
         if (!filter)
-            filter = FBL.noKeyModifiers;
+            filter = Events.noKeyModifiers;
 
         var charCode = ch.charCodeAt(0);
 
@@ -1036,7 +1045,7 @@ var FirebugChrome =
             if (event.charCode == charCode && (!filter || filter(event)))
             {
                 listener();
-                FBL.cancelEvent(event);
+                Events.cancelEvent(event);
             }
         }
 
@@ -1134,20 +1143,20 @@ var FirebugChrome =
 
     onMenuShowing: function(popup)
     {
-        var detachFirebug = FBL.getElementsByAttribute(popup, "id", "menu_detachFirebug")[0];
+        var detachFirebug = DOM.getElementsByAttribute(popup, "id", "menu_detachFirebug")[0];
         if (detachFirebug)
         {
             detachFirebug.setAttribute("label", (Firebug.isDetached() ?
-                FBL.$STR("firebug.AttachFirebug") : FBL.$STR("firebug.DetachFirebug")));
+                Locale.$STR("firebug.AttachFirebug") : Locale.$STR("firebug.DetachFirebug")));
         }
 
-        var toggleFirebug = FBL.getElementsByAttribute(popup, "id", "menu_toggleFirebug")[0];
+        var toggleFirebug = DOM.getElementsByAttribute(popup, "id", "menu_toggleFirebug")[0];
         if (toggleFirebug)
         {
             var fbContentBox = FirebugChrome.$("fbContentBox");
             var collapsed = fbContentBox.getAttribute("collapsed");
             toggleFirebug.setAttribute("label", (collapsed == "true"?
-                FBL.$STR("firebug.ShowFirebug") : FBL.$STR("firebug.HideFirebug")));
+                Locale.$STR("firebug.ShowFirebug") : Locale.$STR("firebug.HideFirebug")));
 
             // If Firebug is detached, hide the menu (F12 doesn't hide but just focuses the
             // external window)
@@ -1296,7 +1305,7 @@ var FirebugChrome =
 
         // 3. Add menu items from uiListeners
         var items = [];
-        FBL.dispatch(Firebug.uiListeners, "onContextMenu", [items, object, target,
+        Events.dispatch(Firebug.uiListeners, "onContextMenu", [items, object, target,
             Firebug.currentContext, panel, popup]);
 
         if (items)
@@ -1328,7 +1337,7 @@ var FirebugChrome =
                 var panelName = panelType.prototype.name;
 
                 var title = Firebug.getPanelTitle(panelType);
-                var label = FBL.$STRF("InspectInTab", [title]);
+                var label = Locale.$STRF("InspectInTab", [title]);
                 var id = "InspectIn" + panelName + "Tab";
 
                 var command = bindFixed(this.select, this, object, panelName);
@@ -1383,10 +1392,10 @@ var FirebugChrome =
             }
         }
 
-        if (FBL.hasClass(target, 'noteInToolTip'))
-            FBL.setClass(tooltip, 'noteInToolTip');
+        if (CSS.hasClass(target, 'noteInToolTip'))
+            CSS.setClass(tooltip, 'noteInToolTip');
         else
-            FBL.removeClass(tooltip, 'noteInToolTip');
+            CSS.removeClass(tooltip, 'noteInToolTip');
 
         if (target && target.hasAttribute("title"))
         {
@@ -1462,7 +1471,7 @@ var FirstRunPage =
     {
         // If the version in preferences is smaller than the current version
         // display the welcome page.
-        if (FBL.checkFirebugVersion(Firebug.currentVersion) > 0)
+        if (System.checkFirebugVersion(Firebug.currentVersion) > 0)
         {
             if (FBTrace.DBG_INITIALIZE)
                 FBTrace.sysout("FirstRunPage.initializeUI; current: " + Firebug.getVersion() +
@@ -1485,7 +1494,7 @@ var FirstRunPage =
                 return;
 
             // Avoid opening of the page in a second browser window.
-            if (FBL.checkFirebugVersion(Firebug.currentVersion) > 0)
+            if (System.checkFirebugVersion(Firebug.currentVersion) > 0)
             {
                 // Don't forget to update the preference so, the page is not displayed again
                 var version = Firebug.getVersion();
@@ -1493,7 +1502,7 @@ var FirstRunPage =
                 version = version.replace('X', '', "g");
 
                 // xxxHonza: put the URL in firebugURLs as soon as it's in chrome.js
-                FBL.openNewTab("http://getfirebug.com/firstrun#Firebug " + version);
+                WIN.openNewTab("http://getfirebug.com/firstrun#Firebug " + version);
             }
         }, 500);
     }
@@ -1748,9 +1757,9 @@ function onSelectingPanel(event)
 
 function onMouseScroll(event)
 {
-    if (FBL.isControlAlt(event))
+    if (Events.isControlAlt(event))
     {
-        FBL.cancelEvent(event);
+        Events.cancelEvent(event);
         Firebug.Options.changeTextSize(-event.detail);
     }
 }
@@ -1813,18 +1822,18 @@ function onPanelClick(event)
         if (!realObject)
             realObject = object;
 
-        if (FBL.isLeftClick(event))
+        if (Events.isLeftClick(event))
         {
-            if (FBL.hasClass(repNode, "objectLink"))
+            if (CSS.hasClass(repNode, "objectLink"))
             {
                 if (realRep)
                 {
                     realRep.inspectObject(realObject, Firebug.currentContext);
-                    FBL.cancelEvent(event);
+                    Events.cancelEvent(event);
                 }
             }
         }
-        else if (FBL.isControlClick(event) || FBL.isMiddleClick(event))
+        else if (Events.isControlClick(event) || Events.isMiddleClick(event))
         {
             if (!realRep || !realRep.browseObject(realObject, Firebug.currentContext))
             {
@@ -1835,38 +1844,38 @@ function onPanelClick(event)
                         return;
                 }
             }
-            FBL.cancelEvent(event);
+            Events.cancelEvent(event);
         }
     }
 }
 
 function onPanelMouseDown(event)
 {
-    if (FBL.isLeftClick(event))
+    if (Events.isLeftClick(event))
     {
         this.lastMouseDownPosition = {x: event.screenX, y: event.screenY};
     }
-    else if (FBL.isMiddleClick(event, true) && FBL.isControlAlt(event))
+    else if (Events.isMiddleClick(event, true) && Events.isControlAlt(event))
     {
-        FBL.cancelEvent(event);
+        Events.cancelEvent(event);
         Firebug.Options.setTextSize(0);
     }
-    else if (FBL.isMiddleClick(event) && Firebug.getRepNode(event.target))
+    else if (Events.isMiddleClick(event) && Firebug.getRepNode(event.target))
     {
         // Prevent auto-scroll when middle-clicking a rep object
-        FBL.cancelEvent(event);
+        Events.cancelEvent(event);
     }
 }
 
 function onPanelMouseUp(event)
 {
-    if (FBL.isLeftClick(event))
+    if (Events.isLeftClick(event))
     {
         var selection = event.target.ownerDocument.defaultView.getSelection();
         var target = selection.focusNode || event.target;
         if(selection.focusNode === selection.anchorNode){
-            var editable = FBL.getAncestorByClass(target, "editable");
-            if (editable || FBL.hasClass(event.target, "inlineExpander"))
+            var editable = DOM.getAncestorByClass(target, "editable");
+            if (editable || CSS.hasClass(event.target, "inlineExpander"))
             {
                 var selectionData;
                 var selFO = selection.focusOffset,selAO = selection.anchorOffset;
@@ -1890,7 +1899,7 @@ function onPanelMouseUp(event)
                     Firebug.Editor.setSelection(selectionData || {start: selFO, end: selFO})
                     selection.removeAllRanges()
                 }
-                FBL.cancelEvent(event);
+                Events.cancelEvent(event);
             }
         }
     }
