@@ -1,7 +1,6 @@
 /* See license.txt for terms of usage */
 
 define([
-    "firebug/lib",
     "firebug/lib/object",
     "firebug/firebug",
     "firebug/domplate",
@@ -25,7 +24,7 @@ define([
     "firebug/breakpoint",
     "firebug/searchBox",
 ],
-function(FBL, OBJECT, Firebug, Domplate, FirebugReps, Locale, ToolsInterface, Events, Wrapper,
+function(OBJECT, Firebug, Domplate, FirebugReps, Locale, ToolsInterface, Events, Wrapper,
     SourceLink, StackFrame, DOM, CSS, Search, STR, ARR, Persist, ToggleBranch, System, Menu) {
 
 with (Domplate) {

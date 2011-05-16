@@ -1,14 +1,13 @@
 /* See license.txt for terms of usage */
 
 define([
-    "firebug/lib",
     "firebug/lib/object",
     "firebug/firebug",
     "arch/tools",
     "firebug/lib/locale",
     "firebug/lib/url",
 ],
-function(FBL, OBJECT, Firebug, ToolsInterface, Locale, URL) {
+function(OBJECT, Firebug, ToolsInterface, Locale, URL) {
 
 // ************************************************************************************************
 // Constants

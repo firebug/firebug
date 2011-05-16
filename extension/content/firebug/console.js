@@ -1,7 +1,6 @@
 /* See license.txt for terms of usage */
 
 define([
-    "firebug/lib",
     "firebug/lib/object",
     "firebug/firebug",
     "firebug/firefox/firefox",
@@ -19,7 +18,7 @@ define([
     "firebug/searchBox",
     "firebug/errors",
 ],
-function(FBL, OBJECT, Firebug, Firefox, FirebugReps, Locale, ToolsInterface, Events, CSS, DOM,
+function(OBJECT, Firebug, Firefox, FirebugReps, Locale, ToolsInterface, Events, CSS, DOM,
     WIN, Search, XML, Menu) {
 
 // ************************************************************************************************

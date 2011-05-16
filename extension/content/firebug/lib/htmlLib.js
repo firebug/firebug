@@ -7,8 +7,9 @@ define([
     "firebug/lib/dom",
     "firebug/lib/search",
     "firebug/lib/xml",
+    "firebug/lib/string",
 ],
-function(OBJECT, Events, CSS, DOM, Search, XML) {
+function(OBJECT, Events, CSS, DOM, Search, XML, STR) {
 
 // ********************************************************************************************* //
 // Constants
@@ -688,7 +689,7 @@ var HTMLLib =
     {
         if (node instanceof window.HTMLAppletElement)
             return false;
-        return node.nodeType == window.Node.TEXT_NODE && FBL.isWhitespace(node.nodeValue);
+        return node.nodeType == window.Node.TEXT_NODE && STR.isWhitespace(node.nodeValue);
     },
 
     /**

@@ -1,7 +1,6 @@
 /* See license.txt for terms of usage */
 
 define([
-    "firebug/lib",
     "firebug/lib/object",
     "firebug/firebug",
     "firebug/domplate",
@@ -12,8 +11,9 @@ define([
     "firebug/lib/dom",
     "firebug/lib/css",
     "firebug/lib/string",
+    "firebug/js/fbs",
 ],
-function(FBL, OBJECT, Firebug, Domplate, FirebugReps, Locale, Wrapper, StackFrame, DOM, CSS, STR) {
+function(OBJECT, Firebug, Domplate, FirebugReps, Locale, Wrapper, StackFrame, DOM, CSS, STR, FBS) {
 
 // ********************************************************************************************* //
 
@@ -92,7 +92,7 @@ Firebug.MemoryProfiler = OBJECT.extend(Firebug.Module,
     start: function(context, title)
     {
         this.profiling = true;
-        FBL.fbs.addHandler(this);
+        FBS.addHandler(this);
 
         // Initialize structures for collected memory data.
         context.memoryProfileStack = []; // Holds memory reports for called fucntions.
@@ -115,7 +115,7 @@ Firebug.MemoryProfiler = OBJECT.extend(Firebug.Module,
 
     stop: function(context)
     {
-        FBL.fbs.removeHandler(this);
+        FBS.removeHandler(this);
         this.profiling = false;
 
         // Calculate total diff
@@ -396,7 +396,7 @@ Firebug.MemoryProfiler = OBJECT.extend(Firebug.Module,
                 captionBox.textContent = Locale.$STR("firebug.Memory Profiler Results");
 
             var timeBox = groupRow.getElementsByClassName("profileTime").item(0);
-            timeBox.textContent = "(" + FBL.formatTime(context.memoryProfileTime) + ")";
+            timeBox.textContent = "(" + STR.formatTime(context.memoryProfileTime) + ")";
 
             var groupBody = groupRow.lastChild;
             var sizer = Firebug.MemoryProfiler.ProfileTable.tag.replace(
@@ -668,7 +668,7 @@ Firebug.MemoryProfiler.ProfileCaption = domplate(Firebug.Rep,
 
 // ********************************************************************************************* //
 
-// FirebugReps.OBJECTLINK is not yet initialized (the FBL.ns not executed) at this moment.
+// FirebugReps.OBJECTLINK is not yet initialized at this moment.
 var OBJECTLINK =
     A({
         "class": "objectLink objectLink-$className a11yFocus",

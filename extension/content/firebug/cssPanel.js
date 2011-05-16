@@ -1,7 +1,6 @@
 /* See license.txt for terms of usage */
 
 define([
-    "firebug/lib",
     "firebug/lib/object",
     "firebug/firebug",
     "firebug/firefox/firefox",
@@ -28,7 +27,7 @@ define([
     "firebug/infotip",
     "firebug/searchBox",
 ],
-function(FBL, OBJECT, Firebug, Firefox, Domplate, FirebugReps, XPCOM, Locale, Events, Wrapper, URL,
+function(OBJECT, Firebug, Firefox, Domplate, FirebugReps, XPCOM, Locale, Events, Wrapper, URL,
     SourceLink, CSS, DOM, WIN, Search, XPATH, STR, XML, ARR, Persist, System) {
 
 with (Domplate) {
@@ -1117,7 +1116,7 @@ Firebug.CSSStyleSheetPanel.prototype = OBJECT.extend(Firebug.Panel,
         else if (object instanceof window.CSSStyleDeclaration)
             return 2;
         else if (object instanceof SourceLink.SourceLink && object.type == "css" &&
-            FBL.reCSS.test(object.href))
+            URL.reCSS.test(object.href))
             return 2;
         else
             return 0;
@@ -1281,16 +1280,16 @@ Firebug.CSSStyleSheetPanel.prototype = OBJECT.extend(Firebug.Panel,
         {
             items.push(
                 {label: "CopyColor",
-                    command: OBJECT.bindFixed(System.copyToClipboard, FBL, this.infoTipObject) }
+                    command: OBJECT.bindFixed(System.copyToClipboard, System, this.infoTipObject) }
             );
         }
         else if (this.infoTipType == "image")
         {
             items.push(
                 {label: "CopyImageLocation",
-                    command: OBJECT.bindFixed(System.copyToClipboard, FBL, this.infoTipObject) },
+                    command: OBJECT.bindFixed(System.copyToClipboard, System, this.infoTipObject) },
                 {label: "OpenImageInNewTab",
-                    command: OBJECT.bindFixed(WIN.openNewTab, FBL, this.infoTipObject) }
+                    command: OBJECT.bindFixed(WIN.openNewTab, WIN, this.infoTipObject) }
             );
         }
 

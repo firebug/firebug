@@ -1,7 +1,6 @@
 /* See license.txt for terms of usage */
 
 define([
-    "firebug/lib",
     "firebug/lib/object",
     "firebug/firebug",
     "firebug/reps",
@@ -15,7 +14,7 @@ define([
     "firebug/consoleExposed",
     "firebug/errors",
 ],
-function(FBL, OBJECT, Firebug, FirebugReps, Locale, Events, URL, StackFrame, WIN, Console, ARR) {
+function(OBJECT, Firebug, FirebugReps, Locale, Events, URL, StackFrame, WIN, Console, ARR) {
 
 // ********************************************************************************************* //
 // Constants

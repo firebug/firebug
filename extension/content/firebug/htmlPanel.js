@@ -1,7 +1,6 @@
 /* See license.txt for terms of usage */
 
 define([
-    "firebug/lib",
     "firebug/lib/object",
     "firebug/firebug",
     "firebug/domplate",
@@ -20,14 +19,15 @@ define([
     "firebug/lib/array",
     "firebug/persist",
     "firebug/firefox/menu",
+    "firebug/lib/url",
     "firebug/breakpoint",
     "firebug/editor",
     "firebug/infotip",
     "firebug/searchBox",
     "firebug/insideOutBox",
 ],
-function(FBL, OBJECT, Firebug, Domplate, FirebugReps, Locale, ToolsInterface, HTMLLib, Events,
-    SourceLink, CSS, DOM, WIN, XPATH, STR, XML, ARR, Persist, Menu) { with (Domplate) {
+function(OBJECT, Firebug, Domplate, FirebugReps, Locale, ToolsInterface, HTMLLib, Events,
+    SourceLink, CSS, DOM, WIN, XPATH, STR, XML, ARR, Persist, Menu, URL) { with (Domplate) {
 
 // ************************************************************************************************
 // Constants
@@ -1111,7 +1111,7 @@ Firebug.HTMLPanel.prototype = OBJECT.extend(WalkingPanel,
             object instanceof window.CDATASection)
             return 2;
         else if (object instanceof SourceLink.SourceLink && object.type == "css" &&
-            !FBL.reCSS.test(object.href))
+            !URL.reCSS.test(object.href))
             return 2;
         else
             return 0;
@@ -1144,7 +1144,7 @@ Firebug.HTMLPanel.prototype = OBJECT.extend(WalkingPanel,
         if (this.ioBox.sourceRow)
             this.ioBox.sourceRow.removeAttribute("exe_line");
 
-        if (object instanceof SourceLink.SourceLink) // && object.type == "css" and !FBL.reCSS(object.href) by supports
+        if (object instanceof SourceLink.SourceLink) // && object.type == "css" and !URL.reCSS(object.href) by supports
         {
             var sourceLink = object;
             var stylesheet = CSS.getStyleSheetByHref(sourceLink.href, this.context);
@@ -1164,7 +1164,7 @@ Firebug.HTMLPanel.prototype = OBJECT.extend(WalkingPanel,
                     for (var lineNo = 1; lineNo < sourceLink.line; lineNo++)
                     {
                         if (!sourceRow) break;
-                        sourceRow = FBL.getNextByClass(sourceRow,  "sourceRow");
+                        sourceRow = DOM.getNextByClass(sourceRow,  "sourceRow");
                     }
                     if (FBTrace.DBG_CSS)
                         FBTrace.sysout("html panel updateSelection sourceLink.line="+sourceLink.line
@@ -1816,7 +1816,7 @@ AttributeEditor.prototype = domplate(Firebug.InlineEditor.prototype,
                 element.removeAttribute(previousValue);
             if (value)
             {
-                var attrValue = FBL.getNextByClass(target, "nodeValue").textContent;
+                var attrValue = DOM.getNextByClass(target, "nodeValue").textContent;
                 element.setAttribute(value, attrValue);
             }
             else
@@ -1824,7 +1824,7 @@ AttributeEditor.prototype = domplate(Firebug.InlineEditor.prototype,
         }
         else if (CSS.hasClass(target, "nodeValue"))
         {
-            var attrName = FBL.getPreviousByClass(target, "nodeName").textContent;
+            var attrName = DOM.getPreviousByClass(target, "nodeName").textContent;
             element.setAttribute(attrName, value);
         }
         //this.panel.markChange();

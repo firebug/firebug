@@ -1,7 +1,6 @@
 /* See license.txt for terms of usage */
 
 define([
-    "firebug/lib",
     "firebug/lib/object",
     "firebug/firebug",
     "firebug/lib/xpcom",
@@ -9,7 +8,7 @@ define([
     "firebug/http/httpLib",
     "firebug/lib/string",
 ],
-function(FBL, OBJECT, Firebug, XPCOM, URL, HTTP, STR) {
+function(OBJECT, Firebug, XPCOM, URL, HTTP, STR) {
 
 // ************************************************************************************************
 // Constants
@@ -91,17 +90,17 @@ Firebug.SourceCache.prototype = OBJECT.extend(new Firebug.Listener(),
             return lines;
         }
 
-        var j = FBL.reJavascript.exec(url);
+        var j = URL.reJavascript.exec(url);
         if (j)
         {
-            var src = url.substring(FBL.reJavascript.lastIndex);
+            var src = url.substring(URL.reJavascript.lastIndex);
             var lines = STR.splitLines(src);
             this.cache[url] = lines;
 
             return lines;
         }
 
-        var c = FBL.reChrome.test(url);
+        var c = URL.reChrome.test(url);
         if (c)
         {
             if (Firebug.filterSystemURLs)
@@ -131,7 +130,7 @@ Firebug.SourceCache.prototype = OBJECT.extend(new Firebug.Listener(),
             return this.loadFromLocal(localURI.spec);
         }
 
-        c = FBL.reFile.test(url);
+        c = URL.reFile.test(url);
         if (c)
         {
             return this.loadFromLocal(url);

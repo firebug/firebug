@@ -600,7 +600,7 @@ StackFrame.getFunctionArgValues = function(frame)
 StackFrame.getArgumentsFromObjectScope = function(frame)
 {
     var argNames = frame.script.getParameterNames();
-    var scope = FBL.unwrapIValue(frame.scope, Firebug.viewChrome);
+    var scope = Wrapper.unwrapIValue(frame.scope, Firebug.viewChrome);
 
     var values = [];
 
@@ -611,7 +611,7 @@ StackFrame.getArgumentsFromObjectScope = function(frame)
         {
             var pvalue = scope[argName];
             //?? XXXjjb why are we unwrapping here, scope is a normal object
-            //var value = pvalue ? FBL.unwrapIValue(pvalue.value) : undefined;
+            //var value = pvalue ? Wrapper.unwrapIValue(pvalue.value) : undefined;
             values.push({name: argName, value: pvalue});
         }
         else

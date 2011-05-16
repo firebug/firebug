@@ -1,7 +1,6 @@
 /* See license.txt for terms of usage */
 
 define([
-    "firebug/lib",
     "firebug/lib/object",
     "firebug/firebug",
     "firebug/domplate",
@@ -15,9 +14,10 @@ define([
     "firebug/lib/css",
     "firebug/lib/dom",
     "firebug/lib/string",
+    "firebug/js/fbs",
 ],
-function(FBL, OBJECT, Firebug, Domplate, FirebugReps, Locale, Wrapper, ToolsInterface, URL,
-    StackFrame, Events, CSS, DOM, STR) {
+function(OBJECT, Firebug, Domplate, FirebugReps, Locale, Wrapper, ToolsInterface, URL,
+    StackFrame, Events, CSS, DOM, STR, FBS) {
 
 // ********************************************************************************************* //
 // Profiler
@@ -89,7 +89,7 @@ Firebug.Profiler = OBJECT.extend(Firebug.Module,
 
     toggleProfiling: function(context)
     {
-        if (FBL.fbs.profiling)
+        if (FBS.profiling)
             this.stopProfiling(context);
         else
             this.startProfiling(context);
@@ -97,7 +97,7 @@ Firebug.Profiler = OBJECT.extend(Firebug.Module,
 
     startProfiling: function(context, title)
     {
-        FBL.fbs.startProfiling();
+        FBS.startProfiling();
 
         Firebug.chrome.setGlobalAttribute("cmd_toggleProfiling", "checked", "true");
 
@@ -115,7 +115,7 @@ Firebug.Profiler = OBJECT.extend(Firebug.Module,
 
     stopProfiling: function(context, cancelReport)
     {
-        var totalTime = FBL.fbs.stopProfiling();
+        var totalTime = FBS.stopProfiling();
         if (totalTime == -1)
             return;
 
@@ -160,7 +160,8 @@ Firebug.Profiler = OBJECT.extend(Firebug.Module,
                 FBTrace.sysout("logProfileReport: "+sourceFileMap[url]+"\n");
         }
 
-        FBL.jsd.enumerateScripts({enumerateScript: function(script)
+        var jsd = Cc["@mozilla.org/js/jsd/debugger-service;1"].getService(Ci.jsdIDebuggerService);
+        jsd.enumerateScripts({enumerateScript: function(script)
         {
             if (script.callCount)
             {

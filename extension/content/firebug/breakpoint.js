@@ -1,7 +1,6 @@
 /* See license.txt for terms of usage */
 
 define([
-    "firebug/lib",
     "firebug/lib/object",
     "firebug/firebug",
     "firebug/domplate",
@@ -16,10 +15,11 @@ define([
     "firebug/lib/string",
     "firebug/lib/array",
     "firebug/firefox/menu",
+    "firebug/js/fbs",
     "firebug/editor",
 ],
-function(FBL, OBJECT, Firebug, Domplate, FirebugReps, Locale, Events, ToolsInterface, SourceLink,
-    StackFrame, CSS, DOM, STR, ARR, Menu) {
+function(OBJECT, Firebug, Domplate, FirebugReps, Locale, Events, ToolsInterface, SourceLink,
+    StackFrame, CSS, DOM, STR, ARR, Menu, FBS) {
 
 // ************************************************************************************************
 // Breakpoints
@@ -199,21 +199,21 @@ Firebug.Breakpoint.BreakpointRep = domplate(Firebug.Rep,
     removeBreakpoint: function(groupName, href, lineNumber)
     {
         if (groupName == "breakpoints")
-            FBL.fbs.clearBreakpoint(href, lineNumber);
+            FBS.clearBreakpoint(href, lineNumber);
         else if (groupName == "errorBreakpoints")
-            FBL.fbs.clearErrorBreakpoint(href, lineNumber);
+            FBS.clearErrorBreakpoint(href, lineNumber);
         else if (groupName == "monitors")
-            FBL.fbs.unmonitor(href, lineNumber);
+            FBS.unmonitor(href, lineNumber);
     },
 
     enableBreakpoint: function(href, lineNumber)
     {
-        FBL.fbs.enableBreakpoint(href, lineNumber);
+        FBS.enableBreakpoint(href, lineNumber);
     },
 
     disableBreakpoint: function(href, lineNumber)
     {
-        FBL.fbs.disableBreakpoint(href, lineNumber);
+        FBS.disableBreakpoint(href, lineNumber);
     },
 
     getContextMenuItems: function(breakpoint, target)
@@ -387,7 +387,7 @@ Firebug.Breakpoint.BreakpointsPanel.prototype = OBJECT.extend(Firebug.Panel,
 
         for (var url in context.sourceFileMap)
         {
-            FBL.fbs.enumerateBreakpoints(url, {call: function(url, line, props, scripts)
+            FBS.enumerateBreakpoints(url, {call: function(url, line, props, scripts)
             {
                 if (FBTrace.DBG_BP)
                     FBTrace.sysout("breakpoints.extractBreakpoints type: "+props.type+" in url "+
@@ -425,7 +425,7 @@ Firebug.Breakpoint.BreakpointsPanel.prototype = OBJECT.extend(Firebug.Panel,
                 breakpoints.push(new Breakpoint(name, url, line, !props.disabled, source, isFuture));
             }});
 
-            FBL.fbs.enumerateErrorBreakpoints(url, {call: function(url, line, props)
+            FBS.enumerateErrorBreakpoints(url, {call: function(url, line, props)
             {
                 if (renamer.checkForRename(url, line, props)) // some url in this sourceFileMap has changed, we'll be back.
                     return;
@@ -435,7 +435,7 @@ Firebug.Breakpoint.BreakpointsPanel.prototype = OBJECT.extend(Firebug.Panel,
                 errorBreakpoints.push(new Breakpoint(name, url, line, true, source));
             }});
 
-            FBL.fbs.enumerateMonitors(url, {call: function(url, line, props)
+            FBS.enumerateMonitors(url, {call: function(url, line, props)
             {
                 if (renamer.checkForRename(url, line, props)) // some url in this sourceFileMap has changed, we'll be back.
                     return;
@@ -559,7 +559,7 @@ function countBreakpoints(context)
     var count = 0;
     for (var url in context.sourceFileMap)
     {
-        FBL.fbs.enumerateBreakpoints(url, {call: function(url, lineNo)
+        FBS.enumerateBreakpoints(url, {call: function(url, lineNo)
         {
             ++count;
         }});
@@ -690,14 +690,14 @@ SourceFileRenamer.prototype.renameSourceFiles = function(context)
         var newURL = Firebug.Debugger.getURLFromMD5(callerURL, sourceFile.source, kind);
         sourceFile.href = newURL.href;
 
-        FBL.fbs.removeBreakpoint(bp.type, oldURL, bp.lineNo);
+        FBS.removeBreakpoint(bp.type, oldURL, bp.lineNo);
         delete context.sourceFileMap[oldURL];  // SourceFile delete
 
         if (FBTrace.DBG_SOURCEFILES)
             FBTrace.sysout("breakpoints.renameSourceFiles type: "+bp.type, bp);
 
         Firebug.Debugger.watchSourceFile(context, sourceFile);
-        var newBP = FBL.fbs.addBreakpoint(sameType, sourceFile, sameLineNo, bp, Firebug.Debugger);
+        var newBP = FBS.addBreakpoint(sameType, sourceFile, sameLineNo, bp, Firebug.Debugger);
 
         var panel = context.getPanel("script", true);
         if (panel)
@@ -818,7 +818,7 @@ Firebug.Breakpoint.ConditionEditor.prototype = domplate(Firebug.InlineEditor.pro
             var lineNo = parseInt(this.target.textContent);
             // TODO rest is mozilla backend
             var sourceFile = compilationUnit.sourceFile;
-            FBL.fbs.setBreakpointCondition(sourceFile, lineNo, value, Firebug.Debugger);
+            FBS.setBreakpointCondition(sourceFile, lineNo, value, Firebug.Debugger);
         }
     },
 });

@@ -1,14 +1,13 @@
 /* See license.txt for terms of usage */
 
 define([
-    "firebug/lib",
     "firebug/lib/object",
     "firebug/firebug",
     "firebug/lib/events",
     "firebug/lib/css",
     "firebug/lib/dom",
 ],
-function(FBL, OBJECT, Firebug, Events, CSS, DOM) {
+function(OBJECT, Firebug, Events, CSS, DOM) {
 
 // ************************************************************************************************
 

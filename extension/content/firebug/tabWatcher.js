@@ -1,7 +1,6 @@
 /* See license.txt for terms of usage */
 
 define([
-    "firebug/lib",
     "firebug/lib/object",
     "firebug/firebug",
     "firebug/firefox/firefox",
@@ -16,7 +15,7 @@ define([
     "firebug/lib/debug",
     "firebug/tabContext",
 ],
-function(FBL, OBJECT, Firebug, Firefox, XPCOM, HttpRequestObserver, Events, URL, HTTP, WIN,
+function(OBJECT, Firebug, Firefox, XPCOM, HttpRequestObserver, Events, URL, HTTP, WIN,
     STR, ARR, Debug) {
 
 // ************************************************************************************************

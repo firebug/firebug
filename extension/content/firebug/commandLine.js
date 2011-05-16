@@ -1,7 +1,6 @@
 /* See license.txt for terms of usage */
 
 define([
-    "firebug/lib",
     "firebug/lib/object",
     "firebug/firebug",
     "firebug/reps",
@@ -23,7 +22,7 @@ define([
     "firebug/console",
     "firebug/commandLineExposed"
 ],
-function(FBL, OBJECT, Firebug, FirebugReps, Locale, Events, Wrapper, URL, CSS, DOM, WIN, System, XPATH,
+function(OBJECT, Firebug, FirebugReps, Locale, Events, Wrapper, URL, CSS, DOM, WIN, System, XPATH,
     STR, XML, ARR, Persist, EventMonitor, Keywords) {
 
 // ************************************************************************************************

@@ -1,7 +1,6 @@
 /* See license.txt for terms of usage */
 
 define([
-    "firebug/lib",
     "firebug/lib/object",
     "firebug/firebug",
     "firebug/reps",
@@ -10,7 +9,7 @@ define([
     "firebug/firefox/window",
     "firebug/lib/array",
 ],
-function(FBL, OBJECT, Firebug, FirebugReps, XPCOM, CSS, WIN, ARR) {
+function(OBJECT, Firebug, FirebugReps, XPCOM, CSS, WIN, ARR) {
 
 // **********************************************************************************************//
 // Constants

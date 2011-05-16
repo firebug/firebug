@@ -1,7 +1,6 @@
 /* See license.txt for terms of usage */
 
 define([
-    "firebug/lib",
     "firebug/lib/object",
     "firebug/firebug",
     "firebug/firefox/firefox",
@@ -13,8 +12,10 @@ define([
     "firebug/lib/dom",
     "firebug/lib/xml",
     "firebug/firefox/window",
+    "firebug/firefox/system",
 ],
-function(FBL, OBJECT, Firebug, Firefox, FirebugReps, Locale, Events, Wrapper, CSS, DOM, XML, WIN) {
+function(OBJECT, Firebug, Firefox, FirebugReps, Locale, Events, Wrapper, CSS, DOM, XML,
+    WIN, System) {
 
 // ************************************************************************************************
 // Constants
@@ -371,7 +372,7 @@ Firebug.Inspector = OBJECT.extend(Firebug.Module,
         if (target && DOM.isElement(target))
             this.inspectNode(target);
         else
-            FBL.beep();
+            System.beep();
     },
 
     /**

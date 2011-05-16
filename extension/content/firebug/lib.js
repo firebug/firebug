@@ -122,6 +122,8 @@ FBL.ToggleBranch = Menu.ToggleBranch;
 //FBL.EventCopy = DOM.EventCopy;
 //FBL.PropertyObj = FirebugReps.PropertyObj;
 
+//FBL.NetFileLink = Firebug.NetMonitor.NetFileLink;
+
 // deprecated
 FBL.$ = function(id, doc)
 {
@@ -145,11 +147,6 @@ Components.utils["import"]("resource://firebug/firebug-service.js");
 FBL.fbs = fbs; // left over from component.
 
 // deprecated
-FBL.reDataURL = /data:text\/javascript;fileName=([^;]*);baseLineNumber=(\d*?),((?:.*?%0A)|(?:.*))/g;
-FBL.reJavascript = /\s*javascript:\s*(.*)/;
-FBL.reChrome = /chrome:\/\/([^\/]*)\//;
-FBL.reCSS = /\.css$/;
-FBL.reFile = /file:\/\/([^\/]*)\//;
 FBL.reUpperCase = /[A-Z]/;
 
 // ********************************************************************************************* //

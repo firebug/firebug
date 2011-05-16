@@ -1,7 +1,6 @@
 /* See license.txt for terms of usage */
 
 define([
-    "firebug/lib",
     "firebug/lib/object",
     "firebug/firebug",
     "arch/tools",
@@ -11,7 +10,7 @@ define([
     "firebug/lib/dom",
     "firebug/lib/string",
 ],
-function(FBL, OBJECT, Firebug, ToolsInterface, Events, SourceLink, CSS, DOM, STR) {
+function(OBJECT, Firebug, ToolsInterface, Events, SourceLink, CSS, DOM, STR) {
 
 // ************************************************************************************************
 // Constants

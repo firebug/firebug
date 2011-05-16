@@ -1,6 +1,9 @@
 /* See license.txt for terms of usage */
 
-define([], function() {
+define([
+    "firebug/lib/string"
+],
+function(STR) {
 
 // ********************************************************************************************* //
 // Constants
@@ -69,7 +72,7 @@ XPATH.cssToXPath = function(rule)
         lastRule = rule;
 
         // Trim leading whitespace
-        rule = FBL.trim(rule);
+        rule = STR.trim(rule);
         if (!rule.length)
             break;
 

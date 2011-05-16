@@ -1,7 +1,6 @@
 /* See license.txt for terms of usage */
 
 define([
-    "firebug/lib",
     "firebug/lib/object",
     "firebug/firebug",
     "firebug/domplate",
@@ -21,7 +20,7 @@ define([
     "firebug/netPanel",
     "firebug/errors",
 ],
-function(FBL, OBJECT, Firebug, Domplate, FirebugReps, Events, HttpRequestObserver, StackFrame,
+function(OBJECT, Firebug, Domplate, FirebugReps, Events, HttpRequestObserver, StackFrame,
     HTTP, CSS, DOM, WIN, System, STR, URL, ARR, Debug) {
 
 // ************************************************************************************************
@@ -966,7 +965,7 @@ function updateTime(spy)
 {
     var timeBox = spy.logRow.getElementsByClassName("spyTime").item(0);
     if (spy.responseTime)
-        timeBox.textContent = " " + FBL.formatTime(spy.responseTime);
+        timeBox.textContent = " " + STR.formatTime(spy.responseTime);
 }
 
 function updateLogRow(spy)

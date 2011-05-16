@@ -1,14 +1,13 @@
 /* See license.txt for terms of usage */
 
 define([
-    "firebug/lib",
     "firebug/lib/object",
     "firebug/firebug",
     "firebug/lib/url",
     "firebug/sourceLink",
     "firebug/lib/stackFrame",
 ],
-function(FBL, OBJECT, Firebug, URL, SourceLink, StackFrame) {
+function(OBJECT, Firebug, URL, SourceLink, StackFrame) {
 
 // ********************************************************************************************* //
 // Constants
@@ -18,6 +17,8 @@ const Ci = Components.interfaces;
 
 const PCMAP_SOURCETEXT = Ci.jsdIScript.PCMAP_SOURCETEXT;
 const PCMAP_PRETTYPRINT = Ci.jsdIScript.PCMAP_PRETTYPRINT;
+
+var jsd = Cc["@mozilla.org/js/jsd/debugger-service;1"].getService(Ci.jsdIDebuggerService);
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -602,7 +603,6 @@ Firebug.EventSourceFile.prototype = OBJECT.descend(new Firebug.SourceFile("event
     {
         return new Firebug.EventSourceFile.OuterScriptAnalyzer(this);
     },
-
 });
 
 Firebug.EventSourceFile.OuterScriptAnalyzer = function(sourceFile)
@@ -619,6 +619,7 @@ Firebug.EventSourceFile.OuterScriptAnalyzer.prototype =
         var line = script.pcToLine(frame.pc, PCMAP_PRETTYPRINT);
         return line - 1;
     },
+
     // Interpret frame to give fn(args)
     getFunctionDescription: function(script, context, frame)
     {
@@ -636,9 +637,10 @@ Firebug.EventSourceFile.OuterScriptAnalyzer.prototype =
         }
         return {name: name, args: args};
     },
+
     getSourceLinkForScript: function (script)
     {
-        return new SourceLink.SourceLink(this.sourceFile.href, 1, "js");  // XXXjjb why do we need FBL.??
+        return new SourceLink.SourceLink(this.sourceFile.href, 1, "js");
     }
 }
 
@@ -657,7 +659,6 @@ Firebug.SourceFile.CommonBase =
     {
         return Firebug.TopLevelSourceFile.OuterScriptAnalyzer;
     },
-
 }
 
 // ********************************************************************************************* //
@@ -868,13 +869,13 @@ Firebug.SourceFile.findScriptForFunctionInContext = function(context, fn)
     if (!fn || typeof(fn) !== 'function')
         return found;
 
-    var wrapped = FBL.jsd.wrapValue(fn);
+    var wrapped = jsd.wrapValue(fn);
     found = wrapped.script;
     if (!found)
         found = wrapped.jsParent.script;
 
     if (!found && FBTrace.DBG_ERRORS)
-        FBTrace.sysout("findScriptForFunctionInContext ",{fn: fn, wrapValue: FBL.jsd.wrapValue(fn),
+        FBTrace.sysout("findScriptForFunctionInContext ",{fn: fn, wrapValue: jsd.wrapValue(fn),
             found: found});
 
     if (FBTrace.DBG_FUNCTION_NAMES)

@@ -1,7 +1,6 @@
 /* See license.txt for terms of usage */
 
 define([
-    "firebug/lib",
     "firebug/lib/object",
     "firebug/firebug",
     "firebug/firefox/firefox",
@@ -38,7 +37,7 @@ define([
     "firebug/searchBox",
     "firebug/errors",
 ],
-function(FBL, OBJECT, Firebug, Firefox, Domplate, XPCOM, ToolsInterface, HttpRequestObserver, Locale,
+function(OBJECT, Firebug, Firefox, Domplate, XPCOM, ToolsInterface, HttpRequestObserver, Locale,
     Events, Options, URL, SourceLink, HTTP, StackFrame, CSS, DOM, WIN, Search, STR, XML,
     JSONLib, ARR, Persist, ToggleBranch, System, Menu, DragDrop) {
 
@@ -674,7 +673,7 @@ NetPanel.prototype = OBJECT.extend(Firebug.ActivablePanel,
         var isPost = Utils.isURLEncodedRequest(file, this.context);
 
         items.push(
-            {label: "CopyLocation", command: OBJECT.bindFixed(System.copyToClipboard, FBL, file.href) }
+            {label: "CopyLocation", command: OBJECT.bindFixed(System.copyToClipboard, System, file.href) }
         );
 
         if (isPost)
@@ -782,7 +781,7 @@ NetPanel.prototype = OBJECT.extend(Firebug.ActivablePanel,
 
     openRequestInTab: function(file)
     {
-        FBL.openNewTab(file.href, file.postText);
+        WIN.openNewTab(file.href, file.postText);
     },
 
     openResponseInTab: function(file)
@@ -1076,7 +1075,7 @@ NetPanel.prototype = OBJECT.extend(Firebug.ActivablePanel,
 
         if (FBTrace.DBG_NET)
             FBTrace.sysout("net.updateLayout; Layout done, time elapsed: " +
-                FBL.formatTime(now() - rightNow) + " (" + length + ")");
+                STR.formatTime(now() - rightNow) + " (" + length + ")");
     },
 
     layout: function()
@@ -2238,8 +2237,7 @@ Firebug.NetMonitor.NetRequestEntry = domplate(Firebug.Rep, new Firebug.Listener(
 
     formatTime: function(elapsed)
     {
-        // Use formatTime util from the lib.
-        return FBL.formatTime(elapsed);
+        return STR.formatTime(elapsed);
     }
 });
 
@@ -3160,12 +3158,12 @@ Firebug.NetMonitor.TimeInfoTip = domplate(Firebug.Rep,
 
     formatTime: function(time)
     {
-        return FBL.formatTime(time)
+        return STR.formatTime(time)
     },
 
     formatStartTime: function(time)
     {
-        var label = FBL.formatTime(time);
+        var label = STR.formatTime(time);
         if (!time)
             return label;
 
@@ -3367,7 +3365,7 @@ Firebug.NetMonitor.NetLimit = domplate(Firebug.Rep,
 
     onPreferences: function(event)
     {
-        FBL.openNewTab("about:config");
+        WIN.openNewTab("about:config");
     },
 
     updateCounter: function(row)
@@ -3612,7 +3610,7 @@ NetProgress.prototype =
             this.context.breakingCause = {
                 title: Locale.$STR("net.Break On XHR"),
                 message: STR.cropString(file.href, 200),
-                copyAction: OBJECT.bindFixed(System.copyToClipboard, FBL, file.href)
+                copyAction: OBJECT.bindFixed(System.copyToClipboard, System, file.href)
             };
 
             halt = true;
@@ -4059,7 +4057,7 @@ NetProgress.prototype =
         if (noCreate)
             return null;
 
-        if (!win || FBL.getRootWindow(win) != this.context.window)
+        if (!win || WIN.getRootWindow(win) != this.context.window)
             return;
 
         var fileDoc = this.getRequestDocument(win);
@@ -4459,15 +4457,15 @@ NetPhase.prototype =
 
 /*
  * Use this object to automatically select Net panel and inspect a network request.
- * Firebug.chrome.select(new FBL.NetFileLink(url [, request]));
+ * Firebug.chrome.select(new Firebug.NetMonitor.NetFileLink(url [, request]));
  */
-FBL.NetFileLink = function(href, request)
+Firebug.NetMonitor.NetFileLink = function(href, request)
 {
     this.href = href;
     this.request = request;
 }
 
-FBL.NetFileLink.prototype =
+Firebug.NetMonitor.NetFileLink.prototype =
 {
     toString: function()
     {
@@ -5197,16 +5195,9 @@ Firebug.NetMonitor.NetHttpActivityObserver =
     {
         try
         {
-            if (typeof(FBL) !== "undefined")
-            {
-                if (httpChannel instanceof Ci.nsIHttpChannel)
-                    this.observeRequest(httpChannel, activityType, activitySubtype, timestamp,
-                        extraSizeData, extraStringData);
-            }
-            else
-            {
-                FBTrace.sysout("net.observeActivity; ERROR FBL is unknown.");
-            }
+            if (httpChannel instanceof Ci.nsIHttpChannel)
+                this.observeRequest(httpChannel, activityType, activitySubtype, timestamp,
+                    extraSizeData, extraStringData);
         }
         catch (exc)
         {

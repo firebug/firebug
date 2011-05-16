@@ -1,11 +1,10 @@
 /* See license.txt for terms of usage */
 
 define([
-    "firebug/lib",
     "firebug/firebug",
     "firebug/lib/wrapper",
 ],
-function(FBL, Firebug, Wrapper) {
+function(Firebug, Wrapper) {
 
 // ********************************************************************************************* //
 // Command Line APIs

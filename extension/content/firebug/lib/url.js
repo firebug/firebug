@@ -20,6 +20,15 @@ const ioService = Cc["@mozilla.org/network/io-service;1"].getService(Ci.nsIIOSer
 var URL = {};
 
 // ************************************************************************************************
+// Regular expressions
+
+URL.reCSS = /\.css$/;
+URL.reJavascript = /\s*javascript:\s*(.*)/;
+URL.reFile = /file:\/\/([^\/]*)\//;
+URL.reChrome = /chrome:\/\/([^\/]*)\//;
+URL.reDataURL = /data:text\/javascript;fileName=([^;]*);baseLineNumber=(\d*?),((?:.*?%0A)|(?:.*))/g;
+
+// ************************************************************************************************
 // URLs
 
 URL.getFileName = function(url)

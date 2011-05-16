@@ -1,11 +1,10 @@
 /* See license.txt for terms of usage */
 
 define([
-    "firebug/lib",
     "firebug/lib/object",
     "firebug/firebug"
 ],
-function(FBL, OBJECT, Firebug) {
+function(OBJECT, Firebug) {
 
 // ************************************************************************************************
 // Trace Module

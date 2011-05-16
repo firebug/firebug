@@ -1,12 +1,11 @@
 /* See license.txt for terms of usage */
 
 define([
-    "firebug/lib",
     "firebug/lib/object",
     "firebug/firebug",
     "firebug/lib/debug",
 ],
-function(FBL, OBJECT, Firebug, Debug) {
+function(OBJECT, Firebug, Debug) {
 
 // ************************************************************************************************
 // This is a panel implemented as its own browser with its own URL

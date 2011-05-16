@@ -654,7 +654,7 @@ DOM.isDOMConstant = function(object, name)
         object instanceof Node ||
         object instanceof Location ||
         object instanceof Event ||
-        object instanceof DOM.EventCopy)) // FBL dep is wrong
+        object instanceof DOM.EventCopy))
         return false;
 
     return DOM.domConstantMap.hasOwnProperty(name);

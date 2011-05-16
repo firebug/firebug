@@ -1,7 +1,6 @@
 /* See license.txt for terms of usage */
 
 define([
-    "firebug/lib",
     "firebug/lib/object",
     "firebug/firebug",
     "firebug/domplate",
@@ -13,7 +12,7 @@ define([
     "firebug/firefox/menu",
     "firebug/editor",
 ],
-function(FBL, OBJECT, Firebug, Domplate, Locale, Events, CSS, DOM, XML, Menu) {
+function(OBJECT, Firebug, Domplate, Locale, Events, CSS, DOM, XML, Menu) {
 
 // ************************************************************************************************
 

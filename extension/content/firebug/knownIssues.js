@@ -1,13 +1,12 @@
 /* See license.txt for terms of usage */
 
 define([
-    "firebug/lib",
     "firebug/lib/object",
     "firebug/lib/options",
     "firebug/firebug",
     "firebug/lib/dom",
 ],
-function(FBL, OBJECT, Options, Firebug, DOM) {
+function(OBJECT, Options, Firebug, DOM) {
 
 // ********************************************************************************************* //
 // Constants

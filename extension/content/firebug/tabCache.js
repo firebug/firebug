@@ -1,7 +1,6 @@
 /* See license.txt for terms of usage */
 
 define([
-    "firebug/lib",
     "firebug/lib/object",
     "firebug/firebug",
     "firebug/lib/xpcom",
@@ -15,7 +14,7 @@ define([
     "firebug/firefox/window",
     "firebug/sourceCache",
 ],
-function(FBL, OBJECT, Firebug, XPCOM, HttpRequestObserver, HttpResponseObserver, Locale, Events,
+function(OBJECT, Firebug, XPCOM, HttpRequestObserver, HttpResponseObserver, Locale, Events,
     URL, HTTP, STR, WIN) {
 
 // ********************************************************************************************* //

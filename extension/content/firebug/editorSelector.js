@@ -1,12 +1,11 @@
 /* See license.txt for terms of usage */
 
 define([
-    "firebug/lib",
     "firebug/firebug",
     "firebug/lib/events",
     "arch/tools"
 ],
-function(FBL, Firebug, Events, ToolsInterface) {
+function(Firebug, Events, ToolsInterface) {
 
 // ********************************************************************************************* //
 // Reusable code for modules that support editing

@@ -1,13 +1,13 @@
 /* See license.txt for terms of usage */
 
 define([
-    "firebug/lib",
     "firebug/lib/object",
     "firebug/firebug",
     "firebug/lib/css",
     "firebug/lib/search",
+    "firebug/firefox/system",
 ],
-function(FBL, OBJECT, Firebug, CSS, Search) {
+function(OBJECT, Firebug, CSS, Search, System) {
 
 // ************************************************************************************************
 // Constants
@@ -92,7 +92,7 @@ Firebug.Search = OBJECT.extend(Firebug.Module,
         {
             var found = panel.search(value, reverse);
             if (!found && value)
-                FBL.beep();
+                System.beep();
 
             if (value)
             {
@@ -138,7 +138,7 @@ Firebug.Search = OBJECT.extend(Firebug.Module,
 
     onNotFound: function()
     {
-        FBL.beep();
+        System.beep();
     },
 
     isCaseSensitive: function(text)

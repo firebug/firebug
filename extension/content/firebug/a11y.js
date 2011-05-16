@@ -1,7 +1,6 @@
 /* See license.txt for terms of usage */
 
 define([
-    "firebug/lib",
     "firebug/lib/object",
     "firebug/firebug",
     "firebug/domplate",
@@ -16,7 +15,7 @@ define([
     "firebug/console",
     "firebug/infotip",
 ],
-function(FBL, OBJECT, Firebug, Domplate, Locale, ToolsInterface, Events, URL, CSS, DOM, XML, XPATH) {
+function(OBJECT, Firebug, Domplate, Locale, ToolsInterface, Events, URL, CSS, DOM, XML, XPATH) {
 
 // ************************************************************************************************
 // Constants
@@ -2597,7 +2596,7 @@ Firebug.A11yModel = OBJECT.extend(Firebug.Module,
         if (!button)
             button = 0;
         if (typeof node == "string")
-            throw new Error("a11y.dispatchMouseEvent obsolete API"); // not used; was node = FBL.$(node);
+            throw new Error("a11y.dispatchMouseEvent obsolete API");
         var doc = node.ownerDocument;
         var event = doc.createEvent('MouseEvents');
         event.initMouseEvent(eventType, true, true, doc.defaultView,
@@ -2676,9 +2675,9 @@ Firebug.A11yModel = OBJECT.extend(Firebug.Module,
         return panelA11y
     },
 
-    //these utils are almost the same as their FBL namesakes ,
-    //except that that the routine skips containers that are not visible (rather than wasting time on their childnodes)
-
+    // These utils are almost the same as their DOM namesakes,
+    // except that that the routine skips containers that are not visible
+    // (rather than wasting time on their childnodes)
     getPreviousByClass : function (node, className, downOnly, maxRoot)
     {
         if (!node)

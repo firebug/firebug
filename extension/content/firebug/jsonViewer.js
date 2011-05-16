@@ -1,7 +1,6 @@
 /* See license.txt for terms of usage */
 
 define([
-    "firebug/lib",
     "firebug/lib/object",
     "firebug/firebug",
     "firebug/domplate",
@@ -16,7 +15,7 @@ define([
     "firebug/domPanel",
     "firebug/reps"
 ],
-function(FBL, OBJECT, Firebug, Domplate, Locale, Events, CSS, DOM, HTTP, STR, JSONLib, ToggleBranch) {
+function(OBJECT, Firebug, Domplate, Locale, Events, CSS, DOM, HTTP, STR, JSONLib, ToggleBranch) {
 
 // ************************************************************************************************
 

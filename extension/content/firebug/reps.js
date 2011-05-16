@@ -1,7 +1,6 @@
 /* See license.txt for terms of usage */
 
 define([
-    "firebug/lib",
     "firebug/lib/object",
     "firebug/firebug",
     "firebug/domplate",
@@ -25,7 +24,7 @@ define([
     "firebug/eventMonitor",
     "firebug/firefox/menu",
 ],
-function(FBL, OBJECT, Firebug, Domplate, XPCOM, Locale, ToolsInterface, HTMLLib, Events, Wrapper,
+function(OBJECT, Firebug, Domplate, XPCOM, Locale, ToolsInterface, HTMLLib, Events, Wrapper,
     URL, SourceLink, StackFrame, CSS, DOM, WIN, System, XPATH, STR, XML, ToggleBranch,
     EventMonitor, Menu) {
 

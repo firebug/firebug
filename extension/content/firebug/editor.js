@@ -1,7 +1,6 @@
 /* See license.txt for terms of usage */
 
 define([
-    "firebug/lib",
     "firebug/lib/object",
     "firebug/firebug",
     "firebug/domplate",
@@ -14,7 +13,7 @@ define([
     "firebug/firefox/menu",
     "firebug/lib/debug",
 ],
-function(FBL, OBJECT, Firebug, Domplate, Locale, Events, CSS, DOM, STR, ARR, Menu, Debug) {
+function(OBJECT, Firebug, Domplate, Locale, Events, CSS, DOM, STR, ARR, Menu, Debug) {
 
 // ************************************************************************************************
 // Constants
@@ -264,7 +263,7 @@ Firebug.Editor = OBJECT.extend(Firebug.Module,
         {
             nextEditable = !value && currentGroup
                 ? getNextOutsider(nextEditable, currentGroup)
-                : FBL.getNextByClass(nextEditable, "editable");
+                : DOM.getNextByClass(nextEditable, "editable");
         }
         while (nextEditable && !nextEditable.offsetHeight);
 
@@ -282,7 +281,7 @@ Firebug.Editor = OBJECT.extend(Firebug.Module,
         {
             prevEditable = !value && currentGroup
                 ? getPreviousOutsider(prevEditable, currentGroup)
-                : FBL.getPreviousByClass(prevEditable, "editable");
+                : DOM.getPreviousByClass(prevEditable, "editable");
         }
         while (prevEditable && !prevEditable.offsetHeight);
 
@@ -307,7 +306,7 @@ Firebug.Editor = OBJECT.extend(Firebug.Module,
 
         var editable = CSS.hasClass(currentGroup, "editable")
             ? currentGroup
-            : FBL.getNextByClass(currentGroup, "editable");
+            : DOM.getNextByClass(currentGroup, "editable");
 
         if (editable)
             this.setEditTarget(editable);
@@ -1583,12 +1582,12 @@ function isGroupInsert(next, group)
 
 function getNextOutsider(element, group)
 {
-    return getOutsider(element, group, OBJECT.bind(FBL.getNextByClass, FBL, "editable"));
+    return getOutsider(element, group, OBJECT.bind(DOM.getNextByClass, DOM, "editable"));
 }
 
 function getPreviousOutsider(element, group)
 {
-    return getOutsider(element, group, OBJECT.bind(getPreviousByClass, FBL, "editable"));
+    return getOutsider(element, group, OBJECT.bind(DOM.getPreviousByClass, DOM, "editable"));
 }
 
 function getInlineParent(element)

@@ -1,7 +1,6 @@
 /* See license.txt for terms of usage */
 
 define([
-    "firebug/lib",
     "firebug/lib/object",
     "firebug/firebug",
     "firebug/reps",
@@ -14,7 +13,7 @@ define([
     "firebug/lib/dom",
     "firebug/firefox/menu",
 ],
-function(FBL, OBJECT, Firebug, FirebugReps, ToolsInterface, Events, Wrapper, StackFrame,
+function(OBJECT, Firebug, FirebugReps, ToolsInterface, Events, Wrapper, StackFrame,
     CSS, ARR, DOM, Menu) {
 
 // ************************************************************************************************

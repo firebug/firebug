@@ -1,7 +1,6 @@
 /* See license.txt for terms of usage */
 
 define([
-    "firebug/lib",
     "firebug/reps",
     "firebug/lib/locale",
     "firebug/lib/wrapper",
@@ -9,7 +8,7 @@ define([
     "firebug/lib/stackFrame",
     "firebug/errors",
 ],
-function(FBL, FirebugReps, Locale, Wrapper, URL, StackFrame) {
+function(FirebugReps, Locale, Wrapper, URL, StackFrame) {
 
 // ********************************************************************************************* //
 
