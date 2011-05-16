@@ -210,10 +210,6 @@ DragDrop.Tracker = Tracker;
 
 // ********************************************************************************************* //
 // Registration in Firebug namespace
-// xxxHonza: this shouldn't be necessary to do in order to access this module. It should be
-// possible to use the return value.
-
-Firebug.DragDrop = DragDrop;
 
 return DragDrop;
 

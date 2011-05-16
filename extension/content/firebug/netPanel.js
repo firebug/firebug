@@ -28,6 +28,7 @@ define([
     "firebug/toggleBranch",
     "firebug/firefox/system",
     "firebug/firefox/menu",
+    "firebug/dragdrop",
     "firebug/breakpoint",
     "firebug/xmlViewer",
     "firebug/svgViewer",
@@ -39,7 +40,7 @@ define([
 ],
 function(FBL, OBJECT, Firebug, Firefox, Domplate, XPCOM, ToolsInterface, HttpRequestObserver, Locale,
     Events, Options, URL, SourceLink, HTTP, StackFrame, CSS, DOM, WIN, Search, STR, XML,
-    JSONLib, ARR, Persist, ToggleBranch, System, Menu) {
+    JSONLib, ARR, Persist, ToggleBranch, System, Menu, DragDrop) {
 
 with (Domplate) {
 
@@ -2616,7 +2617,7 @@ Firebug.NetMonitor.NetInfoBody = domplate(Firebug.Rep, new Firebug.Listener(),
                 this.htmlPreview.style.height = defaultHeight + "px";
 
             var handler = netInfoBox.querySelector(".htmlPreviewResizer");
-            this.resizer = new Firebug.DragDrop.Tracker(handler, {
+            this.resizer = new DragDrop.Tracker(handler, {
                 onDragStart: OBJECT.bind(this.onDragStart, this),
                 onDragOver: OBJECT.bind(this.onDragOver, this),
                 onDrop: OBJECT.bind(this.onDrop, this)
