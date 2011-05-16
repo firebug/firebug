@@ -1176,7 +1176,7 @@ var FirebugChrome =
                 {
                     var checked = false;
                     if (option == "profiling")
-                        checked = FBL.fbs.profiling;
+                        checked = FBS.profiling;
                     else
                         checked = Firebug.Options.get(option);
 
