@@ -26,8 +26,6 @@ DOM.domUtils = Cc["@mozilla.org/inspector/dom-utils;1"].getService(Ci.inIDOMUtil
 
 DOM.getChildByClass = function(node) // ,classname, classname, classname...
 {
-    if (!node)
-        FBTrace.sysout("asfasdfasd");
     for (var i = 1; i < arguments.length; ++i)
     {
         var className = arguments[i];
