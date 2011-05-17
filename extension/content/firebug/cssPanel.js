@@ -370,7 +370,10 @@ Firebug.CSSModule = OBJECT.extend(OBJECT.extend(Firebug.Module, Firebug.EditorSe
 
     deleteRule: function(styleSheet, ruleIndex)
     {
-        if (FBTrace.DBG_CSS) FBTrace.sysout("deleteRule: " + ruleIndex + " " + styleSheet.cssRules.length, styleSheet.cssRules);
+        if (FBTrace.DBG_CSS)
+            FBTrace.sysout("deleteRule: " + ruleIndex + " " + styleSheet.cssRules.length,
+                styleSheet.cssRules);
+
         Events.dispatch(this.fbListeners, "onCSSDeleteRule", [styleSheet, ruleIndex]);
 
         styleSheet.deleteRule(ruleIndex);
@@ -394,7 +397,8 @@ Firebug.CSSModule = OBJECT.extend(OBJECT.extend(Firebug.Module, Firebug.EditorSe
         style.setProperty(propName, propValue, propPriority);
 
         if (propName) {
-            Events.dispatch(this.fbListeners, "onCSSSetProperty", [style, propName, propValue, propPriority, prevValue, prevPriority, rule, baseText]);
+            Events.dispatch(this.fbListeners, "onCSSSetProperty", [style, propName, propValue,
+                propPriority, prevValue, prevPriority, rule, baseText]);
         }
     },
 
@@ -411,9 +415,9 @@ Firebug.CSSModule = OBJECT.extend(OBJECT.extend(Firebug.Module, Firebug.EditorSe
 
         style.removeProperty(propName);
 
-        if (propName) {
-            Events.dispatch(this.fbListeners, "onCSSRemoveProperty", [style, propName, prevValue, prevPriority, rule, baseText]);
-        }
+        if (propName)
+            Events.dispatch(this.fbListeners, "onCSSRemoveProperty", [style, propName, prevValue,
+                prevPriority, rule, baseText]);
     },
 
     /**
@@ -475,13 +479,16 @@ Firebug.CSSModule = OBJECT.extend(OBJECT.extend(Firebug.Module, Firebug.EditorSe
                 var rules = styleSheets[i].cssRules;
                 if (rules.length > 0)
                     var touch = rules[0];
-                if (FBTrace.DBG_CSS && touch)
-                    FBTrace.sysout("css.show() touch "+typeof(touch)+" in "+(styleSheets[i].href?styleSheets[i].href:context.getName()));
+
+                //if (FBTrace.DBG_CSS && touch)
+                //    FBTrace.sysout("css.show() touch "+typeof(touch)+" in "+
+                //        (styleSheets[i].href?styleSheets[i].href:context.getName()));
             }
             catch(e)
             {
                 if (FBTrace.DBG_ERRORS)
-                    FBTrace.sysout("css.show: sheet.cssRules FAILS for "+(styleSheets[i]?styleSheets[i].href:"null sheet")+e, e);
+                    FBTrace.sysout("css.show: sheet.cssRules FAILS for "+
+                        (styleSheets[i]?styleSheets[i].href:"null sheet")+e, e);
             }
         }
     },
@@ -494,7 +501,8 @@ Firebug.CSSModule = OBJECT.extend(OBJECT.extend(Firebug.Module, Firebug.EditorSe
             this.cleanupSheets(target.ownerDocument, context);
         }
     },
-    // ****************************************************************************************************
+
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
     // Module functions
 
     initialize: function()
@@ -528,11 +536,9 @@ Firebug.CSSModule = OBJECT.extend(OBJECT.extend(Firebug.Module, Firebug.EditorSe
     {
         this.removeListener(context.dirtyListener);
     },
-
-    // *****************************************************************
 });
 
-// ************************************************************************************************
+// ********************************************************************************************* //
 
 Firebug.CSSStyleSheetPanel = function() {};
 
@@ -589,7 +595,8 @@ Firebug.CSSStyleSheetPanel.prototype = OBJECT.extend(Firebug.Panel,
         if (Firebug.CSSDirtyListener.isDirty(styleSheet, context))
         {
             var prompts = Cc["@mozilla.org/embedcomp/prompt-service;1"].getService(Ci.nsIPromptService);
-            var proceedToEdit = prompts.confirm(null, "Your existing CSS edits will be lost if you edit source", "Are you sure?");
+            var proceedToEdit = prompts.confirm(null,
+                "Your existing CSS edits will be lost if you edit source", "Are you sure?");
 
             if (!proceedToEdit)
             {
@@ -641,7 +648,9 @@ Firebug.CSSStyleSheetPanel.prototype = OBJECT.extend(Firebug.Panel,
             {
                 var mode = Firebug.CSSModule.getCurrentEditorName();
                 if (FBTrace.DBG_ERRORS)
-                    FBTrace.sysout("editor.startEditing ERROR "+exc, {name: mode, currentEditor: this.currentCSSEditor, styleSheet: styleSheet, CSSModule:Firebug.CSSModule});
+                    FBTrace.sysout("editor.startEditing ERROR "+exc, {name: mode,
+                        currentEditor: this.currentCSSEditor, styleSheet: styleSheet,
+                        CSSModule:Firebug.CSSModule});
             }
         }
     },
@@ -780,7 +789,8 @@ Firebug.CSSStyleSheetPanel.prototype = OBJECT.extend(Firebug.Panel,
             while (index--)
             {
                 var propName = style.item(count - index);
-                this.addProperty(propName, style.getPropertyValue(propName), !!style.getPropertyPriority(propName), false, inheritMode, props);
+                this.addProperty(propName, style.getPropertyValue(propName),
+                    !!style.getPropertyPriority(propName), false, inheritMode, props);
             }
         }
         else
@@ -982,7 +992,8 @@ Firebug.CSSStyleSheetPanel.prototype = OBJECT.extend(Firebug.Panel,
         var propValue = DOM.getChildByClass(row, "cssPropValue").textContent;
         var parsedValue = parsePriority(propValue);
 
-        Firebug.CSSModule.disableProperty(CSS.hasClass(row, "disabledStyle"), rule, propName, parsedValue, map, this.context);
+        Firebug.CSSModule.disableProperty(CSS.hasClass(row, "disabledStyle"), rule,
+            propName, parsedValue, map, this.context);
 
         this.markChange(this.name == "stylesheet");
     },
@@ -1043,11 +1054,13 @@ Firebug.CSSStyleSheetPanel.prototype = OBJECT.extend(Firebug.Panel,
 
         this.startLiveEditing = OBJECT.bind(this.startLiveEditing, this);
         this.stopLiveEditing = OBJECT.bind(Firebug.Editor.stopEditing, Firebug.Editor);
-        Firebug.CSSModule.registerEditor('Live', {startEditing: this.startLiveEditing, stopEditing: this.stopLiveEditing});
+        Firebug.CSSModule.registerEditor('Live', {startEditing: this.startLiveEditing,
+            stopEditing: this.stopLiveEditing});
 
         this.startSourceEditing = OBJECT.bind(this.startSourceEditing, this);
         this.stopSourceEditing = OBJECT.bind(Firebug.Editor.stopEditing, Firebug.Editor);
-        Firebug.CSSModule.registerEditor('Source', {startEditing: this.startSourceEditing, stopEditing: this.stopSourceEditing});
+        Firebug.CSSModule.registerEditor('Source', {startEditing: this.startSourceEditing,
+            stopEditing: this.stopSourceEditing});
 
         Firebug.Panel.initialize.apply(this, arguments);
     },
@@ -1244,10 +1257,18 @@ Firebug.CSSStyleSheetPanel.prototype = OBJECT.extend(Firebug.Panel,
     getOptionsMenuItems: function()
     {
         return [
-            {label: "Expand Shorthand Properties", type: "checkbox", checked: Firebug.expandShorthandProps,
-                    command: OBJECT.bindFixed(Firebug.Options.togglePref, Firebug, "expandShorthandProps") },
+            {
+                label: "Expand Shorthand Properties",
+                type: "checkbox",
+                checked: Firebug.expandShorthandProps,
+                command: OBJECT.bindFixed(Firebug.Options.togglePref,
+                    Firebug, "expandShorthandProps")
+            },
             "-",
-            {label: "Refresh", command: OBJECT.bind(this.refresh, this) }
+            {
+                label: "Refresh",
+                command: OBJECT.bind(this.refresh, this)
+            }
         ];
     },
 
@@ -1430,7 +1451,8 @@ Firebug.CSSStyleSheetPanel.prototype = OBJECT.extend(Firebug.Panel,
             if (styleSheets.length)
             {
                 var sheet = styleSheets[0];
-                return (Firebug.filterSystemURLs && URL.isSystemURL(CSS.getURLForStyleSheet(sheet))) ? null : sheet;
+                return (Firebug.filterSystemURLs &&
+                    URL.isSystemURL(CSS.getURLForStyleSheet(sheet))) ? null : sheet;
             }
         }
         catch (exc)
@@ -1522,7 +1544,8 @@ Firebug.CSSStyleSheetPanel.prototype = OBJECT.extend(Firebug.Panel,
 
         if (this.currentSearch && text == this.currentSearch.text)
         {
-            row = this.currentSearch.findNext(wrapSearch, false, reverse, Firebug.Search.isCaseSensitive(text));
+            row = this.currentSearch.findNext(wrapSearch, false, reverse,
+                Firebug.Search.isCaseSensitive(text));
         }
         else
         {
@@ -1615,7 +1638,7 @@ Firebug.CSSStyleSheetPanel.prototype = OBJECT.extend(Firebug.Panel,
     }
 });
 
-// ************************************************************************************************
+// ********************************************************************************************* //
 
 function CSSElementPanel() {}
 
@@ -1652,7 +1675,7 @@ CSSElementPanel.prototype = OBJECT.extend(Firebug.CSSStyleSheetPanel.prototype,
           )
     }),
 
-    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
     // All calls to this method must call cleanupSheets first
 
     updateCascadeView: function(element)
@@ -1692,7 +1715,7 @@ CSSElementPanel.prototype = OBJECT.extend(Firebug.CSSStyleSheetPanel.prototype,
             return this.selection.ownerDocument.location.href;
     },
 
-    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
     // All calls to this method must call cleanupSheets first
     getInheritedRules: function(element, sections, usedProps)
     {
@@ -1777,7 +1800,8 @@ CSSElementPanel.prototype = OBJECT.extend(Firebug.CSSStyleSheetPanel.prototype,
                 for (var j = 0; j < deadProps.length; ++j)
                 {
                     var deadProp = deadProps[j];
-                    if (!deadProp.disabled && !deadProp.wasInherited && deadProp.important && !prop.important && prop.value.indexOf("%") == -1)
+                    if (!deadProp.disabled && !deadProp.wasInherited && deadProp.important &&
+                        !prop.important && prop.value.indexOf("%") == -1)
                         prop.overridden = true;  // new occurrence overridden
                     else if (!prop.disabled && prop.value.indexOf("%") == -1)
                         deadProp.overridden = true;  // previous occurrences overridden
@@ -2048,7 +2072,8 @@ CSSComputedElementPanel.prototype = OBJECT.extend(CSSElementPanel.prototype,
     template: domplate(
     {
         computedTag:
-            DIV({"class": "a11yCSSView", role: "list", "aria-label": Locale.$STR("aria.labels.computed styles")},
+            DIV({"class": "a11yCSSView", role: "list", "aria-label":
+                Locale.$STR("aria.labels.computed styles")},
                 FOR("group", "$groups",
                     DIV({"class": "computedStylesGroup", $opened: "$group.opened", role: "list"},
                         H1({"class": "cssComputedHeader groupHeader focusRow", role: "listitem"},
@@ -2061,7 +2086,8 @@ CSSComputedElementPanel.prototype = OBJECT.extend(CSSElementPanel.prototype,
             ),
 
         computedAlphabeticalTag:
-            DIV({"class": "a11yCSSView", role: "list", "aria-label" : Locale.$STR("aria.labels.computed styles")},
+            DIV({"class": "a11yCSSView", role: "list",
+                "aria-label" : Locale.$STR("aria.labels.computed styles")},
                 TAG("$stylesTag", {props: "$props"})
             ),
 
@@ -2174,12 +2200,23 @@ CSSComputedElementPanel.prototype = OBJECT.extend(CSSElementPanel.prototype,
     getOptionsMenuItems: function()
     {
         return [
-            {label: "Sort alphabetically", type: "checkbox", checked: Firebug.computedStylesDisplay == "alphabetical",
-                    command: OBJECT.bind(this.toggleDisplay, this) },
-            {label: "Show Mozilla specific styles", type: "checkbox", checked: Firebug.showMozillaSpecificStyles,
-              command:  OBJECT.bindFixed(Firebug.Options.togglePref, Firebug, "showMozillaSpecificStyles") },
+            {
+                label: "Sort alphabetically",
+                type: "checkbox",
+                checked: Firebug.computedStylesDisplay == "alphabetical",
+                command: OBJECT.bind(this.toggleDisplay, this)
+            },
+            {
+                label: "Show Mozilla specific styles",
+                type: "checkbox",
+                checked: Firebug.showMozillaSpecificStyles,
+                command: OBJECT.bindFixed(Firebug.Options.togglePref,
+                    Firebug, "showMozillaSpecificStyles")
+            },
             "-",
-            {label: "Refresh", command: OBJECT.bind(this.refresh, this) }
+            {
+                label: "Refresh", command: OBJECT.bind(this.refresh, this)
+            }
         ];
     },
 
@@ -2209,7 +2246,7 @@ CSSComputedElementPanel.prototype = OBJECT.extend(CSSElementPanel.prototype,
     }
 });
 
-// ************************************************************************************************
+// ********************************************************************************************* //
 // CSSEditor
 
 function CSSEditor(doc)
@@ -2256,12 +2293,17 @@ CSSEditor.prototype = domplate(Firebug.InlineEditor.prototype,
                 propValue = DOM.getChildByClass(row, "cssPropValue").textContent;
                 parsedValue = parsePriority(propValue);
 
-                if (propValue && propValue != "undefined") {
+                if (propValue && propValue != "undefined")
+                {
                     if (FBTrace.DBG_CSS)
-                        FBTrace.sysout("CSSEditor.saveEdit : "+previousValue+"->"+value+" = "+propValue+"\n");
+                        FBTrace.sysout("CSSEditor.saveEdit : "+previousValue+"->"+value+
+                            " = "+propValue+"\n");
+
                     if (previousValue)
                         Firebug.CSSModule.removeProperty(rule, previousValue);
-                    Firebug.CSSModule.setProperty(rule, value, parsedValue.value, parsedValue.priority);
+
+                    Firebug.CSSModule.setProperty(rule, value, parsedValue.value,
+                        parsedValue.priority);
                 }
             }
             else if (!value) // name of the property has been deleted, so remove the property.
@@ -2274,7 +2316,8 @@ CSSEditor.prototype = domplate(Firebug.InlineEditor.prototype,
 
             if (FBTrace.DBG_CSS)
             {
-                FBTrace.sysout("CSSEditor.saveEdit propName=propValue: "+propName +" = "+propValue+"\n");
+                FBTrace.sysout("CSSEditor.saveEdit propName=propValue: "+propName +
+                    " = "+propValue+"\n");
                // FBTrace.sysout("CSSEditor.saveEdit BEFORE style:",style);
             }
 
@@ -2400,20 +2443,21 @@ CSSRuleEditor.prototype = domplate(Firebug.InlineEditor.prototype,
         if (searchRule)
         {
             var styleSheet = searchRule.parentRule || searchRule.parentStyleSheet;// take care of media rules
-            if(!styleSheet)
+            if (!styleSheet)
                 return;
             var cssRules = styleSheet.cssRules;
             for (ruleIndex=0; ruleIndex<cssRules.length && searchRule!=cssRules[ruleIndex]; ruleIndex++) {}
 
-            if(rule)
+            if (rule)
                 oldRule = searchRule;
             else
                 ruleIndex++;
         }
         else
         {
-            if(this.panel.name != 'stylesheet')
+            if (this.panel.name != 'stylesheet')
                 return;
+
             var styleSheet = this.panel.location;//this must be stylesheet panel
             if (!styleSheet)
             {
@@ -2484,7 +2528,8 @@ CSSRuleEditor.prototype = domplate(Firebug.InlineEditor.prototype,
 
                 target.innerHTML = STR.escapeForCss(previousValue);
                 // create dummy rule to be able to recover from error
-                var insertLoc = Firebug.CSSModule.insertRule(styleSheet, 'selectorSavingError{}', ruleIndex);
+                var insertLoc = Firebug.CSSModule.insertRule(styleSheet,
+                    'selectorSavingError{}', ruleIndex);
                 rule = cssRules[insertLoc];
 
                 this.box.setAttribute('saveSuccess',false);
@@ -2648,7 +2693,8 @@ Firebug.CSSDirtyListener.prototype =
         this.markSheetDirty(styleSheet);
     },
 
-    onCSSSetProperty: function(style, propName, propValue, propPriority, prevValue, prevPriority, rule, baseText)
+    onCSSSetProperty: function(style, propName, propValue, propPriority, prevValue,
+        prevPriority, rule, baseText)
     {
         var styleSheet = rule.parentStyleSheet;
         this.markSheetDirty(styleSheet);
