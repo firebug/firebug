@@ -1262,7 +1262,7 @@ Firebug.CSSStyleSheetPanel.prototype = OBJECT.extend(Firebug.Panel,
                 type: "checkbox",
                 checked: Firebug.expandShorthandProps,
                 command: OBJECT.bindFixed(Firebug.Options.togglePref,
-                    Firebug, "expandShorthandProps")
+                    Firebug.Options, "expandShorthandProps")
             },
             "-",
             {
@@ -1953,19 +1953,37 @@ CSSElementPanel.prototype = OBJECT.extend(Firebug.CSSStyleSheetPanel.prototype,
 
     updateOption: function(name, value)
     {
-        if (name == "showUserAgentCSS" || name == "expandShorthandProps" || name == "onlyShowAppliedStyles")
+        if (name == "showUserAgentCSS" || name == "expandShorthandProps" ||
+            name == "onlyShowAppliedStyles")
+        {
             this.refresh();
+        }
     },
 
     getOptionsMenuItems: function()
     {
         var ret = [
-            {label: "Only Show Applied Styles", type: "checkbox", checked: Firebug.onlyShowAppliedStyles,
-                    command: OBJECT.bindFixed(Firebug.Options.togglePref, Firebug, "onlyShowAppliedStyles") },
-            {label: "Show User Agent CSS", type: "checkbox", checked: Firebug.showUserAgentCSS,
-                    command: OBJECT.bindFixed(Firebug.Options.togglePref, Firebug, "showUserAgentCSS") },
-            {label: "Expand Shorthand Properties", type: "checkbox", checked: Firebug.expandShorthandProps,
-                    command: OBJECT.bindFixed(Firebug.Options.togglePref, Firebug, "expandShorthandProps") }
+            {
+                label: "Only Show Applied Styles",
+                type: "checkbox",
+                checked: Firebug.onlyShowAppliedStyles,
+                command: OBJECT.bindFixed(Firebug.Options.togglePref,
+                    Firebug.Options, "onlyShowAppliedStyles")
+            },
+            {
+                label: "Show User Agent CSS",
+                type: "checkbox",
+                checked: Firebug.showUserAgentCSS,
+                command: OBJECT.bindFixed(Firebug.Options.togglePref,
+                    Firebug.Options, "showUserAgentCSS")
+            },
+            {
+                label: "Expand Shorthand Properties",
+                type: "checkbox",
+                checked: Firebug.expandShorthandProps,
+                command: OBJECT.bindFixed(Firebug.Options.togglePref,
+                    Firebug.Options, "expandShorthandProps")
+            }
         ];
 
         if (DOM.domUtils && this.selection)
