@@ -6,8 +6,12 @@
 define([
     "firebug/lib",
     "firebug/lib/events",
+    "firebug/firefox/firefox",
+    "firebug/ToolsInterface",
+    "firebug/firefox/window",
+    "arch/webApp",
 ],
-function factoryBrowser(FBL, Events) {
+function factoryBrowser(FBL, Events, Firefox, ToolsInterface, WIN, WebApp) {
 
 // ************************************************************************************************
 // Browser
@@ -117,6 +121,73 @@ Browser.prototype.clearAllBreakpoints = function()
 Browser.prototype.clearAnnotations = function()
 {
     Firebug.Activation.clearAnnotations();  // should trigger event onClearAnnotations
+}
+
+Browser.prototype.getContextByWebApp = function(webApp)
+{
+    var topMost = webApp.getTopMostWindow();
+    var topMostId = WIN.getWindowId(topMost);
+    return this.contexts[topMostId];
+}
+
+Browser.prototype.setContextByWebApp = function(webApp, context)
+{
+    var topMost = webApp.getTopMostWindow();
+    var topMostId = WIN.getWindowId(topMost);
+    this.contexts[topMostId] = context;
+}
+
+// API
+Browser.prototype.getOrCreateContextByWebApp = function(webApp)
+{
+    var context = this.getContextByWebApp(webApp);
+    if (!context)
+    {
+        var topWindow = webApp.getTopMostWindow();
+        var browser = WIN.getBrowserByWindow(topWindow);
+        if (FBTrace.DBG_WINDOWS)
+        {
+            FBTrace.sysout("-> tabWatcher.watchBrowser for: " + (topWindow.location));
+        }
+
+        var context = TabWatcher.watchTopWindow(topWindow, browser.currentURI, true);
+        this.setContextByWebApp(webApp, context);
+
+        browser.showFirebug = true;
+
+        Events.dispatch(TabWatcher.fbListeners, "watchBrowser", [browser]);  // TODO remove
+    }
+    return context;
+}
+// API
+Browser.prototype.closeContext = function(context)
+{
+    if (context)
+    {
+        var topWindow = context.window;
+        var browser = WIN.getBrowserByWindow(topWindow);
+        if (!browser)
+            throw new Error("Browser.closeContext ERROR, no browser for top most window of context "+context.getName());
+
+        delete browser.showFirebug;
+
+        var shouldDispatch = TabWatcher.unwatchTopWindow(browser.contentWindow);
+
+        if (shouldDispatch)
+        {
+            Events.dispatch(TabWatcher.fbListeners, "unwatchBrowser", [browser, userCommands]);  // TODO remove
+            return true;
+        }
+        return false;
+    }
+}
+// API
+Browser.prototype.getCurrentSelectedWebApp = function()
+{
+    // Remote version must seek selected XUL window first.
+    var browser = Firefox.getCurrentBrowser();
+    FBTrace.sysout("ToolsInterface.WebApp ", ToolsInterface)
+    return new ToolsInterface.WebApp(browser.contentWindow);
 }
 
 Browser.Tool = function(name)

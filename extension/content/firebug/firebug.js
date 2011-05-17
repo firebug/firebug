@@ -8,6 +8,7 @@ define([
     "firebug/lib",
     "firebug/lib/object",
     "firebug/firefox/firefox",
+    "firebug/ToolsInterface",
     "firebug/chrome",
     "firebug/domplate",
     "firebug/lib/options",
@@ -22,8 +23,8 @@ define([
     "firebug/lib/dom",
     "firebug/http/httpLib",
 ],
-function(FBL, OBJECT, Firefox, ChromeFactory, Domplate, Options, Locale, Events, Wrapper, URL, CSS,
-    WIN, STR, ARR, DOM, HTTP) {
+function(FBL, OBJECT, Firefox, ToolsInterface, ChromeFactory, Domplate, Options, Locale, Events,
+    Wrapper, URL, CSS, WIN, STR, ARR, DOM, HTTP) {
 
 // ********************************************************************************************* //
 // Constants
@@ -296,9 +297,8 @@ window.Firebug =
 
         // xxxHonza: Firebug is registered as a listener within bti/tools.js
         // I think it's wrong, should be done in the same modules as addListener.
-        Firebug.ToolsInterface.browser.removeListener(Firebug);
-        Firebug.ToolsInterface.browser.removeListener(Firebug.ToolsInterface.JavaScript);//javascripttool.js
-        Firebug.ToolsInterface.browser.removeListener(Firebug.ToolsAdapter);//firebugadapter.js
+        ToolsInterface.browser.removeListener(Firebug);
+        ToolsInterface.browser.removeListener(ToolsInterface.JavaScript);//javascripttool.js
 
         if (FBTrace.DBG_INITIALIZE)
             FBTrace.sysout("firebug.shutdown exited ");
@@ -414,7 +414,7 @@ window.Firebug =
     getURLsForAllActiveContexts: function()
     {
         var contextURLSet = [];  // create a list of all unique activeContexts
-        Firebug.TabWatcher.iterateContexts( function createActiveContextList(context)
+        ToolsInterface.browser.eachContext( function createActiveContextList(context)
         {
             if (FBTrace.DBG_WINDOWS)
                 FBTrace.sysout("context "+context.getName());
@@ -632,19 +632,19 @@ window.Firebug =
     getPref: function()
     {
         // TODO deprecated
-        return Firebug.Options.getPref.apply(Firebug.Options, arguments);
+        return Options.getPref.apply(Firebug.Options, arguments);
     },
 
     setPref: function()
     {
         // TODO deprecated
-        return Firebug.Options.setPref.apply(Firebug.Options, arguments);
+        return Options.setPref.apply(Firebug.Options, arguments);
     },
 
     clearPref: function()
     {
         // TODO deprecated
-        return Firebug.Options.clearPref.apply(Firebug.Options, arguments);
+        return Options.clearPref.apply(Options, arguments);
     },
 
     prefDomain: "extensions.firebug",
@@ -716,9 +716,7 @@ window.Firebug =
 
     closeFirebug: function(userCommand)  // this is really deactivate
     {
-        var browser = Firefox.getCurrentBrowser();
-
-        Firebug.TabWatcher.unwatchBrowser(browser, userCommand);
+        ToolsInterface.browser.closeContext(Firebug.currentContext);
         Firebug.StartButton.resetTooltip();
     },
 
@@ -733,36 +731,22 @@ window.Firebug =
      */
     toggleBar: function(forceOpen, panelName)
     {
-        var browser = Firefox.getCurrentBrowser();
-
         if (panelName)
             Firebug.chrome.selectPanel(panelName);
 
-        if (!browser.showFirebug) // then we are not debugging the selected tab
-        {
-            // user requests debugging on this tab
-            var created = Firebug.TabWatcher.watchBrowser(browser);  // create a context for this page
-            if (!created)
-            {
-                if (FBTrace.DBG_ERRORS)
-                    FBTrace.sysout("Rejected page should explain to user!");
-                return false;
-            }
+        var webApp = ToolsInterface.browser.getCurrentSelectedWebApp();
 
-            if (FBTrace.DBG_ACTIVATION)
-            {
-                var context = Firebug.TabWatcher.getContextByWindow(browser.contentWindow);
-                FBTrace.sysout("toggleBar created context "+(browser.showFirebug?
-                    "ok":"ERROR no showFirebug!")+((context === Firebug.currentContext)?
-                    "current":"ERROR context not current!"));
-            }
+        var context = ToolsInterface.browser.getContextByWebApp(webApp);
+        if (!context)  // then we are not debugging the selected tab
+        {
+            context = ToolsInterface.browser.getOrCreateContextByWebApp(webApp);
             forceOpen = true;  // Be sure the UI is open for a newly created context
         }
 
         if (Firebug.isDetached()) // if we are out of the browser focus the window
             Firebug.chrome.focus();
         else if (Firebug.openInWindow)
-            this.detachBar(context);
+            this.detachBar();
         else if (Firebug.isMinimized()) // toggle minimize
             Firebug.unMinimize();
         else if (!forceOpen)  // else isInBrowser
@@ -814,7 +798,7 @@ window.Firebug =
             Firebug.chrome.close();
         }
         else
-            this.detachBar(Firebug.currentContext);
+            this.detachBar();
     },
 
     closeDetachedWindow: function(userCommands)
@@ -822,7 +806,8 @@ window.Firebug =
         Firebug.showBar(false);
 
         if (Firebug.currentContext)
-            Firebug.TabWatcher.unwatchBrowser(Firebug.currentContext.browser, userCommands);
+            ToolInterface.browser.closeContext(Firebug.currentContext);
+
         // else the user closed Firebug external window while not looking at a debugged web page.
 
         Firebug.StartButton.resetTooltip();
@@ -842,7 +827,7 @@ window.Firebug =
             FBTrace.sysout("firebug; setChrome "+msg);
         }
         // reattach all contexts to the new chrome
-        Firebug.TabWatcher.iterateContexts(function reattach(context)
+        ToolsInterface.browser.eachContext(function reattach(context)
         {
             context.reattach(oldChrome, newChrome);
 
@@ -850,21 +835,8 @@ window.Firebug =
         });
     },
 
-    detachBar: function(context)
+    detachBar: function()
     {
-        if (!context)
-        {
-            var browser = Firefox.getCurrentBrowser();
-            var created = Firebug.TabWatcher.watchBrowser(browser);  // create a context for this page
-            if (!created)
-            {
-                if (FBTrace.DBG_ERRORS)
-                    FBTrace.sysout("Firebug.detachBar, no context in "+window.location);
-                return null;
-            }
-            context = Firebug.TabWatcher.getContextByWindow(browser.contentWindow);
-        }
-
         if (Firebug.isDetached())  // can be set true attachBrowser
         {
             Firebug.chrome.focus();
@@ -872,8 +844,6 @@ window.Firebug =
         }
 
         this.showBar(false);  // don't show in browser.xul now
-
-        Firebug.chrome.setFirebugContext(context);  // make sure the Firebug.currentContext agrees with context
 
         this.setPlacement("detached");  // we'll reset it in the new window, but we seem to race with code in this window.
 
@@ -883,7 +853,7 @@ window.Firebug =
         var args = {
             FBL: FBL,
             Firebug: this,
-            browser: context.browser,
+            browser: Firebug.currentContext.browser,
         };
         var win = Firefox.openWindow("Firebug", "chrome://firebug/content/firebug.xul", "", args);
 
@@ -901,7 +871,7 @@ window.Firebug =
 
     resetAllOptions: function(confirm)
     {
-        Firebug.Options.resetAllOptions(confirm);
+        Options.resetAllOptions(confirm);
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
@@ -1022,7 +992,7 @@ window.Firebug =
 
     eachPanel: function(callback)
     {
-        Firebug.TabWatcher.iterateContexts(function iteratePanels(context)
+        ToolsInterface.browser.eachContext(function iteratePanels(context)
         {
             var rc = context.eachPanelInContext(callback);
             if (rc)
@@ -1199,7 +1169,7 @@ window.Firebug =
                 {
                     Firebug.placement = i;
                     delete Firebug.previousPlacement;
-                    Firebug.Options.set("previousPlacement", Firebug.placement);
+                    Options.set("previousPlacement", Firebug.placement);
                     Firebug.StartButton.resetTooltip();
                 }
                 return Firebug.placement;
@@ -1216,7 +1186,7 @@ window.Firebug =
     openMinimized: function()
     {
         if (!Firebug.previousPlacement)
-            Firebug.previousPlacement = Firebug.Options.get("previousPlacement");
+            Firebug.previousPlacement = Options.get("previousPlacement");
 
         return (Firebug.previousPlacement && (Firebug.previousPlacement == PLACEMENT_MINIMIZED) )
     },
@@ -1298,7 +1268,7 @@ window.Firebug =
         if (Firebug.openInWindow && !Firebug.isDetached())
         {
             if (context && !Firebug.isMinimized()) // don't detach if it's minimized 2067
-                this.detachBar(context);  //   the placement will be set once the external window opens
+                this.detachBar();  //   the placement will be set once the external window opens
             else  // just make sure we are not showing
                 this.showBar(false);
 
@@ -2197,7 +2167,7 @@ Firebug.ActivablePanel = OBJECT.extend(Firebug.Panel,
         if (!this.name)
             return false;
 
-        return Firebug.Options.get(this.name+".enableSites");
+        return Options.get(this.name+".enableSites");
     },
 
     setEnabled: function(enable)
@@ -2205,7 +2175,7 @@ Firebug.ActivablePanel = OBJECT.extend(Firebug.Panel,
         if (!this.name || !this.activable)
             return;
 
-        Firebug.Options.set(this.name+".enableSites", enable);
+        Options.set(this.name+".enableSites", enable);
     },
 
     /**
@@ -2640,13 +2610,13 @@ Firebug.Migrator =
     getMigrated: function(elt)
     {
         var id = elt.getAttribute('id');
-        return Firebug.Options.get("migrated_"+id);
+        return Options.get("migrated_"+id);
     },
 
     setMigrated: function(elt)
     {
         var id = elt.getAttribute('id');
-        Firebug.Options.set( "migrated_"+id, true, typeof(true));
+        Options.set( "migrated_"+id, true, typeof(true));
     },
 
 }

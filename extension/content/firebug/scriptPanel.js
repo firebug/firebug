@@ -902,7 +902,10 @@ Firebug.ScriptPanel.prototype = OBJECT.extend(Firebug.SourceBoxPanel,
         if (!compilationUnit)
             return;  // XXXjjb do we need to show a blank?
         if ( !(compilationUnit instanceof CompilationUnit) )
+        {
+            FBTrace.sysout("Script panel location not a CompilationUnit: ",compilationUnit);
             throw new Error("Script panel location not a CompilationUnit: "+compilationUnit);
+        }
 
         // Since our last use of the compilationUnit we may have compiled or recompiled the source
         var updatedCompilationUnit = this.context.getCompilationUnit(compilationUnit.getURL());

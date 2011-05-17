@@ -42,6 +42,7 @@ var Firefox =
         var tab = tabBrowser.getBrowserForDocument(win.document);
         tabBrowser.selectedBrowser = tab;
     },
+
     getCurrentURI: function()
     {
         try

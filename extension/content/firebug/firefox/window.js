@@ -157,6 +157,20 @@ WIN.iterateBrowserTabs = function(browserWindow, callback)
     return false;
 }
 
+
+WIN.getBrowserByWindow = function(win)
+{
+    var browsers = Firefox.getBrowsers();
+    for (var i = 0; i < browsers.length; ++i)
+    {
+        var browser = browsers[i];
+        if (browser.contentWindow === win)
+            return browser;
+    }
+
+    return null;
+}
+
 // ********************************************************************************************* //
 
 WIN.getWindowId = function(win)

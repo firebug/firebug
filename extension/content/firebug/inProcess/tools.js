@@ -1,11 +1,13 @@
 /* See license.txt for terms of usage */
 
 define([
-    "firebug/firebug", //xxxHonza: this dependency seems to be wrong.
+    "firebug/ToolsInterface",
+    "firebug/firebug",
+    "firebug/lib/options",
     "arch/browser",
     "arch/compilationunit"
 ],
-function(Firebug, Browser, CompilationUnit) {
+function(ToolsInterface, Firebug, Options, Browser, CompilationUnit) {
 
 // ********************************************************************************************* //
 
@@ -14,28 +16,24 @@ Browser.onDebug = function()
     FBTrace.sysout.apply(FBTrace, arguments);
 }
 
-var ToolsInterface = {};
-
 // Classes
 ToolsInterface.Browser = Browser;
 ToolsInterface.CompilationUnit = CompilationUnit;
 
 // Create a connection object
-ToolsInterface.browser = new Browser();
+var browser = new Browser();
+Object.defineProperty(ToolsInterface, 'browser', {value: new Browser(), writable: false, enumerable: true});
 ToolsInterface.browser.addListener(Firebug);
 
 // Listen for preference changes. This way options module is not dependent on tools
 // xxxHonza: can this be in Browser interface?
-Firebug.Options.addListener(
+Options.addListener(
 {
     updateOption: function(name, value)
     {
         ToolsInterface.browser.dispatch("updateOption", [name, value]);
     }
 });
-
-// FIXME eventually we want the dependency system to pass around the ToolsInterface
-Firebug.ToolsInterface = ToolsInterface;
 
 FBTrace.sysout("tools.js has ToolsInterface "+ToolsInterface, ToolsInterface);
 

@@ -575,6 +575,7 @@ Firebug.TabWatcher = OBJECT.extend(new Firebug.Listener(),
         return this.getContextByWindow(global) || this.getContextBySandbox(global);
     },
 
+    // deprecated, use WIN.getBrowserByWindow
     getBrowserByWindow: function(win)
     {
         var browsers = Firefox.getBrowsers();
@@ -583,7 +584,7 @@ Firebug.TabWatcher = OBJECT.extend(new Firebug.Listener(),
             var browser = browsers[i];
             if (browser.contentWindow == win)
             {
-                registerFrameListener(browser);
+                registerFrameListener(browser); // Yikes side effect!
                 return browser;
             }
         }
@@ -724,7 +725,7 @@ var TabProgressListener = OBJECT.extend(HTTP.BaseProgressListener,
 });
 
 // ************************************************************************************************
-
+// Obsolete
 var FrameProgressListener = OBJECT.extend(HTTP.BaseProgressListener,
 {
     onStateChange: function(progress, request, flag, status)
@@ -773,6 +774,7 @@ var FrameProgressListener = OBJECT.extend(HTTP.BaseProgressListener,
     }
 });
 
+// Obsolete
 // Registers frame listener for specified tab browser.
 function registerFrameListener(browser)
 {
@@ -802,7 +804,7 @@ function unregisterFrameListener(browser)
             WIN.safeGetWindowLocation(win)+", tab: "+WIN.getWindowProxyIdForWindow(win)+"\n");
     }
 }
-
+//***************************************************************************************************
 function getRefererHeader(request)
 {
     var http = XPCOM.QI(request, Ci.nsIHttpChannel);

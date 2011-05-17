@@ -18,7 +18,8 @@ Firebug.ToolsAdapter =
     {
         // Tell the front end modules that the back end sent us an option update event
         Events.dispatch(Firebug.modules, 'updateOption', arguments);
-    }
+    },
+
 };
 ToolsInterface.browser.addListener(Firebug.ToolsAdapter);
 
