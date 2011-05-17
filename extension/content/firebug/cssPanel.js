@@ -2220,7 +2220,17 @@ CSSComputedElementPanel.prototype = OBJECT.extend(CSSElementPanel.prototype,
         this.onClick = OBJECT.bind(this.onClick, this);
         this.onMouseDown = OBJECT.bind(this.onMouseDown, this);
 
-        Firebug.Panel.initialize.apply(this, arguments);
+        // Listen for CSS changes so the Computed panel is properly updated when needed.
+        Firebug.CSSModule.addListener(this);
+
+        CSSElementPanel.prototype.initialize.apply(this, arguments);
+    },
+
+    destroy: function()
+    {
+        Firebug.CSSModule.removeListener(this);
+
+        CSSElementPanel.prototype.destroy.apply(this, arguments);
     },
 
     updateView: function(element)
@@ -2280,6 +2290,32 @@ CSSComputedElementPanel.prototype = OBJECT.extend(CSSElementPanel.prototype,
     {
         var display = Firebug.computedStylesDisplay == "alphabetical" ? "grouped" : "alphabetical";
         Firebug.Options.set("computedStylesDisplay", display);
+    },
+
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+    // Change Listener
+
+    onCSSInsertRule: function(styleSheet, cssText, ruleIndex)
+    {
+        // Force update, this causes updateSelection to be called.
+        // See {@link Firebug.Panel.select}
+        this.selection = null;
+    },
+
+    onCSSDeleteRule: function(styleSheet, ruleIndex)
+    {
+        this.selection = null;
+    },
+
+    onCSSSetProperty: function(style, propName, propValue, propPriority, prevValue,
+        prevPriority, rule, baseText)
+    {
+        this.selection = null;
+    },
+
+    onCSSRemoveProperty: function(style, propName, prevValue, prevPriority, rule, baseText)
+    {
+        this.selection = null;
     }
 });
 
