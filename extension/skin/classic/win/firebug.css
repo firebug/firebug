@@ -190,8 +190,7 @@
 #fbContentSplitter {
     border-top: 1px solid !important;
     -moz-border-top-colors: threedShadow !important;
-    border-bottom: 1px solid !important;
-    -moz-border-bottom-colors: #EEEEEE !important;
+    border-bottom: none;
     min-height: 3px;
     max-height: 3px;
     background-color: #FFFFFF;

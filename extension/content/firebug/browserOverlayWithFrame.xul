@@ -1,9 +1,12 @@
 <?xml version="1.0"?>
+<!--  See license.txt for terms of usage -->
 
 <?xul-overlay href="chrome://firebug/content/start-button/startButtonOverlay.xul"?>
 
-<overlay xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul">
+<!-- CSS for fbContentSplitter -->
+<?xml-stylesheet href="chrome://firebug/content/firebug.css"?>
 
+<overlay xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul">
 
     <script type="application/x-javascript" src="chrome://firebug/content/trace.js"/>
     <script type="application/x-javascript" src="chrome://firebug/content/legacy.js"/>
@@ -11,7 +14,9 @@
     <!-- Firebug panel -->
     <vbox id="appcontent">
         <splitter id="fbContentSplitter" collapsed="true"/>
-        <iframe id="fbMainFrame" flex="2" height="200px" src="chrome://firebug/content/firebugFrame.xul"/>
+        <vbox persist="height" id="fbMainFrame" collapsed="true">
+            <iframe  flex="2" src="chrome://firebug/content/firebugFrame.xul"/>
+         </vbox>
     </vbox>
 
 </overlay>
