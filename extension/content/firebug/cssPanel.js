@@ -492,10 +492,12 @@ Firebug.CSSModule = OBJECT.extend(OBJECT.extend(Firebug.Module, Firebug.EditorSe
             }
         }
     },
+
     cleanupSheetHandler: function(event, context)
     {
         var target = event.target,
             tagName = (target.tagName || "").toLowerCase();
+
         if (tagName == "link")
         {
             this.cleanupSheets(target.ownerDocument, context);
@@ -519,6 +521,7 @@ Firebug.CSSModule = OBJECT.extend(OBJECT.extend(Firebug.Module, Firebug.EditorSe
         doc.addEventListener("DOMAttrModified", cleanupSheetHandler, false);
         doc.addEventListener("DOMNodeInserted", cleanupSheetHandler, false);
     },
+
     loadedContext: function(context)
     {
         var self = this;
@@ -527,11 +530,13 @@ Firebug.CSSModule = OBJECT.extend(OBJECT.extend(Firebug.Module, Firebug.EditorSe
             self.cleanupSheets(subwin.document, context);
         });
     },
+
     initContext: function(context)
     {
         context.dirtyListener = new Firebug.CSSDirtyListener(context);
         this.addListener(context.dirtyListener);
     },
+
     destroyContext: function(context)
     {
         this.removeListener(context.dirtyListener);
@@ -1717,6 +1722,7 @@ CSSElementPanel.prototype = OBJECT.extend(Firebug.CSSStyleSheetPanel.prototype,
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
     // All calls to this method must call cleanupSheets first
+
     getInheritedRules: function(element, sections, usedProps)
     {
         var parent = element.parentNode;
@@ -1740,14 +1746,19 @@ CSSElementPanel.prototype = OBJECT.extend(Firebug.CSSStyleSheetPanel.prototype,
 
         // Firefox 5+ allows inspecting of pseudo-elements (see issue 537)
         if (versionChecker.compare(appInfo.version, "5.0*") >= 0)
-            pseudoElements = ARR.extendArray(pseudoElements, [":first-letter", ":first-line", ":before", ":after"]);
+            pseudoElements = ARR.extendArray(pseudoElements,
+                [":first-letter", ":first-line", ":before", ":after"]);
 
-        for(var p in pseudoElements)
+        for (var p in pseudoElements)
         {
             try
             {
-                inspectedRules = DOM.domUtils ? DOM.domUtils.getCSSStyleRules(element, pseudoElements[p]) : null;
-            } catch (exc) {}
+                inspectedRules = DOM.domUtils ? DOM.domUtils.getCSSStyleRules(
+                    element, pseudoElements[p]) : null;
+            }
+            catch (exc)
+            {
+            }
 
             if (inspectedRules)
             {
@@ -1771,12 +1782,14 @@ CSSElementPanel.prototype = OBJECT.extend(Firebug.CSSStyleSheetPanel.prototype,
 
                     var ruleId = getRuleId(rule);
                     rules.splice(0, 0, {rule: rule, id: ruleId,
-                            selector: rule.selectorText.replace(/ :/g, " *:"), // Show universal selectors with pseudo-class (http://code.google.com/p/fbug/issues/detail?id=3683)
-                            sourceLink: sourceLink,
-                            props: props, inherited: inheritMode,
-                            isSystemSheet: isSystemSheet,
-                            isPseudoElementSheet: isPseudoElementSheet,
-                            isSelectorEditable: true});
+                        // Show universal selectors with pseudo-class
+                        // (http://code.google.com/p/fbug/issues/detail?id=3683)
+                        selector: rule.selectorText.replace(/ :/g, " *:"),
+                        sourceLink: sourceLink,
+                        props: props, inherited: inheritMode,
+                        isSystemSheet: isSystemSheet,
+                        isPseudoElementSheet: isPseudoElementSheet,
+                        isSelectorEditable: true});
                 }
             }
         }
@@ -1784,9 +1797,9 @@ CSSElementPanel.prototype = OBJECT.extend(Firebug.CSSStyleSheetPanel.prototype,
         if (element.style)
             this.getStyleProperties(element, rules, usedProps, inheritMode);
 
-        if (FBTrace.DBG_CSS)
-            FBTrace.sysout("getElementRules "+rules.length+" rules for "+
-                XPATH.getElementXPath(element), rules);
+//        if (FBTrace.DBG_CSS)
+//            FBTrace.sysout("getElementRules "+rules.length+" rules for "+
+//                XPATH.getElementXPath(element), rules);
     },
 
     markOverriddenProps: function(props, usedProps, inheritMode)
@@ -1869,7 +1882,7 @@ CSSElementPanel.prototype = OBJECT.extend(Firebug.CSSStyleSheetPanel.prototype,
                         selector: "element.style", props: props, inherited: inheritMode});
     },
 
-    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
     // extends Panel
 
     name: "css",
@@ -1925,6 +1938,7 @@ CSSElementPanel.prototype = OBJECT.extend(Firebug.CSSStyleSheetPanel.prototype,
     {
         Firebug.CSSModule.cleanupSheets(element.ownerDocument, Firebug.currentContext);
         this.updateCascadeView(element);
+
         if (DOM.domUtils)
         {
             this.contentState = safeGetContentState(element);
@@ -1934,7 +1948,7 @@ CSSElementPanel.prototype = OBJECT.extend(Firebug.CSSStyleSheetPanel.prototype,
 
     updateSelection: function(element)
     {
-        if ( !(element instanceof window.Element) ) // html supports SourceLink
+        if (!(element instanceof window.Element)) // html supports SourceLink
             return;
 
         var sothinkInstalled = !!Firefox.getElementById("swfcatcherKey_sidebar");
@@ -2022,16 +2036,16 @@ CSSElementPanel.prototype = OBJECT.extend(Firebug.CSSStyleSheetPanel.prototype,
 
     addStateChangeHandlers: function(el)
     {
-      this.removeStateChangeHandlers();
+        this.removeStateChangeHandlers();
 
-      el.addEventListener("focus", this.onStateChange, true);
-      el.addEventListener("blur", this.onStateChange, true);
-      el.addEventListener("mouseup", this.onStateChange, false);
-      el.addEventListener("mousedown", this.onStateChange, false);
-      el.addEventListener("mouseover", this.onStateChange, false);
-      el.addEventListener("mouseout", this.onStateChange, false);
+        el.addEventListener("focus", this.onStateChange, true);
+        el.addEventListener("blur", this.onStateChange, true);
+        el.addEventListener("mouseup", this.onStateChange, false);
+        el.addEventListener("mousedown", this.onStateChange, false);
+        el.addEventListener("mouseover", this.onStateChange, false);
+        el.addEventListener("mouseout", this.onStateChange, false);
 
-      this.stateChangeEl = el;
+        this.stateChangeEl = el;
     },
 
     removeStateChangeHandlers: function()
@@ -2050,20 +2064,20 @@ CSSElementPanel.prototype = OBJECT.extend(Firebug.CSSStyleSheetPanel.prototype,
 
     contentStateCheck: function(state)
     {
-      if (!state || this.contentState & state)
-      {
-          var timeoutRunner = OBJECT.bindFixed(function()
-              {
-                  var newState = safeGetContentState(this.selection);
-                  if (newState != this.contentState)
-                  {
-                      this.context.invalidatePanels(this.name);
-                  }
-              }, this);
+        if (!state || this.contentState & state)
+        {
+            var timeoutRunner = OBJECT.bindFixed(function()
+            {
+                var newState = safeGetContentState(this.selection);
+                if (newState != this.contentState)
+                {
+                    this.context.invalidatePanels(this.name);
+                }
+            }, this);
 
-          // Delay exec until after the event has processed and the state has been updated
-          setTimeout(timeoutRunner, 0);
-      }
+            // Delay exec until after the event has processed and the state has been updated
+            setTimeout(timeoutRunner, 0);
+        }
     }
 });
 
@@ -2081,7 +2095,7 @@ function safeGetContentState(selection)
     }
 }
 
-// ************************************************************************************************
+// ********************************************************************************************* //
 
 function CSSComputedElementPanel() {}
 
@@ -2122,10 +2136,13 @@ CSSComputedElementPanel.prototype = OBJECT.extend(CSSElementPanel.prototype,
             )
     }),
 
-    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
     updateComputedView: function(element)
     {
+        if (FBTrace.DBG_CSS)
+            FBTrace.sysout("CSSComputedElementPanel.updateComputedView;", element);
+
         var win = element.ownerDocument.defaultView;
         var style = win.getComputedStyle(element, "");
 
@@ -2148,9 +2165,11 @@ CSSComputedElementPanel.prototype = OBJECT.extend(CSSElementPanel.prototype,
                         props.push({name: propName, value: propValue});
                 }
             }
+
             sortProperties(props);
 
-            var result = this.template.computedAlphabeticalTag.replace({props: props}, this.panelNode);
+            var result = this.template.computedAlphabeticalTag.replace(
+                {props: props}, this.panelNode);
         }
         else
         {
@@ -2182,7 +2201,7 @@ CSSComputedElementPanel.prototype = OBJECT.extend(CSSElementPanel.prototype,
         Events.dispatch(this.fbListeners, 'onCSSRulesAdded', [this, result]);
     },
 
-    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
     // extends Panel
 
     name: "computed",
@@ -2229,7 +2248,7 @@ CSSComputedElementPanel.prototype = OBJECT.extend(CSSElementPanel.prototype,
                 type: "checkbox",
                 checked: Firebug.showMozillaSpecificStyles,
                 command: OBJECT.bindFixed(Firebug.Options.togglePref,
-                    Firebug, "showMozillaSpecificStyles")
+                    Firebug.Options, "showMozillaSpecificStyles")
             },
             "-",
             {
@@ -2698,7 +2717,7 @@ Firebug.CSSDirtyListener.prototype =
         styleSheet.fbDirty = true;
 
         if (FBTrace.DBG_CSS)
-            FBTrace.sysout("CSSDirtyListener markSheetDirty "+styleSheet.href);
+            FBTrace.sysout("CSSDirtyListener markSheetDirty " + styleSheet.href, styleSheet);
     },
 
     onCSSInsertRule: function(styleSheet, cssText, ruleIndex)
