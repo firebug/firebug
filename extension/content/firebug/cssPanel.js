@@ -2635,7 +2635,7 @@ Firebug.CSSDirtyListener.prototype =
         styleSheet.fbDirty = true;
 
         if (FBTrace.DBG_CSS)
-            FBTrace.sysout("CSSDirtyListener markSheetDirty "+index+" "+styleSheet.href);
+            FBTrace.sysout("CSSDirtyListener markSheetDirty "+styleSheet.href);
     },
 
     onCSSInsertRule: function(styleSheet, cssText, ruleIndex)
