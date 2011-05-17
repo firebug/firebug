@@ -106,6 +106,22 @@ var HttpRequestObserver =
         if (topic != "firebug-http-event")
             throw Cr.NS_ERROR_INVALID_ARG;
 
+        // Do not add an observer twice.
+        for (var i=0; i<this.observers.length; i++)
+        {
+            if (this.observers[i] == observer)
+            {
+                // xxxHonza: firebug/debugger is registering itself more times,
+                // not sure if it's on purpose, but it causes following error message:
+                // Error: attempt to run compile-and-go script on a cleared scope
+                // (on the first line of the observe method)
+                if (FBTrace.DBG_HTTPOBSERVER || FBTrace.DBG_ERRORS)
+                    FBTrace.sysout("httpObserver.addObserver; Observer already registered.",
+                        observer);
+                return;
+            }
+        }
+
         this.observers.push(observer);
 
         if (this.observers.length > 0)
