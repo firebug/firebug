@@ -73,9 +73,6 @@ var defaultRep = null;
 var defaultFuncRep = null;
 var menuItemControllers = [];
 var panelTypeMap = {};
-var deadWindows = [];
-var deadWindowTimeout = 0;
-var clearContextTimeout = 0;
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -290,8 +287,6 @@ window.Firebug =
 
         Events.dispatch(modules, "shutdown");
 
-        this.closeDeadWindows();
-
         Firebug.Options.shutdown();
         Firebug.Options.removeListener(this);
 
@@ -450,38 +445,6 @@ window.Firebug =
             FBTrace.sysout("active contexts urls "+contextURLSet.length);
 
         return contextURLSet;
-    },
-
-    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
-    // Dead Windows  XXXjjb this code is not used by 1.4, external placement.
-
-    killWindow: function(browser, chrome)
-    {
-        deadWindows.push({browser: browser, chrome: chrome});
-        deadWindowTimeout = setTimeout(function() { Firebug.closeDeadWindows(); }, 3000);
-    },
-
-    rescueWindow: function(browser)
-    {
-        for (var i = 0; i < deadWindows.length; ++i)
-        {
-            if (deadWindows[i].browser == browser)
-            {
-                deadWindows.splice(i, 1);
-                if (FBTrace.DBG_WINDOWS)
-                    FBTrace.sysout("rescued "+browser.currentURI.spec);
-                break;
-            }
-        }
-    },
-
-    closeDeadWindows: function()
-    {
-        for (var i = 0; i < deadWindows.length; ++i)
-            deadWindows[i].chrome.close();
-
-        deadWindows = [];
-        deadWindowTimeout = 0;
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
@@ -1230,9 +1193,6 @@ window.Firebug =
         this.updateActiveContexts(context); // a newly created context is active
 
         Firebug.chrome.setFirebugContext(context); // a newly created context becomes the default for the view
-
-        if (deadWindowTimeout)
-            this.rescueWindow(context.browser); // if there is already a window, clear showDetached.
     },
 
     updateActiveContexts: function(context) // this should be the only method to call suspend and resume.
@@ -1255,12 +1215,6 @@ window.Firebug =
      */
     showContext: function(browser, context)  // Firebug.TabWatcher showContext. null context means we don't debug that browser
     {
-        if (clearContextTimeout)
-        {
-            clearTimeout(clearContextTimeout);
-            clearContextTimeout = 0;
-        }
-
         Firebug.chrome.setFirebugContext(context); // the context becomes the default for its view
         this.updateActiveContexts(context);  // resume, after setting Firebug.currentContext
 
