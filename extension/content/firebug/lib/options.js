@@ -278,15 +278,24 @@ var Options =
 
         setTimeout(function delaySavePrefs()
         {
-            if (FBTrace.DBG_OPTIONS)
-                FBTrace.sysout("options.delaySavePrefs type="+type+" name="+prefName+
-                    " value="+value+"\n");
+            try
+            {
+                if (FBTrace.DBG_OPTIONS)
+                    FBTrace.sysout("options.delaySavePrefs type="+type+" name="+prefName+
+                        " value="+value);
 
-            prefs.savePrefFile(null);
+                prefs.savePrefFile(null);
+            }
+            catch (e)
+            {
+                if (FBTrace.DBG_ERRORS)
+                    FBTrace.sysout("options.delaySavePrefs; EXCEPTION type="+type+
+                        " name="+prefName+ " value="+value+": " + e, e);
+            }
         });
 
         if (FBTrace.DBG_OPTIONS)
-            FBTrace.sysout("options.setPref type="+type+" name="+prefName+" value="+value+"\n");
+            FBTrace.sysout("options.setPref type="+type+" name="+prefName+" value="+value);
     },
 
     setPreference: function(prefName, value, type, prefBranch)

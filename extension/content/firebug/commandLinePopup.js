@@ -208,6 +208,12 @@ Firebug.CommandLine.Popup = OBJECT.extend(Firebug.Module,
 
     reattach: function(context)
     {
+        if (FBTrace.DBG_ERRORS && !context)
+        {
+            FBTrace.sysout("commandLinePopup.reattach; ERROR No context");
+            return;
+        }
+
         var consolePanelType = Firebug.getPanelType("console");
         var doc = Firebug.chrome.getPanelDocument(consolePanelType);
 

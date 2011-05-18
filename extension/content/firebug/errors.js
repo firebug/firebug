@@ -476,7 +476,17 @@ var Errors = Firebug.Errors = OBJECT.extend(Firebug.Module,
 
         var sourceLine = null;
         if (sourceFile && sourceLineNo && sourceLineNo != 0)
-            sourceLine = context.sourceCache.getLine(sourceFile, sourceLineNo);
+        {
+            if (context.sourceCache)
+            {
+                sourceLine = context.sourceCache.getLine(sourceFile, sourceLineNo);
+            }
+            else if (FBTrace.DBG_ERRORS)
+            {
+                FBTrace.sysout("errors.reparseXPC; ERROR, NULL context.sourceCache, " +
+                    sourceFile + ", " + sourceLineNo);
+            }
+        }
 
         var error = new FirebugReps.ErrorMessageObj(msg, sourceFile,
             sourceLineNo, sourceLine, "error", context, null);
