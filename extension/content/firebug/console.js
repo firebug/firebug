@@ -748,6 +748,8 @@ Firebug.ConsolePanel.prototype = OBJECT.extend(Firebug.ActivablePanel,
             state.profileRow = this.context.profileRow;
         }
 
+        prefs.removeObserver(Firebug.Options.prefDomain, this, false); // TODO remove to options.js
+
         if (FBTrace.DBG_CONSOLE)
             FBTrace.sysout("console.destroy; wasScrolledToBottom: " +
                 this.wasScrolledToBottom + ", " + this.context.getName());
@@ -775,11 +777,6 @@ Firebug.ConsolePanel.prototype = OBJECT.extend(Firebug.ActivablePanel,
             this.panelNode.removeEventListener("scroll", this.onScroller, true);
 
         this.resizeEventTarget.removeEventListener("resize", this.onResizer, true);
-    },
-
-    shutdown: function()
-    {
-        prefs.removeObserver(Firebug.Options.prefDomain, this, false); // TODO remove to options.js
     },
 
     show: function(state)

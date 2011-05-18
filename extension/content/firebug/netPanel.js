@@ -263,7 +263,7 @@ Firebug.NetMonitor = OBJECT.extend(Firebug.ActivableModule,
     {
         Firebug.ActivableModule.shutdown.apply(this, arguments);
 
-        prefs.removeObserver(Firebug.Options.prefDomain, this, false); // TODO options.js
+        prefs.removeObserver(Firebug.Options.prefDomain, NetLimit, false); // TODO options.js
         if (Firebug.TraceModule)
             Firebug.TraceModule.removeListener(this.TraceListener);
 
