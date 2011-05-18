@@ -294,8 +294,8 @@ var require, define;
                         url = context.nameToUrl(name, null, parentModuleMap);
                     }
 
-                    if (context.config.debug && context.config.onDebug) {
-                        context.config.onDebug("makeModuleMap name: "+name+" parentName: "+parentName+" normalizedName: "+normalizedName+" url "+url);
+                    if (context.config.debug && context.config.onTrace) {
+                        context.config.onTrace("makeModuleMap name: "+name+" parentName: "+parentName+" normalizedName: "+normalizedName+" url "+url);
                     }
 
                     //Store the URL mapping for later.
@@ -507,8 +507,8 @@ var require, define;
                     }
                 }
 
-                if (context.config.debug && context.config.onDebug) {
-                    context.config.onDebug("require.js: defining "+fullName+" with "+args.length+" dependents", {defineFunction: manager.callback, dependents: args});
+                if (context.config.debug && context.config.onTrace) {
+                    context.config.onTrace("require.js: defining "+fullName+" with "+args.length+" dependents", {defineFunction: manager.callback, dependents: args});
                 }
                 try {
                     ret = req.execCb(fullName, manager.callback, args, defined[fullName]);
@@ -523,8 +523,8 @@ var require, define;
                     if (manager.usingExports && manager.cjsModule &&
                         manager.cjsModule.exports !== defined[fullName]) {
                         ret = defined[fullName] = manager.cjsModule.exports;
-                        if (context.config.debug && context.config.onDebug) {
-                            context.config.onDebug("require.js: defined "+fullName+" using exports");
+                        if (context.config.debug && context.config.onTrace) {
+                            context.config.onTrace("require.js: defined "+fullName+" using exports");
                         }
                     } else if (fullName in defined) {
                         //This case is when usingExports is in play and
@@ -535,23 +535,23 @@ var require, define;
                         //if it does for some reason, only the original definition
                         //will be used for integrity.
                         ret = defined[fullName];
-                        if (context.config.debug && context.config.onDebug) {
-                            context.config.onDebug("require.js: defined "+fullName+" using previously defined value");
+                        if (context.config.debug && context.config.onTrace) {
+                            context.config.onTrace("require.js: defined "+fullName+" using previously defined value");
                         }
                     } else {
                         //Use the return value from the function.
                         defined[fullName] = ret;
 
-                        if (context.config.debug && context.config.onDebug) {
-                            context.config.onDebug("require.js: defined "+fullName+" using function return");
+                        if (context.config.debug && context.config.onTrace) {
+                            context.config.onTrace("require.js: defined "+fullName+" using function return");
                         }
                     }
                     if (typeof(ret) === 'undefined') {
                          req.onError("require.js "+fullName+" set exports undefined!");
                     }
                 } else {
-                    if (context.config.debug && context.config.onDebug) {
-                        context.config.onDebug("require.js: defined found no fullName");
+                    if (context.config.debug && context.config.onTrace) {
+                        context.config.onTrace("require.js: defined found no fullName");
                     }
                 }
 
@@ -588,8 +588,8 @@ var require, define;
         }
 
         function main(inName, depArray, callback, relModuleMap) {
-            if (context.config.debug && context.config.onDebug) {
-                context.config.onDebug("main calling makeModuleMap with ("+inName+","+ relModuleMap+")");
+            if (context.config.debug && context.config.onTrace) {
+                context.config.onTrace("main calling makeModuleMap with ("+inName+","+ relModuleMap+")");
             }
 
             var moduleMap = makeModuleMap(inName, relModuleMap),
@@ -613,8 +613,8 @@ var require, define;
                         if (!(depName in manager.deps)) {
                             manager.deps[depName] = value;
                             manager.depCount += 1;
-                            if (context.config.debug && context.config.onDebug) {
-                                context.config.onDebug("require.js:  "+manager.fullName+"["+depName+"]= "+typeof(value)+" "+manager.depCount+"/"+manager.depMax, {manager: manager});
+                            if (context.config.debug && context.config.onTrace) {
+                                context.config.onTrace("require.js:  "+manager.fullName+"["+depName+"]= "+typeof(value)+" "+manager.depCount+"/"+manager.depMax, {manager: manager});
                             }
                             if (manager.depCount === manager.depMax) {
                                 //All done, execute!
@@ -707,12 +707,12 @@ var require, define;
                 waiting[manager.waitId] = manager;
                 waitAry.push(manager);
                 context.waitCount += 1;
-                if (context.config.debug && context.config.onDebug) {
+                if (context.config.debug && context.config.onTrace) {
                     var allDefined = "";
                     for (var p in defined) {
                         allDefined += p + ", ";
                     }
-                    context.config.onDebug("require; defined: "+(allDefined ? allDefined : " NONE"), allDefined);
+                    context.config.onTrace("require; defined: "+(allDefined ? allDefined : " NONE"), allDefined);
                     var unresolvedDeps = "";
                     for (var i = 0; i < manager.depArray.length; i++) {
                         if (depArray[i] in defined) continue;
@@ -721,7 +721,7 @@ var require, define;
                     }
 
                     var waitingOn = manager.depCount+"/"+manager.depMax+" "+unresolvedDeps;
-                    context.config.onDebug("require; "+manager.fullName+" waiting on "+waitingOn);
+                    context.config.onTrace("require; "+manager.fullName+" waiting on "+waitingOn);
                 }
             }
         }
@@ -789,24 +789,26 @@ var require, define;
                 depName, i;
             if (fullName) {
                 if (traced[fullName]) {
-                    if (context.config.onError || context.config.onDebug) {
+                    if (context.config.onTrace || context.config.onDebug) {
                         var cycle = Object.keys(traced).join("->")+"->"+fullName;
-                        if (defined[fullName]) {
-                            context.config.onDebug("require.js; traced "+fullName+" already defined");
+                        if (defined[fullName] && context.config.onTrace) {
+                            context.config.onTrace("require.js; traced "+fullName+" already defined");
                         } else {
-                            context.config.onDebug("require.js; "+fullName+" traced but not defined, circular dependency? "+cycle);
+                            var output = context.config.onDebug || context.config.onTrace;
+                            // eg require.js; arch/tools traced but not defined, circular dependency? arch/tools->arch/browser->firebug/tabWatcher->firebug/tabContext->arch/tools
+                            output("require.js; "+fullName+" traced but not defined, circular dependency? "+cycle);
                         }
                     }
                     return defined[fullName];
                 }
 
                 traced[fullName] = true;
-                if (context.config.onDebug) {
-                    context.config.onDebug("require.js; "+fullName+" added to traced: "+Object.keys(traced));
+                if (context.config.onTrace) {
+                    context.config.onTrace("require.js; "+fullName+" added to traced: "+Object.keys(traced));
                 }
             } else {
-                if (context.config.onDebug) {
-                    context.config.onDebug("require.js; forceExec,  no fullName");
+                if (context.config.onTrace) {
+                    context.config.onTrace("require.js; forceExec,  no fullName");
                 }
             }
 
@@ -839,12 +841,12 @@ var require, define;
                 noLoads = "", hasLoadedProp = false, stillLoading = false, prop,
                 err, manager;
 
-            if (context.config.debug && context.config.onDebug){
+            if (context.config.debug && context.config.onTrace){
                 var msg = "waitCount:"+context.waitCount;
                 msg += " pausedCount: "+context.pausedCount;
                 msg += " scriptCount: "+context.scriptCount;
                 msg += (expired ? " EXPIRED: " : " remaining ") + (new Date().getTime() - context.startTime) + "/" + waitInterval +" secs";
-                context.config.onDebug("checkLoaded "+checkLoaded.timeOutIndex+": "+msg);
+                context.config.onTrace("checkLoaded "+checkLoaded.timeOutIndex+": "+msg);
             }
 
             //If there are items still in the paused queue processing wait.
@@ -881,12 +883,12 @@ var require, define;
                     }
                 }
             }
-            if (context.config.debug && context.config.onDebug) {
+            if (context.config.debug && context.config.onTrace) {
                 var msg = "checkLoaded";
                 msg += " hasLoadedProp "+hasLoadedProp;
                 msg += " stillLoading: "+stillLoading;
                 msg += " noLoads: "+noLoads;
-                context.config.onDebug(msg);
+                context.config.onTrace(msg);
             }
             //Check for exit conditions.
             if (!hasLoadedProp && !context.waitCount) {
@@ -937,10 +939,10 @@ var require, define;
                 if (!context.checkLoadedDepth) {
                     context.checkLoadedDepth = 0;
                 }
-                if (context.config.onDebug)
-                    context.config.onDebug("context.checkLoadedDepth "+context.checkLoadedDepth);
+                if (context.config.onTrace)
+                    context.config.onTrace("context.checkLoadedDepth "+context.checkLoadedDepth);
                 if (context.checkLoadedDepth++ > 15) {
-                    if (req.analyzeFailure && context.config.onDebug) {
+                    if (context.config.analyzeFailure) {
                         context.config.analyzeFailure(context, waitAry, specified, loaded);
                     }
                     return;
@@ -1001,9 +1003,10 @@ var require, define;
                 //Indicate a the module is in process of loading.
                 context.loaded[moduleName] = false;
                 context.scriptCount += 1;
-                context.counted.push(moduleName);
-                if (context.config.debug && context.config.onDebug) {
-                    context.config.onDebug("context.counted push "+context.counted[context.scriptCount - 1]);
+                if (context.config.onDebug)
+                    context.counted.push(moduleName);
+                if (context.config.debug && context.config.onTrace) {
+                    context.config.onTrace("context.counted push "+context.counted[context.scriptCount - 1]);
                 }
 
                 //Turn off interactive script matching for IE for any define
@@ -1379,15 +1382,21 @@ var require, define;
                 //the checkLoaded setTimeout 50 ms cost is taken. To avoid
                 //that cost, decrement beforehand.
                 if (req.isAsync) {
-                    if (context.config.debug && context.config.onDebug) {
+                    if (context.config.debug && (context.config.onTrace || context.config.onDebug) ) {
                         var removeCountedIndex = context.counted.indexOf(moduleName);
                         if (removeCountedIndex === -1) {
-                            context.config.onDebug("context.counted async "+(removeCountedIndex)+" pop  ERROR "+moduleName);
-                            for (var p in context.counted)
-                                context.config.onDebug("context.counted["+p+"] "+context.counted[p]+" "+(context.counted[p] === moduleName));
+                            if (context.config.onTrace) {
+                                context.config.onTrace("context.counted async "+(removeCountedIndex)+" pop  ERROR "+moduleName);
+                                for (var p in context.counted)
+                                {
+                                    context.config.onTrace("context.counted["+p+"] "+context.counted[p]+" "+(context.counted[p] === moduleName));
+                                }
+                            }
                         }
                         else {
-                            context.config.onDebug("context.counted async "+(removeCountedIndex)+" pop "+context.counted[removeCountedIndex]+" "+moduleName);
+                            if (context.config.onTrace){
+                                context.config.onTrace("context.counted async "+(removeCountedIndex)+" pop "+context.counted[removeCountedIndex]+" "+moduleName);
+                            }
                             context.counted.splice(removeCountedIndex, 1);
                         }
                     }
@@ -1396,9 +1405,10 @@ var require, define;
                 }
                 resume();
                 if (!req.isAsync) {
-                    if (context.config.debug && context.config.onDebug) {
+                    if (context.config.debug && (context.config.onTrace || context.config.onDebug) ) {
                         var removeCountedIndex = context.counted.indexOf(moduleName);
-                        context.config.onDebug("context.counted not async "+(removeCountedIndex)+" pop "+context.counted[removeCountedIndex]+" "+moduleName);
+                        if (context.config.onTrace)
+                            context.config.onTrace("context.counted not async "+(removeCountedIndex)+" pop "+context.counted[removeCountedIndex]+" "+moduleName);
                         context.counted.splice(removeCountedIndex, 1);
                     }
                     context.scriptCount -= 1;
@@ -1442,9 +1452,9 @@ var require, define;
                     url = syms.join('/') +
                           (ext ? ext :
                           (req.jsExtRegExp.test(moduleName) ? "" : ".js"));
-                    if (context.config.debug && context.config.onDebug) {
+                    if (context.config.debug && context.config.onTrace) {
                         var namedHow = context.namedHow[url] = {moduleName: moduleName, how: "relative", extension: ext, map: (relModuleMap ? relModuleMap.url : "none")};
-                        context.config.onDebug("require.js "+moduleName+"-("+namedHow.how+")->"+url+" relative to "+namedHow.map, namedHow);
+                        context.config.onTrace("require.js "+moduleName+"-("+namedHow.how+")->"+url+" relative to "+namedHow.map, namedHow);
                     }
                 } else {
 
@@ -1460,9 +1470,9 @@ var require, define;
                         //an extension, this method probably needs to be reworked.
                         url = moduleName + (ext ? ext : "");
 
-                        if (context.config.debug && context.config.onDebug) {
+                        if (context.config.debug && context.config.onTrace) {
                             var namedHow = context.namedHow[url] = {moduleName: moduleName, how: "plain path", extension: ext};
-                            context.config.onDebug("require.js "+moduleName+"-("+namedHow.how+")->"+url, namedHow);
+                            context.config.onTrace("require.js "+moduleName+"-("+namedHow.how+")->"+url, namedHow);
                         }
                     } else {
                         //A module that needs to be converted to a path.
@@ -1490,28 +1500,28 @@ var require, define;
                                 break;
                             }
                             // parentModule not found in path
-                            if (context.config.debug && context.config.onDebug) {
+                            if (context.config.debug && context.config.onTrace) {
                                 var allPaths = [];
                                 for (var p in paths)
                                     allPaths.push(p);
-                                context.config.onDebug("require.js "+parentModule+" not found in paths ("+allPaths.join(',')+")");
+                                context.config.onTrace("require.js "+parentModule+" not found in paths ("+allPaths.join(',')+")");
                                 var allPackages = [];
                                 for (var p in pkgs)
                                     allPackages.push(p);
-                                context.config.onDebug("require.js "+parentModule+" not found in packages ("+allPackages.join(',')+")");
+                                context.config.onTrace("require.js "+parentModule+" not found in packages ("+allPackages.join(',')+")");
                             }
                         }
 
                         //Join the path parts together, then figure out if baseUrl is needed.
                         url = syms.join("/") + (ext || ".js");
                         url = (url.charAt(0) === '/' || url.match(/^\w+:/) ? "" : config.baseUrl) + url;
-                        if (context.config.debug && context.config.onDebug) {
+                        if (context.config.debug && context.config.onTrace) {
                             var namedHow = context.namedHow[url] = {moduleName: moduleName, how: "paths", extension: ext, parentModule: parentModule, pathsAtParentModule: paths[parentModule]};
                             if (!paths[parentModule]) {
-                                context.config.onDebug("require.js ERROR "+moduleName+"-("+namedHow.how+"["+parentModule+"]="+paths[parentModule]+")->"+url, namedHow);
+                                context.config.onTrace("require.js ERROR "+moduleName+"-("+namedHow.how+"["+parentModule+"]="+paths[parentModule]+")->"+url, namedHow);
                             }
                             else {
-                                context.config.onDebug("require.js "+moduleName+"-("+namedHow.how+"["+parentModule+"]="+paths[parentModule]+")->"+url, namedHow);
+                                context.config.onTrace("require.js "+moduleName+"-("+namedHow.how+"["+parentModule+"]="+paths[parentModule]+")->"+url, namedHow);
                             }
                         }
                     }
@@ -1637,14 +1647,16 @@ var require, define;
 
         if (!urlFetched[url]) {
             context.scriptCount += 1;
-            if (context.config.debug && context.config.onDebug){
+            if (context.config.debug && (context.config.onTrace || context.config.onDebug) ) {
                 if (!context.counted) {
-                    context.config.onDebug("context.counted ------------ reset");
+                    if (context.config.onTrace)
+                        context.config.onTrace("context.counted ------------ reset");
                     context.counted = [];
                 }
                 context.counted.push(moduleName);
                 var index = context.counted.indexOf(moduleName);
-                context.config.onDebug("context.counted push "+moduleName+" context.scriptCount:"+context.scriptCount+" index "+index);
+                if (context.config.onTrace)
+                    context.config.onTrace("context.counted push "+moduleName+" context.scriptCount:"+context.scriptCount+" index "+index);
             }
             req.attach(url, contextName, moduleName);
             urlFetched[url] = true;
