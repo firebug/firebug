@@ -149,7 +149,7 @@ var HttpRequestObserver =
             }
         }
 
-        if (FBTrace.DBG_HTTPOBSERVER)
+        if (FBTrace.DBG_HTTPOBSERVER || FBTrace.DBG_ERRORS)
             FBTrace.sysout("httpObserver.removeObserver FAILED (no such observer)");
     },
 
