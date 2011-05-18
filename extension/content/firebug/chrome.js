@@ -96,7 +96,7 @@ var FirebugChrome =
             // we've been opened in a new window by an already initialized Firebug
             win.FBL = detachArgs.FBL;
             Firebug = detachArgs.Firebug;
-            Firebug.currentContext = detachArgs.Firebug.currentContext;
+            Firebug.currentContext = detachArgs.Firebug.currentContext; // may be null
         }
         else
         {

@@ -50,7 +50,7 @@ Firebug.Activation = OBJECT.extend(Firebug.Module,
     {
         Firebug.Module.initializeUI.apply(this, arguments);
 
-        Firebug.TabWatcher.addListener(this.TabWatcherListener);
+        Firebug.TabWatcher.addListener(this);
     },
 
     shutdown: function()
@@ -323,21 +323,6 @@ Firebug.Activation = OBJECT.extend(Firebug.Module,
 
 
 });
-
-// ************************************************************************************************
-
-Firebug.Activation.TabWatcherListener =
-{
-    watchBrowser: function(browser)
-    {
-        Firebug.Activation.watchBrowser(browser);
-    },
-
-    unwatchBrowser: function(browser, userCommands)
-    {
-        Firebug.Activation.unwatchBrowser(browser, userCommands);
-    }
-};
 
 // ************************************************************************************************
 
