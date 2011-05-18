@@ -4,11 +4,6 @@
 
 <?xml-stylesheet href="chrome://firebug/content/firebug.css"?>
 
-<!DOCTYPE window [
-<!ENTITY % chromebugDTD SYSTEM "chrome://global/locale/editMenuOverlay.dtd">
-%chromebugDTD;
-]>
-
 <overlay xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul"
          xmlns:html="http://www.w3.org/1999/xhtml">
 
@@ -114,7 +109,7 @@
 
     <popupset id="mainPopupSet">
         <menupopup id="fbContextMenu" onpopupshowing="return Firebug.chrome.onContextShowing(event);">
-            <menuitem label="&copyCmd.label;" accesskey="&copyCmd.accesskey;" command="cmd_copy"/>
+            <menuitem label="Copy" command="cmd_copy" class="fbInternational"/>
         </menupopup>
         <menupopup id="fbInlineEditorPopup" />
         <tooltip id="fbTooltip" class="fbURLMenuItem"
