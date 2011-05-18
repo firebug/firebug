@@ -736,8 +736,10 @@ window.Firebug =
 
         var webApp = ToolsInterface.browser.getCurrentSelectedWebApp();
 
-        var context = ToolsInterface.browser.getContextByWebApp(webApp);
-        if (!context)  // then we are not debugging the selected tab
+        //var context = ToolsInterface.browser.getContextByWebApp(webApp);
+        //if (!context)  // then we are not debugging the selected tab
+        var browser = Firefox.getCurrentBrowser();
+        if (!browser.showFirebug)  // then we are not debugging the selected tab
         {
             context = ToolsInterface.browser.getOrCreateContextByWebApp(webApp);
             forceOpen = true;  // Be sure the UI is open for a newly created context
