@@ -5,11 +5,12 @@ define([
     "firebug/firebug",
     "firebug/reps",
     "firebug/lib/xpcom",
+    "firebug/console",
     "firebug/lib/css",
     "firebug/firefox/window",
     "firebug/lib/array",
 ],
-function(Extend, Firebug, FirebugReps, Xpcom, Css, Win, Arr) {
+function(Extend, Firebug, FirebugReps, Xpcom, Console, Css, Win, Arr) {
 
 // **********************************************************************************************//
 // Constants
@@ -201,7 +202,7 @@ var Errors = Firebug.Errors = Extend.extend(Firebug.Module,
                         if (!msgId)
                             return;
                         if (context)
-                            Firebug.Console.log(object.message, context, "consoleMessage", FirebugReps.Text);
+                            Console.log(object.message, context, "consoleMessage", FirebugReps.Text);
                     }
                     else if (object.message)
                     {
@@ -214,7 +215,7 @@ var Errors = Firebug.Errors = Extend.extend(Firebug.Module,
                             context = Firebug.currentContext;
 
                         if (context)
-                            Firebug.Console.log(object.message, context, "consoleMessage", FirebugReps.Text);
+                            Console.log(object.message, context, "consoleMessage", FirebugReps.Text);
                         else
                             FBTrace.sysout("errors.observe, no context for message", object);
                     }
@@ -306,7 +307,7 @@ var Errors = Firebug.Errors = Extend.extend(Firebug.Module,
         var args = Arr.cloneArray(arguments);
         var msgId = args.shift();
         var context = args.shift();
-        var row = Firebug.Console.log.apply(Firebug.Console, args);
+        var row = Console.log.apply(Console, args);
         return row;
     },
 
@@ -416,7 +417,8 @@ var Errors = Firebug.Errors = Extend.extend(Firebug.Module,
 
     checkEnabled: function()
     {
-        if (this.mustBeEnabled())
+        var beEnabled = Console.isAlwaysEnabled() && this.mustBeEnabled();
+        if (beEnabled)
         {
             if(!this.isObserving)
                 this.startObserving();
@@ -431,6 +433,7 @@ var Errors = Firebug.Errors = Extend.extend(Firebug.Module,
 
         if (FBTrace.DBG_ERRORLOG)
             FBTrace.sysout("errors.checkEnabled mustBeEnabled: "+this.mustBeEnabled()+
+                " Console.isAlwaysEnabled "+  Console.isAlwaysEnabled() +
                 " isObserving:"+this.isObserving);
     },
 
@@ -590,7 +593,7 @@ function lessTalkMoreAction(context, object, isWarning)
         return false;
     }
 
-    var enabled = Firebug.Console.isAlwaysEnabled();
+    var enabled = Console.isAlwaysEnabled();
     if (!enabled) {
         return null;
     }
