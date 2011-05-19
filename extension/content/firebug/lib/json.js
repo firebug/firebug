@@ -12,12 +12,12 @@ var Ci = Components.interfaces;
 var Cc = Components.classes;
 var Cu = Components.utils;
 
-var JSONLib = {};
+var Json = {};
 
 // ********************************************************************************************* //
 // JSON
 
-JSONLib.parseJSONString = function(jsonString, originURL)
+Json.parseJSONString = function(jsonString, originURL)
 {
     if (FBTrace.DBG_JSONVIEWER)
         FBTrace.sysout("jsonviewer.parseJSON; " + jsonString);
@@ -91,13 +91,13 @@ JSONLib.parseJSONString = function(jsonString, originURL)
     return null;
 };
 
-JSONLib.parseJSONPString = function(jsonString, originURL)
+Json.parseJSONPString = function(jsonString, originURL)
 {
 }
 
 // ********************************************************************************************* //
 
-return JSONLib;
+return Json;
 
 // ********************************************************************************************* //
 });

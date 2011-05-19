@@ -15,7 +15,7 @@ define([
     "firebug/domPanel",
     "firebug/reps"
 ],
-function(OBJECT, Firebug, Domplate, Locale, Events, CSS, DOM, HTTP, STR, JSONLib, ToggleBranch) {
+function(Extend, Firebug, Domplate, Locale, Events, Css, Dom, Http, Str, Json, ToggleBranch) {
 
 // ************************************************************************************************
 
@@ -37,7 +37,7 @@ var contentTypes =
 // ************************************************************************************************
 // Model implementation
 
-Firebug.JSONViewerModel = OBJECT.extend(Firebug.Module,
+Firebug.JSONViewerModel = Extend.extend(Firebug.Module,
 {
     dispatchName: "jsonViewer",
 
@@ -62,12 +62,12 @@ Firebug.JSONViewerModel = OBJECT.extend(Firebug.Module,
         // The JSON is still no there, try to parse most common cases.
         if (!file.jsonObject)
         {
-            if (this.isJSON(HTTP.safeGetContentType(file.request), file.responseText))
+            if (this.isJSON(Http.safeGetContentType(file.request), file.responseText))
                 file.jsonObject = this.parseJSON(file);
         }
 
         // The jsonObject is created so, the JSON tab can be displayed.
-        if (file.jsonObject && OBJECT.hasProperties(file.jsonObject))
+        if (file.jsonObject && Extend.hasProperties(file.jsonObject))
         {
             Firebug.NetMonitor.NetInfoBody.appendTab(infoBox, "JSON",
                 Locale.$STR("jsonviewer.tab.JSON"));
@@ -86,7 +86,7 @@ Firebug.JSONViewerModel = OBJECT.extend(Firebug.Module,
         // responses (and post data) (with "{") can be parsed unnecessarily,
         // which represents a little overhead, but this happens only if the request
         // is actually expanded by the user in the UI (Net & Console panels).
-        var responseText = data ? STR.trimLeft(data) : null;
+        var responseText = data ? Str.trimLeft(data) : null;
         if (responseText && responseText.indexOf("{") == 0)
             return true;
 
@@ -94,7 +94,7 @@ Firebug.JSONViewerModel = OBJECT.extend(Firebug.Module,
             return false;
 
         contentType = contentType.split(";")[0];
-        contentType = STR.trim(contentType);
+        contentType = Str.trim(contentType);
         return contentTypes[contentType];
     },
 
@@ -103,7 +103,7 @@ Firebug.JSONViewerModel = OBJECT.extend(Firebug.Module,
     {
         var tab = infoBox.selectedTab;
         var tabBody = infoBox.getElementsByClassName("netInfoJSONText").item(0);
-        if (!CSS.hasClass(tab, "netInfoJSONTab") || tabBody.updated)
+        if (!Css.hasClass(tab, "netInfoJSONTab") || tabBody.updated)
             return;
 
         tabBody.updated = true;
@@ -115,7 +115,7 @@ Firebug.JSONViewerModel = OBJECT.extend(Firebug.Module,
     parseJSON: function(file)
     {
         var jsonString = new String(file.responseText);
-        return JSONLib.parseJSONString(jsonString, "http://" + file.request.originalURI.host);
+        return Json.parseJSONString(jsonString, "http://" + file.request.originalURI.host);
     },
 });
 
@@ -138,17 +138,17 @@ Firebug.JSONViewerModel.Preview = domplate(
     onSort: function(event)
     {
         var target = event.target;
-        var sortLink = DOM.getAncestorByClass(target, "sortLink");
+        var sortLink = Dom.getAncestorByClass(target, "sortLink");
         if (!sortLink)
             return;
 
         Events.cancelEvent(event);
 
-        CSS.toggleClass(sortLink, "sorted");
+        Css.toggleClass(sortLink, "sorted");
         Firebug.Options.set("sortJsonPreview", !Firebug.sortJsonPreview);
 
-        var preview = DOM.getAncestorByClass(sortLink, "jsonPreview");
-        var body = DOM.getAncestorByClass(sortLink, "netInfoJSONText");
+        var preview = Dom.getAncestorByClass(sortLink, "jsonPreview");
+        var body = Dom.getAncestorByClass(sortLink, "netInfoJSONText");
         this.render(body, preview.repObject, body.context);
     },
 
@@ -181,7 +181,7 @@ function JSONTreePlate()
 // xxxHonza: this object is *not* a panel (using Firebug terminology), but
 // there is no other way how to subclass the DOM Tree than to derive from the DOMBasePanel.
 // Better solution would be to have a middle object between DirTablePlate and DOMBasePanel.
-JSONTreePlate.prototype = OBJECT.extend(Firebug.DOMBasePanel.prototype,
+JSONTreePlate.prototype = Extend.extend(Firebug.DOMBasePanel.prototype,
 {
     dispatchName: "JSONTreePlate",
 

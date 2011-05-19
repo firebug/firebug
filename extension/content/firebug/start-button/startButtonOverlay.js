@@ -8,7 +8,7 @@ define([
     "firebug/lib/events",
     "firebug/lib/dom",
 ],
-function(OBJECT, Firebug, Firefox, Locale, Events, DOM) {
+function(Extend, Firebug, Firefox, Locale, Events, Dom) {
 
 // ********************************************************************************************* //
 // Constants
@@ -31,7 +31,7 @@ var versionChecker = Cc["@mozilla.org/xpcom/version-comparator;1"].getService(Ci
  * such as panel activation and also indicates whether Firebug is activated/deactivated for
  * the current page (by changing its color).
  */
-Firebug.StartButton = OBJECT.extend(Firebug.Module,
+Firebug.StartButton = Extend.extend(Firebug.Module,
 /** @lends Firebug.StartButton */
 {
     dispatchName: "startButton",
@@ -117,7 +117,7 @@ Firebug.StartButton = OBJECT.extend(Firebug.Module,
         }
 
         // Don't forget to show the navigation bar - just in case it's hidden.
-        DOM.collapse(navBar, false);
+        Dom.collapse(navBar, false);
         document.persist(navBarId, "collapsed");
     },
 
@@ -133,7 +133,7 @@ Firebug.StartButton = OBJECT.extend(Firebug.Module,
         var show = Firebug.Options.get("showStatusIcon");
         var statusBar = Firefox.getElementById("fbStatusBar");
         if (statusBar)
-            DOM.collapse(statusBar, !show);
+            Dom.collapse(statusBar, !show);
     },
 
     updateOption: function(name, value)

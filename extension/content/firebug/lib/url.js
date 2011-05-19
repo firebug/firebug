@@ -4,7 +4,7 @@ define([
     "firebug/lib/trace",
     "firebug/lib/string",
 ],
-function (FBTrace, STR) {
+function (FBTrace, Str) {
 
 // ********************************************************************************************* //
 // Constants
@@ -17,34 +17,34 @@ const ioService = Cc["@mozilla.org/network/io-service;1"].getService(Ci.nsIIOSer
 // ********************************************************************************************* //
 // Implementation
 
-var URL = {};
+var Url = {};
 
 // ************************************************************************************************
 // Regular expressions
 
-URL.reCSS = /\.css$/;
-URL.reJavascript = /\s*javascript:\s*(.*)/;
-URL.reFile = /file:\/\/([^\/]*)\//;
-URL.reChrome = /chrome:\/\/([^\/]*)\//;
-URL.reDataURL = /data:text\/javascript;fileName=([^;]*);baseLineNumber=(\d*?),((?:.*?%0A)|(?:.*))/g;
+Url.reCSS = /\.css$/;
+Url.reJavascript = /\s*javascript:\s*(.*)/;
+Url.reFile = /file:\/\/([^\/]*)\//;
+Url.reChrome = /chrome:\/\/([^\/]*)\//;
+Url.reDataURL = /data:text\/javascript;fileName=([^;]*);baseLineNumber=(\d*?),((?:.*?%0A)|(?:.*))/g;
 
 // ************************************************************************************************
 // URLs
 
-URL.getFileName = function(url)
+Url.getFileName = function(url)
 {
-    var split = URL.splitURLBase(url);
+    var split = Url.splitURLBase(url);
     return split.name;
 };
 
-URL.splitURLBase = function(url)
+Url.splitURLBase = function(url)
 {
-    if (URL.isDataURL(url))
-        return URL.splitDataURL(url);
-    return URL.splitURLTrue(url);
+    if (Url.isDataURL(url))
+        return Url.splitDataURL(url);
+    return Url.splitURLTrue(url);
 };
 
-URL.splitDataURL = function(url)
+Url.splitDataURL = function(url)
 {
     var mark = url.indexOf('data:');
     if (mark != 0)
@@ -69,7 +69,7 @@ URL.splitDataURL = function(url)
     if (props.hasOwnProperty('fileName'))
     {
          var caller_URL = decodeURIComponent(props['fileName']);
-         var caller_split = URL.splitURLTrue(caller_URL);
+         var caller_split = Url.splitURLTrue(caller_URL);
 
          props['fileName'] = caller_URL;
 
@@ -98,7 +98,7 @@ URL.splitDataURL = function(url)
 };
 
 const reSplitFile = /:\/{1,3}(.*?)\/([^\/]*?)\/?($|\?.*)/;
-URL.splitURLTrue = function(url)
+Url.splitURLTrue = function(url)
 {
     var m = reSplitFile.exec(url);
     if (!m)
@@ -109,7 +109,7 @@ URL.splitURLTrue = function(url)
         return {path: m[1], name: m[2]+m[3]};
 };
 
-URL.getFileExtension = function(url)
+Url.getFileExtension = function(url)
 {
     if (!url)
         return null;
@@ -124,7 +124,7 @@ URL.getFileExtension = function(url)
     return url.substr(lastDot+1);
 };
 
-URL.isSystemURL = function(url)
+Url.isSystemURL = function(url)
 {
     if (!url) return true;
     if (url.length == 0) return true;
@@ -145,7 +145,7 @@ URL.isSystemURL = function(url)
         return false;
 };
 
-URL.isSystemPage = function(win)
+Url.isSystemPage = function(win)
 {
     try
     {
@@ -160,24 +160,24 @@ URL.isSystemPage = function(win)
                 == "chrome://browser/skin/feeds/subscribe.css"))
             return true;
 
-        return URL.isSystemURL(win.location.href);
+        return Url.isSystemURL(win.location.href);
     }
     catch (exc)
     {
         // Sometimes documents just aren't ready to be manipulated here, but don't let that
         // gum up the works
-        FBTrace.sysout("URL.isSystemPage; EXCEPTION document not ready?: " + exc);
+        FBTrace.sysout("Url.isSystemPage; EXCEPTION document not ready?: " + exc);
         return false;
     }
 }
 
-URL.isSystemStyleSheet = function(sheet)
+Url.isSystemStyleSheet = function(sheet)
 {
     var href = sheet && sheet.href;
-    return href && URL.isSystemURL(href);
+    return href && Url.isSystemURL(href);
 };
 
-URL.getURIHost = function(uri)
+Url.getURIHost = function(uri)
 {
     try
     {
@@ -192,7 +192,7 @@ URL.getURIHost = function(uri)
     }
 }
 
-URL.isLocalURL = function(url)
+Url.isLocalURL = function(url)
 {
     if (url.substr(0, 5) == "file:")
         return true;
@@ -202,12 +202,12 @@ URL.isLocalURL = function(url)
         return false;
 };
 
-URL.isDataURL = function(url)
+Url.isDataURL = function(url)
 {
     return (url && url.substr(0,5) == "data:");
 };
 
-URL.getLocalPath = function(url)
+Url.getLocalPath = function(url)
 {
     if (this.isLocalURL(url))
     {
@@ -222,7 +222,7 @@ URL.getLocalPath = function(url)
  * @param URL
  * @returns undefined or nsIURI
  */
-URL.getLocalSystemURI = function(url)
+Url.getLocalSystemURI = function(url)
 {
     try
     {
@@ -250,9 +250,9 @@ URL.getLocalSystemURI = function(url)
 /*
  * Mozilla native path for local URL
  */
-URL.getLocalOrSystemPath = function(url, allowDirectories)
+Url.getLocalOrSystemPath = function(url, allowDirectories)
 {
-    var uri = URL.getLocalSystemURI(url);
+    var uri = Url.getLocalSystemURI(url);
     if (uri instanceof Ci.nsIFileURL)
     {
         var file = uri.file;
@@ -263,14 +263,14 @@ URL.getLocalOrSystemPath = function(url, allowDirectories)
     }
 }
 
-URL.getURLFromLocalFile = function(file)
+Url.getURLFromLocalFile = function(file)
 {
     var fileHandler = ioService.getProtocolHandler("file").QueryInterface(Ci.nsIFileProtocolHandler);
     var URL = fileHandler.getURLSpecFromFile(file);
     return URL;
 };
 
-URL.getDataURLForContent = function(content, url)
+Url.getDataURLForContent = function(content, url)
 {
     // data:text/javascript;fileName=x%2Cy.js;baseLineNumber=10,<the-url-encoded-data>
     var uri = "data:text/html;";
@@ -279,32 +279,32 @@ URL.getDataURLForContent = function(content, url)
     return uri;
 },
 
-URL.getDomain = function(url)
+Url.getDomain = function(url)
 {
     var m = /[^:]+:\/{1,3}([^\/]+)/.exec(url);
     return m ? m[1] : "";
 };
 
-URL.getURLPath = function(url)
+Url.getURLPath = function(url)
 {
     var m = /[^:]+:\/{1,3}[^\/]+(\/.*?)$/.exec(url);
     return m ? m[1] : "";
 };
 
-URL.getPrettyDomain = function(url)
+Url.getPrettyDomain = function(url)
 {
     var m = /[^:]+:\/{1,3}(www\.)?([^\/]+)/.exec(url);
     return m ? m[2] : "";
 };
 
-URL.absoluteURL = function(url, baseURL)
+Url.absoluteURL = function(url, baseURL)
 {
     // Replace "/./" with "/" using regular expressions (don't use string since /./
     // can be treated as regular expressoin too, see 3551).
-    return URL.absoluteURLWithDots(url, baseURL).replace(/\/\.\//, "/", "g");
+    return Url.absoluteURLWithDots(url, baseURL).replace(/\/\.\//, "/", "g");
 };
 
-URL.absoluteURLWithDots = function(url, baseURL)
+Url.absoluteURLWithDots = function(url, baseURL)
 {
     // Should implement http://www.apps.ietf.org/rfc/rfc3986.html#sec-5
     // or use the newURI approach described in issue 3110.
@@ -358,7 +358,7 @@ URL.absoluteURLWithDots = function(url, baseURL)
 }
 
 var reChromeCase = /chrome:\/\/([^/]*)\/(.*?)$/;
-URL.normalizeURL = function(url)  // this gets called a lot, any performance improvement welcome
+Url.normalizeURL = function(url)  // this gets called a lot, any performance improvement welcome
 {
     if (!url)
         return "";
@@ -387,14 +387,14 @@ URL.normalizeURL = function(url)  // this gets called a lot, any performance imp
     return url;
 };
 
-URL.denormalizeURL = function(url)
+Url.denormalizeURL = function(url)
 {
     return url.replace(/file:\/\/\//g, "file:/");
 };
 
 // ********************************************************************************************* //
 
-URL.parseURLParams = function(url)
+Url.parseURLParams = function(url)
 {
     var q = url ? url.indexOf("?") : -1;
     if (q == -1)
@@ -408,10 +408,10 @@ URL.parseURLParams = function(url)
     if (!search)
         return [];
 
-    return URL.parseURLEncodedText(search);
+    return Url.parseURLEncodedText(search);
 };
 
-URL.parseURLEncodedText = function(text, noLimit)
+Url.parseURLEncodedText = function(text, noLimit)
 {
     const maxValueLength = 25000;
 
@@ -426,7 +426,7 @@ URL.parseURLEncodedText = function(text, noLimit)
     text = text.replace(/\+/g, " ");
 
     // Unescape '&amp;' character
-    text = STR.unescapeForURL(text);
+    text = Str.unescapeForURL(text);
 
     function decodeText(text)
     {
@@ -477,10 +477,10 @@ URL.parseURLEncodedText = function(text, noLimit)
     return params;
 };
 
-URL.reEncodeURL = function(file, text, noLimit)
+Url.reEncodeURL = function(file, text, noLimit)
 {
     var lines = text.split("\n");
-    var params = URL.parseURLEncodedText(lines[lines.length-1], noLimit);
+    var params = Url.parseURLEncodedText(lines[lines.length-1], noLimit);
 
     var args = [];
     for (var i = 0; i < params.length; ++i)
@@ -492,7 +492,7 @@ URL.reEncodeURL = function(file, text, noLimit)
     return url;
 };
 
-URL.makeURI = function(urlString)
+Url.makeURI = function(urlString)
 {
     try
     {
@@ -511,10 +511,10 @@ URL.makeURI = function(urlString)
 }
 
 /**
- * Converts resource: to file: URL.
+ * Converts resource: to file: Url.
  * @param {String} resourceURL
  */
-URL.resourceToFile = function(resourceURL)
+Url.resourceToFile = function(resourceURL)
 {
     var resHandler = ioService.getProtocolHandler("resource")
         .QueryInterface(Ci.nsIResProtocolHandler);
@@ -530,7 +530,7 @@ URL.resourceToFile = function(resourceURL)
 // ********************************************************************************************* //
 // Registration
 
-return URL;
+return Url;
 
 // ********************************************************************************************* //
 });

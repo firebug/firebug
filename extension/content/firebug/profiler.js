@@ -16,15 +16,15 @@ define([
     "firebug/lib/string",
     "firebug/js/fbs",
 ],
-function(OBJECT, Firebug, Domplate, FirebugReps, Locale, Wrapper, ToolsInterface, URL,
-    StackFrame, Events, CSS, DOM, STR, FBS) {
+function(Extend, Firebug, Domplate, FirebugReps, Locale, Wrapper, ToolsInterface, Url,
+    StackFrame, Events, Css, Dom, Str, FBS) {
 
     const Cc = Components.classes;
     const Ci = Components.interfaces;
 // ********************************************************************************************* //
 // Profiler
 
-Firebug.Profiler = OBJECT.extend(Firebug.Module,
+Firebug.Profiler = Extend.extend(Firebug.Module,
 {
     dispatchName: "profiler",
 
@@ -142,7 +142,7 @@ Firebug.Profiler = OBJECT.extend(Firebug.Module,
     {
         var row = Firebug.Console.openGroup(title, context, "profile",
             Firebug.Profiler.ProfileCaption, true, null, true);
-        CSS.setClass(row, "profilerRunning");
+        Css.setClass(row, "profilerRunning");
 
         Firebug.Console.closeGroup(context, true);
 
@@ -167,7 +167,7 @@ Firebug.Profiler = OBJECT.extend(Firebug.Module,
         {
             if (script.callCount)
             {
-                if (!Firebug.filterSystemURLs || !URL.isSystemURL(script.fileName))
+                if (!Firebug.filterSystemURLs || !Url.isSystemURL(script.fileName))
                 {
                     var sourceLink = Firebug.SourceFile.getSourceLinkForScript(script, context);
                     if (sourceLink && sourceLink.href in sourceFileMap)
@@ -201,7 +201,7 @@ Firebug.Profiler = OBJECT.extend(Firebug.Module,
             : this.logProfileRow(context, "");
         delete context.profileRow;
 
-        CSS.removeClass(groupRow, "profilerRunning");
+        Css.removeClass(groupRow, "profilerRunning");
 
         if (totalCalls > 0)
         {
@@ -304,12 +304,12 @@ Firebug.Profiler.ProfileTable = domplate(
 
     onClick: function(event)
     {
-        var table = DOM.getAncestorByClass(event.target, "profileTable");
-        var header = DOM.getAncestorByClass(event.target, "headerCell");
+        var table = Dom.getAncestorByClass(event.target, "profileTable");
+        var header = Dom.getAncestorByClass(event.target, "headerCell");
         if (!header)
             return;
 
-        var numerical = !CSS.hasClass(header, "alphaValue");
+        var numerical = !Css.hasClass(header, "alphaValue");
 
         var colIndex = 0;
         for (header = header.previousSibling; header; header = header.previousSibling)
@@ -322,8 +322,8 @@ Firebug.Profiler.ProfileTable = domplate(
     {
         sortAscending = function()
         {
-            CSS.removeClass(header, "sortedDescending");
-            CSS.setClass(header, "sortedAscending");
+            Css.removeClass(header, "sortedDescending");
+            Css.setClass(header, "sortedAscending");
             header.setAttribute("aria-sort", "ascending");
 
             header.sorted = -1;
@@ -334,8 +334,8 @@ Firebug.Profiler.ProfileTable = domplate(
 
         sortDescending = function()
         {
-          CSS.removeClass(header, "sortedAscending");
-          CSS.setClass(header, "sortedDescending");
+          Css.removeClass(header, "sortedAscending");
+          Css.setClass(header, "sortedDescending");
           header.setAttribute("aria-sort", "descending")
 
           header.sorted = 1;
@@ -344,8 +344,8 @@ Firebug.Profiler.ProfileTable = domplate(
               tbody.appendChild(values[i].row);
         }
 
-        var tbody = DOM.getChildByClass(table, "profileTbody");
-        var thead = DOM.getChildByClass(table, "profileThead");
+        var tbody = Dom.getChildByClass(table, "profileTbody");
+        var thead = Dom.getChildByClass(table, "profileThead");
 
         var values = [];
         for (var row = tbody.childNodes[0]; row; row = row.nextSibling)
@@ -358,13 +358,13 @@ Firebug.Profiler.ProfileTable = domplate(
         values.sort(function(a, b) { return a.value < b.value ? -1 : 1; });
 
         var headerRow = thead.firstChild;
-        var headerSorted = DOM.getChildByClass(headerRow, "headerSorted");
-        CSS.removeClass(headerSorted, "headerSorted");
+        var headerSorted = Dom.getChildByClass(headerRow, "headerSorted");
+        Css.removeClass(headerSorted, "headerSorted");
         if (headerSorted)
             headerSorted.removeAttribute('aria-sort');
 
         var header = headerRow.childNodes[colIndex];
-        CSS.setClass(header, "headerSorted");
+        Css.setClass(header, "headerSorted");
 
         if (numerical)
         {
@@ -428,7 +428,7 @@ Firebug.Profiler.ProfileCall = domplate(Firebug.Rep,
 
     getCallName: function(call)
     {
-        return STR.cropString(StackFrame.getFunctionName(call.script, call.context), 60);
+        return Str.cropString(StackFrame.getFunctionName(call.script, call.context), 60);
     },
 
     avgTime: function(call)

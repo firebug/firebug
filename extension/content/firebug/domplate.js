@@ -5,7 +5,7 @@ define([
     "firebug/lib",
     "firebug/lib/string"
 ],
-function(FBL, STR) {
+function(FBL, Str) {
 
 // ********************************************************************************************* //
 
@@ -209,7 +209,7 @@ DomplateTag.prototype =
 
         function __escape__(value)
         {
-            return STR.escapeForElementAttribute(value);
+            return Str.escapeForElementAttribute(value);
         }
 
         function isArray(it)

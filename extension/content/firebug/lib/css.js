@@ -9,12 +9,12 @@ define([
     "firebug/http/httpLib",
     "firebug/lib/xpath",
 ],
-function(FBTrace, URL, Options, WIN, XML, HTTP, XPATH) {
+function(FBTrace, Url, Options, Win, Xml, Http, Xpath) {
 
 // ********************************************************************************************* //
 // Module Implementation
 
-var CSS = {};
+var Css = {};
 
 // ************************************************************************************************
 // CSS
@@ -24,20 +24,20 @@ var cssPropNames = {};
 var cssColorNames = null;
 var imageRules = null;
 
-CSS.getCSSKeywordsByProperty = function(nodeType,propName)
+Css.getCSSKeywordsByProperty = function(nodeType,propName)
 {
     if (!cssKeywordMap[nodeType])
     {
         cssKeywordMap[nodeType] = {};
 
-        for (var name in CSS.cssInfo[nodeType])
+        for (var name in Css.cssInfo[nodeType])
         {
             var list = [];
 
-            var types = CSS.cssInfo[nodeType][name];
+            var types = Css.cssInfo[nodeType][name];
             for (var i = 0; i < types.length; ++i)
             {
-                var keywords = CSS.cssKeywords[types[i]];
+                var keywords = Css.cssKeywords[types[i]];
                 if (keywords)
                     list.push.apply(list, keywords);
             }
@@ -49,20 +49,20 @@ CSS.getCSSKeywordsByProperty = function(nodeType,propName)
     return propName in cssKeywordMap[nodeType] ? cssKeywordMap[nodeType][propName] : [];
 };
 
-CSS.getCSSPropertyNames = function(nodeType)
+Css.getCSSPropertyNames = function(nodeType)
 {
     if (!cssPropNames[nodeType])
     {
         cssPropNames[nodeType] = [];
 
-        for (var name in CSS.cssInfo[nodeType])
+        for (var name in Css.cssInfo[nodeType])
             cssPropNames[nodeType].push(name);
     }
 
     return cssPropNames[nodeType];
 };
 
-CSS.isColorKeyword = function(keyword)
+Css.isColorKeyword = function(keyword)
 {
     if (keyword == "transparent")
         return false;
@@ -71,11 +71,11 @@ CSS.isColorKeyword = function(keyword)
     {
         cssColorNames = [];
 
-        var colors = CSS.cssKeywords["color"];
+        var colors = Css.cssKeywords["color"];
         for (var i = 0; i < colors.length; ++i)
             cssColorNames.push(colors[i].toLowerCase());
 
-        var systemColors = CSS.cssKeywords["systemColor"];
+        var systemColors = Css.cssKeywords["systemColor"];
         for (var i = 0; i < systemColors.length; ++i)
             cssColorNames.push(systemColors[i].toLowerCase());
     }
@@ -83,13 +83,13 @@ CSS.isColorKeyword = function(keyword)
     return cssColorNames.indexOf(keyword.toLowerCase()) != -1;
 };
 
-CSS.isImageRule = function(nodeType,rule)
+Css.isImageRule = function(nodeType,rule)
 {
     if (!imageRules)
     {
         imageRules = [];
 
-        for (var i in CSS.cssInfo[nodeType])
+        for (var i in Css.cssInfo[nodeType])
         {
             var r = i.toLowerCase();
             var suffix = "image";
@@ -101,7 +101,7 @@ CSS.isImageRule = function(nodeType,rule)
     return imageRules.indexOf(rule.toLowerCase()) != -1;
 };
 
-CSS.copyTextStyles = function(fromNode, toNode, style)
+Css.copyTextStyles = function(fromNode, toNode, style)
 {
     var view = fromNode.ownerDocument.defaultView;
     if (view)
@@ -118,7 +118,7 @@ CSS.copyTextStyles = function(fromNode, toNode, style)
     }
 };
 
-CSS.copyBoxStyles = function(fromNode, toNode, style)
+Css.copyBoxStyles = function(fromNode, toNode, style)
 {
     var view = fromNode.ownerDocument.defaultView;
     if (view)
@@ -139,7 +139,7 @@ CSS.copyBoxStyles = function(fromNode, toNode, style)
     }
 };
 
-CSS.readBoxStyles = function(style)
+Css.readBoxStyles = function(style)
 {
     const styleNames = {
         "margin-top": "marginTop", "margin-right": "marginRight",
@@ -161,9 +161,9 @@ CSS.readBoxStyles = function(style)
     return styles;
 };
 
-CSS.getBoxFromStyles = function(style, element)
+Css.getBoxFromStyles = function(style, element)
 {
-    var args = CSS.readBoxStyles(style);
+    var args = Css.readBoxStyles(style);
     args.width = element.offsetWidth
         - (args.paddingLeft+args.paddingRight+args.borderLeft+args.borderRight);
     args.height = element.offsetHeight
@@ -171,12 +171,12 @@ CSS.getBoxFromStyles = function(style, element)
     return args;
 };
 
-CSS.getElementCSSSelector = function(element)
+Css.getElementCSSSelector = function(element)
 {
     if (!element || !element.localName)
         return "null";
 
-    var label = XML.getLocalName(element);
+    var label = Xml.getLocalName(element);
     if (element.id)
         label += "#" + element.id;
 
@@ -186,13 +186,13 @@ CSS.getElementCSSSelector = function(element)
     return label;
 };
 
-CSS.getElementCSSPath = function(element)
+Css.getElementCSSPath = function(element)
 {
     var paths = [];
 
     for (; element && element.nodeType == 1; element = element.parentNode)
     {
-        var selector = CSS.getElementCSSSelector(element);
+        var selector = Css.getElementCSSSelector(element);
         paths.splice(0, 0, selector);
     }
 
@@ -204,7 +204,7 @@ CSS.getElementCSSPath = function(element)
 
 var classNameReCache={};
 
-CSS.hasClass = function(node, name)
+Css.hasClass = function(node, name)
 {
     if (!node || node.nodeType != 1 || !node.className || name == '')
         return false;
@@ -217,7 +217,7 @@ CSS.hasClass = function(node, name)
             var cls = classes[i].trim();
             if (cls != "")
             {
-                if (CSS.hasClass(node, cls) == false)
+                if (Css.hasClass(node, cls) == false)
                     return false;
                 found = true;
             }
@@ -233,7 +233,7 @@ CSS.hasClass = function(node, name)
     return node.className.search(re) != -1;
 };
 
-CSS.setClass = function(node, name)
+Css.setClass = function(node, name)
 {
     if (!node || node.nodeType != 1 || name == '')
         return;
@@ -246,23 +246,23 @@ CSS.setClass = function(node, name)
             var cls = classes[i].trim();
             if (cls != "")
             {
-                CSS.setClass(node, cls);
+                Css.setClass(node, cls);
             }
         }
         return;
     }
-    if (!CSS.hasClass(node, name))
+    if (!Css.hasClass(node, name))
         node.className = node.className.trim() + " " + name;
 };
 
-CSS.getClassValue = function(node, name)
+Css.getClassValue = function(node, name)
 {
     var re = new RegExp(name+"-([^ ]+)");
     var m = re.exec(node.className);
     return m ? m[1] : "";
 };
 
-CSS.removeClass = function(node, name)
+Css.removeClass = function(node, name)
 {
     if (!node || node.nodeType != 1 || node.className == '' || name == '')
         return;
@@ -275,8 +275,8 @@ CSS.removeClass = function(node, name)
             var cls = classes[i].trim();
             if (cls != "")
             {
-                if (CSS.hasClass(node, cls) == false)
-                    CSS.removeClass(node, cls);
+                if (Css.hasClass(node, cls) == false)
+                    Css.removeClass(node, cls);
             }
         }
         return;
@@ -292,28 +292,28 @@ CSS.removeClass = function(node, name)
 
 };
 
-CSS.toggleClass = function(elt, name)
+Css.toggleClass = function(elt, name)
 {
-    if (CSS.hasClass(elt, name))
-        CSS.removeClass(elt, name);
+    if (Css.hasClass(elt, name))
+        Css.removeClass(elt, name);
     else
-        CSS.setClass(elt, name);
+        Css.setClass(elt, name);
 };
 
-CSS.obscure = function(elt, obscured)
+Css.obscure = function(elt, obscured)
 {
     if (obscured)
-        CSS.setClass(elt, "obscured");
+        Css.setClass(elt, "obscured");
     else
-        CSS.removeClass(elt, "obscured");
+        Css.removeClass(elt, "obscured");
 };
 
-CSS.setClassTimed = function(elt, name, context, timeout)
+Css.setClassTimed = function(elt, name, context, timeout)
 {
     if (FBTrace.DBG_HTML || FBTrace.DBG_SOURCEFILES)
     {
         FBTrace.sysout("css.setClassTimed elt.__setClassTimeout: "+elt.__setClassTimeout+
-                " XML.isVisible(elt): "+XML.isVisible(elt)+
+                " Xml.isVisible(elt): "+Xml.isVisible(elt)+
                 " elt.__invisibleAtSetPoint: "+elt.__invisibleAtSetPoint);
     }
 
@@ -323,9 +323,9 @@ CSS.setClassTimed = function(elt, name, context, timeout)
     if (elt.__setClassTimeout)  // then we are already waiting to remove the class mark
         context.clearTimeout(elt.__setClassTimeout);  // reset the timer
     else                        // then we are not waiting to remove the mark
-        CSS.setClass(elt, name);
+        Css.setClass(elt, name);
 
-    if (!XML.isVisible(elt))
+    if (!Xml.isVisible(elt))
     {
         if (elt.__invisibleAtSetPoint)
             elt.__invisibleAtSetPoint--;
@@ -342,26 +342,26 @@ CSS.setClassTimed = function(elt, name, context, timeout)
         delete elt.__setClassTimeout;
 
         if (elt.__invisibleAtSetPoint)  // then user can't see it, try again later
-            CSS.setClassTimed(elt, name, context, timeout);
+            Css.setClassTimed(elt, name, context, timeout);
         else
         {
             delete elt.__invisibleAtSetPoint;  // may be zero
-            CSS.removeClass(elt, name);
+            Css.removeClass(elt, name);
         }
     }, timeout);
 };
 
-CSS.cancelClassTimed = function(elt, name, context)
+Css.cancelClassTimed = function(elt, name, context)
 {
     if (elt.__setClassTimeout)
     {
-        CSS.removeClass(elt, name);
+        Css.removeClass(elt, name);
         context.clearTimeout(elt.__setClassTimeout);
         delete elt.__setClassTimeout;
     }
 };
 
-CSS.safeGetCSSRules = function(styleSheet)
+Css.safeGetCSSRules = function(styleSheet)
 {
     try
     {
@@ -377,13 +377,13 @@ CSS.safeGetCSSRules = function(styleSheet)
 // ********************************************************************************************* //
 // Stylesheet API
 
-CSS.createStyleSheet = function(doc, url)
+Css.createStyleSheet = function(doc, url)
 {
     var style = doc.createElementNS("http://www.w3.org/1999/xhtml", "style");
     style.setAttribute("charset","utf-8");
     style.setAttribute("type", "text/css");
 
-    var cssText = url ? HTTP.getResource(url) : null;
+    var cssText = url ? Http.getResource(url) : null;
     if (cssText)
     {
         var index = url.lastIndexOf("/");
@@ -402,7 +402,7 @@ CSS.createStyleSheet = function(doc, url)
     return style;
 }
 
-CSS.addStyleSheet = function(doc, style)
+Css.addStyleSheet = function(doc, style)
 {
     var heads = doc.getElementsByTagName("head");
     if (heads.length)
@@ -411,34 +411,34 @@ CSS.addStyleSheet = function(doc, style)
         doc.documentElement.appendChild(style);
 };
 
-CSS.appendStylesheet = function(doc, uri)
+Css.appendStylesheet = function(doc, uri)
 {
     // Make sure the stylesheet is not appended twice.
     var styleSheet = doc.getElementById(uri);
     if (styleSheet)
         return styleSheet;
 
-    var styleSheet = CSS.createStyleSheet(doc, uri);
+    var styleSheet = Css.createStyleSheet(doc, uri);
     styleSheet.setAttribute("id", uri);
-    CSS.addStyleSheet(doc, styleSheet);
+    Css.addStyleSheet(doc, styleSheet);
 
     return styleSheet;
 },
 
-CSS.getStyleSheetByHref = function(url, context)
+Css.getStyleSheetByHref = function(url, context)
 {
     if (FBTrace.DBG_ERRORS && FBTrace.DBG_CSS)
     {
-        var r = CSS.totalRules;
-        var s = CSS.totalSheets;
+        var r = Css.totalRules;
+        var s = Css.totalSheets;
         var t = new Date();
     }
 
     if (!context.styleSheetMap)
-        CSS.createStyleSheetMap(context);  // fill cache
+        Css.createStyleSheetMap(context);  // fill cache
 
     if (FBTrace.DBG_ERRORS && FBTrace.DBG_CSS)
-        FBTrace.sysout((CSS.totalRules-r)+" rules in "+ (CSS.totalSheets-s)+
+        FBTrace.sysout((Css.totalRules-r)+" rules in "+ (Css.totalSheets-s)+
             " sheets required "+(new Date().getTime() - t.getTime())+" ms",
             context.styleSheetMap);
 
@@ -447,19 +447,19 @@ CSS.getStyleSheetByHref = function(url, context)
     return context.styleSheetMap.hasOwnProperty(url) ? context.styleSheetMap[url] : undefined;
 };
 
-CSS.createStyleSheetMap = function(context)
+Css.createStyleSheetMap = function(context)
 {
     context.styleSheetMap = {};
 
     function addSheet(sheet)
     {
-        var sheetURL = CSS.getURLForStyleSheet(sheet);
+        var sheetURL = Css.getURLForStyleSheet(sheet);
         context.styleSheetMap[sheetURL] = sheet;
 
         if (FBTrace.DBG_ERRORS && FBTrace.DBG_CSS)
         {
-            CSS.totalSheets++;
-            FBTrace.sysout("addSheet "+CSS.totalSheets+" "+sheetURL);
+            Css.totalSheets++;
+            FBTrace.sysout("addSheet "+Css.totalSheets+" "+sheetURL);
         }
 
         // recurse for imported sheets
@@ -467,7 +467,7 @@ CSS.createStyleSheetMap = function(context)
         for (var i = 0; i < sheet.cssRules.length; ++i)
         {
             if (FBTrace.DBG_ERRORS && FBTrace.DBG_CSS)
-                CSS.totalRules++;
+                Css.totalRules++;
 
             var rule = sheet.cssRules[i];
             if (rule instanceof CSSStyleRule)
@@ -482,7 +482,7 @@ CSS.createStyleSheetMap = function(context)
         }
     }
 
-    WIN.iterateWindows(context.window, function(subwin)
+    Win.iterateWindows(context.window, function(subwin)
     {
         var rootSheets = subwin.document.styleSheets;
         if (!rootSheets)
@@ -500,7 +500,7 @@ CSS.createStyleSheetMap = function(context)
     return context.styleSheetMap;
 };
 
-CSS.getAllStyleSheets = function(context)
+Css.getAllStyleSheets = function(context)
 {
     if (!context)
         return [];
@@ -509,9 +509,9 @@ CSS.getAllStyleSheets = function(context)
 
     function addSheet(sheet)
     {
-        var sheetLocation =  CSS.getURLForStyleSheet(sheet);
+        var sheetLocation =  Css.getURLForStyleSheet(sheet);
 
-        if (!Options.get("showUserAgentCSS") && URL.isSystemURL(sheetLocation))
+        if (!Options.get("showUserAgentCSS") && Url.isSystemURL(sheetLocation))
             return;
 
         if (sheet.ownerNode && Firebug.shouldIgnore(sheet.ownerNode))
@@ -536,7 +536,7 @@ CSS.getAllStyleSheets = function(context)
         }
     }
 
-    WIN.iterateWindows(context.window, function(subwin)
+    Win.iterateWindows(context.window, function(subwin)
     {
         var rootSheets = subwin.document.styleSheets;
         for (var i = 0; i < rootSheets.length; ++i)
@@ -546,7 +546,7 @@ CSS.getAllStyleSheets = function(context)
     return styleSheets;
 };
 
-CSS.getURLForStyleSheet = function(styleSheet)
+Css.getURLForStyleSheet = function(styleSheet)
 {
     // http://www.w3.org/TR/DOM-Level-2-Style/stylesheets.html#StyleSheets-StyleSheet.
     // For inline style sheets, the value of this attribute is null.
@@ -557,15 +557,15 @@ CSS.getURLForStyleSheet = function(styleSheet)
  * Retrieves the instance number for a given style sheet. The instance number
  * is sheet's index within the set of all other sheets whose URL is the same.
  */
-CSS.getInstanceForStyleSheet = function(styleSheet, ownerDocument)
+Css.getInstanceForStyleSheet = function(styleSheet, ownerDocument)
 {
     // ownerDocument is an optional hint for performance
     if (FBTrace.DBG_CSS)
         FBTrace.sysout("getInstanceForStyleSheet href:" + styleSheet.href + " mediaText:" +
             styleSheet.media.mediaText + " path to ownerNode" +
-            (styleSheet.ownerNode && XPATH.getElementXPath(styleSheet.ownerNode)), ownerDocument);
+            (styleSheet.ownerNode && Xpath.getElementXPath(styleSheet.ownerNode)), ownerDocument);
 
-    ownerDocument = ownerDocument || CSS.getDocumentForStyleSheet(styleSheet);
+    ownerDocument = ownerDocument || Css.getDocumentForStyleSheet(styleSheet);
     if (!ownerDocument)
         return;
 
@@ -579,7 +579,7 @@ CSS.getInstanceForStyleSheet = function(styleSheet, ownerDocument)
         if (FBTrace.DBG_CSS)
             FBTrace.sysout("getInstanceForStyleSheet: compare href " + i +
                 " " + curSheet.href + " " + curSheet.media.mediaText + " " +
-                (curSheet.ownerNode && XPATH.getElementXPath(curSheet.ownerNode)));
+                (curSheet.ownerNode && Xpath.getElementXPath(curSheet.ownerNode)));
 
         if (curSheet == styleSheet)
             break;
@@ -590,7 +590,7 @@ CSS.getInstanceForStyleSheet = function(styleSheet, ownerDocument)
     return ret;
 };
 
-CSS.getDocumentForStyleSheet = function(styleSheet)
+Css.getDocumentForStyleSheet = function(styleSheet)
 {
     while (styleSheet.parentStyleSheet && !styleSheet.ownerNode)
     {
@@ -604,8 +604,8 @@ CSS.getDocumentForStyleSheet = function(styleSheet)
 // ********************************************************************************************* //
 // CSS Info
 
-CSS.cssInfo = {};
-CSS.cssInfo.html =
+Css.cssInfo = {};
+Css.cssInfo.html =
 {
     "background": ["bgRepeat", "bgAttachment", "bgPosition", "color", "systemColor",
         "mozBackgroundImage", "none"],
@@ -787,7 +787,7 @@ CSS.cssInfo.html =
 
 };
 
-CSS.cssInfo.svg = {
+Css.cssInfo.svg = {
     "alignment-baseline": ["svgAlignmentBaseline"],
     "baseline-shift": ["baselineShift"],
     "clip": ["auto"],
@@ -849,7 +849,7 @@ CSS.cssInfo.svg = {
     "writing-mode": ["writingMode"]
 };
 
-CSS.inheritedStyleNames =
+Css.inheritedStyleNames =
 {
     "border-collapse": 1,
     "border-spacing": 1,
@@ -884,7 +884,7 @@ CSS.inheritedStyleNames =
     "word-wrap": 1
 };
 
-CSS.cssKeywords =
+Css.cssKeywords =
 {
     "mozAppearance":
     [
@@ -1777,7 +1777,7 @@ CSS.cssKeywords =
     ]
 };
 
-CSS.nonEditableTags =
+Css.nonEditableTags =
 {
     "HTML": 1,
     "HEAD": 1,
@@ -1785,7 +1785,7 @@ CSS.nonEditableTags =
     "head": 1
 };
 
-CSS.innerEditableTags =
+Css.innerEditableTags =
 {
     "BODY": 1,
     "body": 1
@@ -1794,7 +1794,7 @@ CSS.innerEditableTags =
 // ********************************************************************************************* //
 // Registration
 
-return CSS;
+return Css;
 
 // ********************************************************************************************* //
 });

@@ -13,7 +13,7 @@ define([
     "firebug/lib/string",
     "firebug/js/fbs",
 ],
-function(OBJECT, Firebug, Domplate, FirebugReps, Locale, Wrapper, StackFrame, DOM, CSS, STR, FBS) {
+function(Extend, Firebug, Domplate, FirebugReps, Locale, Wrapper, StackFrame, Dom, Css, Str, FBS) {
 
 // ********************************************************************************************* //
 
@@ -38,7 +38,7 @@ var MEMORY_PATHS =
 
 // ********************************************************************************************* //
 
-Firebug.MemoryProfiler = OBJECT.extend(Firebug.Module,
+Firebug.MemoryProfiler = Extend.extend(Firebug.Module,
 {
     dispatchName: "memoryProfiler",
 
@@ -331,7 +331,7 @@ Firebug.MemoryProfiler = OBJECT.extend(Firebug.Module,
     {
         var row = Firebug.Console.openGroup(title, context, "profile",
             Firebug.MemoryProfiler.ProfileCaption, true, null, true);
-        CSS.setClass(row, "profilerRunning");
+        Css.setClass(row, "profilerRunning");
 
         Firebug.Console.closeGroup(context, true);
 
@@ -352,7 +352,7 @@ Firebug.MemoryProfiler = OBJECT.extend(Firebug.Module,
             : this.logProfileRow(context);
         delete context.memoryProfileRow;
 
-        CSS.removeClass(groupRow, "profilerRunning");
+        Css.removeClass(groupRow, "profilerRunning");
 
         var calls = [];
         var totalCalls = 0;
@@ -396,7 +396,7 @@ Firebug.MemoryProfiler = OBJECT.extend(Firebug.Module,
                 captionBox.textContent = Locale.$STR("firebug.Memory Profiler Results");
 
             var timeBox = groupRow.getElementsByClassName("profileTime").item(0);
-            timeBox.textContent = "(" + STR.formatTime(context.memoryProfileTime) + ")";
+            timeBox.textContent = "(" + Str.formatTime(context.memoryProfileTime) + ")";
 
             var groupBody = groupRow.lastChild;
             var sizer = Firebug.MemoryProfiler.ProfileTable.tag.replace(
@@ -477,7 +477,7 @@ ObjectIterator.prototype =
                 continue;
 
             // Ignore built-in objects
-            if (DOM.isDOMMember(obj, name) || DOM.isDOMConstant(obj, name))
+            if (Dom.isDOMMember(obj, name) || Dom.isDOMConstant(obj, name))
                 continue;
 
             try
@@ -566,12 +566,12 @@ Firebug.MemoryProfiler.ProfileTable = domplate(
 
     onClick: function(event)
     {
-        var table = DOM.getAncestorByClass(event.target, "profileTable");
-        var header = DOM.getAncestorByClass(event.target, "headerCell");
+        var table = Dom.getAncestorByClass(event.target, "profileTable");
+        var header = Dom.getAncestorByClass(event.target, "headerCell");
         if (!header)
             return;
 
-        var numerical = !CSS.hasClass(header, "alphaValue");
+        var numerical = !Css.hasClass(header, "alphaValue");
 
         var colIndex = 0;
         for (header = header.previousSibling; header; header = header.previousSibling)
@@ -584,8 +584,8 @@ Firebug.MemoryProfiler.ProfileTable = domplate(
     {
         sortAscending = function()
         {
-            CSS.removeClass(header, "sortedDescending");
-            CSS.setClass(header, "sortedAscending");
+            Css.removeClass(header, "sortedDescending");
+            Css.setClass(header, "sortedAscending");
             header.setAttribute("aria-sort", "ascending");
 
             header.sorted = -1;
@@ -596,8 +596,8 @@ Firebug.MemoryProfiler.ProfileTable = domplate(
 
         sortDescending = function()
         {
-            CSS.removeClass(header, "sortedAscending");
-            CSS.setClass(header, "sortedDescending");
+            Css.removeClass(header, "sortedAscending");
+            Css.setClass(header, "sortedDescending");
             header.setAttribute("aria-sort", "descending")
 
             header.sorted = 1;
@@ -606,8 +606,8 @@ Firebug.MemoryProfiler.ProfileTable = domplate(
                 tbody.appendChild(values[i].row);
         }
 
-        var tbody = DOM.getChildByClass(table, "profileTbody");
-        var thead = DOM.getChildByClass(table, "profileThead");
+        var tbody = Dom.getChildByClass(table, "profileTbody");
+        var thead = Dom.getChildByClass(table, "profileThead");
 
         var values = [];
         for (var row = tbody.childNodes[0]; row; row = row.nextSibling)
@@ -621,13 +621,13 @@ Firebug.MemoryProfiler.ProfileTable = domplate(
         values.sort(function(a, b) { return a.value < b.value ? -1 : 1; });
 
         var headerRow = thead.firstChild;
-        var headerSorted = DOM.getChildByClass(headerRow, "headerSorted");
-        CSS.removeClass(headerSorted, "headerSorted");
+        var headerSorted = Dom.getChildByClass(headerRow, "headerSorted");
+        Css.removeClass(headerSorted, "headerSorted");
         if (headerSorted)
             headerSorted.removeAttribute('aria-sort');
 
         var header = headerRow.childNodes[colIndex];
-        CSS.setClass(header, "headerSorted");
+        Css.setClass(header, "headerSorted");
 
         if (numerical)
         {
@@ -704,7 +704,7 @@ Firebug.MemoryProfiler.ProfileCall = domplate(Firebug.Rep,
 
     getCallName: function(call)
     {
-        return STR.cropString(StackFrame.getFunctionName(call.script, call.context), 60);
+        return Str.cropString(StackFrame.getFunctionName(call.script, call.context), 60);
     },
 
     getColumns: function(call)
@@ -717,7 +717,7 @@ Firebug.MemoryProfiler.ProfileCall = domplate(Firebug.Rep,
 
     getColumnLabel: function(call)
     {
-        return STR.formatSize(call);
+        return Str.formatSize(call);
     },
 
     getSourceLink: function(call)

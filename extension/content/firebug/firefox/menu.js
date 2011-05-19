@@ -88,7 +88,7 @@ Menu.setItemIntoElement = function(element, item)
     }
 
     if (item.className)
-        CSS.setClass(element, item.className);
+        Css.setClass(element, item.className);
 
     if (item.acceltext)
         element.setAttribute("acceltext", item.acceltext);

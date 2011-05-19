@@ -17,12 +17,12 @@ var Cu = Components.utils;
 const reNotWhitespace = /[^\s]/;
 
 
-var STR = {};
+var Str = {};
 
 // ************************************************************************************************
 // Whitespace and Entity conversions
 
-var entityConversionLists = STR.entityConversionLists =
+var entityConversionLists = Str.entityConversionLists =
 {
     normal : {
         whitespace : {
@@ -227,7 +227,7 @@ function escapeGroupsForEntities(str, lists)
     return results;
 }
 
-STR.escapeGroupsForEntities = escapeGroupsForEntities;
+Str.escapeGroupsForEntities = escapeGroupsForEntities;
 
 function unescapeEntities(str, lists)
 {
@@ -268,25 +268,25 @@ function unescapeEntities(str, lists)
 // ************************************************************************************************
 // String escaping
 
-var escapeForTextNode = STR.escapeForTextNode = createSimpleEscape('text', 'normal');
-var escapeForHtmlEditor = STR.escapeForHtmlEditor = createSimpleEscape('editor', 'normal');
-var escapeForElementAttribute = STR.escapeForElementAttribute = createSimpleEscape('attributes', 'normal');
-var escapeForCss = STR.escapeForCss = createSimpleEscape('css', 'normal');
+var escapeForTextNode = Str.escapeForTextNode = createSimpleEscape('text', 'normal');
+var escapeForHtmlEditor = Str.escapeForHtmlEditor = createSimpleEscape('editor', 'normal');
+var escapeForElementAttribute = Str.escapeForElementAttribute = createSimpleEscape('attributes', 'normal');
+var escapeForCss = Str.escapeForCss = createSimpleEscape('css', 'normal');
 
 // deprecated compatibility functions
-STR.deprecateEscapeHTML = createSimpleEscape('text', 'normal');
-STR.deprecatedUnescapeHTML = createSimpleEscape('text', 'reverse');
+Str.deprecateEscapeHTML = createSimpleEscape('text', 'normal');
+Str.deprecatedUnescapeHTML = createSimpleEscape('text', 'reverse');
 
-STR.escapeHTML = Deprecated.deprecated("use appropriate escapeFor... function",
-    STR.deprecateEscapeHTML);
-STR.unescapeHTML = Deprecated.deprecated("use appropriate unescapeFor... function",
-    STR.deprecatedUnescapeHTML);
+Str.escapeHTML = Deprecated.deprecated("use appropriate escapeFor... function",
+    Str.deprecateEscapeHTML);
+Str.unescapeHTML = Deprecated.deprecated("use appropriate unescapeFor... function",
+    Str.deprecatedUnescapeHTML);
 
-var escapeForSourceLine = STR.escapeForSourceLine = createSimpleEscape('text', 'normal');
+var escapeForSourceLine = Str.escapeForSourceLine = createSimpleEscape('text', 'normal');
 
 var unescapeWhitespace = createSimpleEscape('whitespace', 'reverse');
 
-STR.unescapeForTextNode = function(str)
+Str.unescapeForTextNode = function(str)
 {
     if (Options.get("showTextNodesWithWhitespace"))
         str = unescapeWhitespace(str);
@@ -297,24 +297,24 @@ STR.unescapeForTextNode = function(str)
     return str;
 }
 
-STR.unescapeForURL = createSimpleEscape('text', 'reverse');
+Str.unescapeForURL = createSimpleEscape('text', 'reverse');
 
-STR.escapeNewLines = function(value)
+Str.escapeNewLines = function(value)
 {
     return value.replace(/\r/gm, "\\r").replace(/\n/gm, "\\n");
 };
 
-STR.stripNewLines = function(value)
+Str.stripNewLines = function(value)
 {
     return typeof(value) == "string" ? value.replace(/[\r\n]/gm, " ") : value;
 };
 
-STR.escapeJS = function(value)
+Str.escapeJS = function(value)
 {
     return value.replace(/\r/gm, "\\r").replace(/\n/gm, "\\n").replace('"', '\\"', "g");
 };
 
-STR.cropString = function(text, limit, alterText)
+Str.cropString = function(text, limit, alterText)
 {
     if (!alterText)
         alterText = "...";
@@ -339,7 +339,7 @@ STR.cropString = function(text, limit, alterText)
     return text;
 };
 
-STR.lineBreak = function()
+Str.lineBreak = function()
 {
     if (navigator.appVersion.indexOf("Win") != -1)
     {
@@ -354,17 +354,17 @@ STR.lineBreak = function()
     return '\n';
 };
 
-STR.cropMultipleLines = function(text, limit)
+Str.cropMultipleLines = function(text, limit)
 {
     return this.escapeNewLines(this.cropString(text, limit));
 };
 
-STR.isWhitespace = function(text)
+Str.isWhitespace = function(text)
 {
     return !reNotWhitespace.exec(text);
 };
 
-STR.splitLines = function(text)
+Str.splitLines = function(text)
 {
     const reSplitLines2 = /.*(:?\r\n|\n|\r)?/mg;
     var lines;
@@ -381,22 +381,22 @@ STR.splitLines = function(text)
     return lines;
 };
 
-STR.trim = function(text)
+Str.trim = function(text)
 {
     return text.replace(/^\s*|\s*$/g,"");
 }
 
-STR.trimLeft = function(text)
+Str.trimLeft = function(text)
 {
     return text.replace(/^\s+/,"");
 }
 
-STR.trimRight = function(text)
+Str.trimRight = function(text)
 {
     return text.replace(/\s+$/,"");
 }
 
-STR.wrapText = function(text, noEscapeHTML)
+Str.wrapText = function(text, noEscapeHTML)
 {
     var reNonAlphaNumeric = /[^A-Za-z_$0-9'"-]/;
 
@@ -408,7 +408,7 @@ STR.wrapText = function(text, noEscapeHTML)
     // within response body (in order to scroll we need an element).
     // Don't use <pre> elements since this adds additional new line endings when copying
     // selected source code using Firefox->Edit->Copy (Ctrl+C) (issue 2093).
-    var lines = STR.splitLines(text);
+    var lines = Str.splitLines(text);
     for (var i = 0; i < lines.length; ++i)
     {
         var line = lines[i];
@@ -436,9 +436,9 @@ STR.wrapText = function(text, noEscapeHTML)
     return html;
 }
 
-STR.insertWrappedText = function(text, textBox, noEscapeHTML)
+Str.insertWrappedText = function(text, textBox, noEscapeHTML)
 {
-    var html = STR.wrapText(text, noEscapeHTML);
+    var html = Str.wrapText(text, noEscapeHTML);
     textBox.innerHTML = "<pre role=\"list\">" + html.join("") + "</pre>";
 }
 
@@ -453,16 +453,16 @@ function getIndent(line)
     return m ? m[0].length : 0;
 }
 
-STR.cleanIndentation = function(text)
+Str.cleanIndentation = function(text)
 {
-    var lines = STR.splitLines(text);
+    var lines = Str.splitLines(text);
 
     var minIndent = -1;
     for (var i = 0; i < lines.length; ++i)
     {
         var line = lines[i];
         var indent = getIndent(line);
-        if (minIndent == -1 && line && !STR.isWhitespace(line))
+        if (minIndent == -1 && line && !Str.isWhitespace(line))
             minIndent = indent;
         if (indent >= minIndent)
             lines[i] = line.substr(minIndent);
@@ -473,7 +473,7 @@ STR.cleanIndentation = function(text)
 // ************************************************************************************************
 // Formatting
 
-STR.formatNumber = function(number)
+Str.formatNumber = function(number)
 {
     number += "";
     var x = number.split(".");
@@ -485,7 +485,7 @@ STR.formatNumber = function(number)
     return x1 + x2;
 }
 
-STR.formatSize = function(bytes)
+Str.formatSize = function(bytes)
 {
     var negative = (bytes < 0);
     bytes = Math.abs(bytes);
@@ -524,7 +524,7 @@ STR.formatSize = function(bytes)
     return negative ? "-" + result : result;
 }
 
-STR.formatTime = function(elapsed)
+Str.formatTime = function(elapsed)
 {
     if (elapsed == -1)
         return "";
@@ -544,7 +544,7 @@ STR.formatTime = function(elapsed)
 
 // ********************************************************************************************* //
 
-STR.safeToString = function(ob)
+Str.safeToString = function(ob)
 {
     try
     {
@@ -579,7 +579,7 @@ STR.safeToString = function(ob)
 
 // ********************************************************************************************* //
 
-return STR;
+return Str;
 
 // ********************************************************************************************* //
 });

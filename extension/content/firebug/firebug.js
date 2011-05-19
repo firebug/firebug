@@ -23,8 +23,8 @@ define([
     "firebug/lib/dom",
     "firebug/http/httpLib",
 ],
-function(FBL, OBJECT, Firefox, ToolsInterface, ChromeFactory, Domplate, Options, Locale, Events,
-    Wrapper, URL, CSS, WIN, STR, ARR, DOM, HTTP) {
+function(FBL, Extend, Firefox, ToolsInterface, ChromeFactory, Domplate, Options, Locale, Events,
+    Wrapper, Url, Css, Win, Str, Arr, Dom, Http) {
 
 // ********************************************************************************************* //
 // Constants
@@ -172,7 +172,7 @@ window.Firebug =
 
     loadVersion: function(versionURL)
     {
-        var content = HTTP.getResource(versionURL);
+        var content = Http.getResource(versionURL);
         if (!content)
             return "no content at "+versionURL;
 
@@ -473,7 +473,7 @@ window.Firebug =
     unregisterModule: function()
     {
         for (var i = 0; i < arguments.length; ++i)
-            ARR.remove(modules, arguments[i]);
+            Arr.remove(modules, arguments[i]);
     },
 
     registerActivableModule: function()
@@ -498,8 +498,8 @@ window.Firebug =
         for (var i = 0; i < arguments.length; ++i)
         {
             Firebug.TabWatcher.removeListener(arguments[i]);
-            ARR.remove(Firebug.uiListeners, arguments[i]);
-            ARR.remove(extensions, arguments[i])
+            Arr.remove(Firebug.uiListeners, arguments[i]);
+            Arr.remove(extensions, arguments[i])
         }
     },
 
@@ -512,7 +512,7 @@ window.Firebug =
     unregisterUIListener: function()
     {
         for (var i = 0; i < arguments.length; ++i)
-            ARR.remove(Firebug.uiListeners, arguments[i]);
+            Arr.remove(Firebug.uiListeners, arguments[i]);
     },
 
     registerPanel: function()
@@ -556,7 +556,7 @@ window.Firebug =
     unregisterRep: function()
     {
         for (var i = 0; i < arguments.length; ++i)
-            ARR.remove(reps, arguments[i]);
+            Arr.remove(reps, arguments[i]);
     },
 
     setDefaultReps: function(funcRep, rep)
@@ -1031,12 +1031,12 @@ window.Firebug =
         var target = null;
         for (var child = node; child; child = child.parentNode)
         {
-            if (CSS.hasClass(child, "repTarget"))
+            if (Css.hasClass(child, "repTarget"))
                 target = child;
 
             if (child.repObject)
             {
-                if (!target && CSS.hasClass(child, "repIgnore"))
+                if (!target && Css.hasClass(child, "repIgnore"))
                     break;
                 else
                     return child.repObject;
@@ -1081,7 +1081,7 @@ window.Firebug =
 
     visitWebsite: function(which)
     {
-        WIN.openNewTab(firebugURLs[which]);
+        Win.openNewTab(firebugURLs[which]);
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
@@ -1246,7 +1246,7 @@ Firebug.getConsoleByGlobal = function getConsoleByGlobal(global)
                 return handler.console;
             }
             if (FBTrace.DBG_ERRORS)
-                FBTrace.sysout("Firebug.getConsoleByGlobal FAILS, no handler for global "+global+" "+WIN.safeGetWindowLocation(global), global);
+                FBTrace.sysout("Firebug.getConsoleByGlobal FAILS, no handler for global "+global+" "+Win.safeGetWindowLocation(global), global);
         }
         if (FBTrace.DBG_ERRORS)
             FBTrace.sysout("Firebug.getConsoleByGlobal FAILS, no context for global "+global, global);
@@ -1295,7 +1295,7 @@ Firebug.Listener.prototype =
 
     removeListener: function(listener)
     {
-        ARR.remove(this.fbListeners, listener);  // if this.fbListeners is null, remove is being called with no add
+        Arr.remove(this.fbListeners, listener);  // if this.fbListeners is null, remove is being called with no add
     }
 };
 
@@ -1306,7 +1306,7 @@ Firebug.Listener.prototype =
  * <code>Firebug.registerModule</code> method. There is always one instance of a module object
  * per browser window.
  */
-Firebug.Module = OBJECT.extend(new Firebug.Listener(),
+Firebug.Module = Extend.extend(new Firebug.Listener(),
 /** @lends Firebug.Module */
 {
     /**
@@ -1434,7 +1434,7 @@ Firebug.Extension =
  * register with <code>Firebug.registerPanel</code> method. An instance of the panel
  * object is created by the framework for each browser tab where Firebug is activated.
  */
-Firebug.Panel = OBJECT.extend(new Firebug.Listener(),
+Firebug.Panel = Extend.extend(new Firebug.Listener(),
 /** @lends Firebug.Panel */
 {
     searchable: false,    // supports search
@@ -1461,7 +1461,7 @@ Firebug.Panel = OBJECT.extend(new Firebug.Listener(),
         this.panelNode = doc.createElement("div");
         this.panelNode.ownerPanel = this;
 
-        CSS.setClass(this.panelNode, "panelNode panelNode-"+this.name+" contextUID="+context.uid);
+        Css.setClass(this.panelNode, "panelNode panelNode-"+this.name+" contextUID="+context.uid);
 
         // Load persistent content if any.
         var persistedState = Firebug.getPanelState(this);
@@ -1514,7 +1514,7 @@ Firebug.Panel = OBJECT.extend(new Firebug.Listener(),
         while (persistedState.panelNode.firstChild)
             this.panelNode.appendChild(persistedState.panelNode.firstChild);
 
-        DOM.scrollToBottom(this.panelNode);
+        Dom.scrollToBottom(this.panelNode);
     },
 
     // called when a panel in one XUL window is about to disappear to later reappear another XUL window.
@@ -1585,7 +1585,7 @@ Firebug.Panel = OBJECT.extend(new Firebug.Listener(),
         try
         {
             var buttons = Firebug.chrome.$(buttonsId);
-            DOM.collapse(buttons, !show);
+            Dom.collapse(buttons, !show);
         }
         catch (exc)
         {
@@ -1903,7 +1903,7 @@ Firebug.Panel = OBJECT.extend(new Firebug.Listener(),
     getObjectDescription: function(object)
     {
         var url = this.getObjectLocation(object);
-        return URL.splitURLBase(url);
+        return Url.splitURLBase(url);
     },
 
     /*
@@ -1991,7 +1991,7 @@ Firebug.Panel = OBJECT.extend(new Firebug.Listener(),
  * All methods in this object are used on the prototype object (they reprent class methods)
  * and so, |this| points to the panel's prototype and *not* to the panel instance.
  */
-Firebug.ActivablePanel = OBJECT.extend(Firebug.Panel,
+Firebug.ActivablePanel = Extend.extend(Firebug.Panel,
 {
     activable: true,
 
@@ -2039,7 +2039,7 @@ Firebug.ActivablePanel = OBJECT.extend(Firebug.Panel,
  * {@link Firebug.Debugger}, which can be disabled in order to avoid performance
  * penalties (in cases where the user doesn't need a debugger for the moment).
  */
-Firebug.ActivableModule = OBJECT.extend(Firebug.Module,
+Firebug.ActivableModule = Extend.extend(Firebug.Module,
 /** @lends Firebug.ActivableModule */
 {
     /**
@@ -2093,7 +2093,7 @@ Firebug.ActivableModule = OBJECT.extend(Firebug.Module,
 
         if (this.observers.indexOf(observer) !== -1)
         {
-            ARR.remove(this.observers, observer);
+            Arr.remove(this.observers, observer);
             this.onObserverChange(observer);  // targeted, not dispatched
         }
         // else no-op
@@ -2169,7 +2169,7 @@ Firebug.MeasureBox =
             this.measureBox.className = "measureBox";
         }
 
-        CSS.copyTextStyles(target, this.measureBox);
+        Css.copyTextStyles(target, this.measureBox);
         target.ownerDocument.body.appendChild(this.measureBox);
     },
 
@@ -2180,13 +2180,13 @@ Firebug.MeasureBox =
 
     measureText: function(value)
     {
-        this.measureBox.innerHTML = value ? STR.escapeForSourceLine(value) : "m";
+        this.measureBox.innerHTML = value ? Str.escapeForSourceLine(value) : "m";
         return {width: this.measureBox.offsetWidth, height: this.measureBox.offsetHeight-1};
     },
 
     measureInputText: function(value)
     {
-        value = value ? STR.escapeForTextNode(value) : "m";
+        value = value ? Str.escapeForTextNode(value) : "m";
         if (!Firebug.showTextNodesWithWhitespace)
             value = value.replace(/\t/g,'mmmmmm').replace(/\ /g,'m');
         this.measureBox.innerHTML = value;
@@ -2196,7 +2196,7 @@ Firebug.MeasureBox =
     getBox: function(target)
     {
         var style = this.measureBox.ownerDocument.defaultView.getComputedStyle(this.measureBox, "");
-        var box = CSS.getBoxFromStyles(style, this.measureBox);
+        var box = Css.getBoxFromStyles(style, this.measureBox);
         return box;
     },
 
@@ -2300,12 +2300,12 @@ Firebug.Rep = domplate(
 
     cropString: function(text)
     {
-        return STR.cropString(text);
+        return Str.cropString(text);
     },
 
     cropMultipleLines: function(text, limit)
     {
-        return STR.cropMultipleLines(text, limit);
+        return Str.cropMultipleLines(text, limit);
     },
 
     toLowerCase: function(text)

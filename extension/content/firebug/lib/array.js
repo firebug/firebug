@@ -8,12 +8,12 @@ function(FBTrace) {
 // ********************************************************************************************* //
 // Constants
 
-var ARR = {};
+var Arr = {};
 
 // ********************************************************************************************* //
 // Arrays
 
-ARR.keys = function(map)  // At least sometimes the keys will be on user-level window objects
+Arr.keys = function(map)  // At least sometimes the keys will be on user-level window objects
 {
     var keys = [];
     try
@@ -29,7 +29,7 @@ ARR.keys = function(map)  // At least sometimes the keys will be on user-level w
     return keys;  // return is safe
 };
 
-ARR.values = function(map)
+Arr.values = function(map)
 {
     var values = [];
     try
@@ -59,7 +59,7 @@ ARR.values = function(map)
     return values;
 };
 
-ARR.remove = function(list, item)
+Arr.remove = function(list, item)
 {
     for (var i = 0; i < list.length; ++i)
     {
@@ -71,7 +71,7 @@ ARR.remove = function(list, item)
     }
 };
 
-ARR.sliceArray = function(array, index)
+Arr.sliceArray = function(array, index)
 {
     var slice = [];
     for (var i = index; i < array.length; ++i)
@@ -102,8 +102,8 @@ function extendArray(array, array2)
    return newArray;
 }
 
-ARR.extendArray = extendArray;
-ARR.cloneArray = cloneArray;
+Arr.extendArray = extendArray;
+Arr.cloneArray = cloneArray;
 
 function arrayInsert(array, index, other)
 {
@@ -113,11 +113,11 @@ function arrayInsert(array, index, other)
    return array;
 }
 
-ARR.arrayInsert = arrayInsert;
+Arr.arrayInsert = arrayInsert;
 
 // ********************************************************************************************* //
 
-return ARR;
+return Arr;
 
 // ********************************************************************************************* //
 });

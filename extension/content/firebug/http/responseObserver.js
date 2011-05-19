@@ -4,7 +4,7 @@ define([
     "firebug/lib/xpcom",
     "firebug/lib/trace",
 ],
-function(XPCOM, FBTrace) {
+function(Xpcom, FBTrace) {
 
 // ********************************************************************************************* //
 // Constants
@@ -40,7 +40,7 @@ function ChannelListener(win, request, listener)
 
     // The response will be written into the outputStream of this pipe.
     // Both ends of the pipe must be blocking.
-    this.sink = XPCOM.CCIN("@mozilla.org/pipe;1", "nsIPipe");
+    this.sink = Xpcom.CCIN("@mozilla.org/pipe;1", "nsIPipe");
     this.sink.init(false, false, 0x20000, 0x4000, null);
 
     // Remember the input stream, so it isn't released by GC.
@@ -52,7 +52,7 @@ function ChannelListener(win, request, listener)
     // Add tee listener into the chain of request stream listeners so, the chain
     // doesn't include a JS code. This way all exceptions are propertly distributed
     // (#515051).
-    var tee = XPCOM.CCIN("@mozilla.org/network/stream-listener-tee;1", "nsIStreamListenerTee");
+    var tee = Xpcom.CCIN("@mozilla.org/network/stream-listener-tee;1", "nsIStreamListenerTee");
     tee = tee.QueryInterface(Ci.nsIStreamListenerTee);
 
     var originalListener = request.setNewListener(tee);
@@ -107,7 +107,7 @@ ChannelListener.prototype =
         {
             if (this.sink)
             {
-                var bis = XPCOM.CCIN("@mozilla.org/binaryinputstream;1", "nsIBinaryInputStream");
+                var bis = Xpcom.CCIN("@mozilla.org/binaryinputstream;1", "nsIBinaryInputStream");
                 bis.setInputStream(inputStream);
                 var data = bis.readBytes(count);
 
@@ -122,11 +122,11 @@ ChannelListener.prototype =
                     return;
 
                 var binaryInputStream =
-                    XPCOM.CCIN("@mozilla.org/binaryinputstream;1", "nsIBinaryInputStream");
+                    Xpcom.CCIN("@mozilla.org/binaryinputstream;1", "nsIBinaryInputStream");
                 var storageStream =
-                    XPCOM.CCIN("@mozilla.org/storagestream;1", "nsIStorageStream");
+                    Xpcom.CCIN("@mozilla.org/storagestream;1", "nsIStorageStream");
                 var binaryOutputStream =
-                    XPCOM.CCIN("@mozilla.org/binaryoutputstream;1", "nsIBinaryOutputStream");
+                    Xpcom.CCIN("@mozilla.org/binaryoutputstream;1", "nsIBinaryOutputStream");
 
                 binaryInputStream.setInputStream(inputStream);
                 storageStream.init(8192, count, null);

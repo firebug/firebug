@@ -6,7 +6,7 @@ define([
     "firebug/lib/deprecated",
     "firebug/lib/stackFrame",
 ],
-function(XPCOM, FBTrace, Deprecated, StackFrame) {
+function(Xpcom, FBTrace, Deprecated, StackFrame) {
 
 // ********************************************************************************************* //
 // Constants
@@ -18,12 +18,12 @@ const Cr = Components.results;
 const NS_SEEK_SET = Ci.nsISeekableStream.NS_SEEK_SET;
 const ioService = Cc["@mozilla.org/network/io-service;1"].getService(Ci.nsIIOService);
 
-var HTTP = {};
+var Http = {};
 
 // ********************************************************************************************* //
 // Module Implementation
 
-HTTP.readFromStream = function(stream, charset, noClose)
+Http.readFromStream = function(stream, charset, noClose)
 {
     var sis = Cc["@mozilla.org/binaryinputstream;1"].createInstance(Ci.nsIBinaryInputStream);
     sis.setInputStream(stream);
@@ -39,7 +39,7 @@ HTTP.readFromStream = function(stream, charset, noClose)
 
     try
     {
-        return HTTP.convertToUnicode(text, charset);
+        return Http.convertToUnicode(text, charset);
     }
     catch (err)
     {
@@ -50,7 +50,7 @@ HTTP.readFromStream = function(stream, charset, noClose)
     return text;
 };
 
-HTTP.readPostTextFromPage = function(url, context)
+Http.readPostTextFromPage = function(url, context)
 {
     if (url == context.browser.contentWindow.location.href)
     {
@@ -72,7 +72,7 @@ HTTP.readPostTextFromPage = function(url, context)
                 postStream.seek(NS_SEEK_SET, 0);
 
                 var charset = context.window.document.characterSet;
-                return HTTP.readFromStream(postStream, charset, true);
+                return Http.readFromStream(postStream, charset, true);
             }
          }
          catch (exc)
@@ -83,14 +83,14 @@ HTTP.readPostTextFromPage = function(url, context)
      }
 };
 
-HTTP.getResource = function(aURL)
+Http.getResource = function(aURL)
 {
     try
     {
         var channel = ioService.newChannel(aURL, null, null);
         var input = channel.open();
 
-        return HTTP.readFromStream(input);
+        return Http.readFromStream(input);
     }
     catch (e)
     {
@@ -99,7 +99,7 @@ HTTP.getResource = function(aURL)
     }
 };
 
-HTTP.readPostTextFromRequest = function(request, context)
+Http.readPostTextFromRequest = function(request, context)
 {
     try
     {
@@ -119,7 +119,7 @@ HTTP.readPostTextFromRequest = function(request, context)
 
             // Read data from the stream..
             var charset = (context && context.window) ? context.window.document.characterSet : null;
-            var text = HTTP.readFromStream(is, charset, true);
+            var text = Http.readFromStream(is, charset, true);
 
             // Seek locks the file so, seek to the beginning only if necko hasn't read it yet,
             // since necko doesn't seek to 0 before reading (at lest not till 459384 is fixed).
@@ -138,7 +138,7 @@ HTTP.readPostTextFromRequest = function(request, context)
     return null;
 };
 
-HTTP.getInputStreamFromString = function(dataString)
+Http.getInputStreamFromString = function(dataString)
 {
     var stringStream = Cc["@mozilla.org/io/string-input-stream;1"].
         createInstance(Ci.nsIStringInputStream);
@@ -151,9 +151,9 @@ HTTP.getInputStreamFromString = function(dataString)
     return stringStream;
 };
 
-HTTP.getWindowForRequest = function(request)
+Http.getWindowForRequest = function(request)
 {
-    var loadContext = HTTP.getRequestLoadContext(request);
+    var loadContext = Http.getRequestLoadContext(request);
     try
     {
         if (loadContext)
@@ -166,7 +166,7 @@ HTTP.getWindowForRequest = function(request)
     return null;
 };
 
-HTTP.getRequestLoadContext = function(request)
+Http.getRequestLoadContext = function(request)
 {
     try
     {
@@ -203,10 +203,10 @@ HTTP.getRequestLoadContext = function(request)
     return null;
 };
 
-HTTP.getRequestWebProgress = Deprecated.deprecated("Use getRequestLoadContext function",
-    HTTP.getRequestLoadContext);
+Http.getRequestWebProgress = Deprecated.deprecated("Use getRequestLoadContext function",
+    Http.getRequestLoadContext);
 
-HTTP.safeGetRequestName = function(request)
+Http.safeGetRequestName = function(request)
 {
     try
     {
@@ -219,7 +219,7 @@ HTTP.safeGetRequestName = function(request)
     return null;
 }
 
-HTTP.safeGetContentType = function(request)
+Http.safeGetContentType = function(request)
 {
     try
     {
@@ -234,7 +234,7 @@ HTTP.safeGetContentType = function(request)
 
 // ********************************************************************************************* //
 
-HTTP.convertToUnicode = function(text, charset)
+Http.convertToUnicode = function(text, charset)
 {
     if (!text)
         return "";
@@ -258,7 +258,7 @@ HTTP.convertToUnicode = function(text, charset)
     }
 };
 
-HTTP.convertFromUnicode = function(text, charset)
+Http.convertFromUnicode = function(text, charset)
 {
     if (!text)
         return "";
@@ -281,7 +281,7 @@ HTTP.convertFromUnicode = function(text, charset)
 // ************************************************************************************************
 // Network Tracing
 
-HTTP.getStateDescription = function(flag)
+Http.getStateDescription = function(flag)
 {
     var state = [];
     var nsIWebProgressListener = Ci.nsIWebProgressListener;
@@ -306,7 +306,7 @@ HTTP.getStateDescription = function(flag)
     return state.join(", ");
 };
 
-HTTP.getStatusDescription = function(status)
+Http.getStatusDescription = function(status)
 {
     var nsISocketTransport = Ci.nsISocketTransport;
     var nsITransport = Ci.nsITransport;
@@ -321,7 +321,7 @@ HTTP.getStatusDescription = function(status)
     if (status == nsITransport.STATUS_WRITING) return "STATUS_WRITING";
 };
 
-HTTP.getLoadFlagsDescription = function(loadFlags)
+Http.getLoadFlagsDescription = function(loadFlags)
 {
     var flags = [];
     var nsIChannel = Ci.nsIChannel;
@@ -345,7 +345,7 @@ HTTP.getLoadFlagsDescription = function(loadFlags)
 
 // ************************************************************************************************
 
-HTTP.BaseProgressListener =
+Http.BaseProgressListener =
 {
     QueryInterface : function(iid)
     {
@@ -371,7 +371,7 @@ HTTP.BaseProgressListener =
 // ********************************************************************************************* //
 // Registration
 
-return HTTP;
+return Http;
 
 // ********************************************************************************************* //
 });

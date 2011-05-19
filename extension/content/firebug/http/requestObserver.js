@@ -4,7 +4,7 @@ define([
     "firebug/lib/xpcom",
     "firebug/lib/trace",
 ],
-function(XPCOM, FBTrace) {
+function(Xpcom, FBTrace) {
 
 // ********************************************************************************************* //
 // Constants

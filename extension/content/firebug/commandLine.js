@@ -22,8 +22,8 @@ define([
     "firebug/console",
     "firebug/commandLineExposed"
 ],
-function(OBJECT, Firebug, FirebugReps, Locale, Events, Wrapper, URL, CSS, DOM, WIN, System, XPATH,
-    STR, XML, ARR, Persist, EventMonitor, Keywords) {
+function(Extend, Firebug, FirebugReps, Locale, Events, Wrapper, Url, Css, Dom, Win, System, Xpath,
+    Str, Xml, Arr, Persist, EventMonitor, Keywords) {
 
 // ************************************************************************************************
 // Constants
@@ -45,7 +45,7 @@ const reCmdSource = /^with\(_FirebugCommandLine\){(.*)};$/;
 
 // ************************************************************************************************
 
-Firebug.CommandLine = OBJECT.extend(Firebug.Module,
+Firebug.CommandLine = Extend.extend(Firebug.Module,
 {
     dispatchName: "commandLine",
 
@@ -140,10 +140,10 @@ Firebug.CommandLine = OBJECT.extend(Firebug.Module,
         if (!Firebug.CommandLine.isAttached(context, win))
         {
             FBTrace.sysout("commandLine: document does not have command line attached " +
-                "its too early for command line "+WIN.getWindowId(win)+" location:"+
-                WIN.safeGetWindowLocation(win), document);
+                "its too early for command line "+Win.getWindowId(win)+" location:"+
+                Win.safeGetWindowLocation(win), document);
 
-            if (XML.isXMLPrettyPrint(context, win))
+            if (Xml.isXMLPrettyPrint(context, win))
             {
                 var msg = Locale.$STR("commandline.disabledForXMLDocs");
                 var row = Firebug.Console.logFormatted([msg], context, "warn", true);
@@ -152,7 +152,7 @@ Firebug.CommandLine = OBJECT.extend(Firebug.Module,
                 // Log a message with a clickable link that can be used to enable
                 // the command line - but the page will switch into HTML. The listener
                 // passed into the function is called when the user clicks the link.
-                FirebugReps.Description.render(msg, objectBox, OBJECT.bind(function()
+                FirebugReps.Description.render(msg, objectBox, Extend.bind(function()
                 {
                     // Reset the flag that protect script injection into the page.
                     context.isXMLPrettyPrint = false;
@@ -183,7 +183,7 @@ Firebug.CommandLine = OBJECT.extend(Firebug.Module,
         if (!consoleHandler)
         {
             FBTrace.sysout("commandLine evaluateByEventPassing no consoleHandler "+
-                WIN.safeGetWindowLocation(win));
+                Win.safeGetWindowLocation(win));
             return;
         }
 
@@ -294,7 +294,7 @@ Firebug.CommandLine = OBJECT.extend(Firebug.Module,
         if (!consoleHandler)
         {
             FBTrace.sysout("commandLine evaluateByPostMessage no consoleHandler "+
-                WIN.safeGetWindowLocation(win));
+                Win.safeGetWindowLocation(win));
             return;
         }
 
@@ -336,7 +336,7 @@ Firebug.CommandLine = OBJECT.extend(Firebug.Module,
     evaluateInWebPage: function(expr, context, targetWindow)
     {
         var win = targetWindow || context.window;
-        var element = DOM.addScript(win.document, "_firebugInWebPage", expr);
+        var element = Dom.addScript(win.document, "_firebugInWebPage", expr);
         if (!element)
             return;
 
@@ -373,7 +373,7 @@ Firebug.CommandLine = OBJECT.extend(Firebug.Module,
             exceptionFunction(e, context);
 
             result = new FirebugReps.ErrorMessageObj("commandLine.evaluateInSandbox FAILED: " + e,
-                URL.getDataURLForContent(scriptToEval, "FirebugCommandLineEvaluate"),
+                Url.getDataURLForContent(scriptToEval, "FirebugCommandLineEvaluate"),
                 e.lineNumber, 0, "js", context, null);
         }
         return result;
@@ -413,7 +413,7 @@ Firebug.CommandLine = OBJECT.extend(Firebug.Module,
             }
             else
             {
-                var shortExpr = STR.cropString(STR.stripNewLines(expr), 100);
+                var shortExpr = Str.cropString(Str.stripNewLines(expr), 100);
                 Firebug.Console.log(commandPrefix + " " + shortExpr, context, "command",
                     FirebugReps.Text);
             }
@@ -433,7 +433,7 @@ Firebug.CommandLine = OBJECT.extend(Firebug.Module,
             if (noscript && noScriptURI)
                 noscript.setJSEnabled(noScriptURI, true);
 
-            var goodOrBad = OBJECT.bind(Firebug.Console.log, Firebug.Console);
+            var goodOrBad = Extend.bind(Firebug.Console.log, Firebug.Console);
             this.evaluate(expr, context, null, null, goodOrBad, goodOrBad);
 
             if (noscript && noScriptURI)
@@ -494,7 +494,7 @@ Firebug.CommandLine = OBJECT.extend(Firebug.Module,
     copyBookmarklet: function(context)
     {
         var commandLine = this.getCommandLine(context);
-        var expr = "javascript: " + STR.stripNewLines(this.autoCompleter.getVerifiedText(commandLine));
+        var expr = "javascript: " + Str.stripNewLines(this.autoCompleter.getVerifiedText(commandLine));
         System.copyToClipboard(expr);
     },
 
@@ -574,9 +574,9 @@ Firebug.CommandLine = OBJECT.extend(Firebug.Module,
         if (Firebug.currentContext && Firebug.currentContext.panelName != "console")
             return;
 
-        DOM.collapse(chrome.$("fbCommandBox"), multiLine);
-        DOM.collapse(chrome.$("fbPanelSplitter"), !multiLine);
-        DOM.collapse(chrome.$("fbSidePanelDeck"), !multiLine);
+        Dom.collapse(chrome.$("fbCommandBox"), multiLine);
+        Dom.collapse(chrome.$("fbPanelSplitter"), !multiLine);
+        Dom.collapse(chrome.$("fbSidePanelDeck"), !multiLine);
 
         if (multiLine)
             chrome.$("fbSidePanelDeck").selectedPanel = chrome.$("fbLargeCommandBox");
@@ -595,9 +595,9 @@ Firebug.CommandLine = OBJECT.extend(Firebug.Module,
             Firebug.currentContext.commandLineText = Firebug.currentContext.commandLineText || "";
 
             if (multiLine)
-                commandLineLarge.value = STR.cleanIndentation(Firebug.currentContext.commandLineText);
+                commandLineLarge.value = Str.cleanIndentation(Firebug.currentContext.commandLineText);
             else
-                commandLineSmall.value = STR.stripNewLines(Firebug.currentContext.commandLineText);
+                commandLineSmall.value = Str.stripNewLines(Firebug.currentContext.commandLineText);
         }
         // else we may be hiding a panel while turning Firebug off
     },
@@ -617,7 +617,7 @@ Firebug.CommandLine = OBJECT.extend(Firebug.Module,
         var commandLine = this.getCommandLine(context);
         if (commandLine.value.indexOf("\n") >= 0)
         {
-            setTimeout(OBJECT.bindFixed(function()
+            setTimeout(Extend.bindFixed(function()
             {
                 Firebug.Options.set("largeCommandLine", true);
             }, this));
@@ -656,19 +656,19 @@ Firebug.CommandLine = OBJECT.extend(Firebug.Module,
     {
         var showCompletionPopup = Firebug.Options.get("commandLineShowCompleterPopup");
         this.autoCompleter = new Firebug.AutoCompleter(getExpressionOffset, getDot,
-            OBJECT.bind(autoCompleteEval, this), false, true, true, true, showCompletionPopup,
+            Extend.bind(autoCompleteEval, this), false, true, true, true, showCompletionPopup,
             isValidProperty, simplifyExpr, killCompletions);
     },
 
     initializeUI: function()
     {
-        this.onCommandLineFocus = OBJECT.bind(this.onCommandLineFocus, true);
-        this.onCommandLineInput = OBJECT.bind(this.onCommandLineInput, this);
-        this.onCommandLineBlur = OBJECT.bind(this.onCommandLineBlur, this);
-        this.onCommandLineKeyUp = OBJECT.bind(this.onCommandLineKeyUp, this);
-        this.onCommandLineKeyDown = OBJECT.bind(this.onCommandLineKeyDown, this);
-        this.onCommandLineKeyPress = OBJECT.bind(this.onCommandLineKeyPress, this);
-        this.onCommandLineOverflow = OBJECT.bind(this.onCommandLineOverflow, this);
+        this.onCommandLineFocus = Extend.bind(this.onCommandLineFocus, true);
+        this.onCommandLineInput = Extend.bind(this.onCommandLineInput, this);
+        this.onCommandLineBlur = Extend.bind(this.onCommandLineBlur, this);
+        this.onCommandLineKeyUp = Extend.bind(this.onCommandLineKeyUp, this);
+        this.onCommandLineKeyDown = Extend.bind(this.onCommandLineKeyDown, this);
+        this.onCommandLineKeyPress = Extend.bind(this.onCommandLineKeyPress, this);
+        this.onCommandLineOverflow = Extend.bind(this.onCommandLineOverflow, this);
         this.attachListeners();
     },
 
@@ -758,7 +758,7 @@ Firebug.CommandLine = OBJECT.extend(Firebug.Module,
         if (this.isSandbox(context))
             return;
 
-        if (XML.isXMLPrettyPrint(context, win))
+        if (Xml.isXMLPrettyPrint(context, win))
             return false;
 
         if (win)
@@ -970,9 +970,9 @@ Firebug.CommandLine = OBJECT.extend(Firebug.Module,
 
     onPanelEnable: function(panelName)
     {
-        DOM.collapse(Firebug.chrome.$("fbCommandBox"), true);
-        DOM.collapse(Firebug.chrome.$("fbPanelSplitter"), true);
-        DOM.collapse(Firebug.chrome.$("fbSidePanelDeck"), true);
+        Dom.collapse(Firebug.chrome.$("fbCommandBox"), true);
+        Dom.collapse(Firebug.chrome.$("fbPanelSplitter"), true);
+        Dom.collapse(Firebug.chrome.$("fbSidePanelDeck"), true);
 
         this.setMultiLine(Firebug.largeCommandLine, Firebug.chrome);
     },
@@ -982,9 +982,9 @@ Firebug.CommandLine = OBJECT.extend(Firebug.Module,
         if (panelName != 'console')  // we don't care about other panels
             return;
 
-        DOM.collapse(Firebug.chrome.$("fbCommandBox"), true);
-        DOM.collapse(Firebug.chrome.$("fbPanelSplitter"), true);
-        DOM.collapse(Firebug.chrome.$("fbSidePanelDeck"), true);
+        Dom.collapse(Firebug.chrome.$("fbCommandBox"), true);
+        Dom.collapse(Firebug.chrome.$("fbPanelSplitter"), true);
+        Dom.collapse(Firebug.chrome.$("fbSidePanelDeck"), true);
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
@@ -1032,7 +1032,7 @@ Firebug.CommandLine = OBJECT.extend(Firebug.Module,
 // ************************************************************************************************
 // Shared Helpers
 
-Firebug.CommandLine.CommandHandler = OBJECT.extend(Object,
+Firebug.CommandLine.CommandHandler = Extend.extend(Object,
 {
     handle: function(event, api, win)
     {
@@ -1044,10 +1044,10 @@ Firebug.CommandLine.CommandHandler = OBJECT.extend(Object,
         if (contentView)
             var hosed_userObjects = contentView._FirebugCommandLine.userObjects;
 
-        var userObjects = hosed_userObjects ? ARR.cloneArray(hosed_userObjects) : [];
+        var userObjects = hosed_userObjects ? Arr.cloneArray(hosed_userObjects) : [];
 
         if (FBTrace.DBG_COMMANDLINE)
-            FBTrace.sysout("commandLine.CommandHandler for "+WIN.getWindowId(win)+": method "+
+            FBTrace.sysout("commandLine.CommandHandler for "+Win.getWindowId(win)+": method "+
                 methodName+" userObjects:",  userObjects);
 
         var subHandler = api[methodName];
@@ -1615,7 +1615,7 @@ function propChainBuildComplete(out, context, tempExpr, result)
         else if (FirebugReps.Arr.isArray(result))
             complete = nonNumericKeys(result);
         else
-            complete = ARR.keys(result);
+            complete = Arr.keys(result);
         command = getTypeExtractionExpression(tempExpr.command);
     }
 
@@ -1641,7 +1641,7 @@ function propChainBuildComplete(out, context, tempExpr, result)
             {
                 if (tempExpr.type === 'fake')
                 {
-                    complete = complete.concat(ARR.keys(result));
+                    complete = complete.concat(Arr.keys(result));
                 }
                 else
                 {
@@ -1979,7 +1979,7 @@ function autoCompleteEval(preExpr, expr, postExpr, context, spreExpr)
             {
                 // XXXsilin I assume keys(innerWindow)? I'm not familiar enough with
                 // wrapped objects to change it.
-                completions = ARR.keys(contentView); // return is safe
+                completions = Arr.keys(contentView); // return is safe
 
                 // Add some known window properties, without duplicates.
                 completions = completions.concat(getFakeCompleteKeys('Window'));
@@ -1992,7 +1992,7 @@ function autoCompleteEval(preExpr, expr, postExpr, context, spreExpr)
                 }
             }
             else  // hopefull sandbox in Chromebug
-                completions = ARR.keys(context.global);
+                completions = Arr.keys(context.global);
 
             // XXXsilin Is this still necessary, now that '(' doesn't autocomplete?
             // It does help '...; return<CR>' if variables beginning with 'return'
@@ -2085,12 +2085,12 @@ function FirebugCommandLineAPI(context)
     this.$$ = function(selector) // returns unwrapped elements from the page
     {
         var result = Wrapper.unwrapObject(context.baseWindow.document).querySelectorAll(selector);
-        return ARR.cloneArray(result);
+        return Arr.cloneArray(result);
     };
 
     this.$x = function(xpath) // returns unwrapped elements from the page
     {
-        return XPATH.getElementsByXPath(Wrapper.unwrapObject(context.baseWindow.document), xpath);
+        return Xpath.getElementsByXPath(Wrapper.unwrapObject(context.baseWindow.document), xpath);
     };
 
     this.$n = function(index) // values from the extension space
@@ -2141,12 +2141,12 @@ function FirebugCommandLineAPI(context)
 
     this.keys = function(o)
     {
-        return ARR.keys(o);  // the object is from the page, unwrapped
+        return Arr.keys(o);  // the object is from the page, unwrapped
     };
 
     this.values = function(o)
     {
-        return ARR.values(o); // the object is from the page, unwrapped
+        return Arr.values(o); // the object is from the page, unwrapped
     };
 
     this.debug = function(fn)
@@ -2301,7 +2301,7 @@ Firebug.CommandLine.CommandHistory = function()
         if (this.isShown())
             return this.hide;
 
-        DOM.eraseNode(commandsPopup);
+        Dom.eraseNode(commandsPopup);
 
         if(commands.length == 0)
             return;
@@ -2313,8 +2313,8 @@ Firebug.CommandLine.CommandHistory = function()
             var hbox = commandsPopup.ownerDocument.createElementNS("http://www.w3.org/1999/xhtml", "div");
 
             hbox.classList.add("commandHistoryItem");
-            var shortExpr = STR.cropString(STR.stripNewLines(commands[i]), 50);
-            hbox.innerHTML = STR.escapeForTextNode(shortExpr);
+            var shortExpr = Str.cropString(Str.stripNewLines(commands[i]), 50);
+            hbox.innerHTML = Str.escapeForTextNode(shortExpr);
             hbox.value = i;
             vbox.appendChild(hbox);
 
@@ -2343,14 +2343,14 @@ Firebug.CommandLine.CommandHistory = function()
     this.removeCommandSelection = function()
     {
         var selected = commandsPopup.ownerDocument.getElementsByClassName("selected")[0];
-        CSS.removeClass(selected, "selected");
+        Css.removeClass(selected, "selected");
     };
 
     this.selectCommand = function(element)
     {
         this.removeCommandSelection();
 
-        CSS.setClass(element, "selected");
+        Css.setClass(element, "selected");
     };
 
     this.onMouseOver = function(event)
@@ -2445,7 +2445,7 @@ Firebug.CommandLine.injector =
     {
         // Register listener for command-line execution events.
         var handler = new CommandLineHandler(context, win);
-        var boundHandler = OBJECT.bind(handler.handleEvent, handler);
+        var boundHandler = Extend.bind(handler.handleEvent, handler);
 
         if (!context.activeCommandLineHandlers)
             context.activeCommandLineHandlers = {};
@@ -2481,7 +2481,7 @@ Firebug.CommandLine.injector =
 
             if (FBTrace.DBG_CONSOLE)
                 FBTrace.sysout("getCommandLineListener no consoleHandler for "+context.getName()+
-                    " win "+WIN.safeGetWindowLocation(win));
+                    " win "+Win.safeGetWindowLocation(win));
         }
     },
 };

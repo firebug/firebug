@@ -15,7 +15,7 @@ define([
     "firebug/firefox/menu",
     "firebug/lib/debug",
 ],
-function(FBL, OBJECT, Firebug, Locale, XPCOM, URL, SourceLink, CSS, System, ARR, DOM, Menu, Debug) {
+function(FBL, Extend, Firebug, Locale, Xpcom, Url, SourceLink, Css, System, Arr, Dom, Menu, Debug) {
 
 // ********************************************************************************************* //
 // Constants
@@ -23,7 +23,7 @@ function(FBL, OBJECT, Firebug, Locale, XPCOM, URL, SourceLink, CSS, System, ARR,
 const Cc = Components.classes;
 const Ci = Components.interfaces;
 
-const DirService = XPCOM.CCSV("@mozilla.org/file/directory_service;1", "nsIDirectoryServiceProvider");
+const DirService = Xpcom.CCSV("@mozilla.org/file/directory_service;1", "nsIDirectoryServiceProvider");
 const NS_OS_TEMP_DIR = "TmpD"
 const nsIFile = Ci.nsIFile;
 const nsILocalFile = Ci.nsILocalFile;
@@ -40,7 +40,7 @@ var temporaryDirectory = null;
 // ********************************************************************************************* //
 // Module Implementation
 
-Firebug.ExternalEditors = OBJECT.extend(Firebug.Module,
+Firebug.ExternalEditors = Extend.extend(Firebug.Module,
 {
     dispatchName: "externalEditors",
 
@@ -139,7 +139,7 @@ Firebug.ExternalEditors = OBJECT.extend(Firebug.Module,
     {
         var editors = this.getRegisteredEditors();
 
-        DOM.eraseNode(popup);
+        Dom.eraseNode(popup);
         for( var i = 0; i < editors.length; ++i )
         {
             if (editors[i] == "-")
@@ -195,7 +195,7 @@ Firebug.ExternalEditors = OBJECT.extend(Firebug.Module,
                 this.appendContextMenuItem(popup, sourceLink.href,
                     sourceLink.line);
         }
-        else if (CSS.hasClass(target, "stackFrameLink"))
+        else if (Css.hasClass(target, "stackFrameLink"))
             this.appendContextMenuItem(popup, target.innerHTML, target.getAttribute("lineNumber"));
     },
 
@@ -258,7 +258,7 @@ Firebug.ExternalEditors = OBJECT.extend(Firebug.Module,
             var editor = null;
             if (editorId)
             {
-                var list = ARR.extendArray(externalEditors, editors);
+                var list = Arr.extendArray(externalEditors, editors);
                 for (var i = 0; i < list.length; ++i)
                 {
                     if (editorId == list[i].id)
@@ -345,7 +345,7 @@ Firebug.ExternalEditors = OBJECT.extend(Firebug.Module,
 
     getLocalSourceFile: function(context, href)
     {
-        var filePath = URL.getLocalOrSystemPath(href)
+        var filePath = Url.getLocalOrSystemPath(href)
         if (filePath)
             return filePath;
 
@@ -389,17 +389,17 @@ Firebug.ExternalEditors = OBJECT.extend(Firebug.Module,
         if (getPlatformName() == "WINNT")
             lpath = lpath.replace(/\//g, "\\");
 
-        var file = Firebug.XPCOM.QI(temporaryDirectory.clone(), nsILocalFile);
+        var file = Firebug.Xpcom.QI(temporaryDirectory.clone(), nsILocalFile);
         file.appendRelativePath(lpath);
         if (!file.exists())
             file.create(nsIFile.NORMAL_FILE_TYPE, 0664);
         temporaryFiles.push(file.path);
 
-        var converter = Firebug.XPCOM.CCIN("@mozilla.org/intl/scriptableunicodeconverter", "nsIScriptableUnicodeConverter");
+        var converter = Firebug.Xpcom.CCIN("@mozilla.org/intl/scriptableunicodeconverter", "nsIScriptableUnicodeConverter");
         converter.charset = 'UTF-8'; // TODO detect charset from current tab
         data = converter.ConvertFromUnicode(data);
 
-        var stream = Firebug.XPCOM.CCIN("@mozilla.org/network/safe-file-output-stream;1", "nsIFileOutputStream");
+        var stream = Firebug.Xpcom.CCIN("@mozilla.org/network/safe-file-output-stream;1", "nsIFileOutputStream");
         stream.init(file, 0x04 | 0x08 | 0x20, 0664, 0); // write, create, truncate
         stream.write(data, data.length);
         if (stream instanceof nsISafeOutputStream)
@@ -414,7 +414,7 @@ Firebug.ExternalEditors = OBJECT.extend(Firebug.Module,
     {
         try
         {
-            var file = Firebug.XPCOM.CCIN("@mozilla.org/file/local;1", "nsILocalFile");
+            var file = Firebug.Xpcom.CCIN("@mozilla.org/file/local;1", "nsILocalFile");
             for( var i = 0; i < temporaryFiles.length; ++i)
             {
                 file.initWithPath(temporaryFiles[i]);

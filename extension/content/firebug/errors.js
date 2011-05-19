@@ -9,7 +9,7 @@ define([
     "firebug/firefox/window",
     "firebug/lib/array",
 ],
-function(OBJECT, Firebug, FirebugReps, XPCOM, CSS, WIN, ARR) {
+function(Extend, Firebug, FirebugReps, Xpcom, Css, Win, Arr) {
 
 // **********************************************************************************************//
 // Constants
@@ -41,14 +41,14 @@ const pointlessErrors =
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 Components.utils["import"]("resource://firebug/firebug-service.js");
-const consoleService = XPCOM.CCSV("@mozilla.org/consoleservice;1", "nsIConsoleService");
+const consoleService = Xpcom.CCSV("@mozilla.org/consoleservice;1", "nsIConsoleService");
 
 const domWindowUtils = window.QueryInterface(Ci.nsIInterfaceRequestor)
     .getInterface(Ci.nsIDOMWindowUtils);
 
 // ********************************************************************************************* //
 
-var Errors = Firebug.Errors = OBJECT.extend(Firebug.Module,
+var Errors = Firebug.Errors = Extend.extend(Firebug.Module,
 {
     dispatchName: "errors",
 
@@ -69,8 +69,8 @@ var Errors = Firebug.Errors = OBJECT.extend(Firebug.Module,
 
         if (FBTrace.DBG_ERRORLOG && FBTrace.DBG_CSS)
         {
-            CSS.totalSheets = 0;
-            CSS.totalRules = 0;
+            Css.totalSheets = 0;
+            Css.totalRules = 0;
             this.initTime = new Date();
         }
     },
@@ -91,8 +91,8 @@ var Errors = Firebug.Errors = OBJECT.extend(Firebug.Module,
         if (FBTrace.DBG_ERRORLOG && FBTrace.DBG_CSS && 'initTime' in this)
         {
             var deltaT = new Date().getTime() - this.initTime.getTime();
-            FBTrace.sysout("errors.destroyContext sheets: "+CSS.totalSheets+" rules: "+
-                CSS.totalRules+" time: "+deltaT);
+            FBTrace.sysout("errors.destroyContext sheets: "+Css.totalSheets+" rules: "+
+                Css.totalRules+" time: "+deltaT);
         }
     },
 
@@ -303,7 +303,7 @@ var Errors = Firebug.Errors = OBJECT.extend(Firebug.Module,
 
     delayedLogging: function()
     {
-        var args = ARR.cloneArray(arguments);
+        var args = Arr.cloneArray(arguments);
         var msgId = args.shift();
         var context = args.shift();
         var row = Firebug.Console.log.apply(Firebug.Console, args);
@@ -351,7 +351,7 @@ var Errors = Firebug.Errors = OBJECT.extend(Firebug.Module,
 
                 if (context.loaded)
                 {
-                    if (CSS.getStyleSheetByHref(url, context))
+                    if (Css.getStyleSheetByHref(url, context))
                     {
                         if (FBTrace.DBG_ERRORLOG && FBTrace.DBG_CSS)
                             FBTrace.sysout("findContextByURL found match to in loaded styleSheetMap");
@@ -369,7 +369,7 @@ var Errors = Firebug.Errors = OBJECT.extend(Firebug.Module,
                         return errorContext = context;
                     }
 
-                    if (CSS.getStyleSheetByHref(url, context))
+                    if (Css.getStyleSheetByHref(url, context))
                     {
                         if (FBTrace.DBG_ERRORLOG && FBTrace.DBG_CSS)
                             FBTrace.sysout("findContextByURL found match to in non-loaded styleSheetMap");
@@ -382,8 +382,8 @@ var Errors = Firebug.Errors = OBJECT.extend(Firebug.Module,
         if (FBTrace.DBG_ERRORLOG && FBTrace.DBG_CSS && 'initTime' in this)
         {
             var deltaT = new Date().getTime() - this.initTime.getTime();
-            FBTrace.sysout("errors.getErrorContext sheets: "+CSS.totalSheets+
-                " rules: "+CSS.totalRules+" time: "+deltaT);
+            FBTrace.sysout("errors.getErrorContext sheets: "+Css.totalSheets+
+                " rules: "+Css.totalRules+" time: "+deltaT);
         }
 
         if (!errorContext)
@@ -399,12 +399,12 @@ var Errors = Firebug.Errors = OBJECT.extend(Firebug.Module,
             var win1 = this.getErrorWindow(object);
             var win2 = errorContext ? errorContext.window : null;
 
-            win1 = WIN.getRootWindow(win1);
-            win2 = WIN.getRootWindow(win2);
+            win1 = Win.getRootWindow(win1);
+            win2 = Win.getRootWindow(win2);
             if (win1 && win1 != win2)
             {
-                var win1Name = WIN.safeGetWindowLocation(win1);
-                var win2Name = WIN.safeGetWindowLocation(win2);
+                var win1Name = Win.safeGetWindowLocation(win1);
+                var win2Name = Win.safeGetWindowLocation(win2);
                 var moreInfo =  {object: object, fromError2: win1, fromFirebug: win2};
                 FBTrace.sysout("errors.getErrorContext; ERROR wrong parent window? "+
                     win1Name+" !== "+win2Name, moreInfo);

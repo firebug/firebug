@@ -8,7 +8,7 @@ define([
     "firebug/lib/stackFrame",
     "firebug/errors",
 ],
-function(FirebugReps, Locale, Wrapper, URL, StackFrame) {
+function(FirebugReps, Locale, Wrapper, Url, StackFrame) {
 
 // ********************************************************************************************* //
 
@@ -343,7 +343,7 @@ function createFirebugConsole(context, win)
             FBTrace.sysout("consoleInjector.getComponentsStackDump initial stack for userURL "+userURL, frame);
 
         // Drop frames until we get into user code.
-        while (frame && URL.isSystemURL(frame.filename) )
+        while (frame && Url.isSystemURL(frame.filename) )
             frame = frame.caller;
 
         // Drop two more frames, the injected console function and firebugAppendConsole()

@@ -14,7 +14,7 @@ define([
     "firebug/consoleExposed",
     "firebug/errors",
 ],
-function(OBJECT, Firebug, FirebugReps, Locale, Events, URL, StackFrame, WIN, Console, ARR) {
+function(Extend, Firebug, FirebugReps, Locale, Events, Url, StackFrame, Win, Console, Arr) {
 
 // ********************************************************************************************* //
 // Constants
@@ -33,7 +33,7 @@ Firebug.Console.injector =
 
         if (FBTrace.DBG_CONSOLE)
             FBTrace.sysout("Console.isAttached "+handler+" in context "+context.getName()+
-                " and win "+WIN.safeGetWindowLocation(win), handler);
+                " and win "+Win.safeGetWindowLocation(win), handler);
 
         return handler;
     },
@@ -45,7 +45,7 @@ Firebug.Console.injector =
 
         if (FBTrace.DBG_CONSOLE)
             FBTrace.sysout("Console.attachIfNeeded found isAttached false " +
-                WIN.safeGetWindowLocation(win));
+                Win.safeGetWindowLocation(win));
 
         this.attachConsoleInjector(context, win);
         this.addConsoleListener(context, win);
@@ -110,7 +110,7 @@ Firebug.Console.injector =
         if (handler)
         {
             handler.detach();
-            ARR.remove(context.activeConsoleHandlers, handler);
+            Arr.remove(context.activeConsoleHandlers, handler);
         }
     },
 
@@ -124,7 +124,7 @@ Firebug.Console.injector =
         if (FBTrace.DBG_CONSOLE)
             FBTrace.sysout("consoleInjector addConsoleListener set token "+handler.token+
                 " and  attached handler("+handler.handler_name+") to _firebugConsole in : "+
-                WIN.safeGetWindowLocation(win));
+                Win.safeGetWindowLocation(win));
 
     },
 
@@ -187,7 +187,7 @@ function createConsoleHandler(context, win)
     handler.context = context;
 
     // When raised on our injected element, callback to Firebug and append to console
-    handler.boundHandler = OBJECT.bind(handler.handleEvent, handler);
+    handler.boundHandler = Extend.bind(handler.handleEvent, handler);
     win.document.addEventListener('firebugAppendConsole', handler.boundHandler, true); // capturing
 
     if (FBTrace.DBG_CONSOLE)
@@ -480,7 +480,7 @@ Firebug.Console.createConsole = function createConsole(context, win)
                 userURL, frame);
 
         // Drop frames until we get into user code.
-        while (frame && URL.isSystemURL(frame.filename) )
+        while (frame && Url.isSystemURL(frame.filename) )
             frame = frame.caller;
 
         // Drop two more frames, the injected console function and firebugAppendConsole()

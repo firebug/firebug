@@ -9,7 +9,7 @@ define([
     "firebug/lib/css",
     "firebug/http/httpLib",
 ],
-function(OBJECT, Firebug, Domplate, Locale, XPCOM, CSS, HTTP) {
+function(Extend, Firebug, Domplate, Locale, Xpcom, Css, Http) {
 
 // ************************************************************************************************
 // Constants
@@ -35,7 +35,7 @@ var xmlContentTypes =
  * tab wihin network request detail, a listener is registered into
  * <code>Firebug.NetMonitor.NetInfoBody</code> object.
  */
-Firebug.XMLViewerModel = OBJECT.extend(Firebug.Module,
+Firebug.XMLViewerModel = Extend.extend(Firebug.Module,
 {
     dispatchName: "xmlViewer",
 
@@ -52,7 +52,7 @@ Firebug.XMLViewerModel = OBJECT.extend(Firebug.Module,
     },
 
     /**
-     * Check response's content-type and if it's a XML, create a new tab with XML preview.
+     * Check response's content-type and if it's a Xml, create a new tab with XML preview.
      */
     initTabBody: function(infoBox, file)
     {
@@ -60,7 +60,7 @@ Firebug.XMLViewerModel = OBJECT.extend(Firebug.Module,
             FBTrace.sysout("xmlviewer.initTabBody", infoBox);
 
         // If the response is XML let's display a pretty preview.
-        if (this.isXML(HTTP.safeGetContentType(file.request)))
+        if (this.isXML(Http.safeGetContentType(file.request)))
         {
             Firebug.NetMonitor.NetInfoBody.appendTab(infoBox, "XML",
                 Locale.$STR("xmlviewer.tab.XML"));
@@ -92,7 +92,7 @@ Firebug.XMLViewerModel = OBJECT.extend(Firebug.Module,
     {
         var tab = infoBox.selectedTab;
         var tabBody = infoBox.getElementsByClassName("netInfoXMLText").item(0);
-        if (!CSS.hasClass(tab, "netInfoXMLTab") || tabBody.updated)
+        if (!Css.hasClass(tab, "netInfoXMLTab") || tabBody.updated)
             return;
 
         tabBody.updated = true;
@@ -102,7 +102,7 @@ Firebug.XMLViewerModel = OBJECT.extend(Firebug.Module,
 
     insertXML: function(parentNode, text)
     {
-        var parser = XPCOM.CCIN("@mozilla.org/xmlextras/domparser;1", "nsIDOMParser");
+        var parser = Xpcom.CCIN("@mozilla.org/xmlextras/domparser;1", "nsIDOMParser");
         var doc = parser.parseFromString(text, "text/xml");
         var root = doc.documentElement;
 

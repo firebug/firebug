@@ -1434,7 +1434,7 @@ var require, define;
 
             /**
              * Converts a module name to a file path. Supports cases where
-             * moduleName may actually be just an URL.
+             * moduleName may actually be just an Url.
              */
             nameToUrl: function (moduleName, ext, relModuleMap) {
                 var paths, pkgs, pkg, pkgPath, syms, i, parentModule, url,
@@ -1461,7 +1461,7 @@ var require, define;
                     //Normalize module name if have a base relative module name to work from.
                     moduleName = normalize(moduleName, relModuleMap);
 
-                    //If a colon is in the URL, it indicates a protocol is used and it is just
+                    //If a colon is in the Url, it indicates a protocol is used and it is just
                     //an URL to a file, or if it starts with a slash or ends with .js, it is just a plain file.
                     //The slash is important for protocol-less URLs as well as full paths.
                     if (req.jsExtRegExp.test(moduleName)) {

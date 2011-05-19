@@ -6,7 +6,7 @@ define([
     "firebug/firebug",
     "firebug/lib/dom",
 ],
-function(OBJECT, Options, Firebug, DOM) {
+function(Extend, Options, Firebug, Dom) {
 
 // ********************************************************************************************* //
 // Constants
@@ -22,7 +22,7 @@ const appInfo = Cc["@mozilla.org/xre/app-info;1"].getService(Ci.nsIXULAppInfo);
 /**
  * This module is responsible for varisous hacky solutions related to known issues.
  */
-Firebug.KnownIssues = OBJECT.extend(Firebug.Module,
+Firebug.KnownIssues = Extend.extend(Firebug.Module,
 /** @lends Firebug.KnownIssues */
 {
     dispatchName: "knownIssues",
@@ -45,7 +45,7 @@ Firebug.KnownIssues = OBJECT.extend(Firebug.Module,
             var addonBar = document.getElementById("addon-bar");
 
             // Open the addon bar
-            DOM.collapse(addonBar, false);
+            Dom.collapse(addonBar, false);
             document.persist("addon-bar", "collapsed");
 
             // This is just one time operation.

@@ -7,7 +7,7 @@ define([
     "firebug/lib/dom",
     "firebug/firefox/menu",
 ],
-function(OBJECT, Locale, Firebug, DOM, Menu) {
+function(Extend, Locale, Firebug, Dom, Menu) {
 
 // ************************************************************************************************
 // Constants
@@ -22,7 +22,7 @@ const MAX_HISTORY_MENU_ITEMS = 15;
 /**
  * @class Support for back and forward pattern for navigating within Firebug UI (panels).
  */
-Firebug.NavigationHistory = OBJECT.extend(Firebug.Module,
+Firebug.NavigationHistory = Extend.extend(Firebug.Module,
 {
     dispatchName: "navigationHistory",
 
@@ -72,7 +72,7 @@ Firebug.NavigationHistory = OBJECT.extend(Firebug.Module,
         if (FBTrace.DBG_HISTORY)
             FBTrace.sysout("history.onPopupShowing; " + currIndex + ", " + context.getName(), context);
 
-        DOM.eraseNode(popup);
+        Dom.eraseNode(popup);
 
         var list = this.getHistory(context);
 

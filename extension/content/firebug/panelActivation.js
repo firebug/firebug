@@ -10,7 +10,7 @@ define([
     "firebug/lib/url",
     "firebug/lib/dom",
 ],
-function(OBJECT, Firebug, Firefox, ToolsInterface, Locale, Domplate, URL, DOM) {
+function(Extend, Firebug, Firefox, ToolsInterface, Locale, Domplate, Url, Dom) {
 
 // ************************************************************************************************
 // Constants
@@ -32,7 +32,7 @@ const privateBrowsingEnabled = ("@mozilla.org/privatebrowsing;1" in Cc) &&
  * Such panel must be derived from {@link Firebug.ActivablePanel} and appropriate activable
  * module from {@link Firebug.ActivableModule}
  */
-Firebug.PanelActivation = OBJECT.extend(Firebug.Module,
+Firebug.PanelActivation = Extend.extend(Firebug.Module,
 /** @lends Firebug.PanelActivation */
 {
     dispatchName: "panelActivation",
@@ -69,7 +69,7 @@ Firebug.PanelActivation = OBJECT.extend(Firebug.Module,
 
         // Panel toolbar is not displayed for disabled panels.
         var chrome = Firebug.chrome;
-        DOM.collapse(chrome.$("fbToolbar"), !panel);
+        Dom.collapse(chrome.$("fbToolbar"), !panel);
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
@@ -320,7 +320,7 @@ Firebug.DisabledPanelBox = domplate(Firebug.Rep,
     hide: function(browser)
     {
         var parentNode = this.getParentNode(browser);
-        DOM.clearNode(parentNode);
+        Dom.clearNode(parentNode);
         parentNode.setAttribute("collapsed", true);
     },
 

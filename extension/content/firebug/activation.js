@@ -7,7 +7,7 @@ define([
     "firebug/lib/locale",
     "firebug/lib/url",
 ],
-function(OBJECT, Firebug, ToolsInterface, Locale, URL) {
+function(Extend, Firebug, ToolsInterface, Locale, Url) {
 
 // ************************************************************************************************
 // Constants
@@ -41,7 +41,7 @@ const privateBrowsingEnabled = ("@mozilla.org/privatebrowsing;1" in Cc) &&
  *    This logic has higher priority over the URL annotations.
  *    If "off" options is selected, all existing URL annotations are removed.
  */
-Firebug.Activation = OBJECT.extend(Firebug.Module,
+Firebug.Activation = Extend.extend(Firebug.Module,
 {
     // *******************************************************************************************
     dispatchName: "activation",
@@ -70,7 +70,7 @@ Firebug.Activation = OBJECT.extend(Firebug.Module,
         if (Firebug.allPagesActivation == "on")
             return true;
 
-        if (Firebug.filterSystemURLs && URL.isSystemURL(url)) // if about:blank gets thru, 1483 fails
+        if (Firebug.filterSystemURLs && Url.isSystemURL(url)) // if about:blank gets thru, 1483 fails
             return false;
 
         if (userCommands)
@@ -197,9 +197,9 @@ Firebug.Activation = OBJECT.extend(Firebug.Module,
         // Remove fragment, it shouldn't have any impact on the activation.
         url = url.replace(/#.*/, "");
 
-        var uri = URL.makeURI(URL.normalizeURL(url));
+        var uri = Url.makeURI(Url.normalizeURL(url));
 
-        if (Firebug.filterSystemURLs && URL.isSystemURL(url))
+        if (Firebug.filterSystemURLs && Url.isSystemURL(url))
             return uri;
 
         if (url == "about:blank")  // avoid exceptions.
@@ -210,7 +210,7 @@ Firebug.Activation = OBJECT.extend(Firebug.Module,
             try
             {
                 var prePath = uri.prePath; // returns the string before the path (such as "scheme://user:password@host:port").
-                var shortURI = URL.makeURI(prePath);
+                var shortURI = Url.makeURI(prePath);
                 if (!shortURI)
                     return uri;
 

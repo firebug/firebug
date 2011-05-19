@@ -9,7 +9,7 @@ define([
     "firebug/lib/deprecated",
     "firebug/lib/options",
 ],
-function (FBTrace, URL, Locale, Wrapper, SourceLink, Deprecated, Options) {
+function (FBTrace, Url, Locale, Wrapper, SourceLink, Deprecated, Options) {
 
 // ********************************************************************************************* //
 // Constants
@@ -35,7 +35,7 @@ StackFrame.getCorrectedStackTrace = function(frame, context)
         for (; frame && frame.isValid; frame = frame.callingFrame)
         {
             if (!(Options.get("filterSystemURLs") &&
-                URL.isSystemURL(URL.normalizeURL(frame.script.fileName))))
+                Url.isSystemURL(Url.normalizeURL(frame.script.fileName))))
             {
                 var stackFrame = StackFrame.getStackFrame(frame, context, newestFrame);
                 if (stackFrame)
@@ -123,7 +123,7 @@ StackFrame.getStackFrame = function(frame, context, newestFrameXB)
                     "@"+frame.script.fileName, frame.script.functionSource);
 
             var script = frame.script;
-            return new StackFrame.StackFrame({href: URL.normalizeURL(script.fileName)}, frame.line,
+            return new StackFrame.StackFrame({href: Url.normalizeURL(script.fileName)}, frame.line,
                 script.functionName, [], frame, null, context, newestFrameXB);
         }
     }
@@ -525,7 +525,7 @@ StackFrame.getFunctionName = function(script, context, frame, noArgs)
             if (FBTrace.DBG_STACK)
                 FBTrace.sysout("getFunctionName no analyzer, "+script.baseLineNumber+"@"+
                     script.fileName+"\n");
-            name = StackFrame.guessFunctionName(URL.normalizeURL(script.fileName),
+            name = StackFrame.guessFunctionName(Url.normalizeURL(script.fileName),
                 script.baseLineNumber, context);
         }
     }
@@ -543,7 +543,7 @@ StackFrame.guessFunctionName = function(url, lineNo, context)
         if (context.sourceCache)
             return StackFrame.guessFunctionNameFromLines(url, lineNo, context.sourceCache);
     }
-    return "? in "+URL.getFileName(url)+"@"+lineNo;
+    return "? in "+Url.getFileName(url)+"@"+lineNo;
 }
 
 var reGuessFunction = /['"]?([$0-9A-Za-z_]+)['"]?\s*[:=]\s*(function|eval|new Function)/;

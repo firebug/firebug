@@ -4,7 +4,7 @@ define([
     "firebug/lib/trace",
     "firebug/lib/array",
 ],
-function(FBTrace, ARR) {
+function(FBTrace, Arr) {
 
 // ********************************************************************************************* //
 // Constants
@@ -39,7 +39,7 @@ System.launchProgram = function(exePath, args)
         file.initWithPath(exePath);
         if (System.getPlatformName() == "Darwin" && file.isDirectory())
         {
-            args = ARR.extendArray(["-a", exePath], args);
+            args = Arr.extendArray(["-a", exePath], args);
             file.initWithPath("/usr/bin/open");
         }
 

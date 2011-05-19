@@ -7,7 +7,7 @@ define([
     "firebug/lib/array",
     "firebug/lib/xml",
 ],
-function(FBTrace, Deprecated, CSS, ARR, XML) {
+function(FBTrace, Deprecated, Css, Arr, Xml) {
 
 // ********************************************************************************************* //
 // Constants
@@ -15,16 +15,16 @@ function(FBTrace, Deprecated, CSS, ARR, XML) {
 var Ci = Components.interfaces;
 var Cc = Components.classes;
 
-var DOM = {};
+var Dom = {};
 var domMemberCache = null;
 var domMemberMap = {};
 
-DOM.domUtils = Cc["@mozilla.org/inspector/dom-utils;1"].getService(Ci.inIDOMUtils);
+Dom.domUtils = Cc["@mozilla.org/inspector/dom-utils;1"].getService(Ci.inIDOMUtils);
 
 // ********************************************************************************************* //
 // DOM APIs
 
-DOM.getChildByClass = function(node) // ,classname, classname, classname...
+Dom.getChildByClass = function(node) // ,classname, classname, classname...
 {
     for (var i = 1; i < arguments.length; ++i)
     {
@@ -33,7 +33,7 @@ DOM.getChildByClass = function(node) // ,classname, classname, classname...
         node = null;
         for (; child; child = child.nextSibling)
         {
-            if (CSS.hasClass(child, className))
+            if (Css.hasClass(child, className))
             {
                 node = child;
                 break;
@@ -44,18 +44,18 @@ DOM.getChildByClass = function(node) // ,classname, classname, classname...
     return node;
 };
 
-DOM.getAncestorByClass = function(node, className)
+Dom.getAncestorByClass = function(node, className)
 {
     for (var parent = node; parent; parent = parent.parentNode)
     {
-        if (CSS.hasClass(parent, className))
+        if (Css.hasClass(parent, className))
             return parent;
     }
 
     return null;
 };
 
-DOM.getAncestorByTagName = function(node, tagName)
+Dom.getAncestorByTagName = function(node, tagName)
 {
     for (var parent = node; parent; parent = parent.parentNode)
     {
@@ -67,20 +67,20 @@ DOM.getAncestorByTagName = function(node, tagName)
 };
 
 /* @Deprecated  Use native Firefox: node.getElementsByClassName(names).item(0) */
-DOM.getElementByClass = function(node, className)  // className, className, ...
+Dom.getElementByClass = function(node, className)  // className, className, ...
 {
-    return DOM.getElementsByClass.apply(this,arguments).item(0);
+    return Dom.getElementsByClass.apply(this,arguments).item(0);
 };
 
 /* @Deprecated  Use native Firefox: node.getElementsByClassName(names) */
-DOM.getElementsByClass = function(node, className)  // className, className, ...
+Dom.getElementsByClass = function(node, className)  // className, className, ...
 {
-    var args = ARR.cloneArray(arguments); args.splice(0, 1);
+    var args = Arr.cloneArray(arguments); args.splice(0, 1);
     var className = args.join(" ");
     return node.getElementsByClassName(className);
 };
 
-DOM.getElementsByAttribute = function(node, attrName, attrValue)
+Dom.getElementsByAttribute = function(node, attrName, attrValue)
 {
     function iteratorHelper(node, attrName, attrValue, result)
     {
@@ -98,7 +98,7 @@ DOM.getElementsByAttribute = function(node, attrName, attrValue)
     return result;
 }
 
-DOM.isAncestor = function(node, potentialAncestor)
+Dom.isAncestor = function(node, potentialAncestor)
 {
     for (var parent = node; parent; parent = parent.parentNode)
     {
@@ -109,7 +109,7 @@ DOM.isAncestor = function(node, potentialAncestor)
     return false;
 };
 
-DOM.getNextElement = function(node)
+Dom.getNextElement = function(node)
 {
     while (node && node.nodeType != 1)
         node = node.nextSibling;
@@ -117,7 +117,7 @@ DOM.getNextElement = function(node)
     return node;
 };
 
-DOM.getPreviousElement = function(node)
+Dom.getPreviousElement = function(node)
 {
     while (node && node.nodeType != 1)
         node = node.previousSibling;
@@ -125,7 +125,7 @@ DOM.getPreviousElement = function(node)
     return node;
 };
 
-DOM.getBody = function(doc)
+Dom.getBody = function(doc)
 {
     if (doc.body)
         return doc.body;
@@ -140,7 +140,7 @@ DOM.getBody = function(doc)
 // ********************************************************************************************* //
 // DOM Modification
 
-DOM.addScript = function(doc, id, src)
+Dom.addScript = function(doc, id, src)
 {
     var element = doc.createElementNS("http://www.w3.org/1999/xhtml", "html:script");
     element.setAttribute("type", "text/javascript");
@@ -166,7 +166,7 @@ DOM.addScript = function(doc, id, src)
     return element;
 }
 
-DOM.setOuterHTML = function(element, html)
+Dom.setOuterHTML = function(element, html)
 {
     var doc = element.ownerDocument;
     var range = doc.createRange();
@@ -186,7 +186,7 @@ DOM.setOuterHTML = function(element, html)
     }
 };
 
-DOM.appendInnerHTML = function(element, html, referenceElement)
+Dom.appendInnerHTML = function(element, html, referenceElement)
 {
     var doc = element.ownerDocument;
     var range = doc.createRange();  // a helper object
@@ -199,7 +199,7 @@ DOM.appendInnerHTML = function(element, html, referenceElement)
     return firstChild;
 };
 
-DOM.insertTextIntoElement = function(element, text)
+Dom.insertTextIntoElement = function(element, text)
 {
     var command = "cmd_insertText";
 
@@ -216,27 +216,27 @@ DOM.insertTextIntoElement = function(element, text)
 
 // ********************************************************************************************* //
 
-DOM.collapse = function(elt, collapsed)
+Dom.collapse = function(elt, collapsed)
 {
     elt.setAttribute("collapsed", collapsed ? "true" : "false");
 };
 
-DOM.isCollapsed = function(elt)
+Dom.isCollapsed = function(elt)
 {
     return (elt.getAttribute("collapsed") == "true") ? true : false;
 };
 
-DOM.hide = function(elt, hidden)
+Dom.hide = function(elt, hidden)
 {
     elt.style.visibility = hidden ? "hidden" : "visible";
 };
 
-DOM.clearNode = function(node)
+Dom.clearNode = function(node)
 {
     node.innerHTML = "";
 };
 
-DOM.eraseNode = function(node)
+Dom.eraseNode = function(node)
 {
     while (node.lastChild)
         node.removeChild(node.lastChild);
@@ -244,7 +244,7 @@ DOM.eraseNode = function(node)
 
 // ********************************************************************************************* //
 
-DOM.isNode = function(o)
+Dom.isNode = function(o)
 {
     try {
         return o && o instanceof window.Node;
@@ -254,7 +254,7 @@ DOM.isNode = function(o)
     }
 };
 
-DOM.isElement = function(o)
+Dom.isElement = function(o)
 {
     try {
         return o && o instanceof window.Element;
@@ -264,7 +264,7 @@ DOM.isElement = function(o)
     }
 };
 
-DOM.hasChildElements = function(node)
+Dom.hasChildElements = function(node)
 {
     if (node.contentDocument) // iframes
         return true;
@@ -280,19 +280,19 @@ DOM.hasChildElements = function(node)
 
 // ********************************************************************************************* //
 
-DOM.getNextByClass = function(root, state)
+Dom.getNextByClass = function(root, state)
 {
-    function iter(node) { return node.nodeType == 1 && CSS.hasClass(node, state); }
-    return DOM.findNext(root, iter);
+    function iter(node) { return node.nodeType == 1 && Css.hasClass(node, state); }
+    return Dom.findNext(root, iter);
 };
 
-DOM.getPreviousByClass = function(root, state)
+Dom.getPreviousByClass = function(root, state)
 {
-    function iter(node) { return node.nodeType == 1 && CSS.hasClass(node, state); }
-    return DOM.findPrevious(root, iter);
+    function iter(node) { return node.nodeType == 1 && Css.hasClass(node, state); }
+    return Dom.findPrevious(root, iter);
 };
 
-DOM.findNextDown = function(node, criteria)
+Dom.findNextDown = function(node, criteria)
 {
     if (!node)
         return null;
@@ -302,20 +302,20 @@ DOM.findNextDown = function(node, criteria)
         if (criteria(child))
             return child;
 
-        var next = DOM.findNextDown(child, criteria);
+        var next = Dom.findNextDown(child, criteria);
         if (next)
             return next;
     }
 };
 
-DOM.findPreviousUp = function(node, criteria)
+Dom.findPreviousUp = function(node, criteria)
 {
     if (!node)
         return null;
 
     for (var child = node.lastChild; child; child = child.previousSibling)
     {
-        var next = DOM.findPreviousUp(child, criteria);
+        var next = Dom.findPreviousUp(child, criteria);
         if (next)
             return next;
 
@@ -324,14 +324,14 @@ DOM.findPreviousUp = function(node, criteria)
     }
 };
 
-DOM.findNext = function(node, criteria, upOnly, maxRoot)
+Dom.findNext = function(node, criteria, upOnly, maxRoot)
 {
     if (!node)
         return null;
 
     if (!upOnly)
     {
-        var next = DOM.findNextDown(node, criteria);
+        var next = Dom.findNextDown(node, criteria);
         if (next)
             return next;
     }
@@ -341,23 +341,23 @@ DOM.findNext = function(node, criteria, upOnly, maxRoot)
         if (criteria(sib))
             return sib;
 
-        var next = DOM.findNextDown(sib, criteria);
+        var next = Dom.findNextDown(sib, criteria);
         if (next)
             return next;
     }
 
     if (node.parentNode && node.parentNode != maxRoot)
-        return DOM.findNext(node.parentNode, criteria, true, maxRoot);
+        return Dom.findNext(node.parentNode, criteria, true, maxRoot);
 };
 
-DOM.findPrevious = function(node, criteria, downOnly, maxRoot)
+Dom.findPrevious = function(node, criteria, downOnly, maxRoot)
 {
     if (!node)
         return null;
 
     for (var sib = node.previousSibling; sib; sib = sib.previousSibling)
     {
-        var prev = DOM.findPreviousUp(sib, criteria);
+        var prev = Dom.findPreviousUp(sib, criteria);
         if (prev)
             return prev;
 
@@ -367,7 +367,7 @@ DOM.findPrevious = function(node, criteria, downOnly, maxRoot)
 
     if (!downOnly)
     {
-        var next = DOM.findPreviousUp(node, criteria);
+        var next = Dom.findPreviousUp(node, criteria);
         if (next)
             return next;
     }
@@ -377,14 +377,14 @@ DOM.findPrevious = function(node, criteria, downOnly, maxRoot)
         if (criteria(node.parentNode))
             return node.parentNode;
 
-        return DOM.findPrevious(node.parentNode, criteria, true);
+        return Dom.findPrevious(node.parentNode, criteria, true);
     }
 };
 
 // ************************************************************************************************
 // Graphics
 
-DOM.getClientOffset = function(elt)
+Dom.getClientOffset = function(elt)
 {
     function addOffset(elt, coords, view)
     {
@@ -416,7 +416,7 @@ DOM.getClientOffset = function(elt)
     return coords;
 };
 
-DOM.getLTRBWH = function(elt)
+Dom.getLTRBWH = function(elt)
 {
     var bcrect,
         dims = {"left": 0, "top": 0, "right": 0, "bottom": 0, "width": 0, "height": 0};
@@ -443,12 +443,12 @@ DOM.getLTRBWH = function(elt)
     return dims;
 };
 
-DOM.getOffsetSize = function(elt)
+Dom.getOffsetSize = function(elt)
 {
     return {width: elt.offsetWidth, height: elt.offsetHeight};
 };
 
-DOM.getOverflowParent = function(element)
+Dom.getOverflowParent = function(element)
 {
     for (var scrollParent = element.parentNode; scrollParent; scrollParent = scrollParent.offsetParent)
     {
@@ -457,19 +457,19 @@ DOM.getOverflowParent = function(element)
     }
 };
 
-DOM.isScrolledToBottom = function(element)
+Dom.isScrolledToBottom = function(element)
 {
     var onBottom = (element.scrollTop + element.offsetHeight) == element.scrollHeight;
 
     if (FBTrace.DBG_CONSOLE)
-        FBTrace.sysout("DOM.isScrolledToBottom offsetHeight: " + element.offsetHeight +
+        FBTrace.sysout("Dom.isScrolledToBottom offsetHeight: " + element.offsetHeight +
             ", scrollTop: " + element.scrollTop + ", scrollHeight: " + element.scrollHeight +
             ", onBottom: " + onBottom);
 
     return onBottom;
 };
 
-DOM.scrollToBottom = function(element)
+Dom.scrollToBottom = function(element)
 {
     element.scrollTop = element.scrollHeight;
 
@@ -483,27 +483,27 @@ DOM.scrollToBottom = function(element)
     return (element.scrollTop == element.scrollHeight);
 };
 
-DOM.move = function(element, x, y)
+Dom.move = function(element, x, y)
 {
     element.style.left = x + "px";
     element.style.top = y + "px";
 };
 
-DOM.resize = function(element, w, h)
+Dom.resize = function(element, w, h)
 {
     element.style.width = w + "px";
     element.style.height = h + "px";
 };
 
-DOM.linesIntoCenterView = function(element, scrollBox)  // {before: int, after: int}
+Dom.linesIntoCenterView = function(element, scrollBox)  // {before: int, after: int}
 {
     if (!scrollBox)
-        scrollBox = DOM.getOverflowParent(element);
+        scrollBox = Dom.getOverflowParent(element);
 
     if (!scrollBox)
         return;
 
-    var offset = DOM.getClientOffset(element);
+    var offset = Dom.getClientOffset(element);
 
     var topSpace = offset.y - scrollBox.scrollTop;
     var bottomSpace = (scrollBox.scrollTop + scrollBox.clientHeight)
@@ -524,18 +524,18 @@ DOM.linesIntoCenterView = function(element, scrollBox)  // {before: int, after: 
     }
 };
 
-DOM.scrollIntoCenterView = function(element, scrollBox, notX, notY)
+Dom.scrollIntoCenterView = function(element, scrollBox, notX, notY)
 {
     if (!element)
         return;
 
     if (!scrollBox)
-        scrollBox = DOM.getOverflowParent(element);
+        scrollBox = Dom.getOverflowParent(element);
 
     if (!scrollBox)
         return;
 
-    var offset = DOM.getClientOffset(element);
+    var offset = Dom.getClientOffset(element);
 
     if (!notY)
     {
@@ -569,7 +569,7 @@ DOM.scrollIntoCenterView = function(element, scrollBox, notX, notY)
 // ********************************************************************************************* //
 // DOM Members
 
-DOM.getDOMMembers = function(object)
+Dom.getDOMMembers = function(object)
 {
     if (!domMemberCache)
     {
@@ -627,22 +627,22 @@ DOM.getDOMMembers = function(object)
         { return domMemberCache.Attr; }
     else if (object instanceof Node)
         { return domMemberCache.Node; }
-    else if (object instanceof Event || object instanceof DOM.EventCopy)
+    else if (object instanceof Event || object instanceof Dom.EventCopy)
         { return domMemberCache.Event; }
 
     return null;
 };
 
-DOM.isDOMMember = function(object, propName)
+Dom.isDOMMember = function(object, propName)
 {
-    var members = DOM.getDOMMembers(object);
+    var members = Dom.getDOMMembers(object);
     return members && propName in members;
 };
 
-DOM.isDOMConstant = function(object, name)
+Dom.isDOMConstant = function(object, name)
 {
     if (name == undefined)
-        return DOM.isDOMConstantDep({},object);
+        return Dom.isDOMConstantDep({},object);
 
     // The constant map has also its own prototype, but it isn't considered to be a constant.
     if (name == "__proto__")
@@ -652,13 +652,13 @@ DOM.isDOMConstant = function(object, name)
         object instanceof Node ||
         object instanceof Location ||
         object instanceof Event ||
-        object instanceof DOM.EventCopy))
+        object instanceof Dom.EventCopy))
         return false;
 
-    return DOM.domConstantMap.hasOwnProperty(name);
+    return Dom.domConstantMap.hasOwnProperty(name);
 }
 
-DOM.EventCopy = function(event)
+Dom.EventCopy = function(event)
 {
     // Because event objects are destroyed arbitrarily by Gecko, we must make a copy of them to
     // represent them long term in the inspector.
@@ -672,7 +672,7 @@ DOM.EventCopy = function(event)
 
 var isDOMConstantDep = Deprecated.deprecated(
     "isDOMConstant(name) signature changed (object,name)",
-    DOM.isDOMConstant);
+    Dom.isDOMConstant);
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -1476,7 +1476,7 @@ domMemberMap.Event =
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-var domConstantMap = DOM.domConstantMap =
+var domConstantMap = Dom.domConstantMap =
 {
     "ELEMENT_NODE": 1,
     "ATTRIBUTE_NODE": 1,
@@ -1674,7 +1674,7 @@ var domConstantMap = DOM.domConstantMap =
 // ********************************************************************************************* //
 // Registration
 
-return DOM;
+return Dom;
 
 // ********************************************************************************************* //
 });

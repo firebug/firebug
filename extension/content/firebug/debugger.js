@@ -21,8 +21,8 @@ define([
     "firebug/js/fbs",
     "firebug/errors",
 ],
-function(OBJECT, Firebug, Firefox, ToolsInterface, XPCOM, FirebugReps, Locale, HttpRequestObserver,
-    Wrapper, URL, SourceLink, StackFrame, CSS, WIN, STR, ARR, Debug, FBS) {
+function(Extend, Firebug, Firefox, ToolsInterface, Xpcom, FirebugReps, Locale, HttpRequestObserver,
+    Wrapper, Url, SourceLink, StackFrame, Css, Win, Str, Arr, Debug, FBS) {
 
 // ********************************************************************************************* //
 
@@ -70,10 +70,10 @@ var jsd = Cc["@mozilla.org/js/jsd/debugger-service;1"].getService(Ci.jsdIDebugge
 
 // ************************************************************************************************
 
-Firebug.Debugger = OBJECT.extend(Firebug.ActivableModule,
+Firebug.Debugger = Extend.extend(Firebug.ActivableModule,
 {
     dispatchName: "debugger",
-    fbs: FBS, // access to firebug-service in chromebug under browser.xul.DOM.Firebug.Debugger.fbs
+    fbs: FBS, // access to firebug-service in chromebug under browser.xul.Dom.Firebug.Debugger.fbs
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
     // Debugging
@@ -133,7 +133,7 @@ Firebug.Debugger = OBJECT.extend(Firebug.ActivableModule,
     // on bti
     getCurrentFrameKeys: function(context)  // TODO remote
     {
-        var globals = ARR.keys(Wrapper.getContentView(context.getGlobalScope()));  // return is safe
+        var globals = Arr.keys(Wrapper.getContentView(context.getGlobalScope()));  // return is safe
 
         if (context.currentFrame)
             return this.getFrameKeys(context.currentFrame, globals);
@@ -297,7 +297,7 @@ Firebug.Debugger = OBJECT.extend(Firebug.ActivableModule,
             this.freeze(context);
 
             // We will pause here until resume is called
-            var depth = FBS.enterNestedEventLoop({onNest: OBJECT.bindFixed(this.startDebugging, this, context)});
+            var depth = FBS.enterNestedEventLoop({onNest: Extend.bindFixed(this.startDebugging, this, context)});
             // For some reason we don't always end up here
 
             if (FBTrace.DBG_UI_LOOP)
@@ -973,7 +973,7 @@ Firebug.Debugger = OBJECT.extend(Firebug.ActivableModule,
             {
                 if (FBTrace.DBG_UI_LOOP)
                     FBTrace.sysout("debugger.stopDebugging else "+context.getName()+" "+
-                        WIN.safeGetWindowLocation(context.window));
+                        Win.safeGetWindowLocation(context.window));
             }
         }
         catch (exc)
@@ -1026,7 +1026,7 @@ Firebug.Debugger = OBJECT.extend(Firebug.ActivableModule,
         {
             if (FBTrace.DBG_CONSOLE)
                 FBTrace.sysout("debugger.supportsGlobal console isAttached to "+
-                    WIN.safeGetWindowLocation(frameWin)+" in  "+context.getName());
+                    Win.safeGetWindowLocation(frameWin)+" in  "+context.getName());
         }
 
         this.breakContext = context;
@@ -1358,7 +1358,7 @@ Firebug.Debugger = OBJECT.extend(Firebug.ActivableModule,
                     {
                         title: Locale.$STR("Break on Error"),
                         message: error.message,
-                        copyAction: OBJECT.bindFixed(FirebugReps.ErrorMessage.copyError,
+                        copyAction: Extend.bindFixed(FirebugReps.ErrorMessage.copyError,
                             FirebugReps.ErrorMessage, error),
 
                         skipAction: function addSkipperAndGo()
@@ -1483,7 +1483,7 @@ Firebug.Debugger = OBJECT.extend(Firebug.ActivableModule,
         delete this.breakContext;
 
         var script = frame.script;
-        var creatorURL = URL.normalizeURL(frame.script.fileName);
+        var creatorURL = Url.normalizeURL(frame.script.fileName);
         var innerScriptArray = [];
         try {
             var source = script.functionSource;
@@ -1497,12 +1497,12 @@ Firebug.Debugger = OBJECT.extend(Firebug.ActivableModule,
 
         } catch (exc) {
             /*Bug 426692 */
-            var source = creatorURL + "/"+OBJECT.getUniqueId();
+            var source = creatorURL + "/"+Extend.getUniqueId();
         }
 
-        var lines = STR.splitLines(source);
+        var lines = Str.splitLines(source);
 
-        var urlDescribed = this.getDynamicURL(context, URL.normalizeURL(frame.script.fileName), lines, "event");
+        var urlDescribed = this.getDynamicURL(context, Url.normalizeURL(frame.script.fileName), lines, "event");
         var url = urlDescribed.href;
 
         context.sourceCache.invalidate(url);
@@ -1539,7 +1539,7 @@ Firebug.Debugger = OBJECT.extend(Firebug.ActivableModule,
 
         // This is our only chance to get the linetable for the outerScript since it will run and be GC next.
         var script = frame.script;
-        var url = URL.normalizeURL(script.fileName);
+        var url = Url.normalizeURL(script.fileName);
 
         if (FBTrace.DBG_TOPLEVEL)
             FBTrace.sysout("debugger.onTopLevelScriptCreated frame.script.tag="+frame.script.tag+
@@ -1548,9 +1548,9 @@ Firebug.Debugger = OBJECT.extend(Firebug.ActivableModule,
         var isInline = false;
         /* The primary purpose here was to deal with http://code.google.com/p/fbug/issues/detail?id=2912
          * This approach could be applied to inline scripts, so I'll leave the code here until we decide.
-        WIN.iterateWindows(context.window, function isInlineScriptTag(win)
+        Win.iterateWindows(context.window, function isInlineScriptTag(win)
         {
-            var location = WIN.safeGetWindowLocation(win);
+            var location = Win.safeGetWindowLocation(win);
             if (location === url)
             {
                 isInline = true;
@@ -1735,9 +1735,9 @@ Firebug.Debugger = OBJECT.extend(Firebug.ActivableModule,
                         error.lineNo == lineNo)
                     {
                         if (isSet)
-                            CSS.setClass(row.firstChild, "breakForError");
+                            Css.setClass(row.firstChild, "breakForError");
                         else
-                            CSS.removeClass(row.firstChild, "breakForError");
+                            Css.removeClass(row.firstChild, "breakForError");
 
                         ToolsInterface.browser.dispatch( "onToggleErrorBreakpoint",
                             [context, url, lineNo, isSet]);
@@ -1824,7 +1824,7 @@ Firebug.Debugger = OBJECT.extend(Firebug.ActivableModule,
         if (FBTrace.DBG_EVAL)
             FBTrace.sysout("createSourceFileForFunctionConstructor source:"+source+"\n");
 
-        var url = this.getDynamicURL(context, URL.normalizeURL(caller_frame.script.fileName), source, "Function");
+        var url = this.getDynamicURL(context, Url.normalizeURL(caller_frame.script.fileName), source, "Function");
 
         var lines = context.sourceCache.store(url.href, source);
         var sourceFile = new Firebug.FunctionConstructorSourceFile(url, caller_frame.script, ctor_expr, lines.length);
@@ -1844,7 +1844,7 @@ Firebug.Debugger = OBJECT.extend(Firebug.ActivableModule,
         if (FBTrace.DBG_EVAL)
             FBTrace.sysout("debugger.getConstructoreExpression decompiled_lineno:"+decompiled_lineno+"\n");
 
-        var decompiled_lines = STR.splitLines(caller_frame.script.functionSource);  // TODO place in sourceCache?
+        var decompiled_lines = Str.splitLines(caller_frame.script.functionSource);  // TODO place in sourceCache?
         if (FBTrace.DBG_EVAL)
             FBTrace.sysout("debugger.getConstructoreExpression decompiled_lines:",decompiled_lines);
 
@@ -1897,13 +1897,13 @@ Firebug.Debugger = OBJECT.extend(Firebug.ActivableModule,
             var mapType = PCMAP_PRETTYPRINT;
         }
 
-        var lines = STR.splitLines(source);
+        var lines = Str.splitLines(source);
 
         if (FBTrace.DBG_EVAL)
             FBTrace.sysout("getEvalLevelSourceFile "+lines.length+ "lines, mapType:"+
                 ((mapType==PCMAP_SOURCETEXT)?"SOURCE":"PRETTY")+" source:"+source+"\n");
 
-        var url = this.getDynamicURL(context, URL.normalizeURL(frame.script.fileName), lines, "eval");
+        var url = this.getDynamicURL(context, Url.normalizeURL(frame.script.fileName), lines, "eval");
 
         context.sourceCache.invalidate(url.href);
         context.sourceCache.storeSplitLines(url.href, lines);
@@ -1976,7 +1976,7 @@ Firebug.Debugger = OBJECT.extend(Firebug.ActivableModule,
         if (!context.dynamicURLhasBP)
         {
             // If no breakpoints live in dynamic code then we don't need to compare
-            // the previous and reloaded source. In that case let's use a cheap URL.
+            // the previous and reloaded source. In that case let's use a cheap Url.
             var href = new String(callerURL + (kind ? "/"+kind+"/" : "/nokind/")+"seq/"
                 +(context.dynamicURLIndex++));
             url = {href: href, kind: "seq"};
@@ -2037,7 +2037,7 @@ Firebug.Debugger = OBJECT.extend(Firebug.ActivableModule,
     {
         var expr = this.getEvalExpressionFromEval(frame, context);  // eval in eval
 
-        return (expr) ? expr : this.getEvalExpressionFromFile(URL.normalizeURL(frame.script.fileName),
+        return (expr) ? expr : this.getEvalExpressionFromFile(Url.normalizeURL(frame.script.fileName),
             frame.script.baseLineNumber, context);
     },
 
@@ -2045,7 +2045,7 @@ Firebug.Debugger = OBJECT.extend(Firebug.ActivableModule,
     {
         if (context && context.sourceCache)
         {
-            var in_url = URL.reJavascript.exec(url);
+            var in_url = Url.reJavascript.exec(url);
             if (in_url)
             {
                 var m = reEval.exec(in_url[1]);
@@ -2152,14 +2152,14 @@ Firebug.Debugger = OBJECT.extend(Firebug.ActivableModule,
         Firebug.clientID = this.registerClient(Firebug.JSDebugClient);
         this.nsICryptoHash = Components.interfaces["nsICryptoHash"];
 
-        this.debuggerName =  window.location.href +"-@-"+OBJECT.getUniqueId();
+        this.debuggerName =  window.location.href +"-@-"+Extend.getUniqueId();
         this.toString = function() { return this.debuggerName; }
 
         if (FBTrace.DBG_INITIALIZE)
             FBTrace.sysout("debugger.initialize "+ this.debuggerName+" Firebug.clientID "+
                 Firebug.clientID);
 
-        this.hash_service = XPCOM.CCSV("@mozilla.org/security/hash;1", "nsICryptoHash");
+        this.hash_service = Xpcom.CCSV("@mozilla.org/security/hash;1", "nsICryptoHash");
 
         try
         {
@@ -2173,7 +2173,7 @@ Firebug.Debugger = OBJECT.extend(Firebug.ActivableModule,
 
         this.wrappedJSObject = this;  // how we communicate with fbs
 
-        this.onFunctionCall = OBJECT.bind(this.onFunctionCall, this);
+        this.onFunctionCall = Extend.bind(this.onFunctionCall, this);
 
         Firebug.ActivableModule.initialize.apply(this, arguments);
     },
@@ -2282,16 +2282,16 @@ Firebug.Debugger = OBJECT.extend(Firebug.ActivableModule,
             return true;
         }
 
-        WIN.iterateWindows(context.window, function updateEachWin(win)
+        Win.iterateWindows(context.window, function updateEachWin(win)
         {
             if (FBTrace.DBG_SOURCEFILES)
-                FBTrace.sysout("updateScriptFiles WIN.iterateWindows: "+win.location.href+
+                FBTrace.sysout("updateScriptFiles Win.iterateWindows: "+win.location.href+
                     " documentElement: "+win.document.documentElement);
 
             if (!win.document.documentElement)
                 return;
 
-            var url = URL.normalizeURL(win.location.href);
+            var url = Url.normalizeURL(win.location.href);
 
             if (url)
             {
@@ -2315,8 +2315,8 @@ Firebug.Debugger = OBJECT.extend(Firebug.ActivableModule,
             for (var i = 0; i < scripts.length; ++i)
             {
                 var scriptSrc = scripts[i].getAttribute('src'); // for XUL use attribute
-                var url = scriptSrc ? URL.absoluteURL(scriptSrc, baseUrl) : win.location.href;
-                url = URL.normalizeURL(url ? url : win.location.href);
+                var url = scriptSrc ? Url.absoluteURL(scriptSrc, baseUrl) : win.location.href;
+                url = Url.normalizeURL(url ? url : win.location.href);
                 var added = addFile(url, i, (scriptSrc?win.location.href:null));
 
                 if (FBTrace.DBG_SOURCEFILES)
@@ -2355,7 +2355,7 @@ Firebug.Debugger = OBJECT.extend(Firebug.ActivableModule,
             }
         }
 */
-        // context.watchScriptAdditions = OBJECT.bind(this.watchScriptAdditions, this, context);
+        // context.watchScriptAdditions = Extend.bind(this.watchScriptAdditions, this, context);
 
         // context.window.document.addEventListener("DOMNodeInserted", context.watchScriptAdditions, false);
 
@@ -2375,11 +2375,11 @@ Firebug.Debugger = OBJECT.extend(Firebug.ActivableModule,
         if (event.target.tagName.toLowerCase() !== "script")
             return;
         FBTrace.sysout("debugger.watchScriptAdditions ", event.target.innerHTML);
-        var location = WIN.safeGetWindowLocation(context.window);
+        var location = Win.safeGetWindowLocation(context.window);
 
         jsd.enumerateScripts({enumerateScript: function(script)
         {
-            if (URL.normalizeURL(script.fileName) === location)
+            if (Url.normalizeURL(script.fileName) === location)
             {
                 var sourceFile = Firebug.SourceFile.getSourceFileByScript(context, script);
                 FBTrace.sysout('debugger.watchScriptAdditions '+script.tag+" in "+
@@ -2393,7 +2393,7 @@ Firebug.Debugger = OBJECT.extend(Firebug.ActivableModule,
         {
             var sourceFile = context.pendingScriptTagSourceFile;
             sourceFile.scriptTag = event.target;
-            sourceFile.source = STR.splitLines(event.target.innerHTML);
+            sourceFile.source = Str.splitLines(event.target.innerHTML);
 
             var panel = context.getPanel("script", true);
             if (panel)
@@ -2411,11 +2411,11 @@ Firebug.Debugger = OBJECT.extend(Firebug.ActivableModule,
         for (var i = 0; i < scriptTags.length; i++)
         {
             var src = scriptTags[i].getAttribute("src");
-            src = src ? src : WIN.safeGetWindowLocation(win);
+            src = src ? src : Win.safeGetWindowLocation(win);
 
             // If the src is not in the source map, try to use absolute url.
             if (!context.sourceFileMap[src])
-                src = URL.absoluteURL(src, win.location.href);
+                src = Url.absoluteURL(src, win.location.href);
 
             delete context.sourceFileMap[src];
 
@@ -2821,7 +2821,7 @@ function getFrameWindow(frame)
     if (frame.eval("window", "", 1, result))
     {
         var win = Wrapper.unwrapIValue(result.value, Firebug.viewChrome);
-        return WIN.getRootWindow(win);
+        return Win.getRootWindow(win);
     }
 }
 

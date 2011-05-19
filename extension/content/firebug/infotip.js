@@ -9,7 +9,7 @@ define([
     "firebug/lib/css",
     "firebug/lib/dom",
 ],
-function(OBJECT, Firebug, Domplate, Locale, Events, CSS, DOM) {
+function(Extend, Firebug, Domplate, Locale, Events, Css, Dom) {
 
 // ************************************************************************************************
 // Constants
@@ -21,7 +21,7 @@ const infoTipWindowPadding = 25;
 // ************************************************************************************************
 
 with (Domplate) {
-Firebug.InfoTip = OBJECT.extend(Firebug.Module,
+Firebug.InfoTip = Extend.extend(Firebug.Module,
 {
     dispatchName: "infoTip",
     tags: domplate(
@@ -56,8 +56,8 @@ Firebug.InfoTip = OBJECT.extend(Firebug.Module,
 
             if (repeat == "repeat-x" || (w == 1 && h > 1))
             {
-                DOM.collapse(img, true);
-                DOM.collapse(bgImg, false);
+                Dom.collapse(img, true);
+                Dom.collapse(bgImg, false);
                 bgImg.style.background = "url(" + img.src + ") repeat-x";
                 bgImg.style.width = maxWidth + "px";
                 if (h > maxHeight)
@@ -67,8 +67,8 @@ Firebug.InfoTip = OBJECT.extend(Firebug.Module,
             }
             else if (repeat == "repeat-y" || (h == 1 && w > 1))
             {
-                DOM.collapse(img, true);
-                DOM.collapse(bgImg, false);
+                Dom.collapse(img, true);
+                Dom.collapse(bgImg, false);
                 bgImg.style.background = "url(" + img.src + ") repeat-y";
                 bgImg.style.height = maxHeight + "px";
                 if (w > maxWidth)
@@ -78,8 +78,8 @@ Firebug.InfoTip = OBJECT.extend(Firebug.Module,
             }
             else if (repeat == "repeat" || (w == 1 && h == 1))
             {
-                DOM.collapse(img, true);
-                DOM.collapse(bgImg, false);
+                Dom.collapse(img, true);
+                Dom.collapse(bgImg, false);
                 bgImg.style.background = "url(" + img.src + ") repeat";
                 bgImg.style.width = maxWidth + "px";
                 bgImg.style.height = maxHeight + "px";
@@ -103,7 +103,7 @@ Firebug.InfoTip = OBJECT.extend(Firebug.Module,
 
             caption.innerHTML = Locale.$STRF("Dimensions", [w, h]);
 
-            CSS.removeClass(innerBox, "infoTipLoading");
+            Css.removeClass(innerBox, "infoTipLoading");
         },
 
         onErrorImage: function(event)
@@ -122,14 +122,14 @@ Firebug.InfoTip = OBJECT.extend(Firebug.Module,
                 caption.innerHTML = Locale.$STR("firebug.failedToPreviewImageURL");
 
             var innerBox = img.parentNode;
-            CSS.removeClass(innerBox, "infoTipLoading");
+            Css.removeClass(innerBox, "infoTipLoading");
         }
     }),
 
     initializeBrowser: function(browser)
     {
-        browser.onInfoTipMouseOut = OBJECT.bind(this.onMouseOut, this, browser);
-        browser.onInfoTipMouseMove = OBJECT.bind(this.onMouseMove, this, browser);
+        browser.onInfoTipMouseOut = Extend.bind(this.onMouseOut, this, browser);
+        browser.onInfoTipMouseMove = Extend.bind(this.onMouseMove, this, browser);
 
         var doc = browser.contentDocument;
         if (!doc)
@@ -139,7 +139,7 @@ Firebug.InfoTip = OBJECT.extend(Firebug.Module,
         doc.addEventListener("mouseout", browser.onInfoTipMouseOut, true);
         doc.addEventListener("mousemove", browser.onInfoTipMouseMove, true);
 
-        return browser.infoTip = this.tags.infoTipTag.append({}, DOM.getBody(doc));
+        return browser.infoTip = this.tags.infoTipTag.append({}, Dom.getBody(doc));
     },
 
     uninitializeBrowser: function(browser)
@@ -162,7 +162,7 @@ Firebug.InfoTip = OBJECT.extend(Firebug.Module,
         if (!Firebug.showInfoTips)
             return;
 
-        var scrollParent = DOM.getOverflowParent(target);
+        var scrollParent = Dom.getOverflowParent(target);
         var scrollX = x + (scrollParent ? scrollParent.scrollLeft : 0);
 
         var show = panel.showInfoTip(infoTip, target, scrollX, y, rangeParent, rangeOffset);
@@ -231,7 +231,7 @@ Firebug.InfoTip = OBJECT.extend(Firebug.Module,
     onMouseMove: function(event, browser)
     {
         // Ignore if the mouse is moving over the existing info tip.
-        if (DOM.getAncestorByClass(event.target, "infoTip"))
+        if (Dom.getAncestorByClass(event.target, "infoTip"))
             return;
 
         if (browser.currentPanel)

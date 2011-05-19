@@ -3,7 +3,7 @@
 define([
     "firebug/lib/string"
 ],
-function(STR) {
+function(Str) {
 
 // ********************************************************************************************* //
 // Constants
@@ -12,7 +12,7 @@ var Ci = Components.interfaces;
 var Cc = Components.classes;
 var Cu = Components.utils;
 
-var XPATH = {};
+var Xpath = {};
 
 // ********************************************************************************************* //
 // XPATH
@@ -20,15 +20,15 @@ var XPATH = {};
 /**
  * Gets an XPath for an element which describes its hierarchical location.
  */
-XPATH.getElementXPath = function(element)
+Xpath.getElementXPath = function(element)
 {
     if (element && element.id)
         return '//*[@id="' + element.id + '"]';
     else
-        return XPATH.getElementTreeXPath(element);
+        return Xpath.getElementTreeXPath(element);
 };
 
-XPATH.getElementTreeXPath = function(element)
+Xpath.getElementTreeXPath = function(element)
 {
     var paths = [];
 
@@ -54,7 +54,7 @@ XPATH.getElementTreeXPath = function(element)
     return paths.length ? "/" + paths.join("/") : null;
 };
 
-XPATH.cssToXPath = function(rule)
+Xpath.cssToXPath = function(rule)
 {
     var regElement = /^([#.]?)([a-z0-9\\*_-]*)((\|)([a-z0-9\\*_-]*))?/i;
     var regAttr1 = /^\[([^\]]*)\]/i;
@@ -72,7 +72,7 @@ XPATH.cssToXPath = function(rule)
         lastRule = rule;
 
         // Trim leading whitespace
-        rule = STR.trim(rule);
+        rule = Str.trim(rule);
         if (!rule.length)
             break;
 
@@ -154,13 +154,13 @@ XPATH.cssToXPath = function(rule)
     return xpath;
 };
 
-XPATH.getElementsBySelector = function(doc, css)
+Xpath.getElementsBySelector = function(doc, css)
 {
-    var xpath = XPATH.cssToXPath(css);
-    return XPATH.getElementsByXPath(doc, xpath);
+    var xpath = Xpath.cssToXPath(css);
+    return Xpath.getElementsByXPath(doc, xpath);
 };
 
-XPATH.getElementsByXPath = function(doc, xpath)
+Xpath.getElementsByXPath = function(doc, xpath)
 {
     var nodes = [];
 
@@ -178,16 +178,16 @@ XPATH.getElementsByXPath = function(doc, xpath)
     return nodes;
 };
 
-XPATH.getRuleMatchingElements = function(rule, doc)
+Xpath.getRuleMatchingElements = function(rule, doc)
 {
     var css = rule.selectorText;
-    var xpath = XPATH.cssToXPath(css);
-    return XPATH.getElementsByXPath(doc, xpath);
+    var xpath = Xpath.cssToXPath(css);
+    return Xpath.getElementsByXPath(doc, xpath);
 };
 
 // ********************************************************************************************* //
 
-return XPATH;
+return Xpath;
 
 // ********************************************************************************************* //
 });

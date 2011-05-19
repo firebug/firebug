@@ -9,7 +9,7 @@ define([
     "firebug/lib/string",
     "firebug/lib/xml",
 ],
-function(OBJECT, Firebug, CommandLine, CSS, DOM, STR, XML) {
+function(Extend, Firebug, CommandLine, Css, Dom, Str, Xml) {
 
 // ************************************************************************************************
 // Constants
@@ -20,7 +20,7 @@ function(OBJECT, Firebug, CommandLine, CSS, DOM, STR, XML) {
 /**
  * @module Command Line availability in other panels.
  */
-Firebug.CommandLine.Popup = OBJECT.extend(Firebug.Module,
+Firebug.CommandLine.Popup = Extend.extend(Firebug.Module,
 {
     dispatchName: "commandLinePopup",
     lastFocused : null,
@@ -31,7 +31,7 @@ Firebug.CommandLine.Popup = OBJECT.extend(Firebug.Module,
 
         this.setPopupBrowserStyle(Firebug.chrome);
 
-        this.onKeyPress = OBJECT.bind(this.onKeyPress, this);
+        this.onKeyPress = Extend.bind(this.onKeyPress, this);
 
         this.attachListeners();
     },
@@ -81,15 +81,15 @@ Firebug.CommandLine.Popup = OBJECT.extend(Firebug.Module,
 
         if ((largeCmd && isConsole) || !panel)
         {
-            DOM.collapse(chrome.$("fbPanelSplitter"), panel ? false : true);
-            DOM.collapse(chrome.$("fbSidePanelDeck"), panel ? false : true);
-            DOM.collapse(chrome.$("fbCommandBox"), true);
+            Dom.collapse(chrome.$("fbPanelSplitter"), panel ? false : true);
+            Dom.collapse(chrome.$("fbSidePanelDeck"), panel ? false : true);
+            Dom.collapse(chrome.$("fbCommandBox"), true);
             chrome.$("fbSidePanelDeck").selectedPanel = chrome.$("fbLargeCommandBox");
         }
 
         // The console can't be multiline on other panels so, hide the toggle-to-multiline
         // button (displayed at the end of the one line command line)
-        DOM.collapse(chrome.$("fbCommandToggleSmall"), !isConsole);
+        Dom.collapse(chrome.$("fbCommandToggleSmall"), !isConsole);
 
         // Update visibility of the console-popup (hidden if the Console panel is selected).
         this.updateVisibility(visible && !isConsole && panel && disabled != "true");
@@ -112,8 +112,8 @@ Firebug.CommandLine.Popup = OBJECT.extend(Firebug.Module,
         // Set additional style so we can make the panelNode-console node
         // always visible regardless of the currently selected panel.
         var doc = chrome.$("fbCommandPopupBrowser").contentDocument;
-        var body = DOM.getBody(doc);
-        CSS.setClass(body, "commandPopup");
+        var body = Dom.getBody(doc);
+        Css.setClass(body, "commandPopup");
     },
 
     attachListeners: function()
@@ -164,16 +164,16 @@ Firebug.CommandLine.Popup = OBJECT.extend(Firebug.Module,
         var toggle = chrome.$("fbCommandToggleSmall");
 
         // If all the visual parts are already visible then bail out.
-        if (visible && !DOM.isCollapsed(popup) && !DOM.isCollapsed(splitter) &&
-            !DOM.isCollapsed(cmdbox) && !DOM.isCollapsed(toggle))
+        if (visible && !Dom.isCollapsed(popup) && !Dom.isCollapsed(splitter) &&
+            !Dom.isCollapsed(cmdbox) && !Dom.isCollapsed(toggle))
             return;
 
-        DOM.collapse(popup, !visible);
-        DOM.collapse(splitter, !visible);
-        DOM.collapse(cmdbox, !visible);
+        Dom.collapse(popup, !visible);
+        Dom.collapse(splitter, !visible);
+        Dom.collapse(cmdbox, !visible);
 
         // The command line can't be multiline in other panels.
-        DOM.collapse(toggle, visible);
+        Dom.collapse(toggle, visible);
 
         var commandLineSmall = Firebug.CommandLine.getCommandLineLarge();
         var commandLineLarge = Firebug.CommandLine.getCommandLineSmall();
@@ -184,7 +184,7 @@ Firebug.CommandLine.Popup = OBJECT.extend(Firebug.Module,
             this.lastFocused = document.commandDispatcher.focusedElement;
             commandLineSmall.focus();
         }
-        else if (this.lastFocused && XML.isVisible(this.lastFocused) &&
+        else if (this.lastFocused && Xml.isVisible(this.lastFocused) &&
             typeof this.lastFocused.focus == "function")
         {
             this.lastFocused.focus();
@@ -194,9 +194,9 @@ Firebug.CommandLine.Popup = OBJECT.extend(Firebug.Module,
         if (Firebug.largeCommandLine)
         {
             if (visible)
-                commandLineSmall.value = STR.stripNewLines(commandLineLarge.value);
+                commandLineSmall.value = Str.stripNewLines(commandLineLarge.value);
             else
-                commandLineLarge.value = STR.cleanIndentation(commandLineSmall.value);
+                commandLineLarge.value = Str.cleanIndentation(commandLineSmall.value);
         }
     },
 
@@ -234,7 +234,7 @@ Firebug.CommandLine.Popup = OBJECT.extend(Firebug.Module,
         // ESC
         var target = event.target;
         // prevent conflict with inline editors being closed
-        if (target && event.keyCode == 27 && !CSS.hasClass(event.target, "textEditorInner"))
+        if (target && event.keyCode == 27 && !Css.hasClass(event.target, "textEditorInner"))
             this.toggle(Firebug.currentContext);
     }
 });

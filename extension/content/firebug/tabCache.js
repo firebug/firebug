@@ -14,8 +14,8 @@ define([
     "firebug/firefox/window",
     "firebug/sourceCache",
 ],
-function(OBJECT, Firebug, XPCOM, HttpRequestObserver, HttpResponseObserver, Locale, Events,
-    URL, HTTP, STR, WIN) {
+function(Extend, Firebug, Xpcom, HttpRequestObserver, HttpResponseObserver, Locale, Events,
+    Url, Http, Str, Win) {
 
 // ********************************************************************************************* //
 // Constants
@@ -84,7 +84,7 @@ var contentTypes =
  * observer so, HTTP communication can be interecepted and all incoming data stored within
  * a cache.
  */
-Firebug.TabCacheModel = OBJECT.extend(Firebug.Module,
+Firebug.TabCacheModel = Extend.extend(Firebug.Module,
 {
     dispatchName: "tabCache",
     contentTypes: contentTypes,
@@ -134,9 +134,9 @@ Firebug.TabCacheModel = OBJECT.extend(Firebug.Module,
             if (!(subject instanceof Ci.nsIHttpChannel))
                 return;
             // XXXjjb this same code is in net.js, better to have it only once
-            var win = HTTP.getWindowForRequest(subject);
+            var win = Http.getWindowForRequest(subject);
             if (win)
-                var tabId = WIN.getWindowProxyIdForWindow(win); // TODO remove, the tabId is not used after all
+                var tabId = Win.getWindowProxyIdForWindow(win); // TODO remove, the tabId is not used after all
             if (!tabId)
                 return;
 
@@ -177,7 +177,7 @@ Firebug.TabCacheModel = OBJECT.extend(Firebug.Module,
         {
             if (FBTrace.DBG_CACHE)
                 FBTrace.sysout("tabCache.registerStreamListener; " +
-                    HTTP.safeGetRequestName(request));
+                    Http.safeGetRequestName(request));
 
             HttpResponseObserver.register(win, request, new ChannelListenerProxy(win));
         }
@@ -202,13 +202,13 @@ Firebug.TabCacheModel = OBJECT.extend(Firebug.Module,
         if (contentType)
             contentType = contentType.split(";")[0];
 
-        contentType = STR.trim(contentType);
+        contentType = Str.trim(contentType);
         if (contentTypes[contentType])
             return true;
 
         // Hack to work around application/octet-stream for js files (2063).
         // Let's cache all files with js extensions.
-        var extension = URL.getFileExtension(safeGetName(request));
+        var extension = Url.getFileExtension(safeGetName(request));
         if (extension == "js")
             return true;
 
@@ -241,7 +241,7 @@ Firebug.TabCache = function(context)
     Firebug.SourceCache.call(this, context);
 };
 
-Firebug.TabCache.prototype = OBJECT.extend(Firebug.SourceCache.prototype,
+Firebug.TabCache.prototype = Extend.extend(Firebug.SourceCache.prototype,
 {
     responses: [],       // responses in progress.
 
@@ -266,7 +266,7 @@ Firebug.TabCache.prototype = OBJECT.extend(Firebug.SourceCache.prototype,
 
         try
         {
-            responseText = HTTP.convertToUnicode(responseText, win.document.characterSet);
+            responseText = Http.convertToUnicode(responseText, win.document.characterSet);
         }
         catch (err)
         {
@@ -394,7 +394,7 @@ Firebug.TabCache.prototype = OBJECT.extend(Firebug.SourceCache.prototype,
                 return [Locale.$STR("message.The resource from this URL is not text") + ": " + url];
             }
 
-            responseText = HTTP.readFromStream(stream, charset);
+            responseText = Http.readFromStream(stream, charset);
 
             if (FBTrace.DBG_CACHE)
                 FBTrace.sysout("tabCache.loadFromCache (response coming from FF Cache) " +
@@ -460,7 +460,7 @@ Firebug.TabCache.prototype = OBJECT.extend(Firebug.SourceCache.prototype,
         var responseText = lines ? lines.join("") : "";
 
         if (FBTrace.DBG_CACHE)
-            FBTrace.sysout("tabCache.channel.stopRequest: " + HTTP.safeGetRequestName(request),
+            FBTrace.sysout("tabCache.channel.stopRequest: " + Http.safeGetRequestName(request),
                 responseText);
 
         Events.dispatch(Firebug.TabCacheModel.fbListeners, "onStopRequest",

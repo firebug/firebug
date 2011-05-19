@@ -14,8 +14,8 @@ define([
     "firebug/firefox/window",
     "firebug/firefox/system",
 ],
-function(OBJECT, Firebug, Firefox, FirebugReps, Locale, Events, Wrapper, CSS, DOM, XML,
-    WIN, System) {
+function(Extend, Firebug, Firefox, FirebugReps, Locale, Events, Wrapper, Css, Dom, Xml,
+    Win, System) {
 
 // ************************************************************************************************
 // Constants
@@ -40,7 +40,7 @@ var frameHighlighter = null;
 /**
  * @module Implements Firebug Inspector logic.
  */
-Firebug.Inspector = OBJECT.extend(Firebug.Module,
+Firebug.Inspector = Extend.extend(Firebug.Module,
 {
     dispatchName: "inspector",
     inspecting: false,
@@ -70,9 +70,9 @@ Firebug.Inspector = OBJECT.extend(Firebug.Module,
         if (!elementArr || !FirebugReps.Arr.isArray(elementArr))
         {
             // highlight a single element
-            if (!elementArr || !DOM.isElement(elementArr) ||
+            if (!elementArr || !Dom.isElement(elementArr) ||
                 (Wrapper.getContentView(elementArr) &&
-                    !XML.isVisible(Wrapper.getContentView(elementArr))) )
+                    !Xml.isVisible(Wrapper.getContentView(elementArr))) )
             {
                 if(elementArr && elementArr.nodeType == 3)
                     elementArr = elementArr.parentNode;
@@ -346,7 +346,7 @@ Firebug.Inspector = OBJECT.extend(Firebug.Module,
 
     /**
      * Navigate up and down through the DOM and highlight the result. This method is used by the key handlers for the up and down arrow keys.
-     * @param {String} dir Direction to navigate the DOM, either "up" or "down"
+     * @param {String} dir Direction to navigate the Dom, either "up" or "down"
      */
     inspectNodeBy: function(dir)
     {
@@ -365,11 +365,11 @@ Firebug.Inspector = OBJECT.extend(Firebug.Module,
                 if (node.contentDocument)
                     target = node.contentDocument.documentElement;
                 else
-                    target = DOM.getNextElement(node.firstChild);
+                    target = Dom.getNextElement(node.firstChild);
             }
         }
 
-        if (target && DOM.isElement(target))
+        if (target && Dom.isElement(target))
             this.inspectNode(target);
         else
             System.beep();
@@ -448,13 +448,13 @@ Firebug.Inspector = OBJECT.extend(Firebug.Module,
 
         this.keyListeners =
         [
-            chrome.keyCodeListen("RETURN", null, OBJECT.bindFixed(this.stopInspecting, this)),
-            chrome.keyCodeListen("ESCAPE", null, OBJECT.bindFixed(this.stopInspecting, this, true)),
-            chrome.keyCodeListen("UP", Events.isControl, OBJECT.bindFixed(this.inspectNodeBy, this, "up"), true),
-            chrome.keyCodeListen("DOWN", Events.isControl, OBJECT.bindFixed(this.inspectNodeBy, this, "down"), true),
+            chrome.keyCodeListen("RETURN", null, Extend.bindFixed(this.stopInspecting, this)),
+            chrome.keyCodeListen("ESCAPE", null, Extend.bindFixed(this.stopInspecting, this, true)),
+            chrome.keyCodeListen("UP", Events.isControl, Extend.bindFixed(this.inspectNodeBy, this, "up"), true),
+            chrome.keyCodeListen("DOWN", Events.isControl, Extend.bindFixed(this.inspectNodeBy, this, "down"), true),
         ];
 
-        WIN.iterateWindows(win, OBJECT.bind(function(subWin)
+        Win.iterateWindows(win, Extend.bind(function(subWin)
         {
             if (FBTrace.DBG_INSPECT)
                 FBTrace.sysout("inspector.attacheInspectListeners to " + subWin.location +
@@ -489,7 +489,7 @@ Firebug.Inspector = OBJECT.extend(Firebug.Module,
             delete this.keyListeners;
         }
 
-        WIN.iterateWindows(win, OBJECT.bind(function(subWin)
+        Win.iterateWindows(win, Extend.bind(function(subWin)
         {
             subWin.document.removeEventListener("mouseover", this.onInspectingMouseOver, true);
             subWin.document.removeEventListener("mousedown", this.onInspectingMouseDown, true);
@@ -503,7 +503,7 @@ Firebug.Inspector = OBJECT.extend(Firebug.Module,
      */
     detachClickInspectListeners: function(context)
     {
-        WIN.iterateWindows(context, OBJECT.bind(function(subWin)
+        Win.iterateWindows(context, Extend.bind(function(subWin)
         {
             subWin.document.removeEventListener("click", this.onInspectingClick, true);
         }, this));
@@ -595,7 +595,7 @@ Firebug.Inspector = OBJECT.extend(Firebug.Module,
         var win = event.currentTarget.defaultView;
         if (win)
         {
-            win = WIN.getRootWindow(win);
+            win = Win.getRootWindow(win);
             this.detachClickInspectListeners(win);
         }
 
@@ -612,13 +612,13 @@ Firebug.Inspector = OBJECT.extend(Firebug.Module,
     {
         Firebug.Module.initialize.apply(this, arguments);
 
-        this.onInspectingResizeWindow = OBJECT.bind(this.onInspectingResizeWindow, this);
-        this.onInspectingScroll = OBJECT.bind(this.onInspectingScroll, this);
-        this.onInspectingMouseOver = OBJECT.bind(this.onInspectingMouseOver, this);
-        this.onInspectingMouseDown = OBJECT.bind(this.onInspectingMouseDown, this);
-        this.onInspectingMouseUp = OBJECT.bind(this.onInspectingMouseUp, this);
-        this.onInspectingClick = OBJECT.bind(this.onInspectingClick, this);
-        this.onPanelChanged = OBJECT.bind(this.onPanelChanged, this);
+        this.onInspectingResizeWindow = Extend.bind(this.onInspectingResizeWindow, this);
+        this.onInspectingScroll = Extend.bind(this.onInspectingScroll, this);
+        this.onInspectingMouseOver = Extend.bind(this.onInspectingMouseOver, this);
+        this.onInspectingMouseDown = Extend.bind(this.onInspectingMouseDown, this);
+        this.onInspectingMouseUp = Extend.bind(this.onInspectingMouseUp, this);
+        this.onInspectingClick = Extend.bind(this.onInspectingClick, this);
+        this.onPanelChanged = Extend.bind(this.onPanelChanged, this);
 
         this.updateOption("shadeBoxModel", Firebug.shadeBoxModel);
         this.updateOption("showQuickInfoBox", Firebug.showQuickInfoBox);
@@ -729,13 +729,13 @@ Firebug.Inspector = OBJECT.extend(Firebug.Module,
     },
 
     /**
-     * Gets stylesheet by URL.
+     * Gets stylesheet by Url.
      * @param {Window} context the main browser window
      * @param {String} url URL of the stylesheet
      */
     getObjectByURL: function(context, url)
     {
-        var styleSheet = CSS.getStyleSheetByHref(url, context);
+        var styleSheet = Css.getStyleSheetByHref(url, context);
         if (styleSheet)
             return styleSheet;
     },
@@ -905,7 +905,7 @@ function getImageMapHighlighter(context)
                 for (i = 0; i < eltsLen; i++)
                 {
                     elt = elts.snapshotItem(i);
-                    rect = DOM.getLTRBWH(elt);
+                    rect = Dom.getLTRBWH(elt);
 
                     if (multi)
                     {
@@ -947,7 +947,7 @@ function getImageMapHighlighter(context)
 
                     for(j = 0; j < imagesLen; j++)
                     {
-                        rect = DOM.getLTRBWH(images[j], context);
+                        rect = Dom.getLTRBWH(images[j], context);
 
                         ctx.beginPath();
 
@@ -1196,7 +1196,7 @@ Firebug.Inspector.FrameHighlighter.prototype =
         storeHighlighterParams(this, context, element, null, colorObj, null, isMulti);
 
         var cs;
-        var offset = DOM.getLTRBWH(element);
+        var offset = Dom.getLTRBWH(element);
         var x = offset.left, y = offset.top;
         var w = offset.width, h = offset.height;
 
@@ -1367,7 +1367,7 @@ BoxModelHighlighter.prototype =
         storeHighlighterParams(this, context, element, boxFrame, colorObj, null, isMulti);
 
         if (context.highlightFrame)
-            CSS.removeClass(context.highlightFrame, "firebugHighlightBox");
+            Css.removeClass(context.highlightFrame, "firebugHighlightBox");
 
         if (element.tagName !== "AREA")
         {
@@ -1378,11 +1378,11 @@ BoxModelHighlighter.prototype =
 
             if (highlightFrame)
             {
-                CSS.setClass(nodes.offset, "firebugHighlightGroup");
-                CSS.setClass(highlightFrame, "firebugHighlightBox");
+                Css.setClass(nodes.offset, "firebugHighlightGroup");
+                Css.setClass(highlightFrame, "firebugHighlightBox");
             }
             else
-                CSS.removeClass(nodes.offset, "firebugHighlightGroup");
+                Css.removeClass(nodes.offset, "firebugHighlightGroup");
 
             var win = (element.ownerDocument ? element.ownerDocument.defaultView : null);
             if (!win)
@@ -1396,8 +1396,8 @@ BoxModelHighlighter.prototype =
                 return;
             }
 
-            var styles = CSS.readBoxStyles(style);
-            var offset = DOM.getLTRBWH(element);
+            var styles = Css.readBoxStyles(style);
+            var offset = Dom.getLTRBWH(element);
             var x = offset.left - Math.abs(styles.marginLeft);
             var y = offset.top - Math.abs(styles.marginTop);
             var w = offset.width - (styles.paddingLeft + styles.paddingRight + styles.borderLeft + styles.borderRight);
@@ -1598,7 +1598,7 @@ BoxModelHighlighter.prototype =
     setNodesByOffsetParent: function(win, offsetParent, nodes)
     {
         var parentStyle = win.getComputedStyle(offsetParent, "");
-        var parentOffset = DOM.getLTRBWH(offsetParent);
+        var parentOffset = Dom.getLTRBWH(offsetParent);
         var parentX = parentOffset.left + parseInt(parentStyle.borderLeftWidth, 10);
         var parentY = parentOffset.top + parseInt(parentStyle.borderTopWidth, 10);
         var parentW = offsetParent.offsetWidth-1;
@@ -1607,14 +1607,14 @@ BoxModelHighlighter.prototype =
         nodes.parent.style.cssText = moveImp(null, parentX, parentY) + resizeImp(null, parentW, parentH);
 
         if (parentX < 14)
-            CSS.setClass(nodes.parent, "overflowRulerX");
+            Css.setClass(nodes.parent, "overflowRulerX");
         else
-            CSS.removeClass(nodes.parent, "overflowRulerX");
+            Css.removeClass(nodes.parent, "overflowRulerX");
 
         if (parentY < 14)
-            CSS.setClass(nodes.parent, "overflowRulerY");
+            Css.setClass(nodes.parent, "overflowRulerY");
         else
-            CSS.removeClass(nodes.parent, "overflowRulerY");
+            Css.removeClass(nodes.parent, "overflowRulerY");
     }
 };
 
@@ -1732,7 +1732,7 @@ var highlighterCache =
 
 function getNonFrameBody(elt)
 {
-    var body = DOM.getBody(elt.ownerDocument);
+    var body = Dom.getBody(elt.ownerDocument);
     return (body.localName && body.localName.toUpperCase() === "FRAMESET") ? null : body;
 }
 
@@ -1740,10 +1740,10 @@ function attachStyles(context, body)
 {
     var doc = body.ownerDocument;
     if (!context.highlightStyle)
-        context.highlightStyle = CSS.createStyleSheet(doc, highlightCSS);
+        context.highlightStyle = Css.createStyleSheet(doc, highlightCSS);
 
     if (!context.highlightStyle.parentNode || context.highlightStyle.ownerDocument != doc)
-        CSS.addStyleSheet(body.ownerDocument, context.highlightStyle);
+        Css.addStyleSheet(body.ownerDocument, context.highlightStyle);
 }
 
 function createProxiesForDisabledElements(body)

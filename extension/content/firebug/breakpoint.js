@@ -18,13 +18,13 @@ define([
     "firebug/js/fbs",
     "firebug/editor",
 ],
-function(OBJECT, Firebug, Domplate, FirebugReps, Locale, Events, ToolsInterface, SourceLink,
-    StackFrame, CSS, DOM, STR, ARR, Menu, FBS) {
+function(Extend, Firebug, Domplate, FirebugReps, Locale, Events, ToolsInterface, SourceLink,
+    StackFrame, Css, Dom, Str, Arr, Menu, FBS) {
 
 // ************************************************************************************************
 // Breakpoints
 
-Firebug.Breakpoint = OBJECT.extend(Firebug.Module,
+Firebug.Breakpoint = Extend.extend(Firebug.Module,
 {
     dispatchName: "breakpoints",
 
@@ -64,7 +64,7 @@ Firebug.Breakpoint = OBJECT.extend(Firebug.Module,
             breakButton.setAttribute("panelName", panel.name);
 
         breakButton.removeAttribute("type");
-        DOM.collapse(Firebug.chrome.$("fbBonButtons"), !panel.breakable);
+        Dom.collapse(Firebug.chrome.$("fbBonButtons"), !panel.breakable);
 
         // Disable break-on-next if it isn't supported by the current panel.
         if (!panel.supportsBreakOnNext())
@@ -86,7 +86,7 @@ Firebug.Breakpoint = OBJECT.extend(Firebug.Module,
         breakButton.setAttribute("type", "menu-button");
 
         var menuPopup = Firebug.chrome.$("fbBreakOnNextOptions");
-        DOM.eraseNode(menuPopup);
+        Dom.eraseNode(menuPopup);
 
         for (var i=0; i<menuItems.length; ++i)
             Menu.createMenuItem(menuPopup, menuItems[i]);
@@ -218,23 +218,23 @@ Firebug.Breakpoint.BreakpointRep = domplate(Firebug.Rep,
 
     getContextMenuItems: function(breakpoint, target)
     {
-        var head = DOM.getAncestorByClass(target, "breakpointBlock");
-        var groupName = CSS.getClassValue(head, "breakpointBlock");
+        var head = Dom.getAncestorByClass(target, "breakpointBlock");
+        var groupName = Css.getClassValue(head, "breakpointBlock");
 
-        var items = [{label: "Remove Breakpoint", command: OBJECT.bindFixed(this.removeBreakpoint, this, groupName, breakpoint.href, breakpoint.lineNumber)}];
+        var items = [{label: "Remove Breakpoint", command: Extend.bindFixed(this.removeBreakpoint, this, groupName, breakpoint.href, breakpoint.lineNumber)}];
 
         if (groupName == "breakpoints")
         {
             if (breakpoint.checked)
             {
                 items.push(
-                    {label: "Disable Breakpoint", command: OBJECT.bindFixed(this.disableBreakpoint, this, breakpoint.href, breakpoint.lineNumber)}
+                    {label: "Disable Breakpoint", command: Extend.bindFixed(this.disableBreakpoint, this, breakpoint.href, breakpoint.lineNumber)}
                 );
             }
             else
             {
                 items.push(
-                    {label: "Enable Breakpoint", command: OBJECT.bindFixed(this.enableBreakpoint, this, breakpoint.href, breakpoint.lineNumber)}
+                    {label: "Enable Breakpoint", command: Extend.bindFixed(this.enableBreakpoint, this, breakpoint.href, breakpoint.lineNumber)}
                 );
             }
         }
@@ -259,7 +259,7 @@ Firebug.Breakpoint.BreakpointRep = domplate(Firebug.Rep,
     {
         var panel = Firebug.getElementPanel(event.target);
 
-        if (DOM.getAncestorByClass(event.target, "breakpointCheckbox"))
+        if (Dom.getAncestorByClass(event.target, "breakpointCheckbox"))
         {
             var node = event.target.parentNode.getElementsByClassName("objectLink-sourceLink").item(0);
             if (!node)
@@ -274,13 +274,13 @@ Firebug.Breakpoint.BreakpointRep = domplate(Firebug.Rep,
                 this.disableBreakpoint(sourceLink.href, sourceLink.line);
             panel.noRefresh = false;
         }
-        else if (DOM.getAncestorByClass(event.target, "closeButton"))
+        else if (Dom.getAncestorByClass(event.target, "closeButton"))
         {
             panel.noRefresh = true;
             var sourceLink =
               event.target.parentNode.getElementsByClassName("objectLink-sourceLink").item(0).repObject;
-            var head = DOM.getAncestorByClass(event.target, "breakpointBlock");
-            var groupName = CSS.getClassValue(head, "breakpointBlock");
+            var head = Dom.getAncestorByClass(event.target, "breakpointBlock");
+            var groupName = Css.getClassValue(head, "breakpointBlock");
 
             this.removeBreakpoint(groupName, sourceLink.href, sourceLink.line);
 
@@ -294,7 +294,7 @@ Firebug.Breakpoint.BreakpointRep = domplate(Firebug.Rep,
 
 Firebug.Breakpoint.BreakpointsPanel = function() {}
 
-Firebug.Breakpoint.BreakpointsPanel.prototype = OBJECT.extend(Firebug.Panel,
+Firebug.Breakpoint.BreakpointsPanel.prototype = Extend.extend(Firebug.Panel,
 {
     name: "breakpoints",
     parentPanel: "script",
@@ -479,21 +479,21 @@ Firebug.Breakpoint.BreakpointsPanel.prototype = OBJECT.extend(Firebug.Panel,
         {
             items.push(
                 {label: "EnableAllBreakpoints",
-                    command: OBJECT.bindFixed(this.enableAllBreakpoints, this, context, true) }
+                    command: Extend.bindFixed(this.enableAllBreakpoints, this, context, true) }
             );
         }
         if (bpCount && disabledCount != bpCount)
         {
             items.push(
                 {label: "DisableAllBreakpoints",
-                    command: OBJECT.bindFixed(this.enableAllBreakpoints, this, context, false) }
+                    command: Extend.bindFixed(this.enableAllBreakpoints, this, context, false) }
             );
         }
 
         items.push(
             "-",
             {label: "ClearAllBreakpoints", disabled: !bpCount,
-                command: OBJECT.bindFixed(this.clearAllBreakpoints, this, context) }
+                command: Extend.bindFixed(this.clearAllBreakpoints, this, context) }
         );
 
         return items;
@@ -578,12 +578,12 @@ Firebug.Breakpoint.BreakpointGroup.prototype =
 {
     removeBreakpoint: function(bp)
     {
-        ARR.remove(this.breakpoints, bp);
+        Arr.remove(this.breakpoints, bp);
     },
 
     enumerateBreakpoints: function(callback)
     {
-        var breakpoints = ARR.cloneArray(this.breakpoints);
+        var breakpoints = Arr.cloneArray(this.breakpoints);
         for (var i=0; i<breakpoints.length; i++)
         {
             var bp = breakpoints[i];
@@ -765,28 +765,28 @@ Firebug.Breakpoint.ConditionEditor.prototype = domplate(Firebug.InlineEditor.pro
         if (this.getAutoCompleter)
             this.getAutoCompleter().reset();
 
-        DOM.hide(this.box, true);
+        Dom.hide(this.box, true);
         panel.selectedSourceBox.appendChild(this.box);
 
         if (this.input)
             this.input.value = value;
 
-        setTimeout(OBJECT.bindFixed(function()
+        setTimeout(Extend.bindFixed(function()
         {
-            var offset = DOM.getClientOffset(sourceLine);
+            var offset = Dom.getClientOffset(sourceLine);
 
             var bottom = offset.y+sourceLine.offsetHeight;
             var y = bottom - this.box.offsetHeight;
             if (y < panel.selectedSourceBox.scrollTop)
             {
                 y = offset.y;
-                CSS.setClass(this.box, "upsideDown");
+                Css.setClass(this.box, "upsideDown");
             }
             else
-                CSS.removeClass(this.box, "upsideDown");
+                Css.removeClass(this.box, "upsideDown");
 
             this.box.style.top = y + "px";
-            DOM.hide(this.box, false);
+            Dom.hide(this.box, false);
 
             if (this.input)
             {
@@ -897,13 +897,13 @@ Firebug.Breakpoint.BreakNotification.prototype = domplate(Firebug.Rep,
     onMouseOver: function(event)
     {
         var target = event.target;
-        var box = DOM.getAncestorByClass(target, "notificationBox");
+        var box = Dom.getAncestorByClass(target, "notificationBox");
         var close = box.querySelector(".notificationClose");
 
         // The close button is "active" (red) if the mouse hovers over the notification
         // area except when it hovers over a button or link.
         var localName = target.localName ? target.localName.toLowerCase() : "";
-        if (CSS.hasClass(target, "notificationButton") || localName == "a")
+        if (Css.hasClass(target, "notificationButton") || localName == "a")
             close.removeAttribute("active");
         else
             close.setAttribute("active", true);
@@ -911,7 +911,7 @@ Firebug.Breakpoint.BreakNotification.prototype = domplate(Firebug.Rep,
 
     onMouseOut: function(event)
     {
-        var box = DOM.getAncestorByClass(event.target, "notificationBox");
+        var box = Dom.getAncestorByClass(event.target, "notificationBox");
         var close = box.querySelector(".notificationClose");
         close.removeAttribute("active");
     },
@@ -1005,7 +1005,7 @@ Firebug.Breakpoint.BreakNotification.prototype = domplate(Firebug.Rep,
 
     getNotifyObject: function(target)
     {
-        var parentNode = DOM.getAncestorByClass(target, "notificationBox");
+        var parentNode = Dom.getAncestorByClass(target, "notificationBox");
         return parentNode.repObject;
     },
 
@@ -1045,10 +1045,10 @@ Firebug.Breakpoint.BreakNotification.prototype = domplate(Firebug.Rep,
         var str = "";
 
         if (cause.prevValue)
-            str += STR.cropString(cause.prevValue, 40) + " -> ";
+            str += Str.cropString(cause.prevValue, 40) + " -> ";
 
         if (cause.newValue)
-            str += STR.cropString(cause.newValue, 40);
+            str += Str.cropString(cause.newValue, 40);
 
         if (!str.length)
             return "";
@@ -1083,7 +1083,7 @@ Firebug.Breakpoint.BreakNotification.prototype = domplate(Firebug.Rep,
         // Render "do not show again" text
         var descNode = this.box.querySelector(".noNotificationDesc");
         FirebugReps.Description.render(Locale.$STR("firebug.breakpoint.doNotShowBreakNotification2"),
-            descNode, OBJECT.bind(this.onClickLink, this));
+            descNode, Extend.bind(this.onClickLink, this));
 
         // Tooltips
         if (this.cause.skipActionTooltip)

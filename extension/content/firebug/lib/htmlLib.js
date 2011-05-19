@@ -9,7 +9,7 @@ define([
     "firebug/lib/xml",
     "firebug/lib/string",
 ],
-function(OBJECT, Events, CSS, DOM, Search, XML, STR) {
+function(Extend, Events, Css, Dom, Search, Xml, Str) {
 
 // ********************************************************************************************* //
 // Constants
@@ -204,9 +204,9 @@ var HTMLLib =
                 {
                     var attrNodeBox = HTMLLib.findNodeAttrBox(nodeBox, node.nodeName);
                     if (isValue)
-                        return DOM.getChildByClass(attrNodeBox, "nodeValue");
+                        return Dom.getChildByClass(attrNodeBox, "nodeValue");
                     else
-                        return DOM.getChildByClass(attrNodeBox, "nodeName");
+                        return Dom.getChildByClass(attrNodeBox, "nodeName");
                 }
             }
             else if (node.nodeType == Node.TEXT_NODE)
@@ -219,7 +219,7 @@ var HTMLLib =
                 else
                 {
                     var nodeBox = ioBox.openToObject(node.parentNode);
-                    if (CSS.hasClass(nodeBox, "textNodeBox"))
+                    if (Css.hasClass(nodeBox, "textNodeBox"))
                         nodeBox = HTMLLib.getTextElementTextBox(nodeBox);
                     return nodeBox;
                 }
@@ -233,7 +233,7 @@ var HTMLLib =
          */
         this.selectMatched = function(nodeBox, node, match, reverse)
         {
-            setTimeout(OBJECT.bindFixed(function()
+            setTimeout(Extend.bindFixed(function()
             {
                 var reMatch = match.match;
                 this.selectNodeText(nodeBox, node, reMatch[0], reMatch.index, reverse,
@@ -275,15 +275,15 @@ var HTMLLib =
 
             if (row)
             {
-                var trueNodeBox = DOM.getAncestorByClass(nodeBox, "nodeBox");
-                CSS.setClass(trueNodeBox,'search-selection');
+                var trueNodeBox = Dom.getAncestorByClass(nodeBox, "nodeBox");
+                Css.setClass(trueNodeBox,'search-selection');
 
-                DOM.scrollIntoCenterView(row, panelNode);
+                Dom.scrollIntoCenterView(row, panelNode);
                 var sel = panelNode.ownerDocument.defaultView.getSelection();
                 sel.removeAllRanges();
                 sel.addRange(this.textSearch.range);
 
-                CSS.removeClass(trueNodeBox,'search-selection');
+                Css.removeClass(trueNodeBox,'search-selection');
                 return true;
             }
         };
@@ -380,7 +380,7 @@ var HTMLLib =
          */
         this.selectMatched = function(nodeBox, node, match, reverse)
         {
-            setTimeout(OBJECT.bindFixed(function()
+            setTimeout(Extend.bindFixed(function()
             {
                 ioBox.select(node, true, true);
                 Events.dispatch([Firebug.A11yModel], 'onHTMLSearchMatchFound', [panelNode.ownerPanel, match]);
@@ -634,7 +634,7 @@ var HTMLLib =
         if (element.ownerDocument instanceof Ci.nsIDOMDocumentXBL)
         {
             if (FBTrace.DBG_HTML)
-                FBTrace.sysout("hasNoElementChildren "+CSS.getElementCSSSelector(element)+
+                FBTrace.sysout("hasNoElementChildren "+Css.getElementCSSSelector(element)+
                     " (element.ownerDocument instanceof Ci.nsIDOMDocumentXBL) "+
                     (element.ownerDocument instanceof Ci.nsIDOMDocumentXBL), element);
 
@@ -689,7 +689,7 @@ var HTMLLib =
     {
         if (node instanceof window.HTMLAppletElement)
             return false;
-        return node.nodeType == window.Node.TEXT_NODE && STR.isWhitespace(node.nodeValue);
+        return node.nodeType == window.Node.TEXT_NODE && Str.isWhitespace(node.nodeValue);
     },
 
     /**
@@ -711,7 +711,7 @@ var HTMLLib =
         // XXXsroussey reverted above but added a check for self closing tags
         if (Firebug.showTextNodesWithWhitespace)
         {
-            return !element.firstChild && XML.isSelfClosing(element);
+            return !element.firstChild && Xml.isSelfClosing(element);
         }
         else
         {
@@ -721,7 +721,7 @@ var HTMLLib =
                     return false;
             }
         }
-        return XML.isSelfClosing(element);
+        return Xml.isSelfClosing(element);
     },
 
     /**
@@ -765,7 +765,7 @@ var HTMLLib =
         var child = objectNodeBox.firstChild.lastChild.firstChild;
         for (; child; child = child.nextSibling)
         {
-            if (CSS.hasClass(child, "nodeAttr") && child.childNodes[1].firstChild
+            if (Css.hasClass(child, "nodeAttr") && child.childNodes[1].firstChild
                 && child.childNodes[1].firstChild.nodeValue == attrName)
             {
                 return child;
@@ -781,7 +781,7 @@ var HTMLLib =
     getTextElementTextBox: function(nodeBox)
     {
         var nodeLabelBox = nodeBox.firstChild.lastChild;
-        return DOM.getChildByClass(nodeLabelBox, "nodeText");
+        return Dom.getChildByClass(nodeLabelBox, "nodeText");
     },
 
     // These functions can be copied to add tree walking feature, they allow Chromebug

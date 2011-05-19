@@ -7,7 +7,7 @@ define([
     "firebug/lib/css",
     "firebug/lib/dom",
 ],
-function(OBJECT, Firebug, Events, CSS, DOM) {
+function(Extend, Firebug, Events, Css, Dom) {
 
 // ************************************************************************************************
 
@@ -55,7 +55,7 @@ Firebug.InsideOutBox = function(view, box)
     this.selectedObjectBox = null;
     this.highlightedObjectBox = null;
 
-    this.onMouseDown = OBJECT.bind(this.onMouseDown, this);
+    this.onMouseDown = Extend.bind(this.onMouseDown, this);
     box.addEventListener("mousedown", this.onMouseDown, false);
 };
 
@@ -101,7 +101,7 @@ Firebug.InsideOutBox.prototype =
         {
             this.openObjectBox(objectBox);
             if (!noScrollIntoView)
-                DOM.scrollIntoCenterView(objectBox);
+                Dom.scrollIntoCenterView(objectBox);
         }
         return objectBox;
     },
@@ -112,7 +112,7 @@ Firebug.InsideOutBox.prototype =
         if (!objectBox)
             return;
 
-        if (CSS.hasClass(objectBox, "open"))
+        if (Css.hasClass(objectBox, "open"))
             this.contractObjectBox(objectBox, all);
         else
             this.expandObjectBox(objectBox, all, event);
@@ -136,24 +136,24 @@ Firebug.InsideOutBox.prototype =
     {
         if (this.highlightedObjectBox)
         {
-            CSS.removeClass(this.highlightedObjectBox, "highlighted");
+            Css.removeClass(this.highlightedObjectBox, "highlighted");
 
             var highlightedBox = this.getParentObjectBox(this.highlightedObjectBox);
             for (; highlightedBox; highlightedBox = this.getParentObjectBox(highlightedBox))
-                CSS.removeClass(highlightedBox, "highlightOpen");
+                Css.removeClass(highlightedBox, "highlightOpen");
         }
 
         this.highlightedObjectBox = objectBox;
 
         if (objectBox)
         {
-            CSS.setClass(objectBox, "highlighted");
+            Css.setClass(objectBox, "highlighted");
 
             var highlightedBox = this.getParentObjectBox(objectBox);
             for (; highlightedBox; highlightedBox = this.getParentObjectBox(highlightedBox))
-                CSS.setClass(highlightedBox, "highlightOpen");
+                Css.setClass(highlightedBox, "highlightOpen");
 
-           DOM.scrollIntoCenterView(objectBox);
+           Dom.scrollIntoCenterView(objectBox);
         }
     },
 
@@ -172,13 +172,13 @@ Firebug.InsideOutBox.prototype =
         var isSelected = this.selectedObjectBox && objectBox == this.selectedObjectBox;
         if (!isSelected)
         {
-            CSS.removeClass(this.selectedObjectBox, "selected");
+            Css.removeClass(this.selectedObjectBox, "selected");
             Events.dispatch(panel.fbListeners, 'onObjectBoxUnselected', [this.selectedObjectBox]);
             this.selectedObjectBox = objectBox;
 
             if (objectBox)
             {
-                CSS.setClass(objectBox, "selected");
+                Css.setClass(objectBox, "selected");
 
                 // Force it open the first time it is selected
                 if (forceOpen)
@@ -197,7 +197,7 @@ Firebug.InsideOutBox.prototype =
             var labelBox;
             for (; parentBox; parentBox = this.getParentObjectBox(parentBox))
             {
-                CSS.setClass(parentBox, "open");
+                Css.setClass(parentBox, "open");
                 labelBox = parentBox.getElementsByClassName('nodeLabelBox').item(0);
                 if (labelBox)
                     labelBox.setAttribute('aria-expanded', 'true')
@@ -220,7 +220,7 @@ Firebug.InsideOutBox.prototype =
         var labelBox = objectBox.getElementsByClassName('nodeLabelBox').item(0);
         if (labelBox)
             labelBox.setAttribute('aria-expanded', 'true');
-        CSS.setClass(objectBox, "open");
+        Css.setClass(objectBox, "open");
 
         // Recursively expand all child boxes
         if (expandAll)
@@ -242,7 +242,7 @@ Firebug.InsideOutBox.prototype =
                         continue;
                 }
 
-                if (CSS.hasClass(child, "containerNodeBox"))
+                if (Css.hasClass(child, "containerNodeBox"))
                     this.expandObjectBox(child, expandAll);
             }
         }
@@ -250,7 +250,7 @@ Firebug.InsideOutBox.prototype =
 
     contractObjectBox: function(objectBox, contractAll)
     {
-        CSS.removeClass(objectBox, "open");
+        Css.removeClass(objectBox, "open");
 
         var nodeLabel = objectBox.getElementsByClassName("nodeLabel").item(0);
         var labelBox = nodeLabel.getElementsByClassName('nodeLabelBox').item(0);
@@ -266,7 +266,7 @@ Firebug.InsideOutBox.prototype =
         {
             for (var child = nodeChildBox.firstChild; child; child = child.nextSibling)
             {
-                if (CSS.hasClass(child, "containerNodeBox") && CSS.hasClass(child, "open"))
+                if (Css.hasClass(child, "containerNodeBox") && Css.hasClass(child, "open"))
                     this.contractObjectBox(child, contractAll);
             }
         }
@@ -274,7 +274,7 @@ Firebug.InsideOutBox.prototype =
 
     toggleObjectBox: function(objectBox, forceOpen)
     {
-        var isOpen = CSS.hasClass(objectBox, "open");
+        var isOpen = Css.hasClass(objectBox, "open");
         var nodeLabel = objectBox.getElementsByClassName("nodeLabel").item(0);
         var labelBox = nodeLabel.getElementsByClassName('nodeLabelBox').item(0);
         if (labelBox)
@@ -288,12 +288,12 @@ Firebug.InsideOutBox.prototype =
 
     getNextObjectBox: function(objectBox)
     {
-        return DOM.findNext(objectBox, isVisibleTarget, false, this.box);
+        return Dom.findNext(objectBox, isVisibleTarget, false, this.box);
     },
 
     getPreviousObjectBox: function(objectBox)
     {
-        return DOM.findPrevious(objectBox, isVisibleTarget, true, this.box);
+        return Dom.findPrevious(objectBox, isVisibleTarget, true, this.box);
     },
 
     /**
@@ -478,9 +478,9 @@ Firebug.InsideOutBox.prototype =
         if (!repObject)
             return null;
 
-        var parentObjectBox = DOM.getAncestorByClass(nodeChildBox, "nodeBox");
+        var parentObjectBox = Dom.getAncestorByClass(nodeChildBox, "nodeBox");
         if (FBTrace.DBG_HTML)
-            FBTrace.sysout("+++insideOutBox.populateChildBox("+CSS.getElementCSSSelector(repObject)+") parentObjectBox.populated "+parentObjectBox.populated+"\n");
+            FBTrace.sysout("+++insideOutBox.populateChildBox("+Css.getElementCSSSelector(repObject)+") parentObjectBox.populated "+parentObjectBox.populated+"\n");
         if (parentObjectBox.populated)
             return this.findChildObjectBox(nodeChildBox, repObject);
 
@@ -618,7 +618,7 @@ Firebug.InsideOutBox.prototype =
         var hitTwisty = false;
         for (var child = event.target; child; child = child.parentNode)
         {
-            if (CSS.hasClass(child, "twisty"))
+            if (Css.hasClass(child, "twisty"))
                 hitTwisty = true;
             else if (child.repObject)
             {
@@ -639,9 +639,9 @@ function isVisibleTarget(node)
     {
         for (var parent = node.parentNode; parent; parent = parent.parentNode)
         {
-            if (CSS.hasClass(parent, "nodeChildBox")
-                && !CSS.hasClass(parent.parentNode, "open")
-                && !CSS.hasClass(parent.parentNode, "highlightOpen"))
+            if (Css.hasClass(parent, "nodeChildBox")
+                && !Css.hasClass(parent.parentNode, "open")
+                && !Css.hasClass(parent.parentNode, "highlightOpen"))
                 return false;
         }
         return true;
@@ -660,7 +660,7 @@ function formatNode(object)
             else
                 return "(an object with no localName or toString result)";
         }
-        else  return CSS.getElementCSSSelector(object);
+        else  return Css.getElementCSSSelector(object);
     }
     else
         return "(null object)";
@@ -671,7 +671,7 @@ function formatObjectBox(object)
     if (object)
     {
         if (object.localName)
-            return CSS.getElementCSSSelector(object);
+            return Css.getElementCSSSelector(object);
         return object.textContent;
     }
     else

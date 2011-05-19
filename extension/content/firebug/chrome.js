@@ -17,8 +17,8 @@ define([
     "firebug/js/fbs",
     "firebug/firefox/window",
 ],
-function chromeFactory(OBJECT, Firefox, DOM, CSS, System, Menu, URL, Locale, String,
-    Events, FBS, WIN) {
+function chromeFactory(Extend, Firefox, Dom, Css, System, Menu, Url, Locale, String,
+    Events, FBS, Win) {
 
 // ************************************************************************************************
 // Constants
@@ -225,9 +225,9 @@ var FirebugChrome =
             // Append all registered styleesheets into Firebug UI.
             for (var uri in Firebug.stylesheets)
             {
-                CSS.appendStylesheet(doc1, Firebug.stylesheets[uri]);
-                CSS.appendStylesheet(doc2, Firebug.stylesheets[uri]);
-                CSS.appendStylesheet(doc3, Firebug.stylesheets[uri]);
+                Css.appendStylesheet(doc1, Firebug.stylesheets[uri]);
+                Css.appendStylesheet(doc2, Firebug.stylesheets[uri]);
+                Css.appendStylesheet(doc3, Firebug.stylesheets[uri]);
             }
 
             FirstRunPage.initializeUI();
@@ -333,7 +333,7 @@ var FirebugChrome =
     disableOff: function(collapse)
     {
         // disable/enable this button in the Firebug.chrome window.
-        DOM.collapse(FirebugChrome.$("fbCloseButton"), collapse);
+        Dom.collapse(FirebugChrome.$("fbCloseButton"), collapse);
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
@@ -346,7 +346,7 @@ var FirebugChrome =
         var consolePanelType = Firebug.getPanelType("console");
         if (consolePanelType == panelType)
         {
-            if (!DOM.isCollapsed(cmdPopup))
+            if (!Dom.isCollapsed(cmdPopup))
                 return cmdPopupBrowser.contentDocument;
         }
 
@@ -455,7 +455,7 @@ var FirebugChrome =
         contentBox.setAttribute("collapsed", !shouldShow);
         if (!inDetachedScope)
         {
-            DOM.collapse(Firefox.getElementById('fbMainFrame'), !shouldShow);
+            Dom.collapse(Firefox.getElementById('fbMainFrame'), !shouldShow);
         }
 
         // The content splitter is in firefox for the iframe version
@@ -475,12 +475,12 @@ var FirebugChrome =
         {
             Firebug.chrome.toggleOpen(true);
             Firebug.chrome.syncPanel();
-            DOM.collapse(resumeBox, true);
+            Dom.collapse(resumeBox, true);
         }
         else
         {
             Firebug.chrome.toggleOpen(false);
-            DOM.collapse(resumeBox, false);
+            Dom.collapse(resumeBox, false);
             Firebug.chrome.window.document.title = Locale.$STR("Firebug - inactive for current website");
         }
     },
@@ -724,7 +724,7 @@ var FirebugChrome =
             return;
 
         location = location.href || location.url || location.toString();
-        if (Firebug.filterSystemURLs && URL.isSystemURL(location))
+        if (Firebug.filterSystemURLs && Url.isSystemURL(location))
             return;
 
         return location;
@@ -839,8 +839,8 @@ var FirebugChrome =
             panelBar2.selectPanel(null);
 
         sidePanelDeck.selectedPanel = panelBar2;
-        DOM.collapse(sidePanelDeck, !panelBar2.selectedPanel);
-        DOM.collapse(panelSplitter, !panelBar2.selectedPanel);
+        Dom.collapse(sidePanelDeck, !panelBar2.selectedPanel);
+        Dom.collapse(panelSplitter, !panelBar2.selectedPanel);
     },
 
     syncTitle: function()
@@ -865,11 +865,11 @@ var FirebugChrome =
         if (panel && panel.location)
         {
             locationList.location = panel.location;
-            DOM.collapse(locationButtons, false);
+            Dom.collapse(locationButtons, false);
         }
         else
         {
-            DOM.collapse(locationButtons, true);
+            Dom.collapse(locationButtons, true);
         }
     },
 
@@ -890,7 +890,7 @@ var FirebugChrome =
             var path = panel.getObjectPath(panel.selection);
             if (!path || !path.length)
             {
-                DOM.hide(panelStatusSeparator, true);
+                Dom.hide(panelStatusSeparator, true);
                 panelStatus.clear();
             }
             else
@@ -903,14 +903,14 @@ var FirebugChrome =
                 var sibling = panelStatusSeparator.parentNode.previousSibling;
                 while (sibling)
                 {
-                    if (!DOM.isCollapsed(sibling))
+                    if (!Dom.isCollapsed(sibling))
                     {
                         hide = false;
                         break;
                     }
                     sibling = sibling.previousSibling;
                 }
-                DOM.hide(panelStatusSeparator, hide);
+                Dom.hide(panelStatusSeparator, hide);
 
                 if (panel.name != panelStatus.lastPanelName)
                     panelStatus.clear();
@@ -1090,7 +1090,7 @@ var FirebugChrome =
 
     obeyOmitObjectPathStack: function(value)
     {
-        DOM.hide(panelStatus, (value?true:false));
+        Dom.hide(panelStatus, (value?true:false));
     },
 
     toggleShowErrorCount: function()
@@ -1143,14 +1143,14 @@ var FirebugChrome =
 
     onMenuShowing: function(popup)
     {
-        var detachFirebug = DOM.getElementsByAttribute(popup, "id", "menu_detachFirebug")[0];
+        var detachFirebug = Dom.getElementsByAttribute(popup, "id", "menu_detachFirebug")[0];
         if (detachFirebug)
         {
             detachFirebug.setAttribute("label", (Firebug.isDetached() ?
                 Locale.$STR("firebug.AttachFirebug") : Locale.$STR("firebug.DetachFirebug")));
         }
 
-        var toggleFirebug = DOM.getElementsByAttribute(popup, "id", "menu_toggleFirebug")[0];
+        var toggleFirebug = Dom.getElementsByAttribute(popup, "id", "menu_toggleFirebug")[0];
         if (toggleFirebug)
         {
             var fbContentBox = FirebugChrome.$("fbContentBox");
@@ -1224,7 +1224,7 @@ var FirebugChrome =
         if (!panel)
             panel = panelBar1 ? panelBar1.selectedPanel : null; // the event must be on our chrome not inside the panel
 
-        DOM.eraseNode(popup);
+        Dom.eraseNode(popup);
 
         // Make sure the Copy action is only available if there is actually someting
         // selected in the panel.
@@ -1392,10 +1392,10 @@ var FirebugChrome =
             }
         }
 
-        if (CSS.hasClass(target, 'noteInToolTip'))
-            CSS.setClass(tooltip, 'noteInToolTip');
+        if (Css.hasClass(target, 'noteInToolTip'))
+            Css.setClass(tooltip, 'noteInToolTip');
         else
-            CSS.removeClass(tooltip, 'noteInToolTip');
+            Css.removeClass(tooltip, 'noteInToolTip');
 
         if (target && target.hasAttribute("title"))
         {
@@ -1502,7 +1502,7 @@ var FirstRunPage =
                 version = version.replace('X', '', "g");
 
                 // xxxHonza: put the URL in firebugURLs as soon as it's in chrome.js
-                WIN.openNewTab("http://getfirebug.com/firstrun#Firebug " + version);
+                Win.openNewTab("http://getfirebug.com/firstrun#Firebug " + version);
             }
         }, 500);
     }
@@ -1521,8 +1521,8 @@ var KeyBindingsManager =
 {
     initialize: function()
     {
-        this.onFocus = OBJECT.bind(this.onFocus, this);
-        this.onBlur = OBJECT.bind(this.onBlur, this);
+        this.onFocus = Extend.bind(this.onFocus, this);
+        this.onBlur = Extend.bind(this.onBlur, this);
 
         var contentBox = FirebugChrome.$("fbContentBox");
         if (contentBox)
@@ -1737,7 +1737,7 @@ function onSelectingPanel(event)
     var child = toolbar.firstChild;
     while (child)
     {
-        DOM.collapse(child, true);
+        Dom.collapse(child, true);
         child = child.nextSibling;
     }
 
@@ -1824,7 +1824,7 @@ function onPanelClick(event)
 
         if (Events.isLeftClick(event))
         {
-            if (CSS.hasClass(repNode, "objectLink"))
+            if (Css.hasClass(repNode, "objectLink"))
             {
                 if (realRep)
                 {
@@ -1874,8 +1874,8 @@ function onPanelMouseUp(event)
         var selection = event.target.ownerDocument.defaultView.getSelection();
         var target = selection.focusNode || event.target;
         if(selection.focusNode === selection.anchorNode){
-            var editable = DOM.getAncestorByClass(target, "editable");
-            if (editable || CSS.hasClass(event.target, "inlineExpander"))
+            var editable = Dom.getAncestorByClass(target, "editable");
+            if (editable || Css.hasClass(event.target, "inlineExpander"))
             {
                 var selectionData;
                 var selFO = selection.focusOffset,selAO = selection.anchorOffset;

@@ -8,7 +8,7 @@ define([
     "firebug/lib/css",
     "firebug/lib/array",
 ],
-function(Domplate, Locale, FirebugReps, DOM, CSS, ARR) {
+function(Domplate, Locale, FirebugReps, Dom, Css, Arr) {
 
 // ************************************************************************************************
 // Constants
@@ -99,7 +99,7 @@ FirebugReps.Table = domplate(Firebug.Rep,
             return [obj];
 
         if (obj.length)
-            return ARR.cloneArray(obj);
+            return Arr.cloneArray(obj);
 
         var arr = [];
         for (var p in obj)
@@ -116,12 +116,12 @@ FirebugReps.Table = domplate(Firebug.Rep,
 
     onClickHeader: function(event)
     {
-        var table = DOM.getAncestorByClass(event.target, "dataTable");
-        var header = DOM.getAncestorByClass(event.target, "headerCell");
+        var table = Dom.getAncestorByClass(event.target, "dataTable");
+        var header = Dom.getAncestorByClass(event.target, "headerCell");
         if (!header)
             return;
 
-        var numerical = !CSS.hasClass(header, "alphaValue");
+        var numerical = !Css.hasClass(header, "alphaValue");
 
         var colIndex = 0;
         for (header = header.previousSibling; header; header = header.previousSibling)
@@ -132,8 +132,8 @@ FirebugReps.Table = domplate(Firebug.Rep,
 
     sort: function(table, colIndex, numerical)
     {
-        var tbody = DOM.getChildByClass(table, "dataTableTbody");
-        var thead = DOM.getChildByClass(table, "dataTableThead");
+        var tbody = Dom.getChildByClass(table, "dataTableTbody");
+        var thead = Dom.getChildByClass(table, "dataTableThead");
 
         var values = [];
         for (var row = tbody.childNodes[0]; row; row = row.nextSibling)
@@ -146,18 +146,18 @@ FirebugReps.Table = domplate(Firebug.Rep,
         values.sort(function(a, b) { return a.value < b.value ? -1 : 1; });
 
         var headerRow = thead.firstChild;
-        var headerSorted = DOM.getChildByClass(headerRow, "headerSorted");
-        CSS.removeClass(headerSorted, "headerSorted");
+        var headerSorted = Dom.getChildByClass(headerRow, "headerSorted");
+        Css.removeClass(headerSorted, "headerSorted");
         if (headerSorted)
             headerSorted.removeAttribute('aria-sort');
 
         var header = headerRow.childNodes[colIndex];
-        CSS.setClass(header, "headerSorted");
+        Css.setClass(header, "headerSorted");
 
         if (!header.sorted || header.sorted == 1)
         {
-            CSS.removeClass(header, "sortedDescending");
-            CSS.setClass(header, "sortedAscending");
+            Css.removeClass(header, "sortedDescending");
+            Css.setClass(header, "sortedAscending");
             header.setAttribute("aria-sort", "ascending");
 
             header.sorted = -1;
@@ -167,8 +167,8 @@ FirebugReps.Table = domplate(Firebug.Rep,
         }
         else
         {
-            CSS.removeClass(header, "sortedAscending");
-            CSS.setClass(header, "sortedDescending");
+            Css.removeClass(header, "sortedAscending");
+            Css.setClass(header, "sortedDescending");
             header.setAttribute("aria-sort", "descending")
 
             header.sorted = 1;
@@ -278,20 +278,20 @@ FirebugReps.Table = domplate(Firebug.Rep,
      */
     domFilter: function(object, name)
     {
-        var domMembers = DOM.getDOMMembers(object, name);
+        var domMembers = Dom.getDOMMembers(object, name);
 
         if (typeof(object) == "function")
         {
-            if (DOM.isDOMMember(object, name) && !Firebug.showDOMFuncs)
+            if (Dom.isDOMMember(object, name) && !Firebug.showDOMFuncs)
                 return false;
             else if (!Firebug.showUserFuncs)
                 return false;
         }
         else
         {
-            if (DOM.isDOMMember(object, name) && !Firebug.showDOMProps)
+            if (Dom.isDOMMember(object, name) && !Firebug.showDOMProps)
                 return false;
-            else if (DOM.isDOMConstant(object, name) && !Firebug.showDOMConstants)
+            else if (Dom.isDOMConstant(object, name) && !Firebug.showDOMConstants)
                 return false;
             else if (!Firebug.showUserProps)
                 return false;

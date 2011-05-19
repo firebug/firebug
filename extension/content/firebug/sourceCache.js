@@ -8,7 +8,7 @@ define([
     "firebug/http/httpLib",
     "firebug/lib/string",
 ],
-function(OBJECT, Firebug, XPCOM, URL, HTTP, STR) {
+function(Extend, Firebug, Xpcom, Url, Http, Str) {
 
 // ************************************************************************************************
 // Constants
@@ -25,7 +25,7 @@ const nsIHttpChannel = Ci.nsIHttpChannel;
 const IOService = Cc["@mozilla.org/network/io-service;1"];
 const ioService = IOService.getService(nsIIOService);
 const ScriptableInputStream = Cc["@mozilla.org/scriptableinputstream;1"];
-const chromeReg = XPCOM.CCSV("@mozilla.org/chrome/chrome-registry;1", "nsIToolkitChromeRegistry");
+const chromeReg = Xpcom.CCSV("@mozilla.org/chrome/chrome-registry;1", "nsIToolkitChromeRegistry");
 
 const LOAD_FROM_CACHE = nsIRequest.LOAD_FROM_CACHE;
 const LOAD_BYPASS_LOCAL_CACHE_IF_BUSY = nsICachingChannel.LOAD_BYPASS_LOCAL_CACHE_IF_BUSY;
@@ -40,7 +40,7 @@ Firebug.SourceCache = function(context)
     this.cache = {};
 };
 
-Firebug.SourceCache.prototype = OBJECT.extend(new Firebug.Listener(),
+Firebug.SourceCache.prototype = Extend.extend(new Firebug.Listener(),
 {
     isCached: function(url)
     {
@@ -79,28 +79,28 @@ Firebug.SourceCache.prototype = OBJECT.extend(new Firebug.Listener(),
             FBTrace.sysout("sourceCache.load: Not in the Firebug internal cache", urls);
         }
 
-        var d = URL.splitDataURL(url);  //TODO the RE should not have baseLine
+        var d = Url.splitDataURL(url);  //TODO the RE should not have baseLine
         if (d)
         {
             var src = d.encodedContent;
             var data = decodeURIComponent(src);
-            var lines = STR.splitLines(data)
+            var lines = Str.splitLines(data)
             this.cache[url] = lines;
 
             return lines;
         }
 
-        var j = URL.reJavascript.exec(url);
+        var j = Url.reJavascript.exec(url);
         if (j)
         {
-            var src = url.substring(URL.reJavascript.lastIndex);
-            var lines = STR.splitLines(src);
+            var src = url.substring(Url.reJavascript.lastIndex);
+            var lines = Str.splitLines(src);
             this.cache[url] = lines;
 
             return lines;
         }
 
-        var c = URL.reChrome.test(url);
+        var c = Url.reChrome.test(url);
         if (c)
         {
             if (Firebug.filterSystemURLs)
@@ -116,7 +116,7 @@ Firebug.SourceCache.prototype = OBJECT.extend(new Firebug.Listener(),
                     FBTrace.sysout("sourceCache found munged xpcnativewrapper url and set it to "+url+" m "+m+" m[0]:"+m[0]+" [1]"+m[1], m);
             }
 
-            var chromeURI = URL.makeURI(url);
+            var chromeURI = Url.makeURI(url);
             if (!chromeURI)
             {
                 if (FBTrace.DBG_CACHE)
@@ -130,7 +130,7 @@ Firebug.SourceCache.prototype = OBJECT.extend(new Firebug.Listener(),
             return this.loadFromLocal(localURI.spec);
         }
 
-        c = URL.reFile.test(url);
+        c = Url.reFile.test(url);
         if (c)
         {
             return this.loadFromLocal(url);
@@ -138,7 +138,7 @@ Firebug.SourceCache.prototype = OBJECT.extend(new Firebug.Listener(),
 
         if (url.indexOf('resource://') === 0)
         {
-            var fileURL = URL.resourceToFile(url);
+            var fileURL = Url.resourceToFile(url);
             return this.loadFromLocal(url);
         }
 
@@ -156,7 +156,7 @@ Firebug.SourceCache.prototype = OBJECT.extend(new Firebug.Listener(),
             FBTrace.sysout("sourceCache for " + this.context.getName() + " store url=" +
                 url + ((tempURL != url) ? " -> " + tempURL : ""), text);
 
-        var lines = STR.splitLines(text);
+        var lines = Str.splitLines(text);
         return this.storeSplitLines(tempURL, lines);
     },
 
@@ -172,10 +172,10 @@ Firebug.SourceCache.prototype = OBJECT.extend(new Firebug.Listener(),
     loadFromLocal: function(url)
     {
         // if we get this far then we have either a file: or chrome: url converted to file:
-        var src = HTTP.getResource(url);
+        var src = Http.getResource(url);
         if (src)
         {
-            var lines = STR.splitLines(src);
+            var lines = Str.splitLines(src);
             this.cache[url] = lines;
 
             return lines;
@@ -200,7 +200,7 @@ Firebug.SourceCache.prototype = OBJECT.extend(new Firebug.Listener(),
 
             if (method && (channel instanceof nsIHttpChannel))
             {
-                var httpChannel = XPCOM.QI(channel, nsIHttpChannel);
+                var httpChannel = Xpcom.QI(channel, nsIHttpChannel);
                 httpChannel.requestMethod = method;
             }
         }
@@ -219,7 +219,7 @@ Firebug.SourceCache.prototype = OBJECT.extend(new Firebug.Listener(),
                 var postData = getPostStream(this.context);
                 if (postData)
                 {
-                    var uploadChannel = XPCOM.QI(channel, nsIUploadChannel);
+                    var uploadChannel = Xpcom.QI(channel, nsIUploadChannel);
                     uploadChannel.setUploadStream(postData, "", -1);
                     if (FBTrace.DBG_CACHE) FBTrace.sysout("sourceCache.load uploadChannel set\n");
                 }
@@ -227,7 +227,7 @@ Firebug.SourceCache.prototype = OBJECT.extend(new Firebug.Listener(),
 
             if (channel instanceof nsICachingChannel)
             {
-                var cacheChannel = XPCOM.QI(channel, nsICachingChannel);
+                var cacheChannel = Xpcom.QI(channel, nsICachingChannel);
                 cacheChannel.cacheKey = getCacheKey(this.context);
                 if (FBTrace.DBG_CACHE) FBTrace.sysout("sourceCache.load cacheChannel key"+cacheChannel.cacheKey+"\n");
             }
@@ -240,8 +240,8 @@ Firebug.SourceCache.prototype = OBJECT.extend(new Firebug.Listener(),
                 var postData = getPostText(file, this.context);
                 if (postData)
                 {
-                    var postDataStream = HTTP.getInputStreamFromString(postData);
-                    var uploadChannel = XPCOM.QI(channel, nsIUploadChannel);
+                    var postDataStream = Http.getInputStreamFromString(postData);
+                    var uploadChannel = Xpcom.QI(channel, nsIUploadChannel);
                     uploadChannel.setUploadStream(postDataStream, "application/x-www-form-urlencoded", -1);
                     if (FBTrace.DBG_CACHE) FBTrace.sysout("sourceCache.load uploadChannel set\n");
                 }
@@ -269,8 +269,8 @@ Firebug.SourceCache.prototype = OBJECT.extend(new Firebug.Listener(),
 
         try
         {
-            var data = HTTP.readFromStream(stream, charset);
-            var lines = STR.splitLines(data);
+            var data = Http.readFromStream(stream, charset);
+            var lines = Str.splitLines(data);
             this.cache[url] = lines;
             return lines;
         }
@@ -318,16 +318,16 @@ Firebug.SourceCache.prototype = OBJECT.extend(new Firebug.Listener(),
     }
 });
 
-// xxxHonza getPostText and HTTP.readPostTextFromRequest are copied from
+// xxxHonza getPostText and Http.readPostTextFromRequest are copied from
 // net.js. These functions should be removed when this cache is
 // refactored due to the double-load problem.
 function getPostText(file, context)
 {
     if (!file.postText)
-        file.postText = HTTP.readPostTextFromPage(file.href, context);
+        file.postText = Http.readPostTextFromPage(file.href, context);
 
     if (!file.postText)
-        file.postText = HTTP.readPostTextFromRequest(file.request, context);
+        file.postText = Http.readPostTextFromRequest(file.request, context);
 
     return file.postText;
 }
@@ -339,13 +339,13 @@ function getPostStream(context)
     try
     {
         var webNav = context.browser.webNavigation;
-        var descriptor = XPCOM.QI(webNav, Ci.nsIWebPageDescriptor).currentDescriptor;
-        var entry = XPCOM.QI(descriptor, Ci.nsISHEntry);
+        var descriptor = Xpcom.QI(webNav, Ci.nsIWebPageDescriptor).currentDescriptor;
+        var entry = Xpcom.QI(descriptor, Ci.nsISHEntry);
 
         if (entry.postData)
         {
             // Seek to the beginning, or it will probably start reading at the end
-            var postStream = XPCOM.QI(entry.postData, Ci.nsISeekableStream);
+            var postStream = Xpcom.QI(entry.postData, Ci.nsISeekableStream);
             postStream.seek(0, 0);
             return postStream;
         }
@@ -360,8 +360,8 @@ function getCacheKey(context)
     try
     {
         var webNav = context.browser.webNavigation;
-        var descriptor = XPCOM.QI(webNav, Ci.nsIWebPageDescriptor).currentDescriptor;
-        var entry = XPCOM.QI(descriptor, Ci.nsISHEntry);
+        var descriptor = Xpcom.QI(webNav, Ci.nsIWebPageDescriptor).currentDescriptor;
+        var entry = Xpcom.QI(descriptor, Ci.nsISHEntry);
         return entry.cacheKey;
      }
      catch (exc)

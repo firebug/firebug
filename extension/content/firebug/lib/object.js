@@ -5,30 +5,30 @@ define([
     "firebug/lib/array",
     "firebug/lib/string",
 ],
-function(FBTrace, ARR, STR) {
+function(FBTrace, Arr, Str) {
 
 // ********************************************************************************************* //
 
-var OBJECT = {};
+var Extend = {};
 
 // ********************************************************************************************* //
 
-OBJECT.bind = function()  // fn, thisObject, args => thisObject.fn(arguments, args);
+Extend.bind = function()  // fn, thisObject, args => thisObject.fn(arguments, args);
 {
-   var args = ARR.cloneArray(arguments), fn = args.shift(), object = args.shift();
-   return function bind() { return fn.apply(object, ARR.arrayInsert(ARR.cloneArray(args), 0, arguments)); }
+   var args = Arr.cloneArray(arguments), fn = args.shift(), object = args.shift();
+   return function bind() { return fn.apply(object, Arr.arrayInsert(Arr.cloneArray(args), 0, arguments)); }
 };
 
-OBJECT.bindFixed = function() // fn, thisObject, args => thisObject.fn(args);
+Extend.bindFixed = function() // fn, thisObject, args => thisObject.fn(args);
 {
-    var args = ARR.cloneArray(arguments), fn = args.shift(), object = args.shift();
+    var args = Arr.cloneArray(arguments), fn = args.shift(), object = args.shift();
     return function() { return fn.apply(object, args); }
 };
 
-OBJECT.extend = function(l, r)
+Extend.extend = function(l, r)
 {
     if (!l || !r)
-        throw new Error("OBJECT.extend on undefined object");
+        throw new Error("Extend.extend on undefined object");
 
     var newOb = {};
     for (var n in l)
@@ -38,7 +38,7 @@ OBJECT.extend = function(l, r)
     return newOb;
 };
 
-OBJECT.descend = function(prototypeParent, childProperties)
+Extend.descend = function(prototypeParent, childProperties)
 {
     function protoSetter() {};
     protoSetter.prototype = prototypeParent;
@@ -50,11 +50,11 @@ OBJECT.descend = function(prototypeParent, childProperties)
 
 // ************************************************************************************************
 
-OBJECT.hasProperties = function(ob)
+Extend.hasProperties = function(ob)
 {
     try
     {
-        var obString = STR.safeToString(ob);
+        var obString = Str.safeToString(ob);
         if (obString === '[object StorageList]' || obString === '[xpconnect wrapped native prototype]')
             return true;
 
@@ -70,7 +70,7 @@ OBJECT.hasProperties = function(ob)
     catch (exc)
     {
         if (FBTrace.DBG_ERRORS)
-            FBTrace.sysout("lib.hasProperties("+STR.safeToString(ob)+") ERROR "+exc, exc);
+            FBTrace.sysout("lib.hasProperties("+Str.safeToString(ob)+") ERROR "+exc, exc);
 
         if (ob.wrappedJSObject)  // workaround for https://bugzilla.mozilla.org/show_bug.cgi?id=648560
             return true;
@@ -78,7 +78,7 @@ OBJECT.hasProperties = function(ob)
     return false;
 };
 
-OBJECT.getPrototype = function(ob)
+Extend.getPrototype = function(ob)
 {
     try
     {
@@ -88,18 +88,18 @@ OBJECT.getPrototype = function(ob)
 };
 
 
-OBJECT.getUniqueId = function()
+Extend.getUniqueId = function()
 {
     return this.getRandomInt(0,65536);
 }
 
-OBJECT.getRandomInt = function(min, max)
+Extend.getRandomInt = function(min, max)
 {
     return Math.floor(Math.random() * (max - min + 1) + min);
 }
 
 // Cross Window instanceof; type is local to this window
-OBJECT.XW_instanceof = function(obj, type)
+Extend.XW_instanceof = function(obj, type)
 {
     if (obj instanceof type)
         return true;  // within-window test
@@ -129,7 +129,7 @@ OBJECT.XW_instanceof = function(obj, type)
 
 // ********************************************************************************************* //
 
-return OBJECT;
+return Extend;
 
 // ********************************************************************************************* //
 });

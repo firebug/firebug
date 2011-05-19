@@ -9,7 +9,7 @@ var Ci = Components.interfaces;
 var Cc = Components.classes;
 var Cu = Components.utils;
 
-var XPCOM = {};
+var Xpcom = {};
 
 // ********************************************************************************************* //
 // XPCOM Utilities
@@ -19,7 +19,7 @@ var XPCOM = {};
  * @param {Object} cName Name of the service.
  * @param {Object} ifaceName Name of the required interface 
  */
-XPCOM.CCSV = function(cName, ifaceName)
+Xpcom.CCSV = function(cName, ifaceName)
 {
     try
     {
@@ -32,9 +32,9 @@ XPCOM.CCSV = function(cName, ifaceName)
             (exc.stack ? exc.stack : ""));
 
         if (!Cc[cName])
-            Cu.reportError("XPCOM.CCSV; No Components.classes entry for " + cName);
+            Cu.reportError("Xpcom.CCSV; No Components.classes entry for " + cName);
         else if (!Ci[ifaceName])
-            Cu.reportError("XPCOM.CCSV; No Components.interfaces entry for " + ifaceName);
+            Cu.reportError("Xpcom.CCSV; No Components.interfaces entry for " + ifaceName);
     }
 };
 
@@ -43,7 +43,7 @@ XPCOM.CCSV = function(cName, ifaceName)
  * @param {Object} cName Name of the component.
  * @param {Object} ifaceName Name of required interface.
  */
-XPCOM.CCIN = function(cName, ifaceName)
+Xpcom.CCIN = function(cName, ifaceName)
 {
     try
     {
@@ -54,9 +54,9 @@ XPCOM.CCIN = function(cName, ifaceName)
         Cu.reportError(cName + "@" + ifaceName + " FAILED " + exc);
 
         if (!Cc[cName])
-            Cu.reportError("XPCOM.CCIN; No Components.classes entry for " + cName);
+            Cu.reportError("Xpcom.CCIN; No Components.classes entry for " + cName);
         else if (!Ci[ifaceName])
-            Cu.reportError("XPCOM.CCIN; No Components.interfaces entry for " + ifaceName);
+            Cu.reportError("Xpcom.CCIN; No Components.interfaces entry for " + ifaceName);
     }
 };
 
@@ -65,7 +65,7 @@ XPCOM.CCIN = function(cName, ifaceName)
  * @param {Object} obj Object to query an interface for.
  * @param {Object} iface Required interface.
  */
-XPCOM.QI = function(obj, iface)
+Xpcom.QI = function(obj, iface)
 {
     try
     {
@@ -79,7 +79,7 @@ XPCOM.QI = function(obj, iface)
 
 // ********************************************************************************************* //
 
-return XPCOM;
+return Xpcom;
 
 // ********************************************************************************************* //
 });

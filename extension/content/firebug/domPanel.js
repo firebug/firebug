@@ -24,8 +24,8 @@ define([
     "firebug/breakpoint",
     "firebug/searchBox",
 ],
-function(OBJECT, Firebug, Domplate, FirebugReps, Locale, ToolsInterface, Events, Wrapper,
-    SourceLink, StackFrame, DOM, CSS, Search, STR, ARR, Persist, ToggleBranch, System, Menu) {
+function(Extend, Firebug, Domplate, FirebugReps, Locale, ToolsInterface, Events, Wrapper,
+    SourceLink, StackFrame, Dom, Css, Search, Str, Arr, Persist, ToggleBranch, System, Menu) {
 
 with (Domplate) {
 
@@ -45,7 +45,7 @@ const rxIdentifier = /^[$_A-Za-z][$_A-Za-z0-9]*$/
 
 // ************************************************************************************************
 
-Firebug.DOMModule = OBJECT.extend(Firebug.Module,
+Firebug.DOMModule = Extend.extend(Firebug.Module,
 {
     dispatchName: "domModule",
 
@@ -188,15 +188,15 @@ const DirTablePlate = domplate(Firebug.Rep,
         if (!Events.isLeftClick(event))
             return;
 
-        var row = DOM.getAncestorByClass(event.target, "memberRow");
-        var label = DOM.getAncestorByClass(event.target, "memberLabel");
+        var row = Dom.getAncestorByClass(event.target, "memberRow");
+        var label = Dom.getAncestorByClass(event.target, "memberLabel");
         var valueCell = row.getElementsByClassName("memberValueCell").item(0);
         var object = Firebug.getRepObject(event.target);
         var target = row.lastChild.firstChild;
-        var isString = CSS.hasClass(target,"objectBox-string");
+        var isString = Css.hasClass(target,"objectBox-string");
         var inValueCell = event.target == valueCell || event.target == target;
 
-        if (label && CSS.hasClass(row, "hasChildren") && !(isString && inValueCell))
+        if (label && Css.hasClass(row, "hasChildren") && !(isString && inValueCell))
         {
             var row = label.parentNode.parentNode;
             this.toggleRow(row);
@@ -228,7 +228,7 @@ const DirTablePlate = domplate(Firebug.Rep,
     toggleRow: function(row)
     {
         var level = parseInt(row.getAttribute("level"));
-        var table = DOM.getAncestorByClass(row, "domTable");
+        var table = Dom.getAncestorByClass(row, "domTable");
         var toggles = table.toggles;
         if (!toggles)
             toggles = table.repObject.toggles;
@@ -245,16 +245,16 @@ const DirTablePlate = domplate(Firebug.Rep,
 
         var context = domPanel.context;
         var target = row.lastChild.firstChild;
-        var isString = CSS.hasClass(target, "objectBox-string");
+        var isString = Css.hasClass(target, "objectBox-string");
 
-        if (CSS.hasClass(row, "opened"))
+        if (Css.hasClass(row, "opened"))
         {
-            CSS.removeClass(row, "opened");
+            Css.removeClass(row, "opened");
 
             if (isString)
             {
                 var rowValue = row.domObject.value
-                row.lastChild.firstChild.textContent = '"' + STR.cropMultipleLines(rowValue) + '"';
+                row.lastChild.firstChild.textContent = '"' + Str.cropMultipleLines(rowValue) + '"';
             }
             else
             {
@@ -289,7 +289,7 @@ const DirTablePlate = domplate(Firebug.Rep,
         }
         else
         {
-            CSS.setClass(row, "opened");
+            Css.setClass(row, "opened");
             if (isString)
             {
                 var rowValue = row.domObject.value
@@ -354,10 +354,10 @@ const DirTablePlate = domplate(Firebug.Rep,
         Events.cancelEvent(event);
 
         var rowHeader = event.target;
-        if (!CSS.hasClass(rowHeader, "memberRowHeader"))
+        if (!Css.hasClass(rowHeader, "memberRowHeader"))
             return;
 
-        var row = DOM.getAncestorByClass(event.target, "memberRow");
+        var row = Dom.getAncestorByClass(event.target, "memberRow");
         if (!row)
             return;
 
@@ -392,7 +392,7 @@ Firebug.DOMBasePanel = function() {}
 
 Firebug.DOMBasePanel.ToolboxPlate = ToolboxPlate;
 
-Firebug.DOMBasePanel.prototype = OBJECT.extend(Firebug.Panel,
+Firebug.DOMBasePanel.prototype = Extend.extend(Firebug.Panel,
 {
     tag: DirTablePlate.tableTag,
     dirTablePlate: DirTablePlate,
@@ -453,7 +453,7 @@ Firebug.DOMBasePanel.prototype = OBJECT.extend(Firebug.Panel,
         {
             // Special case for "arguments", which is not enumerable by for...in statement.
             if (isArguments(object))
-                object = ARR.cloneArray(object);
+                object = Arr.cloneArray(object);
 
             if (object instanceof window.StorageList)
             {
@@ -472,7 +472,7 @@ Firebug.DOMBasePanel.prototype = OBJECT.extend(Firebug.Panel,
                 if (contentView.hasOwnProperty('prototype') && properties.indexOf('prototype') == -1)
                     properties.push('prototype');
 
-                if (contentView.__proto__ && OBJECT.hasProperties(contentView.__proto__))  // XXXjjb I think it is always true ?
+                if (contentView.__proto__ && Extend.hasProperties(contentView.__proto__))  // XXXjjb I think it is always true ?
                     properties.push('__proto__');
             }
             catch(exc)
@@ -497,7 +497,7 @@ Firebug.DOMBasePanel.prototype = OBJECT.extend(Firebug.Panel,
             if (contentView.wrappedJSObject)
                 properties.push('wrappedJSObject');
 
-            var domMembers = DOM.getDOMMembers(object);
+            var domMembers = Dom.getDOMMembers(object);
             for (var i = 0; i < properties.length; i++)
             {
                 var name = properties[i];
@@ -531,7 +531,7 @@ Firebug.DOMBasePanel.prototype = OBJECT.extend(Firebug.Panel,
                 {
                     if (isClassFunction(val))
                         this.addMember(object, "userClass", userClasses, name, val, level, 0, context);
-                    else if (DOM.isDOMMember(object, name))
+                    else if (Dom.isDOMMember(object, name))
                         this.addMember(object, "domFunction", domFuncs, name, val, level, domMembers[name], context);
                     else
                         this.addMember(object, "userFunction", userFuncs, name, val, level, 0, context);
@@ -540,9 +540,9 @@ Firebug.DOMBasePanel.prototype = OBJECT.extend(Firebug.Panel,
                 {
                     if (isPrototype(name))
                         this.addMember(object, "proto", proto, name, val, level, 0, context);
-                    else if (DOM.isDOMMember(object, name))
+                    else if (Dom.isDOMMember(object, name))
                         this.addMember(object, "dom", domProps, name, val, level, domMembers[name], context);
-                    else if (DOM.isDOMConstant(object, name))
+                    else if (Dom.isDOMConstant(object, name))
                         this.addMember(object, "dom", domConstants, name, val, level, 0, context);
                     else
                         this.addMember(object, "user", userProps, name, val, level, 0, context);
@@ -606,21 +606,21 @@ Firebug.DOMBasePanel.prototype = OBJECT.extend(Firebug.Panel,
         var tag = rep.shortTag ? rep.shortTag : rep.tag;
 
         var valueType = typeof(value);
-        var hasChildren = OBJECT.hasProperties(value) && !(value instanceof FirebugReps.ErrorCopy) &&
+        var hasChildren = Extend.hasProperties(value) && !(value instanceof FirebugReps.ErrorCopy) &&
             (valueType == "function" || (valueType == "object" && value != null)
             || (valueType == "string" && value.length > Firebug.stringCropLength));
 
         // Special case for "arguments", which is not enumerable by for...in statement
-        // and so, OBJECT.hasProperties always returns false.
+        // and so, Extend.hasProperties always returns false.
         if (!hasChildren && value) // arguments will never be falsy if the arguments exist
             hasChildren = isArguments(value);
 
         if (value)
         {
-            var proto = OBJECT.getPrototype(value);
+            var proto = Extend.getPrototype(value);
             // Special case for functions with a protoype that has values
             if (valueType === "function" && proto)
-                hasChildren = hasChildren || OBJECT.hasProperties(proto);
+                hasChildren = hasChildren || Extend.hasProperties(proto);
         }
 
         if (value instanceof window.StorageList)
@@ -668,7 +668,7 @@ Firebug.DOMBasePanel.prototype = OBJECT.extend(Firebug.Panel,
         // Set prefix for user defined properties. This prefix help the user to distinguish
         // among simple properties and those defined using getter and/or (only a) setter.
         var o = this.getObjectView(object);
-        if (o && !DOM.isDOMMember(object, name) && (XPCNativeWrapper.unwrap(object) !== object) )
+        if (o && !Dom.isDOMMember(object, name) && (XPCNativeWrapper.unwrap(object) !== object) )
         {
             var getter = o.__lookupGetter__(name);
             var setter = o.__lookupSetter__(name);
@@ -937,7 +937,7 @@ Firebug.DOMBasePanel.prototype = OBJECT.extend(Firebug.Panel,
         if (member && member.readOnly)
             return;
 
-        if (CSS.hasClass(row, "watchNewRow"))
+        if (Css.hasClass(row, "watchNewRow"))
         {
             if (this.context.stopped)
             {
@@ -955,7 +955,7 @@ Firebug.DOMBasePanel.prototype = OBJECT.extend(Firebug.Panel,
                 row.innerHTML = Locale.$STR("warning.Console must be enabled");
             }
         }
-        else if (CSS.hasClass(row, "watchRow"))
+        else if (Css.hasClass(row, "watchRow"))
         {
             Firebug.Editor.startEditing(row, getRowName(row));
         }
@@ -972,7 +972,7 @@ Firebug.DOMBasePanel.prototype = OBJECT.extend(Firebug.Panel,
                 if (type == "undefined" || type == "number" || type == "boolean")
                     editValue = propValue;
                 else if (type == "string")
-                    editValue = "\"" + STR.escapeJS(propValue) + "\"";
+                    editValue = "\"" + Str.escapeJS(propValue) + "\"";
                 else if (propValue == null)
                     editValue = "null";
                 else if (object instanceof window.Window || object instanceof jsdIStackFrame)
@@ -987,7 +987,7 @@ Firebug.DOMBasePanel.prototype = OBJECT.extend(Firebug.Panel,
 
     deleteProperty: function(row)
     {
-        if (CSS.hasClass(row, "watchRow"))
+        if (Css.hasClass(row, "watchRow"))
             this.deleteWatch(row);
         else
         {
@@ -1081,12 +1081,12 @@ Firebug.DOMBasePanel.prototype = OBJECT.extend(Firebug.Panel,
     highlightRow: function(row)
     {
         if (this.highlightedRow)
-            CSS.cancelClassTimed(this.highlightedRow, "jumpHighlight", this.context);
+            Css.cancelClassTimed(this.highlightedRow, "jumpHighlight", this.context);
 
         this.highlightedRow = row;
 
         if (row)
-            CSS.setClassTimed(row, "jumpHighlight", this.context);
+            Css.setClassTimed(row, "jumpHighlight", this.context);
     },
 
     breakOnProperty: function(row)
@@ -1425,7 +1425,7 @@ Firebug.DOMBasePanel.prototype = OBJECT.extend(Firebug.Panel,
             Menu.optionMenu("ShowOwnProperties", "showOwnProperties", "ShowOwnPropertiesTooltip"),
             enumerablePropertiesItem,
             "-",
-            {label: "Refresh", command: OBJECT.bindFixed(this.rebuild, this, true) }
+            {label: "Refresh", command: Extend.bindFixed(this.rebuild, this, true) }
         ];
     },
 
@@ -1434,7 +1434,7 @@ Firebug.DOMBasePanel.prototype = OBJECT.extend(Firebug.Panel,
         if (FBTrace.DBG_DOM)
             FBTrace.sysout("dom.getContextMenuItems;", object);
 
-        var row = DOM.getAncestorByClass(target, "memberRow");
+        var row = Dom.getAncestorByClass(target, "memberRow");
 
         var items = [];
 
@@ -1444,15 +1444,15 @@ Firebug.DOMBasePanel.prototype = OBJECT.extend(Firebug.Panel,
             var rowObject = this.getRowObject(row);
             var rowValue = this.getRowPropertyValue(row);
 
-            var isWatch = CSS.hasClass(row, "watchRow");
+            var isWatch = Css.hasClass(row, "watchRow");
             var isStackFrame = rowObject instanceof jsdIStackFrame;
 
             items.push(
                 "-",
                 {label: "Copy Name",  // xxxJJB internationalize
-                    command: OBJECT.bindFixed(this.copyName, this, row) },
+                    command: Extend.bindFixed(this.copyName, this, row) },
                 {label: "Copy Path",
-                    command: OBJECT.bindFixed(this.copyPath, this, row) }
+                    command: Extend.bindFixed(this.copyPath, this, row) }
             );
 
             if (typeof(rowValue) == "string" || typeof(rowValue) == "number")
@@ -1460,39 +1460,39 @@ Firebug.DOMBasePanel.prototype = OBJECT.extend(Firebug.Panel,
                 // Functions already have a copy item in their context menu
                 items.push(
                     {label: "CopyValue",
-                        command: OBJECT.bindFixed(this.copyProperty, this, row) }
+                        command: Extend.bindFixed(this.copyProperty, this, row) }
                 );
             }
 
             items.push(
                 "-",
                 {label: isWatch ? "EditWatch" : (isStackFrame ? "EditVariable" : "EditProperty"),
-                    command: OBJECT.bindFixed(this.editProperty, this, row) }
+                    command: Extend.bindFixed(this.editProperty, this, row) }
             );
 
-            if (isWatch || (!isStackFrame && !DOM.isDOMMember(rowObject, rowName)))
+            if (isWatch || (!isStackFrame && !Dom.isDOMMember(rowObject, rowName)))
             {
                 items.push(
                     {label: isWatch ? "DeleteWatch" : "DeleteProperty",
-                        command: OBJECT.bindFixed(this.deleteProperty, this, row) }
+                        command: Extend.bindFixed(this.deleteProperty, this, row) }
                 );
             }
 
             var member = row ? row.domObject : null;
-            if (!DOM.isDOMMember(rowObject, rowName) && member && member.breakable)
+            if (!Dom.isDOMMember(rowObject, rowName) && member && member.breakable)
             {
                 items.push(
                     "-",
                     {label: "dom.label.breakOnPropertyChange", type: "checkbox",
                         checked: this.context.dom.breakpoints.findBreakpoint(rowObject, rowName),
-                        command: OBJECT.bindFixed(this.breakOnProperty, this, row)}
+                        command: Extend.bindFixed(this.breakOnProperty, this, row)}
                 );
             }
         }
 
         items.push(
             "-",
-            {label: "Refresh", command: OBJECT.bindFixed(this.rebuild, this, true) }
+            {label: "Refresh", command: Extend.bindFixed(this.rebuild, this, true) }
         );
 
         return items;
@@ -1513,7 +1513,7 @@ var DOMMainPanel = Firebug.DOMPanel = function () {};
 
 Firebug.DOMPanel.DirTable = DirTablePlate;
 
-DOMMainPanel.prototype = OBJECT.extend(Firebug.DOMBasePanel.prototype,
+DOMMainPanel.prototype = Extend.extend(Firebug.DOMBasePanel.prototype,
 {
     selectRow: function(row, target)
     {
@@ -1527,7 +1527,7 @@ DOMMainPanel.prototype = OBJECT.extend(Firebug.DOMBasePanel.prototype,
 
         // If the object is inside an array, look up its index
         var valueBox = row.lastChild.firstChild;
-        if (CSS.hasClass(valueBox, "objectBox-array"))
+        if (Css.hasClass(valueBox, "objectBox-array"))
         {
             var arrayIndex = FirebugReps.Arr.getItemIndex(target);
             this.pathToAppend.push(arrayIndex);
@@ -1547,7 +1547,7 @@ DOMMainPanel.prototype = OBJECT.extend(Firebug.DOMBasePanel.prototype,
         var repNode = Firebug.getRepNode(event.target);
         if (repNode)
         {
-            var row = DOM.getAncestorByClass(event.target, "memberRow");
+            var row = Dom.getAncestorByClass(event.target, "memberRow");
             if (row)
             {
                 this.selectRow(row, repNode);
@@ -1569,7 +1569,7 @@ DOMMainPanel.prototype = OBJECT.extend(Firebug.DOMBasePanel.prototype,
 
     initialize: function()
     {
-        this.onClick = OBJECT.bind(this.onClick, this);
+        this.onClick = Extend.bind(this.onClick, this);
 
         Firebug.DOMBasePanel.prototype.initialize.apply(this, arguments);
     },
@@ -1603,7 +1603,7 @@ DOMMainPanel.prototype = OBJECT.extend(Firebug.DOMBasePanel.prototype,
             row = this.currentSearch.findNext(true, undefined, reverse, Firebug.Search.isCaseSensitive(text));
         else
         {
-            function findRow(node) { return DOM.getAncestorByClass(node, "memberRow"); }
+            function findRow(node) { return Dom.getAncestorByClass(node, "memberRow"); }
             this.currentSearch = new Search.TextSearch(this.panelNode, findRow);
             row = this.currentSearch.find(text, reverse, Firebug.Search.isCaseSensitive(text));
         }
@@ -1614,7 +1614,7 @@ DOMMainPanel.prototype = OBJECT.extend(Firebug.DOMBasePanel.prototype,
             sel.removeAllRanges();
             sel.addRange(this.currentSearch.range);
 
-            DOM.scrollIntoCenterView(row, this.panelNode);
+            Dom.scrollIntoCenterView(row, this.panelNode);
 
             this.highlightRow(row);
             Events.dispatch(this.fbListeners, 'onDomSearchMatchFound', [this, text, row]);
@@ -1633,7 +1633,7 @@ DOMMainPanel.prototype = OBJECT.extend(Firebug.DOMBasePanel.prototype,
 
 function DOMSidePanel() {}
 
-DOMSidePanel.prototype = OBJECT.extend(Firebug.DOMBasePanel.prototype,
+DOMSidePanel.prototype = Extend.extend(Firebug.DOMBasePanel.prototype,
 {
     name: "domSide",
     parentPanel: "html",
@@ -1646,7 +1646,7 @@ DOMSidePanel.prototype = OBJECT.extend(Firebug.DOMBasePanel.prototype,
 
 Firebug.WatchPanel = function() {}
 
-Firebug.WatchPanel.prototype = OBJECT.extend(Firebug.DOMBasePanel.prototype,
+Firebug.WatchPanel.prototype = Extend.extend(Firebug.DOMBasePanel.prototype,
 {
     tag: DirTablePlate.watchTag,
 
@@ -1705,7 +1705,7 @@ Firebug.WatchPanel.prototype = OBJECT.extend(Firebug.DOMBasePanel.prototype,
         this.watches.splice(rowIndex, 1);
         this.rebuild(true);
 
-        this.context.setTimeout(OBJECT.bindFixed(function()
+        this.context.setTimeout(Extend.bindFixed(function()
         {
             this.showToolbox(null);
         }, this));
@@ -1718,12 +1718,12 @@ Firebug.WatchPanel.prototype = OBJECT.extend(Firebug.DOMBasePanel.prototype,
         var toolbox = this.getToolbox();
         if (row)
         {
-            if (CSS.hasClass(row, "editing"))
+            if (Css.hasClass(row, "editing"))
                 return;
 
             toolbox.watchRow = row;
 
-            var offset = DOM.getClientOffset(row);
+            var offset = Dom.getClientOffset(row);
             toolbox.style.top = offset.y + "px";
             this.panelNode.appendChild(toolbox);
         }
@@ -1747,7 +1747,7 @@ Firebug.WatchPanel.prototype = OBJECT.extend(Firebug.DOMBasePanel.prototype,
 
     onMouseDown: function(event)
     {
-        var watchNewRow = DOM.getAncestorByClass(event.target, "watchNewRow");
+        var watchNewRow = Dom.getAncestorByClass(event.target, "watchNewRow");
         if (watchNewRow)
         {
             this.editProperty(watchNewRow);
@@ -1757,17 +1757,17 @@ Firebug.WatchPanel.prototype = OBJECT.extend(Firebug.DOMBasePanel.prototype,
 
     onMouseOver: function(event)
     {
-        var watchRow = DOM.getAncestorByClass(event.target, "watchRow");
+        var watchRow = Dom.getAncestorByClass(event.target, "watchRow");
         if (watchRow)
             this.showToolbox(watchRow);
     },
 
     onMouseOut: function(event)
     {
-        if (DOM.isAncestor(event.relatedTarget, this.getToolbox()))
+        if (Dom.isAncestor(event.relatedTarget, this.getToolbox()))
             return;
 
-        var watchRow = DOM.getAncestorByClass(event.relatedTarget, "watchRow");
+        var watchRow = Dom.getAncestorByClass(event.relatedTarget, "watchRow");
         if (!watchRow)
             this.showToolbox(null);
     },
@@ -1783,9 +1783,9 @@ Firebug.WatchPanel.prototype = OBJECT.extend(Firebug.DOMBasePanel.prototype,
 
     initialize: function()
     {
-        this.onMouseDown = OBJECT.bind(this.onMouseDown, this);
-        this.onMouseOver = OBJECT.bind(this.onMouseOver, this);
-        this.onMouseOut = OBJECT.bind(this.onMouseOut, this);
+        this.onMouseDown = Extend.bind(this.onMouseDown, this);
+        this.onMouseOver = Extend.bind(this.onMouseOver, this);
+        this.onMouseOut = Extend.bind(this.onMouseOut, this);
 
         Firebug.DOMBasePanel.prototype.initialize.apply(this, arguments);
     },
@@ -1944,11 +1944,11 @@ DOMEditor.prototype = domplate(Firebug.InlineEditor.prototype,
         if (cancel || value == "")
             return;
 
-        var row = DOM.getAncestorByClass(target, "memberRow");
+        var row = Dom.getAncestorByClass(target, "memberRow");
         Events.dispatch(this.panel.fbListeners, 'onWatchEndEditing', [this.panel]);
         if (!row)
             this.panel.addWatch(value);
-        else if (CSS.hasClass(row, "watchRow"))
+        else if (Css.hasClass(row, "watchRow"))
             this.panel.setWatchValue(row, value);
         else
             this.panel.setPropertyValue(row, value);
@@ -1985,7 +1985,7 @@ function isPrototype(name)
 function getWatchRowIndex(row)
 {
     var index = -1;
-    for (; row && CSS.hasClass(row, "watchRow"); row = row.previousSibling)
+    for (; row && Css.hasClass(row, "watchRow"); row = row.previousSibling)
         ++index;
     return index;
 }
@@ -2092,14 +2092,14 @@ Firebug.DOMModule.BreakpointRep = domplate(Firebug.Rep,
     {
         Events.cancelEvent(event);
 
-        if (!CSS.hasClass(event.target, "closeButton"))
+        if (!Css.hasClass(event.target, "closeButton"))
             return;
 
         var bpPanel = Firebug.getElementPanel(event.target);
         var context = bpPanel.context;
 
         // Remove from list of breakpoints.
-        var row = DOM.getAncestorByClass(event.target, "breakpointRow");
+        var row = Dom.getAncestorByClass(event.target, "breakpointRow");
         var bp = row.repObject;
         context.dom.breakpoints.removeBreakpoint(bp.object, bp.propName);
 
@@ -2120,13 +2120,13 @@ Firebug.DOMModule.BreakpointRep = domplate(Firebug.Rep,
     onEnable: function(event)
     {
         var checkBox = event.target;
-        if (!CSS.hasClass(checkBox, "breakpointCheckbox"))
+        if (!Css.hasClass(checkBox, "breakpointCheckbox"))
             return;
 
         var bpPanel = Firebug.getElementPanel(event.target);
         var context = bpPanel.context;
 
-        var bp = DOM.getAncestorByClass(checkBox, "breakpointRow").repObject;
+        var bp = Dom.getAncestorByClass(checkBox, "breakpointRow").repObject;
         bp.checked = checkBox.checked;
 
         var domPanel = context.getPanel("dom", true);
@@ -2179,7 +2179,7 @@ Breakpoint.prototype =
                 {
                     self.context.breakingCause = {
                         title: Locale.$STR("dom.Break On Property"),
-                        message: STR.cropString(prop, 200),
+                        message: Str.cropString(prop, 200),
                         prevValue: oldval,
                         newValue: newval
                     };
@@ -2226,7 +2226,7 @@ function DOMBreakpointGroup()
     this.breakpoints = [];
 }
 
-DOMBreakpointGroup.prototype = OBJECT.extend(new Firebug.Breakpoint.BreakpointGroup(),
+DOMBreakpointGroup.prototype = Extend.extend(new Firebug.Breakpoint.BreakpointGroup(),
 {
     name: "domBreakpoints",
     title: Locale.$STR("dom.label.DOM Breakpoints"),
@@ -2255,7 +2255,7 @@ DOMBreakpointGroup.prototype = OBJECT.extend(new Firebug.Breakpoint.BreakpointGr
         if (bp)
         {
             bp.unwatchProperty();
-            ARR.remove(this.breakpoints, bp);
+            Arr.remove(this.breakpoints, bp);
         }
     },
 

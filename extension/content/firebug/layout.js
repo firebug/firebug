@@ -12,14 +12,14 @@ define([
     "firebug/firefox/menu",
     "firebug/editor",
 ],
-function(OBJECT, Firebug, Domplate, Locale, Events, CSS, DOM, XML, Menu) {
+function(Extend, Firebug, Domplate, Locale, Events, Css, Dom, Xml, Menu) {
 
 // ************************************************************************************************
 
 function LayoutPanel() {}
 
 with (Domplate) {
-LayoutPanel.prototype = OBJECT.extend(Firebug.Panel,
+LayoutPanel.prototype = Extend.extend(Firebug.Panel,
 {
     template: domplate(
     {
@@ -120,16 +120,16 @@ LayoutPanel.prototype = OBJECT.extend(Firebug.Panel,
 
     onMouseOver: function(event)
     {
-        var layoutBox = DOM.getAncestorByClass(event.target, "layoutBox");
+        var layoutBox = Dom.getAncestorByClass(event.target, "layoutBox");
         var boxFrame = layoutBox ? getBoxFrame(layoutBox) : null;
 
         if (this.highlightedBox)
-            CSS.removeClass(this.highlightedBox, "highlighted");
+            Css.removeClass(this.highlightedBox, "highlighted");
 
         this.highlightedBox = layoutBox;
 
         if (layoutBox)
-            CSS.setClass(layoutBox, "highlighted");
+            Css.setClass(layoutBox, "highlighted");
 
         Firebug.Inspector.highlightObject(this.selection, this.context, "boxModel", boxFrame);
     },
@@ -137,11 +137,11 @@ LayoutPanel.prototype = OBJECT.extend(Firebug.Panel,
     onMouseOut: function(event)
     {
         var nextTarget = event.relatedTarget;
-        if (nextTarget && DOM.getAncestorByClass(nextTarget, "layoutBox"))
+        if (nextTarget && Dom.getAncestorByClass(nextTarget, "layoutBox"))
             return;
 
         if (this.highlightedBox)
-            CSS.removeClass(this.highlightedBox, "highlighted");
+            Css.removeClass(this.highlightedBox, "highlighted");
 
         this.highlightedBox = null;
 
@@ -158,8 +158,8 @@ LayoutPanel.prototype = OBJECT.extend(Firebug.Panel,
 
     initialize: function()
     {
-        this.onMouseOver = OBJECT.bind(this.onMouseOver, this);
-        this.onMouseOut = OBJECT.bind(this.onMouseOut, this);
+        this.onMouseOver = Extend.bind(this.onMouseOver, this);
+        this.onMouseOut = Extend.bind(this.onMouseOut, this);
 
         Firebug.Panel.initialize.apply(this, arguments);
     },
@@ -196,14 +196,14 @@ LayoutPanel.prototype = OBJECT.extend(Firebug.Panel,
         if (!view)
             return this.panelNode.innerHTML = "";
 
-        var prev = DOM.getPreviousElement(element.previousSibling);
-        var next = DOM.getNextElement(element.nextSibling);
+        var prev = Dom.getPreviousElement(element.previousSibling);
+        var next = Dom.getNextElement(element.nextSibling);
 
         var style = view.getComputedStyle(element, "");
         var prevStyle = prev ? view.getComputedStyle(prev, "") : null;
         var nextStyle = next ? view.getComputedStyle(next, "") : null;
 
-        var args = CSS.getBoxFromStyles(style, element);
+        var args = Css.getBoxFromStyles(style, element);
 
         args.outerLeft = args.outerRight = args.outerTop = args.outerBottom = '';
         args.outerLeftMode = args.outerRightMode = args.outerTopMode = args.outerBottomMode = "";
@@ -213,7 +213,7 @@ LayoutPanel.prototype = OBJECT.extend(Firebug.Panel,
         args.position = position;
         args.outerLabel = '';
 
-        if (XML.isElementSVG(element) || XML.isElementMathML(element) || XML.isElementXUL(element))
+        if (Xml.isElementSVG(element) || Xml.isElementMathML(element) || Xml.isElementXUL(element))
         {
             var rect = element.getBoundingClientRect();
             // XXXjjb I believe this is incorrect. We should use the value as given by the call
@@ -346,7 +346,7 @@ LayoutEditor.prototype = domplate(Firebug.InlineEditor.prototype,
         if (!this.panel.selection.style)
             return;
 
-        var labelBox = DOM.getAncestorByClass(target, "layoutLabel");
+        var labelBox = Dom.getAncestorByClass(target, "layoutLabel");
         var layoutBox = getLayoutBox(labelBox);
 
         var boxFrame = getBoxFrame(layoutBox);
@@ -369,15 +369,15 @@ LayoutEditor.prototype = domplate(Firebug.InlineEditor.prototype,
             Firebug.Inspector.highlightObject(this.panel.selection, this.panel.context, "boxModel", boxFrame);
         }
 
-        if (CSS.hasClass(target, "layoutVerticalText"))
+        if (Css.hasClass(target, "layoutVerticalText"))
             target.innerHTML = getVerticalText(intValue);
         else
             target.innerHTML = intValue;
 
         if (previousValue == "0" && !!value)
-            CSS.removeClass(target.parentNode, "v0");
+            Css.removeClass(target.parentNode, "v0");
         else if (!value)
-            CSS.setClass(target.parentNode, "v0");
+            Css.setClass(target.parentNode, "v0");
     },
 
     endEditing: function(target, value, cancel)

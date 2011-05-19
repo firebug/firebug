@@ -13,7 +13,7 @@ define([
     "firebug/lib/options",
     "firebug/tabWatcher",  // TODO firebug/firefox/tabWatcher
 ],
-function factoryBrowser(FBL, Events, Firefox, ToolsInterface, WIN, WebApp, Options, TabWatcher) {
+function factoryBrowser(FBL, Events, Firefox, ToolsInterface, Win, WebApp, Options, TabWatcher) {
 
 // ************************************************************************************************
 // Browser
@@ -159,7 +159,7 @@ Browser.prototype.closeContext = function(context, userCommands)
         var index = this.contexts.indexOf(topWindow);
         if (index === -1)
         {
-            var loc = WIN.safeGetWindowLocation(topWindow);
+            var loc = Win.safeGetWindowLocation(topWindow);
             FBTrace.sysout("Browser.closeContext ERROR, no context matching "+loc);
         }
         else
@@ -170,7 +170,7 @@ Browser.prototype.closeContext = function(context, userCommands)
         // TEMP
         TabWatcher.unwatchWindow(topWindow);
 
-        var browser = WIN.getBrowserByWindow(topWindow);
+        var browser = Win.getBrowserByWindow(topWindow);
         if (!browser)
             throw new Error("Browser.closeContext ERROR, no browser for top most window of context "+context.getName());
 
@@ -194,7 +194,7 @@ Browser.prototype.getOrCreateContextByWebApp = function(webApp)
     if (!context)
     {
         var topWindow = webApp.getTopMostWindow();
-        var browser = WIN.getBrowserByWindow(topWindow);
+        var browser = Win.getBrowserByWindow(topWindow);
         if (FBTrace.DBG_WINDOWS)
         {
             FBTrace.sysout("-> tabWatcher.watchBrowser for: " + (topWindow.location));

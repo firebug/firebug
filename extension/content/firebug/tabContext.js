@@ -9,7 +9,7 @@ define([
     "firebug/lib/css",
     "firebug/plugin",
 ],
-function(OBJECT, ToolsInterface, Events, URL, WIN, CSS) {
+function(Extend, ToolsInterface, Events, Url, Win, Css) {
 
 // ************************************************************************************************
 // Constants
@@ -33,7 +33,7 @@ Firebug.TabContext = function(win, browser, chrome, persistedState)
 
     browser.__defineGetter__("chrome", function() { return Firebug.chrome; }); // backward compat
 
-    this.name = URL.normalizeURL(this.getWindowLocation().toString());
+    this.name = Url.normalizeURL(this.getWindowLocation().toString());
 
     this.windows = [];
     this.panelMap = {};
@@ -76,7 +76,7 @@ Firebug.TabContext.prototype =
 
     getWindowLocation: function()
     {
-        return WIN.safeGetWindowLocation(this.window);
+        return Win.safeGetWindowLocation(this.window);
     },
 
     getTitle: function()
@@ -92,17 +92,17 @@ Firebug.TabContext.prototype =
         if (!this.name || this.name === "about:blank")
         {
             var url = this.getWindowLocation().toString();
-            if (URL.isDataURL(url))
+            if (Url.isDataURL(url))
             {
-                var props = URL.splitDataURL(url);
+                var props = Url.splitDataURL(url);
                 if (props.fileName)
                     this.name = "data url from "+props.fileName;
             }
             else
             {
-                this.name = URL.normalizeURL(url);
+                this.name = Url.normalizeURL(url);
                 if (this.name === "about:blank" && this.window.frameElement)
-                    this.name += " in "+CSS.getElementCSSSelector(this.window.frameElement);
+                    this.name += " in "+Css.getElementCSSSelector(this.window.frameElement);
             }
         }
         return this.name;
@@ -252,7 +252,7 @@ Firebug.TabContext.prototype =
 
     addPanelType: function(url, title, parentPanel)
     {
-        url = URL.absoluteURL(url, this.window.location.href);
+        url = Url.absoluteURL(url, this.window.location.href);
         if (!url)
         {
             // XXXjoe Need some kind of notification to console that URL is invalid
@@ -447,7 +447,7 @@ Firebug.TabContext.prototype =
             delete this.refreshTimeout;
         }
 
-        this.refreshTimeout = this.setTimeout(OBJECT.bindFixed(function()
+        this.refreshTimeout = this.setTimeout(Extend.bindFixed(function()
         {
             var invalids = [];
 
@@ -613,7 +613,7 @@ Firebug.TabContext.prototype =
 function createPanelType(name, url, title, parentPanel)
 {
     var panelType = new Function("");
-    panelType.prototype = OBJECT.extend(new Firebug.PluginPanel(),
+    panelType.prototype = Extend.extend(new Firebug.PluginPanel(),
     {
         name: name,
         url: url,

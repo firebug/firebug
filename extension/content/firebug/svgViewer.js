@@ -9,7 +9,7 @@ define([
     "firebug/lib/css",
     "firebug/http/httpLib",
 ],
-function(OBJECT, Firebug, Domplate, Locale, XPCOM, CSS, HTTP) {
+function(Extend, Firebug, Domplate, Locale, Xpcom, Css, Http) {
 
 // ************************************************************************************************
 // Constants
@@ -28,7 +28,7 @@ var contentTypes =
  * tab wihin network request detail, a listener is registered into
  * <code>Firebug.NetMonitor.NetInfoBody</code> object.
  */
-Firebug.SVGViewerModel = OBJECT.extend(Firebug.Module,
+Firebug.SVGViewerModel = Extend.extend(Firebug.Module,
 {
     dispatchName: "svgViewer",
 
@@ -53,7 +53,7 @@ Firebug.SVGViewerModel = OBJECT.extend(Firebug.Module,
             FBTrace.sysout("svgviewer.initTabBody", infoBox);
 
         // If the response is SVG let's display a pretty preview.
-        if (this.isSVG(HTTP.safeGetContentType(file.request)))
+        if (this.isSVG(Http.safeGetContentType(file.request)))
         {
             Firebug.NetMonitor.NetInfoBody.appendTab(infoBox, "SVG",
                 Locale.$STR("svgviewer.tab.SVG"));
@@ -85,7 +85,7 @@ Firebug.SVGViewerModel = OBJECT.extend(Firebug.Module,
     {
         var tab = infoBox.selectedTab;
         var tabBody = infoBox.getElementsByClassName("netInfoSVGText").item(0);
-        if (!CSS.hasClass(tab, "netInfoSVGTab") || tabBody.updated)
+        if (!Css.hasClass(tab, "netInfoSVGTab") || tabBody.updated)
             return;
 
         tabBody.updated = true;
@@ -95,7 +95,7 @@ Firebug.SVGViewerModel = OBJECT.extend(Firebug.Module,
 
     insertSVG: function(parentNode, text)
     {
-        var parser = XPCOM.CCIN("@mozilla.org/xmlextras/domparser;1", "nsIDOMParser");
+        var parser = Xpcom.CCIN("@mozilla.org/xmlextras/domparser;1", "nsIDOMParser");
         var doc = parser.parseFromString(text, "text/xml");
         var root = doc.documentElement;
 

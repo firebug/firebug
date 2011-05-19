@@ -13,8 +13,8 @@ define([
     "firebug/lib/dom",
     "firebug/firefox/menu",
 ],
-function(OBJECT, Firebug, FirebugReps, ToolsInterface, Events, Wrapper, StackFrame,
-    CSS, ARR, DOM, Menu) {
+function(Extend, Firebug, FirebugReps, ToolsInterface, Events, Wrapper, StackFrame,
+    Css, Arr, Dom, Menu) {
 
 // ************************************************************************************************
 // Constants
@@ -31,7 +31,7 @@ const Ci = Components.interfaces;
  * panel.
  */
 Firebug.CallstackPanel = function() {}
-Firebug.CallstackPanel.prototype = OBJECT.extend(Firebug.Panel,
+Firebug.CallstackPanel.prototype = Extend.extend(Firebug.Panel,
 /** @lends Firebug.CallstackPanel */
 {
     name: "callstack",
@@ -189,9 +189,9 @@ Firebug.CallstackPanel.prototype = OBJECT.extend(Firebug.Panel,
 
     showStackTrace: function(trace)
     {
-        DOM.clearNode(this.panelNode);
+        Dom.clearNode(this.panelNode);
 
-        CSS.setClass(this.panelNode, "objectBox-stackTrace");
+        Css.setClass(this.panelNode, "objectBox-stackTrace");
 
         if (!trace)
             return;
@@ -240,10 +240,10 @@ Firebug.CallstackPanel.prototype = OBJECT.extend(Firebug.Panel,
 
     getContextMenuItems: function(nada, target)
     {
-        FBTrace.sysout("panel.getContextMenuItems", ARR.cloneArray(arguments));
+        FBTrace.sysout("panel.getContextMenuItems", Arr.cloneArray(arguments));
         var items = [
-            {label: "Expand All", command: OBJECT.bindFixed(this.onExpandAll, this, target)},
-            {label: "Collapse All", command: OBJECT.bindFixed(this.onCollapseAll, this, target)}
+            {label: "Expand All", command: Extend.bindFixed(this.onExpandAll, this, target)},
+            {label: "Collapse All", command: Extend.bindFixed(this.onCollapseAll, this, target)}
         ];
         return items;
     },
@@ -305,13 +305,13 @@ Referent.prototype =
      */
     getObjectPathExpression: function()
     {
-        this.objectPathExpr = ARR.cloneArray(this.names).reverse().join('.');
+        this.objectPathExpr = Arr.cloneArray(this.names).reverse().join('.');
         return this.objectPathExpr;
     },
 
     getObjectPathObjects: function()
     {
-        this.objChain = ARR.cloneArray(this.values);
+        this.objChain = Arr.cloneArray(this.values);
         this.objChain.push(this.object);
         this.objChain.reverse();
         return this.objChain;

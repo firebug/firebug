@@ -7,7 +7,7 @@ define([
     "firebug/lib/search",
     "firebug/firefox/system",
 ],
-function(OBJECT, Firebug, CSS, Search, System) {
+function(Extend, Firebug, Css, Search, System) {
 
 // ************************************************************************************************
 // Constants
@@ -23,7 +23,7 @@ const searchDelay = 150;
  * available for panels that have <code>searchable<code> property set to true (set to
  * false by default).
  */
-Firebug.Search = OBJECT.extend(Firebug.Module,
+Firebug.Search = Extend.extend(Firebug.Module,
 {
     dispatchName: "search",
 
@@ -49,9 +49,9 @@ Firebug.Search = OBJECT.extend(Firebug.Module,
         var searchBox = Firebug.chrome.$("fbSearchBox");
 
         if (text && text.length > 0)
-            CSS.setClass(searchBox, "fbSearchBox-attention");
+            Css.setClass(searchBox, "fbSearchBox-attention");
         else
-            CSS.removeClass(searchBox, "fbSearchBox-attention");
+            Css.removeClass(searchBox, "fbSearchBox-attention");
 
         searchBox.value = text;
     },
@@ -83,7 +83,7 @@ Firebug.Search = OBJECT.extend(Firebug.Module,
         // have to make sure to make them all visible unless the user is appending to the
         // last string, in which case it's ok to just search the set of visible nodes
         if (!panel.searchText || value == panel.searchText || value.indexOf(panel.searchText) != 0)
-            CSS.removeClass(panelNode, "searching");
+            Css.removeClass(panelNode, "searching");
 
         // Cancel the previous search to keep typing smooth
         clearTimeout(panelNode.searchTimeout);
@@ -97,12 +97,12 @@ Firebug.Search = OBJECT.extend(Firebug.Module,
             if (value)
             {
                 // Hides all nodes that didn't pass the filter
-                CSS.setClass(panelNode, "searching");
+                Css.setClass(panelNode, "searching");
             }
             else
             {
                 // Makes all nodes visible again
-                CSS.removeClass(panelNode, "searching");
+                Css.removeClass(panelNode, "searching");
             }
 
             panel.searchText = value;
@@ -121,12 +121,12 @@ Firebug.Search = OBJECT.extend(Firebug.Module,
                 if (value)
                 {
                     // Hides all nodes that didn't pass the filter
-                    CSS.setClass(panelNode, "searching");
+                    Css.setClass(panelNode, "searching");
                 }
                 else
                 {
                     // Makes all nodes visible again
-                    CSS.removeClass(panelNode, "searching");
+                    Css.removeClass(panelNode, "searching");
                 }
 
                 panel.searchText = value;
@@ -167,7 +167,7 @@ Firebug.Search = OBJECT.extend(Firebug.Module,
     searchOptionMenu: function(label, option)
     {
         return { label: label, checked: Firebug[option], option: option,
-            command: OBJECT.bindFixed(this.onToggleSearchOption, this, option) };
+            command: Extend.bindFixed(this.onToggleSearchOption, this, option) };
     },
 
     onToggleSearchOption: function(option)
@@ -191,7 +191,7 @@ Firebug.Search = OBJECT.extend(Firebug.Module,
         // Manage visibility of the search-box according to the searchable flag.
         var searchBox = Firebug.chrome.$("fbSearchBox");
         searchBox.value = "";
-        CSS.removeClass(searchBox, "fbSearchBox-attention");
+        Css.removeClass(searchBox, "fbSearchBox-attention");
 
         if (panel)
         {

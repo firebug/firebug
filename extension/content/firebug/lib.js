@@ -28,8 +28,8 @@ define([
     "firebug/lib/debug",
     "firebug/lib/keywords",
 ],
-function(OBJECT, XPCOM, Locale, Events, Options, Deprecated, Wrapper, URL, SourceLink,
-    StackFrame, CSS, DOM, HTTP, WIN, Search, XPATH, STR, XML, Persist, ARR, System, JSONLib,
+function(Extend, Xpcom, Locale, Events, Options, Deprecated, Wrapper, Url, SourceLink,
+    StackFrame, Css, Dom, Http, Win, Search, Xpath, Str, Xml, Persist, Arr, System, Json,
     Menu, ToggleBranch, Debug, Keywords) {
 
 // ********************************************************************************************* //
@@ -43,11 +43,11 @@ var FBL = window.FBL || {};  // legacy.js adds top.FBL, FIXME, remove after ifra
 
 // Backward compatibility with extensions
 // deprecated
-for (var p in OBJECT)
-    FBL[p] = OBJECT[p];
+for (var p in Extend)
+    FBL[p] = Extend[p];
 
-for (var p in XPCOM)
-    FBL[p] = XPCOM[p];
+for (var p in Xpcom)
+    FBL[p] = Xpcom[p];
 
 for (var p in Locale)
     FBL[p] = Locale[p];
@@ -58,47 +58,47 @@ for (var p in Events)
 for (var p in Wrapper)
     FBL[p] = Wrapper[p];
 
-for (var p in URL)
-    FBL[p] = URL[p];
+for (var p in Url)
+    FBL[p] = Url[p];
 
 for (var p in StackFrame)
     FBL[p] = StackFrame[p];
 
-for (var p in CSS)
-    FBL[p] = CSS[p];
+for (var p in Css)
+    FBL[p] = Css[p];
 
-for (var p in DOM)
-    FBL[p] = DOM[p];
+for (var p in Dom)
+    FBL[p] = Dom[p];
 
-for (var p in HTTP)
-    FBL[p] = HTTP[p];
+for (var p in Http)
+    FBL[p] = Http[p];
 
-for (var p in WIN)
-    FBL[p] = WIN[p];
+for (var p in Win)
+    FBL[p] = Win[p];
 
 for (var p in Search)
     FBL[p] = Search[p];
 
-for (var p in XPATH)
-    FBL[p] = XPATH[p];
+for (var p in Xpath)
+    FBL[p] = Xpath[p];
 
-for (var p in STR)
-    FBL[p] = STR[p];
+for (var p in Str)
+    FBL[p] = Str[p];
 
-for (var p in XML)
-    FBL[p] = XML[p];
+for (var p in Xml)
+    FBL[p] = Xml[p];
 
 for (var p in Persist)
     FBL[p] = Persist[p];
 
-for (var p in ARR)
-    FBL[p] = ARR[p];
+for (var p in Arr)
+    FBL[p] = Arr[p];
 
 for (var p in System)
     FBL[p] = System[p];
 
-for (var p in JSONLib)
-    FBL[p] = JSONLib[p];
+for (var p in Json)
+    FBL[p] = Json[p];
 
 for (var p in Menu)
     FBL[p] = Menu[p];
@@ -119,7 +119,7 @@ FBL.ToggleBranch = Menu.ToggleBranch;
 
 //FBL.ErrorCopy = FirebugReps.ErrorCopy;
 //FBL.ErrorMessageObj = FirebugReps.ErrorMessageObj;
-//FBL.EventCopy = DOM.EventCopy;
+//FBL.EventCopy = Dom.EventCopy;
 //FBL.PropertyObj = FirebugReps.PropertyObj;
 
 //FBL.NetFileLink = Firebug.NetMonitor.NetFileLink;
