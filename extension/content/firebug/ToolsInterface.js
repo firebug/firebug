@@ -57,8 +57,10 @@ ToolsInterface.Browser.prototype =
     getOrCreateContextByWebApp: function(webApp) { return ToolsInterface.mustOverride(); },
     /*
      * Stop debugging a WebApp and cause the destruction of a ToolsInterface.WebAppContext
+     * @param webAppContext metadata for the page that we are not going to debug any more
+     * @param userCommands true if the user of this UI said to close (vs algorithm)
      */
-    closeContext: function(webAppContext) { return ToolsInterface.mustOverride(); },
+    closeContext: function(webAppContext, userCommands) { return ToolsInterface.mustOverride(); },
 };
 
 ToolsInterface.WebApp.prototype =
@@ -69,6 +71,37 @@ ToolsInterface.WebApp.prototype =
      */
     getTopMostWindow: function() { return ToolsInterface.mustOverride(); },
 };
+
+ToolsInterface.toolTypes =
+{
+    types: [],
+    register: function(toolType)
+    {
+        this.types.push(toolType);
+        if (FBTrace.DBG_INITIALIZE)
+            FBTrace.sysout("ToolsInterface.toolTypes.register "+toolType, toolType);
+    },
+    unregister: function(toolType)
+    {
+        var index = this.types.indexOf(toolType);
+        this.typs.splice(index, 1);
+    },
+    eachToolType: function(fnOfToolType)
+    {
+        for (var i = 0; i < this.types.length; i++)
+        {
+            fnOfToolType(this.types[i]);
+        }
+    }
+}
+
+ToolsInterface.initialize = function()
+{
+    ToolsInterface.toolTypes.eachToolType(function (toolType)
+    {
+        toolType.initialize()
+    });
+}
 
 return ToolsInterface;
 

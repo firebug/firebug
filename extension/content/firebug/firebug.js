@@ -267,9 +267,6 @@ window.Firebug =
         // quitApplicationGranted event (platform is still running) and we call shutdown (Firebug isDetached).
         window.addEventListener('unload', shutdownFirebug, false);
 
-        Firebug.TabWatcher.initialize(this);
-        Firebug.TabWatcher.addListener(this);
-
         // Initial activation of registered panel types. All panel -> module dependencies
         // should be defined now (in onActivationChange).  Must be called after Firebug.TabWatcher is ready.
         Firebug.PanelActivation.activatePanelTypes(panelTypes);
@@ -339,7 +336,7 @@ window.Firebug =
         Firebug.StartButton.resetTooltip();
     },
 
-    toggleSuspend: function()  // TODO XULWindow
+    toggleSuspend: function()  // TODO XULWindow IN detached "Activate Firebug for the current website"
     {
         // getSuspended returns non-null value if Firebug is suspended.
         if (this.getSuspended())
@@ -677,9 +674,11 @@ window.Firebug =
             Firebug.chrome.selectPanel(); // select null causes hide() on selected
     },
 
-    closeFirebug: function(userCommand)  // this is really deactivate
+    closeFirebug: function(userCommands)  // this is really deactivate
     {
-        ToolsInterface.browser.closeContext(Firebug.currentContext);
+        if (!Firebug.currentContext)
+            throw new Error("closeFirebug ERROR: no Firebug.currentContext ");
+        ToolsInterface.browser.closeContext(Firebug.currentContext, userCommands);
         Firebug.StartButton.resetTooltip();
     },
 
@@ -699,10 +698,10 @@ window.Firebug =
 
         var webApp = ToolsInterface.browser.getCurrentSelectedWebApp();
 
-        //var context = ToolsInterface.browser.getContextByWebApp(webApp);
-        //if (!context)  // then we are not debugging the selected tab
-        var browser = Firefox.getCurrentBrowser();
-        if (!browser.showFirebug)  // then we are not debugging the selected tab
+        // var browser = Firefox.getCurrentBrowser();
+        //if (!browser.showFirebug)  // then we are not debugging the selected tab
+        var context = ToolsInterface.browser.getContextByWebApp(webApp);
+        if (!context)  // then we are not debugging the selected tab
         {
             context = ToolsInterface.browser.getOrCreateContextByWebApp(webApp);
             forceOpen = true;  // Be sure the UI is open for a newly created context
@@ -737,7 +736,6 @@ window.Firebug =
 
     unMinimize: function()
     {
-        this.updateActiveContexts(Firebug.currentContext);
         Firebug.setPlacement("inBrowser");
         Firebug.showBar(true);
     },
@@ -771,7 +769,7 @@ window.Firebug =
         Firebug.showBar(false);
 
         if (Firebug.currentContext)
-            ToolInterface.browser.closeContext(Firebug.currentContext);
+            ToolInterface.browser.closeContext(Firebug.currentContext, userCommands);
 
         // else the user closed Firebug external window while not looking at a debugged web page.
 
@@ -818,7 +816,7 @@ window.Firebug =
         var args = {
             FBL: FBL,
             Firebug: this,
-            browser: Firebug.currentContext.browser,
+            browser: Firebug.currentContext ? Firebug.currentContext.browser : null,
         };
         var win = Firefox.openWindow("Firebug", "chrome://firebug/content/firebug.xul", "", args);
 
@@ -1164,62 +1162,8 @@ window.Firebug =
         return Firebug.TabContext;
     },
 
-    shouldShowContext: function(context)
+    showContext: function(browser, context)
     {
-        return Events.dispatch2(modules, "shouldShowContext", [context]);
-    },
-
-    shouldCreateContext: function(browser, url, userCommands)
-    {
-        return Events.dispatch2(modules, "shouldCreateContext", [browser, url, userCommands]);
-    },
-
-    shouldNotCreateContext: function(browser, url, userCommands)
-    {
-        return Events.dispatch2(modules, "shouldNotCreateContext", [browser, url, userCommands]);
-    },
-
-    initContext: function(context, persistedState)  // called after a context is created.
-    {
-        context.panelName = context.browser.panelName;
-        if (context.browser.sidePanelNames)
-            context.sidePanelNames = context.browser.sidePanelNames;
-
-        if (FBTrace.DBG_ERRORS && !context.sidePanelNames)
-            FBTrace.sysout("firebug.initContext sidePanelNames:",context.sidePanelNames);
-
-        Events.dispatch(modules, "initContext", [context, persistedState]);
-
-        this.updateActiveContexts(context); // a newly created context is active
-
-        Firebug.chrome.setFirebugContext(context); // a newly created context becomes the default for the view
-    },
-
-    updateActiveContexts: function(context) // this should be the only method to call suspend and resume.
-    {
-        if (context)  // either a new context or revisiting an old one
-        {
-            if (Firebug.getSuspended())
-                Firebug.resume();  // This will cause onResumeFirebug for every context including this one.
-        }
-        else // this browser has no context
-        {
-            Firebug.suspend();
-        }
-
-        Firebug.StartButton.resetTooltip();
-    },
-
-    /*
-     * To be called from Firebug.TabWatcher only, see selectContext
-     */
-    showContext: function(browser, context)  // Firebug.TabWatcher showContext. null context means we don't debug that browser
-    {
-        Firebug.chrome.setFirebugContext(context); // the context becomes the default for its view
-        this.updateActiveContexts(context);  // resume, after setting Firebug.currentContext
-
-        Events.dispatch(modules, "showContext", [browser, context]);  // tell modules we may show UI
-
         // user wants detached but we are not yet
         if (Firebug.openInWindow && !Firebug.isDetached())
         {
@@ -1244,68 +1188,6 @@ window.Firebug =
             Firebug.chrome.syncResumeBox(context);
         else  // inBrowser
             this.showBar(context?true:false);
-
-    },
-
-    unwatchBrowser: function(browser)  // the context for this browser has been destroyed and removed
-    {
-        Firebug.updateActiveContexts(null);
-    },
-
-    // Either a top level or a frame, (interior window) for an exist context is seen by the tabWatcher.
-    watchWindow: function(context, win)
-    {
-        for (var panelName in context.panelMap)
-        {
-            var panel = context.panelMap[panelName];
-            panel.watchWindow(win);
-        }
-
-        Events.dispatch(modules, "watchWindow", [context, win]);
-    },
-
-    unwatchWindow: function(context, win)
-    {
-        for (var panelName in context.panelMap)
-        {
-            var panel = context.panelMap[panelName];
-            panel.unwatchWindow(win);
-        }
-        Events.dispatch(modules, "unwatchWindow", [context, win]);
-    },
-
-    loadedContext: function(context)
-    {
-        if (!context.browser.currentURI)
-            FBTrace.sysout("firebug.loadedContext problem browser ", context.browser);
-
-        Events.dispatch(modules, "loadedContext", [context]);
-    },
-
-    destroyContext: function(context, persistedState, browser)
-    {
-        if (!context)  // then we are called just to clean up
-            return;
-
-        Events.dispatch(modules, "destroyContext", [context, persistedState]);
-
-        if (Firebug.currentContext == context)
-        {
-            Firebug.chrome.clearPanels(); // disconnect the to-be-destroyed panels from the panelBar
-            Firebug.chrome.setFirebugContext(null);  // Firebug.currentContext is about to be destroyed
-        }
-
-        var browser = context.browser;
-        // Persist remnants of the context for restoration if the user reloads
-        browser.panelName = context.panelName;
-        browser.sidePanelNames = context.sidePanelNames;
-
-        // next the context is deleted and removed from the Firebug.TabWatcher, we clean up in unWatchBrowser
-    },
-
-    onSourceFileCreated: function(context, sourceFile)
-    {
-        Events.dispatch(modules, "onSourceFileCreated", [context, sourceFile]);
     },
 
     //*********************************************************************************************

@@ -181,7 +181,7 @@ require(config,
     "firebug/chrome",
     "firebug/lib",
     "firebug/firebug",
-    "arch/firebugadapter",
+    "arch/tools",
     "arch/javascripttool",
     "firebug/debugger",
     "firebug/traceModule",
@@ -213,7 +213,7 @@ require(config,
     "firebug/commandLineExposed",
     "firebug/consoleExposed"
 ],
-function(ChromeFactory, FBL, Firebug)
+function(ChromeFactory, FBL, Firebug, ToolsInterface)
 {
     try
     {
@@ -232,6 +232,8 @@ function(ChromeFactory, FBL, Firebug)
             window.legacyPatch(FBL, Firebug);
         }
 
+        ToolsInterface.initialize();
+
         if (FBTrace.DBG_MODULES)
             dumpDependencyTree(depTree);
     }
@@ -240,8 +242,8 @@ function(ChromeFactory, FBL, Firebug)
         if (FBTrace)
             FBTrace.sysout("Firebug main initialization ERROR "+exc, exc);
         window.dump("Firebug main initialization ERROR "+exc+"\n");
-        if (Component)
-            Component.utils.reportError(exc);
+        if (Components)
+            Components.utils.reportError(exc);
     }
 });
 

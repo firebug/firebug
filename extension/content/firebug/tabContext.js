@@ -2,7 +2,7 @@
 
 define([
     "firebug/lib/object",
-    "arch/tools",
+    "firebug/ToolsInterface",
     "firebug/lib/events",
     "firebug/lib/url",
     "firebug/firefox/window",

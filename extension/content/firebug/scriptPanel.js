@@ -1281,6 +1281,10 @@ Firebug.ScriptPanel.prototype = OBJECT.extend(Firebug.SourceBoxPanel,
     {
         if (FBTrace.DBG_CONSOLE || FBTrace.DBG_ACTIVATION)
             FBTrace.sysout("ScriptPanel.onActivationChanged; " + enable);
+        if (enable)
+            Firebug.Debugger.addObserver(this);
+        else
+            Firebug.Debugger.removeObserver(this);
     },
 
     // implements Tool

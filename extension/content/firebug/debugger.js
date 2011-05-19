@@ -2452,7 +2452,7 @@ Firebug.Debugger = OBJECT.extend(Firebug.ActivableModule,
     {
         if (name == "breakOnErrors")
             Firefox.getElementById("cmd_breakOnErrors").setAttribute("checked", value);
-
+/*
         if (name == "script.enableSites")
         {
             if (value)
@@ -2460,6 +2460,8 @@ Firebug.Debugger = OBJECT.extend(Firebug.ActivableModule,
             else
                 this.removeObserver(this.selfObserver);
         }
+        FBTrace.sysout("Debugger updateOption "+name+" = "+value+" hasObserver: "+this.hasObservers());
+        */
     },
 
     getObjectByURL: function(context, url)

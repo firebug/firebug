@@ -5,9 +5,10 @@ define([
     "firebug/firebug",
     "firebug/lib/options",
     "arch/browser",
-    "arch/compilationunit"
+    "arch/compilationunit",
+    "firebug/tabWatcher",
 ],
-function(ToolsInterface, Firebug, Options, Browser, CompilationUnit) {
+function(ToolsInterface, Firebug, Options, Browser, CompilationUnit, TabWatcher) {
 
 // ********************************************************************************************* //
 
@@ -16,24 +17,18 @@ Browser.onDebug = function()
     FBTrace.sysout.apply(FBTrace, arguments);
 }
 
+// All of this code needs to be called on initialize() not define()
+
 // Classes
 ToolsInterface.Browser = Browser;
 ToolsInterface.CompilationUnit = CompilationUnit;
 
-// Create a connection object
+
+
+//Create a connection object
 var browser = new Browser();
 Object.defineProperty(ToolsInterface, 'browser', {value: new Browser(), writable: false, enumerable: true});
-ToolsInterface.browser.addListener(Firebug);
 
-// Listen for preference changes. This way options module is not dependent on tools
-// xxxHonza: can this be in Browser interface?
-Options.addListener(
-{
-    updateOption: function(name, value)
-    {
-        ToolsInterface.browser.dispatch("updateOption", [name, value]);
-    }
-});
 
 FBTrace.sysout("tools.js has ToolsInterface "+ToolsInterface, ToolsInterface);
 
