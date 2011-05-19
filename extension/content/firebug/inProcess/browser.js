@@ -217,7 +217,8 @@ Browser.prototype.getCurrentSelectedWebApp = function()
     // Remote version must seek selected XUL window first.
     var browser = Firefox.getCurrentBrowser();
     var webApp = new ToolsInterface.WebApp(browser.contentWindow);
-    FBTrace.sysout("ToolsInterface.WebApp ", {browser: browser, webApp: webApp, ToolsInterface: ToolsInterface});
+    if (FBTrace.DBG_ACTIVATION)
+        FBTrace.sysout("ToolsInterface.WebApp ", {browser: browser, webApp: webApp, ToolsInterface: ToolsInterface});
     return webApp;
 }
 
@@ -652,12 +653,6 @@ var TabWatchListener =
      */
     showContext: function(browser, context)  // Firebug.TabWatcher showContext. null context means we don't debug that browser
     {
-        if (clearContextTimeout)
-        {
-            clearTimeout(clearContextTimeout);
-            clearContextTimeout = 0;
-        }
-
         Firebug.chrome.setFirebugContext(context); // the context becomes the default for its view
         ToolsInterface.browser.toggleResume(context);  // resume, after setting Firebug.currentContext
 
