@@ -4,7 +4,7 @@
  * The 'context' in this file is always 'Firebug.currentContext'
  */
 define([
-    "firebug/lib/object",
+    "firebug/lib/extend",
     "firebug/firefox/firefox",
     "firebug/lib/dom",
     "firebug/lib/css",

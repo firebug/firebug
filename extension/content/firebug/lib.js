@@ -1,7 +1,7 @@
 /* See license.txt for terms of usage */
 
 define([
-    "firebug/lib/object",
+    "firebug/lib/extend",
     "firebug/lib/xpcom",
     "firebug/lib/locale",
     "firebug/lib/events",

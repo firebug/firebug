@@ -2,7 +2,7 @@
 
 define([
     "firebug/lib",
-    "firebug/lib/object",
+    "firebug/lib/extend",
     "firebug/firebug",
     "firebug/firefox/firefox",
 ],

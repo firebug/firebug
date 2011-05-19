@@ -6,7 +6,7 @@
  */
 define([
     "firebug/lib",
-    "firebug/lib/object",
+    "firebug/lib/extend",
     "firebug/firefox/firefox",
     "firebug/ToolsInterface",
     "firebug/chrome",
