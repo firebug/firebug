@@ -1477,7 +1477,7 @@ Firebug.Debugger = Extend.extend(Firebug.ActivableModule,
     onEventScriptCreated: function(frame, outerScript, innerScripts)
     {
         if (FBTrace.DBG_EVENTS)
-            FBTrace.sysout("debugger.onEventScriptCreated script.fileName="+outerScript.fileName+"\n");
+            FBTrace.sysout("debugger.onEventScriptCreated script.fileName="+outerScript.fileName, {outerScript: outerScript, script: frame.script});
 
         var context = this.breakContext;
         delete this.breakContext;
@@ -1503,7 +1503,11 @@ Firebug.Debugger = Extend.extend(Firebug.ActivableModule,
         var lines = Str.splitLines(source);
 
         var urlDescribed = this.getDynamicURL(context, Url.normalizeURL(frame.script.fileName), lines, "event");
-        var url = urlDescribed.href;
+        var handlerName = outerScript.functionName;
+        if (handlerName)
+            var url = urlDescribed.href + '/' + handlerName;
+        else
+            var url = urlDescribed.href;
 
         context.sourceCache.invalidate(url);
         context.sourceCache.storeSplitLines(url, lines);
