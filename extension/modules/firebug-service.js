@@ -706,7 +706,6 @@ var fbs =
             this.osOut("FirebugService Starting, FBTrace should be up\n");
 
         this.profiling = false;
-        this.pauseDepth = 0;
 
         prefs = PrefService.getService(nsIPrefBranch2);
         fbs.prefDomain = "extensions.firebug";
@@ -863,7 +862,7 @@ var fbs =
                 FBTrace.sysout("fbs.registerDebugger have "+debuggers.length+
                     " after reg debuggr.debuggerName: "+debuggr.debuggerName+" we are "+
                     (enabledDebugger?"enabled":"not enabled")+" " + "On:"+(jsd?jsd.isOn:"no jsd")+
-                    " jsd.pauseDepth:"+(jsd?jsd.pauseDepth:"off")+" fbs.pauseDepth:"+fbs.pauseDepth);
+                    " jsd.pauseDepth:"+(jsd?jsd.pauseDepth:"off"));
         }
         else
         {
@@ -1636,7 +1635,6 @@ var fbs =
 
             while (jsd.pauseDepth > 0)  // unwind completely
                 jsd.unPause();
-            fbs.pauseDepth = 0;
 
             jsd.off();
         }
@@ -1660,9 +1658,8 @@ var fbs =
 
         if (rejection.length == 0)  // then everyone wants to pause
         {
-            if (fbs.pauseDepth == 0)  // don't pause if we are paused.
+            if (jsd.pauseDepth == 0)  // don't pause if we are paused.
             {
-                fbs.pauseDepth++;
                 jsd.pause();
                 fbs.unhookScripts();
             }
@@ -1671,28 +1668,26 @@ var fbs =
         }
         else // we don't want to pause
         {
-            while (fbs.pauseDepth > 0)  // make sure we are not paused.
-                fbs.unPause();
-            fbs.pauseDepth = 0;
+            fbs.unPause(true);
         }
+
         if (FBTrace.DBG_FBS_FINDDEBUGGER || FBTrace.DBG_ACTIVATION)
         {
-            FBTrace.sysout("fbs.pause depth "+(jsd.isOn?jsd.pauseDepth:"jsd OFF")+" fbs.pauseDepth: "+fbs.pauseDepth+" rejection "+rejection.length+" from "+clients.length+" clients ", rejection);
+            FBTrace.sysout("fbs.pause depth "+(jsd.isOn?jsd.pauseDepth:"jsd OFF")+" rejection "+rejection.length+" from "+clients.length+" clients ", rejection);
             // The next line gives NS_ERROR_NOT_AVAILABLE
             // FBTrace.sysout("fbs.pause depth "+(jsd.isOn?jsd.pauseDepth:"jsd OFF")+" rejection "+rejection.length+" from clients "+clients, rejection);
         }
-        return fbs.pauseDepth;
+        return jsd.pauseDepth;
     },
 
     unPause: function(force)
     {
-        if (fbs.pauseDepth > 0 || force)
+        if (jsd.pauseDepth > 0 || force)
         {
             if (FBTrace.DBG_ACTIVATION && (!jsd.isOn || jsd.pauseDepth == 0) )
                 FBTrace.sysout("fbs.unpause while jsd.isOn is "+jsd.isOn+
                     " and hooked scripts pauseDepth:"+jsd.pauseDepth);
 
-            fbs.pauseDepth--;
             fbs.hookScripts();
 
             if(jsd.pauseDepth)
@@ -1703,7 +1698,7 @@ var fbs =
 
             if (FBTrace.DBG_ACTIVATION)
                 FBTrace.sysout("fbs.unPause hooked scripts and unPaused, active:"+active+" depth "+
-                    depth+" jsd.isOn: "+jsd.isOn+" fbs.pauseDepth "+fbs.pauseDepth);
+                    depth+" jsd.isOn: "+jsd.isOn);
 
             dispatch(clients, "onJSDActivate", [active, "unpause depth"+jsd.pauseDepth]);
 
@@ -1711,15 +1706,17 @@ var fbs =
         else  // we were not paused.
         {
             if (FBTrace.DBG_ACTIVATION)
-                FBTrace.sysout("fbs.unPause no action: (jsd.pauseDepth || !jsd.isOn) = ("+
-                    jsd.pauseDepth+" || "+ !jsd.isOn+")"+" fbs.pauseDepth "+fbs.pauseDepth);
+            {
+                var noAction = "("+jsd.pauseDepth+" || "+ !jsd.isOn+")";
+                FBTrace.sysout("fbs.unPause no action: (jsd.pauseDepth || !jsd.isOn) = "+noAction);
+            }
         }
-        return fbs.pauseDepth;
+        return jsd.pauseDepth;
     },
 
     isJSDActive: function()
     {
-        return (jsd && jsd.isOn && (jsd.pauseDepth == 0) );
+        return (jsd && jsd.isOn && (jsd.pauseDepth === 0) );
     },
 
     // TODO delete once Chromebug works on BTI
