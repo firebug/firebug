@@ -105,6 +105,7 @@ function dumpDependencyTree(tree)
     }
 
     FBTrace.sysout("Firebug module dependency tree: ", result);
+    FBTrace.sysout("Firebug module list: ", depTree);
 }
 
 // ********************************************************************************************* //
