@@ -464,12 +464,14 @@ var FirebugChrome =
             contentSplitter.setAttribute("collapsed", !shouldShow);
     },
 
-    syncResumeBox: function(context)
+    syncResumeBox: function(context)  // only called when detached
     {
         var resumeBox = Firebug.chrome.$('fbResumeBox');
 
         if (!resumeBox) // the showContext is being called before the reattachContext, we'll get a second showContext
             return;
+
+        this.focus();  // bring to users attention
 
         if (context)
         {
@@ -752,7 +754,7 @@ var FirebugChrome =
          // across windows, but not FirebugChrome and Firebug.currentContext
          Firebug.currentContext = context;
 
-         if (FBTrace.DBG_WINDOWS || FBTrace.DBG_DISPATCH)
+         if (FBTrace.DBG_WINDOWS || FBTrace.DBG_DISPATCH || FBTrace.DBG_ACTIVATION)
              FBTrace.sysout("setFirebugContext "+(Firebug.currentContext?
                 Firebug.currentContext.getName():" **> NULL <** ") + " in "+win.location);
     },

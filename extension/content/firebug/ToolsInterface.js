@@ -97,6 +97,9 @@ ToolsInterface.toolTypes =
 
 ToolsInterface.initialize = function()
 {
+    if (FBTrace.DBG_INITIALIZE)
+        FBTrace.sysout("ToolsInterface.initialize "+ToolsInterface.toolTypes.types.length);
+
     ToolsInterface.toolTypes.eachToolType(function (toolType)
     {
         toolType.initialize()

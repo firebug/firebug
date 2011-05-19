@@ -6,8 +6,9 @@ define([
     "arch/tools",
     "firebug/lib/locale",
     "firebug/lib/url",
+    "firebug/tabWatcher",
 ],
-function(Extend, Firebug, ToolsInterface, Locale, Url) {
+function(Extend, Firebug, ToolsInterface, Locale, Url, TabWatcher) {
 
 // ************************************************************************************************
 // Constants
@@ -49,15 +50,15 @@ Firebug.Activation = Extend.extend(Firebug.Module,
     initializeUI: function()  // called once
     {
         Firebug.Module.initializeUI.apply(this, arguments);
-
-        Firebug.TabWatcher.addListener(this);
+        TabWatcher.initializeUI();
+        TabWatcher.addListener(this);
     },
 
     shutdown: function()
     {
         Firebug.Module.shutdown.apply(this, arguments);
 
-        Firebug.TabWatcher.removeListener(this.TabWatcherListener);
+        TabWatcher.removeListener(this);
 
         this.getAnnotationService().flush();
     },

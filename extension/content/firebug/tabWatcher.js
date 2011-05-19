@@ -62,14 +62,18 @@ Firebug.TabWatcher = Extend.extend(new Firebug.Listener(),
         if (Firebug.TraceModule)
             Firebug.TraceModule.addListener(TraceListener);
 
-        if (FBTrace.DBG_INITIALIZE)
-            FBTrace.sysout("-> tabWatcher initialize "+tabBrowser);
+        HttpRequestObserver.addObserver(TabWatcherHttpObserver, "firebug-http-event", false);
+    },
 
+    initializeUI: function()
+    {
         var tabBrowser = Firefox.getElementById("content");
+
+        if (FBTrace.DBG_INITIALIZE)
+            FBTrace.sysout("-> tabWatcher initializeUI "+tabBrowser);
+
         if (tabBrowser)
             tabBrowser.addProgressListener(TabProgressListener);
-
-        HttpRequestObserver.addObserver(TabWatcherHttpObserver, "firebug-http-event", false);
     },
 
     destroy: function()
