@@ -28,6 +28,7 @@ pref("extensions.firebug.DBG_ERRORS", false);       // error.js                 
 pref("extensions.firebug.DBG_ERRORLOG", false);       // error.js                                  /*@explore*/
 pref("extensions.firebug.DBG_FUNCTION_NAMES", false);  // heuristics for anon functions          /*@explore*/
 pref("extensions.firebug.DBG_EVAL", false);         // debugger.js and firebug-service.js        /*@explore*/
+pref("extensions.firebug.DBG_EVENTS", false);       // browser generated events
 pref("extensions.firebug.DBG_PANELS", false);       // panel selection                           /*@explore*/
 pref("extensions.firebug.DBG_CACHE", false);        // sourceCache                               /*@explore*/
 pref("extensions.firebug.DBG_CONSOLE", false);      // console                                   /*@explore*/
