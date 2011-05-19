@@ -615,6 +615,9 @@ window.Firebug =
         if (!Firebug.chrome)
             return;
 
+        // Distribute to modules.
+        Events.dispatch(this.modules, "updateOption", [name, value]);
+
         // Distribute to the current chrome.
         Firebug.chrome.updateOption(name, value);
 
