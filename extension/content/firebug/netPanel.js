@@ -386,12 +386,12 @@ Firebug.NetMonitor = Extend.extend(Firebug.ActivableModule,
         if (this.hasObservers())
         {
             NetHttpActivityObserver.registerObserver();
-            Firebug.TabWatcher.iterateContexts(monitorContext);
+            Firebug.connection.eachContext(monitorContext);
         }
         else
         {
             NetHttpActivityObserver.unregisterObserver();
-            Firebug.TabWatcher.iterateContexts(unmonitorContext);
+            Firebug.connection.eachContext(unmonitorContext);
         }
     },
 
@@ -407,7 +407,7 @@ Firebug.NetMonitor = Extend.extend(Firebug.ActivableModule,
             // Can't be here since resuming happens when the page is loaded and it's too
             // late since the first (document) requests already happened.
             //httpRequestObserver.registerObservers();
-            Firebug.TabWatcher.iterateContexts(monitorContext);
+            Firebug.connection.eachContext(monitorContext);
         }
 
     },
@@ -421,7 +421,7 @@ Firebug.NetMonitor = Extend.extend(Firebug.ActivableModule,
         if (Firebug.NetMonitor.isAlwaysEnabled())
         {
             //httpRequestObserver.unregisterObservers();  // XXXjjb Honza was called in firebug-http-observer.js on old disableXULWindow
-            Firebug.TabWatcher.iterateContexts(unmonitorContext);
+            Firebug.connection.eachContext(unmonitorContext);
         }
 
     },
@@ -591,11 +591,10 @@ NetPanel.prototype = Extend.extend(Firebug.ActivablePanel,
         if (name == "netFilterCategory")
         {
             Firebug.NetMonitor.syncFilterButtons(Firebug.chrome);
-            for (var i = 0; i < Firebug.TabWatcher.contexts.length; ++i)
+            Firebug.connection.eachContext(function syncFilters(context)
             {
-                var context = Firebug.TabWatcher.contexts[i];
                 Firebug.NetMonitor.onToggleFilter(context, value);
-            }
+            });
         }
     },
 
@@ -4991,7 +4990,7 @@ Firebug.NetMonitor.NetHttpObserver =
                 return;
 
             var win = Http.getWindowForRequest(subject);
-            var context = Firebug.TabWatcher.getContextByWindow(win);
+            var context = Firebug.connection.getContextByWindow(win);
 
             // The context doesn't have to exist yet. In such cases a temp Net context is
             // created within onModifyRequest.
@@ -5033,13 +5032,13 @@ Firebug.NetMonitor.NetHttpObserver =
             win == win.parent && !isRedirect)
         {
             var browser = Firefox.getBrowserForWindow(win);
-            if (!Firebug.TabWatcher.shouldCreateContext(browser, name, null))
+            /*if (!Firebug.TabWatcher.shouldCreateContext(browser, name, null))
             {
                 if (FBTrace.DBG_NET)
                     FBTrace.sysout("net.onModifyRequest; Activation logic says don't create temp context.");
                 return;
             }
-
+*/
             // Create a new network context prematurely.
             if (!contexts[tabId])
             {
@@ -5219,7 +5218,7 @@ Firebug.NetMonitor.NetHttpActivityObserver =
                 return;
         }
 
-        var context = Firebug.TabWatcher.getContextByWindow(win);
+        var context = Firebug.connection.getContextByWindow(win);
         var tabId = Win.getWindowProxyIdForWindow(win);
         if (!(tabId && win))
             return;

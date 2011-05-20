@@ -519,7 +519,7 @@ ChannelListenerProxy.prototype =
     {
         try
         {
-            return Firebug.TabWatcher.getContextByWindow(this.window);
+            return Firebug.connection.getContextByWindow(this.window);
         }
         catch (e)
         {

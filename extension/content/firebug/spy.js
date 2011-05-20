@@ -119,14 +119,15 @@ Firebug.Spy = Extend.extend(Firebug.Module,
         if (name == "showXMLHttpRequests")
         {
             var tach = value ? this.attachObserver : this.detachObserver;
-            for (var i = 0; i < Firebug.TabWatcher.contexts.length; ++i)
+
+            Firebug.connection.eachContext(function tachAll(context)
             {
                 var context = Firebug.TabWatcher.contexts[i];
                 Win.iterateWindows(context.window, function(win)
                 {
                     tach.apply(this, [context, win]);
                 });
-            }
+            });
         }
     },
 

@@ -863,11 +863,10 @@ Firebug.ConsolePanel.prototype = Extend.extend(Firebug.ActivablePanel,
         if (name == "consoleFilterTypes")
         {
             Firebug.Console.syncFilterButtons(Firebug.chrome);
-            for (var i = 0; i < Firebug.TabWatcher.contexts.length; ++i)
+            Firebug.connection.eachContext(function syncFilters(context)
             {
-                var context = Firebug.TabWatcher.contexts[i];
                 Firebug.Console.onToggleFilter(context, value);
-            }
+            });
         }
     },
 

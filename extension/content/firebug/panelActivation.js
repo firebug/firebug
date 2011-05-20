@@ -202,7 +202,7 @@ Firebug.PanelActivation = Extend.extend(Firebug.Module,
         {
             // Iterate all contexts and destroy all instances of the specified panel.
             var self = this;
-            Firebug.TabWatcher.iterateContexts(function(context) {
+            Firebug.connection.eachContext(function(context) {
                 context.destroyPanel(panelType, context.persistedState);
             });
         }

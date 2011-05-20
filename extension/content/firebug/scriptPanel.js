@@ -1510,6 +1510,7 @@ Firebug.ScriptPanel.WarningRep = domplate(Firebug.Rep,
 
     onFocusDebugger: function(event)
     {
+        /*
         Win.iterateBrowserWindows("navigator:browser", function(win)
         {
             return win.Firebug.TabWatcher.iterateContexts(function(context)
@@ -1521,6 +1522,7 @@ Firebug.ScriptPanel.WarningRep = domplate(Firebug.Rep,
                 }
             });
         });
+        */
         // No context is stopped
         if (FBTrace.DBG_UI_LOOP)
             FBTrace.sysout("script.onFocusDebugger FAILED");

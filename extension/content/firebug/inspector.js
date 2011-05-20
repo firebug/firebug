@@ -335,7 +335,6 @@ Firebug.Inspector = Extend.extend(Firebug.Module,
     inspectFromContextMenu: function(elt)
     {
         var panel;
-        //var context = this.inspectingContext || Firebug.TabWatcher.getContextByWindow(elt.ownerDocument.defaultView);
         var inspectingPanelName = "html";
 
         Firebug.toggleBar(true, inspectingPanelName);

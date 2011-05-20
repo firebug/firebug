@@ -126,6 +126,11 @@ Browser.prototype.clearAnnotations = function()
     Firebug.Activation.clearAnnotations();  // should trigger event onClearAnnotations
 }
 
+Browser.prototype.getWebAppByWindow = function(win)
+{
+    return new WebApp(win.top);
+}
+
 Browser.prototype.getContextByWebApp = function(webApp)
 {
     var topMost = webApp.getTopMostWindow();
@@ -138,6 +143,12 @@ Browser.prototype.getContextByWebApp = function(webApp)
         if (context.window === topMost)
             return context
     }
+}
+
+Browser.prototype.getContextByWindow = function(win)
+{
+    var webApp = this.getWebAppByWindow(win);
+    return this.getContextByWebApp(webApp);
 }
 
 Browser.prototype.setContextByWebApp = function(webApp, context)
@@ -404,9 +415,15 @@ Browser.prototype.dispatch = function(eventName, args)
  */
 Browser.prototype.disconnect = function()
 {
-};
+    this.removeListener(Firebug);
+    TabWatcher.destroy();
 
-//TODO: support to remove a listener
+    // Remove the listener after the Firebug.TabWatcher.destroy() method is called so,
+    // destroyContext event is properly dispatched to the Firebug object and
+    // consequently to all registered modules.
+    TabWatcher.removeListener(this);
+}
+
 
 // ************************************************************************************************
 // Private, subclasses may call these functions
@@ -741,15 +758,7 @@ Browser.prototype.connect = function ()
     TabWatcher.addListener(TabWatchListener);
 }
 
-Browser.prototype.disconnect = function()
-{
-    TabWatcher.destroy();
 
-    // Remove the listener after the Firebug.TabWatcher.destroy() method is called so,
-    // destroyContext event is properly dispatched to the Firebug object and
-    // consequently to all registered modules.
-    TabWatcher.removeListener(this);
-}
 
 return exports = Browser;
 

@@ -286,9 +286,7 @@ window.Firebug =
         Firebug.Options.shutdown();
         Firebug.Options.removeListener(this);
 
-        // xxxHonza: Firebug is registered as a listener within bti/tools.js
-        // I think it's wrong, should be done in the same modules as addListener.
-        Firebug.connection.removeListener(Firebug);
+        Firebug.connection.disconnect();
 
         Firebug.PanelActivation.deactivatePanelTypes(panelTypes);
 
@@ -299,13 +297,6 @@ window.Firebug =
     shutdownUI: function()  // TODO chrome.js
     {
         window.removeEventListener('unload', shutdownFirebug, false);
-
-        Firebug.TabWatcher.destroy();
-
-        // Remove the listener after the Firebug.TabWatcher.destroy() method is called so,
-        // destroyContext event is properly dispatched to the Firebug object and
-        // consequently to all registered modules.
-        Firebug.TabWatcher.removeListener(this);
 
         Events.dispatch(modules, "disable", [Firebug.chrome]);
     },
@@ -480,27 +471,6 @@ window.Firebug =
     {
         activableModules.push.apply(activableModules, arguments);
         this.registerModule.apply(this, arguments);
-    },
-
-    registerExtension: function()  // TODO remove
-    {
-        extensions.push.apply(extensions, arguments);
-
-        for (var i = 0; i < arguments.length; ++i)
-            Firebug.TabWatcher.addListener(arguments[i]);
-
-        for (var j = 0; j < arguments.length; j++)
-            Firebug.uiListeners.push(arguments[j]);
-    },
-
-    unregisterExtension: function()  // TODO remove
-    {
-        for (var i = 0; i < arguments.length; ++i)
-        {
-            Firebug.TabWatcher.removeListener(arguments[i]);
-            Arr.remove(Firebug.uiListeners, arguments[i]);
-            Arr.remove(extensions, arguments[i])
-        }
     },
 
     registerUIListener: function()
@@ -1237,7 +1207,7 @@ Firebug.getConsoleByGlobal = function getConsoleByGlobal(global)
 {
     try
     {
-        var context = Firebug.TabWatcher.getContextByGlobal(global);
+        var context = Firebug.connect.getContextByWindow(global);
         if (context)
         {
             var handler = Firebug.Console.injector.getConsoleHandler(context, global);

@@ -328,7 +328,7 @@ var Errors = Firebug.Errors = Extend.extend(Firebug.Module,
             return Firebug.currentContext; // no context for self
 
         var errorContext = null;
-        Firebug.TabWatcher.iterateContexts(
+        Firebug.connection.eachContext(
             function findContextByURL(context)
             {
                 if (FBTrace.DBG_ERRORLOG && FBTrace.DBG_CSS)
@@ -722,7 +722,7 @@ function getExceptionContext(context, object)
     var errorWin = getErrorWindow(object)
     if (errorWin)
     {
-        var errorContext = Firebug.TabWatcher.getContextByWindow(errorWin);
+        var errorContext = Firebug.connection.getContextByWindow(errorWin);
         if (FBTrace.DBG_ERRORLOG)
             FBTrace.sysout("errors.observe exception context:"+
                 (errorContext?errorContext.getName():"none")+" errorWin: "+errorWin+"\n");
