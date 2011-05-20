@@ -149,7 +149,8 @@ Browser.prototype.getContextByWebApp = function(webApp)
 Browser.prototype.getContextByWindow = function(win)
 {
     var webApp = this.getWebAppByWindow(win);
-    return this.getContextByWebApp(webApp);
+    if (webApp)
+        return this.getContextByWebApp(webApp);
 }
 /*
  * get local metadata for the remote WebApp if it exists
