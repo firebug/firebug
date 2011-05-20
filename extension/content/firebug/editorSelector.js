@@ -3,9 +3,8 @@
 define([
     "firebug/firebug",
     "firebug/lib/events",
-    "firebug/ToolsInterface"
 ],
-function(Firebug, Events, ToolsInterface) {
+function(Firebug, Events) {
 
 // ********************************************************************************************* //
 // Reusable code for modules that support editing

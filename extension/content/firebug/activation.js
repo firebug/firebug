@@ -3,12 +3,11 @@
 define([
     "firebug/lib/extend",
     "firebug/firebug",
-    "firebug/ToolsInterface",
     "firebug/lib/locale",
     "firebug/lib/url",
     "firebug/tabWatcher",
 ],
-function(Extend, Firebug, ToolsInterface, Locale, Url, TabWatcher) {
+function(Extend, Firebug, Locale, Url, TabWatcher) {
 
 // ************************************************************************************************
 // Constants
@@ -179,7 +178,7 @@ Firebug.Activation = Extend.extend(Firebug.Module,
     {
         this.getAnnotationService().clear();
         this.getAnnotationService().flush();
-        ToolsInterface.browser.dispatch("onClearAnnotations", []);
+        Firebug.connection.dispatch("onClearAnnotations", []);
     },
 
     getAnnotationService: function()

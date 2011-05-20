@@ -7,7 +7,6 @@ define([
     "firebug/reps",
     "firebug/lib/locale",
     "firebug/lib/wrapper",
-    "firebug/ToolsInterface",
     "firebug/lib/url",
     "firebug/lib/stackFrame",
     "firebug/lib/events",
@@ -16,7 +15,7 @@ define([
     "firebug/lib/string",
     "firebug/js/fbs",
 ],
-function(Extend, Firebug, Domplate, FirebugReps, Locale, Wrapper, ToolsInterface, Url,
+function(Extend, Firebug, Domplate, FirebugReps, Locale, Wrapper, Url,
     StackFrame, Events, Css, Dom, Str, FBS) {
 
     const Cc = Components.classes;
@@ -70,8 +69,8 @@ Firebug.Profiler = Extend.extend(Firebug.Module,
         if (!disabled)
         {
             // The profiler is available only if the Debugger and Console are activated
-            var debuggerTool = ToolsInterface.browser.getTool("script");
-            var consoleTool = ToolsInterface.browser.getTool("console");
+            var debuggerTool = Firebug.connection.getTool("script");
+            var consoleTool = Firebug.connection.getTool("console");
             disabled = (debuggerTool && !debuggerTool.getActive()) ||
                 (consoleTool && !consoleTool.getActive());
         }

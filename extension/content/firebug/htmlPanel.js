@@ -6,7 +6,6 @@ define([
     "firebug/domplate",
     "firebug/reps",
     "firebug/lib/locale",
-    "firebug/ToolsInterface",
     "firebug/lib/htmlLib",
     "firebug/lib/events",
     "firebug/sourceLink",
@@ -26,7 +25,7 @@ define([
     "firebug/searchBox",
     "firebug/insideOutBox",
 ],
-function(Extend, Firebug, Domplate, FirebugReps, Locale, ToolsInterface, HTMLLib, Events,
+function(Extend, Firebug, Domplate, FirebugReps, Locale, HTMLLib, Events,
     SourceLink, Css, Dom, Win, Xpath, Str, Xml, Arr, Persist, Menu, Url) { with (Domplate) {
 
 // ************************************************************************************************
@@ -55,13 +54,13 @@ Firebug.HTMLModule = Extend.extend(Firebug.Module,
     initialize: function(prefDomain, prefNames)
     {
         Firebug.Module.initialize.apply(this, arguments);
-        ToolsInterface.browser.addListener(this.DebuggerListener);
+        Firebug.connection.addListener(this.DebuggerListener);
     },
 
     shutdown: function()
     {
         Firebug.Module.shutdown.apply(this, arguments);
-        ToolsInterface.browser.removeListener(this.DebuggerListener);
+        Firebug.connection.removeListener(this.DebuggerListener);
     },
 
     initContext: function(context, persistedState)

@@ -1,9 +1,8 @@
 /* See license.txt for terms of usage */
 
 define([
-        "firebug/ToolsInterface"
         ],
-function webAppFactory(ToolsInterface)
+function webAppFactory()
 {
     var WebApp = function(win) {
         this.topMostWindow = win;
@@ -16,8 +15,6 @@ function webAppFactory(ToolsInterface)
             return this.topMostWindow;
         }
     }
-
-    ToolsInterface.WebApp = WebApp;
 
     return WebApp;
 });

@@ -6,7 +6,6 @@ define([
     "firebug/domplate",
     "firebug/lib/xpcom",
     "firebug/lib/locale",
-    "firebug/ToolsInterface",
     "firebug/lib/htmlLib",
     "firebug/lib/events",
     "firebug/lib/wrapper",
@@ -23,10 +22,11 @@ define([
     "firebug/toggleBranch",
     "firebug/eventMonitor",
     "firebug/firefox/menu",
+    "arch/compilationunit",
 ],
-function(Extend, Firebug, Domplate, Xpcom, Locale, ToolsInterface, HTMLLib, Events, Wrapper,
+function(Extend, Firebug, Domplate, Xpcom, Locale, HTMLLib, Events, Wrapper,
     Url, SourceLink, StackFrame, Css, Dom, Win, System, Xpath, Str, Xml, ToggleBranch,
-    EventMonitor, Menu) {
+    EventMonitor, Menu, CompilationUnit) {
 
 with (Domplate) {
 
@@ -1444,7 +1444,7 @@ FirebugReps.CompilationUnit = domplate(FirebugReps.SourceLink,
 
     supportsObject: function(object, type)
     {
-       return (object instanceof ToolsInterface.CompilationUnit) ? 2 : 0;
+       return (object instanceof CompilationUnit) ? 2 : 0;
     },
 
     persistObject: function(compilationUnit)

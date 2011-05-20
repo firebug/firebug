@@ -6,7 +6,6 @@ define([
     "firebug/firefox/firefox",
     "firebug/reps",
     "firebug/lib/locale",
-    "firebug/ToolsInterface",
     "firebug/lib/events",
     "firebug/lib/css",
     "firebug/lib/dom",
@@ -19,7 +18,7 @@ define([
     "firebug/searchBox",
     "firebug/errors",
 ],
-function(Extend, Firebug, Firefox, FirebugReps, Locale, ToolsInterface, Events, Css, Dom,
+function(Extend, Firebug, Firefox, FirebugReps, Locale, Events, Css, Dom,
     Win, Search, Xml, Menu, Options) {
 
 // ************************************************************************************************
@@ -212,17 +211,17 @@ Firebug.Console = Extend.extend(ActivableConsole,
 
         Firebug.ActivableModule.initialize.apply(this, arguments);
 
-        this.asTool = new ToolsInterface.Browser.Tool('console');
-        ToolsInterface.browser.addListener(this);
-        ToolsInterface.browser.registerTool(this.asTool);
+        this.asTool = new Firebug.connection.Tool('console');
+        Firebug.connection.addListener(this);
+        Firebug.connection.registerTool(this.asTool);
 
         this.syncFilterButtons(Firebug.chrome);
     },
 
     shutdown: function()
     {
-        ToolsInterface.browser.removeListener(this);
-        ToolsInterface.browser.unregisterTool(this.asTool);
+        Firebug.connection.removeListener(this);
+        Firebug.connection.unregisterTool(this.asTool);
 
         Firebug.ActivableModule.shutdown.apply(this, arguments);
     },

@@ -2,19 +2,17 @@
 
 define([
     "firebug/lib/extend",
-    "firebug/ToolsInterface",
+    "arch/compilationunit",
     "firebug/lib/events",
     "firebug/lib/url",
     "firebug/firefox/window",
     "firebug/lib/css",
     "firebug/plugin",
 ],
-function(Extend, ToolsInterface, Events, Url, Win, Css) {
+function(Extend, CompilationUnit, Events, Url, Win, Css) {
 
 // ************************************************************************************************
 // Constants
-
-var CompilationUnit = ToolsInterface.CompilationUnit;
 
 const throttleTimeWindow = 200;
 const throttleMessageLimit = 30;
@@ -130,7 +128,7 @@ Firebug.TabContext.prototype =
         if (FBTrace.DBG_COMPILATION_UNITS)
             FBTrace.sysout("onCompilationUnit "+url,[this, url, kind] );
 
-        ToolsInterface.browser.dispatch("onCompilationUnit", [this, url, kind]);
+        Firebug.connection.dispatch("onCompilationUnit", [this, url, kind]);
 
         // HACKs
         var compilationUnit = this.getCompilationUnit(url);
@@ -147,7 +145,7 @@ Firebug.TabContext.prototype =
         compilationUnit.getSourceLines(-1, -1, function onLines(compilationUnit,
             firstLineNumber, lastLineNumber, lines)
         {
-            ToolsInterface.browser.dispatch("onSourceLines", arguments);
+            Firebug.connection.dispatch("onSourceLines", arguments);
 
             if (FBTrace.DBG_COMPILATION_UNITS)
                 FBTrace.sysout("onSourceLines "+compilationUnit.getURL()+" "+lines.length+

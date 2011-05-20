@@ -8,7 +8,6 @@ define([
     "firebug/lib",
     "firebug/lib/extend",
     "firebug/firefox/firefox",
-    "firebug/ToolsInterface",
     "firebug/chrome",
     "firebug/domplate",
     "firebug/lib/options",
@@ -23,7 +22,7 @@ define([
     "firebug/lib/dom",
     "firebug/http/httpLib",
 ],
-function(FBL, Extend, Firefox, ToolsInterface, ChromeFactory, Domplate, Options, Locale, Events,
+function(FBL, Extend, Firefox, ChromeFactory, Domplate, Options, Locale, Events,
     Wrapper, Url, Css, Win, Str, Arr, Dom, Http) {
 
 // ********************************************************************************************* //
@@ -289,8 +288,7 @@ window.Firebug =
 
         // xxxHonza: Firebug is registered as a listener within bti/tools.js
         // I think it's wrong, should be done in the same modules as addListener.
-        ToolsInterface.browser.removeListener(Firebug);
-        ToolsInterface.browser.removeListener(ToolsInterface.JavaScript);//javascripttool.js
+        Firebug.connection.removeListener(Firebug);
 
         Firebug.PanelActivation.deactivatePanelTypes(panelTypes);
 
@@ -408,7 +406,7 @@ window.Firebug =
     getURLsForAllActiveContexts: function()
     {
         var contextURLSet = [];  // create a list of all unique activeContexts
-        ToolsInterface.browser.eachContext( function createActiveContextList(context)
+        Firebug.connection.eachContext( function createActiveContextList(context)
         {
             if (FBTrace.DBG_WINDOWS)
                 FBTrace.sysout("context "+context.getName());
@@ -682,7 +680,7 @@ window.Firebug =
     {
         if (!Firebug.currentContext)
             throw new Error("closeFirebug ERROR: no Firebug.currentContext ");
-        ToolsInterface.browser.closeContext(Firebug.currentContext, userCommands);
+        Firebug.connection.closeContext(Firebug.currentContext, userCommands);
         Firebug.StartButton.resetTooltip();
     },
 
@@ -700,11 +698,11 @@ window.Firebug =
         if (panelName)
             Firebug.chrome.selectPanel(panelName);
 
-        var webApp = ToolsInterface.browser.getCurrentSelectedWebApp();
-        var context = ToolsInterface.browser.getContextByWebApp(webApp);
+        var webApp = Firebug.connection.getCurrentSelectedWebApp();
+        var context = Firebug.connection.getContextByWebApp(webApp);
         if (!context)  // then we are not debugging the selected tab
         {
-            context = ToolsInterface.browser.getOrCreateContextByWebApp(webApp);
+            context = Firebug.connection.getOrCreateContextByWebApp(webApp);
             forceOpen = true;  // Be sure the UI is open for a newly created context
         }
         else  // we were debugging
@@ -819,7 +817,7 @@ window.Firebug =
             FBTrace.sysout("firebug; setChrome "+msg);
         }
         // reattach all contexts to the new chrome
-        ToolsInterface.browser.eachContext(function reattach(context)
+        Firebug.connection.eachContext(function reattach(context)
         {
             context.reattach(oldChrome, newChrome);
 
@@ -989,7 +987,7 @@ window.Firebug =
 
     eachPanel: function(callback)
     {
-        ToolsInterface.browser.eachContext(function iteratePanels(context)
+        Firebug.connection.eachContext(function iteratePanels(context)
         {
             var rc = context.eachPanelInContext(callback);
             if (rc)

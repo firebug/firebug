@@ -6,7 +6,8 @@ define([
     "firebug/firefox/firefox",
     "firebug/reps",
     "firebug/domplate",
-    "firebug/ToolsInterface",
+    "arch/javascripttool",
+    "arch/compilationunit",
     "firebug/lib/locale",
     "firebug/lib/events",
     "firebug/lib/url",
@@ -26,8 +27,9 @@ define([
     "firebug/searchBox",
     "firebug/sourceBox",
 ],
-function(Extend, Firebug, Firefox, FirebugReps, Domplate, ToolsInterface, Locale, Events, Url, SourceLink,
-    StackFrame, Css, Dom, Win, Search, Persist, System, Menu, Debug, Keywords) {
+function(Extend, Firebug, Firefox, FirebugReps, Domplate, JavaScriptTool, CompilationUnit,
+        Locale, Events, Url, SourceLink, StackFrame, Css, Dom, Win, Search, Persist,
+        System, Menu, Debug, Keywords) {
 
 // ********************************************************************************************* //
 // Script panel
@@ -322,9 +324,9 @@ Firebug.ScriptPanel.prototype = Extend.extend(Firebug.SourceBoxPanel,
                  this.selectedSourceBox);
 
         if (lineNode.getAttribute("breakpoint") == "true")
-            ToolsInterface.JavaScript.clearBreakpoint(this.context, href, lineNo);
+            JavaScriptTool.clearBreakpoint(this.context, href, lineNo);
         else
-            ToolsInterface.JavaScript.setBreakpoint(this.context, href, lineNo);
+            JavaScriptTool.setBreakpoint(this.context, href, lineNo);
     },
 
     toggleDisableBreakpoint: function(lineNo)
@@ -333,16 +335,16 @@ Firebug.ScriptPanel.prototype = Extend.extend(Firebug.SourceBoxPanel,
 
         var lineNode = this.selectedSourceBox.getLineNode(lineNo);
         if (lineNode.getAttribute("disabledBreakpoint") == "true")
-            ToolsInterface.JavaScript.enableBreakpoint(this.context, href, lineNo);
+            JavaScriptTool.enableBreakpoint(this.context, href, lineNo);
         else
-            ToolsInterface.JavaScript.disableBreakpoint(this.context, href, lineNo);
+            JavaScriptTool.disableBreakpoint(this.context, href, lineNo);
     },
 
     editBreakpointCondition: function(lineNo)
     {
         var sourceRow = this.selectedSourceBox.getLineNode(lineNo);
         var sourceLine = Dom.getChildByClass(sourceRow, "sourceLine");
-        var condition = ToolsInterface.JavaScript.getBreakpointCondition(this.context,
+        var condition = JavaScriptTool.getBreakpointCondition(this.context,
             this.location.getURL(), lineNo);
 
         if (condition)
@@ -437,7 +439,7 @@ Firebug.ScriptPanel.prototype = Extend.extend(Firebug.SourceBoxPanel,
             this.toggleDisableBreakpoint(lineNo);
         else if (Events.isControlClick(event) || Events.isMiddleClick(event))
         {
-            ToolsInterface.JavaScript.runUntil(this.context, compilationUnit, lineNo);
+            JavaScriptTool.runUntil(this.context, compilationUnit, lineNo);
             Events.cancelEvent(event);
         }
     },
@@ -532,7 +534,7 @@ Firebug.ScriptPanel.prototype = Extend.extend(Firebug.SourceBoxPanel,
         delete this.selection;
         Persist.persistObjects(this, state);
 
-        if (this.location instanceof ToolsInterface.CompilationUnit)
+        if (this.location instanceof CompilationUnit)
         {
              state.location = this.location;
         }
@@ -550,7 +552,7 @@ Firebug.ScriptPanel.prototype = Extend.extend(Firebug.SourceBoxPanel,
         }
 
         // xxxHonza: why this is here? I don't see addListener.
-        //ToolsInterface.browser.removeListener(this);
+        //Firebug.connection.removeListener(this);
 
         Firebug.SourceBoxPanel.destroy.apply(this, arguments);
     },
@@ -857,7 +859,7 @@ Firebug.ScriptPanel.prototype = Extend.extend(Firebug.SourceBoxPanel,
 
     supportsObject: function(object, type)
     {
-        if( object instanceof ToolsInterface.CompilationUnit
+        if( object instanceof CompilationUnit
             || (object instanceof SourceLink.SourceLink && object.type == "js")
             || typeof(object) == "function"
             || object instanceof StackFrame.StackFrame)
@@ -896,7 +898,7 @@ Firebug.ScriptPanel.prototype = Extend.extend(Firebug.SourceBoxPanel,
     {
         if (!compilationUnit)
             return;  // XXXjjb do we need to show a blank?
-        if ( !(compilationUnit instanceof ToolsInterface.CompilationUnit) )
+        if ( !(compilationUnit instanceof CompilationUnit) )
         {
             FBTrace.sysout("Script panel location not a CompilationUnit: ",compilationUnit);
             throw new Error("Script panel location not a CompilationUnit: "+compilationUnit);
@@ -933,7 +935,7 @@ Firebug.ScriptPanel.prototype = Extend.extend(Firebug.SourceBoxPanel,
         if (FBTrace.DBG_PANELS)
         {
             FBTrace.sysout("script updateSelection object:"+object+" of type "+typeof(object), object);
-            if (object instanceof ToolsInterface.CompilationUnit)
+            if (object instanceof CompilationUnit)
                 FBTrace.sysout("script updateSelection this.navigate(object)", object);
             else if (object instanceof SourceLink.SourceLink)
                 FBTrace.sysout("script updateSelection this.showSourceLink(object)", object);
@@ -945,7 +947,7 @@ Firebug.ScriptPanel.prototype = Extend.extend(Firebug.SourceBoxPanel,
                 FBTrace.sysout("script updateSelection this.showStackFrame(null)", object);
         }
 
-        if (object instanceof ToolsInterface.CompilationUnit)
+        if (object instanceof CompilationUnit)
             this.navigate(object);
         else if (object instanceof SourceLink.SourceLink)
             this.showSourceLink(object);
@@ -961,10 +963,10 @@ Firebug.ScriptPanel.prototype = Extend.extend(Firebug.SourceBoxPanel,
         if (compilationUnit.getURL().substr(0, 9) == "chrome://")
             return false;
 
-           if (compilationUnit.getKind() === ToolsInterface.CompilationUnit.EVAL && !this.showEvals)
+           if (compilationUnit.getKind() === CompilationUnit.EVAL && !this.showEvals)
                return false;
 
-        if (compilationUnit.getKind() === ToolsInterface.CompilationUnit.BROWSER_GENERATED && !this.showEvents)
+        if (compilationUnit.getKind() === CompilationUnit.BROWSER_GENERATED && !this.showEvents)
             return false;
 
         return true;
@@ -1114,14 +1116,6 @@ Firebug.ScriptPanel.prototype = Extend.extend(Firebug.SourceBoxPanel,
     getObjectDescription: function(compilationUnit)
     {
         var kind = compilationUnit.getKind();
-        if (kind == ToolsInterface.CompilationUnit.BROWSER_GENERATED)
-        {
-            var url = compilationUnit.getURL()
-            var i = url.indexOf("/event/seq");
-            var container = url.substr(0,i);
-            var split = Url.splitURLBase(container);  // path & name
-            return {path: split.path, name: split.name+url.substr(i) };
-        }
         return Url.splitURLBase(compilationUnit.getURL());
     },
 
@@ -1193,7 +1187,7 @@ Firebug.ScriptPanel.prototype = Extend.extend(Firebug.SourceBoxPanel,
         );
         if (hasBreakpoint)
         {
-            var isDisabled = ToolsInterface.JavaScript.isBreakpointDisabled(this.location.href, lineNo);
+            var isDisabled = JavaScriptTool.isBreakpointDisabled(this.location.href, lineNo);
             items.push(
                 {label: "DisableBreakpoint", type: "checkbox", checked: isDisabled,
                     command: Extend.bindFixed(this.toggleDisableBreakpoint, this, lineNo) }
@@ -1251,9 +1245,9 @@ Firebug.ScriptPanel.prototype = Extend.extend(Firebug.SourceBoxPanel,
     breakOnNext: function(enabled)
     {
         if (enabled)
-            ToolsInterface.JavaScript.breakOnNext(this.context, true);
+            JavaScriptTool.breakOnNext(this.context, true);
         else
-            ToolsInterface.JavaScript.breakOnNext(this.context, false);
+            JavaScriptTool.breakOnNext(this.context, false);
     },
 
     getBreakOnNextTooltip: function(armed)
@@ -1358,22 +1352,22 @@ Firebug.ScriptPanel.prototype = Extend.extend(Firebug.SourceBoxPanel,
 
     resume: function(context)
     {
-        ToolsInterface.JavaScript.resumeJavaScript(context);
+        JavaScriptTool.resumeJavaScript(context);
     },
 
     stepOver: function(context)
     {
-        ToolsInterface.JavaScript.stepOver(context);
+        JavaScriptTool.stepOver(context);
     },
 
     stepInto: function(context)
     {
-        ToolsInterface.JavaScript.stepInto(context);
+        JavaScriptTool.stepInto(context);
     },
 
     stepOut: function(context)
     {
-        ToolsInterface.JavaScript.stepOut(context);
+        JavaScriptTool.stepOut(context);
     },
 
     onStartDebugging: function(frame)

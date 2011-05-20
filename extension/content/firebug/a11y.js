@@ -5,7 +5,6 @@ define([
     "firebug/firebug",
     "firebug/domplate",
     "firebug/lib/locale",
-    "firebug/ToolsInterface",
     "firebug/lib/events",
     "firebug/lib/url",
     "firebug/lib/css",
@@ -15,7 +14,7 @@ define([
     "firebug/console",
     "firebug/infotip",
 ],
-function(Extend, Firebug, Domplate, Locale, ToolsInterface, Events, Url, Css, Dom, Xml, Xpath) {
+function(Extend, Firebug, Domplate, Locale, Events, Url, Css, Dom, Xml, Xpath) {
 
 // ************************************************************************************************
 // Constants
@@ -61,14 +60,14 @@ Firebug.A11yModel = Extend.extend(Firebug.Module,
         // mark ourselves disabled so we don't performDisable() if we are not enabled.
         Firebug.chrome.window.a11yEnabled = false;
 
-        ToolsInterface.browser.addListener(this);
+        Firebug.connection.addListener(this);
         Firebug.Console.addListener(this);
         Firebug.DOMModule.addListener(this);
     },
 
     shutdown: function()
     {
-        ToolsInterface.browser.removeListener(this);
+        Firebug.connection.removeListener(this);
         Firebug.Console.removeListener(this);
         Firebug.DOMModule.removeListener(this);
 

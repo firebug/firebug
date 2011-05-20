@@ -6,7 +6,6 @@ define([
     "firebug/domplate",
     "firebug/reps",
     "firebug/lib/locale",
-    "firebug/ToolsInterface",
     "firebug/lib/events",
     "firebug/lib/wrapper",
     "firebug/sourceLink",
@@ -24,7 +23,7 @@ define([
     "firebug/breakpoint",
     "firebug/searchBox",
 ],
-function(Extend, Firebug, Domplate, FirebugReps, Locale, ToolsInterface, Events, Wrapper,
+function(Extend, Firebug, Domplate, FirebugReps, Locale, Events, Wrapper,
     SourceLink, StackFrame, Dom, Css, Search, Str, Arr, Persist, ToggleBranch, System, Menu) {
 
 with (Domplate) {
@@ -54,7 +53,7 @@ Firebug.DOMModule = Extend.extend(Firebug.Module,
         Firebug.Module.initialize.apply(this, arguments);
 
         if (Firebug.Debugger)
-            ToolsInterface.browser.addListener(this.DebuggerListener);
+            Firebug.connection.addListener(this.DebuggerListener);
     },
 
     shutdown: function()
@@ -62,7 +61,7 @@ Firebug.DOMModule = Extend.extend(Firebug.Module,
         Firebug.Module.shutdown.apply(this, arguments);
 
         if (Firebug.Debugger)
-            ToolsInterface.browser.removeListener(this.DebuggerListener);
+            Firebug.connection.removeListener(this.DebuggerListener);
     },
 
     initContext: function(context, persistedState)

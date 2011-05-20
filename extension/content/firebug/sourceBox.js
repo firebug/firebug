@@ -3,19 +3,14 @@
 define([
     "firebug/lib/extend",
     "firebug/firebug",
-    "firebug/ToolsInterface",
+    "arch/compilationunit",
     "firebug/lib/events",
     "firebug/sourceLink",
     "firebug/lib/css",
     "firebug/lib/dom",
     "firebug/lib/string",
 ],
-function(Extend, Firebug, ToolsInterface, Events, SourceLink, Css, Dom, Str) {
-
-// ************************************************************************************************
-// Constants
-
-var CompilationUnit = ToolsInterface.CompilationUnit;
+function(Extend, Firebug, CompilationUnit, Events, SourceLink, Css, Dom, Str) {
 
 // ************************************************************************************************
 

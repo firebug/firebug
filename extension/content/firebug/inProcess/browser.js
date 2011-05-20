@@ -7,13 +7,12 @@ define([
     "firebug/lib",
     "firebug/lib/events",
     "firebug/firefox/firefox",
-    "firebug/ToolsInterface",
     "firebug/firefox/window",
     "arch/webApp",
     "firebug/lib/options",
     "firebug/tabWatcher",  // TODO firebug/firefox/tabWatcher
 ],
-function factoryBrowser(FBL, Events, Firefox, ToolsInterface, Win, WebApp, Options, TabWatcher) {
+function factoryBrowser(FBL, Events, Firefox, Win, WebApp, Options, TabWatcher) {
 
 // ************************************************************************************************
 // Browser
@@ -216,9 +215,9 @@ Browser.prototype.getCurrentSelectedWebApp = function()
 {
     // Remote version must seek selected XUL window first.
     var browser = Firefox.getCurrentBrowser();
-    var webApp = new ToolsInterface.WebApp(browser.contentWindow);
+    var webApp = new WebApp(browser.contentWindow);
     if (FBTrace.DBG_ACTIVATION)
-        FBTrace.sysout("ToolsInterface.WebApp ", {browser: browser, webApp: webApp, ToolsInterface: ToolsInterface});
+        FBTrace.sysout("WebApp ", {browser: browser, webApp: webApp});
     return webApp;
 }
 
@@ -643,7 +642,7 @@ var TabWatchListener =
 
         Firebug.chrome.setFirebugContext(context); // a newly created context becomes the default for the view
 
-        ToolsInterface.browser.toggleResume(context); // a newly created context is active
+        Firebug.connection.toggleResume(context); // a newly created context is active
     },
 
 
@@ -654,7 +653,7 @@ var TabWatchListener =
     showContext: function(browser, context)  // Firebug.TabWatcher showContext. null context means we don't debug that browser
     {
         Firebug.chrome.setFirebugContext(context); // the context becomes the default for its view
-        ToolsInterface.browser.toggleResume(context);  // resume, after setting Firebug.currentContext
+        Firebug.connection.toggleResume(context);  // resume, after setting Firebug.currentContext
 
         Events.dispatch(Firebug.modules, "showContext", [browser, context]);  // tell modules we may show UI
 
@@ -663,7 +662,7 @@ var TabWatchListener =
 
     unwatchBrowser: function(browser)  // the context for this browser has been destroyed and removed
     {
-        ToolsInterface.browser.toggleResume(false);
+        Firebug.connection.toggleResume(false);
     },
 
     // Either a top level or a frame, (interior window) for an exist context is seen by the tabWatcher.
@@ -724,12 +723,10 @@ var TabWatchListener =
 
 };
 
-ToolsInterface.toolTypes.register(Browser);
-
-Browser.initialize = function ()
+Browser.prototype.connect = function ()
 {
     // Events fired on browser are re-broadcast to Firebug.modules
-    ToolsInterface.browser.addListener(Firebug);
+    Firebug.connection.addListener(Firebug);
 
     //Listen for preference changes. This way options module is not dependent on tools
     //xxxHonza: can this be in Browser interface?
@@ -737,14 +734,14 @@ Browser.initialize = function ()
     {
         updateOption: function(name, value)
         {
-            ToolsInterface.browser.dispatch("updateOption", [name, value]);
+            Firebug.connection.dispatch("updateOption", [name, value]);
         }
     });
     TabWatcher.initialize();
     TabWatcher.addListener(TabWatchListener);
 }
 
-Browser.destroy = function()
+Browser.prototype.disconnect = function()
 {
     TabWatcher.destroy();
 

@@ -4,7 +4,7 @@ define([
     "firebug/lib/extend",
     "firebug/firebug",
     "firebug/reps",
-    "firebug/ToolsInterface",
+    "arch/javascripttool",
     "firebug/lib/events",
     "firebug/lib/wrapper",
     "firebug/lib/stackFrame",
@@ -13,7 +13,7 @@ define([
     "firebug/lib/dom",
     "firebug/firefox/menu",
 ],
-function(Extend, Firebug, FirebugReps, ToolsInterface, Events, Wrapper, StackFrame,
+function(Extend, Firebug, FirebugReps, JavaScriptTool, Events, Wrapper, StackFrame,
     Css, Arr, Dom, Menu) {
 
 // ************************************************************************************************
@@ -44,12 +44,12 @@ Firebug.CallstackPanel.prototype = Extend.extend(Firebug.Panel,
     {
         Firebug.Panel.initialize.apply(this, arguments);
 
-        ToolsInterface.browser.addListener(this);
+        Firebug.connection.addListener(this);
     },
 
     destroy: function(state)
     {
-        ToolsInterface.browser.removeListener(this);
+        Firebug.connection.removeListener(this);
 
         Firebug.Panel.destroy.apply(this, arguments);
     },
@@ -79,14 +79,14 @@ Firebug.CallstackPanel.prototype = Extend.extend(Firebug.Panel,
     {
         if (!this.location)
         {
-            this.location = StackFrame.buildStackTrace(ToolsInterface.JavaScript.Turn.currentFrame);
+            this.location = StackFrame.buildStackTrace(JavaScriptTool.Turn.currentFrame);
             this.updateLocation(this.location);
         } // then we are lazy
 
         if (FBTrace.DBG_STACK)
             FBTrace.sysout("callstack.show state: "+state+" this.location: "+this.location,
                 {state: state, panel: this,
-                  currentFrame: ToolsInterface.JavaScript.Turn.currentFrame});
+                  currentFrame: JavaScriptTool.Turn.currentFrame});
 
         if (state)
         {
@@ -134,7 +134,7 @@ Firebug.CallstackPanel.prototype = Extend.extend(Firebug.Panel,
     {
         if (!this.location) // then we are lazy
         {
-            this.location = StackFrame.buildStackTrace(ToolsInterface.JavaScript.Turn.currentFrame);
+            this.location = StackFrame.buildStackTrace(JavaScriptTool.Turn.currentFrame);
             this.updateLocation(this.location);
         }
 

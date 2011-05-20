@@ -214,7 +214,7 @@ require(config,
     "firebug/commandLineExposed",
     "firebug/consoleExposed"
 ],
-function(ChromeFactory, FBL, Firebug, ToolsInterface)
+function(ChromeFactory, FBL, Firebug)
 {
     try
     {
@@ -232,8 +232,6 @@ function(ChromeFactory, FBL, Firebug, ToolsInterface)
             FBTrace.sysout("firebug main.js; legacyPatch");
             window.legacyPatch(FBL, Firebug);
         }
-
-        ToolsInterface.initialize();
 
         if (FBTrace.DBG_MODULES)
             dumpDependencyTree(depTree);

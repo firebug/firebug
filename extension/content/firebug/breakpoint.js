@@ -7,7 +7,6 @@ define([
     "firebug/reps",
     "firebug/lib/locale",
     "firebug/lib/events",
-    "firebug/ToolsInterface",
     "firebug/sourceLink",
     "firebug/lib/stackFrame",
     "firebug/lib/css",
@@ -18,7 +17,7 @@ define([
     "firebug/js/fbs",
     "firebug/editor",
 ],
-function(Extend, Firebug, Domplate, FirebugReps, Locale, Events, ToolsInterface, SourceLink,
+function(Extend, Firebug, Domplate, FirebugReps, Locale, Events, SourceLink,
     StackFrame, Css, Dom, Str, Arr, Menu, FBS) {
 
 // ************************************************************************************************
@@ -361,7 +360,7 @@ Firebug.Breakpoint.BreakpointsPanel.prototype = Extend.extend(Firebug.Panel,
             groups.push({name: "monitors", title: Locale.$STR("LoggedFunctions"),
                 breakpoints: monitors});
 
-        ToolsInterface.browser.dispatch("getBreakpoints", [this.context, groups]);
+        Firebug.connection.dispatch("getBreakpoints", [this.context, groups]);
 
         if (groups.length)
             Firebug.Breakpoint.BreakpointListRep.tag.replace({groups: groups}, this.panelNode);

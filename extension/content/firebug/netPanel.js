@@ -6,7 +6,6 @@ define([
     "firebug/firefox/firefox",
     "firebug/domplate",
     "firebug/lib/xpcom",
-    "firebug/ToolsInterface",
     "firebug/http/requestObserver",
     "firebug/lib/locale",
     "firebug/lib/events",
@@ -37,7 +36,7 @@ define([
     "firebug/searchBox",
     "firebug/errors",
 ],
-function(Extend, Firebug, Firefox, Domplate, Xpcom, ToolsInterface, HttpRequestObserver, Locale,
+function(Extend, Firebug, Firefox, Domplate, Xpcom, HttpRequestObserver, Locale,
     Events, Options, Url, SourceLink, Http, StackFrame, Css, Dom, Win, Search, Str, Xml,
     Json, Arr, Persist, ToggleBranch, System, Menu, DragDrop) {
 
@@ -256,7 +255,7 @@ Firebug.NetMonitor = Extend.extend(Firebug.ActivableModule,
         Firebug.NetMonitor.NetHttpObserver.registerObserver();
         NetHttpActivityObserver.registerObserver();
 
-        ToolsInterface.browser.addListener(this.DebuggerListener);
+        Firebug.connection.addListener(this.DebuggerListener);
     },
 
     shutdown: function()
@@ -270,7 +269,7 @@ Firebug.NetMonitor = Extend.extend(Firebug.ActivableModule,
         Firebug.NetMonitor.NetHttpObserver.unregisterObserver();
         NetHttpActivityObserver.unregisterObserver();
 
-        ToolsInterface.browser.removeListener(this.DebuggerListener);
+        Firebug.connection.removeListener(this.DebuggerListener);
     },
 
     initContext: function(context, persistedState)

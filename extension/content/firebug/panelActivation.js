@@ -4,13 +4,12 @@ define([
     "firebug/lib/extend",
     "firebug/firebug",
     "firebug/firefox/firefox",
-    "firebug/ToolsInterface",
     "firebug/lib/locale",
     "firebug/domplate",
     "firebug/lib/url",
     "firebug/lib/dom",
 ],
-function(Extend, Firebug, Firefox, ToolsInterface, Locale, Domplate, Url, Dom) {
+function(Extend, Firebug, Firefox, Locale, Domplate, Url, Dom) {
 
 // ************************************************************************************************
 // Constants
@@ -42,7 +41,7 @@ Firebug.PanelActivation = Extend.extend(Firebug.Module,
     initialize: function()
     {
         prefs.addObserver(Firebug.Options.getPrefDomain(), this, false);
-        ToolsInterface.browser.addListener(this);
+        Firebug.connection.addListener(this);
     },
 
     initializeUI: function()
@@ -59,7 +58,7 @@ Firebug.PanelActivation = Extend.extend(Firebug.Module,
     shutdown: function()
     {
         prefs.removeObserver(Firebug.Options.getPrefDomain(), this, false);
-        ToolsInterface.browser.removeListener(this);
+        Firebug.connection.removeListener(this);
     },
 
     showPanel: function(browser, panel)
@@ -224,7 +223,7 @@ Firebug.PanelActivation = Extend.extend(Firebug.Module,
 
     clearAnnotations: function()
     {
-        ToolsInterface.browser.clearAnnotations();
+        Firebug.connection.clearAnnotations();
     },
 
     toggleAll: function(state)

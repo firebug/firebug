@@ -4,7 +4,7 @@ define([
     "firebug/lib/extend",
     "firebug/firebug",
     "firebug/firefox/firefox",
-    "firebug/ToolsInterface",
+    "arch/compilationunit",
     "firebug/lib/xpcom",
     "firebug/reps",
     "firebug/lib/locale",
@@ -21,12 +21,8 @@ define([
     "firebug/js/fbs",
     "firebug/errors",
 ],
-function(Extend, Firebug, Firefox, ToolsInterface, Xpcom, FirebugReps, Locale, HttpRequestObserver,
+function(Extend, Firebug, Firefox, CompilationUnit, Xpcom, FirebugReps, Locale, HttpRequestObserver,
     Wrapper, Url, SourceLink, StackFrame, Css, Win, Str, Arr, Debug, FBS) {
-
-// ********************************************************************************************* //
-
-var CompilationUnit = ToolsInterface.CompilationUnit;
 
 // ********************************************************************************************* //
 // Constants
@@ -280,7 +276,7 @@ Firebug.Debugger = Extend.extend(Firebug.ActivableModule,
         context.currentFrame = frame;  // the frame we show to user, depends on selection
         context.stopped = true;
 
-        var hookReturn = ToolsInterface.browser.dispatch("onStop",[context,frame, type,rv]);
+        var hookReturn = Firebug.connection.dispatch("onStop",[context,frame, type,rv]);
         if ( hookReturn && hookReturn >= 0 )
         {
             delete context.stopped;
@@ -319,7 +315,7 @@ Firebug.Debugger = Extend.extend(Firebug.ActivableModule,
 
         this.stopDebugging(context);
 
-        ToolsInterface.browser.dispatch("onResume",[context]);
+        Firebug.connection.dispatch("onResume",[context]);
 
         if (context.aborted)
         {
@@ -341,14 +337,14 @@ Firebug.Debugger = Extend.extend(Firebug.ActivableModule,
                 {
                     if (FBTrace.DBG_UI_LOOP)
                         FBTrace.sysout("Firebug.debugger.reExecute success", result);
-                    ToolsInterface.browser.dispatch( "onRerunComplete", [true, result]);
+                    Firebug.connection.dispatch( "onRerunComplete", [true, result]);
                 }
 
                 function exceptionFunction(result, context)
                 {
                     if (FBTrace.DBG_ERRORS)
                         FBTrace.sysout("Firebug.debugger.reExecute FAILED "+result, result);
-                    ToolsInterface.browser.dispatch( "onRerunComplete", [false, result]);
+                    Firebug.connection.dispatch( "onRerunComplete", [false, result]);
                 }
 
                 Firebug.CommandLine.evaluate("window._firebug.rerunFunction()", context, null,
@@ -938,7 +934,7 @@ Firebug.Debugger = Extend.extend(Firebug.ActivableModule,
         }
 
         var frame = StackFrame.getStackFrame(context.stoppedFrame, context);
-        ToolsInterface.browser.dispatch( "onStartDebugging", [context, frame]);
+        Firebug.connection.dispatch( "onStartDebugging", [context, frame]);
 
         if (FBTrace.DBG_UI_LOOP)
             FBTrace.sysout("startDebugging exit context.stopped:"+context.stopped+" for context: "+
@@ -966,7 +962,7 @@ Firebug.Debugger = Extend.extend(Firebug.ActivableModule,
                 context.executingSourceFile = null;
                 delete context.breakLineNumber;
 
-                ToolsInterface.browser.dispatch( "onStopDebugging", [context]);
+                Firebug.connection.dispatch( "onStopDebugging", [context]);
 
             }
             else
@@ -1218,7 +1214,7 @@ Firebug.Debugger = Extend.extend(Firebug.ActivableModule,
             FBTrace.sysout("onThrow FAILS: "+exc+"\n");
         }
 
-        if (ToolsInterface.browser.dispatch("onThrow",[context, frame, rv]))
+        if (Firebug.connection.dispatch("onThrow",[context, frame, rv]))
             return this.stop(context, frame, TYPE_THROW, rv);
         return RETURN_CONTINUE_THROW;
     },
@@ -1263,7 +1259,7 @@ Firebug.Debugger = Extend.extend(Firebug.ActivableModule,
 
         frame = StackFrame.getStackFrame(frame, context);
 
-        ToolsInterface.browser.dispatch("onMonitorScript",[context, frame]);
+        Firebug.connection.dispatch("onMonitorScript",[context, frame]);
     },
 
     onFunctionCall: function(context, frame, depth, calling)
@@ -1275,7 +1271,7 @@ Firebug.Debugger = Extend.extend(Firebug.ActivableModule,
 
         frame = StackFrame.getStackFrame(frame, context);
 
-        ToolsInterface.browser.dispatch("onFunctionCall",[context, frame, depth, calling]);
+        Firebug.connection.dispatch("onFunctionCall",[context, frame, depth, calling]);
 
         return context;  // returned as first arg on next call from same trace
     },
@@ -1383,7 +1379,7 @@ Firebug.Debugger = Extend.extend(Firebug.ActivableModule,
                 FBTrace.sysout("debugger.onError getCorrectedStackTrace FAILED: "+exc, exc);
         }
 
-        var hookReturn = ToolsInterface.browser.dispatch("onError",[context, frame, error]);
+        var hookReturn = Firebug.connection.dispatch("onError",[context, frame, error]);
 
         if (!context.breakingCause)
             return 0;
@@ -1438,7 +1434,7 @@ Firebug.Debugger = Extend.extend(Firebug.ActivableModule,
                 FBTrace.sysout("debugger.onXULScriptCreated script.fileName="+outerScript.fileName+
                     " in "+context.getName()+" "+sourceFile);
 
-            ToolsInterface.browser.dispatch("onXULScriptCreated",[context, frame, sourceFile.href]);
+            Firebug.connection.dispatch("onXULScriptCreated",[context, frame, sourceFile.href]);
             return sourceFile;
         }
         catch (e)
@@ -1464,7 +1460,7 @@ Firebug.Debugger = Extend.extend(Firebug.ActivableModule,
                 FBTrace.sysout("debugger.onEvalScriptCreated url="+sourceFile.href,
                     StackFrame.getCorrectedStackTrace(frame, context));
 
-            ToolsInterface.browser.dispatch("onEvalScriptCreated",[context, frame, sourceFile.href]);
+            Firebug.connection.dispatch("onEvalScriptCreated",[context, frame, sourceFile.href]);
             return sourceFile;
         }
         catch (e)
@@ -1527,7 +1523,7 @@ Firebug.Debugger = Extend.extend(Firebug.ActivableModule,
             FBTrace.sysout("debugger.onEventScriptCreated sourcefile="+sourceFile.toString()+
                 " -> "+context.getName()+"\n");
 
-        ToolsInterface.browser.dispatch("onEventScriptCreated",[context, frame, url]);
+        Firebug.connection.dispatch("onEventScriptCreated",[context, frame, url]);
         return sourceFile;
     },
 
@@ -1597,7 +1593,7 @@ Firebug.Debugger = Extend.extend(Firebug.ActivableModule,
             }
         }
 
-        ToolsInterface.browser.dispatch("onTopLevelScriptCreated",[context, frame, sourceFile.href]);
+        Firebug.connection.dispatch("onTopLevelScriptCreated",[context, frame, sourceFile.href]);
         return sourceFile;
     },
 
@@ -1704,7 +1700,7 @@ Firebug.Debugger = Extend.extend(Firebug.ActivableModule,
                     }
                     row.removeAttribute("disabledBreakpoint");
                 }
-                ToolsInterface.browser.dispatch( "onToggleBreakpoint", [context, url, lineNo, isSet]);
+                Firebug.connection.dispatch( "onToggleBreakpoint", [context, url, lineNo, isSet]);
                 found = true;
                 continue;
             }
@@ -1743,7 +1739,7 @@ Firebug.Debugger = Extend.extend(Firebug.ActivableModule,
                         else
                             Css.removeClass(row.firstChild, "breakForError");
 
-                        ToolsInterface.browser.dispatch( "onToggleErrorBreakpoint",
+                        Firebug.connection.dispatch( "onToggleErrorBreakpoint",
                             [context, url, lineNo, isSet]);
                     }
                 }
@@ -1799,7 +1795,7 @@ Firebug.Debugger = Extend.extend(Firebug.ActivableModule,
                 FBTrace.sysout(StackFrame.traceToString(StackFrame.getCorrectedStackTrace(frame, context))+"\n");
             }
 
-            ToolsInterface.browser.dispatch("onFunctionConstructor",[context, frame, ctor_script, sourceFile.href]);
+            Firebug.connection.dispatch("onFunctionConstructor",[context, frame, ctor_script, sourceFile.href]);
             return sourceFile.href;
         }
         catch(exc)
@@ -2167,8 +2163,8 @@ Firebug.Debugger = Extend.extend(Firebug.ActivableModule,
 
         try
         {
-            this.asTool = new ToolsInterface.Browser.Tool('script');
-            ToolsInterface.browser.registerTool(this.asTool);
+            this.asTool = new Firebug.connection.Tool('script');
+            Firebug.connection.registerTool(this.asTool);
         }
         catch(exc)
         {
@@ -2184,7 +2180,7 @@ Firebug.Debugger = Extend.extend(Firebug.ActivableModule,
 
     shutdown: function()
     {
-        ToolsInterface.browser.unregisterTool(this.asTool);
+        Firebug.connection.unregisterTool(this.asTool);
 
         Firebug.ActivableModule.destroy.apply(this, arguments);
     },
@@ -2738,19 +2734,19 @@ Firebug.JSDebugClient =
     {
         if (FBTrace.DBG_ACTIVATION)
             FBTrace.sysout("Firebug.JSDebugClient onJSDActivate "+active+" "+fromMsg);
-        ToolsInterface.browser.dispatch("onActivateTool", ["script", active]);
+        Firebug.connection.dispatch("onActivateTool", ["script", active]);
     },
 
     onJSDDeactivate: function(active, fromMsg)
     {
         if (FBTrace.DBG_ACTIVATION)
             FBTrace.sysout("Firebug.JSDebugClient onJSDDeactivate "+active+" "+fromMsg);
-        ToolsInterface.browser.dispatch("onActivateTool", ["script", active]);
+        Firebug.connection.dispatch("onActivateTool", ["script", active]);
     },
 
     onPauseJSDRequested: function(rejection)
     {
-        //ToolsInterface.browser.dispatch( "onPauseJSDRequested", arguments);
+        //Firebug.connection.dispatch( "onPauseJSDRequested", arguments);
 
         if (FBTrace.DBG_ACTIVATION)
             FBTrace.sysout("Firebug.JSDebugClient onPauseJSDRequested ignored");

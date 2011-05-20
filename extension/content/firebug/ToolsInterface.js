@@ -44,7 +44,7 @@ var ToolsInterface =
     },
 };
 
-ToolsInterface.Browser.prototype =
+Firebug.connection.prototype =
 {
     /*
      * The WebApp on the selected tab of the selected window of this Browser
