@@ -72,7 +72,7 @@ Firebug.PanelActivation = Extend.extend(Firebug.Module,
         Dom.collapse(chrome.$("fbToolbar"), !panel);
     },
 
-    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
     activatePanelTypes: function(panelTypes)
     {
@@ -87,7 +87,20 @@ Firebug.PanelActivation = Extend.extend(Firebug.Module,
         }
     },
 
-    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+    deactivatePanelTypes: function(panelTypes)
+    {
+        for (var p in panelTypes)
+        {
+            var panelType = panelTypes[p];
+            if (!this.isPanelActivable(panelType))
+                continue;
+
+            if (this.isPanelEnabled(panelType))
+                panelType.prototype.onActivationChanged(false);
+        }
+    },
+
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
     isPanelActivable: function(panelType)
     {
@@ -104,7 +117,7 @@ Firebug.PanelActivation = Extend.extend(Firebug.Module,
         return panelType ? panelType.prototype.isEnabled() : false;
     },
 
-    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
     // Enable & disable methods.
 
     enablePanel: function(panelType)
@@ -150,7 +163,7 @@ Firebug.PanelActivation = Extend.extend(Firebug.Module,
         var tab = panelBar.updateTab(panelType);
     },
 
-    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
     // Observer activation changes (preference)
 
     /**
@@ -205,7 +218,8 @@ Firebug.PanelActivation = Extend.extend(Firebug.Module,
     {
         Firebug.toggleBar(false);  // and we turn off as it now cannot be enabled
     },
-    // *******************************************************************************************
+
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
     // UI commands
 
     clearAnnotations: function()

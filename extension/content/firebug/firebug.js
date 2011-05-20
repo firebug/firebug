@@ -292,6 +292,8 @@ window.Firebug =
         ToolsInterface.browser.removeListener(Firebug);
         ToolsInterface.browser.removeListener(ToolsInterface.JavaScript);//javascripttool.js
 
+        Firebug.PanelActivation.deactivatePanelTypes(panelTypes);
+
         if (FBTrace.DBG_INITIALIZE)
             FBTrace.sysout("firebug.shutdown exited ");
     },

@@ -133,15 +133,23 @@ var Errors = Firebug.Errors = Extend.extend(Firebug.Module,
 
     startObserving: function()
     {
+        if (FBTrace.DBG_ERRORS)
+            FBTrace.sysout("Errors.startObserving");
+
         if (consoleService)
             consoleService.registerListener(this);
+
         this.isObserving = true;
     },
 
     stopObserving: function()
     {
+        if (FBTrace.DBG_ERRORS)
+            FBTrace.sysout("Errors.stopObserving");
+
         if (consoleService)
             consoleService.unregisterListener(this);
+
         this.isObserving = false;
     },
 
