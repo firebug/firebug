@@ -128,7 +128,8 @@ Browser.prototype.clearAnnotations = function()
 
 Browser.prototype.getWebAppByWindow = function(win)
 {
-    return new WebApp(win.top);
+    if (win && win.top)
+        return new WebApp(win.top);
 }
 
 Browser.prototype.getContextByWebApp = function(webApp)
@@ -150,7 +151,10 @@ Browser.prototype.getContextByWindow = function(win)
     var webApp = this.getWebAppByWindow(win);
     return this.getContextByWebApp(webApp);
 }
-
+/*
+ * get local metadata for the remote WebApp if it exists
+ * @return ToolInterface.WebAppContext or null if the webApp is not being debugged
+ */
 Browser.prototype.setContextByWebApp = function(webApp, context)
 {
     var topMost = webApp.getTopMostWindow();
@@ -160,7 +164,11 @@ Browser.prototype.setContextByWebApp = function(webApp, context)
     this.contexts.push( context );
 }
 
-//API
+/*
+ * Stop debugging a WebApp and cause the destruction of a ToolsInterface.WebAppContext
+ * @param webAppContext metadata for the page that we are not going to debug any more
+ * @param userCommands true if the user of this UI said to close (vs algorithm)
+ */
 Browser.prototype.closeContext = function(context, userCommands)
 {
     if (context)
@@ -197,7 +205,11 @@ Browser.prototype.closeContext = function(context, userCommands)
         return false;
     }
 }
-// API
+/*
+ * get local metadata for the remote WebApp or create one
+ * @param webApp, ToolsInterface.WebApp representing top level window
+ * @return ToolInterface.WebAppContext
+ */
 Browser.prototype.getOrCreateContextByWebApp = function(webApp)
 {
     var context = this.getContextByWebApp(webApp);
@@ -221,7 +233,10 @@ Browser.prototype.getOrCreateContextByWebApp = function(webApp)
     return context;
 }
 
-// API
+/*
+ * The WebApp on the selected tab of the selected window of this Browser
+ * @return WebApp ( never null )
+ */
 Browser.prototype.getCurrentSelectedWebApp = function()
 {
     // Remote version must seek selected XUL window first.

@@ -2161,15 +2161,6 @@ Firebug.Debugger = Extend.extend(Firebug.ActivableModule,
 
         this.hash_service = Xpcom.CCSV("@mozilla.org/security/hash;1", "nsICryptoHash");
 
-        try
-        {
-            this.asTool = new Firebug.connection.Tool('script');
-            Firebug.connection.registerTool(this.asTool);
-        }
-        catch(exc)
-        {
-            FBTrace.sysout("debugger inititialze tool ERROR "+exc, exc);
-        }
 
         this.wrappedJSObject = this;  // how we communicate with fbs
 
@@ -2180,7 +2171,7 @@ Firebug.Debugger = Extend.extend(Firebug.ActivableModule,
 
     shutdown: function()
     {
-        Firebug.connection.unregisterTool(this.asTool);
+        //Firebug.connection.unregisterTool(this.asTool);
 
         Firebug.ActivableModule.destroy.apply(this, arguments);
     },

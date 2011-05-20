@@ -211,9 +211,7 @@ Firebug.Console = Extend.extend(ActivableConsole,
 
         Firebug.ActivableModule.initialize.apply(this, arguments);
 
-        this.asTool = new Firebug.connection.Tool('console');
         Firebug.connection.addListener(this);
-        Firebug.connection.registerTool(this.asTool);
 
         this.syncFilterButtons(Firebug.chrome);
     },
@@ -221,8 +219,6 @@ Firebug.Console = Extend.extend(ActivableConsole,
     shutdown: function()
     {
         Firebug.connection.removeListener(this);
-        Firebug.connection.unregisterTool(this.asTool);
-
         Firebug.ActivableModule.shutdown.apply(this, arguments);
     },
 
@@ -440,7 +436,7 @@ Firebug.Console = Extend.extend(ActivableConsole,
         {
             if (this.isAlwaysEnabled())
             {
-                this.asTool.setActive(active);  // then track the activation of the debugger;
+                //this.asTool.setActive(active);  // then track the activation of the debugger;
             }
         }
     },
