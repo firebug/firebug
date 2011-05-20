@@ -14,12 +14,13 @@ define([
     "firebug/lib/search",
     "firebug/lib/xml",
     "firebug/firefox/menu",
+    "firebug/lib/options",
     "firebug/profiler",
     "firebug/searchBox",
     "firebug/errors",
 ],
 function(Extend, Firebug, Firefox, FirebugReps, Locale, ToolsInterface, Events, Css, Dom,
-    Win, Search, Xml, Menu) {
+    Win, Search, Xml, Menu, Options) {
 
 // ************************************************************************************************
 // Constants
@@ -28,9 +29,8 @@ const Cc = Components.classes;
 const Ci = Components.interfaces;
 const nsIPrefBranch2 = Ci.nsIPrefBranch2;
 const PrefService = Cc["@mozilla.org/preferences-service;1"];
-const prefs = PrefService.getService(nsIPrefBranch2);
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 const logTypes =
 {
@@ -207,6 +207,9 @@ Firebug.Console = Extend.extend(ActivableConsole,
     {
         Firebug.consoleFilterTypes = "";
 
+        // Initialize log limit.
+        this.updateMaxLimit();
+
         Firebug.ActivableModule.initialize.apply(this, arguments);
 
         this.asTool = new ToolsInterface.Browser.Tool('console');
@@ -286,6 +289,18 @@ Firebug.Console = Extend.extend(ActivableConsole,
         Firebug.Console.injector.detachConsole(context, win);
     },
 
+    updateOption: function(name, value)
+    {
+        if (name == "console.logLimit")
+            this.updateMaxLimit();
+    },
+
+    updateMaxLimit: function()
+    {
+        var value = Options.get("console.logLimit");
+        maxQueueRequests =  value ? value : maxQueueRequests;
+    },
+
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
     // extend ActivableModule
 
@@ -349,7 +364,7 @@ Firebug.Console = Extend.extend(ActivableConsole,
 
         Firebug.consoleFilterTypes = filterType;
 
-        Firebug.Options.set("consoleFilterTypes", Firebug.consoleFilterTypes);
+        Options.set("consoleFilterTypes", Firebug.consoleFilterTypes);
 
         var panel = this.getPanel(context, true);
         if (panel)
@@ -529,7 +544,8 @@ Firebug.ConsolePanel.prototype = Extend.extend(Firebug.ActivablePanel,
 
         var limitInfo = {
             totalCount: 0,
-            limitPrefsTitle: Locale.$STRF("LimitPrefsTitle", [Firebug.Options.prefDomain+".console.logLimit"])
+            limitPrefsTitle: Locale.$STRF("LimitPrefsTitle",
+                [Options.prefDomain+".console.logLimit"])
         };
 
         var netLimitRep = Firebug.NetMonitor.NetLimit;
@@ -544,7 +560,8 @@ Firebug.ConsolePanel.prototype = Extend.extend(Firebug.ActivablePanel,
     insertReloadWarning: function()
     {
         // put the message in, we will clear if the window console is injected.
-        this.warningRow = this.append(appendObject, Locale.$STR("message.Reload to activate window console"), "info");
+        this.warningRow = this.append(appendObject, Locale.$STR(
+            "message.Reload to activate window console"), "info");
     },
 
     clearReloadWarning: function()
@@ -722,14 +739,9 @@ Firebug.ConsolePanel.prototype = Extend.extend(Firebug.ActivablePanel,
         {
             this.insertLogLimit(this.context);
 
-            // Initialize log limit and listen for changes.
-            this.updateMaxLimit();
-
             if (this.context.consoleReloadWarning)  // we have not yet injected the console
                 this.insertReloadWarning();
         }
-
-        prefs.addObserver(Firebug.Options.prefDomain, this, false);  // TODO use optins.js
     },
 
     destroy: function(state)
@@ -747,8 +759,6 @@ Firebug.ConsolePanel.prototype = Extend.extend(Firebug.ActivablePanel,
             this.context.profileRow.parentNode.removeChild(this.context.profileRow);
             state.profileRow = this.context.profileRow;
         }
-
-        prefs.removeObserver(Firebug.Options.prefDomain, this, false); // TODO remove to options.js
 
         if (FBTrace.DBG_CONSOLE)
             FBTrace.sysout("console.destroy; wasScrolledToBottom: " +
@@ -867,7 +877,7 @@ Firebug.ConsolePanel.prototype = Extend.extend(Firebug.ActivablePanel,
         // xxxHonza: shouldn't the breakOnErrors be context related?
         // xxxJJB, yes, but we can't support it because we can't yet tell
         // which window the error is on.
-        return Firebug.Options.get("breakOnErrors");
+        return Options.get("breakOnErrors");
     },
 
     getBreakOnNextTooltip: function(enabled)
@@ -922,9 +932,15 @@ Firebug.ConsolePanel.prototype = Extend.extend(Firebug.ActivablePanel,
     {
         var strictDomain = "javascript.options";
         var strictName = "strict";
-        var strictValue = prefs.getBoolPref(strictDomain+"."+strictName);
-        return {label: "JavascriptOptionsStrict", type: "checkbox", checked: strictValue,
-            command: Extend.bindFixed(Firebug.Options.setPref, Firebug, strictDomain, strictName, !strictValue) };
+        var strictValue = Options.getPref(strictDomain, strictName);
+
+        return {
+            label: "JavascriptOptionsStrict",
+            type: "checkbox",
+            checked: strictValue,
+            command: Extend.bindFixed(Options.setPref, Options,
+                strictDomain, strictName, !strictValue)
+        };
     },
 
     getBreakOnMenuItems: function()
@@ -983,7 +999,7 @@ Firebug.ConsolePanel.prototype = Extend.extend(Firebug.ActivablePanel,
 
     breakOnNext: function(breaking)
     {
-        Firebug.Options.set("breakOnErrors", breaking);
+        Options.set("breakOnErrors", breaking);
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
@@ -1042,26 +1058,6 @@ Firebug.ConsolePanel.prototype = Extend.extend(Firebug.ActivablePanel,
         endPt.setStartAfter(logRow);
 
         return Search.finder.Find(text, searchRange, startPt, endPt) != null;
-    },
-
-    // nsIPrefObserver
-    observe: function(subject, topic, data)
-    {
-        // We're observing preferences only.
-        if (topic != "nsPref:changed")
-          return;
-
-        // xxxHonza check this out.
-        var prefDomain = "Firebug.extension.";
-        var prefName = data.substr(prefDomain.length);
-        if (prefName == "console.logLimit")
-            this.updateMaxLimit();
-    },
-
-    updateMaxLimit: function()
-    {
-        var value = Firebug.Options.get("console.logLimit");
-        maxQueueRequests =  value ? value : maxQueueRequests;
     },
 
     showCommandLine: function(shouldShow)
