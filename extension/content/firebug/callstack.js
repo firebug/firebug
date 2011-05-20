@@ -4,7 +4,7 @@ define([
     "firebug/lib/extend",
     "firebug/firebug",
     "firebug/reps",
-    "arch/tools",
+    "firebug/ToolsInterface",
     "firebug/lib/events",
     "firebug/lib/wrapper",
     "firebug/lib/stackFrame",

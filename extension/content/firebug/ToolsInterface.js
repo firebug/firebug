@@ -4,9 +4,16 @@ define([
         // must not depend on Firebug
         ], function factoryToolsInterface()
 {
-
-var ToolsInterface = {
-
+/*
+ * ToolsInterface declares browser-independent classes and methods.
+ * Users of the interface define functions that call methods.
+ *    Users depend on ToolsInterface
+ * Implementors of the interface define browser-dependent methods
+ *    Implementors depend on ToolsInterface
+ * main.js depend upon users and particular implementors
+ */
+var ToolsInterface =
+{
     // ------------------------------------------------------------------------------
     // Classes
 
@@ -72,6 +79,64 @@ ToolsInterface.WebApp.prototype =
     getTopMostWindow: function() { return ToolsInterface.mustOverride(); },
 };
 
+ToolsInterface.CompilationUnit.prototype =
+{
+    /*
+     * Returns the Kind of Compilation Unit
+     * @return one of a few constant strings we should declare.
+     *
+     * <p>
+     * 	This function does not require communication with the browser.
+     * </p>
+     */
+    getKind: function() { return ToolsInterface.mustOverride(); },
+
+
+    isExecutableLine: function(lineNo) { return ToolsInterface.mustOverride(); },
+    /**
+     * Returns the URL of this compilation unit.
+     * <p>
+     * This function does not require communication with
+     * the browser.
+     * </p>
+     *
+     * @function
+     * @returns compilation unit identifier as a {@link String}
+     */
+    getURL: function() { return ToolsInterface.mustOverride(); },
+    /**
+     * Returns the breakpoints that have been created in this compilation unit and
+     * have not been cleared.
+     * <p>
+     * This function does not require communication with
+     * the browser.
+     * </p>
+     * @function
+     * @returns an array of {@link Breakpoint}'s
+     */
+    getBreakpoints: function(){ return ToolsInterface.mustOverride(); },
+
+    eachBreakpoint: function( fnOfLineProps ) { return ToolsInterface.mustOverride(); },
+    /**
+     * Requests the source of this compilation unit asynchronously. Source will be
+     * retrieved from the browser and reported back to the listener function when available.
+     * The handler may be called before or after this function returns.
+     * <p>
+     * TODO: what if the compilation unit no longer exists in the browser
+     * </p>
+     * @function
+     * @param firstLineNumber requested line number starting point; < 1 means from lowest line number
+     * @param lastLineNumber request last line number; < 1 means up to maximum line
+     * @param listener a listener (function) that accepts (compilationUnit, firstLineNumber, lastLineNumber, array of source code lines)
+     */
+    getSourceLines: function(firstLine, lastLine, listener) { return ToolsInterface.mustOverride(); },
+    /*
+     * Request the current estimated number of source lines in the entire compilationUnit
+     */
+    getNumberOfLines: function() { return ToolsInterface.mustOverride(); },
+};
+
+
 ToolsInterface.toolTypes =
 {
     types: [],
@@ -95,16 +160,19 @@ ToolsInterface.toolTypes =
     }
 }
 
-ToolsInterface.initialize = function()
+ToolsInterface.dispatch = function(toolTypeMethodName)
 {
     if (FBTrace.DBG_INITIALIZE)
-        FBTrace.sysout("ToolsInterface.initialize "+ToolsInterface.toolTypes.types.length);
+        FBTrace.sysout("ToolsInterface.dispatch "+toolTypeMethodName+" to "+ToolsInterface.toolTypes.types.length);
 
     ToolsInterface.toolTypes.eachToolType(function (toolType)
     {
-        toolType.initialize()
+        toolType[toolTypeMethodName].apply(toolType,[]);
     });
 }
+
+ToolsInterface.initialize = function(){ToolsInterface.dispatch('initialize');}
+ToolsInterface.destroy    = function(){ToolsInterface.dispatch('destroy');}
 
 return ToolsInterface;
 

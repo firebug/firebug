@@ -3,7 +3,7 @@
 define([
     "firebug/lib/extend",
     "firebug/firebug",
-    "arch/tools",
+    "firebug/ToolsInterface",
     "firebug/lib/events",
     "firebug/sourceLink",
     "firebug/lib/css",

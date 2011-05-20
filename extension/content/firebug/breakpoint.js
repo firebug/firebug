@@ -7,7 +7,7 @@ define([
     "firebug/reps",
     "firebug/lib/locale",
     "firebug/lib/events",
-    "arch/tools",
+    "firebug/ToolsInterface",
     "firebug/sourceLink",
     "firebug/lib/stackFrame",
     "firebug/lib/css",

@@ -6,7 +6,7 @@ define([
     "firebug/firefox/firefox",
     "firebug/reps",
     "firebug/domplate",
-    "arch/tools",
+    "firebug/ToolsInterface",
     "firebug/lib/locale",
     "firebug/lib/events",
     "firebug/lib/url",
@@ -28,11 +28,6 @@ define([
 ],
 function(Extend, Firebug, Firefox, FirebugReps, Domplate, ToolsInterface, Locale, Events, Url, SourceLink,
     StackFrame, Css, Dom, Win, Search, Persist, System, Menu, Debug, Keywords) {
-
-// ********************************************************************************************* //
-// Constants
-
-var CompilationUnit = ToolsInterface.CompilationUnit;
 
 // ********************************************************************************************* //
 // Script panel
@@ -537,7 +532,7 @@ Firebug.ScriptPanel.prototype = Extend.extend(Firebug.SourceBoxPanel,
         delete this.selection;
         Persist.persistObjects(this, state);
 
-        if (this.location instanceof CompilationUnit)
+        if (this.location instanceof ToolsInterface.CompilationUnit)
         {
              state.location = this.location;
         }
@@ -862,7 +857,7 @@ Firebug.ScriptPanel.prototype = Extend.extend(Firebug.SourceBoxPanel,
 
     supportsObject: function(object, type)
     {
-        if( object instanceof CompilationUnit
+        if( object instanceof ToolsInterface.CompilationUnit
             || (object instanceof SourceLink.SourceLink && object.type == "js")
             || typeof(object) == "function"
             || object instanceof StackFrame.StackFrame)
@@ -901,7 +896,7 @@ Firebug.ScriptPanel.prototype = Extend.extend(Firebug.SourceBoxPanel,
     {
         if (!compilationUnit)
             return;  // XXXjjb do we need to show a blank?
-        if ( !(compilationUnit instanceof CompilationUnit) )
+        if ( !(compilationUnit instanceof ToolsInterface.CompilationUnit) )
         {
             FBTrace.sysout("Script panel location not a CompilationUnit: ",compilationUnit);
             throw new Error("Script panel location not a CompilationUnit: "+compilationUnit);
@@ -938,7 +933,7 @@ Firebug.ScriptPanel.prototype = Extend.extend(Firebug.SourceBoxPanel,
         if (FBTrace.DBG_PANELS)
         {
             FBTrace.sysout("script updateSelection object:"+object+" of type "+typeof(object), object);
-            if (object instanceof CompilationUnit)
+            if (object instanceof ToolsInterface.CompilationUnit)
                 FBTrace.sysout("script updateSelection this.navigate(object)", object);
             else if (object instanceof SourceLink.SourceLink)
                 FBTrace.sysout("script updateSelection this.showSourceLink(object)", object);
@@ -950,7 +945,7 @@ Firebug.ScriptPanel.prototype = Extend.extend(Firebug.SourceBoxPanel,
                 FBTrace.sysout("script updateSelection this.showStackFrame(null)", object);
         }
 
-        if (object instanceof CompilationUnit)
+        if (object instanceof ToolsInterface.CompilationUnit)
             this.navigate(object);
         else if (object instanceof SourceLink.SourceLink)
             this.showSourceLink(object);
@@ -966,10 +961,10 @@ Firebug.ScriptPanel.prototype = Extend.extend(Firebug.SourceBoxPanel,
         if (compilationUnit.getURL().substr(0, 9) == "chrome://")
             return false;
 
-           if (compilationUnit.getKind() === CompilationUnit.EVAL && !this.showEvals)
+           if (compilationUnit.getKind() === ToolsInterface.CompilationUnit.EVAL && !this.showEvals)
                return false;
 
-        if (compilationUnit.getKind() === CompilationUnit.BROWSER_GENERATED && !this.showEvents)
+        if (compilationUnit.getKind() === ToolsInterface.CompilationUnit.BROWSER_GENERATED && !this.showEvents)
             return false;
 
         return true;
@@ -1119,7 +1114,7 @@ Firebug.ScriptPanel.prototype = Extend.extend(Firebug.SourceBoxPanel,
     getObjectDescription: function(compilationUnit)
     {
         var kind = compilationUnit.getKind();
-        if (kind == CompilationUnit.BROWSER_GENERATED)
+        if (kind == ToolsInterface.CompilationUnit.BROWSER_GENERATED)
         {
             var url = compilationUnit.getURL()
             var i = url.indexOf("/event/seq");

@@ -4,7 +4,7 @@ define([
     "firebug/lib/extend",
     "firebug/firebug",
     "firebug/firefox/firefox",
-    "arch/tools",
+    "firebug/ToolsInterface",
     "firebug/lib/locale",
     "firebug/domplate",
     "firebug/lib/url",

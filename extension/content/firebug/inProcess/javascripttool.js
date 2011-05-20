@@ -3,7 +3,7 @@
 // ************************************************************************************************
 // Module
 
-define(["arch/tools"], function initializeJavaScriptTool(ToolsInterface)
+define(["firebug/ToolsInterface"], function initializeJavaScriptTool(ToolsInterface)
 {
 
 // ************************************************************************************************
@@ -158,9 +158,6 @@ ToolsInterface.JavaScript.onCompilationUnit = function(context, url, kind)
          FBTrace.sysout("ToolsInterface.JavaScript.onCompilationUnit "+url+" added to "+context.getName(), compilationUnit);
 }
 
-//*********************************************************************************************
-
-ToolsInterface.toolTypes.register(ToolsInterface.JavaScript);
 
 ToolsInterface.JavaScript.initialize = function()
 {

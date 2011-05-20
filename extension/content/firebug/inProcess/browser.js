@@ -744,6 +744,15 @@ Browser.initialize = function ()
     TabWatcher.addListener(TabWatchListener);
 }
 
+Browser.destroy = function()
+{
+    TabWatcher.destroy();
+
+    // Remove the listener after the Firebug.TabWatcher.destroy() method is called so,
+    // destroyContext event is properly dispatched to the Firebug object and
+    // consequently to all registered modules.
+    TabWatcher.removeListener(this);
+}
 
 return exports = Browser;
 

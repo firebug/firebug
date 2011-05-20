@@ -3,7 +3,7 @@
 define([
     "firebug/firebug",
     "firebug/lib/events",
-    "arch/tools"
+    "firebug/ToolsInterface"
 ],
 function(Firebug, Events, ToolsInterface) {
 

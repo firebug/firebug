@@ -6,7 +6,7 @@ define([
     "firebug/firefox/firefox",
     "firebug/reps",
     "firebug/lib/locale",
-    "arch/tools",
+    "firebug/ToolsInterface",
     "firebug/lib/events",
     "firebug/lib/css",
     "firebug/lib/dom",
