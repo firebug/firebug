@@ -93,7 +93,7 @@ catch (exc)
  */
 window.Firebug =
 {
-    version: "1.6",
+    version: "1.8",
 
     dispatchName: "Firebug",
     modules: modules,
