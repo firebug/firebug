@@ -7,8 +7,9 @@ define([
     "firebug/lib/locale",
     "firebug/lib/events",
     "firebug/lib/dom",
+    "firebug/lib/options",
 ],
-function(Extend, Firebug, Firefox, Locale, Events, Dom) {
+function(Extend, Firebug, Firefox, Locale, Events, Dom, Options) {
 
 // ********************************************************************************************* //
 // Constants
@@ -81,10 +82,10 @@ Firebug.StartButton = Extend.extend(Firebug.Module,
      */
     appendToToolbar: function()
     {
-        if (Firebug.Options.get("toolbarCustomizationDone"))
+        if (Options.get("toolbarCustomizationDone"))
             return;
 
-        Firebug.Options.set("toolbarCustomizationDone", true);
+        Options.set("toolbarCustomizationDone", true);
 
         // Get the current navigation bar button set (a string of button IDs) and append
         // ID of the Firebug start button into it.
@@ -132,7 +133,7 @@ Firebug.StartButton = Extend.extend(Firebug.Module,
      */
     updateStatusIcon: function()
     {
-        var show = Firebug.Options.get("showStatusIcon");
+        var show = Options.get("showStatusIcon");
         var statusBar = Firefox.getElementById("fbStatusBar");
         if (statusBar)
             Dom.collapse(statusBar, !show);
