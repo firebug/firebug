@@ -49,7 +49,8 @@ Firebug.StartButton = Extend.extend(Firebug.Module,
             startButton.appendChild(popup.cloneNode(true));
 
             // Append the button into Firefox toolbar automatically.
-            this.appendToToolbar();
+            this.onLoadBinding = Extend.bind(this.onLoad, this);
+            window.addEventListener("load", this.onLoadBinding, false);
 
             // In case of Firefox 4+ the button is a bit different.
             if (versionChecker.compare(appInfo.version, "4.0*") >= 0)
@@ -60,6 +61,12 @@ Firebug.StartButton = Extend.extend(Firebug.Module,
 
         if (FBTrace.DBG_INITIALIZE)
             FBTrace.sysout("Startbutton initializeUI "+startButton);
+    },
+
+    onLoad: function()
+    {
+        window.removeEventListener("load", this.onLoadBinding, false);
+        this.appendToToolbar();
     },
 
     shutdown: function()
@@ -84,12 +91,7 @@ Firebug.StartButton = Extend.extend(Firebug.Module,
         var startButtonId = "firebug-button";
         var navBarId = "nav-bar";
         var navBar = Firefox.getElementById(navBarId);
-
-        // In SeaMonkey we need to read the attribute (see issue 4086)
-        // In Firefox the currentSet property must be used.
-        var currentSet = navBar.getAttribute("currentset");
-        if (!currentSet)
-            currentSet = navBar.currentSet;
+        var currentSet = navBar.currentSet;
 
         if (FBTrace.DBG_INITIALIZE)
             FBTrace.sysout("Startbutton; curSet: " + currentSet);
@@ -98,9 +100,9 @@ Firebug.StartButton = Extend.extend(Firebug.Module,
         var curSet = currentSet.split(",");
         if (curSet.indexOf(startButtonId) == -1)
         {
-            var set = curSet.concat(startButtonId);
-            navBar.setAttribute("currentset", set.join(","));
-            document.persist(navBarId, "currentset");
+            navBar.insertItem(startButtonId);
+            navBar.setAttribute("currentset", navBar.currentSet);
+            document.persist("nav-bar","currentset");
 
             if (FBTrace.DBG_INITIALIZE)
                 FBTrace.sysout("Startbutton; curSet (after modification): " + set.join(","));
