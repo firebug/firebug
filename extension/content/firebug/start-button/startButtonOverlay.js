@@ -53,7 +53,7 @@ Firebug.StartButton = Extend.extend(Firebug.Module,
             window.addEventListener("load", this.onLoadBinding, false);
 
             // In case of Firefox 4+ the button is a bit different.
-            if (versionChecker.compare(appInfo.version, "4.0*") >= 0)
+            if (appInfo.name == "Firefox" && versionChecker.compare(appInfo.version, "4.0*") >= 0)
                 startButton.setAttribute("firefox", "4");
         }
 
@@ -102,10 +102,10 @@ Firebug.StartButton = Extend.extend(Firebug.Module,
         {
             navBar.insertItem(startButtonId);
             navBar.setAttribute("currentset", navBar.currentSet);
-            document.persist("nav-bar","currentset");
+            document.persist("nav-bar", "currentset");
 
             if (FBTrace.DBG_INITIALIZE)
-                FBTrace.sysout("Startbutton; curSet (after modification): " + set.join(","));
+                FBTrace.sysout("Startbutton; curSet (after modification): " + navBar.currentSet);
 
             try
             {
