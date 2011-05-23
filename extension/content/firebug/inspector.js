@@ -694,10 +694,12 @@ Firebug.Inspector = Extend.extend(Firebug.Module,
      */
     showPanel: function(browser, panel)
     {
+        // Don't disable the cmd_toggleInspecting command. The realted shortcut <key> must
+        // be available even if Firebug is not activated for the site. See 4452
         // The panel can be null (if disabled) so use the global context.
-        var context = Firebug.currentContext;
-        var disabled = (context && context.loaded) ? false : true;
-        Firebug.chrome.setGlobalAttribute("cmd_toggleInspecting", "disabled", disabled);
+        // var context = Firebug.currentContext;
+        // var disabled = (context && context.loaded) ? false : true;
+        // Firebug.chrome.setGlobalAttribute("cmd_toggleInspecting", "disabled", disabled);
     },
 
     /**
@@ -706,7 +708,8 @@ Firebug.Inspector = Extend.extend(Firebug.Module,
      */
     loadedContext: function(context)
     {
-        Firebug.chrome.setGlobalAttribute("cmd_toggleInspecting", "disabled", "false");
+        // See the comment in showPanel.
+        // Firebug.chrome.setGlobalAttribute("cmd_toggleInspecting", "disabled", "false");
     },
 
     /**
