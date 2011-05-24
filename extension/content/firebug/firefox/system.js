@@ -13,6 +13,8 @@ var Ci = Components.interfaces;
 var Cc = Components.classes;
 var Cu = Components.utils;
 
+var ioService = Cc["@mozilla.org/network/io-service;1"].getService(Ci.nsIIOService);
+
 var System = {};
 
 // ********************************************************************************************* //
