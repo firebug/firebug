@@ -16,7 +16,7 @@ define([
     "firebug/lib/options",
     "firebug/profiler",
     "firebug/searchBox",
-    "firebug/errors",
+    //"firebug/errors", circular dependency: console->errors->console
 ],
 function(Extend, Firebug, Firefox, FirebugReps, Locale, Events, Css, Dom,
     Win, Search, Xml, Menu, Options) {
