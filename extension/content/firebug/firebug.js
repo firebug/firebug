@@ -2454,6 +2454,14 @@ function shutdownFirebug()
 }
 
 // ********************************************************************************************* //
+
+// Backward compatibility with extensions
+// deprecated
+
+Firebug.getTabIdForWindow = Win.getWindowProxyIdForWindow;
+Firebug.getTabForWindow = Win.getTabForWindow;
+
+// ********************************************************************************************* //
 // Registration
 
 Firebug.Domplate = Domplate;
