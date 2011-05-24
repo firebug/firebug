@@ -234,7 +234,7 @@ Firebug.NetMonitor = Extend.extend(Firebug.ActivableModule,
         Firebug.ActivableModule.initializeUI.apply(this, arguments);
 
         // Initialize max limit for logged requests.
-        NetLimit.updateMaxLimit();
+        Firebug.NetMonitor.updateMaxLimit();
 
         // Synchronize UI buttons with the current filter.
         this.syncFilterButtons(Firebug.chrome);
