@@ -1,41 +1,49 @@
 /* See license.txt for terms of usage */
 
-define([
-],
-function()
-{
-    // Constants
+define([], function() {
 
-    var Ci = Components.interfaces;
-    var Cc = Components.classes;
-    var Cu = Components.utils;
-    var wm = Cc["@mozilla.org/appshell/window-mediator;1"].getService(Ci.nsIWindowMediator);
-// ---- Browser.xul dependent code ----------
+// ********************************************************************************************* //
+// Constants
+
+var Ci = Components.interfaces;
+var Cc = Components.classes;
+var Cu = Components.utils;
+var wm = Cc["@mozilla.org/appshell/window-mediator;1"].getService(Ci.nsIWindowMediator);
+
+// ********************************************************************************************* //
+// Browser.xul dependent code
+
 function getBrowserDocument()
 {
     return top.document;
 }
 
-// ---- Browser.xul independent code ----------
+// ********************************************************************************************* //
+// Browser.xul independent code
+
 var Firefox =
 {
     getElementById: function(id)
     {
         return getBrowserDocument().getElementById(id);
     },
+
     getTabBrowser: function()
     {
         var tabBrowser = Firefox.getElementById("content");
         return tabBrowser;
     },
+
     getCurrentBrowser: function()
     {
         return Firefox.getTabBrowser().selectedBrowser;
     },
+
     getBrowsers: function()
     {
         return Firefox.getTabBrowser().browsers;
     },
+
     selectTabByWindow: function(win)
     {
         var tabBrowser = Firefox.getTabBrowser();
@@ -54,6 +62,7 @@ var Firefox =
             return null;
         }
     },
+
     /**
      * Returns <browser> element for specified content window.
      * @param {Object} win - Content window
@@ -76,8 +85,11 @@ var Firefox =
         }
         else
         {
-            var winFeatures = "resizable,dialog=no,centerscreen" + (features != "" ? ("," + features) : "");
-            var parentWindow = (this.instantApply || !window.opener || window.opener.closed) ? window : window.opener;
+            var winFeatures = "resizable,dialog=no,centerscreen" +
+                (features != "" ? ("," + features) : "");
+            var parentWindow = (this.instantApply || !window.opener || window.opener.closed) ?
+                window : window.opener;
+
             win = parentWindow.openDialog(url, "_blank", winFeatures, params);
         }
         return win;
@@ -90,7 +102,7 @@ var Firefox =
     },
 };
 
-//************************************************************************************************
+// ********************************************************************************************* //
 
 //XXXjoe This horrible hack works around a focus bug in Firefox which is caused when
 //the HTML Validator extension and Firebug are installed.  It causes the keyboard to
@@ -99,16 +111,20 @@ var Firefox =
 //XXXrobc Do we still need this? Does this extension even exist anymore?
 if (top.hasOwnProperty('TidyBrowser'))
 {
- var prev = TidyBrowser.prototype.updateStatusBar;
- TidyBrowser.prototype.updateStatusBar = function()
- {
-     var self = this, args = arguments;
-     setTimeout(function()
-     {
-         prev.apply(self, args);
-     });
- }
+    var prev = TidyBrowser.prototype.updateStatusBar;
+    TidyBrowser.prototype.updateStatusBar = function()
+    {
+        var self = this, args = arguments;
+        setTimeout(function()
+        {
+            prev.apply(self, args);
+        });
+    }
 }
 
+// ********************************************************************************************* //
+
 return Firefox;
+
+// ********************************************************************************************* //
 });
