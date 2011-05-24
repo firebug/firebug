@@ -38,7 +38,7 @@ window.FBL =
                 if (exc.stack)
                     Components.utils.reportError("Firebug initialize FAILS "+exc+" "+exc.stack);
                 else
-                Components.utils.reportError("Firebug initialize FAILS "+exc+" "+
+                    Components.utils.reportError("Firebug initialize FAILS "+exc+" "+
                         fn.toSource().substr(0,500));
             }
         }
@@ -53,7 +53,8 @@ window.FBL =
 }
 
 // ********************************************************************************************* //
-// Called by firebugFrame main.js to pump global back up to top window.
+// Called by firebugFrame main.js to pump global and deprecated API back.
+
 window.legacyPatch = function(FBL, Firebug)
 {
     if (top === window)
@@ -62,3 +63,17 @@ window.legacyPatch = function(FBL, Firebug)
     top.FBL = FBL;
     top.Firebug = Firebug;
 }
+
+window.legacyApiPatch = function(FBL, Firebug, Firefox)
+{
+    // Backward compatibility with extensions
+    // deprecated
+    Firebug.getTabIdForWindow = FBL.getWindowProxyIdForWindow;
+    Firebug.getTabForWindow = FBL.getTabForWindow;
+
+    Firebug.chrome.getBrowsers = Firefox.getBrowsers;
+    Firebug.chrome.getCurrentBrowsers = Firefox.getCurrentBrowsers;
+    Firebug.chrome.getCurrentURI = Firefox.getCurrentURI;
+}
+
+// ********************************************************************************************* //

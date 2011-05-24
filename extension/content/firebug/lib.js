@@ -36,7 +36,6 @@ function(Extend, Xpcom, Locale, Events, Options, Deprecated, Wrapper, Url, Sourc
 
 var FBL = window.FBL || {};  // legacy.js adds top.FBL, FIXME, remove after iframe version
 
-
 // ********************************************************************************************* //
 // xxxHonza: all deprecated API should be removed from 1.9+
 // All properties and methods of FBL namespace are deprecated.
@@ -112,7 +111,6 @@ for (var p in Debug)
 for (var p in Keywords)
     FBL[p] = Keywords[p];
 
-//xxxHonza: also iterate over all props.
 FBL.deprecated = Deprecated.deprecated;
 FBL.SourceLink = SourceLink.SourceLink;
 FBL.ToggleBranch = Menu.ToggleBranch;

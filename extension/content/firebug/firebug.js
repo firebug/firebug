@@ -137,6 +137,9 @@ window.Firebug =
             FBTrace.sysout("firebug.initialize FBL: " + FBL);
         }
 
+        if (window.legacyApiPatch)
+            window.legacyApiPatch(FBL, this, Firefox);
+
         // Till now all registered panels have been inserted into earlyRegPanelTypes.
         var tempPanelTypes = earlyRegPanelTypes;
         earlyRegPanelTypes = null;
@@ -145,7 +148,7 @@ window.Firebug =
 
     completeInitialize: function(tempPanelTypes)
     {
-        if(FBL)
+        if (FBL)
             FBL.initialize();  // non require.js modules
 
         // Append early registered panels at the end.
@@ -2452,14 +2455,6 @@ function shutdownFirebug()
 
     Firebug.shutdown();
 }
-
-// ********************************************************************************************* //
-
-// Backward compatibility with extensions
-// deprecated
-
-Firebug.getTabIdForWindow = Win.getWindowProxyIdForWindow;
-Firebug.getTabForWindow = Win.getTabForWindow;
 
 // ********************************************************************************************* //
 // Registration
