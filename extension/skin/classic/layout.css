@@ -100,12 +100,21 @@
     text-align: center;
 }
 
-.layoutLabelPosition {
-    left: 0;
-    bottom: 2px;
-    width: 100%;
-    text-align: left;
+.layoutLabelPosition,
+.layoutBoxSizing,
+.layoutZIndex {
+    display: block;
 }
+
+.layoutLabelPosition {
+    bottom: 2px;
+    float: left;
+}
+
+.layoutBoxSizing {
+    left: 90px;
+}
+
 .layoutZIndex {
     float: right;
 }

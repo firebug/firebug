@@ -32,9 +32,16 @@ LayoutPanel.prototype = Extend.extend(Firebug.Panel,
                     DIV({"class": "layoutEdgeLeft layoutEdge"}),
 
                     DIV({"class": "layoutLabelBottom layoutLabel layoutLabelPosition"},
-                            SPAN({"class": "layoutPosition layoutCaption", 'aria-label' : Locale.$STR('a11y.layout.position')}, Locale.$STR('position')+": "+'$position'),
-                            SPAN({"class": "layoutZIndex v$zIndex", 'aria-label' : Locale.$STR('a11y.layout.z-index')}, "z: "+'$zIndex')
-                        ),
+                            SPAN({"class": "layoutPosition layoutCaption",
+                                    "aria-label": Locale.$STR("a11y.layout.position")},
+                                Locale.$STR("position") + ": " + "$position"),
+                            SPAN({"class": "layoutBoxSizing layoutCaption",
+                                    "aria-label": Locale.$STR("a11y.layout.box-sizing")},
+                                Locale.$STR("a11y.layout.box-sizing") + ": " + "$boxSizing"),
+                            SPAN({"class": "layoutZIndex v$zIndex",
+                                    "aria-label": Locale.$STR("a11y.layout.z-index")},
+                                "z: " + "$zIndex")
+                    ),
 
                     DIV({"class": "layoutLabelTop layoutLabel v$outerTop"},
                         SPAN({"class": "editable focusStart", 'aria-label' : Locale.$STR('a11y.layout.position top')}, '$outerTop')
@@ -208,6 +215,10 @@ LayoutPanel.prototype = Extend.extend(Firebug.Panel,
         args.outerLeft = args.outerRight = args.outerTop = args.outerBottom = '';
         args.outerLeftMode = args.outerRightMode = args.outerTopMode = args.outerBottomMode = "";
         args.zIndex = args.zIndex ? args.zIndex : "auto";
+
+        boxSizing = style.getPropertyCSSValue("box-sizing") ||
+            style.getPropertyCSSValue("-moz-box-sizing");
+        args.boxSizing = boxSizing.cssText;
 
         var position = style.getPropertyCSSValue("position").cssText;
         args.position = position;
