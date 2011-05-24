@@ -26,6 +26,9 @@ var document = {};   // reference these globals
 
 Win.getWindowProxyIdForWindow = function(win)
 {
+    if (!win)
+        return null;
+
     var id = Win.getWindowId(win).outerWindowID;
 
     // xxxJJB, xxxHonza: the id is often null, what could be the problem?
