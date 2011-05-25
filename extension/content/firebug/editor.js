@@ -19,7 +19,8 @@ function(Extend, Firebug, Domplate, Locale, Events, Css, Dom, Str, Arr, Menu, De
 // Constants
 
 const saveTimeout = 400;
-const pageAmount = 10;
+const largeChangeAmount = 10;
+const smallChangeAmount = 0.1;
 
 // ************************************************************************************************
 // Globals
@@ -342,8 +343,10 @@ Firebug.Editor = Extend.extend(Firebug.Module,
             this.listeners.push(
                 chrome.keyCodeListen("UP", null, Extend.bindFixed(editor.completeValue, editor, -1)),
                 chrome.keyCodeListen("DOWN", null, Extend.bindFixed(editor.completeValue, editor, 1)),
-                chrome.keyCodeListen("PAGE_UP", null, Extend.bindFixed(editor.completeValue, editor, -pageAmount)),
-                chrome.keyCodeListen("PAGE_DOWN", null, Extend.bindFixed(editor.completeValue, editor, pageAmount))
+                chrome.keyCodeListen("UP", Events.isShift, Extend.bindFixed(editor.completeValue, editor, -largeChangeAmount)),
+                chrome.keyCodeListen("DOWN", Events.isShift, Extend.bindFixed(editor.completeValue, editor, largeChangeAmount)),
+                chrome.keyCodeListen("UP", Events.isControl, Extend.bindFixed(editor.completeValue, editor, -smallChangeAmount)),
+                chrome.keyCodeListen("DOWN", Events.isControl, Extend.bindFixed(editor.completeValue, editor, smallChangeAmount))
             );
         }
 
@@ -376,8 +379,10 @@ Firebug.Editor = Extend.extend(Firebug.Module,
                     chrome.keyCodeListen("TAB", Events.isShift, Extend.bind(editor.completeValue, editor, -1)),
                     chrome.keyCodeListen("UP", null, Extend.bindFixed(editor.completeValue, editor, -1, true)),
                     chrome.keyCodeListen("DOWN", null, Extend.bindFixed(editor.completeValue, editor, 1, true)),
-                    chrome.keyCodeListen("PAGE_UP", null, Extend.bindFixed(editor.completeValue, editor, -pageAmount, true)),
-                    chrome.keyCodeListen("PAGE_DOWN", null, Extend.bindFixed(editor.completeValue, editor, pageAmount, true))
+                    chrome.keyCodeListen("UP", Events.isShift, Extend.bindFixed(editor.completeValue, editor, -largeChangeAmount)),
+                    chrome.keyCodeListen("DOWN", Events.isShift, Extend.bindFixed(editor.completeValue, editor, largeChangeAmount)),
+                    chrome.keyCodeListen("UP", Events.isControl, Extend.bindFixed(editor.completeValue, editor, -smallChangeAmount)),
+                    chrome.keyCodeListen("DOWN", Events.isControl, Extend.bindFixed(editor.completeValue, editor, smallChangeAmount))
                 );
             }
         }
@@ -745,14 +750,14 @@ Firebug.InlineEditor.prototype = domplate(Firebug.BaseEditor,
         preExpr = value.substr(0, range.start);
         postExpr = value.substr(range.end+1);
 
-        // See if the value is an integer, and if so increment it
-        var intValue = parseInt(expr);
+        // See if the value is an number, and if so increment it
+        var intValue = parseFloat(expr);
         if (!!intValue || intValue == 0)
         {
-            var m = /\d+/.exec(expr);
+            var m = /\d+(\.\d+)?/.exec(expr);
             var digitPost = expr.substr(m.index+m[0].length);
 
-            var completion = intValue-amt;
+            var completion = Math.round((intValue-amt)*100)/100; // avoid rounding errors
             this.input.value = preExpr + completion + digitPost + postExpr;
             this.input.setSelectionRange(start, end);
 
