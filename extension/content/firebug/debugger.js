@@ -1466,7 +1466,7 @@ Firebug.Debugger = Extend.extend(Firebug.ActivableModule,
         catch (e)
         {
             if (FBTrace.DBG_EVAL || FBTrace.DBG_ERRORS)
-                FBTrace.sysout("onEvalScriptCreated FaILS ", e);
+                FBTrace.sysout("onEvalScriptCreated FaILS "+e, e);
         }
     },
 
@@ -2130,7 +2130,20 @@ Firebug.Debugger = Extend.extend(Firebug.ActivableModule,
             }
             else
             {
+                // Either we failed, or this was a window.eval() call
                 var source;
+
+                if (frame.callingFrame && !this.avoidRecursing)
+                {
+                    // Try the caller, in case we are in window.eval() where the scope is global
+                    this.avoidRecursing = true;
+                    source = this.getEvalBody(frame.callingFrame, asName, asLine, evalExpr);
+                    delete this.avoidRecursing;
+                    if (FBTrace.DBG_EVAL)
+                        FBTrace.sysout("callingFrame used to get source ", source);
+                    return source;
+                }
+
                 if(evalExpr == "function(p,a,c,k,e,r")
                     source = "/packer/ JS compressor detected";
                 else
