@@ -12,10 +12,11 @@ define([
     "firebug/http/httpLib",
     "firebug/lib/string",
     "firebug/firefox/window",
+    "firebug/jsonViewer",
     "firebug/sourceCache",
 ],
 function(Obj, Firebug, Xpcom, HttpRequestObserver, HttpResponseObserver, Locale, Events,
-    Url, Http, Str, Win) {
+    Url, Http, Str, Win, JSONViewerModel) {
 
 // ********************************************************************************************* //
 // Constants
@@ -107,6 +108,11 @@ Firebug.TabCacheModel = Obj.extend(Firebug.Module,
             for (var i=0; i<list.length; i++)
                 contentTypes[list[i]] = 1;
         }
+
+        // Merge with JSON types
+        var jsonTypes = JSONViewerModel.contentTypes;
+        for (var p in jsonTypes)
+            contentTypes[jsonTypes[p]];
 
         // Register for HTTP events.
         HttpRequestObserver.addObserver(this, "firebug-http-event", false);

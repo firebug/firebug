@@ -40,6 +40,7 @@ var contentTypes =
 Firebug.JSONViewerModel = Obj.extend(Firebug.Module,
 {
     dispatchName: "jsonViewer",
+    contentTypes: contentTypes,
 
     initialize: function()
     {
