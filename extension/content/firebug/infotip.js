@@ -1,7 +1,7 @@
 /* See license.txt for terms of usage */
 
 define([
-    "firebug/lib/extend",
+    "firebug/lib/object",
     "firebug/firebug",
     "firebug/domplate",
     "firebug/lib/locale",
@@ -9,7 +9,7 @@ define([
     "firebug/lib/css",
     "firebug/lib/dom",
 ],
-function(Extend, Firebug, Domplate, Locale, Events, Css, Dom) {
+function(Obj, Firebug, Domplate, Locale, Events, Css, Dom) {
 
 // ************************************************************************************************
 // Constants
@@ -21,7 +21,7 @@ const infoTipWindowPadding = 25;
 // ************************************************************************************************
 
 with (Domplate) {
-Firebug.InfoTip = Extend.extend(Firebug.Module,
+Firebug.InfoTip = Obj.extend(Firebug.Module,
 {
     dispatchName: "infoTip",
     tags: domplate(
@@ -128,8 +128,8 @@ Firebug.InfoTip = Extend.extend(Firebug.Module,
 
     initializeBrowser: function(browser)
     {
-        browser.onInfoTipMouseOut = Extend.bind(this.onMouseOut, this, browser);
-        browser.onInfoTipMouseMove = Extend.bind(this.onMouseMove, this, browser);
+        browser.onInfoTipMouseOut = Obj.bind(this.onMouseOut, this, browser);
+        browser.onInfoTipMouseMove = Obj.bind(this.onMouseMove, this, browser);
 
         var doc = browser.contentDocument;
         if (!doc)

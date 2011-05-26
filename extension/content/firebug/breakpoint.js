@@ -1,7 +1,7 @@
 /* See license.txt for terms of usage */
 
 define([
-    "firebug/lib/extend",
+    "firebug/lib/object",
     "firebug/firebug",
     "firebug/domplate",
     "firebug/reps",
@@ -17,13 +17,13 @@ define([
     "firebug/js/fbs",
     "firebug/editor",
 ],
-function(Extend, Firebug, Domplate, FirebugReps, Locale, Events, SourceLink,
+function(Obj, Firebug, Domplate, FirebugReps, Locale, Events, SourceLink,
     StackFrame, Css, Dom, Str, Arr, Menu, FBS) {
 
 // ************************************************************************************************
 // Breakpoints
 
-Firebug.Breakpoint = Extend.extend(Firebug.Module,
+Firebug.Breakpoint = Obj.extend(Firebug.Module,
 {
     dispatchName: "breakpoints",
 
@@ -220,20 +220,20 @@ Firebug.Breakpoint.BreakpointRep = domplate(Firebug.Rep,
         var head = Dom.getAncestorByClass(target, "breakpointBlock");
         var groupName = Css.getClassValue(head, "breakpointBlock");
 
-        var items = [{label: "Remove Breakpoint", command: Extend.bindFixed(this.removeBreakpoint, this, groupName, breakpoint.href, breakpoint.lineNumber)}];
+        var items = [{label: "Remove Breakpoint", command: Obj.bindFixed(this.removeBreakpoint, this, groupName, breakpoint.href, breakpoint.lineNumber)}];
 
         if (groupName == "breakpoints")
         {
             if (breakpoint.checked)
             {
                 items.push(
-                    {label: "Disable Breakpoint", command: Extend.bindFixed(this.disableBreakpoint, this, breakpoint.href, breakpoint.lineNumber)}
+                    {label: "Disable Breakpoint", command: Obj.bindFixed(this.disableBreakpoint, this, breakpoint.href, breakpoint.lineNumber)}
                 );
             }
             else
             {
                 items.push(
-                    {label: "Enable Breakpoint", command: Extend.bindFixed(this.enableBreakpoint, this, breakpoint.href, breakpoint.lineNumber)}
+                    {label: "Enable Breakpoint", command: Obj.bindFixed(this.enableBreakpoint, this, breakpoint.href, breakpoint.lineNumber)}
                 );
             }
         }
@@ -293,7 +293,7 @@ Firebug.Breakpoint.BreakpointRep = domplate(Firebug.Rep,
 
 Firebug.Breakpoint.BreakpointsPanel = function() {}
 
-Firebug.Breakpoint.BreakpointsPanel.prototype = Extend.extend(Firebug.Panel,
+Firebug.Breakpoint.BreakpointsPanel.prototype = Obj.extend(Firebug.Panel,
 {
     name: "breakpoints",
     parentPanel: "script",
@@ -478,21 +478,21 @@ Firebug.Breakpoint.BreakpointsPanel.prototype = Extend.extend(Firebug.Panel,
         {
             items.push(
                 {label: "EnableAllBreakpoints",
-                    command: Extend.bindFixed(this.enableAllBreakpoints, this, context, true) }
+                    command: Obj.bindFixed(this.enableAllBreakpoints, this, context, true) }
             );
         }
         if (bpCount && disabledCount != bpCount)
         {
             items.push(
                 {label: "DisableAllBreakpoints",
-                    command: Extend.bindFixed(this.enableAllBreakpoints, this, context, false) }
+                    command: Obj.bindFixed(this.enableAllBreakpoints, this, context, false) }
             );
         }
 
         items.push(
             "-",
             {label: "ClearAllBreakpoints", disabled: !bpCount,
-                command: Extend.bindFixed(this.clearAllBreakpoints, this, context) }
+                command: Obj.bindFixed(this.clearAllBreakpoints, this, context) }
         );
 
         return items;
@@ -770,7 +770,7 @@ Firebug.Breakpoint.ConditionEditor.prototype = domplate(Firebug.InlineEditor.pro
         if (this.input)
             this.input.value = value;
 
-        setTimeout(Extend.bindFixed(function()
+        setTimeout(Obj.bindFixed(function()
         {
             var offset = Dom.getClientOffset(sourceLine);
 
@@ -1082,7 +1082,7 @@ Firebug.Breakpoint.BreakNotification.prototype = domplate(Firebug.Rep,
         // Render "do not show again" text
         var descNode = this.box.querySelector(".noNotificationDesc");
         FirebugReps.Description.render(Locale.$STR("firebug.breakpoint.doNotShowBreakNotification2"),
-            descNode, Extend.bind(this.onClickLink, this));
+            descNode, Obj.bind(this.onClickLink, this));
 
         // Tooltips
         if (this.cause.skipActionTooltip)

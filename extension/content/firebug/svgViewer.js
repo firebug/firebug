@@ -1,7 +1,7 @@
 /* See license.txt for terms of usage */
 
 define([
-    "firebug/lib/extend",
+    "firebug/lib/object",
     "firebug/firebug",
     "firebug/domplate",
     "firebug/lib/locale",
@@ -9,7 +9,7 @@ define([
     "firebug/lib/css",
     "firebug/http/httpLib",
 ],
-function(Extend, Firebug, Domplate, Locale, Xpcom, Css, Http) {
+function(Obj, Firebug, Domplate, Locale, Xpcom, Css, Http) {
 
 // ************************************************************************************************
 // Constants
@@ -28,7 +28,7 @@ var contentTypes =
  * tab wihin network request detail, a listener is registered into
  * <code>Firebug.NetMonitor.NetInfoBody</code> object.
  */
-Firebug.SVGViewerModel = Extend.extend(Firebug.Module,
+Firebug.SVGViewerModel = Obj.extend(Firebug.Module,
 {
     dispatchName: "svgViewer",
 

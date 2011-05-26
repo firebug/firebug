@@ -1,7 +1,7 @@
 /* See license.txt for terms of usage */
 
 define([
-    "firebug/lib/extend",
+    "firebug/lib/object",
     "firebug/firebug",
     "firebug/firefox/firefox",
     "firebug/lib/locale",
@@ -9,7 +9,7 @@ define([
     "firebug/lib/url",
     "firebug/lib/dom",
 ],
-function(Extend, Firebug, Firefox, Locale, Domplate, Url, Dom) {
+function(Obj, Firebug, Firefox, Locale, Domplate, Url, Dom) {
 
 // ************************************************************************************************
 // Constants
@@ -31,7 +31,7 @@ const privateBrowsingEnabled = ("@mozilla.org/privatebrowsing;1" in Cc) &&
  * Such panel must be derived from {@link Firebug.ActivablePanel} and appropriate activable
  * module from {@link Firebug.ActivableModule}
  */
-Firebug.PanelActivation = Extend.extend(Firebug.Module,
+Firebug.PanelActivation = Obj.extend(Firebug.Module,
 /** @lends Firebug.PanelActivation */
 {
     dispatchName: "panelActivation",

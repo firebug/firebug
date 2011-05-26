@@ -1,7 +1,7 @@
 /* See license.txt for terms of usage */
 
 define([
-    "firebug/lib/extend",
+    "firebug/lib/object",
     "firebug/firebug",
     "firebug/domplate",
     "firebug/lib/locale",
@@ -12,14 +12,14 @@ define([
     "firebug/firefox/menu",
     "firebug/editor",
 ],
-function(Extend, Firebug, Domplate, Locale, Events, Css, Dom, Xml, Menu) {
+function(Obj, Firebug, Domplate, Locale, Events, Css, Dom, Xml, Menu) {
 
 // ************************************************************************************************
 
 function LayoutPanel() {}
 
 with (Domplate) {
-LayoutPanel.prototype = Extend.extend(Firebug.Panel,
+LayoutPanel.prototype = Obj.extend(Firebug.Panel,
 {
     template: domplate(
     {
@@ -165,8 +165,8 @@ LayoutPanel.prototype = Extend.extend(Firebug.Panel,
 
     initialize: function()
     {
-        this.onMouseOver = Extend.bind(this.onMouseOver, this);
-        this.onMouseOut = Extend.bind(this.onMouseOut, this);
+        this.onMouseOver = Obj.bind(this.onMouseOver, this);
+        this.onMouseOut = Obj.bind(this.onMouseOut, this);
 
         Firebug.Panel.initialize.apply(this, arguments);
     },

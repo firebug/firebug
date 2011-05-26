@@ -1,7 +1,7 @@
 /* See license.txt for terms of usage */
 
 define([
-    "firebug/lib/extend",
+    "firebug/lib/object",
     "firebug/firebug",
     "firebug/domplate",
     "firebug/reps",
@@ -13,7 +13,7 @@ define([
     "firebug/lib/string",
     "firebug/js/fbs",
 ],
-function(Extend, Firebug, Domplate, FirebugReps, Locale, Wrapper, StackFrame, Dom, Css, Str, FBS) {
+function(Obj, Firebug, Domplate, FirebugReps, Locale, Wrapper, StackFrame, Dom, Css, Str, FBS) {
 
 // ********************************************************************************************* //
 
@@ -38,7 +38,7 @@ var MEMORY_PATHS =
 
 // ********************************************************************************************* //
 
-Firebug.MemoryProfiler = Extend.extend(Firebug.Module,
+Firebug.MemoryProfiler = Obj.extend(Firebug.Module,
 {
     dispatchName: "memoryProfiler",
 

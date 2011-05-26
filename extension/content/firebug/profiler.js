@@ -1,7 +1,7 @@
 /* See license.txt for terms of usage */
 
 define([
-    "firebug/lib/extend",
+    "firebug/lib/object",
     "firebug/firebug",
     "firebug/domplate",
     "firebug/reps",
@@ -15,7 +15,7 @@ define([
     "firebug/lib/string",
     "firebug/js/fbs",
 ],
-function(Extend, Firebug, Domplate, FirebugReps, Locale, Wrapper, Url,
+function(Obj, Firebug, Domplate, FirebugReps, Locale, Wrapper, Url,
     StackFrame, Events, Css, Dom, Str, FBS) {
 
     const Cc = Components.classes;
@@ -23,7 +23,7 @@ function(Extend, Firebug, Domplate, FirebugReps, Locale, Wrapper, Url,
 // ********************************************************************************************* //
 // Profiler
 
-Firebug.Profiler = Extend.extend(Firebug.Module,
+Firebug.Profiler = Obj.extend(Firebug.Module,
 {
     dispatchName: "profiler",
 

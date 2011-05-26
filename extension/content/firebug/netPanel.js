@@ -1,7 +1,7 @@
 /* See license.txt for terms of usage */
 
 define([
-    "firebug/lib/extend",
+    "firebug/lib/object",
     "firebug/firebug",
     "firebug/firefox/firefox",
     "firebug/domplate",
@@ -36,7 +36,7 @@ define([
     "firebug/searchBox",
     "firebug/errors",
 ],
-function(Extend, Firebug, Firefox, Domplate, Xpcom, HttpRequestObserver, Locale,
+function(Obj, Firebug, Firefox, Domplate, Xpcom, HttpRequestObserver, Locale,
     Events, Options, Url, SourceLink, Http, StackFrame, Css, Dom, Win, Search, Str, Xml,
     Json, Arr, Persist, ToggleBranch, System, Menu, DragDrop) {
 
@@ -191,7 +191,7 @@ const binaryCategoryMap =
  * This allows to avoid (performance) expensive features if the functionality is not necessary
  * for the user.
  */
-Firebug.NetMonitor = Extend.extend(Firebug.ActivableModule,
+Firebug.NetMonitor = Obj.extend(Firebug.ActivableModule,
 {
     dispatchName: "netMonitor",
 
@@ -451,7 +451,7 @@ Firebug.NetMonitor = Extend.extend(Firebug.ActivableModule,
  * features if the functionality is not necessary for the user.
  */
 function NetPanel() {}
-NetPanel.prototype = Extend.extend(Firebug.ActivablePanel,
+NetPanel.prototype = Obj.extend(Firebug.ActivablePanel,
 {
     name: panelName,
     searchable: true,
@@ -466,7 +466,7 @@ NetPanel.prototype = Extend.extend(Firebug.ActivablePanel,
             FBTrace.sysout("net.NetPanel.initialize; " + context.getName());
 
         this.queue = [];
-        this.onContextMenu = Extend.bind(this.onContextMenu, this);
+        this.onContextMenu = Obj.bind(this.onContextMenu, this);
 
         Firebug.ActivablePanel.initialize.apply(this, arguments);
     },
@@ -480,7 +480,7 @@ NetPanel.prototype = Extend.extend(Firebug.ActivablePanel,
     {
         this.panelNode.addEventListener("contextmenu", this.onContextMenu, false);
 
-        this.onResizer = Extend.bind(this.onResize, this);
+        this.onResizer = Obj.bind(this.onResize, this);
         this.resizeEventTarget = Firebug.chrome.$('fbContentBox');
         this.resizeEventTarget.addEventListener("resize", this.onResizer, true);
 
@@ -576,7 +576,7 @@ NetPanel.prototype = Extend.extend(Firebug.ActivablePanel,
         this.layout();
 
         if (!this.layoutInterval)
-            this.layoutInterval = setInterval(Extend.bindFixed(this.updateLayout, this), layoutInterval);
+            this.layoutInterval = setInterval(Obj.bindFixed(this.updateLayout, this), layoutInterval);
 
         if (this.wasScrolledToBottom)
             Dom.scrollToBottom(this.panelNode);
@@ -679,39 +679,39 @@ NetPanel.prototype = Extend.extend(Firebug.ActivablePanel,
         var isPost = Utils.isURLEncodedRequest(file, this.context);
 
         items.push(
-            {label: "CopyLocation", command: Extend.bindFixed(System.copyToClipboard, System, file.href) }
+            {label: "CopyLocation", command: Obj.bindFixed(System.copyToClipboard, System, file.href) }
         );
 
         if (isPost)
         {
             items.push(
-                {label: "CopyLocationParameters", command: Extend.bindFixed(this.copyParams, this, file) }
+                {label: "CopyLocationParameters", command: Obj.bindFixed(this.copyParams, this, file) }
             );
         }
 
         items.push(
             {label: "CopyRequestHeaders",
-                command: Extend.bindFixed(this.copyHeaders, this, file.requestHeaders) },
+                command: Obj.bindFixed(this.copyHeaders, this, file.requestHeaders) },
             {label: "CopyResponseHeaders",
-                command: Extend.bindFixed(this.copyHeaders, this, file.responseHeaders) }
+                command: Obj.bindFixed(this.copyHeaders, this, file.responseHeaders) }
         );
 
         if (textFileCategories.hasOwnProperty(file.category))
         {
             items.push(
-                {label: "CopyResponse", command: Extend.bindFixed(this.copyResponse, this, file) }
+                {label: "CopyResponse", command: Obj.bindFixed(this.copyResponse, this, file) }
             );
         }
 
         items.push(
             "-",
-            {label: "OpenInTab", command: Extend.bindFixed(this.openRequestInTab, this, file) }
+            {label: "OpenInTab", command: Obj.bindFixed(this.openRequestInTab, this, file) }
         );
 
         if (textFileCategories.hasOwnProperty(file.category))
         {
             items.push(
-                {label: "Open Response In New Tab", command: Extend.bindFixed(this.openResponseInTab, this, file) }
+                {label: "Open Response In New Tab", command: Obj.bindFixed(this.openResponseInTab, this, file) }
             );
         }
 
@@ -719,7 +719,7 @@ NetPanel.prototype = Extend.extend(Firebug.ActivablePanel,
         {
             items.push(
                 "-",
-                {label: "StopLoading", command: Extend.bindFixed(this.stopLoading, this, file) }
+                {label: "StopLoading", command: Obj.bindFixed(this.stopLoading, this, file) }
             );
         }
 
@@ -740,14 +740,14 @@ NetPanel.prototype = Extend.extend(Firebug.ActivablePanel,
             items.push(
                 "-",
                 {label: "net.label.Break On XHR", type: "checkbox", checked: !!bp,
-                    command: Extend.bindFixed(this.breakOnRequest, this, file) }
+                    command: Obj.bindFixed(this.breakOnRequest, this, file) }
             );
 
             if (bp)
             {
                 items.push(
                     {label: "EditBreakpointCondition",
-                        command: Extend.bindFixed(this.editBreakpointCondition, this, file) }
+                        command: Obj.bindFixed(this.editBreakpointCondition, this, file) }
                 );
             }
         }
@@ -1914,7 +1914,7 @@ Firebug.NetMonitor.NetRequestTable = domplate(Firebug.Rep, new Firebug.Listener(
                 type: "checkbox",
                 checked: visible,
                 nol10n: true,
-                command: Extend.bindFixed(this.onShowColumn, this, context, column.id)
+                command: Obj.bindFixed(this.onShowColumn, this, context, column.id)
             });
 
             if (visible)
@@ -1932,7 +1932,7 @@ Firebug.NetMonitor.NetRequestTable = domplate(Firebug.Rep, new Firebug.Listener(
         items.push({
             label: Locale.$STR("net.header.Reset_Header"),
             nol10n: true,
-            command: Extend.bindFixed(this.onResetColumns, this, context)
+            command: Obj.bindFixed(this.onResetColumns, this, context)
         });
 
         return items;
@@ -2623,9 +2623,9 @@ Firebug.NetMonitor.NetInfoBody = domplate(Firebug.Rep, new Firebug.Listener(),
 
             var handler = netInfoBox.querySelector(".htmlPreviewResizer");
             this.resizer = new DragDrop.Tracker(handler, {
-                onDragStart: Extend.bind(this.onDragStart, this),
-                onDragOver: Extend.bind(this.onDragOver, this),
-                onDrop: Extend.bind(this.onDrop, this)
+                onDragStart: Obj.bind(this.onDragStart, this),
+                onDragOver: Obj.bind(this.onDragOver, this),
+                onDrop: Obj.bind(this.onDrop, this)
             });
         }
 
@@ -3600,7 +3600,7 @@ NetProgress.prototype =
             this.context.breakingCause = {
                 title: Locale.$STR("net.Break On XHR"),
                 message: Str.cropString(file.href, 200),
-                copyAction: Extend.bindFixed(System.copyToClipboard, System, file.href)
+                copyAction: Obj.bindFixed(System.copyToClipboard, System, file.href)
             };
 
             halt = true;
@@ -5645,8 +5645,8 @@ function Breakpoint(href)
     this.href = href;
     this.checked = true;
     this.condition = "";
-    this.onEvaluateFails = Extend.bind(this.onEvaluateFails, this);
-    this.onEvaluateSucceeds =  Extend.bind(this.onEvaluateSucceeds, this);
+    this.onEvaluateFails = Obj.bind(this.onEvaluateFails, this);
+    this.onEvaluateSucceeds =  Obj.bind(this.onEvaluateSucceeds, this);
 }
 
 Breakpoint.prototype =
@@ -5723,7 +5723,7 @@ function NetBreakpointGroup()
     this.breakpoints = [];
 }
 
-NetBreakpointGroup.prototype = Extend.extend(new Firebug.Breakpoint.BreakpointGroup(),
+NetBreakpointGroup.prototype = Obj.extend(new Firebug.Breakpoint.BreakpointGroup(),
 {
     name: "netBreakpoints",
     title: Locale.$STR("net.label.XHR Breakpoints"),

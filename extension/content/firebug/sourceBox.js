@@ -1,7 +1,7 @@
 /* See license.txt for terms of usage */
 
 define([
-    "firebug/lib/extend",
+    "firebug/lib/object",
     "firebug/firebug",
     "arch/compilationunit",
     "firebug/lib/events",
@@ -10,7 +10,7 @@ define([
     "firebug/lib/dom",
     "firebug/lib/string",
 ],
-function(Extend, Firebug, CompilationUnit, Events, SourceLink, Css, Dom, Str) {
+function(Obj, Firebug, CompilationUnit, Events, SourceLink, Css, Dom, Str) {
 
 // ************************************************************************************************
 
@@ -88,13 +88,13 @@ Firebug.SourceBoxDecorator.prototype =
  */
 Firebug.SourceBoxPanel = function() {};
 
-var SourceBoxPanelBase = Extend.extend(Firebug.MeasureBox, Firebug.ActivablePanel);
-Firebug.SourceBoxPanel = Extend.extend(SourceBoxPanelBase,
+var SourceBoxPanelBase = Obj.extend(Firebug.MeasureBox, Firebug.ActivablePanel);
+Firebug.SourceBoxPanel = Obj.extend(SourceBoxPanelBase,
 /** @lends Firebug.SourceBoxPanel */
 {
     initialize: function(context, doc)
     {
-        this.onResize =  Extend.bind(this.resizer, this);
+        this.onResize =  Obj.bind(this.resizer, this);
         this.sourceBoxes = {};
         this.decorator = this.getDecorator();
 
@@ -548,7 +548,7 @@ Firebug.SourceBoxPanel = Extend.extend(SourceBoxPanelBase,
             this.selectedSourceBox.scrollTop = this.selectedSourceBox.newScrollTop; // *may* cause scrolling
         }
 
-        this.context.scrollTimeout = this.context.setTimeout(Extend.bindFixed(function()
+        this.context.scrollTimeout = this.context.setTimeout(Obj.bindFixed(function()
         {
             if (!this.selectedSourceBox)
             {
@@ -681,7 +681,7 @@ Firebug.SourceBoxPanel = Extend.extend(SourceBoxPanelBase,
         var compilationUnit = sourceBox.repObject;
         compilationUnit.pendingViewRange = viewRange;
         compilationUnit.getSourceLines(viewRange.firstLine, viewRange.lastLine,
-            Extend.bind(this.onSourceLinesAvailable, this));
+            Obj.bind(this.onSourceLinesAvailable, this));
     },
 
     reViewOnSourceLinesAvailable: function(sourceBox, viewRange)
@@ -1050,7 +1050,7 @@ Firebug.SourceBoxPanel = Extend.extend(SourceBoxPanelBase,
         // scroll-bar thumb (or quickly clicking on scroll-arrows), the source code is
         // not decorated (the timeout cleared by the code above) and the scrolling is fast.
         this.context.sourceBoxDecoratorTimeout = this.context.setTimeout(
-            Extend.bindFixed(this.asyncDecorating, this, sourceBox), 150);
+            Obj.bindFixed(this.asyncDecorating, this, sourceBox), 150);
 
         if (this.context.sourceBoxHighlighterTimeout)
         {
@@ -1061,7 +1061,7 @@ Firebug.SourceBoxPanel = Extend.extend(SourceBoxPanelBase,
         // Source code highlighting is using different timeout: 0ms. When searching
         // within the Script panel, the user expects immediate response.
         this.context.sourceBoxHighlighterTimeout = this.context.setTimeout(
-            Extend.bindFixed(this.asyncHighlighting, this, sourceBox));
+            Obj.bindFixed(this.asyncHighlighting, this, sourceBox));
 
         if (FBTrace.DBG_COMPILATION_UNITS)
             FBTrace.sysout("applyDecorator "+sourceBox.repObject.url+" sourceBox.highlighter "+sourceBox.highlighter, sourceBox);

@@ -1,7 +1,7 @@
 /* See license.txt for terms of usage */
 
 define([
-    "firebug/lib/extend",
+    "firebug/lib/object",
     "firebug/firebug",
     "firebug/firefox/firefox",
     "firebug/reps",
@@ -18,7 +18,7 @@ define([
     "firebug/searchBox",
     //"firebug/errors", circular dependency: console->errors->console
 ],
-function(Extend, Firebug, Firefox, FirebugReps, Locale, Events, Css, Dom,
+function(Obj, Firebug, Firefox, FirebugReps, Locale, Events, Css, Dom,
     Win, Search, Xml, Menu, Options) {
 
 // ************************************************************************************************
@@ -157,9 +157,9 @@ Firebug.ConsoleBase =
 
 // ************************************************************************************************
 
-var ActivableConsole = Extend.extend(Firebug.ActivableModule, Firebug.ConsoleBase);
+var ActivableConsole = Obj.extend(Firebug.ActivableModule, Firebug.ConsoleBase);
 
-Firebug.Console = Extend.extend(ActivableConsole,
+Firebug.Console = Obj.extend(ActivableConsole,
 {
     dispatchName: "console",
     toolName: "console",
@@ -473,7 +473,7 @@ Firebug.ConsoleListener =
 
 Firebug.ConsolePanel = function () {};
 
-Firebug.ConsolePanel.prototype = Extend.extend(Firebug.ActivablePanel,
+Firebug.ConsolePanel.prototype = Obj.extend(Firebug.ActivablePanel,
 {
     wasScrolledToBottom: false,
     messageCount: 0,
@@ -766,10 +766,10 @@ Firebug.ConsolePanel.prototype = Extend.extend(Firebug.ActivablePanel,
     {
         Firebug.ActivablePanel.initializeNode.apply(this, arguments);
 
-        this.onScroller = Extend.bind(this.onScroll, this);
+        this.onScroller = Obj.bind(this.onScroll, this);
         this.panelNode.addEventListener("scroll", this.onScroller, true);
 
-        this.onResizer = Extend.bind(this.onResize, this);
+        this.onResizer = Obj.bind(this.onResize, this);
         this.resizeEventTarget = Firebug.chrome.$('fbContentBox');
         this.resizeEventTarget.addEventListener("resize", this.onResizer, true);
     },
@@ -932,7 +932,7 @@ Firebug.ConsolePanel.prototype = Extend.extend(Firebug.ActivablePanel,
             label: "JavascriptOptionsStrict",
             type: "checkbox",
             checked: strictValue,
-            command: Extend.bindFixed(Options.setPref, Options,
+            command: Obj.bindFixed(Options.setPref, Options,
                 strictDomain, strictName, !strictValue)
         };
     },
@@ -1023,7 +1023,7 @@ Firebug.ConsolePanel.prototype = Extend.extend(Firebug.ActivablePanel,
 
             // Search after a delay because we must wait for a frame to be created for
             // the new logRow so that the finder will be able to locate it
-            setTimeout(Extend.bindFixed(function()
+            setTimeout(Obj.bindFixed(function()
             {
                 if (this.searchFilter(this.searchText, logRow))
                     this.matchSet.push(logRow);

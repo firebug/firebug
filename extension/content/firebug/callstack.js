@@ -1,7 +1,7 @@
 /* See license.txt for terms of usage */
 
 define([
-    "firebug/lib/extend",
+    "firebug/lib/object",
     "firebug/firebug",
     "firebug/reps",
     "arch/javascripttool",
@@ -13,7 +13,7 @@ define([
     "firebug/lib/dom",
     "firebug/firefox/menu",
 ],
-function(Extend, Firebug, FirebugReps, JavaScriptTool, Events, Wrapper, StackFrame,
+function(Obj, Firebug, FirebugReps, JavaScriptTool, Events, Wrapper, StackFrame,
     Css, Arr, Dom, Menu) {
 
 // ************************************************************************************************
@@ -31,7 +31,7 @@ const Ci = Components.interfaces;
  * panel.
  */
 Firebug.CallstackPanel = function() {}
-Firebug.CallstackPanel.prototype = Extend.extend(Firebug.Panel,
+Firebug.CallstackPanel.prototype = Obj.extend(Firebug.Panel,
 /** @lends Firebug.CallstackPanel */
 {
     name: "callstack",
@@ -242,8 +242,8 @@ Firebug.CallstackPanel.prototype = Extend.extend(Firebug.Panel,
     {
         FBTrace.sysout("panel.getContextMenuItems", Arr.cloneArray(arguments));
         var items = [
-            {label: "Expand All", command: Extend.bindFixed(this.onExpandAll, this, target)},
-            {label: "Collapse All", command: Extend.bindFixed(this.onCollapseAll, this, target)}
+            {label: "Expand All", command: Obj.bindFixed(this.onExpandAll, this, target)},
+            {label: "Collapse All", command: Obj.bindFixed(this.onCollapseAll, this, target)}
         ];
         return items;
     },

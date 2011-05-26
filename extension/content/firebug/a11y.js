@@ -1,7 +1,7 @@
 /* See license.txt for terms of usage */
 
 define([
-    "firebug/lib/extend",
+    "firebug/lib/object",
     "firebug/firebug",
     "firebug/domplate",
     "firebug/lib/locale",
@@ -14,7 +14,7 @@ define([
     "firebug/console",
     "firebug/infotip",
 ],
-function(Extend, Firebug, Domplate, Locale, Events, Url, Css, Dom, Xml, Xpath) {
+function(Obj, Firebug, Domplate, Locale, Events, Url, Css, Dom, Xml, Xpath) {
 
 // ************************************************************************************************
 // Constants
@@ -26,7 +26,7 @@ var KeyEvent = window.KeyEvent;
 // ************************************************************************************************
 // Module Management
 
-Firebug.A11yModel = Extend.extend(Firebug.Module,
+Firebug.A11yModel = Obj.extend(Firebug.Module,
 {
     dispatchName: "a11y",
 
@@ -34,28 +34,28 @@ Firebug.A11yModel = Extend.extend(Firebug.Module,
     {
         Firebug.Module.initialize.apply(this, arguments);
 
-        this.handleTabBarFocus = Extend.bind(this.handleTabBarFocus, this);
-        this.handleTabBarBlur = Extend.bind(this.handleTabBarBlur, this);
-        this.handlePanelBarKeyPress = Extend.bind(this.handlePanelBarKeyPress, this);
-        this.onNavigablePanelKeyPress = Extend.bind(this.onNavigablePanelKeyPress, this);
-        this.onConsoleMouseDown = Extend.bind(this.onConsoleMouseDown, this);
-        this.onLayoutKeyPress = Extend.bind(this.onLayoutKeyPress, this);
-        this.onCSSKeyPress = Extend.bind(this.onCSSKeyPress, this);
-        this.onCSSMouseDown = Extend.bind(this.onCSSMouseDown, this);
-        this.onHTMLKeyPress = Extend.bind(this.onHTMLKeyPress, this);
-        this.onHTMLFocus = Extend.bind(this.onHTMLFocus, this);
-        this.onHTMLBlur = Extend.bind(this.onHTMLBlur, this);
-        this.onPanelFocus = Extend.bind(this.onPanelFocus, this);
-        this.onLayoutFocus = Extend.bind(this.onLayoutFocus, this);
-        this.onLayoutBlur = Extend.bind(this.onLayoutBlur, this);
-        this.onScriptContextMenu = Extend.bind(this.onScriptContextMenu, this);
-        this.onCSSPanelContextMenu = Extend.bind(this.onCSSPanelContextMenu, this);
-        this.onScriptKeyPress = Extend.bind(this.onScriptKeyPress, this);
-        this.onScriptKeyUp = Extend.bind(this.onScriptKeyUp, this);
-        this.onScriptMouseUp = Extend.bind(this.onScriptMouseUp, this);
-        this.onNetMouseDown = Extend.bind(this.onNetMouseDown, this);
-        this.onNetFocus = Extend.bind(this.onNetFocus, this);
-        this.onNetBlur = Extend.bind(this.onNetBlur, this);
+        this.handleTabBarFocus = Obj.bind(this.handleTabBarFocus, this);
+        this.handleTabBarBlur = Obj.bind(this.handleTabBarBlur, this);
+        this.handlePanelBarKeyPress = Obj.bind(this.handlePanelBarKeyPress, this);
+        this.onNavigablePanelKeyPress = Obj.bind(this.onNavigablePanelKeyPress, this);
+        this.onConsoleMouseDown = Obj.bind(this.onConsoleMouseDown, this);
+        this.onLayoutKeyPress = Obj.bind(this.onLayoutKeyPress, this);
+        this.onCSSKeyPress = Obj.bind(this.onCSSKeyPress, this);
+        this.onCSSMouseDown = Obj.bind(this.onCSSMouseDown, this);
+        this.onHTMLKeyPress = Obj.bind(this.onHTMLKeyPress, this);
+        this.onHTMLFocus = Obj.bind(this.onHTMLFocus, this);
+        this.onHTMLBlur = Obj.bind(this.onHTMLBlur, this);
+        this.onPanelFocus = Obj.bind(this.onPanelFocus, this);
+        this.onLayoutFocus = Obj.bind(this.onLayoutFocus, this);
+        this.onLayoutBlur = Obj.bind(this.onLayoutBlur, this);
+        this.onScriptContextMenu = Obj.bind(this.onScriptContextMenu, this);
+        this.onCSSPanelContextMenu = Obj.bind(this.onCSSPanelContextMenu, this);
+        this.onScriptKeyPress = Obj.bind(this.onScriptKeyPress, this);
+        this.onScriptKeyUp = Obj.bind(this.onScriptKeyUp, this);
+        this.onScriptMouseUp = Obj.bind(this.onScriptMouseUp, this);
+        this.onNetMouseDown = Obj.bind(this.onNetMouseDown, this);
+        this.onNetFocus = Obj.bind(this.onNetFocus, this);
+        this.onNetBlur = Obj.bind(this.onNetBlur, this);
 
         // mark ourselves disabled so we don't performDisable() if we are not enabled.
         Firebug.chrome.window.a11yEnabled = false;
@@ -437,7 +437,7 @@ Firebug.A11yModel = Extend.extend(Firebug.Module,
                         if (siblingTab)
                         {
                             var panelBar = Dom.getAncestorByClass(target, 'panelBar')
-                            setTimeout(Extend.bindFixed(function()
+                            setTimeout(Obj.bindFixed(function()
                             {
                                 panelBar.selectTab(siblingTab);
                                 this.focus(siblingTab);
@@ -458,7 +458,7 @@ Firebug.A11yModel = Extend.extend(Firebug.Module,
                            //temporarily make all buttons in the toolbar part of the tab order,
                            //to allow smooth, native focus advancement
                            Css.setClass(toolbar, 'hasTabOrder');
-                           setTimeout(Extend.bindFixed(function() // time out needed to fix this behavior in 3.6
+                           setTimeout(Obj.bindFixed(function() // time out needed to fix this behavior in 3.6
                            {
                                doc.commandDispatcher[forward ? 'advanceFocus' : 'rewindFocus']();
                                //remove the buttons from the tab order again, so that it will remain uncluttered

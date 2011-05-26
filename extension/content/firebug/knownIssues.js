@@ -1,12 +1,12 @@
 /* See license.txt for terms of usage */
 
 define([
-    "firebug/lib/extend",
+    "firebug/lib/object",
     "firebug/lib/options",
     "firebug/firebug",
     "firebug/lib/dom",
 ],
-function(Extend, Options, Firebug, Dom) {
+function(Obj, Options, Firebug, Dom) {
 
 // ********************************************************************************************* //
 // Constants
@@ -22,7 +22,7 @@ const appInfo = Cc["@mozilla.org/xre/app-info;1"].getService(Ci.nsIXULAppInfo);
 /**
  * This module is responsible for varisous hacky solutions related to known issues.
  */
-Firebug.KnownIssues = Extend.extend(Firebug.Module,
+Firebug.KnownIssues = Obj.extend(Firebug.Module,
 /** @lends Firebug.KnownIssues */
 {
     dispatchName: "knownIssues",

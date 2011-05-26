@@ -2,11 +2,11 @@
 
 define([
     "firebug/lib",
-    "firebug/lib/extend",
+    "firebug/lib/object",
     "firebug/firebug",
     "firebug/firefox/firefox",
 ],
-function(FBL, Extend, Firebug, Firefox) {
+function(FBL, Obj, Firebug, Firefox) {
 
 // ************************************************************************************************
 // Constants
@@ -22,7 +22,7 @@ var KeyEvent = window.KeyEvent;
 /**
  * ShortcutsModel object implements keyboard shortcuts logic.
  */
-Firebug.ShortcutsModel = Extend.extend(Firebug.Module,
+Firebug.ShortcutsModel = Obj.extend(Firebug.Module,
 {
     dispatchName: "shortcuts",
 

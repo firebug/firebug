@@ -1,7 +1,7 @@
 /* See license.txt for terms of usage */
 
 define([
-    "firebug/lib/extend",
+    "firebug/lib/object",
     "firebug/firebug",
     "firebug/domplate",
     "firebug/reps",
@@ -20,7 +20,7 @@ define([
     "firebug/netPanel",
     "firebug/errors",
 ],
-function(Extend, Firebug, Domplate, FirebugReps, Events, HttpRequestObserver, StackFrame,
+function(Obj, Firebug, Domplate, FirebugReps, Events, HttpRequestObserver, StackFrame,
     Http, Css, Dom, Win, System, Str, Url, Arr, Debug) {
 
 // ************************************************************************************************
@@ -44,7 +44,7 @@ var contexts = [];
  * The module is responsible for attaching/detaching a HTTP Observers when Firebug is
  * activated/deactivated for a site.
  */
-Firebug.Spy = Extend.extend(Firebug.Module,
+Firebug.Spy = Obj.extend(Firebug.Module,
 /** @lends Firebug.Spy */
 {
     dispatchName: "spy",
@@ -395,7 +395,7 @@ var SpyHttpObserver =
  * @class This observer is used to properly monitor even mulipart XHRs. It's based on
  * an activity-observer component that has been introduced in Firefox 3.6.
  */
-var SpyHttpActivityObserver = Extend.extend(Firebug.NetMonitor.NetHttpActivityObserver,
+var SpyHttpActivityObserver = Obj.extend(Firebug.NetMonitor.NetHttpActivityObserver,
 /** @lends SpyHttpActivityObserver */
 {
     activeRequests: [],
@@ -926,20 +926,20 @@ Firebug.Spy.XHR = domplate(Firebug.Rep,
     getContextMenuItems: function(spy)
     {
         var items = [
-            {label: "CopyLocation", command: Extend.bindFixed(this.copyURL, this, spy) }
+            {label: "CopyLocation", command: Obj.bindFixed(this.copyURL, this, spy) }
         ];
 
         if (spy.postText)
         {
             items.push(
-                {label: "CopyLocationParameters", command: Extend.bindFixed(this.copyParams, this, spy) }
+                {label: "CopyLocationParameters", command: Obj.bindFixed(this.copyParams, this, spy) }
             );
         }
 
         items.push(
-            {label: "CopyResponse", command: Extend.bindFixed(this.copyResponse, this, spy) },
+            {label: "CopyResponse", command: Obj.bindFixed(this.copyResponse, this, spy) },
             "-",
-            {label: "OpenInTab", command: Extend.bindFixed(this.openInTab, this, spy) }
+            {label: "OpenInTab", command: Obj.bindFixed(this.openInTab, this, spy) }
         );
 
         return items;

@@ -9,26 +9,26 @@ function(FBTrace, Arr, Str) {
 
 // ********************************************************************************************* //
 
-var Extend = {};
+var Obj = {};
 
 // ********************************************************************************************* //
 
-Extend.bind = function()  // fn, thisObject, args => thisObject.fn(arguments, args);
+Obj.bind = function()  // fn, thisObject, args => thisObject.fn(arguments, args);
 {
    var args = Arr.cloneArray(arguments), fn = args.shift(), object = args.shift();
    return function bind() { return fn.apply(object, Arr.arrayInsert(Arr.cloneArray(args), 0, arguments)); }
 };
 
-Extend.bindFixed = function() // fn, thisObject, args => thisObject.fn(args);
+Obj.bindFixed = function() // fn, thisObject, args => thisObject.fn(args);
 {
     var args = Arr.cloneArray(arguments), fn = args.shift(), object = args.shift();
     return function() { return fn.apply(object, args); }
 };
 
-Extend.extend = function(l, r)
+Obj.extend = function(l, r)
 {
     if (!l || !r)
-        throw new Error("Extend.extend on undefined object");
+        throw new Error("Obj.extend on undefined object");
 
     var newOb = {};
     for (var n in l)
@@ -38,7 +38,7 @@ Extend.extend = function(l, r)
     return newOb;
 };
 
-Extend.descend = function(prototypeParent, childProperties)
+Obj.descend = function(prototypeParent, childProperties)
 {
     function protoSetter() {};
     protoSetter.prototype = prototypeParent;
@@ -50,7 +50,7 @@ Extend.descend = function(prototypeParent, childProperties)
 
 // ************************************************************************************************
 
-Extend.hasProperties = function(ob)
+Obj.hasProperties = function(ob)
 {
     try
     {
@@ -78,7 +78,7 @@ Extend.hasProperties = function(ob)
     return false;
 };
 
-Extend.getPrototype = function(ob)
+Obj.getPrototype = function(ob)
 {
     try
     {
@@ -88,18 +88,18 @@ Extend.getPrototype = function(ob)
 };
 
 
-Extend.getUniqueId = function()
+Obj.getUniqueId = function()
 {
     return this.getRandomInt(0,65536);
 }
 
-Extend.getRandomInt = function(min, max)
+Obj.getRandomInt = function(min, max)
 {
     return Math.floor(Math.random() * (max - min + 1) + min);
 }
 
 // Cross Window instanceof; type is local to this window
-Extend.XW_instanceof = function(obj, type)
+Obj.XW_instanceof = function(obj, type)
 {
     if (obj instanceof type)
         return true;  // within-window test
@@ -129,7 +129,7 @@ Extend.XW_instanceof = function(obj, type)
 
 // ********************************************************************************************* //
 
-return Extend;
+return Obj;
 
 // ********************************************************************************************* //
 });

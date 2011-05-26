@@ -1,7 +1,7 @@
 /* See license.txt for terms of usage */
 
 define([
-    "firebug/lib/extend",
+    "firebug/lib/object",
     "firebug/firebug",
     "firebug/reps",
     "firebug/lib/locale",
@@ -14,7 +14,7 @@ define([
     "firebug/consoleExposed",
     "firebug/errors",
 ],
-function(Extend, Firebug, FirebugReps, Locale, Events, Url, StackFrame, Win, Console, Arr) {
+function(Obj, Firebug, FirebugReps, Locale, Events, Url, StackFrame, Win, Console, Arr) {
 
 // ********************************************************************************************* //
 // Constants
@@ -187,7 +187,7 @@ function createConsoleHandler(context, win)
     handler.context = context;
 
     // When raised on our injected element, callback to Firebug and append to console
-    handler.boundHandler = Extend.bind(handler.handleEvent, handler);
+    handler.boundHandler = Obj.bind(handler.handleEvent, handler);
     win.document.addEventListener('firebugAppendConsole', handler.boundHandler, true); // capturing
 
     if (FBTrace.DBG_CONSOLE)

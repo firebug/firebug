@@ -1,14 +1,14 @@
 /* See license.txt for terms of usage */
 
 define([
-    "firebug/lib/extend",
+    "firebug/lib/object",
     "firebug/firebug",
     "firebug/lib/xpcom",
     "firebug/lib/url",
     "firebug/http/httpLib",
     "firebug/lib/string",
 ],
-function(Extend, Firebug, Xpcom, Url, Http, Str) {
+function(Obj, Firebug, Xpcom, Url, Http, Str) {
 
 // ************************************************************************************************
 // Constants
@@ -40,7 +40,7 @@ Firebug.SourceCache = function(context)
     this.cache = {};
 };
 
-Firebug.SourceCache.prototype = Extend.extend(new Firebug.Listener(),
+Firebug.SourceCache.prototype = Obj.extend(new Firebug.Listener(),
 {
     isCached: function(url)
     {

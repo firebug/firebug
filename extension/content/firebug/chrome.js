@@ -4,7 +4,7 @@
  * The 'context' in this file is always 'Firebug.currentContext'
  */
 define([
-    "firebug/lib/extend",
+    "firebug/lib/object",
     "firebug/firefox/firefox",
     "firebug/lib/dom",
     "firebug/lib/css",
@@ -17,7 +17,7 @@ define([
     "firebug/js/fbs",
     "firebug/firefox/window",
 ],
-function chromeFactory(Extend, Firefox, Dom, Css, System, Menu, Url, Locale, String,
+function chromeFactory(Obj, Firefox, Dom, Css, System, Menu, Url, Locale, String,
     Events, FBS, Win) {
 
 // ************************************************************************************************
@@ -1523,8 +1523,8 @@ var KeyBindingsManager =
 {
     initialize: function()
     {
-        this.onFocus = Extend.bind(this.onFocus, this);
-        this.onBlur = Extend.bind(this.onBlur, this);
+        this.onFocus = Obj.bind(this.onFocus, this);
+        this.onBlur = Obj.bind(this.onBlur, this);
 
         var contentBox = FirebugChrome.$("fbContentBox");
         if (contentBox)

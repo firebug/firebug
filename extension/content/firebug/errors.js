@@ -1,7 +1,7 @@
 /* See license.txt for terms of usage */
 
 define([
-    "firebug/lib/extend",
+    "firebug/lib/object",
     "firebug/firebug",
     "firebug/reps",
     "firebug/lib/xpcom",
@@ -10,7 +10,7 @@ define([
     "firebug/firefox/window",
     "firebug/lib/array",
 ],
-function(Extend, Firebug, FirebugReps, Xpcom, Console, Css, Win, Arr) {
+function(Obj, Firebug, FirebugReps, Xpcom, Console, Css, Win, Arr) {
 
 // **********************************************************************************************//
 // Constants
@@ -49,7 +49,7 @@ const domWindowUtils = window.QueryInterface(Ci.nsIInterfaceRequestor)
 
 // ********************************************************************************************* //
 
-var Errors = Firebug.Errors = Extend.extend(Firebug.Module,
+var Errors = Firebug.Errors = Obj.extend(Firebug.Module,
 {
     dispatchName: "errors",
 

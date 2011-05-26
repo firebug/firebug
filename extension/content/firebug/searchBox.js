@@ -1,13 +1,13 @@
 /* See license.txt for terms of usage */
 
 define([
-    "firebug/lib/extend",
+    "firebug/lib/object",
     "firebug/firebug",
     "firebug/lib/css",
     "firebug/lib/search",
     "firebug/firefox/system",
 ],
-function(Extend, Firebug, Css, Search, System) {
+function(Obj, Firebug, Css, Search, System) {
 
 // ************************************************************************************************
 // Constants
@@ -23,7 +23,7 @@ const searchDelay = 150;
  * available for panels that have <code>searchable<code> property set to true (set to
  * false by default).
  */
-Firebug.Search = Extend.extend(Firebug.Module,
+Firebug.Search = Obj.extend(Firebug.Module,
 {
     dispatchName: "search",
 
@@ -167,7 +167,7 @@ Firebug.Search = Extend.extend(Firebug.Module,
     searchOptionMenu: function(label, option)
     {
         return { label: label, checked: Firebug[option], option: option,
-            command: Extend.bindFixed(this.onToggleSearchOption, this, option) };
+            command: Obj.bindFixed(this.onToggleSearchOption, this, option) };
     },
 
     onToggleSearchOption: function(option)

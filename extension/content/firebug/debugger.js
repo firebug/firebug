@@ -1,7 +1,7 @@
 /* See license.txt for terms of usage */
 
 define([
-    "firebug/lib/extend",
+    "firebug/lib/object",
     "firebug/firebug",
     "firebug/firefox/firefox",
     "arch/compilationunit",
@@ -21,7 +21,7 @@ define([
     "firebug/js/fbs",
     "firebug/errors",
 ],
-function(Extend, Firebug, Firefox, CompilationUnit, Xpcom, FirebugReps, Locale, HttpRequestObserver,
+function(Obj, Firebug, Firefox, CompilationUnit, Xpcom, FirebugReps, Locale, HttpRequestObserver,
     Wrapper, Url, SourceLink, StackFrame, Css, Win, Str, Arr, Debug, FBS) {
 
 // ********************************************************************************************* //
@@ -66,7 +66,7 @@ var jsd = Cc["@mozilla.org/js/jsd/debugger-service;1"].getService(Ci.jsdIDebugge
 
 // ************************************************************************************************
 
-Firebug.Debugger = Extend.extend(Firebug.ActivableModule,
+Firebug.Debugger = Obj.extend(Firebug.ActivableModule,
 {
     dispatchName: "debugger",
     fbs: FBS, // access to firebug-service in chromebug under browser.xul.Dom.Firebug.Debugger.fbs
@@ -293,7 +293,7 @@ Firebug.Debugger = Extend.extend(Firebug.ActivableModule,
             this.freeze(context);
 
             // We will pause here until resume is called
-            var depth = FBS.enterNestedEventLoop({onNest: Extend.bindFixed(this.startDebugging, this, context)});
+            var depth = FBS.enterNestedEventLoop({onNest: Obj.bindFixed(this.startDebugging, this, context)});
             // For some reason we don't always end up here
 
             if (FBTrace.DBG_UI_LOOP)
@@ -1354,7 +1354,7 @@ Firebug.Debugger = Extend.extend(Firebug.ActivableModule,
                     {
                         title: Locale.$STR("Break on Error"),
                         message: error.message,
-                        copyAction: Extend.bindFixed(FirebugReps.ErrorMessage.copyError,
+                        copyAction: Obj.bindFixed(FirebugReps.ErrorMessage.copyError,
                             FirebugReps.ErrorMessage, error),
 
                         skipAction: function addSkipperAndGo()
@@ -1493,7 +1493,7 @@ Firebug.Debugger = Extend.extend(Firebug.ActivableModule,
 
         } catch (exc) {
             /*Bug 426692 */
-            var source = creatorURL + "/"+Extend.getUniqueId();
+            var source = creatorURL + "/"+Obj.getUniqueId();
         }
 
         var lines = Str.splitLines(source);
@@ -2165,7 +2165,7 @@ Firebug.Debugger = Extend.extend(Firebug.ActivableModule,
         Firebug.clientID = this.registerClient(Firebug.JSDebugClient);
         this.nsICryptoHash = Components.interfaces["nsICryptoHash"];
 
-        this.debuggerName =  window.location.href +"-@-"+Extend.getUniqueId();
+        this.debuggerName =  window.location.href +"-@-"+Obj.getUniqueId();
         this.toString = function() { return this.debuggerName; }
 
         if (FBTrace.DBG_INITIALIZE)
@@ -2177,7 +2177,7 @@ Firebug.Debugger = Extend.extend(Firebug.ActivableModule,
 
         this.wrappedJSObject = this;  // how we communicate with fbs
 
-        this.onFunctionCall = Extend.bind(this.onFunctionCall, this);
+        this.onFunctionCall = Obj.bind(this.onFunctionCall, this);
 
         Firebug.ActivableModule.initialize.apply(this, arguments);
     },
@@ -2359,7 +2359,7 @@ Firebug.Debugger = Extend.extend(Firebug.ActivableModule,
             }
         }
 */
-        // context.watchScriptAdditions = Extend.bind(this.watchScriptAdditions, this, context);
+        // context.watchScriptAdditions = Obj.bind(this.watchScriptAdditions, this, context);
 
         // context.window.document.addEventListener("DOMNodeInserted", context.watchScriptAdditions, false);
 

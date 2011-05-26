@@ -1,13 +1,13 @@
 /* See license.txt for terms of usage */
 
 define([
-    "firebug/lib/extend",
+    "firebug/lib/object",
     "firebug/firebug",
     "firebug/lib/locale",
     "firebug/lib/url",
     "firebug/tabWatcher",
 ],
-function(Extend, Firebug, Locale, Url, TabWatcher) {
+function(Obj, Firebug, Locale, Url, TabWatcher) {
 
 // ************************************************************************************************
 // Constants
@@ -41,7 +41,7 @@ const privateBrowsingEnabled = ("@mozilla.org/privatebrowsing;1" in Cc) &&
  *    This logic has higher priority over the URL annotations.
  *    If "off" options is selected, all existing URL annotations are removed.
  */
-Firebug.Activation = Extend.extend(Firebug.Module,
+Firebug.Activation = Obj.extend(Firebug.Module,
 {
     // *******************************************************************************************
     dispatchName: "activation",

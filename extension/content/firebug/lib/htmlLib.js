@@ -1,7 +1,7 @@
 /* See license.txt for terms of usage */
 
 define([
-    "firebug/lib/extend",
+    "firebug/lib/object",
     "firebug/lib/events",
     "firebug/lib/css",
     "firebug/lib/dom",
@@ -9,7 +9,7 @@ define([
     "firebug/lib/xml",
     "firebug/lib/string",
 ],
-function(Extend, Events, Css, Dom, Search, Xml, Str) {
+function(Obj, Events, Css, Dom, Search, Xml, Str) {
 
 // ********************************************************************************************* //
 // Constants
@@ -233,7 +233,7 @@ var HTMLLib =
          */
         this.selectMatched = function(nodeBox, node, match, reverse)
         {
-            setTimeout(Extend.bindFixed(function()
+            setTimeout(Obj.bindFixed(function()
             {
                 var reMatch = match.match;
                 this.selectNodeText(nodeBox, node, reMatch[0], reMatch.index, reverse,
@@ -380,7 +380,7 @@ var HTMLLib =
          */
         this.selectMatched = function(nodeBox, node, match, reverse)
         {
-            setTimeout(Extend.bindFixed(function()
+            setTimeout(Obj.bindFixed(function()
             {
                 ioBox.select(node, true, true);
                 Events.dispatch([Firebug.A11yModel], 'onHTMLSearchMatchFound', [panelNode.ownerPanel, match]);

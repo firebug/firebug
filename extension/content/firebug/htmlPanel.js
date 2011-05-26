@@ -1,7 +1,7 @@
 /* See license.txt for terms of usage */
 
 define([
-    "firebug/lib/extend",
+    "firebug/lib/object",
     "firebug/firebug",
     "firebug/domplate",
     "firebug/reps",
@@ -25,7 +25,7 @@ define([
     "firebug/searchBox",
     "firebug/insideOutBox",
 ],
-function(Extend, Firebug, Domplate, FirebugReps, Locale, HTMLLib, Events,
+function(Obj, Firebug, Domplate, FirebugReps, Locale, HTMLLib, Events,
     SourceLink, Css, Dom, Win, Xpath, Str, Xml, Arr, Persist, Menu, Url) { with (Domplate) {
 
 // ************************************************************************************************
@@ -47,7 +47,7 @@ var KeyEvent = window.KeyEvent;
 
 // ************************************************************************************************
 
-Firebug.HTMLModule = Extend.extend(Firebug.Module,
+Firebug.HTMLModule = Obj.extend(Firebug.Module,
 {
     dispatchName: "htmlModule",
 
@@ -100,9 +100,9 @@ Firebug.HTMLModule = Extend.extend(Firebug.Module,
 
 Firebug.HTMLPanel = function() {};
 
-var WalkingPanel = Extend.extend(Firebug.Panel, HTMLLib.ElementWalkerFunctions);
+var WalkingPanel = Obj.extend(Firebug.Panel, HTMLLib.ElementWalkerFunctions);
 
-Firebug.HTMLPanel.prototype = Extend.extend(WalkingPanel,
+Firebug.HTMLPanel.prototype = Obj.extend(WalkingPanel,
 {
     inspectable: true,
 
@@ -956,12 +956,12 @@ Firebug.HTMLPanel.prototype = Extend.extend(WalkingPanel,
 
     initialize: function()
     {
-        this.onMutateText = Extend.bind(this.onMutateText, this);
-        this.onMutateAttr = Extend.bind(this.onMutateAttr, this);
-        this.onMutateNode = Extend.bind(this.onMutateNode, this);
-        this.onClick = Extend.bind(this.onClick, this);
-        this.onMouseDown = Extend.bind(this.onMouseDown, this);
-        this.onKeyPress = Extend.bind(this.onKeyPress, this);
+        this.onMutateText = Obj.bind(this.onMutateText, this);
+        this.onMutateAttr = Obj.bind(this.onMutateAttr, this);
+        this.onMutateNode = Obj.bind(this.onMutateNode, this);
+        this.onClick = Obj.bind(this.onClick, this);
+        this.onMouseDown = Obj.bind(this.onMouseDown, this);
+        this.onKeyPress = Obj.bind(this.onKeyPress, this);
 
         Firebug.Panel.initialize.apply(this, arguments);
     },
@@ -1012,7 +1012,7 @@ Firebug.HTMLPanel.prototype = Extend.extend(WalkingPanel,
             {
                 this.context.attachedMutation = true;
 
-                Win.iterateWindows(this.context.window, Extend.bind(function(win)
+                Win.iterateWindows(this.context.window, Obj.bind(function(win)
                 {
                     var doc = win.document;
                     doc.addEventListener("DOMAttrModified", this.onMutateAttr, false);
@@ -1320,7 +1320,7 @@ Firebug.HTMLPanel.prototype = Extend.extend(WalkingPanel,
         {
             items.push(
                 "-",
-                {label: "NewAttribute", command: Extend.bindFixed(this.editNewAttribute, this, node) }
+                {label: "NewAttribute", command: Obj.bindFixed(this.editNewAttribute, this, node) }
             );
 
             var attrBox = Dom.getAncestorByClass(target, "nodeAttr");
@@ -1330,9 +1330,9 @@ Firebug.HTMLPanel.prototype = Extend.extend(WalkingPanel,
 
                 items.push(
                     {label: Locale.$STRF("EditAttribute", [attrName]), nol10n: true,
-                        command: Extend.bindFixed(this.editAttribute, this, node, attrName) },
+                        command: Obj.bindFixed(this.editAttribute, this, node, attrName) },
                     {label: Locale.$STRF("DeleteAttribute", [attrName]), nol10n: true,
-                        command: Extend.bindFixed(this.deleteAttribute, this, node, attrName) }
+                        command: Obj.bindFixed(this.deleteAttribute, this, node, attrName) }
                 );
             }
 
@@ -1346,8 +1346,8 @@ Firebug.HTMLPanel.prototype = Extend.extend(WalkingPanel,
                     EditElement = "EditSVGElement";
 
                 items.push("-",
-                    {label: EditElement, command: Extend.bindFixed(this.editNode, this, node)},
-                    {label: "DeleteElement", command: Extend.bindFixed(this.deleteNode, this, node),
+                    {label: EditElement, command: Obj.bindFixed(this.editNode, this, node)},
+                    {label: "DeleteElement", command: Obj.bindFixed(this.deleteNode, this, node),
                         disabled:(node.localName in Css.innerEditableTags)}
                 );
             }
@@ -1358,15 +1358,15 @@ Firebug.HTMLPanel.prototype = Extend.extend(WalkingPanel,
             {
                 items.push("-",
                     {label: "html.label.Expand/Contract All", acceltext: "*",
-                        command: Extend.bindFixed(this.toggleAll, this, node)});
+                        command: Obj.bindFixed(this.toggleAll, this, node)});
             }
         }
         else
         {
             items.push(
                 "-",
-                {label: "EditNode", command: Extend.bindFixed(this.editNode, this, node) },
-                {label: "DeleteNode", command: Extend.bindFixed(this.deleteNode, this, node) }
+                {label: "EditNode", command: Obj.bindFixed(this.editNode, this, node) },
+                {label: "DeleteNode", command: Obj.bindFixed(this.deleteNode, this, node) }
             );
         }
 
@@ -2196,17 +2196,17 @@ Firebug.HTMLModule.MutationBreakpoints =
                 {label: "html.label.Break On Attribute Change",
                     type: "checkbox",
                     checked: breakpoints.findBreakpoint(node, BP_BREAKONATTRCHANGE),
-                    command: Extend.bindFixed(this.onModifyBreakpoint, this, context, node,
+                    command: Obj.bindFixed(this.onModifyBreakpoint, this, context, node,
                         BP_BREAKONATTRCHANGE)},
                 {label: "html.label.Break On Child Addition or Removal",
                     type: "checkbox",
                     checked: breakpoints.findBreakpoint(node, BP_BREAKONCHILDCHANGE),
-                    command: Extend.bindFixed(this.onModifyBreakpoint, this, context, node,
+                    command: Obj.bindFixed(this.onModifyBreakpoint, this, context, node,
                         BP_BREAKONCHILDCHANGE)},
                 {label: "html.label.Break On Element Removal",
                     type: "checkbox",
                     checked: breakpoints.findBreakpoint(node, BP_BREAKONREMOVE),
-                    command: Extend.bindFixed(this.onModifyBreakpoint, this, context, node,
+                    command: Obj.bindFixed(this.onModifyBreakpoint, this, context, node,
                         BP_BREAKONREMOVE)}
             );
         }
@@ -2334,7 +2334,7 @@ function MutationBreakpointGroup()
     this.breakpoints = [];
 }
 
-MutationBreakpointGroup.prototype = Extend.extend(new Firebug.Breakpoint.BreakpointGroup(),
+MutationBreakpointGroup.prototype = Obj.extend(new Firebug.Breakpoint.BreakpointGroup(),
 {
     name: "mutationBreakpoints",
     title: Locale.$STR("html.label.HTML Breakpoints"),

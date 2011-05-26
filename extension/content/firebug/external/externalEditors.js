@@ -2,7 +2,7 @@
 
 define([
     "firebug/lib",
-    "firebug/lib/extend",
+    "firebug/lib/object",
     "firebug/firebug",
     "firebug/lib/locale",
     "firebug/lib/xpcom",
@@ -15,7 +15,7 @@ define([
     "firebug/firefox/menu",
     "firebug/lib/debug",
 ],
-function(FBL, Extend, Firebug, Locale, Xpcom, Url, SourceLink, Css, System, Arr, Dom, Menu, Debug) {
+function(FBL, Obj, Firebug, Locale, Xpcom, Url, SourceLink, Css, System, Arr, Dom, Menu, Debug) {
 
 // ********************************************************************************************* //
 // Constants
@@ -40,7 +40,7 @@ var temporaryDirectory = null;
 // ********************************************************************************************* //
 // Module Implementation
 
-Firebug.ExternalEditors = Extend.extend(Firebug.Module,
+Firebug.ExternalEditors = Obj.extend(Firebug.Module,
 {
     dispatchName: "externalEditors",
 

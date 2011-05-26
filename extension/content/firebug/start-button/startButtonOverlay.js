@@ -1,7 +1,7 @@
 /* See license.txt for terms of usage */
 
 define([
-    "firebug/lib/extend",
+    "firebug/lib/object",
     "firebug/firebug",
     "firebug/firefox/firefox",
     "firebug/lib/locale",
@@ -9,7 +9,7 @@ define([
     "firebug/lib/dom",
     "firebug/lib/options",
 ],
-function(Extend, Firebug, Firefox, Locale, Events, Dom, Options) {
+function(Obj, Firebug, Firefox, Locale, Events, Dom, Options) {
 
 // ********************************************************************************************* //
 // Constants
@@ -32,7 +32,7 @@ var versionChecker = Cc["@mozilla.org/xpcom/version-comparator;1"].getService(Ci
  * such as panel activation and also indicates whether Firebug is activated/deactivated for
  * the current page (by changing its color).
  */
-Firebug.StartButton = Extend.extend(Firebug.Module,
+Firebug.StartButton = Obj.extend(Firebug.Module,
 /** @lends Firebug.StartButton */
 {
     dispatchName: "startButton",
@@ -50,7 +50,7 @@ Firebug.StartButton = Extend.extend(Firebug.Module,
             startButton.appendChild(popup.cloneNode(true));
 
             // Append the button into Firefox toolbar automatically.
-            this.onLoadBinding = Extend.bind(this.onLoad, this);
+            this.onLoadBinding = Obj.bind(this.onLoad, this);
             window.addEventListener("load", this.onLoadBinding, false);
 
             // In case of Firefox 4+ the button is a bit different.

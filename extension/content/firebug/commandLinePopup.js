@@ -1,7 +1,7 @@
 /* See license.txt for terms of usage */
 
 define([
-    "firebug/lib/extend",
+    "firebug/lib/object",
     "firebug/firebug",
     "firebug/commandLine",
     "firebug/lib/css",
@@ -9,7 +9,7 @@ define([
     "firebug/lib/string",
     "firebug/lib/xml",
 ],
-function(Extend, Firebug, CommandLine, Css, Dom, Str, Xml) {
+function(Obj, Firebug, CommandLine, Css, Dom, Str, Xml) {
 
 // ************************************************************************************************
 // Constants
@@ -20,7 +20,7 @@ function(Extend, Firebug, CommandLine, Css, Dom, Str, Xml) {
 /**
  * @module Command Line availability in other panels.
  */
-Firebug.CommandLine.Popup = Extend.extend(Firebug.Module,
+Firebug.CommandLine.Popup = Obj.extend(Firebug.Module,
 {
     dispatchName: "commandLinePopup",
     lastFocused : null,
@@ -31,7 +31,7 @@ Firebug.CommandLine.Popup = Extend.extend(Firebug.Module,
 
         this.setPopupBrowserStyle(Firebug.chrome);
 
-        this.onKeyPress = Extend.bind(this.onKeyPress, this);
+        this.onKeyPress = Obj.bind(this.onKeyPress, this);
 
         this.attachListeners();
     },

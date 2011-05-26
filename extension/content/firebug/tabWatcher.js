@@ -1,7 +1,7 @@
 /* See license.txt for terms of usage */
 
 define([
-    "firebug/lib/extend",
+    "firebug/lib/object",
     "firebug/firebug",
     "firebug/firefox/firefox",
     "firebug/lib/xpcom",
@@ -15,7 +15,7 @@ define([
     "firebug/lib/debug",
     "firebug/tabContext",
 ],
-function(Extend, Firebug, Firefox, Xpcom, HttpRequestObserver, Events, Url, Http, Win,
+function(Obj, Firebug, Firefox, Xpcom, HttpRequestObserver, Events, Url, Http, Win,
     Str, Arr, Debug) {
 
 // ************************************************************************************************
@@ -52,7 +52,7 @@ var contexts = [];
 
 // ************************************************************************************************
 
-Firebug.TabWatcher = Extend.extend(new Firebug.Listener(),
+Firebug.TabWatcher = Obj.extend(new Firebug.Listener(),
 {
     // Store contexts where they can be accessed externally
     contexts: contexts,
@@ -188,7 +188,7 @@ Firebug.TabWatcher = Extend.extend(new Firebug.Listener(),
         if (context && !context.loaded && !context.showContextTimeout)
         {
             // still loading, we want to showContext one time but not too agressively
-            context.showContextTimeout = window.setTimeout(Extend.bindFixed( function delayShowContext()
+            context.showContextTimeout = window.setTimeout(Obj.bindFixed( function delayShowContext()
             {
                 if (FBTrace.DBG_WINDOWS)
                     FBTrace.sysout("-> watchTopWindow delayShowContext id:"+context.showContextTimeout, context);
@@ -294,7 +294,7 @@ Firebug.TabWatcher = Extend.extend(new Firebug.Listener(),
         var context = new contextType(win, browser, Firebug.chrome, persistedState);
         contexts.push(context);
 
-        context.uid =  Extend.getUniqueId();
+        context.uid =  Obj.getUniqueId();
 
         browser.showFirebug = true; // this is the only place we should set showFirebug.
 
@@ -627,7 +627,7 @@ var TabWatcherUnloader =
     {
         var root = (win.parent == win);
         var eventName = (root && (win.location.href !== "about:blank")) ? "pagehide" : "unload";
-        var listener = Extend.bind(root ? this.onPageHide : this.onUnload, this);
+        var listener = Obj.bind(root ? this.onPageHide : this.onUnload, this);
         win.addEventListener(eventName, listener, false);
 
         if (FBTrace.DBG_WINDOWS)
@@ -682,7 +682,7 @@ var TabWatcherUnloader =
 
 // ************************************************************************************************
 
-var TabProgressListener = Extend.extend(Http.BaseProgressListener,
+var TabProgressListener = Obj.extend(Http.BaseProgressListener,
 {
     onLocationChange: function(progress, request, uri)
     {
@@ -730,7 +730,7 @@ var TabProgressListener = Extend.extend(Http.BaseProgressListener,
 
 // ************************************************************************************************
 // Obsolete
-var FrameProgressListener = Extend.extend(Http.BaseProgressListener,
+var FrameProgressListener = Obj.extend(Http.BaseProgressListener,
 {
     onStateChange: function(progress, request, flag, status)
     {
@@ -823,7 +823,7 @@ function getRefererHeader(request)
     return referer;
 }
 
-var TabWatcherHttpObserver = Extend.extend(Object,
+var TabWatcherHttpObserver = Obj.extend(Object,
 {
     // nsIObserver
     observe: function(aSubject, aTopic, aData)

@@ -1,13 +1,13 @@
 /* See license.txt for terms of usage */
 
 define([
-    "firebug/lib/extend",
+    "firebug/lib/object",
     "firebug/firebug",
     "firebug/lib/events",
     "firebug/lib/css",
     "firebug/lib/dom",
 ],
-function(Extend, Firebug, Events, Css, Dom) {
+function(Obj, Firebug, Events, Css, Dom) {
 
 // ************************************************************************************************
 
@@ -55,7 +55,7 @@ Firebug.InsideOutBox = function(view, box)
     this.selectedObjectBox = null;
     this.highlightedObjectBox = null;
 
-    this.onMouseDown = Extend.bind(this.onMouseDown, this);
+    this.onMouseDown = Obj.bind(this.onMouseDown, this);
     box.addEventListener("mousedown", this.onMouseDown, false);
 };
 

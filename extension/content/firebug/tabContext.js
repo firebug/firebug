@@ -1,7 +1,7 @@
 /* See license.txt for terms of usage */
 
 define([
-    "firebug/lib/extend",
+    "firebug/lib/object",
     "arch/compilationunit",
     "firebug/lib/events",
     "firebug/lib/url",
@@ -9,7 +9,7 @@ define([
     "firebug/lib/css",
     "firebug/plugin",
 ],
-function(Extend, CompilationUnit, Events, Url, Win, Css) {
+function(Obj, CompilationUnit, Events, Url, Win, Css) {
 
 // ************************************************************************************************
 // Constants
@@ -445,7 +445,7 @@ Firebug.TabContext.prototype =
             delete this.refreshTimeout;
         }
 
-        this.refreshTimeout = this.setTimeout(Extend.bindFixed(function()
+        this.refreshTimeout = this.setTimeout(Obj.bindFixed(function()
         {
             var invalids = [];
 
@@ -611,7 +611,7 @@ Firebug.TabContext.prototype =
 function createPanelType(name, url, title, parentPanel)
 {
     var panelType = new Function("");
-    panelType.prototype = Extend.extend(new Firebug.PluginPanel(),
+    panelType.prototype = Obj.extend(new Firebug.PluginPanel(),
     {
         name: name,
         url: url,

@@ -1,7 +1,7 @@
 /* See license.txt for terms of usage */
 
 define([
-    "firebug/lib/extend",
+    "firebug/lib/object",
     "firebug/firebug",
     "firebug/domplate",
     "firebug/lib/locale",
@@ -15,7 +15,7 @@ define([
     "firebug/domPanel",
     "firebug/reps"
 ],
-function(Extend, Firebug, Domplate, Locale, Events, Css, Dom, Http, Str, Json, ToggleBranch) {
+function(Obj, Firebug, Domplate, Locale, Events, Css, Dom, Http, Str, Json, ToggleBranch) {
 
 // ************************************************************************************************
 
@@ -37,7 +37,7 @@ var contentTypes =
 // ************************************************************************************************
 // Model implementation
 
-Firebug.JSONViewerModel = Extend.extend(Firebug.Module,
+Firebug.JSONViewerModel = Obj.extend(Firebug.Module,
 {
     dispatchName: "jsonViewer",
 
@@ -67,7 +67,7 @@ Firebug.JSONViewerModel = Extend.extend(Firebug.Module,
         }
 
         // The jsonObject is created so, the JSON tab can be displayed.
-        if (file.jsonObject && Extend.hasProperties(file.jsonObject))
+        if (file.jsonObject && Obj.hasProperties(file.jsonObject))
         {
             Firebug.NetMonitor.NetInfoBody.appendTab(infoBox, "JSON",
                 Locale.$STR("jsonviewer.tab.JSON"));
@@ -181,7 +181,7 @@ function JSONTreePlate()
 // xxxHonza: this object is *not* a panel (using Firebug terminology), but
 // there is no other way how to subclass the DOM Tree than to derive from the DOMBasePanel.
 // Better solution would be to have a middle object between DirTablePlate and DOMBasePanel.
-JSONTreePlate.prototype = Extend.extend(Firebug.DOMBasePanel.prototype,
+JSONTreePlate.prototype = Obj.extend(Firebug.DOMBasePanel.prototype,
 {
     dispatchName: "JSONTreePlate",
 

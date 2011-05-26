@@ -1,7 +1,7 @@
 /* See license.txt for terms of usage */
 
 define([
-    "firebug/lib/extend",
+    "firebug/lib/object",
     "firebug/lib/xpcom",
     "firebug/lib/locale",
     "firebug/lib/events",
@@ -28,7 +28,7 @@ define([
     "firebug/lib/debug",
     "firebug/lib/keywords",
 ],
-function(Extend, Xpcom, Locale, Events, Options, Deprecated, Wrapper, Url, SourceLink,
+function(Obj, Xpcom, Locale, Events, Options, Deprecated, Wrapper, Url, SourceLink,
     StackFrame, Css, Dom, Http, Win, Search, Xpath, Str, Xml, Persist, Arr, System, Json,
     Menu, ToggleBranch, Debug, Keywords) {
 
@@ -42,8 +42,8 @@ var FBL = window.FBL || {};  // legacy.js adds top.FBL, FIXME, remove after ifra
 
 // Backward compatibility with extensions
 // deprecated
-for (var p in Extend)
-    FBL[p] = Extend[p];
+for (var p in Obj)
+    FBL[p] = Obj[p];
 
 for (var p in Xpcom)
     FBL[p] = Xpcom[p];

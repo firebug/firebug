@@ -1,7 +1,7 @@
 /* See license.txt for terms of usage */
 
 define([
-    "firebug/lib/extend",
+    "firebug/lib/object",
     "firebug/firebug",
     "firebug/domplate",
     "firebug/lib/locale",
@@ -13,7 +13,7 @@ define([
     "firebug/firefox/menu",
     "firebug/lib/debug",
 ],
-function(Extend, Firebug, Domplate, Locale, Events, Css, Dom, Str, Arr, Menu, Debug) {
+function(Obj, Firebug, Domplate, Locale, Events, Css, Dom, Str, Arr, Menu, Debug) {
 
 // ************************************************************************************************
 // Constants
@@ -43,7 +43,7 @@ var ignoreNextInput = false;
 
 // ************************************************************************************************
 
-Firebug.Editor = Extend.extend(Firebug.Module,
+Firebug.Editor = Obj.extend(Firebug.Module,
 {
     supportsStopEvent: true,
 
@@ -203,7 +203,7 @@ Firebug.Editor = Extend.extend(Firebug.Module,
         else
         {
             var context = currentPanel.context;
-            this.saveTimeout = context.setTimeout(Extend.bindFixed(this.save, this), saveTimeout);
+            this.saveTimeout = context.setTimeout(Obj.bindFixed(this.save, this), saveTimeout);
             if (FBTrace.DBG_EDITOR)
                 FBTrace.sysout("editor.update saveTimeout: "+this.saveTimeout);
         }
@@ -335,29 +335,29 @@ Firebug.Editor = Extend.extend(Firebug.Module,
         var chrome = Firebug.chrome;
 
         this.listeners = [
-            chrome.keyCodeListen("ESCAPE", null, Extend.bind(this.cancelEditing, this)),
+            chrome.keyCodeListen("ESCAPE", null, Obj.bind(this.cancelEditing, this)),
         ];
 
         if (editor.arrowCompletion)
         {
             this.listeners.push(
-                chrome.keyCodeListen("UP", null, Extend.bindFixed(editor.completeValue, editor, -1)),
-                chrome.keyCodeListen("DOWN", null, Extend.bindFixed(editor.completeValue, editor, 1)),
-                chrome.keyCodeListen("UP", Events.isShift, Extend.bindFixed(editor.completeValue, editor, -largeChangeAmount)),
-                chrome.keyCodeListen("DOWN", Events.isShift, Extend.bindFixed(editor.completeValue, editor, largeChangeAmount)),
-                chrome.keyCodeListen("UP", Events.isControl, Extend.bindFixed(editor.completeValue, editor, -smallChangeAmount)),
-                chrome.keyCodeListen("DOWN", Events.isControl, Extend.bindFixed(editor.completeValue, editor, smallChangeAmount))
+                chrome.keyCodeListen("UP", null, Obj.bindFixed(editor.completeValue, editor, -1)),
+                chrome.keyCodeListen("DOWN", null, Obj.bindFixed(editor.completeValue, editor, 1)),
+                chrome.keyCodeListen("UP", Events.isShift, Obj.bindFixed(editor.completeValue, editor, -largeChangeAmount)),
+                chrome.keyCodeListen("DOWN", Events.isShift, Obj.bindFixed(editor.completeValue, editor, largeChangeAmount)),
+                chrome.keyCodeListen("UP", Events.isControl, Obj.bindFixed(editor.completeValue, editor, -smallChangeAmount)),
+                chrome.keyCodeListen("DOWN", Events.isControl, Obj.bindFixed(editor.completeValue, editor, smallChangeAmount))
             );
         }
 
         if (currentEditor.tabNavigation)
         {
             this.listeners.push(
-                chrome.keyCodeListen("RETURN", null, Extend.bind(this.tabNextEditor, this)),
-                chrome.keyCodeListen("RETURN", Events.isShift, Extend.bind(this.saveAndClose, this)),
-                chrome.keyCodeListen("RETURN", Events.isControl, Extend.bind(this.insertRow, this, null, "after")),
-                chrome.keyCodeListen("TAB", null, Extend.bind(this.tabNextEditor, this)),
-                chrome.keyCodeListen("TAB", Events.isShift, Extend.bind(this.tabPreviousEditor, this))
+                chrome.keyCodeListen("RETURN", null, Obj.bind(this.tabNextEditor, this)),
+                chrome.keyCodeListen("RETURN", Events.isShift, Obj.bind(this.saveAndClose, this)),
+                chrome.keyCodeListen("RETURN", Events.isControl, Obj.bind(this.insertRow, this, null, "after")),
+                chrome.keyCodeListen("TAB", null, Obj.bind(this.tabNextEditor, this)),
+                chrome.keyCodeListen("TAB", Events.isShift, Obj.bind(this.tabPreviousEditor, this))
             );
         }
         else if (currentEditor.multiLine)
@@ -369,20 +369,20 @@ Firebug.Editor = Extend.extend(Firebug.Module,
         else
         {
             this.listeners.push(
-                chrome.keyCodeListen("RETURN", null, Extend.bindFixed(this.stopEditing, this))
+                chrome.keyCodeListen("RETURN", null, Obj.bindFixed(this.stopEditing, this))
             );
 
             if (currentEditor.tabCompletion)
             {
                 this.listeners.push(
-                    chrome.keyCodeListen("TAB", null, Extend.bind(editor.completeValue, editor, 1)),
-                    chrome.keyCodeListen("TAB", Events.isShift, Extend.bind(editor.completeValue, editor, -1)),
-                    chrome.keyCodeListen("UP", null, Extend.bindFixed(editor.completeValue, editor, -1, true)),
-                    chrome.keyCodeListen("DOWN", null, Extend.bindFixed(editor.completeValue, editor, 1, true)),
-                    chrome.keyCodeListen("UP", Events.isShift, Extend.bindFixed(editor.completeValue, editor, -largeChangeAmount)),
-                    chrome.keyCodeListen("DOWN", Events.isShift, Extend.bindFixed(editor.completeValue, editor, largeChangeAmount)),
-                    chrome.keyCodeListen("UP", Events.isControl, Extend.bindFixed(editor.completeValue, editor, -smallChangeAmount)),
-                    chrome.keyCodeListen("DOWN", Events.isControl, Extend.bindFixed(editor.completeValue, editor, smallChangeAmount))
+                    chrome.keyCodeListen("TAB", null, Obj.bind(editor.completeValue, editor, 1)),
+                    chrome.keyCodeListen("TAB", Events.isShift, Obj.bind(editor.completeValue, editor, -1)),
+                    chrome.keyCodeListen("UP", null, Obj.bindFixed(editor.completeValue, editor, -1, true)),
+                    chrome.keyCodeListen("DOWN", null, Obj.bindFixed(editor.completeValue, editor, 1, true)),
+                    chrome.keyCodeListen("UP", Events.isShift, Obj.bindFixed(editor.completeValue, editor, -largeChangeAmount)),
+                    chrome.keyCodeListen("DOWN", Events.isShift, Obj.bindFixed(editor.completeValue, editor, largeChangeAmount)),
+                    chrome.keyCodeListen("UP", Events.isControl, Obj.bindFixed(editor.completeValue, editor, -smallChangeAmount)),
+                    chrome.keyCodeListen("DOWN", Events.isControl, Obj.bindFixed(editor.completeValue, editor, smallChangeAmount))
                 );
             }
         }
@@ -424,8 +424,8 @@ Firebug.Editor = Extend.extend(Firebug.Module,
 
     initialize: function()
     {
-        this.onResize = Extend.bindFixed(this.onResize, this);
-        this.onBlur = Extend.bind(this.onBlur, this);
+        this.onResize = Obj.bindFixed(this.onResize, this);
+        this.onBlur = Obj.bind(this.onBlur, this);
 
         Firebug.Module.initialize.apply(this, arguments);
     },
@@ -449,7 +449,7 @@ Firebug.Editor = Extend.extend(Firebug.Module,
 // ************************************************************************************************
 // BaseEditor
 
-Firebug.BaseEditor = Extend.extend(Firebug.MeasureBox,
+Firebug.BaseEditor = Obj.extend(Firebug.MeasureBox,
 {
     getValue: function()
     {
@@ -477,9 +477,9 @@ Firebug.BaseEditor = Extend.extend(Firebug.MeasureBox,
     getContextMenuItems: function(target)
     {
         var items = [];
-        items.push({label: "Cut", command: Extend.bind(this.onCommand, this, "cmd_cut")});
-        items.push({label: "Copy", command: Extend.bind(this.onCommand, this, "cmd_copy")});
-        items.push({label: "Paste", command: Extend.bind(this.onCommand, this, "cmd_paste")});
+        items.push({label: "Cut", command: Obj.bind(this.onCommand, this, "cmd_cut")});
+        items.push({label: "Copy", command: Obj.bind(this.onCommand, this, "cmd_copy")});
+        items.push({label: "Paste", command: Obj.bind(this.onCommand, this, "cmd_paste")});
         return items;
     },
 
@@ -722,8 +722,8 @@ Firebug.InlineEditor.prototype = domplate(Firebug.BaseEditor,
         if (!this.autoCompleter)
         {
             this.autoCompleter = new Firebug.AutoCompleter(null,
-                Extend.bind(this.getAutoCompleteRange, this), Extend.bind(this.getAutoCompleteList, this),
-                true, false, undefined, undefined, undefined, Extend.bind(this.isValidAutoCompleteProperty, this));
+                Obj.bind(this.getAutoCompleteRange, this), Obj.bind(this.getAutoCompleteList, this),
+                true, false, undefined, undefined, undefined, Obj.bind(this.isValidAutoCompleteProperty, this));
         }
 
         return this.autoCompleter;
@@ -1528,7 +1528,7 @@ Firebug.AutoCompleter = function(getExprOffset, getRange, evaluator, selectMode,
             this.acceptCompletionInTextBox(Firebug.CommandLine.getCommandLineSmall(), Firebug.CommandLine.getCompletionBox());
     };
 
-    this.acceptCompletion = Extend.bind(this.acceptCompletion, this);
+    this.acceptCompletion = Obj.bind(this.acceptCompletion, this);
 
     this.focusHack = function(event)
     {
@@ -1587,12 +1587,12 @@ function isGroupInsert(next, group)
 
 function getNextOutsider(element, group)
 {
-    return getOutsider(element, group, Extend.bind(Dom.getNextByClass, Dom, "editable"));
+    return getOutsider(element, group, Obj.bind(Dom.getNextByClass, Dom, "editable"));
 }
 
 function getPreviousOutsider(element, group)
 {
-    return getOutsider(element, group, Extend.bind(Dom.getPreviousByClass, Dom, "editable"));
+    return getOutsider(element, group, Obj.bind(Dom.getPreviousByClass, Dom, "editable"));
 }
 
 function getInlineParent(element)
