@@ -112,7 +112,7 @@ Firebug.TabCacheModel = Obj.extend(Firebug.Module,
         // Merge with JSON types
         var jsonTypes = JSONViewerModel.contentTypes;
         for (var p in jsonTypes)
-            contentTypes[jsonTypes[p]];
+            contentTypes[p] = 1;
 
         // Register for HTTP events.
         HttpRequestObserver.addObserver(this, "firebug-http-event", false);
