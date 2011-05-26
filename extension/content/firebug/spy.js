@@ -122,7 +122,6 @@ Firebug.Spy = Extend.extend(Firebug.Module,
 
             Firebug.connection.eachContext(function tachAll(context)
             {
-                var context = Firebug.TabWatcher.contexts[i];
                 Win.iterateWindows(context.window, function(win)
                 {
                     tach.apply(this, [context, win]);
