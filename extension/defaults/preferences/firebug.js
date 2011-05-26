@@ -46,7 +46,7 @@ pref("extensions.firebug.showXMLErrors", false);
 pref("extensions.firebug.showChromeErrors", false);
 pref("extensions.firebug.showChromeMessages", false);
 pref("extensions.firebug.showExternalErrors", false);
-pref("extensions.firebug.showNetworkErrors", false);
+pref("extensions.firebug.showNetworkErrors", true);
 pref("extensions.firebug.showXMLHttpRequests", true);
 pref("extensions.firebug.showStackTrace", false);
 pref("extensions.firebug.console.logLimit", 500);
