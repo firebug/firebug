@@ -1,21 +1,25 @@
 /* See license.txt for terms of usage */
 
-// ************************************************************************************************
+// ********************************************************************************************* //
 // Module
 
 define([
-        "firebug/firebug",
-        "firebug/debugger",  // TODO firefox/jsdebugger
-        "arch/compilationunit",
-        ], function initializeJavaScriptTool(Firebug, JSDebugger, CompilationUnit)
-{
+    "firebug/lib/object",
+    "firebug/firebug",
+    "firebug/debugger",  // TODO firefox/jsdebugger
+    "arch/compilationunit",
+],
+function initializeJavaScriptTool(Obj, Firebug, JSDebugger, CompilationUnit) {
 
-// ************************************************************************************************
+// ********************************************************************************************* //
 // Implement JavaScript tool for Firefox inProcess
 
-var JavaScriptTool = {};
+var JavaScriptTool = Obj.extend(Firebug.Module,
+{
+    dispatchName: "JavaScriptTool",
+});
 
-/*
+/**
  * A Turn is an callstack for an active being-handled event, similar to a Thread.
  * Currently it only makes sense when we have stopped the server.
  * Currently only one or zero Turn objects can exist ("single-threaded").
@@ -65,6 +69,7 @@ JavaScriptTool.getBreakpointCondition = function(context, url, lineNumber)
     return JSDebugger.fbs.getBreakpointCondition(url, lineNumber);
 };
 
+// ********************************************************************************************* //
 // These functions should be on stack instead
 
 JavaScriptTool.resumeJavaScript = function(context)
@@ -89,10 +94,11 @@ JavaScriptTool.stepOut = function(context)
 
 JavaScriptTool.runUntil = function(compilationUnit, lineNumber)
 {
-    JSDebugger.runUntil(compilationUnit.getBrowserContext(), compilationUnit, lineNumber, JSDebugger);
+    JSDebugger.runUntil(compilationUnit.getBrowserContext(), compilationUnit,
+        lineNumber, JSDebugger);
 };
 
-/*
+/**
  * A previously enabled tool becomes active and sends us an event.
  */
 JavaScriptTool.onActivateTool = function(toolname, active)
@@ -116,7 +122,7 @@ JavaScriptTool.onActivateTool = function(toolname, active)
         tool.setActive(active);
 },
 
-/*
+/**
  * @param context context of the newest frame, where the breakpoint hit
  * @param frame newest StackFrame (crossbrowser) eg where the break point hit
  */
@@ -133,6 +139,7 @@ JavaScriptTool.onStartDebugging = function(context, frame)
 
     if (FBTrace.DBG_STACK)
         FBTrace.sysout("javascripttool currentFrame ", frame);
+
     JavaScriptTool.Turn.currentFrame = frame;
     panel.onStartDebugging(frame);
 }
@@ -144,9 +151,8 @@ JavaScriptTool.onStopDebugging = function(context)
         panel.showNoStackFrame(); // unhighlight and remove toolbar-status line
 
     if (panel)
-    {
         panel.onStopDebugging();
-    }
+
     delete JavaScriptTool.Turn.currentFrame;
 }
 
@@ -159,9 +165,9 @@ JavaScriptTool.onCompilationUnit = function(context, url, kind)
      context.compilationUnits[url] = compilationUnit;
 
      if (FBTrace.DBG_COMPILATION_UNITS)
-         FBTrace.sysout("JavaScriptTool.onCompilationUnit "+url+" added to "+context.getName(), compilationUnit);
+         FBTrace.sysout("JavaScriptTool.onCompilationUnit "+url+" added to "+context.getName(),
+            compilationUnit);
 }
-
 
 JavaScriptTool.initialize = function()
 {
@@ -173,8 +179,12 @@ JavaScriptTool.shutdown = function()
     Firebug.connection.removeListener(JavaScriptTool);  // This is how we get events
 }
 
+// ********************************************************************************************* //
+// Registration
+
 Firebug.registerModule(JavaScriptTool);
 
 return JavaScriptTool;
 
+// ********************************************************************************************* //
 });

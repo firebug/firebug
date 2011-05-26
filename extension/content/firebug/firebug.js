@@ -977,7 +977,7 @@ window.Firebug =
         });
     },
 
-    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
     // URL mapping
 
     getObjectByURL: function(context, url)
@@ -990,7 +990,7 @@ window.Firebug =
         }
     },
 
-    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
     // Reps
 
     getRep: function(object, context)
@@ -1376,6 +1376,7 @@ Firebug.Module = Obj.extend(new Firebug.Listener(),
     getObjectByURL: function(context, url)
     {
     },
+
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
     // intermodule dependency
 
