@@ -26,7 +26,6 @@ catch (err)
             return TraceObj;
         }
     };
-    Components.utils.reportError("FBTrace; " + err);
 }
 
 // ********************************************************************************************* //
