@@ -551,6 +551,9 @@ window.Firebug =
     registerStylesheet: function(styleURI)
     {
         this.stylesheets.push(styleURI);
+
+        if (FBTrace.DBG_REGISTRATION)
+            FBTrace.sysout("registerStylesheet " + styleURI);
     },
 
     registerMenuItem: function(menuItemController)
