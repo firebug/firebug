@@ -86,6 +86,9 @@ System.copyToClipboard = function(string)
 {
     var clipboard = Cc["@mozilla.org/widget/clipboardhelper;1"].getService(Ci.nsIClipboardHelper);
     clipboard.copyString(string);
+    if (FBTrace.DBG_ERRORS)
+        FBTrace.sysout("copyToClipboard "+string, string);
+
 };
 
 // ************************************************************************************************
