@@ -228,6 +228,11 @@ function(ChromeFactory, FBL, Firebug)
         // should load the files also using a loader and so, they also need a config.
         Firebug.getModuleLoaderConfig = getModuleLoaderConfig;
 
+        // Extensions also shouldn't use the global require sinc it should be removed
+        // in the future (if possible). Global 'require' could collied with oteher
+        // extensions.
+        Firebug.require = require;
+
         Firebug.Options.initialize("extensions.firebug");
         window.panelBarWaiter.waitForPanelBar(ChromeFactory);
 
