@@ -6,6 +6,8 @@
 // Inside scripts/main.js
 function getModuleLoaderConfig(baseConfig)
 {
+    baseConfig = baseConfig || {};
+
     // Set configuration defaults.
     baseConfig.baseLoaderUrl = baseConfig.baseLoaderUrl || "resource://moduleLoader/";
     baseConfig.prefDomain = baseConfig.prefDomain || "extensions.firebug";
@@ -151,9 +153,9 @@ require.analyzeFailure = function(context, managers, specified, loaded)
         }
     }
 }
-//
 
-function loadXULCSS(cssURL) {
+function loadXULCSS(cssURL)
+{
     var sss = Components.classes["@mozilla.org/content/style-sheet-service;1"]
     .getService(Components.interfaces.nsIStyleSheetService);
     var ios = Components.classes["@mozilla.org/network/io-service;1"]
@@ -164,9 +166,6 @@ function loadXULCSS(cssURL) {
 // ********************************************************************************************* //
 // Modules
 
-var config = getModuleLoaderConfig({});
-require.onError = config.onError;
-
 if (FBTrace.DBG_INITIALIZE || FBTrace.DBG_MODULES)
 {
     if (FBTrace.DBG_MODULES)
@@ -176,6 +175,8 @@ if (FBTrace.DBG_INITIALIZE || FBTrace.DBG_MODULES)
     var startLoading = new Date().getTime();
 }
 
+var config = getModuleLoaderConfig();
+require.onError = config.onError;
 
 require(config,
 [
@@ -223,6 +224,10 @@ function(ChromeFactory, FBL, Firebug)
             FBTrace.sysout("main.js; Firebug modules loaded using RequireJS in "+delta+" ms");
         }
 
+        // Expose the default module loader config to extensions. Firebug extension
+        // should load the files also using a loader and so, they also need a config.
+        Firebug.getModuleLoaderConfig = getModuleLoaderConfig;
+
         Firebug.Options.initialize("extensions.firebug");
         window.panelBarWaiter.waitForPanelBar(ChromeFactory);
 
@@ -239,7 +244,9 @@ function(ChromeFactory, FBL, Firebug)
     {
         if (FBTrace)
             FBTrace.sysout("Firebug main initialization ERROR "+exc, exc);
+
         window.dump("Firebug main initialization ERROR "+exc+"\n");
+
         if (Components)
             Components.utils.reportError(exc);
     }
