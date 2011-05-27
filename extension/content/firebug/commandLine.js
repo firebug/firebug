@@ -871,15 +871,20 @@ Firebug.CommandLine = Obj.extend(Firebug.Module,
         var commandLine = this.getCommandLine(Firebug.currentContext);
         var completionBox = this.getCompletionBox();
 
-        if (!this.autoCompleter.getVerifiedText(commandLine)) // don't complete on empty command line
+        // Don't complete on empty command line
+        if (!this.autoCompleter.getVerifiedText(commandLine))
         {
             this.autoCompleter.reset();
             this.autoCompleter.hide(this.getCompletionBox());
-            return;
         }
 
         if (!this.commandHistory.isShown())
-            this.autoCompleter.complete(Firebug.currentContext, commandLine, completionBox, true, false);
+        {
+            this.autoCompleter.complete(Firebug.currentContext, commandLine,
+                completionBox, true, false);
+        }
+
+        // Always update the buffer in context, even if command line is empty.
         Firebug.currentContext.commandLineText = this.autoCompleter.getVerifiedText(commandLine);
     },
 
