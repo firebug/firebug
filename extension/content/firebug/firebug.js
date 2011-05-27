@@ -457,7 +457,7 @@ window.Firebug =
     {
         modules.push.apply(modules, arguments);
 
-        if (FBTrace.DBG_INITIALIZE)
+        if (FBTrace.DBG_REGISTRATION)
         {
             for (var i = 0; i < arguments.length; ++i)
                 FBTrace.sysout("registerModule "+arguments[i].dispatchName);
@@ -502,7 +502,7 @@ window.Firebug =
         for (var i = 0; i < arguments.length; ++i)
             panelTypeMap[arguments[i].prototype.name] = arguments[i];
 
-        if (FBTrace.DBG_INITIALIZE)
+        if (FBTrace.DBG_REGISTRATION)
             for (var i = 0; i < arguments.length; ++i)
                 FBTrace.sysout("registerPanel "+arguments[i].prototype.name+"\n");
     },

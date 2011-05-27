@@ -47,7 +47,8 @@ pref("extensions.firebug.DBG_SOURCEFILES", false);  // debugger and sourceCache 
 pref("extensions.firebug.DBG_WINDOWS", false);      // tabWatcher, dispatch events; very useful for understand modules/panels  /*@explore*/
 pref("extensions.firebug.DBG_NET", false);          // net.js                                    /*@explore*/
 pref("extensions.firebug.DBG_NET_EVENTS", false);   // net.js - network events                   /*@explore*/
-pref("extensions.firebug.DBG_INITIALIZE", false);   // registry (modules panels); initialize FB  /*@explore*/
+pref("extensions.firebug.DBG_INITIALIZE", false);   // initialize FB
+pref("extensions.firebug.DBG_REGISTRATION", false); // registry (modules panels); 
 pref("extensions.firebug.DBG_INSPECT", false);      // inspector                                 /*@explore*/
 pref("extensions.firebug.DBG_OPTIONS", false);      //                                           /*@explore*/
 pref("extensions.firebug.DBG_FBS_FLUSH", false);    //                                           /*@explore*/
