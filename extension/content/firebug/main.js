@@ -166,17 +166,17 @@ function loadXULCSS(cssURL)
 // ********************************************************************************************* //
 // Modules
 
+var config = getModuleLoaderConfig();
+require.onError = config.onError;
+
 if (FBTrace.DBG_INITIALIZE || FBTrace.DBG_MODULES)
 {
     if (FBTrace.DBG_MODULES)
         config.debug = true;
 
-    FBTrace.sysout("main.js; Loading Firebug modules...");
+    FBTrace.sysout("main.js; Loading Firebug modules...", config);
     var startLoading = new Date().getTime();
 }
-
-var config = getModuleLoaderConfig();
-require.onError = config.onError;
 
 require(config,
 [
