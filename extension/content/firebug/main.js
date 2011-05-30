@@ -212,7 +212,8 @@ require(config,
     "firebug/tableRep",
     "firebug/commandLinePopup",
     "firebug/commandLineExposed",
-    "firebug/consoleExposed"
+    "firebug/consoleExposed",
+    "firebug/firefox/firebugMenu",
 ],
 function(ChromeFactory, FBL, Firebug)
 {
