@@ -20,7 +20,7 @@ define([
     "firebug/lib/string",
     "firebug/lib/array",
     "firebug/lib/dom",
-    "firebug/http/httpLib",
+    "firebug/net/httpLib",
 ],
 function(FBL, Obj, Firefox, ChromeFactory, Domplate, Options, Locale, Events,
     Wrapper, Url, Css, Win, Str, Arr, Dom, Http) {

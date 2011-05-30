@@ -8,7 +8,7 @@ define([
     "firebug/lib/xpcom",
     "firebug/reps",
     "firebug/lib/locale",
-    "firebug/http/requestObserver",
+    "firebug/net/requestObserver",
     "firebug/lib/wrapper",
     "firebug/lib/url",
     "firebug/sourceLink",

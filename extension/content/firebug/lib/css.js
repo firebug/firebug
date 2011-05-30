@@ -6,7 +6,7 @@ define([
     "firebug/lib/options",
     "firebug/firefox/window",
     "firebug/lib/xml",
-    "firebug/http/httpLib",
+    "firebug/net/httpLib",
     "firebug/lib/xpath",
 ],
 function(FBTrace, Url, Options, Win, Xml, Http, Xpath) {

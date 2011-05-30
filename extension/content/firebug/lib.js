@@ -13,7 +13,7 @@ define([
     "firebug/lib/stackFrame",
     "firebug/lib/css",
     "firebug/lib/dom",
-    "firebug/http/httpLib",
+    "firebug/net/httpLib",
     "firebug/firefox/window",
     "firebug/lib/search",
     "firebug/lib/xpath",
