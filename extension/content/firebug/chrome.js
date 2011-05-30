@@ -1567,9 +1567,6 @@ var KeyBindingsManager =
     {
         this.isEnabled = enable;
 
-        if (FBTrace.DBG_SHORTCUTS)
-            FBTrace.sysout("shortcuts.enableKeys; " + enable);
-
         // Get all key bindings marked as fbOnlyKey
         if (!this.fbOnlyKeys)
         {
@@ -1578,8 +1575,13 @@ var KeyBindingsManager =
                 this.fbOnlyKeys = keyset.querySelectorAll(".fbOnlyKey");
         }
 
-        // Iterate over all key bindings and disable them if Firebug UI is not opened.
         var keys = this.fbOnlyKeys;
+
+        if (FBTrace.DBG_SHORTCUTS)
+            FBTrace.sysout("shortcuts.enableKeys; " + enable + " (keys: " +
+                (keys ? keys.length : "undefined") + ")", keys);
+
+        // Iterate over all key bindings and disable them if Firebug UI is not opened.
         for (var i=0; keys && i<keys.length; i++)
             keys[i].setAttribute("disabled", enable ? "false" : "true");
     }
