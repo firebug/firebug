@@ -110,6 +110,7 @@ var FirebugChrome =
             FBTrace.sysout("Firebug is broken, FBL incomplete, if the last function is QI, check lib.js:", FBL);
 
         Firebug.internationalizeUI(win.document);
+        Firebug.internationalizeUI(top.document);
 
         if (panelBar1)
         {
@@ -134,9 +135,21 @@ var FirebugChrome =
         win.addEventListener("blur", onBlur, true);
 
         // Initialize Firebug Tools, Web Developer and Firebug Icon menus.
-        var firebugMenuPopup = FirebugChrome.$("fbFirebugMenuPopup");
-        this.initializeMenu(FirebugChrome.$("menu_firebug"), firebugMenuPopup);
-        this.initializeMenu(FirebugChrome.$("appmenu_firebug"), firebugMenuPopup);
+        var firebugMenuPopup = Firefox.getElementById("fbFirebugMenuPopup");
+
+        // If 'Web Developer' menu is available (introduced in Firefox 6)
+        // Remove the old entry in Tools menu.
+        if (Firefox.getElementById("menu_webDeveloper_firebug"))
+        {
+            var menuFirebug = Firefox.getElementById("menu_firebug");
+            if (menuFirebug)
+                menuFirebug.parentNode.removeChild(menuFirebug);
+        }
+
+        // Initialize content of Firebug menu at various places.
+        this.initializeMenu(Firefox.getElementById("menu_webDeveloper_firebug"), firebugMenuPopup);
+        this.initializeMenu(Firefox.getElementById("menu_firebug"), firebugMenuPopup);
+        this.initializeMenu(Firefox.getElementById("appmenu_firebug"), firebugMenuPopup);
         this.initializeMenu(FirebugChrome.$("fbFirebugMenu"), firebugMenuPopup);
 
         // Register handlers for (de)activation of key bindings.

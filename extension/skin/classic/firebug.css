@@ -21,7 +21,7 @@
 /*************************************************************************************************/
 /* Firebug Menu & Firefox context menu */
 
-#menu_firebug, #appmenu_firebug {
+#menu_firebug, #appmenu_firebug, #menu_webDeveloper_firebug {
     list-style-image: url(chrome://firebug/skin/firebug16.png);
 }
 

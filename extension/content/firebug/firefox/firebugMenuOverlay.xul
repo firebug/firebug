@@ -1,0 +1,298 @@
+<?xml version="1.0"?>
+
+<overlay xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul"
+         xmlns:html="http://www.w3.org/1999/xhtml">
+
+    <commandset id="mainCommandSet">
+        <command id="cmd_clearConsole" oncommand="Firebug.Console.clear(Firebug.currentContext)"/>
+        <command id="cmd_togglePersistConsole" oncommand="Firebug.Console.togglePersist(Firebug.currentContext)"/>
+        <command id="cmd_clearNet" oncommand="Firebug.NetMonitor.clear(Firebug.currentContext)"/>
+        <command id="cmd_toggleSuspendFirebug" oncommand="Firebug.toggleSuspend()"/>
+        <command id="cmd_closeFirebug" oncommand="Firebug.closeFirebug(true)"/>
+
+        <command id="cmd_toggleInspecting" oncommand="if (!Firebug.currentContext) Firebug.toggleBar(true); Firebug.Inspector.toggleInspecting(Firebug.currentContext)"
+                 checked="false"/>
+        <command id="cmd_toggleQuickInfoBox" oncommand="Firebug.Inspector.toggleQuickInfoBox()"
+                 checked="false"/>
+        <command id="cmd_toggleProfiling" oncommand="Firebug.Profiler.toggleProfiling(Firebug.currentContext)"/>
+        <command id="cmd_toggleMemoryProfiling" oncommand="Firebug.MemoryProfiler.toggleProfiling(Firebug.currentContext)"/>
+        <command id="cmd_toggleHTMLEditing" oncommand="Firebug.currentContext.getPanel('html').toggleEditing()"/>
+        <command id="cmd_togglecssEditMode" oncommand="Firebug.currentContext.getPanel('stylesheet').toggleEditing()"/>
+
+        <command id="cmd_focusCommandLine" oncommand="if (!Firebug.currentContext) Firebug.toggleBar(true); Firebug.CommandLine.focus(Firebug.currentContext)"/>
+        <command id="cmd_focusFirebugSearch" oncommand="if (Firebug.currentContext) Firebug.Search.focus(Firebug.currentContext);"/>
+        <command id="cmd_focusWatchEditor" oncommand="if (Firebug.currentContext) Firebug.chrome.focusWatch(Firebug.currentContext);"/>
+        <command id="cmd_focusLocation" oncommand="if (Firebug.currentContext) Firebug.chrome.focusLocationList(Firebug.currentContext);"/>
+
+        <command id="cmd_breakOnNext" oncommand="Firebug.chrome.breakOnNext(Firebug.currentContext, event);"/>
+
+        <command id="cmd_rerun" oncommand="Firebug.Debugger.rerun(Firebug.currentContext)" disabled="true"/>
+        <command id="cmd_resumeExecution" oncommand="Firebug.Debugger.resume(Firebug.currentContext)" disabled="true"/>
+        <command id="cmd_stepOver" oncommand="Firebug.Debugger.stepOver(Firebug.currentContext)" disabled="true"/>
+        <command id="cmd_stepInto" oncommand="Firebug.Debugger.stepInto(Firebug.currentContext)" disabled="true"/>
+        <command id="cmd_stepOut" oncommand="Firebug.Debugger.stepOut(Firebug.currentContext)" disabled="true"/>
+        <command id="cmd_reenterCommand" oncommand="Firebug.CommandLine.reenter(Firebug.currentContext)"/>
+
+        <command id="cmd_previousFirebugTab" oncommand="Firebug.chrome.gotoPreviousTab()"/>
+        <command id="cmd_leftFirebugTab" oncommand="Firebug.chrome.gotoSiblingTab(false)"/>
+        <command id="cmd_rightFirebugTab" oncommand="Firebug.chrome.gotoSiblingTab(true)"/>
+        <command id="cmd_nextObject" oncommand="Firebug.chrome.gotoNextObject()"/>
+        <command id="cmd_previousObject" oncommand="Firebug.chrome.gotoNextObject(true)"/>
+
+        <command id="cmd_clearAllBreakpoints" oncommand="Firebug.Debugger.clearAllBreakpoints(Firebug.currentContext)"/>
+        <command id="cmd_breakOnErrors" oncommand="Firebug.Options.togglePref('breakOnErrors')"/>
+
+        <command id="cmd_toggleTraceConsole" oncommand="Firebug.TraceModule.openConsole()"/>
+
+        <command id="cmd_toggleFirebug" oncommand="Firebug.toggleBar()"/>
+        <command id="cmd_detachFirebug" oncommand="Firebug.toggleDetachBar(false, true)"/>
+        <command id="cmd_minimizeFirebug" oncommand="Firebug.minimizeBar()"/>
+        <command id="cmd_toggleDetachFirebug" oncommand="Firebug.toggleDetachBar(false, true)"/>
+        <command id="cmd_enablePanels" oncommand="Firebug.PanelActivation.enableAllPanels()"/>
+        <command id="cmd_disablePanels" oncommand="Firebug.PanelActivation.disableAllPanels()"/>
+        <command id="cmd_allOn" oncommand="Firebug.PanelActivation.toggleAll('on')"/>
+        <command id="cmd_clearActivationList" oncommand="Firebug.PanelActivation.clearAnnotations()"/>
+        <command id="cmd_customizeFBKeys" oncommand="Firebug.ShortcutsModel.customizeShortcuts()"/>
+        <command id="cmd_resetAllOptions" oncommand="Firebug.resetAllOptions(true);"/>
+        <command id="cmd_inspect" oncommand="Firebug.Inspector.inspectFromContextMenu(document.popupNode);"/>
+
+        <command id="cmd_togglePersistNet" oncommand="Firebug.NetMonitor.togglePersist(Firebug.currentContext)"/>
+        <command id="cmd_toggleOrient" oncommand="Firebug.chrome.toggleOrient()" />
+        <command id="cmd_toggleShowErrorCount" oncommand="Firebug.chrome.toggleShowErrorCount();" />
+        <command id="cmd_navBack" oncommand="Firebug.NavigationHistory.goBack(Firebug.currentContext)" />
+        <command id="cmd_navForward" oncommand="Firebug.NavigationHistory.goForward(Firebug.currentContext)" />
+        <command id="cmd_toggleFreezeWindow" oncommand="Firebug.Debugger.toggleFreezeWindow(Firebug.currentContext)" />
+
+        <command id="cmd_increaseTextSize" oncommand="Firebug.Options.changeTextSize(1);"/>
+        <command id="cmd_decreaseTextSize" oncommand="Firebug.Options.changeTextSize(-1);"/>
+        <command id="cmd_normalTextSize" oncommand="Firebug.Options.setTextSize(0);"/>
+
+        <command id="cmd_toggleCommandPopup" oncommand="Firebug.CommandLine.Popup.toggle(Firebug.currentContext)"
+            checked="false"/>
+
+        <command id="cmd_openHelp" oncommand="Firebug.visitWebsite('FAQ');"/>
+    </commandset>
+
+    <keyset id="mainKeyset">
+        <key id="key_toggleFirebug" keycode="VK_F12" command="cmd_toggleFirebug"/>
+        <key id="key_reenterCommand" key="e" modifiers="control,shift" command="cmd_reenterCommand" class="fbOnlyKey"/>
+        <key id="key_toggleInspecting" key="c" modifiers="accel,shift" command="cmd_toggleInspecting" />
+        <key id="key_toggleQuickInfoBox" key="i" modifiers="accel,shift" command="cmd_toggleQuickInfoBox" class="fbOnlyKey"/>
+        <key id="key_toggleProfiling" key="p" modifiers="accel,shift" command="cmd_toggleProfiling" class="fbOnlyKey"/>
+        <key id="key_focusCommandLine" key="l" modifiers="accel,shift" command="cmd_focusCommandLine"/>
+        <key id="key_focusFirebugSearch" key="k" modifiers="accel,shift" command="cmd_focusFirebugSearch" class="fbOnlyKey"/>
+        <key id="key_focusWatchEditor" key="n" modifiers="accel,shift" command="cmd_focusWatchEditor" class="fbOnlyKey"/>
+        <key id="key_focusLocation" key=" " modifiers="accel,shift" command="cmd_focusLocation" class="fbOnlyKey"/>
+        <key id="key_focusLocation" key=" " modifiers="control" command="cmd_focusLocation" class="fbOnlyKey"/>
+        <key id="key_nextObject" key="." modifiers="control" command="cmd_nextObject" class="fbOnlyKey"/>
+        <key id="key_previousObject" key="," modifiers="control" command="cmd_previousObject" class="fbOnlyKey"/>
+        <key id="key_previousFirebugTab" key="`" modifiers="control" command="cmd_previousFirebugTab" class="fbOnlyKey"/>
+        <key id="key_leftFirebugTab" keycode="VK_PAGE_UP" modifiers="accel shift" command="cmd_leftFirebugTab" class="fbOnlyKey"/>
+        <key id="key_rightFirebugTab" keycode="VK_PAGE_DOWN" modifiers="accel shift" command="cmd_rightFirebugTab" class="fbOnlyKey"/>
+        <key id="key_customizeFBKeys" key="b" modifiers=",accel shift alt" command="cmd_customizeFBKeys" class="fbOnlyKey"/>
+        <key id="key_detachFirebug" keycode="VK_F12" modifiers="accel" command="cmd_detachFirebug"/>
+        <key id="key_closeFirebug" keycode="VK_F12" modifiers="shift" command="cmd_closeFirebug"/>
+        <key id="key_clearConsole" key="r" modifiers="accel,shift" command="cmd_clearConsole" class="fbOnlyKey"/>
+        <key id="key_navBack" keycode="VK_LEFT" modifiers="accel,shift" command="cmd_navBack" class="fbOnlyKey"/>
+        <key id="key_navForward" keycode="VK_RIGHT" modifiers="accel,shift" command="cmd_navForward" class="fbOnlyKey"/>
+        <key id="key_toggleFreezeWindow" key="f" modifiers="control,shift" command="cmd_toggleFreezeWindow" class="fbOnlyKey"/>
+        <key id="key_increaseTextSize" key="+" modifiers="accel shift" command="cmd_increaseTextSize" class="fbOnlyKey"/>
+        <key id="key_decreaseTextSize" key="-" modifiers="accel shift" command="cmd_decreaseTextSize" class="fbOnlyKey"/>
+        <key id="key_normalTextSize" keycode="VK_INSERT" modifiers="accel shift" command="cmd_normalTextSize" class="fbOnlyKey"/>
+        <key id="key_help" keycode="VK_F1" command="cmd_openHelp" class="fbOnlyKey"/>
+    </keyset>
+
+    <!-- Firefox page context menu -->
+    <menupopup id="contentAreaContextMenu">
+        <menuseparator/>
+        <menuitem id="menu_firebugInspect" label="firebug.InspectElement"
+                  command="cmd_inspect" class="menuitem-iconic fbInternational" />
+    </menupopup>
+
+    <!-- Firefox View menu -->
+    <menupopup id="menu_viewPopup">
+        <menuitem id="menu_viewToggleFirebug" insertbefore="toggle_taskbar"
+                  label="firebug.Firebug" type="checkbox"
+                  key="key_toggleFirebug" command="cmd_toggleFirebug"
+                  class="fbInternational"/>
+    </menupopup>
+
+    <!-- SeaMonkey View menu -->
+    <menupopup id="menu_View_Popup">
+        <menuitem id="menu_viewToggleFirebug" insertafter="menuitem_fullScreen"
+                  label="firebug.Firebug" type="checkbox"
+                  key="key_toggleFirebug" command="cmd_toggleFirebug"
+                  class="fbInternational"/>
+    </menupopup>
+
+    <!-- Firefox Tools menu -->
+    <menupopup id="menu_ToolsPopup">
+        <menu id="menu_firebug" class="menu-iconic fbInternational"
+              label="firebug.Firebug" insertbefore="javascriptConsole">
+              <!-- Content comes from fbFirebugMenuPopup -->
+        </menu>
+    </menupopup>
+
+    <!-- Firefox Tools -> WebDeveloper menu -->
+    <menupopup id="menu_ToolsPopup">
+        <menu id="webDeveloperMenu">
+            <menupopup id="menuWebDeveloperPopup">
+                <menu id="menu_webDeveloper_firebug" class="menu-iconic fbInternational"
+                      label="firebug.Firebug" insertbefore="webConsole">
+                    <!-- Content comes from fbFirebugMenuPopup -->
+                </menu>
+                <menuseparator insertbefore="webConsole" />
+            </menupopup>
+        </menu>
+    </menupopup>
+
+    <!-- Firefox 4 Web Developer menu -->
+    <menupopup id="appmenu_webDeveloper_popup">
+        <splitmenu id="appmenu_firebug" class="fbInternational" iconic="true"
+            label="firebug.Firebug" insertbefore="appmenu_webConsole"
+            command="cmd_toggleFirebug" key="key_toggleFirebug">
+                <!-- Content comes from fbFirebugMenuPopup -->
+        </splitmenu>
+        <menuseparator insertbefore="appmenu_webConsole" />
+    </menupopup>
+
+    <!-- SeaMonkey Tools menu -->
+    <menupopup id="toolsPopup">
+        <menu id="menu_firebug" class="menuitem-iconic fbInternational"
+              label="firebug.Firebug"
+              insertbefore="appmenu_webConsole">
+              <!-- Content comes from fbFirebugMenuPopup -->
+        </menu>
+    </menupopup>
+
+    <!-- Firebug Menu Definition -->
+    <vbox id="appcontent">
+
+        <!-- Firebug Tools & Icon menu & Web Developer menu -->
+        <menupopup id="fbFirebugMenuPopup" role="menu"
+                   onpopupshowing="return Firebug.chrome.onMenuShowing(this);">
+
+            <!-- Open -->
+            <menuitem id="menu_toggleFirebug"
+                      label="firebug.ShowFirebug" command="cmd_toggleFirebug"
+                      key="key_toggleFirebug" class="fbInternational"/>
+            <menuitem id="menu_detachFirebug" label="firebug.DetachFirebug"
+                      command="cmd_toggleDetachFirebug"
+                      key="key_detachFirebug" class="fbInternational"/>
+            <menuitem id="menu_closeFirebug" label="firebug.CloseFirebug"
+                      command="cmd_closeFirebug"
+                      key="key_closeFirebug" class="fbInternational"/>
+
+            <menuseparator id="menu_openActionsSeparator"/>
+
+            <!-- Text Size -->
+            <menu id="FirebugMenu_TextSize" label="firebug.TextSize" class="fbInternational">
+                <menupopup>
+                    <menuitem id="menu_increaseTextSize" label="firebug.IncreaseTextSize"
+                        command="cmd_increaseTextSize"
+                        key="key_increaseTextSize" class="fbInternational"/>
+                    <menuitem id="menu_decreaseTextSize" label="firebug.DecreaseTextSize"
+                        command="cmd_decreaseTextSize"
+                        key="key_decreaseTextSize" class="fbInternational"/>
+                    <menuitem id="menu_normalTextSize" label="firebug.NormalTextSize"
+                        command="cmd_normalTextSize"
+                        key="key_normalTextSize" class="fbInternational"/>
+                </menupopup>
+            </menu>
+
+            <!-- Options -->
+            <menu id="FirebugMenu_Options" label="firebug.Options" class="fbInternational">
+                <menupopup onpopupshowing="return Firebug.chrome.onOptionsShowing(this);"
+                           id="FirebugMenu_OptionsPopup">
+                    <menuitem id="menu_alwaysOpenInWindow"
+                              type="checkbox" label="firebug.AlwaysOpenInWindow"
+                              oncommand="Firebug.chrome.onToggleAlwaysOpenInWindowOption(this, Firebug.currentContext)"
+                              option="openInWindow" class="fbInternational"/>
+                    <menuitem id="menu_toggleShowErrorCount"
+                              type="checkbox" label="firebug.Show_Error_Count"
+                              oncommand="Firebug.chrome.onToggleOption(this)"
+                              option="showErrorCount"
+                              class="fbInternational"/>
+                    <menuitem id="menu_showTooltips"
+                              type="checkbox" label="firebug.ShowTooltips"
+                              oncommand="Firebug.chrome.onToggleOption(this)"
+                              option="showInfoTips" class="fbInternational"/>
+                    <menuitem id="menu_shadeBoxModel"
+                              type="checkbox" label="firebug.ShadeBoxModel"
+                              oncommand="Firebug.chrome.onToggleOption(this)"
+                              option="shadeBoxModel" class="fbInternational"/>
+                    <menuitem id="showQuickInfoBox"
+                              type="checkbox" label="firebug.Show_Quick_Info_Box"
+                              oncommand="Firebug.chrome.onToggleOption(this)"
+                              option="showQuickInfoBox" class="fbInternational"/>
+                    <menuitem id="menu_enableA11y"
+                              type="checkbox"
+                              label="firebug.menu.Enable Accessibility Enhancements"
+                              oncommand="Firebug.chrome.onToggleOption(this)"
+                              option="a11y.enable"
+                              class="fbInternational"/>
+                    <menuitem id="menu_activateSameOrigin"
+                              type="checkbox" label="firebug.menu.Activate Same Origin URLs"
+                              oncommand="Firebug.chrome.onToggleOption(this)"
+                              option="activateSameOrigin" class="fbInternational"/>
+                    <menuitem id="menu_toggleOrient"
+                              type="checkbox" label="firebug.Vertical"
+                              command="cmd_toggleOrient"
+                              option="viewPanelOrient"
+                              class="fbInternational"/>
+                    <menuseparator id="menu_optionsSeparator"/>
+                    <menuitem id="menu_resetAllOptions"
+                              label="firebug.menu.Reset All Firebug Options"
+                              command="cmd_resetAllOptions"
+                              class="fbInternational"/>
+                </menupopup>
+            </menu>
+
+            <menuseparator id="FirebugBetweenOptionsAndSites" collapsed="true"/>
+
+            <!-- Sites -->
+            <menu label="firebug.menu.Firebug Online" id="FirebugMenu_Sites" class="fbInternational">
+                <menupopup id="FirebugMenu_SitesPopup">
+                    <menuitem id="menu_firebugUrlWebsite" label="firebug.Website"
+                        oncommand="Firebug.visitWebsite('main')" class="fbInternational"/>
+                    <menuitem id="menu_firebugFAQ" label="firebug.FAQ"
+                        command="cmd_openHelp" key="key_help" class="fbInternational"/>
+                    <menuitem id="menu_firebugDoc" label="firebug.Documentation"
+                        oncommand="Firebug.visitWebsite('docs')" class="fbInternational"/>
+                    <menuitem id="menu_firebugKeyboard" label="firebug.KeyShortcuts"
+                        oncommand="Firebug.visitWebsite('keyboard')" class="fbInternational"/>
+                    <menuitem id="menu_firebugForums" label="firebug.Forums"
+                        oncommand="Firebug.visitWebsite('discuss')" class="fbInternational"/>
+                    <menuitem id="menu_firebugIssues" label="firebug.Issues"
+                        oncommand="Firebug.visitWebsite('issues')" class="fbInternational"/>
+                    <menuitem id="menu_firebugDonate" label="firebug.Donate"
+                        oncommand="Firebug.visitWebsite('donate')" class="fbInternational"/>
+                </menupopup>
+            </menu>
+
+            <menuseparator  id="menu_miscActionsSeparator"/>
+
+            <menuitem id="menu_inspectElement" label="firebug.InspectElement" type="checkbox"
+                command="cmd_toggleInspecting" key="key_toggleInspecting" class="fbInternational"/>
+            <menuitem id="menu_profileScript" label="firebug.ProfileScript" type="checkbox"
+                command="cmd_toggleProfiling" key="key_toggleProfiling" class="fbInternational"/>
+            <menuitem id="menu_focusCommandLine" label="firebug.CommandLine"
+                command="cmd_focusCommandLine" key="key_focusCommandLine" class="fbInternational"/>
+            <menuitem id="menu_focusFirebugSearch" label="firebug.Search"
+                command="cmd_focusFirebugSearch" key="key_focusFirebugSearch" class="fbInternational"/>
+
+            <menuseparator id="menu_toolsSeparator"/>
+
+            <menuitem id="menu_customizeShortcuts"
+                label="firebug.menu.Customize shortcuts"
+                command="cmd_customizeFBKeys" key="key_customizeFBKeys"
+                class="fbInternational" />
+
+            <menuseparator id="menu_aboutSeparator"/>
+
+            <menuitem id="Firebug_About" class="firebugAbout fbInternational"
+                label="firebug.About" oncommand="Firebug.chrome.openAboutDialog()"/>
+        </menupopup>
+
+    </vbox>
+</overlay>

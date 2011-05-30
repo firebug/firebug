@@ -10,6 +10,7 @@
     <stringbundleset id="stringbundleset">
         <stringbundle id="strings_firebug" src="chrome://firebug/locale/firebug.properties"/>
     </stringbundleset>
+
     <commandset id="mainCommandSet">
         <command id="cmd_clearConsole" oncommand="Firebug.Console.clear(Firebug.currentContext)"/>
         <command id="cmd_togglePersistConsole" oncommand="Firebug.Console.togglePersist(Firebug.currentContext)"/>
@@ -505,137 +506,6 @@
                 oncommand="Firebug.toggleCommandLine(true)"/>
         </hbox>
 
-        <!-- Firebug Tools & Icon menu & Web Developer menu -->
-        <menupopup id="fbFirebugMenuPopup" role="menu"
-                   onpopupshowing="return Firebug.chrome.onMenuShowing(this);">
-
-            <!-- Open -->
-            <menuitem id="menu_toggleFirebug"
-                      label="firebug.ShowFirebug" command="cmd_toggleFirebug"
-                      key="key_toggleFirebug" class="fbInternational"/>
-            <menuitem id="menu_detachFirebug" label="firebug.DetachFirebug"
-                      command="cmd_toggleDetachFirebug"
-                      key="key_detachFirebug" class="fbInternational"/>
-            <menuitem id="menu_closeFirebug" label="firebug.CloseFirebug"
-                      command="cmd_closeFirebug"
-                      key="key_closeFirebug" class="fbInternational"/>
-
-            <menuseparator id="menu_openActionsSeparator"/>
-
-            <!-- Text Size -->
-            <menu id="FirebugMenu_TextSize" label="firebug.TextSize" class="fbInternational">
-                <menupopup>
-                    <menuitem id="menu_increaseTextSize" label="firebug.IncreaseTextSize"
-                        command="cmd_increaseTextSize"
-                        key="key_increaseTextSize" class="fbInternational"/>
-                    <menuitem id="menu_decreaseTextSize" label="firebug.DecreaseTextSize"
-                        command="cmd_decreaseTextSize"
-                        key="key_decreaseTextSize" class="fbInternational"/>
-                    <menuitem id="menu_normalTextSize" label="firebug.NormalTextSize"
-                        command="cmd_normalTextSize"
-                        key="key_normalTextSize" class="fbInternational"/>
-                </menupopup>
-            </menu>
-
-            <!-- Options -->
-            <menu id="FirebugMenu_Options" label="firebug.Options" class="fbInternational">
-                <menupopup onpopupshowing="return Firebug.chrome.onOptionsShowing(this);"
-                           id="FirebugMenu_OptionsPopup">
-                    <menuitem id="menu_alwaysOpenInWindow"
-                              type="checkbox" label="firebug.AlwaysOpenInWindow"
-                              oncommand="Firebug.chrome.onToggleAlwaysOpenInWindowOption(this, Firebug.currentContext)"
-                              option="openInWindow" class="fbInternational"/>
-                    <menuitem id="menu_toggleShowErrorCount"
-                              type="checkbox" label="firebug.Show_Error_Count"
-                              oncommand="Firebug.chrome.onToggleOption(this)"
-                              option="showErrorCount"
-                              class="fbInternational"/>
-                    <menuitem id="menu_showTooltips"
-                              type="checkbox" label="firebug.ShowTooltips"
-                              oncommand="Firebug.chrome.onToggleOption(this)"
-                              option="showInfoTips" class="fbInternational"/>
-                    <menuitem id="menu_shadeBoxModel"
-                              type="checkbox" label="firebug.ShadeBoxModel"
-                              oncommand="Firebug.chrome.onToggleOption(this)"
-                              option="shadeBoxModel" class="fbInternational"/>
-                    <menuitem id="showQuickInfoBox"
-                              type="checkbox" label="firebug.Show_Quick_Info_Box"
-                              oncommand="Firebug.chrome.onToggleOption(this)"
-                              option="showQuickInfoBox" class="fbInternational"/>
-                    <menuitem id="menu_enableA11y"
-                              type="checkbox"
-                              label="firebug.menu.Enable Accessibility Enhancements"
-                              oncommand="Firebug.chrome.onToggleOption(this)"
-                              option="a11y.enable"
-                              class="fbInternational"/>
-                    <menuitem id="menu_activateSameOrigin"
-                              type="checkbox" label="firebug.menu.Activate Same Origin URLs"
-                              oncommand="Firebug.chrome.onToggleOption(this)"
-                              option="activateSameOrigin" class="fbInternational"/>
-                    <menuitem id="menu_toggleOrient"
-                              type="checkbox" label="firebug.Vertical"
-                              command="cmd_toggleOrient"
-                              option="viewPanelOrient"
-                              class="fbInternational"/>
-                    <menuseparator id="menu_optionsSeparator"/>
-                    <menuitem id="menu_resetAllOptions"
-                              label="firebug.menu.Reset All Firebug Options"
-                              command="cmd_resetAllOptions"
-                              class="fbInternational"/>
-                </menupopup>
-            </menu>
-
-            <menuseparator id="FirebugBetweenOptionsAndSites" collapsed="true"/>
-
-            <!-- Sites -->
-            <menu label="firebug.menu.Firebug Online" id="FirebugMenu_Sites" class="fbInternational">
-                <menupopup id="FirebugMenu_SitesPopup">
-                    <menuitem id="menu_firebugUrlWebsite" label="firebug.Website"
-                        oncommand="Firebug.visitWebsite('main')" class="fbInternational"/>
-                    <menuitem id="menu_firebugFAQ" label="firebug.FAQ"
-                        command="cmd_openHelp" key="key_help" class="fbInternational"/>
-                    <menuitem id="menu_firebugDoc" label="firebug.Documentation"
-                        oncommand="Firebug.visitWebsite('docs')" class="fbInternational"/>
-                    <menuitem id="menu_firebugKeyboard" label="firebug.KeyShortcuts"
-                        oncommand="Firebug.visitWebsite('keyboard')" class="fbInternational"/>
-                    <menuitem id="menu_firebugForums" label="firebug.Forums"
-                        oncommand="Firebug.visitWebsite('discuss')" class="fbInternational"/>
-                    <menuitem id="menu_firebugIssues" label="firebug.Issues"
-                        oncommand="Firebug.visitWebsite('issues')" class="fbInternational"/>
-                    <menuitem id="menu_firebugDonate" label="firebug.Donate"
-                        oncommand="Firebug.visitWebsite('donate')" class="fbInternational"/>
-                </menupopup>
-            </menu>
-
-            <menuseparator  id="menu_miscActionsSeparator"/>
-
-            <menuitem id="menu_inspectElement" label="firebug.InspectElement" type="checkbox"
-                command="cmd_toggleInspecting" key="key_toggleInspecting" class="fbInternational"/>
-            <menuitem id="menu_profileScript" label="firebug.ProfileScript" type="checkbox"
-                command="cmd_toggleProfiling" key="key_toggleProfiling" class="fbInternational"/>
-            <menuitem id="menu_focusCommandLine" label="firebug.CommandLine"
-                command="cmd_focusCommandLine" key="key_focusCommandLine" class="fbInternational"/>
-            <menuitem id="menu_focusFirebugSearch" label="firebug.Search"
-                command="cmd_focusFirebugSearch" key="key_focusFirebugSearch" class="fbInternational"/>
-
-            <menuseparator id="menu_toolsSeparator"/>
-
-            <menuitem id="menu_customizeShortcuts"
-                label="firebug.menu.Customize shortcuts"
-                command="cmd_customizeFBKeys" key="key_customizeFBKeys"
-                class="fbInternational" />
-
-            <menuseparator id="menu_aboutSeparator"/>
-
-            <menuitem id="Firebug_About" class="firebugAbout fbInternational"
-                label="firebug.About" oncommand="Firebug.chrome.openAboutDialog()"/>
-        </menupopup>
-
-        <panel id="fbMigrator" noautohide='true'>
-        <!-- The width and height need to be set or the arrow will not show -->
-        <!-- maybe later <iframe id="fbMigrationFrame" width='200' height='100' src="chrome://firebug/skin/migrationArrow.svg"></iframe>
-        <button id="fbMigrationOk" label="Ok"/> -->
-        </panel>
     </vbox>
 <script>
 window.addEventListener("load", function overlayLoad()
