@@ -205,17 +205,16 @@ window.Firebug =
             FBTrace.sysout("Firebug.internationalizeUI");
 
         var elements = doc.getElementsByClassName("fbInternational");
+        elements = Arr.cloneArray(elements);
         var attributes = ["label", "tooltiptext", "aria-label"];
         for (var i=0; i<elements.length; i++)
         {
             var element = elements[i];
+            Css.removeClass(elements[i], "fbInternational");
             for (var j=0; j<attributes.length; j++)
             {
                 if (element.hasAttribute(attributes[j]))
-                {
                     Locale.internationalize(element, attributes[j]);
-                    Css.removeClass(element, "fbInternational");
-                }
             }
         }
 
@@ -247,25 +246,6 @@ window.Firebug =
     {
         if (FBTrace.DBG_INITIALIZE)
             FBTrace.sysout("firebug.initializeUI detachArgs:", detachArgs);
-
-        var version = this.getVersion(); // TODO chrome.js
-        if (version)
-        {
-            this.version = version;
-
-            var fbStatusBar = Firefox.getElementById('fbStatusBar')
-            if (fbStatusBar)
-                fbStatusBar.setAttribute("tooltiptext", "Firebug " + version);
-
-            // At this moment there is more 'Firebug About' items (in the icon and tools menu).
-            var nodes = document.querySelectorAll(".firebugAbout");
-            for (var i=0; i<nodes.length; i++)
-            {
-                var node = nodes[i];
-                var aboutLabel = node.getAttribute("label");
-                node.setAttribute("label", aboutLabel + " " + version);
-            }
-        }
 
         Events.dispatch(menuItemControllers, "initialize", []);  // TODO chrome.js
 

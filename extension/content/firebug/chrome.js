@@ -134,24 +134,6 @@ var FirebugChrome =
 
         win.addEventListener("blur", onBlur, true);
 
-        // Initialize Firebug Tools, Web Developer and Firebug Icon menus.
-        var firebugMenuPopup = Firefox.getElementById("fbFirebugMenuPopup");
-
-        // If 'Web Developer' menu is available (introduced in Firefox 6)
-        // Remove the old entry in Tools menu.
-        if (Firefox.getElementById("menu_webDeveloper_firebug"))
-        {
-            var menuFirebug = Firefox.getElementById("menu_firebug");
-            if (menuFirebug)
-                menuFirebug.parentNode.removeChild(menuFirebug);
-        }
-
-        // Initialize content of Firebug menu at various places.
-        this.initializeMenu(Firefox.getElementById("menu_webDeveloper_firebug"), firebugMenuPopup);
-        this.initializeMenu(Firefox.getElementById("menu_firebug"), firebugMenuPopup);
-        this.initializeMenu(Firefox.getElementById("appmenu_firebug"), firebugMenuPopup);
-        this.initializeMenu(FirebugChrome.$("fbFirebugMenu"), firebugMenuPopup);
-
         // Register handlers for (de)activation of key bindings.
         KeyBindingsManager.initialize();
 
@@ -165,18 +147,6 @@ var FirebugChrome =
         if (FBTrace.DBG_INITIALIZE)
             FBTrace.sysout("chrome.initialized in "+win.location+" with "+
                 (panelBar1 ? panelBar1.browser.ownerDocument.documentURI : "no panel bar"), win);
-    },
-
-    initializeMenu: function(parentMenu, popupMenu)
-    {
-        if (!parentMenu)
-            return;
-
-        if (parentMenu.getAttribute("initialized"))
-            return;
-
-        parentMenu.appendChild(popupMenu.cloneNode(true));
-        parentMenu.setAttribute("initialized", "true");
     },
 
     /**
@@ -243,7 +213,10 @@ var FirebugChrome =
                 Css.appendStylesheet(doc3, Firebug.stylesheets[uri]);
             }
 
+            // xxxHonza: is there any reason why we don't distribute "initializeUI"
+            // event to modules?
             FirstRunPage.initializeUI();
+            Firebug.FirebugMenu.initializeUI();
         }
         catch (exc)
         {

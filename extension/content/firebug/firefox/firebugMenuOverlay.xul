@@ -293,6 +293,5 @@
             <menuitem id="Firebug_About" class="firebugAbout fbInternational"
                 label="firebug.About" oncommand="Firebug.chrome.openAboutDialog()"/>
         </menupopup>
-
     </vbox>
 </overlay>

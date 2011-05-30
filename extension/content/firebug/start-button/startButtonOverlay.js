@@ -56,6 +56,15 @@ Firebug.StartButton = Obj.extend(Firebug.Module,
             // In case of Firefox 4+ the button is a bit different.
             if (appInfo.name == "Firefox" && versionChecker.compare(appInfo.version, "4.0*") >= 0)
                 startButton.setAttribute("firefox", "4");
+
+            // Put Firebug version in tooltip.
+            var version = Firebug.getVersion();
+            if (version)
+            {
+                var fbStatusBar = Firefox.getElementById("fbStatusBar");
+                if (fbStatusBar)
+                    fbStatusBar.setAttribute("tooltiptext", "Firebug " + version);
+            }
         }
 
         this.updateStatusIcon();
