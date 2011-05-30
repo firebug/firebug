@@ -800,7 +800,9 @@ NetPanel.prototype = Obj.extend(Firebug.ActivablePanel,
             stream.setInputStream(inputStream);
             var encodedResponse = btoa(stream.readBytes(stream.available()));
             var dataURI = "data:" + file.request.contentType + ";base64," + encodedResponse;
-            gBrowser.selectedTab = gBrowser.addTab(dataURI);
+
+            var tabBrowser = Firefox.getTabBrowser();
+            tabBrowser.selectedTab = tabBrowser.addTab(dataURI);
         }
         catch (err)
         {
