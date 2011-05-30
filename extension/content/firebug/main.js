@@ -1,4 +1,6 @@
 /* See license.txt for terms of usage */
+try {
+
 
 (function() {
 // ********************************************************************************************* //
@@ -23,58 +25,6 @@ function getModuleLoaderConfig(baseConfig)
         context: "Firebug " + uid, // TODO XUL window id on FF4.0+
         baseUrl: baseConfig.baseUrl,
         paths: baseConfig.paths,
-        onDebug: function()
-        {
-            try
-            {
-                if (!this.FBTrace)
-                {
-                    // traceConsoleService is a global of |window| frome trace.js.
-                    // on the first call we use it to get a ref to the Cu.import module object
-                    this.FBTrace = traceConsoleService.getTracer(baseConfig.prefDomain);
-                }
-
-                if (this.FBTrace.DBG_MODULES)
-                    this.FBTrace.sysout.apply(this.FBTrace,arguments);
-            }
-            catch(exc)
-            {
-                var msg = "";
-                for (var i = 0; i < arguments.length; i++)
-                    msg += arguments[i]+", ";
-
-                Components.utils.reportError("Loader; onDebug:"+msg);  // put something out for sure
-                window.dump("Loader; onDebug:"+msg+"\n");
-            }
-        },
-        onError: function(exc)
-        {
-            var msg = exc.toString() +" "+(exc.fileName || exc.sourceName) + "@" + exc.lineNumber;
-
-            Components.utils.reportError("Loader; Error: "+msg);  // put something out for sure
-            window.dump("Loader; onError:"+msg+"\n");
-            if (!this.FBTrace)
-            {
-                // traceConsoleService is a global of |window| frome trace.js.
-                // on the first call we use it to get a ref to the Cu.import module object
-                this.FBTrace = traceConsoleService.getTracer(baseConfig.prefDomain);
-            }
-
-            if (this.FBTrace.DBG_ERRORS || this.FBTrace.DBG_MODULES)
-                this.FBTrace.sysout("Loader; Error: "+msg, exc);
-
-            if (exc instanceof Error)
-                throw arguments[0];
-            else
-                throw new Error(msg);
-        },
-        onCollectDeps: function(fullName, deps)
-        {
-            var arr = [];
-            for (var p in deps)
-                arr.push(p);
-            depTree[fullName] = arr;
-        }
     };
 
     return config;
@@ -112,46 +62,35 @@ function dumpDependencyTree(tree)
 
 // ********************************************************************************************* //
 
-require.analyzeFailure = function(context, managers, specified, loaded)
+require.onDebug = function()
 {
-    for (var i = 0; i < managers.length; i++)
+    try
     {
-        var manager = managers[i];
-        context.config.onDebug("require.js ERROR failed to complete "+manager.fullName+
-            " isDone:"+manager.isDone+" #defined: "+manager.depCount+" #required: "+
-            manager.depMax);
-
-        var theNulls = [];
-        var theUndefineds = [];
-        var theUnstrucks = manager.strikeList;
-        var depsTotal = 0;
-
-        for (var depName in manager.deps)
-        {
-            if (typeof (manager.deps[depName]) === "undefined")
-                theUndefineds.push(depName);
-            if (manager.deps[depName] === null)
-                theNulls.push(depName);
-
-            var strikeIndex = manager.strikeList.indexOf(depName);
-            manager.strikeList.splice(strikeIndex, 1);
-        }
-
-        context.config.onDebug("require.js: "+theNulls.length+" null dependencies "+
-            theNulls.join(',')+" << check module ids.", theNulls);
-        context.config.onDebug("require.js: "+theUndefineds.length+" undefined dependencies: "+
-            theUndefineds.join(',')+" << check module return values.", theUndefineds);
-        context.config.onDebug("require.js: "+theUnstrucks.length+" unstruck dependencies "+
-            theUnstrucks.join(',')+" << check duplicate requires", theUnstrucks);
-
-        for (var j = 0; j < manager.depArray.length; j++)
-        {
-            var id = manager.depArray[j];
-            var module = manager.deps[id];
-            context.config.onDebug("require.js: "+j+" specified: "+specified[id]+" loaded: "+
-                loaded[id]+" "+id+" "+module);
-        }
+        FBTrace.sysout.apply(FBTrace,arguments);
     }
+    catch(exc)
+    {
+        var msg = "";
+        for (var i = 0; i < arguments.length; i++)
+            msg += arguments[i]+", ";
+
+        Components.utils.reportError("Loader; onDebug:"+msg);  // put something out for sure
+        window.dump("Loader; onDebug:"+msg+"\n");
+    }
+}
+
+require.onError = function(exc)
+{
+    require.onDebug.apply(require, arguments);
+    throw exc;
+}
+
+require.onCollectDeps = function(fullName, deps)
+{
+    var arr = [];
+    for (var p in deps)
+        arr.push(p);
+    depTree[fullName] = arr;
 }
 
 function loadXULCSS(cssURL)
@@ -167,7 +106,6 @@ function loadXULCSS(cssURL)
 // Modules
 
 var config = getModuleLoaderConfig();
-require.onError = config.onError;
 
 if (FBTrace.DBG_INITIALIZE || FBTrace.DBG_MODULES)
 {
@@ -260,3 +198,11 @@ function(ChromeFactory, FBL, Firebug)
 
 // ********************************************************************************************* //
 })();
+} catch (exc) {
+
+    window.dump("Firebug main  ERROR "+exc+"\n");
+
+    if (Components)
+        Components.utils.reportError(exc);
+
+}

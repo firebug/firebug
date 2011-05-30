@@ -1,5 +1,5 @@
 /** vim: et:ts=4:sw=4:sts=4
- * @license RequireJS 0.24.0 Copyright (c) 2010-2011, The Dojo Foundation All Rights Reserved.
+ * @license RequireJS 0.24.0+ Copyright (c) 2010-2011, The Dojo Foundation All Rights Reserved.
  * Available via the MIT or new BSD license.
  * see: http://github.com/jrburke/requirejs for details
  */
@@ -11,7 +11,7 @@
 var require, define;
 (function () {
     //Change this version number for each release.
-    var version = "0.24.0",
+    var version = "0.24.0+",
         commentRegExp = /(\/\*([\s\S]*?)\*\/|\/\/(.*)$)/mg,
         cjsRequireRegExp = /require\(["']([^'"\s]+)["']\)/g,
         currDirRegExp = /^\.\//,
@@ -32,7 +32,7 @@ var require, define;
         //Oh the tragedy, detecting opera. See the usage of isOpera for reason.
         isOpera = typeof opera !== "undefined" && opera.toString() === "[object Opera]",
         reqWaitIdPrefix = "_r@@",
-        empty = {},  // !(p in empty) is a way to implement hasOwnProperty(p)
+        empty = {},
         contexts = {},
         globalDefQueue = [],
         interactiveScript = null,
@@ -40,7 +40,7 @@ var require, define;
         useInteractive = false,
         req, cfg = {}, currentlyAddingScript, s, head, baseElement, scripts, script,
         src, subPath, mainScript, dataMain, i, scrollIntervalId, setReadyState, ctx,
-        jQueryCheck;
+        jQueryCheck, checkLoadedTimeoutId;
 
     function isFunction(it) {
         return ostring.call(it) === "[object Function]";
@@ -63,7 +63,17 @@ var require, define;
                 target[prop] = source[prop];
             }
         }
-        return req;  // XXXjjb why is this returned here?
+        return req;
+    }
+
+    /**
+     * Constructs an error with a pointer to an URL with more information.
+     * @param {String} id the error ID that maps to an ID on a web page.
+     * @param {String} message human readable error.
+     * @returns {Error}
+     */
+    function makeError(id, msg) {
+        return new Error(msg + '\nhttp://requirejs.org/docs/errors.html#' + id);
     }
 
     /**
@@ -91,12 +101,11 @@ var require, define;
             pkgs[pkgObj.name] = {
                 name: pkgObj.name,
                 location: location || pkgObj.name,
-                lib: pkgObj.lib || "lib",
                 //Remove leading dot in main, so main paths are normalized,
                 //and remove any trailing .js, since different package
                 //envs have different conventions: some use a module name,
                 //some use a file name.
-                main: (pkgObj.main || "lib/main")
+                main: (pkgObj.main || "main")
                       .replace(currDirRegExp, '')
                       .replace(jsSuffixRegExp, '')
             };
@@ -131,8 +140,7 @@ var require, define;
                 waitSeconds: 7,
                 baseUrl: s.baseUrl || "./",
                 paths: {},
-                pkgs: {},
-                debug: null,
+                pkgs: {}
             },
             defQueue = [],
             specified = {
@@ -289,13 +297,9 @@ var require, define;
                     if (req.toModuleUrl) {
                         //Special logic required for a particular engine,
                         //like Node.
-                        url = req.toModuleUrl(context, name, parentModuleMap);
+                        url = req.toModuleUrl(context, normalizedName, parentModuleMap);
                     } else {
-                        url = context.nameToUrl(name, null, parentModuleMap);
-                    }
-
-                    if (context.config.debug && context.config.onTrace) {
-                        context.config.onTrace("makeModuleMap name: "+name+" parentName: "+parentName+" normalizedName: "+normalizedName+" url "+url);
+                        url = context.nameToUrl(normalizedName, null, parentModuleMap);
                     }
 
                     //Store the URL mapping for later.
@@ -493,28 +497,25 @@ var require, define;
                 args = [],
                 ary = manager.depArray;
 
-            if (context.config.debug && context.config.onCollectDeps) {
-                context.config.onCollectDeps(fullName, manager.deps);
-            }
-
             //Call the callback to define the module, if necessary.
             if (cb && isFunction(cb)) {
                 //Pull out the defined dependencies and pass the ordered
                 //values to the callback.
                 if (ary) {
                     for (i = 0; i < ary.length; i++) {
-                        args.push(manager.deps[ary[i]]);
+                        var dependency = manager.deps[ary[i]];
+                        if (req.onDebug && typeof(dependency) === "undefined") {
+                            var dependentName = fullName ? ("for " + fullName) : "";
+                            var badDep = makeError('undefinedDependency', "Undefined dependency "+ary[i]+dependentName);
+                            req.onDebug(badDep)
+                        } else {
+                            args.push(dependency);
+                        }
                     }
                 }
 
-                if (context.config.debug && context.config.onTrace) {
-                    context.config.onTrace("require.js: defining "+fullName+" with "+args.length+" dependents", {defineFunction: manager.callback, dependents: args});
-                }
-                try {
-                    ret = req.execCb(fullName, manager.callback, args, defined[fullName]);
-                } catch(exc) {
-                    req.onError(exc);
-                }
+                ret = req.execCb(fullName, manager.callback, args, defined[fullName]);
+
                 if (fullName) {
                     //If exports is in play, favor that since it helps circular
                     //dependencies. If setting exports via "module" is in play,
@@ -523,9 +524,6 @@ var require, define;
                     if (manager.usingExports && manager.cjsModule &&
                         manager.cjsModule.exports !== defined[fullName]) {
                         ret = defined[fullName] = manager.cjsModule.exports;
-                        if (context.config.debug && context.config.onTrace) {
-                            context.config.onTrace("require.js: defined "+fullName+" using exports");
-                        }
                     } else if (fullName in defined) {
                         //This case is when usingExports is in play and
                         //module.exports/setExports was not used. It could also
@@ -535,30 +533,26 @@ var require, define;
                         //if it does for some reason, only the original definition
                         //will be used for integrity.
                         ret = defined[fullName];
-                        if (context.config.debug && context.config.onTrace) {
-                            context.config.onTrace("require.js: defined "+fullName+" using previously defined value");
-                        }
                     } else {
-                        //Use the return value from the function.
-                        defined[fullName] = ret;
-
-                        if (context.config.debug && context.config.onTrace) {
-                            context.config.onTrace("require.js: defined "+fullName+" using function return");
+                        if (ret) {
+                            //Use the return value from the function.
+                            defined[fullName] = ret;
+                        } else {
+                            if (req.onDebug && typeof(jQuery) === "undefined") {
+                                var noReturn = makeError("noreturn", "The module \'"+fullName+"\' has false return value");
+                                req.onDebug(noReturn);
+                            }
                         }
-                    }
-                    if (typeof(ret) === 'undefined') {
-                         req.onError("require.js "+fullName+" set exports undefined!");
-                    }
-                } else {
-                    if (context.config.debug && context.config.onTrace) {
-                        context.config.onTrace("require.js: defined found no fullName");
                     }
                 }
-
             } else if (fullName) {
+                // Syntax errors in script elements end up here because cb will be null,
+                // but lots of special cases also have cb null.
                 //May just be an object definition for the module. Only
                 //worry about defining if have a module name.
-                ret = defined[fullName] = cb;
+                if (cb) {  // set only if the object is truthy
+                    ret = defined[fullName] = cb;
+                }
             }
 
             if (fullName) {
@@ -588,10 +582,6 @@ var require, define;
         }
 
         function main(inName, depArray, callback, relModuleMap) {
-            if (context.config.debug && context.config.onTrace) {
-                context.config.onTrace("main calling makeModuleMap with ("+inName+","+ relModuleMap+")");
-            }
-
             var moduleMap = makeModuleMap(inName, relModuleMap),
                 name = moduleMap.name,
                 fullName = moduleMap.fullName,
@@ -607,15 +597,11 @@ var require, define;
                     fullName: fullName,
                     deps: {},
                     depArray: depArray,
-                    strikeList: [], // length depMax, value depName,
                     callback: callback,
                     onDep: function (depName, value) {
                         if (!(depName in manager.deps)) {
                             manager.deps[depName] = value;
                             manager.depCount += 1;
-                            if (context.config.debug && context.config.onTrace) {
-                                context.config.onTrace("require.js:  "+manager.fullName+"["+depName+"]= "+typeof(value)+" "+manager.depCount+"/"+manager.depMax, {manager: manager});
-                            }
                             if (manager.depCount === manager.depMax) {
                                 //All done, execute!
                                 execManager(manager);
@@ -643,7 +629,7 @@ var require, define;
                 loaded[fullName] = true;
 
                 //If module is jQuery set up delaying its dom ready listeners.
-                if (fullName === "jquery") {
+                if (fullName === "jquery" && callback) {
                     jQueryCheck(callback());
                 }
             }
@@ -686,7 +672,6 @@ var require, define;
 
                         //A dynamic dependency.
                         manager.depMax += 1;
-                        manager.strikeList.push(depName);
 
                         queueDependency(depArg);
 
@@ -707,22 +692,6 @@ var require, define;
                 waiting[manager.waitId] = manager;
                 waitAry.push(manager);
                 context.waitCount += 1;
-                if (context.config.debug && context.config.onTrace) {
-                    var allDefined = "";
-                    for (var p in defined) {
-                        allDefined += p + ", ";
-                    }
-                    context.config.onTrace("require; defined: "+(allDefined ? allDefined : " NONE"), allDefined);
-                    var unresolvedDeps = "";
-                    for (var i = 0; i < manager.depArray.length; i++) {
-                        if (depArray[i] in defined) continue;
-
-                        unresolvedDeps += depArray[i]+",";
-                    }
-
-                    var waitingOn = manager.depCount+"/"+manager.depMax+" "+unresolvedDeps;
-                    context.config.onTrace("require; "+manager.fullName+" waiting on "+waitingOn);
-                }
             }
         }
 
@@ -789,29 +758,11 @@ var require, define;
                 depName, i;
             if (fullName) {
                 if (traced[fullName]) {
-                    if (context.config.onTrace || context.config.onDebug) {
-                        var cycle = Object.keys(traced).join("->")+"->"+fullName;
-                        if (defined[fullName] && context.config.onTrace) {
-                            context.config.onTrace("require.js; traced "+fullName+" already defined");
-                        } else {
-                            var output = context.config.onDebug || context.config.onTrace;
-                            // eg require.js; arch/tools traced but not defined, circular dependency? arch/tools->arch/browser->firebug/tabWatcher->firebug/tabContext->arch/tools
-                            output("require.js; "+fullName+" traced but not defined, circular dependency? "+cycle);
-                        }
-                    }
                     return defined[fullName];
                 }
 
                 traced[fullName] = true;
-                if (context.config.onTrace) {
-                    context.config.onTrace("require.js; "+fullName+" added to traced: "+Object.keys(traced));
-                }
-            } else {
-                if (context.config.onTrace) {
-                    context.config.onTrace("require.js; forceExec,  no fullName");
-                }
             }
-
 
             //forceExec all of its dependencies.
             for (i = 0; i < depArray.length; i++) {
@@ -841,14 +792,6 @@ var require, define;
                 noLoads = "", hasLoadedProp = false, stillLoading = false, prop,
                 err, manager;
 
-            if (context.config.debug && context.config.onTrace){
-                var msg = "waitCount:"+context.waitCount;
-                msg += " pausedCount: "+context.pausedCount;
-                msg += " scriptCount: "+context.scriptCount;
-                msg += (expired ? " EXPIRED: " : " remaining ") + (new Date().getTime() - context.startTime) + "/" + waitInterval +" secs";
-                context.config.onTrace("checkLoaded "+checkLoaded.timeOutIndex+": "+msg);
-            }
-
             //If there are items still in the paused queue processing wait.
             //This is particularly important in the sync case where each paused
             //item is processed right away but there may be more waiting.
@@ -869,9 +812,8 @@ var require, define;
             }
 
             //See if anything is still in flight.
-            var inLoadedAndNotInEmpty = [];
             for (prop in loaded) {
-                if (!(prop in empty)) {  // loaded.hasOwnProperty(prop)
+                if (!(prop in empty)) {
                     hasLoadedProp = true;
                     if (!loaded[prop]) {
                         if (expired) {
@@ -883,45 +825,32 @@ var require, define;
                     }
                 }
             }
-            if (context.config.debug && context.config.onTrace) {
-                var msg = "checkLoaded";
-                msg += " hasLoadedProp "+hasLoadedProp;
-                msg += " stillLoading: "+stillLoading;
-                msg += " noLoads: "+noLoads;
-                context.config.onTrace(msg);
-            }
+
             //Check for exit conditions.
             if (!hasLoadedProp && !context.waitCount) {
                 //If the loaded object had no items, then the rest of
                 //the work below does not need to be done.
                 return undefined;
             }
-            if (expired) {
-                if (noLoads) {
-                    //If wait time expired, throw error of unloaded modules.
-                    err = new Error("require.js load timeout (waitSeconds: "+config.waitSeconds+") for modules: " + noLoads);
-                    err.requireType = "timeout";
-                    err.requireModules = noLoads;
-                    return req.onError(err);
-                } else {
-                    //If wait time expired but no modules wait, throw error of counted modules.
-                    noLoads = context.counted ? context.counted.join(", ") : " rerun with debug";
-                    if(noLoads) {
-                        err = new Error("require.js checkLoaded("+checkLoaded.timeOutIndex+") timeout (waitSeconds: "+config.waitSeconds+") for counted modules: " + noLoads);
-                        err.requireType = "timeout";
-                        err.requireModules = noLoads;
-                        return req.onError(err);
-                    }
-                }
+            if (expired && noLoads) {
+                //If wait time expired, throw error of unloaded modules.
+                err = makeError("timeout", "Load timeout for modules: " + noLoads);
+                err.requireType = "timeout";
+                err.requireModules = noLoads;
+                return req.onError(err);
             }
             if (stillLoading || context.scriptCount) {
-                //Something is still waiting to load. Wait for it.
-                if (isBrowser || isWebWorker) {
-                    checkLoaded.depth = checkLoaded.depth ? checkLoaded.depth++ : 1;
-                    checkLoaded.timeOutIndex = setTimeout(checkLoaded, 50);
+                //Something is still waiting to load. Wait for it, but only
+                //if a timeout is not already in effect.
+                if ((isBrowser || isWebWorker) && !checkLoadedTimeoutId) {
+                    checkLoadedTimeoutId = setTimeout(function () {
+                        checkLoadedTimeoutId = 0;
+                        checkLoaded();
+                    }, 50);
                 }
                 return undefined;
             }
+
             //If still have items in the waiting cue, but all modules have
             //been loaded, then it means there are some circular dependencies
             //that need to be broken.
@@ -934,18 +863,6 @@ var require, define;
                 //Cycle through the waitAry, and call items in sequence.
                 for (i = 0; (manager = waitAry[i]); i++) {
                     forceExec(manager, {});
-                }
-
-                if (!context.checkLoadedDepth) {
-                    context.checkLoadedDepth = 0;
-                }
-                if (context.config.onTrace)
-                    context.config.onTrace("context.checkLoadedDepth "+context.checkLoadedDepth);
-                if (context.checkLoadedDepth++ > 15) {
-                    if (context.config.analyzeFailure) {
-                        context.config.analyzeFailure(context, waitAry, specified, loaded);
-                    }
-                    return;
                 }
 
                 checkLoaded();
@@ -1003,11 +920,6 @@ var require, define;
                 //Indicate a the module is in process of loading.
                 context.loaded[moduleName] = false;
                 context.scriptCount += 1;
-                if (context.config.onDebug)
-                    context.counted.push(moduleName);
-                if (context.config.debug && context.config.onTrace) {
-                    context.config.onTrace("context.counted push "+context.counted[context.scriptCount - 1]);
-                }
 
                 //Turn off interactive script matching for IE for any define
                 //calls in the text, then turn it back on at the end.
@@ -1037,7 +949,8 @@ var require, define;
             }
 
             var pluginName = dep.prefix,
-                fullName = dep.fullName;
+                fullName = dep.fullName,
+                urlFetched = context.urlFetched;
 
             //Do not bother if the dependency has already been specified.
             if (specified[fullName] || loaded[fullName]) {
@@ -1078,7 +991,10 @@ var require, define;
                     pluginsQueue[pluginName].push(dep);
                 }
             } else {
-                req.load(context, fullName, dep.url);
+                if (!urlFetched[dep.url]) {
+                    req.load(context, fullName, dep.url);
+                    urlFetched[dep.url] = true;
+                }
             }
         }
 
@@ -1102,9 +1018,7 @@ var require, define;
             while (defQueue.length) {
                 args = defQueue.shift();
                 if (args[0] === null) {
-                    var causes = 'Mismatched anonymous require.def modules';
-                    causes += " or script tag matches module";
-                    return req.onError(new Error(causes));
+                    return req.onError(makeError('mismatch', 'Second anonymous define(): ' + args[args.length - 1]));
                 } else {
                     callDefMain(args);
                 }
@@ -1162,11 +1076,9 @@ var require, define;
             managerCallbacks: managerCallbacks,
             makeModuleMap: makeModuleMap,
             normalize: normalize,
-            namedHow: {},  // info by url
             /**
              * Set a configuration for the context.
-             * @param {Object} cfg config object to override current configuration. All properties are optional.
-             * See http://requirejs.org/docs/api.html#config
+             * @param {Object} cfg config object to integrate.
              */
             configure: function (cfg) {
                 var paths, prop, packages, pkgs, packagePaths, requireWait;
@@ -1247,7 +1159,7 @@ var require, define;
                     config.priorityWait = cfg.priority;
                 }
 
-                //If a deps array or a config callback is given, then call
+                //If a deps array or a config callback is specified, then call
                 //require with those args. This is useful when require is defined as a
                 //config object before require.js is loaded.
                 if (cfg.deps || cfg.callback) {
@@ -1286,7 +1198,7 @@ var require, define;
 
                     ret = defined[moduleMap.fullName];
                     if (ret === undefined) {
-                        return req.onError(new Error("require: module name '" +
+                        return req.onError(makeError("notloaded", "Module name '" +
                                     moduleMap.fullName +
                                     "' has not been loaded yet for context: " +
                                     contextName));
@@ -1303,7 +1215,7 @@ var require, define;
                         //For built layers, there can be some defined
                         //modules waiting for intake into the context,
                         //in particular module plugins. Take them.
-                        //context.takeGlobalQueue();
+                        context.takeGlobalQueue();
                         resume();
                     }
                 }
@@ -1382,35 +1294,10 @@ var require, define;
                 //the checkLoaded setTimeout 50 ms cost is taken. To avoid
                 //that cost, decrement beforehand.
                 if (req.isAsync) {
-                    if (context.config.debug && (context.config.onTrace || context.config.onDebug) ) {
-                        var removeCountedIndex = context.counted.indexOf(moduleName);
-                        if (removeCountedIndex === -1) {
-                            if (context.config.onTrace) {
-                                context.config.onTrace("context.counted async "+(removeCountedIndex)+" pop  ERROR "+moduleName);
-                                for (var p in context.counted)
-                                {
-                                    context.config.onTrace("context.counted["+p+"] "+context.counted[p]+" "+(context.counted[p] === moduleName));
-                                }
-                            }
-                        }
-                        else {
-                            if (context.config.onTrace){
-                                context.config.onTrace("context.counted async "+(removeCountedIndex)+" pop "+context.counted[removeCountedIndex]+" "+moduleName);
-                            }
-                            context.counted.splice(removeCountedIndex, 1);
-                        }
-                    }
-
                     context.scriptCount -= 1;
                 }
                 resume();
                 if (!req.isAsync) {
-                    if (context.config.debug && (context.config.onTrace || context.config.onDebug) ) {
-                        var removeCountedIndex = context.counted.indexOf(moduleName);
-                        if (context.config.onTrace)
-                            context.config.onTrace("context.counted not async "+(removeCountedIndex)+" pop "+context.counted[removeCountedIndex]+" "+moduleName);
-                        context.counted.splice(removeCountedIndex, 1);
-                    }
                     context.scriptCount -= 1;
                 }
             },
@@ -1434,7 +1321,7 @@ var require, define;
 
             /**
              * Converts a module name to a file path. Supports cases where
-             * moduleName may actually be just an Url.
+             * moduleName may actually be just an URL.
              */
             nameToUrl: function (moduleName, ext, relModuleMap) {
                 var paths, pkgs, pkg, pkgPath, syms, i, parentModule, url,
@@ -1452,16 +1339,12 @@ var require, define;
                     url = syms.join('/') +
                           (ext ? ext :
                           (req.jsExtRegExp.test(moduleName) ? "" : ".js"));
-                    if (context.config.debug && context.config.onTrace) {
-                        var namedHow = context.namedHow[url] = {moduleName: moduleName, how: "relative", extension: ext, map: (relModuleMap ? relModuleMap.url : "none")};
-                        context.config.onTrace("require.js "+moduleName+"-("+namedHow.how+")->"+url+" relative to "+namedHow.map, namedHow);
-                    }
                 } else {
 
                     //Normalize module name if have a base relative module name to work from.
-                    moduleName = normalize(moduleName, relModuleMap);
+                    moduleName = normalize(moduleName, relModuleMap && relModuleMap.fullName);
 
-                    //If a colon is in the Url, it indicates a protocol is used and it is just
+                    //If a colon is in the URL, it indicates a protocol is used and it is just
                     //an URL to a file, or if it starts with a slash or ends with .js, it is just a plain file.
                     //The slash is important for protocol-less URLs as well as full paths.
                     if (req.jsExtRegExp.test(moduleName)) {
@@ -1469,11 +1352,6 @@ var require, define;
                         //Add extension if it is included. This is a bit wonky, only non-.js things pass
                         //an extension, this method probably needs to be reworked.
                         url = moduleName + (ext ? ext : "");
-
-                        if (context.config.debug && context.config.onTrace) {
-                            var namedHow = context.namedHow[url] = {moduleName: moduleName, how: "plain path", extension: ext};
-                            context.config.onTrace("require.js "+moduleName+"-("+namedHow.how+")->"+url, namedHow);
-                        }
                     } else {
                         //A module that needs to be converted to a path.
                         paths = config.paths;
@@ -1494,35 +1372,20 @@ var require, define;
                                 if (moduleName === pkg.name) {
                                     pkgPath = pkg.location + '/' + pkg.main;
                                 } else {
-                                    pkgPath = pkg.location + '/' + pkg.lib;
+                                    pkgPath = pkg.location;
                                 }
                                 syms.splice(0, i, pkgPath);
                                 break;
-                            }
-                            // parentModule not found in path
-                            if (context.config.debug && context.config.onTrace) {
-                                var allPaths = [];
-                                for (var p in paths)
-                                    allPaths.push(p);
-                                context.config.onTrace("require.js "+parentModule+" not found in paths ("+allPaths.join(',')+")");
-                                var allPackages = [];
-                                for (var p in pkgs)
-                                    allPackages.push(p);
-                                context.config.onTrace("require.js "+parentModule+" not found in packages ("+allPackages.join(',')+")");
                             }
                         }
 
                         //Join the path parts together, then figure out if baseUrl is needed.
                         url = syms.join("/") + (ext || ".js");
-                        url = (url.charAt(0) === '/' || url.match(/^\w+:/) ? "" : config.baseUrl) + url;
-                        if (context.config.debug && context.config.onTrace) {
-                            var namedHow = context.namedHow[url] = {moduleName: moduleName, how: "paths", extension: ext, parentModule: parentModule, pathsAtParentModule: paths[parentModule]};
-                            if (!paths[parentModule]) {
-                                context.config.onTrace("require.js ERROR "+moduleName+"-("+namedHow.how+"["+parentModule+"]="+paths[parentModule]+")->"+url, namedHow);
+                        if ( url.charAt(0) !== '/' && ! url.match(/^\w+:/) ) {
+                            if (!config.baseUrl) {
+                                req.onError("No baseUrl, needed for URL: "+url);
                             }
-                            else {
-                                context.config.onTrace("require.js "+moduleName+"-("+namedHow.how+"["+parentModule+"]="+paths[parentModule]+")->"+url, namedHow);
-                            }
+                            url = config.baseUrl + url;
                         }
                     }
                 }
@@ -1549,7 +1412,7 @@ var require, define;
      *
      * If the first argument is an array, then it will be treated as an array
      * of dependency string names to fetch. An optional function callback can
-     * be given, to execute when all of those dependencies are available.
+     * be specified to execute when all of those dependencies are available.
      *
      * Make a local req variable to help Caja compliance (it assumes things
      * on a require that are not standardized), and to give a short
@@ -1592,8 +1455,6 @@ var require, define;
     req.isArray = isArray;
     req.isFunction = isFunction;
     req.mixin = mixin;
-    // publish the default value so clients can test without copy/paste
-    req.defaultContextName = defContextName;
     //Used to filter out dependencies that are already paths.
     req.jsExtRegExp = /^\/|:|\?|\.js$/;
     s = req.s = {
@@ -1636,7 +1497,6 @@ var require, define;
      */
     req.load = function (context, moduleName, url) {
         var contextName = context.contextName,
-            urlFetched = context.urlFetched,
             loaded = context.loaded;
         isDone = false;
 
@@ -1645,29 +1505,15 @@ var require, define;
             loaded[moduleName] = false;
         }
 
-        if (!urlFetched[url]) {
-            context.scriptCount += 1;
-            if (context.config.debug && (context.config.onTrace || context.config.onDebug) ) {
-                if (!context.counted) {
-                    if (context.config.onTrace)
-                        context.config.onTrace("context.counted ------------ reset");
-                    context.counted = [];
-                }
-                context.counted.push(moduleName);
-                var index = context.counted.indexOf(moduleName);
-                if (context.config.onTrace)
-                    context.config.onTrace("context.counted push "+moduleName+" context.scriptCount:"+context.scriptCount+" index "+index);
-            }
-            req.attach(url, contextName, moduleName);
-            urlFetched[url] = true;
+        context.scriptCount += 1;
+        req.attach(url, contextName, moduleName);
 
-            //If tracking a jQuery, then make sure its readyWait
-            //is incremented to prevent its ready callbacks from
-            //triggering too soon.
-            if (context.jQuery && !context.jQueryIncremented) {
-                context.jQuery.readyWait += 1;
-                context.jQueryIncremented = true;
-            }
+        //If tracking a jQuery, then make sure its readyWait
+        //is incremented to prevent its ready callbacks from
+        //triggering too soon.
+        if (context.jQuery && !context.jQueryIncremented) {
+            context.jQuery.readyWait += 1;
+            context.jQueryIncremented = true;
         }
     };
 
@@ -1739,7 +1585,7 @@ var require, define;
         if (useInteractive) {
             node = currentlyAddingScript || getInteractiveScript();
             if (!node) {
-                return req.onError(new Error("ERROR: No matching script interactive for " + callback));
+                return req.onError(makeError("interactive", "No matching script interactive for " + callback));
             }
             if (!name) {
                 name = node.getAttribute("data-requiremodule");
@@ -1772,7 +1618,12 @@ var require, define;
      * @private
      */
     req.execCb = function (name, callback, args, exports) {
-        return callback.apply(exports, args);
+        try {
+            return callback.apply(exports, args);
+        } catch (exc) {
+            req.onError(exc);
+        }
+
     };
 
     /**
@@ -1866,6 +1717,14 @@ var require, define;
                 node.attachEvent("onreadystatechange", callback);
             } else {
                 node.addEventListener("load", callback, false);
+                node.addEventListener("error", function scriptError(event){
+                    context = contexts[contextName];
+                    loaded = context.loaded;
+                    loaded[moduleName] = true;  // Mark loaded to avoid timeout loop
+                    var err = makeError("network", "Could not resolve "+event.target.src);
+                    err.requireType = "network";
+                    req.onError(err);
+                }, false);
             }
             node.src = url;
 
@@ -1930,10 +1789,14 @@ var require, define;
                     dataMain = mainScript.replace(jsSuffixRegExp, '');
                 }
 
+                if (cfg.dataMain) {
+                    req.onError("Two data-main scripts, 1) "+cfg.dataMain+" 2) "+dataMain);
+                    break; // obey the first one if we did not throw in onError
+                }
+
                 //Put the data-main script in the files to load.
                 cfg.deps = cfg.deps ? cfg.deps.concat(dataMain) : [dataMain];
-
-                break;
+                cfg.dataMain = dataMain;
             }
         }
     }
