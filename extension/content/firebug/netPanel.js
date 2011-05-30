@@ -1237,7 +1237,7 @@ NetPanel.prototype = Obj.extend(Firebug.ActivablePanel,
             else
                 Css.removeClass(row, "responseError");
 
-            var netBar = row.childNodes[5].childNodes[1];
+            var netBar = Dom.getChildByClass(row, "netTimeCol").childNodes[1];
             var timeLabel = Dom.getChildByClass(netBar, "netReceivingBar").firstChild;
             timeLabel.innerHTML = NetRequestEntry.getElapsedTime({elapsed: this.elapsed});
 
@@ -1274,7 +1274,7 @@ NetPanel.prototype = Obj.extend(Firebug.ActivablePanel,
             phase = this.calculateFileTimes(file, phase, rightNow);
 
             // Get bar nodes
-            var netBar = row.childNodes[5].childNodes[1];
+            var netBar = Dom.getChildByClass(row, "netTimeCol").childNodes[1];
             var blockingBar = netBar.childNodes[1];
             var resolvingBar = blockingBar.nextSibling;
             var connectingBar = resolvingBar.nextSibling;
@@ -1745,6 +1745,18 @@ Firebug.NetMonitor.NetRequestTable = domplate(Firebug.Rep, new Firebug.Listener(
                         title: Locale.$STR("net.header.Size Tooltip")},
                         Locale.$STR("net.header.Size"))
                     ),
+                    TD({id: "netLocalAddressCol", width: "4%", "class": "netHeaderCell a11yFocus",
+                        "role": "columnheader"},
+                        DIV({"class": "netHeaderCellBox",
+                        title: Locale.$STR("net.header.Local IP Tooltip")},
+                        Locale.$STR("net.header.Local IP"))
+                    ),
+                    TD({id: "netRemoteAddressCol", width: "4%", "class": "netHeaderCell a11yFocus",
+                        "role": "columnheader"},
+                        DIV({"class": "netHeaderCellBox",
+                        title: Locale.$STR("net.header.Remote IP Tooltip")},
+                        Locale.$STR("net.header.Remote IP"))
+                    ),
                     TD({id: "netTimeCol", width: "53%", "class": "netHeaderCell a11yFocus",
                         "role": "columnheader"},
                         DIV({"class": "netHeaderCellBox",
@@ -2025,10 +2037,18 @@ Firebug.NetMonitor.NetRequestEntry = domplate(Firebug.Rep, new Firebug.Listener(
                 TD({"class": "netDomainCol netCol a11yFocus", "role": "gridcell" },
                     DIV({"class": "netDomainLabel netLabel"}, "$file.file|getDomain")
                 ),
-                TD({"class": "netSizeCol netCol a11yFocus", "role": "gridcell", "aria-describedby": "fbNetSizeInfoTip"},
+                TD({"class": "netSizeCol netCol a11yFocus", "role": "gridcell",
+                    "aria-describedby": "fbNetSizeInfoTip"},
                     DIV({"class": "netSizeLabel netLabel"}, "$file.file|getSize")
                 ),
-                TD({"class": "netTimeCol netCol a11yFocus", "role": "gridcell", "aria-describedby": "fbNetTimeInfoTip"  },
+                TD({"class": "netRemoteAddressCol netCol a11yFocus", "role": "gridcell"},
+                    DIV({"class": "netAddressLabel netLabel"}, "$file.file|getLocalAddress")
+                ),
+                TD({"class": "netLocalAddressCol netCol a11yFocus", "role": "gridcell"},
+                    DIV({"class": "netAddressLabel netLabel"}, "$file.file|getRemoteAddress")
+                ),
+                TD({"class": "netTimeCol netCol a11yFocus", "role": "gridcell",
+                    "aria-describedby": "fbNetTimeInfoTip"  },
                     DIV({"class": "netLoadingIcon"}),
                     DIV({"class": "netBar"},
                         "&nbsp;",
@@ -2050,12 +2070,12 @@ Firebug.NetMonitor.NetRequestEntry = domplate(Firebug.Rep, new Firebug.Listener(
     netInfoTag:
         TR({"class": "netInfoRow $file|getCategory outerFocusRow", "role" : "row"},
             TD({"class": "sourceLine netRowHeader"}),
-            TD({"class": "netInfoCol", colspan: 5, "role" : "gridcell"})
+            TD({"class": "netInfoCol", colspan: 7, "role" : "gridcell"})
         ),
 
     activationTag:
         TR({"class": "netRow netActivationRow"},
-            TD({"class": "netCol netActivationLabel", colspan: 6, "role": "status"},
+            TD({"class": "netCol netActivationLabel", colspan: 8, "role": "status"},
                 Locale.$STR("net.ActivationMessage")
             )
         ),
@@ -2071,6 +2091,8 @@ Firebug.NetMonitor.NetRequestEntry = domplate(Firebug.Rep, new Firebug.Listener(
             TD({"class": "netTotalSizeCol netCol netSizeCol a11yFocus", "role" : "gridcell"},
                 DIV({"class": "netTotalSizeLabel netSummaryLabel"}, "0KB")
             ),
+            TD({"class": "netCol netLocalAddressCol a11yFocus", "role" : "gridcell"}),
+            TD({"class": "netCol netRemoteAddressCol a11yFocus", "role" : "gridcell"}),
             TD({"class": "netTotalTimeCol netCol netTimeCol a11yFocus", "role" : "gridcell"},
                 DIV({"class": "netSummaryBar", style: "width: 100%"},
                     DIV({"class": "netCacheSizeLabel netSummaryLabel", collapsed: "true"},
@@ -2088,7 +2110,7 @@ Firebug.NetMonitor.NetRequestEntry = domplate(Firebug.Rep, new Firebug.Listener(
 
     footerTag:
         TR({"class": "netFooterRow", "style" : "height: 100%"},
-            TD({"class": "", colspan: 6})
+            TD({"class": "", colspan: 8})
         ),
 
     onClickRowHeader: function(event)
@@ -2224,6 +2246,28 @@ Firebug.NetMonitor.NetRequestEntry = domplate(Firebug.Rep, new Firebug.Listener(
         return this.formatSize(file.size);
     },
 
+    getLocalAddress: function(file)
+    {
+        var address = file.localAddress ? file.localAddress : "";
+        var port = file.localPort ? file.localPort : "";
+
+        var result = address;
+        result += result ? ":" : "";
+        result += port;
+        return result;
+    },
+
+    getRemoteAddress: function(file)
+    {
+        var address = file.remoteAddress ? file.remoteAddress : "";
+        var port = file.remotePort ? file.remotePort : "";
+
+        var result = address;
+        result += result ? ":" : "";
+        result += port;
+        return result;
+    },
+
     getElapsedTime: function(file)
     {
         if (!file.elapsed || file.elapsed < 0)
@@ -2256,12 +2300,12 @@ Firebug.NetMonitor.NetPage = domplate(Firebug.Rep,
 {
     separatorTag:
         TR({"class": "netRow netPageSeparatorRow"},
-            TD({"class": "netCol netPageSeparatorLabel", colspan: 6, "role": "separator"})
+            TD({"class": "netCol netPageSeparatorLabel", colspan: 8, "role": "separator"})
         ),
 
     pageTag:
         TR({"class": "netRow netPageRow", onclick: "$onPageClick"},
-            TD({"class": "netCol netPageCol", colspan: 6, "role": "separator"},
+            TD({"class": "netCol netPageCol", colspan: 8, "role": "separator"},
                 DIV({"class": "netLabel netPageLabel netPageTitle"}, "$page|getTitle")
             )
         ),
@@ -3342,7 +3386,7 @@ Firebug.NetMonitor.NetLimit = domplate(Firebug.Rep,
 
     limitTag:
         TR({"class": "netRow netLimitRow", $collapsed: "$isCollapsed"},
-            TD({"class": "netCol netLimitCol", colspan: 6},
+            TD({"class": "netCol netLimitCol", colspan: 8},
                 TABLE({cellpadding: 0, cellspacing: 0},
                     TBODY(
                         TR(
@@ -3559,6 +3603,8 @@ NetProgress.prototype =
             file.isBackground = request.loadFlags & LOAD_BACKGROUND;
             file.method = request.requestMethod;
 
+            this.updateIPInfo(request, file);
+
             if (!Ci.nsIHttpActivityDistributor)
                 Utils.getPostText(file, this.context);
 
@@ -3762,6 +3808,8 @@ NetProgress.prototype =
                 file.waitingForTime = time;
                 file.receivingStarted = true;
             }
+
+            this.updateIPInfo(request, file);
         }
 
         // Don't update the UI now (optimalization).
@@ -3877,6 +3925,8 @@ NetProgress.prototype =
                     info = {responseStatus: m[1], responseStatusText: m[2]};
                 this.respondedFile(request, now(), info);
             }
+
+            this.updateIPInfo(request, file);
         }
 
         return file;
@@ -3976,6 +4026,19 @@ NetProgress.prototype =
 
         return this.stopFile(request, time, postText, responseText);
     },
+
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+    // IP Address and port number
+
+    updateIPInfo: function(request, file)
+    {
+        file.localAddress = Http.safeGetLocalAddress(request);
+        file.localPort = Http.safeGetLocalPort(request);
+        file.remoteAddress = Http.safeGetRemoteAddress(request);
+        file.remotePort = Http.safeGetRemotePort(request);
+    },
+
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
     windowPaint: function windowPaint(window, time)
     {

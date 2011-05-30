@@ -63,6 +63,7 @@ Http.readPostTextFromPage = function(url, context)
             if (!(descriptor instanceof Ci.nsISHEntry))
                 return;
 
+            var entry = descriptor;
             if (entry && entry.postData)
             {
                 if (!(entry.postData instanceof Ci.nsISeekableStream))
@@ -229,6 +230,61 @@ Http.safeGetContentType = function(request)
     {
     }
 
+    return null;
+}
+
+// ********************************************************************************************* //
+// IP Adress and port number (Requires Gecko 5).
+
+Http.safeGetLocalAddress = function(request)
+{
+    try
+    {
+        if (request instanceof Ci.nsIHttpChannelInternal)
+            return request.localAddress;
+    }
+    catch (err)
+    {
+    }
+    return null;
+}
+
+Http.safeGetLocalPort = function(request)
+{
+    try
+    {
+        if (request instanceof Ci.nsIHttpChannelInternal)
+            return request.localPort;
+    }
+    catch (err)
+    {
+    }
+    return null;
+}
+
+Http.safeGetRemoteAddress = function(request)
+{
+    try
+    {
+        if (request instanceof Ci.nsIHttpChannelInternal)
+            return request.remoteAddress;
+    }
+    catch (err)
+    {
+    }
+    return null;
+}
+
+Http.safeGetRemotePort = function(request)
+{
+    try
+    {
+        if (request instanceof Ci.nsIHttpChannelInternal)
+            return request.remotePort;
+    }
+    catch (err)
+    {
+    }
     return null;
 }
 

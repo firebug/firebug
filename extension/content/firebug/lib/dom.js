@@ -26,6 +26,12 @@ Dom.domUtils = Cc["@mozilla.org/inspector/dom-utils;1"].getService(Ci.inIDOMUtil
 
 Dom.getChildByClass = function(node) // ,classname, classname, classname...
 {
+    if (!node)
+    {
+        FBTrace.sysout("dom.getChildByClass; ERROR, no parent node!");
+        return null;
+    }
+
     for (var i = 1; i < arguments.length; ++i)
     {
         var className = arguments[i];

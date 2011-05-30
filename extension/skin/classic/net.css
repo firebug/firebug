@@ -156,7 +156,11 @@
 .netTable[hiddenCols~=netSizeCol] TD[id="netSizeCol"],
 .netTable[hiddenCols~=netSizeCol] TD.netSizeCol,
 .netTable[hiddenCols~=netTimeCol] TD[id="netTimeCol"],
-.netTable[hiddenCols~=netTimeCol] TD.netTimeCol {
+.netTable[hiddenCols~=netTimeCol] TD.netTimeCol,
+.netTable[hiddenCols~=netLocalAddressCol] TD[id="netLocalAddressCol"],
+.netTable[hiddenCols~=netLocalAddressCol] TD.netLocalAddressCol,
+.netTable[hiddenCols~=netRemoteAddressCol] TD[id="netRemoteAddressCol"],
+.netTable[hiddenCols~=netRemoteAddressCol] TD.netRemoteAddressCol {
     display: none;
 }
 
@@ -202,6 +206,12 @@
 .netSizeCol {
     text-align: right;
     padding-right: 10px;
+}
+
+.netLocalAddressCol,
+.netRemoteAddressCol {
+    padding-left: 5px;
+    padding-right: 5px;
 }
 
 .netHrefLabel {
@@ -252,6 +262,7 @@
 .netStatusLabel,
 .netDomainLabel,
 .netSizeLabel,
+.netAddressLabel,
 .netBar {
     padding: 1px 0 2px 0 !important;
 }

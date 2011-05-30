@@ -105,7 +105,7 @@ pref("extensions.firebug.net.logLimit", 500);
 pref("extensions.firebug.net.enableSites", false);
 pref("extensions.firebug.netDisplayedResponseLimit", 102400);
 pref("extensions.firebug.netDisplayedPostBodyLimit", 10240);
-pref("extensions.firebug.net.hiddenColumns", "");
+pref("extensions.firebug.net.hiddenColumns", "netLocalAddressCol");
 pref("extensions.firebug.netPhaseInterval", 1000);
 pref("extensions.firebug.sizePrecision", 1);
 pref("extensions.firebug.netParamNameLimit", 25);
