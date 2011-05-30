@@ -27,10 +27,11 @@ define([
     "firebug/toggleBranch",
     "firebug/lib/debug",
     "firebug/lib/keywords",
+    "firebug/firefox/firefox",
 ],
 function(Obj, Xpcom, Locale, Events, Options, Deprecated, Wrapper, Url, SourceLink,
     StackFrame, Css, Dom, Http, Win, Search, Xpath, Str, Xml, Persist, Arr, System, Json,
-    Menu, ToggleBranch, Debug, Keywords) {
+    Menu, ToggleBranch, Debug, Keywords, Firefox) {
 
 // ********************************************************************************************* //
 
@@ -110,6 +111,9 @@ for (var p in Debug)
 
 for (var p in Keywords)
     FBL[p] = Keywords[p];
+
+for (var p in Firefox)
+    FBL[p] = Firefox[p];
 
 FBL.deprecated = Deprecated.deprecated;
 FBL.SourceLink = SourceLink.SourceLink;
