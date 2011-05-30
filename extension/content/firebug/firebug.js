@@ -208,10 +208,14 @@ window.Firebug =
         var attributes = ["label", "tooltiptext", "aria-label"];
         for (var i=0; i<elements.length; i++)
         {
-            for(var j=0; j<attributes.length; j++)
+            var element = elements[i];
+            for (var j=0; j<attributes.length; j++)
             {
-                if (elements[i].hasAttribute(attributes[j]))
-                    Locale.internationalize(elements[i], attributes[j]);
+                if (element.hasAttribute(attributes[j]))
+                {
+                    Locale.internationalize(element, attributes[j]);
+                    Css.removeClass(element, "fbInternational");
+                }
             }
         }
 
