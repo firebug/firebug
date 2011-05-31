@@ -729,17 +729,18 @@ Firebug.CommandLine = Obj.extend(Firebug.Module,
 
         var chrome = Firebug.chrome;
         var panelState = Persist.getPersistedState(this, "console");
-        var value = panel && panel.context.commandLineText ? panel.context.commandLineText :
-            panelState.commandLineText;
+        if (panelState.commandLineText)
+        {
+            var value = panelState.commandLineText;
+            var commandLine = this.getCommandLine(browser);
+            Firebug.currentContext.commandLineText = value;
+            commandLine.value = value;
 
-        var commandLine = this.getCommandLine(browser);
-        Firebug.currentContext.commandLineText = value ? value : "";
-        commandLine.value = Firebug.currentContext.commandLineText;
-
-        // We don't need the persistent value in this session/context any more. The showPanel
-        // method is called every time the panel is selected and the text could have been
-        // changed in this session/context already.
-        delete panelState.commandLineText;
+            // We don't need the persistent value in this session/context any more. The showPanel
+            // method is called every time the panel is selected and the text could have been
+            // changed in this session/context already.
+            delete panelState.commandLineText;
+        }
 
         this.autoCompleter.hide(this.getCompletionBox());
     },
