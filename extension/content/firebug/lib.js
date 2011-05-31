@@ -142,8 +142,14 @@ FBL.jsd = Components.classes["@mozilla.org/js/jsd/debugger-service;1"].
 // ********************************************************************************************* //
 // Constants
 
-Components.utils["import"]("resource://gre/modules/PluralForm.jsm");
-Components.utils["import"]("resource://firebug/firebug-service.js");
+try
+{
+    Components.utils["import"]("resource://gre/modules/PluralForm.jsm");
+    Components.utils["import"]("resource://firebug/firebug-service.js");
+}
+catch (err)
+{
+}
 
 // deprecated
 FBL.fbs = fbs; // left over from component.
