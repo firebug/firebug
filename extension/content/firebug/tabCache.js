@@ -12,7 +12,7 @@ define([
     "firebug/net/httpLib",
     "firebug/lib/string",
     "firebug/firefox/window",
-    "firebug/jsonViewer",
+    "firebug/net/jsonViewer",
     "firebug/sourceCache",
 ],
 function(Obj, Firebug, Xpcom, HttpRequestObserver, HttpResponseObserver, Locale, Events,
