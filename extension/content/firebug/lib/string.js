@@ -366,6 +366,12 @@ Str.isWhitespace = function(text)
 
 Str.splitLines = function(text)
 {
+    if (!text)
+    {
+        FBTrace.sysout("Str.splitLines; ERROR null text.");
+        return [];
+    }
+
     const reSplitLines2 = /.*(:?\r\n|\n|\r)?/mg;
     var lines;
     if (text.match)

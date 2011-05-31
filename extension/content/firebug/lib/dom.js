@@ -224,6 +224,12 @@ Dom.insertTextIntoElement = function(element, text)
 
 Dom.collapse = function(elt, collapsed)
 {
+    if (!elt)
+    {
+        FBTrace.sysout("Dom.collapse; ERROR null element.");
+        return;
+    }
+
     elt.setAttribute("collapsed", collapsed ? "true" : "false");
 };
 
