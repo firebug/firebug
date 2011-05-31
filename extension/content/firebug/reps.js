@@ -36,16 +36,19 @@ with (Domplate) {
 const Cc = Components.classes;
 const Ci = Components.interfaces;
 
-// xxxHonza: RJS
-var FBS = {};
-Components.utils["import"]("resource://firebug/firebug-service.js", FBS);
-
 // xxxHonza: the only global should be Firebug object.
 var FirebugReps = window.FirebugReps = {};
 
-var jsd = Components.classes["@mozilla.org/js/jsd/debugger-service;1"].
-    getService(Components.interfaces.jsdIDebuggerService);
-
+try
+{
+    // xxxHonza: RJS
+    var FBS = {};
+    Components.utils["import"]("resource://firebug/firebug-service.js", FBS);
+    var jsd = Cc["@mozilla.org/js/jsd/debugger-service;1"].getService(Ci.jsdIDebuggerService);
+}
+catch (err)
+{
+}
 
 // ************************************************************************************************
 // Common Tags
