@@ -413,8 +413,7 @@
     cursor: pointer;
 }
 
-.notificationClose:hover,
-.notificationClose[active="true"] {
+.notificationClose:hover {
     background: url(chrome://firebug/skin/notificationClose.png) no-repeat scroll -32px 0 transparent;
 }
 
