@@ -11,121 +11,30 @@
         <stringbundle id="strings_firebug" src="chrome://firebug/locale/firebug.properties"/>
     </stringbundleset>
 
-    <commandset id="mainCommandSet">
-        <command id="cmd_clearConsole" oncommand="Firebug.Console.clear(Firebug.currentContext)"/>
-        <command id="cmd_togglePersistConsole" oncommand="Firebug.Console.togglePersist(Firebug.currentContext)"/>
-        <command id="cmd_clearNet" oncommand="Firebug.NetMonitor.clear(Firebug.currentContext)"/>
-        <command id="cmd_toggleSuspendFirebug" oncommand="Firebug.toggleSuspend()"/>
-        <command id="cmd_closeFirebug" oncommand="Firebug.closeFirebug(true)"/>
-
-        <command id="cmd_toggleInspecting" oncommand="if (!Firebug.currentContext) Firebug.toggleBar(true); Firebug.Inspector.toggleInspecting(Firebug.currentContext)"
-                 checked="false"/>
-        <command id="cmd_toggleQuickInfoBox" oncommand="Firebug.Inspector.toggleQuickInfoBox()"
-                 checked="false"/>
-        <command id="cmd_toggleProfiling" oncommand="Firebug.Profiler.toggleProfiling(Firebug.currentContext)"/>
-        <command id="cmd_toggleMemoryProfiling" oncommand="Firebug.MemoryProfiler.toggleProfiling(Firebug.currentContext)"/>
-        <command id="cmd_toggleHTMLEditing" oncommand="Firebug.currentContext.getPanel('html').toggleEditing()"/>
-        <command id="cmd_togglecssEditMode" oncommand="Firebug.currentContext.getPanel('stylesheet').toggleEditing()"/>
-
-        <command id="cmd_focusCommandLine" oncommand="if (!Firebug.currentContext) Firebug.toggleBar(true); Firebug.CommandLine.focus(Firebug.currentContext)"/>
-        <command id="cmd_focusFirebugSearch" oncommand="if (Firebug.currentContext) Firebug.Search.focus(Firebug.currentContext);"/>
-        <command id="cmd_focusWatchEditor" oncommand="if (Firebug.currentContext) Firebug.chrome.focusWatch(Firebug.currentContext);"/>
-        <command id="cmd_focusLocation" oncommand="if (Firebug.currentContext) Firebug.chrome.focusLocationList(Firebug.currentContext);"/>
-
-        <command id="cmd_breakOnNext" oncommand="Firebug.chrome.breakOnNext(Firebug.currentContext, event);"/>
-
-        <command id="cmd_rerun" oncommand="Firebug.Debugger.rerun(Firebug.currentContext)" disabled="true"/>
-        <command id="cmd_resumeExecution" oncommand="Firebug.Debugger.resume(Firebug.currentContext)" disabled="true"/>
-        <command id="cmd_stepOver" oncommand="Firebug.Debugger.stepOver(Firebug.currentContext)" disabled="true"/>
-        <command id="cmd_stepInto" oncommand="Firebug.Debugger.stepInto(Firebug.currentContext)" disabled="true"/>
-        <command id="cmd_stepOut" oncommand="Firebug.Debugger.stepOut(Firebug.currentContext)" disabled="true"/>
-        <command id="cmd_reenterCommand" oncommand="Firebug.CommandLine.reenter(Firebug.currentContext)"/>
-
-        <command id="cmd_previousFirebugTab" oncommand="Firebug.chrome.gotoPreviousTab()"/>
-        <command id="cmd_leftFirebugTab" oncommand="Firebug.chrome.gotoSiblingTab(false)"/>
-        <command id="cmd_rightFirebugTab" oncommand="Firebug.chrome.gotoSiblingTab(true)"/>
-        <command id="cmd_nextObject" oncommand="Firebug.chrome.gotoNextObject()"/>
-        <command id="cmd_previousObject" oncommand="Firebug.chrome.gotoNextObject(true)"/>
-
-        <command id="cmd_clearAllBreakpoints" oncommand="Firebug.Debugger.clearAllBreakpoints(Firebug.currentContext)"/>
-        <command id="cmd_breakOnErrors" oncommand="Firebug.Options.togglePref('breakOnErrors')"/>
-
-        <command id="cmd_toggleTraceConsole" oncommand="Firebug.TraceModule.openConsole()"/>
-
-        <command id="cmd_detachFirebug" oncommand="Firebug.toggleDetachBar(false, true)"/>
-        <command id="cmd_minimizeFirebug" oncommand="Firebug.minimizeBar()"/>
-        <command id="cmd_toggleDetachFirebug" oncommand="Firebug.toggleDetachBar(false, true)"/>
-        <command id="cmd_enablePanels" oncommand="Firebug.PanelActivation.enableAllPanels()"/>
-        <command id="cmd_disablePanels" oncommand="Firebug.PanelActivation.disableAllPanels()"/>
-        <command id="cmd_allOn" oncommand="Firebug.PanelActivation.toggleAll('on')"/>
-        <command id="cmd_clearActivationList" oncommand="Firebug.PanelActivation.clearAnnotations()"/>
-        <command id="cmd_customizeFBKeys" oncommand="Firebug.ShortcutsModel.customizeShortcuts()"/>
-        <command id="cmd_resetAllOptions" oncommand="Firebug.resetAllOptions(true);"/>
-        <command id="cmd_inspect" oncommand="Firebug.Inspector.inspectFromContextMenu(document.popupNode);"/>
-
-        <command id="cmd_togglePersistNet" oncommand="Firebug.NetMonitor.togglePersist(Firebug.currentContext)"/>
-        <command id="cmd_toggleOrient" oncommand="Firebug.chrome.toggleOrient()" />
-        <command id="cmd_toggleShowErrorCount" oncommand="Firebug.chrome.toggleShowErrorCount();" />
-        <command id="cmd_navBack" oncommand="Firebug.NavigationHistory.goBack(Firebug.currentContext)" />
-        <command id="cmd_navForward" oncommand="Firebug.NavigationHistory.goForward(Firebug.currentContext)" />
-        <command id="cmd_toggleFreezeWindow" oncommand="Firebug.Debugger.toggleFreezeWindow(Firebug.currentContext)" />
-
-        <command id="cmd_increaseTextSize" oncommand="Firebug.Options.changeTextSize(1);"/>
-        <command id="cmd_decreaseTextSize" oncommand="Firebug.Options.changeTextSize(-1);"/>
-        <command id="cmd_normalTextSize" oncommand="Firebug.Options.setTextSize(0);"/>
-
-        <command id="cmd_toggleCommandPopup" oncommand="Firebug.CommandLine.Popup.toggle(Firebug.currentContext)"
-            checked="false"/>
-
-        <command id="cmd_openHelp" oncommand="Firebug.visitWebsite('FAQ');"/>
-    </commandset>
-
-    <keyset id="mainKeyset">
-        <key id="key_reenterCommand" key="e" modifiers="control,shift" command="cmd_reenterCommand" class="fbOnlyKey"/>
-        <key id="key_toggleInspecting" key="c" modifiers="accel,shift" command="cmd_toggleInspecting" />
-        <key id="key_toggleQuickInfoBox" key="i" modifiers="accel,shift" command="cmd_toggleQuickInfoBox" class="fbOnlyKey"/>
-        <key id="key_toggleProfiling" key="p" modifiers="accel,shift" command="cmd_toggleProfiling" class="fbOnlyKey"/>
-        <key id="key_focusCommandLine" key="l" modifiers="accel,shift" command="cmd_focusCommandLine"/>
-        <key id="key_focusFirebugSearch" key="k" modifiers="accel,shift" command="cmd_focusFirebugSearch" class="fbOnlyKey"/>
-        <key id="key_focusWatchEditor" key="n" modifiers="accel,shift" command="cmd_focusWatchEditor" class="fbOnlyKey"/>
-        <key id="key_focusLocation" key=" " modifiers="accel,shift" command="cmd_focusLocation" class="fbOnlyKey"/>
-        <key id="key_focusLocation" key=" " modifiers="control" command="cmd_focusLocation" class="fbOnlyKey"/>
-        <key id="key_nextObject" key="." modifiers="control" command="cmd_nextObject" class="fbOnlyKey"/>
-        <key id="key_previousObject" key="," modifiers="control" command="cmd_previousObject" class="fbOnlyKey"/>
-        <key id="key_previousFirebugTab" key="`" modifiers="control" command="cmd_previousFirebugTab" class="fbOnlyKey"/>
-        <key id="key_leftFirebugTab" keycode="VK_PAGE_UP" modifiers="accel shift" command="cmd_leftFirebugTab" class="fbOnlyKey"/>
-        <key id="key_rightFirebugTab" keycode="VK_PAGE_DOWN" modifiers="accel shift" command="cmd_rightFirebugTab" class="fbOnlyKey"/>
-        <key id="key_customizeFBKeys" key="b" modifiers=",accel shift alt" command="cmd_customizeFBKeys" class="fbOnlyKey"/>
-        <key id="key_detachFirebug" keycode="VK_F12" modifiers="accel" command="cmd_detachFirebug"/>
-        <key id="key_closeFirebug" keycode="VK_F12" modifiers="shift" command="cmd_closeFirebug"/>
-        <key id="key_clearConsole" key="r" modifiers="accel,shift" command="cmd_clearConsole" class="fbOnlyKey"/>
-        <key id="key_navBack" keycode="VK_LEFT" modifiers="accel,shift" command="cmd_navBack" class="fbOnlyKey"/>
-        <key id="key_navForward" keycode="VK_RIGHT" modifiers="accel,shift" command="cmd_navForward" class="fbOnlyKey"/>
-        <key id="key_toggleFreezeWindow" key="f" modifiers="control,shift" command="cmd_toggleFreezeWindow" class="fbOnlyKey"/>
-        <key id="key_increaseTextSize" key="+" modifiers="accel shift" command="cmd_increaseTextSize" class="fbOnlyKey"/>
-        <key id="key_decreaseTextSize" key="-" modifiers="accel shift" command="cmd_decreaseTextSize" class="fbOnlyKey"/>
-        <key id="key_normalTextSize" keycode="VK_INSERT" modifiers="accel shift" command="cmd_normalTextSize" class="fbOnlyKey"/>
-        <key id="key_help" keycode="VK_F1" command="cmd_openHelp" class="fbOnlyKey"/>
-    </keyset>
-
     <popupset id="mainPopupSet">
         <menupopup id="fbContextMenu" onpopupshowing="return Firebug.chrome.onContextShowing(event);">
             <menuitem label="Copy" command="cmd_copy" class="fbInternational"/>
         </menupopup>
+
         <menupopup id="fbInlineEditorPopup" />
+
         <tooltip id="fbTooltip" class="fbURLMenuItem"
             onpopupshowing="return Firebug.chrome.onTooltipShowing(event);"/>
+
         <panel id="fbQuickInfoPanel" width="210" noautohide="true" noautofocus="true"
             onmousedown="Firebug.Inspector.quickInfoBoxHandler(event);"
             onmouseover="Firebug.Inspector.quickInfoBoxHandler(event);"
             onmouseout="Firebug.Inspector.quickInfoBoxHandler(event);">
             <vbox></vbox>
         </panel>
+
         <menupopup id="fbNavigationHistoryMenu"
             oncommand="Firebug.NavigationHistory.onHistoryCommand(event, Firebug.currentContext)"
             onpopupshowing="return Firebug.NavigationHistory.onPopupShowing(this, Firebug.currentContext)" />
+
         <panel id="fbCommandLineCompletionList" class="fbCommandLineCompletionPanel" noautofocus="true">
         </panel>
+
         <panel id="fbCommandHistory" noautofocus="true">
         </panel>
     </popupset>

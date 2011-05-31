@@ -1,5 +1,6 @@
 <?xml version="1.0"?>
 
+<?xul-overlay href="chrome://firebug/content/firefox/firebugMenuOverlay.xul"?>
 <?xul-overlay href="chrome://firebug/content/firebugOverlay.xul"?>
 <?xul-overlay href="chrome://firebug/content/start-button/startButtonOverlay.xul"?>
 

@@ -1,5 +1,6 @@
 <?xml version="1.0"?>
 
+<?xul-overlay href="chrome://firebug/content/firefox/firebugMenuOverlay.xul"?>
 <?xul-overlay href="chrome://firebug/content/firebugOverlay.xul"?>
 
 <?xml-stylesheet href="chrome://global/skin/global.css"?>
@@ -36,10 +37,6 @@
         panelBarWaiter.waitForPanelBar(ChromeFactory);
     </script>
 
-    <stringbundleset id="stringbundleset"/>
-    <commandset id="baseMenuCommandSet"/>
-    <keyset id="baseMenuKeyset"/>
-
     <commandset id="mainCommandSet">
         <command id="cmd_undo" oncommand="goDoCommand('cmd_undo')" disabled="true"/>
         <command id="cmd_redo" oncommand="goDoCommand('cmd_redo')" disabled="true"/>
@@ -57,10 +54,6 @@
     <keyset id="mainKeyset">
         <key id="key_closeWindow" key="w" command="cmd_closeWindow" modifiers="accel"/>
     </keyset>
-
-    <broadcasterset id="mainBroadcasterSet"/>
-
-    <popupset id="mainPopupSet"/>
 
     <!-- Entire Firebug UI -->
        <vbox id="fbContentBox" flex="2">
