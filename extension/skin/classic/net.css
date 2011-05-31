@@ -20,23 +20,6 @@
 }
 
 /************************************************************************************************/
-
-.netHeadRow {
-    background: url(chrome://firebug/skin/group.png) repeat-x #FFFFFF;
-}
-
-.netHeadCol {
-    border-bottom: 1px solid #CCCCCC;
-    padding: 2px 4px 2px 18px;
-    font-weight: bold;
-}
-
-.netHeadLabel {
-    white-space: nowrap;
-    overflow: hidden;
-}
-
-/************************************************************************************************/
 /* Header for Net panel table */
 
 .netHeaderRow {
@@ -570,7 +553,7 @@
 
 .netInfoCol {
     border-top: 1px solid #EEEEEE;
-    background: url(chrome://firebug/skin/group.png) repeat-x -moz-field;
+    background: -moz-field -moz-linear-gradient(top, rgba(0, 0, 0, 0.1), transparent 33px) repeat-x;
 }
 
 .netInfoBody {

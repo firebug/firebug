@@ -237,7 +237,7 @@ h1.groupHeader {
     margin: 0 0 4px 0;
     border-top: 1px solid #CCCCCC;
     border-bottom: 1px solid #CCCCCC;
-    background: url(chrome://firebug/skin/group.png) repeat-x #FFFFFF;
+    background: -moz-field -moz-linear-gradient(bottom, rgba(0, 0, 0, 0.05), rgba(0, 0, 0, 0.1) 60%, rgba(0, 0, 0, 0.05) 60%, transparent) repeat-x;
     font-size: inherit;
 }
 
