@@ -214,13 +214,13 @@ Firebug.TabCacheModel = Obj.extend(Firebug.Module,
 
         // Hack to work around application/octet-stream for js files (2063).
         // Let's cache all files with js extensions.
-        var extension = Url.getFileExtension(safeGetName(request));
+        var extension = Url.getFileExtension(Http.safeGetRequestName(request));
         if (extension == "js")
             return true;
 
         if (FBTrace.DBG_CACHE)
             FBTrace.sysout("tabCache.shouldCacheRequest; Request not cached: " +
-                request.contentType + ", " + safeGetName(request));
+                request.contentType + ", " + Http.safeGetRequestName(request));
 
         return false;
     },
@@ -257,10 +257,10 @@ Firebug.TabCache.prototype = Obj.extend(Firebug.SourceCache.prototype,
             offset = 0;
 
         if (FBTrace.DBG_CACHE)
-            FBTrace.sysout("tabCache.storePartialResponse " + safeGetName(request),
+            FBTrace.sysout("tabCache.storePartialResponse " + Http.safeGetRequestName(request),
                 request.contentCharset);
 
-        var url = safeGetName(request);
+        var url = Http.safeGetRequestName(request);
         var response = this.getResponse(request);
 
         // Skip any response data that we have received before (f ex when
@@ -278,7 +278,7 @@ Firebug.TabCache.prototype = Obj.extend(Firebug.SourceCache.prototype,
         {
             if (FBTrace.DBG_ERRORS || FBTrace.DBG_CACHE)
                 FBTrace.sysout("tabCache.storePartialResponse EXCEPTION " +
-                    safeGetName(request), err);
+                    Http.safeGetRequestName(request), err);
 
             // Even responses that are not converted are stored into the cache.
             // return false;
@@ -305,7 +305,7 @@ Firebug.TabCache.prototype = Obj.extend(Firebug.SourceCache.prototype,
 
     getResponse: function(request)
     {
-        var url = safeGetName(request);
+        var url = Http.safeGetRequestName(request);
         var response = this.responses[url];
         if (!response)
         {
@@ -426,7 +426,7 @@ Firebug.TabCache.prototype = Obj.extend(Firebug.SourceCache.prototype,
     onStartRequest: function(request, requestContext)
     {
         if (FBTrace.DBG_CACHE)
-            FBTrace.sysout("tabCache.channel.startRequest: " + safeGetName(request));
+            FBTrace.sysout("tabCache.channel.startRequest: " + Http.safeGetRequestName(request));
 
         // Make sure the response-entry (used to count total response size) is properly
         // initialized (cleared) now. If no data is received, the response entry remains empty.
@@ -439,7 +439,7 @@ Firebug.TabCache.prototype = Obj.extend(Firebug.SourceCache.prototype,
     onDataAvailable: function(request, requestContext, inputStream, offset, count)
     {
         if (FBTrace.DBG_CACHE)
-            FBTrace.sysout("tabCache.channel.onDataAvailable: " + safeGetName(request));
+            FBTrace.sysout("tabCache.channel.onDataAvailable: " + Http.safeGetRequestName(request));
 
         // If the stream is read a new one must be provided (the stream doesn't implement
         // nsISeekableStream).
@@ -459,7 +459,7 @@ Firebug.TabCache.prototype = Obj.extend(Firebug.SourceCache.prototype,
     {
         // The response is finally received so, remove the request from the list of
         // current responses.
-        var url = safeGetName(request);
+        var url = Http.safeGetRequestName(request);
         delete this.responses[url];
 
         var lines = this.cache[this.removeAnchor(url)];
@@ -544,22 +544,6 @@ ChannelListenerProxy.prototype =
         }
         return false;
     },
-}
-
-// ********************************************************************************************* //
-// Helpers
-
-function safeGetName(request)
-{
-    try
-    {
-        return request.name;
-    }
-    catch (exc)
-    {
-    }
-
-    return null;
 }
 
 // ********************************************************************************************* //

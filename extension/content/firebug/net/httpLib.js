@@ -207,11 +207,27 @@ Http.getRequestLoadContext = function(request)
 Http.getRequestWebProgress = Deprecated.deprecated("Use getRequestLoadContext function",
     Http.getRequestLoadContext);
 
+// ********************************************************************************************* //
+// HTTP Channel Fields
+
 Http.safeGetRequestName = function(request)
 {
     try
     {
         return request.name;
+    }
+    catch (exc)
+    {
+    }
+
+    return null;
+}
+
+Http.safeGetURI = function(browser)
+{
+    try
+    {
+        return browser.currentURI;
     }
     catch (exc)
     {
@@ -289,6 +305,35 @@ Http.safeGetRemotePort = function(request)
 }
 
 // ********************************************************************************************* //
+// XHR
+
+Http.isXHR = function(request)
+{
+    try
+    {
+        var callbacks = request.notificationCallbacks;
+        StackFrame.suspendShowStackTrace();
+        var xhrRequest = callbacks ? callbacks.getInterface(Ci.nsIXMLHttpRequest) : null;
+
+        if (FBTrace.DBG_NET)
+            FBTrace.sysout("net.isXHR; " + (xhrRequest != null) + ", " +
+                Http.safeGetRequestName(request));
+
+        return (xhrRequest != null);
+    }
+    catch (exc)
+    {
+    }
+    finally
+    {
+        StackFrame.resumeShowStackTrace();
+    }
+
+    return false;
+},
+
+// ********************************************************************************************* //
+// Conversions
 
 Http.convertToUnicode = function(text, charset)
 {

@@ -433,13 +433,13 @@ Firebug.TabWatcher = Obj.extend(new Firebug.Listener(),
     {
         if (FBTrace.DBG_WINDOWS)
         {
-            var uri = safeGetURI(browser);
+            var uri = Http.safeGetURI(browser);
             FBTrace.sysout("-> tabWatcher.watchBrowser for: " + (uri instanceof nsIURI?uri.spec:uri) + "\n");
         }
 
         registerFrameListener(browser);
 
-        var shouldDispatch = this.watchTopWindow(browser.contentWindow, safeGetURI(browser), true);
+        var shouldDispatch = this.watchTopWindow(browser.contentWindow, Http.safeGetURI(browser), true);
 
         if (shouldDispatch)
         {
@@ -449,17 +449,18 @@ Firebug.TabWatcher = Obj.extend(new Firebug.Listener(),
         return false;
     },
 
-    /*
+    /**
      * User closes Firebug
      */
-
     unwatchBrowser: function(browser, userCommands)
     {
         if (FBTrace.DBG_WINDOWS)
         {
-            var uri = safeGetURI(browser);
-            FBTrace.sysout("-> tabWatcher.unwatchBrowser for: " + (uri instanceof nsIURI?uri.spec:uri) + " user commands: "+userCommands+(browser?"":"NULL BROWSER"));
+            var uri = Http.safeGetURI(browser);
+            FBTrace.sysout("-> tabWatcher.unwatchBrowser for: " + (uri instanceof nsIURI?
+                uri.spec:uri) + " user commands: "+userCommands+(browser?"":"NULL BROWSER"));
         }
+
         if (!browser)
             return;
 
@@ -721,7 +722,7 @@ var TabProgressListener = Obj.extend(Http.BaseProgressListener,
         {
             var win = progress.DOMWindow;
             FBTrace.sysout("-> TabProgressListener.onStateChanged for: " +
-                safeGetName(request) + ", win: " + win.location.href +
+                Http.safeGetRequestName(request) + ", win: " + win.location.href +
                 ", content URL: " + (win.document ? win.document.URL : "no content URL") +
                 " " + Http.getStateDescription(flag));
         }
@@ -738,7 +739,7 @@ var FrameProgressListener = Obj.extend(Http.BaseProgressListener,
         {
             var win = progress.DOMWindow;
             FBTrace.sysout("-> FrameProgressListener.onStateChanged for: " +
-                safeGetName(request) + ", win: " + win.location.href +
+                Http.safeGetRequestName(request) + ", win: " + win.location.href +
                 ", content URL: " + (win.document ? win.document.URL : "no content URL") +
                 " " + Http.getStateDescription(flag));
         }
@@ -749,7 +750,7 @@ var FrameProgressListener = Obj.extend(Http.BaseProgressListener,
             // it starts executing any scripts in the page.  After lengthy analysis, it seems
             // that the start of these "dummy" requests is the only state that works.
 
-            var safeName = safeGetName(request);
+            var safeName = Http.safeGetRequestName(request);
             if (safeName && ((safeName == dummyURI) || safeName == "about:document-onload-blocker") )
             {
                 var win = progress.DOMWindow;
@@ -1021,30 +1022,6 @@ function onUnloadWindow(event)
         FBTrace.sysout("-> tabWatcher.onUnloadWindow for: "+Win.safeGetWindowLocation(win) +
             " removeEventListener: "+ eventType+"\n");
     Firebug.TabWatcher.unwatchWindow(win);
-}
-
-function safeGetName(request)
-{
-    try
-    {
-        return request.name;
-    }
-    catch (exc)
-    {
-        return null;
-    }
-}
-
-function safeGetURI(browser)
-{
-    try
-    {
-        return browser.currentURI;
-    }
-    catch (exc)
-    {
-        return null;
-    }
 }
 
 // ************************************************************************************************

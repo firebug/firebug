@@ -3,8 +3,9 @@
 define([
     "firebug/lib/xpcom",
     "firebug/lib/trace",
+    "firebug/net/httpLib",
 ],
-function(Xpcom, FBTrace) {
+function(Xpcom, FBTrace, Http) {
 
 // ********************************************************************************************* //
 // Constants
@@ -78,7 +79,7 @@ var HttpRequestObserver =
 
             if (FBTrace.DBG_HTTPOBSERVER)
                 FBTrace.sysout("httpObserver.observe " + (topic ? topic.toUpperCase() : topic) +
-                    ", " + safeGetName(subject));
+                    ", " + Http.safeGetRequestName(subject));
 
             // Notify all registered observers.
             if (topic == "http-on-modify-request" ||
@@ -173,22 +174,6 @@ var HttpRequestObserver =
             }
         }
     }
-}
-
-// ********************************************************************************************* //
-// Request helpers
-
-function safeGetName(request)
-{
-    try
-    {
-        return request.name;
-    }
-    catch (exc)
-    {
-    }
-
-    return null;
 }
 
 // ********************************************************************************************* //

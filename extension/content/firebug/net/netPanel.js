@@ -616,7 +616,7 @@ NetPanel.prototype = Obj.extend(Firebug.ActivablePanel,
         if (!file)
         {
             for (var i=0; i<netProgress.requests.length; i++) {
-                if (safeGetName(netProgress.requests[i]) == object.href) {
+                if (Http.safeGetRequestName(netProgress.requests[i]) == object.href) {
                    file = netProgress.files[i];
                    break;
                 }
@@ -3796,7 +3796,8 @@ NetProgress.prototype =
         else
         {
             if (FBTrace.DBG_NET)
-                FBTrace.sysout("net.respondedCacheFile; NO FILE FOR " + safeGetName(request));
+                FBTrace.sysout("net.respondedCacheFile; NO FILE FOR " +
+                    Http.safeGetRequestName(request));
         }
     },
 
@@ -4098,7 +4099,7 @@ NetProgress.prototype =
 
     getRequestFile: function getRequestFile(request, win, noCreate)
     {
-        var name = safeGetName(request);
+        var name = Http.safeGetRequestName(request);
         if (!name || reIgnore.exec(name))
             return null;
 
@@ -4765,6 +4766,8 @@ function getFrameLevel(win)
 
 Firebug.NetMonitor.Utils =
 {
+    isXHR: Http.isXHR, // deprecated
+
     findHeader: function(headers, name)
     {
         if (!headers)
@@ -4919,29 +4922,6 @@ Firebug.NetMonitor.Utils =
         catch (e) { }
     },
 
-    isXHR: function(request)
-    {
-        try
-        {
-            var callbacks = request.notificationCallbacks;
-            StackFrame.suspendShowStackTrace();
-            var xhrRequest = callbacks ? callbacks.getInterface(Ci.nsIXMLHttpRequest) : null;
-            if (FBTrace.DBG_NET)
-                FBTrace.sysout("net.isXHR; " + (xhrRequest != null) + ", " + safeGetName(request));
-
-            return (xhrRequest != null);
-        }
-        catch (exc)
-        {
-        }
-        finally
-        {
-            StackFrame.resumeShowStackTrace();
-        }
-
-       return false;
-    },
-
     getFileCategory: function(file)
     {
         if (file.category)
@@ -4982,20 +4962,6 @@ Firebug.NetMonitor.Utils =
 };
 
 var Utils = Firebug.NetMonitor.Utils;
-
-// xxxHonza: should ba shared via lib.js
-function safeGetName(request)
-{
-    try
-    {
-        return request.name;
-    }
-    catch (exc)
-    {
-    }
-
-    return null;
-}
 
 // ************************************************************************************************
 
@@ -5039,7 +5005,7 @@ Firebug.NetMonitor.NetHttpObserver =
             if (FBTrace.DBG_NET_EVENTS)
             {
                 FBTrace.sysout("net.events.observe " + (topic ? topic.toUpperCase() : topic) +
-                    ", " + ((subject instanceof Ci.nsIRequest) ? safeGetName(subject) : "") +
+                    ", " + ((subject instanceof Ci.nsIRequest) ? Http.safeGetRequestName(subject) : "") +
                     ", Browser: " + Firebug.chrome.window.document.title);
             }
 
@@ -5058,7 +5024,7 @@ Firebug.NetMonitor.NetHttpObserver =
             if (!tabId)
             {
                 if (FBTrace.DBG_NET)
-                    FBTrace.sysout("net.observe NO TAB " + safeGetName(subject) +
+                    FBTrace.sysout("net.observe NO TAB " + Http.safeGetRequestName(subject) +
                         ", " + tabId + ", " + win);
                 return;
             }
@@ -5118,7 +5084,7 @@ Firebug.NetMonitor.NetHttpObserver =
             // is properly overridden by the activity observer (ACTIVITY_SUBTYPE_REQUEST_HEADER).
             if (Firebug.netShowBFCacheResponses || !Ci.nsIHttpActivityDistributor)
             {
-                var xhr = Utils.isXHR(request);
+                var xhr = Http.isXHR(request);
                 networkContext.post(requestedFile, [request, now(), win, xhr]);
             }
         }
@@ -5154,7 +5120,8 @@ Firebug.NetMonitor.NetHttpObserver =
         if (!networkContext)
         {
             if (FBTrace.DBG_NET)
-                FBTrace.sysout("net.onExamineCachedResponse; No CONTEXT for:" + safeGetName(request));
+                FBTrace.sysout("net.onExamineCachedResponse; No CONTEXT for:" +
+                    Http.safeGetRequestName(request));
             return;
         }
 
@@ -5294,7 +5261,7 @@ Firebug.NetMonitor.NetHttpActivityObserver =
         {
             FBTrace.sysout("activityObserver.observeActivity; " +
                 getTimeLabel(time) + ", " +
-                safeGetName(httpChannel) + ", " +
+                Http.safeGetRequestName(httpChannel) + ", " +
                 getActivityTypeDescription(activityType) + ", " +
                 getActivitySubtypeDescription(activitySubtype) + ", " +
                 extraSizeData,
@@ -5310,7 +5277,7 @@ Firebug.NetMonitor.NetHttpActivityObserver =
                 activeRequests.push(httpChannel);
                 activeRequests.push(win);
 
-                var isXHR = Utils.isXHR(httpChannel);
+                var isXHR = Http.isXHR(httpChannel);
                 networkContext.post(requestedHeaderFile, [httpChannel, time, win, isXHR, extraStringData]);
             }
             else if (activitySubtype == nsIHttpActivityObserver.ACTIVITY_SUBTYPE_TRANSACTION_CLOSE)

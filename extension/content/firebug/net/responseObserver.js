@@ -3,8 +3,9 @@
 define([
     "firebug/lib/xpcom",
     "firebug/lib/trace",
+    "firebug/net/httpLib",
 ],
-function(Xpcom, FBTrace) {
+function(Xpcom, FBTrace, Http) {
 
 // ********************************************************************************************* //
 // Constants
@@ -81,7 +82,7 @@ ChannelListener.prototype =
 
             if (FBTrace.DBG_CACHE || FBTrace.DBG_ERRORS)
                 FBTrace.sysout("ChannelListener.setAsyncListener; EXCEPTION " +
-                    safeGetName(request), err);
+                    Http.safeGetRequestName(request), err);
             return;
         }
 
@@ -94,7 +95,7 @@ ChannelListener.prototype =
         {
             if (FBTrace.DBG_CACHE || FBTrace.DBG_ERRORS)
                 FBTrace.sysout("ChannelListener.setAsyncListener; EXCEPTION " +
-                    safeGetName(request), err);
+                    Http.safeGetRequestName(request), err);
         }
     },
 
@@ -195,7 +196,7 @@ ChannelListener.prototype =
             if (FBTrace.DBG_CACHE || FBTrace.DBG_ERRORS)
                 FBTrace.sysout("ChannelListener.onDataAvailable onCollectData FAILS " +
                     "(" + offset + ", " + count + ") EXCEPTION: " +
-                    safeGetName(request), err);
+                    Http.safeGetRequestName(request), err);
         }
 
         if (this.listener)
@@ -208,7 +209,8 @@ ChannelListener.prototype =
             {
                 if (FBTrace.DBG_CACHE)
                     FBTrace.sysout("ChannelListener.onDataAvailable cancelling request at " +
-                        "(" + offset + ", " + count + ") EXCEPTION: " + safeGetName(request), exc);
+                        "(" + offset + ", " + count + ") EXCEPTION: " +
+                        Http.safeGetRequestName(request), exc);
 
                 request.cancel(exc.result);
             }
@@ -223,7 +225,7 @@ ChannelListener.prototype =
 
             if (FBTrace.DBG_CACHE)
                 FBTrace.sysout("ChannelListener.onStartRequest; " +
-                    this.request.contentType + ", " + safeGetName(this.request));
+                    this.request.contentType + ", " + Http.safeGetRequestName(this.request));
 
             // Don't register listener twice (redirects, see also bug529536).
             // xxxHonza: I don't know any way how to find out that a listener
@@ -274,7 +276,7 @@ ChannelListener.prototype =
             {
                 if (FBTrace.DBG_CACHE)
                     FBTrace.sysout("ChannelListener.onStartRequest cancelling request " +
-                    "EXCEPTION: " + safeGetName(request), exc);
+                    "EXCEPTION: " + Http.safeGetRequestName(request), exc);
 
                 request.cancel(exc.result);
             }
@@ -287,7 +289,7 @@ ChannelListener.prototype =
         {
             if (FBTrace.DBG_CACHE)
                 FBTrace.sysout("ChannelListener.onStopRequest; " +
-                    request.contentType + ", " + safeGetName(request));
+                    request.contentType + ", " + Http.safeGetRequestName(request));
 
             this.proxyListener.onStopRequest(request, requestContext, statusCode);
         }
@@ -319,7 +321,8 @@ ChannelListener.prototype =
         try
         {
             if (FBTrace.DBG_CACHE)
-                FBTrace.sysout("ChannelListener.onInputStreamReady " + safeGetName(this.request));
+                FBTrace.sysout("ChannelListener.onInputStreamReady " +
+                    Http.safeGetRequestName(this.request));
 
             if (stream instanceof Ci.nsIAsyncInputStream)
             {
@@ -335,8 +338,8 @@ ChannelListener.prototype =
                     // which is ok, since this callback can be called even in this
                     // situations.
                     if (FBTrace.DBG_CACHE)
-                        FBTrace.sysout("ChannelListener.onInputStreamReady EXCEPTION calling onDataAvailable:  " +
-                            safeGetName(this.request), err);
+                        FBTrace.sysout("ChannelListener.onInputStreamReady EXCEPTION calling onDataAvailable: " +
+                            Http.safeGetRequestName(this.request), err);
                 }
 
                 // Listen for further incoming data.
@@ -355,7 +358,7 @@ ChannelListener.prototype =
         {
             if (FBTrace.DBG_CACHE || FBTrace.DBG_ERRORS)
                 FBTrace.sysout("ChannelListener.onInputStreamReady EXCEPTION " +
-                    safeGetName(this.request), err);
+                    Http.safeGetRequestName(this.request), err);
         }
     },
 
@@ -373,20 +376,6 @@ ChannelListener.prototype =
 
         throw Components.results.NS_NOINTERFACE;
     },
-}
-
-// ********************************************************************************************* //
-
-function safeGetName(request)
-{
-    try
-    {
-        return request.name;
-    }
-    catch (exc)
-    {
-        return null;
-    }
 }
 
 // ********************************************************************************************* //
