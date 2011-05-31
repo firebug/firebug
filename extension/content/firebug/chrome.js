@@ -457,7 +457,9 @@ var FirebugChrome =
         if (!resumeBox) // the showContext is being called before the reattachContext, we'll get a second showContext
             return;
 
-        this.focus();  // bring to users attention
+        // xxxHonza: don't focus Firebug window now. It would bring Firebug detached window
+        // to the top every time the attached Firefox page is refreshed, which is annoying.
+        //this.focus();  // bring to users attention
 
         if (context)
         {
