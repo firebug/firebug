@@ -9,8 +9,14 @@ var FBS = {};
 
 // ********************************************************************************************* //
 
-// xxxHonza: The entire firebug-service implementation should be here
-Components.utils["import"]("resource://firebug/firebug-service.js", FBS);
+try
+{
+    // xxxHonza: The entire firebug-service implementation should be here
+    Components.utils["import"]("resource://firebug/firebug-service.js", FBS);
+}
+catch (err)
+{
+}
 
 // ********************************************************************************************* //
 

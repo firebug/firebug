@@ -146,13 +146,13 @@ try
 {
     Components.utils["import"]("resource://gre/modules/PluralForm.jsm");
     Components.utils["import"]("resource://firebug/firebug-service.js");
+
+    // deprecated
+    FBL.fbs = fbs; // left over from component.
 }
 catch (err)
 {
 }
-
-// deprecated
-FBL.fbs = fbs; // left over from component.
 
 // deprecated
 FBL.reUpperCase = /[A-Z]/;
