@@ -1,12 +1,3 @@
-// Tracing Console
-pref("extensions.firebug.alwaysOpenTraceConsole", false);       /*@explore*/
-pref("extensions.firebug.trace.maxMessageLength", 400);         /*@explore*/
-pref("extensions.firebug.trace.enableScope", false);            /*@explore*/
-pref("extensions.firebug.trace.showTime", false);               /*@explore*/
-
-// Keyboard Shortcuts
-pref("extensions.firebug.key.shortcut.openTraceConsole", "shift r");                             /*@explore*/
-
 // Tracing Options
 pref("extensions.firebug.DBG_FBS_JSDCONTEXT", false);// firebug trace scriptinfo(huge)   /*@explore*/
 pref("extensions.firebug.DBG_FBS_FF_START", false); // firebug trace from FF start(huge) /*@explore*/
