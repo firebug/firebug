@@ -736,6 +736,11 @@ Firebug.CommandLine = Obj.extend(Firebug.Module,
         Firebug.currentContext.commandLineText = value ? value : "";
         commandLine.value = Firebug.currentContext.commandLineText;
 
+        // We don't need the persistent value in this session/context any more. The showPanel
+        // method is called every time the panel is selected and the text could have been
+        // changed in this session/context already.
+        delete panelState.commandLineText;
+
         this.autoCompleter.hide(this.getCompletionBox());
     },
 
