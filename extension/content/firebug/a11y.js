@@ -11,7 +11,7 @@ define([
     "firebug/lib/dom",
     "firebug/lib/xml",
     "firebug/lib/xpath",
-    "firebug/console",
+    "firebug/console/console",
     "firebug/infotip",
 ],
 function(Obj, Firebug, Domplate, Locale, Events, Url, Css, Dom, Xml, Xpath) {

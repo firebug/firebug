@@ -6,7 +6,7 @@ define([
     "firebug/lib/wrapper",
     "firebug/lib/url",
     "firebug/lib/stackFrame",
-    "firebug/errors",
+    "firebug/console/errors",
 ],
 function(FirebugReps, Locale, Wrapper, Url, StackFrame) {
 

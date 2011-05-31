@@ -20,7 +20,7 @@ define([
     "firebug/lib/string",
     "firebug/lib/xml",
     "firebug/toggleBranch",
-    "firebug/eventMonitor",
+    "firebug/console/eventMonitor",
     "firebug/firefox/menu",
     "arch/compilationunit",
 ],

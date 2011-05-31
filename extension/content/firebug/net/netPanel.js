@@ -34,7 +34,7 @@ define([
     "firebug/infotip",
     "firebug/cssPanel",
     "firebug/searchBox",
-    "firebug/errors",
+    "firebug/console/errors",
 ],
 function(Obj, Firebug, Firefox, Domplate, Xpcom, HttpRequestObserver, Locale,
     Events, Options, Url, SourceLink, Http, StackFrame, Css, Dom, Win, Search, Str, Xml,

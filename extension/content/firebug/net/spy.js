@@ -18,7 +18,7 @@ define([
     "firebug/lib/array",
     "firebug/lib/debug",
     "firebug/net/netPanel",
-    "firebug/errors",
+    "firebug/console/errors",
 ],
 function(Obj, Firebug, Domplate, FirebugReps, Events, HttpRequestObserver, StackFrame,
     Http, Css, Dom, Win, System, Str, Url, Arr, Debug) {

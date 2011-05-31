@@ -3,7 +3,7 @@
 define([
     "firebug/lib/object",
     "firebug/firebug",
-    "firebug/commandLine",
+    "firebug/console/commandLine",
     "firebug/lib/css",
     "firebug/lib/dom",
     "firebug/lib/string",

@@ -19,7 +19,7 @@ define([
     "firebug/lib/array",
     "firebug/lib/debug",
     "firebug/js/fbs",
-    "firebug/errors",
+    "firebug/console/errors",
 ],
 function(Obj, Firebug, Firefox, CompilationUnit, Xpcom, FirebugReps, Locale, HttpRequestObserver,
     Wrapper, Url, SourceLink, StackFrame, Css, Win, Str, Arr, Debug, FBS) {

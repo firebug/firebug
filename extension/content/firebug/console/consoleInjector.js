@@ -9,10 +9,10 @@ define([
     "firebug/lib/url",
     "firebug/lib/stackFrame",
     "firebug/firefox/window",
-    "firebug/console",
+    "firebug/console/console",
     "firebug/lib/array",
-    "firebug/consoleExposed",
-    "firebug/errors",
+    "firebug/console/consoleExposed",
+    "firebug/console/errors",
 ],
 function(Obj, Firebug, FirebugReps, Locale, Events, Url, StackFrame, Win, Console, Arr) {
 

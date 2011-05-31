@@ -17,10 +17,10 @@ define([
     "firebug/lib/xml",
     "firebug/lib/array",
     "firebug/persist",
-    "firebug/eventMonitor",
+    "firebug/console/eventMonitor",
     "firebug/lib/keywords",
-    "firebug/console",
-    "firebug/commandLineExposed"
+    "firebug/console/console",
+    "firebug/console/commandLineExposed"
 ],
 function(Obj, Firebug, FirebugReps, Locale, Events, Wrapper, Url, Css, Dom, Win, System, Xpath,
     Str, Xml, Arr, Persist, EventMonitor, Keywords) {
