@@ -13,7 +13,7 @@ function getModuleLoaderConfig(baseConfig)
     // Set configuration defaults.
     baseConfig.baseLoaderUrl = baseConfig.baseLoaderUrl || "resource://moduleLoader/";
     baseConfig.prefDomain = baseConfig.prefDomain || "extensions.firebug";
-    baseConfig.arch = baseConfig.arch ||  "firebug_rjs/inProcess";
+    baseConfig.arch = baseConfig.arch ||  "firebug_rjs/bti/inProcess";
     baseConfig.baseUrl = baseConfig.baseUrl || "resource://";
     baseConfig.paths = baseConfig.paths || {"arch": baseConfig.arch, "firebug": "firebug_rjs"};
 
