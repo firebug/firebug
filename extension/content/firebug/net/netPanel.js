@@ -1226,6 +1226,12 @@ NetPanel.prototype = Obj.extend(Firebug.ActivablePanel,
                 Css.setClass(row, "category-" + Utils.getFileCategory(file));
             }
 
+            var remoteIPLabel = row.querySelector(".netRemoteAddressCol .netAddressLabel");
+            remoteIPLabel.innerHTML = NetRequestEntry.getRemoteAddress(file);
+
+            var localIPLabel = row.querySelector(".netLocalAddressCol .netAddressLabel");
+            localIPLabel.innerHTML = NetRequestEntry.getLocalAddress(file);
+
             if (file.requestHeaders)
                 Css.setClass(row, "hasHeaders");
 
@@ -3605,8 +3611,6 @@ NetProgress.prototype =
             file.isBackground = request.loadFlags & LOAD_BACKGROUND;
             file.method = request.requestMethod;
 
-            this.updateIPInfo(request, file);
-
             if (!Ci.nsIHttpActivityDistributor)
                 Utils.getPostText(file, this.context);
 
@@ -3811,8 +3815,6 @@ NetProgress.prototype =
                 file.waitingForTime = time;
                 file.receivingStarted = true;
             }
-
-            this.updateIPInfo(request, file);
         }
 
         // Don't update the UI now (optimalization).
