@@ -15,7 +15,7 @@ define([
     "firebug/lib/array",
     "firebug/firefox/menu",
     "firebug/js/fbs",
-    "firebug/editor",
+    "firebug/editor/editor",
 ],
 function(Obj, Firebug, Domplate, FirebugReps, Locale, Events, SourceLink,
     StackFrame, Css, Dom, Str, Arr, Menu, FBS) {

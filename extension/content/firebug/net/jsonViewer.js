@@ -11,8 +11,8 @@ define([
     "firebug/net/httpLib",
     "firebug/lib/string",
     "firebug/lib/json",
-    "firebug/toggleBranch",
-    "firebug/domPanel",
+    "firebug/dom/toggleBranch",
+    "firebug/dom/domPanel",
     "firebug/chrome/reps"
 ],
 function(Obj, Firebug, Domplate, Locale, Events, Css, Dom, Http, Str, Json, ToggleBranch) {

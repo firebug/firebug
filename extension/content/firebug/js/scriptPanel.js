@@ -22,7 +22,7 @@ define([
     "firebug/firefox/menu",
     "firebug/trace/debug",
     "firebug/lib/keywords",
-    "firebug/editorSelector",
+    "firebug/editor/editorSelector",
     "firebug/chrome/infotip",
     "firebug/chrome/searchBox",
     "firebug/js/sourceBox",

@@ -20,7 +20,7 @@ define([
     "firebug/firefox/menu",
     "firebug/lib/url",
     "firebug/js/breakpoint",
-    "firebug/editor",
+    "firebug/editor/editor",
     "firebug/chrome/infotip",
     "firebug/chrome/searchBox",
     "firebug/html/insideOutBox",

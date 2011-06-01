@@ -19,7 +19,7 @@ define([
     "firebug/lib/xpath",
     "firebug/lib/string",
     "firebug/lib/xml",
-    "firebug/toggleBranch",
+    "firebug/dom/toggleBranch",
     "firebug/console/eventMonitor",
     "firebug/firefox/menu",
     "arch/compilationunit",

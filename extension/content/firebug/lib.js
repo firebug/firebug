@@ -24,7 +24,7 @@ define([
     "firebug/firefox/system",
     "firebug/lib/json",
     "firebug/firefox/menu",
-    "firebug/toggleBranch",
+    "firebug/dom/toggleBranch",
     "firebug/trace/debug",
     "firebug/lib/keywords",
     "firebug/firefox/firefox",
