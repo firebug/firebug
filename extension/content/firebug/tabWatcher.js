@@ -12,7 +12,7 @@ define([
     "firebug/firefox/window",
     "firebug/lib/string",
     "firebug/lib/array",
-    "firebug/lib/debug",
+    "firebug/trace/debug",
     "firebug/chrome/tabContext",
 ],
 function(Obj, Firebug, Firefox, Xpcom, HttpRequestObserver, Events, Url, Http, Win,

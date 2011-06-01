@@ -20,7 +20,7 @@ define([
     "firebug/lib/persist",
     "firebug/firefox/system",
     "firebug/firefox/menu",
-    "firebug/lib/debug",
+    "firebug/trace/debug",
     "firebug/lib/keywords",
     "firebug/editorSelector",
     "firebug/chrome/infotip",

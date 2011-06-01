@@ -3,7 +3,7 @@
 define([
     "firebug/lib/object",
     "firebug/firebug",
-    "firebug/lib/debug",
+    "firebug/trace/debug",
 ],
 function(Obj, Firebug, Debug) {
 

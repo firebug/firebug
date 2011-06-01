@@ -13,7 +13,7 @@ define([
     "firebug/lib/array",
     "firebug/lib/dom",
     "firebug/firefox/menu",
-    "firebug/lib/debug",
+    "firebug/trace/debug",
 ],
 function(FBL, Obj, Firebug, Locale, Xpcom, Url, SourceLink, Css, System, Arr, Dom, Menu, Debug) {
 

@@ -17,7 +17,7 @@ define([
     "firebug/firefox/window",
     "firebug/lib/string",
     "firebug/lib/array",
-    "firebug/lib/debug",
+    "firebug/trace/debug",
     "firebug/js/fbs",
     "firebug/console/errors",
 ],

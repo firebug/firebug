@@ -16,7 +16,7 @@ define([
     "firebug/lib/string",
     "firebug/lib/url",
     "firebug/lib/array",
-    "firebug/lib/debug",
+    "firebug/trace/debug",
     "firebug/net/netPanel",
     "firebug/console/errors",
 ],

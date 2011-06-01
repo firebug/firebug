@@ -11,7 +11,7 @@ define([
     "firebug/lib/string",
     "firebug/lib/array",
     "firebug/firefox/menu",
-    "firebug/lib/debug",
+    "firebug/trace/debug",
 ],
 function(Obj, Firebug, Domplate, Locale, Events, Css, Dom, Str, Arr, Menu, Debug) {
 
