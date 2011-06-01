@@ -1,7 +1,7 @@
 /* See license.txt for terms of usage */
 
 define([
-    "firebug/domplate",
+    "firebug/lib/domplate",
     "firebug/lib/locale",
     "firebug/chrome/reps",
     "firebug/lib/dom",

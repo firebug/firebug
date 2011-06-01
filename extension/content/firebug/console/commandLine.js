@@ -16,7 +16,7 @@ define([
     "firebug/lib/string",
     "firebug/lib/xml",
     "firebug/lib/array",
-    "firebug/persist",
+    "firebug/lib/persist",
     "firebug/console/eventMonitor",
     "firebug/lib/keywords",
     "firebug/console/console",

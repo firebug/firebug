@@ -1,6 +1,6 @@
 /* See license.txt for terms of usage */
 
-define(["firebug/domplate"], function(Domplate) {
+define(["firebug/lib/domplate"], function(Domplate) {
 
 // ********************************************************************************************* //
 // Constants

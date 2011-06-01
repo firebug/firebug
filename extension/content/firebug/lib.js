@@ -19,7 +19,7 @@ define([
     "firebug/lib/xpath",
     "firebug/lib/string",
     "firebug/lib/xml",
-    "firebug/persist",
+    "firebug/lib/persist",
     "firebug/lib/array",
     "firebug/firefox/system",
     "firebug/lib/json",

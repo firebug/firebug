@@ -3,7 +3,7 @@
 define([
     "firebug/lib/object",
     "firebug/firebug",
-    "firebug/domplate",
+    "firebug/lib/domplate",
     "firebug/chrome/reps",
     "firebug/lib/locale",
     "firebug/lib/events",
@@ -15,7 +15,7 @@ define([
     "firebug/lib/search",
     "firebug/lib/string",
     "firebug/lib/array",
-    "firebug/persist",
+    "firebug/lib/persist",
     "firebug/toggleBranch",
     "firebug/firefox/system",
     "firebug/firefox/menu",

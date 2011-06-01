@@ -3,7 +3,7 @@
 define([
     "firebug/lib/object",
     "firebug/firebug",
-    "firebug/domplate",
+    "firebug/lib/domplate",
     "firebug/lib/locale",
     "firebug/lib/xpcom",
     "firebug/lib/css",

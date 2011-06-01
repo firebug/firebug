@@ -5,7 +5,7 @@ define([
     "firebug/firebug",
     "firebug/firefox/firefox",
     "firebug/lib/locale",
-    "firebug/domplate",
+    "firebug/lib/domplate",
     "firebug/lib/url",
     "firebug/lib/dom",
 ],
