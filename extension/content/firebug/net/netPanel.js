@@ -2044,10 +2044,10 @@ Firebug.NetMonitor.NetRequestEntry = domplate(Firebug.Rep, new Firebug.Listener(
                     DIV({"class": "netSizeLabel netLabel"}, "$file.file|getSize")
                 ),
                 TD({"class": "netRemoteAddressCol netCol a11yFocus", "role": "gridcell"},
-                    DIV({"class": "netAddressLabel netLabel"}, "$file.file|getLocalAddress")
+                    DIV({"class": "netAddressLabel netLabel"}, "$file.file|getRemoteAddress")
                 ),
                 TD({"class": "netLocalAddressCol netCol a11yFocus", "role": "gridcell"},
-                    DIV({"class": "netAddressLabel netLabel"}, "$file.file|getRemoteAddress")
+                    DIV({"class": "netAddressLabel netLabel"}, "$file.file|getLocalAddress")
                 ),
                 TD({"class": "netTimeCol netCol a11yFocus", "role": "gridcell",
                     "aria-describedby": "fbNetTimeInfoTip"  },
