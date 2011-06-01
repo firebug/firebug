@@ -13,7 +13,7 @@
         ondialogcancel="return true;"
         persist="screenX screenY width height">
 
-    <script type="application/x-javascript" src="chrome://firebug/content/customizeShortcuts.js" />
+    <script type="application/x-javascript" src="chrome://firebug/content/firefox/customizeShortcuts.js" />
 
     <stringbundleset>
         <stringbundle id="platformKeys" src="chrome://global-platform/locale/platformKeys.properties"/>

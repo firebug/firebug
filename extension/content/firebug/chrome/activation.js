@@ -5,7 +5,7 @@ define([
     "firebug/firebug",
     "firebug/lib/locale",
     "firebug/lib/url",
-    "firebug/tabWatcher",
+    "firebug/firefox/tabWatcher",
 ],
 function(Obj, Firebug, Locale, Url, TabWatcher) {
 

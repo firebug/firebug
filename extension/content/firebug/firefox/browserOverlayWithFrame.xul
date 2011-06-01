@@ -16,7 +16,7 @@
     <vbox id="appcontent">
         <splitter id="fbContentSplitter" collapsed="true"/>
         <vbox persist="height" id="fbMainFrame" collapsed="true">
-            <iframe  flex="2" src="chrome://firebug/content/firebugFrame.xul"/>
+            <iframe  flex="2" src="chrome://firebug/content/firefox/firebugFrame.xul"/>
         </vbox>
     </vbox>
 

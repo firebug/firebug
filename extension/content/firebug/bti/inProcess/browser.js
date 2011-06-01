@@ -10,7 +10,7 @@ define([
     "firebug/firefox/window",
     "arch/webApp",
     "firebug/lib/options",
-    "firebug/tabWatcher",  // TODO firebug/firefox/tabWatcher
+    "firebug/firefox/tabWatcher",
 ],
 function factoryBrowser(FBL, Events, Firefox, Win, WebApp, Options, TabWatcher) {
 

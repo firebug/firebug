@@ -8,13 +8,13 @@ window[chromehidden~="toolbar"] #fbToolbar {
 }
 
 #fbContentBox {
-    -moz-binding: url("chrome://firebug/content/bindings.xml#initializer");
+    -moz-binding: url("chrome://firebug/content/firefox/bindings.xml#initializer");
     height: 270px;
     background-color: -moz-dialog;
 }
 
 #fbLargeCommandLine {
-    -moz-binding: url("chrome://firebug/content/bindings.xml#largeCommandLine");
+    -moz-binding: url("chrome://firebug/content/firefox/bindings.xml#largeCommandLine");
 }
 
 .fbCommandLineCompletionPanel {
@@ -45,7 +45,7 @@ window[chromehidden~="toolbar"] #fbToolbar {
 }
 
 textbox[type="fbSearchBox"] {
-    -moz-binding: url("chrome://firebug/content/bindings.xml#searchBox");
+    -moz-binding: url("chrome://firebug/content/firefox/bindings.xml#searchBox");
 }
 textbox[type="fbSearchBox"] .panelFocusBound {
     -moz-user-focus: normal;
@@ -56,29 +56,29 @@ textbox[type="fbSearchBox"] .panelFocusBound {
 }
 
 panelBar {
-    -moz-binding: url("chrome://firebug/content/bindings.xml#panelBar");
+    -moz-binding: url("chrome://firebug/content/firefox/bindings.xml#panelBar");
     -moz-box-orient: vertical;
 }
 
 /************************************************************************************************/
 
 panelStatus {
-    -moz-binding: url("chrome://firebug/content/bindings.xml#panelStatus");
+    -moz-binding: url("chrome://firebug/content/firefox/bindings.xml#panelStatus");
 }
 
 #fbCallstack {
-    -moz-binding: url("chrome://firebug/content/bindings.xml#panelStatus");
+    -moz-binding: url("chrome://firebug/content/firefox/bindings.xml#panelStatus");
 }
 
 /************************************************************************************************/
 /* Location List */
 
 #fbLocationList {
-    -moz-binding: url("chrome://firebug/content/bindings.xml#panelFileList");
+    -moz-binding: url("chrome://firebug/content/firefox/bindings.xml#panelFileList");
 }
 
 .fbLocationListFilter {
-    -moz-binding: url("chrome://firebug/content/bindings.xml#panelFileListFilter");
+    -moz-binding: url("chrome://firebug/content/firefox/bindings.xml#panelFileListFilter");
     background: white;
     border: 1px solid rgb(150, 150, 157);
     padding: 3px;
@@ -110,7 +110,7 @@ panelStatus {
 }
 
 panelTab {
-    -moz-binding: url("chrome://firebug/content/bindings.xml#panelTab");
+    -moz-binding: url("chrome://firebug/content/firefox/bindings.xml#panelTab");
 }
 
 /* Lightup the text, eg on the Script tab when stopped on a breakpoint */
@@ -122,7 +122,7 @@ panelTab[highlight="true"] {
 /* Mini-menu on the panel tab */
 
 panelTabMenu {
-    -moz-binding: url("chrome://firebug/content/bindings.xml#panelTabMenu");
+    -moz-binding: url("chrome://firebug/content/firefox/bindings.xml#panelTabMenu");
 }
 
 panelTab > panelTabMenu .menuTarget {
@@ -291,15 +291,15 @@ panelTab[aria-disabled='true'] {
 /* Scrollable TabBar + TabList */
 
 panelBarArrowscrollbox {
-    -moz-binding: url("chrome://firebug/content/bindings.xml#panelBarArrowscrollbox");
+    -moz-binding: url("chrome://firebug/content/firefox/bindings.xml#panelBarArrowscrollbox");
 }
 
 panelBarTabList {
-    -moz-binding: url("chrome://firebug/content/bindings.xml#panelBarTabList");
+    -moz-binding: url("chrome://firebug/content/firefox/bindings.xml#panelBarTabList");
 }
 
 .panelBarTabListMenuItem {
-    -moz-binding: url("chrome://firebug/content/bindings.xml#panelBarTabListMenuItem");
+    -moz-binding: url("chrome://firebug/content/firefox/bindings.xml#panelBarTabListMenuItem");
 }
 
 /************************************************************************************************/
@@ -315,7 +315,7 @@ menuitem.split-menuitem-item[_moz-menuactive="true"], .split-menu-right-image[_m
 }
 
 menu[type=splitmenu] {
-    -moz-binding: url("chrome://firebug/content/bindings.xml#splitmenu");
+    -moz-binding: url("chrome://firebug/content/firefox/bindings.xml#splitmenu");
     -moz-box-orient: horizontal;
     -moz-appearance: none !important;
     color: menutext;

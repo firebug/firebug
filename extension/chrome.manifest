@@ -47,13 +47,13 @@ locale  firebug vi          locale/vi/
 locale  firebug zh-CN       locale/zh-CN/
 locale  firebug zh-TW       locale/zh-TW/
 
-#overlay chrome://browser/content/browser.xul           chrome://firebug/content/browserOverlay.xul
-overlay chrome://browser/content/browser.xul            chrome://firebug/content/browserOverlayWithFrame.xul
-overlay chrome://firebug/content/firebugFrame.xul       chrome://firebug/content/firefox/firebugMenuOverlay.xul
+#overlay chrome://browser/content/browser.xul                   chrome://firebug/content/browserOverlay.xul
+overlay chrome://browser/content/browser.xul                    chrome://firebug/content/firefox/browserOverlayWithFrame.xul
+overlay chrome://firebug/content/firefox/firebugFrame.xul       chrome://firebug/content/firefox/firebugMenuOverlay.xul
 
-overlay chrome://global/content/customizeToolbar.xul    chrome://firebug/content/firefox/start-button/customizeToolbarOverlay.xul
-overlay chrome://mozapps/content/extensions/about.xul   chrome://firebug/content/firefox/aboutOverlay.xul
-overlay chrome://navigator/content/navigator.xul        chrome://firebug/content/browserOverlay.xul
+overlay chrome://global/content/customizeToolbar.xul            chrome://firebug/content/firefox/start-button/customizeToolbarOverlay.xul
+overlay chrome://mozapps/content/extensions/about.xul           chrome://firebug/content/firefox/aboutOverlay.xul
+overlay chrome://navigator/content/navigator.xul                chrome://firebug/content/browserOverlay.xul
 
 # Support for Mac
 override chrome://firebug/skin/debugger.css chrome://firebug/skin/mac/debugger.css os=Darwin

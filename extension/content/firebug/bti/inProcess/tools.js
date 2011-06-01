@@ -6,7 +6,7 @@ define([
     "arch/browser",
     "arch/compilationunit",
     "arch/javascripttool",
-    "firebug/tabWatcher",
+    "firebug/firefox/tabWatcher",
 ],
 function(Firebug, Options, Browser, CompilationUnit, JavaScriptTool, TabWatcher) {
 
