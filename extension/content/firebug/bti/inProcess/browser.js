@@ -4,7 +4,7 @@
 // Module
 
 define([
-    "firebug/lib",
+    "firebug/lib/lib",
     "firebug/lib/events",
     "firebug/firefox/firefox",
     "firebug/firefox/window",

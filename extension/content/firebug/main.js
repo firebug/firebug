@@ -119,7 +119,7 @@ if (FBTrace.DBG_INITIALIZE || FBTrace.DBG_MODULES)
 require(config,
 [
     "firebug/chrome/chrome",
-    "firebug/lib",
+    "firebug/lib/lib",
     "firebug/firebug",
     "arch/tools",
     "arch/javascripttool",

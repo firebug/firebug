@@ -2,7 +2,7 @@
 
 // xxxHonza: remove deps on FBL.
 define([
-    "firebug/lib",
+    "firebug/lib/lib",
     "firebug/lib/string"
 ],
 function(FBL, Str) {

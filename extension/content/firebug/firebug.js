@@ -5,7 +5,7 @@
  * So, be careful before you create a new dependency.
  */
 define([
-    "firebug/lib",
+    "firebug/lib/lib",
     "firebug/lib/object",
     "firebug/firefox/firefox",
     "firebug/chrome/chrome",
