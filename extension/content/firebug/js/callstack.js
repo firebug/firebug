@@ -7,7 +7,7 @@ define([
     "arch/javascripttool",
     "firebug/lib/events",
     "firebug/lib/wrapper",
-    "firebug/lib/stackFrame",
+    "firebug/js/stackFrame",
     "firebug/lib/css",
     "firebug/lib/array",
     "firebug/lib/dom",

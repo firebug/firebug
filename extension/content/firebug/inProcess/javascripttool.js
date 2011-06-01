@@ -6,7 +6,7 @@
 define([
     "firebug/lib/object",
     "firebug/firebug",
-    "firebug/debugger",  // TODO firefox/jsdebugger
+    "firebug/js/debugger",  // TODO firefox/jsdebugger
     "arch/compilationunit",
 ],
 function initializeJavaScriptTool(Obj, Firebug, JSDebugger, CompilationUnit) {

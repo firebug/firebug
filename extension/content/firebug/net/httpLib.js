@@ -4,7 +4,7 @@ define([
     "firebug/lib/xpcom",
     "firebug/lib/trace",
     "firebug/lib/deprecated",
-    "firebug/lib/stackFrame",
+    "firebug/js/stackFrame",
 ],
 function(Xpcom, FBTrace, Deprecated, StackFrame) {
 

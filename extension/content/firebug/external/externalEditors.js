@@ -7,7 +7,7 @@ define([
     "firebug/lib/locale",
     "firebug/lib/xpcom",
     "firebug/lib/url",
-    "firebug/sourceLink",
+    "firebug/js/sourceLink",
     "firebug/lib/css",
     "firebug/firefox/system",
     "firebug/lib/array",

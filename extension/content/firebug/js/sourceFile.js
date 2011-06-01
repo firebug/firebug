@@ -4,8 +4,8 @@ define([
     "firebug/lib/object",
     "firebug/firebug",
     "firebug/lib/url",
-    "firebug/sourceLink",
-    "firebug/lib/stackFrame",
+    "firebug/js/sourceLink",
+    "firebug/js/stackFrame",
 ],
 function(Obj, Firebug, Url, SourceLink, StackFrame) {
 

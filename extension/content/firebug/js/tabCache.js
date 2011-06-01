@@ -13,7 +13,7 @@ define([
     "firebug/lib/string",
     "firebug/firefox/window",
     "firebug/net/jsonViewer",
-    "firebug/sourceCache",
+    "firebug/js/sourceCache",
 ],
 function(Obj, Firebug, Xpcom, HttpRequestObserver, HttpResponseObserver, Locale, Events,
     Url, Http, Str, Win, JSONViewerModel) {

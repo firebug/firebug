@@ -5,7 +5,7 @@ define([
     "firebug/firebug",
     "arch/compilationunit",
     "firebug/lib/events",
-    "firebug/sourceLink",
+    "firebug/js/sourceLink",
     "firebug/lib/css",
     "firebug/lib/dom",
     "firebug/lib/string",
