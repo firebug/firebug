@@ -1,5 +1,5 @@
 <?xml version="1.0"?>
-<?xml-stylesheet href="chrome://firebug/content/start-button/startButton.css"?>
+<?xml-stylesheet href="chrome://firebug/content/firefox/start-button/startButton.css"?>
 <overlay xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul">
 
     <popupset id="mainPopupSet">

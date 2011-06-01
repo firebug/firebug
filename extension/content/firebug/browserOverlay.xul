@@ -2,7 +2,7 @@
 
 <?xul-overlay href="chrome://firebug/content/firefox/firebugMenuOverlay.xul"?>
 <?xul-overlay href="chrome://firebug/content/firebugOverlay.xul"?>
-<?xul-overlay href="chrome://firebug/content/start-button/startButtonOverlay.xul"?>
+<?xul-overlay href="chrome://firebug/content/firefox/start-button/startButtonOverlay.xul"?>
 
 <overlay xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul">
 

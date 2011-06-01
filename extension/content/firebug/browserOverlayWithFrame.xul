@@ -2,7 +2,7 @@
 <!--  See license.txt for terms of usage -->
 
 <?xul-overlay href="chrome://firebug/content/firefox/firebugMenuOverlay.xul"?>
-<?xul-overlay href="chrome://firebug/content/start-button/startButtonOverlay.xul"?>
+<?xul-overlay href="chrome://firebug/content/firefox/start-button/startButtonOverlay.xul"?>
 
 <!-- CSS for fbContentSplitter -->
 <?xml-stylesheet href="chrome://firebug/content/firebug.css"?>

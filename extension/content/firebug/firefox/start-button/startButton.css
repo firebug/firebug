@@ -50,7 +50,7 @@ toolbar[iconsize="small"] #firebug-button > .toolbarbutton-icon {
    height is not affected. This is OK since the plan for Firefox 4 is to use 16x16 sizes
    only anyway, see: https://bugzilla.mozilla.org/show_bug.cgi?id=616472 */
 #firebug-button[firefox="4"] {
-    -moz-binding: url("chrome://firebug/content/start-button/startButton.xml#start-button");
+    -moz-binding: url("chrome://firebug/content/firefox/start-button/startButton.xml#start-button");
 }
 
 #firebug-button[script="on"][firefox="4"],
