@@ -8,7 +8,7 @@ define([
     "firebug/lib",
     "firebug/lib/object",
     "firebug/firefox/firefox",
-    "firebug/chrome",
+    "firebug/chrome/chrome",
     "firebug/domplate",
     "firebug/lib/options",
     "firebug/lib/locale",

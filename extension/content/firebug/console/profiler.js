@@ -4,7 +4,7 @@ define([
     "firebug/lib/object",
     "firebug/firebug",
     "firebug/domplate",
-    "firebug/reps",
+    "firebug/chrome/reps",
     "firebug/lib/locale",
     "firebug/lib/wrapper",
     "firebug/lib/url",

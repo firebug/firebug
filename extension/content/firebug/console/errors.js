@@ -3,7 +3,7 @@
 define([
     "firebug/lib/object",
     "firebug/firebug",
-    "firebug/reps",
+    "firebug/chrome/reps",
     "firebug/lib/xpcom",
     "firebug/console/console",
     "firebug/lib/css",

@@ -7,7 +7,7 @@ define([
     "firebug/lib/url",
     "firebug/firefox/window",
     "firebug/lib/css",
-    "firebug/plugin",
+    "firebug/chrome/plugin",
 ],
 function(Obj, CompilationUnit, Events, Url, Win, Css) {
 

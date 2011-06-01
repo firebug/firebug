@@ -4,7 +4,7 @@ define([
     "firebug/lib/object",
     "firebug/firebug",
     "firebug/firefox/firefox",
-    "firebug/reps",
+    "firebug/chrome/reps",
     "firebug/lib/locale",
     "firebug/lib/events",
     "firebug/lib/css",
@@ -15,7 +15,7 @@ define([
     "firebug/firefox/menu",
     "firebug/lib/options",
     "firebug/console/profiler",
-    "firebug/searchBox",
+    "firebug/chrome/searchBox",
 ],
 function(Obj, Firebug, Firefox, FirebugReps, Locale, Events, Css, Dom,
     Win, Search, Xml, Menu, Options) {

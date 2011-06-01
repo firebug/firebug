@@ -4,7 +4,7 @@ define([
     "firebug/lib/object",
     "firebug/firebug",
     "firebug/domplate",
-    "firebug/reps",
+    "firebug/chrome/reps",
     "firebug/lib/locale",
     "firebug/lib/events",
     "firebug/lib/wrapper",
@@ -21,7 +21,7 @@ define([
     "firebug/firefox/menu",
     "firebug/editor",
     "firebug/js/breakpoint",
-    "firebug/searchBox",
+    "firebug/chrome/searchBox",
 ],
 function(Obj, Firebug, Domplate, FirebugReps, Locale, Events, Wrapper,
     SourceLink, StackFrame, Dom, Css, Search, Str, Arr, Persist, ToggleBranch, System, Menu) {

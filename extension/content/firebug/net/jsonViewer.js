@@ -13,7 +13,7 @@ define([
     "firebug/lib/json",
     "firebug/toggleBranch",
     "firebug/domPanel",
-    "firebug/reps"
+    "firebug/chrome/reps"
 ],
 function(Obj, Firebug, Domplate, Locale, Events, Css, Dom, Http, Str, Json, ToggleBranch) {
 

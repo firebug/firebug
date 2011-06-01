@@ -6,7 +6,7 @@ define([
     "firebug/firefox/firefox",
     "arch/compilationunit",
     "firebug/lib/xpcom",
-    "firebug/reps",
+    "firebug/chrome/reps",
     "firebug/lib/locale",
     "firebug/net/requestObserver",
     "firebug/lib/wrapper",
