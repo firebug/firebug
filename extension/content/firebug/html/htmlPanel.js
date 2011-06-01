@@ -23,7 +23,9 @@ define([
     "firebug/editor",
     "firebug/infotip",
     "firebug/searchBox",
-    "firebug/insideOutBox",
+    "firebug/html/insideOutBox",
+    "firebug/html/inspector",
+    "firebug/html/layout",
 ],
 function(Obj, Firebug, Domplate, FirebugReps, Locale, HTMLLib, Events,
     SourceLink, Css, Dom, Win, Xpath, Str, Xml, Arr, Persist, Menu, Url) { with (Domplate) {
