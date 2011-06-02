@@ -805,7 +805,9 @@ window.Firebug =
             Firebug: this,
             browser: Firebug.currentContext ? Firebug.currentContext.browser : null,
         };
-        var win = Firefox.openWindow("Firebug", "chrome://firebug/content/firebug.xul", "", args);
+
+        var win = Firefox.openWindow("Firebug",
+            "chrome://firebug/content/firefox/firebug.xul", "", args);
 
         return win;
     },

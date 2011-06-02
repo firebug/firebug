@@ -51,7 +51,7 @@ createFirebugChrome: function(win)  // chrome is created in caller window.
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
     // Private
 
-    var inDetachedScope = (win.location == "chrome://firebug/content/firebug.xul");
+    var inDetachedScope = (win.location == "chrome://firebug/content/firefox/firebug.xul");
 
     var panelBox, panelSplitter, sidePanelDeck, panelBar1, panelBar2, locationList, locationButtons,
         panelStatus, panelStatusSeparator, cmdPopup, cmdPopupBrowser;
