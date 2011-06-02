@@ -32,35 +32,73 @@ function getModuleLoaderConfig(baseConfig)
 
 // ********************************************************************************************* //
 
-var depTree = {};
-function dumpDependencyTree(tree)
+
+// ********************************************************************************************* //
+require.onDebugDAG = function(fullName, deps)
 {
-    function resolveDeps(id, deps, path)
+    if (!require.depsNamesByName)
+        require.depsNamesByName = {};
+
+    var arr = [];
+    for (var p in deps)
+        arr.push(p);
+    require.depsNamesByName[fullName] = arr;
+}
+
+require.analyzeDependencyTree = function()
+{
+    FBTrace.sysout("Firebug module list: ", require.depsNamesByName);
+
+    // For each deps item create an object referencing dependencies
+    function linkArrayItems(id, depNamesByName, path)
     {
+        var deps = depNamesByName[id];
         var result = {};
-        for (var p in deps)
+        for (var i = 0; i < deps.length; i++)
         {
-            var depID = deps[p];
-            if (path.indexOf(":" + depID + ":") == -1)
-                result[depID] = resolveDeps(depID, tree[depID], path + ":" + depID + ":");
+            var depID = deps[i];
+            if (path.indexOf(":" + depID + ":") == -1) // Then depId is not already an dependent
+                result[depID] = linkArrayItems(depID, depNamesByName, path + ":" + depID + ":");
             else
                 FBTrace.sysout("Circular dependency: " + path + ":" + depID + ":");
         }
         return result;
     }
 
-    var result = {};
-    for (var p in tree)
+
+    var linkedDependencies = {};
+    var dependents = {}; // reversed list, dependents by name
+    var depNamesByName = require.depsNamesByName;
+    for (var name in depNamesByName)
     {
-        if (p == "undefined")
-            result["main"] = resolveDeps(p, tree[p], "");
+        var depArray = depNamesByName[name];
+
+        if (name === "undefined") {
+            linkedDependencies["__main__"] = linkArrayItems(name, depNamesByName, "");
+            name = "__main__";
+        }
+        for (var i = 0; i < depArray.length; i++)
+        {
+            var dependent = depArray[i];
+            if (!dependents[dependent])
+                dependents[dependent] = [];
+            dependents[dependent].push(name);
+        }
+    }
+    var minimal = [];
+    var mainDeps = depNamesByName["undefined"];
+    for (var i = 0; i < mainDeps.length; i++)
+    {
+        var dependencyOfMain = mainDeps[i];
+        var dependentsOfDependencyOfMain = dependents[dependencyOfMain];
+        if (dependentsOfDependencyOfMain.length === 1)
+            minimal.push(dependencyOfMain);
     }
 
-    FBTrace.sysout("Firebug module dependency tree: ", result);
-    FBTrace.sysout("Firebug module list: ", depTree);
+    FBTrace.sysout("Firebug module dependency tree: ", linkedDependencies);
+    FBTrace.sysout("Firebug dependents: ", dependents);
+    FBTrace.sysout("Firebug minimal modules list: ", minimal);
 }
-
-// ********************************************************************************************* //
 
 require.onDebug = function()
 {
@@ -85,13 +123,7 @@ require.onError = function(exc)
     throw exc;
 }
 
-require.onCollectDeps = function(fullName, deps)
-{
-    var arr = [];
-    for (var p in deps)
-        arr.push(p);
-    depTree[fullName] = arr;
-}
+
 
 function loadXULCSS(cssURL)
 {
@@ -180,7 +212,7 @@ function(ChromeFactory, FBL, Firebug)
         }
 
         if (FBTrace.DBG_MODULES)
-            dumpDependencyTree(depTree);
+            require.analyzeDependencyTree();
     }
     catch(exc)
     {
