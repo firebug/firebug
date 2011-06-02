@@ -4,7 +4,7 @@ define([
     "firebug/lib/object",
     "firebug/firebug",
     "firebug/firefox/firefox",
-    "firebug/lib/xpcom",
+    "firebug/firefox/xpcom",
     "firebug/net/requestObserver",
     "firebug/lib/events",
     "firebug/lib/url",

@@ -4,7 +4,7 @@ define([
     "firebug/lib/object",
     "firebug/firebug",
     "firebug/lib/domplate",
-    "firebug/lib/xpcom",
+    "firebug/firefox/xpcom",
     "firebug/lib/locale",
     "firebug/lib/htmlLib",
     "firebug/lib/events",

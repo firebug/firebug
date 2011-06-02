@@ -3,7 +3,7 @@
 define([
     "firebug/lib/object",
     "firebug/firebug",
-    "firebug/lib/xpcom",
+    "firebug/firefox/xpcom",
     "firebug/net/requestObserver",
     "firebug/net/responseObserver",
     "firebug/lib/locale",

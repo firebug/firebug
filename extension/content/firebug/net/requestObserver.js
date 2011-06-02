@@ -1,7 +1,7 @@
 /* See license.txt for terms of usage */
 
 define([
-    "firebug/lib/xpcom",
+    "firebug/firefox/xpcom",
     "firebug/lib/trace",
     "firebug/net/httpLib",
 ],
