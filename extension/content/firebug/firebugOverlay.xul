@@ -1,4 +1,7 @@
 <?xml version="1.0"?>
+<!-- See license.txt for terms of usage -->
+
+<?xul-overlay href="chrome://firebug/content/firefox/firebugMenuOverlay.xul"?>
 
 <?xml-stylesheet href="chrome://firebug/content/firebug.css"?>
 

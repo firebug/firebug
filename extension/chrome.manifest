@@ -49,7 +49,6 @@ locale  firebug zh-TW       locale/zh-TW/
 
 #overlay chrome://browser/content/browser.xul                   chrome://firebug/content/browserOverlay.xul
 overlay chrome://browser/content/browser.xul                    chrome://firebug/content/firefox/browserOverlayWithFrame.xul
-overlay chrome://firebug/content/firefox/firebugFrame.xul       chrome://firebug/content/firefox/firebugMenuOverlay.xul
 
 overlay chrome://global/content/customizeToolbar.xul            chrome://firebug/content/firefox/start-button/customizeToolbarOverlay.xul
 overlay chrome://mozapps/content/extensions/about.xul           chrome://firebug/content/firefox/aboutOverlay.xul

@@ -216,7 +216,10 @@ var FirebugChrome =
             // xxxHonza: is there any reason why we don't distribute "initializeUI"
             // event to modules?
             FirstRunPage.initializeUI();
-            Firebug.FirebugMenu.initializeUI();
+
+            // To not execute it twice in in-browser scope.
+            if (inDetachedScope)
+                Firebug.FirebugMenu.initializeUI();
         }
         catch (exc)
         {

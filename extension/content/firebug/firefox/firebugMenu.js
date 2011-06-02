@@ -34,7 +34,7 @@ Firebug.FirebugMenu = Obj.extend(Firebug.Module,
         this.updateAboutMenu(top.document);
 
         // Initialize Firebug Tools, Web Developer and Firebug Icon menus.
-        var firebugMenuPopup = Firefox.getElementById("fbFirebugMenuPopup");
+        var firebugMenuPopup = Firebug.chrome.$("fbFirebugMenuPopup");
 
         // If 'Web Developer' menu is available (introduced in Firefox 6)
         // Remove the old entry in Tools menu.
