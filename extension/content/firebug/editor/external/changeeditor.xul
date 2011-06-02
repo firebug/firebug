@@ -13,8 +13,8 @@
         persist="screenX screenY"
         class="fbInternational">
 
-    <script type="application/x-javascript" src="chrome://firebug/content/xpcom.js"/>
-    <script type="application/x-javascript" src="chrome://firebug/content/external/changeeditor.js"/>
+    <script type="application/x-javascript" src="chrome://firebug/content/trace.js"/>
+    <script type="application/x-javascript" src="chrome://firebug/content/editor/external/changeeditor.js"/>
 
     <vbox flex="1">
         <hbox align="center">

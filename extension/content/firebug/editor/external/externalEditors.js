@@ -14,8 +14,10 @@ define([
     "firebug/lib/dom",
     "firebug/firefox/menu",
     "firebug/trace/debug",
+    "firebug/firefox/firefox",
 ],
-function(FBL, Obj, Firebug, Locale, Xpcom, Url, SourceLink, Css, System, Arr, Dom, Menu, Debug) {
+function(FBL, Obj, Firebug, Locale, Xpcom, Url, SourceLink, Css, System, Arr, Dom,
+    Menu, Debug, Firefox) {
 
 // ********************************************************************************************* //
 // Constants
@@ -173,7 +175,8 @@ Firebug.ExternalEditors = Obj.extend(Firebug.Module,
             prefName: prefDomain + ".externalEditors"
         };
 
-        openWindow("Firebug:ExternalEditors", "chrome://firebug/content/external/editors.xul",
+        Firefox.openWindow("Firebug:ExternalEditors",
+            "chrome://firebug/content/editor/external/editors.xul",
             "", args);
     },
 

@@ -42,6 +42,9 @@ function addOpenEditorShowHide(event)
 
 function addContextToForms(contextMenu)
 {
+    if (typeof(nsContextMenu) == "undefined")
+        return;
+
     // https://bugzilla.mozilla.org/show_bug.cgi?id=433168
     var setTargetOriginal = nsContextMenu.prototype.setTarget;
     nsContextMenu.prototype.setTarget = function(aNode, aRangeParent, aRangeOffset)
@@ -55,3 +58,5 @@ function addContextToForms(contextMenu)
 // ********************************************************************************************* //
 
 window.addEventListener("load", addOpenEditorShowHide, false);
+
+// ********************************************************************************************* //

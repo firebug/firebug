@@ -3,12 +3,16 @@
 // ************************************************************************************************
 // Globals
 
+const Cc = Components.classes;
+const Ci = Components.interfaces;
+
 var item;
 var FBL;
 var internalFilefieldTextbox;
 var browseButton;
+
 // browsing for a new file modifies image and label only if they are autogenereted from filename
-var origLabel = '';
+var origLabel = "";
 var origImage = null;
 
 function onLoad()
@@ -70,7 +74,7 @@ function internationalizeUI(doc)
     {
         if (elements[i].nodeName == "description")
         {
-            var localized = Locale.$STR(elements[i].textContent);
+            var localized = FBL.$STR(elements[i].textContent);
             var parser = Cc["@mozilla.org/xmlextras/domparser;1"].createInstance(Ci.nsIDOMParser);
             var doc = parser.parseFromString("<vbox>" + localized + "</vbox>", "text/xml");
             var root = doc.documentElement;
@@ -129,20 +133,21 @@ function onAccept()
     }
     catch (exc)
     {
-        const Ci = Components.interfaces;
-        const nsIPromptService = nsIPromptService;
+        if (FBTrace.DBG_ERRORS)
+            FBTrace.sysout("changeEditor.onAccept; EXCEPTION " + exc, exc);
+
         var promptService = Cc["@mozilla.org/embedcomp/prompt-service;1"].createInstance(
             Ci.nsIPromptService);
 
         if (exc == "NotAnExecutable")
         {
-            promptService.alert(null, Locale.$STR("changeEditor.Invalid_Application_Path"),
-                Locale.$STR("changeEditor.Path_is_not_an_executable"));
+            promptService.alert(null, FBL.$STR("changeEditor.Invalid_Application_Path"),
+                FBL.$STR("changeEditor.Path_is_not_an_executable"));
         }
         else
         {
-            promptService.alert(null, Locale.$STR("changeEditor.Invalid_Application_Path"),
-                Locale.$STR("changeEditor.Application_does_not_exist"));
+            promptService.alert(null, FBL.$STR("changeEditor.Invalid_Application_Path"),
+                FBL.$STR("changeEditor.Application_does_not_exist"));
         }
 
         return false;

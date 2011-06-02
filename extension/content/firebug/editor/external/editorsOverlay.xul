@@ -2,7 +2,7 @@
 
 <overlay xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul">
 
-<script type="application/x-javascript" src="chrome://firebug/content/external/editorToContextMenu.js"/>
+    <script type="application/x-javascript" src="chrome://firebug/content/editor/external/editorToContextMenu.js"/>
 
     <!-- Firefox page context menu -->
     <menupopup id="contentAreaContextMenu">
@@ -10,7 +10,7 @@
                 insertbefore="context-viewsource" iconic="true" class="fbInternational"
                 command="cmd_openInEditor" openFromContext="true">
             <menupopup id="menu_firebugOpenWith"
-                    onpopupshowing="return Firebug.ExternalEditors.onEditorsShowing(this, 1);"/>
+                onpopupshowing="return Firebug.ExternalEditors.onEditorsShowing(this, 1);"/>
         </menu>
     </menupopup>
 

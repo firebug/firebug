@@ -3,6 +3,9 @@
 // ************************************************************************************************
 // Constants
 
+const Cc = Components.classes;
+const Ci = Components.interfaces;
+
 const prefs = Cc["@mozilla.org/preferences-service;1"].getService(Ci.nsIPrefBranch);
 const names = ["label", "executable", "cmdline", "image"];
 
@@ -101,7 +104,7 @@ var gEditorManager =
             item: item,
             FBL: this._FBL
         };
-        openDialog("chrome://firebug/content/external/changeeditor.xul",  "_blank", "modal,centerscreen,resizable", args, result);
+        openDialog("chrome://firebug/content/editor/external/changeeditor.xul",  "_blank", "modal,centerscreen,resizable", args, result);
         if (result.saveChanges)
         {
             item.id = item.label.replace(/\W/g, "_");
@@ -164,7 +167,7 @@ var gEditorManager =
             FBL: this._FBL
         };
         var result = {};
-        openDialog("chrome://firebug/content/external/changeeditor.xul",  "_blank", "modal,centerscreen", args, result);
+        openDialog("chrome://firebug/content/editor/external/changeeditor.xul",  "_blank", "modal,centerscreen", args, result);
         if (result.saveChanges)
         {
             this._saveItem(item);

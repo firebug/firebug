@@ -1,5 +1,7 @@
 <?xml version="1.0"?>
 
+<?xul-overlay href="chrome://firebug/content/editor/external/editorsOverlay.xul"?>
+
 <overlay xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul"
          xmlns:html="http://www.w3.org/1999/xhtml">
 
