@@ -17,7 +17,7 @@
     <script type="application/x-javascript" src="chrome://firebug/content/trace.js"/>
     <script type="application/x-javascript" src="chrome://firebug/content/legacy.js"/>
     <script type="application/x-javascript">
-       window.Firebug = {};
+       window.Firebug = top.Firebug;
     </script>
     <script type="application/x-javascript" src="chrome://firebug/content/firefox/panelBarWaiter.js"/>
 
