@@ -119,7 +119,8 @@ Firebug.StartButton = Obj.extend(Firebug.Module,
 
             try
             {
-                BrowserToolboxCustomizeDone(true);
+                // The current global scope is not browser.xul.
+                top.BrowserToolboxCustomizeDone(true);
             }
             catch (e)
             {
