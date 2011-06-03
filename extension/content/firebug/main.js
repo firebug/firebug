@@ -1,8 +1,9 @@
 /* See license.txt for terms of usage */
+
 try {
 
-
 (function() {
+// ********************************************************************************************* //
 
 var config = Firebug.getModuleLoaderConfig();
 
@@ -16,10 +17,12 @@ if (FBTrace.DBG_INITIALIZE || FBTrace.DBG_MODULES)
 }
 
 var modules = [
-               "firebug/chrome/chrome",
-               "firebug/lib/lib",
-               "firebug/firebug"
-               ].concat(config.modules);
+    "firebug/chrome/chrome",
+    "firebug/lib/lib",
+    "firebug/firebug"
+].concat(config.modules);
+
+// ********************************************************************************************* //
 
 require(config, modules, function(ChromeFactory, FBL, Firebug)
 {
@@ -62,11 +65,14 @@ require(config, modules, function(ChromeFactory, FBL, Firebug)
 
 // ********************************************************************************************* //
 })();
+
 } catch (exc) {
 
     window.dump("Firebug main  ERROR "+exc+"\n");
 
     if (Components)
         Components.utils.reportError(exc);
-
 }
+
+// ********************************************************************************************* //
+
