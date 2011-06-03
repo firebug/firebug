@@ -6,6 +6,9 @@ resource firebug modules/
 # require js modules
 resource firebug_rjs content/firebug/
 
+# Maps resource://moduleloader/* to files in modules/*
+resource moduleloader modules/
+
 skin    firebug classic/1.0 skin/classic/
 skin    firebug-os  classic/1.0 skin/classic/win/
 
@@ -57,12 +60,14 @@ locale  firebug vi          locale/vi/
 locale  firebug zh-CN       locale/zh-CN/
 locale  firebug zh-TW       locale/zh-TW/
 
-overlay chrome://browser/content/browser.xul            chrome://firebug/content/browserOverlay.xul
-overlay chrome://global/content/customizeToolbar.xul    chrome://firebug/content/firefox/start-button/customizeToolbarOverlay.xul
-overlay chrome://mozapps/content/extensions/about.xul   chrome://firebug/content/firefox/aboutOverlay.xul
-overlay chrome://navigator/content/navigator.xul        chrome://firebug/content/browserOverlay.xul
+#overlay chrome://browser/content/browser.xul                   chrome://firebug/content/browserOverlay.xul
+overlay chrome://browser/content/browser.xul                    chrome://firebug/content/firefox/browserOverlayWithFrame.xul
 
-# Support for Mac 
+overlay chrome://global/content/customizeToolbar.xul            chrome://firebug/content/firefox/start-button/customizeToolbarOverlay.xul
+overlay chrome://mozapps/content/extensions/about.xul           chrome://firebug/content/firefox/aboutOverlay.xul
+overlay chrome://navigator/content/navigator.xul                chrome://firebug/content/browserOverlay.xul
+
+# Support for Mac
 override chrome://firebug/skin/debugger.css chrome://firebug/skin/mac/debugger.css os=Darwin
 override chrome://firebug-os/skin/firebug.css chrome://firebug/skin/mac/firebug.css os=Darwin
 override chrome://firebug-os/skin/panel.css chrome://firebug/skin/mac/panel.css os=Darwin
