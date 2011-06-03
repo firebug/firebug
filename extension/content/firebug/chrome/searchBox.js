@@ -143,7 +143,7 @@ Firebug.Search = Obj.extend(Firebug.Module,
 
     isCaseSensitive: function(text)
     {
-        return !!Firebug.searchCaseSensitive || text.toLowerCase() != text;
+        return !!Firebug.searchCaseSensitive;
     },
 
     getTestingRegex: function(text)
