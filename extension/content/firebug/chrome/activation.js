@@ -19,9 +19,43 @@ const prefs = Cc["@mozilla.org/preferences-service;1"].getService(Ci.nsIPrefBran
 
 // The service doesn't have to be available if Firefox is built with privatebrowsing disabled so,
 // don't foreget to check it before access (issue 2923).
-const privateBrowsingEnabled = ("@mozilla.org/privatebrowsing;1" in Cc) &&
-    Cc["@mozilla.org/privatebrowsing;1"].getService(Ci.nsIPrivateBrowsingService).privateBrowsingEnabled;
+var PrivateBrowsingListener =
+{
+      initialize: function()
+      {
+          this.observerService = Components.classes["@mozilla.org/observer-service;1"]
+              .getService(Components.interfaces.nsIObserverService);
+          this.observerService.addObserver(this, "private-browsing", false);
+          this.observerService.addObserver(this, "quit-application", false);
+          this.update();
+      },
 
+      update: function()
+      {
+          var pbs = Components.classes["@mozilla.org/privatebrowsing;1"]
+              .getService(Components.interfaces.nsIPrivateBrowsingService);
+          this.privateBrowsingEnabled = pbs.privateBrowsingEnabled;
+          if(FBTrace.DBG_ACTIVATION)
+              FBTrace.sysout("PrivateBrowsingListener update "+PrivateBrowsingListener.isPrivateBrowsing())
+      },
+
+      observe : function (aSubject, aTopic, aData)
+      {
+        if (aTopic == "private-browsing")
+        {
+            PrivateBrowsingListener.update();
+        } else if (aTopic == "quit-application")
+        {
+            PrivateBrowsingListener.observerService.removeObserver(this, "quit-application");
+            PrivateBrowsingListener.observerService.removeObserver(this, "private-browsing");
+        }
+      },
+
+      isPrivateBrowsing: function()
+      {
+        return this.privateBrowsingEnabled;
+      },
+};
 // ************************************************************************************************
 
 /**
@@ -51,6 +85,7 @@ Firebug.Activation = Obj.extend(Firebug.Module,
         Firebug.Module.initializeUI.apply(this, arguments);
         TabWatcher.initializeUI();
         TabWatcher.addListener(this);
+        PrivateBrowsingListener.initialize();
     },
 
     shutdown: function()
@@ -263,13 +298,20 @@ Firebug.Activation = Obj.extend(Firebug.Module,
 
     setPageAnnotation: function(currentURI, annotation)
     {
-        if (privateBrowsingEnabled)
+        if (FBTrace.DBG_ACTIVATION || FBTrace.DBG_ANNOTATION)
+            FBTrace.sysout("setPageAnnotation, private browsing:"+PrivateBrowsingListener.isPrivateBrowsing());
+
+        if (PrivateBrowsingListener.isPrivateBrowsing())
         {
             Firebug.Console.logFormatted(
                 [Locale.$STR("firebug.activation.privateBrowsingMode")],
                 Firebug.currentContext, "info");
             Firebug.chrome.selectPanel('console');
             Firebug.Options.set("defaultPanelName", "console");  // make sure the user sees the warning.
+
+            if (FBTrace.DBG_ACTIVATION || FBTrace.DBG_ANNOTATION)
+                FBTrace.sysout("activation warning, private browsing:"+PrivateBrowsingListener.isPrivateBrowsing());
+
             return;
         }
 
@@ -279,7 +321,8 @@ Firebug.Activation = Obj.extend(Firebug.Module,
 
         if (FBTrace.DBG_ACTIVATION || FBTrace.DBG_ANNOTATION)
             FBTrace.sysout("setPageAnnotation currentURI "+currentURI+" becomes URI key "+
-                (uri?uri.spec:"ERROR"));
+                (uri?uri.spec:"ERROR")+" privateBrowsingEnabled: "+
+                PrivateBrowsingListener.isPrivateBrowsing());
 
         if (Firebug.activateSameOrigin)
         {
