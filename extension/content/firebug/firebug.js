@@ -680,31 +680,31 @@ window.Firebug =
             Firebug.minimizeBar();
 
         return true;
-     },
+    },
 
-     /*
-      * Primary function to re-show firebug due to visiting active site.
-      * Unlike toggleBar, we are trying to obey the current placement, not change it.
-      */
-     showContext: function(browser, context)
-     {
-         // user wants detached but we are not yet
-         if (Firebug.openInWindow && !Firebug.isDetached())
-         {
-             if (context && !Firebug.isMinimized()) // don't detach if it's minimized 2067
-                 this.detachBar();  //   the placement will be set once the external window opens
-             else  // just make sure we are not showing
-                 this.showBar(false);
-         }
-         else if (Firebug.openMinimized() && !Firebug.isMinimized())
-             this.minimizeBar();
-         else if (Firebug.isMinimized())
-             this.showBar(false);  // don't show, we are minimized
-         else if (Firebug.isDetached())
-             Firebug.chrome.syncResumeBox(context);
-         else  // inBrowser
-             this.showBar(context?true:false);
-     },
+    /**
+     * Primary function to re-show firebug due to visiting active site.
+     * Unlike toggleBar, we are trying to obey the current placement, not change it.
+     */
+    showContext: function(browser, context)
+    {
+        // user wants detached but we are not yet
+        if (Firebug.openInWindow && !Firebug.isDetached())
+        {
+            if (context && !Firebug.isMinimized()) // don't detach if it's minimized 2067
+                this.detachBar();  //   the placement will be set once the external window opens
+            else  // just make sure we are not showing
+                this.showBar(false);
+        }
+        else if (Firebug.openMinimized() && !Firebug.isMinimized())
+            this.minimizeBar();
+        else if (Firebug.isMinimized())
+            this.showBar(false);  // don't show, we are minimized
+        else if (Firebug.isDetached())
+            Firebug.chrome.syncResumeBox(context);
+        else  // inBrowser
+            this.showBar(context?true:false);
+    },
 
     minimizeBar: function()  // just pull down the UI, but don't deactivate the context
     {
@@ -718,6 +718,10 @@ window.Firebug =
         {
             Firebug.setPlacement("minimized");
             this.showBar(false);
+
+            // Firebug UI is closed, make sure the focus is on the browser.
+            var webApp = Firebug.connection.getCurrentSelectedWebApp();
+            webApp.getTopMostWindow().focus();
         }
     },
 
@@ -734,7 +738,8 @@ window.Firebug =
         return true;
     },
 
-    toggleDetachBar: function(forceOpen, reopenInBrowser)  // detached -> closed; inBrowser -> detached TODO reattach
+    // detached -> closed; inBrowser -> detached TODO reattach
+    toggleDetachBar: function(forceOpen, reopenInBrowser)
     {
         if (!forceOpen && Firebug.isDetached())  // detached -> minimized
         {
@@ -893,7 +898,7 @@ window.Firebug =
         for (var i = 0; i < panelTypes.length; ++i)
         {
             var panelType = panelTypes[i];
-            if (panelType.prototype.parentPanel && (panelType.prototype.parentPanel == mainPanel.name) )
+            if (panelType.prototype.parentPanel && (panelType.prototype.parentPanel == mainPanel.name))
                 resultTypes.push(panelType);
         }
 

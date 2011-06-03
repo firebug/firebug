@@ -1,6 +1,6 @@
 /* See license.txt for terms of usage */
 
-// ************************************************************************************************
+// ********************************************************************************************* //
 // Module
 
 define([
@@ -14,7 +14,7 @@ define([
 ],
 function factoryBrowser(FBL, Events, Firefox, Win, WebApp, Options, TabWatcher) {
 
-// ************************************************************************************************
+// ********************************************************************************************* //
 // Browser
 
 /**
@@ -35,11 +35,9 @@ function Browser()
     this.listeners = [];  // array of Browser.listener objects
     this.tools = {};  // registry of known tools
     this.connected = false;
-
-
 }
 
-// ************************************************************************************************
+// ********************************************************************************************* //
 // API
 
 Browser.debug = {handlers: true};
@@ -110,7 +108,8 @@ Browser.listener =
         Browser.unimplementedHandler.apply(this, arguments);
     },
 };
-/*
+
+/**
  * Testing and sanity: clearAllBreakpoints
  */
 Browser.prototype.clearAllBreakpoints = function()
@@ -118,7 +117,7 @@ Browser.prototype.clearAllBreakpoints = function()
     Firebug.Debugger.clearAllBreakpoints();
 }
 
-/*
+/**
  * Command: clearAnnotations
  */
 Browser.prototype.clearAnnotations = function()
@@ -152,7 +151,7 @@ Browser.prototype.getContextByWindow = function(win)
     if (webApp)
         return this.getContextByWebApp(webApp);
 }
-/*
+/**
  * get local metadata for the remote WebApp if it exists
  * @return ToolInterface.WebAppContext or null if the webApp is not being debugged
  */
@@ -165,7 +164,7 @@ Browser.prototype.setContextByWebApp = function(webApp, context)
     this.contexts.push( context );
 }
 
-/*
+/**
  * Stop debugging a WebApp and cause the destruction of a ToolsInterface.WebAppContext
  * @param webAppContext metadata for the page that we are not going to debug any more
  * @param userCommands true if the user of this UI said to close (vs algorithm)
@@ -191,7 +190,8 @@ Browser.prototype.closeContext = function(context, userCommands)
 
         var browser = Win.getBrowserByWindow(topWindow);
         if (!browser)
-            throw new Error("Browser.closeContext ERROR, no browser for top most window of context "+context.getName());
+            throw new Error("Browser.closeContext ERROR, no browser for top most window of context "+
+                context.getName());
 
         delete browser.showFirebug;
 
@@ -200,13 +200,16 @@ Browser.prototype.closeContext = function(context, userCommands)
         if (shouldDispatch)
         {
             var userCommands;
-            Events.dispatch(TabWatcher.fbListeners, "unwatchBrowser", [browser, userCommands]);  // TODO remove
+
+            // TODO remove
+            Events.dispatch(TabWatcher.fbListeners, "unwatchBrowser", [browser, userCommands]);
             return true;
         }
         return false;
     }
 }
-/*
+
+/**
  * get local metadata for the remote WebApp or create one
  * @param webApp, ToolsInterface.WebApp representing top level window
  * @return ToolInterface.WebAppContext
@@ -234,7 +237,7 @@ Browser.prototype.getOrCreateContextByWebApp = function(webApp)
     return context;
 }
 
-/*
+/**
  * The WebApp on the selected tab of the selected window of this Browser
  * @return WebApp ( never null )
  */
@@ -282,7 +285,7 @@ Browser.prototype.getTools = function()
     return [];
 };
 
-/*
+/**
  * Return the status of a tool
  * @param name, eg "console"
  * @returns an object with properties including toolName and enabled
@@ -292,7 +295,7 @@ Browser.prototype.getTool = function(name)
     return this.tools[name];
 }
 
-/*
+/**
  * Call on the backend
  */
 Browser.prototype.registerTool = function(tool)
@@ -440,13 +443,10 @@ Browser.prototype.disconnect = function()
     TabWatcher.removeListener(this);
 }
 
-
-// ************************************************************************************************
+// ********************************************************************************************* //
 // Private, subclasses may call these functions
 
-
-
-/*
+/**
  * Command to resume/suspend backend
  */
 Browser.prototype.toggleResume = function(resume)
@@ -462,7 +462,6 @@ Browser.prototype.toggleResume = function(resume)
         Firebug.suspend();
     }
 },
-
 
 /**
  * Dispatches an event notification to all registered functions for
@@ -510,7 +509,7 @@ Browser.prototype._setConnected = function(connected)
         this._dispatch("onDisconnect", [this]);
 };
 
-// ************************************************************************************************
+// ********************************************************************************************* //
 // Event Listener
 
 /**
@@ -655,8 +654,7 @@ Browser.EventListener = {
     onBreakpointError: function(breakpoint) {}
 };
 
-// *********************************************************************************************
-//
+// ********************************************************************************************* //
 
 var clearContextTimeout = 0;
 
@@ -774,9 +772,9 @@ Browser.prototype.connect = function ()
     TabWatcher.addListener(TabWatchListener);
 }
 
-
+// ********************************************************************************************* //
 
 return exports = Browser;
 
-// *********************************************************************************************
+// ********************************************************************************************* //
 });
