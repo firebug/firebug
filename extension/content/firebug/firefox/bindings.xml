@@ -3,7 +3,8 @@
 
 <bindings xmlns="http://www.mozilla.org/xbl"
     xmlns:xbl="http://www.mozilla.org/xbl"
-    xmlns:xul="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul">
+    xmlns:xul="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul"
+    xmlns:html="http://www.w3.org/1999/xhtml">
 
 <binding id="initializer">
     <implementation>
@@ -1305,6 +1306,8 @@
         <xul:description anonid="fbSearchBoxDescription"  collapsed="true"/>
         <xul:panel id="fbSearchOptionsPanel" norestorefocus="true" noautofocus="true"
             ignorekeys="true" role="presentation">
+            <xul:description id="fbSearchBoxIsSensitive" value="search.Case AutoSensitive"/>
+            <xul:description id="fbSearchBoxIsNotSensitive" value="search.Case Insensitive"/>
             <xul:vbox class="searchOptionsMenu innerToolbar" role="menu" anonid="fbSearchOptionsMenu">
               <xul:box anonid="startPanelFocus" class="panelFocusBound" onfocus="startFocusHandler()" />
               <xul:vbox anonid="searchOptionsList" role="presentation" />

@@ -197,6 +197,20 @@ textbox[type="fbSearchBox"] > panel {
     font-weight: bold;
 }
 
+
+#fbSearchBoxIsSensitive {
+    display: none;
+}
+.fbSearchBox-autoSensitive #fbSearchBoxIsSensitive {
+    display: block;
+}
+.fbSearchBox-autoSensitive #fbSearchBoxIsNotSensitive {
+    display: block;
+}
+.fbSearchBox-autoSensitive #fbSearchBoxIsNotSensitive {
+    display: none;
+}
+
 #fbCommandBox {
     border-top: 1px solid #CCCCCC;
     background-color: -moz-field;
