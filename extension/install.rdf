@@ -5,7 +5,7 @@
 
   <Description about="urn:mozilla:install-manifest">
     <em:id>firebug@software.joehewitt.com</em:id>
-    <em:version>1.8.0a3</em:version>
+    <em:version>1.8.0b1</em:version>
     <em:type>2</em:type>
 
     <!-- Any suitably modern toolkit application -->
@@ -47,7 +47,7 @@
 
     <em:iconURL>chrome://firebug/skin/firebug32.png</em:iconURL>
     <em:homepageURL>http://www.getfirebug.com/</em:homepageURL>
-    <em:updateURL>https://getfirebug.com/releases/firebug/1.7X/update.rdf</em:updateURL>
+    <em:updateURL>https://getfirebug.com/releases/firebug/1.8/update.rdf</em:updateURL>
 
     <em:translator>Leszek(teo)Zyczkowski (pl-PL)</em:translator>
     <em:translator>markh (nl-NL)</em:translator>
