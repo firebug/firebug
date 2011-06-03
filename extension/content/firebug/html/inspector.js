@@ -21,7 +21,7 @@ function(Obj, Firebug, Firefox, FirebugReps, Locale, Events, Wrapper, Css, Dom, 
 // Constants
 
 const inspectDelay = 200;
-const highlightCSS = "chrome://firebug/content/highlighter.css";
+const highlightCSS = "chrome://firebug/content/html/highlighter.css";
 const ident = {
     frame: 0,
     boxModel: 1,
