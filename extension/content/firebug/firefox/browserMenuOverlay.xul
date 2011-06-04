@@ -19,6 +19,7 @@
         <command id="cmd_focusCommandLine" oncommand="if (!Firebug.currentContext) Firebug.toggleBar(true); Firebug.CommandLine.focus(Firebug.currentContext)"/>
         <command id="cmd_toggleFirebug" oncommand="Firebug.toggleBar()"/>
         <command id="cmd_detachFirebug" oncommand="Firebug.toggleDetachBar(false, true)"/>
+        <command id="cmd_inspect" oncommand="Firebug.Inspector.inspectFromContextMenu(document.popupNode);"/>
     </commandset>
 
     <!-- Firefox page context menu -->
