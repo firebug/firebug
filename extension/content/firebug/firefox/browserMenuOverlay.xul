@@ -54,16 +54,12 @@
     </menupopup>
 
     <!-- Firefox Tools -> WebDeveloper menu -->
-    <menupopup id="menu_ToolsPopup">
-        <menu id="webDeveloperMenu">
-            <menupopup id="menuWebDeveloperPopup">
-                <menu id="menu_webDeveloper_firebug" class="menu-iconic fbInternational"
-                      label="firebug.Firebug" insertbefore="webConsole">
-                    <!-- Content comes from fbFirebugMenuPopup -->
-                </menu>
-                <menuseparator insertbefore="webConsole" />
-            </menupopup>
+    <menupopup id="menuWebDeveloperPopup">
+        <menu id="menu_webDeveloper_firebug" class="menu-iconic fbInternational"
+              label="firebug.Firebug" insertbefore="webConsole">
+            <!-- Content comes from fbFirebugMenuPopup -->
         </menu>
+        <menuseparator insertbefore="webConsole" />
     </menupopup>
 
     <!-- Firefox 4 Web Developer menu -->
