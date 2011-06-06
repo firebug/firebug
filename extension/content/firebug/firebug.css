@@ -224,13 +224,18 @@ panelTab[selected="true"]:hover > panelTabMenu .menuTarget {
     max-width: 250px;
 }
 
+#fbLocationList .toolbarbutton-text {
+    color: #000000;
+}
+
 /************************************************************************************************/
 /* CSS Buttons */
 
 #fbToggleCSSEditing .toolbarbutton-text {
-    padding-top: 3px;
+    padding-top: 1px;
     padding-left: 2px;
     padding-right: 2px;
+    color: #000000;
 }
 
 /************************************************************************************************/

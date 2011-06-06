@@ -86,7 +86,7 @@
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 .userLabel {
-    color: -moz-fieldtext;
+    color: #000000;
     font-weight: bold;
 }
 
@@ -101,7 +101,7 @@
 }
 
 .domLabel {
-    color: -moz-fieldtext;
+    color: #000000;
 }
 
 .domFunctionLabel {

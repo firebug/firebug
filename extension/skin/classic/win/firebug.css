@@ -38,6 +38,7 @@
 .toolbar-text-button,
 .toolbar-text-menubutton {
     padding: 3px 6px;
+    color: #000000;
 }
 
 .toolbar-text-button[checked="true"] {
@@ -247,6 +248,7 @@ panelTab[selected="true"] > .panelTab-left {
 
 panelTab[selected="true"] > .panelTab-text {
     background: url(chrome://firebug/skin/win/tabMid.png) repeat-x top;
+    color: #000000;
 }
 
 panelTab[selected="true"] > panelTabMenu {
@@ -306,6 +308,7 @@ panelTab[selected="true"] > .panelTab-right {
     cursor: pointer;
     margin: 0;
     padding: 0 4px;
+    color: #000000;
 }
 
 .panelStatusLabel > .toolbarbutton-icon {

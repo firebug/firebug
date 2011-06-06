@@ -273,6 +273,7 @@ panelTab[selected="true"] > .panelTab-left {
 
 panelTab[selected="true"] > .panelTab-text {
     background: url(chrome://firebug/skin/mac/tabMid.png) repeat-x top;
+    color: #000000;
 }
 
 panelTab[selected="true"] > panelTabMenu {
