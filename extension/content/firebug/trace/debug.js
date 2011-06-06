@@ -40,7 +40,7 @@ Debug.ERROR = function(exc)
  */
 Debug.STACK_TRACE = function(message)
 {
-    FBTrace.sysout(message);
+    var result = [];
     for (var frame = Components.stack, i = 0; frame; frame = frame.caller, i++)
     {
         if (i < 1)
@@ -49,8 +49,9 @@ Debug.STACK_TRACE = function(message)
         var fileName = unescape(frame.filename ? frame.filename : "");
         var lineNumber = frame.lineNumber ? frame.lineNumber : "";
 
-        FBTrace.sysout(fileName + ":" + lineNumber);
+        result.push(fileName + ":" + lineNumber);
     }
+    FBTrace.sysout(message, result);
 }
 
 return Debug;

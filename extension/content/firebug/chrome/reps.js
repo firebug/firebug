@@ -1678,7 +1678,7 @@ FirebugReps.StackTrace = domplate(Firebug.Rep,
         // Skip Firebug internal frames.
         // xxxHonza: this is anoter place where stack frame is peeling off.
         var result = [];
-        for (var i=0; i<frames.length; i++)
+        for (var i=0; frames && i<frames.length; i++)
         {
             var frame = frames[i];
             var sf = frame.sourceFile;
