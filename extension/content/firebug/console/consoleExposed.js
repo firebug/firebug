@@ -7,8 +7,9 @@ define([
     "firebug/lib/url",
     "firebug/js/stackFrame",
     "firebug/console/errors",
+    "firebug/trace/debug",
 ],
-function(FirebugReps, Locale, Wrapper, Url, StackFrame) {
+function(FirebugReps, Locale, Wrapper, Url, StackFrame, Errors, Debug) {
 
 // ********************************************************************************************* //
 
@@ -225,7 +226,7 @@ function createFirebugConsole(context, win)
         }
         else
         {
-            Firebug.Errors.increaseCount(context);
+            Errors.increaseCount(context);
             return logFormatted(arguments, "error", true);  // user already added info
         }
     };
@@ -282,7 +283,7 @@ function createFirebugConsole(context, win)
 
     function logAssert(category, args)
     {
-        Firebug.Errors.increaseCount(context);
+        Errors.increaseCount(context);
 
         if (!args || !args.length || args.length == 0)
             var msg = [Locale.$STR("Assertion")];
@@ -370,28 +371,30 @@ function createFirebugConsole(context, win)
         var frames = trace ? trace.frames : null;
         if (frames && (frames.length > 0) )
         {
-            var oldest = frames.length - 1;  // 6 - 1 = 5
+            var filteredFrames = [];
+
             for (var i = 0; i < frames.length; i++)
             {
-                if (frames[oldest - i].href.indexOf("chrome:") == 0)
-                    break;
+                if (frames[i].href.indexOf("chrome:") == 0)
+                    continue;
+
+                if (frames[i].href.indexOf("resource:") == 0)
+                    continue;
 
                 // firebug-service scope reached, in some cases the url starts with file://
-                if (frames[oldest - i].href.indexOf("modules/firebug-service.js") != -1)
-                    break;
+                if (frames[i].href.indexOf("modules/firebug-service.js") != -1)
+                    continue;
 
                 // command line
-                var fn = frames[oldest - i].getFunctionName() + "";
+                var fn = frames[i].getFunctionName() + "";
                 if (fn && (fn.indexOf("_firebugEvalEvent") != -1))
-                    break;
+                    continue;
+
+                filteredFrames.push(frames[i]);
             }
 
             // take the oldest frames, leave 2 behind they are injection code
-            trace.frames = trace.frames.slice(2 - i);
-
-            if (FBTrace.DBG_CONSOLE)
-                FBTrace.sysout("consoleInjector getJSDUserStack: "+frames.length+" oldest: "+
-                    oldest+" i: "+i+" i - oldest + 2: "+(i - oldest + 2), trace.toString().split('\n'));
+            trace.frames = filteredFrames; //trace.frames.slice(2 - i);
 
             return trace;
         }
