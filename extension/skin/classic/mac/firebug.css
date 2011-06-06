@@ -1,18 +1,5 @@
 /* See license.txt for terms of usage */
 
-#fbFirebugMenu {
-    list-style-image: url(chrome://firebug/skin/mac/firebugMenu.png);
-}
-
-#fbFirebugMenu:hover {
-    list-style-image: url(chrome://firebug/skin/mac/firebugMenuHover.png);
-}
-
-#fbFirebugMenu:hover:active,
-#fbFirebugMenu[open="true"] {
-    list-style-image: url(chrome://firebug/skin/mac/firebugMenuOpen.png);
-}
-
 #fbFirebugMenu > .toolbarbutton-text,
 #fbFirebugMenu > .toolbarbutton-menu-dropmarker {
     display: none;
@@ -22,7 +9,7 @@
 
 #fbCommandToolbar {
     border-top: 1px solid #BBB9BA;
-    background: #F6F6F6 url(chrome://firebug/skin/mac/toolbar.gif) repeat-x;
+    background: #F6F6F6 -moz-linear-gradient(bottom, #FFFFFF, #E9E9E9 55%, #F2F2F2 55%, #FAFAFA) repeat-x;
 }
 
 #fbCommandArrow,
@@ -67,7 +54,7 @@
 
 #fbToolbar {
     padding-left: 4px;
-    background: #F6F6F6 url(chrome://firebug/skin/mac/toolbar.gif) repeat-x;
+    background: #F6F6F6 -moz-linear-gradient(bottom, #FFFFFF, #E9E9E9 55%, #F2F2F2 55%, #FAFAFA) repeat-x;
     border-bottom: none;
 }
 
@@ -81,6 +68,7 @@
 
 .fbsearch-textbox {
     -moz-border-radius: 10px !important;
+    box-shadow: 0 2px 2px -2px #000000 inset;
 }
 
 #fbSearchOptionsPanel {
@@ -106,7 +94,7 @@
 
 .fbsearch-options-buttons {
     -moz-appearance: none;
-    background: url("chrome://firebug/skin/mac/hud-style-button-middle-background.png") repeat-x #464646 center center;
+    background: #464646 -moz-linear-gradient(bottom, rgba(255, 255, 255, 0.3), rgba(255, 255, 255, 0) 55%, rgba(255, 255, 255, 0.1) 55%, rgba(255, 255, 255, 0.2)) repeat-x center center;
     border: 3px solid;
     -moz-border-top-colors: rgba(0,0,0,0.35) rgba(26,26,26,0.5) rgba(255,255,255,0.4);
     -moz-border-right-colors: rgba(53,53,53,1) rgba(53,53,53,1) rgba(162,162,162,1);
@@ -123,7 +111,11 @@
     margin: 0 !important;
 }
 
-.fbsearch-options-buttons:hover:active {
+.fbsearch-options-buttons:hover {
+    background-color: #666666 !important;
+}
+
+.fbsearch-options-buttons:active {
     background-color: #86888B !important;
 }
 
@@ -160,81 +152,57 @@
     display: none;
 }
 
-#fbMinimizeButton {
-    list-style-image: url(chrome://firebug/skin/mac/min.png) !important;
+#fbMinimizeButton,
+#fbCommandToggleLarge {
+    list-style-image: url(chrome://firebug/skin/mac/min.png);
 }
 
-#fbMinimizeButton:hover {
-    list-style-image: url(chrome://firebug/skin/mac/minHover.png) !important;
-}
-
-#fbMinimizeButton:hover:active {
-    list-style-image: url(chrome://firebug/skin/mac/minActive.png) !important;
+#fbDetachButton,
+#fbCommandToggleSmall {
+    list-style-image: url(chrome://firebug/skin/mac/detach.png);
 }
 
 #fbCloseButton {
-    list-style-image: url(chrome://firebug/skin/mac/close.png) !important;
-}
-
-#fbCloseButton:hover {
-    list-style-image: url(chrome://firebug/skin/mac/closeHover.png) !important;
-}
-
-#fbCloseButton:hover:active {
-    list-style-image: url(chrome://firebug/skin/mac/closeActive.png) !important;
-}
-
-#fbDetachButton {
-    list-style-image: url(chrome://firebug/skin/mac/detach.png) !important;
-}
-
-#fbDetachButton:hover {
-    list-style-image: url(chrome://firebug/skin/mac/detachHover.png) !important;
-}
-
-#fbDetachButton:hover:active {
-    list-style-image: url(chrome://firebug/skin/mac/detachActive.png) !important;
+    list-style-image: url(chrome://firebug/skin/mac/close.png);
 }
 
 #fbCommandLineHistoryButton {
     list-style-image: url(chrome://firebug/skin/mac/commandHistory.png);
+}
+
+#fbCommandToggleLarge {
+    list-style-image: url(chrome://firebug/skin/mac/min.png);
+}
+
+#fbMinimizeButton,
+#fbDetachButton,
+#fbCloseButton,
+#fbCommandToggleSmall,
+#fbCommandToggleLarge,
+#fbCommandLineHistoryButton {
     -moz-image-region: rect(0, 13px, 13px, 0);
 }
 
-#fbCommandLineHistoryButton:hover {
+#fbMinimizeButton:hover,
+#fbDetachButton:hover,
+#fbCloseButton:hover,
+#fbCommandToggleSmall:hover,
+#fbCommandToggleLarge:hover {
     -moz-image-region: rect(13px, 13px, 26px, 0);
 }
 
-#fbCommandLineHistoryButton:active, #fbCommandLineHistoryButton[checked="true"] {
+#fbMinimizeButton:hover:active,
+#fbDetachButton:hover:active,
+#fbCloseButton:hover:active,
+#fbCommandToggleSmall:hover:active,
+#fbCommandToggleLarge:hover:active,
+#fbCommandLineHistoryButton:active,
+#fbCommandLineHistoryButton[checked="true"] {
     -moz-image-region: rect(26px, 13px, 39px, 0);
 }
 
 #fbCommandLineHistoryButton[disabled] {
     -moz-image-region: rect(39px, 13px, 52px, 0);
-}
-
-#fbCommandToggleSmall {
-    list-style-image: url(chrome://firebug/skin/mac/detach.png) !important;
-}
-
-#fbCommandToggleSmall:hover {
-    list-style-image: url(chrome://firebug/skin/mac/detachHover.png) !important;
-}
-
-#fbCommandToggleSmall:hover:active {
-    list-style-image: url(chrome://firebug/skin/mac/detachActive.png) !important;
-}
-
-#fbCommandToggleLarge {
-    list-style-image: url(chrome://firebug/skin/mac/min.png) !important;
-}
-
-#fbCommandToggleLarge:hover {
-    list-style-image: url(chrome://firebug/skin/mac/minHover.png) !important;
-}
-
-#fbCommandToggleLarge:hover:active {
-    list-style-image: url(chrome://firebug/skin/mac/minActive.png) !important;
 }
 
 /********************************************************************************************/
@@ -247,7 +215,7 @@
 /********************************************************************************************/
 
 .panelTabBox {
-    background: #e0e0e0 url(chrome://firebug/skin/mac/tabBar.gif) repeat-x;
+    background: #e0e0e0 -moz-linear-gradient(bottom, #D7D7D7, #EDEDED) repeat-x;
     border-bottom: 1px solid #BBB9BA;
     padding: 0;
     overflow: hidden;
@@ -477,7 +445,7 @@ panelTab[selected="true"] > .panelTab-right {
 
 /* ensure the inner toolbar background looks the same as the other toolbars */
 #fbToolbarInner.innerToolbar {
-    background: #F6F6F6 url(chrome://firebug/skin/mac/toolbar.gif) repeat-x;
+    background: #F6F6F6 -moz-linear-gradient(bottom, #FFFFFF, #E9E9E9 55%, #F2F2F2 55%, #FAFAFA) repeat-x;
     margin-left: -5px;
     margin-right: 0px;
 }
