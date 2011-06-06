@@ -83,82 +83,58 @@
     list-style-image: url(chrome://firebug/skin/win/min.png);
 }
 
-#fbMinimizeButton:hover {
-    list-style-image: url(chrome://firebug/skin/win/minHover.png);
-}
-
-#fbMinimizeButton:hover:active {
-    list-style-image: url(chrome://firebug/skin/win/minActive.png);
-}
-
-
-#fbCloseButton {
-    margin: 0 4px 0 0;
-    -moz-image-region: rect(auto, auto, auto, auto);
-    list-style-image: url("chrome://firebug/skin/win/off.png");
-}
-
-#fbCloseButton:hover {
-    list-style-image: url("chrome://firebug/skin/win/offHover.png");
-}
-
-#fbCloseButton:hover:active {
-    list-style-image: url("chrome://firebug/skin/win/offActive.png");
-}
-
 #fbDetachButton {
-    margin: 0;
-    -moz-image-region: rect(auto, auto, auto, auto);
     list-style-image: url(chrome://firebug/skin/win/detach.png);
 }
 
-#fbDetachButton:hover {
-    list-style-image: url(chrome://firebug/skin/win/detachHover.png);
-}
-
-#fbDetachButton:hover:active {
-    list-style-image: url(chrome://firebug/skin/win/detachActive.png);
+#fbCloseButton {
+    margin-right: 4px;
+    list-style-image: url("chrome://firebug/skin/win/off.png");
 }
 
 #fbCommandLineHistoryButton {
     list-style-image: url(chrome://firebug/skin/win/commandHistory.png);
-    -moz-image-region: rect(0, 16px, 16px, 0);
-}
-
-#fbCommandLineHistoryButton:hover {
-    -moz-image-region: rect(16px, 16px, 32px, 0);
-}
-
-#fbCommandLineHistoryButton:active, #fbCommandLineHistoryButton[checked="true"] {
-    -moz-image-region: rect(32px, 16px, 48px, 0);
-}
-
-#fbCommandLineHistoryButton[disabled] {
-    -moz-image-region: rect(48px, 16px, 64px, 0);
 }
 
 #fbCommandToggleSmall {
     list-style-image: url(chrome://firebug/skin/win/up.png);
 }
 
-#fbCommandToggleSmall:hover {
-    list-style-image: url(chrome://firebug/skin/win/upHover.png);
-}
-
-#fbCommandToggleSmall:hover:active {
-    list-style-image: url(chrome://firebug/skin/win/upActive.png);
-}
-
 #fbCommandToggleLarge {
     list-style-image: url(chrome://firebug/skin/win/down.png);
 }
 
-#fbCommandToggleLarge:hover {
-    list-style-image: url(chrome://firebug/skin/win/downHover.png);
+
+#fbMinimizeButton,
+#fbDetachButton,
+#fbCloseButton,
+#fbCommandLineHistoryButton,
+#fbCommandToggleSmall,
+#fbCommandToggleLarge {
+    -moz-image-region: rect(0, 16px, 16px, 0);
 }
 
-#fbCommandToggleLarge:hover:active {
-    list-style-image: url(chrome://firebug/skin/win/downActive.png);
+#fbMinimizeButton:hover,
+#fbDetachButton:hover,
+#fbCloseButton:hover,
+#fbCommandLineHistoryButton:hover,
+#fbCommandToggleSmall:hover,
+#fbCommandToggleLarge:hover {
+    -moz-image-region: rect(16px, 16px, 32px, 0);
+}
+
+#fbMinimizeButton:active,
+#fbDetachButton:active,
+#fbCloseButton:active,
+#fbCommandLineHistoryButton:active,
+#fbCommandLineHistoryButton[checked="true"],
+#fbCommandToggleSmall:active,
+#fbCommandToggleLarge:active {
+    -moz-image-region: rect(32px, 16px, 48px, 0);
+}
+
+#fbCommandLineHistoryButton[disabled] {
+    -moz-image-region: rect(48px, 16px, 64px, 0);
 }
 
 /************************************************************************************************/
