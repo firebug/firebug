@@ -67,8 +67,8 @@ code {
     height: 100%;
     left: 0;
     top: 0;
-    background-color: -moz-field;
-    color: -moz-fieldtext;
+    background-color: #FFFFFF;
+    color: #000000;
 }
 
 .panelNode[active="true"] {
