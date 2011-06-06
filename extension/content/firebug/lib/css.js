@@ -780,9 +780,9 @@ Css.cssInfo.html =
     "-moz-font-feature-settings": ["normal"], //FF4.0
     "-moz-tab-size": [], //FF4.0,
     "-moz-transition": [], //FF4.0 TODO
-    "-moz-transition-property": [], //FF4.0 TODO
+    "-moz-transition-property": ["mozTransitionProperty"], //FF4.0 TODO
     "-moz-transition-duration": [], //FF4.0 TODO
-    "-moz-transition-timing-function": [], //FF4.0 TODO
+    "-moz-transition-timing-function": ["mozTransitionTimingFunction"], //FF4.0 TODO
     "-moz-transition-delay": [] //FF4.0 TODO
 
 };
@@ -1593,6 +1593,82 @@ Css.cssKeywords =
         "translateY"
     ],
 
+    "mozTransitionProperty":
+    [
+        "background-color",
+        "background-image",
+        "background-position",
+        "background-size",
+        "border-color",
+        "border-radius",
+        "border-width",
+        "border-spacing",
+        "bottom",
+        "box-shadow",
+        "color",
+        "clip",
+        "fill",
+        "fill-opacity",
+        "flood-color",
+        "font-size",
+        "font-size-adjust",
+        "font-stretch",
+        "font-weight",
+        "height",
+        "left",
+        "letter-spacing",
+        "lighting-color",
+        "line-height",
+        "margin ",
+        "marker-offset",
+        "max-height",
+        "max-width",
+        "min-height",
+        "min-width",
+        "opacity",
+        "outline-color",
+        "outline-offset",
+        "outline-width",
+        "padding",
+        "right",
+        "stop-color",
+        "stop-opacity",
+        "stroke",
+        "stroke-dasharray",
+        "stroke-dashoffset",
+        "stroke-miterlimit",
+        "stroke-opacity",
+        "stroke-width",
+        "text-indent",
+        "text-shadow",
+        "top",
+        "vertical-align",
+        "visibility",
+        "width",
+        "word-spacing",
+        "z-index",
+        "-moz-box-flex",
+        "-moz-column-count",
+        "-moz-column-gap",
+        "-moz-column-rule-color",
+        "-moz-column-rule-width",
+        "-moz-column-width",
+        "-moz-image-region",
+        "-moz-outline-radius",
+        "-moz-transform-origin",
+        "-moz-transform"
+    ],
+       
+    "mozTransitionTimingFunction":
+    [
+       "cubic-bezier",
+       "ease",
+       "ease-in",
+       "ease-in-out",
+       "ease-out",
+       "linear"
+    ],
+       
     "width":
     [
         "-moz-max-content",
