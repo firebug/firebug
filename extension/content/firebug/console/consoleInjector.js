@@ -21,6 +21,7 @@ function(Obj, Firebug, FirebugReps, Locale, Events, Url, StackFrame, Win, Consol
 
 const Cc = Components.classes;
 const Ci = Components.interfaces;
+const Cu = Components.utils;
 
 // ********************************************************************************************* //
 // Console Injector
@@ -61,8 +62,33 @@ Firebug.Console.injector =
 
     attachConsoleInjector: function(context, win)
     {
+        // Get the 'console' object (this comes from chrome scope).
         var console = Firebug.ConsoleExposed.createFirebugConsole(context, win);
-        win.wrappedJSObject.console = console;
+
+        // Do not expose the chrome object as is but, rather do a wrapper, see below.
+        //win.wrappedJSObject.console = console;
+        //return;
+
+        // Construct a script string that defines a function. This function returns
+        // an object that wraps every 'console' method. This function will be evaluated
+        // in a window content sandbox and return a wrapper for the 'console' object.
+        var expr = "(function(x) { return {";
+        for (var p in console)
+        {
+            var func = console[p];
+            if (typeof(func) == "function")
+            {
+                expr += p + ": function() { return Function.apply.call(x." + p +
+                    ", x, arguments); },";
+            }
+        }
+        expr += "};})";
+
+        // Evaluate the function in the window sandbox/scope and execute. The return value
+        // is a wrapper for the 'console' object.
+        var sandbox = Cu.Sandbox(win);
+        var getConsoleWrapper = Cu.evalInSandbox(expr, sandbox);
+        win.wrappedJSObject.console = getConsoleWrapper(console);
     },
 
     addConsoleListener: function(context, win)
