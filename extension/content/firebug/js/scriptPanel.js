@@ -224,7 +224,12 @@ Firebug.ScriptPanel.prototype = Obj.extend(Firebug.SourceBoxPanel,
     removeExeLineHighlight: function(sourceBox)
     {
         if (sourceBox.selectedLine)
+        {
             sourceBox.selectedLine.removeAttribute(this.highlightingAttribute);
+
+            // Make sure the highlighter for the selected line is removed too (issue 4359).
+            sourceBox.highlighter = null;
+        }
     },
 
     highlightLine: function(lineNumber, context)
