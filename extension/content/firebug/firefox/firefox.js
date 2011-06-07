@@ -109,17 +109,26 @@ var Firefox =
 //behave erratically when typing, and the only solution I've found is to delay
 //the initialization of HTML Validator by overriding this function with a timeout.
 //XXXrobc Do we still need this? Does this extension even exist anymore?
-if (top.hasOwnProperty('TidyBrowser'))
+//xxxHonza: The extension still exists, but I think we should remove this hack.
+try
 {
-    var prev = TidyBrowser.prototype.updateStatusBar;
-    TidyBrowser.prototype.updateStatusBar = function()
+    if (top.hasOwnProperty('TidyBrowser'))
     {
-        var self = this, args = arguments;
-        setTimeout(function()
+        var prev = TidyBrowser.prototype.updateStatusBar;
+        TidyBrowser.prototype.updateStatusBar = function()
         {
-            prev.apply(self, args);
-        });
+            var self = this, args = arguments;
+            setTimeout(function()
+            {
+                prev.apply(self, args);
+            });
+        }
     }
+}
+catch (err)
+{
+    if (FBTrace.DBG_ERRORS)
+        FBTrace.sysout("firefox; EXCEPTION HTML Validator collision!", err);
 }
 
 // ********************************************************************************************* //
