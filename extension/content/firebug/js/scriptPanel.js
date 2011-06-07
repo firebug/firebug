@@ -434,8 +434,7 @@ Firebug.ScriptPanel.prototype = Obj.extend(Firebug.SourceBoxPanel,
         if (!sourceLine)
             return;
 
-        var sourceRow = sourceLine.parentNode;
-        var compilationUnit = sourceRow.parentNode.repObject;
+        var compilationUnit = Dom.getAncestorByClass(sourceLine, "sourceBox").repObject;
         var lineNo = parseInt(sourceLine.textContent);
 
         if (Events.isLeftClick(event))
@@ -444,7 +443,7 @@ Firebug.ScriptPanel.prototype = Obj.extend(Firebug.SourceBoxPanel,
             this.toggleDisableBreakpoint(lineNo);
         else if (Events.isControlClick(event) || Events.isMiddleClick(event))
         {
-            JavaScriptTool.runUntil(this.context, compilationUnit, lineNo);
+            JavaScriptTool.runUntil(compilationUnit, lineNo);
             Events.cancelEvent(event);
         }
     },
@@ -1373,6 +1372,11 @@ Firebug.ScriptPanel.prototype = Obj.extend(Firebug.SourceBoxPanel,
     stepOut: function(context)
     {
         JavaScriptTool.stepOut(context);
+    },
+
+    runUntil: function(context, compilationUnit, lineNo)
+    {
+        JavaScriptTool.runUntil(compilationUnit, lineNo);
     },
 
     onStartDebugging: function(frame)
