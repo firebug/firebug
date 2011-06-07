@@ -322,9 +322,10 @@ var Errors = Firebug.Errors = Obj.extend(Firebug.Module,
     getErrorContext: function(object)
     {
         var url = object.sourceName;
-        if(!url)
+        if (!url)
             return Firebug.currentContext;  // eg some XPCOM messages
-        if (url.indexOf("://chromebug/"))
+
+        if (url.indexOf("://chromebug/") > 0)
             return Firebug.currentContext; // no context for self
 
         var errorContext = null;
@@ -405,16 +406,21 @@ var Errors = Firebug.Errors = Obj.extend(Firebug.Module,
         // with the window produced by the new nsIScriptError2.outerWindowID
         if (FBTrace.DBG_ERRORS)
         {
-            var win1 = this.getErrorWindow(object);
+            var win1 = getErrorWindow(object);
             var win2 = errorContext ? errorContext.window : null;
 
             win1 = Win.getRootWindow(win1);
             win2 = Win.getRootWindow(win2);
-            if (win1 && win1 != win2)
+
+            var id1 = Win.getWindowProxyIdForWindow(win1);
+            var id2 = Win.getWindowProxyIdForWindow(win2);
+
+            if (win1 && id1 != id2)
             {
                 var win1Name = Win.safeGetWindowLocation(win1);
                 var win2Name = Win.safeGetWindowLocation(win2);
-                var moreInfo =  {object: object, fromError2: win1, fromFirebug: win2};
+                var moreInfo = {object: object, fromError2: win1, fromFirebug: win2};
+
                 FBTrace.sysout("errors.getErrorContext; ERROR wrong parent window? "+
                     win1Name+" !== "+win2Name, moreInfo);
             }
