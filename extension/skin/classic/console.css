@@ -18,7 +18,7 @@
 }
 
 .logGroup {
-    background: -moz-field -moz-linear-gradient(top, rgba(0, 0, 0, 0.1), rgba(0, 0, 0, 0.1) 18px, transparent 51px) repeat-x;
+    background: #FFFFFF -moz-linear-gradient(top, rgba(0, 0, 0, 0.1), rgba(0, 0, 0, 0.1) 18px, transparent 51px) repeat-x;
     padding: 0;
     border: none;
 }
@@ -566,7 +566,7 @@
 
 .logRow-spy,
 .logRow-spy .objectLink-sourceLink {
-    background: -moz-field -moz-linear-gradient(top, rgba(0, 0, 0, 0.1), rgba(0, 0, 0, 0.1) 18px, transparent 51px) repeat-x;
+    background: #FFFFFF -moz-linear-gradient(top, rgba(0, 0, 0, 0.1), rgba(0, 0, 0, 0.1) 18px, transparent 51px) repeat-x;
     padding-right: 4px;
     right: 0;
 }

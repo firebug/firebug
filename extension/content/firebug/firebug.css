@@ -231,6 +231,13 @@ panelTab[selected="true"]:hover > panelTabMenu .menuTarget {
 /************************************************************************************************/
 /* CSS Buttons */
 
+#fbScriptFilterMenu .toolbarbutton-text {
+    color: #000000;
+}
+
+/************************************************************************************************/
+/* Script Buttons */
+
 #fbToggleCSSEditing .toolbarbutton-text {
     padding-top: 1px;
     padding-left: 2px;

@@ -154,7 +154,7 @@
 }
 
 .netRow.loaded {
-    background: -moz-field;
+    background: #FFFFFF;
 }
 
 .netRow.loaded:hover {
@@ -553,7 +553,7 @@
 
 .netInfoCol {
     border-top: 1px solid #EEEEEE;
-    background: -moz-field -moz-linear-gradient(top, rgba(0, 0, 0, 0.1), transparent 33px) repeat-x;
+    background: #FFFFFF -moz-linear-gradient(top, rgba(0, 0, 0, 0.1), transparent 33px) repeat-x;
 }
 
 .netInfoBody {
@@ -573,7 +573,7 @@
     border: 1px solid transparent;
     border-bottom: none;
     font-weight: bold;
-    color: -moz-dialogtext;
+    color: #000000;
 }
 
 .netInfoTab:hover {
@@ -584,7 +584,7 @@
     cursor: default !important;
     border-color: #D7D7D7;
     -moz-border-radius: 4px 4px 0 0;
-    background-color: window;
+    background-color: #FFFFFF;
 }
 
 .logRow-netInfo.error .netInfoTitle {
@@ -612,7 +612,7 @@
     border: 1px solid #D7D7D7;
     border-right: none;
     padding: 8px;
-    background-color: -moz-field;
+    background-color: #FFFFFF;
     font-family: monospace;
     /*overflow-x: auto; HTML is damaged in case of big (2-3MB) responses */
 }

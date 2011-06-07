@@ -237,7 +237,7 @@ h1.groupHeader {
     margin: 0 0 4px 0;
     border-top: 1px solid #CCCCCC;
     border-bottom: 1px solid #CCCCCC;
-    background: -moz-field -moz-linear-gradient(bottom, rgba(0, 0, 0, 0.05), rgba(0, 0, 0, 0.1) 60%, rgba(0, 0, 0, 0.05) 60%, transparent) repeat-x;
+    background: #FFFFFF -moz-linear-gradient(bottom, rgba(0, 0, 0, 0.05), rgba(0, 0, 0, 0.1) 60%, rgba(0, 0, 0, 0.05) 60%, transparent) repeat-x;
     font-size: inherit;
 }
 
@@ -269,8 +269,8 @@ h1.groupHeader {
     right: 0;
     position: absolute;
     padding: 10px 10px 0px 90px;
-    background: -moz-field url(chrome://firebug/skin/firebug32.png) no-repeat 30px 30px;
-    color: -moz-fieldText;
+    background: #FFFFFF url(chrome://firebug/skin/firebug32.png) no-repeat 30px 30px;
+    color: #000000;
     font: message-box;
 }
 
