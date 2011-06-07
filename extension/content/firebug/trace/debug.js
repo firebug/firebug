@@ -34,26 +34,6 @@ Debug.ERROR = function(exc)
 
 // ********************************************************************************************* //
 
-/**
- * Dump the current stack trace.
- * @param {Object} message displayed for the log.
- */
-Debug.STACK_TRACE = function(message)
-{
-    var result = [];
-    for (var frame = Components.stack, i = 0; frame; frame = frame.caller, i++)
-    {
-        if (i < 1)
-            continue;
-
-        var fileName = unescape(frame.filename ? frame.filename : "");
-        var lineNumber = frame.lineNumber ? frame.lineNumber : "";
-
-        result.push(fileName + ":" + lineNumber);
-    }
-    FBTrace.sysout(message, result);
-}
-
 return Debug;
 
 // ********************************************************************************************* //
