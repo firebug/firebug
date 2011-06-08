@@ -438,7 +438,7 @@ var Errors = Firebug.Errors = Obj.extend(Firebug.Module,
             var id1 = Win.getWindowProxyIdForWindow(win1);
             var id2 = Win.getWindowProxyIdForWindow(win2);
 
-            if (win1 && id1 != id2)
+            if (win1 && id1 != id2 && errorContext)
             {
                 var win1Name = Win.safeGetWindowLocation(win1);
                 var win2Name = Win.safeGetWindowLocation(win2);

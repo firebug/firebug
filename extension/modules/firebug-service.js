@@ -2708,6 +2708,14 @@ var fbs =
     */
             if (scope.jsClassName == "Sandbox")
             {
+                // Drop one frame see attachConsoleInjector
+                var fileName = this.safeGetUrlFromFrame(frame);
+                if (fileName && fileName.indexOf("console/consoleInjector.js") > 0)
+                {
+                    if (frame.callingFrame)
+                        return fbs.getOutermostScope(frame.callingFrame);
+                }
+
                 var proto = scope.jsPrototype;
                 if (proto.jsClassName == "XPCNativeWrapper")  // this is the path if we have web page in a sandbox
                 {
@@ -2789,6 +2797,19 @@ var fbs =
             // FF3 gives (NS_ERROR_INVALID_POINTER) [nsIDOMLocation.toString]
         }
         return null;
+    },
+
+    safeGetUrlFromFrame: function(frame)
+    {
+        try
+        {
+            if (frame)
+                return frame.script.fileName;
+        }
+        catch (err)
+        {
+        }
+        return "";
     },
 
     askDebuggersForSupport: function(global, frame)

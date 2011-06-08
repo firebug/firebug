@@ -1128,7 +1128,10 @@ Firebug.Debugger = Obj.extend(Firebug.ActivableModule,
                 context.stackTrace = trace;
             }
             else
+            {
+                trace.frames = trace.frames.slice(1);  // drop one frame see attachConsoleInjector
                 Firebug.Console.log(trace, context, "stackTrace");
+            }
         }
 
         if(FBTrace.DBG_BP)

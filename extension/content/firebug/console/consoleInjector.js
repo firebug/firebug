@@ -72,6 +72,8 @@ Firebug.Console.injector =
         // Construct a script string that defines a function. This function returns
         // an object that wraps every 'console' method. This function will be evaluated
         // in a window content sandbox and return a wrapper for the 'console' object.
+        // Note that this wrapper appends an additional frame that shouldn't be displayed
+        // to the user.
         var expr = "(function(x) { return {";
         for (var p in console)
         {
