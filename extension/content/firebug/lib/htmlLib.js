@@ -164,7 +164,7 @@ var HTMLLib =
             var checkOrder;
             if (node.nodeType != Node.TEXT_NODE)
             {
-                var nameCheck = { name: "nodeName", isValue: false, caseSensitive: false };
+                var nameCheck = { name: "nodeName", isValue: false, caseSensitive: caseSensitive };
                 var valueCheck = { name: "nodeValue", isValue: true, caseSensitive: caseSensitive };
                 checkOrder = reverse ? [ valueCheck, nameCheck ] : [ nameCheck, valueCheck ];
             }
