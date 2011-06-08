@@ -345,6 +345,10 @@ var Errors = Firebug.Errors = Obj.extend(Firebug.Module,
         if (url.indexOf("://chromebug/") > 0)
             return Firebug.currentContext; // no context for self
 
+        var errorContext = getExceptionContext(Firebug.currentContext, object);
+        if (errorContext)
+            return errorContext;
+
         var errorContext = null;
         Firebug.connection.eachContext(
             function findContextByURL(context)
