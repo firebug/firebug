@@ -196,7 +196,7 @@ var Errors = Firebug.Errors = Obj.extend(Firebug.Module,
                 if (context)
                     return this.logScriptError(context, object, isWarning);
 
-                if (FBTrace.DBG_ERRORS || FBTrace.DBG_ERRORLOG)
+                if (FBTrace.DBG_ERRORLOG)
                     FBTrace.sysout("errors.observe nsIScriptError no context! " +
                         object.errorMessage, object);
             }
@@ -427,7 +427,7 @@ var Errors = Firebug.Errors = Obj.extend(Firebug.Module,
 
         // Use nsIScriptError2 (if available) to compare the parent window guessed by Firebug
         // with the window produced by the new nsIScriptError2.outerWindowID
-        if (FBTrace.DBG_ERRORS)
+        if (FBTrace.DBG_ERRORLOG)
         {
             var win1 = getErrorWindow(object);
             var win2 = errorContext ? errorContext.window : null;
@@ -741,16 +741,26 @@ function getErrorWindow(object)
     {
         // Bug 605492 introduces new API: nsIScriptError2.outerWindowID so use it
         // if it's available.
-        if (!Ci["nsIScriptError2"])
-            return null;
+        var path = "no nsIScriptError2";
+        if (Ci["nsIScriptError2"])
+        {
+            path = "not a nsIScriptError2";
+            if (object instanceof Ci.nsIScriptError2)
+            {
+                path = "no outerWindowID";
+                if (object.outerWindowID)
+                {
+                    var win = domWindowUtils.getOuterWindowWithId(object.outerWindowID);
+                    path = "no getOuterWindowWithId";
+                    if (win)
+                        return win;
+                }
 
-        if (!(object instanceof Ci.nsIScriptError2))
-            return null;
-
-        if (!object.outerWindowID)
-            return null;
-
-        return domWindowUtils.getOuterWindowWithId(object.outerWindowID);
+            }
+        }
+        if (FBTrace.DBG_ERRORS)
+            FBTrace.sysout("errors.getErrorWindow failed "+path, object);
+        return null;
     }
     catch (err)
     {
