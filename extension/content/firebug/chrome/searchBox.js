@@ -86,13 +86,14 @@ Firebug.Search = Obj.extend(Firebug.Module,
         if (!panel.searchText || value == panel.searchText || value.indexOf(panel.searchText) != 0)
             Css.removeClass(panelNode, "searching");
 
-        if (Firebug.Search.isAutoSensitive(value))
+        if (Firebug.Search.isCaseSensitive(value))
             Css.setClass(searchBox, "fbSearchBox-autoSensitive");
         else
             Css.removeClass(searchBox, "fbSearchBox-autoSensitive");
 
         if (FBTrace.DBG_SEARCH)
-            FBTrace.sysout("search Firebug.Search.isAutoSensitive(value):"+Firebug.Search.isAutoSensitive(value)+" for "+value, searchBox)
+            FBTrace.sysout("search Firebug.Search.isAutoSensitive(value):" +
+                Firebug.Search.isAutoSensitive(value) + " for " + value, searchBox)
 
         // Cancel the previous search to keep typing smooth
         clearTimeout(panelNode.searchTimeout);
@@ -189,6 +190,9 @@ Firebug.Search = Obj.extend(Firebug.Module,
     onToggleSearchOption: function(option)
     {
         Firebug.Options.set(option, !Firebug[option]);
+
+        // Make sure the "Case Sensitive || Case Insensitive" label is updated.
+        this.update();
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
@@ -197,7 +201,8 @@ Firebug.Search = Obj.extend(Firebug.Module,
     internationalizeUI: function()
     {
         var sensitive = Firebug.chrome.$("fbSearchBoxIsSensitive");
-        sensitive.value = Locale.$STR("search.Auto Case Sensitive");
+        sensitive.value = Locale.$STR("search.Case Sensitive");
+
         var notSensitive = Firebug.chrome.$("fbSearchBoxIsNotSensitive");
         notSensitive.value = Locale.$STR("search.Case Insensitive");
     },
