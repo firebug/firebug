@@ -98,6 +98,19 @@ JavaScriptTool.runUntil = function(compilationUnit, lineNumber)
         lineNumber, JSDebugger);
 };
 
+/*
+ * Command the backend to enable JS
+ */
+JavaScripTool.setActivation = function(enable)
+{
+    if (FBTrace.DBG_CONSOLE || FBTrace.DBG_ACTIVATION)
+        FBTrace.sysout("ScriptPanel.onActivationChanged; " + enable);
+    if (enable)
+        Firebug.Debugger.addObserver(this);
+    else
+        Firebug.Debugger.removeObserver(this);
+}
+
 /**
  * A previously enabled tool becomes active and sends us an event.
  */
