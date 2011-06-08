@@ -157,7 +157,7 @@ Firebug.Editor = Obj.extend(Firebug.Module,
             {
                 this.saveEditAndNotifyListeners(currentTarget, "", previousValue);
 
-                if (removeGroup && currentGroup)
+                if (removeGroup && currentGroup && currentGroup.parentNode)
                     currentGroup.parentNode.removeChild(currentGroup);
             }
             else
