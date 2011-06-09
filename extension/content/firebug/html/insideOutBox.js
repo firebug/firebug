@@ -310,7 +310,9 @@ Firebug.InsideOutBox.prototype =
         var objectBox = this.createObjectBoxes(object, this.rootObject);
 
         if (FBTrace.DBG_HTML)
-            FBTrace.sysout("----insideOutBox.createObjectBox: createObjectBoxes(object="+formatNode(object)+", rootObject="+formatNode(this.rootObject)+") ="+formatNode(objectBox), objectBox);
+            FBTrace.sysout("----insideOutBox.createObjectBox: createObjectBoxes(object="+
+                formatNode(object)+", rootObject="+formatNode(this.rootObject)+") ="+
+                formatNode(objectBox), objectBox);
 
         if (!objectBox)  // we found an object outside of the navigatible tree
             return;
@@ -370,8 +372,8 @@ Firebug.InsideOutBox.prototype =
             var parentNode = this.view.getParentObject(object);
 
             if (FBTrace.DBG_HTML)
-                FBTrace.sysout("insideOutBox.createObjectBoxes createObjectBoxes recursing with parentNode "+
-                    formatNode(parentNode)+" from object "+formatNode(object));
+                FBTrace.sysout("insideOutBox.createObjectBoxes createObjectBoxes recursing " +
+                    "with parentNode "+formatNode(parentNode)+" from object "+formatNode(object));
 
             // recurse towards parent, eventually returning rootObjectBox
             var parentObjectBox = this.createObjectBoxes(parentNode, rootObject);
@@ -394,9 +396,12 @@ Firebug.InsideOutBox.prototype =
             if (!childrenBox)
             {
                 if (FBTrace.DBG_ERRORS)
-                    FBTrace.sysout("insideOutBox.createObjectBoxes FAILS for "+formatNode(object)+" getChildObjectBox("+
-                        formatObjectBox(parentObjectBox)+")= childrenBox: "+formatObjectBox(childrenBox));
-                // This is where we could try to create a box for objects we cannot get to by navigation via walker or DOM nodes (native anonymous)
+                    FBTrace.sysout("insideOutBox.createObjectBoxes FAILS for "+formatNode(object)+
+                        " getChildObjectBox("+formatObjectBox(parentObjectBox)+")= childrenBox: "+
+                        formatObjectBox(childrenBox));
+
+                // This is where we could try to create a box for objects we cannot get to by
+                // navigation via walker or DOM nodes (native anonymous)
                 return null;
             }
 
@@ -473,14 +478,19 @@ Firebug.InsideOutBox.prototype =
             childBox.removeChild(objectBox);
     },
 
-    populateChildBox: function(repObject, nodeChildBox)  // We want all children of the parent of repObject.
+    // We want all children of the parent of repObject.
+    populateChildBox: function(repObject, nodeChildBox)
     {
         if (!repObject)
             return null;
 
         var parentObjectBox = Dom.getAncestorByClass(nodeChildBox, "nodeBox");
+
         if (FBTrace.DBG_HTML)
-            FBTrace.sysout("+++insideOutBox.populateChildBox("+Css.getElementCSSSelector(repObject)+") parentObjectBox.populated "+parentObjectBox.populated+"\n");
+            FBTrace.sysout("+++insideOutBox.populateChildBox("+
+                Css.getElementCSSSelector(repObject)+") parentObjectBox.populated "+
+                parentObjectBox.populated);
+
         if (parentObjectBox.populated)
             return this.findChildObjectBox(nodeChildBox, repObject);
 
@@ -507,7 +517,9 @@ Firebug.InsideOutBox.prototype =
                 var newBox = view.createObjectBox(targetSibling);
                 if (newBox)
                 {
-                    if (!nodeChildBox) FBTrace.sysout("insideOutBox FAILS no nodeChildBox "+repObject, repObject)
+                    if (!nodeChildBox)
+                        FBTrace.sysout("insideOutBox FAILS no nodeChildBox "+repObject, repObject)
+
                     if (lastSiblingBox)
                     {
                         try
@@ -516,8 +528,9 @@ Firebug.InsideOutBox.prototype =
                         }
                         catch(exc)
                         {
-                            FBTrace.sysout("insideOutBox FAILS insertBefore ",{repObject:repObject, nodeChildBox: nodeChildBox, newBox: newBox, lastSiblingBox: lastSiblingBox});
-
+                            FBTrace.sysout("insideOutBox FAILS insertBefore",
+                                {repObject:repObject, nodeChildBox: nodeChildBox, newBox: newBox,
+                                lastSiblingBox: lastSiblingBox});
                         }
                     }
                     else
@@ -538,7 +551,8 @@ Firebug.InsideOutBox.prototype =
             parentObjectBox.populated = true;
 
         if (FBTrace.DBG_HTML)
-            FBTrace.sysout("---insideOutBox.populateChildBox("+(repObject.localName?repObject.localName:repObject)+") targetBox "+targetBox+"\n");
+            FBTrace.sysout("---insideOutBox.populateChildBox("+
+                (repObject.localName?repObject.localName:repObject)+") targetBox "+targetBox);
 
         return targetBox;
     },
@@ -559,12 +573,18 @@ Firebug.InsideOutBox.prototype =
         for (var childBox = parentNodeBox.firstChild; childBox; childBox = childBox.nextSibling)
         {
             if (FBTrace.DBG_HTML)
-                FBTrace.sysout("insideOutBox.findChildObjectBox repObject: " +formatNode(repObject)+" in "+formatNode(childBox)+" = "+formatNode(childBox.repObject), {childBoxRepObject: childBox.repObject,repObject:repObject} );
+                FBTrace.sysout("insideOutBox.findChildObjectBox repObject: " +
+                    formatNode(repObject)+" in "+formatNode(childBox)+" = "+
+                    formatNode(childBox.repObject),
+                    {childBoxRepObject: childBox.repObject,repObject:repObject});
+
             if (childBox.repObject == repObject)
                 return childBox;
         }
+
         if (FBTrace.DBG_HTML)
-            FBTrace.sysout("insideOutBox.findChildObjectBox no match for repObject: " +formatNode(repObject)+" in "+formatNode(parentNodeBox));
+            FBTrace.sysout("insideOutBox.findChildObjectBox no match for repObject: " +
+                formatNode(repObject)+" in "+formatNode(parentNodeBox));
     },
 
     /**
@@ -583,15 +603,18 @@ Firebug.InsideOutBox.prototype =
 
             parentNode = this.view.getParentObject(parentNode);
         }
+
         if (FBTrace.DBG_HTML)
-            FBTrace.sysout("insideOutBox.isInExistingRoot  "+dbg_isInExistingRoot+": (parentNode == this.rootObject)="+(parentNode == this.rootObject));
+            FBTrace.sysout("insideOutBox.isInExistingRoot  "+dbg_isInExistingRoot+
+                ": (parentNode == this.rootObject)="+(parentNode == this.rootObject));
+
         return parentNode == this.rootObject;
     },
 
     getRootNode: function(node)
     {
         if (FBTrace.DBG_HTML)
-            var dbg_getRootNode ="";
+            var dbg_getRootNode = "";
 
         while (1)
         {
@@ -605,6 +628,7 @@ Firebug.InsideOutBox.prototype =
 
             node = parentNode;
         }
+
         if (FBTrace.DBG_HTML)
             FBTrace.sysout("insideOutBox.getRootNode "+dbg_getRootNode);
 
