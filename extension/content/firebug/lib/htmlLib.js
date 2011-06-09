@@ -69,7 +69,9 @@ var HTMLLib =
                 this.selectMatched(nodeBox, node, match, reverse);
             }
             else if (matchCount)
+            {
                 return true;
+            }
             else
             {
                 this.noMatch = true;

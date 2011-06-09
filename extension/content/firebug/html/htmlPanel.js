@@ -1231,7 +1231,9 @@ Firebug.HTMLPanel.prototype = Obj.extend(WalkingPanel,
 
         var search;
         if (text == this.searchText && this.lastSearch)
+        {
             search = this.lastSearch;
+        }
         else
         {
             var doc = this.context.window.document;
