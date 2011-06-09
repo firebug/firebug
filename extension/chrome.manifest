@@ -52,7 +52,10 @@ overlay chrome://browser/content/browser.xul                    chrome://firebug
 
 overlay chrome://global/content/customizeToolbar.xul            chrome://firebug/content/firefox/start-button/customizeToolbarOverlay.xul
 overlay chrome://mozapps/content/extensions/about.xul           chrome://firebug/content/firefox/aboutOverlay.xul
-overlay chrome://navigator/content/navigator.xul                chrome://firebug/content/browserOverlay.xul
+
+# Sea Monkey
+#overlay chrome://navigator/content/navigator.xul               chrome://firebug/content/browserOverlay.xul
+overlay chrome://navigator/content/navigator.xul                chrome://firebug/content/firefox/browserOverlayWithFrame.xul
 
 # Support for Mac
 override chrome://firebug/skin/debugger.css chrome://firebug/skin/mac/debugger.css os=Darwin
