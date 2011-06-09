@@ -197,19 +197,22 @@ textbox[type="fbSearchBox"] > panel {
     font-weight: bold;
 }
 
+/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+/* Case sensitive/insensitive search */
 
 #fbSearchBoxIsSensitive {
     display: none;
 }
+
 .fbSearchBox-autoSensitive #fbSearchBoxIsSensitive {
     display: block;
 }
-.fbSearchBox-autoSensitive #fbSearchBoxIsNotSensitive {
-    display: block;
-}
+
 .fbSearchBox-autoSensitive #fbSearchBoxIsNotSensitive {
     display: none;
 }
+
+/*************************************************************************************************/
 
 #fbCommandBox {
     border-top: 1px solid #CCCCCC;
