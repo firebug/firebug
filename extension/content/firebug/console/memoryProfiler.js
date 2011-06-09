@@ -26,14 +26,14 @@ var memoryReporterManager = Cc["@mozilla.org/memory-reporter-manager;1"].
     getService(Ci.nsIMemoryReporterManager);
 
 // List of memory reports displayed in the result. Append new path in the list in order
-// to create a new columnd in the result report.
+// to create a new column in the result report-table.
 var MEMORY_PATHS =
 {
-    "malloc/allocated": true,
-    "js/gc-heap": true,
-    "js/string-data": true,
-    "js/mjit-code": true,
-    "images/content/used/raw": true,
+    "explicit/js": true,
+    "explicit/js/gc-heap": true,
+    "explicit/js/tjit-data": true,
+    "explicit/js/mjit-code": true,
+    "explicit/images/content/used/raw": true,
 };
 
 // ********************************************************************************************* //
@@ -710,8 +710,8 @@ Firebug.MemoryProfiler.ProfileCall = domplate(Firebug.Rep,
     getColumns: function(call)
     {
         var cols = [];
-        for (var p in call.report)
-            cols.push(call.report[p]);
+        for (var p in MEMORY_PATHS)
+            cols.push(call.report[p] || 0);
         return cols;
     },
 
