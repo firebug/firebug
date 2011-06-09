@@ -22,8 +22,6 @@ try
 }
 catch (err)
 {
-    dump("FBTrace is not installed, use default (empty) implementation.\n");
-
     var traceConsoleService =
     {
         getTracer: function(prefDomain)
