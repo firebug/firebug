@@ -648,7 +648,7 @@ Firebug.CSSStyleSheetPanel.prototype = Obj.extend(Firebug.Panel,
             {
                 var mode = Firebug.CSSModule.getCurrentEditorName();
                 if (FBTrace.DBG_ERRORS)
-                    FBTrace.sysout("editor.startEditing ERROR "+exc, {name: mode,
+                    FBTrace.sysout("editor.startEditing ERROR "+exc, {exc: exc, name: mode,
                         currentEditor: this.currentCSSEditor, styleSheet: styleSheet,
                         CSSModule:Firebug.CSSModule});
             }
@@ -1738,7 +1738,7 @@ CSSElementPanel.prototype = Obj.extend(Firebug.CSSStyleSheetPanel.prototype,
         var pseudoElements = [""];
         var inspectedRules, displayedRules = {};
 
-        // Firefox 6+ allows inspecting of pseudo-elements (see issue 537) 
+        // Firefox 6+ allows inspecting of pseudo-elements (see issue 537)
         if (versionChecker.compare(appInfo.version, "6.0*") >= 0)
             pseudoElements = Arr.extendArray(pseudoElements,
                 [":first-letter", ":first-line", ":before", ":after"]);
