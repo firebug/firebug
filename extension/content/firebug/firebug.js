@@ -591,7 +591,7 @@ window.Firebug =
     {
         if (objectChromeView)
         {
-            var contentView = Wrapper.getContentView(objectChromeView);
+            var contentView = Wrapper.unwrapObject(objectChromeView);
             return (contentView && contentView.firebugIgnore);
         }
         // else don't ignore things we don't understand
@@ -601,7 +601,7 @@ window.Firebug =
     {
         if (objectChromeView)
         {
-            var contentView = Wrapper.getContentView(objectChromeView);
+            var contentView = Wrapper.unwrapObject(objectChromeView);
             if (contentView)
                 contentView.firebugIgnore = true;
         }
