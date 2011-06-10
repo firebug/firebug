@@ -1054,7 +1054,13 @@ var FirebugChrome =
 
     $: function(id)
     {
-        return win.document.getElementById(id);  //document we close over not the global
+        return this.getElementById(id);
+    },
+
+    getElementById: function(id)
+    {
+        // The document we close over not the global.
+        return win.document.getElementById(id);
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *

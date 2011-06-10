@@ -28,6 +28,11 @@ var Firefox =
         return getBrowserDocument().getElementById(id);
     },
 
+    $: function(id)
+    {
+        return this.getElementById(id);
+    },
+
     getTabBrowser: function()
     {
         var tabBrowser = Firefox.getElementById("content");
