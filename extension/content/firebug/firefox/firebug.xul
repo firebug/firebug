@@ -54,8 +54,12 @@
         <key id="key_closeWindow" key="w" command="cmd_closeWindow" modifiers="accel"/>
     </keyset>
 
+    <!-- Various menu popups coming from firebugOverlay.xul are inserted here -->
+    <popupset id="mainPopupSet">
+    </popupset>
+
     <!-- Entire Firebug UI -->
-       <vbox id="fbContentBox" flex="2">
+    <vbox id="fbContentBox" flex="2">
     </vbox>
 
     <!-- If Firebug is displayed in this external window, but not active for currently selected
