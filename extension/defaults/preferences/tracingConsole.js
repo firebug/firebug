@@ -61,3 +61,4 @@ pref("extensions.firebug.DBG_STORAGE", false);          // storageService
 pref("extensions.firebug.DBG_MODULES", false);          // moduleloading
 pref("extensions.firebug.DBG_PROFILER", false);         // profiler
 pref("extensions.firebug.DBG_SEARCH", false);           // search box
+pref("extensions.firebug.DBG_EXTERNALEDITORS", false);  // integration with external editors/IDEs

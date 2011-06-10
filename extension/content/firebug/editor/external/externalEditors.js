@@ -49,6 +49,7 @@ Firebug.ExternalEditors = Obj.extend(Firebug.Module,
     initializeUI: function()
     {
         Firebug.Module.initializeUI.apply(this, arguments);
+
         Firebug.registerUIListener(this)
         this.loadExternalEditors();
     },
@@ -74,6 +75,7 @@ Firebug.ExternalEditors = Obj.extend(Firebug.Module,
     getRegisteredEditors: function()
     {
         var newArray = [];
+
         if (editors.length > 0)
         {
             newArray.push.apply(newArray, editors);
@@ -95,6 +97,7 @@ Firebug.ExternalEditors = Obj.extend(Firebug.Module,
         externalEditors = [];
         var prefDomain = Firebug.Options.getPrefDomain();
         var list = Firebug.Options.getPref(prefDomain, prefName).split(",");
+
         for (var i = 0; i < list.length; ++i)
         {
             var editorId = list[i];
@@ -142,6 +145,7 @@ Firebug.ExternalEditors = Obj.extend(Firebug.Module,
         var editors = this.getRegisteredEditors();
 
         Dom.eraseNode(popup);
+
         for( var i = 0; i < editors.length; ++i )
         {
             if (editors[i] == "-")
@@ -149,6 +153,7 @@ Firebug.ExternalEditors = Obj.extend(Firebug.Module,
                 Menu.createMenuItem(popup, "-");
                 continue;
             }
+
             var item = {
                 label: editors[i].label,
                 image: editors[i].image,
@@ -199,7 +204,9 @@ Firebug.ExternalEditors = Obj.extend(Firebug.Module,
                     sourceLink.line);
         }
         else if (Css.hasClass(target, "stackFrameLink"))
+        {
             this.appendContextMenuItem(popup, target.innerHTML, target.getAttribute("lineNumber"));
+        }
     },
 
     createContextMenuItem: function(doc)
@@ -208,8 +215,10 @@ Firebug.ExternalEditors = Obj.extend(Firebug.Module,
         item.setAttribute('type', "splitmenu");
         item.setAttribute('iconic', "true");
         item.setAttribute('oncommand', "Firebug.ExternalEditors.onContextMenuCommand(event)");
+
         var menupopup = doc.createElement('menupopup');
         menupopup.setAttribute('onpopupshowing', "return Firebug.ExternalEditors.onEditorsShowing(this)");
+
         item.appendChild(menupopup);
         return item;
     },
@@ -219,6 +228,7 @@ Firebug.ExternalEditors = Obj.extend(Firebug.Module,
         var editor = this.getDefaultEditor();
         var doc = popup.ownerDocument;
         var item = doc.getElementById('menu_firebugOpenWithEditor');
+
         if (item)
         {
             item = item.cloneNode(true);
@@ -226,7 +236,10 @@ Firebug.ExternalEditors = Obj.extend(Firebug.Module,
             item.removeAttribute('openFromContext');
         }
         else
+        {
             item = this.createContextMenuItem(doc);
+        }
+
         item.setAttribute('image', editor.image);
         item.setAttribute('label', editor.label);
         item.value = editor.id;
@@ -240,7 +253,7 @@ Firebug.ExternalEditors = Obj.extend(Firebug.Module,
     {
         if (event.target.getAttribute('option') == 'openEditorList')
             this.openEditorList();
-        else if(event.currentTarget.hasAttribute('openFromContext'))
+        else if (event.currentTarget.hasAttribute('openFromContext'))
             this.openContext(Firebug.currentContext, event.target.value);
         else
             this.open(this.lastSource.url, this.lastSource.line, event.target.value);
@@ -248,16 +261,30 @@ Firebug.ExternalEditors = Obj.extend(Firebug.Module,
 
     openContext: function(context, editorId)
     {
+        var line = null;
+        var panel = Firebug.chrome.getSelectedPanel();
+        if (!panel)
+            return;
+
+        var box = panel.selectedSourceBox;
+        if (panel.name == "script" && box && box.centralLine)
+            line = panel.selectedSourceBox.centralLine;
+
         var url = Firebug.chrome.getSelectedPanelURL();
-        this.open(url, null, editorId, context)
+        this.open(url, line, editorId, context);
     },
 
     open: function(href, line, editorId, context)
     {
         try
         {
+            if (FBTrace.DBG_EXTERNALEDITORS)
+                FBTrace.sysout("externalEditors.open; href: " + href + ", line: " + line +
+                    ", editorId: " + editorId + ", context: " + context, context);
+
             if (!href)
                 return;
+
             var editor = null;
             if (editorId)
             {
@@ -289,11 +316,12 @@ Firebug.ExternalEditors = Obj.extend(Firebug.Module,
             var localFile = null;
             var targetAdded = false;
             var cmdline = editor.cmdline
+
             if (cmdline)
             {
                 cmdline = cmdline.replace(' ', '\x00', 'g')
 
-                if (cmdline.indexOf("%line")>-1)
+                if (cmdline.indexOf("%line") > -1)
                 {
                     line = parseInt(line);
                     if (typeof line == 'number' && !isNaN(line))
@@ -310,7 +338,8 @@ Firebug.ExternalEditors = Obj.extend(Firebug.Module,
                         cmdline = cmdline.substring(0, i1) + cmdline.substr(i2);
                     }
                 }
-                if(cmdline.indexOf("%url")>-1)
+
+                if (cmdline.indexOf("%url")>-1)
                 {
                     cmdline = cmdline.replace('%url', href, 'g');
                     targetAdded = true;
@@ -335,6 +364,9 @@ Firebug.ExternalEditors = Obj.extend(Firebug.Module,
                     return;
                 args.push(localFile);
             }
+
+            if (FBTrace.DBG_EXTERNALEDITORS)
+                FBTrace.sysout("externalEditors.open; launcProgram with args:", args);
 
             System.launchProgram(editor.executable, args);
         }
@@ -389,22 +421,24 @@ Firebug.ExternalEditors = Obj.extend(Firebug.Module,
             lpath += ".html";
         }
 
-        if (getPlatformName() == "WINNT")
+        if (System.getPlatformName() == "WINNT")
             lpath = lpath.replace(/\//g, "\\");
 
-        var file = Firebug.Xpcom.QI(temporaryDirectory.clone(), nsILocalFile);
+        var file = Xpcom.QI(temporaryDirectory.clone(), nsILocalFile);
         file.appendRelativePath(lpath);
         if (!file.exists())
             file.create(nsIFile.NORMAL_FILE_TYPE, 0664);
         temporaryFiles.push(file.path);
 
-        var converter = Firebug.Xpcom.CCIN("@mozilla.org/intl/scriptableunicodeconverter", "nsIScriptableUnicodeConverter");
+        var converter = Xpcom.CCIN("@mozilla.org/intl/scriptableunicodeconverter",
+            "nsIScriptableUnicodeConverter");
         converter.charset = 'UTF-8'; // TODO detect charset from current tab
         data = converter.ConvertFromUnicode(data);
 
-        var stream = Firebug.Xpcom.CCIN("@mozilla.org/network/safe-file-output-stream;1", "nsIFileOutputStream");
+        var stream = Xpcom.CCIN("@mozilla.org/network/safe-file-output-stream;1", "nsIFileOutputStream");
         stream.init(file, 0x04 | 0x08 | 0x20, 0664, 0); // write, create, truncate
         stream.write(data, data.length);
+
         if (stream instanceof nsISafeOutputStream)
             stream.finish();
         else
@@ -417,8 +451,8 @@ Firebug.ExternalEditors = Obj.extend(Firebug.Module,
     {
         try
         {
-            var file = Firebug.Xpcom.CCIN("@mozilla.org/file/local;1", "nsILocalFile");
-            for( var i = 0; i < temporaryFiles.length; ++i)
+            var file = Xpcom.CCIN("@mozilla.org/file/local;1", "nsILocalFile");
+            for (var i = 0; i < temporaryFiles.length; ++i)
             {
                 file.initWithPath(temporaryFiles[i]);
                 if (file.exists())
