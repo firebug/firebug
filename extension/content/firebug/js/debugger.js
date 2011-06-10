@@ -272,6 +272,20 @@ Firebug.Debugger = Obj.extend(Firebug.ActivableModule,
         if (FBTrace.DBG_UI_LOOP)
             FBTrace.sysout("debugger.stop "+context.getName()+" frame",frame);
 
+        // Do not break if the user is on another tab
+        if (Firefox.getCurrentURI().spec !== context.window.location.toString())
+        {
+            if (FBTrace.DBG_UI_LOOP)
+            {
+                var current = Firefox.getCurrentURI().spec;
+                var prev = context.window.location.toString();
+                var locations = {current: current, context: prev};
+
+                FBTrace.sysout("debugger.stop ERROR break is not in current window ", locations);
+            }
+            return RETURN_CONTINUE;
+        }
+
         context.stoppedFrame = frame;  // the frame we stopped in, don't change this elsewhere.
         context.currentFrame = frame;  // the frame we show to user, depends on selection
         context.stopped = true;
