@@ -20,6 +20,12 @@
         <command id="cmd_toggleFirebug" oncommand="Firebug.toggleBar()"/>
         <command id="cmd_detachFirebug" oncommand="Firebug.toggleDetachBar(false, true)"/>
         <command id="cmd_inspect" oncommand="Firebug.Inspector.inspectFromContextMenu(document.popupNode);"/>
+        <command id="cmd_toggleDetachFirebug" oncommand="Firebug.toggleDetachBar(false, true)"/>
+        <command id="cmd_increaseTextSize" oncommand="Firebug.Options.changeTextSize(1);"/>
+        <command id="cmd_decreaseTextSize" oncommand="Firebug.Options.changeTextSize(-1);"/>
+        <command id="cmd_normalTextSize" oncommand="Firebug.Options.setTextSize(0);"/>
+        <command id="cmd_focusFirebugSearch" oncommand="if (Firebug.currentContext) Firebug.Search.focus(Firebug.currentContext);"/>
+        <command id="cmd_customizeFBKeys" oncommand="Firebug.ShortcutsModel.customizeShortcuts()"/>
     </commandset>
 
     <!-- Firefox page context menu -->
