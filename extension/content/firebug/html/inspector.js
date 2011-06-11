@@ -90,6 +90,10 @@ Firebug.Inspector = Obj.extend(Firebug.Module,
             if (oldContext && oldContext.window)
                 this.clearAllHighlights();
 
+            // Stop multi element highlighting
+            if (!elementArr)
+                this.repaint.element = null;
+
             this.highlighter = highlighter;
             this.highlightedContext = context;
 
@@ -393,7 +397,7 @@ Firebug.Inspector = Obj.extend(Firebug.Module,
 
         if(isMulti && element)
             this.highlightObject(element, context, highlightType, null, colorObj);
-        else
+        else if(!isMulti)
         {
             var highlighterNode = highlighterCache.get(highlighter.ident);
 
