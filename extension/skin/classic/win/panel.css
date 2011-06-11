@@ -30,8 +30,7 @@
 .netPageRow.opened > .netCol > .netPageTitle,
 .objectBox-stackFrame.hasTwisty.opened,
 .computedStylesGroup.opened > .cssComputedHeader > .twisty {
-    list-style-image: url(chrome://firebug/skin/win/twisty.png);
-    -moz-image-region: rect(0, 16px, 16px, 0);
+    background-image: url(chrome://firebug/skin/win/twistyOpen.png);
 }
 
 .twisty {
