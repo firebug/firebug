@@ -248,6 +248,14 @@ Firebug.TabWatcher = Obj.extend(new Firebug.Listener(),
         if (!this.fbListeners)
             return userCommands;
 
+        // Do not Create if any Listener says true to shouldNotCreateContext
+        if (Events.dispatch2(this.fbListeners, "shouldNotCreateContext", [browser, url, userCommands]))
+        {
+            if (FBTrace.DBG_ACTIVATION)
+                FBTrace.sysout("-> shouldNotCreateContext vetos create context for: "+ url);
+            return false;
+        }
+
         // Create if any listener says true to showCreateContext
         if (Events.dispatch2(this.fbListeners, "shouldCreateContext", [browser, url, userCommands]))
         {
@@ -256,16 +264,8 @@ Firebug.TabWatcher = Obj.extend(new Firebug.Listener(),
             return true;
         }
 
-
         if (FBTrace.DBG_ACTIVATION)
             FBTrace.sysout("-> shouldCreateContext with user: "+userCommands+ " no opinion for: "+ url);
-
-        // Do not Create if any Listener says true to shouldNotCreateContext
-        if (Events.dispatch2(this.fbListeners, "shouldNotCreateContext", [browser, url, userCommands]))
-            return false;
-
-        if (FBTrace.DBG_ACTIVATION)
-            FBTrace.sysout("-> shouldNotCreateContext no opinion for: "+ url);
 
         // create if user said so and no one else has an opinion.
         return userCommands;
