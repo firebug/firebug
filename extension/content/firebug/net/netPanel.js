@@ -1325,10 +1325,9 @@ NetPanel.prototype = Obj.extend(Firebug.ActivablePanel,
                 bars[i].parentNode.removeChild(bars[i]);
 
             // Generate UI for page timings (vertical lines displayed for the first phase)
-            var timeStamps = this.context.netProgress.timeStamps;
-            for (var i=0; i<timeStamps.length; i++)
+            for (var i=0; i<phase.timeStamps.length; i++)
             {
-                var timing = timeStamps[i];
+                var timing = phase.timeStamps[i];
                 if (!timing.offset)
                     continue;
 
@@ -1361,15 +1360,6 @@ NetPanel.prototype = Obj.extend(Firebug.ActivablePanel,
             // the windowLoadBar is visible.
             if (phase.windowLoadTime && this.phaseEndTime < phase.windowLoadTime)
                 this.phaseEndTime = phase.windowLoadTime;
-
-            // Make sure the last time stamp is also included in the phase.
-            var timeStamps = this.context.netProgress.timeStamps;
-            for (var i = 0; i < timeStamps.length; i++)
-            {
-                var stamp = timeStamps[i];
-                if (stamp.time && this.phaseEndTime < stamp.time)
-                    this.phaseEndTime = stamp.time;
-            }
 
             this.phaseElapsed = this.phaseEndTime - phase.startTime;
         }
@@ -1406,16 +1396,11 @@ NetPanel.prototype = Obj.extend(Firebug.ActivablePanel,
 
     calculateTimeStamps: function(file, phase)
     {
-        // Page timings (vertical lines) are displayed only for the first phase.
-        var phases = this.context.netProgress.phases;
-        if (file.phase != phases[0])
-            return;
-
-        // Iterate all registerd page timings fields and calculate offsets (from the
-        // beginning of the waterfall graphs) for all vertical lines.
-        for (var i=0; i<this.context.netProgress.timeStamps.length; i++)
+        // Iterate all time stamps for the current phase and calculate offsets (from the
+        // beginning of the waterfall graphs) for the vertical lines.
+        for (var i=0; i<phase.timeStamps.length; i++)
         {
-            var timeStamp = this.context.netProgress.timeStamps[i];
+            var timeStamp = phase.timeStamps[i];
             var fieldName = timeStamp.name;
             var time = timeStamp.time;
 
@@ -3316,7 +3301,7 @@ Firebug.NetMonitor.TimeInfoTip = domplate(Firebug.Rep,
             loaded: file.loaded, fromCache: file.fromCache});
 
         var events = [];
-        var timeStamps = context.netProgress.timeStamps;
+        var timeStamps = file.phase.timeStamps;
         for (var i=0; i<timeStamps.length; i++)
         {
             var timeStamp = timeStamps[i];
@@ -3610,22 +3595,6 @@ function NetProgress(context)
     this.cacheListener = new NetCacheListener(this);
 
     this.clear();
-
-    this.timeStamps = [];
-
-    this.addTimeStamp = function(name, classes)
-    {
-        var timeStamp = {
-            name: name,
-            classes: classes
-        };
-
-        this.timeStamps.push(timeStamp);
-        return timeStamp;
-    }
-
-    this.contentLoadStamp = this.addTimeStamp("DOMContentLoaded", "netContentLoadBar");
-    this.windowLoadStamp = this.addTimeStamp("load", "netWindowLoadBar");
 }
 
 NetProgress.prototype =
@@ -4126,13 +4095,13 @@ NetProgress.prototype =
         if (!this.phases.length)
             return;
 
-        var timeStamp = this.context.netProgress.addTimeStamp("MozAfterPaint", "netPaintBar");
+        var phase = this.context.netProgress.currentPhase;
+        var timeStamp = phase.addTimeStamp("MozAfterPaint", "netPaintBar");
         timeStamp.time = time;
 
         // Return the first file, so the layout is updated. I can happen that the
         // onLoad event is the last one and the graph end-time must be recalculated.
-        var firstPhase = this.phases[0];
-        return firstPhase.files[0];
+        return phase.files[0];
     },
 
     timeStamp: function timeStamp(window, time, name)
@@ -4144,11 +4113,11 @@ NetProgress.prototype =
         if (!this.phases.length)
             return;
 
-        var timeStamp = this.context.netProgress.addTimeStamp(name, "netTimeStampBar");
+        var phase = this.context.netProgress.currentPhase;
+        var timeStamp = phase.addTimeStamp(name, "netTimeStampBar");
         timeStamp.time = time;
 
-        var firstPhase = this.phases[0];
-        return firstPhase.files[0];
+        return phase.files[0];
     },
 
     windowLoad: function windowLoad(window, time)
@@ -4165,7 +4134,9 @@ NetProgress.prototype =
 
         // Keep the information also in the phase for now, NetExport and other could need it.
         firstPhase.windowLoadTime = time;
-        this.context.netProgress.windowLoadStamp.time = time;
+
+        var timeStamp = firstPhase.addTimeStamp("load", "netWindowLoadBar");
+        timeStamp.time = time;
 
         // Return the first file, so the layout is updated. I can happen that the
         // onLoad event is the last one and the graph end-time must be recalculated.
@@ -4186,7 +4157,9 @@ NetProgress.prototype =
 
         // Keep the information also in the phase for now, NetExport and other could need it.
         firstPhase.contentLoadTime = time;
-        this.context.netProgress.contentLoadStamp.time = time;
+
+        var timeStamp = firstPhase.addTimeStamp("DOMContentLoaded", "netContentLoadBar");
+        timeStamp.time = time;
 
         return null;
     },
@@ -4559,6 +4532,8 @@ function NetPhase(file)
   // List of paint events.
   this.windowPaints = [];
 
+  this.timeStamps = [];
+
   this.addFile(file);
 }
 
@@ -4602,7 +4577,24 @@ NetPhase.prototype =
 
     get endTime()
     {
-        return this.lastFinishedFile ? this.lastFinishedFile.endTime : null;
+        var endTime = this.lastFinishedFile ? this.lastFinishedFile.endTime : null;
+        if (this.timeStamps.length > 0)
+        {
+            var lastTimeStamp = this.timeStamps[this.timeStamps.length-1].time;
+            endTime = (endTime > lastTimeStamp) ? endTime : lastTimeStamp;
+        }
+        return endTime;
+    },
+
+    addTimeStamp: function(name, classes)
+    {
+        var timeStamp = {
+            name: name,
+            classes: classes
+        };
+
+        this.timeStamps.push(timeStamp);
+        return timeStamp;
     }
 };
 
