@@ -277,37 +277,45 @@ Firebug.NetMonitor = Obj.extend(Firebug.ActivableModule,
 
         if (context.window && context.window instanceof Window) // XXXjjb changed test to instanceof because jetpack uses fake window objects
         {
-            var window = context.window;
+            var win = context.window;
 
-            var onWindowPaintHandler = function() {
+            var onWindowPaintHandler = function()
+            {
                 if (context.netProgress)
-                    context.netProgress.post(windowPaint, [window, now()]);
+                    context.netProgress.post(windowPaint, [win, now()]);
             }
 
             if (Options.get("netShowPaintEvents"))
-                window.addEventListener("MozAfterPaint", onWindowPaintHandler, false);
+            {
+                win.addEventListener("MozAfterPaint", onWindowPaintHandler, false);
+            }
 
             // Register "load" listener in order to track window load time.
-            var onWindowLoadHandler = function() {
+            var onWindowLoadHandler = function()
+            {
                 if (context.netProgress)
-                    context.netProgress.post(windowLoad, [window, now()]);
-                window.removeEventListener("load", onWindowLoadHandler, true);
+                    context.netProgress.post(windowLoad, [win, now()]);
+                win.removeEventListener("load", onWindowLoadHandler, true);
 
-                context.setTimeout(function() {
-                    if (window && !window.closed)
-                        window.removeEventListener("MozAfterPaint", onWindowPaintHandler, false);
+                context.setTimeout(function()
+                {
+                    if (win && !win.closed)
+                    {
+                        win.removeEventListener("MozAfterPaint", onWindowPaintHandler, false);
+                    }
                 }, 2000); //xxxHonza: this should be customizable using preferences.
             }
-            window.addEventListener("load", onWindowLoadHandler, true);
+            win.addEventListener("load", onWindowLoadHandler, true);
 
             // Register "DOMContentLoaded" listener to track timing.
-            var onContentLoadHandler = function() {
+            var onContentLoadHandler = function()
+            {
                 if (context.netProgress)
-                    context.netProgress.post(contentLoad, [window, now()]);
-                window.removeEventListener("DOMContentLoaded", onContentLoadHandler, true);
+                    context.netProgress.post(contentLoad, [win, now()]);
+                win.removeEventListener("DOMContentLoaded", onContentLoadHandler, true);
             }
 
-            window.addEventListener("DOMContentLoaded", onContentLoadHandler, true);
+            win.addEventListener("DOMContentLoaded", onContentLoadHandler, true);
         }
 
         if (Firebug.NetMonitor.isAlwaysEnabled())
@@ -439,6 +447,12 @@ Firebug.NetMonitor = Obj.extend(Firebug.ActivableModule,
     {
         var value = Options.get("net.logLimit");
         maxQueueRequests = value ? value : maxQueueRequests;
+    },
+
+    addTimeStamp: function(context, time, name, color)
+    {
+        if (context.netProgress)
+            context.netProgress.post(timeStamp, [context.window, time, name, color]);
     }
 });
 
@@ -968,7 +982,7 @@ NetPanel.prototype = Obj.extend(Firebug.ActivablePanel,
 
     populateTimeInfoTip: function(infoTip, file)
     {
-        Firebug.NetMonitor.TimeInfoTip.render(file, infoTip);
+        Firebug.NetMonitor.TimeInfoTip.render(this.context, file, infoTip);
         return true;
     },
 
@@ -1281,16 +1295,16 @@ NetPanel.prototype = Obj.extend(Firebug.ActivablePanel,
 
             phase = this.calculateFileTimes(file, phase, rightNow);
 
+            // Parent node for all timing bars.
+            var netBar = row.querySelector(".netBar");
+
             // Get bar nodes
-            var netBar = Dom.getChildByClass(row, "netTimeCol").childNodes[1];
             var blockingBar = netBar.childNodes[1];
             var resolvingBar = blockingBar.nextSibling;
             var connectingBar = resolvingBar.nextSibling;
             var sendingBar = connectingBar.nextSibling;
             var waitingBar = sendingBar.nextSibling;
-            var contentLoadBar = waitingBar.nextSibling;
-            var windowLoadBar = contentLoadBar.nextSibling;
-            var receivingBar = windowLoadBar.nextSibling;
+            var receivingBar = waitingBar.nextSibling;
 
             // All bars starts at the beginning
             resolvingBar.style.left = connectingBar.style.left = sendingBar.style.left =
@@ -1305,30 +1319,29 @@ NetPanel.prototype = Obj.extend(Firebug.ActivablePanel,
             waitingBar.style.width = this.barWaitingWidth + "%";
             receivingBar.style.width = this.barReceivingWidth + "%";
 
-            if (this.contentLoadBarOffset) {
-                contentLoadBar.style.left = this.contentLoadBarOffset + "%";
-                contentLoadBar.style.display = "block";
-                this.contentLoadBarOffset = null;
-            }
+            // Remove existing bars
+            var bars = netBar.querySelectorAll(".netPageTimingBar");
+            for (var i=0; i<bars.length; i++)
+                bars[i].parentNode.removeChild(bars[i]);
 
-            if (this.windowLoadBarOffset) {
-                windowLoadBar.style.left = this.windowLoadBarOffset + "%";
-                windowLoadBar.style.display = "block";
-                this.windowLoadBarOffset = null;
-            }
-
-            var items = netBar.getElementsByClassName("netPaintBar");
-            for (var i=0; i<this.windowPaints.length; i++)
+            // Generate UI for page timings (vertical lines displayed for the first phase)
+            var timeStamps = this.context.netProgress.timeStamps;
+            for (var i=0; i<timeStamps.length; i++)
             {
-                var paintBar = (i < items.length) ? items.item(i) : null;
-                if (!paintBar)
-                {
-                    paintBar = document.createElement("div");
-                    netBar.appendChild(paintBar);
-                }
-                paintBar.setAttribute("class", "netPaintBar");
-                paintBar.style.left = this.windowPaints[i] + "%";
-                paintBar.style.display = "block";
+                var timing = timeStamps[i];
+                if (!timing.offset)
+                    continue;
+
+                var bar = netBar.ownerDocument.createElement("DIV");
+                netBar.appendChild(bar);
+
+                if (timing.classes)
+                    Css.setClass(bar, timing.classes);
+
+                Css.setClass(bar, "netPageTimingBar");
+
+                bar.style.left = timing.offset + "%";
+                bar.style.display = "block";
             }
         }
     },
@@ -1375,19 +1388,34 @@ NetPanel.prototype = Obj.extend(Firebug.ActivablePanel,
         if (this.elapsed <= 0)
             this.barReceivingWidth = "1";
 
-        // Compute also offset for the contentLoadBar and windowLoadBar, which are
-        // displayed for the first phase.
-        if (phase.contentLoadTime)
-            this.contentLoadBarOffset = Math.floor(((phase.contentLoadTime-this.phaseStartTime)/this.phaseElapsed) * 100);
-
-        if (phase.windowLoadTime)
-            this.windowLoadBarOffset = Math.floor(((phase.windowLoadTime-this.phaseStartTime)/this.phaseElapsed) * 100);
-
-        this.windowPaints = [];
-        for (var i=0; i<phase.windowPaints.length; i++)
-            this.windowPaints.push(Math.floor(((phase.windowPaints[i]-this.phaseStartTime)/this.phaseElapsed) * 100));
-
+        // Compute also offset for page timings, e.g.: contentLoadBar and windowLoadBar,
+        // which are displayed for the first phase. This is done only if a page exists.
+        this.calculateTimeStamps(file, phase);
+ 
         return phase;
+    },
+
+    calculateTimeStamps: function(file, phase)
+    {
+        // Page timings (vertical lines) are displayed only for the first phase.
+        var phases = this.context.netProgress.phases;
+        if (file.phase != phases[0])
+            return;
+
+        // Iterate all registerd page timings fields and calculate offsets (from the
+        // beginning of the waterfall graphs) for all vertical lines.
+        for (var i=0; i<this.context.netProgress.timeStamps.length; i++)
+        {
+            var timeStamp = this.context.netProgress.timeStamps[i];
+            var fieldName = timeStamp.name;
+            var time = timeStamp.time;
+
+            if (time > 0)
+            {
+                var offset = (((time - this.phaseStartTime)/this.phaseElapsed) * 100).toFixed(3);
+                timeStamp.offset = offset;
+            }
+         }
     },
 
     updateSummaries: function(rightNow, updateAll)
@@ -2065,11 +2093,10 @@ Firebug.NetMonitor.NetRequestEntry = domplate(Firebug.Rep, new Firebug.Listener(
                         DIV({"class": "netConnectingBar", style: "left: $file.offset"}),
                         DIV({"class": "netSendingBar", style: "left: $file.offset"}),
                         DIV({"class": "netWaitingBar", style: "left: $file.offset"}),
-                        DIV({"class": "netContentLoadBar", style: "left: $file.offset"}),
-                        DIV({"class": "netWindowLoadBar", style: "left: $file.offset"}),
                         DIV({"class": "netReceivingBar", style: "left: $file.offset; width: $file.width"},
                             SPAN({"class": "netTimeLabel"}, "$file|getElapsedTime")
                         )
+                        // Page timings (vertical lines) are dynamically appended here.
                     )
                 )
             )
@@ -3196,11 +3223,11 @@ Firebug.NetMonitor.TimeInfoTip = domplate(Firebug.Rep,
         FOR("event", "$events",
             TR({"class": "timeInfoTipEventRow"},
                 TD({"class": "timeInfoTipBar", align: "center"},
-                    DIV({"class": "$event|getBarClass timeInfoTipEventBar"})
+                    DIV({"class": "$event|getTimeStampClass timeInfoTipEventBar"})
                 ),
                 TD("$event.start|formatStartTime"),
-                TD({"colspan": 2},
-                    "$event|getLabel"
+                TD({"class": "timeInfotTipEventName", "colspan": 2},
+                    "$event|getTimeStampLabel"
                 )
             )
         ),
@@ -3215,9 +3242,14 @@ Firebug.NetMonitor.TimeInfoTip = domplate(Firebug.Rep,
         return "net" + obj.bar + "Bar";
     },
 
+    getTimeStampClass: function(obj)
+    {
+        return obj.classes;
+    },
+
     formatTime: function(time)
     {
-        return Str.formatTime(time)
+        return Str.formatTime(time);
     },
 
     formatStartTime: function(time)
@@ -3234,7 +3266,12 @@ Firebug.NetMonitor.TimeInfoTip = domplate(Firebug.Rep,
         return Locale.$STR("requestinfo." + obj.bar);
     },
 
-    render: function(file, parentNode)
+    getTimeStampLabel: function(obj)
+    {
+        return obj.name;
+    },
+
+    render: function(context, file, parentNode)
     {
         var infoTip = Firebug.NetMonitor.TimeInfoTip.tableTag.replace({}, parentNode);
 
@@ -3270,10 +3307,20 @@ Firebug.NetMonitor.TimeInfoTip = domplate(Firebug.Rep,
             loaded: file.loaded, fromCache: file.fromCache});
 
         var events = [];
-        if (file.phase.contentLoadTime)
-            events.push({bar: "ContentLoad", start: file.phase.contentLoadTime - file.startTime});
-        if (file.phase.windowLoadTime)
-            events.push({bar: "WindowLoad", start: file.phase.windowLoadTime - file.startTime});
+        var timeStamps = context.netProgress.timeStamps;
+        for (var i=0; i<timeStamps.length; i++)
+        {
+            var timeStamp = timeStamps[i];
+            events.push({
+                name: timeStamp.name,
+                classes: timeStamp.classes,
+                start: timeStamp.time - file.startTime
+            })
+        }
+
+        events.sort(function(a, b) {
+            return a.start < b.start ? -1 : 1;
+        })
 
         // Insert start request time.
         var startTime = {};
@@ -3554,6 +3601,22 @@ function NetProgress(context)
     this.cacheListener = new NetCacheListener(this);
 
     this.clear();
+
+    this.timeStamps = [];
+
+    this.addTimeStamp = function(name, classes)
+    {
+        var timeStamp = {
+            name: name,
+            classes: classes
+        };
+
+        this.timeStamps.push(timeStamp);
+        return timeStamp;
+    }
+
+    this.contentLoadStamp = this.addTimeStamp("DOMContentLoaded", "netContentLoadBar");
+    this.windowLoadStamp = this.addTimeStamp("load", "netWindowLoadBar");
 }
 
 NetProgress.prototype =
@@ -4054,12 +4117,28 @@ NetProgress.prototype =
         if (!this.phases.length)
             return;
 
-        // Update all requests that belong to the first phase.
-        var firstPhase = this.phases[0];
-        firstPhase.windowPaints.push(time);
+        var timeStamp = this.context.netProgress.addTimeStamp("MozAfterPaint", "netPaintBar");
+        timeStamp.time = time;
 
         // Return the first file, so the layout is updated. I can happen that the
         // onLoad event is the last one and the graph end-time must be recalculated.
+        var firstPhase = this.phases[0];
+        return firstPhase.files[0];
+    },
+
+    timeStamp: function timeStamp(window, time, name)
+    {
+        if (FBTrace.DBG_NET)
+            FBTrace.sysout("net.timeStamp +? " + getPrintableTime() + ", " +
+                window.location.href, this.phases);
+
+        if (!this.phases.length)
+            return;
+
+        var timeStamp = this.context.netProgress.addTimeStamp(name, "netTimeStampBar");
+        timeStamp.time = time;
+
+        var firstPhase = this.phases[0];
         return firstPhase.files[0];
     },
 
@@ -4074,7 +4153,10 @@ NetProgress.prototype =
 
         // Update all requests that belong to the first phase.
         var firstPhase = this.phases[0];
+
+        // Keep the information also in the phase for now, NetExport and other could need it.
         firstPhase.windowLoadTime = time;
+        this.context.netProgress.windowLoadStamp.time = time;
 
         // Return the first file, so the layout is updated. I can happen that the
         // onLoad event is the last one and the graph end-time must be recalculated.
@@ -4092,7 +4174,10 @@ NetProgress.prototype =
 
         // Update all requests that belong to the first phase.
         var firstPhase = this.phases[0];
+
+        // Keep the information also in the phase for now, NetExport and other could need it.
         firstPhase.contentLoadTime = time;
+        this.context.netProgress.contentLoadStamp.time = time;
 
         return null;
     },
@@ -4317,6 +4402,7 @@ var closedFile = NetProgress.prototype.closedFile;
 var resolvingFile = NetProgress.prototype.resolvingFile;
 var progressFile = NetProgress.prototype.progressFile;
 var windowPaint = NetProgress.prototype.windowPaint;
+var timeStamp = NetProgress.prototype.timeStamp;
 var windowLoad = NetProgress.prototype.windowLoad;
 var contentLoad = NetProgress.prototype.contentLoad;
 
