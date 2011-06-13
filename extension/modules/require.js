@@ -526,8 +526,9 @@ var require, define;
                     for (i = 0; i < ary.length; i++) {
                         var dependency = manager.deps[ary[i]];
                         if (req.onDebug && typeof(dependency) === "undefined") {
-                            var dependentName = fullName ? ("for " + fullName) : "";
-                            var badDep = makeError('undefinedDependency', "Undefined dependency "+ary[i]+dependentName);
+                            var dependencyURL = makeModuleMap(ary[i]).url;
+                            var msg = "Compile failed: "+ary[i]+" -> "+dependencyURL;
+                            var badDep = makeError('undefinedDependency', msg);
                             req.onDebug(badDep)
                         } else {
                             args.push(dependency);
@@ -854,7 +855,7 @@ var require, define;
             }
             if (expired && noLoads) {
                 //If wait time expired, throw error of unloaded modules.
-                err = makeError("timeout", "Load timeout for modules: " + noLoads);
+                err = makeError("timeout", "Load timeout in "+window.location+" for modules: " + noLoads);
                 err.requireType = "timeout";
                 err.requireModules = noLoads;
                 return req.onError(err);
@@ -1409,7 +1410,7 @@ var require, define;
                     //Join the path parts together, then figure out if baseUrl is needed.
                     url = syms.join("/") + (ext || ".js");
                     if ( url.charAt(0) !== '/' && ! url.match(/^\w+:/) ) {
-                        if (!config.baseUrl) {
+                        if (config.baseUrl === null || typeof(config.baseUrl) === 'undefined') {
                             req.onError("No baseUrl, needed for URL: "+url);
                         }
                         url = config.baseUrl + url;
