@@ -1151,7 +1151,7 @@ NetPanel.prototype = Obj.extend(Firebug.ActivablePanel,
         {
             var file = queue[i];
             if (!file.phase)
-              continue;
+                continue;
 
             file.invalid = false;
 
@@ -1361,6 +1361,15 @@ NetPanel.prototype = Obj.extend(Firebug.ActivablePanel,
             // the windowLoadBar is visible.
             if (phase.windowLoadTime && this.phaseEndTime < phase.windowLoadTime)
                 this.phaseEndTime = phase.windowLoadTime;
+
+            // Make sure the last time stamp is also included in the phase.
+            var timeStamps = this.context.netProgress.timeStamps;
+            for (var i = 0; i < timeStamps.length; i++)
+            {
+                var stamp = timeStamps[i];
+                if (stamp.time && this.phaseEndTime < stamp.time)
+                    this.phaseEndTime = stamp.time;
+            }
 
             this.phaseElapsed = this.phaseEndTime - phase.startTime;
         }

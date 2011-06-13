@@ -211,6 +211,21 @@ function createFirebugConsole(context, win)
         return diff;
     };
 
+    console.timeStamp = function(name)
+    {
+        name = name || "";
+
+        if (FBTrace.DBG_CONSOLE)
+            FBTrace.sysout("consoleExposed.timeStamp; " + name);
+
+        var now = new Date();
+        Firebug.NetMonitor.addTimeStamp(context, now.getTime(), name);
+
+        var formattedTime = now.getHours() + ":" + now.getMinutes() + ":" +
+            now.getSeconds() + "." + now.getMilliseconds();
+        return logFormatted([formattedTime, name], "timeStamp");
+    };
+
     console.table = function(data, columns)
     {
         FirebugReps.Table.log(data, columns, context);
@@ -260,6 +275,7 @@ function createFirebugConsole(context, win)
     console.__exposedProps__.groupCollapsed = "r";
     console.__exposedProps__.time = "r";
     console.__exposedProps__.timeEnd = "r";
+    console.__exposedProps__.timeStamp = "r";
     console.__exposedProps__.profile = "r";
     console.__exposedProps__.profileEnd = "r";
     console.__exposedProps__.count = "r";
