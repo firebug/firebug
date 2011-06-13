@@ -26,6 +26,11 @@
         <command id="cmd_normalTextSize" oncommand="Firebug.Options.setTextSize(0);"/>
         <command id="cmd_focusFirebugSearch" oncommand="if (Firebug.currentContext) Firebug.Search.focus(Firebug.currentContext);"/>
         <command id="cmd_customizeFBKeys" oncommand="Firebug.ShortcutsModel.customizeShortcuts()"/>
+
+        <command id="cmd_enablePanels" oncommand="Firebug.PanelActivation.enableAllPanels()"/>
+        <command id="cmd_disablePanels" oncommand="Firebug.PanelActivation.disableAllPanels()"/>
+        <command id="cmd_clearActivationList" oncommand="Firebug.PanelActivation.clearAnnotations()"/>
+        <command id="cmd_clearConsole" oncommand="Firebug.Console.clear(Firebug.currentContext)"/>
     </commandset>
 
     <!-- Firefox page context menu -->
