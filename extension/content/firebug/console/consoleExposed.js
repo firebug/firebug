@@ -211,19 +211,19 @@ function createFirebugConsole(context, win)
         return diff;
     };
 
-    console.timeStamp = function(name)
+    console.timeStamp = function(label)
     {
-        name = name || "";
+        label = label || "";
 
         if (FBTrace.DBG_CONSOLE)
-            FBTrace.sysout("consoleExposed.timeStamp; " + name);
+            FBTrace.sysout("consoleExposed.timeStamp; " + label);
 
         var now = new Date();
-        Firebug.NetMonitor.addTimeStamp(context, now.getTime(), name);
+        Firebug.NetMonitor.addTimeStamp(context, now.getTime(), label);
 
         var formattedTime = now.getHours() + ":" + now.getMinutes() + ":" +
             now.getSeconds() + "." + now.getMilliseconds();
-        return logFormatted([formattedTime, name], "timeStamp");
+        return logFormatted([formattedTime, label], "timeStamp");
     };
 
     console.table = function(data, columns)

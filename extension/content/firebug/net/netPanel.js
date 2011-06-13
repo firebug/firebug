@@ -449,10 +449,10 @@ Firebug.NetMonitor = Obj.extend(Firebug.ActivableModule,
         maxQueueRequests = value ? value : maxQueueRequests;
     },
 
-    addTimeStamp: function(context, time, name, color)
+    addTimeStamp: function(context, time, label, color)
     {
         if (context.netProgress)
-            context.netProgress.post(timeStamp, [context.window, time, name, color]);
+            context.netProgress.post(timeStamp, [context.window, time, label, color]);
     }
 });
 
@@ -1401,7 +1401,6 @@ NetPanel.prototype = Obj.extend(Firebug.ActivablePanel,
         for (var i=0; i<phase.timeStamps.length; i++)
         {
             var timeStamp = phase.timeStamps[i];
-            var fieldName = timeStamp.name;
             var time = timeStamp.time;
 
             if (time > 0)
@@ -3306,7 +3305,7 @@ Firebug.NetMonitor.TimeInfoTip = domplate(Firebug.Rep,
         {
             var timeStamp = timeStamps[i];
             events.push({
-                name: timeStamp.name,
+                name: timeStamp.label,
                 classes: timeStamp.classes,
                 start: timeStamp.time - file.startTime
             })
@@ -4104,7 +4103,7 @@ NetProgress.prototype =
         return phase.files[0];
     },
 
-    timeStamp: function timeStamp(window, time, name)
+    timeStamp: function timeStamp(window, time, label)
     {
         if (FBTrace.DBG_NET)
             FBTrace.sysout("net.timeStamp +? " + getPrintableTime() + ", " +
@@ -4114,7 +4113,7 @@ NetProgress.prototype =
             return;
 
         var phase = this.context.netProgress.currentPhase;
-        var timeStamp = phase.addTimeStamp(name, "netTimeStampBar");
+        var timeStamp = phase.addTimeStamp(label, "netTimeStampBar");
         timeStamp.time = time;
 
         return phase.files[0];
@@ -4586,10 +4585,10 @@ NetPhase.prototype =
         return endTime;
     },
 
-    addTimeStamp: function(name, classes)
+    addTimeStamp: function(label, classes)
     {
         var timeStamp = {
-            name: name,
+            label: label,
             classes: classes
         };
 
