@@ -509,6 +509,9 @@ FirebugReps.Arr = domplate(Firebug.Rep,
 
     hasSpecialProperties: function(array)
     {
+        if ( ! "hasOwnProperty" in array)
+            return false;
+
         // Don't use __count__ property, this is being removed from Fx 3.7
         var n = 0;
         for (var p in array)
