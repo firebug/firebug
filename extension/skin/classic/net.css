@@ -331,19 +331,23 @@
     z-index: 10;
 }
 
-.netWindowLoadBar,
-.netContentLoadBar,
-.netPaintBar {
+/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */ 
+/* Vertical lines - time stamps */
+
+.netPageTimingBar {
     position: absolute;
     left: 0;
     top: 0;
     bottom: 0;
     width: 1px;
-    background-color: red;
     z-index: 70;
     opacity: 0.5;
     display: none;
     margin-bottom:-1px;
+}
+
+.netWindowLoadBar {
+    background-color: red;
 }
 
 .netContentLoadBar {
@@ -353,6 +357,12 @@
 .netPaintBar {
     background-color: green;
 }
+
+.netTimeStampBar {
+    background-color: Olive;
+}
+
+/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */ 
 
 .netTimeLabel {
     -moz-box-sizing: padding-box;

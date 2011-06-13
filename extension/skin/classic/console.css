@@ -688,3 +688,17 @@
 .commandPopup .panelNode-console {
     display: block;
 }
+
+/************************************************************************************************/
+/* console.timeStamp */
+
+.logRow-timeStamp {
+    color: Olive;
+    font-family: Lucida Grande, Tahoma, sans-serif;
+}
+
+.logRow-timeStamp SPAN:last-child {
+    font-style: italic;
+    color: gray;
+    padding-left: 5px;
+}
