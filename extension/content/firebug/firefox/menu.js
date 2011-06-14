@@ -4,8 +4,9 @@ define([
     "firebug/lib/trace",
     "firebug/lib/locale",
     "firebug/lib/options",
+    "firebug/lib/css",
 ],
-function(FBTrace, Locale, Options) {
+function(FBTrace, Locale, Options, Css) {
 
 // ********************************************************************************************* //
 // Constants
