@@ -507,11 +507,12 @@ Css.getAllStyleSheets = function(context)
 
     var styleSheets = [];
 
+    var showUACSS = Options.get("showUserAgentCSS");
     function addSheet(sheet)
     {
         var sheetLocation =  Css.getURLForStyleSheet(sheet);
 
-        if (!Options.get("showUserAgentCSS") && Url.isSystemURL(sheetLocation))
+        if (!showUACSS && Url.isSystemURL(sheetLocation))
             return;
 
         if (sheet.ownerNode && Firebug.shouldIgnore(sheet.ownerNode))
