@@ -864,8 +864,9 @@ Firebug.SourceBoxPanel = Obj.extend(SourceBoxPanelBase,
         return viewRange;
     },
 
-    /*
-     * Use the average height of source lines in the cache to estimate where the scroll bar points based on scrollTop
+    /**
+     * Use the average height of source lines in the cache to estimate where the scroll bar
+     * points based on scrollTop
      */
     getViewRangeFromScrollTop: function(sourceBox, scrollTop)
     {
@@ -877,11 +878,18 @@ Firebug.SourceBoxPanel = Obj.extend(SourceBoxPanelBase,
 
         var panelHeight = this.panelNode.clientHeight;
 
-        if (panelHeight === 0)  // then we probably have not inserted the elements yet and the clientHeight is bogus
+        // then we probably have not inserted the elements yet and the clientHeight is bogus
+        if (panelHeight === 0)
             panelHeight = this.panelNode.ownerDocument.documentElement.clientHeight;
 
-        var viewableLines = Math.floor((panelHeight / averageLineHeight));  // see getViewRangeFromTargetLine
+        // Set minimum height of the panel (in case Firebug UI is set to minimum using
+        // using the splitter) so, the source box can be properly created (issue 4417).
+        panelHeight = (panelHeight < 100) ? 100 : panelHeight;
+
+        // see getViewRangeFromTargetLine
+        var viewableLines = Math.floor((panelHeight / averageLineHeight));
         viewRange.lastLine = viewRange.firstLine + viewableLines - 1;  // 15 = 1 + 15 - 1;
+
         if (viewRange.lastLine > sourceBox.maximumLineNumber)
             viewRange.lastLine = sourceBox.maximumLineNumber;
 
@@ -889,20 +897,25 @@ Firebug.SourceBoxPanel = Obj.extend(SourceBoxPanelBase,
 
         if (FBTrace.DBG_COMPILATION_UNITS)
         {
-            FBTrace.sysout("getViewRangeFromScrollTop scrollTop:"+scrollTop+" viewRange: "+viewRange.firstLine+"-"+viewRange.lastLine+" max: "+sourceBox.maximumLineNumber+" panelHeight "+panelHeight);
+            FBTrace.sysout("getViewRangeFromScrollTop scrollTop:"+scrollTop+" viewRange: "+
+                viewRange.firstLine+"-"+viewRange.lastLine+" max: "+sourceBox.maximumLineNumber+
+                " panelHeight "+panelHeight);
+
             if (!this.noRecurse)
             {
                 this.noRecurse = true;
                 var testScrollTop = this.getScrollTopFromViewRange(sourceBox, viewRange);
                 delete this.noRecurse;
-                FBTrace.sysout("getViewRangeFromScrollTop "+((scrollTop==testScrollTop)?"checks":(scrollTop+"=!scrollTop!="+testScrollTop)));
+
+                FBTrace.sysout("getViewRangeFromScrollTop "+((scrollTop==testScrollTop)?
+                    "checks":(scrollTop+"=!scrollTop!="+testScrollTop)));
             }
         }
 
         return viewRange;
     },
 
-    /*
+    /**
      * inverse of the getViewRangeFromScrollTop.
      * If the viewRange was set by targetLineNumber, then this value become the new scroll top
      *    else the value will be the same as the scrollbar's given value of scrollTop.
