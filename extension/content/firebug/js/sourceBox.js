@@ -163,12 +163,26 @@ Firebug.SourceBoxPanel = Obj.extend(SourceBoxPanelBase,
         {
             var sourceBox = this.sourceBoxes[url];
             if (sourceBox)
-                this.panelNode.removeChild(sourceBox);
+            {
+                try
+                {
+                    this.panelNode.removeChild(sourceBox);
+                }
+                catch (err)
+                {
+                    if (FBTrace.DBG_ERRORS)
+                        FBTrace.sysout("sourceBox.removeAllSourceBoxes; EXCEPTION " + err, err);
+                }
+            }
             else if (FBTrace.DBG_ERRORS)
-                FBTrace.sysout("sourceBoxPanel ERROR no sourceBox at "+url+" in context "+this.context.getName());
+            {
+                FBTrace.sysout("sourceBoxPanel ERROR no sourceBox at "+url+" in context "+
+                    this.context.getName());
+            }
         }
 
         this.sourceBoxes = {};
+
         delete this.selectedSourceBox;
         delete this.location;
     },
