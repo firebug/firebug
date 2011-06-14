@@ -2249,16 +2249,15 @@ Firebug.CommandLine.CommandHistory = function()
 
     this.appendToHistory = function(command)
     {
-        if (commands[commandInsertPointer] == command)
-            return;
+        if (commands[commandInsertPointer] != command)
+        {
+            commandInsertPointer++;
+            if (commandInsertPointer >= commandHistoryMax)
+                commandInsertPointer = 0;
 
-        commandInsertPointer++;
-
-        if (commandInsertPointer >= commandHistoryMax)
-            commandInsertPointer = 0;
-
+            commands[commandInsertPointer] = command;
+        }
         commandPointer = commandInsertPointer + 1;
-        commands[commandInsertPointer] = command;
 
         if (Firebug.chrome.$("fbCommandLineHistoryButton").hasAttribute("disabled"))
         {
