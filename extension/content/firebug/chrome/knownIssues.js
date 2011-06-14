@@ -5,8 +5,9 @@ define([
     "firebug/lib/options",
     "firebug/firebug",
     "firebug/lib/dom",
+    "firebug/firefox/firefox",
 ],
-function(Obj, Options, Firebug, Dom) {
+function(Obj, Options, Firebug, Dom, Firefox) {
 
 // ********************************************************************************************* //
 // Constants
@@ -42,7 +43,7 @@ Firebug.KnownIssues = Obj.extend(Firebug.Module,
         // as users will get used to the toolbar button this could be removed completely.
         if (!Firebug.addonBarOpened)
         {
-            var addonBar = document.getElementById("addon-bar");
+            var addonBar = Firefox.getElementById("addon-bar");
 
             // Open the addon bar
             Dom.collapse(addonBar, false);
