@@ -80,8 +80,13 @@ Wrapper.unwrapIValueObject = function(scope, viewChrome)
     {
         var prop = listValue.value[i];
         var name = Wrapper.unwrapIValue(prop.name);
-        if (!Wrapper.shouldIgnore(name))
-            scopeVars[name] = Wrapper.unwrapIValue(prop.value, viewChrome);
+        if (prop.value.jsType === prop.value.TYPE_NULL) // null is an object (!)
+            scopeVars[name] = null;
+        else
+        {
+            if (!Wrapper.shouldIgnore(name))
+                scopeVars[name] = Wrapper.unwrapIValue(prop.value, viewChrome);
+        }
     }
     return scopeVars;
 };
