@@ -51,9 +51,9 @@
 }
 
 .closeButton:hover {
-    background-image: url(chrome://firebug/skin/win/closeHover.png);
+    background: url(chrome://firebug/skin/win/close.png) no-repeat 0 -16px;
 }
 
 .closeButton:hover:active {
-    background-image: url(chrome://firebug/skin/win/closeActive.png);
+    background: url(chrome://firebug/skin/win/close.png) no-repeat 0 -32px;
 }
