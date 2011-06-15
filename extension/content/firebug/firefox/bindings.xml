@@ -1148,14 +1148,14 @@
             this.filter.filterString = "";
 
             this.onkeypress = FBL.bind(this.onKeyPress, this);
-            window.addEventListener("keypress", this.onkeypress, true);
+            window.top.addEventListener("keypress", this.onkeypress, true);
 
             this.onclick = FBL.bind(this.onClick, this);
             this.popup.addEventListener("click", this.onclick, true);
         ]]></handler>
 
         <handler event="popuphidden"><![CDATA[
-            window.removeEventListener("keypress", this.onkeypress, true);
+            window.top.removeEventListener("keypress", this.onkeypress, true);
             delete this.onkeypress;
 
             delete this.filter.filterString;
