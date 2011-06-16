@@ -75,7 +75,7 @@ var HTMLLib =
             else
             {
                 this.noMatch = true;
-                Events.dispatch([Firebug.A11yModel], 'onHTMLSearchNoMatchFound',
+                Events.dispatch([Firebug.A11yModel], "onHTMLSearchNoMatchFound",
                     [panelNode.ownerPanel, text]);
             }
         };
@@ -113,11 +113,8 @@ var HTMLLib =
             var node;
             while (node = walkNode())
             {
-                if (node.nodeType == Node.TEXT_NODE)
-                {
-                    if (HTMLLib.isSourceElement(node.parentNode))
-                        continue;
-                }
+                if (node.nodeType == Node.TEXT_NODE && HTMLLib.isSourceElement(node.parentNode))
+                    continue;
 
                 var m = this.checkNode(node, reverse, caseSensitive);
                 if (m)
@@ -178,12 +175,13 @@ var HTMLLib =
             for (var i = firstStep || 0; i < checkOrder.length; i++)
             {
                 var m = re.exec(node[checkOrder[i].name], reverse, checkOrder[i].caseSensitive);
-                if (m)
+                if (m) {
                     return {
                         node: node,
                         isValue: checkOrder[i].isValue,
                         match: m
                     };
+                }
             }
         };
 
@@ -205,10 +203,7 @@ var HTMLLib =
                 if (nodeBox)
                 {
                     var attrNodeBox = HTMLLib.findNodeAttrBox(nodeBox, node.nodeName);
-                    if (isValue)
-                        return Dom.getChildByClass(attrNodeBox, "nodeValue");
-                    else
-                        return Dom.getChildByClass(attrNodeBox, "nodeName");
+                    return Dom.getChildByClass(attrNodeBox, isValue ? "nodeValue" : "nodeName");
                 }
             }
             else if (node.nodeType == Node.TEXT_NODE)
@@ -241,7 +236,7 @@ var HTMLLib =
                 this.selectNodeText(nodeBox, node, reMatch[0], reMatch.index, reverse,
                     reMatch.caseSensitive);
 
-                Events.dispatch([Firebug.A11yModel], 'onHTMLSearchMatchFound',
+                Events.dispatch([Firebug.A11yModel], "onHTMLSearchMatchFound",
                     [panelNode.ownerPanel, match]);
             }, this));
         };
@@ -278,14 +273,14 @@ var HTMLLib =
             if (row)
             {
                 var trueNodeBox = Dom.getAncestorByClass(nodeBox, "nodeBox");
-                Css.setClass(trueNodeBox,'search-selection');
+                Css.setClass(trueNodeBox, "search-selection");
 
                 Dom.scrollIntoCenterView(row, panelNode);
                 var sel = panelNode.ownerDocument.defaultView.getSelection();
                 sel.removeAllRanges();
                 sel.addRange(this.textSearch.range);
 
-                Css.removeClass(trueNodeBox,'search-selection');
+                Css.removeClass(trueNodeBox, "search-selection");
                 return true;
             }
         };
@@ -385,7 +380,7 @@ var HTMLLib =
             setTimeout(Obj.bindFixed(function()
             {
                 ioBox.select(node, true, true);
-                Events.dispatch([Firebug.A11yModel], 'onHTMLSearchMatchFound', [panelNode.ownerPanel, match]);
+                Events.dispatch([Firebug.A11yModel], "onHTMLSearchMatchFound", [panelNode.ownerPanel, match]);
             }, this));
         };
     },
@@ -409,11 +404,14 @@ var HTMLLib =
         var pastStart, pastEnd;
         var doc = root.ownerDocument;
 
-        function createWalker(docElement) {
+        function createWalker(docElement)
+        {
             var walk = doc.createTreeWalker(docElement, SHOW_ALL, null, true);
             walker.unshift(walk);
         }
-        function getLastAncestor() {
+
+        function getLastAncestor()
+        {
             while (walker[0].lastChild()) {}
             return walker[0].currentNode;
         }
@@ -425,31 +423,38 @@ var HTMLLib =
          */
         this.previousNode = function()
         {
-            if (pastStart) {
+            if (pastStart)
                 return undefined;
-            }
 
-            if (attrIndex) {
+            if (attrIndex)
+            {
                 attrIndex--;
-            } else {
+            }
+            else
+            {
                 var prevNode;
-                if (currentNode == walker[0].root) {
-                    if (walker.length > 1) {
+                if (currentNode == walker[0].root)
+                {
+                    if (walker.length > 1)
+                    {
                         walker.shift();
                         prevNode = walker[0].currentNode;
-                    } else {
+                    }
+                    else
+                    {
                         prevNode = undefined;
                     }
-                } else {
-                    if (!currentNode) {
-                        prevNode = getLastAncestor();
-                    } else {
-                        prevNode = walker[0].previousNode();
-                    }
-                    if (!prevNode) {    // Really shouldn't occur, but to be safe
+                }
+                else
+                {
+                    prevNode = !currentNode ? getLastAncestor(): walker[0].previousNode();
+
+                    // Really shouldn't occur, but to be safe
+                    if (!prevNode)
                         prevNode = walker[0].root;
-                    }
-                    while ((prevNode.nodeName || "").toUpperCase() == "IFRAME") {
+
+                    while ((prevNode.nodeName || "").toUpperCase() == "IFRAME")
+                    {
                         createWalker(prevNode.contentDocument.documentElement);
                         prevNode = getLastAncestor();
                     }
@@ -458,11 +463,10 @@ var HTMLLib =
                 attrIndex = ((prevNode || {}).attributes || []).length;
             }
 
-            if (!currentNode) {
+            if (!currentNode)
                 pastStart = true;
-            } else {
+            else
                 pastEnd = false;
-            }
 
             return this.currentNode();
         };
@@ -474,28 +478,36 @@ var HTMLLib =
          */
         this.nextNode = function()
         {
-            if (pastEnd) {
+            if (pastEnd)
                 return undefined;
-            }
 
-            if (!currentNode) {
+            if (!currentNode)
+            {
                 // We are working with a new tree walker
                 currentNode = walker[0].root;
                 attrIndex = 0;
-            } else {
+            }
+            else
+            {
                 // First check attributes
                 var attrs = currentNode.attributes || [];
-                if (attrIndex < attrs.length) {
+                if (attrIndex < attrs.length)
+                {
                     attrIndex++;
-                } else if ((currentNode.nodeName || "").toUpperCase() == "IFRAME") {
+                }
+                else if ((currentNode.nodeName || "").toUpperCase() == "IFRAME")
+                {
                     // Attributes have completed, check for iframe contents
                     createWalker(currentNode.contentDocument.documentElement);
                     currentNode = walker[0].root;
                     attrIndex = 0;
-                } else {
+                }
+                else
+                {
                     // Next node
                     var nextNode = walker[0].nextNode();
-                    while (!nextNode && walker.length > 1) {
+                    while (!nextNode && walker.length > 1)
+                    {
                         walker.shift();
                         nextNode = walker[0].nextNode();
                     }
@@ -504,11 +516,10 @@ var HTMLLib =
                 }
             }
 
-            if (!currentNode) {
+            if (!currentNode)
                 pastEnd = true;
-            } else {
+            else
                 pastStart = false;
-            }
 
             return this.currentNode();
         };
@@ -520,11 +531,7 @@ var HTMLLib =
          */
         this.currentNode = function()
         {
-            if (!attrIndex) {
-                return currentNode;
-            } else {
-                return currentNode.attributes[attrIndex-1];
-            }
+            return !attrIndex ? currentNode : currentNode.attributes[attrIndex-1];
         };
 
         /**
@@ -636,9 +643,11 @@ var HTMLLib =
         if (element.ownerDocument instanceof Ci.nsIDOMDocumentXBL)
         {
             if (FBTrace.DBG_HTML)
+            {
                 FBTrace.sysout("hasNoElementChildren "+Css.getElementCSSSelector(element)+
                     " (element.ownerDocument instanceof Ci.nsIDOMDocumentXBL) "+
                     (element.ownerDocument instanceof Ci.nsIDOMDocumentXBL), element);
+            }
 
             var walker = new HTMLLib.ElementWalker();
             var child = walker.getFirstChild(element);
@@ -673,8 +682,8 @@ var HTMLLib =
             var children = element.childNodes;
             for (var i = 0; i < children.length; i++)
             {
-              if (children[i] instanceof Comment)
-                 return true;
+                if (children[i] instanceof Comment)
+                   return true;
             }
         };
         return false;
@@ -814,13 +823,13 @@ var HTMLLib =
         {
             // the Mozilla XBL tree walker fails for parentNode
             return node.parentNode;
-        },
+        }
     },
 
     ElementWalker: function()  // tree walking via new ElementWalker
     {
 
-    },
+    }
 };
 
 // ********************************************************************************************* //
