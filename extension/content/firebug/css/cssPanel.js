@@ -1491,6 +1491,31 @@ Firebug.CSSStyleSheetPanel.prototype = Obj.extend(Firebug.Panel,
         return sourceLink;
     },
 
+    getTopmostRuleLine: function()
+    {
+        var panelNode = this.panelNode;
+        for (var child = panelNode.firstChild; child; child = child.nextSibling)
+        {
+            if (child.offsetTop+child.offsetHeight > panelNode.scrollTop)
+            {
+                var rule = child.repObject;
+                if (rule)
+                    return {
+                        line: getRuleLine(rule),
+                        offset: panelNode.scrollTop-child.offsetTop
+                    };
+            }
+        }
+        return 0;
+    },
+
+    getCurrentLineNumber: function()
+    {
+        var ruleLine = this.getTopMostRuleLine();
+        if (ruleLine)
+            return ruleLine.line;
+    },
+
     highlightRow: function(row)
     {
         if (this.highlightedRow)
