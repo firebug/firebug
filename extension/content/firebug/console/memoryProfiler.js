@@ -22,8 +22,19 @@ var Ci = Components.interfaces;
 
 var RETURN_CONTINUE = Ci.jsdIExecutionHook.RETURN_CONTINUE;
 
-var memoryReporterManager = Cc["@mozilla.org/memory-reporter-manager;1"].
-    getService(Ci.nsIMemoryReporterManager);
+var memoryReporterManager;
+
+try
+{
+    memoryReporterManager = Cc["@mozilla.org/memory-reporter-manager;1"].
+        getService(Ci.nsIMemoryReporterManager);
+}
+catch (err)
+{
+    if (FBTrace.DBG_MEMORY_PROFILER)
+        FBTrace.sysout("memoryProfiler; Looks like '@mozilla.org/memory-reporter-manager;1'" +
+            "is no available", err);
+}
 
 // List of memory reports displayed in the result. Append new path in the list in order
 // to create a new column in the result report-table.
@@ -91,6 +102,13 @@ Firebug.MemoryProfiler = Obj.extend(Firebug.Module,
 
     start: function(context, title)
     {
+        if (!memoryReporterManager)
+        {
+            // xxxHonza: locale if memory profiler will be part of 1.8
+            Firebug.Console.log("Memory profiler component is not available on your platform.");
+            return;
+        }
+
         this.profiling = true;
         FBS.addHandler(this);
 
@@ -210,6 +228,10 @@ Firebug.MemoryProfiler = Obj.extend(Firebug.Module,
     getMemoryReport: function()
     {
         var report = {};
+
+        if (!memoryReporterManager)
+            return report;
+
         var iter = memoryReporterManager.enumerateReporters();
         while (iter.hasMoreElements())
         {
