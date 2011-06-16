@@ -519,6 +519,7 @@ Firebug.CSSModule = Obj.extend(Obj.extend(Firebug.Module, Firebug.EditorSelector
         doc.addEventListener("DOMAttrModified", cleanupSheetHandler, false);
         doc.addEventListener("DOMNodeInserted", cleanupSheetHandler, false);
     },
+
     loadedContext: function(context)
     {
         var self = this;
@@ -527,11 +528,13 @@ Firebug.CSSModule = Obj.extend(Obj.extend(Firebug.Module, Firebug.EditorSelector
             self.cleanupSheets(subwin.document, context);
         });
     },
+
     initContext: function(context)
     {
         context.dirtyListener = new Firebug.CSSDirtyListener(context);
         this.addListener(context.dirtyListener);
     },
+
     destroyContext: function(context)
     {
         this.removeListener(context.dirtyListener);
@@ -2389,7 +2392,8 @@ CSSEditor.prototype = domplate(Firebug.InlineEditor.prototype,
             if (value && value != "null")
             {
                 parsedValue = parsePriority(value);
-                Firebug.CSSModule.setProperty(rule, propName, parsedValue.value, parsedValue.priority);
+                Firebug.CSSModule.setProperty(rule, propName, parsedValue.value,
+                    parsedValue.priority);
             }
             else if (previousValue && previousValue != "null")
                 Firebug.CSSModule.removeProperty(rule, propName);
@@ -2400,14 +2404,14 @@ CSSEditor.prototype = domplate(Firebug.InlineEditor.prototype,
             var saveSuccess = !!rule.style.getPropertyValue(propName || value);
             if(!saveSuccess && !propName)
             {
-                propName = value.replace(/-./g,function(match) match[1].toUpperCase());
-                if(propName in rule.style || propName=='float')
-                    saveSuccess = 'almost';
+                propName = value.replace(/-./g, function(match) match[1].toUpperCase());
+                if(propName in rule.style || propName == "float")
+                    saveSuccess = "almost";
             }
-            this.box.setAttribute('saveSuccess',saveSuccess);
+            this.box.setAttribute("saveSuccess",saveSuccess);
         }
         else
-            this.box.removeAttribute('saveSuccess');
+            this.box.removeAttribute("saveSuccess");
 
         Firebug.Inspector.repaint();
 
@@ -2422,7 +2426,11 @@ CSSEditor.prototype = domplate(Firebug.InlineEditor.prototype,
         }
         else if (charCode == 59 /*";"*/ && Css.hasClass(target, "cssPropValue"))
         {
-            return true;
+            var cssValue = parseCSSValue(this.input.value, this.input.selectionStart);
+            // Simple test, if we are inside a string (see issue 4543)
+            var isValueInString = (cssValue.value.indexOf("\"") != -1);
+
+            return !isValueInString;
         }
     },
 
