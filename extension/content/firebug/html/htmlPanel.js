@@ -1874,8 +1874,41 @@ AttributeEditor.prototype = domplate(Firebug.InlineEditor.prototype,
         {
             return true;
         }
-        else if ((charCode == 34 /* '"' */ || charCode == 39 /* ''' */) && Css.hasClass(target, "nodeValue"))
+        else if ((charCode == 34 /* '"' */ || charCode == 39 /* ''' */) &&
+            Css.hasClass(target, "nodeValue"))
         {
+            var jsAttributes = [
+                "onabort",
+                "onblur",
+                "onchange",
+                "onclick",
+                "ondblclick",
+                "onerror",
+                "onfocus",
+                "onkeydown",
+                "onkeypress",
+                "onkeyup",
+                "onload",
+                "onmousedown",
+                "onmousemove",
+                "onmouseout",
+                "onmouseover",
+                "onmouseup",
+                "onreset",
+                "onselect",
+                "onsubmit",
+                "onunload"
+            ]
+
+            var attrName = Dom.getPreviousByClass(target, "nodeName").textContent;
+
+            // This should cover most of the cases where quotes are allowed inside the value
+            // See issue 4542
+            for (var i = 0; i < jsAttributes.length; i++)
+            {
+                if (attrName == jsAttributes[i])
+                    return false;
+            }
             return true;
         }
     },
