@@ -197,13 +197,15 @@ code {
     z-index: 2147483647;
     position: fixed;
     padding: 2px 3px;
-    border: 1px solid #CBE087;
+    border: 1px solid rgb(126, 171, 205);
     background: LightYellow;
-    font-family: monospace;
+    font-family: Lucida Grande, Tahoma, sans-serif;
     color: #000000;
     display: none;
     white-space: nowrap;
     pointer-events: none;
+    border-radius: 3px;
+    box-shadow: gray 2px 2px 3px;
 }
 
 .infoTip[active="true"] {

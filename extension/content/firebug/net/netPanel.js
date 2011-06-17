@@ -3202,14 +3202,16 @@ Firebug.NetMonitor.TimeInfoTip = domplate(Firebug.Rep,
         TR(
             TD(),
             TD("$startTime.time|formatStartTime"),
-            TD({"colspan": 2},
+            TD({"class": "timeInfoTipStartLabel", "colspan": 2},
                 "$startTime|getLabel"
             )
         ),
 
     separatorTag:
         TR(
-            TD({"colspan": 4, "height": "10px"})
+            TD({"class": "timeInfoTipSeparator", "colspan": 4, "height": "10px"},
+                SPAN("$label")
+            )
         ),
 
     eventsTag:
@@ -3318,11 +3320,12 @@ Firebug.NetMonitor.TimeInfoTip = domplate(Firebug.Rep,
         // Insert start request time.
         var startTime = {};
         startTime.time = file.startTime - file.phase.startTime;
-        startTime.bar = "Started";
+        startTime.bar = "started.label";
         this.startTimeTag.insertRows({startTime: startTime}, infoTip.firstChild);
 
         // Insert separator.
-        this.separatorTag.insertRows({}, infoTip.firstChild);
+        this.separatorTag.insertRows({label: Locale.$STR("requestinfo.phases.label")},
+            infoTip.firstChild);
 
         // Insert request timing info.
         this.timingsTag.insertRows({timings: timings}, infoTip.firstChild);
@@ -3330,7 +3333,10 @@ Firebug.NetMonitor.TimeInfoTip = domplate(Firebug.Rep,
         // Insert events timing info.
         if (events.length)
         {
-            this.separatorTag.insertRows({}, infoTip.firstChild);
+            // Insert separator.
+            this.separatorTag.insertRows({label: Locale.$STR("requestinfo.timings.label")},
+                infoTip.firstChild);
+
             this.eventsTag.insertRows({events: events}, infoTip.firstChild);
         }
 
@@ -3412,7 +3418,8 @@ Firebug.NetMonitor.SizeInfoTip = domplate(Firebug.Rep,
                 size: responseHeaders.length + file.size});
             sizeInfo.push({label: Locale.$STR("net.sizeinfo.Total Sent") + "*",
                 size: file.requestHeadersText.length + postText.length});
-            sizeInfo.push({label: "*" + Locale.$STR("net.sizeinfo.Including Headers"), size: -2});
+            sizeInfo.push({label: " ", size: -2});
+            sizeInfo.push({label: "* " + Locale.$STR("net.sizeinfo.Including HTTP Headers"), size: -2});
         }
 
         this.tag.replace({sizeInfo: sizeInfo}, parentNode);
