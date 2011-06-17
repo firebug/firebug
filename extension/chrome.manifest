@@ -47,8 +47,8 @@ locale  firebug vi          locale/vi/
 locale  firebug zh-CN       locale/zh-CN/
 locale  firebug zh-TW       locale/zh-TW/
 
-#overlay chrome://browser/content/browser.xul                   chrome://firebug/content/browserOverlay.xul
-overlay chrome://browser/content/browser.xul                    chrome://firebug/content/firefox/browserOverlayWithFrame.xul
+overlay chrome://browser/content/browser.xul                   chrome://firebug/content/browserOverlay.xul
+#overlay chrome://browser/content/browser.xul                    chrome://firebug/content/firefox/browserOverlayWithFrame.xul
 
 overlay chrome://global/content/customizeToolbar.xul            chrome://firebug/content/firefox/start-button/customizeToolbarOverlay.xul
 overlay chrome://mozapps/content/extensions/about.xul           chrome://firebug/content/firefox/aboutOverlay.xul
