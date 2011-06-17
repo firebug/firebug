@@ -189,9 +189,9 @@ Locale.internationalize = function(element, attr, args)
         if (xulString)
         {
             var localized = args ? Locale.$STRF(xulString, args) : Locale.$STR(xulString);
-
-            // Set localized value of the attribute.
-            element.setAttribute(attr, localized);
+            // Set localized value of the attribute only if it exists.
+            if (localized)
+                element.setAttribute(attr, localized);
         }
     }
     else
