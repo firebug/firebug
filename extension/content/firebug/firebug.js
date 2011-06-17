@@ -87,6 +87,17 @@ catch (exc)
 
 // ********************************************************************************************* //
 
+if (window.Firebug)
+{
+    // Stow the pre-load properties, add them back at the end
+    var PreFirebug = {};
+    var preFirebugKeys = Object.keys(Firebug);
+    preFirebugKeys.forEach(function copyProps(key)
+    {
+        PreFirebug[key] = Firebug[key];
+    });
+}
+
 /**
  * @class Represents the main Firebug application object. An instance of this object is
  * created for each browser window (browser.xul).
@@ -2450,6 +2461,16 @@ function shutdownFirebug()
 
     Firebug.shutdown();
 }
+
+if (preFirebugKeys)
+{
+    // Add back the preLoad properties
+    preFirebugKeys.forEach(function copyProps(key)
+    {
+        Firebug[key] = PreFirebug[key];
+    });
+}
+
 
 // ********************************************************************************************* //
 // Registration

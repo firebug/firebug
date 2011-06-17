@@ -7,7 +7,7 @@ var Firebug = Firebug || {};
 /**
  * Returns default configuration object for Firebug module loader (RequireJS). Custom
  * value can be passed through the argument.
- * 
+ *
  * @param {Object} baseConfig Custom configuration values.
  */
 Firebug.getModuleLoaderConfig = function(baseConfig)
@@ -21,12 +21,9 @@ Firebug.getModuleLoaderConfig = function(baseConfig)
     baseConfig.baseUrl = baseConfig.baseUrl || "resource://";
     baseConfig.paths = baseConfig.paths || {"arch": baseConfig.arch, "firebug": "firebug_rjs"};
 
-    // to give each XUL window its own loader (for now)
-    var uid = Math.random();
-
     var config =
     {
-        context: "Firebug " + uid, // TODO XUL window id on FF4.0+
+        context: "Firebug",
         baseUrl: baseConfig.baseUrl,
         paths: baseConfig.paths,
         modules: [
