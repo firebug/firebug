@@ -1179,6 +1179,9 @@ NetPanel.prototype = Obj.extend(Firebug.ActivablePanel,
             row.repObject = file;
             file.row = row;
 
+            if (file.breakLayout)
+                row.setAttribute("breakLayout", "true");
+
             // Make sure a breakpoint is displayed.
             var breakpoints = this.context.netProgress.breakpoints;
             if (breakpoints && breakpoints.findBreakpoint(file.getFileURL()))
@@ -4308,6 +4311,8 @@ NetProgress.prototype =
     {
         var phase = new NetPhase(file);
         phase.initial = !this.currentPhase;
+
+        file.breakLayout = true;
 
         this.currentPhase = phase;
         this.phases.push(phase);

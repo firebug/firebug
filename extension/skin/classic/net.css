@@ -161,6 +161,15 @@
     background: #EFEFEF;
 }
 
+/* Visual separator between phases */
+.netRow[breakLayout="true"] .netCol {
+    border-top: 1px solid rgb(207,207,207);
+}
+
+.netRow[breakLayout="true"] .netCol.netDebugCol {
+    border-top: none;
+}
+
 .netCol {
     padding: 0;
     vertical-align: top;
@@ -741,8 +750,7 @@ body[resizingHtmlPreview="true"] .netInfoHtmlPreview {
 
 /************************************************************************************************/
 
-.netActivationRow,
-.netPageSeparatorRow {
+.netActivationRow {
     background: rgb(229, 229, 229) !important;
     font-weight: normal;
     color: black;
@@ -761,6 +769,7 @@ body[resizingHtmlPreview="true"] .netInfoHtmlPreview {
 
 .netPageSeparatorRow {
     height: 5px !important;
+    background-color: rgb(238, 238, 238);
 }
 
 .netPageSeparatorLabel {
