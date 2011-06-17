@@ -4252,12 +4252,27 @@ NetProgress.prototype =
     {
         // Phase start can be measured since HTTP-ON-MODIFIED-REQUEST as
         // ACTIVITY_SUBTYPE_REQUEST_HEADER won't fire if the response comes from the BF cache.
-        // If it's standard HTTP request we need to start again since REQUEST_HEADER as this
-        // event has the proper time.
+        // If it's real HTTP request we need to start again since ACTIVITY_SUBTYPE_REQUEST_HEADER
+        // has the proper time.
+        // Order of ACTIVITY_SUBTYPE_REQUEST_HEADER can be different than order of
+        // HTTP-ON-MODIFIED-REQUEST events, see issue 4535
         if (file.phase)
         {
             if (file.phase.files[0] == file)
                 file.phase.startTime = file.startTime;
+
+            // Since the request order can be wrong (see above) we need to iterate all files
+            // in this phase and find the one that actually executed first.
+            // In some cases, the waterfall can display a request executed before another,
+            // but started later.
+            // See: https://bugzilla.mozilla.org/show_bug.cgi?id=664781
+            var phase = file.phase;
+            for (var i=0; i<phase.files.length; i++)
+            {
+                var file = phase.files[i];
+                if (file.startTime > 0 && phase.startTime > file.startTime)
+                    phase.startTime = file.startTime;
+            }
             return;
         }
 
