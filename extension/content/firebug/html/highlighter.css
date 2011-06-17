@@ -18,7 +18,7 @@
     -moz-transform-origin: 50% 50% !important;
     -moz-border-radius: 0 !important;
     -moz-box-shadow: none !important;
-    background-image: none !important;
+    background: transparent none !important;
     pointer-events: none !important;
 }
 
@@ -124,6 +124,6 @@
 
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 .fbProxyElement {
-    position: absolute !important;
+    position: auto !important;
     pointer-events: auto !important;
 }
