@@ -3317,9 +3317,11 @@ Firebug.NetMonitor.TimeInfoTip = domplate(Firebug.Rep,
             return a.start < b.start ? -1 : 1;
         })
 
-        // Insert start request time.
+        // Insert start request time. It's computed since the beginning (pag load start time)
+        // i.e. from the first phase start.
+        var firstPhaseStartTime = context.netProgress.phases[0].startTime;
         var startTime = {};
-        startTime.time = file.startTime - file.phase.startTime;
+        startTime.time = file.startTime - firstPhaseStartTime;
         startTime.bar = "started.label";
         this.startTimeTag.insertRows({startTime: startTime}, infoTip.firstChild);
 
