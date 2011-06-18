@@ -801,7 +801,8 @@ NetPanel.prototype = Obj.extend(Firebug.ActivablePanel,
 
     openRequestInTab: function(file)
     {
-        Win.openNewTab(file.href, file.postText);
+        var lines = file.postText.split("\n");
+        Win.openNewTab(file.href, lines[lines.length-1]);
     },
 
     openResponseInTab: function(file)
