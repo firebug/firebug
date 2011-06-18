@@ -124,6 +124,6 @@
 
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 .fbProxyElement {
-    position: auto !important;
+    position: absolute !important;
     pointer-events: auto !important;
 }
