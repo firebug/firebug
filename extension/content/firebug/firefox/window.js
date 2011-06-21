@@ -37,7 +37,7 @@ Win.getWindowProxyIdForWindow = function(win)
         return Win.getTabIdForWindow(win);
 
     return id;
-},
+};
 
 Win.getTabForWindow = function(aWindow)
 {
@@ -67,13 +67,13 @@ Win.getTabForWindow = function(aWindow)
     }
 
     return null;
-},
+};
 
 Win.getTabIdForWindow = function(win)
 {
     var tab = Win.getTabForWindow(win);
     return tab ? tab.linkedPanel : null;
-},
+};
 
 // ********************************************************************************************* //
 // Window iteration
