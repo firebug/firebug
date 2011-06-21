@@ -486,9 +486,8 @@ Firebug.CommandLine = Obj.extend(Firebug.Module,
 
     reenter: function(context)
     {
-        var command = this.commandHistory.commands[this.commandHistory.commandInsertPointer];
-        if (command)
-            this.enter(context, command);
+        var command = this.commandHistory.getLastCommand();
+        this.enter(context, command);
     },
 
     copyBookmarklet: function(context)
@@ -2246,6 +2245,14 @@ Firebug.CommandLine.CommandHistory = function()
     var commands = [];
     var commandPointer = 0;
     var commandInsertPointer = -1;
+
+    this.getLastCommand = function()
+    {
+        var command = commands[commandInsertPointer];
+        if (!command)
+            return "";
+        return command;
+    };
 
     this.appendToHistory = function(command)
     {
