@@ -8,7 +8,6 @@ define([
     "firebug/firefox/xpcom",
     "firebug/chrome/reps",
     "firebug/lib/locale",
-    "firebug/net/requestObserver",
     "firebug/lib/wrapper",
     "firebug/lib/url",
     "firebug/js/sourceLink",
@@ -21,7 +20,7 @@ define([
     "firebug/js/fbs",
     "firebug/console/errors",
 ],
-function(Obj, Firebug, Firefox, CompilationUnit, Xpcom, FirebugReps, Locale, HttpRequestObserver,
+function(Obj, Firebug, Firefox, CompilationUnit, Xpcom, FirebugReps, Locale,
     Wrapper, Url, SourceLink, StackFrame, Css, Win, Str, Arr, Debug, FBS) {
 
 // ********************************************************************************************* //
@@ -2473,16 +2472,6 @@ Firebug.Debugger = Obj.extend(Firebug.ActivableModule,
     {
         if (name == "breakOnErrors")
             Firefox.getElementById("cmd_breakOnErrors").setAttribute("checked", value);
-/*
-        if (name == "script.enableSites")
-        {
-            if (value)
-                this.addObserver(this.selfObserver);
-            else
-                this.removeObserver(this.selfObserver);
-        }
-        FBTrace.sysout("Debugger updateOption "+name+" = "+value+" hasObserver: "+this.hasObservers());
-        */
     },
 
     getObjectByURL: function(context, url)
@@ -2555,7 +2544,6 @@ Firebug.Debugger = Obj.extend(Firebug.ActivableModule,
     activateDebugger: function()
     {
         this.registerDebugger();
-        HttpRequestObserver.addObserver(this);
 
         // If jsd is already active, we'll notify true; else we'll get another event
         var isActive = FBS.isJSDActive();
@@ -2569,7 +2557,6 @@ Firebug.Debugger = Obj.extend(Firebug.ActivableModule,
     deactivateDebugger: function()
     {
         this.unregisterDebugger();
-        HttpRequestObserver.removeObserver(this);  // for tabCache
 
         var isActive = FBS.isJSDActive();
         if (!isActive)
@@ -2595,7 +2582,6 @@ Firebug.Debugger = Obj.extend(Firebug.ActivableModule,
             return;
 
         var paused = FBS.pause();  // can be called multiple times.
-        HttpRequestObserver.addObserver(this);  // for tabCache
 
         if (FBTrace.DBG_ACTIVATION)
             FBTrace.sysout("debugger.onSuspendFirebug paused: "+paused+" isAlwaysEnabled " +
@@ -2613,7 +2599,6 @@ Firebug.Debugger = Obj.extend(Firebug.ActivableModule,
             return;
 
         var unpaused = FBS.unPause();
-        HttpRequestObserver.removeObserver(this);
 
         if (FBTrace.DBG_ACTIVATION)
             FBTrace.sysout("debugger.onResumeFirebug unpaused: "+unpaused+" isAlwaysEnabled " +

@@ -1408,7 +1408,7 @@ NetPanel.prototype = Obj.extend(Firebug.ActivablePanel,
         // Compute also offset for page timings, e.g.: contentLoadBar and windowLoadBar,
         // which are displayed for the first phase. This is done only if a page exists.
         this.calculateTimeStamps(file, phase);
- 
+
         return phase;
     },
 
@@ -4730,7 +4730,7 @@ function monitorContext(context)
     }
 
     // Register activity-distributor observer if available (#488270)
-    //NetHttpActivityObserver.registerObserver();
+    NetHttpActivityObserver.registerObserver();
 
     var listener = context.netProgress = networkContext;
 
@@ -4767,7 +4767,7 @@ function unmonitorContext(context)
     if (panel)
         panel.updateLayout();
 
-    //NetHttpActivityObserver.unregisterObserver();
+    NetHttpActivityObserver.unregisterObserver();
 
     // Remove cache listener
     context.sourceCache.removeListener(netProgress.cacheListener);

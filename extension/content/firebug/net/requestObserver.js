@@ -157,7 +157,7 @@ var HttpRequestObserver =
     notifyObservers: function(subject, topic, data)
     {
         if (FBTrace.DBG_HTTPOBSERVER)
-            FBTrace.sysout("httpObserver.notifyObservers (" + this.observers.length + ") " + topic);
+            FBTrace.sysout("httpObserver.notifyObservers (" + this.observers.length + ") " + topic, this.observers);
 
         for (var i=0; i<this.observers.length; i++)
         {
