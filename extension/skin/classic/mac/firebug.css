@@ -9,6 +9,7 @@
 
 #fbCommandToolbar {
     border-top: 1px solid #BBB9BA;
+    border-bottom: 1px solid #BBB9BA;
     background: #F6F6F6 -moz-linear-gradient(bottom, #FFFFFF, #E9E9E9 55%, #F2F2F2 55%, #FAFAFA) repeat-x;
 }
 
@@ -94,7 +95,12 @@
 
 .fbsearch-options-buttons {
     -moz-appearance: none;
-    background: #464646 -moz-linear-gradient(bottom, rgba(255, 255, 255, 0.3), rgba(255, 255, 255, 0) 55%, rgba(255, 255, 255, 0.1) 55%, rgba(255, 255, 255, 0.2)) repeat-x center center;
+    background: #464646 -moz-linear-gradient(
+        bottom,
+        rgba(255, 255, 255, 0.3),
+        rgba(255, 255, 255, 0) 55%,
+        rgba(255, 255, 255, 0.1) 55%,
+        rgba(255, 255, 255, 0.2)) repeat-x center center;
     border: 3px solid;
     -moz-border-top-colors: rgba(0,0,0,0.35) rgba(26,26,26,0.5) rgba(255,255,255,0.4);
     -moz-border-right-colors: rgba(53,53,53,1) rgba(53,53,53,1) rgba(162,162,162,1);
@@ -228,60 +234,34 @@
 
 panelTab {
     margin: 2px 1px 0 3px;
+    border: 1px solid transparent;
+    border-bottom: none;
+    border-radius: 4px 4px 0 0;
+    padding: 2px 7px 5px 7px;
     font-size: 11px;
     font-weight: bold;
     color: #565656;
     direction: ltr;
 }
-panelTab:hover,
 panelTab[selected="true"] {
-    margin-bottom: 0px;
+    border: 1px solid #A0A0A0;
+    border-bottom: none;
+    background: -moz-linear-gradient(top, rgba(255, 255, 255, 1), rgba(255, 255, 255, 0.7)) no-repeat 0 0;
+    color: inherit;
 }
 
-.panelTab-left {
-    width: 6px;
+panelTab:not([selected="true"]):hover {
+    border: 1px solid #C8C8C8;
+    border-bottom: none;
+    background: -moz-linear-gradient(top, rgba(255, 255, 255, 0.4), rgba(255, 255, 255, 0.2)) no-repeat 0 0;
 }
 
 .panelTab-text {
     margin: 0;
-    padding: 3px 1px 4px 1px;
-}
-
-.panelTab-right {
-    width: 6px;
-}
-
-panelTab:hover > .panelTab-left {
-    background: url(chrome://firebug/skin/mac/tabLeftHover.png) no-repeat top;
-}
-
-panelTab:hover > .panelTab-text {
-    background: url(chrome://firebug/skin/mac/tabMidHover.png) repeat-x top;
-}
-
-panelTab:hover > panelTabMenu {
-    background: url(chrome://firebug/skin/mac/tabMidHover.png) repeat-x top;
-}
-
-panelTab:hover > .panelTab-right {
-    background: url(chrome://firebug/skin/mac/tabRightHover.png) no-repeat top;
-}
-
-panelTab[selected="true"] > .panelTab-left {
-    background: url(chrome://firebug/skin/mac/tabLeft.png) no-repeat top;
-}
-
-panelTab[selected="true"] > .panelTab-text {
-    background: url(chrome://firebug/skin/mac/tabMid.png) repeat-x top;
-    color: #000000;
 }
 
 panelTab[selected="true"] > panelTabMenu {
-    background: url(chrome://firebug/skin/mac/tabMid.png) repeat-x top;
-}
-
-panelTab[selected="true"] > .panelTab-right {
-    background: url(chrome://firebug/skin/mac/tabRight.png) no-repeat top;
+    margin-left: 3px;
 }
 
 /************************************************************************************************/
@@ -337,43 +317,43 @@ panelTab[selected="true"] > .panelTab-right {
 }
 
 .toolbar-text-button > .toolbarbutton-icon {
-  display: none !important;
+    display: none !important;
 }
 
 .toolbar-text-button:hover:not([disabled="true"]),
 .toolbar-text-menubutton:hover:not([disabled="true"]) {
-  background: url("chrome://browser/skin/bookmark-hover-left.png") no-repeat left center;
+    background: url("chrome://browser/skin/bookmark-hover-left.png") no-repeat left center;
 }
 
 .toolbar-text-button:hover:not([disabled="true"]) > .toolbarbutton-text,
 .toolbar-text-menubutton:hover:not([disabled="true"]) > .toolbarbutton-menu-dropmarker {
-  background: url("chrome://browser/skin/bookmark-hover-right.png") no-repeat right center;
-  color: #fff;
+    background: url("chrome://browser/skin/bookmark-hover-right.png") no-repeat right center;
+    color: #FFFFFF;
 }
 
 .toolbar-text-menubutton:hover:not([disabled="true"]) > .toolbarbutton-text {
-  background: url("chrome://browser/skin/bookmark-hover-mid.png") repeat-x;
-  color: #fff;
+    background: url("chrome://browser/skin/bookmark-hover-mid.png") repeat-x;
+    color: #FFFFFF;
 }
 
 .toolbar-text-button:hover:active:not([disabled="true"]),
 .toolbar-text-button[checked="true"]:not([disabled="true"]),
 .toolbar-text-menubutton:hover:active:not([disabled="true"]),
 .toolbar-text-menubutton[open="true"]:not([disabled="true"]) {
-  background: url("chrome://browser/skin/bookmark-open-left.png") no-repeat left center;
+    background: url("chrome://browser/skin/bookmark-open-left.png") no-repeat left center;
 }
 
 .toolbar-text-menubutton:hover:active:not([disabled="true"]) > .toolbarbutton-text,
 .toolbar-text-menubutton[open="true"]:not([disabled="true"]) > .toolbarbutton-text {
-  background: url("chrome://browser/skin/bookmark-open-mid.png") repeat-x !important;
-  color: #fff;
+    background: url("chrome://browser/skin/bookmark-open-mid.png") repeat-x !important;
+    color: #FFFFFF;
 }
 
 .toolbar-text-button:hover:active:not([disabled="true"]) > .toolbarbutton-text,
 .toolbar-text-button[checked="true"]:not([disabled="true"]) > .toolbarbutton-text,
 .toolbar-text-menubutton:hover:active:not([disabled="true"]) > .toolbarbutton-menu-dropmarker,
 .toolbar-text-menubutton[open="true"]:not([disabled="true"]) > .toolbarbutton-menu-dropmarker {
-  background: url("chrome://browser/skin/bookmark-open-right.png") no-repeat right center;
+    background: url("chrome://browser/skin/bookmark-open-right.png") no-repeat right center;
 }
 
 .toolbar-text-button[checked="true"] {
@@ -446,7 +426,7 @@ panelTab[selected="true"] > .panelTab-right {
 
 /* ensure the inner toolbar background looks the same as the other toolbars */
 #fbToolbarInner.innerToolbar {
-    background: #F6F6F6 -moz-linear-gradient(bottom, #FFFFFF, #E9E9E9 55%, #F2F2F2 55%, #FAFAFA) repeat-x;
+    background: #F6F6F6 -moz-linear-gradient(bottom, #DCDCDC 1px, #FFFFFF 1px, #E9E9E9 55%, #F2F2F2 55%, #FAFAFA) repeat-x;
     margin-left: -5px;
     margin-right: 0px;
 }

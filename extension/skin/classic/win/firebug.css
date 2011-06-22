@@ -186,7 +186,11 @@
 /************************************************************************************************/
 
 .panelTabBox {
-    background: url(chrome://firebug/skin/win/tabBg.png) repeat-x bottom;
+    background: -moz-linear-gradient(
+        bottom,
+        rgba(0, 0, 0, 0.25) 1px,
+        rgba(0, 0, 0, 0.15) 1px,
+        rgba(0, 0, 0, 0));
     border-bottom: 1px solid threedshadow;
     padding: 0;
     overflow: hidden;
@@ -198,65 +202,49 @@
 
 panelTab {
     margin: 1px 0 0 0;
-    border: none;
+    border: 1px solid transparent;
+    border-bottom: none;
+    border-radius: 4px 4px 0 0;
+    padding: 4px 7px;
+    font-size: 11px;
     font-weight: bold;
     color: #565656;
-    font-size: 11px;
     direction: ltr;
 }
 
 panelTab[selected="true"] {
+    border: 1px solid #A0A0A0;
+    border-bottom: none;
+    background: -moz-linear-gradient(
+        top,
+        rgba(255, 255, 255, 0.7),
+        rgba(255, 255, 255, 0.9) 40%,
+        rgba(255, 255, 255, 0.4) 40%,
+        rgba(255, 255, 255, 0.6)) no-repeat 0 0;
     color: inherit;
 }
 
-.panelTab-left {
-    width: 8px;
+panelTab:not([selected="true"]):hover {
+    border: 1px solid #C8C8C8;
+    border-bottom: none;
+    background: -moz-linear-gradient(
+        top,
+        rgba(255, 255, 255, 0.2),
+        rgba(255, 255, 255, 0.4) 40%,
+        rgba(255, 255, 255, 0) 40%,
+        rgba(255, 255, 255, 0.1)) no-repeat 0 0;
 }
 
 .panelTab-text {
     margin: 0;
-    padding: 4px 1px 4px 1px;
 }
 
 .panelTab-text[disabled="true"] {
-    color:Gray;
-}
-
-.panelTab-right {
-    width: 8px;
-}
-
-panelTab:hover > .panelTab-left {
-    background: url(chrome://firebug/skin/win/tabLeftHover.png) no-repeat top;
-}
-
-panelTab:hover > .panelTab-text {
-    background: url(chrome://firebug/skin/win/tabMidHover.png) repeat-x top;
-}
-
-panelTab:hover > panelTabMenu {
-    background: url(chrome://firebug/skin/win/tabMidHover.png) repeat-x top;
-}
-
-panelTab:hover > .panelTab-right {
-    background: url(chrome://firebug/skin/win/tabRightHover.png) no-repeat top;
-}
-
-panelTab[selected="true"] > .panelTab-left {
-    background: url(chrome://firebug/skin/win/tabLeft.png) no-repeat top;
-}
-
-panelTab[selected="true"] > .panelTab-text {
-    background: url(chrome://firebug/skin/win/tabMid.png) repeat-x top;
-    color: #000000;
+    color: gray;
 }
 
 panelTab[selected="true"] > panelTabMenu {
-    background: url(chrome://firebug/skin/win/tabMid.png) repeat-x top;
-}
-
-panelTab[selected="true"] > .panelTab-right {
-    background: url(chrome://firebug/skin/win/tabRight.png) no-repeat top;
+    margin-left: 3px;
 }
 
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
