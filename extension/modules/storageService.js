@@ -10,6 +10,8 @@ const Cr = Components.results;
 // https://developer.mozilla.org/en/Using_JavaScript_code_modules
 var EXPORTED_SYMBOLS = ["Storage", "StorageService", "TextService"];
 
+Components.utils.import("resource://firebug/privacyService.js");
+
 /*
  * http://dev.w3.org/html5/webstorage/#storage-0
  * interface Storage {
@@ -233,6 +235,9 @@ var ObjectPersister =
 
     writeObject: function(leafName, obj)
     {
+        if (PrivacyService.isPrivateBrowsing())
+            throw new Error("No storage is written while in private browsing mode");
+
         if (ObjectPersister.flushTimeout)
             return;
 
