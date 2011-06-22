@@ -369,9 +369,27 @@ Css.safeGetCSSRules = function(styleSheet)
     }
     catch (e)
     {
+        if (FBTrace.DBG_ERRORS)
+            FBTrace.sysout("safeGetCSSRules "+e, e);
     }
 
     return null;
+}
+
+Css.isValidStylesheet = function(styleSheet)
+{
+    try
+    {
+        var dummy = styleSheet.cssRules; // Mozilla throws
+        return true;
+    }
+    catch (e)
+    {
+        if (FBTrace.DBG_ERRORS)
+            FBTrace.sysout("isValidStylesheet "+e, e);
+    }
+
+    return false;
 }
 
 // ********************************************************************************************* //
@@ -427,20 +445,8 @@ Css.appendStylesheet = function(doc, uri)
 
 Css.getStyleSheetByHref = function(url, context)
 {
-    if (FBTrace.DBG_ERRORS && FBTrace.DBG_CSS)
-    {
-        var r = Css.totalRules;
-        var s = Css.totalSheets;
-        var t = new Date();
-    }
-
     if (!context.styleSheetMap)
         Css.createStyleSheetMap(context);  // fill cache
-
-    if (FBTrace.DBG_ERRORS && FBTrace.DBG_CSS)
-        FBTrace.sysout((Css.totalRules-r)+" rules in "+ (Css.totalSheets-s)+
-            " sheets required "+(new Date().getTime() - t.getTime())+" ms",
-            context.styleSheetMap);
 
     // hasOwnProperty is called to prevent possible conflicts with prototype extensions
     // and strict mode warnings
@@ -456,19 +462,10 @@ Css.createStyleSheetMap = function(context)
         var sheetURL = Css.getURLForStyleSheet(sheet);
         context.styleSheetMap[sheetURL] = sheet;
 
-        if (FBTrace.DBG_ERRORS && FBTrace.DBG_CSS)
-        {
-            Css.totalSheets++;
-            FBTrace.sysout("addSheet "+Css.totalSheets+" "+sheetURL);
-        }
-
         // recurse for imported sheets
 
         for (var i = 0; i < sheet.cssRules.length; ++i)
         {
-            if (FBTrace.DBG_ERRORS && FBTrace.DBG_CSS)
-                Css.totalRules++;
-
             var rule = sheet.cssRules[i];
             if (rule instanceof CSSStyleRule)
             {
@@ -1659,7 +1656,7 @@ Css.cssKeywords =
         "-moz-transform-origin",
         "-moz-transform"
     ],
-       
+
     "mozTransitionTimingFunction":
     [
        "cubic-bezier",
@@ -1669,7 +1666,7 @@ Css.cssKeywords =
        "ease-out",
        "linear"
     ],
-       
+
     "width":
     [
         "-moz-max-content",

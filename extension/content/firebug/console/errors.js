@@ -67,13 +67,6 @@ var Errors = Firebug.Errors = Obj.extend(Firebug.Module,
     initContext: function(context)
     {
         this.clear(context);
-
-        if (FBTrace.DBG_ERRORLOG && FBTrace.DBG_CSS)
-        {
-            Css.totalSheets = 0;
-            Css.totalRules = 0;
-            this.initTime = new Date();
-        }
     },
 
     showContext: function(browser, context)
