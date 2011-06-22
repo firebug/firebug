@@ -651,11 +651,9 @@
 
 <binding id="panelTab" display="xul:button">
     <content>
-        <xul:image class="panelTab-left"/>
         <xul:label class="panelTab-text" crop="right" flex="1"
                    xbl:inherits="value=label,accesskey,crop,toolbarmode,buttonstyle,disabled"/>
         <children includes="panelTabMenu"/>
-        <xul:image class="panelTab-right"/>
     </content>
     <implementation>
         <constructor>
