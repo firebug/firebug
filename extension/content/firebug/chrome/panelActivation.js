@@ -19,11 +19,6 @@ const Ci = Components.interfaces;
 
 const prefs = Cc["@mozilla.org/preferences-service;1"].getService(Ci.nsIPrefBranch2);
 
-// The service doesn't have to be available if Firefox is built with privatebrowsing disabled so,
-// don't foreget to check it before access (issue 2923).
-const privateBrowsingEnabled = ("@mozilla.org/privatebrowsing;1" in Cc) &&
-    Cc["@mozilla.org/privatebrowsing;1"].getService(Ci.nsIPrivateBrowsingService).privateBrowsingEnabled;
-
 
 /**
  * @module Implements Panel activation logic. A Firebug panel can support activation in order
