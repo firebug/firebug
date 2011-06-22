@@ -128,7 +128,8 @@ CompilationUnit.prototype.eachBreakpoint = function( fnOfLineProps )
  */
 CompilationUnit.prototype.getSourceLines = function(firstLine, lastLine, listener)
 {
-    this.lines = this.sourceFile.loadScriptLines(this.context);  // TODO remove
+    if (!this.lines)
+        this.lines = this.sourceFile.loadScriptLines(this.context);  // TODO remove
     this.numberOfLines = (this.lines ? this.lines.length : 0);
     listener(this, 1, this.numberOfLines, this.lines);
 };

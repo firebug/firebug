@@ -838,7 +838,8 @@ var require, define;
                     hasLoadedProp = true;
                     if (!loaded[prop]) {
                         if (expired) {
-                            noLoads += prop + " ";
+                            var url = urlMap[prop] || makeModuleMap(prop).url;
+                            noLoads += prop + " ("+url+") ";
                         } else {
                             stillLoading = true;
                             break;
@@ -1242,6 +1243,7 @@ var require, define;
                     if (!(fullName in defined)) {
                         return req.onError(makeError("notloaded", "Module name '" +
                                     moduleMap.fullName +
+                                    "(" + moduleMap.url + ")" +
                                     "' has not been loaded yet for context: " +
                                     contextName));
                     }
