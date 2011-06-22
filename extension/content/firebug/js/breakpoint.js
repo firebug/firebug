@@ -65,8 +65,8 @@ Firebug.Breakpoint = Obj.extend(Firebug.Module,
         breakButton.removeAttribute("type");
         Dom.collapse(Firebug.chrome.$("fbBonButtons"), !panel.breakable);
 
-        // Disable break-on-next if it isn't supported by the current panel.
-        if (!panel.supportsBreakOnNext())
+        // Disable BON if script is disabled or if BON isn't supported by the current panel.
+        if (!Firebug.Debugger.isAlwaysEnabled() || !panel.supportsBreakOnNext())
         {
             Firebug.chrome.setGlobalAttribute("cmd_breakOnNext", "breakable", "disabled");
             return;
