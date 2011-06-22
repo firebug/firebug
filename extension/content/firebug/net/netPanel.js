@@ -1373,6 +1373,20 @@ NetPanel.prototype = Obj.extend(Firebug.ActivablePanel,
 
         var blockingEnd = (file.sendingTime != file.startTime) ? file.sendingTime : file.waitingForTime;
 
+        /* Helper log for debugging timing problems.
+        var timeLog = {};
+        timeLog.startTime = getTimeLabelFromMs(file.startTime);
+        timeLog.resolvingTime = getTimeLabelFromMs(file.resolvingTime);
+        timeLog.connectingTime = getTimeLabelFromMs(file.connectingTime);
+        timeLog.connectedTime = getTimeLabelFromMs(file.connectedTime);
+        timeLog.blockingEnd = getTimeLabelFromMs(blockingEnd);
+        timeLog.sendingTime = getTimeLabelFromMs(file.sendingTime);
+        timeLog.waitingForTime = getTimeLabelFromMs(file.waitingForTime);
+        timeLog.respondedTime = getTimeLabelFromMs(file.respondedTime);
+        timeLog.endTime = getTimeLabelFromMs(file.endTime);
+        FBTrace.sysout("net.calculateFileTimes; " + file.href, timeLog);
+        */
+
         this.barResolvingWidth = Math.round(((file.connectingTime - file.startTime) / this.phaseElapsed) * 100);
         this.barConnectingWidth = Math.round(((file.connectedTime - file.startTime) / this.phaseElapsed) * 100);
         this.barBlockingWidth = Math.round(((blockingEnd - file.startTime) / this.phaseElapsed) * 100);
@@ -2275,7 +2289,8 @@ Firebug.NetMonitor.NetRequestEntry = domplate(Firebug.Rep, new Firebug.Listener(
 
     getSize: function(file)
     {
-        return this.formatSize(file.size);
+        var size = (file.size >= 0) ? file.size : 0;
+        return this.formatSize(size);
     },
 
     getLocalAddress: function(file)
@@ -3277,6 +3292,20 @@ Firebug.NetMonitor.TimeInfoTip = domplate(Firebug.Rep,
         var elapsed = file.loaded ? file.endTime - file.startTime : file.phase.phaseEndTime - file.startTime;
         var blockingEnd = (file.sendingTime > file.startTime) ? file.sendingTime : file.waitingForTime;
 
+        /* Helper log for debugging timing problems.
+        var timeLog = {};
+        timeLog.startTime = getTimeLabelFromMs(file.startTime);
+        timeLog.resolvingTime = getTimeLabelFromMs(file.resolvingTime);
+        timeLog.connectingTime = getTimeLabelFromMs(file.connectingTime);
+        timeLog.connectedTime = getTimeLabelFromMs(file.connectedTime);
+        timeLog.blockingEnd = getTimeLabelFromMs(blockingEnd);
+        timeLog.sendingTime = getTimeLabelFromMs(file.sendingTime);
+        timeLog.waitingForTime = getTimeLabelFromMs(file.waitingForTime);
+        timeLog.respondedTime = getTimeLabelFromMs(file.respondedTime);
+        timeLog.endTime = getTimeLabelFromMs(file.endTime);
+        FBTrace.sysout("net.timeInfoTip.render; " + file.href, timeLog);
+        */
+
         var timings = [];
         timings.push({bar: "Resolving",
             elapsed: file.connectingTime - file.startTime,
@@ -3883,6 +3912,7 @@ NetProgress.prototype =
             if (!file.sendStarted)
             {
                 file.sendingTime = time;
+                file.waitingForTime = time; // in case waiting-for would never came.
                 file.sendStarted = true;
             }
 
@@ -3903,7 +3933,9 @@ NetProgress.prototype =
         if (file)
         {
             file.connectingTime = time;
-            file.connectedTime = time; // just in case connected_to would never came.
+            file.connectedTime = time; // in case connected-to would never came.
+            file.sendingTime = time;  // in case sending-to would never came.
+            file.waitingForTime = time; // in case waiting-for would never came.
         }
 
         // Don't update the UI now (optimalization).
@@ -3916,6 +3948,8 @@ NetProgress.prototype =
         if (file)
         {
             file.connectedTime = time;
+            file.sendingTime = time;  // in case sending-to would never came.
+            file.waitingForTime = time; // in case waiting-for would never came.
         }
 
         // Don't update the UI now (optimalization).
@@ -4028,9 +4062,18 @@ NetProgress.prototype =
         if (file)
         {
             file.resolvingTime = time;
+            file.connectingTime = time; // in case connecting would never came.
+            file.connectedTime = time; // in case connected-to would never came.
+            file.sendingTime = time;  // in case sending-to would never came.
+            file.waitingForTime = time; // in case waiting-for would never came.
         }
 
         return file;
+    },
+
+    resolvedFile: function resolvedFile(request, time)
+    {
+        return null;
     },
 
     progressFile: function progressFile(request, progress, expectedSize, time)
@@ -4411,6 +4454,7 @@ var receivingFile = NetProgress.prototype.receivingFile;
 var responseCompletedFile = NetProgress.prototype.responseCompletedFile;
 var closedFile = NetProgress.prototype.closedFile;
 var resolvingFile = NetProgress.prototype.resolvingFile;
+var resolvedFile = NetProgress.prototype.resolvedFile;
 var progressFile = NetProgress.prototype.progressFile;
 var windowPaint = NetProgress.prototype.windowPaint;
 var timeStamp = NetProgress.prototype.timeStamp;
@@ -5418,6 +5462,8 @@ Firebug.NetMonitor.NetHttpActivityObserver =
         {
             if (activitySubtype == nsISocketTransport.STATUS_RESOLVING)
                 networkContext.post(resolvingFile, [httpChannel, time]);
+            //else if (activitySubtype == nsISocketTransport.STATUS_RESOLVED)
+            //    networkContext.post(resolvedFile, [httpChannel, time]);
             else if (activitySubtype == nsISocketTransport.STATUS_CONNECTING_TO)
                 networkContext.post(connectingFile, [httpChannel, time]);
             else if (activitySubtype == nsISocketTransport.STATUS_CONNECTED_TO)
@@ -5458,6 +5504,13 @@ function getTimeLabel(date)
         ((ms.length > 2) ? ms : ((ms.length > 1) ? "0" + ms : "00" + ms)) + "]";
 }
 
+function getTimeLabelFromMs(ms)
+{
+    var time = new Date();
+    time.setTime(ms);
+    return getTimeLabel(time);
+}
+
 function getActivityTypeDescription(a)
 {
     switch (a)
@@ -5490,6 +5543,8 @@ function getActivitySubtypeDescription(a)
 
     case nsISocketTransport.STATUS_RESOLVING:
         return "STATUS_RESOLVING";
+    case nsISocketTransport.STATUS_RESOLVED:
+        return "STATUS_RESOLVED";
     case nsISocketTransport.STATUS_CONNECTING_TO:
         return "STATUS_CONNECTING_TO";
     case nsISocketTransport.STATUS_CONNECTED_TO:
