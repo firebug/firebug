@@ -451,6 +451,8 @@ Browser.prototype.disconnect = function()
  */
 Browser.prototype.toggleResume = function(resume)
 {
+    if (FBTrace.DBG_ACTIVATION)
+        FBTrace.sysout("toggleResume ------------"+(Firebug.getSuspended()?"OFF":"ON")+"----> "+(!!resume?"ON":"OFF"));
     // this should be the only method to call suspend and resume.
     if (resume)  // either a new context or revisiting an old one
     {

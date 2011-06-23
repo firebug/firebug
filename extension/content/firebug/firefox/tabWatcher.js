@@ -826,6 +826,7 @@ function getRefererHeader(request)
 
 var TabWatcherHttpObserver = Obj.extend(Object,
 {
+    name: "TabWatcherHttpObserver",
     // nsIObserver
     observe: function(aSubject, aTopic, aData)
     {

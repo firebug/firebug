@@ -5139,6 +5139,7 @@ var Utils = Firebug.NetMonitor.Utils;
 
 Firebug.NetMonitor.NetHttpObserver =
 {
+    name: "NetHttpObserver",
     registered: false,
 
     registerObserver: function()

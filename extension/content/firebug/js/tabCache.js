@@ -85,7 +85,7 @@ var contentTypes =
  * observer so, HTTP communication can be interecepted and all incoming data stored within
  * a cache.
  */
-Firebug.TabCacheModel = Obj.extend(Firebug.Module,
+Firebug.TabCacheModel = Obj.extend(Firebug.ActivableModule,
 {
     dispatchName: "tabCache",
     contentTypes: contentTypes,
@@ -113,9 +113,17 @@ Firebug.TabCacheModel = Obj.extend(Firebug.Module,
         var jsonTypes = JSONViewerModel.contentTypes;
         for (var p in jsonTypes)
             contentTypes[p] = 1;
+    },
 
+    onResumeFirebug: function()
+    {
         // Register for HTTP events.
         HttpRequestObserver.addObserver(this, "firebug-http-event", false);
+    },
+
+    onSuspendFirebug: function()
+    {
+        HttpRequestObserver.removeObserver(this, "firebug-http-event");
     },
 
     shutdown: function()
@@ -549,7 +557,7 @@ ChannelListenerProxy.prototype =
 // ********************************************************************************************* //
 // Registration
 
-Firebug.registerModule(Firebug.TabCacheModel);
+Firebug.registerActivableModule(Firebug.TabCacheModel);
 
 return Firebug.TabCacheModel;
 
