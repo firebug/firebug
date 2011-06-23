@@ -1080,6 +1080,7 @@ var FirebugChrome =
         contentBox.style.fontSizeAdjust = fontSizeAdjust;
 
         panelBar1.browser.contentDocument.documentElement.style.fontSizeAdjust = fontSizeAdjust;
+        panelBar2.browser.contentDocument.documentElement.style.fontSizeAdjust = fontSizeAdjust;
 
         var box = Firebug.chrome.$("fbCommandBox");
         box.style.fontSizeAdjust = fontSizeAdjust;
