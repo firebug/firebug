@@ -56,10 +56,11 @@ window.panelBarWaiter = function()
                 if (FBTrace.DBG_INITIALIZE)
                     FBTrace.sysout("panelBarWaiter; callback "+callbackWithChrome);
 
+                chrome.initialize(); // This needs to be the window-specific chrome
+
                 if (callbackWithChrome)
                     callbackWithChrome(chrome);
 
-                chrome.initialize(); // This needs to be the window-specific chrome
                 delete window.panelBarWaiter;
                 return true; // the panel bar is ready
             }

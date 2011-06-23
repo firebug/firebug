@@ -6,10 +6,11 @@
 define([
     "firebug/lib/object",
     "firebug/firebug",
+    "firebug/lib/tool",
     "firebug/js/debugger",  // TODO firefox/jsdebugger
     "arch/compilationunit",
 ],
-function initializeJavaScriptTool(Obj, Firebug, JSDebugger, CompilationUnit) {
+function initializeJavaScriptTool(Obj, Firebug, Tool, JSDebugger, CompilationUnit) {
 
 // ********************************************************************************************* //
 // Implement JavaScript tool for Firefox inProcess
@@ -99,6 +100,30 @@ JavaScriptTool.runUntil = function(compilationUnit, lineNumber)
 };
 
 /*
+ * Browser connection
+ */
+JavaScriptTool.onConnect = function(connection)
+{
+    if (!Firebug.connection.getTool('script'))
+    {
+        JavaScriptTool.asTool = new Tool("script"), // this is the script tool
+        connection.registerTool(JavaScriptTool.asTool);
+    }
+    else
+    {
+        if (FBTrace.DBG_ERRORS)
+            FBTrace.sysout("JavaScriptTool onConnect ERROR script tool already registered");
+    }
+};
+
+JavaScriptTool.onDisconnect = function(connection)
+{
+    if (JavaScriptTool.asTool)
+        connection.unregisterTool(JavaScriptTool.asTool);
+};
+
+
+/*
  * Command the backend to enable JS
  */
 JavaScriptTool.setActivation = function(enable)
@@ -117,7 +142,7 @@ JavaScriptTool.setActivation = function(enable)
 JavaScriptTool.onActivateTool = function(toolname, active)
 {
     if (FBTrace.DBG_ACTIVATION)
-        FBTrace.sysout("JavaScriptTool.onActivateTool "+toolname+" = "+active);
+        FBTrace.sysout("JavaScriptTool.onActivateTool "+toolname+" = "+active+" asTool "+JavaScriptTool.asTool);
 
     if (toolname === 'script')
     {
@@ -126,13 +151,8 @@ JavaScriptTool.onActivateTool = function(toolname, active)
         {
             context.invalidatePanels('script');
         });
+        JavaScriptTool.asTool.setActive(active);
     }
-
-    // This work should be done somewhere more generic that .JavaScript, maybe ToolManager
-    // listening to browser.
-    var tool = Firebug.connection.getTool(toolname);
-    if (tool)
-        tool.setActive(active);
 },
 
 /**
@@ -184,12 +204,15 @@ JavaScriptTool.onCompilationUnit = function(context, url, kind)
 
 JavaScriptTool.initialize = function()
 {
+    FBTrace.sysout("JavaScriptTool initialize");
     Firebug.connection.addListener(JavaScriptTool);  // This is how we get events
 }
 
 JavaScriptTool.shutdown = function()
 {
     Firebug.connection.removeListener(JavaScriptTool);  // This is how we get events
+    if (Firebug.connection.getTool('script'))
+        Firebug.connection.unregisterTool(JavaScriptTool);
 }
 
 // ********************************************************************************************* //

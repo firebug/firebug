@@ -47,7 +47,6 @@ Firebug.getModuleLoaderConfig = function(baseConfig)
             "firebug/net/spy",
             "firebug/js/tabCache",
             "firebug/chrome/activation",
-            "arch/tools",
         ]
     };
 

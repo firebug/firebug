@@ -19,12 +19,13 @@ if (FBTrace.DBG_INITIALIZE || FBTrace.DBG_MODULES)
 var modules = [
     "firebug/chrome/chrome",
     "firebug/lib/lib",
-    "firebug/firebug"
+    "firebug/firebug",
+    "arch/browser"
 ].concat(config.modules);
 
 // ********************************************************************************************* //
 
-require(config, modules, function(ChromeFactory, FBL, Firebug)
+require(config, modules, function(ChromeFactory, FBL, Firebug, Browser)
 {
     try
     {
@@ -38,9 +39,19 @@ require(config, modules, function(ChromeFactory, FBL, Firebug)
         // in the future (if possible). Global 'require' could collide with other
         // extensions.
         Firebug.require = require;
+        Firebug.connection = new Browser();  // prepare for addListener calls
+        
+        Browser.onDebug = function()
+        {
+            FBTrace.sysout.apply(FBTrace, arguments);
+        }
 
         Firebug.Options.initialize("extensions.firebug");
-        window.panelBarWaiter.waitForPanelBar(ChromeFactory);
+        function connect()
+        {
+            Firebug.connection.connect();  // start firing events
+        }
+        window.panelBarWaiter.waitForPanelBar(ChromeFactory, connect);
 
         if (window.legacyPatch)
         {

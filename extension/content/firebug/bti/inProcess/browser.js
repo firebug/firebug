@@ -251,27 +251,6 @@ Browser.prototype.getCurrentSelectedWebApp = function()
     return webApp;
 }
 
-Browser.Tool = function(name)
-{
-    this.toolName = name;
-    this.active = false;
-}
-
-Browser.Tool.prototype =
-{
-    getName: function()
-    {
-        return this.toolName;
-    },
-    getActive: function()
-    {
-        return this.active;
-    },
-    setActive: function(active)
-    {
-        this.active = !!active;
-    }
-}
 
 /**
  * Returns current status of tools
@@ -441,6 +420,8 @@ Browser.prototype.disconnect = function()
     // destroyContext event is properly dispatched to the Firebug object and
     // consequently to all registered modules.
     TabWatcher.removeListener(this);
+
+    this._setConnected(false);
 }
 
 // ********************************************************************************************* //
@@ -465,22 +446,6 @@ Browser.prototype.toggleResume = function(resume)
     }
 },
 
-/**
- * Dispatches an event notification to all registered functions for
- * the specified event type.
- *
- * @param eventType event type
- * @param arguments arguments to be applied to handler functions
- */
-Browser.prototype._dispatch = function(eventType, args)
-{
-    var functions = this.handlers[eventType];
-    if (functions)
-    {
-        for ( var i = 0; i < functions.length; i++)
-            functions[i].apply(null, args);
-    }
-};
 
 /**
  * Sets the browser context that has focus, possibly <code>null</code>.
@@ -493,7 +458,7 @@ Browser.prototype._setFocusContext = function(context)
     var prev = this.activeContext;
     this.activeContext = context;
     if (prev !== context)
-        this._dispatch("onContextChanged", [prev, this.activeContext]);
+        this.dispatch("onContextChanged", [prev, this.activeContext]);
 };
 
 /**
@@ -505,10 +470,13 @@ Browser.prototype._setFocusContext = function(context)
  */
 Browser.prototype._setConnected = function(connected)
 {
+    FBTrace.sysout("Browser._setConnected "+connected + " this.connected "+this.connected);
     var wasConnected = this.connected;
     this.connected = connected;
     if (wasConnected && !connected)
-        this._dispatch("onDisconnect", [this]);
+        this.dispatch("onDisconnect", [this]);
+    else if (!wasConnected && connected)
+        this.dispatch("onConnect", [this]);
 };
 
 // ********************************************************************************************* //
@@ -772,6 +740,8 @@ Browser.prototype.connect = function ()
     });
     TabWatcher.initialize();
     TabWatcher.addListener(TabWatchListener);
+
+    this._setConnected(true);
 }
 
 // ********************************************************************************************* //
