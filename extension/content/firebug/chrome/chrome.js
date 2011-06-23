@@ -451,7 +451,12 @@ var FirebugChrome =
         }
 
         // The content splitter is in firefox for the iframe version
-        var contentSplitter = Firebug.chrome.$("fbContentSplitter") || Firefox.getElementById('fbContentSplitter');
+        // var contentSplitter = Firebug.chrome.$("fbContentSplitter") || Firefox.getElementById('fbContentSplitter');
+        // xxxHonza: this is a mess, in non-iframe version the contentSplitter is null
+        // if this method is executed as a result of browser1Loaded() execution (chrome.js).
+        // It is acutally correct otherwise the splitter would be displayed even when Firebug
+        // is detached (bug).
+        var contentSplitter = Firebug.chrome.$("fbContentSplitter");
         if (contentSplitter)
             contentSplitter.setAttribute("collapsed", !shouldShow);
     },
