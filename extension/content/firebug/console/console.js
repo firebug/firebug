@@ -139,7 +139,19 @@ Firebug.ConsoleBase =
             context = Firebug.currentContext;
 
         if (context)
-            Firebug.Errors.clear(context);
+        {
+            // There could be some logs waiting in the throttle queue so,
+            // clear asynchronously after the queue is flushed.
+            context.throttle(this.clearPanel, this, [context]);
+
+            // Also clear now
+            this.clearPanel(context);
+        }
+    },
+
+    clearPanel: function(context)
+    {
+        Firebug.Errors.clear(context);
 
         var panel = this.getPanel(context, true);
         if (panel)
