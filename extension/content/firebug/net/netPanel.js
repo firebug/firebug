@@ -515,7 +515,6 @@ NetPanel.prototype = Obj.extend(Firebug.ActivablePanel,
         this.initLayout();
 
         var tbody = this.table.querySelector(".netTableBody");
-        var lastRow = this.summaryRow.previousSibling;
 
         // Move all net-rows from the persistedState to this panel.
         var prevTableBody = state.panelNode.getElementsByClassName("netTableBody").item(0);
@@ -524,10 +523,17 @@ NetPanel.prototype = Obj.extend(Firebug.ActivablePanel,
 
         var files = [];
 
+        // Iterate persisted content - table rows. These rows can represent various things
+        // 1) netPageRow - already persisted group
+        // 2) netRow - request entries from the previous session (page load)
         while (prevTableBody.firstChild)
         {
             var row = prevTableBody.firstChild;
-            if (Css.hasClass(row, "netRow") && Css.hasClass(row, "hasHeaders") && !Css.hasClass(row, "history"))
+
+            // Collect all entries that belongs to the current page load (not history)
+            if (Css.hasClass(row, "netRow") &&
+                Css.hasClass(row, "hasHeaders") &&
+                !Css.hasClass(row, "history"))
             {
                 row.repObject.history = true;
                 files.push({
@@ -541,12 +547,20 @@ NetPanel.prototype = Obj.extend(Firebug.ActivablePanel,
             if (Css.hasClass(row, "netPageRow"))
             {
                 Css.removeClass(row, "opened");
-                tbody.insertBefore(row, lastRow);
+
+                // Insert the old page-load-history entry just before the summary-row,
+                // but after the limit row.
+                tbody.insertBefore(row, this.summaryRow);
             }
             else
+            {
                 prevTableBody.removeChild(row);
+            }
         }
 
+        // New page-load-history entry is inserted just before summary row
+        // (at the end of page-load-history entry list)
+        var lastRow = this.summaryRow.previousSibling;
         if (files.length)
         {
             var pageRow = NetPage.pageTag.insertRows({page: state}, lastRow)[0];
@@ -555,6 +569,7 @@ NetPanel.prototype = Obj.extend(Firebug.ActivablePanel,
             lastRow = this.summaryRow.previousSibling;
         }
 
+        // Insert a separator tag at the end of page-load-history entry list.
         if (this.table.getElementsByClassName("netPageRow").item(0))
             NetPage.separatorTag.insertRows({}, lastRow);
 
@@ -1560,6 +1575,15 @@ NetPanel.prototype = Obj.extend(Firebug.ActivablePanel,
 
     removeLogEntry: function(file, noInfo)
     {
+        // Remove associated row-entry from the UI before the removeFile method
+        // is called (and file.row erased).
+        if (this.table)
+        {
+            var tbody = this.table.querySelector(".netTableBody");
+            if (tbody && file.row)
+                tbody.removeChild(file.row);
+        }
+
         if (!this.removeFile(file))
             return;
 
@@ -1569,12 +1593,6 @@ NetPanel.prototype = Obj.extend(Firebug.ActivablePanel,
         var tbody = this.table.querySelector(".netTableBody");
         if (!tbody)
             return;
-
-        if (file.row)
-        {
-            // The file is loaded and there is a row that has to be removed from the UI.
-            tbody.removeChild(file.row);
-        }
 
         if (noInfo || !this.limitRow)
             return;
