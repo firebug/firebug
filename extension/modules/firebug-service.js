@@ -1823,7 +1823,7 @@ var fbs =
         {
             fbs.onDebugRequests--;
             FBTrace.sysout("fbs.onDebug ("+fbs.onDebugRequests+") fileName="+frame.script.fileName+
-                " reportNextError="+reportNextError+" breakOnNext:"+this.breakOnErrors);
+                " reportNextError="+reportNextError+" breakOnErrors:"+this.breakOnErrors+" fbs.breakOnDebugCall: "+fbs.breakOnDebugCall);
         }
 
         if ( isFilteredURL(frame.script.fileName) )
@@ -1842,7 +1842,7 @@ var fbs =
                 reportNextError = false;
                 if (debuggr)
                 {
-                    var hookReturn = debuggr.onError(frame, errorInfo);
+                    var hookReturn = debuggr.onError(frame, errorInfo, fbs.breakOnDebugCall);
                     if (hookReturn >=0)
                         return hookReturn;
                     else if (hookReturn==-1)
@@ -1859,8 +1859,9 @@ var fbs =
                 if ( fbs.isNestedScript(frame, type, rv) && FBTrace.DBG_FBS_SRCUNITS )
                     FBTrace.sysout("fbs.onDebug found nestedScript "+ frame.script.tag);
 
-
                 breakOnNextError = false;
+                delete fbs.breakOnDebugCall;
+
                 if (debuggr)
                     return this.breakIntoDebugger(debuggr, frame, type);
             }
@@ -1896,6 +1897,9 @@ var fbs =
                         ") disabledCount:"+disabledCount+" monitorCount:"+monitorCount+
                         " conditionCount:"+conditionCount+" runningUntil:"+runningUntil, bp);
                 }
+
+                if (bp.type & BP_ERROR)
+                    return RETURN_CONTINUE; // if onError gets called, then we will break
 
                 if (bp.type & BP_MONITOR && !(bp.disabled & BP_MONITOR))
                 {
@@ -2031,7 +2035,23 @@ var fbs =
 
             FBTrace.sysout("fbs.onError ("+fbs.onDebugRequests+") with this.showStackTrace="+
                 this.showStackTrace+" and this.breakOnErrors="+this.breakOnErrors+" kind="+
-                messageKind+" msg="+message+"@"+fileName+":"+lineNo+"."+pos+"\n");
+                messageKind+" msg="+message+"@"+fileName+":"+lineNo+"."+pos, exc.getWrappedValue());
+        }
+
+        if(exc)
+        {
+            var exception = exc.getWrappedValue();
+            fbs.enumerateErrorBreakpoints(exception.fileName, {call: function breakIfMatch(url, lineNo, bp)
+            {
+                // An error breakpoint is in this file
+                if (exception.lineNumber == bp.lineNo)
+                {
+                    fbs.breakOnDebugCall = true;
+
+                    if (FBTrace.DBG_FBS_ERRORS)
+                        FBTrace.sysout("fbs.onError setting breakOnDebugCall for "+url+"@"+exception.lineNumber);
+                }
+            }});
         }
 
         // global to pass info to onDebug. Some duplicate values to support different apis
@@ -2047,6 +2067,10 @@ var fbs =
         }
 
         reportNextError = { fileName: fileName, lineNo: lineNo };
+
+        if (FBTrace.DBG_FBS_ERRORS)
+            fbs.onDebugRequests++;
+
         return false; // Drop into onDebug, sometimes only
     },
 
@@ -3114,7 +3138,11 @@ var fbs =
             for (var i = 0; i < urlBreakpoints.length; ++i)
             {
                 var bp = urlBreakpoints[i];
-                fbs.recordBreakpoint(bp.type, url, bp.lineNo, debuggr, bp, sourceFile);
+                bp = fbs.recordBreakpoint(bp.type, url, bp.lineNo, debuggr, bp, sourceFile);
+
+                if (bp.type & BP_ERROR)
+                    errorBreakpoints.push(bp);
+
                 if (bp.disabled & BP_NORMAL)
                 {
                      if (FBTrace.DBG_FBS_BP)
@@ -3339,8 +3367,6 @@ var fbs =
                     ++disabledCount;
                 if (bp.type & BP_MONITOR)
                     ++monitorCount;
-                if (bp.type & BP_ERROR)
-                    errorBreakpoints.push({href: url, lineNo: bp.lineNo, type: BP_ERROR });
             }
         }
 
@@ -3433,8 +3459,7 @@ var fbs =
 
     needToBreakForError: function(reportNextError)
     {
-        return this.breakOnErrors || this.findErrorBreakpoint(
-            this.normalizeURL(reportNextError.fileName), reportNextError.lineNo) != -1;
+        return this.breakOnErrors || fbs.breakOnDebugCall;
     },
 
     step: function(mode, context, debuggr) // debuggr calls us to stage stepping

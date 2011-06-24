@@ -1292,7 +1292,7 @@ Firebug.Debugger = Obj.extend(Firebug.ActivableModule,
         return context;  // returned as first arg on next call from same trace
     },
 
-    onError: function(frame, error)
+    onError: function(frame, error, hitErrorBreakpoint)
     {
         var context = this.breakContext;
         delete this.breakContext;
@@ -1313,7 +1313,7 @@ Firebug.Debugger = Obj.extend(Firebug.ActivableModule,
 
             delete context.breakingCause;
 
-            if (Firebug.breakOnErrors)
+            if (Firebug.breakOnErrors || hitErrorBreakpoint)
             {
                 var eventOrigin = Wrapper.unwrapIValue(frame.executionContext.globalObject);
                 if (!eventOrigin)
