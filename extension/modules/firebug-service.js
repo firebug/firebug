@@ -2038,6 +2038,8 @@ var fbs =
                 messageKind+" msg="+message+"@"+fileName+":"+lineNo+"."+pos, exc.getWrappedValue());
         }
 
+        delete fbs.breakOnDebugCall;
+
         if(exc)
         {
             var exception = exc.getWrappedValue();
@@ -3141,7 +3143,17 @@ var fbs =
                 bp = fbs.recordBreakpoint(bp.type, url, bp.lineNo, debuggr, bp, sourceFile);
 
                 if (bp.type & BP_ERROR)
-                    errorBreakpoints.push(bp);
+                {
+                    var existingBP = null;
+                    fbs.enumerateErrorBreakpoints(url, {call: function checkExisting(url, lineNo, bp)
+                    {
+                        // An error breakpoint is in this file
+                        if (lineNo == bp.lineNo)
+                            existingBP = true;
+                    }});
+                    if (!existingBP)
+                        errorBreakpoints.push(bp);  // TODO implement as hashtable errorBreakpoints[url@lineNo]
+                }
 
                 if (bp.disabled & BP_NORMAL)
                 {
