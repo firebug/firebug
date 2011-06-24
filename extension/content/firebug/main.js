@@ -40,7 +40,7 @@ require(config, modules, function(ChromeFactory, FBL, Firebug, Browser)
         // extensions.
         Firebug.require = require;
         Firebug.connection = new Browser();  // prepare for addListener calls
-        
+
         Browser.onDebug = function()
         {
             FBTrace.sysout.apply(FBTrace, arguments);
@@ -51,7 +51,7 @@ require(config, modules, function(ChromeFactory, FBL, Firebug, Browser)
         {
             Firebug.connection.connect();  // start firing events
         }
-        window.panelBarWaiter.waitForPanelBar(ChromeFactory, connect);
+        window.panelBarWaiter.waitForPanelBar(ChromeFactory, null, connect);
 
         if (window.legacyPatch)
         {

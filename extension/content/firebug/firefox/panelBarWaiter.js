@@ -11,23 +11,26 @@ window.panelBarWaiter = function()
     var panelBarWaiter = {};
     var waitingPanelBarCount = 2;
     var waitLimit = 200;
-    var chromeFactory = false;
-    var callbackWithChrome = null;
+    var chromeFactory = false;  // set when the module loader is ready
+    var preInitializeCallback = null;
+    var postInitializeCallback = null;
 
     /*
      * Called by module loader to signal modules loaded
      */
-    panelBarWaiter.waitForPanelBar = function(chromeFactoryIn, callback)
+    panelBarWaiter.waitForPanelBar = function(chromeFactoryIn, preInitializeCallbackIn, postInitializeCallbackIn)
     {
+        // set these via closure scope, we don't know which call will be fire
         if (chromeFactoryIn)
             chromeFactory = chromeFactoryIn;
-
-        if (callback)
-            callbackWithChrome = callback;
+        if (preInitializeCallbackIn)
+            preInitializeCallback = preInitializeCallbackIn;
+        if (postInitializeCallbackIn)
+            postInitializeCallback = postInitializeCallbackIn;
 
         waitLimit -= 1;
 
-        if (!panelBarWaiter.initializeWhenReady(callbackWithChrome) && waitLimit > 0)
+        if (!panelBarWaiter.initializeWhenReady() && waitLimit > 0)
         {
             if (FBTrace.DBG_INITIALIZE)
             {
@@ -41,11 +44,11 @@ window.panelBarWaiter = function()
         }
     };
 
-    panelBarWaiter.initializeWhenReady = function(callbackWithChrome)
+    panelBarWaiter.initializeWhenReady = function()
     {
         try
         {
-            // Wait until all panelBar bindings are ready before initializing
+            // Wait until all panelBar bindings and modules are ready before initializing
             if (waitingPanelBarCount == 0 && chromeFactory)
             {
                 if (FBTrace.DBG_INITIALIZE)
@@ -54,12 +57,19 @@ window.panelBarWaiter = function()
                 var chrome = chromeFactory.createFirebugChrome(window);
 
                 if (FBTrace.DBG_INITIALIZE)
-                    FBTrace.sysout("panelBarWaiter; callback "+callbackWithChrome);
+                    FBTrace.sysout("panelBarWaiter; callbacks ",
+                        {
+                            preInitializeCallback: preInitializeCallback,
+                            postInitializeCallback: postInitializeCallback
+                        });
+
+                if (preInitializeCallback)
+                    preInitializeCallback(chrome);
 
                 chrome.initialize(); // This needs to be the window-specific chrome
 
-                if (callbackWithChrome)
-                    callbackWithChrome(chrome);
+                if (postInitializeCallback)
+                    postInitializeCallback(chrome);
 
                 delete window.panelBarWaiter;
                 return true; // the panel bar is ready
@@ -80,22 +90,20 @@ window.panelBarWaiter = function()
     /*
      * Called by binding.xml to signal ctor for a panel
      */
-    panelBarWaiter.panelBarReady = function(callback)
+    panelBarWaiter.panelBarReady = function()
     {
         // We initialize Firebug from here instead of from the onload event because
         // we need to make sure it is initialized before the browser starts loading
         // the home page
         try
         {
-            if(callback)
-                callbackWithChrome = callback;
+            waitingPanelBarCount -= 1;
 
-               waitingPanelBarCount -= 1;
-
-            window.dump("chrome; panelBarReady (" + waitingPanelBarCount + ") "+
+            if (FBTrace.DBG_INITIALIZE)
+                FBTrace.sysout("chrome; panelBarReady (" + waitingPanelBarCount + ") "+
                 (chromeFactory ? "Modules loaded" : "Modules not yet loaded")+" in "+window.location+"\n");
 
-            panelBarWaiter.initializeWhenReady(callbackWithChrome);
+            panelBarWaiter.initializeWhenReady();
         }
         catch (e)
         {
