@@ -470,7 +470,9 @@ Browser.prototype._setFocusContext = function(context)
  */
 Browser.prototype._setConnected = function(connected)
 {
-    FBTrace.sysout("Browser._setConnected "+connected + " this.connected "+this.connected);
+    if (FBTrace.DBG_ACTIVATION)
+        FBTrace.sysout("Browser._setConnected "+connected + " this.connected "+this.connected);
+
     var wasConnected = this.connected;
     this.connected = connected;
     if (wasConnected && !connected)
