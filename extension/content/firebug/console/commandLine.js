@@ -10,6 +10,7 @@ define([
     "firebug/lib/url",
     "firebug/lib/css",
     "firebug/lib/dom",
+    "firebug/firefox/firefox",
     "firebug/firefox/window",
     "firebug/firefox/system",
     "firebug/lib/xpath",
@@ -22,8 +23,8 @@ define([
     "firebug/console/console",
     "firebug/console/commandLineExposed"
 ],
-function(Obj, Firebug, FirebugReps, Locale, Events, Wrapper, Url, Css, Dom, Win, System, Xpath,
-    Str, Xml, Arr, Persist, EventMonitor, Keywords) {
+function(Obj, Firebug, FirebugReps, Locale, Events, Wrapper, Url, Css, Dom, Firefox, Win, System,
+    Xpath, Str, Xml, Arr, Persist, EventMonitor, Keywords) {
 
 // ************************************************************************************************
 // Constants
