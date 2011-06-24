@@ -234,7 +234,8 @@ Firebug.CommandLine.Popup = Obj.extend(Firebug.Module,
         // ESC
         var target = event.target;
         // prevent conflict with inline editors being closed
-        if (target && event.keyCode == 27 && !Css.hasClass(event.target, "textEditorInner"))
+        if (this.isVisible() && target && event.keyCode == KeyEvent.DOM_VK_ESCAPE
+            && !Css.hasClass(target, "textEditorInner"))
             this.toggle(Firebug.currentContext);
     }
 });
