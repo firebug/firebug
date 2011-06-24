@@ -2212,12 +2212,12 @@ Firebug.Debugger = Obj.extend(Firebug.ActivableModule,
 
     addListener: function(listener)
     {
-         Firebug.Debugger.addObserver(listener);
+        Firebug.connection.addListener(listener);
     },
 
     removeListener: function(listener)
     {
-         Firebug.Debugger.removeObserver(listener);
+        Firebug.connection.removeListener(listener);
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
