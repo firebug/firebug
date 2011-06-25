@@ -2138,16 +2138,19 @@ function FirebugCommandLineAPI(context)
             context.baseWindow = entry.win;
 
         Firebug.Console.log(["Current window:", context.baseWindow], context, "info");
+        return "_firebugIgnore";
     };
 
     this.clear = function()  // no web page interaction
     {
         Firebug.Console.clear(context);
+        return "_firebugIgnore";
     };
 
     this.inspect = function(obj, panelName)  // no web page interaction
     {
         Firebug.chrome.select(obj, panelName);
+        return "_firebugIgnore";
     };
 
     this.keys = function(o)
@@ -2163,76 +2166,91 @@ function FirebugCommandLineAPI(context)
     this.debug = function(fn)
     {
         Firebug.Debugger.monitorFunction(fn, "debug");
+        return "_firebugIgnore";
     };
 
     this.undebug = function(fn)
     {
         Firebug.Debugger.unmonitorFunction(fn, "debug");
+        return "_firebugIgnore";
     };
 
     this.monitor = function(fn)
     {
         Firebug.Debugger.monitorFunction(fn, "monitor");
+        return "_firebugIgnore";
     };
 
     this.unmonitor = function(fn)
     {
         Firebug.Debugger.unmonitorFunction(fn, "monitor");
+        return "_firebugIgnore";
     };
 
     this.traceAll = function()
     {
         Firebug.Debugger.traceAll(Firebug.currentContext);
+        return "_firebugIgnore";
     };
 
     this.untraceAll = function()
     {
         Firebug.Debugger.untraceAll(Firebug.currentContext);
+        return "_firebugIgnore";
     };
 
     this.traceCalls = function(fn)
     {
         Firebug.Debugger.traceCalls(Firebug.currentContext, fn);
+        return "_firebugIgnore";
     };
 
     this.untraceCalls = function(fn)
     {
         Firebug.Debugger.untraceCalls(Firebug.currentContext, fn);
+        return "_firebugIgnore";
     };
 
     this.monitorEvents = function(object, types)
     {
         EventMonitor.monitorEvents(object, types, context);
+        return "_firebugIgnore";
     };
 
     this.unmonitorEvents = function(object, types)
     {
         EventMonitor.unmonitorEvents(object, types, context);
+        return "_firebugIgnore";
     };
 
     this.profile = function(title)
     {
         Firebug.Profiler.startProfiling(context, title);
+        return "_firebugIgnore";
     };
 
     this.profileEnd = function()
     {
         Firebug.Profiler.stopProfiling(context);
+        return "_firebugIgnore";
     };
 
     this.copy = function(x)
     {
         System.copyToClipboard(x);
+        return "_firebugIgnore";
     };
 
     this.memoryProfile = function(title)
     {
         Firebug.MemoryProfiler.start(context, title);
+        return "_firebugIgnore";
     };
 
     this.memoryProfileEnd = function()
     {
         Firebug.MemoryProfiler.stop(context);
+        return "_firebugIgnore";
     };
 }
 
