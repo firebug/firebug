@@ -2035,7 +2035,7 @@ var fbs =
 
             FBTrace.sysout("fbs.onError ("+fbs.onDebugRequests+") with this.showStackTrace="+
                 this.showStackTrace+" and this.breakOnErrors="+this.breakOnErrors+" kind="+
-                messageKind+" msg="+message+"@"+fileName+":"+lineNo+"."+pos, exc.getWrappedValue());
+                messageKind+" msg="+message+"@"+fileName+":"+lineNo+"."+pos, (exc ? exc.getWrappedValue() : "No exc object"));
         }
 
         delete fbs.breakOnDebugCall;
