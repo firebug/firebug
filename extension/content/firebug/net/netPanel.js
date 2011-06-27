@@ -361,11 +361,11 @@ Firebug.NetMonitor = Obj.extend(Firebug.ActivableModule,
 
     loadedContext: function(context)
     {
-        if (FBTrace.DBG_NET)
-            FBTrace.sysout("net.loadedContext; Remove temp context (if not removed yet) " + tabId);
-
         var tabId = Win.getWindowProxyIdForWindow(context.browser.contentWindow);
         delete contexts[tabId];
+
+        if (FBTrace.DBG_NET)
+            FBTrace.sysout("net.loadedContext; Remove temp context (if not removed yet) " + tabId);
 
         var netProgress = context.netProgress;
         if (netProgress)
@@ -1280,6 +1280,11 @@ NetPanel.prototype = Obj.extend(Firebug.ActivablePanel,
             else
                 Css.removeClass(row, "fromCache");
 
+            if (file.fromBFCache)
+                Css.setClass(row, "fromBFCache");
+            else
+                Css.removeClass(row, "fromBFCache");
+
             if (NetRequestEntry.isError(file))
                 Css.setClass(row, "responseError");
             else
@@ -2084,7 +2089,7 @@ Firebug.NetMonitor.NetRequestEntry = domplate(Firebug.Rep, new Firebug.Listener(
                 $history: "$file.file.history",
                 $loaded: "$file.file.loaded",
                 $responseError: "$file.file|isError",
-                $fromBFCache: "$file.file.fromBFCache",
+                $fromBFCache: "$file.file|isFromBFCache",
                 $fromCache: "$file.file.fromCache",
                 $inFrame: "$file.file|getInFrame"},
                 TD({"class": "netDebugCol netCol"},
@@ -2159,12 +2164,10 @@ Firebug.NetMonitor.NetRequestEntry = domplate(Firebug.Rep, new Firebug.Listener(
             ),
             TD({"class": "netCol netStatusCol a11yFocus", "role" : "gridcell"}),
             TD({"class": "netCol netDomainCol a11yFocus", "role" : "gridcell"}),
-            TD({"class": "netTotalSizeCol netCol netSizeCol a11yFocus", "role" : "gridcell"},
+            TD({"class": "netTotalSizeCol netCol netSizeCol a11yFocus", "role": "gridcell"},
                 DIV({"class": "netTotalSizeLabel netSummaryLabel"}, "0KB")
             ),
-            TD({"class": "netCol netLocalAddressCol a11yFocus", "role" : "gridcell"}),
-            TD({"class": "netCol netRemoteAddressCol a11yFocus", "role" : "gridcell"}),
-            TD({"class": "netTotalTimeCol netCol netTimeCol a11yFocus", "role" : "gridcell"},
+            TD({"class": "netTotalTimeCol netCol netTimeCol a11yFocus", "role": "gridcell", colspan: "3"},
                 DIV({"class": "netSummaryBar", style: "width: 100%"},
                     DIV({"class": "netCacheSizeLabel netSummaryLabel", collapsed: "true"},
                         "(",
@@ -2287,6 +2290,12 @@ Firebug.NetMonitor.NetRequestEntry = domplate(Firebug.Rep, new Firebug.Listener(
 
         var errorRange = Math.floor(file.responseStatus/100);
         return errorRange == 4 || errorRange == 5;
+    },
+
+    isFromBFCache: function(file)
+    {
+        FBTrace.sysout("isFromBFCache: " + file.href + " + " + file.fromBFCache);
+        return file.fromBFCache;
     },
 
     getHref: function(file)
