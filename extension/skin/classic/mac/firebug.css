@@ -168,6 +168,11 @@
     list-style-image: url(chrome://firebug/skin/mac/detach.png);
 }
 
+#fbCommandToggleSmall,
+#fbCommandToggleLarge {
+    margin-right: 20px !important;
+}
+
 #fbCloseButton {
     list-style-image: url(chrome://firebug/skin/mac/close.png);
 }
