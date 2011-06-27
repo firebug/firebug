@@ -2294,7 +2294,6 @@ Firebug.NetMonitor.NetRequestEntry = domplate(Firebug.Rep, new Firebug.Listener(
 
     isFromBFCache: function(file)
     {
-        FBTrace.sysout("isFromBFCache: " + file.href + " + " + file.fromBFCache);
         return file.fromBFCache;
     },
 
