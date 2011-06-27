@@ -339,10 +339,13 @@ Firebug.ScriptPanel.prototype = Obj.extend(Firebug.SourceBoxPanel,
         var href = this.getSourceBoxURL(this.selectedSourceBox);
 
         var lineNode = this.selectedSourceBox.getLineNode(lineNo);
-        if (lineNode.getAttribute("disabledBreakpoint") == "true")
+        if (lineNode.getAttribute("disabledBreakpoint") == "true") {
             JavaScriptTool.enableBreakpoint(this.context, href, lineNo);
-        else
+        } else {
+            if (lineNode.getAttribute("breakpoint") != "true")
+                JavaScriptTool.setBreakpoint(this.context, href, lineNo);
             JavaScriptTool.disableBreakpoint(this.context, href, lineNo);
+        }
     },
 
     editBreakpointCondition: function(lineNo)
@@ -1297,7 +1300,7 @@ Firebug.ScriptPanel.prototype = Obj.extend(Firebug.SourceBoxPanel,
                 chrome.keyCodeListen("F11", Events.isShift, Obj.bind(this.stepOut, this, context)),
                 chrome.keyListen(",", Events.isControlShift, Obj.bind(this.stepOut, this, context))
             ];
-        },
+    },
 
     detachListeners: function(context, chrome)
     {
