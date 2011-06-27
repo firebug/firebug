@@ -4,7 +4,7 @@
 <?xul-overlay href="chrome://firebug/content/firebugOverlay.xul"?>
 
 <?xml-stylesheet href="chrome://global/skin/global.css"?>
-<?xml-stylesheet href="chrome://firebug/content/firebug.css"?>
+<?xml-stylesheet href="../firebug.css"?>
 <?xml-stylesheet href="chrome://firebug/skin/window.css"?>
 <?xml-stylesheet href="chrome://browser/skin/browser.css"?>
 

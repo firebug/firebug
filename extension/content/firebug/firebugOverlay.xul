@@ -1,9 +1,9 @@
 <?xml version="1.0"?>
 <!-- See license.txt for terms of usage -->
 
-<?xul-overlay href="chrome://firebug/content/firefox/firebugMenuOverlay.xul"?>
+<?xul-overlay href="firefox/firebugMenuOverlay.xul"?>
 
-<?xml-stylesheet href="chrome://firebug/content/firebug.css"?>
+<?xml-stylesheet href="firebug.css"?>
 
 <overlay xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul"
          xmlns:html="http://www.w3.org/1999/xhtml">
