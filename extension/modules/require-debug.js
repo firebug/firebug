@@ -63,15 +63,20 @@ require.log = function()
  * @param fullName module name
  * @param deps array of module names that fullName depends upon
  */
-require.onDebugDAG = function(fullName, deps)
+require.onDebugDAG = function(fullName, deps, url)
 {
     if (!require.depsNamesByName)
+    {
         require.depsNamesByName = {};
+        require.urlByFullName = {};
+    }
+
 
     var arr = [];
     for (var p in deps)
         arr.push(p);
     require.depsNamesByName[fullName] = arr;
+    require.urlByFullName[fullName] = url;
 }
 
 /* Calls require.log to record dependency analysis.
@@ -98,7 +103,6 @@ require.analyzeDependencyTree = function()
         }
         return result;
     }
-
 
     var linkedDependencies = {};
     var dependents = {}; // reversed list, dependents by name
@@ -132,6 +136,7 @@ require.analyzeDependencyTree = function()
     require.log("Firebug module dependency tree: ", linkedDependencies);
     require.log("Firebug dependents: ", dependents);
     require.log("Firebug minimal modules list: ", minimal);
+    require.log("Firebug URLs: ", require.urlByFullName);
 }
 
 /*

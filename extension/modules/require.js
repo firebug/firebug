@@ -515,7 +515,7 @@ var require, define;
                 ary = manager.depArray;
 
             if (req.onDebugDAG) {
-                req.onDebugDAG(fullName, manager.deps);
+                req.onDebugDAG(fullName, manager.deps, makeModuleMap(fullName).url);
             }
 
             //Call the callback to define the module, if necessary.
