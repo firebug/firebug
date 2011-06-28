@@ -1300,7 +1300,9 @@
     <content sizetopopup="none">
         <xul:textbox anonid="searchBox"
             rows="1" label="search.Firebug_Search" class="fbsearch-textbox"
-            onkeyup="onSearchBoxKeyUp(event);" aria-describedby="fbSearchBoxDescription" />
+            onkeyup="onSearchBoxKeyUp(event, this);" aria-describedby="fbSearchBoxDescription">
+            <xul:box class="fbsearch-icon" onclick="onSearchIconClick(event, this.parentNode)"/>
+        </xul:textbox>
         <xul:description anonid="fbSearchBoxDescription"  collapsed="true"/>
         <xul:panel id="fbSearchOptionsPanel" norestorefocus="true" noautofocus="true"
             ignorekeys="true" role="presentation">
@@ -1522,7 +1524,10 @@
         </method>
         <method name="onSearchBoxKeyUp">
             <parameter name="event" />
+            <parameter name="textbox" />
             <body><![CDATA[
+                textbox.setAttribute('active-search', !!textbox.value);
+
                 if (!Firebug.A11yModel || !Firebug.A11yModel.isEnabled())
                     return;
                 if (event.keyCode ==  KeyEvent.DOM_VK_UP || event.keyCode ==  KeyEvent.DOM_VK_DOWN)
@@ -1538,6 +1543,19 @@
                 }
                 else if (event.keyCode ==  KeyEvent.DOM_VK_ESCAPE)
                     this.hideOptions();
+            ]]></body>
+        </method>
+        <method name="onSearchIconClick">
+            <parameter name="event" />
+            <parameter name="textbox" />
+            <body><![CDATA[
+                if (textbox.value) {
+                    this.value = '';
+                    Firebug.Search.update(Firebug.currentContext);
+                } else
+                    this.optionsShown?this.hideOptions(): this.showOptions();
+                if (!this.focused)
+                    this.focus()
             ]]></body>
         </method>
     </implementation>
@@ -1598,7 +1616,8 @@
         <handler event="blur" phase="capturing"><![CDATA[
             if (event.originalTarget.nodeName == 'html:input' && document.activeElement == event.originalTarget)
                 return;
-            this.blurTimeout = this.blurTimeout || setTimeout(function() {
+            this.blurTimeout = this.blurTimeout || setTimeout(function()
+            {
                 hideOptions();
                 status = 'noSearch';
                 focused = false;
