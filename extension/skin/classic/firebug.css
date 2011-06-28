@@ -150,15 +150,6 @@
     color: #FFFFFF;
 }
 
-#fbSearchBox,
-.fbsearch-textbox  {
-    width: 100% !important;
-}
-
-#fbSearchBox {
-    display: block;
-}
-
 .fbsearch-textbox {
     -moz-appearance: none;
     margin: 0 0px 1px 2px;
@@ -204,6 +195,13 @@ textbox[type="fbSearchBox"] > panel {
 .fbSearchBox-attention textbox {
     color: red;
     font-weight: bold;
+}
+
+.fbsearch-splitter {
+    min-width: 6px;
+    -moz-margin-start: -3px;
+    border: medium none;
+    background: none repeat scroll 0% 0% transparent;
 }
 
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */

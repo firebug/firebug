@@ -96,11 +96,8 @@
                     </panelBarArrowscrollbox>
 
                     <!-- Search Box -->
-                    <vbox flex="40">
-                        <spacer flex="1"/>
-                        <textbox id="fbSearchBox" type="fbSearchBox"/>
-                        <spacer flex="1"/>
-                    </vbox>
+                    <splitter resizebefore="flex" resizeafter="flex" class="fbsearch-splitter"/>
+                    <textbox flex="70" id="fbSearchBox" type="fbSearchBox"/>
 
                     <!-- Open In New Window & Minimize & Close -->
                     <hbox id="fbWindowButtons" role="toolbar" class="innerToolbar"

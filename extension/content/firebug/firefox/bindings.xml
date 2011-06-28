@@ -1297,24 +1297,24 @@
 <!-- Searchbox is located in the main Firebug toolbar and can be used to search
     for a keyword within the current panel. -->
 <binding id="searchBox">
-    <content sizetopopup="none">
-        <xul:textbox anonid="searchBox"
+    <content sizetopopup="none" align="center">
+        <xul:textbox anonid="searchBox" flex="1" width='0'
             rows="1" label="search.Firebug_Search" class="fbsearch-textbox"
             onkeyup="onSearchBoxKeyUp(event, this);" aria-describedby="fbSearchBoxDescription">
             <xul:box class="fbsearch-icon" onclick="onSearchIconClick(event, this.parentNode)"/>
         </xul:textbox>
         <xul:description anonid="fbSearchBoxDescription"  collapsed="true"/>
         <xul:panel id="fbSearchOptionsPanel" norestorefocus="true" noautofocus="true"
-            ignorekeys="true" role="presentation">
+            noautohide="true" ignorekeys="true" role="presentation">
             <xul:description id="fbSearchBoxIsSensitive" value="search.Case AutoSensitive"/>
             <xul:description id="fbSearchBoxIsNotSensitive" value="search.Case Insensitive"/>
             <xul:vbox class="searchOptionsMenu innerToolbar" role="menu" anonid="fbSearchOptionsMenu">
               <xul:box anonid="startPanelFocus" class="panelFocusBound" onfocus="startFocusHandler()" />
               <xul:vbox anonid="searchOptionsList" role="presentation" />
               <xul:hbox pack="center" align="center" role="presentation">
-                  <xul:button anonid="searchPrev" class="fbsearch-options-buttons a11yFocus"
+                  <xul:button anonid="searchPrev" class="fbsearch-options-buttons prev a11yFocus"
                     label="search.Previous" oncommand="searchPrev()" role="menuitem" />
-                  <xul:button anonid="searchNext" class="fbsearch-options-buttons a11yFocus"
+                  <xul:button anonid="searchNext" class="fbsearch-options-buttons next a11yFocus"
                     label="search.Next" oncommand="searchNext()" role="menuitem" />
               </xul:hbox>
               <xul:box anonid="endPanelFocus" class="panelFocusBound" onfocus="endFocusHandler()" />
