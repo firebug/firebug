@@ -24,7 +24,7 @@
         <command id="cmd_increaseTextSize" oncommand="Firebug.Options.changeTextSize(1);"/>
         <command id="cmd_decreaseTextSize" oncommand="Firebug.Options.changeTextSize(-1);"/>
         <command id="cmd_normalTextSize" oncommand="Firebug.Options.setTextSize(0);"/>
-        <command id="cmd_focusFirebugSearch" oncommand="if (Firebug.currentContext) Firebug.Search.focus(Firebug.currentContext);"/>
+        <command id="cmd_focusFirebugSearch" oncommand="if (Firebug.currentContext) Firebug.Search.onSearchCommand(document);"/>
         <command id="cmd_customizeFBKeys" oncommand="Firebug.ShortcutsModel.customizeShortcuts()"/>
 
         <command id="cmd_enablePanels" oncommand="Firebug.PanelActivation.enableAllPanels()"/>

@@ -28,6 +28,25 @@ Firebug.Search = Obj.extend(Firebug.Module,
 {
     dispatchName: "search",
 
+    onSearchCommand: function(document)
+    {
+        var el = document.activeElement;
+        var id = el.id;
+        if (id == 'fbPanelBar1-browser' || id == 'fbPanelBar2-browser')
+        {
+            var sel = el.contentWindow.getSelection().toString();
+            if (!sel)
+            {
+                var input = el.contentDocument.activeElement;
+                if (input instanceof Ci.nsIDOMNSEditableElement)
+                    sel = input.QueryInterface(Ci.nsIDOMNSEditableElement).editor.selection.toString();
+            }
+            sel = sel || '';
+            Firebug.chrome.$("fbSearchBox").value = sel;
+            this.focus();
+        }
+    },
+
     search: function(text, context)
     {
         var searchBox = Firebug.chrome.$("fbSearchBox");
@@ -104,7 +123,7 @@ Firebug.Search = Obj.extend(Firebug.Module,
         {
             var found = panel.search(value, reverse);
             if (!found && value)
-                System.beep();
+               this.onNotFound();
 
             if (value)
             {
@@ -152,7 +171,8 @@ Firebug.Search = Obj.extend(Firebug.Module,
 
     onNotFound: function()
     {
-        System.beep();
+        if (this.status != 'notfound')
+            System.beep();
     },
 
     isCaseSensitive: function(text)
