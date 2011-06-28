@@ -46,7 +46,8 @@ Win.getTabForWindow = function(aWindow)
     var tabBrowser = Firefox.getTabBrowser();
     if (!aWindow || !tabBrowser || !tabBrowser.getBrowserIndexForDocument)
     {
-        FBTrace.sysout("ERROR no tabBrowser");
+        if (FBTrace.DBG_WINDOWS)
+            FBTrace.sysout("getTabForWindow FAIL aWindow: "+aWindow+" tabBrowser: "+tabBrowser, tabBrowser);
         return null;
     }
 

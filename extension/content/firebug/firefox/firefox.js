@@ -35,25 +35,32 @@ var Firefox =
 
     getTabBrowser: function()
     {
-        var tabBrowser = Firefox.getElementById("content");
-        return tabBrowser;
+        if (window.gBrowser)
+            return window.gBrowser;
+        if (FBTrace.DBG_WINDOWS)
+            FBTrace.sysout("Firefox.getTabBrowser no window.gBrowser in "+window.location);
     },
 
     getCurrentBrowser: function()
     {
-        return Firefox.getTabBrowser().selectedBrowser;
+        var tabBrowser = Firefox.getTabBrowser();
+        return tabBrowser ? tabBrowser.selectedBrowser : undefined;
     },
 
     getBrowsers: function()
     {
-        return Firefox.getTabBrowser().browsers;
+        var tabBrowser = Firefox.getTabBrowser();
+        return tabBrowser ? tabBrowser.browsers : undefined;
     },
 
     selectTabByWindow: function(win)
     {
         var tabBrowser = Firefox.getTabBrowser();
-        var tab = tabBrowser.getBrowserForDocument(win.document);
-        tabBrowser.selectedBrowser = tab;
+        if (tabBrowser)
+        {
+            var tab = tabBrowser.getBrowserForDocument(win.document);
+            tabBrowser.selectedBrowser = tab;
+        }
     },
 
     getCurrentURI: function()
