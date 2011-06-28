@@ -36,7 +36,7 @@ function(Obj, Firebug, Firefox, FirebugReps, Domplate, JavaScriptTool, Compilati
 
 Firebug.ScriptPanel = function() {};
 
-for(var p in Firebug.EditorSelector)
+for (var p in Firebug.EditorSelector)
 {
     if (Firebug.EditorSelector.hasOwnProperty(p))
         Firebug.ScriptPanel[p] = Firebug.EditorSelector[p];
@@ -68,7 +68,7 @@ Firebug.ScriptPanel.decorator = Obj.extend(new Firebug.SourceBoxDecorator,
             FBTrace.sysout("script.markExecutableLines START: "+compilationUnit.toString());
 
         var lineNo = sourceBox.firstViewableLine;
-        while( lineNode = sourceBox.getLineNode(lineNo) )
+        while (lineNode = sourceBox.getLineNode(lineNo))
         {
             if (lineNode.alreadyMarked)
             {
@@ -163,12 +163,7 @@ Firebug.ScriptPanel.prototype = Obj.extend(Firebug.SourceBoxPanel,
         // Front side UI mark
         var firebugStatus = Firefox.getElementById('firebugStatus');
         if (firebugStatus)
-        {
-            if (active)
-                firebugStatus.setAttribute("script", "on");
-            else
-                firebugStatus.setAttribute("script", "off");
-        }
+            firebugStatus.setAttribute("script", active ? "on" : "off");
 
         if (Firebug.StartButton)
             Firebug.StartButton.resetTooltip();
@@ -315,7 +310,7 @@ Firebug.ScriptPanel.prototype = Obj.extend(Firebug.SourceBoxPanel,
         var href = this.getSourceBoxURL(this.selectedSourceBox);
         var lineNode = this.selectedSourceBox.getLineNode(lineNo);
 
-        if(!lineNode)
+        if (!lineNode)
         {
             if (FBTrace.DBG_ERRORS)
                 FBTrace.sysout("script.toggleBreakpoint no lineNode at "+lineNo+
@@ -339,9 +334,12 @@ Firebug.ScriptPanel.prototype = Obj.extend(Firebug.SourceBoxPanel,
         var href = this.getSourceBoxURL(this.selectedSourceBox);
 
         var lineNode = this.selectedSourceBox.getLineNode(lineNo);
-        if (lineNode.getAttribute("disabledBreakpoint") == "true") {
+        if (lineNode.getAttribute("disabledBreakpoint") == "true")
+        {
             JavaScriptTool.enableBreakpoint(this.context, href, lineNo);
-        } else {
+        }
+        else
+        {
             if (lineNode.getAttribute("breakpoint") != "true")
                 JavaScriptTool.setBreakpoint(this.context, href, lineNo);
             JavaScriptTool.disableBreakpoint(this.context, href, lineNo);
@@ -866,7 +864,7 @@ Firebug.ScriptPanel.prototype = Obj.extend(Firebug.SourceBoxPanel,
 
     supportsObject: function(object, type)
     {
-        if( object instanceof CompilationUnit
+        if (object instanceof CompilationUnit
             || (object instanceof SourceLink.SourceLink && object.type == "js")
             || typeof(object) == "function"
             || object instanceof StackFrame.StackFrame)
@@ -876,7 +874,7 @@ Firebug.ScriptPanel.prototype = Obj.extend(Firebug.SourceBoxPanel,
 
     refresh: function()  // delete any sourceBox-es that are not in sync with compilationUnits
     {
-        for(var url in this.sourceBoxes)
+        for (var url in this.sourceBoxes)
         {
             if (this.sourceBoxes.hasOwnProperty(url))
             {
@@ -884,15 +882,15 @@ Firebug.ScriptPanel.prototype = Obj.extend(Firebug.SourceBoxPanel,
                 var compilationUnit = this.context.getCompilationUnit(url);
                 if (!compilationUnit || compilationUnit != sourceBox.repObject) // then out of sync
                 {
-                   var victim = this.sourceBoxes[url];
-                   delete this.sourceBoxes[url];
-                   if (this.selectedSourceBox == victim)
-                   {
-                        Dom.collapse(this.selectedSourceBox, true);
-                        delete this.selectedSourceBox;
-                   }
-                   if (FBTrace.DBG_COMPILATION_UNITS)
-                       FBTrace.sysout("script.refresh deleted sourceBox for "+url);
+                    var victim = this.sourceBoxes[url];
+                    delete this.sourceBoxes[url];
+                    if (this.selectedSourceBox == victim)
+                    {
+                         Dom.collapse(this.selectedSourceBox, true);
+                         delete this.selectedSourceBox;
+                    }
+                    if (FBTrace.DBG_COMPILATION_UNITS)
+                        FBTrace.sysout("script.refresh deleted sourceBox for "+url);
                 }
             }
         }
@@ -905,7 +903,7 @@ Firebug.ScriptPanel.prototype = Obj.extend(Firebug.SourceBoxPanel,
     {
         if (!compilationUnit)
             return;  // XXXjjb do we need to show a blank?
-        if ( !(compilationUnit instanceof CompilationUnit) )
+        if (!(compilationUnit instanceof CompilationUnit))
         {
             FBTrace.sysout("Script panel location not a CompilationUnit: ",compilationUnit);
             throw new Error("Script panel location not a CompilationUnit: "+compilationUnit);
@@ -970,8 +968,8 @@ Firebug.ScriptPanel.prototype = Obj.extend(Firebug.SourceBoxPanel,
         if (compilationUnit.getURL().substr(0, 9) == "chrome://")
             return false;
 
-           if (compilationUnit.getKind() === CompilationUnit.EVAL && !this.showEvals)
-               return false;
+        if (compilationUnit.getKind() === CompilationUnit.EVAL && !this.showEvals)
+            return false;
 
         if (compilationUnit.getKind() === CompilationUnit.BROWSER_GENERATED && !this.showEvents)
             return false;
@@ -1035,10 +1033,9 @@ Firebug.ScriptPanel.prototype = Obj.extend(Firebug.SourceBoxPanel,
                 if (url == compilationUnits[i].getURL())
                     return compilationUnits[i];
             }
-            return compilationUnits[0];
         }
-        else
-            return compilationUnits[0];
+
+        return compilationUnits[0];
     },
 
     getDefaultSelection: function()
@@ -1049,9 +1046,9 @@ Firebug.ScriptPanel.prototype = Obj.extend(Firebug.SourceBoxPanel,
     getTooltipObject: function(target)
     {
         // Target should be A element with class = sourceLine
-        if ( Css.hasClass(target, 'sourceLine') )
+        if (Css.hasClass(target, 'sourceLine'))
         {
-           return null; // TODO
+            return null; // TODO
         }
         return null;
     },
@@ -1149,9 +1146,7 @@ Firebug.ScriptPanel.prototype = Obj.extend(Firebug.SourceBoxPanel,
             //"-",
             //1.2 option on toolbar this.optionMenu("DebuggerEnableAlways", enableAlwaysPref)
             Menu.optionMenu("firebug.breakpoint.showBreakNotifications", "showBreakNotification")
-        ];/*
-
-*/
+        ];
     },
 
     optionMenu: function(label, option)
@@ -1621,4 +1616,3 @@ return Firebug.ScriptPanel;
 
 // ************************************************************************************************
 });
-
