@@ -20,13 +20,17 @@ Firebug.getModuleLoaderConfig = function(baseConfig)
     baseConfig.arch = baseConfig.arch ||  "firebug_rjs/bti/inProcess";
     baseConfig.baseUrl = baseConfig.baseUrl || "resource://";
     baseConfig.paths = baseConfig.paths || {"arch": baseConfig.arch, "firebug": "firebug_rjs"};
+    baseConfig.xhtml = true;  // createElementNS used
 
-    var config =
+    var keys = Object.keys(baseConfig);
+    var config = {};
+    keys.forEach(function copy(key)
     {
-        context: "Firebug",
-        baseUrl: baseConfig.baseUrl,
-        paths: baseConfig.paths,
-        modules: [
+        config[key] = baseConfig[key];
+    });
+
+    config.context = "Firebug";
+    config.modules = [
             "firebug/trace/traceModule",
             "firebug/chrome/navigationHistory",
             "firebug/chrome/knownIssues",
@@ -47,8 +51,7 @@ Firebug.getModuleLoaderConfig = function(baseConfig)
             "firebug/net/spy",
             "firebug/js/tabCache",
             "firebug/chrome/activation",
-        ]
-    };
+        ];
 
     return config;
 }
