@@ -80,6 +80,8 @@ Firebug.Search = Obj.extend(Firebug.Module,
 
         var value = searchBox.value;
 
+        this.addToHistory(value);
+
         // This sucks, but the find service won't match nodes that are invisible, so we
         // have to make sure to make them all visible unless the user is appending to the
         // last string, in which case it's ok to just search the set of visible nodes
@@ -195,6 +197,30 @@ Firebug.Search = Obj.extend(Firebug.Module,
         this.update();
     },
 
+    history: [],
+
+    addToHistory: function(val)
+    {
+        var history = this.history;
+
+        if (!history[0] || val.indexOf(history[0]) == 0)
+            history[0] = val;
+        else if(history[0].indexOf(val) == 0)
+            return;
+        else
+            history.unshift(val);
+    },
+
+    cycleHistory: function(dir)
+    {
+        var history = this.history;
+        if (dir > 0)
+            history.unshift(history.pop());
+        else
+            history.push(history.shift());
+
+        return history[0]
+    },
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
     // extends Module
 
@@ -215,7 +241,7 @@ Firebug.Search = Obj.extend(Firebug.Module,
     {
         // Manage visibility of the search-box according to the searchable flag.
         var searchBox = Firebug.chrome.$("fbSearchBox");
-        searchBox.value = "";
+        searchBox.status = "noSearch";
         Css.removeClass(searchBox, "fbSearchBox-attention");
         Css.removeClass(searchBox, "fbSearchBox-autoSensitive");
 
@@ -223,7 +249,6 @@ Firebug.Search = Obj.extend(Firebug.Module,
         {
             searchBox.collapsed = !panel.searchable;
             searchBox.updateOptions(panel.getSearchOptionsMenuItems());
-            searchBox.status = "notfound";
         }
         else
             searchBox.collapsed = false;

@@ -1347,27 +1347,29 @@
             ]]></xbl:getter>
             <xbl:setter><![CDATA[
                 var searchBox = document.getAnonymousElementByAttribute(this, "anonid", "searchBox");
+                searchBox.setAttribute('active-search', !!val)
                 searchBox.value = val;
             ]]></xbl:setter>
         </property>
         <property name="placeholder">
             <xbl:getter><![CDATA[
                 var searchBox = document.getAnonymousElementByAttribute(this, "anonid", "searchBox");
-                return searchBox.placeholder || searchBox.emptytext;
+                return searchBox.placeholder;
             ]]></xbl:getter>
             <xbl:setter><![CDATA[
                 var searchBox = document.getAnonymousElementByAttribute(this, "anonid", "searchBox");
-                searchBox.placeholder = searchBox.emptytext = val;
+                searchBox.placeholder = val;
             ]]></xbl:setter>
         </property>
         <property name="status">
             <xbl:getter><![CDATA[
-                return searchBox.getAttribute("status");
+                return Firebug.Search.status;
             ]]></xbl:getter>
             <xbl:setter><![CDATA[
                 var searchBox = document.getAnonymousElementByAttribute(this, "anonid", "searchBox");
-                searchBox.setAttribute("status", searchBox.value == "" || val);
-                searchBox.placeholder = searchBox.emptytext = "";
+                Firebug.Search.status = searchBox.value == "" || val;
+                searchBox.setAttribute("status", Firebug.Search.status);
+                searchBox.placeholder = "";
             ]]></xbl:setter>
         </property>
         <property name="optionsShown">
@@ -1404,8 +1406,8 @@
         <method name="showOptions">
             <body><![CDATA[
                 var optionsPopup = document.getElementById("fbSearchOptionsPanel"),
-                    searchBox = document.getAnonymousElementByAttribute(this, "anonid", "searchBox"),
                     position = (Firebug.getPlacement() == "detached") ? "after_end" : "before_end";
+                this.focused = true;
                 optionsPopup.setAttribute("position", position);
                 optionsPopup.openPopup(this, position, 0, 0, false, false);
 
@@ -1457,6 +1459,8 @@
                 delete this.blurTimeout;
 
                 if (!FBL.hasClass(target, "panelFocusBound")) {
+                    if(!this.focused && this.value)
+                        this.searchNext();
                     this.showOptions();
                 }
             ]]></body>
@@ -1539,7 +1543,22 @@
     </implementation>
     <handlers>
         <handler event="keypress"><![CDATA[
-            if (event.keyCode ==  KeyEvent.DOM_VK_ESCAPE)
+
+            if (event.keyCode ==  KeyEvent.DOM_VK_UP)
+            {
+                if (FBL.isControl(event))
+                    this.value = Firebug.Search.cycleHistory(1);
+                else
+                    this.searchPrev();
+            }
+            else if (event.keyCode ==  KeyEvent.DOM_VK_DOWN)
+            {
+                if (FBL.isControl(event))
+                    this.value = Firebug.Search.cycleHistory(-1);
+                else
+                    this.searchNext();
+            }
+            else if (event.keyCode ==  KeyEvent.DOM_VK_ESCAPE)
             {
                 var optionsPopup = document.getElementById("fbSearchOptionsPanel");
                 var searchBox = document.getAnonymousElementByAttribute(this, "anonid", "searchBox");
@@ -1577,8 +1596,12 @@
             this.panelHasFocus = false;
         ]]></handler>
         <handler event="blur" phase="capturing"><![CDATA[
+            if (event.originalTarget.nodeName == 'html:input' && document.activeElement == event.originalTarget)
+                return;
             this.blurTimeout = this.blurTimeout || setTimeout(function() {
                 hideOptions();
+                status = 'noSearch';
+                focused = false;
             }, 0);
         ]]></handler>
     </handlers>
