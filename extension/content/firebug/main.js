@@ -55,7 +55,8 @@ require(config, modules, function(ChromeFactory, FBL, Firebug, Browser)
 
         if (window.legacyPatch)
         {
-            FBTrace.sysout("firebug main.js; legacyPatch");
+            if (FBTrace.DBG_MODULES)
+                FBTrace.sysout("firebug main.js; legacyPatch");
             window.legacyPatch(FBL, Firebug);
         }
 

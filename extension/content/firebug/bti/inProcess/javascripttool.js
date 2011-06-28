@@ -204,7 +204,9 @@ JavaScriptTool.onCompilationUnit = function(context, url, kind)
 
 JavaScriptTool.initialize = function()
 {
-    FBTrace.sysout("JavaScriptTool initialize");
+    if (FBTrace.DBG_INITIALIZE)
+        FBTrace.sysout("JavaScriptTool initialize");
+
     Firebug.connection.addListener(JavaScriptTool);  // This is how we get events
 }
 

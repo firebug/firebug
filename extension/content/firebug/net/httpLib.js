@@ -314,11 +314,6 @@ Http.isXHR = function(request)
         var callbacks = request.notificationCallbacks;
         StackFrame.suspendShowStackTrace();
         var xhrRequest = callbacks ? callbacks.getInterface(Ci.nsIXMLHttpRequest) : null;
-
-        if (FBTrace.DBG_NET)
-            FBTrace.sysout("net.isXHR; " + (xhrRequest != null) + ", " +
-                Http.safeGetRequestName(request));
-
         return (xhrRequest != null);
     }
     catch (exc)

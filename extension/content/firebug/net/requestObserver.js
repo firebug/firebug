@@ -122,7 +122,8 @@ var HttpRequestObserver =
                 return;
             }
         }
-        if (FBTrace.DBG_HTTPOBSERVER || FBTrace.DBG_ERRORS)
+
+        if (FBTrace.DBG_HTTPOBSERVER)
             FBTrace.sysout("requestObserver addObserver ", observer);
 
         this.observers.push(observer);

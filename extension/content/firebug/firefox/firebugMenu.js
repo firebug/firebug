@@ -26,8 +26,6 @@ Firebug.FirebugMenu = Obj.extend(Firebug.Module,
     {
         Firebug.Module.initializeUI.apply(this, arguments);
 
-        FBTrace.sysout("firebugMenu.initializeUI");
-
         // Put Firebug version on all "About" menu items. This men item appears in
         // Firefox Tools menu (Firefox UI) as well as Firebug Icon menu (Firebug UI)
         this.updateAboutMenu(document);
