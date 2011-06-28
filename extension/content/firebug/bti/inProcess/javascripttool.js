@@ -99,7 +99,7 @@ JavaScriptTool.runUntil = function(compilationUnit, lineNumber)
         lineNumber, JSDebugger);
 };
 
-/*
+/**
  * Browser connection
  */
 JavaScriptTool.onConnect = function(connection)
@@ -122,14 +122,14 @@ JavaScriptTool.onDisconnect = function(connection)
         connection.unregisterTool(JavaScriptTool.asTool);
 };
 
-
-/*
+/**
  * Command the backend to enable JS
  */
 JavaScriptTool.setActivation = function(enable)
 {
     if (FBTrace.DBG_CONSOLE || FBTrace.DBG_ACTIVATION)
         FBTrace.sysout("ScriptPanel.onActivationChanged; " + enable);
+
     if (enable)
         JSDebugger.addObserver(this);
     else
@@ -142,7 +142,8 @@ JavaScriptTool.setActivation = function(enable)
 JavaScriptTool.onActivateTool = function(toolname, active)
 {
     if (FBTrace.DBG_ACTIVATION)
-        FBTrace.sysout("JavaScriptTool.onActivateTool "+toolname+" = "+active+" asTool "+JavaScriptTool.asTool);
+        FBTrace.sysout("JavaScriptTool.onActivateTool "+toolname+" = "+active+" asTool "+
+            JavaScriptTool.asTool);
 
     if (toolname === 'script')
     {
