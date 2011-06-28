@@ -115,14 +115,34 @@ Firebug.TabCacheModel = Obj.extend(Firebug.ActivableModule,
             contentTypes[p] = 1;
     },
 
+    onObserverChange: function(observer)
+    {
+        if (FBTrace.DBG_CACHE)
+            FBTrace.sysout("tabCache.onObserverChange; hasObservers: " + this.hasObservers());
+
+        if (this.hasObservers())
+        {
+            HttpRequestObserver.addObserver(this, "firebug-http-event", false);
+        }
+        else
+        {
+            HttpRequestObserver.removeObserver(this, "firebug-http-event");
+        }
+    },
+
     onResumeFirebug: function()
     {
-        // Register for HTTP events.
+        if (FBTrace.DBG_CACHE)
+            FBTrace.sysout("tabCache.onResumeFirebug;");
+
         HttpRequestObserver.addObserver(this, "firebug-http-event", false);
     },
 
     onSuspendFirebug: function()
     {
+        if (FBTrace.DBG_CACHE)
+            FBTrace.sysout("tabCache.onSuspendFirebug;");
+
         HttpRequestObserver.removeObserver(this, "firebug-http-event");
     },
 

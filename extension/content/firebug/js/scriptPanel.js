@@ -1271,6 +1271,15 @@ Firebug.ScriptPanel.prototype = Obj.extend(Firebug.SourceBoxPanel,
     onActivationChanged: function(enable)
     {
         JavaScriptTool.setActivation(enable);
+
+        if (enable)
+        {
+            Firebug.TabCacheModel.addObserver(this);
+        }
+        else
+        {
+            Firebug.TabCacheModel.removeObserver(this);
+        }
     },
 
     // implements Tool

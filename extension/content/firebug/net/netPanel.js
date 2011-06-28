@@ -249,8 +249,8 @@ Firebug.NetMonitor = Obj.extend(Firebug.ActivableModule,
 
         // HTTP observer must be registered now (and not in monitorContext, since if a
         // page is opened in a new tab the top document request would be missed otherwise.
-        Firebug.NetMonitor.NetHttpObserver.registerObserver();
-        NetHttpActivityObserver.registerObserver();
+        //Firebug.NetMonitor.NetHttpObserver.registerObserver();
+        //NetHttpActivityObserver.registerObserver();
 
         Firebug.connection.addListener(this.DebuggerListener);
     },
@@ -262,8 +262,8 @@ Firebug.NetMonitor = Obj.extend(Firebug.ActivableModule,
         if (Firebug.TraceModule)
             Firebug.TraceModule.removeListener(this.TraceListener);
 
-        Firebug.NetMonitor.NetHttpObserver.unregisterObserver();
-        NetHttpActivityObserver.unregisterObserver();
+        //Firebug.NetMonitor.NetHttpObserver.unregisterObserver();
+        //NetHttpActivityObserver.unregisterObserver();
 
         Firebug.connection.removeListener(this.DebuggerListener);
     },
@@ -387,14 +387,21 @@ Firebug.NetMonitor = Obj.extend(Firebug.ActivableModule,
 
     onObserverChange: function(observer)
     {
+        if (FBTrace.DBG_NET)
+            FBTrace.sysout("net.onObserverChange; hasObservers: " + this.hasObservers());
+
         if (this.hasObservers())
         {
+            Firebug.NetMonitor.NetHttpObserver.registerObserver();
             NetHttpActivityObserver.registerObserver();
+
             Firebug.connection.eachContext(monitorContext);
         }
         else
         {
+            Firebug.NetMonitor.NetHttpObserver.unregisterObserver();
             NetHttpActivityObserver.unregisterObserver();
+
             Firebug.connection.eachContext(unmonitorContext);
         }
     },
@@ -402,7 +409,7 @@ Firebug.NetMonitor = Obj.extend(Firebug.ActivableModule,
     onResumeFirebug: function()
     {
         if (FBTrace.DBG_NET)
-            FBTrace.sysout("net.onResumeFirebug; ");
+            FBTrace.sysout("net.onResumeFirebug; enabled: " + Firebug.NetMonitor.isAlwaysEnabled());
 
         // Resume only if enabled.
         if (Firebug.NetMonitor.isAlwaysEnabled())
@@ -410,24 +417,22 @@ Firebug.NetMonitor = Obj.extend(Firebug.ActivableModule,
             // XXXjjb Honza was called in firebug-http-observer.js on old enableXULWindow
             // Can't be here since resuming happens when the page is loaded and it's too
             // late since the first (document) requests already happened.
-            //httpRequestObserver.registerObservers();
+            Firebug.NetMonitor.NetHttpObserver.registerObserver();
             Firebug.connection.eachContext(monitorContext);
         }
-
     },
 
     onSuspendFirebug: function()
     {
         if (FBTrace.DBG_NET)
-            FBTrace.sysout("net.onSuspendFirebug; ");
+            FBTrace.sysout("net.onSuspendFirebug; enabled: " + Firebug.NetMonitor.isAlwaysEnabled());
 
         // Suspend only if enabled.
         if (Firebug.NetMonitor.isAlwaysEnabled())
         {
-            //httpRequestObserver.unregisterObservers();  // XXXjjb Honza was called in firebug-http-observer.js on old disableXULWindow
+            Firebug.NetMonitor.NetHttpObserver.unregisterObserver();
             Firebug.connection.eachContext(unmonitorContext);
         }
-
     },
 
     togglePersist: function(context)
@@ -932,9 +937,15 @@ NetPanel.prototype = Obj.extend(Firebug.ActivablePanel,
             FBTrace.sysout("console.ConsolePanel.onActivationChanged; " + enable);
 
         if (enable)
+        {
             Firebug.NetMonitor.addObserver(this);
+            Firebug.TabCacheModel.addObserver(this);
+        }
         else
+        {
             Firebug.NetMonitor.removeObserver(this);
+            Firebug.TabCacheModel.removeObserver(this);
+        }
     },
 
     breakOnNext: function(breaking)
@@ -4127,7 +4138,7 @@ NetProgress.prototype =
         var file = this.getRequestFile(request, null, true);
         if (file)
         {
-            if (FBTrace.DBG_NET)
+            if (FBTrace.DBG_NET_EVENTS)
                 FBTrace.sysout("net.stopFile +" + (now() - file.startTime) + " " +
                     getPrintableTime() + ", " + request.URI.path, file);
 
@@ -4210,7 +4221,7 @@ NetProgress.prototype =
 
     windowLoad: function windowLoad(window, time)
     {
-        if (FBTrace.DBG_NET)
+        if (FBTrace.DBG_NET_EVENTS)
             FBTrace.sysout("net.windowLoad +? " + getPrintableTime() + ", " +
                 window.location.href, this.phases);
 
@@ -4233,7 +4244,7 @@ NetProgress.prototype =
 
     contentLoad: function contentLoad(window, time)
     {
-        if (FBTrace.DBG_NET)
+        if (FBTrace.DBG_NET_EVENTS)
             FBTrace.sysout("net.contentLoad +? " + getPrintableTime() + ", " +
                 window.location.href);
 
@@ -4288,7 +4299,7 @@ NetProgress.prototype =
         this.requests.push(request);
         this.files.push(file);
 
-        if (FBTrace.DBG_NET)
+        if (FBTrace.DBG_NET_EVENTS)
             FBTrace.sysout("net.createFile; " + Http.safeGetRequestName(request) +
                 "(" + this.files.length + ")");
 
@@ -4763,7 +4774,7 @@ function monitorContext(context)
     }
 
     // Register activity-distributor observer if available (#488270)
-    NetHttpActivityObserver.registerObserver();
+    //NetHttpActivityObserver.registerObserver();
 
     var listener = context.netProgress = networkContext;
 
@@ -4800,7 +4811,7 @@ function unmonitorContext(context)
     if (panel)
         panel.updateLayout();
 
-    NetHttpActivityObserver.unregisterObserver();
+    //NetHttpActivityObserver.unregisterObserver();
 
     // Remove cache listener
     context.sourceCache.removeListener(netProgress.cacheListener);
@@ -5219,7 +5230,7 @@ Firebug.NetMonitor.NetHttpObserver =
             var tabId = win ? Win.getWindowProxyIdForWindow(win) : null;
             if (!tabId)
             {
-                if (FBTrace.DBG_NET)
+                if (FBTrace.DBG_NET_EVENTS)
                     FBTrace.sysout("net.observe NO TAB " + Http.safeGetRequestName(subject) +
                         ", " + tabId + ", " + win);
                 return;
