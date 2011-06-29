@@ -68,6 +68,9 @@ var NetHttpActivityObserver =
 
         distributor.addObserver(this);
         this.registered = true;
+
+        if (FBTrace.DBG_ACTIVITYOBSERVER)
+            FBTrace.sysout("activityObserver.registerObserver;");
     },
 
     unregisterObserver: function()
@@ -84,6 +87,9 @@ var NetHttpActivityObserver =
 
         distributor.removeObserver(this);
         this.registered = false;
+
+        if (FBTrace.DBG_ACTIVITYOBSERVER)
+            FBTrace.sysout("activityObserver.unregisterObserver;");
     },
 
     getActivityDistributor: function()

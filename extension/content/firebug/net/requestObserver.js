@@ -116,15 +116,16 @@ var HttpRequestObserver =
                 // (on the first line of the observe method)
                 if (FBTrace.DBG_HTTPOBSERVER || FBTrace.DBG_ERRORS)
                     FBTrace.sysout("httpObserver.addObserver; Observer already registered: " +
-                        observer.dispatchName);
+                        observer.dispatchName, getObserverList());
                 return;
             }
         }
 
-        if (FBTrace.DBG_HTTPOBSERVER)
-            FBTrace.sysout("httpObserver.addObserver; " + observer.dispatchName);
-
         this.observers.push(observer);
+
+        if (FBTrace.DBG_HTTPOBSERVER)
+            FBTrace.sysout("httpObserver.addObserver; (" + this.observers.length +
+                "), added: " + observer.dispatchName);
 
         if (this.observers.length > 0)
             this.registerObservers();
@@ -148,7 +149,8 @@ var HttpRequestObserver =
                     this.unregisterObservers();
 
                 if (FBTrace.DBG_HTTPOBSERVER || FBTrace.DBG_ERRORS)
-                    FBTrace.sysout("httpObserver.removeObserver; " + observer.dispatchName);
+                    FBTrace.sysout("httpObserver.removeObserver; (" + this.observers.length +
+                        "), removed: " + observer.dispatchName, getObserverList());
                 return;
             }
         }

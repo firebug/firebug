@@ -524,7 +524,7 @@ NetPanel.prototype = Obj.extend(Firebug.ActivablePanel,
     onActivationChanged: function(enable)
     {
         if (FBTrace.DBG_NET || FBTrace.DBG_ACTIVATION)
-            FBTrace.sysout("console.ConsolePanel.onActivationChanged; " + enable);
+            FBTrace.sysout("net.NetPanel.onActivationChanged; " + enable);
 
         if (enable)
         {
