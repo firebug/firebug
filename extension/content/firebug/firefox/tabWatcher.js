@@ -828,8 +828,11 @@ function registerFrameListener(browser)
 
 function unregisterFrameListener(browser)
 {
-    browser.removeProgressListener(FrameProgressListener);
-    delete browser.frameListener;
+    if (browser.frameListener)
+    {
+        delete browser.frameListener;
+        browser.removeProgressListener(FrameProgressListener);
+    }
 
     if (FBTrace.DBG_WINDOWS)
     {
