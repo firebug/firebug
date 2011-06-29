@@ -114,8 +114,8 @@ var HttpRequestObserver =
                 // not sure if it's on purpose, but it causes following error message:
                 // Error: attempt to run compile-and-go script on a cleared scope
                 // (on the first line of the observe method)
-                if (FBTrace.DBG_HTTPOBSERVER || FBTrace.DBG_ERRORS)
-                    FBTrace.sysout("httpObserver.addObserver; Observer already registered: " +
+                if (FBTrace.DBG_HTTPOBSERVER)
+                    FBTrace.sysout("httpObserver.addObserver; ERROR? Observer already registered: " +
                         observer.dispatchName, getObserverList());
                 return;
             }
@@ -148,15 +148,15 @@ var HttpRequestObserver =
                 if (this.observers.length == 0)
                     this.unregisterObservers();
 
-                if (FBTrace.DBG_HTTPOBSERVER || FBTrace.DBG_ERRORS)
+                if (FBTrace.DBG_HTTPOBSERVER)
                     FBTrace.sysout("httpObserver.removeObserver; (" + this.observers.length +
                         "), removed: " + observer.dispatchName, getObserverList());
                 return;
             }
         }
 
-        if (FBTrace.DBG_HTTPOBSERVER || FBTrace.DBG_ERRORS)
-            FBTrace.sysout("httpObserver.removeObserver FAILED (no such observer): " +
+        if (FBTrace.DBG_HTTPOBSERVER)
+            FBTrace.sysout("httpObserver.removeObserver ERROR? (no such observer): " +
                 observer.dispatchName);
     },
 

@@ -541,7 +541,13 @@ ChannelListenerProxy.prototype =
     {
         var context = this.getContext();
         if (!context)
-            return;
+        {
+            if (FBTrace.DBG_CACHE)
+                FBTrace.sysout("tabCache.channel.onCollectData: NO CONTEXT " +
+                    Http.safeGetRequestName(request), data);
+
+            return false;
+        }
 
         // Store received data into the cache as they come. If the method returns
         // false, the rest of the response is ignored (not cached). This is used
