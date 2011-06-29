@@ -3,9 +3,11 @@
 define([
     "firebug/firefox/xpcom",
     "firebug/lib/trace",
+    "firebug/lib/string",
     "firebug/net/httpLib",
+    "firebug/trace/traceModule",
 ],
-function(Xpcom, FBTrace, Http) {
+function(Xpcom, FBTrace, Str, Http, TraceModule) {
 
 // ********************************************************************************************* //
 // Constants
@@ -38,8 +40,8 @@ var HttpRequestObserver =
     registerObservers: function()
     {
         if (FBTrace.DBG_HTTPOBSERVER)
-            FBTrace.sysout("httpObserver.registerObservers; wasObserving: " +
-                this.observing + " with observers "+this.observers.length, this.observers);
+            FBTrace.sysout("httpObserver.registerObservers; (" + this.observers.length + "), " +
+                "active: " + this.observing, getObserverList());
 
         if (!this.observing)
         {
@@ -54,8 +56,8 @@ var HttpRequestObserver =
     unregisterObservers: function()
     {
         if (FBTrace.DBG_HTTPOBSERVER)
-            FBTrace.sysout("httpObserver.unregisterObservers; wasObserving: " +
-                this.observing + " with observers "+this.observers.length, this.observers);
+            FBTrace.sysout("httpObserver.unregisterObservers; (" + this.observers.length + "), " +
+                "active: " + this.observing, getObserverList());
 
         if (this.observing)
         {
@@ -76,10 +78,6 @@ var HttpRequestObserver =
         {
             if (!(subject instanceof Ci.nsIHttpChannel))
                 return;
-
-            if (FBTrace.DBG_HTTPOBSERVER)
-                FBTrace.sysout("httpObserver.observe " + (topic ? topic.toUpperCase() : topic) +
-                    ", " + Http.safeGetRequestName(subject));
 
             // Notify all registered observers.
             if (topic == "http-on-modify-request" ||
@@ -163,7 +161,11 @@ var HttpRequestObserver =
     notifyObservers: function(subject, topic, data)
     {
         if (FBTrace.DBG_HTTPOBSERVER)
-            FBTrace.sysout("httpObserver.notifyObservers (" + this.observers.length + ") " + topic, this.observers);
+        {
+            FBTrace.sysout("httpObserver.notifyObservers (" + this.observers.length + ") " +
+                (topic ? topic.toUpperCase() : topic) + ", " + Http.safeGetRequestName(subject),
+                getObserverList());
+        }
 
         for (var i=0; i<this.observers.length; i++)
         {
@@ -183,7 +185,42 @@ var HttpRequestObserver =
 }
 
 // ********************************************************************************************* //
+// Tracing Support
+
+function getObserverList()
+{
+    var observerNames = [];
+    for (var i=0; i<HttpRequestObserver.observers.length; i++)
+        observerNames.push(HttpRequestObserver.observers[i].dispatchName);
+
+    return observerNames;
+}
+
+// ********************************************************************************************* //
+// Trace Listener
+
+var TraceListener =
+{
+    onLoadConsole: function(win, rootNode)
+    {
+    },
+
+    onDump: function(message)
+    {
+        var index = message.text.indexOf("httpObserver.");
+        if (index == 0)
+        {
+            message.text = message.text.substr("httpObserver.".length);
+            message.text = Str.trim(message.text);
+            message.type = "DBG_HTTPOBSERVER";
+        }
+    }
+};
+
+// ********************************************************************************************* //
 // Registration
+
+TraceModule.addListener(TraceListener);
 
 return HttpRequestObserver;
 
