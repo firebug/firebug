@@ -9,13 +9,12 @@
 <binding id="initializer">
     <implementation>
         <destructor><![CDATA[
-           Firebug.chrome.shutdown();
+            Firebug.chrome.shutdown();
         ]]></destructor>
     </implementation>
 </binding>
 
 <binding id="panelBar">
-
     <!-- The XUL structure for the panel bar is specified in the XUL source
          inside each "panelBar" element.  This allows us to have panel bars
          with substantially different layous, including the ability to embed
@@ -49,26 +48,26 @@
         <method name="createTab">
             <parameter name="panelType"/>
             <body><![CDATA[
-            var tab = document.createElement("panelTab");
-            tab.panelType = panelType;
-
-            var title = Firebug.getPanelTitle(panelType);
-            var tooltip = Firebug.getPanelTooltip(panelType);
-            tab.setAttribute("label", title);
-            tab.setAttribute("tooltiptext", tooltip);
-
-            this.tabMap[panelType.prototype.name] = tab;
-            this.updateTab(panelType);
-
-            return tab;
+                var tab = document.createElement("panelTab");
+                tab.panelType = panelType;
+    
+                var title = Firebug.getPanelTitle(panelType);
+                var tooltip = Firebug.getPanelTooltip(panelType);
+                tab.setAttribute("label", title);
+                tab.setAttribute("tooltiptext", tooltip);
+    
+                this.tabMap[panelType.prototype.name] = tab;
+                this.updateTab(panelType);
+    
+                return tab;
             ]]></body>
         </method>
 
         <method name="addTab">
             <parameter name="panelType"/>
             <body><![CDATA[
-            var tab = this.createTab(panelType);
-            this.panelTabs.appendChild(tab);
+                var tab = this.createTab(panelType);
+                this.panelTabs.appendChild(tab);
             ]]></body>
         </method>
 
@@ -82,16 +81,16 @@
         <method name="updateTab">
             <parameter name="panelType"/>
             <body><![CDATA[
-            var tab = this.getTab(panelType.prototype.name);
-
-            if (tab && panelType.prototype.activable)
-            {
-                var enabled = panelType.prototype.isEnabled();
-                tab.setAttribute("aria-disabled", enabled ? "false" : "true");
-            }
-
-            // xxxHonza: Does this belong here?
-            Firebug.StartButton.resetTooltip();
+                var tab = this.getTab(panelType.prototype.name);
+    
+                if (tab && panelType.prototype.activable)
+                {
+                    var enabled = panelType.prototype.isEnabled();
+                    tab.setAttribute("aria-disabled", enabled ? "false" : "true");
+                }
+    
+                // xxxHonza: Does this belong here?
+                Firebug.StartButton.resetTooltip();
             ]]></body>
         </method>
 
@@ -113,7 +112,9 @@
                         tab = newTab;
                     }
                     else
+                    {
                         this.tabMap[panelType.prototype.name] = tab;
+                    }
                 }
 
                 // Remove old tabs after the last panel
@@ -167,7 +168,8 @@
             <body><![CDATA[
                 var tab = panelName ? this.tabMap[panelName] : null;
                 var panelType = tab ? tab.panelType : null;
-                var panel = Firebug.currentContext ? Firebug.currentContext.getPanel(panelName) : null;
+                var panel = Firebug.currentContext ?
+                    Firebug.currentContext.getPanel(panelName) : null;
 
                 if (panelName && !tab.panelType.prototype.parentPanel)
                 {
@@ -184,7 +186,7 @@
                     return panel;
 
                 if (FBTrace.DBG_PANELS)
-                    FBTrace.sysout('selectPanel '+panelName+" panel: "+panel);
+                    FBTrace.sysout("selectPanel " + panelName + " panel: " + panel);
 
                 this.hideSelectedPanel();
 
@@ -200,8 +202,11 @@
                 if (tab)
                 {
                     tab.selected = true;
-                    if (Firebug.A11yModel && Firebug.A11yModel.isEnabled() && Firebug.A11yModel.tabFocused &&!forceUpdate)
+                    if (Firebug.A11yModel && Firebug.A11yModel.isEnabled() &&
+                        Firebug.A11yModel.tabFocused && !forceUpdate)
+                    {
                         tab.focus();
+                    }
                 }
 
                 if (panel)
@@ -219,7 +224,7 @@
                 if (sel)
                     sel.removeAllRanges();
 
-                this.showSelectedPanel(panelName);  // sets active attribute true
+                this.showSelectedPanel(panelName); // sets active attribute true
 
                 if (panel && !noRefresh && panel.needsRefresh)
                 {
@@ -235,7 +240,9 @@
                     this.deck.selectedPanel = panel.browser;
                 }
                 else
+                {
                     this.deck.selectedPanel = this.browser;
+                }
 
                 this.dispatch("selectPanel");
 
@@ -284,11 +291,11 @@
                     var state = FBL.getPersistedState(Firebug.currentContext, oldPanel.name);
                     oldPanel.hide(state);
 
-                    oldPanel.visible = false;  // xxxjjb Why three ways to un-show the panel?
+                    oldPanel.visible = false; // xxxjjb Why three ways to un-show the panel?
                     oldPanel.panelNode.removeAttribute("active");
                 }
 
-                // Also hide disabled panel content if any.
+                // Also hide disabled panel content if any
                 if (Firebug.DisabledPanelBox)
                     Firebug.DisabledPanelBox.hide(this.browser);
             ]]></body>
@@ -419,7 +426,7 @@
 
             if (tab && tab.getAttribute("selected") != "true")
             {
-                // Select after a timeout to increase teh snappy
+                // Select after a timeout to increase the snappy
                 setTimeout(FBL.bindFixed(function()
                 {
                     this.selectTab(tab);
@@ -438,92 +445,102 @@
             this.scrollbox = document.getAnonymousElementByAttribute(this, "anonid", "scrollbox");
             window.addEventListener("resize", this, false);
         ]]></constructor>
+
         <method name="_getScrollableElements">
             <body><![CDATA[
                 return this.panelTabs.childNodes;
             ]]></body>
         </method>
+
         <method name="handleEvent">
             <parameter name="event"/>
             <body><![CDATA[
-                switch (event.type) {
-                case "resize":
-                    this.adjustTabSize(event);
-                break;
-            }
+                switch (event.type)
+                {
+                    case "resize":
+                        this.adjustTabSize(event);
+                    break;
+                }
             ]]></body>
         </method>
+
         <method name="adjustTabSize">
             <parameter name="event"/>
             <body><![CDATA[
-            if (!this.initialized)
-                return;
-
-            // Don't shrink at all if the pref is set to zero or less.
-            if (Firebug.panelTabMinWidth <= 0)
-                return;
-
-            var totalWidth = parseInt(this.scrollbox.boxObject.width, 10);
-            if (!totalWidth)
-                return;
-
-            var tabs = FBL.cloneArray(this.panelTabs.children);
-            if (!tabs.length)
-                return;
-
-            var availableSpace = totalWidth;
-            while (tabs.length && availableSpace > 0)
-            {
-                var noSpace = true;
-                var tabWidth = Math.max(Firebug.panelTabMinWidth, availableSpace / tabs.length);
-                for (var i=0; i<tabs.length; i++)
+                if (!this.initialized)
+                    return;
+    
+                // Don't shrink at all, if the pref is set to zero or less
+                if (Firebug.panelTabMinWidth <= 0)
+                    return;
+    
+                var totalWidth = parseInt(this.scrollbox.boxObject.width, 10);
+                if (!totalWidth)
+                    return;
+    
+                var tabs = FBL.cloneArray(this.panelTabs.children);
+                if (!tabs.length)
+                    return;
+    
+                var availableSpace = totalWidth;
+                while (tabs.length && availableSpace > 0)
                 {
-                    var tab = tabs[i];
-                    tab.style.maxWidth = tab.selected == "true" ? "none" : tabWidth + "px";
-                    if (tab.originalWidth <= tabWidth)
+                    var noSpace = true;
+                    var tabWidth = Math.max(Firebug.panelTabMinWidth,
+                        availableSpace / tabs.length);
+
+                    for (var i=0; i<tabs.length; i++)
                     {
-                        noSpace = false;
-                        tabs.splice(i, 1);
-                        availableSpace = availableSpace - tab.originalWidth;
-                        break;
+                        var tab = tabs[i];
+                        tab.style.maxWidth = tab.selected == "true" ? "none" : tabWidth + "px";
+                        if (tab.originalWidth <= tabWidth)
+                        {
+                            noSpace = false;
+                            tabs.splice(i, 1);
+                            availableSpace = availableSpace - tab.originalWidth;
+                            break;
+                        }
                     }
+                    if (noSpace)
+                        break;
                 }
-                if (noSpace)
-                    break;
-            }
             ]]></body>
         </method>
+
         <method name="updateOriginalSize">
             <body><![CDATA[
-            if (this.initialized)
-                return;
-
-            if (!this.panelTabs)
-                return;
-
-            var tab = this.panelTabs.firstChild;
-            while (tab)
-            {
-                tab.originalWidth = tab.boxObject.width;
-                tab = tab.nextSibling;
-            }
-            this.initialized = true;
+                if (this.initialized)
+                    return;
+    
+                if (!this.panelTabs)
+                    return;
+    
+                var tab = this.panelTabs.firstChild;
+                while (tab)
+                {
+                    tab.originalWidth = tab.boxObject.width;
+                    tab = tab.nextSibling;
+                }
+                this.initialized = true;
             ]]></body>
         </method>
+
         <method name="ensureVisibleTab">
             <parameter name="tab"/>
             <body><![CDATA[
-            if (tab)
-                this.scrollBoxObject.ensureElementIsVisible(tab);
+                if (tab)
+                    this.scrollBoxObject.ensureElementIsVisible(tab);
             ]]></body>
         </method>
     </implementation>
+
     <handlers>
         <handler event="underflow"><![CDATA[
             if (event.detail == 0)
                 return; // Ignore vertical events
             this.updateOriginalSize();
         ]]></handler>
+
         <handler event="overflow"><![CDATA[
             if (event.detail == 0)
                 return; // Ignore vertical events
@@ -542,32 +559,32 @@
         </xul:toolbarbutton>
     </content>
     <implementation>
-        <constructor>
-        <![CDATA[
+        <constructor><![CDATA[
             this.popup = document.getAnonymousElementByAttribute(this, "anonid", "popup");
             this.panelBar = document.getElementById("fbPanelBar1");
         ]]>
         </constructor>
         <method name="updateMenuItems">
             <body><![CDATA[
-            var visibleTabs = [];
-            var menuItem = this.popup.firstChild;
-            while (menuItem)
-            {
-                var checked = menuItem.getAttribute("checked") == "true";
-                if (checked)
-                    visibleTabs.push(menuItem);
-
-                menuItem.removeAttribute("disabled");
-                menuItem = menuItem.nextSibling;
-            }
-
-            // If there is only one panel visible don't allow to close it.
-            if (visibleTabs.length == 1)
-                visibleTabs[0].setAttribute("disabled", true);
+                var visibleTabs = [];
+                var menuItem = this.popup.firstChild;
+                while (menuItem)
+                {
+                    var checked = menuItem.getAttribute("checked") == "true";
+                    if (checked)
+                        visibleTabs.push(menuItem);
+    
+                    menuItem.removeAttribute("disabled");
+                    menuItem = menuItem.nextSibling;
+                }
+    
+                // If there is only one panel visible don't allow to close it.
+                if (visibleTabs.length == 1)
+                    visibleTabs[0].setAttribute("disabled", true);
             ]]></body>
         </method>
     </implementation>
+
     <handlers>
         <handler event="popupshowing"><![CDATA[
             var tab = this.panelBar.panelTabs.firstChild;
@@ -597,9 +614,11 @@
 
             return true;
         ]]></handler>
+
         <handler event="popuphidden"><![CDATA[
             FBL.eraseNode(this.popup);
         ]]></handler>
+
         <handler event="command"><![CDATA[
             var menuItem = event.originalTarget;
             var panelName = menuItem.panelType.prototype.name;
@@ -610,40 +629,43 @@
 
 <binding id="panelBarTabListMenuItem" extends="chrome://global/content/bindings/menu.xml#menuitem-iconic">
     <implementation>
-        <constructor>
-        <![CDATA[
-            var iconNode = document.getAnonymousElementByAttribute(this, "class", "menu-iconic-left");
+        <constructor><![CDATA[
+            var iconNode = document.getAnonymousElementByAttribute(this, "class",
+                "menu-iconic-left");
             iconNode.allowEvents = true;
             iconNode.addEventListener("click", FBL.bind(this.onTogglePanel, this), true);
-            iconNode.addEventListener("mouseover", FBL.bind(this.onOverToggleCheckmark, this, iconNode), true);
+            iconNode.addEventListener("mouseover", FBL.bind(this.onOverToggleCheckmark, this, 
+                iconNode), true);
             this.panelBar = FBL.getAncestorByClass(this, "panelBar");
         ]]>
         </constructor>
+
         <method name="onTogglePanel">
             <parameter name="event"/>
             <body><![CDATA[
-            if (this.getAttribute("disabled") == "true")
-                return;
-
-            var panelName = this.panelType.prototype.name;
-            var checked = this.getAttribute("checked") == "true";
-            this.setAttribute("checked", checked ? "false" : "true");
-            this.panelBar.togglePanel(panelName, !checked);
-
-            Firebug.chrome.$("panelBarTabList").updateMenuItems();
+                if (this.getAttribute("disabled") == "true")
+                    return;
+    
+                var panelName = this.panelType.prototype.name;
+                var checked = this.getAttribute("checked") == "true";
+                this.setAttribute("checked", checked ? "false" : "true");
+                this.panelBar.togglePanel(panelName, !checked);
+    
+                Firebug.chrome.$("panelBarTabList").updateMenuItems();
             ]]></body>
         </method>
+
         <method name="onOverToggleCheckmark">
             <parameter name="event"/>
             <parameter name="iconNode"/>
             <body><![CDATA[
-            // xxxHonza: the goal here is to visually indicate that clicking on
-            // checkmarks in the panel list popup selects the panel.
-            // FBTrace.sysout('Here is the iconNode', iconNode);
-            // iconNode.style.backgroundColor = "red";
-            // So, iconNode here is XUL - change the current
-            // background-image style (?) of <xul:image> to something that
-            // pops out a little
+                // xxxHonza: the goal here is to visually indicate that clicking on
+                // checkmarks in the panel list popup selects the panel.
+                // FBTrace.sysout('Here is the iconNode', iconNode);
+                // iconNode.style.backgroundColor = "red";
+                // So, iconNode here is XUL - change the current
+                // background-image style (?) of <xul:image> to something that
+                // pops out a little
             ]]></body>
         </method>
     </implementation>
@@ -656,11 +678,11 @@
         <children includes="panelTabMenu"/>
     </content>
     <implementation>
-        <constructor>
-        <![CDATA[
-            this.labelNode = document.getAnonymousElementByAttribute(this, "class", "panelTab-text"),
-            this.setAttribute('role', 'tab');
-            this.setAttribute('aria-haspopup', 'true');
+        <constructor><![CDATA[
+            this.labelNode = document.getAnonymousElementByAttribute(this, "class",
+                "panelTab-text");
+            this.setAttribute("role", "tab");
+            this.setAttribute("aria-haspopup", "true");
             if (!this.tabMenu)
             {
                 this.tabMenu = document.createElement("panelTabMenu");
@@ -669,19 +691,23 @@
             return this.tabMenu;
         ]]>
         </constructor>
+
         <property name="selected">
             <getter><![CDATA[
                 return this.getAttribute("selected");
             ]]></getter>
+
             <setter><![CDATA[
                 this.setAttribute("selected", val);
                 this.tabMenu.updateVisibility();
             ]]></setter>
         </property>
+
         <property name="label">
             <getter><![CDATA[
                 return this.labelNode.getAttribute("value");
             ]]></getter>
+
             <setter><![CDATA[
                 this.labelNode.setAttribute(val);
             ]]></setter>
@@ -695,71 +721,79 @@
         <xul:menupopup anonid="popup" tooltiptext=""/>
         <xul:image anonid="menuTarget" class="menuTarget"/>
     </content>
+
     <implementation>
-        <constructor>
-        <![CDATA[
-            this.setAttribute('role', 'presentation');
+        <constructor><![CDATA[
+            this.setAttribute("role", "presentation");
             this.popup = document.getAnonymousElementByAttribute(this, "anonid", "popup");
             this.panelBar = FBL.getAncestorByClass(this, "panelBar");
         ]]>
         </constructor>
+
         <field name="value"/>
+
         <method name="onEnable">
             <body><![CDATA[
-            var panelType = this.panelBar.selectedTab.panelType;
-            panelType.prototype.setEnabled(true);
-            this.panelBar.updateTab(panelType);
+                var panelType = this.panelBar.selectedTab.panelType;
+                panelType.prototype.setEnabled(true);
+                this.panelBar.updateTab(panelType);
             ]]></body>
         </method>
+
         <method name="onDisable">
             <body><![CDATA[
-            var panelType = this.panelBar.selectedTab.panelType;
-            panelType.prototype.setEnabled(false);
-            this.panelBar.updateTab(panelType);
+                var panelType = this.panelBar.selectedTab.panelType;
+                panelType.prototype.setEnabled(false);
+                this.panelBar.updateTab(panelType);
             ]]></body>
         </method>
+
         <method name="optionMenu">
             <parameter name="label"/>
             <parameter name="checked"/>
             <parameter name="command"/>
             <body><![CDATA[
-            return {label: label, type: "radio", checked: checked,
-                command: FBL.bindFixed(command, this)};
+                return {label: label, type: "radio", checked: checked,
+                    command: FBL.bindFixed(command, this)};
             ]]></body>
         </method>
+
         <method name="updateVisibility">
             <body><![CDATA[
-            // Hide the mini-menu (displaying panel's option) if following is true:
-            // 1) The panel isn't activable and so there are no enable/disable options.
-            // 2) The panel doesn't provide any additional options.
-            var panel = this.panelBar.selectedPanel;
-            if (!panel)
-                return;
-
-            var panelItems = panel ? panel.getOptionsMenuItems(Firebug.currentContext) : null;
-            if (!panel.activable && !(panelItems && panelItems.length))
-                this.setAttribute("collapsed", "true");
-            else
-                this.removeAttribute("collapsed");
+                // Hide the mini-menu (displaying panel's option) if following is true:
+                // 1) The panel isn't activable and so there are no enable/disable options.
+                // 2) The panel doesn't provide any additional options.
+                var panel = this.panelBar.selectedPanel;
+                if (!panel)
+                    return;
+    
+                var panelItems = panel ? panel.getOptionsMenuItems(Firebug.currentContext) : null;
+                if (!panel.activable && !(panelItems && panelItems.length))
+                    this.setAttribute("collapsed", "true");
+                else
+                    this.removeAttribute("collapsed");
             ]]></body>
         </method>
+
         <method name="showMenu">
             <body><![CDATA[
-            var popupBoxObject = this.popup.popupBoxObject;
-            popupBoxObject.setConsumeRollupEvent(popupBoxObject.ROLLUP_NO_CONSUME);
-            this.popup.showPopup(this, -1, -1, "popup", "bottomleft", "topleft");
+                var popupBoxObject = this.popup.popupBoxObject;
+                popupBoxObject.setConsumeRollupEvent(popupBoxObject.ROLLUP_NO_CONSUME);
+                this.popup.showPopup(this, -1, -1, "popup", "bottomleft", "topleft");
             ]]></body>
         </method>
     </implementation>
+
     <handlers>
         <handler event="mousedown" button="0"><![CDATA[
             this.showMenu();
         ]]></handler>
+
         <handler event="popupshowing"><![CDATA[
             var tab = this.panelBar.selectedTab;
             if (!tab)
                 return false;
-            this.setAttribute('role', 'menu');
+            this.setAttribute("role", "menu");
             var items = [];
             var panelType = tab.panelType;
 
@@ -775,7 +809,7 @@
             var panel = this.panelBar.selectedPanel;
             if (panel)
             {
-                // Get panel's option items.
+                // Get panel's option items
                 var panelItems = panel.getOptionsMenuItems(Firebug.currentContext);
                 if (panelItems && panelItems.length > 0)
                     items.push("-");
@@ -790,8 +824,9 @@
 
             return true;
         ]]></handler>
+
         <handler event="popuphidden"><![CDATA[
-            this.setAttribute('role', 'presentation');
+            this.setAttribute("role", "presentation");
             FBL.eraseNode(this.popup);
         ]]></handler>
     </handlers>
@@ -809,12 +844,12 @@
                 {
                     // extra box needed to fix alignment issue in Vista theme
                     var box = document.createElement("hbox");
-                    box.setAttribute('role', 'separator');
-                    box.setAttribute('align', 'center');
+                    box.setAttribute("role", "separator");
+                    box.setAttribute("align", "center");
                     var sep = document.createElement("label");
                     sep.setAttribute("class", "panelStatusSeparator");
                     sep.setAttribute("value", separator);
-                    sep.setAttribute('role', 'presentation');
+                    sep.setAttribute("role", "presentation");
                     box.appendChild(sep);
                     this.appendChild(box);
                 }
@@ -844,7 +879,8 @@
                 {
                     if (item.rep)
                     {
-                        var itemObject = item.rep.getRealObject(item.repObject, Firebug.currentContext);
+                        var itemObject = item.rep.getRealObject(item.repObject,
+                            Firebug.currentContext);
                         if (itemObject == object)
                             return item;
                     }
@@ -942,7 +978,8 @@
         <property name="location">
             <getter><![CDATA[
                 if (FBTrace.DBG_LOCATIONS)
-                    FBTrace.sysout("location getter label:"+this.getAttribute('label')+" location: "+this.getAttribute('location'));
+                    FBTrace.sysout("location getter label:" + this.getAttribute("label") +
+                        " location: " + this.getAttribute("location"));
                 return this.getAttribute("location");
             ]]></getter>
 
@@ -966,7 +1003,10 @@
                 this.setAttribute("label", FBL.cropString(fileName, 80));
                 this.setAttribute("location", val);
                 if (FBTrace.DBG_LOCATIONS)
-                    FBTrace.sysout("location setter label:"+this.getAttribute('label')+" fileName: "+fileName+ " val: "+val);
+                {
+                    FBTrace.sysout("location setter label:" + this.getAttribute("label") +
+                        " fileName: " + fileName + " val: " + val);
+                }
             ]]></setter>
         </property>
 
@@ -976,17 +1016,25 @@
                 {
                     var functionYieldingExpression = this.getAttribute("locationProvider");
                     try {
-                    if (functionYieldingExpression && functionYieldingExpression.length > 0)
-                        this.locator = eval(functionYieldingExpression);
-                        } catch (e) { FBTrace.sysout("getLocator Fails "+e+" in "+window.location) ; }
-                    if (!this.locator || typeof(this.locator) != 'function')
+                        if (functionYieldingExpression && functionYieldingExpression.length > 0)
+                            this.locator = eval(functionYieldingExpression);
+                    }
+                    catch (e)
+                    {
+                        FBTrace.sysout("getLocator Fails " + e + " in " + window.location);
+                    }
+
+                    if (!this.locator || typeof(this.locator) != "function")
                     {
                         var whichBinding = this.getAttribute("id");
-                        var msg = "ERROR: panelFileList "+whichBinding+" requires attribute \'locationProvider\', an expression yielding a function";
-                        FBTrace.sysout(msg, {locator: this.locator, expression: functionYieldingExpression});
+                        var msg = "ERROR: panelFileList " + whichBinding + " requires attribute " +
+                            "\'locationProvider\', an expression yielding a function";
+                        FBTrace.sysout(msg, {locator: this.locator,
+                            expression: functionYieldingExpression});
                         return null;
                     }
                 }
+
                 // The locator needs
                 //     getObjectDescription(object): return {path, name}
                 //     getLocationList(), a list of objects that can be fed into getObjectDescription
@@ -1023,7 +1071,7 @@
         <method name="onKeyPress">
             <parameter name="event"/>
             <body><![CDATA[
-                if (event.keyCode == 13) // Return
+                if (event.keyCode == KeyEvent.DOM_VK_RETURN)
                 {
                     this.enterActiveItem();
                     FBL.cancelEvent(event);
@@ -1039,14 +1087,13 @@
                 //https://developer.mozilla.org/en/XUL/arrowscrollbox
                 var scrollbutton = event.originalTarget;
                 var anonid = scrollbutton.getAttribute("anonid");
-                if (anonid == 'scrollbutton-up')
+                if (anonid == "scrollbutton-up")
                     scrollbutton.parentNode.scrollByIndex(-15);
-                if (anonid == 'scrollbutton-down')
+                if (anonid == "scrollbutton-down")
                     scrollbutton.parentNode.scrollByIndex(+15);
             ]]>
             </body>
         </method>
-
     </implementation>
 
     <handlers>
@@ -1137,7 +1184,7 @@
 
         <handler event="popupshown"><![CDATA[
             // Weird, but this gets fired when the user clicks on a menuitem,
-            // which hiding the buttons again and resulting in jitters - let's avoid that.
+            // which hides the buttons again and resulting in jitters - let's avoid that.
             if (!this._closed)
                 return;
 
@@ -1165,7 +1212,7 @@
         <handler event="command"><![CDATA[
             var object = event.originalTarget.repObject;
 
-            // Select after a timeout to increase teh snappy
+            // Select after a timeout to increase the snappy
             setTimeout(FBL.bindFixed(function()
             {
                 this.selectObject(object);
@@ -1178,11 +1225,14 @@
             {
                 var locator = this.getLocator();
                 if (locator.getObjectLocation)
-                    event.target.setAttribute('tooltiptext', locator.getObjectLocation(object));
+                    event.target.setAttribute("tooltiptext", locator.getObjectLocation(object));
                 else
                 {
                     if (FBTrace.DBG_LOCATIONS)
-                        FBTrace.sysout("!locator.getObjectLocation for "+ this.getAttribute('label'), locator);
+                    {
+                        FBTrace.sysout("!locator.getObjectLocation for " +
+                            this.getAttribute("label"), locator);
+                    }
                 }
             }
             return;
@@ -1194,7 +1244,7 @@
 <binding id="panelFileListFilter">
     <implementation>
         <constructor><![CDATA[
-           this.popup = this.parentNode;
+            this.popup = this.parentNode;
         ]]></constructor>
 
         <method name="filterList">
@@ -1225,14 +1275,17 @@
                 if (this.firstMatch)
                 {
                     // skip the filterMessageHeader
-                    for (var child = this.popup.firstChild.nextSibling; child; child = child.nextSibling)
+                    for (var child = this.popup.firstChild.nextSibling; child;
+                        child = child.nextSibling)
+                    {
                         child.hidden = !child._searchMatch;
+                    }
 
                     try
                     {
-                        var toolbarButton = this.popup.parentNode;
-                        if(toolbarButton.boxObject instanceof Components.interfaces.nsIMenuBoxObject)
-                            toolbarButton.boxObject.activeChild = this.firstMatch;
+                        var toolbarButtonBO = this.popup.parentNode.boxObject;
+                        if (toolbarButtonBO instanceof Components.interfaces.nsIMenuBoxObject)
+                            toolbarButtonBO.activeChild = this.firstMatch;
                     }
                     catch (err)
                     {
@@ -1248,13 +1301,13 @@
         <method name="onKeyPress">
             <parameter name="event"/>
             <body><![CDATA[
-                if (event.keyCode == 13) // Return
+                if (event.keyCode == KeyEvent.DOM_VK_RETURN)
                 {
                     this.filterString = "";
                 }
-                else if (event.keyCode == 8) // Backspace
+                else if (event.keyCode == KeyEvent.DOM_VK_BACK_SPACE)
                 {
-                    this.filterString = this.filterString.substr(0, this.filterString.length-1);
+                    this.filterString = this.filterString.substr(0, this.filterString.length - 1);
                     this.filterList(this.filterString);
                 }
                 else if (event.charCode)
@@ -1276,10 +1329,10 @@
             <parameter name="filterString"/>
             <parameter name="matched"/>
             <body><![CDATA[
-                // The placeholder is displayed in gray while the filter is in black.
+                // The placeholder is displayed in gray while the filter is in black
                 this.setAttribute("keyword", filterString ? true : false);
 
-                // If there is no match the background is red.
+                // If there is no match the background is red
                 this.setAttribute("match", matched ? true : false);
 
                 // Set the text into the box. If the user entirely removed the text use
@@ -1298,7 +1351,7 @@
     for a keyword within the current panel. -->
 <binding id="searchBox">
     <content sizetopopup="none" align="center">
-        <xul:textbox anonid="searchBox" flex="1" width='0'
+        <xul:textbox anonid="searchBox" flex="1" width="0"
             rows="1" label="search.Firebug_Search" class="fbsearch-textbox"
             onkeyup="onSearchBoxKeyUp(event, this);" aria-describedby="fbSearchBoxDescription">
             <xul:box class="fbsearch-icon" onclick="onSearchIconClick(event, this.parentNode)"/>
@@ -1325,16 +1378,22 @@
 
     <implementation>
         <constructor><![CDATA[
-            var searchBox = document.getAnonymousElementByAttribute(this, "anonid", "searchBox"),
-                searchPrev = document.getAnonymousElementByAttribute(this, "anonid", "searchPrev"),
-                searchNext = document.getAnonymousElementByAttribute(this, "anonid", "searchNext"),
-                searchMenu = document.getAnonymousElementByAttribute(this, "anonid", "fbSearchOptionsMenu"),
-                searchDescription = document.getAnonymousElementByAttribute(this, "anonid", "fbSearchBoxDescription"),
-                optionsPopup = document.getElementById("fbSearchOptionsPanel");
-                if (searchMenu)
-                    searchMenu.setAttribute("aria-label", FBL.$STR("a11y.labels.search options"))
-                if (searchDescription)
-                    searchDescription.setAttribute("tooltiptext", FBL.$STR("a11y.labels.Press up or down arrow key for search options"))
+            var searchBox = document.getAnonymousElementByAttribute(this, "anonid", "searchBox");
+            var searchPrev = document.getAnonymousElementByAttribute(this, "anonid", "searchPrev");
+            var searchNext = document.getAnonymousElementByAttribute(this, "anonid", "searchNext");
+            var searchMenu = document.getAnonymousElementByAttribute(this, "anonid",
+                "fbSearchOptionsMenu");
+            var searchDescription = document.getAnonymousElementByAttribute(this, "anonid",
+                "fbSearchBoxDescription");
+            var optionsPopup = document.getElementById("fbSearchOptionsPanel");
+
+            if (searchMenu)
+                searchMenu.setAttribute("aria-label", FBL.$STR("a11y.labels.search options"));
+            if (searchDescription)
+            {
+                searchDescription.setAttribute("tooltiptext",
+                    FBL.$STR("a11y.labels.Press up or down arrow key for search options"));
+            }
             FBL.internationalize(searchBox, "label");
             FBL.internationalize(searchPrev, "label");
             FBL.internationalize(searchNext, "label");
@@ -1342,38 +1401,50 @@
             searchBox.addEventListener("focus", FBL.bind(this.focusHandler, this), true);
             optionsPopup.addEventListener("focus", FBL.bind(this.panelFocusHandler, this), true);
         ]]></constructor>
+
         <property name="value">
             <xbl:getter><![CDATA[
-                var searchBox = document.getAnonymousElementByAttribute(this, "anonid", "searchBox");
+                var searchBox = document.getAnonymousElementByAttribute(this, "anonid",
+                    "searchBox");
                 return searchBox.value;
             ]]></xbl:getter>
+
             <xbl:setter><![CDATA[
-                var searchBox = document.getAnonymousElementByAttribute(this, "anonid", "searchBox");
-                searchBox.setAttribute('active-search', !!val)
+                var searchBox = document.getAnonymousElementByAttribute(this, "anonid",
+                    "searchBox");
+                searchBox.setAttribute("active-search", !!val);
                 searchBox.value = val;
             ]]></xbl:setter>
         </property>
+
         <property name="placeholder">
             <xbl:getter><![CDATA[
-                var searchBox = document.getAnonymousElementByAttribute(this, "anonid", "searchBox");
+                var searchBox = document.getAnonymousElementByAttribute(this, "anonid",
+                    "searchBox");
                 return searchBox.placeholder;
             ]]></xbl:getter>
+
             <xbl:setter><![CDATA[
-                var searchBox = document.getAnonymousElementByAttribute(this, "anonid", "searchBox");
+                var searchBox = document.getAnonymousElementByAttribute(this, "anonid",
+                    "searchBox");
                 searchBox.placeholder = val;
             ]]></xbl:setter>
         </property>
+
         <property name="status">
             <xbl:getter><![CDATA[
                 return Firebug.Search.status;
             ]]></xbl:getter>
+
             <xbl:setter><![CDATA[
-                var searchBox = document.getAnonymousElementByAttribute(this, "anonid", "searchBox");
+                var searchBox = document.getAnonymousElementByAttribute(this, "anonid",
+                    "searchBox");
                 Firebug.Search.status = searchBox.value == "" || val;
                 searchBox.setAttribute("status", Firebug.Search.status);
                 searchBox.placeholder = "";
             ]]></xbl:setter>
         </property>
+
         <property name="optionsShown">
             <xbl:getter><![CDATA[
                 var optionsPopup = document.getElementById("fbSearchOptionsPanel");
@@ -1388,7 +1459,8 @@
         <method name="updateOptions">
             <parameter name="menuItems" />
             <body><![CDATA[
-                var searchOptions = document.getAnonymousElementByAttribute(this, "anonid", "searchOptionsList");
+                var searchOptions = document.getAnonymousElementByAttribute(this, "anonid",
+                    "searchOptionsList");
                 FBL.eraseNode(searchOptions);
 
                 if (menuItems)
@@ -1405,10 +1477,11 @@
                 }
             ]]></body>
         </method>
+
         <method name="showOptions">
             <body><![CDATA[
-                var optionsPopup = document.getElementById("fbSearchOptionsPanel"),
-                    position = (Firebug.getPlacement() == "detached") ? "after_end" : "before_end";
+                var optionsPopup = document.getElementById("fbSearchOptionsPanel");
+                var position = (Firebug.getPlacement() == "detached" ? "after_end" : "before_end");
                 this.focused = true;
                 optionsPopup.setAttribute("position", position);
                 optionsPopup.openPopup(this, position, 0, 0, false, false);
@@ -1417,6 +1490,7 @@
                 delete this.blurTimeout;
             ]]></body>
         </method>
+
         <method name="hideOptions">
             <body><![CDATA[
                 var optionsPopup = document.getElementById("fbSearchOptionsPanel");
@@ -1426,26 +1500,33 @@
                 delete this.blurTimeout;
             ]]></body>
         </method>
+
         <method name="searchNext">
             <body><![CDATA[
-                this.status = (Firebug.Search.searchNext(Firebug.currentContext) ? "found" : "notfound");
+                this.status = (Firebug.Search.searchNext(Firebug.currentContext) ?
+                    "found" : "notfound");
             ]]></body>
         </method>
+
         <method name="searchPrev">
             <body><![CDATA[
-                this.status = (Firebug.Search.searchPrev(Firebug.currentContext) ? "found" : "notfound");
+                this.status = (Firebug.Search.searchPrev(Firebug.currentContext) ?
+                    "found" : "notfound");
             ]]></body>
         </method>
 
         <method name="focus">
             <body><![CDATA[
-                var searchBox = document.getAnonymousElementByAttribute(this, "anonid", "searchBox");
+                var searchBox = document.getAnonymousElementByAttribute(this, "anonid",
+                    "searchBox");
                 searchBox.focus();
             ]]></body>
         </method>
+
         <method name="select">
             <body><![CDATA[
-                var searchBox = document.getAnonymousElementByAttribute(this, "anonid", "searchBox");
+                var searchBox = document.getAnonymousElementByAttribute(this, "anonid",
+                    "searchBox");
                 searchBox.select();
             ]]></body>
         </method>
@@ -1460,126 +1541,155 @@
                 clearTimeout(this.blurTimeout);
                 delete this.blurTimeout;
 
-                if (!FBL.hasClass(target, "panelFocusBound")) {
-                    if(!this.focused && this.value)
+                if (!FBL.hasClass(target, "panelFocusBound"))
+                {
+                    if (!this.focused && this.value)
                         this.searchNext();
                     this.showOptions();
                 }
             ]]></body>
         </method>
+
         <method name="panelFocusHandler">
             <parameter name="event" />
             <body><![CDATA[
                 this.focusHandler(event);
 
-                if (!FBL.hasClass(event.target, "panelFocusBound")) {
+                if (!FBL.hasClass(event.target, "panelFocusBound"))
                     this.panelHasFocus = true;
-                }
             ]]></body>
         </method>
+
         <method name="endTextFocusHandler">
             <body><![CDATA[
                 clearTimeout(this.blurTimeout);
                 delete this.blurTimeout;
 
-                if (this.panelHasFocus) {
+                if (this.panelHasFocus)
+                {
                     // The user has just tabbed out of the panel
                     document.commandDispatcher.advanceFocus();
                     this.panelHasFocus = false;
-                } else if (this.optionsShown) {
+                }
+                else if (this.optionsShown)
+                {
                     // The user has just tabbed out of the search box (and into the panel)
                     var optionsPopup = document.getElementById("fbSearchOptionsPanel");
                     document.commandDispatcher.advanceFocusIntoSubtree(optionsPopup);
-                } else {
+                }
+                else
+                {
                     // The user has just reverse tabbed from the next tab target
                     this.showOptions();
 
-                    var searchNext = document.getAnonymousElementByAttribute(this, "anonid", "searchNext");
+                    var searchNext = document.getAnonymousElementByAttribute(this, "anonid",
+                        "searchNext");
                     setTimeout(function() { searchNext.focus(); }, 0);
                     this.panelHasFocus = true;
                 }
             ]]></body>
         </method>
+
         <method name="startFocusHandler">
             <body><![CDATA[
-                if (this.panelHasFocus) {
+                if (this.panelHasFocus)
+                {
                     // The user has shift-tabbed out of the panel
-                    var searchBox = document.getAnonymousElementByAttribute(this, "anonid", "searchBox")
+                    var searchBox = document.getAnonymousElementByAttribute(this, "anonid",
+                        "searchBox");
                     searchBox.focus();
-                } else {
+                }
+                else
+                {
                     // The user has just tabbed into the panel
                     document.commandDispatcher.advanceFocus();
                     this.panelHasFocus = true;
                 }
             ]]></body>
         </method>
+
         <method name="endFocusHandler">
             <body><![CDATA[
                 // The user has just tabbed out of the panel
                 this.hideOptions();
 
-                var endTextFocus = document.getAnonymousElementByAttribute(this, "anonid", "endTextFocus");
+                var endTextFocus = document.getAnonymousElementByAttribute(this, "anonid",
+                    "endTextFocus");
                 endTextFocus.focus();
             ]]></body>
         </method>
+
         <method name="onSearchBoxKeyUp">
             <parameter name="event" />
             <parameter name="textbox" />
             <body><![CDATA[
-                textbox.setAttribute('active-search', !!textbox.value);
+                textbox.setAttribute("active-search", !!textbox.value);
 
                 if (!Firebug.A11yModel || !Firebug.A11yModel.isEnabled())
                     return;
                 if (event.keyCode ==  KeyEvent.DOM_VK_UP || event.keyCode ==  KeyEvent.DOM_VK_DOWN)
                 {
-                    var goingDown = event.keyCode ==  KeyEvent.DOM_VK_DOWN;
+                    var goingDown = (event.keyCode == KeyEvent.DOM_VK_DOWN);
                     var optionsPopup = document.getElementById("fbSearchOptionsPanel");
                     var items = optionsPopup.getElementsByClassName("a11yFocus");
                     if (!optionsPopup || !items)
                         return;
                     if (optionsPopup.state == "closed")
                         this.showOptions();
-                    setTimeout(FBL.bindFixed(function(){items[goingDown ? 0 : items.length -1].focus();}));
+
+                    setTimeout(FBL.bindFixed(function()
+                    {
+                        items[goingDown ? 0 : items.length -1].focus();
+                    }));
                 }
-                else if (event.keyCode ==  KeyEvent.DOM_VK_ESCAPE)
+                else if (event.keyCode == KeyEvent.DOM_VK_ESCAPE)
+                {
                     this.hideOptions();
+                }
             ]]></body>
         </method>
+
         <method name="onSearchIconClick">
             <parameter name="event" />
             <parameter name="textbox" />
             <body><![CDATA[
-                if (textbox.value) {
-                    this.value = '';
+                if (textbox.value)
+                {
+                    this.value = "";
                     Firebug.Search.update(Firebug.currentContext);
-                } else
-                    this.optionsShown?this.hideOptions(): this.showOptions();
+                }
+                else
+                {
+                    this.optionsShown ? this.hideOptions() : this.showOptions();
+                }
+
                 if (!this.focused)
                     this.focus()
             ]]></body>
         </method>
     </implementation>
+
     <handlers>
         <handler event="keypress"><![CDATA[
-
-            if (event.keyCode ==  KeyEvent.DOM_VK_UP)
+            if (event.keyCode == KeyEvent.DOM_VK_UP)
             {
                 if (FBL.isControl(event))
                     this.value = Firebug.Search.cycleHistory(1);
                 else
                     this.searchPrev();
             }
-            else if (event.keyCode ==  KeyEvent.DOM_VK_DOWN)
+            else if (event.keyCode == KeyEvent.DOM_VK_DOWN)
             {
                 if (FBL.isControl(event))
                     this.value = Firebug.Search.cycleHistory(-1);
                 else
                     this.searchNext();
             }
-            else if (event.keyCode ==  KeyEvent.DOM_VK_ESCAPE)
+            else if (event.keyCode == KeyEvent.DOM_VK_ESCAPE)
             {
                 var optionsPopup = document.getElementById("fbSearchOptionsPanel");
-                var searchBox = document.getAnonymousElementByAttribute(this, "anonid", "searchBox");
+                var searchBox = document.getAnonymousElementByAttribute(this, "anonid",
+                    "searchBox");
                 if (!optionsPopup || !searchBox)
                     return;
                 searchBox.focus();
@@ -1589,19 +1699,23 @@
                     optionsPopup.hidePopup();
                 }
                 else
+                {
                     return;
+                }
             }
             else if (event.keyCode ==  KeyEvent.DOM_VK_RETURN)
             {
                 if (FBL.isShift(event))
                     this.searchPrev();
                 else if (FBL.isControl(event))
-                    FBL.dispatch([Firebug.A11yModel], 'moveToSearchMatch');
+                    FBL.dispatch([Firebug.A11yModel], "moveToSearchMatch");
                 else
                     this.searchNext();
             }
             else
+            {
                 return;
+            }
 
             FBL.cancelEvent(event);
         ]]></handler>
@@ -1613,19 +1727,23 @@
         <handler event="popupshowing"><![CDATA[
             this.panelHasFocus = false;
         ]]></handler>
+
         <handler event="blur" phase="capturing"><![CDATA[
-            if (event.originalTarget.nodeName == 'html:input' && document.activeElement == event.originalTarget)
+            if (event.originalTarget.nodeName == "html:input" &&
+                document.activeElement == event.originalTarget)
+            {
                 return;
-            this.blurTimeout = this.blurTimeout || setTimeout(function()
+            }
+
+            this.blurTimeout = (this.blurTimeout || setTimeout(function()
             {
                 hideOptions();
-                status = 'noSearch';
+                status = "noSearch";
                 focused = false;
-            }, 0);
+            }, 0));
         ]]></handler>
     </handlers>
 </binding>
-
 
 
 <binding id="largeCommandLine" extends="chrome://global/content/bindings/textbox.xml#textarea">
@@ -1656,10 +1774,10 @@
 
 
 <binding id="splitmenu" extends="chrome://global/content/bindings/menu.xml#menuitem-base">
-    <content align='stretch'>
+    <content align="stretch">
         <xul:menuitem anonid="item" flex="1"
-                    class="menuitem-tooltip split-menuitem-item"
-                    xbl:inherits="label,key,image,value" allowevents='true'/>
+            class="menuitem-tooltip split-menuitem-item"
+            xbl:inherits="label,key,image,value" allowevents="true"/>
         <xul:hbox class="split-menu-right-image" xbl:inherits="_moz-menuactive" >
             <xul:hbox align="center" class="menu-right" xbl:inherits="_moz-menuactive,disabled">
                 <xul:image/>
@@ -1670,7 +1788,8 @@
 
     <implementation implements="nsIDOMXULSelectControlItemElement, nsIDOMXULContainerItemElement, nsIAccessibleProvider">
         <constructor><![CDATA[
-            if (this.getAttribute("iconic") == "true") {
+            if (this.getAttribute("iconic") == "true")
+            {
                 this.item.classList.remove("menuitem-tooltip");
                 this.item.classList.add("menuitem-iconic-tooltip");
                 this.item.classList.add("menuitem-iconic");
@@ -1678,10 +1797,10 @@
             // workaround for 3.6 bug
             this.item.classList.add("split-menuitem-item");
       ]]></constructor>
+
       <field name="item" readonly="true">
-            document.getAnonymousElementByAttribute(this, "anonid", "item");
+          document.getAnonymousElementByAttribute(this, "anonid", "item");
       </field>
     </implementation>
 </binding>
-
 </bindings>
