@@ -115,14 +115,14 @@ var HttpRequestObserver =
                 // Error: attempt to run compile-and-go script on a cleared scope
                 // (on the first line of the observe method)
                 if (FBTrace.DBG_HTTPOBSERVER || FBTrace.DBG_ERRORS)
-                    FBTrace.sysout("httpObserver.addObserver; Observer already registered.",
-                        observer);
+                    FBTrace.sysout("httpObserver.addObserver; Observer already registered: " +
+                        observer.dispatchName);
                 return;
             }
         }
 
         if (FBTrace.DBG_HTTPOBSERVER)
-            FBTrace.sysout("requestObserver addObserver ", observer);
+            FBTrace.sysout("httpObserver.addObserver; " + observer.dispatchName);
 
         this.observers.push(observer);
 
@@ -148,14 +148,14 @@ var HttpRequestObserver =
                     this.unregisterObservers();
 
                 if (FBTrace.DBG_HTTPOBSERVER || FBTrace.DBG_ERRORS)
-                    FBTrace.sysout("httpObserver.removeObserver", observer);
-
+                    FBTrace.sysout("httpObserver.removeObserver; " + observer.dispatchName);
                 return;
             }
         }
 
         if (FBTrace.DBG_HTTPOBSERVER || FBTrace.DBG_ERRORS)
-            FBTrace.sysout("httpObserver.removeObserver FAILED (no such observer)");
+            FBTrace.sysout("httpObserver.removeObserver FAILED (no such observer): " +
+                observer.dispatchName);
     },
 
     notifyObservers: function(subject, topic, data)
