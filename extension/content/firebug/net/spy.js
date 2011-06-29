@@ -17,13 +17,15 @@ define([
     "firebug/lib/url",
     "firebug/lib/array",
     "firebug/trace/debug",
+    "firebug/net/httpActivityObserver",
+    "firebug/net/netUtils",
     "firebug/net/netPanel",
     "firebug/console/errors",
 ],
 function(Obj, Firebug, Domplate, FirebugReps, Events, HttpRequestObserver, StackFrame,
-    Http, Css, Dom, Win, System, Str, Url, Arr, Debug) {
+    Http, Css, Dom, Win, System, Str, Url, Arr, Debug, NetHttpActivityObserver, NetUtils) {
 
-// ************************************************************************************************
+// ********************************************************************************************* //
 // Constants
 
 const Cc = Components.classes;
@@ -32,7 +34,7 @@ const Ci = Components.interfaces;
 // List of contexts with XHR spy attached.
 var contexts = [];
 
-// ************************************************************************************************
+// ********************************************************************************************* //
 // Spy Module
 
 /**
@@ -130,7 +132,7 @@ Firebug.Spy = Obj.extend(Firebug.Module,
         }
     },
 
-    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
     // Attaching Spy to XHR requests.
 
     /**
@@ -234,7 +236,7 @@ Firebug.Spy = Obj.extend(Firebug.Module,
     },
 });
 
-// ************************************************************************************************
+// ********************************************************************************************* //
 
 /**
  * @class This observer uses {@link HttpRequestObserver} to monitor start and end of all XHRs.
@@ -347,7 +349,7 @@ var SpyHttpObserver =
 
         spy.endTime = new Date().getTime();
         spy.responseTime = spy.endTime - spy.sendTime;
-        spy.mimeType = Firebug.NetMonitor.Utils.getMimeType(request.contentType, request.name);
+        spy.mimeType = NetUtils.getMimeType(request.contentType, request.name);
 
         if (!spy.responseHeaders)
             spy.responseHeaders = getResponseHeaders(spy);
@@ -395,7 +397,7 @@ var SpyHttpObserver =
  * @class This observer is used to properly monitor even mulipart XHRs. It's based on
  * an activity-observer component that has been introduced in Firefox 3.6.
  */
-var SpyHttpActivityObserver = Obj.extend(Firebug.NetMonitor.NetHttpActivityObserver,
+var SpyHttpActivityObserver = Obj.extend(NetHttpActivityObserver,
 /** @lends SpyHttpActivityObserver */
 {
     activeRequests: [],
@@ -443,7 +445,8 @@ var SpyHttpActivityObserver = Obj.extend(Firebug.NetMonitor.NetHttpActivityObser
         if (activitySubtype == Ci.nsIHttpActivityObserver.ACTIVITY_SUBTYPE_REQUEST_HEADER)
         {
             if (FBTrace.DBG_SPY)
-                FBTrace.sysout("spy.observeXHRActivity REQUEST_HEADER " + Http.safeGetRequestName(request));
+                FBTrace.sysout("spy.observeXHRActivity REQUEST_HEADER " +
+                    Http.safeGetRequestName(request));
 
             this.activeRequests.push(request);
             this.activeRequests.push(win);
@@ -454,7 +457,8 @@ var SpyHttpActivityObserver = Obj.extend(Firebug.NetMonitor.NetHttpActivityObser
         else if (activitySubtype == Ci.nsIHttpActivityObserver.ACTIVITY_SUBTYPE_TRANSACTION_CLOSE)
         {
             if (FBTrace.DBG_SPY)
-                FBTrace.sysout("spy.observeXHRActivity TRANSACTION_CLOSE " + Http.safeGetRequestName(request));
+                FBTrace.sysout("spy.observeXHRActivity TRANSACTION_CLOSE " +
+                    Http.safeGetRequestName(request));
 
             var index = this.activeRequests.indexOf(request);
             this.activeRequests.splice(index, 2);
@@ -476,7 +480,7 @@ var SpyHttpActivityObserver = Obj.extend(Firebug.NetMonitor.NetHttpActivityObser
     }
 });
 
-// ************************************************************************************************
+// ********************************************************************************************* //
 
 function getSpyForXHR(request, xhrRequest, context, noCreate)
 {
@@ -513,7 +517,7 @@ function getSpyForXHR(request, xhrRequest, context, noCreate)
     return spy;
 }
 
-// ************************************************************************************************
+// ********************************************************************************************* //
 
 /**
  * @class This class represents a Spy object that is attached to XHR. This object
@@ -624,7 +628,7 @@ Firebug.Spy.XMLHttpRequestSpy.prototype =
     },
 };
 
-// ************************************************************************************************
+// ********************************************************************************************* //
 
 function onHTTPSpyReadyStateChange(spy, event)
 {
@@ -678,7 +682,8 @@ function onHTTPSpyReadyStateChange(spy, event)
         // xxxHonza: I don't think this is necessary.
         var netProgress = spy.context.netProgress;
         if (netProgress)
-            netProgress.post(netProgress.stopFile, [spy.request, spy.endTime, spy.postText, spy.responseText]);
+            netProgress.post(netProgress.stopFile, [spy.request, spy.endTime, spy.postText,
+                spy.responseText]);
 
         // Notify registered listeners about finish of the XHR.
         Events.dispatch(Firebug.Spy.fbListeners, "onLoad", [spy.context, spy]);
@@ -750,10 +755,11 @@ function onHTTPSpyAbort(spy)
     // xxxHonza: the net panel shoud find out this itself.
     var netProgress = spy.context.netProgress;
     if (netProgress)
-        netProgress.post(netProgress.abortFile, [spy.request, spy.endTime, spy.postText, spy.responseText]);
+        netProgress.post(netProgress.abortFile, [spy.request, spy.endTime, spy.postText,
+            spy.responseText]);
 }
 
-// ************************************************************************************************
+// ********************************************************************************************* //
 
 function callPageHandler(spy, event, originalHandler)
 {
@@ -786,7 +792,7 @@ function callPageHandler(spy, event, originalHandler)
     }
 }
 
-// ************************************************************************************************
+// ********************************************************************************************* //
 
 /**
  * @domplate Represents a template for XHRs logged in the Console panel. The body of the
@@ -870,14 +876,16 @@ Firebug.Spy.XHR = domplate(Firebug.Rep,
             else
             {
                 var netInfoBox = Dom.getChildByClass(spy.logRow, "spyHead", "netInfoBody");
-                Events.dispatch(Firebug.NetMonitor.NetInfoBody.fbListeners, "destroyTabBody", [netInfoBox, spy]);
+                Events.dispatch(Firebug.NetMonitor.NetInfoBody.fbListeners, "destroyTabBody",
+                    [netInfoBox, spy]);
+
                 if (spyHeadTable)
                     spyHeadTable.setAttribute('aria-expanded', 'false');
             }
         }
     },
 
-    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
     copyURL: function(spy)
     {
@@ -904,7 +912,7 @@ Firebug.Spy.XHR = domplate(Firebug.Rep,
         Win.openNewTab(spy.getURL(), spy.postText);
     },
 
-    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
     supportsObject: function(object, type)
     {
@@ -946,7 +954,7 @@ Firebug.Spy.XHR = domplate(Firebug.Rep,
     }
 })};
 
-// ************************************************************************************************
+// ********************************************************************************************* //
 
 Firebug.XHRSpyListener =
 {
@@ -959,7 +967,7 @@ Firebug.XHRSpyListener =
     }
 };
 
-// ************************************************************************************************
+// ********************************************************************************************* //
 
 function updateTime(spy)
 {
@@ -1018,7 +1026,7 @@ function updateHttpSpyInfo(spy)
     }
 }
 
-// ************************************************************************************************
+// ********************************************************************************************* //
 
 function getRequestHeaders(spy)
 {
@@ -1065,7 +1073,7 @@ function getResponseHeaders(spy)
     return headers;
 }
 
-// ************************************************************************************************
+// ********************************************************************************************* //
 // Tracing Listener
 
 Firebug.Spy.TraceListener =
@@ -1083,15 +1091,13 @@ Firebug.Spy.TraceListener =
     }
 };
 
-// ************************************************************************************************
+// ********************************************************************************************* //
 // Registration
 
 Firebug.registerModule(Firebug.Spy);
 Firebug.registerRep(Firebug.Spy.XHR);
 
-// ************************************************************************************************
-
 return Firebug.Spy;
 
-// ************************************************************************************************
+// ********************************************************************************************* //
 });

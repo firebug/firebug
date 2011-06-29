@@ -26,8 +26,8 @@ var redirectionLimit = PrefService.getIntPref("network.http.redirection-limit");
  * channels (nsIHttpChannel). A new instance of this object is created and registered an HTTP
  * channel. See Firebug.TabCacheModel.onExamineResponse method.
  */
-
 function ChannelListener(win, request, listener)
+/** lends ChannelListener */
 {
     this.window = win;
     this.request = request;

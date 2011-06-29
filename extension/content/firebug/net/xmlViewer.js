@@ -8,10 +8,11 @@ define([
     "firebug/firefox/xpcom",
     "firebug/lib/css",
     "firebug/net/httpLib",
+    "firebug/net/netUtils",
 ],
-function(Obj, Firebug, Domplate, Locale, Xpcom, Css, Http) {
+function(Obj, Firebug, Domplate, Locale, Xpcom, Css, Http, NetUtils) {
 
-// ************************************************************************************************
+// ********************************************************************************************* //
 // Constants
 
 // List of XML related content types.
@@ -27,7 +28,7 @@ var xmlContentTypes =
     "application/vnd.mozilla.xul+xml"
 ];
 
-// ************************************************************************************************
+// ********************************************************************************************* //
 // Model implementation
 
 /**
@@ -36,6 +37,7 @@ var xmlContentTypes =
  * <code>Firebug.NetMonitor.NetInfoBody</code> object.
  */
 Firebug.XMLViewerModel = Obj.extend(Firebug.Module,
+/** lends Firebug.XMLViewerModel */
 {
     dispatchName: "xmlViewer",
 
@@ -97,7 +99,7 @@ Firebug.XMLViewerModel = Obj.extend(Firebug.Module,
 
         tabBody.updated = true;
 
-        this.insertXML(tabBody, Firebug.NetMonitor.Utils.getResponseText(file, context));
+        this.insertXML(tabBody, NetUtils.getResponseText(file, context));
     },
 
     insertXML: function(parentNode, text)
@@ -147,7 +149,7 @@ Firebug.XMLViewerModel = Obj.extend(Firebug.Module,
     }
 });
 
-// ************************************************************************************************
+// ********************************************************************************************* //
 // Domplate
 
 /**
@@ -183,12 +185,12 @@ Firebug.XMLViewerModel.ParseError = domplate(Firebug.Rep,
     }
 })};
 
-// ************************************************************************************************
+// ********************************************************************************************* //
 // Registration
 
 Firebug.registerModule(Firebug.XMLViewerModel);
 
 return Firebug.XMLViewerModel;
 
-// ************************************************************************************************
+// ********************************************************************************************* //
 });
