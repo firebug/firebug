@@ -214,8 +214,6 @@ JavaScriptTool.initialize = function()
 JavaScriptTool.shutdown = function()
 {
     Firebug.connection.removeListener(JavaScriptTool);  // This is how we get events
-    if (Firebug.connection.getTool('script'))
-        Firebug.connection.unregisterTool(JavaScriptTool);
 }
 
 // ********************************************************************************************* //
