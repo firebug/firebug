@@ -1089,9 +1089,12 @@ var FirebugChrome =
 
         var box = Firebug.chrome.$("fbCommandBox");
         box.style.fontSizeAdjust = fontSizeAdjust;
-        Firebug.CommandLine.getCommandLineSmall().style.fontSizeAdjust = fontSizeAdjust;
-        Firebug.chrome.$("fbCommandLineCompletion").style.fontSizeAdjust = fontSizeAdjust;
-        Firebug.CommandLine.getCommandLineLarge().style.fontSizeAdjust = fontSizeAdjust;
+        if (Firebug.CommandLine)
+        {
+            Firebug.CommandLine.getCommandLineSmall().style.fontSizeAdjust = fontSizeAdjust;
+            Firebug.chrome.$("fbCommandLineCompletion").style.fontSizeAdjust = fontSizeAdjust;
+            Firebug.CommandLine.getCommandLineLarge().style.fontSizeAdjust = fontSizeAdjust;
+        }
 
         Firebug.dispatchToPanels("onTextSizeChange", [zoom, fontSizeAdjust]);
     },

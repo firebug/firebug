@@ -314,29 +314,33 @@ Firebug.Console = Obj.extend(ActivableConsole,
     {
         if (this.isAlwaysEnabled())
         {
-            this.watchForErrors();
-
             // we inject the console during JS compiles so we need jsd
             Firebug.Debugger.addObserver(this);
         }
         else
         {
-            this.unwatchForErrors();
             Firebug.Debugger.removeObserver(this);
-
-            // Make sure possible errors coming from the page and displayed in the Firefox
-            // status bar are removed.
-            this.clear();
         }
+
+        if (!Firebug.getSuspended())  // then Firebug is in action
+            this.onResumeFirebug();   // and we need to test to see if we need to addObserver
+        else
+            this.onSuspendFirebug();
     },
 
     onSuspendFirebug: function()
     {
         if (FBTrace.DBG_CONSOLE)
-            FBTrace.sysout("console.onSuspendFirebug\n");
+            FBTrace.sysout("console.onSuspendFirebug isAlwaysEnabled:"+Firebug.Console.isAlwaysEnabled());
 
-        if (Firebug.Console.isAlwaysEnabled())
+        if (this.watchingForErrors)
+        {
+            this.watchingForErrors = false;
             this.unwatchForErrors();
+            // Make sure possible errors coming from the page and displayed in the Firefox
+            // status bar are removed.
+            this.clear();
+        }
     },
 
     onResumeFirebug: function()
@@ -344,8 +348,12 @@ Firebug.Console = Obj.extend(ActivableConsole,
         if (FBTrace.DBG_CONSOLE)
             FBTrace.sysout("console.onResumeFirebug\n");
 
-        if (Firebug.Console.isAlwaysEnabled())
+        if (Firebug.Console.isAlwaysEnabled() || this.hasObservers())
+        {
             this.watchForErrors();
+            this.watchingForErrors = true;
+        }
+
     },
 
     onToggleFilter: function(context, filterType)
@@ -414,6 +422,7 @@ Firebug.Console = Obj.extend(ActivableConsole,
         var fbStatus = Firefox.getElementById('firebugStatus');
         if (fbStatus)
             fbStatus.removeAttribute("console");
+        FBTrace.sysout("unwatchForErrors "+(fbStatus?fbStatus.getAttribute('console'):"no fbStatus"), fbStatus);
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *

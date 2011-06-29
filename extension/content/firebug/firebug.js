@@ -266,7 +266,8 @@ window.Firebug =
 
         // Initial activation of registered panel types. All panel -> module dependencies
         // should be defined now (in onActivationChange).  Must be called after Firebug.TabWatcher is ready.
-        Firebug.PanelActivation.activatePanelTypes(panelTypes);
+        if (Firebug.PanelActivation)
+            Firebug.PanelActivation.activatePanelTypes(panelTypes);
 
         // Tell the modules the UI is up.
         Events.dispatch(modules, "initializeUI", [detachArgs]);

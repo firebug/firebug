@@ -42,20 +42,17 @@ OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 require.log = function()
 {
-    if (window.console)
-        console.log.apply(console, arguments);
-    else
-    {
-        try
-        {
-            FBTrace.sysout.apply(FBTrace, arguments);
-        }
-        catch(exc)
-        {
-            alert.apply(null, arguments);
-        }
-    }
-
+     try
+     {
+         FBTrace.sysout.apply(FBTrace, arguments);
+     }
+     catch(exc)
+     {
+         if (window.console)
+             console.log.apply(console, arguments);
+         else
+             alert.apply(null, arguments);
+     }
 }
 
 /*

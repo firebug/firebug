@@ -237,7 +237,7 @@ Firebug.NetMonitor = Obj.extend(Firebug.ActivableModule,
         }
     },
 
-    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
     // extends Module
 
     onObserverChange: function(observer)
@@ -245,20 +245,8 @@ Firebug.NetMonitor = Obj.extend(Firebug.ActivableModule,
         if (FBTrace.DBG_NET)
             FBTrace.sysout("net.onObserverChange; hasObservers: " + this.hasObservers());
 
-        if (this.hasObservers())
-        {
-            NetHttpObserver.registerObserver();
-            NetHttpActivityObserver.registerObserver();
-
-            Firebug.connection.eachContext(monitorContext);
-        }
-        else
-        {
-            NetHttpObserver.unregisterObserver();
-            NetHttpActivityObserver.unregisterObserver();
-
-            Firebug.connection.eachContext(unmonitorContext);
-        }
+        if (!Firebug.getSuspended())  // then Firebug is in action
+            this.onResumeFirebug();   // and we need to test to see if we need to addObserver
     },
 
     onResumeFirebug: function()
@@ -267,13 +255,15 @@ Firebug.NetMonitor = Obj.extend(Firebug.ActivableModule,
             FBTrace.sysout("net.onResumeFirebug; enabled: " + Firebug.NetMonitor.isAlwaysEnabled());
 
         // Resume only if enabled.
-        if (Firebug.NetMonitor.isAlwaysEnabled())
+        if (Firebug.NetMonitor.isAlwaysEnabled() || this.hasObservers())
         {
             // XXXjjb Honza was called in firebug-http-observer.js on old enableXULWindow
             // Can't be here since resuming happens when the page is loaded and it's too
             // late since the first (document) requests already happened.
             NetHttpObserver.registerObserver();
+            NetHttpActivityObserver.registerObserver();
             Firebug.connection.eachContext(monitorContext);
+            this.observing = true;
         }
     },
 
@@ -283,10 +273,12 @@ Firebug.NetMonitor = Obj.extend(Firebug.ActivableModule,
             FBTrace.sysout("net.onSuspendFirebug; enabled: " + Firebug.NetMonitor.isAlwaysEnabled());
 
         // Suspend only if enabled.
-        if (Firebug.NetMonitor.isAlwaysEnabled())
+        if (this.observing)
         {
             NetHttpObserver.unregisterObserver();
             Firebug.connection.eachContext(unmonitorContext);
+            NetHttpActivityObserver.unregisterObserver();
+            this.observing = false;
         }
     },
 

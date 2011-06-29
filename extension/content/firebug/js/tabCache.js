@@ -120,14 +120,8 @@ Firebug.TabCacheModel = Obj.extend(Firebug.ActivableModule,
         if (FBTrace.DBG_CACHE)
             FBTrace.sysout("tabCache.onObserverChange; hasObservers: " + this.hasObservers());
 
-        if (this.hasObservers())
-        {
-            HttpRequestObserver.addObserver(this, "firebug-http-event", false);
-        }
-        else
-        {
-            HttpRequestObserver.removeObserver(this, "firebug-http-event");
-        }
+        if (!Firebug.getSuspended())  // then Firebug is in action
+            this.onResumeFirebug();   // and we need to test to see if we need to addObserver
     },
 
     onResumeFirebug: function()
@@ -135,15 +129,22 @@ Firebug.TabCacheModel = Obj.extend(Firebug.ActivableModule,
         if (FBTrace.DBG_CACHE)
             FBTrace.sysout("tabCache.onResumeFirebug;");
 
-        HttpRequestObserver.addObserver(this, "firebug-http-event", false);
+        if (this.hasObservers() && !this.observing)
+        {
+            HttpRequestObserver.addObserver(this, "firebug-http-event", false);
+            this.observing = true;
+        }
     },
 
     onSuspendFirebug: function()
     {
         if (FBTrace.DBG_CACHE)
             FBTrace.sysout("tabCache.onSuspendFirebug;");
-
-        HttpRequestObserver.removeObserver(this, "firebug-http-event");
+        if (this.observing)
+        {
+            HttpRequestObserver.removeObserver(this, "firebug-http-event");
+            this.observing = false;
+        }
     },
 
     shutdown: function()
@@ -151,7 +152,8 @@ Firebug.TabCacheModel = Obj.extend(Firebug.ActivableModule,
         if (FBTrace.DBG_CACHE)
             FBTrace.sysout("tabCache.shutdown; Cache model destroyed.");
 
-        HttpRequestObserver.removeObserver(this, "firebug-http-event");
+        if (this.observing)
+            HttpRequestObserver.removeObserver(this, "firebug-http-event");
     },
 
     initContext: function(context)
