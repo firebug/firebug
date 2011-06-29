@@ -248,6 +248,8 @@ Firebug.Spy = Obj.extend(Firebug.Module,
 var SpyHttpObserver =
 /** @lends SpyHttpObserver */
 {
+    dispatchName: "SpyHttpObserver",
+
     observe: function(request, topic, data)
     {
         try
@@ -400,6 +402,7 @@ var SpyHttpObserver =
 var SpyHttpActivityObserver = Obj.extend(NetHttpActivityObserver,
 /** @lends SpyHttpActivityObserver */
 {
+    dispatchName: "SpyHttpActivityObserver",
     activeRequests: [],
 
     observeRequest: function(request, activityType, activitySubtype, timestamp,

@@ -331,7 +331,7 @@ Firebug.NetMonitor = Obj.extend(Firebug.ActivableModule,
 
 var NetHttpObserver =
 {
-    name: "NetHttpObserver",
+    dispatchName: "NetHttpObserver",
     registered: false,
 
     registerObserver: function()
