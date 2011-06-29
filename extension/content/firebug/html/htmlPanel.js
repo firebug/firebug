@@ -1877,7 +1877,7 @@ AttributeEditor.prototype = domplate(Firebug.InlineEditor.prototype,
         else if ((charCode == 34 /* '"' */ || charCode == 39 /* ''' */) &&
             Css.hasClass(target, "nodeValue"))
         {
-            var jsAttributes = [
+            var nonRestrictiveAttributes = [
                 "onabort",
                 "onblur",
                 "onchange",
@@ -1897,16 +1897,18 @@ AttributeEditor.prototype = domplate(Firebug.InlineEditor.prototype,
                 "onreset",
                 "onselect",
                 "onsubmit",
-                "onunload"
+                "onunload",
+                "title",
+                "alt"
             ]
 
             var attrName = Dom.getPreviousByClass(target, "nodeName").textContent;
 
             // This should cover most of the cases where quotes are allowed inside the value
             // See issue 4542
-            for (var i = 0; i < jsAttributes.length; i++)
+            for (var i = 0; i < nonRestrictiveAttributes.length; i++)
             {
-                if (attrName == jsAttributes[i])
+                if (attrName == nonRestrictiveAttributes[i])
                     return false;
             }
             return true;
