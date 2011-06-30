@@ -552,7 +552,8 @@ function monitorContext(context)
     context.netProgress = networkContext;
 
     // Add cache listener so, net panel has always fresh responses.
-    context.sourceCache.addListener(networkContext.cacheListener);
+    // Safe to call multiple times.
+    networkContext.cacheListener.register(context.sourceCache);
 
     // Activate net panel sub-context.
     var panel = context.getPanel(panelName);
@@ -583,8 +584,8 @@ function unmonitorContext(context)
 
     //NetHttpActivityObserver.unregisterObserver();
 
-    // Remove cache listener
-    context.sourceCache.removeListener(netProgress.cacheListener);
+    // Remove cache listener. Safe to call multiple times.
+    netProgress.cacheListener.unregister();
 
     // Deactivate net sub-context.
     context.netProgress.activate(null);
@@ -616,10 +617,35 @@ function createNetProgress(context)
 function NetCacheListener(netProgress)
 {
     this.netProgress = netProgress;
+    this.cache = null;
 }
 
 NetCacheListener.prototype =
 {
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+    // Registration
+
+    register: function(cache)
+    {
+        if (this.cache)
+            return;
+
+        this.cache = cache;
+        this.cache.addListener(this);
+    },
+
+    unregister: function()
+    {
+        if (!this.cache)
+            return;
+
+        this.cache.removeListener(this);
+        this.cache = null;
+    },
+
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+    // Cache Listener
+
     onStartRequest: function(context, request)
     {
         // Keep in mind that the file object (representing the request) doesn't have to be
