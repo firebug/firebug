@@ -211,7 +211,8 @@ Firebug.NetMonitor = Obj.extend(Firebug.ActivableModule,
         Firebug.ActivableModule.showContext.apply(this, arguments);
 
         if (FBTrace.DBG_NET)
-            FBTrace.sysout("net.showContext; " + (context ? context.getName() : "NULL"));
+            FBTrace.sysout("net.showContext; " + (context ? context.getName() : "NULL") +
+                ", temp contexts: " + getTempContextCount());
     },
 
     loadedContext: function(context)
@@ -220,7 +221,8 @@ Firebug.NetMonitor = Obj.extend(Firebug.ActivableModule,
         delete this.contexts[tabId];
 
         if (FBTrace.DBG_NET)
-            FBTrace.sysout("net.loadedContext; Remove temp context (if not removed yet) " + tabId);
+            FBTrace.sysout("net.loadedContext; temp contexts (" +
+                getTempContextCount() + "), removed one for: " + tabId);
 
         var netProgress = context.netProgress;
         if (netProgress)
@@ -402,19 +404,24 @@ var NetHttpObserver =
             win == win.parent && !isRedirect)
         {
             var browser = Firefox.getBrowserForWindow(win);
-            /*if (!Firebug.TabWatcher.shouldCreateContext(browser, name, null))
+
+            /*
+            if (!Firebug.TabWatcher.shouldCreateContext(browser, name, null))
             {
                 if (FBTrace.DBG_NET)
                     FBTrace.sysout("net.onModifyRequest; Activation logic says don't create temp context.");
                 return;
             }
-*/
+            */
+
             // Create a new network context prematurely.
             if (!Firebug.NetMonitor.contexts[tabId])
             {
                 Firebug.NetMonitor.contexts[tabId] = new NetProgress(null);
+
                 if (FBTrace.DBG_NET)
-                    FBTrace.sysout("net.onModifyRequest; Create Temp Context " + tabId);
+                    FBTrace.sysout("net.onModifyRequest; Create Temp Context (" +
+                        getTempContextCount() + "), " + tabId);
             }
         }
 
@@ -633,6 +640,17 @@ Firebug.NetMonitor.TraceListener =
         }
     }
 };
+
+// ********************************************************************************************* //
+// Tracing support
+
+function getTempContextCount()
+{
+    var counter = 0;
+    for (var p in Firebug.NetMonitor.contexts)
+        counter++;
+    return counter;
+}
 
 // ********************************************************************************************* //
 // Registration
