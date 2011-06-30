@@ -13,10 +13,11 @@ define([
     "firebug/lib/string",
     "firebug/lib/array",
     "firebug/trace/debug",
+    "firebug/trace/traceListener",
     "firebug/chrome/tabContext",
 ],
 function(Obj, Firebug, Firefox, Xpcom, HttpRequestObserver, Events, Url, Http, Win,
-    Str, Arr, Debug) {
+    Str, Arr, Debug, TraceListener) {
 
 // ********************************************************************************************* //
 // Constants
@@ -60,7 +61,10 @@ Firebug.TabWatcher = Obj.extend(new Firebug.Listener(),
     initialize: function()
     {
         if (Firebug.TraceModule)
-            Firebug.TraceModule.addListener(TraceListener);
+        {
+            this.traceListener = new TraceListener("->", "DBG_WINDOWS");
+            Firebug.TraceModule.addListener(this.traceListener);
+        }
 
         HttpRequestObserver.addObserver(TabWatcherHttpObserver, "firebug-http-event", false);
     },
@@ -100,7 +104,7 @@ Firebug.TabWatcher = Obj.extend(new Firebug.Listener(),
         }
 
         if (Firebug.TraceModule)
-            Firebug.TraceModule.removeListener(TraceListener);
+            Firebug.TraceModule.removeListener(this.traceListener);
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -1085,22 +1089,6 @@ function onUnloadWindow(event)
 
     Firebug.TabWatcher.unwatchWindow(win);
 }
-
-// ********************************************************************************************* //
-
-var TraceListener =
-{
-    onDump: function(message)
-    {
-        var prefix = "->";
-        if (message.text.indexOf(prefix) == 0)
-        {
-            message.text = message.text.substr(prefix.length);
-            message.text = Str.trim(message.text);
-            message.type = "DBG_WINDOWS";
-        }
-    }
-};
 
 // ********************************************************************************************* //
 

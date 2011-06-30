@@ -19,11 +19,13 @@ define([
     "firebug/trace/debug",
     "firebug/net/httpActivityObserver",
     "firebug/net/netUtils",
+    "firebug/trace/traceListener",
     "firebug/net/netPanel",
     "firebug/console/errors",
 ],
 function(Obj, Firebug, Domplate, FirebugReps, Events, HttpRequestObserver, StackFrame,
-    Http, Css, Dom, Win, System, Str, Url, Arr, Debug, NetHttpActivityObserver, NetUtils) {
+    Http, Css, Dom, Win, System, Str, Url, Arr, Debug, NetHttpActivityObserver, NetUtils,
+    TraceListener) {
 
 // ********************************************************************************************* //
 // Constants
@@ -54,7 +56,10 @@ Firebug.Spy = Obj.extend(Firebug.Module,
     initialize: function()
     {
         if (Firebug.TraceModule)
-            Firebug.TraceModule.addListener(this.TraceListener);
+        {
+            this.traceListener = new TraceListener("spy.", "DBG_SPY");
+            Firebug.TraceModule.addListener(this.traceListener);
+        }
 
         Firebug.Module.initialize.apply(this, arguments);
     },
@@ -64,7 +69,7 @@ Firebug.Spy = Obj.extend(Firebug.Module,
         Firebug.Module.shutdown.apply(this, arguments);
 
         if (Firebug.TraceModule)
-            Firebug.TraceModule.removeListener(this.TraceListener);
+            Firebug.TraceModule.removeListener(this.traceListener);
     },
 
     initContext: function(context)
@@ -1075,24 +1080,6 @@ function getResponseHeaders(spy)
 
     return headers;
 }
-
-// ********************************************************************************************* //
-// Tracing Listener
-
-Firebug.Spy.TraceListener =
-{
-    onDump: function(message)
-    {
-        var prefix = "spy.";
-        var index = message.text.indexOf(prefix);
-        if (index == 0)
-        {
-            message.text = message.text.substr(prefix.length);
-            message.text = Str.trim(message.text);
-            message.type = "DBG_SPY";
-        }
-    }
-};
 
 // ********************************************************************************************* //
 // Registration
