@@ -49,50 +49,8 @@ Firebug.NetMonitor = Obj.extend(Firebug.ActivableModule,
     maxQueueRequests: 500,
     contexts: new Array(),
 
-    clear: function(context)
-    {
-        // The user pressed a Clear button so, remove content of the panel...
-        var panel = context.getPanel(panelName, true);
-        if (panel)
-            panel.clear();
-    },
-
-    onToggleFilter: function(context, filterCategory)
-    {
-        if (!context.netProgress)
-            return;
-
-        Options.set("netFilterCategory", filterCategory);
-
-        // The content filter has been changed. Make sure that the content
-        // of the panel is updated (CSS is used to hide or show individual files).
-        var panel = context.getPanel(panelName, true);
-        if (panel)
-        {
-            panel.setFilter(filterCategory);
-            panel.updateSummaries(NetUtils.now(), true);
-        }
-    },
-
-    syncFilterButtons: function(chrome)
-    {
-        var button = chrome.$("fbNetFilter-" + Firebug.netFilterCategory);
-        button.checked = true;
-    },
-
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-    // extends ActivableModule
-
-    initializeUI: function()
-    {
-        Firebug.ActivableModule.initializeUI.apply(this, arguments);
-
-        // Initialize max limit for logged requests.
-        Firebug.NetMonitor.updateMaxLimit();
-
-        // Synchronize UI buttons with the current filter.
-        this.syncFilterButtons(Firebug.chrome);
-    },
+    // Module
 
     initialize: function()
     {
@@ -107,6 +65,17 @@ Firebug.NetMonitor = Obj.extend(Firebug.ActivableModule,
         //NetHttpActivityObserver.registerObserver();
 
         Firebug.connection.addListener(this.DebuggerListener);
+    },
+
+    initializeUI: function()
+    {
+        Firebug.ActivableModule.initializeUI.apply(this, arguments);
+
+        // Initialize max limit for logged requests.
+        Firebug.NetMonitor.updateMaxLimit();
+
+        // Synchronize UI buttons with the current filter.
+        this.syncFilterButtons(Firebug.chrome);
     },
 
     shutdown: function()
@@ -185,27 +154,6 @@ Firebug.NetMonitor = Obj.extend(Firebug.ActivableModule,
         }
     },
 
-    reattachContext: function(browser, context)
-    {
-        Firebug.ActivableModule.reattachContext.apply(this, arguments);
-        this.syncFilterButtons(Firebug.chrome);
-    },
-
-    destroyContext: function(context, persistedState)
-    {
-        Firebug.ActivableModule.destroyContext.apply(this, arguments);
-
-        if (context.netProgress)
-        {
-            // Remember existing breakpoints.
-            var persistedPanelState = Persist.getPersistedState(context, panelName);
-            persistedPanelState.breakpoints = context.netProgress.breakpoints;
-        }
-
-        if (Firebug.NetMonitor.isAlwaysEnabled())
-            unmonitorContext(context);
-    },
-
     showContext: function(browser, context)
     {
         Firebug.ActivableModule.showContext.apply(this, arguments);
@@ -239,8 +187,29 @@ Firebug.NetMonitor = Obj.extend(Firebug.ActivableModule,
         }
     },
 
-    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
-    // extends Module
+    reattachContext: function(browser, context)
+    {
+        Firebug.ActivableModule.reattachContext.apply(this, arguments);
+        this.syncFilterButtons(Firebug.chrome);
+    },
+
+    destroyContext: function(context, persistedState)
+    {
+        Firebug.ActivableModule.destroyContext.apply(this, arguments);
+
+        if (context.netProgress)
+        {
+            // Remember existing breakpoints.
+            var persistedPanelState = Persist.getPersistedState(context, panelName);
+            persistedPanelState.breakpoints = context.netProgress.breakpoints;
+        }
+
+        if (Firebug.NetMonitor.isAlwaysEnabled())
+            unmonitorContext(context);
+    },
+
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+    // Activable Module
 
     onObserverChange: function(observer)
     {
@@ -282,6 +251,40 @@ Firebug.NetMonitor = Obj.extend(Firebug.ActivableModule,
             NetHttpActivityObserver.unregisterObserver();
             this.observing = false;
         }
+    },
+
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+    // User Actions
+
+    clear: function(context)
+    {
+        // The user pressed a Clear button so, remove content of the panel...
+        var panel = context.getPanel(panelName, true);
+        if (panel)
+            panel.clear();
+    },
+
+    onToggleFilter: function(context, filterCategory)
+    {
+        if (!context.netProgress)
+            return;
+
+        Options.set("netFilterCategory", filterCategory);
+
+        // The content filter has been changed. Make sure that the content
+        // of the panel is updated (CSS is used to hide or show individual files).
+        var panel = context.getPanel(panelName, true);
+        if (panel)
+        {
+            panel.setFilter(filterCategory);
+            panel.updateSummaries(NetUtils.now(), true);
+        }
+    },
+
+    syncFilterButtons: function(chrome)
+    {
+        var button = chrome.$("fbNetFilter-" + Firebug.netFilterCategory);
+        button.checked = true;
     },
 
     togglePersist: function(context)
@@ -545,7 +548,7 @@ function monitorContext(context)
 
     var listener = context.netProgress = networkContext;
 
-    // Add cache listener so, net panel has alwas fresh responses.
+    // Add cache listener so, net panel has always fresh responses.
     context.sourceCache.addListener(networkContext.cacheListener);
 
     // Activate net panel sub-context.
