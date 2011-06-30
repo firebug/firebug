@@ -557,19 +557,6 @@ NetProgress.prototype =
         return null;
     },
 
-    progressFile: function progressFile(request, progress, expectedSize, time)
-    {
-        var file = this.getRequestFile(request, null, true);
-        if (file)
-        {
-            file.size = progress;
-            file.expectedSize = expectedSize;
-            file.endTime = time;
-        }
-
-        return file;
-    },
-
     stopFile: function stopFile(request, time, postText, responseText)
     {
         var file = this.getRequestFile(request, null, true);
@@ -842,81 +829,6 @@ NetProgress.prototype =
         this.currentPhase = phase;
         this.phases.push(phase);
     },
-
-    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-    QueryInterface: function(iid)
-    {
-        if (iid.equals(Ci.nsIWebProgressListener) ||
-            iid.equals(Ci.nsISupportsWeakReference) ||
-            iid.equals(Ci.nsISupports))
-        {
-            return this;
-        }
-
-        throw Components.results.NS_NOINTERFACE;
-    },
-
-    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-    // nsIWebProgressListener
-
-    onStateChange: function(progress, request, flag, status)
-    {
-        // We can't get the nsIHttpChannel for image requests (images use imgIRequest)
-        // So, this method is not much useful.
-    },
-
-    onProgressChange : function(progress, request, current, max, total, maxTotal)
-    {
-        // The timing is measured by activity-distributor observer (if it's available).
-        if (Ci.nsIHttpActivityDistributor)
-            return;
-
-        var file = this.getRequestFile(request, null, true);
-        if (file)
-        {
-            if (FBTrace.DBG_NET)
-                FBTrace.sysout("net.onProgressChange +" + (NetUtils.now() - file.startTime) + " " +
-                    getPrintableTime() + ", " + "progress: " + current +
-                    ", expectedSize: " + max + ", " + request.URI.path, file);
-
-            this.post(progressFile, [request, current, max, NetUtils.now()]);
-        }
-    },
-
-    onStatusChange: function(progress, request, status, message)
-    {
-        // The timing is measured by activity-distributor observer (if it's available).
-        if (Ci.nsIHttpActivityDistributor)
-            return;
-
-        var file = this.getRequestFile(request, null, true);
-        if (file)
-        {
-            if (FBTrace.DBG_NET)
-                FBTrace.sysout("net.onStatusChange +" + (NetUtils.now() - file.startTime) + " " +
-                    getPrintableTime() + ", " + Http.getStatusDescription(status) +
-                    ", " + message + ", " + request.URI.path, file);
-
-            if (status == Ci.nsISocketTransport.STATUS_RESOLVING)
-                this.post(resolvingFile, [request, NetUtils.now()]);
-            else if (status == Ci.nsISocketTransport.STATUS_CONNECTING_TO)
-                this.post(connectingFile, [request, NetUtils.now()]);
-            else if (status == Ci.nsISocketTransport.STATUS_CONNECTED_TO)
-                this.post(connectedFile, [request, NetUtils.now()]);
-            else if (status == Ci.nsISocketTransport.STATUS_SENDING_TO)
-                this.post(sendingFile, [request, NetUtils.now(), -1]);
-            else if (status == Ci.nsISocketTransport.STATUS_WAITING_FOR)
-                this.post(waitingForFile, [request, NetUtils.now()]);
-            else if (status == Ci.nsISocketTransport.STATUS_RECEIVING_FROM)
-                this.post(receivingFile, [request, NetUtils.now(), -1]);
-        }
-    },
-
-    stateIsRequest: false,
-    onLocationChange: function() {},
-    onSecurityChange : function() {},
-    onLinkIconAvailable : function() {},
 };
 
 // ********************************************************************************************* //

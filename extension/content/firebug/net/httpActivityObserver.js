@@ -41,7 +41,6 @@ var responseCompletedFile = NetProgress.prototype.responseCompletedFile;
 var closedFile = NetProgress.prototype.closedFile;
 var resolvingFile = NetProgress.prototype.resolvingFile;
 var resolvedFile = NetProgress.prototype.resolvedFile;
-var progressFile = NetProgress.prototype.progressFile;
 var windowPaint = NetProgress.prototype.windowPaint;
 var timeStamp = NetProgress.prototype.timeStamp;
 var windowLoad = NetProgress.prototype.windowLoad;

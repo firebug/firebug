@@ -548,9 +548,6 @@ function monitorContext(context)
     // Add cache listener so, net panel has alwas fresh responses.
     context.sourceCache.addListener(networkContext.cacheListener);
 
-    // This listener is used to observe downlaod progress.
-    context.browser.addProgressListener(listener);
-
     // Activate net panel sub-context.
     var panel = context.getPanel(panelName);
     context.netProgress.activate(panel);
@@ -582,10 +579,6 @@ function unmonitorContext(context)
 
     // Remove cache listener
     context.sourceCache.removeListener(netProgress.cacheListener);
-
-    // Remove progress listener.
-    if (context.browser.docShell)
-        context.browser.removeProgressListener(netProgress, Ci.nsIWebProgress.NOTIFY_ALL);
 
     // Deactivate net sub-context.
     context.netProgress.activate(null);
