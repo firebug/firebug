@@ -15,10 +15,9 @@ define([
     "firebug/lib/array",
     "firebug/firefox/system",
     "firebug/net/netUtils",
-    "firebug/net/netDebugger",
 ],
 function(Obj, Firebug, Domplate, Locale, Events, Url, SourceLink, Http, Css, Win, Str,
-    Arr, System, NetUtils, NetDebugger) {
+    Arr, System, NetUtils) {
 
 // ********************************************************************************************* //
 // Constants
@@ -47,7 +46,6 @@ function NetProgress(context)
             (context ? context.getName() : "NULL Context"));
 
     this.context = context;
-    this.breakpoints = new NetDebugger.NetBreakpointGroup();
 
     var panel = null;
     var queue = [];
@@ -110,8 +108,6 @@ function NetProgress(context)
 
         queue = [];
     };
-
-    this.cacheListener = new NetCacheListener(this);
 
     this.clear();
 }
@@ -1123,39 +1119,6 @@ function getContentTypeFromResponseHead(value)
         var headerName = option[0];
         if (headerName && headerName.toLowerCase() == "content-type")
             return option[1];
-    }
-}
-
-// ********************************************************************************************* //
-// TabCache Listener
-
-/**
- * TabCache listner implementation. Net panel uses this listner to remember all
- * responses stored into the cache. There can be more requests to the same URL that
- * returns different responses. The Net panels must remember all of them (tab cache
- * remembers only the last one)
- */
-function NetCacheListener(netProgress)
-{
-    this.netProgress = netProgress;
-}
-
-NetCacheListener.prototype =
-{
-    onStartRequest: function(context, request)
-    {
-        // Keep in mind that the file object (representing the request) doesn't have to be
-        // created at this moment (top document request).
-    },
-
-    onStopRequest: function(context, request, responseText)
-    {
-        // Remember the response for this request.
-        var file = this.netProgress.getRequestFile(request, null, true);
-        if (file)
-            file.responseText = responseText;
-
-        Events.dispatch(Firebug.NetMonitor.fbListeners, "onResponseBody", [context, file]);
     }
 }
 

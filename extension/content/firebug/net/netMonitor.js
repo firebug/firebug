@@ -13,9 +13,11 @@ define([
     "firebug/net/netProgress",
     "firebug/net/httpLib",
     "firebug/net/netUtils",
+    "firebug/net/netDebugger",
+    "firebug/lib/events",
 ],
 function(Obj, Firebug, Firefox, Options, Win, Str, Persist, NetHttpActivityObserver,
-    HttpRequestObserver, NetProgress, Http, NetUtils) {
+    HttpRequestObserver, NetProgress, Http, NetUtils, NetDebugger, Events) {
 
 // ********************************************************************************************* //
 // Constants
@@ -420,7 +422,7 @@ var NetHttpObserver =
             // Create a new network context prematurely.
             if (!Firebug.NetMonitor.contexts[tabId])
             {
-                Firebug.NetMonitor.contexts[tabId] = new NetProgress(null);
+                Firebug.NetMonitor.contexts[tabId] = createNetProgress(null);
 
                 if (FBTrace.DBG_NET)
                     FBTrace.sysout("net.onModifyRequest; Create Temp Context (" +
@@ -538,15 +540,16 @@ function monitorContext(context)
     else
     {
         if (FBTrace.DBG_NET)
-            FBTrace.sysout("net.monitorContext; create new NetProgress(context). " + tabId);
+            FBTrace.sysout("net.monitorContext; create network monitor context object for: " +
+                tabId);
 
-        networkContext = new NetProgress(context);
+        networkContext = createNetProgress(context);
     }
 
     // Register activity-distributor observer if available (#488270)
     //NetHttpActivityObserver.registerObserver();
 
-    var listener = context.netProgress = networkContext;
+    context.netProgress = networkContext;
 
     // Add cache listener so, net panel has always fresh responses.
     context.sourceCache.addListener(networkContext.cacheListener);
@@ -591,6 +594,47 @@ function unmonitorContext(context)
 
     // And finaly destroy the net panel sub context.
     delete context.netProgress;
+}
+
+function createNetProgress(context)
+{
+    var netProgress = new NetProgress(context);
+    netProgress.cacheListener = new NetCacheListener(netProgress);
+    netProgress.breakpoints = new NetDebugger.NetBreakpointGroup();
+    return netProgress;
+}
+
+// ********************************************************************************************* //
+// TabCache Listener
+
+/**
+ * TabCache listner implementation. Net panel uses this listner to remember all
+ * responses stored into the cache. There can be more requests to the same URL that
+ * returns different responses. The Net panels must remember all of them (tab cache
+ * remembers only the last one)
+ */
+function NetCacheListener(netProgress)
+{
+    this.netProgress = netProgress;
+}
+
+NetCacheListener.prototype =
+{
+    onStartRequest: function(context, request)
+    {
+        // Keep in mind that the file object (representing the request) doesn't have to be
+        // created at this moment (top document request).
+    },
+
+    onStopRequest: function(context, request, responseText)
+    {
+        // Remember the response for this request.
+        var file = this.netProgress.getRequestFile(request, null, true);
+        if (file)
+            file.responseText = responseText;
+
+        Events.dispatch(Firebug.NetMonitor.fbListeners, "onResponseBody", [context, file]);
+    }
 }
 
 // ********************************************************************************************* //
