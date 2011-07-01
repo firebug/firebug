@@ -217,7 +217,7 @@ Firebug.Search = Obj.extend(Firebug.Module,
         this.update();
     },
 
-    history: [],
+    history: [""],
 
     addToHistory: function(val)
     {
