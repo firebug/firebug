@@ -299,7 +299,7 @@ window.Firebug =
             var stacks = fbObserverService.getStacksForTrack();
             if (stacks)
             {
-                FBTrace.sysout("fbObserverService getStacksForTrack ", stack);
+                FBTrace.sysout("fbObserverService getStacksForTrack ", stacks);
                 alert('observer mismatch detected, see FBTrace output');
             }
         }
