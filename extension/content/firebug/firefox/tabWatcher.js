@@ -62,7 +62,7 @@ Firebug.TabWatcher = Obj.extend(new Firebug.Listener(),
     {
         if (Firebug.TraceModule)
         {
-            this.traceListener = new TraceListener("->", "DBG_WINDOWS");
+            this.traceListener = new TraceListener("->", "DBG_WINDOWS", true);
             Firebug.TraceModule.addListener(this.traceListener);
         }
 

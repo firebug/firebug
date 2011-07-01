@@ -57,7 +57,7 @@ Firebug.Spy = Obj.extend(Firebug.Module,
     {
         if (Firebug.TraceModule)
         {
-            this.traceListener = new TraceListener("spy.", "DBG_SPY");
+            this.traceListener = new TraceListener("spy.", "DBG_SPY", true);
             Firebug.TraceModule.addListener(this.traceListener);
         }
 

@@ -12,10 +12,11 @@ function(Str) {
  * Default implementation of a Trace listener. Can be used to customize tracing logs
  * in the console in order to easily distinguish logs.
  */
-function TraceListener(prefix, type)
+function TraceListener(prefix, type, removePrefix)
 {
     this.prefix = prefix;
     this.type = type;
+    this.removePrefix = removePrefix;
 }
 
 TraceListener.prototype =
@@ -32,7 +33,9 @@ TraceListener.prototype =
         var index = message.text.indexOf(this.prefix);
         if (index == 0)
         {
-            message.text = message.text.substr(this.prefix.length);
+            if (this.removePrefix)
+                message.text = message.text.substr(this.prefix.length);
+
             message.text = Str.trim(message.text);
             message.type = this.type;
         }

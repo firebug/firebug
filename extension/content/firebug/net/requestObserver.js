@@ -6,8 +6,9 @@ define([
     "firebug/lib/string",
     "firebug/net/httpLib",
     "firebug/trace/traceModule",
+    "firebug/trace/traceListener",
 ],
-function(Xpcom, FBTrace, Str, Http, TraceModule) {
+function(Xpcom, FBTrace, Str, Http, TraceModule, TraceListener) {
 
 // ********************************************************************************************* //
 // Constants
@@ -199,30 +200,10 @@ function getObserverList()
 }
 
 // ********************************************************************************************* //
-// Trace Listener
-
-var TraceListener =
-{
-    onLoadConsole: function(win, rootNode)
-    {
-    },
-
-    onDump: function(message)
-    {
-        var index = message.text.indexOf("httpObserver.");
-        if (index == 0)
-        {
-            message.text = message.text.substr("httpObserver.".length);
-            message.text = Str.trim(message.text);
-            message.type = "DBG_HTTPOBSERVER";
-        }
-    }
-};
-
-// ********************************************************************************************* //
 // Registration
 
-TraceModule.addListener(TraceListener);
+// xxxHonza: Do we need to remove the listener?
+TraceModule.addListener(new TraceListener("httpObserver.", "DBG_HTTPOBSERVER", true));
 
 return HttpRequestObserver;
 

@@ -13,10 +13,12 @@ define([
     "firebug/lib/string",
     "firebug/firefox/window",
     "firebug/net/jsonViewer",
+    "firebug/trace/traceModule",
+    "firebug/trace/traceListener",
     "firebug/js/sourceCache",
 ],
 function(Obj, Firebug, Xpcom, HttpRequestObserver, HttpResponseObserver, Locale, Events,
-    Url, Http, Str, Win, JSONViewerModel) {
+    Url, Http, Str, Win, JSONViewerModel, TraceModule, TraceListener) {
 
 // ********************************************************************************************* //
 // Constants
@@ -91,11 +93,23 @@ Firebug.TabCacheModel = Obj.extend(Firebug.ActivableModule,
     contentTypes: contentTypes,
     fbListeners: [],
 
+    initialize: function()
+    {
+        Firebug.ActivableModule.initialize.apply(this, arguments);
+
+        if (Firebug.TraceModule)
+        {
+            this.traceListener = new TraceListener("tabCache.", "DBG_CACHE", false);
+            Firebug.TraceModule.addListener(this.traceListener);
+        }
+    },
+
     initializeUI: function(owner)
     {
+        Firebug.ActivableModule.initializeUI.apply(this, arguments);
+
         if (FBTrace.DBG_CACHE)
-            FBTrace.sysout("tabCache.initializeUI; Cache model initialized, " +
-                "Ci.nsITraceableChannel "+Ci.nsITraceableChannel);
+            FBTrace.sysout("tabCache.initializeUI;");
 
         // Read maximum size limit for cached response from preferences.
         responseSizeLimit = Firebug.Options.get("cache.responseLimit");
@@ -152,6 +166,9 @@ Firebug.TabCacheModel = Obj.extend(Firebug.ActivableModule,
         if (FBTrace.DBG_CACHE)
             FBTrace.sysout("tabCache.shutdown; Cache model destroyed.");
 
+        if (Firebug.TraceModule)
+            Firebug.TraceModule.removeListener(this.traceListener);
+
         if (this.observing)
             HttpRequestObserver.removeObserver(this, "firebug-http-event");
     },
@@ -162,26 +179,31 @@ Firebug.TabCacheModel = Obj.extend(Firebug.ActivableModule,
             FBTrace.sysout("tabCache.initContext for: " + context.getName());
     },
 
-    /* nsIObserver */
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+    // nsIObserver
+
     observe: function(subject, topic, data)
     {
         try
         {
             if (!(subject instanceof Ci.nsIHttpChannel))
                 return;
+
             // XXXjjb this same code is in net.js, better to have it only once
             var win = Http.getWindowForRequest(subject);
-            if (win)
-                var tabId = Win.getWindowProxyIdForWindow(win); // TODO remove, the tabId is not used after all
-            if (!tabId)
+            if (!win)
+            {
+                if (FBTrace.DBG_CACHE)
+                    FBTrace.sysout("tabCache.observe; " + topic + ", NO WINDOW");
                 return;
+            }
 
             if (topic == "http-on-modify-request")
-                this.onModifyRequest(subject, win, tabId);
+                this.onModifyRequest(subject, win);
             else if (topic == "http-on-examine-response")
-                this.onExamineResponse(subject, win, tabId);
+                this.onExamineResponse(subject, win);
             else if (topic == "http-on-examine-cached-response")
-                this.onCachedResponse(subject, win, tabId);
+                this.onCachedResponse(subject, win);
         }
         catch (err)
         {
@@ -190,16 +212,16 @@ Firebug.TabCacheModel = Obj.extend(Firebug.ActivableModule,
         }
     },
 
-    onModifyRequest: function(request, win, tabId)
+    onModifyRequest: function(request, win)
     {
     },
 
-    onExamineResponse: function(request, win, tabId)
+    onExamineResponse: function(request, win)
     {
         this.registerStreamListener(request, win);
     },
 
-    onCachedResponse: function(request, win, tabId)
+    onCachedResponse: function(request, win)
     {
         this.registerStreamListener(request, win);
     },
@@ -220,7 +242,7 @@ Firebug.TabCacheModel = Obj.extend(Firebug.ActivableModule,
         catch (err)
         {
             if (FBTrace.DBG_ERRORS)
-                FBTrace.sysout("tabCache: Register Traceable Listener EXCEPTION", err);
+                FBTrace.sysout("tabCache.Register Traceable Listener EXCEPTION", err);
         }
     },
 
@@ -257,6 +279,7 @@ Firebug.TabCacheModel = Obj.extend(Firebug.ActivableModule,
 });
 
 // ********************************************************************************************* //
+// Tab Cache
 
 /**
  * This cache object is intended to cache all responses made by a specific tab.
