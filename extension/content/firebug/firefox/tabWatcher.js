@@ -14,10 +14,11 @@ define([
     "firebug/lib/array",
     "firebug/trace/debug",
     "firebug/trace/traceListener",
+    "firebug/trace/traceModule",
     "firebug/chrome/tabContext",
 ],
 function(Obj, Firebug, Firefox, Xpcom, HttpRequestObserver, Events, Url, Http, Win,
-    Str, Arr, Debug, TraceListener) {
+    Str, Arr, Debug, TraceListener, TraceModule) {
 
 // ********************************************************************************************* //
 // Constants
@@ -60,11 +61,8 @@ Firebug.TabWatcher = Obj.extend(new Firebug.Listener(),
 
     initialize: function()
     {
-        if (Firebug.TraceModule)
-        {
-            this.traceListener = new TraceListener("->", "DBG_WINDOWS", true);
-            Firebug.TraceModule.addListener(this.traceListener);
-        }
+        this.traceListener = new TraceListener("->", "DBG_WINDOWS", true);
+        TraceModule.addListener(this.traceListener);
 
         HttpRequestObserver.addObserver(TabWatcherHttpObserver, "firebug-http-event", false);
     },
@@ -103,8 +101,7 @@ Firebug.TabWatcher = Obj.extend(new Firebug.Listener(),
             }
         }
 
-        if (Firebug.TraceModule)
-            Firebug.TraceModule.removeListener(this.traceListener);
+        TraceModule.removeListener(this.traceListener);
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

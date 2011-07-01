@@ -20,12 +20,13 @@ define([
     "firebug/net/httpActivityObserver",
     "firebug/net/netUtils",
     "firebug/trace/traceListener",
+    "firebug/trace/traceModule",
     "firebug/net/netPanel",
     "firebug/console/errors",
 ],
 function(Obj, Firebug, Domplate, FirebugReps, Events, HttpRequestObserver, StackFrame,
     Http, Css, Dom, Win, System, Str, Url, Arr, Debug, NetHttpActivityObserver, NetUtils,
-    TraceListener) {
+    TraceListener, TraceModule) {
 
 // ********************************************************************************************* //
 // Constants
@@ -55,11 +56,8 @@ Firebug.Spy = Obj.extend(Firebug.Module,
 
     initialize: function()
     {
-        if (Firebug.TraceModule)
-        {
-            this.traceListener = new TraceListener("spy.", "DBG_SPY", true);
-            Firebug.TraceModule.addListener(this.traceListener);
-        }
+        this.traceListener = new TraceListener("spy.", "DBG_SPY", true);
+        TraceModule.addListener(this.traceListener);
 
         Firebug.Module.initialize.apply(this, arguments);
     },
@@ -68,8 +66,7 @@ Firebug.Spy = Obj.extend(Firebug.Module,
     {
         Firebug.Module.shutdown.apply(this, arguments);
 
-        if (Firebug.TraceModule)
-            Firebug.TraceModule.removeListener(this.traceListener);
+        TraceModule.removeListener(this.traceListener);
     },
 
     initContext: function(context)

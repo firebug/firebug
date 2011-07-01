@@ -97,11 +97,8 @@ Firebug.TabCacheModel = Obj.extend(Firebug.ActivableModule,
     {
         Firebug.ActivableModule.initialize.apply(this, arguments);
 
-        if (Firebug.TraceModule)
-        {
-            this.traceListener = new TraceListener("tabCache.", "DBG_CACHE", false);
-            Firebug.TraceModule.addListener(this.traceListener);
-        }
+        this.traceListener = new TraceListener("tabCache.", "DBG_CACHE", false);
+        TraceModule.addListener(this.traceListener);
     },
 
     initializeUI: function(owner)
@@ -166,8 +163,7 @@ Firebug.TabCacheModel = Obj.extend(Firebug.ActivableModule,
         if (FBTrace.DBG_CACHE)
             FBTrace.sysout("tabCache.shutdown; Cache model destroyed.");
 
-        if (Firebug.TraceModule)
-            Firebug.TraceModule.removeListener(this.traceListener);
+        TraceModule.removeListener(this.traceListener);
 
         if (this.observing)
             HttpRequestObserver.removeObserver(this, "firebug-http-event");
