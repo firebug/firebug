@@ -69,6 +69,8 @@ Firebug.NetMonitor = Obj.extend(Firebug.ActivableModule,
         TraceModule.addListener(this.traceActivityListener);
 
         Firebug.connection.addListener(this.DebuggerListener);
+
+        NetHttpObserver.registerObserver();
     },
 
     initializeUI: function()
@@ -93,6 +95,8 @@ Firebug.NetMonitor = Obj.extend(Firebug.ActivableModule,
         TraceModule.removeListener(this.traceActivityListener);
 
         Firebug.connection.removeListener(this.DebuggerListener);
+
+        NetHttpObserver.unregisterObserver();
     },
 
     initContext: function(context, persistedState)
@@ -173,8 +177,7 @@ Firebug.NetMonitor = Obj.extend(Firebug.ActivableModule,
         delete this.contexts[tabId];
 
         if (FBTrace.DBG_NET)
-            FBTrace.sysout("net.loadedContext; temp contexts (" +
-                getTempContextCount() + "), removed one for: " + tabId);
+            FBTrace.sysout("net.loadedContext; temp contexts (" + getTempContextCount() + ")");
 
         var netProgress = context.netProgress;
         if (netProgress)
@@ -230,16 +233,11 @@ Firebug.NetMonitor = Obj.extend(Firebug.ActivableModule,
         if (FBTrace.DBG_NET)
             FBTrace.sysout("net.onResumeFirebug; enabled: " + Firebug.NetMonitor.isAlwaysEnabled());
 
-        // Resume only if enabled.
-        if (Firebug.NetMonitor.isAlwaysEnabled() || this.hasObservers())
+        // Resume only if NetPanel is enabled and so, observing NetMonitor module.
+        if (Firebug.NetMonitor.isAlwaysEnabled())
         {
-            // XXXjjb Honza was called in firebug-http-observer.js on old enableXULWindow
-            // Can't be here since resuming happens when the page is loaded and it's too
-            // late since the first (document) requests already happened.
-            NetHttpObserver.registerObserver();
             NetHttpActivityObserver.registerObserver();
             Firebug.connection.eachContext(monitorContext);
-            this.observing = true;
         }
     },
 
@@ -248,14 +246,8 @@ Firebug.NetMonitor = Obj.extend(Firebug.ActivableModule,
         if (FBTrace.DBG_NET)
             FBTrace.sysout("net.onSuspendFirebug; enabled: " + Firebug.NetMonitor.isAlwaysEnabled());
 
-        // Suspend only if enabled.
-        if (this.observing)
-        {
-            NetHttpObserver.unregisterObserver();
-            NetHttpActivityObserver.unregisterObserver();
-            Firebug.connection.eachContext(unmonitorContext);
-            this.observing = false;
-        }
+        NetHttpActivityObserver.unregisterObserver();
+        Firebug.connection.eachContext(unmonitorContext);
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -363,6 +355,9 @@ var NetHttpObserver =
     /* nsIObserve */
     observe: function(subject, topic, data)
     {
+        if (!Firebug.NetMonitor.isAlwaysEnabled())
+            return;
+
         try
         {
             if (FBTrace.DBG_NET_EVENTS)
@@ -386,7 +381,7 @@ var NetHttpObserver =
             var tabId = win ? Win.getWindowProxyIdForWindow(win) : null;
             if (!tabId)
             {
-                if (FBTrace.DBG_NET_EVENTS)
+                if (FBTrace.DBG_NET)
                     FBTrace.sysout("net.observe NO TAB " + Http.safeGetRequestName(subject) +
                         ", " + tabId + ", " + win);
                 return;
@@ -419,22 +414,26 @@ var NetHttpObserver =
         {
             var browser = Firefox.getBrowserForWindow(win);
 
-            /*
             if (!Firebug.TabWatcher.shouldCreateContext(browser, name, null))
             {
                 if (FBTrace.DBG_NET)
-                    FBTrace.sysout("net.onModifyRequest; Activation logic says don't create temp context.");
+                    FBTrace.sysout("net.onModifyRequest; Activation logic says don't create " +
+                        "temp context for: " + name);
                 return;
             }
-            */
 
             // Create a new network context prematurely.
             if (!Firebug.NetMonitor.contexts[tabId])
             {
                 Firebug.NetMonitor.contexts[tabId] = createNetProgress(null);
 
+                // OK, we definitelly want to watch this page load, temp context is created
+                // so, make sure the activity-observer is registered and we have detailed
+                // timing info for this first document request.
+                NetHttpActivityObserver.registerObserver();
+
                 if (FBTrace.DBG_NET)
-                    FBTrace.sysout("net.onModifyRequest; Create Temp Context (" +
+                    FBTrace.sysout("net.onModifyRequest; Temp Context created (" +
                         getTempContextCount() + "), " + tabId);
             }
         }
@@ -464,6 +463,9 @@ var NetHttpObserver =
         if (!networkContext)
             networkContext = context ? context.netProgress : null;
 
+        if (!networkContext)
+            return;
+
         var info = new Object();
         info.responseStatus = request.responseStatus;
         info.responseStatusText = request.responseStatusText;
@@ -475,8 +477,10 @@ var NetHttpObserver =
         if (FBTrace.DBG_NET && info.postText)
             FBTrace.sysout("net.onExamineResponse, POST data: " + info.postText, info);
 
-        if (networkContext)
-            networkContext.post(respondedFile, [request, NetUtils.now(), info]);
+        networkContext.post(respondedFile, [request, NetUtils.now(), info]);
+
+        // Make sure to track the first document response.
+        //Firebug.TabCacheModel.registerStreamListener(request, win, true);
     },
 
     onExamineCachedResponse: function(request, win, tabId, context)
@@ -541,7 +545,7 @@ function monitorContext(context)
     if (networkContext)
     {
         if (FBTrace.DBG_NET)
-            FBTrace.sysout("net.monitorContext; Use temporary context." + tabId);
+            FBTrace.sysout("net.monitorContext; Use temporary context: " + tabId);
 
         networkContext.context = context;
         delete Firebug.NetMonitor.contexts[tabId];

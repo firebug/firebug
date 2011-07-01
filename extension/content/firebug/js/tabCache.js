@@ -138,7 +138,7 @@ Firebug.TabCacheModel = Obj.extend(Firebug.ActivableModule,
     onResumeFirebug: function()
     {
         if (FBTrace.DBG_CACHE)
-            FBTrace.sysout("tabCache.onResumeFirebug;");
+            FBTrace.sysout("tabCache.onResumeFirebug; hasObsevers: " + this.hasObservers());
 
         if (this.hasObservers() && !this.observing)
         {
@@ -150,7 +150,8 @@ Firebug.TabCacheModel = Obj.extend(Firebug.ActivableModule,
     onSuspendFirebug: function()
     {
         if (FBTrace.DBG_CACHE)
-            FBTrace.sysout("tabCache.onSuspendFirebug;");
+            FBTrace.sysout("tabCache.onSuspendFirebug; hasObsevers: " + this.hasObservers());
+
         if (this.observing)
         {
             HttpRequestObserver.removeObserver(this, "firebug-http-event");
@@ -222,9 +223,17 @@ Firebug.TabCacheModel = Obj.extend(Firebug.ActivableModule,
         this.registerStreamListener(request, win);
     },
 
-    registerStreamListener: function(request, win)
+    registerStreamListener: function(request, win, forceRegister)
     {
-        if (Firebug.getSuspended())
+        if (Firebug.getSuspended() && !forceRegister)
+        {
+            if (FBTrace.DBG_CACHE)
+                FBTrace.sysout("tabCache.registerStreamListener; DO NOT TRACK, " +
+                    "Firebug suspended for: " + Http.safeGetRequestName(request));
+            return;
+        }
+
+        if (!this.hasObservers())
             return;
 
         try
