@@ -15,9 +15,12 @@ define([
     "firebug/net/netUtils",
     "firebug/net/netDebugger",
     "firebug/lib/events",
+    "firebug/trace/traceListener",
+    "firebug/trace/traceModule",
 ],
 function(Obj, Firebug, Firefox, Options, Win, Str, Persist, NetHttpActivityObserver,
-    HttpRequestObserver, NetProgress, Http, NetUtils, NetDebugger, Events) {
+    HttpRequestObserver, NetProgress, Http, NetUtils, NetDebugger, Events,
+    TraceListener, TraceModule) {
 
 // ********************************************************************************************* //
 // Constants
@@ -58,13 +61,12 @@ Firebug.NetMonitor = Obj.extend(Firebug.ActivableModule,
     {
         Firebug.ActivableModule.initialize.apply(this, arguments);
 
-        if (Firebug.TraceModule)
-            Firebug.TraceModule.addListener(this.TraceListener);
+        this.traceNetListener = new TraceListener("net.", "DBG_NET", true);
+        this.traceActivityListener = new TraceListener("activityObserver.",
+            "DBG_ACTIVITYOBSERVER", true);
 
-        // HTTP observer must be registered now (and not in monitorContext, since if a
-        // page is opened in a new tab the top document request would be missed otherwise.
-        //Firebug.NetMonitor.NetHttpObserver.registerObserver();
-        //NetHttpActivityObserver.registerObserver();
+        TraceModule.addListener(this.traceNetListener);
+        TraceModule.addListener(this.traceActivityListener);
 
         Firebug.connection.addListener(this.DebuggerListener);
     },
@@ -78,17 +80,17 @@ Firebug.NetMonitor = Obj.extend(Firebug.ActivableModule,
 
         // Synchronize UI buttons with the current filter.
         this.syncFilterButtons(Firebug.chrome);
+
+        if (FBTrace.DBG_NET)
+            FBTrace.sysout("net.NetMonitor.initializeUI; enabled: " + this.isAlwaysEnabled());
     },
 
     shutdown: function()
     {
         Firebug.ActivableModule.shutdown.apply(this, arguments);
 
-        if (Firebug.TraceModule)
-            Firebug.TraceModule.removeListener(this.TraceListener);
-
-        //Firebug.NetMonitor.NetHttpObserver.unregisterObserver();
-        //NetHttpActivityObserver.unregisterObserver();
+        TraceModule.removeListener(this.traceNetListener);
+        TraceModule.removeListener(this.traceActivityListener);
 
         Firebug.connection.removeListener(this.DebuggerListener);
     },
@@ -216,7 +218,8 @@ Firebug.NetMonitor = Obj.extend(Firebug.ActivableModule,
     onObserverChange: function(observer)
     {
         if (FBTrace.DBG_NET)
-            FBTrace.sysout("net.onObserverChange; hasObservers: " + this.hasObservers());
+            FBTrace.sysout("net.onObserverChange; hasObservers: " + this.hasObservers() +
+                ", Firebug suspended: " + Firebug.getSuspended());
 
         if (!Firebug.getSuspended())  // then Firebug is in action
             this.onResumeFirebug();   // and we need to test to see if we need to addObserver
@@ -249,8 +252,8 @@ Firebug.NetMonitor = Obj.extend(Firebug.ActivableModule,
         if (this.observing)
         {
             NetHttpObserver.unregisterObserver();
-            Firebug.connection.eachContext(unmonitorContext);
             NetHttpActivityObserver.unregisterObserver();
+            Firebug.connection.eachContext(unmonitorContext);
             this.observing = false;
         }
     },
@@ -338,6 +341,9 @@ var NetHttpObserver =
         if (this.registered)
             return;
 
+        if (FBTrace.DBG_NET)
+            FBTrace.sysout("net.NetHttpObserver.register;");
+
         HttpRequestObserver.addObserver(this, "firebug-http-event", false);
         this.registered = true;
     },
@@ -346,6 +352,9 @@ var NetHttpObserver =
     {
         if (!this.registered)
             return;
+
+        if (FBTrace.DBG_NET)
+            FBTrace.sysout("net.NetHttpObserver.unregister;");
 
         HttpRequestObserver.removeObserver(this, "firebug-http-event");
         this.registered = false;
@@ -673,38 +682,6 @@ Firebug.NetMonitor.DebuggerListener =
         if (context.netProgress && !context.netProgress.breakpoints.isEmpty())
             groups.push(context.netProgress.breakpoints);
     },
-};
-
-// ********************************************************************************************* //
-// Trace Listener
-
-Firebug.NetMonitor.TraceListener =
-{
-    // Called when console window is loaded.
-    onLoadConsole: function(win, rootNode)
-    {
-    },
-
-    // Called when a new message is logged in to the trace-console window.
-    onDump: function(message)
-    {
-        var index = message.text.indexOf("net.");
-        if (index == 0)
-        {
-            message.text = message.text.substr("net.".length);
-            message.text = Str.trim(message.text);
-            message.type = "DBG_NET";
-        }
-
-        var prefix = "activityObserver.";
-        var index = message.text.indexOf(prefix);
-        if (index == 0)
-        {
-            message.text = message.text.substr(prefix.length);
-            message.text = Str.trim(message.text);
-            message.type = "DBG_ACTIVITYOBSERVER";
-        }
-    }
 };
 
 // ********************************************************************************************* //
