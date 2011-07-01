@@ -68,8 +68,14 @@ var NetHttpActivityObserver =
         distributor.addObserver(this);
         this.registered = true;
 
-        if (FBTrace.DBG_ACTIVITYOBSERVER)
-            FBTrace.sysout("activityObserver.registerObserver;");
+        if (FBTrace.DBG_ACTIVITYOBSERVER || FBTrace.DBG_OBSERVERS)
+        {
+            // import fbObserverService
+            Components.utils.import("resource://firebug/observer-service.js");
+            this.trackId = fbObserverService.track(Components.stack);
+            FBTrace.sysout("activityObserver.registerObserver;"+this.trackId+" this.registered: "+this.registered);
+        }
+
     },
 
     unregisterObserver: function()
@@ -87,8 +93,14 @@ var NetHttpActivityObserver =
         distributor.removeObserver(this);
         this.registered = false;
 
-        if (FBTrace.DBG_ACTIVITYOBSERVER)
-            FBTrace.sysout("activityObserver.unregisterObserver;");
+        if (FBTrace.DBG_ACTIVITYOBSERVER || FBTrace.DBG_OBSERVERS)
+        {
+            // import fbObserverService
+            Components.utils.import("resource://firebug/observer-service.js");
+            fbObserverService.untrack(this.trackId);
+            FBTrace.sysout("activityObserver.unregisterObserver;"+this.trackId+" this.registered: "+this.registered);
+        }
+
     },
 
     getActivityDistributor: function()

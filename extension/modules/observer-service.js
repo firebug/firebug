@@ -7,7 +7,7 @@ const Cc = Components.classes;
 const Ci = Components.interfaces;
 const Cr = Components.results;
 
-var EXPORTED_SYMBOLS = ["observerService"];
+var EXPORTED_SYMBOLS = ["fbObserverService"];
 
 
 // ************************************************************************************************
@@ -20,8 +20,8 @@ var FBTrace = null;
  * See also: <a href="https://developer.mozilla.org/en/NsIObserverService">
  * nsIObserverService</a>
  */
-var observerService =
-/** lends observerService */
+var fbObserverService =
+/** lends fbObserverService */
 {
     observersByTopic: {},
 
@@ -72,5 +72,29 @@ var observerService =
         }
         return observers;  // may be null or array
     },
+
+
+    // For debugging observer registration
+
+    stackForTrack: [],
+
+    track: function(stack)
+    {
+        this.stackForTrack.push(stack.toString());
+        return this.stackForTrack.length;
+    },
+
+    untrack: function(index)
+    {
+        if (this.stackForTrack[index - 1])
+            delete this.stackForTrack[index - 1];
+        else
+            Components.reportError("observer-service ERROR attempt to untrack item not tracked at "+(index - 1));
+    },
+
+    getStacksForTrack: function()
+    {
+        return this.stackForTrack;
+    }
 }
 

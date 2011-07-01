@@ -422,7 +422,6 @@ Firebug.Console = Obj.extend(ActivableConsole,
         var fbStatus = Firefox.getElementById('firebugStatus');
         if (fbStatus)
             fbStatus.removeAttribute("console");
-        FBTrace.sysout("unwatchForErrors "+(fbStatus?fbStatus.getAttribute('console'):"no fbStatus"), fbStatus);
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *

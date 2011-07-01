@@ -39,7 +39,7 @@ pref("extensions.firebug.DBG_WINDOWS", false);          // tabWatcher, dispatch 
 pref("extensions.firebug.DBG_NET", false);              // net.js
 pref("extensions.firebug.DBG_NET_EVENTS", false);       // net.js - network events
 pref("extensions.firebug.DBG_INITIALIZE", false);       // initialize FB
-pref("extensions.firebug.DBG_REGISTRATION", false);     // registry (modules panels); 
+pref("extensions.firebug.DBG_REGISTRATION", false);     // registry (modules panels);
 pref("extensions.firebug.DBG_INSPECT", false);          // inspector
 pref("extensions.firebug.DBG_OPTIONS", false);          //
 pref("extensions.firebug.DBG_FBS_FLUSH", false);        //
@@ -62,3 +62,4 @@ pref("extensions.firebug.DBG_MODULES", false);          // moduleloading
 pref("extensions.firebug.DBG_PROFILER", false);         // profiler
 pref("extensions.firebug.DBG_SEARCH", false);           // search box
 pref("extensions.firebug.DBG_EXTERNALEDITORS", false);  // integration with external editors/IDEs
+pref("extensions.firebug.DBG_OBSERVERS", false);        // track/untrack support, should be set, then restart Firefox

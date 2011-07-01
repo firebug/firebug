@@ -278,6 +278,9 @@ window.Firebug =
      */
     shutdown: function()
     {
+        if (Firebug.isShutdown)
+            return;
+
         this.shutdownUI();
 
         Events.dispatch(modules, "shutdown");
@@ -288,6 +291,20 @@ window.Firebug =
         Firebug.connection.disconnect();
 
         Firebug.PanelActivation.deactivatePanelTypes(panelTypes);
+
+        if (FBTrace.DBG_OBSERVERS)
+        {
+            // import fbObserverService
+            Components.utils.import("resource://firebug/observer-service.js");
+            var stacks = fbObserverService.getStacksForTrack();
+            if (stacks)
+            {
+                FBTrace.sysout("fbObserverService getStacksForTrack ", stack);
+                alert('observer mismatch detected, see FBTrace output');
+            }
+        }
+
+        Firebug.isShutdown = true;
 
         if (FBTrace.DBG_INITIALIZE)
             FBTrace.sysout("firebug.shutdown exited ");
