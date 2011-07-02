@@ -1554,7 +1554,9 @@ Firebug.CSSStyleSheetPanel.prototype = Obj.extend(Firebug.Panel,
 
         if (this.navigateToNextDocument(scanDoc, reverse))
         {
-            return this.searchCurrentDoc(true, text, reverse);
+            // firefox findService can't find nodes immediatly after insertion
+            setTimeout(Obj.bind(this.searchCurrentDoc, this), 0, true, text, reverse);
+            return true;
         }
     },
 
