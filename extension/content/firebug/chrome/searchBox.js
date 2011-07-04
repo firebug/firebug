@@ -41,8 +41,7 @@ Firebug.Search = Obj.extend(Firebug.Module,
                 if (input instanceof Ci.nsIDOMNSEditableElement)
                     sel = input.QueryInterface(Ci.nsIDOMNSEditableElement).editor.selection.toString();
             }
-            sel = sel || '';
-            Firebug.chrome.$("fbSearchBox").value = sel;
+            this.search(sel, Firebug.currentContext);
             this.focus();
         }
     },

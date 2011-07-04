@@ -1543,8 +1543,6 @@
 
                 if (!FBL.hasClass(target, "panelFocusBound"))
                 {
-                    if (!this.focused && this.value)
-                        this.searchNext();
                     this.showOptions();
                 }
             ]]></body>
