@@ -774,6 +774,11 @@ NetPanel.prototype = Obj.extend(Firebug.ActivablePanel,
         for (var i = 0; i < queue.length; ++i)
         {
             var file = queue[i];
+
+            // xxxHonza: the entire phase management should ba part of NetPanel object
+            if (!file.phase && this.context.netProgress)
+                this.context.netProgress.extendPhase(file);
+
             if (!file.phase)
                 continue;
 
