@@ -143,6 +143,7 @@
 #fbSearchBox {
     margin-left: 0;
     margin-right: 6px;
+    min-width: 100px;
 }
 
 .fbsearch-textbox[status="notfound"] {
@@ -167,8 +168,8 @@
 .fbsearch-icon {
     cursor: default!important;
     background: url(chrome://firebug/skin/search.png) no-repeat;
-    width:16px;
-    height:16px;
+    width: 16px;
+    height: 16px;
 }
 
 .fbsearch-textbox[active-search='true'] > .fbsearch-icon {
