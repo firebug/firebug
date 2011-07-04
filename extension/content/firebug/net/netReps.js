@@ -534,7 +534,7 @@ Firebug.NetMonitor.NetRequestEntry = domplate(Firebug.Rep, new Firebug.Listener(
 
     getInFrame: function(file)
     {
-        return !!file.document.parent;
+        return !!(file.document ? file.document.parent : false);
     },
 
     getIndent: function(file)

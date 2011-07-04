@@ -3,7 +3,6 @@
 define([
     "firebug/lib/object",
     "firebug/firebug",
-    "firebug/lib/domplate",
     "firebug/lib/locale",
     "firebug/lib/events",
     "firebug/lib/url",
@@ -16,7 +15,7 @@ define([
     "firebug/firefox/system",
     "firebug/net/netUtils",
 ],
-function(Obj, Firebug, Domplate, Locale, Events, Url, SourceLink, Http, Css, Win, Str,
+function(Obj, Firebug, Locale, Events, Url, SourceLink, Http, Css, Win, Str,
     Arr, System, NetUtils) {
 
 // ********************************************************************************************* //
