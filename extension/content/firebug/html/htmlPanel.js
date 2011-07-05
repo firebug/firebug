@@ -654,7 +654,7 @@ Firebug.HTMLPanel.prototype = Obj.extend(WalkingPanel,
                 }
                 else
                 {
-                    var skipParent = this.getFrameConnection(node);
+                    var skipParent = this.getEmbedConnection(parentNode);
                     if (FBTrace.DBG_HTML)
                         FBTrace.sysout("getParentObject skipParent:"+(skipParent?skipParent.nodeName:"none"));
 
@@ -689,7 +689,7 @@ Firebug.HTMLPanel.prototype = Obj.extend(WalkingPanel,
         }
     },
 
-    storeFrameConnection: function(node, skipChild)
+    setEmbedConnection: function(node, skipChild)
     {
         if (!this.embeddedBrowserParents)
         {
@@ -707,7 +707,7 @@ Firebug.HTMLPanel.prototype = Obj.extend(WalkingPanel,
         return skipChild;
     },
 
-    getFrameConnection: function(node)
+    getEmbedConnection: function(node)
     {
         if (this.embeddedBrowserParents)
         {
@@ -752,7 +752,7 @@ Firebug.HTMLPanel.prototype = Obj.extend(WalkingPanel,
             if (index == 0)
             {
                 var skipChild = node.contentDocument.documentElement;  // punch thru and adopt the root element as our child
-                return this.storeFrameConnection(node, skipChild); // (the node's).(type 9 document).(HTMLElement)
+                return this.setEmbedConnection(node, skipChild); // (the node's).(type 9 document).(HTMLElement)
             }
             else if (previousSibling)
             {
@@ -765,7 +765,7 @@ Firebug.HTMLPanel.prototype = Obj.extend(WalkingPanel,
             if (index == 0)
             {
                 var skipChild = node.getSVGDocument().documentElement; // unwrap
-                return this.storeFrameConnection(node, skipChild); // (the node's).(type 9 document).(HTMLElement)
+                return this.setEmbedConnection(node, skipChild); // (the node's).(type 9 document).(HTMLElement)
             }
             else
                 return null;
