@@ -259,7 +259,7 @@ NetPanel.prototype = Obj.extend(Firebug.ActivablePanel,
     {
         var header = Dom.getAncestorByClass(target, "netHeaderRow");
         if (header)
-            return NetRequestTable;
+            return Firebug.NetMonitor.NetRequestTable;
 
         return Firebug.ActivablePanel.getPopupObject.apply(this, arguments);
     },
