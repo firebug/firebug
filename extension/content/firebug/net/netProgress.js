@@ -128,7 +128,7 @@ NetProgress.prototype =
         }
     },
 
-    requestedHeaderFile: function(request, time, win, xhr, extraStringData)
+    requestedHeaderFile: function requestedHeaderFile(request, time, win, xhr, extraStringData)
     {
         var file = this.getRequestFile(request);
         if (file)
@@ -180,7 +180,7 @@ NetProgress.prototype =
         }
     },
 
-    breakOnXHR: function(file)
+    breakOnXHR: function breakOnXHR(file)
     {
         var halt = false;
         var conditionIsFalse = false;
@@ -224,7 +224,7 @@ NetProgress.prototype =
         Firebug.Breakpoint.breakNow(this.context.getPanel(panelName, true));
     },
 
-    respondedHeaderFile: function(request, time, extraStringData)
+    respondedHeaderFile: function respondedHeaderFile(request, time, extraStringData)
     {
         var file = this.getRequestFile(request);
         if (file)
