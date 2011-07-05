@@ -652,21 +652,16 @@ Firebug.HTMLPanel.prototype = Obj.extend(WalkingPanel,
 
                     return parentNode.defaultView.frameElement;
                 }
-                else if (this.embeddedBrowserParents)
+                else
                 {
-                    // better be HTML element, could be iframe
-                    var skipParent = this.embeddedBrowserParents[node];
-
+                    var skipParent = this.getFrameConnection(node);
                     if (FBTrace.DBG_HTML)
                         FBTrace.sysout("getParentObject skipParent:"+(skipParent?skipParent.nodeName:"none"));
 
                     if (skipParent)
                         return skipParent;
-                }
-                else
-                {
-                     // parent is document element, but no window at defaultView.
-                     return null;
+                    else
+                        return null; // parent is document element, but no window at defaultView.
                 }
             }
             else if (!parentNode.localName)
@@ -694,6 +689,33 @@ Firebug.HTMLPanel.prototype = Obj.extend(WalkingPanel,
         }
     },
 
+    storeFrameConnection: function(node, skipChild)
+    {
+        if (!this.embeddedBrowserParents)
+        {
+            this.embeddedBrowserParents = [];
+            this.embeddedBrowserDocument = [];
+        }
+
+        this.embeddedBrowserDocument.push(skipChild);
+        this.embeddedBrowserParents.push(node);         // store our adopted childe in a side table
+
+        if (FBTrace.DBG_HTML)
+            FBTrace.sysout("Found skipChild "+Css.getElementCSSSelector(skipChild)+
+                " for  "+Css.getElementCSSSelector(node)+ " with node.contentDocument "+
+                node.contentDocument);
+        return skipChild;
+    },
+
+    getFrameConnection: function(node)
+    {
+        if (this.embeddedBrowserParents)
+        {
+            var index = this.embeddedBrowserParents.indexOf(node);
+            if (index !== -1)
+                return this.embeddedBrowserDocument[index];
+        }
+    },
     /*
      * @param: node a DOM node from the Web page
      * @param: index counter for important children, may skip whitespace
@@ -729,18 +751,8 @@ Firebug.HTMLPanel.prototype = Obj.extend(WalkingPanel,
         {
             if (index == 0)
             {
-                if (!this.embeddedBrowserParents)
-                    this.embeddedBrowserParents = {};
-
                 var skipChild = node.contentDocument.documentElement;  // punch thru and adopt the root element as our child
-                this.embeddedBrowserParents[skipChild] = node;         // store our adopted childe in a side table
-
-                if (FBTrace.DBG_HTML)
-                    FBTrace.sysout("Found skipChild "+Css.getElementCSSSelector(skipChild)+
-                        " for  "+Css.getElementCSSSelector(node)+ " with node.contentDocument "+
-                        node.contentDocument);
-
-                return skipChild;  // (the node's).(type 9 document).(HTMLElement)
+                return this.storeFrameConnection(node, skipChild); // (the node's).(type 9 document).(HTMLElement)
             }
             else if (previousSibling)
             {
@@ -752,12 +764,8 @@ Firebug.HTMLPanel.prototype = Obj.extend(WalkingPanel,
         {
             if (index == 0)
             {
-                if (!this.embeddedBrowserParents)
-                    this.embeddedBrowserParents = {};
                 var skipChild = node.getSVGDocument().documentElement; // unwrap
-                this.embeddedBrowserParents[skipChild] = node;
-
-                return skipChild;  // (the node's).(type 9 document).(SVGElement)
+                return this.storeFrameConnection(node, skipChild); // (the node's).(type 9 document).(HTMLElement)
             }
             else
                 return null;
