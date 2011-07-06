@@ -53,6 +53,7 @@ pref("extensions.firebug.console.logLimit", 500);
 pref("extensions.firebug.console.enableSites", false);
 pref("extensions.firebug.tabularLogMaxHeight", 200);
 pref("extensions.firebug.consoleFilterTypes", "all");
+pref("extensions.firebug.memoryProfilerEnable", false);
 
 // HTML
 pref("extensions.firebug.showCommentNodes", false);
