@@ -295,10 +295,22 @@ Firebug.DisabledPanelBox = domplate(Firebug.Rep,
 
     onEnable: function(event)
     {
-        var panelBar = Firebug.chrome.$("fbPanelBar1");
+        var view = event.target.ownerDocument.defaultView;
+        var isMainPanel = (view.name == "fbPanelBar1-browser");
+        var panelBar = Firebug.chrome.$(isMainPanel ? "fbPanelBar1" : "fbPanelBar2");
+
         var panelType = panelBar.selectedTab.panelType;
-        panelType.prototype.setEnabled(true);
-        panelBar.updateTab(panelType);
+        if (panelType.prototype.setEnabled)
+        {
+            panelType.prototype.setEnabled(true);
+            panelBar.updateTab(panelType);
+        }
+        else
+        {
+            if (FBTrace.DBG_ERRORS)
+                FBTrace.sysout("panelActivation.onEnable; panel is not activable: " +
+                    Firebug.getPanelTitle(panelType));
+        }
     },
 
     /**
