@@ -338,7 +338,9 @@ var Errors = Firebug.Errors = Obj.extend(Firebug.Module,
         if (url.indexOf("://chromebug/") > 0)
             return Firebug.currentContext; // no context for self
 
-        var errorContext = getExceptionContext(Firebug.currentContext, object);
+        // Correct the error routing in the case that the new window id will work (R10860).
+        // Don't pass the current context (issue 4504)
+        var errorContext = getExceptionContext(null, object);
         if (errorContext)
             return errorContext;
 
@@ -769,8 +771,9 @@ function getExceptionContext(context, object)
     {
         var errorContext = Firebug.connection.getContextByWindow(errorWin);
         if (FBTrace.DBG_ERRORLOG)
-            FBTrace.sysout("errors.observe exception context:"+
-                (errorContext?errorContext.getName():"none")+" errorWin: "+errorWin);
+            FBTrace.sysout("errors.observe exception context: " +
+                (errorContext ? errorContext.getName() : "none") + " errorWin: " +
+                    Win.safeGetWindowLocation(errorWin));
 
         if (errorContext)
             return errorContext;
