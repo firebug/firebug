@@ -361,8 +361,7 @@ Firebug.Console = Obj.extend(ActivableConsole,
         if (!context)
             context = Firebug.currentContext;
 
-        // xxxHonza: what is the issue number?
-        /* Preparation for multiple filters
+        /* Preparation for multiple filters (see issue 4621)
         if (filterType == "")
             Firebug.consoleFilterTypes = "";
         else
