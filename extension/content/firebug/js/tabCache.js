@@ -422,7 +422,7 @@ Firebug.TabCache.prototype = Obj.extend(Firebug.SourceCache.prototype,
                 return responseText;
 
             if (url === "<unknown>")
-                return [Locale.$STR("message.Failed to load source from cache for") + ": " + url];
+                return [Locale.$STR("message.sourceNotAvailableFor") + ": " + url];
 
             var channel = ioService.newChannel(url, null, null);
 
@@ -445,7 +445,7 @@ Firebug.TabCache.prototype = Obj.extend(Firebug.SourceCache.prototype,
                     FBTrace.sysout("tabCache.loadFromCache; Failed to load source for: " + url);
 
                 stream.close();
-                return [Locale.$STR("message.Failed to load source from cache for") + ": " + url];
+                return [Locale.$STR("message.sourceNotAvailableFor") + ": " + url];
             }
 
             // Don't load responses that shouldn't be cached.
