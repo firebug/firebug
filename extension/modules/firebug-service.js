@@ -3323,8 +3323,11 @@ var fbs =
 
     getBreakpointURLs: function()
     {
-         var urls = this.getBreakpointStore().getKeys();
-         return urls;
+        var breakpointStore = this.getBreakpointStore();
+        if (!breakpointStore)
+            return [];
+
+        return breakpointStore.getKeys();
     },
 
     getBreakpointStore: function()
@@ -3354,16 +3357,22 @@ var fbs =
         }
         catch(exc)
         {
-            ERROR("firebug-service restoreBreakpoints ERROR "+exc);
-        }
+            // Throws another exception since fbs is null.
+            //ERROR("firebug-service restoreBreakpoints ERROR "+exc);
 
+            // xxxHonza: why I can't see this log in the Tracing Console?
+            FBTrace.sysout("firebug-service restoreBreakpoints ERROR " + exc, exc);
+        }
     },
 
     restoreBreakpoints: function()
     {
-        this.breakpoints = {};
         var breakpointStore = fbs.getBreakpointStore();
-        var urls =  fbs.getBreakpointURLs();
+        if (!breakpointStore)
+            return;
+
+        this.breakpoints = {};
+        var urls = fbs.getBreakpointURLs();
 
         for (var i = 0; i < urls.length; i++)
         {
