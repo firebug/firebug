@@ -1753,6 +1753,30 @@ Firebug.Panel = Obj.extend(new Firebug.Listener(),
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
+    /*
+     * Called by search in the case something was found.
+     * This will highlight the given node for a specific timespan. There's only one node
+     * highlighted at a time.
+     * @param {Node} Node to highlight
+     */
+    highlightNode: function(node)
+    {
+        if (this.highlightedNode)
+            Css.cancelClassTimed(this.highlightedNode, "jumpHighlight", this.context);
+
+        this.highlightedNode = node;
+
+        if (node)
+            Css.setClassTimed(node, "jumpHighlight", this.context);
+    },
+
+    /*
+     * Called by the framework when panel search is used.
+     * This is responsible for finding and highlighting search matches.
+     * @param {String} text String to search for
+     * @param {Boolean} reverse Indicates, if search is reversed
+     * @return true, if search matched, otherwise false
+     */
     search: function(text, reverse)
     {
     },

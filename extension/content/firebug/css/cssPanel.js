@@ -1516,17 +1516,6 @@ Firebug.CSSStyleSheetPanel.prototype = Obj.extend(Firebug.Panel,
             return ruleLine.line;
     },
 
-    highlightRow: function(row)
-    {
-        if (this.highlightedRow)
-            Css.cancelClassTimed(this.highlightedRow, "jumpHighlight", this.context);
-
-        this.highlightedRow = row;
-
-        if (row)
-            Css.setClassTimed(row, "jumpHighlight", this.context);
-    },
-
     search: function(text, reverse)
     {
         var curDoc = this.searchCurrentDoc(!Firebug.searchGlobal, text, reverse);
@@ -1567,7 +1556,7 @@ Firebug.CSSStyleSheetPanel.prototype = Obj.extend(Firebug.Panel,
         if (!text)
         {
             delete this.currentSearch;
-            this.highlightRow(null);
+            this.highlightNode(null);
             this.document.defaultView.getSelection().removeAllRanges();
             return false;
         }
@@ -1591,7 +1580,7 @@ Firebug.CSSStyleSheetPanel.prototype = Obj.extend(Firebug.Panel,
                     sel.addRange(this.currentSearch.range);
 
                     scrollSelectionIntoView(this);
-                    this.highlightRow(row);
+                    this.highlightNode(row);
 
                     return true;
                 }
@@ -1616,7 +1605,7 @@ Firebug.CSSStyleSheetPanel.prototype = Obj.extend(Firebug.Panel,
             // though first jumpHighlightFactory() has to be adjusted to
             // remove the current highlighting when called again
             Dom.scrollIntoCenterView(row, this.panelNode);
-            this.highlightRow(row.parentNode);
+            this.highlightNode(row.parentNode);
 
             Events.dispatch(this.fbListeners, 'onCSSSearchMatchFound', [this, text, row]);
             return true;

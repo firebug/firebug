@@ -1077,17 +1077,6 @@ Firebug.DOMBasePanel.prototype = Obj.extend(Firebug.Panel,
         this.markChange();
     },
 
-    highlightRow: function(row)
-    {
-        if (this.highlightedRow)
-            Css.cancelClassTimed(this.highlightedRow, "jumpHighlight", this.context);
-
-        this.highlightedRow = row;
-
-        if (row)
-            Css.setClassTimed(row, "jumpHighlight", this.context);
-    },
-
     breakOnProperty: function(row)
     {
         var member = row.domObject;
@@ -1592,7 +1581,7 @@ DOMMainPanel.prototype = Obj.extend(Firebug.DOMBasePanel.prototype,
         if (!text)
         {
             delete this.currentSearch;
-            this.highlightRow(null);
+            this.highlightNode(null);
             this.document.defaultView.getSelection().removeAllRanges();
             return false;
         }
@@ -1615,7 +1604,7 @@ DOMMainPanel.prototype = Obj.extend(Firebug.DOMBasePanel.prototype,
 
             Dom.scrollIntoCenterView(row, this.panelNode);
 
-            this.highlightRow(row);
+            this.highlightNode(row);
             Events.dispatch(this.fbListeners, 'onDomSearchMatchFound', [this, text, row]);
             return true;
         }

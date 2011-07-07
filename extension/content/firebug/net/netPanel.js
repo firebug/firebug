@@ -636,23 +636,12 @@ NetPanel.prototype = Obj.extend(Firebug.ActivablePanel,
         ];
     },
 
-    highlightRow: function(row)
-    {
-        if (this.highlightedRow)
-            Css.cancelClassTimed(this.highlightedRow, "jumpHighlight", this.context);
-
-        this.highlightedRow = row;
-
-        if (row)
-            Css.setClassTimed(row, "jumpHighlight", this.context);
-    },
-
     search: function(text, reverse)
     {
         if (!text)
         {
             delete this.currentSearch;
-            this.highlightRow(null);
+            this.highlightNode(null);
             return false;
         }
 
@@ -674,10 +663,15 @@ NetPanel.prototype = Obj.extend(Firebug.ActivablePanel,
             sel.addRange(this.currentSearch.range);
 
             Dom.scrollIntoCenterView(row, this.panelNode);
-            if(this.currentSearch.shouldSearchResponses() && Dom.getAncestorByClass(row, "netInfoResponseText"))
-                this.highlightRow(row)
+            if(this.currentSearch.shouldSearchResponses() &&
+                Dom.getAncestorByClass(row, "netInfoResponseText"))
+            {
+                this.highlightNode(row)
+            }
             else
-                this.highlightRow(Dom.getAncestorByClass(row, "netRow"));
+            {
+                this.highlightNode(Dom.getAncestorByClass(row, "netRow"));
+            }
             Events.dispatch(this.fbListeners, 'onNetMatchFound', [this, text, row]);
             return true;
         }
