@@ -3367,13 +3367,13 @@ var fbs =
 
     restoreBreakpoints: function()
     {
+        this.breakpoints = {};
+
         var breakpointStore = fbs.getBreakpointStore();
         if (!breakpointStore)
             return;
 
-        this.breakpoints = {};
         var urls = fbs.getBreakpointURLs();
-
         for (var i = 0; i < urls.length; i++)
         {
             var url = urls[i];
