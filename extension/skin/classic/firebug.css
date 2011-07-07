@@ -151,6 +151,12 @@
     color: #FFFFFF;
 }
 
+.fbsearch-textbox[status='wraparound']{
+    background-image:url(chrome://global/skin/icons/wrap.png);
+    background-position: 98% center;
+    background-repeat: no-repeat
+}
+
 .fbsearch-textbox {
     -moz-appearance: none;
     margin: 0 0px 1px 2px;

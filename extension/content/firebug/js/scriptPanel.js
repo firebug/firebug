@@ -779,7 +779,8 @@ Firebug.ScriptPanel.prototype = Obj.extend(Firebug.SourceBoxPanel,
         var curDoc = this.searchCurrentDoc(!Firebug.searchGlobal, text, reverse);
         if (!curDoc && Firebug.searchGlobal)
         {
-            return this.searchOtherDocs(text, reverse);
+            return this.searchOtherDocs(text, reverse) || 
+                        this.searchCurrentDoc(true, text, reverse);
         }
         return curDoc;
     },
@@ -815,7 +816,7 @@ Firebug.ScriptPanel.prototype = Obj.extend(Firebug.SourceBoxPanel,
 
         if (this.navigateToNextDocument(scanDoc, reverse))
         {
-            return this.searchCurrentDoc(true, text, reverse);
+            return this.searchCurrentDoc(true, text, reverse) && 'wraparound';
         }
     },
 
@@ -844,7 +845,7 @@ Firebug.ScriptPanel.prototype = Obj.extend(Firebug.SourceBoxPanel,
             Events.dispatch(this.fbListeners, 'onScriptSearchMatchFound',
                 [this, text, sourceBox.repObject, lineNo]);
 
-            return true;
+            return this.currentSearch.wrapped ? 'wraparound' : true;
         }
         else
         {

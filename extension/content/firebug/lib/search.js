@@ -66,6 +66,7 @@ Search.TextSearch = function(rootNode, rowFinder)
      */
     this.findNext = function(wrapAround, sameNode, reverse, caseSensitive)
     {
+        this.wrapped = false;
         startPt = undefined;
 
         if (sameNode && this.range)
@@ -118,6 +119,7 @@ Search.TextSearch = function(rootNode, rowFinder)
         var match = startPt && this.find(this.text, reverse, caseSensitive);
         if (!match && wrapAround)
         {
+            this.wrapped = true;
             this.reset();
             return this.find(this.text, reverse, caseSensitive);
         }
@@ -152,6 +154,7 @@ Search.SourceBoxTextSearch = function(sourceBox)
 
     this.findNext = function(wrapAround, reverse, caseSensitive)
     {
+        this.wrapped = false;
         var lines = sourceBox.lines;
         var match = null;
         for (var iter = new Search.ReversibleIterator(lines.length, this.mark, reverse); iter.next();)
@@ -167,7 +170,9 @@ Search.SourceBoxTextSearch = function(sourceBox)
         if (!match && wrapAround)
         {
             this.reset();
-            return this.findNext(false, reverse, caseSensitive);
+            var index = this.findNext(false, reverse, caseSensitive);
+            this.wrapped = true;
+            return index;
         }
 
         return match;

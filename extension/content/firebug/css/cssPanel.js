@@ -1521,7 +1521,8 @@ Firebug.CSSStyleSheetPanel.prototype = Obj.extend(Firebug.Panel,
         var curDoc = this.searchCurrentDoc(!Firebug.searchGlobal, text, reverse);
         if (!curDoc && Firebug.searchGlobal)
         {
-            return this.searchOtherDocs(text, reverse);
+            return this.searchOtherDocs(text, reverse) || 
+                        this.searchCurrentDoc(true, text, reverse);
         }
         return curDoc;
     },
@@ -1545,7 +1546,7 @@ Firebug.CSSStyleSheetPanel.prototype = Obj.extend(Firebug.Panel,
         {
             // firefox findService can't find nodes immediatly after insertion
             setTimeout(Obj.bind(this.searchCurrentDoc, this), 0, true, text, reverse);
-            return true;
+            return 'wraparound';
         }
     },
 
@@ -1608,7 +1609,7 @@ Firebug.CSSStyleSheetPanel.prototype = Obj.extend(Firebug.Panel,
             this.highlightNode(row.parentNode);
 
             Events.dispatch(this.fbListeners, 'onCSSSearchMatchFound', [this, text, row]);
-            return true;
+            return this.currentSearch.wrapped ? 'wraparound' : true;
         }
         else
         {

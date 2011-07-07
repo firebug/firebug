@@ -1439,7 +1439,7 @@
             <xbl:setter><![CDATA[
                 var searchBox = document.getAnonymousElementByAttribute(this, "anonid",
                     "searchBox");
-                Firebug.Search.status = searchBox.value == "" || val;
+                Firebug.Search.status = searchBox.value == "" || val || "notfound";
                 searchBox.setAttribute("status", Firebug.Search.status);
                 searchBox.placeholder = "";
             ]]></xbl:setter>
@@ -1503,15 +1503,13 @@
 
         <method name="searchNext">
             <body><![CDATA[
-                this.status = (Firebug.Search.searchNext(Firebug.currentContext) ?
-                    "found" : "notfound");
+                this.status = Firebug.Search.searchNext(Firebug.currentContext);
             ]]></body>
         </method>
 
         <method name="searchPrev">
             <body><![CDATA[
-                this.status = (Firebug.Search.searchPrev(Firebug.currentContext) ?
-                    "found" : "notfound");
+                this.status = Firebug.Search.searchPrev(Firebug.currentContext);
             ]]></body>
         </method>
 
