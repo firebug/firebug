@@ -37,6 +37,11 @@ var Firefox =
     {
         if (window.gBrowser)
             return window.gBrowser;
+
+        var tabBrowser = Firefox.getElementById("content");
+        if (tabBrowser)
+            return tabBrowser;
+
         if (FBTrace.DBG_WINDOWS)
             FBTrace.sysout("Firefox.getTabBrowser no window.gBrowser in "+window.location);
     },
