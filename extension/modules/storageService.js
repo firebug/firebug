@@ -189,8 +189,7 @@ var ObjectPersister =
         if (!text)
             return null;
 
-        var nativeJSON = Cc["@mozilla.org/dom/json;1"].createInstance(Ci.nsIJSON);
-        var obj = nativeJSON.decode(text);
+        var obj = JSON.parse(text);
         if (!obj)
             return;
 

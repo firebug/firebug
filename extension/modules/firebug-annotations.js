@@ -113,8 +113,7 @@ var annotationService =
             if (!json.length)
                 return;
 
-            var nativeJSON = Cc["@mozilla.org/dom/json;1"].createInstance(Ci.nsIJSON);
-            var arr = nativeJSON.decode(json);
+            var arr = JSON.parse(json);
             if (!arr)
                 return;
 
@@ -150,8 +149,7 @@ var annotationService =
                     value: this.annotations[uri]
                 });
 
-            var nativeJSON = Cc["@mozilla.org/dom/json;1"].createInstance(Ci.nsIJSON);
-            var jsonString = nativeJSON.encode(arr);
+            var jsonString = JSON.stringify(arr);
 
             // Store annotations.
             outputStream.write(jsonString, jsonString.length);
