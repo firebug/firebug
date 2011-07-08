@@ -852,9 +852,9 @@ window.Firebug =
         this.showBar(browser && browser.showFirebug);  // implicitly this is operating in the chrome of browser.xul
     },
 
-    toggleCommandLine: function(large)
+    toggleCommandLine: function(showCommandEditor)
     {
-        Options.set('largeCommandLine', large);
+        Options.set("commandEditor", showCommandEditor);
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *

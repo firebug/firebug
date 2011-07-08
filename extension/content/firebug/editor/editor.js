@@ -1525,7 +1525,7 @@ Firebug.AutoCompleter = function(getExprOffset, getRange, evaluator, selectMode,
     this.acceptCompletion = function(event)
     {
         if (completionPopup.currentCompletionBox)
-            this.acceptCompletionInTextBox(Firebug.CommandLine.getCommandLineSmall(), Firebug.CommandLine.getCompletionBox());
+            this.acceptCompletionInTextBox(Firebug.CommandLine.getSingleRowCommandLine(), Firebug.CommandLine.getCompletionBox());
     };
 
     this.acceptCompletion = Obj.bind(this.acceptCompletion, this);

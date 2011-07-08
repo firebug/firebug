@@ -1742,7 +1742,7 @@
 </binding>
 
 
-<binding id="largeCommandLine" extends="chrome://global/content/bindings/textbox.xml#textarea">
+<binding id="commandEditor" extends="chrome://global/content/bindings/textbox.xml#textarea">
     <handlers>
         <handler event="input"><![CDATA[
             Firebug.CommandLine.update(Firebug.currentContext);

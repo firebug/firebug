@@ -24,7 +24,7 @@ const prefNames =  // XXXjjb TODO distribute to modules
 [
     // Global
     "defaultPanelName", "throttleMessages", "textSize", "showInfoTips",
-    "largeCommandLine", "textWrapWidth", "openInWindow", "showErrorCount",
+    "commandEditor", "textWrapWidth", "openInWindow", "showErrorCount",
     "activateSameOrigin", "allPagesActivation", "hiddenPanels",
     "panelTabMinWidth", "sourceLinkLabelWidth", "currentVersion",
     "useDefaultLocale", "toolbarCustomizationDone", "addonBarOpened",

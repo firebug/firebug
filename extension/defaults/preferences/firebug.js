@@ -26,7 +26,7 @@ pref("extensions.firebug.showBreakNotification", true);
 pref("extensions.firebug.showStatusIcon", false);
 
 // Command line
-pref("extensions.firebug.largeCommandLine", false);
+pref("extensions.firebug.commandEditor", false);
 pref("extensions.firebug.alwaysShowCommandLine", false);
 
 // Search

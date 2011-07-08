@@ -13,8 +13,8 @@ window[chromehidden~="toolbar"] #fbToolbar {
     background-color: -moz-dialog;
 }
 
-#fbLargeCommandLine {
-    -moz-binding: url("firefox/bindings.xml#largeCommandLine");
+#fbCommandEditor {
+    -moz-binding: url("firefox/bindings.xml#commandEditor");
 }
 
 .fbCommandLineCompletionPanel {

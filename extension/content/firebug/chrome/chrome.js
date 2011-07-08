@@ -1091,9 +1091,9 @@ var FirebugChrome =
         box.style.fontSizeAdjust = fontSizeAdjust;
         if (Firebug.CommandLine)
         {
-            Firebug.CommandLine.getCommandLineSmall().style.fontSizeAdjust = fontSizeAdjust;
+            Firebug.CommandLine.getSingleRowCommandLine().style.fontSizeAdjust = fontSizeAdjust;
             Firebug.chrome.$("fbCommandLineCompletion").style.fontSizeAdjust = fontSizeAdjust;
-            Firebug.CommandLine.getCommandLineLarge().style.fontSizeAdjust = fontSizeAdjust;
+            Firebug.CommandLine.getCommandEditor().style.fontSizeAdjust = fontSizeAdjust;
         }
 
         Firebug.dispatchToPanels("onTextSizeChange", [zoom, fontSizeAdjust]);

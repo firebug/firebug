@@ -341,11 +341,11 @@
                             </deck>
                         </panelBar>
 
-                        <!-- Command line multiline (large) -->
-                        <vbox id="fbLargeCommandBox">
-                            <textbox id="fbLargeCommandLine" multiline="true" flex="1"
+                        <!-- Command Editor -->
+                        <vbox id="fbCommandEditorBox">
+                            <textbox id="fbCommandEditor" multiline="true" flex="1"
                                 newlines="pasteintact"
-                                label="LargeCommandLine" />
+                                label="CommandEditor" />
                             <hbox id="fbCommandToolbar">
                                 <toolbarbutton id="fbCmdLineRunButton" label="firebug.Run"
                                     class="toolbar-text-button fbInternational"
@@ -364,7 +364,7 @@
                                     tooltiptext="firebug.Insert_a_previously_entered_command"
                                     onmousedown="Firebug.CommandLine.commandHistory.show(this);" disabled="true"/>
                                 <toolbarspacer flex="1"/>
-                                <toolbarbutton id="fbCommandToggleLarge" tooltiptext="firebug.CommandLine" class="toolbarbutton-iconic fbInternational"
+                                <toolbarbutton id="fbToggleCommandEditor" tooltiptext="firebug.CommandLine" class="toolbarbutton-iconic fbInternational"
                                     oncommand="Firebug.toggleCommandLine(false)"/>
                             </hbox>
                         </vbox>
@@ -411,7 +411,7 @@
             </hbox>
 
             <!-- Toggle into multi-line command line -->
-            <toolbarbutton id="fbCommandToggleSmall" tooltiptext="Command_Editor" class="toolbarbutton-iconic fbInternational"
+            <toolbarbutton id="fbToggleCommandLine" tooltiptext="Command_Editor" class="toolbarbutton-iconic fbInternational"
                 oncommand="Firebug.toggleCommandLine(true)"/>
         </hbox>
 

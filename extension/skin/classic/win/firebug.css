@@ -97,11 +97,11 @@
     list-style-image: url(chrome://firebug/skin/win/commandHistory.png);
 }
 
-#fbCommandToggleSmall {
+#fbToggleCommandLine {
     list-style-image: url(chrome://firebug/skin/win/up.png);
 }
 
-#fbCommandToggleLarge {
+#fbToggleCommandEditor {
     list-style-image: url(chrome://firebug/skin/win/down.png);
 }
 
@@ -110,8 +110,8 @@
 #fbDetachButton,
 #fbCloseButton,
 #fbCommandLineHistoryButton,
-#fbCommandToggleSmall,
-#fbCommandToggleLarge {
+#fbToggleCommandLine,
+#fbToggleCommandEditor {
     -moz-image-region: rect(0, 16px, 16px, 0);
 }
 
@@ -119,8 +119,8 @@
 #fbDetachButton:hover,
 #fbCloseButton:hover,
 #fbCommandLineHistoryButton:hover,
-#fbCommandToggleSmall:hover,
-#fbCommandToggleLarge:hover {
+#fbToggleCommandLine:hover,
+#fbToggleCommandEditor:hover {
     -moz-image-region: rect(16px, 16px, 32px, 0);
 }
 
@@ -129,8 +129,8 @@
 #fbCloseButton:active,
 #fbCommandLineHistoryButton:active,
 #fbCommandLineHistoryButton[checked="true"],
-#fbCommandToggleSmall:active,
-#fbCommandToggleLarge:active {
+#fbToggleCommandLine:active,
+#fbToggleCommandEditor:active {
     -moz-image-region: rect(32px, 16px, 48px, 0);
 }
 
@@ -152,7 +152,7 @@
     color: highlighttext;
 }
 
-#fbLargeCommandLine {
+#fbCommandEditor {
     -moz-appearance: none;
     border: none;
     border-top: 1px solid;

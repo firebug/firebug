@@ -927,7 +927,7 @@ Firebug.ConsolePanel.prototype = Obj.extend(Firebug.ActivablePanel,
             this.getShowStackTraceMenuItem(),
             this.getStrictOptionMenuItem(),
             "-",
-            Menu.optionMenu("Command_Editor", "largeCommandLine"),
+            Menu.optionMenu("Command_Editor", "commandEditor"),
             Menu.optionMenu("commandLineShowCompleterPopup", "commandLineShowCompleterPopup")
         ];
     },
@@ -1077,13 +1077,13 @@ Firebug.ConsolePanel.prototype = Obj.extend(Firebug.ActivablePanel,
         if (shouldShow)
         {
             Dom.collapse(Firebug.chrome.$("fbCommandBox"), false);
-            Firebug.CommandLine.setMultiLine(Firebug.largeCommandLine, Firebug.chrome);
+            Firebug.CommandLine.setMultiLine(Firebug.commandEditor, Firebug.chrome);
         }
         else
         {
             // Make sure that entire content of the Console panel is hidden when
             // the panel is disabled.
-            Firebug.CommandLine.setMultiLine(false, Firebug.chrome, Firebug.largeCommandLine);
+            Firebug.CommandLine.setMultiLine(false, Firebug.chrome, Firebug.commandEditor);
             Dom.collapse(Firebug.chrome.$("fbCommandBox"), true);
         }
     },

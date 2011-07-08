@@ -87,7 +87,7 @@
     z-index: 3;
 }
 
-#fbLargeCommandLine {
+#fbCommandEditor {
     margin: 0;
     font-family: monospace;
     direction: ltr;
