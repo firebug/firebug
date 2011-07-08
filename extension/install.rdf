@@ -13,7 +13,7 @@
       <Description>
         <em:id>toolkit@mozilla.org</em:id>
         <em:minVersion>1.9.2</em:minVersion>
-        <em:maxVersion>7.*</em:maxVersion>
+        <em:maxVersion>8.1.*</em:maxVersion>
       </Description>
     </em:targetApplication>
 
