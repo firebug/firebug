@@ -66,20 +66,15 @@ Search.TextSearch = function(rootNode, rowFinder)
      */
     this.findNext = function(wrapAround, sameNode, reverse, caseSensitive)
     {
-        this.wrapped = false;
         startPt = undefined;
 
         if (sameNode && this.range)
         {
             startPt = this.range.cloneRange();
             if (reverse)
-            {
                 startPt.setEnd(startPt.startContainer, startPt.startOffset);
-            }
             else
-            {
                 startPt.setStart(startPt.startContainer, startPt.startOffset+1);
-            }
         }
 
         if (!startPt)
@@ -116,6 +111,7 @@ Search.TextSearch = function(rootNode, rowFinder)
             }
         }
 
+        this.wrapped = false;
         var match = startPt && this.find(this.text, reverse, caseSensitive);
         if (!match && wrapAround)
         {
@@ -154,7 +150,6 @@ Search.SourceBoxTextSearch = function(sourceBox)
 
     this.findNext = function(wrapAround, reverse, caseSensitive)
     {
-        this.wrapped = false;
         var lines = sourceBox.lines;
         var match = null;
         for (var iter = new Search.ReversibleIterator(lines.length, this.mark, reverse); iter.next();)
@@ -167,12 +162,12 @@ Search.SourceBoxTextSearch = function(sourceBox)
             }
         }
 
+        this.wrapped = false;
         if (!match && wrapAround)
         {
             this.reset();
-            var index = this.findNext(false, reverse, caseSensitive);
             this.wrapped = true;
-            return index;
+            return this.findNext(false, reverse, caseSensitive);
         }
 
         return match;

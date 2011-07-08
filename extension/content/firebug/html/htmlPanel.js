@@ -1288,7 +1288,7 @@ Firebug.HTMLPanel.prototype = Obj.extend(WalkingPanel,
             this.search(text, reverse);
         }
 
-        return !search.noMatch && (loopAround ?  'wraparound' : true);
+        return !search.noMatch && (loopAround ?  "wraparound" : true);
     },
 
     getSearchOptionsMenuItems: function()
