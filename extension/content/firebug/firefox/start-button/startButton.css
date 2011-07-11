@@ -5,66 +5,17 @@
 
 /* Inspector button */
 #inspector-button {
-  list-style-image: url(chrome://firebug/skin/inspect.png);
-}
-
-toolbar[iconsize="small"] #inspector-button > .toolbarbutton-icon {
     list-style-image: url(chrome://firebug/skin/inspect.png);
-    width: 16px;
-    height: 16px;
 }
 
 /* Firebug Start Button */
 #firebug-button {
-    list-style-image: url(chrome://firebug/skin/firebug24.png);
-}
-
-#firebug-button[script="on"],
-#firebug-button[net="on"],
-#firebug-button[console="on"] {
-    list-style-image: url(chrome://firebug/skin/firebug24.png);
-}
-
-#firebug-button[suspended="suspended"] {
-    list-style-image: url(chrome://firebug/skin/firebug-gray-24.png);
-}
-
-toolbar[iconsize="small"] #firebug-button[script="on"] > .toolbarbutton-icon,
-toolbar[iconsize="small"] #firebug-button[net="on"] > .toolbarbutton-icon,
-toolbar[iconsize="small"] #firebug-button[console="on"] > .toolbarbutton-icon {
-    list-style-image: url(chrome://firebug/skin/firebug16.png);
-}
-
-toolbar[iconsize="small"] #firebug-button[suspended="suspended"] > .toolbarbutton-icon {
-    list-style-image: url(chrome://firebug/skin/firebug-gray-16.png);
-}
-
-toolbar[iconsize="small"] #firebug-button > .toolbarbutton-icon {
-    list-style-image: url(chrome://firebug/skin/firebug16.png);
-    width: 16px;
-    height: 16px;
-}
-
-/* In Firefox 4, the button has a special badge that shows number of errors. Also, the icon
-   size is always 16x16px and so, if the button is appended into bookmarks or addon-bar the
-   height is not affected. This is OK since the plan for Firefox 4 is to use 16x16 sizes
-   only anyway, see: https://bugzilla.mozilla.org/show_bug.cgi?id=616472 */
-#firebug-button[firefox="4"] {
     -moz-binding: url("chrome://firebug/content/firefox/start-button/startButton.xml#start-button");
-}
-
-#firebug-button[script="on"][firefox="4"],
-#firebug-button[net="on"][firefox="4"],
-#firebug-button[console="on"][firefox="4"] {
-    list-style-image: url(chrome://firebug/skin/firebug16.png);
-}
-
-#firebug-button[firefox="4"] {
-    list-style-image: url(chrome://firebug/skin/firebug16.png);
-}
-
-#firebug-button[suspended="suspended"][firefox="4"] {
     list-style-image: url(chrome://firebug/skin/firebug-gray-16.png);
+}
+
+#firebug-button:-moz-any([console="on"], [script="on"], [net="on"]) .toolbarbutton-icon {
+    list-style-image: url(chrome://firebug/skin/firebug16.png);
 }
 
 /* Error badge (displays an error counter). The badge is only visible if error count
@@ -152,13 +103,6 @@ toolbar[iconsize="small"] #firebug-button > .toolbarbutton-icon {
     list-style-image: url(chrome://firebug/skin/firebug-gray-16.png);
 }
 
-#fbStatusIcon[script="on"],
-#fbStatusIcon[net="on"],
-#fbStatusIcon[console="on"] {
+#fbStatusIcon:-moz-any([script="on"], [net="on"], [console="on"]) {
     list-style-image: url(chrome://firebug/skin/firebug16.png);
 }
-
-#fbStatusIcon[suspended="suspended"] {
-    list-style-image: url(chrome://firebug/skin/firebug-gray-16.png);
-}
-
