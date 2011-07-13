@@ -309,18 +309,18 @@
     background-image: -moz-linear-gradient(top, rgba(255, 255, 255, 0.3), rgba(0, 0, 0, 0.2));
 }
 
+.netBlockingBar {
+    background-color: #EBE1D2;
+    z-index: 60;
+}
+
 .netResolvingBar {
     background-color: #91D2DC;
-    z-index: 60;
+    z-index: 50;
 }
 
 .netConnectingBar {
     background-color: #B9E164;
-    z-index: 50;
-}
-
-.netBlockingBar {
-    background-color: #EBE1D2;
     z-index: 40;
 }
 

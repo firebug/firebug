@@ -1578,7 +1578,7 @@ Firebug.NetMonitor.TimeInfoTip = domplate(Firebug.Rep,
         var infoTip = Firebug.NetMonitor.TimeInfoTip.tableTag.replace({}, parentNode);
 
         var elapsed = file.loaded ? file.endTime - file.startTime : file.phase.phaseEndTime - file.startTime;
-        var blockingEnd = (file.sendingTime > file.startTime) ? file.sendingTime : file.waitingForTime;
+        var blockingEnd = NetUtils.getBlockingEndTime(file);
 
         /* Helper log for debugging timing problems.
         var timeLog = {};
@@ -1594,16 +1594,20 @@ Firebug.NetMonitor.TimeInfoTip = domplate(Firebug.Rep,
         FBTrace.sysout("net.timeInfoTip.render; " + file.href, timeLog);
         */
 
+        var startTime = 0;
+
         var timings = [];
+        timings.push({bar: "Blocking",
+            elapsed: blockingEnd - file.startTime,
+            start: startTime});
+
         timings.push({bar: "Resolving",
-            elapsed: file.connectingTime - file.startTime,
-            start: 0});
+            elapsed: file.connectingTime - file.resolvingTime,
+            start: startTime += timings[0].elapsed});
+
         timings.push({bar: "Connecting",
             elapsed: file.connectedTime - file.connectingTime,
-            start: file.connectingTime - file.startTime});
-        timings.push({bar: "Blocking",
-            elapsed: blockingEnd - file.connectedTime,
-            start: file.connectedTime - file.startTime});
+            start: startTime += timings[1].elapsed});
 
         // In Fx3.6 the STATUS_SENDING_TO is always fired (nsIActivityDistributor)
         // In Fx3.5 the STATUS_SENDING_TO (nsIWebProgressListener) doesn't have to come
@@ -1614,9 +1618,11 @@ Firebug.NetMonitor.TimeInfoTip = domplate(Firebug.Rep,
         timings.push({bar: "Sending",
             elapsed: sendElapsed,
             start: file.sendStarted ? file.sendingTime - file.startTime : sendStarted});
+
         timings.push({bar: "Waiting",
             elapsed: file.respondedTime - file.waitingForTime,
             start: file.waitingForTime - file.startTime});
+
         timings.push({bar: "Receiving",
             elapsed: file.endTime - file.respondedTime,
             start: file.respondedTime - file.startTime,

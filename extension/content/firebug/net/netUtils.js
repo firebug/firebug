@@ -335,6 +335,21 @@ var NetUtils =
     {
         var title = context.getTitle();
         return (title) ? title : context.getName();
+    },
+
+    getBlockingEndTime: function(file)
+    {
+        //var blockingEnd = (file.sendingTime > file.startTime) ? file.sendingTime : file.waitingForTime;
+        if (file.resolveStarted)
+            return file.resolvingTime;
+
+        if (file.connectStarted)
+            return file.connectingTime;
+
+        if (file.sendStarted)
+            return file.sendingTime;
+
+        return file.waitingForTime;
     }
 };
 

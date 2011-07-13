@@ -408,6 +408,7 @@ NetProgress.prototype =
         var file = this.getRequestFile(request, null, true);
         if (file)
         {
+            file.connectStarted = true;
             file.connectingTime = time;
             file.connectedTime = time; // in case connected-to would never came.
             file.sendingTime = time;  // in case sending-to would never came.
@@ -537,6 +538,7 @@ NetProgress.prototype =
         var file = this.getRequestFile(request, null, true);
         if (file)
         {
+            file.resolveStarted = true;
             file.resolvingTime = time;
             file.connectingTime = time; // in case connecting would never came.
             file.connectedTime = time; // in case connected-to would never came.
