@@ -333,10 +333,9 @@ Firebug.Console = Obj.extend(ActivableConsole,
         if (FBTrace.DBG_CONSOLE)
             FBTrace.sysout("console.onSuspendFirebug isAlwaysEnabled:"+Firebug.Console.isAlwaysEnabled());
 
-        if (this.watchingForErrors)
+        if (Firebug.Errors.toggleWatchForErrors(false))
         {
-            this.watchingForErrors = false;
-            this.unwatchForErrors();
+            this.setStatus();
             // Make sure possible errors coming from the page and displayed in the Firefox
             // status bar are removed.
             this.clear();
@@ -348,12 +347,9 @@ Firebug.Console = Obj.extend(ActivableConsole,
         if (FBTrace.DBG_CONSOLE)
             FBTrace.sysout("console.onResumeFirebug\n");
 
-        if (Firebug.Console.isAlwaysEnabled() || this.hasObservers())
-        {
-            this.watchForErrors();
-            this.watchingForErrors = true;
-        }
-
+        var watchForErrors = Firebug.Console.isAlwaysEnabled() || Firebug.Console.hasObservers();
+        if (Firebug.Errors.toggleWatchForErrors(watchForErrors))
+            this.setStatus();
     },
 
     onToggleFilter: function(context, filterType)
@@ -407,20 +403,21 @@ Firebug.Console = Obj.extend(ActivableConsole,
         }
     },
 
-    watchForErrors: function()
+    setStatus: function()
     {
-        Firebug.Errors.checkEnabled();
         var fbStatus = Firefox.getElementById('firebugStatus');
         if (fbStatus)
-            fbStatus.setAttribute("console", "on");
-    },
-
-    unwatchForErrors: function()
-    {
-        Firebug.Errors.checkEnabled();
-        var fbStatus = Firefox.getElementById('firebugStatus');
-        if (fbStatus)
-            fbStatus.removeAttribute("console");
+        {
+            if (Firebug.Errors.watchForErrors)
+                fbStatus.setAttribute("console", "on");
+            else
+                fbStatus.removeAttribute("console");
+        }
+        else
+        {
+            if (FBTrace.DBG_ERRORS)
+                FBTrace.sysout("console.setStatus ERROR no firebugStatus element");
+        }
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *

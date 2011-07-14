@@ -447,9 +447,17 @@ var Errors = Firebug.Errors = Obj.extend(Firebug.Module,
         return errorContext; // we looked everywhere...
     },
 
+    toggleWatchForErrors: function(watchForErrors)
+    {
+    	var previous = this.watchForErrors;
+    	this.watchForErrors = watchForErrors;
+    	this.checkEnabled();
+    	return (previous !== this.watchForErrors);
+    },
+    
     checkEnabled: function()
     {
-        var beEnabled = Console.isAlwaysEnabled() && this.mustBeEnabled();
+        var beEnabled = this.watchForErrors && this.mustBeEnabled();
         if (beEnabled)
         {
             if(!this.isObserving)
