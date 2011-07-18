@@ -5,14 +5,14 @@
 
   <Description about="urn:mozilla:install-manifest">
     <em:id>firebug@software.joehewitt.com</em:id>
-    <em:version>1.8.0b5</em:version>
+    <em:version>1.8.0b6</em:version>
     <em:type>2</em:type>
 
     <!-- Any suitably modern toolkit application -->
     <em:targetApplication>
       <Description>
         <em:id>toolkit@mozilla.org</em:id>
-        <em:minVersion>1.9.2</em:minVersion>
+        <em:minVersion>4.0</em:minVersion>
         <em:maxVersion>10.*</em:maxVersion>
       </Description>
     </em:targetApplication>
