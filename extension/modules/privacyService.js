@@ -33,11 +33,20 @@ var PrivacyService =
 
       update: function()
       {
-          var pbs = Components.classes["@mozilla.org/privatebrowsing;1"]
-              .getService(Components.interfaces.nsIPrivateBrowsingService);
-          this.privateBrowsingEnabled = pbs.privateBrowsingEnabled;
-          if(FBTrace.DBG_ACTIVATION)
-              FBTrace.sysout("PrivacyService update "+PrivacyService.isPrivateBrowsing())
+          try
+          {
+              var pbs = Components.classes["@mozilla.org/privatebrowsing;1"]
+                  .getService(Components.interfaces.nsIPrivateBrowsingService);
+
+              this.privateBrowsingEnabled = pbs.privateBrowsingEnabled;
+              if(FBTrace.DBG_ACTIVATION)
+                  FBTrace.sysout("PrivacyService.update "+PrivacyService.isPrivateBrowsing())
+          }
+          catch (e)
+          {
+              if (FBTrace.DBG_ERRORS)
+                  FBTrace.sysout("PrivacyService.update EXCEPTION " + e, e);
+          }
       },
 
       observe : function (aSubject, aTopic, aData)
