@@ -364,7 +364,7 @@ FirebugReps.Obj = domplate(Firebug.Rep,
                 }
 
                 var t = typeof(value);
-                if (t == "boolean" || t == "number" || (t == "string" && value)
+                if (t == "boolean" || t == "number" || (t == "string")
                     || (t == "object" && value && value.toString))
                 {
                     var rep = Firebug.getRep(value);
