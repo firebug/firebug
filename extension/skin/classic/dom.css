@@ -136,6 +136,7 @@
     background-color: LightYellow;
     border-bottom: 1px solid #BEBEBE;
     color: #666666;
+    line-height: 14px;
 }
 
 .editor-watchNewRow,
