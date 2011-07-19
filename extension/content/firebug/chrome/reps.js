@@ -283,7 +283,7 @@ FirebugReps.Func = domplate(Firebug.Rep,
     }
 });
 
-// ************************************************************************************************
+// ********************************************************************************************* //
 
 FirebugReps.Obj = domplate(Firebug.Rep,
 {
@@ -342,12 +342,50 @@ FirebugReps.Obj = domplate(Firebug.Rep,
 
     propIterator: function (object, max)
     {
+        var props = [];
+
+        // Object member with non-empty are prefered since it give the user better
+        // overview of the object.
+        this.getProps(props, object, max, function(t, value)
+        {
+            return (t == "boolean" || t == "number" || (t == "string" && value) ||
+                (t == "object" && value && value.toString));
+        });
+
+        if (props.length+1 <= max)
+        {
+            // There is not enough props yet, let's display also empty members and functions.
+            this.getProps(props, object, max, function(t, value)
+            {
+                return ((t == "string" && !value) || (t == "object" && !value) || (t == "function"));
+            });
+        }
+
+        if (props.length > max)
+        {
+            props[props.length-1] = {
+                object: Locale.$STR("firebug.reps.more") + "...",
+                tag: FirebugReps.Caption.tag,
+                name: "",
+                equal: "",
+                delim: ""
+            };
+        }
+        else if (props.length > 0)
+        {
+            props[props.length-1].delim = '';
+        }
+
+        return props;
+    },
+
+    getProps: function (props, object, max, filter)
+    {
         max = max || 3;
         if (!object)
             return [];
 
-        var props = [];
-        var len = 0, count = 0;
+        var len = 0;
 
         try
         {
@@ -364,12 +402,11 @@ FirebugReps.Obj = domplate(Firebug.Rep,
                 }
 
                 var t = typeof(value);
-                if (t == "boolean" || t == "number" || (t == "string")
-                    || (t == "object" && value && value.toString))
+                if (filter(t, value))
                 {
                     var rep = Firebug.getRep(value);
                     var tag = rep.shortTag || rep.tag;
-                    if (t == "object")
+                    if ((t == "object" || t == "function") && value)
                     {
                         value = rep.getTitle(value);
                         if (rep.titleTag)
@@ -377,26 +414,12 @@ FirebugReps.Obj = domplate(Firebug.Rep,
                         else
                             tag = FirebugReps.Obj.titleTag;
                     }
-                    count++;
-                    if (count <= max)
+
+                    if (props.length <= max)
                         props.push({tag: tag, name: name, object: value, equal: "=", delim: ", "});
                     else
                         break;
                 }
-            }
-            if (count > max)
-            {
-                props[Math.max(1,max-1)] = {
-                    object: Locale.$STR("firebug.reps.more") + "...",
-                    tag: FirebugReps.Caption.tag,
-                    name: "",
-                    equal: "",
-                    delim: ""
-                };
-            }
-            else if (props.length > 0)
-            {
-                props[props.length-1].delim = '';
             }
         }
         catch (exc)
@@ -406,10 +429,9 @@ FirebugReps.Obj = domplate(Firebug.Rep,
             // XXXjjb also History.previous fails because object is a web-page object which does not have
             // permission to read the history
         }
-        return props;
     },
 
-    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
     className: "object",
 
@@ -419,7 +441,7 @@ FirebugReps.Obj = domplate(Firebug.Rep,
     }
 });
 
-// ************************************************************************************************
+// ********************************************************************************************* //
 
 FirebugReps.Arr = domplate(Firebug.Rep,
 {
