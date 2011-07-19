@@ -1669,14 +1669,14 @@
         <handler event="keypress"><![CDATA[
             if (event.keyCode == KeyEvent.DOM_VK_UP)
             {
-                if (FBL.isControl(event))
+                if (!FBL.isControl(event))
                     this.value = Firebug.Search.cycleHistory(1);
                 else
                     this.searchPrev();
             }
             else if (event.keyCode == KeyEvent.DOM_VK_DOWN)
             {
-                if (FBL.isControl(event))
+                if (!FBL.isControl(event))
                     this.value = Firebug.Search.cycleHistory(-1);
                 else
                     this.searchNext();
