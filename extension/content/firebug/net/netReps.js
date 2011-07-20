@@ -46,6 +46,8 @@ var panelName = "net";
 
 // ********************************************************************************************* //
 
+const reSplitIP = /^(\d+)\.(\d+)\.(\d+)\.(\d+):(\d+)$/;
+
 /**
  * @domplate Represents a template that is used to render basic content of the net panel.
  */
@@ -175,12 +177,43 @@ Firebug.NetMonitor.NetRequestTable = domplate(Firebug.Rep, new Firebug.Listener(
                 continue;
 
             var cell = row.childNodes[colIndex];
-            var value = numerical ? parseFloat(cell.textContent) : cell.textContent;
+            var sortFunction = function sort(a, b) { return a.value < b.value ? -1 : 1; };
+            var ipSortFunction = function sort(a, b)
+            {
+                var aParts = reSplitIP.exec(a.value);
+                var bParts = reSplitIP.exec(b.value);
 
-            if (colID == "netTimeCol")
-                value = row.repObject.startTime;
-            else if (colID == "netSizeCol")
-                value = row.repObject.size;
+                if (!aParts)
+                    return -1;
+                if (!bParts)
+                    return 1;
+
+                for (var i=1; i<aParts.length; ++i)
+                {
+                    if (parseInt(aParts[i]) != parseInt(bParts[i]))
+                        return parseInt(aParts[i]) < parseInt(bParts[i]) ? -1 : 1;
+                }
+
+                return 1;
+            };
+            var value;
+
+            switch (colID)
+            {
+                case "netTimeCol":
+                    value = row.repObject.startTime;
+                    break;
+                case "netSizeCol":
+                    value = row.repObject.size;
+                    break;
+                case "netRemoteAddressCol":
+                case "netLocalAddressCol":
+                    value = cell.textContent;
+                    sortFunction = ipSortFunction;
+                    break;
+                default:
+                    value = numerical ? parseFloat(cell.textContent) : cell.textContent;
+            }
 
             if (Css.hasClass(row, "opened"))
             {
@@ -194,7 +227,7 @@ Firebug.NetMonitor.NetRequestTable = domplate(Firebug.Rep, new Firebug.Listener(
             }
         }
 
-        values.sort(function(a, b) { return a.value < b.value ? -1 : 1; });
+        values.sort(sortFunction);
 
         if ((header.sorted && header.sorted == 1) || (!header.sorted && direction == "asc"))
         {
