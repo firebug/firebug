@@ -102,8 +102,9 @@
     background-color: #F6F6F6;
 }
 
-#netBreakpointBar {
-    max-width: 38px;
+#netBreakpointBar,
+.netDebugCol {
+    max-width: 30px;
 }
 
 #netHrefCol > .netHeaderCellBox {
@@ -130,20 +131,13 @@
 /************************************************************************************************/
 /* Column visibility */
 
-.netTable[hiddenCols~=netHrefCol] TD[id="netHrefCol"],
-.netTable[hiddenCols~=netHrefCol] TD.netHrefCol,
-.netTable[hiddenCols~=netStatusCol] TD[id="netStatusCol"],
-.netTable[hiddenCols~=netStatusCol] TD.netStatusCol,
-.netTable[hiddenCols~=netDomainCol] TD[id="netDomainCol"],
-.netTable[hiddenCols~=netDomainCol] TD.netDomainCol,
-.netTable[hiddenCols~=netSizeCol] TD[id="netSizeCol"],
-.netTable[hiddenCols~=netSizeCol] TD.netSizeCol,
-.netTable[hiddenCols~=netTimeCol] TD[id="netTimeCol"],
-.netTable[hiddenCols~=netTimeCol] TD.netTimeCol,
-.netTable[hiddenCols~=netLocalAddressCol] TD[id="netLocalAddressCol"],
-.netTable[hiddenCols~=netLocalAddressCol] TD.netLocalAddressCol,
-.netTable[hiddenCols~=netRemoteAddressCol] TD[id="netRemoteAddressCol"],
-.netTable[hiddenCols~=netRemoteAddressCol] TD.netRemoteAddressCol {
+.netTable[hiddenCols~=netHrefCol] TD:-moz-any(#netHrefCol, .netHrefCol),
+.netTable[hiddenCols~=netStatusCol] TD:-moz-any(#netStatusCol, .netStatusCol),
+.netTable[hiddenCols~=netDomainCol] TD:-moz-any(#netDomainCol, .netDomainCol),
+.netTable[hiddenCols~=netSizeCol] TD:-moz-any(#netSizeCol, .netSizeCol),
+.netTable[hiddenCols~=netTimeCol] TD:-moz-any(#netTimeCol, .netTimeCol),
+.netTable[hiddenCols~=netLocalAddressCol] TD:-moz-any(#netLocalAddressCol, .netLocalAddressCol),
+.netTable[hiddenCols~=netRemoteAddressCol] TD:-moz-any(#netRemoteAddressCol, .netRemoteAddressCol) {
     display: none;
 }
 
@@ -410,22 +404,14 @@
 /************************************************************************************************/
 /* If coming from BF cache (no network activity) */
 
-.netRow.fromBFCache .netLabel {
-    opacity: 0.5;
+.netRow.fromBFCache :-moz-any(netLabel, .netBlockingBar, .netResolvingBar, .netConnectingBar,
+  .netSendingBar, .netWaitingBar, .netReceivingBar) {
+      opacity: 0.5;
 }
 
 .netRow.fromBFCache .netHrefLabel {
     opacity: 1.0;
     color: gray;
-}
-
-.netRow.fromBFCache .netBlockingBar,
-.netRow.fromBFCache .netResolvingBar,
-.netRow.fromBFCache .netConnectingBar,
-.netRow.fromBFCache .netSendingBar,
-.netRow.fromBFCache .netWaitingBar,
-.netRow.fromBFCache .netReceivingBar {
-    opacity: 0.5;
 }
 
 /************************************************************************************************/
@@ -446,8 +432,8 @@
     color: gray;
 }
 
-.timeInfoTipSeparator SPAN {
-    white-space:pre-wrap;
+.timeInfoTipSeparator span {
+    white-space: pre-wrap;
 }
 
 .timeInfoTipBar,
@@ -799,15 +785,13 @@ body[resizingHtmlPreview="true"] .netInfoHtmlPreview {
     padding-bottom: 3px;
 }
 
-.useA11y .panelNode-net .a11yFocus:focus,
-.useA11y .panelNode-net .focusRow:focus {
+.useA11y .panelNode-net :-moz-any(.a11yFocus, .focusRow):focus {
     outline-offset: -2px;
     background-color: #FFFFD6 !important;
 }
 
 .useA11y .panelNode-net .netHeaderCell:focus,
-.useA11y .panelNode-net :focus .netHeaderCell,
-.useA11y .panelNode-net :focus .netReceivingBar,
+.useA11y .panelNode-net :focus :-moz-any(.netHeaderCell, .netReceivingBar),
 .useA11y .netSummaryRow :focus .netBar,
 .useA11y .netSummaryRow:focus .netBar {
     background-color: #FFFFD6;
