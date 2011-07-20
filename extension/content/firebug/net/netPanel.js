@@ -286,7 +286,7 @@ NetPanel.prototype = Obj.extend(Firebug.ActivablePanel,
         var disabled = !BrowserCache.isEnabled();
         return { label: "net.option.Disable Browser Cache", type: "checkbox", checked: disabled,
             command: function() {
-                BrowserCache.enable(!this.getAttribute("checked"));
+                BrowserCache.toggle(!this.getAttribute("checked"));
             }
         };
     },
@@ -1571,10 +1571,10 @@ Firebug.NetMonitor.BrowserCache =
         return diskCache && memoryCache;
     },
 
-    enable: function(state)
+    toggle: function(state)
     {
         if (FBTrace.DBG_NET)
-            FBTrace.sysout("net.BrowserCache.enable; " + state);
+            FBTrace.sysout("net.BrowserCache.toggle; " + state);
 
         Options.setPref(this.cacheDomain, "disk.enable", state);
         Options.setPref(this.cacheDomain, "memory.enable", state);
