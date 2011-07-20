@@ -329,8 +329,8 @@ Firebug.NetMonitor.NetRequestTable = domplate(Firebug.Rep, new Firebug.Listener(
         var table = panel.table;
         var hiddenCols = table.getAttribute("hiddenCols");
 
-        // If the column is already presented in the list of hidden columns,
-        // remove it, otherwise append.
+        // If the column is already present in the list of hidden columns,
+        // remove it, otherwise append it.
         var index = hiddenCols.indexOf(colId);
         if (index >= 0)
         {
@@ -412,11 +412,11 @@ Firebug.NetMonitor.NetRequestEntry = domplate(Firebug.Rep, new Firebug.Listener(
                     "aria-describedby": "fbNetSizeInfoTip"},
                     DIV({"class": "netSizeLabel netLabel"}, "$file.file|getSize")
                 ),
-                TD({"class": "netRemoteAddressCol netCol a11yFocus", "role": "gridcell"},
-                    DIV({"class": "netAddressLabel netLabel"}, "$file.file|getRemoteAddress")
-                ),
                 TD({"class": "netLocalAddressCol netCol a11yFocus", "role": "gridcell"},
                     DIV({"class": "netAddressLabel netLabel"}, "$file.file|getLocalAddress")
+                ),
+                TD({"class": "netRemoteAddressCol netCol a11yFocus", "role": "gridcell"},
+                    DIV({"class": "netAddressLabel netLabel"}, "$file.file|getRemoteAddress")
                 ),
                 TD({"class": "netTimeCol netCol a11yFocus", "role": "gridcell",
                     "aria-describedby": "fbNetTimeInfoTip"  },
