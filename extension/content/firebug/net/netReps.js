@@ -1780,14 +1780,14 @@ Firebug.NetMonitor.SizeInfoTip = domplate(Firebug.Rep,
         if (file.requestHeadersText)
         {
             var responseHeaders = file.responseHeadersText ? file.responseHeadersText : 0;
-
             sizeInfo.push({label: "-", size: 0});
             sizeInfo.push({label: Locale.$STR("net.sizeinfo.Total Received") + "*",
-                size: responseHeaders.length + file.size});
+                size: (responseHeaders.length ? responseHeaders.length : 0)  + file.size});
             sizeInfo.push({label: Locale.$STR("net.sizeinfo.Total Sent") + "*",
                 size: file.requestHeadersText.length + postText.length});
             sizeInfo.push({label: " ", size: -2});
-            sizeInfo.push({label: "* " + Locale.$STR("net.sizeinfo.Including HTTP Headers"), size: -2});
+            sizeInfo.push({label: "* " + Locale.$STR("net.sizeinfo.Including HTTP Headers"),
+                size: -2});
         }
 
         this.tag.replace({sizeInfo: sizeInfo}, parentNode);
