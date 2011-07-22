@@ -886,9 +886,9 @@ Firebug.SourceBoxPanel = Obj.extend(SourceBoxPanelBase,
     {
         var viewRange = {};
         var averageLineHeight = this.getAverageLineHeight(sourceBox);
-        // If the scrollTop comes in zero, then we better pick line 1.  (0 / 14) + 1 = 1
-        // If the scrollTop comes in > averageLineHeight/2 pick line 2  (8 / 14) + 1 = 1.57 ==> ceil
-        viewRange.firstLine = Math.ceil( (scrollTop / averageLineHeight) + 1);
+        // If the scrollTop comes in zero, then we better pick line 1. (0 / 14) + 1 = 1
+        // If the scrollTop is in the middle of line 2, pick line 2. (20 / 14) + 1 = 2.43 ==> 2
+        viewRange.firstLine = Math.floor((scrollTop / averageLineHeight) + 1);
 
         var panelHeight = this.panelNode.clientHeight;
 
