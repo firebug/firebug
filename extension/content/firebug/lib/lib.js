@@ -117,7 +117,7 @@ for (var p in Firefox)
 
 FBL.deprecated = Deprecated.deprecated;
 FBL.SourceLink = SourceLink.SourceLink;
-FBL.ToggleBranch = Menu.ToggleBranch;
+FBL.ToggleBranch = ToggleBranch.ToggleBranch;
 
 //FBL.ErrorCopy = FirebugReps.ErrorCopy;
 //FBL.ErrorMessageObj = FirebugReps.ErrorMessageObj;
