@@ -154,7 +154,7 @@ Firebug.SourceBoxPanel = Obj.extend(SourceBoxPanelBase,
 
     onTextSizeChange: function(zoom)
     {
-        this.removeAllSourceBoxes();  // clear so we start fresh with new text sizes
+        this.refresh();
     },
 
     removeAllSourceBoxes: function()
