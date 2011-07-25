@@ -1,6 +1,6 @@
 /* See license.txt for terms of usage */
 
-// ************************************************************************************************
+// ********************************************************************************************* //
 // Constants
 
 const Cc = Components.classes;
@@ -9,11 +9,11 @@ const Cr = Components.results;
 
 var EXPORTED_SYMBOLS = ["fbObserverService"];
 
+Components.utils.import("resource://firebug/firebug-trace-service.js");
+var FBTrace = traceConsoleService.getTracer("extensions.firebug");
 
-// ************************************************************************************************
+// ********************************************************************************************* //
 // Observer implementation
-
-var FBTrace = null;
 
 /**
  * @service meta service module for observers
@@ -73,7 +73,7 @@ var fbObserverService =
         return observers;  // may be null or array
     },
 
-
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
     // For debugging observer registration
 
     stackForTrack: [],
@@ -87,14 +87,42 @@ var fbObserverService =
     untrack: function(index)
     {
         if (this.stackForTrack[index - 1])
+        {
             delete this.stackForTrack[index - 1];
+        }
         else
-            Components.reportError("observer-service ERROR attempt to untrack item not tracked at "+(index - 1));
+        {
+            Components.reportError("observer-service. ERROR attempt to untrack item not tracked at " +
+                (index - 1));
+        }
     },
 
     getStacksForTrack: function()
     {
         return this.stackForTrack;
-    }
-}
+    },
 
+    traceStacksForTrack: function()
+    {
+        if (!FBTrace.DBG_OBSERVERS)
+            return;
+
+        var result = false;
+        for (var i=0; i<this.stackForTrack.length; i++)
+        {
+            if (this.stackForTrack[i])
+            {
+                result = true;
+                break;
+            }
+        }
+
+        if (result)
+        {
+            FBTrace.sysout("fbObserverService getStacksForTrack ", this.stackForTrack);
+            alert("observer mismatch detected, see FBTrace output");
+        }
+    }
+};
+
+// ********************************************************************************************* //

@@ -296,12 +296,7 @@ window.Firebug =
         {
             // import fbObserverService
             Components.utils.import("resource://firebug/observer-service.js");
-            var stacks = fbObserverService.getStacksForTrack();
-            if (stacks)
-            {
-                FBTrace.sysout("fbObserverService getStacksForTrack ", stacks);
-                alert('observer mismatch detected, see FBTrace output');
-            }
+            fbObserverService.traceStacksForTrack();
         }
 
         Firebug.isShutdown = true;
