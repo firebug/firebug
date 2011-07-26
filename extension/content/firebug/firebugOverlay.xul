@@ -312,7 +312,7 @@
                             <iframe id="fbPanelBar1-browser"
                                      tooltip="fbTooltip" contextmenu="fbContextMenu"
                                      disablehistory="true"
-                                     type="content-primary"
+                                     type="content"
                                      role="tabpanel" />
                         </deck>
                     </vbox>
@@ -336,7 +336,7 @@
                                          tooltip="fbTooltip" contextmenu="fbContextMenu"
                                          disablehistory="true"
                                          src="chrome://firebug/content/panel.html"
-                                         type="content-primary"
+                                         type="content"
                                          role="tabpanel" />
                             </deck>
                         </panelBar>
