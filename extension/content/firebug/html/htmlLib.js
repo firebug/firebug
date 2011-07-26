@@ -564,7 +564,7 @@ var HTMLLib =
     isSourceElement: function(element)
     {
         if (!Xml.isElementHTML(element) && !Xml.isElementXHTML(element))
-            return;
+            return false;
 
         var tag = element.localName ? element.localName.toLowerCase() : "";
         return tag == "script" || (tag == "link" && element.getAttribute("rel") == "stylesheet") || tag == "style";
