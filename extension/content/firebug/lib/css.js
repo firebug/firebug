@@ -424,9 +424,18 @@ Css.addStyleSheet = function(doc, style)
 {
     var heads = doc.getElementsByTagName("head");
     if (heads.length)
+    {
         heads[0].appendChild(style);
-    else
+    }
+    else if (doc.documentElement)
+    {
         doc.documentElement.appendChild(style);
+    }
+    else
+    {
+        if (FBTrace.DBG_ERRORS)
+            FBTrace.sysout("css.addStyleSheet; ERROR to append a stylesheet");
+    }
 };
 
 Css.appendStylesheet = function(doc, uri)
