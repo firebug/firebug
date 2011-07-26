@@ -66,6 +66,7 @@ Search.TextSearch = function(rootNode, rowFinder)
      */
     this.findNext = function(wrapAround, sameNode, reverse, caseSensitive)
     {
+        this.wrapped = false;
         startPt = undefined;
 
         if (sameNode && this.range)
@@ -111,7 +112,6 @@ Search.TextSearch = function(rootNode, rowFinder)
             }
         }
 
-        this.wrapped = false;
         var match = startPt && this.find(this.text, reverse, caseSensitive);
         if (!match && wrapAround)
         {
@@ -139,6 +139,20 @@ Search.TextSearch = function(rootNode, rowFinder)
 
 Search.SourceBoxTextSearch = function(sourceBox)
 {
+    this.tryToContinueSearch = function(sBox, text)
+    {
+        if (sBox != sourceBox)
+            return false;
+
+        var isSubstring = text.indexOf(this.text) !=-1 || this.text.indexOf(text) !=-1;
+
+        if (isSubstring && this.mark && Math.abs(sourceBox.centralLine - this.mark) < 10)
+            this.mark--;
+        else
+            this.reset();
+
+        return true;
+    };
     this.find = function(text, reverse, caseSensitive)
     {
         this.text = text;
@@ -150,6 +164,7 @@ Search.SourceBoxTextSearch = function(sourceBox)
 
     this.findNext = function(wrapAround, reverse, caseSensitive)
     {
+        this.wrapped = false;
         var lines = sourceBox.lines;
         var match = null;
         for (var iter = new Search.ReversibleIterator(lines.length, this.mark, reverse); iter.next();)
@@ -162,7 +177,6 @@ Search.SourceBoxTextSearch = function(sourceBox)
             }
         }
 
-        this.wrapped = false;
         if (!match && wrapAround)
         {
             this.reset();

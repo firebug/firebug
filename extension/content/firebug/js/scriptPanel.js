@@ -832,11 +832,9 @@ Firebug.ScriptPanel.prototype = Obj.extend(Firebug.SourceBoxPanel,
         }
         else
         {
-            if(this.currentSearch && this.currentSearch.mark)
-                var mark = this.currentSearch.mark;
-            this.currentSearch = new Search.SourceBoxTextSearch(sourceBox);
-            if (mark)
-                this.currentSearch.mark = mark - 1;
+            if (!this.currentSearch || !this.currentSearch.tryToContinueSearch(sourceBox, text))
+                this.currentSearch = new Search.SourceBoxTextSearch(sourceBox);
+
             lineNo = this.currentSearch.find(text, reverse, Firebug.Search.isCaseSensitive(text));
         }
 
