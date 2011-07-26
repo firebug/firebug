@@ -31,27 +31,27 @@ Firebug.getModuleLoaderConfig = function(baseConfig)
 
     config.context = "Firebug";
     config.modules = [
-            "firebug/trace/traceModule",
-            "firebug/chrome/navigationHistory",
-            "firebug/chrome/knownIssues",
-            "firebug/js/sourceFile",
-            "firebug/chrome/shortcuts",
-            "firebug/firefox/start-button/startButtonOverlay",
-            "firebug/editor/external/externalEditors",
-            "firebug/firefox/firebugMenu",
-            "firebug/chrome/panelActivation",
-            "firebug/console/memoryProfiler",
-            "firebug/chrome/tableRep",
-            "firebug/html/htmlPanel",
-            "firebug/console/commandLinePopup",
-            "firebug/accessible/a11y",
-            "firebug/js/scriptPanel",
-            "firebug/js/callstack",
-            "firebug/console/consoleInjector",
-            "firebug/net/spy",
-            "firebug/js/tabCache",
-            "firebug/chrome/activation",
-        ];
+        "firebug/trace/traceModule",
+        "firebug/chrome/navigationHistory",
+        "firebug/chrome/knownIssues",
+        "firebug/js/sourceFile",
+        "firebug/chrome/shortcuts",
+        "firebug/firefox/start-button/startButtonOverlay",
+        "firebug/editor/external/externalEditors",
+        "firebug/firefox/firebugMenu",
+        "firebug/chrome/panelActivation",
+        "firebug/console/memoryProfiler",
+        "firebug/chrome/tableRep",
+        "firebug/html/htmlPanel",
+        "firebug/console/commandLinePopup",
+        "firebug/accessible/a11y",
+        "firebug/js/scriptPanel",
+        "firebug/js/callstack",
+        "firebug/console/consoleInjector",
+        "firebug/net/spy",
+        "firebug/js/tabCache",
+        "firebug/chrome/activation",
+    ];
 
     return config;
 }
