@@ -15,16 +15,19 @@ window.panelBarWaiter = function()
     var preInitializeCallback = null;
     var postInitializeCallback = null;
 
-    /*
+    /**
      * Called by module loader to signal modules loaded
      */
-    panelBarWaiter.waitForPanelBar = function(chromeFactoryIn, preInitializeCallbackIn, postInitializeCallbackIn)
+    panelBarWaiter.waitForPanelBar = function(chromeFactoryIn, preInitializeCallbackIn,
+        postInitializeCallbackIn)
     {
         // set these via closure scope, we don't know which call will be fire
         if (chromeFactoryIn)
             chromeFactory = chromeFactoryIn;
+
         if (preInitializeCallbackIn)
             preInitializeCallback = preInitializeCallbackIn;
+
         if (postInitializeCallbackIn)
             postInitializeCallback = postInitializeCallbackIn;
 
@@ -39,6 +42,7 @@ window.panelBarWaiter = function()
                 msg += " chromeFactory: "+ chromeFactory;
                 FBTrace.sysout(msg);
             }
+
             if (!chromeFactory)
                 setTimeout(panelBarWaiter.waitForPanelBar, 10);
         }
@@ -57,11 +61,13 @@ window.panelBarWaiter = function()
                 var chrome = chromeFactory.createFirebugChrome(window);
 
                 if (FBTrace.DBG_INITIALIZE)
+                {
                     FBTrace.sysout("panelBarWaiter; callbacks ",
-                        {
-                            preInitializeCallback: preInitializeCallback,
-                            postInitializeCallback: postInitializeCallback
-                        });
+                    {
+                        preInitializeCallback: preInitializeCallback,
+                        postInitializeCallback: postInitializeCallback
+                    });
+                }
 
                 if (preInitializeCallback)
                     preInitializeCallback(chrome);
@@ -87,8 +93,8 @@ window.panelBarWaiter = function()
         return false;
     };
 
-    /*
-     * Called by binding.xml to signal ctor for a panel
+    /**
+     * Called by binding.xml to signal ctor for a panel.
      */
     panelBarWaiter.panelBarReady = function()
     {
@@ -100,15 +106,18 @@ window.panelBarWaiter = function()
             waitingPanelBarCount -= 1;
 
             if (FBTrace.DBG_INITIALIZE)
-                FBTrace.sysout("chrome; panelBarReady (" + waitingPanelBarCount + ") "+
-                (chromeFactory ? "Modules loaded" : "Modules not yet loaded")+" in "+window.location+"\n");
+            {
+                FBTrace.sysout("chrome; panelBarReady (" + waitingPanelBarCount + ") " +
+                    (chromeFactory ? "Modules loaded" : "Modules not yet loaded") +
+                    " in " + window.location);
+            }
 
             panelBarWaiter.initializeWhenReady();
         }
         catch (e)
         {
-            dump("bindings panelBar ctor FAILs: "+ e+"\n");
-            dump("window.top "+window.top.location+" window.opener: "+window.opener+"\n");
+            dump("bindings panelBar ctor FAILs: " + e + "\n");
+            dump("window.top " + window.top.location + " window.opener: " + window.opener + "\n");
         }
     }
 
