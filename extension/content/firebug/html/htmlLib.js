@@ -563,9 +563,11 @@ var HTMLLib =
      */
     isSourceElement: function(element)
     {
+        if (!Xml.isElementHTML(element) && !Xml.isElementXHTML(element))
+            return;
+
         var tag = element.localName ? element.localName.toLowerCase() : "";
-        return tag == "script" || tag == "link" || tag == "style"
-            || (tag == "link" && element.getAttribute("rel") == "stylesheet");
+        return tag == "script" || (tag == "link" && element.getAttribute("rel") == "stylesheet") || tag == "style";
     },
 
     /**
