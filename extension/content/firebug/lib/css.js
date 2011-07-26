@@ -781,9 +781,26 @@ Css.cssInfo.html =
     "-moz-transition-property": ["mozTransitionProperty"], //FF4.0 TODO
     "-moz-transition-duration": [], //FF4.0 TODO
     "-moz-transition-timing-function": ["mozTransitionTimingFunction"], //FF4.0 TODO
-    "-moz-transition-delay": [] //FF4.0 TODO
+    "-moz-transition-delay": [], //FF4.0 TODO
+    "-moz-animation":[], // FF5.0
+    "-moz-animation-delay": [], // FF5.0
+    "-moz-animation-direction": [], // FF5.0
+    "-moz-animation-duration": [], // FF5.0
+    "-moz-animation-iteration-count", // FF5.0
+    "-moz-animation-name" : [], // FF5.0
+    "-moz-animation-play-state": [], // FF5.0
+    "-moz-animation-timing-function": [], // FF5.0
+    "-moz-animation-fill-mode": [], // FF5.0
+    "-moz-orient": [], //FF6.0 TODO
+    "-moz-text-decoration-color": ["color"], //FF6.0 TODO
+    "-moz-text-decoration-line": [], //FF6.0 TODO
+    "-moz-text-decoration-style": [], //FF6.0 TODO
+    "-moz-hyphens": [], //FF6.0 TODO
+    "text-overflow": ["ellipsis","clip"] //FF7.0
 
 };
+
+// ::-moz-progress-bar  // FF6 TODO
 
 Css.cssInfo.svg = {
     "alignment-baseline": ["svgAlignmentBaseline"],

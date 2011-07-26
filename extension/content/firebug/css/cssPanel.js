@@ -306,6 +306,15 @@ const styleGroups =
         "-moz-user-select",
         "-moz-user-modify",
         "-moz-user-input",
+        "-moz-animation", // FF5.0
+        "-moz-animation-delay", // FF5.0
+        "-moz-animation-direction", // FF5.0
+        "-moz-animation-duration", // FF5.0
+        "-moz-animation-iteration-count", // FF5.0
+        "-moz-animation-name", // FF5.0
+        "-moz-animation-play-state", // FF5.0
+        "-moz-animation-timing-function", // FF5.0
+        "-moz-animation-fill-mode", // FF5.0
         "-moz-transition", // FF4.0
         "-moz-transition-delay", // FF4.0
         "-moz-transition-duration", // FF4.0
