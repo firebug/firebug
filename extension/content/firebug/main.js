@@ -1,10 +1,10 @@
 /* See license.txt for terms of usage */
 
 try {
-
 (function() {
 // ********************************************************************************************* //
 
+var prefDomain = "extensions.firebug";
 var config = Firebug.getModuleLoaderConfig();
 
 if (FBTrace.DBG_INITIALIZE || FBTrace.DBG_MODULES)
@@ -14,6 +14,24 @@ if (FBTrace.DBG_INITIALIZE || FBTrace.DBG_MODULES)
 
     FBTrace.sysout("main.js; Loading Firebug modules...", config);
     var startLoading = new Date().getTime();
+}
+
+// ********************************************************************************************* //
+
+try
+{
+    // xxxHonza: temporary hack for Crossfire to provide custom set of modules.
+    var prefService = Cc["@mozilla.org/preferences-service;1"].getService(Ci.nsIPrefBranch2);
+    var value = prefService.getCharPref("extensions.firebug.defaultModuleList");
+    if (value)
+    {
+        var modules = value.split(",");
+        if (modules.length)
+            config.modules = modules;
+    }
+}
+catch (err)
+{
 }
 
 var modules = [
@@ -46,11 +64,13 @@ require(config, modules, function(ChromeFactory, FBL, Firebug, Browser)
             FBTrace.sysout.apply(FBTrace, arguments);
         }
 
-        Firebug.Options.initialize("extensions.firebug");
+        Firebug.Options.initialize(prefDomain);
+
         function connect()
         {
             Firebug.connection.connect();  // start firing events
         }
+
         window.panelBarWaiter.waitForPanelBar(ChromeFactory, null, connect);
 
         if (window.legacyPatch)

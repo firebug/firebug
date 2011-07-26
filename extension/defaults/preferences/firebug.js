@@ -2,6 +2,7 @@
 
 // Global
 pref("extensions.firebug.architecture", "inProcess");
+pref("extensions.firebug.defaultModuleList", "");
 
 pref("javascript.options.strict.debug", false);
 pref("extensions.firebug.defaultPanelName", "html");
