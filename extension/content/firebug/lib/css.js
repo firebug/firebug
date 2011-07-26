@@ -786,7 +786,7 @@ Css.cssInfo.html =
     "-moz-animation-delay": [], // FF5.0
     "-moz-animation-direction": [], // FF5.0
     "-moz-animation-duration": [], // FF5.0
-    "-moz-animation-iteration-count", // FF5.0
+    "-moz-animation-iteration-count": [], // FF5.0
     "-moz-animation-name" : [], // FF5.0
     "-moz-animation-play-state": [], // FF5.0
     "-moz-animation-timing-function": [], // FF5.0
