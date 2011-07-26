@@ -326,7 +326,9 @@ Firebug.TabCache.prototype = Obj.extend(Firebug.SourceCache.prototype,
         // requests are projected to the channel listener)
         var newRawSize = offset + responseText.length;
         var addRawBytes = newRawSize - response.rawSize;
-        responseText = responseText.substr(responseText.length - addRawBytes);
+
+        if (responseText.length > addRawBytes)
+            responseText = responseText.substr(responseText.length - addRawBytes);
 
         try
         {
