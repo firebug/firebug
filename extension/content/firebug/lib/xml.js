@@ -291,11 +291,10 @@ Xml.isVisible = function(elt)
 
     try
     {
-        return elt.offsetWidth > 0 ||
+        return (!Xml.isElementHTML(elt) && !Xml.isElementXHTML(elt)) ||
+            elt.offsetWidth > 0 ||
             elt.offsetHeight > 0 ||
-            elt.localName in Xml.invisibleTags ||
-            Xml.isElementSVG(elt) ||
-            Xml.isElementMathML(elt);
+            elt.localName in Xml.invisibleTags;
     }
     catch (err)
     {
