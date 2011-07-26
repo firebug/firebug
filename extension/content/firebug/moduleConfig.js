@@ -1,5 +1,12 @@
 /* See license.txt for terms of usage */
 
+/**
+ * This is the place where the global Firebug object is created. This object represents
+ * the entire application and all consequently created namespaces and variables shoul be
+ * injected into it.
+ *
+ * In the future, there should *not* be any other globals except of the Firebug object.
+ */
 var Firebug = Firebug || {};
 
 // ********************************************************************************************* //
@@ -29,6 +36,8 @@ Firebug.getModuleLoaderConfig = function(baseConfig)
         config[key] = baseConfig[key];
     });
 
+    // This is the basic list of necessary modules. All the other modules will be
+    // automatically loaded as dependencies.
     config.context = "Firebug";
     config.modules = [
         "firebug/trace/traceModule",
