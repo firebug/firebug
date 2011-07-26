@@ -107,10 +107,7 @@
     background-color: #EEEEEE;
 }
 
-.nodeBox.highlightOpen > .nodeCloseLabel,
-.nodeBox.highlightOpen > .nodeChildBox,
-.nodeBox.open > .nodeCloseLabel,
-.nodeBox.open > .nodeChildBox {
+.nodeBox:-moz-any(.highlightOpen, .open) > :-moz-any(.nodeCloseLabel, .nodeChildBox) {
     display: block;
 }
 
@@ -172,9 +169,7 @@
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 .nodeBox.mutated > .nodeLabel,
-.nodeAttr.mutated,
-.nodeValue.mutated,
-.nodeText.mutated,
+:-moz-any(.nodeAttr, .nodeValue.mutated, .nodeText).mutated,
 .nodeBox.mutated > .nodeText {
     background-color: #EFFF79;
     color: #FF0000 !important;
@@ -196,7 +191,7 @@
     padding-left: 0;
 }
 
-.soloElement > .nodeBox  {
+.soloElement > .nodeBox {
     padding-left: 0;
 }
 
@@ -216,18 +211,13 @@
     display: none;
 }
 
-.breakpointCode .nodeBox.containerNodeBox,
-.breakpointCode .nodeLabel {
+.breakpointCode :-moz-any(.nodeBox.containerNodeBox, .nodeLabel) {
     padding-left: 0px;
     margin-left: 0px;
     font-family: monospace !important;
 }
 
-.breakpointCode .nodeTag,
-.breakpointCode .nodeAttr,
-.breakpointCode .nodeText,
-.breakpointCode .nodeValue,
-.breakpointCode .nodeLabel {
+.breakpointCode :-moz-any(.nodeTag, .nodeAttr, .nodeText, .nodeValue, .nodeLabel) {
     color: DarkGreen !important;
 }
 
