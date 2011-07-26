@@ -628,6 +628,9 @@ Firebug.TabWatcher = Obj.extend(new Firebug.Listener(),
     // deprecated, use Win.getBrowserByWindow
     getBrowserByWindow: function(win)
     {
+        if (this.shuttingDown)
+            return null;
+
         var browsers = Firefox.getBrowsers();
         for (var i = 0; i < browsers.length; ++i)
         {
