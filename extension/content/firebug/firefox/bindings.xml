@@ -171,6 +171,9 @@
                 var panel = Firebug.currentContext ?
                     Firebug.currentContext.getPanel(panelName) : null;
 
+                if (!tab)
+                    return;
+
                 if (panelName && !tab.panelType.prototype.parentPanel)
                 {
                     if (Firebug.Options)
