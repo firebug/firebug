@@ -449,12 +449,12 @@ var Errors = Firebug.Errors = Obj.extend(Firebug.Module,
 
     toggleWatchForErrors: function(watchForErrors)
     {
-    	var previous = this.watchForErrors;
-    	this.watchForErrors = watchForErrors;
-    	this.checkEnabled();
-    	return (previous !== this.watchForErrors);
+        var previous = this.watchForErrors;
+        this.watchForErrors = watchForErrors;
+        this.checkEnabled();
+        return (previous !== this.watchForErrors);
     },
-    
+
     checkEnabled: function()
     {
         var beEnabled = this.watchForErrors && this.mustBeEnabled();
