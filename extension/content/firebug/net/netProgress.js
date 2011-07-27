@@ -1016,7 +1016,7 @@ function getCacheEntry(file, netProgress)
 
     file.cacheEntryRequested = true;
 
-    if (FBTrace.DBG_NET)
+    if (FBTrace.DBG_NET_EVENTS)
         FBTrace.sysout("net.getCacheEntry for file.href: " + file.href + "\n");
 
     // Pause first because this is usually called from stopFile, at which point
@@ -1040,7 +1040,7 @@ function getCacheEntry(file, netProgress)
 
 function delayGetCacheEntry(file, netProgress)
 {
-    if (FBTrace.DBG_NET)
+    if (FBTrace.DBG_NET_EVENTS)
         FBTrace.sysout("net.delayGetCacheEntry for file.href=" + file.href + "\n");
 
     // Init cache session.
@@ -1055,7 +1055,7 @@ function delayGetCacheEntry(file, netProgress)
     {
         onCacheEntryAvailable: function(descriptor, accessGranted, status)
         {
-            if (FBTrace.DBG_NET)
+            if (FBTrace.DBG_NET_EVENTS)
                 FBTrace.sysout("net.onCacheEntryAvailable for file.href=" + file.href + "\n");
 
             if (descriptor)

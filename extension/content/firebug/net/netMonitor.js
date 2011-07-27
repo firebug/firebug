@@ -204,6 +204,10 @@ Firebug.NetMonitor = Obj.extend(Firebug.ActivableModule,
     {
         Firebug.ActivableModule.destroyContext.apply(this, arguments);
 
+        if (FBTrace.DBG_NET)
+            FBTrace.sysout("net.destroyContext for: " +
+                (context ? context.getName() : "No context"));
+
         if (context.netProgress)
         {
             // Remember existing breakpoints.
@@ -491,7 +495,7 @@ var NetHttpObserver =
 
         if (!networkContext)
         {
-            if (FBTrace.DBG_NET)
+            if (FBTrace.DBG_NET_EVENTS)
                 FBTrace.sysout("net.onExamineCachedResponse; No CONTEXT for:" +
                     Http.safeGetRequestName(request));
             return;
@@ -582,8 +586,10 @@ function monitorContext(context)
 
 function unmonitorContext(context)
 {
-    if (FBTrace.DBG_NET && context)
-        FBTrace.sysout("net.unmonitorContext; (" + context.netProgress + ") " + context.getName());
+    if (FBTrace.DBG_NET)
+        FBTrace.sysout("net.unmonitorContext; (" +
+            (context ? context.netProgress : "netProgress == NULL") + ") " +
+            (context ? context.getName() : "no context"));
 
     var netProgress = context ? context.netProgress : null;
     if (!netProgress)
