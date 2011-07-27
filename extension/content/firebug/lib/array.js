@@ -66,9 +66,10 @@ Arr.remove = function(list, item)
         if (list[i] == item)
         {
             list.splice(i, 1);
-            break;
+            return true;
         }
     }
+    return false;
 };
 
 Arr.sliceArray = function(array, index)
