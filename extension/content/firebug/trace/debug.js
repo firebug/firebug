@@ -36,7 +36,7 @@ Debug.ERROR = function(exc)
 // ********************************************************************************************* //
 // Tracing for observer service
 
-Debug.traceObservers = function(topic)
+Debug.traceObservers = function(msg, topic)
 {
     var counter = 0;
     var enumerator = observerService.enumerateObservers(topic);
@@ -46,7 +46,12 @@ Debug.traceObservers = function(topic)
         counter++;
     }
 
-    FBTrace.sysout("debug.observers: There is " + counter + " " + "observers for " + topic);
+    var label = "observer";
+    if (counter > 1)
+        label = "observers";
+
+    FBTrace.sysout("debug.observers: " + msg + " There is " + counter + " " +
+        label + " for " + topic);
 }
 
 // ********************************************************************************************* //
