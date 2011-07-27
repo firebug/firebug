@@ -91,6 +91,8 @@ Firebug.Spy = Obj.extend(Firebug.Module,
 
         delete context.spies;
 
+        SpyHttpActivityObserver.cleanUp(context.window);
+
         if (FBTrace.DBG_SPY)
             FBTrace.sysout("spy.destroyContext " + contexts.length + " ", context.getName());
     },
@@ -103,10 +105,15 @@ Firebug.Spy = Obj.extend(Firebug.Module,
 
     unwatchWindow: function(context, win)
     {
+        if (FBTrace.DBG_SPY)
+            FBTrace.sysout("spy.unwatchWindow; " + (context ? context.getName() : "no context"));
+
         try
         {
             // This make sure that the existing context is properly removed from "contexts" array.
             this.detachObserver(context, win);
+
+            SpyHttpActivityObserver.cleanUp(win);
         }
         catch (ex)
         {
@@ -481,6 +488,19 @@ var SpyHttpActivityObserver = Obj.extend(NetHttpActivityObserver,
         else if (activitySubtype == Ci.nsISocketTransport.STATUS_RECEIVING_FROM)
         {
             spy.endTime = time;
+        }
+    },
+
+    cleanUp: function(win)
+    {
+        // https://bugzilla.mozilla.org/show_bug.cgi?id=669730
+        for (var i=0; i<this.activeRequests.length; i+=2)
+        {
+            if (this.activeRequests[i+1] == win)
+            {
+                this.activeRequests.splice(i, 2);
+                i -= 2;
+            }
         }
     }
 });

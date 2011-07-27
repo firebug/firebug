@@ -2,12 +2,13 @@
 
 define([
     "firebug/firefox/xpcom",
+    "firebug/lib/object",
     "firebug/lib/trace",
     "firebug/net/httpLib",
     "firebug/firefox/window",
     "firebug/net/netProgress",
 ],
-function(Xpcom, FBTrace, Http, Win, NetProgress) {
+function(Xpcom, Obj, FBTrace, Http, Win, NetProgress) {
 
 // ********************************************************************************************* //
 // Constants
@@ -314,7 +315,39 @@ function getActivitySubtypeDescription(a)
 }
 
 // ********************************************************************************************* //
+
+// https://bugzilla.mozilla.org/show_bug.cgi?id=669730
+var HttpActivityObserverModule = Obj.extend(Firebug.Module,
+{
+    dispatchName: "HttpActivityObserverModule",
+
+    destroyContext: function(context)
+    {
+        this.cleanUp(context.window);
+    },
+
+    unwatchWindow: function(context, win)
+    {
+        this.cleanUp(win);
+    },
+
+    cleanUp: function(win)
+    {
+        for (var i=0; i<activeRequests.length; i+=2)
+        {
+            if (activeRequests[i+1] == win)
+            {
+                activeRequests.splice(i, 2);
+                i -= 2;
+            }
+        }
+    }
+});
+
+// ********************************************************************************************* //
 // Registration
+
+Firebug.registerModule(HttpActivityObserverModule);
 
 return NetHttpActivityObserver;
 
