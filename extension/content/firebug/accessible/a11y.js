@@ -146,7 +146,7 @@ Firebug.A11yModel = Obj.extend(Firebug.Module,
         if (tmpElem) tmpElem.addEventListener('blur', this.handleTabBarBlur, true);
         tmpElem = chrome.$('fbPanelBar2-panelTabs');
         if (tmpElem) tmpElem.addEventListener('focus', this.handleTabBarFocus, true);
-        tmpELem = chrome.$('fbPanelBar2-panelTabs');
+        tmpElem = chrome.$('fbPanelBar2-panelTabs');
         if (tmpElem) tmpElem.addEventListener('blur', this.handleTabBarBlur, true);
         tmpElem = chrome.$("fbPanelBar1");
         if (tmpElem) Css.setClass(tmpElem.browser.contentDocument.body, 'useA11y');
