@@ -12,6 +12,7 @@ const Cc = Components.classes;
 const Ci = Components.interfaces;
 
 var consoleService = Cc["@mozilla.org/consoleservice;1"].getService(Ci["nsIConsoleService"]);
+var observerService = Cc["@mozilla.org/observer-service;1"].getService(Ci["nsIObserverService"]);
 
 var Debug = {};
 
@@ -25,11 +26,27 @@ Debug.ERROR = function(exc)
         if (exc.stack)
             exc.stack = exc.stack.split('\n');
 
-        FBTrace.sysout("Debug.ERROR: " + exc, exc);
+        FBTrace.sysout("debug.ERROR: " + exc, exc);
     }
 
     if (consoleService)
         consoleService.logStringMessage("FIREBUG ERROR: " + exc);
+}
+
+// ********************************************************************************************* //
+// Tracing for observer service
+
+Debug.traceObservers = function(topic)
+{
+    var counter = 0;
+    var enumerator = observerService.enumerateObservers(topic);
+    while (enumerator.hasMoreElements())
+    {
+        var observer = enumerator.getNext();
+        counter++;
+    }
+
+    FBTrace.sysout("debug.observers: There is " + counter + " " + "observers for " + topic);
 }
 
 // ********************************************************************************************* //
