@@ -187,7 +187,7 @@ Firebug.Console = Obj.extend(ActivableConsole,
         if (FBTrace.DBG_CONSOLE)
             FBTrace.sysout("console.isReadyElsePreparing, win is " +
                 (win?"an argument: ":"null, context.window: ") +
-                (win?win.location:context.window.location), (win?win:context.window));
+                (win?win.location:context.window.location));
 
         if (Xml.isXMLPrettyPrint(context, win))
             return false;

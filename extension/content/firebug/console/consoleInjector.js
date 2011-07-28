@@ -153,7 +153,6 @@ Firebug.Console.injector =
             FBTrace.sysout("consoleInjector addConsoleListener set token "+handler.token+
                 " and  attached handler("+handler.handler_name+") to _firebugConsole in : "+
                 Win.safeGetWindowLocation(win));
-
     },
 
     detachConsole: function(context, win)
