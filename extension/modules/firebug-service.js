@@ -1650,7 +1650,7 @@ var fbs =
 
     pause: function()  // must support multiple calls
     {
-        if (!enabledDebugger)
+        if (!enabledDebugger || !jsd)
             return "not enabled";
 
         var rejection = [];
@@ -1682,6 +1682,9 @@ var fbs =
 
     unPause: function(force)
     {
+        if (!jsd)
+            return;
+
         if (jsd.pauseDepth > 0 || force)
         {
             if (FBTrace.DBG_ACTIVATION && (!jsd.isOn || jsd.pauseDepth == 0) )
