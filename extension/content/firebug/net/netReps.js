@@ -876,7 +876,11 @@ Firebug.NetMonitor.NetInfoBody = domplate(Firebug.Rep, new Firebug.Listener(),
 
     hideHtml: function(file)
     {
-        return (file.mimeType != "text/html") && (file.mimeType != "application/xhtml+xml");
+        if (!file.mimeType)
+            return true;
+
+        return ((file.mimeType.indexOf("text/html") != 0) &&
+            (file.mimeType.indexOf("application/xhtml+xml") != 0));
     },
 
     onClickTab: function(event)
