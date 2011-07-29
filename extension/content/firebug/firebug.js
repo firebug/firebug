@@ -104,7 +104,7 @@ if (window.Firebug)
  */
 window.Firebug =
 {
-    version: "1.8",
+    version: "1.9",
 
     dispatchName: "Firebug",
     modules: modules,
@@ -1213,7 +1213,7 @@ window.Firebug =
     {
         testLists.push({
             extension: "Firebug",
-            testListURL: "http://getfirebug.com/tests/content/testlists/firebug1.8.html"
+            testListURL: "http://getfirebug.com/tests/content/testlists/firebug1.9.html"
         });
     }
 };
