@@ -683,10 +683,12 @@ Firebug.CSSStyleSheetPanel.prototype = Obj.extend(Firebug.Panel,
         //styleSheet.editStyleSheet.showUnformated = true;
     },
 
-    getStylesheetURL: function(rule)
+    getStylesheetURL: function(rule, getBaseUri)
     {
         if (this.location.href)
             return this.location.href;
+        else if (getBaseUri)
+            return this.context.window.document.baseURI;
         else
             return this.context.window.location.href;
     },
@@ -1416,7 +1418,7 @@ Firebug.CSSStyleSheetPanel.prototype = Obj.extend(Firebug.Panel,
                         Firebug.getRepObject(target)),propNameNode.textContent))
                     {
                         var rule = Firebug.getRepObject(target);
-                        var baseURL = this.getStylesheetURL(rule);
+                        var baseURL = this.getStylesheetURL(rule, true);
                         var relURL = parseURLValue(cssValue.value);
                         var absURL = Url.isDataURL(relURL) ? relURL : Url.absoluteURL(relURL, baseURL);
                         var repeat = parseRepeatValue(text);
@@ -1735,11 +1737,13 @@ CSSElementPanel.prototype = Obj.extend(Firebug.CSSStyleSheetPanel.prototype,
         }
     },
 
-    getStylesheetURL: function(rule)
+    getStylesheetURL: function(rule, getBaseUri)
     {
         // if the parentStyleSheet.href is null, CSS std says its inline style
         if (rule && rule.parentStyleSheet && rule.parentStyleSheet.href)
             return rule.parentStyleSheet.href;
+        else if (getBaseUri)
+            return this.selection.ownerDocument.baseURI;
         else
             return this.selection.ownerDocument.location.href;
     },

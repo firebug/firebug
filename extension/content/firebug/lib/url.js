@@ -349,7 +349,7 @@ Url.absoluteURLWithDots = function(url, baseURL)
         return head + url;
     }
     else if (tail[tail.length-1] == "/")
-        return baseURL + url;
+        return B_head + url;
     else
     {
         var parts = tail.split("/");
