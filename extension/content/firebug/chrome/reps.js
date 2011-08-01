@@ -1112,7 +1112,7 @@ FirebugReps.Document = domplate(Firebug.Rep,
     }
 });
 
-// ************************************************************************************************
+// ********************************************************************************************* //
 
 FirebugReps.StyleSheet = domplate(Firebug.Rep,
 {
@@ -1124,19 +1124,29 @@ FirebugReps.StyleSheet = domplate(Firebug.Rep,
         return Url.getFileName(styleSheet.href);
     },
 
-    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
     copyURL: function(styleSheet)
     {
-        System.copyToClipboard(styleSheet.href);
+        var url = Css.getURLForStyleSheet(styleSheet);
+        if (url)
+            System.copyToClipboard(url);
+
+        if (FBTrace.DBG_ERRORS && !url)
+            FBTrace.sysout("reps.StyleSheet.copyURL; ERROR no URL", styleSheet);
     },
 
     openInTab: function(styleSheet)
     {
-        Win.openNewTab(styleSheet.href);
+        var url = Css.getURLForStyleSheet(styleSheet);
+        if (url)
+            Win.openNewTab(url);
+
+        if (FBTrace.DBG_ERRORS && !url)
+            FBTrace.sysout("reps.StyleSheet.openInTab; ERROR no URL", styleSheet);
     },
 
-    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
     className: "object",
 
@@ -1176,7 +1186,7 @@ FirebugReps.StyleSheet = domplate(Firebug.Rep,
     }
 });
 
-// ************************************************************************************************
+// ********************************************************************************************* //
 
 FirebugReps.Window = domplate(Firebug.Rep,
 {

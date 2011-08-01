@@ -1476,6 +1476,11 @@ Firebug.CSSStyleSheetPanel.prototype = Obj.extend(Firebug.Panel,
         }
     },
 
+    getObjectLocation: function(styleSheet)
+    {
+        return Css.getURLForStyleSheet(styleSheet);
+    },
+
     getObjectDescription: function(styleSheet)
     {
         var url = Css.getURLForStyleSheet(styleSheet);
