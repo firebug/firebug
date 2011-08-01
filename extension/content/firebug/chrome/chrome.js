@@ -801,8 +801,11 @@ var FirebugChrome =
 
     syncMainPanels: function()
     {
-        var panelTypes = Firebug.getMainPanelTypes(Firebug.currentContext);
-        panelBar1.updatePanels(panelTypes);
+        if (Firebug.currentContext)
+        {
+            var panelTypes = Firebug.getMainPanelTypes(Firebug.currentContext);
+            panelBar1.updatePanels(panelTypes);
+        }
     },
 
     syncSidePanels: function()
