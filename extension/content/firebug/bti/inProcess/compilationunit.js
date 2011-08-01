@@ -28,6 +28,10 @@ function CompilationUnit(url, context)
     this.breakpoints = [];
     this.numberOfLines = 0;
     this.kind = CompilationUnit.SCRIPT_TAG;
+
+    // Compatibility with SourceLink. There are places where 'href' field is expected.
+    // xxxHonza: should be investigated in 1.9
+    this.href = url;
 }
 
 /*
