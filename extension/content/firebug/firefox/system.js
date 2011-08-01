@@ -79,6 +79,7 @@ System.getIconURLForFile = function(path)
         if (FBTrace.DBG_ERRORS)
             FBTrace.sysout("getIconURLForFile ERROR "+exc+" for "+path, exc);
     }
+
     return null;
 }
 
@@ -86,12 +87,12 @@ System.copyToClipboard = function(string)
 {
     var clipboard = Cc["@mozilla.org/widget/clipboardhelper;1"].getService(Ci.nsIClipboardHelper);
     clipboard.copyString(string);
-    if (FBTrace.DBG_ERRORS)
-        FBTrace.sysout("copyToClipboard "+string, string);
 
+    if (FBTrace.DBG_ERRORS && !string)
+        FBTrace.sysout("system.copyToClipboard; " + string, string);
 };
 
-// ************************************************************************************************
+// ********************************************************************************************* //
 // Firebug Version Comparator
 
 /**
