@@ -210,7 +210,7 @@ Firebug.PanelActivation = Obj.extend(Firebug.Module,
     // respond to event
     onClearAnnotations: function()
     {
-        Firebug.toggleBar(false);  // and we turn off as it now cannot be enabled
+        Firebug.closeFirebug(true);  // and we turn off as it now cannot be enabled
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
