@@ -252,7 +252,7 @@ const DirTablePlate = domplate(Firebug.Rep,
 
             if (isString)
             {
-                var rowValue = row.domObject.value
+                var rowValue = row.domObject.value;
                 row.lastChild.firstChild.textContent = '"' + Str.cropMultipleLines(rowValue) + '"';
             }
             else
