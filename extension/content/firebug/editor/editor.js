@@ -346,7 +346,9 @@ Firebug.Editor = Obj.extend(Firebug.Module,
                 chrome.keyCodeListen("UP", Events.isShift, Obj.bindFixed(editor.completeValue, editor, -largeChangeAmount)),
                 chrome.keyCodeListen("DOWN", Events.isShift, Obj.bindFixed(editor.completeValue, editor, largeChangeAmount)),
                 chrome.keyCodeListen("UP", Events.isControl, Obj.bindFixed(editor.completeValue, editor, -smallChangeAmount)),
-                chrome.keyCodeListen("DOWN", Events.isControl, Obj.bindFixed(editor.completeValue, editor, smallChangeAmount))
+                chrome.keyCodeListen("DOWN", Events.isControl, Obj.bindFixed(editor.completeValue, editor, smallChangeAmount)),
+                chrome.keyCodeListen("PAGE_UP", null, Obj.bindFixed(editor.completeValue, editor, -largeChangeAmount)),
+                chrome.keyCodeListen("PAGE_DOWN", null, Obj.bindFixed(editor.completeValue, editor, largeChangeAmount))
             );
         }
 
@@ -382,7 +384,9 @@ Firebug.Editor = Obj.extend(Firebug.Module,
                     chrome.keyCodeListen("UP", Events.isShift, Obj.bindFixed(editor.completeValue, editor, -largeChangeAmount)),
                     chrome.keyCodeListen("DOWN", Events.isShift, Obj.bindFixed(editor.completeValue, editor, largeChangeAmount)),
                     chrome.keyCodeListen("UP", Events.isControl, Obj.bindFixed(editor.completeValue, editor, -smallChangeAmount)),
-                    chrome.keyCodeListen("DOWN", Events.isControl, Obj.bindFixed(editor.completeValue, editor, smallChangeAmount))
+                    chrome.keyCodeListen("DOWN", Events.isControl, Obj.bindFixed(editor.completeValue, editor, smallChangeAmount)),
+                    chrome.keyCodeListen("PAGE_UP", null, Obj.bindFixed(editor.completeValue, editor, -largeChangeAmount)),
+                    chrome.keyCodeListen("PAGE_DOWN", null, Obj.bindFixed(editor.completeValue, editor, largeChangeAmount))
                 );
             }
         }
@@ -396,7 +400,7 @@ Firebug.Editor = Obj.extend(Firebug.Module,
         var win = currentTarget.ownerDocument.defaultView;
         win.removeEventListener("resize", this.onResize, true);
         win.removeEventListener("blur", this.onBlur, true);
-        win.removeEventListener('input', this.onInput, true);
+        win.removeEventListener("input", this.onInput, true);
 
         var chrome = Firebug.chrome;
         if (chrome)
