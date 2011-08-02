@@ -259,6 +259,8 @@ Firebug.PanelActivation = Obj.extend(Firebug.Module,
 
         // don't show Off button if we are always on
         Firebug.chrome.disableOff(allOn);
+
+        Firebug.StartButton.resetTooltip();
     },
 
     allOn: function()
