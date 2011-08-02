@@ -1228,7 +1228,7 @@ Firebug.getConsoleByGlobal = function getConsoleByGlobal(global)
 {
     try
     {
-        var context = Firebug.connect.getContextByWindow(global);
+        var context = Firebug.connection.getContextByWindow(global);
         if (context)
         {
             var handler = Firebug.Console.injector.getConsoleHandler(context, global);
