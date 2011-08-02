@@ -111,6 +111,7 @@
     position: absolute;
     z-index: 1;
     color: silver;
+    bottom: 0;
 }
 
 .fbCommandHtmlBox .offScreen {

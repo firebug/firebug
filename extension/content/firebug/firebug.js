@@ -663,7 +663,12 @@ window.Firebug =
     closeFirebug: function(userCommands)  // this is really deactivate
     {
         if (!Firebug.currentContext)
-            throw new Error("closeFirebug ERROR: no Firebug.currentContext ");
+            return;
+
+        // It looks like FBTest is calling Firebug.Activation.clearAnnotations()
+        // when there is no current context.
+        //throw new Error("closeFirebug ERROR: no Firebug.currentContext ");
+
         Firebug.connection.closeContext(Firebug.currentContext, userCommands);
         Firebug.StartButton.resetTooltip();
     },

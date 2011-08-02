@@ -309,7 +309,7 @@
                         </toolbox>
 
                         <deck anonid="deck" id="fbPanelBar1-deck" flex="1">
-                            <iframe id="fbPanelBar1-browser"
+                            <browser id="fbPanelBar1-browser"
                                      tooltip="fbTooltip" contextmenu="fbContextMenu"
                                      disablehistory="true"
                                      type="content-targetable"
@@ -332,7 +332,7 @@
                                 </panelBarArrowscrollbox>
                             </hbox>
                             <deck id="fbPanelBar2-deck" flex="1">
-                                <iframe id="fbPanelBar2-browser"
+                                <browser id="fbPanelBar2-browser"
                                          tooltip="fbTooltip" contextmenu="fbContextMenu"
                                          disablehistory="true"
                                          src="chrome://firebug/content/panel.html"
@@ -381,7 +381,7 @@
         <splitter id="fbCommandPopupSplitter" collapsed="true" collapse="after" />
         <vbox id="fbCommandPopup" collapsed="true" height="35" persist="width,height">
             <deck id="fbCommandPopup-deck" flex="1">
-                <iframe id="fbCommandPopupBrowser"
+                <browser id="fbCommandPopupBrowser"
                      tooltip="fbTooltip" contextmenu="fbContextMenu"
                      disablehistory="true"
                      src="chrome://firebug/content/panel.html"/>

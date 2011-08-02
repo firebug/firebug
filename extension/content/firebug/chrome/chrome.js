@@ -1082,13 +1082,17 @@ var FirebugChrome =
             return;
 
         var zoom = Firebug.Options.getZoomByTextSize(value);
-        var fontSizeAdjust = zoom * 0.547; // scale the aspect relative to 11pt Lucida Grande
+        var zoomString = (zoom * 100) + "%";
 
+        var fontSizeAdjust = zoom * 0.547; // scale the aspect relative to 11pt Lucida Grande
         var contentBox = Firebug.chrome.$('fbContentBox');
         contentBox.style.fontSizeAdjust = fontSizeAdjust;
 
-        panelBar1.browser.contentDocument.documentElement.style.fontSizeAdjust = fontSizeAdjust;
-        panelBar2.browser.contentDocument.documentElement.style.fontSizeAdjust = fontSizeAdjust;
+        //panelBar1.browser.contentDocument.documentElement.style.fontSizeAdjust = fontSizeAdjust;
+        //panelBar2.browser.contentDocument.documentElement.style.fontSizeAdjust = fontSizeAdjust;
+
+        panelBar1.browser.markupDocumentViewer.textZoom = zoom;
+        panelBar2.browser.markupDocumentViewer.textZoom = zoom;
 
         var box = Firebug.chrome.$("fbCommandBox");
         box.style.fontSizeAdjust = fontSizeAdjust;
@@ -1096,6 +1100,7 @@ var FirebugChrome =
         {
             Firebug.CommandLine.getSingleRowCommandLine().style.fontSizeAdjust = fontSizeAdjust;
             Firebug.chrome.$("fbCommandLineCompletion").style.fontSizeAdjust = fontSizeAdjust;
+            Firebug.chrome.$("fbCommandLineCompletionList").style.fontSizeAdjust = fontSizeAdjust;
             Firebug.CommandLine.getCommandEditor().style.fontSizeAdjust = fontSizeAdjust;
         }
 
