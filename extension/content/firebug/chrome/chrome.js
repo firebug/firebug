@@ -1093,6 +1093,7 @@ var FirebugChrome =
 
         panelBar1.browser.markupDocumentViewer.textZoom = zoom;
         panelBar2.browser.markupDocumentViewer.textZoom = zoom;
+        cmdPopupBrowser.markupDocumentViewer.textZoom = zoom;
 
         var box = Firebug.chrome.$("fbCommandBox");
         box.style.fontSizeAdjust = fontSizeAdjust;
