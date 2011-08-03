@@ -1312,6 +1312,8 @@ Firebug.AutoCompleter = function(getExprOffset, getRange, evaluator, selectMode,
 
     this.popupCandidates = function(candidates, textBox, completionBox)
     {
+        completionPopup = Firebug.chrome.$("fbCommandLineCompletionList");
+
         // This method should not operate on the textBox or candidates list
         Dom.eraseNode(completionPopup);
 
