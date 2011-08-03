@@ -25,6 +25,7 @@ pref("extensions.firebug.toolbarCustomizationDone", false);
 pref("extensions.firebug.addonBarOpened", false);
 pref("extensions.firebug.showBreakNotification", true);
 pref("extensions.firebug.showStatusIcon", false);
+pref("extensions.firebug.stringCropLength", 50);
 
 // Command line
 pref("extensions.firebug.commandEditor", false);
