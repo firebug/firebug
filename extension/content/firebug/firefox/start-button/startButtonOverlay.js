@@ -76,7 +76,25 @@ Firebug.StartButton = Obj.extend(Firebug.Module,
     onLoad: function()
     {
         window.removeEventListener("load", this.onLoadBinding, false);
-        this.appendToToolbar();
+
+        try
+        {
+            this.appendToToolbar();
+
+            if (FBTrace.DBG_ERRORS)
+            {
+                // Some users complaint about missing start button, this could help
+                // to diagnose the problem.
+                var navBar = Firefox.getElementById("nav-bar");
+                FBTrace.sysout("startButton; onLoad.appendToToolbar: currentSet" +
+                    navBar.currentSet);
+            }
+        }
+        catch (e)
+        {
+            if (FBTrace.DBG_ERRORS)
+                FBTrace.sysout("startButton; onLoad.appendToToolbar EXCEPTION " + e, e);
+        }
     },
 
     shutdown: function()
