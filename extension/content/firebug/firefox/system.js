@@ -104,9 +104,9 @@ System.copyToClipboard = function(string)
  *  1 the current version is bigger
  *
  * @example:
- * if (compareFirebugVersion("1.6") >= 0)
+ * if (compareFirebugVersion("1.9") >= 0)
  * {
- *     // The current version is Firebug 1.6+
+ *     // The current version is Firebug 1.9+
  * }
  */
 System.checkFirebugVersion = function(expectedVersion)
@@ -115,10 +115,6 @@ System.checkFirebugVersion = function(expectedVersion)
         return 1;
 
     var version = Firebug.getVersion();
-
-    // Adapt to Firefox version scheme.
-    expectedVersion = expectedVersion.replace('X', '', "g");
-    version = version.replace('X', '', "g");
 
     // Use Firefox comparator service.
     var versionChecker = Cc["@mozilla.org/xpcom/version-comparator;1"].
