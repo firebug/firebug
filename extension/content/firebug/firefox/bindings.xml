@@ -440,8 +440,13 @@
     extends="chrome://global/content/bindings/scrollbox.xml#arrowscrollbox-clicktoscroll">
     <implementation>
         <constructor><![CDATA[
-            this.panelBar = FBL.getAncestorByClass(this, "panelBar");
-            this.panelTabs = FBL.getElementByClass(this, "panelTabs");
+            var id = this.getAttribute("id")
+            var index = id.indexOf("-Arrowscrollbox");
+            var parentPanelBarId = id.substr(0, index);
+
+            this.panelBar = document.getElementById(parentPanelBarId);
+            this.panelTabs = document.getElementById(parentPanelBarId + "-panelTabs");
+
             this.scrollbox = document.getAnonymousElementByAttribute(this, "anonid", "scrollbox");
             window.addEventListener("resize", this, false);
         ]]></constructor>
@@ -1379,27 +1384,16 @@
     <implementation>
         <constructor><![CDATA[
             var searchBox = document.getAnonymousElementByAttribute(this, "anonid", "searchBox");
-            var searchPrev = document.getAnonymousElementByAttribute(this, "anonid", "searchPrev");
-            var searchNext = document.getAnonymousElementByAttribute(this, "anonid", "searchNext");
-            var searchMenu = document.getAnonymousElementByAttribute(this, "anonid",
-                "fbSearchOptionsMenu");
-            var searchDescription = document.getAnonymousElementByAttribute(this, "anonid",
-                "fbSearchBoxDescription");
             var optionsPopup = document.getElementById("fbSearchOptionsPanel");
 
-            if (searchMenu)
-                searchMenu.setAttribute("aria-label", FBL.$STR("a11y.labels.search options"));
-            if (searchDescription)
-            {
-                searchDescription.setAttribute("tooltiptext",
-                    FBL.$STR("a11y.labels.Press up or down arrow key for search options"));
-            }
-            FBL.internationalize(searchBox, "label");
-            FBL.internationalize(searchPrev, "label");
-            FBL.internationalize(searchNext, "label");
+            var self = this;
+            searchBox.addEventListener("focus", function(event) {
+                self.focusHandler(event);
+            }, true);
 
-            searchBox.addEventListener("focus", FBL.bind(this.focusHandler, this), true);
-            optionsPopup.addEventListener("focus", FBL.bind(this.panelFocusHandler, this), true);
+            optionsPopup.addEventListener("focus", function(event) {
+                self.panelFocusHandler(event);
+            }, true);
         ]]></constructor>
 
         <property name="value">
@@ -1480,8 +1474,31 @@
 
         <method name="showOptions">
             <body><![CDATA[
+                var searchBox = document.getAnonymousElementByAttribute(this, "anonid", "searchBox");
+                var searchPrev = document.getAnonymousElementByAttribute(this, "anonid", "searchPrev");
+                var searchNext = document.getAnonymousElementByAttribute(this, "anonid", "searchNext");
+
+                FBL.internationalize(searchBox, "label");
+                FBL.internationalize(searchPrev, "label");
+                FBL.internationalize(searchNext, "label");
+
+                var searchMenu = document.getAnonymousElementByAttribute(this, "anonid",
+                    "fbSearchOptionsMenu");
+                var searchDescription = document.getAnonymousElementByAttribute(this, "anonid",
+                    "fbSearchBoxDescription");
+
+                if (searchMenu)
+                    searchMenu.setAttribute("aria-label", FBL.$STR("a11y.labels.search options"));
+
+                if (searchDescription)
+                {
+                    searchDescription.setAttribute("tooltiptext",
+                        FBL.$STR("a11y.labels.Press up or down arrow key for search options"));
+                }
+
                 var optionsPopup = document.getElementById("fbSearchOptionsPanel");
                 var position = (Firebug.getPlacement() == "detached" ? "after_end" : "before_end");
+
                 this.focused = true;
                 optionsPopup.setAttribute("position", position);
                 optionsPopup.openPopup(this, position, 0, 0, false, false);
