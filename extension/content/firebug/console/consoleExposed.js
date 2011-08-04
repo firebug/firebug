@@ -306,7 +306,12 @@ function createFirebugConsole(context, win)
         else
             var msg = args[0];
 
-        if (msg.stack)
+        // If there's no error message, there's also no stack trace. See Issue 4700.
+        if (!msg)
+        {
+            var trace = null;
+        }
+        else if (msg.stack)
         {
             var trace = StackFrame.parseToStackTrace(msg.stack, context);
             if (FBTrace.DBG_CONSOLE)
@@ -314,7 +319,7 @@ function createFirebugConsole(context, win)
         }
         else if (context.stackTrace)
         {
-            var trace = context.stackTrace
+            var trace = context.stackTrace;
             if (FBTrace.DBG_CONSOLE)
                 FBTrace.sysout("logAssert trace from context.window.stackTrace", trace);
         }
@@ -327,8 +332,8 @@ function createFirebugConsole(context, win)
 
         trace = StackFrame.cleanStackTraceOfFirebug(trace);
 
-        var url = msg.fileName ? msg.fileName : win.location.href;
-        var lineNo = (trace && msg.lineNumber) ? msg.lineNumber : 0; // we may have only the line popped above
+        var url = msg && msg.fileName ? msg.fileName : win.location.href;
+        var lineNo = (trace && msg && msg.lineNumber) ? msg.lineNumber : 0; // we may have only the line popped above
         var errorObject = new FirebugReps.ErrorMessageObj(msg, url, lineNo, "", category, context, trace);
 
         if (trace && trace.frames && trace.frames[0])
