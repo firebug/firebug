@@ -35,7 +35,8 @@ const mimeExtensionMap =
     "png": "image/png",
     "bmp": "image/bmp",
     "swf": "application/x-shockwave-flash",
-    "flv": "video/x-flv"
+    "flv": "video/x-flv",
+    "webm": "video/webm"
 };
 
 const mimeCategoryMap =
@@ -64,6 +65,7 @@ const mimeCategoryMap =
     "audio/x-mpeg-3": "media",
     "video/mpeg": "media",
     "video/x-mpeg": "media",
+    "video/webm": "media",
     "audio/ogg": "media",
     "application/ogg": "media",
     "application/x-ogg": "media",
