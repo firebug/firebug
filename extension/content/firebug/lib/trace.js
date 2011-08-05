@@ -2,6 +2,11 @@
 
 define([], function() {
 
+//********************************************************************************************* //
+//Constants
+
+const Cu = Components.utils;
+
 // ********************************************************************************************* //
 // Firebug Trace - FBTrace
 
@@ -9,11 +14,11 @@ var scope = {};
 
 try
 {
-    Components.utils["import"]("resource://fbtrace/firebug-trace-service.js", scope);
+    Cu["import"]("resource://fbtrace/firebug-trace-service.js", scope);
 }
 catch (err)
 {
-    Components.utils.reportError("FBTrace is not installed, use empty implementation");
+    Cu.reportError("FBTrace is not installed, use empty implementation");
 
     scope.traceConsoleService =
     {
