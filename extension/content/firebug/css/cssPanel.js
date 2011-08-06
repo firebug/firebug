@@ -1409,7 +1409,7 @@ Firebug.CSSStyleSheetPanel.prototype = Obj.extend(Firebug.Panel,
 
                 this.infoTipValue = cssValue.value;
 
-                if (cssValue.type == "rgb" || cssValue.type == "hsl" ||
+                if (cssValue.type == "rgb" || cssValue.type == "hsl" || cssValue.type == "gradient" ||
                     (!cssValue.type && Css.isColorKeyword(cssValue.value)))
                 {
                     this.infoTipType = "color";
@@ -2884,20 +2884,31 @@ function parseCSSValue(value, offset)
             break;
     }
 
-    if (m)
-    {
-        var type;
-        if (m[1])
-            type = "url";
-        else if (m[2] || m[4])
-            type = "rgb";
-        else if (m[3])
-            type = "hsl";
-        else if (m[5])
-            type = "int";
+    if (!m)
+        return;
 
-        return {value: m[0], start: start+m.index, end: start+m.index+(m[0].length-1), type: type};
+    var type;
+    if (m[1])
+        type = "url";
+    else if (m[2] || m[4])
+        type = "rgb";
+    else if (m[3])
+        type = "hsl";
+    else if (m[5])
+        type = "int";
+
+    var cssValue = {value: m[0], start: start+m.index, end: start+m.index+(m[0].length-1), type: type};
+
+    if (!type && m[8] && m[8].indexOf("gradient") != -1)
+    {
+        var arg = value.substr(m[0].length).match(/\((?:(?:[^\(\)]*)|(?:\(.*?\)))+\)/);
+        if (!arg)
+            return; 
+
+        cssValue.value += arg[0];
+        cssValue.type = "gradient";
     }
+    return cssValue;
 }
 
 function findPropByName(props, name)
