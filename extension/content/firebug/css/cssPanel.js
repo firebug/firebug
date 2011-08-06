@@ -516,7 +516,26 @@ Firebug.CSSModule = Obj.extend(Obj.extend(Firebug.Module, Firebug.EditorSelector
 
     initialize: function()
     {
-           this.editors = {};
+        this.editors = {};
+        this.registerEditor('Live', {
+            startEditing: function(stylesheet, context, panel)
+            {
+                panel.startLiveEditing(stylesheet, context);
+            },
+            stopEditing: function() {
+                Firebug.Editor.stopEditing();
+            }
+        });
+
+        this.registerEditor('Source', {
+            startEditing: function(stylesheet, context, panel)
+            {
+                panel.startSourceEditing(stylesheet, context);
+            },
+            stopEditing: function() {
+                Firebug.Editor.stopEditing();
+            }
+        });
     },
 
     watchWindow: function(context, win)
@@ -653,7 +672,7 @@ Firebug.CSSStyleSheetPanel.prototype = Obj.extend(Firebug.Panel,
             this.currentCSSEditor = Firebug.CSSModule.getCurrentEditor();
             try
             {
-                this.currentCSSEditor.startEditing(styleSheet, this.context);
+                this.currentCSSEditor.startEditing(styleSheet, this.context, this);
                 Events.dispatch(this.fbListeners, 'onStartCSSEditing', [styleSheet, this.context]);
             }
             catch(exc)
@@ -1066,16 +1085,6 @@ Firebug.CSSStyleSheetPanel.prototype = Obj.extend(Firebug.Panel,
         this.onMouseDown = Obj.bind(this.onMouseDown, this);
         this.onClick = Obj.bind(this.onClick, this);
 
-        this.startLiveEditing = Obj.bind(this.startLiveEditing, this);
-        this.stopLiveEditing = Obj.bind(Firebug.Editor.stopEditing, Firebug.Editor);
-        Firebug.CSSModule.registerEditor('Live', {startEditing: this.startLiveEditing,
-            stopEditing: this.stopLiveEditing});
-
-        this.startSourceEditing = Obj.bind(this.startSourceEditing, this);
-        this.stopSourceEditing = Obj.bind(Firebug.Editor.stopEditing, Firebug.Editor);
-        Firebug.CSSModule.registerEditor('Source', {startEditing: this.startSourceEditing,
-            stopEditing: this.stopSourceEditing});
-
         Firebug.Panel.initialize.apply(this, arguments);
     },
 
@@ -1086,9 +1095,6 @@ Firebug.CSSStyleSheetPanel.prototype = Obj.extend(Firebug.Panel,
         Persist.persistObjects(this, state);
 
         this.stopEditing();
-
-        Firebug.CSSModule.unregisterEditor('Live');
-        Firebug.CSSModule.unregisterEditor('Source');
 
         Firebug.Panel.destroy.apply(this, arguments);
     },
