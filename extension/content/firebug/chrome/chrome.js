@@ -1519,10 +1519,10 @@ var FirstRunPage =
                 // Don't forget to update the preference so, the page is not displayed again
                 var version = Firebug.getVersion();
                 Firebug.Options.set("currentVersion", version);
-                version = version.replace('X', '', "g");
 
                 // xxxHonza: put the URL in firebugURLs as soon as it's in chrome.js
-                Win.openNewTab("http://getfirebug.com/firstrun#Firebug " + version);
+                if (Firebug.Options.get("showFirstRunPage"))
+                    Win.openNewTab("http://getfirebug.com/firstrun#Firebug " + version);
             }
         }, 500);
     }
