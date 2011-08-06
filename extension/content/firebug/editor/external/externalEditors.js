@@ -168,8 +168,9 @@ Firebug.ExternalEditors = Obj.extend(Firebug.Module,
             Menu.createMenuItem(popup, "-");
 
         Menu.createMenuItem(popup, {
-            label: Locale.$STR('firebug.Configure_Editors'),
-            option: 'openEditorList'
+            label: Locale.$STR("firebug.Configure_Editors") + "...",
+            nol10n: true,
+            option: "openEditorList"
         });
     },
 
