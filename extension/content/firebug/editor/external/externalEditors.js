@@ -263,13 +263,13 @@ Firebug.ExternalEditors = Obj.extend(Firebug.Module,
     {
         var line = null;
         var panel = Firebug.chrome.getSelectedPanel();
-        if (!panel)
-            return;
-
-        var box = panel.selectedSourceBox;
-        if (panel.name == "script" && box && box.centralLine)
-            line = panel.selectedSourceBox.centralLine;
-
+        if (panel)
+        {
+            var box = panel.selectedSourceBox;
+            if (box && box.centralLine)
+                line = box.centralLine;
+        }
+        // if firebug isn't active this will redturn documentURI
         var url = Firebug.chrome.getSelectedPanelURL();
         this.open(url, line, editorId, context);
     },
