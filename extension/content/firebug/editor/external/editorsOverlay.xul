@@ -17,16 +17,14 @@
 
     <!-- Basic editing related commands -->
     <commandset id="mainCommandSet">
-        <command id="cmd_openInEditor" oncommand="Firebug.ExternalEditors.onContextMenuCommand(event)"/>
+        <command id="cmd_openInEditor" oncommand="Firebug.ExternalEditors.onContextMenuCommand(event);"/>
+        <command id="cmd_openConfigureEditors" oncommand="Firebug.ExternalEditors.openEditorList();"/>
     </commandset>
 
     <!-- Firebug icon menu overlay -->
     <menupopup id="fbFirebugMenuPopup">
-        <menu id="FirebugMenu_OpenWith" label="firebug.OpenWith" insertafter="menu_openActionsSeparator"
-                class="fbInternational" openFromContext="true" command="cmd_openInEditor">
-            <menupopup id="fbFirebugMenu_OpenWith"
-                    onpopupshowing="return Firebug.ExternalEditors.onEditorsShowing(this);"/>
-        </menu>
+        <menuitem id="menu_configureEditors" insertafter="menu_openActionsSeparator"
+                  label="firebug.Configure_Editors" command="cmd_openConfigureEditors"
+                  class="fbInternational"/>
     </menupopup>
-
 </overlay>
