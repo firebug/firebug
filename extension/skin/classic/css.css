@@ -151,9 +151,9 @@
 .infoTipColorBox {
     background-image: -moz-repeating-linear-gradient(
         left top -45deg,
-        #E6E6E6,
-        #E6E6E6 5px,
-        #FFFFFF 5px,
-        #FFFFFF 10px
+        #A0A0A0,
+        #A0A0A0 5px,
+        #C8C8C8 5px,
+        #C8C8C8 10px
     );
 }
