@@ -216,6 +216,7 @@ var FirebugChrome =
             // xxxHonza: is there any reason why we don't distribute "initializeUI"
             // event to modules?
             FirstRunPage.initializeUI();
+            UserAgentModifier.initializeUI();
 
             // To not execute it twice in in-browser scope.
             if (inDetachedScope)
@@ -1528,6 +1529,37 @@ var FirstRunPage =
     }
 }
 
+//************************************************************************************************
+// User agent modifier
+
+/**
+ * This object is responsible for adding Firebug to the user agent header of each request,
+ * if the according property is set.
+ */
+
+var UserAgentModifier =
+{
+    initializeUI: function()
+    {
+        if (Firebug.Options.get("modifyUserAgent"))
+            observerService.addObserver(this, "http-on-modify-request", false);
+    },
+  
+    observe: function(subject, topic, data)
+    {
+        if (topic != "http-on-modify-request")
+          return;
+
+        var httpChannel = subject.QueryInterface(Ci.nsIHttpChannel);
+        httpChannel.setRequestHeader
+        (
+            "User-Agent",
+            httpChannel.getRequestHeader("User-Agent") + ' ' + "Firebug/" + Firebug.currentVersion,
+            false
+        );
+    }
+}
+
 // ************************************************************************************************
 // Key Bindings Manager
 
@@ -1983,4 +2015,3 @@ return ChromeFactory;
 
 // ********************************************************************************************* //
 });
-

@@ -20,6 +20,7 @@ pref("extensions.firebug.panelTabMinWidth", 50);
 pref("extensions.firebug.sourceLinkLabelWidth", 17);
 pref("extensions.firebug.currentVersion", "");
 pref("extensions.firebug.showFirstRunPage", true);
+pref("extensions.firebug.modifyUserAgent", false);
 pref("extensions.firebug.useDefaultLocale", false);
 pref("extensions.firebug.activateSameOrigin", true);
 pref("extensions.firebug.toolbarCustomizationDone", false);
