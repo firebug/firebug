@@ -341,6 +341,13 @@ var HttpActivityObserverModule = Obj.extend(Firebug.Module,
                 i -= 2;
             }
         }
+    },
+
+    shutdown: function()
+    {
+        // destroy NetHttpActivityObserver
+        NetHttpActivityObserver.unregisterObserver();
+        NetHttpActivityObserver.registerObserver = function() {};
     }
 });
 

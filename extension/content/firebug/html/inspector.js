@@ -228,8 +228,9 @@ Firebug.Inspector = Obj.extend(Firebug.Module,
         if (context.stopped)
             Firebug.Debugger.thaw(context);
 
-        if (context.hoverNode)
-            this.inspectNode(context.hoverNode);
+        var hoverNodes = context.window.document.querySelectorAll(':hover');
+        if (hoverNodes.length)
+            this.inspectNode(hoverNodes[hoverNodes.length-1]);
     },
 
     /**
@@ -631,15 +632,6 @@ Firebug.Inspector = Obj.extend(Firebug.Module,
     },
 
     /**
-     * Create a method context.onPreInspectMouseOver that updates context.hoverNode to be equal to event.target. Called on element mouseover.
-     * @param {Window} context Context of the main window
-     */
-    initContext: function(context)
-    {
-        context.onPreInspectMouseOver = function(event) { context.hoverNode = event.target; };
-    },
-
-    /**
      * Stop inspecting and delete timers.
      * @param {Window} context Context of the main window
      */
@@ -656,24 +648,10 @@ Firebug.Inspector = Obj.extend(Firebug.Module,
     },
 
     /**
-     * Attach a mouseover event to win that calls context.onPreInspectMouseOver.
-     * @param {Window} context The context of the onPreInspectMouseOver method
-     * @param {Window} win the context of the main window
-     */
-    watchWindow: function(context, win)
-    {
-        win.addEventListener("mouseover", context.onPreInspectMouseOver, true);
-    },
-
-    /**
-     * Remove the mouseover event from win that was used to call context.onPreInspectMouseOver.
-     * @param {Window} context The context of the onPreInspectMouseOver method
-     * @param {Window} win the context of the main window
      */
     unwatchWindow: function(context, win)
     {
         try {
-            win.removeEventListener("mouseover", context.onPreInspectMouseOver, true);
             this.hideQuickInfoBox();
         } catch (ex) {
             // Get unfortunate errors here sometimes, so let's just ignore them since the window is going away anyhow
