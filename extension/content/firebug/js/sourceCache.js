@@ -305,16 +305,30 @@ Firebug.SourceCache.prototype = Obj.extend(new Firebug.Listener(),
 
     getLine: function(url, lineNo)
     {
-        var lines = this.load(url);
-        if (lines)
+        var lines;
+
+        try
         {
-            if (lineNo <= lines.length)
-                return lines[lineNo-1];
-            else
-                return (lines.length == 1) ? lines[0] : "("+lineNo+" out of range "+lines.length+")";
+            lines = this.load(url);
+        }
+        catch (e)
+        {
+            if (FBTrace.DBG_ERRORS)
+                FBTrace.sysout("sourceCache.getLine; EXCEPTION " + e, e);
+        }
+
+        if (!lines)
+            return "(no source for " + url + ")";
+
+        if (lineNo <= lines.length)
+        {
+            return lines[lineNo-1];
         }
         else
-            return "(no source for "+url+")";
+        {
+            return (lines.length == 1) ?
+                lines[0] : "(" + lineNo + " out of range " + lines.length + ")";
+        }
     }
 });
 
