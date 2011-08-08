@@ -18,8 +18,6 @@ try
 }
 catch (err)
 {
-    Cu.reportError("FBTrace is not installed, use empty implementation");
-
     scope.traceConsoleService =
     {
         getTracer: function(prefDomain)
