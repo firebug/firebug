@@ -59,7 +59,7 @@ Menu.setItemIntoElement = function(element, item)
 
     // Avoid closing the popup menu if a preference has been changed.
     // This allows to quickly change more options.
-    if (item.type == "checkbox")
+    if (item.type == "checkbox" && !item.closemenu)
         element.setAttribute("closemenu", "none");
 
     if (item.checked)

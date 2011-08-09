@@ -767,7 +767,7 @@
             <parameter name="command"/>
             <body><![CDATA[
                 return {label: label, type: "checkbox", checked: checked,
-                    command: FBL.bindFixed(command, this)};
+                    command: FBL.bindFixed(command, this), closemenu: true};
             ]]></body>
         </method>
 
