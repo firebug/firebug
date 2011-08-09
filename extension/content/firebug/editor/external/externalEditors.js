@@ -25,7 +25,8 @@ function(FBL, Obj, Firebug, Locale, Xpcom, Url, SourceLink, Css, System, Arr, Do
 const Cc = Components.classes;
 const Ci = Components.interfaces;
 
-const DirService = Xpcom.CCSV("@mozilla.org/file/directory_service;1", "nsIDirectoryServiceProvider");
+const DirService = Xpcom.CCSV("@mozilla.org/file/directory_service;1",
+    "nsIDirectoryServiceProvider");
 const NS_OS_TEMP_DIR = "TmpD"
 const nsIFile = Ci.nsIFile;
 const nsILocalFile = Ci.nsILocalFile;
@@ -194,15 +195,18 @@ Firebug.ExternalEditors = Obj.extend(Firebug.Module,
         if (object instanceof SourceLink.SourceLink)
         {
             var sourceLink = object;
-            this.appendContextMenuItem(popup, sourceLink.href,
-                sourceLink.line);
+            this.appendContextMenuItem(popup, sourceLink.href, sourceLink.line);
+        }
+        else if (target.id == "fbLocationList")
+        {
+            if (object.href)
+                this.appendContextMenuItem(popup, object.href, 0);
         }
         else if (panel)
         {
             var sourceLink = panel.getSourceLink(target, object);
             if (sourceLink)
-                this.appendContextMenuItem(popup, sourceLink.href,
-                    sourceLink.line);
+                this.appendContextMenuItem(popup, sourceLink.href, sourceLink.line);
         }
         else if (Css.hasClass(target, "stackFrameLink"))
         {
@@ -212,13 +216,14 @@ Firebug.ExternalEditors = Obj.extend(Firebug.Module,
 
     createContextMenuItem: function(doc)
     {
-        var item = doc.createElement('menu');
-        item.setAttribute('type', "splitmenu");
-        item.setAttribute('iconic', "true");
-        item.setAttribute('oncommand', "Firebug.ExternalEditors.onContextMenuCommand(event)");
+        var item = doc.createElement("menu");
+        item.setAttribute("type", "splitmenu");
+        item.setAttribute("iconic", "true");
+        item.setAttribute("oncommand", "Firebug.ExternalEditors.onContextMenuCommand(event)");
 
-        var menupopup = doc.createElement('menupopup');
-        menupopup.setAttribute('onpopupshowing', "return Firebug.ExternalEditors.onEditorsShowing(this)");
+        var menupopup = doc.createElement("menupopup");
+        menupopup.setAttribute("onpopupshowing",
+            "return Firebug.ExternalEditors.onEditorsShowing(this)");
 
         item.appendChild(menupopup);
         return item;
@@ -228,21 +233,21 @@ Firebug.ExternalEditors = Obj.extend(Firebug.Module,
     {
         var editor = this.getDefaultEditor();
         var doc = popup.ownerDocument;
-        var item = doc.getElementById('menu_firebugOpenWithEditor');
+        var item = doc.getElementById("menu_firebugOpenWithEditor");
 
         if (item)
         {
             item = item.cloneNode(true);
             item.hidden = false;
-            item.removeAttribute('openFromContext');
+            item.removeAttribute("openFromContext");
         }
         else
         {
             item = this.createContextMenuItem(doc);
         }
 
-        item.setAttribute('image', editor.image);
-        item.setAttribute('label', editor.label);
+        item.setAttribute("image", editor.image);
+        item.setAttribute("label", editor.label);
         item.value = editor.id;
 
         popup.appendChild(item);
@@ -252,9 +257,9 @@ Firebug.ExternalEditors = Obj.extend(Firebug.Module,
 
     onContextMenuCommand: function(event)
     {
-        if (event.target.getAttribute('option') == 'openEditorList')
+        if (event.target.getAttribute("option") == "openEditorList")
             this.openEditorList();
-        else if (event.currentTarget.hasAttribute('openFromContext'))
+        else if (event.currentTarget.hasAttribute("openFromContext"))
             this.openContext(Firebug.currentContext, event.target.value);
         else
             this.open(this.lastSource.url, this.lastSource.line, event.target.value);
@@ -413,7 +418,8 @@ Firebug.ExternalEditors = Obj.extend(Firebug.Module,
             temporaryDirectory = tmpDir;
         }
 
-        var lpath = href.replace(/^[^:]+:\/*/g, "").replace(/\?.*$/g, "").replace(/[^0-9a-zA-Z\/.]/g, "_");
+        var lpath = href.replace(/^[^:]+:\/*/g, "").replace(/\?.*$/g, "")
+            .replace(/[^0-9a-zA-Z\/.]/g, "_");
         /* dummy comment to workaround eclipse bug */
         if (!/\.[\w]{1,5}$/.test(lpath))
         {
@@ -436,7 +442,8 @@ Firebug.ExternalEditors = Obj.extend(Firebug.Module,
         converter.charset = 'UTF-8'; // TODO detect charset from current tab
         data = converter.ConvertFromUnicode(data);
 
-        var stream = Xpcom.CCIN("@mozilla.org/network/safe-file-output-stream;1", "nsIFileOutputStream");
+        var stream = Xpcom.CCIN("@mozilla.org/network/safe-file-output-stream;1",
+            "nsIFileOutputStream");
         stream.init(file, 0x04 | 0x08 | 0x20, 0664, 0); // write, create, truncate
         stream.write(data, data.length);
 
