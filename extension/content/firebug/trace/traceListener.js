@@ -2,8 +2,9 @@
 
 define([
     "firebug/lib/string",
+    "firebug/lib/css",
 ],
-function(Str) {
+function(Str, Css) {
 
 // ********************************************************************************************* //
 // Trace Listener
@@ -12,11 +13,12 @@ function(Str) {
  * Default implementation of a Trace listener. Can be used to customize tracing logs
  * in the console in order to easily distinguish logs.
  */
-function TraceListener(prefix, type, removePrefix)
+function TraceListener(prefix, type, removePrefix, stylesheetURL)
 {
     this.prefix = prefix;
     this.type = type;
     this.removePrefix = removePrefix;
+    this.stylesheetURL = stylesheetURL;
 }
 
 TraceListener.prototype =
@@ -25,6 +27,8 @@ TraceListener.prototype =
     // Called when console window is loaded.
     onLoadConsole: function(win, rootNode)
     {
+        if (this.stylesheetURL)
+            Css.appendStylesheet(rootNode.ownerDocument, this.stylesheetURL);
     },
 
     // Called when a new message is logged in to the trace-console window.
