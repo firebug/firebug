@@ -13,6 +13,11 @@ var Arr = {};
 // ********************************************************************************************* //
 // Arrays
 
+Arr.isArray = function(obj)
+{
+    return Object.prototype.toString.call(obj) === "[object Array]";
+}
+
 Arr.keys = function(map)  // At least sometimes the keys will be on user-level window objects
 {
     var keys = [];
