@@ -1192,7 +1192,8 @@ Firebug.ScriptPanel.prototype = Obj.extend(Firebug.SourceBoxPanel,
         );
         if (hasBreakpoint)
         {
-            var isDisabled = JavaScriptTool.isBreakpointDisabled(this.location.href, lineNo);
+            var isDisabled = JavaScriptTool.isBreakpointDisabled(this.context, this.location.href,
+                lineNo);
             items.push(
                 {label: "DisableBreakpoint", type: "checkbox", checked: isDisabled,
                     command: Obj.bindFixed(this.toggleDisableBreakpoint, this, lineNo) }
