@@ -708,6 +708,10 @@ function getTempContextCount()
 // ********************************************************************************************* //
 // Registration
 
+// Keep compatibility with existing XUL based extensions
+// deprecated
+Firebug.NetMonitor.Utils = NetUtils;
+
 Firebug.registerActivableModule(Firebug.NetMonitor);
 
 return Firebug.NetMonitor;
