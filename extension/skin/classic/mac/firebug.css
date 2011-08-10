@@ -16,6 +16,7 @@
 #fbCommandArrow,
 #fbCommandLine,
 #fbCommandEditor,
+#fbCommandLineCompletion,
 .fbCommandLineCompletions {
     font-family: Monaco, monospace;
 }
