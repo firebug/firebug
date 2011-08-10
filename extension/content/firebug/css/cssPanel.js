@@ -163,6 +163,7 @@ const styleGroups =
         "font-size",
         "font-weight",
         "font-style",
+        "font-size-adjust",
         "color",
         "text-transform",
         "text-decoration",
