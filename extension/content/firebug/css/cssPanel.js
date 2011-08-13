@@ -43,8 +43,7 @@ const nsIInterfaceRequestor = Ci.nsIInterfaceRequestor;
 const nsISelectionDisplay = Ci.nsISelectionDisplay;
 const nsISelectionController = Ci.nsISelectionController;
 
-var appInfo = Cc["@mozilla.org/xre/app-info;1"].getService(Ci.nsIXULAppInfo);
-var versionChecker = Cc["@mozilla.org/xpcom/version-comparator;1"].getService(Ci.nsIVersionComparator);
+const DOMUTILS_SUPPORTS_PSEUDOELEMENTS = Dom.domUtils.getCSSStyleRules.length == 2
 
 // See: http://mxr.mozilla.org/mozilla1.9.2/source/content/events/public/nsIEventStateManager.h#153
 const STATE_ACTIVE  = 0x01;
@@ -1784,52 +1783,53 @@ CSSElementPanel.prototype = Obj.extend(Firebug.CSSStyleSheetPanel.prototype,
         var inspectedRules, displayedRules = {};
 
         // Firefox 6+ allows inspecting of pseudo-elements (see issue 537)
-        if (versionChecker.compare(appInfo.version, "6.0*") >= 0)
+        if (DOMUTILS_SUPPORTS_PSEUDOELEMENTS && !inheritMode)
             pseudoElements = Arr.extendArray(pseudoElements,
                 [":first-letter", ":first-line", ":before", ":after"]);
 
-        for(var p in pseudoElements)
+        for (var p in pseudoElements)
         {
             try
             {
-                inspectedRules = Dom.domUtils ? Dom.domUtils.getCSSStyleRules(
-                    element, pseudoElements[p]) : null;
+                inspectedRules = Dom.domUtils.getCSSStyleRules(element, pseudoElements[p]);
             }
             catch (exc)
             {
+                continue;
             }
 
-            if (inspectedRules)
+            if (!inspectedRules)
+                continue;
+
+            for (var i = 0; i < inspectedRules.Count(); ++i)
             {
-                for (var i = 0; i < inspectedRules.Count(); ++i)
-                {
-                    var rule = Xpcom.QI(inspectedRules.GetElementAt(i), nsIDOMCSSStyleRule);
+                var rule = Xpcom.QI(inspectedRules.GetElementAt(i), nsIDOMCSSStyleRule);
 
-                    var isSystemSheet = Url.isSystemStyleSheet(rule.parentStyleSheet);
-                    if (!Firebug.showUserAgentCSS && isSystemSheet) // This removes user agent rules
-                        continue;
+                var isSystemSheet = Url.isSystemStyleSheet(rule.parentStyleSheet);
+                if (!Firebug.showUserAgentCSS && isSystemSheet) // This removes user agent rules
+                    continue;
 
-                    var props = this.getRuleProperties(this.context, rule, inheritMode);
-                    if (inheritMode && !props.length)
-                        continue;
+                var props = this.getRuleProperties(this.context, rule, inheritMode);
+                if (inheritMode && !props.length)
+                    continue;
 
-                    var isPseudoElementSheet = (pseudoElements[p] != "");
-                    var sourceLink = this.getSourceLink(null, rule);
+                var isPseudoElementSheet = (pseudoElements[p] != "");
+                var sourceLink = this.getSourceLink(null, rule);
 
-                    if (!isPseudoElementSheet)
-                        this.markOverriddenProps(props, usedProps, inheritMode);
+                if (!isPseudoElementSheet)
+                    this.markOverriddenProps(props, usedProps, inheritMode);
 
-                    var ruleId = getRuleId(rule);
-                    rules.splice(0, 0, {rule: rule, id: ruleId,
-                        // Show universal selectors with pseudo-class
-                        // (http://code.google.com/p/fbug/issues/detail?id=3683)
-                        selector: rule.selectorText.replace(/ :/g, " *:"),
-                            sourceLink: sourceLink,
-                            props: props, inherited: inheritMode,
-                            isSystemSheet: isSystemSheet,
-                            isPseudoElementSheet: isPseudoElementSheet,
-                            isSelectorEditable: true});
-                }
+                var ruleId = getRuleId(rule);
+                rules.splice(0, 0, {rule: rule, id: ruleId,
+                    // Show universal selectors with pseudo-class
+                    // (http://code.google.com/p/fbug/issues/detail?id=3683)
+                    selector: rule.selectorText.replace(/ :/g, " *:"),
+                    sourceLink: sourceLink,
+                    props: props, inherited: inheritMode,
+                    isSystemSheet: isSystemSheet,
+                    isPseudoElementSheet: isPseudoElementSheet,
+                    isSelectorEditable: true
+                });
             }
         }
 
