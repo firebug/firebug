@@ -718,6 +718,13 @@
             ]]></setter>
         </property>
     </implementation>
+    <handlers>
+        <handler event="contextmenu"><![CDATA[
+            var panelTabMenu = this.getElementsByTagName('panelTabMenu')[0];
+            if (panelTabMenu && this.selected == "true")
+                panelTabMenu.showMenu();
+        ]]></handler>
+    </handlers>
 </binding>
 
 <binding id="panelTabMenu" display="xul:button" extends="chrome://global/content/bindings/toolbarbutton.xml#toolbarbutton">
