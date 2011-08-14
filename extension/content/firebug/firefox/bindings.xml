@@ -721,8 +721,8 @@
     <handlers>
         <handler event="contextmenu"><![CDATA[
             var panelTabMenu = this.getElementsByTagName('panelTabMenu')[0];
-            if (panelTabMenu && this.selected == "true")
-                panelTabMenu.showMenu();
+            if (panelTabMenu)
+                panelTabMenu.showMenu(this);
         ]]></handler>
     </handlers>
 </binding>
@@ -746,7 +746,7 @@
 
         <method name="onToggle">
             <body><![CDATA[
-                var panelType = this.panelBar.selectedTab.panelType;
+                var panelType = this.parentNode.panelType;
                 panelType.prototype.setEnabled(!panelType.prototype.isEnabled());
                 this.panelBar.updateTab(panelType);
             ]]></body>
@@ -754,7 +754,7 @@
 
         <method name="onEnable">
             <body><![CDATA[
-                var panelType = this.panelBar.selectedTab.panelType;
+                var panelType = this.parentNode.panelType;
                 panelType.prototype.setEnabled(true);
                 this.panelBar.updateTab(panelType);
             ]]></body>
@@ -762,7 +762,7 @@
 
         <method name="onDisable">
             <body><![CDATA[
-                var panelType = this.panelBar.selectedTab.panelType;
+                var panelType = this.parentNode.panelType;
                 panelType.prototype.setEnabled(false);
                 this.panelBar.updateTab(panelType);
             ]]></body>
@@ -796,10 +796,11 @@
         </method>
 
         <method name="showMenu">
+            <parameter name="anchor"/>
             <body><![CDATA[
                 var popupBoxObject = this.popup.popupBoxObject;
                 popupBoxObject.setConsumeRollupEvent(popupBoxObject.ROLLUP_NO_CONSUME);
-                this.popup.showPopup(this, -1, -1, "popup", "bottomleft", "topleft");
+                this.popup.showPopup(anchor || this, -1, -1, "popup", "bottomleft", "topleft");
             ]]></body>
         </method>
     </implementation>
@@ -807,25 +808,29 @@
     <handlers>
         <handler event="mousedown" button="0"><![CDATA[
             this.showMenu();
+            // needed for displaying menu on not selected tabs
+            event.stopPropagation();
         ]]></handler>
 
         <handler event="popupshowing"><![CDATA[
-            var tab = this.panelBar.selectedTab;
+            var tab = this.parentNode;
             if (!tab)
                 return false;
             this.setAttribute("role", "menu");
             var items = [];
             var panelType = tab.panelType;
+            var enabled = true;
 
             // Create menu items for activation (only for activable panels).
-            if (tab.panelType.prototype.activable)
+            if (panelType.prototype.activable)
             {
-                var enabled = tab.panelType.prototype.isEnabled();
+                enabled = panelType.prototype.isEnabled();
                 items.push(this.optionMenu("panel.Enabled", enabled, this.onToggle));
             }
 
-            var panelItems = [];
-            var panel = this.panelBar.selectedPanel;
+            // force creating panel only if it's not disabled
+            var panel = Firebug.currentContext.getPanelByType(panelType, !enabled);
+
             if (panel)
             {
                 // Get panel's option items
