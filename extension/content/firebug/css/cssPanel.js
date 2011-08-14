@@ -43,7 +43,8 @@ const nsIInterfaceRequestor = Ci.nsIInterfaceRequestor;
 const nsISelectionDisplay = Ci.nsISelectionDisplay;
 const nsISelectionController = Ci.nsISelectionController;
 
-const DOMUTILS_SUPPORTS_PSEUDOELEMENTS = Dom.domUtils.getCSSStyleRules.length == 2
+// before firefox 6 getCSSStyleRules accepted only one argument
+const DOMUTILS_SUPPORTS_PSEUDOELEMENTS = Dom.domUtils.getCSSStyleRules.length > 1;
 
 // See: http://mxr.mozilla.org/mozilla1.9.2/source/content/events/public/nsIEventStateManager.h#153
 const STATE_ACTIVE  = 0x01;
