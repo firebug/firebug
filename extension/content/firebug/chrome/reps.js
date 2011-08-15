@@ -577,9 +577,17 @@ FirebugReps.Arr = domplate(Firebug.Rep,
         return this.isArray(object);
     },
 
+    highlightObject: function(object, context)
+    {
+        // Array template doesn't support highlighting since there is no direct representation
+        // of arrays on the page. Also passing big array objects into:
+        // Firebug.Inspector.highlightObject() can cause perfomance problems (see issue 4736).
+    },
+
     // http://code.google.com/p/fbug/issues/detail?id=874
     // BEGIN Yahoo BSD Source (modified here)  YAHOO.lang.isArray, YUI 2.2.2 June 2007
-    isArray: function(obj) {
+    isArray: function(obj)
+    {
         try {
             if (!obj)
                 return false;

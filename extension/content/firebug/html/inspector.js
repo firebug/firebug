@@ -17,7 +17,7 @@ define([
 function(Obj, Firebug, Firefox, FirebugReps, Locale, Events, Wrapper, Css, Dom, Xml,
     Win, System) {
 
-// ************************************************************************************************
+// ********************************************************************************************* //
 // Constants
 
 const inspectDelay = 200;
@@ -29,13 +29,13 @@ const ident = {
     proxyElt: 3
 };
 
-// ************************************************************************************************
+// ********************************************************************************************* //
 // Globals
 
 var boxModelHighlighter = null;
 var frameHighlighter = null;
 
-// ************************************************************************************************
+// ********************************************************************************************* //
 
 /**
  * @module Implements Firebug Inspector logic.
@@ -47,20 +47,27 @@ Firebug.Inspector = Obj.extend(Firebug.Module,
     inspectingPanel: null,
 
     /**
-     * Main highlighter method. Can be used to highlight elements using the box model, frame or image map highlighters. Can highlight single or multiple elements.
+     * Main highlighter method. Can be used to highlight elements using the box model,
+     * frame or image map highlighters. Can highlight single or multiple elements.
      *
      * Examples:
-     * Firebug.Inspector.highlightObject([window.content.document.getElementById('gbar'), window.content.document.getElementById('logo')], window.content, "frame", null, ["#ff0000",{background:"#0000ff", border:"#ff0000"}])
+     * Firebug.Inspector.highlightObject([window.content.document.getElementById('gbar'),
+     *     window.content.document.getElementById('logo')],
+     *     window.content, "frame", null,
+     *     ["#ff0000",{background:"#0000ff", border:"#ff0000"}])
      * or
-     * Firebug.Inspector.highlightObject([window.content.document.getElementById('gbar'), window.content.document.getElementById('logo')], window.content, "boxModel", null, [{content: "#ff0000", padding: "#eeeeee", border: "#00ff00", margin: "#0000ff"},{content: "#00ff00", padding: "#eeeeee", border: "#00ff00", margin: "#0000ff"}])
+     * Firebug.Inspector.highlightObject([window.content.document.getElementById('gbar'),
+     *     window.content.document.getElementById('logo')], window.content, "boxModel", null,
+     *     [{content: "#ff0000", padding: "#eeeeee", border: "#00ff00", margin: "#0000ff"},
+     *         {content: "#00ff00", padding: "#eeeeee", border: "#00ff00", margin: "#0000ff"}])
      *
      * @param {Array} elementArr Elements to highlight
      * @param {Window} context Context of the elements to be highlighted
      * @param {String} [highlightType] Either "frame" or "boxModel". Default is configurable.
-     * @param {String} [boxFrame] Displays the line guides for the box model layout view. Valid values are
-     *        "content", "padding", "border" or "margin"
-     * @param {String | Array} [colorObj] Any valid html color e.g. red, #f00, #ff0000, etc., a valid color object
-     *        or any valid highlighter color array.
+     * @param {String} [boxFrame] Displays the line guides for the box model layout view.
+     *      Valid values are: "content", "padding", "border" or "margin"
+     * @param {String | Array} [colorObj] Any valid html color e.g. red, #f00, #ff0000, etc.,
+     *      a valid color object or any valid highlighter color array.
      */
     highlightObject: function(elementArr, context, highlightType, boxFrame, colorObj)
     {
@@ -72,9 +79,9 @@ Firebug.Inspector = Obj.extend(Firebug.Module,
             // highlight a single element
             if (!elementArr || !Dom.isElement(elementArr) ||
                 (Wrapper.getContentView(elementArr) &&
-                    !Xml.isVisible(Wrapper.getContentView(elementArr))) )
+                    !Xml.isVisible(Wrapper.getContentView(elementArr))))
             {
-                if(elementArr && elementArr.nodeType == 3)
+                if (elementArr && elementArr.nodeType == 3)
                     elementArr = elementArr.parentNode;
                 else
                     elementArr = null;
@@ -99,7 +106,7 @@ Firebug.Inspector = Obj.extend(Firebug.Module,
 
             if (elementArr)
             {
-                if(!isVisibleElement(elementArr))
+                if (!isVisibleElement(elementArr))
                     highlighter.unhighlight(context);
                 else if (context && context.window && context.window.document)
                     highlighter.highlight(context, elementArr, boxFrame, colorObj, false);
@@ -132,18 +139,19 @@ Firebug.Inspector = Obj.extend(Firebug.Module,
                 context.clearTimeout(context.highlightTimeout);
                 delete context.highlightTimeout;
             }
+
             this.clearAllHighlights();
             usingColorArray = FirebugReps.Arr.isArray(colorObj);
 
             if (context && context.window && context.window.document)
             {
-                for (i = 0, elementLen = elementArr.length; i < elementLen; i++)
+                for (i=0, elementLen=elementArr.length; i<elementLen; i++)
                 {
                     elt = elementArr[i];
 
                     if (elt)
                     {
-                        if(elt.nodeType === 3)
+                        if (elt.nodeType === 3)
                             elt = elt.parentNode;
 
                         if (usingColorArray)
@@ -161,7 +169,8 @@ Firebug.Inspector = Obj.extend(Firebug.Module,
     /**
      * Clear all highlighted areas on a page.
      */
-    clearAllHighlights: function() {
+    clearAllHighlights: function()
+    {
         highlighterCache.clear();
     },
 
@@ -283,7 +292,8 @@ Firebug.Inspector = Obj.extend(Firebug.Module,
     /**
      * Stop inspecting and clear all highlights.
      * @param {Boolean} canceled Indicates whether inspect was cancelled (usually via the escape key)
-     * @param {Boolean} [waitForClick] Indicates whether the next click will still forward you to the clicked element in the HTML panel
+     * @param {Boolean} [waitForClick] Indicates whether the next click will still forward you
+     *      to the clicked element in the HTML panel.
      */
     stopInspecting: function(canceled, waitForClick)
     {
@@ -349,7 +359,9 @@ Firebug.Inspector = Obj.extend(Firebug.Module,
     },
 
     /**
-     * Navigate up and down through the DOM and highlight the result. This method is used by the key handlers for the up and down arrow keys.
+     * Navigate up and down through the DOM and highlight the result. This method is used by
+     * the key handlers for the up and down arrow keys.
+     * 
      * @param {String} dir Direction to navigate the Dom, either "up" or "down"
      */
     inspectNodeBy: function(dir)
@@ -396,8 +408,10 @@ Firebug.Inspector = Obj.extend(Firebug.Module,
         if(!context || (!highlighter && !isMulti))
             return;
 
-        if(isMulti && element)
+        if (isMulti && element)
+        {
             this.highlightObject(element, context, highlightType, null, colorObj);
+        }
         else if(!isMulti)
         {
             var highlighterNode = highlighterCache.get(highlighter.ident);
@@ -413,7 +427,7 @@ Firebug.Inspector = Obj.extend(Firebug.Module,
         }
     },
 
-    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
     /**
      * Attach the scroll and resize handlers to elts window. Called from every highlight call.
@@ -429,8 +443,9 @@ Firebug.Inspector = Obj.extend(Firebug.Module,
         if (FBTrace.DBG_INSPECT)
             FBTrace.sysout("inspector.attachRepaintInspectListeners to " + win.location.href, elt);
 
-        // there is no way to check if the listeners have already been added and we should avoid adding properties
-        // to the users page. Adding them again will do no harm so lets just do that.
+        // there is no way to check if the listeners have already been added and we should
+        // avoid adding properties to the users page.
+        // Adding them again will do no harm so lets just do that.
         win.document.addEventListener("resize", this.onInspectingResizeWindow, true);
         win.document.addEventListener("scroll", this.onInspectingScroll, true);
     },
@@ -502,7 +517,9 @@ Firebug.Inspector = Obj.extend(Firebug.Module,
     },
 
     /**
-     * Remove the click listener independent from detachInspectListeners because if we remove it after mousedown, we won't be able to cancel clicked links.
+     * Remove the click listener independent from detachInspectListeners because if we remove
+     * it after mousedown, we won't be able to cancel clicked links.
+     *
      * @param {Window} context Context of the main browser window
      */
     detachClickInspectListeners: function(context)
@@ -552,7 +569,9 @@ Firebug.Inspector = Obj.extend(Firebug.Module,
     },
 
     /**
-     * Trap mousedown events to prevent clicking a document from triggering a document's mousedown event when inspecting.
+     * Trap mousedown events to prevent clicking a document from triggering a document's
+     * mousedown event when inspecting.
+     *
      * @param {Event} event Used for tracing and canceling the event
      */
     onInspectingMouseDown: function(event)
@@ -569,7 +588,9 @@ Firebug.Inspector = Obj.extend(Firebug.Module,
     },
 
     /**
-     * Trap mouseup events to prevent clicking a document from triggering a document's mouseup event when inspecting.
+     * Trap mouseup events to prevent clicking a document from triggering a document's mouseup
+     * event when inspecting.
+     *
      * @param {Event} event Used for tracing and canceling the event
      */
     onInspectingMouseUp: function(event)
@@ -588,7 +609,9 @@ Firebug.Inspector = Obj.extend(Firebug.Module,
     },
 
     /**
-     * Trap click events to prevent clicking a document from triggering a document's click event when inspecting and removes the click inspect listener.
+     * Trap click events to prevent clicking a document from triggering a document's click event
+     * when inspecting and removes the click inspect listener.
+     *
      * @param {Event} event Used for tracing and canceling the event
      */
     onInspectingClick: function(event)
@@ -606,7 +629,7 @@ Firebug.Inspector = Obj.extend(Firebug.Module,
         Events.cancelEvent(event);
     },
 
-    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
     // extends Module
 
     /**
@@ -651,15 +674,21 @@ Firebug.Inspector = Obj.extend(Firebug.Module,
      */
     unwatchWindow: function(context, win)
     {
-        try {
+        try
+        {
             this.hideQuickInfoBox();
-        } catch (ex) {
-            // Get unfortunate errors here sometimes, so let's just ignore them since the window is going away anyhow
+        }
+        catch (ex)
+        {
+            // Get unfortunate errors here sometimes, so let's just ignore them since the
+            // window is going away anyhow
         }
     },
 
     /**
-     * Called when a FF tab is created or activated (user changes FF tab). We stop inspecting in this situation.
+     * Called when a FF tab is created or activated (user changes FF tab). We stop inspecting
+     * in this situation.
+     *
      * @param {xul:browser} [browser] Browser
      * @param {Window} [context] The main browser window
      */
@@ -763,7 +792,7 @@ Firebug.Inspector = Obj.extend(Firebug.Module,
 
 });
 
-// ************************************************************************************************
+// ********************************************************************************************* //
 // Local Helpers
 
 function getHighlighter(type)
@@ -812,7 +841,7 @@ function resizeImp(element, w, h) {
         return css;
 }
 
-// ************************************************************************************************
+// ********************************************************************************************* //
 // Imagemap Highlighter
 
 function getImageMapHighlighter(context)
@@ -1150,7 +1179,7 @@ var quickInfoBox =
     }
 };
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 Firebug.Inspector.FrameHighlighter = function()
 {
@@ -1185,7 +1214,8 @@ Firebug.Inspector.FrameHighlighter.prototype =
         var w = offset.width, h = offset.height;
 
         if (FBTrace.DBG_INSPECT)
-            FBTrace.sysout("FrameHighlighter HTML tag:" + element.tagName + " x:" + x + " y:" + y + " w:" + w + " h:" + h);
+            FBTrace.sysout("FrameHighlighter HTML tag:" + element.tagName + " x:" + x +
+                " y:" + y + " w:" + w + " h:" + h);
 
         var wacked = isNaN(x) || isNaN(y) || isNaN(w) || isNaN(h);
         if (wacked)
@@ -1323,7 +1353,7 @@ Firebug.Inspector.FrameHighlighter.prototype =
     }
 };
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 function BoxModelHighlighter()
 {
@@ -1602,7 +1632,7 @@ BoxModelHighlighter.prototype =
     }
 };
 
-// ************************************************************************************************
+// ********************************************************************************************* //
 
 var highlighterCache =
 {
@@ -1712,7 +1742,7 @@ var highlighterCache =
     }
 };
 
-// ************************************************************************************************
+// ********************************************************************************************* //
 
 function getNonFrameBody(elt)
 {
@@ -1818,7 +1848,8 @@ function hideElementFromInspection(elt)
 }
 
 // highlightType is only to be used for multihighlighters
-function storeHighlighterParams(highlighter, context, element, boxFrame, colorObj, highlightType, isMulti)
+function storeHighlighterParams(highlighter, context, element, boxFrame, colorObj,
+    highlightType, isMulti)
 {
     var fir = Firebug.Inspector.repaint;
 
@@ -1833,12 +1864,12 @@ function storeHighlighterParams(highlighter, context, element, boxFrame, colorOb
     Firebug.Inspector.highlightedContext = context;
 }
 
-// ************************************************************************************************
+// ********************************************************************************************* //
 // Registration
 
 Firebug.registerModule(Firebug.Inspector);
 
 return Firebug.Inspector;
 
-// ************************************************************************************************
+// ********************************************************************************************* //
 });
