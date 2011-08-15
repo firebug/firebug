@@ -32,7 +32,7 @@ function createFirebugConsole(context, win)
 
     console.log = function log()
     {
-        return logFormatted(arguments, "log");
+        return logFormatted(arguments, "log", true);
     };
 
     console.debug = function debug()
