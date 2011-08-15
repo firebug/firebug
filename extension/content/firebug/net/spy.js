@@ -636,7 +636,9 @@ Firebug.Spy.XMLHttpRequestSpy.prototype =
 
     getURL: function()
     {
-        return this.xhrRequest.channel ? this.xhrRequest.channel.name : this.href;
+        // Don't use this.xhrRequest.channel.name to get the URL. In cases where the
+        // same XHR object is reused for more requests, the URL can be wrong (issue 4738).
+        return this.href;
     },
 
     // Cache listener
@@ -959,7 +961,8 @@ Firebug.Spy.XHR = domplate(Firebug.Rep,
     getContextMenuItems: function(spy)
     {
         var items = [
-            {label: "CopyLocation", command: Obj.bindFixed(this.copyURL, this, spy) }
+            {label: "CopyLocation", id: "fbSpyCopyLocation",
+                command: Obj.bindFixed(this.copyURL, this, spy) }
         ];
 
         if (spy.postText)
@@ -970,9 +973,11 @@ Firebug.Spy.XHR = domplate(Firebug.Rep,
         }
 
         items.push(
-            {label: "CopyResponse", command: Obj.bindFixed(this.copyResponse, this, spy) },
+            {label: "CopyResponse", id: "fbSpyCopyResponse",
+                command: Obj.bindFixed(this.copyResponse, this, spy) },
             "-",
-            {label: "OpenInTab", command: Obj.bindFixed(this.openInTab, this, spy) }
+            {label: "OpenInTab", id: "fbSpyOpenInTab",
+                command: Obj.bindFixed(this.openInTab, this, spy) }
         );
 
         return items;
