@@ -202,6 +202,9 @@ function getObserverList()
 // ********************************************************************************************* //
 // Registration
 
+// Compatibility with Firebug 1.7 extensions: deprecated, obsolete
+FBL.httpObserver = HttpRequestObserver;
+
 // xxxHonza: Do we need to remove the listener?
 TraceModule.addListener(new TraceListener("httpObserver.", "DBG_HTTPOBSERVER", true));
 

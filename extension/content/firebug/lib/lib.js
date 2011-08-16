@@ -123,8 +123,6 @@ FBL.SourceLink = SourceLink.SourceLink;
 //FBL.EventCopy = Dom.EventCopy;
 //FBL.PropertyObj = FirebugReps.PropertyObj;
 
-//FBL.NetFileLink = Firebug.NetMonitor.NetFileLink;
-
 // deprecated
 FBL.$ = function(id, doc)
 {
