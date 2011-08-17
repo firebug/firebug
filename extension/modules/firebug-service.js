@@ -2000,10 +2000,11 @@ var fbs =
             var debuggr = this.findDebugger(frame);  // sets debuggr.breakContext
             if (debuggr)
             {
-                fbs._lastErrorScript = frame.script;
-                fbs._lastErrorLine = frame.line;
-                fbs._lastErrorDebuggr = debuggr;
-                fbs._lastErrorContext = debuggr.breakContext; // XXXjjb this is bad API
+                // https://bugzilla.mozilla.org/show_bug.cgi?id=669730
+                //fbs._lastErrorScript = frame.script;
+                //fbs._lastErrorLine = frame.line;
+                //fbs._lastErrorDebuggr = debuggr;
+                //fbs._lastErrorContext = debuggr.breakContext; // XXXjjb this is bad API
             }
             else
                 delete fbs._lastErrorDebuggr;
@@ -2043,7 +2044,7 @@ var fbs =
 
         delete fbs.breakOnDebugCall;
 
-        if(exc)
+        if (exc)
         {
             var exception = exc.getWrappedValue();
             fbs.enumerateErrorBreakpoints(exception.fileName, {call: function breakIfMatch(url, lineNo, bp)
@@ -2059,12 +2060,15 @@ var fbs =
             }});
         }
 
-        // global to pass info to onDebug. Some duplicate values to support different apis
+        // Global to pass info to onDebug. Some duplicate values to support different apis
+        // Do not store the exception object itself |exc|, errofInfo is a global variable
+        // and it would keep the page (that is producing the error) in the memory
+        // (see bug 669730)
         errorInfo = { errorMessage: message, sourceName: fileName, lineNumber: lineNo,
                 message: message, fileName: fileName, lineNo: lineNo,
-                columnNumber: pos, flags: flags, category: "js", errnum: errnum, exc: exc };
+                columnNumber: pos, flags: flags, category: "js", errnum: errnum };
 
-        if (message=="out of memory")  // bail
+        if (message == "out of memory")  // bail
         {
             if (FBTrace.DBG_FBS_ERRORS)
                 fbs.osOut("fbs.onError sees out of memory "+fileName+":"+lineNo+"\n");
