@@ -464,6 +464,7 @@ Firebug.CSSModule = Obj.extend(Obj.extend(Firebug.Module, Firebug.EditorSelector
     {
         if (!context)
             return;
+
         // Due to the manner in which the layout engine handles multiple
         // references to the same sheet we need to kick it a little bit.
         // The injecting a simple stylesheet then removing it will force
@@ -476,7 +477,16 @@ Firebug.CSSModule = Obj.extend(Obj.extend(Firebug.Module, Firebug.EditorSelector
             var style = Css.createStyleSheet(doc);
             style.innerHTML = "#fbIgnoreStyleDO_NOT_USE {}";
             Css.addStyleSheet(doc, style);
-            style.parentNode.removeChild(style);
+
+            if (style.parentNode)
+            {
+                style.parentNode.removeChild(style);
+            }
+            else
+            {
+                if (FBTrace.DBG_ERRORS)
+                    FBTrace.sysout("css.cleanupSheets; ERROR no parent style:", style);
+            }
         }
 
         // https://bugzilla.mozilla.org/show_bug.cgi?id=500365
