@@ -125,7 +125,7 @@ Firebug.Inspector = Obj.extend(Firebug.Module,
                         highlighter.unhighlight(oldContext);
 
                         if (oldContext.inspectorMouseMove)
-                            oldContext.window.document.removeEventListener("mousemove",
+                            Events.removeEventListener(oldContext.window.document, "mousemove",
                                 oldContext.inspectorMouseMove, true);
                     }
                 }, inspectDelay);
@@ -446,8 +446,8 @@ Firebug.Inspector = Obj.extend(Firebug.Module,
         // there is no way to check if the listeners have already been added and we should
         // avoid adding properties to the users page.
         // Adding them again will do no harm so lets just do that.
-        win.document.addEventListener("resize", this.onInspectingResizeWindow, true);
-        win.document.addEventListener("scroll", this.onInspectingScroll, true);
+        Events.addEventListener(win.document, "resize", this.onInspectingResizeWindow, true);
+        Events.addEventListener(win.document, "scroll", this.onInspectingScroll, true);
     },
 
     /**
@@ -479,10 +479,10 @@ Firebug.Inspector = Obj.extend(Firebug.Module,
                 FBTrace.sysout("inspector.attacheInspectListeners to " + subWin.location +
                     " subWindow of " + win.location);
 
-            subWin.document.addEventListener("mouseover", this.onInspectingMouseOver, true);
-            subWin.document.addEventListener("mousedown", this.onInspectingMouseDown, true);
-            subWin.document.addEventListener("mouseup", this.onInspectingMouseUp, true);
-            subWin.document.addEventListener("click", this.onInspectingClick, true);
+            Events.addEventListener(subWin.document, "mouseover", this.onInspectingMouseOver, true);
+            Events.addEventListener(subWin.document, "mousedown", this.onInspectingMouseDown, true);
+            Events.addEventListener(subWin.document, "mouseup", this.onInspectingMouseUp, true);
+            Events.addEventListener(subWin.document, "click", this.onInspectingClick, true);
         }, this));
     },
 
@@ -510,9 +510,9 @@ Firebug.Inspector = Obj.extend(Firebug.Module,
 
         Win.iterateWindows(win, Obj.bind(function(subWin)
         {
-            subWin.document.removeEventListener("mouseover", this.onInspectingMouseOver, true);
-            subWin.document.removeEventListener("mousedown", this.onInspectingMouseDown, true);
-            subWin.document.removeEventListener("mouseup", this.onInspectingMouseUp, true);
+            Events.removeEventListener(subWin.document, "mouseover", this.onInspectingMouseOver, true);
+            Events.removeEventListener(subWin.document, "mousedown", this.onInspectingMouseDown, true);
+            Events.removeEventListener(subWin.document, "mouseup", this.onInspectingMouseUp, true);
         }, this));
     },
 
@@ -526,7 +526,7 @@ Firebug.Inspector = Obj.extend(Firebug.Module,
     {
         Win.iterateWindows(context, Obj.bind(function(subWin)
         {
-            subWin.document.removeEventListener("click", this.onInspectingClick, true);
+            Events.removeEventListener(subWin.document, "click", this.onInspectingClick, true);
         }, this));
     },
 
@@ -867,10 +867,12 @@ function getImageMapHighlighter(context)
             canvas.className = "firebugResetStyles firebugBlockBackgroundColor firebugCanvas";
             canvas.width = context.window.innerWidth;
             canvas.height = context.window.innerHeight;
-            context.window.addEventListener("scroll", function(){
+
+            Events.addEventListener(context.window, "scroll", function(){
                 context.imageMapHighlighter.show(false);
             }, true);
-            doc.addEventListener("mousemove", function(event){
+
+            Events.addEventListener(doc, "mousemove", function(event){
                 mx = event.clientX;
                 my = event.clientY;
             }, true);

@@ -329,8 +329,8 @@ Firebug.Editor = Obj.extend(Firebug.Module,
     attachListeners: function(editor, context)
     {
         var win = currentTarget.ownerDocument.defaultView;
-        win.addEventListener("resize", this.onResize, true);
-        win.addEventListener("blur", this.onBlur, true);
+        Events.addEventListener(win, "resize", this.onResize, true);
+        Events.addEventListener(win, "blur", this.onBlur, true);
 
         var chrome = Firebug.chrome;
 
@@ -398,9 +398,9 @@ Firebug.Editor = Obj.extend(Firebug.Module,
             return;
 
         var win = currentTarget.ownerDocument.defaultView;
-        win.removeEventListener("resize", this.onResize, true);
-        win.removeEventListener("blur", this.onBlur, true);
-        win.removeEventListener("input", this.onInput, true);
+        Events.removeEventListener(win, "resize", this.onResize, true);
+        Events.removeEventListener(win, "blur", this.onBlur, true);
+        Events.removeEventListener(win, "input", this.onInput, true);
 
         var chrome = Firebug.chrome;
         if (chrome)

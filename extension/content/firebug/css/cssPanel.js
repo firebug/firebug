@@ -555,8 +555,8 @@ Firebug.CSSModule = Obj.extend(Obj.extend(Firebug.Module, Firebug.EditorSelector
             cleanupSheetHandler = Obj.bind(this.cleanupSheetHandler, this, context),
             doc = win.document;
 
-        doc.addEventListener("DOMAttrModified", cleanupSheetHandler, false);
-        doc.addEventListener("DOMNodeInserted", cleanupSheetHandler, false);
+        Events.addEventListener(doc, "DOMAttrModified", cleanupSheetHandler, false);
+        Events.addEventListener(doc, "DOMNodeInserted", cleanupSheetHandler, false);
     },
 
     loadedContext: function(context)
@@ -1967,16 +1967,16 @@ CSSElementPanel.prototype = Obj.extend(Firebug.CSSStyleSheetPanel.prototype,
             // Normally these would not be required, but in order to update after the state is set
             // using the options menu we need to monitor these global events as well
             var doc = win.document;
-            doc.addEventListener("mouseover", this.onHoverChange, false);
-            doc.addEventListener("mousedown", this.onActiveChange, false);
+            Events.addEventListener(doc, "mouseover", this.onHoverChange, false);
+            Events.addEventListener(doc, "mousedown", this.onActiveChange, false);
         }
     },
 
     unwatchWindow: function(win)
     {
         var doc = win.document;
-        doc.removeEventListener("mouseover", this.onHoverChange, false);
-        doc.removeEventListener("mousedown", this.onActiveChange, false);
+        Events.removeEventListener(doc, "mouseover", this.onHoverChange, false);
+        Events.removeEventListener(doc, "mousedown", this.onActiveChange, false);
 
         if (Dom.isAncestor(this.stateChangeEl, doc))
         {
@@ -2092,12 +2092,12 @@ CSSElementPanel.prototype = Obj.extend(Firebug.CSSStyleSheetPanel.prototype,
     {
       this.removeStateChangeHandlers();
 
-      el.addEventListener("focus", this.onStateChange, true);
-      el.addEventListener("blur", this.onStateChange, true);
-      el.addEventListener("mouseup", this.onStateChange, false);
-      el.addEventListener("mousedown", this.onStateChange, false);
-      el.addEventListener("mouseover", this.onStateChange, false);
-      el.addEventListener("mouseout", this.onStateChange, false);
+      Events.addEventListener(el, "focus", this.onStateChange, true);
+      Events.addEventListener(el, "blur", this.onStateChange, true);
+      Events.addEventListener(el, "mouseup", this.onStateChange, false);
+      Events.addEventListener(el, "mousedown", this.onStateChange, false);
+      Events.addEventListener(el, "mouseover", this.onStateChange, false);
+      Events.addEventListener(el, "mouseout", this.onStateChange, false);
 
       this.stateChangeEl = el;
     },
@@ -2107,12 +2107,12 @@ CSSElementPanel.prototype = Obj.extend(Firebug.CSSStyleSheetPanel.prototype,
         var sel = this.stateChangeEl;
         if (sel)
         {
-            sel.removeEventListener("focus", this.onStateChange, true);
-            sel.removeEventListener("blur", this.onStateChange, true);
-            sel.removeEventListener("mouseup", this.onStateChange, false);
-            sel.removeEventListener("mousedown", this.onStateChange, false);
-            sel.removeEventListener("mouseover", this.onStateChange, false);
-            sel.removeEventListener("mouseout", this.onStateChange, false);
+            Events.removeEventListener(sel, "focus", this.onStateChange, true);
+            Events.removeEventListener(sel, "blur", this.onStateChange, true);
+            Events.removeEventListener(sel, "mouseup", this.onStateChange, false);
+            Events.removeEventListener(sel, "mousedown", this.onStateChange, false);
+            Events.removeEventListener(sel, "mouseover", this.onStateChange, false);
+            Events.removeEventListener(sel, "mouseout", this.onStateChange, false);
         }
     },
 

@@ -119,7 +119,7 @@ Firebug.NetMonitor = Obj.extend(Firebug.ActivableModule,
 
             if (Options.get("netShowPaintEvents"))
             {
-                win.addEventListener("MozAfterPaint", onWindowPaintHandler, false);
+                Events.addEventListener(win, "MozAfterPaint", onWindowPaintHandler, false);
             }
 
             // Register "load" listener in order to track window load time.
@@ -127,27 +127,27 @@ Firebug.NetMonitor = Obj.extend(Firebug.ActivableModule,
             {
                 if (context.netProgress)
                     context.netProgress.post(windowLoad, [win, NetUtils.now()]);
-                win.removeEventListener("load", onWindowLoadHandler, true);
+                Events.removeEventListener(win, "load", onWindowLoadHandler, true);
 
                 context.setTimeout(function()
                 {
                     if (win && !win.closed)
                     {
-                        win.removeEventListener("MozAfterPaint", onWindowPaintHandler, false);
+                        Events.removeEventListener(win, "MozAfterPaint", onWindowPaintHandler, false);
                     }
                 }, 2000); //xxxHonza: this should be customizable using preferences.
             }
-            win.addEventListener("load", onWindowLoadHandler, true);
+            Events.addEventListener(win, "load", onWindowLoadHandler, true);
 
             // Register "DOMContentLoaded" listener to track timing.
             var onContentLoadHandler = function()
             {
                 if (context.netProgress)
                     context.netProgress.post(contentLoad, [win, NetUtils.now()]);
-                win.removeEventListener("DOMContentLoaded", onContentLoadHandler, true);
+                Events.removeEventListener(win, "DOMContentLoaded", onContentLoadHandler, true);
             }
 
-            win.addEventListener("DOMContentLoaded", onContentLoadHandler, true);
+            Events.addEventListener(win, "DOMContentLoaded", onContentLoadHandler, true);
         }
 
         if (Firebug.NetMonitor.isAlwaysEnabled())

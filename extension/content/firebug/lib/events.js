@@ -336,6 +336,93 @@ Events.detachFamilyListeners = function(family, object, listener)
 };
 
 // ********************************************************************************************* //
+// Event Listeners (+ support for tracking)
+
+var listeners = [];
+
+Events.addEventListener = function(parent, eventId, listener, capturing)
+{
+    if (FBTrace.DBG_EVENTLISTENERS)
+    {
+        for (var i=0; i<listeners.length; i++)
+        {
+            var l = listeners[i];
+            if (l.parent == parent && l.eventId == eventId && l.listener == listener &&
+                l.capturing == capturing)
+            {
+                FBTrace.sysout("Events.addEventListener; ERROR already registered!", l);
+                return;
+            }
+        }
+    }
+
+    parent.addEventListener(eventId, listener, capturing);
+
+    if (FBTrace.DBG_EVENTLISTENERS)
+    {
+        var frames = [];
+        for (var frame = Components.stack; frame; frame = frame.caller)
+            frames.push(frame.filename + " (" + frame.lineNumber + ")");
+
+        frames.shift();
+
+        var pid = (typeof(parent.location) != "undefined" ? (parent.location + "") : typeof(parent));
+
+        listeners.push({
+            parentId: pid,
+            eventId: eventId,
+            capturing: capturing,
+            listener: listener,
+            stack: frames,
+            parent: parent,
+        });
+    }
+}
+
+Events.removeEventListener = function(parent, eventId, listener, capturing)
+{
+    parent.removeEventListener(eventId, listener, capturing);
+
+    if (FBTrace.DBG_EVENTLISTENERS)
+    {
+        for (var i=0; i<listeners.length; i++)
+        {
+            var l = listeners[i];
+            if (l.parent == parent && l.eventId == eventId && l.listener == listener &&
+                l.capturing == capturing)
+            {
+                listeners.splice(i, 1);
+                return;
+            }
+        }
+
+        var frames = [];
+        for (var frame = Components.stack; frame; frame = frame.caller)
+            frames.push(frame.filename + " (" + frame.lineNumber + ")");
+
+        frames.shift();
+
+        var info = {
+            eventId: eventId,
+            capturing: capturing,
+            listener: listener,
+            stack: frames,
+        };
+
+        FBTrace.sysout("Events.removeEventListener; ERROR not registered!", info);
+    }
+}
+
+if (FBTrace.DBG_EVENTLISTENERS)
+{
+    Firebug.Events = {};
+    Firebug.Events.getRegisteredListeners = function()
+    {
+        return listeners;
+    }
+}
+
+// ********************************************************************************************* //
 
 return Events;
 

@@ -18,10 +18,11 @@ define([
     "firebug/lib/array",
     "firebug/trace/debug",
     "firebug/js/fbs",
+    "firebug/lib/events",
     "firebug/console/errors",
 ],
 function(Obj, Firebug, Firefox, CompilationUnit, Xpcom, FirebugReps, Locale,
-    Wrapper, Url, SourceLink, StackFrame, Css, Win, Str, Arr, Debug, FBS) {
+    Wrapper, Url, SourceLink, StackFrame, Css, Win, Str, Arr, Debug, FBS, Events) {
 
 // ********************************************************************************************* //
 // Constants
@@ -555,7 +556,7 @@ Firebug.Debugger = Obj.extend(Firebug.ActivableModule,
                     {
                         if (!context.saveFocus)
                         {
-                            context.window.removeEventListener('blur', context.discardBlurEvents, true);
+                            Events.removeEventListener(context.window, 'blur', context.discardBlurEvents, true);
                             delete context.discardBlurEvents;
                         }
 
@@ -568,7 +569,7 @@ Firebug.Debugger = Obj.extend(Firebug.ActivableModule,
                         event.stopPropagation();
                     },
 
-                    context.window.addEventListener('blur', context.discardBlurEvents, true);
+                    Events.addEventListener(context.window, 'blur', context.discardBlurEvents, true);
                 }
             }
 
@@ -2450,7 +2451,7 @@ Firebug.Debugger = Obj.extend(Firebug.ActivableModule,
     {
         Firebug.ActivableModule.destroyContext.apply(this, arguments);
 
-        context.window.document.removeEventListener("DOMNodeInserted",
+        Events.removeEventListener(context.window.document, "DOMNodeInserted",
             context.watchScriptAdditions, false);
 
         if (context.stopped)

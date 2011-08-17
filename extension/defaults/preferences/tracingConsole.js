@@ -63,3 +63,4 @@ pref("extensions.firebug.DBG_PROFILER", false);         // profiler
 pref("extensions.firebug.DBG_SEARCH", false);           // search box
 pref("extensions.firebug.DBG_EXTERNALEDITORS", false);  // integration with external editors/IDEs
 pref("extensions.firebug.DBG_OBSERVERS", false);        // track/untrack support, should be set, then restart Firefox
+pref("extensions.firebug.DBG_EVENTLISTENERS", false);   // track/untrack for registered event listeners, restart needed

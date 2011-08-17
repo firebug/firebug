@@ -3,8 +3,9 @@
 define([
     "firebug/firebug",
     "firebug/lib/wrapper",
+    "firebug/lib/events",
 ],
-function(Firebug, Wrapper) {
+function(Firebug, Wrapper, Events) {
 
 // ********************************************************************************************* //
 // Command Line APIs
@@ -118,12 +119,12 @@ function createFirebugCommandLine(context, win)
             contentView.console = console;
         }
 
-        contentView.document.addEventListener("firebugCommandLine", firebugEvalEvent, true);
+        Events.addEventListener(contentView.document, "firebugCommandLine", firebugEvalEvent, true);
     }
 
     function detachCommandLine()
     {
-        contentView.document.removeEventListener("firebugCommandLine", firebugEvalEvent, true);
+        Events.removeEventListener(contentView.document, "firebugCommandLine", firebugEvalEvent, true);
         delete contentView._FirebugCommandLine; // suicide!
 
         if (FBTrace.DBG_COMMANDLINE)

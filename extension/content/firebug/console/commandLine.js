@@ -2489,7 +2489,7 @@ Firebug.CommandLine.injector =
         var consoleHandler = Firebug.Console.injector.getConsoleHandler(context, win);
         context.activeCommandLineHandlers[consoleHandler.token] = boundHandler;
 
-        win.document.addEventListener("firebugExecuteCommand", boundHandler, true);
+        Events.addEventListener(win.document, "firebugExecuteCommand", boundHandler, true);
 
         if (FBTrace.DBG_COMMANDLINE)
             FBTrace.sysout("commandLine.addCommandLineListener to document in window"+
@@ -2500,7 +2500,7 @@ Firebug.CommandLine.injector =
     {
         var boundHandler = this.getCommandLineListener(context, win);
         if (boundHandler)
-            win.document.removeEventListener("firebugExecuteCommand", boundHandler, true);
+            Events.removeEventListener(win.document, "firebugExecuteCommand", boundHandler, true);
 
         if (FBTrace.DBG_COMMANDLINE)
             FBTrace.sysout("commandLine.detachCommandLineListener "+boundHandler+

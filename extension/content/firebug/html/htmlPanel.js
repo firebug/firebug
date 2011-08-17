@@ -1038,10 +1038,10 @@ Firebug.HTMLPanel.prototype = Obj.extend(WalkingPanel,
                 Win.iterateWindows(this.context.window, Obj.bind(function(win)
                 {
                     var doc = win.document;
-                    doc.addEventListener("DOMAttrModified", this.onMutateAttr, false);
-                    doc.addEventListener("DOMCharacterDataModified", this.onMutateText, false);
-                    doc.addEventListener("DOMNodeInserted", this.onMutateNode, false);
-                    doc.addEventListener("DOMNodeRemoved", this.onMutateNode, false);
+                    Events.addEventListener(doc, "DOMAttrModified", this.onMutateAttr, false);
+                    Events.addEventListener(doc, "DOMCharacterDataModified", this.onMutateText, false);
+                    Events.addEventListener(doc, "DOMNodeInserted", this.onMutateNode, false);
+                    Events.addEventListener(doc, "DOMNodeRemoved", this.onMutateNode, false);
                 }, this));
             }
 
@@ -1086,10 +1086,10 @@ Firebug.HTMLPanel.prototype = Obj.extend(WalkingPanel,
         if (this.context.attachedMutation)
         {
             var doc = win.document;
-            doc.addEventListener("DOMAttrModified", this.onMutateAttr, false);
-            doc.addEventListener("DOMCharacterDataModified", this.onMutateText, false);
-            doc.addEventListener("DOMNodeInserted", this.onMutateNode, false);
-            doc.addEventListener("DOMNodeRemoved", this.onMutateNode, false);
+            Events.addEventListener(doc, "DOMAttrModified", this.onMutateAttr, false);
+            Events.addEventListener(doc, "DOMCharacterDataModified", this.onMutateText, false);
+            Events.addEventListener(doc, "DOMNodeInserted", this.onMutateNode, false);
+            Events.addEventListener(doc, "DOMNodeRemoved", this.onMutateNode, false);
         }
     },
 
@@ -1112,10 +1112,10 @@ Firebug.HTMLPanel.prototype = Obj.extend(WalkingPanel,
         }
 
         var doc = win.document;
-        doc.removeEventListener("DOMAttrModified", this.onMutateAttr, false);
-        doc.removeEventListener("DOMCharacterDataModified", this.onMutateText, false);
-        doc.removeEventListener("DOMNodeInserted", this.onMutateNode, false);
-        doc.removeEventListener("DOMNodeRemoved", this.onMutateNode, false);
+        Events.removeEventListener(doc, "DOMAttrModified", this.onMutateAttr, false);
+        Events.removeEventListener(doc, "DOMCharacterDataModified", this.onMutateText, false);
+        Events.removeEventListener(doc, "DOMNodeInserted", this.onMutateNode, false);
+        Events.removeEventListener(doc, "DOMNodeRemoved", this.onMutateNode, false);
     },
 
     mutateDocumentEmbedded: function(win, remove)
