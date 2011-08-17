@@ -70,6 +70,7 @@ pref("extensions.firebug.scrollToMutations", false);
 pref("extensions.firebug.shadeBoxModel", true);
 pref("extensions.firebug.showQuickInfoBox", false);
 pref("extensions.firebug.displayedAttributeValueLimit", 1024);
+pref("extensions.firebug.multiHighlightLimit", 250);
 
 // CSS
 pref("extensions.firebug.onlyShowAppliedStyles", false);

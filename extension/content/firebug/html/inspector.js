@@ -149,7 +149,7 @@ Firebug.Inspector = Obj.extend(Firebug.Module,
                 {
                     elt = elementArr[i];
 
-                    if (elt)
+                    if (elt && elt instanceof HTMLElement)
                     {
                         if (elt.nodeType === 3)
                             elt = elt.parentNode;

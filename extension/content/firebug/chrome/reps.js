@@ -9,6 +9,7 @@ define([
     "firebug/html/htmlLib",
     "firebug/lib/events",
     "firebug/lib/wrapper",
+    "firebug/lib/options",
     "firebug/lib/url",
     "firebug/js/sourceLink",
     "firebug/js/stackFrame",
@@ -24,7 +25,7 @@ define([
     "firebug/firefox/menu",
     "arch/compilationunit",
 ],
-function(Obj, Firebug, Domplate, Xpcom, Locale, HTMLLib, Events, Wrapper,
+function(Obj, Firebug, Domplate, Xpcom, Locale, HTMLLib, Events, Wrapper, Options,
     Url, SourceLink, StackFrame, Css, Dom, Win, System, Xpath, Str, Xml, ToggleBranch,
     EventMonitor, Menu, CompilationUnit) {
 
@@ -579,9 +580,15 @@ FirebugReps.Arr = domplate(Firebug.Rep,
 
     highlightObject: function(object, context)
     {
-        // Array template doesn't support highlighting since there is no direct representation
-        // of arrays on the page. Also passing big array objects into:
-        // Firebug.Inspector.highlightObject() can cause perfomance problems (see issue 4736).
+        // Highlighting huge amount of elements on the page can cause sericous performance
+        // problems (see issue 4736). So, avoid highlighting if the number of elements in
+        // the array exceeds specified limit.
+        var arr = this.getRealObject(object, context);
+        if (!arr || arr.length > Options.get("multiHighlightLimit"))
+            return;
+
+        // Highlight multiple elements on the page.
+        Firebug.Inspector.highlightObject(arr, context);
     },
 
     // http://code.google.com/p/fbug/issues/detail?id=874

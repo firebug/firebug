@@ -2241,7 +2241,8 @@ Firebug.Rep = domplate(
             Firebug.Inspector.highlightObject(realObject, context);
     },
 
-    unhighlightObject: function(object, context) {
+    unhighlightObject: function(object, context)
+    {
         Firebug.Inspector.highlightObject(null);
     },
 
