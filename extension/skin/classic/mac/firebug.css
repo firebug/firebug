@@ -307,7 +307,6 @@ panelTab[selected="true"] > panelTabMenu {
 
 .toolbar-text-button,
 .toolbar-text-menubutton {
-    -moz-appearance: none;
     margin: 0 1px;
     padding: 1px 0px 1px 7px;
     min-width: 0;
@@ -324,50 +323,6 @@ panelTab[selected="true"] > panelTabMenu {
 
 .toolbar-text-button > .toolbarbutton-icon {
     display: none !important;
-}
-
-.toolbar-text-button:hover:not([disabled="true"]),
-.toolbar-text-menubutton:hover:not([disabled="true"]) {
-    background: url("chrome://browser/skin/bookmark-hover-left.png") no-repeat left center;
-}
-
-.toolbar-text-button:hover:not([disabled="true"]) > .toolbarbutton-text,
-.toolbar-text-menubutton:hover:not([disabled="true"]) > .toolbarbutton-menu-dropmarker {
-    background: url("chrome://browser/skin/bookmark-hover-right.png") no-repeat right center;
-    color: #FFFFFF;
-}
-
-.toolbar-text-menubutton:hover:not([disabled="true"]) > .toolbarbutton-text {
-    background: url("chrome://browser/skin/bookmark-hover-mid.png") repeat-x;
-    color: #FFFFFF;
-}
-
-.toolbar-text-button:hover:active:not([disabled="true"]),
-.toolbar-text-button[checked="true"]:not([disabled="true"]),
-.toolbar-text-menubutton:hover:active:not([disabled="true"]),
-.toolbar-text-menubutton[open="true"]:not([disabled="true"]) {
-    background: url("chrome://browser/skin/bookmark-open-left.png") no-repeat left center;
-}
-
-.toolbar-text-menubutton:hover:active:not([disabled="true"]) > .toolbarbutton-text,
-.toolbar-text-menubutton[open="true"]:not([disabled="true"]) > .toolbarbutton-text {
-    background: url("chrome://browser/skin/bookmark-open-mid.png") repeat-x !important;
-    color: #FFFFFF;
-}
-
-.toolbar-text-button:hover:active:not([disabled="true"]) > .toolbarbutton-text,
-.toolbar-text-button[checked="true"]:not([disabled="true"]) > .toolbarbutton-text,
-.toolbar-text-menubutton:hover:active:not([disabled="true"]) > .toolbarbutton-menu-dropmarker,
-.toolbar-text-menubutton[open="true"]:not([disabled="true"]) > .toolbarbutton-menu-dropmarker {
-    background: url("chrome://browser/skin/bookmark-open-right.png") no-repeat right center;
-}
-
-.toolbar-text-button[checked="true"] {
-    background-color: transparent;
-}
-
-.toolbar-text-button[checked="true"] > .toolbarbutton-text {
-    color: #FFFFFF;
 }
 
 .toolbar-text-button .toolbarbutton-text,
