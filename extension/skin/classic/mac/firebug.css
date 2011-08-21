@@ -308,12 +308,14 @@ panelTab[selected="true"] > panelTabMenu {
 .toolbar-text-button,
 .toolbar-text-menubutton {
     margin: 0 1px;
+    -moz-appearance: none;
     padding: 1px 0px 1px 7px;
     min-width: 0;
     max-width: 13em;
     font-weight: bold;
     color: #565656;
     border: none !important;
+    border-radius: 8px;
 }
 
 .toolbar-text-button > .toolbarbutton-text {
@@ -323,6 +325,50 @@ panelTab[selected="true"] > panelTabMenu {
 
 .toolbar-text-button > .toolbarbutton-icon {
     display: none !important;
+}
+
+
+.toolbar-text-button:hover:not([disabled="true"]),
+.toolbar-text-menubutton:hover:not([disabled="true"]) {
+    background: #999;
+    box-shadow: inset rgba(60, 60, 60, 0.15) 0 -1px 3px, inset #111 0 1px 3px, inset rgba(60, 60, 60, 0.1) 0 1px 2px, 0 1px rgba(244, 244, 244, .4);
+}
+
+.toolbar-text-button:hover:active:not([disabled="true"]),
+.toolbar-text-menubutton:hover:active:not([disabled="true"]) {
+    background: #666;
+}
+
+.toolbar-text-button:hover:not([disabled="true"]) > .toolbarbutton-text,
+.toolbar-text-menubutton:hover:not([disabled="true"]) > .toolbarbutton-menu-dropmarker,
+.toolbar-text-menubutton:hover:not([disabled="true"]) > .toolbarbutton-text {
+    color: #FFFFFF;
+    text-shadow: 1px 1px rgba(0, 0, 0, .4);
+}
+
+.toolbar-text-button:hover:active:not([disabled="true"]) > .toolbarbutton-text,
+.toolbar-text-menubutton:hover:active:not([disabled="true"]) > .toolbarbutton-menu-dropmarker,
+.toolbar-text-menubutton:hover:active:not([disabled="true"]) > .toolbarbutton-text {
+    color: #FFFFFF;
+    text-shadow: 1px 1px rgba(0, 0, 0, .7);
+}
+
+.toolbar-text-button[checked="true"]:not([disabled="true"]),
+.toolbar-text-menubutton[open="true"]:not([disabled="true"]) {
+    text-shadow: 0 1px rgba(255, 255, 255, .4);
+    background-color: #ccc;
+}
+
+.toolbar-text-menubutton:hover:active:not([disabled="true"]) > .toolbarbutton-text,
+.toolbar-text-menubutton[open="true"]:not([disabled="true"]) > .toolbarbutton-text {
+    color: #FFFFFF;
+}
+
+.toolbar-text-button > .toolbarbutton-text {
+    color: #333;
+}
+.toolbar-text-button[checked="true"] > .toolbarbutton-text {
+    color: #000;
 }
 
 .toolbar-text-button .toolbarbutton-text,
