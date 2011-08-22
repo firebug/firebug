@@ -1544,11 +1544,16 @@ var UserAgentModifier =
         if (Firebug.Options.get("modifyUserAgent"))
             observerService.addObserver(this, "http-on-modify-request", false);
     },
+
+    shutdown: function()
+    {
+        observerService.removeEventListener(this, "http-on-modify-request", false);
+    },
   
     observe: function(subject, topic, data)
     {
-        if (topic != "http-on-modify-request")
-          return;
+        if (topic != "http-on-modify-request" || Firebug.getSuspended())
+            return;
 
         var httpChannel = subject.QueryInterface(Ci.nsIHttpChannel);
         httpChannel.setRequestHeader
