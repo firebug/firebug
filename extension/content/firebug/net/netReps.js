@@ -586,7 +586,7 @@ Firebug.NetMonitor.NetRequestEntry = domplate(Firebug.Rep, new Firebug.Listener(
         if (file.responseStatus == 401)
         {
             var ntlm = NetUtils.findHeader(file.requestHeaders, "authorization");
-            if (typeof(ntlm) == "string" && ntlm.search(/NTLM/im) != -1)
+            if (ntlm && ntlm.indexOf("NTLM") == 0)
                 return false;
         }
 
