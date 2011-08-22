@@ -721,6 +721,7 @@ var TabWatchListener =
             var panel = context.panelMap[panelName];
             panel.unwatchWindow(win);
         }
+
         Events.dispatch(Firebug.modules, "unwatchWindow", [context, win]);
     },
 
@@ -753,11 +754,34 @@ var TabWatchListener =
         // next the context is deleted and removed from the Firebug.TabWatcher, we clean up in unWatchBrowser
     },
 
-    onSourceFileCreated: function(context, sourceFile)
+    onSourceFileCreated: function()
     {
-        Events.dispatch(Firebug.modules, "onSourceFileCreated", [context, sourceFile]);
+        Events.dispatch(Firebug.modules, "onSourceFileCreated", arguments);
     },
 
+    shouldCreateContext: function()
+    {
+        if (Events.dispatch2(Firebug.modules, "shouldCreateContext", arguments))
+            return true;
+        else
+            return false;
+    },
+
+    shouldNotCreateContext: function()
+    {
+        if (Events.dispatch2(Firebug.modules, "shouldNotCreateContext", arguments))
+            return true;
+        else
+            return false;
+    },
+
+    shouldShowContext: function()
+    {
+        if (Events.dispatch2(Firebug.modules, "shouldShowContext", arguments))
+            return true;
+        else
+            return false;
+    }
 };
 
 // ********************************************************************************************* //

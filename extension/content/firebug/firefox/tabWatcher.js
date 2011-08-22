@@ -257,7 +257,7 @@ Firebug.TabWatcher = Obj.extend(new Firebug.Listener(),
     // Listeners decide to show or not
     shouldShowContext: function(context)
     {
-        if ( Events.dispatch2(this.fbListeners, "shouldShowContext", [context]))
+        if (Events.dispatch2(this.fbListeners, "shouldShowContext", [context]))
             return true;
         else
             return false;
