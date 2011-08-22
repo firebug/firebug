@@ -1,4 +1,4 @@
-/* See license.txt for terms of usage */
+ /* See license.txt for terms of usage */
 
 define([
     "firebug/lib/object",
@@ -582,6 +582,13 @@ Firebug.NetMonitor.NetRequestEntry = domplate(Firebug.Rep, new Firebug.Listener(
     {
         if (file.aborted)
             return true;
+
+        if (file.responseStatus == 401)
+        {
+            var ntlm = NetUtils.findHeader(file.requestHeaders, "authorization");
+            if (typeof(ntlm) == "string" && ntlm.search(/NTLM/im) != -1)
+                return false;
+        }
 
         var errorRange = Math.floor(file.responseStatus/100);
         return errorRange == 4 || errorRange == 5;
