@@ -95,6 +95,9 @@ Menu.setItemIntoElement = function(element, item)
     if (item.acceltext)
         element.setAttribute("acceltext", item.acceltext);
 
+    if (item.name)
+        element.setAttribute("name", item.name);
+
     return element;
 }
 
