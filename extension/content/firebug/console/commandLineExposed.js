@@ -58,7 +58,7 @@ function createFirebugCommandLine(context, win)
         }
 
         commandLine[command] = createCommandHandler(command);
-        commandLine.__exposedProps__[command] = "r";
+        commandLine.__exposedProps__[command] = "rw";
     }
 
     // Define shortcuts for some console methods
@@ -78,7 +78,7 @@ function createFirebugCommandLine(context, win)
         }
 
         commandLine[command] = createShortcutHandler(command);
-        commandLine.__exposedProps__[command] = "r";
+        commandLine.__exposedProps__[command] = "rw";
     }
 
     // Define console variables (inspector history).
