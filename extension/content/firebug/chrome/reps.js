@@ -1931,7 +1931,7 @@ FirebugReps.ErrorMessage = domplate(Firebug.Rep,
     className: "errorMessage",
     inspectable: false,
 
-    supportsObject: function(object, type, context)
+    supportsObject: function(object, type)
     {
         return object instanceof FirebugReps.ErrorMessageObj;
     },
@@ -2016,12 +2016,9 @@ FirebugReps.Except = domplate(Firebug.Rep,
         return errorObject;
     },
 
-    supportsObject: function(object, type, context)
+    supportsObject: function(object, type)
     {
-        var win = context ? Wrapper.getContentView(context.window) : null;
-        var found = (win && instanceOf(object, win.Error)) || (object instanceof FirebugReps.ErrorCopy) ||
-            (object.constructor && object.constructor.name == "ReferenceError");
-        return found;
+        return (object instanceof FirebugReps.ErrorCopy) || Obj.XW_instanceof(object, Error);
     }
 });
 
