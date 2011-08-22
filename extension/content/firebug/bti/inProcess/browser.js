@@ -56,55 +56,88 @@ Browser.unimplementedHandler = function()
 
 Browser.listener =
 {
-    onBreak: function() {
+    onBreak: function()
+    {
         Browser.unimplementedHandler.apply(this, arguments);
     },
-    onConsoleDebug: function() {
+
+    onConsoleDebug: function()
+    {
         Browser.unimplementedHandler.apply(this, arguments);
     },
-    onConsoleError: function() {
+
+    onConsoleError: function()
+    {
         Browser.unimplementedHandler.apply(this, arguments);
     },
-    onConsoleInfo: function() {
+
+    onConsoleInfo: function()
+    {
         Browser.unimplementedHandler.apply(this, arguments);
     },
-    onConsoleLog: function() {
+
+    onConsoleLog: function()
+    {
         Browser.unimplementedHandler.apply(this, arguments);
     },
-    onConsoleWarn: function() {
+
+    onConsoleWarn: function()
+    {
         Browser.unimplementedHandler.apply(this, arguments);
     },
-    onContextCreated: function() {
+
+    onContextCreated: function()
+    {
         Browser.unimplementedHandler.apply(this, arguments);
     },
-    onContextDestroyed: function() {
+
+    onContextDestroyed: function()
+    {
         Browser.unimplementedHandler.apply(this, arguments);
     },
-    onContextChanged: function() {
+
+    onContextChanged: function()
+    {
         Browser.unimplementedHandler.apply(this, arguments);
     },
-    onContextLoaded: function() {
+
+    onContextLoaded: function()
+    {
         Browser.unimplementedHandler.apply(this, arguments);
     },
-    onInspectNode: function() {
+
+    onInspectNode: function()
+    {
         Browser.unimplementedHandler.apply(this, arguments);
     },
-    onResume: function() {
+
+    onResume: function()
+    {
         Browser.unimplementedHandler.apply(this, arguments);
     },
-    onScript: function() {
+
+    onScript: function()
+    {
         Browser.unimplementedHandler.apply(this, arguments);
     },
-    onSuspend: function() {
+
+    onSuspend: function()
+    {
         Browser.unimplementedHandler.apply(this, arguments);
     },
-    onToggleBreakpoint: function() {
+
+    onToggleBreakpoint: function()
+    {
         Browser.unimplementedHandler.apply(this, arguments);
     },
-    onBreakpointError: function() {
+
+    onBreakpointError: function()
+    {
         Browser.unimplementedHandler.apply(this, arguments);
     },
-    onDisconnect: function() {
+
+    onDisconnect: function()
+    {
         Browser.unimplementedHandler.apply(this, arguments);
     },
 };
@@ -433,7 +466,9 @@ Browser.prototype.disconnect = function()
 Browser.prototype.toggleResume = function(resume)
 {
     if (FBTrace.DBG_ACTIVATION)
-        FBTrace.sysout("toggleResume ------------"+(Firebug.getSuspended()?"OFF":"ON")+"----> "+(!!resume?"ON":"OFF"));
+        FBTrace.sysout("toggleResume ------------"+(Firebug.getSuspended()?"OFF":"ON")+"----> "+
+            (!!resume?"ON":"OFF"));
+
     // this should be the only method to call suspend and resume.
     if (resume)  // either a new context or revisiting an old one
     {
@@ -445,7 +480,6 @@ Browser.prototype.toggleResume = function(resume)
         Firebug.suspend();
     }
 },
-
 
 /**
  * Sets the browser context that has focus, possibly <code>null</code>.
@@ -632,6 +666,8 @@ var clearContextTimeout = 0;
 
 var TabWatchListener =
 {
+    dispatchName: "TabWatchListener",
+
     initContext: function(context, persistedState)  // called after a context is created.
     {
         context.panelName = context.browser.panelName;
@@ -648,9 +684,7 @@ var TabWatchListener =
         Firebug.connection.toggleResume(context); // a newly created context is active
     },
 
-
-
-    /*
+    /**
      * To be called from Firebug.TabWatcher only, see selectContext
      */
     showContext: function(browser, context)  // Firebug.TabWatcher showContext. null context means we don't debug that browser
@@ -726,6 +760,8 @@ var TabWatchListener =
 
 };
 
+// ********************************************************************************************* //
+
 Browser.prototype.connect = function ()
 {
     // Events fired on browser are re-broadcast to Firebug.modules
@@ -740,6 +776,7 @@ Browser.prototype.connect = function ()
             Firebug.connection.dispatch("updateOption", [name, value]);
         }
     });
+
     TabWatcher.initialize();
     TabWatcher.addListener(TabWatchListener);
 
