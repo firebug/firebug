@@ -15,8 +15,6 @@ const Ci = Components.interfaces;
 const nsIPrefBranch = Ci.nsIPrefBranch;
 const nsIPrefBranch2 = Ci.nsIPrefBranch2;
 const PrefService = Cc["@mozilla.org/preferences-service;1"];
-const promptService = Cc["@mozilla.org/embedcomp/prompt-service;1"].getService(
-    Ci.nsIPromptService);
 
 const nsIPrefService = Ci.nsIPrefService;
 const prefService = PrefService.getService(nsIPrefService);
@@ -361,6 +359,9 @@ var Options =
             prefs.clearUserPref(prefName);
     },
 
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+    // Firebug UI text zoom
+
     changeTextSize: function(amt)
     {
         var textSize = Options.get("textSize");
@@ -393,18 +394,14 @@ var Options =
         return zoom;
     },
 
-    resetAllOptions: function(confirm)  // to default state
-    {
-        if (confirm)
-        {
-            // xxxHonza: Options can't be dependent on firebug/lib/locale
-            if (!promptService.confirm(null, this.$STR("Firebug"),
-                this.$STR("confirmation.Reset_All_Firebug_Options")))
-            {
-                return;
-            }
-        }
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
+    /**
+     * Resets all Firebug options to default state. Note that every option
+     * starting with "extensions.firebug" is considered as a Firebug option.
+     */
+    resetAllOptions: function()
+    {
         var preferences = prefs.getChildList("extensions.firebug", {});
         for (var i = 0; i < preferences.length; i++)
         {
@@ -428,52 +425,6 @@ var Options =
             Firebug.Debugger.clearAllBreakpoints(context);
         });
     },
-
-    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-    // Localization
-    $STR: function(name, bundle)
-    {
-        var strKey = name.replace(' ', '_', "g");
-
-        if (!Options.get("useDefaultLocale"))
-        {
-            try
-            {
-                if (typeof bundle == "string")
-                    bundle = document.getElementById(bundle);
-
-                if (bundle)
-                    return bundle.getString(strKey);
-                else
-                    return Locale.getStringBundle().GetStringFromName(strKey);
-            }
-            catch (err)
-            {
-                if (FBTrace.DBG_LOCALE)
-                    FBTrace.sysout("lib.getString FAILS '" + name + "'", err);
-            }
-        }
-
-        try
-        {
-            // The en-US string should be always available.
-            var bundle = Locale.getDefaultStringBundle();
-            if (bundle)
-                return bundle.GetStringFromName(strKey);
-        }
-        catch (err)
-        {
-            if (FBTrace.DBG_LOCALE)
-                FBTrace.sysout("lib.getString (default) FAILS '" + name + "'", err);
-        }
-
-        // Don't panic now and use only the label after last dot.
-        var index = name.lastIndexOf(".");
-        if (index > 0 && name.charAt(index-1) != "\\")
-            name = name.substr(index + 1);
-        name = name.replace("_", " ", "g");
-        return name;
-    }
 };
 
 // ********************************************************************************************* //

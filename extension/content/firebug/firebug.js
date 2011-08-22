@@ -855,6 +855,19 @@ window.Firebug =
 
     resetAllOptions: function(confirm)
     {
+        if (confirm)
+        {
+            var promptService = Cc["@mozilla.org/embedcomp/prompt-service;1"].
+                getService(Ci.nsIPromptService);
+
+            // Do not reset options if the user changed its mind.
+            if (!promptService.confirm(null, Locale.$STR("Firebug"),
+                Locale.$STR("confirmation.Reset_All_Firebug_Options")))
+            {
+                return;
+            }
+        }
+
         Options.resetAllOptions(confirm);
     },
 
