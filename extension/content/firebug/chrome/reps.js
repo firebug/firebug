@@ -4,6 +4,7 @@ define([
     "firebug/lib/object",
     "firebug/firebug",
     "firebug/lib/domplate",
+    "firebug/firefox/firefox",
     "firebug/firefox/xpcom",
     "firebug/lib/locale",
     "firebug/html/htmlLib",
@@ -25,7 +26,7 @@ define([
     "firebug/firefox/menu",
     "arch/compilationunit",
 ],
-function(Obj, Firebug, Domplate, Xpcom, Locale, HTMLLib, Events, Wrapper, Options,
+function(Obj, Firebug, Domplate, Firefox, Xpcom, Locale, HTMLLib, Events, Wrapper, Options,
     Url, SourceLink, StackFrame, Css, Dom, Win, System, Xpath, Str, Xml, ToggleBranch,
     EventMonitor, Menu, CompilationUnit) {
 

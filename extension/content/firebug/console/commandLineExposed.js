@@ -147,13 +147,35 @@ function createFirebugCommandLine(context, win)
     {
         try
         {
+            var line = Components.stack.lineNumber;
             var result = contentView.eval(expr);
             notifyFirebug([result], "evaluated", "firebugAppendConsole");
         }
         catch(exc)
         {
-            var result = exc;
-            result.source = expr;
+            // change source and line number of exeptions from commandline code
+            // create new error since properties of nsIXPCException are not modifiable
+            var shouldModify, isXPCException;
+            if (exc.filename == Components.stack.filename)
+                shouldModify = isXPCException = true;
+            else if(exc.fileName == Components.stack.filename)
+                shouldModify = true;
+
+            if (shouldModify)
+            {
+                var result = new Error;
+                delete result.stack;
+                result.source = expr;
+                result.message = exc.message;
+                result.lineNumber = exc.lineNumber - line;
+                result.fileName = "data:," + encodeURIComponent(expr);
+                if(!isXPCException)
+                    result.name = exc.name;
+            }
+            else
+            {
+                result = exc;
+            }
             notifyFirebug([result], "evaluateError", "firebugAppendConsole");
         }
     }
