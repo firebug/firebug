@@ -491,6 +491,11 @@ StackFrame.buildStackTrace = function(frame)
         frame.frameIndex = trace.frames.length;
         frame = frame.getCallingFrame();
     }
+
+    // Set the first frame (the one passed into this function) as the current one (issue 4249).
+    if (trace.frames.length > 0)
+        trace.currentFrameIndex = 1;
+
     return trace;
 };
 

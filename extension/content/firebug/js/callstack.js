@@ -153,7 +153,7 @@ Firebug.CallstackPanel.prototype = Obj.extend(Firebug.Panel,
                 FBTrace.sysout("Callstack updateSelection index:"+trace.currentFrameIndex+
                     " StackFrame "+object, object);
         }
-        else if(object instanceof Ci.jsdIStackFrame)
+        else if (object instanceof Ci.jsdIStackFrame)
         {
             var trace = this.location;
             if (trace)
