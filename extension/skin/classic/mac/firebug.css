@@ -328,8 +328,14 @@ panelTab[selected="true"] > panelTabMenu {
 }
 
 .toolbar-text-button:hover:not([disabled="true"]),
-.toolbar-text-menubutton:hover:not([disabled="true"]) {
+.toolbar-text-menubutton:hover:not([disabled="true"]) ,
+.toolbar-text-button[checked="true"]:hover:not([disabled="true"]),
+.toolbar-text-menubutton[open="true"]:hover:not([disabled="true"]) {
     background: #999999;
+}
+
+.toolbar-text-button:hover:active:not([disabled="true"]),
+.toolbar-text-menubutton:hover:active:not([disabled="true"]) {
     box-shadow:
         inset rgba(60, 60, 60, 0.15) 0 -1px 3px,
         inset #111111 0 1px 3px,
@@ -337,23 +343,11 @@ panelTab[selected="true"] > panelTabMenu {
         0 1px rgba(244, 244, 244, 0.4);
 }
 
-.toolbar-text-button:hover:active:not([disabled="true"]),
-.toolbar-text-menubutton:hover:active:not([disabled="true"]) {
-    background: #666666;
-}
-
 .toolbar-text-button:hover:not([disabled="true"]) > .toolbarbutton-text,
 .toolbar-text-menubutton:hover:not([disabled="true"]) > .toolbarbutton-menu-dropmarker,
 .toolbar-text-menubutton:hover:not([disabled="true"]) > .toolbarbutton-text {
     color: #FFFFFF;
     text-shadow: 1px 1px rgba(0, 0, 0, 0.4);
-}
-
-.toolbar-text-button:hover:active:not([disabled="true"]) > .toolbarbutton-text,
-.toolbar-text-menubutton:hover:active:not([disabled="true"]) > .toolbarbutton-menu-dropmarker,
-.toolbar-text-menubutton:hover:active:not([disabled="true"]) > .toolbarbutton-text {
-    color: #FFFFFF;
-    text-shadow: 1px 1px rgba(0, 0, 0, 0.7);
 }
 
 .toolbar-text-button[checked="true"]:not([disabled="true"]),
