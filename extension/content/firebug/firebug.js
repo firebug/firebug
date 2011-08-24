@@ -229,14 +229,6 @@ window.Firebug =
             }
         }
 
-        // Translated strings for this label don't include "..." at the end.
-        var node = doc.getElementById("menu_configureEditors");
-        if (node && node.getAttribute("label").indexOf("...") == -1)
-        {
-            var label = node.getAttribute("label") + "...";
-            node.setAttribute("label", label);
-        }
-
         // Allow other modules to internationalize UI labels (called also for
         // detached Firebug window).
         Events.dispatch(modules, "internationalizeUI", [doc]);
