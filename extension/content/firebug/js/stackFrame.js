@@ -144,7 +144,10 @@ StackFrame.StackFrame = function(sourceFile, lineNo, functionName, args, nativeF
     // Essential fields
     this.sourceFile = sourceFile;
     this.line = lineNo;
-    this.fn = functionName;  // cache?
+
+    var fn = StackFrame.getDisplayName(nativeFrame ? nativeFrame.scope : null);
+    this.fn = fn || functionName;  // cache?
+
     this.context = context;
 
     // the newest frame in the stack containing 'this' frame
@@ -510,7 +513,11 @@ StackFrame.getFunctionName = function(script, context, frame, noArgs)
         return "(no script)";
     }
 
-    var name = script.functionName;
+    var name = this.getDisplayName(frame ? frame.scope : null, script);
+    if (name)
+        return name;
+
+    name = script.functionName;
     if (!name || (name == "anonymous"))
     {
         name = null;
@@ -539,6 +546,22 @@ StackFrame.getFunctionName = function(script, context, frame, noArgs)
         FBTrace.sysout("getFunctionName "+script.tag+" ="+name+"\n");
 
     return name;
+}
+
+StackFrame.getDisplayName = function(scope, script)
+{
+    try
+    {
+        if (scope)
+            return Wrapper.unwrapIValue(scope).arguments.callee.displayName;
+        else if (script)
+            return Wrapper.unwrapIValue(script.functionObject);
+    }
+    catch (err)
+    {
+        if (FBTrace.DBG_STACK)
+            FBTrace.sysout("stackFrame.getDisplayName; EXCEPTION " + err, err);
+    }
 }
 
 StackFrame.guessFunctionName = function(url, lineNo, context)
