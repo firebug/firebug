@@ -26,8 +26,12 @@ const WARNING_FLAG = nsIScriptError.warningFlag;
 
 const urlRe = new RegExp("([^:]*):(//)?([^/]*)");
 const reUncaught = /uncaught exception/;
-const reException = /uncaught exception:\s\[Exception...\s\"([^\"]*)\".*nsresult:.*\(([^\)]*)\).*location:\s\"([^\s]*)\sLine:\s(\d*)\"/;
-
+// regular expessions for parsing uncaught exceptions
+// see http://lxr.mozilla.org/mozilla/source/js/src/xpconnect/src/xpcexception.cpp#347 
+// and http://lxr.mozilla.org/mozilla/source/js/src/xpconnect/src/xpcstack.cpp#318 
+// and http://lxr.mozilla.org/mozilla/source/dom/src/base/nsDOMException.cpp#351
+const reException1 = /^(?:uncaught exception: )?\[Exception... "(?!<no message>)([\s\S]+)"  nsresult: "0x\S+ \((.+)\)"  location: "(?:(?:JS|native) frame :: (?!<unknown filename>)(.+) :: .+ :: line (\d+)|<unknown>)"  data: (?:yes|no)\]$/
+const reException2 = /^(?:uncaught exception: )?\[Exception... "(?!<no message>)([\s\S]+)"  code: "\d+" nsresult: "0x\S+ \((.+)\)"  location: "(?:(.+) Line: (\d+)|<unknown>)"\]$/
 const pointlessErrors =
 {
     "uncaught exception: Permission denied to call method Location.toString": 1,
@@ -791,15 +795,12 @@ function getExceptionContext(context, object)
 
 function correctLineNumbersOnExceptions(object, error)
 {
-    var m = reException.exec(object.errorMessage);
+    var m = reException1.exec(object.errorMessage) || reException2.exec(object.errorMessage);
     if (m)
     {
         var exception = m[1];
         if (exception)
-            errorMessage = "uncaught exception: "+exception;
-        var nsresult = m[2];
-        if (nsresult)
-            errorMessage += " ("+nsresult+")";
+            error.message = exception;
         var sourceName = m[3];
         var lineNumber = parseInt(m[4]);
 

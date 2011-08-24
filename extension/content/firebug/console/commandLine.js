@@ -176,7 +176,7 @@ Firebug.CommandLine = Obj.extend(Firebug.Module,
         win.document.setUserData("firebug-methodName", "evaluate", null);
 
         expr = expr.toString();
-        expr = "with(_FirebugCommandLine){" + expr + "\n};";
+        expr = "with(_FirebugCommandLine){\n" + expr + "\n};";
         win.document.setUserData("firebug-expr", expr, null);
 
         var consoleHandler = Firebug.Console.injector.getConsoleHandler(context, win);
@@ -288,7 +288,7 @@ Firebug.CommandLine = Obj.extend(Firebug.Module,
         this.initializeCommandLineIfNeeded(context, win);
 
         expr = expr.toString();
-        expr = "with(_FirebugCommandLine){" + expr + "\n};";
+        expr = "with(_FirebugCommandLine){\n" + expr + "\n};";
 
         var consoleHandler = Firebug.Console.injector.getConsoleHandler(context, win);
 

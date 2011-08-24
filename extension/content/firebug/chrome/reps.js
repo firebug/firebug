@@ -1762,7 +1762,7 @@ FirebugReps.ErrorMessage = domplate(Firebug.Rep,
             DIV({"class": "errorTitle focusRow subLogRow", role : 'listitem'},
                 SPAN({"class": "errorDuplication"}, "$object.msgId|getDuplication"),
                 SPAN({"class": "errorMessage"},
-                    "$object.message|getMessage"
+                    "$object.message"
                 )
             ),
             DIV({"class": "errorTrace", role : 'presentation'}),
@@ -1802,13 +1802,6 @@ FirebugReps.ErrorMessage = domplate(Firebug.Rep,
     hasErrorBreak: function(error)
     {
         return FBS.fbs.hasErrorBreakpoint(Url.normalizeURL(error.href), error.lineNo);
-    },
-
-    getMessage: function(message)
-    {
-        var re = /\[Exception... "(.*?)" nsresult:/;
-        var m = re.exec(message);
-        return m ? m[1] : message;
     },
 
     getDuplication: function(msgId)
@@ -1904,7 +1897,7 @@ FirebugReps.ErrorMessage = domplate(Firebug.Rep,
     copyError: function(error)
     {
         var message = [
-            this.getMessage(error.message),
+            error.message,
             error.href,
             "Line " +  error.lineNo
         ];
