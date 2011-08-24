@@ -83,10 +83,6 @@ Firebug.Console.injector =
                 expr += p + ": function() { return Function.apply.call(x." + p +
                     ", x, arguments); },";
             }
-            else if (p == "firebug")
-            {
-                expr += p + ":" + console.firebug + ",";
-            }
         }
         expr += "};})";
 
