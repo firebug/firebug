@@ -497,7 +497,15 @@ Css.createStyleSheetMap = function(context)
 
         for (var i = 0; i < rootSheets.length; ++i)
         {
-            addSheet(rootSheets[i]);
+            try
+            {
+                addSheet(rootSheets[i]);
+            }
+            catch (err)
+            {
+                //if (FBTrace.DBG_ERRORS)
+                //    FBTrace.sysout("css.createStyleSheetMap; EXCEPTION " + err, err);
+            }
         }
     });
 
