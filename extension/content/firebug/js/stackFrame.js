@@ -555,7 +555,7 @@ StackFrame.getDisplayName = function(scope, script)
         if (scope)
             return Wrapper.unwrapIValue(scope).arguments.callee.displayName;
         else if (script)
-            return Wrapper.unwrapIValue(script.functionObject);
+            return script.functionName;
     }
     catch (err)
     {
