@@ -630,13 +630,18 @@ Firebug.ScriptPanel.prototype = Obj.extend(Firebug.SourceBoxPanel,
 
     showWarning: function()
     {
-        if (FBTrace.DBG_PANELS)
-            FBTrace.sysout("showWarning Firebug.jsDebuggerOn:"+Firebug.jsDebuggerOn+
-                " jsDebuggerCalledUs "+this.context.jsDebuggerCalledUs+' in '+this.context.getName());
-
         // Fill the panel node with a warning if needed
         var aLocation = this.getDefaultLocation();
         var jsEnabled = Firebug.Options.getPref("javascript", "enabled");
+
+        if (FBTrace.DBG_PANELS)
+            FBTrace.sysout("script.showWarning; " + this.context.getName(), {
+                jsDebuggerOn: Firebug.jsDebuggerOn,
+                jsDebuggerCalledUs: this.context.jsDebuggerCalledUs,
+                jsEnabled: jsEnabled,
+                aLocation: aLocation,
+            });
+
         if (this.context.activitySuspended && !this.context.stopped)
         {
             // Make sure that the content of the panel is restored as soon as
