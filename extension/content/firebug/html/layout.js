@@ -216,7 +216,7 @@ LayoutPanel.prototype = Obj.extend(Firebug.Panel,
         args.outerLeftMode = args.outerRightMode = args.outerTopMode = args.outerBottomMode = "";
         args.zIndex = args.zIndex ? args.zIndex : "auto";
 
-        boxSizing = style.getPropertyCSSValue("box-sizing") ||
+        var boxSizing = style.getPropertyCSSValue("box-sizing") ||
             style.getPropertyCSSValue("-moz-box-sizing");
         args.boxSizing = boxSizing.cssText;
 

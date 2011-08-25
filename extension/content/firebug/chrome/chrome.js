@@ -1629,7 +1629,7 @@ function getBestPanelName(object, context, panelName)
     // Check if the suggested panel name supports the object, and if so, go with it
     if (panelName)
     {
-        panelType = Firebug.getPanelType(panelName);
+        var panelType = Firebug.getPanelType(panelName);
         if (panelSupportsObject(panelType, object, context))
             return panelType.prototype.name;
     }

@@ -1764,7 +1764,7 @@ function attachStyles(context, body)
 
 function createProxiesForDisabledElements(body)
 {
-    var i, rect, div, node, cs, css
+    var i, rect, div, node, cs, css,
         doc = body.ownerDocument,
         xpe = new XPathEvaluator(),
         nsResolver = xpe.createNSResolver(doc.documentElement);

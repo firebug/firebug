@@ -67,6 +67,7 @@ Firebug.ScriptPanel.decorator = Obj.extend(new Firebug.SourceBoxDecorator,
         if (FBTrace.DBG_BP || FBTrace.DBG_LINETABLE)
             FBTrace.sysout("script.markExecutableLines START: "+compilationUnit.toString());
 
+        var lineNode;
         var lineNo = sourceBox.firstViewableLine;
         while (lineNode = sourceBox.getLineNode(lineNo))
         {

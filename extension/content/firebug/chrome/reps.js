@@ -2613,7 +2613,7 @@ FirebugReps.NamedNodeMap = domplate(Firebug.Rep,
             var value = item.nodeValue;
 
             var rep = Firebug.getRep(value);
-            tag = rep.tag;
+            var tag = rep.tag;
 
             props.push({tag: tag, name: name, object: value, equal: "=", delim: ", "});
         }
