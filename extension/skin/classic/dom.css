@@ -83,6 +83,10 @@
     text-decoration: underline;
 }
 
+.panelNode-dom .memberRow:hover {
+    background-color: #EFEFEF;
+}
+
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 .userLabel {
