@@ -2753,10 +2753,18 @@ Firebug.JSDebugClient =
 
     onPauseJSDRequested: function(rejection)
     {
-        //Firebug.connection.dispatch( "onPauseJSDRequested", arguments);
+        // A debugger client (an instance of Firebug.JSDebugClient)  asked to pause JSD.
+        // Note that there is one instance of Firebug.JSDebugClient per browser (XUL) window.
+        // If the debugger is 'on' in this browser window JSD should not be paused.
+        // (see issue 4609)
+        if (Firebug.jsDebuggerOn)
+            rejection.push(true);
+
+        //Firebug.connection.dispatch("onPauseJSDRequested", arguments);
 
         if (FBTrace.DBG_ACTIVATION)
-            FBTrace.sysout("Firebug.JSDebugClient onPauseJSDRequested ignored");
+            FBTrace.sysout("Firebug.JSDebugClient onPauseJSDRequested ignored" +
+                ", jsDebuggerOn: " + Firebug.jsDebuggerOn);
     },
 }
 
