@@ -2385,7 +2385,8 @@ var fbs =
         if (!fbs)
         {
             if (FBTrace.DBG_FBS_CREATION || FBTrace.DBG_FBS_SRCUNITS || FBTrace.DBG_FBS_TRACKFILES)
-                FBTrace.sysout("onScriptCreated "+script.tag+", but no fbs for script.fileName="+script.fileName);
+                FBTrace.sysout("onScriptCreated " + script.tag + ", but no fbs for script.fileName=" +
+                    script.fileName);
              return;
         }
 
@@ -2395,46 +2396,63 @@ var fbs =
 
             if (FBTrace.DBG_FBS_TRACKFILES)
                 trackFiles.add(fileName);
+
             if (isFilteredURL(fileName) || fbs.isChromebug(fileName))
             {
-                try {
+                try
+                {
                     if (FBTrace.DBG_FBS_CREATION || FBTrace.DBG_FBS_SRCUNITS)
-                        FBTrace.sysout("onScriptCreated "+script.tag+": filename filtered:\'"+fileName+"\'"+(fbs.filterConsoleInjections?" console injection":""));
-                } catch (exc) {
-                    FBTrace.sysout("onScriptCreated "+script.tag+" filtered msg ERROR \'"+script.fileName+"\'"); /*? Bug 426692 */
+                        FBTrace.sysout("onScriptCreated " + script.tag + ": filename filtered:\'" +
+                            fileName + "\'" + (fbs.filterConsoleInjections ? " console injection" : ""));
                 }
+                catch (exc)
+                {
+                    FBTrace.sysout("onScriptCreated " + script.tag + " filtered msg ERROR \'" +
+                        script.fileName+"\'"); /*? Bug 426692 */
+                }
+
                 if (FBTrace.DBG_FBS_TRACKFILES)
                     trackFiles.drop(fileName);
+
                 return;
             }
 
             if (FBTrace.DBG_FBS_CREATION || FBTrace.DBG_FBS_SRCUNITS)
-                FBTrace.sysout("onScriptCreated: "+script.tag+"@("+script.baseLineNumber+"-"
-                    +(script.baseLineNumber+script.lineExtent)+")"+script.fileName);
+                FBTrace.sysout("onScriptCreated: " + script.tag + "@(" + script.baseLineNumber +
+                    "-" + (script.baseLineNumber+script.lineExtent) + ")" + script.fileName);
 
             if (script.lineExtent > 80000 && FBTrace.DBG_FBS_SRCUNITS)
-                FBTrace.sysout("****************>> BOGUS line extent ("+script.lineExtent+") for "+script.fileName);
+                FBTrace.sysout("****************>> BOGUS line extent (" + script.lineExtent +
+                    ") for " + script.fileName);
 
             if (FBTrace.DBG_FBS_CREATION)
             {
-                try {
-                    FBTrace.sysout("onScriptCreated: \'"+script.functionName+"\'", script.functionSource);
-                } catch (exc) {
-                    FBTrace.sysout("onScriptCreated "+script.tag+" ERROR \'"+script.fileName+"\'"); /*? Bug 426692 */
+                try
+                {
+                    FBTrace.sysout("onScriptCreated: \'"+script.functionName+"\'",
+                        script.functionSource);
+                }
+                catch (exc)
+                {
+                    FBTrace.sysout("onScriptCreated " + script.tag + " ERROR \'" +
+                        script.fileName + "\'"); /*? Bug 426692 */
                 }
             }
 
-            if( reXUL.test(script.fileName) )
+            if (reXUL.test(script.fileName))
             {
                 fbs.onXScriptCreatedByTag[script.tag] = fbs.onXULScriptCreated;
                 fbs.pendingXULScripts.push(script);
-                script.setBreakpoint(0);  // Stop in the first one called and assign all with this fileName to sourceFile.
+
+                // Stop in the first one called and assign all with this fileName to sourceFile.
+                script.setBreakpoint(0);
             }
             else if (!script.functionName) // top or eval-level
             {
                 // We need to detect eval() and grab its source.
                 var hasCaller = fbs.createdScriptHasCaller();
-                if (FBTrace.DBG_FBS_SRCUNITS) FBTrace.sysout("top or eval case createdScriptHasCaller "+hasCaller);
+                if (FBTrace.DBG_FBS_SRCUNITS)
+                    FBTrace.sysout("top or eval case createdScriptHasCaller " + hasCaller);
 
                 if (hasCaller)
                 {
@@ -2442,12 +2460,16 @@ var fbs =
                     fbs.onXScriptCreatedByTag[script.tag] = this.onEvalScriptCreated;
                 }
                 else
+                {
                     fbs.onXScriptCreatedByTag[script.tag] = this.onTopLevelScriptCreated;
+                }
 
                 script.setBreakpoint(0);
                 if (FBTrace.DBG_FBS_CREATION || FBTrace.DBG_FBS_SRCUNITS || FBTrace.DBG_FBS_BP)
                 {
-                    FBTrace.sysout("onScriptCreated: set BP at PC 0 in "+(hasCaller?"eval":"top")+" level tag="+script.tag+":"+script.fileName+" jsd depth:"+(jsd.isOn?jsd.pauseDepth+"":"OFF"));
+                    FBTrace.sysout("onScriptCreated: set BP at PC 0 in " +
+                        (hasCaller ? "eval" : "top") + " level tag=" + script.tag + ":" +
+                        script.fileName + " jsd depth:" + (jsd.isOn ? jsd.pauseDepth + "" : "OFF"));
                 }
             }
             else if (script.baseLineNumber == 1)
@@ -2459,7 +2481,7 @@ var fbs =
                 if (FBTrace.DBG_FBS_SRCUNITS)
                 {
                     var hasCaller = fbs.createdScriptHasCaller();
-                    FBTrace.sysout("browser generated createdScriptHasCaller "+hasCaller);
+                    FBTrace.sysout("browser generated createdScriptHasCaller " + hasCaller);
                 }
 
                 fbs.onXScriptCreatedByTag[script.tag] = this.onEventScriptCreated; // for case 1
@@ -2468,19 +2490,21 @@ var fbs =
                 fbs.nestedScriptStack.push(script);  // for case 2
 
                 if (FBTrace.DBG_FBS_CREATION)
-                    FBTrace.sysout("onScriptCreated: set BP at PC 0 in event level tag="+script.tag);
+                    FBTrace.sysout("onScriptCreated: set BP at PC 0 in event level tag=" + script.tag);
             }
             else
             {
                 fbs.nestedScriptStack.push(script);
-                if (FBTrace.DBG_FBS_CREATION) FBTrace.sysout("onScriptCreated: nested function named: "+script.functionName);
-                dispatch(scriptListeners,"onScriptCreated",[script, fileName, script.baseLineNumber]);
+                if (FBTrace.DBG_FBS_CREATION)
+                    FBTrace.sysout("onScriptCreated: nested function named: " + script.functionName);
+
+                dispatch(scriptListeners, "onScriptCreated", [script, fileName, script.baseLineNumber]);
             }
         }
         catch(exc)
         {
-            ERROR("onScriptCreated failed: "+exc);
-            FBTrace.sysout("onScriptCreated failed: ", exc);
+            ERROR("onScriptCreated failed: " + exc);
+            FBTrace.sysout("onScriptCreated failed:", exc);
         }
     },
 
