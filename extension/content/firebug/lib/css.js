@@ -24,7 +24,7 @@ var cssPropNames = {};
 var cssColorNames = null;
 var imageRules = null;
 
-Css.getCSSKeywordsByProperty = function(nodeType,propName)
+Css.getCSSKeywordsByProperty = function(nodeType, propName)
 {
     if (!cssKeywordMap[nodeType])
     {
@@ -46,7 +46,8 @@ Css.getCSSKeywordsByProperty = function(nodeType,propName)
         }
     }
 
-    return propName in cssKeywordMap[nodeType] ? cssKeywordMap[nodeType][propName] : [];
+    return propName.toLowerCase() in cssKeywordMap[nodeType] ?
+        cssKeywordMap[nodeType][propName.toLowerCase()] : [];
 };
 
 Css.getCSSPropertyNames = function(nodeType)
