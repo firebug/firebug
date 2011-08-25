@@ -1770,10 +1770,10 @@ function createProxiesForDisabledElements(body)
         nsResolver = xpe.createNSResolver(doc.documentElement);
 
     var result = xpe.evaluate('//*[@disabled]', doc.documentElement,
-                      nsResolver, XPathResult.ORDERED_NODE_SNAPSHOT_TYPE, null);
-    var l = result.snapshotLength;
+        nsResolver, XPathResult.ORDERED_NODE_SNAPSHOT_TYPE, null);
 
-    for(i = 0; i < l; i++)
+    var l = result.snapshotLength;
+    for (i=0; i<l; i++)
     {
         node = result.snapshotItem(i);
         cs = body.ownerDocument.defaultView.getComputedStyle(node, null);
@@ -1783,32 +1783,31 @@ function createProxiesForDisabledElements(body)
         div.className = "firebugResetStyles fbProxyElement";
 
         css = moveImp(null, rect.left, rect.top + body.scrollTop) + resizeImp(null, rect.width, rect.height);
-        if(cs.MozTransform && cs.MozTransform != "none")
+        if (cs.MozTransform && cs.MozTransform != "none")
           css += "-moz-transform:" + cs.MozTransform + "!important;" +
                  "-moz-transform-origin:" + cs.MozTransformOrigin + "!important;";
-        if(cs.borderRadius)
+        if (cs.borderRadius)
             css += "border-radius:" + cs.borderRadius + " !important;";
-        if(cs.borderTopLeftRadius)
+        if (cs.borderTopLeftRadius)
             css += "border-top-left-radius:" + cs.borderTopLeftRadius + " !important;";
-        if(cs.borderTopRightRadius)
+        if (cs.borderTopRightRadius)
             css += "border-top-right-radius:" + cs.borderTopRightRadius + " !important;";
-        if(cs.borderBottomRightRadius)
+        if (cs.borderBottomRightRadius)
             css += "border-bottom-right-radius:" + cs.borderBottomRightRadius + " !important;";
-        if(cs.borderBottomLeftRadius)
+        if (cs.borderBottomLeftRadius)
             css += "border-bottom-left-radius:" + cs.borderBottomLeftRadius + " !important;";
-        if(cs.MozBorderRadius)
+        if (cs.MozBorderRadius)
             css += "-moz-border-radius:" + cs.MozBorderRadius + " !important;";
-        if(cs.MozBorderRadiusTopleft)
+        if (cs.MozBorderRadiusTopleft)
             css += "-moz-border-radius-topleft:" + cs.MozBorderRadiusTopleft + " !important;";
-        if(cs.MozBorderRadiusTopright)
+        if (cs.MozBorderRadiusTopright)
             css += "-moz-border-radius-topright:" + cs.MozBorderRadiusTopright + " !important;";
-        if(cs.MozBorderRadiusBottomright)
+        if (cs.MozBorderRadiusBottomright)
             css += "-moz-border-radius-bottomright:" + cs.MozBorderRadiusBottomright + " !important;";
-        if(cs.MozBorderRadiusBottomleft)
+        if (cs.MozBorderRadiusBottomleft)
             css += "-moz-border-radius-bottomleft:" + cs.MozBorderRadiusBottomleft + " !important;";
 
         div.style.cssText = css;
-
         div.fbProxyFor = node;
 
         body.appendChild(div);
