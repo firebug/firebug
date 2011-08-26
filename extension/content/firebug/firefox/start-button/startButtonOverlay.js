@@ -320,8 +320,6 @@ Firebug.StartButton = Obj.extend(Firebug.Module,
 
     setSuspended: function(value)
     {
-        FBTrace.sysout("startButton.setSuspended; " + value);
-
         var suspendMarker = Firefox.getElementById("firebugStatus");
 
         if (FBTrace.DBG_ACTIVATION)
