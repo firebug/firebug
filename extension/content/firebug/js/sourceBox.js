@@ -483,11 +483,16 @@ Firebug.SourceBoxPanel = Obj.extend(SourceBoxPanelBase,
         sourceBox.maximumLineNumber = compilationUnit.getNumberOfLines();
         sourceBox.maxLineNoChars = (sourceBox.maximumLineNumber + "").length;
 
+        this.setSourceBoxLineSizes(sourceBox);
+
         this.reViewOnSourceLinesAvailable(sourceBox, requestedLines);
     },
 
     setSourceBoxLineSizes: function(sourceBox)
     {
+        if (!sourceBox.maxLineNoChars)
+            return;
+
         var view = sourceBox.viewport;
 
         var lineNoCharsSpacer = "";
@@ -503,7 +508,7 @@ Firebug.SourceBoxPanel = Obj.extend(SourceBoxPanelBase,
 
         var view = sourceBox.viewport; // TODO some cleaner way
         view.previousSibling.firstChild.firstChild.style.width = sourceBox.lineNoWidth + "px";
-        view.nextSibling.firstChild.firstChild.style.width = sourceBox.lineNoWidth +"px";
+        view.nextSibling.firstChild.firstChild.style.width = sourceBox.lineNoWidth + "px";
 
         if (FBTrace.DBG_COMPILATION_UNITS)
         {
