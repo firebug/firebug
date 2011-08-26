@@ -575,7 +575,7 @@ function whyNotShown(url, categoryList, isWarning)
 
     var isChrome = false;
 
-    if (!category)
+    if (!categoryList)
         return Firebug.showChromeErrors ? null : "no category, assume chrome, showChromeErrors false";
 
     var categories = categoryList.split(" ");
