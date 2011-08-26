@@ -558,15 +558,15 @@ const categoryMap =
 function getBaseCategory(categories)
 {
     var categoryList = categories.split(" ");
-    for (var i = 0 ; i < categoryList.length; ++i)
+    for (var i=0; i<categoryList.length; ++i)
     {
         var category = categoryList[i];
-        if ( categoryMap.hasOwnProperty(category) )
+        if (categoryMap.hasOwnProperty(category))
             return categoryMap[category];
     }
 }
 
-function whyNotShown(url, category, isWarning)
+function whyNotShown(url, categoryList, isWarning)
 {
     var m = urlRe.exec(url);
     var errorScheme = m ? m[1] : "";
@@ -576,10 +576,10 @@ function whyNotShown(url, category, isWarning)
     var isChrome = false;
 
     if (!category)
-        return Firebug.showChromeErrors ? null :"no category, assume chrome, showChromeErrors false";
+        return Firebug.showChromeErrors ? null : "no category, assume chrome, showChromeErrors false";
 
-    var categories = category.split(" ");
-    for (var i = 0 ; i < categories.length; ++i)
+    var categories = categoryList.split(" ");
+    for (var i=0; i<categories.length; ++i)
     {
         var category = categories[i];
         if (category == "CSS" && !Firebug.showCSSErrors)

@@ -81,9 +81,9 @@ Locale.$STR = function(name, bundle)
     try
     {
         // The en-US string should be always available.
-        var bundle = Locale.getDefaultStringBundle();
-        if (bundle)
-            return bundle.GetStringFromName(strKey);
+        var defaultBundle = Locale.getDefaultStringBundle();
+        if (defaultBundle)
+            return defaultBundle.GetStringFromName(strKey);
     }
     catch (err)
     {
@@ -129,9 +129,9 @@ Locale.$STRF = function(name, args, bundle)
     try
     {
         // The en-US string should be always available.
-        var bundle = Locale.getDefaultStringBundle();
-        if (bundle)
-            return bundle.formatStringFromName(strKey, args, args.length);
+        var defaultBundle = Locale.getDefaultStringBundle();
+        if (defaultBundle)
+            return defaultBundle.formatStringFromName(strKey, args, args.length);
     }
     catch (err)
     {

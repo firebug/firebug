@@ -245,7 +245,7 @@ Firebug.PanelActivation = Obj.extend(Firebug.Module,
 
     updateOption: function(name, value)
     {
-        if (name = "allPagesActivation")
+        if (name == "allPagesActivation")
             this.updateAllPagesActivation();
     },
 

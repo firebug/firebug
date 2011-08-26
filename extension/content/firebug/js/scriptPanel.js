@@ -147,12 +147,6 @@ Firebug.ScriptPanel.prototype = Obj.extend(Firebug.SourceBoxPanel,
         return Firebug.ScriptPanel.decorator;
     },
 
-    initialize: function(context, doc)
-    {
-        this.location = null;
-        Firebug.SourceBoxPanel.initialize.apply(this, arguments);
-    },
-
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
     // TODO Class method
 
@@ -521,6 +515,8 @@ Firebug.ScriptPanel.prototype = Obj.extend(Firebug.SourceBoxPanel,
 
     initialize: function(context, doc)
     {
+        this.location = null;
+
         this.onMouseDown = Obj.bind(this.onMouseDown, this);
         this.onContextMenu = Obj.bind(this.onContextMenu, this);
         this.onMouseOver = Obj.bind(this.onMouseOver, this);

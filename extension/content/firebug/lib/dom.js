@@ -82,8 +82,7 @@ Dom.getElementByClass = function(node, className)  // className, className, ...
 Dom.getElementsByClass = function(node, className)  // className, className, ...
 {
     var args = Arr.cloneArray(arguments); args.splice(0, 1);
-    var className = args.join(" ");
-    return node.getElementsByClassName(className);
+    return node.getElementsByClassName(args.join(" "));
 };
 
 Dom.getElementsByAttribute = function(node, attrName, attrValue)

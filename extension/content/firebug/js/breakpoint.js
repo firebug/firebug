@@ -325,7 +325,7 @@ Firebug.Breakpoint.BreakpointsPanel.prototype = Obj.extend(Firebug.Panel,
         if (this.noRefresh)
             return;
 
-        var extracted = this.extractBreakpoints(this.context, breakpoints, errorBreakpoints, monitors);
+        var extracted = this.extractBreakpoints(this.context);
 
         var breakpoints = extracted.breakpoints;
         var errorBreakpoints = extracted.errorBreakpoints;
@@ -378,7 +378,7 @@ Firebug.Breakpoint.BreakpointsPanel.prototype = Obj.extend(Firebug.Panel,
         Events.dispatch(this.fbListeners, 'onBreakRowsRefreshed', [this, this.panelNode]);
     },
 
-    extractBreakpoints: function(context, breakpoints, errorBreakpoints, monitors)
+    extractBreakpoints: function(context)
     {
         var breakpoints = [];
         var errorBreakpoints = [];

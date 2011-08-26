@@ -124,6 +124,8 @@ window.Firebug =
     // xxxHonza: hack, all "Firebug.Options" occurences should be replaced by "Options"
     Options: Options,
 
+    viewChrome: null,
+
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
     // Initialization
 
