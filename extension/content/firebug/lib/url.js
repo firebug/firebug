@@ -46,52 +46,52 @@ Url.splitURLBase = function(url)
 
 Url.splitDataURL = function(url)
 {
-    var mark = url.indexOf('data:');
+    var mark = url.indexOf("data:");
     if (mark != 0)
         return false; //  the first 5 chars must be 'data:'
 
-    var point = url.indexOf(',', 5);
+    var point = url.indexOf(",", 5);
     if (point < 5)
         return false; // syntax error
 
     var props = { encodedContent: url.substr(point+1) };
 
     var metadataBuffer = url.substring(5, point);
-    var metadata = metadataBuffer.split(';');
+    var metadata = metadataBuffer.split(";");
     for (var i = 0; i < metadata.length; i++)
     {
-        var nv = metadata[i].split('=');
+        var nv = metadata[i].split("=");
         if (nv.length == 2)
             props[nv[0]] = nv[1];
     }
 
     // Additional Firebug-specific properties
-    if (props.hasOwnProperty('fileName'))
+    if (props.hasOwnProperty("fileName"))
     {
-         var caller_URL = decodeURIComponent(props['fileName']);
+         var caller_URL = decodeURIComponent(props["fileName"]);
          var caller_split = Url.splitURLTrue(caller_URL);
 
-         props['fileName'] = caller_URL;
+         props["fileName"] = caller_URL;
 
-        if (props.hasOwnProperty('baseLineNumber'))  // this means it's probably an eval()
+        if (props.hasOwnProperty("baseLineNumber"))  // this means it's probably an eval()
         {
-            props['path'] = caller_split.path;
-            props['line'] = props['baseLineNumber'];
-            var hint = decodeURIComponent(props['encodedContent']).substr(0,200).replace(/\s*$/, "");
-            props['name'] =  'eval->'+hint;
+            props["path"] = caller_split.path;
+            props["line"] = props["baseLineNumber"];
+            var hint = decodeURIComponent(props["encodedContent"]).substr(0,200).replace(/\s*$/, "");
+            props["name"] =  "eval->"+hint;
         }
         else
         {
-            props['name'] = caller_split.name;
-            props['path'] = caller_split.path;
+            props["name"] = caller_split.name;
+            props["path"] = caller_split.path;
         }
     }
     else
     {
-        if (!props.hasOwnProperty('path'))
-            props['path'] = "data:";
-        if (!props.hasOwnProperty('name'))
-            props['name'] =  decodeURIComponent(props['encodedContent']).substr(0,200).replace(/\s*$/, "");
+        if (!props.hasOwnProperty("path"))
+            props["path"] = "data:";
+        if (!props.hasOwnProperty("name"))
+            props["name"] =  decodeURIComponent(props["encodedContent"]).substr(0,200).replace(/\s*$/, "");
     }
 
     return props;
@@ -126,7 +126,7 @@ Url.isSystemURL = function(url)
 {
     if (!url) return true;
     if (url.length == 0) return true;
-    if (url[0] == 'h') return false;
+    if (url[0] == "h") return false;
     if (url.substr(0, 9) == "resource:")
         return true;
     else if (url.substr(0, 16) == "chrome://firebug")
@@ -209,7 +209,8 @@ Url.getLocalPath = function(url)
 {
     if (this.isLocalURL(url))
     {
-        var fileHandler = ioService.getProtocolHandler("file").QueryInterface(Ci.nsIFileProtocolHandler);
+        var fileHandler = ioService.getProtocolHandler("file")
+            .QueryInterface(Ci.nsIFileProtocolHandler);
         var file = fileHandler.getFileFromURLSpec(url);
         return file.path;
     }
@@ -227,13 +228,15 @@ Url.getLocalSystemURI = function(url)
         var uri = ioService.newURI(url, null, null);
         if (uri.schemeIs("resource"))
         {
-            var ph = ioService.getProtocolHandler("resource").QueryInterface(Ci.nsIResProtocolHandler);
+            var ph = ioService.getProtocolHandler("resource")
+                .QueryInterface(Ci.nsIResProtocolHandler);
             var abspath = ph.getSubstitution(uri.host);
             uri = ioService.newURI(uri.path.substr(1), null, abspath);
         }
         if (uri.schemeIs("chrome"))
         {
-            var chromeRegistry = Cc["@mozilla.org/chrome/chrome-registry;1"].getService(Ci.nsIChromeRegistry);
+            var chromeRegistry = Cc["@mozilla.org/chrome/chrome-registry;1"]
+                .getService(Ci.nsIChromeRegistry);
             uri = chromeRegistry.convertChromeURL(uri);
         }
         return uri;
@@ -263,7 +266,8 @@ Url.getLocalOrSystemPath = function(url, allowDirectories)
 
 Url.getURLFromLocalFile = function(file)
 {
-    var fileHandler = ioService.getProtocolHandler("file").QueryInterface(Ci.nsIFileProtocolHandler);
+    var fileHandler = ioService.getProtocolHandler("file")
+        .QueryInterface(Ci.nsIFileProtocolHandler);
     var URL = fileHandler.getURLSpecFromFile(file);
     return URL;
 };
@@ -311,12 +315,12 @@ Url.absoluteURLWithDots = function(url, baseURL)
     if (url.length === 0)
         return baseURL;
 
-    var R_query_index = url.indexOf('?');
+    var R_query_index = url.indexOf("?");
     var R_head = url;
     if (R_query_index !== -1)
         R_head = url.substr(0, R_query_index);
 
-    if (url.indexOf(':') !== -1)
+    if (url.indexOf(":") !== -1)
         return url;
 
     var reURL = /(([^:]+:)\/{1,2}[^\/]*)(.*?)$/;
@@ -324,7 +328,7 @@ Url.absoluteURLWithDots = function(url, baseURL)
     if (m_url)
         return url;
 
-    var B_query_index = baseURL.indexOf('?');
+    var B_query_index = baseURL.indexOf("?");
     var B_head = baseURL;
     if (B_query_index !== -1)
         B_head = baseURL.substr(0, B_query_index);
@@ -332,7 +336,7 @@ Url.absoluteURLWithDots = function(url, baseURL)
     if (url[0] === "?")   // cases where R.path is empty.
         return B_head + url;
     if  (url[0] === "#")
-        return baseURL.split('#')[0]+url;
+        return baseURL.split("#")[0]+url;
 
     var m = reURL.exec(B_head);
     if (!m)
@@ -373,7 +377,7 @@ Url.normalizeURL = function(url)  // this gets called a lot, any performance imp
         // For script tags inserted dynamically sometimes the script.fileName is bogus
         url = url.replace(/[^\s]*\s->\s/, "");
 
-        if (url.indexOf('chrome:')==0)
+        if (url.indexOf("chrome:")==0)
         {
             var m = reChromeCase.exec(url);  // 1 is package name, 2 is path
             if (m)
@@ -416,7 +420,7 @@ Url.parseURLEncodedText = function(text, noLimit)
     var params = [];
 
     // In case the text is empty just return the empty parameters
-    if (text == '')
+    if (text == "")
         return params;
 
     // Unescape '+' characters that are used to encode a space.
