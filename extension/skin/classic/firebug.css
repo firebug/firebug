@@ -250,6 +250,10 @@ textbox[type="fbSearchBox"] > panel {
     max-width: none;
 }
 
+.fbInlineItem {
+    font-style: italic;
+}
+
 /************************************************************************************************/
 /* Firebug toolbar buttons */
 

@@ -1124,7 +1124,6 @@ Firebug.ScriptPanel.prototype = Obj.extend(Firebug.SourceBoxPanel,
     // return.path: group/category label, return.name: item label
     getObjectDescription: function(compilationUnit)
     {
-        var kind = compilationUnit.getKind();
         return Url.splitURLBase(compilationUnit.getURL());
     },
 

@@ -1010,7 +1010,7 @@
             <setter><![CDATA[
                 var locator = this.getLocator();
 
-                var fileName = null;
+                var fileName = "";
                 if (!locator)
                 {
                     fileName = "no locator!";
@@ -1018,13 +1018,19 @@
                 else if (val)
                 {
                     var description = locator.getObjectDescription(val);
-                    fileName = (description.label?description.label:description.name);
+                    fileName = description.label ? description.label : description.name;
                 }
-                else
-                    fileName = "(none)";
 
                 this.repObject = val;
-                this.setAttribute("label", FBL.cropString(fileName, 80));
+
+                var button = document.getAnonymousElementByAttribute(this, "anonid", "button");
+                if (fileName == "")
+                    FBL.setClass(button, "fbInlineItem");
+                else
+                    FBL.removeClass(button, "fbInlineItem");
+
+                this.setAttribute("label", fileName != "" ?
+                    FBL.cropString(fileName, 80) : "Inline");
                 this.setAttribute("location", val);
                 if (FBTrace.DBG_LOCATIONS)
                 {
@@ -1191,7 +1197,10 @@
 
                 for (var j = 0; j < urls.length; ++j)
                 {
-                    var menuInfo = {label: urls[j].fileName, nol10n: true};
+                    var menuInfo = {
+                        label: urls[j].fileName != "" ? urls[j].fileName : "Inline",
+                        nol10n: true
+                    };
 
                     if (urls[j].selected)
                     {
@@ -1202,6 +1211,8 @@
                     var menuItem = FBL.createMenuItem(this.popup, menuInfo);
                     menuItem.repObject = urls[j].object;
                     FBL.setClass(menuItem, "fbURLMenuItem");
+                    if (urls[j].fileName == "")
+                        FBL.setClass(menuItem, "fbInlineItem");
                 }
             }
         ]]></handler>
