@@ -566,6 +566,9 @@ Css.getURLForStyleSheet = function(styleSheet)
 {
     // http://www.w3.org/TR/DOM-Level-2-Style/stylesheets.html#StyleSheets-StyleSheet.
     // For inline style sheets, the value of this attribute is null.
+    if (!styleSheet.href && !styleSheet.ownerNode)
+        return null;
+
     return (styleSheet.href ? styleSheet.href : styleSheet.ownerNode.ownerDocument.URL);
 };
 
