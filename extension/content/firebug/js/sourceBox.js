@@ -490,9 +490,6 @@ Firebug.SourceBoxPanel = Obj.extend(SourceBoxPanelBase,
 
     setSourceBoxLineSizes: function(sourceBox)
     {
-        if (!sourceBox.maxLineNoChars)
-            return;
-
         var view = sourceBox.viewport;
 
         var lineNoCharsSpacer = "";
