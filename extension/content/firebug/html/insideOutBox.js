@@ -6,8 +6,9 @@ define([
     "firebug/lib/events",
     "firebug/lib/css",
     "firebug/lib/dom",
+    "firebug/lib/xml",
 ],
-function(Obj, Firebug, Events, Css, Dom) {
+function(Obj, Firebug, Events, Css, Dom, Xml) {
 
 // ************************************************************************************************
 
@@ -106,7 +107,7 @@ Firebug.InsideOutBox.prototype =
         return objectBox;
     },
 
-    toggleObject: function(object, all, event)
+    toggleObject: function(object, all, exceptions)
     {
         var objectBox = this.createObjectBox(object);
         if (!objectBox)
@@ -115,7 +116,7 @@ Firebug.InsideOutBox.prototype =
         if (Css.hasClass(objectBox, "open"))
             this.contractObjectBox(objectBox, all);
         else
-            this.expandObjectBox(objectBox, all, event);
+            this.expandObjectBox(objectBox, all, exceptions);
     },
 
     expandObject: function(object, expandAll)
@@ -205,7 +206,7 @@ Firebug.InsideOutBox.prototype =
         }
     },
 
-    expandObjectBox: function(objectBox, expandAll, event)
+    expandObjectBox: function(objectBox, expandAll, exceptions)
     {
         var nodeChildBox = this.getChildObjectBox(objectBox);
         if (!nodeChildBox)
@@ -217,9 +218,9 @@ Firebug.InsideOutBox.prototype =
             this.populateChildBox(firstChild, nodeChildBox);
         }
 
-        var labelBox = objectBox.getElementsByClassName('nodeLabelBox').item(0);
+        var labelBox = objectBox.getElementsByClassName("nodeLabelBox").item(0);
         if (labelBox)
-            labelBox.setAttribute('aria-expanded', 'true');
+            labelBox.setAttribute("aria-expanded", "true");
         Css.setClass(objectBox, "open");
 
         // Recursively expand all child boxes
@@ -227,23 +228,27 @@ Firebug.InsideOutBox.prototype =
         {
             for (var child = nodeChildBox.firstChild; child; child = child.nextSibling)
             {
-                if (event)
+                if (exceptions && child.repObject)
                 {
+                    var shouldBeExpanded = true;
                     var localName = child.repObject.localName;
-                    var localName = localName ? localName.toLowerCase() : "";
+                    localName = localName ? localName.toLowerCase() : "";
 
-                    // Avoid expanding SCRIPT and LINK tags. Their content is not
-                    // event part of the DOM and it isn't usually what the user
-                    // wants to see when exploring HTML in the HTML panel.
-                    // The user can force expanding by pressing SHIFT key.
-                    // xxxHonza: I believe this entire logic belongs int html.js
-                    //    Refactor when implementing the breakpoint column.
-                    if ((localName == "script" || localName == "link") && !Events.isShift(event))
+                    for (var i=0; i<exceptions.length; i++)
+                    {
+                        if (localName == exceptions[i] &&
+                            (Xml.isElementHTML(child.repObject) || Xml.isElementXHTML(child.repObject)))
+                        {
+                            shouldBeExpanded = false;
+                            break;
+                        }
+                    }
+                    if (!shouldBeExpanded)
                         continue;
                 }
 
                 if (Css.hasClass(child, "containerNodeBox"))
-                    this.expandObjectBox(child, expandAll);
+                    this.expandObjectBox(child, expandAll, exceptions);
             }
         }
     },

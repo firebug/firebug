@@ -128,7 +128,7 @@ Firebug.HTMLPanel.prototype = Obj.extend(WalkingPanel,
 
         if (FBTrace.DBG_PANELS)
             FBTrace.sysout("firebug.select "+this.name+" forceUpdate: "+forceUpdate+" "+object+
-                ((object==this.selection)?"==":"!=")+this.selection);
+                ((object == this.selection) ? "==" : "!=")+this.selection);
 
         if (forceUpdate || object != this.selection)
         {
@@ -236,8 +236,9 @@ Firebug.HTMLPanel.prototype = Obj.extend(WalkingPanel,
             var editor = this.localEditors[type];
             if (!editor)
             {
-             // look for special purpose editor (inserted by an extension), otherwise use our html editor
-                var specializedEditor = Firebug.HTMLPanel.Editors[type] || Firebug.HTMLPanel.Editors['html'];
+                // look for special purpose editor (inserted by an extension), otherwise use our html editor
+                var specializedEditor = Firebug.HTMLPanel.Editors[type] ||
+                    Firebug.HTMLPanel.Editors["html"];
                 editor = this.localEditors[type] = new specializedEditor(this.document);
             }
             this.startEditingNode(node, objectNodeBox, editor, type);
@@ -248,8 +249,8 @@ Firebug.HTMLPanel.prototype = Obj.extend(WalkingPanel,
     {
         switch (type)
         {
-            case 'html':
-            case 'xhtml':
+            case "html":
+            case "xhtml":
                 this.startEditingHTMLNode(node, box, editor);
                 break;
             default:
@@ -276,7 +277,7 @@ Firebug.HTMLPanel.prototype = Obj.extend(WalkingPanel,
 
     deleteNode: function(node, dir)
     {
-        dir = dir || 'up';
+        dir = dir || "up";
         var box = this.ioBox.createObjectBox(node);
         if (Css.hasClass(box, "open"))
             this.ioBox.contractObject(this.selection);
@@ -284,9 +285,11 @@ Firebug.HTMLPanel.prototype = Obj.extend(WalkingPanel,
         Firebug.HTMLModule.deleteNode(node, this.context);
     },
 
-    toggleAll: function(node)
+    toggleAll: function(event, node)
     {
-        this.ioBox.toggleObject(node, true);
+        var expandExternalContentNodes = Events.isShift(event);
+        this.ioBox.toggleObject(node, true, expandExternalContentNodes ?
+            null : ["link", "script", "style"]);
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
@@ -344,13 +347,15 @@ Firebug.HTMLPanel.prototype = Obj.extend(WalkingPanel,
         }
 
         if (FBTrace.DBG_HTML)
-            FBTrace.sysout("html.mutateAttr target:"+target+" attrChange:"+attrChange+" attrName:"+attrName+" attrValue: "+attrValue, target);
+        {
+            FBTrace.sysout("html.mutateAttr target:"+target+" attrChange:"+attrChange+
+                " attrName:"+attrName+" attrValue: "+attrValue, target);
+        }
 
         this.markChange();
 
-        var objectNodeBox = Firebug.scrollToMutations || Firebug.expandMutations
-            ? this.ioBox.createObjectBox(target)
-            : this.ioBox.findObjectBox(target);
+        var objectNodeBox = Firebug.scrollToMutations || Firebug.expandMutations ?
+            this.ioBox.createObjectBox(target) : this.ioBox.findObjectBox(target);
 
         if (!objectNodeBox)
             return;
@@ -419,13 +424,13 @@ Firebug.HTMLPanel.prototype = Obj.extend(WalkingPanel,
 
         this.markChange();
 
-        var parentNodeBox = Firebug.scrollToMutations || Firebug.expandMutations
-            ? this.ioBox.createObjectBox(parent)
-            : this.ioBox.findObjectBox(parent);
+        var parentNodeBox = Firebug.scrollToMutations || Firebug.expandMutations ?
+            this.ioBox.createObjectBox(parent) : this.ioBox.findObjectBox(parent);
 
         if (!parentNodeBox)
         {
-            if (FBTrace.DBG_HTML)   FBTrace.sysout("html.mutateText failed to update text, parent node box does not exist");
+            if (FBTrace.DBG_HTML)
+                FBTrace.sysout("html.mutateText failed to update text, parent node box does not exist");
             return;
         }
 
@@ -441,7 +446,11 @@ Firebug.HTMLPanel.prototype = Obj.extend(WalkingPanel,
             var nodeText = HTMLLib.getTextElementTextBox(parentNodeBox);
             if (!nodeText.firstChild)
             {
-                if (FBTrace.DBG_HTML)   FBTrace.sysout("html.mutateText failed to update text, TextElement firstChild does not exist");
+                if (FBTrace.DBG_HTML)
+                {
+                    FBTrace.sysout("html.mutateText failed to update text, " +
+                        "TextElement firstChild does not exist");
+                }
                 return;
             }
 
@@ -454,7 +463,11 @@ Firebug.HTMLPanel.prototype = Obj.extend(WalkingPanel,
             var childBox = this.ioBox.getChildObjectBox(parentNodeBox);
             if (!childBox)
             {
-                if (FBTrace.DBG_HTML)   FBTrace.sysout("html.mutateText failed to update text, no child object box found");
+                if (FBTrace.DBG_HTML)
+                {
+                    FBTrace.sysout("html.mutateText failed to update text, " +
+                        "no child object box found");
+                }
                 return;
             }
 
@@ -530,9 +543,9 @@ Firebug.HTMLPanel.prototype = Obj.extend(WalkingPanel,
                         }
                     }
 
-                    var objectBox = nextSibling
-                        ? this.ioBox.insertChildBoxBefore(parentNodeBox, target, nextSibling)
-                        : this.ioBox.appendChildBox(parentNodeBox, target);
+                    var objectBox = nextSibling ?
+                        this.ioBox.insertChildBoxBefore(parentNodeBox, target, nextSibling) :
+                        this.ioBox.appendChildBox(parentNodeBox, target);
 
                     this.highlightMutation(objectBox, objectBox, "mutated");
                 }
@@ -614,8 +627,10 @@ Firebug.HTMLPanel.prototype = Obj.extend(WalkingPanel,
     createObjectBox: function(object, isRoot)
     {
         if (FBTrace.DBG_HTML)
+        {
             FBTrace.sysout("html.createObjectBox("+Css.getElementCSSSelector(object)+", isRoot:"+
-                (isRoot?"true":"false")+")");
+                (isRoot? "true" : "false")+")");
+        }
 
         var tag = getNodeTag(object);
         if (tag)
@@ -647,8 +662,10 @@ Firebug.HTMLPanel.prototype = Obj.extend(WalkingPanel,
                         return parentNode;
 
                     if (FBTrace.DBG_HTML)
+                    {
                         FBTrace.sysout("getParentObject parentNode.nodeType 9, frameElement:"+
                             parentNode.defaultView.frameElement);
+                    }
 
                     return parentNode.defaultView.frameElement;
                 }
@@ -930,16 +947,17 @@ Firebug.HTMLPanel.prototype = Obj.extend(WalkingPanel,
         if (!node)
             return;
 
-        if (!Events.noKeyModifiers(event))
-          return;
-
         // * expands the node with all its children
         // + expands the node
         // - collapses the node
         var ch = String.fromCharCode(event.charCode);
         if (ch == "*")
-            this.ioBox.toggleObject(node, true, event);
-        else if (ch == "+")
+            this.toggleAll(event, node);
+
+        if (!Events.noKeyModifiers(event))
+          return;
+
+        if (ch == "+")
             this.ioBox.expandObject(node);
         else if (ch == "-")
             this.ioBox.contractObject(node);
@@ -1403,7 +1421,7 @@ Firebug.HTMLPanel.prototype = Obj.extend(WalkingPanel,
             {
                 items.push("-",
                     {label: "html.label.Expand/Contract All", acceltext: "*",
-                        command: Obj.bindFixed(this.toggleAll, this, node)});
+                        command: Obj.bind(this.toggleAll, this, node)});
             }
         }
         else
@@ -1416,7 +1434,7 @@ Firebug.HTMLPanel.prototype = Obj.extend(WalkingPanel,
         }
 
         Firebug.HTMLModule.MutationBreakpoints.getContextMenuItems(
-            this.context,node, target, items);
+            this.context, node, target, items);
 
         return items;
     },
