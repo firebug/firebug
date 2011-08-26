@@ -249,13 +249,17 @@ Firebug.StartButton = Obj.extend(Firebug.Module,
             FBTrace.sysout("resetTooltip called");
 
         var tooltip = "Firebug " + Firebug.getVersion();
-
         tooltip += "\n" + this.getEnablementStatus();
 
         if (Firebug.getSuspended())
-            tooltip += "\n" + Firebug.getSuspended();
+        {
+            tooltip += "\n" + this.getSuspended();
+        }
         else
-            tooltip += "\n" + Locale.$STRP("plural.Total_Firebugs2", [Firebug.TabWatcher.contexts.length]);
+        {
+            tooltip += "\n" + Locale.$STRP("plural.Total_Firebugs2",
+                [Firebug.TabWatcher.contexts.length]);
+        }
 
         if (Firebug.allPagesActivation == "on")
         {
@@ -301,6 +305,36 @@ Firebug.StartButton = Obj.extend(Firebug.Module,
 
         return status;
     },
+
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+    // Activation
+
+    getSuspended: function()
+    {
+        var suspendMarker = Firefox.getElementById("firebugStatus");
+        if (suspendMarker && suspendMarker.hasAttribute("suspended"))
+            return suspendMarker.getAttribute("suspended");
+
+        return null;
+    },
+
+    setSuspended: function(value)
+    {
+        FBTrace.sysout("startButton.setSuspended; " + value);
+
+        var suspendMarker = Firefox.getElementById("firebugStatus");
+
+        if (FBTrace.DBG_ACTIVATION)
+            FBTrace.sysout("Firebug.setSuspended to "+value+". Browser: " +
+                Firebug.chrome.window.document.title);
+
+        if (value == "suspended")
+            suspendMarker.setAttribute("suspended", value);
+        else
+            suspendMarker.removeAttribute("suspended");
+
+        this.resetTooltip();
+    }
 });
 
 // ********************************************************************************************* //

@@ -2588,6 +2588,10 @@ Firebug.Debugger = Obj.extend(Firebug.ActivableModule,
             FBTrace.sysout("debugger.onSuspendFirebug paused: "+paused+" isAlwaysEnabled " +
                 Firebug.Debugger.isAlwaysEnabled()+"\n");
 
+        // JSD activation is not per browser-tab so, FBS.pause can return 'not-paused' when
+        // Firebug is activated on another tab.
+        // The start-button should somehow reflect that JSD can be still active (even if
+        // Firebug is suspended for the current tab).
         if (!paused)  // then we failed to suspend, undo
             return true;
 

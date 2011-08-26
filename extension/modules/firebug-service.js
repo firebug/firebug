@@ -1656,13 +1656,17 @@ var fbs =
         var rejection = [];
         dispatch(clients, "onPauseJSDRequested", [rejection]);
 
-        if (rejection.length == 0)  // then everyone wants to pause
+        // Number of rejections:
+        // 0 - then everyone wants to pause
+        // 1 - then everyone wants to pause (including the current active tab)
+        if (rejection.length < 2)
         {
             if (jsd.pauseDepth == 0)  // don't pause if we are paused.
             {
                 jsd.pause();
                 fbs.unhookScripts();
             }
+
             var active = fbs.isJSDActive();
             dispatch(clients, "onJSDDeactivate", [active, "pause depth "+jsd.pauseDepth]);
         }

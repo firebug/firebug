@@ -304,25 +304,12 @@ window.Firebug =
 
     getSuspended: function()  // TODO XULWindow
     {
-        var suspendMarker = Firefox.getElementById("firebugStatus");
-        if (suspendMarker && suspendMarker.hasAttribute("suspended"))
-            return suspendMarker.getAttribute("suspended");
-        return null;
+        return Firebug.StartButton.getSuspended();
     },
 
     setSuspended: function(value)  // TODO XULWindow
     {
-        var suspendMarker = Firefox.getElementById("firebugStatus");
-        if (FBTrace.DBG_ACTIVATION)
-            FBTrace.sysout("Firebug.setSuspended to "+value+". Browser: " +
-                Firebug.chrome.window.document.title);
-
-        if (value)
-            suspendMarker.setAttribute("suspended", value);
-        else
-            suspendMarker.removeAttribute("suspended");
-
-        Firebug.StartButton.resetTooltip();
+        Firebug.StartButton.setSuspended(value);
     },
 
     toggleSuspend: function()  // TODO XULWindow IN detached "Activate Firebug for the current website"
