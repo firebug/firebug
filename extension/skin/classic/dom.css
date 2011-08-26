@@ -10,7 +10,7 @@
 }
 
 .memberValueCell {
-    padding: 1px 0 1px 5px;
+    padding: 2px 0 2px 5px;
     display: block;
     overflow: hidden;
 }
@@ -85,6 +85,10 @@
 
 .panelNode-dom .memberRow:hover {
     background-color: #EFEFEF;
+}
+
+.panelNode-dom .memberRow td {
+    border-bottom: 1px solid #EFEFEF;
 }
 
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -197,4 +201,3 @@
 .domTable .objectBox-errorMessage .errorTitle {
     display: inline;
 }
-
