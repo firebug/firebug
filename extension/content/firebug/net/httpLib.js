@@ -127,7 +127,7 @@ Http.readPostTextFromRequest = function(request, context)
             if (ss && prevOffset == 0)
                 ss.seek(NS_SEEK_SET, 0);
 
-            return text;
+            return removeHeaders(request, text);
         }
     }
     catch(exc)
@@ -138,6 +138,34 @@ Http.readPostTextFromRequest = function(request, context)
 
     return null;
 };
+
+/**
+ * Remove headers from post body, https://bugzilla.mozilla.org/show_bug.cgi?id=649338
+ * 
+ * @param {Object} request Channel implementing nsIUploadChannel2
+ * @param {Object} text Extracted text (can include headers at the beggining).
+ */
+function removeHeaders(request, text)
+{
+    if (!text)
+        return text;
+
+    if (typeof(Ci.nsIUploadChannel2) == "undefined")
+        return text;
+
+    if (!(request instanceof Ci.nsIUploadChannel2))
+        return text;
+
+    if (!request.uploadStreamHasHeaders)
+        return text;
+
+    var headerSeparator = "\r\n\r\n";
+    var index = text.indexOf(headerSeparator);
+    if (index == -1)
+        return text;
+
+    return text.substring(index + headerSeparator.length);
+}
 
 Http.getInputStreamFromString = function(dataString)
 {
