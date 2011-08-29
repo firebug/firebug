@@ -1117,7 +1117,7 @@ function parseFormat(format)
     if (format.length <= 0)
         return parts;
 
-    var reg = /((^%|.%)(\d+)?(\.)([a-zA-Z]))|((^%|.%)([a-zA-Z]))/;
+    var reg = /((^%|(?=.)%)(\d+)?(\.)([a-zA-Z]))|((^%|(?=.)%)([a-zA-Z]))/;
     for (var m = reg.exec(format); m; m = reg.exec(format))
     {
         if (m[0].substr(0, 2) == "%%")
@@ -1136,11 +1136,13 @@ function parseFormat(format)
                 case "s":
                     rep = FirebugReps.Text;
                     break;
+
                 case "f":
                 case "i":
                 case "d":
                     rep = FirebugReps.Number;
                     break;
+
                 case "o":
                 case "c":
                     rep = null;
