@@ -605,6 +605,9 @@ var FirebugChrome =
         var panel = this.selectPanel(bestPanelName, sidePanelName, true);
         if (panel)
             panel.select(object, forceUpdate);
+
+        // issue 4778
+        this.syncLocationList();
     },
 
     selectPanel: function(panelName, sidePanelName, noRefresh)
