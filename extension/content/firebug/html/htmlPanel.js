@@ -377,8 +377,11 @@ Firebug.HTMLPanel.prototype = Obj.extend(WalkingPanel,
             if (nodeAttr && nodeAttr.childNodes.length > 3)
             {
                 var attrValueBox = nodeAttr.querySelector("*> .nodeValue");
-                if (attrValueBox)
-                    attrValueBox.innerHTML = attrValue;
+                var attrValueText = attrValueBox.firstChild;
+                if (attrValueText)
+                    attrValueText.nodeValue = attrValue;
+                else
+                    attrValueBox.innerHTML = Str.escapeForTextNode(attrValue);
 
                 this.highlightMutation(attrValueBox, objectNodeBox, "mutated");
             }
