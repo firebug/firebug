@@ -32,7 +32,7 @@ function(Obj, Firebug, Firefox, Domplate, FirebugReps, Xpcom, Locale, Events, Wr
 
 with (Domplate) {
 
-// ************************************************************************************************
+// ********************************************************************************************* //
 // Constants
 
 const Cc = Components.classes;
@@ -51,7 +51,7 @@ const STATE_ACTIVE  = 0x01;
 const STATE_FOCUS   = 0x02;
 const STATE_HOVER   = 0x04;
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 var CSSDomplateBase =
 {
@@ -326,6 +326,9 @@ const styleGroups =
     ]
 };
 
+// ********************************************************************************************* //
+// CSS Module
+
 Firebug.CSSModule = Obj.extend(Obj.extend(Firebug.Module, Firebug.EditorSelector),
 {
     dispatchName: "cssModule",
@@ -343,15 +346,17 @@ Firebug.CSSModule = Obj.extend(Obj.extend(Firebug.Module, Firebug.EditorSelector
             var editStyleSheet = ownerNode.ownerDocument.createElementNS(
                 "http://www.w3.org/1999/xhtml",
                 "style");
+
             Firebug.setIgnored(editStyleSheet);
             editStyleSheet.setAttribute("type", "text/css");
             editStyleSheet.setAttributeNS(
                 "http://www.w3.org/XML/1998/namespace",
                 "base",
                 url.directory);
+
             if (ownerNode.hasAttribute("media"))
             {
-              editStyleSheet.setAttribute("media", ownerNode.getAttribute("media"));
+                editStyleSheet.setAttribute("media", ownerNode.getAttribute("media"));
             }
 
             // Insert the edited stylesheet directly after the old one to ensure the styles
@@ -362,8 +367,10 @@ Firebug.CSSModule = Obj.extend(Obj.extend(Firebug.Module, Firebug.EditorSelector
         }
 
         styleSheet.editStyleSheet.innerHTML = value;
+
         if (FBTrace.DBG_CSS)
-            FBTrace.sysout("css.saveEdit styleSheet.href:"+styleSheet.href+" got innerHTML:"+value+"\n");
+            FBTrace.sysout("css.saveEdit styleSheet.href:" + styleSheet.href +
+                " got innerHTML:" + value);
 
         Events.dispatch(this.fbListeners, "onCSSFreeEdit", [styleSheet, value]);
     },
@@ -433,13 +440,15 @@ Firebug.CSSModule = Obj.extend(Obj.extend(Firebug.Module, Firebug.EditorSelector
     /**
      * Method for atomic propertly removal, such as through the context menu.
      */
-    deleteProperty: function(rule, propName, context) {
+    deleteProperty: function(rule, propName, context)
+    {
         Events.dispatch(this.fbListeners, "onBeginFirebugChange", [rule, context]);
         Firebug.CSSModule.removeProperty(rule, propName);
         Events.dispatch(this.fbListeners, "onEndFirebugChange", [rule, context]);
     },
 
-    disableProperty: function(disable, rule, propName, parsedValue, map, context) {
+    disableProperty: function(disable, rule, propName, parsedValue, map, context)
+    {
         Events.dispatch(this.fbListeners, "onBeginFirebugChange", [rule, context]);
 
         if (disable)
@@ -490,7 +499,8 @@ Firebug.CSSModule = Obj.extend(Obj.extend(Firebug.Module, Firebug.EditorSelector
         }
 
         // https://bugzilla.mozilla.org/show_bug.cgi?id=500365
-        // This voodoo touches each style sheet to force some Firefox internal change to allow edits.
+        // This voodoo touches each style sheet to force some Firefox internal change
+        // to allow edits.
         var styleSheets = Css.getAllStyleSheets(context);
         for(var i = 0; i < styleSheets.length; i++)
         {
@@ -512,6 +522,7 @@ Firebug.CSSModule = Obj.extend(Obj.extend(Firebug.Module, Firebug.EditorSelector
             }
         }
     },
+
     cleanupSheetHandler: function(event, context)
     {
         var target = event.target,
@@ -528,22 +539,26 @@ Firebug.CSSModule = Obj.extend(Obj.extend(Firebug.Module, Firebug.EditorSelector
     initialize: function()
     {
         this.editors = {};
-        this.registerEditor('Live', {
+        this.registerEditor("Live",
+        {
             startEditing: function(stylesheet, context, panel)
             {
                 panel.startLiveEditing(stylesheet, context);
             },
-            stopEditing: function() {
+            stopEditing: function()
+            {
                 Firebug.Editor.stopEditing();
             }
         });
 
-        this.registerEditor('Source', {
+        this.registerEditor("Source",
+        {
             startEditing: function(stylesheet, context, panel)
             {
                 panel.startSourceEditing(stylesheet, context);
             },
-            stopEditing: function() {
+            stopEditing: function()
+            {
                 Firebug.Editor.stopEditing();
             }
         });
@@ -636,7 +651,9 @@ Firebug.CSSStyleSheetPanel.prototype = Obj.extend(Firebug.Panel,
     {
         if (Firebug.CSSDirtyListener.isDirty(styleSheet, context))
         {
-            var prompts = Cc["@mozilla.org/embedcomp/prompt-service;1"].getService(Ci.nsIPromptService);
+            var prompts = Cc["@mozilla.org/embedcomp/prompt-service;1"].
+                getService(Ci.nsIPromptService);
+
             var proceedToEdit = prompts.confirm(null,
                 "Your existing CSS edits will be lost if you edit source", "Are you sure?");
 
@@ -931,7 +948,7 @@ Firebug.CSSStyleSheetPanel.prototype = Obj.extend(Firebug.Panel,
             return name;
     },
 
-    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
     editElementStyle: function()
     {
@@ -1042,11 +1059,10 @@ Firebug.CSSStyleSheetPanel.prototype = Obj.extend(Firebug.Panel,
         this.markChange(this.name == "stylesheet");
     },
 
-    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
     onMouseDown: function(event)
     {
-
     },
 
     onClick: function(event)
@@ -1079,8 +1095,7 @@ Firebug.CSSStyleSheetPanel.prototype = Obj.extend(Firebug.Panel,
         }
     },
 
-
-    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
     // extends Panel
 
     name: "stylesheet",
@@ -1225,7 +1240,8 @@ Firebug.CSSStyleSheetPanel.prototype = Obj.extend(Firebug.Panel,
     {
         this.selection = null;
 
-        if (object instanceof window.CSSStyleDeclaration) {
+        if (object instanceof window.CSSStyleDeclaration)
+        {
             object = object.parentRule;
         }
 
@@ -1258,15 +1274,19 @@ Firebug.CSSStyleSheetPanel.prototype = Obj.extend(Firebug.Panel,
                 {
                     var stylesheet = Css.getStyleSheetByHref(sourceLink.href, this.context);
                     if (stylesheet)
+                    {
                         this.navigate(stylesheet);
+                    }
                     else
                     {
                         if (FBTrace.DBG_CSS)
-                            FBTrace.sysout("css.updateSelection no sourceFile for "+sourceLink.href, sourceLink);
+                            FBTrace.sysout("css.updateSelection no sourceFile for " +
+                                sourceLink.href, sourceLink);
                     }
                 }
             }
-            catch(exc) {
+            catch(exc)
+            {
                 if (FBTrace.DBG_CSS)
                     FBTrace.sysout("css.upDateSelection FAILS "+exc, exc);
             }
@@ -1669,9 +1689,9 @@ Firebug.CSSStyleSheetPanel.prototype = Obj.extend(Firebug.Panel,
 
         for (var p in cssRules.props)
         {
-          var prop = cssRules.props[p];
-          if (!(prop.disabled || prop.overridden))
-            props.push(prop.name + ": " + prop.value + prop.important + ";");
+            var prop = cssRules.props[p];
+            if (!(prop.disabled || prop.overridden))
+                props.push(prop.name + ": " + prop.value + prop.important + ";");
         }
 
         return props;
@@ -1772,6 +1792,7 @@ CSSElementPanel.prototype = Obj.extend(Firebug.CSSStyleSheetPanel.prototype,
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
     // All calls to this method must call cleanupSheets first
+
     getInheritedRules: function(element, sections, usedProps)
     {
         var parent = element.parentNode;
@@ -2457,7 +2478,7 @@ CSSEditor.prototype = domplate(Firebug.InlineEditor.prototype,
                 Firebug.CSSModule.removeProperty(rule, propName);
         }
 
-        if(value)
+        if (value)
         {
             var saveSuccess = !!rule.style.getPropertyValue(propName || value);
             if(!saveSuccess && !propName)
@@ -2504,7 +2525,7 @@ CSSEditor.prototype = domplate(Firebug.InlineEditor.prototype,
 
     getAutoCompleteList: function(preExpr, expr, postExpr)
     {
-        if(expr.indexOf("!") == 0)
+        if (expr.indexOf("!") == 0)
         {
             return ["!important"];
         }
@@ -2529,14 +2550,15 @@ CSSEditor.prototype = domplate(Firebug.InlineEditor.prototype,
     }
 });
 
-//************************************************************************************************
-//CSSRuleEditor
+// ********************************************************************************************* //
+// CSSRuleEditor
 
 function CSSRuleEditor(doc)
 {
     this.initializeInline(doc);
     this.completeAsYouType = false;
 }
+
 CSSRuleEditor.uniquifier = 0;
 CSSRuleEditor.prototype = domplate(Firebug.InlineEditor.prototype,
 {
@@ -2558,7 +2580,8 @@ CSSRuleEditor.prototype = domplate(Firebug.InlineEditor.prototype,
     saveEdit: function(target, value, previousValue)
     {
         if (FBTrace.DBG_CSS)
-            FBTrace.sysout("CSSRuleEditor.saveEdit: '" + value + "'  '" + previousValue + "'", target);
+            FBTrace.sysout("CSSRuleEditor.saveEdit: '" + value + "'  '" + previousValue +
+                "'", target);
 
         target.innerHTML = Str.escapeForCss(value);
 
@@ -2573,21 +2596,27 @@ CSSRuleEditor.prototype = domplate(Firebug.InlineEditor.prototype,
 
         if (searchRule)
         {
-            var styleSheet = searchRule.parentRule || searchRule.parentStyleSheet;// take care of media rules
+            // take care of media rules
+            var styleSheet = searchRule.parentRule || searchRule.parentStyleSheet;
             if(!styleSheet)
                 return;
-            var cssRules = styleSheet.cssRules;
-            for (ruleIndex=0; ruleIndex<cssRules.length && searchRule!=cssRules[ruleIndex]; ruleIndex++) {}
 
-            if(rule)
+            var cssRules = styleSheet.cssRules;
+            for (ruleIndex=0; ruleIndex<cssRules.length && searchRule!=cssRules[ruleIndex];
+                ruleIndex++)
+            {
+            }
+
+            if (rule)
                 oldRule = searchRule;
             else
                 ruleIndex++;
         }
         else
         {
-            if(this.panel.name != 'stylesheet')
+            if (this.panel.name != 'stylesheet')
                 return;
+
             var styleSheet = this.panel.location;//this must be stylesheet panel
             if (!styleSheet)
             {
@@ -2603,8 +2632,8 @@ CSSRuleEditor.prototype = domplate(Firebug.InlineEditor.prototype,
                 Wrapper.getContentView(style).defaultStylesheet = true;
                 this.panel.location = styleSheet = style.sheet;
             }
-            styleSheet = styleSheet.editStyleSheet ? styleSheet.editStyleSheet.sheet : styleSheet;
 
+            styleSheet = styleSheet.editStyleSheet ? styleSheet.editStyleSheet.sheet : styleSheet;
             cssRules = styleSheet.cssRules;
             ruleIndex = cssRules.length;
         }
@@ -2626,15 +2655,18 @@ CSSRuleEditor.prototype = domplate(Firebug.InlineEditor.prototype,
         {
             var cssText = [ value, "{", ];
             var props = row.getElementsByClassName("cssProp");
-            for (var i = 0; i < props.length; i++) {
+            for (var i = 0; i < props.length; i++)
+            {
                 var propEl = props[i];
-                if (!Css.hasClass(propEl, "disabledStyle")) {
+                if (!Css.hasClass(propEl, "disabledStyle"))
+                {
                     cssText.push(Dom.getChildByClass(propEl, "cssPropName").textContent);
                     cssText.push(":");
                     cssText.push(Dom.getChildByClass(propEl, "cssPropValue").textContent);
                     cssText.push(";");
                 }
             }
+
             cssText.push("}");
             cssText = cssText.join("");
 
@@ -2645,7 +2677,7 @@ CSSRuleEditor.prototype = domplate(Firebug.InlineEditor.prototype,
                 ruleIndex++;
 
                 var saveSuccess = this.panel.name != "css";
-                if(!saveSuccess)
+                if (!saveSuccess)
                     saveSuccess =(this.panel.selection &&
                         this.panel.selection.mozMatchesSelector(value))? true: 'almost';
 
@@ -2696,9 +2728,13 @@ CSSRuleEditor.prototype = domplate(Firebug.InlineEditor.prototype,
     }
 });
 
-// ************************************************************************************************
+// ********************************************************************************************* //
 // StyleSheetEditor
 
+/**
+ * StyleSheetEditor represents an inline editor and is used when editing CSS
+ * within the CSS panel.
+ */
 function StyleSheetEditor(doc)
 {
     this.box = this.tag.replace({}, doc, this);
@@ -2712,6 +2748,8 @@ StyleSheetEditor.prototype = domplate(Firebug.BaseEditor,
     tag: DIV(
         TEXTAREA({"class": "styleSheetEditor fullPanelEditor", oninput: "$onInput"})
     ),
+
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
     getValue: function()
     {
@@ -2733,7 +2771,8 @@ StyleSheetEditor.prototype = domplate(Firebug.BaseEditor,
         this.input.value = value;
         this.input.focus();
 
-        var command = Firebug.chrome.$("cmd_togglecssEditMode"); // match CSSModule.getEditorOptionKey
+        // match CSSModule.getEditorOptionKey
+        var command = Firebug.chrome.$("cmd_togglecssEditMode");
         command.setAttribute("checked", true);
     },
 
@@ -2767,7 +2806,7 @@ StyleSheetEditor.prototype = domplate(Firebug.BaseEditor,
         return true;
     },
 
-    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
     onInput: function()
     {
@@ -2786,7 +2825,7 @@ StyleSheetEditor.prototype = domplate(Firebug.BaseEditor,
 
 Firebug.StyleSheetEditor = StyleSheetEditor;
 
-// ************************************************************************************************
+// ********************************************************************************************* //
 
 Firebug.CSSDirtyListener = function(context)
 {
@@ -2837,7 +2876,7 @@ Firebug.CSSDirtyListener.prototype =
     }
 };
 
-// ************************************************************************************************
+// ********************************************************************************************* //
 // Local Helpers
 
 function rgbToHex(value)
@@ -3032,11 +3071,13 @@ const reQuotes = /['"]/g;
 function getRuleId(rule)
 {
     var line = Dom.domUtils.getRuleLine(rule);
-    var ruleId = rule.selectorText.replace(reQuotes,"%")+"/"+line; // xxxjjb I hope % is invalid in selectortext
+
+    // xxxjjb I hope % is invalid in selectortext
+    var ruleId = rule.selectorText.replace(reQuotes,"%")+"/"+line;
     return ruleId;
 }
 
-// ************************************************************************************************
+// ********************************************************************************************* //
 // Registration
 
 Firebug.registerModule(Firebug.CSSModule);
@@ -3048,5 +3089,5 @@ Firebug.registerPanel(CSSComputedElementPanel);
 
 return Firebug.CSSModule;
 
-// ************************************************************************************************
+// ********************************************************************************************* //
 }});
