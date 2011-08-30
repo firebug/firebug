@@ -518,7 +518,7 @@ LineStepper.prototype = extend(OutStepper.prototype,
     unhook: function unhookLineStepper(frame)
     {
         if (FBTrace.DBG_FBS_STEP)
-            FBTrace.sysout("LineStepper unhook ", this);
+            FBTrace.sysout(this.mode + ".hook; unhook " + frameToString(frame));
     },
 
     // jsdIExecutionHook, onExecute
@@ -582,6 +582,11 @@ IntoStepper.prototype = extend(LineStepper.prototype,
         var callingFrame = frame.callingFrame;
         if (callingFrame)
         {
+            // Skip functions running in the frame that is not in this context (issue 3077)
+            var lucky = this.context.getSourceFileByTag(frame.script.tag);
+            if (!lucky)
+                return;
+
             if (this.stepFrameTag === callingFrame.script.tag) // then we stepped into from our caller
                 return this.hit(frame, type);
 
@@ -3811,9 +3816,13 @@ function isFilteredURL(rawJSD_script_filename)
         return true;
     if (fbs.filterSystemURLs)
         return systemURLStem(rawJSD_script_filename);
+
     for (var i = 0; i < fbs.alwayFilterURLsStarting.length; i++)
+    {
         if (rawJSD_script_filename.indexOf(fbs.alwayFilterURLsStarting[i]) != -1)
             return true;
+    }
+
     return false;
 }
 
