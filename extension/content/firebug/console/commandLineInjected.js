@@ -19,8 +19,9 @@ var _FirebugCommandLine =
             if (window[command])
                 continue;
 
-            this[command] = new Function(
-                "return window.console.notifyFirebug(arguments, '" + command + "', 'firebugExecuteCommand');");
+            this[command] = function notifyFirebug() {
+                return window.console.notifyFirebug(arguments, command, "firebugExecuteCommand");
+            };
         }
 
         // Define console shortcuts
@@ -33,7 +34,9 @@ var _FirebugCommandLine =
             if (window[command])
                 continue;
 
-            this[command] = new Function("return window.console." + command + ".apply(window.console, arguments)");
+            this[command] = function apply() {
+                return window.console[command].apply(window.console, arguments);
+            };
         }
 
         // Define console variables.
@@ -44,8 +47,9 @@ var _FirebugCommandLine =
             if (window[prop])
                 continue;
 
-            this.__defineGetter__(prop, new Function(
-                "return window.console.notifyFirebug(arguments, '" + prop + "', 'firebugExecuteCommand');"));
+            this.__defineGetter__(prop, function notifyFirebug() {
+                    return window.console.notifyFirebug(arguments, prop, "firebugExecuteCommand");
+                });
         }
 
         this.attachCommandLine();
