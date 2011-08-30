@@ -342,7 +342,8 @@ Firebug.HTMLPanel.prototype = Obj.extend(WalkingPanel,
         // Due to the delay call this may or may not exist in the tree anymore
         if (!this.ioBox.isInExistingRoot(target))
         {
-            if (FBTrace.DBG_HTML)   FBTrace.sysout("mutateAttr: different tree " + target, target);
+            if (FBTrace.DBG_HTML)
+                FBTrace.sysout("mutateAttr: different tree " + target, target);
             return;
         }
 
@@ -368,26 +369,31 @@ Firebug.HTMLPanel.prototype = Obj.extend(WalkingPanel,
         if (attrChange == MODIFICATION || attrChange == ADDITION)
         {
             var nodeAttr = HTMLLib.findNodeAttrBox(objectNodeBox, attrName);
+
             if (FBTrace.DBG_HTML)
-                FBTrace.sysout("mutateAttr "+attrChange+" "+attrName+"="+attrValue+" node: "+nodeAttr, nodeAttr);
+                FBTrace.sysout("mutateAttr " + attrChange + " " + attrName + "=" + attrValue +
+                    " node: " + nodeAttr, nodeAttr);
+
             if (nodeAttr && nodeAttr.childNodes.length > 3)
             {
                 var attrValueBox = nodeAttr.querySelector("*> .nodeValue");
-                var attrValueText = attrValueBox.firstChild;
-                if (attrValueText)
-                    attrValueText.nodeValue = attrValue;
+                if (attrValueBox)
+                    attrValueBox.innerHTML = attrValue;
 
                 this.highlightMutation(attrValueBox, objectNodeBox, "mutated");
             }
             else
             {
                 var attr = target.getAttributeNode(attrName);
+
                 if (FBTrace.DBG_HTML)
-                    FBTrace.sysout("mutateAttr getAttributeNode "+attrChange+" "+attrName+"="+attrValue+" node: "+attr, attr);
+                    FBTrace.sysout("mutateAttr getAttributeNode " + attrChange + " " + attrName +
+                        "=" + attrValue + " node: " + attr, attr);
+
                 if (attr)
                 {
                     var nodeAttr = Firebug.HTMLPanel.AttrNode.tag.replace({attr: attr},
-                            this.document);
+                        this.document);
 
                     var labelBox = objectNodeBox.querySelector("*> .nodeLabel > .nodeLabelBox");
                     var bracketBox = labelBox.querySelector("*> .nodeBracket");
