@@ -15,14 +15,14 @@ define([
 ],
 function(Obj, Firebug, Domplate, Locale, Events, Css, Dom, Str, Arr, Menu, Debug) {
 
-// ************************************************************************************************
+// ********************************************************************************************* //
 // Constants
 
 const saveTimeout = 400;
 const largeChangeAmount = 10;
 const smallChangeAmount = 0.1;
 
-// ************************************************************************************************
+// ********************************************************************************************* //
 // Globals
 
 var currentTarget = null;
@@ -41,7 +41,7 @@ var previousValue = null;
 var invalidEditor = false;
 var ignoreNextInput = false;
 
-// ************************************************************************************************
+// ********************************************************************************************* //
 
 Firebug.Editor = Obj.extend(Firebug.Module,
 {
@@ -100,8 +100,10 @@ Firebug.Editor = Obj.extend(Firebug.Module,
         currentEditor.show(target, currentPanel, value, selectionData);
         Events.dispatch(this.fbListeners, "onBeginEditing", [currentPanel, currentEditor, target, value]);
         currentEditor.beginEditing(target, value);
+
         if (FBTrace.DBG_EDITOR)
             FBTrace.sysout("Editor start panel "+currentPanel.name);
+
         this.attachListeners(currentEditor, panel.context);
     },
 
@@ -110,7 +112,9 @@ Firebug.Editor = Obj.extend(Firebug.Module,
         if (!currentTarget)
             return;
 
-        Events.dispatch(currentPanel.fbListeners, 'onInlineEditorClose', [currentPanel, currentTarget, !originalValue]);
+        Events.dispatch(currentPanel.fbListeners, "onInlineEditorClose", [currentPanel,
+            currentTarget, !originalValue]);
+
         this.stopEditing();
     },
 
@@ -146,7 +150,9 @@ Firebug.Editor = Obj.extend(Firebug.Module,
         {
             if (cancel)
             {
-                Events.dispatch(currentPanel.fbListeners, 'onInlineEditorClose', [currentPanel, currentTarget, removeGroup && !originalValue]);
+                Events.dispatch(currentPanel.fbListeners, 'onInlineEditorClose', [currentPanel,
+                    currentTarget, removeGroup && !originalValue]);
+
                 if (value != originalValue)
                     this.saveEditAndNotifyListeners(currentTarget, originalValue, previousValue);
 
@@ -161,7 +167,9 @@ Firebug.Editor = Obj.extend(Firebug.Module,
                     currentGroup.parentNode.removeChild(currentGroup);
             }
             else
+            {
                 this.save(value);
+            }
         }
         catch (exc)
         {
@@ -172,8 +180,10 @@ Firebug.Editor = Obj.extend(Firebug.Module,
         currentPanel.editing = false;
 
         Events.dispatch(this.fbListeners, "onStopEdit", [currentPanel, currentEditor, currentTarget]);
+
         if (FBTrace.DBG_EDITOR)
             FBTrace.sysout("Editor stop panel "+currentPanel.name);
+
         currentTarget = null;
         currentGroup = null;
         currentPanel = null;
@@ -199,11 +209,14 @@ Firebug.Editor = Obj.extend(Firebug.Module,
         currentEditor.layout();
 
         if (saveNow)
+        {
             this.save();
+        }
         else
         {
             var context = currentPanel.context;
             this.saveTimeout = context.setTimeout(Obj.bindFixed(this.save, this), saveTimeout);
+
             if (FBTrace.DBG_EDITOR)
                 FBTrace.sysout("editor.update saveTimeout: "+this.saveTimeout);
         }
@@ -216,8 +229,11 @@ Firebug.Editor = Obj.extend(Firebug.Module,
 
         if (value == undefined)
             value = currentEditor.getValue();
+
         if (FBTrace.DBG_EDITOR)
-            FBTrace.sysout("editor.save saveTimeout: "+this.saveTimeout+" currentPanel: "+(currentPanel?currentPanel.name:"null"));
+            FBTrace.sysout("editor.save saveTimeout: " + this.saveTimeout + " currentPanel: " +
+                (currentPanel ? currentPanel.name : "null"));
+
         try
         {
             this.saveEditAndNotifyListeners(currentTarget, value, previousValue);
@@ -235,14 +251,16 @@ Firebug.Editor = Obj.extend(Firebug.Module,
     saveEditAndNotifyListeners: function(currentTarget, value, previousValue)
     {
         currentEditor.saveEdit(currentTarget, value, previousValue);
-        Events.dispatch(this.fbListeners, "onSaveEdit", [currentPanel, currentEditor, currentTarget, value, previousValue]);
+        Events.dispatch(this.fbListeners, "onSaveEdit", [currentPanel, currentEditor,
+            currentTarget, value, previousValue]);
     },
 
     setEditTarget: function(element)
     {
         if (!element)
         {
-            Events.dispatch(currentPanel.fbListeners, 'onInlineEditorClose', [currentPanel, currentTarget, true]);
+            Events.dispatch(currentPanel.fbListeners, "onInlineEditorClose",
+                [currentPanel, currentTarget, true]);
             this.stopEditing();
         }
         else if (Css.hasClass(element, "insertBefore"))
@@ -324,7 +342,7 @@ Firebug.Editor = Obj.extend(Firebug.Module,
         }
     },
 
-    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
     attachListeners: function(editor, context)
     {
@@ -423,7 +441,7 @@ Firebug.Editor = Obj.extend(Firebug.Module,
             this.stopEditing();
     },
 
-    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
     // extends Module
 
     initialize: function()
@@ -450,7 +468,7 @@ Firebug.Editor = Obj.extend(Firebug.Module,
     }
 });
 
-// ************************************************************************************************
+// ********************************************************************************************* //
 // BaseEditor
 
 Firebug.BaseEditor = Obj.extend(Firebug.MeasureBox,
@@ -475,7 +493,7 @@ Firebug.BaseEditor = Obj.extend(Firebug.MeasureBox,
     {
     },
 
-    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
     // Support for context menus within inline editors.
 
     getContextMenuItems: function(target)
@@ -498,7 +516,7 @@ Firebug.BaseEditor = Obj.extend(Firebug.MeasureBox,
             controller.doCommand(cmdId);
     },
 
-    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
     // Editor Module listeners will get "onBeginEditing" just before this call
 
     beginEditing: function(target, value)
@@ -521,7 +539,7 @@ Firebug.BaseEditor = Obj.extend(Firebug.MeasureBox,
     },
 });
 
-// ************************************************************************************************
+// ********************************************************************************************* //
 // InlineEditor
 
 Firebug.InlineEditor = function(doc)
@@ -639,6 +657,7 @@ Firebug.InlineEditor.prototype = domplate(Firebug.BaseEditor,
             this.expander.parentNode.insertBefore(target, this.expander);
             this.textSize = this.measureInputText(value);
         }
+
         this.updateLayout(true);
 
         Dom.scrollIntoCenterView(this.box, null, true);
@@ -679,7 +698,7 @@ Firebug.InlineEditor.prototype = domplate(Firebug.BaseEditor,
         this.updateLayout(false, forceAll);
     },
 
-    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
     beginEditing: function(target, value)
     {
@@ -704,7 +723,7 @@ Firebug.InlineEditor.prototype = domplate(Firebug.BaseEditor,
         return false;
     },
 
-    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
     getAutoCompleteRange: function(value, offset)
     {
@@ -719,15 +738,17 @@ Firebug.InlineEditor.prototype = domplate(Firebug.BaseEditor,
         return true;
     },
 
-    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
     getAutoCompleter: function()
     {
         if (!this.autoCompleter)
         {
             this.autoCompleter = new Firebug.AutoCompleter(null,
-                Obj.bind(this.getAutoCompleteRange, this), Obj.bind(this.getAutoCompleteList, this),
-                true, false, undefined, undefined, undefined, Obj.bind(this.isValidAutoCompleteProperty, this));
+                Obj.bind(this.getAutoCompleteRange, this),
+                Obj.bind(this.getAutoCompleteList, this),
+                true, false, undefined, undefined, undefined,
+                Obj.bind(this.isValidAutoCompleteProperty, this));
         }
 
         return this.autoCompleter;
@@ -773,7 +794,7 @@ Firebug.InlineEditor.prototype = domplate(Firebug.BaseEditor,
             return false;
     },
 
-    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
     onKeyPress: function(event)
     {
@@ -788,7 +809,8 @@ Firebug.InlineEditor.prototype = domplate(Firebug.BaseEditor,
             Firebug.Editor.tabNextEditor();
             Events.cancelEvent(event);
         }
-        else if (this.numeric && event.charCode && (event.charCode < 48 || event.charCode > 57) && event.charCode != 45 && event.charCode != 46)
+        else if (this.numeric && event.charCode && (event.charCode < 48 || event.charCode > 57) &&
+            event.charCode != 45 && event.charCode != 46)
         {
             Events.cancelEvent(event);
         }
@@ -841,7 +863,7 @@ Firebug.InlineEditor.prototype = domplate(Firebug.BaseEditor,
         return true;
     },
 
-    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
     updateLayout: function(initial, forceAll, extraWidth)
     {
@@ -906,7 +928,8 @@ Firebug.InlineEditor.prototype = domplate(Firebug.BaseEditor,
 
 
             var container = currentPanel.panelNode;
-            var maxWidth = container.clientWidth - this.targetOffset.x - fixupL + container.scrollLeft-6;
+            var maxWidth = container.clientWidth - this.targetOffset.x - fixupL +
+                container.scrollLeft-6;
 
             if(inputWidth > maxWidth)
                 inputWidth = maxWidth;
@@ -924,7 +947,7 @@ Firebug.InlineEditor.prototype = domplate(Firebug.BaseEditor,
     }
 })};
 
-// ************************************************************************************************
+// ********************************************************************************************* //
 // Autocompletion
 
 Firebug.AutoCompleter = function(getExprOffset, getRange, evaluator, selectMode, caseSensitive,
@@ -1000,7 +1023,7 @@ Firebug.AutoCompleter = function(getExprOffset, getRange, evaluator, selectMode,
         return found;
     };
 
-    /*
+    /**
      * returns true if candidate list was created
      */
     this.pickCandidates = function(textBox, offset, context, cycle, reverse, showGlobals)
@@ -1437,11 +1460,13 @@ Firebug.AutoCompleter = function(getExprOffset, getRange, evaluator, selectMode,
 
         if (event.ctrlKey && event.keyCode === 32) // Control space
         {
-            this.complete(context, textBox, completionBox, false, false, true); // force completion incl globals
+            // force completion incl globals
+            this.complete(context, textBox, completionBox, false, false, true);
             return true;
         }
         else if (event.keyCode === 9 || // TAB
-            (event.keyCode === 39 && completionBox.value.length && textBox.selectionStart === textBox.value.length)) // right arrow
+            (event.keyCode === 39 && completionBox.value.length &&
+            textBox.selectionStart === textBox.value.length)) // right arrow
         {
             if (!completionBox.value.length)  // then no completion text,
             {
@@ -1531,7 +1556,8 @@ Firebug.AutoCompleter = function(getExprOffset, getRange, evaluator, selectMode,
     this.acceptCompletion = function(event)
     {
         if (completionPopup.currentCompletionBox)
-            this.acceptCompletionInTextBox(Firebug.CommandLine.getSingleRowCommandLine(), Firebug.CommandLine.getCompletionBox());
+            this.acceptCompletionInTextBox(Firebug.CommandLine.getSingleRowCommandLine(),
+                Firebug.CommandLine.getCompletionBox());
     };
 
     this.acceptCompletion = Obj.bind(this.acceptCompletion, this);
@@ -1548,10 +1574,7 @@ Firebug.AutoCompleter = function(getExprOffset, getRange, evaluator, selectMode,
     completionPopup.addEventListener("focus", this.focusHack, true);
 };
 
-
-
-
-// ************************************************************************************************
+// ********************************************************************************************* //
 // Local Helpers
 
 function getDefaultEditor(panel)
@@ -1620,12 +1643,12 @@ function insertTab()
     Dom.insertTextIntoElement(currentEditor.input, Firebug.Editor.tabCharacter);
 }
 
-// ************************************************************************************************
+// ********************************************************************************************* //
 // Registration
 
 Firebug.registerModule(Firebug.Editor);
 
 return Firebug.Editor;
 
-// ************************************************************************************************
+// ********************************************************************************************* //
 });
