@@ -1,4 +1,4 @@
- /* See license.txt for terms of usage */
+/* See license.txt for terms of usage */
 
 define([
     "firebug/lib/object",
