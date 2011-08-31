@@ -1199,6 +1199,7 @@
                 {
                     var menuInfo = {
                         label: urls[j].fileName != "" ? urls[j].fileName : "Inline",
+                        tooltiptext: path + urls[j].fileName,
                         nol10n: true
                     };
 
@@ -1252,25 +1253,6 @@
             {
                 this.selectObject(object);
             }, this));
-        ]]></handler>
-
-        <handler event="mouseover"><![CDATA[
-            var object = Firebug.getRepObject(event.target);
-            if (object)
-            {
-                var locator = this.getLocator();
-                if (locator.getObjectLocation)
-                    event.target.setAttribute("tooltiptext", locator.getObjectLocation(object));
-                else
-                {
-                    if (FBTrace.DBG_LOCATIONS)
-                    {
-                        FBTrace.sysout("!locator.getObjectLocation for " +
-                            this.getAttribute("label"), locator);
-                    }
-                }
-            }
-            return;
         ]]></handler>
     </handlers>
 </binding>
