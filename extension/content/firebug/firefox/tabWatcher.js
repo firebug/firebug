@@ -279,8 +279,8 @@ Firebug.TabWatcher = Obj.extend(new Firebug.Listener(),
             return false;
         }
 
-             if (FBTrace.DBG_ACTIVATION)
-                 FBTrace.sysout("-> shouldCreateContext FBLISTENERS" , this.fbListeners);
+        if (FBTrace.DBG_ACTIVATION)
+            FBTrace.sysout("-> shouldCreateContext FBLISTENERS" , this.fbListeners);
 
         // Create if any listener says true to showCreateContext
         if (Events.dispatch2(this.fbListeners, "shouldCreateContext", [browser, url, userCommands]))
