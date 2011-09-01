@@ -483,6 +483,7 @@ Firebug.Inspector = Obj.extend(Firebug.Module,
             Events.addEventListener(subWin.document, "mousedown", this.onInspectingMouseDown, true);
             Events.addEventListener(subWin.document, "mouseup", this.onInspectingMouseUp, true);
             Events.addEventListener(subWin.document, "click", this.onInspectingClick, true);
+            Events.addEventListener(subWin.document, "keypress", this.onInspectingKeyPress, true);
         }, this));
     },
 
@@ -513,6 +514,7 @@ Firebug.Inspector = Obj.extend(Firebug.Module,
             Events.removeEventListener(subWin.document, "mouseover", this.onInspectingMouseOver, true);
             Events.removeEventListener(subWin.document, "mousedown", this.onInspectingMouseDown, true);
             Events.removeEventListener(subWin.document, "mouseup", this.onInspectingMouseUp, true);
+            Events.removeEventListener(subWin.document, "keypress", this.onInspectingKeyPress, true);
         }, this));
     },
 
@@ -628,6 +630,22 @@ Firebug.Inspector = Obj.extend(Firebug.Module,
 
         Events.cancelEvent(event);
     },
+    
+    /**
+     * Trap keypress events to allow manipulation of the hovered elements
+     *
+     * @param {Event} event Used for canceling the event
+     */
+    onInspectingKeyPress: function(event)
+    {
+        if (event.keyCode == KeyEvent.DOM_VK_DELETE)
+        {
+            Events.dispatch(this.fbListeners, "onBeginFirebugChange", [this.inspectingNode, this]);
+            this.inspectingNode.parentNode.removeChild(this.inspectingNode);
+            Events.dispatch(this.fbListeners, "onEndFirebugChange", [this.inspectingNode, this]);
+            Events.cancelEvent(event);
+        }
+    },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
     // extends Module
@@ -645,6 +663,7 @@ Firebug.Inspector = Obj.extend(Firebug.Module,
         this.onInspectingMouseDown = Obj.bind(this.onInspectingMouseDown, this);
         this.onInspectingMouseUp = Obj.bind(this.onInspectingMouseUp, this);
         this.onInspectingClick = Obj.bind(this.onInspectingClick, this);
+        this.onInspectingKeyPress = Obj.bind(this.onInspectingKeyPress, this);
         this.onPanelChanged = Obj.bind(this.onPanelChanged, this);
 
         this.updateOption("shadeBoxModel", Firebug.shadeBoxModel);
