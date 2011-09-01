@@ -158,6 +158,7 @@
     <target name="deploy" if="deploy.dir.available">
         <copy file="${release.dir}/update.rdf" todir="${deploy-xpi.dir}" overwrite="true"/>
         <copy file="${release.dir}/firebug-${VERSION}${RELEASE}.xpi" todir="${deploy-xpi.dir}" overwrite="true"/>
+        <copy file="${release.dir}/firebug-${VERSION}${RELEASE}-amo.xpi" todir="${deploy-xpi.dir}" overwrite="true"/>
         <echo message="XPI deployed to: ${VERSION}${RELEASE} to ${deploy-xpi.dir}"/>
     </target>
 
