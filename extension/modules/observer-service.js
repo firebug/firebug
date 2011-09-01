@@ -120,7 +120,6 @@ var fbObserverService =
         if (result)
         {
             FBTrace.sysout("fbObserverService getStacksForTrack ", this.stackForTrack);
-            alert("observer mismatch detected, see FBTrace output");
         }
     }
 };
