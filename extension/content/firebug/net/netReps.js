@@ -66,44 +66,58 @@ Firebug.NetMonitor.NetRequestTable = domplate(Firebug.Rep, new Firebug.Listener(
                     TD({id: "netHrefCol", width: "18%", "class": "netHeaderCell alphaValue a11yFocus",
                         "role": "columnheader"},
                         DIV({"class": "netHeaderCellBox",
-                        title: Locale.$STR("net.header.URL Tooltip")},
-                        Locale.$STR("net.header.URL"))
+                            title: Locale.$STR("net.header.URL Tooltip")},
+                            Locale.$STR("net.header.URL")
+                        )
                     ),
                     TD({id: "netStatusCol", width: "12%", "class": "netHeaderCell alphaValue a11yFocus",
                         "role": "columnheader"},
                         DIV({"class": "netHeaderCellBox",
-                        title: Locale.$STR("net.header.Status Tooltip")},
-                        Locale.$STR("net.header.Status"))
+                            title: Locale.$STR("net.header.Status Tooltip")},
+                            Locale.$STR("net.header.Status")
+                        )
+                    ),
+                    TD({id: "netProtocolCol", width: "4%", "class": "netHeaderCell alphaValue a11yFocus",
+                        "role": "columnheader"},
+                        DIV({"class": "netHeaderCellBox",
+                            title: Locale.$STR("net.header.Protocol Tooltip")},
+                            Locale.$STR("net.header.Protocol")
+                        )
                     ),
                     TD({id: "netDomainCol", width: "12%", "class": "netHeaderCell alphaValue a11yFocus",
                         "role": "columnheader"},
                         DIV({"class": "netHeaderCellBox",
-                        title: Locale.$STR("net.header.Domain Tooltip")},
-                        Locale.$STR("net.header.Domain"))
+                            title: Locale.$STR("net.header.Domain Tooltip")},
+                            Locale.$STR("net.header.Domain")
+                        )
                     ),
                     TD({id: "netSizeCol", width: "4%", "class": "netHeaderCell a11yFocus",
                         "role": "columnheader"},
                         DIV({"class": "netHeaderCellBox",
-                        title: Locale.$STR("net.header.Size Tooltip")},
-                        Locale.$STR("net.header.Size"))
+                            title: Locale.$STR("net.header.Size Tooltip")},
+                            Locale.$STR("net.header.Size")
+                        )
                     ),
                     TD({id: "netLocalAddressCol", width: "4%", "class": "netHeaderCell a11yFocus",
                         "role": "columnheader"},
                         DIV({"class": "netHeaderCellBox",
-                        title: Locale.$STR("net.header.Local IP Tooltip")},
-                        Locale.$STR("net.header.Local IP"))
+                            title: Locale.$STR("net.header.Local IP Tooltip")},
+                            Locale.$STR("net.header.Local IP")
+                        )
                     ),
                     TD({id: "netRemoteAddressCol", width: "4%", "class": "netHeaderCell a11yFocus",
                         "role": "columnheader"},
                         DIV({"class": "netHeaderCellBox",
-                        title: Locale.$STR("net.header.Remote IP Tooltip")},
-                        Locale.$STR("net.header.Remote IP"))
+                            title: Locale.$STR("net.header.Remote IP Tooltip")},
+                            Locale.$STR("net.header.Remote IP")
+                        )
                     ),
                     TD({id: "netTimeCol", width: "53%", "class": "netHeaderCell a11yFocus",
                         "role": "columnheader"},
                         DIV({"class": "netHeaderCellBox",
-                        title: Locale.$STR("net.header.Timeline Tooltip")},
-                        Locale.$STR("net.header.Timeline"))
+                            title: Locale.$STR("net.header.Timeline Tooltip")},
+                            Locale.$STR("net.header.Timeline")
+                        )
                     )
                 )
             ),
@@ -405,6 +419,9 @@ Firebug.NetMonitor.NetRequestEntry = domplate(Firebug.Rep, new Firebug.Listener(
                 TD({"class": "netStatusCol netCol a11yFocus", "role": "gridcell"},
                     DIV({"class": "netStatusLabel netLabel"}, "$file.file|getStatus")
                 ),
+                TD({"class": "netProtocolCol netCol a11yFocus", "role": "gridcell"},
+                    DIV({"class": "netProtocolLabel netLabel"}, "$file.file|getProtocol")
+                ),
                 TD({"class": "netDomainCol netCol a11yFocus", "role": "gridcell" },
                     DIV({"class": "netDomainLabel netLabel"}, "$file.file|getDomain")
                 ),
@@ -440,12 +457,12 @@ Firebug.NetMonitor.NetRequestEntry = domplate(Firebug.Rep, new Firebug.Listener(
     netInfoTag:
         TR({"class": "netInfoRow $file|getCategory outerFocusRow", "role" : "row"},
             TD({"class": "sourceLine netRowHeader"}),
-            TD({"class": "netInfoCol", colspan: 7, "role" : "gridcell"})
+            TD({"class": "netInfoCol", colspan: 8, "role" : "gridcell"})
         ),
 
     activationTag:
         TR({"class": "netRow netActivationRow"},
-            TD({"class": "netCol netActivationLabel", colspan: 8, "role": "status"},
+            TD({"class": "netCol netActivationLabel", colspan: 9, "role": "status"},
                 Locale.$STR("net.ActivationMessage")
             )
         ),
@@ -457,6 +474,7 @@ Firebug.NetMonitor.NetRequestEntry = domplate(Firebug.Rep, new Firebug.Listener(
                 DIV({"class": "netCountLabel netSummaryLabel"}, "-")
             ),
             TD({"class": "netCol netStatusCol a11yFocus", "role" : "gridcell"}),
+            TD({"class": "netCol netProtocolCol a11yFocus", "role" : "gridcell"}),
             TD({"class": "netCol netDomainCol a11yFocus", "role" : "gridcell"}),
             TD({"class": "netTotalSizeCol netCol netSizeCol a11yFocus", "role": "gridcell"},
                 DIV({"class": "netTotalSizeLabel netSummaryLabel"}, "0KB")
@@ -478,7 +496,7 @@ Firebug.NetMonitor.NetRequestEntry = domplate(Firebug.Rep, new Firebug.Listener(
 
     footerTag:
         TR({"class": "netFooterRow", "style" : "height: 100%"},
-            TD({"class": "", colspan: 8})
+            TD({"class": "", colspan: 9})
         ),
 
     onClickRowHeader: function(event)
@@ -602,6 +620,11 @@ Firebug.NetMonitor.NetRequestEntry = domplate(Firebug.Rep, new Firebug.Listener(
     getHref: function(file)
     {
         return (file.method ? file.method.toUpperCase() : "?") + " " + Url.getFileName(file.href);
+    },
+
+    getProtocol: function(file)
+    {
+        return Url.getProtocol(file.href);
     },
 
     getStatus: function(file)

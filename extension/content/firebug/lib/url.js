@@ -37,6 +37,12 @@ Url.getFileName = function(url)
     return split.name;
 };
 
+Url.getProtocol = function(url)
+{
+    var split = Url.splitURLBase(url);
+    return split.protocol;
+};
+
 Url.splitURLBase = function(url)
 {
     if (Url.isDataURL(url))
@@ -54,7 +60,7 @@ Url.splitDataURL = function(url)
     if (point < 5)
         return false; // syntax error
 
-    var props = { encodedContent: url.substr(point+1) };
+    var props = { protocol: "data", encodedContent: url.substr(point+1) };
 
     var metadataBuffer = url.substring(5, point);
     var metadata = metadataBuffer.split(";");
@@ -97,14 +103,14 @@ Url.splitDataURL = function(url)
     return props;
 };
 
-const reSplitFile = /:\/{2,3}(.*?)([^\/]*?)($|\?.*)/;
+const reSplitFile = /(.*?):\/{2,3}(.*?)([^\/]*?)($|\?.*)/;
 Url.splitURLTrue = function(url)
 {
     var m = reSplitFile.exec(url);
     if (!m)
         return {name: url, path: url};
     else
-        return {path: m[1], name: m[2]+m[3]};
+        return {protocol: m[1], path: m[2], name: m[3]+m[4]};
 };
 
 Url.getFileExtension = function(url)
