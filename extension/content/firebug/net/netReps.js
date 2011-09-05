@@ -619,7 +619,8 @@ Firebug.NetMonitor.NetRequestEntry = domplate(Firebug.Rep, new Firebug.Listener(
 
     getHref: function(file)
     {
-        return (file.method ? file.method.toUpperCase() : "?") + " " + Url.getFileName(file.href);
+        return (file.method ? file.method.toUpperCase() : "?") + " " +
+            Str.cropString(Url.getFileName(file.href), 40);
     },
 
     getProtocol: function(file)
