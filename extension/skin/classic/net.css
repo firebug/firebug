@@ -415,6 +415,14 @@
 /************************************************************************************************/
 /* If coming from BF cache (no network activity) */
 
+.netTable .netRow.fromBFCache {
+    visibility: collapse;
+}
+
+.netTable.showBFCacheResponses .netRow.fromBFCache {
+    visibility: visible;
+}
+
 .netRow.fromBFCache .netLabel,
 .netRow.fromBFCache .netBlockingBar,
 .netRow.fromBFCache .netResolvingBar,

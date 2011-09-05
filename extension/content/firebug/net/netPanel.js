@@ -228,6 +228,21 @@ NetPanel.prototype = Obj.extend(Firebug.ActivablePanel,
                 Firebug.NetMonitor.onToggleFilter(context, value);
             });
         }
+        else if (name == "netShowBFCacheResponses")
+        {
+            this.updateBFCacheResponses();
+        }
+    },
+
+    updateBFCacheResponses: function()
+    {
+        if (this.table)
+        {
+            if (Firebug.netShowBFCacheResponses)
+                Css.setClass(this.table, "showBFCacheResponses");
+            else
+                Css.removeClass(this.table, "showBFCacheResponses");
+        }
     },
 
     updateSelection: function(object)
@@ -754,6 +769,8 @@ NetPanel.prototype = Obj.extend(Firebug.ActivablePanel,
             var hiddenCols = Options.get("net.hiddenColumns");
             if (hiddenCols)
                 this.table.setAttribute("hiddenCols", hiddenCols);
+
+            this.updateBFCacheResponses();
         }
     },
 
