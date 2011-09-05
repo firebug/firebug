@@ -842,7 +842,7 @@ NetPanel.prototype = Obj.extend(Firebug.ActivablePanel,
         }
         else
         {
-            var sizeLabel = row.childNodes[4].firstChild;
+            var sizeLabel = row.getElementsByClassName("netSizeLabel").item(0);
 
             var sizeText = NetRequestEntry.getSize(file);
 
@@ -852,10 +852,10 @@ NetPanel.prototype = Obj.extend(Firebug.ActivablePanel,
 
             sizeLabel.firstChild.nodeValue = sizeText;
 
-            var methodLabel = row.childNodes[2].firstChild;
+            var methodLabel = row.getElementsByClassName("netStatusLabel").item(0);
             methodLabel.firstChild.nodeValue = NetRequestEntry.getStatus(file);
 
-            var hrefLabel = row.childNodes[1].firstChild;
+            var hrefLabel = row.getElementsByClassName("netHrefLabel").item(0);
             hrefLabel.firstChild.nodeValue = NetRequestEntry.getHref(file);
 
             if (file.mimeType)
@@ -1085,19 +1085,19 @@ NetPanel.prototype = Obj.extend(Firebug.ActivablePanel,
         if (!row)
             return;
 
-        var countLabel = row.childNodes[1].firstChild;
+        var countLabel = row.getElementsByClassName("netCountLabel").item(0); //childNodes[1].firstChild;
         countLabel.firstChild.nodeValue = Locale.$STRP("plural.Request_Count2", [fileCount]);
 
-        var sizeLabel = row.childNodes[4].firstChild;
+        var sizeLabel = row.getElementsByClassName("netTotalSizeLabel").item(0); //childNodes[4].firstChild;
         sizeLabel.setAttribute("totalSize", totalSize);
         sizeLabel.firstChild.nodeValue = NetRequestEntry.formatSize(totalSize);
 
-        var cacheSizeLabel = row.lastChild.firstChild.firstChild;
+        var cacheSizeLabel = row.getElementsByClassName("netCacheSizeLabel").item(0);
         cacheSizeLabel.setAttribute("collapsed", cachedSize == 0);
         cacheSizeLabel.childNodes[1].firstChild.nodeValue =
             NetRequestEntry.formatSize(cachedSize);
 
-        var timeLabel = row.lastChild.firstChild.lastChild.firstChild;
+        var timeLabel = row.getElementsByClassName("netTotalTimeLabel").item(0);
         var timeText = NetRequestEntry.formatTime(totalTime);
         var firstPhase = phases[0];
         if (firstPhase.windowLoadTime)
