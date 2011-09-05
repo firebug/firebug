@@ -103,14 +103,16 @@ Url.splitDataURL = function(url)
     return props;
 };
 
-const reSplitFile = /(.*?):\/{2,3}(.*?)([^\/]*?)($|\?.*)/;
+const reSplitFile = /(.*?):\/{2,3}([^\/]*)(.*?)([^\/]*?)($|\?.*)/;
 Url.splitURLTrue = function(url)
 {
     var m = reSplitFile.exec(url);
     if (!m)
         return {name: url, path: url};
+    else if (m[4] == "" && m[5] == "")
+        return {protocol: m[1], domain: m[2], path: m[3], name: m[3] != "/" ? m[3] : m[2]};
     else
-        return {protocol: m[1], path: m[2], name: m[3]+m[4]};
+        return {protocol: m[1], domain: m[2], path: m[2]+m[3], name: m[4]+m[5]};
 };
 
 Url.getFileExtension = function(url)
