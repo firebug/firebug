@@ -669,6 +669,11 @@ Dom.isDOMConstant = function(object, name)
     return Dom.domConstantMap.hasOwnProperty(name);
 }
 
+Dom.isInlineEventHandler = function(name)
+{
+    return Dom.domInlineEventHandlersMap[name];
+}
+
 Dom.EventCopy = function(event)
 {
     // Because event objects are destroyed arbitrarily by Gecko, we must make a copy of them to
@@ -1681,6 +1686,87 @@ var domConstantMap = Dom.domConstantMap =
     "SVG_ZOOMANDPAN_MAGNIFY": 1,
     "SVG_ZOOMANDPAN_UNKNOWN": 1
 };
+
+// ********************************************************************************************* //
+// Inline Event Handlers (introduced in Firefox 9)
+
+/**
+ * List of event handlers that are settable via on* DOM properties.
+ */
+Dom.domInlineEventHandlersMap =
+{
+    "onabort": 1,
+    "onafterprint": 1,
+    "onafterscriptexecute": 1,
+    "onbeforeprint": 1,
+    "onbeforescriptexecute": 1,
+    "onbeforeunload": 1,
+    "onblur": 1,
+    "oncanplay": 1,
+    "oncanplaythrough": 1,
+    "onchange": 1,
+    "onclick": 1,
+    "oncontextmenu": 1,
+    "oncopy": 1,
+    "oncut": 1,
+    "ondblclick": 1,
+    "ondevicemotion": 1,
+    "ondeviceorientation": 1,
+    "ondrag": 1,
+    "ondragend": 1,
+    "ondragenter": 1,
+    "ondragleave": 1,
+    "ondragover": 1,
+    "ondragstart": 1,
+    "ondrop": 1,
+    "ondurationchange": 1,
+    "onemptied": 1,
+    "onended": 1,
+    "onerror": 1,
+    "onfocus": 1,
+    "onhashchange": 1,
+    "oninput": 1,
+    "oninvalid": 1,
+    "onkeydown": 1,
+    "onkeypress": 1,
+    "onkeyup": 1,
+    "onload": 1,
+    "onloadeddata": 1,
+    "onloadedmetadata": 1,
+    "onloadstart": 1,
+    "onmessage": 1,
+    "onmousedown": 1,
+    "onmousemove": 1,
+    "onmouseout": 1,
+    "onmouseover": 1,
+    "onmouseup": 1,
+    "onoffline": 1,
+    "ononline": 1,
+    "onpagehide": 1,
+    "onpageshow": 1,
+    "onpaste": 1,
+    "onpause": 1,
+    "onplay": 1,
+    "onplaying": 1,
+    "onpopstate": 1,
+    "onprogress": 1,
+    "onratechange": 1,
+    "onreadystatechange": 1,
+    "onreset": 1,
+    "onresize": 1,
+    "onscroll": 1,
+    "onseeked": 1,
+    "onseeking": 1,
+    "onselect": 1,
+    "onshow": 1,
+    "onstalled": 1,
+    "onsubmit": 1,
+    "onsuspend": 1,
+    "ontimeupdate": 1,
+    "onunload": 1,
+    "onvolumechange": 1,
+    "onwaiting": 1,
+}
 
 // ********************************************************************************************* //
 // Registration

@@ -446,7 +446,8 @@ Firebug.DOMBasePanel.prototype = Obj.extend(Firebug.Panel,
             level = 0;
 
         var ordinals = [], userProps = [], userClasses = [], userFuncs = [],
-            domProps = [], domFuncs = [], domConstants = [], proto = [];
+            domProps = [], domFuncs = [], domConstants = [], proto = [],
+            domHandlers = [];
 
         try
         {
@@ -543,6 +544,8 @@ Firebug.DOMBasePanel.prototype = Obj.extend(Firebug.Panel,
                         this.addMember(object, "dom", domProps, name, val, level, domMembers[name], context);
                     else if (Dom.isDOMConstant(object, name))
                         this.addMember(object, "dom", domConstants, name, val, level, 0, context);
+                    else if (Dom.isInlineEventHandler(name))
+                        this.addMember(object, "user", domHandlers, name, val, level, 0, context);
                     else
                         this.addMember(object, "user", userProps, name, val, level, 0, context);
                 }
@@ -595,6 +598,12 @@ Firebug.DOMBasePanel.prototype = Obj.extend(Firebug.Panel,
 
         // The prototype is always displayed at the end.
         members.push.apply(members, proto);
+
+        if (Firebug.showInlineEventHandlers)
+        {
+            domHandlers.sort(sortName);
+            members.push.apply(members, domHandlers);
+        }
 
         return members;
     },
@@ -1391,16 +1400,26 @@ Firebug.DOMBasePanel.prototype = Obj.extend(Firebug.Panel,
 
     updateOption: function(name, value)
     {
-        const optionMap = {showUserProps: 1, showUserFuncs: 1, showDOMProps: 1,
-            showDOMFuncs: 1, showDOMConstants: 1};
-        if ( optionMap.hasOwnProperty(name) )
+        var optionMap = {
+            showUserProps: 1,
+            showUserFuncs: 1,
+            showDOMProps: 1,
+            showDOMFuncs: 1,
+            showDOMConstants: 1,
+            showInlineEventHandlers: 1
+        };
+
+        if (optionMap.hasOwnProperty(name))
             this.rebuild(true);
     },
 
     getOptionsMenuItems: function()
     {
-        var enumerablePropertiesItem = Menu.optionMenu("ShowEnumerableProperties", "showEnumerableProperties", "ShowEnumerablePropertiesTooltip");
-        if (!Firebug.showOwnProperties)  // see getObjectProperites
+        var enumerablePropertiesItem = Menu.optionMenu("ShowEnumerableProperties",
+            "showEnumerableProperties", "ShowEnumerablePropertiesTooltip");
+
+        // See getObjectProperites
+        if (!Firebug.showOwnProperties)
             enumerablePropertiesItem.disabled = true;
 
         return [
@@ -1409,6 +1428,8 @@ Firebug.DOMBasePanel.prototype = Obj.extend(Firebug.Panel,
             Menu.optionMenu("ShowDOMProps", "showDOMProps"),
             Menu.optionMenu("ShowDOMFuncs", "showDOMFuncs"),
             Menu.optionMenu("ShowDOMConstants", "showDOMConstants"),
+            Menu.optionMenu("ShowInlineEventHandlers", "showInlineEventHandlers",
+                "ShowInlineEventHandlersTooltip"),
             "-",
             Menu.optionMenu("ShowOwnProperties", "showOwnProperties", "ShowOwnPropertiesTooltip"),
             enumerablePropertiesItem,
