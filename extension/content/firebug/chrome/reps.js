@@ -579,14 +579,27 @@ FirebugReps.Arr = domplate(Firebug.Rep,
         return this.isArray(object);
     },
 
-    highlightObject: function(object, context)
+    highlightObject: function(object, context, target)
     {
         // Highlighting huge amount of elements on the page can cause sericous performance
         // problems (see issue 4736). So, avoid highlighting if the number of elements in
         // the array exceeds specified limit.
         var arr = this.getRealObject(object, context);
-        if (!arr || arr.length > Options.get("multiHighlightLimit"))
+        var limit = Options.get("multiHighlightLimit");
+        if (!arr || arr.length > limit)
+        {
+            if (Css.hasClass(target, "arrayLeftBracket ") ||
+                Css.hasClass(target, "arrayRightBracket"))
+            {
+                var tooltip = Locale.$STRF("console.multiHighlightLimitExceeded", [limit]);
+                target.setAttribute("title", tooltip);
+            }
+
+            // Do not highlight, a tooltip will be displayed instead.
             return;
+        }
+
+        target.removeAttribute("title");
 
         // Highlight multiple elements on the page.
         Firebug.Inspector.highlightObject(arr, context);
