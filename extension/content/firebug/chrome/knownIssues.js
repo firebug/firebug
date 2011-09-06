@@ -65,7 +65,8 @@ Firebug.KnownIssues = Obj.extend(Firebug.Module,
         if (!Options.get("memoryProfilerEnable"))
         {
             var button = doc.getElementById("fbToggleMemoryProfiling");
-            Dom.collapse(button, true);
+            if (button)
+                Dom.collapse(button, true);
         }
     }
 });
