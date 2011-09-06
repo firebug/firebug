@@ -533,6 +533,8 @@ Firebug.DOMBasePanel.prototype = Obj.extend(Firebug.Panel,
                         this.addMember(object, "userClass", userClasses, name, val, level, 0, context);
                     else if (Dom.isDOMMember(object, name))
                         this.addMember(object, "domFunction", domFuncs, name, val, level, domMembers[name], context);
+                    else if (!Firebug.showUserFuncs && Firebug.showInlineEventHandlers)
+                        this.addMember(object, "userFunction", domHandlers, name, val, level, 0, context);
                     else
                         this.addMember(object, "userFunction", userFuncs, name, val, level, 0, context);
                 }
