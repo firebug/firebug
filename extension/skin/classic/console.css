@@ -457,7 +457,8 @@
 
 /*****************************************************************************************/
 
-.panelNode.searching .logRow {
+.panelNode.searching .logRow,
+.panelNode.searching .logRow-group > .objectLink {
     display: none;
 }
 
