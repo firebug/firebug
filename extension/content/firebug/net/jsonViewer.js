@@ -13,11 +13,13 @@ define([
     "firebug/lib/json",
     "firebug/dom/toggleBranch",
     "firebug/lib/array",
+    "firebug/firefox/system",
+    "firebug/lib/locale",
     "firebug/dom/domPanel",
     "firebug/chrome/reps"
 ],
 function(Obj, Firebug, Domplate, Locale, Events, Css, Dom, Http, Str, Json,
-    ToggleBranch, Arr) {
+    ToggleBranch, Arr, System, Locale) {
 
 // ********************************************************************************************* //
 
@@ -47,11 +49,42 @@ Firebug.JSONViewerModel = Obj.extend(Firebug.Module,
     initialize: function()
     {
         Firebug.NetMonitor.NetInfoBody.addListener(this);
+        Firebug.registerUIListener(this);
     },
 
     shutdown: function()
     {
         Firebug.NetMonitor.NetInfoBody.removeListener(this);
+        Firebug.unregisterUIListener(this);
+    },
+
+    onContextMenu: function(items, object, target, context, panel, popup)
+    {
+        if (panel.name != "net" && panel.name != "console")
+            return;
+
+        var memberLabel = Dom.getAncestorByClass(target, "memberLabel");
+
+        if (!memberLabel)
+            return;
+
+        var row = Dom.getAncestorByClass(target, "memberRow");
+        if (!row || !row.domObject.value)
+            return;
+
+        items.push({
+           id: "fbNetCopyJSON",
+           nol10n: true,
+           label: Locale.$STRF("net.jsonviewer.Copy_JSON", [row.domObject.name]),
+           command: Obj.bindFixed(this.copyJsonResponse, this, row)
+        });
+    },
+
+    copyJsonResponse:function(row)
+    {
+        var value = JSON.stringify(row.domObject.value);
+        if (value)
+            System.copyToClipboard(value);
     },
 
     initTabBody: function(infoBox, file)
