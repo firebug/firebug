@@ -654,8 +654,8 @@ Firebug.CSSStyleSheetPanel.prototype = Obj.extend(Firebug.Panel,
             var prompts = Cc["@mozilla.org/embedcomp/prompt-service;1"].
                 getService(Ci.nsIPromptService);
 
-            var proceedToEdit = prompts.confirm(null,
-                "Your existing CSS edits will be lost if you edit source", "Are you sure?");
+            var proceedToEdit = prompts.confirm(null, Locale.$STR("Firebug"),
+                Locale.$STR("confirmation.Edit_CSS_Source"));
 
             if (!proceedToEdit)
             {
