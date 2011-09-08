@@ -122,8 +122,9 @@ Firebug.TabWatcher = Obj.extend(new Firebug.Listener(),
     watchTopWindow: function(win, uri, userCommands)
     {
         if (FBTrace.DBG_WINDOWS)
-            FBTrace.sysout("-> tabWatcher.watchTopWindow for: "+(uri instanceof nsIURI?uri.spec:uri)+
-                ", tab: "+Win.getWindowProxyIdForWindow(win));
+            FBTrace.sysout("-> tabWatcher.watchTopWindow for: " +
+                (uri instanceof nsIURI?uri.spec:uri) + ", tab: " +
+                Win.getWindowProxyIdForWindow(win));
 
         if (!win)
         {
@@ -173,7 +174,18 @@ Firebug.TabWatcher = Obj.extend(new Firebug.Listener(),
 
         if (win instanceof Ci.nsIDOMWindow && win.parent == win)
         {
-            Events.addEventListener(win, "pageshow", onLoadWindowContent, onLoadWindowContent.capturing);
+            // xxxHonza: This place can be called multiple times for one window so,
+            // make sure event listeners are not registered twice.
+            // There should be a better way to find out whether the listeneres are actually
+            // registered for the window.
+            Events.removeEventListener(win, "pageshow", onLoadWindowContent,
+                onLoadWindowContent.capturing);
+            Events.removeEventListener(win, "DOMContentLoaded", onLoadWindowContent,
+                onLoadWindowContent.capturing);
+
+            // Re-register again since it could have been done too sone before.
+            Events.addEventListener(win, "pageshow", onLoadWindowContent,
+                onLoadWindowContent.capturing);
             Events.addEventListener(win, "DOMContentLoaded", onLoadWindowContent,
                 onLoadWindowContent.capturing);
 
@@ -204,7 +216,7 @@ Firebug.TabWatcher = Obj.extend(new Firebug.Listener(),
         if (context && !context.loaded && !context.showContextTimeout)
         {
             // still loading, we want to showContext one time but not too agressively
-            context.showContextTimeout = window.setTimeout(Obj.bindFixed( function delayShowContext()
+            context.showContextTimeout = window.setTimeout(Obj.bindFixed(function delayShowContext()
             {
                 if (FBTrace.DBG_WINDOWS)
                     FBTrace.sysout("-> watchTopWindow delayShowContext id:" +
@@ -1052,7 +1064,9 @@ function onLoadWindowContent(event)
     var win = event.currentTarget;
     try
     {
-        Events.removeEventListener(win, "pageshow", onLoadWindowContent, onLoadWindowContent.capturing);
+        Events.removeEventListener(win, "pageshow", onLoadWindowContent,
+            onLoadWindowContent.capturing);
+
         if (FBTrace.DBG_WINDOWS)
             FBTrace.sysout("-> tabWatcher.onLoadWindowContent pageshow removeEventListener " +
                 Win.safeGetWindowLocation(win));
@@ -1060,15 +1074,18 @@ function onLoadWindowContent(event)
     catch (exc)
     {
         if (FBTrace.DBG_ERRORS)
-            FBTrace.sysout("-> tabWatcher.onLoadWindowContent removeEventListener pageshow fails", exc);
+            FBTrace.sysout("-> tabWatcher.onLoadWindowContent removeEventListener pageshow fails",
+                exc);
     }
 
     try
     {
-        Events.removeEventListener(win, "DOMContentLoaded", onLoadWindowContent, onLoadWindowContent.capturing);
+        Events.removeEventListener(win, "DOMContentLoaded", onLoadWindowContent,
+            onLoadWindowContent.capturing);
+
         if (FBTrace.DBG_WINDOWS)
-            FBTrace.sysout("-> tabWatcher.onLoadWindowContent DOMContentLoaded removeEventListener " +
-                Win.safeGetWindowLocation(win));
+            FBTrace.sysout("-> tabWatcher.onLoadWindowContent DOMContentLoaded " +
+                "removeEventListener " + Win.safeGetWindowLocation(win));
     }
     catch (exc)
     {
