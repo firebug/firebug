@@ -242,6 +242,10 @@ NetPanel.prototype = Obj.extend(Firebug.ActivablePanel,
                 Css.setClass(this.table, "showBFCacheResponses");
             else
                 Css.removeClass(this.table, "showBFCacheResponses");
+
+            // Recalculate the summary information since some requests doesn't have to
+            // be displayed now.
+            this.updateSummaries(NetUtils.now(), true);
         }
     },
 
@@ -1140,6 +1144,10 @@ NetPanel.prototype = Obj.extend(Firebug.ActivablePanel,
         for (var i=0; i<phase.files.length; i++)
         {
             var file = phase.files[i];
+
+            // Do not count BFCache responses if the user says so.
+            if (!Firebug.netShowBFCacheResponses && file.fromBFCache)
+                continue;
 
             if (!category || file.category == category)
             {
