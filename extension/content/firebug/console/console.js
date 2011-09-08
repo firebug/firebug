@@ -20,7 +20,7 @@ define([
 function(Obj, Firebug, Firefox, FirebugReps, Locale, Events, Css, Dom,
     Win, Search, Xml, Menu, Options) {
 
-// ************************************************************************************************
+// ********************************************************************************************* //
 // Constants
 
 const Cc = Components.classes;
@@ -28,7 +28,7 @@ const Ci = Components.interfaces;
 const nsIPrefBranch2 = Ci.nsIPrefBranch2;
 const PrefService = Cc["@mozilla.org/preferences-service;1"];
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * // * //
 
 const logTypes =
 {
@@ -47,11 +47,11 @@ const logTypes =
     "spy": 1
 };
 
-// ************************************************************************************************
+// ********************************************************************************************* //
 
 var maxQueueRequests = 500;
 
-// ************************************************************************************************
+// ********************************************************************************************* //
 
 Firebug.ConsoleBase =
 {
@@ -166,7 +166,7 @@ Firebug.ConsoleBase =
     },
 };
 
-// ************************************************************************************************
+// ********************************************************************************************* //
 
 var ActivableConsole = Obj.extend(Firebug.ActivableModule, Firebug.ConsoleBase);
 
@@ -175,14 +175,15 @@ Firebug.Console = Obj.extend(ActivableConsole,
     dispatchName: "console",
     toolName: "console",
 
-    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
     // extends Module
 
     showPanel: function(browser, panel)
     {
     },
 
-    isReadyElsePreparing: function(context, win) // this is the only code that should call injector.attachIfNeeded
+    // this is the only code that should call injector.attachIfNeeded
+    isReadyElsePreparing: function(context, win)
     {
         if (FBTrace.DBG_CONSOLE)
             FBTrace.sysout("console.isReadyElsePreparing, win is " +
@@ -201,16 +202,21 @@ Firebug.Console = Obj.extend(ActivableConsole,
             var attached = true;
             for (var i = 0; i < context.windows.length; i++)
                 attached = attached && this.injector.attachIfNeeded(context, context.windows[i]);
-            // already in the list above attached = attached && this.injector.attachIfNeeded(context, context.window);
+
+            // already in the list above:
+            // attached = attached && this.injector.attachIfNeeded(context, context.window);
             if (context.windows.indexOf(context.window) == -1)
-                FBTrace.sysout("isReadyElsePreparing ***************** context.window not in context.windows");
+                FBTrace.sysout("isReadyElsePreparing: context.window not in context.windows");
+
             if (FBTrace.DBG_CONSOLE)
-                FBTrace.sysout("console.isReadyElsePreparing attached to "+context.windows.length+" and returns "+attached);
+                FBTrace.sysout("console.isReadyElsePreparing attached to " +
+                    context.windows.length + " and returns "+attached);
+
             return attached;
         }
     },
 
-    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
     // extends Module
 
     initialize: function()
@@ -271,7 +277,9 @@ Firebug.Console = Obj.extend(ActivableConsole,
     {
         var panel = context.getPanel("console");
         panel.persistContent = panel.persistContent ? false : true;
-        Firebug.chrome.setGlobalAttribute("cmd_togglePersistConsole", "checked", panel.persistContent);
+
+        Firebug.chrome.setGlobalAttribute("cmd_togglePersistConsole", "checked",
+            panel.persistContent);
     },
 
     showContext: function(browser, context)
@@ -285,7 +293,8 @@ Firebug.Console = Obj.extend(ActivableConsole,
     {
         Win.iterateWindows(context.window, function detachOneConsole(win)
         {
-            Firebug.CommandLine.injector.detachCommandLine(context, win);  // remove this first since it needs the console
+            // remove this first since it needs the console
+            Firebug.CommandLine.injector.detachCommandLine(context, win);
             Firebug.Console.injector.detachConsole(context, win);
         });
     },
@@ -307,7 +316,7 @@ Firebug.Console = Obj.extend(ActivableConsole,
         maxQueueRequests =  value ? value : maxQueueRequests;
     },
 
-    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
     // extend ActivableModule
 
     onObserverChange: function(observer)
@@ -331,7 +340,8 @@ Firebug.Console = Obj.extend(ActivableConsole,
     onSuspendFirebug: function()
     {
         if (FBTrace.DBG_CONSOLE)
-            FBTrace.sysout("console.onSuspendFirebug isAlwaysEnabled:"+Firebug.Console.isAlwaysEnabled());
+            FBTrace.sysout("console.onSuspendFirebug isAlwaysEnabled:" +
+                Firebug.Console.isAlwaysEnabled());
 
         if (Firebug.Errors.toggleWatchForErrors(false))
         {
@@ -394,7 +404,6 @@ Firebug.Console = Obj.extend(ActivableConsole,
         else
         {
             var filterTypes = Firebug.consoleFilterTypes.split(" ");
-
             for (var type = 0; type < filterTypes.length; type++)
             {
                 var button = chrome.$("fbConsoleFilter-" + filterTypes[type]);
@@ -420,7 +429,7 @@ Firebug.Console = Obj.extend(ActivableConsole,
         }
     },
 
-    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
     // Firebug.Debugger listener
 
     onMonitorScript: function(context, frame)
@@ -447,7 +456,8 @@ Firebug.Console = Obj.extend(ActivableConsole,
         if (FBTrace.DBG_ACTIVATION)
             FBTrace.sysout("Console.onActivateTool "+toolname+" = "+active);
 
-        if (toolname === 'script')  // Console depends on script to get injected (for now)
+        // Console depends on script to get injected (for now)
+        if (toolname === "script")
         {
             if (this.isAlwaysEnabled())
             {
@@ -456,7 +466,7 @@ Firebug.Console = Obj.extend(ActivableConsole,
         }
     },
 
-    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
     logRow: function(appender, objects, context, className, rep, sourceLink, noThrottle, noRow)
     {
@@ -471,7 +481,7 @@ Firebug.Console = Obj.extend(ActivableConsole,
     },
 });
 
-// ************************************************************************************************
+// ********************************************************************************************* //
 
 Firebug.ConsoleListener =
 {
@@ -484,7 +494,7 @@ Firebug.ConsoleListener =
     }
 };
 
-// ************************************************************************************************
+// ********************************************************************************************* //
 
 Firebug.ConsolePanel = function () {};
 
@@ -519,7 +529,8 @@ Firebug.ConsolePanel.prototype = Obj.extend(Firebug.ActivablePanel,
             this.filterLogRow(row, this.wasScrolledToBottom);
 
             if (FBTrace.DBG_CONSOLE)
-                FBTrace.sysout("console.append; wasScrolledToBottom " + this.wasScrolledToBottom+" "+row.textContent);
+                FBTrace.sysout("console.append; wasScrolledToBottom " + this.wasScrolledToBottom +
+                    " " + row.textContent);
 
             if (this.wasScrolledToBottom)
                 Dom.scrollToBottom(this.panelNode);
@@ -583,7 +594,7 @@ Firebug.ConsolePanel.prototype = Obj.extend(Firebug.ActivablePanel,
         }
     },
 
-    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
     appendObject: function(object, row, rep)
     {
@@ -636,7 +647,8 @@ Firebug.ConsolePanel.prototype = Obj.extend(Firebug.ActivablePanel,
             var part = parts[i];
             if (part && typeof(part) == "object")
             {
-                if (++trialIndex > objects.length)  // then too few parameters for format, assume unformatted.
+                // then too few parameters for format, assume unformatted.
+                if (++trialIndex > objects.length)
                 {
                     format = "";
                     objIndex = -1;
@@ -644,8 +656,8 @@ Firebug.ConsolePanel.prototype = Obj.extend(Firebug.ActivablePanel,
                     break;
                 }
             }
-
         }
+
         for (var i = 0; i < parts.length; ++i)
         {
             var part = parts[i];
@@ -660,7 +672,9 @@ Firebug.ConsolePanel.prototype = Obj.extend(Firebug.ActivablePanel,
                     this.appendObject(part.type, row, FirebugReps.Text);
             }
             else
+            {
                 FirebugReps.Text.tag.append({object: part}, row);
+            }
         }
 
         for (var i = objIndex+1; i < objects.length; ++i)
@@ -732,7 +746,7 @@ Firebug.ConsolePanel.prototype = Obj.extend(Firebug.ActivablePanel,
             this.groups.pop();
     },
 
-    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
     // extends Panel
 
     name: "console",
@@ -840,7 +854,7 @@ Firebug.ConsolePanel.prototype = Obj.extend(Firebug.ActivablePanel,
 
         if (FBTrace.DBG_CONSOLE)
             FBTrace.sysout("console.show; wasScrolledToBottom: " +
-               this.wasScrolledToBottom + ", " + this.context.getName());
+                this.wasScrolledToBottom + ", " + this.context.getName());
 
         if (state && state.profileRow) // then we reloaded while profiling
         {
@@ -967,10 +981,12 @@ Firebug.ConsolePanel.prototype = Obj.extend(Firebug.ActivablePanel,
                 (filterTypes.indexOf("error") != -1 && (type == "error" || type == "errorMessage")) ||
                 (filterTypes.indexOf("warning") != -1 && (type == "warn" || type == "warningMessage")))
             {
-                Css.removeClass(panelNode, "hideType-"+type);
+                Css.removeClass(panelNode, "hideType-" + type);
             }
             else
-                Css.setClass(panelNode, "hideType-"+type);
+            {
+                Css.setClass(panelNode, "hideType-" + type);
+            }
         }
     },
 
@@ -994,15 +1010,19 @@ Firebug.ConsolePanel.prototype = Obj.extend(Firebug.ActivablePanel,
         var logRow = search.find(text);
         if (!logRow)
         {
-            Events.dispatch(this.fbListeners, 'onConsoleSearchMatchFound', [this, text, []]);
+            Events.dispatch(this.fbListeners, "onConsoleSearchMatchFound", [this, text, []]);
             return false;
         }
+
         for (; logRow; logRow = search.findNext())
         {
             Css.setClass(logRow, "matched");
             this.matchSet.push(logRow);
         }
-        Events.dispatch(this.fbListeners, 'onConsoleSearchMatchFound', [this, text, this.matchSet]);
+
+        Events.dispatch(this.fbListeners, "onConsoleSearchMatchFound",
+            [this, text, this.matchSet]);
+
         return true;
     },
 
@@ -1011,7 +1031,7 @@ Firebug.ConsolePanel.prototype = Obj.extend(Firebug.ActivablePanel,
         Options.set("breakOnErrors", breaking);
     },
 
-    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
     // private
 
     createRow: function(rowName, className)
@@ -1109,7 +1129,7 @@ Firebug.ConsolePanel.prototype = Obj.extend(Firebug.ActivablePanel,
     },
 });
 
-// ************************************************************************************************
+// ********************************************************************************************* //
 
 function parseFormat(format)
 {
@@ -1160,7 +1180,7 @@ function parseFormat(format)
     return parts;
 }
 
-// ************************************************************************************************
+// ********************************************************************************************* //
 
 var appendObject = Firebug.ConsolePanel.prototype.appendObject;
 var appendFormatted = Firebug.ConsolePanel.prototype.appendFormatted;
@@ -1168,7 +1188,7 @@ var appendOpenGroup = Firebug.ConsolePanel.prototype.appendOpenGroup;
 var appendCollapsedGroup = Firebug.ConsolePanel.prototype.appendCollapsedGroup;
 var appendCloseGroup = Firebug.ConsolePanel.prototype.appendCloseGroup;
 
-// ************************************************************************************************
+// ********************************************************************************************* //
 // Registration
 
 Firebug.registerActivableModule(Firebug.Console);
@@ -1176,5 +1196,5 @@ Firebug.registerPanel(Firebug.ConsolePanel);
 
 return Firebug.Console;
 
-// ************************************************************************************************
+// ********************************************************************************************* //
 });
