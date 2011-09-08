@@ -7,6 +7,10 @@ window[chromehidden~="toolbar"] #fbToolbar {
    display: -moz-box;
 }
 
+#fbMainContainer {
+    height: 270px;
+}
+
 #fbContentBox {
     -moz-binding: url("firefox/bindings.xml#initializer");
     height: 270px;
