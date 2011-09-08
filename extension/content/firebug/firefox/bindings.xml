@@ -896,6 +896,18 @@
             ]]></body>
         </method>
 
+        <method name="getItems">
+            <body><![CDATA[
+                var items = [];
+                for (var item = this.lastChild; item; item = item.previousSibling)
+                {
+                    if (item.repObject)
+                       items.push(item);
+                }
+                return items;
+            ]]></body>
+        </method>
+
         <method name="getItemByObject">
             <parameter name="object"/>
             <body><![CDATA[

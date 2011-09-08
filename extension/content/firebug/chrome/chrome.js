@@ -928,7 +928,19 @@ var FirebugChrome =
                 var selection = panel.selection;
                 var existingItem = panelStatus.getItemByObject(panel.selection);
                 if (existingItem)
+                {
+                    var statusItems = panelStatus.getItems();
+                    for (var i = 0; i < statusItems.length; ++i)
+                    {
+                        var object = Firebug.getRepObject(statusItems[i]); 
+                        var rep = Firebug.getRep(object, Firebug.currentContext);
+                        var objectTitle = rep.getTitle(object, Firebug.currentContext);
+                        var title = String.cropMultipleLines(objectTitle, statusCropSize);
+
+                        statusItems[i].label = title;
+                    }
                     panelStatus.selectItem(existingItem);
+                }
                 else
                 {
                     panelStatus.clear();
@@ -1135,6 +1147,18 @@ var FirebugChrome =
     },
 
     onObjectSelected: function(object, panel)
+    {
+        if (panel == panelBar1.selectedPanel)
+        {
+            this.syncStatusPath();
+
+            var sidePanel = panelBar2.selectedPanel;
+            if (sidePanel)
+                sidePanel.select(object);
+        }
+    },
+
+    onObjectChanged: function(object, panel)
     {
         if (panel == panelBar1.selectedPanel)
         {

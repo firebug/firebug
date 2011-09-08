@@ -1350,7 +1350,6 @@ Firebug.HTMLPanel.prototype = Obj.extend(WalkingPanel,
 
             path.push(element);
         }
-
         return path;
     },
 
@@ -1900,6 +1899,10 @@ AttributeEditor.prototype = domplate(Firebug.InlineEditor.prototype,
             var attrName = Dom.getPreviousByClass(target, "nodeName").textContent;
             element.setAttribute(attrName, value);
         }
+
+        var panel = Firebug.getElementPanel(target);
+        Events.dispatch(Firebug.uiListeners, "onObjectChanged", [element, panel]);
+
         //this.panel.markChange();
     },
 
