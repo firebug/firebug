@@ -26,10 +26,11 @@ define([
     "firebug/chrome/infotip",
     "firebug/chrome/searchBox",
     "firebug/js/sourceBox",
+    "firebug/js/watchPanel",
 ],
-function(Obj, Firebug, Firefox, FirebugReps, Domplate, JavaScriptTool, CompilationUnit,
-        Locale, Events, Url, SourceLink, StackFrame, Css, Dom, Win, Search, Persist,
-        System, Menu, Debug, Keywords) {
+function (Obj, Firebug, Firefox, FirebugReps, Domplate, JavaScriptTool, CompilationUnit,
+    Locale, Events, Url, SourceLink, StackFrame, Css, Dom, Win, Search, Persist,
+    System, Menu, Debug, Keywords) {
 
 // ********************************************************************************************* //
 // Script panel
