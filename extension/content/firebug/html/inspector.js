@@ -446,6 +446,13 @@ Firebug.Inspector = Obj.extend(Firebug.Module,
         // there is no way to check if the listeners have already been added and we should
         // avoid adding properties to the users page.
         // Adding them again will do no harm so lets just do that.
+
+        // xxxHonza: I think that adding them twice could actualy do harm,
+        // so make sure they are removed before.
+        Events.removeEventListener(win.document, "resize", this.onInspectingResizeWindow, true);
+        Events.removeEventListener(win.document, "scroll", this.onInspectingScroll, true);
+
+        // Register again.
         Events.addEventListener(win.document, "resize", this.onInspectingResizeWindow, true);
         Events.addEventListener(win.document, "scroll", this.onInspectingScroll, true);
     },
