@@ -41,6 +41,13 @@ Firebug.InfoTip = Obj.extend(Firebug.Module,
                 DIV({"class": "infoTipCaption"})
             ),
 
+        fontFamilyTag:
+            DIV({"class": "infoTipFontFamilyBox"},
+                FOR("fontStyle", "$fontStyles",
+                    DIV({style: "font-family:$fontName; $fontStyle"}, Locale.$STR("css.fontFamilyPreview"))
+                )
+            ),
+
         onLoadImage: function(event)
         {
             var img = event.currentTarget;
@@ -244,6 +251,18 @@ Firebug.InfoTip = Obj.extend(Firebug.Module,
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+    populateFontFamilyTip: function(infoTip, fontName)
+    {
+        var fontStyles = [
+           "font-size:12px;",
+           "font-weight:bold; font-size:12px;",
+           "font-style:italic; font-size:12px;",
+           "font-size:14px;",
+           "font-size:18px;"
+        ];
+        this.tags.fontFamilyTag.replace({fontStyles: fontStyles, fontName: fontName}, infoTip);
+        return true;
+    },
 
     populateColorInfoTip: function(infoTip, color)
     {

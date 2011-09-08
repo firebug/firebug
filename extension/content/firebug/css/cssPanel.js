@@ -1429,10 +1429,21 @@ Firebug.CSSStyleSheetPanel.prototype = Obj.extend(Firebug.Panel,
     showInfoTip: function(infoTip, target, x, y, rangeParent, rangeOffset)
     {
         var propValue = Dom.getAncestorByClass(target, "cssPropValue");
+        var propNameNode = target.parentNode.getElementsByClassName("cssPropName").item(0);
+
         if (propValue)
         {
             var text = propValue.textContent;
-            var cssValue = parseCSSValue(text, rangeOffset);
+            if (propNameNode && (propNameNode.textContent.toLowerCase() == "font" ||
+                propNameNode.textContent.toLowerCase() == "font-family"))
+            {
+                var cssValue = parseCssFontFamilyValue(text, rangeOffset);
+            }
+            else
+            {
+                var cssValue = parseCSSValue(text, rangeOffset);
+            }
+
             if (cssValue)
             {
                 if (cssValue.value == this.infoTipValue)
@@ -1440,7 +1451,8 @@ Firebug.CSSStyleSheetPanel.prototype = Obj.extend(Firebug.Panel,
 
                 this.infoTipValue = cssValue.value;
 
-                if (cssValue.type == "rgb" || cssValue.type == "hsl" || cssValue.type == "gradient" ||
+                if (cssValue.type == "rgb" || cssValue.type == "hsl" ||
+                    cssValue.type == "gradient" ||
                     (!cssValue.type && Css.isColorKeyword(cssValue.value)))
                 {
                     this.infoTipType = "color";
@@ -1466,7 +1478,11 @@ Firebug.CSSStyleSheetPanel.prototype = Obj.extend(Firebug.Panel,
                         return Firebug.InfoTip.populateImageInfoTip(infoTip, absURL, repeat);
                     }
                 }
-            }
+                else if (cssValue.type == "fontFamily") 
+                {
+                    return Firebug.InfoTip.populateFontFamilyTip(infoTip, cssValue.value);
+                }
+            } 
         }
 
         delete this.infoTipType;
@@ -1742,10 +1758,10 @@ CSSElementPanel.prototype = Obj.extend(Firebug.CSSStyleSheetPanel.prototype,
             ),
 
         ruleTag:
-          DIV({"class": "cssElementRuleContainer"},
-              TAG(CSSStyleRuleTag.tag, {rule: "$rule"}),
-              TAG(FirebugReps.SourceLink.tag, {object: "$rule.sourceLink"})
-          )
+            DIV({"class": "cssElementRuleContainer"},
+                TAG(CSSStyleRuleTag.tag, {rule: "$rule"}),
+                TAG(FirebugReps.SourceLink.tag, {object: "$rule.sourceLink"})
+            )
     }),
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -2056,22 +2072,22 @@ CSSElementPanel.prototype = Obj.extend(Firebug.CSSStyleSheetPanel.prototype,
                 label: "Only Show Applied Styles",
                 type: "checkbox",
                 checked: Firebug.onlyShowAppliedStyles,
-                command: Obj.bindFixed(Firebug.Options.togglePref,
-                    Firebug.Options, "onlyShowAppliedStyles")
+                command: Obj.bindFixed(Firebug.Options.togglePref, Firebug.Options,
+                    "onlyShowAppliedStyles")
             },
             {
                 label: "Show User Agent CSS",
                 type: "checkbox",
                 checked: Firebug.showUserAgentCSS,
-                command: Obj.bindFixed(Firebug.Options.togglePref,
-                    Firebug.Options, "showUserAgentCSS")
+                command: Obj.bindFixed(Firebug.Options.togglePref, Firebug.Options,
+                    "showUserAgentCSS")
             },
             {
                 label: "Expand Shorthand Properties",
                 type: "checkbox",
                 checked: Firebug.expandShorthandProps,
-                command: Obj.bindFixed(Firebug.Options.togglePref,
-                    Firebug.Options, "expandShorthandProps")
+                command: Obj.bindFixed(Firebug.Options.togglePref, Firebug.Options,
+                    "expandShorthandProps")
             }
         ];
 
@@ -2916,6 +2932,39 @@ function parseRepeatValue(value)
 {
     var m = reRepeat.exec(value);
     return m ? m[0] : "";
+}
+
+function parseCssFontFamilyValue(value, offset)
+{
+    if (value.charAt(offset) == ",")
+        return "";
+
+    var reFonts = /^(.*\d\S*\s)?(.*?)(\s?!important)?$/;
+    var m = reFonts.exec(value);
+    if (!m)
+        return "";
+
+    var fonts = m[2].split(",");
+    var fontsLength = fonts.length;
+    var totalLength = m[1] ? m[1].length : 0;
+
+    // offset begins at 0
+    offset += 1;
+    if (m[1] && offset <= m[1].length)
+        return "";
+
+    for (var i = 0; i < fontsLength; ++i)
+    {
+        // +1 because we add the length of ","
+        totalLength += fonts[i].length + 1;
+        if (totalLength >= offset)
+        {
+            return {
+                value: fonts[i],
+                type: "fontFamily"
+            };
+        }
+    }
 }
 
 function parseCSSValue(value, offset)
