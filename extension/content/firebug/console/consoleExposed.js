@@ -16,7 +16,7 @@ function(FirebugReps, Locale, Wrapper, Url, StackFrame, Errors, Debug) {
 /**
  * Returns a console object (bundled with passed window through closure). The object
  * provides all necessary APIs as described here: http://getfirebug.com/wiki/index.php/Console_API
- * 
+ *
  * @param {Object} context
  * @param {Object} win
  */
@@ -330,11 +330,14 @@ function createFirebugConsole(context, win)
         trace = StackFrame.cleanStackTraceOfFirebug(trace);
 
         var url = msg && msg.fileName ? msg.fileName : win.location.href;
-        var lineNo = (trace && msg && msg.lineNumber) ? msg.lineNumber : 0; // we may have only the line popped above
-        var errorObject = new FirebugReps.ErrorMessageObj(msg, url, lineNo, "", category, context, trace);
+
+        // we may have only the line popped above
+        var lineNo = (trace && msg && msg.lineNumber) ? msg.lineNumber : 0;
+        var errorObject = new FirebugReps.ErrorMessageObj(msg, url, lineNo, "",
+            category, context, trace);
 
         if (trace && trace.frames && trace.frames[0])
-           errorObject.correctWithStackTrace(trace);
+            errorObject.correctWithStackTrace(trace);
 
         errorObject.resetSource();
 
@@ -359,7 +362,8 @@ function createFirebugConsole(context, win)
         var userURL = win.location.href.toString();
 
         if (FBTrace.DBG_CONSOLE)
-            FBTrace.sysout("consoleInjector.getComponentsStackDump initial stack for userURL "+userURL, frame);
+            FBTrace.sysout("consoleInjector.getComponentsStackDump initial stack for userURL " +
+                userURL, frame);
 
         // Drop frames until we get into user code.
         while (frame && Url.isSystemURL(frame.filename) )
@@ -372,7 +376,8 @@ function createFirebugConsole(context, win)
         //    frame = frame.caller;
 
         if (FBTrace.DBG_CONSOLE)
-            FBTrace.sysout("consoleInjector.getComponentsStackDump final stack for userURL "+userURL, frame);
+            FBTrace.sysout("consoleInjector.getComponentsStackDump final stack for userURL " +
+                userURL, frame);
 
         return frame;
     };
