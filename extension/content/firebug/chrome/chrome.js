@@ -929,6 +929,9 @@ var FirebugChrome =
                 var existingItem = panelStatus.getItemByObject(panel.selection);
                 if (existingItem)
                 {
+                    // Update the labels of the status path elements, because it can be,
+                    // that the elements changed even when the selected element exists
+                    // inside the path (issue 4826)
                     var statusItems = panelStatus.getItems();
                     for (var i = 0; i < statusItems.length; ++i)
                     {
