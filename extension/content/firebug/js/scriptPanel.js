@@ -268,18 +268,24 @@ Firebug.ScriptPanel.prototype = Obj.extend(Firebug.SourceBoxPanel,
 
     showStackFrameTrue: function(frame)
     {
-         var url = frame.getURL();
-         var lineNo = frame.getLineNumber();
+        // Make sure the current frame seen by the user is set (issue 4818)
+        // xxxHonza: Better solution (important for remoting)
+        // Set this.context.currentFrame = frame (meaning frameXB) and pass the value of
+        // frameXB during evaluation calls, causing the backend to select the appropriate
+        // frame for frame.eval().
+        this.context.currentFrame = frame.nativeFrame;
 
-         if (FBTrace.DBG_STACK)
-             FBTrace.sysout("showStackFrame: "+url+"@"+lineNo+"\n");
+        var url = frame.getURL();
+        var lineNo = frame.getLineNumber();
 
-         if (this.context.breakingCause)
-             this.context.breakingCause.lineNo = lineNo;
+        if (FBTrace.DBG_STACK)
+            FBTrace.sysout("showStackFrame: "+url+"@"+lineNo+"\n");
 
-         this.scrollToLine(url, lineNo, this.highlightLine(lineNo, this.context));
-         this.context.throttle(this.updateInfoTip, this);
-         return;
+        if (this.context.breakingCause)
+            this.context.breakingCause.lineNo = lineNo;
+
+        this.scrollToLine(url, lineNo, this.highlightLine(lineNo, this.context));
+        this.context.throttle(this.updateInfoTip, this);
     },
 
     showNoStackFrame: function()
