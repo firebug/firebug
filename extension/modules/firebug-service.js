@@ -1900,7 +1900,11 @@ var fbs =
             if (!theDebugger)
                 theDebugger = this.findDebugger(frame);  // sets debuggr.breakContext
 
-            // See issue 1179, should not break if we resumed from a single step and have not advanced.
+            // See issue 1179, should not break if we resumed from a single
+            // step and have not advanced.
+            if (jsdHandlers.hooks.length > 0)
+                return RETURN_CONTINUE;
+
             if (disabledCount || monitorCount || conditionCount || runningUntil)
             {
                 if (FBTrace.DBG_FBS_BP)
