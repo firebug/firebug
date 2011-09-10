@@ -40,6 +40,8 @@ Css.getCSSKeywordsByProperty = function(nodeType, propName)
                 var keywords = Css.cssKeywords[types[i]];
                 if (keywords)
                     list.push.apply(list, keywords);
+                else
+                    list.push(types[i]);
             }
 
             cssKeywordMap[nodeType][name] = list;
@@ -730,6 +732,7 @@ Css.cssInfo.html =
     "padding-bottom": [],
     "padding-left": [],
 
+    "pointer-events": ["auto", "none"],
     "position": ["position"],
     "quotes": ["none"],
     "resize": ["resize"],//FF4.0
@@ -742,7 +745,7 @@ Css.cssInfo.html =
     "text-shadow": [],
     "text-transform": ["textTransform", "none"],
     "top": ["auto"],
-    "unicode-bidi": [],
+    "unicode-bidi": ["unicodeBidi"],
     "vertical-align": ["verticalAlign"],
     "visibility": ["visibility"],
     "white-space": ["whiteSpace"],
@@ -798,7 +801,7 @@ Css.cssInfo.html =
     "-moz-transform-origin": ["bgPosition"],
     "-moz-font-feature-settings": ["normal"], //FF4.0
     "-moz-tab-size": [], //FF4.0,
-    "-moz-transition": [], //FF4.0 TODO
+    "-moz-transition": ["mozTransitionProperty", "mozTransitionTimingFunction"], //FF4.0 TODO
     "-moz-transition-property": ["mozTransitionProperty"], //FF4.0 TODO
     "-moz-transition-duration": [], //FF4.0 TODO
     "-moz-transition-timing-function": ["mozTransitionTimingFunction"], //FF4.0 TODO
@@ -811,12 +814,12 @@ Css.cssInfo.html =
     "-moz-animation-name" : [], // FF5.0
     "-moz-animation-play-state": [], // FF5.0
     "-moz-animation-timing-function": [], // FF5.0
-    "-moz-animation-fill-mode": [], // FF5.0
+    "-moz-animation-fill-mode": ["none", "forwards", "backwards", "both"], // FF5.0
     "-moz-orient": [], //FF6.0 TODO
     "-moz-text-decoration-color": ["color"], //FF6.0 TODO
     "-moz-text-decoration-line": [], //FF6.0 TODO
     "-moz-text-decoration-style": [], //FF6.0 TODO
-    "-moz-hyphens": [], //FF6.0 TODO
+    "-moz-hyphens": ["none", "manual", "auto"], //FF6.0 TODO
     "text-overflow": ["ellipsis","clip"] //FF7.0
 
 };
