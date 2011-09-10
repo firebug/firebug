@@ -613,7 +613,7 @@ Firebug.InlineEditor.prototype = domplate(Firebug.BaseEditor,
     {
         this.input.setSelectionRange(selectionData.start, selectionData.end);
         // Ci.nsISelectionController SELECTION_NORMAL SELECTION_ANCHOR_REGION SCROLL_SYNCHRONOUS
-        this.input.QueryInterface(Ci.nsIDOMNSEditableElement)
+        this.input.QueryInterface(Components.interfaces.nsIDOMNSEditableElement)
             .editor.selectionController.scrollSelectionIntoView(1, 0, 2);
     },
 
@@ -883,8 +883,11 @@ Firebug.InlineEditor.prototype = domplate(Firebug.BaseEditor,
 
             var clR = this.expander.getClientRects(),
                 wasWrapped = this.wrapped, inputWidth = Infinity;
+
             if(clR.length == 1)
+            {
                 this.wrapped = false;
+            }
             else if (clR.length == 2)
             {
                 var w1 = clR[0].width;
@@ -892,7 +895,7 @@ Firebug.InlineEditor.prototype = domplate(Firebug.BaseEditor,
 
                 if (w2 > w1){
                     this.wrapped = true;
-                    inputWidth = w2
+                    inputWidth = w2;
                 } else
                     this.wrapped = false;
             }
@@ -902,8 +905,10 @@ Firebug.InlineEditor.prototype = domplate(Firebug.BaseEditor,
                 if (clR[2].width > 50)
                     inputWidth = clR[1].width;
             }
-            else // clR.length>3
-                this.wrapped = true
+            else if(clR.length > 3)
+            {
+                this.wrapped = true;
+            }
 
             if(this.wrapped)
             {

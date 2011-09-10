@@ -7,7 +7,7 @@ window[chromehidden~="toolbar"] #fbToolbar {
    display: -moz-box;
 }
 
-#fbMainContainer {
+#fbMainFrame {
     height: 270px;
 }
 
