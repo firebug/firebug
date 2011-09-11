@@ -823,7 +823,7 @@ Firebug.CommandLine = Obj.extend(Firebug.Module,
 
     handledKeyDown: function(event)
     {
-        if (event.keyCode === 13 || event.keyCode === 14)  // RETURN , ENTER
+        if (event.keyCode === KeyEvent.DOM_VK_RETURN || event.keyCode === KeyEvent.DOM_VK_ENTER)
         {
             event.preventDefault();
 
@@ -849,19 +849,19 @@ Firebug.CommandLine = Obj.extend(Firebug.Module,
                 return true;
             }
         }
-        else if (event.keyCode === 38) // Up arrow
+        else if (event.keyCode === KeyEvent.DOM_VK_UP)
         {
             event.preventDefault();
             this.commandHistory.cycleCommands(Firebug.currentContext, -1);
             return true;
         }
-        else if (event.keyCode === 40) // Down arrow
+        else if (event.keyCode === KeyEvent.DOM_VK_DOWN)
         {
             event.preventDefault();
             this.commandHistory.cycleCommands(Firebug.currentContext, 1);
             return true;
         }
-        else if (event.keyCode === 27) // Esc
+        else if (event.keyCode === KeyEvent.DOM_VK_ESCAPE)
         {
             event.preventDefault();
             if (Firebug.CommandLine.cancel(Firebug.currentContext))
