@@ -1460,18 +1460,18 @@ Firebug.AutoCompleter = function(getExprOffset, getRange, evaluator, selectMode,
     {
         var clearedTabWarning = this.clearTabWarning(completionBox);
 
-        if (event.altKey || event.metaKey)
+        if (Events.isAlt(event))
             return false;
 
-        if (event.ctrlKey && event.keyCode === 32) // Control space
+        if (Events.isControl(event) && event.keyCode === KeyEvent.DOM_VK_SPACE)
         {
             // force completion incl globals
             this.complete(context, textBox, completionBox, false, false, true);
             return true;
         }
-        else if (event.keyCode === 9 || // TAB
-            (event.keyCode === 39 && completionBox.value.length &&
-            textBox.selectionStart === textBox.value.length)) // right arrow
+        else if ((event.keyCode === KeyEvent.DOM_VK_TAB && !Events.isControl(event)) ||
+            (event.keyCode === KeyEvent.DOM_VK_RIGHT && completionBox.value.length &&
+            textBox.selectionStart === textBox.value.length))
         {
             if (!completionBox.value.length)  // then no completion text,
             {
@@ -1489,7 +1489,7 @@ Firebug.AutoCompleter = function(getExprOffset, getRange, evaluator, selectMode,
                 return true;
             }
         }
-        else if (event.keyCode === 27) // ESC, close the completer
+        else if (event.keyCode === KeyEvent.DOM_VK_ESCAPE)
         {
             if (this.hide(completionBox))  // then we closed the popup
             {
@@ -1497,7 +1497,7 @@ Firebug.AutoCompleter = function(getExprOffset, getRange, evaluator, selectMode,
                 return true;
             }
         }
-        else if (event.keyCode === 38 || event.keyCode === 40) // UP or DOWN arrow
+        else if (event.keyCode === KeyEvent.DOM_VK_UP || event.keyCode === KeyEvent.DOM_VK_DOWN)
         {
             if (this.getCompletionText(completionBox))
             {
