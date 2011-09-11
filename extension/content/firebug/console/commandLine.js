@@ -823,52 +823,53 @@ Firebug.CommandLine = Obj.extend(Firebug.Module,
 
     handledKeyDown: function(event)
     {
-        if (event.keyCode === KeyEvent.DOM_VK_RETURN || event.keyCode === KeyEvent.DOM_VK_ENTER)
+        switch (event.keyCode)
         {
-            event.preventDefault();
+            case KeyEvent.DOM_VK_RETURN:
+            case KeyEvent.DOM_VK_ENTER:
+                event.preventDefault();
+    
+                if (!event.metaKey && !event.shiftKey)
+                {
+                    Firebug.CommandLine.enter(Firebug.currentContext);
+                    handled = true;
+                }
+                else if (event.metaKey && !event.shiftKey)
+                {
+                    Firebug.CommandLine.enterMenu(Firebug.currentContext);
+                    handled = true;
+                }
+                else if(event.shiftKey && !event.metaKey)
+                {
+                    Firebug.CommandLine.enterInspect(Firebug.currentContext);
+                    handled = true;
+                }
+    
+                if (handled)
+                {
+                    this.commandHistory.hide();
+                    return true;
+                }
+                break;
 
-            if (!event.metaKey && !event.shiftKey)
-            {
-                Firebug.CommandLine.enter(Firebug.currentContext);
-                handled = true;
-            }
-            else if (event.metaKey && !event.shiftKey)
-            {
-                Firebug.CommandLine.enterMenu(Firebug.currentContext);
-                handled = true;
-            }
-            else if(event.shiftKey && !event.metaKey)
-            {
-                Firebug.CommandLine.enterInspect(Firebug.currentContext);
-                handled = true;
-            }
+            case KeyEvent.DOM_VK_UP:
+                event.preventDefault();
+                this.commandHistory.cycleCommands(Firebug.currentContext, -1);
+                return true;
 
-            if (handled)
-            {
+            case KeyEvent.DOM_VK_DOWN:
+                event.preventDefault();
+                this.commandHistory.cycleCommands(Firebug.currentContext, 1);
+                return true;
+
+            case KeyEvent.DOM_VK_ESCAPE:
+                event.preventDefault();
+                if (Firebug.CommandLine.cancel(Firebug.currentContext))
+                    Events.cancelEvent(event);
                 this.commandHistory.hide();
                 return true;
-            }
         }
-        else if (event.keyCode === KeyEvent.DOM_VK_UP)
-        {
-            event.preventDefault();
-            this.commandHistory.cycleCommands(Firebug.currentContext, -1);
-            return true;
-        }
-        else if (event.keyCode === KeyEvent.DOM_VK_DOWN)
-        {
-            event.preventDefault();
-            this.commandHistory.cycleCommands(Firebug.currentContext, 1);
-            return true;
-        }
-        else if (event.keyCode === KeyEvent.DOM_VK_ESCAPE)
-        {
-            event.preventDefault();
-            if (Firebug.CommandLine.cancel(Firebug.currentContext))
-                Events.cancelEvent(event);
-            this.commandHistory.hide();
-            return true;
-        }
+
         return false;
     },
 
