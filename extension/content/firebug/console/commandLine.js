@@ -800,10 +800,10 @@ Firebug.CommandLine = Obj.extend(Firebug.Module,
 
     onCommandLineKeyDown: function(event)
     {
-        if (event.keyCode === KeyEvent.DOM_VK_H && (event.ctrlKey || event.metaKey))
+        if (event.keyCode === KeyEvent.DOM_VK_H && Events.isControl(event))
         {
             event.preventDefault();
-            this.commandHistory.show($("fbCommandLineHistoryButton"));
+            this.commandHistory.show(Firebug.chrome.$("fbCommandLineHistoryButton"));
             return true;
         }
 
