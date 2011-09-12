@@ -11,7 +11,7 @@ const Cr = Components.results;
 var EXPORTED_SYMBOLS = ["PrivacyService"];
 
 Components.utils.import("resource://firebug/firebug-trace-service.js");
-FBTrace = traceConsoleService.getTracer("extensions.firebug");
+var FBTrace = traceConsoleService.getTracer("extensions.firebug");
 
 // ********************************************************************************************* //
 
@@ -28,12 +28,14 @@ var PrivacyService =
 
         this.observerService = Components.classes["@mozilla.org/observer-service;1"]
             .getService(Components.interfaces.nsIObserverService);
+
         this.observerService.addObserver(this, "private-browsing", false);
         this.observerService.addObserver(this, "quit-application", false);
+
         this.update();
     },
 
-    update: function()
+    update: function(data)
     {
         try
         {
@@ -42,8 +44,18 @@ var PrivacyService =
 
             this.privateBrowsingEnabled = pbs.privateBrowsingEnabled;
 
+            // Dispatch to all listeners.
+            for (var i=0; i<this.listeners.length; ++i)
+            {
+                var listener = this.listeners[i];
+                if (data == "enter" && "onEnterPrivateBrowsing" in listener)
+                    listener.onEnterPrivateBrowsing();
+                else if (data == "exit" && "onExitPrivateBrowsing" in listener)
+                    listener.onExitPrivateBrowsing();
+            }
+
             if (FBTrace.DBG_ACTIVATION)
-                FBTrace.sysout("PrivacyService.update "+PrivacyService.isPrivateBrowsing())
+                FBTrace.sysout("PrivacyService.update " + PrivacyService.isPrivateBrowsing())
         }
         catch (e)
         {
@@ -52,13 +64,13 @@ var PrivacyService =
         }
     },
 
-    observe: function (aSubject, aTopic, aData)
+    observe: function (subject, topic, data)
     {
-        if (aTopic == "private-browsing")
+        if (topic == "private-browsing")
         {
-            PrivacyService.update();
+            PrivacyService.update(data);
         }
-        else if (aTopic == "quit-application")
+        else if (topic == "quit-application")
         {
             PrivacyService.observerService.removeObserver(this, "quit-application");
             PrivacyService.observerService.removeObserver(this, "private-browsing");
@@ -68,6 +80,23 @@ var PrivacyService =
     isPrivateBrowsing: function()
     {
         return this.privateBrowsingEnabled;
+    },
+
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+    // Listeners
+
+    listeners: [],
+
+    addListener: function(listener)
+    {
+        this.listeners.push(listener);
+    },
+
+    removeListener: function(listener)
+    {
+        for (var i=0; i<this.listeners.length; ++i)
+            if (this.listeners[i] == listener)
+                return this.listeners.splice(i, 1);
     },
 };
 

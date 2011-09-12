@@ -14,6 +14,7 @@ const dirService = Cc["@mozilla.org/file/directory_service;1"].getService(Ci.nsI
 // ********************************************************************************************* //
 // Annotation service implementation
 
+Components.utils.import("resource://firebug/privacyService.js");
 Components.utils.import("resource://firebug/firebug-trace-service.js");
 var FBTrace = traceConsoleService.getTracer("extensions.firebug");
 
@@ -36,6 +37,8 @@ var annotationService =
 
         // Load annotations.
         this.loadAnnotations();
+
+        PrivacyService.addListener(this);
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -79,6 +82,10 @@ var annotationService =
 
     flush: function()
     {
+        // Do not store anything if private-browsing mode is on.
+        if (PrivacyService.isPrivateBrowsing())
+            return;
+
         try
         {
             // Initialize output stream.
@@ -89,10 +96,12 @@ var annotationService =
             // Convert data to JSON.
             var arr = [];
             for (var uri in this.annotations)
+            {
                 arr.push({
                     uri: uri,
                     value: this.annotations[uri]
                 });
+            }
 
             var jsonString = JSON.stringify(arr);
 
@@ -166,6 +175,20 @@ var annotationService =
                 FBTrace.sysout("AnnotationService.loadAnnotations; EXCEPTION", err);
         }
     },
+
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+    // Privacy
+
+    onEnterPrivateBrowsing: function()
+    {
+        this.flush();
+        this.clear();
+    },
+
+    onExitPrivateBrowsing: function()
+    {
+        this.loadAnnotations();
+    }
 };
 
 // ********************************************************************************************* //

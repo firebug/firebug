@@ -15,8 +15,6 @@ function(Obj, Firebug, Locale, Url, TabWatcher) {
 const Cc = Components.classes;
 const Ci = Components.interfaces;
 
-Components.utils.import("resource://firebug/privacyService.js");
-
 // ********************************************************************************************* //
 
 /**
@@ -44,6 +42,7 @@ Firebug.Activation = Obj.extend(Firebug.Module,
     initializeUI: function()
     {
         Firebug.Module.initializeUI.apply(this, arguments);
+
         TabWatcher.initializeUI();
         TabWatcher.addListener(this);
     },
@@ -277,36 +276,13 @@ Firebug.Activation = Obj.extend(Firebug.Module,
 
     setPageAnnotation: function(currentURI, annotation)
     {
-        if (FBTrace.DBG_ACTIVATION || FBTrace.DBG_ANNOTATION)
-            FBTrace.sysout("setPageAnnotation, private browsing:" +
-                PrivacyService.isPrivateBrowsing());
-
-        if (PrivacyService.isPrivateBrowsing())
-        {
-            Firebug.Console.logFormatted(
-                [Locale.$STR("firebug.activation.privateBrowsingMode")],
-                Firebug.currentContext, "info");
-
-            Firebug.chrome.selectPanel('console');
-
-            // make sure the user sees the warning.
-            Firebug.Options.set("defaultPanelName", "console");
-
-            if (FBTrace.DBG_ACTIVATION || FBTrace.DBG_ANNOTATION)
-                FBTrace.sysout("activation warning, private browsing:" +
-                    PrivacyService.isPrivateBrowsing());
-
-            return;
-        }
-
         var uri = this.convertToURIKey(currentURI, Firebug.activateSameOrigin);
         if (uri)
             this.getAnnotationService().setPageAnnotation(uri, annotation);
 
         if (FBTrace.DBG_ACTIVATION || FBTrace.DBG_ANNOTATION)
             FBTrace.sysout("setPageAnnotation currentURI " + currentURI + " becomes URI key "+
-                (uri ? uri.spec : "ERROR") + " privateBrowsingEnabled: " +
-                PrivacyService.isPrivateBrowsing());
+                (uri ? uri.spec : "ERROR"));
 
         if (Firebug.activateSameOrigin)
         {
@@ -354,7 +330,6 @@ Firebug.Activation = Obj.extend(Firebug.Module,
 // Registration
 
 Firebug.registerModule(Firebug.Activation);
-
 
 return Firebug.Activation;
 
