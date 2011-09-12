@@ -9,7 +9,7 @@ define([
 ],
 function(Obj, Firebug, Locale, Url, TabWatcher) {
 
-// ************************************************************************************************
+// ********************************************************************************************* //
 // Constants
 
 const Cc = Components.classes;
@@ -17,7 +17,7 @@ const Ci = Components.interfaces;
 
 Components.utils.import("resource://firebug/privacyService.js");
 
-// ************************************************************************************************
+// ********************************************************************************************* //
 
 /**
  * @module Implements Firebug activation logic.
@@ -38,10 +38,10 @@ Components.utils.import("resource://firebug/privacyService.js");
  */
 Firebug.Activation = Obj.extend(Firebug.Module,
 {
-    // *******************************************************************************************
     dispatchName: "activation",
 
-    initializeUI: function()  // called once
+    // called once
+    initializeUI: function()
     {
         Firebug.Module.initializeUI.apply(this, arguments);
         TabWatcher.initializeUI();
@@ -57,21 +57,25 @@ Firebug.Activation = Obj.extend(Firebug.Module,
         this.getAnnotationService().flush();
     },
 
-    shouldCreateContext: function(browser, url, userCommands)  // true if the Places annotation the URI "firebugged"
+    // true if the Places annotation the URI "firebugged"
+    shouldCreateContext: function(browser, url, userCommands)
     {
         if (FBTrace.DBG_ACTIVATION)
-            FBTrace.sysout("shouldCreateContext allPagesActivation " + Firebug.allPagesActivation);
+            FBTrace.sysout("shouldCreateContext allPagesActivation " +
+                Firebug.allPagesActivation);
 
         if (Firebug.allPagesActivation == "on")
             return true;
 
-        if (Firebug.filterSystemURLs && Url.isSystemURL(url)) // if about:blank gets thru, 1483 fails
+        // if about:blank gets thru, 1483 fails
+        if (Firebug.filterSystemURLs && Url.isSystemURL(url))
             return false;
 
         if (userCommands)
             return true;
 
-        if (browser.showFirebug && url.substr(0, 8) === "wyciwyg:")  // document.open on a firebugged page
+        // document.open on a firebugged page
+        if (browser.showFirebug && url.substr(0, 8) === "wyciwyg:")
             return true;
 
         try
@@ -101,14 +105,17 @@ Firebug.Activation = Obj.extend(Firebug.Module,
 
                 if (dstURI && dstURI.equals(uri)) // and it matches us now
                 {
-                    var srcURI = this.convertToURIKey(browser.FirebugLink.src.spec, Firebug.activateSameOrigin);
+                    var srcURI = this.convertToURIKey(browser.FirebugLink.src.spec,
+                        Firebug.activateSameOrigin);
+
                     if (srcURI)
                     {
                         if (FBTrace.DBG_ACTIVATION)
                             FBTrace.sysout("shouldCreateContext found FirebugLink pointing from " +
                                 srcURI.spec, browser.FirebugLink);
 
-                        if (srcURI.schemeIs("file") || (dstURI.host == srcURI.host) ) // and it's on the same domain
+                        // and it's on the same domain
+                        if (srcURI.schemeIs("file") || (dstURI.host == srcURI.host))
                         {
                             hasAnnotation = this.getAnnotationService().pageHasAnnotation(srcURI);
                             if (hasAnnotation) // and the source page was annotated.
@@ -124,16 +131,18 @@ Firebug.Activation = Obj.extend(Firebug.Module,
                 else
                 {
                     if (FBTrace.DBG_ACTIVATION)
-                        FBTrace.sysout("shouldCreateContext FirebugLink does not match "+uri.spec, browser.FirebugLink);
+                        FBTrace.sysout("shouldCreateContext FirebugLink does not match " +
+                            uri.spec, browser.FirebugLink);
                 }
             }
             else if (browser.contentWindow.opener)
             {
-                var openerContext = Firebug.TabWatcher.getContextByWindow(browser.contentWindow.opener);
+                var openerContext = Firebug.TabWatcher.getContextByWindow(
+                    browser.contentWindow.opener);
 
                 if (FBTrace.DBG_ACTIVATION)
-                    FBTrace.sysout("shouldCreateContext opener found, has "+
-                        (openerContext?"a ":"no ")+" context: "+
+                    FBTrace.sysout("shouldCreateContext opener found, has " +
+                        (openerContext ? "a " : "no ") + " context: " +
                         browser.contentWindow.opener.location);
 
                 if (openerContext)
@@ -155,13 +164,15 @@ Firebug.Activation = Obj.extend(Firebug.Module,
         return this.shouldCreateContext(context.browser, context.getWindowLocation().toString());
     },
 
-    watchBrowser: function(browser)  // Firebug is opened in browser
+    // Firebug is opened in browser
+    watchBrowser: function(browser)
     {
         var annotation = "firebugged.showFirebug";
         this.setPageAnnotation(browser.currentURI.spec, annotation);
     },
 
-    unwatchBrowser: function(browser, userCommands)  // Firebug closes in browser
+    // Firebug closes in browser
+    unwatchBrowser: function(browser, userCommands)
     {
         var uri = browser.currentURI.spec;
         if (userCommands)  // then mark to not open virally.
@@ -174,6 +185,7 @@ Firebug.Activation = Obj.extend(Firebug.Module,
     {
         this.getAnnotationService().clear();
         this.getAnnotationService().flush();
+
         Firebug.connection.dispatch("onClearAnnotations", []);
     },
 
@@ -188,7 +200,8 @@ Firebug.Activation = Obj.extend(Firebug.Module,
         return this.annotationSvc;
     },
 
-    convertToURIKey: function(url, sameOrigin)  // process the URL to canonicalize it. Need not be reversible.
+    // process the URL to canonicalize it. Need not be reversible.
+    convertToURIKey: function(url, sameOrigin)
     {
         // Remove fragment, it shouldn't have any impact on the activation.
         url = url.replace(/#.*/, "");
@@ -205,7 +218,8 @@ Firebug.Activation = Obj.extend(Firebug.Module,
         {
             try
             {
-                var prePath = uri.prePath; // returns the string before the path (such as "scheme://user:password@host:port").
+                // returns the string before the path (such as "scheme://user:password@host:port").
+                var prePath = uri.prePath;
                 var shortURI = Url.makeURI(prePath);
                 if (!shortURI)
                     return uri;
@@ -236,7 +250,10 @@ Firebug.Activation = Obj.extend(Firebug.Module,
             catch (exc)
             {
                 if (FBTrace.DBG_ERRORS)
-                    FBTrace.sysout("activation.convertToURIKey returning full URI, activateSameOrigin FAILS for shortURI "+shortURI+" because: "+exc, exc);
+                    FBTrace.sysout("activation.convertToURIKey returning full URI, " +
+                        "activateSameOrigin FAILS for shortURI " + shortURI + " because: " + exc,
+                        exc);
+
                 return uri;
             }
         }
@@ -248,11 +265,12 @@ Firebug.Activation = Obj.extend(Firebug.Module,
         var annotation = this.getAnnotationService().getPageAnnotation(uri);
 
         if (FBTrace.DBG_ACTIVATION)
-            FBTrace.sysout("shouldCreateContext read back annotation "+annotation+" for uri "+uri.spec);
+            FBTrace.sysout("shouldCreateContext read back annotation " + annotation +
+                " for uri " + uri.spec);
 
         // then the user closed Firebug on this page last time
         if ((Firebug.allPagesActivation != "on") && (annotation.indexOf("closed") > 0))
-            return false; // annotated as 'closed', don't create
+            return false;   // annotated as 'closed', don't create
         else
             return true;    // annotated, createContext
     },
@@ -260,18 +278,23 @@ Firebug.Activation = Obj.extend(Firebug.Module,
     setPageAnnotation: function(currentURI, annotation)
     {
         if (FBTrace.DBG_ACTIVATION || FBTrace.DBG_ANNOTATION)
-            FBTrace.sysout("setPageAnnotation, private browsing:"+PrivacyService.isPrivateBrowsing());
+            FBTrace.sysout("setPageAnnotation, private browsing:" +
+                PrivacyService.isPrivateBrowsing());
 
         if (PrivacyService.isPrivateBrowsing())
         {
             Firebug.Console.logFormatted(
                 [Locale.$STR("firebug.activation.privateBrowsingMode")],
                 Firebug.currentContext, "info");
+
             Firebug.chrome.selectPanel('console');
-            Firebug.Options.set("defaultPanelName", "console");  // make sure the user sees the warning.
+
+            // make sure the user sees the warning.
+            Firebug.Options.set("defaultPanelName", "console");
 
             if (FBTrace.DBG_ACTIVATION || FBTrace.DBG_ANNOTATION)
-                FBTrace.sysout("activation warning, private browsing:"+PrivacyService.isPrivateBrowsing());
+                FBTrace.sysout("activation warning, private browsing:" +
+                    PrivacyService.isPrivateBrowsing());
 
             return;
         }
@@ -281,8 +304,8 @@ Firebug.Activation = Obj.extend(Firebug.Module,
             this.getAnnotationService().setPageAnnotation(uri, annotation);
 
         if (FBTrace.DBG_ACTIVATION || FBTrace.DBG_ANNOTATION)
-            FBTrace.sysout("setPageAnnotation currentURI "+currentURI+" becomes URI key "+
-                (uri?uri.spec:"ERROR")+" privateBrowsingEnabled: "+
+            FBTrace.sysout("setPageAnnotation currentURI " + currentURI + " becomes URI key "+
+                (uri ? uri.spec : "ERROR") + " privateBrowsingEnabled: " +
                 PrivacyService.isPrivateBrowsing());
 
         if (Firebug.activateSameOrigin)
@@ -292,8 +315,8 @@ Firebug.Activation = Obj.extend(Firebug.Module,
                 this.getAnnotationService().setPageAnnotation(uri, annotation);
 
             if (FBTrace.DBG_ACTIVATION || FBTrace.DBG_ANNOTATION)
-                FBTrace.sysout("setPageAnnotation with activeSameOrigin currentURI "+
-                    currentURI.spec+" becomes URI key "+(uri?uri.spec:"ERROR"));
+                FBTrace.sysout("setPageAnnotation with activeSameOrigin currentURI " +
+                    currentURI.spec + " becomes URI key " + (uri ? uri.spec : "ERROR"));
         }
     },
 
@@ -314,7 +337,8 @@ Firebug.Activation = Obj.extend(Firebug.Module,
             FBTrace.sysout("Firebug.Activation.unwatchBrowser untagged "+uri.spec);
     },
 
-    iterateAnnotations: function(fn)  // stops at the first fn(uri) that returns a true value
+    // stops at the first fn(uri) that returns a true value
+    iterateAnnotations: function(fn)
     {
         var annotations = this.getAnnotationService().getAnnotations(this.annotationName);
         for (var uri in annotations)
@@ -324,12 +348,9 @@ Firebug.Activation = Obj.extend(Firebug.Module,
                 return rc;
         }
     },
-
-
 });
 
-// ************************************************************************************************
-
+// ********************************************************************************************* //
 // Registration
 
 Firebug.registerModule(Firebug.Activation);
@@ -337,5 +358,5 @@ Firebug.registerModule(Firebug.Activation);
 
 return Firebug.Activation;
 
-// ************************************************************************************************
+// ********************************************************************************************* //
 });
