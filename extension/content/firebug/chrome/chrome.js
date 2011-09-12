@@ -51,8 +51,6 @@ createFirebugChrome: function(win)  // chrome is created in caller window.
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
     // Private
 
-    var inDetachedScope = (win.location == "chrome://firebug/content/firefox/firebug.xul");
-
     var panelBox, panelSplitter, sidePanelDeck, panelBar1, panelBar2, locationList, locationButtons,
         panelStatus, panelStatusSeparator, cmdPopup, cmdPopupBrowser;
 
@@ -159,9 +157,6 @@ var FirebugChrome =
 
         try
         {
-            if (win.arguments)
-                var detachArgs = win.arguments[0];
-
             this.applyTextSize(Firebug.textSize);
 
             var doc1 = panelBar1.browser.contentDocument;
@@ -200,10 +195,8 @@ var FirebugChrome =
 
             this.updatePanelBar1(Firebug.panelTypes);
 
-            if (inDetachedScope)
-                this.attachBrowser(Firebug.currentContext);
-            else
-                Firebug.initializeUI(detachArgs);
+
+            Firebug.initializeUI();
 
             // Append all registered styleesheets into Firebug UI.
             for (var uri in Firebug.stylesheets)
@@ -216,10 +209,6 @@ var FirebugChrome =
             // xxxHonza: is there any reason why we don't distribute "initializeUI"
             // event to modules?
             FirstRunPage.initializeUI();
-
-            // To not execute it twice in in-browser scope.
-            if (inDetachedScope)
-                Firebug.FirebugMenu.initializeUI();
         }
         catch (exc)
         {
@@ -262,10 +251,7 @@ var FirebugChrome =
 
         Firebug.unregisterUIListener(this);
 
-        if (inDetachedScope)
-            this.undetach();
-        else
-            Firebug.shutdown();
+        Firebug.shutdown();
 
         KeyBindingsManager.shutdown();
     },
@@ -288,39 +274,6 @@ var FirebugChrome =
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 
-    attachBrowser: function(context)  // XXXjjb context == (Firebug.currentContext || null)  and inDetachedScope == true
-    {
-        if (FBTrace.DBG_ACTIVATION)
-            FBTrace.sysout("chrome.attachBrowser with inDetachedScope="+inDetachedScope +
-                " context="+context+" context==Firebug.currentContext: "+(context==Firebug.currentContext)+
-                " in window: "+win.location);
-
-        if (inDetachedScope)  // then we are initializing in external window
-        {
-            Firebug.setChrome(this, "detached"); // 1.4
-
-            if (context)
-                Firebug.selectContext(context);
-            else
-                Firebug.toggleSuspend();
-
-            if (FBTrace.DBG_ACTIVATION)
-                FBTrace.sysout("attachBrowser inDetachedScope in Firebug.chrome.window: "+
-                    Firebug.chrome.window.location);
-        }
-    },
-
-    undetach: function()
-    {
-        var detachedChrome = Firebug.chrome;
-        Firebug.setChrome(Firebug.originalChrome, "minimized");
-
-        Firebug.showBar(false);
-        Firebug.StartButton.resetTooltip();
-
-        // when we are done here the window.closed will be true so we don't want to hang on to the ref.
-        detachedChrome.window = "This is detached chrome!";
-    },
 
     disableOff: function(collapse)
     {
@@ -443,22 +396,29 @@ var FirebugChrome =
 
     toggleOpen: function(shouldShow)
     {
-        var contentBox = Firebug.chrome.$("fbContentBox");
-        contentBox.setAttribute("collapsed", !shouldShow);
-        if (!inDetachedScope)
+        if (this.inDetachedScope)
+        {
+            var contentBox = Firebug.chrome.$("fbContentBox");
+            contentBox.setAttribute("collapsed", !shouldShow);
+        }
+        else
         {
             Dom.collapse(Firefox.getElementById('fbMainFrame'), !shouldShow);
+            var contentSplitter = Firefox.getElementById('fbContentSplitter');
+            if (contentSplitter)
+                contentSplitter.setAttribute("collapsed", !shouldShow);
         }
+    },
 
-        // The content splitter is in firefox for the iframe version
-        var contentSplitter = Firebug.chrome.$("fbContentSplitter") || Firefox.getElementById('fbContentSplitter');
-        // xxxHonza: this is a mess, in non-iframe version the contentSplitter is null
-        // if this method is executed as a result of browser1Loaded() execution (chrome.js).
-        // It is acutally correct otherwise the splitter would be displayed even when Firebug
-        // is detached (bug).
-        //var contentSplitter = Firebug.chrome.$("fbContentSplitter");
-        if (contentSplitter)
-            contentSplitter.setAttribute("collapsed", !shouldShow);
+    onDetach: function()
+	{
+		Firebug.showBar(true)
+    },
+	
+	onUndetach: function()
+	{
+        Dom.collapse(Firebug.chrome.$('fbResumeBox'), true);
+        Dom.collapse(Firebug.chrome.$("fbContentBox"), false);
     },
 
     syncResumeBox: function(context)  // only called when detached
@@ -482,7 +442,7 @@ var FirebugChrome =
         {
             Firebug.chrome.toggleOpen(false);
             Dom.collapse(resumeBox, false);
-            Firebug.chrome.window.document.title = Locale.$STR("Firebug - inactive for current website");
+            Firebug.chrome.window.top.document.title = Locale.$STR("Firebug - inactive for current website");
         }
     },
 
@@ -855,10 +815,10 @@ var FirebugChrome =
         if (Firebug.currentContext)
         {
             var title = Firebug.currentContext.getTitle();
-            win.document.title = Locale.$STRF("WindowTitle", [title]);
+            win.top.document.title = Locale.$STRF("WindowTitle", [title]);
         }
         else
-            win.document.title = Locale.$STR("Firebug");
+            win.top.document.title = Locale.$STR("Firebug");
     },
 
     focusLocationList: function()
@@ -935,7 +895,7 @@ var FirebugChrome =
                     var statusItems = panelStatus.getItems();
                     for (var i = 0; i < statusItems.length; ++i)
                     {
-                        var object = Firebug.getRepObject(statusItems[i]); 
+                        var object = Firebug.getRepObject(statusItems[i]);
                         var rep = Firebug.getRep(object, Firebug.currentContext);
                         var objectTitle = rep.getTitle(object, Firebug.currentContext);
                         var title = String.cropMultipleLines(objectTitle, statusCropSize);
@@ -967,14 +927,102 @@ var FirebugChrome =
         }
     },
 
-    toggleOrient: function()
+    toggleOrient: function(preferredValue)
     {
         var panelPane = FirebugChrome.$("fbPanelPane");
+        if(panelPane.orient == preferredValue)
+            return;
         var newValue = panelPane.orient == "vertical" ? "horizontal" : "vertical";
         panelSplitter.orient = panelPane.orient = newValue;
 
         var option = FirebugChrome.$("menu_toggleOrient").getAttribute("option");
         Firebug.Options.set(option, newValue == "vertical");
+    },
+
+    setPosition: function(pos)
+    {
+        if(Firebug.position == pos || this.inDetachedScope)
+            return;
+
+        var vertical = pos == 'top' || pos == 'bottom'
+        var after = pos == 'bottom' || pos == 'right'
+
+        var document = window.top.document
+        var splitter = Firefox.getElementById('fbContentSplitter') || Firefox.getElementById('fbContentSplitter2')
+        var container = document.getElementById(vertical ? "appcontent" : "browser")
+        var newSplitter = splitter.cloneNode(true)
+        newSplitter.id = vertical ? 'fbContentSplitter' : 'fbContentSplitter2'
+        container.insertBefore(newSplitter, after ? null: container.firstChild)
+        splitter.parentNode.removeChild(splitter)
+
+        var frame = document.getElementById('fbMainFrame')
+
+        var newFrame = frame.cloneNode(true)
+        var newBrowser = newFrame.querySelector('#fbMainContainer')
+        var oldBrowser = frame.querySelector('#fbMainContainer')
+
+        newBrowser.removeAttribute('src')
+
+        container.insertBefore(newFrame, after ? null: container.firstChild)
+
+        this.swapBrowsers(oldBrowser, newBrowser)
+
+        frame.parentNode.removeChild(frame)
+
+        Firebug.position = pos
+        Firebug.changingPosition = false
+
+        this.browser = newBrowser
+
+        //Firebug.chrome.toggleOrient(vertical ? "horizontal" : "vertical")
+    },
+
+    swapBrowsers: function(oldBrowser, newBrowser)
+    {
+        // we need to deal with inner frames first since swapFrameLoaders
+        // doesn't work for type="chrome" browser containing type="content" browsers
+        var frames = Array.prototype.slice.call(oldBrowser.contentDocument.querySelectorAll("browser, iframe"));
+        var tmpFrames = [], placeholders = [];
+
+        var oldDoc = oldBrowser.ownerDocument;
+        var temp = oldDoc.createElement('box');
+        oldDoc.documentElement.appendChild(temp);
+
+        var swapDocShells = function(a, b)
+        {
+            // important! must touch browser.contentDocument to initialize it
+            a.contentDocument == b.contentDocument;
+            if (a.nodeName == "iframe")
+                a.QueryInterface(Ci.nsIFrameLoaderOwner).swapFrameLoaders(b);
+            else
+                a.swapDocShells(b);
+        }
+
+        for (var i = frames.length; i--; )
+        {
+            placeholders[i] = document.createElement('placeholder');
+            tmpFrames[i] = frames[i].cloneNode(true);
+            tmpFrames[i].removeAttribute("src");
+            frames[i].removeAttribute("src");
+            temp.appendChild(tmpFrames[i]);
+        }
+
+
+        for (var i in tmpFrames)
+        {
+            swapDocShells(tmpFrames[i], frames[i]);
+            frames[i].parentNode.replaceChild(placeholders[i], frames[i]);
+        }
+
+        swapDocShells(oldBrowser, newBrowser);
+
+        for (var i in placeholders)
+            placeholders[i].parentNode.replaceChild(frames[i], placeholders[i]);
+
+        for (var i in frames)
+            swapDocShells(tmpFrames[i], frames[i]);
+
+        temp.parentNode.removeChild(temp);
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *

@@ -315,7 +315,7 @@ window.Firebug =
     toggleSuspend: function()  // TODO XULWindow IN detached "Activate Firebug for the current website"
     {
         // getSuspended returns non-null value if Firebug is suspended.
-        if (this.getSuspended())
+        if (this.getSuspended() || this.isDetached())
         {
             // Firebug is suspended now. Two possible actions have been executed:
             // 1) Firebug UI is closed and the user clicked on the status bar icon in order to
@@ -746,14 +746,14 @@ window.Firebug =
     {
         if (!forceOpen && Firebug.isDetached())  // detached -> minimized
         {
-            setTimeout(function delayMinimize()
-            {
-                if (reopenInBrowser)
-                    Firebug.unMinimize();
-                else
-                    Firebug.minimizeBar();
-            }, 200);
-            Firebug.chrome.close();
+            var topWin = Firebug.chrome.window.top;
+            topWin.exportFirebug();
+            topWin.close();
+
+            if (reopenInBrowser)
+                Firebug.unMinimize();
+            else
+                Firebug.minimizeBar();
         }
         else
             this.detachBar();
@@ -771,27 +771,6 @@ window.Firebug =
         Firebug.StartButton.resetTooltip();
     },
 
-    setChrome: function(newChrome, newPlacement)
-    {
-        var oldChrome = Firebug.chrome;
-        Firebug.dispatchToPanels("detach", [oldChrome, newChrome]);
-        Firebug.chrome = newChrome;
-        Firebug.setPlacement(newPlacement);
-
-        if (FBTrace.DBG_INITIALIZE)
-        {
-            var msg = "old: "+oldChrome.window.location;
-            msg    += " new: "+newChrome.window.location;
-            FBTrace.sysout("firebug; setChrome "+msg);
-        }
-        // reattach all contexts to the new chrome
-        Firebug.connection.eachContext(function reattach(context)
-        {
-            context.reattach(oldChrome, newChrome);
-
-            Firebug.reattachContext(context.browser, context);
-        });
-    },
 
     detachBar: function()
     {
@@ -801,23 +780,16 @@ window.Firebug =
             return null;
         }
 
-        this.showBar(false);  // don't show in browser.xul now
+        if(Firebug.chrome.waitingForDetach)
+            return null;
+        Firebug.chrome.waitingForDetach = true;
 
-        this.setPlacement("detached");  // we'll reset it in the new window, but we seem to race with code in this window.
+        Firebug.chrome.toggleOpen(false);  // don't show in browser.xul now
 
         if (FBTrace.DBG_ACTIVATION)
             FBTrace.sysout("Firebug.detachBar opening firebug.xul for context "+Firebug.currentContext.getName() );
 
-        var args = {
-            FBL: FBL,
-            Firebug: this,
-            browser: Firebug.currentContext ? Firebug.currentContext.browser : null,
-        };
-
-        var win = Firefox.openWindow("Firebug",
-            "chrome://firebug/content/firefox/firebug.xul", "", args);
-
-        return win;
+        return Firefox.openWindow("Firebug", "chrome://firebug/content/firefox/firebug.xul", "", {});
     },
 
     syncBar: function()  // show firebug if we should

@@ -1,85 +1,63 @@
 <?xml version="1.0"?>
 
-<?xul-overlay href="chrome://firebug/content/firebugOverlay.xul"?>
-
 <?xml-stylesheet href="chrome://global/skin/global.css"?>
-<?xml-stylesheet href="../firebug.css"?>
-<?xml-stylesheet href="chrome://firebug/skin/window.css"?>
-<?xml-stylesheet href="chrome://browser/skin/browser.css"?>
 
 <window xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul"
         id="firebug"
         title="Firebug"
         width="800" height="600"
-        persist="screenX,screenY,width,height,sizemode">
+        persist="screenX,screenY,width,height,sizemode"
+        onload="importFirebug()" onunload="" onclose="return exportFirebug();">
 
-    <script type="application/x-javascript" src="chrome://global/content/globalOverlay.js"/>
-    <script type="application/x-javascript" src="chrome://firebug/content/trace.js"/>
-    <script type="application/x-javascript" src="chrome://firebug/content/firefox/panelBarWaiter.js"/>
+
+    <vbox flex="2" id="fbMainFrame" collapsed="false">
+        <browser id="fbMainContainer" flex="2" src="" disablehistory="true" />
+    </vbox>
+
     <script type="application/x-javascript">
-        if (window.arguments)
-            var detachArgs = window.arguments[0];
-
-        if (detachArgs)
+        importFirebug = function()
         {
-            window.FBL = detachArgs.FBL;
-            Firebug = detachArgs.Firebug;
-            Firebug.currentContext = detachArgs.Firebug.currentContext;
-            ChromeFactory = Firebug.ChromeFactory;
-        }
-        else
-        {
-            throw new Error("firebug.xul expected window arguments");
+            var Firebug = opener.Firebug, fbc = Firebug.chrome;
+
+            if (fbc.inDetachedScope)
+            {
+                exportFirebug = null;
+                return window.close();
+            }
+
+            fbc.inDetachedScope = true;
+            fbc.waitingForDetach = false;
+
+            fbc.originalBrowser = fbc.window.top.document.getElementById("fbMainContainer");
+            fbc.swapBrowsers(
+                fbc.originalBrowser,
+                document.getElementById("fbMainContainer")
+            );
+            Firebug.setPlacement("detached");
+
+            fbc.originalBrowser.contentWindow.onunload = function()
+            {
+                fbc.shutdown();
+                fbc.window.top.close();
+            }
+
+            fbc.onDetach();
         }
 
-        // the modules are loaded in the browser.xul window. They are passed via Firebug
-        panelBarWaiter.waitForPanelBar(ChromeFactory);
+        exportFirebug = function()
+        {
+            var Firebug = opener.Firebug, fbc = Firebug.chrome;
+
+            fbc.originalBrowser.contentWindow.onunload = null;
+            fbc.inDetachedScope = false;
+
+            fbc.swapBrowsers(
+                document.getElementById("fbMainContainer"),
+                fbc.originalBrowser
+            );
+            fbc.onUndetach();
+            Firebug.setPlacement("minimized");
+        }
     </script>
-
-    <commandset id="mainCommandSet">
-        <command id="cmd_undo" oncommand="goDoCommand('cmd_undo')" disabled="true"/>
-        <command id="cmd_redo" oncommand="goDoCommand('cmd_redo')" disabled="true"/>
-        <command id="cmd_cut" oncommand="goDoCommand('cmd_cut')" disabled="true"/>
-        <command id="cmd_copy" oncommand="goDoCommand('cmd_copy')" disabled="true"/>
-        <command id="cmd_paste" oncommand="goDoCommand('cmd_paste')" disabled="true"/>
-        <command id="cmd_delete" oncommand="goDoCommand('cmd_delete')" disabled="true"/>
-        <command id="cmd_selectAll" oncommand="goDoCommand('cmd_selectAll')" disabled="true"/>
-        <command id="cmd_closeWindow" oncommand="window.close()"/>
-        <command id="cmd_reload" oncommand="Firebug.chrome.reload()"/>
-        <command id="cmd_reloadSkipCache" oncommand="Firebug.chrome.reload(true)"/>
-        <command id="cmd_toggleOrient" oncommand="Firebug.chrome.toggleOrient()"/>
-    </commandset>
-
-    <keyset id="mainKeyset">
-        <key id="key_closeWindow" key="w" command="cmd_closeWindow" modifiers="accel"/>
-    </keyset>
-
-    <!-- Various menu popups coming from firebugOverlay.xul are inserted here -->
-    <popupset id="mainPopupSet">
-    </popupset>
-
-    <!-- Entire Firebug UI -->
-    <vbox id="fbContentBox" flex="2">
-    </vbox>
-
-    <!-- If Firebug is displayed in this external window, but not active for currently selected
-         Firefox tab, the following button allows to resume it. -->
-    <vbox id="fbResumeBox" flex="1" collapsed="true">
-        <hbox id="fbWindowButtons" role="toolbar" class="innerToolbar" aria-label="a11y.labels.firebug window">
-            <spacer flex="1"/>
-            <!-- Allow to minimize/attach Firebug if deactivated -->
-            <toolbarbutton id="fbMinimizeButton" class="toolbarbutton-iconic fbInternational"
-                tooltiptext="Minimize Firebug" command="cmd_minimizeFirebug"/>
-        </hbox>
-        <spacer flex="1"/>
-        <hbox>
-            <spacer flex="1"/>
-            <button id="fbResumeBoxButton"
-                label="label.Activate Firebug for the current website"
-                command="cmd_toggleSuspendFirebug" class="fbInternational"/>
-            <spacer flex="1"/>
-        </hbox>
-        <spacer flex="1"/>
-    </vbox>
 
 </window>
