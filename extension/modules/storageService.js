@@ -1,30 +1,31 @@
 /* See license.txt for terms of usage */
 
-// ************************************************************************************************
+// ********************************************************************************************* //
 // Constants
 
 const Cc = Components.classes;
 const Ci = Components.interfaces;
 const Cr = Components.results;
 
+const dirService = Cc["@mozilla.org/file/directory_service;1"].getService(Ci.nsIProperties);
+
 // https://developer.mozilla.org/en/Using_JavaScript_code_modules
 var EXPORTED_SYMBOLS = ["Storage", "StorageService", "TextService"];
 
-Components.utils.import("resource://firebug/privacyService.js");
+// ********************************************************************************************* //
+// Implementation
 
-/*
+/**
  * http://dev.w3.org/html5/webstorage/#storage-0
  * interface Storage {
-  readonly attribute unsigned long length;
-  getter DOMString key(in unsigned long index);
-  getter any getItem(in DOMString key);
-  setter creator void setItem(in DOMString key, in any data);
-  deleter void removeItem(in DOMString key);
-  void clear();
-};
+ *     readonly attribute unsigned long length;
+ *     getter DOMString key(in unsigned long index);
+ *     getter any getItem(in DOMString key);
+ *     setter creator void setItem(in DOMString key, in any data);
+ *     deleter void removeItem(in DOMString key);
+ *     void clear();
+ * };
  */
-
-
 function Storage(leafName)
 {
     this.leafName = leafName;
@@ -33,6 +34,7 @@ function Storage(leafName)
 
 Storage.prototype =
 {
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
     // Read
 
     get length()
@@ -68,6 +70,7 @@ Storage.prototype =
         return keys;
     },
 
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
     // Write
 
     setItem: function(key, data)
@@ -87,14 +90,14 @@ Storage.prototype =
         this.objectTable = {};
         StorageService.setStorage(this);
     },
-
 };
 
-/*
+// ********************************************************************************************* //
+
+/**
  * var store = StorageService.getStorage(leafName);
  * store.setItem("foo", bar);  // writes to disk
  */
-
 var StorageService =
 {
     getStorage: function(leafName)
@@ -122,15 +125,13 @@ var StorageService =
     },
 };
 
-//***************** IMPLEMENTATION ********************************************************
-
-const dirService = Cc["@mozilla.org/file/directory_service;1"].getService(Ci.nsIProperties);
+// ********************************************************************************************* //
+// Implementation
 
 var FBTrace = null;
 
 /**
  * @class Represents an internal Firebug persistence service.
- *
  */
 var ObjectPersister =
 {
@@ -229,12 +230,14 @@ var ObjectPersister =
         }
     },
 
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
     // Batch the writes for each event loop
     writeDelay: 250,
 
     writeObject: function(leafName, obj)
     {
-        if (PrivacyService.isPrivateBrowsing())
+        if (this.isPrivateBrowsing())
             throw new Error("No storage is written while in private browsing mode");
 
         if (ObjectPersister.flushTimeout)
@@ -243,12 +246,13 @@ var ObjectPersister =
         ObjectPersister.flushTimeout = Cc["@mozilla.org/timer;1"].createInstance(Ci.nsITimer);
 
         var writeOnTimeout = ObjectPersister.getWriteOnTimeout(leafName, obj);
-        ObjectPersister.flushTimeout.init(writeOnTimeout, ObjectPersister.writeDelay, Ci.nsITimer.TYPE_ONE_SHOT);
+        ObjectPersister.flushTimeout.init(writeOnTimeout, ObjectPersister.writeDelay,
+            Ci.nsITimer.TYPE_ONE_SHOT);
     },
 
     getWriteOnTimeout: function(leafName, obj)
     {
-        let writerClosure =
+        var writerClosure =
         {
             leafName: leafName,
             obj: obj,
@@ -273,7 +277,8 @@ var ObjectPersister =
         catch(exc)
         {
             if (FBTrace.DBG_ERRORS || FBTrace.DBG_STORAGE)
-                FBTrace.sysout("ObjectPersister.writeNow; EXCEPTION for "+leafName+": "+exc, {exception: exc, obj: obj});
+                FBTrace.sysout("ObjectPersister.writeNow; EXCEPTION for " + leafName + ": " +
+                    exc, {exception: exc, obj: obj});
         }
     },
 
@@ -292,21 +297,45 @@ var ObjectPersister =
 
             if (FBTrace.DBG_STORAGE)
                 FBTrace.sysout("ObjectPersister.writeNow to " + file.path, string);
+
             return file.path;
         }
         catch (err)
         {
             if (FBTrace.DBG_ERRORS || FBTrace.DBG_STORAGE)
-                FBTrace.sysout("ObjectPersister.writeTextToFile; EXCEPTION for "+file.path+": "+err, {exception: err, string: string});
+                FBTrace.sysout("ObjectPersister.writeTextToFile; EXCEPTION for " + file.path +
+                    ": "+err, {exception: err, string: string});
         }
     },
 
+    isPrivateBrowsing: function()
+    {
+        try
+        {
+            // Unfortunatelly the "firebug/firefox/privacy" module can't be used
+            // since this scope is JavaScript code module.
+            // xxxHonza: storageService should be converted into AMD (but it's used
+            // in firebug-service, which is also JS code module).
+            var pbs = Components.classes["@mozilla.org/privatebrowsing;1"]
+                .getService(Components.interfaces.nsIPrivateBrowsingService);
+            return pbs.privateBrowsingEnabled;
+        }
+        catch (e)
+        {
+        }
+
+        return false;
+    }
 };
+
+// ********************************************************************************************* //
 
 var TextService =
 {
-        readText: ObjectPersister.readTextFromFile,
-        writeText: ObjectPersister.writeTextToFile,
-        getProfileDirectory: ObjectPersister.getProfileDirectory,
-        getFileInDirectory: ObjectPersister.getFileInDirectory,
+    readText: ObjectPersister.readTextFromFile,
+    writeText: ObjectPersister.writeTextToFile,
+    getProfileDirectory: ObjectPersister.getProfileDirectory,
+    getFileInDirectory: ObjectPersister.getFileInDirectory,
 };
+
+// ********************************************************************************************* //

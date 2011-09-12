@@ -1,28 +1,28 @@
 /* See license.txt for terms of usage */
 
+define([
+    "firebug/lib/trace",
+    "firebug/lib/object",
+    "firebug/firefox/privacy",
+],
+function(FBTrace, Obj, Privacy) {
+
 // ********************************************************************************************* //
 // Constants
 
-var EXPORTED_SYMBOLS = ["annotationService"];
-
 const Cc = Components.classes;
 const Ci = Components.interfaces;
-const Cr = Components.results;
 
-const dirService = Cc["@mozilla.org/file/directory_service;1"].getService(Ci.nsIProperties);
+var dirService = Cc["@mozilla.org/file/directory_service;1"].getService(Ci.nsIProperties);
 
 // ********************************************************************************************* //
-// Annotation service implementation
-
-Components.utils.import("resource://firebug/privacyService.js");
-Components.utils.import("resource://firebug/firebug-trace-service.js");
-var FBTrace = traceConsoleService.getTracer("extensions.firebug");
+// Annotation
 
 /**
  * @class Represents an internal Firebug annotation service. This service is used to
  * annotate sites with an info whether Firebug should be activated for them or not.
  */
-var annotationService =
+var Annotations = Obj.extend(Firebug.Module,
 {
     annotations: [],
 
@@ -38,7 +38,14 @@ var annotationService =
         // Load annotations.
         this.loadAnnotations();
 
-        PrivacyService.addListener(this);
+        Privacy.addListener(this);
+    },
+
+    shutdown: function()
+    {
+        this.flush();
+
+        Privacy.removeListener(this);
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -47,7 +54,7 @@ var annotationService =
     setPageAnnotation: function(uri, value)
     {
         if (FBTrace.DBG_ANNOTATIONS)
-            FBTrace.sysout("AnnotationService.setPageAnnotation; " + value + ", " + uri.spec);
+            FBTrace.sysout("Annotations.setPageAnnotation; " + value + ", " + uri.spec);
 
         this.annotations[uri.spec] = value;
     },
@@ -65,7 +72,7 @@ var annotationService =
     removePageAnnotation: function(uri)
     {
         if (FBTrace.DBG_ANNOTATIONS)
-            FBTrace.sysout("AnnotationService.removePageAnnotation; " + uri.spec);
+            FBTrace.sysout("Annotations.removePageAnnotation; " + uri.spec);
 
         delete this.annotations[uri.spec];
     },
@@ -80,10 +87,10 @@ var annotationService =
         this.annotations = [];
     },
 
-    flush: function()
+    flush: function(force)
     {
         // Do not store anything if private-browsing mode is on.
-        if (PrivacyService.isPrivateBrowsing())
+        if (!force && Privacy.isPrivateBrowsing())
             return;
 
         try
@@ -105,18 +112,20 @@ var annotationService =
 
             var jsonString = JSON.stringify(arr);
 
+            FBTrace.sysout("Annotations.flush " + jsonString, jsonString);
+
             // Store annotations.
             outputStream.write(jsonString, jsonString.length);
             outputStream.close();
 
             if (FBTrace.DBG_ANNOTATIONS)
-                FBTrace.sysout("AnnotationService.loadAnnotations; Annotations stored to " +
+                FBTrace.sysout("Annotations.loadAnnotations; Annotations stored to " +
                     this.file.path, jsonString);
         }
         catch (err)
         {
             if (FBTrace.DBG_ERRORS || FBTrace.DBG_ANNOTATIONS)
-                FBTrace.sysout("AnnotationService.flush; EXCEPTION", err);
+                FBTrace.sysout("Annotations.flush; EXCEPTION", err);
         }
     },
 
@@ -134,7 +143,7 @@ var annotationService =
             {
                 this.file.create(Ci.nsIFile.NORMAL_FILE_TYPE, 0666);
                 if (FBTrace.DBG_ANNOTATIONS)
-                    FBTrace.sysout("AnnotationService.loadAnnotations; Annotations file created " +
+                    FBTrace.sysout("Annotations.loadAnnotations; Annotations file created " +
                         this.file.path);
                 return;
             }
@@ -166,33 +175,41 @@ var annotationService =
                 this.annotations[arr[i].uri] = arr[i].value;
 
             if (FBTrace.DBG_ANNOTATIONS)
-                FBTrace.sysout("AnnotationService.loadAnnotations; Annotations loaded from " +
+                FBTrace.sysout("Annotations.loadAnnotations; Annotations loaded from " +
                     this.file.path, arr);
         }
         catch (err)
         {
             if (FBTrace.DBG_ERRORS || FBTrace.DBG_ANNOTATIONS)
-                FBTrace.sysout("AnnotationService.loadAnnotations; EXCEPTION", err);
+                FBTrace.sysout("Annotations.loadAnnotations; EXCEPTION", err);
         }
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
     // Privacy
 
-    onEnterPrivateBrowsing: function()
+    onPrivateBrowsingChange: function(enabled)
     {
-        this.flush();
-        this.clear();
+        if (enabled)
+        {
+            this.flush(true);
+            this.clear();
+        }
+        else
+        {
+            this.loadAnnotations();
+        }
     },
-
-    onExitPrivateBrowsing: function()
-    {
-        this.loadAnnotations();
-    }
-};
+});
 
 // ********************************************************************************************* //
+// Registration
 
-annotationService.initialize();
+Firebug.Annotations = Annotations;
+
+Firebug.registerModule(Annotations);
+
+return Annotations;
 
 // ********************************************************************************************* //
+});
