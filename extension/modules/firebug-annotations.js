@@ -1,11 +1,7 @@
 /* See license.txt for terms of usage */
 
-// ************************************************************************************************
+// ********************************************************************************************* //
 // Constants
-
-const CLASS_ID = Components.ID("{9589DC0D-9709-4578-883E-D393452B3611}");
-const CLASS_NAME = "Firebug Annotation Service";
-const CONTRACT_ID = "@joehewitt.com/firebug-annotation-service;1";
 
 var EXPORTED_SYMBOLS = ["annotationService"];
 
@@ -15,19 +11,35 @@ const Cr = Components.results;
 
 const dirService = Cc["@mozilla.org/file/directory_service;1"].getService(Ci.nsIProperties);
 
-// ************************************************************************************************
+// ********************************************************************************************* //
 // Annotation service implementation
 
-var FBTrace = null;
+Components.utils.import("resource://firebug/firebug-trace-service.js");
+var FBTrace = traceConsoleService.getTracer("extensions.firebug");
 
 /**
  * @class Represents an internal Firebug annotation service. This service is used to
  * annotate sites with an info whether Firebug should be activated for them or not.
  */
-
 var annotationService =
 {
     annotations: [],
+
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+    initialize: function()
+    {
+        // Get annotation file stored within the profile directory.
+        this.file = dirService.get("ProfD", Ci.nsIFile);
+        this.file.append("firebug");
+        this.file.append("annotations.json");
+
+        // Load annotations.
+        this.loadAnnotations();
+    },
+
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+    // Public Methods
 
     setPageAnnotation: function(uri, value)
     {
@@ -65,19 +77,42 @@ var annotationService =
         this.annotations = [];
     },
 
-    initialize: function()
+    flush: function()
     {
-        Components.utils.import("resource://firebug/firebug-trace-service.js");
-        FBTrace = traceConsoleService.getTracer("extensions.firebug");
+        try
+        {
+            // Initialize output stream.
+            var outputStream = Cc["@mozilla.org/network/file-output-stream;1"]
+                .createInstance(Ci.nsIFileOutputStream);
+            outputStream.init(this.file, 0x02 | 0x08 | 0x20, 0666, 0); // write, create, truncate
 
-        // Get annotation file stored within the profile directory.
-        this.file = dirService.get("ProfD", Ci.nsIFile);
-        this.file.append("firebug");
-        this.file.append("annotations.json");
+            // Convert data to JSON.
+            var arr = [];
+            for (var uri in this.annotations)
+                arr.push({
+                    uri: uri,
+                    value: this.annotations[uri]
+                });
 
-        // Load annotations.
-        this.loadAnnotations();
+            var jsonString = JSON.stringify(arr);
+
+            // Store annotations.
+            outputStream.write(jsonString, jsonString.length);
+            outputStream.close();
+
+            if (FBTrace.DBG_ANNOTATIONS)
+                FBTrace.sysout("AnnotationService.loadAnnotations; Annotations stored to " +
+                    this.file.path, jsonString);
+        }
+        catch (err)
+        {
+            if (FBTrace.DBG_ERRORS || FBTrace.DBG_ANNOTATIONS)
+                FBTrace.sysout("AnnotationService.flush; EXCEPTION", err);
+        }
     },
+
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+    // Internals
 
     // Persistence
     loadAnnotations: function()
@@ -131,49 +166,10 @@ var annotationService =
                 FBTrace.sysout("AnnotationService.loadAnnotations; EXCEPTION", err);
         }
     },
-
-    flush: function()
-    {
-        try
-        {
-            // Initialize output stream.
-            var outputStream = Cc["@mozilla.org/network/file-output-stream;1"]
-                .createInstance(Ci.nsIFileOutputStream);
-            outputStream.init(this.file, 0x02 | 0x08 | 0x20, 0666, 0); // write, create, truncate
-
-            // Convert data to JSON.
-            var arr = [];
-            for (var uri in this.annotations)
-                arr.push({
-                    uri: uri,
-                    value: this.annotations[uri]
-                });
-
-            var jsonString = JSON.stringify(arr);
-
-            // Store annotations.
-            outputStream.write(jsonString, jsonString.length);
-            outputStream.close();
-
-            if (FBTrace.DBG_ANNOTATIONS)
-                FBTrace.sysout("AnnotationService.loadAnnotations; Annotations stored to " +
-                    this.file.path, jsonString);
-        }
-        catch (err)
-        {
-            if (FBTrace.DBG_ERRORS || FBTrace.DBG_ANNOTATIONS)
-                FBTrace.sysout("AnnotationService.flush; EXCEPTION", err);
-        }
-    },
-
-    /* nsISupports */
-    QueryInterface: function(iid)
-    {
-        if (iid.equals(Ci.nsISupports))
-            return this;
-
-        throw Cr.NS_ERROR_NO_INTERFACE;
-    }
 };
 
+// ********************************************************************************************* //
+
 annotationService.initialize();
+
+// ********************************************************************************************* //

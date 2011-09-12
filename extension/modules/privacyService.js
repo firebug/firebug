@@ -48,7 +48,7 @@ var PrivacyService =
         catch (e)
         {
             if (FBTrace.DBG_ERRORS)
-            FBTrace.sysout("PrivacyService.update EXCEPTION " + e, e);
+                FBTrace.sysout("PrivacyService.update EXCEPTION " + e, e);
         }
     },
 
