@@ -108,15 +108,6 @@ Firebug.A11yModel = Obj.extend(Firebug.Module,
         }
     },
 
-    reattachContext: function(browser, context)
-    {
-        if (FBTrace.DBG_A11Y)
-            FBTrace.sysout("a11y.reattachContext; " + this.isEnabled() + ", " +
-                Firebug.chrome.getName());
-        if (this.isEnabled())
-            this.set(true, Firebug.chrome);
-    },
-
     set: function(enable, chrome)
     {
         if (chrome.window.a11yEnabled == enable)

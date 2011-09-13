@@ -184,20 +184,6 @@ Firebug.TabContext.prototype =
         return Firebug.chrome;
     },
 
-    reattach: function(oldChrome, newChrome)
-    {
-        for (var panelName in this.panelMap)
-        {
-            var panel = this.panelMap[panelName];
-            panel.detach(oldChrome, newChrome);
-            panel.invalid = true;// this will cause reattach on next use
-
-            var panelNode = panel.panelNode;  // delete panel content
-            if (panelNode && panelNode.parentNode)
-                panelNode.parentNode.removeChild(panelNode);
-        }
-    },
-
     destroy: function(state)
     {
         // All existing timeouts need to be cleared
@@ -318,23 +304,9 @@ Firebug.TabContext.prototype =
 
         var panelName = panelType.prototype.name;
         if ( this.panelMap.hasOwnProperty(panelName) )
-        {
-            var panel = this.panelMap[panelName];
-            //if (FBTrace.DBG_PANELS)
-            //    FBTrace.sysout("tabContext.getPanelByType panel in panelMap, .invalid="+panel.invalid+"\n");
-            if (panel.invalid)
-            {
-                var doc = this.chrome.getPanelDocument(panelType);
-                panel.reattach(doc);
-                delete panel.invalid;
-            }
-
-            return panel;
-        }
+            return this.panelMap[panelName];
         else if (!noCreate)
-        {
             return this.createPanel(panelType);
-        }
     },
 
     eachPanelInContext: function(callback)

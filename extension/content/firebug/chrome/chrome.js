@@ -83,25 +83,9 @@ var FirebugChrome =
         cmdPopup = win.document.getElementById("fbCommandPopup");
         cmdPopupBrowser = win.document.getElementById("fbCommandPopupBrowser");
 
-        if (win.arguments)
-            var detachArgs = win.arguments[0];
-
-        if (FBTrace.DBG_INITIALIZE)
-            FBTrace.sysout("chrome.initialize w/detachArgs=", detachArgs);
-
-        if (detachArgs && detachArgs.Firebug)
-        {
-            // we've been opened in a new window by an already initialized Firebug
-            win.FBL = detachArgs.FBL;
-            Firebug = detachArgs.Firebug;
-            Firebug.currentContext = detachArgs.Firebug.currentContext; // may be null
-        }
-        else
-        {
-            // Firebug has not been initialized yet
-            if (!Firebug.isInitialized)
-                Firebug.initialize(this);
-        }
+        // Firebug has not been initialized yet
+        if (!Firebug.isInitialized)
+            Firebug.initialize(this);
 
         // FBL should be available
         if (FBTrace.sysout && (!FBL || !FBL.initialize) )
@@ -396,6 +380,7 @@ var FirebugChrome =
 
     toggleOpen: function(shouldShow)
     {
+
         if (this.inDetachedScope)
         {
             var contentBox = Firebug.chrome.$("fbContentBox");
@@ -403,6 +388,10 @@ var FirebugChrome =
         }
         else
         {
+            // temporary workaround to fix fbtest
+            var contentBox = Firebug.chrome.$("fbContentBox");
+            contentBox.setAttribute("collapsed", !shouldShow);
+            
             Dom.collapse(Firefox.getElementById('fbMainFrame'), !shouldShow);
             var contentSplitter = Firefox.getElementById('fbContentSplitter');
             if (contentSplitter)
@@ -411,12 +400,12 @@ var FirebugChrome =
     },
 
     onDetach: function()
-	{
-		Firebug.showBar(true)
+    {
+        Firebug.showBar(true)
     },
-	
-	onUndetach: function()
-	{
+    
+    onUndetach: function()
+    {
         Dom.collapse(Firebug.chrome.$('fbResumeBox'), true);
         Dom.collapse(Firebug.chrome.$("fbContentBox"), false);
     },
@@ -424,9 +413,6 @@ var FirebugChrome =
     syncResumeBox: function(context)  // only called when detached
     {
         var resumeBox = Firebug.chrome.$('fbResumeBox');
-
-        if (!resumeBox) // the showContext is being called before the reattachContext, we'll get a second showContext
-            return;
 
         // xxxHonza: don't focus Firebug window now. It would bring Firebug detached window
         // to the top every time the attached Firefox page is refreshed, which is annoying.
@@ -1229,7 +1215,7 @@ var FirebugChrome =
     {
     },
 
-    showUI: function(browser, context) // called when the Firebug UI comes up in browser or detached
+    showUI: function(browser, context) // called when the Firebug UI comes up in browser
     {
     },
 

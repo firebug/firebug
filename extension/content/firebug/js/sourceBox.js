@@ -110,21 +110,6 @@ Firebug.SourceBoxPanel = Obj.extend(SourceBoxPanelBase,
         Firebug.ActivablePanel.initializeNode.apply(this, arguments);
     },
 
-    detach: function(oldChrome, newChrome)
-    {
-        this.removeAllSourceBoxes();  // clear so we start fresh with the new window
-    },
-
-    reattach: function(doc)
-    {
-        var oldEventTarget = this.resizeEventTarget;
-        oldEventTarget.removeEventListener("resize", this.onResize, true);
-        Firebug.Panel.reattach.apply(this, arguments);
-        this.resizeEventTarget = Firebug.chrome.$('fbContentBox');
-        this.resizeEventTarget.addEventListener("resize", this.onResize, true);
-        this.attachToCache();
-    },
-
     destroyNode: function()
     {
         if (this.resizeEventTarget)

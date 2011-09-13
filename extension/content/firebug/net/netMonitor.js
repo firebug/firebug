@@ -194,12 +194,6 @@ Firebug.NetMonitor = Obj.extend(Firebug.ActivableModule,
         }
     },
 
-    reattachContext: function(browser, context)
-    {
-        Firebug.ActivableModule.reattachContext.apply(this, arguments);
-        this.syncFilterButtons(Firebug.chrome);
-    },
-
     destroyContext: function(context, persistedState)
     {
         Firebug.ActivableModule.destroyContext.apply(this, arguments);

@@ -50,16 +50,6 @@ Firebug.CommandLine.Popup = Obj.extend(Firebug.Module,
             this.toggle(context);
     },
 
-    reattachContext: function(browser, context)
-    {
-        this.setPopupBrowserStyle(Firebug.chrome);
-        this.attachListeners();
-
-        var show = Firebug.Options.get("alwaysShowCommandLine");
-        if (show && !this.isVisible())
-            this.toggle(context);
-    },
-
     showPanel: function(browser, panel)
     {
         if (FBTrace.DBG_COMMANDLINE)

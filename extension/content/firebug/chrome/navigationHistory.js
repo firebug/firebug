@@ -44,13 +44,6 @@ Firebug.NavigationHistory = Obj.extend(Firebug.Module,
         }
     },
 
-    reattachContext: function(browser, context)
-    {
-        Firebug.Module.reattachContext.apply(this, arguments);
-
-        this.updateButtons(context);
-    },
-
     destroyContext: function(context, persistedState)
     {
         Firebug.Module.destroyContext.apply(this, arguments);

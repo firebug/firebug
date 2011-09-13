@@ -935,11 +935,6 @@ window.Firebug =
         Events.dispatch(modules, "showSidePanel", [browser, sidePanel]);
     },
 
-    reattachContext: function(browser, context)
-    {
-        Events.dispatch(modules, "reattachContext", [browser, context]);
-    },
-
     eachPanel: function(callback)
     {
         Firebug.connection.eachContext(function iteratePanels(context)
@@ -1296,13 +1291,6 @@ Firebug.Module = Obj.extend(new Firebug.Listener(),
     },
 
     /**
-     * Called after a context is detached to a separate window;
-     */
-    reattachContext: function(browser, context)
-    {
-    },
-
-    /**
      * Called when a context is destroyed. Module may store info on persistedState for reloaded pages.
      */
     destroyContext: function(context, persistedState)
@@ -1477,18 +1465,6 @@ Firebug.Panel = Obj.extend(new Firebug.Listener(),
     // called when a panel in one XUL window is about to disappear to later reappear another XUL window.
     detach: function(oldChrome, newChrome)
     {
-    },
-
-    reattach: function(doc)  // this is how a panel in one window reappears in another window; lazy called
-    {
-        this.document = doc;
-
-        if (this.panelNode)
-        {
-            this.panelNode = doc.adoptNode(this.panelNode, true);
-            this.panelNode.ownerPanel = this;
-            doc.body.appendChild(this.panelNode);
-        }
     },
 
     // Called at the end of module.initialize; addEventListener-s here

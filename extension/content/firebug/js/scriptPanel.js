@@ -566,36 +566,6 @@ Firebug.ScriptPanel.prototype = Obj.extend(Firebug.SourceBoxPanel,
         Firebug.SourceBoxPanel.destroy.apply(this, arguments);
     },
 
-    detach: function(oldChrome, newChrome)
-    {
-        if (this.selectedSourceBox)
-            this.lastSourceScrollTop = this.selectedSourceBox.scrollTop;
-
-        if (this.context.stopped)
-        {
-            this.detachListeners(this.context, oldChrome);
-            this.attachListeners(this.context, newChrome);
-        }
-
-        this.syncCommands(this.context);
-
-        Firebug.SourceBoxPanel.detach.apply(this, arguments);
-    },
-
-    reattach: function(doc)
-    {
-        Firebug.SourceBoxPanel.reattach.apply(this, arguments);
-
-        setTimeout(Obj.bind(function delayScrollToLastTop()
-        {
-            if (this.lastSourceScrollTop)
-            {
-                this.selectedSourceBox.scrollTop = this.lastSourceScrollTop;
-                delete this.lastSourceScrollTop;
-            }
-        }, this));
-    },
-
     initializeNode: function(oldPanelNode)
     {
         this.tooltip = this.document.createElement("div");

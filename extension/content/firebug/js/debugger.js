@@ -2280,13 +2280,6 @@ Firebug.Debugger = Obj.extend(Firebug.ActivableModule,
         Firebug.ActivableModule.initContext.apply(this, arguments);
     },
 
-    reattachContext: function(browser, context)
-    {
-        this.filterButton = Firebug.chrome.$("fbScriptFilterMenu");  // connect to the button in the new window, not 'window'
-        this.filterMenuUpdate();
-        Firebug.ActivableModule.reattachContext.apply(this, arguments);
-    },
-
     showContext: function(browser, context)
     {
         if (context && context.loaded && !context.onLoadWindowContent) // then context was not active during load

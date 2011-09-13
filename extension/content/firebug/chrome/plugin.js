@@ -9,7 +9,7 @@ function(Obj, Firebug, Debug) {
 
 // ************************************************************************************************
 // This is a panel implemented as its own browser with its own URL
-	
+
 Firebug.PluginPanel = function() {};
 
 Firebug.PluginPanel.prototype = Obj.extend(Firebug.Panel,
@@ -62,12 +62,6 @@ Firebug.PluginPanel.prototype = Obj.extend(Firebug.Panel,
     {
         this.destroyBrowser();
         Firebug.Panel.destroy.apply(this, arguments);
-    },
-
-    reattach: function(doc)
-    {
-        this.destroyBrowser();
-        this.createBrowser();
     },
 
     show: function(state)
