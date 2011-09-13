@@ -41,6 +41,11 @@
     color: #000000;
 }
 
+.toolbar-text-button[disabled="true"],
+.toolbar-text-menubutton[disabled="true"] {
+    color: graytext;
+}
+
 .toolbar-text-button[checked="true"] {
     padding: 3px 6px !important;
 }
