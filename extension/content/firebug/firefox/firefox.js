@@ -150,6 +150,11 @@ catch (err)
 }
 
 // ********************************************************************************************* //
+// Registration
+
+// Expose this module through Firebug namespace so, it can be used by extensions that
+// are not based on AMD (e.g. FBTest).
+Firebug.Firefox = Firefox;
 
 return Firefox;
 

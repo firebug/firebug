@@ -380,19 +380,13 @@ var FirebugChrome =
 
     toggleOpen: function(shouldShow)
     {
+        var contentBox = Firebug.chrome.$("fbContentBox");
+        contentBox.setAttribute("collapsed", !shouldShow);
 
-        if (this.inDetachedScope)
+        if (!this.inDetachedScope)
         {
-            var contentBox = Firebug.chrome.$("fbContentBox");
-            contentBox.setAttribute("collapsed", !shouldShow);
-        }
-        else
-        {
-            // temporary workaround to fix fbtest
-            var contentBox = Firebug.chrome.$("fbContentBox");
-            contentBox.setAttribute("collapsed", !shouldShow);
-            
             Dom.collapse(Firefox.getElementById('fbMainFrame'), !shouldShow);
+
             var contentSplitter = Firefox.getElementById('fbContentSplitter');
             if (contentSplitter)
                 contentSplitter.setAttribute("collapsed", !shouldShow);
@@ -403,7 +397,7 @@ var FirebugChrome =
     {
         Firebug.showBar(true)
     },
-    
+
     onUndetach: function()
     {
         Dom.collapse(Firebug.chrome.$('fbResumeBox'), true);
