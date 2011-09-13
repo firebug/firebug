@@ -1467,6 +1467,18 @@ Firebug.Panel = Obj.extend(new Firebug.Listener(),
     {
     },
 
+    reattach: function(doc)  // this is how a panel in one window reappears in another window; lazy called
+    {
+        this.document = doc;
+
+        if (this.panelNode)
+        {
+            this.panelNode = doc.adoptNode(this.panelNode, true);
+            this.panelNode.ownerPanel = this;
+            doc.body.appendChild(this.panelNode);
+        }
+    },
+
     // Called at the end of module.initialize; addEventListener-s here
     initializeNode: function(panelNode)
     {
