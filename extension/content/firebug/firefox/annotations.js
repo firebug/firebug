@@ -112,8 +112,6 @@ var Annotations = Obj.extend(Firebug.Module,
 
             var jsonString = JSON.stringify(arr);
 
-            FBTrace.sysout("Annotations.flush " + jsonString, jsonString);
-
             // Store annotations.
             outputStream.write(jsonString, jsonString.length);
             outputStream.close();
