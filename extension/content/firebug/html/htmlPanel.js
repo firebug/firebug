@@ -463,7 +463,7 @@ Firebug.HTMLPanel.prototype = Obj.extend(WalkingPanel,
                 return;
             }
 
-            nodeText.firstChild.nodeValue = textValue;
+            nodeText.firstChild.firstChild.nodeValue = textValue;
 
             this.highlightMutation(nodeText, parentNodeBox, "mutated");
         }
@@ -484,7 +484,7 @@ Firebug.HTMLPanel.prototype = Obj.extend(WalkingPanel,
             if (textNodeBox)
             {
                 // structure for comment and cdata. Are there others?
-                textNodeBox.children[0].firstChild.nodeValue = textValue;
+                textNodeBox.firstChild.firstChild.nodeValue = textValue;
 
                 this.highlightMutation(textNodeBox, parentNodeBox, "mutated");
             }
