@@ -395,7 +395,11 @@ var FirebugChrome =
 
     onDetach: function()
     {
-        Firebug.showBar(true)
+        if(!Firebug.currentContext)
+            Firebug.toggleBar(true);
+        else
+            Firebug.showBar(true);
+        panelBar1.browser.focus();
     },
 
     onUndetach: function()
