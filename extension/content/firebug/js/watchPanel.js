@@ -165,7 +165,7 @@ Firebug.WatchPanel.prototype = Obj.extend(Firebug.DOMBasePanel.prototype,
         }
 
         this.expandMembers(members, this.toggles, 0, 0, this.context);
-        this.showMembers(members, !newFrame);
+        this.showMembers(members, false);
 
         if (FBTrace.DBG_STACK)
             FBTrace.sysout("dom watch panel updateSelection members " + members.length, members);
