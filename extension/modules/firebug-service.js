@@ -372,9 +372,12 @@ OutStepper.prototype =
 
         if (frame)
         {
+            this.startFrameId = frameId(frame, 0);
             this.callingFrameId = this.getCallingFrameId(frame);
+
             if (!this.callingFrameId)
                 ERROR("OutStepper.hook cannot find callingFrame ", this);
+
             this.startFrameTag = frame.script.tag;
         }
         else
@@ -1900,10 +1903,18 @@ var fbs =
             if (!theDebugger)
                 theDebugger = this.findDebugger(frame);  // sets debuggr.breakContext
 
+            var currFrameId = frameId(frame, 0);
+
             // See issue 1179, should not break if we resumed from a single
             // step and have not advanced.
-            if (jsdHandlers.hooks.length > 0)
-                return RETURN_CONTINUE;
+            // Only break on a breakpoint if a single-step didn't start on
+            // the current line (issue 1098)
+            for (var i=0; i<jsdHandlers.hooks.length; i++)
+            {
+                var handler = jsdHandlers.hooks[i];
+                if (handler.startFrameId == currFrameId)
+                    return RETURN_CONTINUE;
+            }
 
             if (disabledCount || monitorCount || conditionCount || runningUntil)
             {
