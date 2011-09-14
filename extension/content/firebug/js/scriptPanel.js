@@ -552,7 +552,6 @@ Firebug.ScriptPanel.prototype = Obj.extend(Firebug.SourceBoxPanel,
 
             delete this.selectedSourceBox;
         }
-
         Persist.persistObjects(this, state);
 
         if (this.location instanceof CompilationUnit)
@@ -719,7 +718,8 @@ Firebug.ScriptPanel.prototype = Obj.extend(Firebug.SourceBoxPanel,
 
     hide: function(state)
     {
-        this.lastScrollTop = this.selectedSourceBox.scrollTop;
+        if (this.selectedSourceBox)
+            this.lastScrollTop = this.selectedSourceBox.scrollTop;
 
         this.highlight(this.context.stopped);
 
