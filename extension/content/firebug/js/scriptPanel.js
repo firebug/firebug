@@ -541,6 +541,18 @@ Firebug.ScriptPanel.prototype = Obj.extend(Firebug.SourceBoxPanel,
     {
         // We want the location (compilationUnit) to persist, not the selection (eg stackFrame).
         delete this.selection;
+
+        var sourceBox = this.selectedSourceBox;
+        if (sourceBox)
+        {
+            if (sourceBox.centerLine)
+                state.previousCenterLine = sourceBox.centerLine;
+            else
+                state.scrollTop = sourceBox.scrollTop ? sourceBox.scrollTop : this.lastScrollTop;
+
+            delete this.selectedSourceBox;
+        }
+
         Persist.persistObjects(this, state);
 
         if (this.location instanceof CompilationUnit)
@@ -551,13 +563,6 @@ Firebug.ScriptPanel.prototype = Obj.extend(Firebug.SourceBoxPanel,
         {
             if (FBTrace.DBG_COMPILATION_UNITS)
                 FBTrace.sysout("script.destroy had location not a CompilationUnit ", this.location);
-        }
-
-        var sourceBox = this.selectedSourceBox;
-        if (sourceBox)
-        {
-            state.previousCenterLine = sourceBox.centerLine;
-            delete this.selectedSourceBox;
         }
 
         // xxxHonza: why this is here? I don't see addListener.
@@ -670,10 +675,16 @@ Firebug.ScriptPanel.prototype = Obj.extend(Firebug.SourceBoxPanel,
                         this.updateSourceBox(this.selectedSourceBox);
                 }
 
-                if (state && this.location)  // then we are restoring and we have a location, so scroll when we can
+                if (state)
                 {
-                    var sourceLink = new SourceLink.SourceLink(this.location.getURL(), state.previousCenterLine, 'js');
-                    this.showSourceLink(sourceLink);
+                    if (this.location)
+                    {
+                        var sourceLink = new SourceLink.SourceLink(this.location.getURL(), state.previousCenterLine, "js");
+                        this.showSourceLink(sourceLink);
+                    }
+
+                    if (state.scrollTop)
+                        this.selectedSourceBox.scrollTop = state.scrollTop;
                 }
             }
             else // show default
@@ -708,6 +719,8 @@ Firebug.ScriptPanel.prototype = Obj.extend(Firebug.SourceBoxPanel,
 
     hide: function(state)
     {
+        this.lastScrollTop = this.selectedSourceBox.scrollTop;
+
         this.highlight(this.context.stopped);
 
         this.panelNode.ownerDocument.removeEventListener("keypress", this.onKeyPress, true);
