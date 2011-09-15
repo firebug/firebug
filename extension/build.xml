@@ -18,6 +18,10 @@
 * 3) To check GETFIREBUG value run: ant echo
 
 * 4)To build xpi and generate JS doc (from source comments) run: $ant jsdoc
+
+* 5)To build xpi for Babelzilla run: $ant bz
+  - All BZ locales should be stored in "bz-locale" directory.
+
 - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
 <project name="firebug" basedir="." default="build">
 
@@ -29,6 +33,7 @@
     <property name="release.dir" value="./release"/>
     <property name="deploy-xpi.dir" value="${GETFIREBUG}/releases/firebug/${VERSION}"/>
     <property name="deploy-jsdoc.dir" value="${GETFIREBUG}/developer/api/firebug${VERSION}"/>
+    <property name="bz-locale.dir" value="./bz-locale"/>
 
     <available file="${GETFIREBUG}" property="deploy.dir.available"/>
 
@@ -44,9 +49,18 @@
         <delete dir="${release.dir}"/>
     </target>
 
-    <!-- Build Debug (X) -->
+    <!-- Build -->
     <target name="build" depends="clean">
         <antcall target="prepare-build" />
+
+        <!-- Copy install.rdf with updated release version info -->
+        <replace file="${build.dir}/install.rdf" propertyFile="content/firebug/branch.properties">
+            <replacefilter token="@VERSION@" property="VERSION"/>
+            <replacefilter token="@RELEASE@" property="RELEASE"/>
+        </replace>
+
+        <!-- Remove template for manifest file that is used for Babelzilla builds -->
+        <delete file="${build.dir}/chrome.bz.tpl.manifest"/>
 
         <!-- Create XPI for getfirebug.com -->
         <antcall target="createFirebugXPI">
@@ -66,34 +80,40 @@
         <echo message="Firebug version: ${VERSION}${RELEASE} in ${release.dir}"/>
     </target>
 
-    <!-- Build Release -->
-    <target name="release" depends="clean">
+    <!-- Build Babelzilla Release -->
+    <target name="bz" depends="clean">
         <antcall target="prepare-build" />
+
+        <!-- Use Babelzila manifest file (with all locales) -->
+        <copy file="chrome.bz.tpl.manifest" tofile="${build.dir}/chrome.manifest"
+            overwrite="true"/>
+        <delete file="${build.dir}/chrome.bz.tpl.manifest"/>
+
+        <!-- Use all BZ locales -->
+        <copy todir="${build.dir}/locale" overwrite="true">
+            <fileset dir="${bz-locale.dir}">
+               <include name="**/*.properties"/>
+               <exclude name="en-US/*.properties"/>
+            </fileset>
+        </copy>
+
+        <!-- Modify version number (append BZ) -->
+        <replace file="${build.dir}/install.rdf" propertyFile="content/firebug/branch.properties">
+            <replacefilter token="@VERSION@" value="${VERSION}" />
+            <replacefilter token="@RELEASE@" value="${RELEASE}-bz" />
+        </replace>
+
+        <!-- Delete the helper dir with Babelzilla locales from the build directory -->
+        <delete dir="${build.dir}/${bz-locale.dir}" />
 
         <!-- Create XPI for getfirebug.com -->
         <antcall target="createFirebugXPI">
-            <param name="file-name" value="firebug-${VERSION}${RELEASE}.xpi"/>
+            <param name="file-name" value="firebug-${VERSION}${RELEASE}-bz.xpi" />
         </antcall>
 
-        <antcall target="disableUpdate" />
+        <delete dir="${build.dir}" />
 
-        <!-- Create XPI for AMO -->
-        <antcall target="createFirebugXPI">
-            <param name="file-name" value="firebug-${VERSION}${RELEASE}-amo.xpi"/>
-        </antcall>
-
-        <delete dir="${build.dir}"/>
-        <antcall target="deploy" />
-
-        <echo message="Firebug Release version: ${VERSION}${RELEASE} in ${release.dir}"/>
-    </target>
-
-    <!-- Build AMO Release -->
-    <target name="release-amo" depends="clean">
-        <antcall target="prepare-build" />
-        <antcall target="disableUpdate" />
-        <antcall target="createFirebugXPI" />
-        <echo message="Firebug Release version: ${VERSION}${RELEASE} in ${release.dir}"/>
+        <echo message="Firebug Release for Babelzilla: ${VERSION}${RELEASE}-bz in ${release.dir}" />
     </target>
 
     <!-- Prepare build files -->
@@ -121,19 +141,12 @@
             </fileset>
         </copy>
 
-        <!-- Copy install.rdf with updated release version info -->
+        <!-- Copy install.rdf template into the build dir -->
         <copy file="install.rdf.tpl.xml" tofile="${build.dir}/install.rdf"/>
-        <replace file="${build.dir}/install.rdf" propertyFile="content/firebug/branch.properties">
-            <replacefilter token="@VERSION@" property="VERSION"/>
-            <replacefilter token="@RELEASE@" property="RELEASE"/>
-        </replace>
 
         <!-- Remove unnecessary *.xml files in the root directory (like e.g. this build file),
             but not from sub directories. -->
         <delete dir="${build.dir}" includes="*.xml" />
-
-        <!-- Remove template for manifest file that is used for Babelzilla builds -->
-        <delete file="${build.dir}/chrome.bz.tpl.manifest"/>
     </target>
 
     <!-- Create final firebug.xpi file -->
