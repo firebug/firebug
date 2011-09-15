@@ -676,7 +676,6 @@ Firebug.Debugger = Obj.extend(Firebug.ActivableModule,
                 delete context.stoppedFrame;
             });
 
-            Firebug.Debugger.toggleReportTopLevel(context);
             Firebug.Debugger.suspend(context);
         }
         else
@@ -692,18 +691,6 @@ Firebug.Debugger = Obj.extend(Firebug.ActivableModule,
             Firebug.Debugger.unsuppressEventHandling(context);
         else
             Firebug.Debugger.suppressEventHandling(context);
-    },
-
-    toggleReportTopLevel: function(context)
-    {
-        if (context.reportTopLevel)
-        {
-            FBS.removeHandler(TopLevelHook);
-        }
-        else
-        {
-            FBS.addHandler(TopLevelHook);
-        }
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -2679,38 +2666,6 @@ Firebug.Debugger = Obj.extend(Firebug.ActivableModule,
                 this.filterButton.label+'\n');
     },
 });
-
-// ********************************************************************************************* //
-// Top Level Hook
-
-var TopLevelHook =
-{
-    unhook: function()
-    {
-    },
-
-    hook: function()
-    {
-    },
-
-    onFunctionCall: function(frame, type)
-    {
-        return this.onCall(frame, type);
-    },
-
-    onFunctionReturn: function(frame, type)
-    {
-        return this.onCall(frame, type);
-    },
-
-    onCall: function(frame, type)
-    {
-        Firebug.Console.logFormatted(["JavaScript entered", frame.script.fileName,
-            frame.line], context, "info");
-
-        return Ci.jsdIExecutionHook.RETURN_CONTINUE;
-    }
-}
 
 // ********************************************************************************************* //
 
