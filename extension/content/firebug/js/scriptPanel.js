@@ -1290,6 +1290,7 @@ Firebug.ScriptPanel.prototype = Obj.extend(Firebug.SourceBoxPanel,
     {
         this.keyListeners =
             [
+                chrome.keyCodeListen("F8", Events.isShift, Obj.bind(this.rerun, this, context), true),
                 chrome.keyCodeListen("F8", null, Obj.bind(this.resume, this, context), true),
                 chrome.keyListen("/", Events.isControl, Obj.bind(this.resume, this, context)),
                 chrome.keyCodeListen("F10", null, Obj.bind(this.stepOver, this, context), true),
@@ -1351,11 +1352,16 @@ Firebug.ScriptPanel.prototype = Obj.extend(Firebug.SourceBoxPanel,
         }
     },
 
+    rerun: function(context)
+    {
+        JavaScriptTool.rerun(context);
+    },
+
     resume: function(context)
     {
         JavaScriptTool.resumeJavaScript(context);
     },
-
+    
     stepOver: function(context)
     {
         JavaScriptTool.stepOver(context);

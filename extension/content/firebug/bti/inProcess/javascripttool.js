@@ -73,9 +73,14 @@ JavaScriptTool.getBreakpointCondition = function(context, url, lineNumber)
 // ********************************************************************************************* //
 // These functions should be on stack instead
 
+JavaScriptTool.rerun = function(context)
+{
+    JSDebugger.rerun(context);
+};
+
 JavaScriptTool.resumeJavaScript = function(context)
 {
-    JSDebugger.resume(context);
+  JSDebugger.resume(context);
 };
 
 JavaScriptTool.stepOver = function(context)
