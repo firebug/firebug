@@ -637,7 +637,8 @@ Firebug.Debugger = Obj.extend(Firebug.ActivableModule,
             else
             {
                 if (FBTrace.DBG_UI_LOOP)
-                    FBTrace.sysout("debugger.thaw "+executionContext.tag+" executionContext is not valid");
+                    FBTrace.sysout("debugger.thaw "+executionContext.tag+
+                        " executionContext is not valid");
             }
 
             if (FBTrace.DBG_UI_LOOP)
@@ -665,7 +666,8 @@ Firebug.Debugger = Obj.extend(Firebug.ActivableModule,
     // on bti
     toggleFreezeWindow: function(context)
     {
-        if (!context.stopped) // then we need to break into debugger to get the executionContext
+        // then we need to break into debugger to get the executionContext
+        if (!context.stopped)
         {
             Firebug.Debugger.halt(function grabContext(frame)
             {
@@ -695,18 +697,16 @@ Firebug.Debugger = Obj.extend(Firebug.ActivableModule,
     toggleReportTopLevel: function(context)
     {
         if (context.reportTopLevel)
-            FBS.setTopLevelHook(null);
+        {
+            FBS.removeHandler(TopLevelHook);
+        }
         else
         {
-            FBS.setTopLevelHook(Firebug.Debugger, function reportTopLevel(frame)
-            {
-                Firebug.Console.logFormatted(["JavaScript entered", frame.script.fileName,
-                    frame.line], context, "info");
-            });
+            FBS.addHandler(TopLevelHook);
         }
     },
 
-    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
     // Breakpoints
 
     setBreakpoint: function(sourceFile, lineNo)  // TODO: arg should be url
@@ -2680,7 +2680,39 @@ Firebug.Debugger = Obj.extend(Firebug.ActivableModule,
     },
 });
 
-// ************************************************************************************************
+// ********************************************************************************************* //
+// Top Level Hook
+
+var TopLevelHook =
+{
+    unhook: function()
+    {
+    },
+
+    hook: function()
+    {
+    },
+
+    onFunctionCall: function(frame, type)
+    {
+        return this.onCall(frame, type);
+    },
+
+    onFunctionReturn: function(frame, type)
+    {
+        return this.onCall(frame, type);
+    },
+
+    onCall: function(frame, type)
+    {
+        Firebug.Console.logFormatted(["JavaScript entered", frame.script.fileName,
+            frame.line], context, "info");
+
+        return Ci.jsdIExecutionHook.RETURN_CONTINUE;
+    }
+}
+
+// ********************************************************************************************* //
 
 Firebug.Debugger.Breakpoint = function(name, href, lineNumber, checked, sourceLine, isFuture)
 {
@@ -2692,7 +2724,7 @@ Firebug.Debugger.Breakpoint = function(name, href, lineNumber, checked, sourceLi
     this.isFuture = isFuture;
 }
 
-// ************************************************************************************************
+// ********************************************************************************************* //
 
 Firebug.DebuggerListener =
 {

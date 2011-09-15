@@ -218,6 +218,7 @@ var jsdHandlers =
 
             if ("onFunctionCall" in aHook || "onFunctionReturn" in aHook)
                 fbs.hookFunctions();
+
             if ("onInterrupt" in aHook)
                 fbs.hookInterrupts(frame);
         }
@@ -293,7 +294,7 @@ function BreakOnNextCall(debuggr, context)
 
 BreakOnNextCall.prototype =
 {
-    mode: "bon",
+    mode: "BON",
 
     hook: function(frame)
     {
@@ -445,8 +446,8 @@ OutStepper.prototype =
                     return this.hit(frame.callingFrame, type);
 
                 if (FBTrace.DBG_FBS_STEP)
-                    FBTrace.sysout("OutStepper.onFunctionReturn no calling frame "+
-                        frameToString(frame), this);
+                    FBTrace.sysout("OutStepper.onFunctionReturn no calling frame " +
+                        frameToString(frame) + ", " + getCallFromType(type), this);
 
                 jsdHandlers.unhook(frame);  // we are done here
                 jsdHandlers.remove(this);
@@ -2153,12 +2154,6 @@ var fbs =
             fbs.onTopLevelDelegate(frame, type)
     },
 
-    setTopLevelHook: function(fnOfFrameAndType)
-    {
-        fbs.onTopLevelDelegate = fnOfFrameAndType;
-        jsd.topLevelHook = { onCall: hook(fnOfFrameAndType, true)};
-    },
-
     isTopLevelScript: function(frame, type, val)
     {
         var scriptTag = frame.script.tag;
@@ -3641,8 +3636,11 @@ var fbs =
 
     hookFunctions: function()
     {
-        if (FBTrace.DBG_FBS_STEP) FBTrace.sysout("set functionHook");
+        if (FBTrace.DBG_FBS_STEP)
+            FBTrace.sysout("set functionHook");
+
         jsd.functionHook = { onCall: hook(this.onFunction, true) };
+        jsd.topLevelHook = { onCall: hook(this.onFunction, true) };
     },
 
     onFunction: function(frame, type) // called in try/catch block with this === fbs
@@ -3667,6 +3665,7 @@ var fbs =
     unhookFunctions: function()
     {
         jsd.functionHook = null;
+        jsd.topLevelHook = null;
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
