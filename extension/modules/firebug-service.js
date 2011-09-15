@@ -12,6 +12,7 @@
 const Cc = Components.classes;
 const Ci = Components.interfaces;
 const Cu = Components.utils;
+
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 const PrefService = Cc["@mozilla.org/preferences-service;1"];
@@ -178,22 +179,36 @@ var jsdHandlers =
             ERROR("firebug-service.jsdHandlers.add: null hook");
 
         this.hooks.push(aHook);
+
+        if (FBTrace.DBG_FBS_STEP)
+            FBTrace.sysout("fbs.Hooks.add; " + aHook.mode + ", active hooks: " +
+                this.hooks.length);
     },
 
     remove: function(aHook)
     {
         var i = this.hooks.indexOf(aHook);
         if (i != -1)
+        {
             this.hooks.splice(i, 1);
+
+            if (FBTrace.DBG_FBS_STEP)
+                FBTrace.sysout("fbs.Hooks.remove; " + aHook.mode + ", active hooks: " +
+                    this.hooks.length);
+        }
         else
-            ERROR("firebug-service.Hooks.unhook ERROR, no such hook "+aHook.name, {aHook: aHook, Hooks: this});
+        {
+            ERROR("firebug-service.Hooks.unhook ERROR, no such hook " +
+                aHook.name, {aHook: aHook, Hooks: this});
+        }
     },
 
     // activate hooks
     hook: function(frame)
     {
         if (FBTrace.DBG_FBS_STEP)
-            FBTrace.sysout("start hooks "+this.hooks.length+" hooks active "+frameToString(frame), this);
+            FBTrace.sysout("start hooks " + this.hooks.length + " hooks active " +
+                frameToString(frame), this);
 
         for (var i = 0; i < this.hooks.length; i++)
         {
@@ -250,15 +265,15 @@ var jsdHandlers =
         for (var i = 0; i < this.hooks.length; i++)
         {
             var aHook = this.hooks[i];
-
             if (methodName in aHook)
             {
                 if (FBTrace.DBG_FBS_STEP && FBTrace.DBG_DISPATCH)
-                    FBTrace.sysout("firebug-service.jsdHandler.dispatch "+methodName+" to "+aHook+" "+getCallFromType(type)+" frame: "+frameToString(frame), this);
+                    FBTrace.sysout("firebug-service.jsdHandler.dispatch " + methodName +
+                        " to " + aHook + " " + getCallFromType(type) + " frame: " +
+                        frameToString(frame), this);
 
                 var rc = aHook[methodName].apply(aHook, [frame, type, rv]);
-
-                if (typeof(rc) != 'undefined' || rc !== RETURN_CONTINUE)
+                if (typeof(rc) != "undefined" || rc !== RETURN_CONTINUE)
                     return rc;
             }
         }
@@ -304,10 +319,13 @@ BreakOnNextCall.prototype =
         var lucky = this.context.getSourceFileByTag(frame.script.tag);
         if (!lucky) // then function running the frame is not in this context
         {
-            if (!frame.callingFrame) // then we could be running an outer function from a new compilation unit
+            // then we could be running an outer function from a new compilation unit
+            if (!frame.callingFrame)
             {
                 var val = {};
-                if ( fbs.isTopLevelScript(frame, type, val) )  // then the function could have just been added to the context
+
+                // then the function could have just been added to the context
+                if (fbs.isTopLevelScript(frame, type, val))
                     lucky = this.context.getSourceFileByTag(frame.script.tag);
             }
         }
@@ -354,7 +372,7 @@ function OutStepper(debuggr, context)
 OutStepper.prototype =
 /** @lends OutStepper */
 {
-    mode: "out",
+    mode: "STEP_OUT",
 
     getCallingFrameId: function(frame)
     {
@@ -413,7 +431,6 @@ OutStepper.prototype =
     onFunctionReturn: function stepFunctionReturn(frame, type)
     {
         var callingFrameId = this.getCallingFrameId(frame);
-
         if (this.callingFrameId === callingFrameId) // then it is our caller
         {
             if (this.depth) // but we are not back to our caller
@@ -437,22 +454,27 @@ OutStepper.prototype =
             }
         }
 
-        if (!this.callingFrameId && callingFrameId) // then we are returning with out ever calling stepFunctionCall, but on a frame we care about.
+        // Then we are returning with out ever calling stepFunctionCall,
+        // but on a frame we care about.
+        if (!this.callingFrameId && callingFrameId)
         {
-            if (frame.script.tag === this.startFrameTag) // then are returning from the frame we care about
+            // Then are returning from the frame we care about.
+            if (frame.script.tag === this.startFrameTag)
             {
                 if (frame.callingFrame)
                     return this.hit(frame.callingFrame, type);
                 else
                     ERROR("Should be top level just exit", this);
             }
-            ERROR("Returning from a frame we care about but not one we know "+frameToString(frame), this);
+
+            ERROR("Returning from a frame we care about but not one we know " +
+                frameToString(frame), this);
         }
 
         // else it's is not a frame we care about
         if (FBTrace.DBG_FBS_STEP)
-            FBTrace.sysout(this.mode+".onFunctionReturn callingFrameId "+callingFrameId+
-                " called frame "+frameToString(frame), this)
+            FBTrace.sysout(this.mode + ".onFunctionReturn callingFrameId " + callingFrameId +
+                " called frame " + frameToString(frame), this)
     },
 
     unhook: function(frame)
@@ -462,7 +484,8 @@ OutStepper.prototype =
     hit: function(frame, type, rv)
     {
         if (FBTrace.DBG_FBS_STEP)
-            FBTrace.sysout(this.mode+" hit "+getCallFromType(type)+" at "+frameToString(frame), this);
+            FBTrace.sysout(this.mode + " hit " + getCallFromType(type) + " at " +
+                frameToString(frame), this);
 
         var debuggr = fbs.reFindDebugger(frame, this.debuggr);
         if (debuggr)
@@ -504,7 +527,7 @@ function LineStepper(debuggr, context)
 LineStepper.prototype = extend(OutStepper.prototype,
 /** @lends LineStepper */
 {
-    mode: "over",
+    mode: "STEP_OVER",
 
     hook: function hookLineStepper(frame)
     {
@@ -573,14 +596,15 @@ function IntoStepper(debuggr, context)
 IntoStepper.prototype = extend(LineStepper.prototype,
 /** @lends IntoStepper */
 {
-    mode: "into",
+    mode: "STEP_INTO",
 
     hook: function(frame)
     {
         LineStepper.prototype.hook.apply(this, arguments); // hook functions and interrupts
     },
 
-    onFunctionCall: function intoFunctionCall(frame, type) // the frame will be running the called script
+    // the frame will be running the called script
+    onFunctionCall: function intoFunctionCall(frame, type)
     {
         var callingFrame = frame.callingFrame;
         if (callingFrame)
@@ -590,7 +614,8 @@ IntoStepper.prototype = extend(LineStepper.prototype,
             if (!lucky)
                 return;
 
-            if (this.stepFrameTag === callingFrame.script.tag) // then we stepped into from our caller
+            // then we stepped into from our caller
+            if (this.stepFrameTag === callingFrame.script.tag)
                 return this.hit(frame, type);
 
             // else someone else, ignore it
@@ -599,7 +624,8 @@ IntoStepper.prototype = extend(LineStepper.prototype,
                     callingFrame.script.tag, this);
         }
 
-        // else this would be a top level call, do we want to check for another event from this context?
+        // else this would be a top level call, do we want to check for
+        // another event from this context?
     },
 });
 
@@ -626,7 +652,8 @@ LogFunctionStepper.prototype =
         delete fbs.stackDescription;
     },
 
-    onFunctionCall: function logFunctionCall(frame, type) // the frame will be running the called script
+    // the frame will be running the called script
+    onFunctionCall: function logFunctionCall(frame, type)
     {
         if (fbs.inDebuggerSetupStack) // then we are still in the debugger set up code
             return;
@@ -639,7 +666,8 @@ LogFunctionStepper.prototype =
         this.logFunction(frame, type);
     },
 
-    onFunctionReturn: function logFunctionReturn(frame, type) // the frame will be running the called script
+    // the frame will be running the called script
+    onFunctionReturn: function logFunctionReturn(frame, type)
     {
         if (fbs.inDebuggerSetupStack) // then we are still in the debugger set up code
         {
@@ -678,7 +706,8 @@ LogFunctionStepper.prototype =
             ": "+typeName +
             " (frameCount: "+actualFrames+") " +
             " oldestTag "+fbs.stackDescription.oldestTag+
-            " running "+frame.script.tag+" of "+frame.script.fileName+" at "+frame.line+"."+frame.pc);
+            " running "+frame.script.tag+" of "+frame.script.fileName+" at "+
+            frame.line+"."+frame.pc);
     },
 };
 
@@ -710,7 +739,7 @@ var fbs =
         fbs._lastErrorDebuggr = null;
 
 
-        if(FBTrace.DBG_FBS_ERRORS)
+        if (FBTrace.DBG_FBS_ERRORS)
             this.osOut("FirebugService Starting, FBTrace should be up\n");
 
         this.profiling = false;
@@ -757,6 +786,7 @@ var fbs =
                 this.outChannel = "service";
             }
         }
+
         if (this.outChannel === "hidden")  // apparently can't call via JS function
             this.hiddenWindow.dump(str);
         else
@@ -780,9 +810,9 @@ var fbs =
         }
         catch (exc)
         {
-            // Seems to be the normal path...FBTrace.sysout("FirebugService, attempt to exitNestedEventLoop ERROR "+exc);
+            // Seems to be the normal path...
+            // FBTrace.sysout("FirebugService, attempt to exitNestedEventLoop ERROR "+exc);
         }
-
 
         try
         {
@@ -850,7 +880,8 @@ var fbs =
         }
     },
 
-    registerDebugger: function(debuggrWrapper)  // first one in will be last one called. Returns state enabledDebugger
+    // first one in will be last one called. Returns state enabledDebugger
+    registerDebugger: function(debuggrWrapper)
     {
         var debuggr = debuggrWrapper.wrappedJSObject;
 
@@ -879,19 +910,25 @@ var fbs =
             throw err;
         }
 
-
-        try {
+        try
+        {
             if (debuggr.suspendActivity)
                 netDebuggers.push(debuggr);
-        } catch(exc) {
+        }
+        catch(exc)
+        {
         }
 
-        try {
+        try
+        {
             if (debuggr.onScriptCreated) // TODO xxxjjb: I don't know who uses this, remove it?
                 scriptListeners.push(debuggr);
-        } catch(exc) {
         }
-        return  debuggers.length;  // 1.3.1 return to allow Debugger to check progress
+        catch(exc)
+        {
+        }
+
+        return debuggers.length;  // 1.3.1 return to allow Debugger to check progress
     },
 
     unregisterDebugger: function(debuggrWrapper)
@@ -1017,12 +1054,11 @@ var fbs =
         }
     },
 
-    /*
+    /**
      * We are running JS code for Firebug, but we want to break into the debugger with a stack frame.
      * @param debuggr Debugger object asking for break
      * @param fnOfFrame, function(frame) to run on break
      */
-
     halt: function(debuggr, fnOfFrame)
     {
         if (!debuggr || !fnOfFrame)
@@ -1033,7 +1069,9 @@ var fbs =
         }
 
         if (FBTrace.DBG_FBS_BP)
-            FBTrace.sysout('fbs.halt jsd.isOn:'+jsd.isOn+' jsd.pauseDepth:'+jsd.pauseDepth+" fbs.isChromeBlocked "+fbs.isChromeBlocked+"  jsd.debuggerHook: "+ jsd.debuggerHook, jsd.debuggerHook);
+            FBTrace.sysout('fbs.halt jsd.isOn:'+jsd.isOn+' jsd.pauseDepth:'+jsd.pauseDepth+
+                " fbs.isChromeBlocked "+fbs.isChromeBlocked+"  jsd.debuggerHook: "+
+                jsd.debuggerHook, jsd.debuggerHook);
 
         // store for onDebugger
         haltObject = {haltDebugger: debuggr, haltCallBack: fnOfFrame};
@@ -3538,20 +3576,26 @@ var fbs =
         return this.breakOnErrors || fbs.breakOnDebugCall;
     },
 
-    step: function(mode, context, debuggr) // debuggr calls us to stage stepping
+    // debuggr calls us to stage stepping
+    step: function(mode, context, debuggr)
     {
+        var stepper;
+
         if (mode === STEP_INTO)
-            var stepper = new IntoStepper(debuggr, context);
+            stepper = new IntoStepper(debuggr, context);
         else if (mode === STEP_OVER)
-            var stepper = new LineStepper(debuggr, context);
+            stepper = new LineStepper(debuggr, context);
         else if (mode === STEP_OUT)
-            var stepper = new OutStepper(debuggr, context);
+            stepper = new OutStepper(debuggr, context);
 
         if (stepper)
             jsdHandlers.add(stepper);
         else
             ERROR("fbs.step ERROR unknown mode "+mode);
-        // the actual stepping starts after we resume
+
+        // The actual stepping starts after we resume the debuggger. Stepping is always
+        // done when the execution/debugger is paused so, we need to resum and break e.g.
+        // on the next line.
     },
 
     startStepping: function(frame) // if needed
@@ -4151,7 +4195,7 @@ function getCallFromType(type)
         case TYPE_FUNCTION_RETURN: { typeName = "FUNCTION_RETURN"; break; }
         case TYPE_FUNCTION_CALL:   { typeName = "FUNCTION_CALL"; break; }
         case TYPE_TOPLEVEL_START: { typeName = "TOPLEVEL_START"; break; }
-        case TYPE_TOPLEVEL_END:   { typeName = "TOPLEVEL_START"; break; }
+        case TYPE_TOPLEVEL_END:   { typeName = "TOPLEVEL_END"; break; }
     }
     return typeName;
 }

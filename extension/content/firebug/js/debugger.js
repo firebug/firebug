@@ -513,6 +513,7 @@ Firebug.Debugger = Obj.extend(Firebug.ActivableModule,
     {
         if (context.stopped)
             return;
+
         FBS.suspend(this, context);
     },
 
