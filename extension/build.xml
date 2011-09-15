@@ -69,7 +69,6 @@
     <!-- Build Release -->
     <target name="release" depends="clean">
         <antcall target="prepare-build" />
-        <antcall target="disableTracingConsole" />
 
         <!-- Create XPI for getfirebug.com -->
         <antcall target="createFirebugXPI">
@@ -92,7 +91,6 @@
     <!-- Build AMO Release -->
     <target name="release-amo" depends="clean">
         <antcall target="prepare-build" />
-        <antcall target="disableTracingConsole" />
         <antcall target="disableUpdate" />
         <antcall target="createFirebugXPI" />
         <echo message="Firebug Release version: ${VERSION}${RELEASE} in ${release.dir}"/>
@@ -203,16 +201,6 @@
 
         <!-- Deploy -->
         <antcall target="deploy-jsdoc" />
-    </target>
-
-    <!-- Remove (ie comment out) Firebug tracing console overlay from the chrome.manifest file.
-         The console is not available in the final releases. -->
-    <target name="disableTracingConsole">
-        <replaceregexp file="${build.dir}/chrome.manifest"
-            match="(.*)tracingConsoleOverlay\.xul"
-            replace="# \1tracingConsoleOverlay\.xul"
-            byline="true" />
-        <echo message="${build.dir}/chrome.manifest - Tracing Console Disabled" />
     </target>
 
     <!-- Remove update URL, this is necessary for AMO -->
