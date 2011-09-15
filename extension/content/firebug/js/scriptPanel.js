@@ -1206,6 +1206,8 @@ Firebug.ScriptPanel.prototype = Obj.extend(Firebug.SourceBoxPanel,
                 var debuggr = this;
                 items.push(
                     "-",
+                    {label: "firebug.Rerun",
+                        command: Obj.bindFixed(debuggr.rerun, debuggr, this.context) },
                     {label: "firebug.Continue",
                         command: Obj.bindFixed(debuggr.resume, debuggr, this.context) },
                     {label: "firebug.StepOver",
