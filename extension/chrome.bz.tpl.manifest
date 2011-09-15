@@ -14,6 +14,8 @@ skin    firebug-os  classic/1.0 skin/classic/win/
 
 locale  firebug ar-SA       locale/ar-SA/
 locale  firebug bg          locale/bg/
+locale  firebug bn-IN       locale/bn-IN/
+locale  firebug ca          locale/ca/
 locale  firebug ca-AD       locale/ca-AD/
 locale  firebug cs          locale/cs/
 locale  firebug da          locale/da/
@@ -34,6 +36,7 @@ locale  firebug he-IL       locale/he-IL/
 locale  firebug hr-HR       locale/hr-HR/
 locale  firebug hu-HU       locale/hu-HU/
 locale  firebug hy-AM       locale/hy-AM/
+locale  firebug id          locale/id/
 locale  firebug id-ID       locale/id-ID/
 locale  firebug is-IS       locale/is-IS/
 locale  firebug it          locale/it/
