@@ -618,9 +618,11 @@ Firebug.ScriptPanel.prototype = Obj.extend(Firebug.SourceBoxPanel,
                 jsDebuggerCalledUs: this.context.jsDebuggerCalledUs,
                 jsEnabled: jsEnabled,
                 aLocation: aLocation,
+                activitySuspended: this.context.activitySuspended,
+                stopped: this.context.stopped
             });
 
-        if (this.context.activitySuspended && !this.context.stopped)
+        if (!this.context.jsDebuggerCalledUs && !this.context.stopped)
         {
             // Make sure that the content of the panel is restored as soon as
             // the debugger is resumed.
