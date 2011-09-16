@@ -1024,14 +1024,15 @@ var fbs =
     {
         try
         {
-            dispatch(netDebuggers, "suspendActivity");
+            dispatch(debuggers, "suspendActivity");
             this.activitySuspended = true;
 
             fbs.nestedEventLoopDepth = jsd.enterNestedEventLoop(
             {
                 onNest: function()
                 {
-                    dispatch(netDebuggers, "resumeActivity");
+                    // xxxHonza: why this was here?
+                    //dispatch(debuggers, "resumeActivity");
                     callback.onNest();
                 }
             });
@@ -1042,7 +1043,7 @@ var fbs =
         }
         finally
         {
-            dispatch(netDebuggers, "resumeActivity");
+            dispatch(debuggers, "resumeActivity");
             this.activitySuspended = false;
         }
 
@@ -1053,7 +1054,7 @@ var fbs =
     {
         try
         {
-            dispatch(netDebuggers, "suspendActivity");
+            dispatch(debuggers, "suspendActivity");
             return jsd.exitNestedEventLoop();
         }
         catch (exc)

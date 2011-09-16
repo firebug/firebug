@@ -622,7 +622,7 @@ Firebug.ScriptPanel.prototype = Obj.extend(Firebug.SourceBoxPanel,
                 stopped: this.context.stopped
             });
 
-        if (!this.context.jsDebuggerCalledUs && !this.context.stopped)
+        if (this.context.activitySuspended && !this.context.stopped)
         {
             // Make sure that the content of the panel is restored as soon as
             // the debugger is resumed.
@@ -1526,7 +1526,6 @@ Firebug.ScriptPanel.WarningRep = domplate(Firebug.Rep,
 
     onFocusDebugger: function(event)
     {
-        /*
         Win.iterateBrowserWindows("navigator:browser", function(win)
         {
             return win.Firebug.TabWatcher.iterateContexts(function(context)
@@ -1538,7 +1537,7 @@ Firebug.ScriptPanel.WarningRep = domplate(Firebug.Rep,
                 }
             });
         });
-        */
+
         // No context is stopped
         if (FBTrace.DBG_UI_LOOP)
             FBTrace.sysout("script.onFocusDebugger FAILED");

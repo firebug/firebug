@@ -64,8 +64,8 @@ var Firefox =
         var tabBrowser = Firefox.getTabBrowser();
         if (tabBrowser)
         {
-            var tab = tabBrowser.getBrowserForDocument(win.document);
-            tabBrowser.selectedBrowser = tab;
+            var index = tabBrowser.getBrowserIndexForDocument(win.document);
+            tabBrowser.selectTabAtIndex(index);
         }
     },
 

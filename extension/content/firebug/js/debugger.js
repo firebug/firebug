@@ -1073,6 +1073,22 @@ Firebug.Debugger = Obj.extend(Firebug.ActivableModule,
         }
     },
 
+    suspendActivity: function()
+    {
+        Firebug.TabWatcher.iterateContexts(function (context)
+        {
+            context.activitySuspended = true;
+        });
+    },
+
+    resumeActivity: function()
+    {
+        Firebug.TabWatcher.iterateContexts(function (context)
+        {
+            context.activitySuspended = false;
+        });
+    },
+
     onBreak: function(frame, type)
     {
         try
