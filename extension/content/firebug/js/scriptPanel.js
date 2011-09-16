@@ -622,7 +622,8 @@ Firebug.ScriptPanel.prototype = Obj.extend(Firebug.SourceBoxPanel,
                 stopped: this.context.stopped
             });
 
-        if (this.context.activitySuspended && !this.context.stopped)
+        var activitySuspended = this.isActivitySuspended();
+        if (activitySuspended && !this.context.stopped)
         {
             // Make sure that the content of the panel is restored as soon as
             // the debugger is resumed.
@@ -643,6 +644,18 @@ Firebug.ScriptPanel.prototype = Obj.extend(Firebug.SourceBoxPanel,
             return false;
 
         return true;
+    },
+
+    isActivitySuspended: function()
+    {
+        return Win.iterateBrowserWindows("navigator:browser", function(win)
+        {
+            return win.Firebug.TabWatcher.iterateContexts(function(context)
+            {
+                if (context.stopped)
+                     return true;
+            });
+        });
     },
 
     show: function(state)
