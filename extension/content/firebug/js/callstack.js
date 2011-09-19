@@ -16,13 +16,13 @@ define([
 function(Obj, Firebug, FirebugReps, JavaScriptTool, Events, Wrapper, StackFrame,
     Css, Arr, Dom, Menu) {
 
-// ************************************************************************************************
+// ********************************************************************************************* //
 // Constants
 
 const Cc = Components.classes;
 const Ci = Components.interfaces;
 
-// ************************************************************************************************
+// ********************************************************************************************* //
 // Callstack Panel
 
 /**
@@ -58,9 +58,13 @@ Firebug.CallstackPanel.prototype = Obj.extend(Firebug.Panel,
 
     onStartDebugging: function(context, frame)
     {
-        delete this.location;  // if we get a show() call then create and set new location
-        if (this.visible)     // then we should reshow
+        // if we get a show() call then create and set new location
+        delete this.location;
+
+        // then we should reshow
+        if (this.visible)
             this.show();
+
         if (FBTrace.DBG_STACK)
             FBTrace.sysout("callstack; onStartDebugging "+this.visible, this)
     },
@@ -70,7 +74,8 @@ Firebug.CallstackPanel.prototype = Obj.extend(Firebug.Panel,
         if (FBTrace.DBG_STACK)
             FBTrace.sysout("callstack; onStopDebugging ")
 
-        this.showStackTrace(null);  // clear the view
+        // clear the view
+        this.showStackTrace(null);
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -81,7 +86,8 @@ Firebug.CallstackPanel.prototype = Obj.extend(Firebug.Panel,
         {
             this.location = StackFrame.buildStackTrace(JavaScriptTool.Turn.currentFrame);
             this.updateLocation(this.location);
-        } // then we are lazy
+        }
+        // then we are lazy
 
         if (FBTrace.DBG_STACK)
             FBTrace.sysout("callstack.show state: "+state+" this.location: "+this.location,
@@ -99,6 +105,7 @@ Firebug.CallstackPanel.prototype = Obj.extend(Firebug.Panel,
                         FirebugReps.StackFrame.expandArguments(frameElts[i]);
                 }
             }
+
             if (state.selectedCallStackFrameIndex)
             {
                 this.selectFrame(state.selectedCallStackFrameIndex)
@@ -115,9 +122,11 @@ Firebug.CallstackPanel.prototype = Obj.extend(Firebug.Panel,
             var item = frameElts[i];
             if (item.classList.contains("opened"))
                 state.callstackToggles[i] = true;
+
             if (item.getAttribute("selected") == "true")
                 state.selectedCallStackFrameIndex = i + 1;  // traces are 1 base
         }
+
         if (FBTrace.DBG_STACK)
             FBTrace.sysout("callstack.hide state: "+state, state);
     },
@@ -172,6 +181,7 @@ Firebug.CallstackPanel.prototype = Obj.extend(Firebug.Panel,
     {
         if (FBTrace.DBG_STACK)
             FBTrace.sysout("callstack; updateLocation "+object, object);
+
         // All paths lead to showStackTrace
         if (object instanceof StackFrame.StackTrace)
             this.showStackTrace(object);
@@ -227,23 +237,23 @@ Firebug.CallstackPanel.prototype = Obj.extend(Firebug.Panel,
             item.setAttribute("selected", "true");
     },
 
-    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
     // Menus
 
     getOptionsMenuItems: function()
     {
+        // an option handled by chrome.js
         var items = [
-            Menu.optionMenu("OmitObjectPathStack", "omitObjectPathStack"),  // an option handled by chrome.js
+            Menu.optionMenu("OmitObjectPathStack", "omitObjectPathStack"),
         ];
         return items;
     },
 
     getContextMenuItems: function(nada, target)
     {
-        FBTrace.sysout("panel.getContextMenuItems", Arr.cloneArray(arguments));
         var items = [
-            {label: "Expand All", command: Obj.bindFixed(this.onExpandAll, this, target)},
-            {label: "Collapse All", command: Obj.bindFixed(this.onCollapseAll, this, target)}
+            {label: "callstack.Expand All", command: Obj.bindFixed(this.onExpandAll, this, target)},
+            {label: "callstack.Collapse All", command: Obj.bindFixed(this.onCollapseAll, this, target)}
         ];
         return items;
     },
@@ -262,8 +272,7 @@ Firebug.CallstackPanel.prototype = Obj.extend(Firebug.Panel,
             FirebugReps.StackFrame.collapseArguments(elements[i]);
     },
 
-
-    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
     // Referents xxxHonza, xxxJJB: what is this? Incomplete feature for finding all
     // references to a function
 
@@ -278,11 +287,10 @@ Firebug.CallstackPanel.prototype = Obj.extend(Firebug.Panel,
         var fnName = StackFrame.getFunctionName(frame.script, this.context, frame, true);
 
         var referents = this.getReferents(frame, fnName);
-
     },
 });
 
-// ************************************************************************************************
+// ********************************************************************************************* //
 
 function Referent(containerName, container, propertyName, obj)
 {
@@ -291,8 +299,8 @@ function Referent(containerName, container, propertyName, obj)
     this.values = [container];
     this.names = [propertyName, containerName];
     this.object = obj;
-
 }
+
 Referent.prototype =
 {
     getContainer: function()
@@ -324,7 +332,7 @@ Referent.prototype =
     },
 };
 
-// ************************************************************************************************
+// ********************************************************************************************* //
 
 function getReferents(frame, fnName)
 {
@@ -355,7 +363,8 @@ function getReferents(frame, fnName)
                     FBTrace.sysout("Firebug.Debugger.showReferents found from thisObject "+
                         referents.length, {thisObject: thisObject, fn: fn, referents: referents});
 
-                var containingScope = Wrapper.unwrapIValueObject(result.value.jsParent, Firebug.viewwChrome);
+                var containingScope = Wrapper.unwrapIValueObject(result.value.jsParent,
+                    Firebug.viewwChrome);
 
                 if (FBTrace.DBG_STACK)
                     FBTrace.sysout("Firebug.Debugger.showReferents containingScope from "+
@@ -404,12 +413,12 @@ function getReferents(frame, fnName)
     }
 }
 
-// ************************************************************************************************
+// ********************************************************************************************* //
 // Registration
 
 Firebug.registerPanel(Firebug.CallstackPanel);
 
 return Firebug.CallstackPanel;
 
-// ************************************************************************************************
+// ********************************************************************************************* //
 });

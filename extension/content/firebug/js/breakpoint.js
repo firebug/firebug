@@ -224,21 +224,29 @@ Firebug.Breakpoint.BreakpointRep = domplate(Firebug.Rep,
         var head = Dom.getAncestorByClass(target, "breakpointBlock");
         var groupName = Css.getClassValue(head, "breakpointBlock");
 
-        var items = [{label: "Remove Breakpoint", command: Obj.bindFixed(this.removeBreakpoint, this, groupName, breakpoint.href, breakpoint.lineNumber)}];
+        var items = [{
+            label: "breakpoints.Remove Breakpoint",
+            command: Obj.bindFixed(this.removeBreakpoint, this, groupName,
+                breakpoint.href, breakpoint.lineNumber)
+        }];
 
         if (groupName == "breakpoints")
         {
             if (breakpoint.checked)
             {
-                items.push(
-                    {label: "Disable Breakpoint", command: Obj.bindFixed(this.disableBreakpoint, this, breakpoint.href, breakpoint.lineNumber)}
-                );
+                items.push({
+                    label: "breakpoints.Disable Breakpoint",
+                    command: Obj.bindFixed(this.disableBreakpoint, this, breakpoint.href,
+                        breakpoint.lineNumber)
+                });
             }
             else
             {
-                items.push(
-                    {label: "Enable Breakpoint", command: Obj.bindFixed(this.enableBreakpoint, this, breakpoint.href, breakpoint.lineNumber)}
-                );
+                items.push({
+                    label: "breakpoints.Enable Breakpoint",
+                    command: Obj.bindFixed(this.enableBreakpoint, this, breakpoint.href,
+                        breakpoint.lineNumber)
+                });
             }
         }
 
@@ -357,9 +365,11 @@ Firebug.Breakpoint.BreakpointsPanel.prototype = Obj.extend(Firebug.Panel,
         if (breakpoints.length)
             groups.push({name: "breakpoints", title: Locale.$STR("Breakpoints"),
                 breakpoints: breakpoints});
+
         if (errorBreakpoints.length)
             groups.push({name: "errorBreakpoints", title: Locale.$STR("ErrorBreakpoints"),
                 breakpoints: errorBreakpoints});
+
         if (monitors.length)
             groups.push({name: "monitors", title: Locale.$STR("LoggedFunctions"),
                 breakpoints: monitors});

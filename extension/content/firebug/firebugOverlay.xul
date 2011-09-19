@@ -52,7 +52,7 @@
 
                             <!-- Firebug Icon Menu -->
                             <toolbarbutton id="fbFirebugMenu" type="menu"
-                                tooltiptext="Firebug_Options"
+                                tooltiptext="firebug_options"
                                 role="button" aria-haspopup="true" owns="fbFirebugMenuPopup"
                                 class="fbInternational">
 
