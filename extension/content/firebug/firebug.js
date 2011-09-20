@@ -2465,6 +2465,7 @@ if (preFirebugKeys)
 // ********************************************************************************************* //
 // Registration
 
+Firebug.Firefox = Firefox;
 Firebug.Domplate = Domplate;
 Firebug.ChromeFactory = ChromeFactory;
 
