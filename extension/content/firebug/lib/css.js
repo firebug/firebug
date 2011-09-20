@@ -1403,6 +1403,7 @@ Css.cssKeywords =
         "Verdana",
         "Times New Roman",
         "Trebuchet MS",
+        "Lucida Console",
         "Lucida Grande",
         "Helvetica",
         "serif",
