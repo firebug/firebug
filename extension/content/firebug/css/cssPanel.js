@@ -481,7 +481,9 @@ Firebug.CSSModule = Obj.extend(Obj.extend(Firebug.Module, Firebug.EditorSelector
         //
         // WARN: This behavior was determined anecdotally.
         // See http://code.google.com/p/fbug/issues/detail?id=2440
-        if (!Xml.isXMLPrettyPrint(context))
+
+        // This causes additional HTTP request for a font (see 4649).
+        /*if (!Xml.isXMLPrettyPrint(context))
         {
             var style = Css.createStyleSheet(doc);
             style.innerHTML = "#fbIgnoreStyleDO_NOT_USE {}";
@@ -496,7 +498,7 @@ Firebug.CSSModule = Obj.extend(Obj.extend(Firebug.Module, Firebug.EditorSelector
                 if (FBTrace.DBG_ERRORS)
                     FBTrace.sysout("css.cleanupSheets; ERROR no parent style:", style);
             }
-        }
+        }*/
 
         // https://bugzilla.mozilla.org/show_bug.cgi?id=500365
         // This voodoo touches each style sheet to force some Firefox internal change
