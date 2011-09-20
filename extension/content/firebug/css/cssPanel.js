@@ -1387,7 +1387,7 @@ Firebug.CSSStyleSheetPanel.prototype = Obj.extend(Firebug.Panel,
         {
             items.push(
                 "-",
-                {label: "NewProp",
+                {label: "NewProp", id: "fbNewCSSProp",
                     command: Obj.bindFixed(this.insertPropertyRow, this, target) }
             );
 
