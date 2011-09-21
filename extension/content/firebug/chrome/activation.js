@@ -73,7 +73,7 @@ Firebug.Activation = Obj.extend(Firebug.Module,
             return true;
 
         // document.open on a firebugged page
-        if (browser.showFirebug && url.substr(0, 8) === "wyciwyg:")
+        if (browser && browser.showFirebug && url.substr(0, 8) === "wyciwyg:")
             return true;
 
         try

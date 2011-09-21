@@ -133,7 +133,10 @@ Firebug.TabWatcher = Obj.extend(new Firebug.Listener(),
             return false;
         }
 
-        var selectedBrowser = Firefox.getCurrentBrowser();
+        // Do not use Firefox.getCurrentBrowser(); since the current tab can be already
+        // different from what is passed into this function (see issue 4681)
+        // Can be also null, if the window is just closing.
+        var selectedBrowser = Win.getBrowserByWindow(win);
 
         var context = this.getContextByWindow(win);
         if (context) // then we've looked at this window before in this FF session...
