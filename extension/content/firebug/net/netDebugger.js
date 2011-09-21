@@ -8,10 +8,11 @@ define([
     "firebug/lib/events",
     "firebug/lib/url",
     "firebug/lib/css",
+    "firebug/lib/dom",
     "firebug/lib/array",
     "firebug/net/netUtils",
 ],
-function(Obj, Firebug, Domplate, Locale, Events, Url, Css, Arr, NetUtils) {
+function(Obj, Firebug, Domplate, Locale, Events, Url, Css, Dom, Arr, NetUtils) {
 
 // ********************************************************************************************* //
 // Constants
