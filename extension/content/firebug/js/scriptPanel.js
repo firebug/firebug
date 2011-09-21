@@ -696,9 +696,10 @@ Firebug.ScriptPanel.prototype = Obj.extend(Firebug.SourceBoxPanel,
                         var sourceLink = new SourceLink.SourceLink(this.location.getURL(), state.previousCenterLine, "js");
                         this.showSourceLink(sourceLink);
                     }
-
-                    if (state.scrollTop)
+                    else if (state.scrollTop)
+                    {
                         this.selectedSourceBox.scrollTop = state.scrollTop;
+                    }
                 }
             }
             else // show default
