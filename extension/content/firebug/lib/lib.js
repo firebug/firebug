@@ -23,15 +23,16 @@ define([
     "firebug/lib/array",
     "firebug/firefox/system",
     "firebug/lib/json",
+    "firebug/lib/fonts",
     "firebug/firefox/menu",
     "firebug/dom/toggleBranch",
     "firebug/trace/debug",
     "firebug/lib/keywords",
-    "firebug/firefox/firefox",
+    "firebug/firefox/firefox"
 ],
 function(Obj, Xpcom, Locale, Events, Options, Deprecated, Wrapper, Url, SourceLink,
     StackFrame, Css, Dom, Http, Win, Search, Xpath, Str, Xml, Persist, Arr, System, Json,
-    Menu, ToggleBranch, Debug, Keywords, Firefox) {
+    Fonts, Menu, ToggleBranch, Debug, Keywords, Firefox) {
 
 // ********************************************************************************************* //
 
@@ -99,6 +100,9 @@ for (var p in System)
 
 for (var p in Json)
     FBL[p] = Json[p];
+
+for (var p in Fonts)
+    FBL[p] = Fonts[p];
 
 for (var p in Menu)
     FBL[p] = Menu[p];
