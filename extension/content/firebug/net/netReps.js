@@ -896,7 +896,13 @@ Firebug.NetMonitor.NetInfoBody = domplate(Firebug.Rep, new Firebug.Listener(),
 
     hideResponse: function(file)
     {
-        return file.category in NetUtils.binaryFileCategories;
+        for (var i=0; i<file.responseHeaders.length; i++)
+        {
+            if (file.responseHeaders[i].name == "Content-Length")
+                return file.responseHeaders[i].value == 0;
+        }
+
+        return file.category in NetUtils.binaryFileCategories || file.responseText == "";
     },
 
     hideCache: function(file)
