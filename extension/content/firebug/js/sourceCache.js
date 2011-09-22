@@ -171,12 +171,18 @@ Firebug.SourceCache.prototype = Obj.extend(new Firebug.Listener(),
 
     loadFromLocal: function(url)
     {
+        if (FBTrace.DBG_CACHE)
+            FBTrace.sysout("tabCache.loadFromLocal url: " + url);
+
         // if we get this far then we have either a file: or chrome: url converted to file:
         var src = Http.getResource(url);
         if (src)
         {
             var lines = Str.splitLines(src);
-            this.cache[url] = lines;
+
+            // Don't cache locale files to get latest version (issue 1238)
+            // Local files can be currently fetched any time.
+            //this.cache[url] = lines;
 
             return lines;
         }
