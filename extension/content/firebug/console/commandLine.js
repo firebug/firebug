@@ -657,7 +657,7 @@ Firebug.CommandLine = Obj.extend(Firebug.Module,
         var showCompletionPopup = Firebug.Options.get("commandLineShowCompleterPopup");
         this.autoCompleter = new Firebug.AutoCompleter(getExpressionOffset, getDot,
             Obj.bind(autoCompleteEval, this), false, true, true, true, showCompletionPopup,
-            isValidProperty, simplifyExpr, killCompletions);
+            null, simplifyExpr, killCompletions, adjustCompletion);
     },
 
     initializeUI: function()
@@ -1372,6 +1372,30 @@ function killCompletions(expr)
         }
     }
     return false;
+}
+
+function adjustCompletion(completion, preParsed, preExpr)
+{
+    var preLength = preParsed.length + preExpr.length;
+    var property = completion.substr(preLength);
+    if (!isValidProperty(property))
+    {
+        // The property name is actually invalid in free form, so replace
+        // it with array syntax.
+        if (preLength > 0 && completion.charAt(preLength-1) === ".")
+        {
+            completion = completion.substr(0, preLength-1);
+        }
+        else
+        {
+            // Global variable access - assume the variable is a member of
+            // 'window' and not of some object made global by a with-
+            // statement (which we can't really access anyway).
+            completion = completion.substr(0, preLength) + "window";
+        }
+        completion += "[\"" + Str.escapeJS(property) + "\"]";
+    }
+    return completion;
 }
 
 // Types the autocompletion knows about, some of their non-enumerable properties,

@@ -311,7 +311,8 @@ Str.stripNewLines = function(value)
 
 Str.escapeJS = function(value)
 {
-    return value.replace(/\r/gm, "\\r").replace(/\n/gm, "\\n").replace('"', '\\"', "g");
+    return value.replace("\\", "\\\\", "g").replace(/\r/gm, "\\r")
+        .replace(/\n/gm, "\\n").replace('"', '\\"', "g");
 };
 
 Str.cropString = function(text, limit, alterText)

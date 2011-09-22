@@ -957,10 +957,10 @@ Firebug.InlineEditor.prototype = domplate(Firebug.BaseEditor,
 
 Firebug.AutoCompleter = function(getExprOffset, getRange, evaluator, selectMode, caseSensitive,
     noCompleteOnBlank, noShowGlobal, showCompletionPopup, isValidProperty, simplifyExpr,
-    killCompletions)
+    killCompletions, adjustCompletionOnAccept)
 {
     var candidates = null;
-    var originalValue = null;
+    var lastValue = "";
     var originalOffset = -1;
     var lastExpr = null;
     var lastOffset = -1;
@@ -976,13 +976,10 @@ Firebug.AutoCompleter = function(getExprOffset, getRange, evaluator, selectMode,
     var completionStart = -1;
     var completionEnd = -1;
 
-    // XXXsilin 'reJavascriptChar', 'value' and 'accepted' seemed to be unused, so I removed them.
-
     this.revert = function(textBox)
     {
         if (originalOffset != -1)
         {
-            textBox.value = originalValue;
             textBox.setSelectionRange(originalOffset, originalOffset);
 
             this.reset();
@@ -998,7 +995,6 @@ Firebug.AutoCompleter = function(getExprOffset, getRange, evaluator, selectMode,
     this.reset = function()
     {
         candidates = null;
-        originalValue = null;
         originalOffset = -1;
         lastExpr = null;
         lastOffset = 0;
@@ -1035,10 +1031,10 @@ Firebug.AutoCompleter = function(getExprOffset, getRange, evaluator, selectMode,
     {
         var value = textBox.value;
 
-        if (!candidates || !cycle || offset != lastOffset)
+        if (!candidates || !cycle || value != lastValue)
         {
             originalOffset = offset;
-            originalValue = value;
+            lastValue = value;
 
             // XXXsilin What's the reason for dealing with offsets here? Most
             // functions seem to ignore them entirely (getExpressionOffset, getDot),
@@ -1101,61 +1097,30 @@ Firebug.AutoCompleter = function(getExprOffset, getRange, evaluator, selectMode,
             lastExpr = expr;
             lastOffset = offset;
 
-            var searchExpr;
-
             // Check if the cursor is at the very right edge of the expression, or
             // somewhere in the middle of it
             if (expr && offset != parseStart+range.end+1)
-            {
-                if (cycle)
-                {
-                    // We are in the middle of the expression, but we can
-                    // complete by cycling to the next item in the values
-                    // list after the expression
-                    offset = range.start;
-                    searchExpr = expr;
-                    expr = "";
-                }
-                else
-                {
-                    // We can't complete unless we are at the ridge edge
-                    return false;
-                }
-            }
-
-            if (!showGlobals && !preExpr && !expr && !postExpr)
-            {
-                // Don't complete globals unless we are forced to do so.
                 return false;
-            }
+
+            // Don't complete globals unless we are forced to do so.
+            if (!showGlobals && !preExpr && !expr && !postExpr)
+                return false;
 
             var values = evaluator(preExpr, expr, postExpr, context, spreExpr);
             if (!values)
                 return false;
 
             if (expr)
-            {
                 this.setCandidatesByExpr(expr, values, reverse);
-            }
-            else if (searchExpr)
-            {
-                if (!this.setCandidatesBySearchExpr(searchExpr, expr, values))
-                    return false;
-                expr = searchExpr;
-            }
             else
-            {
                 this.setCandidatesByValues(values);
-            }
         }
 
         if (cycle)
             expr = lastExpr;
 
         if (!candidates.length)
-        {
             return false;
-        }
 
         this.adjustLastIndex(cycle, reverse);
 
@@ -1166,10 +1131,9 @@ Firebug.AutoCompleter = function(getExprOffset, getRange, evaluator, selectMode,
         var line = preParsed + preExpr + preCompletion + postCompletion + postExpr;
         var offsetEnd = preParsed.length + preExpr.length + completion.length;
 
-
         if (selectMode) // inline completion uses this
         {
-            textBox.value = line;
+            lastValue = textBox.value = line;
             textBox.setSelectionRange(offset, offsetEnd);
         }
         else
@@ -1191,63 +1155,18 @@ Firebug.AutoCompleter = function(getExprOffset, getRange, evaluator, selectMode,
         // will then go on to complete the first value in the resulting list
         candidates = [];
 
-        if (caseSensitive)
+        var findExpr = (caseSensitive ? expr : expr.toLowerCase());
+        for (var i = 0; i < values.length; ++i)
         {
-            for (var i = 0; i < values.length; ++i)
-            {
-                var name = values[i];
-                if (name.indexOf && name.indexOf(expr) == 0)
-                    candidates.push(name);
-            }
-        }
-        else
-        {
-            var lowerExpr = caseSensitive ? expr : expr.toLowerCase();
-            for (var i = 0; i < values.length; ++i)
-            {
-                var name = values[i];
-                if (name.indexOf && name.toLowerCase().indexOf(lowerExpr) == 0)
-                    candidates.push(name);
-            }
+            var name = values[i];
+            if (!caseSensitive && name.toLowerCase)
+                name = name.toLowerCase();
+
+            if (name.lastIndexOf && name.lastIndexOf(expr, 0) == 0)
+                candidates.push(name);
         }
 
         lastIndex = -2;
-    };
-
-    this.setCandidatesBySearchExpr = function(searchExpr, expr, values)
-    {
-        var searchIndex = -1;
-
-        // Find the first instance of searchExpr in the values list. We
-        // will then complete the string that is found
-        if (caseSensitive)
-        {
-            searchIndex = values.indexOf(expr);
-        }
-        else
-        {
-            var lowerExpr = searchExpr.toLowerCase();
-            for (var i = 0; i < values.length; ++i)
-            {
-                var name = values[i];
-                if (name && name.toLowerCase().indexOf(lowerExpr) == 0)
-                {
-                    searchIndex = i;
-                    break;
-                }
-            }
-        }
-
-        // Nothing found, so there's nothing to complete to
-        if (searchIndex == -1)
-        {
-            this.reset();
-            return false;
-        }
-
-        candidates = Arr.cloneArray(values);
-        lastIndex = searchIndex;
-        return true;
     };
 
     this.setCandidatesByValues = function(values)
@@ -1257,7 +1176,7 @@ Firebug.AutoCompleter = function(getExprOffset, getRange, evaluator, selectMode,
         for (var i = 0; i < values.length; ++i)
         {
             var value = values[i];
-            if (isValidProperty(value))
+            if (!isValidProperty || isValidProperty(value))
                 candidates.push(value);
         }
         lastIndex = -2;
@@ -1270,9 +1189,9 @@ Firebug.AutoCompleter = function(getExprOffset, getRange, evaluator, selectMode,
             lastIndex = this.pickDefaultCandidate();
         else if (candidates.length === 1)
             lastIndex = 0;
-        else if (lastIndex >= candidates.length)  // use default on first completion, else cycle
-            lastIndex = (lastIndex === -2) ? this.pickDefaultCandidate() : 0;
-        else if (lastIndex < 0)
+        else if (lastIndex >= candidates.length)
+            lastIndex = 0;
+        else if (lastIndex < 0)  // use default on first completion, else cycle
             lastIndex = (lastIndex === -2) ? this.pickDefaultCandidate() : (candidates.length - 1);
         else // we have cycle == true
         {
@@ -1552,7 +1471,11 @@ Firebug.AutoCompleter = function(getExprOffset, getRange, evaluator, selectMode,
 
     this.acceptCompletionInTextBox = function(textBox, completionBox)
     {
-        textBox.value = completionBox.value;
+        var completion = completionBox.value;
+        if (adjustCompletionOnAccept)
+            completion = adjustCompletionOnAccept(completion, preParsed, preExpr, postExpr);
+
+        lastValue = textBox.value = completion;
         textBox.setSelectionRange(textBox.value.length, textBox.value.length); // ensure the cursor at EOL
         this.hide(completionBox);
         return true;
