@@ -309,6 +309,12 @@ Str.stripNewLines = function(value)
     return typeof(value) == "string" ? value.replace(/[\r\n]/gm, " ") : value;
 };
 
+Str.escapeSingleQuoteJS = function(value)
+{
+    return value.replace("\\", "\\\\", "g").replace(/\r/gm, "\\r")
+                .replace(/\n/gm, "\\n").replace("'", "\\'", "g");
+};
+
 Str.escapeJS = function(value)
 {
     return value.replace("\\", "\\\\", "g").replace(/\r/gm, "\\r")

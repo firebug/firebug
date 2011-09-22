@@ -655,7 +655,7 @@ Firebug.CommandLine = Obj.extend(Firebug.Module,
     setAutoCompleter: function()
     {
         var showCompletionPopup = Firebug.Options.get("commandLineShowCompleterPopup");
-        this.autoCompleter = new Firebug.AutoCompleter(getExpressionOffset, getDot,
+        this.autoCompleter = new Firebug.AutoCompleter(getExpressionOffset, getRange,
             Obj.bind(autoCompleteEval, this), false, true, true, true, showCompletionPopup,
             null, simplifyExpr, killCompletions, adjustCompletion);
     },
@@ -1089,6 +1089,12 @@ function getExpressionOffset(command)
     var bracketCount = 0;
 
     var start = command.length, instr = false;
+
+    // When completing []-accessed properties, start instead from the last [.
+    var lastBr = command.lastIndexOf("[");
+    if (lastBr !== -1 && /^['"] *$/.test(command.substr(lastBr+1)))
+        start = lastBr;
+
     while (start --> 0)
     {
         var c = command[start];
@@ -1118,13 +1124,17 @@ function getExpressionOffset(command)
     return start + 1;
 }
 
-function getDot(expr, offset)
+function getRange(expr, offset)
 {
+    var lastBr = expr.lastIndexOf("[");
+    if (lastBr !== -1 && /^['"] *$/.test(expr.substr(lastBr+1)))
+        return {start: lastBr+2, end: expr.length-1};
+
     var lastDot = expr.lastIndexOf(".");
-    if (lastDot == -1)
-        return null;
-    else
+    if (lastDot !== -1)
         return {start: lastDot+1, end: expr.length-1};
+
+    return null;
 }
 
 // Get the index of the last non-whitespace character in the range [0, from)
@@ -1376,12 +1386,17 @@ function killCompletions(expr)
 
 function adjustCompletion(completion, preParsed, preExpr)
 {
+    // Don't adjust index completions.
+    if (/^\[['"]$/.test(preExpr.slice(-2)))
+        return completion;
+
     var preLength = preParsed.length + preExpr.length;
     var property = completion.substr(preLength);
     if (!isValidProperty(property))
     {
         // The property name is actually invalid in free form, so replace
         // it with array syntax.
+
         if (preLength > 0 && completion.charAt(preLength-1) === ".")
         {
             completion = completion.substr(0, preLength-1);
@@ -1393,7 +1408,7 @@ function adjustCompletion(completion, preParsed, preExpr)
             // statement (which we can't really access anyway).
             completion = completion.substr(0, preLength) + "window";
         }
-        completion += "[\"" + Str.escapeJS(property) + "\"]";
+        completion += '["' + Str.escapeJS(property) + '"]';
     }
     return completion;
 }
@@ -1655,6 +1670,15 @@ function propChainBuildComplete(out, context, tempExpr, result)
         {
             if (!i || complete[i-1] !== complete[i])
                 resComplete.push(complete[i]);
+        }
+
+        if (out.indexCompletion)
+        {
+            resComplete = resComplete.map(function(x)
+            {
+                x = (out.indexQuoteType === '"') ? Str.escapeJS(x): Str.escapeSingleQuoteJS(x);
+                return x + out.indexQuoteType + "]";
+            });
         }
         out.complete = resComplete;
     };
@@ -1968,12 +1992,26 @@ function autoCompleteEval(preExpr, expr, postExpr, context, spreExpr)
     {
         if (spreExpr)
         {
-            // Remove the trailing dot (if there is one)
-            var lastDot = spreExpr.lastIndexOf(".");
-            if (lastDot !== -1)
+            // In case of array indexing, remove the bracket and set a flag to
+            // escape completions.
+            this.indexCompletion = false;
+            var len = spreExpr.length, lastCh = spreExpr[len-1];
+            if (len >= 2 && spreExpr[len-2] === "[" && spreExpr[len-1] === '"')
             {
-                spreExpr = spreExpr.substr(0, lastDot);
-                preExpr = preExpr.substr(0, lastDot);
+                this.indexCompletion = true;
+                this.indexQuoteType = preExpr[len-1];
+                spreExpr = spreExpr.substr(0, len-2);
+                preExpr = preExpr.substr(0, len-2);
+            }
+            else
+            {
+                // Remove the trailing dot (if there is one)
+                var lastDot = spreExpr.lastIndexOf(".");
+                if (lastDot !== -1)
+                {
+                    spreExpr = spreExpr.substr(0, lastDot);
+                    preExpr = preExpr.substr(0, lastDot);
+                }
             }
 
             this.complete = [];
@@ -2037,7 +2075,7 @@ function autoCompleteEval(preExpr, expr, postExpr, context, spreExpr)
     }
 }
 
-var reValidJSToken = /^[A-Za-z_$][A-Za-z_$0-9]*/;
+var reValidJSToken = /^[A-Za-z_$][A-Za-z_$0-9]*$/;
 function isValidProperty(value)
 {
     // Use only string props
@@ -2049,7 +2087,7 @@ function isValidProperty(value)
     // Following expression checks that the name starts with a letter or $_,
     // and there are only letters, numbers or $_ character in the string (no spaces).
 
-    return value.match(reValidJSToken) == value;
+    return reValidJSToken.test(value);
 }
 
 function addMatchingKeyword(expr, completions)
