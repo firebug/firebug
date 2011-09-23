@@ -181,7 +181,13 @@ var Errors = Firebug.Errors = Obj.extend(Firebug.Module,
             // This cannot be pulled in front of the instanceof
             var isWarning = object && object.flags & WARNING_FLAG;
             var CSSParser = object && object.category == "CSS Parser";
-            var XPConnect = object && object.category && object.category.split(' ').indexOf("XPConnect") != -1;
+            var XPConnect = object && object.category &&
+                object.category.split(' ').indexOf("XPConnect") != -1;
+
+            // Some categories say: "content javascript" even if come from chrome space.
+            var sourceName = (object && object.sourceName) ? object.sourceName : "";
+            if (sourceName.indexOf("chrome") == -1 || sourceName.indexOf("resource") == -1)
+                XPConnect = true;
 
             if (ScriptError && !XPConnect)  // all branches should trace 'object'
             {
@@ -228,9 +234,15 @@ var Errors = Firebug.Errors = Obj.extend(Firebug.Module,
                             context = Firebug.currentContext;
 
                         if (context)
-                            Console.log(object.message, context, "consoleMessage", FirebugReps.Text);
+                        {
+                            // Even chrome errors can be nicely formatted in the Console panel
+                            this.logScriptError(context, object, isWarning);
+                            //Console.log(object.message, context, "consoleMessage", FirebugReps.Text);
+                        }
                         else
+                        {
                             FBTrace.sysout("errors.observe, no context for message", object);
+                        }
                     }
                     else
                     {
@@ -648,9 +660,8 @@ function lessTalkMoreAction(context, object, isWarning)
     }
 
     var enabled = Console.isAlwaysEnabled();
-    if (!enabled) {
+    if (!enabled)
         return null;
-    }
 
     var why = whyNotShown(object.sourceName, object.category, isWarning);
     if (why)
@@ -659,6 +670,7 @@ function lessTalkMoreAction(context, object, isWarning)
             FBTrace.sysout("errors.observe dropping "+object.category+" because: "+why);
 
         context.droppedErrors = context.droppedErrors || {};
+
         if (!context.droppedErrors[object.category])
             context.droppedErrors[object.category] = 1;
         else

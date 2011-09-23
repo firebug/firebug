@@ -28,7 +28,7 @@ const Ci = Components.interfaces;
 const nsIPrefBranch2 = Ci.nsIPrefBranch2;
 const PrefService = Cc["@mozilla.org/preferences-service;1"];
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * // * //
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 const logTypes =
 {
@@ -47,7 +47,7 @@ const logTypes =
     "spy": 1
 };
 
-// ********************************************************************************************* //
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 var maxQueueRequests = 500;
 
@@ -391,7 +391,6 @@ Firebug.Console = Obj.extend(ActivableConsole,
             panel.setFilter(Firebug.consoleFilterTypes);
             Firebug.Search.update(context);
         }
-
     },
 
     syncFilterButtons: function(chrome)
