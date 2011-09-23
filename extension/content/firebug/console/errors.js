@@ -186,7 +186,7 @@ var Errors = Firebug.Errors = Obj.extend(Firebug.Module,
 
             // Some categories say: "content javascript" even if come from chrome space.
             var sourceName = (object && object.sourceName) ? object.sourceName : "";
-            if (sourceName.indexOf("chrome") == -1 || sourceName.indexOf("resource") == -1)
+            if (sourceName.indexOf("chrome") == 0 || sourceName.indexOf("resource") == 0)
                 XPConnect = true;
 
             if (ScriptError && !XPConnect)  // all branches should trace 'object'
