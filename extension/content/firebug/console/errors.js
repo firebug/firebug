@@ -221,7 +221,11 @@ var Errors = Firebug.Errors = Obj.extend(Firebug.Module,
                             return;
 
                         if (context)
-                            Console.log(object.message, context, "consoleMessage", FirebugReps.Text);
+                        {
+                            // Even chrome errors can be nicely formatted in the Console panel
+                            this.logScriptError(context, object, isWarning);
+                            //Console.log(object.message, context, "consoleMessage", FirebugReps.Text);
+                        }
                     }
                     else if (object.message)
                     {
