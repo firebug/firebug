@@ -20,17 +20,17 @@ var Fonts = {};
 // Fonts
 
 /*
- * Retrieves all fonts defined in a document
- * @doc: Document to return the fonts for
+ * Retrieves all fonts used inside a node
+ * @node: Node to return the fonts for
  * @return Array of fonts
  */
-Fonts.getAllFonts = function(doc)
+Fonts.getFonts = function(node)
 {
     if (!Dom.domUtils)
         return [];
 
-    var range = doc.createRange();
-    range.selectNode(doc.documentElement);
+    var range = node.ownerDocument.createRange();
+    range.selectNode(node);
     var fontFaces = Dom.domUtils.getUsedFontFaces(range);
     var fonts = [];
     for (var i=0; i<fontFaces.length; i++)
@@ -56,7 +56,7 @@ Fonts.getFontInfo = function(context, win, identifier)
         return false;
     }
 
-    var fonts = Fonts.getAllFonts(doc);
+    var fonts = Fonts.getFonts(doc.documentElement);
     var url = Url.splitURLBase(identifier);
 
     FBTrace.sysout("Fonts.getFontInfo;", {fonts:fonts, url:url});
