@@ -352,6 +352,23 @@ var NetUtils =
             return file.sendingTime;
 
         return file.waitingForTime;
+    },
+
+    getTimeLabelFromMs: function(ms)
+    {
+        var time = new Date();
+        time.setTime(ms);
+        return this.getTimeLabel(time);
+    },
+
+    getTimeLabel: function(date)
+    {
+        var m = date.getMinutes() + "";
+        var s = date.getSeconds() + "";
+        var ms = date.getMilliseconds() + "";
+        return "[" + ((m.length > 1) ? m : "0" + m) + ":" +
+            ((s.length > 1) ? s : "0" + s) + "." +
+            ((ms.length > 2) ? ms : ((ms.length > 1) ? "0" + ms : "00" + ms)) + "]";
     }
 };
 

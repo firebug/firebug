@@ -7,8 +7,9 @@ define([
     "firebug/net/httpLib",
     "firebug/firefox/window",
     "firebug/net/netProgress",
+    "firebug/net/netUtils",
 ],
-function(Xpcom, Obj, FBTrace, Http, Win, NetProgress) {
+function(Xpcom, Obj, FBTrace, Http, Win, NetProgress, NetUtils) {
 
 // ********************************************************************************************* //
 // Constants
@@ -177,7 +178,7 @@ var NetHttpActivityObserver =
         if (FBTrace.DBG_ACTIVITYOBSERVER)
         {
             FBTrace.sysout("activityObserver.observeActivity; " +
-                getTimeLabel(time) + ", " +
+                NetUtils.getTimeLabel(time) + ", " +
                 Http.safeGetRequestName(httpChannel) + ", " +
                 getActivityTypeDescription(activityType) + ", " +
                 getActivitySubtypeDescription(activitySubtype) + ", " +
@@ -246,23 +247,6 @@ var NetHttpActivityObserver =
 
 // ********************************************************************************************* //
 // Activity Observer Tracing Support
-
-function getTimeLabel(date)
-{
-    var m = date.getMinutes() + "";
-    var s = date.getSeconds() + "";
-    var ms = date.getMilliseconds() + "";
-    return "[" + ((m.length > 1) ? m : "0" + m) + ":" +
-        ((s.length > 1) ? s : "0" + s) + "." +
-        ((ms.length > 2) ? ms : ((ms.length > 1) ? "0" + ms : "00" + ms)) + "]";
-}
-
-function getTimeLabelFromMs(ms)
-{
-    var time = new Date();
-    time.setTime(ms);
-    return getTimeLabel(time);
-}
 
 function getActivityTypeDescription(a)
 {

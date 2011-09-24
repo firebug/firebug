@@ -1038,7 +1038,7 @@ NetPanel.prototype = Obj.extend(Firebug.ActivablePanel,
 
         this.barBlockingWidth = Math.round(((blockingEnd - file.startTime) / this.phaseElapsed) * 100);
         this.barResolvingWidth = Math.round(((file.connectingTime - file.startTime) / this.phaseElapsed) * 100);
-        this.barConnectingWidth = Math.round(((file.connectedTime - file.startTime) / this.phaseElapsed) * 100);
+        this.barConnectingWidth = Math.round(((file.sendingTime - file.startTime) / this.phaseElapsed) * 100);
         this.barSendingWidth = Math.round(((file.waitingForTime - file.startTime) / this.phaseElapsed) * 100);
         this.barWaitingWidth = Math.round(((file.respondedTime - file.startTime) / this.phaseElapsed) * 100);
         this.barReceivingWidth = Math.round((elapsed / this.phaseElapsed) * 100);
