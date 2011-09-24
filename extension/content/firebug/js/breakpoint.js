@@ -20,7 +20,7 @@ define([
 function(Obj, Firebug, Domplate, FirebugReps, Locale, Events, SourceLink,
     StackFrame, Css, Dom, Str, Arr, Menu, FBS) {
 
-// ************************************************************************************************
+// ********************************************************************************************* //
 // Breakpoints
 
 Firebug.Breakpoint = Obj.extend(Firebug.Module,
@@ -177,7 +177,7 @@ Firebug.Breakpoint.BreakpointListRep = domplate(Firebug.Rep,
     }
 });
 
-// ************************************************************************************************
+// ********************************************************************************************* //
 
 Firebug.Breakpoint.BreakpointRep = domplate(Firebug.Rep,
 {
@@ -257,7 +257,7 @@ Firebug.Breakpoint.BreakpointRep = domplate(Firebug.Rep,
         return items;
     },
 
-    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
     inspectable: false,
 
@@ -272,7 +272,9 @@ Firebug.Breakpoint.BreakpointRep = domplate(Firebug.Rep,
 
         if (Dom.getAncestorByClass(event.target, "breakpointCheckbox"))
         {
-            var node = event.target.parentNode.getElementsByClassName("objectLink-sourceLink").item(0);
+            var node = event.target.parentNode.getElementsByClassName(
+                "objectLink-sourceLink").item(0);
+
             if (!node)
                 return;
 
@@ -288,8 +290,9 @@ Firebug.Breakpoint.BreakpointRep = domplate(Firebug.Rep,
         else if (Dom.getAncestorByClass(event.target, "closeButton"))
         {
             panel.noRefresh = true;
-            var sourceLink =
-              event.target.parentNode.getElementsByClassName("objectLink-sourceLink").item(0).repObject;
+            var sourceLink = event.target.parentNode.getElementsByClassName(
+                "objectLink-sourceLink").item(0).repObject;
+
             var head = Dom.getAncestorByClass(event.target, "breakpointBlock");
             var groupName = Css.getClassValue(head, "breakpointBlock");
 
@@ -297,11 +300,12 @@ Firebug.Breakpoint.BreakpointRep = domplate(Firebug.Rep,
 
             panel.noRefresh = false;
         }
+
         panel.refresh();
     }
 })};
 
-// ************************************************************************************************
+// ********************************************************************************************* //
 
 Firebug.Breakpoint.BreakpointsPanel = function() {}
 
@@ -406,7 +410,8 @@ Firebug.Breakpoint.BreakpointsPanel.prototype = Obj.extend(Firebug.Panel,
                     FBTrace.sysout("breakpoints.extractBreakpoints type: "+props.type+" in url "+
                         url+"@"+line+" context "+context.getName(), props);
 
-                if (renamer.checkForRename(url, line, props)) // some url in this sourceFileMap has changed, we'll be back.
+                // some url in this sourceFileMap has changed, we'll be back.
+                if (renamer.checkForRename(url, line, props))
                     return;
 
                 if (scripts)  // then this is a current (not future) breakpoint
@@ -440,7 +445,8 @@ Firebug.Breakpoint.BreakpointsPanel.prototype = Obj.extend(Firebug.Panel,
 
             FBS.enumerateErrorBreakpoints(url, {call: function(url, line, props)
             {
-                if (renamer.checkForRename(url, line, props)) // some url in this sourceFileMap has changed, we'll be back.
+                // some url in this sourceFileMap has changed, we'll be back.
+                if (renamer.checkForRename(url, line, props))
                     return;
 
                 var name = Firebug.SourceFile.guessEnclosingFunctionName(url, line, context);
@@ -450,7 +456,8 @@ Firebug.Breakpoint.BreakpointsPanel.prototype = Obj.extend(Firebug.Panel,
 
             FBS.enumerateMonitors(url, {call: function(url, line, props)
             {
-                if (renamer.checkForRename(url, line, props)) // some url in this sourceFileMap has changed, we'll be back.
+                // some url in this sourceFileMap has changed, we'll be back.
+                if (renamer.checkForRename(url, line, props))
                     return;
 
                 var name = Firebug.SourceFile.guessEnclosingFunctionName(url, line, context);
@@ -461,9 +468,18 @@ Firebug.Breakpoint.BreakpointsPanel.prototype = Obj.extend(Firebug.Panel,
         var result = null;
 
         if (renamer.needToRename(context))
-            result = this.extractBreakpoints(context); // since we renamed some sourceFiles we need to refresh the breakpoints again.
+        {
+            // since we renamed some sourceFiles we need to refresh the breakpoints again.
+            result = this.extractBreakpoints(context);
+        }
         else
-            result = { breakpoints: breakpoints, errorBreakpoints: errorBreakpoints, monitors: monitors };
+        {
+            result = {
+                breakpoints: breakpoints,
+                errorBreakpoints: errorBreakpoints,
+                monitors: monitors
+            };
+        }
 
         // even if we did not rename, some bp may be dynamic
         if (FBTrace.DBG_SOURCEFILES)
@@ -565,7 +581,7 @@ Firebug.Breakpoint.BreakpointsPanel.prototype = Obj.extend(Firebug.Panel,
     }
 });
 
-// ************************************************************************************************
+// ********************************************************************************************* //
 
 function countBreakpoints(context)
 {
@@ -580,7 +596,7 @@ function countBreakpoints(context)
     return count;
 }
 
-// ************************************************************************************************
+// ********************************************************************************************* //
 
 Firebug.Breakpoint.BreakpointGroup = function()
 {
@@ -629,7 +645,7 @@ Firebug.Breakpoint.BreakpointGroup.prototype =
     }
 };
 
-// ************************************************************************************************
+// ********************************************************************************************* //
 // TODO move to mozilla back end
 
 function SourceFileRenamer(context)
@@ -654,7 +670,8 @@ SourceFileRenamer.prototype.checkForRename = function(url, line, props)
             }
         }
 
-        this.context.dynamicURLhasBP = true;  // whether not we needed to rename, the dynamic sourceFile has a bp.
+        // whether not we needed to rename, the dynamic sourceFile has a bp.
+        this.context.dynamicURLhasBP = true;
 
         if (FBTrace.DBG_SOURCEFILES)
             FBTrace.sysout("breakpoints.checkForRename found bp in "+sourceFile+" renamed files:",
@@ -663,7 +680,8 @@ SourceFileRenamer.prototype.checkForRename = function(url, line, props)
     else
     {
         if (FBTrace.DBG_SOURCEFILES)
-            FBTrace.sysout("breakpoints.checkForRename found static bp in "+sourceFile+" bp:", props);
+            FBTrace.sysout("breakpoints.checkForRename found static bp in " + sourceFile +
+                " bp:", props);
     }
 
     return (this.renamedSourceFiles.length > 0);
@@ -692,14 +710,17 @@ SourceFileRenamer.prototype.renameSourceFiles = function(context)
         var sameType = bp.type;
         var sameLineNo = bp.lineNo;
 
-        var segs = oldURL.split('/');  // last is sequence #, next-last is "seq", next-next-last is kind
+        // last is sequence #, next-last is "seq", next-next-last is kind
+        var segs = oldURL.split('/');
         var kind = segs.splice(segs.length - 3, 3)[0];
         var callerURL = segs.join('/');
         if (!sourceFile.source)
         {
-            FBTrace.sysout("breakpoint.renameSourceFiles no source for "+oldURL+" callerURL "+callerURL, sourceFile)
+            FBTrace.sysout("breakpoint.renameSourceFiles no source for " + oldURL +
+                " callerURL " + callerURL, sourceFile)
             continue;
         }
+
         var newURL = Firebug.Debugger.getURLFromMD5(callerURL, sourceFile.source, kind);
         sourceFile.href = newURL.href;
 
@@ -718,6 +739,7 @@ SourceFileRenamer.prototype.renameSourceFiles = function(context)
             panel.context.invalidatePanels("breakpoints");
             panel.renameSourceBox(oldURL, newURL.href);
         }
+
         if (context.sourceCache.isCached(oldURL))
         {
             var lines = context.sourceCache.load(oldURL);
@@ -726,8 +748,10 @@ SourceFileRenamer.prototype.renameSourceFiles = function(context)
         }
 
         if (FBTrace.DBG_SOURCEFILES)
-            FBTrace.sysout("SourceFileRenamer renamed "+oldURL +" to "+newURL, { newBP: newBP, oldBP: bp});
+            FBTrace.sysout("SourceFileRenamer renamed " + oldURL + " to " + newURL,
+                { newBP: newBP, oldBP: bp});
     }
+
     return this.renamedSourceFiles.length;
 }
 
