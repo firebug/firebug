@@ -108,12 +108,13 @@ Firebug.Debugger = Obj.extend(Firebug.ActivableModule,
     {
         return this.halt(function evalInFrame(frame)
         {
-            FBTrace.sysout("evaluateInCallingFrame "+js+" fileName: "+frame.script.fileName+" stack: "+
-                StackFrame.getJSDStackDump(frame)+"\n");
+            FBTrace.sysout("evaluateInCallingFrame " + js + " fileName: " +
+                frame.script.fileName + " stack: " + StackFrame.getJSDStackDump(frame));
 
             var result = {};
             var ok = frame.eval(js, fileName, lineNo, result);
             var value = Wrapper.unwrapIValue(result.value, Firebug.viewChrome);
+
             if (ok)
                 return value;
             else
@@ -121,27 +122,24 @@ Firebug.Debugger = Obj.extend(Firebug.ActivableModule,
         });
     },
 
-    /*
+    /**
      * Used by autocomplete in commandLine
      * @return array of global property names
      */
-
-    // on bti
-    getCurrentFrameKeys: function(context)  // TODO remote
+    getCurrentFrameKeys: function(context)  // TODO remote, on bti
     {
-        var globals = Arr.keys(Wrapper.getContentView(context.getGlobalScope()));  // return is safe
-
+        // return is safe
+        var globals = Arr.keys(Wrapper.getContentView(context.getGlobalScope()));
         if (context.currentFrame)
             return this.getFrameKeys(context.currentFrame, globals);
 
         return globals;
     },
 
-    /*
+    /**
      * private to Debugger, returns list of strings
      */
-    // moz
-    getFrameKeys: function(frame, names)
+    getFrameKeys: function(frame, names) // moz
     {
         var listValue = {value: null}, lengthValue = {value: 0};
         frame.scope.getProperties(listValue, lengthValue);
@@ -155,13 +153,13 @@ Firebug.Debugger = Obj.extend(Firebug.ActivableModule,
         return names;
     },
 
-    /* @Deprecated  see chrome.js */
+    // @Deprecated  see chrome.js
     focusWatch: function(context)  // TODO moved
     {
         return Firebug.chrome.focusWatch(context);
     },
 
-    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
     // Private to Debugger
 
     // moz
@@ -179,7 +177,7 @@ Firebug.Debugger = Obj.extend(Firebug.ActivableModule,
         return true;
     },
 
-    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
     // moz
     halt: function(fnOfFrame)
@@ -212,7 +210,8 @@ Firebug.Debugger = Obj.extend(Firebug.ActivableModule,
     // Used by FBTest
     breakAsIfDebugger: function(frame)
     {
-        var debuggr = FBS.findDebugger(frame); // should return 'this' but also sets this.breakContext
+        // should return 'this' but also sets this.breakContext
+        var debuggr = FBS.findDebugger(frame);
         FBS.breakIntoDebugger(debuggr, frame, 3);
     },
 
@@ -296,8 +295,12 @@ Firebug.Debugger = Obj.extend(Firebug.ActivableModule,
             delete context.stopped;
             delete context.stoppedFrame;
             delete context.currentFrame;
+
             if (FBTrace.DBG_UI_LOOP)
-                FBTrace.sysout("debugger.stop extension vetoed stop with hookReturn "+hookReturn);
+            {
+                FBTrace.sysout("debugger.stop extension vetoed stop with hookReturn " +
+                    hookReturn);
+            }
 
             return hookReturn;
         }
@@ -307,7 +310,10 @@ Firebug.Debugger = Obj.extend(Firebug.ActivableModule,
             this.freeze(context);
 
             // We will pause here until resume is called
-            var depth = FBS.enterNestedEventLoop({onNest: Obj.bindFixed(this.startDebugging, this, context)});
+            var depth = FBS.enterNestedEventLoop({
+                onNest: Obj.bindFixed(this.startDebugging, this, context)
+            });
+
             // For some reason we don't always end up here
 
             if (FBTrace.DBG_UI_LOOP)
@@ -371,7 +377,9 @@ Firebug.Debugger = Obj.extend(Firebug.ActivableModule,
             return RETURN_HOOK_ERROR;
         }
         else
+        {
             return RETURN_CONTINUE;
+        }
     },
 
     // on bti
@@ -418,7 +426,6 @@ Firebug.Debugger = Obj.extend(Firebug.ActivableModule,
 
             // In this oldest frame we have element.onclick(event) or window.foo()
             // We want to cause the page to run this again after we abort this call stack.
-            //
             function getStoreRerunInfoScript(fnName)
             {
                 var str = "if (!window._firebug)window._firebug={};\n";
@@ -536,7 +543,7 @@ Firebug.Debugger = Obj.extend(Firebug.ActivableModule,
         this.resume(context);
     },
 
-    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
     // moz
 
     freeze: function(context)
@@ -557,20 +564,25 @@ Firebug.Debugger = Obj.extend(Firebug.ActivableModule,
                     {
                         if (!context.saveFocus)
                         {
-                            Events.removeEventListener(context.window, 'blur', context.discardBlurEvents, true);
+                            Events.removeEventListener(context.window, "blur",
+                                context.discardBlurEvents, true);
                             delete context.discardBlurEvents;
                         }
 
                         if (FBTrace.DBG_UI_LOOP)
-                            FBTrace.sysout("debugger.freeze discard blur event "+context.saveFocus+
-                                " while focus is "+context.window.document.commandDispatcher.focusedElement,
+                        {
+                            FBTrace.sysout("debugger.freeze discard blur event " +
+                                context.saveFocus + " while focus is " +
+                                context.window.document.commandDispatcher.focusedElement,
                                 event);
+                        }
 
                         event.preventDefault();
                         event.stopPropagation();
                     },
 
-                    Events.addEventListener(context.window, 'blur', context.discardBlurEvents, true);
+                    Events.addEventListener(context.window, "blur",
+                        context.discardBlurEvents, true);
                 }
             }
 
@@ -589,7 +601,8 @@ Firebug.Debugger = Obj.extend(Firebug.ActivableModule,
         {
             // This attribute is only valid for contexts which implement nsIScriptContext.
             if (FBTrace.DBG_UI_LOOP)
-                FBTrace.sysout("debugger.freeze, freeze exception "+exc+" in "+context.getName(), exc);
+                FBTrace.sysout("debugger.freeze, freeze exception " + exc + " in " +
+                    context.getName(), exc);
         }
     },
 
@@ -730,13 +743,17 @@ Firebug.Debugger = Obj.extend(Firebug.ActivableModule,
         }
         else
         {
-            FBS.enumerateBreakpoints(null, {call: function(url, lineNo, bp) // null means all urls
+            // null means all urls
+            FBS.enumerateBreakpoints(null, {call: function(url, lineNo, bp)
             {
-                if (bp.debuggerName !== Firebug.Debugger.debuggerName) // skip breakpoints of other debuggers.
+                // skip breakpoints of other debuggers.
+                if (bp.debuggerName !== Firebug.Debugger.debuggerName)
                     return;
 
-                if (context && !context.getCompilationUnit(url)) // then we want to clear only one context,
-                    return;                                      // so skip URLs in other contexts
+                // then we want to clear only one context,
+                // so skip URLs in other contexts
+                if (context && !context.getCompilationUnit(url))
+                    return;
 
                 FBS.clearBreakpoint(url, lineNo);
             }});
@@ -747,6 +764,7 @@ Firebug.Debugger = Obj.extend(Firebug.ActivableModule,
     {
         if (FBTrace.DBG_BP)
             FBTrace.sysout("enableAllBreakpoints sourceFileMap:", context.sourceFileMap);
+
         for (var url in context.sourceFileMap)
         {
             FBS.enumerateBreakpoints(url, {call: function(url, lineNo)
@@ -791,7 +809,7 @@ Firebug.Debugger = Obj.extend(Firebug.ActivableModule,
         return count;
     },
 
-    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
     // Debugging and monitoring
 
     traceAll: function(context)
@@ -808,15 +826,25 @@ Firebug.Debugger = Obj.extend(Firebug.ActivableModule,
     {
         if (typeof(fn) == "function" || fn instanceof Function)
         {
-            var script = Firebug.SourceFile.findScriptForFunctionInContext(Firebug.currentContext, fn);
+            var script = Firebug.SourceFile.findScriptForFunctionInContext(
+                Firebug.currentContext, fn);
+
             if (script)
+            {
                 this.monitorScript(fn, script, mode);
+            }
             else
-                Firebug.Console.logFormatted(["Firebug unable to locate jsdIScript for function", fn], Firebug.currentContext, "info");
+            {
+                Firebug.Console.logFormatted(
+                    ["Firebug unable to locate jsdIScript for function", fn],
+                    Firebug.currentContext, "info");
+            }
         }
         else
         {
-            Firebug.Console.logFormatted(["Firebug.Debugger.monitorFunction requires a function", fn], Firebug.currentContext, "info");
+            Firebug.Console.logFormatted(
+                ["Firebug.Debugger.monitorFunction requires a function", fn],
+                Firebug.currentContext, "info");
         }
     },
 
@@ -824,7 +852,9 @@ Firebug.Debugger = Obj.extend(Firebug.ActivableModule,
     {
         if (typeof(fn) == "function" || fn instanceof Function)
         {
-            var script = Firebug.SourceFile.findScriptForFunctionInContext(Firebug.currentContext, fn);
+            var script = Firebug.SourceFile.findScriptForFunctionInContext(
+                Firebug.currentContext, fn);
+
             if (script)
                 this.unmonitorScript(fn, script, mode);
         }
@@ -832,7 +862,9 @@ Firebug.Debugger = Obj.extend(Firebug.ActivableModule,
 
     monitorScript: function(fn, script, mode)
     {
-        var scriptInfo = Firebug.SourceFile.getSourceFileAndLineByScript(Firebug.currentContext, script);
+        var scriptInfo = Firebug.SourceFile.getSourceFileAndLineByScript(
+            Firebug.currentContext, script);
+
         if (scriptInfo)
         {
             if (mode == "debug")
@@ -844,7 +876,9 @@ Firebug.Debugger = Obj.extend(Firebug.ActivableModule,
 
     unmonitorScript: function(fn, script, mode)
     {
-        var scriptInfo = Firebug.SourceFile.getSourceFileAndLineByScript(Firebug.currentContext, script);
+        var scriptInfo = Firebug.SourceFile.getSourceFileAndLineByScript(
+            Firebug.currentContext, script);
+
         if (scriptInfo)
         {
             if (mode == "debug")
@@ -893,7 +927,7 @@ Firebug.Debugger = Obj.extend(Firebug.ActivableModule,
             FBS.untraceCalls(scriptInfo.sourceFile, scriptInfo.lineNo, Firebug.Debugger);
     },
 
-    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
     // UI Stuff
 
     /*
@@ -902,8 +936,8 @@ Firebug.Debugger = Obj.extend(Firebug.ActivableModule,
     startDebugging: function(context)
     {
         if (FBTrace.DBG_UI_LOOP)
-            FBTrace.sysout("Firebug.Debugger startDebugging enter context.stopped:"+context.stopped+
-                " for context: "+context.getName()+"\n");
+            FBTrace.sysout("Firebug.Debugger startDebugging enter context.stopped:" +
+                context.stopped + " for context: " + context.getName());
 
         try
         {
@@ -917,21 +951,25 @@ Firebug.Debugger = Obj.extend(Firebug.ActivableModule,
             {
                 if (FBTrace.DBG_UI_LOOP)
                     FBTrace.sysout("startDebugging resuming, no sourceFile for "+
-                        context.stoppedFrame.script.fileName, context.stoppedFrame.script.functionSource);
+                        context.stoppedFrame.script.fileName,
+                        context.stoppedFrame.script.functionSource);
 
                 this.resume(context);
                 return;
             }
 
+            // Make Firebug.currentContext = context and sync the UI
             if (context != Firebug.currentContext)
-                Firebug.selectContext(context);  // Make Firebug.currentContext = context and sync the UI
+                Firebug.selectContext(context);
 
         }
         catch(exc)
         {
             if (FBTrace.DBG_ERRORS)
                 FBTrace.sysout("Resuming debugger: error during debugging loop: "+exc, exc);
+
             Firebug.Console.log("Resuming debugger: error during debugging loop: "+exc);
+
             this.resume(context);
         }
 
@@ -939,17 +977,18 @@ Firebug.Debugger = Obj.extend(Firebug.ActivableModule,
         Firebug.connection.dispatch( "onStartDebugging", [context, frame]);
 
         if (FBTrace.DBG_UI_LOOP)
-            FBTrace.sysout("startDebugging exit context.stopped:"+context.stopped+" for context: "+
-                context.getName()+"\n");
+            FBTrace.sysout("startDebugging exit context.stopped:" + context.stopped +
+                " for context: " + context.getName());
     },
 
-    /*
+    /**
      * Called in the main event loop, from jsd, after we have exited the nested event loop
      */
-
     stopDebugging: function(context)
     {
-        if (FBTrace.DBG_UI_LOOP) FBTrace.sysout("stopDebugging enter context: "+context.getName()+"\n");
+        if (FBTrace.DBG_UI_LOOP)
+            FBTrace.sysout("stopDebugging enter context: " + context.getName());
+
         try
         {
             FBS.unlockDebugger();
@@ -995,26 +1034,31 @@ Firebug.Debugger = Obj.extend(Firebug.ActivableModule,
         Firebug.resumeFirebug();
     },
 
-    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
     supportsWindow: function(win)
     {
         if (!this.isAlwaysEnabled())
             return false;
 
-        var context = ( (win && Firebug.TabWatcher) ? Firebug.TabWatcher.getContextByWindow(win) : null);
+        var context = ((win && Firebug.TabWatcher) ?
+            Firebug.TabWatcher.getContextByWindow(win) : null);
 
         this.breakContext = context;
         return !!context;
     },
 
-    supportsGlobal: function(frameWin) // This is call from fbs for almost all fbs operations
+    // This is call from fbs for almost all fbs operations
+    supportsGlobal: function(frameWin)
     {
-        var context = ( (frameWin && Firebug.TabWatcher) ? Firebug.TabWatcher.getContextByWindow(frameWin) : null);
+        var context = ( (frameWin && Firebug.TabWatcher) ?
+            Firebug.TabWatcher.getContextByWindow(frameWin) : null);
+
         if (!context)
             return false;
 
-        context.jsDebuggerCalledUs = true;  // otherwise we cannot be called.
+        // otherwise we cannot be called.
+        context.jsDebuggerCalledUs = true;
 
         if (!Firebug.Console.injector.isAttached(context, frameWin))
         {
@@ -1059,7 +1103,8 @@ Firebug.Debugger = Obj.extend(Firebug.ActivableModule,
         else
         {
             if (FBTrace.DBG_CONSOLE)
-                FBTrace.sysout("debugger.supportsGlobal injectConsole console NOT enabled ", frameWin);
+                FBTrace.sysout("debugger.supportsGlobal injectConsole console NOT enabled ",
+                    frameWin);
         }
     },
 
@@ -1081,7 +1126,7 @@ Firebug.Debugger = Obj.extend(Firebug.ActivableModule,
 
             if (FBTrace.DBG_BP || (!context && FBTrace.DBG_FBS_ERRORS))
                 FBTrace.sysout("debugger.onBreak breakContext: " +
-                    (context ? context.getName() : " none!"), StackFrame.getJSDStackDump(frame) );
+                    (context ? context.getName() : " none!"), StackFrame.getJSDStackDump(frame));
 
             delete this.breakContext;
 
@@ -1116,27 +1161,33 @@ Firebug.Debugger = Obj.extend(Firebug.ActivableModule,
 
         if (trace)
         {
-            //trace.frames = trace.frames.slice(1); // drop the firebugDebuggerTracer and reorder
+            // drop the firebugDebuggerTracer and reorder
+            //trace.frames = trace.frames.slice(1);
+
             if (FBTrace.DBG_ERRORLOG)
                 FBTrace.sysout("debugger.firebugDebuggerTracer dropped tracer trace.frames "+
                     trace.frames.length, trace.frames);
 
             if (Wrapper.getContentView(context.window)._firebugStackTrace == "requested")
             {
-                trace.frames = trace.frames.slice(1);  // drop console.error() see consoleInjected.js
+                // drop console.error() see consoleInjected.js
+                trace.frames = trace.frames.slice(1);
+
                 if (FBTrace.DBG_ERRORLOG)
                     FBTrace.sysout("debugger.firebugDebuggerTracer requested trace.frames "+
                         trace.frames.length, trace.frames);
+
                 context.stackTrace = trace;
             }
             else
             {
-                trace.frames = trace.frames.slice(1);  // drop one frame see attachConsoleInjector
+                // drop one frame see attachConsoleInjector
+                trace.frames = trace.frames.slice(1);
                 Firebug.Console.log(trace, context, "stackTrace");
             }
         }
 
-        if(FBTrace.DBG_BP)
+        if (FBTrace.DBG_BP)
             FBTrace.sysout("debugger.onBreak "+(trace?"debugger trace":" debugger no trace!"));
 
         return RETURN_CONTINUE;
@@ -1166,9 +1217,11 @@ Firebug.Debugger = Obj.extend(Firebug.ActivableModule,
             message: Locale.$STR("firebug.bon.cause.disableDebuggerKeyword2"),
             skipAction: function addSkipperAndGo()
             {
-                // a breakpoint that never hits, but prevents debugger keyword (see FBS.onDebugger as well)
+                // a breakpoint that never hits, but prevents debugger keyword
+                // (see FBS.onDebugger as well)
                 var bp = Firebug.Debugger.setBreakpoint(sourceFile, lineNo);
                 FBS.disableBreakpoint(sourceFile.href, lineNo);
+
                 if (FBTrace.DBG_BP)
                     FBTrace.sysout("debugger.onBreak converted to disabled bp "+sourceFile.href+
                         "@"+lineNo+" tag: "+frame.script.tag, bp);
@@ -1191,7 +1244,8 @@ Firebug.Debugger = Obj.extend(Firebug.ActivableModule,
         }
 
         if (FBTrace.DBG_BP)
-            FBTrace.sysout("debugger.onThrow context:"+(context?context.getName():"undefined")+"\n");
+            FBTrace.sysout("debugger.onThrow context:" + (context ? context.getName() :
+                "undefined"));
 
         if (!context)
             return RETURN_CONTINUE_THROW;
@@ -1211,7 +1265,8 @@ Firebug.Debugger = Obj.extend(Firebug.ActivableModule,
             }
             else
             {
-                if (FBTrace.DBG_BP) FBTrace.sysout("debugger.onThrow isCatch\n");
+                if (FBTrace.DBG_BP)
+                    FBTrace.sysout("debugger.onThrow isCatch\n");
             }
         }
         catch  (exc)
@@ -1221,6 +1276,7 @@ Firebug.Debugger = Obj.extend(Firebug.ActivableModule,
 
         if (Firebug.connection.dispatch("onThrow",[context, frame, rv]))
             return this.stop(context, frame, TYPE_THROW, rv);
+
         return RETURN_CONTINUE_THROW;
     },
 
@@ -1238,12 +1294,13 @@ Firebug.Debugger = Obj.extend(Firebug.ActivableModule,
                     var preFrameSig = trace[i].signature();
 
                     if (FBTrace.DBG_ERRORS && FBTrace.DBG_STACK)
-                        FBTrace.sysout("debugger.isCatchFromPreviousThrow "+curFrameSig+"=="+
-                            preFrameSig+"\n");
+                        FBTrace.sysout("debugger.isCatchFromPreviousThrow " + curFrameSig + "==" +
+                            preFrameSig);
 
                     if (curFrameSig == preFrameSig)
                     {
-                        return true;  // catch from previous throw (or do we need to compare whole stack?
+                        // catch from previous throw (or do we need to compare whole stack?
+                        return true;
                     }
                 }
                 // We looked at the previous stack and did not match the current frame
@@ -1271,6 +1328,7 @@ Firebug.Debugger = Obj.extend(Firebug.ActivableModule,
     {
         if (!context)
             context = this.getContextByFrame(frame);
+
         if (!context)
             return RETURN_CONTINUE;
 
@@ -1296,6 +1354,7 @@ Firebug.Debugger = Obj.extend(Firebug.ActivableModule,
                 frame = FBS.discardRecursionFrames(frame);
 
             Firebug.errorStackTrace = StackFrame.getCorrectedStackTrace(frame, context);
+
             if (FBTrace.DBG_ERRORS)
                 FBTrace.sysout("debugger.onError; break=" + Firebug.breakOnErrors +
                     ", errorStackTrace:", Firebug.errorStackTrace);
@@ -1351,7 +1410,8 @@ Firebug.Debugger = Obj.extend(Firebug.ActivableModule,
                 }});
 
                 if (FBTrace.DBG_BP)
-                    FBTrace.sysout("debugger.breakon Errors "+doBreak+" for "+sourceFile.href+"@"+lineNo);
+                    FBTrace.sysout("debugger.breakon Errors " + doBreak + " for " +
+                        sourceFile.href + "@" + lineNo);
 
                 if (doBreak)
                 {
@@ -1425,7 +1485,8 @@ Firebug.Debugger = Obj.extend(Firebug.ActivableModule,
             {
                 if (FBTrace.DBG_SOURCEFILES)
                     FBTrace.sysout("debugger.onXULScriptCreated reuse sourcefile="+
-                        sourceFile.toString()+" -> "+context.getName()+" ("+context.uid+")"+"\n");
+                        sourceFile.toString()+" -> "+context.getName()+" ("+context.uid+")");
+
                 Firebug.SourceFile.addScriptsToSourceFile(sourceFile, null, innerScriptEnumerator);
             }
             else
@@ -1454,7 +1515,8 @@ Firebug.Debugger = Obj.extend(Firebug.ActivableModule,
         try
         {
             if (FBTrace.DBG_EVAL)
-                FBTrace.sysout("debugger.onEvalLevelScript script.fileName="+outerScript.fileName+"\n");
+                FBTrace.sysout("debugger.onEvalLevelScript script.fileName=" +
+                    outerScript.fileName);
 
             var context = this.breakContext;
             delete this.breakContext;
@@ -1478,7 +1540,8 @@ Firebug.Debugger = Obj.extend(Firebug.ActivableModule,
     onEventScriptCreated: function(frame, outerScript, innerScripts)
     {
         if (FBTrace.DBG_EVENTS)
-            FBTrace.sysout("debugger.onEventScriptCreated script.fileName="+outerScript.fileName, {outerScript: outerScript, script: frame.script});
+            FBTrace.sysout("debugger.onEventScriptCreated script.fileName=" +
+                outerScript.fileName, {outerScript: outerScript, script: frame.script});
 
         var context = this.breakContext;
         delete this.breakContext;
@@ -1486,7 +1549,9 @@ Firebug.Debugger = Obj.extend(Firebug.ActivableModule,
         var script = frame.script;
         var creatorURL = Url.normalizeURL(frame.script.fileName);
         var innerScriptArray = [];
-        try {
+
+        try
+        {
             var source = script.functionSource;
 
             while (innerScripts.hasMoreElements())
@@ -1495,15 +1560,18 @@ Firebug.Debugger = Obj.extend(Firebug.ActivableModule,
                 source += "\n"+inner.functionSource;
                 innerScriptArray.push(inner);
             }
-
-        } catch (exc) {
+        }
+        catch (exc)
+        {
             /*Bug 426692 */
             var source = creatorURL + "/"+Obj.getUniqueId();
         }
 
         var lines = Str.splitLines(source);
 
-        var urlDescribed = this.getDynamicURL(context, Url.normalizeURL(frame.script.fileName), lines, "event");
+        var urlDescribed = this.getDynamicURL(context,
+            Url.normalizeURL(frame.script.fileName), lines, "event");
+
         var handlerName = outerScript.functionName;
         if (handlerName)
             var url = urlDescribed.href + '/' + handlerName;
@@ -1542,7 +1610,8 @@ Firebug.Debugger = Obj.extend(Firebug.ActivableModule,
         var context = this.breakContext;
         delete this.breakContext;
 
-        // This is our only chance to get the linetable for the outerScript since it will run and be GC next.
+        // This is our only chance to get the linetable for the outerScript
+        // since it will run and be GC next.
         var script = frame.script;
         var url = Url.normalizeURL(script.fileName);
 
@@ -1551,6 +1620,7 @@ Firebug.Debugger = Obj.extend(Firebug.ActivableModule,
                 " has url="+url);
 
         var isInline = false;
+
         /* The primary purpose here was to deal with http://code.google.com/p/fbug/issues/detail?id=2912
          * This approach could be applied to inline scripts, so I'll leave the code here until we decide.
         Win.iterateWindows(context.window, function isInlineScriptTag(win)
@@ -1562,39 +1632,46 @@ Firebug.Debugger = Obj.extend(Firebug.ActivableModule,
                 return isInline;
             }
         });
-    */
+        */
+
         if (FBTrace.DBG_TOPLEVEL)
             FBTrace.sysout("debugger.onTopLevelScriptCreated has inLine:"+isInline+" url="+url);
 
         if (isInline) // never true see above
         {
             var href = url +"/"+context.dynamicURLIndex++;
-            sourceFile = new Firebug.ScriptTagAppendSourceFile(href, script, script.lineExtent, innerScripts);
+            sourceFile = new Firebug.ScriptTagAppendSourceFile(href, script,
+                script.lineExtent, innerScripts);
             this.watchSourceFile(context, sourceFile);
             context.pendingScriptTagSourceFile = sourceFile;
         }
         else
         {
             var sourceFile = context.sourceFileMap[url];
-            if (sourceFile && (sourceFile instanceof Firebug.TopLevelSourceFile) )  // Multiple script tags in HTML or duplicate .js file names.
+
+            // Multiple script tags in HTML or duplicate .js file names.
+            if (sourceFile && (sourceFile instanceof Firebug.TopLevelSourceFile))
             {
                     if (FBTrace.DBG_SOURCEFILES)
                         FBTrace.sysout("debugger.onTopLevelScriptCreated reuse sourcefile="+
-                            sourceFile.toString()+" -> "+context.getName()+" ("+context.uid+")"+"\n");
+                            sourceFile.toString()+" -> "+context.getName()+" ("+context.uid+")");
 
                     if (!sourceFile.outerScript || !sourceFile.outerScript.isValid)
                         sourceFile.outerScript = outerScript;
 
-                    Firebug.SourceFile.addScriptsToSourceFile(sourceFile, outerScript, innerScripts);
+                    Firebug.SourceFile.addScriptsToSourceFile(sourceFile, outerScript,
+                        innerScripts);
             }
             else
             {
-                sourceFile = new Firebug.TopLevelSourceFile(url, script, script.lineExtent, innerScripts);
+                sourceFile = new Firebug.TopLevelSourceFile(url, script, script.lineExtent,
+                    innerScripts);
+
                 this.watchSourceFile(context, sourceFile);
 
                 if (FBTrace.DBG_SOURCEFILES)
                     FBTrace.sysout("debugger.onTopLevelScriptCreated create sourcefile="+
-                        sourceFile.toString()+" -> "+context.getName()+" ("+context.uid+")"+"\n");
+                        sourceFile.toString()+" -> "+context.getName()+" ("+context.uid+")");
             }
         }
 
@@ -1606,11 +1683,12 @@ Firebug.Debugger = Obj.extend(Firebug.ActivableModule,
     {
         if (FBTrace.DBG_BP)
             FBTrace.sysout("debugger.getContextByFrame");
+
         var win = FBS.getOutermostScope(frame);
         return win ? Firebug.TabWatcher.getContextByWindow(win) : null;
     },
 
-    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
     watchSourceFile: function(context, sourceFile)
     {
@@ -1624,15 +1702,16 @@ Firebug.Debugger = Obj.extend(Firebug.ActivableModule,
         context.removeSourceFile(sourceFile);
     },
 
-    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
     onToggleBreakpoint: function(url, lineNo, isSet, props)
     {
         if (props.debuggerName != this.debuggerName) // then not for us
         {
             if (FBTrace.DBG_BP)
-                FBTrace.sysout("debugger("+this.debuggerName+").onToggleBreakpoint ignoring toggle for "+
-                    props.debuggerName+" target "+lineNo+"@"+url+"\n");
+                FBTrace.sysout("debugger(" + this.debuggerName +
+                    ").onToggleBreakpoint ignoring toggle for " +
+                    props.debuggerName + " target " + lineNo + "@" + url);
             return;
         }
 
@@ -1644,7 +1723,8 @@ Firebug.Debugger = Obj.extend(Firebug.ActivableModule,
             if (sourceFile)
             {
                 if (FBTrace.DBG_BP)
-                    FBTrace.sysout("debugger("+this.debuggerName+").onToggleBreakpoint found context "+
+                    FBTrace.sysout("debugger(" + this.debuggerName +
+                        ").onToggleBreakpoint found context " +
                         context.getName());
 
                 if (!isSet && context.dynamicURLhasBP)
@@ -1668,7 +1748,7 @@ Firebug.Debugger = Obj.extend(Firebug.ActivableModule,
                 var row = sourceBox.getLineNode(lineNo);
                 if (FBTrace.DBG_BP)
                     FBTrace.sysout(i+") onToggleBreakpoint getLineNode="+row+" lineNo="+lineNo+
-                        " context:"+context.getName()+"\n");
+                        " context:"+context.getName());
 
                 if (!row)
                     continue;  // we *should* only be called for lines in the viewport...
@@ -1710,11 +1790,13 @@ Firebug.Debugger = Obj.extend(Firebug.ActivableModule,
                 continue;
             }
         }
+
         if (FBTrace.DBG_BP && !found)
             FBTrace.sysout("debugger("+this.debuggerName+").onToggleBreakpoint no find context");
     },
 
-    // xxxHonza, xxxjjb: duplicated in script.js, does it belong here? But onToggleBreakpoint needs it.
+    // xxxHonza, xxxjjb: duplicated in script.js, does it belong here?
+    // But onToggleBreakpoint needs it.
     ableWatchSidePanel: function(context)
     {
         // TODO if (commandline is not active, then we should not show the new watch feature)
@@ -1782,9 +1864,9 @@ Firebug.Debugger = Obj.extend(Firebug.ActivableModule,
             FBTrace.sysout("debugger.checkDynamicURLhasBP "+context.dynamicURLhasBP);
     },
 
-    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
-    // XXXjjb this code is not called, because I found the scheme for detecting Function too complex.
-    // I'm leaving it here to remind us that we need to support new Function().
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+    // XXXjjb this code is not called, because I found the scheme for detecting Function
+    // too complex. I'm leaving it here to remind us that we need to support new Function().
     onFunctionConstructor: function(frame, ctor_script)
     {
        try
@@ -1796,11 +1878,16 @@ Firebug.Debugger = Obj.extend(Firebug.ActivableModule,
 
             if (FBTrace.DBG_EVAL)
             {
-                FBTrace.sysout("debugger.onFunctionConstructor tag="+ctor_script.tag+" url="+sourceFile.href+"\n");
-                FBTrace.sysout(StackFrame.traceToString(StackFrame.getCorrectedStackTrace(frame, context))+"\n");
+                FBTrace.sysout("debugger.onFunctionConstructor tag=" + ctor_script.tag +
+                    " url=" + sourceFile.href);
+
+                FBTrace.sysout(StackFrame.traceToString(
+                    StackFrame.getCorrectedStackTrace(frame, context)));
             }
 
-            Firebug.connection.dispatch("onFunctionConstructor",[context, frame, ctor_script, sourceFile.href]);
+            Firebug.connection.dispatch("onFunctionConstructor",
+                [context, frame, ctor_script, sourceFile.href]);
+
             return sourceFile.href;
         }
         catch(exc)
@@ -1821,18 +1908,27 @@ Firebug.Debugger = Obj.extend(Firebug.ActivableModule,
         if (FBTrace.DBG_EVAL)
             FBTrace.sysout("createSourceFileForFunctionConstructor ctor_expr:"+ctor_expr+"\n");
 
+        var source;
         if (ctor_expr)
-            var source  = this.getEvalBody(caller_frame, "lib.createSourceFileForFunctionConstructor ctor_expr", 1, ctor_expr);
+        {
+            source = this.getEvalBody(caller_frame,
+                "lib.createSourceFileForFunctionConstructor ctor_expr", 1, ctor_expr);
+        }
         else
-            var source = " bah createSourceFileForFunctionConstructor"; //ctor_script.functionSource;
+        {
+            source = " bah createSourceFileForFunctionConstructor"; //ctor_script.functionSource;
+        }
 
         if (FBTrace.DBG_EVAL)
-            FBTrace.sysout("createSourceFileForFunctionConstructor source:"+source+"\n");
+            FBTrace.sysout("createSourceFileForFunctionConstructor source:"+source);
 
-        var url = this.getDynamicURL(context, Url.normalizeURL(caller_frame.script.fileName), source, "Function");
+        var url = this.getDynamicURL(context, Url.normalizeURL(caller_frame.script.fileName),
+            source, "Function");
 
         var lines = context.sourceCache.store(url.href, source);
-        var sourceFile = new Firebug.FunctionConstructorSourceFile(url, caller_frame.script, ctor_expr, lines.length);
+        var sourceFile = new Firebug.FunctionConstructorSourceFile(url, caller_frame.script,
+            ctor_expr, lines.length);
+
         this.watchSourceFile(context, sourceFile);
 
         if (FBTrace.DBG_SOURCEFILES)
@@ -1847,15 +1943,17 @@ Firebug.Debugger = Obj.extend(Firebug.ActivableModule,
         // We believe we are just after the ctor call.
         var decompiled_lineno = getLineAtPC(caller_frame, context);
         if (FBTrace.DBG_EVAL)
-            FBTrace.sysout("debugger.getConstructoreExpression decompiled_lineno:"+decompiled_lineno+"\n");
+            FBTrace.sysout("debugger.getConstructoreExpression decompiled_lineno:"+
+                decompiled_lineno+"\n");
 
-        var decompiled_lines = Str.splitLines(caller_frame.script.functionSource);  // TODO place in sourceCache?
+        // TODO place in sourceCache?
+        var decompiled_lines = Str.splitLines(caller_frame.script.functionSource);
         if (FBTrace.DBG_EVAL)
             FBTrace.sysout("debugger.getConstructoreExpression decompiled_lines:",decompiled_lines);
 
         var candidate_line = decompiled_lines[decompiled_lineno - 1]; // zero origin
         if (FBTrace.DBG_EVAL)
-            FBTrace.sysout("debugger.getConstructoreExpression candidate_line:"+candidate_line+"\n");
+            FBTrace.sysout("debugger.getConstructoreExpression candidate_line:" + candidate_line);
 
         if (candidate_line && candidate_line != null)
         {
@@ -1877,7 +1975,7 @@ Firebug.Debugger = Obj.extend(Firebug.ActivableModule,
     },
 
     // end of guilt trip
-    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
     // Called by debugger.onEval() to store eval() source.
     // The frame has the blank-function-name script and it is not the top frame.
@@ -1889,11 +1987,14 @@ Firebug.Debugger = Obj.extend(Firebug.ActivableModule,
     getEvalLevelSourceFile: function(frame, context, innerScripts)
     {
         var eval_expr = this.getEvalExpression(frame, context);
-        if (FBTrace.DBG_EVAL) FBTrace.sysout("getEvalLevelSourceFile eval_expr:"+eval_expr+"\n");
+
+        if (FBTrace.DBG_EVAL)
+            FBTrace.sysout("getEvalLevelSourceFile eval_expr:"+eval_expr);
 
         if (eval_expr)
         {
-            var source  = this.getEvalBody(frame, "lib.getEvalLevelSourceFile.getEvalBody", 1, eval_expr);
+            var source  = this.getEvalBody(frame, "lib.getEvalLevelSourceFile.getEvalBody",
+                1, eval_expr);
             var mapType = PCMAP_SOURCETEXT;
         }
         else
@@ -1906,9 +2007,10 @@ Firebug.Debugger = Obj.extend(Firebug.ActivableModule,
 
         if (FBTrace.DBG_EVAL)
             FBTrace.sysout("getEvalLevelSourceFile "+lines.length+ "lines, mapType:"+
-                ((mapType==PCMAP_SOURCETEXT)?"SOURCE":"PRETTY")+" source:"+source+"\n");
+                ((mapType==PCMAP_SOURCETEXT)?"SOURCE":"PRETTY")+" source:"+source);
 
-        var url = this.getDynamicURL(context, Url.normalizeURL(frame.script.fileName), lines, "eval");
+        var url = this.getDynamicURL(context, Url.normalizeURL(frame.script.fileName),
+            lines, "eval");
 
         context.sourceCache.invalidate(url.href);
         context.sourceCache.storeSplitLines(url.href, lines);
@@ -1954,8 +2056,10 @@ Firebug.Debugger = Obj.extend(Firebug.ActivableModule,
         var m = reURIinComment.exec(lines[lines.length - 1]);
         if (m)
         {
-            // add context info to the sourceURL so eval'd sources are grouped correctly in the source file list
-            if (m[1] && m[1].indexOf('://') == -1) {
+            // add context info to the sourceURL so eval'd sources are grouped
+            // correctly in the source file list
+            if (m[1] && m[1].indexOf('://') == -1)
+            {
                 var loc = context.window.location;
                 if (m[1].charAt(0) != '/') m[1] = '/'+m[1]; // prepend leading slash if necessary
                 m[1] = loc.protocol + '//' + loc.host + m[1]; // prepend protocol and host
@@ -1972,6 +2076,7 @@ Firebug.Debugger = Obj.extend(Firebug.ActivableModule,
             if (FBTrace.DBG_SOURCEFILES)
                 FBTrace.sysout("debugger.getURLFromLastLine no match"+lines[lines.length - 1]);
         }
+
         return url;
     },
 
@@ -2005,8 +2110,10 @@ Firebug.Debugger = Obj.extend(Firebug.ActivableModule,
         this.hash_service.update(byteArray, byteArray.length);
         var hash = this.hash_service.finish(true);
 
-        // encoding the hash should be ok, it should be information-preserving? Or at least reversable?
-        var href= new String(callerURL + (kind ? "/"+kind+"/" : "/nokind/")+"MD5/" + encodeURIComponent(hash));
+        // encoding the hash should be ok, it should be information-preserving?
+        // Or at least reversable?
+        var href= new String(callerURL + (kind ? "/"+kind+"/" : "/nokind/")+"MD5/" +
+            encodeURIComponent(hash));
         url = {href: href, kind: "MD5"};
 
         if (FBTrace.DBG_SOURCEFILES)
@@ -2020,7 +2127,9 @@ Firebug.Debugger = Obj.extend(Firebug.ActivableModule,
         var url = null;
         var href = null;
         if (!source)
+        {
             href = "eval."+script.tag;
+        }
         else
         {
             // data:text/javascript;fileName=x%2Cy.js;baseLineNumber=10,<the-url-encoded-data>
@@ -2030,13 +2139,15 @@ Firebug.Debugger = Obj.extend(Firebug.ActivableModule,
             //url +=  ";"+ "baseLineNumber="+encodeURIComponent(script.baseLineNumber) +
             href +="," + encodeURIComponent(source);
         }
+
         url = {href:href, kind:"data"};
         if (FBTrace.DBG_SOURCEFILES)
             FBTrace.sysout("debugger.getDataURLForScript "+url.href, url);
+
         return url;
     },
 
-    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
     getEvalExpression: function(frame, context)
     {
@@ -2061,9 +2172,9 @@ Firebug.Debugger = Obj.extend(Firebug.ActivableModule,
             }
 
             var htm = reHTM.exec(url);
-            if (htm) {
+            if (htm)
                 lineNo = lineNo + 1; // embedded scripts seem to be off by one?  XXXjjb heuristic
-            }
+
             // Walk backwards from the first line in the function until we find the line which
             // matches the pattern above, which is the eval call
             var line = "";
@@ -2087,11 +2198,16 @@ Firebug.Debugger = Obj.extend(Firebug.ActivableModule,
         var sourceFile = Firebug.SourceFile.getSourceFileByScript(context, callingFrame.script);
         if (sourceFile)
         {
-            if (FBTrace.DBG_EVAL) {
-                FBTrace.sysout("debugger.getEvalExpressionFromEval sourceFile.href="+sourceFile.href+"\n");
-                FBTrace.sysout("debugger.getEvalExpressionFromEval callingFrame.pc="+callingFrame.pc
-                    +" callingFrame.script.baseLineNumber="+callingFrame.script.baseLineNumber+"\n");
+            if (FBTrace.DBG_EVAL)
+            {
+                FBTrace.sysout("debugger.getEvalExpressionFromEval sourceFile.href=" +
+                    sourceFile.href);
+
+                FBTrace.sysout("debugger.getEvalExpressionFromEval callingFrame.pc=" +
+                    callingFrame.pc + " callingFrame.script.baseLineNumber=" +
+                    callingFrame.script.baseLineNumber);
             }
+
             var lineNo = callingFrame.script.pcToLine(callingFrame.pc, PCMAP_SOURCETEXT);
             lineNo = lineNo - callingFrame.script.baseLineNumber + 1;
             var url  = sourceFile.href;
@@ -2144,8 +2260,10 @@ Firebug.Debugger = Obj.extend(Firebug.ActivableModule,
                     this.avoidRecursing = true;
                     source = this.getEvalBody(frame.callingFrame, asName, asLine, evalExpr);
                     delete this.avoidRecursing;
+
                     if (FBTrace.DBG_EVAL)
                         FBTrace.sysout("callingFrame used to get source ", source);
+
                     return source;
                 }
 
@@ -2153,6 +2271,7 @@ Firebug.Debugger = Obj.extend(Firebug.ActivableModule,
                     source = "/packer/ JS compressor detected";
                 else
                     source = frame.script.functionSource;
+
                 return source+" /* !eval("+evalThis+")) */";
             }
         }
@@ -2162,7 +2281,7 @@ Firebug.Debugger = Obj.extend(Firebug.ActivableModule,
         }
     },
 
-    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
     // extends Module
 
     initialize: function()
@@ -2270,11 +2389,13 @@ Firebug.Debugger = Obj.extend(Firebug.ActivableModule,
 
     showContext: function(browser, context)
     {
-        if (context && context.loaded && !context.onLoadWindowContent) // then context was not active during load
+        // then context was not active during load
+        if (context && context.loaded && !context.onLoadWindowContent)
             this.updateScriptFiles(context);
     },
 
-    updateScriptFiles: function(context)  // scan windows for 'script' tags (only if debugger is not enabled)
+    // scan windows for 'script' tags (only if debugger is not enabled)
+    updateScriptFiles: function(context)
     {
         function addFile(url, scriptTagNumber, dependentURL)
         {
@@ -2301,8 +2422,10 @@ Firebug.Debugger = Obj.extend(Firebug.ActivableModule,
                 {
                     var URLOnly = new Firebug.NoScriptSourceFile(context, url);
                     context.addSourceFile(URLOnly);
+
                     if (FBTrace.DBG_SOURCEFILES)
-                        FBTrace.sysout("updateScriptFiles created NoScriptSourceFile for URL:"+url, URLOnly);
+                        FBTrace.sysout("updateScriptFiles created NoScriptSourceFile for URL:" +
+                            url, URLOnly);
                 }
             }
 
@@ -2356,9 +2479,9 @@ Firebug.Debugger = Obj.extend(Firebug.ActivableModule,
                 });
             }
         }
-*/
-        // context.watchScriptAdditions = Obj.bind(this.watchScriptAdditions, this, context);
+        */
 
+        // context.watchScriptAdditions = Obj.bind(this.watchScriptAdditions, this, context);
         // context.window.document.addEventListener("DOMNodeInserted", context.watchScriptAdditions, false);
 
         if (FBTrace.DBG_SOURCEFILES)
@@ -2374,8 +2497,10 @@ Firebug.Debugger = Obj.extend(Firebug.ActivableModule,
     {
         if (event.type !== "DOMNodeInserted")
             return;
+
         if (event.target.tagName.toLowerCase() !== "script")
             return;
+
         FBTrace.sysout("debugger.watchScriptAdditions ", event.target.innerHTML);
         var location = Win.safeGetWindowLocation(context.window);
 
@@ -2401,13 +2526,15 @@ Firebug.Debugger = Obj.extend(Firebug.ActivableModule,
             if (panel)
                 panel.removeSourceBoxBySourceFile(sourceFile);
 
-            FBTrace.sysout("debugger.watchScriptAdditions connected tag to sourcefile", sourceFile);
+            FBTrace.sysout("debugger.watchScriptAdditions connected tag to sourcefile",
+                sourceFile);
 
             delete context.pendingScriptTagSourceFile;
         }
     },
 
-    unwatchWindow: function(context, win)  // clean up the source file map in case the frame is being reloaded.
+    // clean up the source file map in case the frame is being reloaded.
+    unwatchWindow: function(context, win)
     {
         var scriptTags = win.document.getElementsByTagName("script");
         for (var i = 0; i < scriptTags.length; i++)
@@ -2441,7 +2568,7 @@ Firebug.Debugger = Obj.extend(Firebug.ActivableModule,
             this.abort(context);
         }
 
-        if(persistedState)
+        if (persistedState)
         {
             if (context.dynamicURLhasBP)
                 persistedState.dynamicURLhasBP = context.dynamicURLhasBP;
@@ -2474,7 +2601,8 @@ Firebug.Debugger = Obj.extend(Firebug.ActivableModule,
         if (FBTrace.DBG_ACTIVATION)
             FBTrace.sysout("registerDebugger");
 
-        var check = FBS.registerDebugger(this);  //  this will eventually set 'jsd' on the statusIcon
+        // this will eventually set 'jsd' on the statusIcon
+        var check = FBS.registerDebugger(this);
 
         if (FBTrace.DBG_ACTIVATION)
             FBTrace.sysout("debugger.registerDebugger "+check+" debuggers");
@@ -2495,7 +2623,7 @@ Firebug.Debugger = Obj.extend(Firebug.ActivableModule,
             FBTrace.sysout("debugger.unregisterDebugger: "+check+" debuggers");
     },
 
-    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
     // extends ActivableModule
 
     onObserverChange: function(observer)
@@ -2504,6 +2632,7 @@ Firebug.Debugger = Obj.extend(Firebug.ActivableModule,
         {
             var names = [];
             this.observers.forEach(function(ob){names.push(ob.name || ob.dispatchName || ob.toolName);});
+
             FBTrace.sysout("debugger.onObserverChange "+this.hasObservers()+" "+
                 this.observers.length+": "+names.join(','), this.observers);
         }
@@ -2591,7 +2720,7 @@ Firebug.Debugger = Obj.extend(Firebug.ActivableModule,
                 Firebug.Debugger.isAlwaysEnabled());
     },
 
-    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
     // Menu in toolbar.
 
     onScriptFilterMenuTooltipShowing: function(tooltip, context)
@@ -2717,7 +2846,7 @@ Firebug.DebuggerListener =
     },
 };
 
-// ************************************************************************************************
+// ********************************************************************************************* //
 // Signals from fbs, passed along to our listeners
 
 Firebug.JSDebugClient =
@@ -2813,7 +2942,7 @@ function findObjectPropertyPath(containerName, container, obj, visited)
     return referents;
 }
 
-// ************************************************************************************************
+// ********************************************************************************************* //
 
 function getFrameWindow(frame)
 {
@@ -2839,12 +2968,12 @@ function ArrayEnumerator(array)
     }
 }
 
-// ************************************************************************************************
+// ********************************************************************************************* //
 // Registration
 
 Firebug.registerActivableModule(Firebug.Debugger);
 
 return Firebug.Debugger;
 
-// ************************************************************************************************
+// ********************************************************************************************* //
 });
