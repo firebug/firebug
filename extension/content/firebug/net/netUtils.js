@@ -369,6 +369,41 @@ var NetUtils =
         return "[" + ((m.length > 1) ? m : "0" + m) + ":" +
             ((s.length > 1) ? s : "0" + s) + "." +
             ((ms.length > 2) ? ms : ((ms.length > 1) ? "0" + ms : "00" + ms)) + "]";
+    },
+
+    traceRequestTiming: function(msg, file)
+    {
+        var blockingEnd = this.getBlockingEndTime(file);
+
+        //Helper log for debugging timing problems.
+        var timeLog = {};
+        timeLog.startTime = this.getTimeLabelFromMs(file.startTime);
+        timeLog.resolvingTime = this.getTimeLabelFromMs(file.resolvingTime);
+        timeLog.connectingTime = this.getTimeLabelFromMs(file.connectingTime);
+        timeLog.connectedTime = this.getTimeLabelFromMs(file.connectedTime);
+        timeLog.blockingEnd = this.getTimeLabelFromMs(blockingEnd);
+        timeLog.sendingTime = this.getTimeLabelFromMs(file.sendingTime);
+        timeLog.waitingForTime = this.getTimeLabelFromMs(file.waitingForTime);
+        timeLog.respondedTime = this.getTimeLabelFromMs(file.respondedTime);
+        timeLog.endTime = this.getTimeLabelFromMs(file.endTime);
+
+        if (file.request instanceof Ci.nsITimedChannel)
+        {
+            timeLog.startTime += " - " + this.getTimeLabelFromMs(file.request.channelCreationTime/1000);
+            timeLog.startTime += this.getTimeLabelFromMs(file.request.asyncOpenTime/1000);
+            timeLog.resolvingTime += " - " + this.getTimeLabelFromMs(file.request.domainLookupStartTime/1000);
+            timeLog.resolvingTime += this.getTimeLabelFromMs(file.request.domainLookupEndTime/1000);
+            timeLog.connectingTime += " - " + this.getTimeLabelFromMs(file.request.connectStartTime/1000);
+            timeLog.connectedTime += " - " + this.getTimeLabelFromMs(file.request.connectEndTime/1000);
+            timeLog.sendingTime += " - " + this.getTimeLabelFromMs(file.request.requestStartTime/1000);
+            timeLog.respondedTime += " - " + this.getTimeLabelFromMs(file.request.responseStartTime/1000);
+            timeLog.endTime += " - " + this.getTimeLabelFromMs(file.request.responseEndTime/1000);
+            timeLog.cacheReadStartTime = this.getTimeLabelFromMs(file.request.cacheReadStartTime/1000);
+            timeLog.cacheReadEndTime = this.getTimeLabelFromMs(file.request.cacheReadEndTime/1000);
+            timeLog.timingEnabled = file.request.timingEnabled;
+        }
+
+        FBTrace.sysout(msg + " " + file.href, timeLog);
     }
 };
 

@@ -1655,17 +1655,7 @@ Firebug.NetMonitor.TimeInfoTip = domplate(Firebug.Rep,
         var blockingEnd = NetUtils.getBlockingEndTime(file);
 
         //Helper log for debugging timing problems.
-        /*var timeLog = {};
-        timeLog.startTime = NetUtils.getTimeLabelFromMs(file.startTime);
-        timeLog.resolvingTime = NetUtils.getTimeLabelFromMs(file.resolvingTime);
-        timeLog.connectingTime = NetUtils.getTimeLabelFromMs(file.connectingTime);
-        timeLog.connectedTime = NetUtils.getTimeLabelFromMs(file.connectedTime);
-        timeLog.blockingEnd = NetUtils.getTimeLabelFromMs(blockingEnd);
-        timeLog.sendingTime = NetUtils.getTimeLabelFromMs(file.sendingTime);
-        timeLog.waitingForTime = NetUtils.getTimeLabelFromMs(file.waitingForTime);
-        timeLog.respondedTime = NetUtils.getTimeLabelFromMs(file.respondedTime);
-        timeLog.endTime = NetUtils.getTimeLabelFromMs(file.endTime);
-        FBTrace.sysout("net.timeInfoTip.render; " + file.href, timeLog);*/
+        NetUtils.traceRequestTiming("net.timeInfoTip.render;", file);
 
         var startTime = 0;
 
@@ -1678,10 +1668,11 @@ Firebug.NetMonitor.TimeInfoTip = domplate(Firebug.Rep,
             elapsed: file.connectingTime - file.resolvingTime,
             start: startTime += timings[0].elapsed});
 
-        // Connecting time it counted till the sending time in order to inslude
+        // Connecting time is measured till the sending time in order to include
         // also SSL negotiation.
+        // xxxHonza: time between "connected" and "sending" is SSL negotiation?
         timings.push({bar: "Connecting",
-            elapsed: file.sendingTime - file.connectingTime,
+            elapsed: file.connectStarted ? file.sendingTime - file.connectingTime : 0,
             start: startTime += timings[1].elapsed});
 
         // In Fx3.6 the STATUS_SENDING_TO is always fired (nsIActivityDistributor)

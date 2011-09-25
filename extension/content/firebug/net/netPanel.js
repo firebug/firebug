@@ -1020,22 +1020,10 @@ NetPanel.prototype = Obj.extend(Firebug.ActivablePanel,
         var elapsed = file.loaded ? file.endTime - file.startTime : 0; /*this.phaseEndTime - file.startTime*/
         this.barOffset = Math.floor(((file.startTime-this.phaseStartTime)/this.phaseElapsed) * 100);
 
+        //Helper log for debugging timing problems.
+        //NetUtils.traceRequestTiming("net.calculateFileTimes;", file);
+
         var blockingEnd = NetUtils.getBlockingEndTime(file);
-
-        /* Helper log for debugging timing problems.
-        var timeLog = {};
-        timeLog.startTime = getTimeLabelFromMs(file.startTime);
-        timeLog.resolvingTime = getTimeLabelFromMs(file.resolvingTime);
-        timeLog.connectingTime = getTimeLabelFromMs(file.connectingTime);
-        timeLog.connectedTime = getTimeLabelFromMs(file.connectedTime);
-        timeLog.blockingEnd = getTimeLabelFromMs(blockingEnd);
-        timeLog.sendingTime = getTimeLabelFromMs(file.sendingTime);
-        timeLog.waitingForTime = getTimeLabelFromMs(file.waitingForTime);
-        timeLog.respondedTime = getTimeLabelFromMs(file.respondedTime);
-        timeLog.endTime = getTimeLabelFromMs(file.endTime);
-        FBTrace.sysout("net.calculateFileTimes; " + file.href, timeLog);
-        */
-
         this.barBlockingWidth = Math.round(((blockingEnd - file.startTime) / this.phaseElapsed) * 100);
         this.barResolvingWidth = Math.round(((file.connectingTime - file.startTime) / this.phaseElapsed) * 100);
         this.barConnectingWidth = Math.round(((file.sendingTime - file.startTime) / this.phaseElapsed) * 100);
