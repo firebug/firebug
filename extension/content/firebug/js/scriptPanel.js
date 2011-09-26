@@ -114,8 +114,10 @@ Firebug.ScriptPanel.decorator = Obj.extend(new Firebug.SourceBoxDecorator,
                     scriptRow.setAttribute("condition", "true");
             }
             if (FBTrace.DBG_LINETABLE)
+            {
                 FBTrace.sysout("script.setLineBreakpoints found "+scriptRow+" for "+line+"@"+
                     compilationUnit.getURL()+"\n");
+            }
         });
     },
 });
@@ -157,21 +159,23 @@ Firebug.ScriptPanel.prototype = Obj.extend(Firebug.SourceBoxPanel,
             Firebug.chrome.syncPanel(this.name);
 
         // Front side UI mark
-        var firebugStatus = Firefox.getElementById('firebugStatus');
+        var firebugStatus = Firefox.getElementById("firebugStatus");
         if (firebugStatus)
             firebugStatus.setAttribute("script", active ? "on" : "off");
 
         if (Firebug.StartButton)
             Firebug.StartButton.resetTooltip();
         else
-            FBTrace.sysout("No Firebug.StartButton in onJavaScriptDebugging? ");
+            FBTrace.sysout("No Firebug.StartButton in onJavaScriptDebugging?");
 
         // Front side state
         Firebug.jsDebuggerOn = active;
 
         if (FBTrace.DBG_ACTIVATION)
+        {
             FBTrace.sysout("script.onJavaScriptDebugging "+active+" icon attribute: "+
                 Firefox.getElementById('firebugStatus').getAttribute("script"));
+        }
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
@@ -250,9 +254,11 @@ Firebug.ScriptPanel.prototype = Obj.extend(Firebug.SourceBoxPanel,
             }
 
             if (FBTrace.DBG_BP || FBTrace.DBG_STACK || FBTrace.DBG_COMPILATION_UNITS)
+            {
                 FBTrace.sysout("sourceBox.highlightLine lineNo: "+lineNumber+
                     " sourceBox.selectedLine="+sourceBox.selectedLine+" in "+
                     sourceBox.repObject.getURL());
+            }
 
             return sourceBox.selectedLine; // sticky if we have a valid line
         };
@@ -315,15 +321,20 @@ Firebug.ScriptPanel.prototype = Obj.extend(Firebug.SourceBoxPanel,
         if (!lineNode)
         {
             if (FBTrace.DBG_ERRORS)
+            {
                 FBTrace.sysout("script.toggleBreakpoint no lineNode at "+lineNo+
                     " in selectedSourceBox with URL "+href, this.selectedSourceBox);
+            }
+
             return;
         }
 
         if (FBTrace.DBG_BP)
-            FBTrace.sysout("script.toggleBreakpoint lineNo="+lineNo+
-                " lineNode.breakpoint:"+(lineNode?lineNode.getAttribute("breakpoint"):"(no lineNode)"),
-                 this.selectedSourceBox);
+        {
+            FBTrace.sysout("script.toggleBreakpoint lineNo="+lineNo+" lineNode.breakpoint:"
+                +(lineNode ? lineNode.getAttribute("breakpoint") : "(no lineNode)"),
+                this.selectedSourceBox);
+        }
 
         if (lineNode.getAttribute("breakpoint") == "true")
             JavaScriptTool.clearBreakpoint(this.context, href, lineNo);
@@ -441,9 +452,13 @@ Firebug.ScriptPanel.prototype = Obj.extend(Firebug.SourceBoxPanel,
         var lineNo = parseInt(sourceLine.textContent);
 
         if (Events.isLeftClick(event))
+        {
             this.toggleBreakpoint(lineNo);
+        }
         else if (Events.isShiftClick(event))
+        {
             this.toggleDisableBreakpoint(lineNo);
+        }
         else if (Events.isControlClick(event) || Events.isMiddleClick(event))
         {
             JavaScriptTool.runUntil(compilationUnit, lineNo);
@@ -561,7 +576,10 @@ Firebug.ScriptPanel.prototype = Obj.extend(Firebug.SourceBoxPanel,
         else
         {
             if (FBTrace.DBG_COMPILATION_UNITS)
-                FBTrace.sysout("script.destroy had location not a CompilationUnit ", this.location);
+            {
+                FBTrace.sysout("script.destroy had location not a CompilationUnit ",
+                    this.location);
+            }
         }
 
         // xxxHonza: why this is here? I don't see addListener.
@@ -613,6 +631,7 @@ Firebug.ScriptPanel.prototype = Obj.extend(Firebug.SourceBoxPanel,
         var jsEnabled = Firebug.Options.getPref("javascript", "enabled");
 
         if (FBTrace.DBG_PANELS)
+        {
             FBTrace.sysout("script.showWarning; " + this.context.getName(), {
                 jsDebuggerOn: Firebug.jsDebuggerOn,
                 jsDebuggerCalledUs: this.context.jsDebuggerCalledUs,
@@ -621,6 +640,7 @@ Firebug.ScriptPanel.prototype = Obj.extend(Firebug.SourceBoxPanel,
                 activitySuspended: this.context.activitySuspended,
                 stopped: this.context.stopped
             });
+        }
 
         var activitySuspended = this.isActivitySuspended();
         if (activitySuspended && !this.context.stopped)
@@ -696,7 +716,7 @@ Firebug.ScriptPanel.prototype = Obj.extend(Firebug.SourceBoxPanel,
                         var sourceLink = new SourceLink.SourceLink(this.location.getURL(), state.previousCenterLine, "js");
                         this.showSourceLink(sourceLink);
                     }
-                    else if (state.scrollTop)
+                    if (state.scrollTop)
                     {
                         this.selectedSourceBox.scrollTop = state.scrollTop;
                     }
@@ -787,8 +807,8 @@ Firebug.ScriptPanel.prototype = Obj.extend(Firebug.SourceBoxPanel,
         var curDoc = this.searchCurrentDoc(!Firebug.searchGlobal, text, reverse);
         if (!curDoc && Firebug.searchGlobal)
         {
-            return this.searchOtherDocs(text, reverse) || 
-                        this.searchCurrentDoc(true, text, reverse);
+            return this.searchOtherDocs(text, reverse) ||
+                this.searchCurrentDoc(true, text, reverse);
         }
         return curDoc;
     },
@@ -812,20 +832,18 @@ Firebug.ScriptPanel.prototype = Obj.extend(Firebug.SourceBoxPanel,
 
             if (!lines)
                 return;
-            // we don't care about reverse here as we are just looking for existence,
-            // if we do have a result we will handle the reverse logic on display
-            for (var i = 0; i < lines.length; i++) {
+
+            // We don't care about reverse here as we are just looking for existence.
+            // If we do have a result, we will handle the reverse logic on display.
+            for (var i = 0; i < lines.length; i++)
+            {
                 if (scanRE.test(lines[i]))
-                {
                     return true;
-                }
             }
         }
 
         if (this.navigateToNextDocument(scanDoc, reverse))
-        {
-            return this.searchCurrentDoc(true, text, reverse) && 'wraparound';
-        }
+            return this.searchCurrentDoc(true, text, reverse) && "wraparound";
     },
 
     searchCurrentDoc: function(wrapSearch, text, reverse)
@@ -852,14 +870,14 @@ Firebug.ScriptPanel.prototype = Obj.extend(Firebug.SourceBoxPanel,
             this.scrollToLine(sourceBox.repObject.getURL(), lineNo,
                 this.jumpHighlightFactory(lineNo+1, this.context));
 
-            Events.dispatch(this.fbListeners, 'onScriptSearchMatchFound',
+            Events.dispatch(this.fbListeners, "onScriptSearchMatchFound",
                 [this, text, sourceBox.repObject, lineNo]);
 
-            return this.currentSearch.wrapped ? 'wraparound' : true;
+            return this.currentSearch.wrapped ? "wraparound" : true;
         }
         else
         {
-            Events.dispatch(this.fbListeners, 'onScriptSearchMatchFound', [this, text, null, null]);
+            Events.dispatch(this.fbListeners, "onScriptSearchMatchFound", [this, text, null, null]);
             return false;
         }
     },
@@ -879,8 +897,11 @@ Firebug.ScriptPanel.prototype = Obj.extend(Firebug.SourceBoxPanel,
             || (object instanceof SourceLink.SourceLink && object.type == "js")
             || typeof(object) == "function"
             || object instanceof StackFrame.StackFrame)
+        {
             return 1;
-        else return 0;
+        }
+
+        return 0;
     },
 
     refresh: function()  // delete any sourceBox-es that are not in sync with compilationUnits
@@ -900,6 +921,7 @@ Firebug.ScriptPanel.prototype = Obj.extend(Firebug.SourceBoxPanel,
                          Dom.collapse(this.selectedSourceBox, true);
                          delete this.selectedSourceBox;
                     }
+
                     if (FBTrace.DBG_COMPILATION_UNITS)
                         FBTrace.sysout("script.refresh deleted sourceBox for "+url);
                 }
@@ -914,6 +936,7 @@ Firebug.ScriptPanel.prototype = Obj.extend(Firebug.SourceBoxPanel,
     {
         if (!compilationUnit)
             return;  // XXXjjb do we need to show a blank?
+
         if (!(compilationUnit instanceof CompilationUnit))
         {
             FBTrace.sysout("Script panel location not a CompilationUnit: ",compilationUnit);
@@ -999,8 +1022,11 @@ Firebug.ScriptPanel.prototype = Obj.extend(Firebug.SourceBoxPanel,
 
         if (Firebug.showAllSourceFiles)
         {
-            if (FBTrace.DBG_COMPILATION_UNITS) FBTrace.sysout("script getLocationList "+
-                context.getName()+" allSources", allSources);
+            if (FBTrace.DBG_COMPILATION_UNITS)
+            {
+                FBTrace.sysout("script getLocationList "+context.getName()+" allSources",
+                    allSources);
+            }
             return allSources;
         }
 
@@ -1023,9 +1049,11 @@ Firebug.ScriptPanel.prototype = Obj.extend(Firebug.SourceBoxPanel,
             delete this.context.allScriptsWereFiltered;
 
         if (FBTrace.DBG_COMPILATION_UNITS)
+        {
             FBTrace.sysout("script.getLocationList enabledOnLoad:"+context.onLoadWindowContent+
                 " all:"+allSources.length+" filtered:"+list.length+" allFiltered: "+
                 this.context.allScriptsWereFiltered, list);
+        }
 
         return list;
     },
@@ -1056,11 +1084,9 @@ Firebug.ScriptPanel.prototype = Obj.extend(Firebug.SourceBoxPanel,
 
     getTooltipObject: function(target)
     {
-        // Target should be A element with class = sourceLine
-        if (Css.hasClass(target, 'sourceLine'))
-        {
+        // Target should be an element with class = sourceLine
+        if (Css.hasClass(target, "sourceLine"))
             return null; // TODO
-        }
         return null;
     },
 
@@ -1068,8 +1094,7 @@ Firebug.ScriptPanel.prototype = Obj.extend(Firebug.SourceBoxPanel,
     {
         // Don't show popup over the line numbers, we show the conditional breakpoint
         // editor there instead
-        var sourceLine = Dom.getAncestorByClass(target, "sourceLine");
-        if (sourceLine)
+        if (Dom.getAncestorByClass(target, "sourceLine"))
             return;
 
         var sourceRow = Dom.getAncestorByClass(target, "sourceRow");
@@ -1141,7 +1166,7 @@ Firebug.ScriptPanel.prototype = Obj.extend(Firebug.SourceBoxPanel,
 
         var sourceLine = Dom.getChildByClass(sourceRow, "sourceLine");
         var lineNo = parseInt(sourceLine.textContent);
-        return new SourceLink.SourceLink(this.location.url, lineNo, 'js');
+        return new SourceLink.SourceLink(this.location.url, lineNo, "js");
     },
 
     getOptionsMenuItems: function()
@@ -1267,7 +1292,8 @@ Firebug.ScriptPanel.prototype = Obj.extend(Firebug.SourceBoxPanel,
 
     getBreakOnNextTooltip: function(armed)
     {
-        return (armed ? Locale.$STR("script.Disable Break On Next") : Locale.$STR("script.Break On Next"));
+        return (armed ?
+            Locale.$STR("script.Disable Break On Next") : Locale.$STR("script.Break On Next"));
     },
 
     shouldBreakOnNext: function()
@@ -1286,13 +1312,9 @@ Firebug.ScriptPanel.prototype = Obj.extend(Firebug.SourceBoxPanel,
         JavaScriptTool.setActivation(enable);
 
         if (enable)
-        {
             Firebug.TabCacheModel.addObserver(this);
-        }
         else
-        {
             Firebug.TabCacheModel.removeObserver(this);
-        }
     },
 
     // implements Tool
@@ -1410,8 +1432,11 @@ Firebug.ScriptPanel.prototype = Obj.extend(Firebug.SourceBoxPanel,
             var currentBreakable = Firebug.chrome.getGlobalAttribute("cmd_breakOnNext", "breakable");
 
             if (FBTrace.DBG_BP)
+            {
                 FBTrace.sysout("debugger.startDebugging; currentBreakable "+currentBreakable+
-                    " in " + this.context.getName()+" currentContext "+Firebug.currentContext.getName());
+                    " in " + this.context.getName()+" currentContext "+
+                    Firebug.currentContext.getName());
+            }
 
             if (currentBreakable == "false") // then we are armed but we broke
                 Firebug.chrome.setGlobalAttribute("cmd_breakOnNext", "breakable", "true");
@@ -1437,15 +1462,16 @@ Firebug.ScriptPanel.prototype = Obj.extend(Firebug.SourceBoxPanel,
         }
 
         if (FBTrace.DBG_UI_LOOP)
+        {
             FBTrace.sysout("script.onStartDebugging exit context.stopped:"+this.context.stopped+
                 " for context: "+this.context.getName()+"\n");
+        }
     },
 
     onStopDebugging: function()
     {
         if (FBTrace.DBG_UI_LOOP)
-            FBTrace.sysout("script.onStopDebugging enter context: "+
-                this.context.getName()+"\n");
+            FBTrace.sysout("script.onStopDebugging enter context: "+this.context.getName()+"\n");
 
         try
         {
