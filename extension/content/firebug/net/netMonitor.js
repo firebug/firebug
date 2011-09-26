@@ -634,6 +634,8 @@ function NetCacheListener(netProgress)
 
 NetCacheListener.prototype =
 {
+    dispatchName: "NetCacheListener",
+
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
     // Registration
 

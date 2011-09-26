@@ -113,6 +113,7 @@ function NetProgress(context)
 
 NetProgress.prototype =
 {
+    dispatchName: "netProgress",
     panel: null,
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

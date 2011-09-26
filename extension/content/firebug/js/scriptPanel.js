@@ -126,23 +126,25 @@ Firebug.ScriptPanel.decorator = Obj.extend(new Firebug.SourceBoxDecorator,
 
 Firebug.ScriptPanel.prototype = Obj.extend(Firebug.SourceBoxPanel,
 {
-    /*
-    * Framework connection
-    */
+    dispatchName: "scriptPanel",
+
+    /**
+     * Framework connection
+     */
     updateSourceBox: function(sourceBox)
     {
         this.location = sourceBox.repObject;
     },
 
-    /*
-    * Framework connection
-    */
+    /**
+     * Framework connection
+     */
     getSourceType: function()
     {
         return "js";
     },
 
-    /*
+    /**
      * Framework connection
      */
     getDecorator: function(sourceBox)
