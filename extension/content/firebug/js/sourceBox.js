@@ -186,6 +186,13 @@ Firebug.SourceBoxPanel = Obj.extend(SourceBoxPanelBase,
         {
             var url = request.URI.spec;
             var compilationUnit = context.getCompilationUnit(url);
+
+            // The compilation unit is created when JSD is compiling the script
+            // (e.g. onTopLevelScriptCreated), but onStopRequest can be triggered
+            // before (by a response channel listener) and so, the compilation
+            // unit doesn't have to exist at this moment
+            // However it should be ok, since the UI shouldn't exist before compilation
+            // and so, there shouldn't be what to update.
             if (compilationUnit)
                 this.removeSourceBoxByCompilationUnit(compilationUnit);
         }

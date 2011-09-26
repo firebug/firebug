@@ -1,13 +1,13 @@
 /* See license.txt for terms of usage */
 
-// ************************************************************************************************
+// ********************************************************************************************* //
 // Module
 
 var EXPORTED_SYMBOLS = ["CompilationUnit"];
 
 define([], function(){
 
-// ************************************************************************************************
+// ********************************************************************************************* //
 // Compilation Unit
 
 /**
@@ -34,14 +34,14 @@ function CompilationUnit(url, context)
     this.href = url;
 }
 
-/*
+/**
  * Kinds of Compilation Units
  */
 CompilationUnit.SCRIPT_TAG = "script_tag";
 CompilationUnit.EVAL = "eval";
 CompilationUnit.BROWSER_GENERATED = "event";
 
-// ************************************************************************************************
+// ********************************************************************************************* //
 // API
 
 /**
@@ -112,10 +112,12 @@ CompilationUnit.prototype.getBreakpoints = function()
 
 CompilationUnit.prototype.eachBreakpoint = function( fnOfLineProps )
 {
-     Firebug.Debugger.fbs.enumerateBreakpoints(this.getURL(), {call: function(url, line, props, scripts)
-     {
-          fnOfLineProps(line, props);
-     }});
+     Firebug.Debugger.fbs.enumerateBreakpoints(this.getURL(), { call:
+         function(url, line, props, scripts)
+         {
+              fnOfLineProps(line, props);
+         }
+     });
 };
 
 /**
@@ -128,12 +130,20 @@ CompilationUnit.prototype.eachBreakpoint = function( fnOfLineProps )
  * @function
  * @param firstLineNumber requested line number starting point; < 1 means from lowest line number
  * @param lastLineNumber request last line number; < 1 means up to maximum line
- * @param listener a listener (function) that accepts (compilationUnit, firstLineNumber, lastLineNumber, array of source code lines)
+ * @param listener a listener (function) that accepts (compilationUnit, firstLineNumber,
+ *      lastLineNumber, array of source code lines)
  */
 CompilationUnit.prototype.getSourceLines = function(firstLine, lastLine, listener)
 {
-    if (!this.lines)
-        this.lines = this.sourceFile.loadScriptLines(this.context);  // TODO remove
+    // xxxHonza: do not cache the source lines in compilation unit
+    // The Script panel doesn't display whole script if it's downloaded
+    // partially and the following caching happens sooner.
+    // Or tabCache.storeSplitLines should trigger an update.
+    //if (!this.lines)
+
+    // TODO remove - a comment from xxxJJB.
+    this.lines = this.sourceFile.loadScriptLines(this.context);
+
     this.numberOfLines = (this.lines ? this.lines.length : 0);
     listener(this, 1, this.numberOfLines, this.lines);
 };
@@ -164,9 +174,7 @@ CompilationUnit.prototype.getNumberOfLines = function()
  * @return the {@link Breakpoint} that was created
  */
 
-
-
-// ************************************************************************************************
+// ********************************************************************************************* //
 // Private
 
 /**
@@ -202,10 +210,11 @@ CompilationUnit.prototype._removeBreakpoint = function(breakpoint)
     }
 };
 
-// ************************************************************************************************
+// ********************************************************************************************* //
 // CommonJS
 
 exports = CompilationUnit;
 return CompilationUnit;
 
+// ********************************************************************************************* //
 });
