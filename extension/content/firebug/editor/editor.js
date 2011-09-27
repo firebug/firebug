@@ -771,7 +771,7 @@ Firebug.InlineEditor.prototype = domplate(Firebug.BaseEditor,
         if (!range || range.type != "int")
             range = {start: 0, end: value.length-1};
 
-        var expr = value.substr(range.start, range.end-range.start+1);
+        var expr = value.substring(range.start, range.end+1);
         preExpr = value.substr(0, range.start);
         postExpr = value.substr(range.end+1);
 
@@ -962,6 +962,7 @@ Firebug.AutoCompleter = function(getExprOffset, getRange, evaluator, selectMode,
     var candidates = null;
     var lastValue = "";
     var originalOffset = -1;
+    var originalValue = null;
     var lastExpr = null;
     var lastOffset = -1;
     var exprOffset = 0;
@@ -980,6 +981,7 @@ Firebug.AutoCompleter = function(getExprOffset, getRange, evaluator, selectMode,
     {
         if (originalOffset != -1)
         {
+            textBox.value = lastValue = originalValue;
             textBox.setSelectionRange(originalOffset, originalOffset);
 
             this.reset();
@@ -996,6 +998,7 @@ Firebug.AutoCompleter = function(getExprOffset, getRange, evaluator, selectMode,
     {
         candidates = null;
         originalOffset = -1;
+        originalValue = null;
         lastExpr = null;
         lastOffset = 0;
         exprOffset = 0;
@@ -1020,6 +1023,10 @@ Firebug.AutoCompleter = function(getExprOffset, getRange, evaluator, selectMode,
             else
                 this.clear(completionBox);
         }
+        else if (!found)
+        {
+            this.reset();
+        }
 
         return found;
     };
@@ -1031,16 +1038,10 @@ Firebug.AutoCompleter = function(getExprOffset, getRange, evaluator, selectMode,
     {
         var value = textBox.value;
 
-        if (!candidates || !cycle || value != lastValue)
+        if (!candidates || !cycle || value != lastValue || offset != lastOffset)
         {
             originalOffset = offset;
-            lastValue = value;
-
-            // XXXsilin What's the reason for dealing with offsets here? Most
-            // functions seem to ignore them entirely (getExpressionOffset, getDot),
-            // and it seems completions are killed entirely when not at the end
-            // of an expression anyway. If they have to remain, why not just use
-            // value.substr(0, offset) instead of value everywhere?
+            originalValue = lastValue = value;
 
             // Create a simplified expression by redacting contents/normalizing
             // delimiters of strings and regexes, to make parsing easier.
@@ -1063,7 +1064,7 @@ Firebug.AutoCompleter = function(getExprOffset, getRange, evaluator, selectMode,
             if (!range)
                 range = {start: 0, end: parsed.length-1};
 
-            var expr = parsed.substr(range.start, range.end-range.start+1);
+            var expr = parsed.substring(range.start, range.end+1);
             var spreExpr = sparsed.substr(0, range.start);
             preExpr = parsed.substr(0, range.start);
             postExpr = parsed.substr(range.end+1);
@@ -1097,10 +1098,26 @@ Firebug.AutoCompleter = function(getExprOffset, getRange, evaluator, selectMode,
             lastExpr = expr;
             lastOffset = offset;
 
-            // Check if the cursor is at the very right edge of the expression, or
-            // somewhere in the middle of it
+            var searchExpr = "";
+
+            // Check if the cursor is somewhere in the middle of the expression
             if (expr && offset != parseStart+range.end+1)
-                return false;
+            {
+                if (cycle)
+                {
+                    // Complete by resetting the completion list to the full
+                    // list of candidates, finding our current position in it,
+                    // and cycling from there.
+                    offset = range.start;
+                    searchExpr = expr;
+                    expr = "";
+                }
+                else
+                {
+                    // We can't complete unless we are at the right edge
+                    return false;
+                }
+            }
 
             // Don't complete globals unless we are forced to do so.
             if (!showGlobals && !preExpr && !expr && !postExpr)
@@ -1111,7 +1128,9 @@ Firebug.AutoCompleter = function(getExprOffset, getRange, evaluator, selectMode,
                 return false;
 
             if (expr)
-                this.setCandidatesByExpr(expr, values, reverse);
+                this.setCandidatesByExpr(expr, values);
+            else if (searchExpr)
+                this.setCandidatesBySearchExpr(searchExpr, values);
             else
                 this.setCandidatesByValues(values);
         }
@@ -1149,7 +1168,7 @@ Firebug.AutoCompleter = function(getExprOffset, getRange, evaluator, selectMode,
         return true;
     };
 
-    this.setCandidatesByExpr = function(expr, values, reverse)
+    this.setCandidatesByExpr = function(expr, values)
     {
         // Filter the list of values to those which begin with expr. We
         // will then go on to complete the first value in the resulting list
@@ -1158,15 +1177,47 @@ Firebug.AutoCompleter = function(getExprOffset, getRange, evaluator, selectMode,
         var findExpr = (caseSensitive ? expr : expr.toLowerCase());
         for (var i = 0; i < values.length; ++i)
         {
-            var name = values[i];
-            if (!caseSensitive && name.toLowerCase)
-                name = name.toLowerCase();
+            var name = values[i], testName = name;
+            if (!caseSensitive)
+                testName = testName.toLowerCase();
 
-            if (name.lastIndexOf && name.lastIndexOf(expr, 0) == 0)
+            if (testName.lastIndexOf(findExpr, 0) == 0)
                 candidates.push(name);
         }
 
         lastIndex = -2;
+    };
+
+    this.setCandidatesBySearchExpr = function(expr, values)
+    {
+        var searchIndex = -1;
+
+        var findExpr = (caseSensitive ? expr : expr.toLowerCase());
+
+        // Find the first instance of expr in the values list. We
+        // will then complete the string that is found
+        for (var i = 0; i < values.length; ++i)
+        {
+            var name = values[i];
+            if (!caseSensitive)
+                name = name.toLowerCase();
+
+            if (name.lastIndexOf(findExpr, 0) == 0)
+            {
+                searchIndex = i;
+                break;
+            }
+        }
+
+        if (searchIndex == -1)
+        {
+            // Nothing found, so there's nothing to complete to
+            candidates = [];
+            return;
+        }
+
+        candidates = Arr.cloneArray(values);
+        lastIndex = searchIndex;
     };
 
     this.setCandidatesByValues = function(values)
