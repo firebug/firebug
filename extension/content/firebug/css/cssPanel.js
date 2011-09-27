@@ -178,7 +178,13 @@ const styleGroups =
         "column-width",
         "-moz-tab-size", // FF4.0
         "-moz-font-feature-settings", // FF4.0
-        "-moz-font-language-override" // FF4.0
+        "-moz-font-language-override", // FF4.0
+        "-moz-text-blink", // FF6.0
+        "-moz-text-decoration-color", // FF6.0
+        "-moz-text-decoration-line", // FF6.0
+        "-moz-text-decoration-style", // FF6.0
+        "hyphens", // FF 6.0
+        "text-overflow" // FF7.0
     ],
 
     background: [
@@ -294,7 +300,8 @@ const styleGroups =
         "-moz-column-rule-width",
         "-moz-column-rule-style",
         "-moz-column-rule-color",
-        "-moz-float-edge"
+        "-moz-float-edge",
+        "orient"
     ],
 
     other: [

@@ -735,7 +735,7 @@ Css.cssInfo.html =
     "pointer-events": ["auto", "none"],
     "position": ["position"],
     "quotes": ["none"],
-    "resize": ["resize"],//FF4.0
+    "resize": ["resize"], //FF4.0
     "right": ["auto"],
     "table-layout": ["tableLayout", "auto"],
     "text-align": ["textAlign"],
@@ -815,12 +815,13 @@ Css.cssInfo.html =
     "-moz-animation-play-state": [], // FF5.0
     "-moz-animation-timing-function": [], // FF5.0
     "-moz-animation-fill-mode": ["none", "forwards", "backwards", "both"], // FF5.0
-    "-moz-orient": [], //FF6.0 TODO
-    "-moz-text-decoration-color": ["color"], //FF6.0 TODO
-    "-moz-text-decoration-line": [], //FF6.0 TODO
-    "-moz-text-decoration-style": [], //FF6.0 TODO
-    "-moz-hyphens": ["none", "manual", "auto"], //FF6.0 TODO
-    "text-overflow": ["ellipsis","clip"] //FF7.0
+    "orient": ["horizontal", "vertical"], // FF6.0
+    "-moz-text-blink": ["none", "blink"], // FF6.0
+    "-moz-text-decoration-color": ["color"], // FF6.0
+    "-moz-text-decoration-line": ["mozTextDecorationLine"], // FF6.0
+    "-moz-text-decoration-style": ["mozTextDecorationStyle"], // FF6.0
+    "hyphens": ["none", "manual", "auto"], // FF6.0
+    "text-overflow": ["ellipsis", "clip"] // FF7.0
 
 };
 
@@ -1490,7 +1491,8 @@ Css.cssKeywords =
         "underline",
         "overline",
         "line-through",
-        "blink"
+        "blink",
+        "inherit"
     ],
 
     "textTransform":
@@ -1701,14 +1703,32 @@ Css.cssKeywords =
 
     "mozTransitionTimingFunction":
     [
-       "cubic-bezier",
-       "ease",
-       "ease-in",
-       "ease-in-out",
-       "ease-out",
-       "linear"
+        "cubic-bezier",
+        "ease",
+        "ease-in",
+        "ease-in-out",
+        "ease-out",
+        "linear"
     ],
 
+    "mozTextDecorationLine": // FF 6.0
+    [
+        "underline",
+        "overline",
+        "line-through",
+        "none"
+    ],
+
+    "mozTextDecorationStyle": // FF 6.0
+    [
+        "solid",
+        "double",
+        "dotted",
+        "dashed",
+        "wavy",
+        "inherit"
+    ],
+       
     "width":
     [
         "-moz-max-content",
