@@ -2054,6 +2054,7 @@ Firebug.Debugger = Obj.extend(Firebug.ActivableModule,
         // Ignores any trailing whitespace in |source|
         const reURIinComment = /\/\/@\ssourceURL=\s*(\S*?)\s*$/m;
         var m = reURIinComment.exec(lines[lines.length - 1]);
+
         if (m)
         {
             // add context info to the sourceURL so eval'd sources are grouped
@@ -2066,6 +2067,7 @@ Firebug.Debugger = Obj.extend(Firebug.ActivableModule,
             }
 
             var href = new String(m[1]);
+            href = Url.normalizeURL(href);
 
             url = {href: href, kind: "source"};
             if (FBTrace.DBG_SOURCEFILES)

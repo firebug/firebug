@@ -471,6 +471,12 @@ StackFrame.StackTrace.prototype =
 
         if (FBTrace.DBG_STACK)
             FBTrace.sysout("lib.StackTrace destroy "+this.uid+"\n");
+    },
+
+    toSourceLink: function()
+    {
+        if (this.frames.length > 0)
+            return this.frames[0];
     }
 };
 

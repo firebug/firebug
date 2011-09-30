@@ -289,7 +289,15 @@ function createFirebugConsole(context, win)
 
     function logFormatted(args, className, linkToSource, noThrottle)
     {
-        var sourceLink = linkToSource ? getStackLink() : null;
+        var sourceLink;
+
+        var stack = getJSDUserStack();
+        if (stack && stack.toSourceLink)
+            sourceLink = stack.toSourceLink();
+
+        if (!sourceLink)
+            sourceLink = linkToSource ? getStackLink() : null;
+
         var rc = Firebug.Console.logFormatted(args, context, className, noThrottle, sourceLink);
         return rc ? rc : "_firebugIgnore";
     };
