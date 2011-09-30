@@ -188,7 +188,7 @@ Firebug.SourceCache.prototype = Obj.extend(new Firebug.Listener(),
         {
             var lines = Str.splitLines(src);
 
-            // Don't cache locale files to get latest version (issue 1238)
+            // Don't cache locale files to get latest version (issue 1328)
             // Local files can be currently fetched any time.
             //this.cache[url] = lines;
 
