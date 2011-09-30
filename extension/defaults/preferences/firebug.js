@@ -87,6 +87,7 @@ pref("extensions.firebug.script.enableSites", false);
 pref("extensions.firebug.scriptsFilter", "all");
 pref("extensions.firebug.replaceTabs", 4);
 pref("extensions.firebug.filterSystemURLs", true);
+pref("extensions.firebug.maxScriptLineLength", 10000);
 
 // Stack
 pref("extensions.firebug.omitObjectPathStack", false);

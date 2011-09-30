@@ -59,7 +59,16 @@ Firebug.SourceBoxDecorator.prototype =
      */
     getLineHTML: function(sourceBox, lineNo)
     {
-        var html = Str.escapeForSourceLine(sourceBox.lines[lineNo-1]);
+        var line = sourceBox.lines[lineNo-1];
+
+        // Crop huge lines.
+        if (Firebug.maxScriptLineLength > 0)
+        {
+            if (line.length > Firebug.maxScriptLineLength)
+                line = Str.cropString(line, Firebug.maxScriptLineLength);
+        }
+
+        var html = Str.escapeForSourceLine(line);
 
         // If the pref says so, replace tabs by corresponding number of spaces.
         if (Firebug.replaceTabs > 0)

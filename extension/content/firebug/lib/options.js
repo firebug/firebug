@@ -56,7 +56,7 @@ const prefNames =  // XXXjjb TODO distribute to modules
     "cssEditMode",
 
     // Script
-    "decompileEvals", "replaceTabs",
+    "decompileEvals", "replaceTabs", "maxScriptLineLength",
 
     // DOM
     "showUserProps", "showUserFuncs", "showDOMProps", "showDOMFuncs", "showDOMConstants",
