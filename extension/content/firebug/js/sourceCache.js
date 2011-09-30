@@ -10,7 +10,7 @@ define([
 ],
 function(Obj, Firebug, Xpcom, Url, Http, Str) {
 
-// ************************************************************************************************
+// ********************************************************************************************* //
 // Constants
 
 const Cc = Components.classes;
@@ -32,7 +32,7 @@ const LOAD_BYPASS_LOCAL_CACHE_IF_BUSY = nsICachingChannel.LOAD_BYPASS_LOCAL_CACH
 
 const NS_BINDING_ABORTED = 0x804b0002;
 
-// ************************************************************************************************
+// ********************************************************************************************* //
 
 Firebug.SourceCache = function(context)
 {
@@ -112,21 +112,29 @@ Firebug.SourceCache.prototype = Obj.extend(new Firebug.Listener(),
             if (m)
             {
                 url = m[2];
+
                 if (FBTrace.DBG_CACHE)
-                    FBTrace.sysout("sourceCache found munged xpcnativewrapper url and set it to "+url+" m "+m+" m[0]:"+m[0]+" [1]"+m[1], m);
+                {
+                    FBTrace.sysout("sourceCache found munged xpcnativewrapper url " +
+                        "and set it to " + url + " m " + m + " m[0]:" + m[0] + " [1]" +
+                        m[1], m);
+                }
             }
 
             var chromeURI = Url.makeURI(url);
             if (!chromeURI)
             {
                 if (FBTrace.DBG_CACHE)
-                    FBTrace.sysout("sourceCache.load failed to convert chrome to local: "+url);
-                return ["sourceCache failed to make URI from "+url];
+                    FBTrace.sysout("sourceCache.load failed to convert chrome to local: " + url);
+
+                return ["sourceCache failed to make URI from " + url];
             }
 
             var localURI = chromeReg.convertChromeURL(chromeURI);
             if (FBTrace.DBG_CACHE)
-                FBTrace.sysout("sourceCache.load converting chrome to local: "+url, " -> "+localURI.spec);
+                FBTrace.sysout("sourceCache.load converting chrome to local: " + url,
+                    " -> "+localURI.spec);
+
             return this.loadFromLocal(localURI.spec);
         }
 
@@ -213,13 +221,16 @@ Firebug.SourceCache.prototype = Obj.extend(new Firebug.Listener(),
         catch (exc)
         {
             if (FBTrace.DBG_CACHE)
-                FBTrace.sysout("sourceCache for url:"+url+" window="+this.context.window.location.href+" FAILS:", exc);
+                FBTrace.sysout("sourceCache for url:" + url + " window=" +
+                    this.context.window.location.href + " FAILS:", exc);
             return;
         }
 
         if (url == this.context.browser.contentWindow.location.href)
         {
-            if (FBTrace.DBG_CACHE) FBTrace.sysout("sourceCache.load content window href\n");
+            if (FBTrace.DBG_CACHE)
+                FBTrace.sysout("sourceCache.load content window href");
+
             if (channel instanceof nsIUploadChannel)
             {
                 var postData = getPostStream(this.context);
@@ -227,7 +238,9 @@ Firebug.SourceCache.prototype = Obj.extend(new Firebug.Listener(),
                 {
                     var uploadChannel = Xpcom.QI(channel, nsIUploadChannel);
                     uploadChannel.setUploadStream(postData, "", -1);
-                    if (FBTrace.DBG_CACHE) FBTrace.sysout("sourceCache.load uploadChannel set\n");
+
+                    if (FBTrace.DBG_CACHE)
+                        FBTrace.sysout("sourceCache.load uploadChannel set");
                 }
             }
 
@@ -235,7 +248,8 @@ Firebug.SourceCache.prototype = Obj.extend(new Firebug.Listener(),
             {
                 var cacheChannel = Xpcom.QI(channel, nsICachingChannel);
                 cacheChannel.cacheKey = getCacheKey(this.context);
-                if (FBTrace.DBG_CACHE) FBTrace.sysout("sourceCache.load cacheChannel key"+cacheChannel.cacheKey+"\n");
+                if (FBTrace.DBG_CACHE)
+                    FBTrace.sysout("sourceCache.load cacheChannel key" + cacheChannel.cacheKey);
             }
         }
         else if ((method == "PUT" || method == "POST") && file)
@@ -248,8 +262,11 @@ Firebug.SourceCache.prototype = Obj.extend(new Firebug.Listener(),
                 {
                     var postDataStream = Http.getInputStreamFromString(postData);
                     var uploadChannel = Xpcom.QI(channel, nsIUploadChannel);
-                    uploadChannel.setUploadStream(postDataStream, "application/x-www-form-urlencoded", -1);
-                    if (FBTrace.DBG_CACHE) FBTrace.sysout("sourceCache.load uploadChannel set\n");
+                    uploadChannel.setUploadStream(postDataStream,
+                        "application/x-www-form-urlencoded", -1);
+
+                    if (FBTrace.DBG_CACHE)
+                        FBTrace.sysout("sourceCache.load uploadChannel set");
                 }
             }
         }
@@ -257,20 +274,28 @@ Firebug.SourceCache.prototype = Obj.extend(new Firebug.Listener(),
         var stream;
         try
         {
-            if (FBTrace.DBG_CACHE) FBTrace.sysout("sourceCache.load url:"+url+" with charset"+charset+"\n");
+            if (FBTrace.DBG_CACHE)
+                FBTrace.sysout("sourceCache.load url:" + url + " with charset" + charset);
+
             stream = channel.open();
         }
         catch (exc)
         {
             if (FBTrace.DBG_ERRORS)
             {
-                var isCache = (channel instanceof nsICachingChannel)?"nsICachingChannel":"NOT caching channel";
-                var isUp = (channel instanceof nsIUploadChannel)?"nsIUploadChannel":"NOT nsIUploadChannel";
-                FBTrace.sysout(url+" vs "+this.context.browser.contentWindow.location.href+" and "+isCache+" "+isUp+"\n");
-                FBTrace.sysout("sourceCache.load fails channel.open for url="+url+ " cause:", exc);
+                var isCache = (channel instanceof nsICachingChannel) ?
+                    "nsICachingChannel" : "NOT caching channel";
+                var isUp = (channel instanceof nsIUploadChannel) ?
+                    "nsIUploadChannel" : "NOT nsIUploadChannel";
+
+                FBTrace.sysout(url + " vs " + this.context.browser.contentWindow.location.href +
+                    " and " + isCache + " " + isUp);
+                FBTrace.sysout("sourceCache.load fails channel.open for url=" + url +
+                    " cause:", exc);
                 FBTrace.sysout("sourceCache.load fails channel=", channel);
             }
-            return ["sourceCache.load FAILS for url="+url, exc.toString()];
+
+            return ["sourceCache.load FAILS for url=" + url, exc.toString()];
         }
 
         try
@@ -295,7 +320,11 @@ Firebug.SourceCache.prototype = Obj.extend(new Firebug.Listener(),
     storeSplitLines: function(url, lines)
     {
         if (FBTrace.DBG_CACHE)
-            FBTrace.sysout("sourceCache for window="+this.context.getName()+" store url="+url+"\n");
+        {
+            FBTrace.sysout("sourceCache for window=" + this.context.getName() +
+                " store url=" + url);
+        }
+
         return this.cache[url] = lines;
     },
 
@@ -352,7 +381,7 @@ function getPostText(file, context)
     return file.postText;
 }
 
-// ************************************************************************************************
+// ********************************************************************************************* //
 
 function getPostStream(context)
 {
@@ -389,10 +418,10 @@ function getCacheKey(context)
      }
 }
 
-// ************************************************************************************************
+// ********************************************************************************************* //
 // Registration
 
 return Firebug.SourceCache;
 
-// ************************************************************************************************
+// ********************************************************************************************* //
 });
