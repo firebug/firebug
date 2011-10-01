@@ -1655,7 +1655,7 @@ Firebug.NetMonitor.TimeInfoTip = domplate(Firebug.Rep,
         var blockingEnd = NetUtils.getBlockingEndTime(file);
 
         //Helper log for debugging timing problems.
-        NetUtils.traceRequestTiming("net.timeInfoTip.render;", file);
+        //NetUtils.traceRequestTiming("net.timeInfoTip.render;", file);
 
         var startTime = 0;
 

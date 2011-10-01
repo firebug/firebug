@@ -369,10 +369,10 @@ NetProgress.prototype =
         var file = this.getRequestFile(request, null, true);
         if (file)
         {
-            if (!file.receivingStarted)
+            if (!file.waitingStarted)
             {
                 file.waitingForTime = time;
-                file.receivingStarted = true;
+                file.waitingStarted = true;
             }
         }
 
@@ -407,7 +407,7 @@ NetProgress.prototype =
     connectingFile: function connectingFile(request, time)
     {
         var file = this.getRequestFile(request, null, true);
-        if (file)
+        if (file && !file.connectStarted)
         {
             file.connectStarted = true;
             file.connectingTime = time;
@@ -423,8 +423,9 @@ NetProgress.prototype =
     connectedFile: function connectedFile(request, time)
     {
         var file = this.getRequestFile(request, null, true);
-        if (file)
+        if (file && !file.connected)
         {
+            file.connected = true;
             file.connectedTime = time;
             file.sendingTime = time;  // in case sending-to would never came.
             file.waitingForTime = time; // in case waiting-for would never came.
