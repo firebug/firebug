@@ -1092,7 +1092,7 @@ function getExpressionOffset(command)
 
     // When completing []-accessed properties, start instead from the last [.
     var lastBr = command.lastIndexOf("[");
-    if (lastBr !== -1 && /^['"] *$/.test(command.substr(lastBr+1)))
+    if (lastBr !== -1 && /^" *$/.test(command.substr(lastBr+1)))
         start = lastBr;
 
     while (start --> 0)
@@ -1120,14 +1120,23 @@ function getExpressionOffset(command)
                 break;
         }
     }
+    ++start;
 
-    return start + 1;
+    // The 'new' operator has higher precedence than function calls, so, if
+    // present, it should be included if the expression contains a parenthesis.
+    if (start-4 >= 0 && command.indexOf('(', start) !== -1 &&
+            command.substr(start-4, 4) === 'new ')
+    {
+        start -= 4;
+    }
+
+    return start;
 }
 
 function getRange(expr, offset)
 {
     var lastBr = expr.lastIndexOf("[");
-    if (lastBr !== -1 && /^['"] *$/.test(expr.substr(lastBr+1)))
+    if (lastBr !== -1 && /^" *$/.test(expr.substr(lastBr+1)))
         return {start: lastBr+2, end: expr.length-1};
 
     var lastDot = expr.lastIndexOf(".");
@@ -1339,6 +1348,15 @@ function simplifyExpr(expr)
 // Check if auto-completion should be killed.
 function killCompletions(expr)
 {
+    // Make sure there is actually something to complete at the end.
+    if (expr.length === 0 ||
+            (!reJSChar.test(expr[expr.length-1]) &&
+             expr[expr.length-1] !== '.' &&
+             !/\[" *$/.test(expr)))
+    {
+        return true;
+    }
+
     // Check for 'function i'.
     var ind = expr.lastIndexOf(' ');
     if (isValidProperty(expr.substr(ind+1)) && isFunctionName(expr, ind+1))
@@ -1416,8 +1434,6 @@ function adjustCompletion(completion, preParsed, preExpr)
 // Types the autocompletion knows about, some of their non-enumerable properties,
 // and the return types of some member functions, included in the Firebug.CommandLine
 // object to make it more easily extensible.
-// XXXsilin Would this be better placed in the declaration list of Firebug.CommandLine?
-// xxxHonza: what do you mean by the declaratio list?
 
 Firebug.CommandLine.AutoCompletionKnownTypes = {
     'void': {
@@ -1434,8 +1450,8 @@ Firebug.CommandLine.AutoCompletionKnownTypes = {
         'concat': '|Array',
         'slice': '|Array',
         'join': '|String',
-        'indexOf': '|void',
-        'lastIndexOf': '|void',
+        'indexOf': '|Number',
+        'lastIndexOf': '|Number',
         'filter': '|Array',
         'map': '|Array',
         'reduce': '|void',
@@ -1443,7 +1459,7 @@ Firebug.CommandLine.AutoCompletionKnownTypes = {
         'every': '|void',
         'forEach': '|void',
         'some': '|void',
-        'length': 'void'
+        'length': 'Number'
     },
     'String': {
         '_fb_contType': 'String',
@@ -1453,11 +1469,11 @@ Firebug.CommandLine.AutoCompletionKnownTypes = {
         'charAt': '|String',
         'charCodeAt': '|String',
         'concat': '|String',
-        'indexOf': '|void',
-        'lastIndexOf': '|void',
-        'localeCompare': '|void',
+        'indexOf': '|Number',
+        'lastIndexOf': '|Number',
+        'localeCompare': '|Number',
         'match': '|Array',
-        'search': '|void',
+        'search': '|Number',
         'slice': '|String',
         'replace': '|String',
         'toLowerCase': '|String',
@@ -1465,36 +1481,36 @@ Firebug.CommandLine.AutoCompletionKnownTypes = {
         'toUpperCase': '|String',
         'toLocaleUpperCase': '|String',
         'trim': '|String',
-        'length': 'void'
+        'length': 'Number'
     },
     'RegExp': {
         'test': '|void',
         'exec': '|Array',
-        'lastIndex': 'void',
+        'lastIndex': 'Number',
         'ignoreCase': 'void',
         'global': 'void',
         'multiline': 'void',
         'source': 'String'
     },
     'Date': {
-        'getTime': '|void',
-        'getYear': '|void',
-        'getFullYear': '|void',
-        'getMonth': '|void',
-        'getDate': '|void',
-        'getDay': '|void',
-        'getHours': '|void',
-        'getMinutes': '|void',
-        'getSeconds': '|void',
-        'getMilliseconds': '|void',
-        'getUTCFullYear': '|void',
-        'getUTCMonth': '|void',
-        'getUTCDate': '|void',
-        'getUTCDay': '|void',
-        'getUTCHours': '|void',
-        'getUTCMinutes': '|void',
-        'getUTCSeconds': '|void',
-        'getUTCMilliseconds': '|void',
+        'getTime': '|Number',
+        'getYear': '|Number',
+        'getFullYear': '|Number',
+        'getMonth': '|Number',
+        'getDate': '|Number',
+        'getDay': '|Number',
+        'getHours': '|Number',
+        'getMinutes': '|Number',
+        'getSeconds': '|Number',
+        'getMilliseconds': '|Number',
+        'getUTCFullYear': '|Number',
+        'getUTCMonth': '|Number',
+        'getUTCDate': '|Number',
+        'getUTCDay': '|Number',
+        'getUTCHours': '|Number',
+        'getUTCMinutes': '|Number',
+        'getUTCSeconds': '|Number',
+        'getUTCMilliseconds': '|Number',
         'setTime': '|void',
         'setYear': '|void',
         'setFullYear': '|void',
@@ -1522,12 +1538,13 @@ Firebug.CommandLine.AutoCompletionKnownTypes = {
         'toJSON': '|String',
         'toString': '|String',
         'toLocaleString': '|String',
-        'getTimezoneOffset': '|void'
+        'getTimezoneOffset': '|Number'
     },
     'Function': {
         'call': '|void',
         'apply': '|void',
-        'length': 'void'
+        'length': 'Number',
+        'prototype': 'void'
     },
     'HTMLElement': {
         'getElementsByClassName': '|NodeList',
@@ -1549,24 +1566,74 @@ Firebug.CommandLine.AutoCompletionKnownTypes = {
     },
     'NodeList': {
         '_fb_contType': 'HTMLElement',
-        'length': 'void',
-        'item': '|HTMLElement'
+        'length': 'Number',
+        'item': '|HTMLElement',
+        'namedItem': '|HTMLElement'
     },
     'Window': {
         'encodeURI': '|String',
         'encodeURIComponent': '|String',
         'decodeURI': '|String',
         'decodeURIComponent': '|String',
-        'eval': '|void'
+        'eval': '|void',
+        'parseInt': '|Number',
+        'parseFloat': '|Number',
+        'isNaN': '|void',
+        'isFinite': '|void',
+        'NaN': 'Number',
+        'Math': 'Math',
+        'undefined': 'void',
+        'Infinity': 'Number'
     },
     'HTMLDocument': {
-        'getElementsByClassName': '|NodeList',
-        'getElementsByTagName': '|NodeList',
-        'getElementsByTagNameNS': '|NodeList',
         'querySelector': '|HTMLElement',
-        'querySelectorAll': '|NodeList',
-        'getElementById': '|HTMLElement'
+        'querySelectorAll': '|NodeList'
+    },
+    'Math': {
+        'E': 'Number',
+        'LN2': 'Number',
+        'LN10': 'Number',
+        'LOG2E': 'Number',
+        'LOG10E': 'Number',
+        'PI': 'Number',
+        'SQRT1_2': 'Number',
+        'SQRT2': 'Number',
+        'abs': '|Number',
+        'acos': '|Number',
+        'asin': '|Number',
+        'atan': '|Number',
+        'atan2': '|Number',
+        'ceil': '|Number',
+        'cos': '|Number',
+        'exp': '|Number',
+        'floor': '|Number',
+        'log': '|Number',
+        'max': '|Number',
+        'min': '|Number',
+        'pow': '|Number',
+        'random': '|Number',
+        'round': '|Number',
+        'sin': '|Number',
+        'sqrt': '|Number',
+        'tan': '|Number'
+    },
+    'Number': {
+        // There are also toFixed and valueOf, but they are left out because
+        // they steal focus from toString by being shorter (in the case of
+        // toFixed), and because they are used very seldom.
+        'toExponential': '|String',
+        'toPrecision': '|String',
+        'toLocaleString': '|String',
+        'toString': '|String'
     }
+};
+
+var LinkType = {
+    'PROPERTY': 0,
+    'INDEX': 1,
+    'CALL': 2,
+    'SAFECALL': 3,
+    'RETVAL_HEURISTIC': 4
 };
 
 function getKnownType(t)
@@ -1579,10 +1646,8 @@ function getKnownType(t)
 
 function getKnownTypeInfo(r)
 {
-    if (typeof r !== 'string')
-        return r;
     if (r.charAt(0) === '|')
-        return {'val': 'Function', 'ret': {'val': r.substr(1)}};
+        return {'val': 'Function', 'ret': r.substr(1)};
     return {'val': r};
 }
 
@@ -1592,7 +1657,7 @@ function getFakeCompleteKeys(name)
     if (!type)
         return ret;
     for (var prop in type) {
-        if (prop.substr(0, 4) !== '_fb_' && !type[prop].splice)
+        if (prop.substr(0, 4) !== '_fb_')
             ret.push(prop);
     }
     return ret;
@@ -1622,20 +1687,33 @@ function matchingBracket(expr, start)
 
 function getTypeExtractionExpression(command)
 {
-    // Return a JavaScript expression for determining the type of an object
-    // given by another JavaScript expression. For DOM nodes, return HTMLElement
-    // instead of HTML[node type]Element, for simplicity.
+    // Return a JavaScript expression for determining the type / [[Class]] of
+    // an object given by another JavaScript expression. For DOM nodes, return
+    // HTMLElement instead of HTML[node type]Element, for simplicity.
     var ret = '(function() { var v = ' + command + '; ';
     ret += 'if (window.HTMLElement && v instanceof HTMLElement) return "HTMLElement"; ';
-    ret += 'var cr = Object.prototype.toString.call(v).slice(8, -1); ';
-    ret += 'if (v instanceof window[cr] || v === window[cr].prototype) return cr;})()';
+    ret += 'return Object.prototype.toString.call(v).slice(8, -1);})()';
+    return ret;
+}
+
+function sortUnique(ar)
+{
+    ar = ar.slice();
+    ar.sort();
+    var ret = [];
+    for (var i = 0; i < ar.length; ++i)
+    {
+        if (i && ar[i-1] === ar[i])
+            continue;
+        ret.push(ar[i]);
+    }
     return ret;
 }
 
 function propChainBuildComplete(out, context, tempExpr, result)
 {
     var complete = null, command = null;
-    if (tempExpr.type === 'fake')
+    if (tempExpr.fake)
     {
         var name = tempExpr.value.val;
         complete = getFakeCompleteKeys(name);
@@ -1649,7 +1727,7 @@ function propChainBuildComplete(out, context, tempExpr, result)
         {
             // Strings only have indices as properties, use the fake object
             // completions instead.
-            tempExpr.type = 'fake';
+            tempExpr.fake = true;
             tempExpr.value = getKnownTypeInfo('String');
             propChainBuildComplete(out, context, tempExpr);
             return;
@@ -1663,40 +1741,34 @@ function propChainBuildComplete(out, context, tempExpr, result)
 
     var done = function()
     {
-        complete.sort();
-        var resComplete = [];
-        // Properties may be taken from several sources, so filter out duplicates.
-        for (var i = 0; i < complete.length; ++i)
-        {
-            if (!i || complete[i-1] !== complete[i])
-                resComplete.push(complete[i]);
-        }
-
         if (out.indexCompletion)
         {
-            resComplete = resComplete.map(function(x)
+            complete = complete.map(function(x)
             {
                 x = (out.indexQuoteType === '"') ? Str.escapeJS(x): Str.escapeSingleQuoteJS(x);
                 return x + out.indexQuoteType + "]";
             });
         }
-        out.complete = resComplete;
+
+        // Properties may be taken from several sources, so filter out duplicates.
+        out.complete = sortUnique(complete);
     };
 
     if (command === null)
+    {
         done();
+    }
     else
     {
         Firebug.CommandLine.evaluate(command, context, context.thisValue, null,
             function found(result, context)
             {
-                if (tempExpr.type === 'fake')
+                if (tempExpr.fake)
                 {
                     complete = complete.concat(Arr.keys(result));
                 }
                 else
                 {
-                    // XXXsilin Is using userland strings safe?
                     if (typeof result === 'string' && getKnownType(result))
                     {
                         complete = complete.concat(getFakeCompleteKeys(result));
@@ -1714,7 +1786,7 @@ function propChainBuildComplete(out, context, tempExpr, result)
 
 function evalPropChainStep(step, tempExpr, evalChain, out, context)
 {
-    if (tempExpr.type === 'fake')
+    if (tempExpr.fake)
     {
         if (step === evalChain.length)
         {
@@ -1723,24 +1795,23 @@ function evalPropChainStep(step, tempExpr, evalChain, out, context)
         }
 
         var link = evalChain[step], type = link.type;
-        if (type === 'property' || type === 'index')
+        if (type === LinkType.PROPERTY || type === LinkType.INDEX)
         {
-            // Use the accessed property if it exists and is unique (in case
-            // of multiple-definition functions), otherwise abort. It would
-            // be possible to continue with a 'real' expression of
+            // Use the accessed property if it exists, otherwise abort. It
+            // would be possible to continue with a 'real' expression of
             // `tempExpr.value.val`.prototype, but since prototypes seldom
             // contain actual values of things this doesn't work very well.
-            var mem = (type === 'index' ? '_fb_contType' : link.name);
+            var mem = (type === LinkType.INDEX ? '_fb_contType' : link.name);
             var t = getKnownType(tempExpr.value.val);
-            if (t.hasOwnProperty(mem) && !t[mem].splice)
+            if (t.hasOwnProperty(mem))
                 tempExpr.value = getKnownTypeInfo(t[mem]);
             else
                 return;
         }
-        else if (type === 'call')
+        else if (type === LinkType.CALL)
         {
             if (tempExpr.value.ret)
-                tempExpr.value = tempExpr.value.ret;
+                tempExpr.value = getKnownTypeInfo(tempExpr.value.ret);
             else
                 return;
         }
@@ -1753,28 +1824,28 @@ function evalPropChainStep(step, tempExpr, evalChain, out, context)
         {
             link = evalChain[step];
             type = link.type;
-            if (type === 'property')
+            if (type === LinkType.PROPERTY)
             {
                 tempExpr.thisCommand = tempExpr.command;
                 tempExpr.command += '.' + link.name;
             }
-            else if (type === 'index')
+            else if (type === LinkType.INDEX)
             {
                 tempExpr.thisCommand = 'window';
                 tempExpr.command += '[' + link.cont + ']';
             }
-            else if (type === 'safecall')
+            else if (type === LinkType.SAFECALL)
             {
                 tempExpr.thisCommand = 'window';
-                tempExpr.command += '(' + link.cont + ')';
+                tempExpr.command += '(' + link.origCont + ')';
             }
-            else if (type === 'call')
+            else if (type === LinkType.CALL)
             {
                 if (link.name === '')
                 {
                     // We cannot know about functions without name, try the
                     // heuristic directly.
-                    link.type = 'retval-heuristic';
+                    link.type = LinkType.RETVAL_HEURISTIC;
                     evalPropChainStep(step, tempExpr, evalChain, out, context);
                     return;
                 }
@@ -1782,15 +1853,15 @@ function evalPropChainStep(step, tempExpr, evalChain, out, context)
                 funcCommand = getTypeExtractionExpression(tempExpr.thisCommand);
                 break;
             }
-            else if (type === 'retval-heuristic')
+            else if (type === LinkType.RETVAL_HEURISTIC)
             {
-                if (link.name.substr(0, 3) === 'get' && link.cont !== null)
+                if (link.origCont !== null &&
+                     (link.name.substr(0, 3) === 'get' ||
+                      (link.name.charAt(0) === '$' && link.cont.indexOf(',') === -1)))
                 {
-                    // Names beginning with get are almost always getters, so
-                    // assume the it is a safecall and start over.
-                    // XXXsilin This feels like a good compromise to me. Is
-                    // it okay to make an exception like this?
-                    link.type = 'safecall';
+                    // Names beginning with get or $ are almost always getters, so
+                    // assume it is a safecall and start over.
+                    link.type = LinkType.SAFECALL;
                     evalPropChainStep(step, tempExpr, evalChain, out, context);
                     return;
                 }
@@ -1806,8 +1877,7 @@ function evalPropChainStep(step, tempExpr, evalChain, out, context)
             {
                 if (func)
                 {
-                    // XXXsilin Is using userland values of types 'number' and 'string' safe?
-                    if (type === 'call')
+                    if (type === LinkType.CALL)
                     {
                         if (typeof result !== 'string')
                             return;
@@ -1821,7 +1891,7 @@ function evalPropChainStep(step, tempExpr, evalChain, out, context)
                             if (!propVal.ret)
                                 return;
 
-                            tempExpr.type = 'fake';
+                            tempExpr.fake = true;
                             tempExpr.value = getKnownTypeInfo(propVal.ret);
                             evalPropChainStep(step+1, tempExpr, evalChain, out, context);
                         }
@@ -1829,11 +1899,11 @@ function evalPropChainStep(step, tempExpr, evalChain, out, context)
                         {
                             // Unknown 'this' type or function name, use
                             // heuristics on the function instead.
-                            link.type = 'retval-heuristic';
+                            link.type = LinkType.RETVAL_HEURISTIC;
                             evalPropChainStep(step, tempExpr, evalChain, out, context);
                         }
                     }
-                    else if (type === 'retval-heuristic')
+                    else if (type === LinkType.RETVAL_HEURISTIC)
                     {
                         if (typeof result !== 'string')
                             return;
@@ -1844,15 +1914,28 @@ function evalPropChainStep(step, tempExpr, evalChain, out, context)
                         // into giving wrong results,  but it might work in
                         // some common cases.
 
-                        // Don't support nested functions.
-                        if (result.lastIndexOf('function ') !== 0)
-                            return;
-
-                        // Check for chaining functions.
+                        // Check for chaining functions. This is done before
+                        // checking for nested functions, because completing
+                        // results of member functions containing nested
+                        // functions that use 'return this' seems uncommon,
+                        // and being wrong is not a huge problem.
                         if (result.indexOf('return this;') !== -1)
                         {
                             tempExpr.command = tempExpr.thisCommand;
                             tempExpr.thisCommand = 'window';
+                            evalPropChainStep(step+1, tempExpr, evalChain, out, context);
+                            return;
+                        }
+
+                        // Don't support nested functions.
+                        if (result.lastIndexOf('function') !== 0)
+                            return;
+
+                        // Check for arrays.
+                        if (result.indexOf('return [') !== -1)
+                        {
+                            tempExpr.fake = true;
+                            tempExpr.value = getKnownTypeInfo('Array');
                             evalPropChainStep(step+1, tempExpr, evalChain, out, context);
                             return;
                         }
@@ -1888,34 +1971,34 @@ function evalPropChainStep(step, tempExpr, evalChain, out, context)
 function evalPropChain(self, preExpr, origExpr, context)
 {
     var evalChain = [], linkStart = 0, len = preExpr.length, lastProp = '';
-    var tempExpr = {'type': 'real', 'command': 'window', 'thisCommand': 'window'};
+    var tempExpr = {'fake': false, 'command': 'window', 'thisCommand': 'window'};
     while (linkStart !== len)
     {
         var ch = preExpr.charAt(linkStart);
         if (linkStart === 0)
         {
-            if (ch === '[')
+            if (preExpr.substr(0, 4) === 'new ')
             {
-                tempExpr.type = 'fake';
-                tempExpr.value = {'val': 'Array'};
+                var parInd = preExpr.indexOf('(');
+                tempExpr.command = preExpr.substring(4, parInd) + '.prototype';
+                linkStart = matchingBracket(preExpr, parInd) + 1;
+            }
+            else if (ch === '[')
+            {
+                tempExpr.fake = true;
+                tempExpr.value = getKnownTypeInfo('Array');
                 linkStart = matchingBracket(preExpr, linkStart) + 1;
-                if (linkStart === 0)
-                    return false;
             }
             else if (ch === '"')
             {
                 var isRegex = (origExpr.charAt(0) === '/');
-                tempExpr.type = 'fake';
-                tempExpr.value = {'val': (isRegex ? 'RegExp' : 'String')};
+                tempExpr.fake = true;
+                tempExpr.value = getKnownTypeInfo(isRegex ? 'RegExp' : 'String');
                 linkStart = preExpr.indexOf('"', 1) + 1;
-                if (linkStart === 0)
-                    return false;
             }
-            else if (ch === '(' || ch === '{')
+            else if (!isNaN(ch))
             {
-                // Expression either looks like '(...).prop', which is
-                // too complicated, or '{...}.prop', which is uncommon
-                // and thus pointless to implement.
+                // The expression is really a decimal number.
                 return false;
             }
             else if (reJSChar.test(ch))
@@ -1924,13 +2007,12 @@ function evalPropChain(self, preExpr, origExpr, context)
                 var nextLink = eatProp(preExpr, linkStart);
                 lastProp = preExpr.substring(linkStart, nextLink);
                 linkStart = nextLink;
-                evalChain.push({'type': 'property', 'name': lastProp});
+                tempExpr.command = lastProp;
             }
-            else
-            {
-                // Syntax error, like '.'.
+
+            // Syntax error (like '.') or a too complicated expression.
+            if (linkStart === 0)
                 return false;
-            }
         }
         else
         {
@@ -1940,20 +2022,18 @@ function evalPropChain(self, preExpr, origExpr, context)
                 var nextLink = eatProp(preExpr, linkStart+1);
                 lastProp = preExpr.substring(linkStart+1, nextLink);
                 linkStart = nextLink;
-                evalChain.push({'type': 'property', 'name': lastProp});
+                evalChain.push({'type': LinkType.PROPERTY, 'name': lastProp});
             }
             else if (ch === '(')
             {
                 // Function call. Save the function name and the arguments if
                 // they are safe to evaluate.
                 var endCont = matchingBracket(preExpr, linkStart);
-                var cont = preExpr.substring(linkStart+1, endCont);
+                var cont = preExpr.substring(linkStart+1, endCont), origCont = null;
                 if (reLiteralExpr.test(cont))
-                    cont = origExpr.substring(linkStart+1, endCont);
-                else
-                    cont = null;
+                    origCont = origExpr.substring(linkStart+1, endCont);
                 linkStart = endCont + 1;
-                evalChain.push({'type': 'call', 'name': lastProp, 'cont': cont});
+                evalChain.push({'type': LinkType.CALL, 'name': lastProp, 'origCont': origCont, 'cont': cont});
                 lastProp = '';
             }
             else if (ch === '[')
@@ -1969,7 +2049,7 @@ function evalPropChain(self, preExpr, origExpr, context)
                 else
                     ind = '0';
                 linkStart = endInd+1;
-                evalChain.push({'type': 'index', 'cont': ind});
+                evalChain.push({'type': LinkType.INDEX, 'cont': ind});
                 lastProp = '';
             }
             else
@@ -1992,6 +2072,8 @@ function autoCompleteEval(preExpr, expr, postExpr, context, spreExpr)
     {
         if (spreExpr)
         {
+            // Complete member variables of some .-chained expression
+
             // In case of array indexing, remove the bracket and set a flag to
             // escape completions.
             this.indexCompletion = false;
@@ -2029,32 +2111,21 @@ function autoCompleteEval(preExpr, expr, postExpr, context, spreExpr)
         }
         else
         {
-            // XXXsilin Why is this so entirely different from the above? The only real
-            // change I can see is the addition of keywords; other than that wouldn't
-            // running the above code with preExpr = spreExpr = 'window.' work?
-            // (Help! It looks scary.)
+            // Complete variables from the local scope
 
-            if (context.stopped)
-                return Firebug.Debugger.getCurrentFrameKeys(context);
-
-            // Cross window type pseudo-comparison
             var contentView = Wrapper.getContentView(context.window);
-            if (contentView && contentView.Window &&
-                contentView.constructor.toString() === contentView.Window.toString())
+            if (context.stopped)
             {
-                // XXXsilin I assume keys(innerWindow)? I'm not familiar enough with
-                // wrapped objects to change it.
+                completions = Firebug.Debugger.getCurrentFrameKeys(context);
+            }
+            else if (contentView && contentView.Window &&
+                contentView.constructor.toString() === contentView.Window.toString())
+                // Cross window type pseudo-comparison
+            {
                 completions = Arr.keys(contentView); // return is safe
 
-                // Add some known window properties, without duplicates.
+                // Add some known window properties
                 completions = completions.concat(getFakeCompleteKeys('Window'));
-                var dupCompletions = completions.sort();
-                completions = [];
-                for (var i = 0; i < dupCompletions.length; ++i)
-                {
-                    if (!i || dupCompletions[i-1] !== dupCompletions[i])
-                        completions.push(dupCompletions[i]);
-                }
             }
             else  // hopefull sandbox in Chromebug
                 completions = Arr.keys(context.global);
@@ -2064,7 +2135,8 @@ function autoCompleteEval(preExpr, expr, postExpr, context, spreExpr)
             // exist, but I'm not even sure that's a good use case.
             addMatchingKeyword(expr, completions);
 
-            return completions.sort();
+            // Sort the completions, and avoid duplicates.
+            return sortUnique(completions);
         }
     }
     catch (exc)
@@ -2101,7 +2173,6 @@ function injectScript(script, win)
     win.location = "javascript: " + script;
 }
 
-// XXXsilin only cover positive numbers
 const rePositiveNumber = /^[1-9][0-9]*$/;
 function nonNumericKeys(map)  // At least sometimes the keys will be on user-level window objects
 {
@@ -2110,16 +2181,6 @@ function nonNumericKeys(map)  // At least sometimes the keys will be on user-lev
     {
         for (var name in map)  // enumeration is safe
         {
-            // XXXsilin Wait, what? "number" seems like a typo for "Number", and
-            // I'm also pretty sure numeric indices are strings, not numbers (when
-            // traversed as properties) - even if they were, they propably wouldn't
-            // be proper objects and so not instances of anything). AFAICT, this
-            // breaks completion for arrays and jQuery objects.
-            // Changing this for now, but do look over it because I'm not sure if
-            // it's safe.
-            // if (! (name instanceof number) )
-                // keys.push(name);   // name is string, safe
-
             if (! (name === '0' || rePositiveNumber.test(name)) )
                 keys.push(name);
         }
