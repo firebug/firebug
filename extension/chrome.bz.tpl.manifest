@@ -3,8 +3,6 @@ content firebug content/firebug/ contentaccessible=yes
 
 # Maps resource://firebug/* to files in modules/*
 resource firebug modules/
-# require js modules
-resource firebug_rjs content/firebug/
 
 # Maps resource://moduleloader/* to files in modules/*
 resource moduleloader modules/
@@ -63,7 +61,7 @@ locale  firebug vi          locale/vi/
 locale  firebug zh-CN       locale/zh-CN/
 locale  firebug zh-TW       locale/zh-TW/
 
-overlay chrome://browser/content/browser.xul                   chrome://firebug/content/browserOverlay.xul
+overlay chrome://browser/content/browser.xul                     chrome://firebug/content/browserOverlay.xul
 #overlay chrome://browser/content/browser.xul                    chrome://firebug/content/firefox/browserOverlayWithFrame.xul
 
 overlay chrome://global/content/customizeToolbar.xul            chrome://firebug/content/firefox/start-button/customizeToolbarOverlay.xul

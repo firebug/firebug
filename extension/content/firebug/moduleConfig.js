@@ -24,9 +24,9 @@ Firebug.getModuleLoaderConfig = function(baseConfig)
     // Set configuration defaults.
     baseConfig.baseLoaderUrl = baseConfig.baseLoaderUrl || "resource://moduleLoader/";
     baseConfig.prefDomain = baseConfig.prefDomain || "extensions.firebug";
-    baseConfig.arch = baseConfig.arch ||  "firebug_rjs/bti/inProcess";
+    baseConfig.arch = baseConfig.arch || "chrome://firebug/content/bti/inProcess";
     baseConfig.baseUrl = baseConfig.baseUrl || "resource://";
-    baseConfig.paths = baseConfig.paths || {"arch": baseConfig.arch, "firebug": "firebug_rjs"};
+    baseConfig.paths = baseConfig.paths || {"arch": baseConfig.arch, "firebug": "chrome://firebug/content"};
     baseConfig.xhtml = true;  // createElementNS used
 
     var keys = Object.keys(baseConfig);
@@ -38,7 +38,6 @@ Firebug.getModuleLoaderConfig = function(baseConfig)
 
     // This is the basic list of necessary modules. All the other modules will be
     // automatically loaded as dependencies.
-    config.context = "Firebug";
     config.modules = [
         "firebug/trace/traceModule",
         "firebug/chrome/navigationHistory",

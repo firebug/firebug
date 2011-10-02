@@ -3,8 +3,6 @@ content firebug content/firebug/ contentaccessible=yes
 
 # Maps resource://firebug/* to files in modules/*
 resource firebug modules/
-# require js modules
-resource firebug_rjs content/firebug/
 
 # Maps resource://moduleloader/* to files in modules/*
 resource moduleloader modules/
