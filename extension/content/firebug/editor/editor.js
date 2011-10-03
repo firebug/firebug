@@ -1014,7 +1014,8 @@ Firebug.AutoCompleter = function(getExprOffset, getRange, evaluator, selectMode,
 
         var offset = textBox.selectionStart; // defines the cursor position
 
-        var found = this.pickCandidates(textBox, offset, context, cycle, reverse, showGlobals);
+        var found = this.pickCandidates(textBox, offset, context, cycle, reverse, showGlobals,
+                                        !!completionBox);
 
         if (completionBox)
         {
@@ -1034,7 +1035,7 @@ Firebug.AutoCompleter = function(getExprOffset, getRange, evaluator, selectMode,
     /**
      * returns true if candidate list was created
      */
-    this.pickCandidates = function(textBox, offset, context, cycle, reverse, showGlobals)
+    this.pickCandidates = function(textBox, offset, context, cycle, reverse, showGlobals, completeAtEnd)
     {
         var value = textBox.value;
 
@@ -1099,6 +1100,12 @@ Firebug.AutoCompleter = function(getExprOffset, getRange, evaluator, selectMode,
             lastOffset = offset;
 
             var searchExpr = "";
+
+            // The completionBox completion system (used by the JavaScript
+            // command line) doesn't support modifications in the middle of
+            // the expression - return early for this case.
+            if (completeAtEnd && offset != parseStart+range.end+1)
+                return false;
 
             // Check if the cursor is somewhere in the middle of the expression
             if (expr && offset != parseStart+range.end+1)
