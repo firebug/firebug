@@ -180,7 +180,7 @@ Firebug.ScriptPanel.prototype = Obj.extend(Firebug.SourceBoxPanel,
         }
     },
 
-    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
     showFunction: function(fn)
     {
@@ -215,6 +215,39 @@ Firebug.ScriptPanel.prototype = Obj.extend(Firebug.SourceBoxPanel,
                 delete this.selection;
         }
     },
+
+    /**
+     * Some source files (compilation units) can be loaded asynchronously (e.g. when using
+     * RequireJS). If this case happens, this method tries it again after a short timeout.
+     *
+     * @param {Object} sourceLink  Link to the script and line to be displayed.
+     * @param {Number} counter  Number of async attempts.
+     */
+    showSourceLinkAsync: function(sourceLink, counter)
+    {
+        var compilationUnit = this.context.getCompilationUnit(sourceLink.href);
+        if (compilationUnit)
+        {
+            this.showSourceLink(sourceLink);
+        }
+        else
+        {
+            if (typeof(counter) == "undefined")
+                counter = 15;
+
+            // Stop trying the target script is probably not going to appear.
+            if (counter < 0)
+                return;
+
+            var self = this;
+            this.context.setTimeout(function()
+            {
+                self.showSourceLinkAsync(sourceLink, --counter);
+            }, 50);
+        }
+    },
+
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
     highlightingAttribute: "exe_line",
 
@@ -562,13 +595,14 @@ Firebug.ScriptPanel.prototype = Obj.extend(Firebug.SourceBoxPanel,
         var sourceBox = this.selectedSourceBox;
         if (sourceBox)
         {
-            if (sourceBox.centerLine)
-                state.previousCenterLine = sourceBox.centerLine;
+            if (sourceBox.centralLine)
+                state.previousCentralLine = sourceBox.centralLine;
             else
                 state.scrollTop = sourceBox.scrollTop ? sourceBox.scrollTop : this.lastScrollTop;
 
             delete this.selectedSourceBox;
         }
+
         Persist.persistObjects(this, state);
 
         if (this.location instanceof CompilationUnit)
@@ -713,11 +747,17 @@ Firebug.ScriptPanel.prototype = Obj.extend(Firebug.SourceBoxPanel,
 
                 if (state)
                 {
-                    if (this.location)
+                    if (state.location)
                     {
-                        var sourceLink = new SourceLink.SourceLink(this.location.getURL(), state.previousCenterLine, "js");
-                        this.showSourceLink(sourceLink);
+                        var sourceLink = new SourceLink.SourceLink(state.location.getURL(),
+                            state.previousCentralLine, "js");
+                        this.showSourceLinkAsync(sourceLink);
+
+                        // Do not restore the location again, it could happen during
+                        // the single stepping and overwrite the debugger location.
+                        delete state.location;
                     }
+
                     if (state.scrollTop)
                     {
                         this.selectedSourceBox.scrollTop = state.scrollTop;
