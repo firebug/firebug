@@ -71,17 +71,33 @@ require(config, modules, function(ChromeFactory, FBL, Firebug, Browser)
             Firebug.connection.connect();  // start firing events
         }
 
-        window.panelBarWaiter.waitForPanelBar(ChromeFactory, null, connect);
-
-        if (window.legacyPatch)
+        // Wait till all modules (including those coming from Firebug extensions)
+        // are loaded and thus all panels, firebug-modules, bundles, etc. are properly
+        // registered and Firebug can start to send initialization events.
+        var prevResourcesReady = requirejs.resourcesReady;
+        requirejs.resourcesReady = function(isReady)
         {
-            if (FBTrace.DBG_MODULES)
-                FBTrace.sysout("firebug main.js; legacyPatch");
-            window.legacyPatch(FBL, Firebug);
-        }
+            if (isReady && requirejs.resourcesDone)
+            {
+                if (FBTrace.DBG_INITIALIZE || FBTrace.DBG_MODULES)
+                    FBTrace.sysout("main.js; All RequireJS modules loaded");
 
-        if (FBTrace.DBG_MODULES)
-            require.analyzeDependencyTree();
+                window.panelBarWaiter.waitForPanelBar(ChromeFactory, null, connect);
+
+                if (window.legacyPatch)
+                {
+                    if (FBTrace.DBG_MODULES)
+                        FBTrace.sysout("firebug main.js; legacyPatch");
+                    window.legacyPatch(FBL, Firebug);
+                }
+
+                if (FBTrace.DBG_MODULES)
+                    require.analyzeDependencyTree();
+            }
+
+            if (prevResourcesReady)
+                prevResourcesReady(isReady);
+        }
     }
     catch(exc)
     {
