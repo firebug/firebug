@@ -3611,6 +3611,14 @@ var fbs =
             for(var i = 0; i < urlBreakpoints.length; i++)
             {
                 var bp = urlBreakpoints[i];
+
+                // Do not store breakpoins for "Run unil this line". These are not
+                // visible in Firebug UI and so, it isn't possible to remove them
+                // Note that there can be cases where such breakpoint is not removed
+                // by RunUntil (e.g. crash).
+                if (bp.type == BP_UNTIL)
+                    continue;
+
                 var cleanBP = {};
                 for (var p in bp)
                     cleanBP[p] = bp[p];
@@ -3704,6 +3712,13 @@ var fbs =
         {
             var url = urls[i];
             var bps = breakpointStore.getItem(url);
+
+            // Do not restore "Run unit this line" breakpoints. This should solve complaints
+            // about Firebug braking in the sourece even if there are no breakpoints in
+            // Firebug UI.
+            if (bps.type == BP_UNTIL)
+                continue;
+
             this.breakpoints[url] = bps;
 
             for (var j=0; j<bps.length; j++)
