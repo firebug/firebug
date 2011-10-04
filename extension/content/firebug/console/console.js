@@ -621,12 +621,12 @@ Firebug.ConsolePanel.prototype = Obj.extend(Firebug.ActivablePanel,
         }
 
         var format = objects[0];
-        var objIndex = 0;
+        var objIndex = 1;
 
         if (typeof(format) != "string")
         {
             format = "";
-            objIndex = -1;
+            objIndex = 0;
         }
         else  // a string
         {
@@ -641,16 +641,16 @@ Firebug.ConsolePanel.prototype = Obj.extend(Firebug.ActivablePanel,
 
         var parts = parseFormat(format);
         var trialIndex = objIndex;
-        for (var i= 0; i < parts.length; i++)
+        for (var i = 0; i < parts.length; i++)
         {
             var part = parts[i];
             if (part && typeof(part) == "object")
             {
-                // then too few parameters for format, assume unformatted.
-                if (++trialIndex > objects.length)
+                if (trialIndex++ >= objects.length)
                 {
+                    // Too few parameters for format, assume unformatted.
                     format = "";
-                    objIndex = -1;
+                    objIndex = 0;
                     parts.length = 0;
                     break;
                 }
@@ -662,7 +662,7 @@ Firebug.ConsolePanel.prototype = Obj.extend(Firebug.ActivablePanel,
             var part = parts[i];
             if (part && typeof(part) == "object")
             {
-                var object = objects[++objIndex];
+                var object = objects[objIndex++];
                 if (part.type == "%c")
                     row.setAttribute("style", object.toString());
                 else if (typeof(object) != "undefined")
@@ -676,7 +676,7 @@ Firebug.ConsolePanel.prototype = Obj.extend(Firebug.ActivablePanel,
             }
         }
 
-        for (var i = objIndex+1; i < objects.length; ++i)
+        for (var i = objIndex; i < objects.length; ++i)
         {
             logText(" ", row);
             var object = objects[i];
