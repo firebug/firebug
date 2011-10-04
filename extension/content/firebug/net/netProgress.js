@@ -246,7 +246,12 @@ NetProgress.prototype =
         var file = this.getRequestFile(request);
         if (file)
         {
-            file.respondedTime = time;
+            if (!file.responseStarted)
+            {
+                file.respondedTime = time;
+                file.responseStarted = true;
+            }
+
             file.endTime = time;
             return file;
         }
@@ -329,7 +334,17 @@ NetProgress.prototype =
                 FBTrace.sysout("net.events.respondedCacheFile +" + (NetUtils.now() - file.startTime) + " " +
                      getPrintableTime() + ", " + request.URI.path, file);
 
-            file.respondedTime = time;
+            // on-examine-cache-response is using different timer, do not track response
+            // times from the cache and use the proper waiting time.
+            if (file.waitingStarted)
+                time = file.waitingForTime;
+
+            if (!file.responseStarted)
+            {
+                file.respondedTime = time;
+                file.responseStarted = true;
+            }
+
             file.endTime = time;
             file.fromBFCache = true;
             file.fromCache = true;
@@ -407,6 +422,13 @@ NetProgress.prototype =
     connectingFile: function connectingFile(request, time)
     {
         var file = this.getRequestFile(request, null, true);
+
+        // Resolving, connecting and connected can come after the file is loaded
+        // (closedFile received). This happens if the response is coming from the 
+        // cache. Just ignore it.
+        if (file && file.loaded)
+            return null;
+
         if (file && !file.connectStarted)
         {
             file.connectStarted = true;
@@ -423,6 +445,9 @@ NetProgress.prototype =
     connectedFile: function connectedFile(request, time)
     {
         var file = this.getRequestFile(request, null, true);
+        if (file && file.loaded)
+            return null;
+
         if (file && !file.connected)
         {
             file.connected = true;
@@ -527,7 +552,13 @@ NetProgress.prototype =
                 file.aborted = true;
                 if (!file.responseStatusText)
                     file.responseStatusText = "Aborted";
-                file.respondedTime = time;
+
+                if (!file.responseStarted)
+                {
+                    file.respondedTime = time;
+                    file.responseStarted = true;
+                }
+
                 file.endTime = time;
             }
         }
@@ -538,6 +569,9 @@ NetProgress.prototype =
     resolvingFile: function resolvingFile(request, time)
     {
         var file = this.getRequestFile(request, null, true);
+        if (file && file.loaded)
+            return null;
+
         if (file)
         {
             file.resolveStarted = true;
