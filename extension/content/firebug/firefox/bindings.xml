@@ -985,7 +985,7 @@
 </binding>
 
 <!-- This binding represents a location list used in a panel. The list is based
-     on a menu-button (a toolbar button with popup menu) and its purposes it displaying
+     on a menu-button (toolbar button with a popup-menu) and its purpose is displaying
      available files on the current page. For instance, in the Script panel, the location
      list displays list of all scripts. -->
 <binding id="panelFileList" display="xul:menu"
@@ -1055,7 +1055,9 @@
 
         <method name="getLocator">
             <body><![CDATA[
-                if (!this.locator)  // XXXjjb this is complicated because the location list depends upon the current panel
+                // XXXjjb this is complicated because the location list depends upon
+                // the current panel
+                if (!this.locator)
                 {
                     var functionYieldingExpression = this.getAttribute("locationProvider");
                     try {
@@ -1230,6 +1232,9 @@
                         FBL.setClass(menuItem, "fbInlineItem");
                 }
             }
+
+            // Focus Firebug UI so, keyboard navigation (up/down) in the menu works.
+            Firebug.chrome.focus();
         ]]></handler>
 
         <handler event="popupshown"><![CDATA[
