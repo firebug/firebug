@@ -8,9 +8,10 @@ define([
     "firebug/lib/dom",
     "firebug/lib/css",
     "firebug/js/stackFrame",
+    "firebug/lib/locale",
     "firebug/dom/domPanel",     // Firebug.DOMBasePanel, Firebug.DOMPanel.DirTable
 ],
-function(Obj, Firebug, ToggleBranch, Events, Dom, Css, StackFrame) {
+function(Obj, Firebug, ToggleBranch, Events, Dom, Css, StackFrame, Locale) {
 
 // ********************************************************************************************* //
 // Watch Panel
@@ -42,12 +43,16 @@ Firebug.WatchPanel.prototype = Obj.extend(Firebug.DOMBasePanel.prototype,
         this.onMouseOver = Obj.bind(this.onMouseOver, this);
         this.onMouseOut = Obj.bind(this.onMouseOut, this);
 
+        Firebug.registerUIListener(this);
+
         Firebug.DOMBasePanel.prototype.initialize.apply(this, arguments);
     },
 
     destroy: function(state)
     {
         state.watches = this.watches;
+
+        Firebug.unregisterUIListener(this);
 
         Firebug.DOMBasePanel.prototype.destroy.apply(this, arguments);
     },
@@ -296,6 +301,37 @@ Firebug.WatchPanel.prototype = Obj.extend(Firebug.DOMBasePanel.prototype,
         var watchRow = Dom.getAncestorByClass(event.relatedTarget, "watchRow");
         if (!watchRow)
             this.showToolbox(null);
+    },
+
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+    // Context Menu
+
+    /**
+     * Creates "Add Watch" menu item within DOM and Watch panel context menus.
+     */
+    onContextMenu: function(items, object, target, context, panel, popup)
+    {
+        if (panel.name != "dom" && panel.name != "watches")
+            return;
+
+        var row = Dom.getAncestorByClass(target, "memberRow");
+        if (!row || !row.domObject.value)
+            return;
+
+        var path = this.getPropertyPath(row);
+        if (!path || !path.length)
+            return;
+
+        // Ignore top level variables in the Watch panel.
+        if (panel.name == "watches" && path.length == 1)
+            return;
+
+        items.push({
+           id: "fbAddWatch",
+           nol10n: true,
+           label: Locale.$STR("AddWatch"),
+           command: Obj.bindFixed(this.addWatch, this, path.join(""))
+        });
     },
 });
 
