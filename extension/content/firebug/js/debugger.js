@@ -1493,8 +1493,9 @@ Firebug.Debugger = Obj.extend(Firebug.ActivableModule,
             {
                 sourceFile = new Firebug.XULSourceFile(outerScript.fileName, outerScript,
                     innerScriptEnumerator);
-                this.watchSourceFile(context, sourceFile);
             }
+
+            this.watchSourceFile(context, sourceFile);
 
             if (FBTrace.DBG_SOURCEFILES)
                 FBTrace.sysout("debugger.onXULScriptCreated script.fileName="+outerScript.fileName+
@@ -1652,27 +1653,30 @@ Firebug.Debugger = Obj.extend(Firebug.ActivableModule,
             // Multiple script tags in HTML or duplicate .js file names.
             if (sourceFile && (sourceFile instanceof Firebug.TopLevelSourceFile))
             {
-                    if (FBTrace.DBG_SOURCEFILES)
-                        FBTrace.sysout("debugger.onTopLevelScriptCreated reuse sourcefile="+
-                            sourceFile.toString()+" -> "+context.getName()+" ("+context.uid+")");
+                if (FBTrace.DBG_SOURCEFILES)
+                    FBTrace.sysout("debugger.onTopLevelScriptCreated reuse sourcefile="+
+                        sourceFile.toString()+" -> "+context.getName()+" ("+context.uid+")");
 
-                    if (!sourceFile.outerScript || !sourceFile.outerScript.isValid)
-                        sourceFile.outerScript = outerScript;
+                if (!sourceFile.outerScript || !sourceFile.outerScript.isValid)
+                    sourceFile.outerScript = outerScript;
 
-                    Firebug.SourceFile.addScriptsToSourceFile(sourceFile, outerScript,
-                        innerScripts);
+                Firebug.SourceFile.addScriptsToSourceFile(sourceFile, outerScript,
+                    innerScripts);
             }
             else
             {
                 sourceFile = new Firebug.TopLevelSourceFile(url, script, script.lineExtent,
                     innerScripts);
 
-                this.watchSourceFile(context, sourceFile);
-
                 if (FBTrace.DBG_SOURCEFILES)
                     FBTrace.sysout("debugger.onTopLevelScriptCreated create sourcefile="+
                         sourceFile.toString()+" -> "+context.getName()+" ("+context.uid+")");
             }
+
+            // If a script is inserted multiple times in HTML, we still need to make
+            // sure that meta info is updated (e.g. sourceFileByTag in the context)
+            // (see issue 4880)
+            this.watchSourceFile(context, sourceFile);
         }
 
         Firebug.connection.dispatch("onTopLevelScriptCreated",[context, frame, sourceFile.href]);
