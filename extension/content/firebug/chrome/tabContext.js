@@ -168,6 +168,7 @@ Firebug.TabContext.prototype =
     {
         if (sourceFile.outerScript)
             this.sourceFileByTag[sourceFile.outerScript.tag] = sourceFile;
+
         for (var innerTag in sourceFile.innerScripts)
             this.sourceFileByTag[innerTag] = sourceFile;
     },

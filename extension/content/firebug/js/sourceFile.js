@@ -516,27 +516,26 @@ Firebug.SourceFile.addScriptsToSourceFile = function(sourceFile, outerScript, in
     if (!sourceFile.innerScripts)
          sourceFile.innerScripts = {};
 
-     var total = 0;
-     while (innerScripts.hasMoreElements())
-     {
-         var script = innerScripts.getNext();
-         if (!script || ( (script instanceof Ci.jsdIScript) && !script.tag) )
-         {
-             if (FBTrace.DBG_SOURCEFILES)
-                 FBTrace.sysout("addScriptsToSourceFile innerScripts.getNext FAILS "+
+    var total = 0;
+    while (innerScripts.hasMoreElements())
+    {
+        var script = innerScripts.getNext();
+        if (!script || ((script instanceof Ci.jsdIScript) && !script.tag))
+        {
+            if (FBTrace.DBG_SOURCEFILES)
+                FBTrace.sysout("addScriptsToSourceFile innerScripts.getNext FAILS "+
                     sourceFile, script);
+            continue;
+        }
 
-             continue;
-         }
+        sourceFile.innerScripts[script.tag] = script;
 
-         sourceFile.innerScripts[script.tag] = script;
+        if (FBTrace.DBG_SOURCEFILES)
+            total++;
+    }
 
-         if (FBTrace.DBG_SOURCEFILES)
-             total++;
-     }
-
-     if (FBTrace.DBG_SOURCEFILES)
-         FBTrace.sysout("addScriptsToSourceFile "+ total +" scripts, sourcefile="+
+    if (FBTrace.DBG_SOURCEFILES)
+        FBTrace.sysout("addScriptsToSourceFile "+ total +" scripts, sourcefile="+
             sourceFile.toString(), sourceFile);
 }
 

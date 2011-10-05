@@ -2488,9 +2488,10 @@ var fbs =
 
             // On compilation of a top-level (global-appending) function.
             // After this top-level script executes we lose the jsdIScript so we can't
-            // build its line table.
-            // Therefore we need to build it here.
-            var debuggr = fbs.findDebugger(frame);  // sets debuggr.breakContext
+            // build its line table. Therefore we need to build it here.
+
+            // sets debuggr.breakContext
+            var debuggr = fbs.findDebugger(frame);
             if (debuggr)
             {
                 var sourceFile = debuggr.onTopLevelScriptCreated(frame, frame.script,
