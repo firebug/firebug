@@ -395,6 +395,13 @@ NetPanel.prototype = Obj.extend(Firebug.ActivablePanel,
             }
         }
 
+        items.push("-");
+        items.push({
+            label: "net.label.Resend",
+            id: "fbNetResend",
+            command: Obj.bindFixed(Firebug.Spy.XHR.resend, Firebug.Spy.XHR, file, this.context)
+        });
+
         return items;
     },
 

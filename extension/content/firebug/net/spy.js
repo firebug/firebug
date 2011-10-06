@@ -939,6 +939,31 @@ Firebug.Spy.XHR = domplate(Firebug.Rep,
         Win.openNewTab(spy.getURL(), spy.postText);
     },
 
+    resend: function(spy, context)
+    {
+        try
+        {
+            // xxxHonza: must be done through Console RDP
+            var postData = NetUtils.getPostText(spy, context, true);
+            var request = new context.window.XMLHttpRequest();
+            request.open(spy.method, spy.href, true);
+
+            var headers = spy.requestHeaders;
+            for (var i=0; headers && i<headers.length; i++)
+            {
+                var header = headers[i];
+                request.setRequestHeader(header.name, header.value);
+            }
+
+            request.send(postData);
+        }
+        catch (err)
+        {
+            if (FBTrace.DBG_ERRORS)
+                FBTrace.sysout("spy.resend; EXCEPTION " + err, err);
+        }
+    },
+
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
     supportsObject: function(object, type)
@@ -958,27 +983,43 @@ Firebug.Spy.XHR = domplate(Firebug.Rep,
         return spy.xhrRequest;
     },
 
-    getContextMenuItems: function(spy)
+    getContextMenuItems: function(spy, target, context)
     {
-        var items = [
-            {label: "CopyLocation", id: "fbSpyCopyLocation",
-                command: Obj.bindFixed(this.copyURL, this, spy) }
-        ];
+        var items = [{
+            label: "CopyLocation",
+            id: "fbSpyCopyLocation",
+            command: Obj.bindFixed(this.copyURL, this, spy)
+        }];
 
         if (spy.postText)
         {
-            items.push(
-                {label: "CopyLocationParameters", command: Obj.bindFixed(this.copyParams, this, spy) }
-            );
+            items.push({
+                label: "CopyLocationParameters",
+                command: Obj.bindFixed(this.copyParams, this, spy)
+            });
         }
 
-        items.push(
-            {label: "CopyResponse", id: "fbSpyCopyResponse",
-                command: Obj.bindFixed(this.copyResponse, this, spy) },
-            "-",
-            {label: "OpenInTab", id: "fbSpyOpenInTab",
-                command: Obj.bindFixed(this.openInTab, this, spy) }
-        );
+        items.push({
+            label: "CopyResponse",
+            id: "fbSpyCopyResponse",
+            command: Obj.bindFixed(this.copyResponse, this, spy)
+        });
+
+        items.push("-");
+
+        items.push({
+            label: "OpenInTab",
+            id: "fbSpyOpenInTab",
+            command: Obj.bindFixed(this.openInTab, this, spy)
+        });
+
+        items.push("-");
+
+        items.push({
+            label: "net.label.Resend",
+            id: "fbSpyResend",
+            command: Obj.bindFixed(this.resend, this, spy, context)
+        });
 
         return items;
     }
