@@ -136,7 +136,7 @@ pref("extensions.firebug.key.shortcut.toggleInspecting", "accel shift c");
 pref("extensions.firebug.key.shortcut.toggleQuickInfoBox", "accel shift i");
 pref("extensions.firebug.key.shortcut.toggleProfiling", "accel shift p");
 pref("extensions.firebug.key.shortcut.focusCommandLine", "accel shift l");
-pref("extensions.firebug.key.shortcut.focusFirebugSearch", "accel shift k");
+pref("extensions.firebug.key.shortcut.focusFirebugSearch", "accel f");
 pref("extensions.firebug.key.shortcut.focusWatchEditor", "accel shift n");
 pref("extensions.firebug.key.shortcut.focusLocation", "control shift VK_SPACE");
 pref("extensions.firebug.key.shortcut.nextObject", "control .");
@@ -149,9 +149,9 @@ pref("extensions.firebug.key.shortcut.previousFirebugTab", "control `");
 pref("extensions.firebug.key.shortcut.clearConsole", "accel shift r");
 pref("extensions.firebug.key.shortcut.navBack", "accel shift VK_LEFT");
 pref("extensions.firebug.key.shortcut.navForward", "accel shift VK_RIGHT");
-pref("extensions.firebug.key.shortcut.increaseTextSize", "alt accel +");
-pref("extensions.firebug.key.shortcut.decreaseTextSize", "alt accel -");
-pref("extensions.firebug.key.shortcut.normalTextSize", "alt accel 0");
+pref("extensions.firebug.key.shortcut.increaseTextSize", "accel +");
+pref("extensions.firebug.key.shortcut.decreaseTextSize", "accel -");
+pref("extensions.firebug.key.shortcut.normalTextSize", "accel 0");
 
 // Accessibility
 pref("extensions.firebug.a11y.enable", false);

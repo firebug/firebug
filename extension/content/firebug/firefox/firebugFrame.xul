@@ -37,7 +37,7 @@
         <command id="cmd_paste" oncommand="goDoCommand('cmd_paste')" disabled="true"/>
         <command id="cmd_delete" oncommand="goDoCommand('cmd_delete')" disabled="true"/>
         <command id="cmd_selectAll" oncommand="goDoCommand('cmd_selectAll')" disabled="true"/>
-        <command id="cmd_closeWindow" oncommand="window.close()"/>
+        <command id="cmd_closeWindow" oncommand="Firebug.toggleDetachBar(false, true)"/>
         <command id="cmd_reload" oncommand="Firebug.chrome.reload()"/>
         <command id="cmd_reloadSkipCache" oncommand="Firebug.chrome.reload(true)"/>
         <command id="cmd_toggleOrient" oncommand="Firebug.chrome.toggleOrient()"/>
