@@ -1761,6 +1761,8 @@ Firebug.Debugger = Obj.extend(Firebug.ActivableModule,
                 if (isSet && props)
                 {
                     row.setAttribute("condition", props.condition ? "true" : "false");
+                    row.breakpointCondition = props.condition ? props.condition : null;
+
                     if (props.condition)  // issue 1371
                     {
                         var watchPanel = this.ableWatchSidePanel(context);

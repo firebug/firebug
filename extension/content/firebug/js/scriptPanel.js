@@ -110,19 +110,24 @@ Firebug.ScriptPanel.decorator = Obj.extend(new Firebug.SourceBoxDecorator,
                 scriptRow.setAttribute("breakpoint", "true");
                 if (props.disabled)
                     scriptRow.setAttribute("disabledBreakpoint", "true");
+
                 if (props.condition)
+                {
                     scriptRow.setAttribute("condition", "true");
+                    scriptRow.breakpointCondition = props.condition;
+                }
             }
+
             if (FBTrace.DBG_LINETABLE)
             {
                 FBTrace.sysout("script.setLineBreakpoints found "+scriptRow+" for "+line+"@"+
-                    compilationUnit.getURL()+"\n");
+                    compilationUnit.getURL(), props);
             }
         });
     },
 });
 
-// ************************************************************************************************
+// ********************************************************************************************* //
 
 Firebug.ScriptPanel.prototype = Obj.extend(Firebug.SourceBoxPanel,
 {
@@ -152,7 +157,7 @@ Firebug.ScriptPanel.prototype = Obj.extend(Firebug.SourceBoxPanel,
         return Firebug.ScriptPanel.decorator;
     },
 
-    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
     // TODO Class method
 
     onJavaScriptDebugging: function(active)
@@ -411,7 +416,7 @@ Firebug.ScriptPanel.prototype = Obj.extend(Firebug.SourceBoxPanel,
         Firebug.Editor.startEditing(sourceLine, condition);
     },
 
-    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
     addSelectionWatch: function()
     {
@@ -431,13 +436,44 @@ Firebug.ScriptPanel.prototype = Obj.extend(Firebug.SourceBoxPanel,
         System.copyToClipboard(source);
     },
 
-    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+    // Info Tips
 
     updateInfoTip: function()
     {
         var infoTip = this.panelBrowser.infoTip;
         if (infoTip && this.infoTipExpr)
             this.populateInfoTip(infoTip, this.infoTipExpr);
+    },
+
+    showInfoTip: function(infoTip, target, x, y, rangeParent, rangeOffset)
+    {
+        var sourceLine = Dom.getAncestorByClass(target, "sourceLine");
+        if (sourceLine)
+            return this.populateBreakpointInfoTip(infoTip, sourceLine);
+
+        var frame = this.context.currentFrame;
+        if (!frame)
+            return;
+
+        var sourceRowText = Dom.getAncestorByClass(target, "sourceRowText");
+        if (!sourceRowText)
+            return;
+
+        // see http://code.google.com/p/fbug/issues/detail?id=889
+        // idea from: Jonathan Zarate's rikaichan extension (http://www.polarcloud.com/rikaichan/)
+        if (!rangeParent)
+            return;
+
+        rangeOffset = rangeOffset || 0;
+        var expr = getExpressionAt(rangeParent.data, rangeOffset);
+        if (!expr || !expr.expr)
+            return;
+
+        if (expr.expr == this.infoTipExpr)
+            return true;
+        else
+            return this.populateInfoTip(infoTip, expr.expr);
     },
 
     populateInfoTip: function(infoTip, expr)
@@ -470,7 +506,28 @@ Firebug.ScriptPanel.prototype = Obj.extend(Firebug.SourceBoxPanel,
         return (self.infoTipExpr == expr);
     },
 
-    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+    populateBreakpointInfoTip: function(infoTip, sourceLine)
+    {
+        var sourceRow = Dom.getAncestorByClass(sourceLine, "sourceRow");
+        var condition = sourceRow.getAttribute("condition");
+        if (!condition)
+            return false;
+
+        var expr = sourceRow.breakpointCondition;
+        if (!expr)
+            return false;
+
+        if (expr == this.infoTipExpr)
+            return true;
+
+        Firebug.ScriptPanel.BreakpointInfoTip.render(infoTip, expr);
+
+        this.infoTipExpr = expr;
+
+        return true;
+    },
+
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
     // UI event listeners
 
     onMouseDown: function(event)
@@ -561,7 +618,7 @@ Firebug.ScriptPanel.prototype = Obj.extend(Firebug.SourceBoxPanel,
         }
     },
 
-    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
     // extends Panel
 
     name: "script",
@@ -1129,6 +1186,7 @@ Firebug.ScriptPanel.prototype = Obj.extend(Firebug.SourceBoxPanel,
         // Target should be an element with class = sourceLine
         if (Css.hasClass(target, "sourceLine"))
             return null; // TODO
+
         return null;
     },
 
@@ -1146,31 +1204,6 @@ Firebug.ScriptPanel.prototype = Obj.extend(Firebug.SourceBoxPanel,
         var lineNo = parseInt(sourceRow.firstChild.textContent);
         var scripts = Firebug.SourceFile.findScripts(this.context, this.location.getURL(), lineNo);
         return scripts; // gee I wonder what will happen?
-    },
-
-    showInfoTip: function(infoTip, target, x, y, rangeParent, rangeOffset)
-    {
-        var frame = this.context.currentFrame;
-        if (!frame)
-            return;
-
-        var sourceRowText = Dom.getAncestorByClass(target, "sourceRowText");
-        if (!sourceRowText)
-            return;
-
-        // see http://code.google.com/p/fbug/issues/detail?id=889
-        // idea from: Jonathan Zarate's rikaichan extension (http://www.polarcloud.com/rikaichan/)
-        if (!rangeParent)
-            return;
-        rangeOffset = rangeOffset || 0;
-        var expr = getExpressionAt(rangeParent.data, rangeOffset);
-        if (!expr || !expr.expr)
-            return;
-
-        if (expr.expr == this.infoTipExpr)
-            return true;
-        else
-            return this.populateInfoTip(infoTip, expr.expr);
     },
 
     getObjectPath: function(frame)
@@ -1317,7 +1350,7 @@ Firebug.ScriptPanel.prototype = Obj.extend(Firebug.SourceBoxPanel,
         return this.conditionEditor;
     },
 
-    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
     supportsBreakOnNext: function()
     {
@@ -1343,7 +1376,7 @@ Firebug.ScriptPanel.prototype = Obj.extend(Firebug.SourceBoxPanel,
         return !!this.context.breakOnNextHook;  // TODO BTI
     },
 
-    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
     // extends ActivablePanel
 
     /**
@@ -1544,7 +1577,7 @@ Firebug.ScriptPanel.prototype = Obj.extend(Firebug.SourceBoxPanel,
 
 });
 
-// ************************************************************************************************
+// ********************************************************************************************* //
 
 const reWord = /([A-Za-z_$][A-Za-z_$0-9]*)(\.([A-Za-z_$][A-Za-z_$0-9]*))*/;
 
@@ -1569,12 +1602,14 @@ function getExpressionAt(text, charOffset)
     return {expr: null, offset: -1};
 };
 
-// ************************************************************************************************
+// ********************************************************************************************* //
+// Domplate Templates
+
+with (Domplate) {
 
 /**
  * @domplate Displays various warning messages within the Script panel.
  */
-with (Domplate) {
 Firebug.ScriptPanel.WarningRep = domplate(Firebug.Rep,
 {
     tag:
@@ -1597,7 +1632,7 @@ Firebug.ScriptPanel.WarningRep = domplate(Firebug.Rep,
             Locale.$STR("script.button.Go to that page")
         ),
 
-    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
     onEnableScript: function(event)
     {
@@ -1625,7 +1660,7 @@ Firebug.ScriptPanel.WarningRep = domplate(Firebug.Rep,
             FBTrace.sysout("script.onFocusDebugger FAILED");
     },
 
-    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
     showInactive: function(parentNode)
     {
@@ -1698,16 +1733,33 @@ Firebug.ScriptPanel.WarningRep = domplate(Firebug.Rep,
 
         return box;
     }
-})};
+});
 
 var WarningRep = Firebug.ScriptPanel.WarningRep;
 
-// ************************************************************************************************
+// ********************************************************************************************* //
+
+Firebug.ScriptPanel.BreakpointInfoTip = domplate(Firebug.Rep,
+{
+    tag:
+        DIV("$expr"),
+
+    render: function(parentNode, expr)
+    {
+        this.tag.replace({expr: expr}, parentNode, this);
+    }
+});
+
+// ********************************************************************************************* //
+
+}; // END with (Domplate)
+
+// ********************************************************************************************* //
 // Registration
 
 Firebug.registerPanel(Firebug.ScriptPanel);
 
 return Firebug.ScriptPanel;
 
-// ************************************************************************************************
+// ********************************************************************************************* //
 });
