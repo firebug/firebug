@@ -1051,7 +1051,7 @@ Firebug.AutoCompleter = function(getExprOffset, getRange, evaluator, selectMode,
             if (svalue === null)
                 return false;
 
-            if (killCompletions && killCompletions(svalue, offset, context))
+            if (killCompletions && killCompletions(svalue, offset, context, value))
                 return false;
 
             // Find the part of the string that will be parsed

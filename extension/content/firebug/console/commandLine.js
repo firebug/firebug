@@ -1346,15 +1346,28 @@ function simplifyExpr(expr)
 }
 
 // Check if auto-completion should be killed.
-function killCompletions(expr)
+function killCompletions(expr, offset, context, origExpr)
 {
     // Make sure there is actually something to complete at the end.
-    if (expr.length === 0 ||
-            (!reJSChar.test(expr[expr.length-1]) &&
-             expr[expr.length-1] !== '.' &&
-             !/\[" *$/.test(expr)))
-    {
+    if (expr.length === 0)
         return true;
+
+    if (reJSChar.test(expr[expr.length-1]) ||
+            expr[expr.length-1] === '.')
+    {
+        // An expression at the end - we're fine.
+    }
+    else
+    {
+        var lastBr = expr.lastIndexOf('[');
+        if (lastBr !== -1 && /^" *$/.test(expr.substr(lastBr+1)) &&
+            origExpr.charAt(lastBr+1) !== '/')
+        {
+            // Array completions - we're fine.
+        }
+        else {
+            return true;
+        }
     }
 
     // Check for 'function i'.
