@@ -141,15 +141,22 @@ Firebug.Debugger = Obj.extend(Firebug.ActivableModule,
      */
     getFrameKeys: function(frame, names) // moz
     {
-        var listValue = {value: null}, lengthValue = {value: 0};
-        frame.scope.getProperties(listValue, lengthValue);
-
-        for (var i = 0; i < lengthValue.value; ++i)
+        var scope = frame.scope;
+        while (scope)
         {
-            var prop = listValue.value[i];
-            var name = Wrapper.unwrapIValue(prop.name);
-            names.push(name);
+            var listValue = {value: null}, lengthValue = {value: 0};
+            scope.getProperties(listValue, lengthValue);
+
+            for (var i=0; i<lengthValue.value; ++i)
+            {
+                var prop = listValue.value[i];
+                var name = Wrapper.unwrapIValue(prop.name);
+                names.push(name);
+            }
+
+            scope = scope.jsParent;
         }
+
         return names;
     },
 
