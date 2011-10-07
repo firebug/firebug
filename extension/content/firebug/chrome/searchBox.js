@@ -13,6 +13,9 @@ function(Obj, Firebug, Css, Search, System, Locale) {
 // ************************************************************************************************
 // Constants
 
+const Cc = Components.classes;
+const Ci = Components.interfaces;
+
 const searchDelay = 150;
 
 // ************************************************************************************************
@@ -240,6 +243,7 @@ Firebug.Search = Obj.extend(Firebug.Module,
 
         return history[0]
     },
+
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
     // extends Module
 
