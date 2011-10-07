@@ -702,10 +702,13 @@ Firebug.DOMBasePanel.prototype = Obj.extend(Firebug.Panel,
             }
         }
 
+        var readOnly = isReadOnly(object, name);
+        if (typeof(readOnly) != "undefined")
+            member.readOnly = readOnly;
+
         props.push(member);
         return member;
     },
-
 
     expandMembers: function (members, toggles, offset, level, context)  // recursion starts with offset=0, level=0
     {
@@ -1654,8 +1657,6 @@ DOMSidePanel.prototype = Obj.extend(Firebug.DOMBasePanel.prototype,
 });
 
 // ************************************************************************************************
-
-// ************************************************************************************************
 // Local Helpers
 
 function DOMEditor(doc)
@@ -1722,6 +1723,19 @@ function isArguments(obj)
 function isPrototype(name)
 {
     return (name == "prototype" || name == "__proto__");
+}
+
+function isReadOnly(obj, propName)
+{
+    try
+    {
+        var desc = Object.getOwnPropertyDescriptor(obj, propName);
+        if (desc)
+            return !desc.writable;
+    }
+    catch (err)
+    {
+    }
 }
 
 function getRowName(row)
