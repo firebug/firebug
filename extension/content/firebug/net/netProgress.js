@@ -572,7 +572,7 @@ NetProgress.prototype =
         if (file && file.loaded)
             return null;
 
-        if (file)
+        if (file && !file.resolveStarted)
         {
             file.resolveStarted = true;
             file.resolvingTime = time;

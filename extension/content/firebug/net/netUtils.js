@@ -342,7 +342,8 @@ var NetUtils =
     getBlockingEndTime: function(file)
     {
         //var blockingEnd = (file.sendingTime > file.startTime) ? file.sendingTime : file.waitingForTime;
-        if (file.resolveStarted)
+
+        if (file.resolveStarted && file.connectStarted)
             return file.resolvingTime;
 
         if (file.connectStarted)
