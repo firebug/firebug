@@ -82,8 +82,6 @@ require(config, modules, function(ChromeFactory, FBL, Firebug, Browser)
                 if (FBTrace.DBG_INITIALIZE || FBTrace.DBG_MODULES)
                     FBTrace.sysout("main.js; All RequireJS modules loaded");
 
-                window.panelBarWaiter.waitForPanelBar(ChromeFactory, null, connect);
-
                 if (window.legacyPatch)
                 {
                     if (FBTrace.DBG_MODULES)
@@ -93,6 +91,8 @@ require(config, modules, function(ChromeFactory, FBL, Firebug, Browser)
 
                 if (FBTrace.DBG_MODULES)
                     require.analyzeDependencyTree();
+
+                window.panelBarWaiter.waitForPanelBar(ChromeFactory, null, connect);
             }
 
             if (prevResourcesReady)
