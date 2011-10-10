@@ -207,11 +207,24 @@ Browser.prototype.closeContext = function(context, userCommands)
     if (context)
     {
         var topWindow = context.window;
-        var index = this.contexts.indexOf(topWindow);
+
+        var index = -1;
+        for (var i=0; i<this.contexts.length; i++)
+        {
+            if (this.contexts[i].window == topWindow)
+            {
+                index = i;
+                break;
+            }
+        }
+
         if (index === -1)
         {
-            var loc = Win.safeGetWindowLocation(topWindow);
-            FBTrace.sysout("Browser.closeContext ERROR, no context matching "+loc);
+            if (FBTrace.DBG_ERRORS)
+            {
+                var loc = Win.safeGetWindowLocation(topWindow);
+                FBTrace.sysout("Browser.closeContext ERROR, no context matching " + loc);
+            }
         }
         else
         {
