@@ -30,7 +30,7 @@ function factoryBrowser(FBL, Events, Firefox, Win, WebApp, Options, TabWatcher) 
  */
 function Browser()
 {
-    this.contexts = []; // metadata instances
+    //this.contexts = []; // metadata instances
     this.activeContext = null;
     this.listeners = [];  // array of Browser.listener objects
     this.tools = {};  // registry of known tools
@@ -170,12 +170,12 @@ Browser.prototype.getContextByWebApp = function(webApp)
     var context = TabWatcher.getContextByWindow(topMost);
     return context;
 
-    for (var i = 0; i < this.contexts.length; i++)
+    /*for (var i = 0; i < this.contexts.length; i++)
     {
         var context = this.contexts[i];
         if (context.window === topMost)
             return context
-    }
+    }*/
 }
 
 Browser.prototype.getContextByWindow = function(win)
@@ -184,6 +184,7 @@ Browser.prototype.getContextByWindow = function(win)
     if (webApp)
         return this.getContextByWebApp(webApp);
 }
+
 /**
  * get local metadata for the remote WebApp if it exists
  * @return ToolInterface.WebAppContext or null if the webApp is not being debugged
@@ -192,9 +193,12 @@ Browser.prototype.setContextByWebApp = function(webApp, context)
 {
     var topMost = webApp.getTopMostWindow();
     if (context.window !== topMost)
-        Debug.ERROR("Browser setContextByWebApp mismatched context ", {context: context, win: topMost});
+        Debug.ERROR("Browser setContextByWebApp mismatched context ",
+            {context: context, win: topMost});
 
-    this.contexts.push( context );
+    // xxxHonza: possible mem leak, the context object isn't removed from the array sometimes
+    // Do not use for now (this will be used for remoting).
+    //this.contexts.push(context);
 }
 
 /**
@@ -208,17 +212,7 @@ Browser.prototype.closeContext = function(context, userCommands)
     {
         var topWindow = context.window;
 
-        var index = -1;
-        for (var i=0; i<this.contexts.length; i++)
-        {
-            if (this.contexts[i].window == topWindow)
-            {
-                index = i;
-                break;
-            }
-        }
-
-        if (index === -1)
+        /*if (index === -1)
         {
             if (FBTrace.DBG_ERRORS)
             {
@@ -229,7 +223,7 @@ Browser.prototype.closeContext = function(context, userCommands)
         else
         {
             this.contexts.splice(index, 1);
-        }
+        }*/
 
         // TEMP
         TabWatcher.unwatchWindow(topWindow);
@@ -268,9 +262,7 @@ Browser.prototype.getOrCreateContextByWebApp = function(webApp)
         var topWindow = webApp.getTopMostWindow();
         var browser = Win.getBrowserByWindow(topWindow);
         if (FBTrace.DBG_WINDOWS)
-        {
-            FBTrace.sysout("-> tabWatcher.watchBrowser for: " + (topWindow.location));
-        }
+            FBTrace.sysout("BTI.tabWatcher.watchBrowser for: " + (topWindow.location));
 
         // TEMP
         var context = TabWatcher.watchTopWindow(topWindow, browser.currentURI, true);
@@ -293,7 +285,7 @@ Browser.prototype.getCurrentSelectedWebApp = function()
     var browser = Firefox.getCurrentBrowser();
     var webApp = new WebApp(browser.contentWindow);
     if (FBTrace.DBG_ACTIVATION)
-        FBTrace.sysout("WebApp ", {browser: browser, webApp: webApp});
+        FBTrace.sysout("BTI.WebApp ", {browser: browser, webApp: webApp});
     return webApp;
 }
 
@@ -479,8 +471,8 @@ Browser.prototype.disconnect = function()
 Browser.prototype.toggleResume = function(resume)
 {
     if (FBTrace.DBG_ACTIVATION)
-        FBTrace.sysout("toggleResume ------------"+(Firebug.getSuspended()?"OFF":"ON")+"----> "+
-            (!!resume?"ON":"OFF"));
+        FBTrace.sysout("BTI.toggleResume" + (Firebug.getSuspended() ? "OFF" : "ON") +
+            " -> " + (!!resume ? "ON" : "OFF"));
 
     // this should be the only method to call suspend and resume.
     if (resume)  // either a new context or revisiting an old one
@@ -518,10 +510,12 @@ Browser.prototype._setFocusContext = function(context)
 Browser.prototype._setConnected = function(connected)
 {
     if (FBTrace.DBG_ACTIVATION)
-        FBTrace.sysout("Browser._setConnected "+connected + " this.connected "+this.connected);
+        FBTrace.sysout("BTI.Browser._setConnected " + connected + " this.connected " +
+            this.connected);
 
     var wasConnected = this.connected;
     this.connected = connected;
+
     if (wasConnected && !connected)
         this.dispatch("onDisconnect", [this]);
     else if (!wasConnected && connected)
@@ -688,13 +682,15 @@ var TabWatchListener =
             context.sidePanelNames = context.browser.sidePanelNames;
 
         if (FBTrace.DBG_ERRORS && !context.sidePanelNames)
-            FBTrace.sysout("firebug.initContext sidePanelNames:",context.sidePanelNames);
+            FBTrace.sysout("BTI.firebug.initContext sidePanelNames:", context.sidePanelNames);
 
         Events.dispatch(Firebug.modules, "initContext", [context, persistedState]);
 
-        Firebug.chrome.setFirebugContext(context); // a newly created context becomes the default for the view
+        // a newly created context becomes the default for the view
+        Firebug.chrome.setFirebugContext(context);
 
-        Firebug.connection.toggleResume(context); // a newly created context is active
+        // a newly created context is active
+        Firebug.connection.toggleResume(context);
     },
 
     /**
@@ -741,7 +737,7 @@ var TabWatchListener =
     loadedContext: function(context)
     {
         if (!context.browser.currentURI)
-            FBTrace.sysout("firebug.loadedContext problem browser ", context.browser);
+            FBTrace.sysout("BTI.firebug.loadedContext problem browser ", context.browser);
 
         Events.dispatch(Firebug.modules, "loadedContext", [context]);
     },
@@ -764,7 +760,8 @@ var TabWatchListener =
         browser.panelName = context.panelName;
         browser.sidePanelNames = context.sidePanelNames;
 
-        // next the context is deleted and removed from the Firebug.TabWatcher, we clean up in unWatchBrowser
+        // next the context is deleted and removed from the Firebug.TabWatcher,
+        // we clean up in unWatchBrowser
     },
 
     onSourceFileCreated: function()
