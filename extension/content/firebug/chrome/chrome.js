@@ -69,7 +69,11 @@ var FirebugChrome =
 
     initialize: function()
     {
+        if (FBTrace.DBG_INITIALIZE)
+            FBTrace.sysout("chrome.initialize;");
+
         this.window = win;
+
         panelBox = win.document.getElementById("fbPanelBox");
         panelSplitter = win.document.getElementById("fbPanelSplitter");
         sidePanelDeck = win.document.getElementById("fbSidePanelDeck");
@@ -94,24 +98,41 @@ var FirebugChrome =
         Firebug.internationalizeUI(win.document);
         Firebug.internationalizeUI(top.document);
 
+        var browser1Complete = false;
+        var browser2Complete = false;
+
         if (panelBar1)
         {
             var browser1 = panelBar1.browser;
-            browser1.addEventListener("load", browser1Loaded, true);
+            browser1Complete = browser1.complete;
+
+            if (!browser1Complete)
+                browser1.addEventListener("load", browser1Loaded, true);
+ 
             browser1.droppedLinkHandler = function()
             {
                 return false;
             };
+
+            if (FBTrace.DBG_INITIALIZE)
+                FBTrace.sysout("chrome.browser1.complete; " + browser1Complete);
         }
 
         if (panelBar2)
         {
             var browser2 = panelBar2.browser;
-            browser2.addEventListener("load", browser2Loaded, true);
+            browser2Complete = browser2.complete;
+
+            if (!browser2Complete)
+                browser2.addEventListener("load", browser2Loaded, true);
+
             browser2.droppedLinkHandler = function()
             {
                 return false;
             };
+
+            if (FBTrace.DBG_INITIALIZE)
+                FBTrace.sysout("chrome.browser2.complete; " + browser2Complete);
         }
 
         win.addEventListener("blur", onBlur, true);
@@ -126,6 +147,16 @@ var FirebugChrome =
         if (FBTrace.DBG_INITIALIZE)
             FBTrace.sysout("chrome.initialized in "+win.location+" with "+
                 (panelBar1 ? panelBar1.browser.ownerDocument.documentURI : "no panel bar"), win);
+
+        // At this point both panelBars can be already loaded. If yes, start up
+        // the initialization sequence.
+        if (browser1Complete && browser2Complete)
+        {
+            setTimeout(function()
+            {
+                FirebugChrome.initializeUI();  // the chrome bound into this scope
+            })
+        }
     },
 
     /**
@@ -1635,6 +1666,7 @@ function getBestPanelSupportingObject(object, context)
                 bestLevel = level;
                 bestPanel = panelType;
             }
+
             if (FBTrace.DBG_PANELS)
                 FBTrace.sysout("chrome.getBestPanelName panelType: "+panelType.prototype.name+
                     " level: "+level+" bestPanel: "+ (bestPanel ? bestPanel.prototype.name : "null")+
@@ -1668,27 +1700,34 @@ function browser1Loaded()
 {
     if (FBTrace.DBG_INITIALIZE)
         FBTrace.sysout("browse1Loaded\n");
+
     var browser1 = panelBar1.browser;
+    var browser2 = panelBar2.browser;
     browser1.removeEventListener("load", browser1Loaded, true);
 
     browser1.contentDocument.title = "Firebug Main Panel";
-    browser1Loaded.complete = true;
+    browser1.complete = true;
 
-    if (browser1Loaded.complete && browser2Loaded.complete)
+    if (browser1.complete && browser2.complete)
         FirebugChrome.initializeUI();
+
+    if (FBTrace.DBG_INITIALIZE)
+        FBTrace.sysout("browse1Loaded complete\n");
 }
 
 function browser2Loaded()
 {
     if (FBTrace.DBG_INITIALIZE)
         FBTrace.sysout("browse2Loaded\n");
+
+    var browser1 = panelBar1.browser;
     var browser2 = panelBar2.browser;
     browser2.removeEventListener("load", browser2Loaded, true);
 
     browser2.contentDocument.title = "Firebug Side Panel";
-    browser2Loaded.complete = true;
+    browser2.complete = true;
 
-    if (browser1Loaded.complete && browser2Loaded.complete)
+    if (browser1.complete && browser2.complete)
         FirebugChrome.initializeUI();  // the chrome bound into this scope
 
     if (FBTrace.DBG_INITIALIZE)

@@ -31,6 +31,13 @@
             this.panelTabs = this.getChildElement("panelTabs");
             this.tabMap = {};
 
+            function onBrowserLoad()
+            {
+                this.removeEventListener("load", onBrowserLoad, true);
+                this.complete = true;
+            }
+            this.browser.addEventListener("load", onBrowserLoad, true);
+
             window.panelBarWaiter.panelBarReady();
         ]]></constructor>
 
