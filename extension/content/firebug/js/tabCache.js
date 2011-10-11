@@ -31,7 +31,7 @@ const prefs = Cc["@mozilla.org/preferences-service;1"].getService(Ci.nsIPrefBran
 const versionChecker = Cc["@mozilla.org/xpcom/version-comparator;1"].getService(Ci.nsIVersionComparator);
 const appInfo = Cc["@mozilla.org/xre/app-info;1"].getService(Ci.nsIXULAppInfo);
 
-// Maximum cached size of a signle response (bytes)
+// Maximum cached size of a single response (bytes)
 var responseSizeLimit = 1024 * 1024 * 5;
 
 // List of text content types. These content-types are cached.
@@ -84,7 +84,7 @@ var contentTypes =
 
 /**
  * Implementation of cache model. The only purpose of this object is to register an HTTP
- * observer so, HTTP communication can be interecepted and all incoming data stored within
+ * observer so, HTTP communication can be intercepted and all incoming data stored within
  * a cache.
  */
 Firebug.TabCacheModel = Obj.extend(Firebug.ActivableModule,
@@ -111,7 +111,7 @@ Firebug.TabCacheModel = Obj.extend(Firebug.ActivableModule,
         // Read maximum size limit for cached response from preferences.
         responseSizeLimit = Firebug.Options.get("cache.responseLimit");
 
-        // Read additional text mime-types from preferences.
+        // Read additional text MIME types from preferences.
         var mimeTypes = Firebug.Options.get("cache.mimeTypes");
         if (mimeTypes)
         {
@@ -131,8 +131,9 @@ Firebug.TabCacheModel = Obj.extend(Firebug.ActivableModule,
         if (FBTrace.DBG_CACHE)
             FBTrace.sysout("tabCache.onObserverChange; hasObservers: " + this.hasObservers());
 
-        if (!Firebug.getSuspended())  // then Firebug is in action
-            this.onResumeFirebug();   // and we need to test to see if we need to addObserver
+        // If Firebug is in action, we need to test to see if we need to addObserver
+        if (!Firebug.getSuspended())
+            this.onResumeFirebug();
     },
 
     onResumeFirebug: function()
@@ -269,7 +270,7 @@ Firebug.TabCacheModel = Obj.extend(Firebug.ActivableModule,
         if (contentTypes[contentType])
             return true;
 
-        // Hack to work around application/octet-stream for js files (2063).
+        // Hack to work around application/octet-stream for js files (see issue 2063).
         // Let's cache all files with js extensions.
         var extension = Url.getFileExtension(Http.safeGetRequestName(request));
         if (extension == "js")
@@ -307,7 +308,8 @@ Firebug.TabCache = function(context)
 
 Firebug.TabCache.prototype = Obj.extend(Firebug.SourceCache.prototype,
 {
-    responses: [],       // responses in progress.
+    // Responses in progress
+    responses: [],
 
     storePartialResponse: function(request, responseText, win, offset)
     {
