@@ -201,7 +201,7 @@ Firebug.ScriptPanel.prototype = Obj.extend(Firebug.SourceBoxPanel,
         }
     },
 
-    showSourceLink: function(sourceLink)
+    showSourceLink: function(sourceLink, noHighlight)
     {
         var compilationUnit = this.context.getCompilationUnit(sourceLink.href);
         if (compilationUnit)
@@ -209,8 +209,10 @@ Firebug.ScriptPanel.prototype = Obj.extend(Firebug.SourceBoxPanel,
             this.navigate(compilationUnit);
             if (sourceLink.line)
             {
-                this.scrollToLine(sourceLink.href, sourceLink.line,
-                    this.jumpHighlightFactory(sourceLink.line, this.context));
+                var highlighter = noHighlight ? null :
+                    this.jumpHighlightFactory(sourceLink.line, this.context);
+
+                this.scrollToLine(sourceLink.href, sourceLink.line, highlighter);
 
                 Events.dispatch(this.fbListeners, "onShowSourceLink", [this, sourceLink.line]);
             }
@@ -226,14 +228,15 @@ Firebug.ScriptPanel.prototype = Obj.extend(Firebug.SourceBoxPanel,
      * RequireJS). If this case happens, this method tries it again after a short timeout.
      *
      * @param {Object} sourceLink  Link to the script and line to be displayed.
+     * @param {Boolean} noHighlight Do not highlight the line
      * @param {Number} counter  Number of async attempts.
      */
-    showSourceLinkAsync: function(sourceLink, counter)
+    showSourceLinkAsync: function(sourceLink, noHighlight, counter)
     {
         var compilationUnit = this.context.getCompilationUnit(sourceLink.href);
         if (compilationUnit)
         {
-            this.showSourceLink(sourceLink);
+            this.showSourceLink(sourceLink, noHighlight);
         }
         else
         {
@@ -247,7 +250,7 @@ Firebug.ScriptPanel.prototype = Obj.extend(Firebug.SourceBoxPanel,
             var self = this;
             this.context.setTimeout(function()
             {
-                self.showSourceLinkAsync(sourceLink, --counter);
+                self.showSourceLinkAsync(sourceLink, noHighlight, --counter);
             }, 50);
         }
     },
@@ -808,7 +811,13 @@ Firebug.ScriptPanel.prototype = Obj.extend(Firebug.SourceBoxPanel,
                     {
                         var sourceLink = new SourceLink.SourceLink(state.location.getURL(),
                             state.previousCentralLine, "js");
-                        this.showSourceLinkAsync(sourceLink);
+
+                        // Causes the script panel to show the proper location.
+                        // Do not highlight the line (second argument true), we just want
+                        // to restore the position.
+                        // Also do it asynchronously, the script doesn't have to be
+                        // immediatelly available.
+                        this.showSourceLinkAsync(sourceLink, true);
 
                         // Do not restore the location again, it could happen during
                         // the single stepping and overwrite the debugger location.
