@@ -550,10 +550,12 @@ Firebug.SourceBoxPanel = Obj.extend(SourceBoxPanelBase,
             this.getSourceType());
     },
 
-    /* Select sourcebox with href, scroll lineNo into center, highlight lineNo with
+    /**
+     * Select sourcebox with href, scroll lineNo into center, highlight lineNo with
      * highlighter given
+     * 
      * @param href a Url, null means the selected compilationUnit
-     * @param lineNo integer 1-maximumLineNumber
+     * @param lineNo integer 1 - maximumLineNumber
      * @param highlighter callback, a function(sourceBox). sourceBox.centralLine will be lineNo
      */
     scrollToLine: function(href, lineNo, highlighter)
@@ -647,12 +649,15 @@ Firebug.SourceBoxPanel = Obj.extend(SourceBoxPanelBase,
      */
     jumpHighlightFactory: function(lineNo, context)
     {
+        if (FBTrace.DBG_COMPILATION_UNITS)
+            FBTrace.sysout("sourceBox.jumpHighlightFactory; highlighter created for " + lineNo);
+
         return function jumpHighlightIfInView(sourceBox)
         {
             var  lineNode = sourceBox.getLineNode(lineNo);
 
             if (context.highlightedRow)
-              Css.cancelClassTimed(context.highlightedRow, "jumpHighlight", context);
+                Css.cancelClassTimed(context.highlightedRow, "jumpHighlight", context);
 
             if (lineNode)
             {
@@ -912,9 +917,15 @@ Firebug.SourceBoxPanel = Obj.extend(SourceBoxPanelBase,
 
         var averageLineHeight = this.getAverageLineHeight(sourceBox);
         var panelHeight = this.panelNode.clientHeight;
-        //we never want viewableLines * lineHeight > clientHeight
-        //so viewableLines <= clientHeight / lineHeight
-        var linesPerViewport = Math.floor((panelHeight / averageLineHeight));
+        // We never want viewableLines * lineHeight > clientHeight
+        // So viewableLines <= clientHeight / lineHeight
+        //
+        // In some cases when Script panel is restored flooring the result can cause
+        // loosing one line and so, the Script panel is not properly restored
+        // (the top line is less by one)
+        // Math.floor changed to Math.round
+        // So, 'viewableLines * lineHeight' can be a bit higher than 'clientHeight'.
+        var linesPerViewport = Math.round((panelHeight / averageLineHeight));
 
         viewRange.firstLine = Math.round(targetLineNumber - linesPerViewport / 2);
 
@@ -952,7 +963,7 @@ Firebug.SourceBoxPanel = Obj.extend(SourceBoxPanelBase,
         panelHeight = (panelHeight < 100) ? 100 : panelHeight;
 
         // see getViewRangeFromTargetLine
-        var viewableLines = Math.floor((panelHeight / averageLineHeight));
+        var viewableLines = Math.round((panelHeight / averageLineHeight));
         viewRange.lastLine = viewRange.firstLine + viewableLines - 1;  // 15 = 1 + 15 - 1;
 
         if (viewRange.lastLine > sourceBox.maximumLineNumber)
