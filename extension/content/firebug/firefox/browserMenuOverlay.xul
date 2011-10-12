@@ -31,6 +31,7 @@
         <command id="cmd_disablePanels" oncommand="Firebug.PanelActivation.disableAllPanels()"/>
         <command id="cmd_clearActivationList" oncommand="Firebug.PanelActivation.clearAnnotations()"/>
         <command id="cmd_clearConsole" oncommand="Firebug.Console.clear(Firebug.currentContext)"/>
+        <command id="cmd_allOn" oncommand="Firebug.PanelActivation.toggleAll('on')"/>
     </commandset>
 
     <!-- Firefox page context menu -->
