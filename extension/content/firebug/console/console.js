@@ -478,6 +478,22 @@ Firebug.Console = Obj.extend(ActivableConsole,
         if (this.isAlwaysEnabled())
             return Firebug.ConsoleBase.logRow.apply(this, arguments);
     },
+
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+    getDefaultReturnValue: function(win)
+    {
+        var defaultValue = "_firebugIgnore";
+        var console = win.wrappedJSObject.console;
+        if (!console)
+            return defaultValue;
+
+        var returnValue = console.__returnValue__;
+        if (returnValue)
+            return returnValue;
+
+        return defaultValue;
+    }
 });
 
 // ********************************************************************************************* //

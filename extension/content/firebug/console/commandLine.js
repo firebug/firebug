@@ -24,7 +24,7 @@ define([
     "firebug/console/commandLineExposed"
 ],
 function(Obj, Firebug, FirebugReps, Locale, Events, Wrapper, Url, Css, Dom, Firefox, Win, System,
-    Xpath, Str, Xml, Arr, Persist, EventMonitor, Keywords) {
+    Xpath, Str, Xml, Arr, Persist, EventMonitor, Keywords, Console) {
 
 // ************************************************************************************************
 // Constants
@@ -192,8 +192,10 @@ Firebug.CommandLine = Obj.extend(Firebug.Module,
         {
             consoleHandler.setEvaluatedCallback( function useConsoleFunction(result)
             {
-                if (result === "_firebugIgnore")
+                var ignoreReturnValue = Console.getDefaultReturnValue(win);
+                if (result === ignoreReturnValue)
                     return;
+
                 successConsoleFunction(result, context);  // result will be pass thru this function
             });
         }
@@ -303,8 +305,10 @@ Firebug.CommandLine = Obj.extend(Firebug.Module,
         {
             consoleHandler.setEvaluatedCallback( function useConsoleFunction(result)
             {
-                if (result === "_firebugIgnore")
+                var ignoreReturnValue = Console.getDefaultReturnValue(win);
+                if (result === ignoreReturnValue)
                     return;
+
                 successConsoleFunction(result, context);  // result will be pass thru this function
             });
         }
@@ -2266,19 +2270,19 @@ function FirebugCommandLineAPI(context)
             context.baseWindow = entry.win;
 
         Firebug.Console.log(["Current window:", context.baseWindow], context, "info");
-        return "_firebugIgnore";
+        return Firebug.Console.getDefaultReturnValue(context.window);
     };
 
     this.clear = function()  // no web page interaction
     {
         Firebug.Console.clear(context);
-        return "_firebugIgnore";
+        return Firebug.Console.getDefaultReturnValue(context.window);
     };
 
     this.inspect = function(obj, panelName)  // no web page interaction
     {
         Firebug.chrome.select(obj, panelName);
-        return "_firebugIgnore";
+        return Firebug.Console.getDefaultReturnValue(context.window);
     };
 
     this.keys = function(o)
@@ -2294,91 +2298,91 @@ function FirebugCommandLineAPI(context)
     this.debug = function(fn)
     {
         Firebug.Debugger.monitorFunction(fn, "debug");
-        return "_firebugIgnore";
+        return Firebug.Console.getDefaultReturnValue(context.window);
     };
 
     this.undebug = function(fn)
     {
         Firebug.Debugger.unmonitorFunction(fn, "debug");
-        return "_firebugIgnore";
+        return Firebug.Console.getDefaultReturnValue(context.window);
     };
 
     this.monitor = function(fn)
     {
         Firebug.Debugger.monitorFunction(fn, "monitor");
-        return "_firebugIgnore";
+        return Firebug.Console.getDefaultReturnValue(context.window);
     };
 
     this.unmonitor = function(fn)
     {
         Firebug.Debugger.unmonitorFunction(fn, "monitor");
-        return "_firebugIgnore";
+        return Firebug.Console.getDefaultReturnValue(context.window);
     };
 
     this.traceAll = function()
     {
         Firebug.Debugger.traceAll(Firebug.currentContext);
-        return "_firebugIgnore";
+        return Firebug.Console.getDefaultReturnValue(context.window);
     };
 
     this.untraceAll = function()
     {
         Firebug.Debugger.untraceAll(Firebug.currentContext);
-        return "_firebugIgnore";
+        return Firebug.Console.getDefaultReturnValue(context.window);
     };
 
     this.traceCalls = function(fn)
     {
         Firebug.Debugger.traceCalls(Firebug.currentContext, fn);
-        return "_firebugIgnore";
+        return Firebug.Console.getDefaultReturnValue(context.window);
     };
 
     this.untraceCalls = function(fn)
     {
         Firebug.Debugger.untraceCalls(Firebug.currentContext, fn);
-        return "_firebugIgnore";
+        return Firebug.Console.getDefaultReturnValue(context.window);
     };
 
     this.monitorEvents = function(object, types)
     {
         EventMonitor.monitorEvents(object, types, context);
-        return "_firebugIgnore";
+        return Firebug.Console.getDefaultReturnValue(context.window);
     };
 
     this.unmonitorEvents = function(object, types)
     {
         EventMonitor.unmonitorEvents(object, types, context);
-        return "_firebugIgnore";
+        return Firebug.Console.getDefaultReturnValue(context.window);
     };
 
     this.profile = function(title)
     {
         Firebug.Profiler.startProfiling(context, title);
-        return "_firebugIgnore";
+        return Firebug.Console.getDefaultReturnValue(context.window);
     };
 
     this.profileEnd = function()
     {
         Firebug.Profiler.stopProfiling(context);
-        return "_firebugIgnore";
+        return Firebug.Console.getDefaultReturnValue(context.window);
     };
 
     this.copy = function(x)
     {
         System.copyToClipboard(x);
-        return "_firebugIgnore";
+        return Firebug.Console.getDefaultReturnValue(context.window);
     };
 
     this.memoryProfile = function(title)
     {
         Firebug.MemoryProfiler.start(context, title);
-        return "_firebugIgnore";
+        return Firebug.Console.getDefaultReturnValue(context.window);
     };
 
     this.memoryProfileEnd = function()
     {
         Firebug.MemoryProfiler.stop(context);
-        return "_firebugIgnore";
+        return Firebug.Console.getDefaultReturnValue(context.window);
     };
 }
 
