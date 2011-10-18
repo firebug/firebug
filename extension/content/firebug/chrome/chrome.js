@@ -51,8 +51,7 @@ createFirebugChrome: function(win)  // chrome is created in caller window.
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
     // Private
 
-    var panelBox, panelSplitter, sidePanelDeck, panelBar1, panelBar2, locationList, locationButtons,
-        panelStatus, panelStatusSeparator, cmdPopup, cmdPopupBrowser;
+    var panelSplitter, sidePanelDeck, panelBar1, panelBar2;
 
     var disabledHead = null;
     var disabledCaption = null;
@@ -74,18 +73,10 @@ var FirebugChrome =
 
         this.window = win;
 
-        panelBox = win.document.getElementById("fbPanelBox");
-        panelSplitter = win.document.getElementById("fbPanelSplitter");
-        sidePanelDeck = win.document.getElementById("fbSidePanelDeck");
-        panelBar1 = win.document.getElementById("fbPanelBar1");
-        panelBar2 = win.document.getElementById("fbPanelBar2");
-        locationList = win.document.getElementById("fbLocationList");
-        locationButtons = win.document.getElementById("fbLocationButtons");
-        panelStatus = win.document.getElementById("fbPanelStatus");
-        panelStatusSeparator = win.document.getElementById("fbStatusSeparator");
-
-        cmdPopup = win.document.getElementById("fbCommandPopup");
-        cmdPopupBrowser = win.document.getElementById("fbCommandPopupBrowser");
+        panelSplitter = this.getElementById("fbPanelSplitter");
+        sidePanelDeck = this.getElementById("fbSidePanelDeck");
+        panelBar1 = this.getElementById("fbPanelBar1");
+        panelBar2 = this.getElementById("fbPanelBar2");
 
         // Firebug has not been initialized yet
         if (!Firebug.isInitialized)
@@ -166,6 +157,8 @@ var FirebugChrome =
 
         try
         {
+            var cmdPopupBrowser = this.getElementById("fbCommandPopupBrowser");
+
             this.applyTextSize(Firebug.textSize);
 
             var doc1 = panelBar1.browser.contentDocument;
@@ -200,6 +193,7 @@ var FirebugChrome =
             function stopBubble(event) { event.stopPropagation(); }
             panelBar2.addEventListener("selectingPanel", stopBubble, false);
 
+            var locationList = this.getElementById("fbLocationList");
             locationList.addEventListener("selectObject", onSelectLocation, false);
 
             this.updatePanelBar1(Firebug.panelTypes);
@@ -255,6 +249,7 @@ var FirebugChrome =
         var mainTabBox = panelBar1.ownerDocument.getElementById("fbPanelBar1-tabBox");
         mainTabBox.removeEventListener("mousedown", onMainTabBoxMouseDown, false);
 
+        var locationList = this.getElementById("fbLocationList");
         locationList.removeEventListener("selectObject", onSelectLocation, false);
 
         win.removeEventListener("blur", onBlur, true);
@@ -293,6 +288,9 @@ var FirebugChrome =
 
     getPanelDocument: function(panelType)
     {
+        var cmdPopup = this.getElementById("fbCommandPopup");
+        var cmdPopupBrowser = this.getElementById("fbCommandPopupBrowser");
+
         // Console panel can be displayed for all the other panels
         // (except of the console panel itself)
         // XXXjjb, xxxHonza: this should be somehow better, more generic and extensible...
@@ -510,6 +508,7 @@ var FirebugChrome =
         var panel = Firebug.currentContext.getPanel(Firebug.currentContext.panelName);
         if (panel)
         {
+            var panelStatus = this.getElementById("fbPanelStatus");
             var item = panelStatus.getItemByObject(panel.selection);
             if (item)
             {
@@ -746,6 +745,7 @@ var FirebugChrome =
             FBTrace.sysout("chrome.syncPanel Firebug.currentContext=" +
                 (context ? context.getName() : "undefined"));
 
+        var panelStatus = this.getElementById("fbPanelStatus");
         panelStatus.clear();
 
         if (context)
@@ -831,15 +831,20 @@ var FirebugChrome =
 
     focusLocationList: function()
     {
+        var locationList = this.getElementById("fbLocationList");
         locationList.popup.showPopup(locationList, -1, -1, "popup", "bottomleft", "topleft");
     },
 
     syncLocationList: function()
     {
+        var locationButtons = this.getElementById("fbLocationButtons");
+
         var panel = panelBar1.selectedPanel;
         if (panel && panel.location)
         {
+            var locationList = this.getElementById("fbLocationList");
             locationList.location = panel.location;
+
             Dom.collapse(locationButtons, false);
         }
         else
@@ -850,12 +855,16 @@ var FirebugChrome =
 
     clearStatusPath: function()
     {
+        var panelStatus = this.getElementById("fbPanelStatus");
         panelStatus.clear();
     },
 
     syncStatusPath: function()
     {
+        var panelStatus = this.getElementById("fbPanelStatus");
+        var panelStatusSeparator = this.getElementById("fbStatusSeparator");
         var panel = panelBar1.selectedPanel;
+
         if (!panel || (panel && !panel.selection))
         {
             panelStatus.clear();
@@ -1167,6 +1176,8 @@ var FirebugChrome =
 
         panelBar1.browser.markupDocumentViewer.textZoom = zoom;
         panelBar2.browser.markupDocumentViewer.textZoom = zoom;
+
+        var cmdPopupBrowser = this.getElementById("fbCommandPopupBrowser");
         cmdPopupBrowser.markupDocumentViewer.textZoom = zoom;
 
         var box = Firebug.chrome.$("fbCommandBox");
@@ -1184,6 +1195,7 @@ var FirebugChrome =
 
     obeyOmitObjectPathStack: function(value)
     {
+        var panelStatus = this.getElementById("fbPanelStatus");
         Dom.hide(panelStatus, (value?true:false));
     },
 
@@ -1194,7 +1206,7 @@ var FirebugChrome =
 
     getPanelStatusElements: function()
     {
-        return panelStatus;
+        return this.getElementById("fbPanelStatus");
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
@@ -1741,7 +1753,9 @@ function onBlur(event)
 
 function onSelectLocation(event)
 {
+    var locationList = this.getElementById("fbLocationList");
     var location = locationList.repObject;
+
     FirebugChrome.navigate(location);
 }
 
