@@ -130,6 +130,32 @@ Obj.XW_instanceof = function(obj, type)
     // /Determining_Instance_Relationships
 }
 
+/**
+ * Tells if the given property of the provided object is a non-native getter or not.
+ * This method depends on PropertyPanel.jsm module available in Firefox 5+
+ * isNonNativeGetter has been introduced in Firefox 7
+ *
+ * @param object aObject The object that contains the property.
+ * @param string aProp The property you want to check if it is a getter or not.
+ * @return boolean True if the given property is a getter, false otherwise.
+ */
+Obj.isNonNativeGetter = function()
+{
+    try
+    {
+        var scope = {};
+        Components.utils.import("resource:///modules/PropertyPanel.jsm", scope);
+
+        if (scope.isNonNativeGetter)
+            Obj.isNonNativeGetter = scope.isNonNativeGetter;
+    }
+    catch (err)
+    {
+    }
+
+    return true;
+}
+
 // ********************************************************************************************* //
 
 return Obj;

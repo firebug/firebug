@@ -488,6 +488,9 @@ Firebug.Console = Obj.extend(ActivableConsole,
         if (!console)
             return defaultValue;
 
+        if (Obj.isNonNativeGetter(console, "__returnValue__"))
+            return defaultValue;
+
         var returnValue = console.__returnValue__;
         if (returnValue)
             return returnValue;
