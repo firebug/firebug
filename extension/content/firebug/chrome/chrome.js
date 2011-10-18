@@ -95,9 +95,6 @@ var FirebugChrome =
         if (FBTrace.sysout && (!FBL || !FBL.initialize) )
             FBTrace.sysout("Firebug is broken, FBL incomplete, if the last function is QI, check lib.js:", FBL);
 
-        Firebug.internationalizeUI(win.document);
-        Firebug.internationalizeUI(top.document);
-
         var browser1Complete = false;
         var browser2Complete = false;
 
@@ -207,8 +204,10 @@ var FirebugChrome =
 
             this.updatePanelBar1(Firebug.panelTypes);
 
-
+            // xxxHonza: is there any reason why we don't distribute "initializeUI"
+            // event to modules?
             Firebug.initializeUI();
+            FirstRunPage.initializeUI();
 
             // Append all registered styleesheets into Firebug UI.
             for (var uri in Firebug.stylesheets)
@@ -218,9 +217,8 @@ var FirebugChrome =
                 Css.appendStylesheet(doc3, Firebug.stylesheets[uri]);
             }
 
-            // xxxHonza: is there any reason why we don't distribute "initializeUI"
-            // event to modules?
-            FirstRunPage.initializeUI();
+            Firebug.internationalizeUI(win.document);
+            Firebug.internationalizeUI(top.document);
         }
         catch (exc)
         {
