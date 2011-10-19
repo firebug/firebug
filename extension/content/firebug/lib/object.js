@@ -139,7 +139,7 @@ Obj.XW_instanceof = function(obj, type)
  * @param string aProp The property you want to check if it is a getter or not.
  * @return boolean True if the given property is a getter, false otherwise.
  */
-Obj.isNonNativeGetter = function()
+Obj.isNonNativeGetter = function(obj, propName)
 {
     try
     {
@@ -147,7 +147,10 @@ Obj.isNonNativeGetter = function()
         Components.utils.import("resource:///modules/PropertyPanel.jsm", scope);
 
         if (scope.isNonNativeGetter)
+        {
             Obj.isNonNativeGetter = scope.isNonNativeGetter;
+            return Obj.isNonNativeGetter(obj, propName);
+        }
     }
     catch (err)
     {
