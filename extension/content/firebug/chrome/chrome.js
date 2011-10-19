@@ -198,6 +198,11 @@ var FirebugChrome =
 
             this.updatePanelBar1(Firebug.panelTypes);
 
+            // Internationalize Firebug UI before firing initializeUI
+            // (so, putting version into Firebug About menut operates with correct label)
+            Firebug.internationalizeUI(win.document);
+            Firebug.internationalizeUI(top.document);
+
             // xxxHonza: is there any reason why we don't distribute "initializeUI"
             // event to modules?
             Firebug.initializeUI();
@@ -210,9 +215,6 @@ var FirebugChrome =
                 Css.appendStylesheet(doc2, Firebug.stylesheets[uri]);
                 Css.appendStylesheet(doc3, Firebug.stylesheets[uri]);
             }
-
-            Firebug.internationalizeUI(win.document);
-            Firebug.internationalizeUI(top.document);
         }
         catch (exc)
         {
