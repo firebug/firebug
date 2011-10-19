@@ -165,8 +165,8 @@ Firebug.CommandLine.Popup = Obj.extend(Firebug.Module,
         // The command line can't be multiline in other panels.
         Dom.collapse(toggle, visible);
 
-        var commandLine = Firebug.CommandLine.getCommandEditor();
-        var commandEditor = Firebug.CommandLine.getSingleRowCommandLine();
+        var commandLine = Firebug.CommandLine.getSingleRowCommandLine();
+        var commandEditor = Firebug.CommandLine.getCommandEditor();
 
         // Focus the command line if it has been just displayed.
         if (visible)
