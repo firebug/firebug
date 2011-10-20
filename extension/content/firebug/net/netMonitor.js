@@ -237,6 +237,14 @@ Firebug.NetMonitor = Obj.extend(Firebug.ActivableModule,
             NetHttpActivityObserver.registerObserver();
             Firebug.connection.eachContext(monitorContext);
         }
+        else
+        {
+            // If the Net panel is not enabled, we needto make sure the unmonitorContext
+            // is executed and so, the start button (aka firebug status bar icons) is
+            // properly updated.
+            NetHttpActivityObserver.unregisterObserver();
+            Firebug.connection.eachContext(unmonitorContext);
+        }
     },
 
     onSuspendFirebug: function()
@@ -573,8 +581,7 @@ function monitorContext(context)
     if (!context.persistedState)
         panel.insertActivationMessage();
 
-    // Update status bar icon.
-    Firefox.getElementById('firebugStatus').setAttribute("net", "on");
+    updateStartButton(true);
 }
 
 function unmonitorContext(context)
@@ -602,11 +609,30 @@ function unmonitorContext(context)
     // Deactivate net sub-context.
     context.netProgress.activate(null);
 
-    // Update status bar icon.
-    Firefox.getElementById('firebugStatus').removeAttribute("net");
+    updateStartButton(false);
 
     // And finaly destroy the net panel sub context.
     delete context.netProgress;
+}
+
+function updateStartButton(enabled)
+{
+    if (FBTrace.DBG_NET)
+        FBTrace.sysout("net.updateStartButton; update start button, enabled: " + enabled);
+
+    var firebugStatus = Firefox.getElementById("firebugStatus");
+
+    // Update status
+    if (enabled)
+        firebugStatus.setAttribute("net", "on");
+    else
+        firebugStatus.removeAttribute("net");
+
+    // Update start button tooltip
+    if (Firebug.StartButton)
+        Firebug.StartButton.resetTooltip();
+    else
+        FBTrace.sysout("net.updateStartButton; ERROR No Firebug.StartButton ?");
 }
 
 function createNetProgress(context)
