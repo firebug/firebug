@@ -281,6 +281,13 @@ NetProgress.prototype =
                     file.fromCache = false;
             }
 
+            // respondedFile can be executed asynchronously and getting headers now
+            // could be too late. They could be already replaced by cached headers.
+            if (info.responseHeaders)
+                file.responseHeaders = info.responseHeaders;
+
+            // Get also request headers (and perhaps also responseHeaders, they won't be 
+            // replaced if already available).
             NetUtils.getHttpHeaders(request, file);
 
             if (info)
@@ -1143,8 +1150,37 @@ function delayGetCacheEntry(file, netProgress)
                 descriptor.close();
                 netProgress.update(file);
             }
+
+            getCachedHeaders(file);
         }
     });
+}
+
+function getCachedHeaders(file)
+{
+    // The request is containing cached headers now. These will be also displayed
+    // within the Net panel.
+    var cache = {};
+    NetUtils.getHttpHeaders(file.request, cache);
+
+    if (file.responseHeaders && cache.responseHeaders)
+    {
+        // Create helper map of existing response headers.
+        var responseHeadersMap = {};
+        for (var i=0; i<file.responseHeaders.length; i++)
+            responseHeadersMap[file.responseHeaders[i].name] = true;
+
+        // Get *only* additional headers from the cache.
+        var cachedHeaders = [];
+        for (var i=0; i<cache.responseHeaders.length; i++)
+        {
+            var header = cache.responseHeaders[i];
+            if (!responseHeadersMap[header.name])
+                cachedHeaders.push(header);
+        }
+
+        file.cachedResponseHeaders = cachedHeaders;
+    }
 }
 
 function getContentTypeFromResponseHead(value)

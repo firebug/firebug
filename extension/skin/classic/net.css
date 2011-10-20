@@ -695,6 +695,10 @@
     color: #565656;
 }
 
+.netInfoCachedResponseHeadersBody {
+    color: gray;
+}
+
 .netInfoPostParamsTable,
 .netInfoPostPartsTable,
 .netInfoPostJSONTable,
