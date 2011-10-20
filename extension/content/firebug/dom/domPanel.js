@@ -1663,13 +1663,8 @@ function DOMEditor(doc)
 {
     this.box = this.tag.replace({}, doc, this);
     this.input = this.box;
-
     this.tabNavigation = false;
-    this.tabCompletion = true;
-    this.completeAsYouType = false;
     this.fixedWidth = true;
-
-    this.autoCompleter = Firebug.CommandLine.autoCompleter;
 }
 
 DOMEditor.prototype = domplate(Firebug.InlineEditor.prototype,
