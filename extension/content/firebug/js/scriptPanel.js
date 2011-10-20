@@ -1658,8 +1658,10 @@ Firebug.ScriptPanel.WarningRep = domplate(Firebug.Rep,
             {
                 if (context.stopped)
                 {
-                     win.Firebug.focusBrowserTab(context.window);
-                     return true;
+                    // Focus browser window with active debugger and select the Script panel.
+                    win.Firebug.focusBrowserTab(context.window);
+                    win.Firebug.chrome.selectPanel("script");
+                    return true;
                 }
             });
         });
