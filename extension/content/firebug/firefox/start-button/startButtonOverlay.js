@@ -122,7 +122,7 @@ Firebug.StartButton = Obj.extend(Firebug.Module,
         var currentSet = navBar.currentSet;
 
         if (FBTrace.DBG_INITIALIZE)
-            FBTrace.sysout("Startbutton; curSet: " + currentSet);
+            FBTrace.sysout("Startbutton; curSet (before modification): " + currentSet);
 
         // Append only if the button is not already there.
         var curSet = currentSet.split(",");
@@ -131,6 +131,17 @@ Firebug.StartButton = Obj.extend(Firebug.Module,
             navBar.insertItem(startButtonId);
             navBar.setAttribute("currentset", navBar.currentSet);
             document.persist("nav-bar", "currentset");
+
+            // xxxHonza: Check whether insertItem actually works (there is a problem in Firefox 10)
+            var curSet = navBar.currentSet.split(",");
+            if (curSet.indexOf(startButtonId) == -1)
+            {
+                FBTrace.sysout("Startbutton; navBar.insertItem doesn't work");
+
+                var set = curSet.concat(startButtonId);
+                navBar.setAttribute("currentset", set.join(","));
+                document.persist(navBarId, "currentset");
+            }
 
             if (FBTrace.DBG_INITIALIZE)
                 FBTrace.sysout("Startbutton; curSet (after modification): " + navBar.currentSet);
