@@ -1705,6 +1705,12 @@ Firebug.Debugger = Obj.extend(Firebug.ActivableModule,
     {
         context.addSourceFile(sourceFile);  // store in the context and notify listeners
         //FBS.watchSourceFile(sourceFile);    // tell the service to watch this file
+
+        // Update the Script panel, this script could have been loaded asynchronously
+        // and perhaps is the only one that should be displayed (otherwise the panel
+        // would show: No Javascript on this page). See issue 4932
+        var panel = context.getPanel("script", true);
+        panel.context.invalidatePanels("script");
     },
 
     unwatchSourceFile: function(context, sourceFile)
