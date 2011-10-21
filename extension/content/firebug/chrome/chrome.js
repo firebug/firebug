@@ -1755,7 +1755,7 @@ function onBlur(event)
 
 function onSelectLocation(event)
 {
-    var locationList = this.getElementById("fbLocationList");
+    var locationList = FirebugChrome.getElementById("fbLocationList");
     var location = locationList.repObject;
 
     FirebugChrome.navigate(location);
