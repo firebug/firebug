@@ -643,7 +643,10 @@ Firebug.CommandLine = Obj.extend(Firebug.Module,
 
         if (!context || Firebug.commandEditor)
         {
-            this.autoCompleter.shutdown();
+            // xxxHonza: see http://code.google.com/p/fbug/issues/detail?id=4901#c21
+            if (this.autoCompleter)
+                this.autoCompleter.shutdown();
+
             this.autoCompleter = new Firebug.EmptyJSAutoCompleter();
         }
         else
