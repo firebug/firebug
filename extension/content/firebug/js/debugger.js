@@ -1710,7 +1710,8 @@ Firebug.Debugger = Obj.extend(Firebug.ActivableModule,
         // and perhaps is the only one that should be displayed (otherwise the panel
         // would show: No Javascript on this page). See issue 4932
         var panel = context.getPanel("script", true);
-        panel.context.invalidatePanels("script");
+        if (panel)
+            panel.context.invalidatePanels("script");
     },
 
     unwatchSourceFile: function(context, sourceFile)
