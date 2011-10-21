@@ -1162,25 +1162,7 @@ function getCachedHeaders(file)
     // within the Net panel.
     var cache = {};
     NetUtils.getHttpHeaders(file.request, cache);
-
-    if (file.responseHeaders && cache.responseHeaders)
-    {
-        // Create helper map of existing response headers.
-        var responseHeadersMap = {};
-        for (var i=0; i<file.responseHeaders.length; i++)
-            responseHeadersMap[file.responseHeaders[i].name] = true;
-
-        // Get *only* additional headers from the cache.
-        var cachedHeaders = [];
-        for (var i=0; i<cache.responseHeaders.length; i++)
-        {
-            var header = cache.responseHeaders[i];
-            if (!responseHeadersMap[header.name])
-                cachedHeaders.push(header);
-        }
-
-        file.cachedResponseHeaders = cachedHeaders;
-    }
+    file.cachedResponseHeaders = cache.responseHeaders;
 }
 
 function getContentTypeFromResponseHead(value)
