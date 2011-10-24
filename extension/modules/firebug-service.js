@@ -2554,7 +2554,12 @@ var fbs =
             var script = innerScripts[i];
             if (script.isValid && script.baseLineNumber == 1)
             {
-                script.clearBreakpoint(0);
+                // Clear helper breakpoints that are set automatically when a new script
+                // is created. But avoid cases where the user has a breakpoint on the
+                // first line in a function (issue 3985).
+                //if (!fbs.findBreakpointByScript(script, 0))
+                    script.clearBreakpoint(0);
+
                 if (this.onXScriptCreatedByTag[script.tag])
                     delete this.onXScriptCreatedByTag[script.tag];
             }
