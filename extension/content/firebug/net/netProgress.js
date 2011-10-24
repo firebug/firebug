@@ -1158,6 +1158,10 @@ function delayGetCacheEntry(file, netProgress)
 
 function getCachedHeaders(file)
 {
+    // Cached headers are important only if the reqeust comes from the cache.
+    if (!file.fromCache)
+        return;
+
     // The request is containing cached headers now. These will be also displayed
     // within the Net panel.
     var cache = {};
