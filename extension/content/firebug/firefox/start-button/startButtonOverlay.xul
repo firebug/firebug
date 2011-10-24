@@ -17,6 +17,11 @@
                 command="cmd_toggleDetachFirebug"
                 type="checkbox" key="key_detachFirebug"
                 class="fbInternational"/>
+            <menuitem
+                id="menu_alwaysOpenInWindow"
+                type="checkbox" label="firebug.AlwaysOpenInWindow"
+                oncommand="Firebug.chrome.onToggleAlwaysOpenInWindowOption(this, Firebug.currentContext)"
+                option="openInWindow" class="fbInternational"/>
             <menuseparator/>
             <menuitem
                 id="menu_ClearConsole"
