@@ -82,9 +82,12 @@ var FirebugChrome =
         if (!Firebug.isInitialized)
             Firebug.initialize(this);
 
-        // FBL should be available
-        if (FBTrace.sysout && (!FBL || !FBL.initialize) )
-            FBTrace.sysout("Firebug is broken, FBL incomplete, if the last function is QI, check lib.js:", FBL);
+        // FBL should be available at this moment.
+        if (FBTrace.sysout && (!FBL || !FBL.initialize))
+        {
+            FBTrace.sysout("Firebug is broken, FBL incomplete, if the last function is QI, " +
+                "check lib.js:", FBL);
+        }
 
         var browser1Complete = false;
         var browser2Complete = false;

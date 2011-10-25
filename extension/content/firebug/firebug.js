@@ -64,7 +64,6 @@ const PLACEMENT_MINIMIZED = 3;
 var modules = [];
 var activeContexts = [];
 var activableModules = [];
-var extensions = [];
 var panelTypes = [];
 var earlyRegPanelTypes = []; // See Firebug.registerPanelType for more info
 var reps = [];
@@ -281,19 +280,22 @@ window.Firebug =
      */
     shutdown: function()
     {
-        if (Firebug.isShutdown)
+        if (this.isShutdown)
             return;
 
         this.shutdownUI();
 
         Events.dispatch(modules, "shutdown");
 
-        Firebug.Options.shutdown();
-        Firebug.Options.removeListener(this);
+        this.Options.shutdown();
+        this.Options.removeListener(this);
 
-        Firebug.connection.disconnect();
+        this.connection.disconnect();
 
-        Firebug.PanelActivation.deactivatePanelTypes(panelTypes);
+        this.PanelActivation.deactivatePanelTypes(panelTypes);
+
+        // Shutdown all registered extensions.
+        this.unregisterExtensions();
 
         if (FBTrace.DBG_OBSERVERS)
         {
@@ -302,7 +304,7 @@ window.Firebug =
             fbObserverService.traceStacksForTrack();
         }
 
-        Firebug.isShutdown = true;
+        this.isShutdown = true;
 
         if (FBTrace.DBG_INITIALIZE)
             FBTrace.sysout("firebug.shutdown exited ");
