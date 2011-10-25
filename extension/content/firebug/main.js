@@ -34,6 +34,12 @@ catch (err)
 {
 }
 
+// For now extensions should use 'Firebug.require' to load it's modules so,
+// initialize the field. It should be done now since overlays can be applied
+// yet before the core Firebug modules are (asynchronously) loaded.
+Firebug.require = require;
+
+// Load core Firebug modules.
 var modules = [
     "firebug/chrome/chrome",
     "firebug/lib/lib",
@@ -56,7 +62,6 @@ require(config, modules, function(ChromeFactory, FBL, Firebug, Browser)
         // Extensions also shouldn't use the global require since it should be removed
         // in the future (if possible). Global 'require' could collide with other
         // extensions.
-        Firebug.require = require;
         Firebug.connection = new Browser();  // prepare for addListener calls
 
         Browser.onDebug = function()
