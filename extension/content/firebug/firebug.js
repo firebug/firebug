@@ -839,7 +839,11 @@ window.Firebug =
             }
         }
 
+        // Dispatch to non-module objects.
         Options.resetAllOptions(confirm);
+
+        // Dispatch to all modules so, additional settings can be reset.
+        Events.dispatch(modules, "resetAllOptions", []);
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *

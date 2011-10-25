@@ -198,6 +198,15 @@ var Annotations = Obj.extend(Firebug.Module,
             this.loadAnnotations();
         }
     },
+
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+    // Options
+
+    resetAllOptions: function()
+    {
+        this.clear();
+        this.flush(true);
+    }
 });
 
 // ********************************************************************************************* //

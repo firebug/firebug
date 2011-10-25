@@ -2816,6 +2816,20 @@ Firebug.Debugger = Obj.extend(Firebug.ActivableModule,
             FBTrace.sysout("debugger.filterMenuUpdate value: "+value+" label:"+
                 this.filterButton.label+'\n');
     },
+
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+    // Options
+
+    resetAllOptions: function()
+    {
+        Firebug.TabWatcher.iterateContexts( function clearBPs(context)
+        {
+            Firebug.Debugger.clearAllBreakpoints(context);
+        });
+
+        var breakpointStore = FBS.getBreakpointStore();
+        breakpointStore.clear();
+    }
 });
 
 // ********************************************************************************************* //

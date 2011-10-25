@@ -420,11 +420,6 @@ var Options =
                     FBTrace.sysout("Skipped clearing option: "+i+") "+preferences[i]);
             }
         }
-
-        Firebug.TabWatcher.iterateContexts( function clearBPs(context)
-        {
-            Firebug.Debugger.clearAllBreakpoints(context);
-        });
     },
 };
 
