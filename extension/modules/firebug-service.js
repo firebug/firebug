@@ -3618,7 +3618,7 @@ var fbs =
             {
                 var bp = urlBreakpoints[i];
 
-                // Do not store breakpoins for "Run unil this line". These are not
+                // Do not store breakpoins for "Run until this line". These are not
                 // visible in Firebug UI and so, it isn't possible to remove them
                 // Note that there can be cases where such breakpoint is not removed
                 // by RunUntil (e.g. crash).
@@ -3690,6 +3690,7 @@ var fbs =
                     setItem: function(){},
                     removeItem: function(){},
                     getKeys: function(){return [];},
+                    clear: function(){},
                 };
             }
 

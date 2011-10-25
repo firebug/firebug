@@ -12,6 +12,9 @@ const dirService = Cc["@mozilla.org/file/directory_service;1"].getService(Ci.nsI
 // https://developer.mozilla.org/en/Using_JavaScript_code_modules
 var EXPORTED_SYMBOLS = ["Storage", "StorageService", "TextService"];
 
+Components.utils["import"]("resource://firebug/firebug-trace-service.js");
+var FBTrace = traceConsoleService.getTracer("extensions.firebug");
+
 // ********************************************************************************************* //
 // Implementation
 
@@ -128,8 +131,6 @@ var StorageService =
 // ********************************************************************************************* //
 // Implementation
 
-var FBTrace = null;
-
 /**
  * @class Represents an internal Firebug persistence service.
  */
@@ -164,9 +165,6 @@ var ObjectPersister =
 
     readObject: function(leafName)
     {
-        Components.utils.import("resource://firebug/firebug-trace-service.js");
-        FBTrace = traceConsoleService.getTracer("extensions.firebug");
-
         if (FBTrace.DBG_STORAGE)
             FBTrace.sysout("ObjectPersister read from leafName "+leafName);
 
