@@ -81,7 +81,7 @@ Firebug.ScriptPanel.decorator = Obj.extend(new Firebug.SourceBoxDecorator,
             var script = compilationUnit.isExecutableLine(lineNo);
 
             if (FBTrace.DBG_LINETABLE)
-                FBTrace.sysout("script.markExecutableLines ["+lineNo+"]="+script);
+                FBTrace.sysout("script.markExecutableLines [" + lineNo + "]=" + script);
 
             if (script)
                 lineNode.setAttribute("executable", "true");
@@ -97,7 +97,7 @@ Firebug.ScriptPanel.decorator = Obj.extend(new Firebug.SourceBoxDecorator,
         }
 
         if (FBTrace.DBG_BP || FBTrace.DBG_LINETABLE)
-            FBTrace.sysout("script.markExecutableLines DONE: "+compilationUnit.toString()+"\n");
+            FBTrace.sysout("script.markExecutableLines DONE: " + compilationUnit.toString());
     },
 
     setLineBreakpoints: function(compilationUnit, sourceBox)
@@ -120,8 +120,8 @@ Firebug.ScriptPanel.decorator = Obj.extend(new Firebug.SourceBoxDecorator,
 
             if (FBTrace.DBG_LINETABLE)
             {
-                FBTrace.sysout("script.setLineBreakpoints found "+scriptRow+" for "+line+"@"+
-                    compilationUnit.getURL(), props);
+                FBTrace.sysout("script.setLineBreakpoints found " + scriptRow + " for " + line +
+                    "@" + compilationUnit.getURL(), props);
             }
         });
     },
@@ -162,7 +162,8 @@ Firebug.ScriptPanel.prototype = Obj.extend(Firebug.SourceBoxPanel,
 
     onJavaScriptDebugging: function(active)
     {
-        if (Firebug.chrome.getSelectedPanel() === this) // then the change in jsd causes a refresh
+        // then the change in jsd causes a refresh
+        if (Firebug.chrome.getSelectedPanel() === this)
             Firebug.chrome.syncPanel(this.name);
 
         // Front side UI mark
@@ -196,8 +197,9 @@ Firebug.ScriptPanel.prototype = Obj.extend(Firebug.SourceBoxPanel,
         }
         else
         {
+            // want to avoid the script panel if possible
             if (FBTrace.DBG_ERRORS)
-                FBTrace.sysout("no sourcelink for function"); // want to avoid the script panel if possible
+                FBTrace.sysout("no sourcelink for function");
         }
     },
 
@@ -365,8 +367,8 @@ Firebug.ScriptPanel.prototype = Obj.extend(Firebug.SourceBoxPanel,
         {
             if (FBTrace.DBG_ERRORS)
             {
-                FBTrace.sysout("script.toggleBreakpoint no lineNode at "+lineNo+
-                    " in selectedSourceBox with URL "+href, this.selectedSourceBox);
+                FBTrace.sysout("script.toggleBreakpoint no lineNode at " + lineNo +
+                    " in selectedSourceBox with URL " + href, this.selectedSourceBox);
             }
 
             return;
@@ -374,8 +376,8 @@ Firebug.ScriptPanel.prototype = Obj.extend(Firebug.SourceBoxPanel,
 
         if (FBTrace.DBG_BP)
         {
-            FBTrace.sysout("script.toggleBreakpoint lineNo="+lineNo+" lineNode.breakpoint:"
-                +(lineNode ? lineNode.getAttribute("breakpoint") : "(no lineNode)"),
+            FBTrace.sysout("script.toggleBreakpoint lineNo=" + lineNo + " lineNode.breakpoint:" +
+                (lineNode ? lineNode.getAttribute("breakpoint") : "(no lineNode)"),
                 this.selectedSourceBox);
         }
 
@@ -398,6 +400,7 @@ Firebug.ScriptPanel.prototype = Obj.extend(Firebug.SourceBoxPanel,
         {
             if (lineNode.getAttribute("breakpoint") != "true")
                 JavaScriptTool.setBreakpoint(this.context, href, lineNo);
+
             JavaScriptTool.disableBreakpoint(this.context, href, lineNo);
         }
     },
@@ -485,6 +488,7 @@ Firebug.ScriptPanel.prototype = Obj.extend(Firebug.SourceBoxPanel,
             return false;
 
         var self = this;
+
         // If the evaluate fails, then we report an error and don't show the infoTip
         Firebug.CommandLine.evaluate(expr, this.context, null, this.context.getGlobalScope(),
             function success(result, context)
@@ -974,7 +978,8 @@ Firebug.ScriptPanel.prototype = Obj.extend(Firebug.SourceBoxPanel,
 
         if (lineNo || lineNo === 0)
         {
-            // this lineNo is an zero-based index into sourceBox.lines. Add one for user line numbers
+            // this lineNo is an zero-based index into sourceBox.lines.
+            // Add one for user line numbers
             this.scrollToLine(sourceBox.repObject.getURL(), lineNo,
                 this.jumpHighlightFactory(lineNo+1, this.context));
 
@@ -985,7 +990,9 @@ Firebug.ScriptPanel.prototype = Obj.extend(Firebug.SourceBoxPanel,
         }
         else
         {
-            Events.dispatch(this.fbListeners, "onScriptSearchMatchFound", [this, text, null, null]);
+            Events.dispatch(this.fbListeners, "onScriptSearchMatchFound",
+                [this, text, null, null]);
+
             return false;
         }
     },
@@ -1012,7 +1019,8 @@ Firebug.ScriptPanel.prototype = Obj.extend(Firebug.SourceBoxPanel,
         return 0;
     },
 
-    refresh: function()  // delete any sourceBox-es that are not in sync with compilationUnits
+    // delete any sourceBox-es that are not in sync with compilationUnits
+    refresh: function()
     {
         for (var url in this.sourceBoxes)
         {
@@ -1020,7 +1028,9 @@ Firebug.ScriptPanel.prototype = Obj.extend(Firebug.SourceBoxPanel,
             {
                 var sourceBox = this.sourceBoxes[url];
                 var compilationUnit = this.context.getCompilationUnit(url);
-                if (!compilationUnit || compilationUnit != sourceBox.repObject) // then out of sync
+
+                // then out of sync
+                if (!compilationUnit || compilationUnit != sourceBox.repObject)
                 {
                     var victim = this.sourceBoxes[url];
                     delete this.sourceBoxes[url];
@@ -1031,7 +1041,7 @@ Firebug.ScriptPanel.prototype = Obj.extend(Firebug.SourceBoxPanel,
                     }
 
                     if (FBTrace.DBG_COMPILATION_UNITS)
-                        FBTrace.sysout("script.refresh deleted sourceBox for "+url);
+                        FBTrace.sysout("script.refresh deleted sourceBox for " + url);
                 }
             }
         }
@@ -1047,14 +1057,16 @@ Firebug.ScriptPanel.prototype = Obj.extend(Firebug.SourceBoxPanel,
 
         if (!(compilationUnit instanceof CompilationUnit))
         {
-            FBTrace.sysout("Script panel location not a CompilationUnit: ",compilationUnit);
-            throw new Error("Script panel location not a CompilationUnit: "+compilationUnit);
+            FBTrace.sysout("Script panel location not a CompilationUnit: ", compilationUnit);
+            throw new Error("Script panel location not a CompilationUnit: " + compilationUnit);
         }
 
-        // Since our last use of the compilationUnit we may have compiled or recompiled the source
+        // Since our last use of the compilationUnit we may have compiled or
+        // recompiled the source
         var updatedCompilationUnit = this.context.getCompilationUnit(compilationUnit.getURL());
         if (!updatedCompilationUnit)
             updatedCompilationUnit = this.getDefaultLocation();
+
         if (!updatedCompilationUnit)
             return;
 
@@ -1081,7 +1093,9 @@ Firebug.ScriptPanel.prototype = Obj.extend(Firebug.SourceBoxPanel,
     {
         if (FBTrace.DBG_PANELS)
         {
-            FBTrace.sysout("script updateSelection object:"+object+" of type "+typeof(object), object);
+            FBTrace.sysout("script updateSelection object:" + object + " of type " +
+                typeof(object), object);
+
             if (object instanceof CompilationUnit)
                 FBTrace.sysout("script updateSelection this.navigate(object)", object);
             else if (object instanceof SourceLink.SourceLink)
@@ -1106,7 +1120,6 @@ Firebug.ScriptPanel.prototype = Obj.extend(Firebug.SourceBoxPanel,
 
     showThisCompilationUnit: function(compilationUnit)
     {
-        //-----------------------------------123456789
         if (compilationUnit.getURL().substr(0, 9) == "chrome://")
             return false;
 
@@ -1132,7 +1145,7 @@ Firebug.ScriptPanel.prototype = Obj.extend(Firebug.SourceBoxPanel,
         {
             if (FBTrace.DBG_COMPILATION_UNITS)
             {
-                FBTrace.sysout("script getLocationList "+context.getName()+" allSources",
+                FBTrace.sysout("script getLocationList "+context.getName() + " allSources",
                     allSources);
             }
             return allSources;
@@ -1146,9 +1159,14 @@ Firebug.ScriptPanel.prototype = Obj.extend(Firebug.SourceBoxPanel,
         for (var i = 0; i < allSources.length; i++)
         {
             if (this.showThisCompilationUnit(allSources[i]))
+            {
                 list.push(allSources[i]);
+            }
             else if (FBTrace.DBG_COMPILATION_UNITS)
-                FBTrace.sysout("scrpt.getLocationList filtered "+allSources[i].getURL(), allSources[i]);
+            {
+                FBTrace.sysout("scrpt.getLocationList filtered "+allSources[i].getURL(),
+                    allSources[i]);
+            }
         }
 
         if (!list.length && allSources.length)
@@ -1158,8 +1176,8 @@ Firebug.ScriptPanel.prototype = Obj.extend(Firebug.SourceBoxPanel,
 
         if (FBTrace.DBG_COMPILATION_UNITS)
         {
-            FBTrace.sysout("script.getLocationList enabledOnLoad:"+context.onLoadWindowContent+
-                " all:"+allSources.length+" filtered:"+list.length+" allFiltered: "+
+            FBTrace.sysout("script.getLocationList enabledOnLoad:" + context.onLoadWindowContent +
+                " all:" + allSources.length + " filtered:" + list.length + " allFiltered: " +
                 this.context.allScriptsWereFiltered, list);
         }
 
@@ -1306,6 +1324,7 @@ Firebug.ScriptPanel.prototype = Obj.extend(Firebug.SourceBoxPanel,
             {label: "SetBreakpoint", type: "checkbox", checked: hasBreakpoint,
                 command: Obj.bindFixed(this.toggleBreakpoint, this, lineNo) }
         );
+
         if (hasBreakpoint)
         {
             var isDisabled = JavaScriptTool.isBreakpointDisabled(this.context, this.location.href,
@@ -1315,6 +1334,7 @@ Firebug.ScriptPanel.prototype = Obj.extend(Firebug.SourceBoxPanel,
                     command: Obj.bindFixed(this.toggleDisableBreakpoint, this, lineNo) }
             );
         }
+
         items.push(
             {label: "EditBreakpointCondition",
                 command: Obj.bindFixed(this.editBreakpointCondition, this, lineNo) }
@@ -1407,7 +1427,7 @@ Firebug.ScriptPanel.prototype = Obj.extend(Firebug.SourceBoxPanel,
         this.onJavaScriptDebugging(isActive, "onActiveTool");
     },
 
-    // **********************************************************************************
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
     // Toolbar functions
 
     attachListeners: function(context, chrome)
@@ -1452,7 +1472,9 @@ Firebug.ScriptPanel.prototype = Obj.extend(Firebug.SourceBoxPanel,
         if (!chrome)
         {
             if (FBTrace.DBG_ERRORS)
-                FBTrace.sysout("debugger.syncCommand, context with no chrome: "+context.getGlobalScope());
+                FBTrace.sysout("debugger.syncCommand, context with no chrome: " +
+                    context.getGlobalScope());
+
             return;
         }
 
@@ -1509,16 +1531,17 @@ Firebug.ScriptPanel.prototype = Obj.extend(Firebug.SourceBoxPanel,
     onStartDebugging: function(frame)
     {
         if (FBTrace.DBG_UI_LOOP)
-            FBTrace.sysout("script.startDebugging enter context: "+this.context.getName()+"\n");
+            FBTrace.sysout("script.startDebugging enter context: " + this.context.getName());
 
         try
         {
-            var currentBreakable = Firebug.chrome.getGlobalAttribute("cmd_breakOnNext", "breakable");
+            var currentBreakable = Firebug.chrome.getGlobalAttribute("cmd_breakOnNext",
+                "breakable");
 
             if (FBTrace.DBG_BP)
             {
-                FBTrace.sysout("debugger.startDebugging; currentBreakable "+currentBreakable+
-                    " in " + this.context.getName()+" currentContext "+
+                FBTrace.sysout("debugger.startDebugging; currentBreakable " + currentBreakable +
+                    " in " + this.context.getName() + " currentContext " +
                     Firebug.currentContext.getName());
             }
 
@@ -1540,22 +1563,23 @@ Firebug.ScriptPanel.prototype = Obj.extend(Firebug.SourceBoxPanel,
         catch(exc)
         {
             if (FBTrace.DBG_ERRORS)
-                FBTrace.sysout("Resuming debugger: error during debugging loop: "+exc, exc);
-            Firebug.Console.log("Resuming debugger: error during debugging loop: "+exc);
+                FBTrace.sysout("Resuming debugger: error during debugging loop: " + exc, exc);
+
+            Firebug.Console.log("Resuming debugger: error during debugging loop: " + exc);
             this.resume(this.context);
         }
 
         if (FBTrace.DBG_UI_LOOP)
         {
-            FBTrace.sysout("script.onStartDebugging exit context.stopped:"+this.context.stopped+
-                " for context: "+this.context.getName()+"\n");
+            FBTrace.sysout("script.onStartDebugging exit context.stopped:" +
+                this.context.stopped + " for context: " + this.context.getName());
         }
     },
 
     onStopDebugging: function()
     {
         if (FBTrace.DBG_UI_LOOP)
-            FBTrace.sysout("script.onStopDebugging enter context: "+this.context.getName()+"\n");
+            FBTrace.sysout("script.onStopDebugging enter context: " + this.context.getName());
 
         try
         {
