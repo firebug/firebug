@@ -88,10 +88,10 @@ Storage.prototype =
         StorageService.setStorage(this);
     },
 
-    clear: function()
+    clear: function(now)
     {
         this.objectTable = {};
-        StorageService.setStorage(this);
+        StorageService.setStorage(this, now);
     },
 };
 
@@ -114,12 +114,15 @@ var StorageService =
         return store;
     },
 
-    setStorage: function(store)
+    setStorage: function(store, now)
     {
         if (!store || !store.leafName || !store.objectTable)
             throw new Error("StorageService.setStorage requires Storage Object argument");
 
-        ObjectPersister.writeObject(store.leafName,  store.objectTable);
+        if (now)
+            ObjectPersister.writeNow(store.leafName,  store.objectTable);
+        else
+            ObjectPersister.writeObject(store.leafName,  store.objectTable);
     },
 
     removeStorage: function(leafName)
