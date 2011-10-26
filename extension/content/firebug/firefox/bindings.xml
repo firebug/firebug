@@ -1780,12 +1780,6 @@
         ]]></handler>
 
         <handler event="blur" phase="capturing"><![CDATA[
-            if (event.originalTarget.nodeName == "html:input" &&
-                document.activeElement == event.originalTarget)
-            {
-                return;
-            }
-
             this.blurTimeout = (this.blurTimeout || setTimeout(function()
             {
                 hideOptions();
