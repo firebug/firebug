@@ -10,7 +10,7 @@ define([
 ],
 function(Obj, Firebug, Css, Search, System, Locale) {
 
-// ************************************************************************************************
+// ********************************************************************************************* //
 // Constants
 
 const Cc = Components.classes;
@@ -18,7 +18,7 @@ const Ci = Components.interfaces;
 
 const searchDelay = 150;
 
-// ************************************************************************************************
+// ********************************************************************************************* //
 
 /**
  * @module Implements basic search box functionality. The box is displayed on the right side
@@ -35,15 +35,20 @@ Firebug.Search = Obj.extend(Firebug.Module,
     {
         var el = document.activeElement;
         var id = el.id;
-        if (id == 'fbPanelBar1-browser' || id == 'fbPanelBar2-browser')
+
+        if (id == "fbPanelBar1-browser" || id == "fbPanelBar2-browser")
         {
             var sel = el.contentWindow.getSelection().toString();
             if (!sel)
             {
                 var input = el.contentDocument.activeElement;
                 if (input instanceof Ci.nsIDOMNSEditableElement)
-                    sel = input.QueryInterface(Ci.nsIDOMNSEditableElement).editor.selection.toString();
+                {
+                    sel = input.QueryInterface(Ci.nsIDOMNSEditableElement).
+                        editor.selection.toString();
+                }
             }
+
             this.search(sel, Firebug.currentContext);
             this.focus();
         }
@@ -106,8 +111,11 @@ Firebug.Search = Obj.extend(Firebug.Module,
         // This sucks, but the find service won't match nodes that are invisible, so we
         // have to make sure to make them all visible unless the user is appending to the
         // last string, in which case it's ok to just search the set of visible nodes
-        if (!panel.searchText || value == panel.searchText || value.indexOf(panel.searchText) != 0)
+        if (!panel.searchText || value == panel.searchText ||
+            value.indexOf(panel.searchText) != 0)
+        {
             Css.removeClass(panelNode, "searching");
+        }
 
         if (Firebug.Search.isCaseSensitive(value))
             Css.setClass(searchBox, "fbSearchBox-autoSensitive");
@@ -115,8 +123,10 @@ Firebug.Search = Obj.extend(Firebug.Module,
             Css.removeClass(searchBox, "fbSearchBox-autoSensitive");
 
         if (FBTrace.DBG_SEARCH)
+        {
             FBTrace.sysout("search Firebug.Search.isAutoSensitive(value):" +
                 Firebug.Search.isAutoSensitive(value) + " for " + value, searchBox)
+        }
 
         // Cancel the previous search to keep typing smooth
         clearTimeout(panelNode.searchTimeout);
@@ -163,8 +173,8 @@ Firebug.Search = Obj.extend(Firebug.Module,
                 }
 
                 panel.searchText = value;
-
                 searchBox.status = (found ? "found" : "notfound");
+
                 if (FBTrace.DBG_SEARCH)
                     FBTrace.sysout("search "+searchBox.status+" "+value);
             }, searchDelay);
@@ -190,6 +200,7 @@ Firebug.Search = Obj.extend(Firebug.Module,
     getTestingRegex: function(text)
     {
         var caseSensitive = Firebug.Search.isCaseSensitive(text);
+
         try
         {
             if (Firebug.searchUseRegularExpression)
@@ -207,8 +218,12 @@ Firebug.Search = Obj.extend(Firebug.Module,
 
     searchOptionMenu: function(label, option)
     {
-        return { label: label, checked: Firebug[option], option: option,
-            command: Obj.bindFixed(this.onToggleSearchOption, this, option) };
+        return {
+            label: label,
+            checked: Firebug[option],
+            option: option,
+            command: Obj.bindFixed(this.onToggleSearchOption, this, option)
+        };
     },
 
     onToggleSearchOption: function(option)
@@ -218,6 +233,9 @@ Firebug.Search = Obj.extend(Firebug.Module,
         // Make sure the "Case Sensitive || Case Insensitive" label is updated.
         this.update();
     },
+
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+    // History
 
     history: [""],
 
@@ -244,7 +262,7 @@ Firebug.Search = Obj.extend(Firebug.Module,
         return history[0]
     },
 
-    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
     // extends Module
 
     internationalizeUI: function()
@@ -274,16 +292,18 @@ Firebug.Search = Obj.extend(Firebug.Module,
             searchBox.updateOptions(panel.getSearchOptionsMenuItems());
         }
         else
+        {
             searchBox.collapsed = false;
+        }
     }
 });
 
-// ************************************************************************************************
+// ********************************************************************************************* //
 // Registration
 
 Firebug.registerModule(Firebug.Search);
 
 return Firebug.Search;
 
-// ************************************************************************************************
+// ********************************************************************************************* //
 });
