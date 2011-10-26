@@ -262,12 +262,14 @@ window.Firebug =
 
         Events.dispatch(menuItemControllers, "initialize", []);  // TODO chrome.js
 
-        // In the case that the user opens firebug in a new window but then closes Firefox window, we don't get the
-        // quitApplicationGranted event (platform is still running) and we call shutdown (Firebug isDetached).
+        // In the case that the user opens firebug in a new window but then closes Firefox
+        // window, we don't get the quitApplicationGranted event (platform is still running)
+        // and we call shutdown (Firebug isDetached).
         window.addEventListener('unload', shutdownFirebug, false);
 
         // Initial activation of registered panel types. All panel -> module dependencies
-        // should be defined now (in onActivationChange).  Must be called after Firebug.TabWatcher is ready.
+        // should be defined now (in onActivationChange). Must be called after
+        // Firebug.TabWatcher is ready.
         if (Firebug.PanelActivation)
             Firebug.PanelActivation.activatePanelTypes(panelTypes);
 
@@ -276,7 +278,8 @@ window.Firebug =
     },
 
     /**
-     * called in browser when Firefox closes and in externalMode when fbs gets quitApplicationGranted.
+     * called in browser when Firefox closes and in externalMode when fbs gets
+     * quitApplicationGranted.
      */
     shutdown: function()
     {
@@ -317,20 +320,23 @@ window.Firebug =
         Events.dispatch(modules, "disable", [Firebug.chrome]);
     },
 
-    // ***************************************************************************************** //
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
     // TODO this entire section to XULWindow
 
-    getSuspended: function()  // TODO XULWindow
+    // TODO XULWindow
+    getSuspended: function()
     {
         return Firebug.StartButton.getSuspended();
     },
 
-    setSuspended: function(value)  // TODO XULWindow
+    // TODO XULWindow
+    setSuspended: function(value)
     {
         Firebug.StartButton.setSuspended(value);
     },
 
-    toggleSuspend: function()  // TODO XULWindow IN detached "Activate Firebug for the current website"
+    // TODO XULWindow IN detached "Activate Firebug for the current website"
+    toggleSuspend: function()
     {
         // getSuspended returns non-null value if Firebug is suspended.
         if (this.getSuspended() || this.isDetached())
@@ -360,7 +366,8 @@ window.Firebug =
         }
     },
 
-    suspend: function()  // dispatch suspendFirebug to all windows
+    // dispatch suspendFirebug to all windows
+    suspend: function()
     {
         if(Firebug.rerun)
             return;
@@ -368,16 +375,18 @@ window.Firebug =
         Firebug.suspendFirebug();
     },
 
-    suspendFirebug: function() // dispatch onSuspendFirebug to all modules
+    // dispatch onSuspendFirebug to all modules
+    suspendFirebug: function()
     {
-
-        var cancelSuspend = Events.dispatch2(activableModules, 'onSuspendingFirebug', []);
+        var cancelSuspend = Events.dispatch2(activableModules, "onSuspendingFirebug", []);
         if (cancelSuspend)
             return;
 
         this.setSuspended("suspending");
 
-        var cancelSuspend = Events.dispatch2(activableModules, 'onSuspendFirebug', [Firebug.currentContext]);  // TODO no context arg
+        // TODO no context arg
+        var cancelSuspend = Events.dispatch2(activableModules, "onSuspendFirebug",
+            [Firebug.currentContext]);
 
         if (cancelSuspend)
             Firebug.resume();
@@ -393,13 +402,17 @@ window.Firebug =
     resumeFirebug: function()  // dispatch onResumeFirebug to all modules
     {
         this.setSuspended("resuming");
-        Events.dispatch(activableModules, 'onResumeFirebug', [Firebug.currentContext]);// TODO no context arg
+
+        // TODO no context arg
+        Events.dispatch(activableModules, 'onResumeFirebug', [Firebug.currentContext]);
         this.setSuspended(null);
     },
 
     getURLsForAllActiveContexts: function()
     {
-        var contextURLSet = [];  // create a list of all unique activeContexts
+        var contextURLSet = [];
+
+        // create a list of all unique activeContexts
         Firebug.connection.eachContext( function createActiveContextList(context)
         {
             if (FBTrace.DBG_WINDOWS)
@@ -433,16 +446,17 @@ window.Firebug =
         });
 
         if (FBTrace.DBG_ACTIVATION)
-            FBTrace.sysout("active contexts urls "+contextURLSet.length);
+            FBTrace.sysout("active contexts urls " + contextURLSet.length);
 
         return contextURLSet;
     },
 
-    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
     // Registration
 
     /**
      * Set a default value for a preference into the firebug preferences list.
+     *
      * @param name preference name, possibly dot segmented, will be stored under
      *      extensions.firebug.<name>
      * @param value default value of preference
@@ -784,8 +798,8 @@ window.Firebug =
         if (Firebug.currentContext)
             ToolInterface.browser.closeContext(Firebug.currentContext, userCommands);
 
-        // else the user closed Firebug external window while not looking at a debugged web page.
-
+        // else the user closed Firebug external window while not looking at
+        // a debugged web page.
         Firebug.StartButton.resetTooltip();
     },
 
@@ -805,15 +819,23 @@ window.Firebug =
         Firebug.chrome.toggleOpen(false);  // don't show in browser.xul now
 
         if (FBTrace.DBG_ACTIVATION)
-            FBTrace.sysout("Firebug.detachBar opening firebug.xul for context "+Firebug.currentContext.getName() );
+        {
+            FBTrace.sysout("Firebug.detachBar opening firebug.xul for context " +
+                Firebug.currentContext.getName() );
+        }
 
-        return Firefox.openWindow("Firebug", "chrome://firebug/content/firefox/firebug.xul", "", {});
+        return Firefox.openWindow("Firebug",
+            "chrome://firebug/content/firefox/firebug.xul",
+            "", {});
     },
 
-    syncBar: function()  // show firebug if we should
+    // show firebug if we should
+    syncBar: function()
     {
         var browser = Firefox.getCurrentBrowser();
-        this.showBar(browser && browser.showFirebug);  // implicitly this is operating in the chrome of browser.xul
+
+        // implicitly this is operating in the chrome of browser.xul
+        this.showBar(browser && browser.showFirebug);
     },
 
     toggleCommandLine: function(showCommandEditor)
@@ -821,7 +843,7 @@ window.Firebug =
         Options.set("commandEditor", showCommandEditor);
     },
 
-    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
     // deprecated
 
     resetAllOptions: function(confirm)
@@ -846,7 +868,7 @@ window.Firebug =
         Events.dispatch(modules, "resetAllOptions", []);
     },
 
-    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
     // Panels
 
     getPanelType: function(panelName)
@@ -908,8 +930,12 @@ window.Firebug =
         for (var i = 0; i < panelTypes.length; ++i)
         {
             var panelType = panelTypes[i];
-            if (panelType.prototype.parentPanel && (panelType.prototype.parentPanel == mainPanel.name))
+
+            if (panelType.prototype.parentPanel &&
+                (panelType.prototype.parentPanel == mainPanel.name))
+            {
                 resultTypes.push(panelType);
+            }
         }
 
         if (context.panelTypes)
@@ -1045,7 +1071,7 @@ window.Firebug =
         }
     },
 
-    /*
+    /**
      * The child node that has a repObject
      */
     getRepNode: function(node)
@@ -1078,14 +1104,14 @@ window.Firebug =
         }
     },
 
-    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
     visitWebsite: function(which)
     {
         Win.openNewTab(firebugURLs[which]);
     },
 
-    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
     // nsISupports
 
     QueryInterface : function(iid)
@@ -1098,7 +1124,7 @@ window.Firebug =
         throw Components.results.NS_NOINTERFACE;
     },
 
-    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
     // Placement
 
     isDetached: function()
@@ -1126,9 +1152,10 @@ window.Firebug =
         Firebug.chrome.$("fbSearchBox").hideOptions();
 
         if (FBTrace.DBG_ACTIVATION)
-            FBTrace.sysout("Firebug.setPlacement from "+Firebug.getPlacement()+" to "+toPlacement+" with chrome "+Firebug.chrome.window.location);
+            FBTrace.sysout("Firebug.setPlacement from " + Firebug.getPlacement() + " to " +
+                toPlacement + " with chrome " + Firebug.chrome.window.location);
 
-        for (var i = 0; i < Firebug.placements.length; i++)
+        for (var i=0; i<Firebug.placements.length; i++)
         {
             if (toPlacement == Firebug.placements[i])
             {
@@ -1158,7 +1185,7 @@ window.Firebug =
         return (Firebug.previousPlacement && (Firebug.previousPlacement == PLACEMENT_MINIMIZED) )
     },
 
-    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
     // Firebug.TabWatcher Listener
 
     getContextType: function()
@@ -1166,9 +1193,9 @@ window.Firebug =
         return Firebug.TabContext;
     },
 
-    //*********************************************************************************************
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-    /*
+    /**
      * This method syncs the UI to a context
      * @param context to become the active and visible context
      */
@@ -1177,8 +1204,7 @@ window.Firebug =
         this.showContext(context.browser, context);
     },
 
-    //*********************************************************************************************
-
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
     focusBrowserTab: function(win)    // TODO move to FBL
     {
@@ -1186,7 +1212,7 @@ window.Firebug =
         this.chrome.focus();
     },
 
-    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
     // FBTest
 
     // Expose our test list to the FBTest console for automated testing.
@@ -1199,9 +1225,10 @@ window.Firebug =
     }
 };
 
-// ************************************************************************************************
+// ********************************************************************************************* //
 // API for Greasemonkey, Jetpack and other Firefox extensions
-/*
+
+/**
  * @param global wrapped up global: outer window or sandbox
  * @return a |console| object for the window
  */
@@ -1215,23 +1242,29 @@ Firebug.getConsoleByGlobal = function getConsoleByGlobal(global)
             var handler = Firebug.Console.injector.getConsoleHandler(context, global);
             if (handler)
             {
-                FBTrace.sysout("Firebug.getConsoleByGlobal "+handler.console+" for "+context.getName(), handler);
+                FBTrace.sysout("Firebug.getConsoleByGlobal " + handler.console + " for " +
+                    context.getName(), handler);
+
                 return handler.console;
             }
+
             if (FBTrace.DBG_ERRORS)
-                FBTrace.sysout("Firebug.getConsoleByGlobal FAILS, no handler for global "+global+" "+Win.safeGetWindowLocation(global), global);
+                FBTrace.sysout("Firebug.getConsoleByGlobal FAILS, no handler for global " +
+                    global + " " + Win.safeGetWindowLocation(global), global);
         }
+
         if (FBTrace.DBG_ERRORS)
-            FBTrace.sysout("Firebug.getConsoleByGlobal FAILS, no context for global "+global, global);
+            FBTrace.sysout("Firebug.getConsoleByGlobal FAILS, no context for global " +
+                global, global);
     }
     catch(exc)
     {
         if(FBTrace.DBG_ERRORS)
-            FBTrace.sysout("Firebug.getConsoleByGlobal FAILS "+exc, exc);
+            FBTrace.sysout("Firebug.getConsoleByGlobal FAILS " + exc, exc);
     }
 }
 
-//************************************************************************************************
+// ********************************************************************************************* //
 
 /**
  * Support for listeners registration. This object also extended by Firebug.Module so,
@@ -1268,11 +1301,12 @@ Firebug.Listener.prototype =
 
     removeListener: function(listener)
     {
-        Arr.remove(this.fbListeners, listener);  // if this.fbListeners is null, remove is being called with no add
+        // if this.fbListeners is null, remove is being called with no add
+        Arr.remove(this.fbListeners, listener);
     }
 };
 
-// ************************************************************************************************
+// ********************************************************************************************* //
 
 /**
  * @module Base class for all modules. Every derived module object must be registered using
@@ -1313,7 +1347,8 @@ Firebug.Module = Obj.extend(new Firebug.Listener(),
     },
 
     /**
-     * Called when a context is destroyed. Module may store info on persistedState for reloaded pages.
+     * Called when a context is destroyed. Module may store info on persistedState
+     * for reloaded pages.
      */
     destroyContext: function(context, persistedState)
     {
@@ -1359,7 +1394,7 @@ Firebug.Module = Obj.extend(new Firebug.Listener(),
     {
     },
 
-    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
     updateOption: function(name, value)
     {
@@ -1369,7 +1404,7 @@ Firebug.Module = Obj.extend(new Firebug.Listener(),
     {
     },
 
-    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
     // intermodule dependency
 
     // caller needs module. win maybe context.window or iframe in context.window.
@@ -1379,7 +1414,7 @@ Firebug.Module = Obj.extend(new Firebug.Listener(),
     },
 });
 
-//************************************************************************************************
+// ********************************************************************************************* //
 
 Firebug.Extension =
 {
@@ -1394,7 +1429,7 @@ Firebug.Extension =
     }
 };
 
-// ************************************************************************************************
+// ********************************************************************************************* //
 
 /**
  * @panel Base class for all panels. Every derived panel must define a constructor and
@@ -1428,7 +1463,8 @@ Firebug.Panel = Obj.extend(new Firebug.Listener(),
         this.panelNode = doc.createElement("div");
         this.panelNode.ownerPanel = this;
 
-        Css.setClass(this.panelNode, "panelNode panelNode-"+this.name+" contextUID="+context.uid);
+        Css.setClass(this.panelNode, "panelNode panelNode-" + this.name + " contextUID=" +
+            context.uid);
 
         // Load persistent content if any.
         var persistedState = Firebug.getPanelState(this);
@@ -1446,7 +1482,7 @@ Firebug.Panel = Obj.extend(new Firebug.Listener(),
         Firebug.Breakpoint.updatePanelTab(this, shouldBreak);
 
         if (FBTrace.DBG_INITIALIZE)
-            FBTrace.sysout("firebug.initialize panelNode for "+this.name+"\n");
+            FBTrace.sysout("firebug.initialize panelNode for " + this.name);
 
         this.initializeNode(this.panelNode);
     },
@@ -1454,7 +1490,7 @@ Firebug.Panel = Obj.extend(new Firebug.Listener(),
     destroy: function(state) // Panel may store info on state
     {
         if (FBTrace.DBG_INITIALIZE)
-            FBTrace.sysout("firebug.destroy panelNode for "+this.name+"\n");
+            FBTrace.sysout("firebug.destroy panelNode for " + this.name);
 
         if (this.panelNode)
         {
@@ -1484,12 +1520,14 @@ Firebug.Panel = Obj.extend(new Firebug.Listener(),
         Dom.scrollToBottom(this.panelNode);
     },
 
-    // called when a panel in one XUL window is about to disappear to later reappear another XUL window.
+    // called when a panel in one XUL window is about to disappear to later reappear
+    // another XUL window.
     detach: function(oldChrome, newChrome)
     {
     },
 
-    reattach: function(doc)  // this is how a panel in one window reappears in another window; lazy called
+    // this is how a panel in one window reappears in another window; lazy called
+    reattach: function(doc)
     {
         this.document = doc;
 
@@ -1533,7 +1571,7 @@ Firebug.Panel = Obj.extend(new Firebug.Listener(),
     {
     },
 
-    /*
+    /**
      * Called after chrome.applyTextSize
      * @param zoom: ratio of current size to normal size, eg 1.5
      */
@@ -1542,7 +1580,7 @@ Firebug.Panel = Obj.extend(new Firebug.Listener(),
 
     },
 
-    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
     /**
      * Toolbar helpers
@@ -1561,7 +1599,7 @@ Firebug.Panel = Obj.extend(new Firebug.Listener(),
         }
     },
 
-    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
     /**
      * Returns a number indicating the view's ability to inspect the object.
@@ -1585,7 +1623,8 @@ Firebug.Panel = Obj.extend(new Firebug.Listener(),
         if (!object)
             object = null;  // not undefined.
 
-        if ( !this.location || (object != this.location) )  // if this.location undefined, may set to null
+        // if this.location undefined, may set to null
+        if (!this.location || (object != this.location))
         {
             if (FBTrace.DBG_PANELS)
                 FBTrace.sysout("navigate "+this.name+" to location "+object, object);
@@ -1598,12 +1637,15 @@ Firebug.Panel = Obj.extend(new Firebug.Listener(),
         else
         {
             if (FBTrace.DBG_PANELS)
-                FBTrace.sysout("navigate skipped for panel "+this.name+" when object "+object+
-                    " vs this.location="+this.location, {object: object, location: this.location});
+            {
+                FBTrace.sysout("navigate skipped for panel " + this.name + " when object " +
+                    object + " vs this.location=" + this.location,
+                    {object: object, location: this.location});
+            }
         }
     },
 
-    /*
+    /**
      * The location object has been changed, the panel should update it view
      * @param object a location, must be one of getLocationList() returns
      *  if  getDefaultLocation() can return null, then updateLocation must handle it here.
@@ -1630,15 +1672,16 @@ Firebug.Panel = Obj.extend(new Firebug.Listener(),
         }
     },
 
-    /*
-     * Firebug wants to show an object to the user and this panel has the best supportsObject() result for the object.
-     * If the panel displays a container for objects of this type, it should set this.selectedObject = object
+    /**
+     * Firebug wants to show an object to the user and this panel has the best supportsObject()
+     * result for the object. If the panel displays a container for objects of this type,
+     * it should set this.selectedObject = object
      */
     updateSelection: function(object)
     {
     },
 
-    /*
+    /**
      * Redisplay the panel based on the current location and selection
      */
     refresh: function()
@@ -1787,12 +1830,16 @@ Firebug.Panel = Obj.extend(new Firebug.Listener(),
         var allLocs = this.getLocationList().sort(compare);
         for (var curPos = 0; curPos < allLocs.length && allLocs[curPos] != this.location; curPos++);
 
-        function transformIndex(index) {
-            if (reverse) {
+        function transformIndex(index)
+        {
+            if (reverse)
+            {
                 // For the reverse case we need to implement wrap around.
                 var intermediate = curPos - index - 1;
                 return (intermediate < 0 ? allLocs.length : 0) + intermediate;
-            } else {
+            }
+            else
+            {
                 return (curPos + index + 1) % allLocs.length;
             }
         };
@@ -1809,16 +1856,17 @@ Firebug.Panel = Obj.extend(new Firebug.Listener(),
         }
     },
 
-    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
     // Called when "Options" clicked. Return array of
-    // {label: 'name', nol10n: true,  type: "checkbox", checked: <value>, command:function to set <value>}
+    // {label: 'name', nol10n: true,  type: "checkbox", checked: <value>,
+    //      command:function to set <value>}
     getOptionsMenuItems: function()
     {
         return null;
     },
 
-    /*
+    /**
      * Called by chrome.onContextMenu to build the context menu when this panel has focus.
      * See also FirebugRep for a similar function also called by onContextMenu
      * Extensions may monkey patch and chain off this call
@@ -1840,7 +1888,7 @@ Firebug.Panel = Obj.extend(new Firebug.Listener(),
     {
     },
 
-    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
     getDefaultSelection: function()
     {
@@ -1897,7 +1945,7 @@ Firebug.Panel = Obj.extend(new Firebug.Listener(),
         return Url.splitURLBase(url);
     },
 
-    /*
+    /**
      *  UI signal that a tab needs attention, eg Script panel is currently stopped on a breakpoint
      *  @param: show boolean, true turns on.
      */
@@ -1923,7 +1971,7 @@ Firebug.Panel = Obj.extend(new Firebug.Listener(),
         return tab;
     },
 
-    /*
+    /**
      * If the panel supports source viewing, then return a SourceLink, else null
      * @param target an element from the panel under the mouse
      * @param object the realObject under the mouse
@@ -1932,9 +1980,10 @@ Firebug.Panel = Obj.extend(new Firebug.Listener(),
     {
     },
 
-    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
     // Support for Break On Next
-    /*
+
+    /**
      * Called by the framework to see if the panel currently supports BON
      */
     supportsBreakOnNext: function()
@@ -1972,7 +2021,7 @@ Firebug.Panel = Obj.extend(new Firebug.Listener(),
     },
 });
 
-//************************************************************************************************
+// ********************************************************************************************* //
 
 /**
  * @panel This object represents a panel with two states: enabled/disabled. Such support
@@ -2022,7 +2071,7 @@ Firebug.ActivablePanel = Obj.extend(Firebug.Panel,
     },
 });
 
-// ************************************************************************************************
+// ********************************************************************************************* //
 
 /**
  * @module Should be used by modules (Firebug specific task controllers) that supports
@@ -2056,7 +2105,7 @@ Firebug.ActivableModule = Obj.extend(Firebug.Module,
         Firebug.Module.initialize.apply(this, arguments);
     },
 
-    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
     // Observers (dependencies)
 
     hasObservers: function()
@@ -2101,7 +2150,7 @@ Firebug.ActivableModule = Obj.extend(Firebug.Module,
             FBTrace.sysout("firebug.ActivableModule.onObserverChange;");
     },
 
-    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
     // Firebug Activation
 
     onSuspendingFirebug: function()
@@ -2111,15 +2160,17 @@ Firebug.ActivableModule = Obj.extend(Firebug.Module,
 
     onSuspendFirebug: function()
     {
-        // When the number of activeContexts decreases to zero. Modules should remove listeners, disable function that takes resources
+        // When the number of activeContexts decreases to zero. Modules should remove
+        // listeners, disable function that takes resources
     },
 
     onResumeFirebug: function()
     {
-        // When the number of activeContexts increases from zero. Modules should undo the work done in onSuspendFirebug
+        // When the number of activeContexts increases from zero. Modules should undo the
+        // work done in onSuspendFirebug
     },
 
-    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
     // Module enable/disable APIs.
 
     setDefaultState: function(enable)
@@ -2140,9 +2191,9 @@ Firebug.ActivableModule = Obj.extend(Firebug.Module,
     }
 });
 
-// ************************************************************************************************
+// ********************************************************************************************* //
 
-/*
+/**
  * MeasureBox
  * To get pixels size.width and size.height:
  * <ul><li>     this.startMeasuring(view); </li>
@@ -2180,6 +2231,7 @@ Firebug.MeasureBox =
         value = value ? Str.escapeForTextNode(value) : "m";
         if (!Firebug.showTextNodesWithWhitespace)
             value = value.replace(/\t/g,'mmmmmm').replace(/\ /g,'m');
+
         this.measureBox.innerHTML = value;
         return {width: this.measureBox.offsetWidth, height: this.measureBox.offsetHeight-1};
     },
@@ -2197,7 +2249,7 @@ Firebug.MeasureBox =
     }
 };
 
-// ************************************************************************************************
+// ********************************************************************************************* //
 
 with (Domplate) {
 Firebug.Rep = domplate(
@@ -2268,21 +2320,22 @@ Firebug.Rep = domplate(
         return null;
     },
 
-    /*
-    * Called by chrome.onContextMenu to build the context menu when the underlying object has this rep.
-    * See also Panel for a similar function also called by onContextMenu
-    * Extensions may monkey patch and chain off this call
-    * @param object: the 'realObject', a model value, eg a DOM property
-    * @param target: the HTML element clicked on.
-    * @param context: the context, probably Firebug.currentContext
-    * @return an array of menu items.
-    */
+    /**
+     * Called by chrome.onContextMenu to build the context menu when the underlying object
+     * has this rep. See also Panel for a similar function also called by onContextMenu
+     * Extensions may monkey patch and chain off this call
+     *
+     * @param object: the 'realObject', a model value, eg a DOM property
+     * @param target: the HTML element clicked on.
+     * @param context: the context, probably Firebug.currentContext
+     * @return an array of menu items.
+     */
     getContextMenuItems: function(object, target, context)
     {
         return [];
     },
 
-    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
     // Convenience for domplates
 
     STR: function(name)
@@ -2311,7 +2364,7 @@ Firebug.Rep = domplate(
     }
 })};
 
-// ************************************************************************************************
+// ********************************************************************************************* //
 
 Firebug.Migrator =
 {
@@ -2454,9 +2507,9 @@ Firebug.Migrator =
 
 }
 
-// ************************************************************************************************
+// ********************************************************************************************* //
 
-/*
+/**
  * If we are detached and the main Firefox window closes, also close the matching Firebug window.
  */
 function shutdownFirebug()
