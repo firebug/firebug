@@ -2828,7 +2828,7 @@ Firebug.Debugger = Obj.extend(Firebug.ActivableModule,
         });
 
         var breakpointStore = FBS.getBreakpointStore();
-        breakpointStore.clear();
+        breakpointStore.clear(true);
     }
 });
 
