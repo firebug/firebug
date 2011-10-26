@@ -1142,15 +1142,11 @@ Firebug.JSAutoCompleter = function(textBox, completionBox, showCompletionPopup)
         if (completions === null)
             return true;
 
-        if (completionPopup.state !== "closed")
-            return false;
-
         if (this.getCompletionBoxValue() === textBox.value)
         {
             // The user wouldn't see a difference if we completed. This can
-            // happen for example if you type 'alert' and press enter, when
-            // there is no completion popup (regardless of whether or not
-            // there exist other completions).
+            // happen for example if you type 'alert' and press enter,
+            // regardless of whether or not there exist other completions.
             return true;
         }
 
