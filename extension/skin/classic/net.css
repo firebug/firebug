@@ -416,11 +416,11 @@
 /* If coming from BF cache (no network activity) */
 
 .netTable .netRow.fromBFCache {
-    visibility: collapse;
+    display: none;
 }
 
 .netTable.showBFCacheResponses .netRow.fromBFCache {
-    visibility: visible;
+    display: table-row;
 }
 
 .netRow.fromBFCache .netLabel,
