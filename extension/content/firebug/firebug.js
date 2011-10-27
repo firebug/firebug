@@ -664,6 +664,8 @@ window.Firebug =
             Firebug.chrome.syncPanel();
         else
             Firebug.chrome.selectPanel(); // select null causes hide() on selected
+
+        Firebug.StartButton.resetTooltip();
     },
 
     closeFirebug: function(userCommands)  // this is really deactivate

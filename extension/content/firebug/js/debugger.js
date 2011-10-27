@@ -2714,11 +2714,12 @@ Firebug.Debugger = Obj.extend(Firebug.ActivableModule,
         if (!Firebug.Debugger.isAlwaysEnabled())
             return;
 
-        var paused = FBS.pause();  // can be called multiple times.
+        // can be called multiple times.
+        var paused = FBS.pause(this.debuggerName);
 
         if (FBTrace.DBG_ACTIVATION)
             FBTrace.sysout("debugger.onSuspendFirebug paused: "+paused+" isAlwaysEnabled " +
-                Firebug.Debugger.isAlwaysEnabled()+"\n");
+                Firebug.Debugger.isAlwaysEnabled());
 
         // JSD activation is not per browser-tab so, FBS.pause can return 'not-paused' when
         // Firebug is activated on another tab.
@@ -2901,20 +2902,28 @@ Firebug.JSDebugClient =
         Firebug.connection.dispatch("onActivateTool", ["script", active]);
     },
 
-    onPauseJSDRequested: function(rejection)
+    onPauseJSDRequested: function(rejection, debuggerName)
     {
-        // A debugger client (an instance of Firebug.JSDebugClient)  asked to pause JSD.
+        // A debugger client (an instance of Firebug.JSDebugClient) asked to pause JSD.
         // Note that there is one instance of Firebug.JSDebugClient per browser (XUL) window.
-        // If the debugger is 'on' in this browser window JSD should not be paused.
-        // (see issue 4609)
-        if (Firebug.jsDebuggerOn)
+        // If the debugger is 'on' in this browser window JSD and the request comes from 
+        // another window (debugger) JSD should *not* be paused (see issue 4609).
+        // So, reject only if the request comes from another browser window and Firebug
+        // is resumed in this window.
+        if (debuggerName != Firebug.Debugger.debuggerName && !Firebug.getSuspended())
+        {
             rejection.push(true);
+
+            FBTrace.sysout("Firebug.JSDebugClient onPauseJSDRequested rejected to suspend; " +
+                "Current debugger: " + Firebug.Debugger.debuggerName + ", requestor debugger: " +
+                debuggerName);
+        }
 
         //Firebug.connection.dispatch("onPauseJSDRequested", arguments);
 
         if (FBTrace.DBG_ACTIVATION)
-            FBTrace.sysout("Firebug.JSDebugClient onPauseJSDRequested ignored" +
-                ", jsDebuggerOn: " + Firebug.jsDebuggerOn);
+            FBTrace.sysout("Firebug.JSDebugClient onPauseJSDRequested rejection: " +
+                rejection.length + ", jsDebuggerOn: " + Firebug.jsDebuggerOn);
     },
 }
 

@@ -1621,7 +1621,7 @@ var fbs =
         this.hookScripts();
 
         if (FBTrace.DBG_ACTIVATION)
-            FBTrace.sysout("enableDebugger with active "+active);
+            FBTrace.sysout("fbs.enableDebugger with active "+active);
     },
 
     obeyPrefs: function()
@@ -1714,18 +1714,18 @@ var fbs =
     },
 
     // must support multiple calls
-    pause: function()
+    pause: function(debuggerName)
     {
         if (!enabledDebugger || !jsd)
             return "not enabled";
 
         var rejection = [];
-        dispatch(clients, "onPauseJSDRequested", [rejection]);
+        dispatch(clients, "onPauseJSDRequested", [rejection, debuggerName]);
 
         // Number of rejections:
         // 0 - then everyone wants to pause
         // 1 - then everyone wants to pause (including the current active tab)
-        if (rejection.length < 2)
+        if (rejection.length < 1)
         {
             if (jsd.pauseDepth == 0)  // don't pause if we are paused.
             {

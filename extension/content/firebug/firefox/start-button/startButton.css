@@ -14,7 +14,7 @@
     list-style-image: url(chrome://firebug/skin/firebug-gray-16.png);
 }
 
-#firebug-button:-moz-any([console="on"], [script="on"], [net="on"]) .toolbarbutton-icon {
+#firebug-button[firebugActive="true"] .toolbarbutton-icon {
     list-style-image: url(chrome://firebug/skin/firebug16.png);
 }
 
@@ -103,6 +103,6 @@
     list-style-image: url(chrome://firebug/skin/firebug-gray-16.png);
 }
 
-#fbStatusIcon:-moz-any([script="on"], [net="on"], [console="on"]) {
+#fbStatusIcon[firebugActive="true"] {
     list-style-image: url(chrome://firebug/skin/firebug16.png);
 }

@@ -256,9 +256,6 @@ Firebug.StartButton = Obj.extend(Firebug.Module,
 
     resetTooltip: function()
     {
-        if (FBTrace.DBG_TOOLTIP)
-            FBTrace.sysout("resetTooltip called");
-
         var tooltip = "Firebug " + Firebug.getVersion();
         tooltip += "\n" + this.getEnablementStatus();
 
@@ -286,6 +283,13 @@ Firebug.StartButton = Obj.extend(Firebug.Module,
             return;
 
         firebugStatus.setAttribute("tooltiptext", tooltip);
+
+        // The start button is colorful only if there is a context
+        var active = Firebug.currentContext ? "true" : "false";
+        firebugStatus.setAttribute("firebugActive", active);
+
+        if (FBTrace.DBG_TOOLTIP)
+            FBTrace.sysout("resetTooltip called: firebug active: " + active);
     },
 
     getEnablementStatus: function()
@@ -304,15 +308,15 @@ Firebug.StartButton = Obj.extend(Firebug.Module,
         else
             status += "Console: " + strOff + ",";
 
-        if (firebugStatus.getAttribute("net") == "on")
-            status += " Net: " + strOn + ",";
-        else
-            status += " Net: " + strOff + ",";
-
         if (firebugStatus.getAttribute("script") == "on")
             status += " Script: " + strOn;
         else
             status += " Script: " + strOff + "";
+
+        if (firebugStatus.getAttribute("net") == "on")
+            status += " Net: " + strOn + ",";
+        else
+            status += " Net: " + strOff + ",";
 
         return status;
     },
@@ -334,7 +338,7 @@ Firebug.StartButton = Obj.extend(Firebug.Module,
         var suspendMarker = Firefox.getElementById("firebugStatus");
 
         if (FBTrace.DBG_ACTIVATION)
-            FBTrace.sysout("Firebug.setSuspended to "+value+". Browser: " +
+            FBTrace.sysout("Firebug.setSuspended to " + value + ". Browser: " +
                 Firebug.chrome.window.document.title);
 
         if (value == "suspended")
