@@ -65,14 +65,16 @@ Firebug.Breakpoint = Obj.extend(Firebug.Module,
         breakButton.removeAttribute("type");
         Dom.collapse(Firebug.chrome.$("fbBonButtons"), !panel.breakable);
 
-        // Disable BON if script is disabled or if BON isn't supported by the current panel.
         var scriptPanel = panel.context.getPanel("script", true);
         var scriptEnabled = scriptPanel && scriptPanel.isEnabled();
         var tool = Firebug.connection.getTool("script");
         var scriptActive = tool && tool.getActive();
-        if (!scriptActive || !panel.supportsBreakOnNext())
+
+        // Disable BON if script is disabled or if BON isn't supported by the current panel.
+        if (!scriptEnabled || !scriptActive || !panel.supportsBreakOnNext())
         {
             Firebug.chrome.setGlobalAttribute("cmd_breakOnNext", "breakable", "disabled");
+            this.updateBreakOnNextTooltips(panel);
             return;
         }
 
@@ -105,6 +107,10 @@ Firebug.Breakpoint = Obj.extend(Firebug.Module,
         var tooltip = panel.getBreakOnNextTooltip(armed);
         if (!tooltip)
             tooltip = "";
+
+        // The user should know that BON is disabled if the Script panel (debugger) is disabled.
+        if (breakable == "disabled")
+            tooltip += " " + Locale.$STR("firebug.bon.scriptPanelNeeded");
 
         Firebug.chrome.setGlobalAttribute("cmd_breakOnNext", "tooltiptext", tooltip);
     },
