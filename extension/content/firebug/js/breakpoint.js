@@ -65,13 +65,17 @@ Firebug.Breakpoint = Obj.extend(Firebug.Module,
         breakButton.removeAttribute("type");
         Dom.collapse(Firebug.chrome.$("fbBonButtons"), !panel.breakable);
 
-        var scriptPanel = panel.context.getPanel("script", true);
+        // The script panel can be created at this moment (the second parameter is false)
+        // It's needed for break on next to work (do not wait till the user actuall
+        // selectes the panel).
+        var scriptPanel = panel.context.getPanel("script");
         var scriptEnabled = scriptPanel && scriptPanel.isEnabled();
         var tool = Firebug.connection.getTool("script");
         var scriptActive = tool && tool.getActive();
+        var supported = panel.supportsBreakOnNext();
 
         // Disable BON if script is disabled or if BON isn't supported by the current panel.
-        if (!scriptEnabled || !scriptActive || !panel.supportsBreakOnNext())
+        if (!scriptEnabled || !scriptActive || !supported)
         {
             Firebug.chrome.setGlobalAttribute("cmd_breakOnNext", "breakable", "disabled");
             this.updateBreakOnNextTooltips(panel);
