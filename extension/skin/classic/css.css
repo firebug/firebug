@@ -28,8 +28,12 @@
 }
 
 .cssProp {
-    /*padding-left: 2em;*/
+    padding-left: 3em;
     line-height: 1.4em;
+}
+
+.cssProp > span:first-child {
+    margin-left: -3em;
 }
 
 .cssPropName {
@@ -93,7 +97,7 @@
     background: transparent url(chrome://firebug/skin/disable.png) no-repeat 2px 1px;
 }
 
-.cssProp.editGroup span:first-child:hover {
+.cssProp.editGroup > span:first-child {
     cursor: pointer;
 }
 
