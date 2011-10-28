@@ -1001,14 +1001,21 @@ var FirebugChrome =
 
     swapBrowsers: function(oldBrowser, newBrowser)
     {
+        var oldDoc = oldBrowser.contentDocument
+        // panels remember top window for which they were first opened
+        // so we need to destroy their views
+        var styleSheet = oldDoc.styleSheets[0];
+        var rulePos = styleSheet.cssRules.length;
+        styleSheet.insertRule('panel{display:-moz-box!important; visibility:collapse!important;}', rulePos);
+        
         // we need to deal with inner frames first since swapFrameLoaders
         // doesn't work for type="chrome" browser containing type="content" browsers
-        var frames = Array.prototype.slice.call(oldBrowser.contentDocument.querySelectorAll("browser, iframe"));
+        var frames = oldDoc.querySelectorAll("browser[type*=content], iframe[type*=content]");
         var tmpFrames = [], placeholders = [];
 
-        var oldDoc = oldBrowser.ownerDocument;
-        var temp = oldDoc.createElement('box');
-        oldDoc.documentElement.appendChild(temp);
+        var topDoc = oldBrowser.ownerDocument;
+        var temp = topDoc.createElement('box');
+        topDoc.documentElement.appendChild(temp);
 
         var swapDocShells = function(a, b)
         {
@@ -1029,8 +1036,7 @@ var FirebugChrome =
             temp.appendChild(tmpFrames[i]);
         }
 
-
-        for (var i in tmpFrames)
+        for (var i = tmpFrames.length; i--; )
         {
             swapDocShells(tmpFrames[i], frames[i]);
             frames[i].parentNode.replaceChild(placeholders[i], frames[i]);
@@ -1038,13 +1044,15 @@ var FirebugChrome =
 
         swapDocShells(oldBrowser, newBrowser);
 
-        for (var i in placeholders)
+        for (var i = placeholders.length; i--; )
             placeholders[i].parentNode.replaceChild(frames[i], placeholders[i]);
 
-        for (var i in frames)
+        for (var i = frames.length; i--; )
             swapDocShells(tmpFrames[i], frames[i]);
 
         temp.parentNode.removeChild(temp);
+
+        styleSheet.deleteRule(rulePos);
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
