@@ -1507,7 +1507,7 @@ Firebug.ScriptPanel.prototype = Obj.extend(Firebug.SourceBoxPanel,
     {
         JavaScriptTool.resumeJavaScript(context);
     },
-    
+
     stepOver: function(context)
     {
         JavaScriptTool.stepOver(context);
@@ -1612,7 +1612,7 @@ Firebug.ScriptPanel.prototype = Obj.extend(Firebug.SourceBoxPanel,
 
 // ********************************************************************************************* //
 
-const reWord = /([A-Za-z_$][A-Za-z_$0-9]*)(\.([A-Za-z_$][A-Za-z_$0-9]*))*/;
+const reWord = /([A-Za-z_$0-9]+)(\.([A-Za-z_$0-9]+)|\[([A-Za-z_$0-9]+|["'].+?["'])\])*/;
 
 function getExpressionAt(text, charOffset)
 {
@@ -1624,11 +1624,29 @@ function getExpressionAt(text, charOffset)
         if (charOffset >= wordOffset && charOffset <= wordOffset+word.length)
         {
             var innerOffset = charOffset-wordOffset;
-            var dots = word.substr(0, innerOffset).split(".").length;
-            var subExpr = word.split(".").slice(0, dots).join(".");
-            return {expr: subExpr, offset: wordOffset};
-        }
+            m = word.substr(innerOffset+1).match(/\.|\]|\[|$/);
+            var end = m.index + innerOffset + 1, start = 0;
 
+            var openBr = word.lastIndexOf('[', innerOffset);
+            var closeBr = word.lastIndexOf(']', innerOffset);
+
+            if (openBr == innerOffset)
+                end++;
+            else if (closeBr < openBr)
+            {
+                if (/['"\d]/.test(word[openBr+1]))
+                    end++;
+                else
+                    start = openBr + 1;
+            }
+
+            word = word.substring(start, end);
+
+            if (/^\d+$/.test(word) && word[0] != '0')
+                word = '';
+
+            return {expr: word, offset: wordOffset-start};
+        }
         offset = wordOffset+word.length;
     }
 
