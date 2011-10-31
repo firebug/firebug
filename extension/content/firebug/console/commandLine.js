@@ -1085,6 +1085,7 @@ Firebug.JSAutoCompleter = function(textBox, completionBox, showCompletionPopup)
     var revertValue = null;
 
     var completionPopup = Firebug.chrome.$("fbCommandLineCompletionList");
+    var selectedPopupElement = null;
     var commandCompletionLineLimit = 40;
 
 
@@ -1437,6 +1438,7 @@ Firebug.JSAutoCompleter = function(textBox, completionBox, showCompletionPopup)
     this.popupCandidates = function()
     {
         Dom.eraseNode(completionPopup);
+        selectedPopupElement = null;
 
         var vbox = completionPopup.ownerDocument.createElement("vbox");
         completionPopup.appendChild(vbox);
@@ -1488,13 +1490,15 @@ Firebug.JSAutoCompleter = function(textBox, completionBox, showCompletionPopup)
             post.innerHTML = Str.escapeForTextNode(completion);
             post.classList.add("completionText");
             if (i === completions.index)
-                post.setAttribute('selected', 'true');
+                selectedPopupElement = hbox;
 
             hbox.appendChild(pre);
             hbox.appendChild(post);
             vbox.appendChild(hbox);
         }
 
+        if (selectedPopupElement)
+            selectedPopupElement.setAttribute('selected', 'true');
         this.linuxFocusHack = true;
         setTimeout(this.focusHack, 10);
         completionPopup.openPopup(textBox, "before_start", 0, 0, false, false);
@@ -1516,22 +1520,40 @@ Firebug.JSAutoCompleter = function(textBox, completionBox, showCompletionPopup)
         }
     };
 
-    this.popupClick = function(event)
+    this.getCompletionPopupElementFromEvent = function(event)
     {
         var selected = event.target;
-        while (selected && (selected.localName !== "div"))
+        while (selected && selected.localName !== "div")
             selected = selected.parentNode;
-        if (!selected)
+        return (selected && typeof selected.completionIndex !== "undefined" ? selected : null);
+    };
+
+    this.popupMousedown = function(event)
+    {
+        var el = this.getCompletionPopupElementFromEvent(event);
+        if (!el)
             return;
 
-        var completionIndex = selected.completionIndex;
-        if (typeof completionIndex === "undefined")
+        if (selectedPopupElement)
+            selectedPopupElement.removeAttribute('selected');
+
+        selectedPopupElement = el;
+        selectedPopupElement.setAttribute('selected', 'true');
+        completions.index = el.completionIndex;
+        completionBox.value = this.getCompletionBoxValue();
+    };
+
+    this.popupClick = function(event)
+    {
+        var el = this.getCompletionPopupElementFromEvent(event);
+        if (!el)
             return;
 
-        completions.index = completionIndex;
+        completions.index = el.completionIndex;
         this.acceptCompletion();
     };
 
+    this.popupMousedown = Obj.bind(this.popupMousedown, this);
     this.popupClick = Obj.bind(this.popupClick, this);
 
     this.focusHack = function(event)
@@ -1551,9 +1573,11 @@ Firebug.JSAutoCompleter = function(textBox, completionBox, showCompletionPopup)
     this.shutdown = function()
     {
         completionBox.value = "";
+        completionPopup.removeEventListener("mousedown", this.popupMousedown, true);
         completionPopup.removeEventListener("click", this.popupClick, true);
     };
 
+    completionPopup.addEventListener("mousedown", this.popupMousedown, true);
     completionPopup.addEventListener("click", this.popupClick, true);
 };
 
