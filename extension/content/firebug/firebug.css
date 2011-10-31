@@ -7,9 +7,29 @@ window[chromehidden~="toolbar"] #fbToolbar {
    display: -moz-box;
 }
 
+/* browser.xul styles */
 #fbMainFrame {
     height: 270px;
 }
+
+#fbContentSplitter[dir=reverse]{
+    -moz-transform: scale(-1, -1)
+}
+
+#fbContentSplitter[orient=vertical] {
+    border-top: 1px solid !important;
+    border-bottom: none;
+    min-height: 3px;
+    max-height: 3px;
+}
+
+#fbContentSplitter[orient=horizontal] {
+    border-right: 1px solid !important;
+    border-left: none;    
+    min-width: 3px;
+    max-width: 3px;
+}
+/* end of browser.xul styles */
 
 #fbContentBox {
     -moz-binding: url("firefox/bindings.xml#initializer");

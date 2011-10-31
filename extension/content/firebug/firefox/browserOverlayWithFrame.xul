@@ -16,7 +16,7 @@
     <!-- Firebug panel -->
     <vbox id="appcontent">
         <splitter id="fbContentSplitter" collapsed="true"/>
-        <vbox persist="height" id="fbMainFrame" collapsed="true">
+        <vbox persist="height,width" id="fbMainFrame" collapsed="true">
             <browser id="fbMainContainer" flex="2" src="chrome://firebug/content/firefox/firebugFrame.xul" disablehistory="true"/>
         </vbox>
     </vbox>

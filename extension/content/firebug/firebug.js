@@ -709,7 +709,7 @@ window.Firebug =
 
         if (Firebug.isDetached()) // if we are out of the browser focus the window
             Firebug.chrome.focus();
-        else if (Firebug.openInWindow)
+        else if (Firebug.framePosition == "detached")
             this.detachBar();
         else if (Firebug.isMinimized()) // toggle minimize
             Firebug.unMinimize();
@@ -726,7 +726,7 @@ window.Firebug =
     showContext: function(browser, context)
     {
         // user wants detached but we are not yet
-        if (Firebug.openInWindow && !Firebug.isDetached())
+        if (Firebug.framePosition == "detached" && !Firebug.isDetached())
         {
             if (context && !Firebug.isMinimized()) // don't detach if it's minimized 2067
                 this.detachBar();  //   the placement will be set once the external window opens

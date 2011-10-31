@@ -169,12 +169,8 @@
     border-top: 1px solid threedshadow;
 }
 
-#fbContentSplitter {
-    border-top: 1px solid !important;
-    -moz-border-top-colors: threedShadow !important;
-    border-bottom: none;
-    min-height: 3px;
-    max-height: 3px;
+#fbContentSplitter{
+    border-color: threedShadow !important;
     background-color: #FFFFFF;
 }
 

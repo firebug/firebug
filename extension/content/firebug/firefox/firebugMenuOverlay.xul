@@ -145,10 +145,9 @@
             <menu id="FirebugMenu_Options" label="firebug.Options" class="fbInternational">
                 <menupopup onpopupshowing="return Firebug.chrome.onOptionsShowing(this);"
                            id="FirebugMenu_OptionsPopup">
-                    <menuitem id="menu_alwaysOpenInWindow"
-                              type="checkbox" label="firebug.AlwaysOpenInWindow"
-                              oncommand="Firebug.chrome.onToggleAlwaysOpenInWindowOption(this, Firebug.currentContext)"
-                              option="openInWindow" class="fbInternational"/>
+                    <menu label="firebug.Position of Firebug UI" class="fbInternational">
+                        <menupopup onpopupshowing="Firebug.chrome.onPositionPopupShowing(this)"/>
+                    </menu>
                     <menuitem id="menu_toggleShowErrorCount"
                               type="checkbox" label="firebug.Show_Error_Count"
                               oncommand="Firebug.chrome.onToggleOption(this)"

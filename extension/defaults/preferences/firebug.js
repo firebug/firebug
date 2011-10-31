@@ -10,7 +10,7 @@ pref("extensions.firebug.throttleMessages", true);
 pref("extensions.firebug.textSize", 0);
 pref("extensions.firebug.showInfoTips", true);
 pref("extensions.firebug.textWrapWidth", 100);
-pref("extensions.firebug.openInWindow", false);
+pref("extensions.firebug.framePosition", "bottom");
 pref("extensions.firebug.previousPlacement", 0);
 pref("extensions.firebug.showErrorCount", true);
 pref("extensions.firebug.viewPanelOrient", false);

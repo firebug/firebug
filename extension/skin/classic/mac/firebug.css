@@ -30,11 +30,8 @@
 }
 
 #fbContentSplitter {
-    border-top: 1px solid #BBB9BA;
-    border-bottom: none;
+    border-color: #BBB9BA;
     background: #f3f3f3 !important;
-    min-height: 3px;
-    max-height: 3px;
 }
 
 #fbPanelSplitter {

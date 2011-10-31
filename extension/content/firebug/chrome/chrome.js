@@ -99,7 +99,7 @@ var FirebugChrome =
 
             if (!browser1Complete)
                 browser1.addEventListener("load", browser1Loaded, true);
- 
+
             browser1.droppedLinkHandler = function()
             {
                 return false;
@@ -417,6 +417,13 @@ var FirebugChrome =
             var contentSplitter = Firefox.getElementById('fbContentSplitter');
             if (contentSplitter)
                 contentSplitter.setAttribute("collapsed", !shouldShow);
+        }
+
+        if (shouldShow && !this.positionInitialzed)
+        {
+            this.positionInitialzed = true;
+            if (Firebug.framePosition != "detached" && Firebug.framePosition != "bottom")
+                this.setPosition(); // null only updates frame position without side effects
         }
     },
 
@@ -963,19 +970,39 @@ var FirebugChrome =
 
     setPosition: function(pos)
     {
-        if(Firebug.position == pos || this.inDetachedScope)
+        if (Firebug.framePosition == pos)
             return;
 
-        var vertical = pos == 'top' || pos == 'bottom'
-        var after = pos == 'bottom' || pos == 'right'
+        if (pos)
+        {
+            Firebug.Options.set("framePosition", pos);
+            Firebug.framePosition = pos;
+            if (Firebug.getSuspended())
+                Firebug.toggleBar();
+        }
+        else
+        {
+            pos = Firebug.framePosition;
+        }
 
-        var document = window.top.document
-        var splitter = Firefox.getElementById('fbContentSplitter') || Firefox.getElementById('fbContentSplitter2')
-        var container = document.getElementById(vertical ? "appcontent" : "browser")
-        var newSplitter = splitter.cloneNode(true)
-        newSplitter.id = vertical ? 'fbContentSplitter' : 'fbContentSplitter2'
-        container.insertBefore(newSplitter, after ? null: container.firstChild)
-        splitter.parentNode.removeChild(splitter)
+        if (pos == "detached")
+        {
+            Firebug.toggleDetachBar(true, true);
+            return;
+        }
+
+        if (Firebug.isDetached())
+            Firebug.toggleDetachBar(false, true);
+
+        var vertical = pos == 'top' || pos == 'bottom';
+        var after = pos == 'bottom' || pos == 'right';
+
+        var document = window.top.document;
+        var splitter = Firefox.getElementById('fbContentSplitter');
+        var container = document.getElementById(vertical ? "appcontent" : "browser");
+        splitter.setAttribute("orient", vertical ? "vertical" : "horizontal");
+        splitter.setAttribute("dir", after ? "" : "reverse");
+        container.insertBefore(splitter, after ? null: container.firstChild);
 
         var frame = document.getElementById('fbMainFrame')
 
@@ -991,12 +1018,28 @@ var FirebugChrome =
 
         frame.parentNode.removeChild(frame)
 
-        Firebug.position = pos
-        Firebug.changingPosition = false
+        this.browser = newBrowser;
 
-        this.browser = newBrowser
+        Firebug.chrome.toggleOrient(vertical ? "horizontal" : "vertical");
+    },
 
-        //Firebug.chrome.toggleOrient(vertical ? "horizontal" : "vertical")
+    onPositionPopupShowing: function(popup) {
+        Dom.eraseNode(popup);
+
+        var items = [];
+
+        for each(var pos in ["detached", "top", "bottom", "left", "right"])
+            items.push({
+                label: Locale.$STR("position." + pos),
+                type: "radio",
+                command: bindFixed(this.setPosition, this, pos),
+                checked: Firebug.framePosition == pos
+            })
+
+        items.splice(1, 0, '-');
+
+        for each(var i in items)
+            Menu.createMenuItem(popup, i);
     },
 
     swapBrowsers: function(oldBrowser, newBrowser)
@@ -1006,15 +1049,15 @@ var FirebugChrome =
         // so we need to destroy their views
         var styleSheet = oldDoc.styleSheets[0];
         var rulePos = styleSheet.cssRules.length;
-        styleSheet.insertRule('panel{display:-moz-box!important; visibility:collapse!important;}', rulePos);
-        
+        styleSheet.insertRule("panel{display:-moz-box!important; visibility:collapse!important;}", rulePos);
+
         // we need to deal with inner frames first since swapFrameLoaders
         // doesn't work for type="chrome" browser containing type="content" browsers
         var frames = oldDoc.querySelectorAll("browser[type*=content], iframe[type*=content]");
         var tmpFrames = [], placeholders = [];
 
         var topDoc = oldBrowser.ownerDocument;
-        var temp = topDoc.createElement('box');
+        var temp = topDoc.createElement("box");
         topDoc.documentElement.appendChild(temp);
 
         var swapDocShells = function(a, b)
@@ -1029,7 +1072,7 @@ var FirebugChrome =
 
         for (var i = frames.length; i--; )
         {
-            placeholders[i] = document.createElement('placeholder');
+            placeholders[i] = document.createElement("placeholder");
             tmpFrames[i] = frames[i].cloneNode(true);
             tmpFrames[i].removeAttribute("src");
             frames[i].removeAttribute("src");
@@ -1181,7 +1224,7 @@ var FirebugChrome =
         var zoomString = (zoom * 100) + "%";
 
         var fontSizeAdjust = zoom * 0.547; // scale the aspect relative to 11pt Lucida Grande
-        var contentBox = Firebug.chrome.$('fbContentBox');
+        var contentBox = Firebug.chrome.$("fbContentBox");
         contentBox.style.fontSizeAdjust = fontSizeAdjust;
 
         //panelBar1.browser.contentDocument.documentElement.style.fontSizeAdjust = fontSizeAdjust;
@@ -1323,19 +1366,6 @@ var FirebugChrome =
         var checked = menuitem.getAttribute("checked") == "true";
 
         Firebug.Options.set(option, checked);
-    },
-
-    onToggleAlwaysOpenInWindowOption: function(menuitem, context)
-    {
-        this.onToggleOption(menuitem);
-
-        var suspended = Firebug.getSuspended();
-        var detached = Firebug.isDetached();
-
-        if (suspended && detached)
-            Firebug.toggleDetachBar(false, false);
-        else if (!suspended)
-            Firebug.toggleDetachBar(false, true);
     },
 
     onContextShowing: function(event)
