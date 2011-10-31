@@ -1004,23 +1004,19 @@ var FirebugChrome =
         splitter.setAttribute("dir", after ? "" : "reverse");
         container.insertBefore(splitter, after ? null: container.firstChild);
 
-        var frame = document.getElementById('fbMainFrame')
+        var frame = document.getElementById('fbMainFrame');
 
-        var newFrame = frame.cloneNode(true)
-        var newBrowser = newFrame.querySelector('#fbMainContainer')
-        var oldBrowser = frame.querySelector('#fbMainContainer')
+        var newFrame = frame.cloneNode(true);
+        var newBrowser = newFrame.querySelector('#fbMainContainer');
+        var oldBrowser = frame.querySelector('#fbMainContainer');
 
-        newBrowser.removeAttribute('src')
+        newBrowser.removeAttribute('src');
+        container.insertBefore(newFrame, after ? null: container.firstChild);
 
-        container.insertBefore(newFrame, after ? null: container.firstChild)
-
-        this.swapBrowsers(oldBrowser, newBrowser)
-
-        frame.parentNode.removeChild(frame)
-
+        this.swapBrowsers(oldBrowser, newBrowser);
         this.browser = newBrowser;
 
-        Firebug.chrome.toggleOrient(vertical ? "horizontal" : "vertical");
+        frame.parentNode.removeChild(frame);
     },
 
     onPositionPopupShowing: function(popup) {
