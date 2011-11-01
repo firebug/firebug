@@ -7,11 +7,16 @@ window[chromehidden~="toolbar"] #fbToolbar {
    display: -moz-box;
 }
 
-/* browser.xul styles */
+/*************************************************************************************************/
+/* browser.xul & browserOverlayWithFrame */
+
 #fbMainFrame {
     height: 270px;
     width: 370px;
 }
+
+/*************************************************************************************************/
+/* Firebug Splitter */
 
 #fbContentSplitter[dir=reverse]{
     -moz-transform: scale(-1, -1);
@@ -20,23 +25,30 @@ window[chromehidden~="toolbar"] #fbToolbar {
 #fbContentSplitter[orient=vertical] {
     border-top: 1px solid !important;
     border-bottom: none;
-    min-height: 3px;
-    max-height: 3px;
+    min-height: 5px;
+    max-height: 5px;
+    background-color: -moz-dialog;
 }
 
 #fbContentSplitter[orient=horizontal] {
     border-right: 1px solid !important;
-    border-left: none;    
-    min-width: 3px;
-    max-width: 3px;
+    border-left: none;
+    min-width: 5px;
+    max-width: 5px;
+    background-color: -moz-dialog;
 }
-/* end of browser.xul styles */
+
+/*************************************************************************************************/
+/* FirebugFrame.xul */
 
 #fbContentBox {
     -moz-binding: url("firefox/bindings.xml#initializer");
     height: 270px;
     background-color: -moz-dialog;
 }
+
+/*************************************************************************************************/
+/* FirebugOverlay.xul */
 
 #fbCommandEditor {
     -moz-binding: url("firefox/bindings.xml#commandEditor");
