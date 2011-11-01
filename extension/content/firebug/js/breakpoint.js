@@ -74,10 +74,14 @@ Firebug.Breakpoint = Obj.extend(Firebug.Module,
         var scriptActive = tool && tool.getActive();
         var supported = panel.supportsBreakOnNext();
 
+        // Enable by default and disable if needed.
+        Firebug.chrome.setGlobalAttribute("cmd_breakOnNext", "disabled", null);
+
         // Disable BON if script is disabled or if BON isn't supported by the current panel.
         if (!scriptEnabled || !scriptActive || !supported)
         {
             Firebug.chrome.setGlobalAttribute("cmd_breakOnNext", "breakable", "disabled");
+            Firebug.chrome.setGlobalAttribute("cmd_breakOnNext", "disabled", "true");
             this.updateBreakOnNextTooltips(panel);
             return;
         }
