@@ -13,11 +13,16 @@
     <script type="application/x-javascript" src="chrome://firebug/content/legacy.js"/>
     <script type="application/x-javascript" src="chrome://firebug/content/moduleConfig.js"/>
 
-    <!-- Firebug panel -->
+    <!-- Firebug UI is loaded within 'fbMainContainer' browser. Note that there
+        are some small Firbug UI pieces that are part of the browser.xul scope,
+        such as the Firebug start button or Firebug menu, which is part of the
+        Firefox menu. -->
     <vbox id="appcontent">
         <splitter id="fbContentSplitter" collapsed="true"/>
         <vbox persist="height,width" id="fbMainFrame" collapsed="true">
-            <browser id="fbMainContainer" flex="2" src="chrome://firebug/content/firefox/firebugFrame.xul" disablehistory="true"/>
+            <browser id="fbMainContainer" flex="2"
+                src="chrome://firebug/content/firefox/firebugFrame.xul"
+                disablehistory="true"/>
         </vbox>
     </vbox>
 
