@@ -315,7 +315,7 @@ Firebug.WatchPanel.prototype = Obj.extend(Firebug.DOMBasePanel.prototype,
             return;
 
         var row = Dom.getAncestorByClass(target, "memberRow");
-        if (!row || !row.domObject.value)
+        if (!row) 
             return;
 
         var path = this.getPropertyPath(row);
