@@ -596,17 +596,55 @@ Firebug.NetMonitor.NetRequestEntry = domplate(Firebug.Rep, new Firebug.Listener(
         return 10;
     },
 
+    isNtlmAuthorizationRequest: function(file)
+    {
+        if (file.responseStatus != 401)
+            return false;
+
+        function hasNtlm(value)
+        {
+            return value && value.indexOf("NTLM") == 0;
+        }
+
+        var requestHeader = NetUtils.findHeader(file.requestHeaders, "authorization");
+        //xxxsz: file.responseHeaders is undefined here for some reason
+        var responseHeader = file.responseHeadersText.match(/www-authenticate:\s(.+)/i)[1];
+
+        // Phase 1: no auth in request, no message in response
+        if (!hasNtlm(requestHeader) && hasNtlm(responseHeader) && responseHeader.length == 4)
+        {
+            if (FBTrace.DBG_NET)
+            {
+                FBTrace.sysout("net.updateInfo; NTLM match (phase 1)",
+                    {requestHeader: requestHeader, responseHeader: responseHeader});
+            }
+            return true;
+        }
+
+        // Phase 2: Type-1 message in request and Type-2 message in response
+        if (hasNtlm(requestHeader) && requestHeader.length > 4 &&
+            hasNtlm(responseHeader) && responseHeader.length > 4)
+        {
+            if (FBTrace.DBG_NET)
+            {
+                FBTrace.sysout("net.updateInfo; NTLM match (phase 2)",
+                    {requestHeader: requestHeader, responseHeader: responseHeader});
+            }
+            return true;
+        }
+
+        // Phase 3 response should not contain www-authenticate header in case of
+        // failed authentication, so no additional check required
+        return false;
+    },
+
     isError: function(file)
     {
         if (file.aborted)
             return true;
 
-        if (file.responseStatus == 401)
-        {
-            var ntlm = NetUtils.findHeader(file.requestHeaders, "authorization");
-            if (ntlm && ntlm.indexOf("NTLM") == 0)
-                return false;
-        }
+        if (this.isNtlmAuthorizationRequest(file))
+            return false;
 
         var errorRange = Math.floor(file.responseStatus/100);
         return errorRange == 4 || errorRange == 5;
