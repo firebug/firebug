@@ -244,6 +244,7 @@ var FirebugChrome =
         doc2.removeEventListener("mouseup", onPanelMouseUp, false);
         doc2.removeEventListener("click", onPanelClick, false);
 
+        var cmdPopupBrowser = this.getElementById("fbCommandPopupBrowser");
         var doc3 = cmdPopupBrowser.contentDocument;
         doc3.removeEventListener("mouseover", onPanelMouseOver, false);
         doc3.removeEventListener("mouseout", onPanelMouseOut, false);
