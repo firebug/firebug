@@ -119,7 +119,7 @@ Firebug.NetMonitor = Obj.extend(Firebug.ActivableModule,
 
             if (Options.get("netShowPaintEvents"))
             {
-                Events.addEventListener(win, "MozAfterPaint", onWindowPaintHandler, false);
+                context.addEventListener(win, "MozAfterPaint", onWindowPaintHandler, false);
             }
 
             // Register "load" listener in order to track window load time.
@@ -127,27 +127,27 @@ Firebug.NetMonitor = Obj.extend(Firebug.ActivableModule,
             {
                 if (context.netProgress)
                     context.netProgress.post(windowLoad, [win, NetUtils.now()]);
-                Events.removeEventListener(win, "load", onWindowLoadHandler, true);
+                context.removeEventListener(win, "load", onWindowLoadHandler, true);
 
                 context.setTimeout(function()
                 {
                     if (win && !win.closed)
                     {
-                        Events.removeEventListener(win, "MozAfterPaint", onWindowPaintHandler, false);
+                        context.removeEventListener(win, "MozAfterPaint", onWindowPaintHandler, false);
                     }
                 }, 2000); //xxxHonza: this should be customizable using preferences.
             }
-            Events.addEventListener(win, "load", onWindowLoadHandler, true);
+            context.addEventListener(win, "load", onWindowLoadHandler, true);
 
             // Register "DOMContentLoaded" listener to track timing.
             var onContentLoadHandler = function()
             {
                 if (context.netProgress)
                     context.netProgress.post(contentLoad, [win, NetUtils.now()]);
-                Events.removeEventListener(win, "DOMContentLoaded", onContentLoadHandler, true);
+                context.removeEventListener(win, "DOMContentLoaded", onContentLoadHandler, true);
             }
 
-            Events.addEventListener(win, "DOMContentLoaded", onContentLoadHandler, true);
+            context.addEventListener(win, "DOMContentLoaded", onContentLoadHandler, true);
         }
 
         if (Firebug.NetMonitor.isAlwaysEnabled())
