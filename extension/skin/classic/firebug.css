@@ -317,9 +317,7 @@ textbox[type="fbSearchBox"] > panel {
 #fbNavigateBackButton,
 #fbNavigateForwardButton,
 .navigationHistoryMenuItemForward,
-.navigationHistoryMenuItemBack,
-menupopup[chromedir="rtl"] > .navigationHistoryMenuItemForward,
-menupopup[chromedir="rtl"] > .navigationHistoryMenuItemBack {
+.navigationHistoryMenuItemBack {
     -moz-image-region: rect(0, 16px, 16px, 0);
 }
 
@@ -330,11 +328,7 @@ menupopup[chromedir="rtl"] > .navigationHistoryMenuItemBack {
 .navigationHistoryMenuItemBack:hover,
 .navigationHistoryMenuItemBack:active,
 .navigationHistoryMenuItemForward:hover,
-.navigationHistoryMenuItemForward:active,
-menupopup[chromedir="rtl"] > .navigationHistoryMenuItemForward:hover,
-menupopup[chromedir="rtl"] > .navigationHistoryMenuItemForward:active,
-menupopup[chromedir="rtl"] > .navigationHistoryMenuItemBack:hover,
-menupopup[chromedir="rtl"] > .navigationHistoryMenuItemBack:active {
+.navigationHistoryMenuItemForward:active {
     -moz-image-region: rect(16px, 16px, 32px, 0);
 }
 
@@ -343,16 +337,18 @@ menupopup[chromedir="rtl"] > .navigationHistoryMenuItemBack:active {
     -moz-image-region: rect(32px, 16px, 48px, 0);
 }
 
-#fbNavigateBackButton,
-.navigationHistoryMenuItemBack,
-menupopup[chromedir="rtl"] > .navigationHistoryMenuItemForward {
-      list-style-image: url(chrome://firebug/skin/nav-back.png);
+#fbNavigateBackButton:-moz-locale-dir(ltr),
+#fbNavigateForwardButton:-moz-locale-dir(rtl),
+.navigationHistoryMenuItemBack:-moz-locale-dir(ltr),
+.navigationHistoryMenuItemForward:-moz-locale-dir(rtl) {
+    list-style-image: url(chrome://firebug/skin/nav-back.png);
 }
 
-#fbNavigateForwardButton,
-.navigationHistoryMenuItemForward,
-menupopup[chromedir="rtl"] > .navigationHistoryMenuItemBack {
-      list-style-image: url(chrome://firebug/skin/nav-forward.png);
+#fbNavigateForwardButton:-moz-locale-dir(ltr),
+#fbNavigateBackButton:-moz-locale-dir(rtl),
+.navigationHistoryMenuItemForward:-moz-locale-dir(ltr),
+.navigationHistoryMenuItemBack:-moz-locale-dir(rtl) {
+    list-style-image: url(chrome://firebug/skin/nav-forward.png);
 }
 
 .navigationHistoryMenuItemCurrent {

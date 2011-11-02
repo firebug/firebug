@@ -414,7 +414,7 @@ panelBarArrowscrollbox > .scrollbutton-up {
     -moz-border-radius-topright: 2px;
 }
 
-panelBarArrowscrollbox > .scrollbutton-up[chromedir="rtl"] {
+panelBarArrowscrollbox > .scrollbutton-up:-moz-locale-dir(rtl) {
     border-left-style: solid;
     border-right-style: none;
     -moz-border-radius-topleft: 2px;
@@ -427,7 +427,7 @@ panelBarArrowscrollbox > .scrollbutton-down,
     -moz-border-radius-topleft: 2px;
 }
 
-panelBarArrowscrollbox > .scrollbutton-down[chromedir="rtl"] {
+panelBarArrowscrollbox > .scrollbutton-down:-moz-locale-dir(rtl) {
     border-left-style: none;
     border-right-style: solid;
     -moz-border-radius-topleft: 0px;
