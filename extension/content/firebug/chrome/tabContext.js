@@ -11,17 +11,16 @@ define([
 ],
 function(Obj, CompilationUnit, Events, Url, Win, Css) {
 
-// ************************************************************************************************
+// ********************************************************************************************* //
 // Constants
 
 const throttleTimeWindow = 200;
 const throttleMessageLimit = 30;
 const throttleInterval = 30;
 const throttleFlushCount = 20;
-
 const refreshDelay = 300;
 
-// ************************************************************************************************
+// ********************************************************************************************* //
 
 Firebug.TabContext = function(win, browser, chrome, persistedState)
 {
@@ -29,7 +28,8 @@ Firebug.TabContext = function(win, browser, chrome, persistedState)
     this.browser = browser;
     this.persistedState = persistedState;
 
-    browser.__defineGetter__("chrome", function() { return Firebug.chrome; }); // backward compat
+    // Backward compatibility with extensions.
+    browser.__defineGetter__("chrome", function() { return Firebug.chrome; });
 
     this.name = Url.normalizeURL(this.getWindowLocation().toString());
 
@@ -120,13 +120,14 @@ Firebug.TabContext.prototype =
 
         var kind = CompilationUnit.SCRIPT_TAG;
         if (sourceFile.compilation_unit_type == "event")
-            var kind = CompilationUnit.BROWSER_GENERATED;
+            kind = CompilationUnit.BROWSER_GENERATED;
+
         if (sourceFile.compilation_unit_type == "eval")
-            var kind = CompilationUnit.EVAL;
+            kind = CompilationUnit.EVAL;
 
         var url = sourceFile.href;
         if (FBTrace.DBG_COMPILATION_UNITS)
-            FBTrace.sysout("onCompilationUnit "+url,[this, url, kind] );
+            FBTrace.sysout("onCompilationUnit " + url, [this, url, kind] );
 
         Firebug.connection.dispatch("onCompilationUnit", [this, url, kind]);
 
@@ -148,7 +149,7 @@ Firebug.TabContext.prototype =
             Firebug.connection.dispatch("onSourceLines", arguments);
 
             if (FBTrace.DBG_COMPILATION_UNITS)
-                FBTrace.sysout("onSourceLines "+compilationUnit.getURL()+" "+lines.length+
+                FBTrace.sysout("onSourceLines "+compilationUnit.getURL() + " " + lines.length +
                     " lines", compilationUnit);
         });
     },
@@ -156,7 +157,8 @@ Firebug.TabContext.prototype =
     removeSourceFile: function(sourceFile)
     {
         if (FBTrace.DBG_SOURCEFILES)
-            FBTrace.sysout("tabContext.removeSourceFile "+sourceFile.href+" in context "+sourceFile.context.getName());
+            FBTrace.sysout("tabContext.removeSourceFile " + sourceFile.href + " in context " +
+                sourceFile.context.getName());
 
         delete this.sourceFileMap[sourceFile.href];
         delete sourceFile.context;
@@ -178,9 +180,10 @@ Firebug.TabContext.prototype =
         return this.sourceFileByTag[tag];
     },
 
-    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-    get chrome()  // backward compat
+    // backward compat
+    get chrome()
     {
         return Firebug.chrome;
     },
@@ -221,10 +224,10 @@ Firebug.TabContext.prototype =
         }
 
         if (FBTrace.DBG_INITIALIZE)
-            FBTrace.sysout("tabContext.destroy "+this.getName()+" set state ", state);
+            FBTrace.sysout("tabContext.destroy " + this.getName() + " set state ", state);
     },
 
-    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
     initPanelTypes: function()
     {
@@ -289,9 +292,9 @@ Firebug.TabContext.prototype =
             FBTrace.sysout("tabContext.getPanel no prototype "+panelType, panelType);
             return;
         }
-        var enabled = panelType.prototype.isEnabled ? panelType.prototype.isEnabled() : true;
 
         // Create instance of the panelType only if it's enabled.
+        var enabled = panelType.prototype.isEnabled ? panelType.prototype.isEnabled() : true;
         if (enabled)
             return this.getPanelByType(panelType, noCreate);
 
@@ -336,18 +339,23 @@ Firebug.TabContext.prototype =
         Events.dispatch(Firebug.modules, "onCreatePanel", [this, panel, panelType]);
 
         // Initialize panel and associate with a document.
-        if (panel.parentPanel) // then this new panel is a side panel
+        if (panel.parentPanel)
         {
+            // then this new panel is a side panel
             panel.mainPanel = this.panelMap[panel.parentPanel];
-            if (panel.mainPanel) // then our panel map is consistent
-                panel.mainPanel.addListener(panel); // wire the side panel to get UI events from the main panel
-            else                 // then our panel map is broken, maybe by an extension failure.
+            if (panel.mainPanel)
             {
-                if (FBTrace.DBG_ERRORS)
-                    FBTrace.sysout("tabContext.createPanel panel.mainPanel missing "+panel.name+
-                        " from "+panel.parentPanel.name);
+                // then our panel map is consistent
+                // wire the side panel to get UI events from the main panel
+                panel.mainPanel.addListener(panel);
             }
-
+            else
+            {
+                // then our panel map is broken, maybe by an extension failure.
+                if (FBTrace.DBG_ERRORS)
+                    FBTrace.sysout("tabContext.createPanel panel.mainPanel missing " +
+                        panel.name + " from " + panel.parentPanel.name);
+            }
         }
 
         var doc = this.chrome.getPanelDocument(panelType);
@@ -391,7 +399,8 @@ Firebug.TabContext.prototype =
             panelNode.parentNode.removeChild(panelNode);
     },
 
-    setPanel: function(panelName, panel)  // allows a panel from one context to be used in other contexts.
+    // allows a panel from one context to be used in other contexts.
+    setPanel: function(panelName, panel)
     {
         if (panel)
             this.panelMap[panelName] = panel;
@@ -445,10 +454,11 @@ Firebug.TabContext.prototype =
             // Keep looping until every tab is valid
             if (invalids.length)
                 this.invalidatePanels.apply(this, invalids);
+
         }, this), refreshDelay);
     },
 
-    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
     setTimeout: function(fn, delay)
     {
@@ -531,8 +541,8 @@ Firebug.TabContext.prototype =
 
             this.lastMessageTime = logTime;
 
-            // If the throttle limit has been passed, enqueue the message to be logged later on a timer,
-            // otherwise just execute it now
+            // If the throttle limit has been passed, enqueue the message to be
+            // logged later on a timer, otherwise just execute it now
             if (!this.throttleQueue.length && this.throttleBuildup <= throttleMessageLimit)
             {
                 message.apply(object, args);
@@ -548,6 +558,7 @@ Firebug.TabContext.prototype =
         var self = this;
         this.throttleTimeout =
             this.setTimeout(function() { self.flushThrottleQueue(); }, throttleInterval);
+
         return true;
     },
 
@@ -574,11 +585,13 @@ Firebug.TabContext.prototype =
                 this.setTimeout(function f() { self.flushThrottleQueue(); }, throttleInterval);
         }
         else
+        {
             this.throttleTimeout = 0;
+        }
     }
 };
 
-// ************************************************************************************************
+// ********************************************************************************************* //
 // Local Helpers
 
 function createPanelType(name, url, title, parentPanel)
@@ -600,10 +613,10 @@ function createPanelName(url)
     return url.replace(/[:\\\/\s\.\?\=\&\~]/g, "_");
 }
 
-// ************************************************************************************************
+// ********************************************************************************************* //
 // Registration
 
 return Firebug.TabContext;
 
-// ************************************************************************************************
+// ********************************************************************************************* //
 });
