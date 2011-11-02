@@ -575,12 +575,22 @@ Firebug.CSSModule = Obj.extend(Obj.extend(Firebug.Module, Firebug.EditorSelector
 
     watchWindow: function(context, win)
     {
-        var cleanupSheets = Obj.bind(this.cleanupSheets, this),
-            cleanupSheetHandler = Obj.bind(this.cleanupSheetHandler, this, context),
-            doc = win.document;
+        var doc = win.document;
+        this.cleanupSheetListener= Obj.bind(this.cleanupSheetHandler, this, context);
 
-        Events.addEventListener(doc, "DOMAttrModified", cleanupSheetHandler, false);
-        Events.addEventListener(doc, "DOMNodeInserted", cleanupSheetHandler, false);
+        context.addEventListener(doc, "DOMAttrModified", this.cleanupSheetListener, false);
+        context.addEventListener(doc, "DOMNodeInserted", this.cleanupSheetListener, false);
+    },
+
+    unwatchWindow: function(context, win)
+    {
+        var doc = win.document;
+
+        if (this.cleanupSheetListener)
+        {
+            context.removeEventListener(doc, "DOMAttrModified", this.cleanupSheetListener, false);
+            context.removeEventListener(doc, "DOMNodeInserted", this.cleanupSheetListener, false);
+        }
     },
 
     loadedContext: function(context)
@@ -2006,7 +2016,7 @@ CSSElementPanel.prototype = Obj.extend(Firebug.CSSStyleSheetPanel.prototype,
     {
     },
 
-    watchWindow: function(win)
+    watchWindow: function(context, win)
     {
         if (Dom.domUtils)
         {
@@ -2018,7 +2028,7 @@ CSSElementPanel.prototype = Obj.extend(Firebug.CSSStyleSheetPanel.prototype,
         }
     },
 
-    unwatchWindow: function(win)
+    unwatchWindow: function(context, win)
     {
         var doc = win.document;
         Events.removeEventListener(doc, "mouseover", this.onHoverChange, false);
