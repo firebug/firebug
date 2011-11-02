@@ -11,13 +11,7 @@
              available in Customizable Toolbar dialog, see below) -->
         <menupopup id="fbStatusContextMenu"
             onpopupshowing="Firebug.chrome.onOptionsShowing(this)">
-            <menuitem
-                id="menu_detachFirebugContext"
-                label="firebug.DetachFirebug"
-                command="cmd_toggleDetachFirebug"
-                type="checkbox" key="key_detachFirebug"
-                class="fbInternational"/>
-            <menu label="firebug.Position of Firebug UI" class="fbInternational">
+            <menu label="firebug.uiLocation" class="fbInternational">
                 <menupopup onpopupshowing="Firebug.chrome.onPositionPopupShowing(this)"/>
             </menu>
             <menuseparator/>

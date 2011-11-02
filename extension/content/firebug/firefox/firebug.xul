@@ -55,8 +55,8 @@
                 document.getElementById("fbMainContainer"),
                 fbc.originalBrowser
             );
-            fbc.onUndetach();
             Firebug.setPlacement("minimized");
+            fbc.onUndetach();
         }
     </script>
 

@@ -428,6 +428,8 @@ var FirebugChrome =
 
     onDetach: function()
     {
+        this.syncPosition();
+
         if(!Firebug.currentContext)
             Firebug.toggleBar(true);
         else
@@ -437,6 +439,8 @@ var FirebugChrome =
 
     onUndetach: function()
     {
+        this.syncPosition();
+
         Dom.collapse(Firebug.chrome.$('fbResumeBox'), true);
         Dom.collapse(Firebug.chrome.$("fbContentBox"), false);
     },
@@ -980,8 +984,7 @@ var FirebugChrome =
 
         if (pos)
         {
-            Firebug.Options.set("framePosition", pos);
-            Firebug.framePosition = pos;
+            this.syncPosition(pos);
             if (Firebug.getSuspended())
                 Firebug.toggleBar();
         }
@@ -1022,6 +1025,21 @@ var FirebugChrome =
         this.browser = newBrowser;
 
         frame.parentNode.removeChild(frame);
+        this.framePosition = pos;
+    },
+
+    syncPosition: function(pos)
+    {
+        if (!pos)
+        {
+            if (Firebug.isDetached())
+                pos = "detached";
+            else
+                pos = this.framePosition || 'bottom';
+        }
+
+        Firebug.Options.set("framePosition", pos);
+        return Firebug.framePosition = pos;
     },
 
     onPositionPopupShowing: function(popup)
@@ -1039,6 +1057,8 @@ var FirebugChrome =
             })
 
         items.splice(1, 0, '-');
+
+        items[0].key = "key_detachFirebug"
 
         for each(var i in items)
             Menu.createMenuItem(popup, i);
