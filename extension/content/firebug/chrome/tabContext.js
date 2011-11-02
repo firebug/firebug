@@ -207,6 +207,9 @@ Firebug.TabContext.prototype =
         if (this.throttleTimeout)
             clearTimeout(this.throttleTimeout);
 
+        // All existing DOM listeners need to be cleared
+        this.unregisterAllListeners();
+
         state.panelState = {};
 
         // Inherit panelStates that have not been restored yet
@@ -459,6 +462,7 @@ Firebug.TabContext.prototype =
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+    // Timeouts and Intervals
 
     setTimeout: function(fn, delay)
     {
@@ -511,6 +515,8 @@ Firebug.TabContext.prototype =
     {
         this.throttle(message, object, null, true);
     },
+
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
     // queue the call |object.message(arg)| or just delay it if forceDelay
     throttle: function(message, object, args, forceDelay)
@@ -588,6 +594,68 @@ Firebug.TabContext.prototype =
         {
             this.throttleTimeout = 0;
         }
+    },
+
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+    // Event Listeners
+
+    addEventListener: function(parent, eventId, listener, capturing)
+    {
+        if (!this.listeners)
+            this.listeners = [];
+
+        for (var i=0; i<this.listeners.length; i++)
+        {
+            var l = this.listeners[i];
+            if (l.parent == parent && l.eventId == eventId && l.listener == listener &&
+                l.capturing == capturing)
+            {
+                // Listener already registered!
+                return;
+            }
+        }
+
+        parent.addEventListener(eventId, listener, capturing);
+
+        this.listeners.push({
+            parent: parent,
+            eventId: eventId,
+            listener: listener,
+            capturing: capturing,
+        });
+    },
+
+    removeEventListener: function(parent, eventId, listener, capturing)
+    {
+        parent.removeEventListener(eventId, listener, capturing);
+
+        for (var i=0; i<this.listeners.length; i++)
+        {
+            var l = this.listeners[i];
+            if (l.parent == parent && l.eventId == eventId && l.listener == listener &&
+                l.capturing == capturing)
+            {
+                this.listeners.splice(i, 1);
+                break;
+            }
+        }
+    },
+
+    /**
+     * Executed by the framework when the context is about to be destroyed.
+     */
+    unregisterAllListeners: function()
+    {
+        if (!this.listeners)
+            return;
+
+        for (var i=0; i<this.listeners.length; i++)
+        {
+            var l = this.listeners[i];
+            l.parent.removeEventListener(l.eventId, l.listener, l.capturing);
+        }
+
+        this.listeners = null;
     }
 };
 
