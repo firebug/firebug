@@ -30,7 +30,7 @@ define([
 function(Obj, Firebug, Domplate, FirebugReps, Locale, HTMLLib, Events,
     SourceLink, Css, Dom, Win, Xpath, Str, Xml, Arr, Persist, Menu, Url) { with (Domplate) {
 
-// ************************************************************************************************
+// ********************************************************************************************* //
 // Constants
 
 const Cc = Components.classes;
@@ -47,7 +47,7 @@ const BP_BREAKONTEXT = 4;
 
 var KeyEvent = window.KeyEvent;
 
-// ************************************************************************************************
+// ********************************************************************************************* //
 
 Firebug.HTMLModule = Obj.extend(Firebug.Module,
 {
@@ -98,7 +98,7 @@ Firebug.HTMLModule = Obj.extend(Firebug.Module,
     }
 });
 
-// ************************************************************************************************
+// ********************************************************************************************* //
 
 Firebug.HTMLPanel = function() {};
 
@@ -127,8 +127,8 @@ Firebug.HTMLPanel.prototype = Obj.extend(WalkingPanel,
             object = this.getDefaultSelection();
 
         if (FBTrace.DBG_PANELS)
-            FBTrace.sysout("firebug.select "+this.name+" forceUpdate: "+forceUpdate+" "+object+
-                ((object == this.selection) ? "==" : "!=")+this.selection);
+            FBTrace.sysout("firebug.select " + this.name + " forceUpdate: " + forceUpdate + " " +
+                object + ((object == this.selection) ? "==" : "!=") + this.selection);
 
         if (forceUpdate || object != this.selection)
         {
@@ -136,8 +136,11 @@ Firebug.HTMLPanel.prototype = Obj.extend(WalkingPanel,
             this.updateSelection(object);
             Events.dispatch(Firebug.uiListeners, "onObjectSelected", [object, this]);
 
-            if (this.editing && Firebug.chrome.$("fbToggleHTMLEditing").getAttribute("checked") === "true")
+            if (this.editing &&
+                Firebug.chrome.$("fbToggleHTMLEditing").getAttribute("checked") === "true")
+            {
                 this.editNode(object);
+            }
         }
     },
 
@@ -151,7 +154,6 @@ Firebug.HTMLPanel.prototype = Obj.extend(WalkingPanel,
 
             if (Firebug.Inspector.inspecting)
                 Firebug.Inspector.inspectNode(next.repObject);
-
         }
     },
 
@@ -171,9 +173,13 @@ Firebug.HTMLPanel.prototype = Obj.extend(WalkingPanel,
     selectNodeBy: function(dir)
     {
         if (dir == "up")
+        {
             this.selectPrevious();
+        }
         else if (dir == "down")
+        {
             this.selectNext();
+        }
         else if (dir == "left")
         {
             var box = this.ioBox.createObjectBox(this.selection);
@@ -190,10 +196,11 @@ Firebug.HTMLPanel.prototype = Obj.extend(WalkingPanel,
             else
                 this.selectNext();
         }
+
         Firebug.Inspector.highlightObject(this.selection, this.context);
     },
 
-    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
     editNewAttribute: function(elt)
     {
@@ -236,11 +243,13 @@ Firebug.HTMLPanel.prototype = Obj.extend(WalkingPanel,
             var editor = this.localEditors[type];
             if (!editor)
             {
-                // look for special purpose editor (inserted by an extension), otherwise use our html editor
+                // look for special purpose editor (inserted by an extension),
+                // otherwise use our html editor
                 var specializedEditor = Firebug.HTMLPanel.Editors[type] ||
                     Firebug.HTMLPanel.Editors["html"];
                 editor = this.localEditors[type] = new specializedEditor(this.document);
             }
+
             this.startEditingNode(node, objectNodeBox, editor, type);
         }
     },
@@ -292,7 +301,7 @@ Firebug.HTMLPanel.prototype = Obj.extend(WalkingPanel,
             null : ["link", "script", "style"]);
     },
 
-    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
     getElementSourceText: function(node)
     {
@@ -307,7 +316,9 @@ Firebug.HTMLPanel.prototype = Obj.extend(WalkingPanel,
 
         var url = HTMLLib.getSourceHref(node);
         if (url)
+        {
             lines = this.context.sourceCache.load(url);
+        }
         else
         {
             var text = HTMLLib.getSourceText(node);
@@ -330,7 +341,7 @@ Firebug.HTMLPanel.prototype = Obj.extend(WalkingPanel,
         return sourceElt;
     },
 
-    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
     mutateAttr: function(target, attrChange, attrName, attrValue)
     {
@@ -410,9 +421,7 @@ Firebug.HTMLPanel.prototype = Obj.extend(WalkingPanel,
         {
             var nodeAttr = HTMLLib.findNodeAttrBox(objectNodeBox, attrName);
             if (nodeAttr)
-            {
                 nodeAttr.parentNode.removeChild(nodeAttr);
-            }
 
             // We want to highlight regardless as the domplate may have been
             // generated after the attribute was removed from the node
@@ -427,7 +436,8 @@ Firebug.HTMLPanel.prototype = Obj.extend(WalkingPanel,
         // Due to the delay call this may or may not exist in the tree anymore
         if (!this.ioBox.isInExistingRoot(target))
         {
-            if (FBTrace.DBG_HTML)   FBTrace.sysout("mutateText: different tree " + target, target);
+            if (FBTrace.DBG_HTML)
+                FBTrace.sysout("mutateText: different tree " + target, target);
             return;
         }
 
@@ -439,7 +449,8 @@ Firebug.HTMLPanel.prototype = Obj.extend(WalkingPanel,
         if (!parentNodeBox)
         {
             if (FBTrace.DBG_HTML)
-                FBTrace.sysout("html.mutateText failed to update text, parent node box does not exist");
+                FBTrace.sysout("html.mutateText failed to update text, parent node " +
+                    "box does not exist");
             return;
         }
 
@@ -500,12 +511,14 @@ Firebug.HTMLPanel.prototype = Obj.extend(WalkingPanel,
     mutateNode: function(target, parent, nextSibling, removal)
     {
         if (FBTrace.DBG_HTML)
-            FBTrace.sysout("\nhtml.mutateNode target:"+target+" parent:"+parent+(removal?"REMOVE":"")+"\n");
+            FBTrace.sysout("html.mutateNode target:" + target + " parent:" + parent +
+                (removal ? "REMOVE" : ""));
 
         // Due to the delay call this may or may not exist in the tree anymore
         if (!removal && !this.ioBox.isInExistingRoot(target))
         {
-            if (FBTrace.DBG_HTML)   FBTrace.sysout("mutateNode: different tree " + target, target);
+            if (FBTrace.DBG_HTML)
+                FBTrace.sysout("mutateNode: different tree " + target, target);
             return;
         }
 
@@ -516,7 +529,8 @@ Firebug.HTMLPanel.prototype = Obj.extend(WalkingPanel,
             : this.ioBox.findObjectBox(parent);
 
         if (FBTrace.DBG_HTML)
-            FBTrace.sysout("html.mutateNode parent:"+parent+" parentNodeBox:"+parentNodeBox+"\n");
+            FBTrace.sysout("html.mutateNode parent:" + parent + " parentNodeBox:" +
+                parentNodeBox);
 
         if (!parentNodeBox)
             return;
@@ -543,10 +557,9 @@ Firebug.HTMLPanel.prototype = Obj.extend(WalkingPanel,
                 {
                     if (nextSibling)
                     {
-                        while (
-                                (!Firebug.showTextNodesWithWhitespace && HTMLLib.isWhitespaceText(nextSibling)) ||
-                                (!Firebug.showCommentNodes && nextSibling instanceof window.Comment)
-                              )
+                        while ((!Firebug.showTextNodesWithWhitespace &&
+                            HTMLLib.isWhitespaceText(nextSibling)) ||
+                            (!Firebug.showCommentNodes && nextSibling instanceof window.Comment))
                         {
                             nextSibling = this.findNextSibling(nextSibling);
                         }
@@ -601,7 +614,8 @@ Firebug.HTMLPanel.prototype = Obj.extend(WalkingPanel,
     highlightMutation: function(elt, objectBox, type)
     {
         if (FBTrace.DBG_HTML)
-            FBTrace.sysout("html.highlightMutation Firebug.highlightMutations:"+Firebug.highlightMutations, {elt: elt, objectBox: objectBox, type: type});
+            FBTrace.sysout("html.highlightMutation Firebug.highlightMutations:" +
+                Firebug.highlightMutations, {elt: elt, objectBox: objectBox, type: type});
 
         if (!elt)
             return;
@@ -637,8 +651,8 @@ Firebug.HTMLPanel.prototype = Obj.extend(WalkingPanel,
     {
         if (FBTrace.DBG_HTML)
         {
-            FBTrace.sysout("html.createObjectBox("+Css.getElementCSSSelector(object)+", isRoot:"+
-                (isRoot? "true" : "false")+")");
+            FBTrace.sysout("html.createObjectBox(" + Css.getElementCSSSelector(object) +
+                ", isRoot:" + (isRoot? "true" : "false")+")");
         }
 
         var tag = getNodeTag(object);
@@ -682,7 +696,8 @@ Firebug.HTMLPanel.prototype = Obj.extend(WalkingPanel,
                 {
                     var skipParent = this.getEmbedConnection(parentNode);
                     if (FBTrace.DBG_HTML)
-                        FBTrace.sysout("getParentObject skipParent:"+(skipParent?skipParent.nodeName:"none"));
+                        FBTrace.sysout("getParentObject skipParent:" +
+                            (skipParent ? skipParent.nodeName : "none"));
 
                     if (skipParent)
                         return skipParent;
@@ -697,20 +712,29 @@ Firebug.HTMLPanel.prototype = Obj.extend(WalkingPanel,
                 return null;
             }
             else
+            {
                 return parentNode;
+            }
         }
-        else  // Documents have no parentNode; Attr, Document, DocumentFragment, Entity, and Notation. top level windows have no parentNode
+        else
         {
+            // Documents have no parentNode; Attr, Document, DocumentFragment, Entity,
+            // and Notation. top level windows have no parentNode
             if (node && node.nodeType == 9) // document type
             {
-                if (node.defaultView) // generally a reference to the window object for the document, however that is not defined in the specification
+                // generally a reference to the window object for the document, however
+                // that is not defined in the specification
+                if (node.defaultView)
                 {
                     var embeddingFrame = node.defaultView.frameElement;
                     if (embeddingFrame)
                         return embeddingFrame.contentDocument;
                 }
-                else // a Document object without a parentNode or window
+                else
+                {
+                    // a Document object without a parentNode or window
                     return null;  // top level has no parent
+                }
             }
         }
     },
@@ -724,12 +748,15 @@ Firebug.HTMLPanel.prototype = Obj.extend(WalkingPanel,
         }
 
         this.embeddedBrowserDocument.push(skipChild);
-        this.embeddedBrowserParents.push(node);         // store our adopted childe in a side table
+
+        // store our adopted child in a side table
+        this.embeddedBrowserParents.push(node);
 
         if (FBTrace.DBG_HTML)
-            FBTrace.sysout("Found skipChild "+Css.getElementCSSSelector(skipChild)+
-                " for  "+Css.getElementCSSSelector(node)+ " with node.contentDocument "+
+            FBTrace.sysout("Found skipChild " + Css.getElementCSSSelector(skipChild) +
+                " for  " + Css.getElementCSSSelector(node) + " with node.contentDocument " +
                 node.contentDocument);
+
         return skipChild;
     },
 
@@ -742,7 +769,8 @@ Firebug.HTMLPanel.prototype = Obj.extend(WalkingPanel,
                 return this.embeddedBrowserDocument[index];
         }
     },
-    /*
+
+    /**
      * @param: node a DOM node from the Web page
      * @param: index counter for important children, may skip whitespace
      * @param: previousSibling a node from the web page
@@ -754,9 +782,11 @@ Firebug.HTMLPanel.prototype = Obj.extend(WalkingPanel,
             FBTrace.sysout("getChildObject: null node");
             return;
         }
+
         if (FBTrace.DBG_HTML)
-            FBTrace.sysout("getChildObject "+node.tagName+" index "+index+" previousSibling: "+
-                (previousSibling?Css.getElementCSSSelector(previousSibling):"null"),
+            FBTrace.sysout("getChildObject " + node.tagName + " index " + index +
+                " previousSibling: " +
+                (previousSibling ? Css.getElementCSSSelector(previousSibling) : "null"),
                 {node: node, previousSibling:previousSibling});
 
         if (this.isSourceElement(node))
@@ -777,8 +807,11 @@ Firebug.HTMLPanel.prototype = Obj.extend(WalkingPanel,
         {
             if (index == 0)
             {
-                var skipChild = node.contentDocument.documentElement;  // punch thru and adopt the root element as our child
-                return this.setEmbedConnection(node, skipChild); // (the node's).(type 9 document).(HTMLElement)
+                // punch thru and adopt the root element as our child
+                var skipChild = node.contentDocument.documentElement;
+
+                // (the node's).(type 9 document).(HTMLElement)
+                return this.setEmbedConnection(node, skipChild);
             }
             else if (previousSibling)
             {
@@ -791,22 +824,31 @@ Firebug.HTMLPanel.prototype = Obj.extend(WalkingPanel,
             if (index == 0)
             {
                 var skipChild = node.getSVGDocument().documentElement; // unwrap
-                return this.setEmbedConnection(node, skipChild); // (the node's).(type 9 document).(HTMLElement)
+
+                // (the node's).(type 9 document).(HTMLElement)
+                return this.setEmbedConnection(node, skipChild);
             }
             else
+            {
                 return null;
+            }
         }
 
+        var child;
         if (previousSibling)  // then we are walking
-            var child = this.getNextSibling(previousSibling);  // may return null, meaning done with iteration.
+            child = this.getNextSibling(previousSibling);  // may return null, meaning done with iteration.
         else
-            var child = this.getFirstChild(node); // child is set to at the beginning of an iteration.
+            child = this.getFirstChild(node); // child is set to at the beginning of an iteration.
 
         if (FBTrace.DBG_HTML)
-            FBTrace.sysout("getChildObject firstChild "+Css.getElementCSSSelector(child)+ " with Firebug.showTextNodesWithWhitespace "+Firebug.showTextNodesWithWhitespace);
+            FBTrace.sysout("getChildObject firstChild " + Css.getElementCSSSelector(child) +
+                " with Firebug.showTextNodesWithWhitespace " +
+                Firebug.showTextNodesWithWhitespace);
 
         if (Firebug.showTextNodesWithWhitespace)  // then the index is true to the node list
+        {
             return child;
+        }
         else
         {
             for (; child; child = this.getNextSibling(child))
@@ -815,6 +857,7 @@ Firebug.HTMLPanel.prototype = Obj.extend(WalkingPanel,
                     return child;
             }
         }
+
         return null;  // we have no children worth showing.
     },
 
@@ -833,7 +876,7 @@ Firebug.HTMLPanel.prototype = Obj.extend(WalkingPanel,
         return HTMLLib.isSourceElement(element);
     },
 
-    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
     // Events
 
     onMutateAttr: function(event)
@@ -993,7 +1036,7 @@ Firebug.HTMLPanel.prototype = Obj.extend(WalkingPanel,
         Events.cancelEvent(event);
     },
 
-    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
     // extends Panel
 
     name: "html",
@@ -1094,8 +1137,9 @@ Firebug.HTMLPanel.prototype = Obj.extend(WalkingPanel,
 
     watchWindowDelayed: function(context, win)
     {
-        if (this.context.window && this.context.window != win) // then I guess we are an embedded window
+        if (this.context.window && this.context.window != win)
         {
+            // then I guess we are an embedded window
             var htmlPanel = this;
             Win.iterateWindows(this.context.window, function(subwin)
             {
@@ -1208,7 +1252,8 @@ Firebug.HTMLPanel.prototype = Obj.extend(WalkingPanel,
         if (this.ioBox.sourceRow)
             this.ioBox.sourceRow.removeAttribute("exe_line");
 
-        if (object instanceof SourceLink.SourceLink) // && object.type == "css" and !Url.reCSS(object.href) by supports
+        // && object.type == "css" and !Url.reCSS(object.href) by supports
+        if (object instanceof SourceLink.SourceLink)
         {
             var sourceLink = object;
             var stylesheet = Css.getStyleSheetByHref(sourceLink.href, this.context);
@@ -1225,7 +1270,8 @@ Firebug.HTMLPanel.prototype = Obj.extend(WalkingPanel,
                     var objectbox = this.ioBox.select(ownerNode, true, true, this.noScrollIntoView);
 
                     // XXXjjb seems like this could be bad for errors at the end of long files
-                    var sourceRow = objectbox.getElementsByClassName("sourceRow").item(0); // first source row in style
+                    // first source row in style
+                    var sourceRow = objectbox.getElementsByClassName("sourceRow").item(0);
                     for (var lineNo = 1; lineNo < sourceLink.line; lineNo++)
                     {
                         if (!sourceRow) break;
@@ -1234,14 +1280,16 @@ Firebug.HTMLPanel.prototype = Obj.extend(WalkingPanel,
 
                     if (FBTrace.DBG_CSS)
                         FBTrace.sysout("html panel updateSelection sourceLink.line="+sourceLink.line
-                            +" sourceRow="+(sourceRow?sourceRow.innerHTML:"undefined")+"\n");
+                            +" sourceRow="+(sourceRow?sourceRow.innerHTML:"undefined"));
 
                     if (sourceRow)
                     {
                         this.ioBox.sourceRow = sourceRow;
                         this.ioBox.sourceRow.setAttribute("exe_line", "true");
                         Dom.scrollIntoCenterView(sourceRow);
-                        this.ioBox.selectObjectBox(sourceRow, false);  // sourceRow isn't an objectBox, but the function should work anyway...
+
+                        // sourceRow isn't an objectBox, but the function should work anyway...
+                        this.ioBox.selectObjectBox(sourceRow, false);
                     }
                 }
             }
@@ -1500,7 +1548,7 @@ Firebug.HTMLPanel.prototype = Obj.extend(WalkingPanel,
         return vars;
     },
 
-    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
     // Break on Mutate
 
     breakOnNext: function(breaking)
@@ -1515,12 +1563,13 @@ Firebug.HTMLPanel.prototype = Obj.extend(WalkingPanel,
 
     getBreakOnNextTooltip: function(enabled)
     {
-        return (enabled ? Locale.$STR("html.Disable Break On Mutate") : Locale.$STR("html.Break On Mutate"));
+        return (enabled ? Locale.$STR("html.Disable Break On Mutate") :
+            Locale.$STR("html.Break On Mutate"));
     },
 
 });
 
-// ************************************************************************************************
+// ********************************************************************************************* //
 
 var AttrTag = Firebug.HTMLPanel.AttrTag =
     SPAN({"class": "nodeAttr editGroup"},
@@ -1535,7 +1584,7 @@ var TextTag = Firebug.HTMLPanel.TextTag =
         )
     );
 
-// ************************************************************************************************
+// ********************************************************************************************* //
 
 Firebug.HTMLPanel.CompleteElement = domplate(FirebugReps.Element,
 {
@@ -1572,7 +1621,9 @@ Firebug.HTMLPanel.CompleteElement = domplate(FirebugReps.Element,
             return [node.contentDocument.documentElement];
 
         if (Firebug.showTextNodesWithWhitespace)
+        {
             return Arr.cloneArray(node.childNodes);
+        }
         else
         {
             var nodes = [];
@@ -1583,6 +1634,7 @@ Firebug.HTMLPanel.CompleteElement = domplate(FirebugReps.Element,
                 if (child.nodeType != Node.TEXT_NODE || !HTMLLib.isWhitespaceText(child))
                     nodes.push(child);
             }
+
             return nodes;
         }
     }
@@ -1767,10 +1819,10 @@ Firebug.HTMLPanel.CommentNode = domplate(FirebugReps.Element,
 });
 
 
-// ************************************************************************************************
+// ********************************************************************************************* //
 // TextDataEditor
 
-/*
+/**
  * TextDataEditor deals with text of comments and cdata nodes
  */
 
@@ -1792,10 +1844,10 @@ TextDataEditor.prototype = domplate(Firebug.InlineEditor.prototype,
     }
 });
 
-//************************************************************************************************
+// ********************************************************************************************* //
 // TextNodeEditor
 
-/*
+/**
  * TextNodeEditor deals with text nodes that do and do not have sibling elements. If
  * there are no sibling elements, the parent is known as a TextElement. In other cases
  * we keep track of their position via a range (this is in part because as people type
@@ -1863,8 +1915,8 @@ TextNodeEditor.prototype = domplate(Firebug.InlineEditor.prototype,
     }
 });
 
-//************************************************************************************************
-//AttributeEditor
+// ********************************************************************************************* //
+// AttributeEditor
 
 function AttributeEditor(doc)
 {
@@ -1880,7 +1932,6 @@ AttributeEditor.prototype = domplate(Firebug.InlineEditor.prototype,
             return;
 
         // XXXstr unescape value
-
         target.innerHTML = Str.escapeForElementAttribute(value);
 
         if (Css.hasClass(target, "nodeName"))
@@ -1962,8 +2013,8 @@ AttributeEditor.prototype = domplate(Firebug.InlineEditor.prototype,
     }
 });
 
-//************************************************************************************************
-//HTMLEditor
+// ********************************************************************************************* //
+// HTMLEditor
 
 function HTMLEditor(doc)
 {
@@ -2061,7 +2112,7 @@ HTMLEditor.prototype = domplate(Firebug.BaseEditor,
     }
 });
 
-// ************************************************************************************************
+// ********************************************************************************************* //
 // Editors
 
 Firebug.HTMLPanel.Editors = {
@@ -2072,7 +2123,7 @@ Firebug.HTMLPanel.Editors = {
 };
 
 
-// ************************************************************************************************
+// ********************************************************************************************* //
 // Local Helpers
 
 function getEmptyElementTag(node)
@@ -2206,7 +2257,7 @@ Firebug.HTMLModule.MutationBreakpoints =
         return true;
     },
 
-    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
     // Mutation event handlers.
 
     onMutateAttr: function(event, context)
@@ -2235,8 +2286,11 @@ Firebug.HTMLModule.MutationBreakpoints =
         var node = event.target;
         var removal = event.type == "DOMNodeRemoved";
 
-        if (this.breakOnNextMutate(event, context, removal ? BP_BREAKONREMOVE : BP_BREAKONCHILDCHANGE))
+        if (this.breakOnNextMutate(event, context, removal ?
+            BP_BREAKONREMOVE : BP_BREAKONCHILDCHANGE))
+        {
             return;
+        }
 
         var breakpoints = context.mutationBreakpoints;
         var breaked = false;
@@ -2261,9 +2315,12 @@ Firebug.HTMLModule.MutationBreakpoints =
 
             // Iterate over all parents and see if some of them has a breakpoint.
             var self = this;
-            breakpoints.enumerateBreakpoints(function(bp) {
-                for (var i=0; i<parents.length; i++) {
-                    if (bp.checked && bp.node == parents[i] && bp.type == BP_BREAKONCHILDCHANGE) {
+            breakpoints.enumerateBreakpoints(function(bp)
+            {
+                for (var i=0; i<parents.length; i++)
+                {
+                    if (bp.checked && bp.node == parents[i] && bp.type == BP_BREAKONCHILDCHANGE)
+                    {
                         self.breakWithCause(event, context, BP_BREAKONCHILDCHANGE);
                         return true;
                     }
@@ -2275,8 +2332,10 @@ Firebug.HTMLModule.MutationBreakpoints =
         {
             // Remove all breakpoints assocaited with removed node.
             var invalidate = false;
-            breakpoints.enumerateBreakpoints(function(bp) {
-                if (bp.node == node) {
+            breakpoints.enumerateBreakpoints(function(bp)
+            {
+                if (bp.node == node)
+                {
                     breakpoints.removeBreakpoint(bp);
                     invalidate = true;
                 }
@@ -2287,7 +2346,7 @@ Firebug.HTMLModule.MutationBreakpoints =
         }
     },
 
-    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
     // Context menu items
 
     getContextMenuItems: function(context, node, target, items)
@@ -2340,7 +2399,8 @@ Firebug.HTMLModule.MutationBreakpoints =
         else
             context.mutationBreakpoints.addBreakpoint(node, type);
 
-        Events.dispatch( Firebug.HTMLModule.fbListeners, "onModifyBreakpoint", [context, xpath, type]);
+        Events.dispatch( Firebug.HTMLModule.fbListeners, "onModifyBreakpoint",
+            [context, xpath, type]);
     },
 };
 
@@ -2427,8 +2487,11 @@ Firebug.HTMLModule.BreakpointRep = domplate(Firebug.Rep,
 
         var panel = context.getPanel("html", true);
         if (panel)
-            // xxxsz: Needs a better way to update display of breakpoint than invalidate the whole panel's display
+        {
+            // xxxsz: Needs a better way to update display of breakpoint than invalidate
+            // the whole panel's display
             panel.context.invalidatePanels("breakpoints");
+        }
 
         var bp = Dom.getAncestorByClass(checkBox, "breakpointRow").repObject;
         bp.checked = checkBox.checked;
@@ -2440,7 +2503,7 @@ Firebug.HTMLModule.BreakpointRep = domplate(Firebug.Rep,
     }
 });
 
-// ************************************************************************************************
+// ********************************************************************************************* //
 
 function MutationBreakpointGroup()
 {
@@ -2506,7 +2569,7 @@ function isAncestorIgnored(node)
     return false;
 }
 
-// ************************************************************************************************
+// ********************************************************************************************* //
 // Registration
 
 Firebug.registerPanel(Firebug.HTMLPanel);
@@ -2515,5 +2578,5 @@ Firebug.registerRep(Firebug.HTMLModule.BreakpointRep);
 
 return Firebug.HTMLModule;
 
-// ************************************************************************************************
+// ********************************************************************************************* //
 }});
