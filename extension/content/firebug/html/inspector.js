@@ -433,7 +433,7 @@ Firebug.Inspector = Obj.extend(Firebug.Module,
      * Attach the scroll and resize handlers to elts window. Called from every highlight call.
      * @param {Element} elt Passed in order to reliably obtain context
      */
-    attachRepaintInspectListeners: function(elt)
+    attachRepaintInspectListeners: function(context, elt)
     {
         if (!elt || !elt.ownerDocument || !elt.ownerDocument.defaultView)
             return;
@@ -449,12 +449,12 @@ Firebug.Inspector = Obj.extend(Firebug.Module,
 
         // xxxHonza: I think that adding them twice could actualy do harm,
         // so make sure they are removed before.
-        Events.removeEventListener(win.document, "resize", this.onInspectingResizeWindow, true);
-        Events.removeEventListener(win.document, "scroll", this.onInspectingScroll, true);
+        context.removeEventListener(win.document, "resize", this.onInspectingResizeWindow, true);
+        context.removeEventListener(win.document, "scroll", this.onInspectingScroll, true);
 
         // Register again.
-        Events.addEventListener(win.document, "resize", this.onInspectingResizeWindow, true);
-        Events.addEventListener(win.document, "scroll", this.onInspectingScroll, true);
+        context.addEventListener(win.document, "resize", this.onInspectingResizeWindow, true);
+        context.addEventListener(win.document, "scroll", this.onInspectingScroll, true);
     },
 
     /**
@@ -1233,7 +1233,7 @@ Firebug.Inspector.FrameHighlighter.prototype =
         else
             colorObj = colorObj || {background: "transparent", border: "highlight"};
 
-        Firebug.Inspector.attachRepaintInspectListeners(element);
+        Firebug.Inspector.attachRepaintInspectListeners(context, element);
         storeHighlighterParams(this, context, element, null, colorObj, null, isMulti);
 
         var cs;
@@ -1405,7 +1405,7 @@ BoxModelHighlighter.prototype =
         else
             colorObj = colorObj || {content: "SkyBlue", padding: "SlateBlue", border: "#444444", margin: "#EDFF64"};
 
-        Firebug.Inspector.attachRepaintInspectListeners(element);
+        Firebug.Inspector.attachRepaintInspectListeners(context, element);
         storeHighlighterParams(this, context, element, boxFrame, colorObj, null, isMulti);
 
         if (context.highlightFrame)

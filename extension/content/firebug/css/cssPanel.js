@@ -2023,16 +2023,16 @@ CSSElementPanel.prototype = Obj.extend(Firebug.CSSStyleSheetPanel.prototype,
             // Normally these would not be required, but in order to update after the state is set
             // using the options menu we need to monitor these global events as well
             var doc = win.document;
-            Events.addEventListener(doc, "mouseover", this.onHoverChange, false);
-            Events.addEventListener(doc, "mousedown", this.onActiveChange, false);
+            context.addEventListener(doc, "mouseover", this.onHoverChange, false);
+            context.addEventListener(doc, "mousedown", this.onActiveChange, false);
         }
     },
 
     unwatchWindow: function(context, win)
     {
         var doc = win.document;
-        Events.removeEventListener(doc, "mouseover", this.onHoverChange, false);
-        Events.removeEventListener(doc, "mousedown", this.onActiveChange, false);
+        context.removeEventListener(doc, "mouseover", this.onHoverChange, false);
+        context.removeEventListener(doc, "mousedown", this.onActiveChange, false);
 
         if (Dom.isAncestor(this.stateChangeEl, doc))
         {
