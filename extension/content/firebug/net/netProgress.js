@@ -134,6 +134,8 @@ NetProgress.prototype =
         var file = this.getRequestFile(request);
         if (file)
         {
+            logTime(file, "requestedHeaderFile", time);
+
             file.requestHeadersText = extraStringData;
 
             this.requestedFile(request, time, win, xhr);
@@ -149,6 +151,8 @@ NetProgress.prototype =
         var file = this.getRequestFile(request, win);
         if (file)
         {
+            logTime(file, "requestedFile", time);
+
             if (FBTrace.DBG_NET_EVENTS)
                 FBTrace.sysout("net.events.requestedFile +0 " + getPrintableTime() + ", " +
                     request.URI.path, file);
@@ -229,7 +233,11 @@ NetProgress.prototype =
     {
         var file = this.getRequestFile(request);
         if (file)
+        {
+            logTime(file, "respondedHeaderFile", time);
+
             file.responseHeadersText = extraStringData;
+        }
     },
 
     bodySentFile: function bodySentFile(request, time)
@@ -237,6 +245,8 @@ NetProgress.prototype =
         var file = this.getRequestFile(request);
         if (file)
         {
+            logTime(file, "bodySentFile", time);
+
             NetUtils.getPostText(file, this.context);
         }
     },
@@ -246,6 +256,8 @@ NetProgress.prototype =
         var file = this.getRequestFile(request);
         if (file)
         {
+            logTime(file, "responseStartedFile", time);
+
             if (!file.responseStarted)
             {
                 file.respondedTime = time;
@@ -264,6 +276,8 @@ NetProgress.prototype =
         var file = this.getRequestFile(request);
         if (file)
         {
+            logTime(file, "respondedFile", time);
+
             if (!Ci.nsIHttpActivityDistributor)
             {
                 file.respondedTime = time;
@@ -337,6 +351,8 @@ NetProgress.prototype =
         var file = this.getRequestFile(request, null, true);
         if (file)
         {
+            logTime(file, "respondedCacheFile", time);
+
             if (FBTrace.DBG_NET_EVENTS)
                 FBTrace.sysout("net.events.respondedCacheFile +" + (NetUtils.now() - file.startTime) + " " +
                      getPrintableTime() + ", " + request.URI.path, file);
@@ -391,6 +407,8 @@ NetProgress.prototype =
         var file = this.getRequestFile(request, null, true);
         if (file)
         {
+            logTime(file, "waitingForFile", time);
+
             if (!file.waitingStarted)
             {
                 file.waitingForTime = time;
@@ -407,6 +425,8 @@ NetProgress.prototype =
         var file = this.getRequestFile(request, null, true);
         if (file)
         {
+            logTime(file, "sendingFile", time);
+
             // Remember when the send started.
             if (!file.sendStarted)
             {
@@ -415,7 +435,23 @@ NetProgress.prototype =
                 file.sendStarted = true;
             }
 
+            // Catch 2.
+            // It can happen that "connected" event sometimes comes after sending,
+            // which doesn't make much sense (Firefox bug?)
+            if (!file.connected)
+            {
+                file.connected = true;
+                file.connectedTime = time;
+            }
+
             file.totalSent = size;
+
+            // Catch 1.
+            // Request is sending so reset following flags. There are cases where
+            // RESPONSE_COMPLETE and TRANSACTION_CLOSE came in the middle of
+            // connetion initialization (resolving, connecting, connected).
+            file.loaded = false;
+            file.responseStarted = false;
 
             if (FBTrace.DBG_NET_EVENTS)
                 FBTrace.sysout("net.events.sendingFile +" + (NetUtils.now() - file.startTime) + " " +
@@ -429,6 +465,8 @@ NetProgress.prototype =
     connectingFile: function connectingFile(request, time)
     {
         var file = this.getRequestFile(request, null, true);
+
+        logTime(file, "connectingFile", time);
 
         // Resolving, connecting and connected can come after the file is loaded
         // (closedFile received). This happens if the response is coming from the 
@@ -452,6 +490,9 @@ NetProgress.prototype =
     connectedFile: function connectedFile(request, time)
     {
         var file = this.getRequestFile(request, null, true);
+
+        logTime(file, "connectedFile", time);
+
         if (file && file.loaded)
             return null;
 
@@ -472,6 +513,8 @@ NetProgress.prototype =
         var file = this.getRequestFile(request, null, true);
         if (file)
         {
+            logTime(file, "receivingFile", time);
+
             if (FBTrace.DBG_NET_EVENTS)
                 FBTrace.sysout("net.events.receivingFile +" + time + " " +
                     getPrintableTime() + ", " +
@@ -506,6 +549,8 @@ NetProgress.prototype =
         var file = this.getRequestFile(request, null, true);
         if (file)
         {
+            logTime(file, "responseCompletedFile", time);
+
             if (FBTrace.DBG_NET_EVENTS)
                 FBTrace.sysout("net.events.responseCompletedFile +" + time + " " +
                     getPrintableTime() + ", " + request.URI.path, file);
@@ -540,6 +585,8 @@ NetProgress.prototype =
         var file = this.getRequestFile(request, null, true);
         if (file)
         {
+            logTime(file, "closedFile", time);
+
             if (FBTrace.DBG_NET_EVENTS)
                 FBTrace.sysout("net.events.closedFile +" + time + " " +
                     getPrintableTime() + ", " + request.URI.path);
@@ -576,6 +623,10 @@ NetProgress.prototype =
     resolvingFile: function resolvingFile(request, time)
     {
         var file = this.getRequestFile(request, null, true);
+
+        if (file)
+            logTime(file, "resolvingFile", time);
+
         if (file && file.loaded)
             return null;
 
@@ -602,6 +653,9 @@ NetProgress.prototype =
         var file = this.getRequestFile(request, null, true);
         if (file)
         {
+
+            logTime(file, "stopFile", time);
+
             if (FBTrace.DBG_NET_EVENTS)
                 FBTrace.sysout("net.stopFile +" + (NetUtils.now() - file.startTime) + " " +
                     getPrintableTime() + ", " + request.URI.path, file);
@@ -629,6 +683,8 @@ NetProgress.prototype =
         var file = this.getRequestFile(request, null, true);
         if (file)
         {
+            logTime(file, "abortFile", time);
+
             file.aborted = true;
             file.responseStatusText = "Aborted";
         }
@@ -870,6 +926,27 @@ NetProgress.prototype =
         this.phases.push(phase);
     },
 };
+
+// ********************************************************************************************* //
+// Time Logging
+
+function logTime(file, title, time)
+{
+    // xxxHonza: just for debugging purposes.
+    return;
+
+    if (!file._timings)
+        file._timings = {counter: 0};
+
+    if (!file._timings.logs)
+        file._timings.logs = [];
+
+    file._timings.logs.push({
+        title: title,
+        index: ++file._timings.counter,
+        time: time
+    });
+}
 
 // ********************************************************************************************* //
 
