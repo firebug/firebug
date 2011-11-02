@@ -1561,11 +1561,11 @@ Firebug.Panel = Obj.extend(new Firebug.Listener(),
     {
     },
 
-    watchWindow: function(win)
+    watchWindow: function(context, win)
     {
     },
 
-    unwatchWindow: function(win)
+    unwatchWindow: function(context, win)
     {
     },
 

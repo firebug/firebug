@@ -1084,15 +1084,15 @@ Firebug.HTMLPanel.prototype = Obj.extend(WalkingPanel,
         this.panelNode.ownerDocument.removeEventListener("keypress", this.onKeyPress, true);
     },
 
-    watchWindow: function(win)
+    watchWindow: function(context, win)
     {
         var self = this;
         setTimeout(function() {
-            self.watchWindowDelayed(win);
+            self.watchWindowDelayed(context, win);
         }, 100);
     },
 
-    watchWindowDelayed: function(win)
+    watchWindowDelayed: function(context, win)
     {
         if (this.context.window && this.context.window != win) // then I guess we are an embedded window
         {
@@ -1120,10 +1120,11 @@ Firebug.HTMLPanel.prototype = Obj.extend(WalkingPanel,
         }
     },
 
-    unwatchWindow: function(win)
+    unwatchWindow: function(context, win)
     {
-        if (this.context.window && this.context.window != win) // then I guess we are an embedded window
+        if (this.context.window && this.context.window != win)
         {
+            // then I guess we are an embedded window
             var htmlPanel = this;
             Win.iterateWindows(this.context.window, function(subwin)
             {

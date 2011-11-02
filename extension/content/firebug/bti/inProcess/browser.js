@@ -717,7 +717,7 @@ var TabWatchListener =
         for (var panelName in context.panelMap)
         {
             var panel = context.panelMap[panelName];
-            panel.watchWindow(win);
+            panel.watchWindow(context, win);
         }
 
         Events.dispatch(Firebug.modules, "watchWindow", [context, win]);
@@ -728,7 +728,7 @@ var TabWatchListener =
         for (var panelName in context.panelMap)
         {
             var panel = context.panelMap[panelName];
-            panel.unwatchWindow(win);
+            panel.unwatchWindow(context, win);
         }
 
         Events.dispatch(Firebug.modules, "unwatchWindow", [context, win]);
