@@ -44,7 +44,18 @@ var domplate = function()
     {
         var val = lastSubject[name];
         if (isTag(val))
+        {
+            if (val.tag.subject)
+            {
+                // Clone the entire domplate tag, e.g. DIV(), that is derived from
+                // an existing template. This allows to hold correct 'subject'
+                // reference that is used when executing callbacks implemented by
+                // templates. Note that 'subject' points to the current template object.
+                lastSubject[name] = val = copyObject({}, val);
+                val.tag = copyObject({}, val.tag);
+            }
             val.tag.subject = lastSubject;
+        }
     }
 
     return lastSubject;
