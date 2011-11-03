@@ -51,6 +51,7 @@ var domplate = function()
                 // an existing template. This allows to hold correct 'subject'
                 // reference that is used when executing callbacks implemented by
                 // templates. Note that 'subject' points to the current template object.
+                // See issue: http://code.google.com/p/fbug/issues/detail?id=4425
                 lastSubject[name] = val = copyObject({}, val);
                 val.tag = copyObject({}, val.tag);
             }
