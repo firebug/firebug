@@ -788,9 +788,13 @@ window.Firebug =
                 Firebug.unMinimize();
             else
                 Firebug.minimizeBar();
+            Firebug.chrome.syncPositionPref();
         }
         else
+        {
             this.detachBar();
+            Firebug.chrome.syncPositionPref("detached");
+        }
     },
 
     closeDetachedWindow: function(userCommands)
@@ -819,8 +823,8 @@ window.Firebug =
         Firebug.chrome.waitingForDetach = true;
 
         Firebug.chrome.toggleOpen(false);  // don't show in browser.xul now
-
-        if (FBTrace.DBG_ACTIVATION)
+		
+		if (FBTrace.DBG_ACTIVATION)
         {
             FBTrace.sysout("Firebug.detachBar opening firebug.xul for context " +
                 Firebug.currentContext.getName() );

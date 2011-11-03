@@ -428,8 +428,6 @@ var FirebugChrome =
 
     onDetach: function()
     {
-        this.syncPosition();
-
         if(!Firebug.currentContext)
             Firebug.toggleBar(true);
         else
@@ -439,8 +437,6 @@ var FirebugChrome =
 
     onUndetach: function()
     {
-        this.syncPosition();
-
         Dom.collapse(Firebug.chrome.$('fbResumeBox'), true);
         Dom.collapse(Firebug.chrome.$("fbContentBox"), false);
     },
@@ -984,7 +980,7 @@ var FirebugChrome =
 
         if (pos)
         {
-            this.syncPosition(pos);
+            this.syncPositionPref(pos);
             if (Firebug.getSuspended())
                 Firebug.toggleBar();
         }
@@ -1028,7 +1024,7 @@ var FirebugChrome =
         this.framePosition = pos;
     },
 
-    syncPosition: function(pos)
+    syncPositionPref: function(pos)
     {
         if (!pos)
         {
