@@ -112,7 +112,6 @@ var Options =
 
     shutdown: function()
     {
-        prefService.savePrefFile(null);
         prefs.removeObserver(this.prefDomain, this, false);
     },
 
@@ -277,24 +276,6 @@ var Options =
         var type = this.getPreferenceTypeByExample((prefType ? prefType : typeof(value)));
         if (!this.setPreference(prefName, value, type, prefs))
             return;
-
-        setTimeout(function delaySavePrefs()
-        {
-            try
-            {
-                if (FBTrace.DBG_OPTIONS)
-                    FBTrace.sysout("options.delaySavePrefs type="+type+" name="+prefName+
-                        " value="+value);
-
-                prefs.savePrefFile(null);
-            }
-            catch (e)
-            {
-                if (FBTrace.DBG_ERRORS)
-                    FBTrace.sysout("options.delaySavePrefs; EXCEPTION type="+type+
-                        " name="+prefName+ " value="+value+": " + e, e);
-            }
-        });
 
         if (FBTrace.DBG_OPTIONS)
             FBTrace.sysout("options.setPref type="+type+" name="+prefName+" value="+value);
