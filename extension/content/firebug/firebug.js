@@ -1509,6 +1509,11 @@ Firebug.Panel = Obj.extend(new Firebug.Listener(),
         }
 
         this.destroyNode();
+
+        // xxxHonza: not exactly sure why, but it helps when testing memory-leask.
+        // Note the the selection can point to a document (in case of the HTML panel).
+        // Perhaps it breaks a cycle (page -> firebug -> page)?
+        delete this.selection;
     },
 
     savePersistedContent: function(state)
