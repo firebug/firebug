@@ -311,6 +311,10 @@ Firebug.WatchPanel.prototype = Obj.extend(Firebug.DOMBasePanel.prototype,
      */
     onContextMenu: function(items, object, target, context, panel, popup)
     {
+        // Ignore events from other contexts.
+        if (this.context != context)
+            return;
+
         if (panel.name != "dom" && panel.name != "watches")
             return;
 
