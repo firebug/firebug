@@ -900,6 +900,7 @@
             <body><![CDATA[
                 while (this.lastChild)
                     this.removeChild(this.lastChild);
+                this.selectedItem = null;
             ]]></body>
         </method>
 
