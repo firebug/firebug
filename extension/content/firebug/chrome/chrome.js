@@ -980,7 +980,6 @@ var FirebugChrome =
 
         if (pos)
         {
-            this.syncPositionPref(pos);
             if (Firebug.getSuspended())
                 Firebug.toggleBar();
         }
@@ -997,6 +996,8 @@ var FirebugChrome =
 
         if (Firebug.isDetached())
             Firebug.toggleDetachBar(false, true);
+
+        pos && this.syncPositionPref(pos);
 
         var vertical = pos == 'top' || pos == 'bottom';
         var after = pos == 'bottom' || pos == 'right';
