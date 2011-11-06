@@ -555,7 +555,7 @@ NetProgress.prototype =
                 FBTrace.sysout("net.events.responseCompletedFile +" + time + " " +
                     getPrintableTime() + ", " + request.URI.path, file);
 
-            if (responseSize > 0)
+            if (responseSize >= 0)
                 file.size = responseSize;
 
             // This was only a helper to show download progress.
