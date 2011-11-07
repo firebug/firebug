@@ -74,8 +74,17 @@ FirebugReps.Table = domplate(Firebug.Rep,
         for (var i=0; i<this.columns.length; i++)
         {
             var prop = this.columns[i].property;
-            
-            if (typeof row[prop] === "undefined")
+
+            // Object property is not set for this column, so display entire
+            // row-value in the cell. This can happen in cases where a generic
+            // object is logged using table layout. In such case there is one
+            // column (no property associated) and ech row represnts a member
+            // of the object.
+            if (!prop)
+            {
+                value = row;
+            }
+            else if (typeof row[prop] === "undefined")
             {
                 var props = (typeof(prop) == "string") ? prop.split(".") : [prop];
 
