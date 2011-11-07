@@ -8,8 +8,9 @@ define([
     "firebug/lib/events",
     "firebug/lib/css",
     "firebug/lib/dom",
+    "firebug/lib/fonts"
 ],
-function(Obj, Firebug, Domplate, Locale, Events, Css, Dom) {
+function(Obj, Firebug, Domplate, Locale, Events, Css, Dom, Fonts) {
 
 // ************************************************************************************************
 // Constants
@@ -43,8 +44,11 @@ Firebug.InfoTip = Obj.extend(Firebug.Module,
 
         fontFamilyTag:
             DIV({"class": "infoTipFontFamilyBox"},
-                FOR("fontStyle", "$fontStyles",
-                    DIV({style: "font-family:$fontName; $fontStyle"}, Locale.$STR("css.fontFamilyPreview"))
+                STYLE({"class": "infoTipFontFamilyStyle"}),
+                DIV({"class": "infoTipFontFamilySample"},
+                    FOR("fontStyle", "$fontStyles",
+                        DIV({"class": "infoTipFontFace", style: "$fontStyle"}, Locale.$STR("css.fontFamilyPreview"))
+                    )
                 )
             ),
 
@@ -251,7 +255,7 @@ Firebug.InfoTip = Obj.extend(Firebug.Module,
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
-    populateFontFamilyTip: function(infoTip, fontName)
+    populateFontFamilyInfoTip: function(infoTip, fontName)
     {
         var fontStyles = [
            "font-size:12px;",
@@ -260,7 +264,14 @@ Firebug.InfoTip = Obj.extend(Firebug.Module,
            "font-size:14px;",
            "font-size:18px;"
         ];
-        this.tags.fontFamilyTag.replace({fontStyles: fontStyles, fontName: fontName}, infoTip);
+        var fontObject = Fonts.getFontInfo(null, null, fontName.replace(/"/g, ""));
+
+        if (FBTrace.DBG_INFOTIP)
+            FBTrace.sysout("infotip.populateFontFamilyInfoTip;", fontObject);
+
+        var node = this.tags.fontFamilyTag.replace({fontStyles: fontStyles, fontName: fontName, fontObject: fontObject}, infoTip);
+        var styleNode = node.getElementsByClassName("infoTipFontFamilyStyle").item(0);
+        styleNode.innerHTML = getFontFaceCss(fontObject);
         return true;
     },
 
@@ -305,6 +316,21 @@ Firebug.InfoTip = Obj.extend(Firebug.Module,
         this.showPanel(browser, panel);
     }
 })};
+
+//********************************************************************************************* //
+//Local Helpers
+
+/**
+ * Returns the CSS for the @font-face CSS
+ * 
+ * @param fontObject: Font related information
+ * @return @font-face CSS
+ */
+function getFontFaceCss(fontObject)
+{
+    return fontObject.rule.cssText.replace(/url\(.*?\)/g, "url("+fontObject.URI+")")+
+        " .infoTipFontFace {font-family: \""+fontObject.CSSFamilyName+"\";}";
+}
 
 // ************************************************************************************************
 // Registration

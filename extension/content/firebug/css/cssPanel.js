@@ -1499,7 +1499,7 @@ Firebug.CSSStyleSheetPanel.prototype = Obj.extend(Firebug.Panel,
                 }
                 else if (cssValue.type == "fontFamily") 
                 {
-                    return Firebug.InfoTip.populateFontFamilyTip(infoTip, cssValue.value);
+                    return Firebug.InfoTip.populateFontFamilyInfoTip(infoTip, cssValue.value);
                 }
             } 
         }
