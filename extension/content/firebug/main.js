@@ -97,7 +97,11 @@ require(config, modules, function(ChromeFactory, FBL, Firebug, Browser)
                 if (FBTrace.DBG_MODULES)
                     require.analyzeDependencyTree();
 
-                window.panelBarWaiter.waitForPanelBar(ChromeFactory, null, connect);
+                if (!window.panelBarWaiter)
+                    FBTrace.sysout("main; ERROR window.panelBarWaiter is not available");
+
+                if (window.panelBarWaiter)
+                    window.panelBarWaiter.waitForPanelBar(ChromeFactory, null, connect);
             }
 
             if (prevResourcesReady)
