@@ -65,6 +65,11 @@ var FirebugChrome =
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
     // Initialization
 
+    /**
+     * Called by panelBarWaiter when XUL panelBar(s) (main and side) are constructed
+     * (i.e. the constructor of panelBar binding is executed twice) and when all Firebug
+     * modules + extension modules (if any) are loaded.
+     */
     initialize: function()
     {
         if (FBTrace.DBG_INITIALIZE)
@@ -127,19 +132,13 @@ var FirebugChrome =
 
         win.addEventListener("blur", onBlur, true);
 
-        // Now fire the load events
-        if (panelBar1)
-        {
-            panelBar1.browser.setAttribute("src", "chrome://firebug/content/panel.html");
-            panelBar2.browser.setAttribute("src", "chrome://firebug/content/panel.html");
-        }
-
         if (FBTrace.DBG_INITIALIZE)
             FBTrace.sysout("chrome.initialized in " + win.location + " with " +
                 (panelBar1 ? panelBar1.browser.ownerDocument.documentURI : "no panel bar"), win);
 
-        // At this point both panelBars can be already loaded. If yes, start up
-        // the initialization sequence.
+        // At this point both panelBars can be already loaded, since the src is specified
+        // in firebugOveralay.xul (asynchronously loaded). If yes, start up
+        // the initialization sequence now.
         if (browser1Complete && browser2Complete)
         {
             setTimeout(function()
@@ -154,6 +153,9 @@ var FirebugChrome =
      */
     initializeUI: function()
     {
+        if (FBTrace.DBG_INITIALIZE)
+            FBTrace.sysout("chrome.initializeUI;");
+
         // we listen for panel update
         Firebug.registerUIListener(this);
 
@@ -211,12 +213,18 @@ var FirebugChrome =
             FirstRunPage.initializeUI();
 
             // Append all registered styleesheets into Firebug UI.
-            for (var uri in Firebug.stylesheets)
+            for (var i=0; i<Firebug.stylesheets.length; i++)
             {
-                Css.appendStylesheet(doc1, Firebug.stylesheets[uri]);
-                Css.appendStylesheet(doc2, Firebug.stylesheets[uri]);
-                Css.appendStylesheet(doc3, Firebug.stylesheets[uri]);
+                var uri = Firebug.stylesheets[i];
+
+                Css.appendStylesheet(doc1, uri);
+                Css.appendStylesheet(doc2, uri);
+                Css.appendStylesheet(doc3, uri);
             }
+
+            if (FBTrace.DBG_INITIALIZE)
+                FBTrace.sysout("chrome.initializeUI; Custom stylesheet appended " +
+                    Firebug.stylesheets.length, Firebug.stylesheets);
         }
         catch (exc)
         {

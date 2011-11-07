@@ -342,6 +342,12 @@ Firebug.DisabledPanelBox = domplate(Firebug.Rep,
     hide: function(browser)
     {
         var parentNode = this.getParentNode(browser);
+
+        // xxxHonza: I am seeing null parentNode when Firebug initializes
+        // Could it be because the panel.html can sometimes take more time to load?
+        if (!parentNode)
+            return;
+
         Dom.clearNode(parentNode);
         parentNode.setAttribute("collapsed", true);
     },
