@@ -24,6 +24,7 @@ define([
     "firebug/net/xmlViewer",
     "firebug/net/svgViewer",
     "firebug/net/jsonViewer",
+    "firebug/net/fontViewer",
     "firebug/chrome/infotip",
     "firebug/css/cssPanel",
     "firebug/chrome/searchBox",
@@ -798,7 +799,7 @@ Firebug.NetMonitor.NetPage = domplate(Firebug.Rep,
 // ********************************************************************************************* //
 
 /**
- * @domplate Represents a template that is used to reneder detailed info about a request.
+ * @domplate Represents a template that is used to render detailed info about a request.
  * This template is rendered when a request is expanded.
  */
 Firebug.NetMonitor.NetInfoBody = domplate(Firebug.Rep, new Firebug.Listener(),
@@ -1087,19 +1088,27 @@ Firebug.NetMonitor.NetInfoBody = domplate(Firebug.Rep, new Firebug.Listener(),
         if (Css.hasClass(tab, "netInfoResponseTab") && file.loaded && !netInfoBox.responsePresented)
         {
             var responseTextBox = netInfoBox.getElementsByClassName("netInfoResponseText").item(0);
-            if (file.category == "image")
-            {
-                netInfoBox.responsePresented = true;
 
-                var responseImage = netInfoBox.ownerDocument.createElement("img");
-                responseImage.src = file.href;
+            // Let listeners display the response
+            Events.dispatch(this.fbListeners, "updateResponse", [netInfoBox, file, context]);
 
-                Dom.clearNode(responseTextBox);
-                responseTextBox.appendChild(responseImage, responseTextBox);
-            }
-            else if (!(NetUtils.binaryCategoryMap.hasOwnProperty(file.category)))
+            FBTrace.sysout("netInfoResponseTab", {netInfoBox: netInfoBox, file: file});
+            if (!netInfoBox.responsePresented)
             {
-                this.setResponseText(file, netInfoBox, responseTextBox, context);
+                if (file.category == "image")
+                {
+                    netInfoBox.responsePresented = true;
+    
+                    var responseImage = netInfoBox.ownerDocument.createElement("img");
+                    responseImage.src = file.href;
+    
+                    Dom.clearNode(responseTextBox);
+                    responseTextBox.appendChild(responseImage, responseTextBox);
+                }
+                else if (!(NetUtils.binaryCategoryMap.hasOwnProperty(file.category)))
+                {
+                    this.setResponseText(file, netInfoBox, responseTextBox, context);
+                }
             }
         }
 
@@ -1305,6 +1314,22 @@ Firebug.NetMonitor.NetInfoPostData = domplate(Firebug.Rep, new Firebug.Listener(
             )
         ),
 
+    
+    // application/x-woff
+    fontTable:
+      TABLE({"class": "netInfoPostFontTable", cellpadding: 0, cellspacing: 0, "role": "presentation"},
+          TBODY({"role": "list", "aria-label": Locale.$STR("fontviewer.tab.Font")},
+              TR({"class": "netInfoPostFontTitle", "role": "presentation"},
+                  TD({"role": "presentation" },
+                      Locale.$STR("fontviewer.tab.Font")
+                  )
+              ),
+              TR(
+                  TD({"class": "netInfoPostFontBody"})
+              )
+          )
+      ),
+      
     sourceTable:
         TABLE({"class": "netInfoPostSourceTable", cellpadding: 0, cellspacing: 0, "role": "presentation"},
             TBODY({"role": "list", "aria-label": Locale.$STR("net.label.Source")},
@@ -1359,10 +1384,13 @@ Firebug.NetMonitor.NetInfoPostData = domplate(Firebug.Rep, new Firebug.Listener(
             this.insertJSON(parentNode, file, context);
 
         if (Firebug.XMLViewerModel.isXML(contentType))
-          this.insertXML(parentNode, file, context);
+            this.insertXML(parentNode, file, context);
 
         if (Firebug.SVGViewerModel.isSVG(contentType))
-          this.insertSVG(parentNode, file, context);
+            this.insertSVG(parentNode, file, context);
+
+        if (Firebug.FontViewerModel.isFont(contentType, file.href, text))
+            this.insertFont(parentNode, file, context);
 
         var postText = NetUtils.getPostText(file, context);
         postText = NetUtils.formatPostText(postText);
@@ -1427,6 +1455,16 @@ Firebug.NetMonitor.NetInfoPostData = domplate(Firebug.Rep, new Firebug.Listener(
         var jsonBody = jsonTable.getElementsByClassName("netInfoPostSVGBody").item(0);
 
         Firebug.SVGViewerModel.insertSVG(jsonBody, text);
+    },
+
+    insertFont: function(parentNode, file, context)
+    {
+        var text = NetUtils.getPostText(file, context);
+
+        var fontTable = this.fontTable.append(null, parentNode);
+        var fontBody = fontTable.getElementsByClassName("netInfoPostFontBody").item(0);
+
+        Firebug.FontViewerModel.insertFont(fontBody, text);
     },
 
     insertSource: function(parentNode, text)

@@ -1224,7 +1224,7 @@ defineTags(
     "a", "button", "br", "canvas", "col", "colgroup", "div", "fieldset", "form", "h1", "h2",
     "h3", "hr", "img", "input", "label", "legend", "li", "ol", "optgroup", "option", "p",
     "pre", "select", "b", "span", "strong", "table", "tbody", "td", "textarea", "tfoot", "th",
-    "thead", "tr", "tt", "ul", "iframe", "code",
+    "thead", "tr", "tt", "ul", "iframe", "code", "style",
 
     // HTML5
     "article", "aside", "audio", "bb", "canvas", "command", "datagrid", "datalist", "details",

@@ -26,6 +26,7 @@ define([
     "firebug/net/xmlViewer",
     "firebug/net/svgViewer",
     "firebug/net/jsonViewer",
+    "firebug/net/fontViewer",
     "firebug/chrome/infotip",
     "firebug/css/cssPanel",
     "firebug/chrome/searchBox",

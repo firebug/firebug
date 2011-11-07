@@ -45,15 +45,16 @@ pref("extensions.firebug.DBG_OPTIONS", false);          //
 pref("extensions.firebug.DBG_FBS_FLUSH", false);        //
 pref("extensions.firebug.DBG_HTTPOBSERVER", false);     // Centralized HTTP Observer
 pref("extensions.firebug.DBG_SPY", false);              // spy.js
-pref("extensions.firebug.DBG_JSONVIEWER", false);       // json explorer
 pref("extensions.firebug.DBG_EDITOR", false);           // Inline editors
 pref("extensions.firebug.DBG_SHORTCUTS", false);        // Keyboard shortcuts
 pref("extensions.firebug.DBG_A11Y", false);             // a11y
 pref("extensions.firebug.DBG_LOCALE", false);           // localization, missing strings
 pref("extensions.firebug.DBG_INFOTIP", false);          // popup info tip in panels
 pref("extensions.firebug.DBG_ANNOTATIONS", false);      // Page annotations service
-pref("extensions.firebug.DBG_XMLVIEWER", false);        // xml explorer
-pref("extensions.firebug.DBG_SVGVIEWER", false);        // svg explorer
+pref("extensions.firebug.DBG_XMLVIEWER", false);        // XML explorer
+pref("extensions.firebug.DBG_JSONVIEWER", false);       // JSON explorer
+pref("extensions.firebug.DBG_SVGVIEWER", false);        // SVG explorer
+pref("extensions.firebug.DBG_FONTVIEWER", false);       // Font preview
 pref("extensions.firebug.DBG_ACTIVITYOBSERVER", false); // Net panel's activity observer
 pref("extensions.firebug.DBG_TOOLTIP", false);          // tooltip debugging
 pref("extensions.firebug.DBG_HISTORY", false);          // panel navigation history
