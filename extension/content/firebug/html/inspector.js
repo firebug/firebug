@@ -325,6 +325,8 @@ Firebug.Inspector = Obj.extend(Firebug.Module,
         Events.dispatch(this.fbListeners, "onStopInspecting", [context, this.inspectingNode, canceled]);
 
         this.inspectNode(null);
+
+        this.inspectingPanel = null;
     },
 
     /**

@@ -1515,6 +1515,7 @@ Firebug.Panel = Obj.extend(new Firebug.Listener(),
         // Note the the selection can point to a document (in case of the HTML panel).
         // Perhaps it breaks a cycle (page -> firebug -> page)?
         delete this.selection;
+        delete this.panelBrowser;
     },
 
     savePersistedContent: function(state)

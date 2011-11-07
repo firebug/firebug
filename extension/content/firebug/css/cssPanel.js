@@ -2170,6 +2170,8 @@ CSSElementPanel.prototype = Obj.extend(Firebug.CSSStyleSheetPanel.prototype,
             Events.removeEventListener(sel, "mouseover", this.onStateChange, false);
             Events.removeEventListener(sel, "mouseout", this.onStateChange, false);
         }
+
+        this.stateChangeEl = null;
     },
 
     contentStateCheck: function(state)

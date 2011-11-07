@@ -1064,6 +1064,9 @@ Firebug.HTMLPanel.prototype = Obj.extend(WalkingPanel,
         Persist.persistObjects(this, state);
 
         Firebug.Panel.destroy.apply(this, arguments);
+
+        delete this.embeddedBrowserParents;
+        delete this.embeddedBrowserDocument;
     },
 
     initializeNode: function(oldPanelNode)

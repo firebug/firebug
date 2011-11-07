@@ -1032,6 +1032,7 @@ function onPageHideTopWindow(event)
     {
         // Page is not cached, there may be an unload
         Events.addEventListener(win, "unload", onUnloadTopWindow, true);
+
         if (FBTrace.DBG_WINDOWS)
             FBTrace.sysout("-> tabWatcher onPageHideTopWindow set unload handler " +
                 Win.safeGetWindowLocation(win));
@@ -1054,7 +1055,7 @@ function onUnloadTopWindow(event)
 
     if (FBTrace.DBG_WINDOWS)
         FBTrace.sysout("-> tabWatcher onUnloadTopWindow for: " + Win.safeGetWindowLocation(win) +
-            " typeof :" + typeof(win));
+            " typeof: " + typeof(win));
 
     Firebug.TabWatcher.unwatchTopWindow(win);
 }

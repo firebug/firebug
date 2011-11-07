@@ -749,7 +749,12 @@ var TabWatchListener =
 
         Events.dispatch(Firebug.modules, "destroyContext", [context, persistedState]);
 
-        if (Firebug.currentContext == context)
+        // xxxHonza: not sure if this code is correct. Test case: Firebug active, reload
+        // 1) The Firebug.currentContext can be already set to the new one
+        // 2) The Firebug.currentContext can be already null.
+        // Calling clearPanels is important because it also clears the statuPath, which
+        // contains references to panel objects (e.g. Page document in case of the HTML panel)
+        if (Firebug.currentContext == context || !Firebug.currentContext)
         {
             Firebug.chrome.clearPanels(); // disconnect the to-be-destroyed panels from the panelBar
             Firebug.chrome.setFirebugContext(null);  // Firebug.currentContext is about to be destroyed
