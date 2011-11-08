@@ -54,7 +54,7 @@ pref("extensions.firebug.DBG_ANNOTATIONS", false);      // Page annotations serv
 pref("extensions.firebug.DBG_XMLVIEWER", false);        // XML explorer
 pref("extensions.firebug.DBG_JSONVIEWER", false);       // JSON explorer
 pref("extensions.firebug.DBG_SVGVIEWER", false);        // SVG explorer
-pref("extensions.firebug.DBG_FONTVIEWER", false);       // Font preview
+pref("extensions.firebug.DBG_FONTS", false);            // Fonts information and font viewer
 pref("extensions.firebug.DBG_ACTIVITYOBSERVER", false); // Net panel's activity observer
 pref("extensions.firebug.DBG_TOOLTIP", false);          // tooltip debugging
 pref("extensions.firebug.DBG_HISTORY", false);          // panel navigation history

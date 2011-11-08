@@ -72,7 +72,7 @@ Firebug.FontViewerModel = Obj.extend(Firebug.Module,
         {
             if (contentType.indexOf(contentTypes[i]) == 0)
             {
-                if (FBTrace.DBG_FONTVIEWER)
+                if (FBTrace.DBG_FONTS)
                 {
                     FBTrace.sysout("fontviewer.isFont; content type: "+contentType,
                         {url: url, data: data});
@@ -92,7 +92,7 @@ Firebug.FontViewerModel = Obj.extend(Firebug.Module,
         var validExtension = /woff|otf|ttf/.exec(extension);
         if (validExtension && (!data || data.indexOf("wOFF") == 0 || data.indexOf("OTTO") == 0))
         {
-            if (FBTrace.DBG_FONTVIEWER)
+            if (FBTrace.DBG_FONTS)
             {
                 FBTrace.sysout("fontviewer.isFont; Font without proper content type",
                     {url: url, data: data});
@@ -149,8 +149,8 @@ Firebug.FontViewerModel = Obj.extend(Firebug.Module,
             this.Preview.render(responseTextBox, file, context);
             netInfoBox.responsePresented = true;
 
-            if (FBTrace.DBG_FONTVIEWER)
-              FBTrace.sysout("fontviewer.updateResponse", file);
+            if (FBTrace.DBG_FONTS)
+                FBTrace.sysout("fontviewer.updateResponse", file);
         }
     }
 });
@@ -532,7 +532,7 @@ Firebug.FontViewerModel.Preview = domplate(
         var doc = parser.parseFromString(source, "text/xml");
         var root = doc.documentElement;
 
-        if (FBTrace.DBG_FONTVIEWER)
+        if (FBTrace.DBG_FONTS)
             FBTrace.sysout("fontviewer.insertMetaDataFormatted; XML", doc);
 
         Dom.clearNode(tbody);
@@ -552,7 +552,7 @@ Firebug.FontViewerModel.Preview = domplate(
             props.push({tag: propValueTemplates[child.nodeName], node: child});
         }
 
-        if (FBTrace.DBG_FONTVIEWER)
+        if (FBTrace.DBG_FONTS)
             FBTrace.sysout("fontviewer.insertMetaDataFormatted; props", props);
 
         tbody.repObject = root;

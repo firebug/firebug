@@ -19,7 +19,7 @@ var Fonts = {};
 // ********************************************************************************************* //
 // Fonts
 
-/*
+/**
  * Retrieves all fonts used inside a node
  * @node: Node to return the fonts for
  * @return Array of fonts
@@ -39,7 +39,7 @@ Fonts.getFonts = function(node)
     return fonts;
 }
 
-/*
+/**
  * Retrieves the information about a font
  * @context: Context of the font
  * @win: Window the font is used in
@@ -59,7 +59,8 @@ Fonts.getFontInfo = function(context, win, identifier)
     var fonts = Fonts.getFonts(doc.documentElement);
     var url = Url.splitURLBase(identifier);
 
-    FBTrace.sysout("Fonts.getFontInfo;", {fonts:fonts, url:url});
+    if (FBTrace.DBG_FONTS)
+        FBTrace.sysout("Fonts.getFontInfo;", {fonts:fonts, url:url});
 
     for (var i=0; i<fonts.length; i++)
     {

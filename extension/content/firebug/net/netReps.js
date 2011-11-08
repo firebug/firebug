@@ -1092,7 +1092,8 @@ Firebug.NetMonitor.NetInfoBody = domplate(Firebug.Rep, new Firebug.Listener(),
             // Let listeners display the response
             Events.dispatch(this.fbListeners, "updateResponse", [netInfoBox, file, context]);
 
-            FBTrace.sysout("netInfoResponseTab", {netInfoBox: netInfoBox, file: file});
+            if (FBTrace.DBG_NET)
+                FBTrace.sysout("netInfoResponseTab", {netInfoBox: netInfoBox, file: file});
             if (!netInfoBox.responsePresented)
             {
                 if (file.category == "image")
