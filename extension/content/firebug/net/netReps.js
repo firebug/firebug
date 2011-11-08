@@ -1216,6 +1216,11 @@ Firebug.NetMonitor.NetInfoBody = domplate(Firebug.Rep, new Firebug.Listener(),
             tbody = headersTable.firstChild;
         var titleRow = Dom.getChildByClass(tbody, "netInfo" + rowName + "Title");
 
+        headers.sort(function(a, b)
+        {
+            return a.name > b.name ? 1 : -1;
+        });
+
         this.headerDataTag.insertRows({headers: headers}, titleRow ? titleRow : tbody);
         Css.removeClass(titleRow, "collapsed");
     },
@@ -1607,6 +1612,11 @@ Firebug.NetMonitor.NetInfoHeaders = domplate(Firebug.Rep, new Firebug.Listener()
 
         if (headers && headers.length)
         {
+            headers.sort(function(a, b)
+            {
+                return a.name > b.name ? 1 : -1;
+            });
+
             Firebug.NetMonitor.NetInfoBody.headerDataTag.insertRows({headers: headers}, tbody);
 
             var titleRow = Dom.getChildByClass(headersTable, "netInfo" + rowName + "Title");
