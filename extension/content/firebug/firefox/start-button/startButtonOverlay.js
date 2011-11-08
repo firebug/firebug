@@ -49,10 +49,6 @@ Firebug.StartButton = Obj.extend(Firebug.Module,
             var popup = Firefox.getElementById("fbStatusContextMenu");
             startButton.appendChild(popup.cloneNode(true));
 
-            // Append the button into Firefox toolbar automatically.
-            this.onLoadBinding = Obj.bind(this.onLoad, this);
-            window.addEventListener("load", this.onLoadBinding, false);
-
             // In case of Firefox 4+ the button is a bit different.
             if (appInfo.name == "Firefox" && versionChecker.compare(appInfo.version, "4.0*") >= 0)
                 startButton.setAttribute("firefox", "4");
@@ -73,9 +69,17 @@ Firebug.StartButton = Obj.extend(Firebug.Module,
             FBTrace.sysout("Startbutton initializeUI "+startButton);
     },
 
+    addOnLoadListener: function(win)
+    {
+        this.browserWin = win;
+
+        this.onLoadBinding = Obj.bind(this.onLoad, this);
+        this.browserWin.addEventListener("load", this.onLoadBinding, false);
+    },
+
     onLoad: function()
     {
-        window.removeEventListener("load", this.onLoadBinding, false);
+        this.browserWin.removeEventListener("load", this.onLoadBinding, false);
 
         try
         {
@@ -130,17 +134,13 @@ Firebug.StartButton = Obj.extend(Firebug.Module,
         {
             navBar.insertItem(startButtonId);
             navBar.setAttribute("currentset", navBar.currentSet);
-            document.persist("nav-bar", "currentset");
+            navBar.ownerDocument.persist("nav-bar", "currentset");
 
-            // xxxHonza: Check whether insertItem actually works (there is a problem in Firefox 10)
+            // Check whether insertItem really works
             var curSet = navBar.currentSet.split(",");
             if (curSet.indexOf(startButtonId) == -1)
             {
-                FBTrace.sysout("Startbutton; navBar.insertItem doesn't work");
-
-                var set = curSet.concat(startButtonId);
-                navBar.setAttribute("currentset", set.join(","));
-                document.persist(navBarId, "currentset");
+                FBTrace.sysout("Startbutton; navBar.insertItem doesn't work", curSet);
             }
 
             if (FBTrace.DBG_INITIALIZE)
@@ -352,6 +352,9 @@ Firebug.StartButton = Obj.extend(Firebug.Module,
 
 // ********************************************************************************************* //
 // Registration
+
+// Firebug start button must be appended when the top window (browser) is loaded.
+Firebug.StartButton.addOnLoadListener(top);
 
 Firebug.registerModule(Firebug.StartButton);
 
