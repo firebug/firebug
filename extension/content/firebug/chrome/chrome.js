@@ -27,7 +27,6 @@ const Cc = Components.classes;
 const Ci = Components.interfaces;
 const nsIWebNavigation = Ci.nsIWebNavigation;
 
-const observerService = Cc["@mozilla.org/observer-service;1"].getService(Ci.nsIObserverService);
 const wm = Cc["@mozilla.org/appshell/window-mediator;1"].getService(Ci.nsIWindowMediator);
 
 const LOAD_FLAGS_BYPASS_PROXY = nsIWebNavigation.LOAD_FLAGS_BYPASS_PROXY;
@@ -210,7 +209,6 @@ var FirebugChrome =
             // xxxHonza: is there any reason why we don't distribute "initializeUI"
             // event to modules?
             Firebug.initializeUI();
-            FirstRunPage.initializeUI();
 
             // Append all registered styleesheets into Firebug UI.
             for (var i=0; i<Firebug.stylesheets.length; i++)
@@ -1664,52 +1662,6 @@ var FirebugChrome =
             Firebug.Breakpoint.toggleBreakOnNext(panel);
     },
 };  // end of FirebugChrome
-
-// ********************************************************************************************* //
-// Welcome Page (first run)
-
-var FirstRunPage =
-{
-    initializeUI: function()
-    {
-        // If the version in preferences is smaller than the current version
-        // display the welcome page.
-        if (System.checkFirebugVersion(Firebug.currentVersion) > 0)
-        {
-            if (FBTrace.DBG_INITIALIZE)
-                FBTrace.sysout("FirstRunPage.initializeUI; current: " + Firebug.getVersion() +
-                    "preferences: " + Firebug.currentVersion);
-
-            // Wait for session restore and display the welcome page.
-            observerService.addObserver(this, "sessionstore-windows-restored" , false);
-        }
-    },
-
-    observe: function(subjet, topic, data)
-    {
-        if (topic != "sessionstore-windows-restored")
-            return;
-
-        setTimeout(function()
-        {
-            // Open the page in the top most window so, the user can see it immediately.
-            if (wm.getMostRecentWindow("navigator:browser") != win)
-                return;
-
-            // Avoid opening of the page in a second browser window.
-            if (System.checkFirebugVersion(Firebug.currentVersion) > 0)
-            {
-                // Don't forget to update the preference so, the page is not displayed again
-                var version = Firebug.getVersion();
-                Firebug.Options.set("currentVersion", version);
-
-                // xxxHonza: put the URL in firebugURLs as soon as it's in chrome.js
-                if (Firebug.Options.get("showFirstRunPage"))
-                    Win.openNewTab("http://getfirebug.com/firstrun#Firebug " + version);
-            }
-        }, 500);
-    }
-}
 
 // ********************************************************************************************* //
 // Local Helpers
