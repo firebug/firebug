@@ -90,7 +90,7 @@ Firebug.JSONViewerModel = Obj.extend(Firebug.Module,
     initTabBody: function(infoBox, file)
     {
         if (FBTrace.DBG_JSONVIEWER)
-            FBTrace.sysout("jsonviewer.initTabBody", infoBox);
+            FBTrace.sysout("jsonviewer.initTabBody", {infoBox: infoBox, file: file});
 
         // Let listeners to parse the JSON.
         Events.dispatch(this.fbListeners, "onParseJSON", [file]);
@@ -141,6 +141,9 @@ Firebug.JSONViewerModel = Obj.extend(Firebug.Module,
         var tabBody = infoBox.getElementsByClassName("netInfoJSONText").item(0);
         if (!Css.hasClass(tab, "netInfoJSONTab") || tabBody.updated)
             return;
+
+        if (FBTrace.DBG_JSONVIEWER)
+            FBTrace.sysout("jsonviewer.updateTabBody", infoBox);
 
         tabBody.updated = true;
         tabBody.context = context;
