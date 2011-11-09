@@ -91,6 +91,10 @@ Firebug.Console.injector =
         var sandbox = Cu.Sandbox(win);
         var getConsoleWrapper = Cu.evalInSandbox(expr, sandbox);
         win.wrappedJSObject.console = getConsoleWrapper(console);
+
+        if (FBTrace.DBG_CONSOLE)
+            FBTrace.sysout("console.attachConsoleInjector; Firebug console attached to: " +
+                context.getName());
     },
 
     addConsoleListener: function(context, win)
