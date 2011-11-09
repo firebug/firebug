@@ -8,7 +8,7 @@ define([
     "firebug/firebug",
     "firebug/lib/tool",
     "firebug/js/debugger",  // TODO firefox/jsdebugger
-    "arch/compilationunit",
+    "arch/compilationunit"
 ],
 function initializeJavaScriptTool(Obj, Firebug, Tool, JSDebugger, CompilationUnit) {
 
@@ -21,8 +21,8 @@ var JavaScriptTool = Obj.extend(Firebug.Module,
 });
 
 /**
- * A Turn is an callstack for an active being-handled event, similar to a Thread.
- * Currently it only makes sense when we have stopped the server.
+ * A Turn is an call stack for an active being-handled event, similar to a thread.
+ * Currently it only makes sense, when we have stopped the server.
  * Currently only one or zero Turn objects can exist ("single-threaded").
  */
 JavaScriptTool.Turn =
@@ -109,7 +109,7 @@ JavaScriptTool.runUntil = function(compilationUnit, lineNumber)
  */
 JavaScriptTool.onConnect = function(connection)
 {
-    if (!Firebug.connection.getTool('script'))
+    if (!Firebug.connection.getTool("script"))
     {
         JavaScriptTool.asTool = new Tool("script"), // this is the script tool
         connection.registerTool(JavaScriptTool.asTool);
@@ -147,10 +147,12 @@ JavaScriptTool.setActivation = function(enable)
 JavaScriptTool.onActivateTool = function(toolname, active)
 {
     if (FBTrace.DBG_ACTIVATION)
+    {
         FBTrace.sysout("JavaScriptTool.onActivateTool "+toolname+" = "+active+" asTool "+
             JavaScriptTool.asTool);
+    }
 
-    if (toolname === 'script')
+    if (toolname === "script")
     {
         Firebug.ScriptPanel.prototype.onJavaScriptDebugging(active);
         Firebug.connection.eachContext(function refresh(context)
@@ -204,8 +206,10 @@ JavaScriptTool.onCompilationUnit = function(context, url, kind)
      context.compilationUnits[url] = compilationUnit;
 
      if (FBTrace.DBG_COMPILATION_UNITS)
+     {
          FBTrace.sysout("JavaScriptTool.onCompilationUnit "+url+" added to "+context.getName(),
-            compilationUnit);
+             compilationUnit);
+     }
 }
 
 JavaScriptTool.initialize = function()
