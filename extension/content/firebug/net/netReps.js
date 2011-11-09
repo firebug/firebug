@@ -1530,7 +1530,7 @@ Firebug.NetMonitor.NetInfoHeaders = domplate(Firebug.Rep, new Firebug.Listener()
         DIV({"class": "netInfoHeadersTable", "role": "tabpanel"},
             DIV({"class": "netInfoHeadersGroup netInfoResponseHeadersTitle collapsed"},
                 SPAN(Locale.$STR("ResponseHeaders")),
-                SPAN({"class": "netHeadersViewSource response", onclick: "$onViewSource",
+                SPAN({"class": "netHeadersViewSource response collapsed", onclick: "$onViewSource",
                     _sourceDisplayed: false, _rowName: "ResponseHeaders"},
                     Locale.$STR("net.headers.view source")
                 )
@@ -1541,7 +1541,7 @@ Firebug.NetMonitor.NetInfoHeaders = domplate(Firebug.Rep, new Firebug.Listener()
             ),
             DIV({"class": "netInfoHeadersGroup netInfoRequestHeadersTitle collapsed"},
                 SPAN(Locale.$STR("RequestHeaders")),
-                SPAN({"class": "netHeadersViewSource request", onclick: "$onViewSource",
+                SPAN({"class": "netHeadersViewSource request collapsed", onclick: "$onViewSource",
                     _sourceDisplayed: false, _rowName: "RequestHeaders"},
                     Locale.$STR("net.headers.view source")
                 )
