@@ -70,7 +70,7 @@ Firebug.FontViewerModel = Obj.extend(Firebug.Module,
 
         for (var i=0; i<contentTypes.length; i++)
         {
-            if (contentType.indexOf(contentTypes[i]) == 0)
+            if (contentType == contentTypes[i])
             {
                 if (FBTrace.DBG_FONTS)
                 {
