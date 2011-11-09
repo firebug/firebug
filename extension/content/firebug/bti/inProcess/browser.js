@@ -309,6 +309,9 @@ Browser.prototype.getTools = function()
  */
 Browser.prototype.getTool = function(name)
 {
+    if (!this.tools[name])
+        FBTrace.sysout("BTI.Browser.getTool; Unknown tool: " + name);
+
     return this.tools[name];
 }
 
@@ -334,8 +337,8 @@ Browser.prototype.unregisterTool = function(tool)
     {
         if (!this.tools[name])
             FBTrace.sysout("BTI.Browser.unregisterTool; Unknown tool: " + name);
-
-        delete this.tools[name];
+        else
+            delete this.tools[name];
     }
 }
 
