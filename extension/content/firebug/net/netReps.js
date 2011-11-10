@@ -602,41 +602,9 @@ Firebug.NetMonitor.NetRequestEntry = domplate(Firebug.Rep, new Firebug.Listener(
         if (file.responseStatus != 401)
             return false;
 
-        function hasNtlm(value)
-        {
-            return value && value.indexOf("NTLM") == 0;
-        }
-
-        var requestHeader = NetUtils.findHeader(file.requestHeaders, "authorization");
         //xxxsz: file.responseHeaders is undefined here for some reason
-        var responseHeader = file.responseHeadersText.match(/www-authenticate:\s(.+)/i)[1];
-
-        // Phase 1: no auth in request, no message in response
-        if (!hasNtlm(requestHeader) && hasNtlm(responseHeader) && responseHeader.length == 4)
-        {
-            if (FBTrace.DBG_NET)
-            {
-                FBTrace.sysout("net.updateInfo; NTLM match (phase 1)",
-                    {requestHeader: requestHeader, responseHeader: responseHeader});
-            }
-            return true;
-        }
-
-        // Phase 2: Type-1 message in request and Type-2 message in response
-        if (hasNtlm(requestHeader) && requestHeader.length > 4 &&
-            hasNtlm(responseHeader) && responseHeader.length > 4)
-        {
-            if (FBTrace.DBG_NET)
-            {
-                FBTrace.sysout("net.updateInfo; NTLM match (phase 2)",
-                    {requestHeader: requestHeader, responseHeader: responseHeader});
-            }
-            return true;
-        }
-
-        // Phase 3 response should not contain www-authenticate header in case of
-        // failed authentication, so no additional check required
-        return false;
+        var resp = file.responseHeadersText.match(/www-authenticate:\s(.+)/i)[1];
+        return (resp && resp.search(/ntlm|negotiate/i) >= 0);
     },
 
     isError: function(file)
