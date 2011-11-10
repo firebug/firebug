@@ -25,8 +25,13 @@ var Http = {};
 
 Http.readFromStream = function(stream, charset, noClose)
 {
-    var sis = Cc["@mozilla.org/binaryinputstream;1"].createInstance(Ci.nsIBinaryInputStream);
-    sis.setInputStream(stream);
+    // Causes a memory leak (see https://bugzilla.mozilla.org/show_bug.cgi?id=699801)
+    //var sis = Cc["@mozilla.org/binaryinputstream;1"].createInstance(Ci.nsIBinaryInputStream);
+    //sis.setInputStream(stream);
+
+    var sis = Cc["@mozilla.org/scriptableinputstream;1"].
+        createInstance(Ci.nsIScriptableInputStream);
+    sis.init(stream);
 
     var segments = [];
     for (var count = stream.available(); count; count = stream.available())
