@@ -16,7 +16,7 @@
 .hideCategory-media .category-media,
 .hideCategory-txt .category-txt,
 .hideCategory-bin .category-bin {
-    display: none;
+    display: none!important;
 }
 
 /************************************************************************************************/
