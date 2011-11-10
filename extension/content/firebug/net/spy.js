@@ -319,7 +319,7 @@ var SpyHttpObserver =
         spy.href = url;
 
         if (FBTrace.DBG_SPY)
-            FBTrace.sysout("spy.requestStarted; " + spy.href, spy);
+            FBTrace.sysout("spy.requestStarted; " + spy.href);
 
         // Get "body" for POST and PUT requests. It will be displayed in
         // appropriate tab of the XHR.
@@ -537,7 +537,7 @@ function getSpyForXHR(request, xhrRequest, context, noCreate)
 
     if (FBTrace.DBG_SPY)
         FBTrace.sysout("spy.getSpyForXHR; New spy object created (" +
-            (name == origName ? "new XHR" : "redirected XHR") + ") for: " + name, spy);
+            (name == origName ? "new XHR" : "redirected XHR") + ") for: " + name);
 
     return spy;
 }
@@ -590,6 +590,9 @@ Firebug.Spy.XMLHttpRequestSpy.prototype =
         // xxxHonza: should be removed from FB 3.6
         if (!SpyHttpActivityObserver.getActivityDistributor())
             this.context.sourceCache.addListener(this);
+
+        if (FBTrace.DBG_SPY)
+            FBTrace.sysout("spy.attach; " + Http.safeGetRequestName(this.request));
     },
 
     detach: function()
@@ -645,7 +648,7 @@ Firebug.Spy.XMLHttpRequestSpy.prototype =
     onStopRequest: function(context, request, responseText)
     {
         if (FBTrace.DBG_SPY)
-            FBTrace.sysout("spy.onStopRequest: " + Http.safeGetRequestName(request), responseText);
+            FBTrace.sysout("spy.onStopRequest: " + Http.safeGetRequestName(request));
 
         if (!responseText)
             return;
@@ -723,7 +726,7 @@ function onHTTPSpyReadyStateChange(spy, event)
 function onHTTPSpyLoad(spy)
 {
     if (FBTrace.DBG_SPY)
-        FBTrace.sysout("spy.onHTTPSpyLoad: " + spy.href, spy);
+        FBTrace.sysout("spy.onHTTPSpyLoad: " + spy.href);
 
     // Detach must be done in onLoad (not in onreadystatechange) otherwise
     // onAbort would not be handled.
@@ -745,7 +748,7 @@ function onHTTPSpyLoad(spy)
 function onHTTPSpyError(spy)
 {
     if (FBTrace.DBG_SPY)
-        FBTrace.sysout("spy.onHTTPSpyError; " + spy.href, spy);
+        FBTrace.sysout("spy.onHTTPSpyError; " + spy.href);
 
     spy.detach();
     spy.loaded = true;
@@ -760,7 +763,7 @@ function onHTTPSpyError(spy)
 function onHTTPSpyAbort(spy)
 {
     if (FBTrace.DBG_SPY)
-        FBTrace.sysout("spy.onHTTPSpyAbort: " + spy.href, spy);
+        FBTrace.sysout("spy.onHTTPSpyAbort: " + spy.href);
 
     spy.detach();
     spy.loaded = true;
