@@ -84,15 +84,6 @@ Firebug.StartButton = Obj.extend(Firebug.Module,
         try
         {
             this.appendToToolbar();
-
-            if (FBTrace.DBG_ERRORS)
-            {
-                // Some users complaint about missing start button, this could help
-                // to diagnose the problem.
-                var navBar = Firefox.getElementById("nav-bar");
-                FBTrace.sysout("startButton; onLoad.appendToToolbar: currentSet" +
-                    navBar.currentSet);
-            }
         }
         catch (e)
         {
@@ -122,7 +113,11 @@ Firebug.StartButton = Obj.extend(Firebug.Module,
         // ID of the Firebug start button into it.
         var startButtonId = "firebug-button";
         var navBarId = "nav-bar";
-        var navBar = Firefox.getElementById(navBarId);
+
+        // xxxHonza: do not use Firefox.getElementById, it depends on Firebug.chrome
+        // that doesn't have to be set (loaded) yet. 
+        //var navBar = Firefox.getElementById(navBarId);
+        var navBar = top.document.getElementById(navBarId);
         var currentSet = navBar.currentSet;
 
         if (FBTrace.DBG_INITIALIZE)
