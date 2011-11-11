@@ -32,8 +32,6 @@ Firebug.FirstRunPage =
 {
     registerSessionObserver: function()
     {
-        FBTrace.sysout("FirstRunPage; " + System.checkFirebugVersion(Firebug.currentVersion));
-
         // If the version in preferences is smaller than the current version
         // display the welcome page.
         if (System.checkFirebugVersion(Firebug.currentVersion) > 0)
