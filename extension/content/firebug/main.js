@@ -82,6 +82,13 @@ require(config, modules, function(ChromeFactory, FBL, Firebug, Browser)
         var prevResourcesReady = requirejs.resourcesReady;
         requirejs.resourcesReady = function(isReady)
         {
+            if (Firebug.isInitialized)
+            {
+                if (FBTrace.DBG_INITIALIZE)
+                    FBTrace.sysout("main; Firebug already initialized");
+                return;
+            }
+
             if (isReady && requirejs.resourcesDone)
             {
                 if (FBTrace.DBG_INITIALIZE || FBTrace.DBG_MODULES)
@@ -97,8 +104,9 @@ require(config, modules, function(ChromeFactory, FBL, Firebug, Browser)
                 if (FBTrace.DBG_MODULES)
                     require.analyzeDependencyTree();
 
-                if (!window.panelBarWaiter)
-                    FBTrace.sysout("main; ERROR window.panelBarWaiter is not available");
+                if (!window.panelBarWaiter && FBTrace.DBG_ERRORS)
+                    FBTrace.sysout("main; ERROR window.panelBarWaiter is not available " +
+                        ", Firebug already initialized: " + Firebug.isInitialized);
 
                 if (window.panelBarWaiter)
                     window.panelBarWaiter.waitForPanelBar(ChromeFactory, null, connect);
