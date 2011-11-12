@@ -102,7 +102,7 @@ Firebug.CommandLine = Obj.extend(Firebug.Module,
                     successConsoleFunction, exceptionFunction);
             }
 
-            context.invalidatePanels('dom', 'html');
+            context.invalidatePanels("dom", "html");
         }
         catch (exc)  // XXX jjb, I don't expect this to be taken, the try here is for the finally
         {
@@ -223,7 +223,7 @@ Firebug.CommandLine = Obj.extend(Firebug.Module,
         }
 
         if (FBTrace.DBG_COMMANDLINE)
-            FBTrace.sysout("commandLine.evaluateByEventPassing \'"+expr+"\' using consoleHandler:",
+            FBTrace.sysout("commandLine.evaluateByEventPassing '"+expr+"' using consoleHandler:",
                 consoleHandler);
         try
         {
@@ -677,14 +677,14 @@ Firebug.CommandLine = Obj.extend(Firebug.Module,
         var commandLine = this.getSingleRowCommandLine(),
             commandEditor = this.getCommandEditor();
 
-        commandEditor.addEventListener('focus', this.onCommandLineFocus, true);
-        commandLine.addEventListener('focus', this.onCommandLineFocus, true);
-        commandLine.addEventListener('input', this.onCommandLineInput, true);
-        commandLine.addEventListener('overflow', this.onCommandLineOverflow, true);
-        commandLine.addEventListener('keyup', this.onCommandLineKeyUp, true);
-        commandLine.addEventListener('keydown', this.onCommandLineKeyDown, true);
-        commandLine.addEventListener('keypress', this.onCommandLineKeyPress, true);
-        commandLine.addEventListener('blur', this.onCommandLineBlur, true);
+        commandEditor.addEventListener("focus", this.onCommandLineFocus, true);
+        commandLine.addEventListener("focus", this.onCommandLineFocus, true);
+        commandLine.addEventListener("input", this.onCommandLineInput, true);
+        commandLine.addEventListener("overflow", this.onCommandLineOverflow, true);
+        commandLine.addEventListener("keyup", this.onCommandLineKeyUp, true);
+        commandLine.addEventListener("keydown", this.onCommandLineKeyDown, true);
+        commandLine.addEventListener("keypress", this.onCommandLineKeyPress, true);
+        commandLine.addEventListener("blur", this.onCommandLineBlur, true);
 
         Firebug.Console.addListener(this);  // to get onConsoleInjection
     },
@@ -694,14 +694,14 @@ Firebug.CommandLine = Obj.extend(Firebug.Module,
         var commandLine = this.getSingleRowCommandLine(),
             commandEditor = this.getCommandEditor();
 
-        commandEditor.removeEventListener('focus', this.onCommandLineFocus, true);
-        commandLine.removeEventListener('focus', this.onCommandLineFocus, true);
-        commandLine.removeEventListener('input', this.onCommandLineInput, true);
-        commandLine.removeEventListener('overflow', this.onCommandLineOverflow, true);
-        commandLine.removeEventListener('keyup', this.onCommandLineKeyUp, true);
-        commandLine.removeEventListener('keydown', this.onCommandLineKeyDown, true);
-        commandLine.removeEventListener('keypress', this.onCommandLineKeyPress, true);
-        commandLine.removeEventListener('blur', this.onCommandLineBlur, true);
+        commandEditor.removeEventListener("focus", this.onCommandLineFocus, true);
+        commandLine.removeEventListener("focus", this.onCommandLineFocus, true);
+        commandLine.removeEventListener("input", this.onCommandLineInput, true);
+        commandLine.removeEventListener("overflow", this.onCommandLineOverflow, true);
+        commandLine.removeEventListener("keyup", this.onCommandLineKeyUp, true);
+        commandLine.removeEventListener("keydown", this.onCommandLineKeyDown, true);
+        commandLine.removeEventListener("keypress", this.onCommandLineKeyPress, true);
+        commandLine.removeEventListener("blur", this.onCommandLineBlur, true);
     },
 
     destroyContext: function(context, persistedState)
@@ -899,7 +899,7 @@ Firebug.CommandLine = Obj.extend(Firebug.Module,
 
         if (!Firebug.migrations.commandLineTab)
         {
-            var textBox = Firebug.chrome.$('fbCommandLine');
+            var textBox = Firebug.chrome.$("fbCommandLine");
             textBox.value = "";
             textBox.select();
             Firebug.migrations.commandLineTab = true;
@@ -975,7 +975,7 @@ Firebug.CommandLine = Obj.extend(Firebug.Module,
 
     onPanelDisable: function(panelName)
     {
-        if (panelName != 'console')  // we don't care about other panels
+        if (panelName != "console")  // we don't care about other panels
             return;
 
         Dom.collapse(Firebug.chrome.$("fbCommandBox"), true);
@@ -1075,19 +1075,21 @@ Firebug.CommandLine.CommandHandler = Obj.extend(Object,
 
 Firebug.JSAutoCompleter = function(textBox, completionBox, showCompletionPopup)
 {
-    var completionBase = {
+    this.textBox = textBox;
+    this.completionBox = completionBox;
+    this.showCompletionPopup = showCompletionPopup;
+
+    this.completionBase = {
         pre: null,
         expr: null,
         candidates: []
     };
-    var completions = null;
+    this.completions = null;
 
-    var revertValue = null;
+    this.revertValue = null;
 
-    var completionPopup = Firebug.chrome.$("fbCommandLineCompletionList");
-    var selectedPopupElement = null;
-    var commandCompletionLineLimit = 40;
-
+    this.completionPopup = Firebug.chrome.$("fbCommandLineCompletionList");
+    this.selectedPopupElement = null;
 
     /**
      * If a completion was just performed, revert it. Otherwise do nothing.
@@ -1095,12 +1097,12 @@ Firebug.JSAutoCompleter = function(textBox, completionBox, showCompletionPopup)
      */
     this.revert = function(context)
     {
-        if (revertValue === null)
+        if (this.revertValue === null)
             return false;
 
-        textBox.value = revertValue;
-        var len = textBox.value.length;
-        setCursorToEOL(textBox);
+        this.textBox.value = this.revertValue;
+        var len = this.textBox.value.length;
+        setCursorToEOL(this.textBox);
 
         this.complete(context);
         return true;
@@ -1111,12 +1113,12 @@ Firebug.JSAutoCompleter = function(textBox, completionBox, showCompletionPopup)
      */
     this.hide = function()
     {
-        completionBase = {
+        this.completionBase = {
             pre: null,
             expr: null,
             candidates: []
         };
-        completions = null;
+        this.completions = null;
 
         this.showCompletions();
     };
@@ -1128,8 +1130,8 @@ Firebug.JSAutoCompleter = function(textBox, completionBox, showCompletionPopup)
      */
     this.hideForExpression = function()
     {
-        completionBase.candidates = [];
-        completions = null;
+        this.completionBase.candidates = [];
+        this.completions = null;
 
         this.showCompletions();
     };
@@ -1140,10 +1142,10 @@ Firebug.JSAutoCompleter = function(textBox, completionBox, showCompletionPopup)
      */
     this.acceptReturn = function()
     {
-        if (completions === null)
+        if (!this.completions)
             return true;
 
-        if (this.getCompletionBoxValue() === textBox.value)
+        if (this.getCompletionBoxValue() === this.textBox.value)
         {
             // The user wouldn't see a difference if we completed. This can
             // happen for example if you type 'alert' and press enter,
@@ -1160,7 +1162,7 @@ Firebug.JSAutoCompleter = function(textBox, completionBox, showCompletionPopup)
      */
     this.complete = function(context)
     {
-        revertValue = null;
+        this.revertValue = null;
         this.createCandidates(context);
         this.showCompletions();
     };
@@ -1171,14 +1173,14 @@ Firebug.JSAutoCompleter = function(textBox, completionBox, showCompletionPopup)
      */
     this.createCandidates = function(context)
     {
-        var offset = textBox.selectionStart;
-        if (offset !== textBox.value.length)
+        var offset = this.textBox.selectionStart;
+        if (offset !== this.textBox.value.length)
         {
             this.hide();
             return;
         }
 
-        var value = textBox.value;
+        var value = this.textBox.value;
 
         // Create a simplified expression by redacting contents/normalizing
         // delimiters of strings and regexes, to make parsing easier.
@@ -1207,21 +1209,21 @@ Firebug.JSAutoCompleter = function(textBox, completionBox, showCompletionPopup)
         var spreExpr = sparsed.substr(0, propertyStart);
         var preExpr = parsed.substr(0, propertyStart);
 
-        completionBase.pre = value.substr(0, parseStart);
+        this.completionBase.pre = value.substr(0, parseStart);
 
         if (FBTrace.DBG_COMMANDLINE)
         {
-            var sep = (parsed.indexOf('|') > -1) ? '^' : '|';
-            FBTrace.sysout('Completing: ' + completionBase.pre + sep + preExpr + sep + prop);
+            var sep = (parsed.indexOf("|") > -1) ? "^" : "|";
+            FBTrace.sysout("Completing: " + this.completionBase.pre + sep + preExpr + sep + prop);
         }
 
         // We only need to calculate a new candidate list if the expression has
-        // changed (we can ignore completionBase.pre since completions do not
+        // changed (we can ignore this.completionBase.pre since completions do not
         // depend upon that).
-        if (preExpr !== completionBase.expr)
+        if (preExpr !== this.completionBase.expr)
         {
-            completionBase.expr = preExpr;
-            completionBase.candidates = autoCompleteEval(context, preExpr, spreExpr);
+            this.completionBase.expr = preExpr;
+            this.completionBase.candidates = autoCompleteEval(context, preExpr, spreExpr);
         }
 
         this.createCompletions(prop);
@@ -1234,10 +1236,10 @@ Firebug.JSAutoCompleter = function(textBox, completionBox, showCompletionPopup)
      */
     this.createCompletions = function(prefix)
     {
-        var candidates = completionBase.candidates;
+        var candidates = this.completionBase.candidates;
         var valid = [];
 
-        if (!completionBase.expr && !prefix)
+        if (!this.completionBase.expr && !prefix)
         {
             // Don't complete "".
         }
@@ -1253,7 +1255,7 @@ Firebug.JSAutoCompleter = function(textBox, completionBox, showCompletionPopup)
 
         if (valid.length > 0)
         {
-            completions = {
+            this.completions = {
                 list: valid,
                 prefix: prefix
             };
@@ -1261,7 +1263,7 @@ Firebug.JSAutoCompleter = function(textBox, completionBox, showCompletionPopup)
         }
         else
         {
-            completions = null;
+            this.completions = null;
         }
     };
 
@@ -1273,13 +1275,13 @@ Firebug.JSAutoCompleter = function(textBox, completionBox, showCompletionPopup)
     this.pickDefaultCandidate = function()
     {
         var pick = 0;
-        var ar = completions.list;
+        var ar = this.completions.list;
         for (var i = 1; i < ar.length; i++)
         {
             if (ar[i].length < ar[pick].length)
                 pick = i;
         }
-        completions.index = pick;
+        this.completions.index = pick;
     };
 
     /**
@@ -1288,11 +1290,11 @@ Firebug.JSAutoCompleter = function(textBox, completionBox, showCompletionPopup)
      */
     this.cycle = function(dir)
     {
-        completions.index += dir;
-        if (completions.index >= completions.list.length)
-            completions.index = 0;
-        else if (completions.index < 0)
-            completions.index = completions.list.length - 1;
+        this.completions.index += dir;
+        if (this.completions.index >= this.completions.list.length)
+            this.completions.index = 0;
+        else if (this.completions.index < 0)
+            this.completions.index = this.completions.list.length - 1;
         this.showCompletions();
     };
 
@@ -1302,7 +1304,7 @@ Firebug.JSAutoCompleter = function(textBox, completionBox, showCompletionPopup)
      */
     this.getCurrentCompletion = function()
     {
-        return (completions ? completions.list[completions.index] : null);
+        return (this.completions ? this.completions.list[this.completions.index] : null);
     };
 
     /**
@@ -1313,8 +1315,8 @@ Firebug.JSAutoCompleter = function(textBox, completionBox, showCompletionPopup)
     {
         var completion = this.getCurrentCompletion();
         if (completion === null)
-            return textBox.value;
-        return completionBase.pre + completionBase.expr + completion;
+            return this.textBox.value;
+        return this.completionBase.pre + this.completionBase.expr + completion;
     };
 
     /**
@@ -1323,9 +1325,9 @@ Firebug.JSAutoCompleter = function(textBox, completionBox, showCompletionPopup)
      */
     this.showCompletions = function()
     {
-        completionBox.value = this.getCompletionBoxValue();
+        this.completionBox.value = this.getCompletionBoxValue();
 
-        if (showCompletionPopup && completions && completions.list.length > 1)
+        if (this.showCompletionPopup && this.completions && this.completions.list.length > 1)
             this.popupCandidates();
         else
             this.closePopup();
@@ -1344,7 +1346,7 @@ Firebug.JSAutoCompleter = function(textBox, completionBox, showCompletionPopup)
 
         if (event.keyCode === KeyEvent.DOM_VK_TAB && !Events.isControl(event))
         {
-            if (!completions)  // then no completions,
+            if (!this.completions)  // then no completions,
             {
                 if (clearedTabWarning) // then you were warned,
                     return false; //  pass TAB along
@@ -1360,8 +1362,8 @@ Firebug.JSAutoCompleter = function(textBox, completionBox, showCompletionPopup)
                 return true;
             }
         }
-        else if (event.keyCode === KeyEvent.DOM_VK_RIGHT && completions &&
-            textBox.selectionStart === textBox.value.length)
+        else if (event.keyCode === KeyEvent.DOM_VK_RIGHT && this.completions &&
+            this.textBox.selectionStart === this.textBox.value.length)
         {
             // Complete on right arrow at end of line.
             this.acceptCompletion();
@@ -1370,7 +1372,7 @@ Firebug.JSAutoCompleter = function(textBox, completionBox, showCompletionPopup)
         }
         else if (event.keyCode === KeyEvent.DOM_VK_ESCAPE)
         {
-            if (completions)
+            if (this.completions)
             {
                 this.hideForExpression();
                 Events.cancelEvent(event); // Stop event bubbling if it was used to close the popup.
@@ -1379,7 +1381,7 @@ Firebug.JSAutoCompleter = function(textBox, completionBox, showCompletionPopup)
         }
         else if (event.keyCode === KeyEvent.DOM_VK_UP || event.keyCode === KeyEvent.DOM_VK_DOWN)
         {
-            if (completions)
+            if (this.completions)
             {
                 this.cycle((event.keyCode === KeyEvent.DOM_VK_UP ? -1 : 1));
                 Events.cancelEvent(event);
@@ -1394,7 +1396,7 @@ Firebug.JSAutoCompleter = function(textBox, completionBox, showCompletionPopup)
      */
     this.handleKeyDown = function(event, context)
     {
-        if (event.keyCode === KeyEvent.DOM_VK_ESCAPE && completions)
+        if (event.keyCode === KeyEvent.DOM_VK_ESCAPE && this.completions)
         {
             // Close the completion popup on escape in keydown, so that the popup
             // does not close itself and prevent event propagation on keypress.
@@ -1406,7 +1408,7 @@ Firebug.JSAutoCompleter = function(textBox, completionBox, showCompletionPopup)
     {
         if (this.tabWarning)
         {
-            completionBox.value = "";
+            this.completionBox.value = "";
             delete this.tabWarning;
             return true;
         }
@@ -1415,7 +1417,8 @@ Firebug.JSAutoCompleter = function(textBox, completionBox, showCompletionPopup)
 
     this.setTabWarning = function()
     {
-        completionBox.value = textBox.value + "    " + Locale.$STR("firebug.completion.empty");
+        this.completionBox.value = this.textBox.value + "    " +
+                                Locale.$STR("firebug.completion.empty");
         this.tabWarning = true;
     };
 
@@ -1425,38 +1428,42 @@ Firebug.JSAutoCompleter = function(textBox, completionBox, showCompletionPopup)
     this.acceptCompletion = function()
     {
         var completion = this.getCurrentCompletion();
-        completion = adjustCompletionOnAccept(completionBase.pre, completionBase.expr, completion);
+        completion = adjustCompletionOnAccept(this.completionBase.pre,
+                this.completionBase.expr, completion);
 
-        var originalValue = textBox.value;
-        textBox.value = completion;
-        setCursorToEOL(textBox);
+        var originalValue = this.textBox.value;
+        this.textBox.value = completion;
+        setCursorToEOL(this.textBox);
 
         this.hide();
-        revertValue = originalValue;
+        this.revertValue = originalValue;
     };
 
     this.popupCandidates = function()
     {
-        Dom.eraseNode(completionPopup);
-        selectedPopupElement = null;
+        var commandCompletionLineLimit = 40;
 
-        var vbox = completionPopup.ownerDocument.createElement("vbox");
-        completionPopup.appendChild(vbox);
+        Dom.eraseNode(this.completionPopup);
+        this.selectedPopupElement = null;
+
+        var vbox = this.completionPopup.ownerDocument.createElement("vbox");
+        this.completionPopup.appendChild(vbox);
         vbox.classList.add("fbCommandLineCompletions");
 
-        var title = completionPopup.ownerDocument.createElementNS("http://www.w3.org/1999/xhtml","div");
+        var title = this.completionPopup.ownerDocument.
+                    createElementNS("http://www.w3.org/1999/xhtml","div");
         title.innerHTML = Locale.$STR("console.Use Arrow keys or Enter");
-        title.classList.add('fbPopupTitle');
+        title.classList.add("fbPopupTitle");
         vbox.appendChild(title);
 
-        var escPrefix = Str.escapeForTextNode(textBox.value);
+        var escPrefix = Str.escapeForTextNode(this.textBox.value);
 
         var showTop = 0;
-        var showBottom = completions.list.length;
-        if (completions.list.length > commandCompletionLineLimit)
+        var showBottom = this.completions.list.length;
+        if (this.completions.list.length > commandCompletionLineLimit)
         {
 
-            if (completions.index <= (commandCompletionLineLimit - 3) )
+            if (this.completions.index <= (commandCompletionLineLimit - 3) )
             {
                 // We are in the top part of the list.
                 showBottom = commandCompletionLineLimit;
@@ -1464,13 +1471,13 @@ Firebug.JSAutoCompleter = function(textBox, completionBox, showCompletionPopup)
             else
             {
                 // Implement manual scrolling.
-                if (completions.index > (completions.list.length - 3) )
+                if (this.completions.index > (this.completions.list.length - 3) )
                 {
-                    showBottom = completions.list.length;
+                    showBottom = this.completions.list.length;
                 }
                 else
                 {
-                    showBottom = completions.index + 3;
+                    showBottom = this.completions.index + 3;
                 }
             }
             showTop = showBottom - commandCompletionLineLimit;
@@ -1478,40 +1485,43 @@ Firebug.JSAutoCompleter = function(textBox, completionBox, showCompletionPopup)
 
         for (var i = showTop; i < showBottom; i++)
         {
-            var hbox = completionPopup.ownerDocument.createElementNS("http://www.w3.org/1999/xhtml","div");
+            var hbox = this.completionPopup.ownerDocument.
+                        createElementNS("http://www.w3.org/1999/xhtml","div");
             hbox.completionIndex = i;
 
-            var pre = completionPopup.ownerDocument.createElementNS("http://www.w3.org/1999/xhtml","span");
+            var pre = this.completionPopup.ownerDocument.
+                        createElementNS("http://www.w3.org/1999/xhtml","span");
             pre.innerHTML = escPrefix;
             pre.classList.add("userTypedText");
 
-            var completion = completions.list[i].substr(completions.prefix.length);
-            var post = completionPopup.ownerDocument.createElementNS("http://www.w3.org/1999/xhtml","span");
+            var completion = this.completions.list[i].substr(this.completions.prefix.length);
+            var post = this.completionPopup.ownerDocument.
+                        createElementNS("http://www.w3.org/1999/xhtml","span");
             post.innerHTML = Str.escapeForTextNode(completion);
             post.classList.add("completionText");
-            if (i === completions.index)
-                selectedPopupElement = hbox;
+            if (i === this.completions.index)
+                this.selectedPopupElement = hbox;
 
             hbox.appendChild(pre);
             hbox.appendChild(post);
             vbox.appendChild(hbox);
         }
 
-        if (selectedPopupElement)
-            selectedPopupElement.setAttribute('selected', 'true');
+        if (this.selectedPopupElement)
+            this.selectedPopupElement.setAttribute("selected", "true");
         this.linuxFocusHack = true;
         setTimeout(this.focusHack, 10);
-        completionPopup.openPopup(textBox, "before_start", 0, 0, false, false);
+        this.completionPopup.openPopup(this.textBox, "before_start", 0, 0, false, false);
     };
 
     this.closePopup = function()
     {
-        if (completionPopup.state == "closed")
+        if (this.completionPopup.state == "closed")
             return;
 
         try
         {
-            completionPopup.hidePopup();
+            this.completionPopup.hidePopup();
         }
         catch (err)
         {
@@ -1534,13 +1544,13 @@ Firebug.JSAutoCompleter = function(textBox, completionBox, showCompletionPopup)
         if (!el)
             return;
 
-        if (selectedPopupElement)
-            selectedPopupElement.removeAttribute('selected');
+        if (this.selectedPopupElement)
+            this.selectedPopupElement.removeAttribute("selected");
 
-        selectedPopupElement = el;
-        selectedPopupElement.setAttribute('selected', 'true');
-        completions.index = el.completionIndex;
-        completionBox.value = this.getCompletionBoxValue();
+        this.selectedPopupElement = el;
+        this.selectedPopupElement.setAttribute("selected", "true");
+        this.completions.index = el.completionIndex;
+        this.completionBox.value = this.getCompletionBoxValue();
     };
 
     this.popupClick = function(event)
@@ -1549,7 +1559,7 @@ Firebug.JSAutoCompleter = function(textBox, completionBox, showCompletionPopup)
         if (!el)
             return;
 
-        completions.index = el.completionIndex;
+        this.completions.index = el.completionIndex;
         this.acceptCompletion();
     };
 
@@ -1561,7 +1571,7 @@ Firebug.JSAutoCompleter = function(textBox, completionBox, showCompletionPopup)
         if (this.linuxFocusHack)
         {
             // XXXjjb This does not work, but my experience with focus is that it usually does not work.
-            textBox.focus();
+            this.textBox.focus();
             delete this.linuxFocusHack;
         }
     };
@@ -1572,13 +1582,13 @@ Firebug.JSAutoCompleter = function(textBox, completionBox, showCompletionPopup)
      */
     this.shutdown = function()
     {
-        completionBox.value = "";
-        completionPopup.removeEventListener("mousedown", this.popupMousedown, true);
-        completionPopup.removeEventListener("click", this.popupClick, true);
+        this.completionBox.value = "";
+        this.completionPopup.removeEventListener("mousedown", this.popupMousedown, true);
+        this.completionPopup.removeEventListener("click", this.popupClick, true);
     };
 
-    completionPopup.addEventListener("mousedown", this.popupMousedown, true);
-    completionPopup.addEventListener("click", this.popupClick, true);
+    this.completionPopup.addEventListener("mousedown", this.popupMousedown, true);
+    this.completionPopup.addEventListener("click", this.popupClick, true);
 };
 
 
@@ -1617,9 +1627,9 @@ function getExpressionOffset(command)
     if (lastBr !== -1 && /^" *$/.test(command.substr(lastBr+1)))
         start = lastBr;
 
-    while (start --> 0)
+    for (var i = start-1; i >= 0; --i)
     {
-        var c = command[start];
+        var c = command[i];
         if (reOpenBracket.test(c))
         {
             if (bracketCount)
@@ -1629,8 +1639,8 @@ function getExpressionOffset(command)
         }
         else if (reCloseBracket.test(c))
         {
-            var next = command[start + 1];
-            if (bracketCount === 0 && next !== '.' && next !== '[')
+            var next = command[i + 1];
+            if (bracketCount === 0 && next !== "." && next !== "[")
                 break;
             else
                 ++bracketCount;
@@ -1638,21 +1648,21 @@ function getExpressionOffset(command)
         else if (bracketCount === 0)
         {
             if (c === '"') instr = !instr;
-            else if (!instr && !reJSChar.test(c) && c !== '.')
+            else if (!instr && !reJSChar.test(c) && c !== ".")
                 break;
         }
     }
-    ++start;
+    ++i;
 
     // The 'new' operator has higher precedence than function calls, so, if
     // present, it should be included if the expression contains a parenthesis.
-    if (start-4 >= 0 && command.indexOf('(', start) !== -1 &&
-            command.substr(start-4, 4) === 'new ')
+    if (i-4 >= 0 && command.indexOf("(", i) !== -1 &&
+            command.substr(i-4, 4) === "new ")
     {
-        start -= 4;
+        i -= 4;
     }
 
-    return start;
+    return i;
 }
 
 /**
@@ -1678,46 +1688,46 @@ function getPropertyOffset(expr)
  */
 function prevNonWs(str, from)
 {
-    while (from --> 0)
+    for (var i = from-1; i >= 0; --i)
     {
-        if (str.charAt(from) !== ' ')
-            return from;
+        if (str.charAt(i) !== " ")
+            return i;
     }
     return -1;
 }
 
 /**
- * Find the start of a white-space delimited word, if str[from] is the last
- * character in the word. (This can be used together with prevNonWs to traverse
- * words backwards from a position.)
+ * Find the start of a word consisting of characters matching reJSChar, if
+ * str[from] is the last character in the word. (This can be used together
+ * with prevNonWs to traverse words backwards from a position.)
  */
 function prevWord(str, from)
 {
-    while (from --> 0)
+    for (var i = from-1; i >= 0; --i)
     {
-        if (!reJSChar.test(str.charAt(from)))
-            break;
+        if (!reJSChar.test(str.charAt(i)))
+            return i+1;
     }
-    return from + 1;
+    return 0;
 }
 
 function isFunctionName(expr, pos)
 {
     pos -= 9;
-    return (pos >= 0 && expr.substr(pos, 9) === 'function ' &&
+    return (pos >= 0 && expr.substr(pos, 9) === "function " &&
             (pos === 0 || !reJSChar.test(expr.charAt(pos-1))));
 }
 
 function bwFindMatchingParen(expr, from)
 {
     var bcount = 1;
-    while (from --> 0)
+    for (var i = from-1; i >= 0; --i)
     {
-        if (reCloseBracket.test(expr.charAt(from)))
+        if (reCloseBracket.test(expr.charAt(i)))
             ++bcount;
-        else if (reOpenBracket.test(expr.charAt(from)))
+        else if (reOpenBracket.test(expr.charAt(i)))
             if (--bcount === 0)
-                return from;
+                return i;
     }
     return -1;
 }
@@ -1728,11 +1738,11 @@ function bwFindMatchingParen(expr, from)
  */
 function endingDivIsRegex(expr)
 {
-    var kwActions = ['throw', 'return', 'in', 'instanceof', 'delete', 'new',
-        'do', 'else', 'typeof', 'void', 'yield'];
-    var kwCont = ['function', 'if', 'while', 'for', 'switch', 'catch', 'with'];
+    var kwActions = ["throw", "return", "in", "instanceof", "delete", "new",
+        "do", "else", "typeof", "void", "yield"];
+    var kwCont = ["function", "if", "while", "for", "switch", "catch", "with"];
 
-    var ind = prevNonWs(expr, expr.length), ch = (ind === -1 ? '{' : expr.charAt(ind));
+    var ind = prevNonWs(expr, expr.length), ch = (ind === -1 ? "{" : expr.charAt(ind));
     if (reJSChar.test(ch))
     {
         // Test if the previous word is a keyword usable like 'kw <expr>'.
@@ -1741,7 +1751,7 @@ function endingDivIsRegex(expr)
         var w = expr.substring(prevWord(expr, ind), ind+1);
         return (kwActions.indexOf(w) !== -1);
     }
-    else if (ch === ')')
+    else if (ch === ")")
     {
         // We have a regex in the cases 'if (...) /blah/' and 'function name(...) /blah/'.
         ind = bwFindMatchingParen(expr, ind);
@@ -1757,29 +1767,29 @@ function endingDivIsRegex(expr)
             return true;
         return isFunctionName(expr, wind);
     }
-    else if (ch === ']')
+    else if (ch === "]")
     {
         return false;
     }
     return true;
 }
 
-// Check if a '{' in an expression is an object declaration.
+// Check if a "{" in an expression is an object declaration.
 function isObjectDecl(expr, pos)
 {
     var ind = prevNonWs(expr, pos);
     if (ind === -1)
         return false;
     var ch = expr.charAt(ind);
-    return !(ch === ')' || ch === '{' || ch === '}' || ch === ';');
+    return !(ch === ")" || ch === "{" || ch === "}" || ch === ";");
 }
 
 function isCommaProp(expr, start)
 {
-    var beg = expr.lastIndexOf(',')+1;
+    var beg = expr.lastIndexOf(",")+1;
     if (beg < start)
         beg = start;
-    while (expr.charAt(beg) === ' ')
+    while (expr.charAt(beg) === " ")
         ++beg;
     var prop = expr.substr(beg);
     return isValidProperty(prop);
@@ -1787,7 +1797,7 @@ function isCommaProp(expr, start)
 
 function simplifyExpr(expr)
 {
-    var ret = '', len = expr.length, instr = false, strend, inreg = false, inclass, brackets = [];
+    var ret = "", len = expr.length, instr = false, strend, inreg = false, inclass, brackets = [];
 
     for (var i = 0; i < len; ++i)
     {
@@ -1801,39 +1811,39 @@ function simplifyExpr(expr)
             }
             else
             {
-                if (ch === '\\' && i+1 !== len)
+                if (ch === "\\" && i+1 !== len)
                 {
-                    ret += ' ';
+                    ret += " ";
                     ++i;
                 }
-                ret += ' ';
+                ret += " ";
             }
         }
         else if (inreg)
         {
-            if (inclass && ch === ']')
+            if (inclass && ch === "]")
                 inclass = false;
-            else if (!inclass && ch === '[')
+            else if (!inclass && ch === "[")
                 inclass = true;
-            else if (!inclass && ch === '/')
+            else if (!inclass && ch === "/")
             {
                 // End of regex, eat regex flags
                 inreg = false;
                 while (i+1 !== len && reJSChar.test(expr.charAt(i+1)))
                 {
-                    ret += ' ';
+                    ret += " ";
                     ++i;
                 }
                 ret += '"';
             }
             if (inreg)
             {
-                if (ch === '\\' && i+1 !== len)
+                if (ch === "\\" && i+1 !== len)
                 {
-                    ret += ' ';
+                    ret += " ";
                     ++i;
                 }
-                ret += ' ';
+                ret += " ";
             }
         }
         else
@@ -1844,7 +1854,7 @@ function simplifyExpr(expr)
                 strend = ch;
                 ret += '"';
             }
-            else if (ch === '/')
+            else if (ch === "/")
             {
                 var re = endingDivIsRegex(ret);
                 if (re === null)
@@ -1855,7 +1865,7 @@ function simplifyExpr(expr)
                     ret += '"';
                 }
                 else
-                    ret += '/';
+                    ret += "/";
             }
             else
             {
@@ -1867,11 +1877,11 @@ function simplifyExpr(expr)
                     if (!brackets.length)
                         return null;
                     var br = brackets.pop();
-                    if (br === '(' && ch !== ')')
+                    if (br === "(" && ch !== ")")
                         return null;
-                    if (br === '[' && ch !== ']')
+                    if (br === "[" && ch !== "]")
                         return null;
-                    if (br === '{' && ch !== '}')
+                    if (br === "{" && ch !== "}")
                         return null;
                 }
                 ret += ch;
@@ -1890,15 +1900,15 @@ function killCompletions(expr, origExpr)
         return true;
 
     if (reJSChar.test(expr[expr.length-1]) ||
-            expr[expr.length-1] === '.')
+            expr[expr.length-1] === ".")
     {
         // An expression at the end - we're fine.
     }
     else
     {
-        var lastBr = expr.lastIndexOf('[');
+        var lastBr = expr.lastIndexOf("[");
         if (lastBr !== -1 && /^" *$/.test(expr.substr(lastBr+1)) &&
-            origExpr.charAt(lastBr+1) !== '/')
+            origExpr.charAt(lastBr+1) !== "/")
         {
             // Array completions - we're fine.
         }
@@ -1908,20 +1918,20 @@ function killCompletions(expr, origExpr)
     }
 
     // Check for 'function i'.
-    var ind = expr.lastIndexOf(' ');
+    var ind = expr.lastIndexOf(" ");
     if (isValidProperty(expr.substr(ind+1)) && isFunctionName(expr, ind+1))
         return true;
 
     // Check for '{prop: ..., i'.
     var bwp = bwFindMatchingParen(expr, expr.length);
-    if (bwp !== -1 && expr.charAt(bwp) === '{' &&
+    if (bwp !== -1 && expr.charAt(bwp) === "{" &&
             isObjectDecl(expr, bwp) && isCommaProp(expr, bwp+1))
     {
         return true;
     }
 
     // Check for 'var prop..., i'.
-    var vind = expr.lastIndexOf('var ');
+    var vind = expr.lastIndexOf("var ");
     if (bwp < vind && isCommaProp(expr, vind+4))
     {
         // Note: This doesn't strictly work, because it kills completions even
@@ -1932,7 +1942,7 @@ function killCompletions(expr, origExpr)
     }
 
     // Check for 'function f(i'.
-    while (bwp !== -1 && expr.charAt(bwp) !== '(')
+    while (bwp !== -1 && expr.charAt(bwp) !== "(")
     {
         bwp = bwFindMatchingParen(expr, bwp);
     }
@@ -1942,10 +1952,10 @@ function killCompletions(expr, origExpr)
         if (ind !== -1)
         {
             var stw = prevWord(expr, ind);
-            if (expr.substring(stw, ind+1) === 'function')
+            if (expr.substring(stw, ind+1) === "function")
                 return true;
             ind = prevNonWs(expr, stw);
-            if (ind !== -1 && expr.substring(prevWord(expr, ind), ind+1) === 'function')
+            if (ind !== -1 && expr.substring(prevWord(expr, ind), ind+1) === "function")
                 return true;
         }
     }
@@ -1984,204 +1994,204 @@ function adjustCompletionOnAccept(preParsed, preExpr, property)
 // object to make it more easily extensible.
 
 Firebug.CommandLine.AutoCompletionKnownTypes = {
-    'void': {
-        '_fb_ignorePrototype': true
+    "void": {
+        "_fb_ignorePrototype": true
     },
-    'Array': {
-        'pop': '|void',
-        'push': '|void',
-        'shift': '|void',
-        'unshift': '|void',
-        'reverse': '|Array',
-        'sort': '|Array',
-        'splice': '|Array',
-        'concat': '|Array',
-        'slice': '|Array',
-        'join': '|String',
-        'indexOf': '|Number',
-        'lastIndexOf': '|Number',
-        'filter': '|Array',
-        'map': '|Array',
-        'reduce': '|void',
-        'reduceRight': '|void',
-        'every': '|void',
-        'forEach': '|void',
-        'some': '|void',
-        'length': 'Number'
+    "Array": {
+        "pop": "|void",
+        "push": "|void",
+        "shift": "|void",
+        "unshift": "|void",
+        "reverse": "|Array",
+        "sort": "|Array",
+        "splice": "|Array",
+        "concat": "|Array",
+        "slice": "|Array",
+        "join": "|String",
+        "indexOf": "|Number",
+        "lastIndexOf": "|Number",
+        "filter": "|Array",
+        "map": "|Array",
+        "reduce": "|void",
+        "reduceRight": "|void",
+        "every": "|void",
+        "forEach": "|void",
+        "some": "|void",
+        "length": "Number"
     },
-    'String': {
-        '_fb_contType': 'String',
-        'split': '|Array',
-        'substr': '|String',
-        'substring': '|String',
-        'charAt': '|String',
-        'charCodeAt': '|String',
-        'concat': '|String',
-        'indexOf': '|Number',
-        'lastIndexOf': '|Number',
-        'localeCompare': '|Number',
-        'match': '|Array',
-        'search': '|Number',
-        'slice': '|String',
-        'replace': '|String',
-        'toLowerCase': '|String',
-        'toLocaleLowerCase': '|String',
-        'toUpperCase': '|String',
-        'toLocaleUpperCase': '|String',
-        'trim': '|String',
-        'length': 'Number'
+    "String": {
+        "_fb_contType": "String",
+        "split": "|Array",
+        "substr": "|String",
+        "substring": "|String",
+        "charAt": "|String",
+        "charCodeAt": "|String",
+        "concat": "|String",
+        "indexOf": "|Number",
+        "lastIndexOf": "|Number",
+        "localeCompare": "|Number",
+        "match": "|Array",
+        "search": "|Number",
+        "slice": "|String",
+        "replace": "|String",
+        "toLowerCase": "|String",
+        "toLocaleLowerCase": "|String",
+        "toUpperCase": "|String",
+        "toLocaleUpperCase": "|String",
+        "trim": "|String",
+        "length": "Number"
     },
-    'RegExp': {
-        'test': '|void',
-        'exec': '|Array',
-        'lastIndex': 'Number',
-        'ignoreCase': 'void',
-        'global': 'void',
-        'multiline': 'void',
-        'source': 'String'
+    "RegExp": {
+        "test": "|void",
+        "exec": "|Array",
+        "lastIndex": "Number",
+        "ignoreCase": "void",
+        "global": "void",
+        "multiline": "void",
+        "source": "String"
     },
-    'Date': {
-        'getTime': '|Number',
-        'getYear': '|Number',
-        'getFullYear': '|Number',
-        'getMonth': '|Number',
-        'getDate': '|Number',
-        'getDay': '|Number',
-        'getHours': '|Number',
-        'getMinutes': '|Number',
-        'getSeconds': '|Number',
-        'getMilliseconds': '|Number',
-        'getUTCFullYear': '|Number',
-        'getUTCMonth': '|Number',
-        'getUTCDate': '|Number',
-        'getUTCDay': '|Number',
-        'getUTCHours': '|Number',
-        'getUTCMinutes': '|Number',
-        'getUTCSeconds': '|Number',
-        'getUTCMilliseconds': '|Number',
-        'setTime': '|void',
-        'setYear': '|void',
-        'setFullYear': '|void',
-        'setMonth': '|void',
-        'setDate': '|void',
-        'setHours': '|void',
-        'setMinutes': '|void',
-        'setSeconds': '|void',
-        'setMilliseconds': '|void',
-        'setUTCFullYear': '|void',
-        'setUTCMonth': '|void',
-        'setUTCDate': '|void',
-        'setUTCHours': '|void',
-        'setUTCMinutes': '|void',
-        'setUTCSeconds': '|void',
-        'setUTCMilliseconds': '|void',
-        'toUTCString': '|String',
-        'toLocaleDateString': '|String',
-        'toLocaleTimeString': '|String',
-        'toLocaleFormat': '|String',
-        'toDateString': '|String',
-        'toTimeString': '|String',
-        'toISOString': '|String',
-        'toGMTString': '|String',
-        'toJSON': '|String',
-        'toString': '|String',
-        'toLocaleString': '|String',
-        'getTimezoneOffset': '|Number'
+    "Date": {
+        "getTime": "|Number",
+        "getYear": "|Number",
+        "getFullYear": "|Number",
+        "getMonth": "|Number",
+        "getDate": "|Number",
+        "getDay": "|Number",
+        "getHours": "|Number",
+        "getMinutes": "|Number",
+        "getSeconds": "|Number",
+        "getMilliseconds": "|Number",
+        "getUTCFullYear": "|Number",
+        "getUTCMonth": "|Number",
+        "getUTCDate": "|Number",
+        "getUTCDay": "|Number",
+        "getUTCHours": "|Number",
+        "getUTCMinutes": "|Number",
+        "getUTCSeconds": "|Number",
+        "getUTCMilliseconds": "|Number",
+        "setTime": "|void",
+        "setYear": "|void",
+        "setFullYear": "|void",
+        "setMonth": "|void",
+        "setDate": "|void",
+        "setHours": "|void",
+        "setMinutes": "|void",
+        "setSeconds": "|void",
+        "setMilliseconds": "|void",
+        "setUTCFullYear": "|void",
+        "setUTCMonth": "|void",
+        "setUTCDate": "|void",
+        "setUTCHours": "|void",
+        "setUTCMinutes": "|void",
+        "setUTCSeconds": "|void",
+        "setUTCMilliseconds": "|void",
+        "toUTCString": "|String",
+        "toLocaleDateString": "|String",
+        "toLocaleTimeString": "|String",
+        "toLocaleFormat": "|String",
+        "toDateString": "|String",
+        "toTimeString": "|String",
+        "toISOString": "|String",
+        "toGMTString": "|String",
+        "toJSON": "|String",
+        "toString": "|String",
+        "toLocaleString": "|String",
+        "getTimezoneOffset": "|Number"
     },
-    'Function': {
-        'call': '|void',
-        'apply': '|void',
-        'length': 'Number',
-        'prototype': 'void'
+    "Function": {
+        "call": "|void",
+        "apply": "|void",
+        "length": "Number",
+        "prototype": "void"
     },
-    'HTMLElement': {
-        'getElementsByClassName': '|NodeList',
-        'getElementsByTagName': '|NodeList',
-        'getElementsByTagNameNS': '|NodeList',
-        'querySelector': '|HTMLElement',
-        'querySelectorAll': '|NodeList',
-        'firstChild': 'HTMLElement',
-        'lastChild': 'HTMLElement',
-        'firstElementChild': 'HTMLElement',
-        'lastElementChild': 'HTMLElement',
-        'parentNode': 'HTMLElement',
-        'previousSibling': 'HTMLElement',
-        'nextSibling': 'HTMLElement',
-        'previousElementSibling': 'HTMLElement',
-        'nextElementSibling': 'HTMLElement',
-        'children': 'NodeList',
-        'childNodes': 'NodeList'
+    "HTMLElement": {
+        "getElementsByClassName": "|NodeList",
+        "getElementsByTagName": "|NodeList",
+        "getElementsByTagNameNS": "|NodeList",
+        "querySelector": "|HTMLElement",
+        "querySelectorAll": "|NodeList",
+        "firstChild": "HTMLElement",
+        "lastChild": "HTMLElement",
+        "firstElementChild": "HTMLElement",
+        "lastElementChild": "HTMLElement",
+        "parentNode": "HTMLElement",
+        "previousSibling": "HTMLElement",
+        "nextSibling": "HTMLElement",
+        "previousElementSibling": "HTMLElement",
+        "nextElementSibling": "HTMLElement",
+        "children": "NodeList",
+        "childNodes": "NodeList"
     },
-    'NodeList': {
-        '_fb_contType': 'HTMLElement',
-        'length': 'Number',
-        'item': '|HTMLElement',
-        'namedItem': '|HTMLElement'
+    "NodeList": {
+        "_fb_contType": "HTMLElement",
+        "length": "Number",
+        "item": "|HTMLElement",
+        "namedItem": "|HTMLElement"
     },
-    'Window': {
-        'encodeURI': '|String',
-        'encodeURIComponent': '|String',
-        'decodeURI': '|String',
-        'decodeURIComponent': '|String',
-        'eval': '|void',
-        'parseInt': '|Number',
-        'parseFloat': '|Number',
-        'isNaN': '|void',
-        'isFinite': '|void',
-        'NaN': 'Number',
-        'Math': 'Math',
-        'undefined': 'void',
-        'Infinity': 'Number'
+    "Window": {
+        "encodeURI": "|String",
+        "encodeURIComponent": "|String",
+        "decodeURI": "|String",
+        "decodeURIComponent": "|String",
+        "eval": "|void",
+        "parseInt": "|Number",
+        "parseFloat": "|Number",
+        "isNaN": "|void",
+        "isFinite": "|void",
+        "NaN": "Number",
+        "Math": "Math",
+        "undefined": "void",
+        "Infinity": "Number"
     },
-    'HTMLDocument': {
-        'querySelector': '|HTMLElement',
-        'querySelectorAll': '|NodeList'
+    "HTMLDocument": {
+        "querySelector": "|HTMLElement",
+        "querySelectorAll": "|NodeList"
     },
-    'Math': {
-        'E': 'Number',
-        'LN2': 'Number',
-        'LN10': 'Number',
-        'LOG2E': 'Number',
-        'LOG10E': 'Number',
-        'PI': 'Number',
-        'SQRT1_2': 'Number',
-        'SQRT2': 'Number',
-        'abs': '|Number',
-        'acos': '|Number',
-        'asin': '|Number',
-        'atan': '|Number',
-        'atan2': '|Number',
-        'ceil': '|Number',
-        'cos': '|Number',
-        'exp': '|Number',
-        'floor': '|Number',
-        'log': '|Number',
-        'max': '|Number',
-        'min': '|Number',
-        'pow': '|Number',
-        'random': '|Number',
-        'round': '|Number',
-        'sin': '|Number',
-        'sqrt': '|Number',
-        'tan': '|Number'
+    "Math": {
+        "E": "Number",
+        "LN2": "Number",
+        "LN10": "Number",
+        "LOG2E": "Number",
+        "LOG10E": "Number",
+        "PI": "Number",
+        "SQRT1_2": "Number",
+        "SQRT2": "Number",
+        "abs": "|Number",
+        "acos": "|Number",
+        "asin": "|Number",
+        "atan": "|Number",
+        "atan2": "|Number",
+        "ceil": "|Number",
+        "cos": "|Number",
+        "exp": "|Number",
+        "floor": "|Number",
+        "log": "|Number",
+        "max": "|Number",
+        "min": "|Number",
+        "pow": "|Number",
+        "random": "|Number",
+        "round": "|Number",
+        "sin": "|Number",
+        "sqrt": "|Number",
+        "tan": "|Number"
     },
-    'Number': {
+    "Number": {
         // There are also toFixed and valueOf, but they are left out because
         // they steal focus from toString by being shorter (in the case of
         // toFixed), and because they are used very seldom.
-        'toExponential': '|String',
-        'toPrecision': '|String',
-        'toLocaleString': '|String',
-        'toString': '|String'
+        "toExponential": "|String",
+        "toPrecision": "|String",
+        "toLocaleString": "|String",
+        "toString": "|String"
     }
 };
 
 var LinkType = {
-    'PROPERTY': 0,
-    'INDEX': 1,
-    'CALL': 2,
-    'SAFECALL': 3,
-    'RETVAL_HEURISTIC': 4
+    "PROPERTY": 0,
+    "INDEX": 1,
+    "CALL": 2,
+    "SAFECALL": 3,
+    "RETVAL_HEURISTIC": 4
 };
 
 function getKnownType(t)
@@ -2194,9 +2204,9 @@ function getKnownType(t)
 
 function getKnownTypeInfo(r)
 {
-    if (r.charAt(0) === '|')
-        return {'val': 'Function', 'ret': r.substr(1)};
-    return {'val': r};
+    if (r.charAt(0) === "|")
+        return {"val": "Function", "ret": r.substr(1)};
+    return {"val": r};
 }
 
 function getFakeCompleteKeys(name)
@@ -2205,7 +2215,7 @@ function getFakeCompleteKeys(name)
     if (!type)
         return ret;
     for (var prop in type) {
-        if (prop.substr(0, 4) !== '_fb_')
+        if (prop.substr(0, 4) !== "_fb_")
             ret.push(prop);
     }
     return ret;
@@ -2238,9 +2248,9 @@ function getTypeExtractionExpression(command)
     // Return a JavaScript expression for determining the type / [[Class]] of
     // an object given by another JavaScript expression. For DOM nodes, return
     // HTMLElement instead of HTML[node type]Element, for simplicity.
-    var ret = '(function() { var v = ' + command + '; ';
-    ret += 'if (window.HTMLElement && v instanceof HTMLElement) return "HTMLElement"; ';
-    ret += 'return Object.prototype.toString.call(v).slice(8, -1);})()';
+    var ret = "(function() { var v = " + command + "; ";
+    ret += "if (window.HTMLElement && v instanceof HTMLElement) return 'HTMLElement'; ";
+    ret += "return Object.prototype.toString.call(v).slice(8, -1);})()";
     return ret;
 }
 
@@ -2266,16 +2276,16 @@ function propChainBuildComplete(out, context, tempExpr, result)
         var name = tempExpr.value.val;
         complete = getFakeCompleteKeys(name);
         if (!getKnownType(name)._fb_ignorePrototype)
-            command = name + '.prototype';
+            command = name + ".prototype";
     }
     else
     {
-        if (typeof result === 'string')
+        if (typeof result === "string")
         {
             // Strings only have indices as properties, use the fake object
             // completions instead.
             tempExpr.fake = true;
-            tempExpr.value = getKnownTypeInfo('String');
+            tempExpr.value = getKnownTypeInfo("String");
             propChainBuildComplete(out, context, tempExpr);
             return;
         }
@@ -2316,7 +2326,7 @@ function propChainBuildComplete(out, context, tempExpr, result)
                 }
                 else
                 {
-                    if (typeof result === 'string' && getKnownType(result))
+                    if (typeof result === "string" && getKnownType(result))
                     {
                         complete = complete.concat(getFakeCompleteKeys(result));
                     }
@@ -2348,7 +2358,7 @@ function evalPropChainStep(step, tempExpr, evalChain, out, context)
             // would be possible to continue with a 'real' expression of
             // `tempExpr.value.val`.prototype, but since prototypes seldom
             // contain actual values of things this doesn't work very well.
-            var mem = (type === LinkType.INDEX ? '_fb_contType' : link.name);
+            var mem = (type === LinkType.INDEX ? "_fb_contType" : link.name);
             var t = getKnownType(tempExpr.value.val);
             if (t.hasOwnProperty(mem))
                 tempExpr.value = getKnownTypeInfo(t[mem]);
@@ -2374,21 +2384,21 @@ function evalPropChainStep(step, tempExpr, evalChain, out, context)
             if (type === LinkType.PROPERTY)
             {
                 tempExpr.thisCommand = tempExpr.command;
-                tempExpr.command += '.' + link.name;
+                tempExpr.command += "." + link.name;
             }
             else if (type === LinkType.INDEX)
             {
-                tempExpr.thisCommand = 'window';
-                tempExpr.command += '[' + link.cont + ']';
+                tempExpr.thisCommand = "window";
+                tempExpr.command += "[" + link.cont + "]";
             }
             else if (type === LinkType.SAFECALL)
             {
-                tempExpr.thisCommand = 'window';
-                tempExpr.command += '(' + link.origCont + ')';
+                tempExpr.thisCommand = "window";
+                tempExpr.command += "(" + link.origCont + ")";
             }
             else if (type === LinkType.CALL)
             {
-                if (link.name === '')
+                if (link.name === "")
                 {
                     // We cannot know about functions without name; try the
                     // heuristic directly.
@@ -2403,8 +2413,8 @@ function evalPropChainStep(step, tempExpr, evalChain, out, context)
             else if (type === LinkType.RETVAL_HEURISTIC)
             {
                 if (link.origCont !== null &&
-                     (link.name.substr(0, 3) === 'get' ||
-                      (link.name.charAt(0) === '$' && link.cont.indexOf(',') === -1)))
+                     (link.name.substr(0, 3) === "get" ||
+                      (link.name.charAt(0) === "$" && link.cont.indexOf(",") === -1)))
                 {
                     // Names beginning with get or $ are almost always getters, so
                     // assume it is a safecall and start over.
@@ -2412,7 +2422,7 @@ function evalPropChainStep(step, tempExpr, evalChain, out, context)
                     evalPropChainStep(step, tempExpr, evalChain, out, context);
                     return;
                 }
-                funcCommand = 'Function.prototype.toString.call(' + tempExpr.command + ')';
+                funcCommand = "Function.prototype.toString.call(" + tempExpr.command + ")";
                 break;
             }
             ++step;
@@ -2426,7 +2436,7 @@ function evalPropChainStep(step, tempExpr, evalChain, out, context)
                 {
                     if (type === LinkType.CALL)
                     {
-                        if (typeof result !== 'string')
+                        if (typeof result !== "string")
                             return;
 
                         var t = getKnownType(result);
@@ -2452,7 +2462,7 @@ function evalPropChainStep(step, tempExpr, evalChain, out, context)
                     }
                     else if (type === LinkType.RETVAL_HEURISTIC)
                     {
-                        if (typeof result !== 'string')
+                        if (typeof result !== "string")
                             return;
 
                         // Perform some crude heuristics for figuring out the
@@ -2466,23 +2476,23 @@ function evalPropChainStep(step, tempExpr, evalChain, out, context)
                         // results of member functions containing nested
                         // functions that use 'return this' seems uncommon,
                         // and being wrong is not a huge problem.
-                        if (result.indexOf('return this;') !== -1)
+                        if (result.indexOf("return this;") !== -1)
                         {
                             tempExpr.command = tempExpr.thisCommand;
-                            tempExpr.thisCommand = 'window';
+                            tempExpr.thisCommand = "window";
                             evalPropChainStep(step+1, tempExpr, evalChain, out, context);
                             return;
                         }
 
                         // Don't support nested functions.
-                        if (result.lastIndexOf('function') !== 0)
+                        if (result.lastIndexOf("function") !== 0)
                             return;
 
                         // Check for arrays.
-                        if (result.indexOf('return [') !== -1)
+                        if (result.indexOf("return [") !== -1)
                         {
                             tempExpr.fake = true;
-                            tempExpr.value = getKnownTypeInfo('Array');
+                            tempExpr.value = getKnownTypeInfo("Array");
                             evalPropChainStep(step+1, tempExpr, evalChain, out, context);
                             return;
                         }
@@ -2490,7 +2500,7 @@ function evalPropChainStep(step, tempExpr, evalChain, out, context)
                         // Check for 'return new Type(...);', and use the
                         // prototype as a pseudo-object for those (since it
                         // is probably not a known type that we can fake).
-                        var newPos = result.indexOf('return new ');
+                        var newPos = result.indexOf("return new ");
                         if (newPos !== -1)
                         {
                             var rest = result.substr(newPos + 11),
@@ -2498,7 +2508,7 @@ function evalPropChainStep(step, tempExpr, evalChain, out, context)
                             if (epos !== -1)
                             {
                                 rest = rest.substring(0, epos);
-                                tempExpr.command = rest + '.prototype';
+                                tempExpr.command = rest + ".prototype";
                                 evalPropChainStep(step+1, tempExpr, evalChain, out, context);
                                 return;
                             }
@@ -2517,30 +2527,30 @@ function evalPropChainStep(step, tempExpr, evalChain, out, context)
 
 function evalPropChain(out, preExpr, origExpr, context)
 {
-    var evalChain = [], linkStart = 0, len = preExpr.length, lastProp = '';
-    var tempExpr = {'fake': false, 'command': 'window', 'thisCommand': 'window'};
+    var evalChain = [], linkStart = 0, len = preExpr.length, lastProp = "";
+    var tempExpr = {"fake": false, "command": "window", "thisCommand": "window"};
     while (linkStart !== len)
     {
         var ch = preExpr.charAt(linkStart);
         if (linkStart === 0)
         {
-            if (preExpr.substr(0, 4) === 'new ')
+            if (preExpr.substr(0, 4) === "new ")
             {
-                var parInd = preExpr.indexOf('(');
-                tempExpr.command = preExpr.substring(4, parInd) + '.prototype';
+                var parInd = preExpr.indexOf("(");
+                tempExpr.command = preExpr.substring(4, parInd) + ".prototype";
                 linkStart = matchingBracket(preExpr, parInd) + 1;
             }
-            else if (ch === '[')
+            else if (ch === "[")
             {
                 tempExpr.fake = true;
-                tempExpr.value = getKnownTypeInfo('Array');
+                tempExpr.value = getKnownTypeInfo("Array");
                 linkStart = matchingBracket(preExpr, linkStart) + 1;
             }
             else if (ch === '"')
             {
-                var isRegex = (origExpr.charAt(0) === '/');
+                var isRegex = (origExpr.charAt(0) === "/");
                 tempExpr.fake = true;
-                tempExpr.value = getKnownTypeInfo(isRegex ? 'RegExp' : 'String');
+                tempExpr.value = getKnownTypeInfo(isRegex ? "RegExp" : "String");
                 linkStart = preExpr.indexOf('"', 1) + 1;
             }
             else if (!isNaN(ch))
@@ -2563,15 +2573,15 @@ function evalPropChain(out, preExpr, origExpr, context)
         }
         else
         {
-            if (ch === '.')
+            if (ch === ".")
             {
                 // Property access
                 var nextLink = eatProp(preExpr, linkStart+1);
                 lastProp = preExpr.substring(linkStart+1, nextLink);
                 linkStart = nextLink;
-                evalChain.push({'type': LinkType.PROPERTY, 'name': lastProp});
+                evalChain.push({"type": LinkType.PROPERTY, "name": lastProp});
             }
-            else if (ch === '(')
+            else if (ch === "(")
             {
                 // Function call. Save the function name and the arguments if
                 // they are safe to evaluate.
@@ -2580,10 +2590,10 @@ function evalPropChain(out, preExpr, origExpr, context)
                 if (reLiteralExpr.test(cont))
                     origCont = origExpr.substring(linkStart+1, endCont);
                 linkStart = endCont + 1;
-                evalChain.push({'type': LinkType.CALL, 'name': lastProp, 'origCont': origCont, 'cont': cont});
-                lastProp = '';
+                evalChain.push({"type": LinkType.CALL, "name": lastProp, "origCont": origCont, "cont": cont});
+                lastProp = "";
             }
-            else if (ch === '[')
+            else if (ch === "[")
             {
                 // Index. Use the supplied index if it is a literal; otherwise
                 // it is probably a loop index with a variable not yet defined
@@ -2594,10 +2604,10 @@ function evalPropChain(out, preExpr, origExpr, context)
                 if (reLiteralExpr.test(ind))
                     ind = origExpr.substring(linkStart+1, endInd);
                 else
-                    ind = '0';
+                    ind = "0";
                 linkStart = endInd+1;
-                evalChain.push({'type': LinkType.INDEX, 'cont': ind});
-                lastProp = '';
+                evalChain.push({"type": LinkType.INDEX, "cont": ind});
+                lastProp = "";
             }
             else
             {
@@ -2650,7 +2660,7 @@ function autoCompleteEval(context, preExpr, spreExpr)
                     "' spre:'" + spreExpr + "'.");
 
             // Don't auto-complete '.'.
-            if (spreExpr === '')
+            if (spreExpr === "")
                 return out.complete;
 
             evalPropChain(out, spreExpr, preExpr, context);
@@ -2671,7 +2681,7 @@ function autoCompleteEval(context, preExpr, spreExpr)
                 out.complete = Arr.keys(contentView); // return is safe
 
                 // Add some known window properties
-                out.complete = out.complete.concat(getFakeCompleteKeys('Window'));
+                out.complete = out.complete.concat(getFakeCompleteKeys("Window"));
             }
             else  // hopefully sandbox in Chromebug
             {
@@ -2713,7 +2723,7 @@ function nonNumericKeys(map)  // keys will be on user-level window objects
     {
         for (var name in map)  // enumeration is safe
         {
-            if (! (name === '0' || rePositiveNumber.test(name)) )
+            if (! (name === "0" || rePositiveNumber.test(name)) )
                 keys.push(name);
         }
     }
