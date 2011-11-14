@@ -61,6 +61,8 @@ var FirebugChrome =
 {
     // TODO: remove this property, add getters for location, title , focusedElement, setter popup
 
+    dispatchName: "FirebugChrome",
+
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
     // Initialization
 
