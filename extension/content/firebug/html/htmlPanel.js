@@ -1067,6 +1067,13 @@ Firebug.HTMLPanel.prototype = Obj.extend(WalkingPanel,
 
         delete this.embeddedBrowserParents;
         delete this.embeddedBrowserDocument;
+
+        // xxxHonza: I don't know why this helps, but it helps to release the
+        // page compartment (at least by observing about:memory);
+        // Note that inspectorHistory holds references to page elements.
+        for (var i=0; i<this.inspectorHistory.length; i++)
+            delete this.inspectorHistory[i];
+        delete this.inspectorHistory;
     },
 
     initializeNode: function(oldPanelNode)
