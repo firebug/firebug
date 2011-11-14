@@ -267,11 +267,12 @@ Firebug.InfoTip = Obj.extend(Firebug.Module,
         var fontObject = Fonts.getFontInfo(null, null, fontName.replace(/"/g, ""));
 
         if (FBTrace.DBG_INFOTIP)
-            FBTrace.sysout("infotip.populateFontFamilyInfoTip;", fontObject);
+            FBTrace.sysout("infotip.populateFontFamilyInfoTip;", {fontName: fontName, fontObject: fontObject});
 
         var node = this.tags.fontFamilyTag.replace({fontStyles: fontStyles, fontName: fontName, fontObject: fontObject}, infoTip);
         var styleNode = node.getElementsByClassName("infoTipFontFamilyStyle").item(0);
-        styleNode.innerHTML = getFontFaceCss(fontObject);
+
+        styleNode.innerHTML = getFontFaceCss(fontObject ? fontObject : fontName);
         return true;
     },
 
@@ -326,10 +327,22 @@ Firebug.InfoTip = Obj.extend(Firebug.Module,
  * @param fontObject: Font related information
  * @return @font-face CSS
  */
-function getFontFaceCss(fontObject)
+function getFontFaceCss(font)
 {
-    return fontObject.rule.cssText.replace(/url\(.*?\)/g, "url("+fontObject.URI+")")+
-        " .infoTipFontFace {font-family: \""+fontObject.CSSFamilyName+"\";}";
+    var fontFaceCss = "";
+    var fontName = "";
+
+    if (typeof font == "object")
+    {
+        if (font.rule)
+            fontFaceCss = font.rule.cssText.replace(/url\(.*?\)/g, "url("+font.URI+")");
+        fontName = font.CSSFamilyName;
+    }
+    else
+    {
+        fontName = font;
+    }
+    return fontFaceCss+" .infoTipFontFace {font-family: "+fontName+";}"
 }
 
 // ************************************************************************************************
