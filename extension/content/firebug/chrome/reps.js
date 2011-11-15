@@ -1408,7 +1408,7 @@ FirebugReps.SourceLink = domplate(Firebug.Rep,
             return Locale.$STRF("InstanceLine", [fileName, sourceLink.instance + 1,
                 sourceLink.line]);
         }
-        else if (sourceLink.line && sourceLink.col)
+        else if (sourceLink.line && typeof(sourceLink.col) != "undefined")
         {
             return Locale.$STRF("LineAndCol", [fileName, sourceLink.line, sourceLink.col]);
         }
@@ -1832,9 +1832,9 @@ FirebugReps.ErrorMessage = domplate(Firebug.Rep,
                                     title: Locale.$STR("console.Break On This Error")})
                             ),
                             TD(
-                                A({"class": "errorSource a11yFocus",
-                                    title: "$object|getSourceTitle"},
-                                    PRE("$object|getSource")
+                                A({"class": "errorSource a11yFocus"},
+                                    PRE({"class": "errorSourceCode",
+                                        title: "$object|getSourceTitle"}, "$object|getSource")
                                 ),
                                 TAG(FirebugReps.SourceLink.tag, {object: "$object|getSourceLink"})
                             )
@@ -1875,7 +1875,7 @@ FirebugReps.ErrorMessage = domplate(Firebug.Rep,
 
     isBreakableError: function(error)
     {
-        return (error.category === "js") ? 'errorBreak' : 'errorUnbreakable';
+        return (error.category === "js") ? "errorBreak" : "errorUnbreakable";
     },
 
     hasErrorBreak: function(error)
@@ -1891,10 +1891,14 @@ FirebugReps.ErrorMessage = domplate(Firebug.Rep,
     getSource: function(error, noCrop)
     {
         if (error.source && noCrop)
-            return error.source
+        {
+            return error.source;
+        }
         else if (error.source)
-            return Str.cropString(Str.trim(error.source), this.sourceLimit,
+        {
+            return Str.cropStringEx(Str.trim(error.source), this.sourceLimit,
                 this.alterText, error.colNumber);
+        }
 
         if (error.category == "js" && error.href &&
             error.href.indexOf("XPCSafeJSObjectWrapper") != -1)
@@ -1904,10 +1908,14 @@ FirebugReps.ErrorMessage = domplate(Firebug.Rep,
 
         var source = error.getSourceLine();
         if (source && noCrop)
+        {
             return source;
+        }
         else if (source)
-            return Str.cropString(Str.trim(source), this.sourceLimit,
+        {
+            return Str.cropStringEx(Str.trim(source), this.sourceLimit,
                 this.alterText, error.colNumber);
+        }
 
         return "";
     },
@@ -1933,7 +1941,7 @@ FirebugReps.ErrorMessage = domplate(Firebug.Rep,
         var originalLength = error.source.length;
         var trimmedLength = Str.trimLeft(error.source).length;
 
-        // The source line is displayed withoug starting whitespaces.
+        // The source line is displayed without starting whitespaces.
         colNumber -= (originalLength - trimmedLength);
 
         var source = this.getSource(error, true);
@@ -1942,7 +1950,7 @@ FirebugReps.ErrorMessage = domplate(Firebug.Rep,
 
         source = Str.trim(source);
 
-        // Count how much the pivot needs to be adjucted (based on Str.crop)
+        // Count how much the pivot needs to be adjucted (based on Str.cropStringEx)
         var halfLimit = this.sourceLimit/2;
         var pivot = error.colNumber;
         if (pivot < halfLimit)
@@ -1968,10 +1976,8 @@ FirebugReps.ErrorMessage = domplate(Firebug.Rep,
 
     getSourceTitle: function(error)
     {
-        var source = error.getSourceLine();
-        if (source)
-            return Str.trim(source);
-        return "";
+        var source = this.getSource(error, true);
+        return source ? Str.trim(source) : "";
     },
 
     getSourceLink: function(error)
@@ -2006,7 +2012,7 @@ FirebugReps.ErrorMessage = domplate(Firebug.Rep,
             this.breakOnThisError(target.repObject, panel.context);
             return;
         }
-        else if (Css.hasClass(event.target, "errorSource"))
+        else if (Css.hasClass(event.target, "errorSourceCode"))
         {
             var panel = Firebug.getElementPanel(event.target);
             this.inspectObject(target.repObject, panel.context);
