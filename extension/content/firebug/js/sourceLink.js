@@ -5,13 +5,14 @@ define([], function() {
 // ********************************************************************************************* //
 // Constants
 
-function SourceLink(url, line, type, object, instance)
+function SourceLink(url, line, type, object, instance, col)
 {
     this.href = url;
     this.instance = instance;
     this.line = line;
     this.type = type;
     this.object = object;
+    this.col = col;
 };
 
 SourceLink.prototype =

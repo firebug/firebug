@@ -1408,6 +1408,10 @@ FirebugReps.SourceLink = domplate(Firebug.Rep,
             return Locale.$STRF("InstanceLine", [fileName, sourceLink.instance + 1,
                 sourceLink.line]);
         }
+        else if (sourceLink.line && sourceLink.col)
+        {
+            return Locale.$STRF("LineAndCol", [fileName, sourceLink.line, sourceLink.col]);
+        }
         else if (sourceLink.line)
         {
             return Locale.$STRF("Line", [fileName, sourceLink.line]);
@@ -1951,7 +1955,7 @@ FirebugReps.ErrorMessage = domplate(Firebug.Rep,
         var begin = Math.max(0, pivot - halfLimit);
         colNumber -= begin;
 
-        // Increase because there is an alterText at the beggining now.
+        // Add come cols because there is an alterText at the beggining now.
         if (begin > 0)
             colNumber += this.alterText.length;
 
@@ -1973,7 +1977,8 @@ FirebugReps.ErrorMessage = domplate(Firebug.Rep,
     getSourceLink: function(error)
     {
         var ext = error.category == "css" ? "css" : "js";
-        return error.lineNo ? new SourceLink.SourceLink(error.href, error.lineNo, ext) : null;
+        return error.lineNo ? new SourceLink.SourceLink(error.href, error.lineNo, ext,
+            null, null, error.colNumber) : null;
     },
 
     getSourceType: function(error)
