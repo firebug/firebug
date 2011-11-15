@@ -217,7 +217,7 @@
 }
 
 .errorColPosition {
-    cursor: pointer;
+    -moz-user-select: none;
     font-family: monospace;
     color: DarkGreen;
     display: inline-block;
