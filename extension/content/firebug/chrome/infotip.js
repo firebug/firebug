@@ -323,7 +323,7 @@ Firebug.InfoTip = Obj.extend(Firebug.Module,
 
 /**
  * Returns the CSS for the @font-face CSS
- * 
+ *
  * @param fontObject: Font related information
  * @return @font-face CSS
  */

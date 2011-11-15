@@ -593,7 +593,7 @@ Firebug.TabWatcher = Obj.extend(new Firebug.Listener(),
         if (!currentBrowser.showFirebug)
         {
             // context is null if we don't want to debug this browser
-            Events.dispatch(this.fbListeners, "showContext", [browser, null]); 
+            Events.dispatch(this.fbListeners, "showContext", [browser, null]);
         }
     },
 

@@ -1497,11 +1497,11 @@ Firebug.CSSStyleSheetPanel.prototype = Obj.extend(Firebug.Panel,
                         return Firebug.InfoTip.populateImageInfoTip(infoTip, absURL, repeat);
                     }
                 }
-                else if (cssValue.type == "fontFamily") 
+                else if (cssValue.type == "fontFamily")
                 {
                     return Firebug.InfoTip.populateFontFamilyInfoTip(infoTip, cssValue.value);
                 }
-            } 
+            }
         }
 
         delete this.infoTipType;
@@ -3024,7 +3024,7 @@ function parseCSSValue(value, offset)
     {
         var arg = value.substr(m[0].length).match(/\((?:(?:[^\(\)]*)|(?:\(.*?\)))+\)/);
         if (!arg)
-            return; 
+            return;
 
         cssValue.value += arg[0];
         cssValue.type = "gradient";

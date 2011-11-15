@@ -11,7 +11,7 @@ var prefs = Cc["@mozilla.org/preferences-service;1"].getService(Ci.nsIPrefBranch
 var branch = prefs.getBranch("extensions.firebug.key.shortcut.");
 
 // Initialized from window parameters.
-var FBL; 
+var FBL;
 var FBTrace;
 var Locale;
 
@@ -151,7 +151,7 @@ function getHumanShortcut(element)
 
     if (keyCode.length == 1)
         return getFormattedKey(tokens.join(','), keyCode, null);
-    else 
+    else
         return getFormattedKey(tokens.join(','), null, keyCode);
 }
 

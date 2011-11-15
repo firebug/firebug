@@ -1,8 +1,8 @@
 /* See license.txt for terms of usage */
 
 /* overrides to revert personas. see http://code.google.com/p/fbug/issues/detail?id=2704 */
-#fbContentBox:-moz-lwtheme .tabs-alltabs-button , 
-#fbContentBox:-moz-lwtheme .scrollbutton-up, 
+#fbContentBox:-moz-lwtheme .tabs-alltabs-button,
+#fbContentBox:-moz-lwtheme .scrollbutton-up,
 #fbContentBox:-moz-lwtheme .scrollbutton-down {
     background: url("chrome://firebug/skin/tabbar/tab-bkgnd.png") repeat-x;
     -moz-border-top-colors: ThreeDShadow rgba(255,255,255,.3);
@@ -11,8 +11,8 @@
     background-color: rgba(255,255,255,.5);
 }
 
-#fbContentBox:-moz-lwtheme .tabs-alltabs-button:hover , 
-#fbContentBox:-moz-lwtheme .scrollbutton-up:hover, 
+#fbContentBox:-moz-lwtheme .tabs-alltabs-button:hover,
+#fbContentBox:-moz-lwtheme .scrollbutton-up:hover,
 #fbContentBox:-moz-lwtheme .scrollbutton-down:hover
 {
     background-image: url("chrome://firebug/skin/tabbar/tab-hover-bkgnd.png");

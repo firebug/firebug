@@ -363,7 +363,7 @@ Firebug.Inspector = Obj.extend(Firebug.Module,
     /**
      * Navigate up and down through the DOM and highlight the result. This method is used by
      * the key handlers for the up and down arrow keys.
-     * 
+     *
      * @param {String} dir Direction to navigate the Dom, either "up" or "down"
      */
     inspectNodeBy: function(dir)
@@ -639,7 +639,7 @@ Firebug.Inspector = Obj.extend(Firebug.Module,
 
         Events.cancelEvent(event);
     },
-    
+
     /**
      * Trap keypress events to allow manipulation of the hovered elements
      *

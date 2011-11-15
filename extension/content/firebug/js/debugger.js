@@ -2906,7 +2906,7 @@ Firebug.JSDebugClient =
     {
         // A debugger client (an instance of Firebug.JSDebugClient) asked to pause JSD.
         // Note that there is one instance of Firebug.JSDebugClient per browser (XUL) window.
-        // If the debugger is 'on' in this browser window JSD and the request comes from 
+        // If the debugger is 'on' in this browser window JSD and the request comes from
         // another window (debugger) JSD should *not* be paused (see issue 4609).
         // So, reject only if the request comes from another browser window and Firebug
         // is resumed in this window.

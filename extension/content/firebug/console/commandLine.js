@@ -823,7 +823,7 @@ Firebug.CommandLine = Obj.extend(Firebug.Module,
             case KeyEvent.DOM_VK_RETURN:
             case KeyEvent.DOM_VK_ENTER:
                 event.preventDefault();
-    
+
                 if (!event.metaKey && !event.shiftKey)
                 {
                     Firebug.CommandLine.enter(Firebug.currentContext);
@@ -839,7 +839,7 @@ Firebug.CommandLine = Obj.extend(Firebug.Module,
                     Firebug.CommandLine.enterInspect(Firebug.currentContext);
                     handled = true;
                 }
-    
+
                 if (handled)
                 {
                     this.commandHistory.hide();

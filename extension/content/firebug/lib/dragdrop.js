@@ -10,7 +10,7 @@ function(Obj, Firebug, Events) {
 // ********************************************************************************************* //
 
 /**
- * 
+ *
  * @param {Object} element
  * @param {Object} handle
  * @param {Object} callbacks: onDragStart, onDragOver, onDragLeave, onDrop
@@ -138,7 +138,7 @@ function Position(x, y)
         }
         return newPos;
     }
- 
+
     this.Subtract = function(val)
     {
         var newPos = new Position(this.x, this.y);

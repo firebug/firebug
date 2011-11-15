@@ -174,7 +174,7 @@ ModuleLoader.prototype = {
     },
     /*
      * @param unit compilation unit: {
-     * 	source: a string of JavaScript source,
+     *  source: a string of JavaScript source,
      *  url: identifier,
      *  jsVersion: JavaScript version to compile under
      *  staringLineNumber: offset for source line numbers.
@@ -398,8 +398,8 @@ ModuleLoader.prototype = {
         return this.principal;
     },
 
-    getModuleLoaderName: function()	{
-        if (!this.name)	{
+    getModuleLoaderName: function() {
+        if (!this.name) {
             if (this.config.context) {
                 this.name = this.config.context
             } else if (this.global) {
@@ -420,7 +420,7 @@ ModuleLoader.prototype = {
         return "Moduleloader "+this.getModuleLoaderName()+": "+this.totalEntries+" entries";
     },
 
-    safeGetWindowLocation: function(window)	{
+    safeGetWindowLocation: function(window) {
         try {
             if (window) {
                 if (window.closed) {

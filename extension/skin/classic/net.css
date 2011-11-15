@@ -345,7 +345,7 @@
     z-index: 10;
 }
 
-/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */ 
+/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 /* Vertical lines - time stamps */
 
 .netPageTimingBar {
@@ -376,7 +376,7 @@
     background-color: Olive;
 }
 
-/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */ 
+/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 .netTimeLabel {
     -moz-box-sizing: padding-box;
@@ -442,7 +442,7 @@
 /* Time Info tip */
 
 .timeInfoTip {
-    width: 200px; 
+    width: 200px;
     height: 40px
 }
 

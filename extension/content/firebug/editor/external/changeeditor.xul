@@ -42,7 +42,7 @@
             </toolbarbutton>
         </hbox>
         <vbox align="left" onclick="if(event.target.className=='text-link') insertText(event.target.textContent);">
-            <description class="fbInternational">changeEditor.Supplied_arguments</description>     
+            <description class="fbInternational">changeEditor.Supplied_arguments</description>
             <hbox><label class='text-link'>%url </label> <description class="fbInternational">changeEditor.URL_of_file</description></hbox>
             <hbox><label class='text-link'>%file </label><description class="fbInternational">changeEditor.Path_to_local_file</description></hbox>
             <hbox><label class='text-link'>%line </label><description class="fbInternational">changeEditor.Line_number</description></hbox>

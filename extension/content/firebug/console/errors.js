@@ -27,8 +27,8 @@ const WARNING_FLAG = nsIScriptError.warningFlag;
 const urlRe = new RegExp("([^:]*):(//)?([^/]*)");
 const reUncaught = /uncaught exception/;
 // regular expessions for parsing uncaught exceptions
-// see http://lxr.mozilla.org/mozilla/source/js/src/xpconnect/src/xpcexception.cpp#347 
-// and http://lxr.mozilla.org/mozilla/source/js/src/xpconnect/src/xpcstack.cpp#318 
+// see http://lxr.mozilla.org/mozilla/source/js/src/xpconnect/src/xpcexception.cpp#347
+// and http://lxr.mozilla.org/mozilla/source/js/src/xpconnect/src/xpcstack.cpp#318
 // and http://lxr.mozilla.org/mozilla/source/dom/src/base/nsDOMException.cpp#351
 const reException1 = /^(?:uncaught exception: )?\[Exception... "(?!<no message>)([\s\S]+)"  nsresult: "0x\S+ \((.+)\)"  location: "(?:(?:JS|native) frame :: (?!<unknown filename>)(.+) :: .+ :: line (\d+)|<unknown>)"  data: (?:yes|no)\]$/
 const reException2 = /^(?:uncaught exception: )?\[Exception... "(?!<no message>)([\s\S]+)"  code: "\d+" nsresult: "0x\S+ \((.+)\)"  location: "(?:(.+) Line: (\d+)|<unknown>)"\]$/
