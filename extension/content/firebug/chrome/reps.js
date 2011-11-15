@@ -1797,6 +1797,9 @@ FirebugReps.StackTrace = domplate(Firebug.Rep,
 
 FirebugReps.ErrorMessage = domplate(Firebug.Rep,
 {
+    sourceLimit: 80,
+    alterText: "...",
+
     tag:
         OBJECTBOX({
             $hasTwisty: "$object|hasStackTrace",
@@ -1805,24 +1808,44 @@ FirebugReps.ErrorMessage = domplate(Firebug.Rep,
             _repObject: "$object",
             _stackTrace: "$object|getLastErrorStackTrace",
             onclick: "$onToggleError"},
-
-            DIV({"class": "errorTitle focusRow subLogRow", role : 'listitem'},
+            DIV({"class": "errorTitle focusRow subLogRow", role: "listitem"},
                 SPAN({"class": "errorDuplication"}, "$object.msgId|getDuplication"),
                 SPAN({"class": "errorMessage"},
                     "$object.message"
                 )
             ),
-            DIV({"class": "errorTrace", role : 'presentation'}),
+            DIV({"class": "errorTrace", role: "presentation"}),
             TAG("$object|getObjectsTag", {object: "$object.objects"}),
             DIV({"class": "errorSourceBox errorSource-$object|getSourceType focusRow subLogRow",
                 role : "listitem"},
-                IMG({"class": "$object|isBreakableError a11yFocus", src:"blank.gif",
-                    role : "checkbox", "aria-checked" : "$object|hasErrorBreak",
-                    title: Locale.$STR("console.Break On This Error")}),
-                A({"class": "errorSource a11yFocus", title: "$object|getSourceTitle"},
-                    "$object|getSource"
-                ),
-                TAG(FirebugReps.SourceLink.tag, {object: "$object|getSourceLink"})
+                TABLE({cellspacing: 0, cellpadding: 0},
+                    TBODY(
+                        TR(
+                            TD(
+                                IMG({"class": "$object|isBreakableError a11yFocus",
+                                    src:"blank.gif", role: "checkbox",
+                                    "aria-checked": "$object|hasErrorBreak",
+                                    title: Locale.$STR("console.Break On This Error")})
+                            ),
+                            TD(
+                                A({"class": "errorSource a11yFocus",
+                                    title: "$object|getSourceTitle"},
+                                    PRE("$object|getSource")
+                                ),
+                                TAG(FirebugReps.SourceLink.tag, {object: "$object|getSourceLink"})
+                            )
+                        ),
+                        TR({$collapsed: "$object|hideErrorCaret"},
+                            TD(),
+                            TD(
+                                DIV({"class": "errorColPosition"},
+                                    "$object|getColumnPosition"
+                                ),
+                                DIV({"class": "errorColCaret"})
+                            )
+                        )
+                    )
+                )
             )
         ),
 
@@ -1861,10 +1884,13 @@ FirebugReps.ErrorMessage = domplate(Firebug.Rep,
         return ""; // filled in later
     },
 
-    getSource: function(error)
+    getSource: function(error, noCrop)
     {
-        if (error.source)
-            return Str.cropString(error.source, 80);
+        if (error.source && noCrop)
+            return error.source
+        else if (error.source)
+            return Str.cropString(Str.trim(error.source), this.sourceLimit,
+                this.alterText, error.colNumber);
 
         if (error.category == "js" && error.href &&
             error.href.indexOf("XPCSafeJSObjectWrapper") != -1)
@@ -1873,10 +1899,67 @@ FirebugReps.ErrorMessage = domplate(Firebug.Rep,
         }
 
         var source = error.getSourceLine();
-        if (source)
-            return Str.cropString(source, 80);
+        if (source && noCrop)
+            return source;
+        else if (source)
+            return Str.cropString(Str.trim(source), this.sourceLimit,
+                this.alterText, error.colNumber);
 
         return "";
+    },
+
+    hideErrorCaret: function(error)
+    {
+        var source = this.getSource(error);
+        if (!source)
+            return true;
+
+        if (typeof(error.colNumber) == "undefined")
+            return true;
+
+        return false;
+    },
+
+    getColumnPosition: function(error)
+    {
+        if (this.hideErrorCaret(error))
+            return "";
+
+        var colNumber = error.colNumber;
+        var originalLength = error.source.length;
+        var trimmedLength = Str.trimLeft(error.source).length;
+
+        // The source line is displayed withoug starting whitespaces.
+        colNumber -= (originalLength - trimmedLength);
+
+        var source = this.getSource(error, true);
+        if (!source)
+            return "";
+
+        source = Str.trim(source);
+
+        // Count how much the pivot needs to be adjucted (based on Str.crop)
+        var halfLimit = this.sourceLimit/2;
+        var pivot = error.colNumber;
+        if (pivot < halfLimit)
+            pivot = halfLimit;
+
+        if (pivot > source.length - halfLimit)
+            pivot = source.length - halfLimit;
+
+        // Subtract some columns if the text has been cropped at the beggining.
+        var begin = Math.max(0, pivot - halfLimit);
+        colNumber -= begin;
+
+        // Increase because there is an alterText at the beggining now.
+        if (begin > 0)
+            colNumber += this.alterText.length;
+
+        var text = "";
+        for (var i=0; i<colNumber; i++)
+            text += "-";
+
+        return text;
     },
 
     getSourceTitle: function(error)
@@ -2701,7 +2784,7 @@ FirebugReps.NamedNodeMap = domplate(Firebug.Rep,
 // Error Message
 
 FirebugReps.ErrorMessageObj = function(message, href, lineNo, source, category, context,
-    trace, msgId)
+    trace, msgId, colNumber)
 {
     this.message = message;
     this.href = href;
@@ -2711,6 +2794,7 @@ FirebugReps.ErrorMessageObj = function(message, href, lineNo, source, category, 
     this.context = context;
     this.trace = trace;
     this.msgId = msgId;
+    this.colNumber = colNumber;
 };
 
 FirebugReps.ErrorMessageObj.prototype =

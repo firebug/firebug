@@ -216,6 +216,22 @@
     text-decoration: underline;
 }
 
+.errorColPosition {
+    cursor: pointer;
+    font-family: monospace;
+    color: DarkGreen;
+    display: inline-block;
+}
+
+.errorColCaret {
+    width: 7px;
+    height: 8px;
+    background: url(chrome://firebug/skin/console-error-caret.png) no-repeat;
+    display: inline-block;
+    vertical-align: top;
+    margin-left: 1px;
+}
+
 .errorBreak {
     cursor: pointer;
     display: none;

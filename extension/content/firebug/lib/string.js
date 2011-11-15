@@ -321,7 +321,7 @@ Str.escapeJS = function(value)
         .replace(/\n/gm, "\\n").replace('"', '\\"', "g");
 };
 
-Str.cropString = function(text, limit, alterText)
+Str.cropString = function(text, limit, alterText, pivot)
 {
     if (!alterText)
         alterText = "...";
@@ -337,13 +337,34 @@ Str.cropString = function(text, limit, alterText)
     if (limit <= 0)
         return text;
 
+    if (text.length < limit)
+        return text;
+
+    if (!pivot)
+        pivot = text.length / 2;
+
     var halfLimit = (limit / 2);
-    halfLimit -= 2; // adjustment for alterText's increase in size
 
-    if (text.length > limit)
-        return text.substr(0, halfLimit) + alterText + text.substr(text.length-halfLimit);
+    // Adjust the pivot to the real center in case it's at an edge.
+    if (pivot < halfLimit)
+        pivot = halfLimit;
 
-    return text;
+    if (pivot > text.length - halfLimit)
+        pivot = text.length - halfLimit;
+
+    // Get substring around the pivot
+    var begin = Math.max(0, pivot - halfLimit);
+    var end = Math.min(text.length - 1, pivot + halfLimit);
+    var result = text.substring(begin, end);
+
+    // Append alterText at the beggining end end of the result as necessary.
+    if (begin > 0)
+        result = alterText + result;
+
+    if (end < text.length - 1)
+        result += alterText;
+
+    return result;
 };
 
 Str.lineBreak = function()
