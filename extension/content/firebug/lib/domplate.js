@@ -469,8 +469,9 @@ DomplateTag.prototype =
             return nodeCount;
         }
 
-        // start at a given node |parent|, then index recursively into its children using arguments 2, 3, ...;
-        // The primary purpose of the 'path' is to name variables in the generated code
+        // start at a given node |parent|, then index recursively into its children using
+        // arguments 2, 3, ... The primary purpose of the 'path' is to name variables in the
+        // generated code
         function __path__(parent, offset)
         {
             var root = parent;
@@ -1199,7 +1200,7 @@ function defineTags()
         var fn = createTagHandler(tagName);
         var fnName = tagName.toUpperCase();
 
-        // xxxHonza: Domplate is injected into FBL namesapce only for backward
+        // xxxHonza: Domplate is injected into FBL namespace only for backward
         // compatibility with extensions.
         Domplate[fnName] = FBL[fnName]= fn;
     }
@@ -1213,7 +1214,7 @@ function defineTags()
     }
 }
 
-// xxxHonza: Domplate is injected into FBL namesapce only for backward
+// xxxHonza: Domplate is injected into FBL namespace only for backward
 // compatibility with extensions.
 // We need to mark this as deprecated.
 FBL.TAG = Domplate.TAG;

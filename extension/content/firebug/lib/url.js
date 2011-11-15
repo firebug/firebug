@@ -530,11 +530,11 @@ Url.resourceToFile = function(resourceURL)
         .QueryInterface(Ci.nsIResProtocolHandler);
 
     var justURL = resourceURL.split("resource://")[1];
-    var splitted = justURL.split("/");
-    var sub = splitted.shift();
+    var split = justURL.split("/");
+    var sub = split.shift();
 
     var path = resHandler.getSubstitution(sub).spec;
-    return path + splitted.join("/");
+    return path + split.join("/");
 }
 
 // ********************************************************************************************* //

@@ -1035,7 +1035,7 @@ Firebug.NetFile = NetFile;
  * All phases are stored within NetProgress.phases array.
  *
  * Phases are used to compute size of the graphical timeline. The timeline
- * for each phase starts from the begining of the graph.
+ * for each phase starts from the beginning of the graph.
  */
 function NetPhase(file)
 {

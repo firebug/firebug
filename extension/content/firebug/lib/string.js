@@ -333,7 +333,7 @@ Str.cropString = function(text, limit, alterText)
     if (!limit)
         limit = Options.get("stringCropLength");
 
-    // Crop the string only if a limit is actualy specified.
+    // Crop the string only if a limit is actually specified.
     if (limit <= 0)
         return text;
 
@@ -358,7 +358,7 @@ Str.cropStringEx = function(text, limit, alterText, pivot)
     if (!limit)
         limit = Options.get("stringCropLength");
 
-    // Crop the string only if a limit is actualy specified.
+    // Crop the string only if a limit is actually specified.
     if (limit <= 0)
         return text;
 
@@ -382,7 +382,7 @@ Str.cropStringEx = function(text, limit, alterText, pivot)
     var end = Math.min(text.length - 1, pivot + halfLimit);
     var result = text.substring(begin, end);
 
-    // Append alterText at the beggining end end of the result as necessary.
+    // Add alterText to the beginning or end of the result as necessary.
     if (begin > 0)
         result = alterText + result;
 

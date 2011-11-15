@@ -3091,7 +3091,7 @@ function getOriginalStyleSheetCSS(sheet, context)
 
 function getStyleSheetCSS(sheet, context)
 {
-    function beutify(css, indent)
+    function beautify(css, indent)
     {
         var indent='\n'+Array(indent+1).join(' ');
         var i=css.indexOf('{');
@@ -3106,7 +3106,7 @@ function getStyleSheetCSS(sheet, context)
     {
         var rule = cssRules[i];
         if(rule instanceof window.CSSStyleRule)
-            css.push(beutify(rule.cssText, 4));
+            css.push(beautify(rule.cssText, 4));
         else
             css.push(rule.cssText);
     }

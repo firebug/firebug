@@ -61,7 +61,7 @@ Xpcom.CCIN = function(cName, ifaceName)
 };
 
 /**
- * Queries passed object for requred interface.
+ * Queries passed object for required interface.
  * @param {Object} obj Object to query an interface for.
  * @param {Object} iface Required interface.
  */

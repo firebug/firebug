@@ -655,14 +655,14 @@ var FirebugChrome =
         return switchPanel;
     },
 
-    unswitchToPanel: function(context, switchToPanelName, cancelled)
+    unswitchToPanel: function(context, switchToPanelName, canceled)
     {
         var switchToPanel = context.getPanel(switchToPanelName);
 
         if (this.previouslyFocused)
             this.focus();
 
-        if (cancelled && this.previousPanelName)  // revert
+        if (canceled && this.previousPanelName)  // revert
         {
             if (this.previouslyCollapsed)
                 Firebug.showBar(false);

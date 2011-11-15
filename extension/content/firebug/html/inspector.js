@@ -291,7 +291,7 @@ Firebug.Inspector = Obj.extend(Firebug.Module,
 
     /**
      * Stop inspecting and clear all highlights.
-     * @param {Boolean} canceled Indicates whether inspect was cancelled (usually via the escape key)
+     * @param {Boolean} canceled Indicates whether inspect was canceled (usually via the escape key)
      * @param {Boolean} [waitForClick] Indicates whether the next click will still forward you
      *      to the clicked element in the HTML panel.
      */
@@ -432,7 +432,7 @@ Firebug.Inspector = Obj.extend(Firebug.Module,
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
     /**
-     * Attach the scroll and resize handlers to elts window. Called from every highlight call.
+     * Attach the scroll and resize handlers to elt's window. Called from every highlight call.
      * @param {Element} elt Passed in order to reliably obtain context
      */
     attachRepaintInspectListeners: function(context, elt)
@@ -449,7 +449,7 @@ Firebug.Inspector = Obj.extend(Firebug.Module,
         // avoid adding properties to the users page.
         // Adding them again will do no harm so lets just do that.
 
-        // xxxHonza: I think that adding them twice could actualy do harm,
+        // xxxHonza: I think that adding them twice could actually do harm,
         // so make sure they are removed before.
         context.removeEventListener(win.document, "resize", this.onInspectingResizeWindow, true);
         context.removeEventListener(win.document, "scroll", this.onInspectingScroll, true);
@@ -510,7 +510,7 @@ Firebug.Inspector = Obj.extend(Firebug.Module,
 
         var chrome = Firebug.chrome;
 
-        if (this.keyListeners)  // XXXjjb for some reason this is null some times.
+        if (this.keyListeners)  // XXXjjb for some reason this is null sometimes.
         {
             keyListenersLen = this.keyListeners.length;
             for (i = 0; i < keyListenersLen; ++i)
@@ -528,7 +528,7 @@ Firebug.Inspector = Obj.extend(Firebug.Module,
     },
 
     /**
-     * Remove the click listener independent from detachInspectListeners because if we remove
+     * Remove the click listener independently from detachInspectListeners because if we remove
      * it after mousedown, we won't be able to cancel clicked links.
      *
      * @param {Window} context Context of the main browser window
@@ -733,7 +733,7 @@ Firebug.Inspector = Obj.extend(Firebug.Module,
      */
     showPanel: function(browser, panel)
     {
-        // Don't disable the cmd_toggleInspecting command. The realted shortcut <key> must
+        // Don't disable the cmd_toggleInspecting command. The related shortcut <key> must
         // be available even if Firebug is not activated for the site. See 4452
         // The panel can be null (if disabled) so use the global context.
         // var context = Firebug.currentContext;
@@ -1095,7 +1095,8 @@ var quickInfoBox =
     },
 
     hide: function()
-    {    // if mouse is over panel defer hiding to mouseout to not cause flickering
+    {
+        // if mouse is over panel defer hiding to mouseout to not cause flickering
         if (this.mouseover || this.dragging)
         {
             this.needsToHide = true;

@@ -1310,7 +1310,7 @@ NetPanel.prototype = Obj.extend(Firebug.ActivablePanel,
             if (Css.hasClass(row, "history"))
                 continue;
 
-            // Export also history. These requests can be collpased and so not visible.
+            // Export also history. These requests can be collapsed and so not visible.
             if (row.files)
             {
                 for (var j=0; j<row.files.length; j++)

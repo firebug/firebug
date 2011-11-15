@@ -902,7 +902,6 @@ Firebug.DOMBasePanel.prototype = Obj.extend(Firebug.Panel,
     getRowPathName: function(row)
     {
         var name = row.domObject.name;
-        var seperator = "";
 
         if(name.match(/^[\d]+$/))//ordinal
             return ["", "["+name+"]"];
@@ -915,7 +914,7 @@ Firebug.DOMBasePanel.prototype = Obj.extend(Firebug.Panel,
     copyName: function(row)
     {
         var value = this.getRowPathName(row);
-        value = value[1];//don't want the seperator
+        value = value[1]; //don't want the separator
         System.copyToClipboard(value);
     },
 
@@ -934,7 +933,7 @@ Firebug.DOMBasePanel.prototype = Obj.extend(Firebug.Panel,
         var path = [];
         for(var current = row; current ; current = getParentRow(current))
             path = this.getRowPathName(current).concat(path);
-        path.splice(0,1); //don't want the first seperator
+        path.shift(); //don't want the first separator
         return path;
     },
 

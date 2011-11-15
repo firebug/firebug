@@ -140,7 +140,7 @@ Firebug.Editor = Obj.extend(Firebug.Module,
         if (value == defaultValue)
             value = "";
 
-        // Reset the editor's value so it isn't accidentaly reused the next time
+        // Reset the editor's value so it isn't accidentally reused the next time
         // the editor instance is reused (see also 3280, 3332).
         currentEditor.setValue("");
 

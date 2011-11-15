@@ -352,8 +352,8 @@ FirebugReps.Obj = domplate(Firebug.Rep,
     {
         var props = [];
 
-        // Object member with non-empty are prefered since it give the user better
-        // overview of the object.
+        // Object members with non-empty values are preferred since it gives the
+        // user a better overview of the object.
         this.getProps(props, object, max, function(t, value)
         {
             return (t == "boolean" || t == "number" || (t == "string" && value) ||
@@ -1950,7 +1950,7 @@ FirebugReps.ErrorMessage = domplate(Firebug.Rep,
 
         source = Str.trim(source);
 
-        // Count how much the pivot needs to be adjucted (based on Str.cropStringEx)
+        // Count how much the pivot needs to be adjusted (based on Str.cropStringEx)
         var halfLimit = this.sourceLimit/2;
         var pivot = error.colNumber;
         if (pivot < halfLimit)
@@ -1959,11 +1959,11 @@ FirebugReps.ErrorMessage = domplate(Firebug.Rep,
         if (pivot > source.length - halfLimit)
             pivot = source.length - halfLimit;
 
-        // Subtract some columns if the text has been cropped at the beggining.
+        // Subtract some columns if the text has been cropped at the beginning.
         var begin = Math.max(0, pivot - halfLimit);
         colNumber -= begin;
 
-        // Add come cols because there is an alterText at the beggining now.
+        // Add come cols because there is an alterText at the beginning now.
         if (begin > 0)
             colNumber += this.alterText.length;
 
