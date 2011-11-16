@@ -280,7 +280,7 @@ Firebug.MemoryProfiler = Obj.extend(Firebug.Module,
             if (obj.hasOwnProperty("__fbugMemMark"))
                 return false;
 
-            if (FirebugReps.Arr.isArray(obj))
+            if (FirebugReps.Arr.isArray(obj, context.window))
                 obj.__fbugMemMark = obj.length;
             else
                 obj.__fbugMemMark = true;
@@ -318,8 +318,11 @@ Firebug.MemoryProfiler = Obj.extend(Firebug.Module,
             else // we did see it
             {
                 // but it was an array with a different size
-                if (FirebugReps.Arr.isArray(obj) && (obj.__fbugMemMark !== obj.length) )
+                if (FirebugReps.Arr.isArray(obj, context.window) &&
+                    (obj.__fbugMemMark !== obj.length))
+                {
                     this.deltaObjects[path] = obj;
+                }
             }
 
             // Iterate children

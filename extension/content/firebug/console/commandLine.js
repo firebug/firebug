@@ -2289,7 +2289,7 @@ function propChainBuildComplete(out, context, tempExpr, result)
             propChainBuildComplete(out, context, tempExpr);
             return;
         }
-        else if (FirebugReps.Arr.isArray(result))
+        else if (FirebugReps.Arr.isArray(result, context.window))
             complete = nonNumericKeys(result);
         else
             complete = Arr.keys(result);

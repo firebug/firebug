@@ -258,7 +258,7 @@ JSONTreePlate.prototype = Obj.extend(Firebug.DOMBasePanel.prototype,
         function sortName(a, b) { return a.name > b.name ? 1 : -1; }
 
         // Sort only if it isn't an array (issue 4382).
-        if (Firebug.sortJsonPreview && !Arr.isArray(object))
+        if (Firebug.sortJsonPreview && !Arr.isArray(object, context.window))
             members.sort(sortName);
 
         return members;

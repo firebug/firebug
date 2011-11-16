@@ -582,9 +582,9 @@ FirebugReps.Arr = domplate(Firebug.Rep,
 
     className: "array",
 
-    supportsObject: function(object, type)
+    supportsObject: function(object, type, context)
     {
-        return this.isArray(object);
+        return this.isArray(object, context.window);
     },
 
     highlightObject: function(object, context, target)
@@ -615,45 +615,48 @@ FirebugReps.Arr = domplate(Firebug.Rep,
 
     // http://code.google.com/p/fbug/issues/detail?id=874
     // BEGIN Yahoo BSD Source (modified here)  YAHOO.lang.isArray, YUI 2.2.2 June 2007
-    isArray: function(obj)
+    isArray: function(obj, win)
     {
-        try {
+        win = win || window;
+
+        var view = Wrapper.getContentView(win);
+
+        try
+        {
             if (!obj)
                 return false;
             // do this first to avoid security 1000 errors
             else if (obj instanceof Ci.nsIDOMHistory)
                 return false;
             // do this first to avoid security 1000 errors
-            else if (obj instanceof window.StorageList)
+            else if (obj instanceof view.StorageList)
                 return false;
             // do this first to avoid exceptions
             else if (obj.toString() === "[xpconnect wrapped native prototype]")
                 return false;
-            else if (isFinite(obj.length) && typeof obj.splice === 'function')
+            else if (isFinite(obj.length) && typeof obj.splice === "function")
                 return true;
-            else if (isFinite(obj.length) && typeof obj.callee === 'function') // arguments
+            else if (isFinite(obj.length) && typeof obj.callee === "function") // arguments
                 return true;
-            else if (obj instanceof window.HTMLCollection)
+            else if (obj instanceof view.HTMLCollection)
                 return true;
-            else if (obj instanceof window.NodeList)
+            else if (obj instanceof view.NodeList)
                 return true;
-            else
-                return false;
         }
-        catch(exc)
+        catch (exc)
         {
             try
             {
                 if (FBTrace.DBG_ERRORS)
                 {
                     // Something weird: without the try/catch, OOM, with no exception??
-                    FBTrace.sysout("isArray FAILS: "+exc, exc);
-                    FBTrace.sysout("isArray Fails on obj "+obj);
+                    FBTrace.sysout("isArray FAILS: " + exc, exc);
+                    FBTrace.sysout("isArray Fails on obj " + obj);
                 }
             }
-            catch(exexc)
+            catch (exexc)
             {
-                FBTrace.sysout("isArray double ERROR "+exexc, exexc);
+                FBTrace.sysout("isArray double ERROR " + exexc, exexc);
             }
         }
 

@@ -74,7 +74,7 @@ Firebug.Inspector = Obj.extend(Firebug.Module,
         var i, elt, elementLen, oldContext, usingColorArray;
         var highlighter = highlightType ? getHighlighter(highlightType) : this.defaultHighlighter;
 
-        if (!elementArr || !FirebugReps.Arr.isArray(elementArr))
+        if (!elementArr || !FirebugReps.Arr.isArray(elementArr, context.window))
         {
             // highlight a single element
             if (!elementArr || !Dom.isElement(elementArr) ||
@@ -141,7 +141,7 @@ Firebug.Inspector = Obj.extend(Firebug.Module,
             }
 
             this.clearAllHighlights();
-            usingColorArray = FirebugReps.Arr.isArray(colorObj);
+            usingColorArray = FirebugReps.Arr.isArray(colorObj, context.window);
 
             if (context && context.window && context.window.document)
             {
