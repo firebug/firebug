@@ -37,7 +37,7 @@
     <!-- Firefox page context menu -->
     <menupopup id="contentAreaContextMenu">
         <menuseparator/>
-        <menuitem id="menu_firebugInspect" label="firebug.InspectElement"
+        <menuitem id="menu_firebugInspect" label="firebug.InspectElementWithFirebug"
                   command="cmd_inspect" class="menuitem-iconic fbInternational" />
     </menupopup>
 
