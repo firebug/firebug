@@ -209,7 +209,7 @@ var jsdHandlers =
     hook: function(frame)
     {
         if (FBTrace.DBG_FBS_STEP)
-            FBTrace.sysout("start hooks " + this.hooks.length + " hooks active " +
+            FBTrace.sysout("fbs.start hooks " + this.hooks.length + " hooks active " +
                 frameToString(frame), this);
 
         for (var i = 0; i < this.hooks.length; i++)
@@ -229,7 +229,7 @@ var jsdHandlers =
     unhook: function(frame)
     {
         if (FBTrace.DBG_FBS_STEP)
-            FBTrace.sysout("stop hooks "+this.hooks.length+" hooks active", this);
+            FBTrace.sysout("fbs.stop hooks "+this.hooks.length+" hooks active", this);
 
         this.checkForUnhookFunctions(frame);
         this.checkForUnhookInterrupts(frame);
@@ -271,7 +271,7 @@ var jsdHandlers =
             if (methodName in aHook)
             {
                 if (FBTrace.DBG_FBS_STEP && FBTrace.DBG_DISPATCH)
-                    FBTrace.sysout("firebug-service.jsdHandler.dispatch " + methodName +
+                    FBTrace.sysout("fbs.jsdHandler.dispatch " + methodName +
                         " to " + aHook + " " + getCallFromType(type) + " frame: " +
                         frameToString(frame), this);
 
@@ -337,7 +337,7 @@ BreakOnNextCall.prototype =
         if (lucky) // then we hit in a function in our context
         {
             if (FBTrace.DBG_FBS_STEP)
-                FBTrace.sysout("breakOnNextTopFunction hits at "+getCallFromType(type)+" at "+
+                FBTrace.sysout("fbs.breakOnNextTopFunction hits at "+getCallFromType(type)+" at "+
                     frame.script.fileName+" tag:"+(lucky?"LUCKY WINNER":frame.script.tag),
                     framesToString(frame));
 
@@ -409,7 +409,7 @@ OutStepper.prototype =
         }
 
         if (FBTrace.DBG_FBS_STEP)
-            FBTrace.sysout(this.mode+" hook with frame "+frameToString(frame)+
+            FBTrace.sysout("fbs." + this.mode+" hook with frame "+frameToString(frame)+
                 " with callingFrameId "+this.callingFrameId, this);
 
         return true;
@@ -426,7 +426,7 @@ OutStepper.prototype =
             this.callingFrameId = callingFrameId;  // push new id for stepFunctionReturn
 
             if (FBTrace.DBG_FBS_STEP)
-                FBTrace.sysout(this.mode+" stepFunctionCall new depth "+this.depth+
+                FBTrace.sysout("fbs." + this.mode+" stepFunctionCall new depth "+this.depth+
                     " new callingFrameId "+this.callingFrameId);
         }
 
@@ -451,7 +451,7 @@ OutStepper.prototype =
                     return this.hit(frame.callingFrame, type);
 
                 if (FBTrace.DBG_FBS_STEP)
-                    FBTrace.sysout("OutStepper.onFunctionReturn no calling frame " +
+                    FBTrace.sysout("fbs.OutStepper.onFunctionReturn no calling frame " +
                         frameToString(frame) + ", " + getCallFromType(type), this);
 
                 jsdHandlers.unhook(frame);  // we are done here
@@ -479,8 +479,8 @@ OutStepper.prototype =
 
         // else it's is not a frame we care about
         if (FBTrace.DBG_FBS_STEP)
-            FBTrace.sysout(this.mode + ".onFunctionReturn callingFrameId " + callingFrameId +
-                " called frame " + frameToString(frame), this)
+            FBTrace.sysout("fbs." + this.mode + ".onFunctionReturn callingFrameId " +
+                callingFrameId + " called frame " + frameToString(frame), this)
     },
 
     unhook: function(frame)
@@ -490,7 +490,7 @@ OutStepper.prototype =
     hit: function(frame, type, rv)
     {
         if (FBTrace.DBG_FBS_STEP)
-            FBTrace.sysout(this.mode + " hit " + getCallFromType(type) + " at " +
+            FBTrace.sysout("fbs." + this.mode + " hit " + getCallFromType(type) + " at " +
                 frameToString(frame), this);
 
         var debuggr = fbs.reFindDebugger(frame, this.debuggr);
@@ -511,7 +511,7 @@ OutStepper.prototype =
     toString: function()
     {
         if (!this.context.getName)
-            FBTrace.sysout("this.context.getName ", this.context);
+            FBTrace.sysout("fbs.this.context.getName ", this.context);
 
         return this.mode + " for "+this.context.getName();
     },
@@ -543,14 +543,14 @@ LineStepper.prototype = extend(OutStepper.prototype,
         this.stepFrameTag = frame.script.tag;
 
         if (FBTrace.DBG_FBS_STEP)
-            FBTrace.sysout(this.mode+".hook "+frameToString(frame)+" with lineFrameId "+
-                this.lineFrameId, this);
+            FBTrace.sysout("fbs." + this.mode + ".hook " + frameToString(frame) +
+                " with lineFrameId " + this.lineFrameId, this);
     },
 
     unhook: function unhookLineStepper(frame)
     {
         if (FBTrace.DBG_FBS_STEP)
-            FBTrace.sysout(this.mode + ".hook; unhook " + frameToString(frame));
+            FBTrace.sysout("fbs." + this.mode + ".hook; unhook " + frameToString(frame));
     },
 
     // jsdIExecutionHook, onExecute
@@ -568,9 +568,10 @@ LineStepper.prototype = extend(OutStepper.prototype,
         var frameLineId = frameId(frame, this.depth);
 
         if (FBTrace.DBG_FBS_STEP)
-            FBTrace.sysout(this.mode+" interruptHook pc:"+frame.pc+" frameLineId: "+frameLineId+
-                " vs "+this.lineFrameId+" running "+frame.script.tag+" of "+frame.script.fileName+
-                " at "+frame.line+"."+frame.pc, this);
+            FBTrace.sysout("fbs." + this.mode + " interruptHook pc:" + frame.pc +
+                " frameLineId: " + frameLineId + " vs " + this.lineFrameId + " running " +
+                frame.script.tag + " of " + frame.script.fileName +
+                " at " + frame.line + "." + frame.pc, this);
 
         if (frameLineId != this.lineFrameId)
             return this.hit(frame, type, rv);
@@ -580,7 +581,8 @@ LineStepper.prototype = extend(OutStepper.prototype,
 
     toString: function()
     {
-        if (!this.context.getName) FBTrace.sysout("this.context.getName ", this.context);
+        if (!this.context.getName)
+            FBTrace.sysout("fbs.this.context.getName ", this.context);
 
         return this.mode + " for "+this.context.getName();
     },
@@ -626,8 +628,8 @@ IntoStepper.prototype = extend(LineStepper.prototype,
 
             // else someone else, ignore it
             if (FBTrace.DBG_FBS_STEP)
-                FBTrace.sysout(this.mode+".intoFunctionCall no match "+this.stepFrameTag+" vs "+
-                    callingFrame.script.tag, this);
+                FBTrace.sysout("fbs." + this.mode + ".intoFunctionCall no match " +
+                    this.stepFrameTag + " vs " + callingFrame.script.tag, this);
         }
 
         // else this would be a top level call, do we want to check for
@@ -694,8 +696,8 @@ LogFunctionStepper.prototype =
             var diff = (fbs.stackDescription.oldestTag !== frame.script.tag);
 
             if (FBTrace.DBG_FBS_STEP)
-                FBTrace.sysout("Stack ends at depth "+fbs.stackDescription.depth+
-                    (diff?" NO Match on tag ":" tags match"), fbs.stackDescription.entries);
+                FBTrace.sysout("fbs.Stack ends at depth "+fbs.stackDescription.depth +
+                    (diff ? " NO Match on tag " : " tags match"), fbs.stackDescription.entries);
 
             fbs.stackDescription.entries = [];
         }
@@ -729,7 +731,7 @@ var fbs =
         FBTrace = traceConsoleService.getTracer("extensions.firebug");
 
         if (FBTrace.DBG_FBS_ERRORS)
-            FBTrace.sysout("FirebugService Starting");
+            FBTrace.sysout("fbs.FirebugService Starting");
 
         fbs = this;
 
@@ -771,7 +773,7 @@ var fbs =
         this.nestedScriptStack = []; // scripts contained in leveledScript that have not been drained
 
         if (FBTrace.DBG_FBS_ERRORS)
-            FBTrace.sysout("FirebugService Initialized");
+            FBTrace.sysout("fbs.FirebugService Initialized");
     },
 
     osOut: function(str)
@@ -819,7 +821,7 @@ var fbs =
         catch (exc)
         {
             // Seems to be the normal path...
-            // FBTrace.sysout("FirebugService, attempt to exitNestedEventLoop ERROR "+exc);
+            // FBTrace.sysout("fbs.FirebugService, attempt to exitNestedEventLoop ERROR "+exc);
         }
 
         try
@@ -828,7 +830,7 @@ var fbs =
         }
         catch (exc)
         {
-            FBTrace.sysout("fbs prefs.removeObserver ERROR "+exc, exc);
+            FBTrace.sysout("fbs.prefs.removeObserver ERROR "+exc, exc);
         }
 
         try
@@ -839,7 +841,7 @@ var fbs =
         }
         catch (exc)
         {
-            FBTrace.sysout("fbs quit-application-observers removeObserver ERROR "+exc, exc);
+            FBTrace.sysout("fbs.quit-application-observers removeObserver ERROR "+exc, exc);
         }
 
         jsd = null;
@@ -1241,8 +1243,8 @@ var fbs =
             var urlBreakpoints = fbs.getBreakpoints(url);
 
             if (FBTrace.DBG_FBS_BP)
-                FBTrace.sysout("clearAllBreakpoints "+url+" urlBreakpoints: "+
-                    (urlBreakpoints?urlBreakpoints.length:"null"));
+                FBTrace.sysout("fbs.clearAllBreakpoints " + url + " urlBreakpoints: " +
+                    (urlBreakpoints ? urlBreakpoints.length : "null"));
 
             if (!urlBreakpoints)
                 continue;
@@ -1542,9 +1544,9 @@ var fbs =
             jsd = DebuggerService.getService(jsdIDebuggerService);
 
             if ( FBTrace.DBG_FBS_ERRORS )
-                FBTrace.sysout("enableDebugger gets jsd service, isOn:"+jsd.isOn+" initAtStartup:"+
-                    jsd.initAtStartup+" now have "+debuggers.length+" debuggers"+" in "+
-                    clients.length+" clients");
+                FBTrace.sysout("fbs.enableDebugger gets jsd service, isOn:" + jsd.isOn +
+                    " initAtStartup:" + jsd.initAtStartup + " now have " + debuggers.length +
+                    " debuggers in " + clients.length + " clients");
 
             // This property has been removed from Fx40
             if (jsd.initAtStartup)
@@ -1558,7 +1560,7 @@ var fbs =
                 if (FBTrace.DBG_ACTIVATION)
                 {
                     var startAsyncOn = new Date().getTime();
-                    FBTrace.sysout("firebug-service.activation begin jsd.asyncOn "+startAsyncOn);
+                    FBTrace.sysout("fbs.activation begin jsd.asyncOn " + startAsyncOn);
                 }
 
                 jsd.asyncOn(  // turn on jsd for the next event
@@ -1569,9 +1571,9 @@ var fbs =
                         if (FBTrace.DBG_ACTIVATION)
                         {
                             var nowAsyncOn = new Date().getTime();
-                            FBTrace.sysout("firebug-service.activation now we are in the " +
-                                "next event and JSD is ON "+nowAsyncOn+" delta: "+
-                                (nowAsyncOn - startAsyncOn)+"ms" );
+                            FBTrace.sysout("fbs.activation now we are in the " +
+                                "next event and JSD is ON " + nowAsyncOn + " delta: " +
+                                (nowAsyncOn - startAsyncOn) + "ms");
                         }
 
                         fbs.onDebuggerActivated();
@@ -1589,7 +1591,7 @@ var fbs =
             if (!jsd.isOn)
             {
                 if (FBTrace.DBG_FBS_ERRORS)
-                    FBTrace.sysout("Firefox 3.6 or earlier  ==========================");
+                    FBTrace.sysout("fbs.Firefox 3.6 or earlier");
 
                 jsd.on(); // this should be the only call to jsd.on().
                 fbs.onDebuggerActivated();
@@ -1603,7 +1605,7 @@ var fbs =
         jsd.flags |= DISABLE_OBJECT_TRACE;
 
         if (FBTrace.DBG_ACTIVATION)
-            FBTrace.sysout("jsd.onDebuggerActivated ==========================");
+            FBTrace.sysout("fbs.onDebuggerActivated");
 
         if (jsd.pauseDepth && FBTrace.DBG_FBS_ERRORS)
             FBTrace.sysout("fbs.enableDebugger found non-zero jsd.pauseDepth !! " +
@@ -1621,7 +1623,7 @@ var fbs =
         this.hookScripts();
 
         if (FBTrace.DBG_ACTIVATION)
-            FBTrace.sysout("fbs.enableDebugger with active "+active);
+            FBTrace.sysout("fbs.enableDebugger with active " + active);
     },
 
     obeyPrefs: function()
@@ -1635,8 +1637,8 @@ var fbs =
         var mustReset = (pref !== fbs.scriptsFilter);
 
         if (FBTrace.DBG_OPTIONS)
-            FBTrace.sysout("obeyPrefs mustReset = "+mustReset+" pref: "+pref+" fbs.scriptsFilter: "
-                +fbs.scriptsFilter, fbs);
+            FBTrace.sysout("fbs.obeyPrefs mustReset = " + mustReset + " pref: " + pref +
+                " fbs.scriptsFilter: " + fbs.scriptsFilter, fbs);
 
         pref = fbs.filterSystemURLs;
 
@@ -1645,8 +1647,8 @@ var fbs =
         mustReset = mustReset || (pref !== fbs.filterSystemURLs);
 
         if (FBTrace.DBG_OPTIONS)
-            FBTrace.sysout("obeyPrefs mustReset = "+mustReset+" pref: "+pref+
-                " fbs.filterSystemURLs: "+fbs.filterSystemURLs);
+            FBTrace.sysout("fbs.obeyPrefs mustReset = " + mustReset + " pref: " + pref +
+                " fbs.filterSystemURLs: " + fbs.filterSystemURLs);
 
         if (mustReset && jsd && jsd.scriptHook)
         {
@@ -1678,7 +1680,7 @@ var fbs =
         }
         catch (exc)
         {
-            FBTrace.sysout("firebug-service: constructor getBoolPrefs FAILED with exception=",exc);
+            FBTrace.sysout("fbs.constructor getBoolPrefs FAILED with exception=", exc);
         }
     },
 
@@ -1890,7 +1892,7 @@ var fbs =
         catch(exc)
         {
             if (FBTrace.DBG_FBS_ERRORS)
-                FBTrace.sysout("onDebugger failed: "+exc,exc);
+                FBTrace.sysout("fbs.onDebugger failed: "+exc,exc);
 
             ERROR("onDebugger failed: "+exc, exc);
             return RETURN_CONTINUE;
@@ -1968,7 +1970,7 @@ var fbs =
         if (fbs.isTopLevelScript(frame, type, val))
         {
             if (FBTrace.DBG_FBS_BP)
-                FBTrace.sysout("onBreakpoint isTopLevel returning " + RETURN_CONTINUE);
+                FBTrace.sysout("fbs.onBreakpoint isTopLevel returning " + RETURN_CONTINUE);
 
             return RETURN_CONTINUE;
         }
@@ -1997,7 +1999,7 @@ var fbs =
             {
                 if (FBTrace.DBG_FBS_BP)
                 {
-                    FBTrace.sysout("onBreakpoint("+getExecutionStopNameFromType(type)+
+                    FBTrace.sysout("fbs.onBreakpoint("+getExecutionStopNameFromType(type)+
                         ") disabledCount:"+disabledCount+" monitorCount:"+monitorCount+
                         " conditionCount:"+conditionCount+" runningUntil:"+runningUntil, bp);
                 }
@@ -2023,7 +2025,7 @@ var fbs =
                     else
                     {
                         if (FBTrace.DBG_FBS_ERRORS)
-                            FBTrace.sysout("BP_UNTIL but not runningUntil!", bp);
+                            FBTrace.sysout("fbs.BP_UNTIL but not runningUntil!", bp);
                     }
 
                     if (theDebugger)
@@ -2050,7 +2052,7 @@ var fbs =
         else
         {
             if (FBTrace.DBG_FBS_BP)
-                FBTrace.sysout("onBreakpoint(" + getExecutionStopNameFromType(type) +
+                FBTrace.sysout("fbs.onBreakpoint(" + getExecutionStopNameFromType(type) +
                     ") NO bp match with frame.script.tag=" + frame.script.tag +
                     " clearing and continuing");
 
@@ -2125,7 +2127,7 @@ var fbs =
         if (fbs.trackThrowCatch)
         {
             if (FBTrace.DBG_FBS_ERRORS)
-                FBTrace.sysout("onThrow from tag:" + frame.script.tag + ":" +
+                FBTrace.sysout("fbs.onThrow from tag:" + frame.script.tag + ":" +
                     frame.script.fileName + "@" + frame.line + ": " + frame.pc);
 
             var debuggr = this.findDebugger(frame);
@@ -2213,7 +2215,7 @@ var fbs =
         var scriptTag = frame.script.tag;
 
         if (FBTrace.DBG_FBS_SRCUNITS)
-            FBTrace.sysout("isTopLevelScript frame.script.tag="+frame.script.tag );
+            FBTrace.sysout("fbs.isTopLevelScript frame.script.tag="+frame.script.tag );
 
         if (scriptTag in this.onXScriptCreatedByTag)
         {
@@ -2223,7 +2225,7 @@ var fbs =
             var onXScriptCreated = this.onXScriptCreatedByTag[scriptTag];
 
             if (FBTrace.DBG_FBS_BP)
-                FBTrace.sysout("isTopLevelScript(" + getExecutionStopNameFromType(type) +
+                FBTrace.sysout("fbs.isTopLevelScript(" + getExecutionStopNameFromType(type) +
                     ") with frame.script.tag=" + frame.script.tag + " onXScriptCreated:" +
                     onXScriptCreated.kind);
 
@@ -2236,7 +2238,7 @@ var fbs =
             }
             catch (e)
             {
-                FBTrace.sysout("isTopLevelScript called onXScriptCreated and " +
+                FBTrace.sysout("fbs.isTopLevelScript called onXScriptCreated and " +
                     "it didn't end well:", e);
             }
 
@@ -2282,7 +2284,7 @@ var fbs =
         }
         catch (e)
         {
-            FBTrace.sysout("isNestedScript called onXScriptCreated and it didn't end well:", e);
+            FBTrace.sysout("fbs.isNestedScript called onXScriptCreated and it didn't end well:", e);
         }
 
         return true;
@@ -2337,7 +2339,7 @@ var fbs =
         catch(exc)
         {
             if (FBTrace.DBG_FBS_ERRORS)
-                FBTrace.sysout("onXULScriptCreated ERROR " + exc, exc);
+                FBTrace.sysout("fbs.onXULScriptCreated ERROR " + exc, exc);
         }
     },
 
@@ -2361,12 +2363,12 @@ var fbs =
                         if (FBTrace.DBG_FBS_SRCUNITS)  // these seem to be harmless, but...
                         {
                             var script = frame.script;
-                            FBTrace.sysout("onEventScriptCreated no nestedScriptStack: " +
+                            FBTrace.sysout("fbs.onEventScriptCreated no nestedScriptStack: " +
                                 script.tag + "@(" + script.baseLineNumber + "-" +
                                 (script.baseLineNumber+script.lineExtent) + ")" +
                                 script.fileName);
 
-                            FBTrace.sysout("onEventScriptCreated name: \'" +
+                            FBTrace.sysout("fbs.onEventScriptCreated name: \'" +
                                 script.functionName + "\'");
 
                             try
@@ -2398,11 +2400,11 @@ var fbs =
             catch(exc)
             {
                 if (FBTrace.DBG_ERRORS)
-                    FBTrace.sysout("onEventScriptCreated failed: " + exc, exc);
+                    FBTrace.sysout("fbs.onEventScriptCreated failed: " + exc, exc);
             }
 
             if (FBTrace.DBG_FBS_CREATION || FBTrace.DBG_FBS_SRCUNITS)
-                FBTrace.sysout("onEventScriptCreated frame.script.tag:" + frame.script.tag +
+                FBTrace.sysout("fbs.onEventScriptCreated frame.script.tag:" + frame.script.tag +
                     " href: " + (sourceFile ? sourceFile.href : "no sourceFile"), sourceFile);
         }
 
@@ -2419,7 +2421,7 @@ var fbs =
                 if (!frame.callingFrame)
                 {
                     if (FBTrace.DBG_FBS_CREATION || FBTrace.DBG_FBS_SRCUNITS)
-                        FBTrace.sysout("No calling Frame for eval frame.script.fileName:" +
+                        FBTrace.sysout("fbs.No calling Frame for eval frame.script.fileName:" +
                             frame.script.fileName);
 
                     // These are eval-like things called by native code. They come from .xml files
@@ -2452,15 +2454,15 @@ var fbs =
                 ERROR("onEvalScriptCreated failed: "+exc);
 
                 if (FBTrace.DBG_FBS_ERRORS)
-                    FBTrace.sysout("onEvalScriptCreated failed:", exc);
+                    FBTrace.sysout("fbs.onEvalScriptCreated failed:", exc);
             }
         }
 
         fbs.clearNestedScripts();
 
         if (FBTrace.DBG_FBS_CREATION || FBTrace.DBG_FBS_SRCUNITS)
-            FBTrace.sysout("onEvalScriptCreated outerScript.tag:" + outerScript.tag + " href: " +
-                (sourceFile ? sourceFile.href : "no sourceFile"));
+            FBTrace.sysout("fbs.onEvalScriptCreated outerScript.tag:" + outerScript.tag +
+                " href: " + (sourceFile ? sourceFile.href : "no sourceFile"));
 
         return sourceFile;
     },
@@ -2507,12 +2509,12 @@ var fbs =
             {
                 // modules end up here?
                 if (FBTrace.DBG_FBS_SRCUNITS)
-                    FBTrace.sysout("FBS.onTopLevelScriptCreated no debuggr for " + frame.script.tag);
+                    FBTrace.sysout("fbs.onTopLevelScriptCreated no debuggr for " + frame.script.tag);
             }
         }
         catch (exc)
         {
-            FBTrace.sysout("onTopLevelScriptCreated FAILED: " + exc, exc);
+            FBTrace.sysout("fbs.onTopLevelScriptCreated FAILED: " + exc, exc);
             ERROR("onTopLevelScriptCreated ERROR: " + exc);
         }
 
@@ -2573,8 +2575,8 @@ var fbs =
         if (!fbs)
         {
             if (FBTrace.DBG_FBS_CREATION || FBTrace.DBG_FBS_SRCUNITS || FBTrace.DBG_FBS_TRACKFILES)
-                FBTrace.sysout("onScriptCreated " + script.tag + ", but no fbs for script.fileName=" +
-                    script.fileName);
+                FBTrace.sysout("fbs.onScriptCreated " + script.tag +
+                    ", but no fbs for script.fileName=" + script.fileName);
              return;
         }
 
@@ -2590,12 +2592,14 @@ var fbs =
                 try
                 {
                     if (FBTrace.DBG_FBS_CREATION || FBTrace.DBG_FBS_SRCUNITS)
-                        FBTrace.sysout("onScriptCreated " + script.tag + ": filename filtered:\'" +
-                            fileName + "\'" + (fbs.filterConsoleInjections ? " console injection" : ""));
+                        FBTrace.sysout("fbs.onScriptCreated " + script.tag +
+                            ": filename filtered:\'" +
+                            fileName + "\'" + (fbs.filterConsoleInjections ?
+                            " console injection" : ""));
                 }
                 catch (exc)
                 {
-                    FBTrace.sysout("onScriptCreated " + script.tag + " filtered msg ERROR \'" +
+                    FBTrace.sysout("fbs.onScriptCreated " + script.tag + " filtered msg ERROR \'" +
                         script.fileName+"\'"); /*? Bug 426692 */
                 }
 
@@ -2606,23 +2610,23 @@ var fbs =
             }
 
             if (FBTrace.DBG_FBS_CREATION || FBTrace.DBG_FBS_SRCUNITS)
-                FBTrace.sysout("onScriptCreated: " + script.tag + "@(" + script.baseLineNumber +
+                FBTrace.sysout("fbs.onScriptCreated: " + script.tag + "@(" + script.baseLineNumber +
                     "-" + (script.baseLineNumber+script.lineExtent) + ")" + script.fileName);
 
             if (script.lineExtent > 80000 && FBTrace.DBG_FBS_SRCUNITS)
-                FBTrace.sysout("****************>> BOGUS line extent (" + script.lineExtent +
+                FBTrace.sysout("fbs.BOGUS line extent (" + script.lineExtent +
                     ") for " + script.fileName);
 
             if (FBTrace.DBG_FBS_CREATION)
             {
                 try
                 {
-                    FBTrace.sysout("onScriptCreated: \'"+script.functionName+"\'",
+                    FBTrace.sysout("fbs.onScriptCreated: \'"+script.functionName+"\'",
                         script.functionSource);
                 }
                 catch (exc)
                 {
-                    FBTrace.sysout("onScriptCreated " + script.tag + " ERROR \'" +
+                    FBTrace.sysout("fbs.onScriptCreated " + script.tag + " ERROR \'" +
                         script.fileName + "\'"); /*? Bug 426692 */
                 }
             }
@@ -2640,7 +2644,7 @@ var fbs =
                 // We need to detect eval() and grab its source.
                 var hasCaller = fbs.createdScriptHasCaller();
                 if (FBTrace.DBG_FBS_SRCUNITS)
-                    FBTrace.sysout("top or eval case createdScriptHasCaller " + hasCaller);
+                    FBTrace.sysout("fbs.top or eval case createdScriptHasCaller " + hasCaller);
 
                 if (hasCaller)
                 {
@@ -2656,7 +2660,7 @@ var fbs =
 
                 if (FBTrace.DBG_FBS_CREATION || FBTrace.DBG_FBS_SRCUNITS || FBTrace.DBG_FBS_BP)
                 {
-                    FBTrace.sysout("onScriptCreated: set BP at PC 0 in " +
+                    FBTrace.sysout("fbs.onScriptCreated: set BP at PC 0 in " +
                         (hasCaller ? "eval" : "top") + " level tag=" + script.tag + ":" +
                         script.fileName + " jsd depth:" + (jsd.isOn ? jsd.pauseDepth +
                         "" : "OFF"));
@@ -2672,7 +2676,7 @@ var fbs =
                 if (FBTrace.DBG_FBS_SRCUNITS)
                 {
                     var hasCaller = fbs.createdScriptHasCaller();
-                    FBTrace.sysout("browser generated createdScriptHasCaller " + hasCaller);
+                    FBTrace.sysout("fbs.browser generated createdScriptHasCaller " + hasCaller);
                 }
 
                 fbs.onXScriptCreatedByTag[script.tag] = this.onEventScriptCreated; // for case 1
@@ -2681,7 +2685,7 @@ var fbs =
                 fbs.nestedScriptStack.push(script);  // for case 2
 
                 if (FBTrace.DBG_FBS_CREATION)
-                    FBTrace.sysout("onScriptCreated: set BP at PC 0 in event level tag=" +
+                    FBTrace.sysout("fbs.onScriptCreated: set BP at PC 0 in event level tag=" +
                         script.tag);
             }
             else
@@ -2689,7 +2693,7 @@ var fbs =
                 fbs.nestedScriptStack.push(script);
 
                 if (FBTrace.DBG_FBS_CREATION)
-                    FBTrace.sysout("onScriptCreated: nested function named: " +
+                    FBTrace.sysout("fbs.onScriptCreated: nested function named: " +
                         script.functionName);
 
                 dispatch(scriptListeners, "onScriptCreated", [script, fileName, script.baseLineNumber]);
@@ -2698,7 +2702,7 @@ var fbs =
         catch(exc)
         {
             ERROR("onScriptCreated failed: " + exc);
-            FBTrace.sysout("onScriptCreated failed:", exc);
+            FBTrace.sysout("fbs.onScriptCreated failed:", exc);
         }
     },
 
@@ -2752,7 +2756,7 @@ var fbs =
         catch(exc)
         {
             ERROR("onScriptDestroyed failed: "+exc);
-            FBTrace.sysout("onScriptDestroyed failed: ", exc);
+            FBTrace.sysout("fbs.onScriptDestroyed failed: ", exc);
         }
     },
 
@@ -2802,7 +2806,7 @@ var fbs =
             if (fbs.isChromeBlocked)
             {
                 if (!this.filterChrome)
-                    FBTrace.sysout("removeChromeBlockingFilters is confused ", this);
+                    FBTrace.sysout("fbs.removeChromeBlockingFilters is confused ", this);
 
                 jsd.removeFilter(this.filterChrome);
                 jsd.removeFilter(this.filterComponents);
@@ -2871,12 +2875,12 @@ var fbs =
         }
         catch (exc)
         {
-            FBTrace.sysout("createChromeblockingFilters ERROR >>>>>>>>>>>>>>>>> "+exc, exc);
+            FBTrace.sysout("fbs.createChromeblockingFilters ERROR >>>>>>>>>>>>>>>>> "+exc, exc);
         }
 
         if (FBTrace.DBG_FBS_BP)
         {
-            FBTrace.sysout("createChromeBlockingFilters considered "+COMPONENTS_FILTERS.length+
+            FBTrace.sysout("fbs.createChromeBlockingFilters considered "+COMPONENTS_FILTERS.length+
                     " regexps and created "+this.componentFilters.length+
                     " filters with unfound: "+componentsUnfound.length, componentsUnfound);
             fbs.traceFilters("createChromeBlockingFilters");
@@ -2889,7 +2893,7 @@ var fbs =
 
         jsd.enumerateFilters({ enumerateFilter: function(filter)
         {
-            FBTrace.sysout("jsdIFilter "+filter.urlPattern, filter);
+            FBTrace.sysout("fbs.jsdIFilter "+filter.urlPattern, filter);
         }});
     },
 
@@ -2919,7 +2923,7 @@ var fbs =
                     var global = unwrappedGlobal;
 
                 if (FBTrace.DBG_FBS_JSCONTEXTS)
-                    FBTrace.sysout("getJSContexts jsIContext tag:"+jscontext.tag+
+                    FBTrace.sysout("fbs.getJSContexts jsIContext tag:"+jscontext.tag+
                         (jscontext.isValid?" - isValid\n":" - NOT valid\n"));
 
                 if (global)
@@ -2929,7 +2933,7 @@ var fbs =
                 else
                 {
                     if (FBTrace.DBG_FBS_JSCONTEXTS)
-                        FBTrace.sysout("getJSContexts no global object tag:"+jscontext.tag);
+                        FBTrace.sysout("fbs.getJSContexts no global object tag:"+jscontext.tag);
                     return; // skip this
                 }
 
@@ -2937,7 +2941,7 @@ var fbs =
             }
             catch(e)
             {
-                FBTrace.sysout("jscontext dump FAILED "+e, e);
+                FBTrace.sysout("fbs.jscontext dump FAILED "+e, e);
             }
         }});
 
@@ -3095,14 +3099,14 @@ var fbs =
     askDebuggersForSupport: function(global, frame)
     {
         if (FBTrace.DBG_FBS_FINDDEBUGGER)
-            FBTrace.sysout("askDebuggersForSupport using global " + global + " for " +
+            FBTrace.sysout("fbs.askDebuggersForSupport using global " + global + " for " +
                 frame.script.fileName);
 
         if (global && fbs.isChromebug(fbs.getLocationSafe(global)))
             return false;
 
         if (FBTrace.DBG_FBS_FINDDEBUGGER)
-            FBTrace.sysout("askDebuggersForSupport " + debuggers.length +
+            FBTrace.sysout("fbs.askDebuggersForSupport " + debuggers.length +
                 " debuggers to check for " + frame.script.fileName, debuggers);
 
         for (var i=debuggers.length-1; i>=0; i--)
@@ -3113,10 +3117,10 @@ var fbs =
                 if (debuggr.supportsGlobal(global, frame))
                 {
                     if (!debuggr.breakContext)
-                        FBTrace.sysout("Debugger with no breakContext:",debuggr.supportsGlobal);
+                        FBTrace.sysout("fbs.Debugger with no breakContext:",debuggr.supportsGlobal);
 
                     if (FBTrace.DBG_FBS_FINDDEBUGGER)
-                        FBTrace.sysout(" findDebugger found debuggr (" + debuggr.debuggerName +
+                        FBTrace.sysout("fbs.findDebugger found debuggr (" + debuggr.debuggerName +
                             ") at " + i + " with breakContext " + debuggr.breakContext.getName() +
                             " for global " + fbs.getLocationSafe(global) + " while processing " +
                             frame.script.fileName);
@@ -3126,7 +3130,7 @@ var fbs =
             }
             catch (exc)
             {
-                FBTrace.sysout("firebug-service askDebuggersForSupport ERROR: " + exc,exc);
+                FBTrace.sysout("fbs.askDebuggersForSupport ERROR: " + exc,exc);
             }
         }
         return null;
@@ -3143,11 +3147,11 @@ var fbs =
             try
             {
                 var name = unwrapIValue(prop.name);
-                FBTrace.sysout(i + "]" + name + "=" + unwrapIValue(prop.value));
+                FBTrace.sysout("fbs." + i + "]" + name + "=" + unwrapIValue(prop.value));
             }
             catch (e)
             {
-                FBTrace.sysout(i+"]"+e);
+                FBTrace.sysout("fbs." + i + "]" + e);
             }
         }
     },
@@ -3159,7 +3163,7 @@ var fbs =
             return debuggr;
 
         if (FBTrace.DBG_FBS_FINDDEBUGGER)
-            FBTrace.sysout("reFindDebugger debuggr " + debuggr.debuggerName +
+            FBTrace.sysout("fbs.reFindDebugger debuggr " + debuggr.debuggerName +
                 " does not support frameScopeRoot " + frameScopeRoot, frameScopeRoot);
 
         return null;
@@ -3234,7 +3238,7 @@ var fbs =
         }
 
         if (FBTrace.DBG_FBS_BP)
-            FBTrace.sysout("addBreakpoint for "+url, [bp, sourceFile]);
+            FBTrace.sysout("fbs.addBreakpoint for "+url, [bp, sourceFile]);
 
         return bp;
     },
@@ -3279,7 +3283,7 @@ var fbs =
         var urlBreakpoints = fbs.getBreakpoints(url);
 
         if (FBTrace.DBG_FBS_BP)
-            FBTrace.sysout("removeBreakpoint for "+url+", need to check bps="+
+            FBTrace.sysout("fbs.removeBreakpoint for "+url+", need to check bps="+
                 (urlBreakpoints?urlBreakpoints.length:"none"));
 
         if (!urlBreakpoints)
@@ -3289,7 +3293,7 @@ var fbs =
         {
             var bp = urlBreakpoints[i];
             if (FBTrace.DBG_FBS_BP)
-                FBTrace.sysout("removeBreakpoint checking bp.lineNo vs lineNo=" + bp.lineNo +
+                FBTrace.sysout("fbs.removeBreakpoint checking bp.lineNo vs lineNo=" + bp.lineNo +
                     " vs " + lineNo);
 
             if (bp.lineNo === lineNo)
@@ -3308,12 +3312,12 @@ var fbs =
                                 {
                                     script.clearBreakpoint(bp.pc[j]);
                                     if (FBTrace.DBG_FBS_BP)
-                                        FBTrace.sysout("removeBreakpoint in tag=" + script.tag +
+                                        FBTrace.sysout("fbs.removeBreakpoint in tag=" + script.tag +
                                             " at " + lineNo + "@" + url);
                                 }
                                 catch (exc)
                                 {
-                                    FBTrace.sysout("Firebug service failed to remove breakpoint in " +
+                                    FBTrace.sysout("fbs.Firebug service failed to remove breakpoint in " +
                                         script.tag + " at lineNo=" + lineNo + " pcmap:" + bp.pcmap);
                                 }
                             }
@@ -3359,7 +3363,7 @@ var fbs =
         }
 
         if (FBTrace.DBG_FBS_BP)
-            FBTrace.sysout("findBreakpoint no find for "+lineNo+"@"+url, urlBreakpoints);
+            FBTrace.sysout("fbs.findBreakpoint no find for "+lineNo+"@"+url, urlBreakpoints);
 
         return null;
     },
@@ -3387,7 +3391,7 @@ var fbs =
                                     bp.scriptsWithBreakpoint[iScript].tag + "@" + bp.pc[iScript] :
                                     "future") + " on " + url;
 
-                                FBTrace.sysout("findBreakpointByScript[" + iURL + "," + iBreakpoint +
+                                FBTrace.sysout("fbs.findBreakpointByScript[" + iURL + "," + iBreakpoint +
                                     "," + iScript + "]" + " looking for " + script.tag + "@" + pc +
                                     " vs " + vs);
                             }
@@ -3424,7 +3428,7 @@ var fbs =
             }
             catch (exc)
             {
-                FBTrace.sysout("Failed to give resetBreakpoints trace in url: " + url +
+                FBTrace.sysout("fbs.Failed to give resetBreakpoints trace in url: " + url +
                     " because " + exc + " for urlBreakpoints=", urlBreakpoints);
             }
         }
@@ -3432,7 +3436,7 @@ var fbs =
         if (urlBreakpoints)
         {
             if (FBTrace.DBG_FBS_BP)
-                FBTrace.sysout("resetBreakpoints total bp=" + urlBreakpoints.length +
+                FBTrace.sysout("fbs.resetBreakpoints total bp=" + urlBreakpoints.length +
                     " for url=" + url);
 
             fbs.deleteBreakpoints(url);
@@ -3459,7 +3463,7 @@ var fbs =
                 if (bp.disabled & BP_NORMAL)
                 {
                     if (FBTrace.DBG_FBS_BP)
-                        FBTrace.sysout("resetBreakpoints:  mark breakpoint disabled: " +
+                        FBTrace.sysout("fbs.resetBreakpoints:  mark breakpoint disabled: " +
                             bp.lineNo + "@" + sourceFile);
 
                     fbs.disableBreakpoint(url, bp.lineNo);
@@ -3467,14 +3471,14 @@ var fbs =
                 else
                 {
                     if (FBTrace.DBG_FBS_BP)
-                        FBTrace.sysout("resetBreakpoints: "+bp.lineNo+"@"+sourceFile);
+                        FBTrace.sysout("fbs.resetBreakpoints: "+bp.lineNo+"@"+sourceFile);
                 }
             }
         }
         else
         {
             if (FBTrace.DBG_FBS_BP)
-                FBTrace.sysout("resetBreakpoints no breakpoints for "+url);
+                FBTrace.sysout("fbs.resetBreakpoints no breakpoints for "+url);
         }
     },
 
@@ -3484,12 +3488,12 @@ var fbs =
         if (!scripts)
         {
             if (FBTrace.DBG_FBS_BP)
-                FBTrace.sysout("setJSDBreakpoint:  NO inner scripts: "+bp.lineNo+"@"+sourceFile);
+                FBTrace.sysout("fbs.setJSDBreakpoint:  NO inner scripts: "+bp.lineNo+"@"+sourceFile);
 
             if (!sourceFile.outerScript || !sourceFile.outerScript.isValid)
             {
                 if (FBTrace.DBG_FBS_BP)
-                    FBTrace.sysout("setJSDBreakpoint:  NO valid outerScript\n");
+                    FBTrace.sysout("fbs.setJSDBreakpoint:  NO valid outerScript\n");
                 return;
             }
 
@@ -3508,7 +3512,7 @@ var fbs =
             if (!script.isValid)
             {
                 if (FBTrace.DBG_FBS_BP)
-                    FBTrace.sysout("setJSDBreakpoint:  tag " + script.tag + ", " + i + "/" +
+                    FBTrace.sysout("fbs.setJSDBreakpoint:  tag " + script.tag + ", " + i + "/" +
                         scripts.length + " is invalid");
                 continue;
             }
@@ -3570,7 +3574,7 @@ var fbs =
                         sourceFile.breakOnZero = script.tag;
 
                     if (FBTrace.DBG_FBS_BP)
-                        FBTrace.sysout("setJSDBreakpoint tag: " + script.tag + " line.pc@url=" +
+                        FBTrace.sysout("fbs.setJSDBreakpoint tag: " + script.tag + " line.pc@url=" +
                             bp.lineNo + "." + pc + "@" + sourceFile.href + " using offset:" +
                             sourceFile.getBaseLineOffset() + " jsdLine: " + jsdLine +
                             " pcToLine: " + pcToLine +
@@ -3580,7 +3584,7 @@ var fbs =
                 else
                 {
                     if (FBTrace.DBG_FBS_BP)
-                        FBTrace.sysout("setJSDBreakpoint LINE MISMATCH for tag: " +
+                        FBTrace.sysout("fbs.setJSDBreakpoint LINE MISMATCH for tag: " +
                             script.tag + " line.pc@url=" + bp.lineNo + "." + pc + "@" +
                             sourceFile.href + " using offset:" + sourceFile.getBaseLineOffset() +
                             " jsdLine: " + jsdLine + " pcToLine: " + pcToLine +
@@ -3590,7 +3594,7 @@ var fbs =
             else
             {
                 if (FBTrace.DBG_FBS_BP)
-                    FBTrace.sysout("setJSDBreakpoint NOT isExecutable tag: " + script.tag +
+                    FBTrace.sysout("fbs.setJSDBreakpoint NOT isExecutable tag: " + script.tag +
                         " jsdLine@url=" + jsdLine + "@" + sourceFile.href + " pcmap:" +
                         pcmap + " baselineOffset:" + sourceFile.getBaseLineOffset(), script);
             }
@@ -3639,7 +3643,7 @@ var fbs =
         }
         catch (exc)
         {
-            FBTrace.sysout("firebug-service.saveBreakpoints ERROR " + exc, exc);
+            FBTrace.sysout("fbs.saveBreakpoints ERROR " + exc, exc);
         }
     },
 
@@ -3702,7 +3706,7 @@ var fbs =
             //ERROR("firebug-service restoreBreakpoints ERROR "+exc);
 
             // xxxHonza: why I can't see this log in the Tracing Console?
-            FBTrace.sysout("firebug-service restoreBreakpoints ERROR " + exc, exc);
+            FBTrace.sysout("fbs.restoreBreakpoints ERROR " + exc, exc);
         }
     },
 
@@ -3742,12 +3746,12 @@ var fbs =
 
         if (FBTrace.DBG_FBS_BP)
         {
-            FBTrace.sysout("restoreBreakpoints "+urls.length+", disabledCount:"+disabledCount+
+            FBTrace.sysout("fbs.restoreBreakpoints "+urls.length+", disabledCount:"+disabledCount+
                 " monitorCount:"+monitorCount+" conditionCount:"+conditionCount+", restored ",
                 this.breakpoints);
 
             for (var p in this.breakpoints)
-                FBTrace.sysout("restoreBreakpoints restored "+p+" condition "+
+                FBTrace.sysout("fbs.restoreBreakpoints restored "+p+" condition "+
                     this.breakpoints[p].condition);
         }
     },
@@ -3786,7 +3790,7 @@ var fbs =
         catch(exc)
         {
             if (FBTrace.DBG_FBS_ERRORS)
-                FBTrace.sysout("routeBreakToDebuggr failed: "+exc,exc);
+                FBTrace.sysout("fbs.routeBreakToDebuggr failed: "+exc,exc);
             ERROR("routeBreakToDebuggr failed: "+exc, exc);
         }
 
@@ -3876,7 +3880,7 @@ var fbs =
             ScriptInterrupter.enable(frame.script);
 
         if (FBTrace.DBG_FBS_STEP)
-            FBTrace.sysout("set InterruptHook frame.script.tag: "+
+            FBTrace.sysout("fbs.set InterruptHook frame.script.tag: "+
                 (frame?frame.script.tag:"<no frame>"), ScriptInterrupter);
     },
 
@@ -3898,7 +3902,7 @@ var fbs =
     hookFunctions: function()
     {
         if (FBTrace.DBG_FBS_STEP)
-            FBTrace.sysout("set functionHook");
+            FBTrace.sysout("fbs.set functionHook");
 
         jsd.functionHook = { onCall: hook(this.onFunction, true) };
         jsd.topLevelHook = { onCall: hook(this.onFunction, true) };
@@ -3935,7 +3939,7 @@ var fbs =
     hookScripts: function()
     {
         if (FBTrace.DBG_FBS_STEP || FBTrace.DBG_FBS_TRACKFILES)
-            FBTrace.sysout("set scriptHook\n");
+            FBTrace.sysout("fbs.set scriptHook\n");
 
         jsd.scriptHook = {
             onScriptCreated: hook(this.onScriptCreated),
@@ -3963,7 +3967,7 @@ var fbs =
         fbs.removeChromeBlockingFilters();
 
         if (FBTrace.DBG_FBS_STEP || FBTrace.DBG_FBS_TRACKFILES)
-            FBTrace.sysout("unset scriptHook\n");
+            FBTrace.sysout("fbs.unset scriptHook\n");
     },
 
     // TODO rewrite as a Stepper
@@ -3982,7 +3986,7 @@ var fbs =
                     ++hookFrameCount;
 
                     if (FBTrace.DBG_FBS_STEP)
-                        FBTrace.sysout("callHook TYPE_FUNCTION_CALL "+frame.script.fileName);
+                        FBTrace.sysout("fbs.callHook TYPE_FUNCTION_CALL "+frame.script.fileName);
 
                     contextCached = callBack(contextCached, frame, hookFrameCount, true);
 
@@ -3994,8 +3998,10 @@ var fbs =
                         return;
 
                     --hookFrameCount;
+
                     if (FBTrace.DBG_FBS_STEP)
-                        FBTrace.sysout("functionHook TYPE_FUNCTION_RETURN "+frame.script.fileName);
+                        FBTrace.sysout("fbs.functionHook TYPE_FUNCTION_RETURN " +
+                            frame.script.fileName);
 
                     // stack empty
                     if (unhookAtBottom && hookFrameCount == 0)
@@ -4015,7 +4021,7 @@ var fbs =
         }
 
         if (FBTrace.DBG_FBS_STEP)
-            FBTrace.sysout("set callHook");
+            FBTrace.sysout("fbs.set callHook");
 
         hookFrameCount = 0;
         jsd.functionHook = { onCall: callHook };
@@ -4295,7 +4301,7 @@ function dumpComponentsStack(from)
         msg.push( {desc:frame.filename + "@" + frame.lineNumber +": "+
             frame.sourceLine,frame:frame}  );
 
-    FBTrace.sysout(from+" has stack size:" +msg.length, msg);
+    FBTrace.sysout("fbs." + from + " has stack size:" + msg.length, msg);
 }
 
 function testBreakpoint(frame, bp)
@@ -4391,8 +4397,7 @@ var QuitApplicationGrantedObserver =
     observe: function(subject, topic, data)
     {
         if (FBTrace.DBG_FBS_ERRORS)
-            FBTrace.sysout("xxxxxxxxxxxx FirebugService QuitApplicationGrantedObserver " + topic +
-                "  start xyyxxxxxxxxxxxxxx");
+            FBTrace.sysout("fbs.QuitApplicationGrantedObserver " + topic + " start");
     }
 };
 
@@ -4401,7 +4406,7 @@ var QuitApplicationRequestedObserver =
     observe: function(subject, topic, data)
     {
         if (FBTrace.DBG_FBS_ERRORS)
-            FBTrace.sysout("FirebugService QuitApplicationRequestedObserver "+topic);
+            FBTrace.sysout("fbs.QuitApplicationRequestedObserver " + topic);
     }
 };
 
@@ -4410,15 +4415,14 @@ var QuitApplicationObserver =
     observe: function(subject, topic, data)
     {
         if (FBTrace.DBG_FBS_ERRORS)
-            FBTrace.sysout("FirebugService QuitApplicationObserver "+topic);
+            FBTrace.sysout("fbs.QuitApplicationObserver " + topic);
 
         fbs.disableDebugger();
         fbs.shutdown();
         fbs = null;
 
         if (FBTrace.DBG_FBS_ERRORS)
-            FBTrace.sysout("xxxxxxxxxxxx FirebugService QuitApplicationObserver "+topic+
-                " end xxxxxxxxxxxxxxxxx");
+            FBTrace.sysout("fbs.QuitApplicationObserver " + topic + " end");
     }
 };
 
@@ -4505,7 +4509,9 @@ function getTmpFile()
         get("TmpD", Components.interfaces.nsIFile);
     file.append("fbs.tmp");
     file.createUnique(Components.interfaces.nsIFile.NORMAL_FILE_TYPE, 0666);
-    FBTrace.sysout("FBS opened tmp file "+file.path);
+
+    FBTrace.sysout("fbs.opened tmp file "+file.path);
+
     return file;
 }
 
