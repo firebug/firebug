@@ -1716,7 +1716,7 @@ var fbs =
     // must support multiple calls
     pause: function(debuggerName)
     {
-        if (!enabledDebugger || !jsd)
+        if (!enabledDebugger || !jsd || !jsd.isOn)
             return "not enabled";
 
         var rejection = [];
