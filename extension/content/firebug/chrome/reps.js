@@ -584,7 +584,11 @@ FirebugReps.Arr = domplate(Firebug.Rep,
 
     supportsObject: function(object, type, context)
     {
-        return this.isArray(object, context ? context.window : null);
+        var win;
+        if (typeof(context) != "undefined")
+            win = context ? context.window : null;
+
+        return this.isArray(object, win);
     },
 
     highlightObject: function(object, context, target)
