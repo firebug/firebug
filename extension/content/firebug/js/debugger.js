@@ -1189,7 +1189,7 @@ Firebug.Debugger = Obj.extend(Firebug.ActivableModule,
             else
             {
                 // drop one frame see attachConsoleInjector
-                trace.frames = trace.frames.slice(1);
+                //trace.frames = trace.frames.slice(1);
                 Firebug.Console.log(trace, context, "stackTrace");
             }
         }
@@ -2602,7 +2602,7 @@ Firebug.Debugger = Obj.extend(Firebug.ActivableModule,
     updateOption: function(name, value)
     {
         if (name == "breakOnErrors")
-            Firefox.getElementById("cmd_breakOnErrors").setAttribute("checked", value);
+            Firebug.chrome.getElementById("cmd_breakOnErrors").setAttribute("checked", value);
     },
 
     getObjectByURL: function(context, url)

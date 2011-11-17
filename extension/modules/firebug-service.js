@@ -2780,6 +2780,7 @@ var fbs =
         {
 
             jsd.appendFilter(this.noFilterHalter);  // must be first
+            jsd.appendFilter(this.noFilterTrace);  // must be second
             jsd.appendFilter(this.filterChrome);
             jsd.appendFilter(this.filterComponents);
             jsd.appendFilter(this.filterFirebugComponents);
@@ -2816,6 +2817,7 @@ var fbs =
                 jsd.removeFilter(this.filterPrettyPrint);
                 jsd.removeFilter(this.filterWrapper);
                 jsd.removeFilter(this.noFilterHalter);
+                jsd.removeFilter(this.noFilterTrace);
 
                 for (var i = 0; i < this.componentFilters.length; i++)
                     jsd.removeFilter(this.componentFilters[i]);
@@ -2845,6 +2847,7 @@ var fbs =
             this.filterPrettyPrint = this.createFilter("x-jsd:ppbuffer*");
             this.filterWrapper = this.createFilter("XPCSafeJSObjectWrapper.cpp");
             this.noFilterHalter = this.createFilter("resource://firebug/debuggerHalter.js", true);
+            this.noFilterTrace = this.createFilter("chrome://firebug/content/console/consoleExposed.js", true);
 
             // jsdIFilter does not allow full regexp matching.
             // So to filter components, we filter their directory names, which we obtain
