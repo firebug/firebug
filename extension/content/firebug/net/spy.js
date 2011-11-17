@@ -86,8 +86,12 @@ Firebug.Spy = Obj.extend(Firebug.Module,
         this.detachObserver(context, null);
 
         if (FBTrace.DBG_SPY && context.spies.length)
-            FBTrace.sysout("spy.destroyContext; ERROR There are leaking Spies ("
+            FBTrace.sysout("spy.destroyContext; ERROR There are spies in progress ("
                 + context.spies.length + ") " + context.getName());
+
+        // Make sure that all Spies in progress are detached at this moment.
+        for (var i=0; i<context.spies.length; i++)
+            context.spies[i].detach(true);
 
         delete context.spies;
 
@@ -483,7 +487,7 @@ var SpyHttpActivityObserver = Obj.extend(NetHttpActivityObserver,
             // page load, it may happen that the event (readyState == 4) comes later
             // than actual TRANSACTION_CLOSE.
             if (spy.loaded)
-                spy.detach();
+                spy.detach(false);
         }
         else if (activitySubtype == Ci.nsISocketTransport.STATUS_RECEIVING_FROM)
         {
@@ -595,7 +599,7 @@ Firebug.Spy.XMLHttpRequestSpy.prototype =
             FBTrace.sysout("spy.attach; " + Http.safeGetRequestName(this.request));
     },
 
-    detach: function()
+    detach: function(force)
     {
         // Bubble out if already detached.
         if (!this.onLoad)
@@ -611,7 +615,8 @@ Firebug.Spy.XMLHttpRequestSpy.prototype =
         // 2) In case of immediate cache responses, the transaction doesn't have to
         // be started at all (or the activity observer is no available in Firefox 3.5).
         // So, also detach in this case.
-        if (this.transactionStarted && !this.transactionClosed)
+        // Make sure spy will detach if force is true.
+        if (!force && this.transactionStarted && !this.transactionClosed)
             return;
 
         if (FBTrace.DBG_SPY)
@@ -733,7 +738,7 @@ function onHTTPSpyLoad(spy)
 
     // Detach must be done in onLoad (not in onreadystatechange) otherwise
     // onAbort would not be handled.
-    spy.detach();
+    spy.detach(false);
 
     // xxxHonza: Still needed for Fx 3.5 (#502959)
     if (!SpyHttpActivityObserver.getActivityDistributor())
@@ -755,7 +760,7 @@ function onHTTPSpyError(spy)
     if (FBTrace.DBG_SPY)
         FBTrace.sysout("spy.onHTTPSpyError; " + spy.href);
 
-    spy.detach();
+    spy.detach(false);
     spy.loaded = true;
     spy.error= true;
 
@@ -767,7 +772,7 @@ function onHTTPSpyAbort(spy)
     if (FBTrace.DBG_SPY)
         FBTrace.sysout("spy.onHTTPSpyAbort: " + spy.href);
 
-    spy.detach();
+    spy.detach(false);
     spy.loaded = true;
 
     // Ignore aborts if the request already has a response status.
