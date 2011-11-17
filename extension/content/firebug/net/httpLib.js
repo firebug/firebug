@@ -282,6 +282,19 @@ Http.safeGetContentType = function(request)
     return null;
 }
 
+Http.safeGetXHRResponseText = function(xhr)
+{
+    try
+    {
+        return xhr.responseText;
+    }
+    catch (err)
+    {
+    }
+
+    return null;
+}
+
 // ********************************************************************************************* //
 // IP Adress and port number (Requires Gecko 5).
 

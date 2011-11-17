@@ -695,13 +695,13 @@ function onHTTPSpyReadyStateChange(spy, event)
         // Cumulate response so, multipart response content is properly displayed.
         if (SpyHttpActivityObserver.getActivityDistributor())
         {
-            spy.responseText += spy.xhrRequest.responseText;
+            spy.responseText += Http.safeGetXHRResponseText(spy.xhrRequest);
         }
         else
         {
             // xxxHonza: remove from FB 1.6
             if (!spy.responseText)
-                spy.responseText = spy.xhrRequest.responseText;
+                spy.responseText = Http.safeGetXHRResponseText(spy.xhrRequest);
         }
 
         // The XHR is loaded now (used also by the activity observer).
@@ -744,7 +744,7 @@ function onHTTPSpyLoad(spy)
     if (!spy.loaded)
     {
         spy.loaded = true;
-        spy.responseText = spy.xhrRequest.responseText;
+        spy.responseText = Http.safeGetXHRResponseText(spy.xhrRequest);
 
         updateLogRow(spy);
     }
