@@ -381,24 +381,27 @@ var Options =
     /**
      * Resets all Firebug options to default state. Note that every option
      * starting with "extensions.firebug" is considered as a Firebug option.
+     *
+     * Options starting with DBG_ are intended for Firebug Tracing Console (FBTrace)
+     * and ignored (their state is not changed).
      */
     resetAllOptions: function()
     {
         var preferences = prefs.getChildList("extensions.firebug", {});
         for (var i = 0; i < preferences.length; i++)
         {
-            if (preferences[i].indexOf("DBG_") == -1 &&
-                preferences[i].indexOf("filterSystemURLs") == -1)
+            if (preferences[i].indexOf("DBG_") == -1)
             {
                 if (FBTrace.DBG_OPTIONS)
-                    FBTrace.sysout("Clearing option: "+i+") "+preferences[i]);
+                    FBTrace.sysout("Clearing option: " + i + ") " + preferences[i]);
+
                 if (prefs.prefHasUserValue(preferences[i]))  // avoid exception
                     prefs.clearUserPref(preferences[i]);
             }
             else
             {
                 if (FBTrace.DBG_OPTIONS)
-                    FBTrace.sysout("Skipped clearing option: "+i+") "+preferences[i]);
+                    FBTrace.sysout("Skipped clearing option: " + i + ") " + preferences[i]);
             }
         }
     },
