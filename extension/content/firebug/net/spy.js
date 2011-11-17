@@ -694,7 +694,9 @@ function onHTTPSpyReadyStateChange(spy, event)
     {
         // Cumulate response so, multipart response content is properly displayed.
         if (SpyHttpActivityObserver.getActivityDistributor())
+        {
             spy.responseText += spy.xhrRequest.responseText;
+        }
         else
         {
             // xxxHonza: remove from FB 1.6
@@ -706,6 +708,7 @@ function onHTTPSpyReadyStateChange(spy, event)
         spy.loaded = true;
 
         // Update UI.
+        updateLogRow(spy);
         updateHttpSpyInfo(spy);
 
         // Notify Net pane about a request beeing loaded.
@@ -742,6 +745,8 @@ function onHTTPSpyLoad(spy)
     {
         spy.loaded = true;
         spy.responseText = spy.xhrRequest.responseText;
+
+        updateLogRow(spy);
     }
 }
 
@@ -752,12 +757,9 @@ function onHTTPSpyError(spy)
 
     spy.detach();
     spy.loaded = true;
+    spy.error= true;
 
-    if (spy.logRow)
-    {
-        Css.removeClass(spy.logRow, "loading");
-        Css.setClass(spy.logRow, "error");
-    }
+    updateLogRow(spy);
 }
 
 function onHTTPSpyAbort(spy)
@@ -770,15 +772,14 @@ function onHTTPSpyAbort(spy)
 
     // Ignore aborts if the request already has a response status.
     if (spy.xhrRequest.status)
-        return;
-
-    if (spy.logRow)
     {
-        Css.removeClass(spy.logRow, "loading");
-        Css.setClass(spy.logRow, "error");
+        updateLogRow(spy);
+        return;
     }
 
+    spy.aborted = true;
     spy.statusText = "Aborted";
+
     updateLogRow(spy);
 
     // Notify Net pane about a request beeing aborted.
@@ -1057,8 +1058,16 @@ function updateLogRow(spy)
     var statusBox = spy.logRow.getElementsByClassName("spyStatus").item(0);
     statusBox.textContent = Firebug.Spy.XHR.getStatus(spy);
 
-    Css.removeClass(spy.logRow, "loading");
-    Css.setClass(spy.logRow, "loaded");
+    if (spy.loaded)
+    {
+        Css.removeClass(spy.logRow, "loading");
+        Css.setClass(spy.logRow, "loaded");
+    }
+
+    if (spy.error || spy.aborted)
+    {
+        Css.setClass(spy.logRow, "error");
+    }
 
     try
     {
