@@ -10,11 +10,13 @@ resource moduleloader modules/
 skin    firebug classic/1.0 skin/classic/
 skin    firebug-os  classic/1.0 skin/classic/win/
 
+locale  firebug aa-AH       locale/aa-AH/
 locale  firebug ar-SA       locale/ar-SA/
 locale  firebug bg          locale/bg/
 locale  firebug bn-IN       locale/bn-IN/
 locale  firebug ca          locale/ca/
 locale  firebug ca-AD       locale/ca-AD/
+locale  firebug ca-ES       locale/ca-ES/
 locale  firebug cs          locale/cs/
 locale  firebug da          locale/da/
 locale  firebug de          locale/de/
@@ -26,10 +28,12 @@ locale  firebug es-CL       locale/es-CL/
 locale  firebug es-ES       locale/es-ES/
 locale  firebug et-EE       locale/et-EE/
 locale  firebug fa          locale/fa/
+locale  firebug fa-IR       locale/fa-IR/
 locale  firebug fi-FI       locale/fi-FI/
 locale  firebug fr          locale/fr/
 locale  firebug fy-NL       locale/fy-NL/
 locale  firebug gl-ES       locale/gl-ES/
+locale  firebug he          locale/he/
 locale  firebug he-IL       locale/he-IL/
 locale  firebug hr-HR       locale/hr-HR/
 locale  firebug hu-HU       locale/hu-HU/
