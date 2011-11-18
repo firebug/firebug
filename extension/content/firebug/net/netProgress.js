@@ -1180,7 +1180,7 @@ function delayGetCacheEntry(file, netProgress)
 
             if (descriptor)
             {
-                if (file.size == -1)
+                if (file.size <= 0)
                     file.size = descriptor.dataSize;
 
                 if (descriptor.lastModified && descriptor.lastFetched &&
