@@ -94,11 +94,12 @@ require(config, modules, function(ChromeFactory, FBL, Firebug, Browser)
                 if (FBTrace.DBG_INITIALIZE || FBTrace.DBG_MODULES)
                     FBTrace.sysout("main.js; All RequireJS modules loaded");
 
-                if (window.legacyPatch)
+                if (window.FBL.legacyPatch)
                 {
                     if (FBTrace.DBG_MODULES)
                         FBTrace.sysout("firebug main.js; legacyPatch");
-                    window.legacyPatch(FBL, Firebug);
+
+                    window.FBL.legacyPatch(FBL, Firebug);
                 }
 
                 if (FBTrace.DBG_MODULES)

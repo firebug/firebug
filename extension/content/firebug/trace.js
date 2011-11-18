@@ -1,15 +1,21 @@
 /* See license.txt for terms of usage */
 
-// ************************************************************************************************
+// ********************************************************************************************* //
 // Our global trace object.
 
 var FBTrace = {};
 
+// ********************************************************************************************* //
+
+(function() {
+
+// ********************************************************************************************* //
+    
 try
 {
-    Components.utils["import"]("resource://firebug/firebug-trace-service.js");
-
-    FBTrace = traceConsoleService.getTracer("extensions.firebug");
+    var scope = {};
+    Components.utils["import"]("resource://firebug/firebug-trace-service.js", scope);
+    FBTrace = scope.traceConsoleService.getTracer("extensions.firebug");
     FBTrace.setScope(window);
 
     function clearFBTraceScope()
@@ -26,7 +32,7 @@ catch (err)
     dump("FBTrace; " + err);
 }
 
-// ************************************************************************************************
+// ********************************************************************************************* //
 // Some examples of tracing APIs
 
 // 1) Log "Hello World!" into the console.
@@ -44,3 +50,6 @@ catch (err)
 //    FBTrace.dump("chromebug.extensions", "Hello World!", world);
 //
 // TODO: how to open another console.
+
+// ********************************************************************************************* //
+})();

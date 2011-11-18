@@ -149,8 +149,8 @@ window.Firebug =
             FBTrace.sysout("firebug.initialize FBL: " + FBL);
         }
 
-        if (window.legacyApiPatch)
-            window.legacyApiPatch(FBL, this, Firefox);
+        if (window.FBL.legacyApiPatch)
+            window.FBL.legacyApiPatch(FBL, this, Firefox);
 
         // Till now all registered panels have been inserted into earlyRegPanelTypes.
         var tempPanelTypes = earlyRegPanelTypes;

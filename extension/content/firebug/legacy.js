@@ -55,7 +55,7 @@ window.FBL =
 // ********************************************************************************************* //
 // Called by firebugFrame main.js to pump global and deprecated API back.
 
-window.legacyPatch = function(FBL, Firebug)
+window.FBL.legacyPatch = function(FBL, Firebug)
 {
     if (top === window)
         return;
@@ -64,7 +64,7 @@ window.legacyPatch = function(FBL, Firebug)
     top.Firebug = Firebug;
 }
 
-window.legacyApiPatch = function(FBL, Firebug, Firefox)
+window.FBL.legacyApiPatch = function(FBL, Firebug, Firefox)
 {
     // Backward compatibility with extensions
     // deprecated
