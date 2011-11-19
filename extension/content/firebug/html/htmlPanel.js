@@ -555,16 +555,15 @@ Firebug.HTMLPanel.prototype = Obj.extend(WalkingPanel,
                 }
                 else
                 {
-                    if (nextSibling)
+                    while ( nextSibling && (
+                       (!Firebug.showTextNodesWithWhitespace &&
+                       HTMLLib.isWhitespaceText(nextSibling)) ||
+                       (!Firebug.showCommentNodes && nextSibling instanceof window.Comment)
+                       ) )
                     {
-                        while ((!Firebug.showTextNodesWithWhitespace &&
-                            HTMLLib.isWhitespaceText(nextSibling)) ||
-                            (!Firebug.showCommentNodes && nextSibling instanceof window.Comment))
-                        {
-                            nextSibling = this.findNextSibling(nextSibling);
-                        }
+                       nextSibling = this.findNextSibling(nextSibling);
                     }
-
+                    
                     var objectBox = nextSibling ?
                         this.ioBox.insertChildBoxBefore(parentNodeBox, target, nextSibling) :
                         this.ioBox.appendChildBox(parentNodeBox, target);
