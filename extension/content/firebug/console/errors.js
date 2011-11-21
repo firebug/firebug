@@ -409,6 +409,13 @@ var Errors = Firebug.Errors = Obj.extend(Firebug.Module,
                 if (!context.window || !context.getWindowLocation())
                     return false;
 
+                // If nsIScriptError2 is supported and error's parent widow is available,
+                // check if it corresponds to the contxt.window. If not bail out to avoid
+                // error reporting in a wrong window.
+                var errorWindow = getErrorWindow(object);
+                if (errorWindow && errorWindow != context.window)
+                    return false;
+
                 if (FBTrace.DBG_ERRORLOG)
                 {
                     FBTrace.sysout("findContextByURL seeking " + url + " in " +
