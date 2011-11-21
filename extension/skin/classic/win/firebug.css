@@ -94,7 +94,6 @@
 }
 
 #fbCloseButton {
-    margin-right: 4px;
     list-style-image: url("chrome://firebug/skin/win/off.png");
 }
 
@@ -181,6 +180,7 @@
 
 /* Set proper height of window buttons (close, min, detach) */
 #fbWindowButtons.innerToolbar {
+    margin-right: 4px;
     padding: 5px 0 6px 0;
 }
 
