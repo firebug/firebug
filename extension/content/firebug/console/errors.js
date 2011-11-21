@@ -378,10 +378,19 @@ var Errors = Firebug.Errors = Obj.extend(Firebug.Module,
     getErrorContext: function(object)
     {
         var url = object.sourceName;
-        if (!url)
-            return Firebug.currentContext;  // eg some XPCOM messages
 
-        if (url.indexOf("://chromebug/") > 0)
+        // If window is not associated bail out to avoid reporting errors that are not
+        // page related (issue 4991).
+        if (!url && !object.outerWindowID)
+            return null;
+
+        // eg some XPCOM messages
+        // xxxHonza: this could cause appearing error messages in wrong tabs.
+        // Is this still necessary?
+        if (!url)
+            return Firebug.currentContext;
+
+        if (url && url.indexOf("://chromebug/") > 0)
             return Firebug.currentContext; // no context for self
 
         // Correct the error routing in the case that the new window id will work (R10860).
