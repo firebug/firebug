@@ -4,6 +4,9 @@ try {
 (function() {
 // ********************************************************************************************* //
 
+const Cc = Components.classes;
+const Ci = Components.interfaces;
+
 var prefDomain = "extensions.firebug";
 var config = Firebug.getModuleLoaderConfig();
 
