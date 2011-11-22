@@ -821,6 +821,9 @@ domMemberMap.Window =
     "showModalDialog", // FF 3.0, MS IE4
 
     "InstallTrigger",
+    
+    "performance", // https://developer.mozilla.org/en/Navigation_timing
+    "matchMedia", // https://developer.mozilla.org/en/DOM/window.matchMedia
 
     "getInterface",
 ];
