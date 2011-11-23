@@ -10,7 +10,9 @@ var _FirebugCommandLine =
         // Define console functions.
         var commands = ["$", "$$", "$x", "$n", "cd", "clear", "inspect", "keys",
             "values", "debug", "undebug", "monitor", "unmonitor", "traceCalls", "untraceCalls",
-            "traceAll", "untraceAll", "monitorEvents", "unmonitorEvents", "profile", "profileEnd", "copy"];
+            "traceAll", "untraceAll", "monitorEvents", "unmonitorEvents", "profile",
+            "profileEnd", "copy"];
+
         for (var i=0; i<commands.length; i++)
         {
             var command = commands[i];
@@ -19,7 +21,8 @@ var _FirebugCommandLine =
             if (window[command])
                 continue;
 
-            this[command] = function notifyFirebug() {
+            this[command] = function notifyFirebug()
+            {
                 return window.console.notifyFirebug(arguments, command, "firebugExecuteCommand");
             };
         }
@@ -34,7 +37,8 @@ var _FirebugCommandLine =
             if (window[command])
                 continue;
 
-            this[command] = function apply() {
+            this[command] = function apply()
+            {
                 return window.console[command].apply(window.console, arguments);
             };
         }
@@ -47,9 +51,11 @@ var _FirebugCommandLine =
             if (window[prop])
                 continue;
 
-            this.__defineGetter__(prop, function notifyFirebug() {
-                    return window.console.notifyFirebug(arguments, prop, "firebugExecuteCommand");
-                });
+            this.__defineGetter__(prop, function notifyFirebug()
+            {
+                return window.console.notifyFirebug(arguments, prop,
+                    "firebugExecuteCommand");
+            });
         }
 
         this.attachCommandLine();
@@ -57,32 +63,36 @@ var _FirebugCommandLine =
 
     attachCommandLine: function()
     {
-        // DBG window.dump("attachCommandLine "+window.location+"\n");
+        // DBG window.dump("attachCommandLine " + window.location + "\n");
+
         if (!window.console)
         {
-            // DBG     debugger;
+            // DBG debugger;
             window.loadFirebugConsole();
         }
-        var self = this;
 
+        var self = this;
         this._firebugEvalEvent = function _firebugEvalEvent(event)
         {
-            // DBG window.dump("attachCommandLine firebugCommandLine "+window.location+"\n");
+            // DBG window.dump("attachCommandLine firebugCommandLine " + window.location + "\n");
             var expr = document.getUserData("firebug-expr"); // see commandLine.js
             self.evaluate(expr);
-            // DBG window.dump("attachCommandLine did evaluate on "+expr+"\n");
+            // DBG window.dump("attachCommandLine did evaluate on " + expr + "\n");
         }
 
         document.addEventListener("firebugCommandLine",this._firebugEvalEvent, true);
         document.setUserData("firebug-CommandLineAttached", "true", null);
-        // DBG window.dump("Added listener for firebugCommandLine event "+window.location+"\n");
+
+        // DBG window.dump("Added listener for firebugCommandLine event " +
+        // window.location + "\n");
     },
 
     detachCommandLine: function()
     {
          document.removeEventListener("firebugCommandLine", this._firebugEvalEvent, true);
          delete window._FirebugCommandLine; // suicide!
-         // DBG window.dump("detachCommmandLine<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<\n")
+
+         // DBG window.dump("detachCommmandLine\n");
     },
 
     evaluate: function _firebugInjectedEvaluate(expr)
@@ -107,7 +117,9 @@ var _FirebugCommandLine =
 {
     try
     {
-        // DBG window.dump("_FirebugCommandLine init console is "+window.console+" in "+window.location+"\n");
+        // DBG window.dump("_FirebugCommandLine init console is " + window.console +
+        //    " in " + window.location + "\n");
+
         _FirebugCommandLine.initFirebugCommandLine();
     }
     catch(exc)
@@ -117,6 +129,7 @@ var _FirebugCommandLine =
             message: "_FirebugCommandLine init failed in "+window.location+" because "+exc,
             toString: function() { return this.message; }
         };
+
         throw wrappedException;
     }
 })();
