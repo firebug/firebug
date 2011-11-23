@@ -230,54 +230,6 @@ Firebug.TabContext.prototype =
             FBTrace.sysout("tabContext.destroy " + this.getName() + " set state ", state);
     },
 
-    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-    initPanelTypes: function()
-    {
-        if (!this.panelTypes)
-        {
-            this.panelTypes = [];
-            this.panelTypeMap = {};
-        }
-    },
-
-    addPanelType: function(url, title, parentPanel)
-    {
-        url = Url.absoluteURL(url, this.window.location.href);
-        if (!url)
-        {
-            // XXXjoe Need some kind of notification to console that URL is invalid
-            throw("addPanelType: url is invalid!");
-            return;
-        }
-
-        this.initPanelTypes();
-
-        var name = createPanelName(url);
-        while (name in this.panelTypeMap)
-            name += "_";
-
-        var panelType = createPanelType(name, url, title, parentPanel);
-
-        this.panelTypes.push(panelType);
-        this.panelTypeMap[name] = panelType;
-
-        return panelType;
-    },
-
-    addPanelTypeConstructor: function(panelType)
-    {
-        this.initPanelTypes();
-        this.panelTypes.push(panelType);
-        var name = panelType.prototype.name;
-        this.panelTypeMap[name] = panelType;
-    },
-
-    removePanelType: function(url)
-    {
-        // NYI
-    },
-
     getPanel: function(panelName, noCreate)
     {
         // Get "global" panelType, registered using Firebug.registerPanel
@@ -658,28 +610,6 @@ Firebug.TabContext.prototype =
         this.listeners = null;
     }
 };
-
-// ********************************************************************************************* //
-// Local Helpers
-
-function createPanelType(name, url, title, parentPanel)
-{
-    var panelType = new Function("");
-    panelType.prototype = Obj.extend(new Firebug.PluginPanel(),
-    {
-        name: name,
-        url: url,
-        title: title ? title : "...",
-        parentPanel: parentPanel
-    });
-
-    return panelType;
-}
-
-function createPanelName(url)
-{
-    return url.replace(/[:\\\/\s\.\?\=\&\~]/g, "_");
-}
 
 // ********************************************************************************************* //
 // Registration

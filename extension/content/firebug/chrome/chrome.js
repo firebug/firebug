@@ -1127,31 +1127,6 @@ var FirebugChrome =
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-    addTab: function(context, url, title, parentPanel)
-    {
-        context.addPanelType(url, title, parentPanel);
-        if (context == Firebug.currentContext)
-        {
-            if (parentPanel)
-            {
-                var currentPanel = this.getSelectedPanel();
-                if (currentPanel && parentPanel == currentPanel.name)
-                    this.syncSidePanels();
-            }
-            else
-            {
-                this.syncMainPanels();
-            }
-        }
-    },
-
-    removeTab: function(context, url)
-    {
-        context.removePanelType(url);
-    },
-
-    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
     // Global Attributes
 
     getGlobalAttribute: function(id, name)

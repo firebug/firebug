@@ -914,11 +914,13 @@ function isTag(obj)
 
 function creator(tag, cons)
 {
-    var fn = new Function(
-        "var tag = arguments.callee.tag;" +
-        "var cons = arguments.callee.cons;" +
-        "var newTag = new cons();" +
-        "return newTag.merge(arguments, tag);");
+    var fn = function()
+    {
+        var tag = arguments.callee.tag;
+        var cons = arguments.callee.cons;
+        var newTag = new cons();
+        return newTag.merge(arguments, tag);
+    }
 
     fn.tag = tag;
     fn.cons = cons;
