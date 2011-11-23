@@ -1670,7 +1670,7 @@ DOMEditor.prototype = domplate(Firebug.InlineEditor.prototype,
 {
     tag:
         INPUT({"class": "fixedWidthEditor a11yFocusNoTab",
-            type: "text", title:Locale.$STR("NewWatch"),
+            type: "text",
             oninput: "$onInput", onkeypress: "$onKeyPress"}),
 
     endEditing: function(target, value, cancel)
