@@ -162,6 +162,14 @@ var Errors = Firebug.Errors = Obj.extend(Firebug.Module,
 
     observe: function(object)
     {
+        // Make sure the argument is an error object. 'instanceof' also
+        // queries the object so e.g. outerWindowID (nsIScriptError2) is available.
+        if (!(object instanceof Ci.nsIScriptError) ||
+            !(object instanceof Ci.nsIScriptError2))
+        {
+            return;
+        }
+
         try
         {
             if (window.closed)
@@ -173,132 +181,14 @@ var Errors = Firebug.Errors = Obj.extend(Firebug.Module,
             if (!FBTrace)
                 return;
         }
-        catch(exc)
+        catch (exc)
         {
             return;
         }
 
         try
         {
-            var ScriptError = object instanceof nsIScriptError;
-            var ConsoleMessage = object instanceof nsIConsoleMessage;
-
-            // This cannot be pulled in front of the instanceof
-            var isWarning = object && object.flags & WARNING_FLAG;
-            var CSSParser = object && object.category == "CSS Parser";
-            var XPConnect = object && object.category &&
-                object.category.split(' ').indexOf("XPConnect") != -1;
-
-            // Some categories say: "content javascript" even if come from chrome space.
-            var sourceName = (object && object.sourceName) ? object.sourceName : "";
-            if (sourceName.indexOf("chrome") == 0 || sourceName.indexOf("resource") == 0)
-                XPConnect = true;
-
-            if (ScriptError && !XPConnect)  // all branches should trace 'object'
-            {
-                if (FBTrace.DBG_ERRORLOG)
-                {
-                    FBTrace.sysout("errors.observe nsIScriptError: " + object.errorMessage,
-                        object);
-                }
-
-                // after instanceof
-                var context = this.getErrorContext(object);
-                if (context)
-                    return this.logScriptError(context, object, isWarning);
-
-                if (FBTrace.DBG_ERRORLOG)
-                {
-                    FBTrace.sysout("errors.observe nsIScriptError no context! " +
-                        object.errorMessage, object);
-                }
-            }
-            else
-            {
-                if (Firebug.showChromeMessages)
-                {
-                    if (ConsoleMessage)
-                    {
-                        if (FBTrace.DBG_ERRORLOG)
-                        {
-                            FBTrace.sysout("errors.observe nsIConsoleMessage: " +
-                                object.message, object);
-                        }
-
-                        var context = this.getErrorContext(object);  // after instanceof
-                        if (!context)
-                            context = Firebug.currentContext;
-
-                        var msgId = lessTalkMoreAction(context, object, isWarning);
-                        if (!msgId)
-                            return;
-
-                        if (context)
-                        {
-                            // Even chrome errors can be nicely formatted in the Console panel
-                            this.logScriptError(context, object, isWarning);
-                            //Console.log(object.message, context, "consoleMessage",
-                            //FirebugReps.Text);
-                        }
-                    }
-                    else if (object.message)
-                    {
-                        if (FBTrace.DBG_ERRORLOG)
-                            FBTrace.sysout("errors.observe object.message:", object);
-
-                        var context = this.getErrorContext(object);
-
-                        if (!context)
-                            context = Firebug.currentContext;
-
-                        if (context)
-                        {
-                            // Even chrome errors can be nicely formatted in the Console panel
-                            this.logScriptError(context, object, isWarning);
-                            //Console.log(object.message, context, "consoleMessage",
-                            //FirebugReps.Text);
-                        }
-                        else
-                        {
-                            FBTrace.sysout("errors.observe, no context for message", object);
-                        }
-                    }
-                    else
-                    {
-                        FBTrace.sysout("errors.observe, no message in object", object);
-                    }
-                }
-                else
-                {
-                    if (FBTrace.DBG_ERRORLOG)
-                        FBTrace.sysout("errors.observe showChromeMessages off, dropped:", object);
-                    return;
-                }
-            }
-
-            if (FBTrace.DBG_ERRORLOG)
-            {
-                if (context)
-                {
-                    if (context.window)
-                    {
-                        FBTrace.sysout((isWarning?"warning":"error") + " logged to " +
-                            context.getName());
-                    }
-                    else
-                    {
-                        FBTrace.sysout("errors.observe, context with no window, " +
-                            (isWarning?"warning":"error")+" object:", object);
-
-                        FBTrace.sysout("errors.observe, context with no window, context:",
-                            context);
-                    }
-                }
-                else
-                {
-                    FBTrace.sysout("errors.observe, no context!");
-                }
-            }
+            this.onConsoleLog(object);
         }
         catch (exc)
         {
@@ -308,6 +198,133 @@ var Errors = Firebug.Errors = Obj.extend(Firebug.Module,
             {
                 FBTrace.sysout("errors.observe FAILS " + exc, exc);
                 FBTrace.sysout("errors.observe object " + object, object);
+            }
+        }
+    },
+
+    onConsoleLog: function(object)
+    {
+        var ScriptError = object instanceof nsIScriptError;
+        var ConsoleMessage = object instanceof nsIConsoleMessage;
+
+        // This cannot be pulled in front of the instanceof
+        var isWarning = object && object.flags & WARNING_FLAG;
+        var CSSParser = object && object.category == "CSS Parser";
+        var XPConnect = object && object.category &&
+            object.category.split(' ').indexOf("XPConnect") != -1;
+
+        // Some categories say: "content javascript" even if come from chrome space.
+        var sourceName = (object && object.sourceName) ? object.sourceName : "";
+        if (sourceName.indexOf("chrome") == 0 || sourceName.indexOf("resource") == 0)
+            XPConnect = true;
+
+        if (FBTrace.DBG_ERRORLOG)
+            FBTrace.sysout("errors.observe; ScriptError: " + ScriptError +
+                ", XPConnect: " + XPConnect + ", sourceName: " + sourceName);
+
+        if (ScriptError && !XPConnect)  // all branches should trace 'object'
+        {
+            if (FBTrace.DBG_ERRORLOG)
+            {
+                FBTrace.sysout("errors.observe nsIScriptError: " + object.errorMessage,
+                    object);
+            }
+
+            // after instanceof
+            var context = this.getErrorContext(object);
+            if (context)
+                return this.logScriptError(context, object, isWarning);
+
+            if (FBTrace.DBG_ERRORLOG)
+            {
+                FBTrace.sysout("errors.observe nsIScriptError no context! " +
+                    object.errorMessage, object);
+            }
+        }
+        else
+        {
+            if (Firebug.showChromeMessages)
+            {
+                if (ConsoleMessage)
+                {
+                    if (FBTrace.DBG_ERRORLOG)
+                    {
+                        FBTrace.sysout("errors.observe nsIConsoleMessage: " +
+                            object.message, object);
+                    }
+
+                    var context = this.getErrorContext(object);  // after instanceof
+                    if (!context)
+                        context = Firebug.currentContext;
+
+                    var msgId = lessTalkMoreAction(context, object, isWarning);
+                    if (!msgId)
+                        return;
+
+                    if (context)
+                    {
+                        // Even chrome errors can be nicely formatted in the Console panel
+                        this.logScriptError(context, object, isWarning);
+                        //Console.log(object.message, context, "consoleMessage",
+                        //FirebugReps.Text);
+                    }
+                }
+                else if (object.message)
+                {
+                    if (FBTrace.DBG_ERRORLOG)
+                        FBTrace.sysout("errors.observe object.message:", object);
+
+                    var context = this.getErrorContext(object);
+
+                    if (!context)
+                        context = Firebug.currentContext;
+
+                    if (context)
+                    {
+                        // Even chrome errors can be nicely formatted in the Console panel
+                        this.logScriptError(context, object, isWarning);
+                        //Console.log(object.message, context, "consoleMessage",
+                        //FirebugReps.Text);
+                    }
+                    else
+                    {
+                        FBTrace.sysout("errors.observe, no context for message", object);
+                    }
+                }
+                else
+                {
+                    FBTrace.sysout("errors.observe, no message in object", object);
+                }
+            }
+            else
+            {
+                if (FBTrace.DBG_ERRORLOG)
+                    FBTrace.sysout("errors.observe showChromeMessages off, dropped:", object);
+                return;
+            }
+        }
+
+        if (FBTrace.DBG_ERRORLOG)
+        {
+            if (context)
+            {
+                if (context.window)
+                {
+                    FBTrace.sysout((isWarning?"warning":"error") + " logged to " +
+                        context.getName());
+                }
+                else
+                {
+                    FBTrace.sysout("errors.observe, context with no window, " +
+                        (isWarning?"warning":"error")+" object:", object);
+
+                    FBTrace.sysout("errors.observe, context with no window, context:",
+                        context);
+                }
+            }
+            else
+            {
+                FBTrace.sysout("errors.observe, no context!");
             }
         }
     },
@@ -382,7 +399,12 @@ var Errors = Firebug.Errors = Obj.extend(Firebug.Module,
         // If window is not associated bail out to avoid reporting errors that are not
         // page related (issue 4991).
         if (!url && !object.outerWindowID)
+        {
+            if (FBTrace.DBG_ERRORLOG)
+                FBTrace.sysout("errors.getErrorContext; No URL & no outer-window. " +
+                    "url: " + url + ", outerWindowID: " + object.outerWindowID, object);
             return null;
+        }
 
         // eg some XPCOM messages
         // xxxHonza: this could cause appearing error messages in wrong tabs.
