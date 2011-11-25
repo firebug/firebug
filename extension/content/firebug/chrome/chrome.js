@@ -242,6 +242,7 @@ var FirebugChrome =
         Events.removeEventListener(doc1, "mousedown", onPanelMouseDown, false);
         Events.removeEventListener(doc1, "mouseup", onPanelMouseUp, false);
         Events.removeEventListener(doc1, "click", onPanelClick, false);
+        Events.removeEventListener(panelBar1, "selectingPanel", onSelectingPanel, false);
         Events.removeEventListener(panelBar1, "DOMMouseScroll", onMouseScroll, false);
 
         var doc2 = panelBar2.browser.contentDocument;
@@ -250,6 +251,8 @@ var FirebugChrome =
         Events.removeEventListener(doc2, "mousedown", onPanelMouseDown, false);
         Events.removeEventListener(doc2, "mouseup", onPanelMouseUp, false);
         Events.removeEventListener(doc2, "click", onPanelClick, false);
+        Events.removeEventListener(panelBar2, "selectPanel", onSelectedSidePanel, false);
+        Events.removeEventListener(panelBar2, "selectingPanel", stopBubble, false);
 
         var cmdPopupBrowser = this.getElementById("fbCommandPopupBrowser");
         var doc3 = cmdPopupBrowser.contentDocument;
