@@ -186,7 +186,7 @@ Firebug.TabWatcher = Obj.extend(new Firebug.Listener(),
             Events.removeEventListener(win, "DOMContentLoaded", onLoadWindowContent,
                 onLoadWindowContent.capturing);
 
-            // Re-register again since it could have been done too sone before.
+            // Re-register again since it could have been done too soon before.
             Events.addEventListener(win, "pageshow", onLoadWindowContent,
                 onLoadWindowContent.capturing);
             Events.addEventListener(win, "DOMContentLoaded", onLoadWindowContent,
@@ -241,7 +241,7 @@ Firebug.TabWatcher = Obj.extend(new Firebug.Listener(),
         else
         {
             if (FBTrace.DBG_WINDOWS)
-                FBTrace.sysout("-> watchTopWindow context.loaded:"+context.loaded+ " for "+
+                FBTrace.sysout("-> watchTopWindow context.loaded:" + context.loaded + " for " +
                     context.getName());
 
             this.rushShowContext(win, context);
@@ -252,7 +252,8 @@ Firebug.TabWatcher = Obj.extend(new Firebug.Listener(),
 
     rushShowContext: function(win, context)
     {
-        if (context.showContextTimeout) // then the timeout even has not run, we'll not need it after all.
+        // then the timeout even has not run, we'll not need it after all.
+        if (context.showContextTimeout)
             clearTimeout(context.showContextTimeout);
         delete context.showContextTimeout;
 
@@ -261,8 +262,10 @@ Firebug.TabWatcher = Obj.extend(new Firebug.Listener(),
         if (!currentURI || currentURI.spec != context.browser.currentURI.spec)
         {
             if (FBTrace.DBG_WINDOWS)
-                FBTrace.sysout("-> rushShowContext: Do not show context as it's not the active tab: " +
-                    context.browser.currentURI.spec);
+            {
+                FBTrace.sysout("-> rushShowContext: Do not show context as it's not " +
+                    "the active tab: " + context.browser.currentURI.spec);
+            }
             return;
         }
 
@@ -287,10 +290,11 @@ Firebug.TabWatcher = Obj.extend(new Firebug.Listener(),
             return userCommands;
 
         // Do not Create if any Listener says true to shouldNotCreateContext
-        if (Events.dispatch2(this.fbListeners, "shouldNotCreateContext", [browser, url, userCommands]))
+        if (Events.dispatch2(this.fbListeners, "shouldNotCreateContext",
+            [browser, url, userCommands]))
         {
             if (FBTrace.DBG_ACTIVATION)
-                FBTrace.sysout("-> shouldNotCreateContext vetos create context for: "+ url);
+                FBTrace.sysout("-> shouldNotCreateContext vetos create context for: " + url);
             return false;
         }
 
@@ -298,7 +302,8 @@ Firebug.TabWatcher = Obj.extend(new Firebug.Listener(),
             FBTrace.sysout("-> shouldCreateContext FBLISTENERS" , this.fbListeners);
 
         // Create if any listener says true to showCreateContext
-        if (Events.dispatch2(this.fbListeners, "shouldCreateContext", [browser, url, userCommands]))
+        if (Events.dispatch2(this.fbListeners, "shouldCreateContext",
+            [browser, url, userCommands]))
         {
              if (FBTrace.DBG_ACTIVATION)
                  FBTrace.sysout("-> shouldCreateContext with user: "+userCommands+
@@ -333,7 +338,8 @@ Firebug.TabWatcher = Obj.extend(new Firebug.Listener(),
 
         // The proper instance of Firebug.chrome object (different for detached Firebug and
         // accessible as Firebug.chrome property) must be used for the context object.
-        // (the global context object Firebug.currentContext is also different for detached firebug).
+        // (the global context object Firebug.currentContext is also different for
+        // detached firebug).
         var context = new contextType(win, browser, Firebug.chrome, persistedState);
         contexts.push(context);
 
@@ -364,8 +370,8 @@ Firebug.TabWatcher = Obj.extend(new Firebug.Listener(),
         if ((context && !context.window))
         {
             if (FBTrace.DBG_WINDOWS)
-                FBTrace.sysout("-> tabWatcher.watchLoadedTopWindow bailing !!!, context.window: "+
-                    context.window+", isSystem: "+isSystem);
+                FBTrace.sysout("-> tabWatcher.watchLoadedTopWindow bailing !!!, context.window: " +
+                    context.window + ", isSystem: " + isSystem);
 
             this.unwatchTopWindow(win);
             this.watchContext(win, null, isSystem);
@@ -373,9 +379,9 @@ Firebug.TabWatcher = Obj.extend(new Firebug.Listener(),
         }
 
         if (FBTrace.DBG_WINDOWS)
-            FBTrace.sysout("-> watchLoadedTopWindow context: "+
-                (context?(context.uid+", loaded="+context.loaded):'undefined')+
-                ", "+Win.safeGetWindowLocation(win));
+            FBTrace.sysout("-> watchLoadedTopWindow context: " +
+                (context ? (context.uid + ", loaded=" + context.loaded) : "undefined")+
+                ", " + Win.safeGetWindowLocation(win));
 
         if (context && !context.loaded)
         {
@@ -383,7 +389,7 @@ Firebug.TabWatcher = Obj.extend(new Firebug.Listener(),
 
             if (FBTrace.DBG_WINDOWS)
                 FBTrace.sysout("-> Context *** LOADED *** in watchLoadedTopWindow, id: " +
-                    context.uid +", uri: "+Win.safeGetWindowLocation(win));
+                    context.uid + ", uri: " + Win.safeGetWindowLocation(win));
 
             Events.dispatch(this.fbListeners, "loadedContext", [context]);
 
@@ -415,19 +421,19 @@ Firebug.TabWatcher = Obj.extend(new Firebug.Listener(),
             context.windows.push(win);
 
             if (FBTrace.DBG_WINDOWS)
-                FBTrace.sysout("-> watchWindow register *** FRAME *** to context for win.location: "+
-                    location);
+                FBTrace.sysout("-> watchWindow register *** FRAME *** to context for " +
+                    "win.location: " + location);
 
             Events.dispatch(this.fbListeners, "watchWindow", [context, win]);
 
             if (FBTrace.DBG_WINDOWS)
             {
-                FBTrace.sysout("-> watchWindow for: "+location+", context: "+context.uid);
+                FBTrace.sysout("-> watchWindow for: " + location + ", context: " + context.uid);
 
                 if (context)
                 {
                     for (var i = 0; i < context.windows.length; i++)
-                        FBTrace.sysout("context: "+context.uid+", window in context: " +
+                        FBTrace.sysout("context: " + context.uid + ", window in context: " +
                             context.windows[i].location.href);
                 }
             }
@@ -461,14 +467,19 @@ Firebug.TabWatcher = Obj.extend(new Firebug.Listener(),
         if (!context)
         {
             if (FBTrace.DBG_ERRORS)
-                FBTrace.sysout("unwatchWindow: no context for win "+Win.safeGetWindowLocation(win));
+            {
+                FBTrace.sysout("unwatchWindow: no context for win " +
+                    Win.safeGetWindowLocation(win));
+            }
             return;
         }
 
         var index = context.windows.indexOf(win);
         if (FBTrace.DBG_WINDOWS)
-            FBTrace.sysout("-> tabWatcher.unwatchWindow context: "+context.getName()+
-                " index of win: "+index+"/"+context.windows.length, context.windows);
+        {
+            FBTrace.sysout("-> tabWatcher.unwatchWindow context: " + context.getName() +
+                " index of win: " + index + "/" + context.windows.length, context.windows);
+        }
 
         if (index != -1)
         {
@@ -492,7 +503,8 @@ Firebug.TabWatcher = Obj.extend(new Firebug.Listener(),
 
         registerFrameListener(browser);
 
-        var shouldDispatch = this.watchTopWindow(browser.contentWindow, Http.safeGetURI(browser), true);
+        var shouldDispatch = this.watchTopWindow(browser.contentWindow,
+            Http.safeGetURI(browser), true);
         if (shouldDispatch)
         {
             Events.dispatch(this.fbListeners, "watchBrowser", [browser]);
@@ -510,8 +522,9 @@ Firebug.TabWatcher = Obj.extend(new Firebug.Listener(),
         if (FBTrace.DBG_WINDOWS)
         {
             var uri = Http.safeGetURI(browser);
-            FBTrace.sysout("-> tabWatcher.unwatchBrowser for: " + (uri instanceof nsIURI?
-                uri.spec:uri) + " user commands: "+userCommands+(browser?"":"NULL BROWSER"));
+            FBTrace.sysout("-> tabWatcher.unwatchBrowser for: " +
+                (uri instanceof nsIURI ? uri.spec : uri) + " user commands: " + userCommands +
+                (browser ? "" : "NULL BROWSER"));
         }
 
         if (!browser)
@@ -531,7 +544,8 @@ Firebug.TabWatcher = Obj.extend(new Firebug.Listener(),
         return false;
     },
 
-    watchContext: function(win, context, isSystem)  // called when tabs change in firefox
+    // called when tabs change in firefox
+    watchContext: function(win, context, isSystem)
     {
         if (this.shuttingDown)
             return;
