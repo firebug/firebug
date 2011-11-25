@@ -59,20 +59,20 @@ Firebug.CommandLine = Obj.extend(Firebug.Module,
         if (!context || !win)
             return;
 
-      // The command-line requires that the console has been initialized first,
-      // so make sure that's so.  This call should have no effect if the console
-      // is already initialized.
-      var consoleIsReady = Firebug.Console.isReadyElsePreparing(context, win);
+        // The command-line requires that the console has been initialized first,
+        // so make sure that's so.  This call should have no effect if the console
+        // is already initialized.
+        var consoleIsReady = Firebug.Console.isReadyElsePreparing(context, win);
 
-      // Make sure the command-line is initialized.  This call should have no
-      // effect if the command-line is already initialized.
-      var commandLineIsReady = Firebug.CommandLine.isReadyElsePreparing(context, win);
+        // Make sure the command-line is initialized.  This call should have no
+        // effect if the command-line is already initialized.
+        var commandLineIsReady = Firebug.CommandLine.isReadyElsePreparing(context, win);
 
-      if (FBTrace.DBG_COMMANDLINE)
-      {
-          FBTrace.sysout("commandLine.initializeCommandLineIfNeeded console ready: " +
-            consoleIsReady + " commandLine ready: " + commandLineIsReady);
-      }
+        if (FBTrace.DBG_COMMANDLINE)
+        {
+            FBTrace.sysout("commandLine.initializeCommandLineIfNeeded console ready: " +
+                consoleIsReady + " commandLine ready: " + commandLineIsReady);
+        }
     },
 
     // returns user-level wrapped object I guess.
@@ -700,8 +700,8 @@ Firebug.CommandLine = Obj.extend(Firebug.Module,
 
     attachListeners: function()
     {
-        var commandLine = this.getSingleRowCommandLine(),
-            commandEditor = this.getCommandEditor();
+        var commandLine = this.getSingleRowCommandLine();
+        var commandEditor = this.getCommandEditor();
 
         Events.addEventListener(commandEditor, "focus", this.onCommandLineFocus, true);
 
@@ -718,8 +718,12 @@ Firebug.CommandLine = Obj.extend(Firebug.Module,
 
     shutdown: function()
     {
-        var commandLine = this.getSingleRowCommandLine(),
-            commandEditor = this.getCommandEditor();
+        var commandLine = this.getSingleRowCommandLine();
+        var commandEditor = this.getCommandEditor();
+
+        // Make sure all listeners registered by the auto completer are removed.
+        if (this.autoCompleter)
+            this.autoCompleter.shutdown();
 
         Events.removeEventListener(commandEditor, "focus", this.onCommandLineFocus, true);
 
@@ -1656,7 +1660,7 @@ Firebug.EmptyJSAutoCompleter = function()
     this.handleKeyPress = function() {};
 };
 
-// ********************************************************************************************** //
+// ********************************************************************************************* //
 // Auto-completion helpers
 
 /**
