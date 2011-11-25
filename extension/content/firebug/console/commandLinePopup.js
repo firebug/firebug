@@ -8,8 +8,9 @@ define([
     "firebug/lib/dom",
     "firebug/lib/string",
     "firebug/lib/xml",
+    "firebug/lib/events",
 ],
-function(Obj, Firebug, CommandLine, Css, Dom, Str, Xml) {
+function(Obj, Firebug, CommandLine, Css, Dom, Str, Xml, Events) {
 
 // ************************************************************************************************
 // Constants
