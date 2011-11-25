@@ -458,6 +458,10 @@
             window.addEventListener("resize", this, false);
         ]]></constructor>
 
+        <destructor><![CDATA[
+            window.removeEventListener("resize", this, false);
+        ]]></destructor>
+
         <method name="_getScrollableElements">
             <body><![CDATA[
                 return this.panelTabs.childNodes;
@@ -1264,6 +1268,8 @@
 
         <handler event="popuphidden"><![CDATA[
             window.top.removeEventListener("keypress", this.onkeypress, true);
+            this.popup.removeEventListener("click", this.onclick, true);
+
             delete this.onkeypress;
 
             delete this.filter.filterString;
@@ -1426,14 +1432,28 @@
             var optionsPopup = document.getElementById("fbSearchOptionsPanel");
 
             var self = this;
-            searchBox.addEventListener("focus", function(event) {
-                self.focusHandler(event);
-            }, true);
 
-            optionsPopup.addEventListener("focus", function(event) {
+            this.onFocusSearchBox = function(event)
+            {
+                self.focusHandler(event);
+            }
+
+            this.onFocusOptionsPopup = function(event)
+            {
                 self.panelFocusHandler(event);
-            }, true);
+            }
+
+            searchBox.addEventListener("focus", this.onFocusSearchBox, true);
+            optionsPopup.addEventListener("focus", this.onFocusOptionsPopup, true);
         ]]></constructor>
+
+        <destructor><![CDATA[
+            var searchBox = document.getAnonymousElementByAttribute(this, "anonid", "searchBox");
+            var optionsPopup = document.getElementById("fbSearchOptionsPanel");
+
+            searchBox.removeEventListener("focus", this.onFocusSearchBox, true);
+            optionsPopup.removeEventListener("focus", this.onFocusOptionsPopup, true);
+        ]]></destructor>
 
         <property name="value">
             <xbl:getter><![CDATA[
