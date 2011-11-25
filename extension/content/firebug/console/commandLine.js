@@ -725,6 +725,9 @@ Firebug.CommandLine = Obj.extend(Firebug.Module,
         if (this.autoCompleter)
             this.autoCompleter.shutdown();
 
+        if (this.commandHistory)
+            this.commandHistory.detachListeners();
+
         Events.removeEventListener(commandEditor, "focus", this.onCommandLineFocus, true);
 
         Events.removeEventListener(commandLine, "focus", this.onCommandLineFocus, true);
@@ -2989,6 +2992,7 @@ Firebug.CommandLine.CommandHistory = function()
         var command = commands[commandInsertPointer];
         if (!command)
             return "";
+
         return command;
     };
 
@@ -3002,6 +3006,7 @@ Firebug.CommandLine.CommandHistory = function()
 
             commands[commandInsertPointer] = command;
         }
+
         commandPointer = commandInsertPointer + 1;
 
         if (Firebug.chrome.$("fbCommandLineHistoryButton").hasAttribute("disabled"))
@@ -3009,10 +3014,22 @@ Firebug.CommandLine.CommandHistory = function()
             Firebug.chrome.$("fbCommandLineHistoryButton").removeAttribute("disabled");
             Firebug.chrome.$("fbCommandEditorHistoryButton").removeAttribute("disabled");
 
-            Events.addEventListener(commandsPopup, "mouseover", this.onMouseOver, true);
-            Events.addEventListener(commandsPopup, "mouseup", this.onMouseUp, true);
-            Events.addEventListener(commandsPopup, "popuphidden", this.onPopupHidden, true);
+            this.attachListeners();
         }
+    };
+
+    this.attachListeners = function()
+    {
+        Events.addEventListener(commandsPopup, "mouseover", this.onMouseOver, true);
+        Events.addEventListener(commandsPopup, "mouseup", this.onMouseUp, true);
+        Events.addEventListener(commandsPopup, "popuphidden", this.onPopupHidden, true);
+    };
+
+    this.detachListeners = function()
+    {
+        Events.removeEventListener(commandsPopup, "mouseover", this.onMouseOver, true);
+        Events.removeEventListener(commandsPopup, "mouseup", this.onMouseUp, true);
+        Events.removeEventListener(commandsPopup, "popuphidden", this.onPopupHidden, true);
     };
 
     this.cycleCommands = function(context, dir)
@@ -3053,11 +3070,13 @@ Firebug.CommandLine.CommandHistory = function()
         setCursorToEOL(commandLine);
     };
 
-    this.isShown = function() {
+    this.isShown = function()
+    {
         return commandsPopup.state == "open";
     };
 
-    this.show = function(element) {
+    this.show = function(element)
+    {
         if (this.isShown())
             return this.hide;
 
