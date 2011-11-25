@@ -685,6 +685,9 @@ Firebug.ScriptPanel.prototype = Obj.extend(Firebug.SourceBoxPanel,
         // xxxHonza: why this is here? I don't see addListener.
         //Firebug.connection.removeListener(this);
 
+        // Make sure listeners are removed.
+        this.detachListeners(this.context, Firebug.chrome);
+
         Firebug.SourceBoxPanel.destroy.apply(this, arguments);
     },
 
