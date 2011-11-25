@@ -1136,6 +1136,20 @@ Firebug.HTMLPanel.prototype = Obj.extend(WalkingPanel,
         delete this.infoTipURL;
 
         Events.removeEventListener(this.panelNode.ownerDocument, "keypress", this.onKeyPress, true);
+
+        if (this.context.attachedMutation)
+        {
+            this.context.attachedMutation = false;
+
+            Win.iterateWindows(this.context.window, Obj.bind(function(win)
+            {
+                var doc = win.document;
+                Events.removeEventListener(doc, "DOMAttrModified", this.onMutateAttr, false);
+                Events.removeEventListener(doc, "DOMCharacterDataModified", this.onMutateText, false);
+                Events.removeEventListener(doc, "DOMNodeInserted", this.onMutateNode, false);
+                Events.removeEventListener(doc, "DOMNodeRemoved", this.onMutateNode, false);
+            }, this));
+        }
     },
 
     watchWindow: function(context, win)
