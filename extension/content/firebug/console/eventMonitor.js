@@ -37,7 +37,7 @@ EventMonitor.monitorEvents = function(object, type, context)
         if (!type)
             Events.attachAllListeners(object, context.onMonitorEvent, context);
         else
-            object.addEventListener(type, context.onMonitorEvent, false);
+            Events.addEventListener(object, type, context.onMonitorEvent, false);
     }
 };
 
@@ -54,7 +54,7 @@ EventMonitor.unmonitorEvents = function(object, type, context)
             if (!type)
                 Events.detachAllListeners(object, context.onMonitorEvent, context);
             else
-                object.removeEventListener(type, context.onMonitorEvent, false);
+                Events.removeEventListener(object, type, context.onMonitorEvent, false);
             break;
         }
     }

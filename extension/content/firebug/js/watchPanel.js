@@ -65,18 +65,18 @@ Firebug.WatchPanel.prototype = Obj.extend(Firebug.DOMBasePanel.prototype,
 
     initializeNode: function(oldPanelNode)
     {
-        this.panelNode.addEventListener("mousedown", this.onMouseDown, false);
-        this.panelNode.addEventListener("mouseover", this.onMouseOver, false);
-        this.panelNode.addEventListener("mouseout", this.onMouseOut, false);
+        Events.addEventListener(this.panelNode, "mousedown", this.onMouseDown, false);
+        Events.addEventListener(this.panelNode, "mouseover", this.onMouseOver, false);
+        Events.addEventListener(this.panelNode, "mouseout", this.onMouseOut, false);
 
         Firebug.DOMBasePanel.prototype.initializeNode.apply(this, arguments);
     },
 
     destroyNode: function()
     {
-        this.panelNode.removeEventListener("mousedown", this.onMouseDown, false);
-        this.panelNode.removeEventListener("mouseover", this.onMouseOver, false);
-        this.panelNode.removeEventListener("mouseout", this.onMouseOut, false);
+        Events.removeEventListener(this.panelNode, "mousedown", this.onMouseDown, false);
+        Events.removeEventListener(this.panelNode, "mouseover", this.onMouseOver, false);
+        Events.removeEventListener(this.panelNode, "mouseout", this.onMouseOut, false);
 
         Firebug.DOMBasePanel.prototype.destroyNode.apply(this, arguments);
     },

@@ -103,7 +103,7 @@ var FirebugChrome =
             browser1Complete = browser1.complete;
 
             if (!browser1Complete)
-                browser1.addEventListener("load", browser1Loaded, true);
+                Events.addEventListener(browser1, "load", browser1Loaded, true);
 
             browser1.droppedLinkHandler = function()
             {
@@ -120,7 +120,7 @@ var FirebugChrome =
             browser2Complete = browser2.complete;
 
             if (!browser2Complete)
-                browser2.addEventListener("load", browser2Loaded, true);
+                Events.addEventListener(browser2, "load", browser2Loaded, true);
 
             browser2.droppedLinkHandler = function()
             {
@@ -131,7 +131,7 @@ var FirebugChrome =
                 FBTrace.sysout("chrome.browser2.complete; " + browser2Complete);
         }
 
-        win.addEventListener("blur", onBlur, true);
+        Events.addEventListener(win, "blur", onBlur, true);
 
         if (FBTrace.DBG_INITIALIZE)
             FBTrace.sysout("chrome.initialized in " + win.location + " with " +
@@ -167,39 +167,38 @@ var FirebugChrome =
             this.applyTextSize(Firebug.textSize);
 
             var doc1 = panelBar1.browser.contentDocument;
-            doc1.addEventListener("mouseover", onPanelMouseOver, false);
-            doc1.addEventListener("mouseout", onPanelMouseOut, false);
-            doc1.addEventListener("mousedown", onPanelMouseDown, false);
-            doc1.addEventListener("mouseup", onPanelMouseUp, false);
-            doc1.addEventListener("click", onPanelClick, false);
-            panelBar1.addEventListener("selectingPanel", onSelectingPanel, false);
-            panelBar1.addEventListener("DOMMouseScroll", onMouseScroll, false);
+            Events.addEventListener(doc1, "mouseover", onPanelMouseOver, false);
+            Events.addEventListener(doc1, "mouseout", onPanelMouseOut, false);
+            Events.addEventListener(doc1, "mousedown", onPanelMouseDown, false);
+            Events.addEventListener(doc1, "mouseup", onPanelMouseUp, false);
+            Events.addEventListener(doc1, "click", onPanelClick, false);
+            Events.addEventListener(panelBar1, "selectingPanel", onSelectingPanel, false);
+            Events.addEventListener(panelBar1, "DOMMouseScroll", onMouseScroll, false);
 
             var doc2 = panelBar2.browser.contentDocument;
-            doc2.addEventListener("mouseover", onPanelMouseOver, false);
-            doc2.addEventListener("mouseout", onPanelMouseOut, false);
-            doc2.addEventListener("click", onPanelClick, false);
-            doc2.addEventListener("mousedown", onPanelMouseDown, false);
-            doc2.addEventListener("mouseup", onPanelMouseUp, false);
-            panelBar2.addEventListener("selectPanel", onSelectedSidePanel, false);
+            Events.addEventListener(doc2, "mouseover", onPanelMouseOver, false);
+            Events.addEventListener(doc2, "mouseout", onPanelMouseOut, false);
+            Events.addEventListener(doc2, "click", onPanelClick, false);
+            Events.addEventListener(doc2, "mousedown", onPanelMouseDown, false);
+            Events.addEventListener(doc2, "mouseup", onPanelMouseUp, false);
+            Events.addEventListener(panelBar2, "selectPanel", onSelectedSidePanel, false);
 
             var doc3 = cmdPopupBrowser.contentDocument;
-            doc3.addEventListener("mouseover", onPanelMouseOver, false);
-            doc3.addEventListener("mouseout", onPanelMouseOut, false);
-            doc3.addEventListener("mousedown", onPanelMouseDown, false);
-            doc3.addEventListener("click", onPanelClick, false);
+            Events.addEventListener(doc3, "mouseover", onPanelMouseOver, false);
+            Events.addEventListener(doc3,"mouseout", onPanelMouseOut, false);
+            Events.addEventListener(doc3, "mousedown", onPanelMouseDown, false);
+            Events.addEventListener(doc3, "click", onPanelClick, false);
 
             var mainTabBox = panelBar1.ownerDocument.getElementById("fbPanelBar1-tabBox");
-            mainTabBox.addEventListener("mousedown", onMainTabBoxMouseDown, false);
+            Events.addEventListener(mainTabBox, "mousedown", onMainTabBoxMouseDown, false);
 
             // The side panel bar doesn't care about this event.  It must, however,
             // prevent it from bubbling now that we allow the side panel bar to be
             // *inside* the main panel bar.
-            function stopBubble(event) { event.stopPropagation(); }
-            panelBar2.addEventListener("selectingPanel", stopBubble, false);
+            Events.addEventListener(panelBar2, "selectingPanel", stopBubble, false);
 
             var locationList = this.getElementById("fbLocationList");
-            locationList.addEventListener("selectObject", onSelectLocation, false);
+            Events.addEventListener(locationList, "selectObject", onSelectLocation, false);
 
             this.updatePanelBar1(Firebug.panelTypes);
 
@@ -238,34 +237,34 @@ var FirebugChrome =
             FBTrace.sysout("chrome.shutdown entered for "+win.location+"\n");
 
         var doc1 = panelBar1.browser.contentDocument;
-        doc1.removeEventListener("mouseover", onPanelMouseOver, false);
-        doc1.removeEventListener("mouseout", onPanelMouseOut, false);
-        doc1.removeEventListener("mousedown", onPanelMouseDown, false);
-        doc1.removeEventListener("mouseup", onPanelMouseUp, false);
-        doc1.removeEventListener("click", onPanelClick, false);
-        panelBar1.removeEventListener("DOMMouseScroll", onMouseScroll, false);
+        Events.removeEventListener(doc1, "mouseover", onPanelMouseOver, false);
+        Events.removeEventListener(doc1, "mouseout", onPanelMouseOut, false);
+        Events.removeEventListener(doc1, "mousedown", onPanelMouseDown, false);
+        Events.removeEventListener(doc1, "mouseup", onPanelMouseUp, false);
+        Events.removeEventListener(doc1, "click", onPanelClick, false);
+        Events.removeEventListener(panelBar1, "DOMMouseScroll", onMouseScroll, false);
 
         var doc2 = panelBar2.browser.contentDocument;
-        doc2.removeEventListener("mouseover", onPanelMouseOver, false);
-        doc2.removeEventListener("mouseout", onPanelMouseOut, false);
-        doc2.removeEventListener("mousedown", onPanelMouseDown, false);
-        doc2.removeEventListener("mouseup", onPanelMouseUp, false);
-        doc2.removeEventListener("click", onPanelClick, false);
+        Events.removeEventListener(doc2, "mouseover", onPanelMouseOver, false);
+        Events.removeEventListener(doc2, "mouseout", onPanelMouseOut, false);
+        Events.removeEventListener(doc2, "mousedown", onPanelMouseDown, false);
+        Events.removeEventListener(doc2, "mouseup", onPanelMouseUp, false);
+        Events.removeEventListener(doc2, "click", onPanelClick, false);
 
         var cmdPopupBrowser = this.getElementById("fbCommandPopupBrowser");
         var doc3 = cmdPopupBrowser.contentDocument;
-        doc3.removeEventListener("mouseover", onPanelMouseOver, false);
-        doc3.removeEventListener("mouseout", onPanelMouseOut, false);
-        doc3.removeEventListener("mousedown", onPanelMouseDown, false);
-        doc3.removeEventListener("click", onPanelClick, false);
+        Events.removeEventListener(doc3, "mouseover", onPanelMouseOver, false);
+        Events.removeEventListener(doc3, "mouseout", onPanelMouseOut, false);
+        Events.removeEventListener(doc3, "mousedown", onPanelMouseDown, false);
+        Events.removeEventListener(doc3, "click", onPanelClick, false);
 
         var mainTabBox = panelBar1.ownerDocument.getElementById("fbPanelBar1-tabBox");
-        mainTabBox.removeEventListener("mousedown", onMainTabBoxMouseDown, false);
+        Events.removeEventListener(mainTabBox, "mousedown", onMainTabBoxMouseDown, false);
 
         var locationList = this.getElementById("fbLocationList");
-        locationList.removeEventListener("selectObject", onSelectLocation, false);
+        Events.removeEventListener(locationList, "selectObject", onSelectLocation, false);
 
-        win.removeEventListener("blur", onBlur, true);
+        Events.removeEventListener(win, "blur", onBlur, true);
 
         Firebug.unregisterUIListener(this);
 
@@ -1159,6 +1158,8 @@ var FirebugChrome =
             elt.setAttribute(name, value);
     },
 
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
     keyCodeListen: function(key, filter, listener, capture)
     {
         if (!filter)
@@ -1175,7 +1176,7 @@ var FirebugChrome =
             }
         }
 
-        win.addEventListener("keypress", fn, capture);
+        Events.addEventListener(win, "keypress", fn, capture);
 
         return [fn, capture];
     },
@@ -1196,15 +1197,17 @@ var FirebugChrome =
             }
         }
 
-        win.addEventListener("keypress", fn, capture);
+        Events.addEventListener(win, "keypress", fn, capture);
 
         return [fn, capture];
     },
 
     keyIgnore: function(listener)
     {
-        win.removeEventListener("keypress", listener[0], listener[1]);
+        Events.removeEventListener(win, "keypress", listener[0], listener[1]);
     },
+
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
     $: function(id)
     {
@@ -1728,7 +1731,7 @@ function browser1Loaded()
 
     var browser1 = panelBar1.browser;
     var browser2 = panelBar2.browser;
-    browser1.removeEventListener("load", browser1Loaded, true);
+    Events.removeEventListener(browser1, "load", browser1Loaded, true);
 
     browser1.contentDocument.title = "Firebug Main Panel";
     browser1.complete = true;
@@ -1747,7 +1750,7 @@ function browser2Loaded()
 
     var browser1 = panelBar1.browser;
     var browser2 = panelBar2.browser;
-    browser2.removeEventListener("load", browser2Loaded, true);
+    Events.removeEventListener(browser2, "load", browser2Loaded, true);
 
     browser2.contentDocument.title = "Firebug Side Panel";
     browser2.complete = true;
@@ -1983,6 +1986,11 @@ function onMainTabBoxMouseDown(event)
         var contentSplitter = FirebugChrome.$("fbContentSplitter");
         // TODO: grab the splitter here.
     }
+}
+
+function stopBubble(event)
+{
+    event.stopPropagation();
 }
 
 function getRealObject(object)

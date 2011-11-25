@@ -1080,17 +1080,19 @@ Firebug.HTMLPanel.prototype = Obj.extend(WalkingPanel,
         if (!this.ioBox)
             this.ioBox = new Firebug.InsideOutBox(this, this.panelNode);
 
-        this.panelNode.addEventListener("click", this.onClick, false);
-        this.panelNode.addEventListener("mousedown", this.onMouseDown, false);
+        Events.addEventListener(this.panelNode, "click", this.onClick, false);
+        Events.addEventListener(this.panelNode, "mousedown", this.onMouseDown, false);
 
         Firebug.Panel.initializeNode.apply(this, arguments);
     },
 
     destroyNode: function()
     {
-        this.panelNode.removeEventListener("click", this.onClick, false);
-        this.panelNode.removeEventListener("mousedown", this.onMouseDown, false);
-        this.panelNode.ownerDocument.removeEventListener("keypress", this.onKeyPress, true);
+        Events.removeEventListener(this.panelNode, "click", this.onClick, false);
+        Events.removeEventListener(this.panelNode, "mousedown", this.onMouseDown, false);
+
+        Events.removeEventListener(this.panelNode.ownerDocument, "keypress",
+            this.onKeyPress, true);
 
         if (this.ioBox)
         {
@@ -1106,7 +1108,7 @@ Firebug.HTMLPanel.prototype = Obj.extend(WalkingPanel,
         this.showToolbarButtons("fbHTMLButtons", true);
         this.showToolbarButtons("fbStatusButtons", true);
 
-        this.panelNode.ownerDocument.addEventListener("keypress", this.onKeyPress, true);
+        Events.addEventListener(this.panelNode.ownerDocument, "keypress", this.onKeyPress, true);
 
         if (this.context.loaded)
         {
@@ -1133,7 +1135,7 @@ Firebug.HTMLPanel.prototype = Obj.extend(WalkingPanel,
         // clear the state that is tracking the infotip so it is reset after next show()
         delete this.infoTipURL;
 
-        this.panelNode.ownerDocument.removeEventListener("keypress", this.onKeyPress, true);
+        Events.removeEventListener(this.panelNode.ownerDocument, "keypress", this.onKeyPress, true);
     },
 
     watchWindow: function(context, win)

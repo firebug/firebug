@@ -119,7 +119,7 @@ Firebug.SourceBoxPanel = Obj.extend(SourceBoxPanelBase,
     initializeNode: function(panelNode)
     {
         this.resizeEventTarget = Firebug.chrome.$('fbContentBox');
-        this.resizeEventTarget.addEventListener("resize", this.onResize, true);
+        Events.addEventListener(this.resizeEventTarget, "resize", this.onResize, true);
         this.attachToCache();
 
         Firebug.ActivablePanel.initializeNode.apply(this, arguments);
@@ -129,7 +129,7 @@ Firebug.SourceBoxPanel = Obj.extend(SourceBoxPanelBase,
     {
         if (this.resizeEventTarget)
         {
-            this.resizeEventTarget.removeEventListener("resize", this.onResize, true);
+            Events.removeEventListener(this.resizeEventTarget, "resize", this.onResize, true);
         }
         else
         {

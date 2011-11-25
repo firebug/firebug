@@ -74,12 +74,12 @@ Firebug.StartButton = Obj.extend(Firebug.Module,
         this.browserWin = win;
 
         this.onLoadBinding = Obj.bind(this.onLoad, this);
-        this.browserWin.addEventListener("load", this.onLoadBinding, false);
+        Events.addEventListener(this.browserWin, "load", this.onLoadBinding, false);
     },
 
     onLoad: function()
     {
-        this.browserWin.removeEventListener("load", this.onLoadBinding, false);
+        Events.removeEventListener(this.browserWin, "load", this.onLoadBinding, false);
 
         try
         {

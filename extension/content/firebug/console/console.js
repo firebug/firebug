@@ -739,7 +739,7 @@ Firebug.ConsolePanel.prototype = Obj.extend(Firebug.ActivablePanel,
         this.groups.push(groupBody);
 
         // Expand/collapse logic.
-        innerRow.addEventListener("mousedown", function(event)
+        Events.addEventListener(innerRow, "mousedown", function(event)
         {
             if (Events.isLeftClick(event))
             {
@@ -809,26 +809,26 @@ Firebug.ConsolePanel.prototype = Obj.extend(Firebug.ActivablePanel,
         Firebug.ActivablePanel.destroy.apply(this, arguments);  // must be called last
     },
 
-    initializeNode : function()
+    initializeNode: function()
     {
         Firebug.ActivablePanel.initializeNode.apply(this, arguments);
 
         this.onScroller = Obj.bind(this.onScroll, this);
-        this.panelNode.addEventListener("scroll", this.onScroller, true);
+        Events.addEventListener(this.panelNode, "scroll", this.onScroller, true);
 
         this.onResizer = Obj.bind(this.onResize, this);
         this.resizeEventTarget = Firebug.chrome.$('fbContentBox');
-        this.resizeEventTarget.addEventListener("resize", this.onResizer, true);
+        Events.addEventListener(this.resizeEventTarget, "resize", this.onResizer, true);
     },
 
-    destroyNode : function()
+    destroyNode: function()
     {
         Firebug.ActivablePanel.destroyNode.apply(this, arguments);
 
         if (this.onScroller)
-            this.panelNode.removeEventListener("scroll", this.onScroller, true);
+            Events.removeEventListener(this.panelNode, "scroll", this.onScroller, true);
 
-        this.resizeEventTarget.removeEventListener("resize", this.onResizer, true);
+        Events.removeEventListener(this.resizeEventTarget, "resize", this.onResizer, true);
     },
 
     show: function(state)

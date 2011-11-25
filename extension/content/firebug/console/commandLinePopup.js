@@ -38,7 +38,8 @@ Firebug.CommandLine.Popup = Obj.extend(Firebug.Module,
 
     shutdown: function()
     {
-        Firebug.chrome.$("fbContentBox").removeEventListener("keypress", this.onKeyPress, false);
+        var contentBox = Firebug.chrome.$("fbContentBox");
+        Events.removeEventListener(contentBox, "keypress", this.onKeyPress, false);
     },
 
     initContext: function(context)
@@ -109,7 +110,8 @@ Firebug.CommandLine.Popup = Obj.extend(Firebug.Module,
     attachListeners: function()
     {
         // Register event listeners.
-        Firebug.chrome.$("fbContentBox").addEventListener("keypress", this.onKeyPress, false);
+        var contentBox = Firebug.chrome.$("fbContentBox");
+        Events.addEventListener(contentBox, "keypress", this.onKeyPress, false);
     },
 
     toggle: function(context)

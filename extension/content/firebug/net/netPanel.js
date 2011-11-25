@@ -88,20 +88,19 @@ NetPanel.prototype = Obj.extend(Firebug.ActivablePanel,
 
     initializeNode : function()
     {
-        this.panelNode.addEventListener("contextmenu", this.onContextMenu, false);
+        Events.addEventListener(this.panelNode, "contextmenu", this.onContextMenu, false);
 
         this.onResizer = Obj.bind(this.onResize, this);
         this.resizeEventTarget = Firebug.chrome.$('fbContentBox');
-        this.resizeEventTarget.addEventListener("resize", this.onResizer, true);
+        Events.addEventListener(this.resizeEventTarget, "resize", this.onResizer, true);
 
         Firebug.ActivablePanel.initializeNode.apply(this, arguments);
     },
 
     destroyNode : function()
     {
-        this.panelNode.removeEventListener("contextmenu", this.onContextMenu, false);
-
-        this.resizeEventTarget.removeEventListener("resize", this.onResizer, true);
+        Events.removeEventListener(this.panelNode, "contextmenu", this.onContextMenu, false);
+        Events.removeEventListener(this.resizeEventTarget, "resize", this.onResizer, true);
 
         Firebug.ActivablePanel.destroyNode.apply(this, arguments);
     },

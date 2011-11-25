@@ -173,16 +173,16 @@ LayoutPanel.prototype = Obj.extend(Firebug.Panel,
 
     initializeNode: function(oldPanelNode)
     {
-        this.panelNode.addEventListener("mouseover", this.onMouseOver, false);
-        this.panelNode.addEventListener("mouseout", this.onMouseOut, false);
+        Events.addEventListener(this.panelNode, "mouseover", this.onMouseOver, false);
+        Events.addEventListener(this.panelNode, "mouseout", this.onMouseOut, false);
 
         Firebug.Panel.initializeNode.apply(this, arguments);
     },
 
     destroyNode: function()
     {
-        this.panelNode.removeEventListener("mouseover", this.onMouseOver, false);
-        this.panelNode.removeEventListener("mouseout", this.onMouseOut, false);
+        Events.removeEventListener(this.panelNode, "mouseover", this.onMouseOver, false);
+        Events.removeEventListener(this.panelNode, "mouseout", this.onMouseOut, false);
 
         Firebug.Panel.destroyNode.apply(this, arguments);
     },

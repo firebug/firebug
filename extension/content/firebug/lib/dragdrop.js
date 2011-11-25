@@ -31,7 +31,7 @@ function Tracker(handle, callbacks)
     this.onDragOver = Obj.bind(this.onDragOver, this);
     this.onDrop = Obj.bind(this.onDrop, this);
 
-    this.element.addEventListener("mousedown", this.onDragStart, false);
+    Events.addEventListener(this.element, "mousedown", this.onDragStart, false);
     this.active = true;
 }
 
@@ -52,8 +52,8 @@ Tracker.prototype =
         //    parseInt(this.element.style.left),
         //    parseInt(this.element.style.top));
 
-        this.element.ownerDocument.addEventListener("mousemove", this.onDragOver, false);
-        this.element.ownerDocument.addEventListener("mouseup", this.onDrop, false);
+        Events.addEventListener(this.element.ownerDocument, "mousemove", this.onDragOver, false);
+        Events.addEventListener(this.element.ownerDocument, "mouseup", this.onDrop, false);
 
         Events.cancelEvent(e);
     },
@@ -96,8 +96,8 @@ Tracker.prototype =
         if (!this.dragging)
             return;
 
-        this.element.ownerDocument.removeEventListener("mousemove", this.onDragOver, false);
-        this.element.ownerDocument.removeEventListener("mouseup", this.onDrop, false);
+        Events.removeEventListener(this.element.ownerDocument, "mousemove", this.onDragOver, false);
+        Events.removeEventListener(this.element.ownerDocument, "mouseup", this.onDrop, false);
 
         this.cursorStartPos = null;
         this.cursorLastPos = null;
@@ -111,7 +111,7 @@ Tracker.prototype =
 
     destroy: function()
     {
-        this.element.removeEventListener("mousedown", this.onDragStart, false);
+        Events.removeEventListener(this.element, "mousedown", this.onDragStart, false);
         this.active = false;
 
         if (this.dragging)

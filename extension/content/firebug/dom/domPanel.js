@@ -1589,14 +1589,14 @@ DOMMainPanel.prototype = Obj.extend(Firebug.DOMBasePanel.prototype,
 
     initializeNode: function(oldPanelNode)
     {
-        this.panelNode.addEventListener("click", this.onClick, false);
+        Events.addEventListener(this.panelNode, "click", this.onClick, false);
 
         Firebug.DOMBasePanel.prototype.initializeNode.apply(this, arguments);
     },
 
     destroyNode: function()
     {
-        this.panelNode.removeEventListener("click", this.onClick, false);
+        Events.removeEventListener(this.panelNode, "click", this.onClick, false);
 
         Firebug.DOMBasePanel.prototype.destroyNode.apply(this, arguments);
     },

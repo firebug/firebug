@@ -57,14 +57,14 @@ Firebug.InsideOutBox = function(view, box)
     this.highlightedObjectBox = null;
 
     this.onMouseDown = Obj.bind(this.onMouseDown, this);
-    box.addEventListener("mousedown", this.onMouseDown, false);
+    Events.addEventListener(this.box, "mousedown", this.onMouseDown, false);
 };
 
 Firebug.InsideOutBox.prototype =
 {
     destroy: function()
     {
-        this.box.removeEventListener("mousedown", this.onMouseDown, false);
+        Events.removeEventListener(this.box, "mousedown", this.onMouseDown, false);
     },
 
     highlight: function(object)

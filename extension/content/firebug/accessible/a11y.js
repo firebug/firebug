@@ -132,28 +132,28 @@ Firebug.A11yModel = Obj.extend(Firebug.Module,
         //manage all key events in toolbox (including tablists)
         tmpElem = chrome.$("fbContentBox");
         if (tmpElem)
-            tmpElem.addEventListener("keypress", this.handlePanelBarKeyPress , true);
+            Events.addEventListener(tmpElem, "keypress", this.handlePanelBarKeyPress , true);
 
         //make focus stick to inspect button when clicked
         tmpElem = chrome.$("fbInspectButton");
         if (tmpElem)
-            tmpElem.addEventListener("mousedown", this.focusTarget, true);
+            Events.addEventListener(tmpElem, "mousedown", this.focusTarget, true);
 
         tmpElem = chrome.$("fbPanelBar1-panelTabs");
         if (tmpElem)
-            tmpElem.addEventListener("focus", this.handleTabBarFocus, true);
+            Events.addEventListener(tmpElem, "focus", this.handleTabBarFocus, true);
 
         tmpElem = chrome.$("fbPanelBar1-panelTabs");
         if (tmpElem)
-            tmpElem.addEventListener("blur", this.handleTabBarBlur, true);
+            Events.addEventListener(tmpElem, "blur", this.handleTabBarBlur, true);
 
         tmpElem = chrome.$("fbPanelBar2-panelTabs");
         if (tmpElem)
-            tmpElem.addEventListener("focus", this.handleTabBarFocus, true);
+            Events.addEventListener(tmpElem, "focus", this.handleTabBarFocus, true);
 
         tmpElem = chrome.$("fbPanelBar2-panelTabs");
         if (tmpElem)
-            tmpElem.addEventListener("blur", this.handleTabBarBlur, true);
+            Events.addEventListener(tmpElem, "blur", this.handleTabBarBlur, true);
 
         tmpElem = chrome.$("fbPanelBar1");
         if (tmpElem)
@@ -175,27 +175,27 @@ Firebug.A11yModel = Obj.extend(Firebug.Module,
 
         tmpElem = chrome.$("fbPanelBar1");
         if (tmpElem)
-            tmpElem.removeEventListener("keypress", this.handlePanelBarKeyPress , true);
+            Events.removeEventListener(tmpElem, "keypress", this.handlePanelBarKeyPress , true);
 
         tmpElem = chrome.$("fbInspectButton");
         if (tmpElem)
-            tmpElem.removeEventListener("mousedown", this.focusTarget, true);
+            Events.removeEventListener(tmpElem, "mousedown", this.focusTarget, true);
 
         tmpElem = chrome.$("fbPanelBar1-panelTabs");
         if (tmpElem)
-            tmpElem.removeEventListener("focus", this.handleTabBarFocus, true);
+            Events.removeEventListener(tmpElem, "focus", this.handleTabBarFocus, true);
 
         tmpElem = chrome.$("fbPanelBar1-panelTabs")
         if (tmpElem)
-            tmpElem.removeEventListener("blur", this.handleTabBarBlur, true);
+            Events.removeEventListener(tmpElem, "blur", this.handleTabBarBlur, true);
 
         tmpElem = chrome.$("fbPanelBar2-panelTabs");
         if (tmpElem)
-            tmpElem.removeEventListener("focus", this.handleTabBarFocus, true);
+            Events.removeEventListener(tmpElem, "focus", this.handleTabBarFocus, true);
 
         tmpElem = chrome.$("fbPanelBar2-panelTabs");
         if (tmpElem)
-            tmpElem.removeEventListener("blur", this.handleTabBarBlur, true);
+            Events.removeEventListener(tmpElem, "blur", this.handleTabBarBlur, true);
 
         tmpElem = chrome.$("fbPanelBar1");
         if (tmpElem)
@@ -264,9 +264,9 @@ Firebug.A11yModel = Obj.extend(Firebug.Module,
                 }
                 panel.panelNode.setAttribute("aria-live", "polite");
                 panel.panelNode.setAttribute("aria-relevant", "additions");
-                panel.panelNode.addEventListener("keypress", this.onNavigablePanelKeyPress, false);
-                panel.panelNode.addEventListener("focus", this.onPanelFocus, true);
-                panel.panelNode.addEventListener("mousedown", this.onConsoleMouseDown, false);
+                Events.addEventListener(panel.panelNode, "keypress", this.onNavigablePanelKeyPress, false);
+                Events.addEventListener(panel.panelNode, "focus", this.onPanelFocus, true);
+                Events.addEventListener(panel.panelNode, "mousedown", this.onConsoleMouseDown, false);
                 if (panel.name == "breakpoints")
                     panel.panelNode.style.overflowX = "hidden";
                 break;
@@ -275,17 +275,17 @@ Firebug.A11yModel = Obj.extend(Firebug.Module,
                 panel.panelNode.setAttribute("role", "tree");
                 panel.panelNode.setAttribute("aria-label",
                     Locale.$STR("a11y.labels.document structure"));
-                panel.panelNode.addEventListener("keypress", this.onHTMLKeyPress, false);
-                panel.panelNode.addEventListener("focus", this.onHTMLFocus, true);
-                panel.panelNode.addEventListener("blur", this.onHTMLBlur, true);
+                Events.addEventListener(panel.panelNode, "keypress", this.onHTMLKeyPress, false);
+                Events.addEventListener(panel.panelNode, "focus", this.onHTMLFocus, true);
+                Events.addEventListener(panel.panelNode, "blur", this.onHTMLBlur, true);
                 break;
 
             case "css":
                 panelA11y.manageFocus = true;
-                panel.panelNode.addEventListener("keypress", this.onCSSKeyPress, false);
-                panel.panelNode.addEventListener("mousedown", this.onCSSMouseDown, false);
-                panel.panelNode.addEventListener("focus", this.onPanelFocus, true);
-                panel.panelNode.addEventListener("contextmenu", this.onCSSPanelContextMenu, false)
+                Events.addEventListener(panel.panelNode, "keypress", this.onCSSKeyPress, false);
+                Events.addEventListener(panel.panelNode, "mousedown", this.onCSSMouseDown, false);
+                Events.addEventListener(panel.panelNode, "focus", this.onPanelFocus, true);
+                Events.addEventListener(panel.panelNode, "contextmenu", this.onCSSPanelContextMenu, false)
                 this.insertHiddenText(panel, panel.panelNode,
                     Locale.$STR("a11y.labels.overridden"), false, "CSSOverriddenDescription");
                 panel.panelNode.setAttribute("role", panel.name == "stylesheet" ?
@@ -294,26 +294,26 @@ Firebug.A11yModel = Obj.extend(Firebug.Module,
 
             case "layout":
                 panelA11y.manageFocus = true;
-                panel.panelNode.addEventListener("keypress", this.onLayoutKeyPress, false);
-                panel.panelNode.addEventListener("focus", this.onLayoutFocus, true);
-                panel.panelNode.addEventListener("blur", this.onLayoutBlur, true);
+                Events.addEventListener(panel.panelNode, "keypress", this.onLayoutKeyPress, false);
+                Events.addEventListener(panel.panelNode, "focus", this.onLayoutFocus, true);
+                Events.addEventListener(panel.panelNode, "blur", this.onLayoutBlur, true);
                 break;
 
             case "script":
-                panel.panelNode.addEventListener("contextmenu", this.onScriptContextMenu, true);
-                panel.panelNode.addEventListener("keypress", this.onScriptKeyPress, true);
-                panel.panelNode.addEventListener("keyup", this.onScriptKeyUp, true);
-                panel.panelNode.addEventListener("mouseup", this.onScriptMouseUp, true);
+                Events.addEventListener(panel.panelNode, "contextmenu", this.onScriptContextMenu, true);
+                Events.addEventListener(panel.panelNode, "keypress", this.onScriptKeyPress, true);
+                Events.addEventListener(panel.panelNode, "keyup", this.onScriptKeyUp, true);
+                Events.addEventListener(panel.panelNode, "mouseup", this.onScriptMouseUp, true);
                 panelA11y.oneEmElem = this.addSingleSpaceElem(panel.panelNode);
                 break;
 
             case "net":
                 panelA11y.manageFocus = true;
-                panel.panelNode.addEventListener("keypress", this.onNavigablePanelKeyPress, false);
-                panel.panelNode.addEventListener("focus", this.onPanelFocus, true);
-                panel.panelNode.addEventListener("focus", this.onNetFocus, true);
-                panel.panelNode.addEventListener("blur", this.onNetBlur, true);
-                panel.panelNode.addEventListener("mousedown", this.onNetMouseDown, false);
+                Events.addEventListener(panel.panelNode, "keypress", this.onNavigablePanelKeyPress, false);
+                Events.addEventListener(panel.panelNode, "focus", this.onPanelFocus, true);
+                Events.addEventListener(panel.panelNode, "focus", this.onNetFocus, true);
+                Events.addEventListener(panel.panelNode, "blur", this.onNetBlur, true);
+                Events.addEventListener(panel.panelNode, "mousedown", this.onNetMouseDown, false);
                 break;
         }
     },
@@ -331,47 +331,47 @@ Firebug.A11yModel = Obj.extend(Firebug.Module,
         switch (actAsPanel)
         {
             case "console":
-                panel.panelNode.removeEventListener("keypress", this.onNavigablePanelKeyPress,
+                Events.removeEventListener(panel.panelNode, "keypress", this.onNavigablePanelKeyPress,
                     false);
-                panel.panelNode.removeEventListener("focus", this.onPanelFocus, true);
-                panel.panelNode.removeEventListener("mousedown", this.onConsoleMouseDown, false);
+                Events.removeEventListener(panel.panelNode, "focus", this.onPanelFocus, true);
+                Events.removeEventListener(panel.panelNode, "mousedown", this.onConsoleMouseDown, false);
                 break;
 
             case "html":
-                panel.panelNode.removeEventListener("keypress", this.onHTMLKeyPress, false);
-                panel.panelNode.removeEventListener("focus", this.onHTMLFocus, true);
-                panel.panelNode.removeEventListener("blur", this.onHTMLBlur, true);
+                Events.removeEventListener(panel.panelNode, "keypress", this.onHTMLKeyPress, false);
+                Events.removeEventListener(panel.panelNode, "focus", this.onHTMLFocus, true);
+                Events.removeEventListener(panel.panelNode, "blur", this.onHTMLBlur, true);
                 break;
 
             case "css":
-                panel.panelNode.removeEventListener("keypress", this.onCSSKeyPress, false);
-                panel.panelNode.removeEventListener("mousedown", this.onCSSMouseDown, false);
-                panel.panelNode.removeEventListener("focus", this.onPanelFocus, true);
-                panel.panelNode.removeEventListener("blur", this.onPanelBlur, true);
-                panel.panelNode.removeEventListener("contextmenu", this.onCSSPanelContextMenu,
+                Events.removeEventListener(panel.panelNode, "keypress", this.onCSSKeyPress, false);
+                Events.removeEventListener(panel.panelNode, "mousedown", this.onCSSMouseDown, false);
+                Events.removeEventListener(panel.panelNode, "focus", this.onPanelFocus, true);
+                Events.removeEventListener(panel.panelNode, "blur", this.onPanelBlur, true);
+                Events.removeEventListener(panel.panelNode, "contextmenu", this.onCSSPanelContextMenu,
                     false)
                 break;
 
             case "layout":
-                panel.panelNode.removeEventListener("keypress", this.onLayoutKeyPress, false);
-                panel.panelNode.removeEventListener("focus", this.onLayoutFocus, true);
-                panel.panelNode.removeEventListener("blur", this.onLayoutBlur, true);
+                Events.removeEventListener(panel.panelNode, "keypress", this.onLayoutKeyPress, false);
+                Events.removeEventListener(panel.panelNode, "focus", this.onLayoutFocus, true);
+                Events.removeEventListener(panel.panelNode, "blur", this.onLayoutBlur, true);
                 break;
 
             case "script":
-                panel.panelNode.removeEventListener("contextmenu", this.onScriptContextMenu, true);
-                panel.panelNode.removeEventListener("keypress", this.onScriptKeyPress, true);
-                panel.panelNode.removeEventListener("keyup", this.onScriptKeyUp, true);
-                panel.panelNode.removeEventListener("mouseup", this.onScriptMouseUp, true)
+                Events.removeEventListener(panel.panelNode, "contextmenu", this.onScriptContextMenu, true);
+                Events.removeEventListener(panel.panelNode, "keypress", this.onScriptKeyPress, true);
+                Events.removeEventListener(panel.panelNode, "keyup", this.onScriptKeyUp, true);
+                Events.removeEventListener(panel.panelNode, "mouseup", this.onScriptMouseUp, true)
                 break;
 
             case "net":
-                panel.panelNode.removeEventListener("keypress", this.onNavigablePanelKeyPress,
+                Events.removeEventListener(panel.panelNode, "keypress", this.onNavigablePanelKeyPress,
                     false);
-                panel.panelNode.removeEventListener("focus", this.onPanelFocus, true);
-                panel.panelNode.removeEventListener("focus", this.onNetFocus, true);
-                panel.panelNode.removeEventListener("blur", this.onNetBlur, true);
-                panel.panelNode.removeEventListener("mousedown", this.onNetMouseDown, false);
+                Events.removeEventListener(panel.panelNode, "focus", this.onPanelFocus, true);
+                Events.removeEventListener(panel.panelNode, "focus", this.onNetFocus, true);
+                Events.removeEventListener(panel.panelNode, "blur", this.onNetBlur, true);
+                Events.removeEventListener(panel.panelNode, "mousedown", this.onNetMouseDown, false);
                 break;
         }
     },

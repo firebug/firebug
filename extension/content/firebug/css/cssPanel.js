@@ -1146,16 +1146,16 @@ Firebug.CSSStyleSheetPanel.prototype = Obj.extend(Firebug.Panel,
 
     initializeNode: function(oldPanelNode)
     {
-        this.panelNode.addEventListener("mousedown", this.onMouseDown, false);
-        this.panelNode.addEventListener("click", this.onClick, false);
+        Events.addEventListener(this.panelNode, "mousedown", this.onMouseDown, false);
+        Events.addEventListener(this.panelNode, "click", this.onClick, false);
 
         Firebug.Panel.initializeNode.apply(this, arguments);
     },
 
     destroyNode: function()
     {
-        this.panelNode.removeEventListener("mousedown", this.onMouseDown, false);
-        this.panelNode.removeEventListener("click", this.onClick, false);
+        Events.removeEventListener(this.panelNode, "mousedown", this.onMouseDown, false);
+        Events.removeEventListener(this.panelNode, "click", this.onClick, false);
 
         Firebug.Panel.destroyNode.apply(this, arguments);
     },

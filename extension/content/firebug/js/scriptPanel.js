@@ -696,11 +696,11 @@ Firebug.ScriptPanel.prototype = Obj.extend(Firebug.SourceBoxPanel,
         Css.obscure(this.tooltip, true);
         this.panelNode.appendChild(this.tooltip);
 
-        this.panelNode.addEventListener("mousedown", this.onMouseDown, true);
-        this.panelNode.addEventListener("contextmenu", this.onContextMenu, false);
-        this.panelNode.addEventListener("mouseover", this.onMouseOver, false);
-        this.panelNode.addEventListener("mouseout", this.onMouseOut, false);
-        this.panelNode.addEventListener("scroll", this.onScroll, true);
+        Events.addEventListener(this.panelNode, "mousedown", this.onMouseDown, true);
+        Events.addEventListener(this.panelNode, "contextmenu", this.onContextMenu, false);
+        Events.addEventListener(this.panelNode, "mouseover", this.onMouseOver, false);
+        Events.addEventListener(this.panelNode, "mouseout", this.onMouseOut, false);
+        Events.addEventListener(this.panelNode, "scroll", this.onScroll, true);
 
         Firebug.SourceBoxPanel.initializeNode.apply(this, arguments);
     },
@@ -710,11 +710,11 @@ Firebug.ScriptPanel.prototype = Obj.extend(Firebug.SourceBoxPanel,
         if (this.tooltipTimeout)
             clearTimeout(this.tooltipTimeout);
 
-        this.panelNode.removeEventListener("mousedown", this.onMouseDown, true);
-        this.panelNode.removeEventListener("contextmenu", this.onContextMenu, false);
-        this.panelNode.removeEventListener("mouseover", this.onMouseOver, false);
-        this.panelNode.removeEventListener("mouseout", this.onMouseOut, false);
-        this.panelNode.removeEventListener("scroll", this.onScroll, true);
+        Events.removeEventListener(this.panelNode, "mousedown", this.onMouseDown, true);
+        Events.removeEventListener(this.panelNode, "contextmenu", this.onContextMenu, false);
+        Events.removeEventListener(this.panelNode, "mouseover", this.onMouseOver, false);
+        Events.removeEventListener(this.panelNode, "mouseout", this.onMouseOut, false);
+        Events.removeEventListener(this.panelNode, "scroll", this.onScroll, true);
 
         Firebug.SourceBoxPanel.destroyNode.apply(this, arguments);
     },
@@ -788,8 +788,8 @@ Firebug.ScriptPanel.prototype = Obj.extend(Firebug.SourceBoxPanel,
 
         if (active)
         {
-            this.panelNode.ownerDocument.addEventListener("keypress", this.onKeyPress, true);
-            this.resizeEventTarget.addEventListener("resize", this.onResize, true);
+            Events.addEventListener(this.panelNode.ownerDocument, "keypress", this.onKeyPress, true);
+            Events.addEventListener(this.resizeEventTarget, "resize", this.onResize, true);
 
             this.location = this.getDefaultLocation();
 
@@ -871,8 +871,8 @@ Firebug.ScriptPanel.prototype = Obj.extend(Firebug.SourceBoxPanel,
 
         this.highlight(this.context.stopped);
 
-        this.panelNode.ownerDocument.removeEventListener("keypress", this.onKeyPress, true);
-        this.resizeEventTarget.removeEventListener("resize", this.onResize, true);
+        Events.removeEventListener(this.panelNode.ownerDocument, "keypress", this.onKeyPress, true);
+        Events.removeEventListener(this.resizeEventTarget, "resize", this.onResize, true);
 
         if (FBTrace.DBG_PANELS)
             FBTrace.sysout("script panel HIDE removed onResize eventhandler");
@@ -1433,17 +1433,17 @@ Firebug.ScriptPanel.prototype = Obj.extend(Firebug.SourceBoxPanel,
     attachListeners: function(context, chrome)
     {
         this.keyListeners =
-            [
-                chrome.keyCodeListen("F8", Events.isShift, Obj.bind(this.rerun, this, context), true),
-                chrome.keyCodeListen("F8", null, Obj.bind(this.resume, this, context), true),
-                chrome.keyListen("/", Events.isControl, Obj.bind(this.resume, this, context)),
-                chrome.keyCodeListen("F10", null, Obj.bind(this.stepOver, this, context), true),
-                chrome.keyListen("'", Events.isControl, Obj.bind(this.stepOver, this, context)),
-                chrome.keyCodeListen("F11", null, Obj.bind(this.stepInto, this, context)),
-                chrome.keyListen(";", Events.isControl, Obj.bind(this.stepInto, this, context)),
-                chrome.keyCodeListen("F11", Events.isShift, Obj.bind(this.stepOut, this, context)),
-                chrome.keyListen(",", Events.isControlShift, Obj.bind(this.stepOut, this, context))
-            ];
+        [
+            chrome.keyCodeListen("F8", Events.isShift, Obj.bind(this.rerun, this, context), true),
+            chrome.keyCodeListen("F8", null, Obj.bind(this.resume, this, context), true),
+            chrome.keyListen("/", Events.isControl, Obj.bind(this.resume, this, context)),
+            chrome.keyCodeListen("F10", null, Obj.bind(this.stepOver, this, context), true),
+            chrome.keyListen("'", Events.isControl, Obj.bind(this.stepOver, this, context)),
+            chrome.keyCodeListen("F11", null, Obj.bind(this.stepInto, this, context)),
+            chrome.keyListen(";", Events.isControl, Obj.bind(this.stepInto, this, context)),
+            chrome.keyCodeListen("F11", Events.isShift, Obj.bind(this.stepOut, this, context)),
+            chrome.keyListen(",", Events.isControlShift, Obj.bind(this.stepOut, this, context))
+        ];
     },
 
     detachListeners: function(context, chrome)

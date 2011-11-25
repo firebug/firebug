@@ -679,7 +679,18 @@ Firebug.Inspector = Obj.extend(Firebug.Module,
         this.updateOption("showQuickInfoBox", Firebug.showQuickInfoBox);
 
         var panelBar1 = Firebug.chrome.$("fbPanelBar1");
-        panelBar1.addEventListener("selectPanel", this.onPanelChanged, false);
+        Events.addEventListener(panelBar1, "selectPanel", this.onPanelChanged, false);
+
+        if (FBTrace.DBG_INSPECT)
+            FBTrace.sysout("inspector.initialize;");
+    },
+
+    shutdown: function()
+    {
+        Firebug.Module.shutdown.apply(this, arguments);
+
+        var panelBar1 = Firebug.chrome.$("fbPanelBar1");
+        Events.removeEventListener(panelBar1, "selectPanel", this.onPanelChanged, false);
     },
 
     /**
@@ -1137,15 +1148,15 @@ var quickInfoBox =
             case "mousedown":
                 this.qiPanel = Firebug.chrome.$('fbQuickInfoPanel');
                 this.qiBox = this.qiPanel.boxObject;
-                this.qiPanel.addEventListener('mousemove', this, true);
-                this.qiPanel.addEventListener('mouseup', this, true);
+                Events.addEventListener(this.qiPanel, "mousemove", this, true);
+                Events.addEventListener(this.qiPanel, "mouseup", this, true);
                 this.dragging = true;
                 this.prevX = event.screenX;
                 this.prevY = event.screenY;
                 break;
             case "mouseup":
-                this.qiPanel.removeEventListener('mousemove', this, true);
-                this.qiPanel.removeEventListener('mouseup', this, true);
+                Events.removeEventListener(this.qiPanel, "mousemove", this, true);
+                Events.removeEventListener(this.qiPanel, "mouseup", this, true);
                 this.qiPanel = this.qiBox = null;
                 this.prevX = this.prevY = null;
                 this.dragging = false;

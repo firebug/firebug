@@ -80,7 +80,7 @@ var _FirebugCommandLine =
             // DBG window.dump("attachCommandLine did evaluate on " + expr + "\n");
         }
 
-        document.addEventListener("firebugCommandLine",this._firebugEvalEvent, true);
+        document.addEventListener("firebugCommandLine", this._firebugEvalEvent, true);
         document.setUserData("firebug-CommandLineAttached", "true", null);
 
         // DBG window.dump("Added listener for firebugCommandLine event " +

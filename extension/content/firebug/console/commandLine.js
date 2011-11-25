@@ -679,9 +679,10 @@ Firebug.CommandLine = Obj.extend(Firebug.Module,
             var showCompletionPopup = Firebug.Options.get("commandLineShowCompleterPopup");
             var commandLine = this.getCommandLine(context);
             var completionBox = this.getCompletionBox();
+
             this.autoCompleter.shutdown();
             this.autoCompleter = new Firebug.JSAutoCompleter(commandLine,
-                    completionBox, showCompletionPopup);
+                completionBox, showCompletionPopup);
         }
     },
 
@@ -702,14 +703,15 @@ Firebug.CommandLine = Obj.extend(Firebug.Module,
         var commandLine = this.getSingleRowCommandLine(),
             commandEditor = this.getCommandEditor();
 
-        commandEditor.addEventListener("focus", this.onCommandLineFocus, true);
-        commandLine.addEventListener("focus", this.onCommandLineFocus, true);
-        commandLine.addEventListener("input", this.onCommandLineInput, true);
-        commandLine.addEventListener("overflow", this.onCommandLineOverflow, true);
-        commandLine.addEventListener("keyup", this.onCommandLineKeyUp, true);
-        commandLine.addEventListener("keydown", this.onCommandLineKeyDown, true);
-        commandLine.addEventListener("keypress", this.onCommandLineKeyPress, true);
-        commandLine.addEventListener("blur", this.onCommandLineBlur, true);
+        Events.addEventListener(commandEditor, "focus", this.onCommandLineFocus, true);
+
+        Events.addEventListener(commandLine, "focus", this.onCommandLineFocus, true);
+        Events.addEventListener(commandLine, "input", this.onCommandLineInput, true);
+        Events.addEventListener(commandLine, "overflow", this.onCommandLineOverflow, true);
+        Events.addEventListener(commandLine, "keyup", this.onCommandLineKeyUp, true);
+        Events.addEventListener(commandLine, "keydown", this.onCommandLineKeyDown, true);
+        Events.addEventListener(commandLine, "keypress", this.onCommandLineKeyPress, true);
+        Events.addEventListener(commandLine, "blur", this.onCommandLineBlur, true);
 
         Firebug.Console.addListener(this);  // to get onConsoleInjection
     },
@@ -719,14 +721,15 @@ Firebug.CommandLine = Obj.extend(Firebug.Module,
         var commandLine = this.getSingleRowCommandLine(),
             commandEditor = this.getCommandEditor();
 
-        commandEditor.removeEventListener("focus", this.onCommandLineFocus, true);
-        commandLine.removeEventListener("focus", this.onCommandLineFocus, true);
-        commandLine.removeEventListener("input", this.onCommandLineInput, true);
-        commandLine.removeEventListener("overflow", this.onCommandLineOverflow, true);
-        commandLine.removeEventListener("keyup", this.onCommandLineKeyUp, true);
-        commandLine.removeEventListener("keydown", this.onCommandLineKeyDown, true);
-        commandLine.removeEventListener("keypress", this.onCommandLineKeyPress, true);
-        commandLine.removeEventListener("blur", this.onCommandLineBlur, true);
+        Events.removeEventListener(commandEditor, "focus", this.onCommandLineFocus, true);
+
+        Events.removeEventListener(commandLine, "focus", this.onCommandLineFocus, true);
+        Events.removeEventListener(commandLine, "input", this.onCommandLineInput, true);
+        Events.removeEventListener(commandLine, "overflow", this.onCommandLineOverflow, true);
+        Events.removeEventListener(commandLine, "keyup", this.onCommandLineKeyUp, true);
+        Events.removeEventListener(commandLine, "keydown", this.onCommandLineKeyDown, true);
+        Events.removeEventListener(commandLine, "keypress", this.onCommandLineKeyPress, true);
+        Events.removeEventListener(commandLine, "blur", this.onCommandLineBlur, true);
     },
 
     destroyContext: function(context, persistedState)
@@ -1617,6 +1620,7 @@ Firebug.JSAutoCompleter = function(textBox, completionBox, showCompletionPopup)
             delete this.linuxFocusHack;
         }
     };
+
     this.focusHack = Obj.bind(this.focusHack, this);
 
     /**
@@ -1625,12 +1629,13 @@ Firebug.JSAutoCompleter = function(textBox, completionBox, showCompletionPopup)
     this.shutdown = function()
     {
         this.completionBox.value = "";
-        this.completionPopup.removeEventListener("mousedown", this.popupMousedown, true);
-        this.completionPopup.removeEventListener("click", this.popupClick, true);
+
+        Events.removeEventListener(this.completionPopup, "mousedown", this.popupMousedown, true);
+        Events.removeEventListener(this.completionPopup, "click", this.popupClick, true);
     };
 
-    this.completionPopup.addEventListener("mousedown", this.popupMousedown, true);
-    this.completionPopup.addEventListener("click", this.popupClick, true);
+    Events.addEventListener(this.completionPopup, "mousedown", this.popupMousedown, true);
+    Events.addEventListener(this.completionPopup, "click", this.popupClick, true);
 };
 
 
@@ -2999,9 +3004,10 @@ Firebug.CommandLine.CommandHistory = function()
         {
             Firebug.chrome.$("fbCommandLineHistoryButton").removeAttribute("disabled");
             Firebug.chrome.$("fbCommandEditorHistoryButton").removeAttribute("disabled");
-            commandsPopup.addEventListener("mouseover", this.onMouseOver, true);
-            commandsPopup.addEventListener("mouseup", this.onMouseUp, true);
-            commandsPopup.addEventListener("popuphidden", this.onPopupHidden, true);
+
+            Events.addEventListener(commandsPopup, "mouseover", this.onMouseOver, true);
+            Events.addEventListener(commandsPopup, "mouseup", this.onMouseUp, true);
+            Events.addEventListener(commandsPopup, "popuphidden", this.onPopupHidden, true);
         }
     };
 
