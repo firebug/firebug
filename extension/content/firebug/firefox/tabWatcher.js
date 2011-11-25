@@ -175,21 +175,21 @@ Firebug.TabWatcher = Obj.extend(new Firebug.Listener(),
             context = this.createContext(win, browser, Firebug.getContextType());
         }
 
-        if (win instanceof Ci.nsIDOMWindow && win.parent == win)
+        if (win instanceof Ci.nsIDOMWindow && win.parent == win && context)
         {
             // xxxHonza: This place can be called multiple times for one window so,
             // make sure event listeners are not registered twice.
             // There should be a better way to find out whether the listeneres are actually
             // registered for the window.
-            Events.removeEventListener(win, "pageshow", onLoadWindowContent,
+            context.removeEventListener(win, "pageshow", onLoadWindowContent,
                 onLoadWindowContent.capturing);
-            Events.removeEventListener(win, "DOMContentLoaded", onLoadWindowContent,
+            context.removeEventListener(win, "DOMContentLoaded", onLoadWindowContent,
                 onLoadWindowContent.capturing);
 
             // Re-register again since it could have been done too soon before.
-            Events.addEventListener(win, "pageshow", onLoadWindowContent,
+            context.addEventListener(win, "pageshow", onLoadWindowContent,
                 onLoadWindowContent.capturing);
-            Events.addEventListener(win, "DOMContentLoaded", onLoadWindowContent,
+            context.addEventListener(win, "DOMContentLoaded", onLoadWindowContent,
                 onLoadWindowContent.capturing);
 
             if (FBTrace.DBG_WINDOWS)
@@ -347,11 +347,12 @@ Firebug.TabWatcher = Obj.extend(new Firebug.Listener(),
 
         browser.showFirebug = true; // this is the only place we should set showFirebug.
 
-        if (FBTrace.DBG_WINDOWS || FBTrace.DBG_ACTIVATION) {
-            FBTrace.sysout("-> tabWatcher *** INIT *** context, id: "+context.uid+
-                ", "+context.getName()+" browser "+browser.currentURI.spec +
-                " Firebug.chrome.window: "+Firebug.chrome.window.location +
-                " context.window: "+Win.safeGetWindowLocation(context.window));
+        if (FBTrace.DBG_WINDOWS || FBTrace.DBG_ACTIVATION)
+        {
+            FBTrace.sysout("-> tabWatcher *** INIT *** context, id: " + context.uid +
+                ", " + context.getName() + " browser " + browser.currentURI.spec +
+                " Firebug.chrome.window: " + Firebug.chrome.window.location +
+                " context.window: " + Win.safeGetWindowLocation(context.window));
         }
 
         Events.dispatch(this.fbListeners, "initContext", [context, persistedState]);
@@ -367,7 +368,7 @@ Firebug.TabWatcher = Obj.extend(new Firebug.Listener(),
         var isSystem = Url.isSystemPage(win);
 
         var context = this.getContextByWindow(win);
-        if ((context && !context.window))
+        if (context && !context.window)
         {
             if (FBTrace.DBG_WINDOWS)
                 FBTrace.sysout("-> tabWatcher.watchLoadedTopWindow bailing !!!, context.window: " +
@@ -448,13 +449,16 @@ Firebug.TabWatcher = Obj.extend(new Firebug.Listener(),
     {
         var context = this.getContextByWindow(win);
         if (FBTrace.DBG_WINDOWS)
+        {
             FBTrace.sysout("-> tabWatcher.unwatchTopWindow for: " +
                 (context ? context.getWindowLocation() : "NULL Context") +
                 ", context: " + context);
+        }
 
         this.unwatchContext(win, context);
 
-        return true; // we might later allow extensions to reject unwatch
+        // we might later allow extensions to reject unwatch
+        return true;
     },
 
     /**
@@ -833,7 +837,7 @@ var FrameProgressListener = Obj.extend(Http.BaseProgressListener,
             // that the start of these "dummy" requests is the only state that works.
 
             var safeName = Http.safeGetRequestName(request);
-            if (safeName && ((safeName == dummyURI) || safeName == "about:document-onload-blocker") )
+            if (safeName && ((safeName == dummyURI) || safeName == "about:document-onload-blocker"))
             {
                 var win = progress.DOMWindow;
                 // Another weird edge case here - when opening a new tab with about:blank,
