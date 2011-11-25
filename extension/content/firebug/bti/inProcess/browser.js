@@ -309,7 +309,7 @@ Browser.prototype.getTools = function()
  */
 Browser.prototype.getTool = function(name)
 {
-    if (!this.tools[name])
+    if (FBTrace.DBG_ERRORS && !this.tools[name])
         FBTrace.sysout("BTI.Browser.getTool; Unknown tool: " + name);
 
     return this.tools[name];
@@ -323,7 +323,7 @@ Browser.prototype.registerTool = function(tool)
     var name = tool.getName();
     if (name)
     {
-        if (this.tools[name])
+        if (FBTrace.DBG_ERRORS && this.tools[name])
             FBTrace.sysout("BTI.Browser.unregisterTool; Already registered tool: " + name);
 
         this.tools[name] = tool;
@@ -335,7 +335,7 @@ Browser.prototype.unregisterTool = function(tool)
     var name = tool.getName();
     if (name)
     {
-        if (!this.tools[name])
+        if (FBTrace.DBG_ERRORS && !this.tools[name])
             FBTrace.sysout("BTI.Browser.unregisterTool; Unknown tool: " + name);
         else
             delete this.tools[name];
