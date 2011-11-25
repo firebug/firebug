@@ -927,6 +927,11 @@ Firebug.CommandLine = Obj.extend(Firebug.Module,
 
     onCommandLineFocus: function(event)
     {
+        // xxxHonza: I think that attaching command line on focus is wrong
+        // It's done just before executing a comment and detached immediatelly
+        // after that. All tests pass.
+        return;
+
         var context = Firebug.currentContext;
 
         if (this.autoCompleter.empty)
