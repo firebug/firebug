@@ -928,7 +928,7 @@ Firebug.CommandLine = Obj.extend(Firebug.Module,
     onCommandLineFocus: function(event)
     {
         // xxxHonza: I think that attaching the command line on focus is wrong.
-        // It's done just before executing a command and detached immediatelly
+        // It's done just before executing a command and detached immediately
         // after that. All tests pass.
         return;
 
