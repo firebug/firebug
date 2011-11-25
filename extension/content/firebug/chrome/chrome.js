@@ -233,9 +233,6 @@ var FirebugChrome =
 
     shutdown: function()
     {
-        if (FBTrace.DBG_INITIALIZE || !panelBar1)
-            FBTrace.sysout("chrome.shutdown entered for "+win.location+"\n");
-
         var doc1 = panelBar1.browser.contentDocument;
         Events.removeEventListener(doc1, "mouseover", onPanelMouseOver, false);
         Events.removeEventListener(doc1, "mouseout", onPanelMouseOut, false);
@@ -272,6 +269,27 @@ var FirebugChrome =
         Firebug.unregisterUIListener(this);
 
         Firebug.shutdown();
+
+        if (FBTrace.DBG_EVENTLISTENERS)
+        {
+            var info = [];
+            var listeners = Firebug.Events.getRegisteredListeners();
+            for (var i=0; i<listeners.length; i++)
+            {
+                var listener = listeners[i];
+                info.push({
+                    parentId: listener.parentId,
+                    evendId: listener.eventId,
+                    capturing: listener.capturing,
+                    stack: listener.stack,
+                });
+            }
+
+            FBTrace.sysout("firebug.shutdownFirebug; listeners: " + info.length, info);
+        }
+
+        if (FBTrace.DBG_INITIALIZE)
+            FBTrace.sysout("chrome.shutdown; Done for " + win.location);
     },
 
     updateOption: function(name, value)

@@ -2538,12 +2538,6 @@ function shutdownFirebug()
     }
 
     Firebug.shutdown();
-
-    if (FBTrace.DBG_EVENTLISTENERS)
-    {
-        var listeners = Firebug.Events.getRegisteredListeners();
-        FBTrace.sysout("firebug.shutdownFirebug; listeners: " + listeners, listeners);
-    }
 }
 
 if (preFirebugKeys)
