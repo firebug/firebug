@@ -78,13 +78,13 @@ FirebugReps.Table = domplate(Firebug.Rep,
             // Object property is not set for this column, so display entire
             // row-value in the cell. This can happen in cases where a generic
             // object is logged using table layout. In such case there is one
-            // column (no property associated) and ech row represnts a member
+            // column (no property associated) and each row represents a member
             // of the object.
-            if (!prop)
+            if (typeof prop == "undefined")
             {
                 value = row;
             }
-            else if (typeof row[prop] === "undefined")
+            else if (typeof row[prop] == "undefined")
             {
                 var props = (typeof(prop) == "string") ? prop.split(".") : [prop];
 
@@ -107,6 +107,9 @@ FirebugReps.Table = domplate(Firebug.Rep,
         if (typeof(obj) != "object")
             return [obj];
 
+        if (FBTrace.DBG_CONSOLE)
+            FBTrace.sysout("FirebugReps.Table.getProps", {obj: obj, arr: Arr.cloneArray(obj)});
+
         if (obj.length)
             return Arr.cloneArray(obj);
 
@@ -117,6 +120,7 @@ FirebugReps.Table = domplate(Firebug.Rep,
             if (this.domFilter(value, p))
                 arr.push(value);
         }
+
         return arr;
     },
 
@@ -212,6 +216,9 @@ FirebugReps.Table = domplate(Firebug.Rep,
             });
         }
 
+        if (FBTrace.DBG_CONSOLE)
+            FBTrace.sysout("consoleInjector.table; columns", columns);
+        
         // Generate header info from the data dynamically.
         if (!columns.length)
             columns = this.getHeaderColumns(data);
