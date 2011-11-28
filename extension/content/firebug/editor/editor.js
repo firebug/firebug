@@ -619,6 +619,12 @@ Firebug.InlineEditor.prototype = domplate(Firebug.BaseEditor,
 
     show: function(target, panel, value, selectionData)
     {
+        if (FBTrace.DBG_EDITOR)
+        {
+            FBTrace.sysout("Firebug.InlineEditor.show",
+                {target: target, panel: panel, value: value, selectionData: selectionData});
+        }
+
         Events.dispatch(panel.fbListeners, "onInlineEditorShow", [panel, this]);
         this.target = target;
         this.panel = panel;
@@ -665,6 +671,9 @@ Firebug.InlineEditor.prototype = domplate(Firebug.BaseEditor,
 
     hide: function()
     {
+        if (FBTrace.DBG_EDITOR)
+            FBTrace.sysout("Firebug.InlineEditor.hide");
+
         this.box.className = this.originalClassName;
 
         if (!this.fixedWidth)
@@ -710,6 +719,12 @@ Firebug.InlineEditor.prototype = domplate(Firebug.BaseEditor,
 
     endEditing: function(target, value, cancel)
     {
+        if (FBTrace.DBG_EDITOR)
+        {
+            FBTrace.sysout("Firebug.InlineEditor.endEditing",
+                {target: target, value: value, cancel: cancel});
+        }
+
         // Remove empty groups by default
         return true;
     },
@@ -797,7 +812,7 @@ Firebug.InlineEditor.prototype = domplate(Firebug.BaseEditor,
 
     onKeyPress: function(event)
     {
-        if (event.keyCode == 27 && !this.completeAsYouType)
+        if (event.keyCode == KeyEvent.DOM_VK_ESCAPE && !this.completeAsYouType)
         {
             var reverted = this.getAutoCompleter().revert(this.input);
             if (reverted)
@@ -808,15 +823,16 @@ Firebug.InlineEditor.prototype = domplate(Firebug.BaseEditor,
             Firebug.Editor.tabNextEditor();
             Events.cancelEvent(event);
         }
-        else if (this.numeric && event.charCode && (event.charCode < 48 || event.charCode > 57) &&
-            event.charCode != 45 && event.charCode != 46)
+        else if (this.numeric && event.charCode &&
+            (event.charCode < KeyEvent.DOM_VK_0 || event.charCode > KeyEvent.DOM_VK_9) &&
+            event.charCode != KeyEvent.DOM_VK_INSERT && event.charCode != KeyEvent.DOM_VK_DELETE)
         {
             Events.cancelEvent(event);
         }
         else
         {
             // If the user backspaces, don't autocomplete after the upcoming input event
-            this.ignoreNextInput = event.keyCode == 8;
+            this.ignoreNextInput = event.keyCode == KeyEvent.DOM_VK_BACK_SPACE;
         }
     },
 
