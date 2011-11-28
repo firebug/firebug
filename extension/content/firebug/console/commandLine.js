@@ -927,19 +927,22 @@ Firebug.CommandLine = Obj.extend(Firebug.Module,
 
     onCommandLineFocus: function(event)
     {
-        // xxxHonza: I think that attaching the command line on focus is wrong.
-        // It's done just before executing a command and detached immediately
-        // after that. All tests pass.
-        return;
-
         var context = Firebug.currentContext;
+
+        if (FBTrace.DBG_COMMANDLINE)
+            FBTrace.sysout("commandLine.onCommandLineFocus; for: " +
+                (context ? context.getName() : "no context"));
 
         if (this.autoCompleter.empty)
             this.setAutoCompleter();
 
+        // xxxHonza: I think that attaching the command line on focus is wrong.
+        // It's done just before executing a command and detached immediately
+        // after that. All tests pass.
+
         // Attach the command line API on focus, so it shows up in auto-completion.
         // then there is no currentContext.
-        if (!this.attachConsoleOnFocus())
+        /*if (!this.attachConsoleOnFocus())
             return;
 
         if (!Firebug.migrations.commandLineTab)
@@ -972,7 +975,7 @@ Firebug.CommandLine = Obj.extend(Firebug.Module,
             }
 
             return true; // is attached.
-        }
+        }*/
     },
 
     isAttached: function(context, win)
@@ -1124,7 +1127,7 @@ Firebug.CommandLine.CommandHandler = Obj.extend(Object,
     }
 });
 
-// ********************************************************************************************** //
+// ********************************************************************************************* //
 // JavaScript auto-completion
 
 Firebug.JSAutoCompleter = function(textBox, completionBox, showCompletionPopup)
