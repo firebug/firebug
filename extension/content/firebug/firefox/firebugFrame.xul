@@ -43,10 +43,6 @@
         <command id="cmd_toggleOrient" oncommand="Firebug.chrome.toggleOrient()"/>
     </commandset>
 
-    <keyset id="mainKeyset">
-        <key id="key_closeWindow" key="w" command="cmd_closeWindow" modifiers="accel"/>
-    </keyset>
-
     <broadcasterset id="mainBroadcasterSet"/>
 
     <popupset id="mainPopupSet"/>
