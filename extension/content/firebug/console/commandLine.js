@@ -666,7 +666,10 @@ Firebug.CommandLine = Obj.extend(Firebug.Module,
     {
         var context = Firebug.currentContext;
 
-        if (!context || Firebug.commandEditor)
+        // Set the auto-completer even if the command-editor is currently displayed
+        // in the Console panel. This is to make the auto-completion work even in
+        // the small-command-line available on other panels (see issue 5006).
+        if (!context/* || Firebug.commandEditor*/)
         {
             // xxxHonza: see http://code.google.com/p/fbug/issues/detail?id=4901#c21
             if (this.autoCompleter)
@@ -677,7 +680,9 @@ Firebug.CommandLine = Obj.extend(Firebug.Module,
         else
         {
             var showCompletionPopup = Firebug.Options.get("commandLineShowCompleterPopup");
-            var commandLine = this.getCommandLine(context);
+
+            // Always create the auto-completer for the single command line.
+            var commandLine = this.getSingleRowCommandLine();
             var completionBox = this.getCompletionBox();
 
             this.autoCompleter.shutdown();
