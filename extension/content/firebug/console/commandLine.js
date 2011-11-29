@@ -577,9 +577,17 @@ Firebug.CommandLine = Obj.extend(Firebug.Module,
 
     // xxxsz: setMultiLine should just be called when switching between Command Line
     // and Command Editor
+    // xxxHonza: it is called for me when switching between the Command Line and
+    // Command Editor 
     setMultiLine: function(multiLine, chrome, saveMultiLine)
     {
         var context = Firebug.currentContext;
+
+        if (FBTrace.DBG_COMMANDLINE)
+        {
+            FBTrace.sysout("commandLine.setMultiline; multiLine: " + multiLine + " for: " +
+                (context ? context.getName() : "no contet"));
+        }
 
         if (context && context.panelName != "console")
             return;
