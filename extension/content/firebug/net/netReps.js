@@ -20,6 +20,7 @@ define([
     "firebug/lib/dragdrop",
     "firebug/net/netUtils",
     "firebug/net/netProgress",
+    "firebug/net/httpLib",
     "firebug/js/breakpoint",
     "firebug/net/xmlViewer",
     "firebug/net/svgViewer",
@@ -32,7 +33,7 @@ define([
     "firebug/net/netMonitor",
 ],
 function(Obj, Firebug, Firefox, Domplate, Locale, Events, Options, Url, Css, Dom, Win, Search, Str,
-    Json, Arr, ToggleBranch, DragDrop, NetUtils, NetProgress) {
+    Json, Arr, ToggleBranch, DragDrop, NetUtils, NetProgress, Http) {
 
 with (Domplate) {
 
@@ -1303,7 +1304,7 @@ Firebug.NetMonitor.NetInfoPostData = domplate(Firebug.Rep, new Firebug.Listener(
               )
           )
       ),
-      
+
     sourceTable:
         TABLE({"class": "netInfoPostSourceTable", cellpadding: 0, cellspacing: 0, "role": "presentation"},
             TBODY({"role": "list", "aria-label": Locale.$STR("net.label.Source")},
@@ -1367,6 +1368,9 @@ Firebug.NetMonitor.NetInfoPostData = domplate(Firebug.Rep, new Firebug.Listener(
             this.insertFont(parentNode, file, context);
 
         var postText = NetUtils.getPostText(file, context);
+
+        // Make sure headers are not displayed in the 'source' section.
+        postText = Http.removeHeadersFromPostText(file.request, postText);
         postText = NetUtils.formatPostText(postText);
         if (postText)
             this.insertSource(parentNode, postText);

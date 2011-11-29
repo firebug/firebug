@@ -105,6 +105,14 @@ Http.getResource = function(aURL)
     }
 };
 
+/**
+ * Returns a posted data for specified request object. The return value might contain
+ * headers (if request.uploadStreamHasHeaders is set to true). You can remove these
+ * headers using {@link Http.removeHeadersFromPostText}
+ * 
+ * @param {Object} request The request object
+ * @param {Object} context Current Firebug context (to get charset of the current document)
+ */
 Http.readPostTextFromRequest = function(request, context)
 {
     try
@@ -132,7 +140,7 @@ Http.readPostTextFromRequest = function(request, context)
             if (ss && prevOffset == 0)
                 ss.seek(NS_SEEK_SET, 0);
 
-            return removeHeaders(request, text);
+            return text;
         }
     }
     catch(exc)
@@ -150,7 +158,7 @@ Http.readPostTextFromRequest = function(request, context)
  * @param {Object} request Channel implementing nsIUploadChannel2
  * @param {Object} text Extracted text (can include headers at the beginning).
  */
-function removeHeaders(request, text)
+Http.removeHeadersFromPostText = function(request, text)
 {
     if (!text)
         return text;
