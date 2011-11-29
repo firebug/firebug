@@ -1032,6 +1032,19 @@ Firebug.NetMonitor.NetInfoBody = domplate(Firebug.Rep, new Firebug.Listener(),
                 Firebug.NetMonitor.NetInfoHeaders.renderHeaders(headersText,
                     file.requestHeaders, "RequestHeaders");
             }
+
+            if (!file.postRequestsHeaders)
+            {
+                var text = NetUtils.getPostText(file, context, true);
+                file.postRequestsHeaders = Http.getHeadersFromPostText(file.request, text);
+            }
+
+            if (file.postRequestsHeaders && !netInfoBox.postRequestsHeadersPresented)
+            {
+                netInfoBox.postRequestsHeadersPresented = true;
+                Firebug.NetMonitor.NetInfoHeaders.renderHeaders(headersText,
+                    file.postRequestsHeaders, "PostRequestHeaders");
+            }
         }
 
         if (Css.hasClass(tab, "netInfoPostTab"))
@@ -1528,6 +1541,13 @@ Firebug.NetMonitor.NetInfoHeaders = domplate(Firebug.Rep, new Firebug.Listener()
             TABLE({cellpadding: 0, cellspacing: 0},
                 TBODY({"class": "netInfoCachedResponseHeadersBody", "role": "list",
                     "aria-label": Locale.$STR("CachedResponseHeaders")})
+            ),
+            DIV({"class": "netInfoHeadersGroup netInfoPostRequestHeadersTitle collapsed"},
+                SPAN(Locale.$STR("PostRequestHeaders"))
+            ),
+            TABLE({cellpadding: 0, cellspacing: 0},
+                TBODY({"class": "netInfoPostRequestHeadersBody", "role": "list",
+                    "aria-label": Locale.$STR("PostRequestHeaders")})
             )
         ),
 

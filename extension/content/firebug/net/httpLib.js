@@ -5,8 +5,9 @@ define([
     "firebug/lib/trace",
     "firebug/lib/deprecated",
     "firebug/js/stackFrame",
+    "firebug/lib/string",
 ],
-function(Xpcom, FBTrace, Deprecated, StackFrame) {
+function(Xpcom, FBTrace, Deprecated, StackFrame, Str) {
 
 // ********************************************************************************************* //
 // Constants
@@ -178,6 +179,50 @@ Http.removeHeadersFromPostText = function(request, text)
         return text;
 
     return text.substring(index + headerSeparator.length);
+}
+
+/**
+ * Returns an array of headers from posted data (appended by Firefox)
+ * 
+ * @param {Object} request Channel implementing nsIUploadChannel2
+ * @param {Object} text Posted data from the channel object.
+ */
+Http.getHeadersFromPostText = function(request, text)
+{
+    var headers = [];
+    if (!text)
+        return headers;
+
+    if (typeof(Ci.nsIUploadChannel2) == "undefined")
+        return headers;
+
+    if (!(request instanceof Ci.nsIUploadChannel2))
+        return headers;
+
+    if (!request.uploadStreamHasHeaders)
+        return headers;
+
+    var headerSeparator = "\r\n\r\n";
+    var index = text.indexOf(headerSeparator);
+    if (index == -1)
+        return headers;
+
+    var text = text.substring(0, index);
+    var lines = Str.splitLines(text);
+
+    for (var i=0; i<lines.length; i++)
+    {
+        var header = lines[i].split(":");
+        if (header.length != 2)
+            continue;
+
+        headers.push({
+            name: Str.trim(header[0]),
+            value: Str.trim(header[1]),
+        });
+    }
+
+    return headers;
 }
 
 Http.getInputStreamFromString = function(dataString)
