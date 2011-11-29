@@ -3084,9 +3084,15 @@ function getTopmostRuleLine(panelNode)
 function getOriginalStyleSheetCSS(sheet, context)
 {
     if (sheet.ownerNode instanceof window.HTMLStyleElement)
+    {
         return sheet.ownerNode.innerHTML;
+    }
     else
-        return context.sourceCache.load(sheet.href).join("");
+    {
+        // In the case, that there are no rules, the cache will return a message
+        // to reload the source (see issue 4251)
+        return sheet.cssRules.length != 0 ? context.sourceCache.load(sheet.href).join("") : "";
+    }
 }
 
 function getStyleSheetCSS(sheet, context)
