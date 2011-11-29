@@ -758,7 +758,10 @@ window.Firebug =
 
             // Firebug UI is closed, make sure the focus is on the browser.
             var webApp = Firebug.connection.getCurrentSelectedWebApp();
-            webApp.getTopMostWindow().focus();
+
+            // xxxsz: Focus must be set to the document, not to the window
+            // Otherwise keyboard shortcuts won't work (see issue 4780)
+            webApp.getTopMostWindow().document.focus();
         }
     },
 
