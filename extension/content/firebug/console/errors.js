@@ -432,7 +432,7 @@ var Errors = Firebug.Errors = Obj.extend(Firebug.Module,
                     return false;
 
                 // If nsIScriptError2 is supported and error's parent widow is available,
-                // check if it corresponds to the contxt.window. If not bail out to avoid
+                // check if it corresponds to the context.window. If not bail out to avoid
                 // error reporting in a wrong window.
                 var errorWindow = getErrorWindow(object);
                 if (errorWindow && errorWindow != context.window)
