@@ -970,22 +970,7 @@ Firebug.DOMBasePanel.prototype = Obj.extend(Firebug.Panel,
 
         if (Css.hasClass(row, "watchNewRow"))
         {
-            if (this.context.stopped)
-            {
-                Firebug.Editor.startEditing(row, "");
-            }
-            else if (Firebug.Console.isAlwaysEnabled())
-            {
-                // not stopped in debugger, need command line
-                if (Firebug.CommandLine.onCommandLineFocus())
-                    Firebug.Editor.startEditing(row, "");
-                else
-                    row.innerHTML = Locale.$STR("warning.Command line blocked?");
-            }
-            else
-            {
-                row.innerHTML = Locale.$STR("warning.Console must be enabled");
-            }
+            Firebug.Editor.startEditing(row, "");
         }
         else if (Css.hasClass(row, "watchRow"))
         {
