@@ -2,7 +2,9 @@
 
 .panelNode-script {
     overflow: hidden;
-    font-family: Monaco, monospace;
+
+    /* Do not use Monaco, otherwise the Script panel's viewport doesn't work*/
+    font-family: monospace;
 }
 
 /************************************************************************************************/
@@ -20,7 +22,7 @@
 /************************************************************************************************/
 
 .sourceBox {
-    overflow: auto;
+    overflow: scroll; /* see issue 1479 */
     position: absolute;
     left: 0;
     top: 0;
@@ -47,6 +49,7 @@
     background: #EEEEEE no-repeat 2px 0px;
     color: #A0A0A0;
     white-space: pre;
+    font-family: monospace; /* see issue 2953 */
 }
 
 
