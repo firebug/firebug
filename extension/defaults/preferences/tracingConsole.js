@@ -14,6 +14,7 @@ pref("extensions.firebug.DBG_BP", false);               // debugger.js and fireb
 pref("extensions.firebug.DBG_COMPILATION_UNITS", false);// debugger.js and firebug-services.js; lots of output
 pref("extensions.firebug.DBG_TOPLEVEL", false);         // top level jsd scripts
 pref("extensions.firebug.DBG_STACK", false);            // call stack, mostly debugger.js
+pref("extensions.firebug.DBG_WATCH", false);            // Watch expressions
 pref("extensions.firebug.DBG_UI_LOOP", false);          // debugger.js
 pref("extensions.firebug.DBG_ERRORS", false);           // error.js
 pref("extensions.firebug.DBG_ERRORLOG", false);         // error.js

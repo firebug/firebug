@@ -178,6 +178,9 @@ Firebug.WatchPanel.prototype = Obj.extend(Firebug.DOMBasePanel.prototype,
 
     rebuild: function()
     {
+        if (FBTrace.DBG_WATCH)
+            FBTrace.sysout("Firebug.WatchPanel.rebuild", this.selection);
+
         this.updateSelection(this.selection);
     },
 
@@ -189,6 +192,9 @@ Firebug.WatchPanel.prototype = Obj.extend(Firebug.DOMBasePanel.prototype,
 
     addWatch: function(expression)
     {
+        if (FBTrace.DBG_WATCH)
+            FBTrace.sysout("Firebug.WatchPanel.addWatch; expression: "+expression);
+
         if (!this.watches)
             this.watches = [];
 
@@ -204,6 +210,9 @@ Firebug.WatchPanel.prototype = Obj.extend(Firebug.DOMBasePanel.prototype,
 
     removeWatch: function(expression)
     {
+        if (FBTrace.DBG_WATCH)
+            FBTrace.sysout("Firebug.WatchPanel.removeWatch; expression: "+expression);
+
         if (!this.watches)
             return;
 
@@ -214,6 +223,9 @@ Firebug.WatchPanel.prototype = Obj.extend(Firebug.DOMBasePanel.prototype,
 
     editNewWatch: function(value)
     {
+        if (FBTrace.DBG_WATCH)
+            FBTrace.sysout("Firebug.WatchPanel.editNewWatch; value: "+value);
+
         var watchNewRow = this.panelNode.getElementsByClassName("watchNewRow").item(0);
         if (watchNewRow)
             this.editProperty(watchNewRow, value);
@@ -221,6 +233,9 @@ Firebug.WatchPanel.prototype = Obj.extend(Firebug.DOMBasePanel.prototype,
 
     setWatchValue: function(row, value)
     {
+        if (FBTrace.DBG_WATCH)
+            FBTrace.sysout("Firebug.WatchPanel.setWatchValue", {row: row, value: value});
+
         var rowIndex = getWatchRowIndex(row);
         this.watches[rowIndex] = value;
         this.rebuild(true);
@@ -228,6 +243,9 @@ Firebug.WatchPanel.prototype = Obj.extend(Firebug.DOMBasePanel.prototype,
 
     deleteWatch: function(row)
     {
+        if (FBTrace.DBG_WATCH)
+            FBTrace.sysout("Firebug.WatchPanel.deleteWatch", row);
+
         var rowIndex = getWatchRowIndex(row);
         this.watches.splice(rowIndex, 1);
         this.rebuild(true);
