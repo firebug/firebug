@@ -26,7 +26,7 @@ locale  firebug hr-HR       locale/hr-HR/
 locale  firebug hu-HU       locale/hu-HU/
 locale  firebug hy-AM       locale/hy-AM/
 locale  firebug is-IS       locale/is-IS/
-locale  firebug it-IT       locale/it-IT/
+locale  firebug it          locale/it/
 locale  firebug ja-JP       locale/ja-JP/
 locale  firebug ko-KR       locale/ko-KR/
 locale  firebug nl          locale/nl/
