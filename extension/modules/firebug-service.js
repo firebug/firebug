@@ -1386,7 +1386,7 @@ var fbs =
     removeHandler: function(handler)
     {
         // First remove the hook and then call unhook. The 'unhook' function
-        // checks for registered handlers and removes varisou JSD hook only if there
+        // checks for registered handlers and removes various JSD hooks only, if there
         // are no corresponding handlers.
         jsdHandlers.remove(handler);
         jsdHandlers.unhook();
