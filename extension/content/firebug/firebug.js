@@ -1047,8 +1047,8 @@ window.Firebug =
             {
                 if (rep.supportsObject(object, type, (context?context:Firebug.currentContext) ))
                 {
-                    if (FBTrace.DBG_DOM)
-                        FBTrace.sysout("getRep type: "+type+" object: "+object, rep);
+                    //if (FBTrace.DBG_DOM)
+                    //    FBTrace.sysout("getRep type: "+type+" object: "+object, rep);
                     return rep;
                 }
             }
@@ -1063,10 +1063,10 @@ window.Firebug =
             }
         }
 
-        if (FBTrace.DBG_DOM)
-            FBTrace.sysout("getRep default type: "+type+" object: "+object, rep);
+        //if (FBTrace.DBG_DOM)
+        //    FBTrace.sysout("getRep default type: "+type+" object: "+object, rep);
 
-        return (type == 'function')?defaultFuncRep:defaultRep;
+        return (type == "function") ? defaultFuncRep : defaultRep;
     },
 
     getRepObject: function(node)
