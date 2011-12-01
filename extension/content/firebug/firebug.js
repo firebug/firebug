@@ -761,7 +761,13 @@ window.Firebug =
 
             // xxxsz: Focus must be set to the document, not to the window
             // Otherwise keyboard shortcuts won't work (see issue 4780)
-            webApp.getTopMostWindow().document.focus();
+            var topMostWindow = webApp.getTopMostWindow();
+
+            // xxxHonza: I am seeing a lot's of "topMostWindow.document.focus is not defined"
+            // errors in Firefox Error Console (when running automated tests)
+            // xxxsz: ?
+            if (topMostWindow.document.focus)
+                topMostWindow.document.focus();
         }
     },
 
