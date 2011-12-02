@@ -749,25 +749,12 @@ window.Firebug =
         {
             // TODO reattach
             Firebug.toggleDetachBar(false, false);
-            Firebug.chrome.focus() ;
+            Firebug.chrome.focus();
         }
         else // inBrowser -> minimized
         {
             Firebug.setPlacement("minimized");
             this.showBar(false);
-
-            // Firebug UI is closed, make sure the focus is on the browser.
-            var webApp = Firebug.connection.getCurrentSelectedWebApp();
-
-            // xxxsz: Focus must be set to the document, not to the window
-            // Otherwise keyboard shortcuts won't work (see issue 4780)
-            var topMostWindow = webApp.getTopMostWindow();
-
-            // xxxHonza: I am seeing a lot's of "topMostWindow.document.focus is not defined"
-            // errors in Firefox Error Console (when running automated tests)
-            // xxxsz: ?
-            if (topMostWindow.document.focus)
-                topMostWindow.document.focus();
         }
     },
 
