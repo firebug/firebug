@@ -956,17 +956,27 @@ Firebug.SourceFile.findScriptForFunctionInContext = function(context, fn)
     if (!fn || typeof(fn) !== 'function')
         return found;
 
-    var wrapped = jsd.wrapValue(fn);
-    found = wrapped.script;
-    if (!found)
-        found = wrapped.jsParent.script;
+    try
+    {
+        var wrapped = jsd.wrapValue(fn);
+        found = wrapped.script;
+        if (!found)
+            found = wrapped.jsParent.script;
 
-    if (!found && FBTrace.DBG_ERRORS)
-        FBTrace.sysout("findScriptForFunctionInContext ",{fn: fn, wrapValue: jsd.wrapValue(fn),
-            found: found});
+        if (!found && FBTrace.DBG_ERRORS)
+        {
+            FBTrace.sysout("findScriptForFunctionInContext ",
+                {fn: fn, wrapValue: jsd.wrapValue(fn), found: found});
+        }
+    }
+    catch (err)
+    {
+        if (FBTrace.DBG_ERRORS)
+            FBTrace.sysout("sourceFile.findScriptForFunctionInContext; EXCEPTION " + err, err);
+    }
 
     if (FBTrace.DBG_FUNCTION_NAMES)
-        FBTrace.sysout("findScriptForFunctionInContext found "+(found?found.tag:"none"));
+        FBTrace.sysout("findScriptForFunctionInContext found " + (found ? found.tag : "none"));
 
     return found;
 }
