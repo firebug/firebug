@@ -8,6 +8,7 @@ define([
     "firebug/lib/locale",
     "firebug/lib/wrapper",
     "firebug/lib/url",
+    "firebug/console/console",
     "firebug/js/stackFrame",
     "firebug/lib/events",
     "firebug/lib/css",
@@ -15,7 +16,7 @@ define([
     "firebug/lib/string",
     "firebug/js/fbs",
 ],
-function(Obj, Firebug, Domplate, FirebugReps, Locale, Wrapper, Url,
+function(Obj, Firebug, Domplate, FirebugReps, Locale, Wrapper, Url, Console,
     StackFrame, Events, Css, Dom, Str, FBS) {
 
     const Cc = Components.classes;
@@ -88,6 +89,14 @@ Firebug.Profiler = Obj.extend(Firebug.Module,
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
+    onConsoleCleared: function(context)
+    {
+        if (this.isProfiling())
+            this.stopProfiling(context, true);
+    },
+
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
     toggleProfiling: function(context)
     {
         if (FBS.profiling)
@@ -112,6 +121,7 @@ Firebug.Profiler = Obj.extend(Firebug.Module,
         context.profileRow.originalTitle = originalTitle;
 
         Events.dispatch(this.fbListeners, "startProfiling", [context, originalTitle]);
+        Firebug.Console.addListener(this);
     },
 
     stopProfiling: function(context, cancelReport)
@@ -126,6 +136,8 @@ Firebug.Profiler = Obj.extend(Firebug.Module,
             delete context.profileRow;
         else
             this.logProfileReport(context, cancelReport);
+
+        Firebug.Console.removeListener(this);
 
         // stopProfiling event fired within logProfileReport
     },

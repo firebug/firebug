@@ -146,6 +146,9 @@ Firebug.ConsoleBase =
 
             // Also clear now
             this.clearPanel(context);
+
+            // Let listeners react to console clearing
+            Events.dispatch(this.fbListeners, "onConsoleCleared", [context]);
         }
     },
 
