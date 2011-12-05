@@ -351,7 +351,7 @@ var Errors = Firebug.Errors = Obj.extend(Firebug.Module,
 
         // Display column info only if it isn't zero.
         if (object.columnNumber > 0)
-            error.colNumber = object.lineNumber;
+            error.colNumber = object.columnNumber;
 
         if (Firebug.showStackTrace && Firebug.errorStackTrace)
         {
