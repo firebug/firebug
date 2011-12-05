@@ -177,7 +177,7 @@ Firebug.MemoryProfiler = Obj.extend(Firebug.Module,
             Firebug.Console.closeGroup(context, true);
         }
 
-        Firebug.Console.addListener(this);
+        Firebug.Console.removeListener(this);
 
         //Firebug.Console.logFormatted([deltaObjects], context, "memoryDelta");
     },
