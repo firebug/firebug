@@ -231,13 +231,13 @@ JSONTreePlate.prototype = Obj.extend(Firebug.DOMBasePanel.prototype,
             this.panelNode = parentNode;
             this.context = context;
 
-            var members = this.getMembers(jsonObject, 0);
+            var members = this.getMembers(jsonObject, 0, context);
             this.expandMembers(members, this.toggles, 0, 0, context);
             this.showMembers(members, false, false);
         }
         catch (err)
         {
-            if (FBTrace.DBG_JSONVIEWER)
+            if (FBTrace.DBG_ERRORS || FBTrace.DBG_JSONVIEWER)
                 FBTrace.sysout("jsonviewer.render; EXCEPTION", err);
         }
     },
