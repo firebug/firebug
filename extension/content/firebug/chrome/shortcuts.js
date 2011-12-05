@@ -26,6 +26,13 @@ Firebug.ShortcutsModel = Obj.extend(Firebug.Module,
 {
     dispatchName: "shortcuts",
 
+    mainDoc: null,
+
+    initialize: function()
+    {
+    	this.initShortcut = Obj.bind(this.initShortcut, this);
+    },
+
     initializeUI: function()
     {
         if (FBTrace.DBG_SHORTCUTS)
@@ -36,6 +43,13 @@ Firebug.ShortcutsModel = Obj.extend(Firebug.Module,
 
     initShortcuts : function()
     {
+        var tabBrowser = Firefox.getTabBrowser();
+        if (!tabBrowser) {
+        	if (FBTrace.DBG_SHORTCUTS)
+        		FBTrace.sysout("getTabBrowser FAIL: " + tabBrowser, tabBrowser);
+        	return null;
+        }
+        this.mainDoc = tabBrowser.ownerDocument;
         var branch = prefs.getBranch("extensions.firebug.key.shortcut.");
         var shortcutNames = branch.getChildList("", {});
         shortcutNames.forEach(this.initShortcut);
@@ -49,11 +63,11 @@ Firebug.ShortcutsModel = Obj.extend(Firebug.Module,
         var key = tokens.pop();
         var modifiers = tokens.join(',')
 
-        var keyElem = document.getElementById("key_" + element);
+        var keyElem = this.mainDoc.getElementById("key_" + element);
         if (!keyElem)
         {
             //if key is not defined in xul, add it
-            keyElem = document.createElement('key');
+            keyElem = this.mainDoc.createElement('key');
             keyElem.className = "fbOnlyKey";
             keyElem.id = "key_" + element;
             keyElem.command = "cmd_" + element;
