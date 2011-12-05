@@ -58,8 +58,11 @@ Obj.hasProperties = function(ob)
     try
     {
         var obString = Str.safeToString(ob);
-        if (obString === '[object StorageList]' || obString === '[xpconnect wrapped native prototype]')
+        if (obString === "[object StorageList]" ||
+            obString === "[xpconnect wrapped native prototype]")
+        {
             return true;
+        }
 
         for (var name in ob)
         {
@@ -69,13 +72,23 @@ Obj.hasProperties = function(ob)
             var value = ob[name];
             return true;
         }
+
+        try
+        {
+            var props = Object.getOwnPropertyNames(ob);
+            return props.length > 0;
+        }
+        catch (err)
+        {
+        }
     }
     catch (exc)
     {
         if (FBTrace.DBG_ERRORS)
-            FBTrace.sysout("lib.hasProperties("+Str.safeToString(ob)+") ERROR "+exc, exc);
+            FBTrace.sysout("lib.hasProperties(" + Str.safeToString(ob) + ") ERROR " + exc, exc);
 
-        if (ob.wrappedJSObject)  // workaround for https://bugzilla.mozilla.org/show_bug.cgi?id=648560
+        // workaround for https://bugzilla.mozilla.org/show_bug.cgi?id=648560
+        if (ob.wrappedJSObject)
             return true;
     }
     return false;

@@ -370,24 +370,6 @@ Firebug.DOMBasePanel.prototype = Obj.extend(Firebug.Panel,
         return object;
     },
 
-    getObjectProperties: function(object)
-    {
-        var properties = [];
-        if (Firebug.showOwnProperties)
-        {
-            if (Firebug.showEnumerableProperties)
-                properties = Object.keys(object);
-            else
-                properties = Object.getOwnPropertyNames(object);
-        }
-        else
-        {
-            for (var name in object)
-                properties.push(name);
-        }
-        return properties;
-    },
-
     rebuild: function(update, scrollTop)
     {
         Events.dispatch(this.fbListeners, 'onBeforeDomUpdateSelection', [this]);
@@ -396,6 +378,55 @@ Firebug.DOMBasePanel.prototype = Obj.extend(Firebug.Panel,
 
         this.showMembers(members, update, scrollTop);
     },
+
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+    // Object properties
+
+    /**
+     * Returns list of properties for the passed object.
+     *
+     * @param {Object} object The object we want to get the list of properties for.
+     * @param {Boolean} enumerableOnly If set to true, only enumerable properties are returned.
+     * @param {Boolean} ownOnly If set to true, only own properties (not those from the
+     *      prototype chain) are returned.
+     */
+    getObjectProperties: function(object, enumerableOnly, ownOnly)
+    {
+        var props = [];
+
+        // Get all enumerable-only or all-properties of the object (but not inherited).
+        if (enumerableOnly)
+            props = Object.keys(object);
+        else
+            props = Object.getOwnPropertyNames(object);
+
+        // Not interested in inherited properties, bail out.
+        if (ownOnly)
+            return props;
+
+        // Climb prototype chain.
+        var iheritedProps = [];
+        var parent = Object.getPrototypeOf(object);
+        if (parent)
+            iheritedProps = this.getObjectProperties(parent, enumerableOnly, ownOnly);
+
+        return this.mergeProperties(props, iheritedProps);
+    },
+
+    mergeProperties: function(props1, props2)
+    {
+        var result = Arr.cloneArray(props1);
+        for (var i=0; i<props2.length; i++)
+        {
+            var prop = props2[i];
+            if (!result.hasOwnProperty(prop))
+                result.push(prop);
+        }
+
+        return result;
+    },
+
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
     /**
      * @param object a user-level object wrapped in security blanket
@@ -426,19 +457,29 @@ Firebug.DOMBasePanel.prototype = Obj.extend(Firebug.Panel,
             try
             {
                 var contentView = this.getObjectView(object);
-                var properties = this.getObjectProperties(contentView);
+                var properties = this.getObjectProperties(contentView,
+                    Firebug.showEnumerableProperties, Firebug.showOwnProperties);
 
-                if (contentView.hasOwnProperty("constructor") && properties.indexOf("constructor") == -1)
+                if (contentView.hasOwnProperty("constructor") &&
+                    properties.indexOf("constructor") == -1)
+                {
                     properties.push("constructor");
+                }
 
-                if (contentView.hasOwnProperty("prototype") && properties.indexOf("prototype") == -1)
+                if (contentView.hasOwnProperty("prototype") &&
+                    properties.indexOf("prototype") == -1)
+                {
                     properties.push("prototype");
+                }
 
-                // XXXjjb I think it is always true ?
-                if (contentView.__proto__ && Obj.hasProperties(contentView.__proto__))
-                    properties.push('__proto__');
+                // If showOwnProperties is false the __proto__ can be already in.
+                if (contentView.__proto__ && Obj.hasProperties(contentView.__proto__) &&
+                    properties.indexOf("__proto__") == -1)
+                {
+                    properties.push("__proto__");
+                }
             }
-            catch(exc)
+            catch (exc)
             {
                  // workaround for https://bugzilla.mozilla.org/show_bug.cgi?id=648560
                 if (contentView.wrappedJSObject)
@@ -1383,6 +1424,9 @@ Firebug.DOMBasePanel.prototype = Obj.extend(Firebug.Panel,
         return this.getObjectView(this.context.getGlobalScope());
     },
 
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+    // Options
+
     updateOption: function(name, value)
     {
         var optionMap = {
@@ -1391,7 +1435,9 @@ Firebug.DOMBasePanel.prototype = Obj.extend(Firebug.Panel,
             showDOMProps: 1,
             showDOMFuncs: 1,
             showDOMConstants: 1,
-            showInlineEventHandlers: 1
+            showInlineEventHandlers: 1,
+            showOwnProperties: 1,
+            showEnumerableProperties: 1,
         };
 
         if (optionMap.hasOwnProperty(name))
@@ -1400,13 +1446,6 @@ Firebug.DOMBasePanel.prototype = Obj.extend(Firebug.Panel,
 
     getOptionsMenuItems: function()
     {
-        var enumerablePropertiesItem = Menu.optionMenu("ShowEnumerableProperties",
-            "showEnumerableProperties", "ShowEnumerablePropertiesTooltip");
-
-        // See getObjectProperites
-        if (!Firebug.showOwnProperties)
-            enumerablePropertiesItem.disabled = true;
-
         return [
             Menu.optionMenu("ShowUserProps", "showUserProps"),
             Menu.optionMenu("ShowUserFuncs", "showUserFuncs"),
@@ -1417,9 +1456,10 @@ Firebug.DOMBasePanel.prototype = Obj.extend(Firebug.Panel,
                 "ShowInlineEventHandlersTooltip"),
             "-",
             Menu.optionMenu("ShowOwnProperties", "showOwnProperties", "ShowOwnPropertiesTooltip"),
-            enumerablePropertiesItem,
+            Menu.optionMenu("ShowEnumerableProperties",
+                "showEnumerableProperties", "ShowEnumerablePropertiesTooltip"),
             "-",
-            {label: "Refresh", command: Obj.bindFixed(this.rebuild, this, true) }
+            {label: "Refresh", command: Obj.bindFixed(this.rebuild, this, true)}
         ];
     },
 
@@ -1443,7 +1483,7 @@ Firebug.DOMBasePanel.prototype = Obj.extend(Firebug.Panel,
 
             items.push(
                 "-",
-                {label: "Copy Name",  // xxxJJB internationalize
+                {label: "Copy Name",
                     command: Obj.bindFixed(this.copyName, this, row) },
                 {label: "Copy Path",
                     command: Obj.bindFixed(this.copyPath, this, row) }
