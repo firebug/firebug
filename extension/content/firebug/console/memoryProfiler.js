@@ -77,6 +77,14 @@ Firebug.MemoryProfiler = Obj.extend(Firebug.Module,
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+    onConsoleCleared: function(context)
+    {
+        if (this.isProfiling())
+            this.stop(context, true);
+    },
+
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
     // Activation/deactivation
 
     toggleProfiling: function(context)
@@ -109,6 +117,8 @@ Firebug.MemoryProfiler = Obj.extend(Firebug.Module,
             return;
         }
 
+        Firebug.chrome.setGlobalAttribute("cmd_toggleMemoryProfiling", "checked", "true");
+
         this.profiling = true;
         FBS.addHandler(this);
 
@@ -129,12 +139,16 @@ Firebug.MemoryProfiler = Obj.extend(Firebug.Module,
 
         // For summary numbers (difference between profiling-start and profiling-end)
         context.memoryProfileStack.push(this.getMemoryReport());
+
+        Firebug.Console.addListener(this);
     },
 
-    stop: function(context)
+    stop: function(context, cancelReport)
     {
         FBS.removeHandler(this);
         this.profiling = false;
+
+        Firebug.chrome.setGlobalAttribute("cmd_toggleMemoryProfiling", "checked", "false");
 
         // Calculate total diff
         var oldReport = context.memoryProfileStack.pop();
@@ -153,12 +167,17 @@ Firebug.MemoryProfiler = Obj.extend(Firebug.Module,
         var deltaObjects = this.sweep(context);
         this.cleanUp(context);
 
-        var title = Locale.$STR("firebug.Objects Added While Profiling");
-        var row = Firebug.Console.openCollapsedGroup(title, context, "profile",
-            Firebug.MemoryProfiler.ProfileCaption, true, null, true);
+        if (!cancelReport)
+        {
+            var title = Locale.$STR("firebug.Objects Added While Profiling");
+            var row = Firebug.Console.openCollapsedGroup(title, context, "profile",
+                Firebug.MemoryProfiler.ProfileCaption, true, null, true);
+    
+            Firebug.Console.log(deltaObjects, context, "memoryDelta", Firebug.DOMPanel.DirTable);
+            Firebug.Console.closeGroup(context, true);
+        }
 
-        Firebug.Console.log(deltaObjects, context, "memoryDelta", Firebug.DOMPanel.DirTable);
-        Firebug.Console.closeGroup(context, true);
+        Firebug.Console.addListener(this);
 
         //Firebug.Console.logFormatted([deltaObjects], context, "memoryDelta");
     },
