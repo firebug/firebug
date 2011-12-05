@@ -405,25 +405,12 @@ Firebug.DOMBasePanel.prototype = Obj.extend(Firebug.Panel,
             return props;
 
         // Climb prototype chain.
-        var iheritedProps = [];
+        var inheritedProps = [];
         var parent = Object.getPrototypeOf(object);
         if (parent)
-            iheritedProps = this.getObjectProperties(parent, enumerableOnly, ownOnly);
+            inheritedProps = this.getObjectProperties(parent, enumerableOnly, ownOnly);
 
-        return this.mergeProperties(props, iheritedProps);
-    },
-
-    mergeProperties: function(props1, props2)
-    {
-        var result = Arr.cloneArray(props1);
-        for (var i=0; i<props2.length; i++)
-        {
-            var prop = props2[i];
-            if (!result.hasOwnProperty(prop))
-                result.push(prop);
-        }
-
-        return result;
+        return Arr.merge(props, inheritedProps);
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
