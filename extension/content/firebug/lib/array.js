@@ -89,7 +89,7 @@ Arr.sliceArray = function(array, index)
     return slice;
 };
 
-function cloneArray(array, fn)
+Arr.cloneArray = function(array, fn)
 {
    var newArray = [];
 
@@ -103,7 +103,7 @@ function cloneArray(array, fn)
    return newArray;
 }
 
-function extendArray(array, array2)
+Arr.extendArray = function(array, array2)
 {
    var newArray = [];
    newArray.push.apply(newArray, array);
@@ -111,10 +111,7 @@ function extendArray(array, array2)
    return newArray;
 }
 
-Arr.extendArray = extendArray;
-Arr.cloneArray = cloneArray;
-
-function arrayInsert(array, index, other)
+Arr.arrayInsert = function(array, index, other)
 {
    for (var i = 0; i < other.length; ++i)
        array.splice(i+index, 0, other[i]);
@@ -122,7 +119,29 @@ function arrayInsert(array, index, other)
    return array;
 }
 
-Arr.arrayInsert = arrayInsert;
+/**
+ * Merge two arrays and keep only unique values.
+ * 
+ * @param {Array} arr1 The first array to merge.
+ * @param {Array} arr2 The second array to merge.
+ * @param {Function} sortFunc Optional function for proper sorting of objects in arrays.
+ */
+Arr.merge = function(arr1, arr2, sortFunc)
+{
+    var ar = Arr.extendArray(arr1, arr2);
+    ar.sort(sortFunc);
+
+    var ret = [];
+    for (var i=0; i<ar.length; i++)
+    {
+        // Skip duplicated entries
+        if (i && ar[i-1] === ar[i])
+            continue;
+        ret.push(ar[i]);
+    }
+
+    return ret;
+}
 
 // ********************************************************************************************* //
 
