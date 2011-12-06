@@ -447,7 +447,6 @@ Firebug.TabCache.prototype = Obj.extend(Firebug.SourceCache.prototype,
             }
 
             var doc = this.context.window ? this.context.window.document : null;
-            var doc = this.context.window.document;
             if (doc)
                 charset = doc.characterSet;
 
