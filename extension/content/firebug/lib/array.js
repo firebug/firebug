@@ -120,11 +120,12 @@ Arr.arrayInsert = function(array, index, other)
 }
 
 /**
- * Merge two arrays and keep only unique values.
- * 
+ * Merge two arrays and keep only unique values. Note that this method always
+ * sorts the output (sorting is used for fast removal of duplicated items).
+ *
  * @param {Array} arr1 The first array to merge.
  * @param {Array} arr2 The second array to merge.
- * @param {Function} sortFunc Optional function for proper sorting of objects in arrays.
+ * @param {Function} sortFunc Optional function for proper sorting of items in arrays.
  */
 Arr.merge = function(arr1, arr2, sortFunc)
 {
