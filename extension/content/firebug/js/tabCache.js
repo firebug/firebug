@@ -436,6 +436,17 @@ Firebug.TabCache.prototype = Obj.extend(Firebug.SourceCache.prototype,
                 Ci.nsICachingChannel.LOAD_BYPASS_LOCAL_CACHE_IF_BUSY;
 
             var charset = "UTF-8";
+
+            if (!this.context.window)
+            {
+                if (FBTrace.DBG_ERRORS)
+                {
+                    FBTrace.sysout("tabCache.loadFromCache; ERROR this.context.window " +
+                        "is undefined");
+                }
+            }
+
+            var doc = this.context.window ? this.context.window.document : null;
             var doc = this.context.window.document;
             if (doc)
                 charset = doc.characterSet;
