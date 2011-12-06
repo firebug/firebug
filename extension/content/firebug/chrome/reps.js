@@ -552,9 +552,6 @@ FirebugReps.Arr = domplate(Firebug.Rep,
      */
     hasSpecialProperties: function(array)
     {
-        if (!Arr.isArray(array))
-            return true;
-
         function isInteger(x)
         {
             var y = parseInt(x);
@@ -563,27 +560,19 @@ FirebugReps.Arr = domplate(Firebug.Rep,
            return x==y && x.toString() == y.toString();
         } 
 
-        // Don't use __count__ property, this is being removed from Fx 3.7
         var n = 0;
         var props = Object.getOwnPropertyNames(array);
         for (var i=0; i<props.length; i++)
         {
             var p = props[i];
-            try
-            {
-                // Valid indexes are skipped
-                if (isInteger(p))
-                    continue;
 
-                // Ignore standard 'length' property, anything else is custom.
-                if (p != "length")
-                    return true;
-            }
-            catch (err)
-            {
-                FBTrace.sysout("hasSpecialProperties; EXCEPTION " + err,
-                    {err:err, array: array, p: p});
-            }
+            // Valid indexes are skipped
+            if (isInteger(p))
+                continue;
+
+            // Ignore standard 'length' property, anything else is custom.
+            if (p != "length")
+                return true;
         }
 
         return false;
