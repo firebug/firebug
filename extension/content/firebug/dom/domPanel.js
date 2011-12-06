@@ -460,8 +460,9 @@ Firebug.DOMBasePanel.prototype = Obj.extend(Firebug.Panel,
                 }
 
                 // If showOwnProperties is false the __proto__ can be already in.
+                // If showOwnProperties is true the __proto__ should not be in.
                 if (contentView.__proto__ && Obj.hasProperties(contentView.__proto__) &&
-                    properties.indexOf("__proto__") == -1)
+                    properties.indexOf("__proto__") == -1 && !Firebug.showOwnProperties)
                 {
                     properties.push("__proto__");
                 }
