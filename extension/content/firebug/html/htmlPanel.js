@@ -1492,7 +1492,10 @@ Firebug.HTMLPanel.prototype = Obj.extend(WalkingPanel,
 
                 items.push("-",
                     {label: EditElement, command: Obj.bindFixed(this.editNode, this, node)},
-                    {label: "DeleteElement", command: Obj.bindFixed(this.deleteNode, this, node),
+                    // xxxsz: 'Del' needs to be translated, but therefore customizeShortcuts
+                    // must be turned into a module
+                    {label: "DeleteElement", acceltext: "Del",
+                        command: Obj.bindFixed(this.deleteNode, this, node),
                         disabled:(node.localName in Css.innerEditableTags)}
                 );
             }
