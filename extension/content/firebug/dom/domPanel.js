@@ -461,7 +461,7 @@ Firebug.DOMBasePanel.prototype = Obj.extend(Firebug.Panel,
 
                 // If showOwnProperties is false the __proto__ can be already in.
                 // If showOwnProperties is true the __proto__ should not be in.
-                if (contentView.__proto__ && Obj.hasProperties(contentView.__proto__) &&
+                if (contentView.__proto__ && contentView.hasOwnProperty("__proto__") &&
                     properties.indexOf("__proto__") == -1 && !Firebug.showOwnProperties)
                 {
                     properties.push("__proto__");
@@ -616,8 +616,11 @@ Firebug.DOMBasePanel.prototype = Obj.extend(Firebug.Panel,
         var rep = Firebug.getRep(value);
         var tag = rep.shortTag ? rep.shortTag : rep.tag;
 
+        var hasProperties = Obj.hasProperties(value, Firebug.showEnumerableProperties,
+            Firebug.showOwnProperties);
+
         var valueType = typeof(value);
-        var hasChildren = Obj.hasProperties(value) && !(value instanceof FirebugReps.ErrorCopy) &&
+        var hasChildren = hasProperties && !(value instanceof FirebugReps.ErrorCopy) &&
             (valueType == "function" || (valueType == "object" && value != null)
             || (valueType == "string" && value.length > Firebug.stringCropLength));
 
@@ -631,7 +634,10 @@ Firebug.DOMBasePanel.prototype = Obj.extend(Firebug.Panel,
             var proto = Obj.getPrototype(value);
             // Special case for functions with a protoype that has values
             if (valueType === "function" && proto)
-                hasChildren = hasChildren || Obj.hasProperties(proto);
+            {
+                hasChildren = hasChildren || Obj.hasProperties(proto,
+                    Firebug.showEnumerableProperties, Firebug.showOwnProperties);
+            }
         }
 
         if (value instanceof window.StorageList)

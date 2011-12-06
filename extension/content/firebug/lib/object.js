@@ -53,10 +53,20 @@ Obj.descend = function(prototypeParent, childProperties)
 
 // ************************************************************************************************
 
-Obj.hasProperties = function(ob)
+/**
+ * Returns true if the passed object has any properties, otherwise returns false.
+ *
+ * @param {Object} ob Inspecte object
+ * @param {Object} enumerableOnly Only check enumerable properties (optional)
+ * @param {Object} ownOnly Only check own properties not inherited (optional)
+ */
+Obj.hasProperties = function(ob, enumerableOnly, ownOnly)
 {
     try
     {
+        if (!ob)
+            return false;
+
         var obString = Str.safeToString(ob);
         if (obString === "[object StorageList]" ||
             obString === "[xpconnect wrapped native prototype]")
@@ -64,23 +74,52 @@ Obj.hasProperties = function(ob)
             return true;
         }
 
-        for (var name in ob)
+        // The default case (both options false) is relativelly simple.
+        // Just use for..in loop.
+        if (!enumerableOnly && !ownOnly)
+        {
+            for (var name in ob)
+            {
+                // Try to access the property before declaring existing properties.
+                // It's because some properties can't be read see:
+                // issue 3843, https://bugzilla.mozilla.org/show_bug.cgi?id=455013
+                var value = ob[name];
+                return true;
+            }
+            return false;
+        }
+
+        var type = typeof(ob);
+        if (type != "object")
+        {
+            if (type == "string" && ob.length)
+                return true;
+            return false;
+        }
+
+        if (enumerableOnly)
+            props = Object.keys(ob);
+        else
+            props = Object.getOwnPropertyNames(ob);
+
+        if (props.length)
         {
             // Try to access the property before declaring existing properties.
             // It's because some properties can't be read see:
             // issue 3843, https://bugzilla.mozilla.org/show_bug.cgi?id=455013
-            var value = ob[name];
+            var value = ob[props[0]];
             return true;
         }
 
-        try
-        {
-            var props = Object.getOwnPropertyNames(ob);
-            return props.length > 0;
-        }
-        catch (err)
-        {
-        }
+        // Not interested in inherited properties, bail out.
+        if (ownOnly)
+            return false;
+
+        // Climb prototype chain.
+        var inheritedProps = [];
+        var parent = Object.getPrototypeOf(ob);
+        if (parent)
+            return this.hasProperties(parent, enumerableOnly, ownOnly);
     }
     catch (exc)
     {
@@ -91,6 +130,7 @@ Obj.hasProperties = function(ob)
         if (ob.wrappedJSObject)
             return true;
     }
+
     return false;
 };
 
