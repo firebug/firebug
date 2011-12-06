@@ -2,6 +2,7 @@
 
 define([
     "firebug/lib/object",
+    "firebug/lib/array",
     "firebug/firebug",
     "firebug/lib/domplate",
     "firebug/firefox/firefox",
@@ -26,7 +27,7 @@ define([
     "firebug/firefox/menu",
     "arch/compilationunit",
 ],
-function(Obj, Firebug, Domplate, Firefox, Xpcom, Locale, HTMLLib, Events, Wrapper, Options,
+function(Obj, Arr, Firebug, Domplate, Firefox, Xpcom, Locale, HTMLLib, Events, Wrapper, Options,
     Url, SourceLink, StackFrame, Css, Dom, Win, System, Xpath, Str, Xml, ToggleBranch,
     EventMonitor, Menu, CompilationUnit) {
 
@@ -538,19 +539,45 @@ FirebugReps.Arr = domplate(Firebug.Rep,
         return arrayIndex;
     },
 
+    /**
+     * Returns true if the passed object is an array with additional (custom) properties,
+     * otherwise returns false. Custom properties should be displayed in extra expandable
+     * section.
+     *
+     * Example array with a custom property.
+     * var arr = [0, 1];
+     * arr.myProp = "Hello";
+     *
+     * @param {Array} array The array object.
+     */
     hasSpecialProperties: function(array)
     {
-         if ( ! ("hasOwnProperty" in array) )
-            return false;
+        if (!Arr.isArray(array))
+            return true;
+
+        function isInteger(x)
+        {
+            var y = parseInt(x);
+            if (isNaN(y))
+                return false;
+           return x==y && x.toString() == y.toString();
+        } 
 
         // Don't use __count__ property, this is being removed from Fx 3.7
         var n = 0;
-        for (var p in array)
+        var props = Object.getOwnPropertyNames(array);
+        for (var i=0; i<props.length; i++)
         {
+            var p = props[i];
             try
             {
-                if (array.hasOwnProperty(p))
-                    n++;
+                // Valid indexes are skipped
+                if (isInteger(p))
+                    continue;
+
+                // Ignore standard 'length' property, anything else is custom.
+                if (p != "length")
+                    return true;
             }
             catch (err)
             {
@@ -559,7 +586,7 @@ FirebugReps.Arr = domplate(Firebug.Rep,
             }
         }
 
-        return (array.length != n) && Obj.hasProperties(array);
+        return false;
     },
 
     onToggleProperties: function(event)
