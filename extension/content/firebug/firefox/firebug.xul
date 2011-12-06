@@ -42,6 +42,7 @@
             }
 
             fbc.onDetach();
+            document.getElementById("fbMainContainer").focus();
         }
 
         exportFirebug = function()

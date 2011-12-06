@@ -7,8 +7,10 @@
 const Cc = Components.classes;
 const Ci = Components.interfaces;
 
-var prefs = Cc["@mozilla.org/preferences-service;1"].getService(Ci.nsIPrefBranch).QueryInterface(Ci.nsIPrefService);
-var branch = prefs.getBranch("extensions.firebug.key.shortcut.");
+Components.utils.import("resource://gre/modules/Services.jsm");
+
+var branch = Services.prefs.getBranch("extensions.firebug.key.shortcut.");
+var defaultBranch = Services.prefs.getDefaultBranch("extensions.firebug.key.shortcut.");
 
 // Initialized from window parameters.
 var FBL;
@@ -71,7 +73,7 @@ function setKeyInfo()
     gPlatformKeys.ctrl = Locale.$STR("VK_CONTROL", platformKeys);
     gPlatformKeys.sep = Locale.$STR("MODIFIER_SEPARATOR", platformKeys);
 
-    switch (prefs.getIntPref("ui.key.accelKey"))
+    switch (Services.prefs.getIntPref("ui.key.accelKey"))
     {
         case 17:
             gPlatformKeys.accel = gPlatformKeys.ctrl;
@@ -113,14 +115,15 @@ function saveChanges()
     if (!modified)
         return true;
 
-    if (window.confirm(Locale.$STR('keybindConfirmMsg')))
-    {
-        shortcutNames.forEach(saveShortcut);
-        window.opener.Firebug.ShortcutsModel.initShortcuts();
-        return true;
-    }
+    shortcutNames.forEach(saveShortcut);
 
-    return false;
+    var e = Services.wm.getEnumerator("navigator:browser");
+    while (e.hasMoreElements())
+    {
+        var fbug = e.getNext().Firebug
+        fbug && fbug.ShortcutsModel.initShortcuts();
+    }
+    return true;
 }
 
 function saveShortcut(shortcutId, index, array)
@@ -138,14 +141,15 @@ function handleResetBtn(event)
         modified = true;
     }
 
+    event.target.hidden = true;
     var textbox = document.getElementById(element + '_shortcut');
     if (textbox)
         textbox.value = getHumanShortcut(element);
 }
 
-function getHumanShortcut(element)
+function getHumanShortcut(element, getDefault)
 {
-    var shortcut = branch.getCharPref(element);
+    var shortcut = (getDefault ? defaultBranch : branch).getCharPref(element);
     var tokens = shortcut.split(' ');
     var keyCode = tokens.pop();
 
@@ -159,6 +163,7 @@ function addShortcutRow(element, index, array)
 {
     //Get key configuration from preference
     var shortcut = getHumanShortcut(element);
+    var defaultShortcut = getHumanShortcut(element, true);
     var rows = document.getElementById("shortcutGridRows");
     var row = document.createElement("row");
     var labelText;
@@ -167,7 +172,7 @@ function addShortcutRow(element, index, array)
     // Get the label from firebug.properties
     labelText = Locale.$STR('firebug.shortcut.' + element + ".label");
     if (labelText == "label") // $STR defaults to property name (label) if it's not defined. We don't want that
-        labelText = element
+        labelText = element;
     label.setAttribute("value", labelText);
     row.appendChild(label);
 
@@ -176,13 +181,15 @@ function addShortcutRow(element, index, array)
     textbox.className = "shortcutSink";
     textbox.setAttribute('tooltiptext', labelText + " shortcut");
     textbox.setAttribute("value", shortcut);
+    textbox.setAttribute("default_value", defaultShortcut);
     row.appendChild(textbox);
 
-    var resetBtn = document.createElement('button');
+    var resetBtn = document.createElement('toolbarbutton');
     resetBtn.id = element + "_reset";
     resetBtn.setAttribute('label', Locale.$STR("a11y.labels.reset"));
     resetBtn.setAttribute('aria-label', Locale.$STRF("a11y.labels.reset_shortcut", [labelText]));
     resetBtn.className = "shortcutResetBtn";
+    resetBtn.hidden = defaultShortcut == shortcut;
     row.appendChild(resetBtn);
     rows.appendChild(row);
 }
@@ -207,7 +214,9 @@ function recognizeShortcut(event)
 
     if (event.keyCode == 8 && !event.shiftKey && !event.altKey && !event.ctrlKey) { // Backspace pressed
         updatedShortcuts[target.id.replace('_shortcut', "")] = "";
-        event.target.value = "";
+        target.value = "";
+        // update reset button visisbility
+        target.nextSibling.hidden = false;
 
         return false;
     }
@@ -259,6 +268,9 @@ function recognizeShortcut(event)
     var formatted = getFormattedKey(modifiers, key, keyConstant);
 
     target.value = formatted;
+
+    // update reset button visisbility
+    target.nextSibling.hidden = formatted == target.getAttribute("default_value");
     return false;
 }
 

@@ -460,7 +460,6 @@ var FirebugChrome =
             Firebug.toggleBar(true);
         else
             Firebug.showBar(true);
-        panelBar1.browser.focus();
     },
 
     onUndetach: function()

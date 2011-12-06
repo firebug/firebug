@@ -26,13 +26,6 @@ Firebug.ShortcutsModel = Obj.extend(Firebug.Module,
 {
     dispatchName: "shortcuts",
 
-    mainDoc: null,
-
-    initialize: function()
-    {
-    	this.initShortcut = Obj.bind(this.initShortcut, this);
-    },
-
     initializeUI: function()
     {
         if (FBTrace.DBG_SHORTCUTS)
@@ -43,16 +36,18 @@ Firebug.ShortcutsModel = Obj.extend(Firebug.Module,
 
     initShortcuts : function()
     {
-        var tabBrowser = Firefox.getTabBrowser();
-        if (!tabBrowser) {
-        	if (FBTrace.DBG_SHORTCUTS)
-        		FBTrace.sysout("getTabBrowser FAIL: " + tabBrowser, tabBrowser);
-        	return null;
-        }
-        this.mainDoc = tabBrowser.ownerDocument;
         var branch = prefs.getBranch("extensions.firebug.key.shortcut.");
         var shortcutNames = branch.getChildList("", {});
-        shortcutNames.forEach(this.initShortcut);
+
+        // we need to touch keyset to apply keychanges without restart
+        this.keysets = [];
+        shortcutNames.forEach(this.initShortcut, this);
+        
+        this.keysets.forEach(function(keyset) {
+            keyset.parentNode.insertBefore(keyset, keyset.nextSibling);
+        })
+        
+        this.keysets = null;
     },
 
     initShortcut : function(element, index, array)
@@ -63,30 +58,46 @@ Firebug.ShortcutsModel = Obj.extend(Firebug.Module,
         var key = tokens.pop();
         var modifiers = tokens.join(',')
 
-        var keyElem = this.mainDoc.getElementById("key_" + element);
+        var keyElem = document.getElementById("key_" + element);
         if (!keyElem)
         {
             //if key is not defined in xul, add it
-            keyElem = this.mainDoc.createElement('key');
+            keyElem = document.createElement('key');
             keyElem.className = "fbOnlyKey";
             keyElem.id = "key_" + element;
             keyElem.command = "cmd_" + element;
-            Firefox.getElementById('mainKeyset').appendChild(keyElem);
+            document.getElementById('mainKeyset').appendChild(keyElem);
         }
+
+        //invalidAttr needed in case default shortcut uses key rather than keycode
+        var attr = 'key', invalidAttr = 'key';
 
         //choose between key or keycode attribute
         if (key.length == 1)
-        {
-            keyElem.setAttribute('modifiers', modifiers);
-            keyElem.setAttribute('key', key);
-            keyElem.removeAttribute('keycode');
-        }
-        else if (KeyEvent['DOM_' + key]) //only set valid keycodes
-        {
-            keyElem.setAttribute('modifiers', modifiers);
-            keyElem.setAttribute('keycode', key);
-            keyElem.removeAttribute('key'); //in case default shortcut uses key rather than keycode
-        }
+            invalidAttr = 'keycode';
+        else if (KeyEvent['DOM_' + key])
+            attr = 'keycode';
+        else  //only set valid keycodes
+            return;
+
+        keyElem.setAttribute('modifiers', modifiers);
+        keyElem.setAttribute(attr, key);
+        keyElem.removeAttribute(invalidAttr);
+
+        if (this.keysets.indexOf(keyElem.parentNode) == -1)
+            this.keysets.push(keyElem.parentNode);
+
+        // modify shortcut for global key if it exists
+        var keyElem = Firefox.getElementById("key_" + element);
+        if (!keyElem)
+            return;
+
+        keyElem.setAttribute('modifiers', modifiers);
+        keyElem.setAttribute(attr, key);
+        keyElem.removeAttribute(invalidAttr);
+
+        if (this.keysets.indexOf(keyElem.parentNode) == -1)
+            this.keysets.push(keyElem.parentNode);
     },
 
     // UI Commands
