@@ -57,7 +57,7 @@ function init()
     shortcutNames.sort();
     shortcutNames.forEach(addShortcutRow);
     setHandlers();
-    document.title = Locale.$STR('customizeShortcuts');
+    document.title = Locale.$STR("customizeShortcuts");
 
     if (FBTrace.DBG_SHORTCUTS)
         FBTrace.sysout("shortcuts.init; Customize Shortcuts dialog initialized.");
@@ -75,13 +75,13 @@ function setKeyInfo()
 
     switch (Services.prefs.getIntPref("ui.key.accelKey"))
     {
-        case 17:
+        case KeyEvent.DOM_VK_CONTROL:
             gPlatformKeys.accel = gPlatformKeys.ctrl;
             break;
-        case 18:
+        case KeyEvent.DOM_VK_ALT:
             gPlatformKeys.accel = gPlatformKeys.alt;
             break;
-        case 224:
+        case KeyEvent.DOM_VK_META:
             gPlatformKeys.accel = gPlatformKeys.meta;
             break;
         default:
@@ -98,16 +98,13 @@ function setKeyInfo()
 function setHandlers()
 {
     var i;
-    var shortcutSinks = document.getElementsByClassName('shortcutSink');
+    var shortcutSinks = document.getElementsByClassName("shortcutSink");
     for (i = 0; i < shortcutSinks.length; i++)
-    {
-        shortcutSinks[i].addEventListener('keydown', recognizeShortcut, false);
-    }
-    var resetBtns = document.getElementsByClassName('shortcutResetBtn');
+        shortcutSinks[i].addEventListener("keydown", recognizeShortcut, false);
+
+    var resetBtns = document.getElementsByClassName("shortcutResetBtn");
     for (i = 0; i < resetBtns.length; i++)
-    {
-        resetBtns[i].addEventListener('command', handleResetBtn, false);
-    }
+        resetBtns[i].addEventListener("command", handleResetBtn, false);
 }
 
 function saveChanges()
@@ -134,7 +131,7 @@ function saveShortcut(shortcutId, index, array)
 
 function handleResetBtn(event)
 {
-    var element = event.target.id.replace('_reset', "");
+    var element = event.target.id.replace("_reset", "");
     if (branch.prefHasUserValue(element))
     {
         branch.clearUserPref(element);
@@ -142,7 +139,7 @@ function handleResetBtn(event)
     }
 
     event.target.hidden = true;
-    var textbox = document.getElementById(element + '_shortcut');
+    var textbox = document.getElementById(element + "_shortcut");
     if (textbox)
         textbox.value = getHumanShortcut(element);
 }
@@ -150,18 +147,18 @@ function handleResetBtn(event)
 function getHumanShortcut(element, getDefault)
 {
     var shortcut = (getDefault ? defaultBranch : branch).getCharPref(element);
-    var tokens = shortcut.split(' ');
+    var tokens = shortcut.split(" ");
     var keyCode = tokens.pop();
 
     if (keyCode.length == 1)
-        return getFormattedKey(tokens.join(','), keyCode, null);
+        return getFormattedKey(tokens.join(","), keyCode, null);
     else
-        return getFormattedKey(tokens.join(','), null, keyCode);
+        return getFormattedKey(tokens.join(","), null, keyCode);
 }
 
 function addShortcutRow(element, index, array)
 {
-    //Get key configuration from preference
+    // Get key configuration from preference
     var shortcut = getHumanShortcut(element);
     var defaultShortcut = getHumanShortcut(element, true);
     var rows = document.getElementById("shortcutGridRows");
@@ -170,8 +167,10 @@ function addShortcutRow(element, index, array)
 
     var label = document.createElement("label");
     // Get the label from firebug.properties
-    labelText = Locale.$STR('firebug.shortcut.' + element + ".label");
-    if (labelText == "label") // $STR defaults to property name (label) if it's not defined. We don't want that
+    labelText = Locale.$STR("firebug.shortcut."+element+".label");
+
+    // $STR defaults to property name (label) if it's not defined. We don't want that
+    if (labelText == "label")
         labelText = element;
     label.setAttribute("value", labelText);
     row.appendChild(label);
@@ -179,15 +178,15 @@ function addShortcutRow(element, index, array)
     var textbox = document.createElement("textbox");
     textbox.id = element + "_shortcut";
     textbox.className = "shortcutSink";
-    textbox.setAttribute('tooltiptext', labelText + " shortcut");
+    textbox.setAttribute("tooltiptext", labelText + " shortcut");
     textbox.setAttribute("value", shortcut);
     textbox.setAttribute("default_value", defaultShortcut);
     row.appendChild(textbox);
 
-    var resetBtn = document.createElement('toolbarbutton');
+    var resetBtn = document.createElement("toolbarbutton");
     resetBtn.id = element + "_reset";
-    resetBtn.setAttribute('label', Locale.$STR("a11y.labels.reset"));
-    resetBtn.setAttribute('aria-label', Locale.$STRF("a11y.labels.reset_shortcut", [labelText]));
+    resetBtn.setAttribute("label", Locale.$STR("a11y.labels.reset"));
+    resetBtn.setAttribute("aria-label", Locale.$STRF("a11y.labels.reset_shortcut", [labelText]));
     resetBtn.className = "shortcutResetBtn";
     resetBtn.hidden = defaultShortcut == shortcut;
     row.appendChild(resetBtn);
@@ -196,13 +195,14 @@ function addShortcutRow(element, index, array)
 
 function recognizeShortcut(event)
 {
-    //we're using keydown, so we always start with keycode
+    // We're using keydown, so we always start with keycode
     var shortcut = "";
-    if ( [9, 16, 17, 18].indexOf(event.keyCode) != -1 ||
+    if ([KeyEvent.DOM_VK_TAB, KeyEvent.DOM_VK_SHIFT, KeyEvent.DOM_VK_CONTROL, KeyEvent.DOM_VK_ALT].
+            indexOf(event.keyCode) != -1 ||
         ((!event.shiftKey && !event.altKey && !event.ctrlKey) &&
-        [13, 27].indexOf(event.keyCode) != -1))
+        [KeyEvent.DOM_VK_RETURN, KeyEvent.DOM_VK_ESCAPE].indexOf(event.keyCode) != -1))
     {
-        //Always let tab pass. Let enter & escape pass, if no modifiers are used
+        // Always let tab pass. Let enter & escape pass, if no modifiers are used
         return;
     }
 
@@ -212,10 +212,13 @@ function recognizeShortcut(event)
 
     var target = event.target;
 
-    if (event.keyCode == 8 && !event.shiftKey && !event.altKey && !event.ctrlKey) { // Backspace pressed
-        updatedShortcuts[target.id.replace('_shortcut', "")] = "";
+    // Backspace pressed
+    if (event.keyCode == 8 && !event.shiftKey && !event.altKey && !event.ctrlKey)
+    {
+        updatedShortcuts[target.id.replace("_shortcut", "")] = "";
         target.value = "";
-        // update reset button visisbility
+
+        // Update reset button visibility
         target.nextSibling.hidden = false;
 
         return false;
@@ -239,54 +242,54 @@ function recognizeShortcut(event)
     if (!keyConstant) //should not happen
         return;
 
-    //check if the keycode is actually a printable character
-
-    //1. convert some of the punctuation keyConstants (e.g. VK_COMMA) back to actual characters
+    // Check if the keycode is actually a printable character
+    // 1. Convert some of the punctuation keyConstants (e.g. VK_COMMA) back to actual characters
     if (mustBeKeyChars[keyConstant])
     {
         key = mustBeKeyChars[keyConstant];
     }
     else
     {
-        //2. detect basic alphanumeric keys
+        // 2. Detect basic alphanumeric keys
         var keyNameGuess = keyConstant.replace("VK_", "");
         if (keyNameGuess.length == 1)
             key = keyNameGuess.toLowerCase();
     }
 
     if (modifiers.length > 0)
-    {
-        shortcut += modifiers;
-        shortcut += " ";
-    }
+        shortcut += modifiers+" ";
     shortcut += (key ? key : keyConstant);
 
-    updatedShortcuts[target.id.replace('_shortcut', "")] = shortcut;
+    updatedShortcuts[target.id.replace("_shortcut", "")] = shortcut;
 
-    //show formatted shortcut in textbox
-    modifiers = modifiers.replace(" ",",")
+    // Show formatted shortcut in textbox
+    modifiers = modifiers.replace(" ", ",");
     var formatted = getFormattedKey(modifiers, key, keyConstant);
 
     target.value = formatted;
 
-    // update reset button visisbility
+    // Update reset button visibility
     target.nextSibling.hidden = formatted == target.getAttribute("default_value");
     return false;
 }
 
 function getFormattedKey(modifiers, key, keyConstant)
 {
-    if (modifiers == "shift,alt,control,accel" && keyConstant == "VK_SCROLL_LOCK")
+    if ((modifiers == "shift,alt,control,accel" && keyConstant == "VK_SCROLL_LOCK") ||
+        (key == "" || (!key && keyConstant == "")))
+    {
         return "";
-    if (key == "" || (!key && keyConstant == ""))
-        return "";
+    }
 
     var val = "";
     if (modifiers)
-        val =
-        modifiers.replace(/^[\s,]+|[\s,]+$/g, "").split(/[\s,]+/g).join(gPlatformKeys.sep).replace("alt", gPlatformKeys.alt).replace("shift", gPlatformKeys.shift).replace("control",
-        gPlatformKeys.ctrl).replace("meta", gPlatformKeys.meta).replace("accel", gPlatformKeys.accel)
-        + gPlatformKeys.sep;
+    {
+        val = modifiers.replace(/^[\s,]+|[\s,]+$/g, "").split(/[\s,]+/g).join(gPlatformKeys.sep).
+            replace("alt", gPlatformKeys.alt).replace("shift", gPlatformKeys.shift).
+            replace("control", gPlatformKeys.ctrl).replace("meta", gPlatformKeys.meta).
+            replace("accel", gPlatformKeys.accel) +
+            gPlatformKeys.sep;
+    }
 
     if (key)
         return val += key;
@@ -295,12 +298,12 @@ function getFormattedKey(modifiers, key, keyConstant)
     {
         try
         {
-            //see if a localized version for keyConstant exists (F keys, arrow, enter, pgup, etc.)
+            // See if a localized version for keyConstant exists (F keys, arrow, enter, pgup, etc.)
             val += gLocaleKeys.getString(keyConstant);
         }
         catch (e)
         {
-            //create human friendly alternative ourself
+            // Create human friendly alternative ourself
             val += keyConstant.replace("VK_", "").replace("_", " ").toLowerCase();
         }
     }
