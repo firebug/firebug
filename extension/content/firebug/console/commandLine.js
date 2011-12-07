@@ -129,9 +129,9 @@ Firebug.CommandLine = Obj.extend(Firebug.Module,
             return;
         }
 
-        // Detach the commandline API (if attached) to reinitialize it. If e.g.jQuery
-        // has been loaded in the meantime, the $ functions shouldn't be overwritten.
-        Firebug.CommandLine.injector.detachCommandLine(context, win);
+        //xxxHonza: do not detach the command line here. In case where Firebug is 
+        // halted in the debugger and debugging a function executed in the command line
+        // the command line handler needs to be yet used to display the return value.
 
         // Inject commandLine APIs again.
         this.initializeCommandLineIfNeeded(context, win);
