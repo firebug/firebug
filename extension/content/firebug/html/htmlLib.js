@@ -567,7 +567,8 @@ var HTMLLib =
             return false;
 
         var tag = element.localName ? element.localName.toLowerCase() : "";
-        return tag == "script" || (tag == "link" && element.getAttribute("rel") == "stylesheet") || tag == "style";
+        return tag == "script" || (tag == "link" && element.getAttribute("rel") == "stylesheet") ||
+            tag == "style";
     },
 
     /**
