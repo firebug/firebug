@@ -32,7 +32,7 @@ Firebug.ShortcutsModel = Obj.extend(Firebug.Module,
         this.initShortcuts();
     },
 
-    initShortcuts : function()
+    initShortcuts: function()
     {
         var branch = Services.prefs.getBranch("extensions.firebug.key.shortcut.");
         var shortcutNames = branch.getChildList("", {});
@@ -40,15 +40,20 @@ Firebug.ShortcutsModel = Obj.extend(Firebug.Module,
         // We need to touch keyset to apply keychanges without restart
         this.keysets = [];
         shortcutNames.forEach(this.initShortcut, this);
-        
+
         this.keysets.forEach(function(keyset) {
             keyset.parentNode.insertBefore(keyset, keyset.nextSibling);
-        })
-        
+        });
+
+        var disabledKeyElements = Firefox.getElementById("mainKeyset").
+            querySelectorAll("*[disabled=true]");
+        for each(var elem in disabledKeyElements)
+            elem.setAttribute("disabled", "false");
+
         this.keysets = null;
     },
 
-    initShortcut : function(element, index, array)
+    initShortcut: function(element, index, array)
     {
         var branch = Services.prefs.getBranch("extensions.firebug.key.");
         var shortcut = branch.getCharPref("shortcut." + element);
@@ -95,8 +100,32 @@ Firebug.ShortcutsModel = Obj.extend(Firebug.Module,
 
         // Modify shortcut for global key, if it exists
         var keyElem = Firefox.getElementById("key_" + element);
-        if (!keyElem)
+
+        if (keyElem)
+        {
+            if (FBTrace.DBG_SHORTCUTS)
+            {
+                FBTrace.sysout("Firebug.ShortcutsModel.initShortcut; global shortcut",
+                    {key: key, modifiers: modifiers});
+            }
+
+            // Disable existing global shortcuts
+            var existingKeyElements = Firefox.getElementById("mainKeyset").children;
+            for each (var existingKeyElement in existingKeyElements)
+            {
+                if (existingKeyElement.id != "key_"+element &&
+                    existingKeyElement.getAttribute(attr) == key &&
+                    existingKeyElement.getAttribute("modifiers") == modifiers)
+                {
+                    existingKeyElement.setAttribute("disabled", "true");
+                    break;
+                }
+            }
+        }
+        else
+        {
             return;
+        }
 
         keyElem.setAttribute("modifiers", modifiers);
         keyElem.setAttribute(attr, key);

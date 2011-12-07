@@ -5,11 +5,11 @@
 
     <!-- Shortcuts and commands that must be enabled in browser.xul scope -->
     <keyset id="mainKeyset">
-        <key id="key_toggleFirebug" keycode="VK_F12" command="cmd_toggleFirebug"/>
-        <key id="key_toggleInspecting" key="c" modifiers="accel,shift" command="cmd_toggleInspecting" />
-        <key id="key_focusCommandLine" key="l" modifiers="accel,shift" command="cmd_focusCommandLine"/>
-        <key id="key_detachFirebug" keycode="VK_F12" modifiers="accel" command="cmd_detachFirebug"/>
-        <key id="key_closeFirebug" keycode="VK_F12" modifiers="shift" command="cmd_closeFirebug"/>
+        <key id="key_toggleFirebug" keycode="VK_F12" command="cmd_toggleFirebug" position="1"/>
+        <key id="key_toggleInspecting" key="c" modifiers="accel,shift" command="cmd_toggleInspecting" position="2"/>
+        <key id="key_focusCommandLine" key="l" modifiers="accel,shift" command="cmd_focusCommandLine" position="3"/>
+        <key id="key_detachFirebug" keycode="VK_F12" modifiers="accel" command="cmd_detachFirebug" position="4"/>
+        <key id="key_closeFirebug" keycode="VK_F12" modifiers="shift" command="cmd_closeFirebug" position="5"/>
     </keyset>
 
     <commandset id="mainCommandSet">
