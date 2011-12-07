@@ -610,7 +610,7 @@ FirebugReps.Arr = domplate(Firebug.Rep,
         // the array exceeds specified limit.
         var arr = this.getRealObject(object, context);
         var limit = Options.get("multiHighlightLimit");
-        if (!arr || arr.length > limit)
+        if (!arr || (limit > 0 && arr.length > limit))
         {
             if (Css.hasClass(target, "arrayLeftBracket ") ||
                 Css.hasClass(target, "arrayRightBracket"))
