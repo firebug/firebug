@@ -554,11 +554,11 @@ FirebugReps.Arr = domplate(Firebug.Rep,
     {
         function isInteger(x)
         {
-            var y = parseInt(x);
+            var y = parseInt(x, 10);
             if (isNaN(y))
                 return false;
-           return x==y && x.toString() == y.toString();
-        } 
+           return x == y && x.toString() == y.toString();
+        }
 
         var n = 0;
         var props = Object.getOwnPropertyNames(array);
