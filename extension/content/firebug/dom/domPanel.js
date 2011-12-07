@@ -616,7 +616,7 @@ Firebug.DOMBasePanel.prototype = Obj.extend(Firebug.Panel,
         var rep = Firebug.getRep(value);
         var tag = rep.shortTag ? rep.shortTag : rep.tag;
 
-        var hasProperties = Obj.hasProperties(value, Firebug.showEnumerableProperties,
+        var hasProperties = Obj.hasProperties(value, !Firebug.showEnumerableProperties,
             Firebug.showOwnProperties);
 
         var valueType = typeof(value);
@@ -636,7 +636,7 @@ Firebug.DOMBasePanel.prototype = Obj.extend(Firebug.Panel,
             if (valueType === "function" && proto)
             {
                 hasChildren = hasChildren || Obj.hasProperties(proto,
-                    Firebug.showEnumerableProperties, Firebug.showOwnProperties);
+                    !Firebug.showEnumerableProperties, Firebug.showOwnProperties);
             }
         }
 

@@ -56,11 +56,11 @@ Obj.descend = function(prototypeParent, childProperties)
 /**
  * Returns true if the passed object has any properties, otherwise returns false.
  *
- * @param {Object} ob Inspecte object
- * @param {Object} enumerableOnly Only check enumerable properties (optional)
- * @param {Object} ownOnly Only check own properties not inherited (optional)
+ * @param {Object} ob Inspected object
+ * @param {Object} nonEnumProps If set to true, check also non-enumerable properties (optional)
+ * @param {Object} ownPropsOnly If set to true, only check own properties not inherited (optional)
  */
-Obj.hasProperties = function(ob, enumerableOnly, ownOnly)
+Obj.hasProperties = function(ob, nonEnumProps, ownPropsOnly)
 {
     try
     {
@@ -74,9 +74,9 @@ Obj.hasProperties = function(ob, enumerableOnly, ownOnly)
             return true;
         }
 
-        // The default case (both options false) is relativelly simple.
+        // The default case (both options false) is relatively simple.
         // Just use for..in loop.
-        if (!enumerableOnly && !ownOnly)
+        if (!nonEnumProps && !ownPropsOnly)
         {
             for (var name in ob)
             {
@@ -90,17 +90,13 @@ Obj.hasProperties = function(ob, enumerableOnly, ownOnly)
         }
 
         var type = typeof(ob);
-        if (type != "object")
-        {
-            if (type == "string" && ob.length)
-                return true;
-            return false;
-        }
+        if (type == "string" && ob.length)
+            return true;
 
-        if (enumerableOnly)
-            props = Object.keys(ob);
-        else
+        if (nonEnumProps)
             props = Object.getOwnPropertyNames(ob);
+        else
+            props = Object.keys(ob);
 
         if (props.length)
         {
@@ -112,19 +108,23 @@ Obj.hasProperties = function(ob, enumerableOnly, ownOnly)
         }
 
         // Not interested in inherited properties, bail out.
-        if (ownOnly)
+        if (ownPropsOnly)
             return false;
 
         // Climb prototype chain.
         var inheritedProps = [];
         var parent = Object.getPrototypeOf(ob);
         if (parent)
-            return this.hasProperties(parent, enumerableOnly, ownOnly);
+            return this.hasProperties(parent, nonEnumProps, ownPropsOnly);
     }
     catch (exc)
     {
-        if (FBTrace.DBG_ERRORS)
-            FBTrace.sysout("lib.hasProperties(" + Str.safeToString(ob) + ") ERROR " + exc, exc);
+        // Primitive (non string) objects will throw an exception when passed into
+        // Object.keys or Object.getOwnPropertyNames APIs.
+        // There are also many of "security error" exceptions I guess none is really
+        // necessary to be dispalyed in FBTrace console so, remove the tracing for now.
+        // if (FBTrace.DBG_ERRORS)
+        //     FBTrace.sysout("lib.hasProperties(" + Str.safeToString(ob) + ") ERROR " + exc, exc);
 
         // workaround for https://bugzilla.mozilla.org/show_bug.cgi?id=648560
         if (ob.wrappedJSObject)
