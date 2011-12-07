@@ -557,7 +557,7 @@ FirebugReps.Arr = domplate(Firebug.Rep,
             var y = parseInt(x, 10);
             if (isNaN(y))
                 return false;
-           return x == y && x.toString() == y.toString();
+           return x === y.toString();
         }
 
         var n = 0;
