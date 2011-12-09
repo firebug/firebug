@@ -201,9 +201,10 @@ Firebug.CommandLine.Popup = Obj.extend(Firebug.Module,
 
     reattach: function(context)
     {
-        if (FBTrace.DBG_ERRORS && !context)
+        if (!context)
         {
-            FBTrace.sysout("commandLinePopup.reattach; ERROR No context");
+            if (FBTrace.DBG_ERRORS)
+                FBTrace.sysout("commandLinePopup.reattach; ERROR No context");
             return;
         }
 

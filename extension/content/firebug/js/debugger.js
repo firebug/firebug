@@ -2914,9 +2914,10 @@ Firebug.JSDebugClient =
         {
             rejection.push(true);
 
-            FBTrace.sysout("Firebug.JSDebugClient onPauseJSDRequested rejected to suspend; " +
-                "Current debugger: " + Firebug.Debugger.debuggerName + ", requestor debugger: " +
-                debuggerName);
+            if (FBTrace.DBG_ERRORS)
+                FBTrace.sysout("Firebug.JSDebugClient onPauseJSDRequested rejected to suspend; " +
+                    "Current debugger: " + Firebug.Debugger.debuggerName + ", requestor debugger: " +
+                    debuggerName);
         }
 
         //Firebug.connection.dispatch("onPauseJSDRequested", arguments);

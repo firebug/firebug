@@ -982,7 +982,15 @@ Firebug.NetMonitor.NetInfoBody = domplate(Firebug.Rep, new Firebug.Listener(),
         netInfoBox.selectedTab.setAttribute("aria-selected", "true");
 
         var file = Firebug.getRepObject(netInfoBox);
-        var context = Firebug.getElementPanel(netInfoBox).context;
+        var panel = Firebug.getElementPanel(netInfoBox);
+        if (!panel)
+        {
+            if (FBTrace.DBG_ERRORS)
+                FBTrace.sysout("net.selectTab; ERROR no panel");
+            return;
+        }
+
+        var context = panel.context;
         this.updateInfo(netInfoBox, file, context);
     },
 

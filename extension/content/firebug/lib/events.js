@@ -409,7 +409,8 @@ Events.removeEventListener = function(parent, eventId, listener, capturing)
             stack: frames,
         };
 
-        FBTrace.sysout("Events.removeEventListener; ERROR not registered!", info);
+        // xxxHonza: it's not necessary to polute the tracing console with this message.
+        //FBTrace.sysout("Events.removeEventListener; ERROR not registered!", info);
     }
 }
 
