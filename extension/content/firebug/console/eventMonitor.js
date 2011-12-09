@@ -1,83 +1,113 @@
 /* See license.txt for terms of usage */
 
 define([
+    "firebug/lib/object",
+    "firebug/firebug",
     "firebug/lib/trace",
     "firebug/lib/events",
 ],
-function(FBTrace, Events) {
+function(Obj, Firebug, FBTrace, Events) {
 
 // ********************************************************************************************* //
-// Constants
+// EventMonitor Module
 
-var EventMonitor = {};
-
-// ********************************************************************************************* //
-// Event Monitoring
-
-EventMonitor.toggleMonitorEvents = function(object, type, state, context)
+Firebug.EventMonitor = Obj.extend(Firebug.Module,
 {
-    if (state)
-        EventMonitor.unmonitorEvents(object, type, context);
-    else
-        EventMonitor.monitorEvents(object, type, context);
-};
+    dispatchName: "eventMonitor",
 
-EventMonitor.monitorEvents = function(object, type, context)
-{
-    if (!EventMonitor.areEventsMonitored(object, type, context) && object && object.addEventListener)
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+    // Module
+
+    destroyContext: function(context, persistedState)
     {
-        if (!context.onMonitorEvent)
-            context.onMonitorEvent = function(event) { Firebug.Console.log(event, context); };
-
-        if (!context.eventsMonitored)
-            context.eventsMonitored = [];
-
-        context.eventsMonitored.push({object: object, type: type});
-
-        if (!type)
-            Events.attachAllListeners(object, context.onMonitorEvent, context);
-        else
-            Events.addEventListener(object, type, context.onMonitorEvent, false);
-    }
-};
-
-EventMonitor.unmonitorEvents = function(object, type, context)
-{
-    var eventsMonitored = context.eventsMonitored;
-
-    for (var i = 0; i < eventsMonitored.length; ++i)
-    {
-        if (eventsMonitored[i].object == object && eventsMonitored[i].type == type)
+        // Clean up all existing monitors.
+        var eventsMonitored = context.eventsMonitored;
+        if (eventsMonitored)
         {
-            eventsMonitored.splice(i, 1);
+            for (var i=0; i<eventsMonitored.length; ++i)
+            {
+                var m = eventsMonitored[i];
+
+                if (!m.type)
+                    Events.detachAllListeners(m.object, context.onMonitorEvent, context);
+                else
+                    Events.removeEventListener(m.object, m.type, context.onMonitorEvent, false);
+            }
+        }
+    },
+
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+    // Event Monitor
+
+    toggleMonitorEvents: function(object, type, state, context)
+    {
+        if (state)
+            this.unmonitorEvents(object, type, context);
+        else
+            this.monitorEvents(object, type, context);
+    },
+
+    monitorEvents: function(object, type, context)
+    {
+        if (!this.areEventsMonitored(object, type, context) && object &&
+            object.addEventListener)
+        {
+            if (!context.onMonitorEvent)
+                context.onMonitorEvent = function(event) { Firebug.Console.log(event, context); };
+
+            if (!context.eventsMonitored)
+                context.eventsMonitored = [];
+
+            context.eventsMonitored.push({object: object, type: type});
 
             if (!type)
-                Events.detachAllListeners(object, context.onMonitorEvent, context);
+                Events.attachAllListeners(object, context.onMonitorEvent, context);
             else
-                Events.removeEventListener(object, type, context.onMonitorEvent, false);
-            break;
+                Events.addEventListener(object, type, context.onMonitorEvent, false);
         }
-    }
-};
+    },
 
-EventMonitor.areEventsMonitored = function(object, type, context)
-{
-    var eventsMonitored = context.eventsMonitored;
-    if (eventsMonitored)
+    unmonitorEvents: function(object, type, context)
     {
-        for (var i = 0; i < eventsMonitored.length; ++i)
+        var eventsMonitored = context.eventsMonitored;
+
+        for (var i=0; i<eventsMonitored.length; ++i)
         {
             if (eventsMonitored[i].object == object && eventsMonitored[i].type == type)
-                return true;
-        }
-    }
+            {
+                eventsMonitored.splice(i, 1);
 
-    return false;
-};
+                if (!type)
+                    Events.detachAllListeners(object, context.onMonitorEvent, context);
+                else
+                    Events.removeEventListener(object, type, context.onMonitorEvent, false);
+                break;
+            }
+        }
+    },
+
+    areEventsMonitored: function(object, type, context)
+    {
+        var eventsMonitored = context.eventsMonitored;
+        if (eventsMonitored)
+        {
+            for (var i = 0; i < eventsMonitored.length; ++i)
+            {
+                if (eventsMonitored[i].object == object && eventsMonitored[i].type == type)
+                    return true;
+            }
+        }
+
+        return false;
+    }
+});
 
 // ********************************************************************************************* //
+// Registration & Export
 
-return EventMonitor;
+Firebug.registerModule(Firebug.EventMonitor);
+
+return Firebug.EventMonitor;
 
 // ********************************************************************************************* //
 });
