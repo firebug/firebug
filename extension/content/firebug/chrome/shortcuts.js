@@ -110,7 +110,7 @@ Firebug.ShortcutsModel = Obj.extend(Firebug.Module,
         }
 
         // Disable existing global shortcuts
-        var selector = "key["+attr+"='VK_F12'][modifiers='"+modifiers+"']"
+        var selector = "key["+attr+"='"+key+"'][modifiers='"+modifiers+"']"
             + ":not([id='key_"+element+"']):not([disabled='true'])";
         var existingKeyElements = keyElem.ownerDocument.querySelectorAll(selector);
         for (var i = existingKeyElements.length; i--; )
