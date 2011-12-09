@@ -624,8 +624,7 @@
             // The last menu item is for opening all panels.
             var menuItem = document.createElement("menuitem");
             menuItem.setAttribute("label", FBL.$STR("firebug.Show_All_Panels"));
-            var listener = FBL.bind(this.panelBar.openAllPanels, this.panelBar);
-            menuItem.addEventListener("command", listener, false);
+            menuItem.setAttribute("class", "panelBarTabListOpenAllPanels");
             this.popup.appendChild(menuItem);
 
             return true;
@@ -637,6 +636,13 @@
 
         <handler event="command"><![CDATA[
             var menuItem = event.originalTarget;
+            var className = menuItem.getAttribute("class");
+            if (className == "panelBarTabListOpenAllPanels")
+            {
+                this.panelBar.openAllPanels(event);
+                return;
+            }
+
             var panelName = menuItem.panelType.prototype.name;
             this.panelBar.selectPanel(panelName);
         ]]></handler>
