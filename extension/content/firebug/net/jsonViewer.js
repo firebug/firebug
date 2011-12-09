@@ -14,12 +14,11 @@ define([
     "firebug/dom/toggleBranch",
     "firebug/lib/array",
     "firebug/firefox/system",
-    "firebug/lib/locale",
     "firebug/dom/domPanel",
     "firebug/chrome/reps"
 ],
 function(Obj, Firebug, Domplate, Locale, Events, Css, Dom, Http, Str, Json,
-    ToggleBranch, Arr, System, Locale) {
+    ToggleBranch, Arr, System) {
 
 // ********************************************************************************************* //
 
@@ -188,6 +187,13 @@ Firebug.JSONViewerModel.Preview = domplate(
 
         var preview = Dom.getAncestorByClass(sortLink, "jsonPreview");
         var body = Dom.getAncestorByClass(sortLink, "netInfoJSONText");
+        if (!body)
+        {
+            if (FBTrace.DBG_ERRORS)
+                FBTrace.sysout("jsonViewer.onSort; ERROR body is null");
+            return;
+        }
+
         this.render(body, preview.repObject, body.context);
     },
 
