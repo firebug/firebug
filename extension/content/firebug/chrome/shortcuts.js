@@ -39,28 +39,17 @@ Firebug.ShortcutsModel = Obj.extend(Firebug.Module,
 
         // We need to touch keyset to apply keychanges without restart
         this.keysets = [];
+        this.disabledKeyElements = [];
         shortcutNames.forEach(this.initShortcut, this);
 
         this.keysets.forEach(function(keyset) {
             keyset.parentNode.insertBefore(keyset, keyset.nextSibling);
         });
 
-        var disabledKeyElements = Firefox.getElementById("mainKeyset").
-            querySelectorAll("*[disabled=true]");
+        for each(var elem in this.disabledKeyElements)
+            elem.removeAttribute("disabled");
 
-        try
-        {
-            for each(var elem in disabledKeyElements)
-                elem.setAttribute("disabled", "false");
-        }
-        catch (err)
-        {
-            if (FBTrace.DBG_ERRORS)
-                FBTrace.sysout("shortcuts.initShortcuts; EXCEPTION " + err, err);
-        }
-
-
-        this.keysets = null;
+        this.keysets = this.disabledKeyElements = null;
     },
 
     initShortcut: function(element, index, array)
@@ -111,38 +100,24 @@ Firebug.ShortcutsModel = Obj.extend(Firebug.Module,
         // Modify shortcut for global key, if it exists
         var keyElem = Firefox.getElementById("key_" + element);
 
-        if (keyElem)
-        {
-            if (FBTrace.DBG_SHORTCUTS)
-            {
-                FBTrace.sysout("Firebug.ShortcutsModel.initShortcut; global shortcut",
-                    {key: key, modifiers: modifiers});
-            }
-
-            // Disable existing global shortcuts
-            var existingKeyElements = Firefox.getElementById("mainKeyset").children;
-            for each (var existingKeyElement in existingKeyElements)
-            {
-                try
-                {
-                    if (existingKeyElement.id != "key_"+element &&
-                        existingKeyElement.getAttribute(attr) == key &&
-                        existingKeyElement.getAttribute("modifiers") == modifiers)
-                    {
-                        existingKeyElement.setAttribute("disabled", "true");
-                        break;
-                    }
-                }
-                catch (err)
-                {
-                    if (FBTrace.DBG_ERRORS)
-                        FBTrace.sysout("shortcuts.initShortcut; EXCEPTION " + err, err);
-                }
-            }
-        }
-        else
-        {
+        if (!keyElem)
             return;
+
+        if (FBTrace.DBG_SHORTCUTS)
+        {
+            FBTrace.sysout("Firebug.ShortcutsModel.initShortcut; global shortcut",
+                {key: key, modifiers: modifiers});
+        }
+
+        // Disable existing global shortcuts
+        var selector = "key["+attr+"='VK_F12'][modifiers='"+modifiers+"']"
+            + ":not([id='key_"+element+"']):not([disabled='true'])";
+        var existingKeyElements = keyElem.ownerDocument.querySelectorAll(selector);
+        for (var i = existingKeyElements.length; i--; )
+        {
+            var existingKeyElement = existingKeyElements[i];
+            existingKeyElement.setAttribute("disabled", "true");
+            this.disabledKeyElements.push(existingKeyElement);
         }
 
         keyElem.setAttribute("modifiers", modifiers);
