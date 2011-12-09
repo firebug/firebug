@@ -109,6 +109,18 @@ Firebug.TabWatcher = Obj.extend(new Firebug.Listener(),
         }
 
         TraceModule.removeListener(this.traceListener);
+
+        var listeners = TabWatcherUnloader.listeners;
+        if (listeners.length > 0)
+        {
+            if (FBTrace.DBG_ERRORS)
+            {
+                FBTrace.sysout("-> tabWatcher.destroy; ERROR unregistered listeners! (" +
+                    listeners.length + ")", listeners);
+            }
+
+            TabWatcherUnloader.unregisterAll();
+        }
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -457,6 +469,12 @@ Firebug.TabWatcher = Obj.extend(new Firebug.Listener(),
 
         this.unwatchContext(win, context);
 
+        // Make sure all listeners ('unload' and 'pagehide') are removed.
+        Win.iterateWindows(win, function(win)
+        {
+            TabWatcherUnloader.unregisterWindow(win);
+        });
+
         // we might later allow extensions to reject unwatch
         return true;
     },
@@ -715,8 +733,8 @@ var TabWatcherUnloader =
         Events.addEventListener(win, eventName, listener, false);
 
         if (FBTrace.DBG_WINDOWS)
-            FBTrace.sysout("-> tabWatcher.watchWindow addEventListener for " + eventName+
-                " on "+Win.safeGetWindowLocation(win));
+            FBTrace.sysout("-> tabWatcher.registerWindow; addEventListener for " + eventName+
+                " on " + Win.safeGetWindowLocation(win));
 
         this.listeners.push({
             window: win,
@@ -732,11 +750,30 @@ var TabWatcherUnloader =
         {
             var listener = this.listeners[i];
             if (listener.window != win)
+            {
                 newListeners.push(listener);
+            }
             else
+            {
                 Events.removeEventListener(win, listener.eventName, listener.listener, false);
+
+                if (FBTrace.DBG_WINDOWS)
+                    FBTrace.sysout("-> tabWatcher.unregisterWindow; removeEventListener for " +
+                        listener.eventName + " on " + Win.safeGetWindowLocation(win));
+            }
         }
         this.listeners = newListeners;
+    },
+
+    unregisterAll: function()
+    {
+        for (var i=0; i<this.listeners.length; i++)
+        {
+            var listener = this.listeners[i];
+            Events.removeEventListener(listener.win, listener.eventName, listener.listener, false);
+        }
+
+        this.listeners = [];
     },
 
     onPageHide: function(event)
@@ -763,6 +800,8 @@ var TabWatcherUnloader =
         onUnloadWindow(event);
     },
 };
+
+Firebug.TabWatcherUnloader = TabWatcherUnloader;
 
 // ********************************************************************************************* //
 
