@@ -757,6 +757,13 @@ Firebug.CommandLine = Obj.extend(Firebug.Module,
         this.autoCompleter.hide();
         Persist.persistObjects(this, panelState);
         // more of our work is done in the Console
+
+        // All command line handlers should be removed at this moment.
+        for (var handler in context.activeCommandLineHandlers)
+        {
+            FBTrace.sysout("commandLine.destroyContext; ERROR active commandlinehandler for: " +
+                context.getName());
+        }
     },
 
     showPanel: function(browser, panel)
@@ -1394,7 +1401,7 @@ Firebug.CommandLine.injector =
         if (FBTrace.DBG_COMMANDLINE)
         {
             FBTrace.sysout("commandLine.addCommandLineListener to document in window" +
-                win.location + " with console ", win.console);
+                win.location + " with console ");
         }
     },
 
@@ -1402,11 +1409,16 @@ Firebug.CommandLine.injector =
     {
         var boundHandler = this.getCommandLineListener(context, win);
         if (boundHandler)
+        {
             Events.removeEventListener(win.document, "firebugExecuteCommand", boundHandler, true);
 
-        if (FBTrace.DBG_COMMANDLINE)
-            FBTrace.sysout("commandLine.detachCommandLineListener "+boundHandler+
-                " in window with console "+win.location);
+            var consoleHandler = Firebug.Console.injector.getConsoleHandler(context, win);
+            delete context.activeCommandLineHandlers[consoleHandler.token];
+
+            if (FBTrace.DBG_COMMANDLINE)
+                FBTrace.sysout("commandLine.detachCommandLineListener "+boundHandler+
+                    " in window with console "+win.location);
+        }
     },
 
     getCommandLineListener: function(context, win)
