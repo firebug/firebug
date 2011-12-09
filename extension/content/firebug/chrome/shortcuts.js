@@ -47,8 +47,18 @@ Firebug.ShortcutsModel = Obj.extend(Firebug.Module,
 
         var disabledKeyElements = Firefox.getElementById("mainKeyset").
             querySelectorAll("*[disabled=true]");
-        for each(var elem in disabledKeyElements)
-            elem.setAttribute("disabled", "false");
+
+        try
+        {
+            for each(var elem in disabledKeyElements)
+                elem.setAttribute("disabled", "false");
+        }
+        catch (err)
+        {
+            if (FBTrace.DBG_ERRORS)
+                FBTrace.sysout("shortcuts.initShortcuts; EXCEPTION " + err, err);
+        }
+
 
         this.keysets = null;
     },
@@ -113,12 +123,20 @@ Firebug.ShortcutsModel = Obj.extend(Firebug.Module,
             var existingKeyElements = Firefox.getElementById("mainKeyset").children;
             for each (var existingKeyElement in existingKeyElements)
             {
-                if (existingKeyElement.id != "key_"+element &&
-                    existingKeyElement.getAttribute(attr) == key &&
-                    existingKeyElement.getAttribute("modifiers") == modifiers)
+                try
                 {
-                    existingKeyElement.setAttribute("disabled", "true");
-                    break;
+                    if (existingKeyElement.id != "key_"+element &&
+                        existingKeyElement.getAttribute(attr) == key &&
+                        existingKeyElement.getAttribute("modifiers") == modifiers)
+                    {
+                        existingKeyElement.setAttribute("disabled", "true");
+                        break;
+                    }
+                }
+                catch (err)
+                {
+                    if (FBTrace.DBG_ERRORS)
+                        FBTrace.sysout("shortcuts.initShortcut; EXCEPTION " + err, err);
                 }
             }
         }
