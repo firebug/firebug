@@ -216,7 +216,6 @@ Firebug.Inspector = Obj.extend(Firebug.Module,
         this.clearAllHighlights();
 
         this.inspecting = true;
-        this.inspectingContext = context;
 
         Firebug.chrome.setGlobalAttribute("cmd_toggleInspecting", "checked", "true");
         this.attachInspectListeners(context);
@@ -248,13 +247,16 @@ Firebug.Inspector = Obj.extend(Firebug.Module,
      */
     inspectNode: function(node)
     {
+        if (!this.inspecting)
+            return;
+
         if (node && node.nodeType != 1)
             node = node.parentNode;
 
         if (node && Firebug.shouldIgnore(node) && !node.fbProxyFor)
             return;
 
-        var context = this.inspectingContext;
+        var context = this.inspectingPanel.context;
 
         if (this.inspectTimeout)
         {
@@ -300,7 +302,7 @@ Firebug.Inspector = Obj.extend(Firebug.Module,
         if (!this.inspecting)
             return;
 
-        var context = this.inspectingContext;
+        var context = this.inspectingPanel.context;
 
         if (context.stopped)
             Firebug.Debugger.freeze(context);
