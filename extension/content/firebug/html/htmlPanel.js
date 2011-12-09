@@ -1073,6 +1073,15 @@ Firebug.HTMLPanel.prototype = Obj.extend(WalkingPanel,
         for (var i=0; i<this.inspectorHistory.length; i++)
             delete this.inspectorHistory[i];
         delete this.inspectorHistory;
+
+        Win.iterateWindows(this.context.window, Obj.bind(function(win)
+        {
+            var doc = win.document;
+            Events.removeEventListener(doc, "DOMAttrModified", this.onMutateAttr, false);
+            Events.removeEventListener(doc, "DOMCharacterDataModified", this.onMutateText, false);
+            Events.removeEventListener(doc, "DOMNodeInserted", this.onMutateNode, false);
+            Events.removeEventListener(doc, "DOMNodeRemoved", this.onMutateNode, false);
+        }, this));
     },
 
     initializeNode: function(oldPanelNode)
@@ -1119,6 +1128,17 @@ Firebug.HTMLPanel.prototype = Obj.extend(WalkingPanel,
                 Win.iterateWindows(this.context.window, Obj.bind(function(win)
                 {
                     var doc = win.document;
+
+                    // xxxHonza: an iframe doesn't have to be loaded yet so, do not
+                    // register mutation elements in such cases since they wouldn't
+                    // be removed.
+                    // The listeners can be registered later in watchWindowDelayed,
+                    // but it's also risky. Mutation listeners should be registered
+                    // at the moment when it's clear that the window/frame has been
+                    // loaded.
+                    if (doc.location == "about:blank")
+                        return;
+
                     Events.addEventListener(doc, "DOMAttrModified", this.onMutateAttr, false);
                     Events.addEventListener(doc, "DOMCharacterDataModified", this.onMutateText, false);
                     Events.addEventListener(doc, "DOMNodeInserted", this.onMutateNode, false);
@@ -1182,6 +1202,11 @@ Firebug.HTMLPanel.prototype = Obj.extend(WalkingPanel,
         if (this.context.attachedMutation)
         {
             var doc = win.document;
+
+            // See HTMLPanel.show
+            if (doc.location == "about:blank")
+                return;
+
             Events.addEventListener(doc, "DOMAttrModified", this.onMutateAttr, false);
             Events.addEventListener(doc, "DOMCharacterDataModified", this.onMutateText, false);
             Events.addEventListener(doc, "DOMNodeInserted", this.onMutateNode, false);
