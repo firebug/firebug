@@ -59,7 +59,7 @@ createFirebugChrome: function(win)  // chrome is created in caller window.
 
 var FirebugChrome =
 {
-    // TODO: remove this property, add getters for location, title , focusedElement, setter popup
+    // TODO: remove this property, add getters for location, title, focusedElement, setter popup
 
     dispatchName: "FirebugChrome",
 
@@ -137,7 +137,7 @@ var FirebugChrome =
             FBTrace.sysout("chrome.initialized in " + win.location + " with " +
                 (panelBar1 ? panelBar1.browser.ownerDocument.documentURI : "no panel bar"), win);
 
-        // At this point both panelBars can be already loaded, since the src is specified
+        // At this point both panelBars can be loaded already, since the src is specified
         // in firebugOveralay.xul (asynchronously loaded). If yes, start up
         // the initialization sequence now.
         if (browser1Complete && browser2Complete)
@@ -203,15 +203,15 @@ var FirebugChrome =
             this.updatePanelBar1(Firebug.panelTypes);
 
             // Internationalize Firebug UI before firing initializeUI
-            // (so, putting version into Firebug About menut operates with correct label)
+            // (so putting version into Firebug About menu operates with correct label)
             Firebug.internationalizeUI(win.document);
             Firebug.internationalizeUI(top.document);
 
-            // xxxHonza: is there any reason why we don't distribute "initializeUI"
+            // xxxHonza: Is there any reason why we don't distribute "initializeUI"
             // event to modules?
             Firebug.initializeUI();
 
-            // Append all registered styleesheets into Firebug UI.
+            // Append all registered stylesheets into Firebug UI.
             for (var i=0; i<Firebug.stylesheets.length; i++)
             {
                 var uri = Firebug.stylesheets[i];
@@ -323,8 +323,8 @@ var FirebugChrome =
         var cmdPopup = this.getElementById("fbCommandPopup");
         var cmdPopupBrowser = this.getElementById("fbCommandPopupBrowser");
 
-        // Console panel can be displayed for all the other panels
-        // (except of the console panel itself)
+        // Command Line Popup can be displayed for all the other panels
+        // (except for the Console panel)
         // XXXjjb, xxxHonza: this should be somehow better, more generic and extensible...
         var consolePanelType = Firebug.getPanelType("console");
         if (consolePanelType == panelType)
@@ -472,7 +472,7 @@ var FirebugChrome =
     {
         var resumeBox = Firebug.chrome.$('fbResumeBox');
 
-        // xxxHonza: don't focus Firebug window now. It would bring Firebug detached window
+        // xxxHonza: Don't focus Firebug window now. It would bring Firebug detached window
         // to the top every time the attached Firefox page is refreshed, which is annoying.
         //this.focus();  // bring to users attention
 
@@ -514,12 +514,12 @@ var FirebugChrome =
 
     gotoSiblingTab : function(goRight)
     {
-        if (FirebugChrome.$('fbContentBox').collapsed)
+        if (FirebugChrome.$("fbContentBox").collapsed)
             return;
         var i, currentIndex = newIndex = -1, currentPanel = this.getSelectedPanel(), newPanel;
         var panelTypes = Firebug.getMainPanelTypes(Firebug.currentContext);
 
-        /*get current panel's index (is there a simpler way for this?*/
+        // Get current panel's index (is there a simpler way for this?
         for (i = 0; i < panelTypes.length; i++)
         {
             if (panelTypes[i].prototype.name === currentPanel.name)
@@ -598,8 +598,8 @@ var FirebugChrome =
      *  Set this.selection by object type analysis, passing the object to all panels to
      *      find the best match
      *  @param object the new this.selection object
-     *  @param panelName matching panel.name will be used if its supportsObject returns true value
-     *  @param sidePanelName default side panel name, used if its supportObject returns true value
+     *  @param panelName matching panel.name will be used, if its supportsObject returns true value
+     *  @param sidePanelName default side panel name used, if its supportsObject returns true value
      *  @param forceUpdate if true, then (object === this.selection) is ignored and
      *      updateSelection is called
      */
@@ -681,8 +681,9 @@ var FirebugChrome =
         if (this.previouslyFocused)
             this.focus();
 
-        if (canceled && this.previousPanelName)  // revert
+        if (canceled && this.previousPanelName)
         {
+            // revert
             if (this.previouslyCollapsed)
                 Firebug.showBar(false);
 
@@ -691,8 +692,9 @@ var FirebugChrome =
             else
                 this.selectPanel(this.previousPanelName, this.previousSidePanelName);
         }
-        else // else stay on the switchToPanel
+        else
         {
+            // else stay on the switchToPanel
             this.selectPanel(switchToPanelName);
             if (switchToPanel.selection)
                 this.select(switchToPanel.selection);
@@ -721,9 +723,7 @@ var FirebugChrome =
 
                 if (location && (location instanceof Firebug.SourceFile ||
                     location instanceof CSSStyleSheet))
-                {
                     location = location.href;
-                }
             }
         }
 
@@ -762,9 +762,9 @@ var FirebugChrome =
 
     setFirebugContext: function(context)
     {
-         // This sets the global value of Firebug.currentContext in the window that this
-         // chrome is compiled into. Note that for firebug.xul, the Firebug object is shared
-         // across windows, but not FirebugChrome and Firebug.currentContext
+         // This sets the global value of Firebug.currentContext in the window, that this
+         // chrome is compiled into. Note, that for firebug.xul the Firebug object is shared
+         // across windows, but not FirebugChrome and Firebug.currentContext.
          Firebug.currentContext = context;
 
          if (FBTrace.DBG_WINDOWS || FBTrace.DBG_DISPATCH || FBTrace.DBG_ACTIVATION)
@@ -834,7 +834,8 @@ var FirebugChrome =
         var panelTypes;
         if (Firebug.currentContext)
         {
-            panelTypes = Firebug.getSidePanelTypes(Firebug.currentContext, panelBar1.selectedPanel);
+            panelTypes = Firebug.getSidePanelTypes(Firebug.currentContext,
+                panelBar1.selectedPanel);
             panelBar2.updatePanels(panelTypes);
         }
 
@@ -870,7 +871,9 @@ var FirebugChrome =
             win.top.document.title = Locale.$STRF("WindowTitle", [title]);
         }
         else
+        {
             win.top.document.title = Locale.$STR("Firebug");
+        }
     },
 
     focusLocationList: function()
@@ -924,9 +927,9 @@ var FirebugChrome =
             else
             {
                 // Alright, let's update visibility of the separator. The separator
-                // is displayed only if there are some other buttons on the left side.
-                // Before showing the status separator let's see whethere there are any other
-                // button on the left.
+                // is displayed only, if there are some other buttons on the left side.
+                // Before showing the status separator let's see whether there are any other
+                // buttons on the left.
                 var hide = true;
                 var sibling = panelStatusSeparator.parentNode.previousSibling;
                 while (sibling)
@@ -1073,16 +1076,18 @@ var FirebugChrome =
         var items = [];
 
         for each(var pos in ["detached", "top", "bottom", "left", "right"])
+        {
             items.push({
                 label: Locale.$STR("position." + pos),
                 type: "radio",
                 command: bindFixed(this.setPosition, this, pos),
                 checked: Firebug.framePosition == pos
-            })
+            });
+        }
 
-        items.splice(1, 0, '-');
+        items.splice(1, 0, "-");
 
-        items[0].key = "key_detachFirebug"
+        items[0].key = "key_detachFirebug";
 
         for each(var i in items)
             Menu.createMenuItem(popup, i);
@@ -1091,14 +1096,14 @@ var FirebugChrome =
     swapBrowsers: function(oldBrowser, newBrowser)
     {
         var oldDoc = oldBrowser.contentDocument
-        // panels remember top window for which they were first opened
-        // so we need to destroy their views
+        // Panels remember top window, for which they were first opened.
+        // So we need to destroy their views.
         var styleSheet = oldDoc.styleSheets[0];
         var rulePos = styleSheet.cssRules.length;
         styleSheet.insertRule(
             "panel{display:-moz-box!important; visibility:collapse!important;}", rulePos);
 
-        // we need to deal with inner frames first since swapFrameLoaders
+        // We need to deal with inner frames first since swapFrameLoaders
         // doesn't work for type="chrome" browser containing type="content" browsers
         var frames = oldDoc.querySelectorAll("browser[type*=content], iframe[type*=content]");
         var tmpFrames = [], placeholders = [];
@@ -1171,7 +1176,7 @@ var FirebugChrome =
 
     setChromeDocumentAttribute: function(id, name, value)
     {
-        // Call as  Firebug.chrome.setChromeDocumentAttribute() to set attributes
+        // Call as Firebug.chrome.setChromeDocumentAttribute() to set attributes
         // in another window.
         var elt = FirebugChrome.$(id);
         if (elt)
@@ -1363,8 +1368,8 @@ var FirebugChrome =
             toggleFirebug.setAttribute("label", (collapsed == "true"?
                 Locale.$STR("firebug.ShowFirebug") : Locale.$STR("firebug.HideFirebug")));
 
-            // If Firebug is detached, hide the menu (F12 doesn't hide but just focuses the
-            // external window)
+            // If Firebug is detached, hide the menu ('Open Firebug' shortcut doesn't hide,
+            // but just focuses the external window)
             if (Firebug.isDetached())
                 toggleFirebug.setAttribute("collapsed", (collapsed == "true" ? "false" : "true"));
         }
@@ -1401,8 +1406,8 @@ var FirebugChrome =
 
     onContextShowing: function(event)
     {
-        // xxxHonza: This context-menu support can be used even in separate window, which
-        // doesn't contain the FBUI (panels).
+        // xxxHonza: This context-menu support can be used even in a separate window, which
+        // doesn't contain the Firebug UI (panels).
         //if (!panelBar1.selectedPanel)
         //    return false;
 
@@ -1546,8 +1551,8 @@ var FirebugChrome =
 
     onTooltipShowing: function(event)
     {
-        // xxxHonza: This tooltip support can be used even in separate window, which
-        // doesn't contain the FBUI (panels).
+        // xxxHonza: This tooltip support can be used even in a separate window, which
+        // doesn't contain the Firebug UI (panels).
         //if (!panelBar1.selectedPanel)
         //    return false;
 
@@ -1561,11 +1566,11 @@ var FirebugChrome =
         /* XXXjjb This causes the Script panel to show the function body over and over.
          * We need to clear it at least, but really we need to understand why the tooltip
          * should show the context menu object at all. One thing the contextMenuObject supports
-         * is peeking at function bodies when stopped a breakpoint.
+         * is peeking at function bodies when stopped at a breakpoint.
          * That case could be supported with clearing the contextMenuObject, but we don't
-         * know if that breaks something else. So maybe a popupMenuObject should be set
+         * know, if that breaks something else. So maybe a popupMenuObject should be set
          * on the context if that is what we want to support
-         * The other complication is that there seems to be another tooltip.
+         * The other complication is, that there seems to be another tooltip.
         if (this.contextMenuObject)
         {
             object = this.contextMenuObject;
@@ -1613,7 +1618,7 @@ var FirebugChrome =
 
         try
         {
-            // Firefox 4.0 implements new AddonManager. In case of Firefox 3.6 the module
+            // Firefox 4.0+ implements a new AddonManager. In case of Firefox 3.6 the module
             // is not avaialble and there is an exception.
             Components.utils["import"]("resource://gre/modules/AddonManager.jsm");
         }
@@ -1623,7 +1628,8 @@ var FirebugChrome =
 
         if (typeof(AddonManager) != "undefined")
         {
-            AddonManager.getAddonByID("firebug@software.joehewitt.com", function(addon) {
+            AddonManager.getAddonByID("firebug@software.joehewitt.com", function(addon)
+            {
                 openDialog("chrome://mozapps/content/extensions/about.xul", "",
                 "chrome,centerscreen,modal", addon);
             });
@@ -1671,7 +1677,7 @@ function panelSupportsObject(panelType, object, context)
     if (panelType)
     {
         try {
-            // This tends to throw exceptions often because some objects are weird
+            // This tends to throw exceptions often, because some objects are weird
             return panelType.prototype.supportsObject(object, typeof object, context)
         } catch (exc) {}
     }
@@ -1684,7 +1690,7 @@ function getBestPanelName(object, context, panelName)
     if (!panelName)
         panelName = context.panelName;
 
-    // Check if the suggested panel name supports the object, and if so, go with it
+    // Check, if the panel type of the suggested panel supports the object, and if so, go with it
     if (panelName)
     {
         var panelType = Firebug.getPanelType(panelName);
@@ -1729,7 +1735,7 @@ function getBestSidePanelName(sidePanelName, panelTypes)
 {
     if (sidePanelName)
     {
-        // Verify that the suggested panel name is in the acceptable list
+        // Verify, that the suggested panel name is in the acceptable list
         for (var i = 0; i < panelTypes.length; ++i)
         {
             if (panelTypes[i].prototype.name == sidePanelName)
@@ -1823,8 +1829,8 @@ function onSelectingPanel(event)
         panel.navigate(panel.location);
 
     // Hide all toolbars now. It's a responsibility of the new selected panel to show
-    // those toolbars that are necessary. This avoids the situation when naughty panel
-    // doesn't clean up its toolbars. This must be done before showPanel where visibility
+    // those toolbars, that are necessary. This avoids the situation, when naughty panel
+    // doesn't clean up its toolbars. This must be done before 'showPanel', where visibility
     // of the BON buttons is managed.
     var toolbar = FirebugChrome.$("fbToolbarInner");
     var child = toolbar.firstChild;
@@ -1834,11 +1840,11 @@ function onSelectingPanel(event)
         child = child.nextSibling;
     }
 
-    // Calling Firebug.showPanel causes dispatching "showPanel" to all modules.
+    // Calling Firebug.showPanel causes dispatching 'showPanel' to all modules.
     var browser = panel ? panel.context.browser : Firefox.getCurrentBrowser();
     Firebug.showPanel(browser, panel);
 
-    // Synchronize UI around panels. Execute the sync after showPanel so the logic
+    // Synchronize UI around panels. Execute the sync after 'showPanel' so the logic
     // can decide whether to display separators or not.
     // xxxHonza: The command line should be synced here as well.
     Firebug.chrome.syncLocationList();
@@ -1879,7 +1885,8 @@ function onSelectedSidePanel(event)
         sidePanel.select(panel.selection);
 
     var browser = sidePanel ? sidePanel.context.browser : Firefox.getCurrentBrowser();
-    Firebug.showSidePanel(browser, sidePanel);  // dispatch to modules
+    // dispatch to modules
+    Firebug.showSidePanel(browser, sidePanel);
 }
 
 function onPanelMouseOver(event)
@@ -1967,7 +1974,8 @@ function onPanelMouseUp(event)
     {
         var selection = event.target.ownerDocument.defaultView.getSelection();
         var target = selection.focusNode || event.target;
-        if(selection.focusNode === selection.anchorNode){
+        if (selection.focusNode === selection.anchorNode)
+        {
             var editable = Dom.getAncestorByClass(target, "editable");
             if (editable || Css.hasClass(event.target, "inlineExpander"))
             {
@@ -1977,21 +1985,28 @@ function onPanelMouseUp(event)
                 {
                     var distance = Math.abs(event.screenX - this.lastMouseDownPosition.x) +
                                       Math.abs(event.screenY - this.lastMouseDownPosition.y);
-                     // if mouse has moved far enough set selection at that point
+                    // If mouse has moved far enough, set selection at that point
                     if (distance > 3)
                         selectionData = {start: selFO, end: selFO};
-                     // otherwise leave selectionData undefined to select all text
+                    // otherwise leave selectionData undefined to select all text
                 }
                 else if (selFO < selAO)
+                {
                     selectionData = {start: selFO, end: selAO};
+                }
                 else
+                {
                     selectionData = {start: selAO, end: selFO};
+                }
 
                 if(editable)
+                {
                     Firebug.Editor.startEditing(editable, null, null, selectionData);
-                else {
-                    Firebug.Editor.setSelection(selectionData || {start: selFO, end: selFO})
-                    selection.removeAllRanges()
+                }
+                else
+                {
+                    Firebug.Editor.setSelection(selectionData || {start: selFO, end: selFO});
+                    selection.removeAllRanges();
                 }
                 Events.cancelEvent(event);
             }
