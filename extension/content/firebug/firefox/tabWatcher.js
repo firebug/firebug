@@ -52,6 +52,8 @@ const aboutBlank = "about:blank";
 
 var contexts = [];
 
+var showContextTimeout = 200;
+
 // ********************************************************************************************* //
 
 /**
@@ -230,25 +232,7 @@ Firebug.TabWatcher = Obj.extend(new Firebug.Listener(),
 
         if (context && !context.loaded && !context.showContextTimeout)
         {
-            // still loading, we want to showContext one time but not too agressively
-            context.showContextTimeout = window.setTimeout(Obj.bindFixed(function delayShowContext()
-            {
-                if (FBTrace.DBG_WINDOWS)
-                    FBTrace.sysout("-> watchTopWindow delayShowContext id:" +
-                        context.showContextTimeout, context);
-
-                if (context.window)   // Sometimes context.window is not defined ?
-                {
-                    this.rushShowContext(win, context);  // calls showContext
-                }
-                else
-                {
-                    if(FBTrace.DBG_ERRORS)
-                        FBTrace.sysout("tabWatcher watchTopWindow no context.window " +
-                            (context.browser? context.browser.currentURI.spec :
-                            " and no context.browser"));
-                }
-            }, this), 400);
+            this.rushShowContextTimeout(context, 4);
         }
         else
         {
@@ -260,6 +244,40 @@ Firebug.TabWatcher = Obj.extend(new Firebug.Listener(),
         }
 
         return context;  // we did create or find a context
+    },
+
+    rushShowContextTimeout: function(context, tryAgain)
+    {
+        if (FBTrace.DBG_WINDOWS)
+            FBTrace.sysout("-> rushShowContextTimeout: tryAgain: " + tryAgain);
+
+        // still loading, we want to showContext one time but not too agressively
+        var handler = Obj.bindFixed(function delayShowContext()
+        {
+            if (FBTrace.DBG_WINDOWS)
+                FBTrace.sysout("-> watchTopWindow delayShowContext id:" +
+                    context.showContextTimeout, context);
+
+            if (!context.browser.webProgress.isLoadingDocument && --tryAgain > 0)
+            {
+                this.rushShowContextTimeout(context, tryAgain);
+                return;
+            }
+
+            if (context.window)   // Sometimes context.window is not defined ?
+            {
+                this.rushShowContext(win, context);  // calls showContext
+            }
+            else
+            {
+                if (FBTrace.DBG_ERRORS)
+                    FBTrace.sysout("tabWatcher watchTopWindow no context.window " +
+                        (context.browser? context.browser.currentURI.spec :
+                        " and no context.browser"));
+            }
+        }, this);
+
+        context.showContextTimeout = window.setTimeout(handler, showContextTimeout);
     },
 
     rushShowContext: function(win, context)
