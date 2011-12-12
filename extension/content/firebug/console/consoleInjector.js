@@ -106,9 +106,6 @@ Firebug.Console.injector =
         if (handler)
             return;
 
-        // Initialize Firebug version.
-        win.document.setUserData("firebug-Version", Firebug.version, null);
-
         var handler = createConsoleHandler(context, win);
 
         // Initialize Firebug token
