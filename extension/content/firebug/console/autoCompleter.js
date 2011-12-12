@@ -299,18 +299,22 @@ Firebug.JSAutoCompleter = function(textBox, completionBox, showCompletionPopup)
         if (Events.isAlt(event))
             return false;
 
-        if (event.keyCode === KeyEvent.DOM_VK_TAB && !Events.isControl(event))
+        if (event.keyCode === KeyEvent.DOM_VK_TAB &&
+            !Events.isControl(event) && this.textBox.value !== "")
         {
-            if (!this.completions)  // then no completions,
+            if (!this.completions)
             {
-                if (clearedTabWarning) // then you were warned,
-                    return false; //  pass TAB along
+                if (clearedTabWarning)
+                {
+                    // Send tab along if the user was warned.
+                    return false;
+                }
 
                 this.setTabWarning();
                 Events.cancelEvent(event);
                 return true;
             }
-            else  // complete
+            else
             {
                 this.acceptCompletion();
                 Events.cancelEvent(event);
