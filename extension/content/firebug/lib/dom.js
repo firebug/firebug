@@ -1769,6 +1769,7 @@ Dom.domInlineEventHandlersMap =
     "onunload": 1,
     "onvolumechange": 1,
     "onwaiting": 1,
+    "onmozfullscreenchange": 1,
 }
 
 // ********************************************************************************************* //
