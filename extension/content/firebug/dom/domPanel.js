@@ -461,7 +461,7 @@ Firebug.DOMBasePanel.prototype = Obj.extend(Firebug.Panel,
 
                 // If showOwnProperties is false the __proto__ can be already in.
                 // If showOwnProperties is true the __proto__ should not be in.
-                if (contentView.__proto__ && contentView.hasOwnProperty("__proto__") &&
+                if (contentView.__proto__ && Obj.hasProperties(contentView.__proto__) &&
                     properties.indexOf("__proto__") == -1 && !Firebug.showOwnProperties)
                 {
                     properties.push("__proto__");
@@ -605,6 +605,26 @@ Firebug.DOMBasePanel.prototype = Obj.extend(Firebug.Panel,
         {
             domHandlers.sort(sortName);
             members.push.apply(members, domHandlers);
+        }
+
+        if (FBTrace.DBG_DOM)
+        {
+            var showEnum = Firebug.showEnumerableProperties;
+            var showOwn = Firebug.showOwnProperties;
+            FBTrace.sysout("dom.getMembers; Report: enum-only: " + showEnum +
+                ", own-only: " + showOwn,
+            {
+                object: object,
+                ordinals: ordinals,
+                userProps: userProps,
+                userFuncs: userFuncs,
+                userClasses: userClasses,
+                domProps: domProps,
+                domFuncs: domFuncs,
+                domConstants: domConstants,
+                domHandlers: domHandlers,
+                proto: proto,
+            });
         }
 
         return members;
