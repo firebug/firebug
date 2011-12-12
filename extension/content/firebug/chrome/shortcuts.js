@@ -113,7 +113,7 @@ Firebug.ShortcutsModel = Obj.extend(Firebug.Module,
         var selector = "key["+attr+"='"+key+"'][modifiers='"+modifiers+"']"
             + ":not([id='key_"+element+"']):not([disabled='true'])";
         var existingKeyElements = keyElem.ownerDocument.querySelectorAll(selector);
-        for (var i = existingKeyElements.length; i--; )
+        for (var i = existingKeyElements.length - 1; i >= 0; i--)
         {
             var existingKeyElement = existingKeyElements[i];
             existingKeyElement.setAttribute("disabled", "true");

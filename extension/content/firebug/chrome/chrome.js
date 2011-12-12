@@ -1122,7 +1122,7 @@ var FirebugChrome =
                 a.swapDocShells(b);
         }
 
-        for (var i = frames.length; i--; )
+        for (var i = frames.length - 1; i >= 0; i--)
         {
             placeholders[i] = document.createElement("placeholder");
             tmpFrames[i] = frames[i].cloneNode(true);
@@ -1131,7 +1131,7 @@ var FirebugChrome =
             temp.appendChild(tmpFrames[i]);
         }
 
-        for (var i = tmpFrames.length; i--; )
+        for (var i = tmpFrames.length - 1; i >= 0; i--)
         {
             swapDocShells(tmpFrames[i], frames[i]);
             frames[i].parentNode.replaceChild(placeholders[i], frames[i]);
@@ -1139,10 +1139,10 @@ var FirebugChrome =
 
         swapDocShells(oldBrowser, newBrowser);
 
-        for (var i = placeholders.length; i--; )
+        for (var i = placeholders.length - 1; i >= 0; i--)
             placeholders[i].parentNode.replaceChild(frames[i], placeholders[i]);
 
-        for (var i = frames.length; i--; )
+        for (var i = frames.length - 1; i >= 0; i--)
             swapDocShells(tmpFrames[i], frames[i]);
 
         temp.parentNode.removeChild(temp);
