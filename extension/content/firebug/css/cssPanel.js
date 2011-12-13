@@ -342,6 +342,9 @@ Firebug.CSSModule = Obj.extend(Obj.extend(Firebug.Module, Firebug.EditorSelector
 
     freeEdit: function(styleSheet, value)
     {
+        if (FBTrace.DBG_CSS)
+            FBTrace.sysout("CSSModule.freeEdit",arguments);
+        
         if (!styleSheet.editStyleSheet)
         {
             var ownerNode = getStyleSheetOwnerNode(styleSheet);
@@ -646,6 +649,9 @@ Firebug.CSSStyleSheetPanel.prototype = Obj.extend(Firebug.Panel,
 
     startBuiltInEditing: function(css)
     {
+        if (FBTrace.DBG_CSS)
+            FBTrace.sysout("CSSStyleSheetPanel.startBuiltInEditing",css);
+        
         if (!this.stylesheetEditor)
             this.stylesheetEditor = new StyleSheetEditor(this.document);
 
@@ -689,6 +695,9 @@ Firebug.CSSStyleSheetPanel.prototype = Obj.extend(Firebug.Panel,
 
     stopEditing: function()
     {
+        if (FBTrace.DBG_CSS)
+            FBTrace.sysout("CSSStyleSheetPanel.stopEditing");
+        
         if (this.currentCSSEditor)
         {
             this.currentCSSEditor.stopEditing();
@@ -1799,7 +1808,12 @@ CSSElementPanel.prototype = Obj.extend(Firebug.CSSStyleSheetPanel.prototype,
         {
             if (Firebug.onlyShowAppliedStyles)
                 this.removeOverriddenProps(rules, sections);
+            if (!Firebug.showUserAgentCSS) // This removes user agent rules
+                this.removeSystemRules(rules, sections);
+        }
 
+        if (rules.length || sections.length)
+        {
             inheritLabel = Locale.$STR("InheritedFrom");
             result = this.template.cascadedTag.replace({rules: rules, inherited: sections,
                 inheritLabel: inheritLabel}, this.panelNode);
@@ -1873,8 +1887,6 @@ CSSElementPanel.prototype = Obj.extend(Firebug.CSSStyleSheetPanel.prototype,
                 var rule = Xpcom.QI(inspectedRules.GetElementAt(i), nsIDOMCSSStyleRule);
 
                 var isSystemSheet = Url.isSystemStyleSheet(rule.parentStyleSheet);
-                if (!Firebug.showUserAgentCSS && isSystemSheet) // This removes user agent rules
-                    continue;
 
                 var props = this.getRuleProperties(this.context, rule, inheritMode);
                 if (inheritMode && !props.length)
@@ -1903,9 +1915,9 @@ CSSElementPanel.prototype = Obj.extend(Firebug.CSSStyleSheetPanel.prototype,
         if (element.style)
             this.getStyleProperties(element, rules, usedProps, inheritMode);
 
-//        if (FBTrace.DBG_CSS)
-//            FBTrace.sysout("getElementRules "+rules.length+" rules for "+
-//                Xpath.getElementXPath(element), rules);
+        if (FBTrace.DBG_CSS)
+            FBTrace.sysout("getElementRules "+rules.length+" rules for "+
+                Xpath.getElementXPath(element), rules);
     },
 
     markOverriddenProps: function(props, usedProps, inheritMode)
@@ -1978,7 +1990,36 @@ CSSElementPanel.prototype = Obj.extend(Firebug.CSSStyleSheetPanel.prototype,
                 ++i;
         }
     },
+    
+    removeSystemRules: function(rules, sections)
+    {
+        function removeSystem(rules)
+        {
+            var i=0;
+            while (i<rules.length)
+            {
+                if (rules[i].isSystemSheet)
+                    rules.splice(i, 1);
+                else
+                    ++i;
+            }
+        }
 
+        removeSystem(rules);
+
+        var i=0;
+        while (i<sections.length)
+        {
+            var section = sections[i];
+            removeSystem(section.rules);
+
+            if (section.rules.length == 0)
+                sections.splice(i, 1);
+            else
+                ++i;
+        }
+    },
+    
     getStyleProperties: function(element, rules, usedProps, inheritMode)
     {
         var props = this.parseCSSProps(element.style, inheritMode);
@@ -2460,6 +2501,8 @@ CSSEditor.prototype = domplate(Firebug.InlineEditor.prototype,
 
     saveEdit: function(target, value, previousValue)
     {
+        if (FBTrace.DBG_CSS)
+            FBTrace.sysout("CSSEditor.saveEdit",arguments);
         var propValue, parsedValue, propName;
 
         target.innerHTML = Str.escapeForCss(value);
@@ -2477,11 +2520,12 @@ CSSEditor.prototype = domplate(Firebug.InlineEditor.prototype,
                 propValue = Dom.getChildByClass(row, "cssPropValue").textContent;
                 parsedValue = parsePriority(propValue);
 
-                if (propValue && propValue != "undefined")
-                {
                     if (FBTrace.DBG_CSS)
                         FBTrace.sysout("CSSEditor.saveEdit : "+previousValue+"->"+value+
                             " = "+propValue+"\n");
+
+                if (propValue && propValue != "undefined")
+                {
 
                     if (previousValue)
                         Firebug.CSSModule.removeProperty(rule, previousValue);
@@ -2532,6 +2576,8 @@ CSSEditor.prototype = domplate(Firebug.InlineEditor.prototype,
         Firebug.Inspector.repaint();
 
         this.panel.markChange(this.panel.name == "stylesheet");
+        if (FBTrace.DBG_CSS)
+            FBTrace.sysout("CSSEditor.saveEdit (ending) " + this.panel.name,value);
     },
 
     advanceToNext: function(target, charCode)
@@ -2828,16 +2874,22 @@ StyleSheetEditor.prototype = domplate(Firebug.BaseEditor,
 
     saveEdit: function(target, value, previousValue)
     {
+        if (FBTrace.DBG_CSS)
+            FBTrace.sysout("StyleSheetEditor.saveEdit",arguments);
         Firebug.CSSModule.freeEdit(this.styleSheet, value);
     },
 
     beginEditing: function()
     {
+        if (FBTrace.DBG_CSS)
+            FBTrace.sysout("StyleSheetEditor.beginEditing",arguments);
         this.editing = true;
     },
 
     endEditing: function()
     {
+        if (FBTrace.DBG_CSS)
+            FBTrace.sysout("StyleSheetEditor.endEditing",arguments);
         this.editing = false;
         this.panel.refresh();
         return true;
