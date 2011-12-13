@@ -501,7 +501,17 @@ Firebug.ScriptPanel.prototype = Obj.extend(Firebug.SourceBoxPanel,
 
                 tag.replace({object: result}, infoTip);
 
-                Firebug.chrome.contextMenuObject = result;  // for context menu select()
+                // If the menu is never displayed the contextMenuObject is not reset
+                // (back to null) and is reused at the next time the user opens the
+                // context menu, which is wrong
+                // This line was appended when fixing:
+                // http://code.google.com/p/fbug/issues/detail?id=1700
+                // The object should be returned by getPopupObject method
+                // that is called when the context menu is showing.
+                // The problem is that "onContextShowing" event doesn't have
+                // rangeParent field set and so it isn't possible to get
+                // the expression under the cursor (see getExpressionAt).
+                //Firebug.chrome.contextMenuObject = result;
 
                 self.infoTipExpr = expr;
             },
