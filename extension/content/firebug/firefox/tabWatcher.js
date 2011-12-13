@@ -232,7 +232,7 @@ Firebug.TabWatcher = Obj.extend(new Firebug.Listener(),
 
         if (context && !context.loaded && !context.showContextTimeout)
         {
-            this.rushShowContextTimeout(context, 4);
+            this.rushShowContextTimeout(win, context, 20);
         }
         else
         {
@@ -246,7 +246,7 @@ Firebug.TabWatcher = Obj.extend(new Firebug.Listener(),
         return context;  // we did create or find a context
     },
 
-    rushShowContextTimeout: function(context, tryAgain)
+    rushShowContextTimeout: function(win, context, tryAgain)
     {
         if (FBTrace.DBG_WINDOWS)
             FBTrace.sysout("-> rushShowContextTimeout: tryAgain: " + tryAgain);
@@ -258,9 +258,9 @@ Firebug.TabWatcher = Obj.extend(new Firebug.Listener(),
                 FBTrace.sysout("-> watchTopWindow delayShowContext id:" +
                     context.showContextTimeout, context);
 
-            if (!context.browser.webProgress.isLoadingDocument && --tryAgain > 0)
+            if (context.browser.webProgress.isLoadingDocument && --tryAgain > 0)
             {
-                this.rushShowContextTimeout(context, tryAgain);
+                this.rushShowContextTimeout(win, context, tryAgain);
                 return;
             }
 
