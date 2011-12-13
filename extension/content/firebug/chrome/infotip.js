@@ -12,14 +12,14 @@ define([
 ],
 function(Obj, Firebug, Domplate, Locale, Events, Css, Dom, Fonts) {
 
-// ************************************************************************************************
+// ********************************************************************************************* //
 // Constants
 
 const maxWidth = 100, maxHeight = 80;
 const infoTipMargin = 10;
 const infoTipWindowPadding = 25;
 
-// ************************************************************************************************
+// ********************************************************************************************* //
 
 with (Domplate) {
 Firebug.InfoTip = Obj.extend(Firebug.Module,
@@ -47,7 +47,8 @@ Firebug.InfoTip = Obj.extend(Firebug.Module,
                 STYLE({"class": "infoTipFontFamilyStyle"}),
                 DIV({"class": "infoTipFontFamilySample"},
                     FOR("fontStyle", "$fontStyles",
-                        DIV({"class": "infoTipFontFace", style: "$fontStyle"}, Locale.$STR("css.fontFamilyPreview"))
+                        DIV({"class": "infoTipFontFace", style: "$fontStyle"},
+                            Locale.$STR("css.fontFamilyPreview"))
                     )
                 )
             ),
@@ -191,7 +192,8 @@ Firebug.InfoTip = Obj.extend(Firebug.Module,
 
             if (x+infoTip.offsetWidth+infoTipMargin > panelWidth)
             {
-                infoTip.style.left = Math.max(0, panelWidth-(infoTip.offsetWidth+infoTipMargin)) + "px";
+                infoTip.style.left = Math.max(0, panelWidth -
+                    (infoTip.offsetWidth + infoTipMargin)) + "px";
                 infoTip.style.right = "auto";
             }
             else
@@ -202,7 +204,8 @@ Firebug.InfoTip = Obj.extend(Firebug.Module,
 
             if (y+infoTip.offsetHeight+infoTipMargin > panelHeight)
             {
-                infoTip.style.top = Math.max(0, panelHeight-(infoTip.offsetHeight+infoTipMargin)) + "px";
+                infoTip.style.top = Math.max(0, panelHeight -
+                    (infoTip.offsetHeight+infoTipMargin)) + "px";
                 infoTip.style.bottom = "auto";
             }
             else
@@ -248,13 +251,17 @@ Firebug.InfoTip = Obj.extend(Firebug.Module,
         if (browser.currentPanel)
         {
             var x = event.clientX, y = event.clientY;
-            this.showInfoTip(browser.infoTip, browser.currentPanel, event.target, x, y, event.rangeParent, event.rangeOffset);
+            this.showInfoTip(browser.infoTip, browser.currentPanel, event.target, x, y,
+                event.rangeParent, event.rangeOffset);
         }
         else
+        {
             this.hideInfoTip(browser.infoTip);
+        }
     },
 
-    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
     populateFontFamilyInfoTip: function(infoTip, fontName)
     {
         var fontStyles = [
@@ -267,9 +274,11 @@ Firebug.InfoTip = Obj.extend(Firebug.Module,
         var fontObject = Fonts.getFontInfo(null, null, fontName.replace(/"/g, ""));
 
         if (FBTrace.DBG_INFOTIP)
-            FBTrace.sysout("infotip.populateFontFamilyInfoTip;", {fontName: fontName, fontObject: fontObject});
+            FBTrace.sysout("infotip.populateFontFamilyInfoTip;", {fontName: fontName,
+                fontObject: fontObject});
 
-        var node = this.tags.fontFamilyTag.replace({fontStyles: fontStyles, fontName: fontName, fontObject: fontObject}, infoTip);
+        var node = this.tags.fontFamilyTag.replace({fontStyles: fontStyles, fontName: fontName,
+            fontObject: fontObject}, infoTip);
         var styleNode = node.getElementsByClassName("infoTipFontFamilyStyle").item(0);
 
         styleNode.innerHTML = getFontFaceCss(fontObject ? fontObject : fontName);
@@ -292,7 +301,7 @@ Firebug.InfoTip = Obj.extend(Firebug.Module,
         return true;
     },
 
-    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
     // extends Module
 
     disable: function()
@@ -319,7 +328,7 @@ Firebug.InfoTip = Obj.extend(Firebug.Module,
 })};
 
 //********************************************************************************************* //
-//Local Helpers
+// Local Helpers
 
 /**
  * Returns the CSS for the @font-face CSS
@@ -345,12 +354,12 @@ function getFontFaceCss(font)
     return fontFaceCss+" .infoTipFontFace {font-family: "+fontName+";}"
 }
 
-// ************************************************************************************************
+// ********************************************************************************************* //
 // Registration
 
 Firebug.registerModule(Firebug.InfoTip);
 
 return Firebug.InfoTip;
 
-// ************************************************************************************************
+// ********************************************************************************************* //
 });
