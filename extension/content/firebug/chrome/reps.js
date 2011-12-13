@@ -341,12 +341,12 @@ FirebugReps.Obj = domplate(Firebug.Rep,
 
     longPropIterator: function (object)
     {
-        return this.propIterator(object,100);
+        return this.propIterator(object, 100);
     },
 
     shortPropIterator: function (object)
     {
-        return this.propIterator(object, Firebug.ObjectShortIteratorMax);
+        return this.propIterator(object, Options.get("ObjectShortIteratorMax"));
     },
 
     propIterator: function (object, max)
@@ -483,12 +483,12 @@ FirebugReps.Arr = domplate(Firebug.Rep,
 
     longArrayIterator: function(array)
     {
-       return this.arrayIterator(array,300);
+       return this.arrayIterator(array, 300);
     },
 
     shortArrayIterator: function(array)
     {
-       return this.arrayIterator(array,3);
+       return this.arrayIterator(array, Options.get("ObjectShortIteratorMax"));
     },
 
     arrayIterator: function(array, max)
@@ -2386,7 +2386,7 @@ FirebugReps.Storage = domplate(Firebug.Rep,
 
     shortPropIterator: function(object)
     {
-        return this.propIterator(object, Firebug.ObjectShortIteratorMax);
+        return this.propIterator(object, Options.get("ObjectShortIteratorMax"));
     },
 
     propIterator: function(object, max)
@@ -2538,7 +2538,7 @@ FirebugReps.StorageList = domplate(Firebug.Rep,
 
     shortPropIterator: function(object)
     {
-        return this.propIterator(object, Firebug.ObjectShortIteratorMax);
+        return this.propIterator(object, Options.get("ObjectShortIteratorMax"));
     },
 
     propIterator: function(object, max)
@@ -2769,7 +2769,7 @@ FirebugReps.NamedNodeMap = domplate(Firebug.Rep,
 
     shortPropIterator: function(object)
     {
-        return this.propIterator(object, Firebug.ObjectShortIteratorMax);
+        return this.propIterator(object, Options.get("ObjectShortIteratorMax"));
     },
 
     propIterator: function (object, max)
