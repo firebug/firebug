@@ -623,6 +623,28 @@ Css.getDocumentForStyleSheet = function(styleSheet)
 };
 
 // ********************************************************************************************* //
+
+Css.stripUnits = function(value)
+{
+    // remove units from '0px', '0em' etc. leave non-zero units in-tact.
+    return value.replace(/(url\(.*?\)|[^0]\S*\s*)|0(%|em|ex|px|in|cm|mm|pt|pc)(\s|$)/gi,
+        function(_, skip, remove, whitespace)
+        {
+            return skip || ('0' + whitespace);
+        }
+    );
+}
+
+Css.rgbToHex = function(value)
+{
+    return value.replace(/\brgb\((\d{1,3}),\s*(\d{1,3}),\s*(\d{1,3})\)/gi,
+        function(_, r, g, b) {
+            return '#' + ((1 << 24) + (r << 16) + (g << 8) + (b << 0)).
+                toString(16).substr(-6).toUpperCase();
+        });
+}
+
+// ********************************************************************************************* //
 // CSS Info
 
 Css.cssInfo = {};
