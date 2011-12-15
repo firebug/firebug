@@ -80,19 +80,22 @@ CSSElementPanel.prototype = Obj.extend(CSSStyleSheetPanel.prototype,
 
     updateCascadeView: function(element)
     {
-        var result, warning, inheritLabel;
+        Events.dispatch(this.fbListeners, "onBeforeCSSRulesAdded", [this]);
 
-        Events.dispatch(this.fbListeners, 'onBeforeCSSRulesAdded', [this]);
+        var result, warning, inheritLabel;
         var rules = [], sections = [], usedProps = {};
+
         this.getInheritedRules(element, sections, usedProps);
         this.getElementRules(element, rules, usedProps);
 
         if (rules.length || sections.length)
         {
+            // This removes overridden properties.
             if (Firebug.onlyShowAppliedStyles)
                 this.removeOverriddenProps(rules, sections);
 
-            if (!Firebug.showUserAgentCSS) // This removes user agent rules
+            // This removes user agent rules
+            if (!Firebug.showUserAgentCSS)
                 this.removeSystemRules(rules, sections);
         }
 
@@ -101,14 +104,16 @@ CSSElementPanel.prototype = Obj.extend(CSSStyleSheetPanel.prototype,
             inheritLabel = Locale.$STR("InheritedFrom");
             result = this.template.cascadedTag.replace({rules: rules, inherited: sections,
                 inheritLabel: inheritLabel}, this.panelNode);
-            Events.dispatch(this.fbListeners, 'onCSSRulesAdded', [this, result]);
+
+            Events.dispatch(this.fbListeners, "onCSSRulesAdded", [this, result]);
         }
         else
         {
             warning = FirebugReps.Warning.tag.replace({object: ""}, this.panelNode);
             result = FirebugReps.Description.render(Locale.$STR("css.EmptyElementCSS"),
                 warning, Obj.bind(this.editElementStyle, this));
-            Events.dispatch([Firebug.A11yModel], 'onCSSRulesAdded', [this, result]);
+
+            Events.dispatch([Firebug.A11yModel], "onCSSRulesAdded", [this, result]);
         }
     },
 
@@ -124,8 +129,8 @@ CSSElementPanel.prototype = Obj.extend(CSSStyleSheetPanel.prototype,
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-    // All calls to this method must call cleanupSheets first
 
+    // All calls to this method must call cleanupSheets first
     getInheritedRules: function(element, sections, usedProps)
     {
         var parent = element.parentNode;
@@ -179,7 +184,7 @@ CSSElementPanel.prototype = Obj.extend(CSSStyleSheetPanel.prototype,
                 var sourceLink = this.getSourceLink(null, rule);
 
                 if (!isPseudoElementSheet)
-                    this.markOverriddenProps(props, usedProps, inheritMode);
+                    this.markOverriddenProps(element, props, usedProps, inheritMode);
 
                 var ruleId = this.getRuleId(rule);
                 rules.splice(0, 0, {rule: rule, id: ruleId,
@@ -203,38 +208,74 @@ CSSElementPanel.prototype = Obj.extend(CSSStyleSheetPanel.prototype,
                 Xpath.getElementXPath(element), rules);
     },
 
-    markOverriddenProps: function(props, usedProps, inheritMode)
+    markOverriddenProps: function(element, props, usedProps, inheritMode)
     {
-        for (var i = 0; i < props.length; ++i)
+        var dummyElement = element.ownerDocument.createElementNS(
+            element.namespaceURI, element.tagName);
+
+        for (var i=0; i<props.length; i++)
         {
             var prop = props[i];
-            if (usedProps.hasOwnProperty(prop.name))
+
+            // Helper array for all shorthand properties for the current property.
+            prop.computed = {};
+
+            // Get all shorthand propertis.
+            var dummyStyle = dummyElement.style;
+            dummyStyle.cssText = "";
+            dummyStyle.setProperty(prop.name, prop.value, prop.important);
+
+            var length = dummyStyle.length;
+            for (var k=0; k<length; k++)
             {
-                // all previous occurrences of this property
-                var deadProps = usedProps[prop.name];
-                for (var j = 0; j < deadProps.length; ++j)
+                var name = dummyStyle.item(k);
+
+                prop.computed[name] = {
+                    overridden: false
+                };
+
+                if (usedProps.hasOwnProperty(name))
                 {
-                    var deadProp = deadProps[j];
-                    if (!deadProp.disabled && !deadProp.wasInherited && deadProp.important &&
-                        !prop.important)
+                    var deadProps = usedProps[name];
+
+                    // all previous occurrences of this property
+                    for (var j=0; j<deadProps.length; j++)
                     {
-                        prop.overridden = true;  // new occurrence overridden
-                    }
-                    else if (!prop.disabled && (!deadProp.wasInherited))
-                    {
-                        deadProp.overridden = true;  // previous occurrences overridden
+                        var deadProp = deadProps[j];
+                        if (deadProp.wasInherited)
+                            continue;
+
+                        if (!deadProp.disabled && deadProp.important && !prop.important)
+                        {
+                            // new occurrence overridden
+                            prop.overridden = true;
+
+                            // Remember what exact shorthand property has been overridden.
+                            // This should help when we want to cross out only specific
+                            // part of the property value.
+                            if (prop.computed.hasOwnProperty(name))
+                                prop.computed[name].overridden = true;
+                        }
+                        else if (!prop.disabled)
+                        {
+                            // previous occurrences overridden
+                            deadProp.overridden = true;
+
+                            if (deadProp.computed.hasOwnProperty(name))
+                                deadProp.computed[name].overridden = true;
+                        }
                     }
                 }
-            }
-            else
-            {
-                usedProps[prop.name] = [];
+                else
+                {
+                    usedProps[name] = [];
+                }
+
+                // all occurrences of a property seen so far, by name
+                usedProps[name].push(prop);
             }
 
             prop.wasInherited = inheritMode ? true : false;
-
-            // all occurrences of a property seen so far, by name
-            usedProps[prop.name].push(prop);
         }
     },
 
@@ -314,7 +355,7 @@ CSSElementPanel.prototype = Obj.extend(CSSStyleSheetPanel.prototype,
 
         this.sortProperties(props);
 
-        this.markOverriddenProps(props, usedProps, inheritMode);
+        this.markOverriddenProps(element, props, usedProps, inheritMode);
 
         if (props.length)
         {

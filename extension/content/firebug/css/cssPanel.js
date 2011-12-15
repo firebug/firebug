@@ -57,11 +57,15 @@ var CSSPropTag = domplate(CSSDomplateBase,
             $editGroup: "$rule|isEditable",
             $cssOverridden: "$prop.overridden",
             role: "option"},
-            SPAN("&nbsp;&nbsp;&nbsp;&nbsp;"), // Use spaces for indent so, copy to clipboard is nice.
+
+            // Use spaces for indent so, copy to clipboard is nice.
+            SPAN("&nbsp;&nbsp;&nbsp;&nbsp;"),
             SPAN({"class": "cssPropName", $editable: "$rule|isEditable"},
                 "$prop.name"
             ),
-            SPAN({"class": "cssColon"}, ":&nbsp;"), // Use space here so, copy to clipboard has it (3266).
+
+            // Use space here so, copy to clipboard has it (3266).
+            SPAN({"class": "cssColon"}, ":&nbsp;"),
             SPAN({"class": "cssPropValue", $editable: "$rule|isEditable"},
                 "$prop.value$prop.important"
             ),

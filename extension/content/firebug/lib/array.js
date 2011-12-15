@@ -21,7 +21,8 @@ Arr.isArray = function(obj)
     return Object.prototype.toString.call(obj) === "[object Array]";
 }
 
-Arr.keys = function(map)  // At least sometimes the keys will be on user-level window objects
+// At least sometimes the keys will be on user-level window objects
+Arr.keys = function(map)
 {
     var keys = [];
     try
@@ -54,7 +55,6 @@ Arr.values = function(map)
                 if (FBTrace.DBG_ERRORS)
                     FBTrace.dumpPropreties("lib.values FAILED ", exc);
             }
-
         }
     }
     catch (exc)
