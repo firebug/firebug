@@ -242,8 +242,10 @@ CSSElementPanel.prototype = Obj.extend(CSSStyleSheetPanel.prototype,
                     for (var j=0; j<deadProps.length; j++)
                     {
                         var deadProp = deadProps[j];
-                        if (deadProp.wasInherited)
-                            continue;
+
+                        // xxxHonza: fix for issue 3009, cross out even inherited properties
+                        //if (deadProp.wasInherited)
+                        //    continue;
 
                         if (!deadProp.disabled && deadProp.important && !prop.important)
                         {
