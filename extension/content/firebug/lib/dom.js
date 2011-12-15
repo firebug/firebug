@@ -692,17 +692,6 @@ var isDOMConstantDep = Deprecated.deprecated(
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-// xxxHonza: duplicated in lib.js remove as soon we have firebug/lib/array
-function extendArray(array, array2)
-{
-   var newArray = [];
-   newArray.push.apply(newArray, array);
-   newArray.push.apply(newArray, array2);
-   return newArray;
-}
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
 domMemberMap.Window =
 [
     "document",
@@ -821,7 +810,7 @@ domMemberMap.Window =
     "showModalDialog", // FF 3.0, MS IE4
 
     "InstallTrigger",
-    
+
     "performance", // https://developer.mozilla.org/en/Navigation_timing
     "matchMedia", // https://developer.mozilla.org/en/DOM/window.matchMedia
 
@@ -895,7 +884,7 @@ domMemberMap.Node =
     "setUserData"
 ];
 
-domMemberMap.Document = extendArray(domMemberMap.Node,
+domMemberMap.Document = Arr.extendArray(domMemberMap.Node,
 [
     "documentElement",
     "body",
@@ -1032,7 +1021,7 @@ domMemberMap.Document = extendArray(domMemberMap.Node,
     "setUserData"
 ]);
 
-domMemberMap.Element = extendArray(domMemberMap.Node,
+domMemberMap.Element = Arr.extendArray(domMemberMap.Node,
 [
     "clientWidth",
     "clientHeight",
@@ -1118,7 +1107,7 @@ domMemberMap.Element = extendArray(domMemberMap.Node,
     "releaseCapture"//FF4.0
 ]);
 
-domMemberMap.SVGElement = extendArray(domMemberMap.Element,
+domMemberMap.SVGElement = Arr.extendArray(domMemberMap.Element,
 [
     "x",
     "y",
@@ -1142,7 +1131,7 @@ domMemberMap.SVGElement = extendArray(domMemberMap.Element,
     "preserveAspectRatio"
 ]);
 
-domMemberMap.SVGSVGElement = extendArray(domMemberMap.Element,
+domMemberMap.SVGSVGElement = Arr.extendArray(domMemberMap.Element,
 [
     "x",
     "y",
@@ -1204,7 +1193,7 @@ domMemberMap.SVGSVGElement = extendArray(domMemberMap.Element,
     "unpauseAnimations"
 ]);
 
-domMemberMap.HTMLImageElement = extendArray(domMemberMap.Element,
+domMemberMap.HTMLImageElement = Arr.extendArray(domMemberMap.Element,
 [
     "src",
     "naturalWidth",
@@ -1225,7 +1214,7 @@ domMemberMap.HTMLImageElement = extendArray(domMemberMap.Element,
     "useMap",
 ]);
 
-domMemberMap.HTMLAnchorElement = extendArray(domMemberMap.Element,
+domMemberMap.HTMLAnchorElement = Arr.extendArray(domMemberMap.Element,
 [
     "name",
     "target",
@@ -1248,7 +1237,7 @@ domMemberMap.HTMLAnchorElement = extendArray(domMemberMap.Element,
     "charset"
 ]);
 
-domMemberMap.HTMLIFrameElement = extendArray(domMemberMap.Element,
+domMemberMap.HTMLIFrameElement = Arr.extendArray(domMemberMap.Element,
 [
     "contentDocument",
     "contentWindow",
@@ -1263,7 +1252,7 @@ domMemberMap.HTMLIFrameElement = extendArray(domMemberMap.Element,
     "width"
 ]);
 
-domMemberMap.HTMLTableElement = extendArray(domMemberMap.Element,
+domMemberMap.HTMLTableElement = Arr.extendArray(domMemberMap.Element,
 [
     "bgColor",
     "border",
@@ -1289,7 +1278,7 @@ domMemberMap.HTMLTableElement = extendArray(domMemberMap.Element,
     "insertRow"
 ]);
 
-domMemberMap.HTMLTableRowElement = extendArray(domMemberMap.Element,
+domMemberMap.HTMLTableRowElement = Arr.extendArray(domMemberMap.Element,
 [
     "bgColor",
     "cells",
@@ -1303,7 +1292,7 @@ domMemberMap.HTMLTableRowElement = extendArray(domMemberMap.Element,
     "insertCell"
 ]);
 
-domMemberMap.HTMLTableCellElement = extendArray(domMemberMap.Element,
+domMemberMap.HTMLTableCellElement = Arr.extendArray(domMemberMap.Element,
 [
     "abbr",
     "axis",
@@ -1322,12 +1311,12 @@ domMemberMap.HTMLTableCellElement = extendArray(domMemberMap.Element,
 
 ]);
 
-domMemberMap.HTMLScriptElement = extendArray(domMemberMap.Element,
+domMemberMap.HTMLScriptElement = Arr.extendArray(domMemberMap.Element,
 [
     "src"
 ]);
 
-domMemberMap.HTMLButtonElement = extendArray(domMemberMap.Element,
+domMemberMap.HTMLButtonElement = Arr.extendArray(domMemberMap.Element,
 [
     "accessKey",
     "disabled",
@@ -1339,7 +1328,7 @@ domMemberMap.HTMLButtonElement = extendArray(domMemberMap.Element,
     "click"
 ]);
 
-domMemberMap.HTMLInputElement = extendArray(domMemberMap.Element,
+domMemberMap.HTMLInputElement = Arr.extendArray(domMemberMap.Element,
 [
     "type",
     "value",
@@ -1385,7 +1374,7 @@ domMemberMap.HTMLInputElement = extendArray(domMemberMap.Element,
     "setSelectionRange"
 ]);
 
-domMemberMap.HTMLFormElement = extendArray(domMemberMap.Element,
+domMemberMap.HTMLFormElement = Arr.extendArray(domMemberMap.Element,
 [
     "acceptCharset",
     "action",
@@ -1406,7 +1395,7 @@ domMemberMap.HTMLFormElement = extendArray(domMemberMap.Element,
     "submit"
 ]);
 
-domMemberMap.HTMLBodyElement = extendArray(domMemberMap.Element,
+domMemberMap.HTMLBodyElement = Arr.extendArray(domMemberMap.Element,
 [
     "aLink",
     "background",
@@ -1416,12 +1405,12 @@ domMemberMap.HTMLBodyElement = extendArray(domMemberMap.Element,
     "vLink"
 ]);
 
-domMemberMap.HTMLHtmlElement = extendArray(domMemberMap.Element,
+domMemberMap.HTMLHtmlElement = Arr.extendArray(domMemberMap.Element,
 [
     "version"
 ]);
 
-domMemberMap.Text = extendArray(domMemberMap.Node,
+domMemberMap.Text = Arr.extendArray(domMemberMap.Node,
 [
     "data",
     "length",
@@ -1434,7 +1423,7 @@ domMemberMap.Text = extendArray(domMemberMap.Node,
     "substringData"
 ]);
 
-domMemberMap.Attr = extendArray(domMemberMap.Node,
+domMemberMap.Attr = Arr.extendArray(domMemberMap.Node,
 [
     "name",
     "value",
