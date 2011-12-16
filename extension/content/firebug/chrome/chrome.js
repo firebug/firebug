@@ -1080,7 +1080,7 @@ var FirebugChrome =
             items.push({
                 label: Locale.$STR("position." + pos),
                 type: "radio",
-                command: bindFixed(this.setPosition, this, pos),
+                command: Obj.bindFixed(this.setPosition, this, pos),
                 checked: Firebug.framePosition == pos
             });
         }
@@ -1541,7 +1541,7 @@ var FirebugChrome =
                 var label = Locale.$STRF("InspectInTab", [title]);
                 var id = "InspectIn" + panelName + "Tab";
 
-                var command = bindFixed(this.select, this, object, panelName);
+                var command = Obj.bindFixed(this.select, this, object, panelName);
                 items.push({label: label, command: command, nol10n: true, id: id});
             }
         }
@@ -2045,28 +2045,9 @@ function fatalError(summary, exc)
     throw exc;
 }
 
-// ********************************************************************************************* //
-// Utils (duplicated from lib.js)
-
-function cloneArray(array, fn)
-{
-   var newArray = [];
-
-   for (var i = 0; i < array.length; ++i)
-       newArray.push(array[i]);
-
-   return newArray;
-}
-
-function bindFixed()
-{
-    var args = cloneArray(arguments), fn = args.shift(), object = args.shift();
-    return function() { return fn.apply(object, args); }
-}
-
-return FirebugChrome; // end of createFirebugChrome(win)
-}
-
+return FirebugChrome;
+ 
+}  // end of createFirebugChrome(win)
 }; // end of var ChromeFactory object
 
 // ********************************************************************************************* //
