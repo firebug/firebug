@@ -304,8 +304,6 @@ var FirebugChrome =
             this.applyTextSize(value);
         if (name =="omitObjectPathStack")
             this.obeyOmitObjectPathStack(value);
-        if (name == "showErrorCount")
-            this.toggleShowErrorCount();
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -1285,11 +1283,6 @@ var FirebugChrome =
     {
         var panelStatus = this.getElementById("fbPanelStatus");
         Dom.hide(panelStatus, (value?true:false));
-    },
-
-    toggleShowErrorCount: function()
-    {
-        Firebug.Errors.showContext(null, Firebug.currentContext);
     },
 
     getPanelStatusElements: function()

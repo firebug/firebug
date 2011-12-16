@@ -101,6 +101,14 @@ var Errors = Firebug.Errors = Obj.extend(Firebug.Module,
     updateOption: function(name, value)
     {
         this.checkEnabled();
+
+        if (name == "showErrorCount")
+            this.toggleShowErrorCount();
+    },
+
+    toggleShowErrorCount: function()
+    {
+        this.showContext(null, Firebug.currentContext);
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

@@ -62,7 +62,6 @@
 
         <command id="cmd_togglePersistNet" oncommand="Firebug.NetMonitor.togglePersist(Firebug.currentContext)"/>
         <command id="cmd_toggleOrient" oncommand="Firebug.chrome.toggleOrient()" />
-        <command id="cmd_toggleShowErrorCount" oncommand="Firebug.chrome.toggleShowErrorCount();" />
         <command id="cmd_navBack" oncommand="Firebug.NavigationHistory.goBack(Firebug.currentContext)" />
         <command id="cmd_navForward" oncommand="Firebug.NavigationHistory.goForward(Firebug.currentContext)" />
         <command id="cmd_toggleFreezeWindow" oncommand="Firebug.Debugger.toggleFreezeWindow(Firebug.currentContext)" />
