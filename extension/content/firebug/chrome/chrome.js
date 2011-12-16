@@ -1981,10 +1981,13 @@ function onPanelMouseUp(event)
             {
                 var selectionData;
                 var selFO = selection.focusOffset,selAO = selection.anchorOffset;
-                if (selFO == selAO) // selection is collapsed
+
+                // selection is collapsed
+                if (selFO == selAO)
                 {
                     var distance = Math.abs(event.screenX - this.lastMouseDownPosition.x) +
-                                      Math.abs(event.screenY - this.lastMouseDownPosition.y);
+                        Math.abs(event.screenY - this.lastMouseDownPosition.y);
+
                     // If mouse has moved far enough, set selection at that point
                     if (distance > 3)
                         selectionData = {start: selFO, end: selFO};
@@ -1999,7 +2002,7 @@ function onPanelMouseUp(event)
                     selectionData = {start: selAO, end: selFO};
                 }
 
-                if(editable)
+                if (editable)
                 {
                     Firebug.Editor.startEditing(editable, null, null, selectionData);
                 }
@@ -2008,6 +2011,7 @@ function onPanelMouseUp(event)
                     Firebug.Editor.setSelection(selectionData || {start: selFO, end: selFO});
                     selection.removeAllRanges();
                 }
+
                 Events.cancelEvent(event);
             }
         }

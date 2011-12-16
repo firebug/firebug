@@ -1871,14 +1871,12 @@ Firebug.HTMLPanel.CommentNode = domplate(FirebugReps.Element,
         )
 });
 
-
 // ********************************************************************************************* //
 // TextDataEditor
 
 /**
  * TextDataEditor deals with text of comments and cdata nodes
  */
-
 function TextDataEditor(doc)
 {
     this.initializeInline(doc);
@@ -1886,7 +1884,6 @@ function TextDataEditor(doc)
 
 TextDataEditor.prototype = domplate(Firebug.InlineEditor.prototype,
 {
-
     saveEdit: function(target, value, previousValue)
     {
         var node = Firebug.getRepObject(target);
@@ -1908,7 +1905,6 @@ TextDataEditor.prototype = domplate(Firebug.InlineEditor.prototype,
  * is creating as they type, and this range could be in the middle of the parent
  * elements children).
  */
-
 function TextNodeEditor(doc)
 {
     this.initializeInline(doc);
@@ -1916,12 +1912,12 @@ function TextNodeEditor(doc)
 
 TextNodeEditor.prototype = domplate(Firebug.InlineEditor.prototype,
 {
-
     beginEditing: function(target, value)
     {
         var node = Firebug.getRepObject(target);
         if (!node || node instanceof window.Element)
             return;
+
         var document = node.ownerDocument;
         this.range = document.createRange();
         this.range.setStartBefore(node);
@@ -1935,6 +1931,7 @@ TextNodeEditor.prototype = domplate(Firebug.InlineEditor.prototype,
             this.range.detach();
             delete this.range;
         }
+
         // Remove empty groups by default
         return true;
     },
@@ -1944,26 +1941,30 @@ TextNodeEditor.prototype = domplate(Firebug.InlineEditor.prototype,
         var node = Firebug.getRepObject(target);
         if (!node)
             return;
+
         value = Str.unescapeForTextNode(value || '');
         target.innerHTML = Str.escapeForTextNode(value);
         if (node instanceof window.Element)
         {
             if (Xml.isElementMathML(node) || Xml.isElementSVG(node))
-                node.textContent=value;
+                node.textContent = value;
             else
-                node.innerHTML=value;
+                node.innerHTML = value;
         }
         else
         {
             try
             {
                 var documentFragment = this.range.createContextualFragment(value);
-                var cnl=documentFragment.childNodes.length;
+                var cnl = documentFragment.childNodes.length;
                 this.range.deleteContents();
                 this.range.insertNode(documentFragment);
                 var r = this.range, sc = r.startContainer, so = r.startOffset;
                 this.range.setEnd(sc,so+cnl);
-            } catch (e) {}
+            }
+            catch (e)
+            {
+            }
         }
     }
 });
@@ -2174,7 +2175,6 @@ Firebug.HTMLPanel.Editors = {
     TextNode: TextNodeEditor,
     TextData: TextDataEditor
 };
-
 
 // ********************************************************************************************* //
 // Local Helpers
