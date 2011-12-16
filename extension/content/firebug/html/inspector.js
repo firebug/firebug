@@ -216,6 +216,7 @@ Firebug.Inspector = Obj.extend(Firebug.Module,
         this.clearAllHighlights();
 
         this.inspecting = true;
+        this.inspectingContext = context;
 
         Firebug.chrome.setGlobalAttribute("cmd_toggleInspecting", "checked", "true");
         this.attachInspectListeners(context);
@@ -247,16 +248,13 @@ Firebug.Inspector = Obj.extend(Firebug.Module,
      */
     inspectNode: function(node)
     {
-        if (!this.inspecting)
-            return;
-
         if (node && node.nodeType != 1)
             node = node.parentNode;
 
         if (node && Firebug.shouldIgnore(node) && !node.fbProxyFor)
             return;
 
-        var context = this.inspectingPanel.context;
+        var context = this.inspectingContext;
 
         if (this.inspectTimeout)
         {
@@ -283,7 +281,7 @@ Firebug.Inspector = Obj.extend(Firebug.Module,
 
             this.inspectTimeout = context.setTimeout(function()
             {
-                var selection = inspectingPanel.inspectNode(node);
+                var selection = inspectingPanel ? inspectingPanel.inspectNode(node) : null;
                 Events.dispatch(_this.fbListeners, "onInspectNode", [context, node]);
                 if (selection)
                     inspectingPanel.select(node);
@@ -302,7 +300,7 @@ Firebug.Inspector = Obj.extend(Firebug.Module,
         if (!this.inspecting)
             return;
 
-        var context = this.inspectingPanel.context;
+        var context = this.inspectingContext;
 
         if (context.stopped)
             Firebug.Debugger.freeze(context);
@@ -321,14 +319,23 @@ Firebug.Inspector = Obj.extend(Firebug.Module,
 
         this.inspecting = false;
 
-        Firebug.chrome.unswitchToPanel(context, this.inspectingPanel.name, canceled);
+        if (this.inspectingPanel)
+        {
+            Firebug.chrome.unswitchToPanel(context, this.inspectingPanel.name, canceled);
+            this.inspectingPanel.stopInspecting(this.inspectingNode, canceled);
+        }
+        else
+        {
+            FBTrace.sysout("inspector.stopInspecting; ERROR? inspectingPanel is NULL");
+        }
 
-        this.inspectingPanel.stopInspecting(this.inspectingNode, canceled);
         Events.dispatch(this.fbListeners, "onStopInspecting", [context, this.inspectingNode, canceled]);
 
         this.inspectNode(null);
 
+        // Make sure there are no (indirect) references to the page document.
         this.inspectingPanel = null;
+        this.inspectingContext = null;
     },
 
     /**
