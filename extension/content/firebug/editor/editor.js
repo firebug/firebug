@@ -25,6 +25,7 @@ const smallChangeAmount = 0.1;
 // ********************************************************************************************* //
 // Globals
 
+// xxxHonza: it's bad design to have these globals.
 var currentTarget = null;
 var currentGroup = null;
 var currentPanel = null;
@@ -78,8 +79,6 @@ Firebug.Editor = Obj.extend(Firebug.Module,
                 value = "";
         }
 
-        originalValue = previousValue = value;
-
         invalidEditor = false;
         currentTarget = target;
         currentPanel = panel;
@@ -96,6 +95,8 @@ Firebug.Editor = Obj.extend(Firebug.Module,
         Css.setClass(target, "editing");
         if (currentGroup)
             Css.setClass(currentGroup, "editing");
+
+        originalValue = previousValue = value = currentEditor.getInitialValue(target, value);
 
         currentEditor.show(target, currentPanel, value, selectionData);
         Events.dispatch(this.fbListeners, "onBeginEditing", [currentPanel, currentEditor, target, value]);
@@ -596,6 +597,11 @@ Firebug.InlineEditor.prototype = domplate(Firebug.BaseEditor,
     destroyInput: function()
     {
         // XXXjoe Need to remove input/keypress handlers to avoid leaks
+    },
+
+    getInitialValue: function(target, value)
+    {
+        return value;
     },
 
     getValue: function()

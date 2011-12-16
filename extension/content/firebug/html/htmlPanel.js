@@ -1912,16 +1912,16 @@ function TextNodeEditor(doc)
 
 TextNodeEditor.prototype = domplate(Firebug.InlineEditor.prototype,
 {
-    show: function(target, panel, value, selectionData)
+    getInitialValue: function(target, value)
     {
         // The text displayed within the HTML panel can be shortened (in case 'Show Full Text'
         // option is false) so, get the original textContent from the associated page element
         // (see issue 2183)
         var repObject = Firebug.getRepObject(target);
         if (repObject)
-            value = repObject.textContent;
+            return repObject.textContent;
 
-        Firebug.InlineEditor.prototype.show.apply(this, arguments);
+        return value;
     },
 
     beginEditing: function(target, value)
