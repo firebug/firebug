@@ -689,10 +689,6 @@ Firebug.DOMBasePanel.prototype = Obj.extend(Firebug.Panel,
             // xxxHonza: Support for object change not implemented yet.
             member.breakable = !hasChildren;
 
-            // xxxHonza: Disable breaking on direct window properties, see #520572
-            if (object instanceof Ci.nsIDOMWindow)
-                member.breakable = false;
-
             var breakpoints = context.dom.breakpoints;
             var bp = breakpoints.findBreakpoint(object, name);
             if (bp)
