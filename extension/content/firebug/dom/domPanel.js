@@ -916,7 +916,7 @@ Firebug.DOMBasePanel.prototype = Obj.extend(Firebug.Panel,
         // 2) object[propName] can also throws in case of e.g. non existing "abc.abc" prop name.
         try
         {
-            if (object instanceof jsdIStackFrame)
+            if (object instanceof StackFrame.StackFrame)
                 return Firebug.Debugger.evaluate(propName, this.context);
             else
                 return object[propName];
@@ -1002,7 +1002,7 @@ Firebug.DOMBasePanel.prototype = Obj.extend(Firebug.Panel,
                     editValue = "\"" + Str.escapeJS(propValue) + "\"";
                 else if (propValue == null)
                     editValue = "null";
-                else if (object instanceof window.Window || object instanceof jsdIStackFrame)
+                else if (object instanceof window.Window || object instanceof StackFrame.StackFrame)
                     editValue = getRowName(row);
                 else
                     editValue = "this." + getRowName(row);
@@ -1015,7 +1015,9 @@ Firebug.DOMBasePanel.prototype = Obj.extend(Firebug.Panel,
     deleteProperty: function(row)
     {
         if (Css.hasClass(row, "watchRow"))
+        {
             this.deleteWatch(row);
+        }
         else
         {
             var object = getRowOwnerObject(row);
@@ -1054,7 +1056,7 @@ Firebug.DOMBasePanel.prototype = Obj.extend(Firebug.Panel,
             return;
 
         var object = this.getRealRowObject(row);
-        if (object && !(object instanceof jsdIStackFrame))
+        if (object && !(object instanceof StackFrame.StackFrame))
         {
             Firebug.CommandLine.evaluate(value, this.context, object, this.context.getGlobalScope(),
                 function success(result, context)
@@ -1092,7 +1094,7 @@ Firebug.DOMBasePanel.prototype = Obj.extend(Firebug.Panel,
         {
             try
             {
-                Firebug.CommandLine.evaluate(name+"="+value, this.context);
+                Firebug.CommandLine.evaluate(name + "=" + value, this.context);
             }
             catch (exc)
             {
@@ -1106,6 +1108,12 @@ Firebug.DOMBasePanel.prototype = Obj.extend(Firebug.Panel,
                     return;
                 }
             }
+
+            // Clear cached scope chain (it'll be regenerated the next time the getScopes
+            // is executed). This forces the watch window to update in case a closer scope
+            // variables have been changed during a debugging session.
+            if (object instanceof StackFrame.StackFrame)
+                object.clearScopes();
         }
 
         this.rebuild(true);
@@ -1489,7 +1497,7 @@ Firebug.DOMBasePanel.prototype = Obj.extend(Firebug.Panel,
             var rowValue = this.getRowPropertyValue(row);
 
             var isWatch = Css.hasClass(row, "watchRow");
-            var isStackFrame = rowObject instanceof jsdIStackFrame;
+            var isStackFrame = rowObject instanceof StackFrame.StackFrame;
 
             items.push(
                 "-",

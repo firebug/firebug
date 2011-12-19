@@ -257,13 +257,23 @@ StackFrame.StackFrame.prototype =
         return this.scope;
     },
 
+    clearScopes: function(viewChrome)
+    {
+        // Clears cached scope chain and so, it can be regenerated the next time
+        // getScopes() is executed.
+        this.scope = null;
+    },
+
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
     // Private
+
     generateScopeChain: function (scope, viewChrome)
     {
         var ret = [];
         while (scope)
         {
             var scopeVars;
+
             // getWrappedValue will not contain any variables for closure
             // scopes, so we want to special case this to get all variables
             // in all cases.
@@ -280,13 +290,14 @@ StackFrame.StackFrame.prototype =
             else
             {
                 scopeVars = Wrapper.unwrapIValue(scope, Firebug.viewChrome);
-
                 if (scopeVars && scopeVars.hasOwnProperty)
                 {
-                    if (!scopeVars.hasOwnProperty("toString")) {
+                    if (!scopeVars.hasOwnProperty("toString"))
+                    {
                         (function() {
                             var className = scope.jsClassName;
-                            scopeVars.toString = function() {
+                            scopeVars.toString = function()
+                            {
                                 return Locale.$STR(className + " Scope");
                             };
                         })();
@@ -294,9 +305,10 @@ StackFrame.StackFrame.prototype =
                 }
                 else
                 {
+                    // do not trace scopeVars, you will get a uncatchable exception
                     if (FBTrace.DBG_ERRORS)
-                        FBTrace.sysout("dom .generateScopeChain: bad scopeVars for scope.jsClassName:"+
-                            scope.jsClassName); // do not trace scopeVars, you will get a uncatchable exception
+                        FBTrace.sysout("dom .generateScopeChain: bad scopeVars for " +
+                            "scope.jsClassName:" + scope.jsClassName);
 
                     scopeVars = {error: "Mozilla error: invalid scope variables"};
                 }
@@ -315,7 +327,6 @@ StackFrame.StackFrame.prototype =
 
         return ret;
     },
-
 };
 
 //-----------------------111111----222222-----33---444  1 All 'Not a (' followed by (; 2 All 'Not a )' followed by a ); 3 text between @ and : digits
