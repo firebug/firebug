@@ -372,10 +372,10 @@ Firebug.DOMBasePanel.prototype = Obj.extend(Firebug.Panel,
 
     rebuild: function(update, scrollTop)
     {
-        Events.dispatch(this.fbListeners, 'onBeforeDomUpdateSelection', [this]);
+        Events.dispatch(this.fbListeners, "onBeforeDomUpdateSelection", [this]);
+
         var members = this.getMembers(this.selection, 0, this.context);
         this.expandMembers(members, this.toggles, 0, 0, this.context);
-
         this.showMembers(members, update, scrollTop);
     },
 
@@ -1043,10 +1043,10 @@ Firebug.DOMBasePanel.prototype = Obj.extend(Firebug.Panel,
 
     setPropertyValue: function(row, value)  // value must be string
     {
-        if(FBTrace.DBG_DOM)
+        if (FBTrace.DBG_DOM)
         {
-            FBTrace.sysout("row: "+row);
-            FBTrace.sysout("value: "+value+" type "+typeof(value), value);
+            FBTrace.sysout("row: " + row);
+            FBTrace.sysout("value: " + value + " type " + typeof(value), value);
         }
 
         var name = getRowName(row);
@@ -1056,37 +1056,37 @@ Firebug.DOMBasePanel.prototype = Obj.extend(Firebug.Panel,
         var object = this.getRealRowObject(row);
         if (object && !(object instanceof jsdIStackFrame))
         {
-             Firebug.CommandLine.evaluate(value, this.context, object, this.context.getGlobalScope(),
-                 function success(result, context)
-                 {
-                     if (FBTrace.DBG_DOM)
-                     {
-                         FBTrace.sysout("setPropertyValue evaluate success object[" + name + "]=" +
+            Firebug.CommandLine.evaluate(value, this.context, object, this.context.getGlobalScope(),
+                function success(result, context)
+                {
+                    if (FBTrace.DBG_DOM)
+                    {
+                        FBTrace.sysout("setPropertyValue evaluate success object[" + name + "]=" +
                             result + " type " + typeof(result), result);
-                     }
-                     object[name] = result;
-                 },
-                 function failed(exc, context)
-                 {
-                     try
-                     {
-                         if (FBTrace.DBG_DOM)
-                         {
-                              FBTrace.sysout("setPropertyValue evaluate failed with exc:" + exc +
+                    }
+                    object[name] = result;
+                },
+                function failed(exc, context)
+                {
+                    try
+                    {
+                        if (FBTrace.DBG_DOM)
+                        {
+                            FBTrace.sysout("setPropertyValue evaluate failed with exc:" + exc +
                                 " object[" + name + "]=" + value + " type " + typeof(value), exc);
-                         }
+                        }
 
-                         // If the value doesn't parse, then just store it as a string.
-                         // Some users will not realize they're supposed to enter a JavaScript
-                         // expression and just type literal text
-                         object[name] = String(value);  // unwrappedJSobject.property = string
-                     }
-                     catch (exc)
-                     {
-                         return;
-                     }
-                  }
-             );
+                        // If the value doesn't parse, then just store it as a string.
+                        // Some users will not realize they're supposed to enter a JavaScript
+                        // expression and just type literal text
+                        object[name] = String(value);  // unwrappedJSobject.property = string
+                    }
+                    catch (exc)
+                    {
+                        return;
+                    }
+                }
+            );
         }
         else if (this.context.stopped)
         {

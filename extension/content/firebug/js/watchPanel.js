@@ -117,10 +117,11 @@ Firebug.WatchPanel.prototype = Obj.extend(Firebug.DOMBasePanel.prototype,
             this.frameSignature = frame.signature();
         }
 
+        var scopes;
         if (frame instanceof StackFrame.StackFrame)
-            var scopes = frame.getScopes(Firebug.viewChrome);
+            scopes = frame.getScopes(Firebug.viewChrome);
         else
-            var scopes = [this.context.getGlobalScope()];
+            scopes = [this.context.getGlobalScope()];
 
         if (FBTrace.DBG_STACK)
             FBTrace.sysout("dom watch frame isStackFrame " +
@@ -211,7 +212,7 @@ Firebug.WatchPanel.prototype = Obj.extend(Firebug.DOMBasePanel.prototype,
     removeWatch: function(expression)
     {
         if (FBTrace.DBG_WATCH)
-            FBTrace.sysout("Firebug.WatchPanel.removeWatch; expression: "+expression);
+            FBTrace.sysout("Firebug.WatchPanel.removeWatch; expression: " + expression);
 
         if (!this.watches)
             return;
@@ -224,7 +225,7 @@ Firebug.WatchPanel.prototype = Obj.extend(Firebug.DOMBasePanel.prototype,
     editNewWatch: function(value)
     {
         if (FBTrace.DBG_WATCH)
-            FBTrace.sysout("Firebug.WatchPanel.editNewWatch; value: "+value);
+            FBTrace.sysout("Firebug.WatchPanel.editNewWatch; value: " + value);
 
         var watchNewRow = this.panelNode.getElementsByClassName("watchNewRow").item(0);
         if (watchNewRow)
