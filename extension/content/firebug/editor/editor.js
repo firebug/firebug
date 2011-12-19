@@ -474,6 +474,11 @@ Firebug.Editor = Obj.extend(Firebug.Module,
 
 Firebug.BaseEditor = Obj.extend(Firebug.MeasureBox,
 {
+    getInitialValue: function(target, value)
+    {
+        return value;
+    },
+
     getValue: function()
     {
     },
@@ -597,11 +602,6 @@ Firebug.InlineEditor.prototype = domplate(Firebug.BaseEditor,
     destroyInput: function()
     {
         // XXXjoe Need to remove input/keypress handlers to avoid leaks
-    },
-
-    getInitialValue: function(target, value)
-    {
-        return value;
     },
 
     getValue: function()
