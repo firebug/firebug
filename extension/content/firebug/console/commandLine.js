@@ -1419,6 +1419,13 @@ Firebug.CommandLine.injector =
                 FBTrace.sysout("commandLine.detachCommandLineListener "+boundHandler+
                     " in window with console "+win.location);
         }
+        else
+        {
+            if (FBTrace.DBG_ERRORS || FBTrace.DBG_COMMANDLINE)
+                FBTrace.sysout("commandLine.removeCommandLineListener; ERROR no handler! " +
+                    "This could cause memory leaks, please report an issue if you see this. " +
+                    context.getName());
+        }
     },
 
     getCommandLineListener: function(context, win)
