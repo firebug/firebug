@@ -222,6 +222,14 @@ CSSElementPanel.prototype = Obj.extend(CSSStyleSheetPanel.prototype,
 
             // Get all shorthand propertis.
             var dummyStyle = dummyElement.style;
+
+            // xxxHonza: Not sure why this happens.
+            if (!dummyStyle && FBTrace.DBG_ERRORS)
+            {
+                FBTrace.sysout("css.markOverridenProps; ERROR dummyStyle is NULL");
+                return;
+            }
+
             dummyStyle.cssText = "";
             dummyStyle.setProperty(prop.name, prop.value, prop.important);
 
