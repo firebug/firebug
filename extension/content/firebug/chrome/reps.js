@@ -1118,7 +1118,9 @@ FirebugReps.RegExp = domplate(Firebug.Rep,
 {
     tag:
         OBJECTLINK(
-            SPAN({"class": "objectTitle"}, "$object|getTitle")
+            SPAN({"class": "objectTitle"}, "$object|getTitle"),
+            SPAN("&nbsp;"),
+            SPAN({"class": "regexpSource"}, "$object|getSource")
         ),
 
     className: "regexp",
@@ -1127,6 +1129,15 @@ FirebugReps.RegExp = domplate(Firebug.Rep,
     {
         return type == "object" && object && object.constructor && object.constructor.toString &&
             regexpConstructorRE.test(object.constructor.toString());
+    },
+
+    getSource: function(object)
+    {
+        var source = "/" + object.source + "/";
+        source += object.ignoreCase ? "i" : "";
+        source += object.global ? "g" : "";
+        source += object.multiline ? "m" : "";
+        return source;
     }
 });
 
