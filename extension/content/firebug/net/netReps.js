@@ -58,9 +58,11 @@ Firebug.NetMonitor.NetRequestTable = domplate(Firebug.Rep, new Firebug.Listener(
     inspectable: false,
 
     tableTag:
-        TABLE({"class": "netTable", cellpadding: 0, cellspacing: 0, hiddenCols: "", "role": "treegrid"},
+        TABLE({"class": "netTable", cellpadding: 0, cellspacing: 0, hiddenCols: "",
+            "role": "treegrid"},
             THEAD(
-                TR({"class": "netHeaderRow netRow focusRow outerFocusRow", onclick: "$onClickHeader", "role": "row"},
+                TR({"class": "netHeaderRow netRow focusRow outerFocusRow",
+                    onclick: "$onClickHeader", "role": "row"},
                     TD({id: "netBreakpointBar", width: "1%", "class": "netHeaderCell",
                         "role": "columnheader"},
                         "&nbsp;"
@@ -470,7 +472,8 @@ Firebug.NetMonitor.NetRequestEntry = domplate(Firebug.Rep, new Firebug.Listener(
         ),
 
     summaryTag:
-        TR({"class": "netRow netSummaryRow focusRow outerFocusRow", "role": "row", "aria-live": "polite"},
+        TR({"class": "netRow netSummaryRow focusRow outerFocusRow", "role": "row",
+            "aria-live": "polite"},
             TD({"class": "netCol"}, "&nbsp;"),
             TD({"class": "netCol netHrefCol a11yFocus", "role" : "rowheader"},
                 DIV({"class": "netCountLabel netSummaryLabel"}, "-")
@@ -481,7 +484,8 @@ Firebug.NetMonitor.NetRequestEntry = domplate(Firebug.Rep, new Firebug.Listener(
             TD({"class": "netTotalSizeCol netCol netSizeCol a11yFocus", "role": "gridcell"},
                 DIV({"class": "netTotalSizeLabel netSummaryLabel"}, "0KB")
             ),
-            TD({"class": "netTotalTimeCol netCol netTimeCol a11yFocus", "role": "gridcell", colspan: "3"},
+            TD({"class": "netTotalTimeCol netCol netTimeCol a11yFocus", "role":
+                "gridcell", colspan: "3"},
                 DIV({"class": "netSummaryBar", style: "width: 100%"},
                     DIV({"class": "netCacheSizeLabel netSummaryLabel", collapsed: "true"},
                         "(",
@@ -551,7 +555,8 @@ Firebug.NetMonitor.NetRequestEntry = domplate(Firebug.Rep, new Firebug.Listener(
             var netInfoBox = Firebug.NetMonitor.NetInfoBody.tag.replace({file: file}, netInfoCol);
 
             // Notify listeners so additional tabs can be created.
-            Events.dispatch(Firebug.NetMonitor.NetInfoBody.fbListeners, "initTabBody", [netInfoBox, file]);
+            Events.dispatch(Firebug.NetMonitor.NetInfoBody.fbListeners, "initTabBody",
+                [netInfoBox, file]);
 
             // Select "Headers" tab by default, if no other tab is selected already.
             // (e.g. by a third party Firebug extension in 'initTabBody' event)
@@ -755,7 +760,8 @@ Firebug.NetMonitor.NetPage = domplate(Firebug.Rep,
             Css.removeClass(pageRow, "opened");
 
             var nextRow = pageRow.nextSibling;
-            while (!Css.hasClass(nextRow, "netPageRow") && !Css.hasClass(nextRow, "netPageSeparatorRow"))
+            while (!Css.hasClass(nextRow, "netPageRow") &&
+                !Css.hasClass(nextRow, "netPageSeparatorRow"))
             {
                 var nextSibling = nextRow.nextSibling;
                 nextRow.parentNode.removeChild(nextRow);
@@ -826,7 +832,8 @@ Firebug.NetMonitor.NetInfoBody = domplate(Firebug.Rep, new Firebug.Listener(),
             DIV({"class": "netInfoPutText netInfoText", "role": "tabpanel"}),
             DIV({"class": "netInfoResponseText netInfoText", "role": "tabpanel"}),
             DIV({"class": "netInfoCacheText netInfoText", "role": "tabpanel"},
-                TABLE({"class": "netInfoCacheTable", cellpadding: 0, cellspacing: 0, "role": "presentation"},
+                TABLE({"class": "netInfoCacheTable", cellpadding: 0, cellspacing: 0,
+                    "role": "presentation"},
                     TBODY({"role": "list", "aria-label": Locale.$STR("Cache")})
                 )
             ),
@@ -851,7 +858,8 @@ Firebug.NetMonitor.NetInfoBody = domplate(Firebug.Rep, new Firebug.Listener(),
         ),
 
     customTab:
-        A({"class": "netInfo$tabId\\Tab netInfoTab", onclick: "$onClickTab", view: "$tabId", "role": "tab"},
+        A({"class": "netInfo$tabId\\Tab netInfoTab", onclick: "$onClickTab",
+            view: "$tabId", "role": "tab"},
             "$tabTitle"
         ),
 
@@ -1227,7 +1235,8 @@ Firebug.NetMonitor.NetInfoPostData = domplate(Firebug.Rep, new Firebug.Listener(
 {
     // application/x-www-form-urlencoded
     paramsTable:
-        TABLE({"class": "netInfoPostParamsTable", cellpadding: 0, cellspacing: 0, "role": "presentation"},
+        TABLE({"class": "netInfoPostParamsTable", cellpadding: 0, cellspacing: 0,
+            "role": "presentation"},
             TBODY({"role": "list", "aria-label": Locale.$STR("net.label.Parameters")},
                 TR({"class": "netInfoPostParamsTitle", "role": "presentation"},
                     TD({colspan: 2, "role": "presentation"},
@@ -1244,7 +1253,8 @@ Firebug.NetMonitor.NetInfoPostData = domplate(Firebug.Rep, new Firebug.Listener(
 
     // multipart/form-data
     partsTable:
-        TABLE({"class": "netInfoPostPartsTable", cellpadding: 0, cellspacing: 0, "role": "presentation"},
+        TABLE({"class": "netInfoPostPartsTable", cellpadding: 0, cellspacing: 0,
+            "role": "presentation"},
             TBODY({"role": "list", "aria-label": Locale.$STR("net.label.Parts")},
                 TR({"class": "netInfoPostPartsTitle", "role": "presentation"},
                     TD({colspan: 2, "role":"presentation" },
@@ -1261,7 +1271,8 @@ Firebug.NetMonitor.NetInfoPostData = domplate(Firebug.Rep, new Firebug.Listener(
 
     // application/json
     jsonTable:
-        TABLE({"class": "netInfoPostJSONTable", cellpadding: 0, cellspacing: 0, "role": "presentation"},
+        TABLE({"class": "netInfoPostJSONTable", cellpadding: 0, cellspacing: 0,
+            "role": "presentation"},
             TBODY({"role": "list", "aria-label": Locale.$STR("jsonviewer.tab.JSON")},
                 TR({"class": "netInfoPostJSONTitle", "role": "presentation"},
                     TD({"role": "presentation" },
@@ -1278,7 +1289,8 @@ Firebug.NetMonitor.NetInfoPostData = domplate(Firebug.Rep, new Firebug.Listener(
 
     // application/xml
     xmlTable:
-        TABLE({"class": "netInfoPostXMLTable", cellpadding: 0, cellspacing: 0, "role": "presentation"},
+        TABLE({"class": "netInfoPostXMLTable", cellpadding: 0, cellspacing: 0,
+            "role": "presentation"},
             TBODY({"role": "list", "aria-label": Locale.$STR("xmlviewer.tab.XML")},
                 TR({"class": "netInfoPostXMLTitle", "role": "presentation"},
                     TD({"role": "presentation" },
@@ -1295,7 +1307,8 @@ Firebug.NetMonitor.NetInfoPostData = domplate(Firebug.Rep, new Firebug.Listener(
 
     // image/svg+xml
     svgTable:
-        TABLE({"class": "netInfoPostSVGTable", cellpadding: 0, cellspacing: 0, "role": "presentation"},
+        TABLE({"class": "netInfoPostSVGTable", cellpadding: 0, cellspacing: 0,
+            "role": "presentation"},
             TBODY({"role": "list", "aria-label": Locale.$STR("svgviewer.tab.SVG")},
                 TR({"class": "netInfoPostSVGTitle", "role": "presentation"},
                     TD({"role": "presentation" },
@@ -1310,10 +1323,10 @@ Firebug.NetMonitor.NetInfoPostData = domplate(Firebug.Rep, new Firebug.Listener(
             )
         ),
 
-    
     // application/x-woff
     fontTable:
-      TABLE({"class": "netInfoPostFontTable", cellpadding: 0, cellspacing: 0, "role": "presentation"},
+      TABLE({"class": "netInfoPostFontTable", cellpadding: 0, cellspacing: 0,
+        "role": "presentation"},
           TBODY({"role": "list", "aria-label": Locale.$STR("fontviewer.tab.Font")},
               TR({"class": "netInfoPostFontTitle", "role": "presentation"},
                   TD({"role": "presentation" },
@@ -1327,7 +1340,8 @@ Firebug.NetMonitor.NetInfoPostData = domplate(Firebug.Rep, new Firebug.Listener(
       ),
 
     sourceTable:
-        TABLE({"class": "netInfoPostSourceTable", cellpadding: 0, cellspacing: 0, "role": "presentation"},
+        TABLE({"class": "netInfoPostSourceTable", cellpadding: 0, cellspacing: 0,
+            "role": "presentation"},
             TBODY({"role": "list", "aria-label": Locale.$STR("net.label.Source")},
                 TR({"class": "netInfoPostSourceTitle", "role": "presentation"},
                     TD({colspan: 2, "role": "presentation"},
@@ -1343,7 +1357,7 @@ Firebug.NetMonitor.NetInfoPostData = domplate(Firebug.Rep, new Firebug.Listener(
         TR({"role": "presentation"},
             TD({colspan: 2, "role": "presentation"},
                 FOR("line", "$param|getParamValueIterator",
-                    CODE({"class":"focusRow subFocusRow" , "role": "listitem"},"$line")
+                    CODE({"class":"focusRow subFocusRow" , "role": "listitem"}, "$line")
                 )
             )
         ),
@@ -1754,7 +1768,8 @@ Firebug.NetMonitor.TimeInfoTip = domplate(Firebug.Rep,
     {
         var infoTip = Firebug.NetMonitor.TimeInfoTip.tableTag.replace({}, parentNode);
 
-        var elapsed = file.loaded ? file.endTime - file.startTime : file.phase.phaseEndTime - file.startTime;
+        var elapsed = file.loaded ? file.endTime - file.startTime :
+            file.phase.phaseEndTime - file.startTime;
         var blockingEnd = NetUtils.getBlockingEndTime(file);
 
         //Helper log for debugging timing problems.
@@ -1930,7 +1945,7 @@ Firebug.NetMonitor.SizeInfoTip = domplate(Firebug.Rep,
     },
 });
 
-// ************************************************************************************************
+// ********************************************************************************************* //
 
 Firebug.NetMonitor.NetLimit = domplate(Firebug.Rep,
 {
