@@ -1394,6 +1394,14 @@ Firebug.CommandLine.injector =
             context.activeCommandLineHandlers = {};
 
         var consoleHandler = Firebug.Console.injector.getConsoleHandler(context, win);
+        if (!consoleHandler)
+        {
+            if (FBTrace.DBG_ERRORS || FBTrace.DBG_COMMANDLINE)
+                FBTrace.sysout("commandLine.addCommandLineListener; No console handler! " +
+                    " Command line listener can't be created." +  context.getName());
+            return;
+        }
+
         context.activeCommandLineHandlers[consoleHandler.token] = boundHandler;
 
         Events.addEventListener(win.document, "firebugExecuteCommand", boundHandler, true);
