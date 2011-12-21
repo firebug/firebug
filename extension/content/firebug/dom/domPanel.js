@@ -520,6 +520,8 @@ Firebug.DOMBasePanel.prototype = Obj.extend(Firebug.Panel,
                     // Sometimes we get exceptions trying to access certain members
                     if (FBTrace.DBG_ERRORS && FBTrace.DBG_DOM)
                         FBTrace.sysout("dom.getMembers cannot access "+name, exc);
+
+                    val = undefined;
                 }
 
                 var ordinal = parseInt(name);
