@@ -5,6 +5,7 @@
 
     /* Do not use Monaco, otherwise the Script panel's viewport doesn't work*/
     font-family: monospace;
+    font-size: 12px;  /* Issue 5060 */
 }
 
 /************************************************************************************************/
