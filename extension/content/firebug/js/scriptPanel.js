@@ -1782,7 +1782,7 @@ Firebug.ScriptPanel.WarningRep = domplate(Firebug.Rep,
     {
         var args = {
             pageTitle: Locale.$STR("script.warning.no_javascript"),
-            suggestion: Locale.$STR("script.suggestion.no_javascript")
+            suggestion: Locale.$STR("script.suggestion.no_javascript2")
         }
         return this.tag.replace(args, parentNode, this);
     },
