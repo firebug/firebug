@@ -316,6 +316,10 @@ Firebug.Debugger = Obj.extend(Firebug.ActivableModule,
         {
             this.freeze(context);
 
+            // If firebug hits a breakpoint in an event handler, which used setCapture
+            // the entire browser window is unclickable (see issue 5064)
+            context.window.document.releaseCapture();
+
             // We will pause here until resume is called
             var depth = FBS.enterNestedEventLoop({
                 onNest: Obj.bindFixed(this.startDebugging, this, context)
