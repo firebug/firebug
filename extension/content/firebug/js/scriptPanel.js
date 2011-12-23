@@ -252,7 +252,10 @@ Firebug.ScriptPanel.prototype = Obj.extend(Firebug.SourceBoxPanel,
             var self = this;
             this.context.setTimeout(function()
             {
-                self.showSourceLinkAsync(sourceLink, noHighlight, --counter);
+                // If JS execution is stooped at a breakpoint do not restore the previous
+                // location. The user wants to see the breakpoint now.
+                if (!this.context.stopped)
+                    self.showSourceLinkAsync(sourceLink, noHighlight, --counter);
             }, 50);
         }
     },
