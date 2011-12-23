@@ -107,9 +107,20 @@ var StorageService =
     {
         var store = new Storage(leafName);
 
-        var obj = ObjectPersister.readObject(leafName);
-        if (obj)
-            store.objectTable = obj;
+        try
+        {
+            var obj = ObjectPersister.readObject(leafName);
+            if (obj)
+                store.objectTable = obj;
+        }
+        catch (err)
+        {
+            if (FBTrace.DBG_ERRORS || FBTrace.DBG_STORAGE)
+            {
+                FBTrace.sysout("StorageService.getStorage; EXCEPTION for " + leafName +
+                    ": " + err, err);
+            }
+        }
 
         return store;
     },
