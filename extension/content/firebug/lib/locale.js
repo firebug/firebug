@@ -107,10 +107,6 @@ Locale.$STRF = function(name, args, bundle)
     {
         try
         {
-            // xxxHonza: Workaround for #485511
-            if (!bundle)
-                bundle = "strings_firebug";
-
             if (typeof bundle == "string")
                 bundle = document.getElementById(bundle);
 
