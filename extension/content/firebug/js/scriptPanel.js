@@ -51,7 +51,7 @@ Firebug.ScriptPanel.getEditorOptionKey = function()
 Firebug.ScriptPanel.reLineNumber = /^[^\\]?#(\d*)$/;
 
 /**
- * object used to markup Javascript source lines.
+ * object used to markup JavaScript source lines.
  * In the namespace Firebug.ScriptPanel.
  */
 Firebug.ScriptPanel.decorator = Obj.extend(new Firebug.SourceBoxDecorator,
@@ -162,7 +162,7 @@ Firebug.ScriptPanel.prototype = Obj.extend(Firebug.SourceBoxPanel,
 
     onJavaScriptDebugging: function(active)
     {
-        // then the change in jsd causes a refresh
+        // If this panel is selected, the change in JSD causes a refresh
         if (Firebug.chrome.getSelectedPanel() === this)
             Firebug.chrome.syncPanel(this.name);
 
@@ -197,7 +197,7 @@ Firebug.ScriptPanel.prototype = Obj.extend(Firebug.SourceBoxPanel,
         }
         else
         {
-            // want to avoid the script panel if possible
+            // Want to avoid the Script panel if possible
             if (FBTrace.DBG_ERRORS)
                 FBTrace.sysout("no sourcelink for function");
         }
@@ -219,7 +219,7 @@ Firebug.ScriptPanel.prototype = Obj.extend(Firebug.SourceBoxPanel,
                 Events.dispatch(this.fbListeners, "onShowSourceLink", [this, sourceLink.line]);
             }
 
-            // then clear it so the next link will scroll and highlight.
+            // If the source link is selected, clear it so the next link will scroll and highlight.
             if (sourceLink == this.selection)
                 delete this.selection;
         }
@@ -245,14 +245,14 @@ Firebug.ScriptPanel.prototype = Obj.extend(Firebug.SourceBoxPanel,
             if (typeof(counter) == "undefined")
                 counter = 15;
 
-            // Stop trying the target script is probably not going to appear.
+            // Stop trying. The target script is probably not going to appear.
             if (counter < 0)
                 return;
 
             var self = this;
             this.context.setTimeout(function()
             {
-                // If JS execution is stooped at a breakpoint do not restore the previous
+                // If JS execution is stopped at a breakpoint, do not restore the previous
                 // location. The user wants to see the breakpoint now.
                 if (!this.context.stopped)
                     self.showSourceLinkAsync(sourceLink, noHighlight, --counter);
@@ -270,7 +270,7 @@ Firebug.ScriptPanel.prototype = Obj.extend(Firebug.SourceBoxPanel,
         {
             sourceBox.selectedLine.removeAttribute(this.highlightingAttribute);
 
-            // Make sure the highlighter for the selected line is removed too (issue 4359).
+            // Make sure the highlighter for the selected line is removed, too (issue 4359).
             sourceBox.highlighter = null;
         }
     },
@@ -282,8 +282,10 @@ Firebug.ScriptPanel.prototype = Obj.extend(Firebug.SourceBoxPanel,
         {
             panel.removeExeLineHighlight(sourceBox);
 
-            var lineNode = sourceBox.getLineNode(lineNumber);  // we close over lineNumber
-            sourceBox.selectedLine = lineNode;  // if null, clears
+            // We close over lineNumber
+            var lineNode = sourceBox.getLineNode(lineNumber);
+            // If null, clears
+            sourceBox.selectedLine = lineNode;
 
             if (sourceBox.selectedLine)
             {
@@ -308,7 +310,8 @@ Firebug.ScriptPanel.prototype = Obj.extend(Firebug.SourceBoxPanel,
                     sourceBox.repObject.getURL());
             }
 
-            return sourceBox.selectedLine; // sticky if we have a valid line
+            // Sticky, if we have a valid line
+            return sourceBox.selectedLine;
         };
     },
 
@@ -353,7 +356,8 @@ Firebug.ScriptPanel.prototype = Obj.extend(Firebug.SourceBoxPanel,
         }
 
         var panelStatus = Firebug.chrome.getPanelStatusElements();
-        panelStatus.clear(); // clear stack on status bar
+        // Clear the stack on the panel toolbar
+        panelStatus.clear();
         this.updateInfoTip();
 
         var watchPanel = this.context.getPanel("watches", true);
@@ -469,8 +473,8 @@ Firebug.ScriptPanel.prototype = Obj.extend(Firebug.SourceBoxPanel,
         if (!sourceRowText)
             return;
 
-        // see http://code.google.com/p/fbug/issues/detail?id=889
-        // idea from: Jonathan Zarate's rikaichan extension (http://www.polarcloud.com/rikaichan/)
+        // See http://code.google.com/p/fbug/issues/detail?id=889
+        // Idea from: Jonathan Zarate's rikaichan extension (http://www.polarcloud.com/rikaichan/)
         if (!rangeParent)
             return;
 
@@ -492,7 +496,7 @@ Firebug.ScriptPanel.prototype = Obj.extend(Firebug.SourceBoxPanel,
 
         var self = this;
 
-        // If the evaluate fails, then we report an error and don't show the infoTip
+        // If the evaluate fails, then we report an error and don't show the infotip
         Firebug.CommandLine.evaluate(expr, this.context, null, this.context.getGlobalScope(),
             function success(result, context)
             {
@@ -504,16 +508,16 @@ Firebug.ScriptPanel.prototype = Obj.extend(Firebug.SourceBoxPanel,
 
                 tag.replace({object: result}, infoTip);
 
-                // If the menu is never displayed the contextMenuObject is not reset
+                // If the menu is never displayed, the contextMenuObject is not reset
                 // (back to null) and is reused at the next time the user opens the
-                // context menu, which is wrong
+                // context menu, which is wrong.
                 // This line was appended when fixing:
                 // http://code.google.com/p/fbug/issues/detail?id=1700
-                // The object should be returned by getPopupObject method
+                // The object should be returned by getPopupObject(),
                 // that is called when the context menu is showing.
-                // The problem is that "onContextShowing" event doesn't have
-                // rangeParent field set and so it isn't possible to get
-                // the expression under the cursor (see getExpressionAt).
+                // The problem is, that the "onContextShowing" event doesn't have the
+                // rangeParent field set and so it isn't possible to get the
+                // expression under the cursor (see getExpressionAt).
                 //Firebug.chrome.contextMenuObject = result;
 
                 self.infoTipExpr = expr;
@@ -813,16 +817,24 @@ Firebug.ScriptPanel.prototype = Obj.extend(Firebug.SourceBoxPanel,
             {
                 if (!this.restored)
                 {
-                    delete this.location;  // remove the default location if any
+                    // remove the default location, if any
+                    delete this.location;
                     Persist.restoreLocation(this, state);
                     this.restored = true;
                 }
-                else // we already restored
+                else
                 {
-                    if (!this.selectedSourceBox)  // but somehow we did not make a sourcebox?
+                    // we already restored
+                    if (!this.selectedSourceBox)
+                    {
+                        // but somehow we did not make a sourcebox?
                         this.navigate(this.location);
-                    else  // then we can sync the location to the sourcebox
+                    }
+                    else
+                    {
+                        // then we can sync the location to the sourcebox
                         this.updateSourceBox(this.selectedSourceBox);
+                    }
                 }
 
                 if (state)
@@ -832,11 +844,11 @@ Firebug.ScriptPanel.prototype = Obj.extend(Firebug.SourceBoxPanel,
                         var sourceLink = new SourceLink.SourceLink(state.location.getURL(),
                             state.previousCentralLine, "js");
 
-                        // Causes the script panel to show the proper location.
+                        // Causes the Script panel to show the proper location.
                         // Do not highlight the line (second argument true), we just want
                         // to restore the position.
                         // Also do it asynchronously, the script doesn't have to be
-                        // immediatelly available.
+                        // available immediately.
                         this.showSourceLinkAsync(sourceLink, true);
 
                         // Do not restore the location again, it could happen during
@@ -867,15 +879,14 @@ Firebug.ScriptPanel.prototype = Obj.extend(Firebug.SourceBoxPanel,
 
         Dom.collapse(Firebug.chrome.$("fbToolbar"), !active);
 
-        // These buttons are visible only if debugger is enabled.
+        // These buttons are visible only, if debugger is enabled.
         this.showToolbarButtons("fbLocationSeparator", active);
         this.showToolbarButtons("fbDebuggerButtons", active);
         this.showToolbarButtons("fbLocationButtons", active);
         this.showToolbarButtons("fbScriptButtons", active);
         this.showToolbarButtons("fbStatusButtons", active);
 
-        // Additional debugger panels are visible only if debugger
-        // is active.
+        // Additional debugger panels are visible only, if debugger is active.
         this.panelSplitter.collapsed = !active;
         this.sidePanelDeck.collapsed = !active;
     },
@@ -887,7 +898,8 @@ Firebug.ScriptPanel.prototype = Obj.extend(Firebug.SourceBoxPanel,
 
         this.highlight(this.context.stopped);
 
-        Events.removeEventListener(this.panelNode.ownerDocument, "keypress", this.onKeyPress, true);
+        Events.removeEventListener(this.panelNode.ownerDocument, "keypress", this.onKeyPress,
+            true);
         Events.removeEventListener(this.resizeEventTarget, "resize", this.onResize, true);
 
         if (FBTrace.DBG_PANELS)
@@ -916,12 +928,12 @@ Firebug.ScriptPanel.prototype = Obj.extend(Firebug.SourceBoxPanel,
             return false;
         }
 
-        // Check if the search is for a line number
+        // Check, if the search is for a line number
         var m = Firebug.ScriptPanel.reLineNumber.exec(text);
         if (m)
         {
             if (!m[1])
-                return true; // Don't beep if only a # has been typed
+                return true; // Don't beep, if only a # has been typed
 
             var lineNo = parseInt(m[1]);
             if (!isNaN(lineNo) && (lineNo > 0) && (lineNo < sourceBox.lines.length) )
@@ -951,7 +963,7 @@ Firebug.ScriptPanel.prototype = Obj.extend(Firebug.SourceBoxPanel,
         {
             var lines = null;
 
-            // TODO the source lines arrive async in general
+            // TODO The source lines arrive asynchronous in general
             compilationUnit.getSourceLines(-1, -1, function loadSource(unit, firstLineNumber,
                 lastLineNumber, linesRead)
             {
@@ -994,7 +1006,7 @@ Firebug.ScriptPanel.prototype = Obj.extend(Firebug.SourceBoxPanel,
 
         if (lineNo || lineNo === 0)
         {
-            // this lineNo is an zero-based index into sourceBox.lines.
+            // This lineNo is an zero-based index into sourceBox.lines.
             // Add one for user line numbers
             this.scrollToLine(sourceBox.repObject.getURL(), lineNo,
                 this.jumpHighlightFactory(lineNo+1, this.context));
@@ -1035,7 +1047,7 @@ Firebug.ScriptPanel.prototype = Obj.extend(Firebug.SourceBoxPanel,
         return 0;
     },
 
-    // delete any sourceBox-es that are not in sync with compilationUnits
+    // Delete any sourceBoxes that are not in sync with compilationUnits
     refresh: function()
     {
         for (var url in this.sourceBoxes)
@@ -1062,14 +1074,17 @@ Firebug.ScriptPanel.prototype = Obj.extend(Firebug.SourceBoxPanel,
             }
         }
 
-        if (!this.selectedSourceBox)  // then show() has not run,
-            this.navigate();          // but we have to refresh, so do the default.
+        // If selectedSourceBox is undefined, then show() has not run,
+        // but we have to refresh, so do the default.
+        if (!this.selectedSourceBox)
+            this.navigate();
     },
 
     updateLocation: function(compilationUnit)
     {
+        // XXXjjb do we need to show a blank?
         if (!compilationUnit)
-            return;  // XXXjjb do we need to show a blank?
+            return;
 
         if (!(compilationUnit instanceof CompilationUnit))
         {
@@ -1091,14 +1106,16 @@ Firebug.ScriptPanel.prototype = Obj.extend(Firebug.SourceBoxPanel,
             Dom.clearNode(this.panelNode);
             delete this.activeWarningTag;
 
-            // The user was seeing the warning, but selected a file to show in the script panel.
+            // The user was seeing the warning, but selected a file to show in the Script panel.
             // The removal of the warning leaves the panel without a clientHeight, so
             //  the old sourcebox will be out of sync. Just remove it and start over.
             this.removeAllSourceBoxes();
-            this.show(); // we are not passing state so I guess we could miss a restore
+            // we are not passing state so I guess we could miss a restore
+            this.show();
 
-            if (this.activeWarningTag)  // then show() reset the flag,
-                return;                 // obey it.
+            // If show() reset the flag, obey it
+            if (this.activeWarningTag)
+                return;
         }
 
         this.showSource(updatedCompilationUnit.getURL());
@@ -1235,7 +1252,7 @@ Firebug.ScriptPanel.prototype = Obj.extend(Firebug.SourceBoxPanel,
 
     getPopupObject: function(target)
     {
-        // Don't show popup over the line numbers, we show the conditional breakpoint
+        // Don't show the popup over the line numbers. We show the conditional breakpoint
         // editor there instead
         if (Dom.getAncestorByClass(target, "sourceLine"))
             return;
@@ -1246,7 +1263,9 @@ Firebug.ScriptPanel.prototype = Obj.extend(Firebug.SourceBoxPanel,
 
         var lineNo = parseInt(sourceRow.firstChild.textContent);
         var scripts = Firebug.SourceFile.findScripts(this.context, this.location.getURL(), lineNo);
-        return scripts; // gee I wonder what will happen?
+
+        // Gee I wonder what will happen?
+        return scripts;
     },
 
     getObjectPath: function(frame)
@@ -1561,16 +1580,18 @@ Firebug.ScriptPanel.prototype = Obj.extend(Firebug.SourceBoxPanel,
                     Firebug.currentContext.getName());
             }
 
-            if (currentBreakable == "false") // then we are armed but we broke
+            // If currentBreakable is false, then we are armed, but we broke
+            if (currentBreakable == "false")
                 Firebug.chrome.setGlobalAttribute("cmd_breakOnNext", "breakable", "true");
 
-            if (Firebug.isMinimized()) // then open the UI to show we are stopped
+            // If Firebug is minimized, open the UI to show we are stopped
+            if (Firebug.isMinimized())
                 Firebug.unMinimize();
 
             this.syncCommands(this.context);
             this.syncListeners(this.context);
 
-            // Update Break on Next lightning.
+            // Update Break on Next lightning
             Firebug.Breakpoint.updatePanelTab(this, false);
             Firebug.chrome.select(frame, "script", null, true);
             Firebug.chrome.syncPanel("script");  // issue 3463 and 4213
@@ -1611,7 +1632,8 @@ Firebug.ScriptPanel.prototype = Obj.extend(Firebug.SourceBoxPanel,
             this.syncListeners(this.context);
             this.highlight(false);
 
-            chrome.syncSidePanels();  // after main panel is all updated.
+            // After main panel is completely updated
+            chrome.syncSidePanels();
         }
         catch (exc)
         {
@@ -1716,7 +1738,7 @@ Firebug.ScriptPanel.WarningRep = domplate(Firebug.Rep,
             {
                 if (context.stopped)
                 {
-                    // Focus browser window with active debugger and select the Script panel.
+                    // Focus browser window with active debugger and select the Script panel
                     win.Firebug.focusBrowserTab(context.window);
                     win.Firebug.chrome.selectPanel("script");
                     return true;
