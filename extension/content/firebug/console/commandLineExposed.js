@@ -164,7 +164,7 @@ function createFirebugCommandLine(context, win)
             if (shouldModify)
             {
                 var result = new Error;
-                delete result.stack;
+                result.stack = null;
                 result.source = expr;
                 result.message = exc.message;
                 result.lineNumber = exc.lineNumber - line;
