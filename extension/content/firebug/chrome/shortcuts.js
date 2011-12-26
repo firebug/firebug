@@ -76,7 +76,7 @@ Firebug.ShortcutsModel = Obj.extend(Firebug.Module,
         var invalidAttr = "key";
 
         // Choose between key or keycode attribute
-        if (key.length == 1)
+        if (key.length <= 1)
         {
             invalidAttr = "keycode";
         }
