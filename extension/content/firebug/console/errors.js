@@ -172,8 +172,10 @@ var Errors = Firebug.Errors = Obj.extend(Firebug.Module,
     {
         // Make sure the argument is an error object. 'instanceof' also
         // queries the object so e.g. outerWindowID (nsIScriptError2) is available.
+        // nsIScriptError2 was merged with nsIScriptError, see
+        // https://bugzilla.mozilla.org/show_bug.cgi?id=711721
         if (!(object instanceof Ci.nsIScriptError) ||
-            !(object instanceof Ci.nsIScriptError2))
+            (Ci.nsIScriptError2 && !(object instanceof Ci.nsIScriptError2)))
         {
             return;
         }
