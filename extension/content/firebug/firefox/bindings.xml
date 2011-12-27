@@ -747,7 +747,7 @@
 <binding id="panelTabMenu" display="xul:button" extends="chrome://global/content/bindings/toolbarbutton.xml#toolbarbutton">
     <content>
         <!-- Specify an empty tooltiptext to avoid displaying tooltip from the tab -->
-        <xul:menupopup anonid="popup" tooltiptext=""/>
+        <xul:menupopup anonid="popup" tooltiptext="" class="menuPopup"/>
         <xul:image anonid="menuTarget" class="menuTarget"/>
     </content>
 
@@ -817,7 +817,11 @@
             <body><![CDATA[
                 var popupBoxObject = this.popup.popupBoxObject;
                 popupBoxObject.setConsumeRollupEvent(popupBoxObject.ROLLUP_NO_CONSUME);
-                this.popup.showPopup(anchor || this, -1, -1, "popup", "bottomleft", "topleft");
+                var style = this.ownerDocument.defaultView.getComputedStyle(this.popup, null);
+                var rtlLanguage = style.direction == "rtl";
+                this.popup.showPopup(anchor || this, -1, -1, "popup",
+                    rtlLanguage ? "bottomright" : "bottomleft",
+                    rtlLanguage ? "topright" : "topleft");
             ]]></body>
         </method>
     </implementation>

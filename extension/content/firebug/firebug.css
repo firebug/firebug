@@ -179,6 +179,10 @@ panelTab[selected="true"]:hover > panelTabMenu .menuTarget {
     background: url(chrome://firebug/skin/tabMenuTargetHover.png) no-repeat center;
 }
 
+panelTab > panelTabMenu .menuPopup:-moz-locale-dir(rtl) {
+    direction: rtl;
+}
+
 /************************************************************************************************/
 /* Detached Firebug Window */
 
