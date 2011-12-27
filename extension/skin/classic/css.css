@@ -160,7 +160,6 @@
         -moz-linear-gradient(-45deg, #A0A0A0 25%, transparent 25%),
         -moz-linear-gradient(45deg, transparent 75%, #A0A0A0 75%),
         -moz-linear-gradient(-45deg, transparent 75%, #A0A0A0 75%);
-    -moz-background-size: 16px 16px;
     background-size: 16px 16px;
     background-position:0 0, 8px 0, 8px -8px, 0px 8px;
 }
