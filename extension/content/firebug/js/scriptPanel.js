@@ -254,7 +254,7 @@ Firebug.ScriptPanel.prototype = Obj.extend(Firebug.SourceBoxPanel,
             {
                 // If JS execution is stopped at a breakpoint, do not restore the previous
                 // location. The user wants to see the breakpoint now.
-                if (!this.context.stopped)
+                if (!self.context.stopped)
                     self.showSourceLinkAsync(sourceLink, noHighlight, --counter);
             }, 50);
         }
