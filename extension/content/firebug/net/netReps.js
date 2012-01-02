@@ -912,10 +912,11 @@ Firebug.NetMonitor.NetInfoBody = domplate(Firebug.Rep, new Firebug.Listener(),
 
     hideResponse: function(file)
     {
-        for (var i=0; i<file.responseHeaders.length; i++)
+        var headers = file.responseHeaders;
+        for (var i=0; headers && i<headers.length; i++)
         {
-            if (file.responseHeaders[i].name == "Content-Length")
-                return file.responseHeaders[i].value == 0;
+            if (headers[i].name == "Content-Length")
+                return headers[i].value == 0;
         }
 
         return file.category in NetUtils.binaryFileCategories || file.responseText == "";
