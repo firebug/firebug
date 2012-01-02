@@ -2157,39 +2157,39 @@ FirebugReps.Except = domplate(Firebug.Rep,
     {
         if (object.name)
             return object.name + (object.message ? ": " + object.message : "");
-         if (object.message)
+
+        if (object.message)
             return object.message;
+
         return "Exception";
     },
 
     getErrorMessage: function(object)
     {
-        var context = Firebug.currentContext,
-            win = context.window,
-            trace,
-            url,
-            lineNo,
-            errorObject,
-            message;
+        var context = Firebug.currentContext;
+        var win = context ? context.window : null;
 
-        url = object.fileName ? object.fileName : (win ? win.location.href : "");
-        lineNo = object.lineNumber ? object.lineNumber : 0;
-        message = this.getTitle(object);
+        var url = object.fileName ? object.fileName : (win ? win.location.href : "");
+        var lineNo = object.lineNumber ? object.lineNumber : 0;
+        var message = this.getTitle(object);
 
+        var trace;
         if (object.stack)
         {
             trace = StackFrame.parseToStackTrace(object.stack, context);
             trace = StackFrame.cleanStackTraceOfFirebug(trace);
+
             if (!trace)
                 lineNo = 0;
         }
-        errorObject = new FirebugReps.ErrorMessageObj(message, url, lineNo, '', 'js',
+
+        var errorObject = new FirebugReps.ErrorMessageObj(message, url, lineNo, "", "js",
             context, trace);
 
         if (trace && trace.frames && trace.frames[0])
             errorObject.correctWithStackTrace(trace);
-        errorObject.resetSource();
 
+        errorObject.resetSource();
         return errorObject;
     },
 
