@@ -19,8 +19,12 @@ define([
 function(Obj, Firebug, Domplate, FirebugReps, Locale, Wrapper, Url, Console,
     StackFrame, Events, Css, Dom, Str, FBS) {
 
-    const Cc = Components.classes;
-    const Ci = Components.interfaces;
+// ********************************************************************************************* //
+// Constants
+
+const Cc = Components.classes;
+const Ci = Components.interfaces;
+
 // ********************************************************************************************* //
 // Profiler
 
