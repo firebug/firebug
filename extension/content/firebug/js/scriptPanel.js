@@ -1386,17 +1386,17 @@ Firebug.ScriptPanel.prototype = Obj.extend(Firebug.SourceBoxPanel,
                 var debuggr = this;
                 items.push(
                     "-",
-                    {label: "firebug.Rerun",
+                    {label: "firebug.Rerun", id: "contextMenuRerun",
                         command: Obj.bindFixed(debuggr.rerun, debuggr, this.context) },
-                    {label: "firebug.Continue",
+                    {label: "firebug.Continue", id: "contextMenuContinue",
                         command: Obj.bindFixed(debuggr.resume, debuggr, this.context) },
-                    {label: "firebug.StepOver",
+                    {label: "firebug.StepOver", id: "contextMenuStepOver",
                         command: Obj.bindFixed(debuggr.stepOver, debuggr, this.context) },
-                    {label: "firebug.StepInto",
+                    {label: "firebug.StepInto", id: "contextMenuStepInto",
                         command: Obj.bindFixed(debuggr.stepInto, debuggr, this.context) },
-                    {label: "firebug.StepOut",
+                    {label: "firebug.StepOut", id: "contextMenuStepOut",
                         command: Obj.bindFixed(debuggr.stepOut, debuggr, this.context) },
-                    {label: "firebug.RunUntil",
+                    {label: "firebug.RunUntil", id: "contextMenuRunUntil",
                         command: Obj.bindFixed(debuggr.runUntil, debuggr, this.context,
                         compilationUnit, lineNo) }
                 );
