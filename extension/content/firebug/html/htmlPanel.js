@@ -955,7 +955,8 @@ Firebug.HTMLPanel.prototype = Obj.extend(WalkingPanel,
         }
         else if (Events.isAltClick(event) && event.detail == 2 && !this.editing)
         {
-            this.editNode(this.selection);
+            var node = Firebug.getRepObject(event.target);
+            this.editNode(node);
         }
     },
 
