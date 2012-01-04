@@ -57,7 +57,7 @@ var Locale = {};
  */
 Locale.$STR = function(name, bundle)
 {
-    var strKey = name.replace(' ', '_', "g");
+    var strKey = name.replace(" ", "_", "g");
 
     if (!Options.get("useDefaultLocale"))
     {
@@ -101,12 +101,16 @@ Locale.$STR = function(name, bundle)
 
 Locale.$STRF = function(name, args, bundle)
 {
-    var strKey = name.replace(' ', '_', "g");
+    var strKey = name.replace(" ", "_", "g");
 
     if (!Options.get("useDefaultLocale"))
     {
         try
         {
+            // xxxHonza: Workaround for #485511
+            if (!bundle)
+                bundle = "strings_firebug";
+
             if (typeof bundle == "string")
                 bundle = document.getElementById(bundle);
 
@@ -193,7 +197,7 @@ Locale.internationalize = function(element, attr, args)
     else
     {
         if (FBTrace.DBG_LOCALE)
-            FBTrace.sysout("Failed to internationalize element with attr "+attr+' args:'+args);
+            FBTrace.sysout("Failed to internationalize element with attr "+attr+" args:"+args);
     }
 }
 
