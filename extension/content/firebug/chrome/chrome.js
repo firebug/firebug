@@ -1680,7 +1680,7 @@ function panelSupportsObject(panelType, object, context)
 
 function getBestPanelName(object, context, panelName)
 {
-    if (!panelName)
+    if (!panelName && context)
         panelName = context.panelName;
 
     // Check, if the panel type of the suggested panel supports the object, and if so, go with it
