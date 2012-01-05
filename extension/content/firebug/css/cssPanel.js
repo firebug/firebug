@@ -957,6 +957,16 @@ Firebug.CSSStyleSheetPanel.prototype = Obj.extend(Firebug.Panel,
                 );
         }
 
+        if (Css.hasClass(target, "cssSelector"))
+        {
+            var selector = Str.cropString(target.textContent, 30);
+            items.push(
+                {label: Locale.$STRF("css.Delete Rule", [selector]), nol10n: true,
+                    id: "fbDeleteRuleDeclaration",
+                    command: Obj.bindFixed(this.deleteRuleDeclaration, this, target) }
+            );
+        }
+
         var cssRule = Dom.getAncestorByClass(target, "cssRule");
         if (cssRule && Css.hasClass(cssRule, "cssEditableRule"))
         {
@@ -1299,6 +1309,38 @@ Firebug.CSSStyleSheetPanel.prototype = Obj.extend(Firebug.Panel,
             props.join(Str.lineBreak() + "  ") + Str.lineBreak() + "}");
     },
 
+    },
+
+    deleteRuleDeclaration: function(cssSelector)
+    {
+        var searchRule = Firebug.getRepObject(cssSelector) ||
+            Firebug.getRepObject(cssSelector.nextSibling);
+        var styleSheet = searchRule.parentRule || searchRule.parentStyleSheet;
+        var ruleIndex = 0;
+        var cssRules = styleSheet.cssRules;
+        while (ruleIndex < cssRules.length && searchRule != cssRules[ruleIndex])
+            ruleIndex++;
+
+        if (FBTrace.DBG_CSS)
+        {
+            FBTrace.sysout("css.deleteRuleDeclaration; selector: "+
+                Str.cropString(cssSelector.textContent, 100),
+                {styleSheet: styleSheet, ruleIndex: ruleIndex});
+        }
+
+        Firebug.CSSModule.deleteRule(styleSheet, ruleIndex);
+
+        if (this.context.panelName == "stylesheet")
+        {
+            var rule = Dom.getAncestorByClass(cssSelector, "cssRule");
+            if (rule)
+                rule.parentNode.removeChild(rule);
+        }
+        else
+        {
+            var sidePanel = Firebug.chrome.getSelectedSidePanel();
+            sidePanel.refresh();
+        }
     copyStyleDeclaration: function(cssSelector)
     {
         var props = this.getStyleDeclaration(cssSelector);
@@ -1559,7 +1601,7 @@ CSSRuleEditor.prototype = domplate(Firebug.InlineEditor.prototype,
         }
         else
         {
-            if (this.panel.name != 'stylesheet')
+            if (this.panel.name != "stylesheet")
                 return;
 
             var styleSheet = this.panel.location;//this must be stylesheet panel
