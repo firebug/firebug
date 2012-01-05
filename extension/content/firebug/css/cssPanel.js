@@ -1403,8 +1403,13 @@ CSSEditor.prototype = domplate(Firebug.InlineEditor.prototype,
 
         if (Css.hasClass(target, "cssPropName"))
         {
+
             if (value && previousValue != value)  // name of property has changed.
             {
+                // Record the original CSS text for the inline case so we can reconstruct at a later
+                // point for diffing purposes
+                var baseText = rule.style ? rule.style.cssText : rule.cssText;
+
                 propValue = Dom.getChildByClass(row, "cssPropValue").textContent;
                 parsedValue = parsePriority(propValue);
 
@@ -1424,6 +1429,9 @@ CSSEditor.prototype = domplate(Firebug.InlineEditor.prototype,
                     Firebug.CSSModule.setProperty(rule, value, parsedValue.value,
                         parsedValue.priority);
                 }
+
+                Events.dispatch(this.fbListeners, "onCSSPropertyNameChanged", [rule, value,
+                    previousValue, baseText]);
             }
             else if (!value)
             {
