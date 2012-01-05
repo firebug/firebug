@@ -950,28 +950,6 @@ Firebug.Spy.XHR = domplate(Firebug.Rep,
         Win.openNewTab(spy.getURL(), spy.postText);
     },
 
-    // xxxsz: Could be merged with openResponseInTab() of netPanel.js and put into the lib
-    openResponseInTab: function(spy)
-    {
-        try
-        {
-            var response = NetUtils.getResponseText(spy, this.context);
-            var inputStream = Http.getInputStreamFromString(response);
-            var stream = Xpcom.CCIN("@mozilla.org/binaryinputstream;1", "nsIBinaryInputStream");
-            stream.setInputStream(inputStream);
-            var encodedResponse = btoa(stream.readBytes(stream.available()));
-            var dataURI = "data:" + spy.request.contentType + ";base64," + encodedResponse;
-  
-            var tabBrowser = Firefox.getTabBrowser();
-            tabBrowser.selectedTab = tabBrowser.addTab(dataURI);
-        }
-        catch (err)
-        {
-            if (FBTrace.DBG_ERRORS)
-                FBTrace.sysout("spy.openResponseInTab EXCEPTION", err);
-        }
-    },
-
     resend: function(spy, context)
     {
         try
@@ -1049,7 +1027,7 @@ Firebug.Spy.XHR = domplate(Firebug.Rep,
         items.push({
           label: "Open Response In New Tab",
           id: "fbSpyOpenResponseInTab",
-          command: Obj.bindFixed(this.openResponseInTab, this, spy)
+          command: Obj.bindFixed(NetUtils.openResponseInTab, this, spy)
         });
 
         items.push("-");

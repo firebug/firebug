@@ -32,7 +32,7 @@ define([
     "firebug/chrome/searchBox",
     "firebug/console/errors",
     "firebug/net/netMonitor",
-    "firebug/net/netReps",
+    "firebug/net/netReps"
 ],
 function(Obj, Firebug, Firefox, Domplate, Xpcom, Locale,
     Events, Options, Url, SourceLink, Http, Css, Dom, Win, Search, Str,
@@ -354,7 +354,7 @@ NetPanel.prototype = Obj.extend(Firebug.ActivablePanel,
         if (NetUtils.textFileCategories.hasOwnProperty(file.category))
         {
             items.push(
-                {label: "Open Response In New Tab", command: Obj.bindFixed(this.openResponseInTab, this, file) }
+                {label: "Open Response In New Tab", command: Obj.bindFixed(NetUtils.openResponseInTab, this, file) }
             );
         }
 
@@ -445,27 +445,6 @@ NetPanel.prototype = Obj.extend(Firebug.ActivablePanel,
         else
         {
             Win.openNewTab(file.href, null);
-        }
-    },
-
-    openResponseInTab: function(file)
-    {
-        try
-        {
-            var response = NetUtils.getResponseText(file, this.context);
-            var inputStream = Http.getInputStreamFromString(response);
-            var stream = Xpcom.CCIN("@mozilla.org/binaryinputstream;1", "nsIBinaryInputStream");
-            stream.setInputStream(inputStream);
-            var encodedResponse = btoa(stream.readBytes(stream.available()));
-            var dataURI = "data:" + file.request.contentType + ";base64," + encodedResponse;
-
-            var tabBrowser = Firefox.getTabBrowser();
-            tabBrowser.selectedTab = tabBrowser.addTab(dataURI);
-        }
-        catch (err)
-        {
-            if (FBTrace.DBG_ERRORS)
-                FBTrace.sysout("net.openResponseInTab EXCEPTION", err);
         }
     },
 

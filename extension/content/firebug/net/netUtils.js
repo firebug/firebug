@@ -4,11 +4,13 @@ define([
     "firebug/firebug",
     "firebug/lib/locale",
     "firebug/lib/url",
+    "firebug/firefox/firefox",
+    "firebug/firefox/xpcom",
     "firebug/net/httpLib",
     "firebug/lib/string",
     "firebug/lib/xml",
 ],
-function(Firebug, Locale, Url, Http, Str, Xml) {
+function(Firebug, Locale, Url, Firefox, Xpcom, Http, Str, Xml) {
 
 // ********************************************************************************************* //
 // Constants
@@ -370,6 +372,27 @@ var NetUtils =
         return "[" + ((m.length > 1) ? m : "0" + m) + ":" +
             ((s.length > 1) ? s : "0" + s) + "." +
             ((ms.length > 2) ? ms : ((ms.length > 1) ? "0" + ms : "00" + ms)) + "]";
+    },
+
+    openResponseInTab: function(file)
+    {
+        try
+        {
+            var response = NetUtils.getResponseText(file, this.context);
+            var inputStream = Http.getInputStreamFromString(response);
+            var stream = Xpcom.CCIN("@mozilla.org/binaryinputstream;1", "nsIBinaryInputStream");
+            stream.setInputStream(inputStream);
+            var encodedResponse = btoa(stream.readBytes(stream.available()));
+            var dataURI = "data:" + file.request.contentType + ";base64," + encodedResponse;
+        
+            var tabBrowser = Firefox.getTabBrowser();
+            tabBrowser.selectedTab = tabBrowser.addTab(dataURI);
+        }
+        catch (err)
+        {
+            if (FBTrace.DBG_ERRORS)
+                FBTrace.sysout("net.openResponseInTab EXCEPTION", err);
+        }
     },
 
     traceRequestTiming: function(msg, file)
