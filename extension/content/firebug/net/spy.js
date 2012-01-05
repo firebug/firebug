@@ -3,9 +3,7 @@
 define([
     "firebug/lib/object",
     "firebug/firebug",
-    "firebug/firefox/firefox",
     "firebug/lib/domplate",
-    "firebug/firefox/xpcom",
     "firebug/chrome/reps",
     "firebug/lib/events",
     "firebug/net/requestObserver",
@@ -26,7 +24,7 @@ define([
     "firebug/net/netPanel",
     "firebug/console/errors"
 ],
-function(Obj, Firebug, Firefox, Domplate, Xpcom, FirebugReps, Events, HttpRequestObserver, StackFrame,
+function(Obj, Firebug, Domplate, FirebugReps, Events, HttpRequestObserver, StackFrame,
     Http, Css, Dom, Win, System, Str, Url, Arr, Debug, NetHttpActivityObserver, NetUtils,
     TraceListener, TraceModule) {
 
