@@ -1309,8 +1309,6 @@ Firebug.CSSStyleSheetPanel.prototype = Obj.extend(Firebug.Panel,
             props.join(Str.lineBreak() + "  ") + Str.lineBreak() + "}");
     },
 
-    },
-
     deleteRuleDeclaration: function(cssSelector)
     {
         var searchRule = Firebug.getRepObject(cssSelector) ||
@@ -1341,6 +1339,8 @@ Firebug.CSSStyleSheetPanel.prototype = Obj.extend(Firebug.Panel,
             var sidePanel = Firebug.chrome.getSelectedSidePanel();
             sidePanel.refresh();
         }
+    },
+
     copyStyleDeclaration: function(cssSelector)
     {
         var props = this.getStyleDeclaration(cssSelector);
