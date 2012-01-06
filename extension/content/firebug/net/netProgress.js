@@ -1210,19 +1210,17 @@ function delayGetCacheEntry(file, netProgress)
                 ];
 
                 // Get contentType from the cache.
-                descriptor.visitMetaData(
+                try
                 {
-                    visitMetaDataElement: function(key, value)
-                    {
-                        if (key == "response-head")
-                        {
-                            var contentType = getContentTypeFromResponseHead(value);
-                            file.mimeType = NetUtils.getMimeType(contentType, file.href);
-                            return false;
-                        }
-                        return true;
-                    }
-                });
+                    var value = descriptor.getMetaDataElement("response-head");
+                    var contentType = getContentTypeFromResponseHead(value);
+                    file.mimeType = NetUtils.getMimeType(contentType, file.href);
+                }
+                catch (e)
+                {
+                    if (FBTrace.DBG_ERRORS)
+                        FBTrace.sysout("net.delayGetCacheEntry; EXCEPTION ", e);
+                }
 
                 descriptor.close();
                 netProgress.update(file);
