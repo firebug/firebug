@@ -1470,7 +1470,7 @@ CSSEditor.prototype = domplate(Firebug.InlineEditor.prototype,
             {
                 propName = value.replace(/-./g, function(match)
                 {
-                    match[1].toUpperCase()
+                    return match[1].toUpperCase()
                 });
 
                 if(propName in rule.style || propName == "float")
