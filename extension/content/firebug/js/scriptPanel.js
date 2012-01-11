@@ -1050,6 +1050,9 @@ Firebug.ScriptPanel.prototype = Obj.extend(Firebug.SourceBoxPanel,
     // Delete any sourceBoxes that are not in sync with compilationUnits
     refresh: function()
     {
+        var previousCentralLine;
+        var previousUrl;
+
         for (var url in this.sourceBoxes)
         {
             if (this.sourceBoxes.hasOwnProperty(url))
@@ -1064,8 +1067,11 @@ Firebug.ScriptPanel.prototype = Obj.extend(Firebug.SourceBoxPanel,
                     delete this.sourceBoxes[url];
                     if (this.selectedSourceBox == victim)
                     {
-                         Dom.collapse(this.selectedSourceBox, true);
-                         delete this.selectedSourceBox;
+                        previousCentralLine = this.selectedSourceBox.centralLine;
+                        previousUrl = this.getSourceBoxURL(this.selectedSourceBox);
+
+                        Dom.collapse(this.selectedSourceBox, true);
+                        delete this.selectedSourceBox;
                     }
 
                     if (FBTrace.DBG_COMPILATION_UNITS)
@@ -1077,7 +1083,17 @@ Firebug.ScriptPanel.prototype = Obj.extend(Firebug.SourceBoxPanel,
         // If selectedSourceBox is undefined, then show() has not run,
         // but we have to refresh, so do the default.
         if (!this.selectedSourceBox)
+        {
             this.navigate();
+
+            // Restore the scroll position (issue 5111)
+            if (this.selectedSourceBox)
+            {
+                var url = this.getSourceBoxURL(this.selectedSourceBox);
+                if (this.selectedSourceBox && url == previousUrl)
+                    this.scrollToLine(null, previousCentralLine);
+            }
+        }
     },
 
     updateLocation: function(compilationUnit)
