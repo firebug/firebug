@@ -131,7 +131,12 @@ Firebug.Spy = Obj.extend(Firebug.Module,
     {
         // XXXjjb Honza, if Console.isEnabled(context) false, then this can't be called,
         // but somehow seems not correct
-        if (name == "showXMLHttpRequests")
+
+        // XHR Spy needs to be detached/attached when:
+        // 1) The Show XMLHttpRequests options is off/on
+        // 2) The Console panel is disabled/enabled
+        // See also issue 5109
+        if (name == "showXMLHttpRequests" || name == "console.enableSites")
         {
             var tach = value ? this.attachObserver : this.detachObserver;
 
