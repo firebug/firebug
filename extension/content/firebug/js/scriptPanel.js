@@ -775,6 +775,11 @@ Firebug.ScriptPanel.prototype = Obj.extend(Firebug.SourceBoxPanel,
         {
             this.activeWarningTag = WarningRep.showNotEnabled(this.panelNode);
         }
+        else if (currentURI && (Url.isSystemURL(currentURI.spec) ||
+            currentURI.spec.match(Url.reChrome)))
+        {
+            this.activeWarningTag = WarningRep.showNoDebuggingForSystemSources(this.panelNode);
+        }
         else if (this.context.allScriptsWereFiltered)
         {
             this.activeWarningTag = WarningRep.showFiltered(this.panelNode);
@@ -786,11 +791,6 @@ Firebug.ScriptPanel.prototype = Obj.extend(Firebug.SourceBoxPanel,
         else if (!Firebug.jsDebuggerOn)  // set asynchronously by jsd in FF 4.0
         {
             this.activeWarningTag = WarningRep.showDebuggerInactive(this.panelNode);
-        }
-        else if (currentURI && (Url.isSystemURL(currentURI.spec) ||
-            currentURI.spec.match(Url.reChrome)))
-        {
-            this.activeWarningTag = WarningRep.showNoDebuggingForSystemSources(this.panelNode);
         }
         else if (!aLocation) // they were not filtered, we just had none
         {
