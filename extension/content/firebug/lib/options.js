@@ -80,7 +80,7 @@ const prefNames =  // XXXjjb TODO distribute to modules
 
     "showStackTrace", // Console
     "filterSystemURLs", // Stack
-    "showAllSourceFiles", "breakOnErrors",  "trackThrowCatch" // Script
+    "breakOnErrors",  "trackThrowCatch" // Script
 ];
 
 var optionUpdateMap = {};

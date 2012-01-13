@@ -49,7 +49,8 @@ const firebugURLs =  // TODO chrome.js
     keyboard: "http://getfirebug.com/wiki/index.php/Keyboard_and_Mouse_Shortcuts",
     discuss: "http://groups.google.com/group/firebug",
     issues: "http://code.google.com/p/fbug/issues/list",
-    donate: "http://getfirebug.com/getinvolved"
+    donate: "http://getfirebug.com/getinvolved",
+    issue5110: "http://code.google.com/p/fbug/issues/detail?id=5110"
 };
 
 const scriptBlockSize = 20;

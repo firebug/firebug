@@ -81,7 +81,6 @@ pref("extensions.firebug.cssEditMode", "Source");
 
 // Script
 pref("extensions.firebug.breakOnErrors", false);
-pref("extensions.firebug.showAllSourceFiles", false);
 pref("extensions.firebug.trackThrowCatch", false);
 pref("extensions.firebug.script.enableSites", false);
 pref("extensions.firebug.scriptsFilter", "all");

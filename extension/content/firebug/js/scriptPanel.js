@@ -762,6 +762,7 @@ Firebug.ScriptPanel.prototype = Obj.extend(Firebug.SourceBoxPanel,
             });
         }
 
+        var currentURI = Firefox.getCurrentURI();
         var activitySuspended = this.isActivitySuspended();
         if (activitySuspended && !this.context.stopped)
         {
@@ -771,17 +772,34 @@ Firebug.ScriptPanel.prototype = Obj.extend(Firebug.SourceBoxPanel,
             this.activeWarningTag = WarningRep.showActivitySuspended(this.panelNode);
         }
         else if (!jsEnabled)
+        {
             this.activeWarningTag = WarningRep.showNotEnabled(this.panelNode);
+        }
         else if (this.context.allScriptsWereFiltered)
+        {
             this.activeWarningTag = WarningRep.showFiltered(this.panelNode);
+        }
         else if (aLocation && !this.context.jsDebuggerCalledUs)
+        {
             this.activeWarningTag = WarningRep.showInactive(this.panelNode);
+        }
         else if (!Firebug.jsDebuggerOn)  // set asynchronously by jsd in FF 4.0
+        {
             this.activeWarningTag = WarningRep.showDebuggerInactive(this.panelNode);
+        }
+        else if (currentURI && (Url.isSystemURL(currentURI.spec) ||
+            currentURI.spec.match(Url.reChrome)))
+        {
+            this.activeWarningTag = WarningRep.showNoDebuggingForSystemSources(this.panelNode);
+        }
         else if (!aLocation) // they were not filtered, we just had none
+        {
             this.activeWarningTag = WarningRep.showNoScript(this.panelNode);
+        }
         else
+        {
             return false;
+        }
 
         return true;
     },
@@ -1190,16 +1208,6 @@ Firebug.ScriptPanel.prototype = Obj.extend(Firebug.SourceBoxPanel,
         if (!allSources.length)
             return [];
 
-        if (Firebug.showAllSourceFiles)
-        {
-            if (FBTrace.DBG_COMPILATION_UNITS)
-            {
-                FBTrace.sysout("script getLocationList "+context.getName() + " allSources",
-                    allSources);
-            }
-            return allSources;
-        }
-
         var filter = Firebug.Options.get("scriptsFilter");
         this.showEvents = (filter == "all" || filter == "events");
         this.showEvals = (filter == "all" || filter == "evals");
@@ -1327,7 +1335,6 @@ Firebug.ScriptPanel.prototype = Obj.extend(Firebug.SourceBoxPanel,
         var context = this.context;
 
         return [
-            Menu.optionMenu("ShowAllSourceFiles", "showAllSourceFiles"),
             // 1.2: always check last line; optionMenu("UseLastLineForEvalName", "useLastLineForEvalName"),
             // 1.2: always use MD5 optionMenu("UseMD5ForEvalName", "useMD5ForEvalName")
             Menu.optionMenu("TrackThrowCatch", "trackThrowCatch"),
@@ -1777,7 +1784,7 @@ Firebug.ScriptPanel.WarningRep = domplate(Firebug.Rep,
         };
 
         var box = this.tag.replace(args, parentNode, this);
-        var description = box.querySelector(".disabledPanelDescription");
+        var description = box.getElementsByClassName("disabledPanelDescription").item(0);
         FirebugReps.Description.render(args.suggestion, description,
             Obj.bindFixed(Firebug.TabWatcher.reloadPageFromMemory,  Firebug.TabWatcher,
             Firebug.currentContext));
@@ -1828,6 +1835,21 @@ Firebug.ScriptPanel.WarningRep = domplate(Firebug.Rep,
         return this.tag.replace(args, parentNode, this);
     },
 
+    showNoDebuggingForSystemSources: function(parentNode)
+    {
+        var args = {
+            pageTitle: Locale.$STR("script.warning.no_system_source_debugging"),
+            suggestion: Locale.$STR("script.suggestion.no_system_source_debugging")
+        }
+
+        var box = this.tag.replace(args, parentNode, this);
+        var description = box.getElementsByClassName("disabledPanelDescription").item(0);
+        FirebugReps.Description.render(args.suggestion, description,
+            Obj.bindFixed(Firebug.visitWebsite,  this, "issue5110"));
+
+        return box;
+    },
+    
     showActivitySuspended: function(parentNode)
     {
         var args = {
