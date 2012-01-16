@@ -1418,7 +1418,7 @@
         </xul:textbox>
         <xul:description anonid="fbSearchBoxDescription"  collapsed="true"/>
         <xul:panel id="fbSearchOptionsPanel" norestorefocus="true" noautofocus="true"
-            noautohide="true" ignorekeys="true" role="presentation">
+            ignorekeys="true" role="presentation">
             <xul:description id="fbSearchBoxIsSensitive" value="search.Case AutoSensitive"/>
             <xul:description id="fbSearchBoxIsNotSensitive" value="search.Case Insensitive"/>
             <xul:vbox class="searchOptionsMenu innerToolbar" role="menu" anonid="fbSearchOptionsMenu">
@@ -1448,19 +1448,20 @@
                 self.focusHandler(event);
             };
 
-            this.onBlurSearchBox = function(event)
-            {
-                self.blurHandler(event);
-            };
-
             this.onFocusOptionsPopup = function(event)
             {
                 self.panelFocusHandler(event);
             };
 
-            searchBox.addEventListener("blur", this.onBlurSearchBox, true);
             searchBox.addEventListener("focus", this.onFocusSearchBox, true);
             optionsPopup.addEventListener("focus", this.onFocusOptionsPopup, true);
+
+            // Dynamically set noautohide to avoid mozilla bug 545265.
+            optionsPopup.addEventListener("popupshowing", function runOnce()
+            {
+                optionsPopup.removeEventListener("popupshowing", runOnce, false);
+                optionsPopup.setAttribute("noautohide", true);
+            }, false);
         ]]></constructor>
 
         <destructor><![CDATA[
@@ -1524,11 +1525,6 @@
         <!-- Flag indicating that the child of the panel has or just had focus -->
         <field name="panelHasFocus" />
 
-        <!-- Flag for re-focusing the search field when a Linux bug causes it to be blurred
-        as soon as the panel opens. 0 = nothing, 1 = waiting for possible blur, 2 = blur
-        has happened, should focus (resets to 0 when focus happens). -->
-        <field name="focusHack">0</field>
-
         <!-- Timer to close the popup, set on blur. Any kind of focus that directly follows
         the blur should clear it with clearBlurTimeout(). -->
         <field name="blurTimeout">null</field>
@@ -1591,14 +1587,6 @@
                 var optionsPopup = document.getElementById("fbSearchOptionsPanel");
                 var position = (Firebug.getPlacement() == "detached" ? "after_end" : "before_end");
 
-                this.focusHack = 1;
-                var self = this;
-                setTimeout(function()
-                {
-                    if (self.focusHack == 1)
-                        self.focusHack = 0;
-                }, 20);
-
                 this.focused = true;
                 optionsPopup.setAttribute("position", position);
                 var popupBoxObject = optionsPopup.popupBoxObject;
@@ -1652,37 +1640,12 @@
         <method name="focusHandler">
             <parameter name="event" />
             <body><![CDATA[
-                if (this.focusHack == 2)
-                {
-                    this.focusHack = 0;
-                    return;
-                }
                 this.panelHasFocus = false;
-
                 this.clearBlurTimeout();
+
                 if (!FBL.hasClass(event.target, "panelFocusBound") && !this.optionsShown)
                 {
                     this.showOptions();
-                }
-            ]]></body>
-        </method>
-
-        <method name="blurHandler">
-            <parameter name="event" />
-            <body><![CDATA[
-                if (this.focusHack)
-                {
-                    // The blur was due to the popop - clear the timeout set
-                    // in the blur handler immediately prior to this and give
-                    // focus back instead.
-                    this.clearBlurTimeout();
-
-                    this.focusHack = 2;
-                    setTimeout(function()
-                    {
-                        window.focus();
-                        searchBox.focus();
-                    });
                 }
             ]]></body>
         </method>
@@ -1720,13 +1683,7 @@
 
                     var searchNext = document.getAnonymousElementByAttribute(this, "anonid",
                         "searchNext");
-
-                    // As with the focusHack, showOptions may blur the window, in which case we
-                    // should re-focus it. It might take a few milliseconds before things show up,
-                    // so do the focusing also on a longer timer.
-                    var doFocus = function() { window.focus(); searchNext.focus(); };
-                    setTimeout(doFocus, 0);
-                    setTimeout(doFocus, 20);
+                    setTimeout(function() { searchNext.focus(); }, 0);
                     this.panelHasFocus = true;
                 }
             ]]></body>
@@ -1872,9 +1829,6 @@
         ]]></handler>
 
         <handler event="blur" phase="capturing"><![CDATA[
-            if (this.focusHack)
-                return;
-
             this.clearBlurTimeout();
             this.blurTimeout = setTimeout(function()
             {
