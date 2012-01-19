@@ -25,7 +25,7 @@ define([
     "firebug/chrome/searchBox",
     "firebug/html/insideOutBox",
     "firebug/html/inspector",
-    "firebug/html/layout",
+    "firebug/html/layout"
 ],
 function(Obj, Firebug, Domplate, FirebugReps, Locale, HTMLLib, Events,
     SourceLink, Css, Dom, Win, Xpath, Str, Xml, Arr, Persist, Menu, Url) { with (Domplate) {
@@ -1466,17 +1466,26 @@ Firebug.HTMLPanel.prototype = Obj.extend(WalkingPanel,
     getOptionsMenuItems: function()
     {
         return [
-            Menu.optionMenu("ShowFullText", "showFullTextNodes"),
-            Menu.optionMenu("ShowWhitespace", "showTextNodesWithWhitespace"),
-            Menu.optionMenu("ShowComments", "showCommentNodes"),
-            Menu.optionMenu("ShowTextNodesWithEntities", "showTextNodesWithEntities"),
+            Menu.optionMenu("html.option.Show_Full_Text", "showFullTextNodes",
+                "html.option.tip.Show_Full_Text"),
+            Menu.optionMenu("html.option.Show_Whitespace", "showTextNodesWithWhitespace",
+                "html.option.tip.Show_Whitespace"),
+            Menu.optionMenu("html.option.Show_Comments", "showCommentNodes",
+                "html.option.tip.Show_Comments"),
+            Menu.optionMenu("html.option.Show_Text_Nodes_With_Entities",
+                "showTextNodesWithEntities", "html.option.tip.Show_Text_Nodes_With_Entities"),
             "-",
-            Menu.optionMenu("HighlightMutations", "highlightMutations"),
-            Menu.optionMenu("ExpandMutations", "expandMutations"),
-            Menu.optionMenu("ScrollToMutations", "scrollToMutations"),
+            Menu.optionMenu("html.option.Highlight_Mutations", "highlightMutations",
+                "html.option.tip.Highlight_Mutations"),
+            Menu.optionMenu("html.option.Expand_Mutations", "expandMutations",
+                "html.option.tip.Expand_Mutations"),
+            Menu.optionMenu("html.option.Scroll_To_Mutations", "scrollToMutations",
+                "html.option.tip.Scroll_To_Mutations"),
             "-",
-            Menu.optionMenu("ShadeBoxModel", "shadeBoxModel"),
-            Menu.optionMenu("ShowQuickInfoBox","showQuickInfoBox")
+            Menu.optionMenu("html.option.Shade_Box_Model", "shadeBoxModel",
+                "inspect.option.tip.Shade_Box_Model"),
+            Menu.optionMenu("html.option.Show_Quick_Info_Box","showQuickInfoBox",
+                "inspect.option.tip.Show_Quick_Info_Box")
         ];
     },
 
@@ -1619,8 +1628,7 @@ Firebug.HTMLPanel.prototype = Obj.extend(WalkingPanel,
     {
         return (enabled ? Locale.$STR("html.Disable Break On Mutate") :
             Locale.$STR("html.Break On Mutate"));
-    },
-
+    }
 });
 
 // ********************************************************************************************* //

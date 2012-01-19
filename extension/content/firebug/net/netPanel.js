@@ -293,7 +293,8 @@ NetPanel.prototype = Obj.extend(Firebug.ActivablePanel,
         return [
             this.disableCacheOption(),
             "-",
-            Menu.optionMenu("net.option.Show Paint Events", "netShowPaintEvents"),
+            Menu.optionMenu("net.option.Show Paint Events", "netShowPaintEvents",
+                "net.option.tip.Show Paint Events"),
             Menu.optionMenu("net.option.Show BFCache Responses", "netShowBFCacheResponses",
                 "net.option.tip.Show BFCache Responses")
         ];
@@ -303,8 +304,13 @@ NetPanel.prototype = Obj.extend(Firebug.ActivablePanel,
     {
         var BrowserCache = Firebug.NetMonitor.BrowserCache;
         var disabled = !BrowserCache.isEnabled();
-        return { label: "net.option.Disable Browser Cache", type: "checkbox", checked: disabled,
-            command: function() {
+        return {
+            label: "net.option.Disable Browser Cache",
+            type: "checkbox",
+            checked: disabled,
+            tooltiptext: "net.option.tip.Disable Browser Cache",
+            command: function()
+            {
                 BrowserCache.toggle(!this.getAttribute("checked"));
             }
         };

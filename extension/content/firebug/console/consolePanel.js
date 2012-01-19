@@ -12,7 +12,7 @@ define([
     "firebug/firefox/menu",
     "firebug/lib/options",
     "firebug/console/profiler",
-    "firebug/chrome/searchBox",
+    "firebug/chrome/searchBox"
 ],
 function(Obj, Firebug, FirebugReps, Locale, Events, Css, Dom, Search, Menu, Options) {
 
@@ -237,26 +237,38 @@ Firebug.ConsolePanel.prototype = Obj.extend(Firebug.ActivablePanel,
     getOptionsMenuItems: function()
     {
         return [
-            Menu.optionMenu("ShowJavaScriptErrors", "showJSErrors"),
-            Menu.optionMenu("ShowJavaScriptWarnings", "showJSWarnings"),
-            Menu.optionMenu("ShowCSSErrors", "showCSSErrors"),
-            Menu.optionMenu("ShowXMLErrors", "showXMLErrors"),
-            Menu.optionMenu("ShowXMLHttpRequests", "showXMLHttpRequests"),
-            Menu.optionMenu("ShowChromeErrors", "showChromeErrors"),
-            Menu.optionMenu("ShowChromeMessages", "showChromeMessages"),
-            Menu.optionMenu("ShowExternalErrors", "showExternalErrors"),
-            Menu.optionMenu("ShowNetworkErrors", "showNetworkErrors"),
+            Menu.optionMenu("console.option.Show_JavaScript_Errors", "showJSErrors",
+                "console.option.tip.Show_JavaScript_Errors"),
+            Menu.optionMenu("console.option.Show_JavaScript_Warnings", "showJSWarnings",
+                "console.option.tip.Show_JavaScript_Warnings"),
+            Menu.optionMenu("console.option.Show_CSS_Errors", "showCSSErrors",
+                "console.option.tip.Show_CSS_Errors"),
+            Menu.optionMenu("console.option.Show_XML_Errors", "showXMLErrors",
+                "console.option.tip.Show_XML_Errors"),
+            Menu.optionMenu("console.option.Show_XMLHttpRequests", "showXMLHttpRequests",
+                "console.option.tip.Show_XMLHttpRequests"),
+            Menu.optionMenu("console.option.Show_System_Errors", "showChromeErrors",
+                "console.option.tip.Show_System_Errors"),
+            Menu.optionMenu("console.option.Show_System_Messages", "showChromeMessages",
+                "console.option.tip.Show_System_Messages"),
+            Menu.optionMenu("console.option.Show_External_Errors", "showExternalErrors",
+                "console.option.tip.Show_External_Errors"),
+            Menu.optionMenu("console.option.Show_Network_Errors", "showNetworkErrors",
+                "console.option.tip.Show_Network_Errors"),
             this.getShowStackTraceMenuItem(),
             this.getStrictOptionMenuItem(),
             "-",
-            Menu.optionMenu("Command_Editor", "commandEditor"),
-            Menu.optionMenu("commandLineShowCompleterPopup", "commandLineShowCompleterPopup")
+            Menu.optionMenu("console.option.Show_Command_Editor", "commandEditor",
+                "console.option.tip.Show_Command_Editor"),
+            Menu.optionMenu("console.option.Show_Completion_List_Popup", "commandLineShowCompleterPopup",
+                "console.option.tip.Show_Completion_List_Popup")
         ];
     },
 
     getShowStackTraceMenuItem: function()
     {
-        var menuItem = Menu.optionMenu("ShowStackTrace", "showStackTrace");
+        var menuItem = Menu.optionMenu("console.option.Show_Stack_Trace", "showStackTrace",
+            "console.option.tip.Show_Stack_Trace");
         if (Firebug.currentContext && !Firebug.Debugger.isAlwaysEnabled())
             menuItem.disabled = true;
         return menuItem;
@@ -269,9 +281,10 @@ Firebug.ConsolePanel.prototype = Obj.extend(Firebug.ActivablePanel,
         var strictValue = Options.getPref(strictDomain, strictName);
 
         return {
-            label: "JavascriptOptionsStrict",
+            label: "console.option.Show_Strict_Warnings",
             type: "checkbox",
             checked: strictValue,
+            tooltiptext: "console.option.tip.Show_Strict_Warnings",
             command: Obj.bindFixed(Options.setPref, Options,
                 strictDomain, strictName, !strictValue)
         };

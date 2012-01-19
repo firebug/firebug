@@ -1467,19 +1467,26 @@ Firebug.DOMBasePanel.prototype = Obj.extend(Firebug.Panel,
     getOptionsMenuItems: function()
     {
         return [
-            Menu.optionMenu("ShowUserProps", "showUserProps"),
-            Menu.optionMenu("ShowUserFuncs", "showUserFuncs"),
-            Menu.optionMenu("ShowDOMProps", "showDOMProps"),
-            Menu.optionMenu("ShowDOMFuncs", "showDOMFuncs"),
-            Menu.optionMenu("ShowDOMConstants", "showDOMConstants"),
-            Menu.optionMenu("ShowInlineEventHandlers", "showInlineEventHandlers",
-                "ShowInlineEventHandlersTooltip"),
+            Menu.optionMenu("dom.option.Show User Props", "showUserProps",
+                "dom.option.tip.Show User Props"),
+            Menu.optionMenu("dom.option.Show_User_Funcs", "showUserFuncs",
+                "dom.option.tip.Show_User_Funcs"),
+            Menu.optionMenu("dom.option.Show_DOM_Props", "showDOMProps",
+                "dom.option.tip.Show_DOM_Props"),
+            Menu.optionMenu("dom.option.Show_DOM_Funcs", "showDOMFuncs",
+                "dom.option.tip.Show_DOM_Funcs"),
+            Menu.optionMenu("dom.option.Show_DOM_Constants", "showDOMConstants",
+                "dom.option.tip.Show_DOM_Constants"),
+            Menu.optionMenu("dom.option.Show_Inline_Event_Handlers", "showInlineEventHandlers",
+                "dom.option.tip.Show_Inline_Event_Handlers"),
             "-",
-            Menu.optionMenu("ShowOwnProperties", "showOwnProperties", "ShowOwnPropertiesTooltip"),
-            Menu.optionMenu("ShowEnumerableProperties",
-                "showEnumerableProperties", "ShowEnumerablePropertiesTooltip"),
+            Menu.optionMenu("dom.option.Show_Own_Properties_Only", "showOwnProperties",
+                "dom.option.tip.Show_Own_Properties_Only"),
+            Menu.optionMenu("dom.option.Show_Enumerable_Properties_Only",
+                "showEnumerableProperties", "dom.option.tip.Show_Enumerable_Properties_Only"),
             "-",
-            {label: "Refresh", command: Obj.bindFixed(this.rebuild, this, true)}
+            {label: "panel.Refresh", command: Obj.bindFixed(this.rebuild, this, true),
+                tooltiptext: "panel.tip.Refresh"}
         ];
     },
 
@@ -1546,7 +1553,11 @@ Firebug.DOMBasePanel.prototype = Obj.extend(Firebug.Panel,
 
         items.push(
             "-",
-            {label: "Refresh", command: Obj.bindFixed(this.rebuild, this, true) }
+            {
+                label: "panel.Refresh",
+                command: Obj.bindFixed(this.rebuild, this, true),
+                tooltiptext: "panel.tip.Refresh"
+            }
         );
 
         return items;

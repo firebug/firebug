@@ -8,9 +8,10 @@ define([
     "firebug/lib/events",
     "firebug/lib/css",
     "firebug/lib/dom",
-    "firebug/css/cssElementPanel"
+    "firebug/css/cssElementPanel",
+    "firebug/firefox/menu"
 ],
-function(Obj, Firebug, Domplate, Locale, Events, Css, Dom, CSSElementPanel) {
+function(Obj, Firebug, Domplate, Locale, Events, Css, Dom, CSSElementPanel, Menu) {
 
 with (Domplate) {
 
@@ -174,21 +175,20 @@ CSSComputedElementPanel.prototype = Obj.extend(CSSElementPanel.prototype,
     {
         return [
             {
-                label: "Sort alphabetically",
+                label: "computed.option.Sort_Alphabetically",
                 type: "checkbox",
                 checked: Firebug.computedStylesDisplay == "alphabetical",
+                tooltiptext: "computed.option.tip.Sort_Alphabetically",
                 command: Obj.bind(this.toggleDisplay, this)
             },
-            {
-                label: "Show Mozilla specific styles",
-                type: "checkbox",
-                checked: Firebug.showMozillaSpecificStyles,
-                command: Obj.bindFixed(Firebug.Options.togglePref,
-                    Firebug.Options, "showMozillaSpecificStyles")
-            },
+            Menu.optionMenu("computed.option.Show_Mozilla_Specific_Styles",
+                "showMozillaSpecificStyles",
+                "computed.option.tip.Show_Mozilla_Specific_Styles"),
             "-",
             {
-                label: "Refresh", command: Obj.bind(this.refresh, this)
+                label: "panel.Refresh",
+                command: Obj.bind(this.refresh, this),
+                tooltiptext: "panel.tip.Refresh"
             }
         ];
     },

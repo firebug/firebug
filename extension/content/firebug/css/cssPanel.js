@@ -18,14 +18,15 @@ define([
     "firebug/lib/xml",
     "firebug/lib/persist",
     "firebug/firefox/system",
+    "firebug/firefox/menu",
     "firebug/editor/editor",
     "firebug/editor/editorSelector",
     "firebug/chrome/infotip",
     "firebug/chrome/searchBox",
-    "firebug/css/cssModule",
+    "firebug/css/cssModule"
 ],
 function(Obj, Firebug, Domplate, FirebugReps, Locale, Events, Wrapper, Url,
-    SourceLink, Css, Dom, Win, Search, Str, Xml, Persist, System) {
+    SourceLink, Css, Dom, Win, Search, Str, Xml, Persist, System, Menu) {
 
 with (Domplate) {
 
@@ -883,17 +884,13 @@ Firebug.CSSStyleSheetPanel.prototype = Obj.extend(Firebug.Panel,
     getOptionsMenuItems: function()
     {
         return [
-            {
-                label: "Expand Shorthand Properties",
-                type: "checkbox",
-                checked: Firebug.expandShorthandProps,
-                command: Obj.bindFixed(Firebug.Options.togglePref,
-                    Firebug.Options, "expandShorthandProps")
-            },
+            Menu.optionMenu("css.option.Expand_Shorthand_Properties", "expandShorthandProps",
+                "css.option.tip.Expand_Shorthand_Properties"),
             "-",
             {
-                label: "Refresh",
-                command: Obj.bind(this.refresh, this)
+                label: "panel.Refresh",
+                command: Obj.bind(this.refresh, this),
+                tooltiptext: "panel.tip.Refresh"
             }
         ];
     },
@@ -996,7 +993,11 @@ Firebug.CSSStyleSheetPanel.prototype = Obj.extend(Firebug.Panel,
 
         items.push(
             "-",
-            {label: "Refresh", command: Obj.bind(this.refresh, this) }
+            {
+                label: "panel.Refresh",
+                command: Obj.bind(this.refresh, this),
+                tooltiptext: "panel.tip.Refresh"
+            }
         );
 
         return items;

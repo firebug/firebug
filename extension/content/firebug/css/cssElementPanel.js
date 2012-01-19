@@ -16,9 +16,10 @@ define([
     "firebug/lib/xpath",
     "firebug/lib/array",
     "firebug/css/cssPanel",
+    "firebug/firefox/menu"
 ],
 function(Obj, Firebug, Firefox, Domplate, FirebugReps, Xpcom, Locale, Events, Url,
-    SourceLink, Dom, Css, Xpath, Arr, CSSStyleSheetPanel) {
+    SourceLink, Dom, Css, Xpath, Arr, CSSStyleSheetPanel, Menu) {
 
 with (Domplate) {
 
@@ -471,27 +472,12 @@ CSSElementPanel.prototype = Obj.extend(CSSStyleSheetPanel.prototype,
     getOptionsMenuItems: function()
     {
         var ret = [
-            {
-                label: "Only Show Applied Styles",
-                type: "checkbox",
-                checked: Firebug.onlyShowAppliedStyles,
-                command: Obj.bindFixed(Firebug.Options.togglePref, Firebug.Options,
-                    "onlyShowAppliedStyles")
-            },
-            {
-                label: "Show User Agent CSS",
-                type: "checkbox",
-                checked: Firebug.showUserAgentCSS,
-                command: Obj.bindFixed(Firebug.Options.togglePref, Firebug.Options,
-                    "showUserAgentCSS")
-            },
-            {
-                label: "Expand Shorthand Properties",
-                type: "checkbox",
-                checked: Firebug.expandShorthandProps,
-                command: Obj.bindFixed(Firebug.Options.togglePref, Firebug.Options,
-                    "expandShorthandProps")
-            }
+            Menu.optionMenu("style.option.Only_Show_Applied_Styles", "onlyShowAppliedStyles",
+                "style.option.tip.Only_Show_Applied_Styles"),
+            Menu.optionMenu("style.option.Show_User_Agent_CSS", "showUserAgentCSS",
+                "style.option.tip.Show_User_Agent_CSS"),
+            Menu.optionMenu("css.option.Expand_Shorthand_Properties", "expandShorthandProps",
+                "css.option.tip.Expand_Shorthand_Properties")
         ];
 
         if (Dom.domUtils && this.selection)
@@ -501,17 +487,31 @@ CSSElementPanel.prototype = Obj.extend(CSSStyleSheetPanel.prototype,
 
             ret.push("-");
 
-            ret.push({label: ":active", type: "checkbox", checked: state & STATE_ACTIVE,
-                command: function() {
-                    self.updateContentState(STATE_ACTIVE, !this.getAttribute("checked"));
+            ret.push(
+                {
+                    label: ":active",
+                    type: "checkbox",
+                    checked: state & STATE_ACTIVE,
+                    tooltiptext: "style.option.tip.active",
+                    command: function()
+                    {
+                        self.updateContentState(STATE_ACTIVE, !this.getAttribute("checked"));
+                    }
                 }
-            });
+            );
 
-            ret.push({label: ":hover", type: "checkbox", checked: state & STATE_HOVER,
-                command: function() {
-                    self.updateContentState(STATE_HOVER, !this.getAttribute("checked"));
+            ret.push(
+                {
+                    label: ":hover",
+                    type: "checkbox",
+                    checked: state & STATE_HOVER,
+                    tooltiptext: "style.option.tip.hover",
+                    command: function()
+                    {
+                        self.updateContentState(STATE_HOVER, !this.getAttribute("checked"));
+                    }
                 }
-            });
+            );
         }
 
         return ret;

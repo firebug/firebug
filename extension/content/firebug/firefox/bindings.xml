@@ -789,8 +789,9 @@
             <parameter name="label"/>
             <parameter name="checked"/>
             <parameter name="command"/>
+            <parameter name="tooltiptext"/>
             <body><![CDATA[
-                return {label: label, type: "checkbox", checked: checked,
+                return {label: label, type: "checkbox", checked: checked, tooltiptext: tooltiptext,
                     command: FBL.bindFixed(command, this), closemenu: true};
             ]]></body>
         </method>
@@ -846,7 +847,8 @@
             if (panelType.prototype.activable)
             {
                 enabled = panelType.prototype.isEnabled();
-                items.push(this.optionMenu("panel.Enabled", enabled, this.onToggle));
+                items.push(this.optionMenu("panel.Enabled", enabled, this.onToggle,
+                    "panel.tip.Enabled"));
             }
 
             // force creating panel only if it's not disabled

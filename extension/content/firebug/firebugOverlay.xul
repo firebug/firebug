@@ -83,7 +83,7 @@
                             <toolbarseparator id="fbNavigationSeparator"/>
 
                             <toolbarbutton id="fbCommandPopupButton"
-                                tooltiptext="panel.tooltip.Show Command Line"
+                                tooltiptext="panel.tooltip.Show_Command_Line_Popup"
                                 command="cmd_toggleCommandPopup" class="fbInternational">
                             </toolbarbutton>
                         </hbox>
@@ -431,7 +431,7 @@
                                     disabled="true"/>
                                 <toolbarspacer flex="1"/>
                                 <toolbarbutton id="fbToggleCommandEditor"
-                                    tooltiptext="firebug.CommandLine"
+                                    tooltiptext="console.option.Show_Command_Line"
                                     class="toolbarbutton-iconic fbInternational"
                                     oncommand="Firebug.toggleCommandLine(false)"/>
                             </hbox>
@@ -481,7 +481,7 @@
             </hbox>
 
             <!-- Toggle into multi-line command line -->
-            <toolbarbutton id="fbToggleCommandLine" tooltiptext="Command_Editor"
+            <toolbarbutton id="fbToggleCommandLine" tooltiptext="console.option.Show_Command_Editor"
                 class="toolbarbutton-iconic fbInternational"
                 oncommand="Firebug.toggleCommandLine(true)"/>
         </hbox>

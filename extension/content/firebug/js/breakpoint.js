@@ -521,22 +521,32 @@ Firebug.Breakpoint.BreakpointsPanel.prototype = Obj.extend(Firebug.Panel,
         if (disabledCount)
         {
             items.push(
-                {label: "EnableAllBreakpoints",
-                    command: Obj.bindFixed(this.enableAllBreakpoints, this, context, true) }
+                {
+                    label: "breakpoints.option.Enable_All_Breakpoints",
+                    command: Obj.bindFixed(this.enableAllBreakpoints, this, context, true),
+                    tooltiptext: "breakpoints.option.tip.Enable_All_Breakpoints"
+                }
             );
         }
         if (bpCount && disabledCount != bpCount)
         {
             items.push(
-                {label: "DisableAllBreakpoints",
-                    command: Obj.bindFixed(this.enableAllBreakpoints, this, context, false) }
+                {
+                    label: "breakpoints.option.Disable_All_Breakpoints",
+                    command: Obj.bindFixed(this.enableAllBreakpoints, this, context, false),
+                    tooltiptext: "breakpoints.option.tip.Disable_All_Breakpoints"
+                }
             );
         }
 
         items.push(
             "-",
-            {label: "ClearAllBreakpoints", disabled: !bpCount,
-                command: Obj.bindFixed(this.clearAllBreakpoints, this, context) }
+            {
+                label: "breakpoints.option.Clear All Breakpoints",
+                disabled: !bpCount,
+                command: Obj.bindFixed(this.clearAllBreakpoints, this, context),
+                tooltiptext: "breakpoints.option.tip.Clear_All_Breakpoints"
+            }
         );
 
         return items;

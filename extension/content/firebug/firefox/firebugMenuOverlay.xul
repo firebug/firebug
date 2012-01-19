@@ -154,13 +154,15 @@
                               oncommand="Firebug.chrome.onToggleOption(this)"
                               option="showInfoTips" class="fbInternational"/>
                     <menuitem id="menu_shadeBoxModel"
-                              type="checkbox" label="firebug.ShadeBoxModel"
+                              type="checkbox" label="inspect.option.Shade_Box_Model"
                               oncommand="Firebug.chrome.onToggleOption(this)"
-                              option="shadeBoxModel" class="fbInternational"/>
+                              option="shadeBoxModel" class="fbInternational"
+                              tooltiptext="inspect.option.tip.Shade_Box_Model"/>
                     <menuitem id="showQuickInfoBox"
-                              type="checkbox" label="firebug.Show_Quick_Info_Box"
+                              type="checkbox" label="inspect.option.Show_Quick_Info_Box"
                               oncommand="Firebug.chrome.onToggleOption(this)"
-                              option="showQuickInfoBox" class="fbInternational"/>
+                              option="showQuickInfoBox" class="fbInternational"
+                              tooltiptext="inspect.option.tip.Show_Quick_Info_Box"/>
                     <menuitem id="menu_enableA11y"
                               type="checkbox"
                               label="firebug.menu.Enable Accessibility Enhancements"
@@ -212,7 +214,7 @@
                 command="cmd_toggleInspecting" key="key_toggleInspecting" class="fbInternational"/>
             <menuitem id="menu_profileScript" label="firebug.ProfileScript" type="checkbox"
                 command="cmd_toggleProfiling" key="key_toggleProfiling" class="fbInternational"/>
-            <menuitem id="menu_focusCommandLine" label="firebug.CommandLine"
+            <menuitem id="menu_focusCommandLine" label="console.option.Show_Command_Line"
                 command="cmd_focusCommandLine" key="key_focusCommandLine" class="fbInternational"/>
             <menuitem id="menu_focusFirebugSearch" label="firebug.Search"
                 command="cmd_focusFirebugSearch" key="key_focusFirebugSearch" class="fbInternational"/>
