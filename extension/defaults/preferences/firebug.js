@@ -141,6 +141,7 @@ pref("extensions.firebug.key.shortcut.focusLocation", "control shift VK_SPACE");
 pref("extensions.firebug.key.shortcut.nextObject", "control .");
 pref("extensions.firebug.key.shortcut.previousObject", "control ,");
 pref("extensions.firebug.key.shortcut.toggleFirebug", "VK_F12");
+pref("extensions.firebug.key.shortcut.closeFirebug", "shift VK_F12");
 pref("extensions.firebug.key.shortcut.detachFirebug", "accel VK_F12");
 pref("extensions.firebug.key.shortcut.leftFirebugTab", "accel shift VK_PAGE_UP");
 pref("extensions.firebug.key.shortcut.rightFirebugTab", "accel shift VK_PAGE_DOWN");
