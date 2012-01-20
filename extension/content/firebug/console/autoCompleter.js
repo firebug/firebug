@@ -263,6 +263,14 @@ Firebug.JSAutoCompleter = function(textBox, completionBox, showCompletionPopup)
     };
 
     /**
+     * See if we have any completions.
+     */
+    this.hasCompletions = function()
+    {
+        return !!this.completions;
+    };
+
+    /**
      * Get the value the completion box should have for some value of the
      * text box and a selected completion.
      */
@@ -270,7 +278,7 @@ Firebug.JSAutoCompleter = function(textBox, completionBox, showCompletionPopup)
     {
         var completion = this.getCurrentCompletion();
         if (completion === null)
-            return this.textBox.value;
+            return "";
         return this.completionBase.pre + this.completionBase.expr + completion;
     };
 
@@ -335,7 +343,7 @@ Firebug.JSAutoCompleter = function(textBox, completionBox, showCompletionPopup)
             {
                 this.hideForExpression();
 
-                // Stop event bubbling if it was used to close the popup.
+                // Stop event bubbling if it was used to hide completions.
                 Events.cancelEvent(event);
                 return true;
             }
@@ -469,8 +477,6 @@ Firebug.JSAutoCompleter = function(textBox, completionBox, showCompletionPopup)
         if (this.selectedPopupElement)
             this.selectedPopupElement.setAttribute("selected", "true");
 
-        this.linuxFocusHack = true;
-        setTimeout(this.focusHack, 10);
         this.completionPopup.openPopup(this.textBox, "before_start", 0, 0, false, false);
     };
 
@@ -526,19 +532,6 @@ Firebug.JSAutoCompleter = function(textBox, completionBox, showCompletionPopup)
 
     this.popupMousedown = Obj.bind(this.popupMousedown, this);
     this.popupClick = Obj.bind(this.popupClick, this);
-
-    this.focusHack = function(event)
-    {
-        if (this.linuxFocusHack)
-        {
-            // XXXjjb This does not work, but my experience with focus is that
-            // it usually does not work.
-            this.textBox.focus();
-            delete this.linuxFocusHack;
-        }
-    };
-
-    this.focusHack = Obj.bind(this.focusHack, this);
 
     /**
      * A destructor function, to be called when the auto-completer is destroyed.
@@ -1605,7 +1598,7 @@ function autoCompleteEval(context, preExpr, spreExpr)
             // In case of array indexing, remove the bracket and set a flag to
             // escape completions.
             out.indexCompletion = false;
-            var len = spreExpr.length, lastCh = spreExpr[len-1];
+            var len = spreExpr.length;
             if (len >= 2 && spreExpr[len-2] === "[" && spreExpr[len-1] === '"')
             {
                 out.indexCompletion = true;

@@ -487,7 +487,7 @@ Firebug.BaseEditor = Obj.extend(Firebug.MeasureBox,
     {
     },
 
-    show: function(target, panel, value, textSize)
+    show: function(target, panel, value, selectionData)
     {
     },
 

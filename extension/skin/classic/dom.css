@@ -182,6 +182,11 @@
     border-bottom: 1px solid #BEBEBE;
 }
 
+.domCompletionBox {
+    color: silver;
+    -moz-box-shadow: none;
+}
+
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 .watchToolbox {
