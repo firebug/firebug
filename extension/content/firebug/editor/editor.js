@@ -1098,7 +1098,7 @@ Firebug.AutoCompleter = function(caseSensitive, getExprOffset, getRange, evaluat
                     // Complete by resetting the completion list to the full
                     // list of candidates, finding our current position in it,
                     // and cycling from there.
-                    offset = range.start;
+                    lastOffset = offset = range.start;
                     searchExpr = expr;
                     expr = "";
                 }
@@ -1125,19 +1125,13 @@ Firebug.AutoCompleter = function(caseSensitive, getExprOffset, getRange, evaluat
                 this.setCandidatesByValues(values);
         }
 
-        if (cycle)
-            expr = lastExpr;
-
         if (!candidates.length)
             return false;
 
         this.adjustLastIndex(cycle);
-
         var completion = candidates[lastIndex];
-        var preCompletion = expr.substr(0, offset-exprOffset);
-        var postCompletion = completion.substr(offset-exprOffset);
 
-        var line = preParsed + preExpr + preCompletion + postCompletion + postExpr;
+        var line = preParsed + preExpr + completion + postExpr;
         var offsetEnd = preParsed.length + preExpr.length + completion.length;
 
         // Show the completion
