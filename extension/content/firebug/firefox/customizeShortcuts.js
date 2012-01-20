@@ -163,11 +163,11 @@ function addShortcutRow(element, index, array)
     var defaultShortcut = getHumanShortcut(element, true);
     var rows = document.getElementById("shortcutGridRows");
     var row = document.createElement("row");
-    var labelText;
 
     var label = document.createElement("label");
     // Get the label from firebug.properties
-    labelText = Locale.$STR("firebug.shortcut."+element+".label");
+    var labelText = Locale.$STR("firebug.shortcut.label."+element);
+    var tooltipText = Locale.$STR("firebug.shortcut.tip."+element);
 
     // $STR defaults to property name (label) if it's not defined. We don't want that
     if (labelText == "label")
@@ -178,7 +178,7 @@ function addShortcutRow(element, index, array)
     var textbox = document.createElement("textbox");
     textbox.id = element + "_shortcut";
     textbox.className = "shortcutSink";
-    textbox.setAttribute("tooltiptext", labelText + " shortcut");
+    row.setAttribute("tooltiptext", tooltipText != "tip" ? tooltipText : "");
     textbox.setAttribute("value", shortcut);
     textbox.setAttribute("default_value", defaultShortcut);
     row.appendChild(textbox);
