@@ -1018,14 +1018,17 @@ Firebug.AutoCompleter = function(caseSensitive, getExprOffset, getRange, evaluat
         lastIndex = null;
     };
 
-    this.complete = function(context, textBox, cycle, showGlobals)
+    this.complete = function(context, textBox, cycle)
     {
-        if (!textBox.value && !showGlobals) // then no completion is desired
+        if (!textBox.value && !cycle)
+        {
+            // Don't complete an empty field.
             return false;
+        }
 
         var offset = textBox.selectionStart; // defines the cursor position
 
-        var found = this.pickCandidates(textBox, offset, context, cycle, showGlobals);
+        var found = this.pickCandidates(textBox, offset, context, cycle);
 
         if (!found)
             this.reset();
@@ -1036,7 +1039,7 @@ Firebug.AutoCompleter = function(caseSensitive, getExprOffset, getRange, evaluat
     /**
      * returns true if candidate list was created
      */
-    this.pickCandidates = function(textBox, offset, context, cycle, showGlobals)
+    this.pickCandidates = function(textBox, offset, context, cycle)
     {
         var value = textBox.value;
 
@@ -1070,18 +1073,16 @@ Firebug.AutoCompleter = function(caseSensitive, getExprOffset, getRange, evaluat
             if (!cycle)
             {
                 if (!expr)
-                {
                     return false;
-                }
-                else if (lastExpr && !Str.hasPrefix(lastExpr, expr))
+
+                if (lastExpr)
                 {
                     candidates = null;
-                }
-                else if (lastExpr && lastExpr.length >= expr.length)
-                {
-                    candidates = null;
-                    lastExpr = expr;
-                    return false;
+                    if (Str.hasPrefix(lastExpr, expr))
+                    {
+                        lastExpr = expr;
+                        return false;
+                    }
                 }
             }
 
@@ -1098,19 +1099,19 @@ Firebug.AutoCompleter = function(caseSensitive, getExprOffset, getRange, evaluat
                     // Complete by resetting the completion list to the full
                     // list of candidates, finding our current position in it,
                     // and cycling from there.
-                    lastOffset = offset = range.start;
                     searchExpr = expr;
-                    expr = "";
+                    lastOffset = offset = range.start;
+                    lastExpr = expr = "";
                 }
                 else
                 {
-                    // We can't complete unless we are at the right edge
+                    // We can't complete unless we are at the right edge.
                     return false;
                 }
             }
 
-            // Don't complete globals unless we are forced to do so.
-            if (!showGlobals && !preExpr && !expr && !postExpr)
+            // Don't complete globals unless cycling.
+            if (!cycle && !parsed)
                 return false;
 
             var values = evaluator(preExpr, expr, postExpr);
@@ -1131,8 +1132,14 @@ Firebug.AutoCompleter = function(caseSensitive, getExprOffset, getRange, evaluat
         this.adjustLastIndex(cycle);
         var completion = candidates[lastIndex];
 
-        var line = preParsed + preExpr + completion + postExpr;
-        var offsetEnd = preParsed.length + preExpr.length + completion.length;
+        // Split the completion into a user-typed and a filled-in part - the
+        // former's case should be retained.
+        var typedUntil = offset-exprOffset;
+        var preCompletion = lastExpr.substr(0, typedUntil);
+        var postCompletion = completion.substr(typedUntil);
+
+        var line = preParsed + preExpr + preCompletion + postCompletion + postExpr;
+        var offsetEnd = exprOffset + completion.length;
 
         // Show the completion
         lastValue = textBox.value = line;
