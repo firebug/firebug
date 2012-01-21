@@ -144,7 +144,7 @@ Firebug.SourceCache.prototype = Obj.extend(new Firebug.Listener(),
             return this.loadFromLocal(url);
         }
 
-        if (url.indexOf('resource://') === 0)
+        if (Str.hasPrefix(url, 'resource://'))
         {
             var fileURL = Url.resourceToFile(url);
             return this.loadFromLocal(url);

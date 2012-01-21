@@ -198,7 +198,7 @@ var NetUtils =
     isURLEncodedRequest: function(file, context)
     {
         var text = NetUtils.getPostText(file, context);
-        if (text && text.toLowerCase().indexOf("content-type: application/x-www-form-urlencoded") == 0)
+        if (text && Str.hasPrefix(text.toLowerCase(), "content-type: application/x-www-form-urlencoded"))
             return true;
 
         // The header value doesn't have to be always exactly "application/x-www-form-urlencoded",
@@ -213,7 +213,7 @@ var NetUtils =
     isMultiPartRequest: function(file, context)
     {
         var text = NetUtils.getPostText(file, context);
-        if (text && text.toLowerCase().indexOf("content-type: multipart/form-data") == 0)
+        if (text && Str.hasPrefix(text.toLowerCase(), "content-type: multipart/form-data"))
             return true;
         return false;
     },

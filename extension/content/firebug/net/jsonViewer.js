@@ -122,7 +122,7 @@ Firebug.JSONViewerModel = Obj.extend(Firebug.Module,
         // which represents a little overhead, but this happens only if the request
         // is actually expanded by the user in the UI (Net & Console panels).
         var responseText = data ? Str.trimLeft(data) : null;
-        if (responseText && responseText.lastIndexOf("{", 0) == 0)
+        if (responseText && responseText.charAt(0) === "{")
             return true;
 
         if (!contentType)

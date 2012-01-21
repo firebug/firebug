@@ -163,7 +163,7 @@ Firebug.Spy = Obj.extend(Firebug.Module,
 
         // Don't attach spy to chrome.
         var uri = Win.safeGetWindowLocation(win);
-        if (uri && (uri.indexOf("about:") == 0 || uri.indexOf("chrome:") == 0))
+        if (uri && (Str.hasPrefix(uri, "about:") || Str.hasPrefix(uri, "chrome:")))
             return true;
     },
 

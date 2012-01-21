@@ -52,8 +52,7 @@ Url.splitURLBase = function(url)
 
 Url.splitDataURL = function(url)
 {
-    var mark = url.indexOf("data:");
-    if (mark != 0)
+    if (!Str.hasPrefix(url, "data:"))
         return false; //  the first 5 chars must be 'data:'
 
     var point = url.indexOf(",", 5);
@@ -385,7 +384,7 @@ Url.normalizeURL = function(url)  // this gets called a lot, any performance imp
         // For script tags inserted dynamically sometimes the script.fileName is bogus
         url = url.replace(/[^\s]*\s->\s/, "");
 
-        if (url.indexOf("chrome:")==0)
+        if (Str.hasPrefix(url, "chrome:"))
         {
             var m = reChromeCase.exec(url);  // 1 is package name, 2 is path
             if (m)

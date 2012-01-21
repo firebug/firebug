@@ -203,7 +203,7 @@ Firebug.JSAutoCompleter = function(textBox, completionBox, showCompletionPopup)
             for (var i = 0; i < candidates.length; ++i)
             {
                 var name = candidates[i];
-                if (name.lastIndexOf(prefix, 0) === 0)
+                if (Str.hasPrefix(name, prefix))
                     valid.push(name);
             }
         }

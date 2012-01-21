@@ -5,12 +5,13 @@ define([
     "firebug/lib/locale",
     "firebug/lib/wrapper",
     "firebug/lib/url",
+    "firebug/lib/string",
     "firebug/js/stackFrame",
     "firebug/console/errors",
     "firebug/trace/debug",
     "firebug/console/console",
 ],
-function(FirebugReps, Locale, Wrapper, Url, StackFrame, Errors, Debug, Console) {
+function(FirebugReps, Locale, Wrapper, Url, Str, StackFrame, Errors, Debug, Console) {
 
 // ********************************************************************************************* //
 
@@ -409,10 +410,10 @@ function createFirebugConsole(context, win)
 
             for (var i = 0; i < frames.length; i++)
             {
-                if (frames[i].href.indexOf("chrome:") == 0)
+                if (Str.hasPrefix(frames[i].href, "chrome:"))
                     continue;
 
-                if (frames[i].href.indexOf("resource:") == 0)
+                if (Str.hasPrefix(frames[i].href, "resource:"))
                     continue;
 
                 // firebug-service scope reached, in some cases the url starts with file://

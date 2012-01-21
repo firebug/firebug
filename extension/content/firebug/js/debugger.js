@@ -247,7 +247,7 @@ Firebug.Debugger = Obj.extend(Firebug.ActivableModule,
                 var fileName = frame.script.fileName;
                 if (!fileName)
                     continue;
-                else if (fileName.indexOf(Firebug.Debugger.breakNowURLPrefix) == 0)
+                else if (Str.hasPrefix(fileName, Firebug.Debugger.breakNowURLPrefix))
                     continue;
                 else if (fileName.indexOf("/modules/firebug-") != -1)
                     continue;

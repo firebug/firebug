@@ -120,11 +120,11 @@ Xml.getElementHTML = function(element)
                 var attr = elt.attributes[i];
 
                 // Hide attributes set by Firebug
-                if (attr.localName.indexOf("firebug-") == 0)
+                if (Str.hasPrefix(attr.localName, "firebug-"))
                     continue;
 
                 // MathML
-                if (attr.localName.indexOf("-moz-math") == 0)
+                if (Str.hasPrefix(attr.localName, "-moz-math"))
                 {
                     // just hide for now
                     continue;
@@ -193,11 +193,11 @@ Xml.getElementXML = function(element)
                 var attr = elt.attributes[i];
 
                 // Hide attributes set by Firebug
-                if (attr.localName.indexOf("firebug-") == 0)
+                if (Str.hasPrefix(attr.localName, "firebug-"))
                     continue;
 
                 // MathML
-                if (attr.localName.indexOf("-moz-math") == 0)
+                if (Str.hasPrefix(attr.localName, "-moz-math"))
                 {
                     // just hide for now
                     continue;

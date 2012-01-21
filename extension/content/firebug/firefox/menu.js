@@ -4,7 +4,7 @@ define([
     "firebug/lib/trace",
     "firebug/lib/locale",
     "firebug/lib/options",
-    "firebug/lib/css",
+    "firebug/lib/css"
 ],
 function(FBTrace, Locale, Options, Css) {
 
@@ -30,7 +30,7 @@ Menu.createMenu = function(popup, label)
 
 Menu.createMenuItem = function(popup, item, before)
 {
-    if (typeof(item) == "string" && item.indexOf("-") == 0)
+    if (typeof(item) == "string" && item.charAt(0) == "-")
         return Menu.createMenuSeparator(popup, before);
 
     var menuitem = popup.ownerDocument.createElement("menuitem");

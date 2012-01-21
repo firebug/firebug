@@ -6,9 +6,10 @@ define([
     "firebug/lib/css",
     "firebug/lib/search",
     "firebug/firefox/system",
-    "firebug/lib/locale",
+    "firebug/lib/string",
+    "firebug/lib/locale"
 ],
-function(Obj, Firebug, Css, Search, System, Locale) {
+function(Obj, Firebug, Css, Search, System, Str, Locale) {
 
 // ********************************************************************************************* //
 // Constants
@@ -112,7 +113,7 @@ Firebug.Search = Obj.extend(Firebug.Module,
         // have to make sure to make them all visible unless the user is appending to the
         // last string, in which case it's ok to just search the set of visible nodes
         if (!panel.searchText || value == panel.searchText ||
-            value.indexOf(panel.searchText) != 0)
+            !Str.hasPrefix(value, panel.searchText))
         {
             Css.removeClass(panelNode, "searching");
         }
@@ -243,9 +244,9 @@ Firebug.Search = Obj.extend(Firebug.Module,
     {
         var history = this.history;
 
-        if (!history[0] || val.indexOf(history[0]) == 0)
+        if (!history[0] || Str.hasPrefix(val, history[0]))
             history[0] = val;
-        else if(history[0].indexOf(val) == 0)
+        else if (Str.hasPrefix(history[0], val))
             return;
         else
             history.unshift(val);

@@ -8,9 +8,10 @@ define([
     "firebug/lib/events",
     "firebug/lib/css",
     "firebug/lib/dom",
+    "firebug/lib/string",
     "firebug/lib/fonts"
 ],
-function(Obj, Firebug, Domplate, Locale, Events, Css, Dom, Fonts) {
+function(Obj, Firebug, Domplate, Locale, Events, Css, Dom, Str, Fonts) {
 
 // ********************************************************************************************* //
 // Constants
@@ -128,7 +129,7 @@ Firebug.InfoTip = Obj.extend(Firebug.Module,
             var caption = bgImg.nextSibling;
 
             // Display an error in the caption (instead of dimensions).
-            if (img.src.indexOf("moz-filedata") == 0)
+            if (Str.hasPrefix(img.src, "moz-filedata"))
                 caption.innerHTML = Locale.$STR("firebug.failedToPreviewObjectURL");
             else
                 caption.innerHTML = Locale.$STR("firebug.failedToPreviewImageURL");

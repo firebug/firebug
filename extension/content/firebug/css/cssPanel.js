@@ -1521,7 +1521,7 @@ CSSEditor.prototype = domplate(Firebug.InlineEditor.prototype,
 
     getAutoCompleteList: function(preExpr, expr, postExpr)
     {
-        if (expr.indexOf("!") == 0)
+        if (expr.charAt(0) === "!")
         {
             return ["!important"];
         }

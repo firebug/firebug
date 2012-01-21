@@ -1073,7 +1073,7 @@ Firebug.AutoCompleter = function(caseSensitive, getExprOffset, getRange, evaluat
                 {
                     return false;
                 }
-                else if (lastExpr && lastExpr.indexOf(expr) != 0)
+                else if (lastExpr && !Str.hasPrefix(lastExpr, expr))
                 {
                     candidates = null;
                 }
@@ -1154,7 +1154,7 @@ Firebug.AutoCompleter = function(caseSensitive, getExprOffset, getRange, evaluat
             if (!caseSensitive)
                 testName = testName.toLowerCase();
 
-            if (testName.lastIndexOf(findExpr, 0) == 0)
+            if (Str.hasPrefix(testName, findExpr))
                 candidates.push(name);
         }
 
@@ -1175,7 +1175,7 @@ Firebug.AutoCompleter = function(caseSensitive, getExprOffset, getRange, evaluat
             if (!caseSensitive)
                 name = name.toLowerCase();
 
-            if (name.lastIndexOf(findExpr, 0) == 0)
+            if (Str.hasPrefix(name, findExpr))
             {
                 searchIndex = i;
                 break;

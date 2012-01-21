@@ -3062,8 +3062,8 @@ var fbs =
 
         if (location)
         {
-            if (location.indexOf("chrome://chromebug/") >= 0 ||
-                location.indexOf("chrome://fb4cb/") >= 0)
+            if (location.lastIndexOf("chrome://chromebug/", 0) == 0 ||
+                location.lastIndexOf("chrome://fb4cb/", 0) == 0)
             {
                 return true;
             }

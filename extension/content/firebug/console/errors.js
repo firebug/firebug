@@ -9,8 +9,9 @@ define([
     "firebug/lib/css",
     "firebug/firefox/window",
     "firebug/lib/array",
+    "firebug/lib/string"
 ],
-function(Obj, Firebug, FirebugReps, Xpcom, Console, Css, Win, Arr) {
+function(Obj, Firebug, FirebugReps, Xpcom, Console, Css, Win, Arr, Str) {
 
 // ********************************************************************************************* //
 // Constants
@@ -223,9 +224,9 @@ var Errors = Firebug.Errors = Obj.extend(Firebug.Module,
         var XPConnect = object && object.category &&
             object.category.split(' ').indexOf("XPConnect") != -1;
 
-        // Some categories say: "content javascript" even if come from chrome space.
+        // Some categories say "content javascript" even if they come from chrome space.
         var sourceName = (object && object.sourceName) ? object.sourceName : "";
-        if (sourceName.indexOf("chrome") == 0 || sourceName.indexOf("resource") == 0)
+        if (Str.hasPrefix(sourceName, "chrome:") || Str.hasPrefix(sourceName, "resource:"))
             XPConnect = true;
 
         if (FBTrace.DBG_ERRORLOG)
@@ -797,7 +798,7 @@ function lessTalkMoreAction(context, object, isWarning)
         {
             if (msg.charAt(0) == incoming_message.charAt(0))
             {
-                if (incoming_message.indexOf(msg) == 0)
+                if (Str.hasPrefix(incoming_message, msg))
                 {
                     if (FBTrace.DBG_ERRORLOG)
                         FBTrace.sysout("errors.observe dropping pointlessError: " + msg);

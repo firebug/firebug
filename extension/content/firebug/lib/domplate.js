@@ -131,7 +131,7 @@ DomplateTag.prototype =
             var val = parseValue(args[name]);
             readPartNames(val, this.vars);
 
-            if (name.indexOf("on") == 0)
+            if (Str.hasPrefix(name, "on"))
             {
                 var eventName = name.substr(2);
                 if (!this.listeners)
