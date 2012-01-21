@@ -76,6 +76,28 @@ require.onDebugDAG = function(fullName, deps, url)
     require.urlByFullName[fullName] = url;
 }
 
+require.originalExecCb = require.execCb;
+require.execCb = function (name) {
+    var ret = require.originalExecCb.apply(require, arguments);
+    if (ret) {
+        var basename = "requirejs("+name+")";
+        for (var prop in ret) {
+            if (ret.hasOwnProperty(prop)) {
+                var value = ret[prop];
+                if (value !== null && (typeof value === "function" || typeof value === "object")) {
+                    try {
+                        value.displayName = basename + "/" + prop;
+                    } catch (e) {
+                        require.log("Could not displayName module " + name + " prop " + prop + ": " + e.toString());
+                    }
+                }
+            }
+        }
+        ret.displayName = basename;
+    }
+    return ret;
+};
+
 /* Calls require.log to record dependency analysis.
  * Call this function from your main require.js callback function
  * @param none
