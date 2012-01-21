@@ -42,17 +42,17 @@ OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 require.log = function()
 {
-     try
-     {
-         FBTrace.sysout.apply(FBTrace, arguments);
-     }
-     catch(exc)
-     {
-         if (window.console)
-             console.log.apply(console, arguments);
-         else
-             alert.apply(null, arguments);
-     }
+    try
+    {
+        FBTrace.sysout.apply(FBTrace, arguments);
+    }
+    catch(exc)
+    {
+        if (window.console)
+            console.log.apply(console, arguments);
+        else
+            alert.apply(null, arguments);
+    }
 }
 
 /*
@@ -77,23 +77,29 @@ require.onDebugDAG = function(fullName, deps, url)
 }
 
 require.originalExecCb = require.execCb;
-require.execCb = function (name) {
+require.execCbOFF = function (name) {
     var ret = require.originalExecCb.apply(require, arguments);
-    if (ret) {
-        var basename = "requirejs("+name+")";
-        for (var prop in ret) {
-            if (ret.hasOwnProperty(prop)) {
-                var value = ret[prop];
-                if (value !== null && (typeof value === "function" || typeof value === "object")) {
-                    try {
-                        value.displayName = basename + "/" + prop;
-                    } catch (e) {
-                        require.log("Could not displayName module " + name + " prop " + prop + ": " + e.toString());
+    try {
+        if (ret) {
+            var basename = "requirejs("+name+")";
+            for (var prop in ret) {
+                try {
+                    if (ret.hasOwnProperty(prop)) {
+                        var value = ret[prop];
+                        if (value !== null && (typeof value === "function" || typeof value === "object")) {
+                            value.displayName = basename + "/" + prop;
+                        }
                     }
+                } catch (e) {
+                    require.log("Could not displayName module " + name + " prop " + prop + ": " + e.toString(),[ret,prop,value]);
                 }
             }
+            ret.displayName = basename;
         }
-        ret.displayName = basename;
+    }
+    catch(e)
+    {
+        require.log("Could not displayName module " + name + ": " + e.toString());
     }
     return ret;
 };
