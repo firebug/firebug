@@ -8,8 +8,9 @@ define([
     "firebug/firefox/xpcom",
     "firebug/lib/css",
     "firebug/net/httpLib",
+    "firebug/net/netUtils"
 ],
-function(Obj, Firebug, Domplate, Locale, Xpcom, Css, Http) {
+function(Obj, Firebug, Domplate, Locale, Xpcom, Css, Http, NetUtils) {
 
 // ************************************************************************************************
 // Constants
@@ -72,7 +73,7 @@ Firebug.SVGViewerModel = Obj.extend(Firebug.Module,
         // Look if the response is SVG based.
         for (var i=0; i<contentTypes.length; i++)
         {
-            if (contentType == contentTypes[i])
+            if (NetUtils.matchesContentType(contentType, contentTypes[i]))
                 return true;
         }
 

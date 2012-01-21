@@ -80,7 +80,7 @@ Firebug.XMLViewerModel = Obj.extend(Firebug.Module,
         // Look if the response is XML based.
         for (var i=0; i<xmlContentTypes.length; i++)
         {
-            if (contentType == xmlContentTypes[i])
+            if (NetUtils.matchesContentType(contentType, xmlContentTypes[i]))
                 return true;
         }
 

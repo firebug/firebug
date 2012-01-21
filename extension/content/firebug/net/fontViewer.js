@@ -14,10 +14,11 @@ define([
     "firebug/lib/fonts",
     "firebug/lib/url",
     "firebug/net/httpLib",
+    "firebug/net/netUtils",
     "firebug/lib/options"
 ],
 function(Obj, Firebug, Domplate, Locale, Xpcom, Events, Win, Css, Dom, Str, Fonts, Url, Http,
-    Options) {
+    NetUtils, Options) {
 
 // ********************************************************************************************* //
 
@@ -70,7 +71,7 @@ Firebug.FontViewerModel = Obj.extend(Firebug.Module,
 
         for (var i=0; i<contentTypes.length; i++)
         {
-            if (contentType == contentTypes[i])
+            if (NetUtils.matchesContentType(contentType, contentTypes[i]))
             {
                 if (FBTrace.DBG_FONTS)
                 {

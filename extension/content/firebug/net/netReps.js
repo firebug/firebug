@@ -933,8 +933,8 @@ Firebug.NetMonitor.NetInfoBody = domplate(Firebug.Rep, new Firebug.Listener(),
         if (!file.mimeType)
             return true;
 
-        return ((file.mimeType.indexOf("text/html") != 0) &&
-            (file.mimeType.indexOf("application/xhtml+xml") != 0));
+        return (!NetUtils.matchesContentType(file.mimeType, "text/html") &&
+                !NetUtils.matchesContentType(file.mimeType, "application/xhtml+xml"));
     },
 
     onClickTab: function(event)

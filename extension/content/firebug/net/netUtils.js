@@ -195,19 +195,22 @@ var NetUtils =
             context.sourceCache.loadText(file.href, file.method, file);
     },
 
+    matchesContentType: function(headerValue, contentType)
+    {
+        // The header value doesn't have to match the content type exactly;
+        // there can be a charset specified. So, test for a prefix instead.
+        return Str.hasPrefix(headerValue, contentType);
+    },
+
     isURLEncodedRequest: function(file, context)
     {
         var text = NetUtils.getPostText(file, context);
         if (text && Str.hasPrefix(text.toLowerCase(), "content-type: application/x-www-form-urlencoded"))
             return true;
 
-        // The header value doesn't have to be always exactly "application/x-www-form-urlencoded",
-        // there can be even charset specified. So, use indexOf rather than just "==".
         var headerValue = NetUtils.findHeader(file.requestHeaders, "content-type");
-        if (headerValue && headerValue.indexOf("application/x-www-form-urlencoded") == 0)
-            return true;
-
-        return false;
+        return (headerValue &&
+                NetUtils.matchesContentType(headerValue, "application/x-www-form-urlencoded"));
     },
 
     isMultiPartRequest: function(file, context)
