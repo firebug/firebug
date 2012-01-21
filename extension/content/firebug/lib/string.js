@@ -89,12 +89,23 @@ e(0x2015, '#8213', attr, text, editor); // horizontal bar
 e(0x00a0, 'nbsp', attr, text, white, editor);
 e(0x2002, 'ensp', attr, text, white, editor);
 e(0x2003, 'emsp', attr, text, white, editor);
+e(0x2004, 'emsp13', attr, text, white, editor);
+e(0x2005, 'emsp14', attr, text, white, editor);
+e(0x2007, 'numsp', attr, text, white, editor);
+e(0x2008, 'puncsp', attr, text, white, editor);
 e(0x2009, 'thinsp', attr, text, white, editor);
+e(0x200a, 'hairsp', attr, text, white, editor);
+e(0x200b, '#8203', attr, text, white, editor); // zero-width space (ZWSP)
 e(0x200c, 'zwnj', attr, text, white, editor);
+
+e(0x202f, '#8239', attr, text, white, editor); // NARROW NO-BREAK SPACE
+e(0x205f, '#8287', attr, text, white, editor); // MEDIUM MATHEMATICAL SPACE
+e(0x3000, '#12288', attr, text, white, editor); // IDEOGRAPHIC SPACE
+e(0xfeff, '#65279', attr, text, white, editor); // ZERO WIDTH NO-BREAK SPACE
+
 e(0x200d, 'zwj', attr, text, white, editor);
 e(0x200e, 'lrm', attr, text, white, editor);
 e(0x200f, 'rlm', attr, text, white, editor);
-e(0x200b, '#8203', attr, text, white, editor); // zero-width space (ZWSP)
 
 //************************************************************************************************
 // Entity escaping
