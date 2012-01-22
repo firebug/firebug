@@ -56,8 +56,9 @@ catch (err)
 // ********************************************************************************************* //
 // Common Tags
 
+// use pre here to keep line breaks while copying multiline strings 
 var OBJECTBOX = FirebugReps.OBJECTBOX =
-    SPAN({"class": "objectBox objectBox-$className", role : "presentation"});
+    PRE({"class": "objectBox objectBox-$className", role : "presentation"});
 
 var OBJECTBLOCK = FirebugReps.OBJECTBLOCK =
     DIV({"class": "objectBox objectBox-$className focusRow subLogRow", role : "listitem"});

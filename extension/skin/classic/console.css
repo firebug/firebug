@@ -113,6 +113,11 @@
 
 /*****************************************************************************************/
 
+.objectBox {
+    display: inline;
+    white-space: normal;
+}
+
 .objectBox-string,
 .objectBox-text,
 .objectBox-number,
