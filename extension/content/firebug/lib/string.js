@@ -86,6 +86,7 @@ e(0x2013, 'ndash', attr, text, editor); // en dash
 e(0x2014, 'mdash', attr, text, editor); // em dash
 e(0x2015, '#8213', attr, text, editor); // horizontal bar
 
+// See http://www.cs.tut.fi/~jkorpela/chars/spaces.html
 e(0x00a0, 'nbsp', attr, text, white, editor);
 e(0x2002, 'ensp', attr, text, white, editor);
 e(0x2003, 'emsp', attr, text, white, editor);
