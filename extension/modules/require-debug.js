@@ -77,21 +77,32 @@ require.onDebugDAG = function(fullName, deps, url)
 }
 
 require.originalExecCb = require.execCb;
-require.execCbOFF = function (name) {
+require.execCbOFF = function (name)
+{
     var ret = require.originalExecCb.apply(require, arguments);
-    try {
-        if (ret) {
+    try
+    {
+        if (ret)
+        {
             var basename = "requirejs("+name+")";
-            for (var prop in ret) {
-                try {
-                    if (ret.hasOwnProperty(prop)) {
+            for (var prop in ret)
+            {
+                try
+                {
+                    if (ret.hasOwnProperty(prop))
+                    {
                         var value = ret[prop];
-                        if (value !== null && (typeof value === "function" || typeof value === "object")) {
-                            value.displayName = basename + "/" + prop;
+                        if (value !== null &&
+                            (typeof value == "function" || typeof value == "object"))
+                        {
+                            value.displayName = basename+"/"+prop;
                         }
                     }
-                } catch (e) {
-                    require.log("Could not displayName module " + name + " prop " + prop + ": " + e.toString(),[ret,prop,value]);
+                }
+                catch (e)
+                {
+                    require.log("Could not displayName module "+name+" prop "+prop+": "+
+                        e.toString(), [ret, prop, value]);
                 }
             }
             ret.displayName = basename;
@@ -99,8 +110,9 @@ require.execCbOFF = function (name) {
     }
     catch(e)
     {
-        require.log("Could not displayName module " + name + ": " + e.toString());
+        require.log("Could not displayName module "+name+": "+e.toString());
     }
+
     return ret;
 };
 
@@ -121,10 +133,10 @@ require.analyzeDependencyTree = function()
         for (var i = 0; i < deps.length; i++)
         {
             var depID = deps[i];
-            if (path.indexOf(":" + depID + ":") == -1) // Then depId is not already an dependent
-                result[depID] = linkArrayItems(depID, depNamesByName, path + ":" + depID + ":");
+            if (path.indexOf(":"+depID+":") == -1) // Then depId is not already an dependent
+                result[depID] = linkArrayItems(depID, depNamesByName, path+":"+depID+":");
             else
-                require.log("Circular dependency: " + path + ":" + depID + ":");
+                require.log("Circular dependency: "+path+":"+depID+":");
         }
         return result;
     }
@@ -132,14 +144,17 @@ require.analyzeDependencyTree = function()
     var linkedDependencies = {};
     var dependents = {}; // reversed list, dependents by name
     var depNamesByName = require.depsNamesByName;
+
     for (var name in depNamesByName)
     {
         var depArray = depNamesByName[name];
 
-        if (name === "undefined") {
+        if (name === "undefined")
+        {
             linkedDependencies["__main__"] = linkArrayItems(name, depNamesByName, "");
             name = "__main__";
         }
+
         for (var i = 0; i < depArray.length; i++)
         {
             var dependent = depArray[i];
