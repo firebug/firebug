@@ -791,21 +791,9 @@ Firebug.Breakpoint.ConditionEditor.prototype = domplate(Firebug.InlineEditor.pro
 {
     tag:
         DIV({"class": "conditionEditor"},
-            DIV({"class": "conditionEditorTop1"},
-                DIV({"class": "conditionEditorTop2"})
-            ),
-            DIV({"class": "conditionEditorInner1"},
-                DIV({"class": "conditionEditorInner2"},
-                    DIV({"class": "conditionEditorInner"},
-                        DIV({"class": "conditionCaption"}, Locale.$STR("ConditionInput")),
-                        INPUT({"class": "conditionInput", type: "text",
-                            "aria-label": Locale.$STR("ConditionInput")}
-                        )
-                    )
-                )
-            ),
-            DIV({"class": "conditionEditorBottom1"},
-                DIV({"class": "conditionEditorBottom2"})
+            DIV({"class": "conditionCaption"}, Locale.$STR("ConditionInput")),
+            INPUT({"class": "conditionInput", type: "text",
+                "aria-label": Locale.$STR("ConditionInput")}
             )
         ),
 
@@ -813,8 +801,7 @@ Firebug.Breakpoint.ConditionEditor.prototype = domplate(Firebug.InlineEditor.pro
     {
         this.box = this.tag.replace({}, doc, this);
 
-        // XXXjjb we need childNode[1] always
-        this.input = this.box.childNodes[1].firstChild.firstChild.lastChild;
+        this.input = this.box.getElementsByClassName("conditionInput").item(0);
         Firebug.InlineEditor.prototype.initialize.apply(this, arguments);
     },
 
@@ -844,7 +831,9 @@ Firebug.Breakpoint.ConditionEditor.prototype = domplate(Firebug.InlineEditor.pro
                 Css.setClass(this.box, "upsideDown");
             }
             else
+            {
                 Css.removeClass(this.box, "upsideDown");
+            }
 
             this.box.style.top = y + "px";
             Dom.hide(this.box, false);
