@@ -466,27 +466,6 @@ Firebug.CommandLine = Obj.extend(Firebug.Module,
             noscript.setJSEnabled(noScriptURI, false);
     },
 
-    enterMenu: function(context)
-    {
-        var expr = this.acceptCompletionOrReturnIt(context);
-        if (expr == "")
-            return;
-
-        this.commandHistory.appendToHistory(expr, true);
-
-        this.evaluate(expr, context, null, null, function(result, context)
-        {
-            if (typeof(result) != "undefined")
-            {
-                Firebug.chrome.contextMenuObject = result;
-
-                var popup = Firebug.chrome.$("fbContextMenu");
-                var commandLine = this.getCommandLine(context);
-                popup.showPopup(commandLine, -1, -1, "popup", "bottomleft", "topleft");
-            }
-        });
-    },
-
     enterInspect: function(context)
     {
         var expr = this.acceptCompletionOrReturnIt(context);
@@ -720,7 +699,7 @@ Firebug.CommandLine = Obj.extend(Firebug.Module,
         Events.addEventListener(commandLine, "keypress", this.onCommandLineKeyPress, true);
         Events.addEventListener(commandLine, "blur", this.onCommandLineBlur, true);
 
-        Firebug.Console.addListener(this);  // to get onConsoleInjection
+        Firebug.Console.addListener(this);  // to get onConsoleInjected
     },
 
     shutdown: function()
@@ -881,21 +860,12 @@ Firebug.CommandLine = Obj.extend(Firebug.Module,
                 if (!event.metaKey && !event.shiftKey)
                 {
                     Firebug.CommandLine.enter(Firebug.currentContext);
-                    handled = true;
+                    this.commandHistory.hide();
+                    return true;
                 }
-                else if (event.metaKey && !event.shiftKey)
-                {
-                    Firebug.CommandLine.enterMenu(Firebug.currentContext);
-                    handled = true;
-                }
-                else if(event.shiftKey && !event.metaKey)
+                else if(!event.metaKey && event.shiftKey)
                 {
                     Firebug.CommandLine.enterInspect(Firebug.currentContext);
-                    handled = true;
-                }
-
-                if (handled)
-                {
                     this.commandHistory.hide();
                     return true;
                 }
@@ -941,55 +911,15 @@ Firebug.CommandLine = Obj.extend(Firebug.Module,
 
     onCommandLineFocus: function(event)
     {
-        var context = Firebug.currentContext;
-
         if (FBTrace.DBG_COMMANDLINE)
+        {
+            var context = Firebug.currentContext;
             FBTrace.sysout("commandLine.onCommandLineFocus; for: " +
                 (context ? context.getName() : "no context"));
+        }
 
         if (this.autoCompleter.empty)
             this.setAutoCompleter();
-
-        // xxxHonza: I think that attaching the command line on focus is wrong.
-        // It's done just before executing a command and detached immediately
-        // after that. All tests pass.
-
-        // Attach the command line API on focus, so it shows up in auto-completion.
-        // then there is no currentContext.
-        /*if (!this.attachConsoleOnFocus())
-            return;
-
-        if (!Firebug.migrations.commandLineTab)
-        {
-            var textBox = Firebug.chrome.$("fbCommandLine");
-            textBox.value = "";
-            textBox.select();
-            Firebug.migrations.commandLineTab = true;
-        }
-
-        if (!this.isAttached(context))
-        {
-            return this.isReadyElsePreparing(context);
-        }
-        else
-        {
-            if (FBTrace.DBG_COMMANDLINE)
-            {
-                try
-                {
-                    var cmdLine = this.isAttached(context);
-                    FBTrace.sysout("commandLine.onCommandLineFocus, attachCommandLine " +
-                        cmdLine, cmdLine);
-                }
-                catch (e)
-                {
-                    FBTrace.sysout("commandLine.onCommandLineFocus, " +
-                        "did NOT attachCommandLine ", e);
-                }
-            }
-
-            return true; // is attached.
-        }*/
     },
 
     isAttached: function(context, win)
@@ -998,40 +928,6 @@ Firebug.CommandLine = Obj.extend(Firebug.Module,
             return false;
 
         return Firebug.CommandLine.injector.isAttached(win ? win : context.window);
-    },
-
-    attachConsoleOnFocus: function()
-    {
-        if (!Firebug.currentContext)
-        {
-            if (FBTrace.DBG_ERRORS && FBTrace.DBG_COMMANDLINE)
-                FBTrace.sysout("commandLine.attachConsoleOnFocus no Firebug.currentContext");
-            return false;
-        }
-
-        if (FBTrace.DBG_COMMANDLINE)
-            FBTrace.sysout("commandLine.attachConsoleOnFocus: Firebug.currentContext is " +
-                Firebug.currentContext.getName() + " in window " + window.location);
-
-        // User has decided to use the command line, but the web page may not have the console
-        // if the page has no javascript
-        if (Firebug.Console.isReadyElsePreparing(Firebug.currentContext))
-        {
-            // the page had _firebug so we know that consoleInjected.js compiled and ran.
-            if (FBTrace.DBG_COMMANDLINE)
-            {
-                if (Firebug.currentContext)
-                {
-                    FBTrace.sysout("commandLine.attachConsoleOnFocus: " +
-                        Firebug.currentContext.getName());
-                }
-                else
-                {
-                    FBTrace.sysout("commandLine.attachConsoleOnFocus: No Firebug.currentContext");
-                }
-            }
-        }
-        return true;
     },
 
     onPanelEnable: function(panelName)

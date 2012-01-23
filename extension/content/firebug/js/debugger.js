@@ -1184,23 +1184,9 @@ Firebug.Debugger = Obj.extend(Firebug.ActivableModule,
                 FBTrace.sysout("debugger.firebugDebuggerTracer dropped tracer trace.frames "+
                     trace.frames.length, trace.frames);
 
-            if (Wrapper.getContentView(context.window)._firebugStackTrace == "requested")
-            {
-                // drop console.error() see consoleInjected.js
-                trace.frames = trace.frames.slice(1);
-
-                if (FBTrace.DBG_ERRORLOG)
-                    FBTrace.sysout("debugger.firebugDebuggerTracer requested trace.frames "+
-                        trace.frames.length, trace.frames);
-
-                context.stackTrace = trace;
-            }
-            else
-            {
-                // drop one frame see attachConsoleInjector
-                //trace.frames = trace.frames.slice(1);
-                Firebug.Console.log(trace, context, "stackTrace");
-            }
+            // drop one frame see attachConsoleInjector
+            //trace.frames = trace.frames.slice(1);
+            Firebug.Console.log(trace, context, "stackTrace");
         }
 
         if (FBTrace.DBG_BP)
