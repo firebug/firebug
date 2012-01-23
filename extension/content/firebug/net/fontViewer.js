@@ -69,18 +69,15 @@ Firebug.FontViewerModel = Obj.extend(Firebug.Module,
         if (!contentType)
             return false;
 
-        for (var i=0; i<contentTypes.length; i++)
+        if (NetUtils.matchesContentType(contentType, contentTypes))
         {
-            if (NetUtils.matchesContentType(contentType, contentTypes[i]))
+            if (FBTrace.DBG_FONTS)
             {
-                if (FBTrace.DBG_FONTS)
-                {
-                    FBTrace.sysout("fontviewer.isFont; content type: "+contentType,
-                        {url: url, data: data});
-                }
-
-                return true;
+                FBTrace.sysout("fontviewer.isFont; content type: "+contentType,
+                    {url: url, data: data});
             }
+
+            return true;
         }
 
         // Workaround for font responses without proper content type

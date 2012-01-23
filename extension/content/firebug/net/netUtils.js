@@ -197,9 +197,15 @@ var NetUtils =
 
     matchesContentType: function(headerValue, contentType)
     {
-        // The header value doesn't have to match the content type exactly;
-        // there can be a charset specified. So, test for a prefix instead.
-        return Str.hasPrefix(headerValue, contentType);
+        var ar = (typeof contentType === 'string' ? [contentType] : contentType);
+        for (var i = 0; i < ar.length; ++i)
+        {
+            // The header value doesn't have to match the content type exactly;
+            // there can be a charset specified. So, test for a prefix instead.
+            if (Str.hasPrefix(headerValue, ar[i]))
+                return true;
+        }
+        return false;
     },
 
     isURLEncodedRequest: function(file, context)

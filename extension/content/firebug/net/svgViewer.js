@@ -70,14 +70,7 @@ Firebug.SVGViewerModel = Obj.extend(Firebug.Module,
         if (!contentType)
             return false;
 
-        // Look if the response is SVG based.
-        for (var i=0; i<contentTypes.length; i++)
-        {
-            if (NetUtils.matchesContentType(contentType, contentTypes[i]))
-                return true;
-        }
-
-        return false;
+        return NetUtils.matchesContentType(contentType, contentTypes);
     },
 
     /**

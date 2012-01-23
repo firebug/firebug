@@ -924,7 +924,7 @@ Firebug.NetMonitor.NetInfoBody = domplate(Firebug.Rep, new Firebug.Listener(),
 
     hideCache: function(file)
     {
-        //xxxHonza: I don't see any reason why not to display the cache also info for images.
+        //xxxHonza: I don't see any reason why not to display the cache info also for images.
         return !file.cacheEntry/* || file.category=="image"*/;
     },
 
@@ -933,8 +933,8 @@ Firebug.NetMonitor.NetInfoBody = domplate(Firebug.Rep, new Firebug.Listener(),
         if (!file.mimeType)
             return true;
 
-        return (!NetUtils.matchesContentType(file.mimeType, "text/html") &&
-                !NetUtils.matchesContentType(file.mimeType, "application/xhtml+xml"));
+        var types = ["text/html", "application/xhtml+xml"];
+        return !NetUtils.matchesContentType(file.mimeType, types);
     },
 
     onClickTab: function(event)
