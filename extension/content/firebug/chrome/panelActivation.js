@@ -70,9 +70,9 @@ Firebug.PanelActivation = Obj.extend(Firebug.Module,
 
     activatePanelTypes: function(panelTypes)
     {
-        for (var p in panelTypes)
+        for (var i=0; i<panelTypes.length; i++)
         {
-            var panelType = panelTypes[p];
+            var panelType = panelTypes[i];
             if (!this.isPanelActivable(panelType))
                 continue;
 
@@ -83,9 +83,9 @@ Firebug.PanelActivation = Obj.extend(Firebug.Module,
 
     deactivatePanelTypes: function(panelTypes)
     {
-        for (var p in panelTypes)
+        for (var i=0; i<panelTypes.length; i++)
         {
-            var panelType = panelTypes[p];
+            var panelType = panelTypes[i];
             if (!this.isPanelActivable(panelType))
                 continue;
 
