@@ -197,12 +197,12 @@ var NetUtils =
 
     matchesContentType: function(headerValue, contentType)
     {
-        var ar = (typeof contentType === 'string' ? [contentType] : contentType);
-        for (var i = 0; i < ar.length; ++i)
+        var contentTypes = (typeof contentType == "string" ? [contentType] : contentType);
+        for (var i = 0; i < contentTypes.length; ++i)
         {
             // The header value doesn't have to match the content type exactly;
             // there can be a charset specified. So, test for a prefix instead.
-            if (Str.hasPrefix(headerValue, ar[i]))
+            if (Str.hasPrefix(headerValue, contentTypes[i]))
                 return true;
         }
         return false;
