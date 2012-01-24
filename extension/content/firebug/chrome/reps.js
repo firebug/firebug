@@ -58,7 +58,7 @@ catch (err)
 
 // use pre here to keep line breaks while copying multiline strings 
 var OBJECTBOX = FirebugReps.OBJECTBOX =
-    PRE({"class": "objectBox objectBox-$className", role : "presentation"});
+    PRE({"class": "objectBox inline objectBox-$className", role : "presentation"});
 
 var OBJECTBLOCK = FirebugReps.OBJECTBLOCK =
     DIV({"class": "objectBox objectBox-$className focusRow subLogRow", role : "listitem"});
