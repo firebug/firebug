@@ -1277,11 +1277,12 @@ Firebug.HTMLPanel.prototype = Obj.extend(WalkingPanel,
     updateOption: function(name, value)
     {
         var viewOptionNames = {
-            showCommentNodes:1,
+            showCommentNodes: 1,
             showTextNodesWithEntities:1,
             showTextNodesWithWhitespace:1,
             showFullTextNodes:1
         };
+
 
         if (name in viewOptionNames)
         {
@@ -2042,7 +2043,8 @@ AttributeEditor.prototype = domplate(Firebug.InlineEditor.prototype,
         else if ((charCode == 34 /* '"' */ || charCode == 39 /* ''' */) &&
             Css.hasClass(target, "nodeValue"))
         {
-            var nonRestrictiveAttributes = [
+            var nonRestrictiveAttributes =
+            [
                 "onabort",
                 "onblur",
                 "onchange",
@@ -2064,7 +2066,8 @@ AttributeEditor.prototype = domplate(Firebug.InlineEditor.prototype,
                 "onsubmit",
                 "onunload",
                 "title",
-                "alt"
+                "alt",
+                "style"
             ]
 
             var attrName = Dom.getPreviousByClass(target, "nodeName").textContent;
