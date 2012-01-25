@@ -98,6 +98,7 @@ const reDBG = /DBG_(.*)/;
 const reXUL = /\.xul$|\.xml$/;
 const reTooMuchRecursion = /too\smuch\srecursion/;
 
+const getPref = Components.utils.import("resource://firebug/loader.js", {}).FirebugLoader.getPref; 
 // ********************************************************************************************* //
 // Globals
 
@@ -807,26 +808,9 @@ var fbs =
     {
         timer = null;
 
-        if (!jsd)
-            return;
-
         try
         {
-            do
-            {
-                var depth = jsd.exitNestedEventLoop();
-            }
-            while(depth > 0);
-        }
-        catch (exc)
-        {
-            // Seems to be the normal path...
-            // FBTrace.sysout("fbs.FirebugService, attempt to exitNestedEventLoop ERROR "+exc);
-        }
-
-        try
-        {
-            prefs.removeObserver(fbs.prefDomain, fbs);
+            prefs.removeObserver(fbs.prefDomain, fbs, false);
         }
         catch (exc)
         {
@@ -844,6 +828,36 @@ var fbs =
             FBTrace.sysout("fbs.quit-application-observers removeObserver ERROR "+exc, exc);
         }
 
+        if (!jsd)
+            return;
+
+        try
+        {
+            do
+            {
+                var depth = jsd.exitNestedEventLoop();
+            }
+            while(depth > 0);
+        }
+        catch (exc)
+        {
+            // Seems to be the normal path...
+            // FBTrace.sysout("fbs.FirebugService, attempt to exitNestedEventLoop ERROR "+exc);
+        }
+
+        // make sure to unregister all the hooks
+        var hookNames = ["error", "script", "breakpoint", "debugger", "debug", "interrupt", 
+            "throw", "topLevel", "function", "debug"];
+        for each (var hook in hookNames)
+        {
+            try {
+                jsd[hook + "Hook"] = null;
+            }
+            catch (exc)
+            {
+                FBTrace.sysout("fbs.quit-application-observers removeObserver ERROR "+exc, exc);
+            }
+        }
         jsd = null;
     },
 
@@ -1631,12 +1645,12 @@ var fbs =
 
     obeyPrefs: function()
     {
-        fbs.showStackTrace = prefs.getBoolPref("extensions.firebug.showStackTrace");
-        fbs.breakOnErrors = prefs.getBoolPref("extensions.firebug.breakOnErrors");
-        fbs.trackThrowCatch = prefs.getBoolPref("extensions.firebug.trackThrowCatch");
+        fbs.showStackTrace = getPref("showStackTrace");
+        fbs.breakOnErrors = getPref("breakOnErrors");
+        fbs.trackThrowCatch = getPref("trackThrowCatch");
 
         var pref = fbs.scriptsFilter;
-        fbs.scriptsFilter = prefs.getCharPref("extensions.firebug.scriptsFilter");
+        fbs.scriptsFilter = getPref("scriptsFilter");
         var mustReset = (pref !== fbs.scriptsFilter);
 
         if (FBTrace.DBG_OPTIONS)
@@ -1646,7 +1660,7 @@ var fbs =
         pref = fbs.filterSystemURLs;
 
         // may not be exposed to users
-        fbs.filterSystemURLs = prefs.getBoolPref("extensions.firebug.filterSystemURLs");
+        fbs.filterSystemURLs = getPref("filterSystemURLs");
         mustReset = mustReset || (pref !== fbs.filterSystemURLs);
 
         if (FBTrace.DBG_OPTIONS)
@@ -3062,8 +3076,8 @@ var fbs =
 
         if (location)
         {
-            if (location.lastIndexOf("chrome://chromebug/", 0) == 0 ||
-                location.lastIndexOf("chrome://fb4cb/", 0) == 0)
+            if (location.indexOf("chrome://chromebug/") >= 0 ||
+                location.indexOf("chrome://fb4cb/") >= 0)
             {
                 return true;
             }

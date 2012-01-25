@@ -224,6 +224,9 @@ var FirebugChrome =
             if (FBTrace.DBG_INITIALIZE)
                 FBTrace.sysout("chrome.initializeUI; Custom stylesheet appended " +
                     Firebug.stylesheets.length, Firebug.stylesheets);
+
+            // Fire event for window event listeners.
+            Firebug.sendLoadEvent();
         }
         catch (exc)
         {
@@ -1027,23 +1030,24 @@ var FirebugChrome =
 
         pos && this.syncPositionPref(pos);
 
-        var vertical = pos == 'top' || pos == 'bottom';
-        var after = pos == 'bottom' || pos == 'right';
+        var vertical = pos == "top" || pos == "bottom";
+        var after = pos == "bottom" || pos == "right";
 
         var document = window.top.document;
-        var splitter = Firefox.getElementById('fbContentSplitter');
         var container = document.getElementById(vertical ? "appcontent" : "browser");
+
+        var splitter = Firefox.getElementById("fbContentSplitter");
         splitter.setAttribute("orient", vertical ? "vertical" : "horizontal");
         splitter.setAttribute("dir", after ? "" : "reverse");
-        container.insertBefore(splitter, after ? null: container.firstChild);
+        container.insertBefore(splitter, after ? null : container.firstChild);
 
-        var frame = document.getElementById('fbMainFrame');
+        var frame = document.getElementById("fbMainFrame");
 
         var newFrame = frame.cloneNode(true);
-        var newBrowser = newFrame.querySelector('#fbMainContainer');
-        var oldBrowser = frame.querySelector('#fbMainContainer');
+        var newBrowser = newFrame.querySelector("#fbMainContainer");
+        var oldBrowser = frame.querySelector("#fbMainContainer");
 
-        newBrowser.removeAttribute('src');
+        newBrowser.removeAttribute("src");
         container.insertBefore(newFrame, after ? null: container.firstChild);
 
         this.swapBrowsers(oldBrowser, newBrowser);
@@ -1065,30 +1069,6 @@ var FirebugChrome =
 
         Firebug.Options.set("framePosition", pos);
         return Firebug.framePosition = pos;
-    },
-
-    onPositionPopupShowing: function(popup)
-    {
-        Dom.eraseNode(popup);
-
-        var items = [];
-
-        for each(var pos in ["detached", "top", "bottom", "left", "right"])
-        {
-            items.push({
-                label: Locale.$STR("position." + pos),
-                type: "radio",
-                command: Obj.bindFixed(this.setPosition, this, pos),
-                checked: Firebug.framePosition == pos
-            });
-        }
-
-        items.splice(1, 0, "-");
-
-        items[0].key = "key_detachFirebug";
-
-        for each(var i in items)
-            Menu.createMenuItem(popup, i);
     },
 
     swapBrowsers: function(oldBrowser, newBrowser)

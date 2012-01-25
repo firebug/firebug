@@ -26,49 +26,9 @@ Firebug.FirebugMenu = Obj.extend(Firebug.Module,
     {
         Firebug.Module.initializeUI.apply(this, arguments);
 
-        // Put Firebug version on all "About" menu items. This men item appears in
-        // Firefox Tools menu (Firefox UI) as well as Firebug Icon menu (Firebug UI)
-        this.updateAboutMenu(document);
-        this.updateAboutMenu(top.document);
-
-        // Initialize Firebug Tools, Web Developer and Firebug Icon menus.
-        var firebugMenuPopup = Firebug.chrome.$("fbFirebugMenuPopup");
-
-        // If 'Web Developer' menu is available (introduced in Firefox 6)
-        // Remove the old entry in Tools menu.
-        if (Firefox.getElementById("menu_webDeveloper_firebug"))
-        {
-            var menuFirebug = Firefox.getElementById("menu_firebug");
-            if (menuFirebug)
-                menuFirebug.parentNode.removeChild(menuFirebug);
-        }
-
-        // Initialize content of Firebug menu at various places.
-        this.initializeMenu(Firefox.getElementById("menu_webDeveloper_firebug"), firebugMenuPopup);
-        this.initializeMenu(Firefox.getElementById("menu_firebug"), firebugMenuPopup);
-        this.initializeMenu(Firefox.getElementById("appmenu_firebug"), firebugMenuPopup);
+        // Initialize Firebug Icon menu. The content comes from the global space.
+        var firebugMenuPopup = Firefox.$("fbFirebugMenuPopup");
         this.initializeMenu(Firebug.chrome.$("fbFirebugMenu"), firebugMenuPopup);
-    },
-
-    /**
-     * Append version info to all "About" menu items.
-     * @param {Object} doc The scope document where to look for XUL menu elements.
-     */
-    updateAboutMenu: function(doc)
-    {
-        var version = Firebug.getVersion();
-        if (version)
-        {
-            var nodes = doc.querySelectorAll(".firebugAbout");
-            nodes = Arr.cloneArray(nodes);
-            for (var i=0; i<nodes.length; i++)
-            {
-                var node = nodes[i];
-                var aboutLabel = node.getAttribute("label");
-                node.setAttribute("label", aboutLabel + " " + version);
-                Css.removeClass(node, "firebugAbout");
-            }
-        }
     },
 
     /**
@@ -96,4 +56,6 @@ Firebug.registerModule(Firebug.FirebugMenu);
 // ********************************************************************************************* //
 
 return Firebug.FirebugMenu;
+
+// ********************************************************************************************* //
 });

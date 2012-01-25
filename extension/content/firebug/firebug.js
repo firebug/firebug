@@ -173,9 +173,6 @@ window.Firebug =
 
         Events.dispatch(modules, "initialize", []);
 
-        // Fire event for window event listeners.
-        this.sendLoadEvent();
-
         // This is the final of Firebug initialization.
         FBTrace.timeEnd("INITIALIZATION_TIME");
     },

@@ -1,14 +1,12 @@
 /* See license.txt for terms of usage */
 
-define([], function() {
+// ********************************************************************************************* //
+// Our global trace object.
+
+var EXPORTED_SYMBOLS = ["FBTrace"];
+
+var scope = {};
+Components.utils["import"]("resource://firebug/firebug-trace-service.js", scope);
+var FBTrace = scope.traceConsoleService.getTracer("extensions.firebug");
 
 // ********************************************************************************************* //
-// Module
-
-// The entire localization support is implemented in Mozilla Module so, it can be
-// used yet before the Firebug is fully loaded.
-
-return Components.utils["import"]("resource://firebug/locale.js").Locale;
-
-// ********************************************************************************************* //
-});

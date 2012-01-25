@@ -125,7 +125,7 @@ Firebug.A11yModel = Obj.extend(Firebug.Module,
         var tmpElem;
         //add class used by all a11y related css styles (e.g. :focus and -moz-user-focus styles)
         Css.setClass(chrome.$("fbContentBox"), "useA11y");
-        Css.setClass(chrome.$("fbStatusBar"), "useA11y");
+        //Css.setClass(chrome.$("fbStatusBar"), "useA11y");
         tmpElem = chrome.$("fbStatusPrefix");
         if (tmpElem) tmpElem.setAttribute("value", Locale.$STR("a11y.labels.firebug status"));
 

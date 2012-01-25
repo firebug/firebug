@@ -168,11 +168,6 @@
     border-top: 1px solid threedshadow;
 }
 
-#fbContentSplitter{
-    border-color: threedShadow !important;
-    background-color: #FFFFFF;
-}
-
 #fbToolbar {
     padding-bottom: 1px;
     border-bottom: none;

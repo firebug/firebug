@@ -1,12 +1,5 @@
 /* See license.txt for terms of usage */
 
-/**
- * This is the place where the global Firebug object is created. This object represents
- * the entire application and all consequently created namespaces and variables should be
- * injected into it.
- *
- * In the future, there should *not* be any other globals except of the Firebug object.
- */
 var Firebug = Firebug || {};
 
 // ********************************************************************************************* //
