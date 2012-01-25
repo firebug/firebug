@@ -752,11 +752,7 @@ Firebug.InlineEditor.prototype = domplate(Firebug.BaseEditor,
 
     getAutoCompleteList: function(preExpr, expr, postExpr)
     {
-    },
-
-    isValidAutoCompleteProperty: function(value)
-    {
-        return true;
+        return [];
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -765,10 +761,9 @@ Firebug.InlineEditor.prototype = domplate(Firebug.BaseEditor,
     {
         if (!this.autoCompleter)
         {
-            this.autoCompleter = new Firebug.AutoCompleter(false, null,
+            this.autoCompleter = new Firebug.AutoCompleter(false,
                 Obj.bind(this.getAutoCompleteRange, this),
-                Obj.bind(this.getAutoCompleteList, this),
-                Obj.bind(this.isValidAutoCompleteProperty, this));
+                Obj.bind(this.getAutoCompleteList, this));
         }
 
         return this.autoCompleter;
@@ -785,33 +780,38 @@ Firebug.InlineEditor.prototype = domplate(Firebug.BaseEditor,
     incrementValue: function(amt)
     {
         var value = this.input.value;
-        var start = this.input.selectionStart, end = this.input.selectionEnd;
+        var offset = this.input.selectionStart;
+        var offsetEnd = this.input.selectionEnd;
 
-        var range = this.getAutoCompleteRange(value, start);
-        if (!range || range.type != "int")
-            range = {start: 0, end: value.length-1};
-
-        var expr = value.substring(range.start, range.end+1);
-        preExpr = value.substr(0, range.start);
-        postExpr = value.substr(range.end+1);
-
-        // See if the value is an number, and if so increment it
-        var intValue = parseFloat(expr);
-        if (!!intValue || intValue == 0)
-        {
-            var m = /\d+(\.\d+)?/.exec(expr);
-            var digitPost = expr.substr(m.index+m[0].length);
-
-            var completion = Math.round((intValue-amt)*100)/100; // avoid rounding errors
-            this.input.value = preExpr + completion + digitPost + postExpr;
-            this.input.setSelectionRange(start, end);
-
-            Firebug.Editor.update(true);
-
-            return true;
-        }
-        else
+        var newValue = this.doIncrementValue(value, amt, offset, offsetEnd);
+        if (!newValue)
             return false;
+
+        this.input.value = newValue.value;
+        this.input.setSelectionRange(newValue.start, newValue.end);
+
+        Firebug.Editor.update(true);
+        return true;
+    },
+
+    incrementExpr: function(expr, amt)
+    {
+        var num = parseFloat(expr);
+        if (isNaN(num))
+            return null;
+
+        var m = /\d+(\.\d+)?/.exec(expr);
+        var digitPost = expr.substr(m.index+m[0].length);
+        var newValue = Math.round((num-amt)*100)/100; // avoid rounding errors
+        return newValue + digitPost;
+    },
+
+    doIncrementValue: function(value, amt, offset, offsetEnd)
+    {
+        // See if the value is a single number, and if so increment it
+        value = this.incrementExpr(value, amt);
+        if (value !== null)
+            return {value: value, start: 0, end: value.length};
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -976,7 +976,7 @@ Firebug.InlineEditor.prototype = domplate(Firebug.BaseEditor,
 // ********************************************************************************************* //
 // Autocompletion
 
-Firebug.AutoCompleter = function(caseSensitive, getExprOffset, getRange, evaluator, isValidProperty)
+Firebug.AutoCompleter = function(caseSensitive, getRange, evaluator)
 {
     var candidates = null;
     var lastValue = "";
@@ -986,7 +986,6 @@ Firebug.AutoCompleter = function(caseSensitive, getExprOffset, getRange, evaluat
     var lastOffset = -1;
     var exprOffset = 0;
     var lastIndex = null;
-    var preParsed = null;
     var preExpr = null;
     var postExpr = null;
 
@@ -1028,7 +1027,7 @@ Firebug.AutoCompleter = function(caseSensitive, getExprOffset, getRange, evaluat
 
         var offset = textBox.selectionStart; // defines the cursor position
 
-        var found = this.pickCandidates(textBox, offset, context, cycle);
+        var found = this.pickCandidates(textBox, context, cycle);
 
         if (!found)
             this.reset();
@@ -1039,35 +1038,30 @@ Firebug.AutoCompleter = function(caseSensitive, getExprOffset, getRange, evaluat
     /**
      * returns true if candidate list was created
      */
-    this.pickCandidates = function(textBox, offset, context, cycle)
+    this.pickCandidates = function(textBox, context, cycle)
     {
         var value = textBox.value;
+        var offset = textBox.selectionStart;
 
         if (!candidates || !cycle || value != lastValue || offset != lastOffset)
         {
             originalOffset = offset;
             originalValue = lastValue = value;
 
-            // Find the part of the string that will be parsed
-            var parseStart = getExprOffset ? getExprOffset(value, offset, context) : 0;
-            preParsed = value.substr(0, parseStart);
-            var parsed = value.substr(parseStart);
-
             // Find the part of the string that is being completed
-            var range = getRange ? getRange(parsed, offset-parseStart, context) : null;
+            var range = getRange(value, offset);
             if (!range)
-                range = {start: 0, end: parsed.length-1};
+                range = {start: 0, end: value.length};
 
-            var expr = parsed.substring(range.start, range.end+1);
-            preExpr = parsed.substr(0, range.start);
-            postExpr = parsed.substr(range.end+1);
-            exprOffset = parseStart + range.start;
+            preExpr = value.substr(0, range.start);
+            var expr = value.substring(range.start, range.end);
+            postExpr = value.substr(range.end);
+            exprOffset = range.start;
 
             if (FBTrace.DBG_EDITOR)
             {
-                var sep = (parsed.indexOf('|') > -1) ? '^' : '|';
-                FBTrace.sysout(preExpr+sep+expr+sep+postExpr+" offset: "+offset+
-                    " parseStart:"+parseStart);
+                var sep = (value.indexOf("|") > -1) ? "^" : "|";
+                FBTrace.sysout(preExpr+sep+expr+sep+postExpr + " offset: " + offset);
             }
 
             if (!cycle)
@@ -1075,15 +1069,8 @@ Firebug.AutoCompleter = function(caseSensitive, getExprOffset, getRange, evaluat
                 if (!expr)
                     return false;
 
-                if (lastExpr)
-                {
-                    candidates = null;
-                    if (Str.hasPrefix(lastExpr, expr))
-                    {
-                        lastExpr = expr;
-                        return false;
-                    }
-                }
+                if (lastExpr && Str.hasPrefix(lastExpr, expr))
+                    return false;
             }
 
             lastExpr = expr;
@@ -1092,7 +1079,7 @@ Firebug.AutoCompleter = function(caseSensitive, getExprOffset, getRange, evaluat
             var searchExpr = "";
 
             // Check if the cursor is somewhere in the middle of the expression
-            if (expr && offset != parseStart+range.end+1)
+            if (expr && offset != range.end)
             {
                 if (cycle)
                 {
@@ -1111,19 +1098,15 @@ Firebug.AutoCompleter = function(caseSensitive, getExprOffset, getRange, evaluat
             }
 
             // Don't complete globals unless cycling.
-            if (!cycle && !parsed)
+            if (!cycle && !value)
                 return false;
 
             var values = evaluator(preExpr, expr, postExpr);
-            if (!values)
-                return false;
 
-            if (expr)
-                this.setCandidatesByExpr(expr, values);
-            else if (searchExpr)
+            if (searchExpr)
                 this.setCandidatesBySearchExpr(searchExpr, values);
             else
-                this.setCandidatesByValues(values);
+                this.setCandidatesByExpr(expr, values);
         }
 
         if (!candidates.length)
@@ -1138,7 +1121,7 @@ Firebug.AutoCompleter = function(caseSensitive, getExprOffset, getRange, evaluat
         var preCompletion = lastExpr.substr(0, typedUntil);
         var postCompletion = completion.substr(typedUntil);
 
-        var line = preParsed + preExpr + preCompletion + postCompletion + postExpr;
+        var line = preExpr + preCompletion + postCompletion + postExpr;
         var offsetEnd = exprOffset + completion.length;
 
         // Show the completion
@@ -1157,9 +1140,8 @@ Firebug.AutoCompleter = function(caseSensitive, getExprOffset, getRange, evaluat
         var findExpr = (caseSensitive ? expr : expr.toLowerCase());
         for (var i = 0; i < values.length; ++i)
         {
-            var name = values[i], testName = name;
-            if (!caseSensitive)
-                testName = testName.toLowerCase();
+            var name = values[i];
+            var testName = (caseSensitive ? name : name.toLowerCase());
 
             if (Str.hasPrefix(testName, findExpr))
                 candidates.push(name);
@@ -1198,18 +1180,6 @@ Firebug.AutoCompleter = function(caseSensitive, getExprOffset, getRange, evaluat
 
         candidates = Arr.cloneArray(values);
         lastIndex = searchIndex;
-    };
-
-    this.setCandidatesByValues = function(values)
-    {
-        candidates = [];
-        for (var i = 0; i < values.length; ++i)
-        {
-            var value = values[i];
-            if (!isValidProperty || isValidProperty(value))
-                candidates.push(value);
-        }
-        lastIndex = null;
     };
 
     this.adjustLastIndex = function(cycle)

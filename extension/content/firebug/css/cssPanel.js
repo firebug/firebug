@@ -1514,7 +1514,7 @@ CSSEditor.prototype = domplate(Firebug.InlineEditor.prototype,
     getAutoCompleteRange: function(value, offset)
     {
         if (Css.hasClass(this.target, "cssPropName"))
-            return {start: 0, end: value.length-1};
+            return {start: 0, end: value.length};
         else
             return parseCSSValue(value, offset);
     },
@@ -1527,22 +1527,126 @@ CSSEditor.prototype = domplate(Firebug.InlineEditor.prototype,
         }
         else if (Css.hasClass(this.target, "cssPropName"))
         {
-            return Css.getCSSPropertyNames(Xml.getElementSimpleType(Firebug.getRepObject(this.target)));
+            var nodeType = Xml.getElementSimpleType(Firebug.getRepObject(this.target));
+            return Css.getCSSPropertyNames(nodeType);
         }
         else
         {
             var row = Dom.getAncestorByClass(this.target, "cssProp");
             var propName = Dom.getChildByClass(row, "cssPropName").textContent;
-            return Css.getCSSKeywordsByProperty(Xml.getElementSimpleType(
-                Firebug.getRepObject(this.target)),propName);
+            var nodeType = Xml.getElementSimpleType(Firebug.getRepObject(this.target));
+            return Css.getCSSKeywordsByProperty(nodeType, propName);
         }
     },
 
-    reValidCSSToken: /^[A-Za-z_$\-][A-Za-z_$\-0-9]*/,
-
-    isValidAutoCompleteProperty: function(value)
+    doIncrementValue: function(value, amt, offset, offsetEnd)
     {
-        return this.reValidCSSToken.test(value);
+        var range = parseCSSValue(value, offset);
+        var type = (range && range.type) || "";
+        var expr = (range ? value.substring(range.start, range.end) : "");
+
+        var completion = null, selection;
+        if (type === "int")
+        {
+            var newValue = this.incrementExpr(expr, amt);
+            if (newValue !== null)
+            {
+                completion = newValue;
+                selection = [0, completion.length];
+            }
+        }
+        else if (type === "rgb" && expr.charAt(0) === "#")
+        {
+            var offsetIntoExpr = offset - range.start;
+            var offsetEndIntoExpr = offsetEnd - range.start;
+
+            // Increment a hex color.
+            var res = this.incrementHexColor(expr, amt, offsetIntoExpr, offsetEndIntoExpr);
+            if (res)
+            {
+                completion = res.value;
+                selection = res.selection;
+            }
+        }
+        else
+        {
+            return Firebug.InlineEditor.prototype
+                .doIncrementValue(value, amt, offset, offsetEnd);
+        }
+
+        if (completion === null)
+            return;
+
+        var preExpr = value.substr(0, range.start);
+        var postExpr = value.substr(range.end);
+
+        return {
+            value: preExpr + completion + postExpr,
+            start: range.start + selection[0],
+            end: range.start + selection[1]
+        };
+    },
+
+    incrementHexColor: function(expr, amt, offset, offsetEnd)
+    {
+        // The cursor position used for determining which part to increment is
+        // taken as the selection end, because it makes the color value feel
+        // big-endian-y.
+        var pos = (offsetEnd > expr.length) ? expr.length : offsetEnd;
+
+        // Ignore the leading #.
+        expr = expr.substr(1);
+        --pos;
+
+        // Normalize #ABC -> #AABBCC.
+        if (expr.length === 3)
+        {
+            expr = expr.charAt(0) + expr.charAt(0) +
+                   expr.charAt(1) + expr.charAt(1) +
+                   expr.charAt(2) + expr.charAt(2);
+            pos *= 2;
+        }
+
+        if (expr.length !== 6)
+            return;
+
+        // If there is a single cursor between # and the rest, behave as if
+        // the first part was to be incremented.
+        if (pos === 0 && offset === offsetEnd)
+            pos = 2;
+
+        // Do nothing if there is not anything relevant selected.
+        if (pos <= 0)
+            return;
+
+        // Select the leftmost of the parts the position can belong to.
+        var start = pos - (pos+1)%2 - 1;
+
+        var first = "#" + expr.substr(0, start);
+        var mid = expr.substr(start, 2);
+        var last = expr.substr(start+2);
+
+        var value = parseInt(mid, 16);
+        if (isNaN(value))
+            return;
+
+        // Don't support non-integral increments.
+        if (-1 < amt && amt < 1)
+            amt = (amt < 0 ? -1 : 1);
+        amt = Math.round(amt);
+
+        mid = Math.min(Math.max(value - amt, 0), 255).toString(16);
+        while (mid.length < 2)
+            mid = "0" + mid;
+
+        // Make the incremented part upper-case if the original value can be
+        // seen as such (this should happen even for, say, #444444, because
+        // upper-case hex-colors are the default). Otherwise, the lower-case
+        // result from .toString is used.
+        if (expr.toUpperCase() === expr)
+            mid = mid.toUpperCase();
+
+        return {value: first + mid + last, selection: [start+1, start+3]};
     }
 });
 
@@ -1968,7 +2072,7 @@ function parseCSSValue(value, offset)
     else if (m[5])
         type = "int";
 
-    var cssValue = {value: m[0], start: start+m.index, end: start+m.index+(m[0].length-1), type: type};
+    var cssValue = {value: m[0], start: start+m.index, end: start+m.index+m[0].length, type: type};
 
     if (!type && m[8] && m[8].indexOf("gradient") != -1)
     {
