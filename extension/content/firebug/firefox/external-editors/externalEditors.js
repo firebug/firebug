@@ -183,7 +183,7 @@ Firebug.ExternalEditors = Obj.extend(Firebug.Module,
         };
 
         Firefox.openWindow("Firebug:ExternalEditors",
-            "chrome://firebug/content/editor/external/editors.xul",
+            "chrome://firebug/content/firefox/external-editors/editors.xul",
             "", args);
     },
 

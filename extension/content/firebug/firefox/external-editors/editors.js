@@ -104,7 +104,10 @@ var gEditorManager =
             item: item,
             FBL: this._FBL
         };
-        openDialog("chrome://firebug/content/editor/external/changeeditor.xul",  "_blank", "modal,centerscreen,resizable", args, result);
+
+        openDialog("chrome://firebug/content/firefox/external-editors/changeeditor.xul",
+            "_blank", "modal,centerscreen,resizable", args, result);
+
         if (result.saveChanges)
         {
             item.id = item.label.replace(/\W/g, "_");
@@ -167,7 +170,10 @@ var gEditorManager =
             FBL: this._FBL
         };
         var result = {};
-        openDialog("chrome://firebug/content/editor/external/changeeditor.xul",  "_blank", "modal,centerscreen", args, result);
+
+        openDialog("chrome://firebug/content/firefox/external-editors/changeeditor.xul",
+            "_blank", "modal,centerscreen", args, result);
+
         if (result.saveChanges)
         {
             this._saveItem(item);

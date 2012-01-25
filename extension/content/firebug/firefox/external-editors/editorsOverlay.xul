@@ -3,7 +3,8 @@
 
 <overlay xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul">
 
-    <script type="application/x-javascript" src="chrome://firebug/content/editor/external/editorToContextMenu.js"/>
+    <script type="application/x-javascript"
+        src="chrome://firebug/content/firefox/external-editors/editorToContextMenu.js"/>
 
     <!-- Basic editing related commands -->
     <commandset id="mainCommandSet">

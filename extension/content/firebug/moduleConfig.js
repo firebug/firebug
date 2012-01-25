@@ -40,7 +40,7 @@ Firebug.getModuleLoaderConfig = function(baseConfig)
         "firebug/js/sourceFile",
         "firebug/chrome/shortcuts",
         "firebug/firefox/start-button/startButtonOverlay",
-        "firebug/editor/external/externalEditors",
+        "firebug/firefox/external-editors/externalEditors",
         "firebug/firefox/firebugMenu",
         "firebug/chrome/panelActivation",
         "firebug/console/memoryProfiler",
