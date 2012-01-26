@@ -1541,8 +1541,45 @@ var fbs =
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
+    /**
+     * Do not activate JSD, which is broken in Firefox 9 on Mac and Linux 32 bit
+     * This method is checking the current platform & browser configuration and 
+     * return false for Mac/Linux 32 bit
+     *
+     * See: https://bugzilla.mozilla.org/show_bug.cgi?id=712289
+     *
+     * Can be removed when the min Firefox version is 10
+     * 
+     * Search for 'bug712289' within the source code to remove all find all related
+     * parts of this workaround.
+     */
+    isJSDAvailable: function()
+    {
+        if (typeof(this._isJSDAvailable) == "undefined")
+        {
+            var systemInfo = Cc["@mozilla.org/xre/app-info;1"].getService(Ci.nsIXULRuntime);
+
+            // Check the current OS, must not be Max or Linux 32 bit
+            var os = (systemInfo.XPCOMABI == "x86-gcc3") ? false : true;
+
+            // Check the current Firefox version, must not be 9
+            systemInfo = systemInfo.QueryInterface(Ci.nsIXULAppInfo);
+            var ff = systemInfo.version.indexOf("9.") != 0;
+
+            this._isJSDAvailable = (os && ff);
+        }
+
+        return this._isJSDAvailable;
+    },
+
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
     enableDebugger: function()
     {
+        // bug712289
+        if (!this.isJSDAvailable())
+            return;
+
         if (waitingForTimer)
         {
             timer.cancel();
