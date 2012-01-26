@@ -78,27 +78,27 @@
 
     <keyset id="mainKeyset">
         <key id="key_toggleFirebug" keycode="VK_F12" command="cmd_toggleFirebug"/>
-        <key id="key_reenterCommand" key="e" modifiers="control,shift" command="cmd_reenterCommand"/>
-        <key id="key_toggleInspecting" key="c" modifiers="accel,shift" command="cmd_toggleInspecting" />
-        <key id="key_toggleQuickInfoBox" key="i" modifiers="accel,shift" command="cmd_toggleQuickInfoBox"/>
-        <key id="key_toggleProfiling" key="p" modifiers="accel,shift" command="cmd_toggleProfiling"/>
-        <key id="key_focusCommandLine" key="l" modifiers="accel,shift" command="cmd_focusCommandLine"/>
+        <key id="key_reenterCommand" key="e" modifiers="accel shift" command="cmd_reenterCommand"/>
+        <key id="key_toggleInspecting" key="c" modifiers="accel shift" command="cmd_toggleInspecting" />
+        <key id="key_toggleQuickInfoBox" key="i" modifiers="accel shift" command="cmd_toggleQuickInfoBox"/>
+        <key id="key_toggleProfiling" key="p" modifiers="accel shift" command="cmd_toggleProfiling"/>
+        <key id="key_focusCommandLine" key="l" modifiers="accel shift" command="cmd_focusCommandLine"/>
         <key id="key_focusFirebugSearch" key="f" modifiers="accel" command="cmd_focusFirebugSearch"/>
-        <key id="key_focusWatchEditor" key="n" modifiers="accel,shift" command="cmd_focusWatchEditor"/>
-        <key id="key_focusLocation" key=" " modifiers="accel,shift" command="cmd_focusLocation"/>
+        <key id="key_focusWatchEditor" key="n" modifiers="accel shift" command="cmd_focusWatchEditor"/>
+        <key id="key_focusLocation" key=" " modifiers="accel shift" command="cmd_focusLocation"/>
         <key id="key_focusLocation" key=" " modifiers="control" command="cmd_focusLocation"/>
-        <key id="key_nextObject" key="." modifiers="control" command="cmd_nextObject"/>
-        <key id="key_previousObject" key="," modifiers="control" command="cmd_previousObject"/>
-        <key id="key_previousFirebugTab" key="`" modifiers="control" command="cmd_previousFirebugTab"/>
+        <key id="key_nextObject" key="." modifiers="accel" command="cmd_nextObject"/>
+        <key id="key_previousObject" key="," modifiers="accel" command="cmd_previousObject"/>
+        <key id="key_previousFirebugTab" key="`" modifiers="accel" command="cmd_previousFirebugTab"/>
         <key id="key_leftFirebugTab" keycode="VK_PAGE_UP" modifiers="accel shift" command="cmd_leftFirebugTab"/>
         <key id="key_rightFirebugTab" keycode="VK_PAGE_DOWN" modifiers="accel shift" command="cmd_rightFirebugTab"/>
-        <key id="key_customizeFBKeys" key="b" modifiers=",accel shift alt" command="cmd_customizeFBKeys"/>
+        <key id="key_customizeFBKeys" key="b" modifiers="accel shift alt" command="cmd_customizeFBKeys"/>
         <key id="key_detachFirebug" keycode="VK_F12" modifiers="accel" command="cmd_detachFirebug"/>
         <key id="key_closeFirebug" keycode="VK_F12" modifiers="shift" command="cmd_closeFirebug"/>
-        <key id="key_clearConsole" key="r" modifiers="accel,shift" command="cmd_clearConsole"/>
-        <key id="key_navBack" keycode="VK_LEFT" modifiers="accel,shift" command="cmd_navBack"/>
-        <key id="key_navForward" keycode="VK_RIGHT" modifiers="accel,shift" command="cmd_navForward"/>
-        <key id="key_toggleFreezeWindow" key="f" modifiers="control,shift" command="cmd_toggleFreezeWindow"/>
+        <key id="key_clearConsole" key="r" modifiers="accel shift" command="cmd_clearConsole"/>
+        <key id="key_navBack" keycode="VK_LEFT" modifiers="accel shift" command="cmd_navBack"/>
+        <key id="key_navForward" keycode="VK_RIGHT" modifiers="accel shift" command="cmd_navForward"/>
+        <key id="key_toggleFreezeWindow" key="f" modifiers="control shift" command="cmd_toggleFreezeWindow"/>
         <key id="key_increaseTextSize" key="+" modifiers="accel" command="cmd_increaseTextSize"/>
         <key id="key_decreaseTextSize" key="-" modifiers="accel" command="cmd_decreaseTextSize"/>
         <key id="key_normalTextSize" key="0" modifiers="accel" command="cmd_normalTextSize"/>
