@@ -52,14 +52,13 @@ var FirebugLoader =
         if (i >= 0)
             this.extensions.splice(i, 1);
 
-        this.forEachWindow(function(win)
+        if (e.unloadFromWindow)
         {
-            if (!win.Firebug)
-                return;
-
-            if (e.unloadFromWindow)
-                e.unloadFromWindow();
-        })
+            this.forEachWindow(function(win)
+            {
+                e.unloadFromWindow(win);
+            })
+        }
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

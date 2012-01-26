@@ -60,6 +60,7 @@ Firebug.getModuleLoaderConfig = function(baseConfig)
     return config;
 }
 
+// TODO: merge with extension handling code in loader?
 // ********************************************************************************************* //
 // Firebug Extension Registration
 
