@@ -1589,14 +1589,21 @@ CSSEditor.prototype = domplate(Firebug.InlineEditor.prototype,
 
     incrementHexColor: function(expr, amt, offset, offsetEnd)
     {
-        // The cursor position used for determining which part to increment is
-        // taken as the selection end, because it makes the color value feel
-        // big-endian-y.
-        var pos = (offsetEnd > expr.length) ? expr.length : offsetEnd;
+        // Return early if no part of the expression is selected.
+        if (offsetEnd > expr.length && offset >= expr.length)
+            return;
+        if (offset < 1 && offsetEnd <= 1)
+            return;
 
         // Ignore the leading #.
         expr = expr.substr(1);
-        --pos;
+        --offset;
+        --offsetEnd;
+
+        // Clamp the selection to within the actual value.
+        offset = Math.max(offset, 0);
+        offsetEnd = Math.min(offsetEnd, expr.length);
+        offsetEnd = Math.max(offsetEnd, offset);
 
         // Normalize #ABC -> #AABBCC.
         if (expr.length === 3)
@@ -1604,49 +1611,57 @@ CSSEditor.prototype = domplate(Firebug.InlineEditor.prototype,
             expr = expr.charAt(0) + expr.charAt(0) +
                    expr.charAt(1) + expr.charAt(1) +
                    expr.charAt(2) + expr.charAt(2);
-            pos *= 2;
+            offset *= 2;
+            offsetEnd *= 2;
         }
-
         if (expr.length !== 6)
             return;
 
-        // If there is a single cursor between # and the rest, behave as if
-        // the first part was to be incremented.
-        if (pos === 0 && offset === offsetEnd)
-            pos = 2;
+        if (offset === offsetEnd)
+        {
+            // There is only a single cursor position. Increment an adjacent
+            // color, preferably one to the left.
+            if (offset === 0)
+                offsetEnd = 1;
+            else
+                offset = offsetEnd - 1;
+        }
 
-        // Do nothing if there is not anything relevant selected.
-        if (pos <= 0)
-            return;
+        // Make the selection cover entire parts.
+        offset -= offset%2;
+        offsetEnd += offsetEnd%2;
 
-        // Select the leftmost of the parts the position can belong to.
-        var start = pos - (pos+1)%2 - 1;
-
-        var first = "#" + expr.substr(0, start);
-        var mid = expr.substr(start, 2);
-        var last = expr.substr(start+2);
-
-        var value = parseInt(mid, 16);
-        if (isNaN(value))
-            return;
-
-        // Don't support non-integral increments.
+        // Remap the increments from [0.1, 1, 10] to [1, 1, 16].
         if (-1 < amt && amt < 1)
             amt = (amt < 0 ? -1 : 1);
-        amt = Math.round(amt);
+        if (Math.abs(amt) === 10)
+            amt = (amt < 0 ? -16 : 16);
 
-        mid = Math.min(Math.max(value - amt, 0), 255).toString(16);
-        while (mid.length < 2)
-            mid = "0" + mid;
+        var isUpper = (expr.toUpperCase() === expr);
 
-        // Make the incremented part upper-case if the original value can be
-        // seen as such (this should happen even for, say, #444444, because
-        // upper-case hex-colors are the default). Otherwise, the lower-case
-        // result from .toString is used.
-        if (expr.toUpperCase() === expr)
-            mid = mid.toUpperCase();
+        for (var pos = offset; pos < offsetEnd; pos += 2)
+        {
+            // Increment the part in [pos, pos+2).
+            var mid = expr.substr(pos, 2);
+            var value = parseInt(mid, 16);
+            if (isNaN(value))
+                return;
 
-        return {value: first + mid + last, selection: [start+1, start+3]};
+            mid = Math.min(Math.max(value - amt, 0), 255).toString(16);
+            while (mid.length < 2)
+                mid = "0" + mid;
+
+            // Make the incremented part upper-case if the original value can be
+            // seen as such (this should happen even for, say, #444444, because
+            // upper-case hex-colors are the default). Otherwise, the lower-case
+            // result from .toString is used.
+            if (isUpper)
+                mid = mid.toUpperCase();
+
+            expr = expr.substr(0, pos) + mid + expr.substr(pos+2);
+        }
+
+        return {value: "#" + expr, selection: [offset+1, offsetEnd+1]};
     }
 });
 
