@@ -3,7 +3,7 @@
 define([
     "firebug/lib/trace",
     "firebug/net/httpLib",
-    "firebug/firefox/firefox",
+    "firebug/chrome/firefox",
 ],
 function(FBTrace, Http, Firefox) {
 

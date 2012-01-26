@@ -13,7 +13,7 @@ define([
     "firebug/lib/dom",
     "firebug/lib/string",
     "firebug/lib/array",
-    "firebug/firefox/menu",
+    "firebug/chrome/menu",
     "firebug/js/fbs",
     "firebug/editor/editor",
 ],

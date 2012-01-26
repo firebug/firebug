@@ -13,7 +13,7 @@ define([
     "firebug/lib/json",
     "firebug/dom/toggleBranch",
     "firebug/lib/array",
-    "firebug/firefox/system",
+    "firebug/lib/system",
     "firebug/dom/domPanel",
     "firebug/chrome/reps"
 ],

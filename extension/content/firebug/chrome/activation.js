@@ -5,8 +5,8 @@ define([
     "firebug/firebug",
     "firebug/lib/locale",
     "firebug/lib/url",
-    "firebug/firefox/tabWatcher",
-    "firebug/firefox/annotations",
+    "firebug/chrome/tabWatcher",
+    "firebug/chrome/annotations",
 ],
 function(Obj, Firebug, Locale, Url, TabWatcher, Annotations) {
 

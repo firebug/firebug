@@ -9,7 +9,7 @@ define([
     "firebug/lib/css",
     "firebug/lib/dom",
     "firebug/lib/xml",
-    "firebug/firefox/menu",
+    "firebug/chrome/menu",
     "firebug/editor/editor",
 ],
 function(Obj, Firebug, Domplate, Locale, Events, Css, Dom, Xml, Menu) {

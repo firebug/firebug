@@ -8,7 +8,7 @@ define([
     "firebug/lib/events",
     "firebug/lib/url",
     "firebug/js/stackFrame",
-    "firebug/firefox/window",
+    "firebug/chrome/window",
     "firebug/console/console",
     "firebug/lib/array",
     "firebug/console/consoleExposed",

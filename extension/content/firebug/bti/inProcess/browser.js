@@ -6,11 +6,11 @@
 define([
     "firebug/lib/lib",
     "firebug/lib/events",
-    "firebug/firefox/firefox",
-    "firebug/firefox/window",
+    "firebug/chrome/firefox",
+    "firebug/chrome/window",
     "arch/webApp",
     "firebug/lib/options",
-    "firebug/firefox/tabWatcher",
+    "firebug/chrome/tabWatcher",
 ],
 function factoryBrowser(FBL, Events, Firefox, Win, WebApp, Options, TabWatcher) {
 

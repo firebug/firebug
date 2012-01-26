@@ -3,10 +3,10 @@
 define([
     "firebug/lib/object",
     "firebug/firebug",
-    "firebug/firefox/firefox",
+    "firebug/chrome/firefox",
     "firebug/lib/domplate",
     "firebug/chrome/reps",
-    "firebug/firefox/xpcom",
+    "firebug/lib/xpcom",
     "firebug/lib/locale",
     "firebug/lib/events",
     "firebug/lib/url",
@@ -16,7 +16,7 @@ define([
     "firebug/lib/xpath",
     "firebug/lib/array",
     "firebug/css/cssPanel",
-    "firebug/firefox/menu"
+    "firebug/chrome/menu"
 ],
 function(Obj, Firebug, Firefox, Domplate, FirebugReps, Xpcom, Locale, Events, Url,
     SourceLink, Dom, Css, Xpath, Arr, CSSStyleSheetPanel, Menu) {

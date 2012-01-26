@@ -1,11 +1,11 @@
 /* See license.txt for terms of usage */
 
 define([
-    "firebug/firefox/xpcom",
+    "firebug/lib/xpcom",
     "firebug/lib/object",
     "firebug/lib/trace",
     "firebug/net/httpLib",
-    "firebug/firefox/window",
+    "firebug/chrome/window",
     "firebug/net/netProgress",
     "firebug/net/netUtils",
 ],

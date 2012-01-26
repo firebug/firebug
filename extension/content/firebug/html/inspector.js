@@ -3,7 +3,7 @@
 define([
     "firebug/lib/object",
     "firebug/firebug",
-    "firebug/firefox/firefox",
+    "firebug/chrome/firefox",
     "firebug/chrome/reps",
     "firebug/lib/locale",
     "firebug/lib/events",
@@ -11,8 +11,8 @@ define([
     "firebug/lib/css",
     "firebug/lib/dom",
     "firebug/lib/xml",
-    "firebug/firefox/window",
-    "firebug/firefox/system",
+    "firebug/chrome/window",
+    "firebug/lib/system",
 ],
 function(Obj, Firebug, Firefox, FirebugReps, Locale, Events, Wrapper, Css, Dom, Xml,
     Win, System) {

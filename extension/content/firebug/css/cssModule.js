@@ -3,11 +3,11 @@
 define([
     "firebug/lib/object",
     "firebug/firebug",
-    "firebug/firefox/xpcom",
+    "firebug/lib/xpcom",
     "firebug/lib/events",
     "firebug/lib/url",
     "firebug/lib/css",
-    "firebug/firefox/window",
+    "firebug/chrome/window",
     "firebug/lib/xml",
 ],
 function(Obj, Firebug, Xpcom, Events, Url, Css, Win, Xml) {

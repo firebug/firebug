@@ -5,17 +5,17 @@
  */
 define([
     "firebug/lib/object",
-    "firebug/firefox/firefox",
+    "firebug/chrome/firefox",
     "firebug/lib/dom",
     "firebug/lib/css",
-    "firebug/firefox/system",
-    "firebug/firefox/menu",
+    "firebug/lib/system",
+    "firebug/chrome/menu",
     "firebug/lib/url",
     "firebug/lib/locale",
     "firebug/lib/string",
     "firebug/lib/events",
     "firebug/js/fbs",
-    "firebug/firefox/window",
+    "firebug/chrome/window",
 ],
 function chromeFactory(Obj, Firefox, Dom, Css, System, Menu, Url, Locale, String,
     Events, FBS, Win) {

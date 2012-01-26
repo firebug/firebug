@@ -4,10 +4,10 @@ define([
     "firebug/lib/object",
     "firebug/firebug",
     "firebug/chrome/reps",
-    "firebug/firefox/xpcom",
+    "firebug/lib/xpcom",
     "firebug/console/console",
     "firebug/lib/css",
-    "firebug/firefox/window",
+    "firebug/chrome/window",
     "firebug/lib/array",
     "firebug/lib/string"
 ],

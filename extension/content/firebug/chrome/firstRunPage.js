@@ -1,12 +1,12 @@
 /* See license.txt for terms of usage */
 
 define([
-    "firebug/firefox/firefox",
+    "firebug/chrome/firefox",
     "firebug/lib/dom",
     "firebug/lib/css",
-    "firebug/firefox/system",
+    "firebug/lib/system",
     "firebug/lib/events",
-    "firebug/firefox/window",
+    "firebug/chrome/window",
     "firebug/firebug",
     "firebug/chrome/chrome",
 ],

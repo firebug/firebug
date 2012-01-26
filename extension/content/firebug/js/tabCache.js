@@ -3,7 +3,7 @@
 define([
     "firebug/lib/object",
     "firebug/firebug",
-    "firebug/firefox/xpcom",
+    "firebug/lib/xpcom",
     "firebug/net/requestObserver",
     "firebug/net/responseObserver",
     "firebug/lib/locale",
@@ -11,7 +11,7 @@ define([
     "firebug/lib/url",
     "firebug/net/httpLib",
     "firebug/lib/string",
-    "firebug/firefox/window",
+    "firebug/chrome/window",
     "firebug/net/jsonViewer",
     "firebug/trace/traceModule",
     "firebug/trace/traceListener",

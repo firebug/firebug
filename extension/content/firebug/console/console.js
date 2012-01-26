@@ -3,9 +3,9 @@
 define([
     "firebug/lib/object",
     "firebug/firebug",
-    "firebug/firefox/firefox",
+    "firebug/chrome/firefox",
     "firebug/lib/events",
-    "firebug/firefox/window",
+    "firebug/chrome/window",
     "firebug/lib/search",
     "firebug/lib/xml",
     "firebug/lib/options",

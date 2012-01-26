@@ -3,7 +3,7 @@
 define([
     "firebug/lib/trace",
     "firebug/lib/object",
-    "firebug/firefox/privacy",
+    "firebug/chrome/privacy",
 ],
 function(FBTrace, Obj, Privacy) {
 

@@ -4,7 +4,7 @@ define([
     "firebug/lib/lib",
     "firebug/lib/object",
     "firebug/firebug",
-    "firebug/firefox/firefox",
+    "firebug/chrome/firefox",
 ],
 function(FBL, Obj, Firebug, Firefox) {
 

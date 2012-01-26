@@ -5,7 +5,7 @@ define([
     "firebug/lib/options",
     "firebug/firebug",
     "firebug/lib/dom",
-    "firebug/firefox/firefox",
+    "firebug/chrome/firefox",
 ],
 function(Obj, Options, Firebug, Dom, Firefox) {
 

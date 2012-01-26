@@ -5,7 +5,7 @@ define([
     "arch/compilationunit",
     "firebug/lib/events",
     "firebug/lib/url",
-    "firebug/firefox/window",
+    "firebug/chrome/window",
     "firebug/lib/css",
     "firebug/chrome/plugin",
 ],

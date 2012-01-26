@@ -5,7 +5,7 @@ define([
     "firebug/lib/locale",
     "firebug/firebug",
     "firebug/lib/dom",
-    "firebug/firefox/menu",
+    "firebug/chrome/menu",
 ],
 function(Obj, Locale, Firebug, Dom, Menu) {
 

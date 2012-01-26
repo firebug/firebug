@@ -7,7 +7,7 @@
 define([
     "firebug/lib/lib",
     "firebug/lib/object",
-    "firebug/firefox/firefox",
+    "firebug/chrome/firefox",
     "firebug/chrome/chrome",
     "firebug/lib/domplate",
     "firebug/lib/options",
@@ -16,7 +16,7 @@ define([
     "firebug/lib/wrapper",
     "firebug/lib/url",
     "firebug/lib/css",
-    "firebug/firefox/window",
+    "firebug/chrome/window",
     "firebug/lib/string",
     "firebug/lib/array",
     "firebug/lib/dom",

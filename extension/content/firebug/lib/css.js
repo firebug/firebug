@@ -4,7 +4,7 @@ define([
     "firebug/lib/trace",
     "firebug/lib/url",
     "firebug/lib/options",
-    "firebug/firefox/window",
+    "firebug/chrome/window",
     "firebug/lib/xml",
     "firebug/net/httpLib",
     "firebug/lib/xpath",

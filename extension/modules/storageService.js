@@ -324,7 +324,7 @@ var ObjectPersister =
     {
         try
         {
-            // Unfortunatelly the "firebug/firefox/privacy" module can't be used
+            // Unfortunatelly the "firebug/chrome/privacy" module can't be used
             // since this scope is JavaScript code module.
             // xxxHonza: storageService should be converted into AMD (but it's used
             // in firebug-service, which is also JS code module).

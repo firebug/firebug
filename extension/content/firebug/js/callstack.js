@@ -11,7 +11,7 @@ define([
     "firebug/lib/css",
     "firebug/lib/array",
     "firebug/lib/dom",
-    "firebug/firefox/menu",
+    "firebug/chrome/menu",
 ],
 function(Obj, Firebug, FirebugReps, JavaScriptTool, Events, Wrapper, StackFrame,
     Css, Arr, Dom, Menu) {

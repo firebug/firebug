@@ -9,7 +9,7 @@ define([
     "firebug/lib/css",
     "firebug/lib/dom",
     "firebug/lib/search",
-    "firebug/firefox/menu",
+    "firebug/chrome/menu",
     "firebug/lib/options",
     "firebug/console/profiler",
     "firebug/chrome/searchBox"
