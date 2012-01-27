@@ -1559,14 +1559,30 @@ var fbs =
         {
             var systemInfo = Cc["@mozilla.org/xre/app-info;1"].getService(Ci.nsIXULRuntime);
 
-            // Check the current OS, must not be Max or Linux 32 bit
-            var os = (systemInfo.XPCOMABI == "x86-gcc3") ? false : true;
+            // Check the current OS, must not be Mac or Linux 32 bit
+            var os = systemInfo.XPCOMABI == "x86-gcc3";
 
             // Check the current Firefox version, must not be 9
             systemInfo = systemInfo.QueryInterface(Ci.nsIXULAppInfo);
-            var ff = systemInfo.version.indexOf("9.") != 0;
+            var ff = systemInfo.version.indexOf("9.") == 0;
 
-            this._isJSDAvailable = (os && ff);
+            // If one or another is false, JSD is available.
+            this._isJSDAvailable = !(os && ff);
+
+            if (!this._isJSDAvailable)
+            {
+                try
+                {
+                    consoleService = ConsoleService.getService(nsIConsoleService);
+                    consoleService.logStringMessage(
+                        "WARNING: Firebug Script panel is disabled in Firefox " +
+                        systemInfo.version + " running on 32 bit Mac or Linux (" +
+                        systemInfo.XPCOMABI + ")");
+                }
+                catch (err)
+                {
+                }
+            }
         }
 
         return this._isJSDAvailable;
