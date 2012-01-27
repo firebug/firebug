@@ -116,8 +116,12 @@ var WindowListener =
         win.addEventListener("load", function onLoad()
         {
             win.removeEventListener("load", onLoad, false);
-            if (win.location.href == "chrome://browser/content/browser.xul")
+            var href = win.location.href;
+            if (href == "chrome://browser/content/browser.xul"
+                || href == "chrome://navigator/content/navigator.xul")
+            {
                 FirebugLoader.loadIntoWindow(win)
+            }
         }, false);
     },
 

@@ -133,15 +133,19 @@ function $menupopupOverlay(parent, children)
 
     for each(var child in children)
     {
-        var insertBefore = child.getAttribute("insertbefore");
-        var insertAfter = child.getAttribute("insertafter");
+        var id = child.getAttribute("insertbefore"), beforeEl;
+        if (id)
+            beforeEl = parent.querySelector("#" + id);
+        if (!beforeEl)
+        {
+            id = child.getAttribute("insertafter");
 
-        if (insertBefore)
-            parent.insertBefore(child, parent.querySelector("#" + insertBefore));
-        else if (insertAfter)
-            parent.insertAfter(child, parent.querySelector("#" + insertAfter));
-        else
-            parent.appendChild(child);
+            if (id)
+                beforeEl = parent.querySelector("#" + id);
+            if (beforeEl)
+                beforeEl = beforeEl.nextSibling;
+        }
+        parent.insertBefore(child, beforeEl);
 
         // Mark the inserted node to remove it when Firebug is uninstalled.
         child.setAttribute("firebugRootNode", true);
@@ -154,11 +158,12 @@ function $toolbarButton(id, attrs, children, defaultPos)
     attrs.firebugRootNode = true;
     attrs.id = id;
 
-    var button = $el("toolbarbutton", attrs, children, gNavToolbox.palette);
+    // in seamonkey gNavToolbox is null onload
+    var button = $el("toolbarbutton", attrs, children, (gNavToolbox || $("navigator-toolbox")).palette);
 
     var selector = "[currentset^='" + id + ",'],[currentset*='," + id + ",'],[currentset$='," + id + "']";
     var toolbar = document.querySelector(selector);
-    if (!toolbar) 
+    if (!toolbar)
         return; // todo defaultPos
 
     var currentset = toolbar.getAttribute("currentset").split(",");
@@ -458,7 +463,7 @@ Firebug.GlobalUI.$stylesheet("chrome://firebug/content/firefox/browser.css");
  * This element (a broadcaster) is storing Firebug state information. Other elements
  * (like for example the Firebug start button) can watch it and display the info to
  * the user.
- */ 
+ */
 $el("broadcaster", {id: "firebugStatus", suspended: true}, $("mainBroadcasterSet"));
 
 // ********************************************************************************************* //
@@ -870,7 +875,7 @@ $toolbarButton("inspector-button", {
     image: "chrome://firebug/skin/inspect.png"
 });
 
-// TODO: why contextmenu doesn't work without cloning 
+// TODO: why contextmenu doesn't work without cloning
 $toolbarButton("firebug-button", {
     label: "firebug.Firebug",
     tooltiptext: "firebug.ShowFirebug",
