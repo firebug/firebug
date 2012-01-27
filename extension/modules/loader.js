@@ -319,6 +319,7 @@ FirebugLoader.defaultPrefs = {
     "key.shortcut.nextObject": "accel .",
     "key.shortcut.previousObject": "accel :",
     "key.shortcut.toggleFirebug": "VK_F12",
+    "key.shortcut.closeFirebug": "shift VK_F12",
     "key.shortcut.detachFirebug": "accel VK_F12",
     "key.shortcut.leftFirebugTab": "accel shift VK_PAGE_UP",
     "key.shortcut.rightFirebugTab": "accel shift VK_PAGE_DOWN",
