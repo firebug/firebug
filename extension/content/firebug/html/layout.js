@@ -326,7 +326,7 @@ LayoutPanel.prototype = Obj.extend(Firebug.Panel,
     getOptionsMenuItems: function()
     {
         return [
-            Menu.optionMenu("layout.option.Show_Rulers", "showRulers",
+            Menu.optionMenu("ShowRulers", "showRulers",
                 "layout.option.tip.Show_Rulers")
         ];
     },

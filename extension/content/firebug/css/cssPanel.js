@@ -884,11 +884,11 @@ Firebug.CSSStyleSheetPanel.prototype = Obj.extend(Firebug.Panel,
     getOptionsMenuItems: function()
     {
         return [
-            Menu.optionMenu("css.option.Expand_Shorthand_Properties", "expandShorthandProps",
+            Menu.optionMenu("Expand_Shorthand_Properties", "expandShorthandProps",
                 "css.option.tip.Expand_Shorthand_Properties"),
             "-",
             {
-                label: "panel.Refresh",
+                label: "Refresh",
                 command: Obj.bind(this.refresh, this),
                 tooltiptext: "panel.tip.Refresh"
             }

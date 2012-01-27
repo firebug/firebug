@@ -244,7 +244,7 @@ Firebug.CallstackPanel.prototype = Obj.extend(Firebug.Panel,
     {
         // an option handled by chrome.js
         var items = [
-            Menu.optionMenu("callstack.option.Omit_Object_Path_Stack", "omitObjectPathStack",
+            Menu.optionMenu("OmitObjectPathStack", "omitObjectPathStack",
                 "callstack.option.tip.Omit_Object_Path_Stack"),
         ];
         return items;

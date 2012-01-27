@@ -472,11 +472,11 @@ CSSElementPanel.prototype = Obj.extend(CSSStyleSheetPanel.prototype,
     getOptionsMenuItems: function()
     {
         var ret = [
-            Menu.optionMenu("style.option.Only_Show_Applied_Styles", "onlyShowAppliedStyles",
+            Menu.optionMenu("Only_Show_Applied_Styles", "onlyShowAppliedStyles",
                 "style.option.tip.Only_Show_Applied_Styles"),
-            Menu.optionMenu("style.option.Show_User_Agent_CSS", "showUserAgentCSS",
+            Menu.optionMenu("Show_User_Agent_CSS", "showUserAgentCSS",
                 "style.option.tip.Show_User_Agent_CSS"),
-            Menu.optionMenu("css.option.Expand_Shorthand_Properties", "expandShorthandProps",
+            Menu.optionMenu("Expand_Shorthand_Properties", "expandShorthandProps",
                 "css.option.tip.Expand_Shorthand_Properties")
         ];
 
@@ -489,7 +489,7 @@ CSSElementPanel.prototype = Obj.extend(CSSStyleSheetPanel.prototype,
 
             ret.push(
                 {
-                    label: ":active",
+                    label: "style.option.label.active",
                     type: "checkbox",
                     checked: state & STATE_ACTIVE,
                     tooltiptext: "style.option.tip.active",
@@ -502,7 +502,7 @@ CSSElementPanel.prototype = Obj.extend(CSSStyleSheetPanel.prototype,
 
             ret.push(
                 {
-                    label: ":hover",
+                    label: "style.option.label.hover",
                     type: "checkbox",
                     checked: state & STATE_HOVER,
                     tooltiptext: "style.option.tip.hover",

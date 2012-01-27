@@ -175,18 +175,18 @@ CSSComputedElementPanel.prototype = Obj.extend(CSSElementPanel.prototype,
     {
         return [
             {
-                label: "computed.option.Sort_Alphabetically",
+                label: "Sort_alphabetically",
                 type: "checkbox",
                 checked: Firebug.computedStylesDisplay == "alphabetical",
                 tooltiptext: "computed.option.tip.Sort_Alphabetically",
                 command: Obj.bind(this.toggleDisplay, this)
             },
-            Menu.optionMenu("computed.option.Show_Mozilla_Specific_Styles",
+            Menu.optionMenu("Show_Mozilla_specific_styles",
                 "showMozillaSpecificStyles",
                 "computed.option.tip.Show_Mozilla_Specific_Styles"),
             "-",
             {
-                label: "panel.Refresh",
+                label: "Refresh",
                 command: Obj.bind(this.refresh, this),
                 tooltiptext: "panel.tip.Refresh"
             }

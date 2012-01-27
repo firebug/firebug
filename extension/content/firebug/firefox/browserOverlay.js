@@ -656,7 +656,8 @@ var firebugMenuPopup = $menupopup({id: "fbFirebugMenuPopup",
             $menuitem({
                 id: "menu_shadeBoxModel",
                 type: "checkbox",
-                label: "firebug.ShadeBoxModel",
+                label: "ShadeBoxModel",
+                tooltiptext: "inspect.option.tip.Shade_Box_Model",
                 oncommand: "Firebug.GlobalUI.onToggleOption(this)",
                 option: "shadeBoxModel",
                 "class": "fbInternational"
@@ -664,7 +665,8 @@ var firebugMenuPopup = $menupopup({id: "fbFirebugMenuPopup",
             $menuitem({
                 id: "showQuickInfoBox",
                 type: "checkbox",
-                label: "firebug.Show_Quick_Info_Box",
+                label: "ShowQuickInfoBox",
+                tooltiptext: "inspect.option.tip.Show_Quick_Info_Box",
                 oncommand: "Firebug.GlobalUI.onToggleOption(this)",
                 option: "showQuickInfoBox",
                 "class": "fbInternational"

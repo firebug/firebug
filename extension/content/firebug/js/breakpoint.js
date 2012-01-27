@@ -522,7 +522,7 @@ Firebug.Breakpoint.BreakpointsPanel.prototype = Obj.extend(Firebug.Panel,
         {
             items.push(
                 {
-                    label: "breakpoints.option.Enable_All_Breakpoints",
+                    label: "EnableAllBreakpoints",
                     command: Obj.bindFixed(this.enableAllBreakpoints, this, context, true),
                     tooltiptext: "breakpoints.option.tip.Enable_All_Breakpoints"
                 }
@@ -532,7 +532,7 @@ Firebug.Breakpoint.BreakpointsPanel.prototype = Obj.extend(Firebug.Panel,
         {
             items.push(
                 {
-                    label: "breakpoints.option.Disable_All_Breakpoints",
+                    label: "DisableAllBreakpoints",
                     command: Obj.bindFixed(this.enableAllBreakpoints, this, context, false),
                     tooltiptext: "breakpoints.option.tip.Disable_All_Breakpoints"
                 }
@@ -542,7 +542,7 @@ Firebug.Breakpoint.BreakpointsPanel.prototype = Obj.extend(Firebug.Panel,
         items.push(
             "-",
             {
-                label: "breakpoints.option.Clear All Breakpoints",
+                label: "ClearAllBreakpoints",
                 disabled: !bpCount,
                 command: Obj.bindFixed(this.clearAllBreakpoints, this, context),
                 tooltiptext: "breakpoints.option.tip.Clear_All_Breakpoints"
