@@ -1039,7 +1039,7 @@ var FirebugChrome =
         var splitter = Firefox.getElementById("fbContentSplitter");
         splitter.setAttribute("orient", vertical ? "vertical" : "horizontal");
         splitter.setAttribute("dir", after ? "" : "reverse");
-        container.insertBefore(splitter, after ? null : container.firstChild);
+        container.insertBefore(splitter, after ? null: container.firstChild);
 
         var frame = document.getElementById("fbMainFrame");
 
@@ -1338,8 +1338,16 @@ var FirebugChrome =
         {
             var fbContentBox = FirebugChrome.$("fbContentBox");
             var collapsed = fbContentBox.getAttribute("collapsed");
-            toggleFirebug.setAttribute("label", (collapsed == "true"?
-                Locale.$STR("firebug.ShowFirebug") : Locale.$STR("firebug.HideFirebug")));
+            if (collapsed == "true")
+            {
+                toggleFirebug.setAttribute("label", Locale.$STR("inBrowser"));
+                toggleFirebug.setAttribute("tooltiptext", Locale.$STR("inBrowser"));
+            }
+            else
+            {
+              toggleFirebug.setAttribute("label", Locale.$STR("firebug.menu.Minimize_Firebug"));
+              toggleFirebug.setAttribute("tooltiptext", Locale.$STR("firebug.menu.tip.Minimize_Firebug"));
+            }
 
             // If Firebug is detached, hide the menu ('Open Firebug' shortcut doesn't hide,
             // but just focuses the external window)

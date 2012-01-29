@@ -121,7 +121,7 @@
                             tooltip="fbDetachButtonTooltip" command="cmd_detachFirebug"/>
                         <toolbarbutton id="fbCloseButton"
                             class="toolbarbutton-iconic fbInternational"
-                            tooltiptext="firebug.CloseFirebug" command="cmd_closeFirebug"/>
+                            tooltiptext="firebug.tip.Deactivate_Firebug" command="cmd_closeFirebug"/>
                     </hbox>
                 </hbox>
 

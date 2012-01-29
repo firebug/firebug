@@ -369,8 +369,10 @@ Firebug.GlobalUI =
         var currPos = FirebugLoader.getPref("framePosition");
         for each (var pos in ["detached", "top", "bottom", "left", "right"])
         {
+            var label = pos.charAt(0).toUpperCase() + pos.slice(1);
             var item = $menuitem({
-                label: Locale.$STR("position." + pos),
+                label: Locale.$STR("firebug.menu." + label),
+                tooltiptext: Locale.$STR("firebug.menu.tip." + label),
                 type: "radio",
                 oncommand: oncommand.replace("%pos%", pos),
                 checked: (currPos == pos)
@@ -463,7 +465,7 @@ Firebug.GlobalUI.$stylesheet("chrome://firebug/content/firefox/browser.css");
  * This element (a broadcaster) is storing Firebug state information. Other elements
  * (like for example the Firebug start button) can watch it and display the info to
  * the user.
- */
+ */ 
 $el("broadcaster", {id: "firebugStatus", suspended: true}, $("mainBroadcasterSet"));
 
 // ********************************************************************************************* //
@@ -516,34 +518,48 @@ key_customizeFBKeys
 // Firebug Start Button Popup Menu
 
 $menupopupOverlay($("mainPopupSet"), [
-    $menupopup({id: "fbStatusContextMenu",
-                onpopupshowing: "Firebug.GlobalUI.onOptionsShowing(this)"}, [
-        $menu({label:"firebug.uiLocation", "class": "fbInternational"}, [
+    $menupopup(
+    {
+        id: "fbStatusContextMenu",
+        onpopupshowing: "Firebug.GlobalUI.onOptionsShowing(this)"
+    },
+    [
+        $menu(
+        {
+            label: "firebug.uiLocation",
+            tooltiptext: "firebug.menu.tip.UI_Location",
+            "class": "fbInternational"
+        },
+        [
             $menupopup({onpopupshowing: "Firebug.GlobalUI.onPositionPopupShowing(this)"})
         ]),
         $menuseparator(),
         $menuitem({
             id: "menu_ClearConsole",
             label: "firebug.ClearConsole",
+            tooltiptext: "firebug.ClearTooltip",
             command: "cmd_clearConsole",
             key: "key_clearConsole"
         }),
         $menuitem({
             id: "menu_showErrorCount",
             type: "checkbox",
-            label: "firebug.Show Error Count",
+            label: "firebug.Show_Error_Count",
+            tooltiptext: "firebug.menu.tip.Show_Error_Count",
             oncommand: "Firebug.GlobalUI.onToggleOption(this)",
             option: "showErrorCount"
         }),
         $menuseparator(),
         $menuitem({
             id: "menu_enablePanels",
-            label: "firebug.menu.Enable All Panels",
+            label: "firebug.menu.Enable_All_Panels",
+            tooltiptext: "firebug.menu.tip.Enable_All_Panels",
             command: "cmd_enablePanels"
         }),
         $menuitem({
             id: "menu_disablePanels",
-            label: "firebug.menu.Disable All Panels",
+            label: "firebug.menu.Disable_All_Panels",
+            tooltiptext: "firebug.menu.tip.Disable_All_Panels",
             command: "cmd_disablePanels"
         }),
         $menuseparator(),
@@ -551,11 +567,13 @@ $menupopupOverlay($("mainPopupSet"), [
             id: "menu_AllOn",
             type: "checkbox",
             label: "On_for_all_web_pages",
+            tooltiptext: "firebug.menu.tip.On_for_all_Web_Sites",
             command: "cmd_allOn"
         }),
         $menuitem({
             id: "menu_clearActivationList",
-            label: "firebug.menu.Clear Activation List",
+            label: "firebug.menu.Clear_Activation_List",
+            tooltiptext: "firebug.menu.tip.Clear_Activation_List",
             command: "cmd_clearActivationList"
         })
     ])
@@ -581,56 +599,88 @@ var firebugMenuPopup = $menupopup({id: "fbFirebugMenuPopup",
     onpopupshowing: "return Firebug.GlobalUI.onMenuShowing(this);"}, [
 
     // Open/close Firebug
-    $menuitem({
+    $menuitem(
+    {
         id: "menu_toggleFirebug",
         label: "firebug.ShowFirebug",
+        tooltiptext: "firebug.menu.tip.Open_Firebug",
         command: "cmd_toggleFirebug",
         key: "key_toggleFirebug",
         "class": "fbInternational"
     }),
-    $menuitem({
+    $menuitem(
+    {
         id: "menu_closeFirebug",
-        label: "firebug.CloseFirebug",
+        label: "firebug.Deactivate_Firebug",
+        tooltiptext: "firebug.tip.Deactivate_Firebug",
         command: "cmd_closeFirebug",
         key: "key_closeFirebug",
         "class": "fbInternational"
     }),
 
     // Firebug UI position
-    $menu({label:"firebug.uiLocation", "class": "fbInternational"}, [
+    $menu(
+    {
+        label: "firebug.uiLocation",
+        tooltiptext: "firebug.menu.tip.UI_Location",
+        "class": "fbInternational"
+    },
+    [
         $menupopup({onpopupshowing: "Firebug.GlobalUI.onPositionPopupShowing(this)"})
     ]),
 
     $menuseparator(),
 
     // External Editors
-    $menu({id: "FirebugMenu_OpenWith", label:"firebug.OpenWith", "class": "fbInternational",
-        insertafter: "menu_openActionsSeparator", openFromContext: "true",
-        command: "cmd_openInEditor"}, [
-            $menupopup({id:"fbFirebugMenu_OpenWith",
-                onpopupshowing: "return Firebug.GlobalUI.onEditorsShowing(this);"})
+    $menu(
+    {
+        id: "FirebugMenu_OpenWith",
+        label:"firebug.OpenWith",
+        tooltiptext:"firebug.menu.tip.Open_With",
+        "class": "fbInternational",
+        insertafter: "menu_openActionsSeparator",
+        openFromContext: "true",
+        command: "cmd_openInEditor"
+    },
+    [
+        $menupopup({id:"fbFirebugMenu_OpenWith",
+            onpopupshowing: "return Firebug.GlobalUI.onEditorsShowing(this);"})
     ]),
 
     // Text Size
-    $menu({id: "FirebugMenu_TextSize", label:"firebug.TextSize", "class": "fbInternational"}, [
-        $menupopup({}, [
-            $menuitem({
+    $menu(
+    {
+        id: "FirebugMenu_TextSize",
+        label: "firebug.TextSize",
+        tooltiptext: "firebug.menu.tip.Text_Size",
+        "class": "fbInternational"
+    },
+    [
+        $menupopup({},
+        [
+            $menuitem(
+            {
                 id: "menu_increaseTextSize",
                 label: "firebug.IncreaseTextSize",
+                tooltiptext: "firebug.menu.tip.Increase_Text_Size",
                 command: "cmd_increaseTextSize",
                 key: "key_increaseTextSize",
                 "class": "fbInternational"
             }),
-            $menuitem({
+            $menuitem(
+            {
                 id: "menu_decreaseTextSize",
                 label: "firebug.DecreaseTextSize",
+                tooltiptext: "firebug.menu.tip.Decrease_Text_Size",
                 command: "cmd_decreaseTextSize",
                 key: "key_decreaseTextSize",
                 "class": "fbInternational"
             }),
-            $menuitem({
+            $menuitem(
+            {
                 id: "menu_normalTextSize",
                 label: "firebug.NormalTextSize",
+                tooltiptext: "firebug.menu.tip.Normal_Text_Size",
                 command: "cmd_normalTextSize",
                 key: "key_normalTextSize",
                 "class": "fbInternational"
@@ -639,26 +689,42 @@ var firebugMenuPopup = $menupopup({id: "fbFirebugMenuPopup",
     ]),
 
     // Options
-    $menu({id: "FirebugMenu_Options", label:"firebug.Options", "class": "fbInternational"}, [
-        $menupopup({id: "FirebugMenu_OptionsPopup",
-                    onpopupshowing: "return Firebug.GlobalUI.onOptionsShowing(this);"}, [
-            $menuitem({
+    $menu(
+    {
+        id: "FirebugMenu_Options",
+        label: "firebug.Options",
+        tooltiptext: "firebug.menu.tip.Options",
+        "class": "fbInternational"
+    },
+    [
+        $menupopup(
+        {
+            id: "FirebugMenu_OptionsPopup",
+            onpopupshowing: "return Firebug.GlobalUI.onOptionsShowing(this);"
+        },
+        [
+            $menuitem(
+            {
                 id: "menu_toggleShowErrorCount",
                 type: "checkbox",
                 label: "firebug.Show_Error_Count",
+                tooltiptext: "firebug.menu.tip.Show_Error_Count",
                 oncommand: "Firebug.GlobalUI.onToggleOption(this)",
                 option: "showErrorCount",
                 "class": "fbInternational"
             }),
-            $menuitem({
+            $menuitem(
+            {
                 id: "menu_showTooltips",
                 type: "checkbox",
-                label: "firebug.ShowTooltips",
+                label: "firebug.menu.Show_Info_Tips",
+                tooltiptext: "firebug.menu.tip.Show_Info_Tips",
                 oncommand: "Firebug.GlobalUI.onToggleOption(this)",
                 option: "showInfoTips",
                 "class": "fbInternational"
             }),
-            $menuitem({
+            $menuitem(
+            {
                 id: "menu_shadeBoxModel",
                 type: "checkbox",
                 label: "ShadeBoxModel",
@@ -667,7 +733,8 @@ var firebugMenuPopup = $menupopup({id: "fbFirebugMenuPopup",
                 option: "shadeBoxModel",
                 "class": "fbInternational"
             }),
-            $menuitem({
+            $menuitem(
+            {
                 id: "showQuickInfoBox",
                 type: "checkbox",
                 label: "ShowQuickInfoBox",
@@ -676,34 +743,42 @@ var firebugMenuPopup = $menupopup({id: "fbFirebugMenuPopup",
                 option: "showQuickInfoBox",
                 "class": "fbInternational"
             }),
-            $menuitem({
+            $menuitem(
+            {
                 id: "menu_enableA11y",
                 type: "checkbox",
-                label: "firebug.menu.Enable Accessibility Enhancements",
+                label: "firebug.menu.Enable_Accessibility_Enhancements",
+                tooltiptext: "firebug.menu.tip.Enable_Accessibility_Enhancements",
                 oncommand: "Firebug.GlobalUI.onToggleOption(this)",
                 option: "a11y.enable",
                 "class": "fbInternational"
             }),
-            $menuitem({
+            $menuitem(
+            {
                 id: "menu_activateSameOrigin",
                 type: "checkbox",
-                label: "firebug.menu.Activate Same Origin URLs",
+                label: "firebug.menu.Activate_Same_Origin_URLs",
+                tooltiptext: "firebug.menu.tip.Activate_Same_Origin_URLs",
                 oncommand: "Firebug.GlobalUI.onToggleOption(this)",
                 option: "activateSameOrigin",
                 "class": "fbInternational"
             }),
-            $menuitem({
+            $menuitem(
+            {
                 id: "menu_toggleOrient",
                 type: "checkbox",
-                label: "firebug.Vertical",
+                label: "firebug.menu.Vertical_Panels",
+                tooltiptext: "firebug.menu.tip.Vertical_Panels",
                 command: "cmd_toggleOrient",
                 option: "viewPanelOrient",
                 "class": "fbInternational"
             }),
             $menuseparator({id: "menu_optionsSeparator"}),
-            $menuitem({
+            $menuitem(
+            {
                 id: "menu_resetAllOptions",
-                label: "firebug.menu.Reset All Firebug Options",
+                label: "firebug.menu.Reset_All_Firebug_Options",
+                tooltiptext: "firebug.menu.tip.Reset_All_Firebug_Options",
                 command: "cmd_resetAllOptions",
                 "class": "fbInternational"
             }),
@@ -713,48 +788,70 @@ var firebugMenuPopup = $menupopup({id: "fbFirebugMenuPopup",
     $menuseparator({id: "FirebugBetweenOptionsAndSites", collapsed: "true"}),
 
     // Sites
-    $menu({id: "FirebugMenu_Sites", label:"firebug.menu.Firebug Online", "class": "fbInternational"}, [
-        $menupopup({}, [
-            $menuitem({
+    $menu(
+    {
+        id: "FirebugMenu_Sites",
+        label: "firebug.menu.Firebug_Online",
+        tooltiptext: "firebug.menu.tip.Firebug_Online",
+        "class": "fbInternational"
+    },
+    [
+        $menupopup({},
+        [
+            $menuitem(
+            {
                 id: "menu_firebugUrlWebsite",
                 label: "firebug.Website",
+                tooltiptext: "firebug.menu.tip.Website",
                 oncommand: "Firebug.GlobalUI.visitWebsite('main')",
                 "class": "fbInternational"
             }),
-            $menuitem({
+            $menuitem(
+            {
                 id: "menu_firebugFAQ",
                 label: "firebug.FAQ",
+                tooltiptext: "firebug.menu.tip.FAQ",
                 command: "cmd_openHelp",
                 key: "key_help",
                 "class": "fbInternational"
             }),
-            $menuitem({
+            $menuitem(
+            {
                 id: "menu_firebugDoc",
                 label: "firebug.Documentation",
+                tooltiptext: "firebug.menu.tip.Documentation",
                 oncommand: "Firebug.GlobalUI.visitWebsite('docs')",
                 "class": "fbInternational"
             }),
-            $menuitem({
+            $menuitem(
+            {
                 id: "menu_firebugKeyboard",
                 label: "firebug.KeyShortcuts",
+                tooltiptext: "firebug.menu.tip.Key_Shortcuts",
                 oncommand: "Firebug.GlobalUI.visitWebsite('keyboard')",
                 "class": "fbInternational"
             }),
-            $menuitem({
+            $menuitem(
+            {
                 id: "menu_firebugForums",
                 label: "firebug.Forums",
+                tooltiptext: "firebug.menu.tip.Forums",
                 oncommand: "Firebug.GlobalUI.visitWebsite('discuss')",
                 "class": "fbInternational"
             }),
-            $menuitem({
+            $menuitem(
+            {
                 id: "menu_firebugIssues",
                 label: "firebug.Issues",
+                tooltiptext: "firebug.menu.tip.Issues",
                 oncommand: "Firebug.GlobalUI.visitWebsite('issues')",
                 "class": "fbInternational"
             }),
-            $menuitem({
+            $menuitem(
+            {
                 id: "menu_firebugDonate",
                 label: "firebug.Donate",
+                tooltiptext: "firebug.menu.tip.Donate",
                 oncommand: "Firebug.GlobalUI.visitWebsite('donate')",
                 "class": "fbInternational"
             }),
@@ -765,9 +862,11 @@ var firebugMenuPopup = $menupopup({id: "fbFirebugMenuPopup",
 
     $menuseparator({id: "menu_toolsSeparator", collapsed: "true"}),
 
-    $menuitem({
+    $menuitem(
+    {
         id: "menu_customizeShortcuts",
-        label: "firebug.menu.Customize shortcuts",
+        label: "firebug.menu.Customize_shortcuts",
+        tooltiptext: "firebug.menu.tip.Customize_Shortcuts",
         command: "cmd_customizeFBKeys",
         key: "key_customizeFBKeys",
         "class": "fbInternational"
@@ -778,6 +877,7 @@ var firebugMenuPopup = $menupopup({id: "fbFirebugMenuPopup",
     $menuitem({
         id: "Firebug_About",
         label: "firebug.About",
+        tooltiptext: "firebug.menu.tip.About",
         oncommand: "Firebug.GlobalUI.openAboutDialog()",
         "class": "firebugAbout fbInternational"
     }),
@@ -875,7 +975,7 @@ $toolbarButton("inspector-button", {
     image: "chrome://firebug/skin/inspect.png"
 });
 
-// TODO: why contextmenu doesn't work without cloning
+// TODO: why contextmenu doesn't work without cloning 
 $toolbarButton("firebug-button", {
     label: "firebug.Firebug",
     tooltiptext: "firebug.ShowFirebug",
