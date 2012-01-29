@@ -5,7 +5,7 @@
 // ********************************************************************************************* //
 // Constants
 
-var Cu = Components.utils;
+var {classes: Cc, interfaces: Ci, utils: Cu} = Components;
 
 Cu.import("resource://firebug/fbtrace.js");
 Cu.import("resource://firebug/loader.js");

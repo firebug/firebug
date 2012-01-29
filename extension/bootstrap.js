@@ -61,7 +61,7 @@ function startup(params, reason)
         FirebugLoader.loadIntoWindow(enumerator.getNext());
 
     // Listen for new windows, Firebug must be loaded into them too.
-    Services.wm.addListener(WindowListener);
+    Services.ww.registerNotification(windowWatcher);
 }
 
 function shutdown(params, reason)
@@ -71,7 +71,7 @@ function shutdown(params, reason)
         return;
 
     // Remove "new window" listener.
-    Services.wm.removeListener(WindowListener);
+    Services.ww.unregisterNotification(windowWatcher);
 
     // remove from all windows
     try
@@ -106,27 +106,15 @@ function shutdown(params, reason)
 // ********************************************************************************************* //
 // Window Listener
 
-var WindowListener =
-{
-    onOpenWindow: function(win)
+windowWatcher = function windowWatcher(win, topic) {
+    if (topic != "domwindowopened")
+        return;
+    win.addEventListener("load", function onLoad()
     {
-        win = win.QueryInterface(Ci.nsIInterfaceRequestor).getInterface(Ci.nsIDOMWindow).window;
-
-        // Wait for the window to finish loading
-        win.addEventListener("load", function onLoad()
-        {
-            win.removeEventListener("load", onLoad, false);
-            var href = win.location.href;
-            if (href == "chrome://browser/content/browser.xul"
-                || href == "chrome://navigator/content/navigator.xul")
-            {
-                FirebugLoader.loadIntoWindow(win)
-            }
-        }, false);
-    },
-
-    onCloseWindow: function(win) {},
-    onWindowTitleChange: function(win, aTitle) {}
+        win.removeEventListener("load", onLoad, false);
+        if (win.document.documentElement.getAttribute("windowtype") == 'navigator:browser')
+            FirebugLoader.loadIntoWindow(win)
+    }, false);
 }
 
 // ********************************************************************************************* //
