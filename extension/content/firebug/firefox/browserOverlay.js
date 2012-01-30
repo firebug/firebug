@@ -403,7 +403,10 @@ Firebug.GlobalUI =
     {
         var url = firebugURLs[which];
         if (url)
-            gBrowser.selectedTab = gBrowser.addTab(url + arg, null, null, null);
+        {
+            url = arg ? url + arg : url;
+            gBrowser.selectedTab = gBrowser.addTab(url, null, null, null);
+        }
     },
 
     setPosition: function(newPosition)
