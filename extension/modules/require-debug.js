@@ -93,9 +93,15 @@ require.execCbOFF = function (name)
                     {
                         var value = ret[prop];
                         if (value !== null &&
-                            (typeof value == "function" || typeof value == "object"))
+                            (typeof value == "function"/* || typeof value == "object"*/))
                         {
-                            value.displayName = basename+"/"+prop;
+                                var funcName = name + "_" + prop;
+                                funcName = funcName.replace("/", "_", "g");
+                                funcName = funcName.replace("-", "_", "g");
+                                var namedFunction = eval("(function(){ return function " + funcName +
+                                    "(){return true;} })()");
+                                value.displayName = namedFunction;
+                                //value.displayName = basename+"/"+prop;
                         }
                     }
                 }
