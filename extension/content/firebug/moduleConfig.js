@@ -36,7 +36,6 @@ Firebug.getModuleLoaderConfig = function(baseConfig)
         "firebug/trace/traceModule",
         "firebug/chrome/navigationHistory",
         "firebug/chrome/knownIssues",
-        "firebug/chrome/firstRunPage",
         "firebug/js/sourceFile",
         "firebug/chrome/shortcuts",
         "firebug/firefox/start-button/startButtonOverlay",

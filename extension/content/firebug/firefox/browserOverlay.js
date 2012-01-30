@@ -21,6 +21,7 @@ var firebugURLs =
     discuss: "http://groups.google.com/group/firebug",
     issues: "http://code.google.com/p/fbug/issues/list",
     donate: "http://getfirebug.com/getinvolved",
+    firstRunPage: "http://getfirebug.com/firstrun#Firebug "
 };
 
 // Register bundle yet before any Locale.$STR* API is used.
@@ -398,11 +399,11 @@ Firebug.GlobalUI =
         });
     },
 
-    visitWebsite: function(which)
+    visitWebsite: function(which, arg)
     {
         var url = firebugURLs[which];
         if (url)
-            gBrowser.selectedTab = gBrowser.addTab(url, null, null, null);
+            gBrowser.selectedTab = gBrowser.addTab(url + arg, null, null, null);
     },
 
     setPosition: function(newPosition)
@@ -1061,6 +1062,61 @@ if (version)
         node.classList.remove("firebugAbout");
     }
 }
+
+// ********************************************************************************************* //
+// First Run Page
+
+var observerService = Cc["@mozilla.org/observer-service;1"].getService(Ci.nsIObserverService);
+var wm = Cc["@mozilla.org/appshell/window-mediator;1"].getService(Ci.nsIWindowMediator);
+
+function checkFirebugVersion(currentVersion)
+{
+    if (!currentVersion)
+        return 1;
+
+    var version = Firebug.GlobalUI.getVersion();
+
+    // Use Firefox comparator service.
+    var versionChecker = Cc["@mozilla.org/xpcom/version-comparator;1"].
+        getService(Ci.nsIVersionComparator);
+    return versionChecker.compare(version, currentVersion);
+}
+
+var SessionObserver =
+{
+    observe: function(subjet, topic, data)
+    {
+        if (topic != "sessionstore-windows-restored")
+            return;
+
+        //xxxHonza: Removing observer at this moment is risky. What if the registration
+        // is done too late and the even never come?
+        observerService.removeObserver(SessionObserver, "sessionstore-windows-restored");
+
+        setTimeout(function()
+        {
+            // Open the page in the top most window so, the user can see it immediately.
+            if (wm.getMostRecentWindow("navigator:browser") != window.top)
+                return;
+
+            // Avoid opening of the page in another browser window.
+            if (checkFirebugVersion(FirebugLoader.getPref("currentVersion")) > 0)
+            {
+                // Don't forget to update the preference so, the page is not displayed again
+                FirebugLoader.setPref("currentVersion", version);
+
+                if (FirebugLoader.getPref("showFirstRunPage"))
+                    Firebug.GlobalUI.visitWebsite("firstRunPage",  version);
+            }
+        }, 500);
+    }
+}
+
+var currentVersion = FirebugLoader.getPref("currentVersion");
+if (checkFirebugVersion(currentVersion) > 0)
+    observerService.addObserver(SessionObserver, "sessionstore-windows-restored" , false);
+
+// ********************************************************************************************* //
 
 if (FBTrace.DBG_INITIALIZE)
     FBTrace.sysout("Firebug global overlay applied");
