@@ -581,6 +581,9 @@ Firebug.TabContext.prototype =
     {
         parent.removeEventListener(eventId, listener, capturing);
 
+        if (!this.listeners)
+            this.listeners = [];
+
         for (var i=0; i<this.listeners.length; i++)
         {
             var l = this.listeners[i];
