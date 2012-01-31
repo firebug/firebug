@@ -460,7 +460,7 @@ Firebug.GlobalUI =
 // ********************************************************************************************* //
 // Global Firebug CSS
 
-Firebug.GlobalUI.$stylesheet("chrome://firebug/content/firefox/browser.css");
+Firebug.GlobalUI.$stylesheet("chrome://firebug/content/firefox/browserOverlay.css");
 
 // ********************************************************************************************* //
 // Broadcasters
