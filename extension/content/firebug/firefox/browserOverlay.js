@@ -354,8 +354,7 @@ Firebug.GlobalUI =
 
             // If Firebug is detached, hide the menu ('Open Firebug' shortcut doesn't hide,
             // but just focuses the external window)
-            if (currPos == "detached")
-                toggleFirebug.setAttribute("collapsed", (collapsed == "true" ? "false" : "true"));
+            toggleFirebug.setAttribute("collapsed", (currPos == "detached" ? "true" : "false"));
         }
     },
 
