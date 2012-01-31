@@ -337,7 +337,9 @@ Firebug.GlobalUI =
                 Locale.$STR("firebug.AttachFirebug") : Locale.$STR("firebug.DetachFirebug")));
         }
 
-        var toggleFirebug = document.getElementById("menu_toggleFirebug");
+        // Switch between "Open Firebug" and "Hide Firebug" label in the popup menu
+        // (use the menu, which is just showing).
+        var toggleFirebug = popup.querySelector("#menu_toggleFirebug");
         if (toggleFirebug)
         {
             var collapsed = "true";
