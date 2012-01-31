@@ -324,6 +324,7 @@ FirebugLoader.defaultPrefs = {
     "key.shortcut.leftFirebugTab": "accel shift VK_PAGE_UP",
     "key.shortcut.rightFirebugTab": "accel shift VK_PAGE_DOWN",
     "key.shortcut.previousFirebugTab": "accel `",
+    "key.shortcut.customizeFBKeys": "accel shift alt b",
     "key.shortcut.clearConsole": "accel shift r",
     "key.shortcut.navBack": "accel shift VK_LEFT",
     "key.shortcut.navForward": "accel shift VK_RIGHT",
