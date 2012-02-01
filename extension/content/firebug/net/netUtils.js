@@ -3,6 +3,7 @@
 define([
     "firebug/firebug",
     "firebug/lib/locale",
+    "firebug/lib/events",
     "firebug/lib/url",
     "firebug/chrome/firefox",
     "firebug/lib/xpcom",
@@ -10,7 +11,7 @@ define([
     "firebug/lib/string",
     "firebug/lib/xml",
 ],
-function(Firebug, Locale, Url, Firefox, Xpcom, Http, Str, Xml) {
+function(Firebug, Locale, Events, Url, Firefox, Xpcom, Http, Str, Xml) {
 
 // ********************************************************************************************* //
 // Constants
@@ -251,7 +252,7 @@ var NetUtils =
         return d;
     },
 
-    getHttpHeaders: function(request, file)
+    getHttpHeaders: function(request, file, context)
     {
         if (!(request instanceof Ci.nsIHttpChannel))
             return;
@@ -300,6 +301,13 @@ var NetUtils =
                     }
                 });
                 file.responseHeaders = responseHeaders;
+
+                if (context)
+                {
+                    // Response haeaders are available now, dispatch an event to listeners
+                    Events.dispatch(Firebug.NetMonitor.fbListeners, "onResponseHeaders",
+                        [context, file]);
+                }
             }
         }
         catch (e) { }

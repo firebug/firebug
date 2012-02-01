@@ -481,7 +481,7 @@ var NetHttpObserver =
 
         // Get response headers now. They could be replaced by cached headers later
         // (if the response is coming from the cache).
-        NetUtils.getHttpHeaders(request, info);
+        NetUtils.getHttpHeaders(request, info, context);
 
         if (FBTrace.DBG_NET && info.postText)
             FBTrace.sysout("net.onExamineResponse, POST data: " + info.postText, info);

@@ -302,7 +302,7 @@ NetProgress.prototype =
 
             // Get also request headers (and perhaps also responseHeaders, they won't be 
             // replaced if already available).
-            NetUtils.getHttpHeaders(request, file);
+            NetUtils.getHttpHeaders(request, file, this.context);
 
             if (info)
             {
@@ -376,7 +376,7 @@ NetProgress.prototype =
             if (request.contentLength >= 0)
                 file.size = request.contentLength;
 
-            NetUtils.getHttpHeaders(request, file);
+            NetUtils.getHttpHeaders(request, file, this.context);
 
             if (info)
             {
@@ -668,7 +668,7 @@ NetProgress.prototype =
             file.postText = postText;
             file.responseText = responseText;
 
-            NetUtils.getHttpHeaders(request, file);
+            NetUtils.getHttpHeaders(request, file, this.context);
 
             this.endLoad(file);
 
