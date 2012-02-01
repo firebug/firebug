@@ -313,6 +313,11 @@ Firebug.GlobalUI =
                 if (option)
                 {
                     var checked = FirebugLoader.getPref(option);
+
+                    // xxxHonza: I belive that allPagesActivation could be simple boolean option.
+                    if (option == "allPagesActivation")
+                        checked = (checked == "on") ? true : false;
+
                     child.setAttribute("checked", checked);
                 }
             }
@@ -573,7 +578,8 @@ $menupopupOverlay($("mainPopupSet"), [
             type: "checkbox",
             label: "On_for_all_web_pages",
             tooltiptext: "firebug.menu.tip.On_for_all_Web_Sites",
-            command: "cmd_allOn"
+            command: "cmd_allOn",
+            option: "allPagesActivation"
         }),
         $menuitem({
             id: "menu_clearActivationList",

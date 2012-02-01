@@ -252,13 +252,8 @@ Firebug.PanelActivation = Obj.extend(Firebug.Module,
 
     updateAllPagesActivation: function()
     {
-        var allOn = Firebug.allPagesActivation == "on";
-
-        var menu = Firefox.getElementById('menu_AllOn');
-        if (menu)
-            menu.setAttribute("checked", allOn);
-
         // don't show Off button if we are always on
+        var allOn = Firebug.allPagesActivation == "on";
         Firebug.chrome.disableOff(allOn);
 
         Firebug.StartButton.resetTooltip();
