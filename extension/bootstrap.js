@@ -106,9 +106,11 @@ function shutdown(params, reason)
 // ********************************************************************************************* //
 // Window Listener
 
-windowWatcher = function windowWatcher(win, topic) {
+var windowWatcher = function windowWatcher(win, topic)
+{
     if (topic != "domwindowopened")
         return;
+
     win.addEventListener("load", function onLoad()
     {
         win.removeEventListener("load", onLoad, false);

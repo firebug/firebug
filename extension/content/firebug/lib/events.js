@@ -54,7 +54,7 @@ Events.dispatch = function(listeners, name, args)
                         }
 
                         var culprit = listeners[i] ? listeners[i].dispatchName : null;
-                        FBTrace.sysout("Exception in Events.dispatch "+(culprit?culprit+".":"")+
+                        FBTrace.sysout("EXCEPTION in Events.dispatch "+(culprit?culprit+".":"")+
                             name+": "+exc+" in "+(exc.fileName?exc.fileName:"")+
                             (exc.lineNumber?":"+exc.lineNumber:""), exc);
                     }

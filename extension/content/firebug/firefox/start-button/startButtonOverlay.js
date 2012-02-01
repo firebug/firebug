@@ -39,7 +39,7 @@ Firebug.StartButton = Obj.extend(Firebug.Module,
         Firebug.Module.initializeUI.apply(this, arguments);
 
         if (FBTrace.DBG_INITIALIZE)
-            FBTrace.sysout("StartButton initializeUI " + startButton);
+            FBTrace.sysout("StartButton.initializeUI;");
     },
 
     shutdown: function()
@@ -111,7 +111,7 @@ Firebug.StartButton = Obj.extend(Firebug.Module,
         firebugStatus.setAttribute("firebugActive", active);
 
         if (FBTrace.DBG_TOOLTIP)
-            FBTrace.sysout("resetTooltip called: firebug active: " + active);
+            FBTrace.sysout("StartButton.resetTooltip; called: firebug active: " + active);
     },
 
     getEnablementStatus: function()
@@ -160,7 +160,7 @@ Firebug.StartButton = Obj.extend(Firebug.Module,
         var suspendMarker = Firefox.getElementById("firebugStatus");
 
         if (FBTrace.DBG_ACTIVATION)
-            FBTrace.sysout("Firebug.setSuspended to " + value + ". Browser: " +
+            FBTrace.sysout("StartButton.setSuspended; to " + value + ". Browser: " +
                 Firebug.chrome.window.document.title);
 
         if (value == "suspended")
