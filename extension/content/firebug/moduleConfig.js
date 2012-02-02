@@ -72,9 +72,6 @@ Firebug.getModuleLoaderConfig = function(baseConfig)
     return config;
 }
 
-// TODO: merge with extension handling code in loader?
-// xxxHonza: yes, there should be only one registreExtension method.
-
 // ********************************************************************************************* //
 // Firebug Extension Registration
 
@@ -136,7 +133,7 @@ Firebug.registerExtension = function(extName, extConfig)
 }
 
 /**
- * Unregisters and shutdowns specifidc extension. Registered extensions are unregistered
+ * Unregisters and shutdowns specific extension. Registered extensions are unregistered
  * automatically when Firebug shutdowns. Bootstrapped extensions should use this method
  * to dynamically uninstall an extension.
  *
@@ -166,7 +163,7 @@ Firebug.iterateExtensions = function(callback)
 }
 
 /**
- * Unregisters and shutdowns all registered extensions. Calle by the framework when
+ * Unregisters and shutdowns all registered extensions. Called by the framework when
  * Firebug shutdowns.
  */
 Firebug.unregisterExtensions = function()

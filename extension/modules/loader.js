@@ -26,37 +26,45 @@ function loadSubscript(src, win)
 
 var FirebugLoader =
 {
-    extensions: [],
+    bootstrapScopes: [],
 
-    registerExtension: function(e)
+    registerBootstrapScope: function(e)
     {
-        if (this.extensions.indexOf(e) != -1)
+        if (this.bootstrapScopes.indexOf(e) != -1)
             return;
 
-        this.extensions.push(e);
+        this.bootstrapScopes.push(e);
 
         this.forEachWindow(function(win)
         {
-            e.topWindowReady(win)
+            e.topWindowLoad(win);
 
             if (!win.Firebug.isInitialized)
                 return;
 
-            e.firebugWindowReady(win);
+            e.firebugFrameLoad(win.Firebug);
         })
     },
 
-    unregisterExtension: function(e)
+    unregisterBootstrapScopes: function(e)
     {
-        var i = this.extensions.indexOf(e);
+        var i = this.bootstrapScopes.indexOf(e);
         if (i >= 0)
-            this.extensions.splice(i, 1);
+            this.bootstrapScopes.splice(i, 1);
 
-        if (e.unloadFromWindow)
+        if (e.topWindowUnload)
         {
             this.forEachWindow(function(win)
             {
-                e.unloadFromWindow(win);
+                e.topWindowUnload(win);
+            })
+        }
+
+        if (e.firebugFrameUnload)
+        {
+            this.forEachWindow(function(win)
+            {
+                e.firebugFrameUnload(win.Firebug);
             })
         }
     },
@@ -96,7 +104,7 @@ var FirebugLoader =
     unloadFromWindow: function(win)
     {
         var fbug = win.Firebug
-        this.dispatchToExtensions("unloadFromWindow", [win]);
+        this.dispatchToScopes("topWindowUnload", [win]);
 
         if (fbug.shutdown)
         {
@@ -134,12 +142,12 @@ var FirebugLoader =
         loadSubscript("chrome://firebug/content/firefox/browserOverlay.js", win);
 
         // Firebug extensions should initialize here.
-        this.dispatchToExtensions("topWindowReady", [win]);
+        this.dispatchToScopes("topWindowLoad", [win]);
     },
 
-    dispatchToExtensions: function(name, arguments)
+    dispatchToScopes: function(name, arguments)
     {
-        for each (var e in this.extensions)
+        for each (var e in this.bootstrapScopes)
         {
             try
             {
@@ -166,7 +174,7 @@ var FirebugLoader =
             }
             catch(e)
             {
-                Cu.reportError(e)
+                Cu.reportError(e);
             }
         }
     }

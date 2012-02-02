@@ -297,8 +297,9 @@ Firebug.GlobalUI =
         {
             document.removeEventListener("FirebugLoaded", onLoad, false);
             Firebug.waitingForFirstLoad = false;
+
             // TODO find a better place for notifying extensions
-            FirebugLoader.dispatchToExtensions("firebugWindowReady", [window]);
+            FirebugLoader.dispatchToScopes("firebugFrameLoad", [Firebug]);
             callback && callback(Firebug);
         }, false);
     },

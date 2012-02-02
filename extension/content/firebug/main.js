@@ -137,7 +137,7 @@ require(config, modules, function(ChromeFactory, FBL, Firebug, Browser)
 
 } catch (exc) {
 
-    window.dump("Firebug main  ERROR "+exc+"\n");
+    window.dump("Firebug main  ERROR " + exc + "\n");
 
     if (Components)
         Components.utils.reportError(exc);

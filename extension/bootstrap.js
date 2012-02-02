@@ -76,15 +76,16 @@ function shutdown(params, reason)
     // remove from all windows
     try
     {
-        FirebugLoader.shutdown()
+        FirebugLoader.shutdown();
     }
     catch(e)
     {
-        Cu.reportError(e)
+        Cu.reportError(e);
     }
 
+    // xxxHonza: I think this shouldn't be here (perhaps in firebug-service.js)
     // Shutdown Firebug's JSD debugger service.
-    var fbs = Cu.import("resource://firebug/firebug-service.js", {}).fbs
+    var fbs = Cu.import("resource://firebug/firebug-service.js", {}).fbs;
     fbs.disableDebugger();
     fbs.shutdown();
 
@@ -114,8 +115,8 @@ var windowWatcher = function windowWatcher(win, topic)
     win.addEventListener("load", function onLoad()
     {
         win.removeEventListener("load", onLoad, false);
-        if (win.document.documentElement.getAttribute("windowtype") == 'navigator:browser')
-            FirebugLoader.loadIntoWindow(win)
+        if (win.document.documentElement.getAttribute("windowtype") == "navigator:browser")
+            FirebugLoader.loadIntoWindow(win);
     }, false);
 }
 
