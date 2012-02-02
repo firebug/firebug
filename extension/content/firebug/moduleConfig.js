@@ -17,14 +17,17 @@ Firebug.getModuleLoaderConfig = function(baseConfig)
     // Set configuration defaults.
     baseConfig.baseLoaderUrl = baseConfig.baseLoaderUrl || "resource://moduleLoader/";
     baseConfig.prefDomain = baseConfig.prefDomain || "extensions.firebug";
-    baseConfig.arch = baseConfig.arch || "chrome://firebug/content/bti/inProcess";
     baseConfig.baseUrl = baseConfig.baseUrl || "resource://";
-    baseConfig.paths = baseConfig.paths || {"arch": baseConfig.arch,
-        "firebug": "chrome://firebug/content"};
     baseConfig.xhtml = true;  // createElementNS used
+    baseConfig.arch = baseConfig.arch || "chrome://firebug/content/bti/inProcess";
 
-    var keys = Object.keys(baseConfig);
+    baseConfig.paths = baseConfig.paths || {
+        "arch": baseConfig.arch,
+        "firebug": "chrome://firebug/content"
+    };
+
     var config = {};
+    var keys = Object.keys(baseConfig);
     keys.forEach(function copy(key)
     {
         config[key] = baseConfig[key];
@@ -56,10 +59,22 @@ Firebug.getModuleLoaderConfig = function(baseConfig)
         "firebug/css/cssComputedElementPanel",
     ];
 
+    // Backward compatibility (some modules changed location)
+    // http://getfirebug.com/wiki/index.php/Extension_Migration
+    config.paths["firebug/firefox/annotations"] = "firebug/chrome/annotations";
+    config.paths["firebug/firefox/privacy"] = "firebug/chrome/privacy";
+    config.paths["firebug/firefox/system"] = "firebug/lib/system";
+    config.paths["firebug/firefox/tabWatcher"] = "firebug/chrome/tabWatcher";
+    config.paths["firebug/firefox/xpcom"] = "firebug/lib/xpcom";
+    config.paths["firebug/firefox/window"] = "firebug/chrome/window";
+    config.paths["firebug/firefox/firefox"] = "firebug/chrome/firefox";
+
     return config;
 }
 
 // TODO: merge with extension handling code in loader?
+// xxxHonza: yes, there should be only one registreExtension method.
+
 // ********************************************************************************************* //
 // Firebug Extension Registration
 
@@ -133,7 +148,7 @@ Firebug.unregisterExtension = function(extName)
     if (!extConfig)
         return;
 
-    if (extConfig.app.shutdown)
+    if (extConfig.app && extConfig.app.shutdown)
         extConfig.app.shutdown();
 
     delete this.extensions[extName];
