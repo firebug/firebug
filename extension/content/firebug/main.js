@@ -37,6 +37,34 @@ catch (err)
 {
 }
 
+// ********************************************************************************************* //
+
+// Backward compatibility (some modules changed location)
+// http://getfirebug.com/wiki/index.php/Extension_Migration
+// http://code.google.com/p/fbug/issues/detail?id=5199
+var paths = {};
+paths["firebug/firefox/annotations"] = "firebug/chrome/annotations";
+paths["firebug/firefox/privacy"] = "firebug/chrome/privacy";
+paths["firebug/firefox/system"] = "firebug/lib/system";
+paths["firebug/firefox/tabWatcher"] = "firebug/chrome/tabWatcher";
+paths["firebug/firefox/xpcom"] = "firebug/lib/xpcom";
+paths["firebug/firefox/window"] = "firebug/chrome/window";
+paths["firebug/firefox/firefox"] = "firebug/chrome/firefox";
+
+var originalLoad = require.load;
+require.load = function(context, fullName, url)
+{
+    if (paths[fullName])
+    {
+        var newUrl = paths[fullName].replace("firebug/", "firebug/content/");
+        url = "chrome://" + newUrl + ".js";
+    }
+
+    return originalLoad.apply(require, [context, fullName, url]);
+}
+
+// ********************************************************************************************* //
+
 // For now extensions should use 'Firebug.require' to load it's modules so,
 // initialize the field. It should be done now since overlays can be applied
 // yet before the core Firebug modules are (asynchronously) loaded.

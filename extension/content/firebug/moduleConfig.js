@@ -59,16 +59,6 @@ Firebug.getModuleLoaderConfig = function(baseConfig)
         "firebug/css/cssComputedElementPanel",
     ];
 
-    // Backward compatibility (some modules changed location)
-    // http://getfirebug.com/wiki/index.php/Extension_Migration
-    config.paths["firebug/firefox/annotations"] = "firebug/chrome/annotations";
-    config.paths["firebug/firefox/privacy"] = "firebug/chrome/privacy";
-    config.paths["firebug/firefox/system"] = "firebug/lib/system";
-    config.paths["firebug/firefox/tabWatcher"] = "firebug/chrome/tabWatcher";
-    config.paths["firebug/firefox/xpcom"] = "firebug/lib/xpcom";
-    config.paths["firebug/firefox/window"] = "firebug/chrome/window";
-    config.paths["firebug/firefox/firefox"] = "firebug/chrome/firefox";
-
     return config;
 }
 
@@ -103,7 +93,12 @@ Firebug.registerExtension = function(extName, extConfig)
     this.extensions[extName] = extConfig;
 
     var config = Firebug.getModuleLoaderConfig();
-    config.paths[extName] = extName + "/content";
+
+    // Do not use resource: protocol for extensions (it's not allowed for bootstrapped
+    // extensions to specify the protocol in chrome.manifest and it would require
+    // additional code in every extension (in bootstrap.js), use standard chrome: instead.
+    //config.paths[extName] = extName + "/content";
+    config.paths[extName] = "chrome://" + extName + "/content";
 
     // Load main.js module (the entry point of the extension) and support for tracing.
     // All other extension modules should be loaded within "main" module.
