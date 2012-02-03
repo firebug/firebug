@@ -1774,7 +1774,7 @@ Firebug.ScriptPanel.WarningRep = domplate(Firebug.Rep,
     {
         Firebug.Options.setPref("javascript", "enabled", true);
 
-        Firebug.TabWatcher.reloadPageFromMemory(this.context);
+        Firebug.TabWatcher.reloadPageFromMemory(Firebug.currentContext);
     },
 
     onFocusDebugger: function(event)
