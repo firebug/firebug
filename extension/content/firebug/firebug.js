@@ -117,6 +117,8 @@ window.Firebug =
     stringCropLength: 50,
 
     isInitialized: false,
+    isLoaded: false,
+
     migrations: {},
 
     // Custom stylesheets registered by extensions.
@@ -180,6 +182,8 @@ window.Firebug =
 
     sendLoadEvent: function()
     {
+        this.isLoaded = true;
+
         var event = document.createEvent("Events");
         event.initEvent("FirebugLoaded", true, false);
 
@@ -581,6 +585,10 @@ window.Firebug =
     registerStylesheet: function(styleURI)
     {
         this.stylesheets.push(styleURI);
+
+        // Append the stylesheet into the UI if Firebug is already loaded
+        if (this.isLoaded)
+            Firebug.chrome.appendStylesheet(styleURI);
 
         if (FBTrace.DBG_REGISTRATION)
             FBTrace.sysout("registerStylesheet " + styleURI);

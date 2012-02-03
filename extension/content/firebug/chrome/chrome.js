@@ -215,10 +215,7 @@ var FirebugChrome =
             for (var i=0; i<Firebug.stylesheets.length; i++)
             {
                 var uri = Firebug.stylesheets[i];
-
-                Css.appendStylesheet(doc1, uri);
-                Css.appendStylesheet(doc2, uri);
-                Css.appendStylesheet(doc3, uri);
+                this.appendStylesheet(uri);
             }
 
             if (FBTrace.DBG_INITIALIZE)
@@ -293,6 +290,22 @@ var FirebugChrome =
 
         if (FBTrace.DBG_INITIALIZE)
             FBTrace.sysout("chrome.shutdown; Done for " + win.location);
+    },
+
+    appendStylesheet: function(uri)
+    {
+        var cmdPopupBrowser = this.getElementById("fbCommandPopupBrowser");
+
+        var doc1 = panelBar1.browser.contentDocument;
+        var doc2 = panelBar2.browser.contentDocument;
+        var doc3 = cmdPopupBrowser.contentDocument;
+
+        Css.appendStylesheet(doc1, uri);
+        Css.appendStylesheet(doc2, uri);
+        Css.appendStylesheet(doc3, uri);
+
+        if (FBTrace.DBG_INITIALIZE)
+            FBTrace.sysout("chrome.appendStylesheet; " + uri);
     },
 
     updateOption: function(name, value)
