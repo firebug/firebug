@@ -46,7 +46,7 @@ var FirebugLoader =
         })
     },
 
-    unregisterBootstrapScopes: function(e)
+    unregisterBootstrapScope: function(e)
     {
         var i = this.bootstrapScopes.indexOf(e);
         if (i >= 0)

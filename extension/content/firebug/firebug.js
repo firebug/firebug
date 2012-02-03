@@ -526,7 +526,20 @@ window.Firebug =
 
     unregisterPanel: function(panelType)
     {
-        for (var i = 0; i < panelTypes.length; ++i)
+        FBTrace.sysout("firebug.unregisterPanel: " +
+            (panelType ? panelType.prototype.name : "Undefined panelType"));
+
+        // Remove all instance of the panel.
+        Firebug.connection.eachContext(function (context)
+        {
+            // An empty state can be probably used at this moment since
+            // we are unregistering the panel anyway.
+            var state = {}; //context.browser.persistedState;
+            context.removePanel(panelType, state);
+        });
+
+        // Now remove panel-type itself.
+        for (var i=0; i<panelTypes.length; i++)
         {
             if (panelTypes[i] == panelType)
             {

@@ -348,10 +348,21 @@ Firebug.TabContext.prototype =
             delete state.panelState[panelName];
         }
 
-        // Remove the panel node from the DOM and so delet its content.
+        // Remove the panel node from the DOM and so delete its content.
         var panelNode = panel.panelNode;
         if (panelNode && panelNode.parentNode)
             panelNode.parentNode.removeChild(panelNode);
+    },
+
+    removePanel: function(panelType, state)
+    {
+        var panelName = panelType.prototype.name;
+        if (!this.panelMap.hasOwnProperty(panelName))
+            return null;
+
+        state.panelState = {};
+
+        this.destroyPanel(panelType, state);
     },
 
     // allows a panel from one context to be used in other contexts.
