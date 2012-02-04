@@ -577,6 +577,11 @@ window.Firebug =
         Locale.registerStringBundle(bundleURI);
     },
 
+    unregisterStringBundle: function(bundleURI)
+    {
+        // xxxHonza: TODO:
+    },
+
     /**
      * Allows registering of custom stylesheet coming from extension. The stylesheet is then
      * used automatially thorough Firebug UI.
@@ -592,6 +597,11 @@ window.Firebug =
 
         if (FBTrace.DBG_REGISTRATION)
             FBTrace.sysout("registerStylesheet " + styleURI);
+    },
+
+    unregisterStylesheet: function(styleURI)
+    {
+        // xxxHonza: TODO
     },
 
     registerMenuItem: function(menuItemController)
