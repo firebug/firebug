@@ -14,7 +14,20 @@
         <browser id="fbMainContainer" flex="2" src="" disablehistory="true" />
     </vbox>
 
+    <keyset id="mainkeyset">
+        <key oncommand="window.close()" key='W' modifiers='accel'/>
+        <key oncommand="doFirefoxCommand('Browser:Reload')" keycode='VK_F5'/>
+        <key oncommand="doFirefoxCommand('Browser:Reload')" key='r' modifiers='accel'/>
+        <key oncommand="doFirefoxCommand('Browser:ReloadSkipCache')" keycode='VK_F5' modifiers='accel'/>
+        <key oncommand="doFirefoxCommand('Browser:ReloadSkipCache')" key='r' modifiers='accel,shift'/>
+    </keyset>
+
     <script type="application/x-javascript">
+        doFirefoxCommand = function(id)
+        {
+            opener.Firebug.Firefox.getElementById(id).doCommand();
+        }
+
         importFirebug = function()
         {
             var Firebug = opener.Firebug, fbc = Firebug.chrome;
