@@ -486,7 +486,7 @@ $command("cmd_closeFirebug", "Firebug.closeFirebug(true)");
 $command("cmd_toggleInspecting", "if (!Firebug.currentContext) Firebug.toggleBar(true); Firebug.Inspector.toggleInspecting(Firebug.currentContext)");
 $command("cmd_focusCommandLine", "if (!Firebug.currentContext) Firebug.toggleBar(true); Firebug.CommandLine.focus(Firebug.currentContext)");
 $command("cmd_toggleFirebug", "Firebug.toggleBar()");
-$command("cmd_detachFirebug", "Firebug.goDoCommand(this)");
+$command("cmd_detachFirebug", "Firebug.toggleDetachBar(false, true)");
 $command("cmd_inspect", "Firebug.Inspector.inspectFromContextMenu(document.popupNode);");
 $command("cmd_toggleDetachFirebug", "Firebug.toggleDetachBar(false, true)");
 $command("cmd_increaseTextSize", "Firebug.Options.changeTextSize(1);");
