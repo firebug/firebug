@@ -225,7 +225,7 @@ Url.getLocalPath = function(url)
 
 /**
  * Mozilla URI from non-web URL
- * @param URL
+ * @param URL 
  * @returns undefined or nsIURI
  */
 Url.getLocalSystemURI = function(url)
@@ -240,7 +240,7 @@ Url.getLocalSystemURI = function(url)
             var abspath = ph.getSubstitution(uri.host);
             uri = ioService.newURI(uri.path.substr(1), null, abspath);
         }
-        if (uri.schemeIs("chrome"))
+        while (uri.schemeIs("chrome"))
         {
             var chromeRegistry = Cc["@mozilla.org/chrome/chrome-registry;1"]
                 .getService(Ci.nsIChromeRegistry);
@@ -269,6 +269,13 @@ Url.getLocalOrSystemPath = function(url, allowDirectories)
         else
             return file && !file.isDirectory() && file.path;
     }
+}
+
+Url.getLocalOrSystemFile = function(url)
+{
+    var uri = Url.getLocalSystemURI(url);
+    if (uri instanceof Ci.nsIFileURL)
+        return uri.file;
 }
 
 Url.getURLFromLocalFile = function(file)

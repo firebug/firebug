@@ -133,6 +133,21 @@ Firebug.ExternalEditors = Obj.extend(Firebug.Module,
         return externalEditors[0] || editors[0];
     },
 
+    getEditor: function(id)
+    {
+        if (id)
+        {
+            var list = Arr.extendArray(externalEditors, editors);
+            for each(var editor in list)
+                if (editor.id == id)
+                    return editor;
+        }
+        else
+        {
+            return this.getDefaultEditor();
+        }
+    },
+
     count: function()
     {
         return externalEditors.length + editors.length;
@@ -280,6 +295,9 @@ Firebug.ExternalEditors = Obj.extend(Firebug.Module,
         this.open(url, line, editorId, context);
     },
 
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+    // main
+
     open: function(href, line, editorId, context)
     {
         try
@@ -287,94 +305,43 @@ Firebug.ExternalEditors = Obj.extend(Firebug.Module,
             if (FBTrace.DBG_EXTERNALEDITORS)
                 FBTrace.sysout("externalEditors.open; href: " + href + ", line: " + line +
                     ", editorId: " + editorId + ", context: " + context, context);
-
             if (!href)
                 return;
 
-            var editor = null;
-            if (editorId)
-            {
-                var list = Arr.extendArray(externalEditors, editors);
-                for (var i = 0; i < list.length; ++i)
-                {
-                    if (editorId == list[i].id)
-                    {
-                        editor = list[i];
-                        break;
-                    }
-                }
-            }
-            else
-            {
-                editor = this.getDefaultEditor();
-            }
-
+            var editor = this.getEditor(editorId);
             if (!editor)
                  return;
 
             if (editor.handler)
-            {
-                editor.handler(href,line);
-                return;
+                return editor.handler(href, line);
+
+            var options = {
+                url: href,
+                href: href,
+                line: line,
+                editor: editor,
+                cmdline: editor.cmdline
             }
-
-            var args = [];
-            var localFile = null;
-            var targetAdded = false;
-            var cmdline = editor.cmdline
-
-            if (cmdline)
+            var self = this;
+            this.getLocalSourceFile(options, function(file)
             {
-                cmdline = cmdline.replace(' ', '\x00', 'g')
-
-                if (cmdline.indexOf("%line") > -1)
+                if (file.exists())
                 {
-                    line = parseInt(line);
-                    if (typeof line == 'number' && !isNaN(line))
-                        cmdline = cmdline.replace('%line', line, 'g');
-                    else //don't send argument with bogus line number
+                    if (file.isDirectory())
                     {
-                        var i = cmdline.indexOf("%line");
-                        var i2 = cmdline.indexOf("\x00", i);
-                        if(i2 == -1)
-                            i2 = cmdline.length;
-                        var i1 = cmdline.lastIndexOf("\x00", i);
-                        if(i1 == -1)
-                            i1 = 0;
-                        cmdline = cmdline.substring(0, i1) + cmdline.substr(i2);
+                        file.reveal();
+                        return;
                     }
+
+                    options.file = file.path;
                 }
+                var args = self.parseCmdLine(options.cmdline, options);
 
-                if (cmdline.indexOf("%url")>-1)
-                {
-                    cmdline = cmdline.replace('%url', href, 'g');
-                    targetAdded = true;
-                }
-                else if ( cmdline.indexOf("%file")>-1 )
-                {
-                    localFile = this.getLocalSourceFile(context, href);
-                    if (localFile)
-                    {
-                        cmdline = cmdline.replace('%file', localFile, 'g');
-                        targetAdded = true;
-                    }
-                }
+                if (FBTrace.DBG_EXTERNALEDITORS)
+                    FBTrace.sysout("externalEditors.open; launcProgram with args:", args);
 
-                cmdline.split(/\x00+/).forEach(function(x){ if(x) args.push(x) })
-            }
-
-            if (!targetAdded)
-            {
-                localFile = this.getLocalSourceFile(context, href);
-                if (!localFile)
-                    return;
-                args.push(localFile);
-            }
-
-            if (FBTrace.DBG_EXTERNALEDITORS)
-                FBTrace.sysout("externalEditors.open; launcProgram with args:", args);
-
-            System.launchProgram(editor.executable, args);
+                System.launchProgram(editor.executable, args);
+            });
         }
         catch(exc)
         {
@@ -382,31 +349,137 @@ Firebug.ExternalEditors = Obj.extend(Firebug.Module,
         }
     },
 
+    getLocalSourceFile: function(options, callback)
+    {
+        var href = options.href;
+        var file = Url.getLocalOrSystemFile(href);
+        if (file)
+            return callback(file);
+
+        if (this.checkHeaderRe.test(href))
+        {
+            if (FBTrace.DBG_EXTERNALEDITORS)
+                FBTrace.sysout("externalEditors. connecting server for", href);
+
+            var req = new XMLHttpRequest;
+            req.open("HEAD", href, true);
+            req.onloadend = function() {
+                var path = req.getResponseHeader("X-Local-File-Path");
+                var file = Url.getLocalOrSystemFile(path);
+                if (!file)
+                {
+                    path = 'file:///' + path.replace(/[\/\\]+/g, '/');
+                    file = Url.getLocalOrSystemFile(path);
+                }
+                if (FBTrace.DBG_EXTERNALEDITORS)
+                    FBTrace.sysout("externalEditors. server says", path);
+                if (file)
+                    callback(file);
+                // TODO: do we need to notifiy user if path was wrong?
+            }
+            req.send(null);
+            return;
+        }
+
+
+        file = this.transformHref(href);
+        if (file)
+            return callback(file);
+
+        this.saveToTemporaryFile(href, callback);
+    },
+
+    parseCmdLine: function(cmdLine, options)
+    {
+        var lastI = 0, args = [], argIndex = 0, inGroup;
+        var subs = "col|line|file|url".split("|");
+        // do not send argument with bogus line number
+        function checkGroup()
+        {
+            var group = args.slice(argIndex), isValid = null;
+            for each(var i in subs)
+            {
+                if (group.indexOf("%"+i) == -1)
+                    continue;
+                if (options[i] == undefined)
+                {
+                    isValid = false;
+                }
+                else
+                {
+                    isValid = true;
+                    break;
+                }
+            }
+            if (isValid == false)
+                args = args.slice(0, argIndex);
+            argIndex = args.length;
+        }
+        cmdLine.replace(/(\s+|$)|(?:%([{}]|(%|col|line|file|url)))/g, function(a, b, c, d, i, str)
+        {
+            var skipped = str.substring(lastI, i);
+            lastI = i+a.length;
+            skipped && args.push(skipped);
+
+            if (b || !a)
+            {
+                args.push(" ");
+                if (!inGroup)
+                    checkGroup();
+            } else  if (c == "{") {
+                inGroup = true;
+            } else  if (c == "}") {
+                inGroup = false;
+                checkGroup();
+            } else  if (d) {
+                args.push(a);
+            }
+        });
+
+        cmdLine = args.join("");
+        // add %file
+        if (!/%(url|file)/.test(cmdLine))
+            cmdLine += " %file";
+
+        args = cmdLine.trim().split(" ");
+        args = args.map(function(x)
+        {
+            return x.replace(/(?:%(%|col|line|file|url))/g, function(a, b){
+                if (b == '%')
+                    return b;
+                if (options[b] == null)
+                    return "";
+                return options[b];
+            });
+        })
+        return args;
+    },
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-    getLocalSourceFile: function(context, href)
+    transformHref: function(href)
     {
-        var filePath = Url.getLocalOrSystemPath(href)
-        if (filePath)
-            return filePath;
-
-        var data;
-        if (context)
+        for each (var transform in this.filePathTransforms)
         {
-            data = context.sourceCache.loadText(href);
+            if (transform.regexp.test(href))
+            {
+                var path = href.replace(t.regexp, t.filePath);
+                var file = Url.getLocalOrSystemFile(path);
+                if (file && file.exists())
+                    return file;
+            }
         }
-        else
-        {
-            // xxxHonza: if the fake context is used the source code is always get using
-            // (a) the browser cache or (b) request to the server.
-            var selectedBrowser = Firefox.getCurrentBrowser();
-            var ctx = {
-                browser: selectedBrowser,
-                window: selectedBrowser.contentWindow
-            };
-            data = new Firebug.SourceCache(ctx).loadText(href);
-        }
+    },
 
+    saveToTemporaryFile: function(href, callback)
+    {
+        var data = Firebug.currentContext.sourceCache.loadText(href);
+        var file = this.createTemporaryFile(href, data);
+
+        callback(file);
+    },
+
+    createTemporaryFile: function(href, data)
+    {
         if (!data)
             return;
 
@@ -452,7 +525,7 @@ Firebug.ExternalEditors = Obj.extend(Firebug.Module,
         else
             stream.close();
 
-        return file.path;
+        return file;
     },
 
     deleteTemporaryFiles: function()  // TODO call on "shutdown" event to modules
@@ -480,6 +553,17 @@ Firebug.ExternalEditors = Obj.extend(Firebug.Module,
         {
         }
     },
+});
+
+// object.extend doesn't handle getters
+Firebug.ExternalEditors.__defineGetter__("filePathTransforms", function()
+{
+    return null;
+});
+
+Firebug.ExternalEditors.__defineGetter__("checkHeaderRe", function()
+{
+    return null || /^https?:\/\/localhost/i;
 });
 
 // ********************************************************************************************* //

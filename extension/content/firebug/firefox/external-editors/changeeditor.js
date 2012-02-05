@@ -208,11 +208,13 @@ function insertText(text, whole)
 // would be good to have autosuggest for popular editors
 var defaultCommandLines =
 {
-    "sublimetext": "%file:%line",
-    "notepad++":   "-n%line %file",
-    "emeditor":    "/l %line %file",
-    "browser":     "%url",
-    "explorer":    "/select,%file"
+    "sublimetext":   "%file:%line:%col",
+    "notepad++":     "-n%line %file",
+    "emeditor":      "/l %line %file",
+    "emacs/vim":     "+%line %file",
+    "IntelliJ IDEA": "%{--line %line%} %file",
+    "browser":       "%url",
+    "explorer":      "/select,%file"
 }
 
 function suggestionPopupShowing(popup)
