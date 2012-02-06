@@ -1461,7 +1461,11 @@ Firebug.HTMLPanel.prototype = Obj.extend(WalkingPanel,
 
     getTooltipObject: function(target)
     {
-        return Firebug.getRepObject(target);
+        if (Dom.getAncestorByClass(target, "nodeLabelBox") ||
+            Dom.getAncestorByClass(target, "nodeCloseLabelBox"))
+        {
+            return Firebug.getRepObject(target);
+        }
     },
 
     getOptionsMenuItems: function()
