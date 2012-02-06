@@ -193,6 +193,17 @@ CSSComputedElementPanel.prototype = Obj.extend(CSSElementPanel.prototype,
         ];
     },
 
+    getContextMenuItems: function(style, target)
+    {
+        return [
+            {
+                label: "Refresh",
+                command: Obj.bind(this.refresh, this),
+                tooltiptext: "panel.tip.Refresh"
+            }
+        ];
+    },
+
     onMouseDown: function(event)
     {
         if (!Events.isLeftClick(event))
