@@ -803,15 +803,73 @@ Firebug.InlineEditor.prototype = domplate(Firebug.BaseEditor,
         var m = /\d+(\.\d+)?/.exec(expr);
         var digitPost = expr.substr(m.index+m[0].length);
         var newValue = Math.round((num-amt)*100)/100; // avoid rounding errors
+
+        newValue = newValue.toString();
+
+        // Preserve trailing zeroes of small increments.
+        if (Math.abs(amt) < 1)
+        {
+            if (newValue.indexOf(".") === -1)
+                newValue += ".";
+            var dec = newValue.length - newValue.lastIndexOf(".") - 1;
+            var incDec = Math.abs(amt).toString().length - 2;
+            while (dec < incDec)
+            {
+                newValue += "0";
+                ++dec;
+            }
+        }
+
         return newValue + digitPost;
     },
 
     doIncrementValue: function(value, amt, offset, offsetEnd)
     {
-        // See if the value is a single number, and if so increment it
-        value = this.incrementExpr(value, amt);
-        if (value !== null)
-            return {value: value, start: 0, end: value.length};
+        // Try to find a number around the cursor to increment.
+        var start, end;
+        if (/^-?[0-9.]+$/.test(value.substring(offset, offsetEnd)))
+        {
+            start = offset;
+            end = offsetEnd;
+        }
+        else
+        {
+            var pattern = "[0-9]*";
+            var before = new RegExp(pattern + "$").exec(value.substr(0, offset))[0].length;
+            var after = new RegExp("^" + pattern).exec(value.substr(offset))[0].length;
+
+            start = offset - before;
+            end = offset + after;
+
+            // Expand the number to contain an initial minus sign if it seems
+            // free-standing.
+            if (value.charAt(start-1) === "-" &&
+                (start-1 === 0 || /[ (:,='"]/.test(value.charAt(start-2))))
+            {
+                --start;
+            }
+        }
+
+        if (start !== end)
+        {
+            // Include percentages as part of the incremented number (they are
+            // common enough).
+            if (value.charAt(end) === "%")
+                ++end;
+
+            var first = value.substr(0, start);
+            var mid = value.substring(start, end);
+            var last = value.substr(end);
+            mid = this.incrementExpr(mid, amt);
+            if (mid !== null)
+            {
+                return {
+                    value: first + mid + last,
+                    start: start,
+                    end: start + mid.length
+                };
+            }
+        }
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
