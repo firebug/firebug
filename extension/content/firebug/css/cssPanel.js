@@ -143,7 +143,7 @@ Firebug.CSSStyleRuleTag = CSSStyleRuleTag;
 
 // ********************************************************************************************* //
 
-const reSplitCSS =  /(url\("?[^"\)]+?"?\))|(rgba?\(.*?\))|(hsla?\(.*?\))|(#[\dA-Fa-f]+)|(-?\d+(\.\d+)?(%|[a-z]{1,4})?)|([^,\s\/!\(\)]+)|"(.*?)"|(!(.*)?)/;
+const reSplitCSS =  /(url\("?[^"\)]+?"?\))|(rgba?\([^)]*\)?)|(hsla?\([^)]*\)?)|(#[\dA-Fa-f]+)|(-?\d+(\.\d+)?(%|[a-z]{1,4})?)|([^,\s\/!\(\)]+)|"(.*?)"|(!(.*)?)/;
 const reURL = /url\("?([^"\)]+)?"?\)/;
 const reRepeat = /no-repeat|repeat-x|repeat-y|repeat/;
 
@@ -1570,8 +1570,39 @@ CSSEditor.prototype = domplate(Firebug.InlineEditor.prototype,
         }
         else
         {
-            return Firebug.InlineEditor.prototype
-                .doIncrementValue(value, amt, offset, offsetEnd);
+            var info;
+            if (type === "rgb" || type === "hsl")
+            {
+                info = {};
+                var part = value.substring(range.start, offset).split(",").length - 1;
+                if (part === 3) // alpha
+                {
+                    info.minValue = 0;
+                    info.maxValue = 1;
+                    amt /= 100;
+                }
+                else if (type === "rgb") // rgb color
+                {
+                    info.minValue = 0;
+                    info.maxValue = 255;
+                    if (Math.abs(amt) < 1)
+                        amt = (amt < 0 ? -1 : 1);
+                }
+                else if (part !== 0) // hsl percentage
+                {
+                    info.minValue = 0;
+                    info.maxValue = 100;
+
+                    // If the selection is at the end of a percentage sign, select
+                    // the previous number. This would have been less hacky if
+                    // parseCSSValue parsed functions recursively.
+                    if (value.charAt(offset-1) === "%")
+                        --offset;
+                }
+            }
+
+            return Firebug.InlineEditor.prototype.doIncrementValue
+                .call(this, value, amt, offset, offsetEnd, info);
         }
 
         if (completion === null)

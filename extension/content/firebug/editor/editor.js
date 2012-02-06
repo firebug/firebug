@@ -794,7 +794,7 @@ Firebug.InlineEditor.prototype = domplate(Firebug.BaseEditor,
         return true;
     },
 
-    incrementExpr: function(expr, amt)
+    incrementExpr: function(expr, amt, info)
     {
         var num = parseFloat(expr);
         if (isNaN(num))
@@ -802,7 +802,12 @@ Firebug.InlineEditor.prototype = domplate(Firebug.BaseEditor,
 
         var m = /\d+(\.\d+)?/.exec(expr);
         var digitPost = expr.substr(m.index+m[0].length);
-        var newValue = Math.round((num-amt)*100)/100; // avoid rounding errors
+        var newValue = Math.round((num-amt)*1000)/1000; // avoid rounding errors
+
+        if (info && "minValue" in info)
+            newValue = Math.max(newValue, info.minValue);
+        if (info && "maxValue" in info)
+            newValue = Math.min(newValue, info.maxValue);
 
         newValue = newValue.toString();
 
@@ -823,7 +828,7 @@ Firebug.InlineEditor.prototype = domplate(Firebug.BaseEditor,
         return newValue + digitPost;
     },
 
-    doIncrementValue: function(value, amt, offset, offsetEnd)
+    doIncrementValue: function(value, amt, offset, offsetEnd, info)
     {
         // Try to find a number around the cursor to increment.
         var start, end;
@@ -834,10 +839,12 @@ Firebug.InlineEditor.prototype = domplate(Firebug.BaseEditor,
         }
         else
         {
-            var pattern = "[0-9]*";
+            // Parse periods as belonging to the number only if we are in a known number
+            // context. (This makes incrementing the 1 in 'image1.gif' work.)
+            var pattern = "[" + (info ? "0-9." : "0-9") + "]*";
+
             var before = new RegExp(pattern + "$").exec(value.substr(0, offset))[0].length;
             var after = new RegExp("^" + pattern).exec(value.substr(offset))[0].length;
-
             start = offset - before;
             end = offset + after;
 
@@ -860,7 +867,7 @@ Firebug.InlineEditor.prototype = domplate(Firebug.BaseEditor,
             var first = value.substr(0, start);
             var mid = value.substring(start, end);
             var last = value.substr(end);
-            mid = this.incrementExpr(mid, amt);
+            mid = this.incrementExpr(mid, amt, info);
             if (mid !== null)
             {
                 return {
