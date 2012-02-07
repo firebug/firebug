@@ -351,8 +351,8 @@ Firebug.WatchPanel.prototype = Obj.extend(Firebug.DOMBasePanel.prototype,
 
         items.push({
            id: "fbAddWatch",
-           nol10n: true,
-           label: Locale.$STR("AddWatch"),
+           label: "AddWatch",
+           tooltiptext: "watch.tip.Add_Watch",
            command: Obj.bindFixed(this.addWatch, this, path.join(""))
         });
     },

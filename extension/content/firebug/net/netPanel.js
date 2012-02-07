@@ -293,10 +293,10 @@ NetPanel.prototype = Obj.extend(Firebug.ActivablePanel,
         return [
             this.disableCacheOption(),
             "-",
-            Menu.optionMenu("net.option.Show Paint Events", "netShowPaintEvents",
-                "net.option.tip.Show Paint Events"),
-            Menu.optionMenu("net.option.Show BFCache Responses", "netShowBFCacheResponses",
-                "net.option.tip.Show BFCache Responses")
+            Menu.optionMenu("net.option.Show_Paint_Events", "netShowPaintEvents",
+                "net.option.tip.Show_Paint_Events"),
+            Menu.optionMenu("net.option.Show_BFCache_Responses", "netShowBFCacheResponses",
+                "net.option.tip.Show_BFCache_Responses")
         ];
     },
 
@@ -305,10 +305,10 @@ NetPanel.prototype = Obj.extend(Firebug.ActivablePanel,
         var BrowserCache = Firebug.NetMonitor.BrowserCache;
         var disabled = !BrowserCache.isEnabled();
         return {
-            label: "net.option.Disable Browser Cache",
+            label: "net.option.Disable_Browser_Cache",
             type: "checkbox",
             checked: disabled,
-            tooltiptext: "net.option.tip.Disable Browser Cache",
+            tooltiptext: "net.option.tip.Disable_Browser_Cache",
             command: function()
             {
                 BrowserCache.toggle(!this.getAttribute("checked"));
@@ -328,39 +328,65 @@ NetPanel.prototype = Obj.extend(Firebug.ActivablePanel,
         var isPost = NetUtils.isURLEncodedRequest(file, this.context);
 
         items.push(
-            {label: "CopyLocation", command: Obj.bindFixed(System.copyToClipboard, System, file.href) }
+            {
+                label: "CopyLocation",
+                tooltiptext: "clipboard.tip.Copy_Location",
+                command: Obj.bindFixed(System.copyToClipboard, System, file.href)
+            }
         );
 
         if (isPost)
         {
             items.push(
-                {label: "CopyLocationParameters", command: Obj.bindFixed(this.copyParams, this, file) }
+                {
+                    label: "CopyLocationParameters",
+                    tooltiptext: "net.tip.Copy_Location_Parameters",
+                    command: Obj.bindFixed(this.copyParams, this, file)
+                }
             );
         }
 
         items.push(
-            {label: "CopyRequestHeaders",
-                command: Obj.bindFixed(this.copyHeaders, this, file.requestHeaders) },
-            {label: "CopyResponseHeaders",
-                command: Obj.bindFixed(this.copyHeaders, this, file.responseHeaders) }
+            {
+                label: "CopyRequestHeaders",
+                tooltiptext: "net.tip.Copy_Request_Headers",
+                command: Obj.bindFixed(this.copyHeaders, this, file.requestHeaders)
+            },
+            {
+                label: "CopyResponseHeaders",
+                tooltiptext: "net.tip.Copy_Response_Headers",
+                command: Obj.bindFixed(this.copyHeaders, this, file.responseHeaders)
+            }
         );
 
         if (NetUtils.textFileCategories.hasOwnProperty(file.category))
         {
             items.push(
-                {label: "CopyResponse", command: Obj.bindFixed(this.copyResponse, this, file) }
+                {
+                    label: "CopyResponse",
+                    tooltiptext: "net.tip.Copy_Response",
+                    command: Obj.bindFixed(this.copyResponse, this, file)
+                }
             );
         }
 
         items.push(
             "-",
-            {label: "OpenInTab", command: Obj.bindFixed(this.openRequestInTab, this, file) }
+            {
+                label: "OpenInTab",
+                tooltiptext: "firebug.tip.Open_In_Tab",
+                command: Obj.bindFixed(this.openRequestInTab, this, file)
+            }
         );
 
         if (NetUtils.textFileCategories.hasOwnProperty(file.category))
         {
             items.push(
-                {label: "Open Response In New Tab", command: Obj.bindFixed(NetUtils.openResponseInTab, this, file) }
+                {
+                    label: "Open_Response_In_New_Tab",
+                    tooltiptext: "net.tip.Open_Response_In_New_Tab",
+                    command: Obj.bindFixed(NetUtils.openResponseInTab, this, file)
+                }
             );
         }
 
@@ -368,7 +394,11 @@ NetPanel.prototype = Obj.extend(Firebug.ActivablePanel,
         {
             items.push(
                 "-",
-                {label: "StopLoading", command: Obj.bindFixed(this.stopLoading, this, file) }
+                {
+                    label: "StopLoading",
+                    tooltiptext: "net.tip.Stop_Loading",
+                    command: Obj.bindFixed(this.stopLoading, this, file)
+                }
             );
         }
 
@@ -388,25 +418,36 @@ NetPanel.prototype = Obj.extend(Firebug.ActivablePanel,
 
             items.push(
                 "-",
-                {label: "net.label.Break On XHR", type: "checkbox", checked: !!bp,
-                    command: Obj.bindFixed(this.breakOnRequest, this, file) }
+                {
+                    label: "net.label.Break_On_XHR",
+                    tooltiptext: "net.tip.Break_On_XHR",
+                    type: "checkbox",
+                    checked: !!bp,
+                    command: Obj.bindFixed(this.breakOnRequest, this, file)
+                }
             );
 
             if (bp)
             {
                 items.push(
-                    {label: "EditBreakpointCondition",
-                        command: Obj.bindFixed(this.editBreakpointCondition, this, file) }
+                    {
+                        label: "EditBreakpointCondition",
+                        tooltiptext: "breakpoints.tip.Edit_Breakpoint_Condition",
+                        command: Obj.bindFixed(this.editBreakpointCondition, this, file)
+                    }
                 );
             }
         }
 
         items.push("-");
-        items.push({
-            label: "net.label.Resend",
-            id: "fbNetResend",
-            command: Obj.bindFixed(Firebug.Spy.XHR.resend, Firebug.Spy.XHR, file, this.context)
-        });
+        items.push(
+            {
+                label: "net.label.Resend",
+                tooltiptext: "net.tip.Resend",
+                id: "fbNetResend",
+                command: Obj.bindFixed(Firebug.Spy.XHR.resend, Firebug.Spy.XHR, file, this.context)
+            }
+        );
 
         return items;
     },

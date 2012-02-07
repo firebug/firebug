@@ -1001,6 +1001,7 @@ Firebug.Spy.XHR = domplate(Firebug.Rep,
     {
         var items = [{
             label: "CopyLocation",
+            tooltiptext: "clipboard.tip.Copy_Location",
             id: "fbSpyCopyLocation",
             command: Obj.bindFixed(this.copyURL, this, spy)
         }];
@@ -1009,6 +1010,7 @@ Firebug.Spy.XHR = domplate(Firebug.Rep,
         {
             items.push({
                 label: "CopyLocationParameters",
+                tooltiptext: "net.tip.Copy_Location_Parameters",
                 command: Obj.bindFixed(this.copyParams, this, spy)
             });
         }
@@ -1023,20 +1025,23 @@ Firebug.Spy.XHR = domplate(Firebug.Rep,
 
         items.push({
             label: "OpenInTab",
+            tooltiptext: "firebug.tip.Open_In_Tab",
             id: "fbSpyOpenInTab",
             command: Obj.bindFixed(this.openInTab, this, spy)
         });
         
         items.push({
-          label: "Open Response In New Tab",
-          id: "fbSpyOpenResponseInTab",
-          command: Obj.bindFixed(NetUtils.openResponseInTab, this, spy)
+            label: "Open_Response_In_New_Tab",
+            tooltiptext: "net.tip.Open_Response_In_New_Tab",
+            id: "fbSpyOpenResponseInTab",
+            command: Obj.bindFixed(NetUtils.openResponseInTab, this, spy)
         });
 
         items.push("-");
 
         items.push({
             label: "net.label.Resend",
+            tooltiptext: "net.tip.Resend",
             id: "fbSpyResend",
             command: Obj.bindFixed(this.resend, this, spy, context)
         });

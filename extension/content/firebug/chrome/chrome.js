@@ -1532,11 +1532,13 @@ var FirebugChrome =
                 var panelName = panelType.prototype.name;
 
                 var title = Firebug.getPanelTitle(panelType);
-                var label = Locale.$STRF("InspectInTab", [title]);
-                var id = "InspectIn" + panelName + "Tab";
+                var label = Locale.$STRF("panel.Inspect_In_Panel", [title]);
+                var tooltiptext = Locale.$STRF("panel.tip.Inspect_In_Panel", [title]);
+                var id = "InspectIn" + panelName + "Panel";
 
                 var command = Obj.bindFixed(this.select, this, object, panelName);
-                items.push({label: label, command: command, nol10n: true, id: id});
+                items.push({label: label, tooltiptext: tooltiptext, command: command, nol10n: true,
+                    id: id});
             }
         }
 

@@ -241,16 +241,24 @@
                                         <toolbarseparator class="fbPanelSpecificButtonsSeparator"/>
                                         <tooltip id="fbScriptFilterMenuTooltip" role="presentation"
                                             onpopupshowing="return Firebug.Debugger.onScriptFilterMenuTooltipShowing(this, Firebug.currentContext)"/>
-                                        <toolbarbutton id="fbScriptFilterMenu" type="menu"
-                                            tooltip="fbScriptFilterTooltip" role="button" aria-haspopup="true">
+                                        <toolbarbutton id="fbScriptFilterMenu" type="menu" tooltiptext="script.tip.Script_Type"
+                                            tooltip="fbScriptFilterTooltip" role="button" aria-haspopup="true" class="fbInternational">
                                             <menupopup
                                                 oncommand="return Firebug.Debugger.onScriptFilterMenuCommand(event, Firebug.currentContext)"
                                                 onpopupshowing="return Firebug.Debugger.onScriptFilterMenuPopupShowing(this, Firebug.currentContext)"
                                                 onpopuphiding="return Firebug.Debugger.onScriptFilterMenuPopupHiding(this, Firebug.currentContext)">
-                                                <menuitem type="radio" name="fbScriptFilterMenu" value="static"/>
-                                                <menuitem type="radio" name="fbScriptFilterMenu" value="evals"/>
-                                                <menuitem type="radio" name="fbScriptFilterMenu" value="events"/>
-                                                <menuitem type="radio" name="fbScriptFilterMenu" value="all"/>
+                                                <menuitem type="radio" name="fbScriptFilterMenu"
+                                                    value="static" tooltiptext="script.tip.Script_Filter_Static"
+                                                    class="fbInternational"/>
+                                                <menuitem type="radio" name="fbScriptFilterMenu"
+                                                    value="evals" tooltiptext="script.tip.Script_Filter_Evals"
+                                                    class="fbInternational"/>
+                                                <menuitem type="radio" name="fbScriptFilterMenu"
+                                                    value="events" tooltiptext="script.tip.Script_Filter_Events"
+                                                    class="fbInternational"/>
+                                                <menuitem type="radio" name="fbScriptFilterMenu"
+                                                    value="all" tooltiptext="script.tip.Script_Filter_All"
+                                                    class="fbInternational"/>
                                             </menupopup>
                                         </toolbarbutton>
                                     </hbox>

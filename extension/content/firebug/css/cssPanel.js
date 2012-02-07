@@ -889,8 +889,8 @@ Firebug.CSSStyleSheetPanel.prototype = Obj.extend(Firebug.Panel,
             "-",
             {
                 label: "Refresh",
-                command: Obj.bind(this.refresh, this),
-                tooltiptext: "panel.tip.Refresh"
+                tooltiptext: "panel.tip.Refresh",
+                command: Obj.bind(this.refresh, this)
             }
         ];
     },
@@ -903,9 +903,12 @@ Firebug.CSSStyleSheetPanel.prototype = Obj.extend(Firebug.Panel,
         {
             items = Firebug.BaseEditor.getContextMenuItems();
             items.push(
-                '-',
-                {label: "Load Original Source",
-                    command: Obj.bindFixed(this.loadOriginalSource, this) }
+                "-",
+                {
+                    label: "Load_Original_Source",
+                    tooltiptext: "css.tip.Load_Original_Source",
+                    command: Obj.bindFixed(this.loadOriginalSource, this)
+                }
             );
             return items;
         }
@@ -913,27 +916,44 @@ Firebug.CSSStyleSheetPanel.prototype = Obj.extend(Firebug.Panel,
         if (Css.hasClass(target, "cssSelector"))
         {
             items.push(
-                {label: "Copy Rule Declaration", id: "fbCopyRuleDeclaration",
-                    command: Obj.bindFixed(this.copyRuleDeclaration, this, target) },
-                {label: "Copy Style Declaration", id: "fbCopyStyleDeclaration",
-                    command: Obj.bindFixed(this.copyStyleDeclaration, this, target) }
+                {
+                    label: "Copy_Rule_Declaration",
+                    tooltiptext: "css.tip.Copy_Rule_Declaration",
+                    id: "fbCopyRuleDeclaration",
+                    command: Obj.bindFixed(this.copyRuleDeclaration, this, target)
+                },
+                {
+                    label: "Copy_Style_Declaration",
+                    tooltiptext: "css.tip.Copy_Style_Declaration",
+                    id: "fbCopyStyleDeclaration",
+                    command: Obj.bindFixed(this.copyStyleDeclaration, this, target)
+                }
             );
         }
 
         if (this.infoTipType == "color")
         {
             items.push(
-                {label: "CopyColor",
-                    command: Obj.bindFixed(System.copyToClipboard, System, this.infoTipObject) }
+                {
+                    label: "CopyColor",
+                    tooltiptext: "css.tip.Copy_Color",
+                    command: Obj.bindFixed(System.copyToClipboard, System, this.infoTipObject)
+                }
             );
         }
         else if (this.infoTipType == "image")
         {
             items.push(
-                {label: "CopyImageLocation",
-                    command: Obj.bindFixed(System.copyToClipboard, System, this.infoTipObject) },
-                {label: "OpenImageInNewTab",
-                    command: Obj.bindFixed(Win.openNewTab, Win, this.infoTipObject) }
+                {
+                    label: "CopyImageLocation",
+                    tooltiptext: "css.tip.Copy_Image_Location",
+                    command: Obj.bindFixed(System.copyToClipboard, System, this.infoTipObject)
+                },
+                {
+                    label: "OpenImageInNewTab",
+                    tooltiptext: "css.tip.Open_Image_In_New_Tab",
+                    command: Obj.bindFixed(Win.openNewTab, Win, this.infoTipObject)
+                }
             );
         }
 
@@ -941,16 +961,22 @@ Firebug.CSSStyleSheetPanel.prototype = Obj.extend(Firebug.Panel,
         {
             items.push(
                 "-",
-                {label: "EditStyle",
-                    command: Obj.bindFixed(this.editElementStyle, this) }
+                {
+                    label: "EditStyle",
+                    tooltiptext: "style.tip.Edit_Style",
+                    command: Obj.bindFixed(this.editElementStyle, this)
+                }
             );
         }
         else if (!Url.isSystemStyleSheet(this.selection))
         {
             items.push(
                     "-",
-                    {label: "NewRule",
-                        command: Obj.bindFixed(this.insertRule, this, target) }
+                    {
+                        label: "NewRule",
+                        tooltiptext: "css.tip.New_Rule",
+                        command: Obj.bindFixed(this.insertRule, this, target)
+                    }
                 );
         }
 
@@ -958,9 +984,13 @@ Firebug.CSSStyleSheetPanel.prototype = Obj.extend(Firebug.Panel,
         {
             var selector = Str.cropString(target.textContent, 30);
             items.push(
-                {label: Locale.$STRF("css.Delete Rule", [selector]), nol10n: true,
+                {
+                    label: Locale.$STRF("css.Delete_Rule", [selector]),
+                    tooltiptext: Locale.$STRF("css.tip.Delete_Rule", [selector]),
+                    nol10n: true,
                     id: "fbDeleteRuleDeclaration",
-                    command: Obj.bindFixed(this.deleteRuleDeclaration, this, target) }
+                    command: Obj.bindFixed(this.deleteRuleDeclaration, this, target)
+                }
             );
         }
 
@@ -969,8 +999,12 @@ Firebug.CSSStyleSheetPanel.prototype = Obj.extend(Firebug.Panel,
         {
             items.push(
                 "-",
-                {label: "NewProp", id: "fbNewCSSProp",
-                    command: Obj.bindFixed(this.insertPropertyRow, this, target) }
+                {
+                    label: "NewProp",
+                    tooltiptext: "css.tip.New_Prop",
+                    id: "fbNewCSSProp",
+                    command: Obj.bindFixed(this.insertPropertyRow, this, target)
+                }
             );
 
             var propRow = Dom.getAncestorByClass(target, "cssProp");
@@ -980,13 +1014,26 @@ Firebug.CSSStyleSheetPanel.prototype = Obj.extend(Firebug.Panel,
                 var isDisabled = Css.hasClass(propRow, "disabledStyle");
 
                 items.push(
-                    {label: Locale.$STRF("EditProp", [propName]), nol10n: true,
-                        command: Obj.bindFixed(this.editPropertyRow, this, propRow) },
-                    {label: Locale.$STRF("DeleteProp", [propName]), nol10n: true,
-                        command: Obj.bindFixed(this.deletePropertyRow, this, propRow) },
-                    {label: Locale.$STRF("DisableProp", [propName]), nol10n: true,
-                        type: "checkbox", checked: isDisabled,
-                        command: Obj.bindFixed(this.disablePropertyRow, this, propRow) }
+                    {
+                        label: Locale.$STRF("EditProp", [propName]),
+                        tooltiptext: Locale.$STRF("css.tip.Edit_Prop", [propName]),
+                        nol10n: true,
+                        command: Obj.bindFixed(this.editPropertyRow, this, propRow)
+                    },
+                    {
+                        label: Locale.$STRF("DeleteProp", [propName]),
+                        tooltiptext: Locale.$STRF("css.tip.Delete_Prop", [propName]),
+                        nol10n: true,
+                        command: Obj.bindFixed(this.deletePropertyRow, this, propRow)
+                    },
+                    {
+                        label: Locale.$STRF("DisableProp", [propName]),
+                        tooltiptext: Locale.$STRF("css.tip.Disable_Prop", [propName]),
+                        nol10n: true,
+                        type: "checkbox",
+                        checked: isDisabled,
+                        command: Obj.bindFixed(this.disablePropertyRow, this, propRow)
+                    }
                 );
             }
         }

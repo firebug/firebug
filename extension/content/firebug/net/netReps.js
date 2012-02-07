@@ -310,10 +310,12 @@ Firebug.NetMonitor.NetRequestTable = domplate(Firebug.Rep, new Firebug.Listener(
         for (var i=0; i<columns.length; i++)
         {
             var column = columns[i];
+            var columnContent = column.getElementsByClassName("netHeaderCellBox").item(0);
             var visible = (hiddenCols.indexOf(column.id) == -1);
 
             items.push({
-                label: column.textContent,
+                label: columnContent.textContent,
+                tooltiptext: columnContent.title,
                 type: "checkbox",
                 checked: visible,
                 nol10n: true,
@@ -333,8 +335,8 @@ Firebug.NetMonitor.NetRequestTable = domplate(Firebug.Rep, new Firebug.Listener(
 
         items.push("-");
         items.push({
-            label: Locale.$STR("net.header.Reset_Header"),
-            nol10n: true,
+            label: "net.header.Reset_Header",
+            tooltiptext: "net.header.tip.Reset_Header",
             command: Obj.bindFixed(this.onResetColumns, this, context)
         });
 

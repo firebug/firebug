@@ -1041,31 +1041,66 @@ FirebugReps.Element = domplate(Firebug.Rep,
 
     getContextMenuItems: function(elt, target, context)
     {
+        var type;
         var monitored = EventMonitor.areEventsMonitored(elt, null, context);
-        var CopyElement = "CopyHTML";
-        if (Xml.isElementSVG(elt))
-            CopyElement = "CopySVG";
-        if (Xml.isElementMathML(elt))
-            CopyElement = "CopyMathML";
 
-        var items=[{label: CopyElement, command: Obj.bindFixed(this.copyHTML, this, elt)}];
-        if (!Xml.isElementSVG(elt) && !Xml.isElementMathML(elt))
-            items.push({label: "CopyInnerHTML",
-                command: Obj.bindFixed(this.copyInnerHTML, this, elt) });
+        if (Xml.isElementHTML(elt) || Xml.isElementXHTML(elt))
+            type = "HTML";
+        else if (Xml.isElementMathML(elt))
+            type = "MathML";
+        else if (Xml.isElementSVG(elt))
+            type = "SVG";
+        else if (Xml.isElementXUL(elt))
+            type = "XUL";
+        else
+            type = "XML";
+
+        var items = [
+        {
+            label: Locale.$STRF("html.Copy_Node", [type]),
+            tooltiptext: Locale.$STRF("html.tip.Copy_Node", [type]),
+            command: Obj.bindFixed(this.copyHTML, this, elt)
+        }];
+        if (Xml.isElementHTML(elt) || Xml.isElementXHTML(elt))
+        {
+            items.push(
+            {
+                label: "CopyInnerHTML",
+                tooltiptext: "html.tip.Copy_innerHTML",
+                command: Obj.bindFixed(this.copyInnerHTML, this, elt)
+            });
+        }
 
         return items.concat([
-            {label: "CopyXPath", id: "fbCopyXPath",
-                command: Obj.bindFixed(this.copyXPath, this, elt) },
-            {label: "Copy CSS Path", id: "fbCopyCSSPath",
-                command: Obj.bindFixed(this.copyCSSPath, this, elt) },
+            {
+                label: "CopyXPath",
+                tooltiptext: "html.tip.Copy_XPath",
+                id: "fbCopyXPath",
+                command: Obj.bindFixed(this.copyXPath, this, elt)
+            },
+            {
+                label: "Copy_CSS_Path",
+                tooltiptext: "html.tip.Copy_CSS_Path",
+                id: "fbCopyCSSPath",
+                command: Obj.bindFixed(this.copyCSSPath, this, elt)
+            },
             "-",
-            {label: "ShowEventsInConsole", id: "fbShowEventsInConsole",
-                type: "checkbox", checked: monitored,
+            {
+                label: "ShowEventsInConsole",
+                tooltiptext: "html.tip.Show_Events_In_Console",
+                id: "fbShowEventsInConsole",
+                type: "checkbox",
+                checked: monitored,
                 command: Obj.bindFixed(EventMonitor.toggleMonitorEvents,
-                EventMonitor, elt, null, monitored, context) },
+                    EventMonitor, elt, null, monitored, context)
+            },
             "-",
-            {label: "ScrollIntoView", id: "fbScrollIntoView",
-                command: Obj.bindFixed(elt.scrollIntoView, elt) }
+            {
+                label: "ScrollIntoView",
+                tooltiptext: "html.tip.Scroll_Into_View",
+                id: "fbScrollIntoView",
+                command: Obj.bindFixed(elt.scrollIntoView, elt)
+            }
         ]);
     }
 });
@@ -1252,9 +1287,17 @@ FirebugReps.StyleSheet = domplate(Firebug.Rep,
     getContextMenuItems: function(styleSheet, target, context)
     {
         return [
-            {label: "CopyLocation", command: Obj.bindFixed(this.copyURL, this, styleSheet) },
+            {
+                label: "CopyLocation",
+                tooltiptext: "clipboard.tip.Copy_Location",
+                command: Obj.bindFixed(this.copyURL, this, styleSheet)
+            },
             "-",
-            {label: "OpenInTab", command: Obj.bindFixed(this.openInTab, this, styleSheet) }
+            {
+                label: "OpenInTab",
+                tooltiptext: "firebug.tip.Open_In_Tab",
+                command: Obj.bindFixed(this.openInTab, this, styleSheet)
+            }
         ];
     },
 
@@ -1553,9 +1596,17 @@ FirebugReps.SourceLink = domplate(Firebug.Rep,
     getContextMenuItems: function(sourceLink, target, context)
     {
         return [
-            {label: "CopyLocation", command: Obj.bindFixed(this.copyLink, this, sourceLink) },
+            {
+                label: "CopyLocation",
+                tooltiptext: "clipboard.tip.Copy_Location",
+                command: Obj.bindFixed(this.copyLink, this, sourceLink)
+            },
             "-",
-            {label: "OpenInTab", command: Obj.bindFixed(this.openInTab, this, sourceLink) }
+            {
+                label: "OpenInTab",
+                tooltiptext: "firebug.tip.Open_In_Tab",
+                command: Obj.bindFixed(this.openInTab, this, sourceLink)
+            }
         ];
     }
 });
@@ -2125,7 +2176,11 @@ FirebugReps.ErrorMessage = domplate(Firebug.Rep,
         var breakOnThisError = this.hasErrorBreak(error);
 
         var items = [
-            {label: "CopyError", command: Obj.bindFixed(this.copyError, this, error) }
+            {
+                label: "CopyError",
+                tooltiptext: "console.menu.tip.Copy_Error",
+                command: Obj.bindFixed(this.copyError, this, error)
+            }
         ];
 
         if (error.category == "css")

@@ -905,6 +905,18 @@ Firebug.ScriptPanel.prototype = Obj.extend(Firebug.SourceBoxPanel,
         this.showToolbarButtons("fbScriptButtons", active);
         this.showToolbarButtons("fbStatusButtons", active);
 
+        Firebug.chrome.$("fbRerunButton").setAttribute("tooltiptext",
+            Locale.$STRF("firebug.labelWithShortcut", [Locale.$STR("script.Rerun"), "Shift+F8"]));
+        Firebug.chrome.$("fbContinueButton").setAttribute("tooltiptext",
+            Locale.$STRF("firebug.labelWithShortcut", [Locale.$STR("script.Continue"), "F8"]));
+        Firebug.chrome.$("fbStepIntoButton").setAttribute("tooltiptext",
+            Locale.$STRF("firebug.labelWithShortcut", [Locale.$STR("script.Step_Into"), "F10"]));
+        Firebug.chrome.$("fbStepOverButton").setAttribute("tooltiptext",
+            Locale.$STRF("firebug.labelWithShortcut", [Locale.$STR("script.Step_Over"), "F11"]));
+        Firebug.chrome.$("fbStepOutButton").setAttribute("tooltiptext",
+            Locale.$STRF("firebug.labelWithShortcut",
+                [Locale.$STR("script.Step_Out"), "Shift+F11"]));
+
         // Additional debugger panels are visible only, if debugger is active.
         this.panelSplitter.collapsed = !active;
         this.sidePanelDeck.collapsed = !active;
@@ -1372,9 +1384,17 @@ Firebug.ScriptPanel.prototype = Obj.extend(Firebug.SourceBoxPanel,
         if (selection.toString())
         {
             items.push(
-                {label: "CopySourceCode", command: Obj.bind(this.copySource, this) },
+                {
+                    label: "CopySourceCode",
+                    tooltiptext: "script.tip.Copy_Source_Code",
+                    command: Obj.bind(this.copySource, this)
+                },
                 "-",
-                {label: "AddWatch", command: Obj.bind(this.addSelectionWatch, this) }
+                {
+                    label: "AddWatch",
+                    tooltiptext: "watch.tip.Add_Watch",
+                    command: Obj.bind(this.addSelectionWatch, this)
+                }
             );
         }
 
@@ -1382,8 +1402,13 @@ Firebug.ScriptPanel.prototype = Obj.extend(Firebug.SourceBoxPanel,
 
         items.push(
             "-",
-            {label: "SetBreakpoint", type: "checkbox", checked: hasBreakpoint,
-                command: Obj.bindFixed(this.toggleBreakpoint, this, lineNo) }
+            {
+                label: "SetBreakpoint",
+                tooltiptext: "script.tip.Set_Breakpoint",
+                type: "checkbox",
+                checked: hasBreakpoint,
+                command: Obj.bindFixed(this.toggleBreakpoint, this, lineNo)
+            }
         );
 
         if (hasBreakpoint)
@@ -1391,14 +1416,22 @@ Firebug.ScriptPanel.prototype = Obj.extend(Firebug.SourceBoxPanel,
             var isDisabled = JavaScriptTool.isBreakpointDisabled(this.context, this.location.href,
                 lineNo);
             items.push(
-                {label: "DisableBreakpoint", type: "checkbox", checked: isDisabled,
-                    command: Obj.bindFixed(this.toggleDisableBreakpoint, this, lineNo) }
+                {
+                    label: "breakpoints.Disable_Breakpoint",
+                    tooltiptext: "breakpoints.tip.Disable_Breakpoint",
+                    type: "checkbox",
+                    checked: isDisabled,
+                    command: Obj.bindFixed(this.toggleDisableBreakpoint, this, lineNo)
+                }
             );
         }
 
         items.push(
-            {label: "EditBreakpointCondition",
-                command: Obj.bindFixed(this.editBreakpointCondition, this, lineNo) }
+            {
+                label: "EditBreakpointCondition",
+                tooltiptext: "breakpoints.tip.Edit_Breakpoint_Condition",
+                command: Obj.bindFixed(this.editBreakpointCondition, this, lineNo)
+            }
         );
 
         if (this.context.stopped)
@@ -1412,19 +1445,48 @@ Firebug.ScriptPanel.prototype = Obj.extend(Firebug.SourceBoxPanel,
                 var debuggr = this;
                 items.push(
                     "-",
-                    {label: "firebug.Rerun", id: "contextMenuRerun",
-                        command: Obj.bindFixed(debuggr.rerun, debuggr, this.context) },
-                    {label: "firebug.Continue", id: "contextMenuContinue",
-                        command: Obj.bindFixed(debuggr.resume, debuggr, this.context) },
-                    {label: "firebug.StepOver", id: "contextMenuStepOver",
-                        command: Obj.bindFixed(debuggr.stepOver, debuggr, this.context) },
-                    {label: "firebug.StepInto", id: "contextMenuStepInto",
-                        command: Obj.bindFixed(debuggr.stepInto, debuggr, this.context) },
-                    {label: "firebug.StepOut", id: "contextMenuStepOut",
-                        command: Obj.bindFixed(debuggr.stepOut, debuggr, this.context) },
-                    {label: "firebug.RunUntil", id: "contextMenuRunUntil",
+                    {
+                        label: "script.Rerun",
+                        tooltiptext: "script.tip.Rerun",
+                        id: "contextMenuRerun",
+                        command: Obj.bindFixed(debuggr.rerun, debuggr, this.context),
+                        acceltext: "Shift+F8"
+                    },
+                    {
+                        label: "script.Continue",
+                        tooltiptext: "script.tip.Continue",
+                        id: "contextMenuContinue",
+                        command: Obj.bindFixed(debuggr.resume, debuggr, this.context),
+                        acceltext: "F8"
+                    },
+                    {
+                        label: "script.Step_Over",
+                        tooltiptext: "script.tip.Step_Over",
+                        id: "contextMenuStepOver",
+                        command: Obj.bindFixed(debuggr.stepOver, debuggr, this.context),
+                        acceltext: "F10"
+                    },
+                    {
+                        label: "script.Step_Into",
+                        tooltiptext: "script.tip.Step_Into",
+                        id: "contextMenuStepInto",
+                        command: Obj.bindFixed(debuggr.stepInto, debuggr, this.context),
+                        acceltext: "F11"
+                    },
+                    {
+                        label: "script.Step_Out",
+                        tooltiptext: "script.tip.Step_Out",
+                        id: "contextMenuStepOut",
+                        command: Obj.bindFixed(debuggr.stepOut, debuggr, this.context),
+                        acceltext: "Shift+F11"
+                    },
+                    {
+                        label: "firebug.RunUntil",
+                        tooltiptext: "script.tip.Run_Until",
+                        id: "contextMenuRunUntil",
                         command: Obj.bindFixed(debuggr.runUntil, debuggr, this.context,
-                        compilationUnit, lineNo) }
+                            compilationUnit, lineNo)
+                    }
                 );
             }
         }

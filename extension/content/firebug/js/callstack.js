@@ -253,8 +253,16 @@ Firebug.CallstackPanel.prototype = Obj.extend(Firebug.Panel,
     getContextMenuItems: function(nada, target)
     {
         var items = [
-            {label: "callstack.Expand All", command: Obj.bindFixed(this.onExpandAll, this, target)},
-            {label: "callstack.Collapse All", command: Obj.bindFixed(this.onCollapseAll, this, target)}
+            {
+                label: "callstack.Expand_All",
+                tooltiptext: "callstack.tip.Expand_All",
+                command: Obj.bindFixed(this.onExpandAll, this, target)
+            },
+            {
+                label: "callstack.Collapse_All",
+                tooltiptext: "callstack.tip.Collapse_All",
+                command: Obj.bindFixed(this.onCollapseAll, this, target)
+            }
         ];
         return items;
     },

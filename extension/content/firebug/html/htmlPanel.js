@@ -1501,11 +1501,15 @@ Firebug.HTMLPanel.prototype = Obj.extend(WalkingPanel,
 
         var items = [];
 
-        if (node && node.nodeType == 1)
+        if (node.nodeType == 1)
         {
             items.push(
                 "-",
-                {label: "NewAttribute", command: Obj.bindFixed(this.editNewAttribute, this, node)}
+                {
+                    label: "NewAttribute",
+                    tooltiptext: "html.tip.New_Attribute",
+                    command: Obj.bindFixed(this.editNewAttribute, this, node)
+                }
             );
 
             var attrBox = Dom.getAncestorByClass(target, "nodeAttr");
@@ -1514,47 +1518,86 @@ Firebug.HTMLPanel.prototype = Obj.extend(WalkingPanel,
                 var attrName = attrBox.childNodes[1].textContent;
 
                 items.push(
-                    {label: Locale.$STRF("EditAttribute", [attrName]), nol10n: true,
-                        command: Obj.bindFixed(this.editAttribute, this, node, attrName)},
-                    {label: Locale.$STRF("DeleteAttribute", [attrName]), nol10n: true,
-                        command: Obj.bindFixed(this.deleteAttribute, this, node, attrName)}
+                    {
+                        label: Locale.$STRF("EditAttribute", [attrName]),
+                        tooltiptext: Locale.$STRF("html.tip.Edit_Attribute", [attrName]),
+                        nol10n: true,
+                        command: Obj.bindFixed(this.editAttribute, this, node, attrName)
+                    },
+                    {
+                        label: Locale.$STRF("DeleteAttribute", [attrName]),
+                        tooltiptext: Locale.$STRF("html.tip.Delete_Attribute", [attrName]),
+                        nol10n: true,
+                        command: Obj.bindFixed(this.deleteAttribute, this, node, attrName)
+                    }
                 );
             }
 
             if (!(Css.nonEditableTags.hasOwnProperty(node.localName)))
             {
-                var EditElement = "EditHTMLElement";
+                var type;
 
-                if (Xml.isElementMathML(node))
-                    EditElement = "EditMathMLElement";
+                if (Xml.isElementHTML(node) || Xml.isElementXHTML(node))
+                    type = "HTML";
+                else if (Xml.isElementMathML(node))
+                    type = "MathML";
                 else if (Xml.isElementSVG(node))
-                    EditElement = "EditSVGElement";
+                    type = "SVG";
+                else if (Xml.isElementXUL(node))
+                    type = "XUL";
+                else
+                    type = "XML";
 
                 items.push("-",
-                    {label: EditElement, command: Obj.bindFixed(this.editNode, this, node)},
+                {
+                    label: Locale.$STRF("html.Edit_Node", [type]),
+                    tooltiptext: Locale.$STRF("html.tip.Edit_Node", [type]),
+                    nol10n: true,
+                    command: Obj.bindFixed(this.editNode, this, node)
+                },
+                {
+                    label: "DeleteElement",
+                    tooltiptext: "html.Delete_Element",
+
                     // xxxsz: 'Del' needs to be translated, but therefore customizeShortcuts
                     // must be turned into a module
-                    {label: "DeleteElement", acceltext: "Del",
-                        command: Obj.bindFixed(this.deleteNode, this, node),
-                        disabled:(node.localName in Css.innerEditableTags)}
-                );
+                    acceltext: "Del",
+                    command: Obj.bindFixed(this.deleteNode, this, node),
+                    disabled:(node.localName in Css.innerEditableTags)
+                });
             }
 
             var objectBox = Dom.getAncestorByClass(target, "nodeBox");
             var nodeChildBox = this.ioBox.getChildObjectBox(objectBox);
             if (nodeChildBox)
             {
-                items.push("-",
-                    {label: "html.label.Expand/Contract All", acceltext: "*",
-                        command: Obj.bind(this.toggleAll, this, node)});
+                items.push(
+                    "-",
+                    {
+                        label: "html.label.Expand/Contract_All",
+                        tooltiptext: "html.tip.Expand/Contract_All",
+                        acceltext: "*",
+                        command: Obj.bind(this.toggleAll, this, node)
+                    }
+                );
             }
         }
         else
         {
+            var nodeLabel = Locale.$STR("html.Node");
             items.push(
                 "-",
-                {label: "EditNode", command: Obj.bindFixed(this.editNode, this, node) },
-                {label: "DeleteNode", command: Obj.bindFixed(this.deleteNode, this, node) }
+                {
+                    label: Locale.$STRF("html.Edit_Node", [nodeLabel]),
+                    tooltiptext: Locale.$STRF("html.tip.Edit_Node", [nodeLabel]),
+                    nol10n: true,
+                    command: Obj.bindFixed(this.editNode, this, node)
+                },
+                {
+                    label: "DeleteNode",
+                    tooltiptext: "html.Delete_Node",
+                    command: Obj.bindFixed(this.deleteNode, this, node)
+                }
             );
         }
 
@@ -2446,21 +2489,30 @@ Firebug.HTMLModule.MutationBreakpoints =
         {
             items.push(
                 "-",
-                {label: "html.label.Break On Attribute Change",
+                {
+                    label: "html.label.Break_On_Attribute_Change",
+                    tooltiptext: "html.tip.Break_On_Attribute_Change",
                     type: "checkbox",
                     checked: breakpoints.findBreakpoint(node, BP_BREAKONATTRCHANGE),
                     command: Obj.bindFixed(this.onModifyBreakpoint, this, context, node,
-                        BP_BREAKONATTRCHANGE)},
-                {label: "html.label.Break On Child Addition or Removal",
+                        BP_BREAKONATTRCHANGE)
+                },
+                {
+                    label: "html.label.Break_On_Child_Addition_or_Removal",
+                    tooltiptext: "html.tip.Break_On_Child_Addition_or_Removal",
                     type: "checkbox",
                     checked: breakpoints.findBreakpoint(node, BP_BREAKONCHILDCHANGE),
                     command: Obj.bindFixed(this.onModifyBreakpoint, this, context, node,
-                        BP_BREAKONCHILDCHANGE)},
-                {label: "html.label.Break On Element Removal",
+                        BP_BREAKONCHILDCHANGE)
+                },
+                {
+                    label: "html.label.Break_On_Element_Removal",
+                    tooltiptext: "html.tip.Break_On_Element_Removal",
                     type: "checkbox",
                     checked: breakpoints.findBreakpoint(node, BP_BREAKONREMOVE),
                     command: Obj.bindFixed(this.onModifyBreakpoint, this, context, node,
-                        BP_BREAKONREMOVE)}
+                        BP_BREAKONREMOVE)
+                }
             );
         }
     },
