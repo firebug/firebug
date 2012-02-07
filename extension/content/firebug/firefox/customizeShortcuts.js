@@ -166,7 +166,7 @@ function addShortcutRow(element, index, array)
 
     var label = document.createElement("label");
     // Get the label from firebug.properties
-    var labelText = Locale.$STR("firebug.shortcut.label."+element);
+    var labelText = Locale.$STR("firebug.shortcut."+element+".label");
     var tooltipText = Locale.$STR("firebug.shortcut.tip."+element);
 
     // $STR defaults to property name (label) if it's not defined. We don't want that
