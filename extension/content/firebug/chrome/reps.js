@@ -284,11 +284,20 @@ FirebugReps.Func = domplate(Firebug.Rep,
 
         var name = script ? StackFrame.getFunctionName(script, context) : fn.name;
         return [
-            {label: "CopySource", command: Obj.bindFixed(this.copySource, this, fn) },
+            {
+                label: Locale.$STRF("ShowCallsInConsole", [name]),
+                tooltiptext: Locale.$STRF("dom.tip.Log_Calls_To_Function", [name]),
+                nol10n: true,
+                type: "checkbox",
+                checked: monitored,
+                command: Obj.bindFixed(this.monitor, this, fn, monitored)
+            },
             "-",
-            {label: Locale.$STRF("ShowCallsInConsole", [name]), nol10n: true,
-             type: "checkbox", checked: monitored,
-             command: Obj.bindFixed(this.monitor, this, fn, monitored) }
+            {
+                label: "CopySource",
+                tooltiptext: "dom.tip.Copy_Source",
+                command: Obj.bindFixed(this.copySource, this, fn)
+            }
         ];
     }
 });
@@ -942,20 +951,20 @@ FirebugReps.Element = domplate(Firebug.Rep,
 
         if (Firebug.showTextNodesWithWhitespace)
             escapeGroups.push({
-                'group': 'whitespace',
-                'class': 'nodeWhiteSpace',
-                'extra': {
-                    '\t': '_Tab',
-                    '\n': '_Para',
-                    ' ' : '_Space'
+                "group": "whitespace",
+                "class": "nodeWhiteSpace",
+                "extra": {
+                    "\t": "_Tab",
+                    "\n": "_Para",
+                    " " : "_Space"
                 }
             });
 
         if (Firebug.showTextNodesWithEntities)
             escapeGroups.push({
-                'group':'text',
-                'class':'nodeTextEntity',
-                'extra':{}
+                "group": "text",
+                "class": "nodeTextEntity",
+                "extra":{}
             });
 
         if (escapeGroups.length)
@@ -2187,10 +2196,15 @@ FirebugReps.ErrorMessage = domplate(Firebug.Rep,
         {
             items.push(
                 "-",
-                {label: "BreakOnThisError", type: "checkbox", checked: breakOnThisError,
-                 command: Obj.bindFixed(this.breakOnThisError, this, error) },
-
-                Menu.optionMenu("BreakOnAllErrors", "breakOnErrors")
+                {
+                    label: "BreakOnThisError",
+                    tooltiptext: "console.menu.tip.Break_On_This_Error",
+                    type: "checkbox",
+                    checked: breakOnThisError,
+                    command: Obj.bindFixed(this.breakOnThisError, this, error)
+                },
+                Menu.optionMenu("BreakOnAllErrors", "breakOnErrors",
+                    "console.menu.tip.Break_On_All_Errors")
             );
         }
 
@@ -2257,6 +2271,7 @@ FirebugReps.Except = domplate(Firebug.Rep,
 
 // ********************************************************************************************* //
 
+// xxxsz: Is this code still in use? 
 FirebugReps.Assert = domplate(Firebug.Rep,
 {
     tag:
@@ -2280,12 +2295,21 @@ FirebugReps.Assert = domplate(Firebug.Rep,
         var breakOnThisError = this.hasErrorBreak(error);
 
         return [
-            {label: "CopyError", command: Obj.bindFixed(this.copyError, this, error) },
+            {
+                label: "CopyError",
+                tooltiptext: "console.tip.Copy_Error",
+                command: Obj.bindFixed(this.copyError, this, error)
+            },
             "-",
-            {label: "BreakOnThisError", type: "checkbox", checked: breakOnThisError,
-             command: Obj.bindFixed(this.breakOnThisError, this, error) },
-            {label: "BreakOnAllErrors", type: "checkbox", checked: Firebug.breakOnErrors,
-             command: Obj.bindFixed(this.breakOnAllErrors, this, error) }
+            {
+                label: "BreakOnThisError",
+                tooltiptext: "console.menu.tip.Break_On_This_Error",
+                type: "checkbox",
+                checked: breakOnThisError,
+                command: Obj.bindFixed(this.breakOnThisError, this, error)
+            },
+            Menu.optionMenu("BreakOnAllErrors", "breakOnErrors",
+                "console.menu.tip.Break_On_All_Errors")
         ];
     }
 });
