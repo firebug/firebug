@@ -12,6 +12,7 @@ define([
     "firebug/console/profiler",
     "firebug/chrome/searchBox",
     "firebug/console/consolePanel",
+    "firebug/console/commandEditor",
 ],
 function(Obj, Firebug, Firefox, Events, Win, Search, Xml, Options) {
 

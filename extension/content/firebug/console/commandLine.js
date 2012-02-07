@@ -691,9 +691,6 @@ Firebug.CommandLine = Obj.extend(Firebug.Module,
     attachListeners: function()
     {
         var commandLine = this.getSingleRowCommandLine();
-        var commandEditor = this.getCommandEditor();
-
-        Events.addEventListener(commandEditor, "focus", this.onCommandLineFocus, true);
 
         Events.addEventListener(commandLine, "focus", this.onCommandLineFocus, true);
         Events.addEventListener(commandLine, "input", this.onCommandLineInput, true);
@@ -709,7 +706,6 @@ Firebug.CommandLine = Obj.extend(Firebug.Module,
     shutdown: function()
     {
         var commandLine = this.getSingleRowCommandLine();
-        var commandEditor = this.getCommandEditor();
 
         // Make sure all listeners registered by the auto completer are removed.
         if (this.autoCompleter)
@@ -717,8 +713,6 @@ Firebug.CommandLine = Obj.extend(Firebug.Module,
 
         if (this.commandHistory)
             this.commandHistory.detachListeners();
-
-        Events.removeEventListener(commandEditor, "focus", this.onCommandLineFocus, true);
 
         Events.removeEventListener(commandLine, "focus", this.onCommandLineFocus, true);
         Events.removeEventListener(commandLine, "input", this.onCommandLineInput, true);
@@ -961,7 +955,7 @@ Firebug.CommandLine = Obj.extend(Firebug.Module,
         // for some reason the console has been injected. If the user had focus in the command
         // line they want it added in the page also. If the user has the cursor in the command
         // line and reloads, the focus will already be there. issue 1339
-        var isFocused = (this.getCommandEditor().getAttribute("focused") == "true");
+        var isFocused = Firebug.CommandEditor.hasFocus();
         isFocused = isFocused || (this.getSingleRowCommandLine().getAttribute("focused") == "true");
         if (isFocused)
             setTimeout(this.onCommandLineFocus);
@@ -991,7 +985,7 @@ Firebug.CommandLine = Obj.extend(Firebug.Module,
 
     getCommandEditor: function()
     {
-        return Firebug.chrome.$("fbCommandEditor");
+        return Firebug.CommandEditor;
     }
 });
 

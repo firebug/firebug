@@ -50,8 +50,9 @@ window[chromehidden~="toolbar"] #fbToolbar {
 /*************************************************************************************************/
 /* FirebugOverlay.xul */
 
-#fbCommandEditor {
-    -moz-binding: url("firefox/bindings.xml#commandEditor");
+#fbCommandEditor > textbox {
+    padding: 0;
+    margin: 0;
 }
 
 .fbCommandLineCompletionPanel {

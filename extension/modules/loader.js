@@ -411,6 +411,7 @@ FirebugLoader.defaultPrefs = {
     "DBG_EXTERNALEDITORS": false,  // integration with external editors/IDEs
     "DBG_OBSERVERS": false,        // track/untrack support: should be set: then restart Firefox
     "DBG_EVENTLISTENERS": false,   // track/untrack for registered event listeners: restart needed
+    "DBG_COMMANDEDITOR": false,    // Multiline console based on SourceEditor (Orion)
 }
 
 // ********************************************************************************************* //

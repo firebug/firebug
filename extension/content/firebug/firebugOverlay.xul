@@ -412,9 +412,7 @@
 
                         <!-- Command Editor -->
                         <vbox id="fbCommandEditorBox">
-                            <textbox id="fbCommandEditor" multiline="true" flex="1"
-                                newlines="pasteintact"
-                                label="CommandEditor" />
+                            <hbox id="fbCommandEditor" flex="1" />
                             <hbox id="fbCommandToolbar">
                                 <toolbarbutton id="fbCmdLineRunButton" label="firebug.Run"
                                     class="toolbar-text-button fbInternational"

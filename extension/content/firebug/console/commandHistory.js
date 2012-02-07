@@ -75,8 +75,8 @@ Firebug.CommandHistory = function()
 
     this.cycleCommands = function(context, dir)
     {
-        var command,
-            commandLine = Firebug.CommandLine.getCommandLine(context);
+        var command;
+        var commandLine = Firebug.CommandLine.getCommandLine(context);
 
         if (dir < 0)
         {

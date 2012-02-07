@@ -1266,7 +1266,8 @@ var FirebugChrome =
             Firebug.CommandLine.getSingleRowCommandLine().style.fontSizeAdjust = fontSizeAdjust;
             Firebug.chrome.$("fbCommandLineCompletion").style.fontSizeAdjust = fontSizeAdjust;
             Firebug.chrome.$("fbCommandLineCompletionList").style.fontSizeAdjust = fontSizeAdjust;
-            Firebug.CommandLine.getCommandEditor().style.fontSizeAdjust = fontSizeAdjust;
+
+            Firebug.CommandEditor.fontSizeAdjust(fontSizeAdjust);
         }
 
         Firebug.dispatchToPanels("onTextSizeChange", [zoom, fontSizeAdjust]);
