@@ -924,8 +924,9 @@ window.Firebug =
 
     getPanelTooltip: function(panelType)
     {
-        return panelType.prototype.tooltip ? panelType.prototype.tooltip
-            : this.getPanelTitle(panelType);
+        var tooltip = panelType.prototype.tooltip ? panelType.prototype.tooltip
+            : Locale.$STR("panel.tip."+panelType.prototype.name);
+        return tooltip != panelType.prototype.name ? tooltip : this.getPanelTitle(panelType);
     },
 
     getMainPanelTypes: function(context)
