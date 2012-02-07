@@ -2192,7 +2192,7 @@ FirebugReps.ErrorMessage = domplate(Firebug.Rep,
             }
         ];
 
-        if (error.category == "css")
+        if (error.category != "css")
         {
             items.push(
                 "-",
@@ -2201,7 +2201,7 @@ FirebugReps.ErrorMessage = domplate(Firebug.Rep,
                     tooltiptext: "console.menu.tip.Break_On_This_Error",
                     type: "checkbox",
                     checked: breakOnThisError,
-                    command: Obj.bindFixed(this.breakOnThisError, this, error)
+                    command: Obj.bindFixed(this.breakOnThisError, this, error, context)
                 },
                 Menu.optionMenu("BreakOnAllErrors", "breakOnErrors",
                     "console.menu.tip.Break_On_All_Errors")
@@ -2306,7 +2306,7 @@ FirebugReps.Assert = domplate(Firebug.Rep,
                 tooltiptext: "console.menu.tip.Break_On_This_Error",
                 type: "checkbox",
                 checked: breakOnThisError,
-                command: Obj.bindFixed(this.breakOnThisError, this, error)
+                command: Obj.bindFixed(this.breakOnThisError, this, error, context)
             },
             Menu.optionMenu("BreakOnAllErrors", "breakOnErrors",
                 "console.menu.tip.Break_On_All_Errors")
