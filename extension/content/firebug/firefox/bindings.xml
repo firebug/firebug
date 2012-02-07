@@ -1421,16 +1421,18 @@
         <xul:description anonid="fbSearchBoxDescription"  collapsed="true"/>
         <xul:panel id="fbSearchOptionsPanel" norestorefocus="true" noautofocus="true"
             ignorekeys="true" role="presentation">
-            <xul:description id="fbSearchBoxIsSensitive" value="search.Case AutoSensitive"/>
-            <xul:description id="fbSearchBoxIsNotSensitive" value="search.Case Insensitive"/>
+            <xul:description id="fbSearchBoxIsSensitive" value="search.Case_AutoSensitive"/>
+            <xul:description id="fbSearchBoxIsNotSensitive" value="search.Case_Insensitive"/>
             <xul:vbox class="searchOptionsMenu innerToolbar" role="menu" anonid="fbSearchOptionsMenu">
               <xul:box anonid="startPanelFocus" class="panelFocusBound" onfocus="startFocusHandler()" />
               <xul:vbox anonid="searchOptionsList" role="presentation" />
               <xul:hbox pack="center" align="center" role="presentation">
                   <xul:button anonid="searchPrev" class="fbsearch-options-buttons prev a11yFocus"
-                    label="search.Previous" oncommand="searchPrev()" role="menuitem" />
+                      label="search.Previous" tooltiptext="search.tip.Previous"
+                      oncommand="searchPrev()" role="menuitem" />
                   <xul:button anonid="searchNext" class="fbsearch-options-buttons next a11yFocus"
-                    label="search.Next" oncommand="searchNext()" role="menuitem" />
+                      label="search.Next" tooltiptext="search.tip.Next"
+                      oncommand="searchNext()" role="menuitem" />
               </xul:hbox>
               <xul:box anonid="endPanelFocus" class="panelFocusBound" onfocus="endFocusHandler()" />
             </xul:vbox>
@@ -1570,7 +1572,9 @@
 
                 FBL.internationalize(searchBox, "label");
                 FBL.internationalize(searchPrev, "label");
+                FBL.internationalize(searchPrev, "tooltiptext");
                 FBL.internationalize(searchNext, "label");
+                FBL.internationalize(searchNext, "tooltiptext");
 
                 var searchMenu = document.getAnonymousElementByAttribute(this, "anonid",
                     "fbSearchOptionsMenu");

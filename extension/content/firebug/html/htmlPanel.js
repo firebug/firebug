@@ -1422,7 +1422,8 @@ Firebug.HTMLPanel.prototype = Obj.extend(WalkingPanel,
     getSearchOptionsMenuItems: function()
     {
         return [
-            Firebug.Search.searchOptionMenu("search.Case Sensitive", "searchCaseSensitive")
+            Firebug.Search.searchOptionMenu("search.Case_Sensitive", "searchCaseSensitive",
+                "search.tip.Case_Sensitive")
         ];
     },
 

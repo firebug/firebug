@@ -217,10 +217,11 @@ Firebug.Search = Obj.extend(Firebug.Module,
         }
     },
 
-    searchOptionMenu: function(label, option)
+    searchOptionMenu: function(label, option, tooltiptext)
     {
         return {
             label: label,
+            tooltiptext: tooltiptext,
             checked: Firebug[option],
             option: option,
             command: Obj.bindFixed(this.onToggleSearchOption, this, option)
@@ -269,10 +270,12 @@ Firebug.Search = Obj.extend(Firebug.Module,
     internationalizeUI: function()
     {
         var sensitive = Firebug.chrome.$("fbSearchBoxIsSensitive");
-        sensitive.value = Locale.$STR("search.Case Sensitive");
+        sensitive.value = Locale.$STR("search.Case_Sensitive");
+        sensitive.setAttribute("tooltiptext", Locale.$STR("search.tip.Case_Sensitive"));
 
         var notSensitive = Firebug.chrome.$("fbSearchBoxIsNotSensitive");
-        notSensitive.value = Locale.$STR("search.Case Insensitive");
+        notSensitive.value = Locale.$STR("search.Case_Insensitive");
+        notSensitive.setAttribute("tooltiptext", Locale.$STR("search.tip.Case_Insensitive"));
     },
 
     shutdown: function()

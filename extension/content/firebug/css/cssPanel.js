@@ -1328,9 +1328,12 @@ Firebug.CSSStyleSheetPanel.prototype = Obj.extend(Firebug.Panel,
     getSearchOptionsMenuItems: function()
     {
         return [
-            Firebug.Search.searchOptionMenu("search.Case Sensitive", "searchCaseSensitive"),
-            Firebug.Search.searchOptionMenu("search.Multiple Files", "searchGlobal"),
-            Firebug.Search.searchOptionMenu("search.Use Regular Expression", "searchUseRegularExpression")
+            Firebug.Search.searchOptionMenu("search.Case_Sensitive", "searchCaseSensitive",
+                "search.tip.Case_Sensitive"),
+            Firebug.Search.searchOptionMenu("search.Multiple_Files", "searchGlobal",
+                "search.tip.Multiple_Files"),
+            Firebug.Search.searchOptionMenu("search.Use_Regular_Expression",
+                "searchUseRegularExpression", "search.tip.Use_Regular_Expression")
         ];
     },
 

@@ -680,11 +680,14 @@ NetPanel.prototype = Obj.extend(Firebug.ActivablePanel,
     getSearchOptionsMenuItems: function()
     {
         return [
-            Firebug.Search.searchOptionMenu("search.Case Sensitive", "searchCaseSensitive"),
+            Firebug.Search.searchOptionMenu("search.Case_Sensitive", "searchCaseSensitive",
+                "search.tip.Case_Sensitive"),
             //Firebug.Search.searchOptionMenu("search.net.Headers", "netSearchHeaders"),
             //Firebug.Search.searchOptionMenu("search.net.Parameters", "netSearchParameters"),
-            Firebug.Search.searchOptionMenu("search.Use Regular Expression", "searchUseRegularExpression"),
-            Firebug.Search.searchOptionMenu("search.net.Response Bodies", "netSearchResponseBody")
+            Firebug.Search.searchOptionMenu("search.Use_Regular_Expression",
+                "searchUseRegularExpression", "search.tip.Use_Regular_Expression"),
+            Firebug.Search.searchOptionMenu("search.net.Response_Bodies", "netSearchResponseBody",
+                "search.net.tip.Response_Bodies")
         ];
     },
 

@@ -1843,7 +1843,8 @@ Firebug.Panel = Obj.extend(new Firebug.Listener(),
     getSearchOptionsMenuItems: function()
     {
         return [
-            Firebug.Search.searchOptionMenu("search.Case Sensitive", "searchCaseSensitive")
+            Firebug.Search.searchOptionMenu("search.Case Sensitive", "searchCaseSensitive",
+                "search.tip.Case_Sensitive")
         ];
     },
 
