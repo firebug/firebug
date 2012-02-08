@@ -4,8 +4,11 @@ define([
     "firebug/lib/object",
     "firebug/firebug",
     "firebug/lib/events",
+    "firebug/chrome/menu",
+    "firebug/lib/dom",
+    "firebug/lib/locale",
 ],
-function(Obj, Firebug, Events) {
+function(Obj, Firebug, Events, Menu, Dom, Locale) {
 
 // ********************************************************************************************* //
 // Constants
@@ -56,6 +59,7 @@ Firebug.CommandEditor = Obj.extend(Firebug.Module,
             return;
 
         this.parent.removeEventListener("keypress", this.onKeyPress);
+        this.editor.removeEventListener(SourceEditor.EVENTS.CONTEXT_MENU, this.onContextMenu);
 
         this.editor.destroy();
         this.editor = null;
@@ -68,6 +72,9 @@ Firebug.CommandEditor = Obj.extend(Firebug.Module,
     onEditorLoad: function()
     {
         this.parent.addEventListener("keypress", this.onKeyPress);
+
+        // xxxHonza: Context menu support is going to change in SourceEditor
+        this.editor.addEventListener(SourceEditor.EVENTS.CONTEXT_MENU, this.onContextMenu);
 
         this.editor.setCaretOffset(this.editor.getCharCount());
 
@@ -96,6 +103,36 @@ Firebug.CommandEditor = Obj.extend(Firebug.Module,
                 event.preventDefault();
             break;
         }
+    },
+
+    onContextMenu: function(event)
+    {
+        var popup = document.getElementById("fbCommandEditorPopup");
+        Dom.eraseNode(popup);
+
+        var browserWindow = Firebug.chrome.window;
+        var commandDispatcher = browserWindow.document.commandDispatcher;
+
+        var items = Firebug.CommandEditor.getContextMenuItems();
+        for (var i=0; i<items.length; i++)
+            Menu.createMenuItem(popup, items[i]);
+
+        if (!popup.childNodes.length)
+            return;
+
+        popup.openPopupAtScreen(event.screenX, event.screenY, true);
+    },
+
+    getContextMenuItems: function()
+    {
+        var items = [];
+        items.push({label: Locale.$STR("Cut"), commandID: "cmd_cut"});
+        items.push({label: Locale.$STR("Copy"), commandID: "cmd_copy"});
+        items.push({label: Locale.$STR("Paste"), commandID: "cmd_paste"});
+        items.push({label: Locale.$STR("Delete"), commandID: "cmd_delete"});
+        items.push("-");
+        items.push({label: Locale.$STR("SelectAll"), commandID: "cmd_selectAll"});
+        return items;
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

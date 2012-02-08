@@ -37,6 +37,9 @@
 
         <panel id="fbCommandHistory" noautofocus="true">
         </panel>
+
+        <!-- Context menu for the Command Editor -->
+        <menupopup id="fbCommandEditorPopup" />
     </popupset>
 
     <!-- Main UI -->
