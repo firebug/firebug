@@ -8,7 +8,7 @@ define([
     "firebug/net/requestObserver",
     "firebug/lib/events",
     "firebug/lib/url",
-    "firebug/net/httpLib",
+    "firebug/lib/http",
     "firebug/chrome/window",
     "firebug/lib/string",
     "firebug/lib/array",

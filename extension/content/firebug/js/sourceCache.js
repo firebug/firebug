@@ -5,8 +5,8 @@ define([
     "firebug/firebug",
     "firebug/lib/xpcom",
     "firebug/lib/url",
-    "firebug/net/httpLib",
-    "firebug/lib/string",
+    "firebug/lib/http",
+    "firebug/lib/string"
 ],
 function(Obj, Firebug, Xpcom, Url, Http, Str) {
 

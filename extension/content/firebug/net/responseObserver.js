@@ -3,7 +3,7 @@
 define([
     "firebug/lib/xpcom",
     "firebug/lib/trace",
-    "firebug/net/httpLib",
+    "firebug/lib/http"
 ],
 function(Xpcom, FBTrace, Http) {
 

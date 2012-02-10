@@ -4,9 +4,9 @@ define([
     "firebug/lib/xpcom",
     "firebug/lib/trace",
     "firebug/lib/string",
-    "firebug/net/httpLib",
+    "firebug/lib/http",
     "firebug/trace/traceModule",
-    "firebug/trace/traceListener",
+    "firebug/trace/traceListener"
 ],
 function(Xpcom, FBTrace, Str, Http, TraceModule, TraceListener) {
 

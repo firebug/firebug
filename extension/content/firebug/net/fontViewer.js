@@ -13,7 +13,7 @@ define([
     "firebug/lib/string",
     "firebug/lib/fonts",
     "firebug/lib/url",
-    "firebug/net/httpLib",
+    "firebug/lib/http",
     "firebug/net/netUtils",
     "firebug/lib/options"
 ],

@@ -8,7 +8,7 @@ define([
     "firebug/lib/events",
     "firebug/net/requestObserver",
     "firebug/js/stackFrame",
-    "firebug/net/httpLib",
+    "firebug/lib/http",
     "firebug/lib/css",
     "firebug/lib/dom",
     "firebug/chrome/window",

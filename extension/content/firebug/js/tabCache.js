@@ -9,13 +9,13 @@ define([
     "firebug/lib/locale",
     "firebug/lib/events",
     "firebug/lib/url",
-    "firebug/net/httpLib",
+    "firebug/lib/http",
     "firebug/lib/string",
     "firebug/chrome/window",
     "firebug/net/jsonViewer",
     "firebug/trace/traceModule",
     "firebug/trace/traceListener",
-    "firebug/js/sourceCache",
+    "firebug/js/sourceCache"
 ],
 function(Obj, Firebug, Xpcom, HttpRequestObserver, HttpResponseObserver, Locale, Events,
     Url, Http, Str, Win, JSONViewerModel, TraceModule, TraceListener) {
@@ -334,7 +334,7 @@ Firebug.TabCache.prototype = Obj.extend(Firebug.SourceCache.prototype,
 
         try
         {
-            responseText = Http.convertToUnicode(responseText, win.document.characterSet);
+            responseText = Str.convertToUnicode(responseText, win.document.characterSet);
         }
         catch (err)
         {

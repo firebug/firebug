@@ -11,7 +11,7 @@ define([
     "firebug/lib/options",
     "firebug/lib/url",
     "firebug/js/sourceLink",
-    "firebug/net/httpLib",
+    "firebug/lib/http",
     "firebug/lib/css",
     "firebug/lib/dom",
     "firebug/chrome/window",

@@ -20,7 +20,7 @@ define([
     "firebug/lib/dragdrop",
     "firebug/net/netUtils",
     "firebug/net/netProgress",
-    "firebug/net/httpLib",
+    "firebug/lib/http",
     "firebug/js/breakpoint",
     "firebug/net/xmlViewer",
     "firebug/net/svgViewer",
@@ -30,7 +30,7 @@ define([
     "firebug/css/cssPanel",
     "firebug/chrome/searchBox",
     "firebug/console/errors",
-    "firebug/net/netMonitor",
+    "firebug/net/netMonitor"
 ],
 function(Obj, Firebug, Firefox, Domplate, Locale, Events, Options, Url, Css, Dom, Win, Search, Str,
     Json, Arr, ToggleBranch, DragDrop, NetUtils, NetProgress, Http) {

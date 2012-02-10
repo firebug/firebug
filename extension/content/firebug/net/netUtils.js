@@ -7,9 +7,9 @@ define([
     "firebug/lib/url",
     "firebug/chrome/firefox",
     "firebug/lib/xpcom",
-    "firebug/net/httpLib",
+    "firebug/lib/http",
     "firebug/lib/string",
-    "firebug/lib/xml",
+    "firebug/lib/xml"
 ],
 function(Firebug, Locale, Events, Url, Firefox, Xpcom, Http, Str, Xml) {
 

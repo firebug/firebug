@@ -3,7 +3,7 @@
 define([
     "firebug/lib/trace",
     "firebug/lib/options",
-    "firebug/lib/deprecated",
+    "firebug/lib/deprecated"
 ],
 function(FBTrace, Options, Deprecated) {
 
@@ -619,6 +619,57 @@ Str.formatTime = function(elapsed)
     }
 }
 
+//********************************************************************************************* //
+//Conversions
+
+Str.convertToUnicode = function(text, charset)
+{
+    if (!text)
+        return "";
+
+    try
+    {
+        var conv = Cc["@mozilla.org/intl/scriptableunicodeconverter"].getService(
+            Ci.nsIScriptableUnicodeConverter);
+        conv.charset = charset ? charset : "UTF-8";
+        return conv.ConvertToUnicode(text);
+    }
+    catch (exc)
+    {
+        if (FBTrace.DBG_ERRORS)
+        {
+            FBTrace.sysout("Str.convertToUnicode: fails: for charset "+charset+" conv.charset:"+
+                conv.charset+" exc: "+exc, exc);
+        }
+
+        // the exception is worthless, make up a new one
+        throw new Error("Firebug failed to convert to unicode using charset: "+conv.charset+
+            " in @mozilla.org/intl/scriptableunicodeconverter");
+    }
+};
+
+Str.convertFromUnicode = function(text, charset)
+{
+    if (!text)
+        return "";
+
+    try
+    {
+        var conv = Cc["@mozilla.org/intl/scriptableunicodeconverter"].createInstance(
+            Ci.nsIScriptableUnicodeConverter);
+        conv.charset = charset ? charset : "UTF-8";
+        return conv.ConvertFromUnicode(text);
+    }
+    catch (exc)
+    {
+        if (FBTrace.DBG_ERRORS)
+        {
+            FBTrace.sysout("Str.convertFromUnicode: fails: for charset "+charset+" conv.charset:"+
+                conv.charset+" exc: "+exc, exc);
+        }
+    }
+};
+
 // ********************************************************************************************* //
 
 Str.safeToString = function(ob)
@@ -649,7 +700,7 @@ Str.safeToString = function(ob)
     catch (exc)
     {
         if (FBTrace.DBG_ERRORS)
-            FBTrace.sysout("safeToString FAILS "+exc, exc);
+            FBTrace.sysout("Str.safeToString FAILS "+exc, exc);
     }
     return "[unsupported: no toString() function in type "+typeof(ob)+"]";
 };

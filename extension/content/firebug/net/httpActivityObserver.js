@@ -4,10 +4,10 @@ define([
     "firebug/lib/xpcom",
     "firebug/lib/object",
     "firebug/lib/trace",
-    "firebug/net/httpLib",
+    "firebug/lib/http",
     "firebug/chrome/window",
     "firebug/net/netProgress",
-    "firebug/net/netUtils",
+    "firebug/net/netUtils"
 ],
 function(Xpcom, Obj, FBTrace, Http, Win, NetProgress, NetUtils) {
 

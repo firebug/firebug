@@ -51,6 +51,7 @@ paths["firebug/firefox/xpcom"] = "firebug/lib/xpcom";
 paths["firebug/firefox/window"] = "firebug/chrome/window";
 paths["firebug/firefox/firefox"] = "firebug/chrome/firefox";
 paths["firebug/html/htmlLib"] = "firebug/lib/html";
+paths["firebug/net/httpLib"] = "firebug/lib/http";
 
 var originalLoad = require.load;
 require.load = function(context, fullName, url)

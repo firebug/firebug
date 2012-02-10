@@ -7,8 +7,8 @@ define([
     "firebug/lib/locale",
     "firebug/lib/xpcom",
     "firebug/lib/css",
-    "firebug/net/httpLib",
-    "firebug/net/netUtils",
+    "firebug/lib/http",
+    "firebug/net/netUtils"
 ],
 function(Obj, Firebug, Domplate, Locale, Xpcom, Css, Http, NetUtils) {
 

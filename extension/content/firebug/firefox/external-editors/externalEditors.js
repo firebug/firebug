@@ -7,6 +7,7 @@ define([
     "firebug/lib/locale",
     "firebug/lib/xpcom",
     "firebug/lib/url",
+    "firebug/lib/string",
     "firebug/js/sourceLink",
     "firebug/lib/css",
     "firebug/lib/system",
@@ -14,9 +15,9 @@ define([
     "firebug/lib/dom",
     "firebug/chrome/menu",
     "firebug/trace/debug",
-    "firebug/chrome/firefox",
+    "firebug/chrome/firefox"
 ],
-function(FBL, Obj, Firebug, Locale, Xpcom, Url, SourceLink, Css, System, Arr, Dom,
+function(FBL, Obj, Firebug, Locale, Xpcom, Url, Str, SourceLink, Css, System, Arr, Dom,
     Menu, Debug, Firefox) {
 
 // ********************************************************************************************* //
@@ -510,10 +511,8 @@ Firebug.ExternalEditors = Obj.extend(Firebug.Module,
             file.create(nsIFile.NORMAL_FILE_TYPE, 0664);
         temporaryFiles.push(file.path);
 
-        var converter = Xpcom.CCIN("@mozilla.org/intl/scriptableunicodeconverter",
-            "nsIScriptableUnicodeConverter");
-        converter.charset = 'UTF-8'; // TODO detect charset from current tab
-        data = converter.ConvertFromUnicode(data);
+        // TODO detect charset from current tab
+        data = Str.convertFromUnicode(data);
 
         var stream = Xpcom.CCIN("@mozilla.org/network/safe-file-output-stream;1",
             "nsIFileOutputStream");

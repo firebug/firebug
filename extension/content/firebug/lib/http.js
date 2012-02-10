@@ -5,7 +5,7 @@ define([
     "firebug/lib/trace",
     "firebug/lib/deprecated",
     "firebug/js/stackFrame",
-    "firebug/lib/string",
+    "firebug/lib/string"
 ],
 function(Xpcom, FBTrace, Deprecated, StackFrame, Str) {
 
@@ -45,12 +45,12 @@ Http.readFromStream = function(stream, charset, noClose)
 
     try
     {
-        return Http.convertToUnicode(text, charset);
+        return Str.convertToUnicode(text, charset);
     }
     catch (err)
     {
         if (FBTrace.DBG_ERRORS)
-            FBTrace.sysout("httpLib.readFromStream EXCEPTION charset: " + charset, err);
+            FBTrace.sysout("http.readFromStream EXCEPTION charset: " + charset, err);
     }
 
     return text;
@@ -85,7 +85,7 @@ Http.readPostTextFromPage = function(url, context)
          catch (exc)
          {
              if (FBTrace.DBG_ERRORS)
-                FBTrace.sysout("httpLib.readPostText FAILS, url:"+url, exc);
+                FBTrace.sysout("http.readPostText FAILS, url:"+url, exc);
          }
      }
 };
@@ -147,7 +147,7 @@ Http.readPostTextFromRequest = function(request, context)
     catch(exc)
     {
         if (FBTrace.DBG_ERRORS)
-            FBTrace.sysout("httpLib.readPostTextFromRequest FAILS ", exc);
+            FBTrace.sysout("http.readPostTextFromRequest FAILS ", exc);
     }
 
     return null;
@@ -425,53 +425,6 @@ Http.isXHR = function(request)
 
     return false;
 },
-
-// ********************************************************************************************* //
-// Conversions
-
-Http.convertToUnicode = function(text, charset)
-{
-    if (!text)
-        return "";
-
-    try
-    {
-        var conv = Cc["@mozilla.org/intl/scriptableunicodeconverter"].getService(
-            Ci.nsIScriptableUnicodeConverter);
-        conv.charset = charset ? charset : "UTF-8";
-        return conv.ConvertToUnicode(text);
-    }
-    catch (exc)
-    {
-        if (FBTrace.DBG_ERRORS)
-            FBTrace.sysout("lib.convertToUnicode: fails: for charset "+charset+" conv.charset:"+
-                conv.charset+" exc: "+exc, exc);
-
-        // the exception is worthless, make up a new one
-        throw new Error("Firebug failed to convert to unicode using charset: "+conv.charset+
-            " in @mozilla.org/intl/scriptableunicodeconverter");
-    }
-};
-
-Http.convertFromUnicode = function(text, charset)
-{
-    if (!text)
-        return "";
-
-    try
-    {
-        var conv = Cc["@mozilla.org/intl/scriptableunicodeconverter"].createInstance(
-            Ci.nsIScriptableUnicodeConverter);
-        conv.charset = charset ? charset : "UTF-8";
-        return conv.ConvertFromUnicode(text);
-    }
-    catch (exc)
-    {
-        if (FBTrace.DBG_ERRORS)
-            FBTrace.sysout("lib.convertFromUnicode: fails: for charset "+charset+" conv.charset:"+
-                conv.charset+" exc: "+exc, exc);
-    }
-};
 
 // ************************************************************************************************
 // Network Tracing

@@ -8,7 +8,7 @@ define([
     "firebug/lib/events",
     "firebug/lib/css",
     "firebug/lib/dom",
-    "firebug/net/httpLib",
+    "firebug/lib/http",
     "firebug/lib/string",
     "firebug/lib/json",
     "firebug/dom/toggleBranch",

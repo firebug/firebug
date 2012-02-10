@@ -7,13 +7,13 @@ define([
     "firebug/lib/events",
     "firebug/lib/url",
     "firebug/js/sourceLink",
-    "firebug/net/httpLib",
+    "firebug/lib/http",
     "firebug/lib/css",
     "firebug/chrome/window",
     "firebug/lib/string",
     "firebug/lib/array",
     "firebug/lib/system",
-    "firebug/net/netUtils",
+    "firebug/net/netUtils"
 ],
 function(Obj, Firebug, Locale, Events, Url, SourceLink, Http, Css, Win, Str,
     Arr, System, NetUtils) {
