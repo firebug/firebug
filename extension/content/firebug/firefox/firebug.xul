@@ -15,7 +15,7 @@
     </vbox>
 
     <keyset id="mainkeyset">
-        <key oncommand="window.close()" key='W' modifiers='accel'/>
+        <key oncommand="exportFirebug();window.close();" key='W' modifiers='accel'/>
         <key oncommand="doFirefoxCommand('Browser:Reload')" keycode='VK_F5'/>
         <key oncommand="doFirefoxCommand('Browser:Reload')" key='r' modifiers='accel'/>
         <key oncommand="doFirefoxCommand('Browser:ReloadSkipCache')" keycode='VK_F5' modifiers='accel'/>
@@ -60,6 +60,7 @@
 
         exportFirebug = function()
         {
+            exportFirebug = null;
             var Firebug = opener.Firebug, fbc = Firebug.chrome;
 
             fbc.originalBrowser.contentWindow.onunload = null;
