@@ -15,7 +15,6 @@ var FIREBUG_MODULES = [
     "resource://firebug/firebug-trace-service.js",
     "resource://firebug/loader.js",
     "resource://firebug/locale.js",
-    "resource://firebug/moduleLoader.js",
     "resource://firebug/observer-service.js",
     "resource://firebug/require-debug.js",
     "resource://firebug/require.js",
