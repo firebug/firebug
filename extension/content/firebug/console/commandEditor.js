@@ -41,7 +41,7 @@ Firebug.CommandEditor = Obj.extend(Firebug.Module,
         var config =
         {
             mode: SourceEditor.MODES.JAVASCRIPT,
-            showLineNumbers: true,
+            showLineNumbers: false,
             theme: "chrome://firebug/skin/orion-firebug.css"
         };
 
