@@ -8,7 +8,7 @@ define([
     "firebug/chrome/firefox",
     "firebug/lib/xpcom",
     "firebug/lib/locale",
-    "firebug/html/htmlLib",
+    "firebug/lib/html",
     "firebug/lib/events",
     "firebug/lib/wrapper",
     "firebug/lib/options",
@@ -27,7 +27,7 @@ define([
     "firebug/chrome/menu",
     "arch/compilationunit",
 ],
-function(Obj, Arr, Firebug, Domplate, Firefox, Xpcom, Locale, HTMLLib, Events, Wrapper, Options,
+function(Obj, Arr, Firebug, Domplate, Firefox, Xpcom, Locale, Html, Events, Wrapper, Options,
     Url, SourceLink, StackFrame, Css, Dom, Win, System, Xpath, Str, Xml, ToggleBranch,
     EventMonitor, Menu, CompilationUnit) {
 
@@ -1137,7 +1137,7 @@ FirebugReps.TextNode = domplate(Firebug.Rep,
         // Text nodes have two displays in HTML panel, inline and distinct
         // node. We need to examine which case we are dealing with in order to
         // select the proper object.
-        if (HTMLLib.hasNoElementChildren(node.parentNode))
+        if (Html.hasNoElementChildren(node.parentNode))
         {
             node = node.parentNode;
         }

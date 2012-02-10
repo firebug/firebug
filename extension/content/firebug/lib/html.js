@@ -23,7 +23,7 @@ const SHOW_ALL = Ci.nsIDOMNodeFilter.SHOW_ALL;
  * @class Static utility class. Contains utilities used for displaying and
  *        searching a HTML tree.
  */
-var HTMLLib =
+var Html =
 {
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
     // Node Search Utilities
@@ -44,7 +44,7 @@ var HTMLLib =
     NodeSearch: function(text, root, panelNode, ioBox, walker)
     {
         root = root.documentElement || root;
-        walker = walker || new HTMLLib.DOMWalker(root);
+        walker = walker || new Html.DOMWalker(root);
         var re = new Search.ReversibleRegExp(text, "m");
         var matchCount = 0;
 
@@ -113,7 +113,7 @@ var HTMLLib =
             var node;
             while (node = walkNode())
             {
-                if (node.nodeType == Node.TEXT_NODE && HTMLLib.isSourceElement(node.parentNode))
+                if (node.nodeType == Node.TEXT_NODE && Html.isSourceElement(node.parentNode))
                     continue;
 
                 var m = this.checkNode(node, reverse, caseSensitive);
@@ -202,7 +202,7 @@ var HTMLLib =
                 var nodeBox = ioBox.openToObject(node.ownerElement);
                 if (nodeBox)
                 {
-                    var attrNodeBox = HTMLLib.findNodeAttrBox(nodeBox, node.nodeName);
+                    var attrNodeBox = Html.findNodeAttrBox(nodeBox, node.nodeName);
                     return Dom.getChildByClass(attrNodeBox, isValue ? "nodeValue" : "nodeName");
                 }
             }
@@ -217,7 +217,7 @@ var HTMLLib =
                 {
                     var nodeBox = ioBox.openToObject(node.parentNode);
                     if (Css.hasClass(nodeBox, "textNodeBox"))
-                        nodeBox = HTMLLib.getTextElementTextBox(nodeBox);
+                        nodeBox = Html.getTextElementTextBox(nodeBox);
                     return nodeBox;
                 }
             }
@@ -303,7 +303,7 @@ var HTMLLib =
      */
     SelectorSearch: function(text, doc, panelNode, ioBox)
     {
-        this.parent = new HTMLLib.NodeSearch(text, doc, panelNode, ioBox);
+        this.parent = new Html.NodeSearch(text, doc, panelNode, ioBox);
 
         /**
          * Finds the first match within the document.
@@ -652,7 +652,7 @@ var HTMLLib =
                     (element.ownerDocument instanceof Ci.nsIDOMDocumentXBL), element);
             }
 
-            var walker = new HTMLLib.ElementWalker();
+            var walker = new Html.ElementWalker();
             var child = walker.getFirstChild(element);
 
             while (child)
@@ -731,7 +731,7 @@ var HTMLLib =
         {
             for (var child = element.firstChild; child; child = child.nextSibling)
             {
-                if (!HTMLLib.isWhitespaceText(child))
+                if (!Html.isWhitespaceText(child))
                     return false;
             }
         }
@@ -756,7 +756,7 @@ var HTMLLib =
             // only return a non-whitespace node
             for (var child = node.nextSibling; child; child = child.nextSibling)
             {
-                if (!HTMLLib.isWhitespaceText(child))
+                if (!Html.isWhitespaceText(child))
                     return child;
             }
         }
@@ -838,9 +838,9 @@ var HTMLLib =
 // ********************************************************************************************* //
 // Registration
 
-HTMLLib.ElementWalker.prototype = HTMLLib.ElementWalkerFunctions;
+Html.ElementWalker.prototype = Html.ElementWalkerFunctions;
 
-return HTMLLib;
+return Html;
 
 // ********************************************************************************************* //
 });
