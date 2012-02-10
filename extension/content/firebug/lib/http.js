@@ -426,6 +426,15 @@ Http.isXHR = function(request)
     return false;
 },
 
+// ********************************************************************************************* //
+// Conversions
+
+Http.convertToUnicode = Deprecated.deprecated("Function moved to 'firebug/lib/string' module",
+    Str.convertToUnicode);
+
+Http.convertFromUnicode = Deprecated.deprecated("Function moved to 'firebug/lib/string' module",
+    Str.convertFromUnicode);
+
 // ************************************************************************************************
 // Network Tracing
 
