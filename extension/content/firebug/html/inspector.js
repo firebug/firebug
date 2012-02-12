@@ -336,6 +336,9 @@ Firebug.Inspector = Obj.extend(Firebug.Module,
         // Make sure there are no (indirect) references to the page document.
         this.inspectingPanel = null;
         this.inspectingContext = null;
+
+        if (Firebug.isDetached())
+            window.focus();
     },
 
     /**
