@@ -832,8 +832,12 @@ Firebug.InlineEditor.prototype = domplate(Firebug.BaseEditor,
     {
         // Try to find a number around the cursor to increment.
         var start, end;
-        if (/^-?[0-9.]+$/.test(value.substring(offset, offsetEnd)))
+        if (/^-?[0-9.]/.test(value.substring(offset, offsetEnd)) &&
+            !(info && /\d/.test(value.charAt(offset-1) + value.charAt(offsetEnd))))
         {
+            // We have a number selected, possibly with a suffix, and we are not in
+            // the disallowed case of just part of a known number being selected.
+            // Use that number.
             start = offset;
             end = offsetEnd;
         }
