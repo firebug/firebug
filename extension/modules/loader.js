@@ -472,8 +472,26 @@ FirebugLoader.registerDefaultPrefs = function (prefMap, domain)
     {
         var value = prefMap[name];
         var type = prefTypeMap[typeof value];
-
-        pb["set" + type](name, value);
+        try
+        {
+            pb["set" + type](name, value);
+        }
+        catch(e)
+        {
+            // due to some error in older version of firebug user ended up with wrong type 
+            if (e.result == 0x8000ffff)
+            {
+                try
+                {
+                    pb.clearUserPref(name);
+                    pb["set" + type](name, value);
+                }
+                catch(e)
+                {
+                    Cu.reportError("firebug can't set default value for " + name);
+                }
+            }
+        }
     }
 }
 
