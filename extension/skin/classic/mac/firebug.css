@@ -77,6 +77,7 @@
     margin-bottom: 2px;
     margin-right: -12px;
     -moz-border-image: url(chrome://firebug/skin/mac/search-panel.png) 16 50 24 12 / 16px 50px 24px 12px repeat;
+    color: #ffffff;
 }
 
 #fbSearchOptionsPanel[position="after_end"] {
