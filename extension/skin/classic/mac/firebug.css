@@ -79,6 +79,7 @@
     -moz-border-image: url(chrome://firebug/skin/mac/search-panel.png) 16 50 24 12 stretch;
     -moz-border-image-slice: 16 50 24 12 fill;
     border-width: 16px 50px 24px 12px;
+    border-style: solid;
     color: #ffffff;
 }
 
