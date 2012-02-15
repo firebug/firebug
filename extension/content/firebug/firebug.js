@@ -293,6 +293,8 @@ window.Firebug =
         if (this.isShutdown)
             return;
 
+        this.isShutdown = true;
+
         this.shutdownUI();
 
         Events.dispatch(modules, "shutdown");
@@ -313,8 +315,6 @@ window.Firebug =
             Components.utils.import("resource://firebug/observer-service.js");
             fbObserverService.traceStacksForTrack();
         }
-
-        this.isShutdown = true;
 
         if (FBTrace.DBG_INITIALIZE)
             FBTrace.sysout("firebug.shutdown exited ");
@@ -478,6 +478,10 @@ window.Firebug =
     {
         modules.push.apply(modules, arguments);
 
+        // Fire the initialize event for modules that are registered later.
+        if (Firebug.isInitialized)
+            Events.dispatch(arguments, "initialize", []);
+
         if (FBTrace.DBG_REGISTRATION)
         {
             for (var i = 0; i < arguments.length; ++i)
@@ -489,6 +493,10 @@ window.Firebug =
     {
         for (var i = 0; i < arguments.length; ++i)
             Arr.remove(modules, arguments[i]);
+
+        // Fire shutdown if module was unregistered dynamically (not on Firebug shutdown).
+        if (!Firebug.isShutdown)
+            Events.dispatch(arguments, "shutdown", []);
     },
 
     registerActivableModule: function()
@@ -530,8 +538,13 @@ window.Firebug =
 
     unregisterPanel: function(panelType)
     {
-        FBTrace.sysout("firebug.unregisterPanel: " +
-            (panelType ? panelType.prototype.name : "Undefined panelType"));
+        var panelName = panelType ? panelType.prototype.name : null;
+
+        if (FBTrace.DBG_REGISTRATION)
+        {
+            FBTrace.sysout("firebug.unregisterPanel: " +
+                (panelName ? panelName : "Undefined panelType"));
+        }
 
         // Remove all instance of the panel.
         Firebug.connection.eachContext(function (context)
@@ -553,6 +566,18 @@ window.Firebug =
         }
 
         delete panelTypeMap[panelType.prototype.name];
+
+        // We don't have to update Firebug UI if it's just closing.
+        if (this.isShutdown)
+            return;
+
+        // Make sure another panel is selected if the current one is has been removed.
+        var panel = this.chrome.getSelectedPanel();
+        if (panel.name == panelName)
+            Firebug.chrome.selectPanel("html");
+
+        // The panel tab must be removed from the UI.
+        Firebug.chrome.syncMainPanels();
     },
 
     registerRep: function()
@@ -1625,10 +1650,8 @@ Firebug.Panel = Obj.extend(new Firebug.Listener(),
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+    // Toolbar
 
-    /**
-     * Toolbar helpers
-     */
     showToolbarButtons: function(buttonsId, show)
     {
         try
@@ -1641,6 +1664,11 @@ Firebug.Panel = Obj.extend(new Firebug.Listener(),
             if (FBTrace.DBG_ERRORS)
                 FBTrace.sysout("firebug.Panel showToolbarButtons FAILS "+exc, exc);
         }
+    },
+
+    onGetPanelToolbarButtons: function(panel, items)
+    {
+        return [];
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

@@ -369,6 +369,10 @@
                                             tooltiptext="firebug.StepOut"
                                             class="toolbar-image-button fbInternational"/>
                                     </hbox>
+
+                                    <!-- Toolbar buttons provided by extensions through Firebug API -->
+                                    <hbox id="fbPanelToolbar" collapsed="true" class="noTabStop">
+                                    </hbox>
                                 </hbox>
                             </toolbar>
                         </toolbox>

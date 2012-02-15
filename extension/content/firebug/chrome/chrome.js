@@ -10,6 +10,7 @@ define([
     "firebug/lib/css",
     "firebug/lib/system",
     "firebug/chrome/menu",
+    "firebug/chrome/toolbar",
     "firebug/lib/url",
     "firebug/lib/locale",
     "firebug/lib/string",
@@ -17,7 +18,7 @@ define([
     "firebug/js/fbs",
     "firebug/chrome/window",
 ],
-function chromeFactory(Obj, Firefox, Dom, Css, System, Menu, Url, Locale, String,
+function chromeFactory(Obj, Firefox, Dom, Css, System, Menu, Toolbar, Url, Locale, String,
     Events, FBS, Win) {
 
 // ********************************************************************************************* //
@@ -1664,6 +1665,31 @@ var FirebugChrome =
         if (panel && panel.breakable)
             Firebug.Breakpoint.toggleBreakOnNext(panel);
     },
+
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+    // Main Toolbar
+
+    appendToolbarButton: function(button, before)
+    {
+        FBTrace.sysout("append Toolb button");
+        var toolbar = FirebugChrome.$("fbPanelBar1-buttons");
+        var element = Toolbar.createToolbarButton(toolbar, button, before);
+        element.repObject = button;
+    },
+
+    removeToolbarButton: function(button)
+    {
+        var toolbar = FirebugChrome.$("fbPanelBar1-buttons");
+        for (var child = toolbar.firstChild; child; child = child.nextSibling)
+        {
+            if (child.repObject == button)
+            {
+                toolbar.removeChild(child);
+                break;
+            }
+        }
+    },
+
 };  // end of FirebugChrome
 
 // ********************************************************************************************* //
@@ -1846,6 +1872,29 @@ function onSelectingPanel(event)
     {
         Dom.collapse(child, true);
         child = child.nextSibling;
+    }
+
+    // Those extensions that don't use XUL overlays (e.g. bootstrapped extensions)
+    // can provide toolbar buttons throug Firebug APIs.
+    var panelToolbar = FirebugChrome.$("fbPanelToolbar");
+    Dom.eraseNode(panelToolbar);
+
+    if (panel)
+    {
+        // Get buttons from the current panel.
+        var buttons;
+        if (panel.getPanelToolbarButtons)
+            buttons = panel.getPanelToolbarButtons();
+
+        if (!buttons)
+            buttons = [];
+
+        Events.dispatch(Firebug.uiListeners, "onGetPanelToolbarButtons", [panel, buttons]);
+
+        for (var i=0; i<buttons.length; ++i)
+            Toolbar.createToolbarButton(panelToolbar, buttons[i]);
+
+        Dom.collapse(panelToolbar, buttons.length == 0);
     }
 
     // Calling Firebug.showPanel causes dispatching 'showPanel' to all modules.

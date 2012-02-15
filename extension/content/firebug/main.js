@@ -114,12 +114,10 @@ require(config, modules, function(ChromeFactory, FBL, Firebug, Browser)
         var prevResourcesReady = requirejs.resourcesReady;
         requirejs.resourcesReady = function(isReady)
         {
+            // Extensions are using the same loader so, make sure to not
+            // initialize Firebug twice.
             if (Firebug.isInitialized)
-            {
-                if (FBTrace.DBG_INITIALIZE)
-                    FBTrace.sysout("main; Firebug already initialized");
                 return;
-            }
 
             if (isReady && requirejs.resourcesDone)
             {
