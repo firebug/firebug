@@ -2,36 +2,8 @@
 
 // ********************************************************************************************* //
 
-// xxxHonza: this file should be transformed into AMD module
-function OpenEditorShowHide(event)
-{
-    var doc = event.target.ownerDocument;
-    var item = doc.getElementById("menu_firebugOpenWithEditor");
-
-    var popupNode = doc.popupNode;
-    var hidden = (popupNode instanceof HTMLInputElement
-        || popupNode instanceof HTMLIFrameElement
-        || popupNode instanceof HTMLTextAreaElement)
-
-    if (hidden)
-    {
-        item.hidden = true;
-        return;
-    }
-
-    var editor = Firebug.ExternalEditors.getDefaultEditor();
-    if (!editor)
-    {
-        item.hidden = true;
-        return;
-    }
-
-    item.hidden = false;
-    item.setAttribute('image', editor.image);
-    item.setAttribute('label', editor.label);
-    item.value = editor.id;
-}
-
+// xxxHonza: this file should be transformed into AMD module.
+// Or perhaps joined with an existing module?
 function addOpenEditorShowHide(event)
 {
     top.window.removeEventListener("load", addOpenEditorShowHide, false);
@@ -39,10 +11,7 @@ function addOpenEditorShowHide(event)
     var doc = top.window.document;
     var contextMenu = doc.getElementById("contentAreaContextMenu");
     if (contextMenu)
-    {
         addContextToForms();
-        contextMenu.addEventListener("popupshowing", OpenEditorShowHide, false);
-    }
 };
 
 function addContextToForms(contextMenu)
