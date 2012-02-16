@@ -745,16 +745,20 @@ Firebug.CSSStyleSheetPanel.prototype = Obj.extend(Firebug.Panel,
     supportsObject: function(object, type)
     {
         if (object instanceof window.CSSStyleSheet)
+        {
             return 1;
-        else if (object instanceof window.CSSStyleRule)
+        }
+        else if (object instanceof window.CSSRule ||
+            (object instanceof window.CSSStyleDeclaration && object.parentRule) ||
+            (object instanceof SourceLink.SourceLink && object.type == "css" &&
+                Url.reCSS.test(object.href)))
+        {
             return 2;
-        else if (object instanceof window.CSSStyleDeclaration && object.parentRule)
-            return 2;
-        else if (object instanceof SourceLink.SourceLink && object.type == "css" &&
-            Url.reCSS.test(object.href))
-            return 2;
+        }
         else
+        {
             return 0;
+        }
     },
 
     updateLocation: function(styleSheet)
@@ -821,7 +825,7 @@ Firebug.CSSStyleSheetPanel.prototype = Obj.extend(Firebug.Panel,
             object = object.parentRule;
         }
 
-        if (object instanceof window.CSSStyleRule)
+        if (object instanceof window.CSSRule)
         {
             this.navigate(object.parentStyleSheet);
             this.highlightRule(object);
