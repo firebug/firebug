@@ -1407,7 +1407,7 @@ FirebugReps.CSSRule = domplate(Firebug.Rep,
     getTooltip: function(rule)
     {
         if (rule instanceof CSSFontFaceRule)
-            return Css.extractURLs(rule.style.getPropertyValue("src"));
+            return Css.extractURLs(rule.style.getPropertyValue("src")).join(", ");
 
         return "";
     }
