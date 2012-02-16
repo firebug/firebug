@@ -748,7 +748,7 @@ Firebug.CSSStyleSheetPanel.prototype = Obj.extend(Firebug.Panel,
             return 1;
         else if (object instanceof window.CSSStyleRule)
             return 2;
-        else if (object instanceof window.CSSStyleDeclaration)
+        else if (object instanceof window.CSSStyleDeclaration && object.parentRule)
             return 2;
         else if (object instanceof SourceLink.SourceLink && object.type == "css" &&
             Url.reCSS.test(object.href))
