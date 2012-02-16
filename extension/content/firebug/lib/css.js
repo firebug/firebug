@@ -635,6 +635,17 @@ Css.stripUnits = function(value)
     );
 }
 
+Css.extractURLs = function(value)
+{
+    var urls = [];
+    var urlValues = value.match(/url\((["']).*?\1\)/g);
+
+    for (var i in urlValues)
+        urls.push(urlValues[i].replace(/url\((["'])(.*?)\1\)/, "$2"));
+
+    return urls;
+}
+
 Css.rgbToHex = function(value)
 {
     return value.replace(/\brgb\((\d{1,3}),\s*(\d{1,3}),\s*(\d{1,3})\)/gi,

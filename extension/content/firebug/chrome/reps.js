@@ -1316,6 +1316,103 @@ FirebugReps.StyleSheet = domplate(Firebug.Rep,
     }
 });
 
+//********************************************************************************************* //
+
+FirebugReps.CSSRule = domplate(Firebug.Rep,
+{
+    tag:
+        OBJECTLINK("$object|getType ", SPAN({"class": "objectPropValue"}, "$object|getDescription")),
+
+    getType: function(rule)
+    {
+        if (rule instanceof window.CSSStyleRule)
+        {
+            return "CSSStyleRule";
+        }
+        else if (rule instanceof window.CSSFontFaceRule)
+        {
+            return "CSSFontFaceRule";
+        }
+        else if (rule instanceof window.CSSImportRule)
+        {
+            return "CSSImportRule";
+        }
+        else if (rule instanceof window.CSSMediaRule)
+        {
+            return "CSSMediaRule";
+        }
+        else if (rule instanceof window.CSSCharsetRule)
+        {
+            return "CSSCharsetRule";
+        }
+        else if ((window.CSSKeyframesRule && rule instanceof window.CSSKeyframesRule) ||
+            rule instanceof window.MozCSSKeyframesRule)
+        {
+            return "CSSKeyframesRule";
+        }
+        else if ((window.CSSKeyframeRule && rule instanceof window.CSSKeyframeRule) ||
+            rule instanceof window.MozCSSKeyframeRule)
+        {
+            return "CSSKeyframeRule";
+        }
+
+        return "CSSRule";
+    },
+
+    getDescription: function(rule)
+    {
+        if (rule instanceof window.CSSStyleRule)
+        {
+            return rule.selectorText;
+        }
+        else if (rule instanceof window.CSSFontFaceRule)
+        {
+            return rule.style.getPropertyValue("font-family");
+        }
+        else if (rule instanceof window.CSSImportRule)
+        {
+            return rule.href;
+        }
+        else if (rule instanceof window.CSSMediaRule)
+        {
+            return rule.media.mediaText;
+        }
+        else if (rule instanceof window.CSSCharsetRule)
+        {
+            return rule.encoding;
+        }
+        else if ((window.CSSKeyframesRule && rule instanceof window.CSSKeyframesRule) ||
+            rule instanceof window.MozCSSKeyframesRule)
+        {
+            return rule.name;
+        }
+        else if ((window.CSSKeyframeRule && rule instanceof window.CSSKeyframeRule) ||
+            rule instanceof window.MozCSSKeyframeRule)
+        {
+            return rule.keyText;
+        }
+
+        return "";
+    },
+
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+    className: "object",
+
+    supportsObject: function(object, type)
+    {
+        return object instanceof window.CSSRule;
+    },
+
+    getTooltip: function(rule)
+    {
+        if (rule instanceof CSSFontFaceRule)
+            return Css.extractURLs(rule.style.getPropertyValue("src"));
+
+        return "";
+    }
+});
+
 // ********************************************************************************************* //
 
 FirebugReps.Window = domplate(Firebug.Rep,
@@ -2973,6 +3070,7 @@ Firebug.registerRep(
     FirebugReps.TextNode,
     FirebugReps.Document,
     FirebugReps.StyleSheet,
+    FirebugReps.CSSRule,
     FirebugReps.Event,
     FirebugReps.SourceLink,
     FirebugReps.CompilationUnit,
