@@ -21,6 +21,7 @@ var firebugURLs =
     discuss: "http://groups.google.com/group/firebug",
     issues: "http://code.google.com/p/fbug/issues/list",
     donate: "http://getfirebug.com/getinvolved",
+    extensions: "http://getfirebug.com/wiki/index.php/Firebug_Extensions",
     firstRunPage: "http://getfirebug.com/firstrun#Firebug "
 };
 
@@ -816,6 +817,14 @@ var firebugMenuPopup = $menupopup({id: "fbFirebugMenuPopup",
                 label: "firebug.Website",
                 tooltiptext: "firebug.menu.tip.Website",
                 oncommand: "Firebug.GlobalUI.visitWebsite('main')",
+                "class": "fbInternational"
+            }),
+            $menuitem(
+            {
+                id: "menu_firebugUrlExtensions",
+                label: "firebug.menu.Extensions",
+                tooltiptext: "firebug.menu.tip.Extensions",
+                oncommand: "Firebug.GlobalUI.visitWebsite('extensions')",
                 "class": "fbInternational"
             }),
             $menuitem(
