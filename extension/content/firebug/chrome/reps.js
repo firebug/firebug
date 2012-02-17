@@ -1371,7 +1371,7 @@ FirebugReps.CSSRule = domplate(Firebug.Rep,
         }
         else if (rule instanceof window.CSSImportRule)
         {
-            return rule.href;
+            return Url.getFileName(rule.href);
         }
         else if (rule instanceof window.CSSMediaRule)
         {
@@ -1408,6 +1408,8 @@ FirebugReps.CSSRule = domplate(Firebug.Rep,
     {
         if (rule instanceof CSSFontFaceRule)
             return Css.extractURLs(rule.style.getPropertyValue("src")).join(", ");
+        else if (rule instanceof window.CSSImportRule)
+            return rule.href;
 
         return "";
     }
