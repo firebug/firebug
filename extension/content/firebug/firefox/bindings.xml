@@ -1846,6 +1846,32 @@
     </handlers>
 </binding>
 
+<binding id="commandEditor" extends="chrome://global/content/bindings/textbox.xml#textarea">
+    <handlers>
+        <handler event="input"><![CDATA[
+            Firebug.CommandLine.update(Firebug.currentContext);
+        ]]></handler>
+
+        <handler event="keypress" keycode="VK_TAB"><![CDATA[
+            var input = document.getAnonymousElementByAttribute(this, "anonid", "input");
+            FBL.insertTextIntoElement(input, Firebug.Editor.tabCharacter);
+            event.preventDefault();
+        ]]></handler>
+
+        <handler event="keypress" keycode="VK_RETURN" modifiers="meta" preventdefault="true"><![CDATA[
+            Firebug.CommandLine.enter(Firebug.currentContext);
+        ]]></handler>
+
+        <handler event="keypress" keycode="VK_RETURN" modifiers="control" preventdefault="true"><![CDATA[
+            Firebug.CommandLine.enter(Firebug.currentContext);
+        ]]></handler>
+
+        <handler event="keypress" keycode="VK_ESCAPE" preventdefault="true"><![CDATA[
+            Firebug.CommandLine.cancel(Firebug.currentContext);
+        ]]></handler>
+    </handlers>
+</binding>
+
 <binding id="splitmenu" extends="chrome://global/content/bindings/menu.xml#menuitem-base">
     <content align="stretch">
         <xul:menuitem anonid="item" flex="1"

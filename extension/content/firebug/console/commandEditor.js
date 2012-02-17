@@ -17,8 +17,19 @@ var Cc = Components.classes;
 var Ci = Components.interfaces;
 var Cu = Components.utils;
 
-// Introduced in Firefox 8
-Cu["import"]("resource:///modules/source-editor.jsm");
+var MODE_JAVASCRIPT = 0;
+
+try
+{
+    // Introduced in Firefox 8
+    Cu["import"]("resource:///modules/source-editor.jsm");
+    MODE_JAVASCRIPT = SourceEditor.MODES.JAVASCRIPT;
+}
+catch (err)
+{
+    if (FBTrace.DBG_ERRORS)
+        FBTrace.sysout("commandEditor: EXCEPTION source-editors is not available!");
+}
 
 // ********************************************************************************************* //
 // Command Editor
@@ -36,11 +47,14 @@ Firebug.CommandEditor = Obj.extend(Firebug.Module,
         if (this.editor)
             return;
 
-        this.editor = new SourceEditor();
+        if (typeof(SourceEditor) != "undefined")
+            this.editor = new SourceEditor();
+        else
+            this.editor = new TextEditor();
 
         var config =
         {
-            mode: SourceEditor.MODES.JAVASCRIPT,
+            mode: MODE_JAVASCRIPT,
             showLineNumbers: false,
             theme: "chrome://firebug/skin/orion-firebug.css"
         };
@@ -178,8 +192,15 @@ Firebug.CommandEditor = Obj.extend(Firebug.Module,
         if (!this.editor || !this.editor._view)
             return;
 
-        var doc = this.editor._view._frame.contentDocument;
-        doc.body.style.fontSizeAdjust = adjust;
+        if (typeof(SourceEditor))
+        {
+            var doc = this.editor._view._frame.contentDocument;
+            doc.body.style.fontSizeAdjust = adjust;
+        }
+        else
+        {
+            this.editor.textBox.style.fontSizeAdjust = adjust;
+        }
     }
 });
 
@@ -195,6 +216,73 @@ Firebug.CommandEditor.__defineSetter__("value", function(val)
 {
     this.setText(val);
 });
+
+// ********************************************************************************************* //
+// Text Editor
+
+/**
+ * A simple <textbox> element is used in environments where the Orion SourceEditor is not
+ * available (such as SeaMonkey)
+ */
+function TextEditor() {}
+TextEditor.prototype =
+{
+    init: function(editorElement, config, callback)
+    {
+        var commandEditorBox = editorElement.parentNode;
+
+        this.textBox = commandEditorBox.ownerDocument.createElement("textbox");
+        this.textBox.setAttribute("id", "fbCommandEditor");
+        this.textBox.setAttribute("multiline", "true");
+        this.textBox.setAttribute("flex", "1");
+        this.textBox.setAttribute("newlines", "pasteintact");
+        this.textBox.setAttribute("label", "CommandEditor");
+
+        commandEditorBox.replaceChild(this.textBox, editorElement);
+
+        // The original source editor is also loaded asynchronously.
+        setTimeout(callback);
+    },
+
+    destroy: function()
+    {
+    },
+
+    addEventListener: function(type, callback)
+    {
+        Events.addEventListener(this.textBox, type, callback, true);
+    },
+
+    removeEventListener: function(type, callback)
+    {
+        Events.removeEventListener(this.textBox, type, callback, true);
+    },
+
+    setCaretOffset: function(offset)
+    {
+        this.textBox.setCaretOffset(offset);
+    },
+
+    setText: function(text)
+    {
+        this.textBox.value = text;
+    },
+
+    getText: function()
+    {
+        return this.textBox.value;
+    },
+
+    setSelection: function(start, end)
+    {
+        this.textBox.setSelection(start, end);
+    },
+
+    hasFocus: function()
+    {
+        return this.textBox.getAttribute("focused") == "true";
+    }
+}
 
 // ********************************************************************************************* //
 // Registration
