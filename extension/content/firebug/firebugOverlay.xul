@@ -165,7 +165,7 @@
                                             label="firebug.console.Persist"
                                             class="toolbar-text-button fbInternational"
                                             type="checkbox"
-                                            tooltiptext="firebug.console.Do Not Clear On Reload"
+                                            tooltiptext="firebug.console.Do_Not_Clear_On_Reload2"
                                             command="cmd_togglePersistConsole"/>
                                         <toolbarbutton id="fbToggleProfiling" label="firebug.Profile"
                                             class="toolbar-text-button fbInternational"
@@ -270,10 +270,10 @@
                                         <toolbarseparator class="fbPanelSpecificButtonsSeparator"/>
                                         <toolbarbutton id="fbNetClear" label="firebug.Clear"
                                             class="toolbar-text-button fbInternational"
-                                            tooltiptext="firebug.ClearTooltip" command="cmd_clearNet"/>
+                                            tooltiptext="net.tip.Clear" command="cmd_clearNet"/>
                                         <toolbarbutton id="fbNetPersist" label="firebug.console.Persist"
                                             class="toolbar-text-button fbInternational"
-                                            tooltiptext="firebug.console.Do Not Clear On Reload"
+                                            tooltiptext="firebug.console.Do_Not_Clear_On_Reload2"
                                             command="cmd_togglePersistNet"/>
                                         <hbox id="fbNetButtonsFilter" class="noTabStop">
                                             <toolbarseparator/>
