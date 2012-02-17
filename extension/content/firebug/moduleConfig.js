@@ -87,7 +87,7 @@ Firebug.registerExtension = function(extName, extConfig)
         return;
     }
 
-    if (FBTrace.DBG_INITIALIZE)
+    if (FBTrace.DBG_REGISTRATION)
         FBTrace.sysout("Extension registered: " + extName);
 
     this.extensions[extName] = extConfig;
@@ -125,7 +125,7 @@ Firebug.registerExtension = function(extName, extConfig)
         }
         catch (err)
         {
-            if (FBTrace.DBG_ERRORS || FBTrace.DBG_INITIALIZE)
+            if (FBTrace.DBG_ERRORS || FBTrace.DBG_REGISTRATION)
                 FBTrace.sysout("firebug.main; Extension: " + extName + " EXCEPTION " + err, err);
         }
     });
@@ -144,10 +144,21 @@ Firebug.unregisterExtension = function(extName)
     if (!extConfig)
         return;
 
-    if (extConfig.app && extConfig.app.shutdown)
-        extConfig.app.shutdown();
+    try
+    {
+        if (extConfig.app && extConfig.app.shutdown)
+            extConfig.app.shutdown();
 
-    delete this.extensions[extName];
+        delete this.extensions[extName];
+
+        if (FBTrace.DBG_REGISTRATION)
+            FBTrace.sysout("Extension unregistered: " + extName);
+    }
+    catch (err)
+    {
+        if (FBTrace.DBG_ERRORS || FBTrace.DBG_REGISTRATION)
+            FBTrace.sysout("unregisterExtension: " + extName + " EXCEPTION " + err, err);
+    }
 }
 
 Firebug.getExtensionConfig = function(extName)

@@ -573,7 +573,7 @@ window.Firebug =
 
         // Make sure another panel is selected if the current one is has been removed.
         var panel = this.chrome.getSelectedPanel();
-        if (panel.name == panelName)
+        if (panel && panel.name == panelName)
             Firebug.chrome.selectPanel("html");
 
         // The panel tab must be removed from the UI.
