@@ -770,7 +770,7 @@ var firebugMenuPopup = $menupopup({id: "fbFirebugMenuPopup",
             {
                 id: "menu_activateSameOrigin",
                 type: "checkbox",
-                label: "firebug.menu.Activate_Same_Origin_URLs",
+                label: "firebug.menu.Activate_Same_Origin_URLs2",
                 tooltiptext: "firebug.menu.tip.Activate_Same_Origin_URLs",
                 oncommand: "Firebug.GlobalUI.onToggleOption(this)",
                 option: "activateSameOrigin",
