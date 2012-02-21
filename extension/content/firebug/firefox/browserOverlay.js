@@ -80,11 +80,13 @@ function $el(name, attributes, children, parent)
     return el;
 }
 
-function $command(id, oncommand)
+function $command(id, oncommand, arg)
 {
     // Wrap the command within a startFirebug call. If Firebug isn't yet loaded
     // this will force it to load.
     oncommand = "Firebug.GlobalUI.startFirebug(function(){" + oncommand + "})";
+    if (arg) 
+        oncommand = "void function(arg){" + oncommand + "}(" + arg + ")";
 
     return $el("command", {
         id: id,
@@ -488,7 +490,7 @@ $command("cmd_toggleInspecting", "if (!Firebug.currentContext) Firebug.toggleBar
 $command("cmd_focusCommandLine", "if (!Firebug.currentContext) Firebug.toggleBar(true); Firebug.CommandLine.focus(Firebug.currentContext)");
 $command("cmd_toggleFirebug", "Firebug.toggleBar()");
 $command("cmd_detachFirebug", "Firebug.toggleDetachBar(false, true)");
-$command("cmd_inspect", "Firebug.Inspector.inspectFromContextMenu(document.popupNode);");
+$command("cmd_inspect", "Firebug.Inspector.inspectFromContextMenu(arg)", "document.popupNode");
 $command("cmd_toggleDetachFirebug", "Firebug.toggleDetachBar(false, true)");
 $command("cmd_increaseTextSize", "Firebug.Options.changeTextSize(1);");
 $command("cmd_decreaseTextSize", "Firebug.Options.changeTextSize(-1);");
