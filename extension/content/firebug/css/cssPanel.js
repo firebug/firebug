@@ -1471,7 +1471,14 @@ CSSEditor.prototype = domplate(Firebug.InlineEditor.prototype,
 
         var rule = Firebug.getRepObject(target);
 
-        if (Css.hasClass(target, "cssPropName"))
+        if (rule instanceof window.CSSCharsetRule)
+        {
+            if (FBTrace.DBG_CSS)
+                FBTrace.sysout("CSSEditor.saveEdit: @charset: " + previousValue + "->" + value);
+
+            rule.encoding = value;
+        }
+        else if (Css.hasClass(target, "cssPropName"))
         {
 
             if (value && previousValue != value)  // name of property has changed.
