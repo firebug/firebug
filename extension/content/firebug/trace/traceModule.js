@@ -19,6 +19,16 @@ function(Obj, Firebug) {
 Firebug.TraceModule = Obj.extend(Firebug.Module,
 {
     dispatchName: "traceModule",
+
+    getListenerByPrefix: function(prefix)
+    {
+        for (var i=0; i<this.fbListeners.length; i++)
+        {
+            var listener = this.fbListeners[i];
+            if (listener.prefix == prefix)
+                return listener;
+        }
+    }
 });
 
 return Firebug.TraceModule;

@@ -21,10 +21,11 @@ define([
     "firebug/lib/array",
     "firebug/lib/dom",
     "firebug/lib/http",
-    "firebug/js/fbs"
+    "firebug/js/fbs",
+    "firebug/trace/traceListener",
 ],
 function(FBL, Obj, Firefox, ChromeFactory, Domplate, Options, Locale, Events,
-    Wrapper, Url, Css, Win, Str, Arr, Dom, Http, FBS) {
+    Wrapper, Url, Css, Win, Str, Arr, Dom, Http, FBS, TraceListener) {
 
 // ********************************************************************************************* //
 // Constants
@@ -633,6 +634,27 @@ window.Firebug =
     {
         FBTrace.sysout("Firebug.registerMenuItem");
         menuItemControllers.push(menuItemController);
+    },
+
+    registerTracePrefix: function(prefix, type, removePrefix, styleURI)
+    {
+        var listener = Firebug.TraceModule.getListenerByPrefix(prefix);
+        if (listener && FBTrace.DBG_ERRORS)
+        {
+            FBTrace.sysout("firebug.registerTracePrefix; ERROR " +
+                "there is already such prefix registered!");
+            return;
+        }
+
+        listener = new TraceListener(prefix, type, removePrefix, styleURI);
+        Firebug.TraceModule.addListener(listener);
+    },
+
+    unregisterTracePrefix: function(prefix)
+    {
+        var listener = Firebug.TraceModule.getListenerByPrefix(prefix);
+        if (listener)
+            Firebug.TraceModule.removeListener(listener);
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
