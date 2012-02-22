@@ -350,12 +350,12 @@ NetPanel.prototype = Obj.extend(Firebug.ActivablePanel,
             {
                 label: "CopyRequestHeaders",
                 tooltiptext: "net.tip.Copy_Request_Headers",
-                command: Obj.bindFixed(this.copyHeaders, this, file.requestHeaders)
+                command: Obj.bindFixed(this.copyRequestHeaders, this, file)
             },
             {
                 label: "CopyResponseHeaders",
                 tooltiptext: "net.tip.Copy_Response_Headers",
-                command: Obj.bindFixed(this.copyHeaders, this, file.responseHeaders)
+                command: Obj.bindFixed(this.copyResponseHeaders, this, file)
             }
         );
 
@@ -460,20 +460,14 @@ NetPanel.prototype = Obj.extend(Firebug.ActivablePanel,
         System.copyToClipboard(url);
     },
 
-    copyHeaders: function(headers)
+    copyRequestHeaders: function(file)
     {
-        var lines = [];
-        if (headers)
-        {
-            for (var i = 0; i < headers.length; ++i)
-            {
-                var header = headers[i];
-                lines.push(header.name + ": " + header.value);
-            }
-        }
+        System.copyToClipboard(file.requestHeadersText);
+    },
 
-        var text = lines.join("\r\n");
-        System.copyToClipboard(text);
+    copyResponseHeaders: function(file)
+    {
+        System.copyToClipboard(file.responseHeadersText);
     },
 
     copyResponse: function(file)
