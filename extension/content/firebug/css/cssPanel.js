@@ -88,6 +88,17 @@ var CSSImportRuleTag = domplate(
     )
 });
 
+var CSSCharsetRuleTag = domplate(CSSDomplateBase,
+{
+    tag:
+        DIV({"class": "cssRule focusRow cssCharsetRule", _repObject: "$rule.rule"},
+            SPAN({"class": "cssRuleName"}, "@charset"),
+            " &quot;",
+            SPAN({"class": "cssRuleValue", $editable: "$rule|isEditable"}, "$rule.rule.encoding"),
+            "&quot;;"
+        )
+});
+
 var CSSFontFaceRuleTag = domplate(CSSDomplateBase,
 {
     tag:
@@ -370,6 +381,10 @@ Firebug.CSSStyleSheetPanel.prototype = Obj.extend(Firebug.Panel,
                 else if (rule instanceof window.CSSImportRule)
                 {
                     rules.push({tag: CSSImportRuleTag.tag, rule: rule});
+                }
+                else if (rule instanceof window.CSSCharsetRule)
+                {
+                    rules.push({tag: CSSCharsetRuleTag.tag, rule: rule});
                 }
                 else if (rule instanceof window.CSSMediaRule)
                 {
@@ -1578,6 +1593,10 @@ CSSEditor.prototype = domplate(Firebug.InlineEditor.prototype,
         if (expr.charAt(0) === "!")
         {
             return ["!important"];
+        }
+        else if (Dom.getAncestorByClass(this.target, "cssCharsetRule"))
+        {
+            return Css.charsets;
         }
         else if (Css.hasClass(this.target, "cssPropName"))
         {
