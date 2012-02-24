@@ -28,9 +28,6 @@ Firebug.TabContext = function(win, browser, chrome, persistedState)
     this.browser = browser;
     this.persistedState = persistedState;
 
-    // Backward compatibility with extensions.
-    browser.__defineGetter__("chrome", function() { return Firebug.chrome; });
-
     this.name = Url.normalizeURL(this.getWindowLocation().toString());
 
     this.windows = [];
