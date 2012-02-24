@@ -243,6 +243,7 @@ FirebugLoader.defaultPrefs = {
     "tabularLogMaxHeight": 200,
     "consoleFilterTypes": "all",
     "memoryProfilerEnable": false,
+    "preferJSDSourceLinks": false,  // Slows down logging in the Console panel
 
 // HTML
     "showCommentNodes": false,

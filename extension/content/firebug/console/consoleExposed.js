@@ -10,8 +10,9 @@ define([
     "firebug/console/errors",
     "firebug/trace/debug",
     "firebug/console/console",
+    "firebug/lib/options",
 ],
-function(FirebugReps, Locale, Wrapper, Url, Str, StackFrame, Errors, Debug, Console) {
+function(FirebugReps, Locale, Wrapper, Url, Str, StackFrame, Errors, Debug, Console, Options) {
 
 // ********************************************************************************************* //
 
@@ -294,9 +295,13 @@ function createFirebugConsole(context, win)
     {
         var sourceLink;
 
-        var stack = getJSDUserStack();
-        if (stack && stack.toSourceLink)
-            sourceLink = stack.toSourceLink();
+        // Using JSD to get user stack is time consuming.
+        if (Options.get("preferJSDSourceLinks"))
+        {
+            var stack = getJSDUserStack();
+            if (stack && stack.toSourceLink)
+                sourceLink = stack.toSourceLink();
+        }
 
         if (!sourceLink)
             sourceLink = linkToSource ? getStackLink() : null;
