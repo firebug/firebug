@@ -758,6 +758,9 @@ window.Firebug =
         // when there is no current context.
         //throw new Error("closeFirebug ERROR: no Firebug.currentContext ");
 
+        // Focus the browser window again
+        Firebug.currentContext.window.focus();
+
         Firebug.connection.closeContext(Firebug.currentContext, userCommands);
         Firebug.StartButton.resetTooltip();
     },
@@ -836,6 +839,9 @@ window.Firebug =
         {
             Firebug.setPlacement("minimized");
             this.showBar(false);
+
+            // Focus the browser window again 
+            Firebug.currentContext.window.focus();
         }
     },
 
