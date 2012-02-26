@@ -1184,13 +1184,12 @@ Firebug.AutoCompleter = function(caseSensitive, getRange, evaluator)
         this.adjustLastIndex(cycle);
         var completion = candidates[lastIndex];
 
-        // Split the completion into a user-typed and a filled-in part - the
-        // former's case should be retained.
-        var typedUntil = offset-exprOffset;
-        var preCompletion = lastExpr.substr(0, typedUntil);
-        var postCompletion = completion.substr(typedUntil);
+        // Adjust the case of the completion - when editing colors, 'd' should
+        // be completed into 'darkred', not 'darkRed'.
+        var userTyped = lastExpr.substr(0, offset-exprOffset);
+        completion = this.convertCompletionCase(completion, userTyped);
 
-        var line = preExpr + preCompletion + postCompletion + postExpr;
+        var line = preExpr + completion + postExpr;
         var offsetEnd = exprOffset + completion.length;
 
         // Show the completion
@@ -1271,6 +1270,28 @@ Firebug.AutoCompleter = function(caseSensitive, getRange, evaluator)
                 lastIndex = 0;
             else if (lastIndex < 0)
                 lastIndex = candidates.length - 1;
+        }
+    };
+
+    this.convertCompletionCase = function(completion, userTyped)
+    {
+        var preCompletion = completion.substr(0, userTyped.length);
+        if (preCompletion === userTyped)
+        {
+            // Trust the completion to be correct.
+            return completion;
+        }
+        else
+        {
+            // If the typed string is entirely in one case, use that.
+            if (userTyped === userTyped.toLowerCase())
+                return completion.toLowerCase();
+            if (userTyped === userTyped.toUpperCase())
+                return completion.toUpperCase();
+
+            // The typed string mixes case in some odd way; use the rest of
+            // the completion as-is.
+            return userTyped + completion.substr(userTyped.length);
         }
     };
 
