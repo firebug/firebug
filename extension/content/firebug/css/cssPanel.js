@@ -78,14 +78,23 @@ var CSSPropTag = domplate(CSSDomplateBase,
 var CSSRuleTag =
     TAG("$rule.tag", {rule: "$rule"});
 
-var CSSImportRuleTag = domplate(
+var CSSImportRuleTag = domplate(CSSDomplateBase,
 {
     tag:
         DIV({"class": "cssRule insertInto focusRow importRule", _repObject: "$rule.rule"},
         "@import &quot;",
         A({"class": "objectLink", _repObject: "$rule.rule.styleSheet"}, "$rule.rule.href"),
-        "&quot;;"
-    )
+        "&quot;",
+        SPAN({"class": "separator"}, "$rule.rule|getSeparator"),
+        SPAN({"class": "cssMediaQuery", $editable: "$rule|isEditable"},
+            "$rule.rule.media.mediaText"),
+        ";"
+    ),
+
+    getSeparator: function(rule)
+    {
+        return rule.media.mediaText == "" ? "" : " ";
+    }
 });
 
 var CSSCharsetRuleTag = domplate(CSSDomplateBase,
@@ -93,7 +102,7 @@ var CSSCharsetRuleTag = domplate(CSSDomplateBase,
     tag:
         DIV({"class": "cssRule focusRow cssCharsetRule", _repObject: "$rule.rule"},
             SPAN({"class": "cssRuleName"}, "@charset"),
-            " &quot;",
+            "&nbsp;&quot;",
             SPAN({"class": "cssRuleValue", $editable: "$rule|isEditable"}, "$rule.rule.encoding"),
             "&quot;;"
         )
@@ -563,6 +572,13 @@ Firebug.CSSStyleSheetPanel.prototype = Obj.extend(Firebug.Panel,
         Firebug.Editor.insertRowForObject(styleRuleBox);
     },
 
+    editMediaQuery: function(target)
+    {
+        var row = Dom.getAncestorByClass(target, "cssRule");
+        var mediaQueryBox = Dom.getChildByClass(row, "cssMediaQuery");
+        Firebug.Editor.startEditing(mediaQueryBox);
+    },
+
     insertPropertyRow: function(row)
     {
         Firebug.Editor.insertRowForObject(row);
@@ -1014,44 +1030,59 @@ Firebug.CSSStyleSheetPanel.prototype = Obj.extend(Firebug.Panel,
         }
 
         var cssRule = Dom.getAncestorByClass(target, "cssRule");
-        if (cssRule && Css.hasClass(cssRule, "cssEditableRule"))
+        if (cssRule)
         {
-            items.push(
-                "-",
-                {
-                    label: "NewProp",
-                    tooltiptext: "css.tip.New_Prop",
-                    id: "fbNewCSSProp",
-                    command: Obj.bindFixed(this.insertPropertyRow, this, target)
-                }
-            );
-
-            var propRow = Dom.getAncestorByClass(target, "cssProp");
-            if (propRow)
+            if(Css.hasClass(cssRule, "cssEditableRule"))
             {
-                var propName = Dom.getChildByClass(propRow, "cssPropName").textContent;
-                var isDisabled = Css.hasClass(propRow, "disabledStyle");
-
+                items.push(
+                    "-",
+                    {
+                        label: "NewProp",
+                        tooltiptext: "css.tip.New_Prop",
+                        id: "fbNewCSSProp",
+                        command: Obj.bindFixed(this.insertPropertyRow, this, target)
+                    }
+                );
+    
+                var propRow = Dom.getAncestorByClass(target, "cssProp");
+                if (propRow)
+                {
+                    var propName = Dom.getChildByClass(propRow, "cssPropName").textContent;
+                    var isDisabled = Css.hasClass(propRow, "disabledStyle");
+    
+                    items.push(
+                        {
+                            label: Locale.$STRF("EditProp", [propName]),
+                            tooltiptext: Locale.$STRF("css.tip.Edit_Prop", [propName]),
+                            nol10n: true,
+                            command: Obj.bindFixed(this.editPropertyRow, this, propRow)
+                        },
+                        {
+                            label: Locale.$STRF("DeleteProp", [propName]),
+                            tooltiptext: Locale.$STRF("css.tip.Delete_Prop", [propName]),
+                            nol10n: true,
+                            command: Obj.bindFixed(this.deletePropertyRow, this, propRow)
+                        },
+                        {
+                            label: Locale.$STRF("DisableProp", [propName]),
+                            tooltiptext: Locale.$STRF("css.tip.Disable_Prop", [propName]),
+                            nol10n: true,
+                            type: "checkbox",
+                            checked: isDisabled,
+                            command: Obj.bindFixed(this.disablePropertyRow, this, propRow)
+                        }
+                    );
+                }
+            }
+    
+            if (Css.hasClass(cssRule, "importRule"))
+            {
                 items.push(
                     {
-                        label: Locale.$STRF("EditProp", [propName]),
-                        tooltiptext: Locale.$STRF("css.tip.Edit_Prop", [propName]),
-                        nol10n: true,
-                        command: Obj.bindFixed(this.editPropertyRow, this, propRow)
-                    },
-                    {
-                        label: Locale.$STRF("DeleteProp", [propName]),
-                        tooltiptext: Locale.$STRF("css.tip.Delete_Prop", [propName]),
-                        nol10n: true,
-                        command: Obj.bindFixed(this.deletePropertyRow, this, propRow)
-                    },
-                    {
-                        label: Locale.$STRF("DisableProp", [propName]),
-                        tooltiptext: Locale.$STRF("css.tip.Disable_Prop", [propName]),
-                        nol10n: true,
-                        type: "checkbox",
-                        checked: isDisabled,
-                        command: Obj.bindFixed(this.disablePropertyRow, this, propRow)
+                        label: "css.menu.Edit_Media_Query",
+                        tooltiptext: "css.menu.tip.Edit_Media_Query",
+                        id: "fbEditMediaQuery",
+                        command: Obj.bindFixed(this.editMediaQuery, this, target)
                     }
                 );
             }
@@ -1471,7 +1502,25 @@ CSSEditor.prototype = domplate(Firebug.InlineEditor.prototype,
 
         var rule = Firebug.getRepObject(target);
 
-        if (rule instanceof window.CSSCharsetRule)
+        if (rule instanceof window.CSSImportRule && Css.hasClass(target, "cssMediaQuery"))
+        {
+            if (FBTrace.DBG_CSS)
+            {
+                FBTrace.sysout("CSSEditor.saveEdit: @import media query: " +
+                    previousValue + "->" + value);
+            }
+
+            rule.media.mediaText = value;
+
+            // Workaround to apply the media query changes
+            rule.parentStyleSheet.disabled = true;
+            rule.parentStyleSheet.disabled = false;
+
+            row = Dom.getAncestorByClass(target, "importRule");
+            row.getElementsByClassName("separator").item(0).innerHTML = 
+                value == "" ? "" : "&nbsp;";
+        }
+        else if (rule instanceof window.CSSCharsetRule)
         {
             if (FBTrace.DBG_CSS)
                 FBTrace.sysout("CSSEditor.saveEdit: @charset: " + previousValue + "->" + value);
@@ -1600,6 +1649,10 @@ CSSEditor.prototype = domplate(Firebug.InlineEditor.prototype,
         if (expr.charAt(0) === "!")
         {
             return ["!important"];
+        }
+        else if (Dom.getAncestorByClass(this.target, "importRule"))
+        {
+            return [];
         }
         else if (Dom.getAncestorByClass(this.target, "cssCharsetRule"))
         {
