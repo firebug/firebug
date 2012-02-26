@@ -162,7 +162,7 @@
     -moz-appearance: none;
     margin: 0 0px 1px 2px;
     border: 1px solid;
-    -moz-border-radius: 5px;  /* Matched to the a11y outline impl */
+    border-radius: 5px;  /* Matched to the a11y outline impl */
     -moz-border-top-colors: #96969D;
     -moz-border-right-colors: #96969D;
     -moz-border-bottom-colors: #96969D;
@@ -197,7 +197,7 @@
 
 textbox[type="fbSearchBox"] > panel {
     /* This prevents the drop shadow from appearing See nsLayoutUtils::GetFrameTransparency*/
-    -moz-border-radius: 1px;
+    border-radius: 1px;
 }
 
 .fbSearchBox-attention textbox {

@@ -1235,38 +1235,31 @@ Firebug.Inspector.FrameHighlighter.prototype =
             cs = body.ownerDocument.defaultView.getComputedStyle(element, null);
 
             if(cs.MozTransform && cs.MozTransform != "none")
-                css += "-moz-transform:" + cs.MozTransform + "!important;" +
-                       "-moz-transform-origin:" + cs.MozTransformOrigin + "!important;";
+                css += "-moz-transform: "+cs.MozTransform+"!important;" +
+                       "-moz-transform-origin: "+cs.MozTransformOrigin+"!important;";
             if(cs.borderRadius)
-                css += "border-radius:" + cs.borderRadius + " !important;";
+                css += "border-radius: "+cs.borderRadius+"!important;";
             if(cs.borderTopLeftRadius)
-                css += "border-top-left-radius:" + cs.borderTopLeftRadius + " !important;";
+                css += "border-top-left-radius: "+cs.borderTopLeftRadius+"!important;";
             if(cs.borderTopRightRadius)
-                css += "border-top-right-radius:" + cs.borderTopRightRadius + " !important;";
+                css += "border-top-right-radius: "+cs.borderTopRightRadius+"!important;";
             if(cs.borderBottomRightRadius)
-                css += "border-bottom-right-radius:" + cs.borderBottomRightRadius + " !important;";
+                css += "border-bottom-right-radius: "+cs.borderBottomRightRadius+"!important;";
             if(cs.borderBottomLeftRadius)
-                css += "border-bottom-left-radius:" + cs.borderBottomLeftRadius + " !important;";
-            if(cs.MozBorderRadius)
-                css += "-moz-border-radius:" + cs.MozBorderRadius + " !important;";
-            if(cs.MozBorderRadiusTopleft)
-                css += "-moz-border-radius-topleft:" + cs.MozBorderRadiusTopleft + " !important;";
-            if(cs.MozBorderRadiusTopright)
-                css += "-moz-border-radius-topright:" + cs.MozBorderRadiusTopright + " !important;";
-            if(cs.MozBorderRadiusBottomright)
-                css += "-moz-border-radius-bottomright:" + cs.MozBorderRadiusBottomright + " !important;";
-            if(cs.MozBorderRadiusBottomleft)
-                css += "-moz-border-radius-bottomleft:" + cs.MozBorderRadiusBottomleft + " !important;";
+                css += "border-bottom-left-radius: "+cs.borderBottomLeftRadius+"!important;";
 
-            if(colorObj && colorObj.border)
-                css += "box-shadow: 0 0 2px 2px " + colorObj.border + " !important; -moz-box-shadow: 0 0 2px 2px " + colorObj.border + " !important;";
-            else
-                css += "box-shadow: 0 0 2px 2px highlight !important; -moz-box-shadow: 0 0 2px 2px highlight !important;";
+            css += "box-shadow: 0 0 2px 2px "+
+                (colorObj && colorObj.border ? colorObj.border : "highlight")+"!important;";
 
             if(colorObj && colorObj.background)
-                bgDiv.style.cssText = "width: 100% !important; height: 100% !important; background-color: " + colorObj.background + " !important; opacity: 0.6 !important;";
+            {
+                bgDiv.style.cssText = "width: 100%!important; height: 100%!important;" +
+                    "background-color: "+colorObj.background+"!important; opacity: 0.6!important;";
+            }
             else
-                bgDiv.style.cssText = "background-color: transparent !important;";
+            {
+                bgDiv.style.cssText = "background-color: transparent!important;";
+            }
 
             highlighter.style.cssText = css;
 
@@ -1785,16 +1778,6 @@ function createProxiesForDisabledElements(body)
             css += "border-bottom-right-radius:" + cs.borderBottomRightRadius + " !important;";
         if (cs.borderBottomLeftRadius)
             css += "border-bottom-left-radius:" + cs.borderBottomLeftRadius + " !important;";
-        if (cs.MozBorderRadius)
-            css += "-moz-border-radius:" + cs.MozBorderRadius + " !important;";
-        if (cs.MozBorderRadiusTopleft)
-            css += "-moz-border-radius-topleft:" + cs.MozBorderRadiusTopleft + " !important;";
-        if (cs.MozBorderRadiusTopright)
-            css += "-moz-border-radius-topright:" + cs.MozBorderRadiusTopright + " !important;";
-        if (cs.MozBorderRadiusBottomright)
-            css += "-moz-border-radius-bottomright:" + cs.MozBorderRadiusBottomright + " !important;";
-        if (cs.MozBorderRadiusBottomleft)
-            css += "-moz-border-radius-bottomleft:" + cs.MozBorderRadiusBottomleft + " !important;";
 
         div.style.cssText = css;
         div.fbProxyFor = node;

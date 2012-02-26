@@ -91,7 +91,7 @@ code {
     position: relative;
     margin: 4em auto;
     border: 1px solid threedshadow;
-    -moz-border-radius: 10px;
+    border-radius: 10px;
     padding: 20px 30px 30px 90px;
     background: #ffffff url(chrome://firebug/skin/firebug32.png) no-repeat 30px 30px;
     color: #000000;
@@ -155,7 +155,7 @@ code {
 .inlineEditor {
     margin-left: -3px;
     margin-top: -2px;
-    -moz-box-shadow: 0 2px 6px rgba(0, 0, 0, 0.5);
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.5);
 }
 
 .textEditorInner,
@@ -168,22 +168,22 @@ code {
 }
 
 .inlineEditor[saveSuccess='true'] {
-    -moz-box-shadow: 0 2px 6px rgba(0, 250, 0, 0.5);
+    box-shadow: 0 2px 6px rgba(0, 250, 0, 0.5);
 }
 
 .inlineEditor[saveSuccess='false'] {
-    -moz-box-shadow: 0 2px 6px rgba(250, 0, 0, 0.5);
+    box-shadow: 0 2px 6px rgba(250, 0, 0, 0.5);
 }
 
 .inlineEditor[saveSuccess='almost'] {
-    -moz-box-shadow: 0 2px 6px rgba(250, 250, 0, 0.8);
+    box-shadow: 0 2px 6px rgba(250, 250, 0, 0.8);
 }
 
 .fixedWidthEditor {
     border-left: none !important;
     border-right: none !important;
     text-indent: 3px;
-    -moz-box-shadow: 0 2px 6px rgba(0, 0, 0, 0.5);
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.5);
 }
 
 .textEditorInner {

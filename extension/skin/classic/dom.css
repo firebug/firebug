@@ -184,7 +184,7 @@
 
 .domCompletionBox {
     color: silver;
-    -moz-box-shadow: none;
+    box-shadow: none;
 }
 
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */

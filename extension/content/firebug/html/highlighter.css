@@ -16,8 +16,8 @@
     position: fixed !important;
     -moz-transform: rotate(0deg) !important;
     -moz-transform-origin: 50% 50% !important;
-    -moz-border-radius: 0 !important;
-    -moz-box-shadow: none !important;
+    border-radius: 0 !important;
+    box-shadow: none !important;
     background: transparent none !important;
     pointer-events: none !important;
 }

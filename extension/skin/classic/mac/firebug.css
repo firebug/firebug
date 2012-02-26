@@ -66,7 +66,7 @@
 }
 
 .fbsearch-textbox {
-    -moz-border-radius: 10px !important;
+    border-radius: 10px !important;
     box-shadow: 0 2px 2px -2px #000000 inset;
 }
 
@@ -110,7 +110,7 @@
     -moz-border-right-colors: rgba(53,53,53,1) rgba(53,53,53,1) rgba(162,162,162,1);
     -moz-border-bottom-colors: rgba(128,128,128,0.35) rgba(0,0,0,0.5) rgba(255,255,255,0.15);
     -moz-border-left-colors: rgba(0,0,0,0.35) rgba(26,26,26,0.5) rgba(255,255,255,0.4);
-    -moz-border-radius: 20px;
+    border-radius: 20px;
     padding: 1px 9px;
     margin: 10px 0 0;
     min-height: 0px;
