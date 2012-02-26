@@ -661,12 +661,12 @@ Css.rgbToHex = function(value)
 Css.cssInfo = {};
 Css.cssInfo.html =
 {
-    "background": ["bgRepeat", "bgAttachment", "bgPosition", "color", "systemColor",
+    "background": ["bgRepeat", "bgAttachment", "position", "color", "systemColor",
         "mozBackgroundImage", "none"],
     "background-attachment": ["bgAttachment"],
     "background-color": ["color", "systemColor"],
     "background-image": ["none", "mozBackgroundImage"],
-    "background-position": ["bgPosition"],
+    "background-position": ["position"],
     "background-repeat": ["bgRepeat"],
     "background-size": ["bgSize"],
     "background-clip": ["boxModels"], //FF4.0
@@ -700,7 +700,7 @@ Css.cssInfo.html =
     "border-bottom-right-radius": [], //FF4.0
     "border-bottom-left-radius": [], //FF4.0
 
-    "box-shadow": [], //FF4.0
+    "box-shadow": ["boxShadow", "color", "systemColor", "none"], //FF4.0
 
     "bottom": ["auto"],
     "caption-side": ["captionSide"],
@@ -713,9 +713,9 @@ Css.cssInfo.html =
     "cursor": ["cursor", "none"],
     "direction": ["direction"],
     "display": ["display", "none"],
-    "empty-cells": [],
+    "empty-cells": ["-moz-show-background"],
     "float": ["float", "none"],
-    "font": ["fontStyle", "fontVariant", "fontWeight", "fontFamily"],
+    "font": ["fontStyle", "fontVariant", "fontWeight", "fontFamily", "mozFont"],
 
     "font-family": ["fontFamily"],
     "font-size": ["fontSize"],
@@ -788,12 +788,13 @@ Css.cssInfo.html =
     "z-index": [],
 
     "-moz-appearance": ["mozAppearance"],
-    "-moz-border-image": ["mozBorderImage", "thickness", "none"],
-    "-moz-border-radius": [],
-    "-moz-border-radius-bottomleft": [],
-    "-moz-border-radius-bottomright": [],
-    "-moz-border-radius-topleft": [],
-    "-moz-border-radius-topright": [],
+    "-moz-backface-visibility": ["mozBackfaceVisibility"], // FF 10.0
+    "-moz-border-image": ["mozBorderImageRepeat", "thickness", "none"],
+    "-moz-border-image-outset": [],
+    "-moz-border-image-repeat": ["mozBorderImageRepeat"],
+    "-moz-border-image-slice": [],
+    "-moz-border-image-source": [],
+    "-moz-border-image-width": [],
     "-moz-border-top-colors": ["color", "systemColor"],
     "-moz-border-right-colors": ["color", "systemColor"],
     "-moz-border-bottom-colors": ["color", "systemColor"],
@@ -812,27 +813,26 @@ Css.cssInfo.html =
     "-moz-box-ordinal-group": [],
     "-moz-box-orient": ["mozBoxOrient"],
     "-moz-box-pack": ["mozBoxPack"],
-    "-moz-box-shadow": ["mozBoxShadow", "none"],
     "-moz-box-sizing": ["mozBoxSizing"],
     "-moz-user-focus": ["userFocus", "none"],
-    "-moz-user-input": ["userInput"],
-    "-moz-user-modify": [],
+    "-moz-user-input": ["userInput", "inherit", "none"],
+    "-moz-user-modify": ["mozUserModify"],
     "-moz-user-select": ["userSelect", "none"],
-    //"-moz-background-clip": [], //Removed/renamed in FF4.0
     "-moz-background-inline-policy": [],
-    //"-moz-background-origin": [], //Removed/renamed in FF4.0
     "-moz-binding": [],
-    "-moz-column-count": [],
-    "-moz-column-gap": [],
+    "-moz-column-count": ["auto"],
+    "-moz-column-gap": ["normal"],
     "-moz-column-rule": ["thickness", "borderStyle", "color", "systemColor"],
     "-moz-column-rule-width": ["thickness"],
     "-moz-column-rule-style": ["borderStyle"],
     "-moz-column-rule-color": ["color",  "systemColor"],
-    "-moz-column-width": [],
+    "-moz-column-width": ["auto"],
     "-moz-image-region": [],
     "-moz-transform": ["mozTransformFunction", "none"],
-    "-moz-transform-origin": ["bgPosition"],
+    "-moz-transform-origin": ["position"],
+    "-moz-transform-style": ["mozTransformStyle"], // FF 10.0
     "-moz-font-feature-settings": ["normal"], //FF4.0
+    "-moz-font-language-override": [],
     "-moz-tab-size": [], //FF4.0,
     "-moz-transition": ["mozTransitionProperty", "mozTransitionTimingFunction"], //FF4.0 TODO
     "-moz-transition-property": ["mozTransitionProperty"], //FF4.0 TODO
@@ -850,12 +850,14 @@ Css.cssInfo.html =
     "-moz-animation-fill-mode": ["none", "forwards", "backwards", "both"], // FF5.0
     "orient": ["horizontal", "vertical"], // FF6.0
     "-moz-text-blink": ["none", "blink"], // FF6.0
-    "-moz-text-decoration-color": ["color"], // FF6.0
+    "-moz-text-decoration-color": ["color", "inherit"], // FF6.0
     "-moz-text-decoration-line": ["mozTextDecorationLine"], // FF6.0
     "-moz-text-decoration-style": ["mozTextDecorationStyle"], // FF6.0
-    "hyphens": ["none", "manual", "auto"], // FF6.0
-    "text-overflow": ["ellipsis", "clip"] // FF7.0
-
+    "-moz-hyphens": ["mozHyphens"], // FF6.0
+    "text-overflow": ["textOverflow"], // FF7.0
+    "-moz-text-align-last": ["mozTextAlignLast"], // FF 12.0
+    "-moz-perspective": ["none"], // FF 10.0
+    "-moz-perspective-origin": ["position"] // FF 10.0
 };
 
 // ::-moz-progress-bar  // FF6 TODO
@@ -898,10 +900,10 @@ Css.cssInfo.svg = {
     "lighting-color": ["currentColor"],
     "marker": ["none"],
     "marker-end": ["none"],
-    "mask": ["none"],
+    "mask": ["inherit", "none"],
     "opacity": [],
-    "overflow": ["auto","svgOverflow"],
-    "pointer-events": ["pointerEvents","none"],
+    "overflow": ["auto", "svgOverflow"],
+    "pointer-events": ["pointerEvents", "none"],
     "shape-rendering": ["auto","shapeRendering"],
     "stop-color": ["currentColor"],
     "stop-opacity": [],
@@ -961,53 +963,98 @@ Css.cssKeywords =
 {
     "mozAppearance":
     [
+        "none",
         "button",
-        "button-small",
+        "button-arrow-down",
+        "button-arrow-next",
+        "button-arrow-previous",
+        "button-arrow-up",
+        "button-bevel",
+        "button-focus",
+        "caret",
         "checkbox",
         "checkbox-container",
-        "checkbox-small",
-        "dialog",
+        "checkbox-label",
+        "checkmenuitem",
+        "dualbutton",
+        "groupbox",
         "listbox",
+        "listitem",
+        "menuarrow",
+        "menubar",
+        "menucheckbox",
+        "menuimage",
         "menuitem",
+        "menuitemtext",
         "menulist",
         "menulist-button",
+        "menulist-text",
         "menulist-textfield",
         "menupopup",
+        "menuradio",
+        "menuseparator",
         "progressbar",
+        "progressbar-vertical",
+        "progresschunk",
+        "progresschunk-vertical",
         "radio",
         "radio-container",
-        "radio-small",
+        "radio-label",
+        "radiomenuitem",
         "resizer",
-        "scrollbar",
+        "resizerpanel",
+        "scale-horizontal",
+        "scalethumbend",
+        "scalethumb-horizontal",
+        "scalethumbstart",
+        "scalethumbtick",
+        "scalethumb-vertical",
+        "scale-vertical",
         "scrollbarbutton-down",
         "scrollbarbutton-left",
         "scrollbarbutton-right",
         "scrollbarbutton-up",
+        "scrollbarthumb-horizontal",
+        "scrollbarthumb-vertical",
         "scrollbartrack-horizontal",
         "scrollbartrack-vertical",
+        "searchfield",
         "separator",
+        "sheet",
+        "spinner",
+        "spinner-downbutton",
+        "spinner-textfield",
+        "spinner-upbutton",
+        "splitter",
         "statusbar",
+        "statusbarpanel",
         "tab",
-        "tab-left-edge",
+        "tabpanel",
         "tabpanels",
+        "tab-scroll-arrow-back",
+        "tab-scroll-arrow-forward",
         "textfield",
+        "textfield-multiline",
         "toolbar",
         "toolbarbutton",
+        "toolbarbutton-dropdown",
+        "toolbargripper",
         "toolbox",
         "tooltip",
+        "treeheader",
         "treeheadercell",
         "treeheadersortarrow",
         "treeitem",
+        "treeline",
         "treetwisty",
         "treetwistyopen",
-        "treeview",
-        "window",
-        "-moz-mac-unified-toolbar", //FF3.5
-        "-moz-win-borderless-glass", //FF4.0
-        "-moz-win-browsertabbar-toolbox", //FF3.0
-        "-moz-win-communications-toolbox", //FF3.0
-        "-moz-win-glass", //FF3.5
-        "-moz-win-media-toolbox" //FF
+        "treeview"
+    ],
+
+    "mozBackfaceVisibility":
+    [
+        "visible",
+        "hidden"
     ],
 
     "systemColor":
@@ -1040,12 +1087,26 @@ Css.cssKeywords =
         "Window",
         "WindowFrame",
         "WindowText",
-        "-moz-field",
-        "-moz-fieldtext",
-        "-moz-workspace",
-        "-moz-visitedhyperlinktext",
-        "-moz-nativehyperlinktext",
-        "-moz-use-text-color"
+        "-moz-mac-unified-toolbar",
+        "-moz-win-borderless-glass",
+        "-moz-win-browsertabbar-toolbox",
+        "-moz-win-communicationstext",
+        "-moz-win-communications-toolbox",
+        "-moz-win-exclude-glass", // FF 6.0
+        "-moz-win-glass",
+        "-moz-win-mediatext",
+        "-moz-win-media-toolbox",
+        "-moz-window-button-box",
+        "-moz-window-button-box-maximized",
+        "-moz-window-button-close",
+        "-moz-window-button-maximize",
+        "-moz-window-button-minimize",
+        "-moz-window-button-restore",
+        "-moz-window-frame-bottom",
+        "-moz-window-frame-left",
+        "-moz-window-frame-right",
+        "-moz-window-titlebar",
+        "-moz-window-titlebar-maximized"
     ],
 
     "color":
@@ -1198,7 +1259,40 @@ Css.cssKeywords =
         "Yellow",
         "YellowGreen",
         "transparent",
-        "invert"
+        "invert",
+        "-moz-activehyperlinktext",
+        "-moz-hyperlinktext",
+        "-moz-visitedhyperlinktext",
+        "-moz-buttondefault",
+        "-moz-buttonhoverface",
+        "-moz-buttonhovertext",
+        "-moz-default-background-color", // FF 5.0
+        "-moz-default-color", // FF 5.0
+        "-moz-cellhighlight",
+        "-moz-cellhighlighttext",
+        "-moz-field",
+        "-moz-fieldtext",
+        "-moz-dialog",
+        "-moz-dialogtext",
+        "-moz-dragtargetzone",
+        "-moz-mac-accentdarkestshadow",
+        "-moz-mac-accentdarkshadow",
+        "-moz-mac-accentface",
+        "-moz-mac-accentlightesthighlight",
+        "-moz-mac-accentlightshadow",
+        "-moz-mac-accentregularhighlight",
+        "-moz-mac-accentregularshadow",
+        "-moz-mac-chrome-active",
+        "-moz-mac-chrome-inactive",
+        "-moz-mac-focusring",
+        "-moz-mac-menuselect",
+        "-moz-mac-menushadow",
+        "-moz-mac-menutextselect",
+        "-moz-menuhover",
+        "-moz-menuhovertext",
+        "-moz-win-communicationstext",
+        "-moz-win-mediatext",
+        "-moz-nativehyperlinktext"
     ],
 
     "auto":
@@ -1265,15 +1359,10 @@ Css.cssKeywords =
         "move",
         "no-drop",
         "not-allowed",
-        "-moz-alias",
-        "-moz-cell",
-        "-moz-copy",
         "-moz-grab",
         "-moz-grabbing",
-        "-moz-contextmenu",
         "-moz-zoom-in",
-        "-moz-zoom-out",
-        "-moz-spinning"
+        "-moz-zoom-out"
     ],
 
     "boxModels": //FF4.0
@@ -1295,7 +1384,7 @@ Css.cssKeywords =
         "fixed"
     ],
 
-    "bgPosition":
+    "position":
     [
         "top",
         "center",
@@ -1346,9 +1435,8 @@ Css.cssKeywords =
         "visible",
         "hidden",
         "scroll",
-        "-moz-scrollbars-horizontal",
-        "-moz-scrollbars-none",
-        "-moz-scrollbars-vertical"
+        "auto",
+        "-moz-hidden-unscrollable"
     ],
 
     "listStyleType":
@@ -1373,7 +1461,38 @@ Css.cssKeywords =
         "katakana",
         "hiragana-iroha",
         "katakana-iroha",
-        "inherit"
+        "inherit",
+        "-moz-arabic-indic",
+        "-moz-bengali",
+        "-moz-cjk-earthly-branch",
+        "-moz-cjk-heavenly-stem",
+        "-moz-devanagari",
+        "-moz-ethiopic-halehame",
+        "-moz-ethiopic-halehame-am",
+        "-moz-ethiopic-halehame-ti-er",
+        "-moz-ethiopic-halehame-ti-et",
+        "-moz-ethiopic-numeric",
+        "-moz-gujarati",
+        "-moz-gurmukhi",
+        "-moz-hangul",
+        "-moz-hangul-consonant",
+        "-moz-japanese-formal",
+        "-moz-japanese-informal",
+        "-moz-kannada",
+        "-moz-khmer",
+        "-moz-lao",
+        "-moz-malayalam",
+        "-moz-myanmar",
+        "-moz-oriya",
+        "-moz-persian",
+        "-moz-simp-chinese-formal",
+        "-moz-simp-chinese-informal",
+        "-moz-tamil",
+        "-moz-telugu",
+        "-moz-thai",
+        "-moz-trad-chinese-formal",
+        "-moz-trad-chinese-informal",
+        "-moz-urdu"
     ],
 
     "listStylePosition":
@@ -1451,9 +1570,24 @@ Css.cssKeywords =
         "message-box",
         "small-caption",
         "status-bar",
-        "inherit"
+        "inherit",
+        "-moz-fixed"
     ],
 
+    "mozFont":
+    [
+        "-moz-button",
+        "-moz-info",
+        "-moz-desktop",
+        "-moz-dialog",
+        "-moz-document",
+        "-moz-workspace",
+        "-moz-window",
+        "-moz-list",
+        "-moz-pull-down-menu",
+        "-moz-field"
+    ],
+       
     "display":
     [
         "block",
@@ -1480,14 +1614,11 @@ Css.cssKeywords =
         "-moz-grid-group",
         "-moz-grid-line",
         "-moz-groupbox",
-        "-moz-inline-block",
         "-moz-inline-box",
         "-moz-inline-grid",
         "-moz-inline-stack",
-        "-moz-inline-table",
         "-moz-marker",
         "-moz-popup",
-        "-moz-runin",
         "-moz-stack"
     ],
 
@@ -1525,7 +1656,8 @@ Css.cssKeywords =
         "overline",
         "line-through",
         "blink",
-        "inherit"
+        "inherit",
+        "-moz-anchor-decoration"
     ],
 
     "textTransform":
@@ -1593,9 +1725,19 @@ Css.cssKeywords =
         "enabled"
     ],
 
+    "mozUserModify":
+    [
+        "read-only",
+        "read-write",
+        "write-only"
+    ],
+       
     "userSelect":
     [
-        "normal"
+        "text",
+        "-moz-none",
+        "all",
+        "element"
     ],
 
     "mozBoxSizing":
@@ -1633,16 +1775,17 @@ Css.cssKeywords =
         "end"
     ],
 
-    "mozBoxShadow":
+    "boxShadow":
     [
         "inset"
     ],
 
-    "mozBorderImage":
+    "mozBorderImageRepeat":
     [
         "stretch",
         "round",
-        "repeat"
+        "repeat",
+        "space"
     ],
 
     "mozBackgroundImage":
@@ -1666,6 +1809,12 @@ Css.cssKeywords =
         "translate",
         "translateX",
         "translateY"
+    ],
+
+    "mozTransformStyle": // FF 10.0
+    [
+        "preserve-3d",
+        "flat"
     ],
 
     "mozTransitionProperty":
@@ -1734,14 +1883,17 @@ Css.cssKeywords =
         "-moz-transform"
     ],
 
-    "mozTransitionTimingFunction":
+    "mozTransitionTimingFunction": // FF 4.0
     [
         "cubic-bezier",
         "ease",
         "ease-in",
         "ease-in-out",
         "ease-out",
-        "linear"
+        "linear",
+        "step-start",
+        "step-end",
+        "steps"
     ],
 
     "mozTextDecorationLine": // FF 6.0
@@ -1760,6 +1912,32 @@ Css.cssKeywords =
         "dashed",
         "wavy",
         "inherit"
+    ],
+
+    "mozHyphens": // FF 6.0
+    [
+        "none",
+        "manual",
+        "auto"
+    ],
+
+    "textOverflow": // FF 7.0
+    [
+       "clip",
+       "ellipsis",
+       "inherit"
+    ],
+       
+    "mozTextAlignLast": // FF 12.0
+    [
+       "auto",
+       "start",
+       "end",
+       "left",
+       "right",
+       "center",
+       "justify",
+       "inherit"
     ],
        
     "width":
@@ -1882,8 +2060,9 @@ Css.cssKeywords =
     "imageRendering":
     [
         "auto",
-        "optimizeSpeed",
-        "optimizeQuality"
+        "optimizespeed",
+        "optimizequality",
+        "-moz-crisp-edges"
     ],
 
     "svgOverflow":
