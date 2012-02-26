@@ -960,17 +960,17 @@ FirebugReps.Element = domplate(Firebug.Rep,
                 }
             });
 
-        if (Firebug.showTextNodesWithEntities)
+        if (Firebug.entityDisplay != "symbols")
             escapeGroups.push({
                 "group": "text",
                 "class": "nodeTextEntity",
-                "extra":{}
+                "extra": {}
             });
 
         if (escapeGroups.length)
-            return Str.escapeGroupsForEntities(text, escapeGroups);
+            return Str.escapeGroupsForEntities(text, escapeGroups, Options.get("entityDisplay"));
         else
-            return [{str:text,'class':'',extra:''}];
+            return [{str:text, "class": "", extra: ""}];
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

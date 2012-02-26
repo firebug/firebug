@@ -248,7 +248,7 @@ FirebugLoader.defaultPrefs = {
 // HTML
     "showCommentNodes": false,
     "showTextNodesWithWhitespace": false,
-    "showTextNodesWithEntities": true,
+    "entityDisplay": "names",
     "showFullTextNodes": true,
     "highlightMutations": true,
     "expandMutations": false,

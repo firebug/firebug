@@ -12,6 +12,7 @@ define([
     "firebug/lib/css",
     "firebug/lib/dom",
     "firebug/chrome/window",
+    "firebug/lib/options",
     "firebug/lib/xpath",
     "firebug/lib/string",
     "firebug/lib/xml",
@@ -28,7 +29,8 @@ define([
     "firebug/html/layout"
 ],
 function(Obj, Firebug, Domplate, FirebugReps, Locale, HTMLLib, Events,
-    SourceLink, Css, Dom, Win, Xpath, Str, Xml, Arr, Persist, Menu, Url) { with (Domplate) {
+    SourceLink, Css, Dom, Win, Options, Xpath, Str, Xml, Arr, Persist, Menu,
+    Url) { with (Domplate) {
 
 // ********************************************************************************************* //
 // Constants
@@ -1278,11 +1280,10 @@ Firebug.HTMLPanel.prototype = Obj.extend(WalkingPanel,
     {
         var viewOptionNames = {
             showCommentNodes: 1,
-            showTextNodesWithEntities:1,
-            showTextNodesWithWhitespace:1,
-            showFullTextNodes:1
+            entityDisplay: 1,
+            showTextNodesWithWhitespace: 1,
+            showFullTextNodes: 1
         };
-
 
         if (name in viewOptionNames)
         {
@@ -1478,8 +1479,34 @@ Firebug.HTMLPanel.prototype = Obj.extend(WalkingPanel,
                 "html.option.tip.Show_Whitespace"),
             Menu.optionMenu("ShowComments", "showCommentNodes",
                 "html.option.tip.Show_Comments"),
-            Menu.optionMenu("ShowTextNodesWithEntities",
-                "showTextNodesWithEntities", "html.option.tip.Show_Text_Nodes_With_Entities"),
+            "-",
+            {
+                label: "html.option.Show_Entities_As_Symbols",
+                tooltiptext: "html.option.tip.Show_Entities_As_Symbols",
+                type: "radio",
+                name: "entityDisplay",
+                id: "entityDisplaySymbols",
+                command: Obj.bindFixed(this.setEntityDisplay, this, "symbols"),
+                checked: Options.get("entityDisplay") == "symbols"
+            },
+            {
+                label: "html.option.Show_Entities_As_Names",
+                tooltiptext: "html.option.tip.Show_Entities_As_Names",
+                type: "radio",
+                name: "entityDisplay",
+                id: "entityDisplayNames",
+                command: Obj.bindFixed(this.setEntityDisplay, this, "names"),
+                checked: Options.get("entityDisplay") == "names"
+            },
+            {
+                label: "html.option.Show_Entities_As_Unicode",
+                tooltiptext: "html.option.tip.Show_Entities_As_Unicode",
+                type: "radio",
+                name: "entityDisplay",
+                id: "entityDisplayUnicode",
+                command: Obj.bindFixed(this.setEntityDisplay, this, "unicode"),
+                checked: Options.get("entityDisplay") == "unicode"
+            },
             "-",
             Menu.optionMenu("HighlightMutations", "highlightMutations",
                 "html.option.tip.Highlight_Mutations"),
@@ -1658,6 +1685,13 @@ Firebug.HTMLPanel.prototype = Obj.extend(WalkingPanel,
             vars["$"+i] = this.inspectorHistory[i];
 
         return vars;
+    },
+
+    setEntityDisplay: function(type) {
+        Options.set("entityDisplay", type);
+
+        var menuItem = Firebug.chrome.$("entityDisplay"+type.charAt(0).toUpperCase()+type.slice(1));
+        menuItem.setAttribute("checked", "true");
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

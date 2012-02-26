@@ -3,9 +3,10 @@
 define([
     "firebug/lib/trace",
     "firebug/lib/options",
-    "firebug/lib/deprecated"
+    "firebug/lib/deprecated",
+    "firebug/lib/xpcom"
 ],
-function(FBTrace, Options, Deprecated) {
+function(FBTrace, Options, Deprecated, Xpcom) {
 
 // ********************************************************************************************* //
 // Constants
@@ -191,51 +192,132 @@ function createSimpleEscape(name, direction)
     }
 }
 
-function escapeGroupsForEntities(str, lists)
+function escapeEntityAsName(char)
 {
-    lists = [].concat(lists);
-    var re = getEscapeRegexp('normal', lists),
-        split = String(str).split(re),
-        len = split.length,
-        results = [],
-        cur, r, i, ri = 0, l, list, last = '';
-    if (!len)
-        return [ {
-            str : String(str),
-            group : '',
-            name : ''
-        } ];
-    for (i = 0; i < len; i++)
+    var entityConverter = Xpcom.CCSV("@mozilla.org/intl/entityconverter;1", "nsIEntityConverter");
+    try
     {
-        cur = split[i];
-        if (cur == '')
-            continue;
-        for (l = 0; l < lists.length; l++)
+        return entityConverter.ConvertToEntity(char, entityConverter.entityW3C);
+    }
+    catch(e)
+    {
+        return char;
+    }
+}
+
+function escapeEntityAsUnicode(char)
+{
+    var charCode = char.charCodeAt(0);
+
+    if (charCode == 34)
+        return "&quot;";
+    else if (charCode == 38)
+        return "&amp;";
+    else if (charCode < 32 || charCode >= 127)
+        return "&#" + charCode + ";";
+
+    return char;
+}
+
+function escapeGroupsForEntities(str, lists, type)
+{
+    var results = [];
+    var noEntityString = "";
+    var textListIndex = -1;
+
+    if (!type)
+        type = "names";
+
+    for (var i = 0, listsLen = lists.length; i < listsLen; i++)
+    {
+        if (lists[i].group == "text")
         {
-            list = lists[l];
-            r = entityConversionLists.normal[list.group][cur];
-            // if (cur == ' ' && list.group == 'whitespace' && last == ' ') // only show for runs of more than one space
-            //     r = ' ';
-            if (r)
+            textListIndex = i;
+            break;
+        }
+    }
+
+    for (var i = 0, strLen = str.length; i < strLen; i++)
+    {
+        var result = str.charAt(i);
+
+        // If there's "text" in the list groups, use a different
+        // method for converting the characters
+        if (textListIndex != -1)
+        {
+            if (type == "unicode")
+                result = escapeEntityAsUnicode(str.charAt(i));
+            else if (type == "names")
+                result = escapeEntityAsName(str.charAt(i));
+        }
+
+        if (result != str.charAt(i))
+        {
+            if (noEntityString != "")
             {
-                results[ri] = {
-                    'str' : r,
-                    'class' : list['class'],
-                    'extra' : list.extra[cur] ? list['class']
-                            + list.extra[cur] : ''
-                };
-                break;
+                results.push({
+                    "str": noEntityString,
+                    "class": "",
+                    "extra": ""
+                });
+                noEntityString = "";
+            }
+
+            results.push({
+                "str": result,
+                "class": lists[textListIndex].class,
+                "extra": lists[textListIndex].extra[result] ? lists[textListIndex].class
+                        + lists[textListIndex].extra[result] : ""
+            });
+        }
+        else
+        {
+            var listEntity;
+            for each (var list in lists)
+            {
+                if (list.group != "text")
+                {
+                    listEntity = entityConversionLists.normal[list.group][result];
+                    if (listEntity)
+                    {
+                        result = listEntity;
+
+                        if (noEntityString != "")
+                        {
+                            results.push({
+                                "str": noEntityString,
+                                "class": "",
+                                "extra": ""
+                            });
+                            noEntityString = "";
+                        }
+
+                        results.push({
+                            "str": result,
+                            "class": list.class,
+                            "extra": list.extra[result] ? list.class + list.extra[result] : ""
+                        });
+                        break;
+                    }
+                }
+            }
+
+            if (result == str.charAt(i))
+            {
+                noEntityString += result;
             }
         }
-        // last=cur;
-        if (!r)
-            results[ri] = {
-                'str' : cur,
-                'class' : '',
-                'extra' : ''
-            };
-        ri++;
     }
+
+    if (noEntityString != "")
+    {
+        results.push({
+            "str": noEntityString,
+            "class": "",
+            "extra": ""
+        });
+    }
+
     return results;
 }
 
@@ -303,7 +385,7 @@ Str.unescapeForTextNode = function(str)
     if (Options.get("showTextNodesWithWhitespace"))
         str = unescapeWhitespace(str);
 
-    if (!Options.get("showTextNodesWithEntities"))
+    if (Options.get("entityDisplay") == "names")
         str = escapeForElementAttribute(str);
 
     return str;
