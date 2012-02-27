@@ -17,13 +17,16 @@ var Cc = Components.classes;
 var Ci = Components.interfaces;
 var Cu = Components.utils;
 
-var MODE_JAVASCRIPT = 0;
+var MODE_JAVASCRIPT = "js";
+var CONTEXT_MENU = "";
 
 try
 {
     // Introduced in Firefox 8
     Cu["import"]("resource:///modules/source-editor.jsm");
+
     MODE_JAVASCRIPT = SourceEditor.MODES.JAVASCRIPT;
+    CONTEXT_MENU = SourceEditor.EVENTS.CONTEXT_MENU;
 }
 catch (err)
 {
@@ -73,7 +76,7 @@ Firebug.CommandEditor = Obj.extend(Firebug.Module,
             return;
 
         this.parent.removeEventListener("keypress", this.onKeyPress);
-        this.editor.removeEventListener(SourceEditor.EVENTS.CONTEXT_MENU, this.onContextMenu);
+        this.editor.removeEventListener(CONTEXT_MENU, this.onContextMenu);
 
         this.editor.destroy();
         this.editor = null;
@@ -88,7 +91,7 @@ Firebug.CommandEditor = Obj.extend(Firebug.Module,
         this.parent.addEventListener("keypress", this.onKeyPress);
 
         // xxxHonza: Context menu support is going to change in SourceEditor
-        this.editor.addEventListener(SourceEditor.EVENTS.CONTEXT_MENU, this.onContextMenu);
+        this.editor.addEventListener(CONTEXT_MENU, this.onContextMenu);
 
         this.editor.setCaretOffset(this.editor.getCharCount());
 
@@ -192,7 +195,7 @@ Firebug.CommandEditor = Obj.extend(Firebug.Module,
         if (!this.editor || !this.editor._view)
             return;
 
-        if (typeof(SourceEditor))
+        if (typeof(SourceEditor) != "undefined")
         {
             var doc = this.editor._view._frame.contentDocument;
             doc.body.style.fontSizeAdjust = adjust;
@@ -250,11 +253,17 @@ TextEditor.prototype =
 
     addEventListener: function(type, callback)
     {
+        if (!type)
+            return;
+
         Events.addEventListener(this.textBox, type, callback, true);
     },
 
     removeEventListener: function(type, callback)
     {
+        if (!type)
+            return;
+
         Events.removeEventListener(this.textBox, type, callback, true);
     },
 
