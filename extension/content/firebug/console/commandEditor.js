@@ -269,7 +269,11 @@ TextEditor.prototype =
 
     setCaretOffset: function(offset)
     {
-        this.textBox.setCaretOffset(offset);
+    },
+
+    getCharCount: function()
+    {
+        return this.textBox.value ? this.textBox.value.length : 0;
     },
 
     setText: function(text)
