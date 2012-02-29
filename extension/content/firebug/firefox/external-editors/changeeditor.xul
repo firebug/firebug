@@ -5,17 +5,18 @@
 <?xml-stylesheet href="chrome://browser/skin/preferences/preferences.css" type="text/css"?>
 
 <dialog xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul"
-        buttons="accept,cancel"
+        buttons="extra2,accept,cancel"
         id="firebug-external-editors-change"
         title="changeEditor.Editor_Configuration"
         onload="onLoad();"
         ondialogaccept="return onAccept();"
         persist="screenX screenY"
-        class="fbInternational">
+        class="fbInternational"
+        buttonlabelextra2="test"
+        ondialogextra2="testEditor()">
 
-    <script type="application/x-javascript" src="chrome://firebug/content/trace.js"/>
-    <script type="application/x-javascript"
-        src="chrome://firebug/content/firefox/external-editors/changeeditor.js"/>
+    <script src="chrome://firebug/content/trace.js"/>
+    <script src="chrome://firebug/content/firefox/external-editors/changeeditor.js"/>
 
     <vbox flex="1">
         <hbox align="center">

@@ -208,13 +208,15 @@ function insertText(text, whole)
 // would be good to have autosuggest for popular editors
 var defaultCommandLines =
 {
-    "sublimetext":   "%file:%line:%col",
-    "notepad++":     "-n%line %file",
-    "emeditor":      "/l %line %file",
-    "emacs/vim":     "+%line %file",
-    "IntelliJ IDEA": "%{--line %line%} %file",
-    "browser":       "%url",
-    "explorer":      "/select,%file"
+    "emacs/vim/gedit/nano/geany":     "+%line %file",
+    "sublimetext":                    "%file:%line:%col",
+    "notepad++":                      "-n%line %file",
+    "emeditor":                       "/l %line %file",
+    "IntelliJ IDEA":                  "%{--line %line%} %file",
+    "browser":                        "%url",
+    "explorer":                       "/select,%file",
+    "wget/curl":                      "%url",
+    "firefox":                        "http://validator.w3.org/check?uri=%url"
 }
 
 function suggestionPopupShowing(popup)
@@ -242,3 +244,28 @@ function suggestionPopupShowing(popup)
 }
 
 // ************************************************************************************************
+// TODO: suggestions for application?
+/*
+var paths = []
+var handlers = Cc["@mozilla.org/uriloader/external-helper-app-service;1"]
+    .getService(Ci.nsIMIMEService).getFromTypeAndExtension("", "js").possibleLocalHandlers;
+for (var i = handlers.length - 1; i >= 0; i--)
+    paths.unshift(handlers.queryElementAt(i, Ci.nsILocalHandlerApp).executable.path);
+
+paths
+*/
+
+// ************************************************************************************************
+var testEditor = function()
+{
+    var tmpItem = {};
+    var file = document.getElementById("executable").file;
+    if (file)
+        tmpItem.executable = file.path;
+    tmpItem.cmdline = document.getElementById("cmdline").value;
+
+    var Firebug = opener.opener.Firebug;
+    Firebug.ExternalEditors.open(Firebug.Firefox.getCurrentBrowser().currentURI.spec, 5, tmpItem);
+}
+
+
