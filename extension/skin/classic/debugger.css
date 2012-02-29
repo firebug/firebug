@@ -157,6 +157,10 @@
     font-size: inherit;
 }
 
+.conditionInput.completionInput {
+    position: relative;
+}
+
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 .upsideDown {

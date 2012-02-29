@@ -3,6 +3,7 @@
 define([
     "firebug/lib/object",
     "firebug/firebug",
+    "firebug/lib/domplate",
     "firebug/chrome/reps",
     "firebug/lib/locale",
     "firebug/lib/events",
@@ -10,9 +11,9 @@ define([
     "firebug/lib/dom",
     "firebug/lib/string",
     "firebug/lib/array",
-    "firebug/console/console"
+    "firebug/editor/editor"
 ],
-function(Obj, Firebug, FirebugReps, Locale, Events, Wrapper, Dom, Str, Arr, Console) {
+function(Obj, Firebug, Domplate, FirebugReps, Locale, Events, Wrapper, Dom, Str, Arr, Editor) {
 
 // ********************************************************************************************* //
 // Constants
@@ -28,11 +29,12 @@ const reLiteralExpr = /^[ "0-9,]*$/;
 // ********************************************************************************************* //
 // JavaScript auto-completion
 
-Firebug.JSAutoCompleter = function(textBox, completionBox, showCompletionPopup)
+Firebug.JSAutoCompleter = function(textBox, completionBox, options)
 {
     this.textBox = textBox;
     this.completionBox = completionBox;
-    this.showCompletionPopup = showCompletionPopup;
+    this.options = options;
+    this.showCompletionPopup = options.completionPopup;
 
     this.completionBase = {
         pre: null,
@@ -178,7 +180,8 @@ Firebug.JSAutoCompleter = function(textBox, completionBox, showCompletionPopup)
         if (preExpr !== this.completionBase.expr)
         {
             this.completionBase.expr = preExpr;
-            this.completionBase.candidates = autoCompleteEval(context, preExpr, spreExpr);
+            this.completionBase.candidates = autoCompleteEval(context, preExpr, spreExpr,
+                this.options.includeCurrentScope);
         }
 
         this.createCompletions(prop);
@@ -310,7 +313,13 @@ Firebug.JSAutoCompleter = function(textBox, completionBox, showCompletionPopup)
         if (event.keyCode === KeyEvent.DOM_VK_TAB &&
             !Events.isControl(event) && this.textBox.value !== "")
         {
-            if (!this.completions)
+            if (this.completions)
+            {
+                this.acceptCompletion();
+                Events.cancelEvent(event);
+                return true;
+            }
+            else if (this.options.tabWarnings)
             {
                 if (clearedTabWarning)
                 {
@@ -322,12 +331,13 @@ Firebug.JSAutoCompleter = function(textBox, completionBox, showCompletionPopup)
                 Events.cancelEvent(event);
                 return true;
             }
-            else
-            {
-                this.acceptCompletion();
-                Events.cancelEvent(event);
-                return true;
-            }
+        }
+        else if (event.keyCode === KeyEvent.DOM_VK_RETURN && !this.acceptReturn())
+        {
+            // Completion on return, when one is user-visible.
+            this.acceptCompletion();
+            Events.cancelEvent(event);
+            return true;
         }
         else if (event.keyCode === KeyEvent.DOM_VK_RIGHT && this.completions &&
             this.textBox.selectionStart === this.textBox.value.length)
@@ -342,10 +352,18 @@ Firebug.JSAutoCompleter = function(textBox, completionBox, showCompletionPopup)
             if (this.completions)
             {
                 this.hideForExpression();
-
-                // Stop event bubbling if it was used to hide completions.
                 Events.cancelEvent(event);
                 return true;
+            }
+            else
+            {
+                // There are no visible completions, but we might still be able to
+                // revert a recently performed completion.
+                if (this.revert(context))
+                {
+                    Events.cancelEvent(event);
+                    return true;
+                }
             }
         }
         else if (event.keyCode === KeyEvent.DOM_VK_UP || event.keyCode === KeyEvent.DOM_VK_DOWN)
@@ -356,8 +374,8 @@ Firebug.JSAutoCompleter = function(textBox, completionBox, showCompletionPopup)
                 Events.cancelEvent(event);
                 return true;
             }
-            // else the arrow will fall through to command history
         }
+        return false;
     };
 
     /**
@@ -566,6 +584,76 @@ Firebug.EmptyJSAutoCompleter = function()
     this.handleKeyDown = function() {};
     this.handleKeyPress = function() {};
 };
+
+// ********************************************************************************************* //
+
+/**
+ * An (abstract) editor with simple JavaScript auto-completion.
+ */
+Firebug.JSEditor = function()
+{
+};
+
+with (Domplate) {
+Firebug.JSEditor.prototype = domplate(Firebug.InlineEditor.prototype,
+{
+    setupCompleter: function(completionBox, options)
+    {
+        this.tabNavigation = false;
+        this.arrowCompletion = false;
+        this.fixedWidth = true;
+        this.completionBox = completionBox;
+
+        this.autoCompleter = new EditorJSAutoCompleter(this.input, this.completionBox, options);
+    },
+
+    updateLayout: function()
+    {
+        // Make sure the completion box stays in sync with the input box.
+        Firebug.InlineEditor.prototype.updateLayout.apply(this, arguments);
+        this.completionBox.style.width = this.input.style.width;
+        this.completionBox.style.height = this.input.style.height;
+    },
+
+    destroy: function()
+    {
+        this.autoCompleter.destroy();
+        Firebug.InlineEditor.prototype.destroy.call(this);
+    },
+
+    onKeyPress: function(event)
+    {
+        var context = this.panel.context;
+
+        if (this.getAutoCompleter().handleKeyPress(event, context))
+            return;
+
+        if (event.keyCode === KeyEvent.DOM_VK_TAB ||
+            event.keyCode === KeyEvent.DOM_VK_RETURN)
+        {
+            this.stopEditing();
+            Events.cancelEvent(event);
+        }
+    },
+
+    onInput: function()
+    {
+        var context = this.panel.context;
+        this.getAutoCompleter().complete(context);
+        Firebug.Editor.update();
+    }
+});
+}
+
+function EditorJSAutoCompleter(box, completionBox, options)
+{
+    var ac = new Firebug.JSAutoCompleter(box, completionBox, options);
+
+    this.destroy = Obj.bindFixed(ac.shutdown, ac);
+    this.reset = Obj.bindFixed(ac.hide, ac);
+    this.complete = Obj.bind(ac.complete, ac);
+    this.handleKeyPress = Obj.bind(ac.handleKeyPress, ac);
+}
 
 // ********************************************************************************************* //
 // Auto-completion helpers
@@ -1583,7 +1671,7 @@ function evalPropChain(out, preExpr, origExpr, context)
     return true;
 }
 
-function autoCompleteEval(context, preExpr, spreExpr)
+function autoCompleteEval(context, preExpr, spreExpr, includeCurrentScope)
 {
     var out = {};
 
@@ -1632,7 +1720,7 @@ function autoCompleteEval(context, preExpr, spreExpr)
             // Complete variables from the local scope
 
             var contentView = Wrapper.getContentView(context.window);
-            if (context.stopped)
+            if (context.stopped && includeCurrentScope)
             {
                 out.complete = Firebug.Debugger.getCurrentFrameKeys(context);
             }

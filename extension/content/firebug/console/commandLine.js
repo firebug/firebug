@@ -407,21 +407,9 @@ Firebug.CommandLine = Obj.extend(Firebug.Module,
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-    acceptCompletionOrReturnIt: function(context)
-    {
-        var commandLine = this.getCommandLine(context);
-        if (this.autoCompleter.acceptReturn())
-            return commandLine.value; // we have nothing to complete
-
-        this.autoCompleter.acceptCompletion();
-
-        // next time we will return text
-        return "";
-    },
-
     enter: function(context, command)
     {
-        var expr = command ? command : this.acceptCompletionOrReturnIt(context);
+        var expr = command ? command : this.getCommandLine(context).value;
         if (expr == "")
             return;
 
@@ -468,7 +456,7 @@ Firebug.CommandLine = Obj.extend(Firebug.Module,
 
     enterInspect: function(context)
     {
-        var expr = this.acceptCompletionOrReturnIt(context);
+        var expr = this.getCommandLine(context).value;
         if (expr == "")
             return;
 
@@ -542,9 +530,6 @@ Firebug.CommandLine = Obj.extend(Firebug.Module,
 
     cancel: function(context)
     {
-        if (this.autoCompleter.revert(context))
-            return;
-
         return this.clear(context);
     },
 
@@ -651,28 +636,32 @@ Firebug.CommandLine = Obj.extend(Firebug.Module,
     {
         var context = Firebug.currentContext;
 
+        // xxxHonza: see http://code.google.com/p/fbug/issues/detail?id=4901#c21
+        if (this.autoCompleter)
+            this.autoCompleter.shutdown();
+
         // Set the auto-completer even if the command-editor is currently displayed
         // in the Console panel. This is to make the auto-completion work even in
         // the small-command-line available on other panels (see issue 5006).
+
         if (!context/* || Firebug.commandEditor*/)
         {
-            // xxxHonza: see http://code.google.com/p/fbug/issues/detail?id=4901#c21
-            if (this.autoCompleter)
-                this.autoCompleter.shutdown();
-
             this.autoCompleter = new Firebug.EmptyJSAutoCompleter();
         }
         else
         {
-            var showCompletionPopup = Firebug.Options.get("commandLineShowCompleterPopup");
-
             // Always create the auto-completer for the single command line.
             var commandLine = this.getSingleRowCommandLine();
             var completionBox = this.getCompletionBox();
 
-            this.autoCompleter.shutdown();
+            var options = {
+                completionPopup: Firebug.Options.get("commandLineShowCompleterPopup"),
+                tabWarnings: true,
+                includeCurrentScope: true
+            };
+
             this.autoCompleter = new Firebug.JSAutoCompleter(commandLine,
-                completionBox, showCompletionPopup);
+                completionBox, options);
         }
     },
 
@@ -843,7 +832,7 @@ Firebug.CommandLine = Obj.extend(Firebug.Module,
 
         if (!this.autoCompleter.handleKeyPress(event, context))
         {
-            this.handleKeyPress(event);  // independent of completer
+            this.handleKeyPress(event);
         }
     },
 

@@ -16,6 +16,7 @@ define([
     "firebug/chrome/menu",
     "firebug/js/fbs",
     "firebug/editor/editor",
+    "firebug/console/autoCompleter"
 ],
 function(Obj, Firebug, Domplate, FirebugReps, Locale, Events, SourceLink,
     StackFrame, Css, Dom, Str, Arr, Menu, FBS) {
@@ -790,22 +791,29 @@ Firebug.Breakpoint.ConditionEditor = function(doc)
 }
 
 with (Domplate) {
-Firebug.Breakpoint.ConditionEditor.prototype = domplate(Firebug.InlineEditor.prototype,
+Firebug.Breakpoint.ConditionEditor.prototype = domplate(Firebug.JSEditor.prototype,
 {
     tag:
         DIV({"class": "conditionEditor"},
             DIV({"class": "conditionCaption"}, Locale.$STR("ConditionInput")),
-            INPUT({"class": "conditionInput", type: "text",
-                "aria-label": Locale.$STR("ConditionInput")}
+            INPUT({"class": "conditionInput completionBox", type: "text",
+                tabindex: "-1"}),
+            INPUT({"class": "conditionInput completionInput", type: "text",
+                "aria-label": Locale.$STR("ConditionInput"),
+                oninput: "$onInput", onkeypress: "$onKeyPress"}
             )
         ),
 
     initialize: function(doc)
     {
         this.box = this.tag.replace({}, doc, this);
+        this.input = this.box.getElementsByClassName("completionInput").item(0);
 
-        this.input = this.box.getElementsByClassName("conditionInput").item(0);
-        Firebug.InlineEditor.prototype.initialize.apply(this, arguments);
+        var completionBox = this.box.getElementsByClassName("completionBox").item(0);
+        var options = {
+            tabWarnings: true
+        };
+        this.setupCompleter(completionBox, options);
     },
 
     show: function(sourceLine, panel, value)
@@ -813,14 +821,12 @@ Firebug.Breakpoint.ConditionEditor.prototype = domplate(Firebug.InlineEditor.pro
         this.target = sourceLine;
         this.panel = panel;
 
-        if (this.getAutoCompleter)
-            this.getAutoCompleter().reset();
+        this.getAutoCompleter().reset();
 
         Dom.hide(this.box, true);
         panel.selectedSourceBox.appendChild(this.box);
 
-        if (this.input)
-            this.input.value = value;
+        this.input.value = value;
 
         setTimeout(Obj.bindFixed(function()
         {
@@ -841,11 +847,8 @@ Firebug.Breakpoint.ConditionEditor.prototype = domplate(Firebug.InlineEditor.pro
             this.box.style.top = y + "px";
             Dom.hide(this.box, false);
 
-            if (this.input)
-            {
-                this.input.focus();
-                this.input.select();
-            }
+            this.input.focus();
+            this.input.select();
         }, this));
     },
 

@@ -191,6 +191,19 @@ code {
     padding: 1px;
 }
 
+.completionBox {
+    position: absolute;
+    color: silver;
+}
+
+.completionInput {
+    background-color: transparent;
+}
+
+.fixedWidthEditor.completionBox {
+    box-shadow: none;
+}
+
 /************************************************************************************************/
 
 .infoTip {

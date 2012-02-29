@@ -49,7 +49,7 @@ const rxIdentifier = /^[$_A-Za-z][$_A-Za-z0-9]*$/
 const WatchRowTag =
     TR({"class": "watchNewRow", level: 0},
         TD({"class": "watchEditCell", colspan: 3},
-            DIV({"class": "watchEditBox a11yFocusNoTab", role: "button", "tabindex": "0",
+            DIV({"class": "watchEditBox a11yFocusNoTab", role: "button", tabindex: "0",
                 "aria-label": Locale.$STR("a11y.labels.press enter to add new watch expression")},
                     Locale.$STR("NewWatch")
             )
@@ -1755,23 +1755,22 @@ function DOMEditor(doc)
 {
     this.box = this.tag.replace({}, doc, this);
     this.input = this.box.childNodes[1];
-    this.completionBox = this.box.childNodes[0];
-    this.tabNavigation = false;
-    this.arrowCompletion = false;
-    this.fixedWidth = true;
 
-    this.autoCompleter = new DOMAutoCompleter(this.input, this.completionBox);
+    var completionBox = this.box.childNodes[0];
+    var options = {
+        includeCurrentScope: true
+    };
+    this.setupCompleter(completionBox, options);
 }
 
-DOMEditor.prototype = domplate(Firebug.InlineEditor.prototype,
+DOMEditor.prototype = domplate(Firebug.JSEditor.prototype,
 {
     tag:
         DIV({style: "position: absolute;"},
-            INPUT({"class": "fixedWidthEditor domCompletionBox", type: "text",
-                "tabindex": "-1"}),
-            INPUT({"class": "fixedWidthEditor a11yFocusNoTab", type: "text",
-            style: "background: transparent;",
-            oninput: "$onInput", onkeypress: "$onKeyPress"})),
+            INPUT({"class": "fixedWidthEditor completionBox", type: "text",
+                tabindex: "-1"}),
+            INPUT({"class": "fixedWidthEditor completionInput", type: "text",
+                oninput: "$onInput", onkeypress: "$onKeyPress"})),
 
     endEditing: function(target, value, cancel)
     {
@@ -1791,101 +1790,8 @@ DOMEditor.prototype = domplate(Firebug.InlineEditor.prototype,
             this.panel.setWatchValue(row, value);
         else
             this.panel.setPropertyValue(row, value);
-    },
-
-    updateLayout: function()
-    {
-        // Make sure the completion box stays in sync with the input box.
-        Firebug.InlineEditor.prototype.updateLayout.apply(this, arguments);
-        this.completionBox.style.width = this.input.style.width;
-        this.completionBox.style.height = this.input.style.height;
-    },
-
-    destroy: function()
-    {
-        this.autoCompleter.destroy();
-        Firebug.InlineEditor.prototype.destroy.call(this);
-    },
-
-    onKeyPress: function(event)
-    {
-        var context = this.panel.context;
-        var ac = this.getAutoCompleter();
-
-        if (event.keyCode === KeyEvent.DOM_VK_TAB ||
-            event.keyCode === KeyEvent.DOM_VK_RETURN)
-        {
-            if (ac.acceptCompletion())
-                Firebug.Editor.update();
-            else
-                this.stopEditing();
-            Events.cancelEvent(event);
-        }
-        else if (event.keyCode === KeyEvent.DOM_VK_RIGHT &&
-            this.input.selectionStart === this.input.value.length)
-        {
-            // Complete on right arrow at end of line.
-            if (ac.acceptCompletion())
-                Events.cancelEvent(event);
-        }
-        else if (event.keyCode === KeyEvent.DOM_VK_UP || event.keyCode === KeyEvent.DOM_VK_DOWN)
-        {
-            var dir = (event.keyCode === KeyEvent.DOM_VK_UP ? -1 : 1);
-            if (ac.cycle(dir))
-                Events.cancelEvent(event);
-        }
-        else if (event.keyCode === KeyEvent.DOM_VK_ESCAPE)
-        {
-            if (ac.cancel(context))
-                Events.cancelEvent(event);
-        }
-    },
-
-    onInput: function()
-    {
-        var context = this.panel.context;
-        this.getAutoCompleter().complete(context);
-        Firebug.Editor.update();
     }
 });
-
-
-function DOMAutoCompleter(box, completionBox)
-{
-    var ac = new Firebug.JSAutoCompleter(box, completionBox, false);
-
-    this.destroy = function() { ac.shutdown(); };
-    this.reset = function() { ac.hide(); };
-    this.complete = function(context) { ac.complete(context); };
-
-    this.cycle = function(dir)
-    {
-        if (!ac.hasCompletions())
-            return false;
-        ac.cycle(dir);
-        return true;
-    };
-
-    this.acceptCompletion = function()
-    {
-        if (ac.acceptReturn())
-            return false;
-        ac.acceptCompletion();
-        return true;
-    };
-
-    this.cancel = function(context)
-    {
-        if (ac.acceptReturn())
-        {
-            // There are no visible completions, but we might still be able to
-            // revert a recently performed completion.
-            return ac.revert(context);
-        }
-        ac.hideForExpression();
-        return true;
-    };
-}
 
 // ********************************************************************************************* //
 // Local Helpers
