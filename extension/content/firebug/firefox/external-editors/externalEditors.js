@@ -136,17 +136,16 @@ Firebug.ExternalEditors = Obj.extend(Firebug.Module,
 
     getEditor: function(id)
     {
-        if (id)
-        {
-            var list = Arr.extendArray(externalEditors, editors);
-            for each(var editor in list)
-                if (editor.id == id)
-                    return editor;
-        }
-        else
-        {
+        if (typeof id == "object")
+            return id;
+
+        if (!id)
             return this.getDefaultEditor();
-        }
+
+        var list = Arr.extendArray(externalEditors, editors);
+        for each(var editor in list)
+            if (editor.id == id)
+                return editor;
     },
 
     count: function()
@@ -324,7 +323,7 @@ Firebug.ExternalEditors = Obj.extend(Firebug.Module,
                 cmdline: editor.cmdline
             }
             var self = this;
-            this.getLocalSourceFile(options, function(file)
+            this.getLocalFile(options, function(file)
             {
                 if (file.exists())
                 {
@@ -350,7 +349,7 @@ Firebug.ExternalEditors = Obj.extend(Firebug.Module,
         }
     },
 
-    getLocalSourceFile: function(options, callback)
+    getLocalFile: function(options, callback)
     {
         var href = options.href;
         var file = Url.getLocalOrSystemFile(href);
@@ -364,16 +363,13 @@ Firebug.ExternalEditors = Obj.extend(Firebug.Module,
 
             var req = new XMLHttpRequest;
             req.open("HEAD", href, true);
+            req.setRequestHeader("X-Line", options.line);
+            req.setRequestHeader("X-Column", options.col);
             req.onloadend = function() {
                 var path = req.getResponseHeader("X-Local-File-Path");
-                var file = Url.getLocalOrSystemFile(path);
-                if (!file)
-                {
-                    path = 'file:///' + path.replace(/[\/\\]+/g, '/');
-                    file = Url.getLocalOrSystemFile(path);
-                }
                 if (FBTrace.DBG_EXTERNALEDITORS)
                     FBTrace.sysout("externalEditors. server says", path);
+                var file = fixupFilePath(path);
                 if (file)
                     callback(file);
                 // TODO: do we need to notifiy user if path was wrong?
@@ -416,6 +412,7 @@ Firebug.ExternalEditors = Obj.extend(Firebug.Module,
                 args = args.slice(0, argIndex);
             argIndex = args.length;
         }
+
         cmdLine.replace(/(\s+|$)|(?:%([{}]|(%|col|line|file|url)))/g, function(a, b, c, d, i, str)
         {
             var skipped = str.substring(lastI, i);
@@ -459,14 +456,18 @@ Firebug.ExternalEditors = Obj.extend(Firebug.Module,
 
     transformHref: function(href)
     {
-        for each (var transform in this.filePathTransforms)
+        for each (var transform in this.pathTransformations)
         {
             if (transform.regexp.test(href))
             {
-                var path = href.replace(t.regexp, t.filePath);
-                var file = Url.getLocalOrSystemFile(path);
+                var path = href.replace(transform.regexp, transform.filePath);
+                var file = fixupFilePath(path);
                 if (file && file.exists())
+                {
+                    if (FBTrace.DBG_EXTERNALEDITORS)
+                        FBTrace.sysout("externalEditors. " + href + " transformed to", file.path);
                     return file;
+                }
             }
         }
     },
@@ -554,16 +555,136 @@ Firebug.ExternalEditors = Obj.extend(Firebug.Module,
     },
 });
 
-// object.extend doesn't handle getters
-Firebug.ExternalEditors.__defineGetter__("filePathTransforms", function()
+function fixupFilePath(path)
 {
-    return null;
-});
+    var file = Url.getLocalOrSystemFile(path);
+    if (!file)
+    {
+        path = 'file:///' + path.replace(/[\/\\]+/g, '/');
+        file = Url.getLocalOrSystemFile(path);
+    }
+    return file;
+}
 
-Firebug.ExternalEditors.__defineGetter__("checkHeaderRe", function()
+// object.extend doesn't handle getters
+Firebug.ExternalEditors.__defineGetter__("pathTransformations",
+    lazyLoadUrlMappings.bind(Firebug.ExternalEditors, "pathTransformations"));
+
+Firebug.ExternalEditors.__defineGetter__("checkHeaderRe",
+    lazyLoadUrlMappings.bind(Firebug.ExternalEditors, "checkHeaderRe"));
+
+function lazyLoadUrlMappings(propName)
 {
-    return null || /^https?:\/\/localhost/i;
-});
+    delete this.pathTransformations;
+    delete this.checkHeaderRe;
+
+    var lines = readEntireFile(userFile("urlMappings.txt")).split(/[\n\r]+/);
+    var sp = "=>";
+
+    function safeRegexp(source)
+    {
+        try
+        {
+            return RegExp(source, 'i');
+        }
+        catch(e)
+        {
+        }
+    }
+
+    this.pathTransformations = [];
+    this.checkHeaderRe = null;
+    for (var i in lines)
+    {
+        var line = lines[i].split('=>');
+
+        if (!line[1] || !line[0])
+            continue;
+
+        var start = line[0].trim()
+        var end = line[1].trim();
+
+        if (start[0] == '/' && start[1] == '/')
+            continue;
+
+        if (start == "X-Local-File-Path")
+        {
+            this.checkHeaderRe = safeRegexp(end);
+            continue;
+        }
+        var t = {
+            regexp: safeRegexp(start, i),
+            filePath: end
+        }
+        if (t.regexp && t.filePath)
+            this.pathTransformations.push(t)
+    }
+
+    if (!this.checkHeaderRe)
+        this.checkHeaderRe = /^https?:\/\/(localhost)(\/|:|$)/i;
+
+    return this[propName];
+}
+
+Firebug.ExternalEditors.saveUrlMappings = function()
+{
+    var sp = " => ";
+    var text = [
+        "X-Local-File-Path", sp, this.checkHeaderRe.source, "\n\n"
+    ];
+    for each (var t in this.pathTransformations)
+        text.push(t.regexp, sp, t.filePath, "\n");
+
+    var file = userFile("urlMappings.txt");
+    writeToFile(file, text.join(""));
+}
+
+// file helpers
+function userFile(name)
+{
+    var file = Services.dirsvc.get("ProfD", Ci.nsIFile);
+    file.append("firebug");
+    file.append(name);
+    return file
+}
+
+function readEntireFile(file)
+{
+    if(!file.exists())
+        return "";
+
+    var data = "", str = {};
+    var fstream = Cc["@mozilla.org/network/file-input-stream;1"]
+        .createInstance(Ci.nsIFileInputStream);
+    var converter = Cc["@mozilla.org/intl/converter-input-stream;1"]
+        .createInstance(Ci.nsIConverterInputStream);
+
+    const replacementChar = Ci.nsIConverterInputStream.DEFAULT_REPLACEMENT_CHARACTER;
+    fstream.init(file, -1, 0, 0);
+    converter.init(fstream, "UTF-8", 1024, replacementChar);
+    while (converter.readString(4096, str) != 0){
+        data += str.value;
+    }
+    converter.close();
+
+    return data;
+}
+
+function writeToFile(file, text)
+{
+    var fostream = Cc["@mozilla.org/network/file-output-stream;1"]
+        .createInstance(Ci.nsIFileOutputStream);
+    var converter = Cc["@mozilla.org/intl/converter-output-stream;1"]
+        .createInstance(Ci.nsIConverterOutputStream);
+
+    if(!file.exists())
+        file.create(Ci.nsIFile.NORMAL_FILE_TYPE, 0664);
+
+    fostream.init(file, 0x02 | 0x08 | 0x20, 0664, 0); // write, create, truncate
+    converter.init(fostream, "UTF-8", 4096, 0x0000);
+    converter.writeString(text);
+    converter.close();
+}
 
 // ********************************************************************************************* //
 // Registration

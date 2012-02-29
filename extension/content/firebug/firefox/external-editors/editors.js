@@ -5,6 +5,7 @@
 
 const Cc = Components.classes;
 const Ci = Components.interfaces;
+const Cu = Components.utils;
 
 const prefs = Cc["@mozilla.org/preferences-service;1"].getService(Ci.nsIPrefBranch);
 const names = ["label", "executable", "cmdline", "image"];
@@ -260,3 +261,179 @@ var gEditorManager =
 };
 
 // ************************************************************************************************
+// URLMappings
+Cu.import("resource://firebug/loader.js")
+
+var headerName = "X-Local-File-Path";
+var headerExplaination = "\
+// the following regexp is used by firebug to determine\n\
+// if it should send request to the server to get\n\
+// file path with " + headerName + " header\n\
+// defalt value is ^https?:\\/\\/(localhost)(\\/|:|$)";
+
+var listExplaination = "\
+// list of mappings in the form\n\
+// ^https?:\\/\\/my.domain.com/ => c:\\php/www\\ \n\
+// ";
+var noMapping = "no mappings for tested url";
+var willQueryServer = "for this url Firebug will send query to server";
+
+var splitter = " => ";
+var gUrlMappingManager = {
+    init: function()
+    {
+        var Firebug = opener.Firebug;
+        var extModule = Firebug.ExternalEditors;
+        this.checkHeaderRe = extModule.checkHeaderRe;
+        this.pathTransformations = extModule.pathTransformations;
+
+        var val = [
+            headerExplaination,    "\n",
+            headerName, splitter, extModule.checkHeaderRe.source,
+            "\n\n",
+            listExplaination,
+            "\n"
+        ];
+
+        for each (var transform in this.pathTransformations)
+            val.push(transform.regexp.source, splitter, transform.filePath, '\n');
+
+        val.push(splitter, "\n")
+
+        document.getElementById("urlMappings").value = val.join("");
+        document.getElementById("test").value = Firebug.Firefox.getCurrentBrowser().currentURI.spec;
+
+        this.onMainInput();
+    },
+    uninit: function()
+    {
+        this.save();
+        opener.Firebug.ExternalEditors.saveUrlMappings();
+    },
+    save: function()
+    {
+        var checkHeaderRe = this.checkHeaderRe;
+        var pathTransformations = this.pathTransformations;
+
+        FirebugLoader.forEachWindow(function(win)
+        {
+            var extModule = win.Firebug.ExternalEditors;
+            delete extModule.pathTransformations;
+            delete extModule.checkHeaderRe;
+            extModule.checkHeaderRe = checkHeaderRe;
+            extModule.pathTransformations = pathTransformations;
+        });
+    },
+    parse: function(val)
+    {
+        var lines = val.split(/(?:\n\r|\n|\r)/);
+        var errors = this.errors = [];
+        function addRegexp(source, line)
+        {
+            if (!source)
+                return;
+
+            try
+            {
+                source = source.replace(/\\?\//g, '\\/');
+                return RegExp(source, 'i');
+            }
+            catch(e)
+            {
+                errors.push(line + ': ' + e);
+                return null;
+            }
+        }
+
+        this.pathTransformations = [];
+        this.checkHeaderRe = null;
+        for (var i in lines)
+        {
+            var line = lines[i].split('=>');
+
+            if (!line[1] || !line[0])
+                continue;
+
+            var start = line[0].trim()
+            var end = line[1].trim();
+
+            if (start[0] == '/' && start[1] == '/')
+                continue;
+
+            if (start == headerName)
+            {
+                if (this.checkHeaderRe)
+                    erors.push(i)
+                else
+                    this.checkHeaderRe = addRegexp(end, i);
+                continue;
+            }
+            var t = {
+                regexp: addRegexp(start, i),
+                filePath: end
+            }
+            if (t.regexp && t.filePath)
+                this.pathTransformations.push(t)
+        }
+
+        if (!this.checkHeaderRe)
+            this.checkHeaderRe = /^$/
+    },
+    onTestInput: function()
+    {
+        var testBox = document.getElementById("test");
+        var resultBox = document.getElementById("result");
+        var href = testBox.value;
+        if (this.checkHeaderRe.test(href))
+        {
+            resultBox.value = "firebug will send query to server";
+        }
+        else
+        {
+            for each (var transform in this.pathTransformations)
+            {
+                if (transform.regexp.test(href))
+                {
+                    var path = href.replace(transform.regexp, transform.filePath);
+                    break;
+                }
+            }
+            if (path) {
+                resultBox.style.cssText = "box-shadow: 0px 0px 1.5px 1px lime;";
+                href = path;
+            }
+            resultBox.value = href.replace(/([^:\\\/])[\\\/]+/g, '$1/');
+        }
+    },
+    onMainInput: function()
+    {
+        this.parse(document.getElementById("urlMappings").value);
+        var resultBox = document.getElementById("result");
+        if (this.errors.length)
+        {
+            resultBox.value = this.errors;
+            resultBox.style.cssText = "box-shadow: 0px 0px 1.5px 1px red;";
+        } else
+        {
+            resultBox.style.cssText = "";
+            this.onTestInput()
+        }
+    },
+    schedule: function(funcName)
+    {
+        if (this._scheduled != "onMainInput")
+            this._scheduled = funcName
+
+        if (this.timeOut != null)
+            return;
+        this.timeOut = setTimeout(function(_this)
+        {
+            _this[_this._scheduled]();
+            _this._scheduled = _this.timeOut = null;
+            _this.save()
+        }, 80, this);
+    }
+}
+
+// ************************************************************************************************
+
