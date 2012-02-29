@@ -10,10 +10,10 @@ define([
 ],
 function(Domplate, Locale, FirebugReps, Dom, Css, Arr) {
 
-// ************************************************************************************************
+// ********************************************************************************************* //
 // Constants
 
-// ************************************************************************************************
+// ********************************************************************************************* //
 
 with (Domplate) {
 FirebugReps.Table = domplate(Firebug.Rep,
@@ -124,7 +124,7 @@ FirebugReps.Table = domplate(Firebug.Rep,
         return arr;
     },
 
-    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
     // Sorting
 
     onClickHeader: function(event)
@@ -191,7 +191,7 @@ FirebugReps.Table = domplate(Firebug.Rep,
         }
     },
 
-    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
     // Console logging
 
     log: function(data, cols, context)
@@ -201,27 +201,7 @@ FirebugReps.Table = domplate(Firebug.Rep,
         if (!data)
             return;
 
-        // Get header info from passed argument (can be null).
-        var columns = [];
-        for (var i=0; cols && i<cols.length; i++)
-        {
-            var col = cols[i];
-            var prop = (typeof(col.property) != "undefined") ? col.property : col;
-            var label = (typeof(col.label) != "undefined") ? col.label : prop;
-
-            columns.push({
-                property: prop,
-                label: label,
-                alphaValue: true
-            });
-        }
-
-        if (FBTrace.DBG_CONSOLE)
-            FBTrace.sysout("consoleInjector.table; columns", columns);
-        
-        // Generate header info from the data dynamically.
-        if (!columns.length)
-            columns = this.getHeaderColumns(data);
+        var columns = this.computeColumns(data, cols);
 
         // Don't limit strings in the table. It should be mostly ok. In case of
         // complaints we need an option.
@@ -249,6 +229,33 @@ FirebugReps.Table = domplate(Firebug.Rep,
             Firebug.stringCropLength = prevValue;
             delete this.columns;
         }
+    },
+
+    computeColumns: function(data, cols)
+    {
+        // Get header info from passed argument (can be null).
+        var columns = [];
+        for (var i=0; cols && i<cols.length; i++)
+        {
+            var col = cols[i];
+            var prop = (typeof(col.property) != "undefined") ? col.property : col;
+            var label = (typeof(col.label) != "undefined") ? col.label : prop;
+
+            columns.push({
+                property: prop,
+                label: label,
+                alphaValue: true
+            });
+        }
+
+        if (FBTrace.DBG_CONSOLE)
+            FBTrace.sysout("consoleInjector.table; columns", columns);
+
+        // Generate header info from the data dynamically.
+        if (!columns.length)
+            columns = this.getHeaderColumns(data);
+
+        return columns;
     },
 
     /**
@@ -317,10 +324,10 @@ FirebugReps.Table = domplate(Firebug.Rep,
     }
 })};
 
-// ************************************************************************************************
+// ********************************************************************************************* //
 // Registration
 
 return FirebugReps.Table;
 
-// ************************************************************************************************
+// ********************************************************************************************* //
 });
