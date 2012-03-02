@@ -1669,6 +1669,7 @@ DOMMainPanel.prototype = Obj.extend(Firebug.DOMBasePanel.prototype,
     deriveA11yFrom: "console",
     searchType : "dom",
     order: 50,
+    inspectable: true,
 
     initialize: function()
     {
