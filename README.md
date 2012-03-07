@@ -1,12 +1,12 @@
 Firebug
 =======
-** Web Development Evolved.**
+*Web Development Evolved* [getfirebug.com](getfirebug.com) 
 
-[getfirebug.com](getfirebug.com)
+[Download](https://addons.mozilla.org/en-US/firefox/addon/firebug/)
 
 
-Repository Structure
---------------------
+Source Repository Structure
+---------------------------
 See [more](http://getfirebug.com/wiki/index.php/Source) information about Firebug
 repository structure.
 
@@ -23,24 +23,30 @@ In order to build Firebug *.xpi package run following in your command line
     $ cd firebug/extension
     $ ant
 
-The *.xpi file should be located within *release* directory.
+The *.xpi file should be located within `./release` directory.
 
 
 Run Firebug From Source
 -----------------------
-The *extension* directory represents Firebug extension directory and so, you run Firebug
-directly from it.
+The *extension* directory directly contains Firebug extension files and so, you run Firebug directly from it.
 
-# Locate your Firefox [profile folder](http://kb.mozillazine.org/Profile_folder)
-# Open extensions/ folder, create it if it doesn't exist.
-# Create a new text file and put the full path to your development folder inside.
-(e.g. C:\firebug\extension\ or ~/firebug/extension/). Windows users should retain the OS'
+1. Locate your Firefox [profile folder](http://kb.mozillazine.org/Profile_folder)
+2. Open `extensions/` folder, create if it doesn't exist.
+3. Create a new text file and put the full path to your development folder inside.
+(e.g. `C:\firebug\extension\` or `~/firebug/extension/`). Windows users should retain the OS'
 slash direction, and everyone should remember to include a closing slash and remove any
 trailing spaces.
-# Save the file with Firebug ID firebug@software.joehewitt.com
+4. Save the file with Firebug ID as it's name `firebug@software.joehewitt.com`
 
 
-Resources
----------
+Further Resources
+-----------------
 
-* Home: 
+* Home: [http://getfirebug.com/](http://getfirebug.com/)
+* Blog: [http://blog.getfirebug.com/](http://blog.getfirebug.com/)
+* Twitter: [http://twitter.com/#!/firebugnews](http://twitter.com/#!/firebugnews)
+* Discussion Group: [https://groups.google.com/forum/?fromgroups#!forum/firebug](https://groups.google.com/forum/?fromgroups#!forum/firebug)
+* Wiki: [http://getfirebug.com/wiki](http://getfirebug.com/wiki/index.php/Main_Page)
+* Report an Issue: [http://code.google.com/p/fbug/issues/list](http://code.google.com/p/fbug/issues/list)
+* Firebug Extensions: [http://code.google.com/p/fbug/issues/list](http://code.google.com/p/fbug/issues/list)
+
