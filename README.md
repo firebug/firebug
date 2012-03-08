@@ -1,6 +1,6 @@
 Firebug
 =======
-*Web Development Evolved* [getfirebug.com](getfirebug.com) 
+*Web Development Evolved* [getfirebug.com](getfirebug.com)
 
 [Download](https://addons.mozilla.org/en-US/firefox/addon/firebug/)
 
@@ -19,6 +19,7 @@ repository structure.
 Build Firebug XPI
 -----------------
 In order to build Firebug *.xpi package run following in your command line
+(you need [Apache Ant](http://ant.apache.org/))
 
     $ cd firebug/extension
     $ ant
@@ -28,7 +29,9 @@ The *.xpi file should be located within `./release` directory.
 
 Run Firebug From Source
 -----------------------
-The *extension* directory directly contains Firebug extension files and so, you run Firebug directly from it.
+The *extension* directory directly contains Firebug extension files and so, you can run
+Firebug directly from it. This is the recommended way how to quickly test your code
+changes and provide a patch.
 
 1. Locate your Firefox [profile folder](http://kb.mozillazine.org/Profile_folder)
 2. Open `extensions/` folder, create if it doesn't exist.
