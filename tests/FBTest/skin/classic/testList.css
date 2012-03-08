@@ -1,0 +1,233 @@
+/* See license.txt for terms of usage */
+
+#testList {
+    overflow: auto;
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    left: 0;
+    top: 0;
+    background-color: #FFFFFF;
+    color: #000000;
+}
+
+/************************************************************************************************/
+
+.testListTable {
+    width: 100%;
+    border-top: 1px solid #EFEFEF;
+    height: 100%;
+    font-size: 11px;
+}
+
+.testListRow {
+    background: white;
+}
+
+.testListRow:hover {
+    background: #EFEFEF;
+}
+
+.testListCol {
+    padding: 0;
+    vertical-align: top;
+    border-bottom: 1px solid #EFEFEF;
+    white-space: nowrap;
+}
+
+.testName {
+    width: 17px;
+    background-repeat: no-repeat;
+    background-position: 3px 3px;
+    padding-left: 17px;
+}
+
+.testListCol.testName {
+    border-left: 1px solid #EFEFEF;
+}
+
+.testListRow.results .testName {
+    background-image: url(chrome://firebug/skin/win/twistyClosed.png);
+}
+
+.testListRow.opened .testName {
+    background-image: url(chrome://firebug/skin/win/twistyOpen.png);
+}
+
+.testListRow.error .testLink {
+    color: red !important;
+}
+
+.testListRow.todo .testLink {
+    color: gray !important;
+}
+
+.testListRow.disabled .testLink {
+    text-decoration: line-through;
+}
+
+.testUri {
+    overflow: hidden;
+    min-width: 70px;
+    padding: 1px 0 2px 0px !important;
+}
+
+.testDesc {
+    width: 100%;
+    color: Gray;
+    margin-right: 7px;
+    text-align: left;
+    padding: 1px 0 2px 4px !important;
+}
+
+.testDesc SPAN {
+    margin-right: 7px;
+}
+
+.testLink {
+    color: #0000ff;
+    cursor:pointer;
+}
+
+.testLink:hover {
+    text-decoration:underline;
+}
+
+/************************************************************************************************/
+
+.testGroupSeparator {
+    background: rgb(232, 242, 254);
+}
+
+.testGroupSeparator > TD {
+    height: 20px;
+    border-bottom: 1px solid #9C9C9C;
+    background-color: #BBBBBB;
+    border-top: 1px solid #999999;
+    border-bottom: 2px solid;
+    -moz-border-bottom-colors: #EFEFEF #999999;
+}
+
+.testGroupSeparator > TD > .extension {
+    font-weight: bold;
+    padding-left: 10px;
+}
+
+.testGroupSeparator > TD > .location {
+    color: gray;
+    padding-left: 10px;
+}
+
+/************************************************************************************************/
+
+.testListCol.testIcon {
+    min-width: 60px;
+    color: gray;
+    padding-top: 1px;
+}
+
+.testListCol .statusIcon {
+    margin-right: 4px;
+    margin-left: 4px;
+    width: 37px;
+    height: 16px;
+    vertical-align: middle;
+    background: transparent no-repeat 0 0;
+}
+
+.testListRow.running .statusIcon {
+    background-image: url(chrome://firebug/skin/loading_16.gif);
+    background-position: 10px 0px;
+}
+
+/************************************************************************************************/
+
+.testBodyCol {
+    padding-left: 18px;
+}
+
+/************************************************************************************************/
+
+.groupTable {
+    width: 100%;
+    overflow: hidden;
+    font-family: Lucida Grande, Tahoma, sans-serif;
+    font-size: 11px;
+}
+
+.testGroupCol {
+}
+
+.testGroupRow {
+    background: white;
+    height:17px;
+}
+
+.opened > .testGroupCol > .testGroupName {
+    background-image: url(chrome://firebug/skin/win/twistyOpen.png);
+}
+
+.testGroupName {
+    background-image: url(chrome://firebug/skin/win/twistyClosed.png);
+    background-repeat: no-repeat;
+    background-position: 2px 1px;
+    padding-left: 18px;
+    font-weight: bold;
+    cursor:pointer;
+}
+
+.testGroupCount {
+    color: gray;
+    padding-left: 3px;
+}
+
+.groupBodyCol {
+    padding-left: 18px;
+}
+
+.groupAction {
+    white-space:nowrap;
+    padding-left: 15px;
+    padding-right: 5px;
+}
+
+/************************************************************************************************/
+
+/* Colorize group if there is a failing tests inside */
+.testGroupRow.error {
+    color: red;
+}
+
+/************************************************************************************************/
+
+/* Hide:
+ * 1) passing tests 
+ * 2) results of passing tests (if opened)
+ * 3) passing groups
+ */
+.groupTable.hidePassingTests .testListRow,
+.groupTable.hidePassingTests .testListRow.opened + TR,
+.groupTable.hidePassingTests .testGroupRow {
+    display: none;
+}
+
+.groupTable.hidePassingTests .testListRow.error,
+.groupTable.hidePassingTests .testListRow.error.opened + TR,
+.groupTable.hidePassingTests .testGroupRow.error {
+    display: block;
+}
+
+/* Hide also borders */
+.groupTable.hidePassingTests .testListRow .testListCol,
+.groupTable.hidePassingTests .testListTable {
+    border-bottom: 0;
+    border-top: 0;
+}
+
+.groupTable.hidePassingTests .testListRow.error .testListCol {
+    border-bottom: 1px solid #EFEFEF;
+}
+
+.groupTable.hidePassingTests .groupBodyRow.error testListTable {
+    border-top: 1px solid #EFEFEF;
+}

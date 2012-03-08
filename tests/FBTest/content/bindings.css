@@ -1,0 +1,13 @@
+/* See license.txt for terms of usage */
+
+#testListUrlBar {
+    -moz-binding: url("chrome://fbtest/content/bindings.xml#urlbar");
+}
+
+#testCaseUrlBar {
+    -moz-binding: url("chrome://fbtest/content/bindings.xml#urlbar");
+}
+
+#testDriverUrlBar {
+    -moz-binding: url("chrome://fbtest/content/bindings.xml#urlbar");
+}
