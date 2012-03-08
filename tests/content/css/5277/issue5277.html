@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Issue 5277: Display @import rule media queries and allow editing them</title>
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+        <link href="../../_common/testcase.css" type="text/css" rel="stylesheet"/>
+        <style type="text/css">
+        @import "issue5277.css" screen and (min-width: 400px);
+
+        #element1 {
+            width: 100px;
+            height: 100px;
+            background-color: #8C8CFF;
+        }
+        </style>
+    </head>
+    <body>
+        <header>
+            <h1><a href="http://code.google.com/p/fbug/issues/detail?id=5277">Issue 5277</a>: Display @import rule media queries and allow editing them</h1>
+        </header>
+        <div>
+            <section id="content">
+                <div id="element1"></div>
+            </section>
+            <section id="description">
+                <h3>Steps to reproduce</h3>
+                <ol>
+                    <li>Open Firebug</li>
+                    <li>Switch to the <em>CSS</em> panel</li>
+                    <li>
+                        Select <em>issue5277.html</em> from the Location Menu</br>
+                        <span class="ok">&rArr; <code>@import "issue5277.css" screen and (min-width: 400px);</code> should be listed inside the panel</span>
+                    </li>
+                    <li>
+                        Resize the browser window, so that the content width is between 400 and 800 pixels<br/>
+                        <span class="ok">&rArr; The <code>&lt;div&gt;</code> above (<code>#element1</code>) should be green</span>
+                    </li>
+                    <li>Click the media query of the rule</li>
+                    <li>
+                        Change <code>400px</code> to <code>800px</code><br/>
+                        <span class="ok">&rArr; The <code>&lt;div&gt;</code> above (<code>#element1</code>) should now be blue</span>
+                    </li>
+                    <li>Leave inline editing by clicking somewhere outside the editor</li>
+                    <li>
+                        Resize the browser window, so that the content with is greater than 800 pixels<br/>
+                        <span class="ok">&rArr; The <code>&lt;div&gt;</code> above (<code>#element1</code>) should be green again</span>
+                    </li>
+                </ol>
+                <h3>Expected result</h3>
+                <ul>
+                    <li>@import rule media queries should be displayed and inside the <em>CSS</em> panel and the user should be able to edit them (with changes immediately applied)</li>
+                </ul>
+            </section>
+            <footer>Sebastian Zartner, sebastianzartner@gmx.de</footer>
+        </div>
+    </body>
+</html>

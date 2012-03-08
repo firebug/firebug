@@ -1,0 +1,32 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+<html>
+<head>
+  <title>Test Case for breakOnError</title>
+</head>
+<body>
+
+<h1>Break On Error</h1>
+
+<p>This test-case is intended for testing <i>breakOnError</i> feature
+<br/>
+<i>Jan Odvarko, odvarko@gmail.com</i>
+</p>
+
+<ol>
+<li>Open Firebug and enable the Console and Debugger panels, reload this page.</li>
+<li>Switch to the Console panel and click <code style="color:green">Break On All Errors</code>.</li>
+<li>Press the <code>Execute Test</code> button</li>
+<li>Firebug should switch to the Script panel and halt in the debugger.</li>
+</ol>
+
+<button id="testButton" onclick="onExecuteTest()">Execute Test</button>
+
+<script type="text/javascript">
+function onExecuteTest()
+{
+  var j = t234();
+}
+</script>
+  
+</body>
+</html>

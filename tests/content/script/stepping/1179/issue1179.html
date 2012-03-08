@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Issue 1179: Issue summary</title>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+    <link href="../../../_common/testcase.css"
+        type="text/css" rel="stylesheet"/>
+</head>
+<body>
+<script type="text/javascript">
+function clickMe()
+{
+    var someFillerLine = 0;
+    clickNested();
+    var someFillerLine2 = 1;
+    return;
+}
+
+function clickNested()
+{
+    var x = 0;
+    var y = 1;
+    var z = x + y;
+    return z + y;
+}
+</script>
+<header>
+    <h1><a href="http://code.google.com/p/fbug/issues/detail?id=1179">Issue 1179</a>:
+        Actions do not move the program counter after Step Into if breakpoint is on first line of function</h1>
+</header>
+<div>
+    <section id="description">
+        <h3>Steps to reproduce</h3>
+        <ol>
+            <li>Open Firebug, enable the Script panel and reload the page.</li>
+            <li>Create a breakpoint on lines <code>14</code> and <code>21</code></li>
+            <li>Press this button <button id="testButton" onclick="clickMe()">Break</button></li>
+            <li>Debugger should halt at line <code>14</code></li>
+            <li>Step Into should go to line <code>21</code></li>
+            <li>Step Out should go to line <code>14</code></li>
+            <li>Step Into should go to line <code>15</code></li>
+            <li>Step Over should go to line <code>16</code></li>
+        </ol>
+    </section>
+    <footer>
+        Jan Odvarko, odvarko@gmail.com;
+    </footer>
+</div>
+</body>
+</html>

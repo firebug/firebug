@@ -1,0 +1,44 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+          "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <title>Test Case for Issue #176</title>
+</head>
+<body>
+<h1>Test for Issue #176</h1>
+
+<p>This test-case is intended for <a href="http://code.google.com/p/fbug/issues/detail?id=176">Issue #176</a>
+- <span class="h3">net flash tab not recognising flv files</span>.
+<br/>
+<i>Jan Odvarko, odvarko@gmail.com</i>
+</p>
+
+<ul>
+    <li>Open Firebug UI and enable Net panel.</li>
+    <li>Clear the browser cache.</li>
+    <li>Press <b>Execute Test</b> button below to execute test request.</li>
+    <li>Two requests: <i>issue176.txt</i> and <i>issue176.flv</i> must be displayed.</li>
+    <li>Change Net panel filter to <b>Flash</b>.</li>
+    <li>Both generated requests must be displayed.</li>
+    <li>To repeat the test you need to refresh the page.</li>
+</ul>
+<button id="testButton" onclick="runTest()">Execute Test</button>
+<script>
+function runTest()
+{
+    appendScript("issue176.txt");
+    appendScript("issue176.flv");
+}
+
+function appendScript(uri)
+{
+    var script = document.createElement("script");
+    script.setAttribute("type", "text/javascript");
+    script.setAttribute("src", uri);
+
+    var head = document.getElementsByTagName("head")[0];
+    head.appendChild(script);
+}
+</script>
+</body>
+</html>

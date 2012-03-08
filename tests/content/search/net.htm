@@ -1,0 +1,51 @@
+<html>
+<head>
+    <meta http-equiv="Content-type" content="text/html; charset=utf-8">
+    <title>Search Test</title>
+    <script type="text/javascript" src="../env.js"></script>
+    <script type="text/javascript" src="search.js"></script>
+    <script type="text/javascript">
+        window.onload = function() {
+            makeRequest("GET", "NETiframe.htm",
+                    function() {
+
+            var netPanel = openAndSelectPanel("net");
+            var text = "NET";
+
+            var tests = [
+                         {
+                             description: "Net Forward Case Insensitive",
+                             expected: 2,
+                             text: text,
+                             reverse: false,
+                             caseSensitive: false
+                         },
+                         {
+                             description: "Net Reverse Case Insensitive",
+                             expected: 2,
+                             text: text,
+                             reverse: true,
+                             caseSensitive: false
+                         },
+                         {
+                             description: "Net Forward Case Sensitive",
+                             expected: 1,
+                             text: text,
+                             reverse: false,
+                             caseSensitive: true
+                         },
+                         {
+                             description: "Net Reverse Case Sensitive",
+                             expected: 1,
+                             text: text,
+                             reverse: true,
+                             caseSensitive: true
+                         }
+                        ];
+            executeRangeTestSuite(tests, netPanel.panelNode, function() { FBTest.testDone(); });
+            });
+        };
+    </script>
+</head>
+<body>
+</body>

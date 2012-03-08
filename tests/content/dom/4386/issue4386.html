@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Issue 4386: DOM breakpoints can't be deleted or disabled/enabled from within the Breakpoints Side Panel</title>
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+        <link href="../../_common/testcase.css" type="text/css" rel="stylesheet"/>
+        <script type="text/javascript">
+            var _test = {a: "Variable 1", b: "Variable 2", c: "Variable 3", d: "Variable 4"};
+        </script>
+    </head>
+    <body>
+        <header>
+            <h1><a href="http://code.google.com/p/fbug/issues/detail?id=4386">Issue 4386</a>: DOM breakpoints can't be deleted or disabled/enabled from within the Breakpoints Side Panel</h1>
+        </header>
+        <div>
+            <section id="description">
+                <h3>Steps to reproduce</h3>
+                <ol>
+                    <li>Open Firebug</li>
+                    <li>Enable the <em>Script</em> panel</li>
+                    <li>Reload the page</li>
+                    <li>Switch to the <em>DOM</em> panel</li>
+                    <li>Search for the object <code>_test</code> and expand it</li>
+                    <li>Set breakpoints at <code>a</code>, <code>b</code>, <code>c</code> and <code>d</code></li>
+                    <li>Switch to the <em>Script</em> panel and there to the <em>Breakpoints</em> side panel</li>
+                    <li>Click the Remove button of the <code>a</code> and <code>b</code> breakpoint to remove these breakpoints</li>
+                    <li>Click the checkbox besides the <code>c</code> breakpoint to disable the breakpoint</li>
+                    <li>Switch back to the <em>DOM</em> panel</li>
+                    <li>Have a look at the properties of <code>test</code></li>
+                </ol>
+                <h3>Expected result</h3>
+                <ul>
+                    <li>
+                      The display of all DOM breakpoints is updated when they are changed inside the <em>Script</em> panel<br/>
+                      (breakpoint for <code>a</code> and <code>b</code> removed, breakpoint for <code>c</code> disabled, breakpoint for <code>d</code> enabled)
+                    </li>
+                </ul>
+            </section>
+            <footer>
+                Sebastian Zartner, sebastianzartner@gmx.de
+            </footer>
+        </div>
+    </body>
+</html>

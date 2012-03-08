@@ -1,0 +1,37 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+<html>
+<head>
+  <title>Test Case for Issue #654</title>
+</head>
+<body>
+
+<h1>Issue #654</h1>
+
+<p>This test-case is intended for <a href="http://code.google.com/p/fbug/issues/detail?id=654">Issue #654</a>
+- <span class="h3">IP address included on a Net line entry</span>.
+
+<br/>
+<i>Jan Odvarko, odvarko@gmail.com</i>
+</p>
+
+<ol>
+<li>Open Firebug, enable the Net panel and reload this page.</li>
+<li>Right click on the Net panel's header and pick the <i>Local IP</i> entry (to display additional column).</li>
+<li>Click the <span id="responseData" style="color:green">Execute Test</span> button.</li>
+<li>There should be two requests displayed in the Net panel (<i>issue654.html</i> and <i>issue654.php</i>).</li>
+<li>Both request should display <i>Remote IP</i> and <i>Local IP</i> together with port numbers.</li>
+</ol>
+
+<button id="testButton" onclick="executeTest()">Execute Test</button>
+
+<script type="text/javascript">
+function executeTest()
+{
+    var request = new XMLHttpRequest();
+    request.open("GET", "issue654.php", true);
+    request.send(null);
+}
+</script>
+
+</body>
+</html>

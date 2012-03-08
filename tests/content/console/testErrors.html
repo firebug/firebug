@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Console error reporting</title>
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+        <link href="../_common/testcase.css" type="text/css" rel="stylesheet"/>
+        <script type="application/x-javascript">
+        function deepError()
+        {
+            badStuff();
+        }
+
+        function badStuff()
+        {
+        /*foo*/                    B3();
+        }
+
+        function throwit()
+        {
+            try {
+                throw "hi";
+            } catch (exc) {}
+        
+            throw "hi";
+        }
+
+        function explode()
+        {
+            for (var i = 0; i < 1000; ++i)
+                setTimeout(new Function("b" + i + "();"), 0);
+        }
+
+        function clickClick()
+        {
+            var deepError = document.getElementById("deepError");
+            var shallowError = document.getElementById("shallowError");
+        
+            click(shallowError);
+            click(deepError);
+        }
+
+        function click(node)
+        {
+            var doc = node.ownerDocument, event = doc.createEvent("MouseEvents");
+            event.initMouseEvent("click", true, true, doc.defaultView, 0, 0, 0, 0, 0,
+                false, false, false, false, 0, null);
+            return node.dispatchEvent(event);
+        }
+
+        function test1891()
+        {
+            var myDocument = document.implementation.createDocument("","",null);
+            myDocument.createElement("0");
+        }
+
+        function domError()
+        {
+            document.getElementById();
+        }
+        </script>
+    </head>
+    <body>
+        <header>
+            <h1>Console error reporting</h1>
+        </header>
+        <div>
+            <section id="content">
+                <button id="thousandErrors" onclick="explode()" style="color: red;">A thousand errors</button><br/>
+                <button id="syntaxError" onclick="2BeOrNot2Be(40)">Syntax error</button>
+                <button id="shallowError" onclick="foops()">Shallow error</button>
+                <button id="deepError" onclick="deepError()">Deep error</button>
+                <button id="throw" onclick="throwit()">Throw</button>
+                <button id="uncaughtException1891" onclick="test1891()">Uncaught exception</button>
+                <button id="domError" onclick="domError()">DOM error</button><br/>
+                <button id="clickClick" onclick="clickClick()">Two errors via events</button>
+            </section>
+            <section id="description">
+                <h3>Steps to reproduce</h3>
+                <ol>
+                    <li>Open Firebug</li>
+                    <li>Enable the <em>Script</em> and <em>Console</em> panel and switch to the <em>Console</em> panel</li>
+                    <li>Click every button above</li>
+                </ol>
+                <h3>Expected result</h3>
+                <ul>
+                    <li>Every button generates an error, which is displayed inside the <em>Console</em> panel</li>
+                </ul>
+            </section>
+            <footer>Sebastian Zartner, sebastianzartner@gmx.de</footer>
+        </div>
+    </body>
+</html>

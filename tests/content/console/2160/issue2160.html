@@ -1,0 +1,37 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+<html>
+<head>
+    <title>Test Case for Issue #2160</title>
+    <script type="text/javascript">
+        function onLoad()
+        {
+            for (var i = 0; i < 300; ++i)
+              console.log(i);
+
+            console.log("Doing addOnLoad...");
+        }
+        window.addEventListener("load", onLoad, true);
+    </script>
+</head>
+<body>
+
+<h1>Issue #2160</h1>
+
+<p>This test-case is intended for <a href="http://code.google.com/p/fbug/issues/detail?id=2160">Issue #2160</a>
+- <span class="h3">Console does not always start auto-scrolled to the bottom</span>.
+<br/>
+<i>Jan Odvarko, odvarko@gmail.com</i>
+</p>
+
+<ol>
+<li>Open Firebug, enable and select the Console panel.</li>
+<li>Reload the test page. You should see bunch of logs in the panel.</li>
+<li>Scroll the Console panel to the top.</li>
+<li>Reload: the content must be again scrolled at the top.</li>
+<li>Scroll the Console panel to the bottom.</li>
+<li>Reload: the content must be again scrolled at the bottom.</li>
+</ol>
+
+
+</body>
+</html>

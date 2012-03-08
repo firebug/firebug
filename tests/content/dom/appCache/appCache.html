@@ -1,0 +1,107 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html manifest="appCache.manifest">
+<head>
+  <title>Test Case for applicationCache</title>
+  <link type="text/css" rel="stylesheet" href="appCache.css" />
+  <script type="text/javascript" src="appCache-1.php"></script>
+  <script type="text/javascript" src="appCache-2.php"></script>
+</head>
+<body>
+
+<h1>window.applicationCache</h1>
+<i>Jan Odvarko, odvarko@gmail.com</i>
+
+<ol>
+<li>Open Firebug and select the DOM panel.</li>
+<li>Click the <span style="color:green">Add Item</span> button</li>
+<li>Check the applicationCache object, there should be 1 item.</li>
+<li>Click the <span style="color:green">Remove Item</span> button</li>
+<li>Check the applicationCache object, there should be no item.</li>
+</ol>
+
+<button id="removeButton" onclick="onRemoveItem()">Remove Item</button>
+<button id="addButton" onclick="onAddItem()">Add Item</button>
+<br />
+<br />
+
+<span id="content1"></span> (coming from cached file)<br />
+<span id="content2"></span> (coming from not cached file)<br />
+<br />
+
+<i>The first date is coming from a JS function that is generated on
+the server and cached. Since the file isn't downloaded again the value
+is not updated. Click the <span style="color:green">Update Cache</span>
+and refresh the page. The date should be updated, correct?</i><br />
+<br />
+
+<button id="updateButton" onclick="onUpdate()">Update Cache</button>
+
+<script type="text/javascript">
+
+var content1 = document.getElementById("content1");
+var content2 = document.getElementById("content2");
+content1.innerHTML = getCurrentDate1();
+content2.innerHTML = getCurrentDate2();
+
+var href = window.location.href;
+var i = href.lastIndexOf(".");
+var itemURL = href.substr(0, i) + ".js";
+
+if (typeof(console) == "undefined")
+{
+    window.console = { log: function() {} };
+}
+
+applicationCache.oncached = function()
+{
+    console.log("oncached");
+}
+
+applicationCache.onchecking = function()
+{
+    console.log("onchecking");
+}
+
+applicationCache.onerror = function()
+{
+    console.log("onerror");
+}
+
+applicationCache.onnoupdate = function()
+{
+    console.log("onnoupdate");
+}
+
+applicationCache.ondownloading = function()
+{
+    console.log("ondownloading");
+}
+
+applicationCache.onprogress = function()
+{
+    console.log("onprogress");
+}
+
+applicationCache.onupdateready = function()
+{
+    console.log("onupdateready");
+}
+
+function onUpdate()
+{
+    applicationCache.update();
+}
+
+function onRemoveItem()
+{
+    applicationCache.mozRemove(itemURL);
+}
+
+function onAddItem()
+{
+    applicationCache.mozAdd(itemURL);
+}
+</script>
+
+</body>
+</html>

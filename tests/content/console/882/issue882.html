@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <title>Console Source File and Line Number Reporting Bug</title>
+    <script language="javascript" type="text/javascript">
+
+   function init() {
+     console.info("init");
+     external();
+   };
+
+   window.onload = function() {
+     init();
+   };
+
+    </script>
+    <script language="javascript" type="text/javascript" 
+            src="external.js"></script>
+  </head>
+  <body>
+    <h1>Console Source File and Line Number Reporting Bug</h1>
+    <ol>
+      <li>Load this page.</li>
+      <li>Observe that console reports that "init" is written from
+      line 10 of this file.  <br/>
+      <b>Issue a:</b> Line 10 is not in the script section.</li>
+      <li>Observe that console reports that "external" is written from
+      line 2 of this file.<br/>
+      <b>Issue b:</b> It should report the file name as "external.js",
+      and it should report that the line number is 2.</li>
+    </ol>
+  </body>
+</html>

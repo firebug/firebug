@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Issue 1179: Issue summary</title>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+    <link href="../../../_common/testcase.css"
+        type="text/css" rel="stylesheet"/>
+</head>
+<body>
+<script>
+    var a=1;
+    var b=2;
+</script>
+<header>
+    <h1><a href="http://code.google.com/p/fbug/issues/detail?id=1179">Issue 1179</a>:
+        Actions do not move the program counter after Step Into if breakpoint is on first line of function</h1>
+</header>
+<div>
+    <section id="description">
+        <h3>Steps to reproduce</h3>
+        <ol>
+            <li>Open Firebug, enable the Script panel and reload the page.</li>
+            <li>Create a breakpoint on line <code>11</code></li>
+            <li>Refresh this page</li>
+            <li>Debugger should halt at line <code>11</code></li>
+            <li>Step Over should go to line <code>12</code></li>
+            <li>Another Step Over should resume the debugger</li>
+            <li>Refresh this page</li>
+            <li>Debugger should halt at line <code>11</code></li>
+            <li>Press continue to resume the debugger</li>
+            <li>Debugger should be resumed</li>
+        </ol>
+    </section>
+    <footer>
+        Jan Odvarko, odvarko@gmail.com;
+    </footer>
+</div>
+</body>
+</html>

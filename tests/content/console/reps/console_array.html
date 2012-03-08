@@ -1,0 +1,148 @@
+<html>
+  <head>
+    <script>
+      function defineObjects() {
+        arrayObjects = {
+          description: "objects that should be displayed as arrays (surrounded by square brackets)",
+          objects: [
+            [ "empty array by array literal", [] ],
+            [ "array with 1 element by array literal", [1] ],
+            [ "array with multiple elements by array literal", [1, "foo", window] ],
+            [ "array with multiple undefined elements by array literal", [, , ,] ],
+            [ "empty array by Array constructor", new Array() ],
+            [ "array with 1 element by Array constructor", new Array("foo") ],
+            [ "array with multiple elements by Array constructor", new Array(1, "foo", window) ],
+            [ "array with multiple undefined elements by Array constructor", new Array(3) ],
+            [ "HTMLCollection (issue 588 / issue 489)", document.getElementsByTagName("div") ],
+            [ "NodeList (issue 588)", document.documentElement.childNodes ],
+            [ "arguments object", (function() { return arguments; })(1, "foo", window) ],
+          ],
+        };
+        notArrayObjects = {
+          description: "objects that should not be displayed as arrays",
+          objects: [
+            [ "string literal", "foo" ],
+            [ "string object (issue 234)", new String("foo") ],
+            [ "object with \"length\" property (issue 212)", ({0: "foo", 1: "bar", length: 2}) ],
+            [ "object created by a constructor that includes the word \"Array\" (issue 874)",
+              new (function NotAnArray() { this.data = "this is not Array"; })
+            ],
+            [ "sessionStorage (issue 1695)", window.sessionStorage ],
+          ],
+        };
+        todoObjects = {
+          description: "objects undecided",
+          objects: [
+            [ "empty array with user-defined properties (issue 766)",
+              (function() {
+                var arr = [];
+                arr["key1"] = "value1";
+                arr["key2"] = "value2";
+                return arr;
+              })()
+            ],
+          ],
+        };
+      }
+      function runTests() {
+          testGroup("array", arrayObjects);
+          testGroup("notArray", notArrayObjects);
+          testGroup("array", todoObjects);
+          console.log("DONE");
+      }
+      function showTests() {
+        showGroup(arrayObjects);
+        showGroup(notArrayObjects);
+        showGroup(todoObjects);
+      }
+      function output(name, obj) {
+        console.log(name + "\r\n", obj);
+      }
+      function testGroup(kind, definition)
+      {
+          for (var i = 0; i < definition.objects.length; i++) {
+            console.log(kind, definition.objects[i][0], definition.objects[i][1]);
+          }
+      }
+      function showGroup(definition) {
+        console.group(definition.description);
+        for (var i = 0; i < definition.objects.length; i++) {
+          output(definition.objects[i][0], definition.objects[i][1]);
+        }
+        console.groupEnd(definition.description);
+      }
+
+      function createAllButtons()
+      {
+          var table = document.getElementById("buttonsHere");
+          createButtons("arrays", arrayObjects, table);
+          createButtons("notArrays", notArrayObjects, table);
+          createButtons("maybeArrays", todoObjects, table);
+      }
+
+      function createButtons(kind, category, table)
+      {
+          var div = document.createElement("div");
+          div.setAttribute('class', kind);
+          var label = document.createElement("span");
+          label.innerHTML = category.description;
+          div.appendChild(label);
+          var br = document.createElement('br');
+          div.appendChild(br);
+          for (var i = 0; i < category.objects.length; i++)
+          {
+              var button = document.createElement('button');
+              button.innerHTML = category.objects[i][0];
+              button.object = category.objects[i][1];
+              div.appendChild(button);
+          }
+          table.appendChild(div);
+      }
+
+      function huntBug(obj)
+      {
+          try
+          {
+              //if (obj instanceof Ci.nsIDOMHistory) // do this first to avoid security 1000 errors?
+              //    console.log("instanceof Ci.nsIDOMHistory", obj);
+              if (isFinite(obj.length) && typeof obj.splice === 'function')
+                  console.log("finite length with splice function", obj);
+              if (obj instanceof HTMLCollection)
+                  console.log("an HTMLCollection", obj);
+              if (obj instanceof NodeList)
+                  console.log("a NodeList", obj);
+              if (obj instanceof Storage)
+                  console.log("Storage", obj);
+          }
+          catch(exc)
+          {
+              console.log("FAILS:"+exc, exc);
+          }
+      }
+      function buggy()
+      {
+          var a = [];
+          console.log("a declared empty array");
+          huntBug(a);
+
+          var s = window.sessionStorage;
+          var properties = 0;
+          for (var name in s)
+              properties++;
+
+          console.log(properties+"properties includes length: "+sessionStorage.length);
+          huntBug(s);
+          console.log("sessionStorage after", s);
+      }
+    </script>
+  </head>
+  <body onload="defineObjects();createAllButtons();">
+    <div>
+      <button onclick="showTests()">show tests</button>
+      <button onclick="buggy()">hunt security 1000 bug</button>
+      <button id="runTests" onclick="defineObjects();runTests()">runTests</button>
+    </div>
+    <h2>Array Tests from issue 1159, contribution by <a href="http://code.google.com/u/sevenfurnace/">sevenfurnace</a></h2>
+     <div id="buttonsHere"></div>
+       </body>
+</html>

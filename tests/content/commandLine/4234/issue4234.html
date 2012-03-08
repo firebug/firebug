@@ -1,0 +1,29 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+<html>
+<head>
+  <title>Test Case for Issue #4234</title>
+</head>
+<body>
+
+<h1>Issue #4234</h1>
+
+<p>This test-case is intended for <a href="http://code.google.com/p/fbug/issues/detail?id=4234">Issue #4234</a>
+- <span class="h3"> Object with array property showing as blank</span>.
+<br/>
+<i>Jan Odvarko, odvarko@gmail.com</i>
+</p>
+
+<ol>
+<li>Open Firebug and enable the Console panel.</li>
+<li>Type following in to the command line: <code style="color:green">var a = {arr: [1,2,3]}; a;</code></li>
+<li>Press Enter</li>
+<li>The result should be:
+<pre>
+>>> var a = {arr: [1,2,3]}; a;
+Object { arr=[3] }
+</pre>
+</li>
+</ol>
+  
+</body>
+</html>

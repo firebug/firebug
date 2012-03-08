@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Issue 958: Search Field shouldn't be cleared when switching between panels</title>
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+        <link href="../../_common/testcase.css" type="text/css" rel="stylesheet"/>
+    </head>
+    <body>
+        <header>
+            <h1><a href="http://code.google.com/p/fbug/issues/detail?id=958">Issue 958</a>: Search Field shouldn't be cleared when switching between panels</h1>
+        </header>
+        <div>
+            <section id="description">
+                <h3>Steps to reproduce</h3>
+                <ol>
+                    <li>Open Firebug</li>
+                    <li>Switch to the <em>Console</em> panel</li>
+                    <li>Press <code class="key">Ctrl+F</code> to switch to the search field</li>
+                    <li>Type <code>hello</code> into the search field</li>
+                    <li>Switch to the <em>HTML</em> panel and then to the <em>CSS</em> panel</li>
+                </ol>
+                <h3>Expected result</h3>
+                <ul>
+                    <li>The entered search string should stay inside the search field</li>
+                </ul>
+            </section>
+            <footer>Sebastian Zartner, sebastianzartner@gmx.de</footer>
+        </div>
+    </body>
+</html>

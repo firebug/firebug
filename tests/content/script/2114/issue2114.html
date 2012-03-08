@@ -1,0 +1,55 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+<html>
+<head>
+  <title>Test Case for Issue #2114</title>
+  <style type="text/css">
+      textarea {
+          width: 140px;
+      }
+  </style>
+</head>
+<body>
+
+<h1>Issue #2114</h1>
+
+<p>This test-case is intended for <a href="http://code.google.com/p/fbug/issues/detail?id=2114">Issue #2114</a>
+- <span class="h3">E4X objects can no longer be inspected in 1.4.0</span>.
+<br/>
+<i>Jan Odvarko, odvarko@gmail.com</i>
+</p>
+
+<ol>
+<li>Open Firebug and enable the Script panel.</li>
+<li>Set a breakpoint on line 31</li>
+<li>Reload</li>
+<li>Single step (F10)</li>
+<li>BUG: Firefox emits this error message: <i>is not a function</i> and Firebug
+exits debugging.</li>
+</ol>
+
+<script type="text/javascript">
+var aE4X = <one><two>hi</two></one>;
+var two = aE4X; // set breakpoint here and mouseover aE4X
+
+document.write('<textarea>' + aE4X.toString() + '</textarea>');
+
+var props = "";
+for (var p in aE4X)
+    props += p + "="+ aE4X[p]+"  ";
+
+document.write('<textarea>' + props + '</textarea>');
+document.write('<textarea>' + "typeof: "+typeof(aE4X) + '</textarea>');
+document.write('<textarea>' + "prototype: "+typeof(aE4X.prototype) + '</textarea>');
+
+aE4X.prototype = new Object();
+document.write('<textarea>' + aE4X.toString() + '</textarea>');
+
+aE4X.foo = 5;
+document.write('<textarea>' + aE4X["foo"] + '</textarea>');
+
+aE4X.constructor = new Object();
+document.write('<textarea>' + aE4X.toString() + '</textarea>');
+</script>
+  
+</body>
+</html>

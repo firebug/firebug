@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Issue 3408: Console panel breaks if Firebug is reactivated</title>
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+        <link href="../../_common/testcase.css" type="text/css" rel="stylesheet"/>
+        <script type="text/javascript">
+        function onExecuteTest()
+        {
+            console.log("This is a test log");
+        }
+</script>
+    </head>
+    <body>
+        <header>
+            <h1><a href="http://code.google.com/p/fbug/issues/detail?id=3408">Issue 3408</a>: Console panel breaks if Firebug is reactivated</h1>
+        </header>
+        <div>
+            <section id="content">
+                <button id="testButton" onclick="onExecuteTest()">Execute Test</button>
+            </section>
+            <section id="description">
+                <h3>Steps to reproduce</h3>
+                <ol>
+                    <li>Open Firebug</li>
+                    <li>Enable and switch to the <em>Console</em> panel</li>
+                    <li>
+                        Click on the <em>Execute Test</em> button above<br/>
+                        <span class="ok">There should be a log <code>This is a test log</code> in the console</span>
+                    </li>
+                    <li>Deactivate Firebug for the site by clicking the close button</li>
+                    <li>Activate Firebug again by clicking the Start Button</li>
+                    <li>Click on the <em>Execute Test</em> button again</li>
+                </ol>
+                <h3>Expected result</h3>
+                <ul>
+                    <li>The log must be there again</li>
+                </ul>
+            </section>
+            <footer>Jan Odvarko, odvarko@gmail.com</footer>
+        </div>
+    </body>
+</html>

@@ -1,0 +1,34 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+<html>
+<head>
+  <title>Test Case for command line</title>
+</head>
+<body>
+
+<h1>Command line API: debug</h1>
+
+<p>This test-case is intended for command line <b>debug</b> method.
+<br/>
+<i>Jan Odvarko, odvarko@gmail.com</i>
+</p>
+
+<ol>
+<li>Open Firebug and enable the Console panel.</li>
+<li>Reload the page.</li>
+<li>Execute <span style="color:green">debug(onExecuteTest)</span> expression on the command line.</li>
+<li>Press the <span style="color:green">Execute Test</span> button below.</li>
+<li>The debugger must stop at the first line of the <i>onExecuteTest</i> method.</li>
+</ol>
+
+<button id="testButton" onclick="onExecuteTest()">Execute Test</button>
+<br/><br/>
+
+<script type="text/javascript">
+function onExecuteTest()
+{
+    console.log("Hello World!");
+}
+</script>
+  
+</body>
+</html>

@@ -1,0 +1,18 @@
+<!DOCTYPE html>
+<body>
+  <script>
+    var oldhref = window.location.href;
+    window.location = "data:text/html,<body>";
+    while (window.location.href == oldhref) {
+      var xhr = new XMLHttpRequest();
+      xhr.open("GET", oldhref, false);
+      xhr.send();
+    }
+    x = 4;
+    window.xx = 6;
+    watch('x', alert);
+    window.watch('xx', alert);
+    x = 5;
+    window.xx = 7;
+  </script>
+</body>

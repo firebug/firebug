@@ -1,0 +1,38 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+<html>
+<head>
+  <title>Test Case for Issue #2772</title>
+  <script type="text/javascript">
+  this._testObject = {
+    innerObject: {
+        yetAnotherObject: {
+          prop: "A"
+        },
+        prop: "B"
+    },
+    prop: "C"
+  }
+  </script>
+</head>
+<body>
+
+<h1>Issue #2772</h1>
+
+<p>This test-case is intended for <a href="http://code.google.com/p/fbug/issues/detail?id=2772">Issue #2772</a>
+- <span class="h3">DOM panel on reload no longer selects previous selected node</span>.
+<br/>
+<i>Jan Odvarko, odvarko@gmail.com</i>
+</p>
+
+<ol>
+<li>Open Firebug and select the DOM panel.</li>
+<li>Expand the <span style="color:green">_testObject</span>
+    and click on the value (displayed on the right) of
+    <span style="color:green">innerObject</span>.</li>
+<li>Path in the toolbar should show: <code>window > _testObject > innerObject</code></li>
+<li>Refresh the window</code></li>
+<li>The path in the toolbar should remain the same (as well as DOM panel content).</code></li>
+</ol>
+
+</body>
+</html>

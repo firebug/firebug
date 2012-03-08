@@ -1,0 +1,25 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+          "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+</head>
+<body>
+<h1>Test for Issue #2696</h1>
+<ul>
+    <li>Open Firebug UI and enable the Net panel.</li>
+    <li>Press Execute Request button below to execute test request.</li>
+    <li>Expand the new request entry <b>issue2696.txt</b> and select the <b>Response</b> tab.</li>
+    <li>The tab must display following: <code style="color:green">Test response for 2696.</code></li>
+</ul>
+
+<button id="testButton" onclick="runTest()">Execute Request</button>
+<script>
+function runTest(callback)
+{
+    var request = new XMLHttpRequest();
+    request.open("POST", "issue2696.txt#test-anchor-id", true);
+    request.send();
+}
+</script>
+</body>
+</html>

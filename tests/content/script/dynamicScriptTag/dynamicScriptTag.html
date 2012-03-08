@@ -1,0 +1,40 @@
+<html>
+<head>
+<script>
+
+// From Firebug lib.js
+this.addScript = function(doc, id, src)
+{
+    var element = doc.createElementNS("http://www.w3.org/1999/xhtml", "html:script");
+    element.setAttribute("type", "text/javascript");
+    element.setAttribute("id", id);
+
+    element.innerHTML = src;
+    doc.documentElement.appendChild(element);
+    return element;
+}
+
+window.addEventListener("load", function addTag()
+{
+    console.log("Hello from load event handler");
+    var src = "debugger;\n window.console.log('Hello From Dynamic Script Tag!');\ndebugger;";
+    window.addScript(document, "dynamicScriptTag", src);
+}, true);
+console.log("Hello from static script tag");
+</script>
+</head>
+<body>
+<h1>Test case for dynamic inline script tag debugging</h1>
+<p>Issue <a href="http://code.google.com/p/fbug/issues/detail?id=2912">2912</a>:     problems debugging javascript added by appending script tags</p>
+
+<ol>
+<li>Enable all panels (right click on Firebug Start button)</li>
+<li>Reload the page</li>
+</ol>
+<ul>
+<li>Expected: two lines in the Console, followed by breaking into the Script panel on a <code>debugger;</code> statement.</li>
+<li>Observed: three lines in the Console, no source in the Script panel from the third Console.log call.</li>
+</ul>
+<p> As far as I can tell, jsd.onScriptCreated() is not called for the dynamic script tag. So there is no hack we can create in Firebug to solve this problem.</p>
+</body>
+</html>

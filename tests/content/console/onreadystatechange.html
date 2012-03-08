@@ -1,0 +1,25 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+          "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+</head>
+<body>
+<h1>Test for console.log(request.onreadystatechange</h1>
+
+<i>Fails in FF3.1b3</i>
+
+<script type="application/javascript">
+
+function test()
+{
+    var request = new XMLHttpRequest();
+    request.onreadystatechange = function aFunction() {
+    };
+    //window.dump(request.onreadystatechange);
+    console.log(request.onreadystatechange);
+
+}
+window.addEventListener('load', test, true);
+</script>
+</body>
+</html>

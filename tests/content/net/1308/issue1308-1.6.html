@@ -1,0 +1,21 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+          "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+</head>
+<body>
+<h1>Test Case for Issue #1308</h1>
+
+<button id="testButton" onclick="runTest()">Execute Test</button>
+
+<script>
+function runTest()
+{
+    var request = new XMLHttpRequest();
+    request.open("POST", "issue1308.txt", true);
+    request.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
+    request.send("param1=1+%2B 2");
+}
+</script>
+</body>
+</html>

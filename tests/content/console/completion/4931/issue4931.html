@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Issue 4931: Issue summary</title>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+    <link href="../../../_common/testcase.css"
+        type="text/css" rel="stylesheet"/>
+</head>
+<body>
+<header>
+    <h1><a href="http://code.google.com/p/fbug/issues/detail?id=4931">Issue 4931</a>:
+        Pressing the Enter key is eaten by the auto-completion popup</h1>
+</header>
+<div>
+    <section id="description">
+        <h3>Steps to reproduce</h3>
+        <ol>
+            <li>Open Firebug and enable the Console panel</li>
+            <li>Type "a" (without quotes) into the command line.</li>
+            <li>The autocompletion should appear</li>
+            <li>Press the <code>Enter</code> key</li>
+            <li>The popup should close and the expression should be evaluated.</li>
+        </ol>
+    </section>
+    <footer>
+        Jan Odvarko, odvarko@gmail.com;
+    </footer>
+</div>
+
+<script type="text/javascript">
+var a = "Hello";
+var aa = "Just a helper";
+var aaa = "Another helper";
+</script>
+</body>
+</html>

@@ -1,0 +1,60 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+<html>
+<head>
+  <title>Test Case for Issue #1275</title>
+</head>
+<body>
+
+<h1>Issue #1275</h1>
+
+<p>This test-case is intended for <a href="http://code.google.com/p/fbug/issues/detail?id=1275">Issue #1275</a>
+- <span class="h3">firebug does not show JSON answers from server</span>.
+<br/>
+<i>Jan Odvarko, odvarko@gmail.com</i>
+</p>
+
+<ol>
+<li>Click on the <b>JSON Request</b> button to initiate request for JSON data.</li>
+<li>Open Firebug and activate Net panel.</li>
+<li>Expand the <span style="color:green">.../issue1275.txt</span> request and check Response tab.</li>
+<li>Content of the tab should display content of <a href="issue1275.txt">this</a> file.</li>
+</ol>
+
+<button id="testButton" onclick="jsonRequest()">JSON Request</button>
+
+<br/><br/>
+
+<script type="text/javascript">
+var request;
+function jsonRequest(callback)
+{
+    try {
+        request = new XMLHttpRequest();
+        request.onabort = function() {
+            // Never called in 3.0.6, but seems to be working in 3.1b2
+            //alert("aborted: " + request.responseText);
+        }
+        request.onreadystatechange = function() {
+            if (request.readyState == 4) {
+                if (request.status == 200) {
+                    request.abort();
+                    delete request;
+                    if (callback) {
+                        setTimeout(function() {
+                            callback(request);
+                        }, 300);
+                    }
+                }
+            }
+        };
+        request.open("POST", "issue1275.txt", true);
+        request.send(null);
+    }
+    catch (err) {
+        alert("Error initializing XMLHttpRequest.\n" + err);
+    }
+}
+</script>
+
+</body>
+</html>

@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Issue 4382: JSON sorting</title>
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+        <link href="../../_common/testcase.css" type="text/css" rel="stylesheet"/>
+        <script type="text/javascript">
+        function sendAJAXRequest(type)
+        {
+            var xhr = new XMLHttpRequest();
+            xhr.onreadystatechange = function()
+            {
+                if (xhr.readyState == 4 && xhr.status == 200)
+                {
+                    var output = document.getElementById("output");
+                    output.innerHTML = xhr.responseText;
+                    output.style.display = "block";
+                }
+            }
+            xhr.open("GET", "json.php?type="+type, true);
+            xhr.send(null);
+        }
+        </script>
+    </head>
+    <body>
+        <header>
+            <h1><a href="http://code.google.com/p/fbug/issues/detail?id=4382">Issue 4382</a>: JSON sorting</h1>
+        </header>
+        <div>
+            <section id="content">
+                <button type="button" id="requestArray" onclick="sendAJAXRequest('array')">Send array request</button>
+                <button type="button" id="requestObject" onclick="sendAJAXRequest('object')">Send object request</button>
+                <section id="output"></section>
+            </section>
+            <section id="description">
+                <h2>JSON Array</h2>
+                <h3>Steps to reproduce</h3>
+                <ol>
+                    <li>Open Firebug</li>
+                    <li>Enable and switch to the <em>Net</em> panel</li>
+                    <li>
+                        Click the <em>Send array request</em> button<br/>
+                        <span class="ok">&rArr; There should be a request to <code>json.php?type=array</code> shown inside the request list</span>
+                    </li>
+                    <li>
+                        Expand the request to <code>json.php?type=array</code><br/>
+                        <span class="ok">&rArr; There should be a <em>JSON</em> tab</span>
+                    </li>
+                    <li>
+                        Expand the <em>JSON</em> tab<br/>
+                        <span class="ok">&rArr; The array items should be listed in numerical order (<code>1</code>, <code>2</code>, <code>3</code>, &hellip;)</span>
+                    </li>
+                    <li>
+                        Click the <em>Sort by key</em> link
+                        <span class="ok">&rArr; The order shouldn't change</span>
+                    </li>
+                </ol>
+                <h3>Expected result</h3>
+                <ul>
+                    <li>The array items should be listed in numerical order</li>
+                    <li>Sorting by key should not change the order</li>
+                </ul>
+                <h2>JSON Object</h2>
+                <h3>Steps to reproduce</h3>
+                <ol>
+                    <li>Open Firebug</li>
+                    <li>Enable and switch to the <em>Net</em> panel</li>
+                    <li>
+                        Click the <em>Send object request</em> button<br/>
+                        <span class="ok">&rArr; There should be a request to <code>json.php?type=object</code> shown inside the request list</span>
+                    </li>
+                    <li>
+                        Expand the request to <code>json.php?type=object</code><br/>
+                        <span class="ok">&rArr; There should be a <em>JSON</em> tab</span>
+                    </li>
+                    <li>
+                        Expand the <em>JSON</em> tab<br/>
+                        <span class="ok">&rArr; The object properties should be listed in the order they were defined (<code>5</code>, <code>2</code>, <code>15</code>, &hellip;)</span>
+                    </li>
+                    <li>
+                        Click the <em>Sort by key</em> link
+                        <span class="ok">&rArr; The object properties should be listed in alphabetical order (<code>1</code>, <code>10</code>, <code>11</code>, &hellip;)</span>
+                    </li>
+                </ol>
+                <h3>Expected result</h3>
+                <ul>
+                    <li>The object properties should be listed in the order they were defined by default</li>
+                    <li>There should be an option to switch to an alphabetical order</li>
+                </ul>
+            </section>
+            <footer>Sebastian Zartner, sebastianzartner@gmx.de</footer>
+        </div>
+    </body>
+</html>

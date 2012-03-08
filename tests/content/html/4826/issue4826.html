@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Issue 4826: Changing the ID of a node in HTML Panel doesn't update Element Path</title>
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+        <link href="../../_common/testcase.css" type="text/css" rel="stylesheet"/>
+        <style type="text/css">
+            #content div {
+                width: 100px;
+                height: 100px;
+                background-image: -moz-linear-gradient(135deg, #788CFF, #B4C8FF);
+            }
+        </style>
+    </head>
+    <body>
+        <header>
+            <h1><a href="http://code.google.com/p/fbug/issues/detail?id=4826">Issue 4826</a>: Changing the ID of a node in HTML Panel doesn't update Element Path</h1>
+        </header>
+        <div>
+            <section id="content">
+                <div id="testnode"></div>
+            </section>
+            <section id="description">
+                <h3>Steps to reproduce</h3>
+                <ol>
+                    <li>Open Firebug</li>
+                    <li>Switch to the <em>HTML</em> panel</li>
+                    <li>Inspect the blue <code>&lt;div&gt;</code> above (<code>#testnode</code>)</li>
+                    <li>Click the <code>id</code> attribute's value (<code>testnode</code>)) to start inline editing</li>
+                    <li>Type <code>foo</code></li>
+                    <li>
+                        Click somewhere outside the inline editor to stop inline editing<br/>
+                        <span class="ok">&rArr; Inside the Element Path the node should be shown as <code>div#foo</code>.</span>
+                    </li>
+                    <li>
+                        Click <code>section#content</code> inside the Element Path<br/>
+                        <span class="ok">&rArr; The <code>&lt;section&gt;</code> node (<code>#content</code>) should be selected inside the <em>HTML</em> panel.</span>
+                    </li>
+                    <li>Click the <code>id</code> attribute's value (<code>foo</code>)) to start inline editing</li>
+                    <li>Type <code>bar</code></li>
+                    <li>
+                        Click somewhere outside the inline editor to stop inline editing<br/>
+                        <span class="ok">&rArr; Inside the Element Path the node should be shown as <code>div#bar</code>.</span>
+                    </li>
+                </ol>
+                <h3>Expected result</h3>
+                <ul>
+                    <li>The id of a node should always be updated inside the Element Path, when it's changed.</li>
+                </ul>
+            </section>
+            <footer>Sebastian Zartner, sebastianzartner@gmx.de</footer>
+        </div>
+    </body>
+</html>

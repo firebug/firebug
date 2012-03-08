@@ -1,0 +1,52 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+<html>
+<head>
+  <title>Test Case for Issue #3421</title>
+</head>
+<body>
+
+<h1>Issue #3421</h1>
+
+<p>This test-case is intended for <a href="http://code.google.com/p/fbug/issues/detail?id=3421">Issue #3421</a>
+- <span class="h3">Autocompletion expression parsing is wrong</span>.
+<br/>
+<i>Jan Odvarko, odvarko@gmail.com</i>
+</p>
+
+<ol>
+<li>Open Firebug and enable the Console panel.</li>
+<li>Step by step type following expressions in the the command line
+and verify that the autocompletion popup window<br/> appears for:</li>
+<ul>
+    <li><code style="color:green">a={}.</code></li>
+    <li><code style="color:green">1+do</code></li>
+    <li><code style="color:green">{}do</code></li>
+    <li><code style="color:green">if(false)document.</code></li>
+    <li><code style="color:green">my_var.</code></li>
+    <li><code style="color:green">0&lt;i</code></li>
+    <li><code style="color:green">$myvar.</code></li>
+</ul>
+
+and doesn't appear for:
+<ul>
+    <li><code style="color:green">a={}.</code></li>
+    <li><code style="color:green">myvar2.</code></li>
+</ul>
+
+</ol>
+
+<script type="text/javascript">
+var my_var = {
+  prop1: function() {},
+  prop2: function() {}
+}
+
+var $myvar = my_var;
+
+var myvar2 = {
+    "t-2": 20
+}
+</script>
+
+</body>
+</html>

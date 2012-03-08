@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Issue 4905: Show the "Connection" header in the network/headers part</title>
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+        <link href="../../_common/testcase.css" type="text/css" rel="stylesheet"/>
+        <script type="text/javascript" src="issue4095.php"></script>
+        <script type="text/javascript" src="issue4095.php"></script>
+    </head>
+    <body>
+        <header>
+            <h1><a href="http://code.google.com/p/fbug/issues/detail?id=4905">Issue 4905</a>: Show the "Connection" header in the network/headers part</h1>
+        </header>
+        <div>
+            <section id="description">
+                <h3>Steps to reproduce</h3>
+                <ol>
+                    <li>Open Firebug</li>
+                    <li>Enable and switch to the <em>Net</em> panel</li>
+                    <li>Reload the page</li>
+                    <li>Expand that request to <code>issue4095.php</code> by clicking on it</li>
+                </ol>
+                <h3>Expected result</h3>
+                <ul>
+                    <li>In the <em>Headers</em> tab there must be a section for the headers coming from cache</li>
+                    <li>The cached response headers must include a <code>Cache-Control</code> header</li>
+                </ul>
+            </section>
+            <footer>Sebastian Zartner, sebastianzartner@gmx.de</footer>
+        </div>
+    </body>
+</html>

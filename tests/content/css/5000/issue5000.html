@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Issue 5000: Add option to delete CSS rule</title>
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+        <link href="../../_common/testcase.css" type="text/css" rel="stylesheet"/>
+        <style type="text/css">
+        #element1 {
+            width: 100px;
+            height: 100px;
+            background: #8C8CFF -moz-linear-gradient(135deg, #788CFF, #B4C8FF);
+        }
+        </style>
+    </head>
+    <body>
+        <header>
+            <h1><a href="http://code.google.com/p/fbug/issues/detail?id=5000">Issue 5000</a>: Add option to delete CSS rule</h1>
+        </header>
+        <div>
+            <section id="content">
+                <div id="element1"></div>
+            </section>
+            <section id="description">
+                <h3>Steps to reproduce</h3>
+                <ol>
+                    <li>Open Firebug</li>
+                    <li>Switch to the <em>CSS</em> panel</li>
+                    <li>Select <em>issue5000.html</em> from the Location Menu</li>
+                    <li>
+                        Right-click on the rule with the selector <code>#element1</code><br/>
+                        <span class="ok">There should be an option <em>Delete "#element1"</em></span>
+                    </li>
+                    <li>Click the <em>Delete "#element1"</em> option</li>
+                </ol>
+                <h3>Expected result</h3>
+                <ul>
+                    <li>The rule is removed from the <em>CSS</em> panel</li>
+                    <li>The CSS of the rule is not affecting the style of the <code>&lt;div&gt;</code> above (<code>#element1</code>) anymore</li>
+                </ul>
+            </section>
+            <footer>Sebastian Zartner, sebastianzartner@gmx.de</footer>
+        </div>
+    </body>
+</html>

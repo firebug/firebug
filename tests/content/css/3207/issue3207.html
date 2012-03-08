@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Issue 3207: CSS properties in the "Computed" tab are not updated correctly</title>
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+        <link href="../../_common/testcase.css" type="text/css" rel="stylesheet"/>
+        <style type="text/css">
+            #element1 {
+                width: 100px;
+                height: 100px;
+                background: #B4C8FF -moz-linear-gradient(135deg, #788CFF, #B4C8FF) no-repeat;
+            }
+        </style>
+    </head>
+    <body>
+        <header>
+            <h1><a href="http://code.google.com/p/fbug/issues/detail?id=3207">Issue 3207</a>: CSS properties in the "Computed" tab are not updated correctly</h1>
+        </header>
+        <div>
+            <section id="content">
+                <div id="element1"></div>
+            </section>
+            <section id="description">
+                <h3>Steps to reproduce</h3>
+                <ol>
+                    <li>Open Firebug</li>
+                    <li>Switch to the <em>HTML</em> panel</li>
+                    <li>Inspect the blue <code>&lt;div&gt;</code> above (<code>#element1</code>)</li>
+                    <li>
+                        Switch to the <em>Computed</em> side panel
+                        <span class="ok">&rArr; <code>"Trebuchet MS",Helvetica,sans-serif</code> should be shown for the <code>font-family</code> property</span>
+                    </li>
+                    <li>Switch to the <em>Style</em> side panel</li>
+                    <li>Right-click into the <code>#element1</code> rule and choose <em>New Property...</em> from the context menu</li>
+                    <li>Add <code>font-family</code> as property and <code>Georgia</code> as value</li>
+                    <li>Switch back to the <em>Computed</em> side panel</li>
+                </ol>
+                <h3>Expected result</h3>
+                <ul>
+                    <li>The <code>font-family</code> property should now have <code>Georgia</code> as value</li>
+                </ul>
+            </section>
+            <footer>Sebastian Zartner, sebastianzartner@gmx.de</footer>
+        </div>
+    </body>
+</html>

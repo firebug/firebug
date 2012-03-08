@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Issue 4509: &quot;Run to line&quot; debugging shortcut is activated neither by Ctrl-click nor by middle-click on line number</title>
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+        <link href="../../../_common/testcase.css" type="text/css" rel="stylesheet"/>
+        <script type="text/javascript">
+        window.addEventListener("load", function()
+        {
+            debugger;
+            console.log("That's the first log line.");
+            console.log("Run To Line should stop here.");
+        });
+        </script>
+    </head>
+    <body>
+        <header>
+            <h1><a href="http://code.google.com/p/fbug/issues/detail?id=4509">Issue 4509</a>: &quot;Run to line&quot; debugging shortcut is activated neither by Ctrl-click nor by middle-click on line number</h1>
+        </header>
+        <div>
+            <section id="description">
+                <h2><em>Run To This Line</em> via context menu</h2>
+                <h3>Steps to reproduce</h3>
+                <ol>
+                    <li>Open Firebug</li>
+                    <li>Enable the <em>Console</em> and <em>Script</em> and switch to the <em>Script</em> panel</li>
+                    <li>
+                        Reload the page<br/>
+                        <span class="ok">&rArr; Script execution should stop at line 10 (<code>debugger;</code>)</span>
+                    </li>
+                    <li>
+                        Right-click on line 12 (<code>console.log(&quot;Run To Line should stop here.&quot;);</code>) and choose <em>Run To This Line</em> from the context menu<br/>
+                        <span class="ok">&rArr; The execution indicator should now stand at line 12 (<code>console.log(&quot;Run To Line should stop here.&quot;);</code>)</span>
+                    </li>
+                    <li>
+                        Switch to the <em>Console</em> panel<br/>
+                        <span class="ok">&rArr; <code>That's the first log line.</code> should be listed inside the console</span>
+                    </li>
+                </ol>
+                <h3>Expected result</h3>
+                <ul>
+                    <li><em>Run To This Line</em> should execute the script to the clicked line</li>
+                </ul>
+
+                <h2>Run to line via <code class="key">Ctrl/&#8984;</code>+click on Breakpoint Column</h2>
+                <h3>Steps to reproduce</h3>
+                <ol>
+                    <li>Open Firebug</li>
+                    <li>Enable the <em>Console</em> and <em>Script</em> and switch to the <em>Script</em> panel</li>
+                    <li>
+                        Reload the page<br/>
+                        <span class="ok">&rArr; Script execution should stop at line 10 (<code>debugger;</code>)</span>
+                    </li>
+                    <li>
+                        Hold down <code class="key">Ctrl/&#8984;</code> and click on the Breakpoint Column at line 12 (<code>console.log(&quot;Run To Line should stop here.&quot;);</code>)<br/>
+                        <span class="ok">&rArr; The execution indicator should now stand at line 12 (<code>console.log(&quot;Run To Line should stop here.&quot;);</code>)</span>
+                    </li>
+                    <li>
+                        Switch to the <em>Console</em> panel<br/>
+                        <span class="ok">&rArr; <code>That's the first log line.</code> should be listed inside the console</span>
+                    </li>
+                </ol>
+                <h3>Expected result</h3>
+                <ul>
+                    <li><code class="key">Ctrl/&#8984;</code>+clicking in the Breakpoint Column should execute the script to the clicked line</li>
+                </ul>
+
+                <h2>Run to line via middle-click on Breakpoint Column</h2>
+                <h3>Steps to reproduce</h3>
+                <ol>
+                    <li>Open Firebug</li>
+                    <li>Enable the <em>Console</em> and <em>Script</em> and switch to the <em>Script</em> panel</li>
+                    <li>
+                        Reload the page<br/>
+                        <span class="ok">&rArr; Script execution should stop at line 10 (<code>debugger;</code>)</span>
+                    </li>
+                    <li>
+                        Middle-click on the Breakpoint Column at line 12 (<code>console.log(&quot;Run To Line should stop here.&quot;);</code>)<br/>
+                        <span class="ok">&rArr; The execution indicator should now stand at line 12 (<code>console.log(&quot;Run To Line should stop here.&quot;);</code>)</span>
+                    </li>
+                    <li>
+                        Switch to the <em>Console</em> panel<br/>
+                        <span class="ok">&rArr; <code>That's the first log line.</code> should be listed inside the console</span>
+                    </li>
+                </ol>
+                <h3>Expected result</h3>
+                <ul>
+                    <li>Middle-clicking in the Breakpoint Column should execute the script to the clicked line</li>
+                </ul>
+            </section>
+            <footer>Sebastian Zartner, sebastianzartner@gmx.de</footer>
+        </div>
+    </body>
+</html>

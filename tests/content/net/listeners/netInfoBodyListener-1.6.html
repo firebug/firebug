@@ -1,0 +1,22 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+<html>
+<head>
+  <title>Test Case for netInfoBody listener</title>
+</head>
+<body>
+
+<h1>netInfoBody listener</h1>
+<i>Jan Odvarko, odvarko@gmail.com</i>
+
+<button id="testButton" onclick="runTest()">Execute Test</button>
+
+<script type="text/javascript">
+function runTest()
+{
+    var request = new XMLHttpRequest();
+    request.open("POST", "netInfoBodyListener.txt", true);
+    request.send(null);
+}
+</script>
+</body>
+</html>

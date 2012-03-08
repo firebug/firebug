@@ -1,0 +1,39 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+<html>
+<head>
+  <title>Test Case for Break On Property</title>
+</head>
+<body>
+
+<script type="text/javascript">
+
+function dumpIt(prop, oldval, newval)
+{
+    window.dump("changed: "+prop+" from "+oldval+" to "+newval+"\n");
+    return newval;
+}
+
+var avar = "avar";
+window.watch("avar", dumpIt);
+
+window.dump("window.avar: "+window.avar+"\n");
+window.dump("avar: "+avar+"\n");
+
+window.dotProp = "dotProp";
+window.watch("dotProp", dumpIt);
+
+window.dump("window.dotProp: "+window.dotProp+"\n");
+window.dump("dotProp: "+dotProp+"\n");
+
+avar = "avar "+(new Date()).getTime();
+window.dotProp = "dotProp "+ (new Date()).getTime();
+window.avar = "window.avar "+(new Date()).getTime();
+
+window.dump("window.avar: "+window.avar+"\n");
+window.dump("avar: "+avar+"\n");
+
+
+</script>
+
+</body>
+</html>

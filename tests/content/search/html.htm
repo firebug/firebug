@@ -1,0 +1,56 @@
+<html>
+<head>
+    <meta http-equiv="Content-type" content="text/html; charset=utf-8">
+    <title>Search Test</title>
+    <script type="text/javascript" src="../env.js"></script>
+    <script type="text/javascript" src="search.js"></script>
+    <script type="text/javascript">
+        window.onload = function() {
+
+            var htmlPanel = openAndSelectPanel("html");
+
+            setTimeout(function() {
+            var text = "scrIpt";
+
+            var tests = [
+                         {
+                             description: "HTML Forward Case Insensitive",
+                             expected: 17,
+                             text: text,
+                             reverse: false,
+                             caseSensitive: false
+                         },
+                         {
+                             description: "HTML Reverse Case Insensitive",
+                             expected: 17,
+                             text: text,
+                             reverse: true,
+                             caseSensitive: false
+                         },
+                         {
+                             description: "HTML Forward Case Sensitive",
+                             expected: 8,
+                             text: text,
+                             reverse: false,
+                             caseSensitive: true
+                         },
+                         {
+                             description: "HTML Reverse Case Sensitive",
+                             expected: 8,
+                             text: text,
+                             reverse: true,
+                             caseSensitive: true
+                         }
+                        ];
+            executeRangeTestSuite(tests, htmlPanel.panelNode, function() { FBTest.testDone(); });
+            }, 500);
+        };
+    </script>
+</head>
+<body>
+    <div class="script scrIpt">Test Data</div>
+    <div class="scrIpt scrIpt">Test Data</div>
+    Script script
+    <iframe src="htmlIframe.htm"></iframe>
+    SCRIPT
+</body>

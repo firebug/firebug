@@ -1,0 +1,29 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+          "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+</head>
+<body>
+<h1>Test for Issue #1764</h1>
+<ol>
+    <li>Open Firebug UI (F12) and enable the Net panel.</li>
+    <li>The Net panel should be empty, displaying just a messsage:
+        <i>Net panel activated. Any request while the Net panel is inactive are not shown.</i>
+        (or similar)</li>
+    <li>Check <i>Disable Browser Cache</i> in Net panel's mini tab-menu.</li>
+    <li>Copy the link below to the clipboard.</li>
+    <li>Open a new empty Firefox tab.</li>
+    <li>Put the link into Firefox address bar (in the new tab) and press enter.</li>
+    <li>Firebug should be automatically opened and the Net panel should display
+        one request. Expand the request and check the Response tab, it should display
+        the response body.</li>
+</ol>
+
+<a id="openNewTab" target="_blank" href="issue1764-2.html">Copy this link to the clipboard</a>
+<br/><br/>
+<i>You can also open the new tab by clicking on the link. The Net panel should also display
+one request (and the response body).</i>
+
+</script>
+</body>
+</html>

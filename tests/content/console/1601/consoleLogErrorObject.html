@@ -1,0 +1,51 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+<html>
+<head>
+    <title>Test Case for Issue #1601</title>
+</head>
+<body>
+
+<h1>Issue #1601</h1>
+
+<p>This test-case is intended for <a href="http://code.google.com/p/fbug/issues/detail?id=1601">Issue #1601</a>
+- <span class="h3">console.log(Error) formats stack in an unhelpful way</span>.
+<br/>
+<i>johnjbarton, johnjbarton@johnjbarton.com</i>
+</p>
+
+<ol>
+<li>Open Firebug and select the Console panel.</li>
+<li>Make sure you have <i>Show XMLHttpRequests</i> option checked.</li>
+<li>Press the <i>Execute Requests</i> button.</li>
+<li>There shoud be four XHR logs displayed in the console panel</li>
+<li>Expand every log and check <i>Response</i> tab. There should be response for every one.</li>
+</ol>
+
+<button id="runTest" onclick="makeABooBoo();">Make a error appear</button>
+
+<script>
+function makeABooBoo()
+{
+    try
+    {
+        var np = 0;
+        for (var p in ReferenceError)
+            console.log((np++) +":"+p);
+
+        window.RP = ReferenceError.prototype;
+        console.log("ReferenceError.prototype", window.RP);
+        window.rp = r.prototype;
+
+        console.log("r.stack:"+typeof(r.stack));
+        var bar = foo; // foo is undefined
+    }
+    catch(exc)
+    {
+        console.log("exc instanceof Error ? "+(exc instanceof Error));
+        console.log("exc.stack:"+exc.stack);
+        console.debug(exc);
+    }
+}
+</script>
+</body>
+</html>

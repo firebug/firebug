@@ -1,0 +1,43 @@
+<html>
+<head>
+    <meta http-equiv="Content-type" content="text/html; charset=utf-8">
+    <title>DOM Walker Test</title>
+    <script type="text/javascript" src="../env.js"></script>
+    <script type="text/javascript" src="domWalker.js"></script>
+    <script type="text/javascript">
+        var expectedContent = [
+            { type: Node.ELEMENT_NODE, name: "html" },
+            { type: Node.ELEMENT_NODE, name: "head" },
+            { type: Node.TEXT_NODE },
+            { type: Node.ELEMENT_NODE, name: "meta" },
+            { type: Node.ATTRIBUTE_NODE, name: ["content", "http-equiv"] },
+            { type: Node.ATTRIBUTE_NODE, name: ["content", "http-equiv"] },
+            { type: Node.TEXT_NODE },
+            { type: Node.ELEMENT_NODE, name: "title" },
+            { type: Node.TEXT_NODE },
+            { type: Node.TEXT_NODE },
+            { type: Node.ELEMENT_NODE, name: "script" },
+            { type: Node.ATTRIBUTE_NODE, name: ["src", "type"] },
+            { type: Node.ATTRIBUTE_NODE, name: ["src", "type"] },
+            { type: Node.TEXT_NODE },
+            { type: Node.ELEMENT_NODE, name: "script" },
+            { type: Node.ATTRIBUTE_NODE, name: ["src", "type"] },
+            { type: Node.ATTRIBUTE_NODE, name: ["src", "type"] },
+            { type: Node.TEXT_NODE },
+            { type: Node.ELEMENT_NODE, name: "script" },
+            { type: Node.ATTRIBUTE_NODE, name: "type" },
+            { type: Node.TEXT_NODE },
+            { type: Node.TEXT_NODE },
+            { type: Node.ELEMENT_NODE, name: "div" },  // Produced by firebug.
+            { type: Node.ATTRIBUTE_NODE, name: [ "id", "style", "FirebugVersion" ] },
+            { type: Node.ATTRIBUTE_NODE, name: [ "id", "style", "FirebugVersion" ] },
+            { type: Node.ATTRIBUTE_NODE, name: [ "id", "style", "FirebugVersion" ] },
+            { type: Node.ELEMENT_NODE, name: "body" },
+            { type: Node.TEXT_NODE }
+        ];
+    </script>
+</head>
+<body>
+    Script
+    SCRIPT
+</body>

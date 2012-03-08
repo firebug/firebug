@@ -1,0 +1,61 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+<html>
+<head>
+    <title>Test Case for Issue #1495</title>
+</head>
+<body>
+
+<h1>Issue #1495</h1>
+
+<p>This test-case is intended for <a href="http://code.google.com/p/fbug/issues/detail?id=1495">Issue #1495</a>
+- <span class="h3">No more ajax response for a while</span>.
+<br/>
+<i>Jan Odvarko, odvarko@gmail.com</i>
+</p>
+
+<ol>
+<li>Open Firebug and select the Console panel.</li>
+<li>Make sure you have <i>Show XMLHttpRequests</i> option checked.</li>
+<li>Press the <i>Execute Requests</i> button.</li>
+<li>There shoud be four XHR logs displayed in the console panel</li>
+<li>Expand every log and check <i>Response</i> tab. There should be response for every one.</li>
+</ol>
+
+<button id="runTest" onclick="runTest(null)">Execute Requests</button>
+
+<script>
+var button = document.getElementById("runTest");
+button.disabled = false;
+
+function runTest(callback)
+{
+    button.disabled = true;
+
+    var counter = 0;
+    var uris = ["parser.js", "stamp.js", "fx.js", "sniff.js"];
+    for (var i=0; i<uris.length; i++) {
+        executeRequest(uris[i], function(request) {
+            if (++counter >= 4)
+                if (callback)
+                    callback(request);
+                button.disabled = false;
+        });
+    }
+}
+
+function executeRequest(uri, callback)
+{
+    var request = new XMLHttpRequest();
+    request.onreadystatechange = function () {
+        if (request.readyState == 4 && request.status == 200)
+            setTimeout(function() {
+                callback(request);
+            }, 300);
+    };
+
+    request.open("GET", uri, true);
+    request.send(null);
+}
+</script>
+</body>
+</html>

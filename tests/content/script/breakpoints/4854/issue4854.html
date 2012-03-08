@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Issue 4854: XHR breakpoints can't be removed from Breakpoints side panel</title>
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+        <link href="../../../_common/testcase.css" type="text/css" rel="stylesheet"/>
+        <script type="text/javascript">
+        function makeXHR()
+        {
+            var request = new XMLHttpRequest();
+            request.open("GET", "issue4854.txt", true);
+            request.send(false);
+        }
+        </script>
+    </head>
+    <body>
+        <header>
+            <h1><a href="http://code.google.com/p/fbug/issues/detail?id=4854">Issue 4854</a>: XHR breakpoints can't be removed from Breakpoints side panel</h1>
+        </header>
+        <div>
+            <section id="content">
+                <button id="makeXHR" onclick="makeXHR()">Make XMLHttpRequest</button>
+            </section>
+            <section id="description">
+                <h3>Steps to reproduce</h3>
+                <ol>
+                    <li>Open Firebug</li>
+                    <li>Enable the <em>Script</em> and the <em>Net</em> panel and switch to the <em>Net</em> panel</li>
+                    <li>Reload the page</li>
+                    <li>
+                        Click the <em>Make XMLHttpRequest</em> button</li> above<br/>
+                        <span class="ok">&rArr; An XHR will be made and listed inside the Net panel</span>
+                    </li>
+                    <li>Click the breakpoint column besides the XHR entry to set a breakpoint</li>
+                    <li>
+                        Switch to the <em>Script</em> panel and there to the <em>Breakpoints</em> side panel<br/>
+                        <span class="ok">&rArr; The XHR breakpoint is listed there</span>
+                    <li>Click the X on the right side to remove the breakpoint</li>
+                </ol>
+                <h3>Expected result</h3>
+                <ul>
+                    <li>The breakpoint should be removed</li>
+                </ul>
+            </section>
+            <footer>Sebastian Zartner, sebastianzartner@gmx.de</footer>
+        </div>
+    </body>
+</html>

@@ -1,0 +1,36 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+<html>
+<head>
+  <title>Test Case for Issue #2558</title>
+</head>
+<body>
+
+<h1>Issue #2558</h1>
+
+<p>This test-case is intended for <a href="http://code.google.com/p/fbug/issues/detail?id=2558">Issue #2558</a>
+- <span class="h3">Function arguments not expandable in watch panel even though the object is array-like</span>.
+<br/>
+<i>Jan Odvarko, odvarko@gmail.com</i>
+</p>
+
+<ol>
+<li>Open/enable Firebug and refresh.</li>
+<li>Press <span style="color:green">Execute Test</span> button.</li>
+<li>Firebug should stop at <i>debugger</i> keyword.</li>
+<li>Type <span style="color:green">arguments</span> in to the <i>Watch</i> panel and press enter.</li>
+<li>If you expand the value, you should see:<br/>
+<span style="color:green">1</span>,
+<span style="color:green">"omni"</span>,
+<span style="color:green">3</span></li>
+</ol>
+
+<button id="testButton" onclick="onExecuteTest(1, 'omni', 3)">Execute Test</button>
+
+<script type="text/javascript">
+function onExecuteTest(a, b, c) {
+    debugger;
+}
+</script>
+
+</body>
+</html>

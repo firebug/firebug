@@ -1,0 +1,110 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+<html>
+<head>
+  <title>Test Case for Issue #3363</title>
+</head>
+<body>
+
+<h1>Issue #3363</h1>
+
+<p>This test-case is intended for <a href="http://code.google.com/p/fbug/issues/detail?id=3363">Issue #3363</a>
+- <span class="h3">groupCollapsed gets confused</span>.
+<br/>
+<i>Jan Odvarko, odvarko@gmail.com</i>
+</p>
+
+<ol>
+<li>Open Firebug and enable the Console panel.</li>
+<li>Copy the code below and paste it into the Firebug's command line.</li>
+<li>The Console panel should display <b>5</b> groups.</li>
+</ol>
+
+<pre>
+console.clear();
+console.groupCollapsed('group1');
+console.log('');
+console.log('');
+console.log('');
+console.log('');
+console.groupEnd();
+console.groupCollapsed('group2');
+console.log('');
+console.groupEnd();
+console.groupCollapsed('group3');
+console.log('');
+console.log('');
+console.log('');
+console.log('');
+console.groupEnd();
+console.groupCollapsed('group4');
+console.info('');
+console.log('');
+console.info('');
+console.log('');
+console.info('');
+console.log('');
+console.info('');
+console.log('');
+console.info('');
+console.log('');
+console.info('');
+console.log('');
+console.info('');
+console.log('');
+console.info('');
+console.log('');
+console.info('');
+console.log('');
+console.groupEnd();
+console.groupCollapsed('group5');
+console.info('');
+console.groupEnd();
+</pre>
+
+<script type="text/javascript">
+function onExecuteTest()
+{
+console.clear();
+console.groupCollapsed('group1');
+console.log('');
+console.log('');
+console.log('');
+console.log('');
+console.groupEnd();
+console.groupCollapsed('group2');
+console.log('');
+console.groupEnd();
+console.groupCollapsed('group3');
+console.log('');
+console.log('');
+console.log('');
+console.log('');
+console.groupEnd();
+console.groupCollapsed('group4');
+console.info('');
+console.log('');
+console.info('');
+console.log('');
+console.info('');
+console.log('');
+console.info('');
+console.log('');
+console.info('');
+console.log('');
+console.info('');
+console.log('');
+console.info('');
+console.log('');
+console.info('');
+console.log('');
+console.info('');
+console.log('');
+console.groupEnd();
+console.groupCollapsed('group5');
+console.info('');
+console.groupEnd();
+}
+</script>
+  
+</body>
+</html>

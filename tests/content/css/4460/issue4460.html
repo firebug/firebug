@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Issue 4460: Add CSS3 box-sizing property to Layout side panel</title>
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+        <link href="../../_common/testcase.css" type="text/css" rel="stylesheet"/>
+        <style type="text/css">
+            section#content {
+                height: 112px;
+            }
+
+            #element1, #element2, #element3 {
+                width: 7em;
+                height: 7em;
+                float: left;
+                margin-right: 10px;
+                border: 3px solid;
+                padding: 3px;
+            }
+      
+            #element1 {
+                border-color: #3264FF;
+                background-image: -moz-linear-gradient(135deg, #788CFF, #B4C8FF);
+                -moz-box-sizing: content-box;
+            }
+      
+            #element2 {
+                border-color: #32FF64;
+                background-image: -moz-linear-gradient(135deg, #78FF8C, #B4FFC8);
+                -moz-box-sizing: padding-box;
+            }
+      
+            #element3 {
+                border-color: #FFFF32;
+                background-image: -moz-linear-gradient(135deg, #FFFF78, #FFFFB4);
+                -moz-box-sizing: border-box;
+            }
+        </style>
+    </head>
+    <body>
+        <h1><a href="http://code.google.com/p/fbug/issues/detail?id=4460">Issue 4460</a>: Add CSS3 box-sizing property to Layout side panel</h1>
+        <div>
+            <section id="content">
+                <div id="element1"></div>
+                <div id="element2"></div>
+                <div id="element3"></div>
+            </section>
+            <section id="description">
+                <h3>Steps to reproduce</h3>
+                <ol>
+                    <li>Inspect the blue <code>&lt;div&gt;</code> above</li>
+                    <li>Switch to the <em>Layout</em> side panel</li>
+                    <li>Have a look at the <code>box-sizing</code> value inside the <em>Layout</em> side panel</li>
+                    <li>Inspect the green <code>&lt;div&gt;</code> above</li>
+                    <li>Have a look at the <code>box-sizing</code> value inside the <em>Layout</em> side panel</li>
+                    <li>Inspect the yellow <code>&lt;div&gt;</code> above</li>
+                    <li>Have a look at the <code>box-sizing</code> value inside the <em>Layout</em> side panel</li>
+                </ol>
+                <h3>Expected Results</h3>
+                <ul>
+                    <li>After step 2: <code>content-box</code></li>
+                    <li>After step 4: <code>padding-box</code></li>
+                    <li>After step 6: <code>border-box</code></li>
+                </ul>
+            </section>
+            <footer>Sebastian Zartner, sebastianzartner@gmx.de</footer>
+        </div>
+    </body>
+</html>

@@ -1,0 +1,31 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+<html>
+<head>
+    <title>Test Case for Issue #2978</title>
+</head>
+<body>
+
+<h1>Issue #2978</h1>
+
+<p>This test-case is intended for <a href="http://code.google.com/p/fbug/issues/detail?id=2978">Issue #2978</a>
+- <span class="h3">Enhancement: Copy CSS path from selected element</span>.
+<br/>
+<i>Jan Odvarko, odvarko@gmail.com</i>
+</p>
+
+<ol>
+<li>Open Firebug and select the HTML panel.</li>
+<li>Find <code style="color:green">myElem<span/>ent</code> in the panel
+(<i>/html/body/div/span</i>). You can use the search box.</li>
+<li>Select the element within the panel (click on it).</li>
+<li>Now right click on the <code style="color:green">span#myEl<span/>ement</code>
+button in the toolbar and pick <i>Copy CSS Path</i>.</li>
+<li>Following text should be copied into the clipboard
+<code style="color:green">html body div.myClass span#myEle<span/>ment</code></li>
+</ol>
+
+<div class="myClass">
+    <span id="myElement">Test Element</div>
+</div>
+</body>
+</html>

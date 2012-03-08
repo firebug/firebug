@@ -1,0 +1,31 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+          "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+</head>
+<body>
+<h1>Test for Issue #1256</h1>
+<ul>
+    <li>Open Firebug UI and enable Net panel.</li>
+    <li>Press Execute Request button below to execute test request.</li>
+    <li>Expand the new request entry <b>issue1256.txt</b> and select the <b>Post</b> tab.</li>
+    <li>The tab must display following: <code style="color:green"><b>param1</b> 1 + 2</code></li>
+</ul>
+<div id="finished" style="color:green" />
+<button id="testButton" onclick="runTest()">Execute Request</button>
+<script>
+function runTest()
+{
+    var request = new XMLHttpRequest();
+    request.onreadystatechange = function () {
+        if (request.readyState == 4 && request.status == 200)
+            document.getElementById("finished").innerHTML = "Request Finished";
+    };
+
+    request.open("POST", "issue1256.txt", true);
+    request.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
+    request.send("param1=1 %2B 2");
+}
+</script>
+</body>
+</html>

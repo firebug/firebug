@@ -1,0 +1,32 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+<html>
+<head>
+  <title>Test Case for DOM Attributes</title>
+</head>
+<body>
+
+<h1>Test Case for DOM Attributes</h1>
+
+<p>This test-case is intended for <a href="http://code.google.com/p/fbug/issues/detail?id=3790">Issue #3790</a>
+- <span class="h3">Better DOM representation for element attributes</span>.
+<br/>
+<i>Jan Odvarko, odvarko@gmail.com</i>
+</p>
+
+<ol>
+<li>Enable Firebug enable the console panel</li>
+<!-- Since the test searches for 'Inspect ' + 'Me' string in the HTML panel,
+    make sure the same keyword is not used in the description or anywhere
+    else on this page. -->
+<li>Select the HTML panel and search for "Inspect <span>Me</span>"</li>
+<li>Right click on the element and pick 'Inspect in DOM tab'.</li>
+<li>You should see a list of attributes in the DOM panel, something as follows:<br/>
+<code>[style="color:green", name="testName", id="testId"]</code>
+</li>
+<li>The list of attributes should be clickable and you should be able
+to further inspect individual attributes.</li>
+</ol>
+
+<div id="testId" name="testName" style="color:green">Inspect Me</div>
+</body>
+</html>

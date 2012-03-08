@@ -1,0 +1,39 @@
+<html>
+<head>
+<script type="application/javascript;version=1.7">
+function simpleGenerator(){
+  console.log("It's simple!");
+  yield "first";
+  yield "second";
+  yield "third";
+  for (var i = 0; i < 3; i++)
+    yield i;
+}
+
+var g = simpleGenerator();
+var first = g.next();
+console.log(first); // prints "first"
+console.log(g.next()); // prints "second"
+console.log(g.next()); // prints "third"
+console.log(g.next()); // prints 0
+console.log(g.next()); // prints 1
+console.log(g.next()); // prints 2
+console.log(g.next()); // StopIteration is thrown
+</script>
+</head>
+<body>
+<h1>simpleGenerators</h1>
+This example is from <a href="https://developer.mozilla.org/en/Core_JavaScript_1.5_Guide/Iterators_and_Generators">Generators: a better way to build Iterators</a>
+
+<ol>
+<li>Set a breakpoint on line 12 var g = simpleGenerator()</li>
+<li>Reload the page, you stop on line 12</li>
+<li>Step into, you stop on line 4 function simpleGenerator(){</li>
+<li><b>BUG: the developer needs to know that this is a generator</b></li>
+<li>Step into, you stop on line 12. BUG: should be 13, is this Firebug bug?</li>
+<li>Step into, you stop on line 13.</li>
+<li>Step into, you continue to end of the program</li>
+<li><b>BUG: we should have gone to line 5</b></li>
+</ol>
+</body>
+</html>

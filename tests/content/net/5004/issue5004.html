@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Issue 5004: Only raw http post request parameters view</title>
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+        <link href="../../_common/testcase.css" type="text/css" rel="stylesheet"/>
+    </head>
+    <body>
+        <header>
+            <h1><a href="http://code.google.com/p/fbug/issues/detail?id=5004">Issue 5004</a>: Only raw http post request parameters view</h1>
+        </header>
+        <div>
+            <section id="content">
+                <form action="" method="post">
+                    <input type="text" name="param" value="value"/>
+                    <button type="submit">Send</button>
+                </form>
+            </section>
+            <section id="description">
+                <h3>Steps to reproduce</h3>
+                <ol>
+                    <li>Open Firebug</li>
+                    <li>Enable and switch to the <em>Net</em> panel</li>
+                    <li>
+                        Click the <em>Send</em> button above<br/>
+                        <span class="ok">The <em>Net</em> panel will display a POST request to issue5004.html</span>
+                    </li>
+                    <li>Expand that request by clicking on it</li>
+                    <li>Switch to the <em>Post</em> tab</li>
+                    <li>Check its contents</li>
+                </ol>
+                <h3>Expected result</h3>
+                <ul>
+                    <li>The parameter should also be displayed formatted</li>
+                </ul>
+            </section>
+            <footer>Sebastian Zartner, sebastianzartner@gmx.de</footer>
+        </div>
+    </body>
+</html>

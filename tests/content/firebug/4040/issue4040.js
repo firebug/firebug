@@ -1,0 +1,26 @@
+function runTest()
+{
+    FBTest.sysout("issue4040.START");
+    FBTest.openNewTab(basePath + "firebug/4040/issue4040.html", function(win)
+    {
+        FBTest.openFirebug();
+        var panel = FBTest.selectPanel("stylesheet");
+        FBTest.compare(1, getNumberOfRules(panel), "There must be one CSS rule");
+
+        FBTest.openNewTab("about:blank", function(win)
+        {
+            FBTest.openFirebug();
+            var panel = FBTest.selectPanel("stylesheet");
+            FBTest.compare(0, getNumberOfRules(panel), "There must be no CSS rule");
+
+            FBTest.testDone("issue4040.DONE");
+        });
+    });
+}
+
+function getNumberOfRules(panel)
+{
+    var cssRule = panel.panelNode.querySelectorAll(".cssRule");
+    FBTest.sysout("cssRule "+ cssRule.length);
+    return cssRule ? cssRule.length : 0;
+}

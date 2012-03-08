@@ -1,0 +1,23 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+          "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+</head>
+<body>
+<h1>Test for: Preserve content after Firebug UI reopen.</h1>
+<ul>
+    <li>Open Firebug UI and enable Console panel.</li>
+    <li>Click on the button below to create a simple log.</li>
+    <li>Close and open Firebug UI by clicking on the status bar icon.</li>
+    <li>Verify that the log is still within the Console panel.</li>
+</ul>
+
+<button id="testButton" onclick="runTest()">Console Log</button>
+<script>
+function runTest()
+{
+    console.log("Hello From Test!");
+}
+</script>
+</body>
+</html>

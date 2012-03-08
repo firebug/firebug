@@ -1,0 +1,53 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+<html>
+<head>
+  <title>Test Case for console object</title>
+</head>
+<body>
+
+<h1>Console object API: group</h1>
+
+<p>This test-case is intended for <b>console.group</b>, <b>console.groupEnd</b> and <b>console.groupCollapsed</b> methods.
+<br/>
+<i>Jan Odvarko, odvarko@gmail.com</i>
+</p>
+
+<ol>
+<li>Open Firebug and enable the Console panel.</li>
+<li>Click on the <code style="color:green">Opened Group</code> button below.</li>
+<li>The Console panel should display an opened
+<span style="color:blue">Group1</span> with one <span style="color:blue">log</span>
+message inside. There should be additional <span style="color:blue">info</span>
+message displayed after and outside of the group.</li>
+<li>Click on the <code style="color:green">Collapsed Group</code> button below.</li>
+<li>The Console panel should display a collapsed
+<span style="color:blue">Group2</span> with one <span style="color:blue">log</span>
+message inside. There should be additional <span style="color:blue">info</span>
+message displayed after and outside of the group.</li>
+</ol>
+
+<button id="testButton1" onclick="onExecuteTest1()">Opened Group</button>
+<button id="testButton2" onclick="onExecuteTest2()">Collapsed Group</button>
+
+<br/><br/>
+
+<script type="text/javascript">
+function onExecuteTest1()
+{
+    console.group("Group1");
+    console.log("log");
+    console.groupEnd("Group1");
+    console.info("info");
+}
+
+function onExecuteTest2()
+{
+    console.groupCollapsed("Group2");
+    console.log("log");
+    console.groupEnd("Group2");
+    console.info("info");
+}
+</script>
+  
+</body>
+</html>

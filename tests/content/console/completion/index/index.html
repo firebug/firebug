@@ -1,0 +1,68 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+<html>
+<head>
+  <title>Test Case for Index Completions</title>
+  <style type="text/css">
+  code {
+      color: green;
+  }
+  </style>
+</head>
+<body>
+
+<h1>Index Completions</h1>
+
+<p>This test-case is intended for testing completions involving obj["member"] syntax, introduced in
+issues <a href="http://code.google.com/p/fbug/issues/detail?id=3622">3622</a>
+and <a href="http://code.google.com/p/fbug/issues/detail?id=4803">4803</a>.
+<br/>
+<i>Simon Lindholm, simon.lindholm10@gmail.com</i>
+</p>
+
+<ol>
+<li>Open Firebug and enable the Console panel.</li>
+<li>Step by step type the following expressions in the command line and verify
+that completions appear for:</li>
+<ul>
+    <li><code>qqq</code></li>
+    <li><code>qqa</code></li>
+    <li><code>window.qqa</code></li>
+    <li><code>window['</code></li>
+    <li><code>window['qqq</code></li>
+    <li><code>window["qqq</code></li>
+    <li><code>window["qqa'</code></li>
+    <li><code>window['qqa\'</code></li>
+</ul>
+and don't appear for:
+<ul>
+    <li><code>-</code></li>
+    <li><code>"</code></li>
+    <li><code>\"</code></li>
+    <li><code>["</code></li>
+    <li><code>qqq-</code></li>
+    <li><code>window.qqa'</code></li>
+    <li><code>window[</code></li>
+    <li><code>window['qqa'</code></li>
+    <li><code>window[/qq</code></li>
+</ul>
+<li>Type <code>qqq</code> into the command line, press TAB, and verify that it
+contains <code>window["qqq--"]</code>.</li>
+<li>Type <code>window.qqq</code> into the command line, press TAB, and verify
+that it contains <code>window["qqq--"]</code>.</li>
+<li>Type <code>qqa</code> into the command line, press TAB, and verify that it
+contains <code>window["qqa'\"\\"]</code>.</li>
+<li>Type <code>window['qqa</code> into the command line, press TAB, and verify
+that it contains <code>window['qqa\'"\\']</code>.</li>
+<li>Type <code>window["qqa</code> into the command line, press TAB, and verify
+that it contains <code>window["qqa'\"\\"]</code>.</li>
+</ol>
+
+<script type="text/javascript">
+window["-----"] = 1;
+window["\"\""] = 1;
+window["qqq--"] = 1;
+window["qqa'\"\\"] = 1;
+</script>
+
+</body>
+</html>

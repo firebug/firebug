@@ -1,0 +1,95 @@
+<html>
+<head>
+    <meta http-equiv="Content-type" content="text/html; charset=utf-8">
+    <title>Search Test</title>
+    <script type="text/javascript" src="../env.js"></script>
+    <script type="text/javascript" src="search.js"></script>
+    <script type="text/javascript">
+        window.onload = function() {
+            var cssPanel = openAndSelectPanel("stylesheet");
+
+            setTimeout(function() {
+            var text = "CSS";
+
+            selectLocation(cssPanel, /.*css1.css$/);
+            var tests = [
+                         {
+                             description: "CSS Forward Case Insensitive",
+                             expected: 2,
+                             text: text,
+                             reverse: false,
+                             caseSensitive: false
+                         },
+                         {
+                             description: "CSS Reverse Case Insensitive",
+                             expected: 2,
+                             text: text,
+                             reverse: true,
+                             caseSensitive: false
+                         },
+                         {
+                             description: "CSS Forward Case Sensitive",
+                             expected: 1,
+                             text: text,
+                             reverse: false,
+                             caseSensitive: true
+                         },
+                         {
+                             description: "CSS Reverse Case Sensitive",
+                             expected: 1,
+                             text: text,
+                             reverse: true,
+                             caseSensitive: true
+                         },
+                         {
+                             description: "Global CSS Forward Case Insensitive",
+                             expected: {
+                                 'css1.css': 2,
+                                 'css2.css': 1
+                             },
+                             text: text,
+                             reverse: false,
+                             caseSensitive: false,
+                             global: true
+                         },
+                         {
+                             description: "Global CSS Reverse Case Insensitive",
+                             expected: {
+                                 'css1.css': 2,
+                                 'css2.css': 1
+                             },
+                             text: text,
+                             reverse: true,
+                             caseSensitive: false,
+                             global: true
+                         },
+                         {
+                             description: "Global CSS Forward Case Sensitive",
+                             expected: {
+                                 'css1.css': 1
+                             },
+                             text: text,
+                             reverse: false,
+                             caseSensitive: true,
+                             global: true
+                         },
+                         {
+                             description: "Global CSS Reverse Case Sensitive",
+                             expected: {
+                                 'css1.css': 1
+                             },
+                             text: text,
+                             reverse: true,
+                             caseSensitive: true,
+                             global: true
+                         }
+                        ];
+            executeRangeTestSuite(tests, cssPanel.panelNode, function() { FBTest.testDone(); });
+            }, 500);
+        };
+    </script>
+    <link rel="stylesheet" type="text/css" href="css1.css" />
+    <link rel="stylesheet" type="text/css" href="css2.css" />
+</head>
+<body>
+</body>

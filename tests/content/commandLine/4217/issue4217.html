@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Issue 4217: Shortcut "Reenter Command" doesn't work</title>
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+        <link href="../../_common/testcase.css" type="text/css" rel="stylesheet"/>
+    </head>
+    <body>
+        <header>
+            <h1><a href="http://code.google.com/p/fbug/issues/detail?id=4217">Issue 4217</a>: Shortcut "Reenter Command" doesn't work</h1>
+        </header>
+        <div>
+            <section id="description">
+                <h3>Steps to reproduce</h3>
+                <ol>
+                    <li>Open Firebug</li>
+                    <li>Enable and switch to the <em>Console</em> panel</li>
+                    <li>
+                        Type <code>console.log('hello')</code> and hit <code class="key">Enter</code><br/>
+                        &rArr; the result of executing the command will be shown inside the <em>Console</em>
+                    </li>
+                    <li>Press the shortcut for re-entering the command (by default this is <code class="key">Ctrl+Shift+E</code>)</li>
+                </ol>
+                <h3>Expected result</h3>
+                <ul>
+                    <li>The command will be executed again and the result will be shown inside the <em>Console</em></li>
+                </ul>
+            </section>
+            <footer>
+                Sebastian Zartner, sebastianzartner@gmx.de
+            </footer>
+        </div>
+    </body>
+</html>

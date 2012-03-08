@@ -1,0 +1,43 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+<html>
+<head>
+  <title>Test Case for Issue #4213</title>
+  <script type="text/javascript" src="issue4213-1.js"></script>
+  <script type="text/javascript" src="issue4213-2.js"></script>
+</head>
+<body>
+
+<h1>Issue #4213</h1>
+
+<p>This test-case is intended for <a href="http://code.google.com/p/fbug/issues/detail?id=4213">Issue #4213</a>
+- <span class="h3">Script panel's location button is not updated</span>.
+<br/>
+<i>Jan Odvarko, odvarko@gmail.com</i>
+</p>
+
+<script type="text/javascript">
+function onExecuteTest()
+{
+    var result = myFunc1("Hello World!");
+    console.log(result)
+}
+</script>
+
+<ol>
+<li>Open Firebug and enable, select the Script panel. Reload this page.</li>
+<li>Select <i>issue4213.html</i> in the location bar.</li>
+<li>Create breakpoint at line 21</li>
+<li>Click on the <code style="color:green">Execute Test</code> button below.</li>
+<li>Step into <code>myFunc1</code></li>
+<li>Check the location bar, <i>issue4213-1.js</i> file should be selected -> BUG.</li>
+</ol>
+
+<button id="testButton" onclick="onExecuteTest()">Execute Test</button>
+
+<br/><br/>
+
+<i>If you step over within the issue4213-1.js file, the location button is updated.
+But it's too late.</i>
+
+</body>
+</html>

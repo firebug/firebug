@@ -1,0 +1,27 @@
+<html>
+<head>
+    <title>This iframe is used to ensure that the window is a fixed size</title>
+    
+    <script>
+        function doit() {
+            var url = document.location.search;
+
+            url = url.substring(5, url.length);
+            
+            document.getElementById('testIframe').src = url;
+        }
+    </script>
+</head>
+<body onload="doit();">
+    <h1>This iframe is used to ensure that the window is a fixed size</h1>
+    
+    <script>
+        var url = document.location.search;
+
+        url = url.substring(5, url.length);
+            
+        document.write('<iframe id="testIframe" src="' + url + '" style="width:800px;height:600px;" />');
+    </script>
+    
+</body>
+</html>

@@ -1,0 +1,2 @@
+function scriptTest2script() {
+}

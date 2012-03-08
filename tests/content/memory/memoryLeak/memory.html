@@ -1,0 +1,71 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+<html>
+<head>
+  <title>Test Case for memory leaks</title>
+</head>
+<body>
+
+<h1>Memory leaks</h1>
+
+<p>This test-case is intended for memory leaks
+<i>Jan Odvarko, odvarko@gmail.com</i>
+</p>
+
+<ol>
+<li>Open Taks manager (or any other tool) and watch Firefox memory consumption</li>
+<li>Click on the <code style="color:green">Open Popup</code> button and close
+the opened window. Repeat and watch memory consumption</li>
+<li>The memory is not released after the popup window is closed.</li>
+</ol>
+
+<button id="openPopup" onclick="onOpenPopup()">Open Popup</button>
+<br/><br/><br/>
+<i>Use this button to automate popup opening and closing. You need to allow popups for this site.</i>
+<br/><br/>
+<button onclick="autoPopup()">Auto Open & Close</button>
+Number of popups: <input id="counterInput" type="text" size="2" value="50"/>
+<span id="counter"></span>
+
+<script type="text/javascript">
+function autoPopup()
+{
+    var counter = document.getElementById("counterInput").value;
+    openAutoPopup(parseInt(counter));
+}
+
+function openAutoPopup(counter)
+{
+    document.getElementById("counter").innerHTML = counter;
+    if (counter <= 0)
+        return;
+
+    var popup;
+    function onUnload()
+    {
+        popup.removeEventListener("unload", onUnload, false);
+        setTimeout(function() {
+            openAutoPopup(--counter);
+        }, 500);
+    };
+
+    popup = window.open("memory-popup.html?autoclose", "bug", "width=500");
+    popup.addEventListener("unload", onUnload, false);
+}
+
+function onOpenPopup()
+{
+    var popup = window.open("memory-popup.html", "bug", "width=500");
+
+    // Catch load event and notify possible listener (test driver).
+    popup.addEventListener("load", function()
+    {
+        var event = document.createEvent("Events");
+        event.initEvent("popup-loaded", true, false);
+        document.setUserData("popup-window", popup, null);
+        document.dispatchEvent(event);
+    }, false);
+}
+</script>
+
+</body>
+</html>

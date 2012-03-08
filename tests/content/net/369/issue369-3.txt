@@ -1,0 +1,6 @@
+<?php
+header("Content-Type: application/json");
+?>
+/*-secure-
+{'firstName':'John','lastName':'Smith','address':{'streetAddress':'21 2nd Street','city':'New York','state':'NY','postalCode':10021},'phoneNumbers':['212 555-1234','646 555-4567']}
+*/

@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Test Case for Issue #4085</title>
+</head>
+<body>
+
+<h1>Issue #4085</h1>
+
+<p>This test-case is intended for <a href="http://code.google.com/p/fbug/issues/detail?id=4085">Issue #4085</a>
+- <span class="h3">Errors inside an XmlHttpRequest.onReadyStateChange still fail silently</span>.
+<br/>
+<i>Jan Odvarko, odvarko@gmail.com</i>
+</p>
+
+<ol>
+<li>Open Firebug and select & enable the Console panel.</li>
+<li>Click on the <code style="color:green">Execute Test</code> button below.</li>
+<li>You should see an error log in the Console.</li>
+</ol>
+
+<button id="testButton" onclick="onExecuteTest()">Execute Test</button>
+
+<script type="text/javascript">
+function onExecuteTest()
+{
+    var oXmlHttp = new XMLHttpRequest();
+    oXmlHttp.open("GET", this.location.href);
+    oXmlHttp.onreadystatechange = function(e)
+    {
+        if (oXmlHttp.readyState == 4 && oXmlHttp.status == 200)
+        {
+            //This line should throw an error visible in both the Error Console and the Firebug console
+            throw Error('You should be able to see me in the console');
+        }
+    }
+
+    oXmlHttp.send(null);
+}
+</script>
+
+</body>
+</html>

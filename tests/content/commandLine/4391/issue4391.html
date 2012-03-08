@@ -1,0 +1,60 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+<html>
+<head>
+  <title>Test Case for Issue #4391</title>
+</head>
+<body>
+
+<h1>Issue #4391</h1>
+
+<p>This test-case is intended for <a href="http://code.google.com/p/fbug/issues/detail?id=4391">Issue #4391</a>
+- <span class="h3"> Can not use $ for jQuery in console</span>.
+<br/>
+<i>Jan Odvarko, odvarko@gmail.com</i>
+</p>
+
+<ol>
+<li>Open Firebug and enable the Console panel.</li>
+<li>Type following in to the command line: <code style="color:green">$("testElement")</code></li>
+<li>Press Enter</li>
+<li>The result should be:
+<pre>
+>>> $("testElement")
+&ltdiv id="testElement"&gt
+</pre>
+<li>Load jQuery by clicking this button:
+<button id="loadjQuery" onclick="loadjQuery()">Load jQuery</button>&nbsp;<span id="loaded"></span>
+</li>
+<li>Type following in to the command line: <code style="color:green">$("#testElement")</code></li>
+<li>The result should be:
+<pre>
+>>> $("#testElement")
+[div#testElement]
+</pre>
+</li>
+</ol>
+
+<script type="text/javascript">
+function loadjQuery()
+{
+    var s = document.createElement("script");
+    s.setAttribute("src", "jquery-latest.js");
+    s.onload = function()
+    {
+        var loaded = document.getElementById("loaded");
+        loaded.innerHTML = "Loaded";
+
+        var ev = document.createEvent("Events");
+        ev.initEvent("jQueryLoaded", true, false);
+        loaded.dispatchEvent(ev);
+    }
+    document.getElementsByTagName("body")[0].appendChild(s);
+}
+</script>
+
+<span style="color:green">
+<div id="testElement">Test Element</div>
+</span>
+
+</body>
+</html>

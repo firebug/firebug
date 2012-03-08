@@ -1,0 +1,42 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+<html>
+<head>
+  <title>Test Case for Issue #1927</title>
+</head>
+<body>
+
+<h1>Issue #1927</h1>
+
+<p>This test-case is intended for <a href="http://code.google.com/p/fbug/issues/detail?id=1927">Issue #1927</a>
+- <span class="h3">Firebug 1.4.0b3 concatenates AJAX responses if HTTP authentication is required for the resource</span>.
+<br/>
+<i>Jan Odvarko, odvarko@gmail.com</i>
+</p>
+
+<ol>
+<li>Open Firebug and enable the Net panel.</li>
+<li>Click on the <code style="color:green">Execute Test</code> button below.</li>
+<li>You'll be prompted for an user name and password</li>
+<li>You don't have to fill in anything, just press <code style="color:green">OK</code>.</li>
+<li>The dialog reappear, now press <code style="color:green">Cancel</code>.</li>
+<li>Expand the <code style="color:green">issue1927.php</code> request in the <i>Net</i> panel.</li>
+<li>Verify the response. It should be equal to: <code style="color:green">TEST</code>.</li>
+</ol>
+
+<button id="testButton" onclick="send_request()">Execute Test</button>
+<br />
+<br />
+
+<i>The 'TEST' string should not be displayed twice.</i>
+
+<script type="text/javascript">
+function send_request()
+{
+    var xmlHttp=new XMLHttpRequest();
+    xmlHttp.open("GET", "issue1927.php", true);
+    xmlHttp.send(null);
+}
+</script>
+  
+</body>
+</html>

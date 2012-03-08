@@ -1,0 +1,65 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+<html>
+<head>
+  <title>Test Case for Issue #2285</title>
+</head>
+<body>
+
+<h1>Issue #2285</h1>
+
+<p>This test-case is intended for <a href="http://code.google.com/p/fbug/issues/detail?id=2285">Issue #2285</a>
+- <span class="h3">support for content-type: multipart/x-mixed-replace</span>.
+<br/>
+<i>Jan Odvarko, odvarko@gmail.com</i>
+</p>
+
+<i>You need at least Firefox 3.6 to pass this test.</i>
+
+<ol>
+<li>Open Firebug and enable the Console panel.</li>
+<li>Make sure <i>Show XMLHttpRequests</i> option is on.</li>
+<li>Click on the <code style="color:green">Execute Test</code> button below.</li>
+<li>Click button below and wait till you see number
+    <span style="color:green">4</span> here:
+    <span id="content" style="color:red">0</span>
+</li>
+<li>Expand the <i>issue2285.php</i> entry in the Console panel and verify
+    the Response tab. It should show:
+    <code style="color:green">Part0+Part1+Part2+Part3+</code>
+</li>
+</ol>
+
+<button id="testButton" onclick="onMultipart()">Execute Test</button>
+
+<script type="text/javascript">
+function onMultipart()
+{
+    var content = document.getElementById("content");
+
+    var request = new XMLHttpRequest();
+    request.multipart = true;
+
+    var counter = 0;
+    content.innerHTML = counter;
+
+    request.open("POST", "issue2285.php", true);
+    request.onreadystatechange = function()
+    {
+        if (request.readyState == 4 && request.status == 200)
+        {
+            content.innerHTML = ++counter;
+            if (counter == 4)
+            {
+                var event = document.createEvent("Events");
+                event.initEvent("test-done", true, false);
+                document.dispatchEvent(event);
+            }
+        }
+    }
+
+    request.send(null);
+}
+</script>
+  
+</body>
+</html>

@@ -1,0 +1,29 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+<html>
+<head>
+  <title>Test Case for Issue #4209</title>
+</head>
+<body>
+
+<h1>Issue #4209</h1>
+
+<p>This test-case is intended for <a href="http://code.google.com/p/fbug/issues/detail?id=4209">Issue #4209</a>
+- <span class="h3"> Object being listed as String</span>.
+<br/>
+<i>Jan Odvarko, odvarko@gmail.com</i>
+</p>
+
+<ol>
+<li>Open Firebug and enable the Console panel.</li>
+<li>Type following in to the command line: <code>var a = {obj: {prop: 1}}; a;</code></li>
+<li>Press Enter</li>
+<li>The result should be:
+<pre>
+>>> var a = {obj: {prop: 1}}; a;
+Object { obj={...}}
+</pre>
+</li>
+</ol>
+  
+</body>
+</html>

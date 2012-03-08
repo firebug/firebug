@@ -1,0 +1,25 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+<html>
+<head>
+  <title>Test Case for Issue #4453</title>
+</head>
+<body>
+
+<h1>Issue #4453</h1>
+
+<p>This test-case is intended for <a href="http://code.google.com/p/fbug/issues/detail?id=4453">Issue #4453</a>
+- <span class="h3">Content of the command line can't be cleared.</span>.
+<br/>
+<i>Jan Odvarko, odvarko@gmail.com</i>
+</p>
+
+<ol>
+<li>Open Firebug and enable the Console panel.</li>
+<li>Type any string in the command line (don't press Enter key), switch to the HTML panel and back.</li>
+<li>The string must be there.</li>
+<li>Focus the command remove the string (don't press Enter key), switch to the HTML panel and back.</li>
+<li>The string must be removed.</li>
+</ol>
+
+</body>
+</html>

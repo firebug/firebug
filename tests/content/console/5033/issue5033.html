@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Issue 5033: Return value from a function executed on the command line is not displayed.</title>
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+        <link href="../../_common/testcase.css" type="text/css" rel="stylesheet"/>
+        <script type="text/javascript">
+        function testFunction()
+        {
+           var a = 10;
+           a += 10;
+           return a;
+        }
+        </script>
+    </head>
+    <body>
+        <header>
+            <h1><a href="http://code.google.com/p/fbug/issues/detail?id=5033">Issue 5033</a>: Return value from a function executed on the command line is not displayed.</h1>
+        </header>
+        <div>
+            <section id="description">
+                <h3>Steps to reproduce</h3>
+                <ol>
+                    <li>Open Firebug</li>
+                    <li>Enable the <em>Console</em> and <em>Script</em> panel and switch to the <em>Script</em> panel</li>
+                    <li>Reload the page</li>
+                    <li>Create a breakpoint on line 10 (<code>var a = 10;</code>)</li>
+                    <li>Switch to the <em>Console</em> panel</li>
+                    <li>
+                        Type <code>testFunction()</code> into the Command Line and hit <code class="key">Enter</code><br/>
+                        <span class="ok">The script execution should stop at the breakpoint</span>
+                    </li>
+                    <li>Click the <em>Step Over</em> button until the execution is resumed</li>
+                    <li>Switch back to the <em>Console</em> panel and check its output</li>
+                </ol>
+                <h3>Expected result</h3>
+                <ul>
+                    <li>The function's return value <code>20</code> should be displayed</li>
+                </ul>
+            </section>
+            <footer>Sebastian Zartner, sebastianzartner@gmx.de</footer>
+        </div>
+    </body>
+</html>

@@ -1,0 +1,65 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+<html>
+<head>
+  <title>Test Case for Mutation Breakpoints II.</title>
+</head>
+<body>
+<h1>Test Case for Mutation Breakpoints</h1>
+<i>Jan Odvarko, odvarko@gmail.com</i>
+
+<p>This test is intended to verify <i>Break On Mutate</i> support within the
+HTML panel. This features allows to debug mutation events (<i>DOMAttrModified</i>,
+<i>DOMCharacterDataModified</i>, <i>DOMNodeInserted</i>, <i>DOMNodeRemoved</i>)
+</ul>
+</p>
+
+<ol>
+<li>Open Firebug and select the HTML panel.</li>
+<li>Expand <code>body</code> element</li>
+<li>Right-click on the <code>content</code> element (it's the green h3 'Test Element')</li>
+<li>Step by step pick:
+    <ul>
+        <li>Break on Attribute Change</li>
+        <li>Break on Child Addition or Removal</li>
+        <li>Break on Element Removal</li>
+    </ul>
+</li>
+<li>Use button below to fire appropriate changes and check that Firebug
+always breaks at the proper location.</li>
+</ol>
+
+<h3 id="content" style="color:green">Test Element</h3>
+
+<button id="breakOnAttrModified" onclick="breakOnAttrModified()">Break on Attribute Modified</button>
+<button id="breakOnNodeInserted" onclick="breakOnNodeInserted()">Break on Node Inserted</button>
+<button id="breakOnNodeRemoved" onclick="breakOnNodeRemoved()">Break on Node Removed</button>
+
+<script type="text/javascript">
+var content = document.getElementById("content");
+function breakOnAttrModified()
+{
+    var now = (new Date()).getTime();
+    content.setAttribute("test", now); // Line 42 do not move
+}
+
+function breakOnNodeInserted()
+{
+    content.appendChild(document.createElement("div"));  // line 47 do not move
+}
+
+function breakOnNodeRemoved()
+{
+    if (content.firstChild)
+        content.removeChild(content.firstChild);  // line 53 do not move
+    else
+        alert("You have to append a node first. Use 'Break on Node Inserted'.");
+}
+
+</script>
+
+<br/><br/>
+<i>Make sure <b>extensions.firebug.filterSystemURLs</b> preference is set to true.
+If not, set it and reload the page.</i>
+
+</body>
+</html>

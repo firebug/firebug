@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="UTF-8"/>
+        <title>Issue 5006: Switching panels does not correctly set the command line auto-completer</title>
+        <link href="../../../_common/testcase.css" type="text/css" rel="stylesheet"/>
+    </head>
+    <body>
+        <header>
+        <h1><a href="http://code.google.com/p/fbug/issues/detail?id=5006">Issue 5006</a>: Switching panels does not correctly set the command line auto-completer</h1>
+        </header>
+        <div>
+            <section id="description">
+                <h3>Steps to reproduce</h3>
+                <ol>
+                    <li>Open Firebug</li>
+                    <li>Switch to the <em>HTML</em> panel, and enable the <em>Console</em> panel through its right-click menu</li>
+                    <li>Click the <em>Show Command Line</em> button.</li>
+                    <li>
+                        Type <code>win</code> into the <em>Command Line</em><br/>
+                        <span class="ok">
+                            <code>window</code> should appear as a completion.
+                        </span>
+                    </li>
+                    <li>Clear its contents, and switch to the <em>Console</em> panel</li>
+                    <li>Open the <em>Command Editor</em></li>
+                    <li>Switch to the <em>HTML</em> panel</li>
+                    <li>
+                        Type <code>win</code> into the <em>Command Line</em> again<br/>
+                        <span class="ok">
+                            Completions should still appear.
+                        </span>
+                    </li>
+                </ol>
+            </section>
+            <footer>
+                Simon Lindholm, simon.lindholm10@gmail.com
+            </footer>
+        </div>
+    </body>
+</html>
