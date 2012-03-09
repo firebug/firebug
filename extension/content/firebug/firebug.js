@@ -533,8 +533,17 @@ window.Firebug =
             panelTypeMap[arguments[i].prototype.name] = arguments[i];
 
         if (FBTrace.DBG_REGISTRATION)
+        {
             for (var i = 0; i < arguments.length; ++i)
-                FBTrace.sysout("registerPanel "+arguments[i].prototype.name+"\n");
+                FBTrace.sysout("registerPanel "+arguments[i].prototype.name);
+        }
+
+        // If Firebug is not initialized yet the UI will be updated automatically soon.
+        if (!this.isInitialized)
+            return;
+
+        Firebug.chrome.syncMainPanels();
+        Firebug.chrome.syncSidePanels();
     },
 
     unregisterPanel: function(panelType)
@@ -579,6 +588,7 @@ window.Firebug =
 
         // The panel tab must be removed from the UI.
         Firebug.chrome.syncMainPanels();
+        Firebug.chrome.syncSidePanels();
     },
 
     registerRep: function()
@@ -971,6 +981,9 @@ window.Firebug =
 
     getPanelTitle: function(panelType)
     {
+        if (!panelType)
+            return null;
+
         return panelType.prototype.title ? panelType.prototype.title
             : Locale.$STR("Panel-"+panelType.prototype.name);
     },
