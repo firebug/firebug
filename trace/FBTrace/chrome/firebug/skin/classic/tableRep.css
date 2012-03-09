@@ -1,0 +1,63 @@
+/* See license.txt for terms of usage */
+
+.objectBox-table {
+    font-family: monospace;
+    white-space: pre-wrap;
+}
+
+/************************************************************************************************/
+/* Console Panel */
+
+.logRow-table {
+    padding: 0;
+}
+
+.dataTableSizer {
+    width: 100%;
+}
+
+.dataTableSizer:focus {
+    outline: none;
+}
+
+.dataTable {
+}
+
+/* If the table is displayed within a group the border is provided by that group. */
+.logGroup .dataTable {
+    border: none;
+}
+
+.dataTable TBODY {
+    overflow-x: hidden;
+    overflow-y: scroll;
+}
+
+.dataTable tr:nth-child(even) {
+    background-color: #EFEFEF;
+}
+
+.dataTable a {
+    vertical-align:middle;
+}
+
+.dataTable td {
+    padding: 1px 4px 0 4px;
+}
+
+/* The last column needs more horizontal space since part of it is overlapped by
+   the vertical scroll bar */
+.dataTable td:last-child {
+    padding-right: 20px;
+}
+
+.useA11y .dataTable *:focus {
+    outline-offset: -2px;
+}
+
+/*****************************************************************************************/
+/* Console panel filter */
+
+.panelNode.hideType-table .logRow-table {
+    display: none !important;
+}

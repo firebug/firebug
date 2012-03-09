@@ -1,0 +1,27 @@
+<?xml version="1.0"?>
+<window xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul"
+    id="FBTraceConsole-blocker"
+    windowtype="FBTraceConsole-blocker:ui"
+    title="Block JavaScript"
+    width="600" height="480"
+    persist="screenX,screenY,width,height">
+
+    <script type="application/x-javascript">
+    function armOnLoad(event)
+    {
+        window.releaser = window.arguments[0];
+        window.dump("------------ "+window.location+" load " + window.releaser.prefDomain + "\n");
+        window.releaser.unblock = function()
+        {
+            window.dump("------------ "+window.location+" unblock ---------------\n");
+            window.dump("------------ "+window.releaser.prefDomain+" ---------------\n");
+            window.close();
+            window.dump("------------ "+window.closed+" tracing console unblock done ---------------\n");
+        }
+    }
+    window.addEventListener('load', armOnLoad, false);
+    </script>
+    <vbox>
+        <browser id="content" flex="2" disablehistory="true" src="" />
+    </vbox>
+</window>

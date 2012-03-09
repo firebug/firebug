@@ -1,0 +1,71 @@
+/* See license.txt for terms of usage */
+
+.panelNode-callstack {
+    overflow: auto;
+}
+
+/**
+ * This objectLink-stackFrame should be consistent with panelStatusLabel so the
+ * call stack looks the same in toolbar and panel.
+ */
+.objectLink-stackFrame {
+    cursor: pointer;
+    margin: 0;
+    padding: 0 4px;
+}
+
+.objectBox-stackFrame {
+    padding-left: 17px;
+    cursor: default;
+    position: relative;
+    padding-bottom: 2px;
+    border-top: 1px solid transparent;
+    border-bottom: 1px solid transparent;
+}
+
+.objectBox-stackFrame,
+.objectBox-stackFrame .objectLink,
+.objectBox-stackFrame .objectBox {
+    white-space: nowrap !important;
+}
+
+.objectBox-stackFrame[selected="true"] {
+    border-top: 1px solid #D9D9B6;
+    border-bottom: 1px solid #D9D9B6;
+    background-color: lightgoldenrodyellow;
+}
+
+.objectLink-stackFrame:hover {
+    color: blue;
+}
+
+.objectLink-stackFrame[selected="true"] {
+    font-weight: bold;
+}
+
+/* The source links are always displayed at the end of the frame line. */
+.panelNode-callstack .objectLink-sourceLink {
+    position: relative;
+    top: 0;
+}
+
+/*************************************************************************************************/
+/* Expandable Argument List */
+
+.objectBox-stackFrame .argList {
+    display: none;
+    margin-bottom: 5px;
+}
+
+.objectBox-stackFrame.opened .argList {
+    display: block;
+}
+
+/**
+ * The one-line list of arguments is hidden if the frame is exapanded. So, the source
+ * link is nicely visible.
+ */
+.objectBox-stackFrame.opened .arguments {
+    display: none;
+}
+
