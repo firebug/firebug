@@ -1012,7 +1012,9 @@ $toolbarButton("firebug-button", {
 // Appends Firebug start button into Firefox toolbar automatically after installation.
 // The button is appended only once so, if the user removes it, it isn't appended again.
 // TODO: merge into $toolbarButton?
-if (!$("firebug-button") && !FirebugLoader.getPref("toolbarCustomizationDone"))
+// toolbarpalette check is for seamonkey, where it is in the document
+if ((!$("firebug-button") || $("firebug-button").parentNode.tagName == "toolbarpalette") 
+    && !FirebugLoader.getPref("toolbarCustomizationDone"))
 {
     FirebugLoader.setPref("toolbarCustomizationDone", true);
 
