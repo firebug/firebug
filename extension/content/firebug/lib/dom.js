@@ -244,14 +244,48 @@ Dom.hide = function(elt, hidden)
 
 Dom.clearNode = function(node)
 {
+    Dom.clearDomplate(node);
+
     node.innerHTML = "";
 };
 
 Dom.eraseNode = function(node)
 {
+    Dom.clearDomplate(node);
+
     while (node.lastChild)
         node.removeChild(node.lastChild);
 };
+
+// ********************************************************************************************* //
+
+/**
+ * Help function that removes references created by Domplate. These references can
+ * point to content (web page) objects and create cycles between two compartments
+ * that can't be released by CC collector.
+ *
+ * @param {Object} node Root of the tree that should be cleaned up.
+ */
+Dom.clearDomplate = function(node)
+{
+    if (!Firebug.clearDomplate)
+        return;
+
+    var walker = node.ownerDocument.createTreeWalker(node,
+        Ci.nsIDOMNodeFilter.SHOW_ALL, null, true);
+
+    while (node)
+    {
+        delete node.repObject;
+        delete node.stackTrace;
+        delete node.checked;
+        delete node.domObject;
+        delete node.toggles;
+        delete node.domPanel;
+
+        node = walker.nextNode();
+    }
+}
 
 // ********************************************************************************************* //
 
