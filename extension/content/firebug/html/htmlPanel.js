@@ -1160,7 +1160,10 @@ Firebug.HTMLPanel.prototype = Obj.extend(WalkingPanel,
 
         Events.removeEventListener(this.panelNode.ownerDocument, "keypress", this.onKeyPress, true);
 
-        if (this.context.attachedMutation)
+        // Optimalization: if the HTML panel isn't currently selected remove
+        // mutation listeners. Don't do it if there are mutation breakpoints
+        // these should work even if the HTML panel is not selected (issue 5316)
+        if (this.context.attachedMutation && this.context.mutationBreakpoints.isEmpty())
         {
             this.context.attachedMutation = false;
 
