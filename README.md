@@ -42,6 +42,12 @@ trailing spaces.
 4. Save the file with Firebug ID as it's name `firebug@software.joehewitt.com`
 
 
+Hacking on Firebug
+------------------
+See detailed [instructions](http://www.softwareishard.com/blog/firebug/hacking-on-firebug/)
+about how to provide a patch to Firebug source.
+
+
 Further Resources
 -----------------
 
