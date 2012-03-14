@@ -210,8 +210,18 @@ CSSElementPanel.prototype = Obj.extend(CSSStyleSheetPanel.prototype,
 
     markOverriddenProps: function(element, props, usedProps, inheritMode)
     {
-        var dummyElement = element.ownerDocument.createElementNS(
-            element.namespaceURI, element.tagName);
+        // Element can contain an invalid name (see issue 5303)
+        try
+        {
+            var dummyElement = element.ownerDocument.createElementNS(
+                element.namespaceURI, element.tagName);
+        }
+        catch (err)
+        {
+            if (FBTrace.DBG_ERRORS)
+                FBTrace.sysout("css.markOverriddenProps:", err);
+            return;
+        }
 
         for (var i=0; i<props.length; i++)
         {
