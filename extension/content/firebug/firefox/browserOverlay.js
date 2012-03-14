@@ -71,7 +71,10 @@ function $el(name, attributes, children, parent)
 
     if (parent)
     {
-        parent.appendChild(el);
+        if (attributes.position)
+            parent.insertBefore(el, parent.children[attributes.position - 1]);
+        else
+            parent.appendChild(el);
 
         // Mark to remove when Firebug is uninstalled.
         el.setAttribute("firebugRootNode", true);
@@ -85,7 +88,7 @@ function $command(id, oncommand, arg)
     // Wrap the command within a startFirebug call. If Firebug isn't yet loaded
     // this will force it to load.
     oncommand = "Firebug.GlobalUI.startFirebug(function(){" + oncommand + "})";
-    if (arg) 
+    if (arg)
         oncommand = "void function(arg){" + oncommand + "}(" + arg + ")";
 
     return $el("command", {
@@ -479,7 +482,7 @@ Firebug.GlobalUI.$stylesheet("chrome://firebug/content/firefox/browserOverlay.cs
  * This element (a broadcaster) is storing Firebug state information. Other elements
  * (like for example the Firebug start button) can watch it and display the info to
  * the user.
- */ 
+ */
 $el("broadcaster", {id: "firebugStatus", suspended: true}, $("mainBroadcasterSet"));
 
 // ********************************************************************************************* //
@@ -512,11 +515,35 @@ $command("cmd_openInEditor", "Firebug.ExternalEditors.onContextMenuCommand(event
 // ********************************************************************************************* //
 // Global Shortcuts
 
-$key("key_toggleFirebug", "VK_F12", "", "cmd_toggleFirebug", 1);
-$key("key_toggleInspecting", "c", "accel,shift", "cmd_toggleInspecting", 2);
-$key("key_focusCommandLine", "l", "accel,shift", "cmd_focusCommandLine", 3);
-$key("key_detachFirebug", "VK_F12", "accel", "cmd_detachFirebug", 4);
-$key("key_closeFirebug", "VK_F12", "shift", "cmd_closeFirebug", 5);
+(function(globalShortcuts)
+{
+    var keyset = $("mainKeyset");
+
+    globalShortcuts.forEach(function(id)
+    {
+        var shortcut = FirebugLoader.getPref("key.shortcut." + id);
+        var tokens = shortcut.split(" ");
+        var key = tokens.pop();
+
+        var keyProps = {
+            id: "key_" + id,
+            modifiers: tokens.join(","),
+            command: "cmd_" + id,
+            position: 1
+        };
+
+        if (key.length <= 1)
+            keyProps.key = key;
+        else if (KeyEvent["DOM_"+key])
+            keyProps.keycode = key;
+
+        $el("key", keyProps, keyset);
+    });
+
+    keyset.parentNode.insertBefore(keyset, keyset.nextSibling);
+})(["toggleFirebug", "toggleInspecting", "focusCommandLine",
+    "detachFirebug", "closeFirebug"]);
+
 
 /* Used by the global menu, but should be really global shortcuts?
 key_increaseTextSize
@@ -998,7 +1025,7 @@ $toolbarButton("inspector-button", {
     image: "chrome://firebug/skin/inspect.png"
 });
 
-// TODO: why contextmenu doesn't work without cloning 
+// TODO: why contextmenu doesn't work without cloning
 $toolbarButton("firebug-button", {
     label: "firebug.Firebug",
     tooltiptext: "firebug.ShowFirebug",
@@ -1013,7 +1040,7 @@ $toolbarButton("firebug-button", {
 // The button is appended only once so, if the user removes it, it isn't appended again.
 // TODO: merge into $toolbarButton?
 // toolbarpalette check is for seamonkey, where it is in the document
-if ((!$("firebug-button") || $("firebug-button").parentNode.tagName == "toolbarpalette") 
+if ((!$("firebug-button") || $("firebug-button").parentNode.tagName == "toolbarpalette")
     && !FirebugLoader.getPref("toolbarCustomizationDone"))
 {
     FirebugLoader.setPref("toolbarCustomizationDone", true);
