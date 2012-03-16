@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Issue 5336: HTMLCollection object is undefined in the Script panel</title>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+    <link href="../../../_common/testcase.css" type="text/css" rel="stylesheet"/>
+</head>
+<body>
+<script>
+function onClick()
+{
+    var elements = document.getElementsByClassName("test");
+    debugger;
+}
+</script>
+<header>
+    <h1><a href="http://code.google.com/p/fbug/issues/detail?id=5336">Issue 5336</a>:
+        HTMLCollection object is undefined in the Script panel</h1>
+</header>
+<div>
+    <section id="description">
+        <h3>Steps to reproduce</h3>
+        <ol>
+            <li>Enabled the Script panel, reload this page</li>
+            <li>Click this button <button onclick="onClick()" id="testButton">Click Me</button></li>
+            <li>Check the Watch panel, there should be a variable <code>elements</code>
+                with value: <code>[div.test, div.test]</code></li>
+        </ol>
+    </section>
+    <div class="test"></div>
+    <div class="test"></div>
+    <footer>
+        Jan Odvarko, odvarko@gmail.com;
+    </footer>
+</div>
+</body>
+</html>
