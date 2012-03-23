@@ -1,0 +1,21 @@
+{
+  "name": "firebug",
+  "description": "Web Development Evolved - The Firebug you have known and loved",
+  "version": "1.9.0",
+  "homepage" : "http://getfirebug.com/",
+  "engines": {
+    "node": ">= 0.6.6"
+  },
+  "dependencies": {
+    "dryice": ">= 0.4.4",
+    "shelljs": ">= 0.0.2"
+  },
+  "author": "Jan Odvarko <odvarko@gmail.com>",
+  "repository" : {
+    "type" : "git",
+     "url" : "git://github.com/firebug/firebug.git"
+  },
+  "licenses": [
+    { "type": "BSD", "url": "http://opensource.org/licenses/BSD-3-Clause" }
+  ]
+}
