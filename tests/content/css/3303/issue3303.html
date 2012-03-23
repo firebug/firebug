@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Issue 3303: Up/Down key working incorrectly for fonts when editing CSS</title>
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+        <link href="../../_common/testcase.css" type="text/css" rel="stylesheet"/>
+        <style type="text/css">
+        #font {
+            font-family: Arial, serif;
+        }
+        </style>
+    </head>
+    <body>
+        <header>
+            <h1><a href="http://code.google.com/p/fbug/issues/detail?id=3303">Issue 3303</a>: Up/Down key working incorrectly for fonts when editing CSS</h1>
+        </header>
+        <div>
+            <section id="content">
+              <p id="font">Hello Firebug user!</p>
+            </section>
+            <section id="description">
+                <h3>Steps to reproduce</h3>
+                <ol>
+                    <li>Open Firebug</li>
+                    <li>Switch to the <em>HTML</em> panel and there to the <em>Style</em> side panel</li>
+                    <li>Inspect the paragraph above (<code>#font</code>)</li>
+                    <li>Click on the value of the <code>font-family</code> property inside the <code>#font</code> rule</li>
+                    <li>Set the text cursor between the <code>A</code> and the <code>l</code> of <code>Arial</code></li>
+                    <li>
+                        Press <code class="key">Down</code> one time<br/>
+                        <span class="ok">The value should now be <code>Comic Sans MS,serif</code> with <code>Comic Sans MS</code> being selected</span>
+                    </li>
+                    <li>
+                        Press <code class="key">Down</code> a second time<br/>
+                        <span class="ok">The value should now be <code>Georgia,serif</code> with <code>Georgia</code> being selected</span>
+                    </li>
+                    <li>
+                        Press <code class="key">Up</code> one time<br/>
+                        <span class="ok">The value should now be <code>Comic Sans MS,serif</code> again with <code>Comic Sans MS</code> being selected</span>
+                    </li>
+                    <li>
+                        Press <code class="key">Up</code> a second time<br/>
+                        <span class="ok">The value should now be <code>Arial,serif</code> again with <code>Arial</code> being selected</span>
+                    </li>
+                </ol>
+                <h3>Expected result</h3>
+                <ul>
+                    <li>Auto-completion should work correctly on space-separated font names when pressing <code class="key">Up</code>/<code class="key">Down</code></li>
+                </ul>
+            </section>
+            <footer>Sebastian Zartner, sebastianzartner@gmx.de</footer>
+        </div>
+    </body>
+</html>
