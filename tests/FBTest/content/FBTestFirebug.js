@@ -2431,11 +2431,10 @@ this.getImageDataFromNode = function(node, x, y, width, height)
         currentNode = currentNode.parentNode;
     } while (currentNode.nodeName !== "HTML");
 
-    if (x && y)
-    {
-        top += y;
+    if (x)
         left += x;
-    }
+    if (y)
+        top += y;
 
     var canvas = this.getCanvasFromWindow(node.ownerDocument.defaultView, left, top,
         width || node.clientWidth, height || node.clientHeight);
