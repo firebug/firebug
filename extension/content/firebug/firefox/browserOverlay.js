@@ -994,7 +994,6 @@ $menupopupOverlay($("appmenu_webDeveloper_popup"), [
         command: "cmd_toggleFirebug",
         key: "key_toggleFirebug",
         label: "firebug.Firebug",
-        command: "cmd_toggleFirebug",
         iconic: "true",
         "class": "fbInternational"
     }, [firebugMenuPopup.cloneNode(true)]),
