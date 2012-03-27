@@ -2419,7 +2419,7 @@ this.TaskList.prototype =
 // ********************************************************************************************* //
 // Screen copy
 
-this.getImageDataFromNode = function(node)
+this.getImageDataFromNode = function(node, x, y, width, height)
 {
     var top = 0;
     var left = 0;
@@ -2431,8 +2431,13 @@ this.getImageDataFromNode = function(node)
         currentNode = currentNode.parentNode;
     } while (currentNode.nodeName !== "HTML");
 
+    if (x)
+        left += x;
+    if (y)
+        top += y;
+
     var canvas = this.getCanvasFromWindow(node.ownerDocument.defaultView, left, top,
-        node.clientWidth, node.clientHeight);
+        width || node.clientWidth, height || node.clientHeight);
     return canvas.toDataURL("image/png", "");
 };
 

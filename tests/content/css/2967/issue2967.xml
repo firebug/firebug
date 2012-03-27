@@ -1,0 +1,53 @@
+<?xml version="1.0"?>
+<!DOCTYPE html [
+  <!ENTITY rArr "⇒">
+]>
+<html lang="en" xmlns="http://www.w3.org/1999/xhtml" xml:lang="en">
+    <head>
+        <title>Issue 2967: CSS on in SVG placed in a mixed XHTML+SVG document does not show up on CSS tab</title>
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+        <link href="../../_common/testcase.css" type="text/css" rel="stylesheet"/>
+    </head>
+    <body>
+        <header>
+            <h1><a href="http://code.google.com/p/fbug/issues/detail?id=2967">Issue 2967</a>: CSS on in SVG placed in a mixed XHTML+SVG document does not show up on CSS tab</h1>
+        </header>
+        <div>
+            <section id="content">
+                <svg xmlns="http://www.w3.org/2000/svg" version="1.1" width="100" height="100" id="rect">
+                    <style type="text/css">
+                    #rect {
+                        fill: url(#linearGradient);
+                    }
+                    </style>
+                    <linearGradient id="linearGradient" x1="100" y1="100" x2="0" y2="0" gradientUnits="userSpaceOnUse">
+                        <stop style="stop-color: #788cff;" offset="0"/>
+                        <stop style="stop-color: #b4c8ff;" offset="1"/>
+                    </linearGradient>
+                    <rect width="100" height="100" x="0" y="0" id="rect"/>
+                </svg>
+            </section>
+            <section id="description">
+                <h3>Steps to reproduce</h3>
+                <ol>
+                    <li>Open Firebug</li>
+                    <li>Switch to the <em>CSS</em> panel</li>
+                    <li>
+                        Open the CSS Location Menu<br/>
+                        <span class="ok">&rArr; There should be an entry <em>issue2967.xml</em></span>
+                    </li>
+                    <li>
+                        Select that entry<br/>
+                        <span class="ok">&rArr; The SVG stylesheet inside <em>issue2967.xml</em> should be shown inside the CSS panel</span>
+                    </li>
+                    <li>Select that entry</li>
+                </ol>
+                <h3>Expected result</h3>
+                <ul>
+                    <li>The <em>CSS</em> panel should be able to handle CSS of SVGs embedded into XHTML files</li>
+                </ul>
+            </section>
+            <footer>Sebastian Zartner, sebastianzartner@gmx.de</footer>
+        </div>
+    </body>
+</html>

@@ -5,6 +5,13 @@
         <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
         <link href="../../_common/testcase.css" type="text/css" rel="stylesheet">
         <style type="text/css">
+            #sayHi {
+                width: 75px;
+                background-position: 5px 50%;
+                background-repeat: no-repeat;
+                text-align: right;
+            }
+
             #output {
                 display: none;
             }
@@ -16,7 +23,7 @@
         </header>
         <div>
             <section id="content">
-                <button id="sayHi" onclick="var output = document.getElementById(output'); output.style.display = 'block'; output.innerHTML = Hi there, tester!&quot;">
+                <button id="sayHi" onclick="var output = document.getElementById(output'); output.style.display = 'block'; output.innerHTML = Hi there, tester!&quot;" style="background-image: url(firebug.png');">
                     Say hi
                 </button>
                 <section id="output">
@@ -28,7 +35,12 @@
                     <li>Open Firebug</li>
                     <li>Switch to the HTML panel</li>
                     <li>Inspect the <em>Say hi</em> button above</li>
-                    <li>Click the value of the <code>onclick</code> attribute to start inline editing</li>
+                    <li>Click the value of the <code>id</code> attribute of the <em>Say hi</em> button to start inline editing</li>
+                    <li>
+                        Enter a double quote (<code>&quot;</code>)<br/>
+                        <span class="ok">&rArr; The inline editor should jump to the <code>onclick</code> attribute</span>
+                    </li>
+                    <li>Click the value of the <code>onclick</code> attribute of the <em>Say hi</em> button to start inline editing</li>
                     <li>Move the text cursor between the opening bracket and <code>output</code> of <code>getElementById(output&#39;)</code></li>
                     <li>
                         Enter a single quote (<code>&#39;</code>)<br/>
@@ -36,14 +48,25 @@
                     </li>
                     <li>Move the text cursor before the <code>H</code> of <code>Hi</code></li>
                     <li>
-                        Enter a double quote (&quot;)<br/>
+                        Enter a double quote (<code>&quot;</code>)<br/>
                         <span class="ok">&rArr; The double quote is entered into the input field</span>
                     </li>
-                    <li>Click the <em>Say hi</em> button above</li>
+                    <li>
+                        Click the <em>Say hi</em> button above<br/>
+                        <span class="ok">&rArr; <code>Hi there, tester!</code> should be shown below the button</span>
+                    </li>
+                    <li>Click the value of the <code>style</code> attribute of the <em>Say hi</em> button to start inline editing</li>
+                    <li>Move the text cursor after the opening bracket</li>
+                    <li>
+                        Enter a single quote (<code>&#39;</code>)<br/>
+                        <span class="ok">&rArr; The single quote is entered into the input field</span><br/>
+                        <span class="ok">&rArr; The background of the <code>Say hi</code> button changes to the Firebug logo</span>
+                    </li>
                 </ol>
                 <h3>Expected Result</h3>
                 <ul>
-                    <li><code>Hi there, tester!</code> shown below the button</li>
+                    <li>Event handler attributes like <code>onclick</code> and <code>title</code>, <code>alt</code> and <code>style</code> should allow entering quotes</li>
+                    <li>On all other attributes the inline editor should jump to the next field</li>
                 </ul>
             </section>
             <footer>Sebastian Zartner, sebastianzartner@gmx.de</footer>

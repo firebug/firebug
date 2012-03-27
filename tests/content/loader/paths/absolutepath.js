@@ -11,8 +11,8 @@ function runTest()
 
     var require = FBTest.getRequire();
     require(config, [
-        baseUrl + "add",
-        baseUrl + "subtract"
+        baseUrl + "add.js",
+        baseUrl + "subtract.js"
     ],
     function(AddModule, SubtractModule)
     {
