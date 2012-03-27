@@ -686,7 +686,7 @@ StackFrame.getArgumentsFromCallScope = function(frame)
 
 // ********************************************************************************************* //
 
-var saveShowStackTrace = {};
+var saveShowStackTrace;
 
 /**
  * use in the try{} around a call to getInterface to prevent fbs from generating stack traces
@@ -702,7 +702,11 @@ StackFrame.suspendShowStackTrace = function()
  */
 StackFrame.resumeShowStackTrace = function()
 {
-    Firebug.showStackTrace = saveShowStackTrace;
+    if (saveShowStackTrace)
+    {
+        Firebug.showStackTrace = saveShowStackTrace;
+        delete saveShowStackTrace;
+    }
 };
 
 // ********************************************************************************************* //
