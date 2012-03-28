@@ -1167,6 +1167,21 @@ if (checkFirebugVersion(currentVersion) > 0)
     observerService.addObserver(SessionObserver, "sessionstore-windows-restored" , false);
 
 // ********************************************************************************************* //
+// Context Menu Workaround
+
+if (typeof(nsContextMenu) != "undefined")
+{
+    // https://bugzilla.mozilla.org/show_bug.cgi?id=433168
+    var setTargetOriginal = nsContextMenu.prototype.setTarget;
+    nsContextMenu.prototype.setTarget = function(aNode, aRangeParent, aRangeOffset)
+    {
+        setTargetOriginal.apply(this, arguments);
+        if (this.isTargetAFormControl(aNode))
+            this.shouldDisplay = true;
+    };
+}
+
+// ********************************************************************************************* //
 
 if (FBTrace.DBG_INITIALIZE)
     FBTrace.sysout("Firebug global overlay applied");
