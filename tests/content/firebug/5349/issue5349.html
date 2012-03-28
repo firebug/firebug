@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Issue 5349: Context menu in select, radio, check, not work</title>
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+        <link href="../../_common/testcase.css" type="text/css" rel="stylesheet"/>
+    </head>
+    <body>
+        <header>
+            <h1><a href="http://code.google.com/p/fbug/issues/detail?id=5349">Issue 5349</a>: Context menu in select, radio, check, not work</h1>
+        </header>
+        <div>
+            <section id="content">
+              <select id="selectbox">
+                <option>Hello</option>
+                <option>Firebug</option>
+                <option>user!</option>
+              </select>
+            </section>
+            <section id="description">
+                <h3>Steps to reproduce</h3>
+                <ol>
+                    <li>Right-click the selectbox above</li>
+                </ol>
+                <h3>Expected result</h3>
+                <ul>
+                    <li>The context menu should appear including the option <em>Inspect Element with Firebug</em></li>
+                </ul>
+            </section>
+            <footer>Sebastian Zartner, sebastianzartner@gmx.de</footer>
+        </div>
+    </body>
+</html>
