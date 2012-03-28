@@ -2145,7 +2145,9 @@ this.selectElementInHtmlPanel = function(element, callback)
  */
 this.executeContextMenuCommand = function(target, menuItemIdentifier, callback)
 {
-    var contextMenu = FW.FBL.$("fbContextMenu");
+    var contextMenu = target.ownerDocument.documentURI == "chrome://firebug/content/panel.html" ?
+        FW.FBL.$("fbContextMenu") : FW.Firebug.chrome.window.top.window.document.
+            getElementById("contentAreaContextMenu");
 
     var self = this;
     function onPopupShown(event)
@@ -2159,7 +2161,7 @@ this.executeContextMenuCommand = function(target, menuItemIdentifier, callback)
             if (typeof menuItemIdentifier == "string" || menuItemIdentifier.id)
             {
                 var menuItemId = menuItemIdentifier.id || menuItemIdentifier;
-                menuItem = contextMenu.ownerDocument.getElementById((menuItemId));
+                menuItem = contextMenu.ownerDocument.getElementById(menuItemId);
             }
             else if (menuItemIdentifier.label)
             {
@@ -2201,7 +2203,7 @@ this.executeContextMenuCommand = function(target, menuItemIdentifier, callback)
     contextMenu.addEventListener("popupshown", onPopupShown, false);
 
     // Right click on the target element.
-    var eventDetails = {type : "contextmenu", button : 2};
+    var eventDetails = {type: "contextmenu", button: 2};
     this.synthesizeMouse(target, 2, 2, eventDetails);
 };
 
