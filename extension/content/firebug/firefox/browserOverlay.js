@@ -341,32 +341,41 @@ Firebug.GlobalUI =
 
     onMenuShowing: function(popup)
     {
-        var currPos = FirebugLoader.getPref("framePosition");
-        var detachFirebug = document.getElementById("menu_detachFirebug");
-        if (detachFirebug)
+        var collapsed = "true";
+        if (Firebug.chrome)
         {
-            detachFirebug.setAttribute("label", (currPos == "detached" ?
-                Locale.$STR("firebug.AttachFirebug") : Locale.$STR("firebug.DetachFirebug")));
+            var fbContentBox = Firebug.chrome.$("fbContentBox");
+            collapsed = fbContentBox.getAttribute("collapsed");
         }
 
+        var currPos = FirebugLoader.getPref("framePosition");
+        var placement = Firebug.getPlacement ? Firebug.getPlacement() : "";
+
         // Switch between "Open Firebug" and "Hide Firebug" label in the popup menu
-        // (use the menu, which is just showing).
         var toggleFirebug = popup.querySelector("#menu_toggleFirebug");
         if (toggleFirebug)
         {
-            var collapsed = "true";
-            if (Firebug.chrome)
-            {
-                var fbContentBox = Firebug.chrome.$("fbContentBox");
-                collapsed = fbContentBox.getAttribute("collapsed");
-            }
-
-            toggleFirebug.setAttribute("label", (collapsed == "true" ?
+            var hiddenUI = (collapsed == "true" || placement == "minimized");
+            toggleFirebug.setAttribute("label", (hiddenUI ?
                 Locale.$STR("firebug.ShowFirebug") : Locale.$STR("firebug.HideFirebug")));
 
-            // If Firebug is detached, hide the menu ('Open Firebug' shortcut doesn't hide,
-            // but just focuses the external window)
-            toggleFirebug.setAttribute("collapsed", (currPos == "detached" ? "true" : "false"));
+            toggleFirebug.setAttribute("tooltiptext", (hiddenUI ?
+                Locale.$STR("firebug.menu.tip.Open_Firebug") :
+                Locale.$STR("firebug.menu.tip.Minimize_Firebug")));
+
+            // If Firebug is detached, use "Focus Firebug Window" label
+            if (currPos == "detached" && Firebug.currentContext)
+            {
+                toggleFirebug.setAttribute("label", Locale.$STR("firebug.FocusFirebug"));
+                toggleFirebug.setAttribute("tooltiptext", Locale.$STR("firebug.menu.tip.Focus_Firebug"));
+            }
+        }
+
+        // Hide "Deactivate Firebug" menu if Firebug is not active.
+        var closeFirebug = popup.querySelector("#menu_closeFirebug");
+        if (closeFirebug)
+        {
+            closeFirebug.setAttribute("collapsed", (Firebug.currentContext ? "false" : "true"));
         }
     },
 
