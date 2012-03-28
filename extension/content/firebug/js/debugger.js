@@ -1346,6 +1346,10 @@ Firebug.Debugger = Obj.extend(Firebug.ActivableModule,
         var context = this.breakContext;
         delete this.breakContext;
 
+        // If the script panel is disabled, Firebug can't break on error.
+        if (!Firebug.PanelActivation.isPanelEnabled("script"))
+            return 0;
+
         try
         {
             if (FBTrace.DBG_ERRORS)

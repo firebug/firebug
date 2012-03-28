@@ -1553,6 +1553,10 @@ Firebug.ScriptPanel.prototype = Obj.extend(Firebug.SourceBoxPanel,
             Firebug.TabCacheModel.addObserver(this);
         else
             Firebug.TabCacheModel.removeObserver(this);
+
+        // If the Script is disabled make sure the BON tab flag (orange background)
+        // is properly updated.
+        Firebug.Breakpoint.updatePanelTabs(Firebug.currentContext);
     },
 
     // implements Tool

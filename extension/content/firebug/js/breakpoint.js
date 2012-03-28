@@ -137,10 +137,29 @@ Firebug.Breakpoint = Obj.extend(Firebug.Module,
         if (!panel)
             return;
 
+        // If the script panels is disabled, BON can't be active.
+        if (!Firebug.PanelActivation.isPanelEnabled("script"))
+            armed = false;
+
         var panelBar = Firebug.chrome.$("fbPanelBar1");
         var tab = panelBar.getTab(panel.name);
         if (tab)
             tab.setAttribute("breakOnNextArmed", armed ? "true" : "false");
+    },
+
+    updatePanelTabs: function(context)
+    {
+        if (!context)
+            return;
+
+        var panelTypes = Firebug.getMainPanelTypes(context);
+        for (var i=0; i<panelTypes.length; ++i)
+        {
+            var panelType = panelTypes[i];
+            var panel = context.getPanel(panelType.prototype.name);
+            var shouldBreak = (panel && panel.shouldBreakOnNext()) ? true : false;
+            this.updatePanelTab(panel, shouldBreak);
+        }
     },
 
     // supports non-JS break on next

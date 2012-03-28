@@ -835,6 +835,10 @@ var FirebugChrome =
         {
             var panelTypes = Firebug.getMainPanelTypes(Firebug.currentContext);
             panelBar1.updatePanels(panelTypes);
+
+            // Upadate also BON tab flag (orange background if BON is active)
+            // every time the user changes the current tab in Firefox.
+            Firebug.Breakpoint.updatePanelTabs(Firebug.currentContext);
         }
     },
 

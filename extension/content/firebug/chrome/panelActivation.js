@@ -104,6 +104,9 @@ Firebug.PanelActivation = Obj.extend(Firebug.Module,
 
     isPanelEnabled: function(panelType)
     {
+        if (typeof(panelType) == "string")
+            panelType = Firebug.getPanelType("script");
+
         if (!this.isPanelActivable(panelType))
             return true;
 
