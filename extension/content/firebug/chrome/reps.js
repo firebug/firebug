@@ -213,7 +213,8 @@ FirebugReps.Func = domplate(Firebug.Rep,
         var fnText = Str.safeToString(fn);
         var namedFn = /^function ([^(]+\([^)]*\)) \{/.exec(fnText);
         var anonFn  = /^function \(/.test(fnText);
-        return namedFn ? namedFn[1] : (anonFn ? "function()" : fnText);
+        var displayName = fn.displayName;
+        return namedFn ? namedFn[1] : (displayName ? displayName + "()": (anonFn ? "function()" : fnText));
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
