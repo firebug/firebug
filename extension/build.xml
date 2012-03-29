@@ -137,7 +137,6 @@
                <include name="**/*.ico"/>
                <include name="**/*.manifest"/>
                <include name="**/*.txt"/>
-               <include name="**/*.html"/>
             </fileset>
         </copy>
 
