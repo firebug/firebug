@@ -369,6 +369,12 @@ Firebug.GlobalUI =
                 toggleFirebug.setAttribute("label", Locale.$STR("firebug.FocusFirebug"));
                 toggleFirebug.setAttribute("tooltiptext", Locale.$STR("firebug.menu.tip.Focus_Firebug"));
             }
+
+            // Hide "Focus Firebug Window" item if the menu is opened from within
+            // the detached Firebug window.
+            var currentLocation = toggleFirebug.ownerDocument.defaultView.top.location.href;
+            var inDetachedWindow = currentLocation.indexOf("firebug.xul") > 0;
+            toggleFirebug.setAttribute("collapsed", (inDetachedWindow ? "true" : "false"));
         }
 
         // Hide "Deactivate Firebug" menu if Firebug is not active.
