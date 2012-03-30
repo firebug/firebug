@@ -4,16 +4,18 @@ function runTest()
     FBTest.openNewTab(basePath + "console/api/trace.html", function(win)
     {
         FBTest.openFirebug();
+        FBTest.enableScriptPanel();
         FBTest.enableConsolePanel(function(win)
         {
             var config = {tagName: "div", classes: "logRow logRow-stackTrace"};
             FBTest.waitForDisplayedElement("console", config, function(row)
             {
+                FBTest.progress("asdfas");
                 var stackFrames = row.getElementsByClassName("objectBox-stackFrame");
                 FBTest.compare(2, stackFrames.length, "There must be 2 stack frames.");
 
                 var reStack1 = new RegExp("onExecuteTest\\(\\)\\s*" +
-                    FW.FBL.$STRF("Line", ["trace.html", 34]).replace(/([\\"'\(\)])/g, "\\$1"));
+                    FW.FBL.$STRF("Line", ["trace.html", 35]).replace(/([\\"'\(\)])/g, "\\$1"));
                 FBTest.compare(reStack1, stackFrames[0].textContent, "The first stack frame text must match.");
 
                 FBTest.progress("Found stack frame "+stackFrames[1].textContent);
