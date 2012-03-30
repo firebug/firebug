@@ -1,7 +1,7 @@
 {
-  "name": "firebug",
-  "description": "Web Development Evolved - The Firebug you have known and loved",
-  "version": "1.9.0",
+  "name": "Firebug",
+  "description": "Web Development Evolved.",
+  "version": "1.10.0a6",
   "homepage" : "http://getfirebug.com/",
   "engines": {
     "node": ">= 0.6.6"
@@ -10,7 +10,7 @@
     "dryice": ">= 0.4.4",
     "shelljs": ">= 0.0.2"
   },
-  "author": "Jan Odvarko <odvarko@gmail.com>",
+  "author": "Joe Hewitt",
   "repository" : {
     "type" : "git",
      "url" : "git://github.com/firebug/firebug.git"
