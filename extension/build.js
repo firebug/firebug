@@ -1,8 +1,15 @@
+/* See license.txt for terms of usage */
+
+// ********************************************************************************************* //
+// Dependencies
 
 var path = require("path");
 var fs = require("fs");
 var shell = require("shelljs");
 var copy = require("dryice").copy;
+var os = require("os");
+
+// ********************************************************************************************* //
 
 function help()
 {
@@ -39,40 +46,36 @@ function help()
     console.log('   - All BZ locales should be stored in "bz-locale" directory.');
 }
 
+// ********************************************************************************************* //
+
 function main()
 {
-  var args = process.argv;
+    var args = process.argv;
+
     if (args.length < 3)
-    {
         build();
-    }
     else if (args.length >= 4 || args[2] === "help")
-    {
         help();
-    }
     else if (args[2] === "echo")
-    {
         echo();
-    }
     else if (args[2] === "jsdoc")
-    {
         jsdoc();
-    }
     else if (args[2] === "bz")
-    {
         bz();
-    }
+    else if (args[2] === "clean")
+        clean();
     else
-    {
         help();
-    }
 }
 
+// ********************************************************************************************* //
+// Globals
+
 // <property file="content/firebug/branch.properties"/>
-var getfirebugDir = 'none';
-var packageFile = fs.readFileSync(__dirname + '/package.json', 'utf8');
+var getfirebugDir = "none";
+var packageFile = fs.readFileSync(__dirname + "/package.json", "utf8");
 var version = JSON.parse(packageFile).version;
-var release = '';
+var release = "";
 
 var buildDir = "./build";
 var releaseDir = "./release";
@@ -80,10 +83,12 @@ var deployXpiDir = getfirebugDir + "/releases/firebug/" + version + "";
 var deployJsdocDir = getfirebugDir + "/developer/api/firebug" + version + "";
 var bzLocaleDir = "./bz-locale";
 
-var deployDirAvailable = path.existsSync(getfirebugDir) &&
-        fs.statSync(getfirebugDir).isDirectory;
+var deployDirAvailable = path.existsSync(getfirebugDir) && fs.statSync(getfirebugDir).isDirectory;
 
-function prepareBuild() {
+// ********************************************************************************************* //
+
+function prepareBuild()
+{
     shell.mkdir(buildDir);
     shell.mkdir(releaseDir);
 
@@ -96,7 +101,7 @@ function prepareBuild() {
             // and then deleted. Now we copy everything with exclusions, but
             // we don't know what extra exclusions were missing
             exclude: [
-                /.*\.js/, /.*\.graphml/, /build\.xml/, /node_modules/,
+                /.*\.graphml/, /build\.xml/, /node_modules/,
                 /install\.rdf\.tpl\.xml/, /update\.rdf\.tpl\.xml/
             ]
         },
@@ -104,70 +109,82 @@ function prepareBuild() {
     });
 
     var project = copy.createCommonJsProject({
-      roots: [ __dirname + '/content' ]
-    });
-    copy({
-        source: [
-            copy.getMiniRequire(),
-            {
-                project: project,
-                require: [
-                    /*
-                    "firebug/chrome/chrome",
-                    "firebug/lib/lib",
-                    "firebug/firebug",
-                    "firebug/bti/inProcess/browser"
-                    */
-                    "firebug/net/netPanel"
-                ]
-            }
-        ],
-        dest: buildDir + '/main.js'
+        roots: [__dirname + "/content"]
     });
 
     copy({
-      source: { value:project.getDependencyGraphML() },
-      dest: 'netpanel.graphml'
+        source: [
+            //copy.getMiniRequire(),
+            {
+                project: project,
+                require: [
+                    "firebug/net/netPanel"
+                ]
+            },
+            __dirname + "/content/firebug/main.js"
+        ],
+        filter: moduleDefines,
+        dest: buildDir + "/content/firebug/main.js"
+    });
+
+    copy({
+        source: {value:project.getDependencyGraphML()},
+        dest: "netpanel.graphml"
     });
 
     // Copy install.rdf template into the build dir
     copy({
-        source: 'install.rdf.tpl.xml',
-        dest: buildDir + '/install.rdf'
+        source: "install.rdf.tpl.xml",
+        dest: buildDir + "/install.rdf"
     })
 }
+
+// ********************************************************************************************* //
 
 /**
  * Munge define lines to add module names
  */
-function moduleDefines(input, source) {
-    if (!source) {
-        console.log('- Source without filename passed to moduleDefines().' +
-            ' Skipping addition of define(...) wrapper.');
+function moduleDefines(input, source)
+{
+    if (!source)
+    {
+        console.log("- Source without filename passed to moduleDefines()." +
+            " Skipping addition of define(...) wrapper.");
+        console.log(input.substr(0, 300));
         return input;
     }
+
     input = (typeof input !== 'string') ? input.toString() : input;
     var deps = source.deps ? Object.keys(source.deps) : [];
     deps = deps.length ? (", '" + deps.join("', '") + "'") : "";
+
     var module = source.isLocation ? source.path : source;
     module = module.replace(/\.js$/, '');
+
     return input.replace(/define\(\[/, 'define("' + module + '", [');
 };
+
 moduleDefines.onRead = true;
 
-function build() {
+// ********************************************************************************************* //
+
+/**
+ * Build Firebug XPI
+ */
+function build()
+{
     clean();
     prepareBuild();
 
     // Update install.rdf with updated release version info
     copy({
-        source: buildDir + '/install.rdf',
+        source: buildDir + "/install.rdf",
         filter: function(data) {
             return data
                 .replace(/@VERSION@/, version)
                 .replace(/@RELEASE@/, release);
         },
-        dest: buildDir + '/install.rdf'
+        dest: buildDir + "/install.rdf"
     });
 
     // Remove template for manifest file that is used for Babelzilla builds
@@ -177,13 +194,14 @@ function build() {
     createFirebugXPI("firebug-" + version + release + ".xpi");
 
     // Remove update URL, this is necessary for AMO
-    copy({
+    /*copy({
         source: buildDir + "/install.rdf",
-        filter: function(data) {
+        filter: function(data)
+        {
             return data.replace(/(.*)https:\/\/getfirebug.com\/releases\/firebug\/" + version + "\/update.rdf(.*)/, '');
         },
         dest: buildDir + "/install.rdf"
-    });
+    });*/
 
     // Create XPI for AMO
     createFirebugXPI("firebug-" + version + release + "-amo.xpi");
@@ -195,8 +213,17 @@ function build() {
     console.log("Firebug version: " + version + release + " in " + releaseDir);
 }
 
-function createFirebugXPI(filename) {
+// ********************************************************************************************* //
+
+/**
+ * Create final xpi package
+ */
+function createFirebugXPI(filename)
+{
+    return;
+
     zip(releaseDir + "/" + filename, buildDir);
+
     copy({
         source: 'update.rdf.tpl.xml',
         filter: function(data) {
@@ -209,7 +236,10 @@ function createFirebugXPI(filename) {
     });
 }
 
-function deploy() {
+// ********************************************************************************************* //
+
+function deploy()
+{
     if (deployDirAvailable) {
         /*
         <copy file="${releaseDir}/update.rdf" todir="${deployXpiDir}" overwrite="true"/>
@@ -220,16 +250,22 @@ function deploy() {
     }
 }
 
-function echo() {
+// ********************************************************************************************* //
+
+function echo()
+{
     console.log("Build directory: " + buildDir);
     console.log("Deploy directory: " + getfirebugDir + " available: " + deployDirAvailable);
 }
+
+// ********************************************************************************************* //
 
 /**
  * Support for generating docs from Firebug source code using js-doc-toolkit
  * See the output in $svn/jsdoc/out directory
  */
-function jsdoc() {
+function jsdoc()
+{
     build();
     /*
     <property name="jsdoc.dir" value="../../jsdoc/"/>
@@ -259,7 +295,10 @@ function jsdoc() {
     deployJsdoc();
 }
 
-function deployJsdoc() {
+// ********************************************************************************************* //
+
+function deployJsdoc()
+{
     if (deployDirAvailable) {
         /*
         <copy todir="${deployJsdocDir}">
@@ -271,7 +310,10 @@ function deployJsdoc() {
     }
 }
 
-function bz() {
+// ********************************************************************************************* //
+
+function bz()
+{
     clean();
     prepareBuild();
     /*
@@ -308,13 +350,39 @@ function bz() {
     */
 }
 
-function clean() {
-    shell.rm('-rf', buildDir);
-    shell.rm('-rf', releaseDir);
+// ********************************************************************************************* //
+
+function clean()
+{
+    shell.rm("-rf", buildDir);
+    shell.rm("-rf", releaseDir);
 }
 
-function zip(filename, directory) {
-  console.log('zip is not implemented. Skipping ' + filename);
+// ********************************************************************************************* //
+
+function zip(filename, directory)
+{
+    return;
+    // Create final XPI package.
+    var zip;
+    if (os.platform() === "win32")
+    {
+        var params = "a -tzip " + filename + " directory ";
+        zip = spawn("7z.exe", params.split(" "), { cwd: release });
+    }
+    else
+    {
+        zip = spawn("zip", [ "-r", __dirname + "/" + xpiFileName, release ]);
+    }
+
+    zip.on("exit", function()
+    {
+    });
 }
+
+// ********************************************************************************************* //
+// Startup
 
 main();
+
+// ********************************************************************************************* //
