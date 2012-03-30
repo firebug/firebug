@@ -340,6 +340,7 @@ FirebugLoader.defaultPrefs = {
     "key.shortcut.increaseTextSize": "accel +",
     "key.shortcut.decreaseTextSize": "accel -",
     "key.shortcut.normalTextSize": "accel 0",
+    "key.shortcut.help": "VK_F1",
 
 // Accessibility
     "a11y.enable": false,
