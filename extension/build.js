@@ -97,11 +97,12 @@ function prepareBuild()
         source: {
             root: '.',
             // TODO: Previously we copied everything that matched this set of
-            // extensions: js, xul, properties, css, html, xml, dtd, ong, gif, ico, manifest, txt, html
+            // extensions: js, xul, properties, css, html, xml, dtd, ong, gif, ico,
+            //      manifest, txt, html
             // and then deleted. Now we copy everything with exclusions, but
             // we don't know what extra exclusions were missing
             exclude: [
-                /.*\.graphml/, /build\.xml/, /node_modules/,
+                /.*\.graphml/, /build\.xml/, /node_modules/, /build\.js/,
                 /install\.rdf\.tpl\.xml/, /update\.rdf\.tpl\.xml/
             ]
         },
@@ -109,7 +110,12 @@ function prepareBuild()
     });
 
     var project = copy.createCommonJsProject({
-        roots: [__dirname + "/content"]
+        roots: [
+            __dirname + "/content"
+        ],
+        aliases: {
+            "arch": "firebug/bti/inProcess"
+        }
     });
 
     copy({
@@ -118,8 +124,32 @@ function prepareBuild()
             {
                 project: project,
                 require: [
-                    "firebug/net/netPanel"
-                ]
+                    "firebug/chrome/chrome",
+                    "firebug/lib/lib",
+                    "firebug/firebug",
+                    "firebug/bti/inProcess/browser",
+                    "firebug/trace/traceModule",
+                    "firebug/chrome/navigationHistory",
+                    "firebug/chrome/knownIssues",
+                    "firebug/js/sourceFile",
+                    "firebug/chrome/shortcuts",
+                    "firebug/firefox/start-button/startButtonOverlay",
+                    "firebug/firefox/external-editors/externalEditors",
+                    "firebug/firefox/firebugMenu",
+                    "firebug/chrome/panelActivation",
+                    "firebug/console/memoryProfiler",
+                    "firebug/chrome/tableRep",
+                    "firebug/html/htmlPanel",
+                    "firebug/console/commandLinePopup",
+                    "firebug/accessible/a11y",
+                    "firebug/js/scriptPanel",
+                    "firebug/js/callstack",
+                    "firebug/console/consoleInjector",
+                    "firebug/net/spy",
+                    "firebug/js/tabCache",
+                    "firebug/chrome/activation",
+                    "firebug/css/cssComputedElementPanel",
+                ],
             },
             __dirname + "/content/firebug/main.js"
         ],
@@ -127,10 +157,17 @@ function prepareBuild()
         dest: buildDir + "/content/firebug/main.js"
     });
 
+    // Compress main.js file (all extension modules)
     copy({
+        source: buildDir + "/content/firebug/main.js",
+        filter: copy.filter.uglifyjs,
+        dest: buildDir + "/content/firebug/main.js"
+    });
+
+    /*copy({
         source: {value:project.getDependencyGraphML()},
         dest: "netpanel.graphml"
-    });
+    });*/
 
     // Copy install.rdf template into the build dir
     copy({
