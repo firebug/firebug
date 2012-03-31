@@ -6,7 +6,7 @@
 .*.gz
 
 # Editor junk
-/.project
+*.project
 /.pydevproject
 /.settings/
 /.settings.xml
@@ -20,3 +20,6 @@
 
 # Files from NPM
 /extension/node_modules/
+
+# Extensions
+/extension/firebug@software.joehewitt.com
