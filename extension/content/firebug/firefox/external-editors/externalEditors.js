@@ -143,9 +143,12 @@ Firebug.ExternalEditors = Obj.extend(Firebug.Module,
             return this.getDefaultEditor();
 
         var list = Arr.extendArray(externalEditors, editors);
-        for each(var editor in list)
+        for (var i=0; i<list.length; i++)
+        {
+            var editor = list[i];
             if (editor.id == id)
                 return editor;
+        }
     },
 
     count: function()
@@ -390,15 +393,18 @@ Firebug.ExternalEditors = Obj.extend(Firebug.Module,
     {
         var lastI = 0, args = [], argIndex = 0, inGroup;
         var subs = "col|line|file|url".split("|");
+
         // do not send argument with bogus line number
         function checkGroup()
         {
             var group = args.slice(argIndex), isValid = null;
-            for each(var i in subs)
+            for (var i=0; i<subs.length; i++)
             {
-                if (group.indexOf("%"+i) == -1)
+                var sub = subs[i];
+                if (group.indexOf("%" + sub) == -1)
                     continue;
-                if (options[i] == undefined)
+
+                if (options[sub] == undefined)
                 {
                     isValid = false;
                 }
@@ -408,8 +414,10 @@ Firebug.ExternalEditors = Obj.extend(Firebug.Module,
                     break;
                 }
             }
+
             if (isValid == false)
                 args = args.slice(0, argIndex);
+
             argIndex = args.length;
         }
 
@@ -456,8 +464,9 @@ Firebug.ExternalEditors = Obj.extend(Firebug.Module,
 
     transformHref: function(href)
     {
-        for each (var transform in this.pathTransformations)
+        for (var i=0; i<this.pathTransformations.length; i++)
         {
+            var transform = this.pathTransformations[i];
             if (transform.regexp.test(href))
             {
                 var path = href.replace(transform.regexp, transform.filePath);
@@ -632,8 +641,12 @@ Firebug.ExternalEditors.saveUrlMappings = function()
     var text = [
         "X-Local-File-Path", sp, this.checkHeaderRe.source, "\n\n"
     ];
-    for each (var t in this.pathTransformations)
+
+    for (var i = 0; i < this.pathTransformations.length; i++)
+    {
+        var t = this.pathTransformations[i];
         text.push(t.regexp, sp, t.filePath, "\n");
+    }
 
     var file = userFile("urlMappings.txt");
     writeToFile(file, text.join(""));
