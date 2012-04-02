@@ -2169,7 +2169,7 @@ this.executeContextMenuCommand = function(target, menuItemIdentifier, callback)
                 var menuItems = contextMenu.children;
                 for each (menuItem in menuItems)
                 {
-                    if (menuItem.textContent == menuItemId)
+                    if (menuItem.label == menuItemId)
                         break;
                 }
             }
