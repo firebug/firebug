@@ -7,7 +7,7 @@
     "node": ">= 0.6.6"
   },
   "dependencies": {
-    "dryice": ">= 0.4.4",
+    "dryice": ">= 0.4.5",
     "shelljs": ">= 0.0.2"
   },
   "author": "Joe Hewitt",
