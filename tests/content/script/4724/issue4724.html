@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Issue 4724: &quot;Disable Breakpoint&quot; is not checked on disabled breakpoints</title>
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+        <link href="../../_common/testcase.css" type="text/css" rel="stylesheet"/>
+        <script type="text/javascript">
+        var test = "Hello Firebug user!";
+        </script>
+    </head>
+    <body>
+        <header>
+            <h1><a href="http://code.google.com/p/fbug/issues/detail?id=4724">Issue 4724</a>: &quot;Disable Breakpoint&quot; is not checked on disabled breakpoints</h1>
+        </header>
+        <div>
+            <section id="description">
+                <h3>Steps to reproduce</h3>
+                <ol>
+                    <li>Open Firebug</li>
+                    <li>Enable and switch to the <em>Script</em> panel</li>
+                    <li>Reload the page</li>
+                    <li>Click the breakpoint column at line 8 (<code>var test = "Hello Firebug user!";</code>) to create a breakpoint</li>
+                    <li>Right-click line 8</li>
+                </ol>
+                <h3>Expected result</h3>
+                <ul>
+                    <li>The context menu option <em>Set Breakpoint</em> should be checked</li>
+                </ul>
+            </section>
+            <footer>Sebastian Zartner, sebastianzartner@gmx.de</footer>
+        </div>
+    </body>
+</html>
