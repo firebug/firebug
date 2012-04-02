@@ -8,6 +8,7 @@ var fs = require("fs");
 var shell = require("shelljs");
 var copy = require("dryice").copy;
 var os = require("os");
+var spawn = require("child_process").spawn;
 
 // ********************************************************************************************* //
 
@@ -74,9 +75,17 @@ function main()
 // <property file="content/firebug/branch.properties"/>
 var getfirebugDir = "none";
 var packageFile = fs.readFileSync(__dirname + "/package.json", "utf8");
-var version = JSON.parse(packageFile).version;
-var release = "";
+var versionString = JSON.parse(packageFile).version;
 
+// Parse Firebug version string (e.e. "1.10.0a5" -> version: "1.10", release ".0a5")
+var result = versionString.match(/^(\d+\.\d+)?(\S*)$/);
+if (result.length != 3)
+    throw new Error("Wrong version string!");
+
+var version = result[1];
+var release = result[2];
+
+// Compute various target directories.
 var buildDir = "./build";
 var releaseDir = "./release";
 var deployXpiDir = getfirebugDir + "/releases/firebug/" + version + "";
@@ -219,8 +228,8 @@ function build()
         source: buildDir + "/install.rdf",
         filter: function(data) {
             return data
-                .replace(/@VERSION@/, version)
-                .replace(/@RELEASE@/, release);
+                .replace(/@VERSION@/gm, version)
+                .replace(/@RELEASE@/gm, release);
         },
         dest: buildDir + "/install.rdf"
     });
@@ -228,27 +237,32 @@ function build()
     // Remove template for manifest file that is used for Babelzilla builds
     shell.rm(buildDir + "/chrome.bz.tpl.manifest");
 
-    // Create XPI for getfirebug.com
-    createFirebugXPI("firebug-" + version + release + ".xpi");
+    // Create XPI for getfirebug.com (zipping is asynchronous)
+    createFirebugXPI("firebug-" + version + release + ".xpi", function()
+    {
+        // Remove update URL, it's needed only for alpha versions. All the other
+        // versions updates from AMO.
+        copy({
+            source: buildDir + "/install.rdf",
+            filter: function(data)
+            {
+                var re = new RegExp("(.*)https:\/\/getfirebug.com\/releases\/firebug\/" +
+                    version + "\/update.rdf(.*)");
+                return data.replace(re, '');
+            },
+            dest: buildDir + "/install.rdf"
+        });
 
-    // Remove update URL, this is necessary for AMO
-    /*copy({
-        source: buildDir + "/install.rdf",
-        filter: function(data)
+        // Create XPI for AMO (no update URL)
+        createFirebugXPI("firebug-" + version + release + "-amo.xpi", function()
         {
-            return data.replace(/(.*)https:\/\/getfirebug.com\/releases\/firebug\/" + version + "\/update.rdf(.*)/, '');
-        },
-        dest: buildDir + "/install.rdf"
-    });*/
+            shell.rm("-rf", buildDir);
 
-    // Create XPI for AMO
-    createFirebugXPI("firebug-" + version + release + "-amo.xpi");
+            deploy();
 
-    //shell.rm('-rf', buildDir);
-
-    deploy();
-
-    console.log("Firebug version: " + version + release + " in " + releaseDir);
+            console.log("Firebug version: " + version + release + " in " + releaseDir);
+        });
+    });
 }
 
 // ********************************************************************************************* //
@@ -256,19 +270,17 @@ function build()
 /**
  * Create final xpi package
  */
-function createFirebugXPI(filename)
+function createFirebugXPI(filename, callback)
 {
-    return;
-
-    zip(releaseDir + "/" + filename, buildDir);
+    zip(releaseDir + "/" + filename, buildDir, callback);
 
     copy({
         source: 'update.rdf.tpl.xml',
         filter: function(data) {
             return data
-                .replace(/@VERSION@/, version)
-                .replace(/@RELEASE@/, release)
-                .replace(/@LEAF@/, "firebug-" + version + release + ".xpi");
+                .replace(/@VERSION@/gm, version)
+                .replace(/@RELEASE@/gm, release)
+                .replace(/@LEAF@/gm, "firebug-" + version + release + ".xpi");
         },
         dest: releaseDir + "/update.rdf"
     });
@@ -398,23 +410,24 @@ function clean()
 
 // ********************************************************************************************* //
 
-function zip(filename, directory)
+function zip(filename, directory, callback)
 {
-    return;
     // Create final XPI package.
     var zip;
     if (os.platform() === "win32")
     {
-        var params = "a -tzip " + filename + " directory ";
-        zip = spawn("7z.exe", params.split(" "), { cwd: release });
+        var params = "a -tzip " + filename + " " + directory + "/*";
+        zip = spawn("7z.exe", params.split(" "), { cwd: "." });
     }
     else
     {
-        zip = spawn("zip", [ "-r", __dirname + "/" + xpiFileName, release ]);
+        // not tested
+        //zip = spawn("zip", [ "-r", __dirname + "/" + xpiFileName, release ]);
     }
 
     zip.on("exit", function()
     {
+        callback();
     });
 }
 
