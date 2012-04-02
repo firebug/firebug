@@ -2169,7 +2169,7 @@ this.executeContextMenuCommand = function(target, menuItemIdentifier, callback)
                 var menuItems = contextMenu.children;
                 for each (menuItem in menuItems)
                 {
-                    if (menuItem.textContent == menuItemId)
+                    if (menuItem.label == menuItemId)
                         break;
                 }
             }
@@ -2183,7 +2183,6 @@ this.executeContextMenuCommand = function(target, menuItemIdentifier, callback)
                 return;
             }
 
-            FBTest.sysout("menuItem", menuItem);
             // Click on specified menu item.
             self.synthesizeMouse(menuItem);
 
@@ -2431,7 +2430,7 @@ this.getImageDataFromNode = function(node, x, y, width, height)
         top += currentNode.offsetTop;
         left += currentNode.offsetLeft;
         currentNode = currentNode.parentNode;
-    } while (currentNode.nodeName !== "HTML");
+    } while (currentNode.parentNode !== currentNode.ownerDocument);
 
     if (x)
         left += x;

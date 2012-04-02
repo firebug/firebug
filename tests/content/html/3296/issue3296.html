@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Issue 3296: Form's action doesn't change and it isn't shown in HTML panel</title>
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+        <link href="../../_common/testcase.css" type="text/css" rel="stylesheet"/>
+        <script type="text/javascript">
+        window.addEventListener("load", function()
+        {
+            document.getElementsByTagName("form").item(0).setAttribute("action", "issue3296.html");
+        }, false);
+        </script>
+    </head>
+    <body>
+        <header>
+            <h1><a href="http://code.google.com/p/fbug/issues/detail?id=3296">Issue 3296</a>: Form's action doesn't change and it isn't shown in HTML panel</h1>
+        </header>
+        <div>
+            <section id="content">
+                <form action="">
+                    <input type="text" id="formField"/>
+                </form>
+            </section>
+            <section id="description">
+                <h3>Steps to reproduce</h3>
+                <ol>
+                    <li>Open Firebug</li>
+                    <li>Switch to the <em>HTML</em> panel</li>
+                    <li>Inspect the text field above (<code>#formField</code>)</li>
+                    <li>Reload the page</li>
+                </ol>
+                <h3>Expected result</h3>
+                <ul>
+                    <li><code>issue3296.html</code> should be displayed as value for the <code>action</code> attribute of the <code>&lt;form&gt;</code> tag.</li>
+                </ul>
+            </section>
+            <footer>Sebastian Zartner, sebastianzartner@gmx.de</footer>
+        </div>
+    </body>
+</html>
