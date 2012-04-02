@@ -2430,7 +2430,7 @@ this.getImageDataFromNode = function(node, x, y, width, height)
         top += currentNode.offsetTop;
         left += currentNode.offsetLeft;
         currentNode = currentNode.parentNode;
-    } while (currentNode.nodeName !== "HTML");
+    } while (currentNode.parentNode !== currentNode.ownerDocument);
 
     if (x)
         left += x;
