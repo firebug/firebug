@@ -2183,7 +2183,6 @@ this.executeContextMenuCommand = function(target, menuItemIdentifier, callback)
                 return;
             }
 
-            FBTest.sysout("menuItem", menuItem);
             // Click on specified menu item.
             self.synthesizeMouse(menuItem);
 
