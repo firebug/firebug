@@ -158,11 +158,12 @@ function prepareBuild()
     });
 
     // Compress main.js file (all extension modules)
-    copy({
+    // xxxHonza: do not use uglify for build, there is missing ';' somewhere
+    /*copy({
         source: buildDir + "/content/firebug/main.js",
         filter: copy.filter.uglifyjs,
         dest: buildDir + "/content/firebug/main.js"
-    });
+    });*/
 
     /*copy({
         source: {value:project.getDependencyGraphML()},
