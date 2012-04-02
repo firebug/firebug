@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Issue 5359: Use displayName in profiler</title>
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+        <link href="../../_common/testcase.css" type="text/css" rel="stylesheet"/>
+        <script type="text/javascript">
+        function onExecuteTest()
+        {
+            console.profile("Test");
+            a();
+            console.profileEnd();
+        }
+
+        var a = function()
+        {
+            b();
+        }
+
+        var b = function()
+        {
+        }
+
+        a.displayName = "myFuncA";
+        b.displayName = "myFuncB";
+        </script>
+    </head>
+    <body>
+        <header>
+            <h1>Issue 5359: Use displayName in profiler</h1>
+        </header>
+        <div>
+            <section id="description">
+                <h3>Steps to reproduce</h3>
+                <ol>
+                    <li>Open Firebug</li>
+                    <li>Enable the <em>Script</em> and <em>Console</em> panel and switch to the <em>Console</em> panel</li>
+                    <li>Reload the page</li>
+                    <li>Click on this button: <button id="testButton" onclick="onExecuteTest()">Execute Test</button></li>
+                </ol>
+                <h3>Expected result</h3>
+                <ul>
+                    <li>The <em>Console</em> panel should display a result table with two functions (they must not be anonymous):
+                    <code style="color:Green">
+myFuncA
+myFuncB
+                    </code>
+                    </li>
+                </ul>
+            </section>
+            <footer>Jan Odvarko, odvarko@gmail.com</footer>
+        </div>
+    </body>
+</html>
