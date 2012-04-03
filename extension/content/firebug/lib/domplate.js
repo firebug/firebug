@@ -341,7 +341,10 @@ DomplateTag.prototype =
         topBlock.push(',">"');
 
         this.generateChildMarkup(topBlock, topOuts, blocks, info);
-        topBlock.push(',"</', this.tagName, '>"');
+
+        // <br> element doesn't use end tag.
+        if (this.tagName != "br")
+            topBlock.push(',"</', this.tagName, '>"');
 
         if (FBTrace.DBG_DOMPLATE)
             FBTrace.sysout("DomplateTag.generateMarkup "+this.tagName+": "+topBlock.slice( - topBlock.length + beginBlock).join("").replace("\n"," "), {listeners: this.listeners, props: this.props, attrs: this.attrs});
