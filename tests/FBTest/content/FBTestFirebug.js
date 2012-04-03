@@ -2145,7 +2145,7 @@ this.selectElementInHtmlPanel = function(element, callback)
  */
 this.executeContextMenuCommand = function(target, menuItemIdentifier, callback)
 {
-    var contextMenu = target.ownerDocument.documentURI == "chrome://firebug/content/panel.html" ?
+    var contextMenu = FW.FBL.hasPrefix(target.ownerDocument.documentURI, "chrome://firebug/") ?
         FW.FBL.$("fbContextMenu") : FW.Firebug.chrome.window.top.window.document.
             getElementById("contentAreaContextMenu");
 
