@@ -11,7 +11,7 @@ function(FBL, Str) {
 
 var Domplate = {};
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 function DomplateTag(tagName)
 {
@@ -28,7 +28,7 @@ function DomplateLoop()
 {
 }
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 var womb = null;
 var uid = 0;
@@ -87,10 +87,13 @@ Domplate.FOR = function()
 
 DomplateTag.prototype =
 {
-    /*
-     *  Initializer for DOM templates. Called to create new Functions objects like TR, TD, OBJLINK, etc. See defineTag
-     *  @param args keyword argments for the template, the {} brace stuff after the tag name, eg TR({...}, TD(...
-     *  @param oldTag a nested tag, eg the TD tag in TR({...}, TD(...
+    /**
+     * Initializer for DOM templates. Called to create new Functions objects like TR, TD,
+     * OBJLINK, etc. See defineTag
+     *
+     * @param args keyword argments for the template, the {} brace stuff after the tag name,
+     *      eg TR({...}, TD(...
+     * @param oldTag a nested tag, eg the TD tag in TR({...}, TD(...
      */
     merge: function(args, oldTag)
     {
@@ -204,7 +207,10 @@ DomplateTag.prototype =
             if (!tag || !tag.tag)
             {
                 if (FBTrace.DBG_DOMPLATE)
-                    FBTrace.sysout("domplate.Empty tag object passed to __link__ (compileMarkup). Ignoring element.");
+                {
+                    FBTrace.sysout("domplate.Empty tag object passed to __link__ " +
+                        "(compileMarkup). Ignoring element.");
+                }
                 return;
             }
 
@@ -263,7 +269,10 @@ DomplateTag.prototype =
         }
 
         if (FBTrace.DBG_DOMPLATE)
-            fnBlock.push("//@ sourceURL=chrome://firebug/compileMarkup_"+(this.tagName?this.tagName:'')+"_"+(uid++)+".js\n");
+        {
+            fnBlock.push("//@ sourceURL=chrome://firebug/compileMarkup_" +
+                (this.tagName?this.tagName:'')+"_"+(uid++)+".js\n");
+        }
 
         var js = fnBlock.join("");
         this.renderMarkup = eval(js);
@@ -347,7 +356,9 @@ DomplateTag.prototype =
             topBlock.push(',"</', this.tagName, '>"');
 
         if (FBTrace.DBG_DOMPLATE)
-            FBTrace.sysout("DomplateTag.generateMarkup "+this.tagName+": "+topBlock.slice( - topBlock.length + beginBlock).join("").replace("\n"," "), {listeners: this.listeners, props: this.props, attrs: this.attrs});
+            FBTrace.sysout("DomplateTag.generateMarkup " + this.tagName + ": " +
+                topBlock.slice( - topBlock.length + beginBlock).join("").replace("\n"," "),
+                {listeners: this.listeners, props: this.props, attrs: this.attrs});
 
     },
 
@@ -446,7 +457,10 @@ DomplateTag.prototype =
             if (!tag || !tag.tag)
             {
                 if (FBTrace.DBG_DOMPLATE)
-                    FBTrace.sysout("domplate.Empty tag object passed to __link__ (compileDOM). Ignoring element.");
+                {
+                    FBTrace.sysout("domplate.Empty tag object passed to __link__ " +
+                        "(compileDOM). Ignoring element.");
+                }
                 return;
             }
 
@@ -531,7 +545,9 @@ DomplateTag.prototype =
             {
                 var val = this.listeners[i+1];
                 var arg = generateArg(val, path, args);
-                blocks.push('node.addEventListener("', this.listeners[i], '", __bind__(this, ', arg, '), false);\n');
+
+                blocks.push('node.addEventListener("', this.listeners[i],
+                    '", __bind__(this, ', arg, '), false);\n');
             }
         }
 
@@ -553,15 +569,18 @@ DomplateTag.prototype =
     {
         blocks.push("var node = __path__(root, o");
 
+        // this will be a sum of integers as a string which will be summed in the eval,
+        // then passed to __path__
         for (var i = 0; i < path.length; ++i)
-            blocks.push(",", path[i]);  // this will be a sum of integers as a string which will be summed in the eval, then passed to __path__
+            blocks.push(",", path[i]);
 
         blocks.push(");\n");
 
         if (FBTrace.DBG_DOMPLATE)
         {
             var nBlocks = 2*path.length + 2;
-            var genTrace = "FBTrace.sysout(\'"+blocks.slice(-nBlocks).join("").replace("\n","")+"\'+'->'+(node?FBL.getElementHTML(node):'null'), node);\n";
+            var genTrace = "FBTrace.sysout(\'"+blocks.slice(-nBlocks).join("").replace("\n","")+
+                "\'+'->'+(node?FBL.getElementHTML(node):'null'), node);\n";
             blocks.push(genTrace);
         }
     },
@@ -580,8 +599,10 @@ DomplateTag.prototype =
         path.pop();
     },
 
-    /*
-     * We are just hiding from javascript.options.strict. For some reasons it's ok if we return undefined here.
+    /**
+     * We are just hiding from javascript.options.strict. For some reasons it's ok if
+     * we return undefined here.
+     *
      * @return null or undefined or possibly a context.
      */
     getContext: function()
@@ -590,7 +611,7 @@ DomplateTag.prototype =
     }
 };
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 DomplateEmbed.prototype = copyObject(DomplateTag.prototype,
 {
@@ -646,7 +667,10 @@ DomplateEmbed.prototype = copyObject(DomplateTag.prototype,
         blocks.push('});\n');
 
         if (FBTrace.DBG_DOMPLATE)
-            FBTrace.sysout("DomplateEmbed.generateMarkup "+blocks.slice( - blocks.length + beginBlock).join("").replace("\n"," "), {value: this.value, attrs: this.attrs});
+        {
+            FBTrace.sysout("DomplateEmbed.generateMarkup "+blocks.slice( - blocks.length +
+                beginBlock).join("").replace("\n"," "), {value: this.value, attrs: this.attrs});
+        }
 
         //this.generateChildMarkup(topBlock, topOuts, blocks, info);
     },
@@ -666,14 +690,18 @@ DomplateEmbed.prototype = copyObject(DomplateTag.prototype,
 
         if (FBTrace.DBG_DOMPLATE)
         {
-            FBTrace.sysout("DomplateEmbed.generateDOM "+blocks.slice( - blocks.length + beginBlock).join("").replace("\n"," "), {path: path});
-            blocks.push("FBTrace.sysout('__link__ called with node:'+FBL.getElementHTML(node), node);\n");
+            FBTrace.sysout("DomplateEmbed.generateDOM "+blocks.slice( - blocks.length +
+                beginBlock).join("").replace("\n"," "), {path: path});
+
+            blocks.push("FBTrace.sysout('__link__ called with node:'+" +
+                "FBL.getElementHTML(node), node);\n");
         }
+
         return embedName;
     }
 });
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 DomplateLoop.prototype = copyObject(DomplateTag.prototype,
 {
@@ -717,11 +745,16 @@ DomplateLoop.prototype = copyObject(DomplateTag.prototype,
             }
         }
         else
+        {
             iterName = this.iter;
+        }
 
-        blocks.push('__loop__.apply(this, [', iterName, ', __out__, function(', this.varName, ', __out__) {\n');
+        blocks.push('__loop__.apply(this, [', iterName, ', __out__, function(',
+            this.varName, ', __out__) {\n');
+
         this.generateChildMarkup(topBlock, topOuts, blocks, info);
         this.addCode(topBlock, topOuts, blocks);
+
         blocks.push('}]);\n');
     },
 
@@ -754,9 +787,12 @@ DomplateLoop.prototype = copyObject(DomplateTag.prototype,
 
         path[path.length-1] = basePath+'+'+loopName;
 
-        blocks.push(loopName,' = __loop__.apply(this, [', iterName, ', function(', counterName,',',loopName);
+        blocks.push(loopName,' = __loop__.apply(this, [', iterName, ', function(',
+            counterName,',',loopName);
+
         for (var i = 0; i < path.renderIndex; ++i)
             blocks.push(',d'+i);
+
         blocks.push(') {\n');
         blocks.push(subBlocks.join(""));
         blocks.push('return ', nodeCount, ';\n');
@@ -768,7 +804,7 @@ DomplateLoop.prototype = copyObject(DomplateTag.prototype,
     }
 });
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 function Variable(name, format)
 {
@@ -781,7 +817,7 @@ function Parts(parts)
     this.parts = parts;
 }
 
-// ************************************************************************************************
+// ********************************************************************************************* //
 
 function parseParts(str)
 {
@@ -932,7 +968,7 @@ function creator(tag, cons)
     return fn;
 }
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 function copyArray(oldArray)
 {
@@ -957,7 +993,7 @@ function extend(l, r)
         l[n] = r[n];
 }
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 function ArrayIterator(array)
 {
@@ -979,7 +1015,7 @@ FBL.$break = function()
     throw StopIteration;
 };
 
-// ************************************************************************************************
+// ********************************************************************************************* //
 
 var Renderer =
 {
@@ -1093,10 +1129,13 @@ var Renderer =
             FBTrace.sysout("domplate.insertNode html: "+html+"\n");
 
         var range = doc.createRange();
-        // if doc starts with a Text node, domplate fails because the fragment starts with a text node.
-        // That must be a gecko bug, but let's just workaround it since we want to switch to innerHTML anyway
+
+        // if doc starts with a Text node, domplate fails because the fragment starts
+        // with a text node. That must be a gecko bug, but let's just workaround it since
+        // we want to switch to innerHTML anyway
         var aDiv = doc.getElementsByTagName("div").item(0);
         range.setStartBefore(aDiv);
+
         // TODO replace with standard innerHTML
         var frag = range.createContextualFragment(html);
 
@@ -1146,6 +1185,7 @@ var Renderer =
         var domArgs = [root, this.tag.context, 0];
         domArgs.push.apply(domArgs, this.tag.domArgs);
         domArgs.push.apply(domArgs, outputs);
+
         try
         {
             this.tag.renderDOM.apply(self ? self : this.tag.subject, domArgs);
@@ -1153,9 +1193,15 @@ var Renderer =
         catch(exc)
         {
             if (FBTrace.DBG_ERRORS)
-                FBTrace.sysout("domplate renderDom FAILS "+exc, {exc: exc, renderDOM: this.tag.renderDOM.toSource(), domplate: this, domArgs: domArgs, self: self});
+            {
+                FBTrace.sysout("domplate renderDom FAILS " + exc, {exc: exc, renderDOM:
+                    this.tag.renderDOM.toSource(), domplate: this, domArgs: domArgs, self: self});
+            }
+
             var chained =  new Error("Domplate.renderDom FAILS: "+exc);
-            chained.cause = {exc: exc, renderDOM: this.tag.renderDOM.toSource(), domplate: this, domArgs: domArgs, self: self};
+            chained.cause = {exc: exc, renderDOM: this.tag.renderDOM.toSource(),
+                domplate: this, domArgs: domArgs, self: self};
+
             throw chained;
         }
 
@@ -1195,7 +1241,7 @@ var Renderer =
     }
 };
 
-// ************************************************************************************************
+// ********************************************************************************************* //
 
 function defineTags()
 {
@@ -1238,10 +1284,10 @@ defineTags(
     "output", "progress", "ruby", "rp", "rt", "section", "source", "time", "video"
 );
 
-// ************************************************************************************************
+// ********************************************************************************************* //
 // Registration
 
 return Domplate;
 
-// ************************************************************************************************
+// ********************************************************************************************* //
 });
