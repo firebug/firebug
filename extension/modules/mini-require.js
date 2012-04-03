@@ -91,7 +91,8 @@ var Loader =
         }
         else
         {
-            this.load(module.scope, moduleId);
+            var moduleUrl = this.getModuleUrl(moduleId) + ".js";
+            require.load(module.scope, moduleId, moduleUrl);
         }
 
         this.currentModule.pop();
@@ -100,19 +101,15 @@ var Loader =
         return module.exports;
     },
 
-    load: function(moduleScope, moduleId)
+    load: function(context, fullName, url)
     {
-        //xxxHonza: Remaping moved modules
-
-        var moduleUrl = this.getModuleUrl(moduleId) + ".js";
-
         try
         {
-            Services.scriptloader.loadSubScript(moduleUrl, moduleScope);
+            Services.scriptloader.loadSubScript(url, context);
         }
         catch (err)
         {
-            Cu.reportError(moduleId + " -> " + moduleUrl);
+            Cu.reportError(fullName + " -> " + url);
             Cu.reportError(err);
         }
     },
@@ -158,6 +155,7 @@ var Loader =
 
 require = Loader.require.bind(Loader);
 define = Loader.define.bind(Loader);
+require.load = Loader.load.bind(Loader);
 
 // ********************************************************************************************* //
 })();
