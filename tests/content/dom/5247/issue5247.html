@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Issue 5247: Add reps for different types of CSSRules</title>
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+        <link href="../../_common/testcase.css" type="text/css" rel="stylesheet"/>
+        <style type="text/css">
+        @charset "utf-8";
+
+        @import "external/externalStylesheet.css";
+
+        @media (min-width: 500px) and (max-width: 700px) {
+            #mediaSpecificRule {
+                color: green;
+            }
+        }
+
+        @font-face {
+            font-family: "TitilliumMaps";
+            src: url(/fonts/TitilliumMaps26L002.eot), url(/fonts/TitilliumMaps26L002.woff) format("woff"), url(/fonts/TitilliumMaps26L002.ttf) format("truetype");
+        }
+
+        @-moz-keyframes slidein {
+            from {
+                margin-left: 100%;
+                width: 300%;
+            }
+
+            to {
+                margin-left: 0%;
+                width: 100%;
+            }
+        }
+
+        #internalRule {
+            color: red;
+        }
+        </style>
+    </head>
+    <body>
+        <header>
+            <h1><a href="http://code.google.com/p/fbug/issues/detail?id=5247">Issue 5247</a>: Add reps for different types of CSSRules</h1>
+        </header>
+        <div>
+            <section id="description">
+                <h3>Steps to reproduce</h3>
+                <ol>
+                    <li>Open Firebug</li>
+                    <li>Switch to the <em>CSS</em> panel</li>
+                    <li>Select <em>issue5247.html</em> from the Location Menu</li>
+                    <li>
+                        Right-click the Location Button and choose <em>Inspect in DOM panel</em> from the context menu<br/>
+                        <span class="ok">&rArr; Firebug should switch to the <em>DOM</em> panel and display the stylesheet</span>
+                    </li>
+                    <li>
+                        Expand the <code>cssRules</code> property<br/>
+                        <span class="ok">
+                            &rArr; There should be 6 rules listed:<br/>
+                            <code>CSSCharsetRule utf-8
+CSSImportRule externalStylesheet.css
+CSSMediaRule (min-width: 500px) and (max-width: 700px)
+CSSFontFaceRule "TitilliumMaps"
+CSSKeyframesRule slidein
+CSSStyleRule #internalRule
+</code>
+                        </span>
+                    </li>
+                    <li>
+                        Expand the <em>CSSKeyframesRule</em> and the <code>cssRules</code> property in it<br/>
+                        <span class="ok">
+                            &rArr; There should be 2 <em>CSSKeyframeRule</em>s listed:<br/>
+<code>CSSKeyframeRule 0%
+CSSKeyframeRule 100%
+</code>
+                        </span>
+                    </li>
+                </ol>
+                <h3>Expected result</h3>
+                <ul>
+                    <li>Each CSSRule should have its own </li>
+                </ul>
+            </section>
+            <footer>Sebastian Zartner, sebastianzartner@gmx.de</footer>
+        </div>
+    </body>
+</html>
