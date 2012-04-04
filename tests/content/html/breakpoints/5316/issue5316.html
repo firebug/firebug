@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Issue 5316: Break on HTML mutation works only if the HTML panel is selected</title>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+    <link href="../../../../templates/default/testcase.css"
+        type="text/css" rel="stylesheet"/>
+</head>
+<body>
+<header>
+    <h1><a href="http://code.google.com/p/fbug/issues/detail?id=5316">Issue 5316</a>:
+        Break on HTML mutation works only if the HTML panel is selected</h1>
+</header>
+
+<script type="text/javascript">
+function breakOnAttrModified()
+{
+    var content = document.getElementById("content");
+    var now = (new Date()).getTime();
+    content.setAttribute("test", now); // Line 42 do not move
+}
+</script>
+
+<div>
+    <section id="description">
+        <h3>Steps to reproduce</h3>
+        <ol>
+            <li>Open Firebug and enable the Script panel, reload this page</li>
+            <li>Select the HTML panel</li>
+            <li>Expand <code>body</code> element</li>
+            <li>Right-click on the <i>content</i> element (it's the green h3 'Test Element')</li>
+            <li>Check <span style="color:green">Break on Attribute Change</span></li>
+            <li>Select the Script panel</li>
+            <li>Click this button:
+                <button id="testButton" onclick="breakOnAttrModified()">Break on Attribute Modified</button>
+            </li>
+            <li>Firebug must break into the debugger</li>
+            <li>Reload the page (keep the Script panel selected)</li>
+            <li>Click the button above again</li>
+            <li>Firebug must break into the debugger</li>
+            </ol>
+        </ol>
+
+        <h3 id="content" style="color:green">Test Element</h3>
+
+    </section>
+    <footer>
+        Jan Odvarko, odvarko@gmail.com;
+    </footer>
+</div>
+
+</body>
+</html>
