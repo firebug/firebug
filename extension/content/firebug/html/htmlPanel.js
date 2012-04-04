@@ -1159,23 +1159,6 @@ Firebug.HTMLPanel.prototype = Obj.extend(WalkingPanel,
         delete this.infoTipURL;
 
         Events.removeEventListener(this.panelNode.ownerDocument, "keypress", this.onKeyPress, true);
-
-        // Optimalization: if the HTML panel isn't currently selected remove
-        // mutation listeners. Don't do it if there are mutation breakpoints
-        // these should work even if the HTML panel is not selected (issue 5316)
-        if (this.context.attachedMutation && this.context.mutationBreakpoints.isEmpty())
-        {
-            this.context.attachedMutation = false;
-
-            Win.iterateWindows(this.context.window, Obj.bind(function(win)
-            {
-                var doc = win.document;
-                Events.removeEventListener(doc, "DOMAttrModified", this.onMutateAttr, false);
-                Events.removeEventListener(doc, "DOMCharacterDataModified", this.onMutateText, false);
-                Events.removeEventListener(doc, "DOMNodeInserted", this.onMutateNode, false);
-                Events.removeEventListener(doc, "DOMNodeRemoved", this.onMutateNode, false);
-            }, this));
-        }
     },
 
     watchWindow: function(context, win)
