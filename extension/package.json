@@ -1,0 +1,21 @@
+{
+  "name": "Firebug",
+  "description": "Web Development Evolved.",
+  "version": "1.10.0a6",
+  "homepage" : "http://getfirebug.com/",
+  "engines": {
+    "node": ">= 0.6.6"
+  },
+  "dependencies": {
+    "dryice": ">= 0.4.5",
+    "shelljs": ">= 0.0.2"
+  },
+  "author": "Joe Hewitt",
+  "repository" : {
+    "type" : "git",
+     "url" : "git://github.com/firebug/firebug.git"
+  },
+  "licenses": [
+    { "type": "BSD", "url": "http://opensource.org/licenses/BSD-3-Clause" }
+  ]
+}

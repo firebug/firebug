@@ -1,0 +1,25 @@
+
+# Junk that could exist anywhere:
+.DS_Store
+*.swp
+*.tmp
+.*.gz
+
+# Editor junk
+*.project
+/.pydevproject
+/.settings/
+/.settings.xml
+/.settings.xml.old
+/.idea/
+
+# Build Files
+/extension/build/
+/extension/release/
+*.graphml
+
+# Files from NPM
+/extension/node_modules/
+
+# Extensions
+/extension/firebug@software.joehewitt.com
