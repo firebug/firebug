@@ -812,7 +812,12 @@ function callPageHandler(spy, event, originalHandler)
         // Calling the page handler throwed an exception (see #502959)
         // This should be fixed in Firefox 3.5
         if (originalHandler && event)
-            originalHandler.handleEvent(event);
+        {
+            if (originalHandler.handleEvent)
+                originalHandler.handleEvent(event);
+            else
+                originalHandler.call(spy.xhrRequest, event);
+        }
     }
     catch (exc)
     {
