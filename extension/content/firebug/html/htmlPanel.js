@@ -380,8 +380,6 @@ Firebug.HTMLPanel.prototype = Obj.extend(WalkingPanel,
             Events.addEventListener(doc, "DOMCharacterDataModified", self.onMutateText, false);
             Events.addEventListener(doc, "DOMNodeInserted", self.onMutateNode, false);
             Events.addEventListener(doc, "DOMNodeRemoved", self.onMutateNode, false);
-
-            FBTrace.sysout("registering " + self.name);
         }
 
         // If a window is specified use it, otherwise register listeners for all
