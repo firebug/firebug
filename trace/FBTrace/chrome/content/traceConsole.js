@@ -410,50 +410,40 @@ var TraceConsole =
             "chrome,all,dialog=no", defaultArgs);
     },
 
-    toggleFirebug: function(on, topWin)
+    toggleFirebug: function(on)
     {
-        if (!topWin)
-        {
-            if (!TraceCommandLine.currentWindow)
-                TraceCommandLine.toggleCommandLine();
+        Components.utils.import("resource://gre/modules/Services.jsm");
+        Services.obs.notifyObservers(null, "startupcache-invalidate", null);
 
-            topWin = TraceCommandLine.currentWindow;
-        }
+        var BOOTSTRAP_REASONS = {
+            APP_STARTUP     : 1,
+            APP_SHUTDOWN    : 2,
+            ADDON_ENABLE    : 3,
+            ADDON_DISABLE   : 4,
+            ADDON_INSTALL   : 5,
+            ADDON_UNINSTALL : 6,
+            ADDON_UPGRADE   : 7,
+            ADDON_DOWNGRADE : 8
+        };
+        var XPIProviderBP = Components.utils.import("resource://gre/modules/XPIProvider.jsm");
+        var id = "firebug@software.joehewitt.com";
+        var XPIProvider = XPIProviderBP.XPIProvider;
+        var file = Cc["@mozilla.org/file/local;1"].createInstance(Ci.nsILocalFile);
+        file.persistentDescriptor = XPIProvider.bootstrappedAddons[id].descriptor;
 
-        if (topWin.Firebug && !topWin.Firebug.isShutdown)
-            topWin.Firebug.shutdown();
-
-        var doc = topWin.document;
-
-        // Remove all Firebug global includes (in browser.xul scope).
-        var scriptList = Array.slice(doc.querySelectorAll("script[src*='firebug/content/']"));
-        for each(var s in scriptList)
-            s.parentNode.removeChild(s);
-
-        // Remove Firebug panel
-        var splitter = doc.getElementById("fbContentSplitter");
-        var mainFrame = doc.getElementById("fbMainFrame");
-
-        if (mainFrame)
-            mainFrame.parentNode.removeChild(mainFrame);
-
-        if (splitter)
-            splitter.parentNode.removeChild(splitter);
-
-        topWin.Firebug = null;
-
+        var t1 = Date.now();
+        XPIProvider.callBootstrapMethod(id, XPIProvider.bootstrappedAddons[id].version,
+                                XPIProvider.bootstrappedAddons[id].type, file,
+                                "shutdown", BOOTSTRAP_REASONS.ADDON_DISABLE);
+        FBTrace.sysout("shutdown time :" + (Date.now() - t1) + "ms");
         if (!on)
             return;
 
-        doc.addEventListener("FirebugLoaded", function onLoad()
-        {
-            doc.removeEventListener("FirebugLoaded", onLoad, false)
-            setTimeout(function(){topWin.Firebug.toggleBar(true)}, 200)
-        }, false);
-
-        // In order to load Firebug, dynamically apply its main overlay.
-        doc.loadOverlay("chrome://firebug/content/firefox/browserOverlayWithFrame.xul",
-            {observe: function(){}});
+        t1 = Date.now()
+        XPIProvider.callBootstrapMethod(id, XPIProvider.bootstrappedAddons[id].version,
+                                XPIProvider.bootstrappedAddons[id].type, file,
+                                "startup", BOOTSTRAP_REASONS.APP_STARTUP);
+        FBTrace.sysout("startup time :" + (Date.now() - t1) + "ms");
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
