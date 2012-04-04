@@ -570,8 +570,11 @@ StackFrame.getDisplayName = function(scope, script)
     try
     {
         if (scope)
+        {
             return Wrapper.unwrapIValue(scope).arguments.callee.displayName;
-        else if (script) {
+        }
+        else if (script)
+        {
             var fnObj = Wrapper.unwrapIValue(script.functionObject);
             return (fnObj && fnObj.displayName) ? fnObj.displayName : script.functionName;
         }
