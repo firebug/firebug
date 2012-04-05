@@ -163,7 +163,7 @@ Firebug.CSSStyleRuleTag = CSSStyleRuleTag;
 
 // ********************************************************************************************* //
 
-const reSplitCSS =  /(url\("?[^"\)]+?"?\))|(rgba?\([^)]*\)?)|(hsla?\([^)]*\)?)|(#[\dA-Fa-f]+)|(-?\d+(\.\d+)?(%|[a-z]{1,4})?)|([^,\s\/!\(\)]+)|"(.*?)"|(!(.*)?)/;
+const reSplitCSS = /(url\("?[^"\)]+?"?\))|(rgba?\([^)]*\)?)|(hsla?\([^)]*\)?)|(#[\dA-Fa-f]+)|(-?\d+(\.\d+)?(%|[a-z]{1,4})?)|"([^"]*)"?|'([^']*)'?|([^,\s\/!\(\)]+)|(!(.*)?)/;
 const reURL = /url\("?([^"\)]+)?"?\)/;
 const reRepeat = /no-repeat|repeat-x|repeat-y|repeat/;
 
@@ -1668,7 +1668,23 @@ CSSEditor.prototype = domplate(Firebug.InlineEditor.prototype,
             var row = Dom.getAncestorByClass(this.target, "cssProp");
             var propName = Dom.getChildByClass(row, "cssPropName").textContent;
             var nodeType = Xml.getElementSimpleType(Firebug.getRepObject(this.target));
-            return Css.getCSSKeywordsByProperty(nodeType, propName);
+            var keywords = Css.getCSSKeywordsByProperty(nodeType, propName);
+
+            var q = expr.charAt(0);
+            if ((propName === "font" || propName === "font-family") &&
+                expr.length > 1 && (q === '"' || q === "'"))
+            {
+                keywords = keywords.slice();
+                for (var i = 0; i < keywords.length; ++i)
+                {
+                    // Treat values starting with capital letters as font names
+                    // that can be quoted.
+                    var k = keywords[i];
+                    if (k.charAt(0).toLowerCase() !== k.charAt(0))
+                        keywords[i] = q + k + q;
+                }
+            }
+            return keywords;
         }
     },
 
@@ -2253,7 +2269,7 @@ function parseCSSValue(value, offset)
 
     var cssValue = {value: m[0], start: start+m.index, end: start+m.index+m[0].length, type: type};
 
-    if (!type && m[8] && m[8].indexOf("gradient") != -1)
+    if (!type && m[10] && m[10].indexOf("gradient") != -1)
     {
         var arg = value.substr(m[0].length).match(/\((?:(?:[^\(\)]*)|(?:\(.*?\)))+\)/);
         if (!arg)
