@@ -35,8 +35,14 @@ Wrapper.unwrapObject = function(object)
 
     // There is an exception when accessing StorageList.wrappedJSObject (which is
     // instance of StorageObsolete)
-    if (object instanceof window.StorageList)
-        return object;
+    try
+    {
+        if (object instanceof window.StorageList)
+            return object;
+    }
+    catch (e)
+    {
+    }
 
     if (object.wrappedJSObject)
         return object.wrappedJSObject;
