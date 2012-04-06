@@ -26,6 +26,9 @@ var Loader =
 
     require: function(config, modules, callback)
     {
+        if (typeof config == "string" && !modules && !callback)
+            return this.modules[config].exports;
+
         this.config = config ? config : this.config;
         this.currentModule = [];
 
