@@ -21,7 +21,7 @@ Wrapper.getContentView = function(object)
 
     // There is an exception when accessing StorageList.wrappedJSObject (which is
     // instance of StorageObsolete)
-    if (object instanceof window.StorageList)
+    if ("StorageList" in object && object instanceof window.StorageList)
         return false;
 
     return (object.wrappedJSObject);
@@ -35,14 +35,8 @@ Wrapper.unwrapObject = function(object)
 
     // There is an exception when accessing StorageList.wrappedJSObject (which is
     // instance of StorageObsolete)
-    try
-    {
-        if (object instanceof window.StorageList)
-            return object;
-    }
-    catch (e)
-    {
-    }
+    if ("StorageList" in object && object instanceof window.StorageList)
+        return object;
 
     if (object.wrappedJSObject)
         return object.wrappedJSObject;
