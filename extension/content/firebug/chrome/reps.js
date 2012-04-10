@@ -593,6 +593,8 @@ FirebugReps.Arr = domplate(Firebug.Rep,
 
     onToggleProperties: function(event)
     {
+        Events.cancelEvent(event);
+
         var target = event.originalTarget;
         if (Css.hasClass(target, "objectBox-array"))
         {
@@ -600,10 +602,14 @@ FirebugReps.Arr = domplate(Firebug.Rep,
 
             var propBox = target.getElementsByClassName("arrayProperties").item(0);
             if (Css.hasClass(target, "opened"))
+            {
                 Firebug.DOMPanel.DirTable.tag.replace(
                     {object: target.repObject, toggles: this.toggles}, propBox);
+            }
             else
+            {
                 Dom.clearNode(propBox);
+            }
         }
     },
 
