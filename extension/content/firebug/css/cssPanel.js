@@ -1690,14 +1690,26 @@ CSSEditor.prototype = domplate(Firebug.InlineEditor.prototype,
 
     doIncrementValue: function(value, amt, offset, offsetEnd)
     {
+        var propName = null;
+        if (Css.hasClass(this.target, "cssPropValue"))
+        {
+            var propRow = Dom.getAncestorByClass(this.target, "cssProp");
+            propName = Dom.getChildByClass(propRow, "cssPropName").textContent;
+        }
+
         var range = parseCSSValue(value, offset);
         var type = (range && range.type) || "";
         var expr = (range ? value.substring(range.start, range.end) : "");
 
-        var completion = null, selection;
+        var completion = null, selection, info;
         if (type === "int")
         {
-            var newValue = this.incrementExpr(expr, amt);
+            if (propName === "opacity")
+            {
+                info = {minValue: 0, maxValue: 1};
+                amt /= 100;
+            }
+            var newValue = this.incrementExpr(expr, amt, info);
             if (newValue !== null)
             {
                 completion = newValue;
@@ -1719,7 +1731,6 @@ CSSEditor.prototype = domplate(Firebug.InlineEditor.prototype,
         }
         else
         {
-            var info;
             if (type === "rgb" || type === "hsl")
             {
                 info = {};
