@@ -566,9 +566,11 @@ Firebug.DOMBasePanel.prototype = Obj.extend(Firebug.Panel,
         }
 
         function sortName(a, b) { return a.name > b.name ? 1 : -1; }
+        function sortOrdinal(a, b) { return parseInt(a.name) > parseInt(b.name) ? 1 : -1; }
 
         var members = [];
 
+        ordinals.sort(sortOrdinal);
         members.push.apply(members, ordinals);
 
         if (Firebug.showUserProps)
