@@ -807,26 +807,9 @@ var fbs =
     {
         timer = null;
 
-        if (!jsd)
-            return;
-
         try
         {
-            do
-            {
-                var depth = jsd.exitNestedEventLoop();
-            }
-            while(depth > 0);
-        }
-        catch (exc)
-        {
-            // Seems to be the normal path...
-            // FBTrace.sysout("fbs.FirebugService, attempt to exitNestedEventLoop ERROR "+exc);
-        }
-
-        try
-        {
-            prefs.removeObserver(fbs.prefDomain, fbs);
+            prefs.removeObserver(fbs.prefDomain, fbs, false);
         }
         catch (exc)
         {
@@ -844,6 +827,36 @@ var fbs =
             FBTrace.sysout("fbs.quit-application-observers removeObserver ERROR "+exc, exc);
         }
 
+        if (!jsd)
+            return;
+
+        try
+        {
+            do
+            {
+                var depth = jsd.exitNestedEventLoop();
+            }
+            while(depth > 0);
+        }
+        catch (exc)
+        {
+            // Seems to be the normal path...
+            // FBTrace.sysout("fbs.FirebugService, attempt to exitNestedEventLoop ERROR "+exc);
+        }
+
+        // make sure to unregister all the hooks
+        var hookNames = ["error", "script", "breakpoint", "debugger", "debug", "interrupt", 
+            "throw", "topLevel", "function", "debug"];
+        for each (var hook in hookNames)
+        {
+            try {
+                jsd[hook + "Hook"] = null;
+            }
+            catch (exc)
+            {
+                FBTrace.sysout("fbs.quit-application-observers removeObserver ERROR "+exc, exc);
+            }
+        }
         jsd = null;
     },
 
@@ -1527,8 +1540,61 @@ var fbs =
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
+    /**
+     * Do not activate JSD, which is broken in Firefox 9 on Mac and Linux 32 bit
+     * This method is checking the current platform & browser configuration and 
+     * return false for Mac/Linux 32 bit
+     *
+     * See: https://bugzilla.mozilla.org/show_bug.cgi?id=712289
+     *
+     * Can be removed when the min Firefox version is 10
+     * 
+     * Search for 'bug712289' within the source code to remove all find all related
+     * parts of this workaround.
+     */
+    isJSDAvailable: function()
+    {
+        if (typeof(this._isJSDAvailable) == "undefined")
+        {
+            var systemInfo = Cc["@mozilla.org/xre/app-info;1"].getService(Ci.nsIXULRuntime);
+
+            // Check the current OS, must not be Mac or Linux 32 bit
+            var os = systemInfo.XPCOMABI == "x86-gcc3";
+
+            // Check the current Firefox version, must not be 9
+            systemInfo = systemInfo.QueryInterface(Ci.nsIXULAppInfo);
+            var ff = systemInfo.version.indexOf("9.") == 0;
+
+            // If one or another is false, JSD is available.
+            this._isJSDAvailable = !(os && ff);
+
+            if (!this._isJSDAvailable)
+            {
+                try
+                {
+                    consoleService = ConsoleService.getService(nsIConsoleService);
+                    consoleService.logStringMessage(
+                        "WARNING: Firebug Script panel is disabled in Firefox " +
+                        systemInfo.version + " running on 32 bit Mac or Linux (" +
+                        systemInfo.XPCOMABI + ")");
+                }
+                catch (err)
+                {
+                }
+            }
+        }
+
+        return this._isJSDAvailable;
+    },
+
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
     enableDebugger: function()
     {
+        // bug712289
+        if (!this.isJSDAvailable())
+            return;
+
         if (waitingForTimer)
         {
             timer.cancel();

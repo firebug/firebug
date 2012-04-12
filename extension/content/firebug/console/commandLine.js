@@ -641,6 +641,10 @@ Firebug.CommandLine = Obj.extend(Firebug.Module,
             setTimeout(Obj.bindFixed(function()
             {
                 Firebug.Options.set("commandEditor", true);
+
+                // Switch to the Console panel, where the multiline command line
+                // is actually displayed. This should be improved see issue 5146
+                Firebug.chrome.selectPanel("console");
             }, this));
         }
     },

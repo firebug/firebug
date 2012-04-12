@@ -21,9 +21,10 @@ define([
     "firebug/lib/array",
     "firebug/lib/dom",
     "firebug/net/httpLib",
+    "firebug/js/fbs",
 ],
 function(FBL, Obj, Firefox, ChromeFactory, Domplate, Options, Locale, Events,
-    Wrapper, Url, Css, Win, Str, Arr, Dom, Http) {
+    Wrapper, Url, Css, Win, Str, Arr, Dom, Http, FBS) {
 
 // ********************************************************************************************* //
 // Constants
@@ -272,6 +273,10 @@ window.Firebug =
         // Firebug.TabWatcher is ready.
         if (Firebug.PanelActivation)
             Firebug.PanelActivation.activatePanelTypes(panelTypes);
+
+        // bug712289
+        if (Firebug.PanelActivation && !FBS.isJSDAvailable())
+            Firebug.PanelActivation.disablePanel(this.getPanelType("script"));
 
         // Tell the modules the UI is up.
         Events.dispatch(modules, "initializeUI", [detachArgs]);
