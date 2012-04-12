@@ -1,0 +1,68 @@
+<?xml version="1.0"?>
+
+<?xml-stylesheet href="chrome://global/skin/global.css"?>
+<?xml-stylesheet href="chrome://browser/skin/preferences/preferences.css"?>
+
+<window xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul"
+        class="windowDialog fbInternational"
+        windowtype="Firebug:ExternalEditors"
+        id="firebug-external-editors"
+        width="600" height="300"
+        title="firebug.Configure_Editors"
+        onload="gEditorManager.init();"
+        onunload="gEditorManager.uninit();"
+        persist="screenX screenY width height">
+
+    <script type="application/x-javascript" src="chrome://firebug/content/xpcom.js"/>
+    <script type="application/x-javascript" src="chrome://firebug/content/editor/external/editors.js"/>
+
+    <vbox flex="1" class="contentPane">
+        <label id="actionsIntro" control="editorsList"
+            value="editors.Configured_Firebug_Editors" class="fbInternational"/>
+        <separator class="thin"/>
+        <tree id="editorsList" flex="1" seltype="single"
+            lastSelected="0" persist="lastSelected"
+            onselect="gEditorManager.onSelectionChanged();"
+            ondblclick="gEditorManager.changeEditorHandler();">
+            <treecols>
+                <treecol id="editorName" ignoreincolumnpicker="true" flex="1"
+                    persist="width" class="fbInternational"
+                    label="editors.Editor"/>
+                <splitter class="tree-splitter" />
+                <treecol id="editorExecutable" flex="1"
+                    persist="width" class="fbInternational"
+                    label="editors.Executable"/>
+                <splitter class="tree-splitter" />
+                <treecol id="editorParams" flex="1"
+                    persist="width" class="fbInternational"
+                    label="editors.Launch_Arguments"/>
+            </treecols>
+        <treechildren/>
+     </tree>
+    </vbox>
+
+    <separator class="thin"/>
+
+    <hbox>
+        <hbox flex="1" class="actionButtons">
+            <button id="addEditor" icon="add"
+                label="editors.Add" class="fbInternational"
+                oncommand="gEditorManager.addEditorHandler();"/>
+            <button id="removeEditor" icon="remove"
+                label="editors.Remove" class="fbInternational"
+                oncommand="gEditorManager.removeEditorHandler();"/>
+            <button id="changeEditor"
+                label="editors.Change" class="fbInternational"
+                oncommand="gEditorManager.changeEditorHandler();"/>
+            <button id="moveUpEditor"
+                label="editors.Move_Up" class="fbInternational"
+                oncommand="gEditorManager.moveUpEditorHandler();"/>
+                <spacer flex="1"/>
+            <button id="closeDialogButton"
+                oncommand="close();" icon="close"
+                label="editors.Close" class="fbInternational"/>
+        </hbox>
+        <resizer dir="bottomright"/>
+    </hbox>
+
+</window>

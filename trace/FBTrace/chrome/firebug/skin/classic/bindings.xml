@@ -1,0 +1,19 @@
+<?xml version="1.0"?>
+
+<bindings id="bindings"
+   xmlns="http://www.mozilla.org/xbl"
+   xmlns:xul="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul"
+   xmlns:xbl="http://www.mozilla.org/xbl">
+
+  <binding id="tab" display="xul:button"
+           extends="chrome://global/content/bindings/button.xml#button-base">
+    <content>
+      <xul:hbox class="tab-image-left" xbl:inherits="selected"/>
+      <xul:hbox flex="1" class="tab-image-middle" align="center" xbl:inherits="selected">
+        <xul:label flex="1" xbl:inherits="value=label,crop,accesskey" crop="right" class="tab-text"/>
+      </xul:hbox>
+      <xul:hbox class="tab-image-right" xbl:inherits="selected"/>
+    </content>
+  </binding>
+
+</bindings>

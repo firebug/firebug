@@ -1,0 +1,420 @@
+/* See license.txt for terms of usage */
+
+/************************************************************************************************/
+
+#panelNode-traceConsole,
+#traceLogContent {
+    overflow: hidden;
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    left: 0;
+    top: 0;
+    background-color: #FFFFFF;
+    color: #000000;
+}
+
+#traceLogContent {
+    overflow: auto;
+}
+
+/************************************************************************************************/
+
+.traceTable {
+    width: 100%;
+    height: 100%;
+}
+
+.traceInfoCol {
+    border-top: 1px solid #EEEEEE;
+    background: url(chrome://fbtrace/skin/group.png) repeat-x #FFFFFF;
+    vertical-align: top;
+}
+
+.traceInfoBody {
+    margin: 10px 0 0 0;
+    height: 100%;
+}
+
+.traceInfoTabs {
+    position: relative;
+    padding-left: 14px;
+}
+
+.traceInfoTab {
+    position: relative;
+    top: -3px;
+    margin-top: 10px;
+    padding: 4px 6px;
+    border: 1px solid transparent;
+    border-bottom: none;
+    font-weight: bold;
+    color: #565656;
+}
+
+.traceInfoTab:hover {
+    cursor: pointer;
+}
+
+.traceInfoTab[selected="true"] {
+    cursor: default !important;
+    border-color: #D7D7D7;
+    -moz-border-radius: 4px 4px 0 0;
+    background-color: #FFFFFF;
+}
+
+.traceInfoText {
+    display: none;
+    margin: 0;
+    border-top: 1px solid #D7D7D7;
+    padding: 0px;
+    background-color: #FFFFFF;
+}
+
+.traceInfoText[selected="true"] {
+    display: block;
+}
+
+.traceInfoOptionsText {
+    float: left;
+    padding: 3px;
+}
+
+.traceInfoLogsText {
+    height: 100%;
+}
+
+.traceInfoLogsFrame {
+    border: 0;
+    width: 100%;
+    height: 100%;
+}
+
+.traceInfoGlobalText {
+    float: left;
+    padding: 3px;
+}
+
+/************************************************************************************************/
+
+.messageTable {
+    width: 100%;
+}
+
+.messageRow .messageNameLabel {
+    background-image: url(chrome://fbtrace-os/skin/twistyClosed.png);
+    background-repeat: no-repeat;
+    background-position: 2px 2px;
+}
+
+.messageNameLabel:hover {
+    cursor: pointer;
+    color: blue;
+    text-decoration: underline;
+}
+
+/*.messageRow */.opened > .messageCol > .messageNameLabel {
+    background-image: url(chrome://fbtrace-os/skin/twistyOpen.png);
+}
+
+/************************************************************************************************/
+
+.messageRow {
+    background: white;
+}
+
+.messageRow:hover {
+    background: #EFEFEF;
+}
+
+.separatorRow {
+    background-image: none;
+    background: yellow !important;
+    height:32px;
+}
+
+.separatorRow td div {
+    height:32px;
+    text-align: left;
+    vertical-align: middle;
+    font-size: 26px;
+    color: black;
+    font-weight: bold;
+    margin-left: 15px;
+}
+
+.importHeaderRow {
+    background-image: none;
+    background: rgb(241, 226, 210) !important;
+}
+
+.importHeaderRow .messageCol {
+    padding: 7px;
+}
+
+.importFooterRow {
+    background-image: none;
+    background: rgb(241, 226, 210) !important;
+    height:16px;
+}
+
+.messageCol {
+    padding: 0;
+    vertical-align: top;
+    border-bottom: 1px solid #EFEFEF;  
+    white-space: nowrap;
+}
+
+.messageBodyCol {
+    width: 100%;
+}
+.messageLabel {
+    padding: 1px 0 2px 10px;
+}
+
+/* Support for search box */
+.panelNode.searching .messageRow {
+    display: none;
+}
+
+.messageRow.matched {
+    display: table-row !important;
+}
+
+/************************************************************************************************/
+
+.messageNameLabel {
+    -moz-box-sizing: padding-box;
+    overflow: hidden;
+    padding-top: 1px;
+    font-weight: bold;
+}
+
+.messageNameCol {
+    width: 30px;
+    min-width: 30px;
+}
+
+.messageNameCol > .messageNameLabel {
+    padding-left: 18px;
+}
+
+/************************************************************************************************/
+
+.messageTimeLabel {
+    display: none;
+}
+
+.showTime .messageTimeLabel {
+    display: block;
+}
+
+/************************************************************************************************/
+
+.messageInfoCol {
+    border-top: 1px solid #EEEEEE;
+    background: url(chrome://fbtrace/skin/group.png) repeat-x #FFFFFF;
+}
+
+.messageInfoBody {
+    margin: 10px 0 4px 10px;
+}
+
+.messageInfoTabs {
+    position: relative;
+    padding-left: 14px;
+}
+
+.messageInfoTab {
+    position: relative;
+    top: -3px;
+    margin-top: 10px;
+    padding: 4px 6px;
+    border: 1px solid transparent;
+    border-bottom: none;
+    font-weight: bold;
+    color: #565656;
+}
+
+.messageInfoTab:hover {
+    cursor: pointer;
+}
+
+.messageInfoTab[selected="true"] {
+    cursor: default !important;
+    border-color: #D7D7D7;
+    -moz-border-radius: 4px 4px 0 0;
+    background-color: #FFFFFF;
+}
+
+.messageInfoText {
+    display: none;
+    margin: 0;
+    border: 1px solid #D7D7D7;
+    border-right: none;
+    padding: 8px;
+    background-color: #FFFFFF;
+    font-family: monospace;
+    overflow-x: auto;
+}
+
+.messageInfoText[selected="true"] {
+    display: block;
+}
+
+.messageInfoResponseFrame {
+    border: 0;
+    width: 100%;
+    height:100%;
+}
+
+/************************************************************************************************/
+
+.openDebugger {
+    color:Fuchsia;
+    text-decoration:none !important;
+    cursor:pointer;
+}
+
+/************************************************************************************************/
+
+.messageInfoStackTable .stackFrame {
+}
+
+.messageInfoStackTable .stackFrame > A:hover {
+}
+
+.stackFrameLink:hover {
+    cursor:pointer;
+    text-decoration:underline;
+}
+
+.stackFuncName {
+    color: gray;
+}
+
+.messageInfoExcText > .ExceptionMessage {
+    font-weight:bold;
+    color: Red;
+}
+
+/* Exception */
+.messageTable .objectBox-errorMessage {
+    color: Red;
+}
+
+/************************************************************************************************/
+
+/* Custom messages types for Firebug */
+.DBG_INITIALIZATION {
+    color: rgb(98, 0, 64);
+}
+
+.DBG_FBS {
+    color: rgb(98, 0, 128);
+}
+
+.DBG_WINDOWS {
+    color: rgb(148, 121, 71);
+}
+
+.DBG_NET {
+    color: maroon;
+}
+
+.DBG_ACTIVITYOBSERVER {
+    color: rgb(164, 123, 123);
+}
+
+.DBG_JSERROR,
+.DBG_ERRORS {
+    color: Red;
+}
+
+.DBG_SPY {
+    color: rgb(145, 80, 0);
+}
+
+.DBG_GLOBALOBSERVER {
+    color: rgb(0, 170, 133);
+}
+
+.DBG_HTTPOBSERVER {
+    color: rgb(0, 133, 131);
+}
+
+.DBG_CACHE {
+    color: rgb(240, 159, 0);
+}
+
+.DBG_BTI {
+    color: rgb(170, 0, 241);
+}
+
+/************************************************************************************************/
+
+#consoleToolbar toolbarbutton {
+    margin:1px;
+    -moz-box-orient: vertical;
+}
+
+#consoleToolbar toolbarbutton .toolbarbutton-icon {
+    padding:5px;
+}
+
+/************************************************************************************************/
+
+#clearConsole {
+    list-style-image: url("chrome://fbtrace/skin/clear.png");
+}
+
+#findConsole {
+    list-style-image: url("chrome://global/skin/icons/Search-glass.png");
+    -moz-image-region: rect(0px 16px 16px 0px);
+}
+
+#separateConsole {
+    list-style-image:url("chrome://fbtrace/skin/tag.png");
+}
+
+#saveToFile {
+    list-style-image: url("chrome://fbtrace/skin/Toolbar-small.png");
+    -moz-image-region: rect(0px 96px 16px 80px);
+}
+
+#loadFromFile {
+    list-style-image: url("chrome://fbtrace/skin/up.png");
+}
+
+#traceToolsMenu {
+    list-style-image: url("chrome://fbtrace/skin/tools.png");
+}
+
+#closeFirefox {
+    list-style-image: url("chrome://fbtrace/skin/Toolbar-small.png");
+    -moz-image-region: rect(0px 48px 16px 32px);
+}
+
+#restartFirefox {
+    list-style-image: url("chrome://fbtrace/skin/Toolbar-small.png");
+    -moz-image-region: rect(0px 64px 16px 48px);
+}
+
+/************************************************************************************************/
+
+.traceOption {
+    margin: 2px 5px;
+    cursor: default !important;
+    padding: 0 2px 0 2px; 
+    border: solid 1px #D7D7D7;
+    background-color: #FFFFFF;
+    font-size: 12px;
+}
+
+.traceOption[checked="true"] {
+    background-color: #D7D7D7;
+}
+
+.traceInfoOptionsText[tabular="true"] .traceOption {
+    width: 160px;
+}

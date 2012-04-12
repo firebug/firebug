@@ -1,0 +1,10 @@
+/* See license.txt for terms of usage */
+
+/************************************************************************************************/
+/* Customize Shortcuts Dialog */
+
+#shortcutGrid {
+    background-color: white;
+    overflow: auto;
+    border: 1px gray solid;
+}

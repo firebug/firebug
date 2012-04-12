@@ -1,0 +1,29 @@
+<?xml version="1.0"?>
+<!-- See license.txt for terms of usage -->
+
+<?xul-overlay href="chrome://firebug/content/firefox/start-button/startButtonOverlay.xul"?>
+<?xul-overlay href="chrome://firebug/content/firefox/browserMenuOverlay.xul"?>
+
+<!-- CSS for fbContentSplitter -->
+<?xml-stylesheet href="chrome://firebug/content/firebug.css"?>
+
+<overlay xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul">
+
+    <script type="application/x-javascript" src="chrome://firebug/content/trace.js"/>
+    <script type="application/x-javascript" src="chrome://firebug/content/legacy.js"/>
+    <script type="application/x-javascript" src="chrome://firebug/content/moduleConfig.js"/>
+
+    <!-- Firebug UI is loaded within 'fbMainContainer' browser. Note that there
+        are some small Firbug UI pieces that are part of the browser.xul scope,
+        such as the Firebug start button or Firebug menu, which is part of the
+        Firefox menu. -->
+    <vbox id="appcontent">
+        <splitter id="fbContentSplitter" collapsed="true"/>
+        <vbox persist="height,width" id="fbMainFrame" collapsed="true">
+            <browser id="fbMainContainer" flex="2"
+                src="chrome://firebug/content/firefox/firebugFrame.xul"
+                disablehistory="true"/>
+        </vbox>
+    </vbox>
+
+</overlay>

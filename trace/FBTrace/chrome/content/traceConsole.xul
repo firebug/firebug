@@ -1,0 +1,190 @@
+<?xml version="1.0"?>
+
+<?xml-stylesheet href="chrome://global/skin/global.css"?>
+<?xml-stylesheet href="chrome://global/skin/findBar.css" type="text/css"?>
+<?xml-stylesheet href="chrome://fbtrace/content/traceConsole.css"?>
+<?xml-stylesheet href="chrome://fbtrace/skin/commandLine.css"?>
+
+<window xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul"
+        xmlns:html="http://www.w3.org/1999/xhtml"
+        id="TraceConsole"
+        windowtype="FBTraceConsole"
+        title="Firebug Trace Console"
+        width="640" height="480"
+        screenX="10" screenY="10"
+        persist="screenX screenY width height sizemode"
+        onload="TraceConsole.initialize()"
+        onunload="TraceConsole.shutdown()">
+
+  <script type="application/x-javascript" src="chrome://global/content/globalOverlay.js"/>
+  <script type="application/x-javascript" src="chrome://global/content/findBar.js"/>
+
+  <!-- Embedded Firebug Files -->
+  <script type="application/x-javascript" src="trace.js"/>
+  <script type="application/x-javascript" src="chrome://fbtrace-firebug/content/legacy.js"/>
+  <script type="application/x-javascript" src="resource://fbtrace-firebug/require.js"/>
+
+  <!-- Trace Console Application -->
+  <script type="application/x-javascript" src="traceConsole.js"/>
+  <script type="application/x-javascript" src="traceCommandLine.js"/>
+  <script type="application/x-javascript" src="main.js"/>
+  <script type="application/x-javascript" src="unblocker.js"/>
+  <script type="application/x-javascript" src="traceObjectInspector.js"/>
+
+  <!-- String Bundles -->
+  <stringbundle id="bundle_findBar" src="chrome://global/locale/findbar.properties"/>
+  <stringbundle id="strings_firebug" src="chrome://fbtrace-firebug/locale/firebug.properties"/>
+
+  <commandset id="mainCommandSet">
+    <command id="cmd_clearConsole" oncommand="TraceConsole.onClearConsole()"/>
+    <command id="cmd_find" oncommand="gFindBar.onFindCommand();"/>
+    <command id="cmd_findAgain" oncommand="gFindBar.onFindAgainCmd();"/>
+    <command id="cmd_findPrevious" oncommand="gFindBar.onFindPreviousCmd();"/>
+    <command id="cmd_separateConsole" oncommand="TraceConsole.onSeparateConsole();"/>
+    <command id="cmd_saveToFile" oncommand="TraceConsole.onSaveToFile();"/>
+    <command id="cmd_loadFromFile" oncommand="TraceConsole.onLoadFromFile();"/>
+    <command id="cmd_exitFirefox" oncommand="TraceConsole.onExitFirefox();"/>
+    <command id="cmd_restartFirefox" oncommand="TraceConsole.onRestartFirefox();"/>
+    <command id="cmd_copy" oncommand="goDoCommand('cmd_copy')" disabled="true"/>
+    <command id="cmd_clearCache" oncommand="TraceConsole.onClearCache()"/>
+    <command id="cmd_forceGC" oncommand="TraceConsole.onForceGC()"/>
+    <command id="cmd_openProfileDir" oncommand="TraceConsole.openProfileDir()"/>
+    <command id="cmd_openFirefox" oncommand="TraceConsole.openFirefox()"/>
+    <command id="cmd_turnOffFirebug" oncommand="TraceConsole.toggleFirebug(false)"/>
+    <command id="cmd_reloadFirebug" oncommand="TraceConsole.toggleFirebug(true)"/>
+    <command id="cmd_showCommandLine" oncommand="TraceCommandLine.toggleCommandLine()"/>
+    <command id="cmd_lineEvaluate" oncommand="TraceCommandLine.evaluate()"/>
+    <command id="cmd_traceObjectInspector" oncommand="TraceObjectInspector.inspect()"/>
+    <command id="cmd_alwaysOpenTraceConsole" oncommand="TraceConsole.onToggleOption(this)" option="alwaysOpenTraceConsole"/>
+  </commandset>
+
+  <keyset id="mainKeyset">
+    <key id="key_find" key="f" command="cmd_find" modifiers="accel"/>
+    <key id="key_separateConsole" key="b" command="cmd_separateConsole" modifiers="accel"/>
+    <key id="key_saveToFile" key="s" command="cmd_saveToFile" modifiers="accel"/>
+    <key id="key_loadFromFile" key="o" command="cmd_loadFromFile" modifiers="accel"/>
+    <key id="key_clearConsole" key="l" command="cmd_clearConsole" modifiers="accel"/>
+    <key id="key_lineEvaluate" keycode="VK_F5" command="cmd_lineEvaluate" modifiers="accel"/>
+    <key id="key_lineEvaluate" keycode="VK_RETURN" command="cmd_lineEvaluate" modifiers="accel"/>
+  </keyset>
+
+  <!-- Trace Console Toolbar -->
+  <toolbox id="consoleToolbox">
+    <toolbar id="consoleToolbar" align="center">
+      <toolbarbutton id="clearConsole"
+        label="tracing.cmd.Clear" class="toolbar-image-button fbInternational"
+        tooltiptext="tracing.cmd.tip.Clear"
+        command="cmd_clearConsole"/>
+      <toolbarbutton id="findConsole"
+        label="tracing.cmd.Find" class="toolbar-image-button fbInternational"
+        tooltiptext="tracing.cmd.tip.Find"
+        command="cmd_find"/>
+      <toolbarbutton id="separateConsole"
+        label="tracing.cmd.Bookmark" class="toolbar-image-button fbInternational"
+        tooltiptext="tracing.cmd.tip.Bookmark"
+        command="cmd_separateConsole"/>
+      <toolbarbutton id="traceToolsMenu"
+        class="toolbar-image-button fbmenubutton fbInternational"
+        label="tracing.cmd.Tools"
+        command="cmd_showCommandLine"
+        tooltiptext="tracing.cmd.tip.Tools"
+        type="menu-button">
+            <menupopup onpopupshowing="TraceConsole.onOptionsShowing(this)">
+                <menuitem id="saveToFile"
+                    label="tracing.cmd.Save" class="toolbar-image-button fbInternational"
+                    tooltiptext="tracing.cmd.tip.Save"
+                    command="cmd_saveToFile"/>
+                <menuitem id="loadFromFile"
+                    label="tracing.cmd.Load" class="toolbar-image-button fbInternational"
+                    tooltiptext="tracing.cmd.tip.Load"
+                    command="cmd_loadFromFile"/>
+                <menuseparator />
+                <menuitem id="showCommandLine" type="checkbox"
+                    label="tracing.cmd.Show Command Line" class="toolbar-image-button fbInternational"
+                    tooltiptext="tracing.cmd.tip.Show Command Line"
+                    command="cmd_showCommandLine"/>
+                <menuitem id="turnOffFirebug"
+                    label="tracing.cmd.Turn Off Firebug" class="toolbar-image-button fbInternational"
+                    command="cmd_turnOffFirebug"/>
+                <menuitem id="reloadFirebug"
+                    label="tracing.cmd.Reload Firebug" class="toolbar-image-button fbInternational"
+                    command="cmd_reloadFirebug"/>
+                <menuseparator />
+                <menuitem id="clearCache"
+                    label="tracing.cmd.Clear Browser Cache" class="toolbar-image-button fbInternational"
+                    tooltiptext="tracing.cmd.tip.Clear Browser Cache"
+                    command="cmd_clearCache"/>
+                <menuitem id="forceGC"
+                    label="tracing.cmd.Force Garbage Collector" class="toolbar-image-button fbInternational"
+                    tooltiptext="tracing.cmd.tip.Force Garbage Collector"
+                    command="cmd_forceGC"/>
+                <menuitem id="openProfileDir"
+                    label="tracing.cmd.Open Profile Directory" class="toolbar-image-button fbInternational"
+                    tooltiptext="tracing.cmd.tip.Open Profile Directory"
+                    command="cmd_openProfileDir"/>
+                <menuitem id="openFirefox"
+                    label="tracing.cmd.Open Firefox" class="toolbar-image-button fbInternational"
+                    tooltiptext="tracing.cmd.tip.Open Firefox"
+                    command="cmd_openFirefox"/>
+                <menuseparator />
+                <menuitem id="traceObjectInspector"
+                    label="tracing.cmd.Inspector" class="toolbar-image-button fbInternational"
+                    tooltiptext="tracing.cmd.tip.Inspector"
+                    command="cmd_traceObjectInspector"/>
+                <menuseparator />
+                <menuitem id="alwaysOpenTraceConsole"
+                    type="checkbox" label="Always_Open"
+                    command="cmd_alwaysOpenTraceConsole"
+                    class="fbInternational" option="alwaysOpenTraceConsole"/>
+            </menupopup>
+      </toolbarbutton>
+      <toolbarseparator flex="1"/>
+      <toolbarbutton id="restartFirefox"
+        label="tracing.cmd.Restart" class="toolbar-image-button fbInternational"
+        tooltiptext="tracing.cmd.tip.Restart"
+        command="cmd_restartFirefox"/>
+      <toolbarbutton id="closeFirefox"
+        label="tracing.cmd.Exit" class="toolbar-image-button fbInternational"
+        tooltiptext="tracing.cmd.tip.Exit"
+        command="cmd_exitFirefox"/>
+    </toolbar>
+  </toolbox>
+
+  <popupset id="mainPopupSet">
+    <menupopup id="fbContextMenu" onpopupshowing="return Firebug.chrome.onContextShowing(event);" />
+    <tooltip id="fbTooltip" class="fbURLMenuItem" onpopupshowing="return Firebug.chrome.onTooltipShowing(event);"/>
+  </popupset>
+
+  <vbox flex="1">
+
+    <!-- Content -->
+    <browser id="consoleFrame" type="content-primary"
+             src="traceConsole.html" flex="1"
+             disablehistory="true" contextmenu="fbContextMenu"
+             tooltip="fbTooltip"/>
+
+    <splitter id="fbTraceSplitter" collapsed="true"/>
+
+    <!-- Command line -->
+    <vbox id="fbTraceCommandLine" collapsed="true" persist="height">
+        <toolbar id="commandLineToolbar" align="center">
+            <toolbarbutton id="cmdLineEvaluate" label="tracing.cmd.Evaluate"
+                tooltiptext="tracing.cmd.tip.Evaluate"
+                command="cmd_lineEvaluate" class="fbInternational">
+            </toolbarbutton>
+            <toolbarbutton id="cmdLineContext" label="Context" type="menu">
+                <menupopup onpopupshowing="return TraceCommandLine.onContextMenuShowing(this);"
+                    onpopuphidden="TraceCommandLine.onContextMenuHidden(this)"/>
+            </toolbarbutton>
+        </toolbar>
+
+        <hbox id="fbTrace-editor" flex="1">
+            <textbox id="fbTraceScriptBox" multiline="true" flex="1"/>
+        </hbox>
+        
+    </vbox>
+
+    <!-- Search bar -->
+    <findbar id="FindToolbar" browserid="consoleFrame"/>
+  </vbox>
+</window>

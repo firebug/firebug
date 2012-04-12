@@ -1,0 +1,110 @@
+<?xml version="1.0" ?>
+
+<!-- In order to build the extension run: $ant build (in the extension dir)
+    The final xpi file should be located in a release directory -->
+<project name="tracingConsole" basedir="." default="build">
+
+    <!-- Properties -->
+    <property file="ant.properties"/>
+
+    <!-- Directories -->
+    <property name="build.dir" value="release"/>
+    <property name="deploy-xpi.dir" value="${GETFIREBUG}/releases/fbtrace/${VERSION}"/>
+
+    <available file="${GETFIREBUG}" property="deploy.dir.available"/>
+
+    <!-- Clean -->
+    <target name="clean">
+        <delete dir="${build.dir}"/>
+    </target>
+
+    <!-- Build -->
+    <target name="build" depends="clean">
+
+        <!-- Copy defaults directory -->
+        <copy todir="${build.dir}/components">
+            <fileset dir="components">
+               <include name="**/*.js"/>
+            </fileset>
+        </copy>
+
+        <!-- Copy defaults directory -->
+        <copy todir="${build.dir}/defaults">
+            <fileset dir="defaults">
+               <include name="**/*.js"/>
+            </fileset>
+        </copy>
+
+        <!-- Copy chrome directory -->
+        <copy todir="${build.dir}/chrome">
+            <fileset dir="chrome">
+               <include name="**/*.js"/>
+               <include name="**/*.xul"/>
+               <include name="**/*.properties"/>
+               <include name="**/*.css"/>
+               <include name="**/*.html"/>
+               <include name="**/*.xml"/>
+               <include name="**/*.dtd"/>
+               <include name="**/*.png"/>
+               <include name="**/*.gif"/>
+               <include name="**/*.ico"/>
+               <include name="**/*.manifest"/>
+               <include name="**/*.txt"/>
+            </fileset>
+        </copy>
+
+        <!-- Copy defaults directory -->
+        <copy todir="${build.dir}/icons">
+            <fileset dir="icons">
+               <include name="**/*.ico"/>
+            </fileset>
+        </copy>
+
+        <!-- Copy defaults directory -->
+        <copy todir="${build.dir}/modules">
+            <fileset dir="modules">
+               <include name="**/*.js"/>
+            </fileset>
+        </copy>
+
+        <!-- Copy extension installation files and licence.txt -->
+        <copy file="chrome.manifest" todir="${build.dir}"/>
+        <copy file="install.rdf" todir="${build.dir}"/>
+        <copy file="license.txt" todir="${build.dir}"/>
+        <copy file="update.rdf" todir="${build.dir}"/>
+
+        <!-- Update release version from ant.properties file -->
+        <replace file="${build.dir}/install.rdf" propertyFile="ant.properties">
+            <replacefilter token="@VERSION@" property="VERSION"/>
+            <replacefilter token="@RELEASE@" property="RELEASE"/>
+        </replace>
+
+        <!-- Create final tracingConsole.xpi file -->
+        <zip destfile="${build.dir}/fbTrace-${VERSION}${RELEASE}.xpi"
+            basedir="${build.dir}" update="true" />
+
+        <!-- Generate update.rdf file -->
+        <replace file="${build.dir}/update.rdf" propertyFile="ant.properties">
+            <replacefilter token="@VERSION@" property="VERSION"/>
+            <replacefilter token="@RELEASE@" property="RELEASE"/>
+        </replace>
+
+        <!-- Final build message -->
+        <echo message="FBTrace version: ${VERSION}${RELEASE}"/>
+
+        <!-- Deploy -->
+        <antcall target="deploy" />
+    </target>
+
+    <!-- Deploy if target available -->
+    <target name="deploy" if="deploy.dir.available">
+
+        <!-- Deploy xpi & update.rdf files -->
+        <copy file="${build.dir}/update.rdf" todir="${deploy-xpi.dir}" overwrite="true"/>
+        <copy file="${build.dir}/fbTrace-${VERSION}${RELEASE}.xpi" todir="${deploy-xpi.dir}" overwrite="true"/>
+
+        <!-- Final deploy message -->
+        <echo message="fbTrace-${VERSION}${RELEASE} deployed to: ${deploy-xpi.dir}"/>
+    </target>
+
+</project>

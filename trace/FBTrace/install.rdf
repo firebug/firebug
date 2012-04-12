@@ -1,0 +1,44 @@
+﻿<?xml version="1.0"?>
+
+<RDF xmlns="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+     xmlns:em="http://www.mozilla.org/2004/em-rdf#">
+
+  <Description about="urn:mozilla:install-manifest">
+    <em:id>fbtrace@getfirebug.com</em:id>
+    <em:version>@VERSION@@RELEASE@</em:version>
+
+    <!-- Any suitably modern toolkit application -->
+    <em:targetApplication>
+      <Description>
+        <em:id>toolkit@mozilla.org</em:id>
+        <em:minVersion>5.0</em:minVersion>
+        <em:maxVersion>20.*</em:maxVersion>
+      </Description>
+    </em:targetApplication>
+
+    <!-- Firefox -->
+    <em:targetApplication>
+      <Description>
+        <em:id>{ec8030f7-c20a-464f-9b0e-13a3a9e97384}</em:id>
+        <em:minVersion>5.0</em:minVersion>
+        <em:maxVersion>20.*</em:maxVersion>
+      </Description>
+    </em:targetApplication>
+
+    <!-- Fennec -->
+    <em:targetApplication>
+      <Description>
+        <em:id>{a23983c0-fd0e-11dc-95ff-0800200c9a66}</em:id>
+        <em:minVersion>5.0</em:minVersion>
+        <em:maxVersion>20.*</em:maxVersion>
+      </Description>
+    </em:targetApplication>
+
+    <em:name>FBTrace</em:name>
+    <em:description>Tracing Console for Firebug.</em:description>
+    <em:creator>Jan Odvarko</em:creator>
+    <em:homepageURL>http://getfirebug.com/releases/extensions/</em:homepageURL>
+
+    <em:updateURL>https://getfirebug.com/releases/fbtrace/@VERSION@/update.rdf</em:updateURL>
+  </Description>
+</RDF>
