@@ -730,6 +730,9 @@ Firebug.TabWatcher = Obj.extend(new Firebug.Listener(),
     // Called by script panel, not sure where this belongs.
     reloadPageFromMemory: function(context)
     {
+        if (!context)
+            context = Firebug.currentContext;
+
         if (context.browser)
             context.browser.reloadWithFlags(Ci.nsIWebNavigation.LOAD_FLAGS_CHARSET_CHANGE)
         else
