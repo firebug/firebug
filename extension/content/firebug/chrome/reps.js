@@ -2127,12 +2127,12 @@ FirebugReps.ErrorMessage = domplate(Firebug.Rep,
             {label: "CopyError", command: Obj.bindFixed(this.copyError, this, error) }
         ];
 
-        if (error.category == "css")
+        if (error.category != "css")
         {
             items.push(
                 "-",
                 {label: "BreakOnThisError", type: "checkbox", checked: breakOnThisError,
-                 command: Obj.bindFixed(this.breakOnThisError, this, error) },
+                 command: Obj.bindFixed(this.breakOnThisError, this, error, context) },
 
                 Menu.optionMenu("BreakOnAllErrors", "breakOnErrors")
             );
@@ -2227,7 +2227,7 @@ FirebugReps.Assert = domplate(Firebug.Rep,
             {label: "CopyError", command: Obj.bindFixed(this.copyError, this, error) },
             "-",
             {label: "BreakOnThisError", type: "checkbox", checked: breakOnThisError,
-             command: Obj.bindFixed(this.breakOnThisError, this, error) },
+             command: Obj.bindFixed(this.breakOnThisError, this, error, context) },
             {label: "BreakOnAllErrors", type: "checkbox", checked: Firebug.breakOnErrors,
              command: Obj.bindFixed(this.breakOnAllErrors, this, error) }
         ];
