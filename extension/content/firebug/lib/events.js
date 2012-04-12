@@ -15,7 +15,12 @@ var Events = {};
 Events.dispatch = function(listeners, name, args)
 {
     if (!listeners)
+    {
+        if (FBTrace.DBG_DISPATCH)
+            FBTrace.sysout("Events.dispatch "+name+" without listeners");
+
         return;
+    }
 
     try
     {

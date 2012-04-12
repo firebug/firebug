@@ -1756,7 +1756,13 @@ function browser1Loaded()
     browser1.complete = true;
 
     if (browser1.complete && browser2.complete)
-        FirebugChrome.initializeUI();
+    {
+        // initializeUI is executed asynchronously, which solves the issue 3442
+        // The problem has been introduced (from unknown reason) by revision R12210
+        setTimeout(function() {
+            FirebugChrome.initializeUI();  // the chrome bound into this scope
+        });
+    }
 
     if (FBTrace.DBG_INITIALIZE)
         FBTrace.sysout("browse1Loaded complete\n");
@@ -1775,7 +1781,12 @@ function browser2Loaded()
     browser2.complete = true;
 
     if (browser1.complete && browser2.complete)
-        FirebugChrome.initializeUI();  // the chrome bound into this scope
+    {
+        // See browser1Loaded for more info.
+        setTimeout(function() {
+            FirebugChrome.initializeUI();  // the chrome bound into this scope
+        });
+    }
 
     if (FBTrace.DBG_INITIALIZE)
         FBTrace.sysout("browse2Loaded complete\n");

@@ -1418,7 +1418,7 @@
         </xul:textbox>
         <xul:description anonid="fbSearchBoxDescription"  collapsed="true"/>
         <xul:panel id="fbSearchOptionsPanel" norestorefocus="true" noautofocus="true"
-            noautohide="true" ignorekeys="true" role="presentation">
+            ignorekeys="true" role="presentation">
             <xul:description id="fbSearchBoxIsSensitive" value="search.Case AutoSensitive"/>
             <xul:description id="fbSearchBoxIsNotSensitive" value="search.Case Insensitive"/>
             <xul:vbox class="searchOptionsMenu innerToolbar" role="menu" anonid="fbSearchOptionsMenu">
@@ -1446,15 +1446,22 @@
             this.onFocusSearchBox = function(event)
             {
                 self.focusHandler(event);
-            }
+            };
 
             this.onFocusOptionsPopup = function(event)
             {
                 self.panelFocusHandler(event);
-            }
+            };
 
             searchBox.addEventListener("focus", this.onFocusSearchBox, true);
             optionsPopup.addEventListener("focus", this.onFocusOptionsPopup, true);
+
+            // Dynamically set noautohide to avoid mozilla bug 545265.
+            optionsPopup.addEventListener("popupshowing", function runOnce()
+            {
+                optionsPopup.removeEventListener("popupshowing", runOnce, false);
+                optionsPopup.setAttribute("noautohide", true);
+            }, false);
         ]]></constructor>
 
         <destructor><![CDATA[
@@ -1517,7 +1524,19 @@
 
         <!-- Flag indicating that the child of the panel has or just had focus -->
         <field name="panelHasFocus" />
-        <field name="blurTimeout" />
+
+        <!-- Timer to close the popup, set on blur. Any kind of focus that directly follows
+        the blur should clear it with clearBlurTimeout(). -->
+        <field name="blurTimeout">null</field>
+
+        <method name="clearBlurTimeout">
+            <body><![CDATA[
+                if (this.blurTimeout !== null) {
+                    clearTimeout(this.blurTimeout);
+                    this.blurTimeout = null;
+                }
+            ]]></body>
+        </method>
 
         <method name="updateOptions">
             <parameter name="menuItems" />
@@ -1574,8 +1593,7 @@
                 popupBoxObject.setConsumeRollupEvent(popupBoxObject.ROLLUP_NO_CONSUME);
                 optionsPopup.openPopup(this, position, 0, 0, false, false);
 
-                clearTimeout(this.blurTimeout);
-                delete this.blurTimeout;
+                this.clearBlurTimeout();
             ]]></body>
         </method>
 
@@ -1584,8 +1602,7 @@
                 var optionsPopup = document.getElementById("fbSearchOptionsPanel");
                 optionsPopup.hidePopup();
 
-                clearTimeout(this.blurTimeout);
-                delete this.blurTimeout;
+                this.clearBlurTimeout();
             ]]></body>
         </method>
 
@@ -1623,11 +1640,10 @@
         <method name="focusHandler">
             <parameter name="event" />
             <body><![CDATA[
-                var target = event.target;
-                clearTimeout(this.blurTimeout);
-                delete this.blurTimeout;
+                this.panelHasFocus = false;
+                this.clearBlurTimeout();
 
-                if (!FBL.hasClass(target, "panelFocusBound"))
+                if (!FBL.hasClass(event.target, "panelFocusBound") && !this.optionsShown)
                 {
                     this.showOptions();
                 }
@@ -1637,7 +1653,7 @@
         <method name="panelFocusHandler">
             <parameter name="event" />
             <body><![CDATA[
-                this.focusHandler(event);
+                this.clearBlurTimeout();
 
                 if (!FBL.hasClass(event.target, "panelFocusBound"))
                     this.panelHasFocus = true;
@@ -1646,8 +1662,7 @@
 
         <method name="endTextFocusHandler">
             <body><![CDATA[
-                clearTimeout(this.blurTimeout);
-                delete this.blurTimeout;
+                this.clearBlurTimeout();
 
                 if (this.panelHasFocus)
                 {
@@ -1682,6 +1697,7 @@
                     var searchBox = document.getAnonymousElementByAttribute(this, "anonid",
                         "searchBox");
                     searchBox.focus();
+                    this.panelHasFocus = false;
                 }
                 else
                 {
@@ -1748,7 +1764,7 @@
                 }
 
                 if (!this.focused)
-                    this.focus()
+                    this.focus();
             ]]></body>
         </method>
     </implementation>
@@ -1813,12 +1829,13 @@
         ]]></handler>
 
         <handler event="blur" phase="capturing"><![CDATA[
-            this.blurTimeout = (this.blurTimeout || setTimeout(function()
+            this.clearBlurTimeout();
+            this.blurTimeout = setTimeout(function()
             {
                 hideOptions();
                 status = "noSearch";
                 focused = false;
-            }, 0));
+            }, 0);
         ]]></handler>
     </handlers>
 </binding>
